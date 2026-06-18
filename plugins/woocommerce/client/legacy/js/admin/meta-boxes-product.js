@@ -126,6 +126,200 @@ jQuery( function ( $ ) {
 			return false;
 		} );
 
+	const wc_product_publish_timestamp = {
+		init: function () {
+			this.$timestampdiv = $( '#timestampdiv' );
+			this.$timestamp_wrap =
+				this.$timestampdiv.find( '.timestamp-wrap' );
+			this.$fields = $( '#aa, #mm, #jj, #hh, #mn' );
+
+			if (
+				! this.$timestampdiv.length ||
+				! this.$timestamp_wrap.length ||
+				5 !== this.$fields.length ||
+				$( '#wc-product-publish-datetime' ).length
+			) {
+				return;
+			}
+
+			this.render_field();
+			this.bind_events();
+			this.sync_from_core_fields();
+		},
+
+		pad: function ( value ) {
+			return ( '00' + value ).slice( -2 );
+		},
+
+		get_accessible_label: function () {
+			const timestamp = document.getElementById( 'timestamp' );
+
+			if ( ! timestamp ) {
+				return '';
+			}
+
+			const label_node = Array.prototype.find.call(
+				timestamp.childNodes,
+				function ( node ) {
+					return 3 === node.nodeType;
+				}
+			);
+
+			return label_node
+				? label_node.nodeValue.replace( /:$/, '' ).trim()
+				: '';
+		},
+
+		render_field: function () {
+			this.$datetime_input = $( '<input />', {
+				type: 'datetime-local',
+				id: 'wc-product-publish-datetime',
+				class: 'wc-product-publish-datetime-input',
+				step: '60',
+			} );
+
+			const label = this.get_accessible_label();
+
+			if ( label ) {
+				this.$datetime_input.attr( 'aria-label', label );
+			}
+
+			this.$timestamp_wrap.before( this.$datetime_input );
+			this.$timestampdiv.addClass(
+				'wc-product-publish-has-datetime-input'
+			);
+		},
+
+		bind_events: function () {
+			const self = this;
+			const save_button = this.$timestampdiv
+				.find( '.save-timestamp' )
+				.get( 0 );
+			const post_form = document.getElementById( 'post' );
+
+			this.$datetime_input.on( 'input change', function () {
+				self.sync_to_core_fields();
+			} );
+
+			this.$timestampdiv
+				.siblings( 'a.edit-timestamp' )
+				.on( 'click', function () {
+					window.setTimeout( function () {
+						self.sync_from_core_fields();
+						self.clear_invalid_state();
+						self.$datetime_input.trigger( 'focus' );
+					}, 0 );
+				} );
+
+			this.$timestampdiv
+				.find( '.cancel-timestamp' )
+				.on( 'click', function () {
+					window.setTimeout( function () {
+						self.sync_from_core_fields();
+						self.clear_invalid_state();
+					}, 0 );
+				} );
+
+			if ( save_button ) {
+				save_button.addEventListener(
+					'click',
+					function ( event ) {
+						if ( ! self.sync_to_core_fields() ) {
+							event.preventDefault();
+							event.stopImmediatePropagation();
+							self.focus_invalid_field();
+						}
+					},
+					true
+				);
+			}
+
+			if ( post_form ) {
+				post_form.addEventListener(
+					'submit',
+					function ( event ) {
+						if (
+							self.$timestampdiv.is( ':visible' ) &&
+							! self.sync_to_core_fields()
+						) {
+							event.preventDefault();
+							event.stopImmediatePropagation();
+							self.focus_invalid_field();
+						}
+					},
+					true
+				);
+			}
+		},
+
+		sync_from_core_fields: function () {
+			this.$datetime_input.val(
+				$( '#aa' ).val() +
+					'-' +
+					this.pad( $( '#mm' ).val() ) +
+					'-' +
+					this.pad( $( '#jj' ).val() ) +
+					'T' +
+					this.pad( $( '#hh' ).val() ) +
+					':' +
+					this.pad( $( '#mn' ).val() )
+			);
+		},
+
+		sync_to_core_fields: function () {
+			const value = this.$datetime_input.val();
+			const parts = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(
+				value
+			);
+
+			if ( ! parts || ! this.is_valid_datetime( parts ) ) {
+				this.set_invalid_state();
+				return false;
+			}
+
+			$( '#aa' ).val( parts[ 1 ] );
+			$( '#mm' ).val( parts[ 2 ] );
+			$( '#jj' ).val( parts[ 3 ] );
+			$( '#hh' ).val( parts[ 4 ] );
+			$( '#mn' ).val( parts[ 5 ] );
+
+			this.clear_invalid_state();
+			return true;
+		},
+
+		is_valid_datetime: function ( parts ) {
+			const attempted_date = new Date(
+				Number( parts[ 1 ] ),
+				Number( parts[ 2 ] ) - 1,
+				Number( parts[ 3 ] ),
+				Number( parts[ 4 ] ),
+				Number( parts[ 5 ] )
+			);
+
+			return (
+				attempted_date.getFullYear() === Number( parts[ 1 ] ) &&
+				attempted_date.getMonth() + 1 === Number( parts[ 2 ] ) &&
+				attempted_date.getDate() === Number( parts[ 3 ] ) &&
+				attempted_date.getHours() === Number( parts[ 4 ] ) &&
+				attempted_date.getMinutes() === Number( parts[ 5 ] )
+			);
+		},
+
+		set_invalid_state: function () {
+			this.$datetime_input.addClass( 'form-invalid' );
+		},
+
+		clear_invalid_state: function () {
+			this.$datetime_input.removeClass( 'form-invalid' );
+		},
+
+		focus_invalid_field: function () {
+			this.$datetime_input.trigger( 'focus' );
+		},
+	};
+
+	wc_product_publish_timestamp.init();
+
 	// Product type specific options.
 	$( 'select#product-type' )
 		.on( 'change', function () {

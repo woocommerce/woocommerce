@@ -8630,6 +8630,31 @@ table.bar_chart {
 		margin-right: 4px;
 	}
 
+	&.post-type-product #submitdiv {
+		#wc-product-publish-datetime {
+			box-sizing: border-box;
+			display: block;
+			font-size: 13px;
+			height: 32px;
+			margin: 0 0 4px;
+			padding: 0 8px;
+			text-align: left;
+			width: 100%;
+		}
+
+		#wc-product-publish-datetime::-webkit-datetime-edit {
+			text-align: left;
+		}
+
+		#timestampdiv.wc-product-publish-has-datetime-input .timestamp-wrap {
+			display: none;
+		}
+
+		#wc-product-publish-datetime.form-invalid {
+			border-color: #d63638;
+		}
+	}
+
 	// Shipping zone name input: ID selector in the base rule outranks the form-table override above.
 	.wc-shipping-zone-settings #zone_name {
 		padding: 0 12px;
