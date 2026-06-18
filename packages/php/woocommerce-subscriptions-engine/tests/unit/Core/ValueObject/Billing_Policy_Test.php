@@ -127,4 +127,117 @@ class Billing_Policy_Test extends TestCase {
 		$this->expectException( DomainException::class );
 		$policy->compute_next_renewal_from( new DateTimeImmutable( '2026-01-01', new DateTimeZone( 'UTC' ) ) );
 	}
+
+	/**
+	 * @dataProvider provide_min_and_max_cycles_validation_cases
+	 * @param string|null $expected_exception_message The expected exception message, or null if no exception is expected.
+	 * @param int|null    $min_cycles                 The minimum number of cycles.
+	 * @param int|null    $max_cycles                 The maximum number of cycles.
+	 */
+	public function test_min_and_max_cycles_validation( ?string $expected_exception_message, ?int $min_cycles, ?int $max_cycles ): void {
+		if ( null !== $expected_exception_message ) {
+			$this->expectException( DomainException::class );
+			$this->expectExceptionMessage( $expected_exception_message );
+		}
+
+		$policy = Billing_Policy::from_array(
+			array(
+				'period'     => 'month',
+				'interval'   => 1,
+				'min_cycles' => $min_cycles,
+				'max_cycles' => $max_cycles,
+			)
+		);
+
+		if ( null === $expected_exception_message ) {
+			$this->assertInstanceOf( Billing_Policy::class, $policy );
+			$this->assertSame( $min_cycles, $policy->get_min_cycles() );
+			$this->assertSame( $max_cycles, $policy->get_max_cycles() );
+		}
+	}
+
+	public function provide_min_and_max_cycles_validation_cases(): array {
+		return array(
+			'min_cycles is 0, max_cycles is null'        => array(
+				'expected_exception_message' => null,
+				'min_cycles'                 => 0,
+				'max_cycles'                 => null,
+			),
+			'min_cycles is 0, max_cycles is positive'    => array(
+				'expected_exception_message' => null,
+				'min_cycles'                 => 0,
+				'max_cycles'                 => 10,
+			),
+			'min_cycles is 0, max_cycles is less than 0' => array(
+				'expected_exception_message' => 'Billing_Policy: max_cycles must be 0 or greater, got -4.',
+				'min_cycles'                 => 0,
+				'max_cycles'                 => -4,
+			),
+			'max_cycles is 0, min_cycles is null'        => array(
+				'expected_exception_message' => null,
+				'min_cycles'                 => null,
+				'max_cycles'                 => 0,
+			),
+			'max_cycles is 0, min_cycles is positive'    => array(
+				'expected_exception_message' => 'Billing_Policy: min_cycles cannot exceed max_cycles, got 5 and 0.',
+				'min_cycles'                 => 5,
+				'max_cycles'                 => 0,
+			),
+			'max_cycles is 0, min_cycles is greater than max_cycles' => array(
+				'expected_exception_message' => 'Billing_Policy: min_cycles cannot exceed max_cycles, got 5 and 0.',
+				'min_cycles'                 => 5,
+				'max_cycles'                 => 0,
+			),
+			'max_cycles is positive, min_cycles is null' => array(
+				'expected_exception_message' => null,
+				'min_cycles'                 => null,
+				'max_cycles'                 => 10,
+			),
+			'max_cycles is positive, min_cycles is positive' => array(
+				'expected_exception_message' => null,
+				'min_cycles'                 => 1,
+				'max_cycles'                 => 10,
+			),
+			'max_cycles is positive, min_cycles is the same as max_cycles' => array(
+				'expected_exception_message' => null,
+				'min_cycles'                 => 10,
+				'max_cycles'                 => 10,
+			),
+			'min_cycles is positive, max_cycles is null' => array(
+				'expected_exception_message' => null,
+				'min_cycles'                 => 1,
+				'max_cycles'                 => null,
+			),
+			'min_cycles is positive, max_cycles is positive' => array(
+				'expected_exception_message' => null,
+				'min_cycles'                 => 1,
+				'max_cycles'                 => 10,
+			),
+			'min_cycles is positive, max_cycles is less than min_cycles' => array(
+				'expected_exception_message' => 'Billing_Policy: min_cycles cannot exceed max_cycles, got 10 and 9.',
+				'min_cycles'                 => 10,
+				'max_cycles'                 => 9,
+			),
+			'min_cycles is negative, max_cycles is null' => array(
+				'expected_exception_message' => 'Billing_Policy: min_cycles must be 0 or greater, got -1.',
+				'min_cycles'                 => -1,
+				'max_cycles'                 => null,
+			),
+			'min_cycles is negative, max_cycles is positive' => array(
+				'expected_exception_message' => 'Billing_Policy: min_cycles must be 0 or greater, got -1.',
+				'min_cycles'                 => -1,
+				'max_cycles'                 => 10,
+			),
+			'min_cycles is negative, max_cycles is less than min_cycles' => array(
+				'expected_exception_message' => 'Billing_Policy: min_cycles must be 0 or greater, got -1.',
+				'min_cycles'                 => -1,
+				'max_cycles'                 => -1,
+			),
+			'min_cycles is positive, max_cycles is negative' => array(
+				'expected_exception_message' => 'Billing_Policy: max_cycles must be 0 or greater, got -1.',
+				'min_cycles'                 => 1,
+				'max_cycles'                 => -1,
+			),
+		);
+	}
 }

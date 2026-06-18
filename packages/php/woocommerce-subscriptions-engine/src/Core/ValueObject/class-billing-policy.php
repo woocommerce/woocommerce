@@ -80,6 +80,8 @@ final class Billing_Policy {
 	 * @param array{length: int, unit: string}|null $trial_duration Native trial; null if none.
 	 */
 	public function __construct( string $period, int $interval, ?int $min_cycles, ?int $max_cycles, ?array $trial_duration ) {
+		$this->validate_min_max_cycles( $min_cycles, $max_cycles );
+
 		$this->period         = $period;
 		$this->interval       = $interval;
 		$this->min_cycles     = $min_cycles;
@@ -237,5 +239,32 @@ final class Billing_Policy {
 		}
 
 		return $unit;
+	}
+
+	/**
+	 * Validate the min_cycles and max_cycles fields.
+	 *
+	 * @param int|null $min_cycles Minimum cycles before cancellation is allowed.
+	 * @param int|null $max_cycles Total cycles before the contract ends.
+	 * @throws DomainException If min_cycles or max_cycles are not valid.
+	 */
+	private function validate_min_max_cycles( ?int $min_cycles, ?int $max_cycles ): void {
+		if ( null !== $min_cycles && $min_cycles < 0 ) {
+			throw new DomainException(
+				sprintf( 'Billing_Policy: min_cycles must be 0 or greater, got %d.', $min_cycles )
+			);
+		}
+
+		if ( null !== $max_cycles && $max_cycles < 0 ) {
+			throw new DomainException(
+				sprintf( 'Billing_Policy: max_cycles must be 0 or greater, got %d.', $max_cycles )
+			);
+		}
+
+		if ( null !== $min_cycles && null !== $max_cycles && $min_cycles > $max_cycles ) {
+			throw new DomainException(
+				sprintf( 'Billing_Policy: min_cycles cannot exceed max_cycles, got %d and %d.', $min_cycles, $max_cycles )
+			);
+		}
 	}
 }
