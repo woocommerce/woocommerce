@@ -131,7 +131,6 @@ jQuery( function ( $ ) {
 			this.init_action_buttons();
 			this.init_status();
 			this.init_post_visibility();
-			this.init_timestamp();
 			this.init_catalog_visibility();
 		},
 
@@ -141,28 +140,24 @@ jQuery( function ( $ ) {
 					.text()
 					.trim() ||
 				'Confirm';
+			const confirm_selectors = [
+				'#post-status-select .save-post-status',
+				'#post-visibility-select .save-post-visibility',
+				'#timestampdiv .save-timestamp',
+				'#catalog-visibility-select .save-post-visibility',
+			].join( ', ' );
+			const cancel_selectors = [
+				'#post-status-select .cancel-post-status',
+				'#post-visibility-select .cancel-post-visibility',
+				'#timestampdiv .cancel-timestamp',
+				'#catalog-visibility-select .cancel-post-visibility',
+			].join( ', ' );
 
-			$(
-				[
-					'#post-status-select .save-post-status',
-					'#post-visibility-select .save-post-visibility',
-					'#timestampdiv .save-timestamp',
-					'#catalog-visibility-select .save-post-visibility',
-				].join( ', ' )
-			)
-				.addClass( 'button-compact wc-product-publish-confirm-button' )
-				.text( confirm_text );
+			$( confirm_selectors ).addClass( 'button-compact' ).text( confirm_text );
 
-			$(
-				[
-					'#post-status-select .cancel-post-status',
-					'#post-visibility-select .cancel-post-visibility',
-					'#timestampdiv .cancel-timestamp',
-					'#catalog-visibility-select .cancel-post-visibility',
-				].join( ', ' )
-			)
+			$( cancel_selectors )
 				.removeClass( 'button-cancel' )
-				.addClass( 'button-link wc-product-publish-cancel-link' );
+				.addClass( 'button-link' );
 		},
 
 		hide_current_value: function ( display_selector ) {
@@ -201,7 +196,12 @@ jQuery( function ( $ ) {
 			$( '#misc-publishing-actions' ).on(
 				'click',
 				'.edit-post-status',
-				() => this.hide_current_value( display_selector )
+				() => {
+					this.hide_current_value( display_selector );
+					window.setTimeout( function () {
+						$( '#post-status-select' ).css( 'display', 'flex' );
+					}, 0 );
+				}
 			);
 
 			$( '#misc-publishing-actions' ).on(
@@ -298,51 +298,6 @@ jQuery( function ( $ ) {
 
 			this.show_current_value( '#post-visibility-display' );
 			sync_select_from_radios();
-		},
-
-		init_timestamp: function () {
-			const selected_value_selector = '#timestamp b';
-
-			const normalize_timestamp_label = function () {
-				const timestamp = document.getElementById( 'timestamp' );
-
-				if ( ! timestamp ) {
-					return;
-				}
-
-				const label_node = Array.prototype.find.call(
-					timestamp.childNodes,
-					function ( node ) {
-						return node.TEXT_NODE === node.nodeType;
-					}
-				);
-
-				if ( ! label_node || -1 !== label_node.nodeValue.indexOf( ':' ) ) {
-					return;
-				}
-
-				label_node.nodeValue = label_node.nodeValue.replace(
-					/(\S)\s*$/,
-					'$1: '
-				);
-			};
-
-			$( '#timestampdiv' )
-				.siblings( '.edit-timestamp' )
-				.on( 'click', () => {
-					normalize_timestamp_label();
-				} );
-
-			$( '#timestampdiv .save-timestamp, #timestampdiv .cancel-timestamp' ).on(
-				'click',
-				() => {
-					normalize_timestamp_label();
-					this.show_current_value( selected_value_selector );
-				}
-			);
-
-			normalize_timestamp_label();
-			this.show_current_value( selected_value_selector );
 		},
 
 		init_catalog_visibility: function () {

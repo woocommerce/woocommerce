@@ -8633,8 +8633,6 @@ table.bar_chart {
 	&.post-type-product #submitdiv {
 		--wc-product-publish-spacing-1: var(--wp-admin-grid-unit-05, 4px);
 		--wc-product-publish-spacing-2: var(--wp-admin-grid-unit-10, 8px);
-		--wc-product-publish-spacing-3: var(--wp-admin-grid-unit-15, 12px);
-		--wc-product-publish-spacing-4: var(--wp-admin-grid-unit-20, 16px);
 		--wc-product-publish-icon-size: 20px;
 		--wc-product-publish-row-horizontal-padding: 10px;
 		--wc-product-publish-row-offset: calc(
@@ -8646,7 +8644,6 @@ table.bar_chart {
 		.misc-pub-visibility,
 		.misc-pub-curtime,
 		.misc-pub-catalog-visibility {
-			box-sizing: border-box;
 			padding-left: calc(
 				var(--wc-product-publish-row-horizontal-padding) +
 					var(--wc-product-publish-row-offset)
@@ -8659,8 +8656,6 @@ table.bar_chart {
 		.misc-pub-curtime #timestamp::before,
 		.misc-pub-catalog-visibility::before {
 			left: var(--wc-product-publish-row-horizontal-padding);
-			margin-left: 0;
-			padding-right: 0;
 			position: absolute;
 			top: calc(var(--wc-product-publish-spacing-2) - 2px);
 			width: var(--wc-product-publish-icon-size);
@@ -8685,18 +8680,6 @@ table.bar_chart {
 			display: none;
 		}
 
-		.wc-product-publish-confirm-button.button-compact {
-			align-items: center;
-			display: inline-flex;
-			justify-content: center;
-			text-decoration: none;
-			vertical-align: middle;
-		}
-
-		.wc-product-publish-cancel-link {
-			line-height: 32px;
-		}
-
 		#post-visibility-select > p:last-child,
 		#timestampdiv > p,
 		#catalog-visibility-select > p:last-child {
@@ -8718,17 +8701,11 @@ table.bar_chart {
 			display: none;
 		}
 
-		@at-root body.js.post-type-product #submitdiv #post-status-select[style*="display: block"] {
-			display: flex !important;
-		}
-
 		#post-status-select .wc-product-publish-select {
 			flex-basis: 100%;
 		}
 
 		.misc-pub-catalog-visibility::before {
-			-webkit-font-smoothing: antialiased;
-			-moz-osx-font-smoothing: grayscale;
 			color: currentColor;
 			content: "\f180";
 			content: "\f180" / "";
