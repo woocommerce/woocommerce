@@ -72,9 +72,23 @@ export type SettingsUIShellNavigationItem = {
 	active?: boolean;
 };
 
+export type SettingsUIShellBadgeIntent =
+	| 'default'
+	| 'info'
+	| 'success'
+	| 'warning'
+	| 'error';
+
+export type SettingsUIShellBadge = {
+	label: string;
+	intent?: SettingsUIShellBadgeIntent;
+};
+
 export type SettingsUIShell = {
 	title?: string;
+	subtitle?: string;
 	breadcrumbs?: SettingsUIShellBreadcrumb[];
+	badges?: SettingsUIShellBadge[];
 	navigation?: SettingsUIShellNavigationItem[];
 	sectionNavigation?: SettingsUIShellNavigationItem[];
 	navigationComponent?: string;

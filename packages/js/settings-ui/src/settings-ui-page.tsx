@@ -387,6 +387,20 @@ const ShellHeader = ( {
 			</nav>
 		) : undefined;
 
+	const badges =
+		shell.badges && shell.badges.length > 0
+			? shell.badges.map( ( badge, index ) => (
+					<span
+						className={ `wc-settings-ui-shell__badge wc-settings-ui-shell__badge--${
+							badge.intent || 'default'
+						}` }
+						key={ `${ badge.label }-${ index }` }
+					>
+						{ badge.label }
+					</span>
+			  ) )
+			: undefined;
+
 	const saveButtonLabel = __( 'Save', 'woocommerce' );
 
 	const actions = showSaveButton ? (
@@ -409,7 +423,9 @@ const ShellHeader = ( {
 			className="wc-settings-ui-shell"
 			headingLevel={ 1 }
 			title={ title }
+			subTitle={ shell.subtitle }
 			breadcrumbs={ breadcrumbs }
+			badges={ badges }
 			actions={ actions }
 			showSidebarToggle={ false }
 		>
