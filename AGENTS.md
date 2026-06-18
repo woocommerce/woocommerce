@@ -74,6 +74,10 @@ plugins/woocommerce/
 - Used for `@since` annotations (remove `-dev` suffix)
 - When changing template files (PHP files used to display UI on the front-end) the version in their header should be updated to the current version, without the `-dev` suffix.
 
+**JavaScript:**
+
+- Prefer vanilla JavaScript/TypeScript over jQuery for new or modified code. Keep existing jQuery when a rewrite is out of scope.
+
 ## Development Workflow
 
 1. Make code changes

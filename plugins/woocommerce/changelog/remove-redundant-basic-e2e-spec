@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove redundant basic E2E smoke test; its checks are implicitly covered by other specs.

@@ -894,7 +894,6 @@
 					},
 					"events": [
 						"pull_request",
-						"nightly-checks",
 						"release-checks",
 						"blocks-e2e-wp-latest-1"
 					],

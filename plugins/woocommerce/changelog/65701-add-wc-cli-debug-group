@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add the WooCommerce debug group to HPOS CLI debug messages.
