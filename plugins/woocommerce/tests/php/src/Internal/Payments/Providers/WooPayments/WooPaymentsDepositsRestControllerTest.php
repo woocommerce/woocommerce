@@ -658,12 +658,12 @@ class WooPaymentsDepositsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	private function get_expected_routes(): array {
 		return array(
-			'/wc/v3/payments/deposits'                           => array( WP_REST_Server::READABLE, WP_REST_Server::CREATABLE ),
-			'/wc/v3/payments/deposits/summary'                   => array( WP_REST_Server::READABLE ),
-			'/wc/v3/payments/deposits/overview-all'              => array( WP_REST_Server::READABLE ),
-			'/wc/v3/payments/deposits/download'                  => array( WP_REST_Server::CREATABLE ),
+			'/wc/v3/payments/deposits'              => array( WP_REST_Server::READABLE, WP_REST_Server::CREATABLE ),
+			'/wc/v3/payments/deposits/summary'      => array( WP_REST_Server::READABLE ),
+			'/wc/v3/payments/deposits/overview-all' => array( WP_REST_Server::READABLE ),
+			'/wc/v3/payments/deposits/download'     => array( WP_REST_Server::CREATABLE ),
 			'/wc/v3/payments/deposits/download/(?P<export_id>.*)' => array( WP_REST_Server::READABLE ),
-			'/wc/v3/payments/deposits/(?P<deposit_id>[\w]+)'     => array( WP_REST_Server::READABLE ),
+			'/wc/v3/payments/deposits/(?P<deposit_id>[\w]+)' => array( WP_REST_Server::READABLE ),
 		);
 	}
 }

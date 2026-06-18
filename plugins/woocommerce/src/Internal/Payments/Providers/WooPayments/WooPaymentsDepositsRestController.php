@@ -360,7 +360,7 @@ class WooPaymentsDepositsRestController implements RegisterHooksInterface {
 	/**
 	 * Extract allowed params from the request without normalizing platform-facing names.
 	 *
-	 * @param WP_REST_Request   $request Request.
+	 * @param WP_REST_Request    $request Request.
 	 * @param array<string,bool> $allowed Allowed param map.
 	 * @phpstan-param WP_REST_Request<array<string,mixed>> $request
 	 * @return array<string,mixed>

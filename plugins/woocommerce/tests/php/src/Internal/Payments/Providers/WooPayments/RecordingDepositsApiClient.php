@@ -182,8 +182,8 @@ class RecordingDepositsApiClient extends WooPaymentsApiClient {
 	 * Initiate payout export.
 	 *
 	 * @param array<string,mixed> $query      Query params.
-	 * @param string             $user_email User email.
-	 * @param string|null        $locale     Locale.
+	 * @param string              $user_email User email.
+	 * @param string|null         $locale     Locale.
 	 * @return array<string,mixed>
 	 */
 	public function get_deposits_export( array $query = array(), string $user_email = '', ?string $locale = null ): array {
