@@ -100,6 +100,11 @@ class WooPaymentsApiClient {
 	private const TRANSACTIONS_API = 'transactions';
 
 	/**
+	 * WooPayments deposits API path. These endpoints back the merchant-facing payouts surfaces.
+	 */
+	private const DEPOSITS_API = 'deposits';
+
+	/**
 	 * HTTP client.
 	 *
 	 * @var WooPaymentsHttpClient
@@ -627,6 +632,104 @@ class WooPaymentsApiClient {
 		$this->validate_route_resource_id( $transaction_id );
 
 		return $this->request( array(), self::TRANSACTIONS_API . '/' . $transaction_id, 'GET' );
+	}
+
+	/**
+	 * Retrieve WooPayments payout overviews.
+	 *
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_deposits_overview(): array {
+		return $this->request( array(), self::DEPOSITS_API . '/overview-all', 'GET' );
+	}
+
+	/**
+	 * Retrieve WooPayments payouts.
+	 *
+	 * @param array<string,mixed> $query Query params.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_deposits( array $query = array() ): array {
+		return $this->request( $query, self::DEPOSITS_API, 'GET' );
+	}
+
+	/**
+	 * Retrieve WooPayments payout summary.
+	 *
+	 * @param array<string,mixed> $query Query params.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_deposits_summary( array $query = array() ): array {
+		return $this->request( $query, self::DEPOSITS_API . '/summary', 'GET' );
+	}
+
+	/**
+	 * Retrieve a WooPayments payout detail.
+	 *
+	 * @param string $deposit_id Deposit ID.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function get_deposit( string $deposit_id ): array {
+		$this->validate_route_resource_id( $deposit_id );
+
+		return $this->request( array(), self::DEPOSITS_API . '/' . $deposit_id, 'GET' );
+	}
+
+	/**
+	 * Initiate a WooPayments payout export.
+	 *
+	 * @param array<string,mixed> $filters    Export filters.
+	 * @param string              $user_email User email for the export.
+	 * @param string|null         $locale     Site locale.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_deposits_export( array $filters = array(), string $user_email = '', ?string $locale = null ): array {
+		if ( '' !== $user_email ) {
+			$filters['user_email'] = $user_email;
+		}
+
+		if ( null !== $locale && '' !== $locale ) {
+			$filters['locale'] = $locale;
+		}
+
+		return $this->request( $filters, self::DEPOSITS_API . '/download', 'POST' );
+	}
+
+	/**
+	 * Retrieve a WooPayments payout export URL.
+	 *
+	 * @param string $export_id Export ID.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function get_payouts_export_url( string $export_id ): array {
+		$this->validate_route_resource_id( $export_id );
+
+		return $this->request( array(), self::DEPOSITS_API . '/download/' . $export_id, 'GET' );
+	}
+
+	/**
+	 * Trigger a WooPayments manual payout.
+	 *
+	 * @param string $type     Payout type.
+	 * @param string $currency Payout currency.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function manual_deposit( string $type, string $currency ): array {
+		return $this->request(
+			array(
+				'type'     => $type,
+				'currency' => $currency,
+			),
+			self::DEPOSITS_API,
+			'POST'
+		);
 	}
 
 	/**

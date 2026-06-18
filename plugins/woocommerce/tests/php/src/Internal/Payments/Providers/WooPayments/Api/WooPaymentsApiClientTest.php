@@ -1183,6 +1183,165 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should retrieve payout overviews and lists through preserved deposits endpoints.
+	 */
+	public function test_deposits_read_methods_use_preserved_endpoints_and_query_names(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'data'        => array(),
+					'total_count' => 0,
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$sut->get_deposits_overview();
+
+		$this->assertSame( '/sites/123/wcpay/deposits/overview-all?test_mode=1', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+
+		$sut->get_deposits(
+			array(
+				'page'              => 2,
+				'pagesize'          => 25,
+				'sort'              => 'date',
+				'direction'         => 'desc',
+				'store_currency_is' => 'usd',
+				'status_is'         => 'paid',
+			)
+		);
+
+		$this->assertStringStartsWith( '/sites/123/wcpay/deposits?', $http_client->last_path );
+		$this->assertStringContainsString( 'test_mode=1', $http_client->last_path );
+		$this->assertStringContainsString( 'page=2', $http_client->last_path );
+		$this->assertStringContainsString( 'pagesize=25', $http_client->last_path );
+		$this->assertStringContainsString( 'sort=date', $http_client->last_path );
+		$this->assertStringContainsString( 'direction=desc', $http_client->last_path );
+		$this->assertStringContainsString( 'store_currency_is=usd', $http_client->last_path );
+		$this->assertStringContainsString( 'status_is=paid', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+
+		$sut->get_deposits_summary(
+			array(
+				'store_currency_is' => 'usd',
+				'status_is_not'     => 'failed',
+			)
+		);
+
+		$this->assertStringStartsWith( '/sites/123/wcpay/deposits/summary?', $http_client->last_path );
+		$this->assertStringContainsString( 'test_mode=1', $http_client->last_path );
+		$this->assertStringContainsString( 'store_currency_is=usd', $http_client->last_path );
+		$this->assertStringContainsString( 'status_is_not=failed', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+	}
+
+	/**
+	 * @testdox Should retrieve payout details and reject unsafe payout identifiers.
+	 */
+	public function test_get_deposit_uses_preserved_detail_endpoint_and_validates_identifier(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'id' => 'po_test',
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->get_deposit( 'po_test' );
+
+		$this->assertSame( '/sites/123/wcpay/deposits/po_test?test_mode=0', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+		$this->assertSame( 'po_test', $result['id'] );
+
+		$this->expectException( WooPaymentsApiException::class );
+
+		$sut->get_deposit( '../po_test' );
+	}
+
+	/**
+	 * @testdox Should preserve deposits export and manual payout endpoints.
+	 */
+	public function test_deposits_export_and_manual_payout_methods_use_preserved_endpoints(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'exported_deposits' => 42,
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$sut->get_deposits_export(
+			array(
+				'status_is'         => 'paid',
+				'store_currency_is' => 'usd',
+			),
+			'merchant@example.com',
+			'en_US'
+		);
+
+		$this->assertSame( '/sites/123/wcpay/deposits/download', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertStringContainsString( '"test_mode":true', (string) $http_client->last_body );
+		$this->assertStringContainsString( '"status_is":"paid"', (string) $http_client->last_body );
+		$this->assertStringContainsString( '"store_currency_is":"usd"', (string) $http_client->last_body );
+		$this->assertStringContainsString( '"user_email":"merchant@example.com"', (string) $http_client->last_body );
+		$this->assertStringContainsString( '"locale":"en_US"', (string) $http_client->last_body );
+
+		$sut->get_payouts_export_url( 'poexp_test' );
+
+		$this->assertSame( '/sites/123/wcpay/deposits/download/poexp_test?test_mode=1', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+
+		$sut->manual_deposit( 'instant', 'usd' );
+
+		$this->assertSame( '/sites/123/wcpay/deposits', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertStringContainsString( '"type":"instant"', (string) $http_client->last_body );
+		$this->assertStringContainsString( '"currency":"usd"', (string) $http_client->last_body );
+	}
+
+	/**
+	 * @testdox Should reject unsafe payout export identifiers.
+	 */
+	public function test_get_payouts_export_url_rejects_invalid_route_identifier(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array() ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$this->expectException( WooPaymentsApiException::class );
+
+		$sut->get_payouts_export_url( '../poexp_test' );
+	}
+
+	/**
 	 * Create a WooPayments account service mock.
 	 *
 	 * @param bool      $test_mode            Whether WooPayments should run in test mode.

@@ -16,23 +16,41 @@ const WooPaymentsOverviewChunk = lazy(
 		)
 );
 
+const WooPaymentsPayoutsChunk = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "settings-payments-woopayments-payouts" */ './payouts'
+		)
+);
+
+const LoadingFallback = () => (
+	<div>
+		{ sprintf(
+			/* translators: %s: WooPayments */
+			__( 'Loading %s…', 'woocommerce' ),
+			'WooPayments'
+		) }
+	</div>
+);
+
 registerSettingsPaymentsProviderRoute( {
 	id: 'woopayments-overview',
 	path: '/woopayments/overview',
 	order: 100,
 	element: (
-		<Suspense
-			fallback={
-				<div>
-					{ sprintf(
-						/* translators: %s: WooPayments */
-						__( 'Loading %s…', 'woocommerce' ),
-						'WooPayments'
-					) }
-				</div>
-			}
-		>
+		<Suspense fallback={ <LoadingFallback /> }>
 			<WooPaymentsOverviewChunk />
+		</Suspense>
+	),
+} );
+
+registerSettingsPaymentsProviderRoute( {
+	id: 'woopayments-payouts',
+	path: '/woopayments/payouts',
+	order: 110,
+	element: (
+		<Suspense fallback={ <LoadingFallback /> }>
+			<WooPaymentsPayoutsChunk />
 		</Suspense>
 	),
 } );

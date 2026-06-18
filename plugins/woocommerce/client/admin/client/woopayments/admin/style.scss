@@ -1,3 +1,97 @@
 .woocommerce-woopayments-overview {
 	max-width: 960px;
 }
+
+.woocommerce-woopayments-overview__content,
+.woocommerce-woopayments-payouts {
+	display: grid;
+	gap: 24px;
+	max-width: 960px;
+}
+
+.woocommerce-woopayments-overview__cards {
+	display: grid;
+	gap: 16px;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.woocommerce-woopayments-overview-card {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	padding: 20px;
+}
+
+.woocommerce-woopayments-overview-card h2,
+.woocommerce-woopayments-overview-card h3 {
+	margin-top: 0;
+}
+
+.woocommerce-woopayments-overview-card__header {
+	align-items: baseline;
+	display: flex;
+	gap: 16px;
+	justify-content: space-between;
+}
+
+.woocommerce-woopayments-overview-card__amount {
+	font-size: 20px;
+	font-weight: 600;
+}
+
+.woocommerce-woopayments-overview__balance-grid {
+	display: grid;
+	gap: 12px;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	margin: 0;
+}
+
+.woocommerce-woopayments-overview__balance-grid div {
+	background: #f6f7f7;
+	border-radius: 4px;
+	padding: 12px;
+}
+
+.woocommerce-woopayments-overview__balance-grid dt {
+	color: #646970;
+	font-size: 12px;
+	margin-bottom: 4px;
+}
+
+.woocommerce-woopayments-overview__balance-grid dd {
+	font-size: 18px;
+	font-weight: 600;
+	margin: 0;
+}
+
+.woocommerce-woopayments-overview__notice {
+	background: #fcf9e8;
+	border-left: 4px solid #dba617;
+	margin: 12px 0;
+	padding: 10px 12px;
+}
+
+.woocommerce-woopayments-overview__payouts-table {
+	border-collapse: collapse;
+	margin-top: 12px;
+	width: 100%;
+}
+
+.woocommerce-woopayments-overview__payouts-table th,
+.woocommerce-woopayments-overview__payouts-table td {
+	border-bottom: 1px solid #dcdcde;
+	padding: 10px 0;
+	text-align: left;
+}
+
+.woocommerce-woopayments-overview__payouts-table th:last-child,
+.woocommerce-woopayments-overview__payouts-table td:last-child {
+	text-align: right;
+}
+
+@media screen and (max-width: 782px) {
+	.woocommerce-woopayments-overview__cards,
+	.woocommerce-woopayments-overview__balance-grid {
+		grid-template-columns: 1fr;
+	}
+}

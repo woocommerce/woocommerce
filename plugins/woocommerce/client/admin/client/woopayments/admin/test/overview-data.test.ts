@@ -1,0 +1,77 @@
+/**
+ * External dependencies
+ */
+import apiFetch from '@wordpress/api-fetch';
+
+/**
+ * Internal dependencies
+ */
+import {
+	getWooPaymentsDeposit,
+	getWooPaymentsDeposits,
+	getWooPaymentsDepositsOverview,
+	getWooPaymentsDepositsSummary,
+	getWooPaymentsRecentDeposits,
+} from '../overview/data';
+
+jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+
+const mockApiFetch = apiFetch as jest.MockedFunction< typeof apiFetch >;
+
+describe( 'WooPayments overview deposits data', () => {
+	beforeEach( () => {
+		mockApiFetch.mockReset();
+		mockApiFetch.mockResolvedValue( {} );
+	} );
+
+	it( 'loads payout overview data from the preserved deposits overview endpoint', async () => {
+		await getWooPaymentsDepositsOverview();
+
+		expect( mockApiFetch ).toHaveBeenCalledWith( {
+			path: '/wc/v3/payments/deposits/overview-all',
+			method: 'GET',
+		} );
+	} );
+
+	it( 'loads recent payouts with the reference query names', async () => {
+		await getWooPaymentsRecentDeposits( 'usd' );
+
+		expect( mockApiFetch ).toHaveBeenCalledWith( {
+			path: '/wc/v3/payments/deposits?page=1&pagesize=3&sort=date&direction=desc&store_currency_is=usd',
+			method: 'GET',
+		} );
+	} );
+
+	it( 'preserves payout list query names instead of normalizing them to WordPress collection names', async () => {
+		await getWooPaymentsDeposits( {
+			page: 2,
+			pagesize: 25,
+			sort: 'date',
+			direction: 'desc',
+			store_currency_is: 'usd',
+			status_is: 'paid',
+		} );
+
+		expect( mockApiFetch ).toHaveBeenCalledWith( {
+			path: '/wc/v3/payments/deposits?page=2&pagesize=25&sort=date&direction=desc&store_currency_is=usd&status_is=paid',
+			method: 'GET',
+		} );
+	} );
+
+	it( 'loads payout summaries and details from preserved endpoint names', async () => {
+		await getWooPaymentsDepositsSummary( {
+			store_currency_is: 'usd',
+			status_is_not: 'failed',
+		} );
+		await getWooPaymentsDeposit( 'po_test' );
+
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 1, {
+			path: '/wc/v3/payments/deposits/summary?store_currency_is=usd&status_is_not=failed',
+			method: 'GET',
+		} );
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 2, {
+			path: '/wc/v3/payments/deposits/po_test',
+			method: 'GET',
+		} );
+	} );
+} );

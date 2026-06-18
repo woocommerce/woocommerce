@@ -1,13 +1,13 @@
 /**
  * Internal dependencies
  */
-import { WooPaymentsAccountSettings } from '~/woopayments/settings/account-settings';
+import { WooPaymentsOverviewPage } from './overview/page';
 import './style.scss';
 
 export const WooPaymentsOverview = () => {
 	return (
 		<div className="woocommerce-woopayments-overview">
-			<WooPaymentsAccountSettings />
+			<WooPaymentsOverviewPage />
 		</div>
 	);
 };
