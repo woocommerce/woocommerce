@@ -78,16 +78,17 @@ class WooContentProcessorTest extends \WC_Unit_Test_Case {
 			}
 		);
 
-		$wc_email                   = new \WC_Email_Customer_New_Account();
-		$wc_email->user_login       = 'testuser';
-		$wc_email->user_email       = 'test@example.com';
-		$wc_email->user_pass        = 'testpass';
-		$wc_email->set_password_url = 'https://example.com/set-password';
+		$wc_email                     = new \WC_Email_Customer_New_Account();
+		$wc_email->user_login         = 'testuser';
+		$wc_email->user_email         = 'test@example.com';
+		$wc_email->user_pass          = 'testpass';
+		$wc_email->password_generated = true;
+		$wc_email->set_password_url   = 'https://example.com/set-password';
 
 		$content = $this->woo_content_processor->get_woo_content( $wc_email );
 
 		$this->assertNotEmpty( $content );
-		$this->assertStringContainsString( 'Set your new password', $content );
+		$this->assertStringContainsString( 'Confirm email address and set password', $content );
 		$this->assertStringNotContainsString( 'Test email header', $content );
 		$this->assertStringNotContainsString( 'Test email footer', $content );
 		$this->assertStringNotContainsString( '<body>', $content );

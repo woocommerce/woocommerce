@@ -5,9 +5,9 @@
  * @package WooCommerce\Emails
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
+
+use Automattic\WooCommerce\Internal\CustomerEmailVerification\EmailVerificationService;
 
 if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 
@@ -64,6 +64,13 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 		 * @var string
 		 */
 		public $user_display_name;
+
+		/**
+		 * Email verification URL.
+		 *
+		 * @var string
+		 */
+		public $verify_url;
 
 		/**
 		 * Constructor.
@@ -126,6 +133,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 				$this->recipient          = $this->user_email;
 				$this->user_pass          = $user_pass;
 				$this->password_generated = $password_generated;
+				$this->verify_url         = wc_get_container()->get( EmailVerificationService::class )->build_verification_url( $user_id );
 			}
 
 			$this->send_notification();
@@ -136,6 +144,8 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 		/**
 		 * Get content html.
 		 *
+		 * Note: Password is no longer used in the template, but we're keeping it here for backwards compatibility with custom templates.
+		 *
 		 * @return string
 		 */
 		public function get_content_html() {
@@ -145,6 +155,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 					'email_heading'      => $this->get_heading(),
 					'additional_content' => $this->get_additional_content(),
 					'user_login'         => $this->user_login,
+					'user_email'         => $this->user_email,
 					'user_display_name'  => $this->user_display_name,
 					'blogname'           => $this->get_blogname(),
 					'set_password_url'   => $this->set_password_url,
@@ -152,7 +163,8 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 					'plain_text'         => false,
 					'email'              => $this,
 					'password_generated' => $this->password_generated,
-					'user_pass'          => $this->user_pass, // Password is no longer used in the template, but we're keeping it here for backwards compatibility with custom templates.
+					'user_pass'          => $this->user_pass,
+					'verify_url'         => $this->verify_url,
 				)
 			);
 		}
@@ -169,6 +181,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 					'email_heading'      => $this->get_heading(),
 					'additional_content' => $this->get_additional_content(),
 					'user_login'         => $this->user_login,
+					'user_email'         => $this->user_email,
 					'user_display_name'  => $this->user_display_name,
 					'blogname'           => $this->get_blogname(),
 					'set_password_url'   => $this->set_password_url,
@@ -176,7 +189,8 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 					'plain_text'         => true,
 					'email'              => $this,
 					'password_generated' => $this->password_generated,
-					'user_pass'          => $this->user_pass, // Password is no longer used in the template, but we're keeping it here for backwards compatibility with custom templates.
+					'user_pass'          => $this->user_pass,
+					'verify_url'         => $this->verify_url,
 				)
 			);
 		}
@@ -192,12 +206,14 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 				array(
 					'user_login'         => $this->user_login,
 					'user_display_name'  => $this->user_display_name,
+					'user_email'         => $this->user_email,
 					'set_password_url'   => $this->set_password_url,
 					'sent_to_admin'      => false,
 					'plain_text'         => false,
 					'email'              => $this,
 					'password_generated' => $this->password_generated,
-					'user_pass'          => $this->user_pass, // Password is no longer used in the template, but we're keeping it here for backwards compatibility with custom templates.
+					'user_pass'          => $this->user_pass,
+					'verify_url'         => $this->verify_url,
 				)
 			);
 		}

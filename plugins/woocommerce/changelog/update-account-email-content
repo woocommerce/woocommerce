@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Refresh the new-account and password-reset email content, replacing the password with an email-confirmation call to action.

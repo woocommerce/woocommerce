@@ -73,11 +73,19 @@ if ( 'customer_invoice' === $email->id ) :
 endif;
 
 if ( 'customer_new_account' === $email->id ) :
-	?>
-	<?php if ( $set_password_url ) : ?>
-		<p><a href="<?php echo esc_attr( $set_password_url ); ?>"><?php printf( esc_html__( 'Set your new password.', 'woocommerce' ) ); ?></a></p>
+	if ( $password_generated && $set_password_url ) :
+		?>
+		<p><a href="<?php echo esc_url( $set_password_url ); ?>"><?php esc_html_e( 'Confirm email address and set password', 'woocommerce' ); ?></a></p>
+		<?php
+	else :
+		?>
+		<p><a href="<?php echo esc_url( $verify_url ?? wc_get_page_permalink( 'myaccount' ) ); ?>"><?php esc_html_e( 'Confirm email address', 'woocommerce' ); ?></a></p>
 		<?php
 	endif;
+	?>
+	<?php /* translators: %s: the customer's email address. */ ?>
+	<p><?php echo wp_kses_post( sprintf( __( "Once you've confirmed that %s is your email address, we'll link any past orders to your account.", 'woocommerce' ), '<strong>' . esc_html( $user_email ) . '</strong>' ) ); ?></p>
+	<?php
 endif;
 
 if ( 'customer_reset_password' === $email->id && isset( $reset_key, $user_id ) ) :

@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.6.0
+ * @version 11.0.0
  */
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
@@ -36,21 +36,7 @@ defined( 'ABSPATH' ) || exit;
 
 <!-- wp:paragraph -->
 <p><?php
-	/* translators: %s: Store name */
-	printf( esc_html__( 'Someone has requested a new password for the following account on %s:', 'woocommerce' ), '<!--[woocommerce/site-title]-->' );
-?></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph -->
-<p><?php
-/* translators: %s: Username */
-echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocommerce/customer-username]-->' ), array( 'b' => array() ) );
-?></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph -->
-<p><?php
-	echo esc_html__( 'If you didn’t make this request, just ignore this email. If you’d like to proceed, reset your password via the link below:', 'woocommerce' );
+	echo esc_html__( 'We received a request to update your password. To reset your password, click the link below:', 'woocommerce' );
 ?></p>
 <!-- /wp:paragraph -->
 
@@ -59,6 +45,6 @@ echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocomm
 <!-- /wp:woocommerce/email-content -->
 
 <!-- wp:paragraph {"align":"center"} -->
-<p class="has-text-align-center"> <?php echo esc_html__( 'Thanks for reading.', 'woocommerce' ); ?> </p>
+<p class="has-text-align-center"> <?php echo esc_html__( "If you didn't request this email, there's nothing to worry about, and you can safely ignore it.", 'woocommerce' ); ?> </p>
 <!-- /wp:paragraph -->
 
