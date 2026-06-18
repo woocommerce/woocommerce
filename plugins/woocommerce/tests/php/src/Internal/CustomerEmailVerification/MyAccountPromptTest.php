@@ -45,6 +45,18 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		parent::tearDown();
 	}
 
+	/**
+	 * Create a linkable guest order for the given email.
+	 *
+	 * @param string $email Billing email to attach the guest order to.
+	 */
+	private function create_guest_order( string $email ): void {
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( $email );
+		$order->set_customer_id( 0 );
+		$order->save();
+	}
+
 	// -------------------------------------------------------------------------
 	// should_show_prompt()
 	// -------------------------------------------------------------------------
@@ -67,10 +79,7 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		wp_set_current_user( $user_id );
 
 		// A linkable guest order must exist for the prompt to appear.
-		$order = \WC_Helper_Order::create_order( 0 );
-		$order->set_billing_email( $email );
-		$order->set_customer_id( 0 );
-		$order->save();
+		$this->create_guest_order( $email );
 
 		$this->assertTrue( $this->sut->should_show_prompt(), 'Unverified customers with linkable guest orders should see the prompt' );
 	}
@@ -98,10 +107,7 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		$user_id = wc_create_new_customer( $email, 'ctapromptuser', 'pw' );
 		wp_set_current_user( $user_id );
 
-		$order = \WC_Helper_Order::create_order( 0 );
-		$order->set_billing_email( $email );
-		$order->set_customer_id( 0 );
-		$order->save();
+		$this->create_guest_order( $email );
 
 		$wp->query_vars['orders'] = '';
 		wc_clear_notices();
@@ -122,10 +128,7 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		$user_id = wc_create_new_customer( $email, 'inboxpromptuser', 'pw' );
 		wp_set_current_user( $user_id );
 
-		$order = \WC_Helper_Order::create_order( 0 );
-		$order->set_billing_email( $email );
-		$order->set_customer_id( 0 );
-		$order->save();
+		$this->create_guest_order( $email );
 
 		// A confirmation link was just sent.
 		$this->service->create_verification_key( $user_id );
@@ -149,10 +152,7 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		wp_set_current_user( $user_id );
 
 		// A linkable guest order exists, so only the temporary-password suppression should hide the prompt.
-		$order = \WC_Helper_Order::create_order( 0 );
-		$order->set_billing_email( $email );
-		$order->set_customer_id( 0 );
-		$order->save();
+		$this->create_guest_order( $email );
 
 		update_user_option( $user_id, 'default_password_nag', true, true );
 
