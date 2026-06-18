@@ -67,7 +67,7 @@ class WooPaymentsDisputesListRequest extends WooPaymentsPaginatedListRequest {
 	/**
 	 * Catch reference filter setters without normalizing platform-facing names.
 	 *
-	 * @param string $name Method name.
+	 * @param string           $name Method name.
 	 * @param array<int,mixed> $arguments Method arguments.
 	 */
 	public function __call( string $name, array $arguments ): void {
