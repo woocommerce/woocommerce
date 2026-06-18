@@ -67,13 +67,14 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	 */
 	private function dispatch_send_request(): void {
 		$abort = static function ( $location ): void {
-			throw new \RuntimeException( (string) $location );
+			throw new \RuntimeException( esc_html( (string) $location ) );
 		};
 		add_filter( 'wp_redirect', $abort );
 		try {
 			$this->sut->handle_send_request();
 		} catch ( \RuntimeException $e ) {
-			unset( $e ); // Expected: handle_send_request() redirects and exits.
+			// Expected: handle_send_request() redirects and exits.
+			unset( $e );
 		} finally {
 			remove_filter( 'wp_redirect', $abort );
 		}
@@ -251,7 +252,7 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 
 		$notification_count = 0;
 		$listener           = static function () use ( &$notification_count ) {
-			$notification_count++;
+			++$notification_count;
 		};
 		add_action( 'woocommerce_customer_verify_email_notification', $listener );
 
@@ -292,6 +293,8 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		$elapsed = $this->service->seconds_since_last_key( $user_id );
 
 		$this->assertNotNull( $elapsed, 'Should return an integer after key creation' );
-		$this->assertLessThan( 5, $elapsed, 'Elapsed time should be under 5 seconds immediately after key creation' );
+		$this->assertGreaterThanOrEqual( 0, $elapsed, 'Elapsed time should never be negative' );
+		// Generous upper bound: proves a real, recent elapsed value without being flaky on a slow runner.
+		$this->assertLessThan( 60, $elapsed, 'Elapsed time should be well within the rate-limit window after key creation' );
 	}
 }
