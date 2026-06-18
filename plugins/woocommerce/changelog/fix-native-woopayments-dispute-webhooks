@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Handle native WooPayments dispute webhook events with reference-compatible order side effects and fail-closed validation.
