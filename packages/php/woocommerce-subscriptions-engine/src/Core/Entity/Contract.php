@@ -389,11 +389,7 @@ final class Contract {
 			return;
 		}
 
-		if ( ! ContractStatus::can_transition( $this->status, $status ) ) {
-			throw new DomainException(
-				sprintf( 'Contract: illegal status transition from "%s" to "%s".', $this->status, $status )
-			);
-		}
+		ContractStatus::assert_transition_allowed( $this->status, $status );
 
 		$this->status = $status;
 	}

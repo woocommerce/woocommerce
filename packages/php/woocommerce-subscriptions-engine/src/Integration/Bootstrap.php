@@ -14,6 +14,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration;
 
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway\CapabilityRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 defined( 'ABSPATH' ) || exit;
@@ -40,6 +41,8 @@ final class Bootstrap {
 		}
 
 		self::$initialized = true;
+
+		CapabilityRegistry::init();
 
 		if ( did_action( 'init' ) ) {
 			self::maybe_install_schema();

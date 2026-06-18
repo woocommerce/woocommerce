@@ -12,6 +12,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
+use DomainException;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -61,15 +63,53 @@ final class ContractStatus {
 	/**
 	 * Whether a contract may move from `$from` to `$to`.
 	 *
+	 * Unknown source or target statuses are reported as not allowed, so a row
+	 * that has drifted into an unrecognized state cannot be transitioned out of
+	 * a value we do not know how to reason about. Same-status calls
+	 * (`active` -> `active`) report false here; {@see Contract::set_status()}
+	 * short-circuits no-ops before consulting this table so they do not surface
+	 * as exceptions to callers.
+	 *
 	 * @param string $from Current status.
 	 * @param string $to   Target status.
 	 */
-	public static function can_transition( string $from, string $to ): bool {
+	public static function is_transition_allowed( string $from, string $to ): bool {
 		if ( ! self::is_valid( $from ) || ! self::is_valid( $to ) ) {
 			return false;
 		}
 
 		return in_array( $to, self::transitions()[ $from ], true );
+	}
+
+	/**
+	 * Whether a contract may move from `$from` to `$to`.
+	 *
+	 * Alias of {@see self::is_transition_allowed()}.
+	 *
+	 * @param string $from Current status.
+	 * @param string $to   Target status.
+	 */
+	public static function can_transition( string $from, string $to ): bool {
+		return self::is_transition_allowed( $from, $to );
+	}
+
+	/**
+	 * Throw if `$from` -> `$to` is not an allowed transition.
+	 *
+	 * The canonical enforcement entry point: every status change flows through
+	 * here before the new status is applied, which makes "no nonsense states" a
+	 * structural guarantee rather than a code-review aspiration.
+	 *
+	 * @param string $from Current status.
+	 * @param string $to   Target status.
+	 * @throws DomainException When the transition is rejected by {@see self::is_transition_allowed()}.
+	 */
+	public static function assert_transition_allowed( string $from, string $to ): void {
+		if ( ! self::is_transition_allowed( $from, $to ) ) {
+			throw new DomainException(
+				sprintf( 'ContractStatus: illegal status transition from "%s" to "%s".', $from, $to )
+			);
+		}
 	}
 
 	/**
