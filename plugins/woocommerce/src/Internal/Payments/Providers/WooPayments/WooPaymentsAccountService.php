@@ -720,6 +720,91 @@ class WooPaymentsAccountService implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Tell whether the cached account is rejected.
+	 *
+	 * @return bool
+	 */
+	public function is_account_rejected(): bool {
+		$account_data = $this->get_cached_account_data();
+		$status       = $account_data['status'] ?? '';
+
+		return $this->has_account()
+			&& is_scalar( $status )
+			&& str_starts_with( (string) $status, 'rejected' );
+	}
+
+	/**
+	 * Tell whether the cached account is under review.
+	 *
+	 * @return bool
+	 */
+	public function is_account_under_review(): bool {
+		$account_data = $this->get_cached_account_data();
+
+		return $this->has_account() && 'under_review' === ( $account_data['status'] ?? null );
+	}
+
+	/**
+	 * Tell whether the cached account completed details submission.
+	 *
+	 * @return bool
+	 */
+	public function is_details_submitted(): bool {
+		$account_data = $this->get_cached_account_data();
+
+		return $this->is_truthy( $account_data['details_submitted'] ?? false );
+	}
+
+	/**
+	 * Tell whether the cached account is valid for native WooPayments admin navigation.
+	 *
+	 * @return bool
+	 */
+	public function has_valid_account_for_admin_navigation(): bool {
+		$account_data = $this->get_cached_account_data();
+		$capabilities = is_array( $account_data['capabilities'] ?? null ) ? $account_data['capabilities'] : array();
+
+		return $this->has_account()
+			&& $this->is_details_submitted()
+			&& isset( $capabilities['card_payments'] )
+			&& 'unrequested' !== $capabilities['card_payments'];
+	}
+
+	/**
+	 * Tell whether the cached account is eligible for in-person payments.
+	 *
+	 * @return bool
+	 */
+	public function is_card_present_eligible(): bool {
+		$account_data = $this->get_cached_account_data();
+
+		return $this->has_account() && $this->is_truthy( $account_data['card_present_eligible'] ?? false );
+	}
+
+	/**
+	 * Tell whether the cached account has card readers available.
+	 *
+	 * @return bool
+	 */
+	public function has_card_readers_available(): bool {
+		$account_data = $this->get_cached_account_data();
+
+		return $this->has_account() && $this->is_truthy( $account_data['has_card_readers_available'] ?? false );
+	}
+
+	/**
+	 * Tell whether the cached account has previous Capital loans.
+	 *
+	 * @return bool
+	 */
+	public function has_previous_capital_loans(): bool {
+		$account_data = $this->get_cached_account_data();
+		$capital      = is_array( $account_data['capital'] ?? null ) ? $account_data['capital'] : array();
+
+		return $this->has_account() && $this->is_truthy( $capital['has_previous_loans'] ?? false );
+	}
+
+	/**
 	 * Tell whether WooPayments is in test mode.
 	 *
 	 * @return bool

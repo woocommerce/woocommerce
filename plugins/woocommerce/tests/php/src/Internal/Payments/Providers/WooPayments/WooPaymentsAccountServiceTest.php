@@ -242,6 +242,140 @@ class WooPaymentsAccountServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should expose rejected and under-review account state from the preserved account cache.
+	 */
+	public function test_exposes_rejected_and_under_review_account_state_from_account_cache(): void {
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => $this->get_valid_live_account_payload(
+					array(
+						'status' => 'rejected.fraud',
+					)
+				),
+			)
+		);
+
+		$sut = $this->create_service();
+
+		$this->assertTrue( method_exists( $sut, 'is_account_rejected' ), 'Account rejection state should be part of the native account service contract.' );
+		$this->assertTrue( $sut->is_account_rejected() );
+		$this->assertFalse( $sut->is_account_under_review() );
+
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => $this->get_valid_live_account_payload(
+					array(
+						'status' => 'under_review',
+					)
+				),
+			)
+		);
+		$sut = $this->create_service();
+
+		$this->assertFalse( $sut->is_account_rejected() );
+		$this->assertTrue( $sut->is_account_under_review() );
+	}
+
+	/**
+	 * @testdox Should expose details-submitted and admin-navigation validity from the preserved account cache.
+	 */
+	public function test_exposes_details_submitted_and_admin_navigation_validity_from_account_cache(): void {
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => $this->get_valid_live_account_payload(
+					array(
+						'capabilities' => array(
+							'card_payments' => 'active',
+						),
+					)
+				),
+			)
+		);
+
+		$sut = $this->create_service();
+
+		$this->assertTrue( method_exists( $sut, 'is_details_submitted' ), 'Details-submitted state should be part of the native account service contract.' );
+		$this->assertTrue( $sut->is_details_submitted() );
+		$this->assertTrue( $sut->has_valid_account_for_admin_navigation() );
+
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => $this->get_valid_live_account_payload(
+					array(
+						'capabilities' => array(
+							'card_payments' => 'unrequested',
+						),
+					)
+				),
+			)
+		);
+		$sut = $this->create_service();
+
+		$this->assertFalse( $sut->has_valid_account_for_admin_navigation() );
+
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => $this->get_valid_live_account_payload(
+					array(
+						'details_submitted' => false,
+						'capabilities'      => array(
+							'card_payments' => 'active',
+						),
+					)
+				),
+			)
+		);
+		$sut = $this->create_service();
+
+		$this->assertFalse( $sut->is_details_submitted() );
+		$this->assertFalse( $sut->has_valid_account_for_admin_navigation() );
+	}
+
+	/**
+	 * @testdox Should expose card-reader and Capital visibility flags from the preserved account cache.
+	 */
+	public function test_exposes_card_reader_and_capital_visibility_flags_from_account_cache(): void {
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => $this->get_valid_live_account_payload(
+					array(
+						'card_present_eligible'      => true,
+						'has_card_readers_available' => true,
+						'capital'                    => array(
+							'has_previous_loans' => true,
+						),
+					)
+				),
+			)
+		);
+
+		$sut = $this->create_service();
+
+		$this->assertTrue( method_exists( $sut, 'is_card_present_eligible' ), 'Card-present eligibility should be part of the native account service contract.' );
+		$this->assertTrue( $sut->is_card_present_eligible() );
+		$this->assertTrue( $sut->has_card_readers_available() );
+		$this->assertTrue( $sut->has_previous_capital_loans() );
+
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => $this->get_valid_live_account_payload(),
+			)
+		);
+		$sut = $this->create_service();
+
+		$this->assertFalse( $sut->is_card_present_eligible() );
+		$this->assertFalse( $sut->has_card_readers_available() );
+		$this->assertFalse( $sut->has_previous_capital_loans() );
+	}
+
+	/**
 	 * @testdox Should clear the preserved account cache so the next account read can refresh from the provider.
 	 */
 	public function test_clear_cache_deletes_preserved_account_cache(): void {
