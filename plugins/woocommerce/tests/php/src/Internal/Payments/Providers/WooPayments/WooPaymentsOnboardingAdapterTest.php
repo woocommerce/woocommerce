@@ -307,6 +307,26 @@ class WooPaymentsOnboardingAdapterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Native overview fallback should use the Settings Payments provider route.
+	 */
+	public function test_native_overview_fallback_uses_settings_payments_provider_route(): void {
+		$legacy_runtime_proxy = new LegacyRuntimeProxy( false );
+		$legacy_runtime       = new WooPaymentsLegacyRuntime();
+		$legacy_runtime->init( $legacy_runtime_proxy );
+		$adapter = new WooPaymentsOnboardingAdapter();
+		$adapter->init( $legacy_runtime, $this->provider, $this->native_gateway, $this->native_account_service );
+
+		$this->provider->method( 'can_process_payments' )->willReturn( true );
+
+		$url = rawurldecode( $adapter->get_overview_page_url() );
+
+		$this->assertStringContainsString( 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/overview', $url );
+		$this->assertStringContainsString( 'from=' . WooPaymentsService::FROM_NOX_IN_CONTEXT, $url );
+		$this->assertStringNotContainsString( 'page=wc-admin', $url );
+		$this->assertStringNotContainsString( 'path=/payments/overview', $url );
+	}
+
+	/**
 	 * @testdox Legacy runtime seam supplies extension, gateway, account, and URL data.
 	 */
 	public function test_legacy_runtime_seam_supplies_extension_gateway_account_and_url_data(): void {

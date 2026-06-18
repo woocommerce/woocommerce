@@ -7,6 +7,7 @@ export interface WooPaymentsTransaction {
 	id?: string;
 	transaction_id?: string;
 	charge_id?: string;
+	payment_intent_id?: string;
 	type?: string;
 	amount?: number;
 	currency?: string;
@@ -26,6 +27,7 @@ export interface WooPaymentsDispute {
 		| {
 				id?: string;
 				payment_intent?: string;
+				balance_transaction?: string | { id?: string };
 		  };
 	payment_intent?: string;
 	transaction_id?: string;
@@ -49,6 +51,30 @@ export interface WooPaymentsDispute {
 	};
 	customer_name?: string;
 	customer_email?: string;
+}
+
+export interface WooPaymentsCharge {
+	id?: string;
+	payment_intent?: string;
+	balance_transaction?: string | { id?: string };
+	type?: string;
+	amount?: number;
+	currency?: string;
+	created?: number | string;
+	date?: number | string;
+	status?: string;
+}
+
+export interface WooPaymentsPaymentIntent {
+	id?: string;
+	charge?: WooPaymentsCharge;
+	charges?: {
+		data?: WooPaymentsCharge[];
+	};
+	amount?: number;
+	currency?: string;
+	created?: number | string;
+	status?: string;
 }
 
 export interface WooPaymentsDisputeMetadata {

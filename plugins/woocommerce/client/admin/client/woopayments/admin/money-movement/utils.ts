@@ -67,6 +67,51 @@ export const getChargeId = ( item: {
 	return item.charge_id || item.charge?.id || item.id || '';
 };
 
+export const getTransactionDetailsRoute = ( item: {
+	id?: string;
+	transaction_id?: string;
+	charge_id?: string;
+	payment_intent_id?: string;
+	payment_intent?: string;
+	type?: string;
+	charge?:
+		| string
+		| {
+				id?: string;
+				payment_intent?: string;
+				balance_transaction?: string | { id?: string };
+		  };
+} ) => {
+	const charge = typeof item.charge === 'object' ? item.charge : undefined;
+	const primaryId =
+		item.payment_intent_id ||
+		item.payment_intent ||
+		charge?.payment_intent ||
+		item.charge_id ||
+		( typeof item.charge === 'string' ? item.charge : charge?.id ) ||
+		item.id ||
+		item.transaction_id ||
+		'';
+	const balanceTransaction = charge?.balance_transaction;
+	const balanceTransactionId =
+		typeof balanceTransaction === 'string'
+			? balanceTransaction
+			: balanceTransaction?.id;
+	const transactionId =
+		item.transaction_id ||
+		balanceTransactionId ||
+		( item.id?.startsWith( 'txn_' ) ? item.id : '' );
+
+	return buildPathWithQuery( '/woopayments/transactions/details', {
+		id: primaryId,
+		transaction_id:
+			transactionId && transactionId !== primaryId
+				? transactionId
+				: undefined,
+		transaction_type: item.type,
+	} );
+};
+
 export const formatDate = ( value?: string | number ) => {
 	if ( ! value ) {
 		return '-';

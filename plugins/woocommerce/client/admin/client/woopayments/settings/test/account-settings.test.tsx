@@ -18,8 +18,8 @@ const createAccountResponse = (
 	overrides: Partial< WooPaymentsAccount > = {},
 	urls: Partial< WooPaymentsAccountResponse[ 'urls' ] > = {
 		overview_page:
-			'https://example.com/wp-admin/admin.php?page=wc-admin&path=/payments/overview',
-		setup: 'https://example.com/wp-admin/admin.php?page=wc-admin&path=/woopayments/onboarding',
+			'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/woopayments/overview',
+		setup: 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/woopayments/onboarding',
 	}
 ): WooPaymentsAccountResponse => ( {
 	account: {
@@ -205,7 +205,7 @@ describe( 'WooPaymentsAccountSettings', () => {
 			screen.getByRole( 'link', { name: 'Set up WooPayments' } )
 		).toHaveAttribute(
 			'href',
-			'https://example.com/wp-admin/admin.php?page=wc-admin&path=/woopayments/onboarding'
+			'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/woopayments/onboarding'
 		);
 		expect( screen.queryByText( 'acct_123' ) ).not.toBeInTheDocument();
 	} );

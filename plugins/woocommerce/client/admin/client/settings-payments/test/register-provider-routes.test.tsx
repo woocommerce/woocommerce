@@ -16,13 +16,24 @@ describe( 'Settings Payments provider route bootstrap', () => {
 
 			const routes = getSettingsPaymentsProviderRoutes();
 
-			expect( routes ).toHaveLength( 1 );
-			expect( routes[ 0 ] ).toMatchObject( {
-				id: 'woopayments-overview',
-				path: '/woopayments/overview',
-				order: 100,
+			expect(
+				routes.map( ( { path: routePath } ) => routePath )
+			).toEqual( [
+				'/woopayments/settings',
+				'/woopayments/overview',
+				'/woopayments/payouts',
+				'/woopayments/payouts/details',
+				'/woopayments/transactions',
+				'/woopayments/transactions/details',
+				'/woopayments/disputes',
+				'/woopayments/disputes/details',
+				'/woopayments/disputes/challenge',
+				'/woopayments/card-readers',
+				'/woopayments/loans',
+			] );
+			routes.forEach( ( route ) => {
+				expect( route.path ).not.toMatch( /^\/payments\// );
 			} );
-			expect( routes[ 0 ].path ).not.toMatch( /^\/payments\// );
 		} );
 	} );
 } );

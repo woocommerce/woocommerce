@@ -11,6 +11,8 @@ import type {
 	WooPaymentsDisputeFile,
 	WooPaymentsListResponse,
 	WooPaymentsMoneyMovementQuery,
+	WooPaymentsCharge,
+	WooPaymentsPaymentIntent,
 	WooPaymentsTransaction,
 } from './types';
 import { buildPathWithQuery } from './utils';
@@ -42,6 +44,24 @@ export const getWooPaymentsTransaction = (
 	apiFetch< WooPaymentsTransaction >( {
 		path: `${ PAYMENTS_PATH }/transactions/${ encodeURIComponent(
 			transactionId
+		) }`,
+		method: 'GET',
+	} );
+
+export const getWooPaymentsCharge = (
+	chargeId: string
+): Promise< WooPaymentsCharge > =>
+	apiFetch< WooPaymentsCharge >( {
+		path: `${ PAYMENTS_PATH }/charges/${ encodeURIComponent( chargeId ) }`,
+		method: 'GET',
+	} );
+
+export const getWooPaymentsPaymentIntent = (
+	paymentIntentId: string
+): Promise< WooPaymentsPaymentIntent > =>
+	apiFetch< WooPaymentsPaymentIntent >( {
+		path: `${ PAYMENTS_PATH }/payment_intents/${ encodeURIComponent(
+			paymentIntentId
 		) }`,
 		method: 'GET',
 	} );

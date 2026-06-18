@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
 use Automattic\WooCommerce\Internal\Payments\NativeWooPaymentsGateway;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentLifecycleService;
@@ -343,8 +344,9 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 			$meta['_charge_id'] = (string) $charge['id'];
 		}
 
-		if ( isset( $charge['balance_transaction']['id'] ) ) {
-			$meta['_wcpay_payment_transaction_id'] = (string) $charge['balance_transaction']['id'];
+		$balance_transaction_id = $this->get_balance_transaction_id( $charge['balance_transaction'] ?? null );
+		if ( '' !== $balance_transaction_id ) {
+			$meta['_wcpay_payment_transaction_id'] = $balance_transaction_id;
 		}
 
 		if ( isset( $charge['outcome']['risk_level'] ) ) {
@@ -379,9 +381,10 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 			return null;
 		}
 
-		$charge_id = isset( $charge['id'] ) ? (string) $charge['id'] : '';
+		$charge_id              = isset( $charge['id'] ) ? (string) $charge['id'] : '';
+		$balance_transaction_id = $this->get_balance_transaction_id( $charge['balance_transaction'] ?? null );
 
-		return $this->get_payment_success_note( $order, $intent_id, $charge_id );
+		return $this->get_payment_success_note( $order, $intent_id, $charge_id, $balance_transaction_id );
 	}
 
 	/**
@@ -494,13 +497,14 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 	 *
 	 * @param WC_Order $order     Order object.
 	 * @param string   $intent_id Payment intent ID.
-	 * @param string   $charge_id Charge ID.
+	 * @param string   $charge_id              Charge ID.
+	 * @param string   $balance_transaction_id Balance transaction ID.
 	 * @return string
 	 */
-	private function get_payment_success_note( WC_Order $order, string $intent_id, string $charge_id ): string {
+	private function get_payment_success_note( WC_Order $order, string $intent_id, string $charge_id, string $balance_transaction_id = '' ): string {
 		$formatted_amount = wc_price( (float) $order->get_total(), array( 'currency' => $order->get_currency() ) ) . ' ' . $order->get_currency();
 		$transaction_id   = '' !== $intent_id ? $intent_id : $charge_id;
-		$transaction_url  = $this->get_transaction_url( $intent_id, $charge_id );
+		$transaction_url  = $this->get_transaction_url( $intent_id, $charge_id, $balance_transaction_id );
 
 		if ( 'test' === $this->account_service->get_mode() ) {
 			return sprintf(
@@ -558,12 +562,13 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 	/**
 	 * Get the WooPayments transaction details URL.
 	 *
-	 * @param string $intent_id Payment intent ID.
-	 * @param string $charge_id Charge ID.
+	 * @param string $intent_id              Payment intent ID.
+	 * @param string $charge_id              Charge ID.
+	 * @param string $balance_transaction_id Balance transaction ID.
 	 * @return string
 	 */
-	private function get_transaction_url( string $intent_id, string $charge_id ): string {
-		if ( '' === $intent_id && '' === $charge_id ) {
+	private function get_transaction_url( string $intent_id, string $charge_id, string $balance_transaction_id = '' ): string {
+		if ( '' === $intent_id && '' === $charge_id && '' === $balance_transaction_id ) {
 			return '';
 		}
 
@@ -571,14 +576,35 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 			return '';
 		}
 
-		return add_query_arg(
-			array(
-				'page' => 'wc-admin',
-				'path' => rawurlencode( '/payments/transactions/details' ),
-				'id'   => '' !== $intent_id ? $intent_id : $charge_id,
-			),
-			admin_url( 'admin.php' )
+		$params = array(
+			'id' => '' !== $intent_id ? $intent_id : $charge_id,
 		);
+		if ( '' !== $balance_transaction_id ) {
+			$params['transaction_id'] = $balance_transaction_id;
+		}
+
+		return Utils::wc_payments_settings_url(
+			'/woopayments/transactions/details',
+			$params
+		);
+	}
+
+	/**
+	 * Get a balance transaction ID from a provider response field.
+	 *
+	 * @param mixed $balance_transaction Balance transaction response field.
+	 * @return string
+	 */
+	private function get_balance_transaction_id( $balance_transaction ): string {
+		if ( is_string( $balance_transaction ) ) {
+			return $balance_transaction;
+		}
+
+		if ( is_array( $balance_transaction ) && isset( $balance_transaction['id'] ) ) {
+			return (string) $balance_transaction['id'];
+		}
+
+		return '';
 	}
 
 	/**

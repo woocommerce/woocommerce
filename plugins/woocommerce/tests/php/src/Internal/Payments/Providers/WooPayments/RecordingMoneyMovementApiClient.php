@@ -76,6 +76,30 @@ class RecordingMoneyMovementApiClient extends WooPaymentsApiClient {
 	}
 
 	/**
+	 * Get charge.
+	 *
+	 * @param string $charge_id Charge ID.
+	 * @return array<string,mixed>
+	 */
+	public function get_charge( string $charge_id ): array {
+		$this->record( 'get_charge', array( 'charge_id' => $charge_id ) );
+
+		return $this->response;
+	}
+
+	/**
+	 * Get payment intent.
+	 *
+	 * @param string $intent_id Intent ID.
+	 * @return array<string,mixed>
+	 */
+	public function get_payment_intention( string $intent_id ): array {
+		$this->record( 'get_payment_intention', array( 'intent_id' => $intent_id ) );
+
+		return $this->response;
+	}
+
+	/**
 	 * Search transactions.
 	 *
 	 * @param string $search_term Search term.

@@ -16,6 +16,7 @@ import {
 	formatLabel,
 	getResourceId,
 	getErrorMessage,
+	getTransactionDetailsRoute,
 } from './utils';
 import { EmptyState, LiveStatusMessage, StatusMessage } from './table';
 import { getSettingsPaymentsProviderRouteUrl } from '../overview/utils';
@@ -135,9 +136,9 @@ export const WooPaymentsTransactionsPage = () => {
 									<td>
 										<a
 											href={ getSettingsPaymentsProviderRouteUrl(
-												`/woopayments/transactions/details?id=${ encodeURIComponent(
-													id
-												) }`
+												getTransactionDetailsRoute(
+													transaction
+												)
 											) }
 											aria-label={ sprintf(
 												/* translators: 1: transaction type, 2: transaction ID. */

@@ -187,21 +187,22 @@ class WooPaymentsDepositsRestControllerTest extends WC_REST_Unit_Test_Case {
 			},
 			9
 		);
-		add_filter(
-			'wcpay_list_deposits_request',
-			static function ( \WCPay\Core\Server\Request\List_Deposits $request ) use ( &$observed_api, &$observed_page_size ): \WCPay\Core\Server\Request\List_Deposits {
-				$observed_api       = $request->get_api();
-				$observed_page_size = $request->get_param( 'pagesize' );
-				$request->set_page_size( 50 );
-				$request->set_date_after( '2026-06-01 00:00:00' );
-				$request->set_date_before( '2026-06-18 23:59:59' );
-				$request->set_date_between( array( '2026-06-01 00:00:00', '2026-06-18 23:59:59' ) );
-				$request->set_status_is( 'failed' );
+			add_filter(
+				'wcpay_list_deposits_request',
+				static function ( \WCPay\Core\Server\Request\List_Deposits $request ) use ( &$observed_api, &$observed_page_size ): \WCPay\Core\Server\Request\List_Deposits {
+					$observed_api       = $request->get_api();
+					$observed_page_size = $request->get_param( 'pagesize' );
+					$request->set_page_size( 50 );
+					$request->set_date_after( '2026-06-01 00:00:00' );
+					$request->set_date_before( '2026-06-18 23:59:59' );
+					$request->set_date_between( array( '2026-06-01 00:00:00', '2026-06-18 23:59:59' ) );
+					$request->set_status_is( 'failed' );
+					$request->set_param( 'status_is_not', 'canceled' );
 
-				return $request;
-			},
-			10
-		);
+					return $request;
+				},
+				10
+			);
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/payments/deposits' );
 		$request->set_query_params(
@@ -214,23 +215,24 @@ class WooPaymentsDepositsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertSame( 200, $response->get_status() );
-		$this->assertSame( 'deposits', $observed_api );
-		$this->assertSame( 25, $observed_page_size );
-		$this->assertSame(
-			array(
-				'page'         => 2,
-				'pagesize'     => 50,
-				'sort'         => 'created',
-				'direction'    => 'desc',
-				'limit'        => 100,
-				'status_is'    => 'failed',
-				'date_after'   => '2026-06-01 00:00:00',
-				'date_before'  => '2026-06-18 23:59:59',
-				'date_between' => array( '2026-06-01 00:00:00', '2026-06-18 23:59:59' ),
-			),
-			$this->api_client->last_deposits_query
-		);
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( 'deposits', $observed_api );
+			$this->assertSame( 25, $observed_page_size );
+			$this->assertSame(
+				array(
+					'page'          => 2,
+					'pagesize'      => 50,
+					'sort'          => 'created',
+					'direction'     => 'desc',
+					'limit'         => 100,
+					'status_is'     => 'failed',
+					'date_after'    => '2026-06-01 00:00:00',
+					'date_before'   => '2026-06-18 23:59:59',
+					'date_between'  => array( '2026-06-01 00:00:00', '2026-06-18 23:59:59' ),
+					'status_is_not' => 'canceled',
+				),
+				$this->api_client->last_deposits_query
+			);
 	}
 
 	/**

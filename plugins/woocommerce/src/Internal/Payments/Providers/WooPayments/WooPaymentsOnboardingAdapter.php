@@ -296,13 +296,11 @@ class WooPaymentsOnboardingAdapter {
 			);
 		}
 
-		return add_query_arg(
+		return Utils::wc_payments_settings_url(
+			WooPaymentsService::OVERVIEW_PATH,
 			array(
-				'page' => 'wc-admin',
-				'path' => '/payments/overview',
 				'from' => WooPaymentsService::FROM_NOX_IN_CONTEXT,
-			),
-			admin_url( 'admin.php' )
+			)
 		);
 	}
 

@@ -392,6 +392,9 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'USD was processed using WooPayments', $outcome->get_data()['note'] );
 		$this->assertStringContainsString( 'was processed using WooPayments in <strong>test mode</strong>', $outcome->get_data()['note'] );
 		$this->assertStringContainsString( 'pi_native', $outcome->get_data()['note'] );
+		$this->assertStringNotContainsString( '/payments/transactions/details', $outcome->get_data()['note'] );
+		$this->assertStringContainsString( '/woopayments/transactions/details', $outcome->get_data()['note'] );
+		$this->assertStringContainsString( 'transaction_id=txn_native', $outcome->get_data()['note'] );
 		$this->assertSame( '1.75', $outcome->get_data()['meta']['_wcpay_transaction_fee'] );
 		$this->assertSame( '48.25', $outcome->get_data()['meta']['_wcpay_net'] );
 		$outcome_meta = $outcome->get_data()['meta'];

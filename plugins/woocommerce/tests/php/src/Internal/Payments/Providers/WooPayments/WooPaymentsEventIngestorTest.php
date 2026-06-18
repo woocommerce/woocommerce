@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentLifecycleService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
@@ -600,6 +601,7 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 		$order = $this->create_woopayments_order();
 		$order->set_status( 'processing' );
 		$order->update_meta_data( '_charge_id', 'ch_123' );
+		$order->update_meta_data( '_wcpay_payment_transaction_id', 'txn_123' );
 		$order->save();
 
 		$this->sut->process( $this->create_dispute_event( 'charge.dispute.created', 'needs_response' ) );
@@ -615,8 +617,9 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 				'&#36;</span>50.00',
 				'with reason "Transaction unauthorized"',
 				'Response due by July 1, 2026',
-				'path=%2Fpayments%2Ftransactions%2Fdetails',
+				'/woopayments/transactions/details',
 				'id=ch_123',
+				'transaction_id=txn_123',
 			)
 		);
 		$this->assertSame( '', $order->get_meta( '_dispute_id', true ) );
@@ -659,7 +662,7 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 				'&#36;</span>50.00',
 				'with reason "Transaction unauthorized"',
 				'Response due by July 1, 2026',
-				'path=%2Fpayments%2Ftransactions%2Fdetails',
+				'/woopayments/transactions/details',
 				'id=ch_123',
 			)
 		);
@@ -2545,13 +2548,11 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 	 * @return string
 	 */
 	private function get_expected_dispute_url( string $charge_id ): string {
-		return add_query_arg(
+		return Utils::wc_payments_settings_url(
+			'/woopayments/transactions/details',
 			array(
-				'page' => 'wc-admin',
-				'path' => rawurlencode( '/payments/transactions/details' ),
-				'id'   => $charge_id,
-			),
-			admin_url( 'admin.php' )
+				'id' => $charge_id,
+			)
 		);
 	}
 

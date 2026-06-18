@@ -231,6 +231,9 @@ class WooPaymentsCheckoutAjaxControllerTest extends WC_Unit_Test_Case {
 		$this->assert_order_has_note_containing( $order, 'A test payment of' );
 		$this->assert_order_has_note_containing( $order, 'was processed using WooPayments in <strong>test mode</strong>' );
 		$this->assert_order_has_note_containing( $order, 'pi_native' );
+		$this->assert_order_has_note_containing( $order, '/woopayments/transactions/details' );
+		$this->assert_order_has_note_containing( $order, 'transaction_id=txn_native' );
+		$this->assert_order_has_no_note_containing( $order, '/payments/transactions/details' );
 	}
 
 	/**

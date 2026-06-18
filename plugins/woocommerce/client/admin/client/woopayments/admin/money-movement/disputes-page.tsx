@@ -15,9 +15,9 @@ import {
 	formatAmount,
 	formatDate,
 	formatLabel,
-	getChargeId,
 	getDisputeId,
 	getErrorMessage,
+	getTransactionDetailsRoute,
 } from './utils';
 import { EmptyState, LiveStatusMessage, StatusMessage } from './table';
 import { getSettingsPaymentsProviderRouteUrl } from '../overview/utils';
@@ -124,7 +124,6 @@ export const WooPaymentsDisputesPage = () => {
 					<tbody>
 						{ disputes.map( ( dispute ) => {
 							const id = getDisputeId( dispute );
-							const chargeId = getChargeId( dispute );
 							const isActionable = isDisputeActionable( dispute );
 							const rowHref = isActionable
 								? getSettingsPaymentsProviderRouteUrl(
@@ -133,9 +132,7 @@ export const WooPaymentsDisputesPage = () => {
 										) }`
 								  )
 								: getSettingsPaymentsProviderRouteUrl(
-										`/woopayments/transactions/details?id=${ encodeURIComponent(
-											chargeId || id
-										) }`
+										getTransactionDetailsRoute( dispute )
 								  );
 							const ariaLabel = isActionable
 								? sprintf(

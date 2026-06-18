@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsDi
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsFraudOutcomeTransactionsListRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsMoneyMovementOrderService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsOrderDataService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPaymentDetailsRestController;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsTransactionsListRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsTransactionsRestController;
 use RuntimeException;
@@ -71,6 +72,83 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 		$controller->register();
 
 		$this->assertFalse( has_action( 'rest_api_init', array( $controller, 'register_routes' ) ) );
+	}
+
+	/**
+	 * @testdox Payment detail routes register only when native owns runtime.
+	 */
+	public function test_payment_detail_routes_register_only_when_native_owns_runtime(): void {
+		$controller = $this->create_payment_details_controller( true );
+		$controller->register();
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'rest_api_init' );
+
+		$routes = $this->server->get_routes();
+		$this->assertArrayHasKey( '/wc/v3/payments/charges/(?P<charge_id>\\w+)', $routes );
+		$this->assertArrayHasKey( '/wc/v3/payments/payment_intents/(?P<payment_intent_id>\\w+)', $routes );
+
+		$controller = $this->create_payment_details_controller( false );
+		$controller->register();
+
+		$this->assertFalse( has_action( 'rest_api_init', array( $controller, 'register_routes' ) ) );
+	}
+
+	/**
+	 * @testdox Payment detail charge route proxies the charge ID.
+	 */
+	public function test_payment_detail_charge_route_proxies_charge_id(): void {
+		$this->api_client->response = array(
+			'id'                  => 'ch_test',
+			'balance_transaction' => array( 'id' => 'txn_test' ),
+		);
+		$this->create_payment_details_controller( true )->register_routes();
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/payments/charges/ch_test' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'get_charge', $this->api_client->last_call['method'] );
+		$this->assertSame( 'ch_test', $this->api_client->last_call['charge_id'] );
+		$this->assertSame( 'txn_test', $data['balance_transaction']['id'] );
+	}
+
+	/**
+	 * @testdox Payment detail payment intent route proxies the intent ID.
+	 */
+	public function test_payment_detail_intent_route_proxies_intent_id(): void {
+		$this->api_client->response = array(
+			'id'     => 'pi_test',
+			'charge' => array(
+				'id'                  => 'ch_test',
+				'balance_transaction' => array( 'id' => 'txn_test' ),
+			),
+		);
+		$this->create_payment_details_controller( true )->register_routes();
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/payments/payment_intents/pi_test' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'get_payment_intention', $this->api_client->last_call['method'] );
+		$this->assertSame( 'pi_test', $this->api_client->last_call['intent_id'] );
+		$this->assertSame( 'txn_test', $data['charge']['balance_transaction']['id'] );
+	}
+
+	/**
+	 * @testdox Payment detail routes preserve API error status codes.
+	 */
+	public function test_payment_detail_routes_preserve_api_error_status_codes(): void {
+		$this->api_client->exception = new WooPaymentsApiException( 'Charge not found.', 'wcpay_missing_charge', 404 );
+		$this->create_payment_details_controller( true )->register_routes();
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/payments/charges/ch_missing' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 404, $response->get_status() );
+		$this->assertSame( 'wcpay_missing_charge', $data['code'] );
 	}
 
 	/**
@@ -763,6 +841,19 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 	private function create_disputes_controller( bool $native_register, ?WooPaymentsMoneyMovementOrderService $order_service = null ): WooPaymentsDisputesRestController {
 		$controller = new WooPaymentsDisputesRestController();
 		$controller->init( $this->create_arbiter( $native_register ), $this->api_client, $order_service ?? $this->create_order_service() );
+
+		return $controller;
+	}
+
+	/**
+	 * Create a payment details controller.
+	 *
+	 * @param bool $native_register Whether native should own routes.
+	 * @return WooPaymentsPaymentDetailsRestController
+	 */
+	private function create_payment_details_controller( bool $native_register ): WooPaymentsPaymentDetailsRestController {
+		$controller = new WooPaymentsPaymentDetailsRestController();
+		$controller->init( $this->create_arbiter( $native_register ), $this->api_client );
 
 		return $controller;
 	}

@@ -12,6 +12,8 @@ import { WooPaymentsTransactionDetailsPage } from '../money-movement/transaction
 import { WooPaymentsTransactionsPage } from '../money-movement/transactions-page';
 import {
 	getWooPaymentsDisputes,
+	getWooPaymentsCharge,
+	getWooPaymentsPaymentIntent,
 	getWooPaymentsTransaction,
 	getWooPaymentsTransactions,
 } from '../money-movement/data';
@@ -22,6 +24,8 @@ jest.mock( '@woocommerce/tracks', () => ( {
 
 jest.mock( '../money-movement/data', () => ( {
 	getWooPaymentsDisputes: jest.fn(),
+	getWooPaymentsCharge: jest.fn(),
+	getWooPaymentsPaymentIntent: jest.fn(),
 	getWooPaymentsTransaction: jest.fn(),
 	getWooPaymentsTransactions: jest.fn(),
 } ) );
@@ -31,6 +35,12 @@ const mockGetTransactions = getWooPaymentsTransactions as jest.MockedFunction<
 >;
 const mockGetDisputes = getWooPaymentsDisputes as jest.MockedFunction<
 	typeof getWooPaymentsDisputes
+>;
+const mockGetCharge = getWooPaymentsCharge as jest.MockedFunction<
+	typeof getWooPaymentsCharge
+>;
+const mockGetPaymentIntent = getWooPaymentsPaymentIntent as jest.MockedFunction<
+	typeof getWooPaymentsPaymentIntent
 >;
 const mockGetTransaction = getWooPaymentsTransaction as jest.MockedFunction<
 	typeof getWooPaymentsTransaction
@@ -43,6 +53,8 @@ describe( 'WooPayments money movement pages', () => {
 		};
 		mockGetTransactions.mockReset();
 		mockGetDisputes.mockReset();
+		mockGetCharge.mockReset();
+		mockGetPaymentIntent.mockReset();
 		mockGetTransaction.mockReset();
 	} );
 
@@ -68,6 +80,33 @@ describe( 'WooPayments money movement pages', () => {
 		).toBeInTheDocument();
 		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
 			'Transactions loaded.'
+		);
+	} );
+
+	it( 'builds transaction list links with payment ids and transaction context', async () => {
+		mockGetTransactions.mockResolvedValue( {
+			data: [
+				{
+					transaction_id: 'txn_test',
+					payment_intent_id: 'pi_test',
+					charge_id: 'ch_test',
+					type: 'charge',
+					date: '2026-06-18',
+					amount: 5000,
+					currency: 'usd',
+				},
+			],
+		} );
+
+		render( <WooPaymentsTransactionsPage /> );
+
+		expect(
+			await screen.findByRole( 'link', {
+				name: 'View transaction details for Charge transaction txn_test',
+			} )
+		).toHaveAttribute(
+			'href',
+			'http://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=%2Fwoopayments%2Ftransactions%2Fdetails&id=pi_test&transaction_id=txn_test&transaction_type=charge'
 		);
 	} );
 
@@ -161,5 +200,71 @@ describe( 'WooPayments money movement pages', () => {
 		expect( await screen.findByRole( 'alert' ) ).toHaveTextContent(
 			'Provider failed'
 		);
+	} );
+
+	it( 'loads payment intent details when the route id is a payment intent', async () => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_test',
+			charge: {
+				id: 'ch_test',
+				balance_transaction: { id: 'txn_test' },
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+			},
+		} );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_test&transaction_id=txn_test',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		expect( await screen.findByText( 'txn_test' ) ).toBeInTheDocument();
+		expect( mockGetPaymentIntent ).toHaveBeenCalledWith( 'pi_test' );
+		expect( mockGetTransaction ).not.toHaveBeenCalled();
+	} );
+
+	it( 'loads charge details when the route id is a charge fallback', async () => {
+		mockGetCharge.mockResolvedValue( {
+			id: 'ch_test',
+			payment_intent: 'pi_test',
+			balance_transaction: 'txn_test',
+			type: 'charge',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+		} );
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_test',
+			charge: {
+				id: 'ch_test',
+				balance_transaction: 'txn_test',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+			},
+		} );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=ch_test',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		expect( await screen.findByText( 'txn_test' ) ).toBeInTheDocument();
+		expect( mockGetCharge ).toHaveBeenCalledWith( 'ch_test' );
+		expect( mockGetPaymentIntent ).toHaveBeenCalledWith( 'pi_test' );
+		expect( mockGetTransaction ).not.toHaveBeenCalled();
 	} );
 } );
