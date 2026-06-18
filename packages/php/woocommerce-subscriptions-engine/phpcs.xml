@@ -40,11 +40,6 @@
 		<exclude-pattern>src/Integration/Storage/*</exclude-pattern>
 	</rule>
 
-	<!-- Exclude bootstrap from the SeparateFunctionsFromOO.Mixed rule -->
-	<rule ref="Universal.Files.SeparateFunctionsFromOO.Mixed">
-		<exclude-pattern>tests/unit/_bootstrap.php</exclude-pattern>
-	</rule>
-
 	<!-- Exclude test files from the PSR2.Methods.MethodDeclaration.Underscore rule due to methods _after() and _before() -->
 	<rule ref="PSR2.Methods.MethodDeclaration.Underscore">
 		<exclude-pattern>tests/unit</exclude-pattern>
