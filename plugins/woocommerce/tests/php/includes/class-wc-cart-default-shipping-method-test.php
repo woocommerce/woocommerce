@@ -46,6 +46,7 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 		$this->zone->delete( true );
 		update_option( 'woocommerce_shipping_cost_requires_address', 'no' );
 		WC()->cart->cart_context = 'shortcode';
+		WC()->session->set( 'chosen_shipping_methods', null );
 		WC()->session->set( 'chosen_shipping_method_origins', null );
 		parent::tearDown();
 	}
@@ -190,8 +191,8 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	 * @testdox Preserves manually chosen local pickup even when a shipping rate is available.
 	 */
 	public function test_preserves_manual_local_pickup_when_shipping_rate_available(): void {
-		$chosen      = WC()->session->get( 'chosen_shipping_methods', array() );
-		$chosen[ 0 ] = 'local_pickup:1';
+		$chosen    = WC()->session->get( 'chosen_shipping_methods', array() );
+		$chosen[0] = 'local_pickup:1';
 		WC()->session->set( 'chosen_shipping_methods', $chosen );
 		wc_set_chosen_shipping_method_origin( 0, 'manual', 'local_pickup:1' );
 
@@ -209,6 +210,11 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	 * @testdox Defaults unrecorded origin to manual (backwards-compat).
 	 */
 	public function test_unrecorded_origin_preserves_local_pickup(): void {
+		// Mirror the actual pre-upgrade session state: the auto-defaulter had already written pickup
+		// into chosen_shipping_methods before this PR shipped, but no origin was ever recorded.
+		$chosen    = WC()->session->get( 'chosen_shipping_methods', array() );
+		$chosen[0] = 'local_pickup:1';
+		WC()->session->set( 'chosen_shipping_methods', $chosen );
 		WC()->session->set( 'chosen_shipping_method_origins', null );
 
 		$package = $this->build_package( array( 'flat_rate:1', 'local_pickup:1' ) );
@@ -278,8 +284,8 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 'auto', wc_get_chosen_shipping_method_origin( 0 ) );
 
 		// Simulate a third-party plugin overwriting the chosen rate directly.
-		$chosen      = WC()->session->get( 'chosen_shipping_methods', array() );
-		$chosen[ 0 ] = 'local_pickup:2';
+		$chosen    = WC()->session->get( 'chosen_shipping_methods', array() );
+		$chosen[0] = 'local_pickup:2';
 		WC()->session->set( 'chosen_shipping_methods', $chosen );
 
 		$this->assertSame(

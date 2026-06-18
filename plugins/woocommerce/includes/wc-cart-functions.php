@@ -506,7 +506,7 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 
 /**
  * Records who picked the currently chosen shipping method for a package: the
- * `wc_get_default_shipping_method_for_package()` auto-defaulter ('auto') or the
+ * auto-defaulter in `wc_get_chosen_shipping_method_for_package()` ('auto') or the
  * customer via an explicit selection path like the Store API select-shipping-rate
  * route, the shortcode cart/checkout AJAX, or a coupon-driven free-shipping
  * override ('manual').
@@ -523,7 +523,7 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
  * recorded rate_id no longer matches the current chosen rate, and the reader
  * falls back to 'manual'.
  *
- * @since 10.6.0
+ * @since 11.1.0
  *
  * @param int|string $key     Package key.
  * @param string     $origin  Either 'auto' or 'manual'.
@@ -560,7 +560,7 @@ function wc_set_chosen_shipping_method_origin( $key, $origin, $rate_id ) {
  *   overwrote the choice, so the recorded 'auto' marker is stale and we treat
  *   the new choice as deliberate).
  *
- * @since 10.6.0
+ * @since 11.1.0
  *
  * @param int|string $key Package key.
  * @return string 'auto' or 'manual'.
@@ -651,7 +651,7 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 	$chosen_method_id            = current( explode( ':', $chosen_method ) );
 	$chosen_method_exists        = in_array( $chosen_method, $rate_keys, true );
 	$is_local_pickup_chosen      = in_array( $chosen_method_id, $local_pickup_method_ids, true );
-	$default_method_id           = '' === $default ? '' : current( explode( ':', $default ) );
+	$default_method_id           = '' === $default ? '' : current( explode( ':', (string) $default ) );
 	$has_non_pickup_alternative  = '' !== $default && ! in_array( $default_method_id, $local_pickup_method_ids, true );
 	$previous_choice_was_auto    = 'auto' === wc_get_chosen_shipping_method_origin( $key );
 	$unstick_auto_default_pickup = $previous_choice_was_auto && $has_non_pickup_alternative;
