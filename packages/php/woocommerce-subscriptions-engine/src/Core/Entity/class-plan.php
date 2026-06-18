@@ -140,7 +140,7 @@ final class Plan {
 	/**
 	 * Build a new, unsaved plan.
 	 *
-	 * @param int                  $group_id Parent plan group id.
+	 * @param int    $group_id Parent plan group id.
 	 * @param array{
 	 *     name: string,
 	 *     billing_policy: Billing_Policy,

@@ -267,6 +267,7 @@ final class Contract {
 	 *     addresses: array{ billing: array<string, mixed>, shipping: array<string, mixed> },
 	 *     meta: array<string, string>,
 	 * } $args Contract attributes.
+	 * @throws DomainException If the contract attributes are not valid.
 	 */
 	public static function create( array $args ): self {
 		$status = (string) ( $args['status'] ?? Contract_Status::ACTIVE );

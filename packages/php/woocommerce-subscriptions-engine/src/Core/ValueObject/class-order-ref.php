@@ -32,6 +32,7 @@ final class Order_Ref {
 	 * Build an order reference.
 	 *
 	 * @param int $id Order id.
+	 * @throws \InvalidArgumentException If the order id is not greater than 0.
 	 */
 	public function __construct( int $id ) {
 		if ( $id <= 0 ) {

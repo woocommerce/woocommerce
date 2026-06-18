@@ -95,6 +95,7 @@ final class Billing_Policy {
 	 * Missing nullable keys default to null. `period` and `interval` are required.
 	 *
 	 * @param array<string, mixed> $data Decoded billing_policy row.
+	 * @throws DomainException If the data is not valid.
 	 */
 	public static function from_array( array $data ): self {
 		if ( ! array_key_exists( 'period', $data ) ) {
@@ -113,7 +114,7 @@ final class Billing_Policy {
 		$trial = $data['trial_duration'] ?? null;
 		if ( null !== $trial && ! is_array( $trial ) ) {
 			throw new DomainException(
-				sprintf( 'Billing_Policy: trial_duration must be null or an array, got %s.', json_encode( $trial ) )
+				sprintf( 'Billing_Policy: trial_duration must be null or an array, got %s.', wp_json_encode( $trial ) )
 			);
 		}
 

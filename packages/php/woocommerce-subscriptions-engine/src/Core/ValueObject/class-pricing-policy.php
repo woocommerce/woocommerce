@@ -74,7 +74,7 @@ final class Pricing_Policy {
 	 */
 	public static function from_array( array $data ): self {
 		$raw_policies = is_array( $data['policies'] ?? null ) ? $data['policies'] : array();
-		$policies = array_values(
+		$policies     = array_values(
 			array_filter(
 				array_map(
 					static function ( $entry ): ?array {
