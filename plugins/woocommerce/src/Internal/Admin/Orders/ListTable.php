@@ -444,6 +444,32 @@ class ListTable extends WP_List_Table {
 		$orders      = wc_get_orders( $order_query_args );
 		$this->items = $orders->orders;
 
+		/**
+		 * Fires after the orders for the current list-table page have been queried.
+		 *
+		 * Provides the full set of orders shown on the page, so extensions can prime
+		 * caches / preload related data (shipments, documents, meta, ...) for all of
+		 * them at once instead of running per-row queries. This is the Custom Order
+		 * Table equivalent of the `the_posts` filter that the legacy (posts-based)
+		 * order screen exposed through WP_Query.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param array     $orders     Orders (WC_Order objects) on the current page.
+		 * @param ListTable $list_table The list table instance.
+		 */
+		do_action( 'woocommerce_order_list_table_prepared_items', $this->items, $this );
+
+		/**
+		 * Same as `woocommerce_order_list_table_prepared_items` but for a specific order type.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param array     $orders     Orders (WC_Order objects) on the current page.
+		 * @param ListTable $list_table The list table instance.
+		 */
+		do_action( 'woocommerce_' . $this->order_type . '_list_table_prepared_items', $this->items, $this );
+
 		$max_num_pages = $this->get_max_num_pages( $orders );
 
 		// Check in case the user has attempted to page beyond the available range of orders.
