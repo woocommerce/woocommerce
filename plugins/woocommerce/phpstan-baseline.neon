@@ -70652,12 +70652,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
 		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_customer_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:needs_payment\(\)\.$#'
 			identifier: method.notFound
 			count: 2
@@ -70863,12 +70857,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_billing_email\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/StoreApi/Routes/V1/Order.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_customer_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/StoreApi/Routes/V1/Order.php

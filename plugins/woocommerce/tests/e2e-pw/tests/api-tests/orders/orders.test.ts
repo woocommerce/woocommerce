@@ -8,6 +8,7 @@ import { faker } from '@faker-js/faker';
  */
 import { test, expect } from '../../../fixtures/api-tests-fixtures';
 import { order } from '../../../data';
+import { getMediaBySlug } from '../../../utils/media';
 
 const RAND_STRING = faker.string.alphanumeric( 8 ).toLowerCase();
 const COUPON_CODE = `coupon-${ faker.string.alphanumeric( 4 ).toLowerCase() }`;
@@ -234,6 +235,13 @@ test.describe.serial( 'Orders API tests', () => {
 				'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. ' +
 				'Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
 
+			const { source_url: downloadFile } = await getMediaBySlug(
+				'image-01'
+			);
+			const { source_url: downloadFile2 } = await getMediaBySlug(
+				'image-02'
+			);
+
 			const simpleProducts = await request.post(
 				'./wp-json/wc/v3/products/batch',
 				{
@@ -407,7 +415,7 @@ test.describe.serial( 'Orders API tests', () => {
 									{
 										id: '2579cf07-8b08-4c25-888a-b6258dd1f035',
 										name: 'Single',
-										file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
+										file: downloadFile,
 									},
 								],
 								download_limit: 1,
@@ -477,12 +485,12 @@ test.describe.serial( 'Orders API tests', () => {
 									{
 										id: 'cc10249f-1de2-44d4-93d3-9f88ae629f76',
 										name: 'Single 1',
-										file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
+										file: downloadFile,
 									},
 									{
 										id: 'aea8ef69-ccdc-4d83-8e21-3c395ebb9411',
 										name: 'Single 2',
-										file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/album.jpg',
+										file: downloadFile2,
 									},
 								],
 								download_limit: 1,

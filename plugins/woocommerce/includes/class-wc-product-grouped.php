@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -97,7 +98,7 @@ class WC_Product_Grouped extends WC_Product {
 
 		foreach ( $children as $child ) {
 			if ( '' !== $child->get_price() ) {
-				$child_prices[] = 'incl' === $tax_display_mode ? wc_get_price_including_tax( $child ) : wc_get_price_excluding_tax( $child );
+				$child_prices[] = TaxDisplayMode::INCLUSIVE === $tax_display_mode ? wc_get_price_including_tax( $child ) : wc_get_price_excluding_tax( $child );
 			}
 		}
 

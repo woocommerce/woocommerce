@@ -7,6 +7,7 @@ use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
 use Automattic\WooCommerce\Blocks\Utils\ProductAvailabilityUtils;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 /**
  * ProductSchema class.
@@ -947,7 +948,7 @@ class ProductSchema extends AbstractSchema {
 	 * @return string Valid tax display mode.
 	 */
 	protected function get_tax_display_mode( $tax_display_mode = '' ) {
-		return in_array( $tax_display_mode, [ 'incl', 'excl' ], true ) ? $tax_display_mode : get_option( 'woocommerce_tax_display_shop' );
+		return in_array( $tax_display_mode, [ TaxDisplayMode::INCLUSIVE, TaxDisplayMode::EXCLUSIVE ], true ) ? $tax_display_mode : get_option( 'woocommerce_tax_display_shop' );
 	}
 
 	/**
@@ -957,7 +958,7 @@ class ProductSchema extends AbstractSchema {
 	 * @return string Function name.
 	 */
 	protected function get_price_function_from_tax_display_mode( $tax_display_mode ) {
-		return 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
+		return TaxDisplayMode::INCLUSIVE === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
 	}
 
 	/**
@@ -983,7 +984,7 @@ class ProductSchema extends AbstractSchema {
 
 		if ( $product->is_type( ProductType::GROUPED ) ) {
 			$children       = $product->get_visible_children();
-			$price_function = 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
+			$price_function = TaxDisplayMode::INCLUSIVE === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
 
 			foreach ( $children as $child ) {
 				if ( '' !== $child->get_price() ) {
