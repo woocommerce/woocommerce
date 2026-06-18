@@ -91,7 +91,6 @@ const baseSchema = (
 describe( 'settings UI shell header fields', () => {
 	afterEach( () => {
 		__resetRegistry();
-		document.body.innerHTML = '';
 	} );
 
 	it( 'renders the shell subtitle', () => {
@@ -105,12 +104,14 @@ describe( 'settings UI shell header fields', () => {
 			/>
 		);
 
-		expect(
-			container.querySelector( '.admin-ui-page__header-subtitle' )
-				?.textContent
-		).toBe( 'Manage your test settings.' );
+		// Anchor on the forwarded text, not the mock's structural class —
+		// this would catch a `subtitle` → `subTitle` mapping bug regardless of how the mock renders.
+		expect( container.textContent ).toContain(
+			'Manage your test settings.'
+		);
 
 		act( () => root.unmount() );
+		container.remove();
 	} );
 
 	it( 'renders badges with their intent class', () => {
@@ -145,6 +146,40 @@ describe( 'settings UI shell header fields', () => {
 		).toBe( true );
 
 		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'falls back to the default intent for an unknown intent value', () => {
+		const { container, root } = renderElement(
+			<SettingsUIPage
+				schema={ baseSchema( {
+					title: 'Test page',
+					// Simulate an extension passing an unrecognized intent string at runtime
+					// (TS unions are erased; PHP-supplied schemas can carry arbitrary strings).
+					badges: [
+						{
+							label: 'Mystery',
+							intent: 'magic' as never,
+						},
+					],
+				} ) }
+				page="test_page"
+			/>
+		);
+
+		const badge = container.querySelector(
+			'.wc-settings-ui-shell__badge'
+		);
+		expect( badge ).not.toBeNull();
+		expect(
+			badge?.classList.contains( 'wc-settings-ui-shell__badge--default' )
+		).toBe( true );
+		expect(
+			badge?.classList.contains( 'wc-settings-ui-shell__badge--magic' )
+		).toBe( false );
+
+		act( () => root.unmount() );
+		container.remove();
 	} );
 
 	it( 'omits subtitle and badges when not provided', () => {
@@ -163,5 +198,6 @@ describe( 'settings UI shell header fields', () => {
 		).toBeNull();
 
 		act( () => root.unmount() );
+		container.remove();
 	} );
 } );

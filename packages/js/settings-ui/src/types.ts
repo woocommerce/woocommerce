@@ -72,6 +72,12 @@ export type SettingsUIShellNavigationItem = {
 	active?: boolean;
 };
 
+/**
+ * Visual intent for a shell header badge. Mirrors common web semantic
+ * conventions and maps to the `wc-settings-ui-shell__badge--<intent>`
+ * CSS modifiers. Intent conveys color only — the `label` text must
+ * carry the actual meaning for screen-reader and color-blind users.
+ */
 export type SettingsUIShellBadgeIntent =
 	| 'default'
 	| 'info'

@@ -201,6 +201,8 @@ $schema['shell']['badges']   = array(
 
 `subtitle` renders under the page title. Each badge renders as a pill next to the title; `intent` selects its color. Both are plain text and are escaped on render.
 
+`intent` is decorative styling only — it conveys meaning through color. The badge `label` must be self-descriptive so screen-reader and color-blind users get the same information (e.g. prefer `"Active"` or `"Beta"` over generic text). Unknown `intent` values fall back to `default`.
+
 ## Reference migration in WooCommerce core
 
 The Products settings page is the Core reference migration. With `settings-ui` enabled, the Products tab renders through the settings UI. With the flag disabled, it renders through the existing legacy settings UI.

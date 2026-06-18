@@ -40,6 +40,16 @@ import type {
 	SettingsValues,
 } from './types';
 
+// Runtime allowlist for badge intents — TS unions erase at compile time,
+// so guard the className interpolation against unexpected strings from PHP-supplied schemas.
+const VALID_BADGE_INTENTS = new Set( [
+	'default',
+	'info',
+	'success',
+	'warning',
+	'error',
+] );
+
 type SaveNotice = {
 	status: 'success' | 'error';
 	message: string;
@@ -387,19 +397,21 @@ const ShellHeader = ( {
 			</nav>
 		) : undefined;
 
-	const badges =
-		shell.badges && shell.badges.length > 0
-			? shell.badges.map( ( badge, index ) => (
+	const badges = shell.badges?.length
+		? shell.badges.map( ( badge, index ) => {
+				const intent = VALID_BADGE_INTENTS.has( badge.intent as string )
+					? badge.intent
+					: 'default';
+				return (
 					<span
-						className={ `wc-settings-ui-shell__badge wc-settings-ui-shell__badge--${
-							badge.intent || 'default'
-						}` }
+						className={ `wc-settings-ui-shell__badge wc-settings-ui-shell__badge--${ intent }` }
 						key={ `${ badge.label }-${ index }` }
 					>
 						{ badge.label }
 					</span>
-			  ) )
-			: undefined;
+				);
+		  } )
+		: undefined;
 
 	const saveButtonLabel = __( 'Save', 'woocommerce' );
 

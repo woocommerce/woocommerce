@@ -144,27 +144,31 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		padding: 0 8px;
 
 		// Default / neutral.
-		background: #f0f0f0;
-		color: #1e1e1e;
+		background: var(--Alias-bg-bg-surface-secondary, #f5f5f5);
+		color: var(--Alias-text-text, #070707);
+
+		&--default {
+			// Inherits the base styling — defined for symmetry with the other intent modifiers.
+		}
 
 		&--success {
-			background: #cdf5d3;
-			color: #002b00;
+			background: var(--Alias-bg-bg-surface-success, #daffe0);
+			color: var(--Alias-text-text-success, #144722);
 		}
 
 		&--info {
-			background: #e0eaff;
-			color: #00204d;
+			background: var(--Alias-bg-bg-surface-secondary, #f5f5f5);
+			color: var(--Alias-text-text, #070707);
 		}
 
 		&--warning {
-			background: #fcf3e6;
-			color: #5a3300;
+			background: var(--Alias-bg-bg-surface-warning, #fff2d7);
+			color: var(--Alias-text-text-warning, #4d3716);
 		}
 
 		&--error {
-			background: #fce4e4;
-			color: #5a0000;
+			background: var(--Alias-bg-bg-surface-error, #fce4e4);
+			color: var(--Alias-text-text-error, #5a0000);
 		}
 	}
 
