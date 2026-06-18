@@ -52,6 +52,7 @@ class WCTransactionalEmailsTest extends \WC_Unit_Test_Case {
 
 		$this->assertIsArray( $emails );
 		$this->assertContains( 'customer_new_account', $emails );
+		$this->assertContains( 'customer_verify_email', $emails );
 		$this->assertContains( 'customer_completed_order', $emails );
 		$this->assertContains( 'customer_processing_order', $emails );
 		$this->assertContains( 'customer_pos_completed_order', $emails );
