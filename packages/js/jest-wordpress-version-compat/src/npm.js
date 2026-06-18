@@ -8,7 +8,9 @@ function parseNpmViewVersion( packageSpec, stdout ) {
 	const trimmedOutput = stdout.trim();
 
 	if ( ! trimmedOutput ) {
-		throw new Error( `npm returned an empty version for ${ packageSpec }.` );
+		throw new Error(
+			`npm returned an empty version for ${ packageSpec }.`
+		);
 	}
 
 	try {

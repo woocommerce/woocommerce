@@ -124,7 +124,11 @@ function createInstalledPackage( cwd, packageName, version, packageJson = {} ) {
 	fs.mkdirSync( packageDirectory, { recursive: true } );
 	fs.writeFileSync(
 		path.join( packageDirectory, 'package.json' ),
-		JSON.stringify( { name: packageName, version, ...packageJson }, null, 2 )
+		JSON.stringify(
+			{ name: packageName, version, ...packageJson },
+			null,
+			2
+		)
 	);
 }
 
@@ -214,12 +218,7 @@ describe( 'cache', () => {
 			},
 		} );
 		createInstalledPackage(
-			path.join(
-				cwd,
-				'node_modules',
-				'@woocommerce',
-				'experimental'
-			),
+			path.join( cwd, 'node_modules', '@woocommerce', 'experimental' ),
 			'@woocommerce/components',
 			'1.0.0',
 			{
@@ -347,34 +346,6 @@ describe( 'cache', () => {
 			'@wordpress/private-apis': LATEST_WORDPRESS_PACKAGE_VERSION,
 		} );
 		expectNpmInstallFromCache( path.join( cacheRoot, 'latest' ) );
-		expect(
-			JSON.parse(
-				fs.readFileSync(
-					path.join(
-						result.cacheDirectory,
-						'resolved-versions.json'
-					),
-					'utf8'
-				)
-			)
-		).toEqual( {
-			__dependencies: {
-				'@wordpress/data': {
-					version: LATEST_WORDPRESS_PACKAGE_VERSION,
-					dependencies: mockPackageDependencies[ '@wordpress/data' ],
-				},
-				'@wordpress/private-apis': {
-					version: LATEST_WORDPRESS_PACKAGE_VERSION,
-					dependencies: {},
-				},
-			},
-			__distTags: {
-				'@wordpress/data': LATEST_WORDPRESS_DIST_TAG,
-				'@wordpress/private-apis': LATEST_WORDPRESS_DIST_TAG,
-			},
-			'@wordpress/data': LATEST_WORDPRESS_PACKAGE_VERSION,
-			'@wordpress/private-apis': LATEST_WORDPRESS_PACKAGE_VERSION,
-		} );
 	} );
 
 	it( 'installs transitive WordPress dependencies for cached WordPress packages', () => {
@@ -444,7 +415,7 @@ describe( 'cache', () => {
 		expectNpmInstallFromCache( path.join( cacheRoot, 'latest-1' ) );
 	} );
 
-	it( 'reuses cached package dependencies for the same package version', () => {
+	it( 'skips npm install when cached packages match the target version', () => {
 		const cwd = createFixtureProject( {
 			dependencies: {
 				'@wordpress/data': 'catalog:wp-min',
@@ -464,59 +435,25 @@ describe( 'cache', () => {
 			LATEST_WORDPRESS_PACKAGE_VERSION
 		);
 
-		fs.mkdirSync( cacheDirectory, { recursive: true } );
-		fs.writeFileSync(
-			path.join( cacheDirectory, 'resolved-versions.json' ),
-			JSON.stringify(
-				{
-					__dependencies: {
-						'@wordpress/data': {
-							version: LATEST_WORDPRESS_PACKAGE_VERSION,
-							dependencies:
-								mockPackageDependencies[ '@wordpress/data' ],
-						},
-						'@wordpress/private-apis': {
-							version: LATEST_WORDPRESS_PACKAGE_VERSION,
-							dependencies: {},
-						},
-					},
-					__distTags: {
-						'@wordpress/data': LATEST_WORDPRESS_DIST_TAG,
-						'@wordpress/private-apis': LATEST_WORDPRESS_DIST_TAG,
-					},
-					'@wordpress/data': LATEST_WORDPRESS_PACKAGE_VERSION,
-					'@wordpress/private-apis':
-						LATEST_WORDPRESS_PACKAGE_VERSION,
-				},
-				null,
-				2
-			)
-		);
-
-		prepare( {
+		const result = prepare( {
 			cwd,
 			cacheRoot,
 			wpVersion: 'latest',
 			logger: false,
 		} );
 
+		expect( result.installedPackages ).toEqual( [] );
 		expect( spawnSync ).not.toHaveBeenCalledWith(
 			'npm',
 			[
-				'view',
-				`@wordpress/data@${ LATEST_WORDPRESS_PACKAGE_VERSION }`,
-				'dependencies',
-				'--json',
-			],
-			expect.anything()
-		);
-		expect( spawnSync ).not.toHaveBeenCalledWith(
-			'npm',
-			[
-				'view',
-				`@wordpress/private-apis@${ LATEST_WORDPRESS_PACKAGE_VERSION }`,
-				'dependencies',
-				'--json',
+				'install',
+				'--prefix',
+				cacheDirectory,
+				'--package-lock=false',
+				'--ignore-scripts',
+				'--no-audit',
+				'--no-fund',
+				'--save-exact',
 			],
 			expect.anything()
 		);
@@ -612,78 +549,6 @@ describe( 'cache', () => {
 		expectNpmInstallFromCache( path.join( cacheRoot, 'latest' ) );
 	} );
 
-	it( 'refreshes latest when cached metadata does not include the npm dist-tag', () => {
-		const cwd = createFixtureProject( {
-			dependencies: {
-				'@wordpress/data': 'catalog:wp-min',
-			},
-		} );
-		const cacheRoot = path.join( cwd, '.cache' );
-		const cacheDirectory = path.join( cacheRoot, 'latest' );
-
-		fs.mkdirSync( cacheDirectory, { recursive: true } );
-		fs.writeFileSync(
-			path.join( cacheDirectory, 'resolved-versions.json' ),
-			JSON.stringify(
-				{
-					'@wordpress/data': PREVIOUS_WORDPRESS_PACKAGE_VERSION,
-				},
-				null,
-				2
-			)
-		);
-
-		prepare( {
-			cwd,
-			cacheRoot,
-			wpVersion: 'latest',
-			logger: false,
-		} );
-
-		expect(
-			JSON.parse(
-				fs.readFileSync(
-					path.join( cacheDirectory, 'resolved-versions.json' ),
-					'utf8'
-				)
-			)
-		).toEqual( {
-			__dependencies: {
-				'@wordpress/data': {
-					version: LATEST_WORDPRESS_PACKAGE_VERSION,
-					dependencies: mockPackageDependencies[ '@wordpress/data' ],
-				},
-				'@wordpress/private-apis': {
-					version: LATEST_WORDPRESS_PACKAGE_VERSION,
-					dependencies: {},
-				},
-			},
-			__distTags: {
-				'@wordpress/data': LATEST_WORDPRESS_DIST_TAG,
-				'@wordpress/private-apis': LATEST_WORDPRESS_DIST_TAG,
-			},
-			'@wordpress/data': LATEST_WORDPRESS_PACKAGE_VERSION,
-			'@wordpress/private-apis': LATEST_WORDPRESS_PACKAGE_VERSION,
-		} );
-	} );
-
-	it( 'throws in offline mode when packages are missing', () => {
-		const cwd = createFixtureProject( {
-			dependencies: {
-				'@wordpress/data': 'catalog:wp-min',
-			},
-		} );
-
-		expect( () =>
-			prepare( {
-				cwd,
-				cacheRoot: path.join( cwd, '.cache' ),
-				wpVersion: 'latest',
-				offline: true,
-			} )
-		).toThrow( /run the compatibility test once with network access/ );
-	} );
-
 	it( 'uses the previous WordPress dist-tag for latest-1', () => {
 		const cwd = createFixtureProject( {} );
 		const cacheRoot = path.join( cwd, '.cache' );
@@ -696,6 +561,7 @@ describe( 'cache', () => {
 			logger: false,
 		} );
 
+		expect( result.wpVersion ).toBe( 'latest-1' );
 		expectCachePackageJson( result.cacheDirectory, 'latest-1', {
 			'@wordpress/data': PREVIOUS_WORDPRESS_PACKAGE_VERSION,
 			'@wordpress/private-apis': PREVIOUS_WORDPRESS_PACKAGE_VERSION,

@@ -54,29 +54,6 @@ module.exports = withWordPressDependencyCompat(
 );
 ```
 
-## Conditional Test Logic
-
-Use the package root helpers when a test needs to adjust assertions for the active target:
-
-```javascript
-const {
-	getWordPressVersionTarget,
-	isWordPressVersionTarget,
-} = require( '@woocommerce/jest-wordpress-version-compat' );
-
-if ( isWordPressVersionTarget( 'gutenberg' ) ) {
-	// Gutenberg-specific assertion.
-}
-
-if ( isWordPressVersionTarget( [ 'latest', 'latest-1' ] ) ) {
-	// WordPress core package assertion.
-}
-
-const selectedTarget = getWordPressVersionTarget();
-```
-
-When `WP_VERSION` is not set, `getWordPressVersionTarget()` returns `undefined` and `isWordPressVersionTarget()` returns `false`. Unsupported values throw so misconfigured test runs fail fast.
-
 ## WooCommerce Monorepo Usage
 
 Most WooCommerce packages should not compose this helper directly. The shared integration lives in `@woocommerce/internal-js-tests/jest-preset.js`.
@@ -98,18 +75,10 @@ pnpm test:js:gutenberg
 
 Packages that do not use the shared preset must compose `withWordPressDependencyCompat()` themselves before they participate in compatibility remapping.
 
-## Cache And Offline Mode
+## Cache
 
 Cached packages are installed under:
 
 ```text
 node_modules/.cache/jest-wordpress-version-compat/<wp-version>/
 ```
-
-Set `WP_JEST_DEPENDENCY_COMPAT_OFFLINE=1` to fail when selected packages are missing from cache:
-
-```bash
-WP_JEST_DEPENDENCY_COMPAT_OFFLINE=1 WP_VERSION=latest jest
-```
-
-This is useful in CI jobs that restore the cache before running tests.

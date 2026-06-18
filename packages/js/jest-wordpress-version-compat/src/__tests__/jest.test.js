@@ -10,11 +10,7 @@ jest.mock( '../cache', () => ( {
 } ) );
 
 const packageRoot = require( '../index' );
-const {
-	getWordPressVersionTarget,
-	isWordPressVersionTarget,
-	withWordPressDependencyCompat,
-} = packageRoot;
+const { withWordPressDependencyCompat } = packageRoot;
 
 function mockPreparedCache( packagePaths = {} ) {
 	cache.prepare.mockReturnValue( {
@@ -211,57 +207,7 @@ describe( 'jest adapter', () => {
 
 	it( 'keeps the package root export limited to public Jest helpers', () => {
 		expect( packageRoot ).toEqual( {
-			getWordPressVersionTarget,
-			isWordPressVersionTarget,
 			withWordPressDependencyCompat,
 		} );
-	} );
-
-	it( 'reads the selected WordPress version target from the environment', () => {
-		expect(
-			getWordPressVersionTarget( {
-				WP_VERSION: 'latest',
-			} )
-		).toBe( 'latest' );
-		expect(
-			getWordPressVersionTarget( {
-				WP_VERSION: 'latest-1',
-			} )
-		).toBe( 'latest-1' );
-		expect(
-			getWordPressVersionTarget( {
-				WP_VERSION: 'gutenberg',
-			} )
-		).toBe( 'gutenberg' );
-		expect( getWordPressVersionTarget( {} ) ).toBeUndefined();
-		expect( () =>
-			getWordPressVersionTarget( {
-				WP_VERSION: 'nightly',
-			} )
-		).toThrow( /Unsupported WordPress version/ );
-	} );
-
-	it( 'checks whether the selected WordPress version matches a target', () => {
-		expect(
-			isWordPressVersionTarget( 'latest', {
-				WP_VERSION: 'latest',
-			} )
-		).toBe( true );
-		expect(
-			isWordPressVersionTarget( [ 'latest', 'latest-1' ], {
-				WP_VERSION: 'latest-1',
-			} )
-		).toBe( true );
-		expect(
-			isWordPressVersionTarget( 'gutenberg', {
-				WP_VERSION: 'latest',
-			} )
-		).toBe( false );
-		expect( isWordPressVersionTarget( 'latest', {} ) ).toBe( false );
-		expect( () =>
-			isWordPressVersionTarget( 'nightly', {
-				WP_VERSION: 'latest',
-			} )
-		).toThrow( /Unsupported WordPress version/ );
 	} );
 } );

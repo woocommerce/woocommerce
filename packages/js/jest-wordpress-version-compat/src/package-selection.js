@@ -3,35 +3,12 @@
 const fs = require( 'node:fs' );
 const path = require( 'node:path' );
 
+const { findUp, readJsonFile } = require( './file-utils' );
 const {
 	getNpmDistTagForWordPressVersion,
 	isBundledPackage,
 	isWordPressPackage,
 } = require( './metadata' );
-
-function findUp( fileName, startDirectory = process.cwd() ) {
-	let currentDirectory = path.resolve( startDirectory );
-
-	while ( true ) {
-		const candidate = path.join( currentDirectory, fileName );
-
-		if ( fs.existsSync( candidate ) ) {
-			return candidate;
-		}
-
-		const parentDirectory = path.dirname( currentDirectory );
-
-		if ( parentDirectory === currentDirectory ) {
-			return undefined;
-		}
-
-		currentDirectory = parentDirectory;
-	}
-}
-
-function readJsonFile( filePath ) {
-	return JSON.parse( fs.readFileSync( filePath, 'utf8' ) );
-}
 
 function findProjectPackageJson( cwd = process.cwd() ) {
 	const packageFile = findUp( 'package.json', cwd );
@@ -114,9 +91,10 @@ function getWorkspaceDependencyNames( packageJson ) {
 		'peerDependencies',
 		'optionalDependencies',
 	] )
-		.filter( ( [ packageName, versionSpec ] ) =>
-			packageName.startsWith( '@woocommerce/' ) &&
-			String( versionSpec ).startsWith( 'workspace:' )
+		.filter(
+			( [ packageName, versionSpec ] ) =>
+				packageName.startsWith( '@woocommerce/' ) &&
+				String( versionSpec ).startsWith( 'workspace:' )
 		)
 		.map( ( [ packageName ] ) => packageName )
 		.sort();
@@ -198,12 +176,13 @@ function resolveRequestedPackages( {
 	cwd = process.cwd(),
 } = {} ) {
 	getNpmDistTagForWordPressVersion( wpVersion );
-	const packageJson = findProjectPackageJson( cwd );
 	const configuredPackages = normalizePackageList( packages );
 
 	if ( configuredPackages ) {
 		return configuredPackages;
 	}
+
+	const packageJson = findProjectPackageJson( cwd );
 
 	return [
 		...new Set( [
