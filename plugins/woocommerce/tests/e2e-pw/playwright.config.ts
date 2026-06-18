@@ -155,8 +155,6 @@ const serialRunSpecs = [
 	'**/tests/order/order-coupon.spec.ts',
 	// Toggles the global `woocommerce_downloads_grant_access_after_payment` setting.
 	'**/tests/order/order-edit.spec.ts',
-	// Mutates the global `woocommerce_order_email_verification_grace_period` setting.
-	'**/tests/order/order-grace-period.spec.ts',
 	// Enables the global `woocommerce_feature_customer_review_request_enabled` flag.
 	'**/tests/order/review-order-page.spec.ts',
 	// Imports a fixed-content CSV (fixed SKUs/names) and asserts the imported rows
