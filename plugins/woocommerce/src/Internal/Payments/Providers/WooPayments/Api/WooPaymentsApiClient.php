@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use WP_Error;
+use WP_REST_Request;
 
 /**
  * Minimal native WooPayments API client for provider-owned WooPayments operations.
@@ -25,6 +26,11 @@ class WooPaymentsApiClient {
 	private const REQUEST_TIMEOUT_SECONDS = 70;
 
 	/**
+	 * Public WordPress.com API base preserved for compatibility filters.
+	 */
+	private const WPCOM_ENDPOINT_BASE = 'https://public-api.wordpress.com/wpcom/v2';
+
+	/**
 	 * WooPayments onboarding API path.
 	 */
 	private const ONBOARDING_API = 'onboarding';
@@ -33,6 +39,16 @@ class WooPaymentsApiClient {
 	 * WooPayments accounts API path.
 	 */
 	private const ACCOUNTS_API = 'accounts';
+
+	/**
+	 * WooPayments account capabilities API path.
+	 */
+	private const CAPABILITIES_API = 'accounts/capabilities';
+
+	/**
+	 * WooPayments files API path.
+	 */
+	private const FILES_API = 'files';
 
 	/**
 	 * WooPayments API root.
@@ -108,6 +124,11 @@ class WooPaymentsApiClient {
 	 * WooPayments fraud outcomes API path.
 	 */
 	private const FRAUD_OUTCOMES_API = 'fraud_outcomes';
+
+	/**
+	 * WooPayments fraud ruleset API path.
+	 */
+	private const FRAUD_RULESET_API = 'fraud_ruleset';
 
 	/**
 	 * WooPayments deposits API path. These endpoints back the merchant-facing payouts surfaces.
@@ -767,6 +788,22 @@ class WooPaymentsApiClient {
 	}
 
 	/**
+	 * Save fraud ruleset config for the connected account.
+	 *
+	 * @param array<int|string,mixed> $ruleset_config Ruleset config.
+	 * @return array<string,mixed>
+	 */
+	public function save_fraud_ruleset( array $ruleset_config ): array {
+		return $this->request(
+			array(
+				'ruleset_config' => $ruleset_config,
+			),
+			self::FRAUD_RULESET_API,
+			'POST'
+		);
+	}
+
+	/**
 	 * Retrieve WooPayments disputes.
 	 *
 	 * @param array<string,mixed> $filters Query filters.
@@ -1178,6 +1215,40 @@ class WooPaymentsApiClient {
 	}
 
 	/**
+	 * Update connected account settings.
+	 *
+	 * @param array<string,mixed> $account_settings Account settings accepted by the platform accounts endpoint.
+	 * @return array<string,mixed>
+	 */
+	public function update_account( array $account_settings ): array {
+		if ( empty( $account_settings ) ) {
+			return array();
+		}
+
+		return $this->request( $account_settings, self::ACCOUNTS_API, 'POST' );
+	}
+
+	/**
+	 * Request or unrequest a connected account capability.
+	 *
+	 * @param string $capability_id Capability ID.
+	 * @param bool   $requested Whether the capability should be requested.
+	 * @return array<string,mixed>
+	 */
+	public function request_capability( string $capability_id, bool $requested ): array {
+		return $this->request(
+			array(
+				'capability_id' => $capability_id,
+				'requested'     => $requested,
+			),
+			self::CAPABILITIES_API,
+			'POST',
+			true,
+			true
+		);
+	}
+
+	/**
 	 * Retrieve the connected WooPayments account.
 	 *
 	 * @param string $woocommerce_store_id WooCommerce store ID.
@@ -1195,6 +1266,83 @@ class WooPaymentsApiClient {
 		return $this->request(
 			$params,
 			self::ACCOUNTS_API,
+			'GET'
+		);
+	}
+
+	/**
+	 * Upload a file through the native files endpoint.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @phpstan-param WP_REST_Request<array<string,mixed>> $request
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the uploaded file is invalid or the request fails.
+	 */
+	public function upload_file( WP_REST_Request $request ): array {
+		$file_params = $request->get_file_params();
+		$file        = is_array( $file_params['file'] ?? null ) ? $file_params['file'] : array();
+
+		if ( empty( $file ) || ! empty( $file['error'] ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
+			throw new WooPaymentsApiException( __( 'Max file size exceeded.', 'woocommerce' ), 'wcpay_evidence_file_max_size', 400 );
+		}
+
+		$file_contents = file_get_contents( (string) ( $file['tmp_name'] ?? '' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading a local uploaded temp file.
+		if ( false === $file_contents ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
+			throw new WooPaymentsApiException( __( 'Unable to read the uploaded file.', 'woocommerce' ), 'wcpay_evidence_file_read_error', 400 );
+		}
+
+		try {
+			return $this->request(
+				array(
+					'file'       => base64_encode( $file_contents ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Encoding uploaded file contents for the provider Files API.
+					'file_name'  => isset( $file['name'] ) && is_scalar( $file['name'] ) ? (string) $file['name'] : '',
+					'file_type'  => isset( $file['type'] ) && is_scalar( $file['type'] ) ? (string) $file['type'] : '',
+					'purpose'    => (string) $request->get_param( 'purpose' ),
+					'as_account' => (bool) $request->get_param( 'as_account' ),
+				),
+				self::FILES_API,
+				'POST'
+			);
+		} catch ( WooPaymentsApiException $exception ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
+			throw new WooPaymentsApiException( $exception->getMessage(), 'wcpay_evidence_file_upload_error', $exception->get_http_code() );
+		}
+	}
+
+	/**
+	 * Retrieve provider file details.
+	 *
+	 * @param string $file_id    Provider file ID.
+	 * @param bool   $as_account Whether to fetch the file as the connected account.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_file( string $file_id, bool $as_account = true ): array {
+		$this->validate_route_resource_id( $file_id );
+
+		return $this->request(
+			array( 'as_account' => $as_account ),
+			self::FILES_API . '/' . $file_id,
+			'GET'
+		);
+	}
+
+	/**
+	 * Retrieve provider file contents.
+	 *
+	 * @param string $file_id    Provider file ID.
+	 * @param bool   $as_account Whether to fetch the file as the connected account.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_file_contents( string $file_id, bool $as_account = true ): array {
+		$this->validate_route_resource_id( $file_id );
+
+		return $this->request(
+			array( 'as_account' => $as_account ),
+			self::FILES_API . '/' . $file_id . '/contents',
 			'GET'
 		);
 	}
@@ -1299,15 +1447,18 @@ class WooPaymentsApiClient {
 		 *
 	 * @param array<string,string> $headers Request headers.
 		 */
-		$headers = apply_filters( 'wcpay_api_request_headers', $headers );
-		$site_id = $this->http_client->get_blog_id();
-		$path    = $is_site_scoped
+		$headers    = apply_filters( 'wcpay_api_request_headers', $headers );
+		$site_id    = $this->http_client->get_blog_id();
+		$path       = $is_site_scoped
 			? sprintf( '/sites/%d/wcpay/%s', (int) $site_id, $api )
 			: sprintf( '/wcpay/%s', $api );
-		$body    = null;
+		$body       = null;
+		$filter_url = $this->get_filter_request_url( $api, $is_site_scoped );
 
 		if ( 'GET' === $method ) {
-			$path .= '?' . http_build_query( $params );
+			$query_string = http_build_query( $params );
+			$path        .= '?' . $query_string;
+			$filter_url  .= '?' . $query_string;
 		} else {
 			$body = wp_json_encode( $params );
 
@@ -1326,6 +1477,18 @@ class WooPaymentsApiClient {
 			$use_user_token,
 			$blocking
 		);
+
+		/**
+		 * Filters the WooPayments native response after transport dispatch.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param mixed  $response Transport response.
+		 * @param string $method   HTTP method.
+		 * @param string $url      Public WordPress.com API URL.
+		 * @param string $api      WooPayments API path.
+		 */
+		$response = apply_filters( 'wcpay_api_request_response', $response, $method, $filter_url, $api );
 
 		if ( ! $blocking ) {
 			return array();
@@ -1353,6 +1516,22 @@ class WooPaymentsApiClient {
 		}
 
 		return is_array( $decoded_body ) ? $decoded_body : array();
+	}
+
+	/**
+	 * Get the compatibility URL exposed to WooPayments API response filters.
+	 *
+	 * @param string $api            WooPayments API path.
+	 * @param bool   $is_site_scoped Whether the request is site-scoped.
+	 * @return string
+	 */
+	private function get_filter_request_url( string $api, bool $is_site_scoped ): string {
+		$url = self::WPCOM_ENDPOINT_BASE;
+		if ( $is_site_scoped ) {
+			$url .= '/sites/%s';
+		}
+
+		return $url . '/' . self::ENDPOINT_REST_BASE . '/' . ltrim( $api, '/' );
 	}
 
 	/**

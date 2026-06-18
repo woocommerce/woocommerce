@@ -75,7 +75,7 @@
 		gap: 20px 24px;
 		margin: 0;
 
-		@include breakpoint( "<782px" ) {
+		@include breakpoint("<782px") {
 			grid-template-columns: 1fr;
 		}
 	}
@@ -98,5 +98,236 @@
 			line-height: 20px;
 			overflow-wrap: anywhere;
 		}
+	}
+}
+
+.woopayments-settings-page {
+	max-width: 1120px;
+	margin: 32px 12px 80px;
+	color: $gray-900;
+
+	&__header {
+		max-width: 760px;
+		margin-bottom: 24px;
+
+		h1 {
+			margin: 0;
+			font-size: 24px;
+			line-height: 32px;
+			font-weight: 600;
+		}
+
+		p {
+			margin: 8px 0 0;
+			color: $gray-700;
+			font-size: 13px;
+			line-height: 20px;
+		}
+	}
+
+	&__loading {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		margin: 0;
+		color: $gray-700;
+	}
+}
+
+.woopayments-settings-section {
+	display: grid;
+	grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+	gap: 24px;
+	padding: 24px 0;
+	border-top: 1px solid $gray-200;
+
+	@include breakpoint("<782px") {
+		grid-template-columns: 1fr;
+		gap: 12px;
+	}
+
+	&__details {
+		h2 {
+			margin: 0;
+			font-size: 16px;
+			line-height: 24px;
+			font-weight: 600;
+		}
+	}
+
+	&__description {
+		margin-top: 8px;
+		color: $gray-700;
+		font-size: 13px;
+		line-height: 20px;
+
+		p {
+			margin: 0 0 8px;
+		}
+	}
+
+	&__controls.components-card {
+		width: 100%;
+		padding: 24px;
+		border-radius: 2px;
+		box-shadow: none;
+	}
+}
+
+.woopayments-settings-field-group {
+	& + & {
+		margin-top: 28px;
+		padding-top: 24px;
+		border-top: 1px solid $gray-100;
+	}
+
+	h3 {
+		margin: 0 0 16px;
+		font-size: 14px;
+		line-height: 20px;
+		font-weight: 600;
+	}
+
+	.components-base-control {
+		margin-bottom: 16px;
+	}
+}
+
+.woopayments-settings-payment-method {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 12px 0;
+	border-bottom: 1px solid $gray-100;
+
+	&:last-child {
+		border-bottom: 0;
+	}
+
+	.components-base-control {
+		margin-bottom: 0;
+	}
+
+	&__status {
+		flex: 0 0 auto;
+		min-height: 22px;
+		padding: 1px 8px;
+		border: 1px solid $gray-300;
+		border-radius: 2px;
+		background: $gray-100;
+		color: $gray-700;
+		font-size: 12px;
+		line-height: 18px;
+	}
+}
+
+.woopayments-settings-control-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 16px;
+
+	@include breakpoint("<782px") {
+		grid-template-columns: 1fr;
+	}
+}
+
+.woopayments-settings-location-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 12px;
+	margin: 8px 0 16px;
+
+	@include breakpoint("<782px") {
+		grid-template-columns: 1fr;
+	}
+}
+
+.woopayments-settings-location-fieldset {
+	min-width: 0;
+	margin: 8px 0 16px;
+	padding: 0;
+	border: 0;
+}
+
+.woopayments-settings-logo-upload {
+	margin-top: 16px;
+
+	label {
+		display: block;
+		margin-bottom: 8px;
+		font-weight: 500;
+	}
+
+	input[type="file"] {
+		display: block;
+		max-width: 100%;
+	}
+
+	.components-notice {
+		margin: 12px 0 0;
+	}
+}
+
+.woopayments-settings-modal {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+
+	h2,
+	p {
+		margin: 0;
+	}
+
+	&__actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 8px;
+		margin-top: 8px;
+	}
+}
+
+.woopayments-settings-inline-status {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 8px 0 0;
+	color: $gray-700;
+
+	.components-button {
+		margin-left: 8px;
+	}
+}
+
+.woopayments-settings-character-count,
+.woopayments-settings-muted {
+	margin: 8px 0 0;
+	color: $gray-700;
+	font-size: 12px;
+	line-height: 18px;
+}
+
+.woopayments-settings-save-bar {
+	position: sticky;
+	bottom: 0;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	margin-top: 24px;
+	padding: 16px 0;
+	border-top: 1px solid $gray-200;
+	background: $gray-100;
+
+	@include breakpoint("<782px") {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	&__status {
+		margin: 0;
+		color: $gray-700;
+		font-size: 13px;
+		line-height: 20px;
 	}
 }

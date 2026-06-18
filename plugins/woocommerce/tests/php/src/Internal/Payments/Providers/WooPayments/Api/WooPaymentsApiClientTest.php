@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymen
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiException;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use WC_Unit_Test_Case;
+use WP_REST_Request;
 
 /**
  * Tests for the WooPaymentsApiClient class.
@@ -103,6 +104,51 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 			$this->assertSame( 'card_declined', $exception->get_error_code() );
 			$this->assertStringContainsString( 'Card declined', $exception->getMessage() );
 		}
+	}
+
+	/**
+	 * @testdox Should apply the preserved WooPayments response filter after transport requests.
+	 */
+	public function test_request_applies_preserved_response_filter_after_transport_requests(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 302 ),
+			'headers'  => array( 'location' => 'https://local.test/wp-cron.php?doing_wp_cron=1' ),
+			'body'     => '',
+		);
+		$filter_observations   = array();
+		$filter                = static function ( $response, string $method, string $url, string $api ) use ( &$filter_observations ): array {
+			$filter_observations = array(
+				'method'        => $method,
+				'url'           => $url,
+				'api'           => $api,
+				'response_code' => wp_remote_retrieve_response_code( $response ),
+			);
+
+			return array(
+				'response' => array( 'code' => 200 ),
+				'headers'  => array( 'content-type' => 'application/json' ),
+				'body'     => wp_json_encode( array( 'id' => 're_filtered' ) ),
+			);
+		};
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+		add_filter( 'wcpay_api_request_response', $filter, 10, 4 );
+
+		try {
+			$result = $sut->refund_charge( 'ch_test', 250, 'requested_by_customer', 'native_transport', 'idem_test' );
+		} finally {
+			remove_filter( 'wcpay_api_request_response', $filter, 10 );
+		}
+
+		$this->assertArrayHasKey( 'id', $result );
+		$this->assertSame( 're_filtered', $result['id'] );
+		$this->assertSame( 302, $filter_observations['response_code'] );
+		$this->assertSame( 'POST', $filter_observations['method'] );
+		$this->assertSame( 'refunds', $filter_observations['api'] );
+		$this->assertStringStartsWith( 'https://public-api.wordpress.com/wpcom/v2/sites/%s/wcpay/refunds', $filter_observations['url'] );
 	}
 
 	/**
@@ -832,6 +878,254 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $body );
 		$this->assertTrue( $body['test_mode'] );
 		$this->assertTrue( $http_client->last_use_user_token );
+	}
+
+	/**
+	 * @testdox Should update connected account settings through the native accounts endpoint.
+	 */
+	public function test_update_account_posts_to_accounts_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'success' => true ) ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$result = $sut->update_account(
+			array(
+				'statement_descriptor'   => 'NATIVE STORE',
+				'business_support_email' => 'support@example.test',
+			)
+		);
+		$body   = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertTrue( $result['success'] );
+		$this->assertSame( '/sites/123/wcpay/accounts', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertIsArray( $body );
+		$this->assertSame( 'NATIVE STORE', $body['statement_descriptor'] );
+		$this->assertSame( 'support@example.test', $body['business_support_email'] );
+		$this->assertTrue( $body['test_mode'] );
+	}
+
+	/**
+	 * @testdox Should request account capabilities through the user-token native endpoint.
+	 */
+	public function test_request_capability_posts_to_capabilities_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'status' => 'active' ) ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$result = $sut->request_capability( 'link_payments', true );
+		$body   = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertSame( 'active', $result['status'] );
+		$this->assertSame( '/sites/123/wcpay/accounts/capabilities', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertIsArray( $body );
+		$this->assertSame( 'link_payments', $body['capability_id'] );
+		$this->assertTrue( $body['requested'] );
+		$this->assertTrue( $http_client->last_use_user_token );
+	}
+
+	/**
+	 * @testdox Should forward valid file uploads larger than the WooPay logo UI limit.
+	 */
+	public function test_upload_file_forwards_valid_files_larger_than_woopay_logo_ui_limit(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'id' => 'file_dispute_evidence' ) ),
+		);
+		$tmp_file              = tempnam( sys_get_temp_dir(), 'wcpay-large-file-' );
+		$this->assertIsString( $tmp_file );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture temp file.
+		file_put_contents( $tmp_file, str_repeat( 'x', 510001 ) );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/payments/file' );
+		$request->set_param( 'purpose', 'dispute_evidence' );
+		$request->set_param( 'as_account', true );
+		$request->set_file_params(
+			array(
+				'file' => array(
+					'name'     => 'large-evidence.pdf',
+					'type'     => 'application/pdf',
+					'tmp_name' => $tmp_file,
+					'error'    => 0,
+					'size'     => 510001,
+				),
+			)
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		try {
+			$result = $sut->upload_file( $request );
+			$body   = json_decode( (string) $http_client->last_body, true );
+
+			$this->assertSame( 'file_dispute_evidence', $result['id'] );
+			$this->assertSame( '/sites/123/wcpay/files', $http_client->last_path );
+			$this->assertSame( 'POST', $http_client->last_method );
+			$this->assertIsArray( $body );
+			$this->assertSame( base64_encode( str_repeat( 'x', 510001 ) ), $body['file'] ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Expected provider payload encoding.
+			$this->assertSame( 'large-evidence.pdf', $body['file_name'] );
+			$this->assertSame( 'application/pdf', $body['file_type'] );
+			$this->assertSame( 'dispute_evidence', $body['purpose'] );
+			$this->assertTrue( $body['as_account'] );
+		} finally {
+			wp_delete_file( $tmp_file );
+		}
+	}
+
+	/**
+	 * @testdox Should wrap provider file upload failures with the preserved evidence upload code.
+	 */
+	public function test_upload_file_wraps_provider_failures_with_evidence_upload_error_code(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 413 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'error' => array(
+						'code'    => 'file_too_large',
+						'message' => 'The uploaded file is too large.',
+					),
+				)
+			),
+		);
+		$tmp_file              = tempnam( sys_get_temp_dir(), 'wcpay-upload-error-' );
+		$this->assertIsString( $tmp_file );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture temp file.
+		file_put_contents( $tmp_file, 'evidence' );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/payments/file' );
+		$request->set_param( 'purpose', 'dispute_evidence' );
+		$request->set_file_params(
+			array(
+				'file' => array(
+					'name'     => 'evidence.pdf',
+					'type'     => 'application/pdf',
+					'tmp_name' => $tmp_file,
+					'error'    => 0,
+					'size'     => 8,
+				),
+			)
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		try {
+			$sut->upload_file( $request );
+			$this->fail( 'Expected the provider file upload failure to be wrapped.' );
+		} catch ( WooPaymentsApiException $exception ) {
+			$this->assertSame( 'wcpay_evidence_file_upload_error', $exception->get_error_code() );
+			$this->assertSame( 413, $exception->get_http_code() );
+			$this->assertStringContainsString( 'The uploaded file is too large.', $exception->getMessage() );
+		} finally {
+			wp_delete_file( $tmp_file );
+		}
+	}
+
+	/**
+	 * @testdox Should fetch file details and contents through native file endpoints.
+	 */
+	public function test_get_file_details_and_contents_use_native_file_endpoints(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'id'      => 'file_logo',
+					'purpose' => 'business_logo',
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$file  = $sut->get_file( 'file_logo', false );
+		$query = array();
+		parse_str( (string) wp_parse_url( $http_client->last_path, PHP_URL_QUERY ), $query );
+
+		$this->assertSame( 'file_logo', $file['id'] );
+		$this->assertSame( '/sites/123/wcpay/files/file_logo', strtok( $http_client->last_path, '?' ) );
+		$this->assertSame( '0', $query['as_account'] );
+		$this->assertSame( '0', $query['test_mode'] );
+		$this->assertSame( 'GET', $http_client->last_method );
+
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'content_type' => 'image/png',
+					'file_content' => 'TE9HTw==',
+				)
+			),
+		);
+
+		$contents = $sut->get_file_contents( 'file_logo', false );
+		$query    = array();
+		parse_str( (string) wp_parse_url( $http_client->last_path, PHP_URL_QUERY ), $query );
+
+		$this->assertSame( 'image/png', $contents['content_type'] );
+		$this->assertSame( 'TE9HTw==', $contents['file_content'] );
+		$this->assertSame( '/sites/123/wcpay/files/file_logo/contents', strtok( $http_client->last_path, '?' ) );
+		$this->assertSame( '0', $query['as_account'] );
+		$this->assertSame( '0', $query['test_mode'] );
+		$this->assertSame( 'GET', $http_client->last_method );
+	}
+
+	/**
+	 * @testdox Should save fraud rulesets through the native fraud ruleset endpoint.
+	 */
+	public function test_save_fraud_ruleset_posts_to_fraud_ruleset_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'success' => true ) ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->save_fraud_ruleset(
+			array(
+				array(
+					'key'     => 'avs_verification',
+					'outcome' => 'block',
+				),
+			)
+		);
+		$body   = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertTrue( $result['success'] );
+		$this->assertSame( '/sites/123/wcpay/fraud_ruleset', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertIsArray( $body );
+		$this->assertSame( 'avs_verification', $body['ruleset_config'][0]['key'] );
 	}
 
 	/**

@@ -777,7 +777,7 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 			)
 		);
 
-		$meta = array_merge( $meta, $this->get_fraud_outcome_order_meta( $intent ) );
+		$meta = array_merge( $meta, $this->get_fraud_outcome_order_meta( $intent, $charge ) );
 
 		return $meta;
 	}
@@ -786,11 +786,16 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 	 * Get WooPayments fraud-outcome order meta from provider metadata.
 	 *
 	 * @param array<string,mixed> $intent Native intent response.
+	 * @param array<string,mixed> $charge Native Charge response.
 	 * @return array<string,string>
 	 */
-	private function get_fraud_outcome_order_meta( array $intent ): array {
+	private function get_fraud_outcome_order_meta( array $intent, array $charge ): array {
 		$metadata      = isset( $intent['metadata'] ) && is_array( $intent['metadata'] ) ? $intent['metadata'] : array();
 		$fraud_outcome = isset( $metadata['fraud_outcome'] ) ? (string) $metadata['fraud_outcome'] : '';
+
+		if ( '' === $fraud_outcome && $this->is_card_charge( $charge ) ) {
+			$fraud_outcome = 'allow';
+		}
 
 		if ( ! in_array( $fraud_outcome, array( 'allow', 'block', 'review' ), true ) ) {
 			return array();
@@ -800,6 +805,20 @@ class WooPaymentsCheckoutAjaxController implements RegisterHooksInterface {
 			'_wcpay_fraud_outcome_status' => $fraud_outcome,
 			'_wcpay_fraud_meta_box_type'  => 'allow',
 		);
+	}
+
+	/**
+	 * Tell whether a native charge was made with a card payment method.
+	 *
+	 * @param array<string,mixed> $charge Native Charge response.
+	 * @return bool
+	 */
+	private function is_card_charge( array $charge ): bool {
+		$payment_method_details = isset( $charge['payment_method_details'] ) && is_array( $charge['payment_method_details'] )
+			? $charge['payment_method_details']
+			: array();
+
+		return 'card' === (string) ( $payment_method_details['type'] ?? '' );
 	}
 
 	/**

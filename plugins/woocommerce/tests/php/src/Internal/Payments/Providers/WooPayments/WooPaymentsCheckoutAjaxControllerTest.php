@@ -222,8 +222,8 @@ class WooPaymentsCheckoutAjaxControllerTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'test', $order->get_meta( '_wcpay_mode', true ) );
 		$this->assertSame( '1.75', $order->get_meta( '_wcpay_transaction_fee', true ) );
 		$this->assertSame( '48.25', $order->get_meta( '_wcpay_net', true ) );
-		$this->assertSame( '', $order->get_meta( '_wcpay_fraud_outcome_status', true ) );
-		$this->assertSame( '', $order->get_meta( '_wcpay_fraud_meta_box_type', true ) );
+		$this->assertSame( 'allow', $order->get_meta( '_wcpay_fraud_outcome_status', true ) );
+		$this->assertSame( 'allow', $order->get_meta( '_wcpay_fraud_meta_box_type', true ) );
 		$this->assertSame( 'Visa credit card', $order->get_payment_method_title() );
 		$this->assertSame( '4242', $order->get_meta( 'last4', true ) );
 		$this->assertSame( 'visa', $order->get_meta( '_card_brand', true ) );

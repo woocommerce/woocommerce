@@ -1,10 +1,18 @@
 /**
+ * External dependencies
+ */
+import { render, screen } from '@testing-library/react';
+import fs from 'fs';
+import path from 'path';
+
+/**
  * Internal dependencies
  */
 import {
 	getSettingsPaymentsProviderRoutes,
 	resetSettingsPaymentsProviderRoutesForTesting,
 } from '~/settings-payments/provider-routes';
+import { SettingsPaymentsWoopayments } from '~/settings-payments/settings-payments-woopayments';
 
 describe( 'WooPayments Settings Payments routes', () => {
 	beforeEach( () => {
@@ -20,14 +28,19 @@ describe( 'WooPayments Settings Payments routes', () => {
 
 		const routes = getSettingsPaymentsProviderRoutes();
 
-		expect( routes ).toHaveLength( 7 );
+		expect( routes ).toHaveLength( 8 );
 		expect(
-			routes.map( ( { id, path, order } ) => ( {
+			routes.map( ( { id, path: routePath, order } ) => ( {
 				id,
-				path,
+				path: routePath,
 				order,
 			} ) )
 		).toEqual( [
+			{
+				id: 'woopayments-settings',
+				path: '/woopayments/settings',
+				order: 90,
+			},
 			{
 				id: 'woopayments-overview',
 				path: '/woopayments/overview',
@@ -73,5 +86,37 @@ describe( 'WooPayments Settings Payments routes', () => {
 		expect( JSON.stringify( routes ) ).not.toContain(
 			'wc-pay-welcome-page'
 		);
+	} );
+
+	it( 'loads the settings route from a dedicated settings chunk', () => {
+		const source = fs.readFileSync(
+			path.resolve( __dirname, '../routes.tsx' ),
+			'utf8'
+		);
+
+		expect( source ).toContain(
+			'webpackChunkName: "settings-payments-woopayments-settings"'
+		);
+	} );
+
+	it( 'renders the native settings page from the legacy WooPayments settings shell', () => {
+		render( <SettingsPaymentsWoopayments /> );
+
+		expect(
+			screen.getByRole( 'heading', {
+				name: 'WooPayments settings',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'region', {
+				name: 'WooPayments settings',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText( /Loading WooPayments settings/ )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText( /Native settings placeholder/ )
+		).not.toBeInTheDocument();
 	} );
 } );

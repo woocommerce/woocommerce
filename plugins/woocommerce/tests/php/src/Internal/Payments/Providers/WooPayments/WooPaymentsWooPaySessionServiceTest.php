@@ -39,6 +39,7 @@ class WooPaymentsWooPaySessionServiceTest extends WC_Unit_Test_Case {
 		wc_empty_cart();
 		delete_option( 'wcpay_woopay_checkout_appearance' );
 		delete_option( 'wcpay_styles_cache_version' );
+		remove_theme_mod( 'custom_logo' );
 		if ( class_exists( '\Jetpack_Options' ) ) {
 			\Jetpack_Options::delete_option(
 				array(
@@ -146,6 +147,46 @@ class WooPaymentsWooPaySessionServiceTest extends WC_Unit_Test_Case {
 		$result = $sut->get_init_session_request( 'shopper@example.com', 'qwerty123' );
 
 		$this->assertSame( 'qwerty123', $result['user_session'] );
+	}
+
+	/**
+	 * @testdox Should fall back to the theme custom logo in WooPay init session store data.
+	 */
+	public function test_init_session_request_uses_theme_custom_logo_when_woopay_logo_is_not_configured(): void {
+		$custom_logo_id = 123;
+		$filter         = static function ( $downsize, $id, $size ) use ( $custom_logo_id ) {
+			if ( $custom_logo_id === $id && 'full' === $size ) {
+				return array( 'https://example.test/theme-logo.png', 128, 64, false );
+			}
+
+			return $downsize;
+		};
+		add_filter( 'image_downsize', $filter, 10, 3 );
+		set_theme_mod( 'custom_logo', $custom_logo_id );
+
+		try {
+			$sut    = $this->create_service();
+			$result = $sut->get_init_session_request( 'shopper@example.com', 'qwerty123' );
+
+			$this->assertSame( 'https://example.test/theme-logo.png', $result['store_data']['store_logo'] );
+		} finally {
+			remove_filter( 'image_downsize', $filter, 10 );
+		}
+	}
+
+	/**
+	 * @testdox Should send the WooPay store logo file URL when a custom logo is configured.
+	 */
+	public function test_init_session_request_uses_configured_woopay_store_logo_file_url(): void {
+		$sut = $this->create_service(
+			array(
+				'platform_checkout_store_logo' => 'file_logo',
+			)
+		);
+
+		$result = $sut->get_init_session_request( 'shopper@example.com', 'qwerty123' );
+
+		$this->assertSame( get_rest_url( null, 'wc/v3/payments/file/file_logo' ), $result['store_data']['store_logo'] );
 	}
 
 	/**

@@ -9,6 +9,13 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { registerSettingsPaymentsProviderRoute } from '~/settings-payments/provider-routes';
 
+const WooPaymentsSettingsChunk = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "settings-payments-woopayments-settings" */ '../settings'
+		)
+);
+
 const WooPaymentsOverviewChunk = lazy(
 	() =>
 		import(
@@ -67,6 +74,17 @@ const LoadingFallback = () => (
 		) }
 	</div>
 );
+
+registerSettingsPaymentsProviderRoute( {
+	id: 'woopayments-settings',
+	path: '/woopayments/settings',
+	order: 90,
+	element: (
+		<Suspense fallback={ <LoadingFallback /> }>
+			<WooPaymentsSettingsChunk />
+		</Suspense>
+	),
+} );
 
 registerSettingsPaymentsProviderRoute( {
 	id: 'woopayments-overview',

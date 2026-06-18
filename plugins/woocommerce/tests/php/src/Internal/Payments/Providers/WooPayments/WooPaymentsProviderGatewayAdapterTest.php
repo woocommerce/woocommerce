@@ -248,8 +248,17 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 						'total_count' => 1,
 						'data'        => array(
 							array(
-								'id'               => 'ch_native',
-								'fee_breakdown_v1' => array(
+								'id'                     => 'ch_native',
+								'payment_method_details' => array(
+									'type' => 'card',
+									'card' => array(
+										'brand'   => 'visa',
+										'funding' => 'credit',
+										'last4'   => '4242',
+										'network' => 'visa',
+									),
+								),
+								'fee_breakdown_v1'       => array(
 									'totals'  => array(
 										'fee'         => array(
 											'amount'   => 293,
@@ -385,8 +394,11 @@ class WooPaymentsProviderGatewayAdapterTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'pi_native', $outcome->get_data()['note'] );
 		$this->assertSame( '1.75', $outcome->get_data()['meta']['_wcpay_transaction_fee'] );
 		$this->assertSame( '48.25', $outcome->get_data()['meta']['_wcpay_net'] );
-		$this->assertArrayNotHasKey( '_wcpay_fraud_outcome_status', $outcome->get_data()['meta'] );
-		$this->assertArrayNotHasKey( '_wcpay_fraud_meta_box_type', $outcome->get_data()['meta'] );
+		$outcome_meta = $outcome->get_data()['meta'];
+		$this->assertArrayHasKey( '_wcpay_fraud_outcome_status', $outcome_meta );
+		$this->assertArrayHasKey( '_wcpay_fraud_meta_box_type', $outcome_meta );
+		$this->assertSame( 'allow', $outcome_meta['_wcpay_fraud_outcome_status'] );
+		$this->assertSame( 'allow', $outcome_meta['_wcpay_fraud_meta_box_type'] );
 		$this->assertOrderHasNote(
 			$order,
 			'<strong>Fee details:</strong><div class="captured-event-details">' . PHP_EOL

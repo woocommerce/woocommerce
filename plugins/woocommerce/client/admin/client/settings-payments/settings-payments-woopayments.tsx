@@ -1,10 +1,10 @@
 /**
  * Internal dependencies
  */
-import { WooPaymentsAccountSettings } from '~/woopayments/settings/account-settings';
+import { WooPaymentsSettingsPage } from '~/woopayments/settings';
 
 export const SettingsPaymentsWoopayments = () => {
-	return <WooPaymentsAccountSettings />;
+	return <WooPaymentsSettingsPage />;
 };
 
 export default SettingsPaymentsWoopayments;

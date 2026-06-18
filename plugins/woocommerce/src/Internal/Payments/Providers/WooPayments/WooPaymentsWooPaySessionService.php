@@ -1127,10 +1127,15 @@ class WooPaymentsWooPaySessionService {
 		if ( $order instanceof \WC_Order ) {
 			$checkout_url = $order->get_checkout_payment_url();
 		}
+		$store_logo_file_id = (string) $this->get_account_service()->get_gateway_setting( 'platform_checkout_store_logo', '' );
+		$store_logo         = $this->get_theme_store_logo_url();
+		if ( '' !== $store_logo_file_id ) {
+			$store_logo = get_rest_url( null, 'wc/v3/payments/file/' . $store_logo_file_id );
+		}
 
 		return array(
 			'store_name'                     => get_bloginfo( 'name' ),
-			'store_logo'                     => '',
+			'store_logo'                     => $store_logo,
 			'custom_message'                 => (string) $this->get_account_service()->get_gateway_setting( 'platform_checkout_custom_message', '' ),
 			'blog_id'                        => $this->get_store_blog_id(),
 			'blog_url'                       => get_site_url(),
@@ -1149,6 +1154,22 @@ class WooPaymentsWooPaySessionService {
 			'checkout_schema_namespaces'     => array(),
 			'optional_fields_status'         => array(),
 		);
+	}
+
+	/**
+	 * Get the store logo URL from the active theme custom logo.
+	 *
+	 * @return string
+	 */
+	private function get_theme_store_logo_url(): string {
+		$site_logo_id = get_theme_mod( 'custom_logo' );
+		if ( empty( $site_logo_id ) ) {
+			return '';
+		}
+
+		$site_logo = wp_get_attachment_image_src( (int) $site_logo_id, 'full' );
+
+		return is_array( $site_logo ) && isset( $site_logo[0] ) && is_string( $site_logo[0] ) ? $site_logo[0] : '';
 	}
 
 	/**

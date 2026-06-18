@@ -1,0 +1,234 @@
+/**
+ * External dependencies
+ */
+import directApiFetch from '@wordpress/api-fetch';
+
+jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+
+const mockCreateSuccessNotice = jest.fn();
+const mockCreateErrorNotice = jest.fn();
+const mockGetSettings = jest.fn();
+const mockRegister = jest.fn();
+
+jest.mock( '@wordpress/data', () => ( {
+	combineReducers: jest.fn( ( reducers ) => reducers ),
+	createReduxStore: jest.fn( ( name, config ) => ( {
+		name,
+		...config,
+	} ) ),
+	dispatch: jest.fn( ( storeName: string ) => {
+		if ( storeName === 'core/notices' ) {
+			return {
+				createSuccessNotice: mockCreateSuccessNotice,
+				createErrorNotice: mockCreateErrorNotice,
+			};
+		}
+
+		return {
+			startResolution: jest.fn(),
+			finishResolution: jest.fn(),
+		};
+	} ),
+	register: mockRegister,
+	select: jest.fn( () => ( {
+		getSettings: mockGetSettings,
+	} ) ),
+	useDispatch: jest.fn(),
+	useSelect: jest.fn(),
+} ) );
+
+const mockDirectApiFetch = directApiFetch as jest.MockedFunction<
+	typeof directApiFetch
+>;
+
+describe( 'WooPayments settings data store', () => {
+	beforeEach( () => {
+		mockCreateSuccessNotice.mockReset();
+		mockCreateErrorNotice.mockReset();
+		mockGetSettings.mockReset();
+		mockRegister.mockReset();
+		mockDirectApiFetch.mockReset();
+		delete (
+			window as typeof window & {
+				wcSettings?: unknown;
+				wcpaySettings?: unknown;
+			}
+		 ).wcSettings;
+		delete (
+			window as typeof window & {
+				wcSettings?: unknown;
+				wcpaySettings?: unknown;
+			}
+		 ).wcpaySettings;
+	} );
+
+	it( 'registers the public settings store name used by WooPayments settings components', async () => {
+		const { STORE_NAME, store } = await import( '../data/store' );
+
+		expect( STORE_NAME ).toBe( 'wc/payments/settings' );
+		expect( store.name ).toBe( 'wc/payments/settings' );
+	} );
+
+	it( 'resolves settings from the preserved WooPayments settings endpoint', async () => {
+		const { getSettings } = await import( '../data/resolvers' );
+		const resolver = getSettings();
+
+		expect( resolver.next().value ).toEqual( {
+			type: 'API_FETCH',
+			request: {
+				path: '/wc/v3/payments/settings',
+			},
+		} );
+	} );
+
+	it( 'saves settings to the preserved WooPayments settings endpoint', async () => {
+		const settings = {
+			is_wcpay_enabled: true,
+			enabled_payment_method_ids: [ 'card' ],
+		};
+		const response = {
+			data: {
+				payment_method_statuses: {
+					card_payments: {
+						status: 'active',
+						requirements: [],
+					},
+				},
+			},
+		};
+		mockGetSettings.mockReturnValue( settings );
+
+		const { saveSettings } = await import( '../data/actions' );
+		const action = saveSettings();
+
+		action.next();
+
+		expect( action.next().value ).toEqual( {
+			type: 'API_FETCH',
+			request: {
+				path: '/wc/v3/payments/settings',
+				method: 'post',
+				data: settings,
+			},
+		} );
+
+		action.next( response );
+		action.next();
+		action.next();
+		const result = action.next();
+
+		expect( result.value ).toBe( true );
+		expect( mockCreateSuccessNotice ).toHaveBeenCalledWith(
+			'Settings saved.'
+		);
+	} );
+
+	it( 'accepts unwrapped REST settings responses when saving settings', async () => {
+		const settings = {
+			is_wcpay_enabled: true,
+			enabled_payment_method_ids: [ 'card' ],
+		};
+		mockGetSettings.mockReturnValue( settings );
+
+		const { saveSettings } = await import( '../data/actions' );
+		const action = saveSettings();
+
+		action.next();
+		action.next();
+		action.next( {
+			payment_method_statuses: {
+				card_payments: {
+					status: 'active',
+					requirements: [],
+				},
+			},
+		} );
+		action.next();
+		action.next();
+		const result = action.next();
+
+		expect( result.value ).toBe( true );
+		expect( mockCreateSuccessNotice ).toHaveBeenCalledWith(
+			'Settings saved.'
+		);
+	} );
+
+	it( 'saves allowlisted options through the preserved option endpoint', async () => {
+		mockDirectApiFetch.mockResolvedValue( {} );
+
+		const { saveOption } = await import( '../data/actions' );
+
+		await saveOption(
+			'wcpay_fraud_protection_welcome_tour_dismissed',
+			true
+		);
+
+		expect( mockDirectApiFetch ).toHaveBeenCalledWith( {
+			path: '/wc/v3/payments/settings/wcpay_fraud_protection_welcome_tour_dismissed',
+			method: 'post',
+			data: { value: true },
+		} );
+	} );
+
+	it( 'does not export Stripe Billing migration actions, selectors, or hooks', async () => {
+		const [ actions, selectors, hooks ] = await Promise.all( [
+			import( '../data/actions' ),
+			import( '../data/selectors' ),
+			import( '../data/hooks' ),
+		] );
+
+		expect( actions ).not.toHaveProperty(
+			'submitStripeBillingSubscriptionMigration'
+		);
+		expect( actions ).not.toHaveProperty( 'updateIsStripeBillingEnabled' );
+		expect( selectors ).not.toHaveProperty( 'getIsStripeBillingEnabled' );
+		expect( selectors ).not.toHaveProperty(
+			'getIsStripeBillingMigrationInProgress'
+		);
+		expect( hooks ).not.toHaveProperty( 'useStripeBilling' );
+		expect( hooks ).not.toHaveProperty( 'useStripeBillingMigration' );
+		expect( JSON.stringify( actions ) ).not.toContain(
+			'/settings/schedule-stripe-billing-migration'
+		);
+	} );
+
+	it( 'reads settings bootstrap data from the Core-owned wcSettings admin payload', async () => {
+		(
+			window as typeof window & {
+				wcSettings: {
+					admin: {
+						woopaymentsSettings: {
+							accountStatus: string;
+						};
+					};
+				};
+				wcpaySettings: {
+					accountStatus: string;
+				};
+			}
+		 ).wcSettings = {
+			admin: {
+				woopaymentsSettings: {
+					accountStatus: 'connected',
+				},
+			},
+		};
+		(
+			window as typeof window & {
+				wcpaySettings: {
+					accountStatus: string;
+				};
+			}
+		 ).wcpaySettings = {
+			accountStatus: 'legacy-plugin-global',
+		};
+
+		const { getWooPaymentsSettingsBootstrap } = await import(
+			'../bootstrap'
+		);
+
+		expect( getWooPaymentsSettingsBootstrap() ).toEqual( {
+			accountStatus: 'connected',
+		} );
+	} );
+} );

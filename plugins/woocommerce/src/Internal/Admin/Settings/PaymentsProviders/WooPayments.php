@@ -75,6 +75,24 @@ class WooPayments extends PaymentGateway {
 	}
 
 	/**
+	 * Get the settings URL for the WooPayments payment gateway.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
+	 * @return string The settings URL for the payment gateway.
+	 */
+	public function get_settings_url( WC_Payment_Gateway $payment_gateway ): string {
+		unset( $payment_gateway );
+
+		return Utils::wc_payments_settings_url(
+			'/woopayments/settings',
+			array(
+				'from' => Payments::FROM_PAYMENTS_SETTINGS,
+			)
+		);
+	}
+
+	/**
 	 * Extract the payment gateway provider details from the object.
 	 *
 	 * @param WC_Payment_Gateway $gateway      The payment gateway object.

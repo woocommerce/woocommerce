@@ -7,9 +7,12 @@ use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsSettingsService;
 use Exception;
 use WP_Error;
 use WP_Http;
+use WP_HTTP_Response;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -19,6 +22,19 @@ use WP_REST_Response;
  * @internal
  */
 class WooPaymentsRestController extends RestApiControllerBase {
+
+	/**
+	 * Public file purposes that may be served without payment gateway management permissions.
+	 */
+	private const PUBLIC_FILE_PURPOSES = array(
+		'business_logo',
+		'business_icon',
+	);
+
+	/**
+	 * Prefix for cached provider file purposes.
+	 */
+	private const FILE_PURPOSE_CACHE_PREFIX = 'woocommerce_native_woopayments_file_purpose_';
 
 	/**
 	 * The root namespace for the JSON REST API endpoints.
@@ -49,6 +65,20 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	private WooPaymentsService $woopayments;
 
 	/**
+	 * The native WooPayments settings contract service.
+	 *
+	 * @var WooPaymentsSettingsService|null
+	 */
+	private ?WooPaymentsSettingsService $settings_service = null;
+
+	/**
+	 * Native payments runtime arbiter.
+	 *
+	 * @var NativePaymentsRuntimeArbiter|null
+	 */
+	private ?NativePaymentsRuntimeArbiter $runtime_arbiter = null;
+
+	/**
 	 * Get the WooCommerce REST API namespace for the class.
 	 *
 	 * @return string
@@ -63,6 +93,10 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 * @param bool $override Whether to override the existing routes. Useful for testing.
 	 */
 	public function register_routes( bool $override = false ) {
+		if ( $this->should_register_native_settings_routes() ) {
+			$this->register_native_settings_routes( $override );
+		}
+
 		register_rest_route(
 			$this->route_namespace,
 			'/' . $this->rest_base . '/onboarding',
@@ -76,7 +110,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 						'location' => array(
 							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
-							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'pattern'           => '[a-zA-Z]{2}',
+							// Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
@@ -104,7 +139,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 						'location' => array(
 							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
-							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'pattern'           => '[a-zA-Z]{2}',
+							// Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
@@ -131,7 +167,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 						'location' => array(
 							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
-							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'pattern'           => '[a-zA-Z]{2}',
+							// Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
@@ -158,7 +195,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 						'location' => array(
 							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
-							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'pattern'           => '[a-zA-Z]{2}',
+							// Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
@@ -179,7 +217,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 						'location' => array(
 							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
-							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'pattern'           => '[a-zA-Z]{2}',
+							// Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
@@ -206,7 +245,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 						'location' => array(
 							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
-							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'pattern'           => '[a-zA-Z]{2}',
+							// Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
@@ -228,7 +268,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 						'location' => array(
 							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
-							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'pattern'           => '[a-zA-Z]{2}',
+							// Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
@@ -255,7 +296,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 						'location' => array(
 							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
-							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'pattern'           => '[a-zA-Z]{2}',
+							// Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
@@ -282,7 +324,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 						'location' => array(
 							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
-							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'pattern'           => '[a-zA-Z]{2}',
+							// Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
@@ -309,7 +352,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 						'location' => array(
 							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
-							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'pattern'           => '[a-zA-Z]{2}',
+							// Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
@@ -338,7 +382,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 						'location' => array(
 							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
-							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'pattern'           => '[a-zA-Z]{2}',
+							// Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
@@ -372,7 +417,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 						'location' => array(
 							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
-							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'pattern'           => '[a-zA-Z]{2}',
+							// Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
@@ -394,7 +440,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 						'location' => array(
 							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
-							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'pattern'           => '[a-zA-Z]{2}',
+							// Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
@@ -454,7 +501,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 						'location' => array(
 							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
 							'type'              => 'string',
-							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'pattern'           => '[a-zA-Z]{2}',
+							// Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
@@ -496,14 +544,253 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	/**
 	 * Initialize the class instance.
 	 *
-	 * @param Payments           $payments    The general payments settings page service.
-	 * @param WooPaymentsService $woopayments The WooPayments-specific Payments settings page service.
+	 * @param Payments                          $payments        The general payments settings page service.
+	 * @param WooPaymentsService                $woopayments     The WooPayments-specific Payments settings page service.
+	 * @param WooPaymentsSettingsService|null   $settings_service Optional native WooPayments settings service.
+	 * @param NativePaymentsRuntimeArbiter|null $runtime_arbiter Optional native payments runtime arbiter.
 	 *
 	 * @internal
 	 */
-	final public function init( Payments $payments, WooPaymentsService $woopayments ): void {
-		$this->payments    = $payments;
-		$this->woopayments = $woopayments;
+	final public function init( Payments $payments, WooPaymentsService $woopayments, ?WooPaymentsSettingsService $settings_service = null, ?NativePaymentsRuntimeArbiter $runtime_arbiter = null ): void {
+		$this->payments         = $payments;
+		$this->woopayments      = $woopayments;
+		$this->settings_service = $settings_service;
+		$this->runtime_arbiter  = $runtime_arbiter;
+	}
+
+	/**
+	 * Register the legacy-compatible native WooPayments settings endpoints.
+	 *
+	 * @param bool $override Whether to override existing routes.
+	 * @return void
+	 */
+	private function register_native_settings_routes( bool $override ): void {
+		register_rest_route(
+			'wc/v3',
+			'/payments/settings',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'get_native_settings' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+				),
+				array(
+					'methods'             => \WP_REST_Server::EDITABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'update_native_settings' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => $this->get_native_settings_update_args(),
+				),
+			),
+			$override
+		);
+
+		register_rest_route(
+			'wc/v3',
+			'/payments/settings/(?P<option_name>[a-zA-Z0-9_-]+)',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::EDITABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'update_native_settings_option' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => array(
+						'option_name' => array(
+							'required'          => true,
+							'sanitize_callback' => 'sanitize_key',
+						),
+						'value'       => array(
+							'required' => true,
+						),
+					),
+				),
+			),
+			$override
+		);
+
+		register_rest_route(
+			'wc/v3',
+			'/payments/file',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'upload_native_settings_file' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+				),
+			),
+			$override
+		);
+
+		register_rest_route(
+			'wc/v3',
+			'/payments/file/(?P<file_id>\w+)/details',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'get_native_settings_file_details' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => $this->get_file_route_args(),
+				),
+			),
+			$override
+		);
+
+		register_rest_route(
+			'wc/v3',
+			'/payments/file/(?P<file_id>\w+)/content',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'get_native_settings_file_contents' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => $this->get_file_route_args(),
+				),
+			),
+			$override
+		);
+
+		register_rest_route(
+			'wc/v3',
+			'/payments/file/(?P<file_id>\w+)',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'get_native_public_settings_file' ),
+					'permission_callback' => '__return_true',
+					'args'                => $this->get_file_route_args(),
+				),
+			),
+			$override
+		);
+	}
+
+	/**
+	 * Tell whether native WooPayments settings routes may register for this request.
+	 *
+	 * @return bool
+	 */
+	private function should_register_native_settings_routes(): bool {
+		return null === $this->runtime_arbiter || $this->runtime_arbiter->should_native_register();
+	}
+
+	/**
+	 * Get validation args for the legacy-compatible WooPayments settings update route.
+	 *
+	 * @return array<string,array<string,mixed>>
+	 */
+	private function get_native_settings_update_args(): array {
+		$payment_method_ids = WooPaymentsSettingsService::get_supported_payment_method_ids();
+		$express_method_ids = WooPaymentsSettingsService::get_express_checkout_method_ids();
+		$args               = array(
+			'enabled_payment_method_ids'           => $this->get_string_array_arg( $payment_method_ids ),
+			'express_checkout_product_methods'     => $this->get_string_array_arg( $express_method_ids ),
+			'express_checkout_cart_methods'        => $this->get_string_array_arg( $express_method_ids ),
+			'express_checkout_checkout_methods'    => $this->get_string_array_arg( $express_method_ids ),
+			'payment_request_button_border_radius' => $this->get_typed_arg( 'integer' ),
+			'deposit_schedule_monthly_anchor'      => $this->get_typed_arg( array( 'integer', 'null' ) ),
+			'advanced_fraud_protection_settings'   => $this->get_typed_arg( 'array' ),
+			'account_business_support_address'     => $this->get_typed_arg( 'object' ),
+		);
+
+		foreach (
+			array(
+				'is_wcpay_enabled',
+				'is_manual_capture_enabled',
+				'is_test_mode_enabled',
+				'is_debug_log_enabled',
+				'is_saved_cards_enabled',
+				'is_payment_request_enabled',
+				'is_express_checkout_in_payment_methods_enabled',
+				'is_woopay_enabled',
+				'is_woopay_global_theme_support_enabled',
+				'is_multi_currency_enabled',
+				'is_wcpay_subscriptions_enabled',
+			) as $key
+		) {
+			$args[ $key ] = $this->get_typed_arg( 'boolean' );
+		}
+
+		foreach (
+			array(
+				'payment_request_button_size',
+				'payment_request_button_type',
+				'payment_request_button_theme',
+				'woopay_custom_message',
+				'woopay_store_logo',
+				'account_statement_descriptor',
+				'account_statement_descriptor_kanji',
+				'account_statement_descriptor_kana',
+				'account_business_name',
+				'account_business_url',
+				'account_business_support_email',
+				'account_business_support_phone',
+				'account_branding_logo',
+				'account_branding_icon',
+				'account_branding_primary_color',
+				'account_branding_secondary_color',
+				'account_communications_email',
+				'deposit_schedule_interval',
+				'deposit_schedule_weekly_anchor',
+				'current_protection_level',
+			) as $key
+		) {
+			$args[ $key ] = $this->get_typed_arg( 'string' );
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Get a REST arg schema for typed scalar or array settings.
+	 *
+	 * @param string|string[] $type JSON schema type.
+	 * @return array<string,mixed>
+	 */
+	private function get_typed_arg( $type ): array {
+		return array(
+			'type'              => $type,
+			'required'          => false,
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+	}
+
+	/**
+	 * Get a REST arg schema for string arrays.
+	 *
+	 * @param string[] $allowed_values Allowed values.
+	 * @return array<string,mixed>
+	 */
+	private function get_string_array_arg( array $allowed_values ): array {
+		return array(
+			'type'              => 'array',
+			'required'          => false,
+			'uniqueItems'       => true,
+			'maxItems'          => count( $allowed_values ),
+			'items'             => array(
+				'type' => 'string',
+				'enum' => $allowed_values,
+			),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+	}
+
+	/**
+	 * Get validation args for file routes.
+	 *
+	 * @return array<string,array<string,mixed>>
+	 */
+	private function get_file_route_args(): array {
+		return array(
+			'file_id'    => array(
+				'required'          => true,
+				'type'              => 'string',
+				'pattern'           => '\w+',
+				'validate_callback' => 'rest_validate_request_arg',
+			),
+			'as_account' => array(
+				'required'          => false,
+				'type'              => 'boolean',
+				'validate_callback' => 'rest_validate_request_arg',
+			),
+		);
 	}
 
 	/**
@@ -881,6 +1168,246 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		}
 
 		return rest_ensure_response( $summary );
+	}
+
+	/**
+	 * Get the native WooPayments settings contract.
+	 *
+	 * @return WP_REST_Response The response.
+	 */
+	protected function get_native_settings(): WP_REST_Response {
+		return rest_ensure_response( $this->get_settings_service()->get_settings() );
+	}
+
+	/**
+	 * Update the native WooPayments settings contract.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string,mixed>> $request
+	 * @return WP_Error|WP_REST_Response The response or error.
+	 */
+	protected function update_native_settings( WP_REST_Request $request ) {
+		$result = $this->get_settings_service()->update_settings( $request->get_params() );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return rest_ensure_response( $result );
+	}
+
+	/**
+	 * Update an allowlisted native WooPayments settings option.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string,mixed>> $request
+	 * @return WP_Error|WP_REST_Response The response or error.
+	 */
+	protected function update_native_settings_option( WP_REST_Request $request ) {
+		$option_name = (string) $request->get_param( 'option_name' );
+		$value       = $request->get_param( 'value' );
+		$result      = $this->get_settings_service()->update_option( $option_name, $value );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return rest_ensure_response( array( 'success' => true ) );
+	}
+
+	/**
+	 * Upload a file for the native WooPayments settings page.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string,mixed>> $request
+	 * @return WP_Error|WP_REST_Response The response or error.
+	 */
+	protected function upload_native_settings_file( WP_REST_Request $request ) {
+		$result = $this->get_settings_service()->upload_file( $request );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return rest_ensure_response( $result );
+	}
+
+	/**
+	 * Get provider file details for the native WooPayments settings page.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string,mixed>> $request
+	 * @return WP_Error|WP_REST_Response The response or error.
+	 */
+	protected function get_native_settings_file_details( WP_REST_Request $request ) {
+		$result = $this->get_settings_service()->get_file(
+			(string) $request->get_param( 'file_id' ),
+			(bool) $request->get_param( 'as_account' )
+		);
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return rest_ensure_response( $result );
+	}
+
+	/**
+	 * Get provider file contents for the native WooPayments settings page.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string,mixed>> $request
+	 * @return WP_Error|WP_REST_Response The response or error.
+	 */
+	protected function get_native_settings_file_contents( WP_REST_Request $request ) {
+		$result = $this->get_settings_service()->get_file_contents(
+			(string) $request->get_param( 'file_id' ),
+			(bool) $request->get_param( 'as_account' )
+		);
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return rest_ensure_response( $result );
+	}
+
+	/**
+	 * Get a provider file as inline bytes when it is public, or when the current user may manage payment gateways.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string,mixed>> $request
+	 * @return WP_Error|WP_HTTP_Response The response or error.
+	 */
+	protected function get_native_public_settings_file( WP_REST_Request $request ) {
+		$file_id    = (string) $request->get_param( 'file_id' );
+		$as_account = (bool) $request->get_param( 'as_account' );
+		$purpose    = $this->get_cached_file_purpose( $file_id, $as_account );
+
+		if ( '' === $purpose ) {
+			$file = $this->get_settings_service()->get_file( $file_id, $as_account );
+			if ( is_wp_error( $file ) ) {
+				return $this->get_file_error_response( $file );
+			}
+
+			$purpose = isset( $file['purpose'] ) && is_scalar( $file['purpose'] ) ? (string) $file['purpose'] : '';
+			if ( '' !== $purpose ) {
+				set_transient( $this->get_file_purpose_cache_key( $file_id, $as_account ), $purpose, DAY_IN_SECONDS );
+			}
+		}
+
+		if ( ! $this->is_public_file_purpose( $purpose ) ) {
+			$permission = $this->check_permissions( $request );
+			if ( true !== $permission ) {
+				return is_wp_error( $permission )
+					? $permission
+					: new WP_Error(
+						'rest_forbidden',
+						esc_html__( 'Sorry, you are not allowed to do that.', 'woocommerce' ),
+						array( 'status' => rest_authorization_required_code() )
+					);
+			}
+		}
+
+		$contents = $this->get_settings_service()->get_file_contents( $file_id, $as_account );
+		if ( is_wp_error( $contents ) ) {
+			return $this->get_file_error_response( $contents );
+		}
+
+		$file_content = isset( $contents['file_content'] ) && is_scalar( $contents['file_content'] ) ? (string) $contents['file_content'] : '';
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Decoding provider file contents for the inline file response.
+		$decoded_file = base64_decode( $file_content, true );
+		if ( false === $decoded_file ) {
+			return new WP_Error(
+				'woocommerce_woopayments_file_content_invalid',
+				esc_html__( 'Unable to read the file contents.', 'woocommerce' ),
+				array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+			);
+		}
+
+		add_filter(
+			'rest_pre_serve_request',
+			static function ( bool $served, WP_HTTP_Response $response ): bool {
+				$content_disposition = $response->get_headers()['Content-Disposition'] ?? '';
+				if ( 'inline' !== $content_disposition ) {
+					return $served;
+				}
+
+				echo $response->get_data(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- File bytes are intentionally streamed as the response body.
+				return true;
+			},
+			10,
+			2
+		);
+
+		$content_type = isset( $contents['content_type'] ) && is_scalar( $contents['content_type'] ) ? (string) $contents['content_type'] : 'application/octet-stream';
+
+		return new WP_HTTP_Response(
+			$decoded_file,
+			200,
+			array(
+				'Content-Type'        => $content_type,
+				'Content-Disposition' => 'inline',
+			)
+		);
+	}
+
+	/**
+	 * Get a cached provider file purpose.
+	 *
+	 * @param string $file_id    Provider file ID.
+	 * @param bool   $as_account Whether the file is fetched as the connected account.
+	 * @return string
+	 */
+	private function get_cached_file_purpose( string $file_id, bool $as_account ): string {
+		$purpose = get_transient( $this->get_file_purpose_cache_key( $file_id, $as_account ) );
+
+		return is_string( $purpose ) ? $purpose : '';
+	}
+
+	/**
+	 * Get the transient cache key for a provider file purpose.
+	 *
+	 * @param string $file_id    Provider file ID.
+	 * @param bool   $as_account Whether the file is fetched as the connected account.
+	 * @return string
+	 */
+	private function get_file_purpose_cache_key( string $file_id, bool $as_account ): string {
+		return self::FILE_PURPOSE_CACHE_PREFIX . $file_id . '_' . ( $as_account ? '1' : '0' );
+	}
+
+	/**
+	 * Tell whether a provider file purpose may be served publicly.
+	 *
+	 * @param string $purpose Provider file purpose.
+	 * @return bool
+	 */
+	private function is_public_file_purpose( string $purpose ): bool {
+		return in_array( $purpose, self::PUBLIC_FILE_PURPOSES, true );
+	}
+
+	/**
+	 * Normalize public file route errors to the reference REST contract.
+	 *
+	 * @param WP_Error $error File API error.
+	 * @return WP_Error
+	 */
+	private function get_file_error_response( WP_Error $error ): WP_Error {
+		$status = 'resource_missing' === $error->get_error_code() ? WP_Http::NOT_FOUND : WP_Http::INTERNAL_SERVER_ERROR;
+
+		return new WP_Error(
+			$error->get_error_code(),
+			$error->get_error_message(),
+			array( 'status' => $status )
+		);
+	}
+
+	/**
+	 * Get the native WooPayments settings service.
+	 *
+	 * @return WooPaymentsSettingsService
+	 */
+	private function get_settings_service(): WooPaymentsSettingsService {
+		if ( ! $this->settings_service instanceof WooPaymentsSettingsService ) {
+			$this->settings_service = wc_get_container()->get( WooPaymentsSettingsService::class );
+		}
+
+		return $this->settings_service;
 	}
 
 	/**

@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentsProviders
 use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
@@ -118,6 +119,20 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		$container->reset_all_resolved();
 
 		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Should point WooPayments settings to the native routed settings page.
+	 */
+	public function test_get_settings_url_points_to_native_routed_settings_page(): void {
+		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments' );
+
+		$url = $this->sut->get_settings_url( $fake_gateway );
+
+		$this->assertStringContainsString( 'admin.php?page=wc-settings&tab=checkout', $url );
+		$this->assertStringContainsString( 'path=/woopayments/settings', rawurldecode( $url ) );
+		$this->assertStringContainsString( 'from=' . Payments::FROM_PAYMENTS_SETTINGS, rawurldecode( $url ) );
+		$this->assertStringNotContainsString( 'section=', rawurldecode( $url ) );
 	}
 
 	/**
