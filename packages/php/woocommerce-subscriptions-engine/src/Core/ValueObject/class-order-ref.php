@@ -34,6 +34,9 @@ final class Order_Ref {
 	 * @param int $id Order id.
 	 */
 	public function __construct( int $id ) {
+		if ( $id <= 0 ) {
+			throw new \InvalidArgumentException( 'Order id must be greater than 0.' );
+		}
 		$this->id = $id;
 	}
 
