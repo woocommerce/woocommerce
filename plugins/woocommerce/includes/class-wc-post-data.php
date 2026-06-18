@@ -80,7 +80,7 @@ class WC_Post_Data {
 		add_action( 'edited_term', array( __CLASS__, 'handle_attribute_term_updated' ), 10, 3 );
 		add_action( 'delete_term', array( __CLASS__, 'handle_attribute_term_deleted' ), 10, 4 );
 		// Product Variations - Parent Product Updates Attributes.
-		add_action( 'woocommerce_product_attributes_updated', array( __CLASS__, 'on_product_attributes_updated' ), 10, 1 );
+		add_action( 'woocommerce_product_attributes_updated', array( __CLASS__, 'on_product_attributes_updated' ), 10, 2 );
 		// Product Variations - Action Scheduler.
 		add_action( 'wc_regenerate_product_variation_summaries', array( __CLASS__, 'regenerate_product_variation_summaries' ), 10, 1 );
 		add_action( 'wc_regenerate_attribute_variation_summaries', array( __CLASS__, 'regenerate_attribute_variation_summaries' ), 10, 1 );
@@ -964,12 +964,18 @@ class WC_Post_Data {
 	 *
 	 * @since 10.2.0
 	 * @param WC_Product $product The variable product whose attributes were updated.
+	 * @param bool       $force   Whether the update was forced. Forced updates originate from the read-time
+	 *                            backwards-compatibility migration in the data store, where the product's
+	 *                            in-memory attributes can be an incomplete view of what's stored, so stale
+	 *                            attribute meta cleanup must be skipped to avoid deleting valid meta.
 	 *
 	 * @return void
 	 */
-	public static function on_product_attributes_updated( $product ) {
+	public static function on_product_attributes_updated( $product, $force = false ) {
 		if ( $product->is_type( 'variable' ) ) {
-			self::delete_stale_variation_attribute_meta( $product );
+			if ( ! $force ) {
+				self::delete_stale_variation_attribute_meta( $product );
+			}
 
 			global $wpdb;
 			$threshold     = self::get_variation_summaries_sync_threshold();
