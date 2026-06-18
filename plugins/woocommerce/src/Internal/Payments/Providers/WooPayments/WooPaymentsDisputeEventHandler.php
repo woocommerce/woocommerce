@@ -60,16 +60,25 @@ class WooPaymentsDisputeEventHandler {
 	private WooPaymentsLegacyRuntime $legacy_runtime;
 
 	/**
+	 * Dispute cache service.
+	 *
+	 * @var WooPaymentsDisputeCacheService
+	 */
+	private WooPaymentsDisputeCacheService $dispute_cache_service;
+
+	/**
 	 * Initialize the handler.
 	 *
 	 * @internal
 	 *
-	 * @param WooPaymentsLegacyRuntime $legacy_runtime WooPayments legacy runtime.
-	 * @param WooPaymentsApiClient     $api_client     Native WooPayments API client.
+	 * @param WooPaymentsLegacyRuntime       $legacy_runtime        WooPayments legacy runtime.
+	 * @param WooPaymentsApiClient           $api_client            Native WooPayments API client.
+	 * @param WooPaymentsDisputeCacheService $dispute_cache_service Dispute cache service.
 	 */
-	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsApiClient $api_client ): void {
-		$this->legacy_runtime = $legacy_runtime;
-		$this->api_client     = $api_client;
+	final public function init( WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsApiClient $api_client, WooPaymentsDisputeCacheService $dispute_cache_service ): void {
+		$this->legacy_runtime        = $legacy_runtime;
+		$this->api_client            = $api_client;
+		$this->dispute_cache_service = $dispute_cache_service;
 	}
 
 	/**
@@ -108,15 +117,19 @@ class WooPaymentsDisputeEventHandler {
 
 		if ( 'charge.dispute.created' === $event_type ) {
 			$this->process_dispute_created( $order, $event_object, $charge_id );
+			$this->dispute_cache_service->delete_dispute_caches();
 			return;
 		}
 
 		if ( 'charge.dispute.closed' === $event_type ) {
 			$this->process_dispute_closed( $order, $event_object, $charge_id );
+			$this->dispute_cache_service->delete_dispute_caches();
 			return;
 		}
 
-		$this->process_dispute_updated( $order, $event_type, $charge_id );
+		if ( $this->process_dispute_updated( $order, $event_type, $charge_id ) ) {
+			$this->dispute_cache_service->delete_dispute_caches();
+		}
 	}
 
 	/**
@@ -215,8 +228,9 @@ class WooPaymentsDisputeEventHandler {
 	 * @param WC_Order $order      Order object.
 	 * @param string   $event_type Event type.
 	 * @param string   $charge_id  Charge ID.
+	 * @return bool True when a new update note was applied.
 	 */
-	private function process_dispute_updated( WC_Order $order, string $event_type, string $charge_id ): void {
+	private function process_dispute_updated( WC_Order $order, string $event_type, string $charge_id ): bool {
 		switch ( $event_type ) {
 			case 'charge.dispute.funds_withdrawn':
 				$message = __( 'Payment dispute and fees have been deducted from your next payout', 'woocommerce' );
@@ -236,10 +250,11 @@ class WooPaymentsDisputeEventHandler {
 		);
 
 		if ( $this->order_note_exists( $order, $note ) ) {
-			return;
+			return false;
 		}
 
 		$order->add_order_note( $note );
+		return true;
 	}
 
 	/**

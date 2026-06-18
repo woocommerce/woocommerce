@@ -42,6 +42,7 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 		remove_all_filters( WooPaymentsEventIngestor::FILTER_LIVE_MODE );
 		remove_all_actions( 'woocommerce_payments_before_webhook_delivery' );
 		remove_all_actions( 'woocommerce_payments_after_webhook_delivery' );
+		$this->delete_dispute_cache_options();
 		parent::tearDown();
 	}
 
@@ -442,6 +443,21 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox charge.dispute.created deletes stale dispute caches.
+	 */
+	public function test_dispute_created_deletes_dispute_caches(): void {
+		$order = $this->create_woopayments_order();
+		$order->set_status( 'processing' );
+		$order->update_meta_data( '_charge_id', 'ch_123' );
+		$order->save();
+		$this->seed_dispute_cache_options();
+
+		$this->sut->process( $this->create_dispute_event( 'charge.dispute.created', 'needs_response' ) );
+
+		$this->assert_dispute_cache_options_deleted();
+	}
+
+	/**
 	 * @testdox charge.dispute.created uses inquiry wording for warning dispute statuses.
 	 */
 	public function test_dispute_created_uses_inquiry_note_for_warning_status(): void {
@@ -493,6 +509,21 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox charge.dispute.updated deletes stale dispute caches when an update note is applied.
+	 */
+	public function test_dispute_updated_deletes_dispute_caches(): void {
+		$order = $this->create_woopayments_order();
+		$order->set_status( 'processing' );
+		$order->update_meta_data( '_charge_id', 'ch_123' );
+		$order->save();
+		$this->seed_dispute_cache_options();
+
+		$this->sut->process( $this->create_dispute_event( 'charge.dispute.updated', 'needs_response' ) );
+
+		$this->assert_dispute_cache_options_deleted();
+	}
+
+	/**
 	 * Provide dispute update events.
 	 *
 	 * @return array<string,array{0:string,1:string}>
@@ -529,6 +560,29 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( WC_Order::class, $order );
 		$this->assertSame( 'completed', $order->get_status() );
 		$this->assertOrderHasNote( $order, 'Dispute has been closed with status won. See <a href="' . $this->get_expected_dispute_url( 'ch_123' ) . '" target="_blank" rel="noopener noreferrer">dispute overview</a> for more details.' );
+	}
+
+	/**
+	 * @testdox charge.dispute.closed deletes stale dispute caches.
+	 */
+	public function test_dispute_closed_deletes_dispute_caches(): void {
+		$order = $this->create_woopayments_order();
+		$order->set_status( 'on-hold' );
+		$order->update_meta_data( '_charge_id', 'ch_123' );
+		$order->save();
+		$this->seed_dispute_cache_options();
+
+		$sut = new WooPaymentsEventIngestor();
+		$sut->init(
+			wc_get_container()->get( OrderPaymentLifecycleService::class ),
+			new LegacyProxy(),
+			new WooPaymentsLegacyRuntime(),
+			$this->create_dispute_summary_api_client()
+		);
+
+		$sut->process( $this->create_dispute_event( 'charge.dispute.closed', 'won' ) );
+
+		$this->assert_dispute_cache_options_deleted();
 	}
 
 	/**
@@ -1007,6 +1061,46 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 		}
 
 		$this->addToAssertionCount( 1 );
+	}
+
+	/**
+	 * Seed stale dispute cache options.
+	 */
+	private function seed_dispute_cache_options(): void {
+		foreach ( $this->get_dispute_cache_option_keys() as $key ) {
+			update_option( $key, array( 'stale' => true ), false );
+		}
+	}
+
+	/**
+	 * Assert that dispute cache options were deleted.
+	 */
+	private function assert_dispute_cache_options_deleted(): void {
+		foreach ( $this->get_dispute_cache_option_keys() as $key ) {
+			$this->assertFalse( get_option( $key, false ), "Expected dispute cache option {$key} to be deleted." );
+		}
+	}
+
+	/**
+	 * Delete dispute cache options.
+	 */
+	private function delete_dispute_cache_options(): void {
+		foreach ( $this->get_dispute_cache_option_keys() as $key ) {
+			delete_option( $key );
+		}
+	}
+
+	/**
+	 * Get the reference WooPayments dispute cache option keys.
+	 *
+	 * @return string[]
+	 */
+	private function get_dispute_cache_option_keys(): array {
+		return array(
+			'wcpay_dispute_status_counts_cache',
+			'wcpay_test_dispute_status_counts_cache',
+			'wcpay_active_dispute_cache',
+		);
 	}
 
 	/**

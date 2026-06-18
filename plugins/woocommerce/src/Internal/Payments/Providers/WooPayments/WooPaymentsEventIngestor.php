@@ -121,13 +121,14 @@ class WooPaymentsEventIngestor {
 	 *
 	 * @internal
 	 *
-	 * @param OrderPaymentLifecycleService     $lifecycle_service  Order lifecycle service.
-	 * @param LegacyProxy                      $legacy_proxy       Legacy proxy.
-	 * @param WooPaymentsLegacyRuntime         $legacy_runtime     WooPayments legacy runtime.
-	 * @param WooPaymentsApiClient             $api_client         Native WooPayments API client.
-	 * @param WooPaymentsOrderDataService|null $order_data_service WooPayments order data service.
+	 * @param OrderPaymentLifecycleService        $lifecycle_service     Order lifecycle service.
+	 * @param LegacyProxy                         $legacy_proxy          Legacy proxy.
+	 * @param WooPaymentsLegacyRuntime            $legacy_runtime        WooPayments legacy runtime.
+	 * @param WooPaymentsApiClient                $api_client            Native WooPayments API client.
+	 * @param WooPaymentsOrderDataService|null    $order_data_service    WooPayments order data service.
+	 * @param WooPaymentsDisputeCacheService|null $dispute_cache_service Dispute cache service.
 	 */
-	final public function init( OrderPaymentLifecycleService $lifecycle_service, LegacyProxy $legacy_proxy, WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsApiClient $api_client, ?WooPaymentsOrderDataService $order_data_service = null ): void {
+	final public function init( OrderPaymentLifecycleService $lifecycle_service, LegacyProxy $legacy_proxy, WooPaymentsLegacyRuntime $legacy_runtime, WooPaymentsApiClient $api_client, ?WooPaymentsOrderDataService $order_data_service = null, ?WooPaymentsDisputeCacheService $dispute_cache_service = null ): void {
 		$this->lifecycle_service  = $lifecycle_service;
 		$this->legacy_proxy       = $legacy_proxy;
 		$this->legacy_runtime     = $legacy_runtime;
@@ -135,7 +136,11 @@ class WooPaymentsEventIngestor {
 		$this->order_data_service = $order_data_service;
 
 		$this->dispute_event_handler = new WooPaymentsDisputeEventHandler();
-		$this->dispute_event_handler->init( $legacy_runtime, $api_client );
+		$this->dispute_event_handler->init(
+			$legacy_runtime,
+			$api_client,
+			$dispute_cache_service ?? wc_get_container()->get( WooPaymentsDisputeCacheService::class )
+		);
 	}
 
 	/**
