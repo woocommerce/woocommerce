@@ -102,6 +102,13 @@ setup( 'setup site', async ( { baseURL, restApi } ) => {
 	await setup.step( 'general settings', async () => {
 		await restApi.post( `${ WC_API_PATH }/settings/general/batch`, {
 			update: [
+				// Force tax calculation off so the shared site has a deterministic,
+				// tax-free baseline. Many `core-parallel` specs assert on untaxed
+				// cart/refund totals; a stale `woocommerce_calc_taxes=yes` left by
+				// an interrupted serial run otherwise inflates every total by the
+				// standard rate and fails them. Serial tax specs enable taxes
+				// themselves when they run, so this baseline doesn't affect them.
+				{ id: 'woocommerce_calc_taxes', value: 'no' },
 				{ id: 'woocommerce_allowed_countries', value: 'all' },
 				{ id: 'woocommerce_currency', value: 'USD' },
 				{ id: 'woocommerce_price_thousand_sep', value: ',' },

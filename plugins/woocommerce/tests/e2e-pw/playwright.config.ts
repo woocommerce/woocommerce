@@ -120,34 +120,52 @@ export const setupProjects = [
  * `core-parallel` by default, except the other-project folders in `nonCoreSpecs`.
  */
 const serialRunSpecs = [
+	// `analytics-data` drains the whole store's Action Scheduler queue via
+	// `?process-waiting-actions` (other workers' order/product churn floods it past
+	// the 10s timeout) and asserts exact store-wide totals; `analytics-access`
+	// asserts store-wide `$0.00 / Orders 0`. Both are polluted by concurrent orders.
 	'**/tests/analytics/**/*.spec.ts',
-	'**/tests/brands/**/*.spec.ts',
+	// Mutate global tax, default customer location, AJAX add-to-cart and payment
+	// gateway settings, plus the shared cart page behavior.
 	'**/tests/cart/**/*.spec.ts',
-	'**/tests/checkout/**/*.spec.ts',
-	// Only the cart/checkout coupon specs mutate global store address/currency/tax
-	// settings — they stay serial. `coupons.spec.ts` is a single admin-form test
-	// with unique data and runs in `core-parallel`.
+	// Mutate global tax/gateway/custom-button options.
+	'**/tests/checkout/checkout-shortcode-custom-place-order-button.spec.ts',
+	'**/tests/checkout/checkout.spec.ts',
+	// Mutate global store address/currency/tax settings.
 	'**/tests/coupons/cart-block-coupons.spec.ts',
 	'**/tests/coupons/cart-checkout-coupons.spec.ts',
 	'**/tests/coupons/cart-checkout-restricted-coupons.spec.ts',
-	'**/tests/customer/**/*.spec.ts',
-	// `editor/command-palette.spec.ts` only navigates admin pages and creates a
-	// uniquely-named product — it runs in `core-parallel`.
+	// Toggle email feature flags and global WooCommerce email settings, and depend
+	// on shared Mailpit inbox state.
 	'**/tests/email/**/*.spec.ts',
+	// Toggle email-editor feature flags and mutate shared email-template posts,
+	// settings and helper-plugin/Tracks state.
 	'**/tests/email-editor/**/*.spec.ts',
+	// Mutate the global onboarding profile/options, site-visibility options and
+	// the active theme.
 	'**/tests/onboarding/**/*.spec.ts',
-	// Order specs that mutate global state (tax, gateways, settings) stay serial.
-	// `order-status-filter` (asserts only count>0 on its own statuses) and
-	// `order-refund` (scoped to its own order) run in `core-parallel`.
+	// Toggles the global `woocommerce_calc_taxes` setting and tax classes/rates.
 	'**/tests/order/create-order.spec.ts',
+	// Enables and configures the global `bacs` payment gateway.
 	'**/tests/order/customer-payment-page.spec.ts',
+	// Select-all → bulk "Change status to completed" flips every other worker's
+	// orders on the shared orders list.
 	'**/tests/order/order-bulk-edit.spec.ts',
+	// Creates a fixed `5off` coupon code that collides with concurrent creators.
 	'**/tests/order/order-coupon.spec.ts',
+	// Toggles the global `woocommerce_downloads_grant_access_after_payment` setting.
 	'**/tests/order/order-edit.spec.ts',
+	// Mutates the global `woocommerce_order_email_verification_grace_period` setting.
 	'**/tests/order/order-grace-period.spec.ts',
+	// Enables the global `woocommerce_feature_customer_review_request_enabled` flag.
 	'**/tests/order/review-order-page.spec.ts',
+	// Imports a fixed-content CSV (fixed SKUs/names) and asserts the imported rows
+	// on the store-wide product list — collides with concurrently created products.
 	'**/tests/product/product-import-csv.spec.ts',
+	// Mutate global WooCommerce settings (store address/currency/country, tax,
+	// REST API keys, webhooks, feature flags).
 	'**/tests/settings/**/*.spec.ts',
+	// Mutate global shipping classes, zones and methods.
 	'**/tests/shipping/**/*.spec.ts',
 	// Toggles the global `woocommerce_cart_redirect_after_add` setting, which
 	// changes add-to-cart behavior for every other worker — not parallel-safe.
@@ -155,6 +173,8 @@ const serialRunSpecs = [
 	// Sorts and paginates the store-wide shop listing, which other workers
 	// mutate by creating/deleting products — not parallel-safe.
 	'**/tests/shop/shop-search-browse-sort.spec.ts',
+	// Trashes and restores the global Shop page in a fixture; while trashed, every
+	// other worker's shop/cart/account navigation 404s.
 	'**/tests/shop/shop-title-after-deletion.spec.ts',
 ];
 
