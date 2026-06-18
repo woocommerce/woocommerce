@@ -17,7 +17,13 @@ class OrderLinker {
 	 */
 	public function __construct() {
 		// wc_update_new_customer_past_orders() already no-ops on an invalid/guest user ID.
-		add_action( 'woocommerce_customer_email_verified', 'wc_update_new_customer_past_orders' );
+		// Wrapped in a void closure because the function returns a count that an action callback must not return.
+		add_action(
+			'woocommerce_customer_email_verified',
+			static function ( int $user_id ): void {
+				wc_update_new_customer_past_orders( $user_id );
+			}
+		);
 	}
 
 	/**
