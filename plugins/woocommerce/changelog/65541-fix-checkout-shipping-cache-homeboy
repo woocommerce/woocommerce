@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Prevent calculated package totals from invalidating cached shipping rates.
+Prevent non-rate package metadata from invalidating cached shipping rates.
