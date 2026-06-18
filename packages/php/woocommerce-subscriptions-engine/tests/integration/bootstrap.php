@@ -61,7 +61,9 @@ class Subscriptions_Engine_Tests_Bootstrap {
 
 		tests_add_filter( 'muplugins_loaded', array( $this, 'load_plugin' ) );
 
-		define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', __DIR__ . '/../../vendor/yoast/phpunit-polyfills/phpunitpolyfills-autoload.php' );
+		if ( ! defined( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH' ) ) {
+			define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', __DIR__ . '/../../vendor/yoast/phpunit-polyfills/phpunitpolyfills-autoload.php' );
+		}
 
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
