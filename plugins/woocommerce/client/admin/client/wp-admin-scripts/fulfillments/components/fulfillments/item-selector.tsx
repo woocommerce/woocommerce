@@ -193,7 +193,7 @@ export default function ItemSelector( { editMode }: ItemSelectorProps ) {
 								selectedItemsCount,
 								'woocommerce'
 							),
-							selectedItemsCount
+							selectedItemsCount.toString()
 						) }
 					</div>
 				</div>

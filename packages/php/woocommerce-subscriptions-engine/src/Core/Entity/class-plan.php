@@ -1,0 +1,480 @@
+<?php
+/**
+ * Plan - a subscription selling plan: cadence, pricing, and delivery policy for
+ * one or more products.
+ *
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
+
+use InvalidArgumentException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Billing_Policy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Delivery_Policy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Pricing_Policy;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Plan entity.
+ *
+ * Construct via {@see self::create()} for a new (unsaved) plan or
+ * {@see self::from_storage()} when hydrating a stored row.
+ */
+final class Plan {
+
+	const DEFAULT_CATEGORY = 'SUBSCRIPTION';
+
+	const ALLOWED_POLICY_TYPES = array( 'percentage', 'fixed_amount', 'price' );
+
+	/**
+	 * Plan id, or null before it is persisted.
+	 *
+	 * @var int|null
+	 */
+	private $id;
+
+	/**
+	 * Parent plan group id.
+	 *
+	 * @var int
+	 */
+	private $group_id;
+
+	/**
+	 * Display name.
+	 *
+	 * @var string
+	 */
+	private $name;
+
+	/**
+	 * Optional description.
+	 *
+	 * @var string|null
+	 */
+	private $description;
+
+	/**
+	 * Picker options, e.g. [{ name, value }].
+	 *
+	 * @var array<int, mixed>
+	 */
+	private $options;
+
+	/**
+	 * Billing cadence. Required - every plan has one.
+	 *
+	 * @var Billing_Policy
+	 */
+	private $billing_policy;
+
+	/**
+	 * Optional delivery policy.
+	 *
+	 * @var Delivery_Policy|null
+	 */
+	private $delivery_policy;
+
+	/**
+	 * Optional pricing policy.
+	 *
+	 * @var Pricing_Policy|null
+	 */
+	private $pricing_policy;
+
+	/**
+	 * Plan category.
+	 *
+	 * @var string
+	 */
+	private $category;
+
+	/**
+	 * Owning extension slug, or null until owner semantics are assigned.
+	 *
+	 * @var string|null
+	 */
+	private $extension_slug;
+
+	/**
+	 * Use {@see self::create()} or {@see self::from_storage()}.
+	 *
+	 * @param int|null             $id              Plan id, or null before save.
+	 * @param int                  $group_id        Parent plan group id.
+	 * @param string               $name            Display name.
+	 * @param string|null          $description     Optional description.
+	 * @param array<int, mixed>    $options         Picker options.
+	 * @param Billing_Policy       $billing_policy  Billing cadence.
+	 * @param Delivery_Policy|null $delivery_policy Optional delivery policy.
+	 * @param Pricing_Policy|null  $pricing_policy  Optional pricing policy.
+	 * @param string               $category        Plan category.
+	 * @param string|null          $extension_slug  Owning extension slug.
+	 */
+	private function __construct(
+		?int $id,
+		int $group_id,
+		string $name,
+		?string $description,
+		array $options,
+		Billing_Policy $billing_policy,
+		?Delivery_Policy $delivery_policy,
+		?Pricing_Policy $pricing_policy,
+		string $category,
+		?string $extension_slug
+	) {
+		$this->id              = $id;
+		$this->group_id        = $group_id;
+		$this->name            = $name;
+		$this->description     = $description;
+		$this->options         = $options;
+		$this->billing_policy  = $billing_policy;
+		$this->delivery_policy = $delivery_policy;
+		$this->pricing_policy  = $pricing_policy;
+		$this->category        = $category;
+		$this->extension_slug  = $extension_slug;
+	}
+
+	/**
+	 * Build a new, unsaved plan.
+	 *
+	 * @param int    $group_id Parent plan group id.
+	 * @param array{
+	 *     name: string,
+	 *     billing_policy: Billing_Policy,
+	 *     description?: string,
+	 *     options?: array<int, mixed>,
+	 *     delivery_policy?: Delivery_Policy,
+	 *     pricing_policy?: Pricing_Policy,
+	 *     category: string,
+	 *     extension_slug?: string,
+	 * } $args     Plan attributes.
+	 * @throws InvalidArgumentException If pricing_policy entries fail validation.
+	 */
+	public static function create( int $group_id, array $args ): self {
+		$pricing_policy = $args['pricing_policy'] ?? null;
+		if ( null !== $pricing_policy ) {
+			self::validate_pricing_policy( $pricing_policy );
+		}
+
+		return new self(
+			null,
+			$group_id,
+			(string) $args['name'],
+			$args['description'] ?? null,
+			$args['options'] ?? array(),
+			$args['billing_policy'],
+			$args['delivery_policy'] ?? null,
+			$pricing_policy,
+			$args['category'] ?? self::DEFAULT_CATEGORY,
+			$args['extension_slug'] ?? null
+		);
+	}
+
+	/**
+	 * Hydrate from a stored row. Policy columns arrive JSON-decoded.
+	 *
+	 * @param array<string, mixed> $row Decoded plan row.
+	 */
+	public static function from_storage( array $row ): self {
+		return new self(
+			isset( $row['id'] ) ? (int) $row['id'] : null,
+			(int) $row['group_id'],
+			(string) $row['name'],
+			isset( $row['description'] ) ? (string) $row['description'] : null,
+			is_array( $row['options'] ?? null ) ? $row['options'] : array(),
+			Billing_Policy::from_array( $row['billing_policy'] ),
+			isset( $row['delivery_policy'] ) && is_array( $row['delivery_policy'] ) ? Delivery_Policy::from_array( $row['delivery_policy'] ) : null,
+			isset( $row['pricing_policy'] ) && is_array( $row['pricing_policy'] ) ? Pricing_Policy::from_array( $row['pricing_policy'] ) : null,
+			(string) ( $row['category'] ?? self::DEFAULT_CATEGORY ),
+			isset( $row['extension_slug'] ) ? (string) $row['extension_slug'] : null
+		);
+	}
+
+	/**
+	 * Plan id, or null before save.
+	 */
+	public function get_id(): ?int {
+		return $this->id;
+	}
+
+	/**
+	 * Assign the id after a successful insert.
+	 *
+	 * @param int $id Plan id.
+	 */
+	public function set_id( int $id ): void {
+		$this->id = $id;
+	}
+
+	/**
+	 * Parent plan group id.
+	 */
+	public function get_group_id(): int {
+		return $this->group_id;
+	}
+
+	/**
+	 * Display name.
+	 */
+	public function get_name(): string {
+		return $this->name;
+	}
+
+	/**
+	 * Set the display name.
+	 *
+	 * @param string $name Display name.
+	 */
+	public function set_name( string $name ): void {
+		$this->name = $name;
+	}
+
+	/**
+	 * Optional description.
+	 */
+	public function get_description(): ?string {
+		return $this->description;
+	}
+
+	/**
+	 * Set the description.
+	 *
+	 * @param string|null $description Description.
+	 */
+	public function set_description( ?string $description ): void {
+		$this->description = $description;
+	}
+
+	/**
+	 * Picker options.
+	 *
+	 * @return array<int, mixed>
+	 */
+	public function get_options(): array {
+		return $this->options;
+	}
+
+	/**
+	 * Set the picker options.
+	 *
+	 * @param array<int, mixed> $options Picker options.
+	 */
+	public function set_options( array $options ): void {
+		$this->options = $options;
+	}
+
+	/**
+	 * Billing cadence.
+	 */
+	public function get_billing_policy(): Billing_Policy {
+		return $this->billing_policy;
+	}
+
+	/**
+	 * Set the billing cadence.
+	 *
+	 * @param Billing_Policy $billing_policy Billing cadence.
+	 */
+	public function set_billing_policy( Billing_Policy $billing_policy ): void {
+		$this->billing_policy = $billing_policy;
+	}
+
+	/**
+	 * Optional delivery policy.
+	 */
+	public function get_delivery_policy(): ?Delivery_Policy {
+		return $this->delivery_policy;
+	}
+
+	/**
+	 * Set the delivery policy.
+	 *
+	 * @param Delivery_Policy|null $delivery_policy Delivery policy.
+	 */
+	public function set_delivery_policy( ?Delivery_Policy $delivery_policy ): void {
+		$this->delivery_policy = $delivery_policy;
+	}
+
+	/**
+	 * Optional pricing policy.
+	 */
+	public function get_pricing_policy(): ?Pricing_Policy {
+		return $this->pricing_policy;
+	}
+
+	/**
+	 * Set the pricing policy.
+	 *
+	 * @param Pricing_Policy|null $pricing_policy Pricing policy.
+	 * @throws InvalidArgumentException If pricing_policy entries fail validation.
+	 */
+	public function set_pricing_policy( ?Pricing_Policy $pricing_policy ): void {
+		if ( null !== $pricing_policy ) {
+			self::validate_pricing_policy( $pricing_policy );
+		}
+		$this->pricing_policy = $pricing_policy;
+	}
+
+	/**
+	 * Plan category.
+	 */
+	public function get_category(): string {
+		return $this->category;
+	}
+
+	/**
+	 * Set the plan category.
+	 *
+	 * @param string $category Plan category.
+	 */
+	public function set_category( string $category ): void {
+		$this->category = $category;
+	}
+
+	/**
+	 * Owning extension slug, or null.
+	 */
+	public function get_extension_slug(): ?string {
+		return $this->extension_slug;
+	}
+
+	/**
+	 * Apply this plan's pricing policy (if any) to a base price for the cycle.
+	 *
+	 * When no pricing policy is set, returns `$base_price` unchanged.
+	 *
+	 * @param float $base_price The product's base price for this cycle.
+	 * @param int   $cycle      1-indexed cycle number (1 = first billing cycle).
+	 */
+	public function calculate_price( float $base_price, int $cycle = 1 ): float {
+		if ( null === $this->pricing_policy ) {
+			return $base_price;
+		}
+
+		return $this->pricing_policy->calculate_price( $base_price, $cycle );
+	}
+
+	/**
+	 * Serialize to the storage column shape (excluding generated id/timestamps).
+	 *
+	 * Policy value objects are returned as arrays; the repository JSON-encodes them.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function to_storage(): array {
+		return array(
+			'group_id'        => $this->group_id,
+			'name'            => $this->name,
+			'description'     => $this->description,
+			'options'         => $this->options,
+			'billing_policy'  => $this->billing_policy->to_array(),
+			'delivery_policy' => null !== $this->delivery_policy ? $this->delivery_policy->to_array() : null,
+			'pricing_policy'  => null !== $this->pricing_policy ? $this->pricing_policy->to_array() : null,
+			'category'        => $this->category,
+			'extension_slug'  => $this->extension_slug,
+		);
+	}
+
+	/**
+	 * Validate every entry in a pricing policy's policies[] and one_time_fees[].
+	 *
+	 * Rules:
+	 *  - policies[].type is one of percentage, fixed_amount, price.
+	 *  - policies[].value is numeric and non-negative; percentage is capped at 100.
+	 *  - one_time_fees[].amount is numeric and non-negative.
+	 *  - one_time_fees[].taxable is a bool.
+	 *  - one_time_fees[].tax_class is string or null (preserves '' != null).
+	 *  - one_time_fees[].kind is intentionally not whitelisted - consumers extend
+	 *    with namespaced kinds.
+	 *
+	 * @param Pricing_Policy $pricing_policy Policy to validate.
+	 * @throws InvalidArgumentException With a message naming the offending entry index.
+	 */
+	private static function validate_pricing_policy( Pricing_Policy $pricing_policy ): void {
+		foreach ( $pricing_policy->get_policies() as $index => $entry ) {
+			if ( ! is_array( $entry ) ) {
+				throw new InvalidArgumentException(
+					sprintf( 'pricing_policy.policies[%d]: must be an array, got %s', (int) $index, gettype( $entry ) )
+				);
+			}
+
+			$type           = $entry['type'] ?? null;
+			$value          = $entry['value'] ?? null;
+			$starting_cycle = $entry['starting_cycle'] ?? null;
+
+			if ( ! is_string( $type ) || ! in_array( $type, self::ALLOWED_POLICY_TYPES, true ) ) {
+				$shown = is_scalar( $type ) ? (string) $type : gettype( $type );
+				throw new InvalidArgumentException(
+					sprintf( 'pricing_policy.policies[%d]: invalid type %s', (int) $index, $shown )
+				);
+			}
+
+			if ( ! is_numeric( $value ) ) {
+				throw new InvalidArgumentException(
+					sprintf( 'pricing_policy.policies[%d]: value must be numeric, got %s', (int) $index, gettype( $value ) )
+				);
+			}
+
+			$value = (float) $value;
+
+			if ( $value < 0 ) {
+				throw new InvalidArgumentException(
+					sprintf( 'pricing_policy.policies[%d]: %s value must be non-negative, got %s', (int) $index, $type, $value )
+				);
+			}
+
+			if ( 'percentage' === $type && $value > 100 ) {
+				throw new InvalidArgumentException(
+					sprintf( 'pricing_policy.policies[%d]: percentage must not exceed 100, got %s', (int) $index, $value )
+				);
+			}
+
+			if ( null !== $starting_cycle ) {
+				if ( ! is_int( $starting_cycle ) ) {
+					throw new InvalidArgumentException(
+						sprintf( 'pricing_policy.policies[%d]: starting_cycle must be an integer, got %s', (int) $index, gettype( $starting_cycle ) )
+					);
+				}
+
+				if ( $starting_cycle < 1 ) {
+					throw new InvalidArgumentException(
+						sprintf( 'pricing_policy.policies[%d]: starting_cycle must be at least 1, got %d', (int) $index, $starting_cycle )
+					);
+				}
+			}
+		}
+
+		foreach ( $pricing_policy->get_one_time_fees() as $index => $entry ) {
+			$amount    = $entry['amount'] ?? null;
+			$taxable   = $entry['taxable'] ?? null;
+			$tax_class = $entry['tax_class'] ?? null;
+
+			if ( ! is_numeric( $amount ) ) {
+				throw new InvalidArgumentException(
+					sprintf( 'pricing_policy.one_time_fees[%d]: amount must be numeric, got %s', (int) $index, gettype( $amount ) )
+				);
+			}
+
+			if ( (float) $amount < 0 ) {
+				throw new InvalidArgumentException(
+					sprintf( 'pricing_policy.one_time_fees[%d]: amount must be non-negative, got %s', (int) $index, $amount )
+				);
+			}
+
+			if ( ! is_bool( $taxable ) ) {
+				throw new InvalidArgumentException(
+					sprintf( 'pricing_policy.one_time_fees[%d]: taxable must be a bool, got %s', (int) $index, gettype( $taxable ) )
+				);
+			}
+
+			if ( null !== $tax_class && ! is_string( $tax_class ) ) {
+				throw new InvalidArgumentException(
+					sprintf( 'pricing_policy.one_time_fees[%d]: tax_class must be string or null, got %s', (int) $index, gettype( $tax_class ) )
+				);
+			}
+		}
+	}
+}
