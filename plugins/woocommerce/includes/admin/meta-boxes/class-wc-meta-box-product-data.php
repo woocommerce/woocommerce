@@ -345,6 +345,9 @@ class WC_Meta_Box_Product_Data {
 				array_filter(
 					$attributes,
 					function ( $attribute ) use ( $blocked_attribute_names ) {
+						if ( ! $attribute instanceof WC_Product_Attribute ) {
+							return true;
+						}
 						return ! in_array( $attribute->get_name(), $blocked_attribute_names, true );
 					}
 				)

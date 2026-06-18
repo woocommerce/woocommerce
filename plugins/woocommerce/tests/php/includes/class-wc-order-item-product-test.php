@@ -627,13 +627,11 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	 * @testdox set_variation logs a collision under the 'attribute-collision' source when a variation attribute uses a reserved structural key.
 	 */
 	public function test_set_variation_logs_collision_for_reserved_structural_key() {
-		$fake_logger = $this->create_fake_logger();
-		add_filter(
-			'woocommerce_logging_class',
-			function () use ( $fake_logger ) {
-				return $fake_logger;
-			}
-		);
+		$fake_logger   = $this->create_fake_logger();
+		$logger_filter = static function () use ( $fake_logger ) {
+			return $fake_logger;
+		};
+		add_filter( 'woocommerce_logging_class', $logger_filter );
 
 		$item = new WC_Order_Item_Product();
 		$item->set_variation(
@@ -643,7 +641,7 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		remove_all_filters( 'woocommerce_logging_class' );
+		remove_filter( 'woocommerce_logging_class', $logger_filter );
 
 		$this->assertCount( 1, $fake_logger->warning_calls, 'Exactly one collision should be logged.' );
 		$this->assertSame( 'attribute-collision', $fake_logger->warning_calls[0]['context']['source'], 'The collision should be logged under the attribute-collision source.' );
@@ -655,13 +653,11 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	 * @testdox set_variation does not log anything when no variation attribute uses a reserved structural key.
 	 */
 	public function test_set_variation_does_not_log_without_collision() {
-		$fake_logger = $this->create_fake_logger();
-		add_filter(
-			'woocommerce_logging_class',
-			function () use ( $fake_logger ) {
-				return $fake_logger;
-			}
-		);
+		$fake_logger   = $this->create_fake_logger();
+		$logger_filter = static function () use ( $fake_logger ) {
+			return $fake_logger;
+		};
+		add_filter( 'woocommerce_logging_class', $logger_filter );
 
 		$item = new WC_Order_Item_Product();
 		$item->set_variation(
@@ -671,7 +667,7 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		remove_all_filters( 'woocommerce_logging_class' );
+		remove_filter( 'woocommerce_logging_class', $logger_filter );
 
 		$this->assertCount( 0, $fake_logger->warning_calls, 'No collision should be logged for regular attribute names.' );
 	}

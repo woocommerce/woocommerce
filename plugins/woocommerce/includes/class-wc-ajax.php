@@ -849,8 +849,16 @@ class WC_AJAX {
 
 			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
-			// The classic editor's "Save attributes" handler reads the error from the top level of the response.
-			wp_send_json( array( 'error' => $e->getMessage() ) );
+			// The classic editor's "Save attributes" handler reads the error from the top level of the response,
+			// while the legacy 'success'/'data.error' envelope is preserved for backwards compatibility.
+			$message = $e->getMessage();
+			wp_send_json(
+				array(
+					'success' => false,
+					'error'   => $message,
+					'data'    => array( 'error' => $message ),
+				)
+			);
 		}
 
 		// wp_send_json_success must be outside the try block not to break phpunit tests.
@@ -879,8 +887,16 @@ class WC_AJAX {
 			wp_die();
 
 		} catch ( Exception $e ) {
-			// The classic editor's add-attributes-and-variations handler reads the error from the top level of the response.
-			wp_send_json( array( 'error' => $e->getMessage() ) );
+			// The classic editor's add-attributes-and-variations handler reads the error from the top level of the response,
+			// while the legacy 'success'/'data.error' envelope is preserved for backwards compatibility.
+			$message = $e->getMessage();
+			wp_send_json(
+				array(
+					'success' => false,
+					'error'   => $message,
+					'data'    => array( 'error' => $message ),
+				)
+			);
 		}
 	}
 	/**
