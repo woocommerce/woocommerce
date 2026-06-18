@@ -4540,10 +4540,20 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
 	if ( is_array( $item_data ) ) {
 		// Format item data ready to display.
 		foreach ( $item_data as $key => $data ) {
+			if ( ! is_array( $data ) ) {
+				unset( $item_data[ $key ] );
+				continue;
+			}
 			// Set hidden to true to not display meta on cart.
 			if ( ! empty( $data['hidden'] ) ) {
 				unset( $item_data[ $key ] );
 				continue;
+			}
+			foreach ( $data as $data_value ) {
+				if ( ! is_scalar( $data_value ) ) {
+					unset( $item_data[ $key ] );
+					continue 2;
+				}
 			}
 			$item_data[ $key ]['key']     = ! empty( $data['key'] ) ? $data['key'] : $data['name'];
 			$item_data[ $key ]['display'] = ! empty( $data['display'] ) ? $data['display'] : $data['value'];

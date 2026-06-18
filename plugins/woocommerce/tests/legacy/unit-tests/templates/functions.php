@@ -292,6 +292,83 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_html, $actual_html );
 	}
 
+	/**
+	 * Test wc_get_formatted_cart_item_data skips non-scalar item data.
+	 */
+	public function test_wc_get_formatted_cart_item_data_skips_non_scalar_item_data() {
+		$filter = function ( $item_data ) {
+			$item_data[] = array(
+				'key'   => 'Gift wrap',
+				'value' => 'Included',
+			);
+			$item_data[] = array(
+				'key'   => 'Attachments',
+				'value' => array( 'file-a.pdf', 'file-b.pdf' ),
+			);
+			$item_data[] = array(
+				'key'     => 'Extra',
+				'value'   => 'Details',
+				'display' => new stdClass(),
+			);
+
+			return $item_data;
+		};
+
+		add_filter( 'woocommerce_get_item_data', $filter );
+
+		try {
+			$html = wc_get_formatted_cart_item_data(
+				array(
+					'data'      => new WC_Product_Simple(),
+					'variation' => array(),
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_get_item_data', $filter );
+		}
+
+		$this->assertStringContainsString( 'Gift wrap', $html );
+		$this->assertStringContainsString( 'Included', $html );
+		$this->assertStringNotContainsString( 'Attachments', $html );
+		$this->assertStringNotContainsString( 'file-a.pdf', $html );
+		$this->assertStringNotContainsString( 'Extra', $html );
+		$this->assertStringNotContainsString( 'Details', $html );
+	}
+
+	/**
+	 * Test wc_get_formatted_cart_item_data skips non-scalar item data in flat output.
+	 */
+	public function test_wc_get_formatted_cart_item_data_skips_non_scalar_item_data_in_flat_output() {
+		$filter = function ( $item_data ) {
+			$item_data[] = array(
+				'key'   => 'Gift wrap',
+				'value' => 'Included',
+			);
+			$item_data[] = array(
+				'key'   => 'Attachments',
+				'value' => array( 'file-a.pdf', 'file-b.pdf' ),
+			);
+
+			return $item_data;
+		};
+
+		add_filter( 'woocommerce_get_item_data', $filter );
+
+		try {
+			$output = wc_get_formatted_cart_item_data(
+				array(
+					'data'      => new WC_Product_Simple(),
+					'variation' => array(),
+				),
+				true
+			);
+		} finally {
+			remove_filter( 'woocommerce_get_item_data', $filter );
+		}
+
+		$this->assertSame( "Gift wrap: Included\n", $output );
+	}
+
 	public function test_hidden_field() {
 		$actual_html   = woocommerce_form_field(
 			'test',
