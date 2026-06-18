@@ -249,6 +249,81 @@ class ProductWalker {
 	}
 
 	/**
+	 * Walks through a single chunk of products: a bounded number of batches starting at a given page.
+	 *
+	 * Unlike {@see walk()}, this does not start or end the feed — the caller controls the feed
+	 * lifecycle (begin/resume/flush/finalize) so the feed can be written across several processes.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param int           $start_page  The 1-based page (batch) to start at.
+	 * @param int           $max_batches The maximum number of batches to process in this chunk.
+	 * @param callable|null $callback    The callback to call after each batch of products is processed.
+	 * @return WalkerProgress The progress for this chunk: per-chunk processed counts plus the overall
+	 *                        total_count and total_batch_count, so the caller can determine whether the
+	 *                        feed is complete and where the next chunk should resume.
+	 */
+	public function walk_chunk( int $start_page, int $max_batches, ?callable $callback = null ): WalkerProgress {
+		if ( $start_page < 1 ) {
+			$start_page = 1;
+		}
+		if ( $max_batches < 1 ) {
+			$max_batches = 1;
+		}
+
+		$progress = null;
+		$page     = $start_page;
+
+		// Check how much memory is available at first.
+		$initial_available_memory = $this->memory_manager->get_available_memory();
+
+		$batches_in_chunk = 0;
+		do {
+			$result   = $this->iterate( $this->query_args, $page, $this->per_page );
+			$iterated = count( $result->products );
+
+			// Only build the progress object once; the total/total batch count is stable across pages.
+			if ( is_null( $progress ) ) {
+				$progress = WalkerProgress::from_wc_get_products_result( $result );
+			}
+			$progress->processed_items += $iterated;
+			++$progress->processed_batches;
+			++$batches_in_chunk;
+			++$page;
+
+			if ( is_callable( $callback ) && $iterated > 0 ) {
+				$callback( $progress );
+			}
+
+			if ( $this->time_limit > 0 ) {
+				set_time_limit( $this->time_limit );
+			}
+
+			// We don't want to use more than half of the available memory at the beginning of the script.
+			$current_memory = $this->memory_manager->get_available_memory();
+			if ( $initial_available_memory - $current_memory >= $initial_available_memory / 2 ) {
+				$this->memory_manager->flush_caches();
+			}
+		} while (
+			// If `wc_get_products()` returns less than the batch size, it was the last page.
+			$iterated === $this->per_page
+
+			// Stop once this chunk has processed its allotment of batches.
+			&& $batches_in_chunk < $max_batches
+
+			// For the cases where the above are true, make sure that we do not exceed the total number of pages.
+			&& ( $progress->total_batch_count <= 0 || ( $page - 1 ) < $progress->total_batch_count )
+		);
+
+		return $progress ?? WalkerProgress::from_wc_get_products_result(
+			(object) array(
+				'total'         => 0,
+				'max_num_pages' => 0,
+			)
+		);
+	}
+
+	/**
 	 * Iterates through a batch of products.
 	 *
 	 * @param array $args The arguments to pass to wc_get_products().

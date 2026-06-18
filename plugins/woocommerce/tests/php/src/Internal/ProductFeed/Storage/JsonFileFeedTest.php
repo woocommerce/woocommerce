@@ -87,6 +87,91 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that a chunked feed written across begin/resume/finalize produces a single valid JSON array.
+	 */
+	public function test_chunked_feed_produces_valid_json_across_chunks() {
+		$chunk_one = array(
+			array( 'name' => 'First' ),
+			array( 'name' => 'Second' ),
+		);
+		$chunk_two = array(
+			array( 'name' => 'Third' ),
+		);
+
+		// First chunk: begin the feed and write some entries, then flush (do not finalize).
+		$feed       = new JsonFileFeed( 'test-feed' );
+		$identifier = $feed->begin();
+		foreach ( $chunk_one as $entry ) {
+			$feed->add_entry( $entry );
+		}
+		$entries_written = $feed->get_entry_count();
+		$feed->flush();
+
+		// Second (final) chunk: a fresh instance resumes the same feed and finalizes it, mirroring
+		// how a subsequent Action Scheduler action would run in its own process.
+		$feed_two = new JsonFileFeed( 'test-feed' );
+		$feed_two->resume( $identifier, $entries_written );
+		foreach ( $chunk_two as $entry ) {
+			$feed_two->add_entry( $entry );
+		}
+		$feed_two->finalize();
+
+		$path = $feed_two->get_file_path();
+		$this->assertNotNull( $path );
+		$this->assertSame(
+			wp_json_encode( array_merge( $chunk_one, $chunk_two ) ),
+			file_get_contents( $path )
+		);
+	}
+
+	/**
+	 * Test that a chunked feed whose first chunk wrote no entries still produces a valid JSON array.
+	 */
+	public function test_chunked_feed_handles_empty_first_chunk() {
+		$feed       = new JsonFileFeed( 'test-feed' );
+		$identifier = $feed->begin();
+		$feed->flush();
+
+		$feed_two = new JsonFileFeed( 'test-feed' );
+		$feed_two->resume( $identifier, 0 );
+		$feed_two->add_entry( array( 'name' => 'Only' ) );
+		$feed_two->finalize();
+
+		$this->assertSame(
+			wp_json_encode( array( array( 'name' => 'Only' ) ) ),
+			file_get_contents( $feed_two->get_file_path() )
+		);
+	}
+
+	/**
+	 * Test that can_resume reports whether a chunked feed file exists to append to.
+	 */
+	public function test_can_resume_reflects_partial_file_existence() {
+		$feed = new JsonFileFeed( 'test-feed' );
+
+		// Nothing started yet.
+		$this->assertFalse( $feed->can_resume( 'does-not-exist.json' ) );
+
+		// After begin() the partial file exists and can be resumed.
+		$identifier = $feed->begin();
+		$feed->flush();
+		$this->assertTrue( $feed->can_resume( $identifier ) );
+	}
+
+	/**
+	 * Test that delete removes a partial feed file.
+	 */
+	public function test_delete_removes_partial_feed_file() {
+		$feed       = new JsonFileFeed( 'test-feed' );
+		$identifier = $feed->begin();
+		$feed->flush();
+		$this->assertTrue( $feed->can_resume( $identifier ) );
+
+		$feed->delete( $identifier );
+		$this->assertFalse( $feed->can_resume( $identifier ) );
+	}
+
+	/**
 	 * Test that get_entry_count reflects the number of rows written to the feed.
 	 */
 	public function test_get_entry_count_reflects_added_entries() {

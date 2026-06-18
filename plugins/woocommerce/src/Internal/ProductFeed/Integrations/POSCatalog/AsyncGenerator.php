@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog;
 
 use ActionScheduler_AsyncRequest_QueueRunner;
 use ActionScheduler_Store;
+use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductWalker;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\WalkerProgress;
 
@@ -55,6 +56,21 @@ class AsyncGenerator {
 	const STATE_FAILED      = 'failed';
 
 	/**
+	 * The number of products fetched per database batch.
+	 *
+	 * @var int
+	 */
+	const BATCH_SIZE = 100;
+
+	/**
+	 * The default number of products processed per chunk. Each chunk runs in its own action and
+	 * schedules the next, so this keeps individual runs short on large catalogs.
+	 *
+	 * @var int
+	 */
+	const DEFAULT_CHUNK_SIZE = 2500;
+
+	/**
 	 * Integration instance.
 	 *
 	 * @var POSIntegration
@@ -97,14 +113,25 @@ class AsyncGenerator {
 		$option_key = $this->get_option_key( $args );
 		$status     = get_option( $option_key );
 
-		// For existing jobs, make sure that everything in the status makes sense.
-		if ( is_array( $status ) && ! $this->validate_status( $status ) ) {
-			$status = false;
-		}
-
-		// If the status is an array, it means that there is nothing to schedule in this method.
 		if ( is_array( $status ) ) {
-			return $status;
+			// A still-valid status (including a healthy, actively-progressing job) is returned as-is.
+			if ( $this->validate_status( $status ) ) {
+				return $status;
+			}
+
+			// A stalled in-progress job whose cursor is intact is resumed from where it stopped
+			// (e.g. a chunk whose follow-up was never triggered because the host has no traffic or
+			// cron) rather than regenerated from scratch.
+			if ( $this->is_resumable( $status ) ) {
+				$status['updated_at'] = time();
+				update_option( $option_key, $status );
+
+				// Clear any stale pending actions, then re-arm the next chunk.
+				as_unschedule_all_actions( self::FEED_GENERATION_ACTION, array( $option_key ), 'woo-product-feed' );
+				$this->schedule_generation_action( $option_key );
+
+				return $status;
+			}
 		}
 
 		// Clear all previous actions to avoid race conditions.
@@ -126,12 +153,32 @@ class AsyncGenerator {
 			$status
 		);
 
-		// Start an immediate async action to generate the feed.
+		// Start an immediate async action to generate the first chunk of the feed.
+		$this->schedule_generation_action( $option_key );
+
+		return $status;
+	}
+
+	/**
+	 * Schedules (and immediately dispatches) an async action to process a feed generation chunk.
+	 *
+	 * Used both to start generation and to queue each subsequent chunk, so that a large catalog is
+	 * built across several short actions rather than one long-running one.
+	 *
+	 * @param string $option_key The option key for the feed generation status.
+	 * @return void
+	 */
+	private function schedule_generation_action( string $option_key ): void {
+		// Note: the action is deliberately not scheduled as "unique". Action Scheduler's uniqueness
+		// check matches on hook + group only (not args), and treats both pending AND running actions
+		// as blockers. When this is called to queue the next chunk, the current chunk's own action is
+		// still running, so a unique enqueue would be silently rejected and generation would stall.
+		// Per-job de-duplication is instead handled by as_unschedule_all_actions() in get_status().
 		as_enqueue_async_action(
 			self::FEED_GENERATION_ACTION,
 			array( $option_key ),
 			'woo-product-feed',
-			true,
+			false,
 			1
 		);
 
@@ -141,8 +188,22 @@ class AsyncGenerator {
 			$async_request = new ActionScheduler_AsyncRequest_QueueRunner( $store );
 			$async_request->dispatch();
 		}
+	}
 
-		return $status;
+	/**
+	 * Determines whether a stalled in-progress job can be resumed from its cursor.
+	 *
+	 * A resumable job is one that was mid-generation and still records which feed file it was
+	 * building and which page it had reached. The partial feed file itself is validated later, when
+	 * the resumed chunk runs, so that a missing file falls back to a fresh start.
+	 *
+	 * @param array $status The feed generation status.
+	 * @return bool True if the job can be resumed rather than restarted.
+	 */
+	private function is_resumable( array $status ): bool {
+		return self::STATE_IN_PROGRESS === ( $status['state'] ?? '' )
+			&& ! empty( $status['file_name'] )
+			&& isset( $status['page'] );
 	}
 
 	/**
@@ -156,8 +217,18 @@ class AsyncGenerator {
 	public function feed_generation_action( string $option_key ) {
 		$status = get_option( $option_key );
 
-		if ( ! is_array( $status ) || ! isset( $status['state'] ) || self::STATE_SCHEDULED !== $status['state'] ) {
+		// Only a scheduled (first chunk) or in-progress (continuation) job should be processed here.
+		if ( ! is_array( $status ) || ! in_array( $status['state'] ?? '', array( self::STATE_SCHEDULED, self::STATE_IN_PROGRESS ), true ) ) {
 			wc_get_logger()->error( 'Invalid feed generation status', array( 'status' => $status ) );
+			return;
+		}
+
+		$is_first_chunk = self::STATE_SCHEDULED === $status['state'];
+
+		// A continuation must know which feed file it is appending to. If it doesn't, the status is
+		// corrupt; bail and let the heartbeat-based recovery restart generation from scratch.
+		if ( ! $is_first_chunk && empty( $status['file_name'] ) ) {
+			wc_get_logger()->error( 'Invalid feed generation continuation status', array( 'status' => $status ) );
 			return;
 		}
 
@@ -165,83 +236,82 @@ class AsyncGenerator {
 		$status['updated_at'] = time();
 		update_option( $option_key, $status );
 
+		$feed = null;
 		try {
-			// Large catalogs are memory heavy, so give the process as much headroom as the
-			// host allows before the heavy lifting begins. This only raises the limit for the
-			// current process and never lowers an already higher limit.
-			wp_raise_memory_limit( 'admin' );
+			$this->raise_resource_limits();
 
-			/**
-			 * Filters the per-batch PHP execution time limit (in seconds) for product feed generation.
-			 *
-			 * The execution time limit is set to this value up front and reset to it after each processed
-			 * batch, so that a low `max_execution_time` does not abort generation part-way through a large
-			 * catalog. Return 0 to leave the time limit untouched.
-			 *
-			 * This only affects PHP's own execution timeout. It does not extend Action Scheduler's
-			 * failure period (`action_scheduler_failure_period`, 300 seconds by default) nor any hard
-			 * server/host request timeout, so it is a mitigation rather than a guarantee for very large
-			 * catalogs.
-			 *
-			 * @param int $batch_time_limit The per-batch time limit in seconds.
-			 *
-			 * @since 11.0.0
-			 */
-			$batch_time_limit = (int) apply_filters( 'woocommerce_product_feed_batch_time_limit', 5 * MINUTE_IN_SECONDS );
+			$feed = $this->integration->create_feed();
 
-			// Raise the time limit up front too: the walker only resets it after each batch, so the
-			// initial product query and the first batch would otherwise run under whatever (possibly
-			// very low) limit the Action Scheduler request started with.
-			if ( $batch_time_limit > 0 ) {
-				wc_set_time_limit( $batch_time_limit );
+			if ( ! $is_first_chunk && ! $feed->can_resume( (string) $status['file_name'] ) ) {
+				// The feed was supposed to be continued, but its partial file has vanished
+				// (e.g. cleaned up by the host). Start over rather than append to nothing.
+				$is_first_chunk = true;
 			}
 
-			$feed   = $this->integration->create_feed();
+			if ( $is_first_chunk ) {
+				// Begin a brand-new feed and reset the cursor.
+				$status['file_name']       = $feed->begin();
+				$status['page']            = 1;
+				$status['processed']       = 0;
+				$status['entries_written'] = 0;
+			} else {
+				// Resume appending to the feed started by a previous chunk.
+				$feed->resume( (string) $status['file_name'], (int) ( $status['entries_written'] ?? 0 ) );
+			}
+
 			$walker = ProductWalker::from_integration( $this->integration, $feed );
-			$walker->add_time_limit( $batch_time_limit );
+			$walker->set_batch_size( $this->get_batch_size() );
+			$walker->add_time_limit( $this->get_batch_time_limit() );
 
-			// Add dynamic args to the mapper.
-			$args = $status['args'] ?? array();
-			if (
-				isset( $args['_product_fields'] )
-				&& is_string( $args['_product_fields'] ) &&
-				! empty( $args['_product_fields'] )
-			) {
-				$this->integration->get_product_mapper()->set_fields( $args['_product_fields'] );
-			}
-			if (
-				isset( $args['_variation_fields'] )
-				&& is_string( $args['_variation_fields'] ) &&
-				! empty( $args['_variation_fields'] )
-			) {
-				$this->integration->get_product_mapper()->set_variation_fields( $args['_variation_fields'] );
-			}
+			$this->apply_mapper_args( $status['args'] ?? array() );
 
-			$walker->walk(
-				function ( WalkerProgress $progress ) use ( &$status, $option_key ) {
-					$status = $this->update_feed_progress( $status, $progress );
+			$start_page     = max( 1, (int) ( $status['page'] ?? 1 ) );
+			$base_processed = (int) ( $status['processed'] ?? 0 );
+			$progress       = $walker->walk_chunk(
+				$start_page,
+				$this->get_chunk_batch_count(),
+				function ( WalkerProgress $progress ) use ( &$status, $option_key, $base_processed ) {
+					// Update progress (and the heartbeat) after every batch, so polling sees smooth
+					// progress within a chunk rather than a single jump at the chunk boundary.
+					$status = $this->update_progress( $status, $base_processed + $progress->processed_items, $progress->total_count );
 					update_option( $option_key, $status );
 				}
 			);
 
-			// Store the final details.
-			$status['state']        = self::STATE_COMPLETED;
-			$status['url']          = $feed->get_file_url();
-			$status['path']         = $feed->get_file_path();
-			$status['completed_at'] = time();
-			update_option( $option_key, $status );
+			// Advance the cursor and cumulative counters.
+			$status                    = $this->update_progress( $status, $base_processed + $progress->processed_items, $progress->total_count );
+			$status['entries_written'] = (int) ( $status['entries_written'] ?? 0 ) + $feed->get_entry_count();
+			$status['page']            = $start_page + $progress->processed_batches;
 
-			// Schedule another action to delete the file after the expiry time.
-			as_schedule_single_action(
-				time() + self::FEED_EXPIRY,
-				self::FEED_DELETION_ACTION,
-				array(
-					$option_key,
-					$feed->get_file_path(),
-				),
-				'woo-product-feed',
-				false
-			);
+			$is_complete = $progress->total_batch_count <= 0 || (int) $status['page'] > $progress->total_batch_count;
+
+			if ( $is_complete ) {
+				$feed->finalize();
+
+				$status['state']        = self::STATE_COMPLETED;
+				$status['progress']     = 100;
+				$status['url']          = $feed->get_file_url();
+				$status['path']         = $feed->get_file_path();
+				$status['completed_at'] = time();
+				update_option( $option_key, $status );
+
+				// Schedule another action to delete the file after the expiry time.
+				as_schedule_single_action(
+					time() + self::FEED_EXPIRY,
+					self::FEED_DELETION_ACTION,
+					array(
+						$option_key,
+						$feed->get_file_path(),
+					),
+					'woo-product-feed',
+					false
+				);
+			} else {
+				// Persist this chunk and schedule the next one.
+				$feed->flush();
+				update_option( $option_key, $status );
+				$this->schedule_generation_action( $option_key );
+			}
 		} catch ( \Throwable $e ) {
 			wc_get_logger()->error(
 				'Feed generation failed',
@@ -251,10 +321,154 @@ class AsyncGenerator {
 				)
 			);
 
+			// Close the file handle, if any, so it is not left dangling.
+			if ( $feed instanceof FeedInterface ) {
+				$feed->flush();
+			}
+
 			$status['state']     = self::STATE_FAILED;
 			$status['error']     = $e->getMessage();
 			$status['failed_at'] = time();
 			update_option( $option_key, $status );
+		}
+	}
+
+	/**
+	 * Raises the memory and execution time limits for the current process before heavy work begins.
+	 *
+	 * These only affect the current process and never lower an already higher limit. They cannot
+	 * override a hard host/server request timeout or Action Scheduler's failure period.
+	 *
+	 * @return void
+	 */
+	private function raise_resource_limits(): void {
+		// Large catalogs are memory heavy, so give the process as much headroom as the host allows.
+		wp_raise_memory_limit( 'admin' );
+
+		// Raise the time limit up front: the walker only resets it after each batch, so the initial
+		// product query and the first batch would otherwise run under whatever (possibly very low)
+		// limit the Action Scheduler request started with.
+		$batch_time_limit = $this->get_batch_time_limit();
+		if ( $batch_time_limit > 0 ) {
+			wc_set_time_limit( $batch_time_limit );
+		}
+	}
+
+	/**
+	 * Returns the per-batch PHP execution time limit (in seconds) for feed generation.
+	 *
+	 * @return int The per-batch time limit in seconds.
+	 */
+	private function get_batch_time_limit(): int {
+		/**
+		 * Filters the per-batch PHP execution time limit (in seconds) for product feed generation.
+		 *
+		 * The execution time limit is set to this value up front and reset to it after each processed
+		 * batch, so that a low `max_execution_time` does not abort generation part-way through a chunk.
+		 * Return 0 to leave the time limit untouched.
+		 *
+		 * This only affects PHP's own execution timeout. It does not extend Action Scheduler's failure
+		 * period (`action_scheduler_failure_period`, 300 seconds by default) nor any hard server/host
+		 * request timeout.
+		 *
+		 * @param int $batch_time_limit The per-batch time limit in seconds.
+		 *
+		 * @since 11.0.0
+		 */
+		return (int) apply_filters( 'woocommerce_product_feed_batch_time_limit', 5 * MINUTE_IN_SECONDS );
+	}
+
+	/**
+	 * Returns the number of batches to process per chunk, derived from the configured chunk size.
+	 *
+	 * @return int The number of batches per chunk (at least 1).
+	 */
+	private function get_chunk_batch_count(): int {
+		/**
+		 * Filters the number of products processed per chunk during feed generation.
+		 *
+		 * Each chunk runs in its own Action Scheduler action and then schedules the next, keeping
+		 * every run short enough to finish well within Action Scheduler's failure period and the
+		 * host's request timeout. Larger chunks mean fewer actions but longer individual runs.
+		 *
+		 * @param int $chunk_size The number of products to process per chunk.
+		 *
+		 * @since 11.0.0
+		 */
+		$chunk_size = (int) apply_filters( 'woocommerce_product_feed_chunk_size', self::DEFAULT_CHUNK_SIZE );
+		if ( $chunk_size < 1 ) {
+			$chunk_size = self::DEFAULT_CHUNK_SIZE;
+		}
+
+		return (int) max( 1, (int) ceil( $chunk_size / $this->get_batch_size() ) );
+	}
+
+	/**
+	 * Returns the number of products fetched per database batch.
+	 *
+	 * @return int The batch size (at least 1).
+	 */
+	private function get_batch_size(): int {
+		/**
+		 * Filters the number of products fetched per database query during feed generation.
+		 *
+		 * Smaller batches use less memory per query at the cost of more queries. This is the
+		 * granularity within a chunk; see `woocommerce_product_feed_chunk_size` for how many
+		 * products each Action Scheduler action processes.
+		 *
+		 * @param int $batch_size The number of products per database batch.
+		 *
+		 * @since 11.0.0
+		 */
+		$batch_size = (int) apply_filters( 'woocommerce_product_feed_batch_size', self::BATCH_SIZE );
+
+		return (int) max( 1, $batch_size );
+	}
+
+	/**
+	 * Updates the cumulative progress fields on the status and refreshes the heartbeat.
+	 *
+	 * @param array $status    The current feed generation status.
+	 * @param int   $processed The cumulative number of products processed so far.
+	 * @param int   $total     The total number of products to process.
+	 * @return array The updated status.
+	 */
+	private function update_progress( array $status, int $processed, int $total ): array {
+		$status['processed']  = $processed;
+		$status['total']      = $total;
+		$status['progress']   = $total > 0 ? round( ( $processed / $total ) * 100, 2 ) : 0;
+		$status['updated_at'] = time();
+		return $status;
+	}
+
+	/**
+	 * Applies the dynamic field arguments to the product mapper.
+	 *
+	 * @param array $args The feed generation arguments.
+	 * @return void
+	 */
+	private function apply_mapper_args( array $args ): void {
+		if ( isset( $args['_product_fields'] ) && is_string( $args['_product_fields'] ) && '' !== $args['_product_fields'] ) {
+			$this->integration->get_product_mapper()->set_fields( $args['_product_fields'] );
+		}
+		if ( isset( $args['_variation_fields'] ) && is_string( $args['_variation_fields'] ) && '' !== $args['_variation_fields'] ) {
+			$this->integration->get_product_mapper()->set_variation_fields( $args['_variation_fields'] );
+		}
+	}
+
+	/**
+	 * Deletes the feed file referenced by a status, if any.
+	 *
+	 * Completed feeds expose a full path; in-progress chunked feeds only track a file name.
+	 *
+	 * @param array $status The feed generation status.
+	 * @return void
+	 */
+	private function discard_feed( array $status ): void {
+		if ( ! empty( $status['path'] ) ) {
+			wp_delete_file( (string) $status['path'] );
+		} elseif ( ! empty( $status['file_name'] ) ) {
+			$this->integration->create_feed()->delete( (string) $status['file_name'] );
 		}
 	}
 
@@ -271,8 +485,15 @@ class AsyncGenerator {
 		$option_key = $this->get_option_key( $args );
 		$status     = get_option( $option_key );
 
-		// If there is no option, there is nothing to force. If the option is invalid, we can restart.
+		// If there is no option, there is nothing to force. If the status is invalid (stale, expired,
+		// or a stalled in-progress job), force always regenerates from scratch — unlike get_status(),
+		// which resumes a stalled job. Discard any partial feed and clear the option so the restart
+		// starts clean rather than resuming.
 		if ( ! is_array( $status ) || ! $this->validate_status( $status ) ) {
+			if ( is_array( $status ) ) {
+				$this->discard_feed( $status );
+				delete_option( $option_key );
+			}
 			return $this->get_status( $args );
 		}
 
@@ -339,23 +560,6 @@ class AsyncGenerator {
 				)
 			)
 		);
-	}
-
-	/**
-	 * Updates the feed progress while the feed is being generated.
-	 *
-	 * @param array          $status   The last previously known status.
-	 * @param WalkerProgress $progress The progress of the walker.
-	 * @return array                   Updated status of the feed generation.
-	 */
-	private function update_feed_progress( array $status, WalkerProgress $progress ): array {
-		$status['progress']   = $progress->total_count > 0
-			? round( ( $progress->processed_items / $progress->total_count ) * 100, 2 )
-			: 0;
-		$status['processed']  = $progress->processed_items;
-		$status['total']      = $progress->total_count;
-		$status['updated_at'] = time();
-		return $status;
 	}
 
 	/**

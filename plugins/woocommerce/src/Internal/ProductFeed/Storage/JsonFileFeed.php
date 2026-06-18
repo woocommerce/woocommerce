@@ -108,23 +108,7 @@ class JsonFileFeed implements FeedInterface {
 		$this->entry_count    = 0;
 		$this->file_completed = false;
 		$this->file_url       = null;
-
-		/**
-		 * Allows the current time to be overridden before a feed is stored.
-		 *
-		 * @param int           $time The current time.
-		 * @param FeedInterface $feed The feed instance.
-		 * @return int The current time.
-		 * @since 10.5.0
-		 */
-		$current_time    = apply_filters( 'woocommerce_product_feed_time', time(), $this );
-		$hash_data       = $this->base_name . gmdate( 'r', $current_time );
-		$this->file_name = sprintf(
-			'%s-%s-%s.json',
-			$this->base_name,
-			gmdate( 'Y-m-d', $current_time ),
-			wp_hash( $hash_data )
-		);
+		$this->file_name      = $this->generate_file_name();
 
 		// Start by trying to use a temp directory to generate the feed.
 		$this->file_path   = get_temp_dir() . DIRECTORY_SEPARATOR . $this->file_name;
@@ -194,6 +178,172 @@ class JsonFileFeed implements FeedInterface {
 
 		// Indicate that we have a complete file.
 		$this->file_completed = true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @throws Exception If the feed directory or file cannot be created.
+	 */
+	public function begin(): string {
+		// Chunked feeds are written across separate processes (and possibly servers), so the
+		// shared upload directory is used directly rather than a per-request temp directory.
+		$upload_dir = $this->get_upload_dir();
+
+		$this->entry_count      = 0;
+		$this->file_completed   = false;
+		$this->file_url         = null;
+		$this->is_temp_filepath = false;
+		$this->file_name        = $this->generate_file_name();
+		$this->file_path        = $upload_dir['path'] . $this->file_name;
+
+		$this->file_handle = fopen( $this->file_path, 'w' );
+		if ( false === $this->file_handle ) {
+			throw new Exception(
+				esc_html(
+					sprintf(
+						/* translators: %s: directory path */
+						__( 'Unable to open feed file for writing: %s', 'woocommerce' ),
+						$this->file_path
+					)
+				)
+			);
+		}
+
+		// Open the array.
+		fwrite( $this->file_handle, '[' );
+
+		return $this->file_name;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string $identifier The identifier returned by begin().
+	 * @return bool True if the feed exists and can be appended to.
+	 */
+	public function can_resume( string $identifier ): bool {
+		// Resolve the path without creating the upload directory as a side effect.
+		$upload_dir = wp_upload_dir( null, false );
+		$path       = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . self::UPLOAD_DIR . DIRECTORY_SEPARATOR . $identifier;
+
+		return is_file( $path ) && filesize( $path ) > 0;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string $identifier      The identifier returned by begin().
+	 * @param int    $entries_written The number of entries already written by previous chunks.
+	 * @throws Exception If the feed file cannot be opened for appending.
+	 */
+	public function resume( string $identifier, int $entries_written ): void {
+		$upload_dir = $this->get_upload_dir();
+
+		$this->file_name        = $identifier;
+		$this->file_path        = $upload_dir['path'] . $identifier;
+		$this->file_completed   = false;
+		$this->file_url         = null;
+		$this->is_temp_filepath = false;
+		// Seed the entry count so the comma separator in add_entry() accounts for entries
+		// already written by previous chunks.
+		$this->entry_count = $entries_written;
+
+		$this->file_handle = fopen( $this->file_path, 'a' );
+		if ( false === $this->file_handle ) {
+			throw new Exception(
+				esc_html(
+					sprintf(
+						/* translators: %s: file path */
+						__( 'Unable to open feed file for appending: %s', 'woocommerce' ),
+						$this->file_path
+					)
+				)
+			);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function flush(): void {
+		if ( is_resource( $this->file_handle ) ) {
+			fclose( $this->file_handle );
+			$this->file_handle = null;
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @throws Exception If the feed file cannot be opened to be finalized.
+	 */
+	public function finalize(): void {
+		// The handle may already be closed by a previous flush() (e.g. the last chunk runs in its
+		// own process), so reopen the file for appending if needed.
+		if ( ! is_resource( $this->file_handle ) ) {
+			$this->file_handle = fopen( (string) $this->file_path, 'a' );
+		}
+
+		if ( ! is_resource( $this->file_handle ) ) {
+			throw new Exception(
+				esc_html(
+					sprintf(
+						/* translators: %s: file path */
+						__( 'Unable to open feed file to finalize: %s', 'woocommerce' ),
+						(string) $this->file_path
+					)
+				)
+			);
+		}
+
+		// Close the array and the file.
+		fwrite( $this->file_handle, ']' );
+		fclose( $this->file_handle );
+		$this->file_handle = null;
+
+		$this->file_completed = true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string $identifier The identifier returned by begin().
+	 * @return void
+	 */
+	public function delete( string $identifier ): void {
+		// Resolve the path without creating the upload directory as a side effect.
+		$upload_dir = wp_upload_dir( null, false );
+		$path       = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . self::UPLOAD_DIR . DIRECTORY_SEPARATOR . $identifier;
+
+		if ( is_file( $path ) ) {
+			wp_delete_file( $path );
+		}
+	}
+
+	/**
+	 * Generate the feed file name based on the base name and the current time.
+	 *
+	 * @return string The feed file name.
+	 */
+	private function generate_file_name(): string {
+		/**
+		 * Allows the current time to be overridden before a feed is stored.
+		 *
+		 * @param int           $time The current time.
+		 * @param FeedInterface $feed The feed instance.
+		 * @return int The current time.
+		 * @since 10.5.0
+		 */
+		$current_time = apply_filters( 'woocommerce_product_feed_time', time(), $this );
+		$hash_data    = $this->base_name . gmdate( 'r', $current_time );
+
+		return sprintf(
+			'%s-%s-%s.json',
+			$this->base_name,
+			gmdate( 'Y-m-d', $current_time ),
+			wp_hash( $hash_data )
+		);
 	}
 
 	/**
