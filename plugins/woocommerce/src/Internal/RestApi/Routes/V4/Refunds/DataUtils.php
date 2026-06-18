@@ -58,12 +58,24 @@ class DataUtils {
 		$prepared_line_items = array();
 
 		foreach ( $line_items as $line_item ) {
-			if ( ! isset( $line_item['line_item_id'], $line_item['quantity'], $line_item['refund_total'] ) ) {
+			// A line item is processable when it has an ID and at least one of
+			// quantity or refund_total. The legacy v3-style form may omit
+			// quantity entirely; in that case qty=0 is recorded on the refund,
+			// matching v3 semantics ("refunded $X of this line without consuming
+			// specific units"). Dollar accounting via get_remaining_refund_amount
+			// still bounds subsequent refunds, so per-unit looseness here does
+			// not enable over-refunding.
+			if ( ! isset( $line_item['line_item_id'] ) ) {
+				continue;
+			}
+			if ( ! isset( $line_item['quantity'] ) && ! isset( $line_item['refund_total'] ) ) {
 				continue;
 			}
 
-			// If no explicit refund_tax provided, extract tax from refund_total using WC_Tax.
-			if ( ! isset( $line_item['refund_tax'] ) ) {
+			// If no explicit refund_tax provided, extract tax from refund_total
+			// using WC_Tax. Skip when refund_total is also missing — there's
+			// nothing to extract tax from.
+			if ( ! isset( $line_item['refund_tax'] ) && isset( $line_item['refund_total'] ) ) {
 				$original_item = $order->get_item( $line_item['line_item_id'] );
 				if ( $original_item ) {
 					$original_taxes = $original_item->get_taxes();
@@ -110,9 +122,12 @@ class DataUtils {
 				}
 			}
 
+			// Default qty=0 when quantity was omitted (legacy v3-style explicit
+			// refund_total path). Default refund_total=0 defensively; in practice
+			// validate_line_items ensures one of them is set by this point.
 			$prepared_line_items[ $line_item['line_item_id'] ] = array(
-				'qty'          => $line_item['quantity'],
-				'refund_total' => $line_item['refund_total'],
+				'qty'          => $line_item['quantity'] ?? 0,
+				'refund_total' => $line_item['refund_total'] ?? 0,
 				'refund_tax'   => $this->convert_line_item_taxes_to_internal_format( $line_item['refund_tax'] ?? array() ),
 			);
 		}
@@ -155,13 +170,16 @@ class DataUtils {
 		$amount = 0;
 
 		foreach ( $line_items as $line_item ) {
-			if ( ! empty( $line_item['refund_total'] ) && is_numeric( $line_item['refund_total'] ) ) {
+			// is_numeric() (not !empty) — an explicit refund_total of 0 is a valid
+			// "zero refund for this line" value and must round-trip cleanly, not
+			// be silently dropped from the sum.
+			if ( isset( $line_item['refund_total'] ) && is_numeric( $line_item['refund_total'] ) ) {
 				$amount += $line_item['refund_total'];
 			}
 
 			if ( ! empty( $line_item['refund_tax'] ) && is_array( $line_item['refund_tax'] ) ) {
 				foreach ( $line_item['refund_tax'] as $tax ) {
-					if ( ! empty( $tax['refund_total'] ) && is_numeric( $tax['refund_total'] ) ) {
+					if ( isset( $tax['refund_total'] ) && is_numeric( $tax['refund_total'] ) ) {
 						$amount += $tax['refund_total'];
 					}
 				}
@@ -179,6 +197,10 @@ class DataUtils {
 	 * @return boolean|WP_Error
 	 */
 	public function validate_line_items( $line_items, WC_Order $order ) {
+		// Precompute refunded quantities/totals once so the over-refund check
+		// below caps against remaining refundable quantity, not the original.
+		$refund_data = $this->compute_refunded_quantities_and_totals( $order );
+
 		foreach ( $line_items as $line_item ) {
 			$line_item_id = $line_item['line_item_id'] ?? null;
 
@@ -197,15 +219,108 @@ class DataUtils {
 				return new WP_Error( 'invalid_line_item', __( 'Line item is not a product, fee, or shipping line.', 'woocommerce' ) );
 			}
 
-			// Validate item quantity is not greater than the item quantity.
-			if ( $item->get_quantity() < $line_item['quantity'] ) {
-				/* translators: %s: item quantity */
-				return new WP_Error( 'invalid_line_item', sprintf( __( 'Line item quantity cannot be greater than the item quantity (%s).', 'woocommerce' ), $item->get_quantity() ) );
+			// Quantity is required only when the client omits refund_total — the
+			// auto-compute path needs a real quantity to derive the unit price.
+			// When refund_total is provided explicitly (legacy v3-style path),
+			// quantity is informational and can be missing/zero, matching the
+			// original v4 schema's `default: 0` behavior.
+			$refund_total_missing = ! array_key_exists( 'refund_total', $line_item ) || null === $line_item['refund_total'];
+
+			// Reject the ambiguous "auto-computed refund_total + explicit refund_tax"
+			// combination. Auto-compute writes a tax-inclusive value; the
+			// converter then skips tax extraction because refund_tax is set,
+			// and calculate_refund_amount double-counts the tax. The client
+			// must either supply refund_total explicitly (and may then supply
+			// refund_tax to override the auto-extracted split) or let the
+			// server handle taxes (omit both).
+			if ( $refund_total_missing && isset( $line_item['refund_tax'] ) ) {
+				return new WP_Error(
+					'invalid_line_item',
+					__( 'refund_tax cannot be combined with an auto-computed refund_total. Provide refund_total explicitly when supplying refund_tax.', 'woocommerce' )
+				);
+			}
+
+			if ( $refund_total_missing && ( ! isset( $line_item['quantity'] ) || ! is_int( $line_item['quantity'] ) || $line_item['quantity'] < 1 ) ) {
+				return new WP_Error(
+					'invalid_line_item',
+					__( 'Line item quantity must be a positive integer when refund_total is omitted.', 'woocommerce' )
+				);
+			}
+
+			// Auto-compute requires a non-zero source quantity to derive the unit
+			// price from. If the client omitted refund_total (or sent null) and the
+			// source product has zero quantity, surface a clear error rather than
+			// letting the request slip into the misleading "must be greater than
+			// zero" branch downstream.
+			if ( $refund_total_missing && $item instanceof \WC_Order_Item_Product && 0 === $item->get_quantity() ) {
+				return new WP_Error(
+					'invalid_line_item',
+					sprintf(
+						/* translators: %d: line item id */
+						__( 'Cannot auto-compute refund for line item %d: source quantity is zero. Provide an explicit refund_total.', 'woocommerce' ),
+						(int) $line_item_id
+					)
+				);
+			}
+
+			// Validate refund quantity does not exceed remaining refundable
+			// quantity for this line. compute_refunded_quantities_and_totals
+			// returns negative values for already-refunded units (matches the
+			// convention used by validate_preview_line_items), so adding to
+			// $item->get_quantity() yields the remaining count.
+			// Only fires when a quantity was provided — the legacy
+			// explicit-refund_total path may omit it.
+			if ( isset( $line_item['quantity'] ) && $item instanceof \WC_Order_Item_Product ) {
+				$remaining_qty = $item->get_quantity() + ( $refund_data['qtys'][ $line_item_id ] ?? 0 );
+				if ( $line_item['quantity'] > $remaining_qty ) {
+					return new WP_Error(
+						'invalid_line_item',
+						sprintf(
+							/* translators: %d: remaining refundable quantity */
+							__( 'Line item quantity cannot be greater than the remaining refundable quantity (%d).', 'woocommerce' ),
+							$remaining_qty
+						)
+					);
+				}
+			} elseif ( isset( $line_item['quantity'] ) ) {
+				if ( $item->get_quantity() < $line_item['quantity'] ) {
+					/* translators: %s: item quantity */
+					return new WP_Error( 'invalid_line_item', sprintf( __( 'Line item quantity cannot be greater than the item quantity (%s).', 'woocommerce' ), $item->get_quantity() ) );
+				}
+
+				$price_decimals      = wc_get_price_decimals();
+				$item_total_with_tax = abs( (float) $item->get_total() + (float) $item->get_total_tax() );
+				$refunded_total      = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
+				$remaining_total     = $item_total_with_tax - $refunded_total;
+				$requested_total     = isset( $line_item['refund_total'] )
+					? abs( (float) $line_item['refund_total'] )
+					: abs( $this->compute_line_item_refund_total( $item, $line_item['quantity'] ) );
+
+				if ( $remaining_total <= 0 ) {
+					return new WP_Error(
+						'invalid_line_item',
+						__( 'This line item has already been fully refunded.', 'woocommerce' )
+					);
+				}
+
+				if ( $requested_total > NumberUtil::round( $remaining_total, $price_decimals ) ) {
+					return new WP_Error(
+						'invalid_line_item',
+						sprintf(
+							/* translators: %s: remaining refundable amount */
+							__( 'Line item refund total cannot be greater than the remaining refundable amount (%s).', 'woocommerce' ),
+							wc_format_decimal( $remaining_total, $price_decimals )
+						)
+					);
+				}
 			}
 
 			// Validate refund total is not greater than the item total (including tax).
+			// Round both sides to price decimals before comparing — the raw float sum
+			// (e.g. 29.97 + 2.66) can land a hair below the rounded refund_total and
+			// spuriously reject full-line refunds, including auto-computed totals.
 			$item_total_with_tax = $item->get_total() + $item->get_total_tax();
-			if ( $item_total_with_tax < $line_item['refund_total'] ) {
+			if ( isset( $line_item['refund_total'] ) && NumberUtil::round( (float) $item_total_with_tax, wc_get_price_decimals() ) < NumberUtil::round( (float) $line_item['refund_total'], wc_get_price_decimals() ) ) {
 				return new WP_Error(
 					'invalid_refund_amount',
 					sprintf(
@@ -345,6 +460,77 @@ class DataUtils {
 		}
 
 		return NumberUtil::round( (float) $item->get_total() + (float) $item->get_total_tax(), $price_decimals );
+	}
+
+	/**
+	 * Fill in refund_total for any line item that omits it, computing the value from
+	 * the order item's unit price × quantity via compute_line_item_refund_total().
+	 *
+	 * Items that already have refund_total (including an explicit 0) are left
+	 * untouched, so existing v3-style clients keep working. Items where refund_total
+	 * is omitted OR is explicitly null are treated as "compute it for me". Items
+	 * that can't be resolved (missing line_item_id, item not on order, invalid
+	 * quantity, unsupported item type, product with zero source quantity) are
+	 * also left untouched — validate_line_items surfaces the right error for
+	 * those cases.
+	 *
+	 * Auto-computed values are tax-inclusive, matching the convention enforced by
+	 * the existing converter (convert_line_items_to_internal_format extracts tax
+	 * from a tax-inclusive refund_total).
+	 *
+	 * @param array    $line_items Line items from the request (schema format).
+	 *                             Each item: array{line_item_id?: int, quantity?: int,
+	 *                             refund_total?: float|int|null, refund_tax?: array<int, mixed>}.
+	 * @param WC_Order $order      The order being refunded.
+	 * @return array The line items with refund_total populated where possible (same shape as input).
+	 *
+	 * @since 10.9.0
+	 */
+	public function fill_missing_refund_totals( array $line_items, WC_Order $order ): array {
+		foreach ( $line_items as $key => $line_item ) {
+			// Treat a missing key and an explicit `null` value the same — both mean
+			// "compute it for me". An explicit `0` is treated as a zero refund for
+			// that line (existing behaviour: calculate_refund_amount skips it from
+			// the sum, the under-refund check may then trip).
+			if ( array_key_exists( 'refund_total', $line_item ) && null !== $line_item['refund_total'] ) {
+				continue;
+			}
+
+			// Skip auto-compute when the client also supplied an explicit
+			// refund_tax. Auto-compute writes a tax-inclusive refund_total, but
+			// the converter then skips tax extraction whenever refund_tax is
+			// already present — and calculate_refund_amount would add both,
+			// inflating the total by the tax amount. Leave refund_total unset;
+			// validate_line_items rejects this ambiguous combination with a
+			// clear error.
+			if ( isset( $line_item['refund_tax'] ) ) {
+				continue;
+			}
+
+			$line_item_id = $line_item['line_item_id'] ?? null;
+			$quantity     = $line_item['quantity'] ?? null;
+			if ( ! $line_item_id || ! is_int( $quantity ) || $quantity < 1 ) {
+				continue;
+			}
+
+			$item = $order->get_item( $line_item_id );
+			if ( ! $item || ! ( $item instanceof WC_Order_Item_Product || $item instanceof WC_Order_Item_Shipping || $item instanceof WC_Order_Item_Fee ) ) {
+				continue;
+			}
+
+			// A product whose source line has zero quantity has no unit price to
+			// derive a refund from. Skip so validate_line_items surfaces a clear
+			// 'invalid_line_item' error to the API consumer instead of letting a
+			// silent 0.0 propagate into the misleading "must be greater than zero"
+			// branch downstream.
+			if ( $item instanceof WC_Order_Item_Product && 0 === $item->get_quantity() ) {
+				continue;
+			}
+
+			$line_items[ $key ]['refund_total'] = $this->compute_line_item_refund_total( $item, $quantity );
+		}
+
+		return $line_items;
 	}
 
 	/**

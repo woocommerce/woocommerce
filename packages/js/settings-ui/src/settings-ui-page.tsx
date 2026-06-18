@@ -98,6 +98,15 @@ const getActionVariant = ( variant?: string ) =>
 		? variant
 		: 'secondary' ) as 'primary' | 'secondary' | 'tertiary' | 'link';
 
+// TS unions erase at runtime, so guard the className interpolation against unexpected
+// strings from PHP-supplied schemas.
+const getBadgeIntent = ( intent?: string ) =>
+	[ 'default', 'info', 'success', 'warning', 'error' ].includes(
+		intent || ''
+	)
+		? intent
+		: 'default';
+
 const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>
 	schema.save || { adapter: 'form_post' };
 
@@ -387,6 +396,19 @@ const ShellHeader = ( {
 			</nav>
 		) : undefined;
 
+	const badges = shell.badges?.length
+		? shell.badges.map( ( badge, index ) => (
+				<span
+					className={ `wc-settings-ui-shell__badge wc-settings-ui-shell__badge--${ getBadgeIntent(
+						badge.intent
+					) }` }
+					key={ `${ badge.label }-${ index }` }
+				>
+					{ badge.label }
+				</span>
+		  ) )
+		: undefined;
+
 	const saveButtonLabel = __( 'Save', 'woocommerce' );
 
 	const actions = showSaveButton ? (
@@ -409,7 +431,9 @@ const ShellHeader = ( {
 			className="wc-settings-ui-shell"
 			headingLevel={ 1 }
 			title={ title }
+			subTitle={ shell.subtitle }
 			breadcrumbs={ breadcrumbs }
+			badges={ badges }
 			actions={ actions }
 			showSidebarToggle={ false }
 		>

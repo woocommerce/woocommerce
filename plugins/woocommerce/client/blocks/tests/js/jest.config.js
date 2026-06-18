@@ -22,6 +22,8 @@ const singletonWpModules = [
 	'@wordpress/html-entities',
 	'@wordpress/keyboard-shortcuts',
 	'@wordpress/patterns',
+	'@wordpress/rich-text',
+	'@wordpress/notices',
 ];
 
 const wpSingletonMapper = singletonWpModules.reduce( ( acc, mod ) => {

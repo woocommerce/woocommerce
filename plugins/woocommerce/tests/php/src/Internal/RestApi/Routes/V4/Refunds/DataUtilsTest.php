@@ -336,6 +336,68 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox calculate_refund_amount treats explicit refund_total: 0 as a valid zero contribution, not as missing.
+	 *
+	 * Regression guard: a previous implementation used `!empty($line_item['refund_total'])`
+	 * which is `true` for `0` / `0.0` / `"0"`. A mixed request like
+	 * `[{refund_total: 50}, {refund_total: 0}]` therefore summed to 50 with the
+	 * second line silently absent. The current implementation uses `isset() && is_numeric()`,
+	 * which preserves the explicit-zero contract documented in the schema.
+	 */
+	public function test_calculate_refund_amount_includes_explicit_zero(): void {
+		$line_items = array(
+			array(
+				'line_item_id' => 1,
+				'quantity'     => 1,
+				'refund_total' => 50.00,
+			),
+			array(
+				'line_item_id' => 2,
+				'quantity'     => 1,
+				'refund_total' => 0,
+			),
+		);
+
+		$result = $this->data_utils->calculate_refund_amount( $line_items );
+
+		$this->assertSame( 50.0, $result, 'Explicit-zero line contributes 0; total stays 50.' );
+	}
+
+	/**
+	 * @testdox convert_line_items_to_internal_format accepts the legacy v3-style shape (refund_total without quantity) and records qty=0.
+	 */
+	public function test_convert_line_items_legacy_no_quantity_defaults_qty_zero(): void {
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'quantity' => 2,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->save();
+
+		$result = $this->data_utils->convert_line_items_to_internal_format(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => 30.00,
+				),
+			),
+			$order
+		);
+
+		$this->assertArrayHasKey( $item->get_id(), $result, 'Line item must be attached, not silently dropped.' );
+		$this->assertSame( 0, $result[ $item->get_id() ]['qty'] );
+		$this->assertSame( 30.00, $result[ $item->get_id() ]['refund_total'] );
+
+		$order->delete( true );
+	}
+
+	/**
 	 * @testdox Should compute line item refund total for a product based on unit price and quantity.
 	 */
 	public function test_compute_line_item_refund_total_product(): void {
@@ -483,6 +545,27 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox compute_line_item_refund_total returns the same total regardless of the quantity argument for shipping items.
+	 *
+	 * Behavior lock. Shipping lines refund as a whole; the quantity argument
+	 * must not multiply the result. A future refactor that wrongly applied
+	 * unit_price * quantity to shipping would fail this assertion.
+	 */
+	public function test_compute_line_item_refund_total_shipping_ignores_quantity(): void {
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_props(
+			array(
+				'method_title' => 'Flat Rate',
+				'total'        => 10.00,
+			)
+		);
+		$shipping->set_taxes( array( 'total' => array( 1 => 1.50 ) ) );
+		$shipping->save();
+
+		$this->assertSame( 11.50, $this->data_utils->compute_line_item_refund_total( $shipping, 5 ) );
+	}
+
+	/**
 	 * @testdox Should return full item total + tax for fee items.
 	 */
 	public function test_compute_line_item_refund_total_fee_positive(): void {
@@ -497,6 +580,26 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$fee->save();
 
 		$this->assertSame( 23.00, $this->data_utils->compute_line_item_refund_total( $fee, 1 ) );
+	}
+
+	/**
+	 * @testdox compute_line_item_refund_total returns the same total regardless of the quantity argument for fee items.
+	 *
+	 * Behavior lock matching the shipping case. Fees refund as a whole; quantity
+	 * must not multiply the result.
+	 */
+	public function test_compute_line_item_refund_total_fee_ignores_quantity(): void {
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Handling',
+				'total' => 20.00,
+			)
+		);
+		$fee->set_taxes( array( 'total' => array( 1 => 3.00 ) ) );
+		$fee->save();
+
+		$this->assertSame( 23.00, $this->data_utils->compute_line_item_refund_total( $fee, 5 ) );
 	}
 
 	/**
@@ -1274,6 +1377,496 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertTrue( $result, 'Negative-total fee with no prior refund should pass validation.' );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox validate_line_items rejects missing or non-positive quantity with a clear invalid_line_item error.
+	 *
+	 * @dataProvider provider_invalid_quantities_for_validate_line_items
+	 *
+	 * @param mixed $quantity The quantity value to test (or null to omit the key).
+	 */
+	public function test_validate_line_items_rejects_missing_quantity( $quantity ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 20.00,
+				'total'    => 20.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$line_item = array( 'line_item_id' => $item->get_id() );
+		if ( null !== $quantity ) {
+			$line_item['quantity'] = $quantity;
+		}
+
+		$result = $this->data_utils->validate_line_items( array( $line_item ), $order );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertEquals( 'invalid_line_item', $result->get_error_code() );
+		$this->assertStringContainsString( 'positive integer', $result->get_error_message() );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @return array<string, array<int, mixed>>
+	 */
+	public function provider_invalid_quantities_for_validate_line_items(): array {
+		return array(
+			'missing'  => array( null ),
+			'zero'     => array( 0 ),
+			'negative' => array( -1 ),
+			'string'   => array( '2' ),
+			'float'    => array( 1.5 ),
+		);
+	}
+
+	/**
+	 * @testdox validate_line_items accepts missing/zero quantity when refund_total is provided explicitly (legacy v3-style path).
+	 *
+	 * @dataProvider provider_loose_quantities_with_explicit_refund_total
+	 *
+	 * @param mixed $quantity The quantity value to test (or null to omit the key).
+	 */
+	public function test_validate_line_items_accepts_loose_quantity_with_explicit_refund_total( $quantity ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 20.00,
+				'total'    => 20.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$line_item = array(
+			'line_item_id' => $item->get_id(),
+			'refund_total' => 10.00,
+		);
+		if ( null !== $quantity ) {
+			$line_item['quantity'] = $quantity;
+		}
+
+		$result = $this->data_utils->validate_line_items( array( $line_item ), $order );
+
+		$this->assertTrue( $result, 'Legacy explicit-refund_total path should accept missing/zero quantity.' );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @return array<string, array<int, mixed>>
+	 */
+	public function provider_loose_quantities_with_explicit_refund_total(): array {
+		return array(
+			'missing' => array( null ),
+			'zero'    => array( 0 ),
+		);
+	}
+
+	/**
+	 * @testdox fill_missing_refund_totals computes refund_total for a product line item when missing.
+	 */
+	public function test_fill_missing_refund_totals_product(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 25.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 4,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->save();
+
+		$result = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 2,
+				),
+			),
+			$order
+		);
+
+		$this->assertArrayHasKey( 'refund_total', $result[0] );
+		$this->assertSame( 50.00, $result[0]['refund_total'], '2 × $25 unit price = $50' );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox fill_missing_refund_totals treats refund_total: null the same as a missing key (computes it).
+	 */
+	public function test_fill_missing_refund_totals_treats_null_as_missing(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 15.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 30.00,
+				'total'    => 30.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->save();
+
+		$result = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+					'refund_total' => null,
+				),
+			),
+			$order
+		);
+
+		$this->assertArrayHasKey( 'refund_total', $result[0] );
+		$this->assertSame( 15.00, $result[0]['refund_total'], 'null should be treated the same as omitted — auto-computed' );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox fill_missing_refund_totals leaves explicit refund_total: 0 untouched.
+	 */
+	public function test_fill_missing_refund_totals_leaves_explicit_zero_untouched(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10.00,
+				'total'    => 10.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->save();
+
+		$result = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+					'refund_total' => 0,
+				),
+			),
+			$order
+		);
+
+		$this->assertSame( 0, $result[0]['refund_total'], 'Explicit zero must not be replaced by the auto-computed value' );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox fill_missing_refund_totals leaves explicit refund_total untouched.
+	 */
+	public function test_fill_missing_refund_totals_preserves_explicit(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10.00,
+				'total'    => 10.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->save();
+
+		$result = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+					'refund_total' => 7.50,
+				),
+			),
+			$order
+		);
+
+		$this->assertSame( 7.50, $result[0]['refund_total'], 'Explicit refund_total must not be overwritten' );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox fill_missing_refund_totals leaves the item alone when line_item_id does not resolve.
+	 */
+	public function test_fill_missing_refund_totals_skips_unknown_item(): void {
+		$order = wc_create_order();
+		$order->save();
+
+		$result = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => 999999,
+					'quantity'     => 1,
+				),
+			),
+			$order
+		);
+
+		$this->assertArrayNotHasKey( 'refund_total', $result[0] );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox fill_missing_refund_totals skips items with bad or missing quantity.
+	 *
+	 * @dataProvider provider_bad_quantities_for_fill
+	 *
+	 * @param mixed $quantity The quantity value to test.
+	 */
+	public function test_fill_missing_refund_totals_skips_bad_quantity( $quantity ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->save();
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 20.00,
+				'total'    => 20.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->save();
+
+		$line_item = array( 'line_item_id' => $item->get_id() );
+		if ( null !== $quantity ) {
+			$line_item['quantity'] = $quantity;
+		}
+
+		$result = $this->data_utils->fill_missing_refund_totals( array( $line_item ), $order );
+
+		$this->assertArrayNotHasKey( 'refund_total', $result[0] );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @return array<string, array<int, mixed>>
+	 */
+	public function provider_bad_quantities_for_fill(): array {
+		return array(
+			'missing'  => array( null ),
+			'zero'     => array( 0 ),
+			'negative' => array( -1 ),
+			'string'   => array( 'abc' ),
+			'float'    => array( 1.5 ),
+		);
+	}
+
+	/**
+	 * @testdox fill_missing_refund_totals leaves refund_total unset for product items whose source has zero quantity.
+	 */
+	public function test_fill_missing_refund_totals_skips_zero_source_quantity_product(): void {
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'quantity' => 0,
+				'subtotal' => 0,
+				'total'    => 0,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->save();
+
+		$result = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			),
+			$order
+		);
+
+		$this->assertArrayNotHasKey( 'refund_total', $result[0], 'Helper must leave refund_total unset so validate_line_items can surface a specific error.' );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox validate_line_items returns a specific error when refund_total is omitted and source product has zero quantity.
+	 */
+	public function test_validate_line_items_zero_source_quantity_with_missing_refund_total(): void {
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'quantity' => 0,
+				'subtotal' => 0,
+				'total'    => 0,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->save();
+
+		$result = $this->data_utils->validate_line_items(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertEquals( 'invalid_line_item', $result->get_error_code() );
+		$this->assertStringContainsString( 'source quantity is zero', $result->get_error_message() );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox fill_missing_refund_totals returns full item total for shipping items, ignoring quantity.
+	 */
+	public function test_fill_missing_refund_totals_shipping(): void {
+		$order    = wc_create_order();
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_props(
+			array(
+				'method_title' => 'Flat Rate',
+				'total'        => 12.50,
+			)
+		);
+		$shipping->save();
+		$order->add_item( $shipping );
+		$order->save();
+
+		$result = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $shipping->get_id(),
+					'quantity'     => 1,
+				),
+			),
+			$order
+		);
+
+		$this->assertSame( 12.50, $result[0]['refund_total'] );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox fill_missing_refund_totals processes a mixed array (some items with, some without refund_total).
+	 */
+	public function test_fill_missing_refund_totals_mixed(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10.00 );
+		$product->save();
+
+		$order  = wc_create_order();
+		$item_a = new WC_Order_Item_Product();
+		$item_a->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10.00,
+				'total'    => 10.00,
+			)
+		);
+		$item_a->save();
+		$order->add_item( $item_a );
+
+		$item_b = new WC_Order_Item_Product();
+		$item_b->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10.00,
+				'total'    => 10.00,
+			)
+		);
+		$item_b->save();
+		$order->add_item( $item_b );
+		$order->save();
+
+		$result = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $item_a->get_id(),
+					'quantity'     => 1,
+				),
+				// Item A above has no refund_total, expected to be filled with 10.00.
+				array(
+					'line_item_id' => $item_b->get_id(),
+					'quantity'     => 1,
+					'refund_total' => 7.0,
+				),
+				// Item B has explicit refund_total 7.0, expected to be preserved.
+			),
+			$order
+		);
+
+		$this->assertSame( 10.00, $result[0]['refund_total'] );
+		$this->assertSame( 7.0, $result[1]['refund_total'] );
 
 		$product->delete( true );
 		$order->delete( true );

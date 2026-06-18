@@ -185,6 +185,24 @@ array(
 
 Descriptions are sanitized with `wp_kses_post()`. Actions are structured data with `id`, `label`, `href`, optional `variant`, optional `target`, and optional `rel`.
 
+## Page header
+
+A settings UI page that supplies its own schema (via `SettingsUIPageInterface::get_schema()`) can set header content through the `shell` key. Alongside `title` and `breadcrumbs`, the header supports a `subtitle` and `badges`:
+
+```php
+$schema['shell']['subtitle'] = __( 'Manage your store payment settings.', 'my-plugin' );
+$schema['shell']['badges']   = array(
+	array(
+		'label'  => __( 'Active', 'my-plugin' ),
+		'intent' => 'success', // default | info | success | warning | error
+	),
+);
+```
+
+`subtitle` renders under the page title. Each badge renders as a pill next to the title; `intent` selects its color. Both are plain text and are escaped on render.
+
+`intent` is decorative styling only — it conveys meaning through color. The badge `label` must be self-descriptive so screen-reader and color-blind users get the same information (e.g. prefer `"Active"` or `"Beta"` over generic text). Unknown `intent` values fall back to `default`.
+
 ## Reference migration in WooCommerce core
 
 The Products settings page is the Core reference migration. With `settings-ui` enabled, the Products tab renders through the settings UI. With the flag disabled, it renders through the existing legacy settings UI.
