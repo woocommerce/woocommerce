@@ -10,8 +10,8 @@
 		 stopOnFailure="false"
 		 verbose="true">
 	<testsuites>
-		<testsuite name="SubscriptionsEngineUnitTestSuite">
-			<directory suffix="Test.php">./tests/unit</directory>
+		<testsuite name="WooCommerceSubscriptionsEngineUnitTestSuite">
+			<directory suffix="_Test.php">./tests/unit</directory>
 		</testsuite>
 	</testsuites>
 
