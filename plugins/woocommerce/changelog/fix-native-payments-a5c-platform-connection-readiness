@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve WooPayments cutover platform connection and WCPay transport readiness.
