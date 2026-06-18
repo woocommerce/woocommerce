@@ -16,6 +16,8 @@
  * Requires PHP: 7.4
  */
 
+defined( 'ABSPATH' ) || exit;
+
 $autoload_entry_point = __DIR__ . '/vendor/autoload.php';
 if ( file_exists( $autoload_entry_point ) ) {
 	require_once $autoload_entry_point;
