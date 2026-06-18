@@ -2152,8 +2152,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * For stores with fixed end-prices (prices entered including tax with the
 	 * woocommerce_adjust_non_base_location_prices adjustment disabled), the
 	 * line-item subtotal tax is removed so the displayed subtotal matches the
-	 * ex-tax cart display. Only line-item taxes are subtracted, not the fee or
-	 * shipping taxes that get_cart_tax() would also include.
+	 * ex-tax cart display. Only line-item taxes are subtracted, not the fee tax
+	 * that get_cart_tax() would also include.
 	 *
 	 * @return float
 	 */
