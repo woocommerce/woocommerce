@@ -1135,6 +1135,54 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should retrieve dispute summary through the preserved disputes endpoint.
+	 */
+	public function test_get_dispute_summary_uses_preserved_disputes_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'disputed_amount' => 500,
+					'currency'        => 'usd',
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$result = $sut->get_dispute_summary( 'du_test' );
+
+		$this->assertSame( '/sites/123/wcpay/disputes/du_test/summary?test_mode=1', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+		$this->assertSame( 500, $result['disputed_amount'] );
+		$this->assertSame( 'usd', $result['currency'] );
+	}
+
+	/**
+	 * @testdox Should reject invalid dispute summary route identifiers.
+	 */
+	public function test_get_dispute_summary_rejects_invalid_route_identifier(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array() ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$this->expectException( WooPaymentsApiException::class );
+
+		$sut->get_dispute_summary( '../du_test' );
+	}
+
+	/**
 	 * Create a WooPayments account service mock.
 	 *
 	 * @param bool      $test_mode            Whether WooPayments should run in test mode.

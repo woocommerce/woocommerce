@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymen
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsEventIngestor;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsLegacyRuntime;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Exception;
 use InvalidArgumentException;
 use RuntimeException;
 use WC_Order;
@@ -412,6 +413,310 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox charge.dispute.created resolves the order by charge ID and places it on hold.
+	 */
+	public function test_dispute_created_marks_order_on_hold(): void {
+		$order = $this->create_woopayments_order();
+		$order->set_status( 'processing' );
+		$order->update_meta_data( '_charge_id', 'ch_123' );
+		$order->save();
+
+		$this->sut->process( $this->create_dispute_event( 'charge.dispute.created', 'needs_response' ) );
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'on-hold', $order->get_status() );
+		$this->assertOrderHasNoteContaining(
+			$order,
+			array(
+				'Payment has been disputed for',
+				'&#36;</span>50.00',
+				'with reason "Transaction unauthorized"',
+				'Response due by July 1, 2026',
+				'path=%2Fpayments%2Ftransactions%2Fdetails',
+				'id=ch_123',
+			)
+		);
+		$this->assertSame( '', $order->get_meta( '_dispute_id', true ) );
+	}
+
+	/**
+	 * @testdox charge.dispute.created uses inquiry wording for warning dispute statuses.
+	 */
+	public function test_dispute_created_uses_inquiry_note_for_warning_status(): void {
+		$order = $this->create_woopayments_order();
+		$order->set_status( 'processing' );
+		$order->update_meta_data( '_charge_id', 'ch_123' );
+		$order->save();
+
+		$this->sut->process( $this->create_dispute_event( 'charge.dispute.created', 'warning_needs_response' ) );
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'on-hold', $order->get_status() );
+		$this->assertOrderHasNoteContaining(
+			$order,
+			array(
+				'A payment inquiry has been raised for',
+				'&#36;</span>50.00',
+				'with reason "Transaction unauthorized"',
+				'Response due by July 1, 2026',
+				'path=%2Fpayments%2Ftransactions%2Fdetails',
+				'id=ch_123',
+			)
+		);
+	}
+
+	/**
+	 * @testdox charge.dispute.updated adds the reference dispute update note without changing order status.
+	 *
+	 * @dataProvider dispute_update_event_provider
+	 *
+	 * @param string $event_type Event type.
+	 * @param string $message    Expected message.
+	 */
+	public function test_dispute_updates_add_notes_without_changing_status( string $event_type, string $message ): void {
+		$order = $this->create_woopayments_order();
+		$order->set_status( 'processing' );
+		$order->update_meta_data( '_charge_id', 'ch_123' );
+		$order->save();
+
+		$this->sut->process( $this->create_dispute_event( $event_type, 'needs_response' ) );
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'processing', $order->get_status() );
+		$this->assertOrderHasNote( $order, $message . '. See <a href="' . $this->get_expected_dispute_url( 'ch_123' ) . '">dispute overview</a> for more details.' );
+	}
+
+	/**
+	 * Provide dispute update events.
+	 *
+	 * @return array<string,array{0:string,1:string}>
+	 */
+	public function dispute_update_event_provider(): array {
+		return array(
+			'updated'          => array( 'charge.dispute.updated', 'Payment dispute has been updated' ),
+			'funds withdrawn'  => array( 'charge.dispute.funds_withdrawn', 'Payment dispute and fees have been deducted from your next payout' ),
+			'funds reinstated' => array( 'charge.dispute.funds_reinstated', 'Payment dispute funds have been reinstated' ),
+		);
+	}
+
+	/**
+	 * @testdox charge.dispute.closed completes the order for won disputes.
+	 */
+	public function test_dispute_closed_won_completes_order(): void {
+		$order = $this->create_woopayments_order();
+		$order->set_status( 'on-hold' );
+		$order->update_meta_data( '_charge_id', 'ch_123' );
+		$order->save();
+
+		$sut = new WooPaymentsEventIngestor();
+		$sut->init(
+			wc_get_container()->get( OrderPaymentLifecycleService::class ),
+			new LegacyProxy(),
+			new WooPaymentsLegacyRuntime(),
+			$this->create_dispute_summary_api_client()
+		);
+
+		$sut->process( $this->create_dispute_event( 'charge.dispute.closed', 'won' ) );
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'completed', $order->get_status() );
+		$this->assertOrderHasNote( $order, 'Dispute has been closed with status won. See <a href="' . $this->get_expected_dispute_url( 'ch_123' ) . '" target="_blank" rel="noopener noreferrer">dispute overview</a> for more details.' );
+	}
+
+	/**
+	 * @testdox charge.dispute.closed creates a capped local refund for lost disputes.
+	 */
+	public function test_dispute_closed_lost_creates_local_refund(): void {
+		$order = $this->create_woopayments_order();
+		$order->set_status( 'on-hold' );
+		$order->update_meta_data( '_charge_id', 'ch_123' );
+		$order->save();
+
+		$sut = new WooPaymentsEventIngestor();
+		$sut->init(
+			wc_get_container()->get( OrderPaymentLifecycleService::class ),
+			new LegacyProxy(),
+			new WooPaymentsLegacyRuntime(),
+			$this->create_dispute_summary_api_client(
+				array(
+					'disputed_amount' => 500,
+					'currency'        => 'usd',
+				)
+			)
+		);
+
+		$sut->process( $this->create_dispute_event( 'charge.dispute.closed', 'lost' ) );
+		$sut->process( $this->create_dispute_event( 'charge.dispute.closed', 'lost' ) );
+
+		$order   = wc_get_order( $order->get_id() );
+		$refunds = $order instanceof WC_Order ? $order->get_refunds() : array();
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertCount( 1, $refunds );
+		$this->assertSame( '-5.00', $refunds[0]->get_total() );
+		$this->assertSame( 'Dispute lost.', $refunds[0]->get_reason() );
+		$this->assertSame( '', $refunds[0]->get_meta( '_wcpay_refund_id', true ) );
+		$this->assertOrderHasNote( $order, 'Dispute has been closed with status lost. See <a href="' . $this->get_expected_dispute_url( 'ch_123' ) . '" target="_blank" rel="noopener noreferrer">dispute overview</a> for more details.' );
+	}
+
+	/**
+	 * @testdox charge.dispute.closed lost fails closed when the local refund cannot be created.
+	 */
+	public function test_dispute_closed_lost_fails_closed_when_local_refund_creation_fails(): void {
+		$order = $this->create_woopayments_order();
+		$order->set_status( 'on-hold' );
+		$order->update_meta_data( '_charge_id', 'ch_123' );
+		$order->save();
+		$refund_blocker = static function (): void {
+			throw new Exception( 'Refund creation blocked.' );
+		};
+
+		$sut = new WooPaymentsEventIngestor();
+		$sut->init(
+			wc_get_container()->get( OrderPaymentLifecycleService::class ),
+			new LegacyProxy(),
+			new WooPaymentsLegacyRuntime(),
+			$this->create_dispute_summary_api_client(
+				array(
+					'disputed_amount' => 500,
+					'currency'        => 'usd',
+				)
+			)
+		);
+
+		add_action( 'woocommerce_create_refund', $refund_blocker );
+		$exception = null;
+		try {
+			$sut->process( $this->create_dispute_event( 'charge.dispute.closed', 'lost' ) );
+		} catch ( RuntimeException $caught ) {
+			$exception = $caught;
+		} finally {
+			remove_action( 'woocommerce_create_refund', $refund_blocker );
+		}
+
+		$this->assertInstanceOf( RuntimeException::class, $exception, 'Expected lost dispute processing to fail when local refund creation fails.' );
+		$this->assertStringContainsString( 'Could not create local dispute refund', $exception->getMessage() );
+
+		$order   = wc_get_order( $order->get_id() );
+		$refunds = $order instanceof WC_Order ? $order->get_refunds() : array();
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'on-hold', $order->get_status() );
+		$this->assertCount( 0, $refunds );
+		$this->assertOrderLacksNoteContaining( $order, array( 'Dispute has been closed with status lost' ) );
+	}
+
+	/**
+	 * @testdox charge.dispute.closed fails closed when required dispute fields are missing.
+	 *
+	 * @dataProvider malformed_closed_dispute_event_provider
+	 *
+	 * @param string $missing_field Missing field.
+	 */
+	public function test_dispute_closed_fails_closed_when_required_fields_are_missing( string $missing_field ): void {
+		$order = $this->create_woopayments_order();
+		$order->set_status( 'on-hold' );
+		$order->update_meta_data( '_charge_id', 'ch_123' );
+		$order->save();
+		$event = $this->create_dispute_event( 'charge.dispute.closed', 'won' );
+		unset( $event['data']['object'][ $missing_field ] );
+
+		$exception = null;
+		try {
+			$this->sut->process( $event );
+		} catch ( RuntimeException $caught ) {
+			$exception = $caught;
+		}
+
+		$this->assertInstanceOf( RuntimeException::class, $exception, 'Expected malformed dispute closed event to fail closed.' );
+		$this->assertStringContainsString( $missing_field, $exception->getMessage() );
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'on-hold', $order->get_status() );
+		$this->assertOrderLacksNoteContaining( $order, array( 'Dispute has been closed' ) );
+	}
+
+	/**
+	 * Provide malformed closed dispute event fields.
+	 *
+	 * @return array<string,array{0:string}>
+	 */
+	public function malformed_closed_dispute_event_provider(): array {
+		return array(
+			'missing status' => array( 'status' ),
+			'missing id'     => array( 'id' ),
+		);
+	}
+
+	/**
+	 * @testdox charge.dispute.created fails closed when required dispute fields are missing.
+	 *
+	 * @dataProvider malformed_created_dispute_event_provider
+	 *
+	 * @param string[] $missing_path Missing field path under the dispute object.
+	 * @param string   $missing_key  Missing field name.
+	 */
+	public function test_dispute_created_fails_closed_when_required_fields_are_missing( array $missing_path, string $missing_key ): void {
+		$order = $this->create_woopayments_order();
+		$order->set_status( 'processing' );
+		$order->update_meta_data( '_charge_id', 'ch_123' );
+		$order->save();
+		$event = $this->create_dispute_event( 'charge.dispute.created', 'needs_response' );
+		$this->unset_dispute_object_path( $event, $missing_path );
+
+		$exception = null;
+		try {
+			$this->sut->process( $event );
+		} catch ( RuntimeException $caught ) {
+			$exception = $caught;
+		}
+
+		$this->assertInstanceOf( RuntimeException::class, $exception, 'Expected malformed dispute created event to fail closed.' );
+		$this->assertStringContainsString( $missing_key, $exception->getMessage() );
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'processing', $order->get_status() );
+		$this->assertOrderLacksNoteContaining( $order, array( 'Payment has been disputed' ) );
+		$this->assertOrderLacksNoteContaining( $order, array( 'A payment inquiry has been raised' ) );
+	}
+
+	/**
+	 * Provide malformed created dispute event fields.
+	 *
+	 * @return array<string,array{0:string[],1:string}>
+	 */
+	public function malformed_created_dispute_event_provider(): array {
+		return array(
+			'missing status'           => array( array( 'status' ), 'status' ),
+			'missing reason'           => array( array( 'reason' ), 'reason' ),
+			'missing amount'           => array( array( 'amount' ), 'amount' ),
+			'missing evidence details' => array( array( 'evidence_details' ), 'evidence_details' ),
+			'missing due by'           => array( array( 'evidence_details', 'due_by' ), 'due_by' ),
+		);
+	}
+
+	/**
+	 * @testdox charge.dispute.closed with no matching order fails closed.
+	 */
+	public function test_dispute_closed_without_matching_charge_fails_closed(): void {
+		$this->expectException( RuntimeException::class );
+
+		$this->sut->process( $this->create_dispute_event( 'charge.dispute.closed', 'won' ) );
+	}
+
+	/**
 	 * @testdox Unknown event types are successful no-ops.
 	 */
 	public function test_unknown_event_type_is_a_successful_noop(): void {
@@ -645,6 +950,164 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertGreaterThan( 0, $count, "Missing order note: {$expected}" );
+	}
+
+	/**
+	 * Assert that an order has a note containing all expected fragments.
+	 *
+	 * @param WC_Order $order     Order object.
+	 * @param string[] $fragments Expected note fragments.
+	 */
+	private function assertOrderHasNoteContaining( WC_Order $order, array $fragments ): void {
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'type'     => 'any',
+			)
+		);
+
+		foreach ( $notes as $note ) {
+			$content = (string) $note->content;
+			foreach ( $fragments as $fragment ) {
+				if ( false === strpos( $content, $fragment ) ) {
+					continue 2;
+				}
+			}
+
+			$this->addToAssertionCount( 1 );
+			return;
+		}
+
+		$this->fail( 'Missing order note containing: ' . implode( ', ', $fragments ) . '. Notes: ' . wp_json_encode( wp_list_pluck( $notes, 'content' ) ) );
+	}
+
+	/**
+	 * Assert that an order does not have a note containing all expected fragments.
+	 *
+	 * @param WC_Order $order     Order object.
+	 * @param string[] $fragments Expected note fragments.
+	 */
+	private function assertOrderLacksNoteContaining( WC_Order $order, array $fragments ): void {
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'type'     => 'any',
+			)
+		);
+
+		foreach ( $notes as $note ) {
+			$content = (string) $note->content;
+			foreach ( $fragments as $fragment ) {
+				if ( false === strpos( $content, $fragment ) ) {
+					continue 2;
+				}
+			}
+
+			$this->fail( 'Unexpected order note containing: ' . implode( ', ', $fragments ) . '. Notes: ' . wp_json_encode( wp_list_pluck( $notes, 'content' ) ) );
+		}
+
+		$this->addToAssertionCount( 1 );
+	}
+
+	/**
+	 * Unset a nested field under the dispute event object.
+	 *
+	 * @param array<string,mixed> $event Dispute event.
+	 * @param string[]            $path  Field path under data.object.
+	 */
+	private function unset_dispute_object_path( array &$event, array $path ): void {
+		$target = &$event['data']['object'];
+		$last   = array_pop( $path );
+		foreach ( $path as $segment ) {
+			$target = &$target[ $segment ];
+		}
+
+		unset( $target[ $last ] );
+	}
+
+	/**
+	 * Create a dispute-shaped event.
+	 *
+	 * @param string              $type      Event type.
+	 * @param string              $status    Dispute status.
+	 * @param array<string,mixed> $overrides Object overrides.
+	 * @return array<string,mixed>
+	 */
+	private function create_dispute_event( string $type, string $status, array $overrides = array() ): array {
+		$object = array_replace_recursive(
+			array(
+				'id'               => 'du_123',
+				'charge'           => 'ch_123',
+				'amount'           => 5000,
+				'reason'           => 'fraudulent',
+				'status'           => $status,
+				'evidence_details' => array(
+					'due_by' => strtotime( '2026-07-01 00:00:00 UTC' ),
+				),
+			),
+			$overrides
+		);
+
+		return array(
+			'id'   => 'evt_dispute',
+			'type' => $type,
+			'data' => array(
+				'object' => $object,
+			),
+		);
+	}
+
+	/**
+	 * Create a dispute summary API client.
+	 *
+	 * @param array<string,mixed> $summary Dispute summary.
+	 * @return WooPaymentsApiClient
+	 */
+	private function create_dispute_summary_api_client( array $summary = array() ): WooPaymentsApiClient {
+		return new class( $summary ) extends WooPaymentsApiClient {
+			/**
+			 * Dispute summary response.
+			 *
+			 * @var array<string,mixed>
+			 */
+			private array $summary;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param array<string,mixed> $summary Dispute summary response.
+			 */
+			public function __construct( array $summary ) {
+				$this->summary = $summary;
+			}
+
+			/**
+			 * Retrieve a WooPayments dispute summary.
+			 *
+			 * @param string $dispute_id Dispute ID.
+			 * @return array<string,mixed>
+			 */
+			public function get_dispute_summary( string $dispute_id ): array {
+				return $this->summary;
+			}
+		};
+	}
+
+	/**
+	 * Get the expected dispute URL.
+	 *
+	 * @param string $charge_id Charge ID.
+	 * @return string
+	 */
+	private function get_expected_dispute_url( string $charge_id ): string {
+		return add_query_arg(
+			array(
+				'page' => 'wc-admin',
+				'path' => rawurlencode( '/payments/transactions/details' ),
+				'id'   => $charge_id,
+			),
+			admin_url( 'admin.php' )
+		);
 	}
 
 	/**

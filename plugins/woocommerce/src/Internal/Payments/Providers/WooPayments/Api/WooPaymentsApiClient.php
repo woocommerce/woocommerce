@@ -604,6 +604,19 @@ class WooPaymentsApiClient {
 	}
 
 	/**
+	 * Retrieve a WooPayments dispute summary.
+	 *
+	 * @param string $dispute_id Dispute ID.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function get_dispute_summary( string $dispute_id ): array {
+		$this->validate_route_resource_id( $dispute_id );
+
+		return $this->request( array(), 'disputes/' . $dispute_id . '/summary', 'GET' );
+	}
+
+	/**
 	 * Retrieve a WooPayments transaction.
 	 *
 	 * @param string $transaction_id Transaction ID.
