@@ -125,7 +125,7 @@ class WC_Admin_Report {
 
 		$args['order_status'] = $order_status;
 
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() && class_exists( HposLegacyOrderReportQueryBuilder::class ) ) {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$query = ( new HposLegacyOrderReportQueryBuilder() )->build_query( $args, (int) $this->start_date, (int) $this->end_date );
 
 			return $this->execute_order_report_query( $query, $args );
@@ -395,37 +395,42 @@ class WC_Admin_Report {
 		}
 
 		if ( $debug || $nocache ) {
-			self::enable_big_selects();
-
-			/**
-			 * Filters the legacy order report query result.
-			 *
-			 * @param mixed $result Query result returned by wpdb.
-			 * @param array $data   Report data arguments.
-			 *
-			 * @since 2.1.0
-			 */
-			return apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
+			return $this->run_order_report_query( $query_type, $query, $data );
 		}
 
 		$query_hash = md5( $query_type . $query );
 		$result     = $this->get_cached_query( $query_hash );
 		if ( null === $result ) {
-			self::enable_big_selects();
-
-			/**
-			 * Filters the legacy order report query result.
-			 *
-			 * @param mixed $result Query result returned by wpdb.
-			 * @param array $data   Report data arguments.
-			 *
-			 * @since 2.1.0
-			 */
-			$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
+			$result = $this->run_order_report_query( $query_type, $query, $data );
 		}
 		$this->set_cached_query( $query_hash, $result );
 
 		return $result;
+	}
+
+	/**
+	 * Run a legacy order report query and apply the result filter.
+	 *
+	 * @param string $query_type wpdb method used to run the query (e.g. `get_results`, `get_var`).
+	 * @param string $query      The assembled SQL string.
+	 * @param array  $data       Report data arguments passed to the result filter.
+	 *
+	 * @return mixed Query result returned by wpdb (filtered).
+	 */
+	private function run_order_report_query( $query_type, $query, $data ) {
+		global $wpdb;
+
+		self::enable_big_selects();
+
+		/**
+		 * Filters the legacy order report query result.
+		 *
+		 * @param mixed $result Query result returned by wpdb.
+		 * @param array $data   Report data arguments.
+		 *
+		 * @since 2.1.0
+		 */
+		return apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
 	}
 
 	/**

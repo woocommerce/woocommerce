@@ -29,6 +29,13 @@ class HposLegacyOrderReportQueryBuilder {
 	private $report_schema = null;
 
 	/**
+	 * Lazy cache for the legacy `posts` column => HPOS column map used during one query build.
+	 *
+	 * @var array<string,string>|null
+	 */
+	private $column_map = null;
+
+	/**
 	 * Build the SQL clauses for an HPOS-backed legacy order report query.
 	 *
 	 * @param array $args       Parsed report arguments.
@@ -556,13 +563,19 @@ class HposLegacyOrderReportQueryBuilder {
 	 * @return array<string,string>
 	 */
 	private function legacy_to_hpos_column_map(): array {
-		return array(
+		if ( null !== $this->column_map ) {
+			return $this->column_map;
+		}
+
+		$this->column_map = array(
 			'ID'          => 'orders.id',
 			'post_date'   => $this->hpos_local_date_expr(),
 			'post_parent' => 'orders.parent_order_id',
 			'post_status' => 'orders.status',
 			'post_type'   => 'orders.type',
 		);
+
+		return $this->column_map;
 	}
 
 	/**
