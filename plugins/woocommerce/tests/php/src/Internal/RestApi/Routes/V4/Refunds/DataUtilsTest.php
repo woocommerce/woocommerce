@@ -1548,12 +1548,12 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return quantity_exceeds_refundable when a partially-refunded shipping line cannot fit a full preview at its original total.
+	 * @testdox Should return refund_total_exceeds_remaining when a partially-refunded shipping line cannot fit a full preview at its original total.
 	 *
 	 * Order has a $10 shipping line + a $50 product line so the order is still
 	 * refundable after a $5 partial shipping refund. Previewing the shipping
 	 * line at qty=1 would refund the full $10 — exceeds the $5 remaining on
-	 * that line — so validation must reject with `quantity_exceeds_refundable`.
+	 * that line — so validation must reject with `refund_total_exceeds_remaining`.
 	 * Without the per-line cap, validate would pass and `build_refund_preview`
 	 * would return an oversized total.
 	 */
@@ -1616,7 +1616,7 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertInstanceOf( \WP_Error::class, $result );
-		$this->assertEquals( 'quantity_exceeds_refundable', $result->get_error_code() );
+		$this->assertEquals( 'refund_total_exceeds_remaining', $result->get_error_code() );
 
 		$product->delete( true );
 		$order->delete( true );
@@ -1842,7 +1842,7 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertInstanceOf( \WP_Error::class, $result );
-		$this->assertEquals( 'quantity_exceeds_refundable', $result->get_error_code() );
+		$this->assertEquals( 'refund_total_exceeds_remaining', $result->get_error_code() );
 
 		$order->delete( true );
 	}

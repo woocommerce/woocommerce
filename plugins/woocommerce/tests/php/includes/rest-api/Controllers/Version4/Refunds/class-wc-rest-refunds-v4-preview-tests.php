@@ -1717,6 +1717,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		// Preview must not return 200 while create rejects the same auto-filled $200 over-refund.
 		$preview_response = $this->do_preview_request( $order->get_id(), $line_items );
 		$this->assertEquals( 422, $preview_response->get_status() );
+		$this->assertEquals( 'refund_total_exceeds_remaining', $preview_response->get_data()['code'] );
 
 		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
 		$create_request->set_body_params(
@@ -1727,6 +1728,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		);
 		$create_response = $this->server->dispatch( $create_request );
 		$this->assertEquals( 422, $create_response->get_status() );
+		$this->assertEquals( 'refund_total_exceeds_remaining', $create_response->get_data()['code'] );
 	}
 
 	/**

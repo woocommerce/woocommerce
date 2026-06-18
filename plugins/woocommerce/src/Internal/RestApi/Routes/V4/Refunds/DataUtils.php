@@ -1074,7 +1074,7 @@ class DataUtils {
 				$remaining_total = abs( $signed_line_total ) - $refunded_total;
 				if ( $remaining_total <= 0 ) {
 					return new WP_Error(
-						'quantity_exceeds_refundable',
+						'line_item_already_refunded',
 						__( 'This line item has already been fully refunded.', 'woocommerce' ),
 						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
 					);
@@ -1083,10 +1083,10 @@ class DataUtils {
 				$requested_total = abs( $this->compute_line_item_refund_total( $item, $line_item['quantity'] ) );
 				if ( $requested_total > NumberUtil::round( $remaining_total, $price_decimals ) ) {
 					return new WP_Error(
-						'quantity_exceeds_refundable',
+						'refund_total_exceeds_remaining',
 						sprintf(
 							/* translators: %s: remaining refundable amount */
-							__( 'Requested refund exceeds the remaining refundable amount for this line item (%s).', 'woocommerce' ),
+							__( 'refund_total cannot exceed the remaining refundable amount for this line item (%s).', 'woocommerce' ),
 							wc_format_decimal( $remaining_total, $price_decimals )
 						),
 						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
