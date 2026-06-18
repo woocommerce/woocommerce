@@ -8637,6 +8637,10 @@ table.bar_chart {
 		--wc-product-publish-spacing-4: var(--wp-admin-grid-unit-20, 16px);
 		--wc-product-publish-icon-size: 20px;
 		--wc-product-publish-row-horizontal-padding: 10px;
+		--wc-product-publish-row-offset: calc(
+			var(--wc-product-publish-icon-size) +
+				var(--wc-product-publish-spacing-2)
+		);
 
 		.misc-pub-post-status,
 		.misc-pub-visibility,
@@ -8645,8 +8649,7 @@ table.bar_chart {
 			box-sizing: border-box;
 			padding-left: calc(
 				var(--wc-product-publish-row-horizontal-padding) +
-					var(--wc-product-publish-icon-size) +
-					var(--wc-product-publish-spacing-2)
+					var(--wc-product-publish-row-offset)
 			);
 			position: relative;
 		}
@@ -8661,6 +8664,14 @@ table.bar_chart {
 			position: absolute;
 			top: var(--wc-product-publish-spacing-2);
 			width: var(--wc-product-publish-icon-size);
+		}
+
+		#post-status-select,
+		#post-visibility-select,
+		#timestampdiv,
+		#catalog-visibility-select {
+			margin-left: calc(-1 * var(--wc-product-publish-row-offset));
+			width: calc(100% + var(--wc-product-publish-row-offset));
 		}
 
 		.wc-product-publish-select {
