@@ -50,11 +50,14 @@ export interface WooPaymentsDeposit {
 	amount: number;
 	status: WooPaymentsDepositStatus | string;
 	bankAccount?: string | null;
+	bank_reference_key?: string | null;
 	currency: string | null;
 	automatic?: boolean;
 	fee?: number;
 	fee_percentage?: number;
 	created?: number;
+	failure_code?: string;
+	failure_message?: string;
 }
 
 export interface WooPaymentsDepositsOverview {

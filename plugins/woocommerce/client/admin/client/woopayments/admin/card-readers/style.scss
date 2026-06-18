@@ -1,0 +1,41 @@
+.woocommerce-woopayments-card-readers {
+	&__section {
+		background: #fff;
+		border: 1px solid #dcdcde;
+		margin: 24px 0;
+		padding: 24px;
+	}
+
+	&__status {
+		margin: 16px 0 0;
+	}
+
+	&__table {
+		border-collapse: collapse;
+		margin-top: 24px;
+		width: 100%;
+
+		th,
+		td {
+			border-bottom: 1px solid #dcdcde;
+			padding: 12px;
+			text-align: left;
+		}
+
+		th {
+			font-weight: 600;
+		}
+	}
+
+	&__status-badge {
+		background: #f0f0f1;
+		border-radius: 16px;
+		display: inline-block;
+		line-height: 1.5;
+		padding: 2px 8px;
+
+		&.is-active {
+			background: #edfaef;
+		}
+	}
+}

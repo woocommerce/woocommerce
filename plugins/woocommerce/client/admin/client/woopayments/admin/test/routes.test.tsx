@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
+import apiFetch from '@wordpress/api-fetch';
 import fs from 'fs';
 import path from 'path';
 
@@ -14,21 +15,31 @@ import {
 } from '~/settings-payments/provider-routes';
 import { SettingsPaymentsWoopayments } from '~/settings-payments/settings-payments-woopayments';
 
+jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+
+const mockApiFetch = apiFetch as jest.MockedFunction< typeof apiFetch >;
+
 describe( 'WooPayments Settings Payments routes', () => {
-	beforeEach( () => {
+	beforeAll( async () => {
 		resetSettingsPaymentsProviderRoutesForTesting();
-	} );
-
-	afterEach( () => {
-		resetSettingsPaymentsProviderRoutesForTesting();
-	} );
-
-	it( 'registers WooPayments under the Settings Payments route seam', async () => {
 		await import( '../routes' );
+	} );
 
+	beforeEach( () => {
+		window.wcSettings = {
+			adminUrl: 'http://example.com/wp-admin',
+		};
+		mockApiFetch.mockReset();
+	} );
+
+	afterAll( () => {
+		resetSettingsPaymentsProviderRoutesForTesting();
+	} );
+
+	it( 'registers WooPayments under the Settings Payments route seam', () => {
 		const routes = getSettingsPaymentsProviderRoutes();
 
-		expect( routes ).toHaveLength( 8 );
+		expect( routes ).toHaveLength( 11 );
 		expect(
 			routes.map( ( { id, path: routePath, order } ) => ( {
 				id,
@@ -50,6 +61,11 @@ describe( 'WooPayments Settings Payments routes', () => {
 				id: 'woopayments-payouts',
 				path: '/woopayments/payouts',
 				order: 110,
+			},
+			{
+				id: 'woopayments-payout-details',
+				path: '/woopayments/payouts/details',
+				order: 111,
 			},
 			{
 				id: 'woopayments-transactions',
@@ -76,6 +92,16 @@ describe( 'WooPayments Settings Payments routes', () => {
 				path: '/woopayments/disputes/challenge',
 				order: 124,
 			},
+			{
+				id: 'woopayments-card-readers',
+				path: '/woopayments/card-readers',
+				order: 125,
+			},
+			{
+				id: 'woopayments-capital',
+				path: '/woopayments/loans',
+				order: 126,
+			},
 		] );
 		routes.forEach( ( route ) => {
 			expect( route.element ).toBeDefined();
@@ -97,6 +123,38 @@ describe( 'WooPayments Settings Payments routes', () => {
 		expect( source ).toContain(
 			'webpackChunkName: "settings-payments-woopayments-settings"'
 		);
+	} );
+
+	it( 'announces lazy route loading through a status fallback', async () => {
+		mockApiFetch.mockResolvedValueOnce( {} ).mockResolvedValueOnce( {
+			data: [],
+		} );
+
+		const route = getSettingsPaymentsProviderRoutes().find(
+			( { path: routePath } ) => routePath === '/woopayments/loans'
+		);
+
+		expect( route ).toBeDefined();
+		if ( ! route ) {
+			throw new Error(
+				'Expected the WooPayments Capital route to exist.'
+			);
+		}
+
+		render( route.element );
+
+		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
+			'Loading WooPayments…'
+		);
+		expect( screen.getByRole( 'status' ) ).toHaveAttribute(
+			'aria-busy',
+			'true'
+		);
+		expect(
+			await screen.findByText( 'No Capital loans found.', {
+				selector: '.woocommerce-woopayments-capital__empty',
+			} )
+		).toBeInTheDocument();
 	} );
 
 	it( 'renders the native settings page from the legacy WooPayments settings shell', () => {

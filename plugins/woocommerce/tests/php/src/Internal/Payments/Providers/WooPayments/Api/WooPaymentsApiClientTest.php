@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments\A
 
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiException;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use WC_Unit_Test_Case;
 use WP_REST_Request;
@@ -1613,6 +1614,150 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'POST', $http_client->last_method );
 		$this->assertStringContainsString( '"type":"instant"', (string) $http_client->last_body );
 		$this->assertStringContainsString( '"currency":"usd"', (string) $http_client->last_body );
+	}
+
+	/**
+	 * @testdox Should retrieve Capital active loan summary and loans through preserved endpoints.
+	 */
+	public function test_capital_admin_methods_use_preserved_endpoints(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'data' => array(),
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$sut->get_capital_active_loan_summary();
+
+		$this->assertSame( '/sites/123/wcpay/capital/active_loan_summary?test_mode=1', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+		$this->assertNull( $http_client->last_body );
+
+		$sut->get_capital_loans();
+
+		$this->assertSame( '/sites/123/wcpay/capital/loans?test_mode=1', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+		$this->assertNull( $http_client->last_body );
+	}
+
+	/**
+	 * @testdox Should preserve legacy Capital request filters before dispatch.
+	 */
+	public function test_capital_admin_methods_preserve_legacy_request_filters(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'data' => array(),
+				)
+			),
+		);
+
+		$summary_filter = function ( WooPaymentsApiRequest $request ): WooPaymentsApiRequest {
+			$this->assertSame( 'capital/active_loan_summary', $request->get_api() );
+			$this->assertSame( 'GET', $request->get_method() );
+			$request->set_param( 'include', 'details' );
+
+			return $request;
+		};
+		$loans_filter   = function ( WooPaymentsApiRequest $request ): WooPaymentsApiRequest {
+			$this->assertSame( 'capital/loans', $request->get_api() );
+			$this->assertSame( 'GET', $request->get_method() );
+			$request->set_param( 'limit', 25 );
+
+			return $request;
+		};
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+		add_filter( 'wcpay_get_active_loan_summary_request', $summary_filter );
+		add_filter( 'wcpay_get_loans_request', $loans_filter );
+
+		try {
+			$sut->get_capital_active_loan_summary();
+			$summary_path = $http_client->last_path;
+
+			$sut->get_capital_loans();
+			$loans_path = $http_client->last_path;
+		} finally {
+			remove_filter( 'wcpay_get_active_loan_summary_request', $summary_filter );
+			remove_filter( 'wcpay_get_loans_request', $loans_filter );
+		}
+
+		$this->assertStringContainsString( 'include=details', $summary_path );
+		$this->assertStringContainsString( 'test_mode=1', $summary_path );
+		$this->assertStringContainsString( 'limit=25', $loans_path );
+		$this->assertStringContainsString( 'test_mode=1', $loans_path );
+	}
+
+	/**
+	 * @testdox Should expose Capital request filters as legacy request objects.
+	 */
+	public function test_capital_admin_methods_expose_legacy_request_object_aliases(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'data' => array(),
+				)
+			),
+		);
+
+		$observed_summary_request = null;
+		$observed_loans_request   = null;
+
+		$summary_filter = function ( \WCPay\Core\Server\Request $request ) use ( &$observed_summary_request ): \WCPay\Core\Server\Request {
+			$observed_summary_request = $request;
+			$this->assertSame( 'capital/active_loan_summary', $request->get_api() );
+			$this->assertSame( 'GET', $request->get_method() );
+			$request->set_param( 'include', 'details' );
+
+			return $request;
+		};
+		$loans_filter   = function ( \WCPay\Core\Server\Request\Get_Request $request ) use ( &$observed_loans_request ): \WCPay\Core\Server\Request\Get_Request {
+			$observed_loans_request = $request;
+			$this->assertSame( 'capital/loans', $request->get_api() );
+			$this->assertSame( 'GET', $request->get_method() );
+			$request->set_param( 'limit', 25 );
+
+			return $request;
+		};
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+		add_filter( 'wcpay_get_active_loan_summary_request', $summary_filter );
+		add_filter( 'wcpay_get_loans_request', $loans_filter );
+
+		try {
+			$sut->get_capital_active_loan_summary();
+			$summary_path = $http_client->last_path;
+			$sut->get_capital_loans();
+			$loans_path = $http_client->last_path;
+		} finally {
+			remove_filter( 'wcpay_get_active_loan_summary_request', $summary_filter );
+			remove_filter( 'wcpay_get_loans_request', $loans_filter );
+		}
+
+		$this->assertInstanceOf( WooPaymentsApiRequest::class, $observed_summary_request );
+		$this->assertInstanceOf( WooPaymentsApiRequest::class, $observed_loans_request );
+		$this->assertStringContainsString( 'include=details', $summary_path );
+		$this->assertStringContainsString( 'test_mode=1', $summary_path );
+		$this->assertStringContainsString( 'limit=25', $loans_path );
+		$this->assertStringContainsString( 'test_mode=1', $loans_path );
 	}
 
 	/**

@@ -1,0 +1,73 @@
+.woocommerce-woopayments-capital {
+	display: grid;
+	gap: 16px;
+	max-width: 960px;
+
+	&__section {
+		background: #fff;
+		border: 1px solid #dcdcde;
+		padding: 20px;
+	}
+
+	&__section h2,
+	&__section h3 {
+		margin-top: 0;
+	}
+
+	&__status,
+	&__empty {
+		margin: 16px 0 0;
+	}
+
+	&__summary {
+		display: grid;
+		gap: 0;
+		margin: 0;
+	}
+
+	&__summary div {
+		border-bottom: 1px solid #dcdcde;
+		display: grid;
+		gap: 8px;
+		grid-template-columns: 180px minmax(0, 1fr);
+		padding: 12px 0;
+	}
+
+	&__summary div:last-child {
+		border-bottom: 0;
+	}
+
+	&__summary dt {
+		color: #646970;
+		font-weight: 600;
+	}
+
+	&__summary dd {
+		margin: 0;
+		overflow-wrap: anywhere;
+	}
+
+	&__table {
+		border-collapse: collapse;
+		width: 100%;
+	}
+
+	&__table th,
+	&__table td {
+		border-bottom: 1px solid #dcdcde;
+		padding: 12px;
+		text-align: left;
+		vertical-align: top;
+	}
+
+	&__table th:nth-child(n+3),
+	&__table td:nth-child(n+3) {
+		text-align: right;
+	}
+}
+
+@media screen and (max-width: 782px) {
+	.woocommerce-woopayments-capital__summary div {
+		grid-template-columns: 1fr;
+	}
+}

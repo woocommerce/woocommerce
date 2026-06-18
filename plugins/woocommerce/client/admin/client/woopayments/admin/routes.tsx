@@ -30,6 +30,13 @@ const WooPaymentsPayoutsChunk = lazy(
 		)
 );
 
+const WooPaymentsPayoutDetailsChunk = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "settings-payments-woopayments-payouts" */ './payout-details'
+		)
+);
+
 const WooPaymentsTransactionsChunk = lazy(
 	() =>
 		import(
@@ -65,8 +72,22 @@ const WooPaymentsDisputeChallengeChunk = lazy(
 		)
 );
 
+const WooPaymentsCardReadersChunk = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "settings-payments-woopayments-card-readers" */ './card-readers'
+		)
+);
+
+const WooPaymentsCapitalChunk = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "settings-payments-woopayments-capital" */ './capital'
+		)
+);
+
 const LoadingFallback = () => (
-	<div>
+	<div role="status" aria-live="polite" aria-busy="true">
 		{ sprintf(
 			/* translators: %s: WooPayments */
 			__( 'Loading %s…', 'woocommerce' ),
@@ -104,6 +125,17 @@ registerSettingsPaymentsProviderRoute( {
 	element: (
 		<Suspense fallback={ <LoadingFallback /> }>
 			<WooPaymentsPayoutsChunk />
+		</Suspense>
+	),
+} );
+
+registerSettingsPaymentsProviderRoute( {
+	id: 'woopayments-payout-details',
+	path: '/woopayments/payouts/details',
+	order: 111,
+	element: (
+		<Suspense fallback={ <LoadingFallback /> }>
+			<WooPaymentsPayoutDetailsChunk />
 		</Suspense>
 	),
 } );
@@ -159,6 +191,28 @@ registerSettingsPaymentsProviderRoute( {
 	element: (
 		<Suspense fallback={ <LoadingFallback /> }>
 			<WooPaymentsDisputeChallengeChunk />
+		</Suspense>
+	),
+} );
+
+registerSettingsPaymentsProviderRoute( {
+	id: 'woopayments-card-readers',
+	path: '/woopayments/card-readers',
+	order: 125,
+	element: (
+		<Suspense fallback={ <LoadingFallback /> }>
+			<WooPaymentsCardReadersChunk />
+		</Suspense>
+	),
+} );
+
+registerSettingsPaymentsProviderRoute( {
+	id: 'woopayments-capital',
+	path: '/woopayments/loans',
+	order: 126,
+	element: (
+		<Suspense fallback={ <LoadingFallback /> }>
+			<WooPaymentsCapitalChunk />
 		</Suspense>
 	),
 } );

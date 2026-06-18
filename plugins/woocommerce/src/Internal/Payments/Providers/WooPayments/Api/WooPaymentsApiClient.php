@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api;
 
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPaginatedListRequest;
 use WP_Error;
 use WP_REST_Request;
 
@@ -134,6 +135,11 @@ class WooPaymentsApiClient {
 	 * WooPayments deposits API path. These endpoints back the merchant-facing payouts surfaces.
 	 */
 	private const DEPOSITS_API = 'deposits';
+
+	/**
+	 * WooPayments Capital API path.
+	 */
+	private const CAPITAL_API = 'capital';
 
 	/**
 	 * HTTP client.
@@ -1018,6 +1024,36 @@ class WooPaymentsApiClient {
 	}
 
 	/**
+	 * Retrieve the WooPayments Capital active loan summary.
+	 *
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_capital_active_loan_summary(): array {
+		return $this->request_with_legacy_filter(
+			array(),
+			self::CAPITAL_API . '/active_loan_summary',
+			'GET',
+			'wcpay_get_active_loan_summary_request'
+		);
+	}
+
+	/**
+	 * Retrieve WooPayments Capital loans.
+	 *
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_capital_loans(): array {
+		return $this->request_with_legacy_filter(
+			array(),
+			self::CAPITAL_API . '/loans',
+			'GET',
+			'wcpay_get_loans_request'
+		);
+	}
+
+	/**
 	 * Retrieve recommended payment methods for onboarding.
 	 *
 	 * This route is intentionally not sent through the signed provider request path because recommendations are used
@@ -1516,6 +1552,50 @@ class WooPaymentsApiClient {
 		}
 
 		return is_array( $decoded_body ) ? $decoded_body : array();
+	}
+
+	/**
+	 * Send a request after applying a legacy WooPayments request-object filter.
+	 *
+	 * @param array<int|string,mixed> $params Request params.
+	 * @param string                  $api    API path.
+	 * @param string                  $method HTTP method.
+	 * @param string                  $hook   Legacy WooPayments request filter hook.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	private function request_with_legacy_filter( array $params, string $api, string $method, string $hook ): array {
+		WooPaymentsApiRequest::register_legacy_aliases();
+
+		$request = WooPaymentsApiRequest::create( $params, $api, $method );
+
+		/**
+		 * Filters a WooPayments API request before native transport dispatch.
+		 *
+		 * This preserves legacy WooPayments request-object filters for provider APIs that had public request hooks before moving into core.
+		 *
+		 * @since 11.0.0
+		 *
+			 * @param WooPaymentsApiRequest $request Native request compatibility object, aliased to legacy WooPayments request classes when the extension is absent.
+			 */
+		$filtered_request = apply_filters( $hook, $request );
+
+		if ( ! $filtered_request instanceof WooPaymentsPaginatedListRequest ) {
+			// translators: %s: WooPayments API request filter hook name.
+			$message = sprintf( __( 'Invalid WooPayments request returned by %s.', 'woocommerce' ), $hook );
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception messages are not HTML output.
+			throw new WooPaymentsApiException( $message, 'wcpay_invalid_filtered_request', 500 );
+		}
+
+		$filtered_params = $filtered_request->get_params();
+		$filtered_api    = $filtered_request->get_api();
+		$filtered_method = $filtered_request->get_method();
+
+		return $this->request(
+			$filtered_params,
+			$filtered_api,
+			$filtered_method
+		);
 	}
 
 	/**

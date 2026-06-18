@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -13,6 +13,7 @@ import {
 	formatPayoutDate,
 	formatPayoutStatus,
 	formatWooPaymentsAmount,
+	getSettingsPaymentsProviderRouteUrl,
 } from './overview/utils';
 import './style.scss';
 
@@ -124,7 +125,27 @@ export const WooPaymentsPayouts = () => {
 						<tbody>
 							{ payouts.map( ( payout ) => (
 								<tr key={ payout.id }>
-									<td>{ formatPayoutDate( payout ) }</td>
+									<td>
+										<a
+											href={ getSettingsPaymentsProviderRouteUrl(
+												`/woopayments/payouts/details?id=${ encodeURIComponent(
+													payout.id
+												) }`
+											) }
+										>
+											{ formatPayoutDate( payout ) }
+											<span className="screen-reader-text">
+												{ sprintf(
+													/* translators: %s: payout ID. */
+													__(
+														' - view payout details for %s',
+														'woocommerce'
+													),
+													payout.id
+												) }
+											</span>
+										</a>
+									</td>
 									<td>
 										{ formatPayoutStatus( payout.status ) }
 									</td>
