@@ -13,7 +13,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.5.0
+ * @version 11.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -89,6 +89,17 @@ if ( 'customer_reset_password' === $email->id && isset( $reset_key, $user_id ) )
 	<?php
 endif;
 
+if ( 'customer_verify_email' === $email->id ) :
+	// Customer verify email address email.
+	?>
+<p>
+	<a class="link" href="<?php echo esc_url( $verify_url ?? wc_get_page_permalink( 'myaccount' ) ); ?>">
+		<?php esc_html_e( 'Confirm email address', 'woocommerce' ); ?>
+	</a>
+</p>
+	<?php
+endif;
+
 /**
  * Action hook for email classes to hook into the general block email template.
  *
@@ -110,6 +121,7 @@ $emails_without_order_details = apply_filters( 'woocommerce_emails_general_block
 $accounts_related_emails = array(
 	'customer_reset_password',
 	'customer_new_account',
+	'customer_verify_email',
 );
 
 $emails_without_order_details = array_merge( $emails_without_order_details ?? array(), $accounts_related_emails );
