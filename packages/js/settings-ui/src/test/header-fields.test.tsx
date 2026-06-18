@@ -167,9 +167,7 @@ describe( 'settings UI shell header fields', () => {
 			/>
 		);
 
-		const badge = container.querySelector(
-			'.wc-settings-ui-shell__badge'
-		);
+		const badge = container.querySelector( '.wc-settings-ui-shell__badge' );
 		expect( badge ).not.toBeNull();
 		expect(
 			badge?.classList.contains( 'wc-settings-ui-shell__badge--default' )
