@@ -578,9 +578,8 @@ class ListTable extends WP_List_Table {
 			$this->order_query_args['s'] = $search_term;
 			$this->has_filter            = true;
 
-			// 'search_filter' is only meaningful when there is a search term. The search form always submits the
-			// filter dropdown value, and setting it without a term would needlessly disqualify the query from the
-			// cached-count fast path in prepare_items(), triggering a potentially slow COUNT query.
+			// 'search_filter' is inert without a search term, but setting it (the form always submits the dropdown)
+			// would disqualify the request from the cached-count fast path in prepare_items() and force a COUNT.
 			$filter = trim( sanitize_text_field( $this->request['search-filter'] ) );
 			if ( ! empty( $filter ) ) {
 				$this->order_query_args['search_filter'] = $filter;

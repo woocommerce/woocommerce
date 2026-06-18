@@ -12,25 +12,16 @@ use Automattic\WooCommerce\Caches\OrderCountCache;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Rewrites a "multiple statuses, ordered by creation date" order query (such as the default order admin list screen
- * query) as a UNION ALL of single-status queries.
+ * Rewrites a "multiple statuses, ordered by creation date" order query (such as the default order admin list
+ * screen query) as a UNION ALL of single-status queries.
  *
- * `status IN (...)` prevents the `type_status_date` index from providing a global `date_created_gmt` ordering, so
- * the optimizer must either sort all matching rows or walk the `date_created` index while filtering. On large
- * stores it may choose a plan that examines millions of rows to produce a single page of results, depending on the
- * optimizer heuristics available (e.g. the MySQL `prefer_ordering_index` switch). With one branch per (type,
- * status) pair, each branch is fully served — filtering and ordering — by the `type_status_date` index regardless
- * of optimizer behavior or status selectivity, and the outer query only needs to merge a handful of pre-sorted
- * candidate rows.
+ * `status IN (...)` prevents the `type_status_date` index from serving a global `date_created_gmt` ordering, so on
+ * large stores the optimizer may pick a plan that scans millions of rows for a single page. One branch per (type,
+ * status) pair is fully served — filter and order — by `type_status_date`, leaving the outer query to merge a few
+ * pre-sorted rows.
  *
- * The rewrite is skipped unless the final query clauses are byte-identical to those generated purely by the 'type'
- * and 'status' query args, which guarantees that queries customized in any way (other query args, search, meta
- * queries, or modifications via the 'woocommerce_orders_table_query_clauses' filter) are never altered. Queries
- * modified via the 'woocommerce_orders_table_query_sql' filter are not rewritten either: build_query() only
- * attempts the rewrite when that filter returned the query unchanged.
- *
- * By default the rewrite is also gated by store size: on stores below the order count threshold the regular query
- * is already fast even with a suboptimal plan, while each UNION branch adds a small constant cost.
+ * Eligibility (exact clause match) and the store-size gate are documented at the methods that enforce them
+ * (get_sql() and is_enabled()).
  */
 class OrdersTableStatusUnionQuery {
 
@@ -44,22 +35,28 @@ class OrdersTableStatusUnionQuery {
 	 * Maximum row depth (offset + row count). Each UNION branch must fetch up to this many rows, so deeply
 	 * paginated queries are left untouched.
 	 */
-	private const MAX_ROWS = 2000;
+	private const MAX_ROWS = 2_000;
 
 	/**
-	 * Minimum number of orders (per the order count cache) matching the queried types and statuses for the
-	 * rewrite to be enabled by default. An educated guess at the store size where a mis-planned query becomes
-	 * user-visible, not a measured crossover: the rewrite never beats a well-planned regular query, so this
-	 * only balances its small constant cost against the risk of a slow plan on bigger tables.
+	 * Minimum number of orders (per the order count cache) matching the queried types and statuses for the rewrite
+	 * to be enabled by default. A rough threshold for where a mis-planned query gets user-visible, not a measured
+	 * crossover.
 	 */
-	private const MIN_ORDER_COUNT = 500000;
+	private const MIN_ORDER_COUNT = 500_000;
 
 	/**
 	 * The query being rewritten.
 	 *
 	 * @var OrdersTableQuery
 	 */
-	private $query;
+	private OrdersTableQuery $query;
+
+	/**
+	 * The orders table name.
+	 *
+	 * @var string
+	 */
+	private string $orders_table;
 
 	/**
 	 * Constructor.
@@ -69,7 +66,8 @@ class OrdersTableStatusUnionQuery {
 	 * @since 11.0.0
 	 */
 	public function __construct( OrdersTableQuery $query ) {
-		$this->query = $query;
+		$this->query        = $query;
+		$this->orders_table = $query->get_table_name( 'orders' );
 	}
 
 	/**
@@ -83,35 +81,81 @@ class OrdersTableStatusUnionQuery {
 	 * @since 11.0.0
 	 */
 	public function get_sql( array $clauses, bool $suppress_filters ): ?string {
-		global $wpdb;
-
-		$orders_table = $this->query->get_table_name( 'orders' );
-
-		$fields  = $clauses['fields'] ?? '';
-		$join    = $clauses['join'] ?? '';
-		$where   = $clauses['where'] ?? '';
-		$groupby = $clauses['groupby'] ?? '';
-		$orderby = $clauses['orderby'] ?? '';
-		$limits  = $clauses['limits'] ?? '';
-
-		if ( '' !== $join || '' !== $groupby || "{$orders_table}.id" !== $fields ) {
+		// Each step either extracts a validated piece of the rewrite or bails out (returns null) when the query
+		// isn't the plain "type + status, ordered by creation date" shape we can safely rewrite. The UNION is only
+		// assembled once every piece is in place.
+		if ( ! $this->has_rewritable_clause_shape( $clauses ) ) {
 			return null;
 		}
 
-		// Only an ORDER BY on date_created_gmt alone can be satisfied by the type_status_date index within each branch.
-		$direction = null;
-		foreach ( array( 'ASC', 'DESC' ) as $_direction ) {
-			if ( "ORDER BY {$orders_table}.date_created_gmt {$_direction}" === $orderby ) {
-				$direction = $_direction;
-			}
-		}
-
+		$direction = $this->extract_order_direction( $clauses['orderby'] ?? '' );
 		if ( is_null( $direction ) ) {
 			return null;
 		}
 
-		// Unlimited or deeply paginated queries gain nothing from the rewrite: each branch would have to fetch
-		// (offset + row count) rows. The digit cap also rejects the "unlimited" sentinel row count.
+		$limit = $this->extract_limit( $clauses['limits'] ?? '' );
+		if ( is_null( $limit ) ) {
+			return null;
+		}
+
+		$types_and_statuses = $this->extract_types_and_statuses();
+		if ( is_null( $types_and_statuses ) ) {
+			return null;
+		}
+		list( $types, $statuses ) = $types_and_statuses;
+
+		if ( ! $this->is_enabled( $types, $statuses, $suppress_filters ) ) {
+			return null;
+		}
+
+		if ( ! $this->where_matches_type_status_args( $clauses['where'] ?? '' ) ) {
+			return null;
+		}
+
+		list( $offset, $row_count ) = $limit;
+
+		return $this->build_union_sql( $types, $statuses, $direction, $offset + $row_count, $clauses['limits'] ?? '' );
+	}
+
+	/**
+	 * Checks the fixed clauses (selected fields, join, group by) are exactly those of the plain order id list
+	 * query. Any join, grouping or extra selected field means the query isn't a candidate for the rewrite.
+	 *
+	 * @param string[] $clauses The query clauses (see get_sql()).
+	 * @return bool Whether the clause shape is rewritable.
+	 */
+	private function has_rewritable_clause_shape( array $clauses ): bool {
+		return '' === ( $clauses['join'] ?? '' )
+			&& '' === ( $clauses['groupby'] ?? '' )
+			&& "{$this->orders_table}.id" === ( $clauses['fields'] ?? '' );
+	}
+
+	/**
+	 * Extracts the sort direction from the ORDER BY clause, or NULL when it isn't an ORDER BY on date_created_gmt
+	 * alone (the only ordering the type_status_date index can satisfy within each branch).
+	 *
+	 * @param string $orderby The ORDER BY clause, including the keyword.
+	 * @return string|null 'ASC', 'DESC', or NULL when ineligible.
+	 */
+	private function extract_order_direction( string $orderby ): ?string {
+		foreach ( array( 'ASC', 'DESC' ) as $direction ) {
+			if ( "ORDER BY {$this->orders_table}.date_created_gmt {$direction}" === $orderby ) {
+				return $direction;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Extracts the offset and row count from the LIMIT clause, or NULL when the query is unlimited or too deeply
+	 * paginated to benefit (each branch would have to fetch offset + row count rows). The digit cap also rejects
+	 * the "unlimited" sentinel row count.
+	 *
+	 * @param string $limits The LIMIT clause, including the keyword.
+	 * @return int[]|null Array of [ offset, row count ], or NULL when ineligible.
+	 */
+	private function extract_limit( string $limits ): ?array {
 		if ( ! preg_match( '/^LIMIT (\d{1,7}), (\d{1,7})$/', $limits, $limit_parts ) ) {
 			return null;
 		}
@@ -123,6 +167,17 @@ class OrdersTableStatusUnionQuery {
 			return null;
 		}
 
+		return array( $offset, $row_count );
+	}
+
+	/**
+	 * Extracts the queried order types and statuses, or NULL when they don't form a rewritable set: the 'type' and
+	 * 'status' args must both be set and contain only non-empty strings, cover at least two statuses (a single
+	 * status is already served by the type_status_date index), and stay within the branch cap.
+	 *
+	 * @return array[]|null Array of [ types, statuses ] (each a list of unique strings), or NULL when ineligible.
+	 */
+	private function extract_types_and_statuses(): ?array {
 		if ( ! $this->query->arg_isset( 'type' ) || ! $this->query->arg_isset( 'status' ) ) {
 			return null;
 		}
@@ -136,38 +191,52 @@ class OrdersTableStatusUnionQuery {
 			}
 		}
 
-		// A single status doesn't need the rewrite (the type_status_date index already provides the ordering).
 		if ( count( $statuses ) < 2 || ( count( $types ) * count( $statuses ) ) > self::MAX_BRANCHES ) {
 			return null;
 		}
 
-		if ( ! $this->is_enabled( $types, $statuses, $suppress_filters ) ) {
-			return null;
-		}
+		return array( $types, $statuses );
+	}
 
-		// Require the WHERE clause to be exactly the one the 'type' and 'status' args generate (same order as
-		// OrdersTableQuery::process_orders_table_query_args()). Any other contribution — other query args or
-		// filters — disqualifies the query. Both columns are of the 'string' type per the OrdersTableDataStore
-		// column mappings.
+	/**
+	 * Checks the WHERE clause is exactly the one the 'type' and 'status' args generate (same order as
+	 * OrdersTableQuery::process_orders_table_query_args()). Any other contribution — other query args or filters —
+	 * disqualifies the query. Both columns are of the 'string' type per the OrdersTableDataStore column mappings.
+	 *
+	 * @param string $where The WHERE clause (without the WHERE keyword).
+	 * @return bool Whether the WHERE clause is exactly the type/status one.
+	 */
+	private function where_matches_type_status_args( string $where ): bool {
 		$expected_where = '1=1';
 		foreach ( array( 'status', 'type' ) as $arg_key ) {
-			$clause          = $this->query->where( $orders_table, $arg_key, '=', $this->query->get( $arg_key ), 'string' );
+			$clause          = $this->query->where( $this->orders_table, $arg_key, '=', $this->query->get( $arg_key ), 'string' );
 			$expected_where .= " AND ({$clause})";
 		}
 
-		if ( $where !== $expected_where ) {
-			return null;
-		}
+		return $where === $expected_where;
+	}
 
-		// Each branch is wrapped in a derived table (instead of using parenthesized UNION members) so that the
-		// per-branch ORDER BY + LIMIT is honored across MySQL, MariaDB and SQLite.
-		$branch_rows = $offset + $row_count;
-		$branches    = array();
+	/**
+	 * Assembles the UNION ALL rewrite from the validated pieces. Each branch is wrapped in a derived table (instead
+	 * of using parenthesized UNION members) so that the per-branch ORDER BY + LIMIT is honored across MySQL,
+	 * MariaDB and SQLite.
+	 *
+	 * @param string[] $types       Queried order types.
+	 * @param string[] $statuses    Queried order statuses.
+	 * @param string   $direction   Sort direction ('ASC' or 'DESC').
+	 * @param int      $branch_rows Number of rows each branch must fetch (offset + row count).
+	 * @param string   $limits      The outer LIMIT clause, including the keyword.
+	 * @return string The rewritten SQL query.
+	 */
+	private function build_union_sql( array $types, array $statuses, string $direction, int $branch_rows, string $limits ): string {
+		global $wpdb;
+
+		$branches = array();
 
 		foreach ( $types as $type ) {
 			foreach ( $statuses as $status ) {
 				$branch = $wpdb->prepare(
-					"SELECT id, date_created_gmt FROM {$orders_table} WHERE type = %s AND status = %s ORDER BY date_created_gmt {$direction} LIMIT {$branch_rows}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"SELECT id, date_created_gmt FROM {$this->orders_table} WHERE type = %s AND status = %s ORDER BY date_created_gmt {$direction} LIMIT {$branch_rows}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					$type,
 					$status
 				);
@@ -182,11 +251,8 @@ class OrdersTableStatusUnionQuery {
 	/**
 	 * Returns whether the rewrite should be used for the given types and statuses.
 	 *
-	 * By default the rewrite is only enabled when the number of orders matching the queried types and statuses
-	 * (per the order count cache) reaches MIN_ORDER_COUNT: below that, the regular query is fast even with a
-	 * suboptimal execution plan, while each UNION branch adds a small constant cost. The counts are read from the
-	 * cache without recomputing them, so the rewrite stays disabled while the cache is cold (it is kept warm by
-	 * the order admin list screen, among others).
+	 * Enabled by default once the matching order count reaches MIN_ORDER_COUNT. Counts are read from the cache
+	 * without recomputing them, so the rewrite stays disabled while the cache is cold.
 	 *
 	 * @param string[] $types            Queried order types.
 	 * @param string[] $statuses         Queried order statuses.
@@ -200,6 +266,9 @@ class OrdersTableStatusUnionQuery {
 		foreach ( $types as $type ) {
 			$counts = $count_cache->get( $type, $statuses );
 
+			// A cold cache for any queried type means we have no confident total, so bail out (count 0, rewrite
+			// disabled) rather than enable on a partial count — hence reset and break, not continue.
+			// OrderCountCache::get() returns null when any of the type's queried statuses is missing from the cache.
 			if ( is_null( $counts ) ) {
 				$orders_count = 0;
 				break;

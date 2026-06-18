@@ -930,19 +930,15 @@ class OrdersTableQuery {
 		}
 
 		if ( $filtered_sql === $this->sql ) {
-			// Performance note: a query filtering by multiple statuses and ordered by creation date can't be served
-			// efficiently by a single index, and the optimizer may choose a plan that examines millions of rows on
-			// large stores. Rewriting it as a UNION of single-status queries lets each branch be fully served
-			// (filtering and ordering) by the type_status_date index. The rewrite is only attempted when no
-			// 'woocommerce_orders_table_query_sql' callback modified the query, so that code customizing the SQL
-			// always operates on (and gets) the regular query shape. See OrdersTableStatusUnionQuery.
+			// On large HPOS stores this multi-status, date-ordered query can get a slow plan (scanning millions of
+			// rows); rewriting it as a UNION of single-status queries lets the type_status_date index serve each
+			// branch. Only attempted when no 'woocommerce_orders_table_query_sql' callback changed the query. See
+			// OrdersTableStatusUnionQuery.
 			$status_union_sql = ( new OrdersTableStatusUnionQuery( $this ) )->get_sql(
 				compact( 'fields', 'join', 'where', 'groupby', 'orderby', 'limits' ),
 				$this->suppress_filters
 			);
-			if ( ! is_null( $status_union_sql ) ) {
-				$this->sql = $status_union_sql;
-			}
+			$this->sql        = $status_union_sql ?? $this->sql;
 		} else {
 			$this->sql = $filtered_sql;
 		}
