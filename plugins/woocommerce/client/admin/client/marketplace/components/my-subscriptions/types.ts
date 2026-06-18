@@ -34,7 +34,7 @@ export type Subscription = {
 	included_in_host_plan?: boolean;
 	is_agency?: boolean;
 	is_shared: boolean;
-	owner_email: boolean;
+	owner_email: string;
 	has_changelog: boolean;
 };
 

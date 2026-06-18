@@ -305,7 +305,7 @@ export default function PaymentMethodsSelection() {
 									{ sprintf(
 										/* translators: %s: number of hidden payment methods */
 										__( 'Show more (%s)', 'woocommerce' ),
-										hiddenCount
+										hiddenCount.toString()
 									) }
 								</Button>
 							</div>

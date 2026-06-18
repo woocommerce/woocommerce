@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Disable the Blocks e2e WP latest-1 job in nightly checks to avoid noise while that build is fixed. CI job config only; nothing shipped to merchants.
+
+
