@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add TaxDisplayMode enum class for woocommerce_tax_display_shop/cart option values and implement it across the codebase.
