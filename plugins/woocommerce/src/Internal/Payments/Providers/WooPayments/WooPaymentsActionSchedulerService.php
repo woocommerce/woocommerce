@@ -27,9 +27,9 @@ class WooPaymentsActionSchedulerService {
 	 *
 	 * @since 11.0.0
 	 *
-	 * @param string              $hook Hook name.
-	 * @param array<string,mixed> $args      Action args.
-	 * @param int|null            $timestamp Scheduled timestamp. Defaults to now.
+	 * @param string                  $hook Hook name.
+	 * @param array<int|string,mixed> $args Action args.
+	 * @param int|null                $timestamp Scheduled timestamp. Defaults to now.
 	 */
 	public function schedule_job( string $hook, array $args = array(), ?int $timestamp = null ): void {
 		if ( $this->has_pending_action( $hook, $args ) ) {
@@ -46,8 +46,8 @@ class WooPaymentsActionSchedulerService {
 	 * failed-event fetch can schedule the next page when the provider reports
 	 * more events.
 	 *
-	 * @param string              $hook Hook name.
-	 * @param array<string,mixed> $args Action args.
+	 * @param string                  $hook Hook name.
+	 * @param array<int|string,mixed> $args Action args.
 	 * @return bool
 	 */
 	private function has_pending_action( string $hook, array $args ): bool {

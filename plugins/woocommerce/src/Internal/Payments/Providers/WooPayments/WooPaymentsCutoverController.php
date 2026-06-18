@@ -112,10 +112,7 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 	 *
 	 * @var string[]
 	 */
-	private const DEFAULT_PENDING_OPERATIONAL_QUEUE_HOOKS = array(
-		'wcpay_instant_deposit_reminder',
-		'wcpay_post_kyc_activation_email_send',
-	);
+	private const DEFAULT_PENDING_OPERATIONAL_QUEUE_HOOKS = array();
 
 	/**
 	 * Status value for a successful plugin disable.
@@ -340,7 +337,7 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 		 *
 		 * @since 11.0.0
 		 */
-		if ( ! (bool) apply_filters( self::FILTER_NATIVE_ADMIN_SURFACES_READY, false ) ) {
+		if ( ! (bool) apply_filters( self::FILTER_NATIVE_ADMIN_SURFACES_READY, true ) ) {
 			$failures[] = 'native_admin_surfaces_unavailable';
 		}
 

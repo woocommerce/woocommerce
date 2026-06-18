@@ -7,6 +7,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Subscriptions;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+
 /**
  * Detects legacy WooPayments Stripe Billing subscription markers.
  *
@@ -70,38 +72,41 @@ class WooPaymentsLegacySubscriptionsGuard {
 	 * @return bool True when at least one marker exists.
 	 */
 	private function query_legacy_marker_exists(): bool {
-		$args = array(
-			'type'       => self::ORDER_TYPES,
-			'status'     => 'all',
-			'limit'      => 1,
-			'return'     => 'ids',
-			'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-				'relation' => 'OR',
-			),
+		return $this->query_legacy_marker_exists_from_hpos_tables() || $this->query_legacy_marker_exists_from_posts();
+	}
+
+	/**
+	 * Query the HPOS tables directly for legacy markers.
+	 *
+	 * @return bool True when at least one marker exists.
+	 */
+	private function query_legacy_marker_exists_from_hpos_tables(): bool {
+		global $wpdb;
+
+		// Keep this placeholder matrix in sync with the fixed marker constants above.
+		$sql = $wpdb->prepare(
+			'SELECT 1
+			FROM %i AS orders
+			INNER JOIN %i AS ordermeta ON orders.id = ordermeta.order_id
+			WHERE orders.type IN ( %s, %s )
+				AND ordermeta.meta_key IN ( %s, %s, %s, %s, %s, %s, %s, %s, %s )
+			LIMIT 1',
+			OrdersTableDataStore::get_orders_table_name(),
+			OrdersTableDataStore::get_meta_table_name(),
+			self::ORDER_TYPES[0],
+			self::ORDER_TYPES[1],
+			self::LEGACY_POST_META_KEYS[0],
+			self::LEGACY_POST_META_KEYS[1],
+			self::LEGACY_POST_META_KEYS[2],
+			self::LEGACY_POST_META_KEYS[3],
+			self::LEGACY_POST_META_KEYS[4],
+			self::LEGACY_POST_META_KEYS[5],
+			self::LEGACY_POST_META_KEYS[6],
+			self::LEGACY_POST_META_KEYS[7],
+			self::LEGACY_POST_META_KEYS[8]
 		);
 
-		foreach ( self::LEGACY_POST_META_KEYS as $meta_key ) {
-			$args['meta_query'][] = array(
-				'key'     => $meta_key,
-				'compare' => 'EXISTS',
-			);
-		}
-
-		if ( function_exists( 'wcs_get_orders_with_meta_query' ) ) {
-			$orders = wcs_get_orders_with_meta_query( $args );
-			if ( is_array( $orders ) && array() !== $orders ) {
-				return true;
-			}
-		}
-
-		if ( function_exists( 'wc_get_orders' ) ) {
-			$orders = wc_get_orders( $args );
-			if ( is_array( $orders ) && array() !== $orders ) {
-				return true;
-			}
-		}
-
-		return $this->query_legacy_marker_exists_from_posts();
+		return null !== $wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**

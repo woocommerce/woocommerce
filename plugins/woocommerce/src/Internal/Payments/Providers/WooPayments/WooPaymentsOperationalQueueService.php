@@ -7,6 +7,9 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments;
 
+use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Notes\DataStore as NotesDataStore;
+use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
 use Automattic\WooCommerce\Internal\Payments\OrderPaymentStore;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
@@ -49,6 +52,104 @@ class WooPaymentsOperationalQueueService implements RegisterHooksInterface {
 	 * @var string
 	 */
 	const UPDATE_COMPATIBILITY_DATA_ACTION = 'wcpay_update_compatibility_data';
+
+	/**
+	 * Preserved Instant Deposit reminder hook.
+	 *
+	 * @var string
+	 */
+	const INSTANT_DEPOSIT_REMINDER_ACTION = 'wcpay_instant_deposit_reminder';
+
+	/**
+	 * Preserved post-KYC activation email hook.
+	 *
+	 * @var string
+	 */
+	const POST_KYC_ACTIVATION_EMAIL_SEND_ACTION = 'wcpay_post_kyc_activation_email_send';
+
+	/**
+	 * Preserved post-KYC activation email class registry key.
+	 *
+	 * @var string
+	 */
+	const POST_KYC_ACTIVATION_EMAIL_CLASS_KEY = 'WC_Payments_Email_Post_Kyc_Activation';
+
+	/**
+	 * Preserved Instant Deposit eligibility note name.
+	 *
+	 * @var string
+	 */
+	private const INSTANT_DEPOSIT_NOTE_NAME = 'wc-payments-notes-instant-deposits-eligible';
+
+	/**
+	 * Preserved option that records a merchant has been eligible for Instant Deposits.
+	 *
+	 * @var string
+	 */
+	private const INSTANT_DEPOSITS_PREVIOUSLY_ELIGIBLE_OPTION = 'wcpay_instant_deposits_previously_eligible';
+
+	/**
+	 * Preserved KYC completion date option.
+	 *
+	 * @var string
+	 */
+	private const KYC_COMPLETION_DATE_OPTION = 'wcpay_kyc_completion_date';
+
+	/**
+	 * Preserved KYC submitted date option.
+	 *
+	 * @var string
+	 */
+	private const KYC_SUBMITTED_DATE_OPTION = 'wcpay_kyc_submitted_date';
+
+	/**
+	 * Preserved post-KYC activation email sent-stage option.
+	 *
+	 * @var string
+	 */
+	private const POST_KYC_EMAIL_SENT_STAGES_OPTION = 'wcpay_post_kyc_activation_email_sent_stages';
+
+	/**
+	 * Preserved post-KYC activation email scheduled marker.
+	 *
+	 * @var string
+	 */
+	private const POST_KYC_EMAILS_SCHEDULED_OPTION = 'wcpay_post_kyc_activation_emails_scheduled';
+
+	/**
+	 * Preserved first-live-sale marker.
+	 *
+	 * @var string
+	 */
+	private const HAS_LIVE_SALE_OPTION = 'wcpay_has_live_sale';
+
+	/**
+	 * Preserved post-KYC activation eligibility transient.
+	 *
+	 * @var string
+	 */
+	private const POST_KYC_ACTIVATION_ELIGIBLE_TRANSIENT = 'wcpay_post_kyc_activation_eligible';
+
+	/**
+	 * Post-KYC activation email stages in days after KYC completion.
+	 *
+	 * @var int[]
+	 */
+	private const POST_KYC_STAGE_DAYS = array( 7, 14, 30 );
+
+	/**
+	 * Grace window for stale post-KYC activation email actions.
+	 *
+	 * @var int
+	 */
+	private const POST_KYC_STALE_GRACE_SECONDS = 7 * DAY_IN_SECONDS;
+
+	/**
+	 * Instant Deposit reminder cadence.
+	 *
+	 * @var int
+	 */
+	private const INSTANT_DEPOSIT_REMINDER_DELAY = 90 * DAY_IN_SECONDS;
 
 	/**
 	 * Runtime owner arbiter.
@@ -124,6 +225,13 @@ class WooPaymentsOperationalQueueService implements RegisterHooksInterface {
 		add_action( self::ADD_FEE_BREAKDOWN_TO_ORDER_NOTES_ACTION, array( $this, 'handle_wcpay_add_fee_breakdown_to_order_notes' ), 10, 3 );
 		add_action( self::UPDATE_COMPATIBILITY_DATA_ACTION, array( $this, 'handle_wcpay_update_compatibility_data' ), 10, 0 );
 		add_action( 'woocommerce_payments_account_refreshed', array( $this, 'schedule_compatibility_data_update' ) );
+		add_action( 'woocommerce_payments_account_refreshed', array( $this, 'handle_wcpay_instant_deposits_inbox_note' ) );
+		add_action( 'woocommerce_payments_account_refreshed', array( $this, 'maybe_record_kyc_completion_date' ) );
+		add_action( self::INSTANT_DEPOSIT_REMINDER_ACTION, array( $this, 'handle_wcpay_instant_deposit_reminder' ), 10, 0 );
+		add_action( 'add_option_' . self::KYC_COMPLETION_DATE_OPTION, array( $this, 'handle_add_option_wcpay_kyc_completion_date' ), 10, 2 );
+		add_action( self::POST_KYC_ACTIVATION_EMAIL_SEND_ACTION, array( $this, 'handle_wcpay_post_kyc_activation_email_send' ), 10, 1 );
+		add_action( 'admin_init', array( $this, 'handle_wcpay_post_kyc_activation_email_cta' ) );
+		add_filter( 'woocommerce_email_classes', array( $this, 'add_post_kyc_activation_email' ), 10, 1 );
 		add_action( 'after_switch_theme', array( $this, 'schedule_compatibility_data_update' ) );
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'schedule_recurring_actions' ) );
 	}
@@ -189,6 +297,208 @@ class WooPaymentsOperationalQueueService implements RegisterHooksInterface {
 		} catch ( Throwable $exception ) {
 			$this->log_exception( 'Failed to sync native WooPayments compatibility data.', $exception );
 		}
+	}
+
+	/**
+	 * Refresh the Instant Deposit eligibility inbox note from account data.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $account Account data from the WooPayments account cache refresh hook.
+	 */
+	public function handle_wcpay_instant_deposits_inbox_note( $account ): void {
+		if ( ! is_array( $account ) || empty( $account ) ) {
+			return;
+		}
+
+		if ( empty( $account['instant_deposits_eligible'] ) ) {
+			return;
+		}
+
+		update_option( self::INSTANT_DEPOSITS_PREVIOUSLY_ELIGIBLE_OPTION, true );
+
+		try {
+			$this->add_instant_deposit_note();
+			$this->schedule_instant_deposit_note_reminder();
+		} catch ( Throwable $exception ) {
+			$this->log_exception( 'Failed to refresh native WooPayments Instant Deposit eligibility note.', $exception );
+		}
+	}
+
+	/**
+	 * Handle the preserved Instant Deposit reminder action.
+	 *
+	 * @internal
+	 */
+	public function handle_wcpay_instant_deposit_reminder(): void {
+		try {
+			$this->delete_instant_deposit_note();
+		} catch ( Throwable $exception ) {
+			$this->log_exception( 'Failed to delete native WooPayments Instant Deposit eligibility note.', $exception );
+		}
+
+		$this->handle_wcpay_instant_deposits_inbox_note( $this->account_service->get_cached_account_data() );
+	}
+
+	/**
+	 * Record the first live KYC completion observation from account refresh data.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $account Account data from the WooPayments account cache refresh hook.
+	 */
+	public function maybe_record_kyc_completion_date( $account ): void {
+		if ( ! is_array( $account ) || empty( $account ) ) {
+			return;
+		}
+
+		if ( empty( $account['payments_enabled'] ) || empty( $account['is_live'] ) || ! empty( $account['is_test_drive'] ) ) {
+			return;
+		}
+
+		if ( get_option( self::KYC_COMPLETION_DATE_OPTION ) ) {
+			return;
+		}
+
+		$kyc_submitted_date = (int) get_option( self::KYC_SUBMITTED_DATE_OPTION, 0 );
+		$account_created    = (int) ( $account['created'] ?? 0 );
+
+		if ( $kyc_submitted_date ) {
+			$completion_date = time();
+		} elseif ( $account_created ) {
+			$completion_date = $account_created;
+		} else {
+			return;
+		}
+
+		update_option( self::KYC_COMPLETION_DATE_OPTION, $completion_date, false );
+	}
+
+	/**
+	 * Schedule the preserved post-KYC activation email stages when KYC completion is recorded.
+	 *
+	 * @internal
+	 *
+	 * @param string $option_name Option name.
+	 * @param mixed  $value       Option value.
+	 */
+	public function handle_add_option_wcpay_kyc_completion_date( $option_name, $value ): void {
+		if ( self::KYC_COMPLETION_DATE_OPTION !== $option_name ) {
+			return;
+		}
+
+		if ( get_option( self::POST_KYC_EMAILS_SCHEDULED_OPTION ) ) {
+			return;
+		}
+
+		$kyc_date = (int) $value;
+		if ( ! $kyc_date ) {
+			return;
+		}
+
+		$now = time();
+		foreach ( self::POST_KYC_STAGE_DAYS as $stage ) {
+			$send_at = $kyc_date + $stage * DAY_IN_SECONDS;
+			if ( $send_at < $now - self::POST_KYC_STALE_GRACE_SECONDS ) {
+				continue;
+			}
+
+			$this->scheduler->schedule_job(
+				self::POST_KYC_ACTIVATION_EMAIL_SEND_ACTION,
+				array( $stage ),
+				max( $send_at, $now + MINUTE_IN_SECONDS )
+			);
+		}
+
+		update_option( self::POST_KYC_EMAILS_SCHEDULED_OPTION, '1', false );
+	}
+
+	/**
+	 * Handle the preserved staged post-KYC activation email action.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $stage Stage day.
+	 */
+	public function handle_wcpay_post_kyc_activation_email_send( $stage ): void {
+		$stage = (int) $stage;
+		if ( ! in_array( $stage, self::POST_KYC_STAGE_DAYS, true ) ) {
+			return;
+		}
+
+		$sent_stages = $this->get_post_kyc_sent_stages();
+		if ( in_array( $stage, $sent_stages, true ) ) {
+			return;
+		}
+
+		$kyc_date = (int) get_option( self::KYC_COMPLETION_DATE_OPTION, 0 );
+		if ( ! $kyc_date ) {
+			return;
+		}
+
+		if ( time() > $kyc_date + $stage * DAY_IN_SECONDS + self::POST_KYC_STALE_GRACE_SECONDS ) {
+			return;
+		}
+
+		if ( ! $this->is_post_kyc_activation_email_eligible() ) {
+			return;
+		}
+
+		$email = $this->get_post_kyc_activation_email();
+		if ( ! $email || ! $email->is_enabled() || ! $email->get_recipient() ) {
+			return;
+		}
+
+		if ( ! $email->trigger( $stage ) ) {
+			return;
+		}
+
+		$sent_stages[] = $stage;
+		update_option( self::POST_KYC_EMAIL_SENT_STAGES_OPTION, array_values( array_unique( $sent_stages ) ), false );
+	}
+
+	/**
+	 * Register the post-KYC activation email class.
+	 *
+	 * @internal
+	 *
+	 * @param array<string,mixed> $email_classes WooCommerce email classes.
+	 * @return array<string,mixed>
+	 */
+	public function add_post_kyc_activation_email( array $email_classes ): array {
+		$email_classes[ self::POST_KYC_ACTIVATION_EMAIL_CLASS_KEY ] = new WooPaymentsPostKycActivationEmail();
+
+		return $email_classes;
+	}
+
+	/**
+	 * Track clicks from the post-KYC activation email CTA.
+	 *
+	 * @internal
+	 */
+	public function handle_wcpay_post_kyc_activation_email_cta(): void {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['wcpay_referrer'] ) || 'post_kyc_email' !== $_GET['wcpay_referrer'] ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		$stage = isset( $_GET['wcpay_referrer_stage'] ) ? (int) $_GET['wcpay_referrer_stage'] : 0;
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		if ( ! in_array( $stage, self::POST_KYC_STAGE_DAYS, true ) ) {
+			return;
+		}
+
+		if ( class_exists( '\WC_Tracks' ) ) {
+			\WC_Tracks::record_event( 'wcpay_post_kyc_activation_email_cta_clicked', array( 'stage' => $stage ) );
+		}
+
+		wp_safe_redirect( remove_query_arg( array( 'wcpay_referrer', 'wcpay_referrer_stage' ) ) );
+		exit;
 	}
 
 	/**
@@ -267,6 +577,173 @@ class WooPaymentsOperationalQueueService implements RegisterHooksInterface {
 				}
 			}
 		);
+	}
+
+	/**
+	 * Add the preserved Instant Deposit eligibility note when it does not already exist.
+	 */
+	private function add_instant_deposit_note(): void {
+		/**
+		 * Notes data store.
+		 *
+		 * @var NotesDataStore $data_store
+		 */
+		$data_store = Notes::load_data_store();
+		if ( ! empty( $data_store->get_notes_with_name( self::INSTANT_DEPOSIT_NOTE_NAME ) ) ) {
+			return;
+		}
+
+		$note = new Note();
+		$note->set_title(
+			sprintf(
+				/* translators: %s: WooPayments. */
+				__( "You're now eligible to receive Instant Payouts with %s", 'woocommerce' ),
+				'WooPayments'
+			)
+		);
+		$note->set_content(
+			sprintf(
+				/* translators: 1: WooPayments, 2: Instant Payouts documentation URL. */
+				__( 'Get immediate access to your funds when you need them - including nights, weekends, and holidays. With %1$s\' <a href="%2$s">Instant Payouts feature</a>, you\'re able to transfer your earnings to a debit card within minutes.', 'woocommerce' ),
+				'WooPayments',
+				esc_url( 'https://woocommerce.com/document/woopayments/payouts/instant-payouts/' )
+			)
+		);
+		$note->set_content_data( (object) array() );
+		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+		$note->set_name( self::INSTANT_DEPOSIT_NOTE_NAME );
+		$note->set_source( 'woocommerce-payments' );
+		$note->add_action(
+			self::INSTANT_DEPOSIT_NOTE_NAME,
+			__( 'Request an instant payout', 'woocommerce' ),
+			'https://woocommerce.com/document/woopayments/payouts/instant-payouts/#request-an-instant-payout',
+			'unactioned',
+			true
+		);
+		$note->save();
+	}
+
+	/**
+	 * Delete the preserved Instant Deposit eligibility note.
+	 */
+	private function delete_instant_deposit_note(): void {
+		/**
+		 * Notes data store.
+		 *
+		 * @var NotesDataStore $data_store
+		 */
+		$data_store = Notes::load_data_store();
+		$note_ids   = $data_store->get_notes_with_name( self::INSTANT_DEPOSIT_NOTE_NAME );
+
+		foreach ( $note_ids as $note_id ) {
+			$note = Notes::get_note( (int) $note_id );
+			if ( $note instanceof Note ) {
+				$data_store->delete( $note );
+			}
+		}
+	}
+
+	/**
+	 * Schedule the next preserved Instant Deposit eligibility reminder.
+	 */
+	private function schedule_instant_deposit_note_reminder(): void {
+		$this->scheduler->schedule_job( self::INSTANT_DEPOSIT_REMINDER_ACTION, array(), time() + self::INSTANT_DEPOSIT_REMINDER_DELAY );
+	}
+
+	/**
+	 * Get post-KYC activation stages already sent.
+	 *
+	 * @return int[]
+	 */
+	private function get_post_kyc_sent_stages(): array {
+		$sent_stages = get_option( self::POST_KYC_EMAIL_SENT_STAGES_OPTION, array() );
+		if ( ! is_array( $sent_stages ) ) {
+			return array();
+		}
+
+		return array_values(
+			array_intersect(
+				self::POST_KYC_STAGE_DAYS,
+				array_map( 'intval', $sent_stages )
+			)
+		);
+	}
+
+	/**
+	 * Tell whether the store is eligible for a post-KYC activation email.
+	 *
+	 * @return bool
+	 */
+	private function is_post_kyc_activation_email_eligible(): bool {
+		if ( ! $this->account_service->can_process_payments() ) {
+			return false;
+		}
+
+		if ( $this->account_service->has_test_account() ) {
+			return false;
+		}
+
+		if ( $this->account_service->is_test_mode_enabled() ) {
+			return false;
+		}
+
+		if ( ! get_option( self::KYC_COMPLETION_DATE_OPTION ) ) {
+			return false;
+		}
+
+		return ! $this->has_live_sale();
+	}
+
+	/**
+	 * Tell whether the store has a live WooPayments sale.
+	 *
+	 * @return bool
+	 */
+	private function has_live_sale(): bool {
+		if ( get_option( self::HAS_LIVE_SALE_OPTION ) ) {
+			return true;
+		}
+
+		$orders = wc_get_orders(
+			array(
+				'payment_method' => OrderPaymentStore::GATEWAY_ID,
+				'limit'          => 1,
+				'return'         => 'ids',
+				'status'         => array( 'wc-completed', 'wc-processing' ),
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				'meta_query'     => array(
+					array(
+						'key'     => '_wcpay_mode',
+						'value'   => array( 'production', 'prod', 'live' ),
+						'compare' => 'IN',
+					),
+				),
+			)
+		);
+
+		if ( ! empty( $orders ) ) {
+			update_option( self::HAS_LIVE_SALE_OPTION, '1', true );
+			delete_transient( self::POST_KYC_ACTIVATION_ELIGIBLE_TRANSIENT );
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get the native post-KYC activation email instance.
+	 *
+	 * @return WooPaymentsPostKycActivationEmail|null
+	 */
+	private function get_post_kyc_activation_email(): ?WooPaymentsPostKycActivationEmail {
+		if ( ! function_exists( 'WC' ) || ! WC()->mailer() ) {
+			return null;
+		}
+
+		$emails = WC()->mailer()->get_emails();
+		$email  = $emails[ self::POST_KYC_ACTIVATION_EMAIL_CLASS_KEY ] ?? null;
+
+		return $email instanceof WooPaymentsPostKycActivationEmail ? $email : null;
 	}
 
 	/**

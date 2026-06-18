@@ -13,16 +13,16 @@ class RecordingActionSchedulerService extends WooPaymentsActionSchedulerService 
 	/**
 	 * Scheduled jobs.
 	 *
-	 * @var array<int,array{hook:string,args:array<string,mixed>,timestamp?:int}>
+	 * @var array<int,array{hook:string,args:array<int|string,mixed>,timestamp?:int}>
 	 */
 	public array $scheduled_jobs = array();
 
 	/**
 	 * Record a scheduled job.
 	 *
-	 * @param string              $hook Hook name.
-	 * @param array<string,mixed> $args Action args.
-	 * @param int|null            $timestamp Optional scheduled timestamp.
+	 * @param string                  $hook Hook name.
+	 * @param array<int|string,mixed> $args Action args.
+	 * @param int|null                $timestamp Optional scheduled timestamp.
 	 */
 	public function schedule_job( string $hook, array $args = array(), ?int $timestamp = null ): void {
 		$job = array(

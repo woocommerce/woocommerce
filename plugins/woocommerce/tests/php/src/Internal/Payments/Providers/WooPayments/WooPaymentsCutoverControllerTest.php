@@ -8,6 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Subscriptions\WooPaymentsLegacySubscriptionsGuard;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCutoverController;
@@ -77,6 +78,13 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 	private bool $registered_subscription_order_type = false;
 
 	/**
+	 * Raw HPOS order rows created by tests.
+	 *
+	 * @var int[]
+	 */
+	private array $raw_hpos_order_ids = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -120,6 +128,7 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 			unregister_post_type( 'shop_subscription' );
 			$this->registered_subscription_order_type = false;
 		}
+		$this->delete_raw_hpos_orders();
 		Constants::clear_single_constant( 'WC_ALLOW_MERGED_FEATURE_PLUGINS' );
 		$this->reset_legacy_proxy_mocks();
 
@@ -309,6 +318,7 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 		$this->fake_plugin_active();
 		$this->fake_current_user_caps( true );
 		add_filter( NativePaymentsRuntimeArbiter::FILTER_NATIVE_ENABLED, '__return_true' );
+		add_filter( WooPaymentsCutoverController::FILTER_NATIVE_ADMIN_SURFACES_READY, '__return_false' );
 		add_filter( WooPaymentsCutoverController::FILTER_PROVIDER_EVENT_TYPES_PENDING_CUTOVER, '__return_empty_array' );
 		$this->native_provider_ready = true;
 
@@ -341,10 +351,28 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 		add_filter( NativePaymentsRuntimeArbiter::FILTER_NATIVE_ENABLED, '__return_true' );
 		add_filter( WooPaymentsCutoverController::FILTER_NATIVE_ADMIN_SURFACES_READY, '__return_true' );
 		add_filter( WooPaymentsCutoverController::FILTER_PROVIDER_EVENT_TYPES_PENDING_CUTOVER, '__return_empty_array' );
+		add_filter( WooPaymentsCutoverController::FILTER_OPERATIONAL_QUEUE_HOOKS_PENDING_CUTOVER, static fn() => array( 'example_hook' ) );
 		$this->native_provider_ready = true;
 
 		$this->assertContains( 'operational_queue_hooks_undispositioned', $this->sut->get_preflight_failures() );
 		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
+	}
+
+	/**
+	 * @testdox Cutover preflight no longer reports admin, event, or queue blockers after A5a disposition.
+	 */
+	public function test_preflight_closes_admin_event_and_queue_blockers_by_default(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		add_filter( NativePaymentsRuntimeArbiter::FILTER_NATIVE_ENABLED, '__return_true' );
+		$this->native_provider_ready = true;
+
+		$failures = $this->sut->get_preflight_failures();
+
+		$this->assertNotContains( 'native_admin_surfaces_unavailable', $failures );
+		$this->assertNotContains( 'provider_events_undispositioned', $failures );
+		$this->assertNotContains( 'operational_queue_hooks_undispositioned', $failures );
+		$this->assertTrue( $this->sut->should_show_soft_cutover_notice() );
 	}
 
 	/**
@@ -410,6 +438,19 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 		$order = wc_create_order();
 		$order->update_meta_data( '_migrated_wcpay_billing_invoice_id', 'in_migrated_123' );
 		$order->save();
+
+		$this->assertContains( 'legacy_stripe_billing_subscriptions_present', $this->sut->get_preflight_failures() );
+		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
+	}
+
+	/**
+	 * @testdox Cutover preflight blocks legacy Stripe Billing markers in HPOS order meta.
+	 */
+	public function test_preflight_blocks_legacy_stripe_billing_hpos_marker(): void {
+		$this->fake_plugin_active();
+		$this->fake_current_user_caps( true );
+		$this->enable_ready_cutover();
+		$this->create_legacy_stripe_billing_hpos_marker( '_wcpay_pending_invoice_id' );
 
 		$this->assertContains( 'legacy_stripe_billing_subscriptions_present', $this->sut->get_preflight_failures() );
 		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
@@ -557,6 +598,66 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 		update_post_meta( $post_id, $meta_key, 'sub_legacy_' . $status );
 
 		return $post_id;
+	}
+
+	/**
+	 * Create a raw HPOS legacy marker fixture without hydrating an order object.
+	 *
+	 * @param string $meta_key Legacy marker meta key.
+	 * @return int Raw HPOS order ID.
+	 */
+	private function create_legacy_stripe_billing_hpos_marker( string $meta_key ): int {
+		global $wpdb;
+
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$meta_table   = OrdersTableDataStore::get_meta_table_name();
+		$order_id     = (int) $wpdb->get_var( "SELECT COALESCE(MAX(id), 0) + 1 FROM {$orders_table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$wpdb->insert(
+			$orders_table,
+			array(
+				'id'               => $order_id,
+				'status'           => 'wc-active',
+				'currency'         => 'USD',
+				'type'             => 'shop_subscription',
+				'date_created_gmt' => gmdate( 'Y-m-d H:i:s' ),
+				'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ),
+			)
+		);
+		$wpdb->insert(
+			$meta_table,
+			array(
+				'order_id'   => $order_id,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Raw HPOS test fixture row.
+				'meta_key'   => $meta_key,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Raw HPOS test fixture row.
+				'meta_value' => 'in_legacy_hpos',
+			)
+		);
+
+		$this->raw_hpos_order_ids[] = $order_id;
+
+		return $order_id;
+	}
+
+	/**
+	 * Delete raw HPOS order rows created by this test.
+	 */
+	private function delete_raw_hpos_orders(): void {
+		global $wpdb;
+
+		if ( array() === $this->raw_hpos_order_ids ) {
+			return;
+		}
+
+		$order_ids    = implode( ',', array_map( 'absint', $this->raw_hpos_order_ids ) );
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$meta_table   = OrdersTableDataStore::get_meta_table_name();
+
+		$wpdb->query( "DELETE FROM {$meta_table} WHERE order_id IN ({$order_ids})" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "DELETE FROM {$orders_table} WHERE id IN ({$order_ids})" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$this->raw_hpos_order_ids = array();
 	}
 
 	/**

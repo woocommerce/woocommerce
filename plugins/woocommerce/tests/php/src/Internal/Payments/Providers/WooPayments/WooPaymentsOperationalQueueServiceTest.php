@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAc
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsOperationalQueueService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsOrderDataService;
 use Automattic\WooCommerce\Tests\Internal\Payments\StaticNativeRuntimeArbiter;
+use WC_Data_Store;
 use WC_Order;
 use WC_Unit_Test_Case;
 
@@ -35,6 +36,17 @@ class WooPaymentsOperationalQueueServiceTest extends WC_Unit_Test_Case {
 		}
 
 		remove_all_filters( 'wcpay_test_mode' );
+		delete_option( 'wcpay_instant_deposits_previously_eligible' );
+		delete_option( 'wcpay_post_kyc_activation_email_sent_stages' );
+		delete_option( 'wcpay_post_kyc_activation_emails_scheduled' );
+		delete_option( 'wcpay_kyc_completion_date' );
+		delete_option( 'wcpay_kyc_submitted_date' );
+		delete_option( 'wcpay_has_live_sale' );
+		delete_transient( 'wcpay_post_kyc_activation_eligible' );
+		$this->delete_instant_deposit_note();
+		remove_filter( 'woocommerce_email_classes', '__return_empty_array', 20 );
+		remove_filter( 'pre_wp_mail', '__return_true' );
+		$this->reset_mailer_emails();
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
 			as_unschedule_all_actions( WooPaymentsOperationalQueueService::STORE_SETUP_SYNC_ACTION, null, WooPaymentsActionSchedulerService::GROUP_ID );
 		}
@@ -56,8 +68,13 @@ class WooPaymentsOperationalQueueServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( 10, has_action( 'wcpay_update_compatibility_data', array( $service, 'handle_wcpay_update_compatibility_data' ) ) );
 		$this->assertSame( 10, has_action( 'woocommerce_payments_account_refreshed', array( $service, 'schedule_compatibility_data_update' ) ) );
 		$this->assertSame( 10, has_action( 'after_switch_theme', array( $service, 'schedule_compatibility_data_update' ) ) );
-		$this->assertFalse( has_action( 'wcpay_instant_deposit_reminder', array( $service, 'handle_wcpay_instant_deposit_reminder' ) ) );
-		$this->assertFalse( has_action( 'wcpay_post_kyc_activation_email_send', array( $service, 'handle_wcpay_post_kyc_activation_email_send' ) ) );
+		$this->assertSame( 10, has_action( 'woocommerce_payments_account_refreshed', array( $service, 'handle_wcpay_instant_deposits_inbox_note' ) ) );
+		$this->assertSame( 10, has_action( 'woocommerce_payments_account_refreshed', array( $service, 'maybe_record_kyc_completion_date' ) ) );
+		$this->assertSame( 10, has_action( 'wcpay_instant_deposit_reminder', array( $service, 'handle_wcpay_instant_deposit_reminder' ) ) );
+		$this->assertSame( 10, has_action( 'add_option_wcpay_kyc_completion_date', array( $service, 'handle_add_option_wcpay_kyc_completion_date' ) ) );
+		$this->assertSame( 10, has_action( 'wcpay_post_kyc_activation_email_send', array( $service, 'handle_wcpay_post_kyc_activation_email_send' ) ) );
+		$this->assertSame( 10, has_action( 'admin_init', array( $service, 'handle_wcpay_post_kyc_activation_email_cta' ) ) );
+		$this->assertSame( 10, has_filter( 'woocommerce_email_classes', array( $service, 'add_post_kyc_activation_email' ) ) );
 	}
 
 	/**
@@ -72,6 +89,9 @@ class WooPaymentsOperationalQueueServiceTest extends WC_Unit_Test_Case {
 		$this->assertFalse( has_action( 'wcpay_update_saved_payment_method', array( $service, 'handle_wcpay_update_saved_payment_method' ) ) );
 		$this->assertFalse( has_action( 'wcpay_add_fee_breakdown_to_order_notes', array( $service, 'handle_wcpay_add_fee_breakdown_to_order_notes' ) ) );
 		$this->assertFalse( has_action( 'wcpay_update_compatibility_data', array( $service, 'handle_wcpay_update_compatibility_data' ) ) );
+		$this->assertFalse( has_action( 'wcpay_instant_deposit_reminder', array( $service, 'handle_wcpay_instant_deposit_reminder' ) ) );
+		$this->assertFalse( has_action( 'wcpay_post_kyc_activation_email_send', array( $service, 'handle_wcpay_post_kyc_activation_email_send' ) ) );
+		$this->assertFalse( has_filter( 'woocommerce_email_classes', array( $service, 'add_post_kyc_activation_email' ) ) );
 	}
 
 	/**
@@ -263,6 +283,260 @@ class WooPaymentsOperationalQueueServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Instant deposit eligibility refresh creates the preserved inbox note and reminder.
+	 */
+	public function test_instant_deposit_eligibility_refresh_creates_note_and_reminder(): void {
+		$scheduler = new RecordingActionSchedulerService();
+		$service   = $this->create_service( new StaticNativeRuntimeArbiter( true ), $scheduler );
+
+		$service->handle_wcpay_instant_deposits_inbox_note(
+			array(
+				'instant_deposits_eligible' => true,
+			)
+		);
+
+		$this->assertTrue( (bool) get_option( 'wcpay_instant_deposits_previously_eligible', false ) );
+		$this->assertNotSame( array(), $this->get_instant_deposit_note_ids() );
+		$this->assertCount( 1, $scheduler->scheduled_jobs );
+		$this->assertSame( 'wcpay_instant_deposit_reminder', $scheduler->scheduled_jobs[0]['hook'] );
+		$this->assertSame( array(), $scheduler->scheduled_jobs[0]['args'] );
+		$this->assertGreaterThanOrEqual( time() + 90 * DAY_IN_SECONDS - 5, $scheduler->scheduled_jobs[0]['timestamp'] ?? 0 );
+	}
+
+	/**
+	 * @testdox Instant deposit eligibility refresh skips ineligible accounts.
+	 */
+	public function test_instant_deposit_eligibility_refresh_skips_ineligible_accounts(): void {
+		$scheduler = new RecordingActionSchedulerService();
+		$service   = $this->create_service( new StaticNativeRuntimeArbiter( true ), $scheduler );
+
+		$service->handle_wcpay_instant_deposits_inbox_note(
+			array(
+				'instant_deposits_eligible' => false,
+			)
+		);
+
+		$this->assertFalse( (bool) get_option( 'wcpay_instant_deposits_previously_eligible', false ) );
+		$this->assertSame( array(), $this->get_instant_deposit_note_ids() );
+		$this->assertSame( array(), $scheduler->scheduled_jobs );
+	}
+
+	/**
+	 * @testdox Instant deposit reminder refreshes the note from cached account data.
+	 */
+	public function test_instant_deposit_reminder_refreshes_note_from_cached_account_data(): void {
+		$scheduler       = new RecordingActionSchedulerService();
+		$account_service = $this->create_account_service(
+			array(
+				'instant_deposits_eligible' => true,
+			),
+			false
+		);
+		$service         = $this->create_service( new StaticNativeRuntimeArbiter( true ), $scheduler, null, $account_service );
+
+		$service->handle_wcpay_instant_deposit_reminder();
+
+		$this->assertNotSame( array(), $this->get_instant_deposit_note_ids() );
+		$this->assertCount( 1, $scheduler->scheduled_jobs );
+		$this->assertSame( 'wcpay_instant_deposit_reminder', $scheduler->scheduled_jobs[0]['hook'] );
+	}
+
+	/**
+	 * @testdox Post-KYC completion schedules staged activation emails.
+	 */
+	public function test_post_kyc_completion_schedules_staged_activation_emails(): void {
+		$scheduler = new RecordingActionSchedulerService();
+		$service   = $this->create_service( new StaticNativeRuntimeArbiter( true ), $scheduler );
+		$kyc_date  = time();
+
+		$service->handle_add_option_wcpay_kyc_completion_date( 'wcpay_kyc_completion_date', $kyc_date );
+
+		$this->assertSame( '1', get_option( 'wcpay_post_kyc_activation_emails_scheduled' ) );
+		$this->assertSame(
+			array( array( 7 ), array( 14 ), array( 30 ) ),
+			array_column( $scheduler->scheduled_jobs, 'args' )
+		);
+		$this->assertSame(
+			array( 'wcpay_post_kyc_activation_email_send', 'wcpay_post_kyc_activation_email_send', 'wcpay_post_kyc_activation_email_send' ),
+			array_column( $scheduler->scheduled_jobs, 'hook' )
+		);
+	}
+
+	/**
+	 * @testdox Account refresh records post-KYC completion once and schedules staged emails.
+	 */
+	public function test_account_refresh_records_post_kyc_completion_and_schedules_staged_emails(): void {
+		$scheduler = new RecordingActionSchedulerService();
+		$service   = $this->create_service( new StaticNativeRuntimeArbiter( true ), $scheduler );
+		$service->register();
+		update_option( 'wcpay_kyc_submitted_date', time() - HOUR_IN_SECONDS, false );
+
+		/**
+		 * Fires after WooPayments account data is refreshed.
+		 *
+		 * @since 11.0.0
+		 */
+		do_action(
+			'woocommerce_payments_account_refreshed',
+			array(
+				'payments_enabled' => true,
+				'is_live'          => true,
+				'is_test_drive'    => false,
+				'created'          => time() - MONTH_IN_SECONDS,
+			)
+		);
+
+		$post_kyc_jobs = array_values(
+			array_filter(
+				$scheduler->scheduled_jobs,
+				static fn( array $job ): bool => 'wcpay_post_kyc_activation_email_send' === $job['hook']
+			)
+		);
+
+		$this->assertSame( '1', get_option( 'wcpay_post_kyc_activation_emails_scheduled' ) );
+		$this->assertGreaterThan( 0, (int) get_option( 'wcpay_kyc_completion_date', 0 ) );
+		$this->assertSame(
+			array( array( 7 ), array( 14 ), array( 30 ) ),
+			array_column( $post_kyc_jobs, 'args' )
+		);
+	}
+
+	/**
+	 * @testdox Account refresh does not overwrite an existing post-KYC completion date.
+	 */
+	public function test_account_refresh_does_not_overwrite_existing_post_kyc_completion_date(): void {
+		$scheduler         = new RecordingActionSchedulerService();
+		$service           = $this->create_service( new StaticNativeRuntimeArbiter( true ), $scheduler );
+		$existing_kyc_date = time() - YEAR_IN_SECONDS;
+
+		update_option( 'wcpay_kyc_completion_date', $existing_kyc_date, false );
+		$service->maybe_record_kyc_completion_date(
+			array(
+				'payments_enabled' => true,
+				'is_live'          => true,
+				'is_test_drive'    => false,
+				'created'          => time() - MONTH_IN_SECONDS,
+			)
+		);
+
+		$this->assertSame( $existing_kyc_date, (int) get_option( 'wcpay_kyc_completion_date', 0 ) );
+		$this->assertSame( array(), $scheduler->scheduled_jobs );
+	}
+
+	/**
+	 * @testdox Post-KYC activation email registration preserves the WooPayments email settings key.
+	 */
+	public function test_post_kyc_activation_email_registration_preserves_settings_key(): void {
+		$service = $this->create_service( new StaticNativeRuntimeArbiter( true ) );
+		$emails  = $service->add_post_kyc_activation_email( array() );
+
+		$this->assertArrayHasKey( 'WC_Payments_Email_Post_Kyc_Activation', $emails );
+		$this->assertSame( 'wcpay_post_kyc_activation', $emails['WC_Payments_Email_Post_Kyc_Activation']->id );
+		$this->assertSame( 'woocommerce_woocommerce_payments_wcpay_post_kyc_activation_settings', $emails['WC_Payments_Email_Post_Kyc_Activation']->get_option_key() );
+		$this->assertSame( 'emails/post-kyc-activation.php', $emails['WC_Payments_Email_Post_Kyc_Activation']->template_html );
+		$this->assertSame( 'emails/plain/post-kyc-activation.php', $emails['WC_Payments_Email_Post_Kyc_Activation']->template_plain );
+	}
+
+	/**
+	 * @testdox Post-KYC activation email jobs mark the stage only after successful delivery.
+	 */
+	public function test_post_kyc_activation_email_job_marks_stage_after_successful_delivery(): void {
+		update_option( 'wcpay_kyc_completion_date', time() - 8 * DAY_IN_SECONDS, false );
+		add_filter( 'pre_wp_mail', '__return_true' );
+
+		$account_service = $this->create_account_service(
+			array(
+				'is_live'           => true,
+				'is_test_drive'     => false,
+				'payments_enabled'  => true,
+				'details_submitted' => true,
+				'capabilities'      => array(
+					'card_payments' => 'active',
+				),
+			),
+			false,
+			true,
+			false
+		);
+		$service         = $this->create_service( new StaticNativeRuntimeArbiter( true ), new RecordingActionSchedulerService(), null, $account_service );
+		$service->register();
+		$this->reset_mailer_emails();
+
+		$service->handle_wcpay_post_kyc_activation_email_send( 7 );
+
+		remove_filter( 'pre_wp_mail', '__return_true' );
+
+		$this->assertSame( array( 7 ), get_option( 'wcpay_post_kyc_activation_email_sent_stages' ) );
+	}
+
+	/**
+	 * @testdox Post-KYC activation email jobs fail closed when the WooCommerce email registry omits the preserved email.
+	 */
+	public function test_post_kyc_activation_email_job_skips_when_email_registry_omits_preserved_email(): void {
+		update_option( 'wcpay_kyc_completion_date', time() - 8 * DAY_IN_SECONDS, false );
+		add_filter( 'pre_wp_mail', '__return_true' );
+		add_filter( 'woocommerce_email_classes', '__return_empty_array', 20 );
+		$this->reset_mailer_emails();
+
+		$account_service = $this->create_account_service(
+			array(
+				'is_live'           => true,
+				'is_test_drive'     => false,
+				'payments_enabled'  => true,
+				'details_submitted' => true,
+				'capabilities'      => array(
+					'card_payments' => 'active',
+				),
+			),
+			false,
+			true,
+			false
+		);
+		$service         = $this->create_service( new StaticNativeRuntimeArbiter( true ), new RecordingActionSchedulerService(), null, $account_service );
+
+		$service->handle_wcpay_post_kyc_activation_email_send( 7 );
+
+		remove_filter( 'woocommerce_email_classes', '__return_empty_array', 20 );
+		remove_filter( 'pre_wp_mail', '__return_true' );
+
+		$this->assertFalse( get_option( 'wcpay_post_kyc_activation_email_sent_stages' ) );
+	}
+
+	/**
+	 * @testdox Post-KYC activation email jobs do not consume stages when the merchant already has a live sale.
+	 */
+	public function test_post_kyc_activation_email_job_skips_live_sale_stores(): void {
+		update_option( 'wcpay_kyc_completion_date', time() - 8 * DAY_IN_SECONDS, false );
+		add_filter( 'pre_wp_mail', '__return_true' );
+		$order = wc_create_order();
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$order->set_payment_method( 'woocommerce_payments' );
+		$order->set_status( 'completed' );
+		$order->update_meta_data( '_wcpay_mode', 'production' );
+		$order->save();
+
+		$account_service = $this->create_account_service(
+			array(
+				'is_live'           => true,
+				'is_test_drive'     => false,
+				'payments_enabled'  => true,
+				'details_submitted' => true,
+			),
+			false,
+			true,
+			false
+		);
+		$service         = $this->create_service( new StaticNativeRuntimeArbiter( true ), new RecordingActionSchedulerService(), null, $account_service );
+
+		$service->handle_wcpay_post_kyc_activation_email_send( 7 );
+
+		remove_filter( 'pre_wp_mail', '__return_true' );
+
+		$this->assertFalse( get_option( 'wcpay_post_kyc_activation_email_sent_stages' ) );
+		$this->assertSame( '1', get_option( 'wcpay_has_live_sale' ) );
+	}
+
+	/**
 	 * Create an operational queue service.
 	 *
 	 * @param NativePaymentsRuntimeArbiter           $arbiter            Runtime arbiter.
@@ -313,16 +587,23 @@ class WooPaymentsOperationalQueueServiceTest extends WC_Unit_Test_Case {
 	/**
 	 * Create an account service mock.
 	 *
+	 * @param array<string,mixed> $account_data         Account data returned by the mock.
+	 * @param bool                $test_mode            Whether test mode is enabled.
+	 * @param bool                $can_process_payments Whether the account can process payments.
+	 * @param bool                $test_account         Whether the account is a test-drive account.
 	 * @return WooPaymentsAccountService
 	 */
-	private function create_account_service(): WooPaymentsAccountService {
+	private function create_account_service( array $account_data = array(), bool $test_mode = true, bool $can_process_payments = true, bool $test_account = false ): WooPaymentsAccountService {
 		$account_service = $this->getMockBuilder( WooPaymentsAccountService::class )
 			->disableOriginalConstructor()
-			->onlyMethods( array( 'is_test_mode_enabled', 'is_test_mode_onboarding_enabled' ) )
+			->onlyMethods( array( 'is_test_mode_enabled', 'is_test_mode_onboarding_enabled', 'get_cached_account_data', 'can_process_payments', 'has_test_account' ) )
 			->getMock();
 
-		$account_service->method( 'is_test_mode_enabled' )->willReturn( true );
-		$account_service->method( 'is_test_mode_onboarding_enabled' )->willReturn( true );
+		$account_service->method( 'is_test_mode_enabled' )->willReturn( $test_mode );
+		$account_service->method( 'is_test_mode_onboarding_enabled' )->willReturn( $test_mode );
+		$account_service->method( 'get_cached_account_data' )->willReturn( $account_data );
+		$account_service->method( 'can_process_payments' )->willReturn( $can_process_payments );
+		$account_service->method( 'has_test_account' )->willReturn( $test_account );
 
 		return $account_service;
 	}
@@ -403,8 +684,50 @@ class WooPaymentsOperationalQueueServiceTest extends WC_Unit_Test_Case {
 		remove_action( 'wcpay_update_saved_payment_method', array( $service, 'handle_wcpay_update_saved_payment_method' ) );
 		remove_action( 'wcpay_add_fee_breakdown_to_order_notes', array( $service, 'handle_wcpay_add_fee_breakdown_to_order_notes' ) );
 		remove_action( 'wcpay_update_compatibility_data', array( $service, 'handle_wcpay_update_compatibility_data' ) );
+		remove_action( 'wcpay_instant_deposit_reminder', array( $service, 'handle_wcpay_instant_deposit_reminder' ) );
+		remove_action( 'add_option_wcpay_kyc_completion_date', array( $service, 'handle_add_option_wcpay_kyc_completion_date' ) );
+		remove_action( 'wcpay_post_kyc_activation_email_send', array( $service, 'handle_wcpay_post_kyc_activation_email_send' ) );
+		remove_action( 'admin_init', array( $service, 'handle_wcpay_post_kyc_activation_email_cta' ) );
 		remove_action( 'woocommerce_payments_account_refreshed', array( $service, 'schedule_compatibility_data_update' ) );
+		remove_action( 'woocommerce_payments_account_refreshed', array( $service, 'handle_wcpay_instant_deposits_inbox_note' ) );
+		remove_action( 'woocommerce_payments_account_refreshed', array( $service, 'maybe_record_kyc_completion_date' ) );
 		remove_action( 'after_switch_theme', array( $service, 'schedule_compatibility_data_update' ) );
 		remove_action( 'action_scheduler_ensure_recurring_actions', array( $service, 'schedule_recurring_actions' ) );
+		remove_filter( 'woocommerce_email_classes', array( $service, 'add_post_kyc_activation_email' ) );
+	}
+
+	/**
+	 * Rebuild WooCommerce's cached email registry under the currently registered filters.
+	 */
+	private function reset_mailer_emails(): void {
+		if ( function_exists( 'WC' ) && WC()->mailer() ) {
+			WC()->mailer()->emails = array();
+			WC()->mailer()->init();
+		}
+	}
+
+	/**
+	 * Get preserved instant deposit note IDs.
+	 *
+	 * @return int[]
+	 */
+	private function get_instant_deposit_note_ids(): array {
+		$data_store = WC_Data_Store::load( 'admin-note' );
+		$note_ids   = $data_store->get_notes_with_name( 'wc-payments-notes-instant-deposits-eligible' );
+
+		return array_map( 'absint', $note_ids );
+	}
+
+	/**
+	 * Delete preserved instant deposit notes.
+	 */
+	private function delete_instant_deposit_note(): void {
+		$data_store = WC_Data_Store::load( 'admin-note' );
+		foreach ( $this->get_instant_deposit_note_ids() as $note_id ) {
+			$note = \Automattic\WooCommerce\Admin\Notes\Notes::get_note( $note_id );
+			if ( $note instanceof \Automattic\WooCommerce\Admin\Notes\Note ) {
+				$data_store->delete( $note );
+			}
+		}
 	}
 }
