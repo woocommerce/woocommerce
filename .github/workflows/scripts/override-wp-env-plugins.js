@@ -22,44 +22,47 @@ const artifactUrl = `https://github.com/woocommerce/woocommerce/releases/downloa
 
 const configPath = `${ WP_ENV_CONFIG_PATH }/.wp-env.json`;
 console.log( `Reading ${ configPath }` );
-const data = fs.readFileSync( configPath, 'utf8' );
-const wpEnvConfig = JSON.parse( data );
+const wpEnvConfig = JSON.parse( fs.readFileSync( configPath, 'utf8' ) );
+
+// wp-env names an installed plugin's folder after the source basename, so
+// installing WooCommerce straight from the release URL would create a
+// `woocommerce-trunk-nightly` folder - a name no real install produces and which
+// breaks the test setup's `wp-content/plugins/woocommerce/...` assumptions.
+// Instead, mount the release artifact at the canonical `woocommerce` folder via a
+// mapping (wp-env downloads and extracts it for us; the zip's top-level dir is
+// `woocommerce/`, the same one WordPress core unzips for a real user) and drop
+// the source entry from the plugin lists. Mapped plugins are not auto-activated,
+// so `tests/e2e-pw/bin/test-env-setup.sh` activates WooCommerce explicitly.
+const wooCommerceEntries = [ '.', '../woocommerce' ];
+const withoutWooCommerce = ( plugins ) =>
+	Array.isArray( plugins )
+		? plugins.filter( ( entry ) => ! wooCommerceEntries.includes( entry ) )
+		: plugins;
+
+const wooCommerceMapping = {
+	'wp-content/plugins/woocommerce': artifactUrl,
+};
 
 const overrideConfig = {};
 
 if ( wpEnvConfig.plugins ) {
-	overrideConfig.plugins = wpEnvConfig.plugins;
+	overrideConfig.plugins = withoutWooCommerce( wpEnvConfig.plugins );
 }
 
 if ( wpEnvConfig.env?.tests?.plugins ) {
 	overrideConfig.env = {
 		tests: {
-			plugins: wpEnvConfig.env.tests.plugins,
+			plugins: withoutWooCommerce( wpEnvConfig.env.tests.plugins ),
+			mappings: wooCommerceMapping,
 		},
 	};
+} else {
+	overrideConfig.mappings = wooCommerceMapping;
 }
 
-const entriesToReplace = [ '.', '../woocommerce' ];
-
-for ( const entry of entriesToReplace ) {
-	// Search and replace in root plugins
-	let found = overrideConfig.plugins.indexOf( entry );
-	if ( found >= 0 ) {
-		console.log(
-			`Replacing ${ entry } with ${ artifactUrl } in root plugins`
-		);
-		overrideConfig.plugins[ found ] = artifactUrl;
-	}
-
-	// Search and replace in test env plugins
-	found = overrideConfig.env?.tests?.plugins?.indexOf( entry );
-	if ( found >= 0 ) {
-		console.log(
-			`Replacing ${ entry } with ${ artifactUrl } in env.tests.plugins`
-		);
-		overrideConfig.env.tests.plugins[ found ] = artifactUrl;
-	}
-}
+console.log(
+	`Mapping ${ artifactUrl } to wp-content/plugins/woocommerce`
+);
 
 const overrideConfigPath = `${ WP_ENV_CONFIG_PATH }/.wp-env.override.json`;
 console.log( `Saving ${ overrideConfigPath }` );
