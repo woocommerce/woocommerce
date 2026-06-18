@@ -455,6 +455,27 @@ final class Contract {
 	}
 
 	/**
+	 * Recurring discount per cycle (decimal-safe string).
+	 */
+	public function get_discount_total(): string {
+		return $this->discount_total;
+	}
+
+	/**
+	 * Recurring shipping per cycle (decimal-safe string).
+	 */
+	public function get_shipping_total(): string {
+		return $this->shipping_total;
+	}
+
+	/**
+	 * Recurring tax per cycle (decimal-safe string).
+	 */
+	public function get_tax_total(): string {
+		return $this->tax_total;
+	}
+
+	/**
 	 * Next renewal attempt, or null.
 	 */
 	public function get_next_payment_gmt(): ?string {
@@ -471,6 +492,22 @@ final class Contract {
 	}
 
 	/**
+	 * Last successful renewal payment, or null. GMT string.
+	 */
+	public function get_last_payment_gmt(): ?string {
+		return $this->last_payment_gmt;
+	}
+
+	/**
+	 * Set the last successful renewal payment timestamp.
+	 *
+	 * @param string|null $last_payment_gmt GMT string or null.
+	 */
+	public function set_last_payment_gmt( ?string $last_payment_gmt ): void {
+		$this->last_payment_gmt = $last_payment_gmt;
+	}
+
+	/**
 	 * Start timestamp (GMT string).
 	 */
 	public function get_start_gmt(): string {
@@ -482,6 +519,28 @@ final class Contract {
 	 */
 	public function get_cycle_count(): int {
 		return $this->cycle_count;
+	}
+
+	/**
+	 * Set the count of successfully-paid renewal cycles.
+	 *
+	 * The renewal money-path advances this under a per-cycle idempotency guard,
+	 * so the read-modify-write happens once per cycle and a plain setter is
+	 * safe. An atomic, server-side increment becomes necessary once renewal
+	 * accounting is driven by concurrent gateway webhooks (the cycles/attempts
+	 * reshape); until then this is the simpler shape.
+	 *
+	 * @param int $cycle_count New cycle count.
+	 * @throws DomainException If `$cycle_count` is negative.
+	 */
+	public function set_cycle_count( int $cycle_count ): void {
+		if ( $cycle_count < 0 ) {
+			throw new DomainException(
+				sprintf( 'Contract: cycle_count must be 0 or greater, got %d.', $cycle_count )
+			);
+		}
+
+		$this->cycle_count = $cycle_count;
 	}
 
 	/**
