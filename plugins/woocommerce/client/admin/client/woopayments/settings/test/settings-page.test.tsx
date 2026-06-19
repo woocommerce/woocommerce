@@ -809,6 +809,192 @@ describe( 'WooPaymentsSettingsPage', () => {
 		).not.toBeInTheDocument();
 	} );
 
+	it( 'renders fraud protection with the reference Basic and Advanced level controls', () => {
+		mockUseCurrentProtectionLevel.mockReturnValue( [ 'basic', noop ] );
+		mockUseAdvancedFraudProtectionSettings.mockReturnValue( [ [], noop ] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const section = screen
+			.getByRole( 'heading', { name: 'Fraud protection' } )
+			.closest( '.woopayments-settings-section' ) as HTMLElement;
+
+		expect(
+			within( section ).getByText(
+				'Help avoid unauthorized transactions and disputes by setting your fraud protection level.'
+			)
+		).toBeInTheDocument();
+		expect(
+			within( section ).getByRole( 'link', {
+				name: /Learn more about fraud protection/,
+			} )
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/document/woopayments/fraud-and-disputes/fraud-protection/'
+		);
+		expect(
+			within( section ).getByRole( 'heading', {
+				name: 'Set your payment risk level',
+			} )
+		).toBeInTheDocument();
+		expect(
+			within( section ).getByRole( 'group', {
+				name: 'Fraud protection level',
+			} )
+		).toHaveClass( 'woopayments-fraud-protection-levels' );
+		expect(
+			within( section ).getByRole( 'radio', { name: 'Basic' } )
+		).toBeChecked();
+		expect(
+			within( section ).getByRole( 'radio', { name: 'Advanced' } )
+		).toBeInTheDocument();
+		expect(
+			within( section ).queryByRole( 'combobox', {
+				name: 'Protection level',
+			} )
+		).not.toBeInTheDocument();
+		expect(
+			within( section ).queryByText( 'Standard' )
+		).not.toBeInTheDocument();
+		expect(
+			within( section ).getByText(
+				'Provides the base level of platform protection.'
+			)
+		).toBeInTheDocument();
+		expect(
+			within( section ).getByText(
+				'Allows you to fine-tune the level of filtering according to your business needs.'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'links advanced fraud protection to the native provider settings route', () => {
+		mockUseCurrentProtectionLevel.mockReturnValue( [ 'advanced', noop ] );
+		mockUseAdvancedFraudProtectionSettings.mockReturnValue( [ [], noop ] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getByRole( 'link', { name: 'Configure' } )
+		).toHaveAttribute(
+			'href',
+			expect.stringContaining(
+				'path=%2Fwoopayments%2Fsettings%2Ffraud-protection'
+			)
+		);
+	} );
+
+	it( 'does not link advanced fraud protection while fraud settings failed to load', () => {
+		mockUseCurrentProtectionLevel.mockReturnValue( [ 'advanced', noop ] );
+		mockUseAdvancedFraudProtectionSettings.mockReturnValue( [
+			'error',
+			noop,
+		] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.queryByRole( 'link', { name: 'Configure' } )
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByRole( 'button', { name: 'Configure' } )
+		).toBeDisabled();
+	} );
+
+	it( 'uses Edit copy for configured advanced fraud protection settings', () => {
+		mockUseCurrentProtectionLevel.mockReturnValue( [ 'advanced', noop ] );
+		mockUseAdvancedFraudProtectionSettings.mockReturnValue( [
+			[ { key: 'avs_verification' } ],
+			noop,
+		] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect( screen.getByRole( 'link', { name: 'Edit' } ) ).toHaveAttribute(
+			'href',
+			expect.stringContaining(
+				'path=%2Fwoopayments%2Fsettings%2Ffraud-protection'
+			)
+		);
+	} );
+
+	it( 'opens the Basic fraud protection help modal', async () => {
+		mockUseCurrentProtectionLevel.mockReturnValue( [ 'basic', noop ] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Basic level help icon' } )
+		);
+
+		expect(
+			screen.getByRole( 'heading', { name: 'Basic filter level' } )
+		).toBeInTheDocument();
+		const dialog = screen.getByRole( 'dialog', {
+			name: 'Basic filter level',
+		} );
+		expect(
+			within( dialog ).getByText(
+				'Provides basic anti-fraud protection only.'
+			)
+		).toBeInTheDocument();
+		expect(
+			within( dialog ).getByText( 'Payments will be blocked if:' )
+		).toBeInTheDocument();
+		expect(
+			within( dialog ).getByText(
+				'The billing address does not match what is on file with the card issuer.'
+			)
+		).toBeInTheDocument();
+		expect(
+			within( dialog ).getByText(
+				"The card's issuing bank cannot verify the CVV."
+			)
+		).toBeInTheDocument();
+		expect(
+			within( dialog ).getByRole( 'button', { name: 'Got it' } )
+		).toBeInTheDocument();
+	} );
+
+	it( 'honors explicitly disabled Basic fraud checks from the native settings contract', async () => {
+		mockUseCurrentProtectionLevel.mockReturnValue( [ 'basic', noop ] );
+		mockUseGetSettings.mockReturnValue( {
+			fraud_protection: {
+				decline_on_avs_failure: false,
+				decline_on_cvc_failure: false,
+			},
+			account_status: {
+				fraudProtection: {
+					declineOnAVSFailure: true,
+					declineOnCVCFailure: true,
+				},
+			},
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Basic level help icon' } )
+		);
+
+		const dialog = screen.getByRole( 'dialog', {
+			name: 'Basic filter level',
+		} );
+		expect(
+			within( dialog ).queryByText( 'Payments will be blocked if:' )
+		).not.toBeInTheDocument();
+		expect(
+			within( dialog ).queryByText(
+				'The billing address does not match what is on file with the card issuer.'
+			)
+		).not.toBeInTheDocument();
+		expect(
+			within( dialog ).queryByText(
+				"The card's issuing bank cannot verify the CVV."
+			)
+		).not.toBeInTheDocument();
+	} );
+
 	it( 'keeps Stripe Billing migration UI out of the native settings page', () => {
 		render( <WooPaymentsSettingsPage /> );
 

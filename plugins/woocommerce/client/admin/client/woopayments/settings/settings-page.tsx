@@ -24,6 +24,7 @@ import {
 	saveOption,
 	updateDismissedDuplicatePaymentMethodNotices,
 } from './data/actions';
+import { FraudProtectionSettings } from './fraud-protection';
 import { WooPaymentsPaymentMethodsList } from './payment-methods-list';
 import {
 	useAccountBusinessSupportEmail,
@@ -33,11 +34,9 @@ import {
 	useAccountStatementDescriptor,
 	useAccountStatementDescriptorKana,
 	useAccountStatementDescriptorKanji,
-	useAdvancedFraudProtectionSettings,
 	useAmazonPayEnabledSettings,
 	useCardPresentEligible,
 	useCompletedWaitingPeriod,
-	useCurrentProtectionLevel,
 	useDebugLog,
 	useDepositDelayDays,
 	useDepositRestrictions,
@@ -91,7 +90,6 @@ type PayoutWeeklyAnchor =
 	| 'wednesday'
 	| 'thursday'
 	| 'friday';
-type FraudProtectionLevel = 'basic' | 'standard' | 'advanced';
 type PaymentMethodStatus = {
 	status?: string;
 	requirements?: unknown[];
@@ -138,11 +136,6 @@ const asPayoutWeeklyAnchor = ( value: string ): PayoutWeeklyAnchor =>
 	[ 'monday', 'tuesday', 'wednesday', 'thursday', 'friday' ].includes( value )
 		? ( value as PayoutWeeklyAnchor )
 		: 'monday';
-
-const asFraudProtectionLevel = ( value: string ): FraudProtectionLevel =>
-	[ 'basic', 'standard', 'advanced' ].includes( value )
-		? ( value as FraudProtectionLevel )
-		: 'basic';
 
 const asSettingsRecord = ( value: unknown ): SettingsRecord =>
 	value && typeof value === 'object' ? ( value as SettingsRecord ) : {};
@@ -1008,58 +1001,28 @@ const NotificationsSettingsSection = () => {
 };
 
 const FraudProtectionSettingsSection = () => {
-	const [ protectionLevel, setProtectionLevel ] =
-		useCurrentProtectionLevel() as StringSetting;
-	const [ advancedFraudProtectionSettings ] =
-		useAdvancedFraudProtectionSettings() as [
-			unknown[],
-			( value: unknown[] ) => void
-		];
-	const advancedRuleCount = Array.isArray( advancedFraudProtectionSettings )
-		? advancedFraudProtectionSettings.length
-		: 0;
-
 	return (
 		<SettingsSection
 			id="fraud-protection"
 			title={ __( 'Fraud protection', 'woocommerce' ) }
 			description={
-				<p>
-					{ __(
-						'Choose the fraud protection level used to screen card transactions.',
-						'woocommerce'
-					) }
-				</p>
+				<>
+					<p>
+						{ __(
+							'Help avoid unauthorized transactions and disputes by setting your fraud protection level.',
+							'woocommerce'
+						) }
+					</p>
+					<ExternalLink href="https://woocommerce.com/document/woopayments/fraud-and-disputes/fraud-protection/">
+						{ __(
+							'Learn more about fraud protection',
+							'woocommerce'
+						) }
+					</ExternalLink>
+				</>
 			}
 		>
-			<SelectControl
-				label={ __( 'Protection level', 'woocommerce' ) }
-				value={ asFraudProtectionLevel( protectionLevel ) }
-				options={ [
-					{ label: __( 'Basic', 'woocommerce' ), value: 'basic' },
-					{
-						label: __( 'Standard', 'woocommerce' ),
-						value: 'standard',
-					},
-					{
-						label: __( 'Advanced', 'woocommerce' ),
-						value: 'advanced',
-					},
-				] }
-				onChange={ setProtectionLevel }
-				__nextHasNoMarginBottom
-				__next40pxDefaultSize
-			/>
-			<p className="woopayments-settings-muted">
-				{ sprintf(
-					/* translators: %d: Number of advanced fraud protection rules. */
-					__(
-						'%d advanced fraud protection rules are preserved by WooPayments.',
-						'woocommerce'
-					),
-					advancedRuleCount
-				) }
-			</p>
+			<FraudProtectionSettings />
 		</SettingsSection>
 	);
 };

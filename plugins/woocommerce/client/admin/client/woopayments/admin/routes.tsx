@@ -23,6 +23,13 @@ const WooPaymentsExpressCheckoutSettingsChunk = lazy(
 		)
 );
 
+const WooPaymentsFraudProtectionSettingsChunk = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "settings-payments-woopayments-fraud-protection-settings" */ '../settings/fraud-protection/advanced'
+		)
+);
+
 const WooPaymentsOverviewChunk = lazy(
 	() =>
 		import(
@@ -121,6 +128,17 @@ registerSettingsPaymentsProviderRoute( {
 	element: (
 		<Suspense fallback={ <LoadingFallback /> }>
 			<WooPaymentsExpressCheckoutSettingsChunk />
+		</Suspense>
+	),
+} );
+
+registerSettingsPaymentsProviderRoute( {
+	id: 'woopayments-fraud-protection-settings',
+	path: '/woopayments/settings/fraud-protection',
+	order: 92,
+	element: (
+		<Suspense fallback={ <LoadingFallback /> }>
+			<WooPaymentsFraudProtectionSettingsChunk />
 		</Suspense>
 	),
 } );

@@ -280,6 +280,7 @@ class WooPaymentsSettingsService {
 			'woopay_appearance'                          => $this->get_woopay_appearance_for_settings(),
 			'woopay_font_rules'                          => $this->get_woopay_font_rules_for_settings(),
 			'store_name'                                 => get_bloginfo( 'name' ),
+			'store_currency'                             => $this->get_store_currency(),
 			'site_logo_url'                              => $this->get_site_logo_url(),
 			'deposit_schedule_interval'                  => $account_fields['deposit_schedule_interval'],
 			'deposit_schedule_monthly_anchor'            => $account_fields['deposit_schedule_monthly_anchor'],
@@ -290,6 +291,9 @@ class WooPaymentsSettingsService {
 			'deposit_completed_waiting_period'           => $account_fields['deposit_completed_waiting_period'],
 			'current_protection_level'                   => $this->get_current_protection_level(),
 			'advanced_fraud_protection_settings'         => $this->get_advanced_fraud_protection_settings( $settings ),
+			'fraud_protection'                           => $this->get_fraud_protection_settings(),
+			'fraud_protection_allowed_countries'         => $this->get_fraud_protection_allowed_countries(),
+			'is_fraud_protection_review_feature_active'  => $this->is_fraud_protection_review_feature_active(),
 			'express_checkout_product_methods'           => $this->sanitize_payment_method_ids( $this->get_array_setting( $settings, 'express_checkout_product_methods' ), self::EXPRESS_CHECKOUT_METHOD_IDS ),
 			'express_checkout_cart_methods'              => $this->sanitize_payment_method_ids( $this->get_array_setting( $settings, 'express_checkout_cart_methods' ), self::EXPRESS_CHECKOUT_METHOD_IDS ),
 			'express_checkout_checkout_methods'          => $this->sanitize_payment_method_ids( $this->get_array_setting( $settings, 'express_checkout_checkout_methods' ), self::EXPRESS_CHECKOUT_METHOD_IDS ),
@@ -872,6 +876,7 @@ class WooPaymentsSettingsService {
 				$this->api_client->save_fraud_ruleset( $fraud_settings['ruleset_config'] );
 				set_transient( 'wcpay_fraud_protection_settings', $fraud_settings['ruleset_config'], DAY_IN_SECONDS );
 				update_option( 'current_protection_level', $fraud_settings['protection_level'] );
+				$this->sync_cached_fraud_mitigation_settings_after_fraud_save( $fraud_settings );
 			}
 		} catch ( WooPaymentsApiException $e ) {
 			return $this->api_exception_to_wp_error( $e );
@@ -912,6 +917,46 @@ class WooPaymentsSettingsService {
 			'protection_level' => $protection_level,
 			'ruleset_config'   => $ruleset_config,
 		);
+	}
+
+	/**
+	 * Keep account-level fraud mitigation flags aligned with the just-saved advanced ruleset.
+	 *
+	 * @param array{protection_level:string,ruleset_config:array<int|string,mixed>} $fraud_settings Saved fraud settings.
+	 * @return void
+	 */
+	private function sync_cached_fraud_mitigation_settings_after_fraud_save( array $fraud_settings ): void {
+		if ( 'advanced' !== $fraud_settings['protection_level'] ) {
+			return;
+		}
+
+		$account_data = $this->account_service->get_cached_account_data();
+		if ( empty( $account_data ) ) {
+			return;
+		}
+
+		$fraud_mitigation_settings                      = is_array( $account_data['fraud_mitigation_settings'] ?? null ) ? $account_data['fraud_mitigation_settings'] : array();
+		$fraud_mitigation_settings['avs_check_enabled'] = $this->ruleset_contains_fraud_rule( $fraud_settings['ruleset_config'], 'avs_verification' );
+		$account_data['fraud_mitigation_settings']      = $fraud_mitigation_settings;
+
+		$this->account_service->cache_account_data( $account_data );
+	}
+
+	/**
+	 * Check whether a fraud ruleset contains a rule key.
+	 *
+	 * @param array<int|string,mixed> $ruleset  Fraud ruleset.
+	 * @param string                  $rule_key Rule key.
+	 * @return bool
+	 */
+	private function ruleset_contains_fraud_rule( array $ruleset, string $rule_key ): bool {
+		foreach ( $ruleset as $rule ) {
+			if ( is_array( $rule ) && ( $rule['key'] ?? null ) === $rule_key ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -1210,6 +1255,63 @@ class WooPaymentsSettingsService {
 		}
 
 		return $this->get_array_setting( $settings, 'advanced_fraud_protection_settings' );
+	}
+
+	/**
+	 * Get the WooCommerce store currency for fraud threshold rules.
+	 *
+	 * @return string
+	 */
+	private function get_store_currency(): string {
+		$currency = function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : get_option( 'woocommerce_currency', 'USD' );
+
+		return is_scalar( $currency ) ? strtoupper( (string) $currency ) : 'USD';
+	}
+
+	/**
+	 * Get platform fraud protection settings projected from cached account data.
+	 *
+	 * @return array<string,bool>
+	 */
+	private function get_fraud_protection_settings(): array {
+		$account_data = $this->account_service->get_cached_account_data();
+
+		return array(
+			'decline_on_avs_failure' => $this->get_account_bool_setting( $account_data, array( 'fraud_mitigation_settings', 'avs_check_enabled' ), true ),
+			'decline_on_cvc_failure' => $this->get_account_bool_setting( $account_data, array( 'fraud_mitigation_settings', 'cvc_check_enabled' ), true ),
+		);
+	}
+
+	/**
+	 * Get the WooCommerce selling-location settings used by fraud filters.
+	 *
+	 * @return array{type:string,countries:string[]}
+	 */
+	private function get_fraud_protection_allowed_countries(): array {
+		$selling_locations_type = get_option( 'woocommerce_allowed_countries', 'all' );
+		$selling_locations_type = is_scalar( $selling_locations_type ) ? (string) $selling_locations_type : 'all';
+
+		if ( 'specific' === $selling_locations_type ) {
+			$countries = get_option( 'woocommerce_specific_allowed_countries', array() );
+		} elseif ( 'all_except' === $selling_locations_type ) {
+			$countries = get_option( 'woocommerce_all_except_countries', array() );
+		} else {
+			$countries = array();
+		}
+
+		return array(
+			'type'      => in_array( $selling_locations_type, array( 'all', 'specific', 'all_except' ), true ) ? $selling_locations_type : 'all',
+			'countries' => is_array( $countries ) ? array_values( array_filter( $countries, 'is_string' ) ) : array(),
+		);
+	}
+
+	/**
+	 * Tell whether fraud-protection review outcomes are enabled.
+	 *
+	 * @return bool
+	 */
+	private function is_fraud_protection_review_feature_active(): bool {
+		return '1' === (string) get_option( 'wcpay_frt_review_feature_active', '0' );
 	}
 
 	/**

@@ -38,4 +38,14 @@ describe( 'getSettingsPaymentsProviderRouteUrl', () => {
 			'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=%2Fwoopayments%2Fsettings%2Fexpress-checkout%2Fpayment_request&from=settings-payments'
 		);
 	} );
+
+	it( 'builds fraud protection settings provider route URLs', () => {
+		expect(
+			getSettingsPaymentsProviderRouteUrl(
+				'/woopayments/settings/fraud-protection?from=woopayments-settings'
+			)
+		).toBe(
+			'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=%2Fwoopayments%2Fsettings%2Ffraud-protection&from=woopayments-settings'
+		);
+	} );
 } );

@@ -37,10 +37,21 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 	private RecordingWooPaySessionService $woopay_session_service;
 
 	/**
+	 * Original WooCommerce options mutated by focused settings-contract tests.
+	 *
+	 * @var array<string,mixed>
+	 */
+	private array $original_woocommerce_options = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		foreach ( $this->get_mutated_woocommerce_options() as $option_name ) {
+			$this->original_woocommerce_options[ $option_name ] = get_option( $option_name, null );
+		}
 
 		$this->api_client             = new RecordingSettingsApiClient();
 		$this->woopay_session_service = new RecordingWooPaySessionService();
@@ -60,8 +71,16 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 		delete_option( '_wcpay_feature_stripe_billing' );
 		delete_option( 'wcpay_duplicate_payment_method_notices_dismissed' );
 		delete_option( 'wcpay_fraud_protection_welcome_tour_dismissed' );
+		delete_option( 'wcpay_frt_review_feature_active' );
 		delete_option( 'current_protection_level' );
 		delete_transient( 'wcpay_fraud_protection_settings' );
+		foreach ( $this->get_mutated_woocommerce_options() as $option_name ) {
+			if ( array_key_exists( $option_name, $this->original_woocommerce_options ) && null !== $this->original_woocommerce_options[ $option_name ] ) {
+				update_option( $option_name, $this->original_woocommerce_options[ $option_name ] );
+			} else {
+				delete_option( $option_name );
+			}
+		}
 		remove_all_filters( 'wcpay_dev_mode' );
 		remove_all_filters( 'wcpay_test_mode' );
 		remove_all_filters( 'wcpay_test_mode_onboarding' );
@@ -272,6 +291,54 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'is_migrating_stripe_billing', $settings );
 		$this->assertArrayNotHasKey( 'stripe_billing_subscription_count', $settings );
 		$this->assertArrayNotHasKey( 'stripe_billing_migrated_count', $settings );
+	}
+
+	/**
+	 * @testdox Should expose native fraud-protection environment fields consumed by Core-owned settings surfaces.
+	 */
+	public function test_get_settings_exposes_native_fraud_protection_environment_fields(): void {
+		update_option( 'woocommerce_currency', 'EUR' );
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US', 'CA' ) );
+		update_option( 'wcpay_frt_review_feature_active', '1' );
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data'    => array(
+					'account_id'                => 'acct_native_test',
+					'is_live'                   => true,
+					'fraud_mitigation_settings' => array(
+						'avs_check_enabled' => false,
+						'cvc_check_enabled' => true,
+					),
+					'store_currencies'          => array(
+						'default'   => 'usd',
+						'supported' => array( 'usd', 'eur' ),
+					),
+				),
+				'fetched' => time(),
+				'errored' => false,
+			)
+		);
+
+		$settings = $this->sut->get_settings();
+
+		$this->assertSame( 'EUR', $settings['store_currency'] );
+		$this->assertTrue( $settings['is_fraud_protection_review_feature_active'] );
+		$this->assertSame(
+			array(
+				'type'      => 'specific',
+				'countries' => array( 'US', 'CA' ),
+			),
+			$settings['fraud_protection_allowed_countries']
+		);
+		$this->assertSame(
+			array(
+				'decline_on_avs_failure' => false,
+				'decline_on_cvc_failure' => true,
+			),
+			$settings['fraud_protection']
+		);
 	}
 
 	/**
@@ -665,6 +732,75 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep cached account fraud flags in sync after saving advanced fraud settings.
+	 */
+	public function test_update_settings_patches_cached_advanced_fraud_flags_after_ruleset_save(): void {
+		update_option( 'current_protection_level', 'advanced' );
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data'    => array(
+					'account_id'                => 'acct_native_test',
+					'is_live'                   => true,
+					'capabilities'              => array(
+						'card_payments' => 'active',
+					),
+					'fees'                      => array(
+						'card' => array(),
+					),
+					'fraud_mitigation_settings' => array(
+						'avs_check_enabled' => true,
+						'cvc_check_enabled' => true,
+					),
+				),
+				'fetched' => time(),
+				'errored' => false,
+			)
+		);
+		set_transient(
+			'wcpay_fraud_protection_settings',
+			array(
+				array(
+					'key'     => 'avs_verification',
+					'outcome' => 'block',
+					'check'   => array(
+						'key'      => 'avs_mismatch',
+						'operator' => 'equals',
+						'value'    => true,
+					),
+				),
+			),
+			DAY_IN_SECONDS
+		);
+
+		$result = $this->sut->update_settings(
+			array(
+				'current_protection_level'           => 'advanced',
+				'advanced_fraud_protection_settings' => array(
+					array(
+						'key'     => 'address_mismatch',
+						'outcome' => 'block',
+						'check'   => array(
+							'key'      => 'billing_shipping_address_same',
+							'operator' => 'equals',
+							'value'    => false,
+						),
+					),
+				),
+			)
+		);
+
+		$cached_account = get_option( 'wcpay_account_data' );
+
+		$this->assertIsArray( $result );
+		$this->assertIsArray( $cached_account );
+		$this->assertFalse( $cached_account['data']['fraud_mitigation_settings']['avs_check_enabled'] );
+		$this->assertTrue( $cached_account['data']['fraud_mitigation_settings']['cvc_check_enabled'] );
+		$this->assertFalse( $result['fraud_protection']['decline_on_avs_failure'] );
+		$this->assertTrue( $result['fraud_protection']['decline_on_cvc_failure'] );
+	}
+
+	/**
 	 * @testdox Should save canonical fraud presets instead of stale advanced rules.
 	 */
 	public function test_update_settings_saves_canonical_fraud_presets(): void {
@@ -1002,6 +1138,20 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Get WooCommerce settings options mutated by focused contract tests.
+	 *
+	 * @return string[]
+	 */
+	private function get_mutated_woocommerce_options(): array {
+		return array(
+			'woocommerce_currency',
+			'woocommerce_allowed_countries',
+			'woocommerce_specific_allowed_countries',
+			'woocommerce_all_except_countries',
+		);
+	}
+
+	/**
 	 * Get the settings keys required by the hoisted settings store.
 	 *
 	 * @return string[]
@@ -1058,6 +1208,7 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 			'woopay_appearance',
 			'woopay_font_rules',
 			'store_name',
+			'store_currency',
 			'site_logo_url',
 			'deposit_schedule_interval',
 			'deposit_schedule_monthly_anchor',
@@ -1068,6 +1219,9 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 			'deposit_completed_waiting_period',
 			'current_protection_level',
 			'advanced_fraud_protection_settings',
+			'fraud_protection',
+			'fraud_protection_allowed_countries',
+			'is_fraud_protection_review_feature_active',
 			'express_checkout_product_methods',
 			'express_checkout_cart_methods',
 			'express_checkout_checkout_methods',
