@@ -7,9 +7,15 @@
  *
  * Usage: php check_new_functions.php <pr_branch> <compare_branch>
  * Example: php check_new_functions.php feature/new-functions trunk
+ *
+ * @package WooCommerce
  */
 
-// Check if we have the required arguments
+// This is a CLI-only script: it shells out to git via exec() and writes plain text to stdout.
+// WordPress's web-oriented escaping and system-call sniffs therefore don't apply here.
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.PHP.DiscouragedPHPFunctions.system_calls_exec
+
+// Check if we have the required arguments.
 if ( $argc < 3 ) {
 	echo "Usage: php check_new_functions.php <pr_branch> <compare_branch>\n";
 	echo "Example: php check_new_functions.php feature/new-functions trunk\n";
@@ -19,14 +25,14 @@ if ( $argc < 3 ) {
 $pr_branch      = $argv[1];
 $compare_branch = $argv[2];
 
-// Get the root of the repository
+// Get the root of the repository.
 $get_repo_root_command = 'git rev-parse --show-toplevel';
 $output                = array();
 $return_code           = 0;
 
 exec( $get_repo_root_command, $output, $return_code );
 
-if ( $return_code !== 0 ) {
+if ( 0 !== $return_code ) {
 	echo "Error: Failed to execute git rev-parse command\n";
 	echo "Command: $get_repo_root_command\n";
 	exit( 1 );
@@ -44,7 +50,7 @@ $return_code  = 0;
 
 exec( $diff_command, $output, $return_code );
 
-if ( $return_code !== 0 ) {
+if ( 0 !== $return_code ) {
 	echo "Error: Failed to execute git diff command\n";
 	echo "Command: $diff_command\n";
 	exit( 1 );
@@ -55,7 +61,7 @@ if ( empty( $output ) ) {
 	exit( 0 );
 }
 
-// Parse the diff output to find added and deleted functions
+// Parse the diff output to find added and deleted functions.
 $added_function_file_map = array();
 $deleted_functions       = array();
 
@@ -69,11 +75,13 @@ $excluded_files = array(
 
 $current_file = '';
 foreach ( $output as $line ) {
-	// Track current file being processed
+	// Track current file being processed.
 	if ( preg_match( '/^diff --git a\/(.+?) b\/(.+?)$/', $line, $matches ) ) {
-		$current_file = $matches[2]; // Use the 'b' (new) file path
+		// Use the 'b' (new) file path.
+		$current_file = $matches[2];
 	} elseif ( preg_match( '/^\+\+\+ b\/(.+?)$/', $line, $matches ) ) {
-		$current_file = $matches[1]; // Alternative way to get file path
+		// Alternative way to get the file path.
+		$current_file = $matches[1];
 	}
 
 	// Skip files that are allowed to define standalone functions.
@@ -114,9 +122,9 @@ foreach ( array_unique( array_values( $added_function_file_map ) ) as $file ) {
 		continue;
 	}
 
-	$names  = array();
-	$tokens = token_get_all( implode( "\n", $file_lines ) );
-	$count  = count( $tokens );
+	$function_names = array();
+	$tokens         = token_get_all( implode( "\n", $file_lines ) );
+	$count          = count( $tokens );
 	for ( $i = 0; $i < $count; $i++ ) {
 		if ( ! is_array( $tokens[ $i ] ) || T_FUNCTION !== $tokens[ $i ][0] ) {
 			continue;
@@ -128,15 +136,17 @@ foreach ( array_unique( array_values( $added_function_file_map ) ) as $file ) {
 				continue;
 			}
 			if ( '&' === $token ) {
-				continue; // Return-by-reference functions.
+				// Return-by-reference functions.
+				continue;
 			}
 			if ( is_array( $token ) && T_STRING === $token[0] ) {
-				$names[] = $token[1];
+				$function_names[] = $token[1];
 			}
-			break; // Name found, or this is an anonymous function.
+			// Name found, or this is an anonymous function.
+			break;
 		}
 	}
-	$php_functions_by_file[ $file ] = $names;
+	$php_functions_by_file[ $file ] = $function_names;
 }
 
 foreach ( $added_function_file_map as $function => $file ) {
@@ -145,15 +155,15 @@ foreach ( $added_function_file_map as $function => $file ) {
 	}
 }
 
-// Calculate net added functions (added minus deleted) and clean file paths
+// Calculate net added functions (added minus deleted) and clean file paths.
 $net_function_file_map = array();
 foreach ( $added_function_file_map as $function => $file_path ) {
-	// Skip functions that were also deleted (net zero change)
-	if ( in_array( $function, $deleted_functions ) ) {
+	// Skip functions that were also deleted (net zero change).
+	if ( in_array( $function, $deleted_functions, true ) ) {
 		continue;
 	}
 
-	// Remove "plugins/woocommerce/" prefix from file path
+	// Remove "plugins/woocommerce/" prefix from file path.
 	$plugin_path_prefix = 'plugins/woocommerce/';
 	if ( strpos( $file_path, $plugin_path_prefix ) === 0 ) {
 		$file_path = substr( $file_path, strlen( $plugin_path_prefix ) );
@@ -161,19 +171,21 @@ foreach ( $added_function_file_map as $function => $file_path ) {
 	$net_function_file_map[ $function ] = $file_path;
 }
 
-// Check if there are any net added functions
+// Check if there are any net added functions.
 if ( empty( $net_function_file_map ) ) {
 	exit( 0 );
 }
 
-// Print error message and formatted table
+// Print error message and formatted table.
 echo "The following new functions are added in $pr_branch:\n\n";
 
-// Find the longest function name to determine column width
+// Find the longest function name to determine column width.
 $max_function_length = max( array_map( 'strlen', array_keys( $net_function_file_map ) ) );
-$column_width        = max( 15, $max_function_length + 2 ); // Minimum width of 15, plus 2 for padding
 
-// Format as table
+// Minimum width of 15, plus 2 for padding.
+$column_width = max( 15, $max_function_length + 2 );
+
+// Format as table.
 printf( "%-{$column_width}s | %s\n", 'Function Name', 'File Path' );
 echo str_repeat( '-', $column_width + 3 ) . str_repeat( '-', 50 ) . "\n";
 foreach ( $net_function_file_map as $function => $file ) {
