@@ -18,6 +18,36 @@ export interface WooPaymentsTransaction {
 	status?: string;
 }
 
+export interface WooPaymentsAuthorization {
+	id?: string;
+	captured?: boolean;
+	charge_id?: string;
+	created?: number | string;
+	order_id?: number | string;
+	risk_level?: number | string;
+	amount?: number;
+	customer_name?: string;
+	customer_email?: string;
+	customer_country?: string;
+	payment_intent_id?: string;
+	currency?: string;
+}
+
+export interface WooPaymentsAuthorizationsSummary {
+	count?: number;
+	total_count?: number;
+	total?: number;
+	currency?: string;
+	all_currencies?: string[];
+}
+
+export interface WooPaymentsAuthorizationActionResponse {
+	id?: string;
+	status?: string;
+	payment_intent_id?: string;
+	[ key: string ]: unknown;
+}
+
 export interface WooPaymentsDispute {
 	id?: string;
 	dispute_id?: string;
@@ -142,6 +172,14 @@ export interface WooPaymentsMoneyMovementQuery {
 	date_before?: string | string[];
 	date_between?: string | string[];
 	[ key: string ]: string | string[] | number | boolean | undefined;
+}
+
+export interface WooPaymentsAuthorizationQuery
+	extends WooPaymentsMoneyMovementQuery {
+	order_id_is?: string | string[];
+	customer_email_is?: string | string[];
+	customer_country_is?: string | string[];
+	risk_level_is?: string | string[];
 }
 
 export type WooPaymentsMoneyMovementQueryFilterParam =

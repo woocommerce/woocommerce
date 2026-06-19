@@ -76,6 +76,49 @@ class RecordingMoneyMovementApiClient extends WooPaymentsApiClient {
 	}
 
 	/**
+	 * Get authorizations.
+	 *
+	 * @param array<string,mixed> $query                  Query params.
+	 * @param bool                $preserve_legacy_filter Whether to preserve legacy request filters.
+	 * @return array<string,mixed>
+	 */
+	public function get_authorizations( array $query = array(), bool $preserve_legacy_filter = true ): array {
+		$this->record(
+			'get_authorizations',
+			array(
+				'query'                  => $query,
+				'preserve_legacy_filter' => $preserve_legacy_filter,
+			)
+		);
+
+		return $this->response;
+	}
+
+	/**
+	 * Get authorizations summary.
+	 *
+	 * @param array<string,mixed> $query Query params.
+	 * @return array<string,mixed>
+	 */
+	public function get_authorizations_summary( array $query = array() ): array {
+		$this->record( 'get_authorizations_summary', array( 'query' => $query ) );
+
+		return $this->response;
+	}
+
+	/**
+	 * Get authorization.
+	 *
+	 * @param string $payment_intent_id Payment intent ID.
+	 * @return array<string,mixed>
+	 */
+	public function get_authorization( string $payment_intent_id ): array {
+		$this->record( 'get_authorization', array( 'payment_intent_id' => $payment_intent_id ) );
+
+		return $this->response;
+	}
+
+	/**
 	 * Get charge.
 	 *
 	 * @param string $charge_id Charge ID.

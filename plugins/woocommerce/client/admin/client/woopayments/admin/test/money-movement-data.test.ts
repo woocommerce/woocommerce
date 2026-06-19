@@ -6,6 +6,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
+import * as moneyMovementData from '../money-movement/data';
 import {
 	closeWooPaymentsDispute,
 	getWooPaymentsDispute,
@@ -70,6 +71,75 @@ describe( 'WooPayments money movement data helpers', () => {
 		expect( mockApiFetch ).toHaveBeenNthCalledWith( 5, {
 			path: '/wc/v3/payments/transactions/download/export_test',
 			method: 'GET',
+		} );
+	} );
+
+	it( 'preserves authorizations endpoint paths and action routes', async () => {
+		const dataHelpers = moneyMovementData as unknown as Record<
+			string,
+			( ...args: unknown[] ) => Promise< unknown >
+		>;
+
+		expect( typeof dataHelpers.getWooPaymentsAuthorizations ).toBe(
+			'function'
+		);
+		expect( typeof dataHelpers.getWooPaymentsAuthorization ).toBe(
+			'function'
+		);
+		expect( typeof dataHelpers.getWooPaymentsAuthorizationsSummary ).toBe(
+			'function'
+		);
+		expect( typeof dataHelpers.captureWooPaymentsAuthorization ).toBe(
+			'function'
+		);
+		expect( typeof dataHelpers.cancelWooPaymentsAuthorization ).toBe(
+			'function'
+		);
+
+		await dataHelpers.getWooPaymentsAuthorizations( {
+			page: 2,
+			pagesize: 25,
+			sort: 'capture_by',
+			direction: 'desc',
+			search: 'Ada',
+			loan_id_is: 'loan_test',
+			deposit_id: 'po_test',
+			store_currency_is: 'usd',
+		} );
+		await dataHelpers.getWooPaymentsAuthorization( 'pi_test' );
+		await dataHelpers.getWooPaymentsAuthorizationsSummary( {
+			sort: 'capture_by',
+			direction: 'asc',
+			type_is: 'charge',
+		} );
+		await dataHelpers.captureWooPaymentsAuthorization( 123, 'pi_test' );
+		await dataHelpers.cancelWooPaymentsAuthorization( 123, 'pi_test' );
+
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 1, {
+			path: '/wc/v3/payments/authorizations?page=2&pagesize=25&sort=created&direction=desc&search=Ada',
+			method: 'GET',
+		} );
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 2, {
+			path: '/wc/v3/payments/authorizations/pi_test',
+			method: 'GET',
+		} );
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 3, {
+			path: '/wc/v3/payments/authorizations/summary?sort=created&direction=asc',
+			method: 'GET',
+		} );
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 4, {
+			path: '/wc/v3/payments/orders/123/capture_authorization',
+			method: 'POST',
+			data: {
+				payment_intent_id: 'pi_test',
+			},
+		} );
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 5, {
+			path: '/wc/v3/payments/orders/123/cancel_authorization',
+			method: 'POST',
+			data: {
+				payment_intent_id: 'pi_test',
+			},
 		} );
 	} );
 

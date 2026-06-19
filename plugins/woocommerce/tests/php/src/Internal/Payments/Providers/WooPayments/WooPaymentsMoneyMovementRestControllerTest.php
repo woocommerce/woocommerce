@@ -4,12 +4,19 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
+use Automattic\WooCommerce\Internal\Payments\PaymentContext;
+use Automattic\WooCommerce\Internal\Payments\PaymentOutcome;
+use Automattic\WooCommerce\Internal\Payments\PaymentProcessingService;
+use Automattic\WooCommerce\Internal\Payments\ProviderContract;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiException;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAuthorizationsListRequest;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAuthorizationsRestController;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsDisputesRestController;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsFraudOutcomeTransactionsListRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsMoneyMovementOrderService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsOrderDataService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPaymentDetailsRestController;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsProvider;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsTransactionsListRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsTransactionsRestController;
 use RuntimeException;
@@ -44,6 +51,7 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 	 */
 	public function tearDown(): void {
 		remove_all_filters( 'wcpay_list_transactions_request' );
+		remove_all_filters( 'wcpay_list_authorizations_request' );
 		remove_all_filters( 'wcpay_list_disputes_request' );
 		remove_all_filters( 'wcpay_list_fraud_outcome_transactions_request' );
 		remove_all_filters( 'wcpay_list_fraud_outcome_transactions_summary_request' );
@@ -72,6 +80,324 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 		$controller->register();
 
 		$this->assertFalse( has_action( 'rest_api_init', array( $controller, 'register_routes' ) ) );
+	}
+
+	/**
+	 * @testdox Authorization routes register only when native owns runtime.
+	 */
+	public function test_authorization_routes_register_only_when_native_owns_runtime(): void {
+		$controller = $this->create_authorizations_controller( true );
+		$controller->register();
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'rest_api_init' );
+
+		$routes = $this->server->get_routes();
+		$this->assertArrayHasKey( '/wc/v3/payments/authorizations', $routes );
+		$this->assertArrayHasKey( '/wc/v3/payments/authorizations/summary', $routes );
+		$this->assertArrayHasKey( '/wc/v3/payments/authorizations/(?P<payment_intent_id>\\w+)', $routes );
+		$this->assertArrayHasKey( '/wc/v3/payments/orders/(?P<order_id>\\w+)/capture_authorization', $routes );
+		$this->assertArrayHasKey( '/wc/v3/payments/orders/(?P<order_id>\\w+)/cancel_authorization', $routes );
+
+		$controller = $this->create_authorizations_controller( false );
+		$controller->register();
+
+		$this->assertFalse( has_action( 'rest_api_init', array( $controller, 'register_routes' ) ) );
+	}
+
+	/**
+	 * @testdox Authorizations list preserves reference query names and the legacy request filter.
+	 */
+	public function test_authorizations_list_preserves_filter_contract(): void {
+		$this->create_authorizations_controller( true )->register_routes();
+		$observed_request = null;
+
+		add_filter(
+			'wcpay_list_authorizations_request',
+			static function ( \WCPay\Core\Server\Request\List_Authorizations $request ) use ( &$observed_request ): \WCPay\Core\Server\Request\List_Authorizations {
+				$observed_request = $request;
+				$request->set_page_size( 50 );
+				$request->set_param( 'customer_email_is', 'ada@example.com' );
+
+				return $request;
+			}
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/payments/authorizations' );
+		$request->set_query_params(
+			array(
+				'page'                => '2',
+				'pagesize'            => '25',
+				'sort'                => 'capture_by',
+				'direction'           => 'asc',
+				'order_id'            => '123',
+				'customer_email'      => 'grace@example.com',
+				'payment_method_type' => 'card',
+				'loan_id_is'          => 'drop-me',
+				'store_currency_is'   => 'drop-me',
+				'ignored'             => 'drop-me',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertInstanceOf( WooPaymentsAuthorizationsListRequest::class, $observed_request );
+		$this->assertSame( 'authorizations', $observed_request->get_api() );
+		$this->assertSame( 'get_authorizations', $this->api_client->last_call['method'] );
+		$this->assertSame(
+			array(
+				'page'              => 2,
+				'pagesize'          => 50,
+				'sort'              => 'created',
+				'direction'         => 'asc',
+				'limit'             => 100,
+				'order_id_is'       => '123',
+				'customer_email_is' => 'ada@example.com',
+				'source_is'         => 'card',
+			),
+			$this->api_client->last_call['query']
+		);
+	}
+
+	/**
+	 * @testdox Authorization detail and summary routes proxy the compatible API methods.
+	 */
+	public function test_authorization_detail_and_summary_routes_proxy_api_methods(): void {
+		$this->create_authorizations_controller( true )->register_routes();
+
+		$this->api_client->response = array(
+			'payment_intent_id' => 'pi_auth',
+			'captured'          => false,
+		);
+
+		$detail_response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payments/authorizations/pi_auth' ) );
+
+		$this->assertSame( 200, $detail_response->get_status() );
+		$this->assertSame( 'get_authorization', $this->api_client->last_call['method'] );
+		$this->assertSame( 'pi_auth', $this->api_client->last_call['payment_intent_id'] );
+
+		$this->api_client->response = array(
+			'count' => 2,
+			'total' => 1000,
+		);
+
+		$summary_response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payments/authorizations/summary' ) );
+
+		$this->assertSame( 200, $summary_response->get_status() );
+		$this->assertSame( 'get_authorizations_summary', $this->api_client->last_call['method'] );
+		$this->assertSame( 2, $summary_response->get_data()['count'] );
+	}
+
+	/**
+	 * @testdox Authorization actions validate order state before delegating to native payment processing.
+	 */
+	public function test_authorization_actions_validate_order_state_before_processing(): void {
+		$processing_service = new class() extends PaymentProcessingService {
+			/**
+			 * Capture call count.
+			 *
+			 * @var int
+			 */
+			public int $capture_calls = 0;
+
+			/**
+			 * Capture a payment.
+			 *
+			 * @param PaymentContext   $context  Payment context.
+			 * @param ProviderContract $provider Payment provider.
+			 * @return PaymentOutcome
+			 */
+			public function capture( PaymentContext $context, ProviderContract $provider ): PaymentOutcome {
+				++$this->capture_calls;
+
+				return new PaymentOutcome( PaymentOutcome::STATUS_COMPLETED, 'pi_auth' );
+			}
+		};
+
+		$this->create_authorizations_controller( true, $processing_service )->register_routes();
+
+		$missing_response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/payments/orders/999999/capture_authorization' ) );
+
+		$this->assertSame( 404, $missing_response->get_status() );
+		$this->assertSame( 'wcpay_missing_order', $missing_response->get_data()['code'] );
+		$this->assertSame( 0, $processing_service->capture_calls );
+
+		$order   = $this->create_authorized_order( 'pi_order' );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/payments/orders/' . $order->get_id() . '/capture_authorization' );
+		$request->set_body_params( array( 'payment_intent_id' => 'pi_other' ) );
+
+		$mismatch_response = $this->server->dispatch( $request );
+
+		$this->assertSame( 409, $mismatch_response->get_status() );
+		$this->assertSame( 'wcpay_intent_order_mismatch', $mismatch_response->get_data()['code'] );
+		$this->assertSame( 0, $processing_service->capture_calls );
+	}
+
+	/**
+	 * @testdox Authorization actions reject live intents that belong to another order.
+	 */
+	public function test_authorization_actions_reject_live_intent_order_mismatch(): void {
+		$processing_service = new class() extends PaymentProcessingService {
+			/**
+			 * Capture call count.
+			 *
+			 * @var int
+			 */
+			public int $capture_calls = 0;
+
+			/**
+			 * Capture a payment.
+			 *
+			 * @param PaymentContext   $context  Payment context.
+			 * @param ProviderContract $provider Payment provider.
+			 * @return PaymentOutcome
+			 */
+			public function capture( PaymentContext $context, ProviderContract $provider ): PaymentOutcome {
+				++$this->capture_calls;
+
+				return new PaymentOutcome( PaymentOutcome::STATUS_COMPLETED, 'pi_auth' );
+			}
+		};
+
+		$this->create_authorizations_controller( true, $processing_service )->register_routes();
+		$order                      = $this->create_authorized_order( 'pi_auth' );
+		$this->api_client->response = array(
+			'id'       => 'pi_auth',
+			'status'   => 'requires_capture',
+			'metadata' => array(
+				'order_id' => (string) ( $order->get_id() + 1 ),
+			),
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/payments/orders/' . $order->get_id() . '/capture_authorization' );
+		$request->set_body_params( array( 'payment_intent_id' => 'pi_auth' ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( 'wcpay_intent_order_mismatch', $response->get_data()['code'] );
+		$this->assertSame( 'get_payment_intention', $this->api_client->last_call['method'] );
+		$this->assertSame( 0, $processing_service->capture_calls );
+	}
+
+	/**
+	 * @testdox Authorization actions reject stale live intent statuses.
+	 */
+	public function test_authorization_actions_reject_stale_live_intent_status(): void {
+		$processing_service = new class() extends PaymentProcessingService {
+			/**
+			 * Cancel call count.
+			 *
+			 * @var int
+			 */
+			public int $cancel_calls = 0;
+
+			/**
+			 * Cancel a payment.
+			 *
+			 * @param PaymentContext   $context  Payment context.
+			 * @param ProviderContract $provider Payment provider.
+			 * @return PaymentOutcome
+			 */
+			public function cancel( PaymentContext $context, ProviderContract $provider ): PaymentOutcome {
+				++$this->cancel_calls;
+
+				return new PaymentOutcome( PaymentOutcome::STATUS_CANCELED, 'pi_auth' );
+			}
+		};
+
+		$this->create_authorizations_controller( true, $processing_service )->register_routes();
+		$order                      = $this->create_authorized_order( 'pi_auth' );
+		$this->api_client->response = array(
+			'id'       => 'pi_auth',
+			'status'   => 'succeeded',
+			'metadata' => array(
+				'order_id' => (string) $order->get_id(),
+			),
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/payments/orders/' . $order->get_id() . '/cancel_authorization' );
+		$request->set_body_params( array( 'payment_intent_id' => 'pi_auth' ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( 'wcpay_payment_uncapturable', $response->get_data()['code'] );
+		$this->assertSame( 'get_payment_intention', $this->api_client->last_call['method'] );
+		$this->assertSame( 0, $processing_service->cancel_calls );
+	}
+
+	/**
+	 * @testdox Capture and cancel authorization actions delegate through native payment processing.
+	 */
+	public function test_authorization_actions_delegate_through_native_processing(): void {
+		$processing_service = new class() extends PaymentProcessingService {
+			/**
+			 * Last capture context.
+			 *
+			 * @var PaymentContext|null
+			 */
+			public ?PaymentContext $last_capture_context = null;
+
+			/**
+			 * Last cancel context.
+			 *
+			 * @var PaymentContext|null
+			 */
+			public ?PaymentContext $last_cancel_context = null;
+
+			/**
+			 * Capture a payment.
+			 *
+			 * @param PaymentContext   $context  Payment context.
+			 * @param ProviderContract $provider Payment provider.
+			 * @return PaymentOutcome
+			 */
+			public function capture( PaymentContext $context, ProviderContract $provider ): PaymentOutcome {
+				$this->last_capture_context = $context;
+
+				return new PaymentOutcome( PaymentOutcome::STATUS_COMPLETED, 'pi_auth' );
+			}
+
+			/**
+			 * Cancel a payment.
+			 *
+			 * @param PaymentContext   $context  Payment context.
+			 * @param ProviderContract $provider Payment provider.
+			 * @return PaymentOutcome
+			 */
+			public function cancel( PaymentContext $context, ProviderContract $provider ): PaymentOutcome {
+				$this->last_cancel_context = $context;
+
+				return new PaymentOutcome( PaymentOutcome::STATUS_CANCELED, 'pi_auth' );
+			}
+		};
+
+		$this->create_authorizations_controller( true, $processing_service )->register_routes();
+		$order                      = $this->create_authorized_order( 'pi_auth' );
+		$this->api_client->response = array(
+			'id'       => 'pi_auth',
+			'status'   => 'requires_capture',
+			'metadata' => array(
+				'order_id' => (string) $order->get_id(),
+			),
+		);
+
+		$capture_request = new WP_REST_Request( 'POST', '/wc/v3/payments/orders/' . $order->get_id() . '/capture_authorization' );
+		$capture_request->set_body_params( array( 'payment_intent_id' => 'pi_auth' ) );
+		$capture_response = $this->server->dispatch( $capture_request );
+
+		$this->assertSame( 200, $capture_response->get_status() );
+		$this->assertSame( 'succeeded', $capture_response->get_data()['status'] );
+		$this->assertSame( 'pi_auth', $capture_response->get_data()['id'] );
+		$this->assertInstanceOf( PaymentContext::class, $processing_service->last_capture_context );
+
+		$cancel_request = new WP_REST_Request( 'POST', '/wc/v3/payments/orders/' . $order->get_id() . '/cancel_authorization' );
+		$cancel_request->set_body_params( array( 'payment_intent_id' => 'pi_auth' ) );
+		$cancel_response = $this->server->dispatch( $cancel_request );
+
+		$this->assertSame( 200, $cancel_response->get_status() );
+		$this->assertSame( 'canceled', $cancel_response->get_data()['status'] );
+		$this->assertSame( 'pi_auth', $cancel_response->get_data()['id'] );
+		$this->assertInstanceOf( PaymentContext::class, $processing_service->last_cancel_context );
 	}
 
 	/**
@@ -846,6 +1172,20 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * Create an authorizations controller.
+	 *
+	 * @param bool                          $native_register    Whether native should own routes.
+	 * @param PaymentProcessingService|null $processing_service Optional payment processing service.
+	 * @return WooPaymentsAuthorizationsRestController
+	 */
+	private function create_authorizations_controller( bool $native_register, ?PaymentProcessingService $processing_service = null ): WooPaymentsAuthorizationsRestController {
+		$controller = new WooPaymentsAuthorizationsRestController();
+		$controller->init( $this->create_arbiter( $native_register ), $this->api_client, $processing_service ?? new PaymentProcessingService(), new WooPaymentsProvider() );
+
+		return $controller;
+	}
+
+	/**
 	 * Create a payment details controller.
 	 *
 	 * @param bool $native_register Whether native should own routes.
@@ -889,6 +1229,27 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 		$order->update_meta_data( '_charge_id', $charge_id );
 		$order->update_meta_data( '_intent_id', $intent_id );
 		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Create an authorized WooPayments order.
+	 *
+	 * @param string $intent_id Intent ID.
+	 * @return WC_Order
+	 */
+	private function create_authorized_order( string $intent_id ): WC_Order {
+		$order = wc_create_order();
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		$order->set_total( 10 );
+		$order->set_currency( 'USD' );
+		$order->set_transaction_id( $intent_id );
+		$order->update_meta_data( '_intent_id', $intent_id );
+		$order->update_meta_data( '_intention_status', 'requires_capture' );
+		$order->save();
+		$order->update_status( 'on-hold' );
 
 		return $order;
 	}

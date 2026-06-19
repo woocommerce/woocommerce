@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymen
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsGetPmPromotionsRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
+use WCPay\Core\Server\Request\List_Authorizations;
 use WC_Unit_Test_Case;
 use WP_Error;
 use WP_REST_Request;
@@ -1830,6 +1831,154 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'POST', $http_client->last_method );
 		$this->assertStringContainsString( '"type":"instant"', (string) $http_client->last_body );
 		$this->assertStringContainsString( '"currency":"usd"', (string) $http_client->last_body );
+	}
+
+	/**
+	 * @testdox Should retrieve authorizations through the preserved list endpoint and request hook.
+	 */
+	public function test_get_authorizations_preserves_list_endpoint_and_request_hook(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'data' => array(
+						array( 'payment_intent_id' => 'pi_auth' ),
+					),
+				)
+			),
+		);
+		$observed_request      = null;
+		$filter                = static function ( List_Authorizations $request ) use ( &$observed_request ): List_Authorizations {
+			$observed_request = $request;
+			$request->set_param( 'pagesize', 50 );
+			$request->set_param( 'customer_email_is', 'ada@example.com' );
+
+			return $request;
+		};
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$this->assertTrue( method_exists( $sut, 'get_authorizations' ), 'WooPaymentsApiClient should expose get_authorizations().' );
+
+		add_filter( 'wcpay_list_authorizations_request', $filter );
+
+		try {
+			$result = $sut->get_authorizations(
+				array(
+					'page'      => 2,
+					'pagesize'  => 25,
+					'sort'      => 'created',
+					'direction' => 'desc',
+				)
+			);
+		} finally {
+			remove_filter( 'wcpay_list_authorizations_request', $filter );
+		}
+
+		$this->assertSame( 'pi_auth', $result['data'][0]['payment_intent_id'] );
+		$this->assertInstanceOf( List_Authorizations::class, $observed_request );
+		$this->assertSame( 'authorizations', $observed_request->get_api() );
+		$this->assertSame( 'GET', $observed_request->get_method() );
+		$this->assertSame( '/sites/123/wcpay/authorizations?test_mode=0&page=2&pagesize=50&sort=created&direction=desc&limit=100&customer_email_is=ada%40example.com', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+		$this->assertNull( $http_client->last_body );
+	}
+
+	/**
+	 * @testdox Should retrieve a single authorization through the preserved detail endpoint and request hook.
+	 */
+	public function test_get_authorization_preserves_detail_endpoint_and_request_hook(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'payment_intent_id' => 'pi_auth',
+					'is_captured'       => false,
+				)
+			),
+		);
+		$observed_request      = null;
+		$filter                = static function ( WooPaymentsApiRequest $request ) use ( &$observed_request ): WooPaymentsApiRequest {
+			$observed_request = $request;
+
+			return $request;
+		};
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$this->assertTrue( method_exists( $sut, 'get_authorization' ), 'WooPaymentsApiClient should expose get_authorization().' );
+
+		add_filter( 'wcpay_get_authorization_request', $filter );
+
+		try {
+			$result = $sut->get_authorization( 'pi_auth' );
+		} finally {
+			remove_filter( 'wcpay_get_authorization_request', $filter );
+		}
+
+		$this->assertSame( 'pi_auth', $result['payment_intent_id'] );
+		$this->assertInstanceOf( WooPaymentsApiRequest::class, $observed_request );
+		$this->assertSame( 'authorizations/pi_auth', $observed_request->get_api() );
+		$this->assertSame( 'GET', $observed_request->get_method() );
+		$this->assertSame( '/sites/123/wcpay/authorizations/pi_auth?test_mode=0', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+
+		$this->expectException( WooPaymentsApiException::class );
+
+		$sut->get_authorization( '../pi_auth' );
+	}
+
+	/**
+	 * @testdox Should preserve authorization summary filters and the legacy summary hook.
+	 */
+	public function test_get_authorizations_summary_preserves_filters_and_legacy_hook(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'count' => 3,
+				)
+			),
+		);
+		$observed_request      = null;
+		$filter                = static function ( WooPaymentsApiRequest $request ) use ( &$observed_request ): WooPaymentsApiRequest {
+			$observed_request = $request;
+			$request->set_param( 'pagesize', 50 );
+
+			return $request;
+		};
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+		add_filter( 'wc_pay_get_authorizations_summary', $filter );
+
+		try {
+			$result = $sut->get_authorizations_summary(
+				array(
+					'page'     => 2,
+					'pagesize' => 25,
+				)
+			);
+		} finally {
+			remove_filter( 'wc_pay_get_authorizations_summary', $filter );
+		}
+
+		$this->assertSame( 3, $result['count'] );
+		$this->assertInstanceOf( WooPaymentsApiRequest::class, $observed_request );
+		$this->assertSame( 'authorizations/summary', $observed_request->get_api() );
+		$this->assertSame( '/sites/123/wcpay/authorizations/summary?test_mode=1&page=2&pagesize=50', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
 	}
 
 	/**

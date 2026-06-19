@@ -265,9 +265,11 @@ class WooPaymentsAdminMenuBadgeServiceTest extends WC_Unit_Test_Case {
 			/**
 			 * Return fake authorization summary data.
 			 *
+			 * @param array<string,mixed> $query Query params.
 			 * @return array<string,mixed>
 			 */
-			public function get_authorizations_summary(): array {
+			public function get_authorizations_summary( array $query = array() ): array {
+				unset( $query );
 				++$this->authorization_summary_calls;
 
 				return $this->authorization_summary;

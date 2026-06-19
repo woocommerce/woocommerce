@@ -39,6 +39,22 @@ const QUERY_PARAM_ORDER = [
 	...MONEY_MOVEMENT_FILTER_PARAMS,
 ] as const;
 
+const AUTHORIZATION_QUERY_PARAM_ORDER = [
+	'page',
+	'pagesize',
+	'sort',
+	'direction',
+	'search',
+	'date_after',
+	'date_before',
+	'date_between',
+	'order_id_is',
+	'customer_email_is',
+	'customer_country_is',
+	'risk_level_is',
+	'source_is',
+] as const;
+
 const FILTER_FIELD_ALIASES: Record<
 	string,
 	WooPaymentsMoneyMovementQueryFilterParam
@@ -209,7 +225,9 @@ export const parseMoneyMovementQuery = (
 		)
 	);
 	const pagesize = normalizePositiveInteger(
-		params.get( 'pagesize' ) || params.get( 'perPage' ),
+		params.get( 'pagesize' ) ||
+			params.get( 'perPage' ) ||
+			params.get( 'per_page' ),
 		normalizePositiveInteger(
 			defaults.pagesize,
 			DEFAULT_MONEY_MOVEMENT_QUERY.pagesize
@@ -261,6 +279,39 @@ export const serializeMoneyMovementQuery = (
 
 	QUERY_PARAM_ORDER.forEach( ( key ) => {
 		addParam( params, key, query[ key ] );
+	} );
+
+	return params.toString();
+};
+
+export const sanitizeWooPaymentsAuthorizationsQuery = (
+	query: WooPaymentsMoneyMovementQuery
+): WooPaymentsMoneyMovementQuery => {
+	const sanitized: Record< string, WooPaymentsMoneyMovementQuery[ string ] > =
+		{};
+
+	AUTHORIZATION_QUERY_PARAM_ORDER.forEach( ( key ) => {
+		const value = query[ key ];
+
+		if ( value === undefined || value === null || value === '' ) {
+			return;
+		}
+
+		sanitized[ key ] =
+			key === 'sort' && value === 'capture_by' ? 'created' : value;
+	} );
+
+	return sanitized;
+};
+
+export const serializeWooPaymentsAuthorizationsQuery = (
+	query: WooPaymentsMoneyMovementQuery
+): string => {
+	const sanitized = sanitizeWooPaymentsAuthorizationsQuery( query );
+	const params = new URLSearchParams();
+
+	AUTHORIZATION_QUERY_PARAM_ORDER.forEach( ( key ) => {
+		addParam( params, key, sanitized[ key ] );
 	} );
 
 	return params.toString();

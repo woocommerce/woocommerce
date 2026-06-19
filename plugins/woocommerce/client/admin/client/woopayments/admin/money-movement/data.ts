@@ -7,6 +7,10 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import type {
+	WooPaymentsAuthorization,
+	WooPaymentsAuthorizationActionResponse,
+	WooPaymentsAuthorizationQuery,
+	WooPaymentsAuthorizationsSummary,
 	WooPaymentsDispute,
 	WooPaymentsDisputeFile,
 	WooPaymentsFraudOutcomeQuery,
@@ -17,8 +21,18 @@ import type {
 	WooPaymentsTransaction,
 } from './types';
 import { buildPathWithQuery } from './utils';
+import { serializeWooPaymentsAuthorizationsQuery } from './query';
 
 const PAYMENTS_PATH = '/wc/v3/payments';
+
+const buildAuthorizationsPath = (
+	path: string,
+	query: WooPaymentsAuthorizationQuery = {}
+) => {
+	const queryString = serializeWooPaymentsAuthorizationsQuery( query );
+
+	return queryString ? `${ path }?${ queryString }` : path;
+};
 
 export const getWooPaymentsTransactions = (
 	query: WooPaymentsMoneyMovementQuery = {}
@@ -96,6 +110,66 @@ export const getWooPaymentsTransactionsExportUrl = (
 			exportId
 		) }`,
 		method: 'GET',
+	} );
+
+export const getWooPaymentsAuthorizations = (
+	query: WooPaymentsAuthorizationQuery = {}
+): Promise< WooPaymentsListResponse< WooPaymentsAuthorization > > =>
+	apiFetch< WooPaymentsListResponse< WooPaymentsAuthorization > >( {
+		path: buildAuthorizationsPath(
+			`${ PAYMENTS_PATH }/authorizations`,
+			query
+		),
+		method: 'GET',
+	} );
+
+export const getWooPaymentsAuthorizationsSummary = (
+	query: WooPaymentsAuthorizationQuery = {}
+): Promise< WooPaymentsAuthorizationsSummary > =>
+	apiFetch< WooPaymentsAuthorizationsSummary >( {
+		path: buildAuthorizationsPath(
+			`${ PAYMENTS_PATH }/authorizations/summary`,
+			query
+		),
+		method: 'GET',
+	} );
+
+export const getWooPaymentsAuthorization = (
+	paymentIntentId: string
+): Promise< WooPaymentsAuthorization > =>
+	apiFetch< WooPaymentsAuthorization >( {
+		path: `${ PAYMENTS_PATH }/authorizations/${ encodeURIComponent(
+			paymentIntentId
+		) }`,
+		method: 'GET',
+	} );
+
+export const captureWooPaymentsAuthorization = (
+	orderId: number | string,
+	paymentIntentId: string
+): Promise< WooPaymentsAuthorizationActionResponse > =>
+	apiFetch< WooPaymentsAuthorizationActionResponse >( {
+		path: `${ PAYMENTS_PATH }/orders/${ encodeURIComponent(
+			String( orderId )
+		) }/capture_authorization`,
+		method: 'POST',
+		data: {
+			payment_intent_id: paymentIntentId,
+		},
+	} );
+
+export const cancelWooPaymentsAuthorization = (
+	orderId: number | string,
+	paymentIntentId: string
+): Promise< WooPaymentsAuthorizationActionResponse > =>
+	apiFetch< WooPaymentsAuthorizationActionResponse >( {
+		path: `${ PAYMENTS_PATH }/orders/${ encodeURIComponent(
+			String( orderId )
+		) }/cancel_authorization`,
+		method: 'POST',
+		data: {
+			payment_intent_id: paymentIntentId,
+		},
 	} );
 
 export const getWooPaymentsFraudOutcomeTransactions = (

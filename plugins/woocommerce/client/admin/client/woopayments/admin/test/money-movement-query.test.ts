@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+import * as moneyMovementQuery from '../money-movement/query';
 import {
 	buildMoneyMovementRoutePath,
 	dataViewsViewToMoneyMovementQuery,
@@ -55,6 +56,21 @@ describe( 'WooPayments money movement query helpers', () => {
 		} );
 	} );
 
+	it( 'accepts legacy per_page URLs and maps them to native pagesize', () => {
+		const query = parseMoneyMovementQuery( '?per_page=50', {
+			pagesize: 25,
+			sort: 'created',
+			direction: 'desc',
+		} );
+
+		expect( query ).toEqual( {
+			page: 1,
+			pagesize: 50,
+			sort: 'created',
+			direction: 'desc',
+		} );
+	} );
+
 	it( 'serializes only the provider subroute query contract', () => {
 		const queryString = serializeMoneyMovementQuery( {
 			page: 1,
@@ -79,6 +95,45 @@ describe( 'WooPayments money movement query helpers', () => {
 			'refunded',
 		] );
 		expect( params.has( 'wc_admin_page' ) ).toBe( false );
+	} );
+
+	it( 'serializes authorizations query state without transaction-only filters', () => {
+		const queryHelpers = moneyMovementQuery as unknown as Record<
+			string,
+			( query: Record< string, unknown > ) => string
+		>;
+
+		expect(
+			typeof queryHelpers.serializeWooPaymentsAuthorizationsQuery
+		).toBe( 'function' );
+
+		const queryString =
+			queryHelpers.serializeWooPaymentsAuthorizationsQuery( {
+				page: 2,
+				pagesize: 25,
+				sort: 'capture_by',
+				direction: 'desc',
+				search: 'Ada',
+				date_after: '2026-06-01',
+				loan_id_is: 'loan_test',
+				deposit_id: 'po_test',
+				store_currency_is: 'usd',
+				type_is: 'charge',
+				status_is: 'paid',
+			} );
+		const params = new URLSearchParams( queryString );
+
+		expect( params.get( 'page' ) ).toBe( '2' );
+		expect( params.get( 'pagesize' ) ).toBe( '25' );
+		expect( params.get( 'sort' ) ).toBe( 'created' );
+		expect( params.get( 'direction' ) ).toBe( 'desc' );
+		expect( params.get( 'search' ) ).toBe( 'Ada' );
+		expect( params.get( 'date_after' ) ).toBe( '2026-06-01' );
+		expect( params.has( 'loan_id_is' ) ).toBe( false );
+		expect( params.has( 'deposit_id' ) ).toBe( false );
+		expect( params.has( 'store_currency_is' ) ).toBe( false );
+		expect( params.has( 'type_is' ) ).toBe( false );
+		expect( params.has( 'status_is' ) ).toBe( false );
 	} );
 
 	it( 'builds route paths without resurrecting wc-admin navigation state', () => {

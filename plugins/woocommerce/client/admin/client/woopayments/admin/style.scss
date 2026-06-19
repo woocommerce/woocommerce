@@ -287,6 +287,25 @@
 	margin: 0;
 }
 
+.woocommerce-woopayments-money-movement__tabs {
+	border-bottom: 1px solid #dcdcde;
+	display: flex;
+	gap: 16px;
+}
+
+.woocommerce-woopayments-money-movement__tabs a {
+	border-bottom: 2px solid transparent;
+	color: #2c3338;
+	padding: 0 0 10px;
+	text-decoration: none;
+}
+
+.woocommerce-woopayments-money-movement__tabs a[aria-current="page"] {
+	border-bottom-color: #3858e9;
+	color: #1e1e1e;
+	font-weight: 600;
+}
+
 .woocommerce-woopayments-money-movement__status,
 .woocommerce-woopayments-money-movement__empty,
 .woocommerce-woopayments-money-movement__notice {
@@ -319,6 +338,13 @@
 .woocommerce-woopayments-money-movement__table th:last-child,
 .woocommerce-woopayments-money-movement__table td:last-child {
 	text-align: right;
+}
+
+.woocommerce-woopayments-money-movement__row-actions {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
 }
 
 .woocommerce-woopayments-money-movement__details {

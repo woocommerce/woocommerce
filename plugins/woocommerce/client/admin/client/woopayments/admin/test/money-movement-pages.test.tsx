@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -21,14 +21,39 @@ import {
 	getWooPaymentsTransactions,
 	getWooPaymentsTransactionsSummary,
 	getWooPaymentsTransactionsExportUrl,
+	getWooPaymentsAuthorizations,
+	getWooPaymentsAuthorizationsSummary,
 	getWooPaymentsDisputesExportUrl,
+	captureWooPaymentsAuthorization,
+	cancelWooPaymentsAuthorization,
 	requestWooPaymentsDisputesExport,
 	requestWooPaymentsTransactionsExport,
 } from '../money-movement/data';
 
+const mockCreateSuccessNotice = jest.fn();
+const mockCreateErrorNotice = jest.fn();
+
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
+
+jest.mock( '@wordpress/data', () => {
+	const actual = jest.requireActual( '@wordpress/data' );
+
+	return {
+		...actual,
+		dispatch: jest.fn( ( storeName ) => {
+			if ( storeName === 'core/notices' ) {
+				return {
+					createSuccessNotice: mockCreateSuccessNotice,
+					createErrorNotice: mockCreateErrorNotice,
+				};
+			}
+
+			return actual.dispatch( storeName );
+		} ),
+	};
+} );
 
 jest.mock( '@wordpress/dataviews/wp', () => ( {
 	DataViews: ( {
@@ -42,6 +67,7 @@ jest.mock( '@wordpress/dataviews/wp', () => ( {
 		data?: Array< Record< string, unknown > >;
 		fields?: Array< {
 			id: string;
+			label?: ReactNode;
 			render?: ( props: {
 				item: Record< string, unknown >;
 			} ) => ReactNode;
@@ -77,8 +103,22 @@ jest.mock( '@wordpress/dataviews/wp', () => ( {
 				Mock change DataViews columns
 			</button>
 			{ header }
+			<div role="row">
+				{ fields.map( ( field ) => (
+					<div key={ field.id } role="columnheader">
+						{ field.label }
+					</div>
+				) ) }
+			</div>
 			{ data.map( ( item ) => (
-				<div key={ String( item.id || item.transaction_id ) }>
+				<div
+					key={ String(
+						item.id ||
+							item.transaction_id ||
+							item.payment_intent_id ||
+							item.order_id
+					) }
+				>
 					{ fields.map( ( field ) => (
 						<div key={ field.id }>
 							{ field.render
@@ -103,6 +143,10 @@ jest.mock( '../money-movement/data', () => ( {
 	getWooPaymentsTransaction: jest.fn(),
 	getWooPaymentsTransactions: jest.fn(),
 	getWooPaymentsTransactionsSummary: jest.fn(),
+	getWooPaymentsAuthorizations: jest.fn(),
+	getWooPaymentsAuthorizationsSummary: jest.fn(),
+	captureWooPaymentsAuthorization: jest.fn(),
+	cancelWooPaymentsAuthorization: jest.fn(),
 	getWooPaymentsDisputesSummary: jest.fn(),
 	requestWooPaymentsTransactionsExport: jest.fn(),
 	getWooPaymentsTransactionsExportUrl: jest.fn(),
@@ -128,6 +172,22 @@ const mockGetTransaction = getWooPaymentsTransaction as jest.MockedFunction<
 const mockGetTransactionsSummary =
 	getWooPaymentsTransactionsSummary as jest.MockedFunction<
 		typeof getWooPaymentsTransactionsSummary
+	>;
+const mockGetAuthorizations =
+	getWooPaymentsAuthorizations as jest.MockedFunction<
+		typeof getWooPaymentsAuthorizations
+	>;
+const mockGetAuthorizationsSummary =
+	getWooPaymentsAuthorizationsSummary as jest.MockedFunction<
+		typeof getWooPaymentsAuthorizationsSummary
+	>;
+const mockCaptureAuthorization =
+	captureWooPaymentsAuthorization as jest.MockedFunction<
+		typeof captureWooPaymentsAuthorization
+	>;
+const mockCancelAuthorization =
+	cancelWooPaymentsAuthorization as jest.MockedFunction<
+		typeof cancelWooPaymentsAuthorization
 	>;
 const mockGetDisputesSummary =
 	getWooPaymentsDisputesSummary as jest.MockedFunction<
@@ -167,11 +227,17 @@ describe( 'WooPayments money movement pages', () => {
 		mockGetPaymentIntent.mockReset();
 		mockGetTransaction.mockReset();
 		mockGetTransactionsSummary.mockReset();
+		mockGetAuthorizations.mockReset();
+		mockGetAuthorizationsSummary.mockReset();
+		mockCaptureAuthorization.mockReset();
+		mockCancelAuthorization.mockReset();
 		mockGetDisputesSummary.mockReset();
 		mockRequestTransactionsExport.mockReset();
 		mockGetTransactionsExportUrl.mockReset();
 		mockRequestDisputesExport.mockReset();
 		mockGetDisputesExportUrl.mockReset();
+		mockCreateSuccessNotice.mockReset();
+		mockCreateErrorNotice.mockReset();
 	} );
 
 	afterEach( () => {
@@ -432,6 +498,334 @@ describe( 'WooPayments money movement pages', () => {
 				fields: expect.anything(),
 				layout: expect.anything(),
 			} )
+		);
+	} );
+
+	it( 'renders uncaptured authorizations in a separate transactions tab', async () => {
+		mockGetAuthorizations.mockResolvedValue( {
+			data: [
+				{
+					payment_intent_id: 'pi_auth',
+					charge_id: 'ch_auth',
+					order_id: 123,
+					created: '2026-06-12T10:30:00Z',
+					risk_level: 1,
+					amount: 5000,
+					currency: 'usd',
+					customer_name: 'Ada Lovelace',
+					customer_email: 'ada@example.com',
+					customer_country: 'US',
+				},
+			],
+			total_count: 1,
+		} );
+		mockGetAuthorizationsSummary.mockResolvedValue( {
+			count: 1,
+			total: 5000,
+			currency: 'usd',
+			all_currencies: [ 'usd' ],
+		} );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions?tab=uncaptured',
+				] }
+			>
+				<WooPaymentsTransactionsPage />
+			</MemoryRouter>
+		);
+
+		expect(
+			screen.getByRole( 'link', { name: 'Transactions' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'link', { name: 'Uncaptured' } )
+		).toHaveAttribute( 'aria-current', 'page' );
+
+		expect(
+			await screen.findByRole( 'columnheader', {
+				name: 'Authorized date',
+			} )
+		).toBeInTheDocument();
+		[
+			'Capture by',
+			'Order',
+			'Risk',
+			'Amount',
+			'Customer',
+			'Actions',
+		].forEach( ( label ) => {
+			expect(
+				screen.getByRole( 'columnheader', { name: label } )
+			).toBeInTheDocument();
+		} );
+		expect(
+			screen.getByRole( 'button', {
+				name: 'Capture authorization for order #123',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'button', {
+				name: 'Cancel authorization for order #123',
+			} )
+		).toBeInTheDocument();
+		expect( screen.getByText( 'Ada Lovelace' ) ).toBeInTheDocument();
+	} );
+
+	it( 'uses sanitized uncaptured query state and separate DataViews preferences', async () => {
+		mockGetAuthorizations.mockResolvedValue( {
+			data: [
+				{
+					payment_intent_id: 'pi_auth',
+					order_id: 123,
+					created: '2026-06-12T10:30:00Z',
+					amount: 5000,
+					currency: 'usd',
+				},
+			],
+			total_count: 1,
+		} );
+		mockGetAuthorizationsSummary.mockResolvedValue( {
+			count: 1,
+			total: 5000,
+			currency: 'usd',
+		} );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions?tab=uncaptured&search=Ada&loan_id_is=loan_test',
+				] }
+			>
+				<WooPaymentsTransactionsPage />
+			</MemoryRouter>
+		);
+
+		expect(
+			await screen.findByRole( 'searchbox', {
+				name: 'Search uncaptured transactions',
+			} )
+		).toHaveValue( 'Ada' );
+
+		expect( mockGetAuthorizations ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				search: 'Ada',
+			} )
+		);
+		expect( mockGetAuthorizations ).not.toHaveBeenCalledWith(
+			expect.objectContaining( {
+				loan_id_is: 'loan_test',
+			} )
+		);
+
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'button', {
+					name: 'Mock change DataViews columns',
+				} )
+			);
+		} );
+
+		expect(
+			window.localStorage.getItem(
+				'woocommerce_woopayments_money_movement_view_authorizations'
+			)
+		).toContain( '"fields":["type","amount"]' );
+		expect(
+			window.localStorage.getItem(
+				'woocommerce_woopayments_money_movement_view_transactions'
+			)
+		).toBeNull();
+	} );
+
+	it( 'keeps authorization capture pending and dispatches a success notice', async () => {
+		let resolveCapture: ( value: unknown ) => void = () => undefined;
+		const capturePromise = new Promise( ( resolve ) => {
+			resolveCapture = resolve;
+		} );
+
+		mockGetAuthorizations.mockResolvedValue( {
+			data: [
+				{
+					payment_intent_id: 'pi_auth',
+					order_id: 123,
+					created: '2026-06-12T10:30:00Z',
+					amount: 5000,
+					currency: 'usd',
+				},
+			],
+			total_count: 1,
+		} );
+		mockGetAuthorizationsSummary.mockResolvedValue( {
+			count: 1,
+			total: 5000,
+			currency: 'usd',
+		} );
+		mockCaptureAuthorization.mockReturnValueOnce(
+			capturePromise as Promise< never >
+		);
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions?tab=uncaptured',
+				] }
+			>
+				<WooPaymentsTransactionsPage />
+			</MemoryRouter>
+		);
+
+		await userEvent.click(
+			await screen.findByRole( 'button', {
+				name: 'Capture authorization for order #123',
+			} )
+		);
+
+		expect(
+			await screen.findByRole( 'button', {
+				name: 'Capturing authorization for order #123',
+			} )
+		).toBeDisabled();
+
+		await act( async () => {
+			resolveCapture( {
+				id: 'pi_auth',
+				status: 'succeeded',
+			} );
+			await capturePromise;
+			await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
+		} );
+
+		await waitFor( () =>
+			expect( mockCreateSuccessNotice ).toHaveBeenCalledWith(
+				'Payment for order #123 captured successfully.'
+			)
+		);
+		expect( mockCaptureAuthorization ).toHaveBeenCalledWith(
+			123,
+			'pi_auth'
+		);
+	} );
+
+	it( 'reloads uncaptured summary data after a successful authorization action', async () => {
+		mockGetAuthorizations
+			.mockResolvedValueOnce( {
+				data: [
+					{
+						payment_intent_id: 'pi_auth',
+						order_id: 123,
+						created: '2026-06-12T10:30:00Z',
+						amount: 5000,
+						currency: 'usd',
+					},
+				],
+				total_count: 1,
+			} )
+			.mockResolvedValueOnce( {
+				data: [],
+				total_count: 0,
+			} );
+		mockGetAuthorizationsSummary
+			.mockResolvedValueOnce( {
+				count: 1,
+				total: 5000,
+				currency: 'usd',
+			} )
+			.mockResolvedValueOnce( {
+				count: 0,
+				total: 0,
+				currency: 'usd',
+			} );
+		mockCaptureAuthorization.mockResolvedValueOnce( {
+			id: 'pi_auth',
+			status: 'succeeded',
+		} );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions?tab=uncaptured',
+				] }
+			>
+				<WooPaymentsTransactionsPage />
+			</MemoryRouter>
+		);
+
+		expect(
+			await screen.findByText( '1 uncaptured transactions' )
+		).toBeInTheDocument();
+		expect( screen.getAllByText( '$50.00' ) ).not.toHaveLength( 0 );
+
+		await userEvent.click(
+			screen.getByRole( 'button', {
+				name: 'Capture authorization for order #123',
+			} )
+		);
+
+		await waitFor( () => {
+			expect( mockGetAuthorizations ).toHaveBeenCalledTimes( 2 );
+			expect( mockGetAuthorizationsSummary ).toHaveBeenCalledTimes( 2 );
+		} );
+		expect(
+			await screen.findByText( '0 uncaptured transactions' )
+		).toBeInTheDocument();
+		expect( screen.getByText( '$0.00' ) ).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', {
+				name: 'Capture authorization for order #123',
+			} )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'dispatches an error notice when canceling an authorization fails', async () => {
+		mockGetAuthorizations.mockResolvedValue( {
+			data: [
+				{
+					payment_intent_id: 'pi_auth',
+					order_id: 123,
+					created: '2026-06-12T10:30:00Z',
+					amount: 5000,
+					currency: 'usd',
+				},
+			],
+			total_count: 1,
+		} );
+		mockGetAuthorizationsSummary.mockResolvedValue( {
+			count: 1,
+			total: 5000,
+			currency: 'usd',
+		} );
+		mockCancelAuthorization.mockRejectedValueOnce(
+			new Error( 'Authorization already canceled.' )
+		);
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions?tab=uncaptured',
+				] }
+			>
+				<WooPaymentsTransactionsPage />
+			</MemoryRouter>
+		);
+
+		const cancelButton = await screen.findByRole( 'button', {
+			name: 'Cancel authorization for order #123',
+		} );
+
+		await act( async () => {
+			await userEvent.click( cancelButton );
+		} );
+
+		await waitFor( () =>
+			expect( mockCreateErrorNotice ).toHaveBeenCalledWith(
+				'Unable to cancel authorization for order #123. Authorization already canceled.'
+			)
+		);
+		expect( mockCancelAuthorization ).toHaveBeenCalledWith(
+			123,
+			'pi_auth'
 		);
 	} );
 

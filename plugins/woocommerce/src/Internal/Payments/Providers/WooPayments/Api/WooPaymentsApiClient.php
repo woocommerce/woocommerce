@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api;
 
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAuthorizationsListRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPaginatedListRequest;
 use WP_Error;
 use WP_REST_Request;
@@ -754,15 +755,53 @@ class WooPaymentsApiClient {
 	/**
 	 * Retrieve the manual-capture authorization summary used by admin menu badges.
 	 *
+	 * @param array<string,mixed> $query Query params.
 	 * @return array<string,mixed>
 	 * @throws WooPaymentsApiException When the request fails.
 	 */
-	public function get_authorizations_summary(): array {
+	public function get_authorizations_summary( array $query = array() ): array {
 		return $this->request_with_legacy_filter(
-			array(),
+			$query,
 			self::AUTHORIZATIONS_API . '/summary',
 			'GET',
 			'wc_pay_get_authorizations_summary'
+		);
+	}
+
+	/**
+	 * Retrieve WooPayments uncaptured authorizations.
+	 *
+	 * @param array<string,mixed> $query                  Query params.
+	 * @param bool                $preserve_legacy_filter Whether to apply the preserved legacy request hook.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_authorizations( array $query = array(), bool $preserve_legacy_filter = true ): array {
+		if ( ! $preserve_legacy_filter ) {
+			return $this->request( $query, self::AUTHORIZATIONS_API, 'GET' );
+		}
+
+		return $this->request_with_legacy_request_filter(
+			WooPaymentsAuthorizationsListRequest::from_params( $query ),
+			'wcpay_list_authorizations_request'
+		);
+	}
+
+	/**
+	 * Retrieve a WooPayments uncaptured authorization.
+	 *
+	 * @param string $payment_intent_id Payment intent ID.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function get_authorization( string $payment_intent_id ): array {
+		$this->validate_route_resource_id( $payment_intent_id );
+
+		return $this->request_with_legacy_filter(
+			array(),
+			self::AUTHORIZATIONS_API . '/' . $payment_intent_id,
+			'GET',
+			'wcpay_get_authorization_request'
 		);
 	}
 
@@ -1726,6 +1765,8 @@ class WooPaymentsApiClient {
 			WooPaymentsActivatePmPromotionRequest::register_legacy_aliases();
 		} elseif ( $request instanceof WooPaymentsGetAccountCapitalLinkRequest ) {
 			WooPaymentsGetAccountCapitalLinkRequest::register_legacy_aliases();
+		} elseif ( $request instanceof WooPaymentsAuthorizationsListRequest ) {
+			WooPaymentsAuthorizationsListRequest::register_legacy_alias();
 		} else {
 			WooPaymentsApiRequest::register_legacy_aliases();
 		}
