@@ -129,14 +129,16 @@ const serialRunSpecs = [
 	// Mutates the shared admin's `woocommerce_meta.dashboard_sections` and flips the
 	// global `woocommerce_analytics_scheduled_import` option (racing analytics-settings).
 	'**/tests/analytics/analytics-overview.spec.ts',
-	// Flips the global `woocommerce_calc_taxes` setting on (the ×1.055 tax pollution
-	// other workers' untaxed-total assertions depend on being off).
-	'**/tests/cart/**/*.spec.ts',
+	// Flips the global `woocommerce_default_customer_address` (geolocation) and
+	// `woocommerce_enable_ajax_add_to_cart` settings, which change add-to-cart
+	// behavior for every other worker. (`cart.spec.ts` runs in core-parallel — it
+	// scopes its tax rate to a dedicated tax class instead of toggling global tax.)
+	'**/tests/cart/add-to-cart.spec.ts',
 	// Activates a custom-gateway test plugin globally, which would surface its extra
 	// payment button on every other worker's checkout.
 	'**/tests/checkout/checkout-shortcode-custom-place-order-button.spec.ts',
-	// Flips global `woocommerce_calc_taxes` on plus the checkout login/signup
-	// reminder options.
+	// Mutates global checkout login/signup reminder options and flips
+	// `woocommerce_calc_taxes` (baseline is `yes`; this toggles it off then on).
 	'**/tests/checkout/checkout.spec.ts',
 	// Sets the global store currency and exercises the shared blocks cart page.
 	'**/tests/coupons/cart-block-coupons.spec.ts',

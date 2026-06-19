@@ -19,7 +19,6 @@ import {
 	CLASSIC_CART_PAGE,
 	CLASSIC_CHECKOUT_PAGE,
 } from '../../utils/pages';
-import { setTaxCalculationEnabled } from '../../utils/taxes';
 
 // Suffix the coupon codes with a per-run unique id so concurrent workers never
 // create colliding global coupon codes.
@@ -54,18 +53,12 @@ test.describe(
 	() => {
 		let firstProductId: number;
 		let codWasEnabled: boolean;
-		let taxCalcWasEnabled: boolean;
 		const couponBatchId: number[] = [];
 
 		test.beforeAll( async ( { restApi } ) => {
 			// Make sure the classic cart and checkout pages exist
 			await createClassicCartPage();
 			await createClassicCheckoutPage();
-
-			taxCalcWasEnabled = await setTaxCalculationEnabled(
-				restApi,
-				false
-			);
 
 			// make sure the currency is USD
 			await restApi.put(
@@ -114,7 +107,6 @@ test.describe(
 				delete: [ ...couponBatchId ],
 			} );
 			await setGatewayEnabled( restApi, 'cod', codWasEnabled );
-			await setTaxCalculationEnabled( restApi, taxCalcWasEnabled );
 		} );
 
 		for ( let i = 0; i < coupons.length; i++ ) {

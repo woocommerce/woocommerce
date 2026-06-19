@@ -102,13 +102,14 @@ setup( 'setup site', async ( { baseURL, restApi } ) => {
 	await setup.step( 'general settings', async () => {
 		await restApi.post( `${ WC_API_PATH }/settings/general/batch`, {
 			update: [
-				// Force tax calculation off so the shared site has a deterministic,
-				// tax-free baseline. Many `core-parallel` specs assert on untaxed
-				// cart/refund totals; a stale `woocommerce_calc_taxes=yes` left by
-				// an interrupted serial run otherwise inflates every total by the
-				// standard rate and fails them. Serial tax specs enable taxes
-				// themselves when they run, so this baseline doesn't affect them.
-				{ id: 'woocommerce_calc_taxes', value: 'no' },
+				// Enable tax calculation globally so tax-dependent specs don't each
+				// flip this global switch on/off mid-run. The shared baseline stays
+				// tax-free because no standard-rate tax rate exists (the next step
+				// clears any stray rates), so `core-parallel` specs asserting untaxed
+				// cart/refund totals are unaffected. A spec that needs taxes scopes
+				// its rate to a dedicated tax class and assigns only its own products
+				// to that class (see `cart.spec.ts`), so other workers never match it.
+				{ id: 'woocommerce_calc_taxes', value: 'yes' },
 				{ id: 'woocommerce_allowed_countries', value: 'all' },
 				{ id: 'woocommerce_currency', value: 'USD' },
 				{ id: 'woocommerce_price_thousand_sep', value: ',' },
@@ -120,6 +121,70 @@ setup( 'setup site', async ( { baseURL, restApi } ) => {
 				{ id: 'woocommerce_store_postcode', value: '94107' },
 			],
 		} );
+	} );
+
+	await setup.step( 'tax display settings', async () => {
+		// Pin the tax display mode deterministically. With taxes enabled globally,
+		// display mode now affects how class-scoped tax specs (e.g. `cart.spec.ts`)
+		// see prices, and a stray `incl` left by an interrupted blocks/settings-tax
+		// run would otherwise break their ex-tax line-price assertions. `excl` is
+		// the WooCommerce default: line prices shown ex-tax, totals tax-inclusive.
+		await restApi.post( `${ WC_API_PATH }/settings/tax/batch`, {
+			update: [
+				{ id: 'woocommerce_prices_include_tax', value: 'no' },
+				{ id: 'woocommerce_tax_display_shop', value: 'excl' },
+				{ id: 'woocommerce_tax_display_cart', value: 'excl' },
+			],
+		} );
+	} );
+
+	await setup.step( 'clear tax rates', async () => {
+		// With tax calculation enabled globally, the parallel baseline must have
+		// zero tax rates so untaxed-total assertions stay deterministic. Delete any
+		// rates left behind by an interrupted serial tax spec; specs that need a
+		// rate create (and clean up) a class-scoped one of their own.
+		let page = 1;
+		let allRates: { id: number }[] = [];
+		while ( true ) {
+			const { data: chunk } = await restApi.get< { id: number }[] >(
+				`${ WC_API_PATH }/taxes?per_page=100&page=${ page }`
+			);
+			allRates = allRates.concat( chunk );
+			if ( chunk.length < 100 ) break;
+			page++;
+		}
+
+		// The batch endpoint enforces a 100-item limit across all operations.
+		for ( let i = 0; i < allRates.length; i += 100 ) {
+			await restApi.post( `${ WC_API_PATH }/taxes/batch`, {
+				delete: allRates.slice( i, i + 100 ).map( ( rate ) => rate.id ),
+			} );
+		}
+	} );
+
+	await setup.step( 'clear orphaned tax classes', async () => {
+		// Specs that create a dedicated tax class (e.g. `cart.spec.ts`) clean up
+		// after themselves, but interrupted runs can leave orphaned classes. Remove
+		// any non-built-in class so the environment doesn't drift over time.
+		const BUILT_IN_SLUGS = new Set( [
+			'standard',
+			'reduced-rate',
+			'zero-rate',
+		] );
+		const { data: classes } = await restApi.get< { slug: string }[] >(
+			`${ WC_API_PATH }/taxes/classes`
+		);
+
+		await Promise.all(
+			classes
+				.filter( ( cls ) => ! BUILT_IN_SLUGS.has( cls.slug ) )
+				.map( ( cls ) =>
+					restApi.delete(
+						`${ WC_API_PATH }/taxes/classes/${ cls.slug }`,
+						{ force: true }
+					)
+				)
+		);
 	} );
 
 	await setup.step( 'enable offline payment gateways', async () => {

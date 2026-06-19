@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
+import { faker } from '@faker-js/faker';
 import {
 	addAProductToCart,
 	WC_API_PATH,
@@ -15,7 +16,6 @@ import { getFakeProduct } from '../../utils/data';
 import { createClassicCartPage, CLASSIC_CART_PAGE } from '../../utils/pages';
 import { checkCartContent } from '../../utils/cart';
 import { setGatewayEnabled } from '../../utils/payment-gateways';
-import { setTaxCalculationEnabled } from '../../utils/taxes';
 
 const cartPages = [ { name: 'blocks cart', slug: 'cart' }, CLASSIC_CART_PAGE ];
 
@@ -28,11 +28,6 @@ const test = baseTest.extend( {
 	page: async ( { page, restApi }, use ) => {
 		await createClassicCartPage();
 
-		const taxesWereEnabled = await setTaxCalculationEnabled(
-			restApi,
-			true
-		);
-
 		// COD and BACS are enabled globally in site setup; guard defensively in
 		// case they are somehow off, and restore their prior state afterwards.
 		const codWasEnabled = await setGatewayEnabled( restApi, 'cod', true );
@@ -43,11 +38,10 @@ const test = baseTest.extend( {
 
 		// revert the settings to initial state
 
-		await setTaxCalculationEnabled( restApi, taxesWereEnabled );
 		await setGatewayEnabled( restApi, 'cod', codWasEnabled );
 		await setGatewayEnabled( restApi, 'bacs', bacsWasEnabled );
 	},
-	products: async ( { restApi }, use ) => {
+	products: async ( { restApi, tax }, use ) => {
 		const products = [];
 
 		// Using dec: 0 to avoid small rounding issues
@@ -57,6 +51,10 @@ const test = baseTest.extend( {
 					...getFakeProduct( { dec: 0 } ),
 					manage_stock: true,
 					stock_quantity: 3,
+					// Assign to this spec's own tax class so only these products
+					// are taxed; other workers' products use the standard class,
+					// which has no rate under the taxes-on baseline.
+					tax_class: tax.taxClassSlug,
 				} )
 				.then( ( response ) => {
 					products.push( response.data );
@@ -72,26 +70,45 @@ const test = baseTest.extend( {
 		}
 	},
 	tax: async ( { restApi }, use ) => {
-		let tax;
-		await restApi
-			.post( `${ WC_API_PATH }/taxes`, {
+		// Tax calculation is enabled globally in site setup with no standard
+		// rate, so the shared baseline is tax-free. Create a dedicated tax class
+		// and a rate scoped to it; only products assigned to this class (this
+		// spec's, see the `products` fixture) are taxed, so concurrent workers
+		// are never affected.
+		const className = `Cart Spec ${ faker.string.alphanumeric( 8 ) }`;
+		const { data: taxClass } = await restApi.post(
+			`${ WC_API_PATH }/taxes/classes`,
+			{ name: className }
+		);
+
+		let rate;
+		try {
+			( { data: rate } = await restApi.post( `${ WC_API_PATH }/taxes`, {
 				country: 'US',
 				state: '*',
 				cities: '*',
 				postcodes: '*',
 				rate: '25',
-				name: 'US Tax',
+				name: 'Cart Spec Tax',
 				shipping: false,
-			} )
-			.then( ( r ) => {
-				tax = r.data;
-			} );
-
-		await use( tax );
-
-		await restApi.delete( `${ WC_API_PATH }/taxes/${ tax.id }`, {
-			force: true,
-		} );
+				class: taxClass.slug,
+			} ) );
+			await use( { ...rate, taxClassSlug: taxClass.slug } );
+		} finally {
+			if ( rate ) {
+				await restApi
+					.delete( `${ WC_API_PATH }/taxes/${ rate.id }`, {
+						force: true,
+					} )
+					.catch( console.error );
+			}
+			await restApi
+				.delete(
+					`${ WC_API_PATH }/taxes/classes/${ taxClass.slug }`,
+					{ force: true }
+				)
+				.catch( console.error );
+		}
 	},
 } );
 /* endregion */

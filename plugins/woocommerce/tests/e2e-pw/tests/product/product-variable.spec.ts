@@ -10,7 +10,6 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { tags, test, expect } from '../../fixtures/fixtures';
 import { checkCartContent } from '../../utils/cart';
 import { getFakeProduct } from '../../utils/data';
-import { setTaxCalculationEnabled } from '../../utils/taxes';
 
 const productPrice = 18.16;
 const cartDialogMessage =
@@ -176,11 +175,8 @@ test.describe(
 		const variableProductName = getFakeProduct( { type: 'variable' } ).name;
 		let slug: string;
 		let variableProductId: number;
-		let taxesWereEnabled: boolean;
 
 		test.beforeAll( async ( { restApi } ) => {
-			taxesWereEnabled = await setTaxCalculationEnabled( restApi, false );
-
 			// add product
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
@@ -219,8 +215,6 @@ test.describe(
 					force: true,
 				}
 			);
-
-			await setTaxCalculationEnabled( restApi, taxesWereEnabled );
 		} );
 
 		test( 'should be able to add variation products to the cart', async ( {
@@ -306,11 +300,8 @@ test.describe(
 		const variableProductName = getFakeProduct( { type: 'variable' } ).name;
 		let slug: string;
 		let variableProductId: number;
-		let taxesWereEnabled: boolean;
 
 		test.beforeAll( async ( { restApi } ) => {
-			taxesWereEnabled = await setTaxCalculationEnabled( restApi, false );
-
 			// add product
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
@@ -355,8 +346,6 @@ test.describe(
 					force: true,
 				}
 			);
-
-			await setTaxCalculationEnabled( restApi, taxesWereEnabled );
 		} );
 
 		test(

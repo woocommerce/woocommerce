@@ -311,9 +311,8 @@
 					"testType": "e2e",
 					"command": "test:e2e:core-serial",
 					"shardingArguments": [
-						"--shard=1/3",
-						"--shard=2/3",
-						"--shard=3/3"
+						"--shard=1/2",
+						"--shard=2/2"
 					],
 					"changes": [
 						"client/admin/config/*.json",
