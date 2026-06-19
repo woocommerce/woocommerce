@@ -176,6 +176,9 @@ class WebflowMapper implements PlatformMapperInterface {
 			? wp_kses_post( (string) $field_data->{$short_description_key} )
 			: '';
 
+		// Status and visibility mirror the source on every import, so a re-run resets any manual
+		// draft/hide a merchant applied to a previously imported product. This is intentional: the
+		// migrator treats Webflow as the source of truth for these fields.
 		$basic['status']             = $this->map_status( $product );
 		$basic['catalog_visibility'] = 'visible';
 
