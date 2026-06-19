@@ -269,9 +269,43 @@
 					]
 				},
 				{
-					"name": "Core e2e tests",
+					"name": "Core e2e tests - parallel",
 					"testType": "e2e",
-					"command": "test:e2e:core-all",
+					"command": "test:e2e:core-parallel",
+					"shardingArguments": [],
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.json",
+						"composer.lock",
+						"i18n/**/*.php",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/e2e-pw/**",
+						".wp-env.json",
+						"woocommerce.php",
+						"uninstall.php"
+					],
+					"testEnv": {
+						"start": "env:test --debug"
+					},
+					"events": [
+						"pull_request",
+						"push",
+						"release-checks",
+						"core-e2e"
+					],
+					"report": {
+						"resultsBlobName": "core-e2e-report",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Core e2e tests - serial",
+					"testType": "e2e",
+					"command": "test:e2e:core-serial",
 					"shardingArguments": [
 						"--shard=1/4",
 						"--shard=2/4",
