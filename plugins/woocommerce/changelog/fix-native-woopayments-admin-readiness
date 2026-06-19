@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow native WooPayments cutover readiness after admin parity gates pass.
