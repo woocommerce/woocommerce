@@ -62,7 +62,10 @@ test.describe(
 			await createClassicCartPage();
 			await createClassicCheckoutPage();
 
-			taxCalcWasEnabled = await setTaxCalculationEnabled( restApi, false );
+			taxCalcWasEnabled = await setTaxCalculationEnabled(
+				restApi,
+				false
+			);
 
 			// make sure the currency is USD
 			await restApi.put(
