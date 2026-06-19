@@ -5,6 +5,29 @@
 	.components-panel__body {
 		background: #fff;
 		border: 1px solid $gray-200;
+		overflow: hidden;
+
+		&:first-child,
+		&.is-opened + .components-panel__body {
+			border-top-left-radius: 8px;
+			border-top-right-radius: 8px;
+
+			.components-panel__body-toggle {
+				border-top-left-radius: 8px;
+				border-top-right-radius: 8px;
+			}
+		}
+
+		&:last-child,
+		&.is-opened {
+			border-bottom-left-radius: 8px;
+			border-bottom-right-radius: 8px;
+
+			&:not(.is-opened) .components-panel__body-toggle {
+				border-bottom-left-radius: 8px;
+				border-bottom-right-radius: 8px;
+			}
+		}
 
 		&.is-opened {
 			margin-bottom: $gap-large;
