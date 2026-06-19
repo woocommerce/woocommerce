@@ -79,7 +79,7 @@ class VerificationController {
 
 		$current_user_id = get_current_user_id();
 
-		// Refuse verification is the email key was for a different user than the one logged in.
+		// Refuse verification if the email key was for a different user than the one logged in.
 		if ( $current_user_id && $current_user_id !== $user_id ) {
 			wc_add_notice( __( 'Unable to confirm this email while you are logged in to a different account. Please log out and open the link again.', 'woocommerce' ), 'error' );
 		} elseif ( $this->process_verification( $user_id, $key ) ) {
