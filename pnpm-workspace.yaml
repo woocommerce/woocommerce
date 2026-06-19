@@ -46,7 +46,7 @@ catalogs:
         '@wordpress/preferences': 4.33.5
         '@wordpress/primitives': 4.33.1
         '@wordpress/priority-queue': 3.33.1
-        '@wordpress/private-apis': ^1.48.1 # Use a caret range to make sure we are using an up-to-date private package list.
+        '@wordpress/private-apis': ^1.33.1 # Use a caret range to make sure we are using an up-to-date private package list.
         '@wordpress/rich-text': 7.33.2
         '@wordpress/server-side-render': 6.9.5
         '@wordpress/url': 4.33.1
