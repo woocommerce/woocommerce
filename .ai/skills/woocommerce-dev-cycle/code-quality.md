@@ -28,10 +28,13 @@ For markdown linting rules and workflow, see [markdown-linting.md](markdown-lint
 ### Check for PHP Linting Issues
 
 ```bash
-pnpm run lint:changes:branch:php
+pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes
+pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch
 ```
 
-Checks changed files for WordPress Coding Standards violations (read-only).
+The first command checks changed PHP files. The second checks the full branch diff with `phpcs-changed` and is required before the final commit or PR. Both commands are read-only.
+
+Treat all `phpcs` errors and warnings as blocking because CI treats warnings as failures. Fix every finding before the final commit; if a finding is intentionally suppressed, add a clear inline justification.
 
 ### Fix PHP Code Style Issues
 
@@ -131,8 +134,9 @@ Do not fix linting errors in unrelated code unless specifically asked to do so.
 git status
 git diff
 
-# 3. Run linting on your changes
-pnpm run lint:changes:branch:php
+# 3. Run required PHP lint gates on your changes
+pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes
+pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch
 
 # 4. Fix issues automatically
 pnpm run lint:php:fix
@@ -205,7 +209,9 @@ FOUND 2 ERRORS AFFECTING 2 LINES
 
 Before committing your changes:
 
-- [ ] Run `pnpm run lint:changes:branch:php`
+- [ ] For PHP changes, run `pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes`
+- [ ] For PHP changes, run `pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch`
+- [ ] Confirm all `phpcs` errors and warnings are fixed or intentionally suppressed with a clear inline justification
 - [ ] Run `pnpm run lint:php:fix` if issues found
 - [ ] Run `pnpm run lint:changes:branch:js` if you modified JS files
 - [ ] Run `pnpm --filter=@woocommerce/block-library lint:js-fix` if you modified blocks JS/TS files
@@ -260,7 +266,8 @@ pnpm install
 
 ```bash
 # Good - only checks your changes
-pnpm run lint:changes:branch:php
+pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes
+pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch
 
 # Avoid - checks entire codebase
 pnpm run lint:php
@@ -281,4 +288,5 @@ pnpm run lint:php
 - Code quality tools help maintain consistency across the codebase
 - Automatic fixes save time but should always be reviewed
 - Some issues require manual intervention and understanding of the context
-- Linting is required before committing to ensure code quality standards
+- The PHP changed-file lint and branch-diff lint are required before the final commit or PR for PHP changes
+- `phpcs` warnings are blocking because CI treats them as failures

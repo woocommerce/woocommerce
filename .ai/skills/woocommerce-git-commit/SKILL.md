@@ -23,6 +23,14 @@ From the dynamic context above, determine what changed:
 - **No changes?** Stop — tell the user there's nothing to commit.
 - **Already staged?** Respect what the user staged. Only consider unstaged files for additional commits.
 - Read full diffs only for files where the stat summary is ambiguous.
+- **PHP changes?** Before committing, verify the final diff has passed both required WooCommerce PHP lint gates from `woocommerce-dev-cycle`:
+
+  ```sh
+  pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes
+  pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch
+  ```
+
+  Treat all `phpcs` warnings as blocking. Fix every finding, or add a clear inline justification for any intentional suppression, before executing the final commit.
 
 ### 2. Decide Commit Grouping
 
@@ -84,4 +92,4 @@ After all commits, show `git log --oneline -n <number of new commits>` to confir
 - No Co-Authored-By lines or self-attribution
 - Never push to remote
 - Never use `git add -A` or `git add .`
-- Do not run pre-commit lint/test checks — the `woocommerce-dev-cycle` skill handles that. Linting should be run *before* invoking this skill, not after.
+- Do not execute the final commit for PHP changes until the `woocommerce-dev-cycle` PHP lint gates above have passed on the final diff

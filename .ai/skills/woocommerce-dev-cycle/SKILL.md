@@ -23,14 +23,23 @@ The standard development workflow:
 
 1. Make code changes
 2. Run relevant tests: `pnpm run test:php:env -- --filter YourTestClass`
-3. Run linting/type checking: `pnpm run lint:changes:branch:php`
-4. Fix any issues: `pnpm run lint:php:fix`
-5. Commit changes only after tests pass
+3. For PHP changes, run both required lint gates before the final commit:
+
+   ```bash
+   pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes
+   pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch
+   ```
+
+4. Treat all `phpcs` errors and warnings as blocking. Fix every finding, or add a clear inline justification for any intentional suppression, before the final commit.
+5. Run PHPStan or other type checks required by the changed area.
+6. Commit changes only after tests pass and all required checks are clean.
 
 ## Key Principles
 
 - Always run tests after making changes to verify functionality
 - Use specific test filters to run relevant tests during development
 - Fix linting errors solely for code in your current branch
+- The PHP changed-file lint and branch-diff lint are required before the final commit or PR for PHP changes
+- `phpcs` warnings block the final commit because CI treats them as failures
 - Test failures provide detailed output showing expected vs actual values
 - The test environment handles WordPress/WooCommerce setup automatically

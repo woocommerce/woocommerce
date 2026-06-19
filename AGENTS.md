@@ -82,35 +82,38 @@ plugins/woocommerce/
 
 1. Make code changes
 2. Run relevant tests (see `woocommerce-dev-cycle` skill)
-3. Run linting (see `woocommerce-dev-cycle` skill)
+3. For PHP changes, run the required PHP lint gates before the final commit (see Pre-commit Checks and the `woocommerce-dev-cycle` skill)
 4. Run PHPStan for PHP changes (see below)
 5. Commit only after tests pass and all checks are clean
 6. Create changelog entries for each affected package
-7. Create PR only after changelog entries exist
+7. Create PR only after changelog entries exist and the required lint gates are still clean
 
 ### Pre-commit Checks
 
-**Before committing PHP changes**, run these checks to avoid CI failures:
+**Before the final commit for any PHP changes**, run the WooCommerce PHP lint gates documented in `woocommerce-dev-cycle` before invoking `woocommerce-git-commit` or creating a PR. This is a required, non-skippable gate because CI's Lint job treats CodeSniffer warnings as failures.
 
 ```sh
 # Lint changed PHP files
 pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes
 
+# Lint the full branch diff with phpcs-changed
+pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch
+```
+
+Both commands must complete cleanly. Treat all `phpcs` errors and warnings as blocking. Fix every finding before the final commit; if a finding must be intentionally suppressed, add a clear inline justification before committing.
+
+Also run PHPStan for modified PHP files:
+
+```sh
 # Run PHPStan on modified files (from plugins/woocommerce directory)
 composer exec -- phpstan analyse path/to/modified/File.php --memory-limit=2G
 ```
 
 **PHPStan Baseline Policy:** The baseline file (`phpstan-baseline.neon`) must never be added to. It should only shrink over time as existing errors are naturally resolved by code changes. If PHPStan reports a new error, fix it in the code rather than adding it to the baseline. If your fix resolves a previously baselined error, remove the corresponding entry from the baseline.
 
-### Pre-push Checks
+### Pre-push and PR Checks
 
-**Before pushing**, run the branch-level lint to catch issues across all commits on the branch (e.g. alignment warnings that per-file linting misses):
-
-```sh
-pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch
-```
-
-This compares the full branch diff against trunk and runs `phpcs-changed` on it. Fix any warnings before pushing.
+Do not push or create a PR for PHP changes until the pre-commit PHP lint gates above pass on the final branch diff. Re-run `pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch` after any commit rewrite or last-minute PHP change.
 
 **NEVER create a PR without changelog entries.** Each package modified in the monorepo requires its own changelog entry. Run for each affected package:
 
@@ -190,7 +193,10 @@ Reference: [WordPress Interactivity API - Private Stores](https://developer.word
 pnpm test:php:env -- --filter TestClassName
 
 # Lint changed files
-pnpm lint:php:changes
+pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes
+
+# Lint full PHP branch diff
+pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch
 
 # Fix linting issues
 pnpm lint:php:fix -- path/to/file.php

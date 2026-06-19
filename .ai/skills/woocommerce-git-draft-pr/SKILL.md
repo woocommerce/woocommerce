@@ -24,6 +24,15 @@ Verify from dynamic context: not on trunk (stop if so), commits exist ahead of t
 
 **Base branch**: use `release/*` if the branch was created from one, otherwise `trunk`.
 
+For branches with PHP changes, verify the final branch has passed both required WooCommerce PHP lint gates before pushing or creating the PR:
+
+```sh
+pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes
+pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch
+```
+
+Treat all `phpcs` warnings as blocking. Fix every finding, or add a clear inline justification for any intentional suppression, before PR creation.
+
 From the dynamic context above (read full diffs only if the stat summary is ambiguous), determine:
 
 - **Change type**: Fix, Add, Update, Dev, Tweak, Performance, or Enhancement
@@ -82,3 +91,4 @@ Output the PR URL. If UI changes need screenshots, remind the user.
 - Never commit code — pushing is fine
 - Preserve the PR template section headings and HTML comments exactly
 - Changelog checkboxes must match CI automation format
+- Do not create a PR for PHP changes until the required PHP lint gates pass on the final branch diff

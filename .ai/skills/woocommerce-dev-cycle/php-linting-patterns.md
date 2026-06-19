@@ -19,20 +19,25 @@
 **NEVER run linting on the entire codebase.** Always lint specific files, changed files or staged files only.
 
 ```bash
-# ✅ CORRECT: Check only changed files at the branch level
-pnpm lint:php:changes
+# CORRECT: Check changed PHP files for the WooCommerce plugin
+pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes
 
-# ✅ CORRECT: Check only changed files that are staged
-pnpm lint:php:changes:staged
+# CORRECT: Check the full branch diff with phpcs-changed before final commit
+pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch
 
-# ✅ CORRECT: Lint specific file
+# CORRECT: Check only changed files that are staged
+pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes:staged
+
+# CORRECT: Lint specific file
 pnpm lint:php -- path/to/file.php
 pnpm lint:php:fix -- path/to/file.php
 
-# ❌ WRONG: Lints entire codebase
+# WRONG: Lints entire codebase
 pnpm lint:php
 pnpm lint:php:fix
 ```
+
+Before the final commit for PHP changes, both the changed-file lint and branch-diff lint must pass. Treat every `phpcs` warning as blocking because CI does.
 
 ## Common PHP Linting Issues & Fixes
 
@@ -263,35 +268,44 @@ public function process_payment( $order_id ) {
 1. **Run linting on changed files:**
 
    ```bash
-   pnpm lint:php:changes
+   pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes
    ```
 
-2. **Auto-fix what you can:**
+2. **Run the branch-diff lint before the final commit:**
+
+   ```bash
+   pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch
+   ```
+
+3. **Auto-fix what you can:**
 
    ```bash
    pnpm lint:php:fix -- path/to/file.php
    ```
 
-3. **Review remaining errors** - Common issues that require manual fixing:
+4. **Review remaining errors and warnings** - Common issues that require manual fixing:
    - Translators comment placement
    - File docblock order (PSR-12)
    - Unused closure parameters (add `unset()`)
 
-4. **Address remaining issues manually**
+5. **Address remaining issues manually**
 
-5. **Verify the output is clean:**
+6. **Verify the output is clean:**
 
    ```bash
    pnpm lint:php -- path/to/file.php
    ```
 
-6. **Commit**
+7. **Commit only after both required lint gates pass.** If a finding is intentionally suppressed, add a clear inline justification before committing.
 
 ## Quick Command Reference
 
 ```bash
 # Check changed files
-pnpm lint:php:changes
+pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes
+
+# Check the branch diff before final commit
+pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch
 
 # Check specific file
 pnpm lint:php -- src/Internal/Admin/ClassName.php
