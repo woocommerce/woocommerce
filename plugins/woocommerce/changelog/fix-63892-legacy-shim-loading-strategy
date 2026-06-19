@@ -1,2 +1,4 @@
-Signed-off-by: SH Sajal Chowdhury <sajal.marketer@gmail.com>
-Comment: Fix strategy mismatch between legacy alias scripts and their real counterparts. Scripts with legacy handles now use blocking strategy consistently, since WordPress discards loading strategies on alias scripts (src=false) since 6.3.
+Significance: patch
+Type: fix
+
+Fix strategy mismatch between legacy alias scripts and their real counterparts. Scripts with legacy handles now use blocking strategy consistently, since WordPress discards loading strategies on alias scripts (src=false) since 6.3.

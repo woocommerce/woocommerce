@@ -414,7 +414,7 @@ class WC_Frontend_Scripts {
 		$register_scripts = self::get_scripts();
 
 		foreach ( $register_scripts as $name => $props ) {
-			$in_footer = array( 'strategy' => 'defer' );
+			$is_legacy_handle = isset( $props['legacy_handle'] );
 
 			/*
 			 * Scripts with legacy alias handles must use a blocking strategy.
@@ -427,13 +427,11 @@ class WC_Frontend_Scripts {
 			 * Using blocking for both the real script and its alias ensures
 			 * consistent execution order through the dependency chain.
 			 */
-			if ( isset( $props['legacy_handle'] ) ) {
-				$in_footer = true;
-			}
+			$in_footer = $is_legacy_handle ? true : array( 'strategy' => 'defer' );
 
 			self::register_script( $name, $props['src'], $props['deps'], $props['version'], $in_footer );
 
-			if ( isset( $props['legacy_handle'] ) ) {
+			if ( $is_legacy_handle ) {
 				self::register_script( $props['legacy_handle'], false, array( $name ), $props['version'], $in_footer );
 			}
 		}
