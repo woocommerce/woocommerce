@@ -1,0 +1,3 @@
+Significance: patch
+Type: performance
+Comment: Memoize WC_Shipping::calculate_shipping() within a request so the woocommerce_shipping_packages filter is not re-run for unchanged packages, avoiding repeated expensive recalculations during cart/AJAX updates.

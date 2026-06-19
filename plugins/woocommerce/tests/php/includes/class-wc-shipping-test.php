@@ -171,6 +171,96 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox the woocommerce_shipping_packages filter is not re-run when calculate_shipping() is called again with unchanged packages.
+	 */
+	public function test_calculate_shipping_memoizes_packages_filter() {
+		// The memoization is bypassed while debug mode is on (see setUp), mirroring the per-package cache.
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+
+		$packages = array(
+			array(
+				'contents'      => array(),
+				'contents_cost' => 10,
+				'destination'   => array(
+					'country'  => 'US',
+					'state'    => 'CA',
+					'postcode' => '00000',
+				),
+			),
+		);
+
+		$filter_calls = 0;
+		// The filter reorganizes the packages (adds a marker) so we can assert the cached result returned on
+		// a memo hit reflects the filter output, not the raw pre-filter packages.
+		$filter = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			$shipping_packages['reorganized'] = true;
+			return $shipping_packages;
+		};
+
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$first  = $this->sut->calculate_shipping( $packages );
+		$second = $this->sut->calculate_shipping( $packages );
+		$third  = $this->sut->calculate_shipping( $packages );
+
+		$this->assertEquals( 1, $filter_calls, 'Filter should run once for repeated identical calls.' );
+		$this->assertArrayHasKey( 'reorganized', $first, 'First call returns the filtered packages.' );
+		$this->assertArrayHasKey( 'reorganized', $second, 'Memoized call returns the filtered (reorganized) packages.' );
+		$this->assertEquals( $first, $second, 'Memoized result matches the originally filtered result.' );
+		$this->assertEquals( $first, $third, 'Memoized result is stable across repeated calls.' );
+
+		// Changing the packages should bust the memo and re-run the filter.
+		$packages[0]['destination']['country'] = 'GB';
+		$packages[0]['destination']['state']   = '';
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertEquals( 2, $filter_calls, 'Filter should run again when the packages change.' );
+
+		// reset_shipping() should force the next call to recalculate.
+		$this->sut->reset_shipping();
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertEquals( 3, $filter_calls, 'Filter should run again after reset_shipping().' );
+
+		remove_filter( 'woocommerce_shipping_packages', $filter );
+	}
+
+	/**
+	 * @testdox the woocommerce_shipping_packages filter is run on every call when shipping debug mode is enabled.
+	 */
+	public function test_calculate_shipping_does_not_memoize_in_debug_mode() {
+		// Debug mode is enabled in setUp(); the memo should be bypassed so developers see fresh results.
+		$packages = array(
+			array(
+				'contents'      => array(),
+				'contents_cost' => 10,
+				'destination'   => array(
+					'country'  => 'US',
+					'state'    => 'CA',
+					'postcode' => '00000',
+				),
+			),
+		);
+
+		$filter_calls = 0;
+		$filter       = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			return $shipping_packages;
+		};
+
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$this->sut->calculate_shipping( $packages );
+		$this->sut->calculate_shipping( $packages );
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertEquals( 3, $filter_calls, 'Filter should run on every call while debug mode is enabled.' );
+
+		remove_filter( 'woocommerce_shipping_packages', $filter );
+	}
+
+	/**
 	 * Data provider for test_calculate_shipping_for_hide_rates_when_free.
 	 *
 	 * @return array[]
