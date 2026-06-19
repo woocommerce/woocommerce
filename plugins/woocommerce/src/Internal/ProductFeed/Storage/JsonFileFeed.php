@@ -111,6 +111,18 @@ class JsonFileFeed implements FeedInterface {
 		$this->file_url       = null;
 
 		if ( null !== $resume_identifier ) {
+			if ( ! $this->is_valid_feed_identifier( $resume_identifier ) ) {
+				throw new Exception(
+					esc_html(
+						sprintf(
+							/* translators: %s: feed identifier */
+							__( 'Invalid feed file identifier: %s', 'woocommerce' ),
+							$resume_identifier
+						)
+					)
+				);
+			}
+
 			$this->file_name = $resume_identifier;
 			$this->file_path = $upload_dir['path'] . $resume_identifier;
 
@@ -199,6 +211,11 @@ class JsonFileFeed implements FeedInterface {
 	 * @return void
 	 */
 	public function delete( string $identifier ): void {
+		// Never turn an identifier that is actually a path into a delete outside the feed directory.
+		if ( ! $this->is_valid_feed_identifier( $identifier ) ) {
+			return;
+		}
+
 		$path = $this->feed_file_path( $identifier );
 		if ( is_file( $path ) ) {
 			wp_delete_file( $path );
@@ -206,9 +223,26 @@ class JsonFileFeed implements FeedInterface {
 	}
 
 	/**
+	 * Checks that a feed identifier is a plain feed file name, not a path.
+	 *
+	 * Identifiers round-trip through the persisted status option and are accepted by the public
+	 * {@see delete()}, so a corrupted or hostile value (e.g. containing `../`) must never be
+	 * concatenated into a path that escapes the feed directory.
+	 *
+	 * @param string $identifier The feed file identifier to check.
+	 * @return bool True if the identifier is a safe, plain `.json` file name.
+	 */
+	private function is_valid_feed_identifier( string $identifier ): bool {
+		return '' !== $identifier
+			&& wp_basename( $identifier ) === $identifier
+			&& 'json' === strtolower( (string) pathinfo( $identifier, PATHINFO_EXTENSION ) );
+	}
+
+	/**
 	 * Resolves a feed file's path from its identifier without creating the upload directory.
 	 *
 	 * Unlike {@see get_upload_dir()} (used when writing), this must not create the directory as a side effect.
+	 * Callers must validate the identifier with {@see is_valid_feed_identifier()} first.
 	 *
 	 * @param string $identifier The feed file name.
 	 * @return string The absolute path to the feed file.

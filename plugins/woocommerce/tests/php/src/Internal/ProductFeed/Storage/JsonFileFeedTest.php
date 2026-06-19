@@ -176,6 +176,36 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that resuming with an identifier that is actually a path (traversal attempt) is rejected
+	 * rather than opening a file outside the feed directory.
+	 */
+	public function test_start_rejects_resume_identifier_with_path() {
+		$this->expectException( \Exception::class );
+		( new JsonFileFeed( 'test-feed' ) )->start( '../escape.json' );
+	}
+
+	/**
+	 * Test that delete() ignores an identifier containing a path, so it cannot remove a file outside
+	 * the feed directory, while a plain identifier still deletes normally.
+	 */
+	public function test_delete_ignores_identifier_with_path() {
+		$feed       = new JsonFileFeed( 'test-feed' );
+		$identifier = $feed->start();
+		$feed->flush();
+
+		$path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier;
+		$this->assertTrue( file_exists( $path ) );
+
+		// An identifier that resolves back to the same file via a parent path must be rejected.
+		$feed->delete( '../' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier );
+		$this->assertTrue( file_exists( $path ), 'A traversal identifier must not delete the file.' );
+
+		// The plain identifier still deletes.
+		$feed->delete( $identifier );
+		$this->assertFalse( file_exists( $path ) );
+	}
+
+	/**
 	 * Test that get_entry_count reflects the number of rows written to the feed.
 	 */
 	public function test_get_entry_count_reflects_added_entries() {

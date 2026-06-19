@@ -618,4 +618,42 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertSame( AsyncGenerator::STATE_COMPLETED, $updated_status['state'] );
 		$this->assertArrayHasKey( 'updated_at', $updated_status );
 	}
+
+	/**
+	 * Test that discarding a feed never deletes a path that lies outside the feed directory, even when
+	 * the persisted status was corrupted or tampered with to point elsewhere.
+	 */
+	public function test_discard_feed_does_not_delete_path_outside_feed_dir() {
+		// A sentinel file outside the feed directory that a tampered status path points at.
+		$outside = wp_upload_dir()['basedir'] . '/not-a-feed.json';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions
+		file_put_contents( $outside, 'keep' );
+
+		$method = ( new ReflectionClass( $this->sut ) )->getMethod( 'discard_feed' );
+		$method->setAccessible( true );
+		$method->invoke( $this->sut, array( 'path' => $outside ) );
+
+		$this->assertTrue( file_exists( $outside ), 'A path outside the feed directory must not be deleted.' );
+		wp_delete_file( $outside );
+	}
+
+	/**
+	 * Test that discarding a legacy feed (path only, no file_name) deletes the file when it is inside
+	 * the feed directory.
+	 */
+	public function test_discard_feed_deletes_legacy_path_inside_feed_dir() {
+		$partial    = new JsonFileFeed( 'pos-catalog-feed-test' );
+		$identifier = $partial->start();
+		$partial->flush();
+
+		$path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier;
+		$this->assertTrue( file_exists( $path ) );
+
+		$method = ( new ReflectionClass( $this->sut ) )->getMethod( 'discard_feed' );
+		$method->setAccessible( true );
+		// Legacy status: only a path, no file_name.
+		$method->invoke( $this->sut, array( 'path' => $path ) );
+
+		$this->assertFalse( file_exists( $path ) );
+	}
 }
