@@ -54875,12 +54875,6 @@ parameters:
 			path: src/Blocks/Shipping/ShippingController.php
 
 		-
-			message: '#^Action callback returns bool but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: src/Blocks/Shipping/ShippingController.php
-
-		-
 			message: '#^Cannot call method get_data\(\) on bool\|WC_Shipping_Zone\.$#'
 			identifier: method.nonObject
 			count: 1

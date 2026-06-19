@@ -150,9 +150,12 @@ class PickupLocationsRestControllerTest extends WC_Unit_Test_Case {
 		$request->set_param(
 			'pickup_locations',
 			array(
-				array(),                            // Empty object — dropped.
-				array( 'name' => '' ),              // Nameless — dropped.
-				array( 'name' => 'Warehouse' ),     // Name only — kept, other keys defaulted.
+				// Empty object: dropped.
+				array(),
+				// Nameless: dropped.
+				array( 'name' => '' ),
+				// Name only: kept, other keys defaulted.
+				array( 'name' => 'Warehouse' ),
 			)
 		);
 

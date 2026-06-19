@@ -619,6 +619,8 @@ class ShippingController {
 	 * @return bool
 	 */
 	public function track_local_pickup( $served, $result, $request ) {
+		unset( $result, $request );
+
 		wc_deprecated_function( __METHOD__, '11.0.0' );
 		return $served;
 	}

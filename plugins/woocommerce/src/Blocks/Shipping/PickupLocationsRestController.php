@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks\Shipping;
 
 /**
@@ -210,15 +212,16 @@ class PickupLocationsRestController extends \WP_REST_Controller {
 				}
 			}
 
+			$enabled = isset( $location['enabled'] ) ? rest_sanitize_boolean( (string) $location['enabled'] ) : false;
+
 			$sanitized[] = array(
 				'name'    => $name,
 				'address' => $address,
-				// Details may contain limited HTML — match the rendering side
+				// Details may contain limited HTML. Match the rendering side
 				// in ShippingController::show_local_pickup_details() which uses
 				// wp_kses_post().
 				'details' => isset( $location['details'] ) ? wp_kses_post( (string) $location['details'] ) : '',
-				// WP stub declares an unresolvable template type for rest_sanitize_boolean; the mixed array offset is accepted at runtime.
-				'enabled' => isset( $location['enabled'] ) ? rest_sanitize_boolean( $location['enabled'] ) : false, // @phpstan-ignore argument.templateType
+				'enabled' => $enabled,
 			);
 		}
 
