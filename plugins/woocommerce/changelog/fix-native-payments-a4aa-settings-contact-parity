@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improve native WooPayments settings contact validation and reference copy parity.
