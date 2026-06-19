@@ -249,6 +249,9 @@ export const WooPaymentsOverviewPage = () => {
 
 	return (
 		<div className="woocommerce-woopayments-overview__content">
+			<h1 className="woocommerce-woopayments-overview__title">
+				{ __( 'Overview', 'woocommerce' ) }
+			</h1>
 			<OverviewNotices />
 			{ shell && (
 				<OverviewTaskList
@@ -306,7 +309,7 @@ export const WooPaymentsOverviewPage = () => {
 					isDismissed={ shell.is_connection_success_modal_dismissed }
 				/>
 			) }
-			<WooPaymentsAccountSettings />
+			<WooPaymentsAccountSettings headingLevel={ 2 } />
 			<SpotlightPromotion />
 		</div>
 	);

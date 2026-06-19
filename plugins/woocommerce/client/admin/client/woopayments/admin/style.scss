@@ -15,6 +15,10 @@
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.woocommerce-woopayments-overview__title {
+	margin: 0;
+}
+
 .woocommerce-woopayments-overview-card {
 	background: #fff;
 	border: 1px solid #dcdcde;

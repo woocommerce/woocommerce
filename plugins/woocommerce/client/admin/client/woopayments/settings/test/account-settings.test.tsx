@@ -53,7 +53,10 @@ describe( 'WooPaymentsAccountSettings', () => {
 		render( <WooPaymentsAccountSettings /> );
 
 		expect(
-			screen.getByRole( 'heading', { name: 'WooPayments settings' } )
+			screen.getByRole( 'heading', {
+				name: 'WooPayments settings',
+				level: 1,
+			} )
 		).toBeInTheDocument();
 		expect(
 			screen.getByText( 'Loading WooPayments account…' )
@@ -62,6 +65,25 @@ describe( 'WooPaymentsAccountSettings', () => {
 			path: '/wc-admin/settings/payments/woopayments/account',
 			method: 'GET',
 		} );
+	} );
+
+	it( 'should render the account settings title as a subsection when embedded', () => {
+		mockApiFetch.mockReturnValue( new Promise( () => {} ) );
+
+		render( <WooPaymentsAccountSettings headingLevel={ 2 } /> );
+
+		expect(
+			screen.getByRole( 'heading', {
+				name: 'WooPayments settings',
+				level: 2,
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'heading', {
+				name: 'WooPayments settings',
+				level: 1,
+			} )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'should render an error message when the account cannot be loaded', async () => {

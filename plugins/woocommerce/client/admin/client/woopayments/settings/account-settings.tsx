@@ -92,6 +92,10 @@ const getErrorMessage = ( error: unknown ) => {
 };
 
 type ResultHeadingRef = ( node: HTMLHeadingElement | null ) => void;
+type SettingsHeadingLevel = 1 | 2;
+type WooPaymentsAccountSettingsProps = {
+	headingLevel?: SettingsHeadingLevel;
+};
 
 const AccountDetails = ( {
 	account,
@@ -184,7 +188,9 @@ const SetupState = ( {
 	</section>
 );
 
-export const WooPaymentsAccountSettings = () => {
+export const WooPaymentsAccountSettings = ( {
+	headingLevel = 1,
+}: WooPaymentsAccountSettingsProps ) => {
 	const [ response, setResponse ] =
 		useState< WooPaymentsAccountResponse | null >( null );
 	const [ isLoading, setIsLoading ] = useState( true );
@@ -267,11 +273,12 @@ export const WooPaymentsAccountSettings = () => {
 
 	const account = response?.account;
 	const setupUrl = response?.urls?.setup;
+	const SettingsHeading = headingLevel === 1 ? 'h1' : 'h2';
 
 	return (
 		<div className="woopayments-account-settings" ref={ rootRef }>
 			<header className="woopayments-account-settings__header">
-				<h1>{ getSettingsTitle() }</h1>
+				<SettingsHeading>{ getSettingsTitle() }</SettingsHeading>
 			</header>
 
 			{ isLoading && ! errorMessage && (

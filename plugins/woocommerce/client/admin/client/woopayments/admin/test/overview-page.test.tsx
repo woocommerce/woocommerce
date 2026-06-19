@@ -66,9 +66,11 @@ jest.mock( '@wordpress/data', () => {
 } );
 
 jest.mock( '~/woopayments/settings/account-settings', () => ( {
-	WooPaymentsAccountSettings: () => (
-		<h2 tabIndex={ -1 }>WooPayments settings</h2>
-	),
+	WooPaymentsAccountSettings: ( { headingLevel = 1 } ) => {
+		const HeadingTag = `h${ headingLevel }` as keyof JSX.IntrinsicElements;
+
+		return <HeadingTag tabIndex={ -1 }>WooPayments settings</HeadingTag>;
+	},
 } ) );
 
 jest.mock( '../../promotions/spotlight', () => ( {
@@ -357,6 +359,21 @@ describe( 'WooPaymentsOverviewPage', () => {
 			},
 		} );
 		window.history.pushState( {}, '', '/' );
+	} );
+
+	it( 'renders a stable page heading', async () => {
+		render( <WooPaymentsOverviewPage /> );
+
+		expect(
+			screen.getByRole( 'heading', { name: 'Overview', level: 1 } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'heading', {
+				name: 'WooPayments settings',
+				level: 2,
+			} )
+		).toBeInTheDocument();
+		await screen.findByRole( 'heading', { name: 'Balance' } );
 	} );
 
 	it( 'loads recent payout history when overview loading fails', async () => {

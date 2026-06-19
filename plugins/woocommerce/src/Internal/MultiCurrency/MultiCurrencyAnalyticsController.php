@@ -227,10 +227,8 @@ class MultiCurrencyAnalyticsController implements RegisterHooksInterface {
 		$this->add_filter_once( 'woocommerce_analytics_clauses_where_orders_stats_total', array( $this, 'handle_woocommerce_analytics_clauses_where' ) );
 		$this->add_filter_once( 'woocommerce_analytics_clauses_where_orders_stats_interval', array( $this, 'handle_woocommerce_analytics_clauses_where' ) );
 
-		if ( $this->has_selected_non_default_currency() ) {
-			$this->add_filter_once( 'woocommerce_analytics_clauses_select_orders_subquery', array( $this, 'handle_woocommerce_analytics_clauses_select_orders' ) );
-			$this->add_filter_once( 'woocommerce_analytics_clauses_select_orders_stats_total', array( $this, 'handle_woocommerce_analytics_clauses_select_orders' ) );
-		}
+		$this->add_filter_once( 'woocommerce_analytics_clauses_select_orders_subquery', array( $this, 'handle_woocommerce_analytics_clauses_select_orders' ) );
+		$this->add_filter_once( 'woocommerce_analytics_clauses_select_orders_stats_total', array( $this, 'handle_woocommerce_analytics_clauses_select_orders' ) );
 	}
 
 	/**
@@ -344,6 +342,10 @@ class MultiCurrencyAnalyticsController implements RegisterHooksInterface {
 	 */
 	public function handle_woocommerce_analytics_clauses_select_orders( array $clauses ): array {
 		if ( $this->is_clause_filter_disabled( self::DISABLE_ORDER_SELECT_FILTER ) ) {
+			return $clauses;
+		}
+
+		if ( ! $this->has_selected_non_default_currency() ) {
 			return $clauses;
 		}
 

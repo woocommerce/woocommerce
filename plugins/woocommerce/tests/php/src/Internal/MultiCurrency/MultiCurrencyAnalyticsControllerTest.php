@@ -155,9 +155,9 @@ class MultiCurrencyAnalyticsControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should register selected-currency SQL hooks only for non-default currency.
+	 * @testdox Should register selected-currency SQL hooks for REST requests with multi-currency orders.
 	 */
-	public function test_registers_selected_currency_sql_hooks_only_for_non_default_currency(): void {
+	public function test_registers_selected_currency_sql_hooks_for_rest_requests_with_multi_currency_orders(): void {
 		$sut = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE );
 		$sut->set_rest_request_resolver( static fn(): bool => true );
 		$sut->set_multi_currency_orders_resolver( static fn(): bool => true );
@@ -168,6 +168,42 @@ class MultiCurrencyAnalyticsControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 10, has_filter( 'woocommerce_analytics_clauses_select_orders_subquery', array( $sut, 'handle_woocommerce_analytics_clauses_select_orders' ) ) );
 		$this->assertSame( 10, has_filter( 'woocommerce_analytics_clauses_select_orders_stats_total', array( $sut, 'handle_woocommerce_analytics_clauses_select_orders' ) ) );
+	}
+
+	/**
+	 * @testdox Should not resolve the default currency while registering selected-currency SQL hooks.
+	 */
+	public function test_register_does_not_resolve_default_currency_for_selected_currency_sql_hooks(): void {
+		$sut = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE );
+		$sut->set_rest_request_resolver( static fn(): bool => true );
+		$sut->set_multi_currency_orders_resolver( static fn(): bool => true );
+		$sut->set_request_args_resolver( static fn(): array => array( 'currency' => 'EUR' ) );
+		$sut->set_default_currency_resolver(
+			static function (): string {
+				throw new \RuntimeException( 'Default currency should not be resolved during analytics registration.' );
+			}
+		);
+
+		$sut->register();
+
+		$this->assertSame( 10, has_filter( 'woocommerce_analytics_clauses_select_orders_subquery', array( $sut, 'handle_woocommerce_analytics_clauses_select_orders' ) ) );
+		$this->assertSame( 10, has_filter( 'woocommerce_analytics_clauses_select_orders_stats_total', array( $sut, 'handle_woocommerce_analytics_clauses_select_orders' ) ) );
+	}
+
+	/**
+	 * @testdox Should leave selected-currency order select clauses unchanged for the default currency.
+	 */
+	public function test_selected_currency_order_select_clauses_are_unchanged_for_default_currency(): void {
+		global $wpdb;
+
+		$sut = $this->create_controller( MultiCurrencyRuntimeArbiter::OWNER_CORE );
+		$sut->set_default_currency_resolver( static fn(): string => 'USD' );
+		$sut->set_request_args_resolver( static fn(): array => array( 'currency' => 'USD' ) );
+		$clauses = array( "{$wpdb->prefix}wc_order_stats.net_total" );
+
+		$result = $sut->handle_woocommerce_analytics_clauses_select_orders( $clauses );
+
+		$this->assertSame( $clauses, $result, 'Default-currency analytics requests should not project selected-currency totals.' );
 	}
 
 	/**
