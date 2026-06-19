@@ -23,8 +23,8 @@ defined( 'ABSPATH' ) || exit;
  *   - injects Interactivity directives onto the server-rendered cart markup
  *     (without editing the templates) so the existing PHP hooks/filters keep
  *     producing the HTML;
- *   - (TODO) enqueues the 'woocommerce/classic-cart' script module once it is
- *     registered through the script-module build / AssetsController.
+ *   - enqueues the 'woocommerce/classic-cart' script module (registered through
+ *     the script-module build / AssetsController).
  *
  * The legacy implementation is left fully intact so the two run side by side;
  * only the feature flag decides which is active. 'wc-cart-fragments' is NOT
@@ -159,7 +159,12 @@ class ClassicCartInteractivity implements RegisterHooksInterface {
 		}
 
 		$processor = new WP_HTML_Tag_Processor( (string) $product_quantity );
-		if ( $processor->next_tag( array( 'tag_name' => 'INPUT', 'class_name' => 'qty' ) ) ) {
+		if ( $processor->next_tag(
+			array(
+				'tag_name'   => 'INPUT',
+				'class_name' => 'qty',
+			)
+		) ) {
 			$processor->set_attribute( 'data-wp-on--change', self::STORE_NAMESPACE . '::actions.changeQuantity' );
 			$processor->set_attribute( 'data-wp-context', (string) wp_json_encode( array( 'cartItemKey' => $cart_item_key ) ) );
 		}

@@ -20,11 +20,12 @@
  * store (owned by Billow), not here.
  */
 
+/**
+ * External dependencies
+ */
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import { actions as router } from '@wordpress/interactivity-router';
-
-// Register/extend the shared Mini-Cart store (namespace `woocommerce`).
-import '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/woocommerce/cart'; // Side-effect: registers shared store.
 
 type ClassicCartContext = {
 	cartItemKey: string;
@@ -64,9 +65,11 @@ function* rerenderCart(): Generator< unknown > {
  * working. No-op when jQuery is absent.
  */
 function emitLegacyEvent( name: string, ...args: unknown[] ): void {
-	const w = window as unknown as { jQuery?: ( target: unknown ) => {
-		trigger: ( n: string, a?: unknown[] ) => void;
-	}; };
+	const w = window as unknown as {
+		jQuery?: ( target: unknown ) => {
+			trigger: ( n: string, a?: unknown[] ) => void;
+		};
+	};
 	if ( w.jQuery ) {
 		w.jQuery( document.body ).trigger( name, args );
 	}
@@ -80,14 +83,17 @@ async function storeApiPost(
 	path: string,
 	data: Record< string, unknown >
 ): Promise< unknown > {
-	const response = await fetch( `${ wooState.restUrl }wc/store/v1/${ path }`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			Nonce: wooState.nonce,
-		},
-		body: JSON.stringify( data ),
-	} );
+	const response = await fetch(
+		`${ wooState.restUrl }wc/store/v1/${ path }`,
+		{
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Nonce: wooState.nonce,
+			},
+			body: JSON.stringify( data ),
+		}
+	);
 	return response.json();
 }
 
@@ -101,10 +107,7 @@ const { actions } = store( 'woocommerce/classic-cart', {
 		*changeQuantity(): Generator< unknown > {
 			const { cartItemKey } = getContext< ClassicCartContext >();
 			const { ref } = getElement();
-			const quantity = parseInt(
-				( ref as HTMLInputElement ).value,
-				10
-			);
+			const quantity = parseInt( ( ref as HTMLInputElement ).value, 10 );
 			yield wooActions.addCartItem( { key: cartItemKey, quantity } );
 			yield* rerenderCart();
 		},
@@ -174,7 +177,7 @@ const { actions } = store( 'woocommerce/classic-cart', {
 		// Shipping calculator submit -> set customer address, re-render.
 		*calculateShipping( event: Event ): Generator< unknown > {
 			event.preventDefault();
-			const form = ( getElement().ref as HTMLFormElement );
+			const form = getElement().ref as HTMLFormElement;
 			const data = new FormData( form );
 			yield storeApiPost( 'cart/update-customer', {
 				shipping_address: {
