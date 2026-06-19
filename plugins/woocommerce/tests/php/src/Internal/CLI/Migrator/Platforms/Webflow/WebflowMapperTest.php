@@ -87,6 +87,67 @@ class WebflowMapperTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Zero-decimal currencies (e.g. JPY) are not divided by 100.
+	 */
+	public function test_zero_decimal_currency_price_is_not_divided(): void {
+		$item = MockWebflowData::simple_product_item();
+
+		$item->skus[0]->fieldData->price                = (object) array(
+			'value' => 2000,
+			'unit'  => 'JPY',
+		);
+		$item->skus[0]->fieldData->{'compare-at-price'} = null;
+
+		$result = $this->mapper->map_product_data( $item );
+
+		$this->assertSame( '2000', $result['regular_price'] );
+	}
+
+	/**
+	 * Three-decimal currencies (e.g. KWD) divide minor units by 1000.
+	 */
+	public function test_three_decimal_currency_price_is_scaled_by_thousand(): void {
+		$item = MockWebflowData::simple_product_item();
+
+		$item->skus[0]->fieldData->price                = (object) array(
+			'value' => 2000,
+			'unit'  => 'KWD',
+		);
+		$item->skus[0]->fieldData->{'compare-at-price'} = null;
+
+		$result = $this->mapper->map_product_data( $item );
+
+		$this->assertSame( '2.000', $result['regular_price'] );
+	}
+
+	/**
+	 * sku-properties present but only one SKU maps to a simple product (lone option dropped).
+	 */
+	public function test_single_sku_with_properties_is_simple(): void {
+		$item       = MockWebflowData::variable_product_item();
+		$item->skus = array( $item->skus[0] );
+
+		$result = $this->mapper->map_product_data( $item );
+
+		$this->assertFalse( $result['is_variable'] );
+		$this->assertSame( array(), $result['attributes'] );
+		$this->assertSame( array(), $result['variations'] );
+	}
+
+	/**
+	 * Multiple SKUs but no sku-properties maps to a simple product.
+	 */
+	public function test_multiple_skus_without_properties_is_simple(): void {
+		$item = MockWebflowData::variable_product_item();
+		unset( $item->product->fieldData->{'sku-properties'} );
+
+		$result = $this->mapper->map_product_data( $item );
+
+		$this->assertFalse( $result['is_variable'] );
+		$this->assertSame( array(), $result['attributes'] );
+	}
+
+	/**
 	 * Test stock mapping for finite inventory.
 	 */
 	public function test_simple_product_stock(): void {
