@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent embedded WooPayments business verification from hanging when the Stripe loader fails.
