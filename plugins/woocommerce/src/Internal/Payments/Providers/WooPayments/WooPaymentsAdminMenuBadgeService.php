@@ -173,6 +173,15 @@ class WooPaymentsAdminMenuBadgeService {
 			return true;
 		}
 
+		/**
+		 * Filters the WooPayments admin menu badge database cache TTL.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param int                 $ttl            Cache TTL in seconds.
+		 * @param string              $key            Cache option key.
+		 * @param array<string,mixed> $cache_contents Badge cache wrapper.
+		 */
 		$ttl = (int) apply_filters( 'wcpay_database_cache_ttl', DAY_IN_SECONDS, $key, $cache_contents );
 		if ( ! empty( $cache_contents['errored'] ) ) {
 			$ttl = min( $ttl, self::ERRORED_CACHE_RETRY_TTL );
