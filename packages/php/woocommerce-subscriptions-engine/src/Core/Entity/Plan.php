@@ -11,9 +11,9 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
 use InvalidArgumentException;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Billing_Policy;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Delivery_Policy;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Pricing_Policy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\DeliveryPolicy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -67,21 +67,21 @@ final class Plan {
 	/**
 	 * Billing cadence. Required - every plan has one.
 	 *
-	 * @var Billing_Policy
+	 * @var BillingPolicy
 	 */
 	private $billing_policy;
 
 	/**
 	 * Optional delivery policy.
 	 *
-	 * @var Delivery_Policy|null
+	 * @var DeliveryPolicy|null
 	 */
 	private $delivery_policy;
 
 	/**
 	 * Optional pricing policy.
 	 *
-	 * @var Pricing_Policy|null
+	 * @var PricingPolicy|null
 	 */
 	private $pricing_policy;
 
@@ -102,16 +102,16 @@ final class Plan {
 	/**
 	 * Use {@see self::create()} or {@see self::from_storage()}.
 	 *
-	 * @param int|null             $id              Plan id, or null before save.
-	 * @param int                  $group_id        Parent plan group id.
-	 * @param string               $name            Display name.
-	 * @param string|null          $description     Optional description.
-	 * @param array<int, mixed>    $options         Picker options.
-	 * @param Billing_Policy       $billing_policy  Billing cadence.
-	 * @param Delivery_Policy|null $delivery_policy Optional delivery policy.
-	 * @param Pricing_Policy|null  $pricing_policy  Optional pricing policy.
-	 * @param string               $category        Plan category.
-	 * @param string|null          $extension_slug  Owning extension slug.
+	 * @param int|null            $id              Plan id, or null before save.
+	 * @param int                 $group_id        Parent plan group id.
+	 * @param string              $name            Display name.
+	 * @param string|null         $description     Optional description.
+	 * @param array<int, mixed>   $options         Picker options.
+	 * @param BillingPolicy       $billing_policy  Billing cadence.
+	 * @param DeliveryPolicy|null $delivery_policy Optional delivery policy.
+	 * @param PricingPolicy|null  $pricing_policy  Optional pricing policy.
+	 * @param string              $category        Plan category.
+	 * @param string|null         $extension_slug  Owning extension slug.
 	 */
 	private function __construct(
 		?int $id,
@@ -119,9 +119,9 @@ final class Plan {
 		string $name,
 		?string $description,
 		array $options,
-		Billing_Policy $billing_policy,
-		?Delivery_Policy $delivery_policy,
-		?Pricing_Policy $pricing_policy,
+		BillingPolicy $billing_policy,
+		?DeliveryPolicy $delivery_policy,
+		?PricingPolicy $pricing_policy,
 		string $category,
 		?string $extension_slug
 	) {
@@ -143,11 +143,11 @@ final class Plan {
 	 * @param int    $group_id Parent plan group id.
 	 * @param array{
 	 *     name: string,
-	 *     billing_policy: Billing_Policy,
+	 *     billing_policy: BillingPolicy,
 	 *     description?: string,
 	 *     options?: array<int, mixed>,
-	 *     delivery_policy?: Delivery_Policy,
-	 *     pricing_policy?: Pricing_Policy,
+	 *     delivery_policy?: DeliveryPolicy,
+	 *     pricing_policy?: PricingPolicy,
 	 *     category: string,
 	 *     extension_slug?: string,
 	 * } $args     Plan attributes.
@@ -185,9 +185,9 @@ final class Plan {
 			(string) $row['name'],
 			isset( $row['description'] ) ? (string) $row['description'] : null,
 			is_array( $row['options'] ?? null ) ? $row['options'] : array(),
-			Billing_Policy::from_array( $row['billing_policy'] ),
-			isset( $row['delivery_policy'] ) && is_array( $row['delivery_policy'] ) ? Delivery_Policy::from_array( $row['delivery_policy'] ) : null,
-			isset( $row['pricing_policy'] ) && is_array( $row['pricing_policy'] ) ? Pricing_Policy::from_array( $row['pricing_policy'] ) : null,
+			BillingPolicy::from_array( $row['billing_policy'] ),
+			isset( $row['delivery_policy'] ) && is_array( $row['delivery_policy'] ) ? DeliveryPolicy::from_array( $row['delivery_policy'] ) : null,
+			isset( $row['pricing_policy'] ) && is_array( $row['pricing_policy'] ) ? PricingPolicy::from_array( $row['pricing_policy'] ) : null,
 			(string) ( $row['category'] ?? self::DEFAULT_CATEGORY ),
 			isset( $row['extension_slug'] ) ? (string) $row['extension_slug'] : null
 		);
@@ -269,49 +269,49 @@ final class Plan {
 	/**
 	 * Billing cadence.
 	 */
-	public function get_billing_policy(): Billing_Policy {
+	public function get_billing_policy(): BillingPolicy {
 		return $this->billing_policy;
 	}
 
 	/**
 	 * Set the billing cadence.
 	 *
-	 * @param Billing_Policy $billing_policy Billing cadence.
+	 * @param BillingPolicy $billing_policy Billing cadence.
 	 */
-	public function set_billing_policy( Billing_Policy $billing_policy ): void {
+	public function set_billing_policy( BillingPolicy $billing_policy ): void {
 		$this->billing_policy = $billing_policy;
 	}
 
 	/**
 	 * Optional delivery policy.
 	 */
-	public function get_delivery_policy(): ?Delivery_Policy {
+	public function get_delivery_policy(): ?DeliveryPolicy {
 		return $this->delivery_policy;
 	}
 
 	/**
 	 * Set the delivery policy.
 	 *
-	 * @param Delivery_Policy|null $delivery_policy Delivery policy.
+	 * @param DeliveryPolicy|null $delivery_policy Delivery policy.
 	 */
-	public function set_delivery_policy( ?Delivery_Policy $delivery_policy ): void {
+	public function set_delivery_policy( ?DeliveryPolicy $delivery_policy ): void {
 		$this->delivery_policy = $delivery_policy;
 	}
 
 	/**
 	 * Optional pricing policy.
 	 */
-	public function get_pricing_policy(): ?Pricing_Policy {
+	public function get_pricing_policy(): ?PricingPolicy {
 		return $this->pricing_policy;
 	}
 
 	/**
 	 * Set the pricing policy.
 	 *
-	 * @param Pricing_Policy|null $pricing_policy Pricing policy.
+	 * @param PricingPolicy|null $pricing_policy Pricing policy.
 	 * @throws InvalidArgumentException If pricing_policy entries fail validation.
 	 */
-	public function set_pricing_policy( ?Pricing_Policy $pricing_policy ): void {
+	public function set_pricing_policy( ?PricingPolicy $pricing_policy ): void {
 		if ( null !== $pricing_policy ) {
 			self::validate_pricing_policy( $pricing_policy );
 		}
@@ -390,10 +390,10 @@ final class Plan {
 	 *  - one_time_fees[].kind is intentionally not whitelisted - consumers extend
 	 *    with namespaced kinds.
 	 *
-	 * @param Pricing_Policy $pricing_policy Policy to validate.
+	 * @param PricingPolicy $pricing_policy Policy to validate.
 	 * @throws InvalidArgumentException With a message naming the offending entry index.
 	 */
-	private static function validate_pricing_policy( Pricing_Policy $pricing_policy ): void {
+	private static function validate_pricing_policy( PricingPolicy $pricing_policy ): void {
 		foreach ( $pricing_policy->get_policies() as $index => $entry ) {
 			if ( ! is_array( $entry ) ) {
 				throw new InvalidArgumentException(

@@ -162,8 +162,8 @@ class RefundPreviewSchema extends AbstractSchema {
 					'readonly'    => true,
 				),
 				'quantity' => array(
-					'description' => __( 'The quantity being refunded.', 'woocommerce' ),
-					'type'        => 'integer',
+					'description' => __( 'The quantity being refunded. Null when the refund was specified by amount only.', 'woocommerce' ),
+					'type'        => array( 'integer', 'null' ),
 					'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 					'readonly'    => true,
 				),

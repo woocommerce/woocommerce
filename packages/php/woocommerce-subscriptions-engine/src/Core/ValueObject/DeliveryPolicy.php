@@ -1,6 +1,6 @@
 <?php
 /**
- * Delivery_Policy - typed value object for a plan's delivery anchors, cutoff,
+ * DeliveryPolicy - typed value object for a plan's delivery anchors, cutoff,
  * and intent.
  *
  * Mirrors the `delivery_policy` JSON column shape, deliberately thin for now.
@@ -27,12 +27,12 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Delivery_Policy value object.
+ * DeliveryPolicy value object.
  *
  * Immutable. Construct via {@see self::from_array()} when hydrating from a
  * stored row, or via the constructor when building one in code.
  */
-final class Delivery_Policy {
+final class DeliveryPolicy {
 
 	/**
 	 * Anchor entries. Each: `{type, day, month?}`.

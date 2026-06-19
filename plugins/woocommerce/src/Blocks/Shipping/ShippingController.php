@@ -5,6 +5,7 @@ use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use WC_Customer;
@@ -136,7 +137,7 @@ class ShippingController {
 			$tax         = $shipping_method->get_total_tax();
 
 			// Format cost with tax handling.
-			if ( 'excl' === $tax_display ) {
+			if ( TaxDisplayMode::EXCLUSIVE === $tax_display ) {
 				// Show pickup cost excluding tax.
 				$formatted_cost = wc_price( $cost, array( 'currency' => $order->get_currency() ) );
 				if ( (float) $tax > 0 && $order->get_prices_include_tax() ) {

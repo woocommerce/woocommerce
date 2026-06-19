@@ -1,6 +1,6 @@
 <?php
 /**
- * Contract_Repository - persistence for {@see Contract} entities.
+ * ContractRepository - persistence for {@see Contract} entities.
  *
  * Lives in the integration layer: it owns the $wpdb access and spans the four
  * contract tables (contract row, items, addresses, meta), hydrating the Core
@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Contract repository.
  */
-final class Contract_Repository {
+final class ContractRepository {
 
 	/**
 	 * Address columns persisted to the addresses table.
@@ -56,7 +56,7 @@ final class Contract_Repository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$inserted = $wpdb->insert(
-			Schema_Installer::get_table_name( Schema_Installer::TABLE_CONTRACTS ),
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ),
 			array_merge(
 				$data,
 				array(
@@ -89,7 +89,7 @@ final class Contract_Repository {
 	public function find( int $id ): ?Contract {
 		global $wpdb;
 
-		$contracts = Schema_Installer::get_table_name( Schema_Installer::TABLE_CONTRACTS );
+		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$contracts} WHERE id = %d", $id ), ARRAY_A );
@@ -116,16 +116,16 @@ final class Contract_Repository {
 		global $wpdb;
 
 		foreach ( array(
-			Schema_Installer::TABLE_CONTRACT_ITEMS,
-			Schema_Installer::TABLE_CONTRACT_ADDRESSES,
-			Schema_Installer::TABLE_CONTRACT_META,
+			SchemaInstaller::TABLE_CONTRACT_ITEMS,
+			SchemaInstaller::TABLE_CONTRACT_ADDRESSES,
+			SchemaInstaller::TABLE_CONTRACT_META,
 		) as $child ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->delete( Schema_Installer::get_table_name( $child ), array( 'contract_id' => $id ) );
+			$wpdb->delete( SchemaInstaller::get_table_name( $child ), array( 'contract_id' => $id ) );
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$deleted = $wpdb->delete( Schema_Installer::get_table_name( Schema_Installer::TABLE_CONTRACTS ), array( 'id' => $id ) );
+		$deleted = $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'id' => $id ) );
 
 		return (bool) $deleted;
 	}
@@ -142,7 +142,7 @@ final class Contract_Repository {
 		foreach ( $items as $item ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->insert(
-				Schema_Installer::get_table_name( Schema_Installer::TABLE_CONTRACT_ITEMS ),
+				SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS ),
 				array(
 					'contract_id'  => $contract_id,
 					'item_name'    => (string) ( $item['item_name'] ?? '' ),
@@ -178,7 +178,7 @@ final class Contract_Repository {
 			}
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->insert( Schema_Installer::get_table_name( Schema_Installer::TABLE_CONTRACT_ADDRESSES ), $record );
+			$wpdb->insert( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ), $record );
 		}
 	}
 
@@ -196,7 +196,7 @@ final class Contract_Repository {
 			// meta; the slow-meta-query heuristic does not apply.
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			$wpdb->insert(
-				Schema_Installer::get_table_name( Schema_Installer::TABLE_CONTRACT_META ),
+				SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ),
 				array(
 					'contract_id' => $contract_id,
 					'meta_key'    => (string) $key,
@@ -215,7 +215,7 @@ final class Contract_Repository {
 	private function find_items( int $contract_id ): array {
 		global $wpdb;
 
-		$table = Schema_Installer::get_table_name( Schema_Installer::TABLE_CONTRACT_ITEMS );
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d ORDER BY id ASC", $contract_id ), ARRAY_A );
@@ -232,7 +232,7 @@ final class Contract_Repository {
 	private function find_addresses( int $contract_id ): array {
 		global $wpdb;
 
-		$table = Schema_Installer::get_table_name( Schema_Installer::TABLE_CONTRACT_ADDRESSES );
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d", $contract_id ), ARRAY_A );
@@ -254,7 +254,7 @@ final class Contract_Repository {
 	private function find_meta( int $contract_id ): array {
 		global $wpdb;
 
-		$table = Schema_Installer::get_table_name( Schema_Installer::TABLE_CONTRACT_META );
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
 
 		// These are the engine's own contract-meta columns, not post/order meta;
 		// the slow-meta-query heuristic does not apply.

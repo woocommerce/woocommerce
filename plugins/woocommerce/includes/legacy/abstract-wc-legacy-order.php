@@ -1,6 +1,7 @@
 <?php
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -433,9 +434,9 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		} elseif ( 'tax_display_cart' === $key ) {
 			return get_option( 'woocommerce_tax_display_cart' );
 		} elseif ( 'display_totals_ex_tax' === $key ) {
-			return 'excl' === get_option( 'woocommerce_tax_display_cart' );
+			return TaxDisplayMode::EXCLUSIVE === get_option( 'woocommerce_tax_display_cart' );
 		} elseif ( 'display_cart_ex_tax' === $key ) {
-			return 'excl' === get_option( 'woocommerce_tax_display_cart' );
+			return TaxDisplayMode::EXCLUSIVE === get_option( 'woocommerce_tax_display_cart' );
 		} elseif ( 'cart_discount' === $key ) {
 			return $this->get_total_discount();
 		} elseif ( 'cart_discount_tax' === $key ) {

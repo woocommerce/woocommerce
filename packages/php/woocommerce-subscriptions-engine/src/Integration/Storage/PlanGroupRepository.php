@@ -1,6 +1,6 @@
 <?php
 /**
- * Plan_Group_Repository - persistence for {@see Plan_Group} entities.
+ * PlanGroupRepository - persistence for {@see PlanGroup} entities.
  *
  * The engine's tables are private API; consumers reach plan groups through the public surface.
  *
@@ -11,23 +11,23 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage;
 
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan_Group;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanGroup;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Plan_Group repository.
+ * PlanGroup repository.
  */
-final class Plan_Group_Repository {
+final class PlanGroupRepository {
 
 	/**
 	 * Insert a new plan group and stamp its id back onto the entity.
 	 *
-	 * @param Plan_Group $group Group to insert.
+	 * @param PlanGroup $group Group to insert.
 	 * @return int The new group id.
 	 * @throws \RuntimeException If the insert fails.
 	 */
-	public function insert( Plan_Group $group ): int {
+	public function insert( PlanGroup $group ): int {
 		global $wpdb;
 
 		$now  = gmdate( 'Y-m-d H:i:s' );
@@ -35,7 +35,7 @@ final class Plan_Group_Repository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$inserted = $wpdb->insert(
-			Schema_Installer::get_table_name( Schema_Installer::TABLE_PLAN_GROUPS ),
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_GROUPS ),
 			array(
 				'name'             => $data['name'],
 				'merchant_code'    => $data['merchant_code'],
@@ -60,12 +60,12 @@ final class Plan_Group_Repository {
 	 * Fetch a plan group by id.
 	 *
 	 * @param int $id Group id.
-	 * @return Plan_Group|null Hydrated group, or null if not found.
+	 * @return PlanGroup|null Hydrated group, or null if not found.
 	 */
-	public function find( int $id ): ?Plan_Group {
+	public function find( int $id ): ?PlanGroup {
 		global $wpdb;
 
-		$table = Schema_Installer::get_table_name( Schema_Installer::TABLE_PLAN_GROUPS );
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_GROUPS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ), ARRAY_A );
@@ -76,7 +76,7 @@ final class Plan_Group_Repository {
 
 		$row['options_display'] = self::decode_json( $row['options_display'] );
 
-		return Plan_Group::from_storage( $row );
+		return PlanGroup::from_storage( $row );
 	}
 
 	/**
@@ -90,7 +90,7 @@ final class Plan_Group_Repository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$deleted = $wpdb->delete(
-			Schema_Installer::get_table_name( Schema_Installer::TABLE_PLAN_GROUPS ),
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_GROUPS ),
 			array( 'id' => $id )
 		);
 

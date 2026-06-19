@@ -11,19 +11,19 @@
 
 declare( strict_types=1 );
 
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Schema_Installer;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 // phpcs:disable Universal.Files.SeparateFunctionsFromOO.Mixed -- Bootstrap file mixes a class and procedural setup.
 
 /**
  * Bootstrap runner for the integration suite.
  */
-class Subscriptions_Engine_Tests_Bootstrap {
+class SubscriptionsEngineTestsBootstrap {
 
 	/**
 	 * Singleton instance.
 	 *
-	 * @var Subscriptions_Engine_Tests_Bootstrap|null
+	 * @var SubscriptionsEngineTestsBootstrap|null
 	 */
 	protected static $instance = null;
 
@@ -69,22 +69,22 @@ class Subscriptions_Engine_Tests_Bootstrap {
 
 		// Install once, outside any test transaction, so the init-hook installer
 		// short-circuits during tests and DDL never breaks rollback isolation.
-		Schema_Installer::install();
+		SchemaInstaller::install();
 
-		require_once $this->plugin_dir . '/tests/integration/class-engine-integration-test-case.php';
+		require_once $this->plugin_dir . '/tests/integration/EngineIntegrationTestCase.php';
 	}
 
 	/**
 	 * Load the engine plugin file.
 	 */
 	public function load_plugin(): void {
-		require_once $this->plugin_dir . '/subscriptions-engine.php';
+		require_once $this->plugin_dir . '/woocommerce-subscriptions-engine.php';
 	}
 
 	/**
 	 * Get the singleton instance.
 	 *
-	 * @return Subscriptions_Engine_Tests_Bootstrap
+	 * @return SubscriptionsEngineTestsBootstrap
 	 */
 	public static function instance(): self {
 		if ( null === self::$instance ) {
@@ -95,4 +95,4 @@ class Subscriptions_Engine_Tests_Bootstrap {
 	}
 }
 
-Subscriptions_Engine_Tests_Bootstrap::instance();
+SubscriptionsEngineTestsBootstrap::instance();

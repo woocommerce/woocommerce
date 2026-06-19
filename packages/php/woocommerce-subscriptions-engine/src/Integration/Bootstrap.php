@@ -14,7 +14,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration;
 
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Schema_Installer;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -52,6 +52,6 @@ final class Bootstrap {
 	 * Install or upgrade the engine schema when it is missing or behind.
 	 */
 	public static function maybe_install_schema(): void {
-		Schema_Installer::maybe_install();
+		SchemaInstaller::maybe_install();
 	}
 }
