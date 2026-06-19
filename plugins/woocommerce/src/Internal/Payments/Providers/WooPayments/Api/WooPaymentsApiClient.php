@@ -1322,6 +1322,16 @@ class WooPaymentsApiClient {
 	}
 
 	/**
+	 * Create a WooPayments embedded account session.
+	 *
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function create_embedded_account_session(): array {
+		return $this->request( array(), self::ACCOUNTS_API . '/embedded/session', 'POST', true, true );
+	}
+
+	/**
 	 * Create a WooPayments Capital account link.
 	 *
 	 * @param string $return_url  URL to return to after viewing the offer.

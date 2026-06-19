@@ -43,6 +43,7 @@ class WooPaymentsOverviewServiceTest extends WC_Unit_Test_Case {
 		delete_option( 'wcpay_onboarding_test_mode' );
 		delete_option( 'wcpay_dispute_status_counts_cache' );
 		delete_option( 'wcpay_test_dispute_status_counts_cache' );
+		delete_option( '_wcpay_feature_dispute_readiness_overview' );
 
 		parent::tearDown();
 	}
@@ -61,6 +62,48 @@ class WooPaymentsOverviewServiceTest extends WC_Unit_Test_Case {
 				'deposits_enabled'     => true,
 				'is_live'              => false,
 				'is_test_drive'        => true,
+				'account_details'      => array(
+					'account_status' => array(
+						'text'             => 'Restricted soon',
+						'background_color' => 'yellow',
+					),
+					'payout_status'  => array(
+						'text'             => 'Payouts enabled',
+						'background_color' => 'green',
+					),
+					'banner'         => array(
+						'text'             => 'Action required',
+						'background_color' => 'yellow',
+					),
+				),
+				'fees'                 => array(
+					'card'           => array(
+						'base'     => array(
+							'percentage_rate' => 2.9,
+							'fixed_rate'      => 0.3,
+						),
+						'discount' => array(
+							array(
+								'currency'        => 'usd',
+								'percentage_rate' => 1.1,
+								'fixed_rate'      => 0.15,
+							),
+						),
+					),
+					'link'           => array(
+						'discount' => array(),
+					),
+					'invalid_method' => array(
+						'discount' => array(
+							array(
+								'percentage_rate' => 99.9,
+							),
+						),
+					),
+				),
+				'capital'              => array(
+					'has_active_loan' => true,
+				),
 				'requirements'         => array(
 					'currently_due'    => array( 'representative.verification.document' ),
 					'current_deadline' => 1781740800,
@@ -79,6 +122,13 @@ class WooPaymentsOverviewServiceTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_deleted_todo_tasks', array( 'deleted-task' ) );
 		update_option( 'woocommerce_remind_me_later_todo_tasks', array( 'later-task' => 1781740800000 ) );
 		update_option( 'wcpay_connection_success_modal_dismissed', 'yes' );
+		update_option( '_wcpay_feature_dispute_readiness_overview', 'yes' );
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'upe_enabled_payment_method_ids' => array( 'card', 'link', 'invalid_method' ),
+			)
+		);
 		update_option(
 			'wcpay_test_dispute_status_counts_cache',
 			array(
@@ -119,6 +169,32 @@ class WooPaymentsOverviewServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( 'later-task' => 1781740800000 ), $overview['overview_tasks_visibility']['remind_me_later_todo_tasks'] );
 		$this->assertTrue( $overview['is_connection_success_modal_dismissed'] );
 		$this->assertSame( 3, $overview['disputes_awaiting_response_count'] );
+		$this->assertSame( 'Restricted soon', $overview['account_details']['account_status']['text'] );
+		$this->assertSame( 'Payouts enabled', $overview['account_details']['payout_status']['text'] );
+		$this->assertSame( 'Action required', $overview['account_details']['banner']['text'] );
+		$this->assertSame(
+			array(
+				array(
+					'payment_method' => 'card',
+					'fee'            => array(
+						'base'     => array(
+							'percentage_rate' => 2.9,
+							'fixed_rate'      => 0.3,
+						),
+						'discount' => array(
+							array(
+								'currency'        => 'usd',
+								'percentage_rate' => 1.1,
+								'fixed_rate'      => 0.15,
+							),
+						),
+					),
+				),
+			),
+			$overview['account_fees']
+		);
+		$this->assertTrue( $overview['feature_flags']['dispute_readiness_overview'] );
+		$this->assertTrue( $overview['account_loans']['has_active_loan'] );
 		$this->assertSame( '', $overview['wpcom_reconnect_url'] );
 		$this->assertStringContainsString( 'path=/woopayments/overview', $overview['urls']['overview_page'] );
 		$this->assertStringContainsString( 'path=/woopayments/onboarding', $overview['urls']['setup'] );
@@ -150,6 +226,10 @@ class WooPaymentsOverviewServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( array(), $overview['account_status']['requirements']['errors'] );
 		$this->assertFalse( $overview['show_update_details_task'] );
 		$this->assertNull( $overview['disputes_awaiting_response_count'] );
+		$this->assertNull( $overview['account_details'] );
+		$this->assertSame( array(), $overview['account_fees'] );
+		$this->assertSame( array( 'dispute_readiness_overview' => true ), $overview['feature_flags'] );
+		$this->assertSame( array( 'has_active_loan' => false ), $overview['account_loans'] );
 		$this->assertSame( '', $overview['wpcom_reconnect_url'] );
 	}
 

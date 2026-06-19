@@ -373,6 +373,38 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should create an embedded account session through the account-scoped user-token endpoint.
+	 */
+	public function test_create_embedded_account_session_posts_to_account_scoped_user_token_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'client_secret'   => 'cs_test',
+					'expires_at'      => 1781740800,
+					'account_id'      => 'acct_native',
+					'is_live'         => false,
+					'publishable_key' => 'pk_test_native',
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->create_embedded_account_session();
+
+		$this->assertSame( 'cs_test', $result['client_secret'] );
+		$this->assertSame( '/sites/123/wcpay/accounts/embedded/session', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertTrue( $http_client->last_use_user_token, 'Embedded account sessions must use the connection-owner user token.' );
+		$this->assertStringContainsString( '"test_mode":false', (string) $http_client->last_body );
+	}
+
+	/**
 	 * @testdox Should create a customer through the native transport customers endpoint.
 	 */
 	public function test_create_customer_posts_to_customers_endpoint(): void {

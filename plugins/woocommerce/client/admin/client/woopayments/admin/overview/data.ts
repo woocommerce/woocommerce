@@ -14,10 +14,14 @@ import type {
 	WooPaymentsDepositsSummary,
 	WooPaymentsOverviewDisputesResponse,
 	WooPaymentsOverviewShell,
+	WooPaymentsAccountSession,
+	WooPaymentsDisputeReadinessPayload,
 } from './types';
 
 const DEPOSITS_PATH = '/wc/v3/payments/deposits';
 const DISPUTES_PATH = '/wc/v3/payments/disputes';
+const ACCOUNTS_SESSION_PATH = '/wc/v3/payments/accounts/session';
+const DISPUTE_READINESS_PATH = '/wc/v3/payments/dispute-readiness';
 const OVERVIEW_SHELL_PATH = '/wc-admin/settings/payments/woopayments/overview';
 const DISPUTE_AWAITING_RESPONSE_STATUSES = [
 	'needs_response',
@@ -141,4 +145,32 @@ export const getWooPaymentsOverviewDisputes =
 				search: DISPUTE_AWAITING_RESPONSE_STATUSES,
 			} ),
 			method: 'GET',
+		} );
+
+export const createWooPaymentsAccountSession =
+	async (): Promise< WooPaymentsAccountSession > =>
+		apiFetch< WooPaymentsAccountSession >( {
+			path: ACCOUNTS_SESSION_PATH,
+			method: 'GET',
+		} );
+
+export const getWooPaymentsDisputeReadiness =
+	async (): Promise< WooPaymentsDisputeReadinessPayload > =>
+		apiFetch< WooPaymentsDisputeReadinessPayload >( {
+			path: DISPUTE_READINESS_PATH,
+			method: 'GET',
+		} );
+
+export const dismissWooPaymentsDisputeReadinessCard =
+	async (): Promise< WooPaymentsDisputeReadinessPayload > =>
+		apiFetch< WooPaymentsDisputeReadinessPayload >( {
+			path: `${ DISPUTE_READINESS_PATH }/dismiss`,
+			method: 'POST',
+		} );
+
+export const confirmWooPaymentsDisputeReadinessStatementDescriptor =
+	async (): Promise< WooPaymentsDisputeReadinessPayload > =>
+		apiFetch< WooPaymentsDisputeReadinessPayload >( {
+			path: `${ DISPUTE_READINESS_PATH }/statement-descriptor/confirm`,
+			method: 'POST',
 		} );

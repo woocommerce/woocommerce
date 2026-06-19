@@ -143,6 +143,36 @@ export interface WooPaymentsOverviewTasksVisibility {
 	remind_me_later_todo_tasks: Record< string, number >;
 }
 
+export interface WooPaymentsOverviewAccountDetailsStatus {
+	text?: string;
+	background_color?: string;
+	[ key: string ]: unknown;
+}
+
+export interface WooPaymentsOverviewAccountDetailsBanner {
+	text?: string;
+	background_color?: string;
+	cta_text?: string;
+	cta_link?: string;
+	[ key: string ]: unknown;
+}
+
+export interface WooPaymentsOverviewAccountDetails {
+	account_status: WooPaymentsOverviewAccountDetailsStatus;
+	payout_status: WooPaymentsOverviewAccountDetailsStatus;
+	banner?: WooPaymentsOverviewAccountDetailsBanner | null;
+}
+
+export interface WooPaymentsOverviewAccountFee {
+	payment_method: string;
+	label?: string;
+	fee: {
+		base?: Record< string, unknown >;
+		discount?: Record< string, unknown >[];
+		[ key: string ]: unknown;
+	};
+}
+
 export interface WooPaymentsOverviewShell {
 	account: WooPaymentsOverviewAccount;
 	account_status: WooPaymentsOverviewAccountStatus;
@@ -150,6 +180,14 @@ export interface WooPaymentsOverviewShell {
 	overview_tasks_visibility: WooPaymentsOverviewTasksVisibility;
 	is_connection_success_modal_dismissed: boolean;
 	disputes_awaiting_response_count: number | null;
+	account_details?: WooPaymentsOverviewAccountDetails | null;
+	account_fees?: WooPaymentsOverviewAccountFee[];
+	feature_flags?: {
+		dispute_readiness_overview?: boolean;
+	};
+	account_loans?: {
+		has_active_loan?: boolean;
+	};
 	wpcom_reconnect_url: string;
 	urls: {
 		overview_page?: string;
@@ -176,6 +214,47 @@ export interface WooPaymentsOverviewDispute {
 export interface WooPaymentsOverviewDisputesResponse {
 	data?: WooPaymentsOverviewDispute[];
 	total_count?: number;
+}
+
+export interface WooPaymentsAccountSession {
+	clientSecret?: string;
+	expiresAt?: number;
+	accountId?: string;
+	isLive?: boolean;
+	publishableKey?: string;
+	locale?: string;
+}
+
+export type WooPaymentsDisputeReadinessSignalStatus = 'complete' | 'incomplete';
+
+export interface WooPaymentsDisputeReadinessSignal {
+	id: string;
+	status: WooPaymentsDisputeReadinessSignalStatus;
+	label: string;
+	description?: string;
+	actionLabel?: string;
+	actionUrl?: string;
+	reason?: string;
+	reviewPrompt?: {
+		text: string;
+		currentDescriptor: string;
+		confirmLabel: string;
+		updateLabel: string;
+	};
+}
+
+export interface WooPaymentsDisputeReadinessPayload {
+	overview?: {
+		enabled: boolean;
+		hidden?: boolean;
+		score?: number;
+		total?: number;
+		state?: WooPaymentsDisputeReadinessSignalStatus;
+		isDismissed?: boolean;
+		completeSignalIds?: string[];
+		incompleteSignalIds?: string[];
+		signals?: WooPaymentsDisputeReadinessSignal[];
+	};
 }
 
 export interface WooPaymentsOverviewTask {

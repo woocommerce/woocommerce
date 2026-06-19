@@ -7,10 +7,14 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import {
+	confirmWooPaymentsDisputeReadinessStatementDescriptor,
+	createWooPaymentsAccountSession,
+	dismissWooPaymentsDisputeReadinessCard,
 	getWooPaymentsDeposit,
 	getWooPaymentsDeposits,
 	getWooPaymentsDepositsOverview,
 	getWooPaymentsDepositsSummary,
+	getWooPaymentsDisputeReadiness,
 	getWooPaymentsOverviewDisputes,
 	getWooPaymentsOverviewShell,
 	getWooPaymentsRecentDeposits,
@@ -111,6 +115,42 @@ describe( 'WooPayments overview deposits data', () => {
 		expect( mockApiFetch ).toHaveBeenCalledWith( {
 			path: '/wc/v3/payments/disputes?page=1&pagesize=50&search%5B%5D=needs_response&search%5B%5D=warning_needs_response',
 			method: 'GET',
+		} );
+	} );
+
+	it( 'creates embedded account sessions from the preserved endpoint', async () => {
+		await createWooPaymentsAccountSession();
+
+		expect( mockApiFetch ).toHaveBeenCalledWith( {
+			path: '/wc/v3/payments/accounts/session',
+			method: 'GET',
+		} );
+	} );
+
+	it( 'loads dispute readiness from the preserved endpoint', async () => {
+		await getWooPaymentsDisputeReadiness();
+
+		expect( mockApiFetch ).toHaveBeenCalledWith( {
+			path: '/wc/v3/payments/dispute-readiness',
+			method: 'GET',
+		} );
+	} );
+
+	it( 'dismisses dispute readiness through the preserved endpoint', async () => {
+		await dismissWooPaymentsDisputeReadinessCard();
+
+		expect( mockApiFetch ).toHaveBeenCalledWith( {
+			path: '/wc/v3/payments/dispute-readiness/dismiss',
+			method: 'POST',
+		} );
+	} );
+
+	it( 'confirms dispute readiness statement descriptors through the preserved endpoint', async () => {
+		await confirmWooPaymentsDisputeReadinessStatementDescriptor();
+
+		expect( mockApiFetch ).toHaveBeenCalledWith( {
+			path: '/wc/v3/payments/dispute-readiness/statement-descriptor/confirm',
+			method: 'POST',
 		} );
 	} );
 } );

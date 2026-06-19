@@ -227,7 +227,9 @@ export const AccountBalancesCard = ( {
 			aria-busy={ isLoading }
 		>
 			<div className="woocommerce-woopayments-overview-card__header">
-				<h2 id={ headingId }>{ __( 'Balance', 'woocommerce' ) }</h2>
+				<h2 id={ headingId } tabIndex={ -1 }>
+					{ __( 'Balance', 'woocommerce' ) }
+				</h2>
 				{ hasBalanceData && currencyOptions.length > 1 && (
 					<div className="woocommerce-woopayments-overview__currency-selector">
 						<label htmlFor={ currencySelectId }>

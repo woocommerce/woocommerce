@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useEffect, useState } from '@wordpress/element';
+import { lazy, Suspense, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -17,6 +17,9 @@ import {
 } from './data';
 import { AccountBalancesCard } from './components/account-balances-card';
 import { PayoutsOverviewCard } from './components/payouts-overview-card';
+import { AccountDetailsCard } from './components/account-details-card';
+import { ActiveLoanSummaryCard } from './components/active-loan-summary-card';
+import { DisputeReadinessCard } from './components/dispute-readiness-card';
 import type {
 	WooPaymentsDeposit,
 	WooPaymentsDepositsOverview,
@@ -30,6 +33,12 @@ import { buildOverviewTasks } from './components/overview-tasks';
 import { OverviewTaskList } from './components/overview-task-list';
 import { UpdateBusinessDetailsModal } from './components/update-business-details-modal';
 import { ConnectionSuccessModal } from './components/connection-success-modal';
+
+const InboxNotifications = lazy( () =>
+	import( './components/inbox-notifications' ).then( ( module ) => ( {
+		default: module.InboxNotifications,
+	} ) )
+);
 
 const getErrorMessage = ( error: unknown ) => {
 	if ( error instanceof Error && error.message ) {
@@ -229,17 +238,18 @@ export const WooPaymentsOverviewPage = () => {
 		new URLSearchParams( window.location.search ).get(
 			'wcpay-connection-success'
 		) === '1' &&
+		! shell.account.test_mode_onboarding &&
 		shell.account.can_process_payments &&
 		shell.account_status.deposits_enabled;
+	const hasWorkingConnectedAccount =
+		!! shell && shell.account.connected && shell.account.working;
+	const shouldLoadDisputeReadiness =
+		hasWorkingConnectedAccount &&
+		!! shell?.feature_flags?.dispute_readiness_overview;
 
 	return (
 		<div className="woocommerce-woopayments-overview__content">
 			<OverviewNotices />
-			{ shouldShowConnectionSuccessModal && shell && (
-				<ConnectionSuccessModal
-					isDismissed={ shell.is_connection_success_modal_dismissed }
-				/>
-			) }
 			{ shell && (
 				<OverviewTaskList
 					tasks={ tasks }
@@ -252,8 +262,6 @@ export const WooPaymentsOverviewPage = () => {
 					onClose={ () => setUpdateBusinessDetailsShell( null ) }
 				/>
 			) }
-			<WooPaymentsAccountSettings />
-			<SpotlightPromotion />
 			<div className="woocommerce-woopayments-overview__cards">
 				<AccountBalancesCard
 					isLoading={ isLoading }
@@ -271,6 +279,35 @@ export const WooPaymentsOverviewPage = () => {
 					selectedCurrency={ selectedCurrency || undefined }
 				/>
 			</div>
+			{ shell && (
+				<>
+					<AccountDetailsCard
+						accountDetails={ shell.account_details }
+						accountFees={ shell.account_fees }
+					/>
+					<DisputeReadinessCard
+						enabled={ shouldLoadDisputeReadiness }
+						focusAfterDismissId="woocommerce-woopayments-balance-heading"
+					/>
+					<ActiveLoanSummaryCard
+						hasActiveLoan={
+							!! shell.account_loans?.has_active_loan
+						}
+					/>
+				</>
+			) }
+			{ hasWorkingConnectedAccount && (
+				<Suspense fallback={ null }>
+					<InboxNotifications />
+				</Suspense>
+			) }
+			{ shouldShowConnectionSuccessModal && shell && (
+				<ConnectionSuccessModal
+					isDismissed={ shell.is_connection_success_modal_dismissed }
+				/>
+			) }
+			<WooPaymentsAccountSettings />
+			<SpotlightPromotion />
 		</div>
 	);
 };

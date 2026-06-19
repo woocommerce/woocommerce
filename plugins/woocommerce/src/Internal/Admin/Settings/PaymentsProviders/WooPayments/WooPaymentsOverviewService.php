@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPa
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsSettingsService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -55,6 +56,10 @@ class WooPaymentsOverviewService {
 			'overview_tasks_visibility'             => $this->get_overview_tasks_visibility(),
 			'is_connection_success_modal_dismissed' => $this->is_truthy( get_option( 'wcpay_connection_success_modal_dismissed', false ) ),
 			'disputes_awaiting_response_count'      => $this->get_cached_disputes_awaiting_response_count(),
+			'account_details'                       => $this->get_account_details_projection( $account_data ),
+			'account_fees'                          => $this->get_active_account_fees( $account_data ),
+			'feature_flags'                         => $this->get_feature_flags_projection(),
+			'account_loans'                         => $this->get_account_loans_projection( $account_data ),
 			'wpcom_reconnect_url'                   => '',
 			'urls'                                  => array(
 				'overview_page' => Utils::wc_payments_settings_url( '/woopayments/overview' ),
@@ -246,7 +251,114 @@ class WooPaymentsOverviewService {
 				'woocommerce_deleted_todo_tasks',
 				'woocommerce_remind_me_later_todo_tasks',
 				'wcpay_connection_success_modal_dismissed',
+				'_wcpay_feature_dispute_readiness_overview',
 			)
+		);
+	}
+
+	/**
+	 * Get AccountDetails card data from the preserved account snapshot.
+	 *
+	 * @param array<string,mixed> $account_data Preserved account data snapshot.
+	 * @return array<string,mixed>|null
+	 */
+	private function get_account_details_projection( array $account_data ): ?array {
+		$account_details = $account_data['account_details'] ?? null;
+
+		if (
+			! is_array( $account_details )
+			|| ! is_array( $account_details['account_status'] ?? null )
+			|| ! is_array( $account_details['payout_status'] ?? null )
+			|| ! array_key_exists( 'banner', $account_details )
+		) {
+			return null;
+		}
+
+		return array(
+			'account_status' => $this->sanitize_scalar_array( $account_details['account_status'] ),
+			'payout_status'  => $this->sanitize_scalar_array( $account_details['payout_status'] ),
+			'banner'         => is_array( $account_details['banner'] ) ? $this->sanitize_scalar_array( $account_details['banner'] ) : null,
+		);
+	}
+
+	/**
+	 * Get active discounted account fee rows for enabled payment methods.
+	 *
+	 * @param array<string,mixed> $account_data Preserved account data snapshot.
+	 * @return array<int,array{payment_method:string,fee:array<string,mixed>}>
+	 */
+	private function get_active_account_fees( array $account_data ): array {
+		$fees        = is_array( $account_data['fees'] ?? null ) ? $account_data['fees'] : array();
+		$enabled_ids = $this->get_enabled_payment_method_ids();
+		$active_fees = array();
+
+		foreach ( $enabled_ids as $payment_method_id ) {
+			if ( ! in_array( $payment_method_id, WooPaymentsSettingsService::get_supported_payment_method_ids(), true ) || ! is_array( $fees[ $payment_method_id ] ?? null ) ) {
+				continue;
+			}
+
+			$fee_structure = $fees[ $payment_method_id ];
+			if ( ! $this->has_non_empty_array( $fee_structure['discount'] ?? array() ) ) {
+				continue;
+			}
+
+			$active_fees[] = array(
+				'payment_method' => $payment_method_id,
+				'fee'            => $this->sanitize_scalar_array( $fee_structure ),
+			);
+		}
+
+		return $active_fees;
+	}
+
+	/**
+	 * Get enabled WooPayments method IDs from gateway settings.
+	 *
+	 * @return string[]
+	 */
+	private function get_enabled_payment_method_ids(): array {
+		$settings    = get_option( 'woocommerce_woocommerce_payments_settings', array() );
+		$enabled_ids = is_array( $settings ) && is_array( $settings['upe_enabled_payment_method_ids'] ?? null )
+			? $settings['upe_enabled_payment_method_ids']
+			: ( is_array( $settings ) && is_array( $settings['enabled_payment_method_ids'] ?? null ) ? $settings['enabled_payment_method_ids'] : array( 'card' ) );
+
+		$sanitized_ids = array();
+		foreach ( $enabled_ids as $enabled_id ) {
+			$enabled_id = $this->get_scalar( $enabled_id );
+			if ( '' !== $enabled_id ) {
+				$sanitized_ids[] = $enabled_id;
+			}
+		}
+
+		return array_values( array_unique( $sanitized_ids ) );
+	}
+
+	/**
+	 * Get Overview feature flags.
+	 *
+	 * @return array<string,bool>
+	 */
+	private function get_feature_flags_projection(): array {
+		return array(
+			'dispute_readiness_overview' => $this->is_truthy( get_option( '_wcpay_feature_dispute_readiness_overview', '1' ) ),
+		);
+	}
+
+	/**
+	 * Get native Overview account-loan flags.
+	 *
+	 * @param array<string,mixed> $account_data Preserved account data snapshot.
+	 * @return array<string,bool>
+	 */
+	private function get_account_loans_projection( array $account_data ): array {
+		$account_loans = $account_data['capital'] ?? $account_data['account_loans'] ?? $account_data['accountLoans'] ?? array();
+
+		return array(
+			'has_active_loan' => is_array( $account_loans )
+				&& (
+					$this->is_truthy( $account_loans['has_active_loan'] ?? false )
+					|| $this->is_truthy( $account_loans['hasActiveLoan'] ?? false )
+				),
 		);
 	}
 
@@ -406,6 +518,29 @@ class WooPaymentsOverviewService {
 	 */
 	private function get_scalar( $value ): string {
 		return is_scalar( $value ) ? (string) $value : '';
+	}
+
+	/**
+	 * Recursively keep scalar/null array values only.
+	 *
+	 * @param array<mixed> $value Raw array.
+	 * @return array<mixed>
+	 */
+	private function sanitize_scalar_array( array $value ): array {
+		$sanitized = array();
+
+		foreach ( $value as $key => $item ) {
+			if ( is_array( $item ) ) {
+				$sanitized[ $key ] = $this->sanitize_scalar_array( $item );
+				continue;
+			}
+
+			if ( is_scalar( $item ) || null === $item ) {
+				$sanitized[ $key ] = $item;
+			}
+		}
+
+		return $sanitized;
 	}
 
 	/**
