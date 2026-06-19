@@ -347,6 +347,23 @@ const { actions } = store< Store >(
 					);
 				}
 
+				// Keyless-requires-delta invariant. A keyless add always issues
+				// `add-item`, whose quantity is a delta added to the existing
+				// line, so an absolute `quantity` would be misinterpreted as a
+				// delta and compound across rapid clicks. Keyless callers must
+				// therefore pass `quantityToAdd`; an absolute `quantity` is only
+				// valid alongside an explicit `key`, which targets a specific
+				// line via `update-item` with the absolute value.
+				if (
+					key === undefined &&
+					quantity !== undefined &&
+					quantityToAdd === undefined
+				) {
+					throw new Error(
+						'addCartItem: a keyless add must pass quantityToAdd (a delta), not an absolute quantity.'
+					);
+				}
+
 				const a11yModulePromise = import( '@wordpress/a11y' );
 
 				// Find existing item

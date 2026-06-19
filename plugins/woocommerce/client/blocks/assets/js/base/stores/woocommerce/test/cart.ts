@@ -403,6 +403,79 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 	} );
 
+	describe( 'addCartItem keyless-requires-delta invariant guard', () => {
+		it( 'throws when called keyless with an absolute quantity (no quantityToAdd)', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			await expect(
+				runAction(
+					actions.addCartItem( {
+						id: 42,
+						quantity: 5,
+						type: 'simple',
+					} )
+				)
+			).rejects.toThrow();
+		} );
+
+		it( 'does not throw and proceeds on the add-item path for a keyless quantityToAdd delta', async () => {
+			const captured = mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			await expect(
+				runAction(
+					actions.addCartItem( {
+						id: 42,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				)
+			).resolves.toBeUndefined();
+
+			expect( captured ).toHaveLength( 1 );
+			expect( captured[ 0 ].path ).toBe( '/wc/store/v1/cart/add-item' );
+		} );
+
+		it( 'does not throw for an explicit key with an absolute quantity (key-first stepper path unaffected)', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { id: 42, quantity: 3, key: 'server-key-abc' } ),
+			] );
+
+			await expect(
+				runAction(
+					actions.addCartItem( {
+						id: 42,
+						key: 'server-key-abc',
+						quantity: 5,
+						type: 'simple',
+					} )
+				)
+			).resolves.toBeUndefined();
+		} );
+
+		it( 'still throws when both quantity and quantityToAdd are passed together', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			await expect(
+				runAction(
+					actions.addCartItem( {
+						id: 42,
+						quantity: 5,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				)
+			).rejects.toThrow();
+		} );
+	} );
+
 	describe( 'batchAddCartItems endpoint selection', () => {
 		it( 'issues add-item (never update-item) for a keyless batch item that matches a keyed line by product id', async () => {
 			const captured = mockBatchFetch();
