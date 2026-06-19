@@ -1,6 +1,6 @@
 <?php
 /**
- * Billing_Policy - typed value object for a plan's billing cadence and trial.
+ * BillingPolicy - typed value object for a plan's billing cadence and trial.
  *
  * Mirrors the `billing_policy` JSON column shape. Shape:
  *   {
@@ -28,12 +28,12 @@ use DomainException;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Billing_Policy value object.
+ * BillingPolicy value object.
  *
  * Immutable. Construct via {@see self::from_array()} when hydrating from a
  * stored row, or via the constructor when building one in code.
  */
-final class Billing_Policy {
+final class BillingPolicy {
 
 	/**
 	 * Period unit: 'day' | 'week' | 'month' | 'year'.
@@ -99,22 +99,22 @@ final class Billing_Policy {
 	 */
 	public static function from_array( array $data ): self {
 		if ( ! array_key_exists( 'period', $data ) ) {
-			throw new DomainException( 'Billing_Policy: period is required, but not supplied.' );
+			throw new DomainException( 'BillingPolicy: period is required, but not supplied.' );
 		}
 		if ( ! array_key_exists( 'interval', $data ) ) {
-			throw new DomainException( 'Billing_Policy: interval is required, but not supplied.' );
+			throw new DomainException( 'BillingPolicy: interval is required, but not supplied.' );
 		}
 		if ( ! is_string( $data['period'] ) ) {
-			throw new DomainException( 'Billing_Policy: period must be a string, got ' . gettype( $data['period'] ) . '.' );
+			throw new DomainException( 'BillingPolicy: period must be a string, got ' . gettype( $data['period'] ) . '.' );
 		}
 		if ( ! is_int( $data['interval'] ) ) {
-			throw new DomainException( 'Billing_Policy: interval must be an integer, got ' . gettype( $data['interval'] ) . '.' );
+			throw new DomainException( 'BillingPolicy: interval must be an integer, got ' . gettype( $data['interval'] ) . '.' );
 		}
 
 		$trial = $data['trial_duration'] ?? null;
 		if ( null !== $trial && ! is_array( $trial ) ) {
 			throw new DomainException(
-				sprintf( 'Billing_Policy: trial_duration must be null or an array, got %s.', wp_json_encode( $trial ) )
+				sprintf( 'BillingPolicy: trial_duration must be null or an array, got %s.', wp_json_encode( $trial ) )
 			);
 		}
 
@@ -180,7 +180,7 @@ final class Billing_Policy {
 	public function compute_next_renewal_from( DateTimeImmutable $anchor ): DateTimeImmutable {
 		if ( $this->interval <= 0 ) {
 			throw new DomainException(
-				sprintf( 'Billing_Policy::compute_next_renewal_from(): interval must be positive, got %d.', $this->interval )
+				sprintf( 'BillingPolicy::compute_next_renewal_from(): interval must be positive, got %d.', $this->interval )
 			);
 		}
 
@@ -211,7 +211,7 @@ final class Billing_Policy {
 
 		if ( $length <= 0 ) {
 			throw new DomainException(
-				sprintf( 'Billing_Policy::compute_first_renewal_from(): trial length must be positive, got %d.', $length )
+				sprintf( 'BillingPolicy::compute_first_renewal_from(): trial length must be positive, got %d.', $length )
 			);
 		}
 
@@ -247,7 +247,7 @@ final class Billing_Policy {
 	private function normalize_unit( string $unit, string $label ): string {
 		if ( ! in_array( $unit, array( 'day', 'week', 'month', 'year' ), true ) ) {
 			throw new DomainException(
-				sprintf( 'Billing_Policy: invalid %s "%s".', $label, $unit )
+				sprintf( 'BillingPolicy: invalid %s "%s".', $label, $unit )
 			);
 		}
 
@@ -264,19 +264,19 @@ final class Billing_Policy {
 	private function validate_min_max_cycles( ?int $min_cycles, ?int $max_cycles ): void {
 		if ( null !== $min_cycles && $min_cycles < 0 ) {
 			throw new DomainException(
-				sprintf( 'Billing_Policy: min_cycles must be 0 or greater, got %d.', $min_cycles )
+				sprintf( 'BillingPolicy: min_cycles must be 0 or greater, got %d.', $min_cycles )
 			);
 		}
 
 		if ( null !== $max_cycles && $max_cycles < 0 ) {
 			throw new DomainException(
-				sprintf( 'Billing_Policy: max_cycles must be 0 or greater, got %d.', $max_cycles )
+				sprintf( 'BillingPolicy: max_cycles must be 0 or greater, got %d.', $max_cycles )
 			);
 		}
 
 		if ( null !== $min_cycles && null !== $max_cycles && $min_cycles > $max_cycles ) {
 			throw new DomainException(
-				sprintf( 'Billing_Policy: min_cycles cannot exceed max_cycles, got %d and %d.', $min_cycles, $max_cycles )
+				sprintf( 'BillingPolicy: min_cycles cannot exceed max_cycles, got %d and %d.', $min_cycles, $max_cycles )
 			);
 		}
 	}
@@ -294,19 +294,19 @@ final class Billing_Policy {
 		}
 
 		if ( ! array_key_exists( 'length', $trial_duration ) ) {
-			throw new DomainException( "Billing_Policy: trial_duration['length'] is required." );
+			throw new DomainException( "BillingPolicy: trial_duration['length'] is required." );
 		}
 		if ( ! array_key_exists( 'unit', $trial_duration ) ) {
-			throw new DomainException( "Billing_Policy: trial_duration['unit'] is required." );
+			throw new DomainException( "BillingPolicy: trial_duration['unit'] is required." );
 		}
 		if ( ! is_int( $trial_duration['length'] ) ) {
 			throw new DomainException(
-				sprintf( "Billing_Policy: trial_duration['length'] must be an integer, got %s.", gettype( $trial_duration['length'] ) )
+				sprintf( "BillingPolicy: trial_duration['length'] must be an integer, got %s.", gettype( $trial_duration['length'] ) )
 			);
 		}
 		if ( ! is_string( $trial_duration['unit'] ) ) {
 			throw new DomainException(
-				sprintf( "Billing_Policy: trial_duration['unit'] must be a string, got %s.", gettype( $trial_duration['unit'] ) )
+				sprintf( "BillingPolicy: trial_duration['unit'] must be a string, got %s.", gettype( $trial_duration['unit'] ) )
 			);
 		}
 

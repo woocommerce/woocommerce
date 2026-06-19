@@ -1,6 +1,6 @@
 <?php
 /**
- * Instrument_Ref - an immutable reference to a stored payment instrument.
+ * InstrumentRef - an immutable reference to a stored payment instrument.
  *
  * Carries the payment token id plus the gateway code and human-readable title
  * frozen at the time the instrument was attached. The Core zone never loads a
@@ -17,12 +17,12 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Instrument_Ref value object.
+ * InstrumentRef value object.
  *
  * Immutable. A null token id covers gateways that do not expose a stored token
  * (for example some manual gateways).
  */
-final class Instrument_Ref {
+final class InstrumentRef {
 
 	/**
 	 * Payment token id, or null when the gateway exposes no token.

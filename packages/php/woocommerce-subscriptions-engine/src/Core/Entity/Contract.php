@@ -2,10 +2,10 @@
 /**
  * Contract - the stable, customer-facing identity of a subscription. Manages
  * core data for the subscription and enforces lifecycle transitions through
- * {@see Contract_Status}.
+ * {@see ContractStatus}.
  *
  * Money totals are kept as decimal-safe strings; timestamps are GMT strings
- * (`Y-m-d H:i:s`). The payment instrument is exposed as an {@see Instrument_Ref}
+ * (`Y-m-d H:i:s`). The payment instrument is exposed as an {@see InstrumentRef}
  * rather than a live payment token.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity
@@ -16,7 +16,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
 use DomainException;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Instrument_Ref;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\InstrumentRef;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -42,7 +42,7 @@ final class Contract {
 	private $id;
 
 	/**
-	 * Lifecycle status. See {@see Contract_Status}.
+	 * Lifecycle status. See {@see ContractStatus}.
 	 *
 	 * @var string
 	 */
@@ -270,8 +270,8 @@ final class Contract {
 	 * @throws DomainException If the contract attributes are not valid.
 	 */
 	public static function create( array $args ): self {
-		$status = (string) ( $args['status'] ?? Contract_Status::ACTIVE );
-		if ( ! Contract_Status::is_valid( $status ) ) {
+		$status = (string) ( $args['status'] ?? ContractStatus::ACTIVE );
+		if ( ! ContractStatus::is_valid( $status ) ) {
 			throw new DomainException(
 				sprintf( 'Contract: invalid status "%s".', $status )
 			);
@@ -382,14 +382,14 @@ final class Contract {
 	 * Transition the contract to a new status.
 	 *
 	 * @param string $status Target status.
-	 * @throws DomainException If the transition is not allowed by Contract_Status.
+	 * @throws DomainException If the transition is not allowed by ContractStatus.
 	 */
 	public function set_status( string $status ): void {
 		if ( $status === $this->status ) {
 			return;
 		}
 
-		if ( ! Contract_Status::can_transition( $this->status, $status ) ) {
+		if ( ! ContractStatus::can_transition( $this->status, $status ) ) {
 			throw new DomainException(
 				sprintf( 'Contract: illegal status transition from "%s" to "%s".', $this->status, $status )
 			);
@@ -436,16 +436,16 @@ final class Contract {
 	/**
 	 * The payment instrument as an immutable reference.
 	 */
-	public function get_payment_instrument(): Instrument_Ref {
-		return new Instrument_Ref( $this->payment_token_id, $this->payment_method, $this->payment_method_title );
+	public function get_payment_instrument(): InstrumentRef {
+		return new InstrumentRef( $this->payment_token_id, $this->payment_method, $this->payment_method_title );
 	}
 
 	/**
 	 * Set the payment instrument from an immutable reference.
 	 *
-	 * @param Instrument_Ref $instrument Payment instrument reference.
+	 * @param InstrumentRef $instrument Payment instrument reference.
 	 */
-	public function set_payment_instrument( Instrument_Ref $instrument ): void {
+	public function set_payment_instrument( InstrumentRef $instrument ): void {
 		$this->payment_token_id     = $instrument->get_token_id();
 		$this->payment_method       = $instrument->get_gateway();
 		$this->payment_method_title = $instrument->get_title();

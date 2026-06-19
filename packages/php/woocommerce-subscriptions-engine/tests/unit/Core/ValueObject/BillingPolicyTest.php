@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for Billing_Policy.
+ * Unit tests for BillingPolicy.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine
  */
@@ -13,12 +13,12 @@ use DateTimeImmutable;
 use DateTimeZone;
 use DomainException;
 use PHPUnit\Framework\TestCase;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Billing_Policy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 
 /**
- * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Billing_Policy
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy
  */
-class Billing_Policy_Test extends TestCase {
+class BillingPolicyTest extends TestCase {
 
 	public function test_round_trips_through_array(): void {
 		$data = array(
@@ -32,7 +32,7 @@ class Billing_Policy_Test extends TestCase {
 			),
 		);
 
-		$policy = Billing_Policy::from_array( $data );
+		$policy = BillingPolicy::from_array( $data );
 
 		$this->assertSame( 'month', $policy->get_period() );
 		$this->assertSame( 2, $policy->get_interval() );
@@ -43,7 +43,7 @@ class Billing_Policy_Test extends TestCase {
 	}
 
 	public function test_missing_nullable_keys_default_to_null(): void {
-		$policy = Billing_Policy::from_array(
+		$policy = BillingPolicy::from_array(
 			array(
 				'period'   => 'week',
 				'interval' => 1,
@@ -56,7 +56,7 @@ class Billing_Policy_Test extends TestCase {
 	}
 
 	public function test_compute_next_renewal_adds_one_cadence_in_utc(): void {
-		$policy = Billing_Policy::from_array(
+		$policy = BillingPolicy::from_array(
 			array(
 				'period'   => 'month',
 				'interval' => 1,
@@ -71,7 +71,7 @@ class Billing_Policy_Test extends TestCase {
 	}
 
 	public function test_compute_first_renewal_honours_trial(): void {
-		$policy = Billing_Policy::from_array(
+		$policy = BillingPolicy::from_array(
 			array(
 				'period'         => 'month',
 				'interval'       => 1,
@@ -89,7 +89,7 @@ class Billing_Policy_Test extends TestCase {
 	}
 
 	public function test_compute_first_renewal_without_trial_matches_next(): void {
-		$policy = Billing_Policy::from_array(
+		$policy = BillingPolicy::from_array(
 			array(
 				'period'   => 'year',
 				'interval' => 1,
@@ -105,7 +105,7 @@ class Billing_Policy_Test extends TestCase {
 	}
 
 	public function test_invalid_period_throws(): void {
-		$policy = Billing_Policy::from_array(
+		$policy = BillingPolicy::from_array(
 			array(
 				'period'   => 'fortnight',
 				'interval' => 1,
@@ -117,7 +117,7 @@ class Billing_Policy_Test extends TestCase {
 	}
 
 	public function test_non_positive_interval_throws(): void {
-		$policy = Billing_Policy::from_array(
+		$policy = BillingPolicy::from_array(
 			array(
 				'period'   => 'month',
 				'interval' => 0,
@@ -140,7 +140,7 @@ class Billing_Policy_Test extends TestCase {
 			$this->expectExceptionMessage( $expected_exception_message );
 		}
 
-		$policy = Billing_Policy::from_array(
+		$policy = BillingPolicy::from_array(
 			array(
 				'period'     => 'month',
 				'interval'   => 1,
@@ -150,7 +150,7 @@ class Billing_Policy_Test extends TestCase {
 		);
 
 		if ( null === $expected_exception_message ) {
-			$this->assertInstanceOf( Billing_Policy::class, $policy );
+			$this->assertInstanceOf( BillingPolicy::class, $policy );
 			$this->assertSame( $min_cycles, $policy->get_min_cycles() );
 			$this->assertSame( $max_cycles, $policy->get_max_cycles() );
 		}
@@ -169,7 +169,7 @@ class Billing_Policy_Test extends TestCase {
 				'max_cycles'                 => 10,
 			),
 			'min_cycles is 0, max_cycles is less than 0' => array(
-				'expected_exception_message' => 'Billing_Policy: max_cycles must be 0 or greater, got -4.',
+				'expected_exception_message' => 'BillingPolicy: max_cycles must be 0 or greater, got -4.',
 				'min_cycles'                 => 0,
 				'max_cycles'                 => -4,
 			),
@@ -179,12 +179,12 @@ class Billing_Policy_Test extends TestCase {
 				'max_cycles'                 => 0,
 			),
 			'max_cycles is 0, min_cycles is positive'    => array(
-				'expected_exception_message' => 'Billing_Policy: min_cycles cannot exceed max_cycles, got 5 and 0.',
+				'expected_exception_message' => 'BillingPolicy: min_cycles cannot exceed max_cycles, got 5 and 0.',
 				'min_cycles'                 => 5,
 				'max_cycles'                 => 0,
 			),
 			'max_cycles is 0, min_cycles is greater than max_cycles' => array(
-				'expected_exception_message' => 'Billing_Policy: min_cycles cannot exceed max_cycles, got 5 and 0.',
+				'expected_exception_message' => 'BillingPolicy: min_cycles cannot exceed max_cycles, got 5 and 0.',
 				'min_cycles'                 => 5,
 				'max_cycles'                 => 0,
 			),
@@ -214,27 +214,27 @@ class Billing_Policy_Test extends TestCase {
 				'max_cycles'                 => 10,
 			),
 			'min_cycles is positive, max_cycles is less than min_cycles' => array(
-				'expected_exception_message' => 'Billing_Policy: min_cycles cannot exceed max_cycles, got 10 and 9.',
+				'expected_exception_message' => 'BillingPolicy: min_cycles cannot exceed max_cycles, got 10 and 9.',
 				'min_cycles'                 => 10,
 				'max_cycles'                 => 9,
 			),
 			'min_cycles is negative, max_cycles is null' => array(
-				'expected_exception_message' => 'Billing_Policy: min_cycles must be 0 or greater, got -1.',
+				'expected_exception_message' => 'BillingPolicy: min_cycles must be 0 or greater, got -1.',
 				'min_cycles'                 => -1,
 				'max_cycles'                 => null,
 			),
 			'min_cycles is negative, max_cycles is positive' => array(
-				'expected_exception_message' => 'Billing_Policy: min_cycles must be 0 or greater, got -1.',
+				'expected_exception_message' => 'BillingPolicy: min_cycles must be 0 or greater, got -1.',
 				'min_cycles'                 => -1,
 				'max_cycles'                 => 10,
 			),
 			'min_cycles is negative, max_cycles is less than min_cycles' => array(
-				'expected_exception_message' => 'Billing_Policy: min_cycles must be 0 or greater, got -1.',
+				'expected_exception_message' => 'BillingPolicy: min_cycles must be 0 or greater, got -1.',
 				'min_cycles'                 => -1,
 				'max_cycles'                 => -1,
 			),
 			'min_cycles is positive, max_cycles is negative' => array(
-				'expected_exception_message' => 'Billing_Policy: max_cycles must be 0 or greater, got -1.',
+				'expected_exception_message' => 'BillingPolicy: max_cycles must be 0 or greater, got -1.',
 				'min_cycles'                 => 1,
 				'max_cycles'                 => -1,
 			),
