@@ -89,6 +89,7 @@ class WooContentProcessorTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $content );
 		$this->assertStringContainsString( 'Set your new password', $content );
+		$this->assertStringContainsString( "Once you've clicked the link and set your new password, we'll link any past orders to your account.", $content );
 		$this->assertStringNotContainsString( 'Test email header', $content );
 		$this->assertStringNotContainsString( 'Test email footer', $content );
 		$this->assertStringNotContainsString( '<body>', $content );

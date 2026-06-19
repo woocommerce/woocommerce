@@ -161,7 +161,8 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 					'plain_text'         => false,
 					'email'              => $this,
 					'password_generated' => $this->password_generated,
-					'user_pass'          => $this->user_pass, // Password is no longer used in the template, but we're keeping it here for backwards compatibility with custom templates.
+					// Password is no longer used in the template, but we're keeping it here for backwards compatibility with custom templates.
+					'user_pass'          => $this->user_pass,
 					'verify_url'         => $this->verify_url,
 				)
 			);
@@ -187,7 +188,8 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 					'plain_text'         => true,
 					'email'              => $this,
 					'password_generated' => $this->password_generated,
-					'user_pass'          => $this->user_pass, // Password is no longer used in the template, but we're keeping it here for backwards compatibility with custom templates.
+					// Password is no longer used in the template, but we're keeping it here for backwards compatibility with custom templates.
+					'user_pass'          => $this->user_pass,
 					'verify_url'         => $this->verify_url,
 				)
 			);
@@ -210,7 +212,8 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 					'plain_text'         => false,
 					'email'              => $this,
 					'password_generated' => $this->password_generated,
-					'user_pass'          => $this->user_pass, // Password is no longer used in the template, but we're keeping it here for backwards compatibility with custom templates.
+					// Password is no longer used in the template, but we're keeping it here for backwards compatibility with custom templates.
+					'user_pass'          => $this->user_pass,
 					'verify_url'         => $this->verify_url,
 				)
 			);

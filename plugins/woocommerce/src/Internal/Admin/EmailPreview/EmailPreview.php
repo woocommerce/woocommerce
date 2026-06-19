@@ -210,6 +210,10 @@ class EmailPreview {
 				$this->email->reset_key = 'reset_key';
 			}
 
+			if ( property_exists( $this->email, 'reset_url' ) ) {
+				$this->email->reset_url = 'https://example.com/reset-password';
+			}
+
 			if ( property_exists( $this->email, 'set_password_url' ) ) {
 				$this->email->set_password_url = 'https://example.com/set-password';
 			}

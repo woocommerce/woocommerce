@@ -24,9 +24,14 @@
  * @var string    $reset_key          Reset key.
  * @var string    $user_id            User ID.
  * @var string    $user_login         User login.
+ * @var string    $reset_url          Reset password URL.
  */
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
 defined( 'ABSPATH' ) || exit;
+
+$email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n";
 echo esc_html( wp_strip_all_tags( $email_heading ) );
@@ -34,15 +39,22 @@ echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 /* translators: %s: Customer first name, or username if name is not available */
 echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_display_name ) ) . "\n\n";
-echo esc_html__( 'We received a request to update your password. To reset your password, click the link below:', 'woocommerce' );
+if ( $email_improvements_enabled ) {
+	esc_html_e( 'We received a request to update your password. To reset your password, click the link below:', 'woocommerce' );
+	echo "\n\n----------------------------------------\n\n";
+	echo esc_url( $reset_url );
+	echo "\n\n----------------------------------------\n\n";
+	esc_html_e( "If you didn't request this email, there's nothing to worry about, and you can safely ignore it.", 'woocommerce' );
+} else {
+	/* translators: %s: Store name */
+	echo sprintf( esc_html__( 'Someone has requested a new password for the following account on %s:', 'woocommerce' ), esc_html( $blogname ) ) . "\n\n";
+	/* translators: %s: Customer username */
+	echo sprintf( esc_html__( 'Username: %s', 'woocommerce' ), esc_html( $user_login ) ) . "\n\n";
+	echo esc_html__( 'If you didn\'t make this request, just ignore this email. If you\'d like to proceed:', 'woocommerce' ) . "\n\n";
+	echo esc_url( $reset_url ) . "\n\n";
+}
 
 echo "\n\n----------------------------------------\n\n";
-
-echo esc_url( add_query_arg( array( 'key' => $reset_key, 'id' => $user_id, 'login' => rawurlencode( $user_login ) ), wc_get_endpoint_url( 'lost-password', '', wc_get_page_permalink( 'myaccount' ) ) ) ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
-
-echo "\n\n----------------------------------------\n\n";
-
-echo esc_html__( "If you didn't request this email, there's nothing to worry about, and you can safely ignore it.", 'woocommerce' ) . "\n\n";
 
 /**
  * Show user-defined additional content - this is set in each email's settings.

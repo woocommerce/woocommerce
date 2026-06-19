@@ -24,6 +24,7 @@
  * @var string    $reset_key          Reset key.
  * @var string    $user_id            User ID.
  * @var string    $user_login         User login.
+ * @var string    $reset_url          Reset password URL.
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -45,28 +46,29 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 <?php /* translators: %s: Customer first name, or username if name is not available. */ ?>
 <p><?php printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_display_name ) ); ?></p>
-<p><?php esc_html_e( 'We received a request to update your password. To reset your password, click the link below:', 'woocommerce' ); ?></p>
-
-<?php
-$reset_url = add_query_arg(
-	array(
-		'key'   => $reset_key,
-		'id'    => $user_id,
-		'login' => rawurlencode( $user_login ),
-	),
-	wc_get_endpoint_url( 'lost-password', '', wc_get_page_permalink( 'myaccount' ) )
-);
-wc_get_template(
-	'emails/email-button.php',
-	array(
-		'url'   => $reset_url,
-		'label' => __( 'Reset password', 'woocommerce' ),
-	)
-);
-?>
-<p>
-	<?php esc_html_e( "If you didn't request this email, there's nothing to worry about, and you can safely ignore it.", 'woocommerce' ); ?>
-</p>
+<?php if ( $email_improvements_enabled ) : ?>
+	<p><?php esc_html_e( 'We received a request to update your password. To reset your password, click the link below:', 'woocommerce' ); ?></p>
+	<?php
+	wc_get_template(
+		'emails/email-button.php',
+		array(
+			'url'   => $reset_url,
+			'label' => __( 'Reset password', 'woocommerce' ),
+		)
+	);
+	?>
+	<p><?php esc_html_e( "If you didn't request this email, there's nothing to worry about, and you can safely ignore it.", 'woocommerce' ); ?></p>
+<?php else : ?>
+	<?php /* translators: %s: Store name */ ?>
+	<p><?php printf( esc_html__( 'Someone has requested a new password for the following account on %s:', 'woocommerce' ), esc_html( $blogname ) ); ?></p>
+	<?php /* translators: %s: Customer username */ ?>
+	<p><?php printf( esc_html__( 'Username: %s', 'woocommerce' ), esc_html( $user_login ) ); ?></p>
+	<p><?php esc_html_e( 'If you didn\'t make this request, just ignore this email. If you\'d like to proceed:', 'woocommerce' ); ?></p>
+	<p>
+		<a class="link" href="<?php echo esc_url( $reset_url ); ?>"><?php esc_html_e( 'Click here to reset your password', 'woocommerce' ); ?></a>
+		<?php esc_html_e( "If you didn't request this email, there's nothing to worry about, and you can safely ignore it.", 'woocommerce' ); ?>
+	</p>
+<?php endif; ?>
 
 <?php echo $email_improvements_enabled ? '</div>' : ''; ?>
 

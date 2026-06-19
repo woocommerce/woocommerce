@@ -6,7 +6,8 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+	// Exit if accessed directly.
+	exit;
 }
 
 if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
@@ -57,6 +58,13 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 		 * @var string
 		 */
 		public $user_display_name;
+
+		/**
+		 * Reset password URL.
+		 *
+		 * @var string
+		 */
+		public $reset_url;
 
 		/**
 		 * Constructor.
@@ -131,6 +139,14 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 				$this->reset_key         = $reset_key;
 				$this->user_email        = stripslashes( $this->object->user_email );
 				$this->recipient         = $this->user_email;
+				$this->reset_url         = add_query_arg(
+					array(
+						'key'   => $this->reset_key,
+						'id'    => $this->user_id,
+						'login' => rawurlencode( $this->user_login ),
+					),
+					wc_get_endpoint_url( 'lost-password', '', wc_get_page_permalink( 'myaccount' ) )
+				);
 				$customer                = new WC_Customer( $this->object->ID );
 				$first_name              = ! empty( $customer->get_billing_first_name() ) ? $customer->get_billing_first_name() : $this->object->first_name;
 				$this->user_display_name = ! empty( $first_name ) ? $first_name : $this->user_login;
@@ -155,6 +171,7 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 					'user_login'         => $this->user_login,
 					'user_display_name'  => $this->user_display_name,
 					'reset_key'          => $this->reset_key,
+					'reset_url'          => $this->reset_url,
 					'blogname'           => $this->get_blogname(),
 					'additional_content' => $this->get_additional_content(),
 					'sent_to_admin'      => false,
@@ -178,6 +195,7 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 					'user_login'         => $this->user_login,
 					'user_display_name'  => $this->user_display_name,
 					'reset_key'          => $this->reset_key,
+					'reset_url'          => $this->reset_url,
 					'blogname'           => $this->get_blogname(),
 					'additional_content' => $this->get_additional_content(),
 					'sent_to_admin'      => false,
@@ -201,6 +219,7 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 					'user_login'        => $this->user_login,
 					'user_display_name' => $this->user_display_name,
 					'reset_key'         => $this->reset_key,
+					'reset_url'         => $this->reset_url,
 					'sent_to_admin'     => false,
 					'plain_text'        => false,
 					'email'             => $this,
