@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Blocks\Shipping;
  * capability (e.g. Shop Managers) can save Local Pickup settings without
  * requiring the manage_options capability needed by /wp/v2/settings.
  *
- * @since 10.9.0
+ * @since 11.0.0
  */
 class PickupLocationsRestController extends \WP_REST_Controller {
 
@@ -28,6 +28,8 @@ class PickupLocationsRestController extends \WP_REST_Controller {
 
 	/**
 	 * Register routes.
+	 *
+	 * @return void
 	 */
 	public function register_routes() {
 		register_rest_route(
@@ -38,9 +40,17 @@ class PickupLocationsRestController extends \WP_REST_Controller {
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_settings' ),
 					'permission_callback' => array( $this, 'update_settings_permissions_check' ),
-					'args'                => $this->get_endpoint_args(),
+					'args'                => array(
+						'pickup_location_settings' => array(
+							'description' => __( 'Local pickup method settings.', 'woocommerce' ),
+							'type'        => 'object',
+						),
+						'pickup_locations'         => array(
+							'description' => __( 'List of local pickup locations.', 'woocommerce' ),
+							'type'        => 'array',
+						),
+					),
 				),
-				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
 	}
@@ -48,7 +58,7 @@ class PickupLocationsRestController extends \WP_REST_Controller {
 	/**
 	 * Check whether the current user can update pickup location settings.
 	 *
-	 * @param \WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request<array<string, mixed>> $request Request object.
 	 * @return true|\WP_Error
 	 */
 	public function update_settings_permissions_check( $request ) {
@@ -66,27 +76,64 @@ class PickupLocationsRestController extends \WP_REST_Controller {
 	/**
 	 * Save pickup location settings and return the saved values.
 	 *
-	 * @param \WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request<array<string, mixed>> $request Request object.
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function update_settings( $request ) {
 		$settings  = $request->get_param( 'pickup_location_settings' );
 		$locations = $request->get_param( 'pickup_locations' );
 
-		if ( null !== $settings && is_array( $settings ) ) {
+		if ( is_array( $settings ) ) {
 			$settings = $this->sanitize_pickup_location_settings( $settings );
 			update_option( 'woocommerce_pickup_location_settings', $settings );
 		}
 
-		if ( null !== $locations && is_array( $locations ) ) {
+		if ( is_array( $locations ) ) {
 			$locations = $this->sanitize_pickup_locations( $locations );
 			update_option( 'pickup_location_pickup_locations', $locations );
+		}
+
+		// The settings UI always saves both arrays together; a Tracks snapshot is
+		// only meaningful with both present, so skip partial (non-UI) updates.
+		if ( is_array( $settings ) && is_array( $locations ) ) {
+			$this->record_save_event( $settings, $locations );
 		}
 
 		return rest_ensure_response(
 			array(
 				'pickup_location_settings' => $settings,
 				'pickup_locations'         => $locations,
+			)
+		);
+	}
+
+	/**
+	 * Record a Tracks event summarising a Local Pickup settings save.
+	 *
+	 * @param array $settings  Sanitized method settings.
+	 * @param array $locations Sanitized list of pickup locations.
+	 * @return void
+	 */
+	private function record_save_event( array $settings, array $locations ): void {
+		$cost = $settings['cost'] ?? '';
+
+		\WC_Tracks::record_event(
+			'local_pickup_save_changes',
+			array(
+				'local_pickup_enabled'     => 'yes' === ( $settings['enabled'] ?? '' ),
+				'title'                    => __( 'Pickup', 'woocommerce' ) === ( $settings['title'] ?? '' ),
+				'price'                    => '' === $cost,
+				'cost'                     => '' === $cost ? 0 : $cost,
+				'taxes'                    => $settings['tax_status'] ?? '',
+				'total_pickup_locations'   => count( $locations ),
+				'pickup_locations_enabled' => count(
+					array_filter(
+						$locations,
+						function ( $location ) {
+							return ! empty( $location['enabled'] );
+						}
+					)
+				),
 			)
 		);
 	}
@@ -105,8 +152,6 @@ class PickupLocationsRestController extends \WP_REST_Controller {
 		$sanitized = array();
 
 		if ( isset( $settings['enabled'] ) ) {
-			// The schema enum will already reject anything other than 'yes'/'no',
-			// but normalize defensively in case the dispatcher is bypassed.
 			$sanitized['enabled'] = in_array( $settings['enabled'], array( 'yes', 'no' ), true )
 				? $settings['enabled']
 				: 'no';
@@ -145,115 +190,38 @@ class PickupLocationsRestController extends \WP_REST_Controller {
 				continue;
 			}
 
-			$entry = array();
+			$name = isset( $location['name'] ) ? sanitize_text_field( (string) $location['name'] ) : '';
 
-			if ( isset( $location['name'] ) ) {
-				$entry['name'] = sanitize_text_field( (string) $location['name'] );
+			// A pickup location with no name is unusable, and incomplete entries
+			// would later trigger undefined-index notices in
+			// ShippingController::hydrate_client_settings(), which reads these
+			// fields unconditionally. Skip nameless entries and always emit every
+			// key with a safe default for the ones we keep.
+			if ( '' === $name ) {
+				continue;
 			}
 
+			$address = array();
 			if ( isset( $location['address'] ) && is_array( $location['address'] ) ) {
-				$address     = $location['address'];
-				$address_out = array();
 				foreach ( array( 'address_1', 'city', 'state', 'postcode', 'country' ) as $field ) {
-					if ( isset( $address[ $field ] ) ) {
-						$address_out[ $field ] = sanitize_text_field( (string) $address[ $field ] );
+					if ( isset( $location['address'][ $field ] ) ) {
+						$address[ $field ] = sanitize_text_field( (string) $location['address'][ $field ] );
 					}
 				}
-				$entry['address'] = $address_out;
 			}
 
-			if ( isset( $location['details'] ) ) {
+			$sanitized[] = array(
+				'name'    => $name,
+				'address' => $address,
 				// Details may contain limited HTML — match the rendering side
 				// in ShippingController::show_local_pickup_details() which uses
 				// wp_kses_post().
-				$entry['details'] = wp_kses_post( (string) $location['details'] );
-			}
-
-			if ( isset( $location['enabled'] ) ) {
-				$entry['enabled'] = rest_sanitize_boolean( $location['enabled'] );
-			}
-
-			$sanitized[] = $entry;
+				'details' => isset( $location['details'] ) ? wp_kses_post( (string) $location['details'] ) : '',
+				// WP stub declares an unresolvable template type for rest_sanitize_boolean; the mixed array offset is accepted at runtime.
+				'enabled' => isset( $location['enabled'] ) ? rest_sanitize_boolean( $location['enabled'] ) : false, // @phpstan-ignore argument.templateType
+			);
 		}
 
 		return $sanitized;
-	}
-
-	/**
-	 * Get the schema for the request args.
-	 *
-	 * @return array
-	 */
-	private function get_endpoint_args() {
-		return array(
-			'pickup_location_settings' => array(
-				'description' => __( 'Local pickup method settings.', 'woocommerce' ),
-				'type'        => 'object',
-				'required'    => false,
-				'properties'  => array(
-					'enabled'    => array(
-						'description' => __( 'Whether local pickup is enabled.', 'woocommerce' ),
-						'type'        => 'string',
-						'enum'        => array( 'yes', 'no' ),
-					),
-					'title'      => array(
-						'description' => __( 'Title shown to customers during checkout.', 'woocommerce' ),
-						'type'        => 'string',
-					),
-					'tax_status' => array(
-						'description' => __( 'Tax status applied to the pickup cost.', 'woocommerce' ),
-						'type'        => 'string',
-						'enum'        => array( 'taxable', 'none' ),
-					),
-					'cost'       => array(
-						'description' => __( 'Optional cost charged for local pickup.', 'woocommerce' ),
-						'type'        => 'string',
-					),
-				),
-			),
-			'pickup_locations'         => array(
-				'description' => __( 'List of local pickup locations.', 'woocommerce' ),
-				'type'        => 'array',
-				'required'    => false,
-				'items'       => array(
-					'type'       => 'object',
-					'properties' => array(
-						'name'    => array(
-							'type' => 'string',
-						),
-						'address' => array(
-							'type'       => 'object',
-							'properties' => array(
-								'address_1' => array( 'type' => 'string' ),
-								'city'      => array( 'type' => 'string' ),
-								'state'     => array( 'type' => 'string' ),
-								'postcode'  => array( 'type' => 'string' ),
-								'country'   => array( 'type' => 'string' ),
-							),
-						),
-						'details' => array(
-							'type' => 'string',
-						),
-						'enabled' => array(
-							'type' => 'boolean',
-						),
-					),
-				),
-			),
-		);
-	}
-
-	/**
-	 * Get the item schema.
-	 *
-	 * @return array
-	 */
-	public function get_item_schema() {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'pickup-locations',
-			'type'       => 'object',
-			'properties' => $this->get_endpoint_args(),
-		);
 	}
 }

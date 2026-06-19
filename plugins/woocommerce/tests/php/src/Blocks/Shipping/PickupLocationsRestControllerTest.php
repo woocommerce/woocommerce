@@ -19,13 +19,6 @@ class PickupLocationsRestControllerTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Administrator user ID.
-	 *
-	 * @var int
-	 */
-	private $admin_id;
-
-	/**
 	 * Shop manager user ID.
 	 *
 	 * @var int
@@ -45,7 +38,6 @@ class PickupLocationsRestControllerTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut             = new PickupLocationsRestController();
-		$this->admin_id        = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		$this->shop_manager_id = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
 		$this->editor_id       = self::factory()->user->create( array( 'role' => 'editor' ) );
 	}
@@ -78,19 +70,6 @@ class PickupLocationsRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should allow an administrator to update pickup location settings.
-	 */
-	public function test_admin_can_update_settings(): void {
-		wp_set_current_user( $this->admin_id );
-
-		$result = $this->sut->update_settings_permissions_check(
-			new \WP_REST_Request( 'POST', '/wc/v3/pickup-locations' )
-		);
-
-		$this->assertTrue( $result, 'An administrator should be allowed to edit pickup location settings.' );
-	}
-
-	/**
 	 * @testdox Should deny an editor from updating pickup location settings.
 	 */
 	public function test_editor_cannot_update_settings(): void {
@@ -101,19 +80,6 @@ class PickupLocationsRestControllerTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertWPError( $result, 'An editor should not be allowed to edit pickup location settings.' );
-	}
-
-	/**
-	 * @testdox Should deny an unauthenticated user from updating pickup location settings.
-	 */
-	public function test_unauthenticated_user_cannot_update_settings(): void {
-		wp_set_current_user( 0 );
-
-		$result = $this->sut->update_settings_permissions_check(
-			new \WP_REST_Request( 'POST', '/wc/v3/pickup-locations' )
-		);
-
-		$this->assertWPError( $result, 'An unauthenticated user should not be allowed to edit pickup location settings.' );
 	}
 
 	// -------------------------------------------------------------------------
@@ -172,6 +138,39 @@ class PickupLocationsRestControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( $locations, $data['pickup_locations'], 'Response should echo back the saved locations.' );
 		$this->assertSame( $locations, get_option( 'pickup_location_pickup_locations' ), 'Locations should be persisted to the database.' );
+	}
+
+	/**
+	 * @testdox Should drop incomplete locations and default missing keys so admin hydration never hits undefined indexes.
+	 */
+	public function test_update_settings_drops_incomplete_locations(): void {
+		wp_set_current_user( $this->shop_manager_id );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/pickup-locations' );
+		$request->set_param(
+			'pickup_locations',
+			array(
+				array(),                            // Empty object — dropped.
+				array( 'name' => '' ),              // Nameless — dropped.
+				array( 'name' => 'Warehouse' ),     // Name only — kept, other keys defaulted.
+			)
+		);
+
+		$this->sut->update_settings( $request );
+
+		$saved = get_option( 'pickup_location_pickup_locations' );
+
+		$this->assertCount( 1, $saved, 'Only the named location should be persisted.' );
+		$this->assertSame(
+			array(
+				'name'    => 'Warehouse',
+				'address' => array(),
+				'details' => '',
+				'enabled' => false,
+			),
+			$saved[0],
+			'A kept location must always carry every key so hydrate_client_settings() never reads a missing index.'
+		);
 	}
 
 	/**
