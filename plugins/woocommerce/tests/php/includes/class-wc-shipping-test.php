@@ -342,7 +342,7 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	 */
 	private function get_package_hash_test_package(): array {
 		return array(
-			'contents'       => array(
+			'contents'      => array(
 				'test_item' => array(
 					'quantity'          => 1,
 					'line_subtotal'     => 10,
@@ -352,18 +352,18 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 					'data'              => new WC_Product_Simple(),
 				),
 			),
-			'contents_cost'  => 10,
-			'destination'    => array(
+			'contents_cost' => 10,
+			'destination'   => array(
 				'country'  => 'US',
 				'state'    => 'CA',
 				'postcode' => '00000',
 			),
-			'package_id'     => 'package-1',
-			'package_name'   => 'Package 1',
-			'package_index'  => 1,
-			'subtotal'       => 10,
-			'total'          => 10,
-			'rates'          => array(),
+			'package_id'    => 'package-1',
+			'package_name'  => 'Package 1',
+			'package_index' => 1,
+			'subtotal'      => 10,
+			'total'         => 10,
+			'rates'         => array(),
 		);
 	}
 
