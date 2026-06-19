@@ -33,15 +33,12 @@ echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 /* translators: %s: Customer first name, or username if name is not available */
 echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_display_name ) ) . "\n\n";
-echo sprintf(
-	/* translators: %s: the customer's email address. */
-	esc_html__( "Once you've confirmed that %s is your email address, we'll link any past orders to your account.", 'woocommerce' ),
-	esc_html( $user_email )
-) . "\n\n";
+/* translators: %s: the customer's email address. */
+echo sprintf( esc_html__( "Once you've confirmed that %s is your email address, we'll link any past orders to your account.", 'woocommerce' ), esc_html( $user_email ) ) . "\n\n";
 
-echo esc_url( ! empty( $verify_url ) ? $verify_url : wc_get_page_permalink( 'myaccount' ) );
-
-echo "\n\n----------------------------------------\n\n";
+echo "----------------------------------------\n\n";
+echo esc_url( $verify_url ) . "\n\n";
+echo "----------------------------------------\n\n";
 
 echo esc_html__( "If you didn't request this email, there's nothing to worry about, and you can safely ignore it.", 'woocommerce' ) . "\n\n";
 
