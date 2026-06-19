@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep native WooPayments admin-surface readiness fail-closed until parity gates explicitly pass.
