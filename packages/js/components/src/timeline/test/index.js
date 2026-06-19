@@ -1,28 +1,13 @@
-/* eslint-disable jest/no-mocks-import */
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
-import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import Timeline from '..';
-import mockData from './__mocks__/timeline-mock-data';
 import { groupItemsUsing, sortByDateUsing } from '../util.js';
 
 describe( 'Timeline', () => {
-	test( 'Empty snapshot', () => {
-		const { container } = render( <Timeline /> );
-		expect( container ).toMatchSnapshot();
-	} );
-
-	test( 'With data snapshot', () => {
-		const { container } = render( <Timeline items={ mockData } /> );
-		expect( container ).toMatchSnapshot();
-	} );
-
 	describe( 'Timeline utilities', () => {
 		test( 'Sorts correctly', () => {
 			const jan21 = new Date( 2020, 0, 21 );

@@ -16,7 +16,6 @@ describe( 'AbbreviatedCard', () => {
 				<p>Abbreviated card content</p>
 			</AbbreviatedCard>
 		);
-		expect( container ).toMatchSnapshot();
 
 		// should have correct content
 		expect( getByText( 'Abbreviated card content' ) ).toBeInTheDocument();

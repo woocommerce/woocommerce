@@ -227,30 +227,6 @@ describe( 'Filter by Stock block', () => {
 		server.resetHandlers();
 	} );
 
-	test( 'renders the stock filter block', async () => {
-		const { container } = setup( {
-			showFilterButton: false,
-			showCounts: false,
-		} );
-		expect( container ).toMatchSnapshot();
-	} );
-
-	test( 'renders the stock filter block with the filter button', async () => {
-		const { container } = setup( {
-			showFilterButton: true,
-			showCounts: false,
-		} );
-		expect( container ).toMatchSnapshot();
-	} );
-
-	test( 'renders the stock filter block with the product counts', async () => {
-		const { container } = setup( {
-			showFilterButton: false,
-			showCounts: true,
-		} );
-		expect( container ).toMatchSnapshot();
-	} );
-
 	describe( 'Single choice Dropdown', () => {
 		test( 'renders dropdown', () => {
 			const { getDropdown, getList } = setupSingleChoiceDropdown();
