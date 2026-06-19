@@ -372,11 +372,15 @@ const { actions } = store< Store >(
 
 				// Keyless-requires-delta invariant. A keyless add always issues
 				// `add-item`, whose quantity is a delta added to the existing
-				// line, so an absolute `quantity` would be misinterpreted as a
-				// delta and compound across rapid clicks. Keyless callers must
-				// therefore pass `quantityToAdd`; an absolute `quantity` is only
-				// valid alongside an explicit `key`, which targets a specific
-				// line via `update-item` with the absolute value.
+				// line; rapid-click compounding relies on that — each click sends
+				// its own delta and the server sums them (N -> N+1 -> N+2). An
+				// absolute `quantity` on a keyless add would be misread as a delta
+				// and corrupt that compounding, so keyless callers must pass
+				// `quantityToAdd`. An absolute `quantity` is legitimate only when
+				// paired with an explicit `key`: that is the keyed-stepper path
+				// (mini-cart / cart-block quantity controls), which targets one
+				// known line via `update-item` and sets its quantity outright.
+				// Those keyed callers are intentionally exempt from this guard.
 				if (
 					key === undefined &&
 					quantity !== undefined &&
