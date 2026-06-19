@@ -437,11 +437,15 @@ const { actions } = store< Store >(
 					itemToSend = { ...existingItem, quantity: targetQuantity };
 				} else {
 					// Keyless add: build a fresh payload for the add-item
-					// endpoint and never copy the matched line's key. add-item
-					// adds to the existing quantity rather than setting it, so
-					// when a line matches (by id/variation, possibly carrying a
-					// server key) we post the delta against its quantity; with
-					// no match we post the full target quantity.
+					// endpoint and never copy the matched line's key. The amount
+					// sent is always a delta — add-item adds to the existing
+					// quantity rather than setting it — so a match (by
+					// id/variation, possibly carrying a server key) only tells us
+					// how much delta is already accounted for in the running
+					// optimistic total; with no match we post the full target
+					// quantity. The matched line is never sent as an absolute
+					// quantity: per the iron rule the posted amount is a function
+					// of the delta, not of the match.
 					const quantityToSend = existingItem
 						? targetQuantity - existingItem.quantity
 						: targetQuantity;
@@ -480,7 +484,19 @@ const { actions } = store< Store >(
 										existingItem.quantity
 									);
 								}
-								// Update existing item's quantity (whether server-confirmed or optimistic).
+								// Iron rule: this in-place bump is render-only. It
+								// makes the common re-add flicker-free, but it must
+								// never feed back into endpoint selection or the
+								// posted amount — those are already fixed above as a
+								// pure function of key-presence and the delta. On a
+								// keyless add the match may bump a server-keyed line's
+								// rendered quantity (the accepted, self-correcting
+								// meta-only blip the server reconciles away); it must
+								// not flip the add into `update-item` or supply an
+								// absolute quantity. A future edit that lets this
+								// match drive the endpoint or the posted amount
+								// resurrects the original "cannot update bundle item"
+								// / wrong-line bug.
 								const isSoldIndividually =
 									isCartItem( existingItem ) &&
 									existingItem.sold_individually;
@@ -605,12 +621,14 @@ const { actions } = store< Store >(
 							];
 						} else {
 							// Keyless add: build a fresh payload for the add-item
-							// endpoint and never copy the matched line's key.
+							// endpoint and never copy the matched line's key. As in
+							// addCartItem, the amount sent is always a delta —
 							// add-item adds to the existing quantity rather than
-							// setting it, so when a line matches (by
-							// id/variation, possibly carrying a server key) we
-							// post the delta against its quantity; with no match
-							// we post the full target quantity.
+							// setting it — so a match (by id/variation, possibly
+							// carrying a server key) only tells us how much delta is
+							// already accounted for; with no match we post the full
+							// target quantity. Per the iron rule the matched line is
+							// never sent as an absolute quantity.
 							const quantityToSend = existingItem
 								? quantity - existingItem.quantity
 								: quantity;
@@ -652,6 +670,16 @@ const { actions } = store< Store >(
 											existingItem.quantity
 										);
 									}
+									// Iron rule (same as addCartItem): this in-place
+									// bump is render-only and must never feed back into
+									// endpoint selection or the posted amount, which are
+									// already fixed above as a pure function of
+									// key-presence and the delta. Bumping a server-keyed
+									// line's rendered quantity on a keyless add is the
+									// accepted meta-only blip the server reconciles; it
+									// must not flip the add into `update-item` or post an
+									// absolute quantity. Letting this match drive the
+									// endpoint or amount reintroduces the bug.
 									existingItem.quantity = quantity;
 								} else {
 									state.cart.items.push( itemToSend );
