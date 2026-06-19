@@ -245,28 +245,7 @@ final class Contract {
 	/**
 	 * Build a new, unsaved contract.
 	 *
-	 * @param array{
-	 *     customer_id: int,
-	 *     currency: string,
-	 *     selling_plan_id: int,
-	 *     origin_order_id: int,
-	 *     start_gmt: string,
-	 *     status?: string,
-	 *     extension_slug?: string,
-	 *     payment_method?: string,
-	 *     payment_method_title?: string,
-	 *     payment_token_id?: int,
-	 *     billing_total: string,
-	 *     discount_total?: string,
-	 *     shipping_total?: string,
-	 *     tax_total?: string,
-	 *     next_payment_gmt?: string,
-	 *     trial_end_gmt?: string,
-	 *     schedule_source: string,
-	 *     items: array<int, array<string, mixed>>,
-	 *     addresses: array{ billing: array<string, mixed>, shipping: array<string, mixed> },
-	 *     meta: array<string, string>,
-	 * } $args Contract attributes.
+	 * @param array<string, mixed> $args Contract attributes.
 	 * @throws DomainException If the contract attributes are not valid.
 	 */
 	public static function create( array $args ): self {
