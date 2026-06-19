@@ -12,23 +12,43 @@ import type {
 	WooPaymentsDepositsOverview,
 	WooPaymentsDepositsQuery,
 	WooPaymentsDepositsSummary,
+	WooPaymentsOverviewDisputesResponse,
+	WooPaymentsOverviewShell,
 } from './types';
 
 const DEPOSITS_PATH = '/wc/v3/payments/deposits';
+const DISPUTES_PATH = '/wc/v3/payments/disputes';
+const OVERVIEW_SHELL_PATH = '/wc-admin/settings/payments/woopayments/overview';
+const DISPUTE_AWAITING_RESPONSE_STATUSES = [
+	'needs_response',
+	'warning_needs_response',
+];
 
 const buildPathWithQuery = (
 	path: string,
-	query: WooPaymentsDepositsQuery = {}
+	query: WooPaymentsDepositsQuery | Record< string, unknown > = {}
 ) => {
 	const params = new URLSearchParams();
 
-	Object.entries( query ).forEach( ( [ key, value ] ) => {
-		if ( value === undefined || value === null || value === '' ) {
-			return;
-		}
+	Object.entries( query as Record< string, unknown > ).forEach(
+		( [ key, value ] ) => {
+			if ( value === undefined || value === null || value === '' ) {
+				return;
+			}
 
-		params.append( key, String( value ) );
-	} );
+			if ( Array.isArray( value ) ) {
+				value.forEach( ( item ) => {
+					if ( item !== undefined && item !== null && item !== '' ) {
+						params.append( `${ key }[]`, String( item ) );
+					}
+				} );
+
+				return;
+			}
+
+			params.append( key, String( value ) );
+		}
+	);
 
 	const queryString = params.toString();
 
@@ -88,3 +108,21 @@ export const submitWooPaymentsInstantDeposit = async (
 			currency,
 		},
 	} );
+
+export const getWooPaymentsOverviewShell =
+	async (): Promise< WooPaymentsOverviewShell > =>
+		apiFetch< WooPaymentsOverviewShell >( {
+			path: OVERVIEW_SHELL_PATH,
+			method: 'GET',
+		} );
+
+export const getWooPaymentsOverviewDisputes =
+	async (): Promise< WooPaymentsOverviewDisputesResponse > =>
+		apiFetch< WooPaymentsOverviewDisputesResponse >( {
+			path: buildPathWithQuery( DISPUTES_PATH, {
+				page: 1,
+				pagesize: 50,
+				search: DISPUTE_AWAITING_RESPONSE_STATUSES,
+			} ),
+			method: 'GET',
+		} );

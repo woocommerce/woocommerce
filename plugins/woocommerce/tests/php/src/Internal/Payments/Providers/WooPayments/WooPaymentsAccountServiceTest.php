@@ -942,6 +942,37 @@ class WooPaymentsAccountServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should expose the preserved account data snapshot without refreshing expired cache data.
+	 */
+	public function test_get_preserved_account_data_snapshot_does_not_refresh_expired_cache(): void {
+		$stale_account = $this->get_valid_live_account_payload(
+			array(
+				'account_id' => 'acct_stale',
+			)
+		);
+		$fresh_account = $this->get_valid_live_account_payload(
+			array(
+				'account_id' => 'acct_fresh',
+			)
+		);
+		$api_client    = $this->create_counting_account_api_client( $fresh_account );
+		$sut           = $this->create_service_with_api_client( $api_client );
+
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data'               => $stale_account,
+				'fetched'            => time() - ( 25 * HOUR_IN_SECONDS ),
+				'errored'            => false,
+				'consecutive_errors' => 0,
+			)
+		);
+
+		$this->assertSame( $stale_account, $sut->get_preserved_account_data_snapshot() );
+		$this->assertSame( 0, $api_client->calls );
+	}
+
+	/**
 	 * @testdox Should let onboarding test mode and the legacy test-mode filter override persisted gateway settings.
 	 */
 	public function test_mode_follows_onboarding_option_and_test_mode_filter(): void {

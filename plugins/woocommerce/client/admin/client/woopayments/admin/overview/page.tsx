@@ -10,14 +10,26 @@ import { __ } from '@wordpress/i18n';
 import { WooPaymentsAccountSettings } from '~/woopayments/settings/account-settings';
 import {
 	getWooPaymentsDepositsOverview,
+	getWooPaymentsOverviewDisputes,
+	getWooPaymentsOverviewShell,
 	getWooPaymentsRecentDeposits,
 	submitWooPaymentsInstantDeposit,
 } from './data';
 import { AccountBalancesCard } from './components/account-balances-card';
 import { PayoutsOverviewCard } from './components/payouts-overview-card';
-import type { WooPaymentsDeposit, WooPaymentsDepositsOverview } from './types';
+import type {
+	WooPaymentsDeposit,
+	WooPaymentsDepositsOverview,
+	WooPaymentsOverviewDispute,
+	WooPaymentsOverviewShell,
+} from './types';
 import { getSelectedBalanceCurrency } from './utils';
 import { SpotlightPromotion } from '../../promotions/spotlight';
+import { OverviewNotices } from './components/overview-notices';
+import { buildOverviewTasks } from './components/overview-tasks';
+import { OverviewTaskList } from './components/overview-task-list';
+import { UpdateBusinessDetailsModal } from './components/update-business-details-modal';
+import { ConnectionSuccessModal } from './components/connection-success-modal';
 
 const getErrorMessage = ( error: unknown ) => {
 	if ( error instanceof Error && error.message ) {
@@ -53,6 +65,14 @@ export const WooPaymentsOverviewPage = () => {
 	const [ payoutsErrorMessage, setPayoutsErrorMessage ] = useState<
 		string | null
 	>( null );
+	const [ shell, setShell ] = useState< WooPaymentsOverviewShell | null >(
+		null
+	);
+	const [ disputes, setDisputes ] = useState< WooPaymentsOverviewDispute[] >(
+		[]
+	);
+	const [ updateBusinessDetailsShell, setUpdateBusinessDetailsShell ] =
+		useState< WooPaymentsOverviewShell | null >( null );
 
 	const reloadOverviewAndPayouts = async ( currency: string ) => {
 		const deposit = await submitWooPaymentsInstantDeposit( currency );
@@ -150,8 +170,88 @@ export const WooPaymentsOverviewPage = () => {
 		};
 	}, [ selectedCurrency ] );
 
+	useEffect( () => {
+		let isMounted = true;
+
+		getWooPaymentsOverviewShell()
+			.then( ( nextShell ) => {
+				if ( ! isMounted ) {
+					return;
+				}
+
+				setShell( nextShell );
+
+				if (
+					! nextShell.account.connected ||
+					nextShell.disputes_awaiting_response_count === 0
+				) {
+					setDisputes( [] );
+					return;
+				}
+
+				getWooPaymentsOverviewDisputes()
+					.then( ( response ) => {
+						if ( isMounted ) {
+							setDisputes( response.data ?? [] );
+						}
+					} )
+					.catch( () => {
+						if ( isMounted ) {
+							setDisputes( [] );
+						}
+					} );
+			} )
+			.catch( () => {
+				if ( isMounted ) {
+					setShell( null );
+					setDisputes( [] );
+				}
+			} );
+
+		return () => {
+			isMounted = false;
+		};
+	}, [] );
+
+	const tasks = shell
+		? buildOverviewTasks( {
+				shell,
+				disputes,
+				onOpenUpdateBusinessDetails: setUpdateBusinessDetailsShell,
+				onActivatePayments: () =>
+					document.dispatchEvent(
+						new CustomEvent( 'wcpay:activate_payments' )
+					),
+		  } )
+		: [];
+	const shouldShowConnectionSuccessModal =
+		!! shell &&
+		new URLSearchParams( window.location.search ).get(
+			'wcpay-connection-success'
+		) === '1' &&
+		shell.account.can_process_payments &&
+		shell.account_status.deposits_enabled;
+
 	return (
 		<div className="woocommerce-woopayments-overview__content">
+			<OverviewNotices />
+			{ shouldShowConnectionSuccessModal && shell && (
+				<ConnectionSuccessModal
+					isDismissed={ shell.is_connection_success_modal_dismissed }
+				/>
+			) }
+			{ shell && (
+				<OverviewTaskList
+					tasks={ tasks }
+					visibility={ shell.overview_tasks_visibility }
+				/>
+			) }
+			{ updateBusinessDetailsShell && (
+				<UpdateBusinessDetailsModal
+					shell={ updateBusinessDetailsShell }
+					onClose={ () => setUpdateBusinessDetailsShell( null ) }
+				/>
+			) }
 			<WooPaymentsAccountSettings />
 			<SpotlightPromotion />
 			<div className="woocommerce-woopayments-overview__cards">

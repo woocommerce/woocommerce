@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentsProviders\WooPayments;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsOverviewService;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController;
@@ -56,6 +57,11 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	private $mock_pm_promotions_service;
 
 	/**
+	 * @var MockObject|WooPaymentsOverviewService
+	 */
+	private $mock_overview_service;
+
+	/**
 	 * @var MockObject|NativePaymentsRuntimeArbiter
 	 */
 	private $mock_runtime_arbiter;
@@ -82,6 +88,9 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_pm_promotions_service = $this->getMockBuilder( WooPaymentsPmPromotionsService::class )
 			->onlyMethods( array( 'get_visible_promotions', 'activate_promotion', 'dismiss_promotion' ) )
 			->getMock();
+		$this->mock_overview_service      = $this->getMockBuilder( WooPaymentsOverviewService::class )
+			->onlyMethods( array( 'get_overview' ) )
+			->getMock();
 		$this->mock_runtime_arbiter       = $this->getMockBuilder( NativePaymentsRuntimeArbiter::class )
 			->disableOriginalConstructor()
 			->onlyMethods( array( 'should_native_register' ) )
@@ -91,7 +100,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			->willReturn( true );
 
 		$this->sut = new WooPaymentsRestController();
-		$this->sut->init( $this->mock_payments_service, $this->mock_woopayments_service, $this->mock_settings_service, $this->mock_runtime_arbiter, $this->mock_pm_promotions_service );
+		$this->sut->init( $this->mock_payments_service, $this->mock_woopayments_service, $this->mock_settings_service, $this->mock_runtime_arbiter, $this->mock_pm_promotions_service, $this->mock_overview_service );
 		$this->sut->register_routes( true );
 	}
 
@@ -249,6 +258,83 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 500, $response->get_status() );
 		$this->assertSame( 'woocommerce_rest_woopayments_account_error', $response->get_data()['code'] );
 		$this->assertSame( 'Account summary unavailable.', $response->get_data()['message'] );
+	}
+
+	/**
+	 * @testdox Should return the native WooPayments Overview projection for users with permission.
+	 */
+	public function test_get_overview_by_manager(): void {
+		$overview = array(
+			'account'                               => array(
+				'id'        => 'acct_native_test',
+				'connected' => true,
+			),
+			'account_status'                        => array(
+				'status' => 'restricted_soon',
+			),
+			'show_update_details_task'              => true,
+			'overview_tasks_visibility'             => array(
+				'dismissed_todo_tasks'       => array( 'old-task' ),
+				'deleted_todo_tasks'         => array(),
+				'remind_me_later_todo_tasks' => array(),
+			),
+			'is_connection_success_modal_dismissed' => false,
+			'wpcom_reconnect_url'                   => '',
+			'urls'                                  => array(
+				'overview_page' => 'https://example.com/overview',
+			),
+		);
+
+		$this->mock_overview_service
+			->expects( $this->once() )
+			->method( 'get_overview' )
+			->willReturn( $overview );
+
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/overview' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $overview, $response->get_data() );
+	}
+
+	/**
+	 * @testdox Should block the native WooPayments Overview projection for users without permission.
+	 */
+	public function test_get_overview_by_user_without_caps(): void {
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		$filter_callback = fn( $caps ) => array(
+			'manage_woocommerce' => false,
+			'install_plugins'    => true,
+		);
+		add_filter( 'user_has_cap', $filter_callback );
+
+		$this->mock_overview_service
+			->expects( $this->never() )
+			->method( 'get_overview' );
+
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/overview' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
+
+		remove_filter( 'user_has_cap', $filter_callback );
+	}
+
+	/**
+	 * @testdox Should return an Overview projection error when the service throws.
+	 */
+	public function test_get_overview_with_exception(): void {
+		$this->mock_overview_service
+			->expects( $this->once() )
+			->method( 'get_overview' )
+			->willThrowException( new \Exception( 'Overview unavailable.' ) );
+
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/overview' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_woopayments_overview_error', $response->get_data()['code'] );
+		$this->assertSame( 'Overview unavailable.', $response->get_data()['message'] );
 	}
 
 	/**

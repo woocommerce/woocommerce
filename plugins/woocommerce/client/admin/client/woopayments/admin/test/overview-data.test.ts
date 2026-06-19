@@ -11,6 +11,8 @@ import {
 	getWooPaymentsDeposits,
 	getWooPaymentsDepositsOverview,
 	getWooPaymentsDepositsSummary,
+	getWooPaymentsOverviewDisputes,
+	getWooPaymentsOverviewShell,
 	getWooPaymentsRecentDeposits,
 } from '../overview/data';
 
@@ -71,6 +73,24 @@ describe( 'WooPayments overview deposits data', () => {
 		} );
 		expect( mockApiFetch ).toHaveBeenNthCalledWith( 2, {
 			path: '/wc/v3/payments/deposits/po_test',
+			method: 'GET',
+		} );
+	} );
+
+	it( 'loads the overview action shell projection from the native endpoint', async () => {
+		await getWooPaymentsOverviewShell();
+
+		expect( mockApiFetch ).toHaveBeenCalledWith( {
+			path: '/wc-admin/settings/payments/woopayments/overview',
+			method: 'GET',
+		} );
+	} );
+
+	it( 'loads urgent disputes with endpoint-compatible actionable statuses', async () => {
+		await getWooPaymentsOverviewDisputes();
+
+		expect( mockApiFetch ).toHaveBeenCalledWith( {
+			path: '/wc/v3/payments/disputes?page=1&pagesize=50&search%5B%5D=needs_response&search%5B%5D=warning_needs_response',
 			method: 'GET',
 		} );
 	} );

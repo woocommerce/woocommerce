@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import type { ReactNode } from 'react';
+
 export type WooPaymentsDepositStatus =
 	| 'paid'
 	| 'pending'
@@ -96,4 +101,95 @@ export interface WooPaymentsDepositsQuery {
 	date_between?: string;
 	status_is?: string;
 	status_is_not?: string;
+}
+
+export interface WooPaymentsOverviewAccount {
+	id: string;
+	mode: string;
+	connected: boolean;
+	working: boolean;
+	can_process_payments: boolean;
+	details_submitted: boolean;
+	test_mode: boolean;
+	test_mode_onboarding: boolean;
+	dev_mode: boolean;
+	test_drive: boolean;
+	sandbox: boolean;
+	live: boolean;
+}
+
+export interface WooPaymentsOverviewRequirementError {
+	code?: string;
+	reason?: string;
+	requirement?: string;
+}
+
+export interface WooPaymentsOverviewAccountStatus {
+	status: string;
+	current_deadline: number | null;
+	past_due: boolean;
+	account_link: string;
+	requirements: {
+		errors?: WooPaymentsOverviewRequirementError[];
+	};
+	details_submitted: boolean;
+	payments_enabled: boolean;
+	deposits_enabled: boolean;
+}
+
+export interface WooPaymentsOverviewTasksVisibility {
+	dismissed_todo_tasks: string[];
+	deleted_todo_tasks: string[];
+	remind_me_later_todo_tasks: Record< string, number >;
+}
+
+export interface WooPaymentsOverviewShell {
+	account: WooPaymentsOverviewAccount;
+	account_status: WooPaymentsOverviewAccountStatus;
+	show_update_details_task: boolean;
+	overview_tasks_visibility: WooPaymentsOverviewTasksVisibility;
+	is_connection_success_modal_dismissed: boolean;
+	disputes_awaiting_response_count: number | null;
+	wpcom_reconnect_url: string;
+	urls: {
+		overview_page?: string;
+		settings?: string;
+		onboarding?: string;
+		setup?: string;
+	};
+}
+
+export interface WooPaymentsOverviewDispute {
+	id?: string;
+	dispute_id?: string;
+	charge_id?: string;
+	charge?: string | { id?: string };
+	amount?: number;
+	currency?: string;
+	due_by?: number | string;
+	evidence_due_by?: number | string;
+	evidence_details?: {
+		due_by?: number | string;
+	};
+}
+
+export interface WooPaymentsOverviewDisputesResponse {
+	data?: WooPaymentsOverviewDispute[];
+	total_count?: number;
+}
+
+export interface WooPaymentsOverviewTask {
+	key: string;
+	title: string;
+	content?: ReactNode;
+	additionalInfo?: ReactNode;
+	actionLabel?: string;
+	href?: string;
+	onClick?: () => void;
+	completed?: boolean;
+	level?: number;
+	showActionButton?: boolean;
+	isDismissable?: boolean;
+	isDeletable?: boolean;
+	allowSnooze?: boolean;
 }

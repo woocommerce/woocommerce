@@ -323,6 +323,19 @@ class WooPaymentsAccountService implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Get the account data currently preserved in the local account cache without forcing a refresh.
+	 *
+	 * @since 11.0.0
+	 * @return array<string,mixed>
+	 */
+	public function get_preserved_account_data_snapshot(): array {
+		$cache = $this->get_account_cache();
+		$data  = is_array( $cache ) && array_key_exists( 'data', $cache ) ? $cache['data'] : null;
+
+		return is_array( $data ) ? $data : array();
+	}
+
+	/**
 	 * Persist the account deletion currently being processed so retries can continue after partial cleanup.
 	 *
 	 * @since 11.0.0

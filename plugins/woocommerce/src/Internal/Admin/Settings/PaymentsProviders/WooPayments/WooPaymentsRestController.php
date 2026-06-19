@@ -80,6 +80,13 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	private ?WooPaymentsPmPromotionsService $pm_promotions_service = null;
 
 	/**
+	 * The native WooPayments Overview projection service.
+	 *
+	 * @var WooPaymentsOverviewService|null
+	 */
+	private ?WooPaymentsOverviewService $overview_service = null;
+
+	/**
 	 * Native payments runtime arbiter.
 	 *
 	 * @var NativePaymentsRuntimeArbiter|null
@@ -485,6 +492,19 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		);
 		register_rest_route(
 			$this->route_namespace,
+			'/' . $this->rest_base . '/overview',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'get_overview' ),
+					'validation_callback' => 'rest_validate_request_arg',
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+				),
+			),
+			$override
+		);
+		register_rest_route(
+			$this->route_namespace,
 			'/' . $this->rest_base . '/woopay-eligibility',
 			array(
 				array(
@@ -557,15 +577,17 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 * @param WooPaymentsSettingsService|null     $settings_service Optional native WooPayments settings service.
 	 * @param NativePaymentsRuntimeArbiter|null   $runtime_arbiter Optional native payments runtime arbiter.
 	 * @param WooPaymentsPmPromotionsService|null $pm_promotions_service Optional native WooPayments PM promotions service.
+	 * @param WooPaymentsOverviewService|null     $overview_service Optional native WooPayments Overview projection service.
 	 *
 	 * @internal
 	 */
-	final public function init( Payments $payments, WooPaymentsService $woopayments, ?WooPaymentsSettingsService $settings_service = null, ?NativePaymentsRuntimeArbiter $runtime_arbiter = null, ?WooPaymentsPmPromotionsService $pm_promotions_service = null ): void {
+	final public function init( Payments $payments, WooPaymentsService $woopayments, ?WooPaymentsSettingsService $settings_service = null, ?NativePaymentsRuntimeArbiter $runtime_arbiter = null, ?WooPaymentsPmPromotionsService $pm_promotions_service = null, ?WooPaymentsOverviewService $overview_service = null ): void {
 		$this->payments              = $payments;
 		$this->woopayments           = $woopayments;
 		$this->settings_service      = $settings_service;
 		$this->runtime_arbiter       = $runtime_arbiter;
 		$this->pm_promotions_service = $pm_promotions_service;
+		$this->overview_service      = $overview_service;
 	}
 
 	/**
@@ -1255,6 +1277,21 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	}
 
 	/**
+	 * Get a safe read-only Overview projection for the native WooPayments settings surface.
+	 *
+	 * @return WP_Error|WP_REST_Response The response or error.
+	 */
+	protected function get_overview() {
+		try {
+			$overview = $this->get_overview_service()->get_overview();
+		} catch ( Exception $e ) {
+			return new WP_Error( 'woocommerce_rest_woopayments_overview_error', $e->getMessage(), array( 'status' => WP_Http::INTERNAL_SERVER_ERROR ) );
+		}
+
+		return rest_ensure_response( $overview );
+	}
+
+	/**
 	 * Get the native WooPayments settings contract.
 	 *
 	 * @return WP_REST_Response The response.
@@ -1544,6 +1581,19 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		}
 
 		return $this->pm_promotions_service;
+	}
+
+	/**
+	 * Get the native WooPayments Overview projection service.
+	 *
+	 * @return WooPaymentsOverviewService
+	 */
+	private function get_overview_service(): WooPaymentsOverviewService {
+		if ( ! $this->overview_service instanceof WooPaymentsOverviewService ) {
+			$this->overview_service = wc_get_container()->get( WooPaymentsOverviewService::class );
+		}
+
+		return $this->overview_service;
 	}
 
 	/**

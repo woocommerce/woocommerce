@@ -10,9 +10,12 @@ import userEvent from '@testing-library/user-event';
 import { WooPaymentsOverviewPage } from '../overview/page';
 import {
 	getWooPaymentsDepositsOverview,
+	getWooPaymentsOverviewDisputes,
+	getWooPaymentsOverviewShell,
 	getWooPaymentsRecentDeposits,
 	submitWooPaymentsInstantDeposit,
 } from '../overview/data';
+import { saveOption } from '../../settings/data/actions';
 
 const mockCreateSuccessNotice = jest.fn();
 const mockCreateErrorNotice = jest.fn();
@@ -45,13 +48,26 @@ jest.mock( '../../promotions/spotlight', () => ( {
 
 jest.mock( '../overview/data', () => ( {
 	getWooPaymentsDepositsOverview: jest.fn(),
+	getWooPaymentsOverviewDisputes: jest.fn(),
+	getWooPaymentsOverviewShell: jest.fn(),
 	getWooPaymentsRecentDeposits: jest.fn(),
 	submitWooPaymentsInstantDeposit: jest.fn(),
+} ) );
+
+jest.mock( '../../settings/data/actions', () => ( {
+	saveOption: jest.fn(),
 } ) );
 
 const mockGetOverview = getWooPaymentsDepositsOverview as jest.MockedFunction<
 	typeof getWooPaymentsDepositsOverview
 >;
+const mockGetShell = getWooPaymentsOverviewShell as jest.MockedFunction<
+	typeof getWooPaymentsOverviewShell
+>;
+const mockGetOverviewDisputes =
+	getWooPaymentsOverviewDisputes as jest.MockedFunction<
+		typeof getWooPaymentsOverviewDisputes
+	>;
 const mockGetRecent = getWooPaymentsRecentDeposits as jest.MockedFunction<
 	typeof getWooPaymentsRecentDeposits
 >;
@@ -59,6 +75,7 @@ const mockSubmitInstantPayout =
 	submitWooPaymentsInstantDeposit as jest.MockedFunction<
 		typeof submitWooPaymentsInstantDeposit
 	>;
+const mockSaveOption = saveOption as jest.MockedFunction< typeof saveOption >;
 
 const createDeferred = < T, >() => {
 	let resolve!: ( value: T ) => void;
@@ -71,19 +88,95 @@ const createDeferred = < T, >() => {
 	return { promise, resolve, reject };
 };
 
+const createShell = ( overrides: Record< string, unknown > = {} ) => ( {
+	account: {
+		id: 'acct_test',
+		mode: 'live',
+		connected: true,
+		working: true,
+		can_process_payments: true,
+		details_submitted: true,
+		test_mode: false,
+		test_mode_onboarding: false,
+		dev_mode: false,
+		test_drive: false,
+		sandbox: false,
+		live: true,
+	},
+	account_status: {
+		status: 'complete',
+		current_deadline: 0,
+		past_due: false,
+		account_link: 'https://connect.example/update',
+		requirements: {
+			errors: [],
+		},
+		details_submitted: true,
+		payments_enabled: true,
+		deposits_enabled: true,
+	},
+	show_update_details_task: false,
+	disputes_awaiting_response_count: null,
+	overview_tasks_visibility: {
+		dismissed_todo_tasks: [],
+		deleted_todo_tasks: [],
+		remind_me_later_todo_tasks: {},
+	},
+	is_connection_success_modal_dismissed: false,
+	wpcom_reconnect_url: '',
+	urls: {
+		overview_page: '',
+		settings: '',
+		onboarding: '',
+		setup: '',
+	},
+	...overrides,
+} );
+
+const createDepositsOverview = () => ( {
+	balance: {
+		available: [ { amount: 1000, currency: 'usd' } ],
+		pending: [ { amount: 250, currency: 'usd' } ],
+		instant: [],
+	},
+	account: {
+		default_currency: 'usd',
+		deposits_enabled: true,
+		deposits_schedule: {
+			interval: 'weekly',
+			weekly_anchor: 'monday',
+		},
+		completed_waiting_period: true,
+		default_external_accounts: [],
+	},
+	deposit: {
+		last_paid: [],
+	},
+} );
+
 describe( 'WooPaymentsOverviewPage', () => {
 	beforeEach( () => {
 		mockGetOverview.mockReset();
+		mockGetShell.mockReset();
+		mockGetOverviewDisputes.mockReset();
 		mockGetRecent.mockReset();
 		mockSubmitInstantPayout.mockReset();
+		mockSaveOption.mockReset();
 		mockCreateSuccessNotice.mockClear();
 		mockCreateErrorNotice.mockClear();
+		mockGetShell.mockResolvedValue( createShell() );
+		mockGetOverviewDisputes.mockResolvedValue( {
+			data: [],
+			total_count: 0,
+		} );
+		mockSaveOption.mockResolvedValue( undefined );
 		Object.defineProperty( window, 'wcSettings', {
 			configurable: true,
 			value: {
 				adminUrl: 'https://example.com/wp-admin/',
 			},
 		} );
+		window.history.pushState( {}, '', '/' );
 	} );
 
 	it( 'loads recent payout history when overview loading fails', async () => {
@@ -325,6 +418,146 @@ describe( 'WooPaymentsOverviewPage', () => {
 		expect( mockGetRecent ).toHaveBeenCalledTimes( 2 );
 		expect(
 			screen.queryByText( /Get \$9\.00 via instant payout/ )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'renders query notices, tasks, spotlight, and financial cards in shell order', async () => {
+		window.history.pushState(
+			{},
+			'',
+			'/wp-admin/admin.php?wcpay-login-error=1'
+		);
+		mockGetShell.mockResolvedValue(
+			createShell( {
+				account_status: {
+					...createShell().account_status,
+					status: 'restricted',
+					details_submitted: false,
+				},
+				show_update_details_task: true,
+			} )
+		);
+		mockGetOverview.mockResolvedValue( createDepositsOverview() );
+		mockGetRecent.mockResolvedValue( {
+			data: [],
+			total_count: 0,
+		} );
+
+		const { container } = render( <WooPaymentsOverviewPage /> );
+
+		await screen.findByText( 'Finish setting up WooPayments' );
+		await screen.findByRole( 'heading', { name: 'Balance' } );
+
+		const text = container.textContent || '';
+		const noticeIndex = text.indexOf(
+			'There was a problem redirecting you to the account dashboard. Please try again.'
+		);
+		const taskIndex = text.indexOf( 'Finish setting up WooPayments' );
+		const spotlightIndex = text.indexOf( 'Spotlight promotion' );
+		const balanceIndex = text.indexOf( 'Balance' );
+
+		expect( noticeIndex ).toBeGreaterThanOrEqual( 0 );
+		expect( taskIndex ).toBeGreaterThan( noticeIndex );
+		expect( spotlightIndex ).toBeGreaterThan( taskIndex );
+		expect( balanceIndex ).toBeGreaterThan( spotlightIndex );
+	} );
+
+	it( 'does not fetch disputes when the shell reports no actionable disputes', async () => {
+		mockGetShell.mockResolvedValue(
+			createShell( {
+				account_status: {
+					...createShell().account_status,
+					status: 'restricted',
+					details_submitted: false,
+				},
+				show_update_details_task: true,
+				disputes_awaiting_response_count: 0,
+			} )
+		);
+		mockGetOverview.mockResolvedValue( createDepositsOverview() );
+		mockGetRecent.mockResolvedValue( {
+			data: [],
+			total_count: 0,
+		} );
+
+		render( <WooPaymentsOverviewPage /> );
+
+		expect(
+			await screen.findByText( 'Finish setting up WooPayments' )
+		).toBeInTheDocument();
+		expect( mockGetOverviewDisputes ).not.toHaveBeenCalled();
+	} );
+
+	it( 'fails closed when the overview shell cannot be loaded', async () => {
+		mockGetShell.mockRejectedValue( new Error( 'Shell failed.' ) );
+		mockGetOverview.mockResolvedValue( createDepositsOverview() );
+		mockGetRecent.mockResolvedValue( {
+			data: [],
+			total_count: 0,
+		} );
+
+		render( <WooPaymentsOverviewPage /> );
+
+		expect(
+			await screen.findByText( 'Spotlight promotion' )
+		).toBeInTheDocument();
+		expect(
+			await screen.findByRole( 'heading', { name: 'Balance' } )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'heading', { name: 'Things to do' } )
+		).not.toBeInTheDocument();
+		expect( screen.queryByText( 'Shell failed.' ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'persists connection success modal dismissal', async () => {
+		window.history.pushState(
+			{},
+			'',
+			'/wp-admin/admin.php?wcpay-connection-success=1'
+		);
+		mockGetShell.mockResolvedValue(
+			createShell( {
+				account: {
+					...createShell().account,
+					can_process_payments: true,
+				},
+				account_status: {
+					...createShell().account_status,
+					deposits_enabled: true,
+					payments_enabled: true,
+				},
+				is_connection_success_modal_dismissed: false,
+			} )
+		);
+		mockGetOverview.mockResolvedValue( createDepositsOverview() );
+		mockGetRecent.mockResolvedValue( {
+			data: [],
+			total_count: 0,
+		} );
+
+		render( <WooPaymentsOverviewPage /> );
+
+		expect(
+			await screen.findByRole( 'heading', {
+				name: "You're ready to accept payments!",
+			} )
+		).toBeInTheDocument();
+
+		await userEvent.click(
+			screen.getByRole( 'button', {
+				name: 'Dismiss',
+			} )
+		);
+
+		expect( mockSaveOption ).toHaveBeenCalledWith(
+			'wcpay_connection_success_modal_dismissed',
+			true
+		);
+		expect(
+			screen.queryByRole( 'heading', {
+				name: "You're ready to accept payments!",
+			} )
 		).not.toBeInTheDocument();
 	} );
 } );
