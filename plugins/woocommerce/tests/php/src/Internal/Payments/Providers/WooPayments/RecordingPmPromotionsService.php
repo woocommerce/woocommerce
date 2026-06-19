@@ -47,12 +47,13 @@ class RecordingPmPromotionsService extends WooPaymentsPmPromotionsService {
 	 * @return bool
 	 */
 	public function maybe_activate_promotion_for_payment_method( string $payment_method_id ): bool {
-		$settings = get_option( 'woocommerce_woocommerce_payments_settings', array() );
-
-		$this->maybe_activated_payment_methods[]                         = $payment_method_id;
-		$this->enabled_payment_methods_at_activation[ $payment_method_id ] = is_array( $settings ) && is_array( $settings['upe_enabled_payment_method_ids'] ?? null )
+		$settings                = get_option( 'woocommerce_woocommerce_payments_settings', array() );
+		$enabled_payment_methods = is_array( $settings ) && is_array( $settings['upe_enabled_payment_method_ids'] ?? null )
 			? $settings['upe_enabled_payment_method_ids']
 			: array();
+
+		$this->maybe_activated_payment_methods[]                           = $payment_method_id;
+		$this->enabled_payment_methods_at_activation[ $payment_method_id ] = $enabled_payment_methods;
 
 		return true;
 	}

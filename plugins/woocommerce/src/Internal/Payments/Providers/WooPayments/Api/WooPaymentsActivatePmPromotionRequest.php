@@ -33,7 +33,7 @@ class WooPaymentsActivatePmPromotionRequest extends WooPaymentsApiRequest {
 	 * @return self
 	 */
 	public static function from_id( string $id ): self {
-		$request = new self();
+		$request     = new self();
 		$request->id = $id;
 		$request->set_api( self::API . '/' . rawurlencode( $id ) . '/activate' );
 		$request->set_method( 'POST' );

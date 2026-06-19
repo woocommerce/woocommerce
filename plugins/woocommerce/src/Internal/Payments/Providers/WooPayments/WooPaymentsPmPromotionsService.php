@@ -899,7 +899,7 @@ class WooPaymentsPmPromotionsService {
 					return $this->api_client;
 				}
 			} catch ( \Throwable $e ) {
-				// Fall through to the typed provider exception below.
+				$this->log_promotion_error( $e->getMessage() );
 			}
 		}
 

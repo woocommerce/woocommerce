@@ -3,8 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
-use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
-use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPmPromotionsService;
 use WC_Unit_Test_Case;
 
@@ -65,13 +63,13 @@ class WooPaymentsPmPromotionsServiceTest extends WC_Unit_Test_Case {
 	 * @testdox Should filter invalid, enabled, dismissed, discounted, and duplicate promotion groups.
 	 */
 	public function test_get_visible_promotions_filters_invalid_enabled_dismissed_discounted_and_duplicate_promo_ids(): void {
-			update_option(
-				'woocommerce_woocommerce_payments_settings',
-				array(
-					'upe_available_payment_methods'  => array( 'card', 'affirm', 'klarna', 'afterpay_clearpay' ),
-					'upe_enabled_payment_method_ids' => array( 'card' ),
-				)
-			);
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'upe_available_payment_methods'  => array( 'card', 'affirm', 'klarna', 'afterpay_clearpay' ),
+				'upe_enabled_payment_method_ids' => array( 'card' ),
+			)
+		);
 		update_option(
 			'_wcpay_pm_promotion_dismissals',
 			array(
@@ -87,7 +85,7 @@ class WooPaymentsPmPromotionsServiceTest extends WC_Unit_Test_Case {
 				),
 			),
 		);
-		$this->api_client->promotions_response       = array(
+		$this->api_client->promotions_response      = array(
 			$this->promotion_fixture( 'card-promo__spotlight', 'card-promo', 'card', 'spotlight' ),
 			$this->promotion_fixture( 'unknown-promo__spotlight', 'unknown-promo', 'unknown_method', 'spotlight' ),
 			$this->promotion_fixture( 'klarna-dismissed__spotlight', 'klarna-dismissed', 'klarna', 'spotlight' ),
@@ -161,7 +159,7 @@ class WooPaymentsPmPromotionsServiceTest extends WC_Unit_Test_Case {
 		$this->api_client->promotions_response = array(
 			$this->promotion_fixture( 'klarna-promo__spotlight', 'klarna-promo', 'klarna', 'spotlight' ),
 		);
-		$before                           = time();
+		$before                                = time();
 
 		$result     = $this->sut->dismiss_promotion( 'klarna-promo__spotlight' );
 		$dismissals = get_option( '_wcpay_pm_promotion_dismissals' );
@@ -177,13 +175,13 @@ class WooPaymentsPmPromotionsServiceTest extends WC_Unit_Test_Case {
 	 * @testdox Should activate through the platform, dismiss, enable the method, and clear caches.
 	 */
 	public function test_activate_promotion_calls_platform_marks_dismissed_enables_method_and_clears_cache(): void {
-			update_option(
-				'woocommerce_woocommerce_payments_settings',
-				array(
-					'upe_available_payment_methods'  => array( 'card', 'klarna' ),
-					'upe_enabled_payment_method_ids' => array( 'card' ),
-				)
-			);
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'upe_available_payment_methods'  => array( 'card', 'klarna' ),
+				'upe_enabled_payment_method_ids' => array( 'card' ),
+			)
+		);
 		set_transient( WooPaymentsPmPromotionsService::PROMOTIONS_CACHE_KEY, array( 'stale' => true ), DAY_IN_SECONDS );
 		$this->api_client->promotions_response = array(
 			$this->promotion_fixture( 'klarna-promo__spotlight', 'klarna-promo', 'klarna', 'spotlight' ),
@@ -207,13 +205,13 @@ class WooPaymentsPmPromotionsServiceTest extends WC_Unit_Test_Case {
 	 * @testdox Should activate settings-save promotions before the method is enabled.
 	 */
 	public function test_maybe_activate_promotion_for_payment_method_runs_before_settings_enable(): void {
-			update_option(
-				'woocommerce_woocommerce_payments_settings',
-				array(
-					'upe_available_payment_methods'  => array( 'card', 'klarna' ),
-					'upe_enabled_payment_method_ids' => array( 'card' ),
-				)
-			);
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'upe_available_payment_methods'  => array( 'card', 'klarna' ),
+				'upe_enabled_payment_method_ids' => array( 'card' ),
+			)
+		);
 		$this->api_client->promotions_response = array(
 			$this->promotion_fixture( 'klarna-promo__spotlight', 'klarna-promo', 'klarna', 'spotlight' ),
 		);
@@ -282,95 +280,5 @@ class WooPaymentsPmPromotionsServiceTest extends WC_Unit_Test_Case {
 			'description'    => 'Offer flexible payments.',
 			'tc_url'         => 'https://example.com/terms',
 		);
-	}
-}
-
-/**
- * Recording API client for promotion service tests.
- */
-class RecordingPmPromotionsApiClient extends WooPaymentsApiClient {
-
-	/**
-	 * Promotions response.
-	 *
-	 * @var array<int,array<string,mixed>>
-	 */
-	public array $promotions_response = array();
-
-	/**
-	 * Activated promotion IDs.
-	 *
-	 * @var string[]
-	 */
-	public array $activated_promotion_ids = array();
-
-	/**
-	 * Number of promotion fetches.
-	 *
-	 * @var int
-	 */
-	public int $get_pm_promotions_calls = 0;
-
-	/**
-	 * Retrieve PM promotions.
-	 *
-	 * @param array<string,mixed> $store_context Store context.
-	 * @return array<int,array<string,mixed>>
-	 */
-	public function get_pm_promotions( array $store_context ): array {
-		++$this->get_pm_promotions_calls;
-
-		return $this->promotions_response;
-	}
-
-	/**
-	 * Activate a PM promotion.
-	 *
-	 * @param string $promotion_id Promotion ID.
-	 * @return array<string,mixed>
-	 */
-	public function activate_pm_promotion( string $promotion_id ): array {
-		$this->activated_promotion_ids[] = $promotion_id;
-
-		return array( 'success' => true );
-	}
-}
-
-/**
- * Recording account service for promotion service tests.
- */
-class RecordingPmPromotionsAccountService extends WooPaymentsAccountService {
-
-	/**
-	 * Cached account data.
-	 *
-	 * @var array<string,mixed>
-	 */
-	public array $cached_account_data = array();
-
-	/**
-	 * Clear cache calls.
-	 *
-	 * @var int
-	 */
-	public int $clear_cache_calls = 0;
-
-	/**
-	 * Get cached account data.
-	 *
-	 * @param bool $force_refresh Whether to force refresh.
-	 * @return array<string,mixed>
-	 */
-	public function get_cached_account_data( bool $force_refresh = false ): array {
-		return $this->cached_account_data;
-	}
-
-	/**
-	 * Clear account cache.
-	 *
-	 * @return void
-	 */
-	public function clear_cache(): void {
-		++$this->clear_cache_calls;
 	}
 }
