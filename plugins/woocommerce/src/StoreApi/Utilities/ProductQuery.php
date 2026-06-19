@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
@@ -550,7 +551,7 @@ class ProductQuery implements QueryClausesGenerator {
 	 */
 	protected function adjust_price_filters_for_displayed_taxes() {
 		$display  = get_option( 'woocommerce_tax_display_shop' );
-		$database = wc_prices_include_tax() ? 'incl' : 'excl';
+		$database = wc_prices_include_tax() ? TaxDisplayMode::INCLUSIVE : TaxDisplayMode::EXCLUSIVE;
 
 		return $display !== $database;
 	}
@@ -580,7 +581,7 @@ class ProductQuery implements QueryClausesGenerator {
 		$base_tax_rates = WC_Tax::get_base_tax_rates( $tax_class );
 
 		// If prices are shown incl. tax, we want to remove the taxes from the filter amount to match prices stored excl. tax.
-		if ( 'incl' === $tax_display ) {
+		if ( TaxDisplayMode::INCLUSIVE === $tax_display ) {
 			/**
 			 * Filters if taxes should be removed from locations outside the store base location.
 			 *

@@ -1,17 +1,14 @@
 /**
  * External dependencies
  */
-import {
-	Button,
-	CheckboxControl,
-	TextControl,
-	TextareaControl,
-} from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { TreeSelectControl } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { paymentGatewaysStore, paymentSettingsStore } from '@woocommerce/data';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useMemo } from '@wordpress/element';
+import { DataForm } from '@wordpress/dataviews';
+import type { Field } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
@@ -20,6 +17,12 @@ import '../settings-payments-body.scss';
 import { mapShippingMethodsOptions } from '~/settings-payments/offline/utils';
 import { Settings } from '~/settings-payments/components/settings';
 import { FieldPlaceholder } from '~/settings-payments/components/field-placeholder';
+import {
+	CheckboxEdit,
+	TextEdit,
+	TextareaEdit,
+	type OfflineFormValues,
+} from './dataform-controls';
 
 /**
  * This page is used to manage the settings for the Cash on delivery payment gateway.
@@ -48,9 +51,7 @@ export const SettingsPaymentsCod = () => {
 			invalidateResolutionForPaymentSettings,
 	} = useDispatch( paymentSettingsStore );
 
-	const [ formValues, setFormValues ] = useState<
-		Record< string, string | boolean | string[] >
-	>( {} );
+	const [ formValues, setFormValues ] = useState< OfflineFormValues >( {} );
 	const [ isSaving, setIsSaving ] = useState( false );
 	const [ hasChanges, setHasChanges ] = useState( false );
 
@@ -72,6 +73,89 @@ export const SettingsPaymentsCod = () => {
 			setHasChanges( false );
 		}
 	}, [ codSettings ] );
+
+	const shippingMethodsOptions = useMemo(
+		() =>
+			codSettings?.settings.enable_for_methods?.options
+				? mapShippingMethodsOptions(
+						codSettings.settings.enable_for_methods.options
+				  )
+				: [],
+		[ codSettings ]
+	);
+
+	const fields: Field< OfflineFormValues >[] = useMemo(
+		() => [
+			{
+				id: 'enabled',
+				label: __( 'Enable cash on delivery payments', 'woocommerce' ),
+				Edit: CheckboxEdit,
+			},
+			{
+				id: 'title',
+				label: __( 'Title', 'woocommerce' ),
+				description: __(
+					'Payment method name that the customer will see during checkout.',
+					'woocommerce'
+				),
+				placeholder: __( 'Cash on delivery payments', 'woocommerce' ),
+				Edit: TextEdit,
+			},
+			{
+				id: 'description',
+				label: __( 'Description', 'woocommerce' ),
+				description: __(
+					'Payment method description that the customer will see during checkout.',
+					'woocommerce'
+				),
+				Edit: TextareaEdit,
+			},
+			{
+				id: 'instructions',
+				label: __( 'Instructions', 'woocommerce' ),
+				description: __(
+					'Instructions that will be added to the thank you page and emails.',
+					'woocommerce'
+				),
+				Edit: TextareaEdit,
+			},
+			{
+				id: 'enable_for_methods',
+				label: __( 'Enable for shipping methods', 'woocommerce' ),
+				description: __(
+					'Select shipping methods for which this payment method is enabled.',
+					'woocommerce'
+				),
+				// COD-specific edit control: renders the shipping methods
+				// multi-select using the options that ship with the gateway.
+				Edit: ( { data, field, onChange } ) => {
+					const value = field.getValue( { item: data } );
+					return (
+						<TreeSelectControl
+							label={ field.label }
+							help={ field.description }
+							options={ shippingMethodsOptions }
+							value={ Array.isArray( value ) ? value : [] }
+							onChange={ ( newValue: string[] ) =>
+								onChange( { [ field.id ]: newValue } )
+							}
+							selectAllLabel={ false }
+						/>
+					);
+				},
+			},
+			{
+				id: 'enable_for_virtual',
+				label: __( 'Accept for virtual orders', 'woocommerce' ),
+				description: __(
+					'Accept cash on delivery if the order is virtual',
+					'woocommerce'
+				),
+				Edit: CheckboxEdit,
+			},
+		],
+		[ shippingMethodsOptions ]
+	);
 
 	const saveSettings = () => {
 		if ( ! codSettings ) {
@@ -132,142 +216,34 @@ export const SettingsPaymentsCod = () => {
 						) }
 					>
 						{ isLoading ? (
-							<FieldPlaceholder size="small" />
+							<>
+								<FieldPlaceholder size="small" />
+								<FieldPlaceholder size="medium" />
+								<FieldPlaceholder size="large" />
+								<FieldPlaceholder size="large" />
+								<FieldPlaceholder size="medium" />
+								<FieldPlaceholder size="small" />
+							</>
 						) : (
-							<CheckboxControl
-								label={ __(
-									'Enable cash on delivery payments',
-									'woocommerce'
-								) }
-								checked={ Boolean( formValues.enabled ) }
-								onChange={ ( checked ) => {
-									setFormValues( {
-										...formValues,
-										enabled: checked,
-									} );
-									setHasChanges( true );
+							<DataForm
+								data={ formValues }
+								fields={ fields }
+								form={ {
+									type: 'regular',
+									fields: [
+										'enabled',
+										'title',
+										'description',
+										'instructions',
+										'enable_for_methods',
+										'enable_for_virtual',
+									],
 								} }
-							/>
-						) }
-						{ isLoading ? (
-							<FieldPlaceholder size="medium" />
-						) : (
-							<TextControl
-								label={ __( 'Title', 'woocommerce' ) }
-								help={ __(
-									'Payment method name that the customer will see during checkout.',
-									'woocommerce'
-								) }
-								placeholder={ __(
-									'Cash on delivery payments',
-									'woocommerce'
-								) }
-								value={ String( formValues.title ) }
-								onChange={ ( value ) => {
-									setFormValues( {
-										...formValues,
-										title: value,
-									} );
-									setHasChanges( true );
-								} }
-							/>
-						) }
-						{ isLoading ? (
-							<FieldPlaceholder size="large" />
-						) : (
-							<TextareaControl
-								label={ __( 'Description', 'woocommerce' ) }
-								help={ __(
-									'Payment method description that the customer will see during checkout.',
-									'woocommerce'
-								) }
-								value={ String( formValues.description ) }
-								onChange={ ( value ) => {
-									setFormValues( {
-										...formValues,
-										description: value,
-									} );
-									setHasChanges( true );
-								} }
-							/>
-						) }
-						{ isLoading ? (
-							<FieldPlaceholder size="large" />
-						) : (
-							<TextareaControl
-								label={ __( 'Instructions', 'woocommerce' ) }
-								help={ __(
-									'Instructions that will be added to the thank you page and emails.',
-									'woocommerce'
-								) }
-								value={ String( formValues.instructions ) }
-								onChange={ ( value ) => {
-									setFormValues( {
-										...formValues,
-										instructions: value,
-									} );
-									setHasChanges( true );
-								} }
-							/>
-						) }
-						{ isLoading || ! codSettings ? (
-							<FieldPlaceholder size="medium" />
-						) : (
-							<TreeSelectControl
-								label={ __(
-									'Enable for shipping methods',
-									'woocommerce'
-								) }
-								help={ __(
-									'Select shipping methods for which this payment method is enabled.',
-									'woocommerce'
-								) }
-								options={
-									codSettings.settings.enable_for_methods
-										?.options
-										? mapShippingMethodsOptions(
-												codSettings.settings
-													.enable_for_methods.options
-										  )
-										: []
-								}
-								value={
-									Array.isArray(
-										formValues.enable_for_methods
-									)
-										? formValues.enable_for_methods
-										: []
-								}
-								onChange={ ( value: string[] ) => {
-									setFormValues( {
-										...formValues,
-										enable_for_methods: value,
-									} );
-									setHasChanges( true );
-								} }
-								selectAllLabel={ false }
-							/>
-						) }
-						{ isLoading ? (
-							<FieldPlaceholder size="small" />
-						) : (
-							<CheckboxControl
-								label={ __(
-									'Accept for virtual orders',
-									'woocommerce'
-								) }
-								help={ __(
-									'Accept cash on delivery if the order is virtual',
-									'woocommerce'
-								) }
-								checked={ Boolean(
-									formValues.enable_for_virtual
-								) }
-								onChange={ ( checked ) => {
-									setFormValues( {
-										...formValues,
-										enable_for_virtual: checked,
-									} );
+								onChange={ ( edits: OfflineFormValues ) => {
+									setFormValues( ( values ) => ( {
+										...values,
+										...edits,
+									} ) );
 									setHasChanges( true );
 								} }
 							/>
