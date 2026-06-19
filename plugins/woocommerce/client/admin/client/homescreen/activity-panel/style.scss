@@ -1,10 +1,12 @@
 .woocommerce-homescreen .woocommerce-activity-panel {
-	background: transparent;
-	border: 0;
+	background: #fff;
+	border: 1px solid $gray-200;
+	border-radius: 8px;
+	overflow: hidden;
 
 	.components-panel__body {
 		background: #fff;
-		border: 1px solid $gray-200;
+		border: 0;
 
 		&.is-opened {
 			margin-bottom: $gap-large;
@@ -16,7 +18,11 @@
 	}
 
 	&.components-panel > .components-panel__body:last-child {
-		border-bottom: 1px solid $gray-200;
+		border-bottom: 0;
+	}
+
+	&.components-panel > .components-panel__body + .components-panel__body {
+		border-top: 1px solid $gray-200;
 	}
 
 	.components-panel__row {
