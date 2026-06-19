@@ -69,7 +69,7 @@
 		"@wordpress/media-utils": "catalog:wp-min",
 		"@wordpress/private-apis": "catalog:wp-min",
 		"@wordpress/router": "1.11.0",
-		"@wordpress/ui": "catalog:wp-bundled",
+		"@wordpress/ui": "0.15.1",
 		"@wordpress/theme": "0.12.0",
 		"@wordpress/notices": "catalog:wp-min",
 		"@wordpress/api-fetch": "catalog:wp-min",

@@ -1,6 +1,7 @@
 @import "../node_modules/@wordpress/theme/src/prebuilt/css/design-tokens.css";
 @import "@wordpress/components/build-style/style.css";
 @import "@wordpress/dataviews/build-style/style.css";
+@import "@wordpress/admin-ui/build-style/style.css";
 @import "@wordpress/base-styles/mixins";
 
 .product_page_woocommerce-products-dashboard {
@@ -36,11 +37,7 @@
 }
 
 .product_page_woocommerce-products-dashboard-snackbar {
-	position: fixed;
-	right: var(--wpds-dimension-padding-lg, 16px);
-	bottom: var(--wpds-dimension-padding-lg, 16px);
-	left: var(--wpds-dimension-padding-lg, 16px);
-	width: auto;
+	@include snackbar-container;
 	z-index: 100002;
 }
 
