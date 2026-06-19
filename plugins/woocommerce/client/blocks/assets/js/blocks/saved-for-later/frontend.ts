@@ -316,14 +316,21 @@ store< BlockStore >(
 
 				// `cartActions.addCartItem` catches its own errors and
 				// surfaces them as store notices, so the yield resolves
-				// the same way on success and failure. The server owns
-				// cart-line identity for adds, so a successful add can land
-				// as a brand new standalone line rather than bumping an
-				// existing one. Compare the total quantity across every line
-				// matching this product before and after the add, and only
-				// remove from the saved list when that total grew. Both reads
-				// observe the server-reconciled cart because `addCartItem`
-				// resolves only after the mutation batcher commits it.
+				// the same way on success and failure. To tell success from
+				// failure we have to read the cart ourselves. The server owns
+				// cart-line identity for adds, so a successful add can land as
+				// a brand new standalone line rather than bumping an existing
+				// one — e.g. when this product is in the cart only as a meta
+				// line (a bundle child, booking, or add-on configuration). A
+				// single id-matched read would misjudge that case: it can
+				// resolve to the unchanged pre-existing line both times, see no
+				// growth, and conclude the add failed even though a new line
+				// was correctly created. So instead, compare the total quantity
+				// across every line matching this product before and after the
+				// add, and only remove from the saved list when that total
+				// grew. Both reads observe the server-reconciled cart because
+				// `addCartItem` resolves only after the mutation batcher commits
+				// it, so the comparison is order-independent.
 				const beforeSum = sumMatchingCartQuantity(
 					cartState.cart.items,
 					listItem.id,
