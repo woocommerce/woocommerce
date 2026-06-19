@@ -3,11 +3,8 @@
 const fs = require( 'node:fs' );
 const os = require( 'node:os' );
 const path = require( 'node:path' );
-const { spawnSync } = require( 'node:child_process' );
 
 const GUTENBERG_PACKAGE_VERSION = '100.0.0';
-const OLDER_WORDPRESS_DIST_TAG = 'wp-100.0';
-const OLDER_WORDPRESS_PACKAGE_VERSION = '90.0.0';
 const PREVIOUS_WORDPRESS_DIST_TAG = 'wp-100.1';
 const PREVIOUS_WORDPRESS_PACKAGE_VERSION = '91.0.0';
 const LATEST_WORDPRESS_DIST_TAG = 'wp-101.0';
@@ -35,71 +32,20 @@ const mockPackageDependencies = {
 	},
 };
 
-function mockGetPackageNameFromSpec( packageSpec ) {
-	const versionSeparatorIndex = packageSpec.indexOf( '@', 1 );
-
-	return versionSeparatorIndex === -1
-		? packageSpec
-		: packageSpec.slice( 0, versionSeparatorIndex );
-}
-
-jest.mock( 'node:child_process', () => ( {
-	spawnSync: jest.fn( ( _command, args ) => {
-		if ( args[ 0 ] === 'view' && args[ 2 ] === 'dist-tags' ) {
-			return {
-				status: 0,
-				stdout: JSON.stringify( {
-					latest: GUTENBERG_PACKAGE_VERSION,
-					[ OLDER_WORDPRESS_DIST_TAG ]:
-						OLDER_WORDPRESS_PACKAGE_VERSION,
-					[ PREVIOUS_WORDPRESS_DIST_TAG ]:
-						PREVIOUS_WORDPRESS_PACKAGE_VERSION,
-					[ LATEST_WORDPRESS_DIST_TAG ]:
-						LATEST_WORDPRESS_PACKAGE_VERSION,
-				} ),
-				stderr: '',
-			};
-		}
-
-		if ( args[ 0 ] === 'view' && args[ 2 ] === 'dependencies' ) {
-			return {
-				status: 0,
-				stdout: JSON.stringify(
-					mockPackageDependencies[
-						mockGetPackageNameFromSpec( args[ 1 ] )
-					] || {}
-				),
-				stderr: '',
-			};
-		}
-
-		if ( args[ 0 ] === 'view' ) {
-			let version = GUTENBERG_PACKAGE_VERSION;
-
-			if ( args[ 1 ].includes( OLDER_WORDPRESS_DIST_TAG ) ) {
-				version = OLDER_WORDPRESS_PACKAGE_VERSION;
-			} else if ( args[ 1 ].includes( PREVIOUS_WORDPRESS_DIST_TAG ) ) {
-				version = PREVIOUS_WORDPRESS_PACKAGE_VERSION;
-			} else if ( args[ 1 ].includes( LATEST_WORDPRESS_DIST_TAG ) ) {
-				version = LATEST_WORDPRESS_PACKAGE_VERSION;
-			}
-
-			return {
-				status: 0,
-				stdout: JSON.stringify( version ),
-				stderr: '',
-			};
-		}
-
-		return {
-			status: 0,
-			stdout: '',
-			stderr: '',
-		};
-	} ),
+jest.mock( '../src/npm', () => ( {
+	installPackages: jest.fn(),
+	resolvePackageDependenciesFromNpm: jest.fn(),
+	resolvePackageVersionFromNpm: jest.fn(),
+	resolveWordPressDistTagFromNpm: jest.fn(),
 } ) );
 
-const { prepare } = require( '../cache' );
+const { prepare } = require( '../src/cache' );
+const {
+	installPackages,
+	resolvePackageDependenciesFromNpm,
+	resolvePackageVersionFromNpm,
+	resolveWordPressDistTagFromNpm,
+} = require( '../src/npm' );
 
 function createFixtureProject( packageJson ) {
 	const directory = fs.mkdtempSync(
@@ -149,31 +95,42 @@ function expectCachePackageJson( cacheDirectory, wpVersion, packageVersions ) {
 	} );
 }
 
-function expectNpmInstallFromCache( cacheDirectory ) {
-	expect( spawnSync ).toHaveBeenCalledWith(
-		'npm',
-		[
-			'install',
-			'--prefix',
-			cacheDirectory,
-			'--package-lock=false',
-			'--ignore-scripts',
-			'--no-audit',
-			'--no-fund',
-			'--save-exact',
-		],
-		expect.objectContaining( {
-			encoding: 'utf8',
-		} )
+function mockNpmPackageResolution() {
+	installPackages.mockReset();
+	resolveWordPressDistTagFromNpm.mockReset();
+	resolvePackageVersionFromNpm.mockReset();
+	resolvePackageDependenciesFromNpm.mockReset();
+
+	resolveWordPressDistTagFromNpm.mockImplementation(
+		( _packageName, offset ) =>
+			offset === 1
+				? PREVIOUS_WORDPRESS_DIST_TAG
+				: LATEST_WORDPRESS_DIST_TAG
+	);
+	resolvePackageVersionFromNpm.mockImplementation(
+		( _packageName, _wpVersion, distTag ) => {
+			if ( distTag === 'latest' ) {
+				return GUTENBERG_PACKAGE_VERSION;
+			}
+
+			if ( distTag === PREVIOUS_WORDPRESS_DIST_TAG ) {
+				return PREVIOUS_WORDPRESS_PACKAGE_VERSION;
+			}
+
+			return LATEST_WORDPRESS_PACKAGE_VERSION;
+		}
+	);
+	resolvePackageDependenciesFromNpm.mockImplementation(
+		( packageName ) => mockPackageDependencies[ packageName ] || {}
 	);
 }
 
 describe( 'cache', () => {
 	beforeEach( () => {
-		spawnSync.mockClear();
+		mockNpmPackageResolution();
 	} );
 
-	it( 'resolves requested packages from package.json dependencies', () => {
+	it( 'selects catalog WordPress dependencies and ignores bundled packages', () => {
 		const cwd = createFixtureProject( {
 			dependencies: {
 				'@wordpress/data': 'catalog:wp-min',
@@ -287,68 +244,7 @@ describe( 'cache', () => {
 		expect( result.packages ).toEqual( [ '@wordpress/element' ] );
 	} );
 
-	it( 'does not resolve or install bundled packages', () => {
-		const cwd = createFixtureProject( {
-			dependencies: {
-				'@wordpress/data': 'catalog:wp-min',
-				'@wordpress/icons': 'catalog:wp-bundled',
-			},
-		} );
-		const cacheRoot = path.join( cwd, '.cache' );
-
-		const result = prepare( {
-			cwd,
-			cacheRoot,
-			wpVersion: 'gutenberg',
-			logger: false,
-		} );
-
-		expect( result.packages ).toEqual( [ '@wordpress/data' ] );
-		expect( result.installedPackages ).toEqual( [
-			'@wordpress/data',
-			'@wordpress/private-apis',
-		] );
-		expect( spawnSync ).not.toHaveBeenCalledWith(
-			'npm',
-			expect.arrayContaining( [ 'view', '@wordpress/icons@latest' ] ),
-			expect.anything()
-		);
-		expect( spawnSync ).not.toHaveBeenCalledWith(
-			'npm',
-			expect.arrayContaining( [
-				`@wordpress/icons@${ PREVIOUS_WORDPRESS_PACKAGE_VERSION }`,
-			] ),
-			expect.anything()
-		);
-	} );
-
-	it( 'creates a cache package and installs missing packages', () => {
-		const cwd = createFixtureProject( {
-			dependencies: {
-				'@wordpress/data': 'catalog:wp-min',
-			},
-		} );
-		const cacheRoot = path.join( cwd, '.cache' );
-
-		const result = prepare( {
-			cwd,
-			cacheRoot,
-			wpVersion: 'latest',
-			logger: false,
-		} );
-
-		expect( result.installedPackages ).toEqual( [
-			'@wordpress/data',
-			'@wordpress/private-apis',
-		] );
-		expectCachePackageJson( result.cacheDirectory, 'latest', {
-			'@wordpress/data': LATEST_WORDPRESS_PACKAGE_VERSION,
-			'@wordpress/private-apis': LATEST_WORDPRESS_PACKAGE_VERSION,
-		} );
-		expectNpmInstallFromCache( path.join( cacheRoot, 'latest' ) );
-	} );
-
-	it( 'installs transitive WordPress dependencies for cached WordPress packages', () => {
+	it( 'installs selected packages and their transitive WordPress dependencies', () => {
 		const cwd = createFixtureProject( {
 			dependencies: {
 				'@wordpress/components': 'catalog:wp-min',
@@ -412,7 +308,13 @@ describe( 'cache', () => {
 			'@wordpress/element': PREVIOUS_WORDPRESS_PACKAGE_VERSION,
 			'@wordpress/private-apis': PREVIOUS_WORDPRESS_PACKAGE_VERSION,
 		} );
-		expectNpmInstallFromCache( path.join( cacheRoot, 'latest-1' ) );
+		expect( resolveWordPressDistTagFromNpm ).toHaveBeenCalledWith(
+			'@wordpress/components',
+			1
+		);
+		expect( installPackages ).toHaveBeenCalledWith(
+			path.join( cacheRoot, 'latest-1' )
+		);
 	} );
 
 	it( 'skips npm install when cached packages match the target version', () => {
@@ -443,20 +345,7 @@ describe( 'cache', () => {
 		} );
 
 		expect( result.installedPackages ).toEqual( [] );
-		expect( spawnSync ).not.toHaveBeenCalledWith(
-			'npm',
-			[
-				'install',
-				'--prefix',
-				cacheDirectory,
-				'--package-lock=false',
-				'--ignore-scripts',
-				'--no-audit',
-				'--no-fund',
-				'--save-exact',
-			],
-			expect.anything()
-		);
+		expect( installPackages ).not.toHaveBeenCalled();
 	} );
 
 	it( 'refreshes cached packages when the cached version is stale', () => {
@@ -494,79 +383,7 @@ describe( 'cache', () => {
 			'@wordpress/data': LATEST_WORDPRESS_PACKAGE_VERSION,
 			'@wordpress/private-apis': LATEST_WORDPRESS_PACKAGE_VERSION,
 		} );
-		expectNpmInstallFromCache( cacheDirectory );
-	} );
-
-	it( 'uses the compatibility cache when the installed package matches the target version', () => {
-		const cwd = createFixtureProject( {
-			dependencies: {
-				'@wordpress/data': 'catalog:wp-min',
-			},
-		} );
-		const cacheRoot = path.join( cwd, '.cache' );
-
-		createInstalledPackage(
-			cwd,
-			'@wordpress/data',
-			LATEST_WORDPRESS_PACKAGE_VERSION
-		);
-
-		const result = prepare( {
-			cwd,
-			cacheRoot,
-			wpVersion: 'latest',
-			logger: false,
-		} );
-
-		expect( result.cachePackages ).toEqual( [
-			'@wordpress/data',
-			'@wordpress/private-apis',
-		] );
-		expect( result.installedPackages ).toEqual( [
-			'@wordpress/data',
-			'@wordpress/private-apis',
-		] );
-		expect( result.packagePaths ).toEqual( {
-			'@wordpress/data': path.join(
-				cacheRoot,
-				'latest',
-				'node_modules',
-				'@wordpress',
-				'data'
-			),
-			'@wordpress/private-apis': path.join(
-				cacheRoot,
-				'latest',
-				'node_modules',
-				'@wordpress',
-				'private-apis'
-			),
-		} );
-		expectCachePackageJson( result.cacheDirectory, 'latest', {
-			'@wordpress/data': LATEST_WORDPRESS_PACKAGE_VERSION,
-			'@wordpress/private-apis': LATEST_WORDPRESS_PACKAGE_VERSION,
-		} );
-		expectNpmInstallFromCache( path.join( cacheRoot, 'latest' ) );
-	} );
-
-	it( 'uses the previous WordPress dist-tag for latest-1', () => {
-		const cwd = createFixtureProject( {} );
-		const cacheRoot = path.join( cwd, '.cache' );
-
-		const result = prepare( {
-			cwd,
-			cacheRoot,
-			wpVersion: 'latest-1',
-			packages: [ '@wordpress/data' ],
-			logger: false,
-		} );
-
-		expect( result.wpVersion ).toBe( 'latest-1' );
-		expectCachePackageJson( result.cacheDirectory, 'latest-1', {
-			'@wordpress/data': PREVIOUS_WORDPRESS_PACKAGE_VERSION,
-			'@wordpress/private-apis': PREVIOUS_WORDPRESS_PACKAGE_VERSION,
-		} );
-		expectNpmInstallFromCache( path.join( cacheRoot, 'latest-1' ) );
+		expect( installPackages ).toHaveBeenCalledWith( cacheDirectory );
 	} );
 
 	it( 'uses the npm latest dist-tag for gutenberg', () => {
@@ -581,18 +398,18 @@ describe( 'cache', () => {
 			logger: false,
 		} );
 
-		expect( spawnSync ).toHaveBeenCalledWith(
-			'npm',
-			[ 'view', '@wordpress/data@latest', 'version', '--json' ],
-			expect.objectContaining( {
-				encoding: 'utf8',
-			} )
+		expect( resolvePackageVersionFromNpm ).toHaveBeenCalledWith(
+			'@wordpress/data',
+			'gutenberg',
+			'latest'
 		);
 		expectCachePackageJson( result.cacheDirectory, 'gutenberg', {
 			'@wordpress/data': GUTENBERG_PACKAGE_VERSION,
 			'@wordpress/private-apis': GUTENBERG_PACKAGE_VERSION,
 		} );
-		expectNpmInstallFromCache( path.join( cacheRoot, 'gutenberg' ) );
+		expect( installPackages ).toHaveBeenCalledWith(
+			path.join( cacheRoot, 'gutenberg' )
+		);
 	} );
 
 	it( 'rejects unsupported WordPress version targets', () => {

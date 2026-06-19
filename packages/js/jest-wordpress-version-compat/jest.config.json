@@ -1,10 +1,10 @@
 {
 	"rootDir": "./",
 	"roots": [
-		"<rootDir>/src"
+		"<rootDir>/test"
 	],
 	"testEnvironment": "node",
 	"testMatch": [
-		"**/__tests__/**/*.test.js"
+		"**/*.test.js"
 	]
 }

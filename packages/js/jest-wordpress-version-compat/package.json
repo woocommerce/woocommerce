@@ -1,5 +1,6 @@
 {
 	"name": "@woocommerce/jest-wordpress-version-compat",
+	"private": true,
 	"version": "0.1.0",
 	"description": "Jest configuration helper for testing against WordPress package versions.",
 	"author": "Automattic",
@@ -35,8 +36,8 @@
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:fix:lang:js": "eslint src --fix",
-		"lint:lang:js": "eslint src",
+		"lint:fix:lang:js": "eslint src test --fix",
+		"lint:lang:js": "eslint src test",
 		"test:js": "jest --config ./jest.config.json --passWithNoTests",
 		"update:php": "XDEBUG_MODE=off composer update --quiet"
 	},
@@ -59,7 +60,10 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "src/**/*.js"
+				"changes": [
+					"src/**/*.js",
+					"test/**/*.js"
+				]
 			},
 			"tests": [
 				{
@@ -67,7 +71,8 @@
 					"command": "test:js",
 					"changes": [
 						"jest.config.json",
-						"src/**/*.js"
+						"src/**/*.js",
+						"test/**/*.js"
 					],
 					"events": [
 						"pull_request",
