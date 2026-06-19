@@ -100,7 +100,7 @@ class JsonFileFeed implements FeedInterface {
 	 * @param string|null $resume_identifier Identifier of an existing feed to resume, or null to start fresh.
 	 * @param int         $entries_written   The number of entries already written by previous chunks.
 	 * @return string The identifier of the feed that was started.
-	 * @throws Exception If the feed directory or file cannot be created/opened.
+	 * @throws Exception If the feed directory or file cannot be created/opened, or a resumed feed is missing.
 	 */
 	public function start( ?string $resume_identifier = null, int $entries_written = 0 ): string {
 		$upload_dir = $this->get_upload_dir();
@@ -108,12 +108,24 @@ class JsonFileFeed implements FeedInterface {
 		$this->file_completed = false;
 		$this->file_url       = null;
 
-		// Resume an existing feed when asked to and its partial file is still present; otherwise start
-		// a brand-new feed. The file may have vanished (e.g. cleaned up by the host), in which case we
-		// fall back to a fresh feed.
-		if ( null !== $resume_identifier && $this->partial_file_exists( $resume_identifier ) ) {
+		if ( null !== $resume_identifier ) {
 			$this->file_name = $resume_identifier;
 			$this->file_path = $upload_dir['path'] . $resume_identifier;
+
+			// The partial must still be there to append to. If it has vanished (e.g. cleaned up by the
+			// host), fail rather than write a corrupt feed; the caller restarts generation from scratch.
+			if ( ! is_file( $this->file_path ) ) {
+				throw new Exception(
+					esc_html(
+						sprintf(
+							/* translators: %s: file path */
+							__( 'Cannot resume feed; file does not exist: %s', 'woocommerce' ),
+							$this->file_path
+						)
+					)
+				);
+			}
+
 			// Seed the entry count so add_entry()'s separator accounts for entries already written.
 			$this->entry_count = $entries_written;
 			$this->open_handle( $this->file_path, 'a' );
@@ -125,8 +137,6 @@ class JsonFileFeed implements FeedInterface {
 		$this->file_name   = $this->generate_file_name();
 		$this->file_path   = $upload_dir['path'] . $this->file_name;
 		$this->open_handle( $this->file_path, 'w' );
-
-		// Open the array.
 		fwrite( $this->file_handle, '[' );
 
 		return $this->file_name;
@@ -158,27 +168,15 @@ class JsonFileFeed implements FeedInterface {
 
 	/**
 	 * {@inheritDoc}
-	 *
-	 * @throws Exception If the feed file cannot be opened to be finalized.
 	 */
 	public function end(): void {
-		// Nothing was ever started; keep the historical no-op behaviour.
-		if ( ! is_resource( $this->file_handle ) && empty( $this->file_path ) ) {
+		if ( ! is_resource( $this->file_handle ) ) {
 			return;
 		}
 
-		// The handle may have been released by flush() between chunks (the last chunk can run in its
-		// own process), so reopen the file for appending if needed.
-		if ( ! is_resource( $this->file_handle ) ) {
-			$this->open_handle( (string) $this->file_path, 'a' );
-		}
-
-		// Close the array and the file.
 		fwrite( $this->file_handle, ']' );
 		fclose( $this->file_handle );
-		$this->file_handle = null;
-
-		// Indicate that we have a complete file.
+		$this->file_handle    = null;
 		$this->file_completed = true;
 	}
 
@@ -208,8 +206,7 @@ class JsonFileFeed implements FeedInterface {
 	/**
 	 * Resolves a feed file's path from its identifier without creating the upload directory.
 	 *
-	 * Used for existence checks and deletion, where the directory should not be created as a side
-	 * effect (unlike {@see get_upload_dir()}, which is used when actually writing a feed).
+	 * Unlike {@see get_upload_dir()} (used when writing), this must not create the directory as a side effect.
 	 *
 	 * @param string $identifier The feed file name.
 	 * @return string The absolute path to the feed file.
@@ -217,17 +214,6 @@ class JsonFileFeed implements FeedInterface {
 	private function feed_file_path( string $identifier ): string {
 		$upload_dir = wp_upload_dir( null, false );
 		return $upload_dir['basedir'] . DIRECTORY_SEPARATOR . self::UPLOAD_DIR . DIRECTORY_SEPARATOR . $identifier;
-	}
-
-	/**
-	 * Determines whether a partial feed file exists and can be appended to.
-	 *
-	 * @param string $identifier The feed file name.
-	 * @return bool True if the feed file exists and has content.
-	 */
-	private function partial_file_exists( string $identifier ): bool {
-		$path = $this->feed_file_path( $identifier );
-		return is_file( $path ) && filesize( $path ) > 0;
 	}
 
 	/**

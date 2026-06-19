@@ -142,21 +142,22 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that start() resumes an existing partial feed, but falls back to a fresh feed (new
-	 * identifier) when the partial file no longer exists.
+	 * Test that start() resumes an existing partial feed by reusing its identifier, and throws when the
+	 * partial file is missing rather than appending to a non-existent file.
 	 */
-	public function test_start_resumes_existing_feed_or_falls_back_to_fresh() {
-		$feed = new JsonFileFeed( 'test-feed' );
-
-		// Resuming a feed that does not exist falls back to a fresh feed with a new identifier.
-		$fresh = $feed->start( 'does-not-exist.json' );
-		$this->assertNotSame( 'does-not-exist.json', $fresh );
+	public function test_start_resumes_existing_feed_and_throws_when_missing() {
+		// Resuming a just-created feed reuses the same identifier.
+		$feed       = new JsonFileFeed( 'test-feed' );
+		$identifier = $feed->start();
 		$feed->flush();
 
-		// Resuming the just-created feed reuses the same identifier.
 		$feed_two = new JsonFileFeed( 'test-feed' );
-		$resumed  = $feed_two->start( $fresh );
-		$this->assertSame( $fresh, $resumed );
+		$this->assertSame( $identifier, $feed_two->start( $identifier ) );
+		$feed_two->flush();
+
+		// Resuming a feed that no longer exists throws.
+		$this->expectException( \Exception::class );
+		( new JsonFileFeed( 'test-feed' ) )->start( 'does-not-exist.json' );
 	}
 
 	/**

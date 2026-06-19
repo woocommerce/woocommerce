@@ -208,9 +208,8 @@ class ProductWalker {
 	 * @param callable|null $callback    The callback to call after each batch of products is processed.
 	 * @param int           $start_page  The 1-based page (batch) to start at.
 	 * @param int           $max_batches The maximum number of batches to process in this call.
-	 * @return WalkerProgress The progress for this call: the number of items/batches processed here
-	 *                        plus the overall total_count and total_batch_count, so the caller can
-	 *                        tell whether the feed is complete and where the next chunk should resume.
+	 * @return WalkerProgress Items/batches processed here, plus the overall total_count and
+	 *                        total_batch_count so the caller knows whether the feed is complete.
 	 */
 	public function walk( ?callable $callback = null, int $start_page = 1, int $max_batches = PHP_INT_MAX ): WalkerProgress {
 		if ( $start_page < 1 ) {

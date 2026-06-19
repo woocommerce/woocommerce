@@ -18,18 +18,15 @@ interface FeedInterface {
 	/**
 	 * Start a feed, either fresh or by resuming one a previous chunk began.
 	 *
-	 * A feed may be written across several separate processes (e.g. one Action Scheduler action per
-	 * chunk), so it is created in a stable, shared location and identified by the returned value.
-	 * Pass that identifier back on a later chunk to keep appending to the same feed; pass nothing to
-	 * begin a new feed. If the identifier given no longer resolves to an existing feed, a fresh feed
-	 * is started instead — the returned identifier (which then differs from the one passed in) lets
-	 * the caller detect that fallback.
+	 * A feed may be written across separate processes (one Action Scheduler action per chunk), so it
+	 * lives in a stable, shared location identified by the returned value. Pass that identifier back on
+	 * a later chunk to keep appending to the same feed; pass nothing to begin a new one.
 	 *
 	 * @since 10.5.0
 	 *
 	 * @param string|null $resume_identifier Identifier of an existing feed to resume, or null to start fresh.
-	 * @param int         $entries_written   The number of entries already written by previous chunks, used
-	 *                                        when resuming so separators are added correctly.
+	 * @param int         $entries_written   The number of entries already written by previous chunks, so
+	 *                                        separators are added correctly when resuming.
 	 * @return string The identifier of the feed that was started, to be passed back by later chunks.
 	 */
 	public function start( ?string $resume_identifier = null, int $entries_written = 0 ): string;

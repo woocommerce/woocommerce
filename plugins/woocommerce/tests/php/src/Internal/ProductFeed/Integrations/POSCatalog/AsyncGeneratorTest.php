@@ -538,16 +538,15 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that a continuation whose partial feed file has vanished falls back to a fresh start
-	 * rather than appending to a non-existent file.
+	 * Test that a continuation whose partial feed file has vanished fails rather than appending to a
+	 * non-existent file. Recovery (restart from scratch) then happens on the next status poll.
 	 */
-	public function test_feed_generation_restarts_when_partial_file_missing() {
+	public function test_feed_generation_fails_when_partial_file_missing() {
 		add_filter( 'woocommerce_product_feed_batch_size', fn() => 1 );
 		add_filter( 'woocommerce_product_feed_chunk_size', fn() => 1 );
 
 		$this->setup_real_feed_integration();
 
-		WC_Helper_Product::create_simple_product();
 		WC_Helper_Product::create_simple_product();
 
 		// A continuation pointing at a partial file that does not exist.
@@ -567,15 +566,9 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$this->sut->feed_generation_action( self::OPTION_KEY );
 		$status = get_option( self::OPTION_KEY );
 
-		// It started over: a new file, and the cursor reflects a fresh run (1 processed after page 1).
-		$this->assertNotSame( 'pos-catalog-feed-missing.json', $status['file_name'] );
-		$this->assertSame( 1, $status['processed'] );
+		$this->assertSame( AsyncGenerator::STATE_FAILED, $status['state'] );
 
 		as_unschedule_all_actions( AsyncGenerator::FEED_GENERATION_ACTION, array(), 'woo-product-feed' );
-		$partial_path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $status['file_name'];
-		if ( file_exists( $partial_path ) ) {
-			wp_delete_file( $partial_path );
-		}
 	}
 
 	/**

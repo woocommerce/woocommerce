@@ -65,10 +65,9 @@ class AsyncGenerator {
 	/**
 	 * The chunk sizes (products processed per action) tried in descending order.
 	 *
-	 * Generation starts at the first (largest) size, which lets most catalogs finish in a single
-	 * action with no inter-action latency. Each time a run gets stuck — most likely killed because the
-	 * size was too large for the host — the effective size steps down one rung and is persisted, so
-	 * future runs (including the next request from the app) do not repeat the attempt that failed.
+	 * Generation starts at the first (largest) size so most catalogs finish in a single action. When a
+	 * run gets stuck — likely killed because the size was too large for the host — the size steps down
+	 * one rung and is persisted, so future runs do not repeat the attempt that failed.
 	 *
 	 * @var int[]
 	 */
@@ -113,25 +112,21 @@ class AsyncGenerator {
 	 * @return array           The feed generation status.
 	 */
 	public function get_status( ?array $args = null ): array {
-		// Determine the option key based on the integration ID and arguments.
 		$option_key = $this->get_option_key( $args );
 		$status     = get_option( $option_key );
 
 		if ( is_array( $status ) ) {
-			// A still-valid status (including a healthy, actively-progressing job) is returned as-is.
 			if ( $this->validate_status( $status ) ) {
 				return $status;
 			}
 
-			// An in-progress job that fails validation has a stale heartbeat: it was killed mid-run,
-			// most likely because the chunk size was too large for this host. Step the chunk size down
-			// so this and future jobs use a smaller, more reliable size.
+			// A stuck in-progress job was most likely killed because the chunk size was too large for
+			// this host, so step it down for this and future runs.
 			if ( self::STATE_IN_PROGRESS === ( $status['state'] ?? '' ) ) {
 				$this->reduce_chunk_size( $option_key );
 			}
 
-			// Whatever made it invalid (stuck, expired, …), discard any partial feed it left behind
-			// and start fresh.
+			// Whatever made the status invalid (stuck, expired, …), discard the partial feed and start fresh.
 			$this->discard_feed( $status );
 		}
 
@@ -149,12 +144,8 @@ class AsyncGenerator {
 			'args'         => $args ?? array(),
 		);
 
-		update_option(
-			$option_key,
-			$status
-		);
+		update_option( $option_key, $status );
 
-		// Start an immediate async action to generate the first chunk of the feed.
 		$this->schedule_generation_action( $option_key );
 
 		return $status;
@@ -163,18 +154,14 @@ class AsyncGenerator {
 	/**
 	 * Schedules (and immediately dispatches) an async action to process a feed generation chunk.
 	 *
-	 * Used both to start generation and to queue each subsequent chunk, so that a large catalog is
-	 * built across several short actions rather than one long-running one.
-	 *
 	 * @param string $option_key The option key for the feed generation status.
 	 * @return void
 	 */
 	private function schedule_generation_action( string $option_key ): void {
-		// Note: the action is deliberately not scheduled as "unique". Action Scheduler's uniqueness
-		// check matches on hook + group only (not args), and treats both pending AND running actions
-		// as blockers. When this is called to queue the next chunk, the current chunk's own action is
-		// still running, so a unique enqueue would be silently rejected and generation would stall.
-		// Per-job de-duplication is instead handled by as_unschedule_all_actions() in get_status().
+		// Deliberately not enqueued as "unique": Action Scheduler's uniqueness check matches on hook +
+		// group only (not args) and treats a running action as a blocker, so a unique enqueue of the next
+		// chunk would be rejected while the current chunk's action is still running. Per-job de-duplication
+		// is handled by as_unschedule_all_actions() in get_status() instead.
 		as_enqueue_async_action(
 			self::FEED_GENERATION_ACTION,
 			array( $option_key ),
@@ -183,7 +170,7 @@ class AsyncGenerator {
 			1
 		);
 
-		// Manually force an async request to be dispatched to process the action immediately.
+		// Force an async request so the action runs immediately.
 		if ( class_exists( ActionScheduler_AsyncRequest_QueueRunner::class ) && class_exists( ActionScheduler_Store::class ) ) {
 			$store         = ActionScheduler_Store::instance();
 			$async_request = new ActionScheduler_AsyncRequest_QueueRunner( $store );
@@ -204,13 +191,7 @@ class AsyncGenerator {
 
 		// Only a scheduled (first chunk) or in-progress (continuation) job should be processed here.
 		if ( ! is_array( $status ) || ! in_array( $status['state'] ?? '', array( self::STATE_SCHEDULED, self::STATE_IN_PROGRESS ), true ) ) {
-			wc_get_logger()->error(
-				'Invalid feed generation status',
-				array(
-					'status'     => $status,
-					'chunk_size' => $this->get_effective_chunk_size( $option_key ),
-				)
-			);
+			wc_get_logger()->error( 'Invalid feed generation status', array( 'status' => $status ) );
 			return;
 		}
 
@@ -219,13 +200,7 @@ class AsyncGenerator {
 		// A continuation must know which feed file it is appending to. If it doesn't, the status is
 		// corrupt; bail and let the heartbeat-based recovery restart generation from scratch.
 		if ( ! $is_first_chunk && empty( $status['file_name'] ) ) {
-			wc_get_logger()->error(
-				'Invalid feed generation continuation status',
-				array(
-					'status'     => $status,
-					'chunk_size' => $this->get_effective_chunk_size( $option_key ),
-				)
-			);
+			wc_get_logger()->error( 'Invalid feed generation continuation status', array( 'status' => $status ) );
 			return;
 		}
 
@@ -239,22 +214,14 @@ class AsyncGenerator {
 
 			$feed = $this->integration->create_feed();
 
-			// Start a fresh feed, or resume the one a previous chunk began. start() returns the
-			// identifier it actually used; a continuation whose partial file has vanished (e.g. cleaned
-			// up by the host) falls back to a fresh feed, which we detect by the returned identifier
-			// differing from the stored one — in which case the cursor is reset to start over.
-			$resume_identifier = $is_first_chunk ? null : (string) $status['file_name'];
-			$identifier        = $feed->start( $resume_identifier, (int) ( $status['entries_written'] ?? 0 ) );
-
-			if ( ( $status['file_name'] ?? null ) !== $identifier ) {
-				$status['file_name']       = $identifier;
+			if ( $is_first_chunk ) {
+				$status['file_name']       = $feed->start();
 				$status['page']            = 1;
 				$status['processed']       = 0;
 				$status['entries_written'] = 0;
-
-				// Persist the new feed reference immediately so a job killed during its first batch can
-				// still be cleaned up (and polled) by the stuck-job recovery.
 				update_option( $option_key, $status );
+			} else {
+				$feed->start( (string) $status['file_name'], (int) ( $status['entries_written'] ?? 0 ) );
 			}
 
 			$walker = ProductWalker::from_integration( $this->integration, $feed );
@@ -263,15 +230,12 @@ class AsyncGenerator {
 
 			$this->apply_mapper_args( $status['args'] ?? array() );
 
-			// The current effective chunk size determines how many batches this action processes before
-			// it finalizes (if complete) or schedules the next chunk. It starts large enough that most
-			// catalogs finish in one action, and shrinks if a previous run got stuck.
 			$start_page     = max( 1, (int) ( $status['page'] ?? 1 ) );
 			$base_processed = (int) ( $status['processed'] ?? 0 );
 			$progress       = $walker->walk(
 				function ( WalkerProgress $progress ) use ( &$status, $option_key, $base_processed ) {
-					// Update progress (and the heartbeat) after every batch, so polling sees smooth
-					// progress within a chunk rather than a single jump at the chunk boundary.
+					// Refresh progress and the heartbeat after every batch, so polling sees smooth progress
+					// within a chunk rather than a single jump at the chunk boundary.
 					$status = $this->update_progress( $status, $base_processed + $progress->processed_items, $progress->total_count );
 					update_option( $option_key, $status );
 				},
@@ -279,9 +243,8 @@ class AsyncGenerator {
 				$this->get_chunk_batch_count( $option_key )
 			);
 
-			// Advance the cursor and cumulative counters. The feed's entry count is already cumulative
-			// across chunks (start() seeds it with the running total when resuming), so it is stored
-			// as-is rather than added to the previous total.
+			// The feed's entry count is already cumulative across chunks (start() seeds it with the running
+			// total when resuming), so store it as-is rather than adding to the previous total.
 			$status                    = $this->update_progress( $status, $base_processed + $progress->processed_items, $progress->total_count );
 			$status['entries_written'] = $feed->get_entry_count();
 			$status['page']            = $start_page + $progress->processed_batches;
@@ -298,19 +261,15 @@ class AsyncGenerator {
 				$status['completed_at'] = time();
 				update_option( $option_key, $status );
 
-				// Schedule another action to delete the file after the expiry time.
+				// Schedule deletion of the file after the expiry time.
 				as_schedule_single_action(
 					time() + self::FEED_EXPIRY,
 					self::FEED_DELETION_ACTION,
-					array(
-						$option_key,
-						$feed->get_file_path(),
-					),
+					array( $option_key, $feed->get_file_path() ),
 					'woo-product-feed',
 					false
 				);
 			} else {
-				// Persist this chunk and schedule the next one.
 				$feed->flush();
 				update_option( $option_key, $status );
 				$this->schedule_generation_action( $option_key );
@@ -321,11 +280,10 @@ class AsyncGenerator {
 				array(
 					'error'      => $e->getMessage(),
 					'option_key' => $option_key,
-					'chunk_size' => $this->get_effective_chunk_size( $option_key ),
 				)
 			);
 
-			// Close the file handle, if any, so it is not left dangling.
+			// Release the file handle, if any, so it is not left dangling.
 			if ( $feed instanceof FeedInterface ) {
 				$feed->flush();
 			}
@@ -346,12 +304,10 @@ class AsyncGenerator {
 	 * @return void
 	 */
 	private function raise_resource_limits(): void {
-		// Large catalogs are memory heavy, so give the process as much headroom as the host allows.
 		wp_raise_memory_limit( 'admin' );
 
 		// Raise the time limit up front: the walker only resets it after each batch, so the initial
-		// product query and the first batch would otherwise run under whatever (possibly very low)
-		// limit the Action Scheduler request started with.
+		// product query and the first batch would otherwise run under the request's (possibly low) limit.
 		$batch_time_limit = $this->get_batch_time_limit();
 		if ( $batch_time_limit > 0 ) {
 			wc_set_time_limit( $batch_time_limit );
@@ -367,13 +323,10 @@ class AsyncGenerator {
 		/**
 		 * Filters the per-batch PHP execution time limit (in seconds) for product feed generation.
 		 *
-		 * The execution time limit is set to this value up front and reset to it after each processed
-		 * batch, so that a low `max_execution_time` does not abort generation part-way through a chunk.
-		 * Return 0 to leave the time limit untouched.
-		 *
-		 * This only affects PHP's own execution timeout. It does not extend Action Scheduler's failure
-		 * period (`action_scheduler_failure_period`, 300 seconds by default) nor any hard server/host
-		 * request timeout.
+		 * The limit is set up front and reset after each processed batch, so a low `max_execution_time`
+		 * does not abort generation part-way through a chunk. Return 0 to leave the time limit untouched.
+		 * This only affects PHP's own execution timeout, not Action Scheduler's failure period nor any
+		 * hard server/host request timeout.
 		 *
 		 * @param int $batch_time_limit The per-batch time limit in seconds.
 		 *
@@ -392,12 +345,9 @@ class AsyncGenerator {
 		/**
 		 * Filters the number of products processed per chunk during feed generation.
 		 *
-		 * Each chunk runs in its own Action Scheduler action and then schedules the next, keeping
-		 * every run short enough to finish well within Action Scheduler's failure period and the
-		 * host's request timeout. Larger chunks mean fewer actions but longer individual runs.
-		 *
-		 * Defaults to the effective chunk size, which starts large (so most catalogs finish in one
-		 * action) and shrinks automatically if a run gets stuck.
+		 * Each chunk runs in its own Action Scheduler action and then schedules the next, keeping every
+		 * run short enough to finish within Action Scheduler's failure period and the host's request
+		 * timeout. Defaults to the effective chunk size, which starts large and shrinks if a run gets stuck.
 		 *
 		 * @param int $chunk_size The number of products to process per chunk.
 		 *
@@ -412,11 +362,10 @@ class AsyncGenerator {
 	}
 
 	/**
-	 * Returns the option key under which the effective chunk size is persisted for a feed.
+	 * Returns the option key under which the effective chunk size is persisted.
 	 *
-	 * The chunk size lives in its own option (a sibling of the status option) so it survives the
-	 * status being deleted when a job completes, expires, or is restarted — that is what lets a
-	 * shrunk chunk size carry over to the next request from the app.
+	 * Stored separately from the status so a shrunk chunk size survives the status being cleared when a
+	 * job completes, expires, or restarts, and carries over to the next request from the app.
 	 *
 	 * @param string $option_key The option key for the feed generation status.
 	 * @return string The option key for the effective chunk size.
@@ -440,8 +389,7 @@ class AsyncGenerator {
 	/**
 	 * Steps the effective chunk size down to the next-smaller configured size and persists it.
 	 *
-	 * Called when a job gets stuck (its run was killed, most likely because the chunk size was too
-	 * large for this host). Once at the smallest configured size it stays there.
+	 * Called when a job gets stuck. Once at the smallest configured size it stays there.
 	 *
 	 * @param string $option_key The option key for the feed generation status.
 	 * @return int The new effective chunk size.
@@ -449,8 +397,7 @@ class AsyncGenerator {
 	private function reduce_chunk_size( string $option_key ): int {
 		$current = $this->get_effective_chunk_size( $option_key );
 
-		// CHUNK_SIZE_STEPS is in descending order, so the first step smaller than the current size is
-		// the next rung down. If none is smaller, we are already at the smallest size.
+		// CHUNK_SIZE_STEPS is descending, so the first step smaller than the current size is the next rung down.
 		$next = $current;
 		foreach ( self::CHUNK_SIZE_STEPS as $step ) {
 			if ( $step < $current ) {
@@ -482,8 +429,7 @@ class AsyncGenerator {
 		/**
 		 * Filters the number of products fetched per database query during feed generation.
 		 *
-		 * Smaller batches use less memory per query at the cost of more queries. This is the
-		 * granularity within a chunk; see `woocommerce_product_feed_chunk_size` for how many
+		 * This is the granularity within a chunk; see `woocommerce_product_feed_chunk_size` for how many
 		 * products each Action Scheduler action processes.
 		 *
 		 * @param int $batch_size The number of products per database batch.
@@ -555,10 +501,8 @@ class AsyncGenerator {
 		$option_key = $this->get_option_key( $args );
 		$status     = get_option( $option_key );
 
-		// If there is no option, there is nothing to force. If the status is invalid (stale, expired,
-		// or a stalled in-progress job), force always regenerates from scratch — unlike get_status(),
-		// which resumes a stalled job. Discard any partial feed and clear the option so the restart
-		// starts clean rather than resuming.
+		// An invalid status (stale, expired, or a stalled in-progress job) always regenerates from
+		// scratch: discard any partial feed and clear the option so the restart starts clean.
 		if ( ! is_array( $status ) || ! $this->validate_status( $status ) ) {
 			if ( is_array( $status ) ) {
 				$this->discard_feed( $status );
@@ -569,23 +513,19 @@ class AsyncGenerator {
 
 		switch ( $status['state'] ?? '' ) {
 			case self::STATE_SCHEDULED:
-				// If generation is scheduled, we can just let it be and return the current status.
-				// It should start shortly.
+				// Generation is already scheduled and should start shortly; leave it be.
 				return $status;
 
 			case self::STATE_IN_PROGRESS:
-				// A genuinely running job (its heartbeat is still fresh, otherwise validate_status()
-				// above would have restarted it) cannot be interrupted mid-flight.
+				// A genuinely running job (fresh heartbeat) cannot be interrupted mid-flight.
 				throw new \Exception( 'Feed generation is already in progress and cannot be stopped.' );
 
 			case self::STATE_COMPLETED:
-				// Delete the existing file, clear the option and let generation start again.
 				wp_delete_file( (string) $status['path'] );
 				delete_option( $option_key );
 				return $this->get_status( $args );
 
 			case self::STATE_FAILED:
-				// Clear the failed status and restart generation.
 				delete_option( $option_key );
 				return $this->get_status( $args );
 
@@ -642,14 +582,8 @@ class AsyncGenerator {
 	 * @return bool         True if the status is valid, false otherwise.
 	 */
 	private function validate_status( array $status ): bool {
-		/**
-		 * For completed jobs, make sure the file still exists. Regenerate otherwise.
-		 *
-		 * The file should typically get deleted at the same time as the status is cleared.
-		 * However, something else could cause the file to disappear in the meantime (ex. manual delete).
-		 *
-		 * Also, if the cleanup job failed, the feed might appear as complete, but be expired.
-		 */
+		// For completed jobs, the file must still exist and not be expired (e.g. manually deleted, or a
+		// cleanup job that failed to clear an expired feed).
 		if ( self::STATE_COMPLETED === $status['state'] ) {
 			if ( ! file_exists( $status['path'] ) ) {
 				return false;
@@ -665,12 +599,8 @@ class AsyncGenerator {
 		}
 
 		/**
-		 * If the job has been scheduled more than 10 minutes ago but has not
-		 * transitioned to IN_PROGRESS yet, ActionScheduler is typically stuck.
-		 */
-
-		/**
-		 * Allows the timeout for a feed to remain in `scheduled` state to be changed.
+		 * Allows the timeout for a feed to remain in `scheduled` state to be changed. Past this point
+		 * Action Scheduler is typically stuck and the job is regenerated.
 		 *
 		 * @param int $stuck_time The stuck time in seconds.
 		 * @return int The stuck time in seconds.
@@ -687,21 +617,15 @@ class AsyncGenerator {
 			return false;
 		}
 
-		/**
-		 * If the job is in progress but has not updated its heartbeat within the timeout, the
-		 * process was most likely killed (server/host timeout or out of memory) before it could
-		 * mark itself as failed. Without this check, such a job would stay `in_progress` forever
-		 * and no new feed could ever be generated.
-		 *
-		 * The heartbeat (`updated_at`) is refreshed when the job starts and after every processed
-		 * batch, so an active job keeps it fresh while a killed one does not.
-		 */
+		// An in-progress job that has not refreshed its heartbeat (`updated_at`, set on start and after
+		// every batch) within the timeout was most likely killed (host timeout or out of memory) before
+		// it could mark itself failed. Treat it as stuck so a new feed can be generated.
 		if ( self::STATE_IN_PROGRESS === $status['state'] ) {
 			$last_activity = $status['updated_at'] ?? $status['scheduled_at'] ?? 0;
 
 			/**
-			 * Allows the timeout for a feed to remain in `in_progress` state without a heartbeat
-			 * update to be changed. Past this point the job is treated as stuck and regenerated.
+			 * Allows the heartbeat timeout for an `in_progress` feed to be changed. Past this point the
+			 * job is treated as stuck and regenerated.
 			 *
 			 * @param int $stuck_time The stuck time in seconds.
 			 * @return int The stuck time in seconds.
@@ -713,7 +637,6 @@ class AsyncGenerator {
 			}
 		}
 
-		// All good.
 		return true;
 	}
 }
