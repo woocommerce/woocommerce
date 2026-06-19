@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a CI check that prevents new standalone functions from being added to the `includes` and `src` directories.
