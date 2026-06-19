@@ -457,9 +457,9 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Cutover preflight fails closed until native admin surface parity is explicitly verified.
+	 * @testdox Cutover preflight defaults admin surfaces to ready after the A4 exit gate passes.
 	 */
-	public function test_preflight_defaults_to_blocking_until_native_admin_surfaces_are_verified(): void {
+	public function test_preflight_defaults_to_ready_after_native_admin_surfaces_are_verified(): void {
 		$this->fake_plugin_active();
 		$this->fake_current_user_caps( true );
 		add_filter( NativePaymentsRuntimeArbiter::FILTER_NATIVE_ENABLED, '__return_true' );
@@ -467,9 +467,10 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 		add_filter( WooPaymentsCutoverController::FILTER_OPERATIONAL_QUEUE_HOOKS_PENDING_CUTOVER, '__return_empty_array' );
 		$this->native_provider_ready = true;
 
-		$this->assertContains( 'native_admin_surfaces_unavailable', $this->sut->get_preflight_failures() );
-		$this->assertFalse( $this->sut->should_show_soft_cutover_notice() );
-		$this->assertFalse( $this->sut->disable_woopayments_plugin() );
+		$failures = $this->sut->get_preflight_failures();
+
+		$this->assertNotContains( 'native_admin_surfaces_unavailable', $failures );
+		$this->assertTrue( $this->sut->should_show_soft_cutover_notice() );
 	}
 
 	/**
