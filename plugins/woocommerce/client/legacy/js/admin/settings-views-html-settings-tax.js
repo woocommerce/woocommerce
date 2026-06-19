@@ -21,29 +21,44 @@
 			$pagination        = $( '#rates-pagination, #rates-bottom-pagination' ),
 			$search_field      = $( '#rates-search .wc-tax-rates-search-field' ),
 			$submit            = $( '.woocommerce-save-button[type=submit]' ),
-			countryAutocompleteSource = function( request, response ) {
-				var term    = request.term.toLowerCase(),
-					matcher = new RegExp( $.ui.autocomplete.escapeRegex( term ), 'i' ),
-					matches = $.grep( data.countries, function( country ) {
-						return matcher.test( country.value ) || matcher.test( country.label );
-					} );
+			/**
+			 * Build a jQuery UI autocomplete source that matches against both the
+			 * stored code (`value`) and the display name (`label`), so a field
+			 * holding a code (e.g. a country or state code) can be found by typing
+			 * the code, not just the name. Matches are ranked so the most relevant
+			 * code matches surface first.
+			 *
+			 * @param {Array} items List of { value, label } objects to search.
+			 * @return {Function} An autocomplete `source` callback.
+			 */
+			createCodeAwareSource = function( items ) {
+				return function( request, response ) {
+					var term    = request.term.toLowerCase(),
+						matcher = new RegExp( $.ui.autocomplete.escapeRegex( term ), 'i' ),
+						matches = $.grep( items, function( item ) {
+							return matcher.test( item.value ) || matcher.test( item.label );
+						} );
 
-				response( _.sortBy( matches, function( country ) {
-					var value = country.value.toLowerCase(),
-						label = country.label.toLowerCase();
+					/* Rank: exact code (0), code prefix (1), name prefix (2), name substring (3). */
+					response( _.sortBy( matches, function( item ) {
+						var value = item.value.toLowerCase(),
+							label = item.label.toLowerCase();
 
-					if ( value === term ) {
-						return 0;
-					}
-					if ( 0 === value.indexOf( term ) ) {
-						return 1;
-					}
-					if ( 0 === label.indexOf( term ) ) {
-						return 2;
-					}
-					return 3;
-				} ) );
+						if ( value === term ) {
+							return 0;
+						}
+						if ( 0 === value.indexOf( term ) ) {
+							return 1;
+						}
+						if ( 0 === label.indexOf( term ) ) {
+							return 2;
+						}
+						return 3;
+					} ) );
+				};
 			},
+			countryAutocompleteSource = createCodeAwareSource( data.countries ),
+			stateAutocompleteSource   = createCodeAwareSource( data.states ),
 			WCTaxTableModelConstructor = Backbone.Model.extend({
 				changes: {},
 				setRateAttribute: function( rateID, attribute, value ) {
@@ -183,8 +198,8 @@
 
 					// Initialize autocomplete for states.
 					this.$el.find( 'td.state input' ).autocomplete({
-						source: data.states,
-						minLength: 3
+						source: stateAutocompleteSource,
+						minLength: 2
 					});
 
 					// Postcode and city don't have `name` values by default.

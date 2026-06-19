@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix tax state code autocomplete so states can be found by typing their code
