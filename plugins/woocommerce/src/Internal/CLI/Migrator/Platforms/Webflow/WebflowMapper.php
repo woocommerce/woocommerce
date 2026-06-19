@@ -739,13 +739,10 @@ class WebflowMapper implements PlatformMapperInterface {
 		}
 
 		$unit_key    = 'weight-unit';
-		$source_unit = isset( $sku_field->{$unit_key} ) ? strtolower( (string) $sku_field->{$unit_key} ) : 'lb';
+		$source_unit = isset( $sku_field->{$unit_key} ) ? strtolower( (string) $sku_field->{$unit_key} ) : 'lbs';
 		$source_unit = $this->normalize_weight_unit( $source_unit );
 
 		$store_unit = strtolower( (string) get_option( 'woocommerce_weight_unit', 'kg' ) );
-		if ( 'lbs' === $store_unit ) {
-			$store_unit = 'lb';
-		}
 
 		if ( $source_unit === $store_unit ) {
 			return $weight;
@@ -768,14 +765,14 @@ class WebflowMapper implements PlatformMapperInterface {
 	private function normalize_weight_unit( string $unit ): string {
 		$map = array(
 			'oz'    => 'oz',
-			'lb'    => 'lb',
-			'lbs'   => 'lb',
-			'pound' => 'lb',
+			'lb'    => 'lbs',
+			'lbs'   => 'lbs',
+			'pound' => 'lbs',
 			'g'     => 'g',
 			'gram'  => 'g',
 			'kg'    => 'kg',
 		);
-		return $map[ $unit ] ?? 'lb';
+		return $map[ $unit ] ?? 'lbs';
 	}
 
 	/**
