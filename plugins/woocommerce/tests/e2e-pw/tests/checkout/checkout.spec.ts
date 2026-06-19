@@ -20,7 +20,9 @@ import {
 	CLASSIC_CHECKOUT_PAGE,
 } from '../../utils/pages';
 import { logInFromMyAccount } from '../../utils/login';
+import { setGatewayEnabled } from '../../utils/payment-gateways';
 import { updateIfNeeded, resetValue } from '../../utils/settings';
+import { setTaxCalculationEnabled } from '../../utils/taxes';
 
 //todo handle other countries and states than the default (US, CA) when filling the addresses
 
@@ -151,9 +153,9 @@ const test = baseTest.extend( {
 	page: async ( { page, restApi }, use ) => {
 		await createClassicCheckoutPage();
 
-		const calcTaxesState = await updateIfNeeded(
-			'general/woocommerce_calc_taxes',
-			'yes'
+		const taxesWereEnabled = await setTaxCalculationEnabled(
+			restApi,
+			true
 		);
 
 		const loginAtCheckoutState = await updateIfNeeded(
@@ -166,36 +168,17 @@ const test = baseTest.extend( {
 			'yes'
 		);
 
-		// Check id COD payment is enabled and enable it if it is not
-		const codResponse = await restApi.get(
-			`${ WC_API_PATH }/payment_gateways/cod`
-		);
-		const codEnabled = codResponse.enabled;
-
-		if ( ! codEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: true,
-			} );
-		}
-
-		// Check id BACS payment is enabled and enable it if it is not
-		const bacsResponse = await restApi.get(
-			`${ WC_API_PATH }/payment_gateways/bacs`
-		);
-		const bacsEnabled = bacsResponse.enabled;
-
-		if ( ! bacsEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
-				enabled: true,
-			} );
-		}
+		// COD and BACS are enabled globally in site setup; guard defensively in
+		// case they are somehow off, and restore their prior state afterwards.
+		const codWasEnabled = await setGatewayEnabled( restApi, 'cod', true );
+		const bacsWasEnabled = await setGatewayEnabled( restApi, 'bacs', true );
 
 		await page.context().clearCookies();
 		await use( page );
 
 		// revert the settings to initial state
 
-		await resetValue( 'general/woocommerce_calc_taxes', calcTaxesState );
+		await setTaxCalculationEnabled( restApi, taxesWereEnabled );
 
 		await resetValue(
 			'account/woocommerce_enable_checkout_login_reminder',
@@ -207,17 +190,8 @@ const test = baseTest.extend( {
 			signUpAtCheckoutState
 		);
 
-		if ( ! codEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: codEnabled,
-			} );
-		}
-
-		if ( ! bacsEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
-				enabled: bacsEnabled,
-			} );
-		}
+		await setGatewayEnabled( restApi, 'cod', codWasEnabled );
+		await setGatewayEnabled( restApi, 'bacs', bacsWasEnabled );
 	},
 	product: async ( { restApi }, use ) => {
 		let product;

@@ -16,6 +16,7 @@ import {
 	CLASSIC_CHECKOUT_PAGE,
 } from '../../utils/pages';
 import { wpCLI } from '../../utils/cli';
+import { setGatewayEnabled } from '../../utils/payment-gateways';
 
 const test = baseTest.extend( {
 	page: async ( { page, restApi }, use ) => {
@@ -31,31 +32,25 @@ const test = baseTest.extend( {
 			`wp option set woocommerce_test-custom-button_settings --format=json '{"enabled":"yes"}'`
 		);
 
-		// Ensuring that COD is enabled, so it can _also_ be used during checkout.
-		const codResponse = await restApi.get(
-			`${ WC_API_PATH }/payment_gateways/cod`
-		);
-		const codEnabled = codResponse.enabled;
-
-		if ( ! codEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: true,
-			} );
-		}
+		// COD is enabled globally in site setup; guard defensively in case it is
+		// somehow off so it can _also_ be used during checkout.
+		const codWasEnabled = await setGatewayEnabled( restApi, 'cod', true );
 
 		await page.context().clearCookies();
 		await use( page );
 
-		// Cleanup: restoring COD and removing the custom gateway
+		// Cleanup: deactivate the test plugin so its custom gateway stops being
+		// registered on every checkout/order-pay page for the rest of the run.
+		// The gateway hardcodes `enabled = 'yes'` in its constructor, so deleting
+		// the option alone would NOT disable it — only deactivation does.
+		await wpCLI(
+			'wp plugin deactivate woocommerce-blocks-test-plugins/custom-place-order-button-test.php'
+		);
 		await wpCLI(
 			`wp option delete woocommerce_test-custom-button_settings`
 		);
 
-		if ( ! codEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: codEnabled,
-			} );
-		}
+		await setGatewayEnabled( restApi, 'cod', codWasEnabled );
 	},
 	product: async ( { restApi }, use ) => {
 		let product;

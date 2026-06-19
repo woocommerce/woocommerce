@@ -67,8 +67,8 @@
 		"test:e2e:install": "pnpm playwright install chromium",
 		"test:e2e:blocks": "pnpm playwright test --config=tests/e2e-pw/playwright.config.ts --project=blocks-chromium",
 		"test:e2e:blocks:performance": "pnpm playwright test --config=tests/e2e-pw/playwright.performance.config.ts --project=blocks-performance",
-		"test:e2e:email-update-propagation:pr": "pnpm test:e2e:default --project=core-all --grep @pr tests/email-editor/update-propagation",
-		"test:e2e:email-update-propagation:nightly": "pnpm test:e2e:default --project=core-all tests/email-editor/update-propagation",
+		"test:e2e:email-update-propagation:pr": "pnpm test:e2e:default --project=core-serial --project=core-parallel --grep @pr tests/email-editor/update-propagation",
+		"test:e2e:email-update-propagation:nightly": "pnpm test:e2e:default --project=core-serial --project=core-parallel tests/email-editor/update-propagation",
 		"test:e2e:with-env": "pnpm test:e2e:install && bash ./tests/e2e-pw/run-tests-with-env.sh",
 		"test:e2e:pressable": "pnpm test:e2e:with-env default-pressable",
 		"test:e2e:wpcom": "pnpm test:e2e:with-env default-wpcom",
@@ -273,7 +273,10 @@
 					"name": "Core e2e tests - parallel",
 					"testType": "e2e",
 					"command": "test:e2e:core-parallel",
-					"shardingArguments": [],
+					"shardingArguments": [
+						"--shard=1/2",
+						"--shard=2/2"
+					],
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
@@ -308,10 +311,9 @@
 					"testType": "e2e",
 					"command": "test:e2e:core-serial",
 					"shardingArguments": [
-						"--shard=1/4",
-						"--shard=2/4",
-						"--shard=3/4",
-						"--shard=4/4"
+						"--shard=1/3",
+						"--shard=2/3",
+						"--shard=3/3"
 					],
 					"changes": [
 						"client/admin/config/*.json",

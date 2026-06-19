@@ -129,15 +129,19 @@ const serialRunSpecs = [
 	// Mutates the shared admin's `woocommerce_meta.dashboard_sections` and flips the
 	// global `woocommerce_analytics_scheduled_import` option (racing analytics-settings).
 	'**/tests/analytics/analytics-overview.spec.ts',
-	// Mutate global tax, default customer location, AJAX add-to-cart and payment
-	// gateway settings, plus the shared cart page behavior.
+	// Flips the global `woocommerce_calc_taxes` setting on (the ×1.055 tax pollution
+	// other workers' untaxed-total assertions depend on being off).
 	'**/tests/cart/**/*.spec.ts',
-	// Mutate global tax/gateway/custom-button options.
+	// Activates a custom-gateway test plugin globally, which would surface its extra
+	// payment button on every other worker's checkout.
 	'**/tests/checkout/checkout-shortcode-custom-place-order-button.spec.ts',
+	// Flips global `woocommerce_calc_taxes` on plus the checkout login/signup
+	// reminder options.
 	'**/tests/checkout/checkout.spec.ts',
-	// Mutate global store address/currency/tax settings.
+	// Sets the global store currency and exercises the shared blocks cart page.
 	'**/tests/coupons/cart-block-coupons.spec.ts',
-	'**/tests/coupons/cart-checkout-coupons.spec.ts',
+	// Creates a global "Free Shipping" shipping zone (and US store address) that
+	// other workers' cart/checkout flows would pick up.
 	'**/tests/coupons/cart-checkout-restricted-coupons.spec.ts',
 	// Toggle email feature flags and global WooCommerce email settings, and depend
 	// on shared Mailpit inbox state.
@@ -152,8 +156,6 @@ const serialRunSpecs = [
 	'**/tests/onboarding/**/*.spec.ts',
 	// Toggles the global `woocommerce_calc_taxes` setting and tax classes/rates.
 	'**/tests/order/create-order.spec.ts',
-	// Enables and configures the global `bacs` payment gateway.
-	'**/tests/order/customer-payment-page.spec.ts',
 	// Select-all → bulk "Change status to completed" flips every other worker's
 	// orders on the shared orders list.
 	'**/tests/order/order-bulk-edit.spec.ts',

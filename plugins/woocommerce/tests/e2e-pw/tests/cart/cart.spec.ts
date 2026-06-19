@@ -14,7 +14,8 @@ import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
 import { createClassicCartPage, CLASSIC_CART_PAGE } from '../../utils/pages';
 import { checkCartContent } from '../../utils/cart';
-import { updateIfNeeded, resetValue } from '../../utils/settings';
+import { setGatewayEnabled } from '../../utils/payment-gateways';
+import { setTaxCalculationEnabled } from '../../utils/taxes';
 
 const cartPages = [ { name: 'blocks cart', slug: 'cart' }, CLASSIC_CART_PAGE ];
 
@@ -27,53 +28,24 @@ const test = baseTest.extend( {
 	page: async ( { page, restApi }, use ) => {
 		await createClassicCartPage();
 
-		const calcTaxesState = await updateIfNeeded(
-			`general/woocommerce_calc_taxes`,
-			'yes'
+		const taxesWereEnabled = await setTaxCalculationEnabled(
+			restApi,
+			true
 		);
 
-		// Check id COD payment is enabled and enable it if it is not
-		const codResponse = await restApi.get(
-			`${ WC_API_PATH }/payment_gateways/cod`
-		);
-		const codEnabled = codResponse.enabled;
-
-		if ( ! codEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: true,
-			} );
-		}
-
-		// Check id BACS payment is enabled and enable it if it is not
-		const bacsResponse = await restApi.get(
-			`${ WC_API_PATH }/payment_gateways/bacs`
-		);
-		const bacsEnabled = bacsResponse.enabled;
-
-		if ( ! bacsEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
-				enabled: true,
-			} );
-		}
+		// COD and BACS are enabled globally in site setup; guard defensively in
+		// case they are somehow off, and restore their prior state afterwards.
+		const codWasEnabled = await setGatewayEnabled( restApi, 'cod', true );
+		const bacsWasEnabled = await setGatewayEnabled( restApi, 'bacs', true );
 
 		await page.context().clearCookies();
 		await use( page );
 
 		// revert the settings to initial state
 
-		await resetValue( `general/woocommerce_calc_taxes`, calcTaxesState );
-
-		if ( ! codEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: codEnabled,
-			} );
-		}
-
-		if ( ! bacsEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
-				enabled: bacsEnabled,
-			} );
-		}
+		await setTaxCalculationEnabled( restApi, taxesWereEnabled );
+		await setGatewayEnabled( restApi, 'cod', codWasEnabled );
+		await setGatewayEnabled( restApi, 'bacs', bacsWasEnabled );
 	},
 	products: async ( { restApi }, use ) => {
 		const products = [];
@@ -195,7 +167,7 @@ test(
 			// Verify undo link is no longer visible (cleanup occurred)
 			await expect(
 				page.getByRole( 'link', { name: 'Undo?' } )
-			).not.toBeVisible();
+			).toBeHidden();
 		} );
 	}
 );

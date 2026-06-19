@@ -121,4 +121,18 @@ setup( 'setup site', async ( { baseURL, restApi } ) => {
 			],
 		} );
 	} );
+
+	await setup.step( 'enable offline payment gateways', async () => {
+		// Enable COD and BACS once for the whole shared site so specs that need an
+		// offline gateway at checkout don't each toggle them on/off. Toggling a
+		// gateway off in a spec's afterAll would disable it for every other worker
+		// mid-run, so the gateways are owned by the baseline instead. Set explicitly
+		// rather than relying on defaults (both ship disabled on a fresh install).
+		await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
+			enabled: true,
+		} );
+		await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
+			enabled: true,
+		} );
+	} );
 } );

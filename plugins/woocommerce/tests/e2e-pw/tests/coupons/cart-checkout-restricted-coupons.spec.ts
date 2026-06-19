@@ -11,6 +11,7 @@ import {
  * Internal dependencies
  */
 import { tags, test, expect } from '../../fixtures/fixtures';
+import { setGatewayEnabled } from '../../utils/payment-gateways';
 import {
 	createClassicCartPage,
 	createClassicCheckoutPage,
@@ -63,6 +64,7 @@ test.describe(
 			firstCategoryId: number,
 			secondCategoryId: number,
 			shippingZoneId: number;
+		let codWasEnabled: boolean;
 		const couponBatchId: number[] = [];
 
 		test.beforeAll( async ( { restApi } ) => {
@@ -98,10 +100,9 @@ test.describe(
 					value: 'USD',
 				}
 			);
-			// enable COD
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: true,
-			} );
+			// COD is enabled globally in site setup; guard defensively in case it
+			// is somehow off, and restore its prior state in afterAll.
+			codWasEnabled = await setGatewayEnabled( restApi, 'cod', true );
 			// add a shipping zone and method
 			await restApi
 				.post( `${ WC_API_PATH }/shipping/zones`, {
@@ -257,9 +258,8 @@ test.describe(
 				delete: [ ...couponBatchId ],
 			} );
 
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: false,
-			} );
+			await setGatewayEnabled( restApi, 'cod', codWasEnabled );
+
 			await restApi.delete(
 				`${ WC_API_PATH }/shipping/zones/${ shippingZoneId }`,
 				{

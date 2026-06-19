@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { faker } from '@faker-js/faker';
 import {
 	addAProductToCart,
 	WC_API_PATH,
@@ -10,28 +11,35 @@ import {
  * Internal dependencies
  */
 import { tags, test, expect } from '../../fixtures/fixtures';
+import { getFakeProduct } from '../../utils/data';
+import { setGatewayEnabled } from '../../utils/payment-gateways';
 import {
 	createClassicCartPage,
 	createClassicCheckoutPage,
 	CLASSIC_CART_PAGE,
 	CLASSIC_CHECKOUT_PAGE,
 } from '../../utils/pages';
-import { updateIfNeeded } from '../../utils/settings';
+import { setTaxCalculationEnabled } from '../../utils/taxes';
 
-const firstProductName = 'Coupon test product';
+// Suffix the coupon codes with a per-run unique id so concurrent workers never
+// create colliding global coupon codes.
+const couponSuffix = faker.string.alphanumeric( {
+	length: 6,
+	casing: 'lower',
+} );
 const coupons = [
 	{
-		code: 'fixed-cart-off',
+		code: `fixed-cart-off-${ couponSuffix }`,
 		discount_type: 'fixed_cart',
 		amount: '5.00',
 	},
 	{
-		code: 'percent-off',
+		code: `percent-off-${ couponSuffix }`,
 		discount_type: 'percent',
 		amount: '50',
 	},
 	{
-		code: 'fixed-product-off',
+		code: `fixed-product-off-${ couponSuffix }`,
 		discount_type: 'fixed_product',
 		amount: '7.00',
 	},
@@ -45,6 +53,8 @@ test.describe(
 	{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
 	() => {
 		let firstProductId: number;
+		let codWasEnabled: boolean;
+		let taxCalcWasEnabled: boolean;
 		const couponBatchId: number[] = [];
 
 		test.beforeAll( async ( { restApi } ) => {
@@ -52,7 +62,7 @@ test.describe(
 			await createClassicCartPage();
 			await createClassicCheckoutPage();
 
-			await updateIfNeeded( 'general/woocommerce_calc_taxes', 'no' );
+			taxCalcWasEnabled = await setTaxCalculationEnabled( restApi, false );
 
 			// make sure the currency is USD
 			await restApi.put(
@@ -61,17 +71,15 @@ test.describe(
 					value: 'USD',
 				}
 			);
-			// enable COD
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: true,
-			} );
+			// COD is enabled globally in site setup; guard defensively in case it
+			// is somehow off, and restore its prior state in afterAll.
+			codWasEnabled = await setGatewayEnabled( restApi, 'cod', true );
 			// add product
 			await restApi
-				.post( `${ WC_API_PATH }/products`, {
-					name: firstProductName,
-					type: 'simple',
-					regular_price: '20.00',
-				} )
+				.post(
+					`${ WC_API_PATH }/products`,
+					getFakeProduct( { regular_price: '20.00' } )
+				)
 				.then( ( response: { data: { id: number } } ) => {
 					firstProductId = response.data.id;
 				} );
@@ -102,9 +110,8 @@ test.describe(
 			await restApi.post( `${ WC_API_PATH }/coupons/batch`, {
 				delete: [ ...couponBatchId ],
 			} );
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: false,
-			} );
+			await setGatewayEnabled( restApi, 'cod', codWasEnabled );
+			await setTaxCalculationEnabled( restApi, taxCalcWasEnabled );
 		} );
 
 		for ( let i = 0; i < coupons.length; i++ ) {

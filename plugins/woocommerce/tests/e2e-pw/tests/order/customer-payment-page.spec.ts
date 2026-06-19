@@ -7,17 +7,23 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  * Internal dependencies
  */
 import { tags, expect, test } from '../../fixtures/fixtures';
+import { getFakeProduct } from '../../utils/data';
+import { setGatewayEnabled } from '../../utils/payment-gateways';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 let productId: number, orderId: number;
-const productName = 'Simple Product Name';
-const productPrice = '15.99';
+// Unique per run so concurrent workers don't create products with the same name.
+const product = getFakeProduct( { regular_price: '15.99' } );
+const productName = product.name;
+const productPrice = product.regular_price;
 
 test.describe(
 	'WooCommerce Merchant Flow: Orders > Customer Payment Page',
 	{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
+
+		let bacsWasEnabled: boolean;
 
 		test.beforeAll( async ( { restApi } ) => {
 			// create a simple product
@@ -43,10 +49,9 @@ test.describe(
 				.then( ( response: { data: { id: number } } ) => {
 					orderId = response.data.id;
 				} );
-			// enable bank transfer as a payment option
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
-				enabled: 'true',
-			} );
+			// BACS is enabled globally in site setup; guard defensively in case it
+			// is somehow off, and restore its prior state in afterAll.
+			bacsWasEnabled = await setGatewayEnabled( restApi, 'bacs', true );
 		} );
 
 		test.afterAll( async ( { restApi } ) => {
@@ -56,9 +61,7 @@ test.describe(
 			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
 				force: true,
 			} );
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
-				enabled: 'false',
-			} );
+			await setGatewayEnabled( restApi, 'bacs', bacsWasEnabled );
 		} );
 
 		test(
