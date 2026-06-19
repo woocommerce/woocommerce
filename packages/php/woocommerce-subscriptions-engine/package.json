@@ -8,11 +8,13 @@
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:php": "composer run-script phpcbf",
 		"lint:lang:php": "composer run-script phpcs",
+		"phpstan": "pnpm run phpstan:php8",
+		"phpstan:php7": "vendor/bin/phpstan analyse -c phpstan7.neon --memory-limit=2G",
+		"phpstan:php8": "vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=2G",
 		"test:php:ci": "pnpm test:php:unit && pnpm test:php:integration",
 		"test:php:unit": "composer run-script test:unit",
 		"test:php:integration": "composer run-script test:integration",
-		"env:test": "pnpm wp-env start --update",
-		"postinstall": "composer install"
+		"env:test": "pnpm wp-env start --update"
 	},
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
@@ -46,6 +48,32 @@
 							"wpVersion": "latest"
 						}
 					},
+					"events": [
+						"pull_request",
+						"push"
+					]
+				},
+				{
+					"name": "PHPStan: PHP 7.4",
+					"testType": "static:analysis",
+					"command": "phpstan:php7",
+					"changes": [
+						"**/*.php",
+						"*.neon"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				},
+				{
+					"name": "PHPStan: PHP 8.4",
+					"testType": "static:analysis",
+					"command": "phpstan:php8",
+					"changes": [
+						"**/*.php",
+						"*.neon"
+					],
 					"events": [
 						"pull_request",
 						"push"

@@ -1,0 +1,20 @@
+parameters:
+	level: 9
+	phpVersion: 80400
+	tmpDir: phpstan-tmp
+	bootstrapFiles:
+		- vendor/autoload.php
+		- vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
+		- vendor/php-stubs/woocommerce-stubs/woocommerce-packages-stubs.php
+		- phpstan-stubs/stubs.php
+		- vendor/php-stubs/wordpress-tests-stubs/wordpress-tests-stubs.php
+	scanDirectories:
+	    - phpstan-stubs
+	paths:
+		- src
+		- tests
+	treatPhpDocTypesAsCertain: false
+
+includes:
+	- vendor/szepeviktor/phpstan-wordpress/extension.neon
+	- vendor/phpstan/phpstan-phpunit/extension.neon
