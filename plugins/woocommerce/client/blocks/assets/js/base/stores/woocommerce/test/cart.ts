@@ -67,16 +67,27 @@ type CapturedRequest = {
  * request and any dynamic imports) and the resolved value is fed back into the
  * generator until it is done.
  *
+ * When a yielded promise rejects, the rejection is routed back into the
+ * generator via `iterator.throw()` (mirroring the real Interactivity runtime),
+ * so the action's own `try/catch` runs — e.g. `addCartItem` catching a capped
+ * request and emitting an error notice. A rejection the generator does not
+ * catch re-throws here so `await runAction(...)` still rejects.
+ *
  * @param action The async action return value cast to a generator.
  * @return A promise that resolves once the generator has finished.
  */
 async function runAction( action: unknown ): Promise< void > {
-	const iterator = action as Iterator< unknown, unknown, unknown >;
+	const iterator = action as Generator< unknown, unknown, unknown >;
 	let next = iterator.next();
 	while ( ! next.done ) {
-		// eslint-disable-next-line no-await-in-loop
-		const resolved = await next.value;
-		next = iterator.next( resolved );
+		try {
+			// eslint-disable-next-line no-await-in-loop
+			const resolved = await next.value;
+			next = iterator.next( resolved );
+		} catch ( error ) {
+			// Feed the rejection into the generator so its try/catch handles it.
+			next = iterator.throw( error );
+		}
 	}
 }
 
@@ -230,6 +241,86 @@ function spyOnUpdateNotices(): Notice[] {
 		return undefined;
 	} ) as unknown as Store[ 'actions' ][ 'updateNotices' ];
 	return received;
+}
+
+/**
+ * Replaces the registered `showNoticeError` action with a spy and returns the
+ * list of errors it receives.
+ *
+ * The error/`catch` path of the cart actions surfaces a failed mutation by
+ * calling `actions.showNoticeError( error )` — the error-notice boundary,
+ * distinct from the auto-update info-notice boundary `actions.updateNotices`.
+ * Asserting on this spy proves a genuine cap surfaced as an error notice rather
+ * than an auto-update notice. The spy is installed after {@link loadCartStore}.
+ *
+ * @return The accumulating list of errors passed to `showNoticeError`.
+ */
+function spyOnShowNoticeError(): Error[] {
+	const received: Error[] = [];
+	const actions = mockRegisteredStore?.actions as Store[ 'actions' ];
+	actions.showNoticeError = jest.fn( ( error: Error ) => {
+		received.push( error );
+		return undefined;
+	} ) as unknown as Store[ 'actions' ][ 'showNoticeError' ];
+	return received;
+}
+
+/**
+ * Installs a `global.fetch` mock whose batch responses reject one targeted
+ * mutation with an HTTP error status, reproducing a genuine server cap.
+ *
+ * The GET refresh still resolves the nonce gate. Each batch request whose body
+ * targets `failForPath` gets a non-2xx response entry carrying the supplied
+ * error `code`/`message`; every other request echoes the post-optimistic cart
+ * as a success. A failed entry makes the mutation queue roll the optimistic
+ * change back (no successful server state for it) and reject that request's
+ * promise, which surfaces through the action's `catch` path.
+ *
+ * @param options             Failure configuration.
+ * @param options.failForPath The Store API path whose mutation should fail,
+ *                            e.g. `/wc/store/v1/cart/add-item`.
+ * @param options.status      The HTTP status to report for the failed mutation.
+ * @param options.code        The error code carried in the failed response body.
+ * @param options.message     The human-readable error message in the body.
+ * @return The array that accumulates captured mutation requests.
+ */
+function mockBatchFetchFailing( {
+	failForPath,
+	status = 400,
+	code = 'woocommerce_rest_cart_product_no_stock',
+	message = 'You cannot add that amount to the cart.',
+}: {
+	failForPath: string;
+	status?: number;
+	code?: string;
+	message?: string;
+} ): CapturedRequest[] {
+	const captured: CapturedRequest[] = [];
+	global.fetch = jest.fn(
+		async ( _url: RequestInfo | URL, init?: RequestInit ) => {
+			// The GET refresh has no body; reply with an empty cart and a nonce.
+			if ( ! init?.body ) {
+				return new Response(
+					JSON.stringify( { items: [], totals: {}, errors: [] } ),
+					{ headers: { Nonce: 'test-nonce-123' } }
+				);
+			}
+			const parsed = JSON.parse( init.body as string ) as {
+				requests: CapturedRequest[];
+			};
+			parsed.requests.forEach( ( request ) => captured.push( request ) );
+			const serverCart = JSON.parse( JSON.stringify( mockState.cart ) );
+			const responses = parsed.requests.map( ( request ) =>
+				request.path === failForPath
+					? { status, body: { code, message } }
+					: { status: 200, body: serverCart }
+			);
+			return new Response( JSON.stringify( { responses } ), {
+				headers: { Nonce: 'test-nonce-123' },
+			} );
+		}
+	) as unknown as typeof fetch;
+	return captured;
 }
 
 /**
@@ -759,6 +850,53 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			).toBe( false );
 		} );
 
+		it( 'emits no quantity-changed notice when only the first of two meta lines for the same product is bumped optimistically', async () => {
+			// The product is present as two distinct keyed meta lines (qty 3 and
+			// qty 2). A keyless add matches and optimistically bumps only the
+			// first line (server-key-1) to 4. The server keeps both meta lines at
+			// their pre-add quantities and adds a separate standalone line. The
+			// bumped line's pre-optimistic baseline (3) must be diffed against the
+			// server quantity (3) so no spurious notice fires; the untouched
+			// second line (still 2 in both snapshots) must not notify either.
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( {
+						key: 'server-key-1',
+						id: 42,
+						quantity: 3,
+					} ),
+					makeKeyedLine( {
+						key: 'server-key-2',
+						id: 42,
+						quantity: 2,
+					} ),
+					makeKeyedLine( {
+						key: 'server-key-new',
+						id: 42,
+						quantity: 1,
+					} ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { key: 'server-key-1', id: 42, quantity: 3 } ),
+				makeKeyedLine( { key: 'server-key-2', id: 42, quantity: 2 } ),
+			] );
+			const notices = spyOnUpdateNotices();
+
+			await runAction(
+				actions.addCartItem( {
+					id: 42,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+
+			expect(
+				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
+			).toBe( false );
+		} );
+
 		it( 'still emits the quantity-changed notice for a keyed mini-cart stepper change returned at its pre-stepper quantity', async () => {
 			// A keyed update (explicit key + absolute quantity) is never recorded
 			// in the keyless baseline set, so the override does not apply. The
@@ -988,6 +1126,79 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect(
 				notices.some( ( n ) => n.notice.includes( 'Vanished Product' ) )
 			).toBe( true );
+		} );
+	} );
+
+	describe( 'genuine add-path cap surfaces as an error notice (not an auto-update notice)', () => {
+		// The quantity-changed info notice template the auto-UPDATE branch emits.
+		const QUANTITY_CHANGED = 'was changed to';
+
+		it( 'routes an HTTP 400 add-item failure to an error notice and never to an auto-update notice', async () => {
+			// A plain keyless re-add the server caps (e.g. out of stock) returns a
+			// non-2xx batch entry. That rejects the mutation, so the action takes
+			// the throw/catch path: the failure must surface as an error notice
+			// via showNoticeError, not as an auto-update "quantity changed" notice
+			// through updateNotices.
+			mockBatchFetchFailing( {
+				failForPath: '/wc/store/v1/cart/add-item',
+				status: 400,
+				code: 'woocommerce_rest_cart_product_no_stock',
+				message: 'You cannot add that amount to the cart.',
+			} );
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+			const autoUpdateNotices = spyOnUpdateNotices();
+			const errors = spyOnShowNoticeError();
+
+			await runAction(
+				actions.addCartItem( {
+					id: 42,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+
+			// The cap surfaced through the error-notice boundary carrying the
+			// server-supplied message and code.
+			expect( errors ).toHaveLength( 1 );
+			expect( errors[ 0 ].message ).toBe(
+				'You cannot add that amount to the cart.'
+			);
+			expect( ( errors[ 0 ] as Error & { code?: string } ).code ).toBe(
+				'woocommerce_rest_cart_product_no_stock'
+			);
+
+			// No auto-update "quantity changed" notice was emitted for the cap.
+			expect(
+				autoUpdateNotices.some( ( n ) =>
+					n.notice.includes( QUANTITY_CHANGED )
+				)
+			).toBe( false );
+		} );
+
+		it( 'rolls the optimistic bump back when the add-item request is capped (HTTP 400)', async () => {
+			// The optimistic update bumps the matched line 3 -> 4 before the
+			// request flushes. Because the only mutation fails, the queue has no
+			// successful server state and must roll the cart back to its
+			// pre-cycle snapshot, leaving the line at its original quantity 3.
+			mockBatchFetchFailing( {
+				failForPath: '/wc/store/v1/cart/add-item',
+				status: 400,
+			} );
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+			spyOnShowNoticeError();
+
+			await runAction(
+				actions.addCartItem( {
+					id: 42,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+
+			expect( mockState.cart.items ).toHaveLength( 1 );
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( 3 );
 		} );
 	} );
 } );
