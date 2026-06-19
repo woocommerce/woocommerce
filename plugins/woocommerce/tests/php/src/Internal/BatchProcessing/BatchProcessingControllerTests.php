@@ -298,6 +298,28 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Dequeuing a processor from a corrupted list strips non-string values instead of fataling on array_diff().
+	 */
+	public function test_dequeue_processor_strips_non_string_values_without_fataling(): void {
+		// Mirror of the remove_processor corruption test for the dequeue path, which shares sanitize_processor_list().
+		update_option(
+			BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME,
+			array( 'Processor\\A', new \stdClass(), array( 'corrupt' ), 'Processor\\B' ),
+			false
+		);
+
+		$dequeue = new \ReflectionMethod( $this->sut, 'dequeue_processor' );
+		$dequeue->setAccessible( true );
+		$dequeue->invoke( $this->sut, 'Processor\\A' );
+
+		$this->assertSame(
+			array( 'Processor\\B' ),
+			$this->sut->get_enqueued_processors(),
+			'Dequeuing must drop the target and strip non-string values, leaving only valid processor names.'
+		);
+	}
+
+	/**
 	 * @testdox Dequeuing a finished processor re-reads the freshest list, so a concurrently-added processor is not dropped.
 	 */
 	public function test_dequeue_processor_uses_fresh_state(): void {
@@ -380,6 +402,7 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 	 * @testdox When the named lock is held by another connection, the mutation still proceeds (best-effort) after the timeout.
 	 */
 	public function test_enqueue_processor_proceeds_when_lock_held_by_another_connection(): void {
+		global $wpdb;
 		$lock_name = $this->get_lock_name();
 
 		// Open a second, independent database connection and hold the lock there so the controller's own
@@ -388,6 +411,21 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 		$other->query( $other->prepare( 'SELECT GET_LOCK(%s, %d)', $lock_name, 30 ) );
 
 		try {
+			/*
+			 * Fail fast if the second connection did not actually claim the lock: otherwise the controller would
+			 * acquire it normally and this test would silently pass without ever exercising the best-effort
+			 * fallback. IS_USED_LOCK() returns the connection id holding the lock (null if free), so assert it is
+			 * held by a different session than the request connection.
+			 */
+			$lock_holder    = $other->get_var( $other->prepare( 'SELECT IS_USED_LOCK(%s)', $lock_name ) );
+			$request_thread = (string) $wpdb->get_var( 'SELECT CONNECTION_ID()' );
+			$this->assertNotNull( $lock_holder, 'Precondition: the second connection must hold the lock.' );
+			$this->assertNotSame(
+				$request_thread,
+				(string) $lock_holder,
+				'Precondition: the lock must be held by the other connection, not the request connection, so the controller is forced onto its best-effort path.'
+			);
+
 			$this->sut->enqueue_processor( 'Processor\\A' );
 
 			$this->assertContains(

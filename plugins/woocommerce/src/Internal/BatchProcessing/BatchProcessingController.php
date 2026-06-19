@@ -791,7 +791,12 @@ class BatchProcessingController {
 			return;
 		}
 
-		$enqueued_processors    = $this->get_enqueued_processors();
+		/*
+		 * Sanitize before array_diff()/array_filter(): array_diff() string-casts its operands (fatal on an object
+		 * entry in PHP 8) and is_scheduled() is typed string, so a corrupted option must be reduced to class-name
+		 * strings first.
+		 */
+		$enqueued_processors    = $this->sanitize_processor_list( $this->get_enqueued_processors() );
 		$unscheduled_processors = array_diff( $enqueued_processors, array_filter( $enqueued_processors, array( $this, 'is_scheduled' ) ) );
 
 		foreach ( $unscheduled_processors as $processor ) {
