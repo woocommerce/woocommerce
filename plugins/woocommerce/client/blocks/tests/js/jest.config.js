@@ -56,6 +56,7 @@ const config = {
 	moduleNameMapper: {
 		'\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)$':
 			'<rootDir>/tests/js/config/file-mock.js',
+		'^client-zip$': '<rootDir>/tests/js/config/client-zip-mock.js',
 
 		// WordPress singleton modules — bare specifiers only; sub-path
 		// imports (e.g. @wordpress/data/build/foo) fall through to normal

@@ -1,5 +1,15 @@
 const { webcrypto } = require( 'node:crypto' );
 
+/**
+ * This setup file is for browser globals and mocks that do not depend on a
+ * package's physical location in node_modules. Jest setup-file mocks are tied
+ * to the module path Jest resolves at runtime, but compatibility tests may load
+ * the same dependency from the WordPress compatibility cache's node_modules
+ * tree. For third-party dependencies that may resolve from multiple physical
+ * locations, prefer `moduleNameMapper` in jest.config.js so every resolution
+ * path hits the same mock.
+ */
+
 global.crypto = webcrypto;
 
 global.TextEncoder = require( 'util' ).TextEncoder;
@@ -16,8 +26,6 @@ global.__i18n_text_domain__ = 'woocommerce';
  * likely run into this.
  */
 global.wp = {};
-
-require( '@wordpress/data' );
 
 /**
  * wcSettings is required by @woocommerce/* packages.
@@ -375,15 +383,6 @@ if ( ! window.DOMRect ) {
 if ( ! window.DOMRectReadOnly ) {
 	window.DOMRectReadOnly = class DOMRectReadOnly {};
 }
-
-/**
- * client-zip is meant to be used in a browser and is therefore released as an
- * ES6 module only, in order to use it in node environment, we need to mock it.
- * See: https://github.com/Touffy/client-zip/issues/28
- */
-jest.mock( 'client-zip', () => ( {
-	downloadZip: jest.fn(),
-} ) );
 
 /**
  * Mock isEditor to return false by default in tests, since the core/editor
