@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
-use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Marketplace_Suggestions;
@@ -416,18 +416,18 @@ class Settings {
 	 * @return array
 	 */
 	private function add_settings_ui_schema( array $settings ): array {
-		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'settings-ui' ) || ! current_user_can( 'manage_woocommerce' ) ) {
+		$context = SettingsUIRequestContext::get_current();
+		if ( ! $context ) {
 			return $settings;
 		}
 
-		$settings_ui_page = $this->get_current_settings_ui_page();
-		if ( ! $settings_ui_page ) {
+		$schema = $context->get_schema();
+		if ( ! is_array( $schema ) ) {
 			return $settings;
 		}
 
-		$section     = $this->get_current_settings_section();
-		$section_key = '' === $section ? 'default' : $section;
-		$page_id     = $settings_ui_page->get_page_id();
+		$page_id     = $context->get_page_id();
+		$section_key = $context->get_current_section_key();
 
 		if ( ! isset( $settings['settingsUI'] ) || ! is_array( $settings['settingsUI'] ) ) {
 			$settings['settingsUI'] = array();
@@ -436,78 +436,8 @@ class Settings {
 			$settings['settingsUI'][ $page_id ] = array();
 		}
 
-		try {
-			$settings['settingsUI'][ $page_id ][ $section_key ] = $settings_ui_page->get_schema( $section );
-		} catch ( \Throwable $e ) {
-			$GLOBALS['wc_settings_ui_schema_failed'][ $page_id ][ $section_key ] = true;
-
-			if ( $e instanceof \Exception ) {
-				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
-			}
-		}
+		$settings['settingsUI'][ $page_id ][ $section_key ] = $schema;
 
 		return $settings;
-	}
-
-	/**
-	 * Get the settings UI adapter for the current settings tab.
-	 *
-	 * @return SettingsUIPageInterface|null
-	 */
-	private function get_current_settings_ui_page(): ?SettingsUIPageInterface {
-		if ( ! class_exists( '\WC_Admin_Settings' ) ) {
-			return null;
-		}
-
-		$current_tab = $this->get_current_settings_tab();
-		foreach ( \WC_Admin_Settings::get_settings_pages() as $settings_page ) {
-			if ( ! $settings_page instanceof \WC_Settings_Page || $settings_page->get_id() !== $current_tab ) {
-				continue;
-			}
-
-			$settings_ui_page = $settings_page->get_settings_ui_page();
-			return $settings_ui_page instanceof SettingsUIPageInterface ? $settings_ui_page : null;
-		}
-
-		return null;
-	}
-
-	/**
-	 * Get the current WooCommerce settings tab.
-	 *
-	 * @return string
-	 */
-	private function get_current_settings_tab(): string {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( ! isset( $_GET['tab'] ) ) {
-			return 'general';
-		}
-
-		$tab = wp_unslash( $_GET['tab'] );
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		if ( ! is_string( $tab ) ) {
-			return 'general';
-		}
-
-		$tab = sanitize_title( $tab );
-		return '' !== $tab ? $tab : 'general';
-	}
-
-	/**
-	 * Get the current WooCommerce settings section.
-	 *
-	 * @return string
-	 */
-	private function get_current_settings_section(): string {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( ! isset( $_GET['section'] ) ) {
-			return '';
-		}
-
-		$section = wp_unslash( $_GET['section'] );
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		return is_string( $section ) ? sanitize_title( $section ) : '';
 	}
 }

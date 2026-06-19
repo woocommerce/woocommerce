@@ -78,12 +78,7 @@ final class PlanGroup {
 	/**
 	 * Build a new, unsaved group.
 	 *
-	 * @param array{
-	 *     name: string,
-	 *     merchant_code?: string|null,
-	 *     options_display?: array<int, mixed>,
-	 *     app_id?: string|null,
-	 * } $args Group attributes.
+	 * @param array<string, mixed> $args Group attributes.
 	 */
 	public static function create( array $args ): self {
 		return new self(

@@ -117,6 +117,99 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertNull( $repo->find( $id )->get_extension_slug() );
 	}
 
+	public function test_update_persists_scheduling_fields(): void {
+		$repo = new ContractRepository();
+		$id   = $repo->insert( $this->make_contract() );
+
+		$contract = $repo->find( $id );
+		$contract->set_status( ContractStatus::ON_HOLD );
+		$contract->set_next_payment_gmt( '2026-08-15 00:00:00' );
+		$contract->set_cycle_count( 3 );
+		$contract->set_last_payment_gmt( '2026-07-15 00:00:00' );
+
+		$this->assertTrue( $repo->update( $contract ) );
+
+		$reloaded = $repo->find( $id );
+		$this->assertSame( ContractStatus::ON_HOLD, $reloaded->get_status() );
+		$this->assertSame( '2026-08-15 00:00:00', $reloaded->get_next_payment_gmt() );
+		$this->assertSame( 3, $reloaded->get_cycle_count() );
+		$this->assertSame( '2026-07-15 00:00:00', $reloaded->get_last_payment_gmt() );
+	}
+
+	public function test_update_replaces_child_rows(): void {
+		$repo = new ContractRepository();
+		$id   = $repo->insert( $this->make_contract() );
+
+		$contract = $repo->find( $id );
+		$this->assertCount( 1, $contract->get_items() );
+
+		// Re-create with a different set of items / meta and update.
+		$mutated = Contract::create(
+			array(
+				'customer_id'     => $contract->get_customer_id(),
+				'currency'        => $contract->get_currency(),
+				'selling_plan_id' => $contract->get_selling_plan_id(),
+				'origin_order_id' => $contract->get_origin_order_id(),
+				'start_gmt'       => $contract->get_start_gmt(),
+				'billing_total'   => $contract->get_billing_total(),
+				'items'           => array(
+					array(
+						'item_name'  => 'Tea tin',
+						'item_type'  => 'line_item',
+						'product_id' => 300,
+						'quantity'   => '2',
+						'subtotal'   => '24.00',
+						'total'      => '24.00',
+					),
+				),
+				'meta'            => array( 'source_channel' => 'email' ),
+			)
+		);
+		$mutated->set_id( $id );
+
+		$this->assertTrue( $repo->update( $mutated ) );
+
+		$reloaded = $repo->find( $id );
+		$items    = $reloaded->get_items();
+		$this->assertCount( 1, $items );
+		$this->assertSame( 'Tea tin', $items[0]['item_name'] );
+		$this->assertSame( 'email', $reloaded->get_meta()['source_channel'] );
+	}
+
+	public function test_update_throws_without_id(): void {
+		$this->expectException( \RuntimeException::class );
+		( new ContractRepository() )->update( $this->make_contract() );
+	}
+
+	public function test_update_rejects_deleted_contract_and_writes_no_orphans(): void {
+		global $wpdb;
+
+		$repo = new ContractRepository();
+		$id   = $repo->insert( $this->make_contract() );
+
+		// Simulate a concurrent delete: the contract row and its children are gone.
+		$this->assertTrue( $repo->delete( $id ) );
+
+		$stale = $this->make_contract();
+		$stale->set_id( $id );
+
+		try {
+			$repo->update( $stale );
+			$this->fail( 'Expected RuntimeException when updating a contract whose row no longer exists.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'no longer exists', $e->getMessage() );
+		}
+
+		// The guard fired before any child write, so no orphan rows were created.
+		$items_table = \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller::get_table_name(
+			\Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller::TABLE_CONTRACT_ITEMS
+		);
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$remaining = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$items_table} WHERE contract_id = %d", $id ) );
+
+		$this->assertSame( '0', $remaining );
+	}
+
 	public function test_delete_removes_contract_and_children(): void {
 		global $wpdb;
 

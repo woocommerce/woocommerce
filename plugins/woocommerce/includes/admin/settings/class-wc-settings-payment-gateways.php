@@ -7,6 +7,7 @@
 
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Admin\Settings\SettingsSectionRegistry;
 use Automattic\WooCommerce\Internal\Admin\Loader;
 
 defined( 'ABSPATH' ) || exit;
@@ -123,6 +124,11 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		do_action( 'woocommerce_admin_field_payment_gateways' );
 		ob_end_clean();
 
+		if ( is_string( $current_section ) && $this->is_registered_settings_section( $current_section ) ) {
+			parent::output();
+			return;
+		}
+
 		if ( is_string( $current_section ) && $this->should_render_react_section( $current_section ) ) {
 			$this->render_react_section( $this->standardize_section_name( $current_section ) );
 		} elseif ( is_string( $current_section ) && ! empty( $current_section ) ) {
@@ -221,6 +227,20 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		}
 
 		return $section;
+	}
+
+	/**
+	 * Check if a section is registered through the settings section registry.
+	 *
+	 * @param mixed $section Section id.
+	 * @return bool
+	 */
+	private function is_registered_settings_section( $section ): bool {
+		if ( '' === (string) $section ) {
+			return false;
+		}
+
+		return null !== SettingsSectionRegistry::get_instance()->get_registered( self::TAB_NAME, (string) $section );
 	}
 
 	/**

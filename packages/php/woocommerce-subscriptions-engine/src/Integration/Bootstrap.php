@@ -14,6 +14,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration;
 
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway\CapabilityRegistry;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 defined( 'ABSPATH' ) || exit;
@@ -40,6 +42,13 @@ final class Bootstrap {
 		}
 
 		self::$initialized = true;
+
+		CapabilityRegistry::init();
+
+		// Register the Action Scheduler callback that dispatches a due renewal
+		// back into the engine. Must run on every boot (not just activation) so
+		// AS can fire scheduled renewals.
+		RenewalEngine::register_hooks();
 
 		if ( did_action( 'init' ) ) {
 			self::maybe_install_schema();
