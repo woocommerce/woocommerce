@@ -102,6 +102,7 @@ export {
 export { SelectTree as __experimentalSelectTreeControl } from './experimental-select-tree-control';
 export { default as TreeSelectControl } from './tree-select-control';
 export { default as PhoneNumberInput } from './phone-number-input';
+export { validatePhoneNumber } from './phone-number-input/validation';
 export { DisplayState } from './display-state';
 export { ProgressBar } from './progress-bar';
 export { ConfettiAnimation } from './confetti-animation';

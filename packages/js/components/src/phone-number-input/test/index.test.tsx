@@ -3,7 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 import { noop } from 'lodash';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -38,6 +38,31 @@ describe( 'PhoneNumberInput', () => {
 			'id',
 			'test-id'
 		);
+	} );
+
+	it( 'passes input props to the text field', () => {
+		const onBlur = jest.fn();
+
+		render(
+			<PhoneNumberInput
+				id="test-id"
+				value=""
+				onChange={ noop }
+				inputProps={ {
+					'aria-describedby': 'phone-error',
+					'aria-invalid': true,
+					onBlur,
+				} }
+			/>
+		);
+
+		const input = screen.getByRole( 'textbox' );
+		expect( input ).toHaveAttribute( 'aria-describedby', 'phone-error' );
+		expect( input ).toHaveAttribute( 'aria-invalid', 'true' );
+
+		fireEvent.blur( input );
+
+		expect( onBlur ).toHaveBeenCalled();
 	} );
 
 	it( 'calls onChange callback on number input', () => {

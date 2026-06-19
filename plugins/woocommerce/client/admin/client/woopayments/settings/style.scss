@@ -554,6 +554,17 @@
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 16px;
 
+	.wcpay-component-phone-number-input {
+		display: block;
+		width: 100%;
+	}
+
+	.wcpay-component-phone-number-input__input {
+		box-sizing: border-box;
+		width: 100%;
+		min-height: 40px;
+	}
+
 	@include breakpoint("<782px") {
 		grid-template-columns: 1fr;
 	}

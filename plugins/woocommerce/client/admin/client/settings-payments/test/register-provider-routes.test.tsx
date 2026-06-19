@@ -27,11 +27,13 @@ describe( 'Settings Payments provider route bootstrap', () => {
 				'/woopayments/payouts/details',
 				'/woopayments/transactions',
 				'/woopayments/transactions/details',
+				'/woopayments/reports',
 				'/woopayments/disputes',
 				'/woopayments/disputes/details',
 				'/woopayments/disputes/challenge',
 				'/woopayments/card-readers',
 				'/woopayments/loans',
+				'/woopayments/documents',
 			] );
 			routes.forEach( ( route ) => {
 				expect( route.path ).not.toMatch( /^\/payments\// );

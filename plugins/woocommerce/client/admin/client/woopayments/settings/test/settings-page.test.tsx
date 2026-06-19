@@ -11,6 +11,7 @@ import {
 	within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -189,7 +190,7 @@ const setHookDefaults = () => {
 		noop,
 	] );
 	mockUseAccountBusinessSupportPhone.mockReturnValue( [
-		'+15555555555',
+		'+12015555555',
 		noop,
 	] );
 	mockUseDepositScheduleInterval.mockReturnValue( [ 'weekly', noop ] );
@@ -1433,6 +1434,181 @@ describe( 'WooPaymentsSettingsPage', () => {
 		).toBeInTheDocument();
 	} );
 
+	it( 'renders notification email warning and confirmation when the email changes', async () => {
+		mockUseAccountCommunicationsEmail.mockImplementation( () =>
+			useState( 'owner@example.com' )
+		);
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const section = screen
+			.getByRole( 'heading', { name: 'Account notifications' } )
+			.closest( '.woopayments-settings-section' ) as HTMLElement;
+
+		expect(
+			within( section ).getByRole( 'heading', {
+				name: 'Notifications email',
+			} )
+		).toBeInTheDocument();
+		expect(
+			within( section ).getByText(
+				'Provide an email address where you would like to receive communications about your WooPayments account.'
+			)
+		).toBeInTheDocument();
+		expect(
+			within( section ).getByText(
+				'Anyone with access to this email address will be treated as the account owner. Please verify the address carefully.'
+			)
+		).toBeInTheDocument();
+
+		const emailInput = within( section ).getByRole( 'textbox', {
+			name: 'Email address',
+		} );
+		await userEvent.clear( emailInput );
+		await userEvent.type( emailInput, 'new-owner@example.com' );
+
+		const confirmInput = within( section ).getByRole( 'textbox', {
+			name: 'Confirm email address',
+		} );
+		await userEvent.type( confirmInput, 'someone-else@example.com' );
+		fireEvent.blur( confirmInput );
+
+		expect(
+			within( section ).getByText(
+				'Email addresses do not match. Please re-enter your email address.'
+			)
+		).toBeInTheDocument();
+		expect( confirmInput ).toHaveAttribute( 'aria-invalid', 'true' );
+		expect(
+			screen.getByRole( 'button', { name: 'Save changes' } )
+		).toHaveAttribute( 'aria-disabled', 'true' );
+
+		await userEvent.clear( confirmInput );
+		await userEvent.type( confirmInput, 'new-owner@example.com' );
+
+		await waitFor( () =>
+			expect(
+				screen.getByRole( 'button', { name: 'Save changes' } )
+			).toBeEnabled()
+		);
+	} );
+
+	it( 'validates notification email format after the field is blurred', async () => {
+		mockUseAccountCommunicationsEmail.mockImplementation( () =>
+			useState( 'owner@example.com' )
+		);
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const section = screen
+			.getByRole( 'heading', { name: 'Account notifications' } )
+			.closest( '.woopayments-settings-section' ) as HTMLElement;
+		const emailInput = within( section ).getByRole( 'textbox', {
+			name: 'Email address',
+		} );
+
+		await userEvent.clear( emailInput );
+		await userEvent.type( emailInput, 'mailto:owner@example.com' );
+		fireEvent.blur( emailInput );
+
+		expect(
+			within( section ).getByText( 'Please enter a valid email address.' )
+		).toBeInTheDocument();
+		expect( emailInput ).toHaveAttribute( 'aria-invalid', 'true' );
+		expect( emailInput ).toHaveAttribute(
+			'aria-describedby',
+			'woopayments-notifications-email-error'
+		);
+		expect(
+			screen.getByRole( 'button', { name: 'Save changes' } )
+		).toHaveAttribute( 'aria-disabled', 'true' );
+	} );
+
+	it( 'renders transaction helper copy and validates support contact inputs', async () => {
+		mockUseAccountBusinessSupportEmail.mockImplementation( () =>
+			useState( 'support@example.com' )
+		);
+		mockUseAccountBusinessSupportPhone.mockImplementation( () =>
+			useState( '+15555555555' )
+		);
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const section = screen
+			.getByRole( 'heading', { name: 'Transactions' } )
+			.closest( '.woopayments-settings-section' ) as HTMLElement;
+
+		expect(
+			within( section ).getByText(
+				'When enabled, users will be able to pay with a saved card during checkout. Card details are stored in our platform, not on your store.'
+			)
+		).toBeInTheDocument();
+		expect(
+			within( section ).getByText(
+				"Edit the way your store name appears on your customers' bank statements."
+			)
+		).toBeInTheDocument();
+		expect(
+			within( section ).getByText(
+				'Provide contact information where customers can reach you for support.'
+			)
+		).toBeInTheDocument();
+
+		const supportEmail = within( section ).getByRole( 'textbox', {
+			name: 'Support email',
+		} );
+		await userEvent.clear( supportEmail );
+		await userEvent.type( supportEmail, 'not-email' );
+		fireEvent.blur( supportEmail );
+
+		expect(
+			within( section ).getByText( 'Please enter a valid email address.' )
+		).toBeInTheDocument();
+		expect( supportEmail ).toHaveAttribute( 'aria-invalid', 'true' );
+		expect(
+			screen.getByRole( 'button', { name: 'Save changes' } )
+		).toHaveAttribute( 'aria-disabled', 'true' );
+
+		await userEvent.clear( supportEmail );
+		await userEvent.type( supportEmail, 'support@example.com' );
+
+		const supportPhone = within( section ).getByRole( 'textbox', {
+			name: 'Support phone number',
+		} );
+		await userEvent.clear( supportPhone );
+		await userEvent.type( supportPhone, '12345' );
+		fireEvent.blur( supportPhone );
+
+		expect(
+			within( section ).getByText( 'Please enter a valid phone number.' )
+		).toBeInTheDocument();
+		expect( supportPhone ).toHaveAttribute( 'aria-invalid', 'true' );
+		expect(
+			screen.getByRole( 'button', { name: 'Save changes' } )
+		).toHaveAttribute( 'aria-disabled', 'true' );
+	} );
+
+	it( 'requires a support phone number before settings can be saved', () => {
+		mockUseAccountBusinessSupportPhone.mockImplementation( () =>
+			useState( '' )
+		);
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const section = screen
+			.getByRole( 'heading', { name: 'Transactions' } )
+			.closest( '.woopayments-settings-section' ) as HTMLElement;
+
+		expect(
+			within( section ).getByText(
+				'Support phone number cannot be empty.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'button', { name: 'Save changes' } )
+		).toHaveAttribute( 'aria-disabled', 'true' );
+	} );
+
 	it( 'announces the page-level save busy state accessibly', () => {
 		mockUseSettings.mockReturnValue( {
 			isLoading: false,
@@ -1443,7 +1619,9 @@ describe( 'WooPaymentsSettingsPage', () => {
 
 		render( <WooPaymentsSettingsPage /> );
 
-		const status = screen.getByRole( 'status' );
+		const status = document.querySelector(
+			'.woopayments-settings-busy-state__status'
+		) as HTMLElement;
 		expect( status ).toHaveTextContent( 'Saving…' );
 		expect( status.parentElement ).not.toHaveAttribute( 'aria-busy' );
 		expect(
@@ -1649,5 +1827,64 @@ describe( 'WooPaymentsSettingsPage', () => {
 		expect(
 			screen.queryByRole( 'button', { name: /migrate/i } )
 		).not.toBeInTheDocument();
+	} );
+
+	it( 'renders reference advanced settings copy and development-mode debug behavior', () => {
+		mockUseDevMode.mockReturnValue( true );
+		mockUseWCPaySubscriptions.mockReturnValue( [ true, true, noop ] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const section = screen
+			.getByRole( 'heading', { name: 'Advanced settings' } )
+			.closest( '.woopayments-settings-section' ) as HTMLElement;
+
+		expect(
+			within( section ).getByText(
+				/Allow customers to shop and pay in multiple currencies./
+			)
+		).toBeInTheDocument();
+		expect(
+			within( section ).getByRole( 'link', { name: /Learn more/ } )
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/document/woopayments/currencies/multi-currency-setup/'
+		);
+		expect(
+			within( section ).getByText(
+				/This feature is deprecated. Existing subscription renewals will continue to work, but creating or managing subscriptions is no longer available./
+			)
+		).toBeInTheDocument();
+
+		const debugLog = within( section ).getByRole( 'checkbox', {
+			name: 'Log error messages (defaulted on for test accounts)',
+		} );
+		expect( debugLog ).toBeChecked();
+		expect( debugLog ).toBeDisabled();
+		expect(
+			within( section ).getByText(
+				'When enabled, payment error logs will be saved to WooCommerce > Status > Logs.'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'prevents enabling deprecated bundled subscriptions from the native settings page', () => {
+		const setSubscriptionsEnabled = jest.fn();
+		mockUseWCPaySubscriptions.mockReturnValue( [
+			false,
+			true,
+			setSubscriptionsEnabled,
+		] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const subscriptionsToggle = screen.getByRole( 'checkbox', {
+			name: 'Enable Subscriptions with WooPayments',
+		} );
+
+		expect( subscriptionsToggle ).toBeDisabled();
+		fireEvent.click( subscriptionsToggle );
+
+		expect( setSubscriptionsEnabled ).not.toHaveBeenCalled();
 	} );
 } );

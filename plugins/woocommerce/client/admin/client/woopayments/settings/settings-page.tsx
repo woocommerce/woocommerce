@@ -2,6 +2,7 @@
  * External dependencies
  */
 import {
+	BaseControl,
 	Button,
 	Card,
 	CheckboxControl,
@@ -12,8 +13,9 @@ import {
 	Spinner,
 	TextControl,
 } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { __, _x, sprintf } from '@wordpress/i18n';
+import { PhoneNumberInput, validatePhoneNumber } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -81,9 +83,18 @@ const HEADING_ID = 'woopayments-settings-page-heading';
 const ACCOUNT_STATEMENT_MAX_LENGTH = 22;
 const ACCOUNT_STATEMENT_MAX_LENGTH_KANJI = 17;
 const ACCOUNT_STATEMENT_MAX_LENGTH_KANA = 22;
+const NOTIFICATIONS_EMAIL_ERROR_ID = 'woopayments-notifications-email-error';
+const NOTIFICATIONS_EMAIL_CONFIRM_ERROR_ID =
+	'woopayments-notifications-email-confirm-error';
+const SUPPORT_EMAIL_ERROR_ID = 'woopayments-support-email-error';
+const SUPPORT_PHONE_ERROR_ID = 'woopayments-support-phone-error';
+const SUPPORT_PHONE_INPUT_ID = 'woopayments-support-phone-input';
+const EMAIL_ADDRESS_PATTERN =
+	/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9.-]+$/;
 type SettingsRecord = Record< string, unknown >;
 type StringSetter = ( value: string ) => void;
 type BooleanSetter = ( value: boolean ) => void;
+type ValidationSetter = ( isValid: boolean ) => void;
 type StringArraySetter = ( value: string[] ) => void;
 type BooleanSetting = [ boolean, BooleanSetter ];
 type StringSetting = [ string, StringSetter ];
@@ -220,6 +231,19 @@ const asPmPromotions = ( value: unknown ): PmPromotion[] =>
 					'title' in promotion
 		  )
 		: [];
+
+const getSavingErrorDetailMessage = ( value: unknown, key: string ) => {
+	const error = asSettingsRecord( value );
+	const data = asSettingsRecord( error.data );
+	const details = asSettingsRecord( data.details );
+	const detail = asSettingsRecord( details[ key ] );
+
+	return asString( detail.message );
+};
+
+const isValidEmailAddress = ( value: string ) =>
+	value === '' ||
+	( value.length <= 254 && EMAIL_ADDRESS_PATTERN.test( value ) );
 
 const isCustomizableExpressCheckoutMethod = (
 	methodId: ExpressCheckoutOverviewMethod
@@ -752,7 +776,11 @@ const ExpressCheckoutSettingsSection = () => {
 	);
 };
 
-const TransactionsSettingsSection = () => {
+const TransactionsSettingsSection = ( {
+	onValidationChange,
+}: {
+	onValidationChange?: ValidationSetter;
+} ) => {
 	const settings = asSettingsRecord( useGetSettings() );
 	const [ isSavedCardsEnabled, setIsSavedCardsEnabled ] =
 		useSavedCards() as BooleanSetting;
@@ -772,9 +800,79 @@ const TransactionsSettingsSection = () => {
 		useAccountBusinessSupportEmail() as StringSetting;
 	const [ supportPhone, setSupportPhone ] =
 		useAccountBusinessSupportPhone() as StringSetting;
-	const savingError = asSettingsRecord( useGetSavingError() );
-	const serverErrorMessage = asString( savingError.server_error );
+	const [ initialSupportEmail ] = useState( supportEmail );
+	const [ initialSupportPhone ] = useState( supportPhone );
+	const [ hasSupportEmailBlurred, setHasSupportEmailBlurred ] =
+		useState( false );
+	const [ hasSupportPhoneChanged, setHasSupportPhoneChanged ] =
+		useState( false );
+	const [ supportPhoneCountry, setSupportPhoneCountry ] = useState<
+		string | undefined
+	>();
+	const savingError = useGetSavingError();
+	const savingErrorRecord = asSettingsRecord( savingError );
+	const serverErrorMessage =
+		asString( savingErrorRecord.server_error ) ||
+		getSavingErrorDetailMessage(
+			savingError,
+			'account_statement_descriptor'
+		);
 	const accountCountry = asString( settings.account_country );
+	const isTestModeOnboarding = Boolean( useTestModeOnboarding() );
+	const supportEmailServerError = getSavingErrorDetailMessage(
+		savingError,
+		'account_business_support_email'
+	);
+	const supportPhoneServerError = getSavingErrorDetailMessage(
+		savingError,
+		'account_business_support_phone'
+	);
+	const isTestSupportPhoneValid =
+		isTestModeOnboarding && supportPhone === '+10000000000';
+	const isSupportPhoneEmpty = supportPhone === '';
+	const isSupportPhoneFormatValid =
+		isSupportPhoneEmpty ||
+		isTestSupportPhoneValid ||
+		validatePhoneNumber( supportPhone, supportPhoneCountry );
+	const supportEmailInvalidFormat =
+		supportEmail !== '' && ! isValidEmailAddress( supportEmail );
+	const isSupportEmailValid =
+		! supportEmailServerError &&
+		! ( supportEmail === '' && initialSupportEmail !== '' ) &&
+		! supportEmailInvalidFormat;
+	const isSupportPhoneValid =
+		! supportPhoneServerError &&
+		! isSupportPhoneEmpty &&
+		isSupportPhoneFormatValid;
+	const supportEmailError =
+		supportEmailServerError ||
+		( supportEmail === '' && initialSupportEmail !== ''
+			? __(
+					'Support email cannot be empty once it has been set before, please specify.',
+					'woocommerce'
+			  )
+			: '' ) ||
+		( hasSupportEmailBlurred && supportEmailInvalidFormat
+			? __( 'Please enter a valid email address.', 'woocommerce' )
+			: '' );
+	const supportPhoneError =
+		supportPhoneServerError ||
+		( isSupportPhoneEmpty && initialSupportPhone !== ''
+			? __(
+					'Support phone number cannot be empty once it has been set before, please specify.',
+					'woocommerce'
+			  )
+			: '' ) ||
+		( isSupportPhoneEmpty
+			? __( 'Support phone number cannot be empty.', 'woocommerce' )
+			: '' ) ||
+		( hasSupportPhoneChanged && ! isSupportPhoneFormatValid
+			? __( 'Please enter a valid phone number.', 'woocommerce' )
+			: '' );
+
+	useEffect( () => {
+		onValidationChange?.( isSupportEmailValid && isSupportPhoneValid );
+	}, [ isSupportEmailValid, isSupportPhoneValid, onValidationChange ] );
 
 	return (
 		<SettingsSection
@@ -795,7 +893,7 @@ const TransactionsSettingsSection = () => {
 				<CheckboxControl
 					checked={ isSavedCardsEnabled }
 					help={ __(
-						'Customers can pay with cards they saved during earlier purchases.',
+						'When enabled, users will be able to pay with a saved card during checkout. Card details are stored in our platform, not on your store.',
 						'woocommerce'
 					) }
 					label={ __(
@@ -824,6 +922,12 @@ const TransactionsSettingsSection = () => {
 				/>
 			</FieldGroup>
 			<FieldGroup title={ __( 'Customer statements', 'woocommerce' ) }>
+				<p>
+					{ __(
+						"Edit the way your store name appears on your customers' bank statements.",
+						'woocommerce'
+					) }
+				</p>
 				{ serverErrorMessage && (
 					<Notice status="error" isDismissible={ false }>
 						{ serverErrorMessage }
@@ -873,23 +977,103 @@ const TransactionsSettingsSection = () => {
 				) }
 			</FieldGroup>
 			<FieldGroup title={ __( 'Customer support', 'woocommerce' ) }>
+				<p>
+					{ __(
+						'Provide contact information where customers can reach you for support.',
+						'woocommerce'
+					) }
+				</p>
 				<div className="woopayments-settings-control-grid">
-					<TextControl
-						label={ __( 'Support email', 'woocommerce' ) }
-						type="email"
-						value={ supportEmail }
-						onChange={ setSupportEmail }
-						__nextHasNoMarginBottom
-						__next40pxDefaultSize
-					/>
-					<TextControl
-						label={ __( 'Support phone', 'woocommerce' ) }
-						type="tel"
-						value={ supportPhone }
-						onChange={ setSupportPhone }
-						__nextHasNoMarginBottom
-						__next40pxDefaultSize
-					/>
+					<div>
+						<div id={ SUPPORT_EMAIL_ERROR_ID }>
+							{ supportEmailError && (
+								<Notice status="error" isDismissible={ false }>
+									{ supportEmailError }
+								</Notice>
+							) }
+						</div>
+						<TextControl
+							label={ __( 'Support email', 'woocommerce' ) }
+							help={ __(
+								'This may be visible on receipts, invoices, and automated emails from your store.',
+								'woocommerce'
+							) }
+							type="email"
+							value={ supportEmail }
+							onChange={ setSupportEmail }
+							onBlur={ () => setHasSupportEmailBlurred( true ) }
+							aria-invalid={
+								supportEmailError ? true : undefined
+							}
+							aria-describedby={
+								supportEmailError
+									? SUPPORT_EMAIL_ERROR_ID
+									: undefined
+							}
+							__nextHasNoMarginBottom
+							__next40pxDefaultSize
+						/>
+					</div>
+					<div>
+						<div id={ SUPPORT_PHONE_ERROR_ID }>
+							{ supportPhoneError && (
+								<Notice status="error" isDismissible={ false }>
+									{ supportPhoneError }
+								</Notice>
+							) }
+						</div>
+						<BaseControl
+							label={ __(
+								'Support phone number',
+								'woocommerce'
+							) }
+							help={
+								<>
+									{ __(
+										'This may be visible on receipts, invoices, and automated emails from your store.',
+										'woocommerce'
+									) }
+									{ isTestModeOnboarding && (
+										<>
+											<br />
+											{ __(
+												'(+1 0000000000 can be used for test accounts)',
+												'woocommerce'
+											) }
+										</>
+									) }
+								</>
+							}
+							id={ SUPPORT_PHONE_INPUT_ID }
+							__nextHasNoMarginBottom
+						>
+							<PhoneNumberInput
+								id={ SUPPORT_PHONE_INPUT_ID }
+								value={ supportPhone }
+								onChange={ ( value, e164, country ) => {
+									const localDigits = value
+										.replace( /^\+\d+\s*/, '' )
+										.replace( /\D/g, '' );
+
+									setSupportPhone(
+										localDigits === '' ? '' : e164
+									);
+									setSupportPhoneCountry( country );
+									setHasSupportPhoneChanged( true );
+								} }
+								inputProps={ {
+									'aria-invalid': supportPhoneError
+										? true
+										: undefined,
+									'aria-describedby': supportPhoneError
+										? SUPPORT_PHONE_ERROR_ID
+										: undefined,
+									onBlur: () =>
+										setHasSupportPhoneChanged( true ),
+								} }
+							/>
+						</BaseControl>
+					</div>
 				</div>
 			</FieldGroup>
 		</SettingsSection>
@@ -1053,9 +1237,42 @@ const PayoutsSettingsSection = () => {
 	);
 };
 
-const NotificationsSettingsSection = () => {
+const NotificationsSettingsSection = ( {
+	onValidationChange,
+}: {
+	onValidationChange?: ValidationSetter;
+} ) => {
 	const [ email, setEmail ] =
 		useAccountCommunicationsEmail() as StringSetting;
+	const [ initialEmail ] = useState( email );
+	const [ hasBlurred, setHasBlurred ] = useState( false );
+	const [ confirmEmail, setConfirmEmail ] = useState( '' );
+	const [ hasConfirmBlurred, setHasConfirmBlurred ] = useState( false );
+	const savingError = useGetSavingError();
+	const serverError = getSavingErrorDetailMessage(
+		savingError,
+		'account_communications_email'
+	);
+	const emailHasChanged = email !== initialEmail;
+	const emailsMatch = ! emailHasChanged || email === confirmEmail;
+	const isNotificationEmailValid =
+		emailsMatch && ( email === '' || isValidEmailAddress( email ) );
+	const emailError =
+		serverError ||
+		( hasBlurred && ! isValidEmailAddress( email )
+			? __( 'Please enter a valid email address.', 'woocommerce' )
+			: '' );
+	const confirmEmailError =
+		emailHasChanged && hasConfirmBlurred && ! emailsMatch
+			? __(
+					'Email addresses do not match. Please re-enter your email address.',
+					'woocommerce'
+			  )
+			: '';
+
+	useEffect( () => {
+		onValidationChange?.( isNotificationEmailValid );
+	}, [ isNotificationEmailValid, onValidationChange ] );
 
 	return (
 		<SettingsSection
@@ -1070,14 +1287,75 @@ const NotificationsSettingsSection = () => {
 				</p>
 			}
 		>
-			<TextControl
-				label={ __( 'Notification email', 'woocommerce' ) }
-				type="email"
-				value={ email }
-				onChange={ setEmail }
-				__nextHasNoMarginBottom
-				__next40pxDefaultSize
-			/>
+			<FieldGroup title={ __( 'Notifications email', 'woocommerce' ) }>
+				<p className="woopayments-settings-muted">
+					{ __(
+						'Provide an email address where you would like to receive communications about your WooPayments account.',
+						'woocommerce'
+					) }
+				</p>
+				<Notice
+					status="warning"
+					isDismissible={ false }
+					className="woopayments-settings-notifications-email-warning"
+				>
+					{ __(
+						'Anyone with access to this email address will be treated as the account owner. Please verify the address carefully.',
+						'woocommerce'
+					) }
+				</Notice>
+				<div id={ NOTIFICATIONS_EMAIL_ERROR_ID }>
+					{ emailError && (
+						<Notice status="error" isDismissible={ false }>
+							{ emailError }
+						</Notice>
+					) }
+				</div>
+				<TextControl
+					label={ __( 'Email address', 'woocommerce' ) }
+					type="email"
+					value={ email }
+					onChange={ setEmail }
+					onBlur={ () => setHasBlurred( true ) }
+					aria-invalid={ emailError ? true : undefined }
+					aria-describedby={
+						emailError ? NOTIFICATIONS_EMAIL_ERROR_ID : undefined
+					}
+					__nextHasNoMarginBottom
+					__next40pxDefaultSize
+				/>
+				{ emailHasChanged && (
+					<>
+						<div id={ NOTIFICATIONS_EMAIL_CONFIRM_ERROR_ID }>
+							{ confirmEmailError && (
+								<Notice status="error" isDismissible={ false }>
+									{ confirmEmailError }
+								</Notice>
+							) }
+						</div>
+						<TextControl
+							label={ __(
+								'Confirm email address',
+								'woocommerce'
+							) }
+							type="email"
+							value={ confirmEmail }
+							onChange={ setConfirmEmail }
+							onBlur={ () => setHasConfirmBlurred( true ) }
+							aria-invalid={
+								confirmEmailError ? true : undefined
+							}
+							aria-describedby={
+								confirmEmailError
+									? NOTIFICATIONS_EMAIL_CONFIRM_ERROR_ID
+									: undefined
+							}
+							__nextHasNoMarginBottom
+							__next40pxDefaultSize
+						/>
+					</>
+				) }
+			</FieldGroup>
 		</SettingsSection>
 	);
 };
@@ -1114,6 +1392,7 @@ const AdvancedSettingsSection = () => {
 		useMultiCurrency() as BooleanSetting;
 	const [ isDebugLogEnabled, setIsDebugLogEnabled ] =
 		useDebugLog() as BooleanSetting;
+	const isDevModeEnabled = Boolean( useDevMode() );
 	const [
 		isWCPaySubscriptionsEnabled,
 		isWCPaySubscriptionsEligible,
@@ -1136,6 +1415,17 @@ const AdvancedSettingsSection = () => {
 			<CheckboxControl
 				checked={ isMultiCurrencyEnabled }
 				label={ __( 'Enable multi-currency', 'woocommerce' ) }
+				help={
+					<>
+						{ __(
+							'Allow customers to shop and pay in multiple currencies.',
+							'woocommerce'
+						) }{ ' ' }
+						<ExternalLink href="https://woocommerce.com/document/woopayments/currencies/multi-currency-setup/">
+							{ __( 'Learn more', 'woocommerce' ) }
+						</ExternalLink>
+					</>
+				}
 				onChange={ ( value ) =>
 					setIsMultiCurrencyEnabled( Boolean( value ) )
 				}
@@ -1143,30 +1433,63 @@ const AdvancedSettingsSection = () => {
 			/>
 			<CheckboxControl
 				checked={ isWCPaySubscriptionsEnabled }
-				disabled={ ! isWCPaySubscriptionsEligible }
+				disabled={
+					! isWCPaySubscriptionsEligible ||
+					! isWCPaySubscriptionsEnabled
+				}
 				help={
-					isWCPaySubscriptionsEligible
-						? __(
-								'Process subscription renewals with WooPayments.',
+					isWCPaySubscriptionsEligible ? (
+						<>
+							{ __(
+								'This feature is deprecated. Existing subscription renewals will continue to work, but creating or managing subscriptions is no longer available. Install',
 								'woocommerce'
-						  )
-						: __(
-								'WooPayments subscriptions are not available for this account.',
+							) }{ ' ' }
+							<ExternalLink href="https://woocommerce.com/products/woocommerce-subscriptions/">
+								{ __(
+									'WooCommerce Subscriptions',
+									'woocommerce'
+								) }
+							</ExternalLink>{ ' ' }
+							{ __(
+								'to continue managing subscriptions.',
 								'woocommerce'
-						  )
+							) }
+						</>
+					) : (
+						__(
+							'WooPayments subscriptions are not available for this account.',
+							'woocommerce'
+						)
+					)
 				}
 				label={ __(
-					'Enable WooPayments subscriptions',
+					'Enable Subscriptions with WooPayments',
 					'woocommerce'
 				) }
-				onChange={ ( value ) =>
-					setIsWCPaySubscriptionsEnabled( Boolean( value ) )
-				}
+				onChange={ ( value ) => {
+					if ( value ) {
+						return;
+					}
+
+					setIsWCPaySubscriptionsEnabled( false );
+				} }
 				__nextHasNoMarginBottom
 			/>
 			<CheckboxControl
-				checked={ isDebugLogEnabled }
-				label={ __( 'Enable debug logging', 'woocommerce' ) }
+				checked={ isDevModeEnabled || isDebugLogEnabled }
+				disabled={ isDevModeEnabled }
+				help={ __(
+					'When enabled, payment error logs will be saved to WooCommerce > Status > Logs.',
+					'woocommerce'
+				) }
+				label={
+					isDevModeEnabled
+						? __(
+								'Log error messages (defaulted on for test accounts)',
+								'woocommerce'
+						  )
+						: __( 'Log error messages', 'woocommerce' )
+				}
 				onChange={ ( value ) =>
 					setIsDebugLogEnabled( Boolean( value ) )
 				}
@@ -1223,6 +1546,10 @@ export const WooPaymentsSettingsPage = () => {
 	getWooPaymentsSettingsBootstrap();
 
 	const { isLoading, isSaving } = useSettings();
+	const [ isTransactionInputsValid, setTransactionInputsValid ] =
+		useState( true );
+	const [ isNotificationEmailValid, setNotificationEmailValid ] =
+		useState( true );
 	const settings = asSettingsRecord( useGetSettings() );
 	const [ enabledPaymentMethodIds ] =
 		useEnabledPaymentMethodIds() as StringArraySetting;
@@ -1266,9 +1593,13 @@ export const WooPaymentsSettingsPage = () => {
 					<PaymentMethodsSettingsSection />
 					<BuyNowPayLaterSettingsSection />
 					<ExpressCheckoutSettingsSection />
-					<TransactionsSettingsSection />
+					<TransactionsSettingsSection
+						onValidationChange={ setTransactionInputsValid }
+					/>
 					<PayoutsSettingsSection />
-					<NotificationsSettingsSection />
+					<NotificationsSettingsSection
+						onValidationChange={ setNotificationEmailValid }
+					/>
 					<FraudProtectionSettingsSection />
 					<AdvancedSettingsSection />
 					{ isCardPresentEligible && (
@@ -1283,7 +1614,13 @@ export const WooPaymentsSettingsPage = () => {
 							) }
 						</p>
 					) }
-					<SaveSettingsSection disabled={ isSaving } />
+					<SaveSettingsSection
+						disabled={
+							isSaving ||
+							! isTransactionInputsValid ||
+							! isNotificationEmailValid
+						}
+					/>
 				</SettingsBusyState>
 			) }
 		</section>
