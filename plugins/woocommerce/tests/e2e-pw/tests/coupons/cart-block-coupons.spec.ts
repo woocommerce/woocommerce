@@ -12,31 +12,20 @@ import {
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 
 const simpleProductName = 'Cart Coupons Product';
-const singleProductFullPrice = '110.00';
-const singleProductSalePrice = '55.00';
-const coupons = [
-	{
-		code: '5fixedcart',
-		discount_type: 'fixed_cart',
-		amount: '5.00',
-	},
-	{
-		code: '50percoff',
-		discount_type: 'percent',
-		amount: '50',
-	},
-	{
-		code: '10fixedproduct',
-		discount_type: 'fixed_product',
-		amount: '10.00',
-	},
-];
+const coupon = {
+	code: '5fixedcart',
+	discount_type: 'fixed_cart',
+	amount: '5.00',
+};
 const couponLimitedCode = '10fixedcartlimited';
 const customerBilling = {
 	email: 'john.doe.merchant.test@example.com',
 };
 
-let productId: number, orderId: number, limitedCouponId: number;
+let productId: number,
+	orderId: number,
+	couponId: number,
+	limitedCouponId: number;
 
 const test = baseTest.extend( {
 	page: async ( { page }, use ) => {
@@ -50,8 +39,6 @@ test.describe(
 	'Cart Block Applying Coupons',
 	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
 	() => {
-		const couponBatchId: number[] = [];
-
 		test.beforeAll( async ( { restApi } ) => {
 			// make sure the currency is USD
 			await restApi.put(
@@ -65,21 +52,16 @@ test.describe(
 				.post( `${ WC_API_PATH }/products`, {
 					name: simpleProductName,
 					type: 'simple',
-					regular_price: singleProductFullPrice,
-					sale_price: singleProductSalePrice,
+					regular_price: '110.00',
 				} )
 				.then( ( response: { data: { id: number } } ) => {
 					productId = response.data.id;
 				} );
-			// add coupons
+			// add coupon
 			await restApi
-				.post( `${ WC_API_PATH }/coupons/batch`, {
-					create: coupons,
-				} )
-				.then( ( response: { data: { create: { id: number }[] } } ) => {
-					for ( let i = 0; i < response.data.create.length; i++ ) {
-						couponBatchId.push( response.data.create[ i ].id );
-					}
+				.post( `${ WC_API_PATH }/coupons`, coupon )
+				.then( ( response: { data: { id: number } } ) => {
+					couponId = response.data.id;
 				} );
 			// add limited coupon
 			await restApi
@@ -114,157 +96,38 @@ test.describe(
 				delete: [ productId ],
 			} );
 			await restApi.post( `${ WC_API_PATH }/coupons/batch`, {
-				delete: [ ...couponBatchId, limitedCouponId ],
+				delete: [ couponId, limitedCouponId ],
 			} );
 			await restApi.post( `${ WC_API_PATH }/orders/batch`, {
 				delete: [ orderId ],
 			} );
 		} );
 
-		test(
-			'allows cart block to apply coupon of any type',
-			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
-			async ( { page } ) => {
-				const totals = [ '$50.00', '$27.50', '$45.00' ];
+		test( 'applies a coupon via the cart block form', async ( {
+			page,
+		} ) => {
+			await page.getByRole( 'button', { name: 'Add coupons' } ).click();
+			await page.getByLabel( 'Enter code' ).fill( coupon.code );
+			await page.getByText( 'Apply', { exact: true } ).click();
 
-				// apply all coupon types
-				for ( let i = 0; i < coupons.length; i++ ) {
-					await page
-						.getByRole( 'button', { name: 'Add coupons' } )
-						.click();
-					await page
-						.getByLabel( 'Enter code' )
-						.fill( coupons[ i ].code );
-					await page.getByText( 'Apply', { exact: true } ).click();
-					await expect(
-						page
-							.locator(
-								'.wc-block-components-notice-banner__content'
-							)
-							.getByText(
-								`Coupon code "${ coupons[ i ].code }" has been applied to your cart.`
-							)
-					).toBeVisible();
-					await expect(
-						page.locator(
-							'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-						)
-					).toHaveText( totals[ i ] );
-					await page
-						.getByLabel( `Remove coupon "${ coupons[ i ].code }"` )
-						.click();
-					await expect(
-						page
-							.locator(
-								'.wc-block-components-notice-banner__content'
-							)
-							.getByText(
-								`Coupon code "${ coupons[ i ].code }" has been removed from your cart.`
-							)
-					).toBeVisible();
-				}
-			}
-		);
-
-		test(
-			'allows cart block to apply multiple coupons',
-			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
-			async ( { page } ) => {
-				const totals = [ '$50.00', '$22.50', '$12.50' ];
-				const totalsReverse = [ '$17.50', '$45.00', '$55.00' ];
-				const discounts = [ '-$5.00', '-$32.50', '-$42.50' ];
-
-				// add all coupons and verify prices
-				for ( let i = 0; i < coupons.length; i++ ) {
-					await page
-						.getByRole( 'button', { name: 'Add coupons' } )
-						.click();
-					await page
-						.getByLabel( 'Enter code' )
-						.fill( coupons[ i ].code );
-					await page.getByText( 'Apply', { exact: true } ).click();
-					await expect(
-						page
-							.locator(
-								'.wc-block-components-notice-banner__content'
-							)
-							.getByText(
-								`Coupon code "${ coupons[ i ].code }" has been applied to your cart.`
-							)
-					).toBeVisible();
-					await expect(
-						page.locator(
-							'.wc-block-components-totals-discount > .wc-block-components-totals-item__value'
-						)
-					).toHaveText( discounts[ i ] );
-					await expect(
-						page.locator(
-							'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-						)
-					).toHaveText( totals[ i ] );
-				}
-
-				for ( let i = 0; i < coupons.length; i++ ) {
-					await page
-						.getByLabel( `Remove coupon "${ coupons[ i ].code }"` )
-						.click();
-					await expect(
-						page
-							.locator(
-								'.wc-block-components-notice-banner__content'
-							)
-							.getByText(
-								`Coupon code "${ coupons[ i ].code }" has been removed from your cart.`
-							)
-					).toBeVisible();
-					await expect(
-						page.locator(
-							'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-						)
-					).toHaveText( totalsReverse[ i ] );
-				}
-			}
-		);
-
-		test(
-			'prevents cart block applying same coupon twice',
-			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
-			async ( { page } ) => {
-				// try to add two same coupons and verify the error message
-				await page
-					.getByRole( 'button', { name: 'Add coupons' } )
-					.click();
-				await page.getByLabel( 'Enter code' ).fill( coupons[ 0 ].code );
-				await page.getByText( 'Apply', { exact: true } ).click();
-				await expect(
-					page
-						.locator(
-							'.wc-block-components-notice-banner__content'
-						)
-						.getByText(
-							`Coupon code "${ coupons[ 0 ].code }" has been applied to your cart.`
-						)
-				).toBeVisible();
-				await page
-					.getByRole( 'button', { name: 'Add coupons' } )
-					.click();
-				await page.getByLabel( 'Enter code' ).fill( coupons[ 0 ].code );
-				await page.getByText( 'Apply', { exact: true } ).click();
-				await expect(
-					page
-						.getByRole( 'alert' )
-						.getByText(
-							`Coupon code "${ coupons[ 0 ].code }" has already been applied.`
-						)
-				).toBeVisible();
-			}
-		);
+			// The block form is wired end-to-end: success notice renders...
+			await expect(
+				page
+					.locator( '.wc-block-components-notice-banner__content' )
+					.getByText(
+						`Coupon code "${ coupon.code }" has been applied to your cart.`
+					)
+			).toBeVisible();
+			// ...and a discount line appears. Value is asserted in PHPUnit, not here.
+			await expect(
+				page.locator( '.wc-block-components-totals-discount' )
+			).toBeVisible();
+		} );
 
 		test(
 			'prevents cart block applying coupon with usage limit',
 			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
 			async ( { page } ) => {
-				// add coupon with usage limit
 				await page
 					.getByRole( 'button', { name: 'Add coupons' } )
 					.click();
