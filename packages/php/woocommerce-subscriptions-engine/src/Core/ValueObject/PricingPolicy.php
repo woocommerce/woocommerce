@@ -1,6 +1,6 @@
 <?php
 /**
- * Pricing_Policy - typed value object for a plan's recurring price adjustments
+ * PricingPolicy - typed value object for a plan's recurring price adjustments
  * and one-time fees.
  *
  * Mirrors the `pricing_policy` JSON column shape. Shape:
@@ -30,13 +30,13 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Pricing_Policy value object.
+ * PricingPolicy value object.
  *
  * Immutable. The plan column itself is nullable when neither policies nor fees
  * apply; the value object never represents that absence - it always holds two
  * arrays, possibly both empty.
  */
-final class Pricing_Policy {
+final class PricingPolicy {
 
 	/**
 	 * Recurring price adjustments, applied in array order.

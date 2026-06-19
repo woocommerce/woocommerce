@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 use WP_REST_Request;
@@ -708,9 +709,13 @@ class OrderSchema extends AbstractSchema {
 			$data['shipping_lines'] = array();
 			foreach ( $shipping_lines as $shipping_line ) {
 				$item_data = $this->order_shipping_schema->get_item_response( $shipping_line, $request );
-				$refunded  = $refund_data['totals'][ $shipping_line->get_id() ] ?? 0.0;
+				$refunded  = abs( (float) ( $refund_data['totals'][ $shipping_line->get_id() ] ?? 0.0 ) );
 
-				$item_data['can_be_refunded'] = ( (float) $shipping_line->get_total() + (float) $shipping_line->get_total_tax() - $refunded ) > 0;
+				// Mirror Refunds\DataUtils validation: compare on a tax-inclusive, absolute basis
+				// (so discount/negative lines are handled) and round to currency precision (so a
+				// fully-refunded line is not reported refundable on a sub-cent float residue).
+				$remaining                    = abs( (float) $shipping_line->get_total() + (float) $shipping_line->get_total_tax() ) - $refunded;
+				$item_data['can_be_refunded'] = NumberUtil::round( $remaining, wc_get_price_decimals() ) > 0;
 
 				$data['shipping_lines'][] = $item_data;
 			}
@@ -734,9 +739,13 @@ class OrderSchema extends AbstractSchema {
 			$data['fee_lines'] = array();
 			foreach ( $fee_lines as $fee_line ) {
 				$item_data = $this->order_fee_schema->get_item_response( $fee_line, $request );
-				$refunded  = $refund_data['totals'][ $fee_line->get_id() ] ?? 0.0;
+				$refunded  = abs( (float) ( $refund_data['totals'][ $fee_line->get_id() ] ?? 0.0 ) );
 
-				$item_data['can_be_refunded'] = ( (float) $fee_line->get_total() + (float) $fee_line->get_total_tax() - $refunded ) > 0;
+				// Mirror Refunds\DataUtils validation: compare on a tax-inclusive, absolute basis
+				// (so discount/negative fee lines are handled) and round to currency precision (so a
+				// fully-refunded line is not reported refundable on a sub-cent float residue).
+				$remaining                    = abs( (float) $fee_line->get_total() + (float) $fee_line->get_total_tax() ) - $refunded;
+				$item_data['can_be_refunded'] = NumberUtil::round( $remaining, wc_get_price_decimals() ) > 0;
 
 				$data['fee_lines'][] = $item_data;
 			}

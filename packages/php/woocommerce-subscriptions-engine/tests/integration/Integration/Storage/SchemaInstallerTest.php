@@ -1,6 +1,6 @@
 <?php
 /**
- * Integration tests for Schema_Installer.
+ * Integration tests for SchemaInstaller.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine
  */
@@ -9,13 +9,13 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\Storage;
 
-use Engine_Integration_Test_Case;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Schema_Installer;
+use EngineIntegrationTestCase;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
- * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Schema_Installer
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller
  */
-class Schema_Installer_Test extends Engine_Integration_Test_Case {
+class SchemaInstallerTest extends EngineIntegrationTestCase {
 
 	/**
 	 * The six baseline tables the installer owns.
@@ -24,12 +24,12 @@ class Schema_Installer_Test extends Engine_Integration_Test_Case {
 	 */
 	public function table_provider(): array {
 		return array(
-			array( Schema_Installer::TABLE_PLAN_GROUPS ),
-			array( Schema_Installer::TABLE_PLANS ),
-			array( Schema_Installer::TABLE_CONTRACTS ),
-			array( Schema_Installer::TABLE_CONTRACT_ITEMS ),
-			array( Schema_Installer::TABLE_CONTRACT_ADDRESSES ),
-			array( Schema_Installer::TABLE_CONTRACT_META ),
+			array( SchemaInstaller::TABLE_PLAN_GROUPS ),
+			array( SchemaInstaller::TABLE_PLANS ),
+			array( SchemaInstaller::TABLE_CONTRACTS ),
+			array( SchemaInstaller::TABLE_CONTRACT_ITEMS ),
+			array( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ),
+			array( SchemaInstaller::TABLE_CONTRACT_META ),
 		);
 	}
 
@@ -41,7 +41,7 @@ class Schema_Installer_Test extends Engine_Integration_Test_Case {
 	public function test_each_baseline_table_exists( string $logical ): void {
 		global $wpdb;
 
-		$table = Schema_Installer::get_table_name( $logical );
+		$table = SchemaInstaller::get_table_name( $logical );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
@@ -50,26 +50,26 @@ class Schema_Installer_Test extends Engine_Integration_Test_Case {
 	}
 
 	public function test_version_option_is_set_after_install(): void {
-		$this->assertTrue( Schema_Installer::is_current() );
-		$this->assertSame( Schema_Installer::VERSION, get_option( Schema_Installer::VERSION_OPTION ) );
+		$this->assertTrue( SchemaInstaller::is_current() );
+		$this->assertSame( SchemaInstaller::VERSION, get_option( SchemaInstaller::VERSION_OPTION ) );
 	}
 
 	public function test_install_is_idempotent(): void {
 		// Running install again must not error or change the recorded version.
-		Schema_Installer::install();
+		SchemaInstaller::install();
 
-		$this->assertSame( Schema_Installer::VERSION, get_option( Schema_Installer::VERSION_OPTION ) );
+		$this->assertSame( SchemaInstaller::VERSION, get_option( SchemaInstaller::VERSION_OPTION ) );
 	}
 
 	public function test_unknown_table_identifier_throws(): void {
 		$this->expectException( \InvalidArgumentException::class );
-		Schema_Installer::get_table_name( 'not_a_table' );
+		SchemaInstaller::get_table_name( 'not_a_table' );
 	}
 
 	public function test_plans_table_has_extension_slug_column(): void {
 		global $wpdb;
 
-		$table = Schema_Installer::get_table_name( Schema_Installer::TABLE_PLANS );
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$column = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'extension_slug' ) );
@@ -80,7 +80,7 @@ class Schema_Installer_Test extends Engine_Integration_Test_Case {
 	public function test_contracts_table_has_extension_slug_column(): void {
 		global $wpdb;
 
-		$table = Schema_Installer::get_table_name( Schema_Installer::TABLE_CONTRACTS );
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$column = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'extension_slug' ) );

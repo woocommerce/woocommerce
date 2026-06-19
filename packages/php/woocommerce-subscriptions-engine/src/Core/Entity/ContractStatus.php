@@ -1,6 +1,6 @@
 <?php
 /**
- * Contract_Status - the contract lifecycle state machine.
+ * ContractStatus - the contract lifecycle state machine.
  *
  * Owns the set of valid statuses and the allowed transitions between them.
  * Status transitions are validated here and applied by the {@see Contract} entity.
@@ -15,9 +15,9 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Contract_Status value/helper class.
+ * ContractStatus value/helper class.
  */
-final class Contract_Status {
+final class ContractStatus {
 
 	const ACTIVE               = 'active';
 	const ON_HOLD              = 'on-hold';

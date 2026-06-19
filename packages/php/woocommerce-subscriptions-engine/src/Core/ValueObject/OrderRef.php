@@ -1,6 +1,6 @@
 <?php
 /**
- * Order_Ref - an immutable reference to a WooCommerce order by id.
+ * OrderRef - an immutable reference to a WooCommerce order by id.
  *
  * The Core zone never loads a live order object; it holds a reference and
  * commands effects through the Orders host binding in the integration layer.
@@ -15,11 +15,11 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Order_Ref value object.
+ * OrderRef value object.
  *
  * Immutable identity wrapper.
  */
-final class Order_Ref {
+final class OrderRef {
 
 	/**
 	 * Order id.
@@ -51,9 +51,9 @@ final class Order_Ref {
 	/**
 	 * Value equality by id.
 	 *
-	 * @param Order_Ref $other Reference to compare against.
+	 * @param OrderRef $other Reference to compare against.
 	 */
-	public function equals( Order_Ref $other ): bool {
+	public function equals( OrderRef $other ): bool {
 		return $this->id === $other->id;
 	}
 }

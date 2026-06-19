@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for Pricing_Policy.
+ * Unit tests for PricingPolicy.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine
  */
@@ -10,15 +10,15 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\ValueObject;
 
 use PHPUnit\Framework\TestCase;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Pricing_Policy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
 
 /**
- * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Pricing_Policy
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy
  */
-class Pricing_Policy_Test extends TestCase {
+class PricingPolicyTest extends TestCase {
 
 	public function test_empty_policy_returns_base_price(): void {
-		$policy = Pricing_Policy::from_array( array() );
+		$policy = PricingPolicy::from_array( array() );
 
 		$this->assertSame( 25.0, $policy->calculate_price( 25.0 ) );
 		$this->assertSame( array(), $policy->get_policies() );
@@ -26,7 +26,7 @@ class Pricing_Policy_Test extends TestCase {
 	}
 
 	public function test_percentage_discount_applies(): void {
-		$policy = Pricing_Policy::from_array(
+		$policy = PricingPolicy::from_array(
 			array(
 				'policies' => array(
 					array(
@@ -41,7 +41,7 @@ class Pricing_Policy_Test extends TestCase {
 	}
 
 	public function test_fixed_amount_is_clamped_at_zero(): void {
-		$policy = Pricing_Policy::from_array(
+		$policy = PricingPolicy::from_array(
 			array(
 				'policies' => array(
 					array(
@@ -56,7 +56,7 @@ class Pricing_Policy_Test extends TestCase {
 	}
 
 	public function test_price_replaces_base_and_starting_cycle_gates(): void {
-		$policy = Pricing_Policy::from_array(
+		$policy = PricingPolicy::from_array(
 			array(
 				'policies' => array(
 					array(
@@ -75,7 +75,7 @@ class Pricing_Policy_Test extends TestCase {
 	}
 
 	public function test_whole_number_values_normalize_to_float(): void {
-		$policy = Pricing_Policy::from_array(
+		$policy = PricingPolicy::from_array(
 			array(
 				'policies'      => array(
 					array(

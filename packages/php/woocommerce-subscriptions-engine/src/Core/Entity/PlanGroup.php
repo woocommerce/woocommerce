@@ -1,6 +1,6 @@
 <?php
 /**
- * Plan_Group - a merchandising container for selling plans.
+ * PlanGroup - a merchandising container for selling plans.
  *
  * `merchant_code` is an optional stable external identifier; when present it is
  * unique at the storage layer and is the deduplication key consumers use to
@@ -16,12 +16,12 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Plan_Group entity.
+ * PlanGroup entity.
  *
  * Construct via {@see self::create()} for a new (unsaved) group or
  * {@see self::from_storage()} when hydrating a stored row.
  */
-final class Plan_Group {
+final class PlanGroup {
 
 	/**
 	 * Group id, or null before it is persisted.

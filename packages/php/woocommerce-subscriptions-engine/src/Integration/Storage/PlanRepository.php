@@ -1,6 +1,6 @@
 <?php
 /**
- * Plan_Repository - persistence for {@see Plan} entities.
+ * PlanRepository - persistence for {@see Plan} entities.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage
  */
@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Plan repository.
  */
-final class Plan_Repository {
+final class PlanRepository {
 
 	/**
 	 * Policy columns stored as JSON.
@@ -40,7 +40,7 @@ final class Plan_Repository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$inserted = $wpdb->insert(
-			Schema_Installer::get_table_name( Schema_Installer::TABLE_PLANS ),
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
 			array(
 				'group_id'         => $data['group_id'],
 				'name'             => $data['name'],
@@ -76,7 +76,7 @@ final class Plan_Repository {
 	public function find( int $id ): ?Plan {
 		global $wpdb;
 
-		$table = Schema_Installer::get_table_name( Schema_Installer::TABLE_PLANS );
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ), ARRAY_A );
@@ -111,7 +111,7 @@ final class Plan_Repository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$updated = $wpdb->update(
-			Schema_Installer::get_table_name( Schema_Installer::TABLE_PLANS ),
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
 			array(
 				'name'             => $data['name'],
 				'description'      => $data['description'],
@@ -140,7 +140,7 @@ final class Plan_Repository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$deleted = $wpdb->delete(
-			Schema_Installer::get_table_name( Schema_Installer::TABLE_PLANS ),
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
 			array( 'id' => $id )
 		);
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Integration tests for Contract_Repository.
+ * Integration tests for ContractRepository.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine
  */
@@ -9,15 +9,15 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\Storage;
 
-use Engine_Integration_Test_Case;
+use EngineIntegrationTestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract_Status;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Contract_Repository;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 
 /**
- * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Contract_Repository
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository
  */
-class Contract_Repository_Test extends Engine_Integration_Test_Case {
+class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 	private function make_contract(): Contract {
 		return Contract::create(
@@ -64,7 +64,7 @@ class Contract_Repository_Test extends Engine_Integration_Test_Case {
 	}
 
 	public function test_contract_round_trips_with_children(): void {
-		$repo = new Contract_Repository();
+		$repo = new ContractRepository();
 
 		$id = $repo->insert( $this->make_contract() );
 		$this->assertGreaterThan( 0, $id );
@@ -76,7 +76,7 @@ class Contract_Repository_Test extends Engine_Integration_Test_Case {
 		$this->assertSame( 42, $fetched->get_customer_id() );
 		$this->assertSame( 'USD', $fetched->get_currency() );
 		$this->assertSame( 'lite', $fetched->get_extension_slug() );
-		$this->assertSame( Contract_Status::ACTIVE, $fetched->get_status() );
+		$this->assertSame( ContractStatus::ACTIVE, $fetched->get_status() );
 		$this->assertSame( '2026-07-15 00:00:00', $fetched->get_next_payment_gmt() );
 
 		// Payment instrument reference.
@@ -100,7 +100,7 @@ class Contract_Repository_Test extends Engine_Integration_Test_Case {
 	}
 
 	public function test_extension_slug_defaults_to_null_when_unset(): void {
-		$repo = new Contract_Repository();
+		$repo = new ContractRepository();
 
 		$id = $repo->insert(
 			Contract::create(
@@ -120,14 +120,14 @@ class Contract_Repository_Test extends Engine_Integration_Test_Case {
 	public function test_delete_removes_contract_and_children(): void {
 		global $wpdb;
 
-		$repo = new Contract_Repository();
+		$repo = new ContractRepository();
 		$id   = $repo->insert( $this->make_contract() );
 
 		$this->assertTrue( $repo->delete( $id ) );
 		$this->assertNull( $repo->find( $id ) );
 
-		$items_table = \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Schema_Installer::get_table_name(
-			\Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Schema_Installer::TABLE_CONTRACT_ITEMS
+		$items_table = \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller::get_table_name(
+			\Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller::TABLE_CONTRACT_ITEMS
 		);
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$remaining = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$items_table} WHERE contract_id = %d", $id ) );
