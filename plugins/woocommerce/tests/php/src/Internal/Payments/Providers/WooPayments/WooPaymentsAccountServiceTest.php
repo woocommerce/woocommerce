@@ -80,6 +80,30 @@ class WooPaymentsAccountServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should expose whether the native WooPayments gateway is enabled.
+	 */
+	public function test_exposes_gateway_enabled_state_from_gateway_settings(): void {
+		update_option( 'woocommerce_woocommerce_payments_settings', array( 'enabled' => 'yes' ) );
+
+		$sut = $this->create_service();
+
+		$this->assertTrue( $sut->is_gateway_enabled() );
+
+		update_option( 'woocommerce_woocommerce_payments_settings', array( 'enabled' => 'no' ) );
+
+		$this->assertFalse( $sut->is_gateway_enabled() );
+	}
+
+	/**
+	 * @testdox Should fail closed when the native WooPayments gateway enabled setting is absent.
+	 */
+	public function test_gateway_enabled_state_defaults_to_disabled_when_setting_is_absent(): void {
+		$sut = $this->create_service();
+
+		$this->assertFalse( $sut->is_gateway_enabled() );
+	}
+
+	/**
 	 * @testdox Should expose the account default currency from the preserved account cache.
 	 */
 	public function test_exposes_account_default_currency_from_account_cache(): void {

@@ -2189,6 +2189,89 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should call preserved admin badge count endpoints.
+	 */
+	public function test_gets_preserved_admin_badge_count_endpoints(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'count' => 3 ) ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$sut->get_dispute_status_counts();
+
+		$this->assertSame( '/sites/123/wcpay/disputes/status_counts?test_mode=0', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+
+		$sut->get_authorizations_summary();
+
+		$this->assertSame( '/sites/123/wcpay/authorizations/summary?test_mode=0', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+	}
+
+	/**
+	 * @testdox Should preserve admin badge count legacy request filters.
+	 */
+	public function test_admin_badge_count_methods_preserve_legacy_request_filters(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'count' => 3 ) ),
+		);
+
+		$dispute_hook_called       = false;
+		$authorization_hook_called = false;
+
+		$dispute_filter = function ( WooPaymentsApiRequest $request ) use ( &$dispute_hook_called ): WooPaymentsApiRequest {
+			$dispute_hook_called = true;
+			$this->assertSame( 'disputes/status_counts', $request->get_api() );
+			$this->assertSame( 'GET', $request->get_method() );
+			$request->set_param( 'status_is', 'needs_response' );
+
+			return $request;
+		};
+
+		$authorization_filter = function ( WooPaymentsApiRequest $request ) use ( &$authorization_hook_called ): WooPaymentsApiRequest {
+			$authorization_hook_called = true;
+			$this->assertSame( 'authorizations/summary', $request->get_api() );
+			$this->assertSame( 'GET', $request->get_method() );
+			$request->set_param( 'manual_capture', true );
+
+			return $request;
+		};
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+		add_filter( 'wcpay_get_dispute_status_counts', $dispute_filter );
+		add_filter( 'wc_pay_get_authorizations_summary', $authorization_filter );
+
+		try {
+			$sut->get_dispute_status_counts();
+			$dispute_path = $http_client->last_path;
+
+			$sut->get_authorizations_summary();
+			$authorization_path = $http_client->last_path;
+		} finally {
+			remove_filter( 'wcpay_get_dispute_status_counts', $dispute_filter );
+			remove_filter( 'wc_pay_get_authorizations_summary', $authorization_filter );
+		}
+
+		$this->assertTrue( $dispute_hook_called, 'Dispute badge count requests should run the preserved request filter.' );
+		$this->assertStringContainsString( 'status_is=needs_response', $dispute_path );
+		$this->assertStringContainsString( 'test_mode=0', $dispute_path );
+		$this->assertTrue( $authorization_hook_called, 'Authorization summary requests should run the preserved request filter.' );
+		$this->assertStringContainsString( 'manual_capture=true', $authorization_path );
+		$this->assertStringContainsString( 'test_mode=0', $authorization_path );
+	}
+
+	/**
 	 * @testdox Should reject unsafe payout export identifiers.
 	 */
 	public function test_get_payouts_export_url_rejects_invalid_route_identifier(): void {

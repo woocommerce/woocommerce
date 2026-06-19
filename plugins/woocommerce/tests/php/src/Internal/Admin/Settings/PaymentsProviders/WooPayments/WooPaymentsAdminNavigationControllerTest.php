@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAdminMenuBadgeService;
 use PHPUnit\Framework\MockObject\MockObject;
 use WC_Unit_Test_Case;
 
@@ -81,6 +82,28 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not map legacy WooPayments WC Admin paths when the native gateway is disabled.
+	 */
+	public function test_does_not_map_legacy_payment_paths_when_native_gateway_is_disabled(): void {
+		$sut = $this->create_controller(
+			true,
+			array(
+				'is_gateway_enabled' => false,
+			)
+		);
+
+		$this->assertSame(
+			'',
+			$sut->get_legacy_payment_path_redirect_url(
+				array(
+					'page' => 'wc-admin',
+					'path' => '%2Fpayments%2Ftransactions',
+				)
+			)
+		);
+	}
+
+	/**
 	 * @testdox Should not redirect unrelated WC Admin paths.
 	 */
 	public function test_does_not_map_unrelated_wc_admin_paths(): void {
@@ -116,6 +139,23 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 		wp_set_current_user( $this->factory->user->create( array( 'role' => 'customer' ) ) );
 
 		$sut = $this->create_controller( true );
+		$sut->add_menu_items();
+
+		$this->assertSame( array(), $this->get_payments_submenu_items() );
+	}
+
+	/**
+	 * @testdox Should not add WooPayments navigation when the native gateway is disabled.
+	 */
+	public function test_does_not_add_menu_items_when_native_gateway_is_disabled(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+
+		$sut = $this->create_controller(
+			true,
+			array(
+				'is_gateway_enabled' => false,
+			)
+		);
 		$sut->add_menu_items();
 
 		$this->assertSame( array(), $this->get_payments_submenu_items() );
@@ -165,6 +205,101 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 			array_column( $items, 2 )
 		);
 		$this->assertStringNotContainsString( 'wc-admin&path=/payments', implode( "\n", array_column( $items, 2 ) ) );
+	}
+
+	/**
+	 * @testdox Should add a Disputes badge and direct the submenu to awaiting-response disputes.
+	 */
+	public function test_adds_disputes_badge_and_awaiting_response_filter(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+
+		$sut = $this->create_controller(
+			true,
+			array(),
+			array(
+				'disputes_awaiting_response' => 4,
+			)
+		);
+		$sut->add_menu_items();
+
+		$disputes_item = $this->get_submenu_item_by_title( 'Disputes' );
+
+		$this->assertStringContainsString( 'wcpay-menu-badge awaiting-mod count-4', $disputes_item[0] );
+		$this->assertStringContainsString( '<span class="plugin-count">4</span>', $disputes_item[0] );
+		$this->assertStringContainsString( 'path=/woopayments/disputes', $disputes_item[2] );
+		$this->assertStringContainsString( 'filter=awaiting_response', $disputes_item[2] );
+	}
+
+	/**
+	 * @testdox Should omit the Disputes badge and filter when there are no awaiting-response disputes.
+	 */
+	public function test_omits_disputes_badge_for_zero_count(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+
+		$sut = $this->create_controller( true );
+		$sut->add_menu_items();
+
+		$disputes_item = $this->get_submenu_item_by_title( 'Disputes' );
+
+		$this->assertSame( 'Disputes', $disputes_item[0] );
+		$this->assertSame( $this->get_settings_url( '/woopayments/disputes' ), $disputes_item[2] );
+	}
+
+	/**
+	 * @testdox Should add a Transactions badge when uncaptured transactions exist.
+	 */
+	public function test_adds_transactions_badge_for_uncaptured_transactions(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+
+		$sut = $this->create_controller(
+			true,
+			array(),
+			array(
+				'uncaptured_transactions' => 3,
+			)
+		);
+		$sut->add_menu_items();
+
+		$transactions_item = $this->get_submenu_item_by_title( 'Transactions' );
+
+		$this->assertStringContainsString( 'wcpay-menu-badge awaiting-mod count-3', $transactions_item[0] );
+		$this->assertStringContainsString( '<span class="plugin-count">3</span>', $transactions_item[0] );
+		$this->assertSame( $this->get_settings_url( '/woopayments/transactions' ), $transactions_item[2] );
+	}
+
+	/**
+	 * @testdox Should omit the Transactions badge when there are no uncaptured transactions.
+	 */
+	public function test_omits_transactions_badge_for_zero_count(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+
+		$sut = $this->create_controller( true );
+		$sut->add_menu_items();
+
+		$transactions_item = $this->get_submenu_item_by_title( 'Transactions' );
+
+		$this->assertSame( 'Transactions', $transactions_item[0] );
+		$this->assertSame( $this->get_settings_url( '/woopayments/transactions' ), $transactions_item[2] );
+	}
+
+	/**
+	 * @testdox Should keep Reports and Documents absent until their native surfaces are ported.
+	 */
+	public function test_reports_and_documents_menu_items_remain_absent_until_surfaces_are_ported(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+
+		$sut = $this->create_controller( true );
+		$sut->add_menu_items();
+
+		$titles = array_map(
+			static function ( array $item ): string {
+				return trim( wp_strip_all_tags( $item[0] ) );
+			},
+			$this->get_payments_submenu_items()
+		);
+
+		$this->assertNotContains( 'Reports', $titles );
+		$this->assertNotContains( 'Documents', $titles );
 	}
 
 	/**
@@ -269,9 +404,10 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 	 *
 	 * @param bool               $native_register Whether native should own menu registration.
 	 * @param array<string,bool> $account_state   Account state overrides.
+	 * @param array<string,int>  $badge_counts    Badge count overrides.
 	 * @return WooPaymentsAdminNavigationController
 	 */
-	private function create_controller( bool $native_register, array $account_state = array() ): WooPaymentsAdminNavigationController {
+	private function create_controller( bool $native_register, array $account_state = array(), array $badge_counts = array() ): WooPaymentsAdminNavigationController {
 		$class_name = WooPaymentsAdminNavigationController::class;
 		$this->assertTrue( class_exists( $class_name ), 'WooPayments admin navigation controller should exist.' );
 
@@ -282,8 +418,9 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 		$arbiter->method( 'should_native_register' )->willReturn( $native_register );
 
 		$account_service = $this->create_account_service( $account_state );
+		$badge_service   = $this->create_badge_service( $badge_counts );
 		$controller      = new $class_name();
-		$controller->init( $arbiter, $account_service );
+		$controller->init( $arbiter, $account_service, $badge_service );
 
 		return $controller;
 	}
@@ -302,6 +439,7 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 				'is_account_rejected'                    => false,
 				'is_account_under_review'                => false,
 				'is_details_submitted'                   => true,
+				'is_gateway_enabled'                     => true,
 				'is_card_present_eligible'               => false,
 				'has_card_readers_available'             => false,
 				'has_previous_capital_loans'             => false,
@@ -327,6 +465,32 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a native badge service test double.
+	 *
+	 * @param array<string,int> $overrides Badge count overrides.
+	 * @return WooPaymentsAdminMenuBadgeService&MockObject
+	 */
+	private function create_badge_service( array $overrides = array() ): WooPaymentsAdminMenuBadgeService {
+		$counts = array_merge(
+			array(
+				'disputes_awaiting_response' => 0,
+				'uncaptured_transactions'    => 0,
+			),
+			$overrides
+		);
+
+		$badge_service = $this->getMockBuilder( WooPaymentsAdminMenuBadgeService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_disputes_awaiting_response_count', 'get_uncaptured_transactions_count' ) )
+			->getMock();
+
+		$badge_service->method( 'get_disputes_awaiting_response_count' )->willReturn( $counts['disputes_awaiting_response'] );
+		$badge_service->method( 'get_uncaptured_transactions_count' )->willReturn( $counts['uncaptured_transactions'] );
+
+		return $badge_service;
+	}
+
+	/**
 	 * Get WooPayments submenu items from the Core Payments parent.
 	 *
 	 * @return array<int,array<int,string>>
@@ -335,6 +499,22 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 		global $submenu;
 
 		return array_values( $submenu[ $this->get_parent_slug() ] ?? array() );
+	}
+
+	/**
+	 * Get a submenu item by its visible title prefix.
+	 *
+	 * @param string $title Menu title.
+	 * @return array<int,string>
+	 */
+	private function get_submenu_item_by_title( string $title ): array {
+		foreach ( $this->get_payments_submenu_items() as $item ) {
+			if ( str_starts_with( $item[0], $title ) ) {
+				return $item;
+			}
+		}
+
+		$this->fail( sprintf( 'Expected submenu item "%s" to exist.', $title ) );
 	}
 
 	/**

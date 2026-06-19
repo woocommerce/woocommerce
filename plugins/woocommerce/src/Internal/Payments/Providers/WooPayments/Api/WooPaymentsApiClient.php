@@ -132,6 +132,11 @@ class WooPaymentsApiClient {
 	private const TRANSACTIONS_API = 'transactions';
 
 	/**
+	 * WooPayments authorizations API path.
+	 */
+	private const AUTHORIZATIONS_API = 'authorizations';
+
+	/**
 	 * WooPayments disputes API path.
 	 */
 	private const DISPUTES_API = 'disputes';
@@ -714,6 +719,21 @@ class WooPaymentsApiClient {
 	}
 
 	/**
+	 * Retrieve the manual-capture authorization summary used by admin menu badges.
+	 *
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_authorizations_summary(): array {
+		return $this->request_with_legacy_filter(
+			array(),
+			self::AUTHORIZATIONS_API . '/summary',
+			'GET',
+			'wc_pay_get_authorizations_summary'
+		);
+	}
+
+	/**
 	 * Initiate a WooPayments transactions export.
 	 *
 	 * @param array<string,mixed> $filters    Export filters.
@@ -844,6 +864,21 @@ class WooPaymentsApiClient {
 	 */
 	public function get_disputes_summary( array $filters = array() ): array {
 		return $this->request( array( '0' => $filters ), self::DISPUTES_API . '/summary', 'GET' );
+	}
+
+	/**
+	 * Retrieve dispute status counts used by admin menu badges.
+	 *
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_dispute_status_counts(): array {
+		return $this->request_with_legacy_filter(
+			array(),
+			self::DISPUTES_API . '/status_counts',
+			'GET',
+			'wcpay_get_dispute_status_counts'
+		);
 	}
 
 	/**
@@ -1612,8 +1647,8 @@ class WooPaymentsApiClient {
 		 *
 		 * @since 11.0.0
 		 *
-			 * @param WooPaymentsApiRequest $request Native request compatibility object, aliased to legacy WooPayments request classes when the extension is absent.
-			 */
+		 * @param WooPaymentsApiRequest $request Native request compatibility object, aliased to legacy WooPayments request classes when the extension is absent.
+		 */
 		$filtered_request = apply_filters( $hook, $request );
 
 		if ( ! $filtered_request instanceof WooPaymentsPaginatedListRequest ) {

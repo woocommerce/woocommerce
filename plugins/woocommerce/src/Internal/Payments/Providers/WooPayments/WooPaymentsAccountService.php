@@ -851,6 +851,15 @@ class WooPaymentsAccountService implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Tell whether the WooPayments gateway is enabled.
+	 *
+	 * @return bool
+	 */
+	public function is_gateway_enabled(): bool {
+		return 'yes' === (string) $this->get_gateway_setting( 'enabled', 'no' );
+	}
+
+	/**
 	 * Tell whether WooPayments is in test-mode onboarding.
 	 *
 	 * @return bool

@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAdminMenuBadgeService;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 defined( 'ABSPATH' ) || exit;
@@ -26,6 +27,8 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 	private const CAPABILITY = 'manage_woocommerce';
 
 	private const MENU_HOOK_PRIORITY = 70;
+
+	private const UNRESOLVED_NOTIFICATION_BADGE_FORMAT = ' <span class="wcpay-menu-badge awaiting-mod count-%1$d"><span class="plugin-count">%1$d</span></span>';
 
 	private const PATH_ONBOARDING = '/woopayments/onboarding';
 
@@ -51,6 +54,7 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 
 	private const PATH_PAYOUT_DETAILS = '/woopayments/payouts/details';
 
+	// Reports/Documents legacy routes are intentionally absent until their native UI/API surfaces are ported.
 	private const LEGACY_ROUTE_REDIRECTS = array(
 		'/payments/overview'             => self::PATH_OVERVIEW,
 		'/payments/deposits'             => self::PATH_PAYOUTS,
@@ -82,16 +86,29 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 	private WooPaymentsAccountService $account_service;
 
 	/**
+	 * WooPayments admin menu badge service.
+	 *
+	 * @var WooPaymentsAdminMenuBadgeService
+	 */
+	private WooPaymentsAdminMenuBadgeService $badge_service;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param NativePaymentsRuntimeArbiter $arbiter         Runtime owner arbiter.
-	 * @param WooPaymentsAccountService    $account_service WooPayments account service.
+	 * @param NativePaymentsRuntimeArbiter     $arbiter         Runtime owner arbiter.
+	 * @param WooPaymentsAccountService        $account_service WooPayments account service.
+	 * @param WooPaymentsAdminMenuBadgeService $badge_service   WooPayments admin menu badge service.
 	 */
-	final public function init( NativePaymentsRuntimeArbiter $arbiter, WooPaymentsAccountService $account_service ): void {
+	final public function init(
+		NativePaymentsRuntimeArbiter $arbiter,
+		WooPaymentsAccountService $account_service,
+		WooPaymentsAdminMenuBadgeService $badge_service
+	): void {
 		$this->arbiter         = $arbiter;
 		$this->account_service = $account_service;
+		$this->badge_service   = $badge_service;
 	}
 
 	/**
@@ -139,6 +156,10 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 	 */
 	public function get_legacy_payment_path_redirect_url( array $request ): string {
 		if ( 'wc-admin' !== $this->get_request_scalar( $request, 'page' ) ) {
+			return '';
+		}
+
+		if ( ! $this->account_service->is_gateway_enabled() ) {
 			return '';
 		}
 
@@ -201,19 +222,28 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	public function add_menu_items(): void {
-		if ( ! current_user_can( self::CAPABILITY ) || ! $this->arbiter->should_native_register() ) {
+		if (
+			! current_user_can( self::CAPABILITY )
+			|| ! $this->arbiter->should_native_register()
+			|| ! $this->account_service->is_gateway_enabled()
+		) {
 			return;
 		}
 
 		foreach ( $this->get_menu_items() as $menu_item ) {
-			$this->append_menu_item( $menu_item['title'], $menu_item['path'] );
+			$this->append_menu_item(
+				$menu_item['title'],
+				$menu_item['path'],
+				$menu_item['query'] ?? array(),
+				$menu_item['badge_count'] ?? 0
+			);
 		}
 	}
 
 	/**
 	 * Get the menu items that should be visible for the cached account state.
 	 *
-	 * @return array<int,array{title:string,path:string}>
+	 * @return array<int,array{title:string,path:string,query?:array<string,string>,badge_count?:int}>
 	 */
 	private function get_menu_items(): array {
 		if ( $this->account_service->is_account_rejected() || $this->account_service->is_account_under_review() ) {
@@ -248,7 +278,7 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 	/**
 	 * Get the full native WooPayments submenu for a valid account.
 	 *
-	 * @return array<int,array{title:string,path:string}>
+	 * @return array<int,array{title:string,path:string,query?:array<string,string>,badge_count?:int}>
 	 */
 	private function get_full_menu_items(): array {
 		$menu_items = array(
@@ -260,14 +290,8 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 				'title' => __( 'Payouts', 'woocommerce' ),
 				'path'  => self::PATH_PAYOUTS,
 			),
-			array(
-				'title' => __( 'Transactions', 'woocommerce' ),
-				'path'  => self::PATH_TRANSACTIONS,
-			),
-			array(
-				'title' => __( 'Disputes', 'woocommerce' ),
-				'path'  => self::PATH_DISPUTES,
-			),
+			$this->get_transactions_menu_item(),
+			$this->get_disputes_menu_item(),
 		);
 
 		if ( $this->account_service->is_card_present_eligible() && $this->account_service->has_card_readers_available() ) {
@@ -295,7 +319,7 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 	/**
 	 * Get the reduced native WooPayments submenu for restricted accounts.
 	 *
-	 * @return array<int,array{title:string,path:string}>
+	 * @return array<int,array{title:string,path:string,query?:array<string,string>,badge_count?:int}>
 	 */
 	private function get_reduced_menu_items(): array {
 		return array(
@@ -303,28 +327,64 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 				'title' => __( 'Overview', 'woocommerce' ),
 				'path'  => self::PATH_OVERVIEW,
 			),
-			array(
-				'title' => __( 'Transactions', 'woocommerce' ),
-				'path'  => self::PATH_TRANSACTIONS,
-			),
-			array(
-				'title' => __( 'Disputes', 'woocommerce' ),
-				'path'  => self::PATH_DISPUTES,
-			),
+			$this->get_transactions_menu_item(),
+			$this->get_disputes_menu_item(),
 		);
+	}
+
+	/**
+	 * Get the Transactions menu item with the uncaptured authorization badge when needed.
+	 *
+	 * @return array{title:string,path:string,badge_count?:int}
+	 */
+	private function get_transactions_menu_item(): array {
+		$menu_item = array(
+			'title' => __( 'Transactions', 'woocommerce' ),
+			'path'  => self::PATH_TRANSACTIONS,
+		);
+
+		$count = $this->badge_service->get_uncaptured_transactions_count();
+		if ( $count > 0 ) {
+			$menu_item['badge_count'] = $count;
+		}
+
+		return $menu_item;
+	}
+
+	/**
+	 * Get the Disputes menu item with the awaiting-response badge and filter when needed.
+	 *
+	 * @return array{title:string,path:string,query?:array<string,string>,badge_count?:int}
+	 */
+	private function get_disputes_menu_item(): array {
+		$menu_item = array(
+			'title' => __( 'Disputes', 'woocommerce' ),
+			'path'  => self::PATH_DISPUTES,
+		);
+
+		$count = $this->badge_service->get_disputes_awaiting_response_count();
+		if ( $count > 0 ) {
+			$menu_item['query']       = array( 'filter' => 'awaiting_response' );
+			$menu_item['badge_count'] = $count;
+		}
+
+		return $menu_item;
 	}
 
 	/**
 	 * Append one submenu item under the Core Payments parent.
 	 *
-	 * @param string $title Menu title.
-	 * @param string $path  Native WooPayments settings route path.
+	 * @param string               $title       Menu title.
+	 * @param string               $path        Native WooPayments settings route path.
+	 * @param array<string,string> $query       Extra query args.
+	 * @param int                  $badge_count Badge count.
 	 * @return void
 	 */
-	private function append_menu_item( string $title, string $path ): void {
+	private function append_menu_item( string $title, string $path, array $query = array(), int $badge_count = 0 ): void {
 		global $submenu;
 
 		$parent_slug = $this->get_parent_slug();
+		$query       = array_merge( array( 'from' => Payments::FROM_PAYMENTS_MENU_ITEM ), $query );
 
 		// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited -- WordPress admin menus are registered through global arrays.
 		if ( ! isset( $submenu[ $parent_slug ] ) || ! is_array( $submenu[ $parent_slug ] ) ) {
@@ -332,11 +392,25 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 		}
 
 		$submenu[ $parent_slug ][] = array(
-			$title,
+			esc_html( $title ) . $this->get_notification_badge( $badge_count ),
 			self::CAPABILITY,
-			Utils::wc_payments_settings_url( $path, array( 'from' => Payments::FROM_PAYMENTS_MENU_ITEM ) ),
+			Utils::wc_payments_settings_url( $path, $query ),
 		);
 		// phpcs:enable WordPress.WP.GlobalVariablesOverride.Prohibited
+	}
+
+	/**
+	 * Get a menu notification badge.
+	 *
+	 * @param int $count Badge count.
+	 * @return string
+	 */
+	private function get_notification_badge( int $count ): string {
+		if ( $count <= 0 ) {
+			return '';
+		}
+
+		return sprintf( self::UNRESOLVED_NOTIFICATION_BADGE_FORMAT, $count );
 	}
 
 	/**

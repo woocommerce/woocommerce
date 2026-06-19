@@ -21,6 +21,7 @@ describe( 'Settings Payments provider route bootstrap', () => {
 			).toEqual( [
 				'/woopayments/settings',
 				'/woopayments/settings/express-checkout/:methodId',
+				'/woopayments/settings/fraud-protection',
 				'/woopayments/overview',
 				'/woopayments/payouts',
 				'/woopayments/payouts/details',
