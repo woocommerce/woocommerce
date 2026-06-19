@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the native WooPayments cutover success notice after mandatory plugin deactivation.
