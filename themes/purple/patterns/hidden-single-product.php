@@ -1,12 +1,8 @@
 <?php
 /**
  * Title: WooCommerce Single Product
- * Slug: purple/woocommerce-single-product
- * Categories: page, purple
- * Keywords: woo-commerce, single product, product, page
- * Post Types: page, wp_template
- * Viewport width: 1400
- * Description: A page template for the WooCommerce single product page.
+ * Slug: purple/hidden-single-product
+ * Inserter: no
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Single Product"},"align":"wide","style":{"spacing":{"blockGap":"0","padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"}}},"layout":{"type":"default"}} -->
