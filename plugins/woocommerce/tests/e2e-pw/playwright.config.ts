@@ -143,8 +143,13 @@ const serialRunSpecs = [
 	// Creates a global "Free Shipping" shipping zone (and US store address) that
 	// other workers' cart/checkout flows would pick up.
 	'**/tests/coupons/cart-checkout-restricted-coupons.spec.ts',
-	// Toggle email feature flags and global WooCommerce email settings, and depend
-	// on shared Mailpit inbox state.
+	// Every spec toggles a global email feature flag via `setOption`:
+	// `editor-tracking-selectors`/`settings-email-listing` flip
+	// `woocommerce_feature_block_email_editor_enabled`, while `account-emails`/
+	// `order-emails`/`settings-email` flip `woocommerce_feature_email_improvements_enabled`.
+	// Run in parallel they race on those options — one file's afterAll disables the
+	// editor (or flips improvements) mid-test for the others. Proven not parallel-safe:
+	// an email-only `core-parallel` run failed across all three clusters.
 	'**/tests/email/**/*.spec.ts',
 	// Each spec toggles the global `woocommerce_feature_block_email_editor_enabled`
 	// flag in beforeAll/afterAll; running the files concurrently races on that option
@@ -156,9 +161,6 @@ const serialRunSpecs = [
 	'**/tests/onboarding/**/*.spec.ts',
 	// Toggles the global `woocommerce_calc_taxes` setting and tax classes/rates.
 	'**/tests/order/create-order.spec.ts',
-	// Select-all → bulk "Change status to completed" flips every other worker's
-	// orders on the shared orders list.
-	'**/tests/order/order-bulk-edit.spec.ts',
 	// Toggles the global `woocommerce_downloads_grant_access_after_payment` setting.
 	'**/tests/order/order-edit.spec.ts',
 	// Submits and deletes product reviews via the Review Order form while it runs;
