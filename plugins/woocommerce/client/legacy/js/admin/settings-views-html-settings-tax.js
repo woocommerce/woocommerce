@@ -41,8 +41,10 @@
 
 					/* Rank: exact code (0), code prefix (1), name prefix (2), name substring (3). */
 					response( _.sortBy( matches, function( item ) {
-						var value = item.value.toLowerCase(),
-							label = item.label.toLowerCase();
+						// Some state codes are numeric (e.g. US Minor Outlying Islands),
+						// which arrive as numbers, so coerce to string before comparing.
+						var value = String( item.value ).toLowerCase(),
+							label = String( item.label ).toLowerCase();
 
 						if ( value === term ) {
 							return 0;
