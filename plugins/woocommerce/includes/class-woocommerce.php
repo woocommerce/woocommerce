@@ -444,6 +444,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsDisputesRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCapitalRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsDocumentsRestController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsReportsRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsWebhookReliabilityService::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsOrderTrackingService::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsOperationalQueueService::class )->register();

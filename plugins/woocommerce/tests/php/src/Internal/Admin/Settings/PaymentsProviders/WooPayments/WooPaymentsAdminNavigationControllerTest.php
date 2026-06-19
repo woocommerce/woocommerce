@@ -26,6 +26,7 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Isolate admin menu assertions in this test.
 		$submenu = array();
 		wp_set_current_user( 0 );
+		unset( $_GET['page'], $_GET['tab'], $_GET['path'] );
 
 		parent::tearDown();
 	}
@@ -40,9 +41,11 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 70, has_action( 'admin_menu', array( $sut, 'add_menu_items' ) ) );
 		$this->assertSame( 10, has_action( 'admin_init', array( $sut, 'redirect_legacy_payment_paths' ) ) );
+		$this->assertSame( 10, has_filter( 'woocommerce_admin_shared_settings', array( $sut, 'preload_shared_settings' ) ) );
 
 		remove_action( 'admin_menu', array( $sut, 'add_menu_items' ), 70 );
 		remove_action( 'admin_init', array( $sut, 'redirect_legacy_payment_paths' ), 10 );
+		remove_filter( 'woocommerce_admin_shared_settings', array( $sut, 'preload_shared_settings' ), 10 );
 	}
 
 	/**
@@ -55,6 +58,52 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( has_action( 'admin_menu', array( $sut, 'add_menu_items' ) ) );
 		$this->assertFalse( has_action( 'admin_init', array( $sut, 'redirect_legacy_payment_paths' ) ) );
+		$this->assertFalse( has_filter( 'woocommerce_admin_shared_settings', array( $sut, 'preload_shared_settings' ) ) );
+	}
+
+	/**
+	 * @testdox Should preload the Reports feature flag for native WooPayments routes on the Payments settings page.
+	 */
+	public function test_preloads_reports_feature_flag_on_payments_settings_request(): void {
+		$_GET['page'] = 'wc-settings';
+		$_GET['tab']  = 'checkout';
+		$sut          = $this->create_controller(
+			true,
+			array(
+				'is_reports_enabled' => true,
+			)
+		);
+
+		$settings = $sut->preload_shared_settings(
+			array(
+				'woopaymentsSettings' => array(
+					'featureFlags' => array(
+						'existingFlag' => true,
+					),
+				),
+			)
+		);
+
+		$this->assertTrue( $settings['woopaymentsSettings']['featureFlags']['reportsArea'] );
+		$this->assertTrue( $settings['woopaymentsSettings']['featureFlags']['existingFlag'] );
+	}
+
+	/**
+	 * @testdox Should not preload WooPayments route flags outside the Payments settings page.
+	 */
+	public function test_does_not_preload_reports_feature_flag_outside_payments_settings_request(): void {
+		$_GET['page'] = 'wc-admin';
+		$_GET['tab']  = 'checkout';
+		$sut          = $this->create_controller(
+			true,
+			array(
+				'is_reports_enabled' => true,
+			)
+		);
+
+		$settings = $sut->preload_shared_settings( array() );
+
+		$this->assertSame( array(), $settings );
 	}
 
 	/**
@@ -125,6 +174,59 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 				array(
 					'page' => 'wc-admin',
 					'path' => '%2Fpayments%2Fdocuments',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should map legacy WooPayments WC Admin Reports URLs to the native Reports route when Reports are enabled.
+	 */
+	public function test_maps_legacy_payment_reports_url_to_native_route_when_reports_are_enabled(): void {
+		$sut = $this->create_controller(
+			true,
+			array(
+				'is_reports_enabled' => true,
+			)
+		);
+
+		$url = $sut->get_legacy_payment_path_redirect_url(
+			array(
+				'page'     => 'wc-admin',
+				'path'     => '%2Fpayments%2Freports',
+				'tab'      => 'fees',
+				'view'     => 'fees',
+				'currency' => 'USD',
+			)
+		);
+		parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+
+		$this->assertStringContainsString( 'admin.php?page=wc-settings&tab=checkout', $url );
+		$this->assertStringContainsString( 'path=/woopayments/reports', $url );
+		$this->assertStringContainsString( 'currency=USD', $url );
+		$this->assertStringContainsString( 'view=fees', $url );
+		$this->assertSame( 'checkout', $query['tab'] );
+		$this->assertSame( 'fees', $query['report_tab'] );
+		$this->assertStringNotContainsString( 'page=wc-admin', $url );
+	}
+
+	/**
+	 * @testdox Should not map legacy WooPayments WC Admin Reports URLs when Reports are disabled.
+	 */
+	public function test_does_not_map_legacy_payment_reports_url_when_reports_are_disabled(): void {
+		$sut = $this->create_controller(
+			true,
+			array(
+				'is_reports_enabled' => false,
+			)
+		);
+
+		$this->assertSame(
+			'',
+			$sut->get_legacy_payment_path_redirect_url(
+				array(
+					'page' => 'wc-admin',
+					'path' => '%2Fpayments%2Freports',
 				)
 			)
 		);
@@ -333,9 +435,9 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should add Documents navigation only when Documents are eligible while keeping Reports absent.
+	 * @testdox Should add Documents navigation only when Documents are eligible while Reports are disabled by default.
 	 */
-	public function test_adds_documents_menu_item_only_when_documents_are_enabled_and_keeps_reports_absent(): void {
+	public function test_adds_documents_menu_item_only_when_documents_are_enabled_and_reports_are_disabled_by_default(): void {
 		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
 
 		$sut = $this->create_controller(
@@ -378,6 +480,36 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should add Reports after Transactions for a valid native account when Reports are enabled.
+	 */
+	public function test_adds_reports_menu_item_after_transactions_when_reports_are_enabled(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+
+		$sut = $this->create_controller(
+			true,
+			array(
+				'is_reports_enabled' => true,
+			)
+		);
+		$sut->add_menu_items();
+
+		$items = $this->get_payments_submenu_items();
+
+		$this->assertSame(
+			array(
+				'Overview',
+				'Payouts',
+				'Transactions',
+				'Reports',
+				'Disputes',
+				'Settings',
+			),
+			array_column( $items, 0 )
+		);
+		$this->assertSame( $this->get_settings_url( '/woopayments/reports' ), $this->get_submenu_item_by_title( 'Reports' )[2] );
+	}
+
+	/**
 	 * @testdox Should add reduced WooPayments navigation for rejected and under-review native accounts.
 	 * @dataProvider provider_restricted_account_states
 	 *
@@ -407,6 +539,7 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 			),
 			array_column( $items, 2 )
 		);
+		$this->assertNotContains( 'Reports', array_column( $items, 0 ) );
 	}
 
 	/**
@@ -519,6 +652,7 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 				'has_card_readers_available'             => false,
 				'has_previous_capital_loans'             => false,
 				'is_documents_enabled'                   => false,
+				'is_reports_enabled'                     => false,
 			),
 			$overrides
 		);

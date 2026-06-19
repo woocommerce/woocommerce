@@ -39,7 +39,7 @@ describe( 'WooPayments Settings Payments routes', () => {
 	it( 'registers WooPayments under the Settings Payments route seam', () => {
 		const routes = getSettingsPaymentsProviderRoutes();
 
-		expect( routes ).toHaveLength( 14 );
+		expect( routes ).toHaveLength( 15 );
 		expect(
 			routes.map( ( { id, path: routePath, order } ) => ( {
 				id,
@@ -88,34 +88,39 @@ describe( 'WooPayments Settings Payments routes', () => {
 				order: 121,
 			},
 			{
+				id: 'woopayments-reports',
+				path: '/woopayments/reports',
+				order: 122,
+			},
+			{
 				id: 'woopayments-disputes',
 				path: '/woopayments/disputes',
-				order: 122,
+				order: 123,
 			},
 			{
 				id: 'woopayments-dispute-details',
 				path: '/woopayments/disputes/details',
-				order: 123,
+				order: 124,
 			},
 			{
 				id: 'woopayments-dispute-challenge',
 				path: '/woopayments/disputes/challenge',
-				order: 124,
+				order: 125,
 			},
 			{
 				id: 'woopayments-card-readers',
 				path: '/woopayments/card-readers',
-				order: 125,
+				order: 126,
 			},
 			{
 				id: 'woopayments-capital',
 				path: '/woopayments/loans',
-				order: 126,
+				order: 127,
 			},
 			{
 				id: 'woopayments-documents',
 				path: '/woopayments/documents',
-				order: 127,
+				order: 128,
 			},
 		] );
 		routes.forEach( ( route ) => {
@@ -171,6 +176,50 @@ describe( 'WooPayments Settings Payments routes', () => {
 		expect( source ).toContain(
 			'webpackChunkName: "settings-payments-woopayments-documents"'
 		);
+	} );
+
+	it( 'loads the Reports route from a dedicated chunk', () => {
+		const source = fs.readFileSync(
+			path.resolve( __dirname, '../routes.tsx' ),
+			'utf8'
+		);
+
+		expect( source ).toContain(
+			'webpackChunkName: "settings-payments-woopayments-reports"'
+		);
+	} );
+
+	it( 'does not load the Reports chunk when the Reports feature flag is disabled', () => {
+		window.wcSettings = {
+			adminUrl: 'http://example.com/wp-admin',
+			admin: {
+				woopaymentsSettings: {
+					featureFlags: {
+						reportsArea: false,
+					},
+				},
+			},
+		};
+
+		const route = getSettingsPaymentsProviderRoutes().find(
+			( { path: routePath } ) => routePath === '/woopayments/reports'
+		);
+
+		expect( route ).toBeDefined();
+		if ( ! route ) {
+			throw new Error(
+				'Expected the WooPayments Reports route to exist.'
+			);
+		}
+
+		render( route.element );
+
+		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
+			'Reports are unavailable.'
+		);
+		expect(
+			screen.queryByText( 'Loading WooPayments…' )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'announces lazy route loading through a status fallback', async () => {

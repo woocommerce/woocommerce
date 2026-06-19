@@ -10,6 +10,8 @@ use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymen
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsGetPmPromotionsRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsDocumentsListRequest;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsReportingBalanceSummaryRequest;
+use WCPay\Core\Server\Request\Get_Reporting_Balance_Summary;
 use WCPay\Core\Server\Request\List_Authorizations;
 use WCPay\Core\Server\Request\List_Documents;
 use WC_Unit_Test_Case;
@@ -2924,6 +2926,84 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->expectException( WooPaymentsApiException::class );
 
 		$sut->get_payouts_export_url( '../poexp_test' );
+	}
+
+	/**
+	 * @testdox Should retrieve reporting balance summary through the preserved request object and filter.
+	 */
+	public function test_get_reporting_balance_summary_preserves_legacy_request_filter_contract(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'data' => array( 'available' => array() ) ) ),
+		);
+		$observed_request      = null;
+
+		$filter = function ( Get_Reporting_Balance_Summary $request ) use ( &$observed_request ): Get_Reporting_Balance_Summary {
+			$observed_request = $request;
+			$this->assertSame( 'reporting/balance_summary', $request->get_api() );
+			$this->assertSame( 'GET', $request->get_method() );
+			$request->set_currency( 'EUR' );
+
+			return $request;
+		};
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+		add_filter( 'wcpay_get_reporting_balance_summary_request', $filter );
+
+		try {
+			$result = $sut->get_reporting_balance_summary(
+				array(
+					'date_start' => '2026-06-01T00:00:00Z',
+					'date_end'   => '2026-06-19T23:59:59Z',
+					'currency'   => 'usd',
+					'ignored'    => 'drop-me',
+				)
+			);
+		} finally {
+			remove_filter( 'wcpay_get_reporting_balance_summary_request', $filter );
+		}
+
+		$this->assertSame( array( 'data' => array( 'available' => array() ) ), $result );
+		$this->assertInstanceOf( WooPaymentsReportingBalanceSummaryRequest::class, $observed_request );
+		$query = array();
+		parse_str( (string) wp_parse_url( $http_client->last_path, PHP_URL_QUERY ), $query );
+
+		$this->assertSame( '/sites/123/wcpay/reporting/balance_summary', strtok( $http_client->last_path, '?' ) );
+		$this->assertSame( '0', $query['test_mode'] );
+		$this->assertSame( '2026-06-01T00:00:00Z', $query['date_start'] );
+		$this->assertSame( '2026-06-19T23:59:59Z', $query['date_end'] );
+		$this->assertSame( 'eur', $query['currency'] );
+		$this->assertArrayNotHasKey( 'ignored', $query );
+	}
+
+	/**
+	 * @testdox Should reject invalid reporting balance summary currencies before transport.
+	 */
+	public function test_get_reporting_balance_summary_rejects_invalid_currency_before_transport(): void {
+		$http_client          = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id = 123;
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		try {
+			$sut->get_reporting_balance_summary(
+				array(
+					'date_start' => '2026-06-01T00:00:00Z',
+					'date_end'   => '2026-06-19T23:59:59Z',
+					'currency'   => 'usd1',
+				)
+			);
+			$this->fail( 'Invalid reporting currency should throw before transport.' );
+		} catch ( WooPaymentsApiException $exception ) {
+			$this->assertSame( 400, $exception->get_http_code() );
+		}
+
+		$this->assertSame( '', $http_client->last_path );
 	}
 
 	/**

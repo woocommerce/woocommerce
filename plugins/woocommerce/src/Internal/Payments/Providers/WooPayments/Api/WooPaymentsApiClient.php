@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAc
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAuthorizationsListRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsDocumentsListRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPaginatedListRequest;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsReportingBalanceSummaryRequest;
 use WP_Error;
 use WP_REST_Request;
 
@@ -133,6 +134,9 @@ class WooPaymentsApiClient {
 	 */
 	private const TRANSACTIONS_API = 'transactions';
 
+	/**
+	 * WooPayments reporting API path.
+	 */
 	/**
 	 * WooPayments authorizations API path.
 	 */
@@ -745,6 +749,29 @@ class WooPaymentsApiClient {
 	 */
 	public function get_transactions( array $query = array() ): array {
 		return $this->request( $query, self::TRANSACTIONS_API, 'GET' );
+	}
+
+	/**
+	 * Retrieve WooPayments reporting balance summary.
+	 *
+	 * @param array<string,mixed> $query Query params.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_reporting_balance_summary( array $query = array() ): array {
+		return $this->request_with_legacy_request_filter(
+			WooPaymentsReportingBalanceSummaryRequest::from_params(
+				array_intersect_key(
+					$query,
+					array(
+						'date_start' => true,
+						'date_end'   => true,
+						'currency'   => true,
+					)
+				)
+			),
+			'wcpay_get_reporting_balance_summary_request'
+		);
 	}
 
 	/**
@@ -1906,6 +1933,8 @@ class WooPaymentsApiClient {
 			WooPaymentsAuthorizationsListRequest::register_legacy_alias();
 		} elseif ( $request instanceof WooPaymentsDocumentsListRequest ) {
 			WooPaymentsDocumentsListRequest::register_legacy_alias();
+		} elseif ( $request instanceof WooPaymentsReportingBalanceSummaryRequest ) {
+			WooPaymentsReportingBalanceSummaryRequest::register_legacy_alias();
 		} else {
 			WooPaymentsApiRequest::register_legacy_aliases();
 		}

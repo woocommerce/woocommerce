@@ -65,6 +65,13 @@ const WooPaymentsTransactionDetailsChunk = lazy(
 		)
 );
 
+const WooPaymentsReportsChunk = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "settings-payments-woopayments-reports" */ './reports'
+		)
+);
+
 const WooPaymentsDisputesChunk = lazy(
 	() =>
 		import(
@@ -107,6 +114,38 @@ const WooPaymentsDocumentsChunk = lazy(
 		)
 );
 
+type WooPaymentsRouteWindow = typeof globalThis & {
+	wcSettings?: {
+		admin?: {
+			woopaymentsSettings?: {
+				featureFlags?: {
+					reportsArea?: boolean;
+				};
+			};
+		};
+	};
+	wcpaySettings?: {
+		featureFlags?: {
+			reportsArea?: boolean;
+		};
+	};
+};
+
+const getReportsAreaFeatureFlag = () => {
+	const settings = globalThis as WooPaymentsRouteWindow;
+	const nativeFlag =
+		settings.wcSettings?.admin?.woopaymentsSettings?.featureFlags
+			?.reportsArea;
+
+	if ( typeof nativeFlag === 'boolean' ) {
+		return nativeFlag;
+	}
+
+	const legacyFlag = settings.wcpaySettings?.featureFlags?.reportsArea;
+
+	return typeof legacyFlag === 'boolean' ? legacyFlag : true;
+};
+
 const LoadingFallback = () => (
 	<div role="status" aria-live="polite" aria-busy="true">
 		{ sprintf(
@@ -116,6 +155,21 @@ const LoadingFallback = () => (
 		) }
 	</div>
 );
+
+const WooPaymentsReportsUnavailable = () => (
+	<div role="status" aria-live="polite">
+		{ __( 'Reports are unavailable.', 'woocommerce' ) }
+	</div>
+);
+
+const WooPaymentsReportsRoute = () =>
+	getReportsAreaFeatureFlag() ? (
+		<Suspense fallback={ <LoadingFallback /> }>
+			<WooPaymentsReportsChunk />
+		</Suspense>
+	) : (
+		<WooPaymentsReportsUnavailable />
+	);
 
 registerSettingsPaymentsProviderRoute( {
 	id: 'woopayments-settings',
@@ -206,9 +260,16 @@ registerSettingsPaymentsProviderRoute( {
 } );
 
 registerSettingsPaymentsProviderRoute( {
+	id: 'woopayments-reports',
+	path: '/woopayments/reports',
+	order: 122,
+	element: <WooPaymentsReportsRoute />,
+} );
+
+registerSettingsPaymentsProviderRoute( {
 	id: 'woopayments-disputes',
 	path: '/woopayments/disputes',
-	order: 122,
+	order: 123,
 	element: (
 		<Suspense fallback={ <LoadingFallback /> }>
 			<WooPaymentsDisputesChunk />
@@ -219,7 +280,7 @@ registerSettingsPaymentsProviderRoute( {
 registerSettingsPaymentsProviderRoute( {
 	id: 'woopayments-dispute-details',
 	path: '/woopayments/disputes/details',
-	order: 123,
+	order: 124,
 	element: (
 		<Suspense fallback={ <LoadingFallback /> }>
 			<WooPaymentsDisputeDetailsChunk />
@@ -230,7 +291,7 @@ registerSettingsPaymentsProviderRoute( {
 registerSettingsPaymentsProviderRoute( {
 	id: 'woopayments-dispute-challenge',
 	path: '/woopayments/disputes/challenge',
-	order: 124,
+	order: 125,
 	element: (
 		<Suspense fallback={ <LoadingFallback /> }>
 			<WooPaymentsDisputeChallengeChunk />
@@ -241,7 +302,7 @@ registerSettingsPaymentsProviderRoute( {
 registerSettingsPaymentsProviderRoute( {
 	id: 'woopayments-card-readers',
 	path: '/woopayments/card-readers',
-	order: 125,
+	order: 126,
 	element: (
 		<Suspense fallback={ <LoadingFallback /> }>
 			<WooPaymentsCardReadersChunk />
@@ -252,7 +313,7 @@ registerSettingsPaymentsProviderRoute( {
 registerSettingsPaymentsProviderRoute( {
 	id: 'woopayments-capital',
 	path: '/woopayments/loans',
-	order: 126,
+	order: 127,
 	element: (
 		<Suspense fallback={ <LoadingFallback /> }>
 			<WooPaymentsCapitalChunk />
@@ -263,7 +324,7 @@ registerSettingsPaymentsProviderRoute( {
 registerSettingsPaymentsProviderRoute( {
 	id: 'woopayments-documents',
 	path: '/woopayments/documents',
-	order: 127,
+	order: 128,
 	element: (
 		<Suspense fallback={ <LoadingFallback /> }>
 			<WooPaymentsDocumentsChunk />

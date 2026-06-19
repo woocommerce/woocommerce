@@ -40,6 +40,8 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 
 	private const PATH_TRANSACTION_DETAILS = '/woopayments/transactions/details';
 
+	private const PATH_REPORTS = '/woopayments/reports';
+
 	private const PATH_DISPUTES = '/woopayments/disputes';
 
 	private const PATH_DISPUTE_DETAILS = '/woopayments/disputes/details';
@@ -58,7 +60,8 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 
 	private const LEGACY_DOCUMENTS_ROUTE = '/payments/documents';
 
-	// Reports legacy routes are intentionally absent until their native UI/API surfaces are ported.
+	private const LEGACY_REPORTS_ROUTE = '/payments/reports';
+
 	private const LEGACY_ROUTE_REDIRECTS = array(
 		'/payments/overview'             => self::PATH_OVERVIEW,
 		'/payments/deposits'             => self::PATH_PAYOUTS,
@@ -67,6 +70,7 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 		'/payments/payouts/details'      => self::PATH_PAYOUT_DETAILS,
 		'/payments/transactions'         => self::PATH_TRANSACTIONS,
 		'/payments/transactions/details' => self::PATH_TRANSACTION_DETAILS,
+		self::LEGACY_REPORTS_ROUTE       => self::PATH_REPORTS,
 		'/payments/disputes'             => self::PATH_DISPUTES,
 		'/payments/disputes/details'     => self::PATH_DISPUTE_DETAILS,
 		'/payments/disputes/challenge'   => self::PATH_DISPUTE_CHALLENGE,
@@ -131,6 +135,40 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 		if ( false === has_action( 'admin_init', array( $this, 'redirect_legacy_payment_paths' ) ) ) {
 			add_action( 'admin_init', array( $this, 'redirect_legacy_payment_paths' ) );
 		}
+
+		if ( false === has_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_shared_settings' ) ) ) {
+			add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_shared_settings' ) );
+		}
+	}
+
+	/**
+	 * Preload native WooPayments settings for the Payments settings page frontend.
+	 *
+	 * @param mixed $settings Shared admin settings.
+	 * @return array<mixed>
+	 */
+	public function preload_shared_settings( $settings = array() ): array {
+		if ( ! is_array( $settings ) ) {
+			$settings = array();
+		}
+
+		if ( ! $this->is_payments_settings_request() ) {
+			return $settings;
+		}
+
+		if ( ! isset( $settings['woopaymentsSettings'] ) || ! is_array( $settings['woopaymentsSettings'] ) ) {
+			$settings['woopaymentsSettings'] = array();
+		}
+
+		$feature_flags = $settings['woopaymentsSettings']['featureFlags'] ?? array();
+		if ( ! is_array( $feature_flags ) ) {
+			$feature_flags = array();
+		}
+
+		$feature_flags['reportsArea']                    = $this->account_service->is_reports_enabled();
+		$settings['woopaymentsSettings']['featureFlags'] = $feature_flags;
+
+		return $settings;
 	}
 
 	/**
@@ -178,6 +216,10 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 			return '';
 		}
 
+		if ( self::LEGACY_REPORTS_ROUTE === $legacy_path && ! $this->account_service->is_reports_enabled() ) {
+			return '';
+		}
+
 		$query = array();
 		foreach ( $request as $key => $value ) {
 			if ( in_array( $key, array( 'page', 'path' ), true ) || ! is_scalar( $value ) ) {
@@ -190,6 +232,11 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 			}
 
 			$query[ $sanitized_key ] = sanitize_text_field( wp_unslash( (string) $value ) );
+		}
+
+		if ( self::LEGACY_REPORTS_ROUTE === $legacy_path && isset( $query['tab'] ) ) {
+			$query['report_tab'] = $query['tab'];
+			unset( $query['tab'] );
 		}
 
 		return Utils::wc_payments_settings_url( $target_path, $query );
@@ -223,6 +270,20 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 		}
 
 		return wp_unslash( (string) $request[ $key ] );
+	}
+
+	/**
+	 * Tell whether the current admin request is the Core Payments settings page.
+	 *
+	 * @return bool
+	 */
+	private function is_payments_settings_request(): bool {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only request routing for admin shared settings.
+		$page = $this->get_request_scalar( $_GET, 'page' );
+		$tab  = $this->get_request_scalar( $_GET, 'tab' );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		return 'wc-settings' === $page && 'checkout' === $tab;
 	}
 
 	/**
@@ -300,8 +361,16 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 				'path'  => self::PATH_PAYOUTS,
 			),
 			$this->get_transactions_menu_item(),
-			$this->get_disputes_menu_item(),
 		);
+
+		if ( $this->account_service->is_reports_enabled() ) {
+			$menu_items[] = array(
+				'title' => __( 'Reports', 'woocommerce' ),
+				'path'  => self::PATH_REPORTS,
+			);
+		}
+
+		$menu_items[] = $this->get_disputes_menu_item();
 
 		if ( $this->account_service->is_card_present_eligible() && $this->account_service->has_card_readers_available() ) {
 			$menu_items[] = array(

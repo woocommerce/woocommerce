@@ -25,6 +25,8 @@ class WooPaymentsAccountService implements RegisterHooksInterface {
 
 	private const SETTINGS_OPTION = 'woocommerce_woocommerce_payments_settings';
 
+	private const REPORTS_AREA_FLAG_OPTION = '_wcpay_feature_reports_area';
+
 	private const ONBOARDING_TEST_MODE_OPTION = 'wcpay_onboarding_test_mode';
 
 	private const ONBOARDING_DISABLED_TRANSIENT = 'wcpay_on_boarding_disabled';
@@ -845,6 +847,22 @@ class WooPaymentsAccountService implements RegisterHooksInterface {
 		$account_data = $this->get_cached_account_data();
 
 		return $this->has_account() && $this->is_truthy( $account_data['is_documents_enabled'] ?? false );
+	}
+
+	/**
+	 * Tell whether the cached account is eligible for Reports.
+	 *
+	 * @since 11.0.0
+	 * @return bool
+	 */
+	public function is_reports_enabled(): bool {
+		$enabled = $this->legacy_proxy->call_function( 'get_option', self::REPORTS_AREA_FLAG_OPTION, '0' );
+
+		if ( '1' !== (string) $enabled ) {
+			return false;
+		}
+
+		return $this->has_account();
 	}
 
 	/**

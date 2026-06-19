@@ -1,0 +1,81 @@
+.woocommerce-woopayments-reports {
+	max-width: 1120px;
+
+	&__intro {
+		margin: 0 0 16px;
+		color: #50575e;
+	}
+
+	&__tabs {
+		display: flex;
+		gap: 4px;
+		margin-bottom: 24px;
+		border-bottom: 1px solid #dcdcde;
+
+		[role="tab"] {
+			margin: 0;
+			padding: 10px 14px;
+			border: 0;
+			border-bottom: 3px solid transparent;
+			background: transparent;
+			color: #2c3338;
+			cursor: pointer;
+
+			&[aria-selected="true"] {
+				border-bottom-color: #007cba;
+				color: #1d2327;
+				font-weight: 600;
+			}
+
+			&:focus-visible {
+				outline: 2px solid #007cba;
+				outline-offset: 2px;
+			}
+		}
+	}
+
+	&__toolbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px;
+		margin-bottom: 16px;
+
+		h2 {
+			margin: 0;
+			font-size: 20px;
+			line-height: 28px;
+		}
+	}
+
+	&__date-range {
+		min-width: 180px;
+		margin: 0;
+	}
+
+	&__actions {
+		display: flex;
+		gap: 8px;
+	}
+}
+
+.woocommerce-woopayments-reports-state {
+	max-width: 560px;
+	padding: 24px;
+	border: 1px solid #dcdcde;
+	background: #fff;
+
+	h2 {
+		margin-top: 0;
+		font-size: 20px;
+		line-height: 28px;
+	}
+
+	&__description {
+		color: #50575e;
+	}
+
+	&__action {
+		margin-top: 16px;
+	}
+}

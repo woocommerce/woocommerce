@@ -29,6 +29,7 @@ class WooPaymentsAccountServiceTest extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_woopayments_nox_profile' );
 		delete_option( 'woocommerce_woopayments_nox_onboarding_locked' );
 		delete_option( 'wcpay_account_deletion_pending_id' );
+		delete_option( '_wcpay_feature_reports_area' );
 		foreach ( $this->get_preserved_database_cache_keys() as $cache_key ) {
 			delete_option( $cache_key );
 		}
@@ -473,6 +474,49 @@ class WooPaymentsAccountServiceTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $sut->is_documents_enabled() );
 		$this->assertFalse( $sut->has_submitted_vat_data() );
+	}
+
+	/**
+	 * @testdox Should expose Reports eligibility from the preserved feature flag when an account exists.
+	 */
+	public function test_exposes_reports_feature_flag_from_preserved_option(): void {
+		update_option( 'wcpay_account_data', array( 'data' => $this->get_valid_live_account_payload() ) );
+		update_option( '_wcpay_feature_reports_area', '1' );
+
+		$sut = $this->create_service();
+
+		$this->assertTrue( method_exists( $sut, 'is_reports_enabled' ), 'Reports eligibility should be part of the native account service contract.' );
+		$this->assertTrue( $sut->is_reports_enabled() );
+
+		update_option( '_wcpay_feature_reports_area', '0' );
+		$sut = $this->create_service();
+
+		$this->assertFalse( $sut->is_reports_enabled() );
+	}
+
+	/**
+	 * @testdox Should fail closed for Reports when the flag is enabled but no account exists.
+	 */
+	public function test_reports_feature_flag_requires_an_account(): void {
+		update_option( '_wcpay_feature_reports_area', '1' );
+
+		$sut = $this->create_service();
+
+		$this->assertTrue( method_exists( $sut, 'is_reports_enabled' ), 'Reports eligibility should be part of the native account service contract.' );
+		$this->assertFalse( $sut->is_reports_enabled() );
+	}
+
+	/**
+	 * @testdox Should not read account data when the Reports feature flag is disabled.
+	 */
+	public function test_reports_feature_flag_disabled_short_circuits_account_read(): void {
+		$api_client = $this->create_counting_account_api_client( $this->get_valid_live_account_payload() );
+		$sut        = $this->create_service_with_api_client( $api_client );
+
+		update_option( '_wcpay_feature_reports_area', '0' );
+
+		$this->assertFalse( $sut->is_reports_enabled() );
+		$this->assertSame( 0, $api_client->calls, 'Disabled Reports should not trigger an account refresh.' );
 	}
 
 	/**
