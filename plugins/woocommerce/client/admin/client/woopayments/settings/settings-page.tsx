@@ -13,12 +13,13 @@ import {
 	TextControl,
 } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _x, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { getSettingsPaymentsProviderRouteUrl } from '../admin/utils';
+import { AccountModeNotice } from './account-mode-notice';
 import { getWooPaymentsSettingsBootstrap } from './bootstrap';
 import {
 	saveOption,
@@ -26,11 +27,12 @@ import {
 } from './data/actions';
 import { FraudProtectionSettings } from './fraud-protection';
 import { WooPaymentsPaymentMethodsList } from './payment-methods-list';
+import { PayoutBankAccount } from './payout-bank-account';
+import { SettingsBusyState } from './settings-busy-state';
 import {
 	useAccountBusinessSupportEmail,
 	useAccountBusinessSupportPhone,
 	useAccountCommunicationsEmail,
-	useAccountDomesticCurrency,
 	useAccountStatementDescriptor,
 	useAccountStatementDescriptorKana,
 	useAccountStatementDescriptorKanji,
@@ -69,6 +71,7 @@ import {
 	useWCPaySubscriptions,
 } from './data/hooks';
 import './data/store';
+import './settings-page-only.scss';
 import './style.scss';
 
 const PROVIDER_NAME = 'WooPayments';
@@ -136,6 +139,60 @@ const asPayoutWeeklyAnchor = ( value: string ): PayoutWeeklyAnchor =>
 	[ 'monday', 'tuesday', 'wednesday', 'thursday', 'friday' ].includes( value )
 		? ( value as PayoutWeeklyAnchor )
 		: 'monday';
+
+const getMonthlyAnchorLabel = ( anchor: number ) => {
+	if ( anchor === 31 ) {
+		return __( 'Last day of the month', 'woocommerce' );
+	}
+
+	if ( [ 1, 21 ].includes( anchor ) ) {
+		return sprintf(
+			/* translators: %d: Day of the month. */
+			_x( '%dst', 'monthly payout schedule day option', 'woocommerce' ),
+			anchor
+		);
+	}
+
+	if ( [ 2, 22 ].includes( anchor ) ) {
+		return sprintf(
+			/* translators: %d: Day of the month. */
+			_x( '%dnd', 'monthly payout schedule day option', 'woocommerce' ),
+			anchor
+		);
+	}
+
+	if ( [ 3, 23 ].includes( anchor ) ) {
+		return sprintf(
+			/* translators: %d: Day of the month. */
+			_x( '%drd', 'monthly payout schedule day option', 'woocommerce' ),
+			anchor
+		);
+	}
+
+	return sprintf(
+		/* translators: %d: Day of the month. */
+		_x( '%dth', 'monthly payout schedule day option', 'woocommerce' ),
+		anchor
+	);
+};
+
+const getPayoutScheduleHelpText = ( payoutInterval: PayoutInterval ) => {
+	if ( payoutInterval === 'monthly' ) {
+		return __(
+			'Payouts scheduled on a weekend will be sent on the next business day.',
+			'woocommerce'
+		);
+	}
+
+	if ( payoutInterval === 'weekly' ) {
+		return __(
+			'Payouts that fall on a holiday will initiate on the next business day.',
+			'woocommerce'
+		);
+	}
+
+	return __( 'Payouts will occur every business day.', 'woocommerce' );
+};
 
 const asSettingsRecord = ( value: unknown ): SettingsRecord =>
 	value && typeof value === 'object' ? ( value as SettingsRecord ) : {};
@@ -259,6 +316,7 @@ const GeneralSettingsSection = () => {
 					</p>
 				}
 			>
+				<AccountModeNotice isDevModeEnabled={ isDevModeEnabled } />
 				<CheckboxControl
 					checked={ isWCPayEnabled }
 					label={ sprintf(
@@ -829,7 +887,6 @@ const PayoutsSettingsSection = () => {
 	const completedWaitingPeriod = Boolean( useCompletedWaitingPeriod() );
 	const depositStatus = asString( useDepositStatus() );
 	const depositRestrictions = asString( useDepositRestrictions() );
-	const domesticCurrency = asString( useAccountDomesticCurrency() );
 	const accountCountry = asString(
 		asSettingsRecord( useGetSettings() ).account_country
 	);
@@ -866,107 +923,109 @@ const PayoutsSettingsSection = () => {
 				</p>
 			}
 		>
-			{ isScheduleRestricted && (
-				<Notice status="warning" isDismissible={ false }>
-					<p>
-						{ __(
-							'Payout scheduling is currently unavailable for this account.',
-							'woocommerce'
-						) }
-					</p>
-					<ExternalLink href="https://woocommerce.com/document/woopayments/payouts/payout-schedule/">
-						{ __( 'Learn more', 'woocommerce' ) }
-					</ExternalLink>
-				</Notice>
-			) }
-			{ ! isScheduleRestricted && isWaitingPeriodIncomplete && (
-				<Notice status="warning" isDismissible={ false }>
-					<p>
-						{ __(
-							'Payout scheduling becomes available after the standard waiting period for new accounts is complete.',
-							'woocommerce'
-						) }
-					</p>
-					<ExternalLink href="https://woocommerce.com/document/woopayments/payouts/payout-schedule/">
-						{ __( 'Learn more', 'woocommerce' ) }
-					</ExternalLink>
-				</Notice>
-			) }
-			{ ! isScheduleRestricted && ! isWaitingPeriodIncomplete && (
-				<div className="woopayments-settings-control-grid">
-					<SelectControl
-						label={ __( 'Frequency', 'woocommerce' ) }
-						value={ payoutInterval }
-						options={ intervalOptions }
-						onChange={ setInterval }
-						__nextHasNoMarginBottom
-						__next40pxDefaultSize
-					/>
-					{ payoutInterval === 'weekly' && (
-						<SelectControl
-							label={ __( 'Day', 'woocommerce' ) }
-							value={ asPayoutWeeklyAnchor( weeklyAnchor ) }
-							options={ [
-								{
-									label: __( 'Monday', 'woocommerce' ),
-									value: 'monday',
-								},
-								{
-									label: __( 'Tuesday', 'woocommerce' ),
-									value: 'tuesday',
-								},
-								{
-									label: __( 'Wednesday', 'woocommerce' ),
-									value: 'wednesday',
-								},
-								{
-									label: __( 'Thursday', 'woocommerce' ),
-									value: 'thursday',
-								},
-								{
-									label: __( 'Friday', 'woocommerce' ),
-									value: 'friday',
-								},
-							] }
-							onChange={ setWeeklyAnchor }
-							__nextHasNoMarginBottom
-							__next40pxDefaultSize
-						/>
-					) }
-					{ payoutInterval === 'monthly' && (
-						<SelectControl
-							label={ __( 'Date', 'woocommerce' ) }
-							value={ monthlyAnchor }
-							options={ [
-								...Array.from(
-									{ length: 28 },
-									( _value, index ) => ( {
-										label: String( index + 1 ),
-										value: String( index + 1 ),
-									} )
-								),
-								{
-									label: __(
-										'Last day of the month',
-										'woocommerce'
-									),
-									value: '31',
-								},
-							] }
-							onChange={ setMonthlyAnchor }
-							__nextHasNoMarginBottom
-							__next40pxDefaultSize
-						/>
-					) }
-				</div>
-			) }
-			<p className="woopayments-settings-muted">
-				{ sprintf(
-					/* translators: %s: Currency code. */
-					__( 'Payout currency: %s', 'woocommerce' ),
-					domesticCurrency || '-'
+			<FieldGroup title={ __( 'Payout schedule', 'woocommerce' ) }>
+				{ isScheduleRestricted && (
+					<Notice status="warning" isDismissible={ false }>
+						<p>
+							{ __(
+								'Payout scheduling is currently unavailable for this account.',
+								'woocommerce'
+							) }
+						</p>
+						<ExternalLink href="https://woocommerce.com/document/woopayments/payouts/payout-schedule/">
+							{ __( 'Learn more', 'woocommerce' ) }
+						</ExternalLink>
+					</Notice>
 				) }
-			</p>
+				{ ! isScheduleRestricted && isWaitingPeriodIncomplete && (
+					<Notice status="warning" isDismissible={ false }>
+						<p>
+							{ __(
+								'Payout scheduling becomes available after the standard 7-day waiting period for new accounts is complete.',
+								'woocommerce'
+							) }
+						</p>
+						<ExternalLink href="https://woocommerce.com/document/woopayments/payouts/payout-schedule/">
+							{ __( 'Learn more', 'woocommerce' ) }
+						</ExternalLink>
+					</Notice>
+				) }
+				{ ! isScheduleRestricted && ! isWaitingPeriodIncomplete && (
+					<div className="woopayments-settings-control-grid">
+						<SelectControl
+							label={ __( 'Frequency', 'woocommerce' ) }
+							value={ payoutInterval }
+							options={ intervalOptions }
+							onChange={ setInterval }
+							__nextHasNoMarginBottom
+							__next40pxDefaultSize
+						/>
+						{ payoutInterval === 'weekly' && (
+							<SelectControl
+								label={ __( 'Day', 'woocommerce' ) }
+								value={ asPayoutWeeklyAnchor( weeklyAnchor ) }
+								options={ [
+									{
+										label: __( 'Monday', 'woocommerce' ),
+										value: 'monday',
+									},
+									{
+										label: __( 'Tuesday', 'woocommerce' ),
+										value: 'tuesday',
+									},
+									{
+										label: __( 'Wednesday', 'woocommerce' ),
+										value: 'wednesday',
+									},
+									{
+										label: __( 'Thursday', 'woocommerce' ),
+										value: 'thursday',
+									},
+									{
+										label: __( 'Friday', 'woocommerce' ),
+										value: 'friday',
+									},
+								] }
+								onChange={ setWeeklyAnchor }
+								__nextHasNoMarginBottom
+								__next40pxDefaultSize
+							/>
+						) }
+						{ payoutInterval === 'monthly' && (
+							<SelectControl
+								label={ __( 'Date', 'woocommerce' ) }
+								value={ monthlyAnchor }
+								options={ [
+									...Array.from(
+										{ length: 28 },
+										( _value, index ) => ( {
+											label: getMonthlyAnchorLabel(
+												index + 1
+											),
+											value: String( index + 1 ),
+										} )
+									),
+									{
+										label: getMonthlyAnchorLabel( 31 ),
+										value: '31',
+									},
+								] }
+								onChange={ setMonthlyAnchor }
+								__nextHasNoMarginBottom
+								__next40pxDefaultSize
+							/>
+						) }
+					</div>
+				) }
+				{ ! isScheduleRestricted && ! isWaitingPeriodIncomplete && (
+					<p className="woopayments-settings-muted">
+						{ getPayoutScheduleHelpText( payoutInterval ) }
+					</p>
+				) }
+			</FieldGroup>
+			<FieldGroup title={ __( 'Payout bank account', 'woocommerce' ) }>
+				<PayoutBankAccount />
+			</FieldGroup>
 		</SettingsSection>
 	);
 };
@@ -1178,7 +1237,7 @@ export const WooPaymentsSettingsPage = () => {
 					{ __( 'Loading WooPayments settings…', 'woocommerce' ) }
 				</p>
 			) : (
-				<>
+				<SettingsBusyState isBusy={ isSaving }>
 					<GeneralSettingsSection />
 					<PaymentMethodsSettingsSection />
 					<BuyNowPayLaterSettingsSection />
@@ -1201,7 +1260,7 @@ export const WooPaymentsSettingsPage = () => {
 						</p>
 					) }
 					<SaveSettingsSection disabled={ isSaving } />
-				</>
+				</SettingsBusyState>
 			) }
 		</section>
 	);

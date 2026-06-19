@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { speak } from '@wordpress/a11y';
 import apiFetch from '@wordpress/api-fetch';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -11,8 +12,12 @@ import userEvent from '@testing-library/user-event';
 import { WooPaymentsSettingsPage } from '../settings-page';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+jest.mock( '@wordpress/a11y', () => ( {
+	speak: jest.fn(),
+} ) );
 
 const mockApiFetch = apiFetch as jest.MockedFunction< typeof apiFetch >;
+const mockSpeak = speak as jest.MockedFunction< typeof speak >;
 
 const mockSaveSettings = jest.fn();
 const mockUseSettings = jest.fn();
@@ -261,7 +266,35 @@ const setHookDefaults = () => {
 describe( 'WooPaymentsSettingsPage', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
-		mockApiFetch.mockResolvedValue( {} );
+		mockApiFetch.mockImplementation( ( options ) => {
+			const path = typeof options === 'string' ? options : options?.path;
+
+			if ( path === '/wc-admin/settings/payments/woopayments/account' ) {
+				return Promise.resolve( {
+					account: {
+						id: 'acct_live',
+						mode: 'live',
+						default_currency: 'usd',
+						connected: true,
+						working: true,
+						can_process_payments: true,
+						test_mode: false,
+						test_drive: false,
+						sandbox: false,
+						live: true,
+					},
+					urls: {
+						setup: 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/onboarding',
+					},
+				} );
+			}
+
+			if ( path === '/wc/v3/payments/deposits/overview-all' ) {
+				return new Promise( () => {} );
+			}
+
+			return Promise.resolve( {} );
+		} );
 		setHookDefaults();
 	} );
 
@@ -777,6 +810,181 @@ describe( 'WooPaymentsSettingsPage', () => {
 		expect( setTestMode ).toHaveBeenCalledWith( true );
 	} );
 
+	it( 'renders the test-account switch-to-live notice and modal', async () => {
+		mockApiFetch.mockImplementation( ( options ) => {
+			const path = typeof options === 'string' ? options : options?.path;
+
+			if ( path === '/wc-admin/settings/payments/woopayments/account' ) {
+				return Promise.resolve( {
+					account: {
+						id: 'acct_test',
+						mode: 'test',
+						default_currency: 'usd',
+						connected: true,
+						working: true,
+						can_process_payments: true,
+						test_mode: true,
+						test_drive: true,
+						sandbox: false,
+						live: false,
+					},
+					urls: {
+						setup: 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/onboarding',
+					},
+				} );
+			}
+
+			return Promise.resolve( {
+				account: {
+					account_link: 'https://connect.stripe.test/account',
+					default_currency: 'usd',
+					default_external_accounts: [],
+				},
+			} );
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			await screen.findByText( 'You are using a test account.' )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				'Provide additional details about your business so you can begin accepting real payments.'
+			)
+		).toBeInTheDocument();
+
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Activate payments' } )
+		);
+
+		const dialog = screen.getByRole( 'dialog', {
+			name: 'Activate payments on your store',
+		} );
+		expect(
+			within( dialog ).getByText(
+				"Before continuing, please make sure that you're aware of the following:"
+			)
+		).toBeInTheDocument();
+		expect(
+			within( dialog ).getByText(
+				'Your test account will be deactivated, but your transactions can be found in your order history.'
+			)
+		).toBeInTheDocument();
+		expect(
+			within( dialog ).getByText(
+				'To use WooPayments, you will need to verify your business details.'
+			)
+		).toBeInTheDocument();
+		expect(
+			within( dialog ).getByText(
+				'In order to receive payouts, you will need to provide your bank details.'
+			)
+		).toBeInTheDocument();
+		expect(
+			within( dialog ).getByRole( 'link', {
+				name: 'Activate payments',
+			} )
+		).toHaveAttribute(
+			'href',
+			expect.stringContaining( 'from=wcpay-setup-live-payments' )
+		);
+	} );
+
+	it( 'opens the setup-live modal from the legacy activation event bridge', async () => {
+		mockApiFetch.mockImplementation( ( options ) => {
+			const path = typeof options === 'string' ? options : options?.path;
+
+			if ( path === '/wc-admin/settings/payments/woopayments/account' ) {
+				return Promise.resolve( {
+					account: {
+						id: 'acct_test',
+						mode: 'test',
+						default_currency: 'usd',
+						connected: true,
+						working: true,
+						can_process_payments: true,
+						test_mode: true,
+						test_drive: true,
+						sandbox: false,
+						live: false,
+					},
+					urls: {
+						setup: 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/onboarding',
+					},
+				} );
+			}
+
+			return Promise.resolve( {
+				account: {
+					account_link: 'https://connect.stripe.test/account',
+					default_currency: 'usd',
+					default_external_accounts: [],
+				},
+			} );
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await screen.findByText( 'You are using a test account.' );
+		fireEvent( document, new CustomEvent( 'wcpay:activate_payments' ) );
+
+		expect(
+			await screen.findByRole( 'dialog', {
+				name: 'Activate payments on your store',
+			} )
+		).toBeInTheDocument();
+	} );
+
+	it( 'renders the reference development-mode test-account warning copy', async () => {
+		mockUseDevMode.mockReturnValue( true );
+		mockApiFetch.mockImplementation( ( options ) => {
+			const path = typeof options === 'string' ? options : options?.path;
+
+			if ( path === '/wc-admin/settings/payments/woopayments/account' ) {
+				return Promise.resolve( {
+					account: {
+						id: 'acct_test',
+						mode: 'test',
+						default_currency: 'usd',
+						connected: true,
+						working: true,
+						can_process_payments: true,
+						test_mode: true,
+						test_drive: true,
+						sandbox: false,
+						live: false,
+					},
+					urls: {
+						setup: 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/onboarding',
+					},
+				} );
+			}
+
+			return Promise.resolve( {} );
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const heading = await screen.findByText(
+			'You are using a test account.'
+		);
+		expect( heading.closest( 'p' ) ).toHaveTextContent(
+			'⚠️ Development mode is enabled for the store! There can be no live onboarding process while using development, testing, or staging WordPress environments!'
+		);
+		expect(
+			screen.getByRole( 'link', {
+				name: /WordPress environment/,
+			} )
+		).toHaveAttribute(
+			'href',
+			'https://make.wordpress.org/core/2020/08/27/wordpress-environment-types/'
+		);
+		expect(
+			screen.queryByRole( 'button', { name: 'Activate payments' } )
+		).not.toBeInTheDocument();
+	} );
+
 	it( 'keeps express checkout detail controls out of the overview page', () => {
 		render( <WooPaymentsSettingsPage /> );
 
@@ -807,6 +1015,262 @@ describe( 'WooPaymentsSettingsPage', () => {
 		expect(
 			screen.queryByRole( 'combobox', { name: 'Frequency' } )
 		).not.toBeInTheDocument();
+	} );
+
+	it( 'renders payout schedule and bank account management parity copy', async () => {
+		mockApiFetch.mockImplementation( ( options ) => {
+			const path = typeof options === 'string' ? options : options?.path;
+
+			if ( path === '/wc-admin/settings/payments/woopayments/account' ) {
+				return Promise.resolve( {
+					account: {
+						id: 'acct_live',
+						mode: 'live',
+						default_currency: 'usd',
+						connected: true,
+						working: true,
+						can_process_payments: true,
+						test_mode: false,
+						test_drive: false,
+						sandbox: false,
+						live: true,
+					},
+					urls: {
+						setup: 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/onboarding',
+					},
+				} );
+			}
+
+			if ( path === '/wc/v3/payments/deposits/overview-all' ) {
+				return Promise.resolve( {
+					account: {
+						account_link: 'https://connect.stripe.test/account',
+						default_currency: 'usd',
+						default_external_accounts: [
+							{ currency: 'usd', status: 'enabled' },
+						],
+					},
+				} );
+			}
+
+			return Promise.resolve( {} );
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const section = screen
+			.getByRole( 'heading', { name: 'Payouts' } )
+			.closest( '.woopayments-settings-section' ) as HTMLElement;
+
+		expect(
+			within( section ).getByRole( 'heading', {
+				name: 'Payout schedule',
+			} )
+		).toBeInTheDocument();
+		expect(
+			within( section ).getByRole( 'heading', {
+				name: 'Payout bank account',
+			} )
+		).toBeInTheDocument();
+		expect(
+			await within( section ).findByText(
+				'Manage and update your bank account information to receive payouts.'
+			)
+		).toBeInTheDocument();
+		expect(
+			await within( section ).findByRole( 'link', {
+				name: /Manage in Stripe/,
+			} )
+		).toHaveAttribute( 'href', 'https://connect.stripe.test/account' );
+	} );
+
+	it( 'renders the failed payout bank-account notice when an external account errored', async () => {
+		mockApiFetch.mockImplementation( ( options ) => {
+			const path = typeof options === 'string' ? options : options?.path;
+
+			if ( path === '/wc-admin/settings/payments/woopayments/account' ) {
+				return Promise.resolve( {
+					account: {
+						id: 'acct_live',
+						mode: 'live',
+						default_currency: 'usd',
+						connected: true,
+						working: true,
+						can_process_payments: true,
+						test_mode: false,
+						test_drive: false,
+						sandbox: false,
+						live: true,
+					},
+					urls: {
+						setup: 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/onboarding',
+					},
+				} );
+			}
+
+			if ( path === '/wc/v3/payments/deposits/overview-all' ) {
+				return Promise.resolve( {
+					account: {
+						account_link: 'https://connect.stripe.test/account',
+						default_currency: 'usd',
+						default_external_accounts: [
+							{ currency: 'usd', status: 'errored' },
+						],
+					},
+				} );
+			}
+
+			return Promise.resolve( {} );
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			await screen.findByText(
+				'Payouts are currently paused because a recent payout failed.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'link', {
+				name: 'update your bank account details',
+			} )
+		).toHaveAttribute(
+			'href',
+			expect.stringContaining( 'source=wcpay-payout-failure-notice' )
+		);
+		expect( mockSpeak ).toHaveBeenCalledWith(
+			'Payouts are currently paused because a recent payout failed.',
+			'assertive'
+		);
+	} );
+
+	it( 'matches the reference settings behavior for multicurrency failed payout accounts', async () => {
+		mockApiFetch.mockImplementation( ( options ) => {
+			const path = typeof options === 'string' ? options : options?.path;
+
+			if ( path === '/wc-admin/settings/payments/woopayments/account' ) {
+				return Promise.resolve( {
+					account: {
+						id: 'acct_live',
+						mode: 'live',
+						default_currency: 'usd',
+						connected: true,
+						working: true,
+						can_process_payments: true,
+						test_mode: false,
+						test_drive: false,
+						sandbox: false,
+						live: true,
+					},
+					urls: {
+						setup: 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/onboarding',
+					},
+				} );
+			}
+
+			if ( path === '/wc/v3/payments/deposits/overview-all' ) {
+				return Promise.resolve( {
+					account: {
+						account_link: 'https://connect.stripe.test/account',
+						default_currency: 'usd',
+						default_external_accounts: [
+							{ currency: 'usd', status: 'enabled' },
+							{ currency: 'eur', status: 'errored' },
+						],
+					},
+				} );
+			}
+
+			return Promise.resolve( {} );
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			await screen.findByText(
+				'Payouts are currently paused because a recent payout failed.'
+			)
+		).toBeInTheDocument();
+		expect( mockSpeak ).toHaveBeenCalledWith(
+			'Payouts are currently paused because a recent payout failed.',
+			'assertive'
+		);
+	} );
+
+	it( 'uses the reference payout waiting-period copy', () => {
+		mockUseCompletedWaitingPeriod.mockReturnValue( false );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getByText(
+				'Payout scheduling becomes available after the standard 7-day waiting period for new accounts is complete.'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it.each( [
+		[ 'daily', 'Payouts will occur every business day.' ],
+		[
+			'weekly',
+			'Payouts that fall on a holiday will initiate on the next business day.',
+		],
+		[
+			'monthly',
+			'Payouts scheduled on a weekend will be sent on the next business day.',
+		],
+	] )(
+		'uses reference payout schedule helper copy for %s payouts',
+		( interval, helperCopy ) => {
+			mockUseDepositScheduleInterval.mockReturnValue( [
+				interval as string,
+				noop,
+			] );
+
+			render( <WooPaymentsSettingsPage /> );
+
+			expect( screen.getByText( helperCopy ) ).toBeInTheDocument();
+			expect(
+				screen.queryByText( /Payout currency:/ )
+			).not.toBeInTheDocument();
+		}
+	);
+
+	it( 'uses reference monthly payout date labels', () => {
+		mockUseDepositScheduleInterval.mockReturnValue( [ 'monthly', noop ] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const dateSelect = screen.getByRole( 'combobox', { name: 'Date' } );
+		expect(
+			within( dateSelect ).getByRole( 'option', { name: '1st' } )
+		).toBeInTheDocument();
+		expect(
+			within( dateSelect ).getByRole( 'option', { name: '2nd' } )
+		).toBeInTheDocument();
+		expect(
+			within( dateSelect ).getByRole( 'option', { name: '3rd' } )
+		).toBeInTheDocument();
+	} );
+
+	it( 'announces the page-level save busy state accessibly', () => {
+		mockUseSettings.mockReturnValue( {
+			isLoading: false,
+			isSaving: true,
+			isDirty: true,
+			saveSettings: mockSaveSettings,
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const status = screen.getByRole( 'status' );
+		expect( status ).toHaveTextContent( 'Saving…' );
+		expect( status.parentElement ).not.toHaveAttribute( 'aria-busy' );
+		expect(
+			status.parentElement?.querySelector(
+				'.woopayments-settings-busy-state__content'
+			)
+		).toHaveAttribute( 'aria-busy', 'true' );
 	} );
 
 	it( 'renders fraud protection with the reference Basic and Advanced level controls', () => {

@@ -1,0 +1,73 @@
+.woopayments-settings-account-mode-notice.components-notice {
+	margin: 0 0 20px;
+	background: #fcf9e8;
+	border-left: 0;
+
+	p {
+		margin: 0 0 12px;
+		color: $gray-900;
+		font-size: 13px;
+		line-height: 20px;
+	}
+
+	.components-notice__content {
+		margin: 0;
+	}
+}
+
+.woopayments-settings-setup-live-modal {
+	&__content {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+
+		p,
+		ul {
+			margin: 0;
+		}
+
+		ul {
+			display: grid;
+			gap: 12px;
+			padding-left: 20px;
+		}
+	}
+
+	&__footer {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 24px;
+	}
+}
+
+.woopayments-settings-payout-bank-account {
+	margin: 0;
+	color: $gray-700;
+	font-size: 13px;
+	line-height: 20px;
+}
+
+.woopayments-settings-payout-bank-account__notice {
+	margin: 0;
+	padding: 12px;
+	border-left: 4px solid $alert-red;
+	background: #f7ebec;
+	color: $gray-900;
+	font-size: 13px;
+	line-height: 20px;
+}
+
+.woopayments-settings-busy-state {
+	&__status {
+		display: block;
+	}
+
+	&__content {
+		transition: opacity 120ms ease;
+	}
+
+	&.is-busy &__content {
+		cursor: progress;
+		opacity: 0.55;
+	}
+}
