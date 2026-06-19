@@ -15,6 +15,7 @@ use WC_Order;
 use WC_Order_Item_Product;
 use WC_Order_Item_Shipping;
 use WC_Product;
+use WC_Product_Download;
 use WC_Product_Variation;
 use WP_User;
 
@@ -633,7 +634,7 @@ class EmailPreview {
 		add_filter( 'woocommerce_is_downloadable', array( $this, 'force_product_downloadable' ), 10, 1 );
 		add_filter( 'woocommerce_product_file', array( $this, 'provide_dummy_product_file' ), 10, 1 );
 		// Provide dummy downloadable items for email preview.
-		add_filter( 'woocommerce_order_get_downloadable_items', array( $this, 'get_dummy_downloadable_items' ), 10, 1 );
+		add_filter( 'woocommerce_order_get_downloadable_items', array( $this, 'get_dummy_downloadable_items' ) );
 	}
 
 	/**
@@ -705,14 +706,14 @@ class EmailPreview {
 	/**
 	 * Provide a dummy product file so product->has_file() returns true in preview.
 	 *
-	 * @param array|null $file Current file array or null.
-	 * @return array|null
+	 * @param WC_Product_Download|array|null $file Current file object, array, or null.
+	 * @return WC_Product_Download|array|null
 	 */
 	public function provide_dummy_product_file( $file ) {
 		/**
 		 * Filters whether the current request is an email preview.
 		 *
-		 * When true, provide a dummy product file array so downloadable template parts
+		 * When true, provide a dummy product file so downloadable template parts
 		 * can render during preview.
 		 *
 		 * @since 9.6.0
@@ -720,10 +721,11 @@ class EmailPreview {
 		 * @param bool $is_email_preview Whether preview mode is active.
 		 */
 		if ( apply_filters( 'woocommerce_is_email_preview', false ) ) {
-			return array(
-				'name' => __( 'Sample Download File.pdf', 'woocommerce' ),
-				'file' => 'sample-download.pdf',
-			);
+			$dummy_file = new WC_Product_Download();
+			$dummy_file->set_id( 'preview-dummy' );
+			$dummy_file->set_name( __( 'Sample Download File.pdf', 'woocommerce' ) );
+			$dummy_file->set_file( 'sample-download.pdf' );
+			return $dummy_file;
 		}
 		return $file;
 	}
@@ -731,10 +733,9 @@ class EmailPreview {
 	/**
 	 * Get dummy downloadable items for email preview.
 	 *
-	 * @param array $downloads Existing downloads.
 	 * @return array
 	 */
-	public function get_dummy_downloadable_items( $downloads ) {
+	public function get_dummy_downloadable_items() {
 		$dummy_downloads = array(
 			array(
 				'product_name'   => $this->get_dummy_downloadable_product()->get_name(),
@@ -745,7 +746,7 @@ class EmailPreview {
 			),
 		);
 
-		return array_merge( $downloads, $dummy_downloads );
+		return $dummy_downloads;
 	}
 
 	/**

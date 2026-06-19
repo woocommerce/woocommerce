@@ -58,6 +58,9 @@ const isValidRegistration = (
 	} );
 };
 
+const hasSectionScope = ( scope: SettingsExtensionRegistration[ 'scope' ] ) =>
+	typeof scope.section !== 'undefined';
+
 const scopeMatches = (
 	registration: SettingsExtensionRegistration,
 	context: SettingsFieldContext
@@ -66,14 +69,36 @@ const scopeMatches = (
 		return false;
 	}
 
-	return (
-		! registration.scope.section ||
-		registration.scope.section === context.section
-	);
+	if ( ! hasSectionScope( registration.scope ) ) {
+		return true;
+	}
+
+	return ( registration.scope.section ?? '' ) === ( context.section ?? '' );
+};
+
+const findInMatchingRegistrations = < T >(
+	context: SettingsFieldContext,
+	getValue: ( registration: SettingsExtensionRegistration ) => T | undefined
+): T | undefined => {
+	for ( let i = registrations.length - 1; i >= 0; i-- ) {
+		const registration = registrations[ i ];
+		if ( ! scopeMatches( registration, context ) ) {
+			continue;
+		}
+
+		const value = getValue( registration );
+		if ( typeof value !== 'undefined' ) {
+			return value;
+		}
+	}
+
+	return undefined;
 };
 
 const getScopeKey = ( scope: SettingsExtensionRegistration[ 'scope' ] ) =>
-	`${ scope.page }::${ scope.section || 'default' }`;
+	`${ scope.page }::${
+		hasSectionScope( scope ) ? scope.section || 'default' : '*'
+	}`;
 
 const hasDuplicateScopeAndKeys = (
 	registration: SettingsExtensionRegistration,
@@ -157,42 +182,27 @@ export const resolveFieldComponent = (
 	field: SettingsUIField,
 	context: SettingsFieldContext
 ): SettingsFieldComponent | undefined => {
-	if ( field.component ) {
-		for ( let i = registrations.length - 1; i >= 0; i-- ) {
-			const registration = registrations[ i ];
-			if ( ! scopeMatches( registration, context ) ) {
-				continue;
-			}
+	const componentName = field.component;
+	const component = componentName
+		? findInMatchingRegistrations(
+				context,
+				( registration ) => registration.components?.[ componentName ]
+		  )
+		: undefined;
 
-			const namedComponent = registration.components?.[ field.component ];
-			if ( namedComponent ) {
-				return namedComponent;
-			}
-		}
-	}
+	const resolvedComponent =
+		component ??
+		findInMatchingRegistrations(
+			context,
+			( registration ) => registration.fieldOverrides?.[ field.id ]
+		) ??
+		findInMatchingRegistrations(
+			context,
+			( registration ) => registration.typeRenderers?.[ field.type ]
+		);
 
-	for ( let i = registrations.length - 1; i >= 0; i-- ) {
-		const registration = registrations[ i ];
-		if ( ! scopeMatches( registration, context ) ) {
-			continue;
-		}
-
-		const fieldOverride = registration.fieldOverrides?.[ field.id ];
-		if ( fieldOverride ) {
-			return fieldOverride;
-		}
-	}
-
-	for ( let i = registrations.length - 1; i >= 0; i-- ) {
-		const registration = registrations[ i ];
-		if ( ! scopeMatches( registration, context ) ) {
-			continue;
-		}
-
-		const typeRenderer = registration.typeRenderers?.[ field.type ];
-		if ( typeRenderer ) {
-			return typeRenderer;
-		}
+	if ( resolvedComponent ) {
+		return resolvedComponent;
 	}
 
 	if ( field.component ) {
@@ -208,55 +218,32 @@ export const resolveFieldComponent = (
 export const resolveFieldVisibilityPredicate = (
 	fieldId: string,
 	context: SettingsFieldContext
-): SettingsVisibilityPredicate | undefined => {
-	for ( let i = registrations.length - 1; i >= 0; i-- ) {
-		const registration = registrations[ i ];
-		if ( ! scopeMatches( registration, context ) ) {
-			continue;
-		}
-
-		const predicate = registration.fieldVisibility?.[ fieldId ];
-		if ( predicate ) {
-			return predicate;
-		}
-	}
-
-	return undefined;
-};
+): SettingsVisibilityPredicate | undefined =>
+	findInMatchingRegistrations(
+		context,
+		( registration ) => registration.fieldVisibility?.[ fieldId ]
+	);
 
 export const resolveGroupVisibilityPredicate = (
 	groupId: string,
 	context: SettingsFieldContext
-): SettingsVisibilityPredicate | undefined => {
-	for ( let i = registrations.length - 1; i >= 0; i-- ) {
-		const registration = registrations[ i ];
-		if ( ! scopeMatches( registration, context ) ) {
-			continue;
-		}
-
-		const predicate = registration.groupVisibility?.[ groupId ];
-		if ( predicate ) {
-			return predicate;
-		}
-	}
-
-	return undefined;
-};
+): SettingsVisibilityPredicate | undefined =>
+	findInMatchingRegistrations(
+		context,
+		( registration ) => registration.groupVisibility?.[ groupId ]
+	);
 
 export const resolveSaveHandler = (
 	handler: string,
 	context: SettingsFieldContext
 ): SettingsSaveHandler | undefined => {
-	for ( let i = registrations.length - 1; i >= 0; i-- ) {
-		const registration = registrations[ i ];
-		if ( ! scopeMatches( registration, context ) ) {
-			continue;
-		}
+	const saveHandler = findInMatchingRegistrations(
+		context,
+		( registration ) => registration.saveHandlers?.[ handler ]
+	);
 
-		const saveHandler = registration.saveHandlers?.[ handler ];
-		if ( saveHandler ) {
-			return saveHandler;
-		}
+	if ( saveHandler ) {
+		return saveHandler;
 	}
 
 	warn( `Save handler "${ handler }" is not registered.`, { context } );
@@ -267,16 +254,13 @@ export const resolveRegionComponent = (
 	component: string,
 	context: SettingsFieldContext
 ): SettingsRegionComponent | undefined => {
-	for ( let i = registrations.length - 1; i >= 0; i-- ) {
-		const registration = registrations[ i ];
-		if ( ! scopeMatches( registration, context ) ) {
-			continue;
-		}
+	const region = findInMatchingRegistrations(
+		context,
+		( registration ) => registration.regions?.[ component ]
+	);
 
-		const region = registration.regions?.[ component ];
-		if ( region ) {
-			return region;
-		}
+	if ( region ) {
+		return region;
 	}
 
 	warn( `Region component "${ component }" is not registered.`, {

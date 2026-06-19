@@ -49,6 +49,9 @@ type PendingNavigation = {
 	href: string;
 };
 
+const normalizeSection = ( section?: string ) =>
+	section === 'default' ? '' : section;
+
 const getInitialValues = ( schema: SettingsUISchema ): SettingsValues => {
 	const values: SettingsValues = {};
 
@@ -521,7 +524,9 @@ export const SettingsUIPage = ( {
 	const context: SettingsFieldContext = useMemo(
 		() => ( {
 			page: page || schema.id,
-			section: section || schema.section,
+			section: normalizeSection(
+				typeof section === 'undefined' ? schema.section : section
+			),
 		} ),
 		[ page, schema.id, schema.section, section ]
 	);

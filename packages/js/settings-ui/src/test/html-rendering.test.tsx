@@ -108,6 +108,49 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
+	it( 'normalizes the default schema section to default-section scope', () => {
+		const DefaultSectionField = jest.fn( () => (
+			<div>Default section field</div>
+		) );
+		registerSettingsExtension( {
+			scope: { page: 'test-page', section: '' },
+			fieldOverrides: {
+				test_field: DefaultSectionField,
+			},
+		} );
+
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'none' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+
+		expect( container.textContent ).toContain( 'Default section field' );
+		expect( DefaultSectionField.mock.calls[ 0 ][ 0 ].context.section ).toBe(
+			''
+		);
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
 	it( 'sanitizes native field descriptions before rendering', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
@@ -265,7 +308,7 @@ describe( 'settings HTML rendering', () => {
 			.mockRejectedValue( new Error( 'Save failed.' ) );
 
 		registerSettingsExtension( {
-			scope: { page: 'test-page', section: 'default' },
+			scope: { page: 'test-page', section: '' },
 			saveHandlers: {
 				fail: saveHandler,
 			},

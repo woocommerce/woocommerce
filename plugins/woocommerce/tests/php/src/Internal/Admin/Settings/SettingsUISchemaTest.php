@@ -39,6 +39,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			$schema['shell'],
 			'The shell title should use the decoded page title.'
 		);
+		$this->assertSame( 'default', $schema['section'], 'The default section should remain the stable schema value.' );
 	}
 
 	/**
@@ -85,6 +86,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'default', $schema['groups'] );
 		$this->assertSame( 'default', array_key_first( $schema['groups'] ) );
+		$this->assertArrayNotHasKey( 'order', $schema['groups']['default'], 'Internal group ordering should not leak into the schema.' );
 		$this->assertSame( 'woocommerce_test_text', $schema['groups']['default']['fields'][0]['id'] );
 		$this->assertSame( 'saved value', $schema['groups']['default']['fields'][0]['value'] );
 	}
