@@ -8,8 +8,9 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use _WP_Dependency;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
-use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 use Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
+
 /**
  * WCAdminAssets Class.
  */
@@ -432,102 +433,17 @@ class WCAdminAssets {
 	 * @return array
 	 */
 	private function get_settings_ui_script_dependencies(): array {
-		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'settings-ui' ) || ! current_user_can( 'manage_woocommerce' ) ) {
+		$context = SettingsUIRequestContext::get_current();
+		if ( ! $context ) {
 			return array();
 		}
 
-		$settings_ui_page = $this->get_current_settings_ui_page();
-		if ( ! $settings_ui_page ) {
-			return array();
-		}
-
-		$extension_handles = array();
-		try {
-			$extension_handles = $settings_ui_page->get_script_handles( $this->get_current_settings_section() );
-		} catch ( \Throwable $e ) {
-			if ( $e instanceof \Exception ) {
-				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
-			}
-		}
-
-		/**
-		 * Extension-provided handles may violate the interface contract.
-		 *
-		 * @var mixed[] $extension_handles
-		 */
 		$dependencies = array_merge(
 			array( 'wc-settings-ui' ),
-			array_filter(
-				$extension_handles,
-				static function ( $script_handle ): bool {
-					return is_string( $script_handle ) && '' !== $script_handle;
-				}
-			)
+			$context->get_script_handles()
 		);
 
 		return array_values( array_unique( $dependencies ) );
-	}
-
-	/**
-	 * Get the settings UI adapter for the current settings tab.
-	 *
-	 * @return SettingsUIPageInterface|null
-	 */
-	private function get_current_settings_ui_page(): ?SettingsUIPageInterface {
-		if ( ! class_exists( '\WC_Admin_Settings' ) ) {
-			return null;
-		}
-
-		$current_tab = $this->get_current_settings_tab();
-		foreach ( \WC_Admin_Settings::get_settings_pages() as $settings_page ) {
-			if ( ! $settings_page instanceof \WC_Settings_Page || $settings_page->get_id() !== $current_tab ) {
-				continue;
-			}
-
-			$settings_ui_page = $settings_page->get_settings_ui_page();
-			return $settings_ui_page instanceof SettingsUIPageInterface ? $settings_ui_page : null;
-		}
-
-		return null;
-	}
-
-	/**
-	 * Get the current WooCommerce settings tab.
-	 *
-	 * @return string
-	 */
-	private function get_current_settings_tab(): string {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( ! isset( $_GET['tab'] ) ) {
-			return 'general';
-		}
-
-		$tab = wp_unslash( $_GET['tab'] );
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		if ( ! is_string( $tab ) ) {
-			return 'general';
-		}
-
-		$tab = sanitize_title( $tab );
-		return '' !== $tab ? $tab : 'general';
-	}
-
-	/**
-	 * Get the current WooCommerce settings section.
-	 *
-	 * @return string
-	 */
-	private function get_current_settings_section(): string {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( ! isset( $_GET['section'] ) ) {
-			return '';
-		}
-
-		$section = wp_unslash( $_GET['section'] );
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		return is_string( $section ) ? sanitize_title( $section ) : '';
 	}
 
 	/**

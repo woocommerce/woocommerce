@@ -315,7 +315,8 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertEquals( 404, $response->get_status() );
+		// A bad line_item_id reference is a 400 (malformed request), matching the create endpoint.
+		$this->assertEquals( 400, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertEquals( 'line_item_not_found', $data['code'] );
 	}
@@ -431,9 +432,9 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	 * Quantity scenarios that should all be rejected at the HTTP boundary.
 	 *
 	 * Some inputs are rejected by the REST framework (`rest_invalid_param`) and
-	 * others by DataUtils::validate_preview_line_items (`invalid_quantity`).
-	 * The test accepts either so it documents the actual observable behaviour
-	 * without coupling to which layer rejects first.
+	 * others by DataUtils::validate_preview_line_items (`invalid_quantity` or
+	 * `missing_quantity_or_refund_total`). The test accepts any from the set so it
+	 * documents the actual observable behaviour without coupling to which layer rejects.
 	 *
 	 * @return array<string, array<int, mixed>>
 	 */
@@ -441,7 +442,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		return array(
 			'zero'        => array( array( 'quantity' => 0 ), array( 'rest_invalid_param', 'invalid_quantity' ) ),
 			'negative'    => array( array( 'quantity' => -1 ), array( 'rest_invalid_param', 'invalid_quantity' ) ),
-			'missing key' => array( array(), array( 'rest_invalid_param', 'missing_line_item_id', 'invalid_quantity' ) ),
+			'missing key' => array( array(), array( 'rest_invalid_param', 'missing_line_item_id', 'missing_quantity_or_refund_total' ) ),
 			'string'      => array( array( 'quantity' => 'abc' ), array( 'rest_invalid_param', 'invalid_quantity' ) ),
 			'float'       => array( array( 'quantity' => 1.5 ), array( 'rest_invalid_param', 'invalid_quantity' ) ),
 		);
@@ -1038,6 +1039,831 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( '150.00', $data['max_refundable'], 'Max refundable should be original total minus already refunded' );
+	}
+
+	/**
+	 * @testdox Partial amount preview on a product line returns the tax split for the requested amount.
+	 */
+	public function test_preview_partial_amount_product_line(): void {
+		$tax_rate_id = $this->create_tax_rate( 10.0 );
+		// $100 product + $10 tax = $110 total. Request a partial $55 refund.
+		$order   = $this->create_order_with_product_and_tax( 100.00, 1, $tax_rate_id, 10.00 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'refund_total' => 55.00,
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+
+		// refund_total = 55 (tax-inclusive). Tax extracted from 55 at 10%: ~5.00.
+		$this->assertEquals( '55.00', $data['total'] );
+		$this->assertGreaterThan( 0.0, (float) $data['tax'] );
+		// quantity is null because the caller did not supply it.
+		$this->assertNull( $data['breakdown']['products']['items'][0]['quantity'] );
+	}
+
+	/**
+	 * @testdox Partial amount preview on a product line with both quantity and refund_total uses refund_total.
+	 */
+	public function test_preview_partial_amount_overrides_quantity_for_product(): void {
+		// $10/unit × 5 units = $50 total. quantity=2 would compute $20, but refund_total=30 wins.
+		$order   = $this->create_order_with_product( 10.00, 5 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 2,
+					'refund_total' => 30.00,
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+
+		// refund_total wins: total = 30.
+		$this->assertEquals( '30.00', $data['total'] );
+		// quantity is echoed back from the request.
+		$this->assertEquals( 2, $data['breakdown']['products']['items'][0]['quantity'] );
+	}
+
+	/**
+	 * @testdox Partial amount preview on a fee line returns correct tax split.
+	 */
+	public function test_preview_partial_amount_fee_line(): void {
+		// $20 fee, no tax.
+		$order = $this->create_order_with_fee( 20.00 );
+		$items = $order->get_items( 'fee' );
+		$item  = reset( $items );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => 8.00,
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+
+		$this->assertEquals( '8.00', $data['total'] );
+		$this->assertEquals( '0.00', $data['tax'] );
+		$this->assertNull( $data['breakdown']['fees']['items'][0]['quantity'] );
+	}
+
+	/**
+	 * @testdox Partial amount preview on a shipping line returns correct total.
+	 */
+	public function test_preview_partial_amount_shipping_line(): void {
+		$order = $this->create_order_with_shipping( 15.00 );
+		$items = $order->get_items( 'shipping' );
+		$item  = reset( $items );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => 6.00,
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+
+		$this->assertEquals( '6.00', $data['total'] );
+		$this->assertNull( $data['breakdown']['shipping']['items'][0]['quantity'] );
+	}
+
+	/**
+	 * @testdox Partial amount preview returns 422 when refund_total exceeds line item total.
+	 */
+	public function test_preview_partial_amount_exceeds_line_total_returns_422(): void {
+		$order   = $this->create_order_with_product( 20.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'refund_total' => 25.00,
+				),
+			)
+		);
+
+		$this->assertEquals( 422, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'refund_total_exceeds_line', $data['code'] );
+	}
+
+	/**
+	 * @testdox Partial amount preview returns 400 when neither quantity nor refund_total is provided.
+	 */
+	public function test_preview_missing_quantity_and_refund_total_returns_400(): void {
+		$order   = $this->create_order_with_product( 20.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'missing_quantity_or_refund_total', $data['code'] );
+	}
+
+	/**
+	 * @testdox Partial amount preview on fee returns 422 when refund_total exceeds remaining after prior partial refund.
+	 */
+	public function test_preview_partial_amount_fee_exceeds_remaining_returns_422(): void {
+		$order = $this->create_order_with_fee( 20.00 );
+		$items = $order->get_items( 'fee' );
+		$item  = reset( $items );
+
+		// First partial refund: $12 of the $20 fee.
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 12.00,
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => 0,
+						'refund_total' => 12.00,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		// Try to refund $15, but only $8 remains.
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => 15.00,
+				),
+			)
+		);
+
+		$this->assertEquals( 422, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'refund_total_exceeds_remaining', $data['code'] );
+	}
+
+	/**
+	 * @testdox Partial amount preview returns 400 invalid_refund_total when refund_total is zero.
+	 */
+	public function test_preview_partial_amount_zero_refund_total_returns_400(): void {
+		$order   = $this->create_order_with_product( 20.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'refund_total' => 0,
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'invalid_refund_total', $data['code'] );
+	}
+
+	/**
+	 * @testdox Partial amount preview returns 400 invalid_refund_total when refund_total is zero even if quantity is provided.
+	 */
+	public function test_preview_zero_refund_total_with_quantity_returns_400(): void {
+		// Regression: a zero refund_total used to be treated as absent by
+		// validation (which then validated the quantity path) while
+		// build_refund_preview() used the explicit 0, producing a 200
+		// response with a $0.00 total. The combination must be rejected.
+		$order   = $this->create_order_with_product( 20.00, 2 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 2,
+					'refund_total' => 0,
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'invalid_refund_total', $data['code'] );
+	}
+
+	/**
+	 * @testdox Partial amount preview treats an explicit null refund_total as the quantity form.
+	 */
+	public function test_preview_null_refund_total_with_quantity_uses_quantity(): void {
+		// null means "use the quantity form" — mirrors the create endpoint,
+		// where null means "compute the total for me".
+		$order   = $this->create_order_with_product( 20.00, 2 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 1,
+					'refund_total' => null,
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( '20.00', $data['total'] );
+		$this->assertSame( 1, $data['breakdown']['products']['items'][0]['quantity'] );
+	}
+
+	/**
+	 * @testdox Partial amount preview on a product returns 422 when refund_total exceeds remaining after prior partial refund.
+	 */
+	public function test_preview_partial_amount_product_exceeds_remaining_returns_422(): void {
+		$order   = $this->create_order_with_product( 50.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		// First partial refund: $30 of the $50 product.
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 30.00,
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 0,
+						'refund_total' => 30.00,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		// Try to refund $25, but only $20 remains.
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'refund_total' => 25.00,
+				),
+			)
+		);
+
+		$this->assertEquals( 422, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'refund_total_exceeds_remaining', $data['code'] );
+	}
+
+	/**
+	 * @testdox Partial amount preview splits tax so subtotal + tax equals the requested total exactly.
+	 */
+	public function test_preview_partial_amount_tax_split_reconstitutes_total(): void {
+		$tax_rate_id = $this->create_tax_rate( 10.0 );
+		// $100 net + $10 tax = $110 incl. Refund $55 (half): expect 50.00 net + 5.00 tax.
+		$order   = $this->create_order_with_product_and_tax( 100.00, 1, $tax_rate_id, 10.00 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'refund_total' => 55.00,
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$item = $data['breakdown']['products']['items'][0];
+
+		$this->assertEquals( '50.00', $item['subtotal'], 'Net subtotal should be half of the $100 net.' );
+		$this->assertEquals( '5.00', $item['tax'], 'Tax should be half of the $10 stored tax.' );
+		$this->assertEquals( '55.00', $item['total'], 'Total should equal the requested refund_total.' );
+		$this->assertEquals(
+			$item['total'],
+			wc_format_decimal( (float) $item['subtotal'] + (float) $item['tax'], wc_get_price_decimals() ),
+			'subtotal + tax must reconstitute the total to the cent.'
+		);
+	}
+
+	/**
+	 * @testdox Partial amount preview splits tax by the line's stored ratio, not the tax rate percent.
+	 */
+	public function test_preview_partial_amount_non_proportional_stored_tax(): void {
+		// Tax rate is labelled 10% but the stored line tax is $8 on a $100 net ($108 incl).
+		// A rate-based split of a $54 refund would extract 54 - 54/1.10 = $4.91; the correct
+		// proportional split is 54 * 8/108 = $4.00.
+		$tax_rate_id = $this->create_tax_rate( 10.0 );
+		$order       = $this->create_order_with_product_and_tax( 100.00, 1, $tax_rate_id, 8.00 );
+		$item_id     = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'refund_total' => 54.00,
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$item = $response->get_data()['breakdown']['products']['items'][0];
+
+		$this->assertEquals( '4.00', $item['tax'], 'Tax must be split by the stored 8/108 ratio, not the 10% rate.' );
+		$this->assertEquals( '50.00', $item['subtotal'] );
+	}
+
+	/**
+	 * @testdox Partial amount preview keeps charged tax even when the order tax rate resolves to zero.
+	 */
+	public function test_preview_partial_amount_zero_rate_taxed_line(): void {
+		// A line that was charged $10 tax but whose order tax item has a 0% rate. A rate-based
+		// split would zero the tax out; the proportional split keeps it ($55 * 10/110 = $5.00).
+		$tax_rate_id = $this->create_tax_rate( 0.0 );
+		$order       = $this->create_order_with_product_and_tax( 100.00, 1, $tax_rate_id, 10.00 );
+		$item_id     = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'refund_total' => 55.00,
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$item = $response->get_data()['breakdown']['products']['items'][0];
+
+		$this->assertEquals( '5.00', $item['tax'], 'Charged tax must not be dropped when the rate is zero.' );
+		$this->assertEquals( '50.00', $item['subtotal'] );
+	}
+
+	/**
+	 * @testdox A partial-amount preview matches the line totals stored on the created refund.
+	 */
+	public function test_preview_amount_matches_created_refund(): void {
+		$tax_rate_id = $this->create_tax_rate( 10.0 );
+		$order       = $this->create_order_with_product_and_tax( 100.00, 1, $tax_rate_id, 10.00 );
+		$item_id     = $this->get_first_line_item_id( $order );
+
+		$preview_response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'refund_total' => 55.00,
+				),
+			)
+		);
+		$this->assertEquals( 200, $preview_response->get_status() );
+		$preview_item = $preview_response->get_data()['breakdown']['products']['items'][0];
+
+		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$create_request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_id,
+						'refund_total' => 55.00,
+					),
+				),
+			)
+		);
+		$create_response = $this->server->dispatch( $create_request );
+		$this->assertEquals( 201, $create_response->get_status() );
+
+		$refund       = wc_get_order( $create_response->get_data()['id'] );
+		$refund_items = $refund->get_items();
+		$refund_item  = reset( $refund_items );
+		$dp           = wc_get_price_decimals();
+
+		$this->assertEquals(
+			$preview_item['subtotal'],
+			wc_format_decimal( abs( (float) $refund_item->get_total() ), $dp ),
+			'Created refund line net total must match the previewed subtotal.'
+		);
+		$this->assertEquals(
+			$preview_item['tax'],
+			wc_format_decimal( abs( (float) $refund_item->get_total_tax() ), $dp ),
+			'Created refund line tax must match the previewed tax.'
+		);
+	}
+
+	/**
+	 * @testdox A sub-cent refund_total is rounded to currency precision identically in preview and create.
+	 */
+	public function test_preview_partial_amount_rounds_to_currency_precision(): void {
+		$order   = $this->create_order_with_product( 100.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$preview_response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'refund_total' => 33.337,
+				),
+			)
+		);
+		$this->assertEquals( 200, $preview_response->get_status() );
+		$this->assertEquals( '33.34', $preview_response->get_data()['total'], 'Preview total should round to currency precision.' );
+
+		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$create_request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_id,
+						'refund_total' => 33.337,
+					),
+				),
+			)
+		);
+		$create_response = $this->server->dispatch( $create_request );
+		$this->assertEquals( 201, $create_response->get_status() );
+		$this->assertEquals( '33.34', $create_response->get_data()['amount'], 'Create amount must round identically to the preview.' );
+	}
+
+	/**
+	 * @testdox Partial amount preview succeeds when refund_total exactly equals the line item total.
+	 */
+	public function test_preview_partial_amount_equal_to_line_total_succeeds(): void {
+		$order   = $this->create_order_with_product( 20.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'refund_total' => 20.00,
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status(), 'A refund_total equal to the line total must be accepted.' );
+		$this->assertEquals( '20.00', $response->get_data()['total'] );
+	}
+
+	/**
+	 * @testdox Partial amount preview returns 422 line_item_already_refunded when the line is fully refunded.
+	 */
+	public function test_preview_partial_amount_fully_refunded_line_returns_422_already_refunded(): void {
+		// Two-line order so the order itself stays refundable (the fee remains) while the
+		// product line is fully refunded — otherwise the order-level guard fires first.
+		$order   = $this->create_order_with_product( 50.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$fee = new \WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Service fee',
+				'total' => 10.00,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+		$order->set_total( 60.00 );
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 50.00,
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 1,
+						'refund_total' => 50.00,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'refund_total' => 5.00,
+				),
+			)
+		);
+
+		$this->assertEquals( 422, $response->get_status() );
+		$this->assertEquals( 'line_item_already_refunded', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Preview returns 400 duplicate_line_item when the same line item appears more than once.
+	 */
+	public function test_preview_duplicate_line_item_returns_400(): void {
+		// Without dedup, each entry validates against the same remaining snapshot, so two
+		// $8 entries on a $10 line would each pass the per-line cap and double-count.
+		$order = $this->create_order_with_fee( 10.00 );
+		$items = $order->get_items( 'fee' );
+		$item  = reset( $items );
+
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => 8.00,
+				),
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => 8.00,
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'duplicate_line_item', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Partial amount preview rounds to currency precision on a zero-decimal currency.
+	 */
+	public function test_preview_partial_amount_zero_decimal_currency(): void {
+		$tax_rate_id = $this->create_tax_rate( 10.0 );
+		// $100 net + $10 tax = $110 incl, stored at 2dp before the currency switch.
+		$order   = $this->create_order_with_product_and_tax( 100.00, 1, $tax_rate_id, 10.00 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		// Switch to a zero-decimal currency for the request only.
+		add_filter( 'wc_get_price_decimals', '__return_zero' );
+
+		try {
+			$response = $this->do_preview_request(
+				$order->get_id(),
+				array(
+					array(
+						'line_item_id' => $item_id,
+						'refund_total' => 55.4,
+					),
+				)
+			);
+
+			$this->assertEquals( 200, $response->get_status() );
+			$item = $response->get_data()['breakdown']['products']['items'][0];
+
+			// 55.4 rounds to 55 at 0dp; the 10% split gives whole-unit 50 net / 5 tax.
+			$this->assertEquals( '55', $item['total'], 'Total should round to a whole unit.' );
+			$this->assertEquals( '5', $item['tax'] );
+			$this->assertEquals( '50', $item['subtotal'] );
+		} finally {
+			remove_filter( 'wc_get_price_decimals', '__return_zero' );
+		}
+	}
+
+	/**
+	 * @testdox Preview rejects a quantity exceeding refundable units even when refund_total is supplied, matching create.
+	 */
+	public function test_preview_quantity_with_refund_total_exceeding_units_matches_create(): void {
+		$order   = $this->create_order_with_product( 10.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$line_items = array(
+			array(
+				'line_item_id' => $item_id,
+				'quantity'     => 2,
+				'refund_total' => 1.00,
+			),
+		);
+
+		$preview_response = $this->do_preview_request( $order->get_id(), $line_items );
+		$this->assertEquals( 422, $preview_response->get_status(), 'Preview must reject a quantity over the refundable units.' );
+		$this->assertEquals( 'quantity_exceeds_refundable', $preview_response->get_data()['code'] );
+
+		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$create_request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => $line_items,
+			)
+		);
+		$create_response = $this->server->dispatch( $create_request );
+		$this->assertEquals( 422, $create_response->get_status(), 'Create rejects the same input, so preview must not return 200.' );
+		$this->assertEquals( 'quantity_exceeds_refundable', $create_response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Preview rejects a product quantity refund that exceeds the remaining line amount after a prior amount-only refund, matching create.
+	 */
+	public function test_preview_product_quantity_after_amount_refund_matches_create(): void {
+		$order   = $this->create_order_with_product( 100.00, 2 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		// Prior amount-only refund of $150 on the line (no units consumed: qty 0).
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 150.00,
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 0,
+						'refund_total' => 150.00,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		$line_items = array(
+			array(
+				'line_item_id' => $item_id,
+				'quantity'     => 2,
+			),
+		);
+
+		// Preview must not return 200 while create rejects the same auto-filled $200 over-refund.
+		$preview_response = $this->do_preview_request( $order->get_id(), $line_items );
+		$this->assertEquals( 422, $preview_response->get_status() );
+		$this->assertEquals( 'refund_total_exceeds_remaining', $preview_response->get_data()['code'] );
+
+		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$create_request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => $line_items,
+			)
+		);
+		$create_response = $this->server->dispatch( $create_request );
+		$this->assertEquals( 422, $create_response->get_status() );
+		$this->assertEquals( 'refund_total_exceeds_remaining', $create_response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Preview accepts a mixed refund with a negative discount-fee line, matching create.
+	 */
+	public function test_preview_partial_amount_negative_fee_matches_create(): void {
+		$order   = $this->create_order_with_product( 50.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$fee = new \WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Discount',
+				'total' => -10.00,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+		$order->set_total( 40.00 );
+		$order->save();
+
+		// Refund the full product line and the full discount: net $40, the order total.
+		$line_items = array(
+			array(
+				'line_item_id' => $item_id,
+				'refund_total' => 50.00,
+			),
+			array(
+				'line_item_id' => $fee->get_id(),
+				'refund_total' => -10.00,
+			),
+		);
+
+		$preview_response = $this->do_preview_request( $order->get_id(), $line_items );
+		$this->assertEquals( 200, $preview_response->get_status(), 'Preview must accept the negative discount-fee line.' );
+		$this->assertEquals( '40.00', $preview_response->get_data()['total'] );
+
+		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$create_request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => $line_items,
+			)
+		);
+		$create_response = $this->server->dispatch( $create_request );
+		$this->assertEquals( 201, $create_response->get_status(), 'Create accepts the same mixed request.' );
+		$this->assertEquals( '40.00', $create_response->get_data()['amount'], 'Create amount must match the preview total.' );
+	}
+
+	/**
+	 * @testdox Preview rejects a refund whose aggregate total is negative, matching create.
+	 */
+	public function test_preview_negative_only_total_rejected_matches_create(): void {
+		$order   = $this->create_order_with_product( 50.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$fee = new \WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Discount',
+				'total' => -10.00,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+		$order->set_total( 40.00 );
+		$order->save();
+
+		// A refund of only the negative discount line nets -$5.
+		$line_items = array(
+			array(
+				'line_item_id' => $fee->get_id(),
+				'refund_total' => -5.00,
+			),
+		);
+
+		$preview_response = $this->do_preview_request( $order->get_id(), $line_items );
+		$this->assertNotEquals( 200, $preview_response->get_status(), 'Preview must not accept a non-positive aggregate total.' );
+		$this->assertEquals( 'invalid_refund_amount', $preview_response->get_data()['code'] );
+
+		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$create_request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => $line_items,
+			)
+		);
+		$create_response = $this->server->dispatch( $create_request );
+		$this->assertEquals( 'invalid_refund_amount', $create_response->get_data()['code'], 'Create rejects the same input.' );
+	}
+
+	/**
+	 * @testdox Preview rejects a refund whose aggregate total nets to zero, matching create.
+	 */
+	public function test_preview_zero_net_total_rejected_matches_create(): void {
+		// $20 product less a $10 discount: order stays refundable ($10), but the refund nets $0.
+		$order   = $this->create_order_with_product( 20.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$fee = new \WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Discount',
+				'total' => -10.00,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+		$order->set_total( 10.00 );
+		$order->save();
+
+		$line_items = array(
+			array(
+				'line_item_id' => $item_id,
+				'refund_total' => 10.00,
+			),
+			array(
+				'line_item_id' => $fee->get_id(),
+				'refund_total' => -10.00,
+			),
+		);
+
+		$preview_response = $this->do_preview_request( $order->get_id(), $line_items );
+		$this->assertNotEquals( 200, $preview_response->get_status(), 'Preview must not accept a zero aggregate total.' );
+		$this->assertEquals( 'invalid_refund_amount', $preview_response->get_data()['code'] );
+
+		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$create_request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => $line_items,
+			)
+		);
+		$create_response = $this->server->dispatch( $create_request );
+		$this->assertEquals( 'invalid_refund_amount', $create_response->get_data()['code'], 'Create rejects the same input.' );
 	}
 
 	// -- Helper methods --

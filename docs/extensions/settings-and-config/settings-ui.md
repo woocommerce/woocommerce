@@ -18,6 +18,16 @@ It is designed for extension authors who want to migrate incrementally. PHP stil
 -   Saves use the existing WooCommerce settings form POST flow by default.
 -   The public PHP API is available under `Automattic\WooCommerce\Admin\Settings`.
 
+## Build a settings UI integration
+
+A complete integration has the same pieces whether it is a full settings tab or a section inside an existing tab:
+
+1. Choose the location: a new `WC_Settings_Page` tab, or a registered section under an existing tab.
+2. Define fields in PHP using the WooCommerce settings array. This remains the source of truth for labels, descriptions, defaults, option ids, and fallback rendering.
+3. Add Settings UI metadata to fields that need custom React rendering, such as a stable `component` name.
+4. Return any script handles that register those custom components before the settings UI mounts.
+5. Use the default `form_post` save adapter unless the field is display-only or manages persistence separately.
+
 ## Enable the feature flag
 
 For local testing, enable the feature with a small mu-plugin:
@@ -59,6 +69,73 @@ class My_Plugin_Settings_Page extends WC_Settings_Page {
 ```
 
 WooCommerce only uses the adapter when the `settings-ui` feature flag is enabled. Returning an adapter does not change the page while the feature flag is disabled.
+
+## Register a section under an existing settings tab
+
+Extensions can register a complete settings section under an existing WooCommerce settings tab. The section object defines where the section lives, how it is labelled, which fields it renders, which scripts power custom React components, and how fields are saved.
+
+This is useful for payment providers or integrations that should live inside a Core-owned tab such as **WooCommerce > Settings > Payments**.
+
+```php
+<?php
+use Automattic\WooCommerce\Admin\Settings\SettingsSection;
+use Automattic\WooCommerce\Admin\Settings\SettingsSectionRegistry;
+
+final class My_Plugin_Settings_Section extends SettingsSection {
+	public function get_parent_page_id(): string {
+		return 'checkout';
+	}
+
+	public function get_id(): string {
+		return 'my_plugin';
+	}
+
+	public function get_label(): string {
+		return __( 'My plugin', 'my-plugin' );
+	}
+
+	public function get_settings( WC_Settings_Page $parent_page ): array {
+		return array(
+			array(
+				'title' => __( 'My plugin', 'my-plugin' ),
+				'type'  => 'title',
+				'id'    => 'my_plugin_options',
+			),
+			array(
+				'title'     => __( 'Payment methods', 'my-plugin' ),
+				'id'        => 'my_plugin_payment_methods',
+				'type'      => 'multiselect',
+				'component' => 'my-plugin/payment-method-picker',
+				'options'   => array(
+					'card' => __( 'Card', 'my-plugin' ),
+					'bnpl' => __( 'Buy now, pay later', 'my-plugin' ),
+				),
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'my_plugin_options',
+			),
+		);
+	}
+
+	public function get_script_handles( WC_Settings_Page $parent_page ): array {
+		return array( 'my-plugin-settings-ui' );
+	}
+
+	// The inherited save adapter is `form_post` by default.
+}
+
+add_action(
+	'woocommerce_settings_sections_registration',
+	function ( SettingsSectionRegistry $registry ): void {
+		$registry->register( new My_Plugin_Settings_Section() );
+	}
+);
+```
+
+WooCommerce creates the settings UI adapter for registered sections internally. When the settings UI feature flag is disabled, WooCommerce falls back to the legacy settings returned by `get_settings()`. Saves continue through the existing WooCommerce settings form flow and section-specific hooks such as `woocommerce_update_options_checkout_my_plugin`.
+
+Use a section id that does not conflict with an existing section on the same settings tab. For the `checkout` tab, ids that match existing payment gateway sections are reserved.
 
 ## Native field migration
 
@@ -116,6 +193,8 @@ registerSettingsExtension( {
 	},
 } );
 ```
+
+Omit `scope.section` for a page-wide registration. Use `section: ''` for the default section only, or pass a section id such as `section: 'payments'` for one named section.
 
 See [Registering settings UI components](./registering-settings-ui-components.md) for the full component contract.
 
@@ -184,6 +263,24 @@ array(
 ```
 
 Descriptions are sanitized with `wp_kses_post()`. Actions are structured data with `id`, `label`, `href`, optional `variant`, optional `target`, and optional `rel`.
+
+## Page header
+
+A settings UI page that supplies its own schema (via `SettingsUIPageInterface::get_schema()`) can set header content through the `shell` key. Alongside `title` and `breadcrumbs`, the header supports a `subtitle` and `badges`:
+
+```php
+$schema['shell']['subtitle'] = __( 'Manage your store payment settings.', 'my-plugin' );
+$schema['shell']['badges']   = array(
+	array(
+		'label'  => __( 'Active', 'my-plugin' ),
+		'intent' => 'success', // default | info | success | warning | error
+	),
+);
+```
+
+`subtitle` renders under the page title. Each badge renders as a pill next to the title; `intent` selects its color. Both are plain text and are escaped on render.
+
+`intent` is decorative styling only — it conveys meaning through color. The badge `label` must be self-descriptive so screen-reader and color-blind users get the same information (e.g. prefer `"Active"` or `"Beta"` over generic text). Unknown `intent` values fall back to `default`.
 
 ## Reference migration in WooCommerce core
 

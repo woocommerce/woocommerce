@@ -76,7 +76,7 @@ export const registerSettingsUIScreens = () => {
 					createElement( SettingsUIPage, {
 						schema,
 						page,
-						section: section || schema.section,
+						section,
 					} )
 				)
 			);

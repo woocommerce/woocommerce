@@ -18,4 +18,13 @@ if [[ -z $changedFiles ]]; then
     exit 0
 fi
 
-composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles
+# Run all checks even if an earlier one fails, then report a non-zero status if any failed,
+# so a failure in one check is never masked by a later one passing.
+status=0
+
+composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles || status=1
+
+# Also verify that no new PHP functions are added.
+php ./bin/check-new-functions.php HEAD "$baseBranch" || status=1
+
+exit $status
