@@ -166,7 +166,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'email_cancelled_order',
 						label: 'Cancelled order',
 						description:
-							'Cancelled order emails are sent to chosen recipient(s) when orders have been marked cancelled (if they were previously processing or on-hold).',
+							'Cancelled order emails are sent to chosen recipient(s) when orders have been marked cancelled (if they were previously pending, processing, or on-hold).',
 						parent_id: 'email',
 						sub_groups: expect.arrayContaining( [] ),
 					} ),
