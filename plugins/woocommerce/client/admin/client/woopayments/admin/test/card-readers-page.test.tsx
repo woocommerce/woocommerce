@@ -43,6 +43,14 @@ describe( 'WooPaymentsCardReadersPage', () => {
 				name: 'Connected card readers',
 			} )
 		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				'Card readers are marked as active if they’ve processed one or more transactions during the current billing cycle. To connect or disconnect card readers, use the WooCommerce mobile application.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'region', { name: 'Connected card readers' } )
+		).toHaveClass( 'woocommerce-woopayments-card-readers__settings-card' );
 		expect( mockApiFetch ).toHaveBeenCalledWith( {
 			path: '/wc/v3/payments/readers?limit=10',
 			method: 'GET',
@@ -56,8 +64,14 @@ describe( 'WooPaymentsCardReadersPage', () => {
 		expect(
 			screen.getByRole( 'cell', { name: 'bbpos_wisepos_e' } )
 		).toBeInTheDocument();
-		expect( screen.getByText( 'Active' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Inactive' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Active' ) ).toHaveClass(
+			'woocommerce-woopayments-card-readers__status-badge',
+			'is-active'
+		);
+		expect( screen.getByText( 'Inactive' ) ).toHaveClass(
+			'woocommerce-woopayments-card-readers__status-badge',
+			'is-inactive'
+		);
 		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
 			'Card readers loaded.'
 		);
@@ -72,10 +86,8 @@ describe( 'WooPaymentsCardReadersPage', () => {
 			'No card readers found.'
 		);
 		expect(
-			screen.getByText(
-				'To connect or disconnect card readers, use the WooCommerce mobile application.'
-			)
-		).toBeInTheDocument();
+			screen.queryByRole( 'button', { name: /view options/i } )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'announces loading errors', async () => {

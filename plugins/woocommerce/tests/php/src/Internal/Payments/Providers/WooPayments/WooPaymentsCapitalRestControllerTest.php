@@ -48,6 +48,11 @@ class WooPaymentsCapitalRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_action( 'rest_api_init', array( $this->sut, 'register_routes' ) );
+		remove_action( 'admin_init', array( $this->sut, 'redirect_loan_offer_request' ) );
+		remove_filter( 'wp_doing_ajax', '__return_true' );
+		remove_all_filters( 'allowed_redirect_hosts' );
+		remove_all_filters( 'wp_redirect' );
+		unset( $_GET['wcpay-loan-offer'] );
 		parent::tearDown();
 	}
 
@@ -63,8 +68,11 @@ class WooPaymentsCapitalRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertArrayHasKey( '/wc/v3/payments/capital/active_loan_summary', $routes );
 		$this->assertArrayHasKey( '/wc/v3/payments/capital/loans', $routes );
+		$this->assertArrayHasKey( '/wc/v3/payments/capital/loan_offer', $routes );
 		$this->assertRouteHasMethod( $routes['/wc/v3/payments/capital/active_loan_summary'], WP_REST_Server::READABLE );
 		$this->assertRouteHasMethod( $routes['/wc/v3/payments/capital/loans'], WP_REST_Server::READABLE );
+		$this->assertRouteHasMethod( $routes['/wc/v3/payments/capital/loan_offer'], WP_REST_Server::READABLE );
+		$this->assertNotFalse( has_action( 'admin_init', array( $this->sut, 'redirect_loan_offer_request' ) ) );
 	}
 
 	/**
@@ -75,6 +83,7 @@ class WooPaymentsCapitalRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->sut->register();
 
 		$this->assertFalse( has_action( 'rest_api_init', array( $this->sut, 'register_routes' ) ) );
+		$this->assertFalse( has_action( 'admin_init', array( $this->sut, 'redirect_loan_offer_request' ) ) );
 	}
 
 	/**
@@ -85,6 +94,19 @@ class WooPaymentsCapitalRestControllerTest extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( 0 );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payments/capital/active_loan_summary' ) );
+
+		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
+		$this->assertSame( '', $this->api_client->last_call );
+	}
+
+	/**
+	 * @testdox Loan offer route requires manage_woocommerce before creating a Capital link.
+	 */
+	public function test_loan_offer_route_requires_manage_woocommerce(): void {
+		$this->sut->register_routes();
+		wp_set_current_user( 0 );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payments/capital/loan_offer' ) );
 
 		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
 		$this->assertSame( '', $this->api_client->last_call );
@@ -126,6 +148,93 @@ class WooPaymentsCapitalRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Loan offer route redirects to the returned Capital link URL.
+	 */
+	public function test_loan_offer_route_redirects_to_returned_capital_link_url(): void {
+		$this->api_client->capital_link_response = array(
+			'url' => 'https://capital.example.test/view-offer',
+		);
+		$this->sut->register_routes();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payments/capital/loan_offer' ) );
+
+		$this->assertSame( 'create_capital_link', $this->api_client->last_call );
+		$this->assertSame( 302, $response->get_status() );
+		$this->assertSame( 'https://capital.example.test/view-offer', $response->get_headers()['Location'] );
+		$this->assertStringContainsString( 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/overview', rawurldecode( $this->api_client->last_return_url ) );
+		$this->assertStringContainsString( 'admin.php?wcpay-loan-offer', $this->api_client->last_refresh_url );
+	}
+
+	/**
+	 * @testdox Legacy loan offer query arg redirects to a fresh Capital link.
+	 */
+	public function test_loan_offer_query_arg_redirects_to_returned_capital_link_url(): void {
+		$this->api_client->capital_link_response = array(
+			'url' => 'https://connect.stripe.com/capital/view-offer',
+		);
+		$_GET['wcpay-loan-offer']                = '';
+		add_filter( 'allowed_redirect_hosts', array( $this, 'allow_stripe_redirect_host' ) );
+		add_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
+
+		try {
+			$this->sut->redirect_loan_offer_request();
+			$this->fail( 'Expected the redirect to be intercepted.' );
+		} catch ( \RuntimeException $exception ) {
+			$this->assertSame( 'wp_redirect intercepted: https://connect.stripe.com/capital/view-offer', $exception->getMessage() );
+		}
+
+		$this->assertSame( 'create_capital_link', $this->api_client->last_call );
+		$this->assertStringContainsString( 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/overview', rawurldecode( $this->api_client->last_return_url ) );
+		$this->assertStringContainsString( 'admin.php?wcpay-loan-offer', $this->api_client->last_refresh_url );
+	}
+
+	/**
+	 * @testdox Legacy loan offer query arg is ignored during AJAX requests.
+	 */
+	public function test_loan_offer_query_arg_does_not_redirect_during_ajax_requests(): void {
+		$_GET['wcpay-loan-offer'] = '';
+		add_filter( 'wp_doing_ajax', '__return_true' );
+
+		$this->sut->redirect_loan_offer_request();
+
+		$this->assertSame( '', $this->api_client->last_call );
+	}
+
+	/**
+	 * @testdox Loan offer route redirects to the overview error notice when the API request fails.
+	 */
+	public function test_loan_offer_route_redirects_to_overview_error_when_api_fails(): void {
+		$this->api_client->exception = new WooPaymentsApiException( 'Capital unavailable.', 'capital_unavailable', 503 );
+		$this->sut->register_routes();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payments/capital/loan_offer' ) );
+		$location = rawurldecode( (string) ( $response->get_headers()['Location'] ?? '' ) );
+
+		$this->assertSame( 'create_capital_link', $this->api_client->last_call );
+		$this->assertSame( 302, $response->get_status() );
+		$this->assertStringContainsString( 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/overview', $location );
+		$this->assertStringContainsString( 'wcpay-loan-offer-error=1', $location );
+	}
+
+	/**
+	 * @testdox Loan offer route redirects to the overview error notice when the response omits a URL.
+	 */
+	public function test_loan_offer_route_redirects_to_overview_error_when_response_omits_url(): void {
+		$this->api_client->capital_link_response = array(
+			'id' => 'link_without_url',
+		);
+		$this->sut->register_routes();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payments/capital/loan_offer' ) );
+		$location = rawurldecode( (string) ( $response->get_headers()['Location'] ?? '' ) );
+
+		$this->assertSame( 'create_capital_link', $this->api_client->last_call );
+		$this->assertSame( 302, $response->get_status() );
+		$this->assertStringContainsString( 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/overview', $location );
+		$this->assertStringContainsString( 'wcpay-loan-offer-error=1', $location );
+	}
+
+	/**
 	 * @testdox API exceptions preserve the legacy Capital REST error envelope.
 	 */
 	public function test_api_exceptions_preserve_legacy_error_envelope(): void {
@@ -136,6 +245,29 @@ class WooPaymentsCapitalRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 'capital_unavailable', $response->get_error_code() );
 		$this->assertSame( 'Capital unavailable.', $response->get_error_message() );
 		$this->assertNull( $response->get_error_data() );
+	}
+
+	/**
+	 * Add the Stripe redirect host for redirect tests.
+	 *
+	 * @param string[] $hosts Allowed hosts.
+	 * @return string[]
+	 */
+	public function allow_stripe_redirect_host( array $hosts ): array {
+		$hosts[] = 'connect.stripe.com';
+
+		return $hosts;
+	}
+
+	/**
+	 * Intercept redirects so production exit paths do not stop the test runner.
+	 *
+	 * @param string $location Redirect target.
+	 * @return never
+	 * @throws \RuntimeException Always.
+	 */
+	public function intercept_redirect( string $location ): void {
+		throw new \RuntimeException( 'wp_redirect intercepted: ' . esc_url_raw( $location ) );
 	}
 
 	/**
@@ -187,6 +319,27 @@ class WooPaymentsCapitalRestControllerTest extends WC_REST_Unit_Test_Case {
 			public array $loans_response = array();
 
 			/**
+			 * Capital link response.
+			 *
+			 * @var array<string,mixed>
+			 */
+			public array $capital_link_response = array();
+
+			/**
+			 * Last return URL sent to the API client.
+			 *
+			 * @var string
+			 */
+			public string $last_return_url = '';
+
+			/**
+			 * Last refresh URL sent to the API client.
+			 *
+			 * @var string
+			 */
+			public string $last_refresh_url = '';
+
+			/**
 			 * Optional exception thrown by the next call.
 			 *
 			 * @var WooPaymentsApiException|null
@@ -215,6 +368,22 @@ class WooPaymentsCapitalRestControllerTest extends WC_REST_Unit_Test_Case {
 				$this->throw_if_configured();
 
 				return $this->loans_response;
+			}
+
+			/**
+			 * Create a Capital link.
+			 *
+			 * @param string $return_url  Return URL.
+			 * @param string $refresh_url Refresh URL.
+			 * @return array<string,mixed>
+			 */
+			public function create_capital_link( string $return_url, string $refresh_url ): array {
+				$this->last_call        = __FUNCTION__;
+				$this->last_return_url  = $return_url;
+				$this->last_refresh_url = $refresh_url;
+				$this->throw_if_configured();
+
+				return $this->capital_link_response;
 			}
 
 			/**

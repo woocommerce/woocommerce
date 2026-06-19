@@ -42,6 +42,7 @@ class WooPaymentsAccountServiceTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'wcpay_dev_mode' );
 		remove_all_filters( 'wcpay_test_mode' );
 		remove_all_filters( 'wcpay_test_mode_onboarding' );
+		remove_all_filters( 'allowed_redirect_hosts' );
 		set_current_screen( 'front' );
 		parent::tearDown();
 	}
@@ -101,6 +102,18 @@ class WooPaymentsAccountServiceTest extends WC_Unit_Test_Case {
 		$sut = $this->create_service();
 
 		$this->assertFalse( $sut->is_gateway_enabled() );
+	}
+
+	/**
+	 * @testdox Should preserve Stripe-hosted WooPayments redirects.
+	 */
+	public function test_registers_stripe_allowed_redirect_host(): void {
+		$sut = $this->create_service();
+		$sut->register();
+
+		$this->assertNotFalse( has_filter( 'allowed_redirect_hosts', array( $sut, 'allowed_redirect_hosts' ) ) );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		$this->assertContains( 'connect.stripe.com', apply_filters( 'allowed_redirect_hosts', array() ) );
 	}
 
 	/**

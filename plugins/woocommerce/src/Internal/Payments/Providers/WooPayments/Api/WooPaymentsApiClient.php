@@ -1137,6 +1137,24 @@ class WooPaymentsApiClient {
 	}
 
 	/**
+	 * Create a WooPayments Capital account link.
+	 *
+	 * @param string $return_url  URL to return to after viewing the offer.
+	 * @param string $refresh_url URL to use when the link expires or is invalid.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function create_capital_link( string $return_url, string $refresh_url ): array {
+		$request = WooPaymentsGetAccountCapitalLinkRequest::from_urls( $return_url, $refresh_url );
+
+		return $this->request_with_legacy_request_filter(
+			$request,
+			'wcpay_get_account_capital_link',
+			true
+		);
+	}
+
+	/**
 	 * Retrieve recommended payment methods for onboarding.
 	 *
 	 * This route is intentionally not sent through the signed provider request path because recommendations are used
@@ -1535,21 +1553,24 @@ class WooPaymentsApiClient {
 	 * @param bool                    $is_site_scoped Whether to include the WPCOM site ID in the API path.
 	 * @param bool                    $use_user_token Whether to sign with the connection-owner user token.
 	 * @param bool                    $blocking      Whether to block for the transport response.
+	 * @param bool                    $include_test_mode_param Whether to add test mode to request params.
 	 * @return array<string,mixed>
 	 * @throws WooPaymentsApiException When the request fails.
 	 */
-	private function request( array $params, string $api, string $method, bool $is_site_scoped = true, bool $use_user_token = false, bool $blocking = true ): array {
+	private function request( array $params, string $api, string $method, bool $is_site_scoped = true, bool $use_user_token = false, bool $blocking = true, bool $include_test_mode_param = true ): array {
 		if ( ! $this->is_available() ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
 			throw new WooPaymentsApiException( __( 'Site is not connected to WordPress.com.', 'woocommerce' ), 'wcpay_wpcom_not_connected', 409 );
 		}
 
-		$params = wp_parse_args(
-			$params,
-			array(
-				'test_mode' => $this->account_service->is_test_mode_enabled(),
-			)
-		);
+		if ( $include_test_mode_param ) {
+			$params = wp_parse_args(
+				$params,
+				array(
+					'test_mode' => $this->account_service->is_test_mode_enabled(),
+				)
+			);
+		}
 
 		/**
 		 * Filters the WooPayments native request parameters before transport dispatch.
@@ -1694,14 +1715,17 @@ class WooPaymentsApiClient {
 	 *
 	 * @param WooPaymentsPaginatedListRequest $request Native request compatibility object.
 	 * @param string                          $hook    Legacy WooPayments request filter hook.
+	 * @param bool                            $include_test_mode_in_query Whether to add test mode to the API path query.
 	 * @return array<string,mixed>
 	 * @throws WooPaymentsApiException When the request fails.
 	 */
-	private function request_with_legacy_request_filter( WooPaymentsPaginatedListRequest $request, string $hook ): array {
+	private function request_with_legacy_request_filter( WooPaymentsPaginatedListRequest $request, string $hook, bool $include_test_mode_in_query = false ): array {
 		if ( $request instanceof WooPaymentsGetPmPromotionsRequest ) {
 			WooPaymentsGetPmPromotionsRequest::register_legacy_aliases();
 		} elseif ( $request instanceof WooPaymentsActivatePmPromotionRequest ) {
 			WooPaymentsActivatePmPromotionRequest::register_legacy_aliases();
+		} elseif ( $request instanceof WooPaymentsGetAccountCapitalLinkRequest ) {
+			WooPaymentsGetAccountCapitalLinkRequest::register_legacy_aliases();
 		} else {
 			WooPaymentsApiRequest::register_legacy_aliases();
 		}
@@ -1728,10 +1752,23 @@ class WooPaymentsApiClient {
 		$filtered_api    = $filtered_request->get_api();
 		$filtered_method = $filtered_request->get_method();
 
+		if ( $include_test_mode_in_query ) {
+			$filtered_api = add_query_arg(
+				array(
+					'test_mode' => $this->account_service->is_test_mode_enabled() ? '1' : '0',
+				),
+				$filtered_api
+			);
+		}
+
 		return $this->request(
 			$filtered_params,
 			$filtered_api,
-			$filtered_method
+			$filtered_method,
+			$filtered_request->is_site_specific(),
+			$filtered_request->should_use_user_token(),
+			true,
+			! $include_test_mode_in_query
 		);
 	}
 

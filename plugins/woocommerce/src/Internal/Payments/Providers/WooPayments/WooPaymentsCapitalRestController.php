@@ -7,6 +7,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
+use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiException;
@@ -64,6 +66,10 @@ class WooPaymentsCapitalRestController implements RegisterHooksInterface {
 		if ( false === has_action( 'rest_api_init', array( $this, 'register_routes' ) ) ) {
 			add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 		}
+
+		if ( false === has_action( 'admin_init', array( $this, 'redirect_loan_offer_request' ) ) ) {
+			add_action( 'admin_init', array( $this, 'redirect_loan_offer_request' ) );
+		}
 	}
 
 	/**
@@ -72,6 +78,7 @@ class WooPaymentsCapitalRestController implements RegisterHooksInterface {
 	public function register_routes(): void {
 		register_rest_route( self::NAMESPACE, '/payments/capital/active_loan_summary', $this->get_readable_route( 'get_active_loan_summary' ) );
 		register_rest_route( self::NAMESPACE, '/payments/capital/loans', $this->get_readable_route( 'get_loans' ) );
+		register_rest_route( self::NAMESPACE, '/payments/capital/loan_offer', $this->get_readable_route( 'get_loan_offer' ) );
 	}
 
 	/**
@@ -118,6 +125,39 @@ class WooPaymentsCapitalRestController implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Create and redirect to a Capital loan offer link.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @phpstan-param WP_REST_Request<array<string,mixed>> $request
+	 * @return WP_REST_Response
+	 */
+	public function get_loan_offer( WP_REST_Request $request ): WP_REST_Response {
+		unset( $request );
+
+		return $this->redirect_response( $this->get_loan_offer_redirect_url() );
+	}
+
+	/**
+	 * Redirect legacy Capital offer links to a fresh provider loan offer link.
+	 *
+	 * @return void
+	 */
+	public function redirect_loan_offer_request(): void {
+		if ( wp_doing_ajax() || ! current_user_can( 'manage_woocommerce' ) || ! $this->arbiter->should_native_register() ) {
+			return;
+		}
+
+		// This mirrors the legacy automatic email/expired-link redirect. The GET flag only indicates that we should create a fresh Capital link.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['wcpay-loan-offer'] ) ) {
+			return;
+		}
+
+		wp_safe_redirect( $this->get_loan_offer_redirect_url() );
+		exit;
+	}
+
+	/**
 	 * Get a readable route definition.
 	 *
 	 * @param string $callback Callback method.
@@ -142,5 +182,78 @@ class WooPaymentsCapitalRestController implements RegisterHooksInterface {
 			'' !== $exception->get_error_code() ? $exception->get_error_code() : 'wcpay_api_error',
 			$exception->getMessage()
 		);
+	}
+
+	/**
+	 * Build the native WooPayments overview URL.
+	 *
+	 * @param array<string,string> $query Query args.
+	 * @return string
+	 */
+	private function get_overview_url( array $query = array() ): string {
+		return Utils::wc_payments_settings_url( WooPaymentsService::OVERVIEW_PATH, $query );
+	}
+
+	/**
+	 * Build the refresh URL used by expired loan offer links.
+	 *
+	 * @return string
+	 */
+	private function get_loan_offer_refresh_url(): string {
+		return add_query_arg(
+			array(
+				'wcpay-loan-offer' => '',
+			),
+			admin_url( 'admin.php' )
+		);
+	}
+
+	/**
+	 * Build the loan offer failure URL.
+	 *
+	 * @return string
+	 */
+	private function get_loan_offer_error_url(): string {
+		return $this->get_overview_url(
+			array(
+				'wcpay-loan-offer-error' => '1',
+			)
+		);
+	}
+
+	/**
+	 * Build a testable REST redirect response.
+	 *
+	 * @param string $url Redirect URL.
+	 * @return WP_REST_Response
+	 */
+	private function redirect_response( string $url ): WP_REST_Response {
+		$response = new WP_REST_Response( null, 302 );
+		$response->header( 'Location', $url );
+
+		return $response;
+	}
+
+	/**
+	 * Build the redirect URL for the Capital loan offer flow.
+	 *
+	 * @return string
+	 */
+	private function get_loan_offer_redirect_url(): string {
+		try {
+			$capital_link = $this->api_client->create_capital_link(
+				$this->get_overview_url(),
+				$this->get_loan_offer_refresh_url()
+			);
+			$url          = isset( $capital_link['url'] ) ? (string) $capital_link['url'] : '';
+
+			if ( '' !== $url ) {
+				return $url;
+			}
+		} catch ( WooPaymentsApiException $exception ) {
+			unset( $exception );
+		}
+
+		return $this->get_loan_offer_error_url();
 	}
 }

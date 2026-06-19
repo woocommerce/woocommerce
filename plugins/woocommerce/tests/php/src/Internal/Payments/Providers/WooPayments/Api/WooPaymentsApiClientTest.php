@@ -1865,6 +1865,47 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should create Capital financing offer links through the preserved accounts endpoint.
+	 */
+	public function test_create_capital_link_posts_financing_offer_payload_to_capital_links_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'url' => 'https://capital.example.test/view-offer',
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$this->assertTrue( method_exists( $sut, 'create_capital_link' ), 'WooPaymentsApiClient should expose create_capital_link().' );
+
+		$result = $sut->create_capital_link(
+			'https://example.test/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/woopayments/overview',
+			'https://example.test/wp-admin/admin.php?wcpay-loan-offer'
+		);
+		$body   = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertSame( 'https://capital.example.test/view-offer', $result['url'] );
+		$this->assertSame( '/sites/123/wcpay/accounts/capital_links?test_mode=1', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertTrue( $http_client->last_use_user_token );
+		$this->assertSame(
+			array(
+				'type'        => 'capital_financing_offer',
+				'return_url'  => 'https://example.test/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/woopayments/overview',
+				'refresh_url' => 'https://example.test/wp-admin/admin.php?wcpay-loan-offer',
+			),
+			$body
+		);
+	}
+
+	/**
 	 * @testdox Should preserve legacy Capital request filters before dispatch.
 	 */
 	public function test_capital_admin_methods_preserve_legacy_request_filters(): void {
@@ -1915,6 +1956,58 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'test_mode=1', $summary_path );
 		$this->assertStringContainsString( 'limit=25', $loans_path );
 		$this->assertStringContainsString( 'test_mode=1', $loans_path );
+	}
+
+	/**
+	 * @testdox Should preserve the legacy Capital link request filter object.
+	 */
+	public function test_create_capital_link_preserves_legacy_request_filter_object(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'url' => 'https://capital.example.test/filtered-offer',
+				)
+			),
+		);
+
+		$observed_request = null;
+		$filter           = function ( \WCPay\Core\Server\Request\Get_Account_Capital_Link $request ) use ( &$observed_request ): \WCPay\Core\Server\Request\Get_Account_Capital_Link {
+			$observed_request = $request;
+
+			$this->assertSame( 'accounts/capital_links', $request->get_api() );
+			$this->assertSame( 'POST', $request->get_method() );
+			$this->assertTrue( $request->should_use_user_token() );
+			$this->assertSame( 'capital_financing_offer', $request->get_param( 'type' ) );
+			$this->assertSame( 'https://example.test/return', $request->get_param( 'return_url' ) );
+			$this->assertSame( 'https://example.test/refresh', $request->get_param( 'refresh_url' ) );
+			$request->set_type( 'filtered_capital_financing_offer' );
+
+			return $request;
+		};
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( true ) );
+
+		$this->assertTrue( method_exists( $sut, 'create_capital_link' ), 'WooPaymentsApiClient should expose create_capital_link().' );
+
+		add_filter( 'wcpay_get_account_capital_link', $filter );
+
+		try {
+			$sut->create_capital_link( 'https://example.test/return', 'https://example.test/refresh' );
+		} finally {
+			remove_filter( 'wcpay_get_account_capital_link', $filter );
+		}
+
+		$body = json_decode( (string) $http_client->last_body, true );
+
+		$this->assertInstanceOf( WooPaymentsApiRequest::class, $observed_request );
+		$this->assertSame( 'filtered_capital_financing_offer', $body['type'] );
+		$this->assertSame( '/sites/123/wcpay/accounts/capital_links?test_mode=1', $http_client->last_path );
+		$this->assertTrue( $http_client->last_use_user_token );
 	}
 
 	/**

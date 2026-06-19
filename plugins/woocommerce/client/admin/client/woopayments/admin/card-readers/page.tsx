@@ -86,21 +86,18 @@ export const WooPaymentsCardReadersPage = () => {
 	return (
 		<div className="woocommerce-woopayments-card-readers">
 			<section
-				className="woocommerce-woopayments-card-readers__section"
+				className="woocommerce-woopayments-card-readers__settings-card"
 				aria-busy={ isLoading }
+				aria-labelledby="woocommerce-woopayments-card-readers-heading"
 			>
-				<h2>{ __( 'Connected card readers', 'woocommerce' ) }</h2>
-				<p>
-					{ __(
-						'Card readers are marked as active if they have processed one or more transactions during the current billing cycle.',
-						'woocommerce'
-					) }
-				</p>
+				<h2 id="woocommerce-woopayments-card-readers-heading">
+					{ __( 'Connected card readers', 'woocommerce' ) }
+				</h2>
 				<p>
 					{ sprintf(
 						/* translators: %s: WooCommerce */
 						__(
-							'To connect or disconnect card readers, use the %s mobile application.',
+							'Card readers are marked as active if they’ve processed one or more transactions during the current billing cycle. To connect or disconnect card readers, use the %s mobile application.',
 							'woocommerce'
 						),
 						'WooCommerce'
@@ -142,7 +139,7 @@ export const WooPaymentsCardReadersPage = () => {
 											className={
 												reader.is_active
 													? 'woocommerce-woopayments-card-readers__status-badge is-active'
-													: 'woocommerce-woopayments-card-readers__status-badge'
+													: 'woocommerce-woopayments-card-readers__status-badge is-inactive'
 											}
 										>
 											{ getStatusLabel( reader ) }

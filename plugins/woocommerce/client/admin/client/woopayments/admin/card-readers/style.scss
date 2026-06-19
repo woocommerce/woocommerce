@@ -1,5 +1,5 @@
 .woocommerce-woopayments-card-readers {
-	&__section {
+	&__settings-card {
 		background: #fff;
 		border: 1px solid #dcdcde;
 		margin: 24px 0;
@@ -29,6 +29,7 @@
 
 	&__status-badge {
 		background: #f0f0f1;
+		border: 1px solid #c3c4c7;
 		border-radius: 16px;
 		display: inline-block;
 		line-height: 1.5;
@@ -36,6 +37,11 @@
 
 		&.is-active {
 			background: #edfaef;
+			border-color: #68de7c;
+		}
+
+		&.is-inactive {
+			background: #f6f7f7;
 		}
 	}
 }

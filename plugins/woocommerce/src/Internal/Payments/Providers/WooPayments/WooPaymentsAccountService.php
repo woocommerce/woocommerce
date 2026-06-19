@@ -131,6 +131,24 @@ class WooPaymentsAccountService implements RegisterHooksInterface {
 		if ( false === has_action( 'action_scheduler_before_execute', array( $this, 'disable_refresh' ) ) ) {
 			add_action( 'action_scheduler_before_execute', array( $this, 'disable_refresh' ) );
 		}
+
+		if ( false === has_filter( 'allowed_redirect_hosts', array( $this, 'allowed_redirect_hosts' ) ) ) {
+			add_filter( 'allowed_redirect_hosts', array( $this, 'allowed_redirect_hosts' ) );
+		}
+	}
+
+	/**
+	 * Add preserved WooPayments external redirect hosts.
+	 *
+	 * @param array<int,string> $hosts Allowed redirect hosts.
+	 * @return array<int,string>
+	 */
+	public function allowed_redirect_hosts( array $hosts ): array {
+		if ( ! in_array( 'connect.stripe.com', $hosts, true ) ) {
+			$hosts[] = 'connect.stripe.com';
+		}
+
+		return $hosts;
 	}
 
 	/**
