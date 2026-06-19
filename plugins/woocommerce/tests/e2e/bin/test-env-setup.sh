@@ -50,9 +50,7 @@ echo -e 'Install Plugin-check utility plugin \n'
 wp-env run tests-cli wp plugin install plugin-check --activate
 
 echo -e 'Add Customer user \n'
-if wp-env run tests-cli wp user get customer --field=ID >/dev/null 2>&1; then
-	echo "User 'customer' already exists; skipping creation."
-else
+if ! wp-env run tests-cli wp user get customer --field=ID >/dev/null 2>&1; then
 	wp-env run tests-cli wp user create customer customer@woocommercecoree2etestsuite.com \
 		--user_pass=password \
 		--role=customer \
