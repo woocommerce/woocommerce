@@ -22,6 +22,9 @@ inputs:
     pull-package-composer-deps:
         description: 'Given a string value, will pull the package specific dependencies cache. Not necessary if pull-package-deps is specified.'
         default: false
+    node-cache-key-suffix:
+        description: 'Optional suffix for node_modules/.cache keys, used to separate cache variants for the same package/build type.'
+        default: ''
 runs:
     using: 'composite'
     steps:
@@ -62,8 +65,10 @@ runs:
           uses: 'actions/cache@v4'
           with:
               path: './node_modules/.cache'
-              key: "${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
-              restore-keys: '${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-'
+              key: "${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}${{ inputs.node-cache-key-suffix != '' && format( '-{0}', inputs.node-cache-key-suffix ) || '' }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
+              restore-keys: |
+                  ${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}${{ inputs.node-cache-key-suffix != '' && format( '-{0}', inputs.node-cache-key-suffix ) || '' }}-
+                  ${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-
         - name: 'Cache Composer Dependencies'
           if: ${{ inputs.pull-package-deps != 'false' || inputs.pull-package-composer-deps != 'false' }}
           uses: 'actions/cache@v4'
