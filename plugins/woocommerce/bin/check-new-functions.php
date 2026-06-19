@@ -44,7 +44,15 @@ $repo_root = current( $output );
 // diverged from the compare branch) rather than comparing branch tips. This prevents false
 // positives when the PR branch is behind the compare branch: a two-dot diff would otherwise
 // report functions that the compare branch removed/changed as if the PR had added them.
-$diff_command = "git diff $compare_branch...$pr_branch -- {$repo_root}/plugins/woocommerce/includes/ {$repo_root}/plugins/woocommerce/src/";
+//
+// Every interpolated value is passed through escapeshellarg(). The branch names come from the
+// caller (CI passes the fixed values "HEAD" and "origin/trunk"), so this is defense-in-depth
+// rather than a fix for a known exposure; escaping the paths also keeps the command correct
+// when the repository lives under a path that contains spaces. The two escaped refs are joined
+// around the literal "..." so the shell collapses them into a single "<base>...<head>" argument.
+$diff_command = 'git diff ' . escapeshellarg( $compare_branch ) . '...' . escapeshellarg( $pr_branch )
+	. ' -- ' . escapeshellarg( "$repo_root/plugins/woocommerce/includes/" )
+	. ' ' . escapeshellarg( "$repo_root/plugins/woocommerce/src/" );
 $output       = array();
 $return_code  = 0;
 
