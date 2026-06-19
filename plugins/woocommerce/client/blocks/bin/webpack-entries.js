@@ -51,14 +51,7 @@ const blocks = {
 		customDir: 'reviews/all-reviews',
 	},
 	'attribute-filter': {},
-	breadcrumbs: {},
-	'catalog-sorting': {},
-	'category-description': {},
-	'coming-soon': {},
-	'coupon-code': {},
 	'customer-account': {},
-	dropdown: {},
-	'email-content': {},
 	'featured-category': {
 		customDir: 'featured-items/featured-category',
 	},
@@ -74,21 +67,13 @@ const blocks = {
 	'legacy-template': {
 		customDir: 'classic-template',
 	},
-	'classic-shortcode': {},
-	'page-content-wrapper': {},
-	'payment-method-icons': {},
 	'price-filter': {},
 	'product-best-sellers': {},
 	'product-category': {},
-	'product-categories': {},
 	'product-collection': {},
-	'product-collection-no-results': {
-		customDir: 'product-collection/inner-blocks/no-results',
-	},
 	'product-new': {},
 	'product-on-sale': {},
 	'product-query': {},
-	'product-results-count': {},
 	'product-search': {},
 	'product-tag': {},
 	'product-template': {},
@@ -106,44 +91,8 @@ const blocks = {
 	},
 	'saved-for-later': {},
 	wishlist: {},
-	'add-to-wishlist-button': {},
 	'single-product': {},
 	'stock-filter': {},
-	'store-notices': {},
-	'product-filters': {},
-	'product-filter-status': {
-		customDir: 'product-filters/inner-blocks/status-filter',
-	},
-	'product-filter-price': {
-		customDir: 'product-filters/inner-blocks/price-filter',
-	},
-	'product-filter-attribute': {
-		customDir: 'product-filters/inner-blocks/attribute-filter',
-	},
-	'product-filter-rating': {
-		customDir: 'product-filters/inner-blocks/rating-filter',
-	},
-	'product-filter-active': {
-		customDir: 'product-filters/inner-blocks/active-filters',
-	},
-	'product-filter-taxonomy': {
-		customDir: 'product-filters/inner-blocks/taxonomy-filter',
-	},
-	'product-filter-removable-chips': {
-		customDir: 'product-filters/inner-blocks/removable-chips',
-	},
-	'product-filter-clear-button': {
-		customDir: 'product-filters/inner-blocks/clear-button',
-	},
-	'product-filter-checkbox-list': {
-		customDir: 'product-filters/inner-blocks/checkbox-list',
-	},
-	'product-filter-chips': {
-		customDir: 'product-filters/inner-blocks/chips',
-	},
-	'product-filter-price-slider': {
-		customDir: 'product-filters/inner-blocks/price-slider',
-	},
 	'order-confirmation-summary': {
 		customDir: 'order-confirmation/summary',
 	},
@@ -187,42 +136,6 @@ const blocks = {
 		customDir: 'order-confirmation/create-account',
 	},
 	'product-details': {},
-	'product-description': {},
-	'product-specifications': {},
-	'product-reviews': {},
-	'product-review-rating': {
-		customDir: 'product-reviews/inner-blocks/review-rating',
-	},
-	'product-reviews-title': {
-		customDir: 'product-reviews/inner-blocks/reviews-title',
-	},
-	'product-review-form': {
-		customDir: 'product-reviews/inner-blocks/review-form',
-	},
-	'product-review-date': {
-		customDir: 'product-reviews/inner-blocks/review-date',
-	},
-	'product-review-content': {
-		customDir: 'product-reviews/inner-blocks/review-content',
-	},
-	'product-review-author-name': {
-		customDir: 'product-reviews/inner-blocks/review-author-name',
-	},
-	'product-reviews-pagination': {
-		customDir: 'product-reviews/inner-blocks/reviews-pagination',
-	},
-	'product-reviews-pagination-next': {
-		customDir: 'product-reviews/inner-blocks/reviews-pagination-next',
-	},
-	'product-reviews-pagination-previous': {
-		customDir: 'product-reviews/inner-blocks/reviews-pagination-previous',
-	},
-	'product-reviews-pagination-numbers': {
-		customDir: 'product-reviews/inner-blocks/reviews-pagination-numbers',
-	},
-	'product-review-template': {
-		customDir: 'product-reviews/inner-blocks/review-template',
-	},
 };
 
 /**

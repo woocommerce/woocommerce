@@ -51,4 +51,17 @@ module.exports = {
 			},
 		],
 	},
+	overrides: [
+		{
+			files: [ 'src/**/test/**/*.{js,ts,tsx}' ],
+			rules: {
+				'import/no-extraneous-dependencies': [
+					'error',
+					{
+						devDependencies: true,
+					},
+				],
+			},
+		},
+	],
 };

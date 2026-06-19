@@ -1,0 +1,98 @@
+:where(.wp-block-woocommerce-classic-shortcode) {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.wp-block-woocommerce-classic-shortcode__placeholder-warning {
+	border-left: 5px solid #2181d2;
+	padding-left: 2.5em;
+}
+.wp-block-woocommerce-classic-shortcode__placeholder {
+	.components-placeholder__fieldset {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+}
+.wp-block-woocommerce-classic-shortcode__placeholder-wireframe,
+.wp-block-woocommerce-classic-shortcode__placeholder-copy {
+	grid-row-start: 1;
+	grid-column-start: 1;
+	transition: 0.3s all ease;
+}
+.wp-block-woocommerce-classic-shortcode__placeholder-copy {
+	border: 1px solid #1e1e1e;
+	background-color: #fff;
+	padding: 24px 32px;
+	border-radius: 4px;
+	display: flex;
+	flex-direction: column;
+	max-width: 900px;
+	width: 400px;
+	margin: auto;
+	opacity: 0;
+	z-index: 10;
+
+	.wp-block-woocommerce-classic-shortcode__placeholder-copy__icon-container {
+		margin: 0 0 16px;
+
+		h1 {
+			color: #7f54b3;
+			font-size: 1.25em;
+			margin: 0;
+		}
+		span {
+			font-size: 1.5em;
+			display: block;
+		}
+	}
+	p {
+		margin: 0 0 16px;
+	}
+	.wp-block-woocommerce-classic-shortcode__placeholder-migration-button-container {
+		margin: 16px 0;
+		display: inline-flex;
+		flex-wrap: nowrap;
+		gap: 16px;
+		justify-content: flex-start;
+	}
+}
+.wp-block-woocommerce-classic-shortcode__placeholder-wireframe {
+	pointer-events: none;
+
+	// Image based placeholders should fill horizontal width.
+	> img,
+	> svg {
+		width: 100%;
+		height: auto;
+		color: #e0e0e0;
+	}
+}
+
+.wp-block-woocommerce-classic-shortcode {
+	.components-placeholder {
+		box-shadow: none;
+		padding: 0;
+		background-color: transparent;
+	}
+}
+
+.is-selected .wp-block-woocommerce-classic-shortcode,
+.is-hovered .wp-block-woocommerce-classic-shortcode,
+.wp-block-woocommerce-classic-shortcode.is-selected,
+.wp-block-woocommerce-classic-shortcode.is-hovered {
+	.wp-block-woocommerce-classic-shortcode__placeholder-wireframe {
+		filter: blur(3px);
+		opacity: 0.5;
+
+		* {
+			color: #e0e0e0 !important;
+			border-color: #e0e0e0 !important;
+		}
+	}
+	.wp-block-woocommerce-classic-shortcode__placeholder-copy {
+		opacity: 1;
+	}
+	.components-placeholder {
+		box-shadow: inherit;
+	}
+}

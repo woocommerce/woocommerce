@@ -1,0 +1,90 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "woocommerce/product-filter-attribute",
+	"title": "Attribute Filter",
+	"description": "Enable customers to filter the product grid by selecting one or more attributes, such as color.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"ancestor": [ "woocommerce/product-filters" ],
+	"editorScript": "wc-block-library",
+	"style": "wc-block-library",
+	"supports": {
+		"interactivity": true,
+		"color": {
+			"text": true,
+			"background": false,
+			"__experimentalDefaultControls": {
+				"text": false
+			}
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontStyle": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalDefaultControls": {
+				"fontSize": false
+			}
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true,
+			"blockGap": true,
+			"__experimentalDefaultControls": {
+				"margin": false,
+				"padding": false,
+				"blockGap": false
+			}
+		},
+		"__experimentalBorder": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true,
+			"__experimentalDefaultControls": {
+				"color": false,
+				"radius": false,
+				"style": false,
+				"width": false
+			}
+		}
+	},
+	"usesContext": [ "query", "filterParams" ],
+	"attributes": {
+		"attributeId": {
+			"type": "number"
+		},
+		"showCounts": {
+			"type": "boolean"
+		},
+		"queryType": {
+			"type": "string"
+		},
+		"displayStyle": {
+			"type": "string"
+		},
+		"selectType": {
+			"type": "string"
+		},
+		"isPreview": {
+			"type": "boolean"
+		},
+		"sortOrder": {
+			"type": "string"
+		},
+		"hideEmpty": {
+			"type": "boolean"
+		}
+	},
+	"example": {
+		"attributes": {
+			"isPreview": true
+		}
+	}
+}

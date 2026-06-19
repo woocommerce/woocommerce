@@ -16,10 +16,10 @@ import '../../accordion/accordion-group';
 import '../../accordion/inner-blocks/accordion-header';
 import '../../accordion/inner-blocks/accordion-item';
 import '../../accordion/inner-blocks/accordion-panel';
-import '../../product-description';
-import '../../product-reviews';
-import '../../product-specifications';
 import '../../single-product';
+import '../../../../../packages/block-library/src/product-description';
+import '../../../../../packages/block-library/src/product-specifications';
+import '../../../../../packages/block-library/src/product-reviews';
 
 import { initializeEditor } from '../../../../../tests/integration/helpers/integration-test-editor';
 import {

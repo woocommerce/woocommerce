@@ -1,0 +1,19 @@
+/* eslint-disable import/no-extraneous-dependencies */
+/**
+ * External dependencies
+ */
+import { registerBlockType } from '@wordpress/blocks';
+import { productFilterStatus } from '@woocommerce/icons';
+
+/**
+ * Internal dependencies
+ */
+import edit from './edit';
+import metadata from './block.json';
+import save from './save';
+
+registerBlockType( metadata, {
+	icon: productFilterStatus,
+	save,
+	edit,
+} );
