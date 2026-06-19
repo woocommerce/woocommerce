@@ -55,7 +55,11 @@ sunglasses_product_id=$(wp post list --post_type=product --field=ID --name="Sung
 wp post update $sunglasses_product_id --post_password="password" --user=1
 
 # Enable attribute archives.
-attribute_ids=$(wp wc product_attribute list --fields=id --format=ids --user=1)
+# `--format=ids` already returns only the IDs; passing `--fields=id` on top of
+# it makes the WC CLI try to field-limit scalar IDs as if they were rows, which
+# triggers a "foreach() argument must be of type array|object, int given"
+# warning in class-wc-cli-rest-command.php. The two flags are redundant.
+attribute_ids=$(wp wc product_attribute list --format=ids --user=1)
 if [ -n "$attribute_ids" ]; then
   for id in $attribute_ids; do
     wp wc product_attribute update "$id" --has_archives=true --user=1
