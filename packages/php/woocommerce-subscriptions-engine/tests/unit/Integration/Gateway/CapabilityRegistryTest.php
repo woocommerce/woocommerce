@@ -30,14 +30,14 @@ class CapabilityRegistryTest extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 		GatewayCapabilities::reset();
-		$GLOBALS['wcs_engine_test_apply_filters_calls']  = array();
-		$GLOBALS['wcs_engine_test_apply_filters_return'] = null;
+		$GLOBALS['woocommerce_subscriptions_engine_test_apply_filters_calls']  = array();
+		$GLOBALS['woocommerce_subscriptions_engine_test_apply_filters_return'] = null;
 	}
 
 	protected function tearDown(): void {
 		GatewayCapabilities::reset();
-		$GLOBALS['wcs_engine_test_apply_filters_calls']  = array();
-		$GLOBALS['wcs_engine_test_apply_filters_return'] = null;
+		$GLOBALS['woocommerce_subscriptions_engine_test_apply_filters_calls']  = array();
+		$GLOBALS['woocommerce_subscriptions_engine_test_apply_filters_return'] = null;
 		parent::tearDown();
 	}
 
@@ -68,7 +68,7 @@ class CapabilityRegistryTest extends TestCase {
 
 		CapabilityRegistry::supports( 'dummy', GatewayCapabilities::RECURRING );
 
-		$calls = $GLOBALS['wcs_engine_test_apply_filters_calls'];
+		$calls = $GLOBALS['woocommerce_subscriptions_engine_test_apply_filters_calls'];
 		$this->assertCount( 1, $calls );
 		$this->assertSame( CapabilityRegistry::CAPABILITY_CHECK_FILTER, $calls[0]['hook'] );
 		// The pre-filter value is the steps-1-2 result: true for a declared cap.
@@ -79,19 +79,19 @@ class CapabilityRegistryTest extends TestCase {
 
 	public function test_filter_can_override_a_true_to_false(): void {
 		CapabilityRegistry::declare_compatibility( 'dummy', array( GatewayCapabilities::RECURRING ) );
-		$GLOBALS['wcs_engine_test_apply_filters_return'] = false;
+		$GLOBALS['woocommerce_subscriptions_engine_test_apply_filters_return'] = false;
 
 		$this->assertFalse( CapabilityRegistry::supports( 'dummy', GatewayCapabilities::RECURRING ) );
 	}
 
 	public function test_filter_can_override_a_false_to_true(): void {
-		$GLOBALS['wcs_engine_test_apply_filters_return'] = true;
+		$GLOBALS['woocommerce_subscriptions_engine_test_apply_filters_return'] = true;
 
 		$this->assertTrue( CapabilityRegistry::supports( 'undeclared', GatewayCapabilities::AMOUNT_CHANGES ) );
 	}
 
 	public function test_supports_casts_a_non_bool_filter_result(): void {
-		$GLOBALS['wcs_engine_test_apply_filters_return'] = '1';
+		$GLOBALS['woocommerce_subscriptions_engine_test_apply_filters_return'] = '1';
 
 		$result = CapabilityRegistry::supports( 'dummy', GatewayCapabilities::RECURRING );
 

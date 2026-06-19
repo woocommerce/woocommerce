@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Add the renewal money-path: order-to-contract factory, the renewal engine (schedule, advance, charge, cancel) with its Action Scheduler bridge, the pure Core renewal calculator, and ContractRepository::update().
