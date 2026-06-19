@@ -480,10 +480,6 @@
 				}
 			},
 			"woocommerce/product-price": {
-				"typography": {
-					"fontSize":  "var(--wp--preset--font-size--large)",
-					"lineHeight": "1.5"
-				},
 				"color": {
 					"text": "var(--wp--preset--color--theme-4)"
 				}
