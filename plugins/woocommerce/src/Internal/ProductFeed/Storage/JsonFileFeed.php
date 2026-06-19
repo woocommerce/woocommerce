@@ -57,7 +57,9 @@ class JsonFileFeed implements FeedInterface {
 	/**
 	 * The file handle.
 	 *
-	 * @var resource|false|null
+	 * Only ever a resource or null: open_handle() throws instead of storing a failed fopen().
+	 *
+	 * @var resource|null
 	 */
 	private $file_handle = null;
 
@@ -136,7 +138,7 @@ class JsonFileFeed implements FeedInterface {
 		$this->entry_count = 0;
 		$this->file_name   = $this->generate_file_name();
 		$this->file_path   = $upload_dir['path'] . $this->file_name;
-		$handle = $this->open_handle( $this->file_path, 'w' );
+		$handle            = $this->open_handle( $this->file_path, 'w' );
 		fwrite( $handle, '[' );
 
 		return $this->file_name;
