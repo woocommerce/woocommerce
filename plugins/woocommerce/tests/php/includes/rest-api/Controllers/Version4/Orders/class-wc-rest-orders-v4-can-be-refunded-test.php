@@ -531,6 +531,109 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Partially refunded shipping line with tax keeps can_be_refunded true.
+	 *
+	 * Regression test for WOOPLUG-6819: refunded fee/shipping totals from
+	 * DataUtils::compute_refunded_quantities_and_totals() are tax-inclusive,
+	 * so OrderSchema::can_be_refunded must compare against tax-inclusive line totals.
+	 */
+	public function test_partially_refunded_shipping_line_with_tax(): void {
+		$order = wc_create_order( array( 'customer_id' => $this->user_id ) );
+
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_props(
+			array(
+				'method_title' => 'Flat Rate',
+				'total'        => '10.00',
+			)
+		);
+		$shipping_item->set_taxes(
+			array(
+				'total' => array( 1 => '1.50' ),
+			)
+		);
+		$shipping_item->save();
+		$order->add_item( $shipping_item );
+		$order->set_status( 'completed' );
+		$order->save();
+		$order->update_taxes();
+		$order->calculate_totals( false );
+
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 10.35,
+				'line_items' => array(
+					$shipping_item->get_id() => array(
+						'qty'          => 0,
+						'refund_total' => 9.00,
+						'refund_tax'   => array( 1 => 1.35 ),
+					),
+				),
+			)
+		);
+
+		$data = $this->get_order_response( $order->get_id() );
+
+		$this->assertTrue(
+			$data['shipping_lines'][0]['can_be_refunded'],
+			'Partially refunded shipping line with tax should remain refundable'
+		);
+	}
+
+	/**
+	 * @testdox Partially refunded fee line with tax keeps can_be_refunded true.
+	 *
+	 * Regression test for WOOPLUG-6819.
+	 */
+	public function test_partially_refunded_fee_line_with_tax(): void {
+		$order = wc_create_order( array( 'customer_id' => $this->user_id ) );
+
+		$fee_item = new WC_Order_Item_Fee();
+		$fee_item->set_props(
+			array(
+				'name'  => 'Test Fee',
+				'total' => '20.00',
+			)
+		);
+		$fee_item->set_taxes(
+			array(
+				'total' => array( 1 => '3.00' ),
+			)
+		);
+		$fee_item->save();
+		$order->add_item( $fee_item );
+		$order->set_status( 'completed' );
+		$order->save();
+		$order->update_taxes();
+		$order->calculate_totals( false );
+
+		// Refunded tax-inclusive total (20.50) exceeds the tax-exclusive line total (20.00) but
+		// not the tax-inclusive total (23.00). Under the old buggy comparison this flipped
+		// can_be_refunded to false even though $2.50 of fee + tax remains refundable.
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 20.50,
+				'line_items' => array(
+					$fee_item->get_id() => array(
+						'qty'          => 0,
+						'refund_total' => 18.00,
+						'refund_tax'   => array( 1 => 2.50 ),
+					),
+				),
+			)
+		);
+
+		$data = $this->get_order_response( $order->get_id() );
+
+		$this->assertTrue(
+			$data['fee_lines'][0]['can_be_refunded'],
+			'Partially refunded fee line with tax should remain refundable'
+		);
+	}
+
+	/**
 	 * @testdox Zero-priced product line item with quantity follows quantity logic.
 	 */
 	public function test_zero_priced_item_follows_quantity_logic(): void {
@@ -557,6 +660,52 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 		$this->assertTrue(
 			$data['line_items'][0]['can_be_refunded'],
 			'Zero-priced item with remaining quantity should be refundable'
+		);
+	}
+
+	/**
+	 * @testdox Discount (negative-total) fee line with no prior refund reports can_be_refunded true.
+	 *
+	 * Regression for WOOPLUG-6829: the comparison omitted abs(), so a negative
+	 * discount fee (e.g. a loyalty credit) reported can_be_refunded=false even
+	 * though the refund validator accepts it as part of a mixed refund.
+	 */
+	public function test_negative_fee_line_can_be_refunded(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '50.00' ) );
+		$order   = wc_create_order( array( 'customer_id' => $this->user_id ) );
+
+		$item = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 50,
+				'total'    => 50,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Loyalty discount',
+				'total' => '-10.00',
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+
+		$order->set_status( 'completed' );
+		$order->save();
+		$order->calculate_totals( false );
+
+		$data = $this->get_order_response( $order->get_id() );
+
+		$this->assertNotEmpty( $data['fee_lines'], 'Order should have fee lines' );
+		$this->assertTrue(
+			$data['fee_lines'][0]['can_be_refunded'],
+			'A discount (negative) fee with no prior refund should be refundable.'
 		);
 	}
 }

@@ -51,6 +51,119 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Enqueuing the same processor repeatedly keeps a single entry.
+	 */
+	public function test_enqueue_processor_is_idempotent(): void {
+		$processor = get_class( $this->test_process );
+
+		$this->sut->enqueue_processor( $processor );
+		$this->sut->enqueue_processor( $processor );
+		$this->sut->enqueue_processor( $processor );
+
+		$enqueued = $this->sut->get_enqueued_processors();
+		$this->assertCount( 1, $enqueued, 'Repeated enqueues of the same processor must not create duplicates.' );
+		$this->assertContains( $processor, $enqueued, 'The enqueued processor should still be present.' );
+		$this->assertCount( 1, get_option( BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME ), 'The persisted option must not contain duplicates.' );
+	}
+
+	/**
+	 * @testdox Enqueuing collapses a pre-existing list bloated with duplicates and persists the cleanup.
+	 */
+	public function test_enqueue_processor_collapses_preexisting_duplicates(): void {
+		$processor = get_class( $this->test_process );
+
+		// Simulate an option bloated by the historical duplicate bug.
+		update_option(
+			BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME,
+			array_fill( 0, 5, $processor ),
+			false
+		);
+
+		$this->sut->enqueue_processor( $processor );
+
+		$this->assertCount( 1, $this->sut->get_enqueued_processors(), 'Existing duplicates should collapse to a single entry.' );
+		$persisted = get_option( BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME );
+		$this->assertCount( 1, $persisted, 'The de-duplicated list should be persisted.' );
+		$this->assertContains( $processor, $persisted, 'The persisted list should still contain the processor.' );
+	}
+
+	/**
+	 * @testdox Enqueuing a processor collapses duplicates of other processors without dropping them.
+	 */
+	public function test_enqueue_processor_collapses_duplicates_without_dropping_others(): void {
+		update_option(
+			BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME,
+			array( 'Processor\\A', 'Processor\\A', 'Processor\\A', 'Processor\\B' ),
+			false
+		);
+
+		$this->sut->enqueue_processor( 'Processor\\C' );
+
+		$this->assertSame(
+			array( 'Processor\\A', 'Processor\\B', 'Processor\\C' ),
+			$this->sut->get_enqueued_processors(),
+			'Collapsing duplicates must preserve other processors and append the new one, in order.'
+		);
+	}
+
+	/**
+	 * @testdox Re-enqueuing an already-present processor on a clean list does not rewrite the option.
+	 */
+	public function test_enqueue_processor_skips_write_when_unchanged(): void {
+		$processor = get_class( $this->test_process );
+		$this->sut->enqueue_processor( $processor );
+
+		$writes = 0;
+		add_filter(
+			'pre_update_option_' . BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME,
+			function ( $value ) use ( &$writes ) {
+				++$writes;
+				return $value;
+			}
+		);
+
+		$this->sut->enqueue_processor( $processor );
+
+		$this->assertSame( 0, $writes, 'A no-op enqueue must not trigger an option write.' );
+	}
+
+	/**
+	 * @testdox Enqueuing strips non-string values from a corrupted option without fataling.
+	 */
+	public function test_enqueue_processor_strips_non_string_values(): void {
+		$processor = get_class( $this->test_process );
+
+		// A corrupted option containing non-string values would otherwise make array_unique() fatal.
+		update_option(
+			BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME,
+			array( $processor, new \stdClass(), array( 'corrupt' ), 12345 ),
+			false
+		);
+
+		$this->sut->enqueue_processor( $processor );
+
+		$this->assertSame( array( $processor ), $this->sut->get_enqueued_processors(), 'Non-string values must be stripped, leaving only valid processor names.' );
+	}
+
+	/**
+	 * @testdox Enqueuing collapses a heavily bloated list of thousands of duplicates to a single entry.
+	 */
+	public function test_enqueue_processor_collapses_heavily_bloated_list(): void {
+		$processor = get_class( $this->test_process );
+
+		// Mirror the reported production case (thousands of identical entries).
+		update_option(
+			BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME,
+			array_fill( 0, 3000, $processor ),
+			false
+		);
+
+		$this->sut->enqueue_processor( $processor );
+
+		$this->assertSame( array( $processor ), $this->sut->get_enqueued_processors(), 'A heavily bloated list must collapse to a single entry.' );
+	}
+
+	/**
 	 * @testdox 'remove_processor' dequeues and unschedules a processor, but the watchdog is kept alive if more processors are still enqueued.
 	 */
 	public function test_remove_processor_when_others_are_still_enqueued() {

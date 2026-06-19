@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Clarify Settings UI extension section scoping so omitted sections are page-wide and empty sections target the default section.

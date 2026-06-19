@@ -53,7 +53,7 @@
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"opis/json-schema": "*",
-		"woocommerce/action-scheduler": "3.9.3",
+		"woocommerce/action-scheduler": "4.0.0",
 		"woocommerce/blueprint": "*",
 		"woocommerce/email-editor": "*",
 		"wordpress/abilities-api": "^0.4.0",

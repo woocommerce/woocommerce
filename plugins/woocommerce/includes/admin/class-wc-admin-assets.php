@@ -506,7 +506,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'export_selected_products_nonce' => current_user_can( 'export' ) ? wp_create_nonce( 'export-selected-products' ) : null,
 					),
 					'urls'                              => array(
-						'add_product'     => \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
+						'add_product'     => null,
 						'import_products' => current_user_can( 'import' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) : null,
 						'export_products' => current_user_can( 'export' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ) : null,
 					),
@@ -808,6 +808,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					array(
 						'delete_log_confirmation' => esc_js( __( 'Are you sure you want to delete this log?', 'woocommerce' ) ),
 						'run_tool_confirmation'   => esc_js( __( 'Are you sure you want to run this tool?', 'woocommerce' ) ),
+						'tools_poll_interval'     => 10000,
+						'tools_url'               => esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=tools' ) ),
 					)
 				);
 			}

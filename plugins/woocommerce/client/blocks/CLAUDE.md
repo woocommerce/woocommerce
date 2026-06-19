@@ -132,9 +132,11 @@ $this->asset_data_registry->add('reviewRatingsEnabled', wc_review_ratings_enable
 // Available in JS as window.wcSettings.reviewRatingsEnabled
 ```
 
-### Interactivity API Stores (LOCKED)
+### Interactivity API Stores
 
-All WooCommerce Interactivity API stores use `lock: true`. They are **private by design**:
+Most WooCommerce Interactivity API stores are private by design. Exception: the `woocommerce/product-filters` store is public for Product Filters inner-block extensibility.
+
+For private stores:
 
 - Not intended for third-party extension
 - Removing/changing store state is NOT a breaking change
@@ -182,7 +184,7 @@ Webpack is configured with **11 separate configs** in `bin/webpack-configs.js`:
 
 - Core, Main, Frontend, Extensions, Payments, Styling, Site Editor, Interactivity, Cart/Checkout Frontend, Dependency Detection
 
-Build is orchestrated by **wireit** for caching. TypeScript uses **60+ path aliases** defined in `tsconfig.base.json`.
+Webpack writes directly to `plugins/woocommerce/assets/client/blocks/` so PHP enqueues run against the final asset locations with no copy step. TypeScript uses **60+ path aliases** defined in `tsconfig.base.json`.
 
 ## Testing
 

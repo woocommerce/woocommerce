@@ -35,6 +35,9 @@ permissions:
 concurrency:
   group: release-bump-version-${{ inputs.branch }}
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   bump-version:
     name: Bump WooCommerce Version

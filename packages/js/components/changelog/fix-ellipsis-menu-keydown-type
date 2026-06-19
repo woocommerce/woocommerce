@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix TypeScript error in EllipsisMenu onKeyDown handler by using native KeyboardEvent type.
