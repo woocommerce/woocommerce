@@ -15,6 +15,7 @@ use WC_Order;
 use WC_Order_Item_Product;
 use WC_Order_Item_Shipping;
 use WC_Product;
+use WC_Product_Download;
 use WC_Product_Variation;
 use WP_User;
 
@@ -705,14 +706,14 @@ class EmailPreview {
 	/**
 	 * Provide a dummy product file so product->has_file() returns true in preview.
 	 *
-	 * @param array|null $file Current file array or null.
-	 * @return array|null
+	 * @param WC_Product_Download|array|null $file Current file object, array, or null.
+	 * @return WC_Product_Download|array|null
 	 */
 	public function provide_dummy_product_file( $file ) {
 		/**
 		 * Filters whether the current request is an email preview.
 		 *
-		 * When true, provide a dummy product file array so downloadable template parts
+		 * When true, provide a dummy product file so downloadable template parts
 		 * can render during preview.
 		 *
 		 * @since 9.6.0
@@ -720,10 +721,11 @@ class EmailPreview {
 		 * @param bool $is_email_preview Whether preview mode is active.
 		 */
 		if ( apply_filters( 'woocommerce_is_email_preview', false ) ) {
-			return array(
-				'name' => __( 'Sample Download File.pdf', 'woocommerce' ),
-				'file' => 'sample-download.pdf',
-			);
+			$dummy_file = new WC_Product_Download();
+			$dummy_file->set_id( 'preview-dummy' );
+			$dummy_file->set_name( __( 'Sample Download File.pdf', 'woocommerce' ) );
+			$dummy_file->set_file( 'sample-download.pdf' );
+			return $dummy_file;
 		}
 		return $file;
 	}

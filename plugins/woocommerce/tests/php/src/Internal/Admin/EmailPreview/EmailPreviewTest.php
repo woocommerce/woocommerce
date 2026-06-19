@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\Admin\EmailPreview\PreviewOrder;
 use WC_Emails;
 use WC_Helper_Order;
 use WC_Product;
+use WC_Product_Download;
 use WC_Unit_Test_Case;
 
 /**
@@ -235,6 +236,21 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'Your ' . self::SITE_TITLE . ' order has been received!', $subject );
 
 		remove_filter( 'woocommerce_prepare_email_for_preview', $email_filter, 10 );
+	}
+
+	/**
+	 * @testdox Email preview provides dummy product files as download objects.
+	 */
+	public function test_provide_dummy_product_file_returns_download_object_in_preview(): void {
+		add_filter( 'woocommerce_is_email_preview', '__return_true' );
+
+		$file = $this->sut->provide_dummy_product_file( null );
+
+		remove_filter( 'woocommerce_is_email_preview', '__return_true' );
+
+		$this->assertInstanceOf( WC_Product_Download::class, $file );
+		$this->assertSame( 'Sample Download File.pdf', $file->get_name() );
+		$this->assertSame( 'sample-download.pdf', $file->get_file() );
 	}
 
 	/**
