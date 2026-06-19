@@ -24,7 +24,7 @@ class EmailVerificationService {
 	private const VERIFIED_META = '_wc_email_verified';
 
 	/**
-	 * User meta key that stores the verification token as "{timestamp}:{wp_fast_hash}".
+	 * User meta key that stores the verification token as "{timestamp}:{key_hash}:{email_hash}".
 	 */
 	private const KEY_META = '_wc_email_verification_key';
 
@@ -109,8 +109,10 @@ class EmailVerificationService {
 	 * Generate and store a one-time email-verification key for the given user.
 	 *
 	 * The plaintext key is returned for inclusion in the verification email link.
-	 * The stored value is a "{timestamp}:{wp_fast_hash}" pair so the plaintext is
-	 * never persisted and the token expires after DAY_IN_SECONDS.
+	 * The stored value is a "{timestamp}:{key_hash}:{email_hash}" triplet so the plaintext
+	 * is never persisted and the token expires after DAY_IN_SECONDS. The email hash binds
+	 * the token to the account email in effect at issuance, so a key emailed to one address
+	 * can never verify a different address the account is later switched to.
 	 *
 	 * @since 11.0.0
 	 *
@@ -118,8 +120,11 @@ class EmailVerificationService {
 	 * @return string The plaintext verification key.
 	 */
 	public function create_verification_key( int $user_id ): string {
-		$key = wp_generate_password( 20, false );
-		Users::update_site_user_meta( $user_id, self::KEY_META, time() . ':' . wp_fast_hash( $key ) );
+		$key        = wp_generate_password( 20, false );
+		$user       = get_user_by( 'id', $user_id );
+		$email_hash = $user instanceof \WP_User ? wp_fast_hash( strtolower( $user->user_email ) ) : '';
+
+		Users::update_site_user_meta( $user_id, self::KEY_META, time() . ':' . wp_fast_hash( $key ) . ':' . $email_hash );
 		return $key;
 	}
 
@@ -148,8 +153,8 @@ class EmailVerificationService {
 	/**
 	 * Validate a plaintext verification key against the stored hash for the given user.
 	 *
-	 * Returns false if no token is stored, if the token has expired, or if the key
-	 * does not match the stored hash.
+	 * Returns false if no token is stored, if the token has expired, if the account email
+	 * has changed since the token was issued, or if the key does not match the stored hash.
 	 *
 	 * @since 11.0.0
 	 *
@@ -164,10 +169,21 @@ class EmailVerificationService {
 			return false;
 		}
 
-		list( $timestamp, $hash ) = $parsed;
+		list( $timestamp, $hash, $email_hash ) = $parsed;
 
 		if ( time() - $timestamp > DAY_IN_SECONDS ) {
 			return false;
+		}
+
+		// Tokens issued after email-binding was added carry the email they were minted for. Reject
+		// the token if the account email has since changed, so a key emailed to one address can't be
+		// used to verify a different address. Legacy tokens (empty hash) skip this check.
+		if ( '' !== $email_hash ) {
+			$user = get_user_by( 'id', $user_id );
+
+			if ( ! $user instanceof \WP_User || ! wp_verify_fast_hash( strtolower( $user->user_email ), $email_hash ) ) {
+				return false;
+			}
 		}
 
 		return wp_verify_fast_hash( $key, $hash );
@@ -176,11 +192,12 @@ class EmailVerificationService {
 	/**
 	 * Parse the stored verification token into its timestamp and hash parts.
 	 *
-	 * The token is persisted as "{timestamp}:{wp_fast_hash}"; this is the single place
-	 * that knows that format.
+	 * The token is persisted as "{timestamp}:{key_hash}:{email_hash}"; this is the single place
+	 * that knows that format. The email hash is absent on legacy tokens minted before email
+	 * binding was added, in which case it is returned as an empty string.
 	 *
 	 * @param int $user_id WordPress user ID.
-	 * @return array{0: int, 1: string}|null The [timestamp, hash] pair, or null when no token is stored.
+	 * @return array{0: int, 1: string, 2: string}|null The [timestamp, key_hash, email_hash] triplet, or null when no valid token is stored.
 	 */
 	private function parse_stored_key( int $user_id ): ?array {
 		$stored = (string) Users::get_site_user_meta( $user_id, self::KEY_META );
@@ -189,9 +206,16 @@ class EmailVerificationService {
 			return null;
 		}
 
-		list( $timestamp, $hash ) = explode( ':', $stored, 2 );
+		$parts      = explode( ':', $stored, 3 );
+		$timestamp  = (int) ( $parts[0] ?? 0 );
+		$hash       = (string) ( $parts[1] ?? '' );
+		$email_hash = (string) ( $parts[2] ?? '' );
 
-		return array( (int) $timestamp, $hash );
+		if ( '' === $hash ) {
+			return null;
+		}
+
+		return array( $timestamp, $hash, $email_hash );
 	}
 
 	/**

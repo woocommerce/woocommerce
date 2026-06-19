@@ -72,6 +72,67 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A token is rejected after the account email changes, so it can't verify a different address.
+	 */
+	public function test_token_rejected_after_email_change(): void {
+		$user_id = wc_create_new_customer( 'issued-for@example.com', 'tokenuser', 'pw' );
+
+		$key = $this->sut->create_verification_key( $user_id );
+		$this->assertTrue( $this->sut->check_verification_key( $user_id, $key ), 'Token should be valid for the email it was issued for' );
+
+		wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => 'changed-to@example.com',
+			)
+		);
+		clean_user_cache( $user_id );
+
+		$this->assertFalse(
+			$this->sut->check_verification_key( $user_id, $key ),
+			'A token minted for the old email must not verify the new email'
+		);
+	}
+
+	/**
+	 * @testdox A token still verifies after a non-email profile change (case-insensitive email match).
+	 */
+	public function test_token_accepted_after_non_email_change(): void {
+		$user_id = wc_create_new_customer( 'stable@example.com', 'stableuser', 'pw' );
+
+		$key = $this->sut->create_verification_key( $user_id );
+
+		wp_update_user(
+			array(
+				'ID'           => $user_id,
+				'display_name' => 'Renamed Customer',
+			)
+		);
+		clean_user_cache( $user_id );
+
+		$this->assertTrue(
+			$this->sut->check_verification_key( $user_id, $key ),
+			'A token must remain valid when the account email is unchanged'
+		);
+	}
+
+	/**
+	 * @testdox A legacy token stored without an email binding is still accepted.
+	 */
+	public function test_legacy_token_without_email_binding_is_accepted(): void {
+		$user_id = wc_create_new_customer( 'legacy@example.com', 'legacyuser', 'pw' );
+
+		$key = wp_generate_password( 20, false );
+		// Simulate a token stored before email binding was added (timestamp:key_hash, no email hash).
+		Users::update_site_user_meta( $user_id, '_wc_email_verification_key', time() . ':' . wp_fast_hash( $key ) );
+
+		$this->assertTrue(
+			$this->sut->check_verification_key( $user_id, $key ),
+			'Pre-existing two-part tokens must remain valid for backward compatibility'
+		);
+	}
+
+	/**
 	 * @testdox An expired token should be rejected.
 	 */
 	public function test_expired_token_is_rejected(): void {
