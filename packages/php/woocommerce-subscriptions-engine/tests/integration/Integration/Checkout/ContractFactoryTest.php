@@ -154,4 +154,14 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 		$this->expectException( \RuntimeException::class );
 		( new ContractFactory() )->create_from_order( $order, $plan );
 	}
+
+	public function test_unsaved_order_is_rejected(): void {
+		// An order that was never saved reports id 0, which would persist
+		// origin_order_id => 0 and link the contract to a non-existent order.
+		$order = new WC_Order();
+		$order->set_currency( 'USD' );
+
+		$this->expectException( \RuntimeException::class );
+		( new ContractFactory() )->create_from_order( $order, $this->make_plan() );
+	}
 }

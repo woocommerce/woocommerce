@@ -181,6 +181,35 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		( new ContractRepository() )->update( $this->make_contract() );
 	}
 
+	public function test_update_rejects_deleted_contract_and_writes_no_orphans(): void {
+		global $wpdb;
+
+		$repo = new ContractRepository();
+		$id   = $repo->insert( $this->make_contract() );
+
+		// Simulate a concurrent delete: the contract row and its children are gone.
+		$this->assertTrue( $repo->delete( $id ) );
+
+		$stale = $this->make_contract();
+		$stale->set_id( $id );
+
+		try {
+			$repo->update( $stale );
+			$this->fail( 'Expected RuntimeException when updating a contract whose row no longer exists.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'no longer exists', $e->getMessage() );
+		}
+
+		// The guard fired before any child write, so no orphan rows were created.
+		$items_table = \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller::get_table_name(
+			\Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller::TABLE_CONTRACT_ITEMS
+		);
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$remaining = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$items_table} WHERE contract_id = %d", $id ) );
+
+		$this->assertSame( '0', $remaining );
+	}
+
 	public function test_delete_removes_contract_and_children(): void {
 		global $wpdb;
 

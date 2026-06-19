@@ -322,8 +322,19 @@ final class Contract {
 	 * @param array<int, array<string, mixed>>    $items     Item rows.
 	 * @param array<string, array<string, mixed>> $addresses Address rows keyed by type.
 	 * @param array<string, string>               $meta      Meta as key => value.
+	 * @throws DomainException If the stored cycle_count is negative.
 	 */
 	public static function from_storage( array $row, array $items = array(), array $addresses = array(), array $meta = array() ): self {
+		// Hydration is a trust boundary too: a corrupted or migrated row must not
+		// smuggle a negative cycle_count past the invariant set_cycle_count()
+		// enforces, since that would corrupt renewal cycle and idempotency math.
+		$cycle_count = (int) ( $row['cycle_count'] ?? 0 );
+		if ( $cycle_count < 0 ) {
+			throw new DomainException(
+				sprintf( 'Contract: stored cycle_count must be 0 or greater, got %d.', $cycle_count )
+			);
+		}
+
 		return new self(
 			array(
 				'id'                   => isset( $row['id'] ) ? (int) $row['id'] : null,
@@ -346,7 +357,7 @@ final class Contract {
 				'last_attempt_gmt'     => $row['last_attempt_gmt'] ?? null,
 				'trial_end_gmt'        => $row['trial_end_gmt'] ?? null,
 				'end_gmt'              => $row['end_gmt'] ?? null,
-				'cycle_count'          => (int) ( $row['cycle_count'] ?? 0 ),
+				'cycle_count'          => $cycle_count,
 				'schedule_source'      => (string) ( $row['schedule_source'] ?? self::SCHEDULE_SOURCE_PRIMITIVE ),
 				'items'                => $items,
 				'addresses'            => $addresses,

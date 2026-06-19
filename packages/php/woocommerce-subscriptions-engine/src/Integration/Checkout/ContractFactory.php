@@ -83,12 +83,18 @@ final class ContractFactory {
 	 * @param Plan                 $plan      The selling plan the customer chose. Must be persisted (have an id).
 	 * @param array<string, mixed> $overrides Optional explicit values for any Contract::create() field.
 	 * @return Contract The persisted contract, with its id assigned.
-	 * @throws \RuntimeException If the plan has no id, or the insert fails.
+	 * @throws \RuntimeException If the plan or order has no id, or the insert fails.
 	 */
 	public function create_from_order( WC_Order $order, Plan $plan, array $overrides = array() ): Contract {
 		$plan_id = $plan->get_id();
 		if ( null === $plan_id ) {
 			throw new \RuntimeException( 'ContractFactory::create_from_order(): the selling plan must be persisted (have an id) before a contract can reference it.' );
+		}
+
+		// An unsaved order reports id 0; persisting origin_order_id => 0 would link
+		// the contract to a non-existent order. Require a saved order up front.
+		if ( ! $order->get_id() ) {
+			throw new \RuntimeException( 'ContractFactory::create_from_order(): the order must be persisted (have an id) before a contract can link to it.' );
 		}
 
 		$now       = gmdate( 'Y-m-d H:i:s' );

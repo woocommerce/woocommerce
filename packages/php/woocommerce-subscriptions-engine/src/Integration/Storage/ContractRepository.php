@@ -92,9 +92,9 @@ final class ContractRepository {
 	 * stamps), so the child churn is rare in practice; revisit with a diffing
 	 * upsert if a high-frequency child-row writer appears.
 	 *
-	 * @param Contract $contract Contract to update. Must have an id.
+	 * @param Contract $contract Contract to update. Must have an id whose row still exists.
 	 * @return bool True when the contract row was updated (or already current).
-	 * @throws \RuntimeException If the contract has no id.
+	 * @throws \RuntimeException If the contract has no id, or its row no longer exists.
 	 */
 	public function update( Contract $contract ): bool {
 		global $wpdb;
@@ -104,11 +104,29 @@ final class ContractRepository {
 			throw new \RuntimeException( 'Cannot update a contract that has no id. Use ContractRepository::insert() for a new contract.' );
 		}
 
+		$contracts_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// Guard against a stale id / concurrent delete before touching any table.
+		// `$wpdb->update()` returns 0 for both "matched, nothing changed" and "no
+		// row matched", so on its own it cannot tell that the parent is gone - and
+		// the child delete/reinsert below would then write orphan rows, since no
+		// foreign key enforces the relation. This narrows but does not fully close
+		// the race; the complete fix wraps the whole method in a transaction with
+		// SELECT ... FOR UPDATE, tracked as separate hardening (the integration
+		// suite's transaction-based isolation needs a test-safe approach first).
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$exists = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$contracts_table} WHERE id = %d", $id ) );
+		if ( null === $exists ) {
+			throw new \RuntimeException(
+				esc_html( sprintf( 'Cannot update contract %d: the contract row no longer exists (stale id or concurrent delete).', $id ) )
+			);
+		}
+
 		$data = $contract->to_storage();
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$updated = $wpdb->update(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ),
+			$contracts_table,
 			array_merge(
 				$data,
 				array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) )
@@ -137,7 +155,8 @@ final class ContractRepository {
 
 		// `$wpdb->update` returns 0 (int) when the row matched but no column
 		// changed - a successful no-op, not a failure. Only `false` is an error,
-		// and that path threw above.
+		// and that path threw above; the "row no longer exists" case is ruled out
+		// by the existence guard at the top of this method.
 		return true;
 	}
 
