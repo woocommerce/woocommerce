@@ -322,8 +322,19 @@ final class Contract {
 	 * @param array<int, array<string, mixed>>    $items     Item rows.
 	 * @param array<string, array<string, mixed>> $addresses Address rows keyed by type.
 	 * @param array<string, string>               $meta      Meta as key => value.
+	 * @throws DomainException If the stored cycle_count is negative.
 	 */
 	public static function from_storage( array $row, array $items = array(), array $addresses = array(), array $meta = array() ): self {
+		// Hydration is a trust boundary too: a corrupted or migrated row must not
+		// smuggle a negative cycle_count past the invariant set_cycle_count()
+		// enforces, since that would corrupt renewal cycle and idempotency math.
+		$cycle_count = (int) ( $row['cycle_count'] ?? 0 );
+		if ( $cycle_count < 0 ) {
+			throw new DomainException(
+				sprintf( 'Contract: stored cycle_count must be 0 or greater, got %d.', $cycle_count )
+			);
+		}
+
 		return new self(
 			array(
 				'id'                   => isset( $row['id'] ) ? (int) $row['id'] : null,
@@ -346,7 +357,7 @@ final class Contract {
 				'last_attempt_gmt'     => $row['last_attempt_gmt'] ?? null,
 				'trial_end_gmt'        => $row['trial_end_gmt'] ?? null,
 				'end_gmt'              => $row['end_gmt'] ?? null,
-				'cycle_count'          => (int) ( $row['cycle_count'] ?? 0 ),
+				'cycle_count'          => $cycle_count,
 				'schedule_source'      => (string) ( $row['schedule_source'] ?? self::SCHEDULE_SOURCE_PRIMITIVE ),
 				'items'                => $items,
 				'addresses'            => $addresses,
@@ -389,11 +400,7 @@ final class Contract {
 			return;
 		}
 
-		if ( ! ContractStatus::can_transition( $this->status, $status ) ) {
-			throw new DomainException(
-				sprintf( 'Contract: illegal status transition from "%s" to "%s".', $this->status, $status )
-			);
-		}
+		ContractStatus::assert_transition_allowed( $this->status, $status );
 
 		$this->status = $status;
 	}
@@ -459,6 +466,27 @@ final class Contract {
 	}
 
 	/**
+	 * Recurring discount per cycle (decimal-safe string).
+	 */
+	public function get_discount_total(): string {
+		return $this->discount_total;
+	}
+
+	/**
+	 * Recurring shipping per cycle (decimal-safe string).
+	 */
+	public function get_shipping_total(): string {
+		return $this->shipping_total;
+	}
+
+	/**
+	 * Recurring tax per cycle (decimal-safe string).
+	 */
+	public function get_tax_total(): string {
+		return $this->tax_total;
+	}
+
+	/**
 	 * Next renewal attempt, or null.
 	 */
 	public function get_next_payment_gmt(): ?string {
@@ -475,6 +503,22 @@ final class Contract {
 	}
 
 	/**
+	 * Last successful renewal payment, or null. GMT string.
+	 */
+	public function get_last_payment_gmt(): ?string {
+		return $this->last_payment_gmt;
+	}
+
+	/**
+	 * Set the last successful renewal payment timestamp.
+	 *
+	 * @param string|null $last_payment_gmt GMT string or null.
+	 */
+	public function set_last_payment_gmt( ?string $last_payment_gmt ): void {
+		$this->last_payment_gmt = $last_payment_gmt;
+	}
+
+	/**
 	 * Start timestamp (GMT string).
 	 */
 	public function get_start_gmt(): string {
@@ -486,6 +530,28 @@ final class Contract {
 	 */
 	public function get_cycle_count(): int {
 		return $this->cycle_count;
+	}
+
+	/**
+	 * Set the count of successfully-paid renewal cycles.
+	 *
+	 * The renewal money-path advances this under a per-cycle idempotency guard,
+	 * so the read-modify-write happens once per cycle and a plain setter is
+	 * safe. An atomic, server-side increment becomes necessary once renewal
+	 * accounting is driven by concurrent gateway webhooks (the cycles/attempts
+	 * reshape); until then this is the simpler shape.
+	 *
+	 * @param int $cycle_count New cycle count.
+	 * @throws DomainException If `$cycle_count` is negative.
+	 */
+	public function set_cycle_count( int $cycle_count ): void {
+		if ( $cycle_count < 0 ) {
+			throw new DomainException(
+				sprintf( 'Contract: cycle_count must be 0 or greater, got %d.', $cycle_count )
+			);
+		}
+
+		$this->cycle_count = $cycle_count;
 	}
 
 	/**
