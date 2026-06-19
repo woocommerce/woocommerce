@@ -1,6 +1,6 @@
 <?php
 /**
- * Schema_Installer - owns the engine's baseline database tables.
+ * SchemaInstaller - owns the engine's baseline database tables.
  *
  * Creates and drops the plan tables (`wc_selling_plan_groups`,
  * `wc_selling_plans`) and the contract tables (`wc_subscription_contracts`,
@@ -27,7 +27,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Schema installer and table-name resolver.
  */
-final class Schema_Installer {
+final class SchemaInstaller {
 
 	/**
 	 * Schema version. Bump when the CREATE TABLE statements change so the
@@ -119,7 +119,7 @@ final class Schema_Installer {
 	}
 
 	/**
-	 * Whether the installed schema version matches Schema_Installer::VERSION.
+	 * Whether the installed schema version matches SchemaInstaller::VERSION.
 	 */
 	public static function is_current(): bool {
 		return self::VERSION === get_option( self::VERSION_OPTION );

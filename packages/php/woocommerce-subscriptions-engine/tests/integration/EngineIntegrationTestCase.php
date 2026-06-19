@@ -13,5 +13,5 @@ declare( strict_types=1 );
 /**
  * Engine integration test case.
  */
-abstract class Engine_Integration_Test_Case extends WP_UnitTestCase {
+abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 }

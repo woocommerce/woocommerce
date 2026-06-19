@@ -1,6 +1,6 @@
 <?php
 /**
- * Integration tests for Plan_Repository (and Plan_Group_Repository).
+ * Integration tests for PlanRepository (and PlanGroupRepository).
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine
  */
@@ -9,36 +9,36 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\Storage;
 
-use Engine_Integration_Test_Case;
+use EngineIntegrationTestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan_Group;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Billing_Policy;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\Pricing_Policy;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Plan_Group_Repository;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Plan_Repository;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanGroup;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanGroupRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
 /**
- * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Plan_Repository
- * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\Plan_Group_Repository
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanGroupRepository
  */
-class Plan_Repository_Test extends Engine_Integration_Test_Case {
+class PlanRepositoryTest extends EngineIntegrationTestCase {
 
 	private function make_group(): int {
-		$group = Plan_Group::create(
+		$group = PlanGroup::create(
 			array(
 				'name'          => 'Coffee club',
 				'merchant_code' => 'coffee-club',
 			)
 		);
 
-		return ( new Plan_Group_Repository() )->insert( $group );
+		return ( new PlanGroupRepository() )->insert( $group );
 	}
 
 	public function test_plan_group_round_trips(): void {
-		$repo = new Plan_Group_Repository();
+		$repo = new PlanGroupRepository();
 
 		$id = $repo->insert(
-			Plan_Group::create(
+			PlanGroup::create(
 				array(
 					'name'            => 'Boxes',
 					'merchant_code'   => 'boxes',
@@ -50,7 +50,7 @@ class Plan_Repository_Test extends Engine_Integration_Test_Case {
 
 		$fetched = $repo->find( $id );
 
-		$this->assertInstanceOf( Plan_Group::class, $fetched );
+		$this->assertInstanceOf( PlanGroup::class, $fetched );
 		$this->assertSame( $id, $fetched->get_id() );
 		$this->assertSame( 'Boxes', $fetched->get_name() );
 		$this->assertSame( 'boxes', $fetched->get_merchant_code() );
@@ -60,7 +60,7 @@ class Plan_Repository_Test extends Engine_Integration_Test_Case {
 
 	public function test_plan_round_trips_with_policies_and_extension_slug(): void {
 		$group_id = $this->make_group();
-		$repo     = new Plan_Repository();
+		$repo     = new PlanRepository();
 
 		$plan = Plan::create(
 			$group_id,
@@ -73,14 +73,14 @@ class Plan_Repository_Test extends Engine_Integration_Test_Case {
 						'value' => 'monthly',
 					),
 				),
-				'billing_policy' => Billing_Policy::from_array(
+				'billing_policy' => BillingPolicy::from_array(
 					array(
 						'period'     => 'month',
 						'interval'   => 1,
 						'max_cycles' => 12,
 					)
 				),
-				'pricing_policy' => Pricing_Policy::from_array(
+				'pricing_policy' => PricingPolicy::from_array(
 					array(
 						'policies' => array(
 							array(
@@ -113,14 +113,14 @@ class Plan_Repository_Test extends Engine_Integration_Test_Case {
 
 	public function test_plan_without_optional_policies_round_trips(): void {
 		$group_id = $this->make_group();
-		$repo     = new Plan_Repository();
+		$repo     = new PlanRepository();
 
 		$id = $repo->insert(
 			Plan::create(
 				$group_id,
 				array(
 					'name'           => 'Bare',
-					'billing_policy' => Billing_Policy::from_array(
+					'billing_policy' => BillingPolicy::from_array(
 						array(
 							'period'   => 'week',
 							'interval' => 2,
@@ -140,13 +140,13 @@ class Plan_Repository_Test extends Engine_Integration_Test_Case {
 
 	public function test_update_persists_changes(): void {
 		$group_id = $this->make_group();
-		$repo     = new Plan_Repository();
+		$repo     = new PlanRepository();
 
 		$plan = Plan::create(
 			$group_id,
 			array(
 				'name'           => 'Before',
-				'billing_policy' => Billing_Policy::from_array(
+				'billing_policy' => BillingPolicy::from_array(
 					array(
 						'period'   => 'month',
 						'interval' => 1,
@@ -164,14 +164,14 @@ class Plan_Repository_Test extends Engine_Integration_Test_Case {
 
 	public function test_delete_removes_the_row(): void {
 		$group_id = $this->make_group();
-		$repo     = new Plan_Repository();
+		$repo     = new PlanRepository();
 
 		$id = $repo->insert(
 			Plan::create(
 				$group_id,
 				array(
 					'name'           => 'Doomed',
-					'billing_policy' => Billing_Policy::from_array(
+					'billing_policy' => BillingPolicy::from_array(
 						array(
 							'period'   => 'month',
 							'interval' => 1,

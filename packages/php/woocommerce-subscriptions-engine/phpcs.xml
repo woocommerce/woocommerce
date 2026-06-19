@@ -11,6 +11,23 @@
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
 
+	<!--
+		Enforce PSR-4 naming for src/  with PascalCase filenames matching the class short-names.
+		This also requires excluding src/ from the default WordPress file name and class name rules.
+	-->
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>src/</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>src/</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Classes.ClassFileName">
+		<include-pattern>src/</include-pattern>
+	</rule>
+	<rule ref="Squiz.Classes.ValidClassName">
+		<include-pattern>src/</include-pattern>
+	</rule>
+
 	<!-- Test method names are self-documenting; do not require per-method docblocks. -->
 	<rule ref="Squiz.Commenting.FunctionComment.Missing">
 		<exclude-pattern>tests/*</exclude-pattern>

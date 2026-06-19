@@ -11,7 +11,7 @@
 		 verbose="true">
 	<testsuites>
 		<testsuite name="WooCommerceSubscriptionsEngineUnitTestSuite">
-			<directory suffix="_Test.php">./tests/unit</directory>
+			<directory suffix="Test.php">./tests/unit</directory>
 		</testsuite>
 	</testsuites>
 

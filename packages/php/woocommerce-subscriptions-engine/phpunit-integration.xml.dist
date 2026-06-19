@@ -10,7 +10,7 @@
 		 xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
 	<testsuites>
 		<testsuite name="Integration">
-			<directory suffix="_Test.php">./tests/integration</directory>
+			<directory suffix="Test.php">./tests/integration</directory>
 		</testsuite>
 	</testsuites>
 </phpunit>
