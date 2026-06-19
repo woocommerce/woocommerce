@@ -15,7 +15,6 @@
 		"./package.json": "./package.json"
 	},
 	"wpScript": true,
-	"wpScriptExtraDependencies": [ "wc-store-data" ],
 	"wpScriptModuleExports": {
 		"./product-gallery/view": "./build-module/product-gallery/frontend.mjs",
 		"./product-gallery-large-image/view": "./build-module/product-gallery-large-image/frontend.mjs"
@@ -24,10 +23,8 @@
 		"@wordpress/icons": "wp-bundled"
 	},
 	"devDependencies": {
-		"@testing-library/jest-dom": "6.4.5",
-		"@testing-library/react": "15.0.7",
+		"clsx": "2.1.1",
 		"@wordpress/data": "wp-min",
-		"@wordpress/core-data": "wp-min",
-		"clsx": "2.1.1"
+		"@wordpress/core-data": "wp-min"
 	}
 }

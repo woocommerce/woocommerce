@@ -52024,6 +52024,36 @@ parameters:
 			path: src/Blocks/BlockTypes/OrderConfirmation/Totals.php
 
 		-
+			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Blocks/BlockTypes/PaymentMethodIcons.php
+
+		-
+			message: '#^Cannot call method get_icon_url\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Blocks/BlockTypes/PaymentMethodIcons.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\PaymentMethodIcons\:\:enqueue_data\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Blocks/BlockTypes/PaymentMethodIcons.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\PaymentMethodIcons\:\:get_block_type_script\(\) should return array\|string but returns null\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Blocks/BlockTypes/PaymentMethodIcons.php
+
+		-
+			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\<string\>\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/PaymentMethodIcons.php
+
+		-
 			message: '#^Cannot access property \$term_id on WP_Post\|WP_Post_Type\|WP_Term\|WP_User\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -52312,6 +52342,42 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCollection/HandlerRegistry.php
 
 		-
+			message: '#^Cannot access offset ''host'' on array\{scheme\?\: string, host\?\: string, port\?\: int\<0, 65535\>, user\?\: string, pass\?\: string, path\?\: string, query\?\: string, fragment\?\: string\}\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Blocks/BlockTypes/ProductCollection/NoResults.php
+
+		-
+			message: '#^Cannot access offset ''scheme'' on array\{scheme\?\: string, host\?\: string, port\?\: int\<0, 65535\>, user\?\: string, pass\?\: string, path\?\: string, query\?\: string, fragment\?\: string\}\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Blocks/BlockTypes/ProductCollection/NoResults.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\NoResults\:\:get_current_url_without_filters\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Blocks/BlockTypes/ProductCollection/NoResults.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\NoResults\:\:modify_anchor_tag_urls\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Blocks/BlockTypes/ProductCollection/NoResults.php
+
+		-
+			message: '#^Parameter \#1 \$haystack of function strpos expects string, int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/ProductCollection/NoResults.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\NoResults\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/ProductCollection/NoResults.php
+
+		-
 			message: '#^Call to function is_array\(\) with array\<array\<int\>\> will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -52490,6 +52556,18 @@ parameters:
 			identifier: isset.property
 			count: 1
 			path: src/Blocks/BlockTypes/ProductCollection/Utils.php
+
+		-
+			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Blocks/BlockTypes/ProductDescription.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductDescription\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/ProductDescription.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductDetails\:\:enqueue_legacy_assets\(\) has no return type specified\.$#'
@@ -53434,6 +53512,30 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductRatingStars.php
 
 		-
+			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Blocks/BlockTypes/ProductResultsCount.php
+
+		-
+			message: '#^Parameter \#1 \$html of class WP_HTML_Tag_Processor constructor expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/ProductResultsCount.php
+
+		-
+			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''div'' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/ProductResultsCount.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductResultsCount\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/ProductResultsCount.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSKU\:\:get_block_type_uses_context\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -53492,6 +53594,42 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductSearch.php
+
+		-
+			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Blocks/BlockTypes/ProductSpecifications.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSpecifications\:\:render\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Blocks/BlockTypes/ProductSpecifications.php
+
+		-
+			message: '#^Parameter \#1 \$dimensions of function wc_format_dimensions expects array, array\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/ProductSpecifications.php
+
+		-
+			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|WP_Error given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/ProductSpecifications.php
+
+		-
+			message: '#^Parameter \#1 \$weight of function wc_format_weight expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/ProductSpecifications.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSpecifications\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/ProductSpecifications.php
 
 		-
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
@@ -53758,6 +53896,204 @@ parameters:
 			path: src/Blocks/BlockTypes/RelatedProducts.php
 
 		-
+			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewAuthorName.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\ProductReviewAuthorName\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewAuthorName.php
+
+		-
+			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewContent.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\ProductReviewContent\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewContent.php
+
+		-
+			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewDate.php
+
+		-
+			message: '#^Parameter \#1 \$from of function human_time_diff expects int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewDate.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\ProductReviewDate\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewDate.php
+
+		-
+			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 5
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewForm.php
+
+		-
+			message: '#^Expected 1 @param tags, found 2\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewForm.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\ProductReviewForm\:\:render_stars\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewForm.php
+
+		-
+			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''form'' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewForm.php
+
+		-
+			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewForm.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\ProductReviewForm\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewForm.php
+
+		-
+			message: '#^Variable \$interactivity_config in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewForm.php
+
+		-
+			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewRating.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\ProductReviewRating\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewRating.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\ProductReviewTemplate\:\:render\(\) should return string but empty return statement found\.$#'
+			identifier: return.empty
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewTemplate.php
+
+		-
+			message: '#^Parameter \#1 \$input of function array_reverse expects array, array\<int\|WP_Comment\>\|int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewTemplate.php
+
+		-
+			message: '#^Parameter \#1 \$var of function count expects array\|Countable, array\<int\|WP_Comment\>\|int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewTemplate.php
+
+		-
+			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviews.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\ProductReviews\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviews.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\ProductReviews\:\:render_legacy_block\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviews.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\ProductReviewsPagination\:\:render\(\) should return string but empty return statement found\.$#'
+			identifier: return.empty
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewsPagination.php
+
+		-
+			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''a'' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewsPagination.php
+
+		-
+			message: '#^Parameter \#3 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, array\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewsPaginationNumbers.php
+
+		-
+			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewsTitle.php
+
+		-
+			message: '#^Call to method get_review_count\(\) on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WC_Product\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewsTitle.php
+
+		-
+			message: '#^Call to method get_title\(\) on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WC_Product\.$#'
+			identifier: class.notFound
+			count: 4
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewsTitle.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\ProductReviewsTitle\:\:render\(\) should return string but empty return statement found\.$#'
+			identifier: return.empty
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewsTitle.php
+
+		-
+			message: '#^Parameter \#2 \$product of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\ProductReviewsTitle\:\:get_reviews_title\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WC_Product, WC_Product given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewsTitle.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\ProductReviewsTitle\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewsTitle.php
+
+		-
+			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\ProductReviewsTitle\:\:get_reviews_title\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WC_Product\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewsTitle.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 2
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewsTitle.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ReviewsByCategory\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -53834,6 +54170,12 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/StockFilter.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\StoreNotices\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/StoreNotices.php
 
 		-
 			message: '#^Callback expects 1 parameter, \$accepted_args is set to 2\.$#'

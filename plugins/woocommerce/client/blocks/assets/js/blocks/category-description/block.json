@@ -1,0 +1,27 @@
+{
+	"name": "woocommerce/category-description",
+	"title": "Product Category Description",
+	"description": "Displays the current category description.",
+	"category": "woocommerce",
+	"apiVersion": 3,
+	"textdomain": "woocommerce",
+	"attributes": {
+		"textAlign": {
+			"type": "string"
+		}
+	},
+	"supports": {
+		"align": false,
+		"color": {
+			"background": true,
+			"text": true
+		},
+		"html": false,
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"typography": true
+	},
+	"usesContext": [ "termId", "termTaxonomy" ]
+}

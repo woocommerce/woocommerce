@@ -16,7 +16,7 @@ class Utils {
 	 * Prepare and execute a query for the Product Collection block.
 	 * This method is used by the Product Collection block and the No Results block.
 	 *
-	 * @param \WP_Block $block Block instance.
+	 * @param WP_Block $block Block instance.
 	 */
 	public static function prepare_and_execute_query( $block ) {
 		$page_key = isset( $block->context['queryId'] ) ? 'query-' . $block->context['queryId'] . '-page' : 'query-page';
@@ -63,7 +63,7 @@ class Utils {
 	 * Helper function that constructs a WP_Query args array from
 	 * a Product Collection or global query.
 	 *
-	 * @param \WP_Block $block Block instance.
+	 * @param WP_Block $block Block instance.
 	 * @param int      $page  Current query's page.
 	 *
 	 * @return array Returns the constructed WP_Query arguments.

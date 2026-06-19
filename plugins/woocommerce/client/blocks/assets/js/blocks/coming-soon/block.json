@@ -1,0 +1,25 @@
+{
+	"name": "woocommerce/coming-soon",
+	"category": "woocommerce",
+	"title": "Coming Soon",
+	"attributes": {
+		"color": {
+			"type": "string"
+		},
+		"storeOnly": {
+			"type": "boolean",
+			"default": false
+		},
+		"comingSoonPatternId": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"color": {
+			"background": true,
+			"text": true
+		},
+		"inserter": false
+	}
+}
