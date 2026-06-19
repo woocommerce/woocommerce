@@ -196,14 +196,23 @@ const test = base.extend<
 			) }`;
 			failByKey.set( key, ( failByKey.get( key ) || 0 ) + 1 );
 		} );
-		page.on( 'response', ( resp ) => {
+		// Context-level (not page-level): the 500s fire on secondary pages the
+		// editor opens (frontend / preview), which a page-scoped listener
+		// misses. The context covers every page opened during the test.
+		page.context().on( 'response', ( resp ) => {
 			const status = resp.status();
 			if ( status < 400 ) {
 				return;
 			}
+			let where = '';
+			try {
+				where = ` page=${ new URL( resp.frame().url() ).pathname }`;
+			} catch {
+				where = '';
+			}
 			const key = `${ status } ${ resp
 				.request()
-				.method() } ${ normalizeHttp( resp.url() ) }`;
+				.method() } ${ normalizeHttp( resp.url() ) }${ where }`;
 			httpErrByKey.set( key, ( httpErrByKey.get( key ) || 0 ) + 1 );
 			// Capture the body of the first sample of each 5xx: WP fatals /
 			// REST error payloads carry the root cause. Passive read, tracked
