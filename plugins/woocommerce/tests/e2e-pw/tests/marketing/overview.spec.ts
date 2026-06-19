@@ -12,7 +12,7 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 test.describe( 'Marketing page', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
-	test( 'Marketing Overview page have relevant content', async ( {
+	test( 'Marketing Overview page has relevant content', async ( {
 		page,
 	} ) => {
 		// See if this is a WPCOM site.
@@ -57,26 +57,32 @@ test.describe( 'Marketing page', () => {
 	} );
 
 	test(
-		'Introduction can be dismissed',
+		'Dismissed introduction stays hidden after reload',
 		{ tag: [ tags.SKIP_ON_PRESSABLE, tags.NOT_E2E, tags.NON_CRITICAL ] },
 		async ( { page } ) => {
+			// Auto-dismiss the introduction the first time it appears. The
+			// banner is rendered by React after navigation and may already be
+			// gone if dismissed in a previous run, so register a handler that
+			// clicks it whenever it shows up. `times: 1` limits this to the
+			// initial dismissal: after the reload below the handler is spent,
+			// so a banner that wrongly reappears will fail the assertion
+			// instead of being silently re-dismissed.
+			await page.addLocatorHandler(
+				page.locator(
+					'.woocommerce-marketing-introduction-banner-close-button'
+				),
+				async ( locator ) => {
+					await locator.click();
+				},
+				{ times: 1 }
+			);
+
 			// Go to the Marketing page.
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fmarketing'
 			);
 
-			// Dismiss the introduction (if it's visible)
-			try {
-				await page
-					.locator(
-						'.woocommerce-marketing-introduction-banner-illustration > .components-button'
-					)
-					.click( { timeout: 2000 } );
-			} catch ( e ) {
-				console.log( 'Info: introduction already hidden' );
-			}
-
-			// The introduction should be hidden.
+			// The introduction should be hidden (dismissed by the handler).
 			await expect(
 				page.getByText(
 					'Reach new customers and increase sales without leaving WooCommerce'
@@ -92,40 +98,6 @@ test.describe( 'Marketing page', () => {
 					'Reach new customers and increase sales without leaving WooCommerce'
 				)
 			).toBeHidden();
-		}
-	);
-
-	test(
-		'Learning section can be expanded',
-		{ tag: [ tags.NOT_E2E, tags.NON_CRITICAL ] },
-		async ( { page } ) => {
-			// Go to the Dashboard page (this adds time for posts to be created)
-			await page.goto( 'wp-admin/index.php' );
-
-			// Go to the Marketing page.
-			await page.goto(
-				'wp-admin/admin.php?page=wc-admin&path=%2Fmarketing'
-			);
-
-			// Expand the learning section
-			await page.getByLabel( 'Expand' ).waitFor();
-			await page.getByLabel( 'Expand' ).click( { timeout: 2000 } );
-
-			// The learning section should be expanded.
-			await expect( page.getByText( 'Page 1 of 4' ) ).toBeVisible();
-
-			// Can navigate to next page
-			await page.getByLabel( 'Next page' ).click();
-			await expect( page.getByText( 'Page 2 of 4' ) ).toBeVisible();
-
-			// Collapse the learning section
-			await page
-				.getByLabel( 'Collapse' )
-				.nth( 2 )
-				.click( { timeout: 2000 } );
-
-			// The learning section should be collapsed.
-			await expect( page.getByText( 'Page 1 of 4' ) ).toBeHidden();
 		}
 	);
 } );

@@ -19,6 +19,8 @@ export type {
 	SettingsUISaveStrategy,
 	SettingsUISchema,
 	SettingsUIShell,
+	SettingsUIShellBadge,
+	SettingsUIShellBadgeIntent,
 	SettingsUIShellBreadcrumb,
 	SettingsExtensionRegistration,
 	SettingsExtensionScope,
