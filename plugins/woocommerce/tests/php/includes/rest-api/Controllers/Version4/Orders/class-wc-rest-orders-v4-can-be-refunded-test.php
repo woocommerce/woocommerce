@@ -662,4 +662,50 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 			'Zero-priced item with remaining quantity should be refundable'
 		);
 	}
+
+	/**
+	 * @testdox Discount (negative-total) fee line with no prior refund reports can_be_refunded true.
+	 *
+	 * Regression for WOOPLUG-6829: the comparison omitted abs(), so a negative
+	 * discount fee (e.g. a loyalty credit) reported can_be_refunded=false even
+	 * though the refund validator accepts it as part of a mixed refund.
+	 */
+	public function test_negative_fee_line_can_be_refunded(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '50.00' ) );
+		$order   = wc_create_order( array( 'customer_id' => $this->user_id ) );
+
+		$item = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 50,
+				'total'    => 50,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Loyalty discount',
+				'total' => '-10.00',
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+
+		$order->set_status( 'completed' );
+		$order->save();
+		$order->calculate_totals( false );
+
+		$data = $this->get_order_response( $order->get_id() );
+
+		$this->assertNotEmpty( $data['fee_lines'], 'Order should have fee lines' );
+		$this->assertTrue(
+			$data['fee_lines'][0]['can_be_refunded'],
+			'A discount (negative) fee with no prior refund should be refundable.'
+		);
+	}
 }

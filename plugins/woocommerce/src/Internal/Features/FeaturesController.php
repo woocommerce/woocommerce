@@ -168,6 +168,7 @@ class FeaturesController {
 		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'display_email_improvements_feedback_notice' ), 10, 2 );
 		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'flag_abandoned_cart_recovery_enabled_notice' ), 10, 2 );
 		add_action( 'woocommerce_settings_advanced', array( $this, 'maybe_render_abandoned_cart_recovery_enabled_notice' ), 1 );
+		add_filter( 'woocommerce_settings-advanced', array( $this, 'add_point_of_sale_setting_for_rest_api' ), 10, 1 ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 	}
 
 	/**
@@ -548,20 +549,13 @@ class FeaturesController {
 					'Enable Point of Sale functionality in the WooCommerce mobile apps.',
 					'woocommerce'
 				),
+				'is_experimental'              => false,
 				'enabled_by_default'           => true,
-				'disable_ui'                   => false,
-
-				/*
-				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
-				* but we wish to handle compatibility checking in a similar fashion to legacy features. The
-				* rational for setting legacy to true is therefore similar to that of the 'order_attribution'
-				* feature.
-				*
-				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
-				*/
+				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-				'is_experimental'              => true,
+				'deprecated_since'             => '11.0.0',
+				'deprecated_value'             => true,
 			),
 			'fulfillments'                       => array(
 				'name'                         => __( 'Order Fulfillments', 'woocommerce' ),
@@ -1334,6 +1328,34 @@ class FeaturesController {
 			$sections['features'] = __( 'Features', 'woocommerce' );
 		}
 		return $sections;
+	}
+
+	/**
+	 * Handler for the 'woocommerce_settings-advanced' hook, which defines the settings
+	 * exposed in the wc/v3 settings REST API for the 'advanced' group. It appends the
+	 * Point of Sale feature flag setting.
+	 *
+	 * This is a compatibility shim for the WooCommerce mobile apps: app versions released
+	 * before the point_of_sale feature became always enabled (deprecated in 11.0.0) read and
+	 * write this setting via wc/v3/settings/advanced/woocommerce_feature_point_of_sale_enabled
+	 * to decide whether POS can be used. The setting is no longer rendered in the admin UI;
+	 * this shim can be removed once those app versions are no longer supported.
+	 *
+	 * @param array $settings The settings of the 'advanced' group, as exposed in the REST API.
+	 * @return array The updated settings array.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function add_point_of_sale_setting_for_rest_api( $settings ): array {
+		$settings[] = array(
+			'id'          => 'woocommerce_feature_point_of_sale_enabled',
+			'option_key'  => 'woocommerce_feature_point_of_sale_enabled',
+			'label'       => __( 'Point of Sale', 'woocommerce' ),
+			'description' => __( 'Enable Point of Sale functionality in the WooCommerce mobile apps.', 'woocommerce' ),
+			'type'        => 'checkbox',
+			'default'     => 'yes',
+		);
+		return $settings;
 	}
 
 	/**
