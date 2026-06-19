@@ -8,11 +8,11 @@ import { isLatestMinusOneWordPress } from '@woocommerce/jest-wordpress-version-c
  */
 import type { ProductEntityRecord } from '../types';
 
-import { fieldExtensions } from './field';
-
 const describeForCurrentWordPressTarget = isLatestMinusOneWordPress()
 	? describe.skip
 	: describe;
+
+let fieldExtensions: typeof import('./field').fieldExtensions;
 
 const renderTags = ( item: Partial< ProductEntityRecord > ) => {
 	if ( ! fieldExtensions.render ) {
@@ -29,6 +29,10 @@ const renderTags = ( item: Partial< ProductEntityRecord > ) => {
 };
 
 describeForCurrentWordPressTarget( 'tags field', () => {
+	beforeAll( async () => {
+		( { fieldExtensions } = await import( './field' ) );
+	} );
+
 	it( 'renders tag names instead of tag IDs', () => {
 		expect(
 			renderTags( {
