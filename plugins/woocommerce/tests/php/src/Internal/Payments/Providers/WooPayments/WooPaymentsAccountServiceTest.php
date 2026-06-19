@@ -413,6 +413,69 @@ class WooPaymentsAccountServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should expose Documents eligibility and VAT submission flags from the preserved account cache.
+	 */
+	public function test_exposes_document_flags_from_account_cache(): void {
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => $this->get_valid_live_account_payload(
+					array(
+						'is_documents_enabled'   => true,
+						'has_submitted_vat_data' => true,
+					)
+				),
+			)
+		);
+
+		$sut = $this->create_service();
+
+		$this->assertTrue( method_exists( $sut, 'is_documents_enabled' ), 'Documents eligibility should be part of the native account service contract.' );
+		$this->assertTrue( method_exists( $sut, 'has_submitted_vat_data' ), 'VAT submission state should be part of the native account service contract.' );
+		$this->assertTrue( $sut->is_documents_enabled() );
+		$this->assertTrue( $sut->has_submitted_vat_data() );
+
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => $this->get_valid_live_account_payload(
+					array(
+						'is_documents_enabled'   => false,
+						'has_submitted_vat_data' => false,
+					)
+				),
+			)
+		);
+		$sut = $this->create_service();
+
+		$this->assertFalse( $sut->is_documents_enabled() );
+		$this->assertFalse( $sut->has_submitted_vat_data() );
+	}
+
+	/**
+	 * @testdox Should fail closed when Documents flags are missing or no account is cached.
+	 */
+	public function test_document_flags_fail_closed_when_missing_or_no_account_exists(): void {
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data' => $this->get_valid_live_account_payload(),
+			)
+		);
+
+		$sut = $this->create_service();
+
+		$this->assertFalse( $sut->is_documents_enabled() );
+		$this->assertFalse( $sut->has_submitted_vat_data() );
+
+		update_option( 'wcpay_account_data', array( 'data' => array() ) );
+		$sut = $this->create_service();
+
+		$this->assertFalse( $sut->is_documents_enabled() );
+		$this->assertFalse( $sut->has_submitted_vat_data() );
+	}
+
+	/**
 	 * @testdox Should clear the preserved account cache so the next account read can refresh from the provider.
 	 */
 	public function test_clear_cache_deletes_preserved_account_cache(): void {

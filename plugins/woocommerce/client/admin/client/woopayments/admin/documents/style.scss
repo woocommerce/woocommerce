@@ -1,0 +1,57 @@
+.woocommerce-woopayments-documents {
+	display: grid;
+	gap: 16px;
+	max-width: 1120px;
+
+	&__header {
+		display: flex;
+		justify-content: space-between;
+	}
+
+	&__title-row {
+		align-items: center;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+	}
+
+	&__title-row h1 {
+		margin: 0;
+	}
+
+	&__header p {
+		color: #50575e;
+		margin: 8px 0 0;
+	}
+
+	&__test-mode {
+		background: #fcf9e8;
+		border: 1px solid #dba617;
+		border-radius: 2px;
+		color: #4f3500;
+		display: inline-block;
+		font-weight: 600;
+		line-height: 1.5;
+		padding: 2px 8px;
+	}
+
+	&__empty {
+		background: #fff;
+		border: 1px solid #dcdcde;
+		padding: 16px;
+	}
+}
+
+.woocommerce-woopayments-documents-vat-modal {
+	&__content {
+		display: grid;
+		gap: 16px;
+		min-width: min(420px, 80vw);
+	}
+
+	&__actions {
+		display: flex;
+		gap: 8px;
+		justify-content: flex-end;
+	}
+}

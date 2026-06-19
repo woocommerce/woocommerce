@@ -39,7 +39,7 @@ describe( 'WooPayments Settings Payments routes', () => {
 	it( 'registers WooPayments under the Settings Payments route seam', () => {
 		const routes = getSettingsPaymentsProviderRoutes();
 
-		expect( routes ).toHaveLength( 13 );
+		expect( routes ).toHaveLength( 14 );
 		expect(
 			routes.map( ( { id, path: routePath, order } ) => ( {
 				id,
@@ -112,6 +112,11 @@ describe( 'WooPayments Settings Payments routes', () => {
 				path: '/woopayments/loans',
 				order: 126,
 			},
+			{
+				id: 'woopayments-documents',
+				path: '/woopayments/documents',
+				order: 127,
+			},
 		] );
 		routes.forEach( ( route ) => {
 			expect( route.element ).toBeDefined();
@@ -157,10 +162,24 @@ describe( 'WooPayments Settings Payments routes', () => {
 		);
 	} );
 
+	it( 'loads the Documents route from a dedicated chunk', () => {
+		const source = fs.readFileSync(
+			path.resolve( __dirname, '../routes.tsx' ),
+			'utf8'
+		);
+
+		expect( source ).toContain(
+			'webpackChunkName: "settings-payments-woopayments-documents"'
+		);
+	} );
+
 	it( 'announces lazy route loading through a status fallback', async () => {
-		mockApiFetch.mockResolvedValueOnce( {} ).mockResolvedValueOnce( {
-			data: [],
-		} );
+		mockApiFetch
+			.mockResolvedValueOnce( {} )
+			.mockResolvedValueOnce( {} )
+			.mockResolvedValueOnce( {
+				data: [],
+			} );
 
 		const route = getSettingsPaymentsProviderRoutes().find(
 			( { path: routePath } ) => routePath === '/woopayments/loans'

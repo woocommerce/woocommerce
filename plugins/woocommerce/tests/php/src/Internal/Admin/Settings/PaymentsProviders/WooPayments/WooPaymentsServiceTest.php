@@ -239,14 +239,17 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			'wcpay_account_data',
 			array(
 				'data' => array(
-					'account_id'           => 'acct_native_test',
-					'test_publishable_key' => 'pk_test_secret',
-					'live_publishable_key' => 'pk_live_secret',
-					'payments_enabled'     => true,
-					'details_submitted'    => true,
-					'is_test_drive'        => true,
-					'is_live'              => false,
-					'store_currencies'     => array(
+					'account_id'             => 'acct_native_test',
+					'test_publishable_key'   => 'pk_test_secret',
+					'live_publishable_key'   => 'pk_live_secret',
+					'payments_enabled'       => true,
+					'details_submitted'      => true,
+					'is_test_drive'          => true,
+					'is_live'                => false,
+					'is_documents_enabled'   => true,
+					'has_submitted_vat_data' => true,
+					'country'                => 'NL',
+					'store_currencies'       => array(
 						'default' => 'eur',
 					),
 				),
@@ -273,10 +276,20 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $summary['account']['test_drive'] );
 		$this->assertFalse( $summary['account']['sandbox'] );
 		$this->assertFalse( $summary['account']['live'] );
+		$this->assertSame(
+			array(
+				'enabled'                => true,
+				'has_submitted_vat_data' => true,
+				'country'                => 'NL',
+			),
+			$summary['documents']
+		);
 		$this->assertStringContainsString( 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/overview', $summary['urls']['overview_page'] );
 		$this->assertSame( 'https://example.com/woopayments/onboarding', $summary['urls']['setup'] );
 		$this->assertArrayNotHasKey( 'test_publishable_key', $summary['account'] );
 		$this->assertArrayNotHasKey( 'live_publishable_key', $summary['account'] );
+		$this->assertArrayNotHasKey( 'is_documents_enabled', $summary['account'] );
+		$this->assertArrayNotHasKey( 'has_submitted_vat_data', $summary['account'] );
 	}
 
 	/**
@@ -297,6 +310,14 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $summary['account']['test_drive'] );
 		$this->assertFalse( $summary['account']['sandbox'] );
 		$this->assertFalse( $summary['account']['live'] );
+		$this->assertSame(
+			array(
+				'enabled'                => false,
+				'has_submitted_vat_data' => false,
+				'country'                => '',
+			),
+			$summary['documents']
+		);
 		$this->assertStringContainsString( 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/overview', $summary['urls']['overview_page'] );
 		$this->assertSame( 'https://example.com/woopayments/onboarding', $summary['urls']['setup'] );
 	}

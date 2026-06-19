@@ -238,7 +238,7 @@ class WooPaymentsService {
 		$account_service = $this->get_native_account_service();
 
 		return array(
-			'account' => array(
+			'account'   => array(
 				'id'                   => $account_service->get_account_id(),
 				'mode'                 => $account_service->get_mode(),
 				'default_currency'     => $account_service->get_account_default_currency(),
@@ -250,7 +250,12 @@ class WooPaymentsService {
 				'sandbox'              => $account_service->has_sandbox_account(),
 				'live'                 => $account_service->has_live_account(),
 			),
-			'urls'    => array(
+			'documents' => array(
+				'enabled'                => $account_service->is_documents_enabled(),
+				'has_submitted_vat_data' => $account_service->has_submitted_vat_data(),
+				'country'                => $account_service->get_account_country(),
+			),
+			'urls'      => array(
 				'overview_page' => $this->get_overview_page_url(),
 				'setup'         => $this->get_setup_page_url(),
 			),

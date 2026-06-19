@@ -100,6 +100,13 @@ const WooPaymentsCapitalChunk = lazy(
 		)
 );
 
+const WooPaymentsDocumentsChunk = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "settings-payments-woopayments-documents" */ './documents'
+		)
+);
+
 const LoadingFallback = () => (
 	<div role="status" aria-live="polite" aria-busy="true">
 		{ sprintf(
@@ -249,6 +256,17 @@ registerSettingsPaymentsProviderRoute( {
 	element: (
 		<Suspense fallback={ <LoadingFallback /> }>
 			<WooPaymentsCapitalChunk />
+		</Suspense>
+	),
+} );
+
+registerSettingsPaymentsProviderRoute( {
+	id: 'woopayments-documents',
+	path: '/woopayments/documents',
+	order: 127,
+	element: (
+		<Suspense fallback={ <LoadingFallback /> }>
+			<WooPaymentsDocumentsChunk />
 		</Suspense>
 	),
 } );

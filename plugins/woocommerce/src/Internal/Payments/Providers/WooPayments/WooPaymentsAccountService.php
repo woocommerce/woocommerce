@@ -836,6 +836,43 @@ class WooPaymentsAccountService implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Tell whether the cached account is eligible for Documents.
+	 *
+	 * @since 11.0.0
+	 * @return bool
+	 */
+	public function is_documents_enabled(): bool {
+		$account_data = $this->get_cached_account_data();
+
+		return $this->has_account() && $this->is_truthy( $account_data['is_documents_enabled'] ?? false );
+	}
+
+	/**
+	 * Tell whether the cached account has submitted VAT details.
+	 *
+	 * @since 11.0.0
+	 * @return bool
+	 */
+	public function has_submitted_vat_data(): bool {
+		$account_data = $this->get_cached_account_data();
+
+		return $this->has_account() && $this->is_truthy( $account_data['has_submitted_vat_data'] ?? false );
+	}
+
+	/**
+	 * Get the cached account country.
+	 *
+	 * @since 11.0.0
+	 * @return string
+	 */
+	public function get_account_country(): string {
+		$account_data = $this->get_cached_account_data();
+		$country      = $account_data['country'] ?? '';
+
+		return $this->has_account() && is_scalar( $country ) ? strtoupper( trim( (string) $country ) ) : '';
+	}
+
+	/**
 	 * Tell whether WooPayments is in test mode.
 	 *
 	 * @return bool

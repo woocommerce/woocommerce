@@ -9,7 +9,9 @@ use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymen
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsGetPmPromotionsRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsDocumentsListRequest;
 use WCPay\Core\Server\Request\List_Authorizations;
+use WCPay\Core\Server\Request\List_Documents;
 use WC_Unit_Test_Case;
 use WP_Error;
 use WP_REST_Request;
@@ -2686,6 +2688,222 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( WooPaymentsGetPmPromotionsRequest::class, $observed_get_request );
 		$this->assertInstanceOf( WooPaymentsActivatePmPromotionRequest::class, $observed_activate_request );
 		$this->assertStringContainsString( 'locale=fr_FR', $get_path );
+	}
+
+	/**
+	 * @testdox Should list documents through the preserved documents request object and filter.
+	 */
+	public function test_get_documents_preserves_legacy_request_filter_contract(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'data' => array() ) ),
+		);
+		$observed_request      = null;
+
+		$filter = function ( List_Documents $request ) use ( &$observed_request ): List_Documents {
+			$observed_request = $request;
+			$this->assertSame( 'documents', $request->get_api() );
+			$this->assertSame( 'GET', $request->get_method() );
+			$request->set_type_is( 'vat_invoice' );
+
+			return $request;
+		};
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+		add_filter( 'wcpay_list_documents_request', $filter );
+
+		try {
+			$result = $sut->get_documents(
+				array(
+					'page'     => 2,
+					'pagesize' => 50,
+					'match'    => 'all',
+					'type_is'  => 'statement',
+					'ignored'  => 'drop-me',
+				)
+			);
+		} finally {
+			remove_filter( 'wcpay_list_documents_request', $filter );
+		}
+
+		$this->assertSame( array( 'data' => array() ), $result );
+		$this->assertInstanceOf( WooPaymentsDocumentsListRequest::class, $observed_request );
+		$query = array();
+		parse_str( (string) wp_parse_url( $http_client->last_path, PHP_URL_QUERY ), $query );
+
+		$this->assertSame( '/sites/123/wcpay/documents', strtok( $http_client->last_path, '?' ) );
+		$this->assertSame( '0', $query['test_mode'] );
+		$this->assertSame( '2', $query['page'] );
+		$this->assertSame( '50', $query['pagesize'] );
+		$this->assertSame( 'date', $query['sort'] );
+		$this->assertSame( 'desc', $query['direction'] );
+		$this->assertSame( '100', $query['limit'] );
+		$this->assertSame( 'all', $query['match'] );
+		$this->assertSame( 'vat_invoice', $query['type_is'] );
+	}
+
+	/**
+	 * @testdox Should request documents summary with filter-only params.
+	 */
+	public function test_get_documents_summary_forwards_filter_only_params(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'count' => 3 ) ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->get_documents_summary(
+			array(
+				'match'       => 'all',
+				'date_before' => '2026-06-18',
+				'type_is'     => 'vat_invoice',
+				'page'        => 2,
+				'pagesize'    => 50,
+			)
+		);
+
+		$this->assertSame( array( 'count' => 3 ), $result );
+		$query = array();
+		parse_str( (string) wp_parse_url( $http_client->last_path, PHP_URL_QUERY ), $query );
+
+		$this->assertSame( '/sites/123/wcpay/documents/summary', strtok( $http_client->last_path, '?' ) );
+		$this->assertSame( '0', $query['test_mode'] );
+		$this->assertSame( 'all', $query['match'] );
+		$this->assertSame( '2026-06-18', $query['date_before'] );
+		$this->assertSame( 'vat_invoice', $query['type_is'] );
+		$this->assertArrayNotHasKey( 'page', $query );
+		$this->assertArrayNotHasKey( 'pagesize', $query );
+	}
+
+	/**
+	 * @testdox Should download document responses without JSON decoding.
+	 */
+	public function test_get_document_returns_raw_document_response(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array(
+				'code'    => 200,
+				'message' => 'OK',
+			),
+			'headers'  => array(
+				'content-type'        => 'application/pdf',
+				'content-disposition' => 'attachment; filename="invoice.pdf"',
+			),
+			'body'     => '%PDF document',
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->get_document( 'vat_invoice-123' );
+
+		$this->assertSame( $http_client->response, $result );
+		$this->assertSame( '/sites/123/wcpay/documents/vat_invoice-123?test_mode=0', $http_client->last_path );
+	}
+
+	/**
+	 * @testdox Should reject unsafe document identifiers.
+	 */
+	public function test_get_document_rejects_invalid_route_identifier(): void {
+		$sut = new WooPaymentsApiClient();
+		$sut->init( new FakeWooPaymentsHttpClient(), $this->create_account_service( false ) );
+
+		$this->expectException( WooPaymentsApiException::class );
+
+		$sut->get_document( '../vat_invoice-123' );
+	}
+
+	/**
+	 * @testdox Should validate VAT through the preserved VAT request filter.
+	 */
+	public function test_validate_vat_preserves_legacy_request_filter_contract(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'is_valid' => true ) ),
+		);
+		$hook_called           = false;
+
+		$filter = function ( WooPaymentsApiRequest $request ) use ( &$hook_called ): WooPaymentsApiRequest {
+			$hook_called = true;
+			$this->assertSame( 'vat/RO123456', $request->get_api() );
+			$this->assertSame( 'GET', $request->get_method() );
+
+			return $request;
+		};
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+		add_filter( 'wcpay_validate_vat_request', $filter );
+
+		try {
+			$result = $sut->validate_vat( 'RO123456' );
+		} finally {
+			remove_filter( 'wcpay_validate_vat_request', $filter );
+		}
+
+		$this->assertSame( array( 'is_valid' => true ), $result );
+		$this->assertTrue( $hook_called, 'VAT validation should run the preserved request filter.' );
+		$this->assertSame( '/sites/123/wcpay/vat/RO123456?test_mode=0', $http_client->last_path );
+	}
+
+	/**
+	 * @testdox Should not double-encode already encoded VAT route parameters.
+	 */
+	public function test_validate_vat_does_not_double_encode_route_parameter(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'is_valid' => true ) ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->validate_vat( 'CHE%20123' );
+
+		$this->assertSame( array( 'is_valid' => true ), $result );
+		$this->assertSame( '/sites/123/wcpay/vat/CHE%20123?test_mode=0', $http_client->last_path );
+		$this->assertStringNotContainsString( '%2520', $http_client->last_path );
+	}
+
+	/**
+	 * @testdox Should save VAT details with optional VAT number, name, and address.
+	 */
+	public function test_save_vat_details_posts_optional_vat_payload(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'success' => true ) ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->save_vat_details( 'RO123456', 'ACME SRL', '1 Market Street' );
+
+		$this->assertSame( array( 'success' => true ), $result );
+		$this->assertSame( '/sites/123/wcpay/vat', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+		$this->assertStringContainsString( '"vat_number":"RO123456"', (string) $http_client->last_body );
+		$this->assertStringContainsString( '"name":"ACME SRL"', (string) $http_client->last_body );
+		$this->assertStringContainsString( '"address":"1 Market Street"', (string) $http_client->last_body );
 	}
 
 	/**

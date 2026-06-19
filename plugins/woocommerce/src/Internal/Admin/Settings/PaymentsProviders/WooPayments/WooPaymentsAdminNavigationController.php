@@ -50,11 +50,15 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 
 	private const PATH_LOANS = '/woopayments/loans';
 
+	private const PATH_DOCUMENTS = '/woopayments/documents';
+
 	private const PATH_SETTINGS = '/woopayments/settings';
 
 	private const PATH_PAYOUT_DETAILS = '/woopayments/payouts/details';
 
-	// Reports/Documents legacy routes are intentionally absent until their native UI/API surfaces are ported.
+	private const LEGACY_DOCUMENTS_ROUTE = '/payments/documents';
+
+	// Reports legacy routes are intentionally absent until their native UI/API surfaces are ported.
 	private const LEGACY_ROUTE_REDIRECTS = array(
 		'/payments/overview'             => self::PATH_OVERVIEW,
 		'/payments/deposits'             => self::PATH_PAYOUTS,
@@ -68,6 +72,7 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 		'/payments/disputes/challenge'   => self::PATH_DISPUTE_CHALLENGE,
 		'/payments/card-readers'         => self::PATH_CARD_READERS,
 		'/payments/loans'                => self::PATH_LOANS,
+		self::LEGACY_DOCUMENTS_ROUTE     => self::PATH_DOCUMENTS,
 		'/payments/settings'             => self::PATH_SETTINGS,
 	);
 
@@ -166,6 +171,10 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 		$legacy_path = sanitize_text_field( rawurldecode( $this->get_raw_request_scalar( $request, 'path' ) ) );
 		$target_path = self::LEGACY_ROUTE_REDIRECTS[ $legacy_path ] ?? '';
 		if ( '' === $target_path ) {
+			return '';
+		}
+
+		if ( self::LEGACY_DOCUMENTS_ROUTE === $legacy_path && ! $this->account_service->is_documents_enabled() ) {
 			return '';
 		}
 
@@ -305,6 +314,13 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 			$menu_items[] = array(
 				'title' => __( 'Capital Loans', 'woocommerce' ),
 				'path'  => self::PATH_LOANS,
+			);
+		}
+
+		if ( $this->account_service->is_documents_enabled() ) {
+			$menu_items[] = array(
+				'title' => __( 'Documents', 'woocommerce' ),
+				'path'  => self::PATH_DOCUMENTS,
 			);
 		}
 

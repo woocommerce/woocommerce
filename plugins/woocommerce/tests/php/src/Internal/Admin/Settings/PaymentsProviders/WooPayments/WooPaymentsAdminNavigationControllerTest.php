@@ -82,6 +82,55 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should map legacy WooPayments WC Admin Documents URLs to the native Documents route when eligible.
+	 */
+	public function test_maps_legacy_payment_documents_url_to_native_route_when_documents_are_enabled(): void {
+		$sut = $this->create_controller(
+			true,
+			array(
+				'is_documents_enabled' => true,
+			)
+		);
+
+		$url = $sut->get_legacy_payment_path_redirect_url(
+			array(
+				'page'          => 'wc-admin',
+				'path'          => '%2Fpayments%2Fdocuments',
+				'document_id'   => 'doc_native',
+				'document_type' => 'vat_invoice',
+			)
+		);
+
+		$this->assertStringContainsString( 'admin.php?page=wc-settings&tab=checkout', $url );
+		$this->assertStringContainsString( 'path=/woopayments/documents', $url );
+		$this->assertStringContainsString( 'document_id=doc_native', $url );
+		$this->assertStringContainsString( 'document_type=vat_invoice', $url );
+		$this->assertStringNotContainsString( 'page=wc-admin', $url );
+	}
+
+	/**
+	 * @testdox Should not map legacy WooPayments WC Admin Documents URLs when Documents are not eligible.
+	 */
+	public function test_does_not_map_legacy_payment_documents_url_when_documents_are_disabled(): void {
+		$sut = $this->create_controller(
+			true,
+			array(
+				'is_documents_enabled' => false,
+			)
+		);
+
+		$this->assertSame(
+			'',
+			$sut->get_legacy_payment_path_redirect_url(
+				array(
+					'page' => 'wc-admin',
+					'path' => '%2Fpayments%2Fdocuments',
+				)
+			)
+		);
+	}
+
+	/**
 	 * @testdox Should not map legacy WooPayments WC Admin paths when the native gateway is disabled.
 	 */
 	public function test_does_not_map_legacy_payment_paths_when_native_gateway_is_disabled(): void {
@@ -173,6 +222,7 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 				'is_card_present_eligible'      => true,
 				'has_card_readers_available'    => true,
 				'has_previous_capital_loans'    => true,
+				'is_documents_enabled'          => false,
 				'has_valid_admin_account_state' => true,
 			)
 		);
@@ -283,12 +333,17 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep Reports and Documents absent until their native surfaces are ported.
+	 * @testdox Should add Documents navigation only when Documents are eligible while keeping Reports absent.
 	 */
-	public function test_reports_and_documents_menu_items_remain_absent_until_surfaces_are_ported(): void {
+	public function test_adds_documents_menu_item_only_when_documents_are_enabled_and_keeps_reports_absent(): void {
 		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
 
-		$sut = $this->create_controller( true );
+		$sut = $this->create_controller(
+			true,
+			array(
+				'is_documents_enabled' => false,
+			)
+		);
 		$sut->add_menu_items();
 
 		$titles = array_map(
@@ -300,6 +355,26 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertNotContains( 'Reports', $titles );
 		$this->assertNotContains( 'Documents', $titles );
+
+		$sut = $this->create_controller(
+			true,
+			array(
+				'is_documents_enabled' => true,
+			)
+		);
+		$sut->add_menu_items();
+
+		$titles         = array_map(
+			static function ( array $item ): string {
+				return trim( wp_strip_all_tags( $item[0] ) );
+			},
+			$this->get_payments_submenu_items()
+		);
+		$documents_item = $this->get_submenu_item_by_title( 'Documents' );
+
+		$this->assertNotContains( 'Reports', $titles );
+		$this->assertContains( 'Documents', $titles );
+		$this->assertSame( $this->get_settings_url( '/woopayments/documents' ), $documents_item[2] );
 	}
 
 	/**
@@ -443,6 +518,7 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 				'is_card_present_eligible'               => false,
 				'has_card_readers_available'             => false,
 				'has_previous_capital_loans'             => false,
+				'is_documents_enabled'                   => false,
 			),
 			$overrides
 		);

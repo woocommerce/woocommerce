@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAuthorizationsListRequest;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsDocumentsListRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPaginatedListRequest;
 use WP_Error;
 use WP_REST_Request;
@@ -156,6 +157,16 @@ class WooPaymentsApiClient {
 	 * WooPayments deposits API path. These endpoints back the merchant-facing payouts surfaces.
 	 */
 	private const DEPOSITS_API = 'deposits';
+
+	/**
+	 * WooPayments Documents API path.
+	 */
+	private const DOCUMENTS_API = 'documents';
+
+	/**
+	 * WooPayments VAT API path.
+	 */
+	private const VAT_API = 'vat';
 
 	/**
 	 * WooPayments Capital API path.
@@ -1146,6 +1157,114 @@ class WooPaymentsApiClient {
 	}
 
 	/**
+	 * Retrieve WooPayments documents.
+	 *
+	 * @param array<string,mixed> $query Query params.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_documents( array $query = array() ): array {
+		$query = array_intersect_key(
+			$query,
+			array(
+				'page'         => true,
+				'pagesize'     => true,
+				'sort'         => true,
+				'direction'    => true,
+				'limit'        => true,
+				'match'        => true,
+				'date_before'  => true,
+				'date_after'   => true,
+				'date_between' => true,
+				'type_is'      => true,
+				'type_is_not'  => true,
+			)
+		);
+
+		return $this->request_with_legacy_request_filter(
+			WooPaymentsDocumentsListRequest::from_params( $query ),
+			'wcpay_list_documents_request'
+		);
+	}
+
+	/**
+	 * Retrieve WooPayments documents summary.
+	 *
+	 * @param array<string,mixed> $query Query filters.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_documents_summary( array $query = array() ): array {
+		$query = array_intersect_key(
+			$query,
+			array(
+				'match'        => true,
+				'date_before'  => true,
+				'date_after'   => true,
+				'date_between' => true,
+				'type_is'      => true,
+				'type_is_not'  => true,
+			)
+		);
+
+		return $this->request( $query, self::DOCUMENTS_API . '/summary', 'GET' );
+	}
+
+	/**
+	 * Retrieve a WooPayments document raw response.
+	 *
+	 * @param string $document_id Document ID.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	public function get_document( string $document_id ): array {
+		$this->validate_document_id( $document_id );
+
+		return $this->request( array(), self::DOCUMENTS_API . '/' . $document_id, 'GET', true, false, true, true, true );
+	}
+
+	/**
+	 * Validate a VAT number.
+	 *
+	 * @param string $vat_number VAT number.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function validate_vat( string $vat_number ): array {
+		return $this->request_with_legacy_filter(
+			array(),
+			self::VAT_API . '/' . $vat_number,
+			'GET',
+			'wcpay_validate_vat_request'
+		);
+	}
+
+	/**
+	 * Save VAT details.
+	 *
+	 * @param string|null $vat_number VAT number.
+	 * @param string      $name       Name.
+	 * @param string      $address    Address.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function save_vat_details( ?string $vat_number, string $name, string $address ): array {
+		$params = array(
+			'name'    => $name,
+			'address' => $address,
+		);
+
+		if ( null !== $vat_number ) {
+			$params['vat_number'] = $vat_number;
+		}
+
+		$response = $this->request( $params, self::VAT_API, 'POST' );
+		$this->account_service->refresh_account_data();
+
+		return $response;
+	}
+
+	/**
 	 * Retrieve the WooPayments Capital active loan summary.
 	 *
 	 * @return array<string,mixed>
@@ -1571,6 +1690,19 @@ class WooPaymentsApiClient {
 	}
 
 	/**
+	 * Validate a WooPayments document ID before path interpolation.
+	 *
+	 * @param string $id Document ID.
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	private function validate_document_id( string $id ): void {
+		if ( '' === $id || ! preg_match( '/^[\w-]+$/', $id ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
+			throw new WooPaymentsApiException( __( 'Route param validation failed.', 'woocommerce' ), 'wcpay_route_validation_failure', 400 );
+		}
+	}
+
+	/**
 	 * Validate a payment method promotion ID before path interpolation.
 	 *
 	 * @param string $id Promotion ID.
@@ -1593,10 +1725,11 @@ class WooPaymentsApiClient {
 	 * @param bool                    $use_user_token Whether to sign with the connection-owner user token.
 	 * @param bool                    $blocking      Whether to block for the transport response.
 	 * @param bool                    $include_test_mode_param Whether to add test mode to request params.
+	 * @param bool                    $return_raw_response Whether to return the raw transport response.
 	 * @return array<string,mixed>
 	 * @throws WooPaymentsApiException When the request fails.
 	 */
-	private function request( array $params, string $api, string $method, bool $is_site_scoped = true, bool $use_user_token = false, bool $blocking = true, bool $include_test_mode_param = true ): array {
+	private function request( array $params, string $api, string $method, bool $is_site_scoped = true, bool $use_user_token = false, bool $blocking = true, bool $include_test_mode_param = true, bool $return_raw_response = false ): array {
 		if ( ! $this->is_available() ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
 			throw new WooPaymentsApiException( __( 'Site is not connected to WordPress.com.', 'woocommerce' ), 'wcpay_wpcom_not_connected', 409 );
@@ -1719,6 +1852,10 @@ class WooPaymentsApiClient {
 		$is_json             = false !== strpos( strtolower( $content_type ), 'application/json' );
 		$decoded_body        = json_decode( $response_body, true );
 
+		if ( $return_raw_response && 400 > $response_code ) {
+			return is_array( $response ) ? $response : array();
+		}
+
 		if ( null === $decoded_body && '' !== $response_body && $is_json ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
 			throw new WooPaymentsApiException( __( 'Unable to decode response from WooPayments.', 'woocommerce' ), 'wcpay_unparseable_or_null_body', $response_code );
@@ -1767,6 +1904,8 @@ class WooPaymentsApiClient {
 			WooPaymentsGetAccountCapitalLinkRequest::register_legacy_aliases();
 		} elseif ( $request instanceof WooPaymentsAuthorizationsListRequest ) {
 			WooPaymentsAuthorizationsListRequest::register_legacy_alias();
+		} elseif ( $request instanceof WooPaymentsDocumentsListRequest ) {
+			WooPaymentsDocumentsListRequest::register_legacy_alias();
 		} else {
 			WooPaymentsApiRequest::register_legacy_aliases();
 		}
