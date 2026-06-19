@@ -397,12 +397,6 @@
 					"text": "var(--wp--preset--color--theme-4)"
 				}
 			},
-			"jetpack/contact-form": {
-				"border": {
-					"radius": "0"
-				},
-				"css": ".contact-form input[type=text], .contact-form input[type=email], .contact-form input[type=tel], .contact-form input[type=url], .contact-form input[type=number], .contact-form textarea { padding:calc(0.75em - 1px) calc(var(--wp--preset--spacing--30) - 1px); }"
-			},
 			"woocommerce/product-title": {
 				"typography": {
 					"fontSize":  "var(--wp--preset--font-size--large)",
