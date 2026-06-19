@@ -165,26 +165,6 @@ class WebflowFetcher implements PlatformFetcherInterface {
 	}
 
 	/**
-	 * Returns the resolved category cache (cms_item_id => {name, slug}).
-	 *
-	 * Forces resolution if not already loaded. Used by the mapper.
-	 *
-	 * @return array<string,array{name:string,slug:string}>
-	 */
-	public function get_category_cache(): array {
-		if ( null === $this->category_cache ) {
-			$site_id = $this->webflow_client->get_site_id();
-			if ( is_wp_error( $site_id ) ) {
-				$this->category_cache = array();
-			} else {
-				$this->ensure_category_cache_loaded( $site_id );
-			}
-		}
-
-		return $this->category_cache ?? array();
-	}
-
-	/**
 	 * Decorate each product item with a `_resolved_categories` property whose value is an
 	 * array of `{name, slug}` for every recognized CMS item id in `product.fieldData.category`.
 	 *
