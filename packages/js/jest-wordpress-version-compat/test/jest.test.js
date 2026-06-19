@@ -10,7 +10,13 @@ jest.mock( '../src/cache', () => ( {
 } ) );
 
 const packageRoot = require( '../src' );
-const { withWordPressDependencyCompat } = packageRoot;
+const {
+	getCurrentWordPressVersion,
+	isLatestGutenberg,
+	isLatestMinusOneWordPress,
+	isLatestWordPress,
+	withWordPressDependencyCompat,
+} = packageRoot;
 
 function mockPreparedCache( packagePaths = {} ) {
 	cache.prepare.mockReturnValue( {
@@ -29,8 +35,12 @@ describe( 'jest adapter', () => {
 		fs.existsSync.mockRestore();
 	} );
 
-	it( 'exports only the public Jest helper', () => {
+	it( 'exports the public Jest helpers', () => {
 		expect( packageRoot ).toEqual( {
+			getCurrentWordPressVersion,
+			isLatestGutenberg,
+			isLatestMinusOneWordPress,
+			isLatestWordPress,
 			withWordPressDependencyCompat,
 		} );
 	} );
@@ -134,5 +144,50 @@ describe( 'jest adapter', () => {
 		expect( config.transformIgnorePatterns ).toEqual( [
 			'node_modules/(?!(?:\\.cache/jest-wordpress-version-compat/latest/node_modules/(?:parsel-js)|\\.pnpm|parsel-js)/)',
 		] );
+	} );
+} );
+
+describe( 'wordpress version test helpers', () => {
+	const originalWpVersion = process.env.WP_VERSION;
+
+	afterEach( () => {
+		if ( originalWpVersion === undefined ) {
+			delete process.env.WP_VERSION;
+		} else {
+			process.env.WP_VERSION = originalWpVersion;
+		}
+	} );
+
+	it( 'defaults to the latest WordPress target', () => {
+		delete process.env.WP_VERSION;
+
+		expect( getCurrentWordPressVersion() ).toBe( 'latest' );
+		expect( isLatestWordPress() ).toBe( true );
+		expect( isLatestMinusOneWordPress() ).toBe( false );
+		expect( isLatestGutenberg() ).toBe( false );
+	} );
+
+	it( 'detects the latest WordPress target', () => {
+		process.env.WP_VERSION = 'latest';
+
+		expect( isLatestWordPress() ).toBe( true );
+		expect( isLatestMinusOneWordPress() ).toBe( false );
+		expect( isLatestGutenberg() ).toBe( false );
+	} );
+
+	it( 'detects the previous latest WordPress target', () => {
+		process.env.WP_VERSION = 'latest-1';
+
+		expect( isLatestWordPress() ).toBe( false );
+		expect( isLatestMinusOneWordPress() ).toBe( true );
+		expect( isLatestGutenberg() ).toBe( false );
+	} );
+
+	it( 'detects the latest Gutenberg target', () => {
+		process.env.WP_VERSION = 'gutenberg';
+
+		expect( isLatestWordPress() ).toBe( false );
+		expect( isLatestMinusOneWordPress() ).toBe( false );
+		expect( isLatestGutenberg() ).toBe( true );
 	} );
 } );

@@ -1665,6 +1665,9 @@ importers:
       '@woocommerce/internal-js-tests':
         specifier: workspace:*
         version: link:../internal-js-tests
+      '@woocommerce/jest-wordpress-version-compat':
+        specifier: workspace:*
+        version: link:../jest-wordpress-version-compat
       css-loader:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1(@swc/core@1.15.24))

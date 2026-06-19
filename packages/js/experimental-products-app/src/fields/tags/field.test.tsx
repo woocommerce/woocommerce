@@ -1,9 +1,18 @@
 /**
+ * External dependencies
+ */
+import { isLatestMinusOneWordPress } from '@woocommerce/jest-wordpress-version-compat';
+
+/**
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../types';
 
 import { fieldExtensions } from './field';
+
+const describeForCurrentWordPressTarget = isLatestMinusOneWordPress()
+	? describe.skip
+	: describe;
 
 const renderTags = ( item: Partial< ProductEntityRecord > ) => {
 	if ( ! fieldExtensions.render ) {
@@ -19,7 +28,7 @@ const renderTags = ( item: Partial< ProductEntityRecord > ) => {
 	} );
 };
 
-describe( 'tags field', () => {
+describeForCurrentWordPressTarget( 'tags field', () => {
 	it( 'renders tag names instead of tag IDs', () => {
 		expect(
 			renderTags( {

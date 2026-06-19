@@ -32,6 +32,37 @@ Supported targets are:
 - `latest-1`: the previous WordPress npm dist-tag available for each requested package.
 - `gutenberg`: the npm `latest` dist-tag.
 
+## Conditional Tests
+
+Use the exported helpers when a suite or test only applies to specific WordPress dependency targets:
+
+```javascript
+const {
+	isLatestGutenberg,
+	isLatestMinusOneWordPress,
+	isLatestWordPress,
+} = require( '@woocommerce/jest-wordpress-version-compat' );
+
+const describeForCurrentTarget =
+	isLatestWordPress() || isLatestGutenberg() ? describe : describe.skip;
+
+describeForCurrentTarget( 'data views', () => {
+	it( 'uses APIs unavailable in latest-1', () => {
+		// ...
+	} );
+} );
+
+const itForPreviousWordPressTarget = isLatestMinusOneWordPress()
+	? it
+	: it.skip;
+
+itForPreviousWordPressTarget( 'covers the previous WordPress target', () => {
+	// ...
+} );
+```
+
+The helpers read `WP_VERSION` and fall back to `latest` when it is not set.
+
 ## Package Selection
 
 By default, the helper reads the closest `package.json` and selects declared `@wordpress/*` dependencies whose version spec starts with `catalog:wp-`. Packages bundled with WordPress but not useful for compatibility remapping are excluded internally.
