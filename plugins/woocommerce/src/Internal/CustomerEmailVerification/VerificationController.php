@@ -79,9 +79,7 @@ class VerificationController {
 
 		$current_user_id = get_current_user_id();
 
-		// Refuse to verify (and silently switch accounts) when signed in as someone else. The link
-		// authenticates as its owner, so honouring it here would log the current user out of their
-		// own account. Only the link's owner, or a logged-out visitor, may complete verification.
+		// Refuse verification is the email key was for a different user than the one logged in.
 		if ( $current_user_id && $current_user_id !== $user_id ) {
 			wc_add_notice( __( 'Unable to confirm this email while you are logged in to a different account. Please log out and open the link again.', 'woocommerce' ), 'error' );
 		} elseif ( $this->process_verification( $user_id, $key ) ) {
@@ -93,8 +91,7 @@ class VerificationController {
 			wc_add_notice( __( 'This confirmation link is invalid or has expired. Please request a new one.', 'woocommerce' ), 'error' );
 		}
 
-		// Land on the Orders endpoint where the linked orders and the verification prompt live,
-		// matching the send/resend flow. The notice added above renders there.
+		// Land on the Orders endpoint where the linked orders and the verification prompt live.
 		wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
 		exit;
 	}
