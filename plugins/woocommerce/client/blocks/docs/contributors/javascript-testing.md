@@ -71,15 +71,15 @@ When e2e test suites are run in a GitHub automation, a report is generated autom
 
 To access the reports, you should go to the _Details_ of a failed e2e test suite:
 
-<img src="https://user-images.githubusercontent.com/3616980/231486295-26b1d8fd-2420-4890-b143-a249cc990d20.png" alt="PR showing a failing test suite and the cursor over the Details button of that suite" width="780" />
+![PR showing a failing test suite and the cursor over the Details button of that suite](https://user-images.githubusercontent.com/3616980/231486295-26b1d8fd-2420-4890-b143-a249cc990d20.png)
 
 From there, you can open the _Summary_ of the e2e test jobs:
 
-<img src="https://user-images.githubusercontent.com/3616980/231486308-8f85779b-8ede-440d-a250-6ff612d6ea20.png" alt="Log of an e2e test suite that failed, highlighting the Summary button" width="780" />
+![Log of an e2e test suite that failed, highlighting the Summary button](https://user-images.githubusercontent.com/3616980/231486308-8f85779b-8ede-440d-a250-6ff612d6ea20.png)
 
 From the _Summary_ page, if you scroll down, you can download the report of each test suite that failed:
 
-<img src="https://user-images.githubusercontent.com/3616980/231486320-c52a0e10-c80e-4d3a-ae0f-b3998013f528.png" alt="Report summary showing the Artifacts list, including the e2e reports" width="780" />
+![Report summary showing the Artifacts list, including the e2e reports](https://user-images.githubusercontent.com/3616980/231486320-c52a0e10-c80e-4d3a-ae0f-b3998013f528.png)
 
 That will download a ZIP that you can open in your browser locally.
 
