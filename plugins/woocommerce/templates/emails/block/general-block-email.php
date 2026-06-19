@@ -14,6 +14,8 @@
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
  * @version 11.0.0
+ *
+ * @var \WC_Order    $order      Order object.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -89,14 +91,13 @@ if ( 'customer_reset_password' === $email->id && isset( $reset_key, $user_id ) )
 	<?php
 endif;
 
-if ( 'customer_verify_email' === $email->id ) :
-	// Customer verify email address email.
+if ( 'customer_verify_email' === $email->id && $verify_url ) :
 	?>
-<p>
-	<a class="link" href="<?php echo esc_url( ! empty( $verify_url ) ? $verify_url : wc_get_page_permalink( 'myaccount' ) ); ?>">
-		<?php esc_html_e( 'Confirm email address', 'woocommerce' ); ?>
-	</a>
-</p>
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button -->
+<div class="wp-block-button" style="display:inline-block"><a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( $verify_url ); ?>"><?php esc_html_e( 'Confirm email address', 'woocommerce' ); ?></a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons -->
 	<?php
 endif;
 

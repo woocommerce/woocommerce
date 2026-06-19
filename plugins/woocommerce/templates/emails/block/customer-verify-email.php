@@ -29,14 +29,15 @@ defined( 'ABSPATH' ) || exit;
 
 <!-- wp:paragraph -->
 <p><?php
-	/* translators: %s: Customer username */
-	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/customer-username]-->' );
+	/* translators: %s: Customer first name */
+	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/customer-first-name]-->' );
 ?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
 <p><?php
-	echo esc_html__( 'Confirm your email address to link your past orders to your account. Click the link below:', 'woocommerce' );
+	/* translators: %s: Customer email */
+	printf( esc_html__( "Once you've confirmed that %s is your email address, we'll link any past orders to your account.", 'woocommerce' ), '<!--[woocommerce/customer-email]-->' );
 ?></p>
 <!-- /wp:paragraph -->
 
@@ -44,6 +45,6 @@ defined( 'ABSPATH' ) || exit;
 <div class="wp-block-woocommerce-email-content"> <?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?> </div>
 <!-- /wp:woocommerce/email-content -->
 
-<!-- wp:paragraph {"align":"center"} -->
-<p class="has-text-align-center"> <?php echo esc_html__( "If you didn't request this email, there's nothing to worry about, and you can safely ignore it.", 'woocommerce' ); ?> </p>
+<!-- wp:paragraph -->
+<p> <?php echo esc_html__( "If you didn't request this email, there's nothing to worry about, and you can safely ignore it.", 'woocommerce' ); ?> </p>
 <!-- /wp:paragraph -->

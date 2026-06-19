@@ -31,6 +31,7 @@ class EmailPreview {
 	const USER_OBJECT_EMAILS = array(
 		'WC_Email_Customer_New_Account',
 		'WC_Email_Customer_Reset_Password',
+		'Automattic\WooCommerce\Internal\CustomerEmailVerification\Emails\CustomerVerifyEmail',
 	);
 
 	const TRANSIENT_PREVIEW_EMAIL_IMPROVEMENTS = 'woocommerce_preview_email_improvements';
@@ -201,6 +202,10 @@ class EmailPreview {
 			$this->email->user_email = $object->user_email;
 			$this->email->user_login = $object->user_login;
 
+			if ( property_exists( $this->email, 'user_display_name' ) ) {
+				$this->email->user_display_name = $object->first_name;
+			}
+
 			if ( property_exists( $this->email, 'reset_key' ) ) {
 				$this->email->reset_key = 'reset_key';
 			}
@@ -211,6 +216,10 @@ class EmailPreview {
 
 			if ( property_exists( $this->email, 'user_id' ) ) {
 				$this->email->user_id = 0;
+			}
+
+			if ( property_exists( $this->email, 'verify_url' ) ) {
+				$this->email->verify_url = 'https://example.com/verify-email';
 			}
 
 			$this->email->set_object( $object );
