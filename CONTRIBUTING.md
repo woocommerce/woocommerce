@@ -136,7 +136,7 @@ For the full PR workflow, changelog conventions, and coding guidelines, see [Con
 
 ## Repository structure
 
-```
+```text
 plugins/                   # WordPress plugins
   woocommerce/             # WooCommerce Core plugin
     src/                   #   Modern PHP (PSR-4, DI container)
