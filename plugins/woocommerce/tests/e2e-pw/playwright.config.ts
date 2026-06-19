@@ -161,8 +161,6 @@ const serialRunSpecs = [
 	// Mutate the global onboarding profile/options, site-visibility options and
 	// the active theme.
 	'**/tests/onboarding/**/*.spec.ts',
-	// Toggles the global `woocommerce_calc_taxes` setting and tax classes/rates.
-	'**/tests/order/create-order.spec.ts',
 	// Toggles the global `woocommerce_downloads_grant_access_after_payment` setting.
 	'**/tests/order/order-edit.spec.ts',
 	// Submits and deletes product reviews via the Review Order form while it runs;

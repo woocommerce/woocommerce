@@ -16,6 +16,7 @@ import { getFakeProduct } from '../../utils/data';
 import { createClassicCartPage, CLASSIC_CART_PAGE } from '../../utils/pages';
 import { checkCartContent } from '../../utils/cart';
 import { setGatewayEnabled } from '../../utils/payment-gateways';
+import { assertTaxCalculationEnabled } from '../../utils/taxes';
 
 const cartPages = [ { name: 'blocks cart', slug: 'cart' }, CLASSIC_CART_PAGE ];
 
@@ -70,6 +71,7 @@ const test = baseTest.extend( {
 		}
 	},
 	tax: async ( { restApi }, use ) => {
+		await assertTaxCalculationEnabled( restApi );
 		// Tax calculation is enabled globally in site setup with no standard
 		// rate, so the shared baseline is tax-free. Create a dedicated tax class
 		// and a rate scoped to it; only products assigned to this class (this
@@ -103,10 +105,9 @@ const test = baseTest.extend( {
 					.catch( console.error );
 			}
 			await restApi
-				.delete(
-					`${ WC_API_PATH }/taxes/classes/${ taxClass.slug }`,
-					{ force: true }
-				)
+				.delete( `${ WC_API_PATH }/taxes/classes/${ taxClass.slug }`, {
+					force: true,
+				} )
 				.catch( console.error );
 		}
 	},

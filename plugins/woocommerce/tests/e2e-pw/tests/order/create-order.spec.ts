@@ -10,6 +10,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { random } from '../../utils/helpers';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { assertTaxCalculationEnabled } from '../../utils/taxes';
 
 const taxClasses = [
 	{
@@ -192,10 +193,10 @@ const test = baseTest.extend( {
 				product = response.data;
 			} );
 
-		for ( const key in variations ) {
-			restApi.post(
+		for ( const variation of variations ) {
+			await restApi.post(
 				`${ WC_API_PATH }/products/${ product.id }/variations`,
-				variations[ key ]
+				variation
 			);
 		}
 
@@ -277,13 +278,7 @@ test.describe(
 	{ tag: [ tags.SERVICES, tags.HPOS ] },
 	() => {
 		test.beforeAll( async ( { restApi } ) => {
-			// enable taxes on the account
-			await restApi.put(
-				`${ WC_API_PATH }/settings/general/woocommerce_calc_taxes`,
-				{
-					value: 'yes',
-				}
-			);
+			await assertTaxCalculationEnabled( restApi );
 			// add tax classes
 			for ( const taxClass of taxClasses ) {
 				await restApi.post(
@@ -318,13 +313,6 @@ test.describe(
 						}
 					);
 			}
-			// turn off taxes
-			await restApi.put(
-				`${ WC_API_PATH }/settings/general/woocommerce_calc_taxes`,
-				{
-					value: 'no',
-				}
-			);
 		} );
 
 		test( 'can create a simple guest order', async ( {
