@@ -218,7 +218,7 @@ class WC_CLI_REST_Command {
 			$assoc_args['per_page'] = '100';
 		}
 
-		list( $status, $body, $headers ) = $this->do_request( $method, $this->get_filled_route( $args ), $assoc_args );
+		list( $status, $body, $headers ) = $this->do_request( $method, $this->get_list_route( $args, $assoc_args ), $assoc_args );
 		if ( ! empty( $assoc_args['format'] ) && 'ids' === $assoc_args['format'] ) {
 			$items = array_column( $body, 'id' );
 		} else {
@@ -413,18 +413,66 @@ EOT;
 		$route                = $this->route;
 
 		foreach ( $this->get_supported_ids() as $id_name => $id_desc ) {
-			if ( 'id' !== $id_name && strpos( $route, '<' . $id_name . '>' ) !== false && ! empty( $args ) ) {
-				$route                = str_replace( array( '(?P<' . $id_name . '>[\d]+)', '(?P<' . $id_name . '>\w[\w\s\-]*)' ), $args[0], $route );
+			if ( 'id' !== $id_name && $this->route_contains_id( $route, $id_name ) && ! empty( $args ) ) {
+				$route                = str_replace( array( '(?P<' . $id_name . '>[\d]+)', '(?P<' . $id_name . '>\w[\w\s\-]*)', '<' . $id_name . '>' ), $args[0], $route );
 				$supported_id_matched = true;
 			}
 		}
 
 		if ( ! empty( $args ) ) {
 			$id_replacement = $supported_id_matched && ! empty( $args[1] ) ? $args[1] : $args[0];
-			$route          = str_replace( array( '(?P<id>[\d]+)', '(?P<id>[\w-]+)' ), $id_replacement, $route );
+			$route          = str_replace( array( '(?P<id>[\d]+)', '(?P<id>[\w-]+)', '<id>' ), $id_replacement, $route );
 		}
 
 		return rtrim( $route );
+	}
+
+	/**
+	 * Check if a route contains a supported ID.
+	 *
+	 * @param string $route   Route path.
+	 * @param string $id_name ID name.
+	 * @return bool
+	 */
+	private function route_contains_id( $route, $id_name ) {
+		return false !== strpos( $route, '<' . $id_name . '>' ) || false !== strpos( $route, '(?P<' . $id_name . '>' );
+	}
+
+	/**
+	 * Get the route for listing this resource.
+	 *
+	 * @param array $args       Positional arguments passed to the originating WP-CLI command.
+	 * @param array $assoc_args Associative arguments passed to the originating WP-CLI command.
+	 * @return string
+	 */
+	private function get_list_route( $args = array(), $assoc_args = array() ) {
+		if ( $this->is_product_variations_collection_route() ) {
+			if ( ! empty( $args ) ) {
+				return $this->get_filled_route( $args );
+			}
+
+			if ( ! empty( $assoc_args['product_id'] ) ) {
+				return $this->get_filled_route( array( $assoc_args['product_id'] ) );
+			}
+
+			return '/wc/v3/variations';
+		}
+
+		return $this->get_filled_route( $args );
+	}
+
+	/**
+	 * Check if this command maps to the nested product variations collection route.
+	 *
+	 * @return bool
+	 */
+	private function is_product_variations_collection_route() {
+		$normalized_route = rtrim( $this->route, '/' );
+
+		return 'product_variation' === $this->name
+			&& false !== strpos( $this->route, '/products/' )
+			&& false !== strpos( $this->route, 'product_id' )
+			&& '/variations' === substr( $normalized_route, -11 );
 	}
 
 	/**

@@ -157,12 +157,12 @@ class WC_CLI_Runner {
 			$ids      = array();
 
 			foreach ( $supported_ids as $id_name => $id_desc ) {
-				if ( strpos( $route, '<' . $id_name . '>' ) !== false ) {
+				if ( self::route_contains_id( $route, $id_name ) ) {
 					$synopsis[] = array(
 						'name'        => $id_name,
 						'type'        => 'positional',
 						'description' => $id_desc,
-						'optional'    => false,
+						'optional'    => self::is_optional_positional_id( $route_data['schema']['title'], $route, $command, $id_name ),
 					);
 					$ids[]      = $id_name;
 				}
@@ -250,5 +250,46 @@ class WC_CLI_Runner {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Check if a route contains a supported ID.
+	 *
+	 * @param string $route   Route path.
+	 * @param string $id_name ID name.
+	 * @return bool
+	 */
+	private static function route_contains_id( $route, $id_name ) {
+		return false !== strpos( $route, '<' . $id_name . '>' ) || false !== strpos( $route, '(?P<' . $id_name . '>' );
+	}
+
+	/**
+	 * Check if a positional ID should be optional for a generated command.
+	 *
+	 * @param string $name    Command name.
+	 * @param string $route   Route path.
+	 * @param string $command Command name.
+	 * @param string $id_name ID name.
+	 * @return bool
+	 */
+	private static function is_optional_positional_id( $name, $route, $command, $id_name ) {
+		return 'product_variation' === $name
+			&& 'list' === $command
+			&& 'product_id' === $id_name
+			&& self::is_product_variations_collection_route( $route );
+	}
+
+	/**
+	 * Check if a route is the nested product variations collection route.
+	 *
+	 * @param string $route Route path.
+	 * @return bool
+	 */
+	private static function is_product_variations_collection_route( $route ) {
+		$normalized_route = rtrim( $route, '/' );
+
+		return false !== strpos( $route, '/products/' )
+			&& false !== strpos( $route, 'product_id' )
+			&& '/variations' === substr( $normalized_route, -11 );
 	}
 }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow WP-CLI to list product variations without a product ID.

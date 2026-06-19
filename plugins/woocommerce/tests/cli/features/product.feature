@@ -87,3 +87,17 @@ Scenario: CRUD a product
 		"""
 		Success
 		"""
+
+Scenario: List product variations without a product ID
+
+	When I run `wp wc product create --user=admin --name='Test Variable Product' --type='variable' --attributes='[{ "id": 0, "name": "Size", "position": 0, "visible": true, "variation": true, "options": ["Small", "Large"]}]' --porcelain`
+	Then save STDOUT as {PRODUCT_ID}
+
+	When I run `wp wc product_variation create {PRODUCT_ID} --user=admin --regular_price='12.00' --attributes='[{ "name": "Size", "option": "Small" }]' --porcelain`
+	Then save STDOUT as {VARIATION_ID}
+
+	When I run `wp wc product_variation list --user=admin --format=ids`
+	Then STDOUT should contain:
+		"""
+		{VARIATION_ID}
+		"""
