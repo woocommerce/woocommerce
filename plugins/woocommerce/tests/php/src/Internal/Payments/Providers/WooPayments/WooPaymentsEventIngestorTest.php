@@ -617,7 +617,7 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 				'&#36;</span>50.00',
 				'with reason "Transaction unauthorized"',
 				'Response due by July 1, 2026',
-				'/woopayments/transactions/details',
+				'path=%2Fpayments%2Ftransactions%2Fdetails',
 				'id=ch_123',
 				'transaction_id=txn_123',
 			)
@@ -662,7 +662,7 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 				'&#36;</span>50.00',
 				'with reason "Transaction unauthorized"',
 				'Response due by July 1, 2026',
-				'/woopayments/transactions/details',
+				'path=%2Fpayments%2Ftransactions%2Fdetails',
 				'id=ch_123',
 			)
 		);
@@ -2548,8 +2548,8 @@ class WooPaymentsEventIngestorTest extends WC_Unit_Test_Case {
 	 * @return string
 	 */
 	private function get_expected_dispute_url( string $charge_id ): string {
-		return Utils::wc_payments_settings_url(
-			'/woopayments/transactions/details',
+		return Utils::wc_payments_legacy_admin_url(
+			'/payments/transactions/details',
 			array(
 				'id' => $charge_id,
 			)

@@ -35,13 +35,37 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 
 	private const PATH_TRANSACTIONS = '/woopayments/transactions';
 
+	private const PATH_TRANSACTION_DETAILS = '/woopayments/transactions/details';
+
 	private const PATH_DISPUTES = '/woopayments/disputes';
+
+	private const PATH_DISPUTE_DETAILS = '/woopayments/disputes/details';
+
+	private const PATH_DISPUTE_CHALLENGE = '/woopayments/disputes/challenge';
 
 	private const PATH_CARD_READERS = '/woopayments/card-readers';
 
 	private const PATH_LOANS = '/woopayments/loans';
 
 	private const PATH_SETTINGS = '/woopayments/settings';
+
+	private const PATH_PAYOUT_DETAILS = '/woopayments/payouts/details';
+
+	private const LEGACY_ROUTE_REDIRECTS = array(
+		'/payments/overview'             => self::PATH_OVERVIEW,
+		'/payments/deposits'             => self::PATH_PAYOUTS,
+		'/payments/deposits/details'     => self::PATH_PAYOUT_DETAILS,
+		'/payments/payouts'              => self::PATH_PAYOUTS,
+		'/payments/payouts/details'      => self::PATH_PAYOUT_DETAILS,
+		'/payments/transactions'         => self::PATH_TRANSACTIONS,
+		'/payments/transactions/details' => self::PATH_TRANSACTION_DETAILS,
+		'/payments/disputes'             => self::PATH_DISPUTES,
+		'/payments/disputes/details'     => self::PATH_DISPUTE_DETAILS,
+		'/payments/disputes/challenge'   => self::PATH_DISPUTE_CHALLENGE,
+		'/payments/card-readers'         => self::PATH_CARD_READERS,
+		'/payments/loans'                => self::PATH_LOANS,
+		'/payments/settings'             => self::PATH_SETTINGS,
+	);
 
 	/**
 	 * Runtime owner arbiter.
@@ -81,6 +105,94 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 		if ( false === has_action( 'admin_menu', array( $this, 'add_menu_items' ) ) ) {
 			add_action( 'admin_menu', array( $this, 'add_menu_items' ), self::MENU_HOOK_PRIORITY );
 		}
+
+		if ( false === has_action( 'admin_init', array( $this, 'redirect_legacy_payment_paths' ) ) ) {
+			add_action( 'admin_init', array( $this, 'redirect_legacy_payment_paths' ) );
+		}
+	}
+
+	/**
+	 * Redirect legacy WooPayments WC Admin paths to their native Settings > Payments routes.
+	 *
+	 * @return void
+	 */
+	public function redirect_legacy_payment_paths(): void {
+		if ( ! current_user_can( self::CAPABILITY ) || ! $this->arbiter->should_native_register() ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only redirect for legacy admin deep links.
+		$redirect_url = $this->get_legacy_payment_path_redirect_url( $_GET );
+		if ( '' === $redirect_url ) {
+			return;
+		}
+
+		wp_safe_redirect( $redirect_url );
+		exit;
+	}
+
+	/**
+	 * Get the native redirect URL for a legacy WooPayments WC Admin request.
+	 *
+	 * @param array<string,mixed> $request Query request.
+	 * @return string
+	 */
+	public function get_legacy_payment_path_redirect_url( array $request ): string {
+		if ( 'wc-admin' !== $this->get_request_scalar( $request, 'page' ) ) {
+			return '';
+		}
+
+		$legacy_path = sanitize_text_field( rawurldecode( $this->get_raw_request_scalar( $request, 'path' ) ) );
+		$target_path = self::LEGACY_ROUTE_REDIRECTS[ $legacy_path ] ?? '';
+		if ( '' === $target_path ) {
+			return '';
+		}
+
+		$query = array();
+		foreach ( $request as $key => $value ) {
+			if ( in_array( $key, array( 'page', 'path' ), true ) || ! is_scalar( $value ) ) {
+				continue;
+			}
+
+			$sanitized_key = sanitize_key( (string) $key );
+			if ( '' === $sanitized_key ) {
+				continue;
+			}
+
+			$query[ $sanitized_key ] = sanitize_text_field( wp_unslash( (string) $value ) );
+		}
+
+		return Utils::wc_payments_settings_url( $target_path, $query );
+	}
+
+	/**
+	 * Get a scalar request value.
+	 *
+	 * @param array<string,mixed> $request Query request.
+	 * @param string              $key     Query key.
+	 * @return string
+	 */
+	private function get_request_scalar( array $request, string $key ): string {
+		if ( ! isset( $request[ $key ] ) || ! is_scalar( $request[ $key ] ) ) {
+			return '';
+		}
+
+		return sanitize_text_field( wp_unslash( (string) $request[ $key ] ) );
+	}
+
+	/**
+	 * Get a raw scalar request value.
+	 *
+	 * @param array<string,mixed> $request Query request.
+	 * @param string              $key     Query key.
+	 * @return string
+	 */
+	private function get_raw_request_scalar( array $request, string $key ): string {
+		if ( ! isset( $request[ $key ] ) || ! is_scalar( $request[ $key ] ) ) {
+			return '';
+		}
+
+		return wp_unslash( (string) $request[ $key ] );
 	}
 
 	/**

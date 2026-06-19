@@ -1459,12 +1459,9 @@ class WooPaymentsProviderGatewayAdapter {
 		$params = array(
 			'id' => '' !== $intent_id ? $intent_id : $charge_id,
 		);
-		if ( '' !== $balance_transaction_id ) {
-			$params['transaction_id'] = $balance_transaction_id;
-		}
 
-		return Utils::wc_payments_settings_url(
-			'/woopayments/transactions/details',
+		return Utils::wc_payments_legacy_admin_url(
+			'/payments/transactions/details',
 			$params
 		);
 	}

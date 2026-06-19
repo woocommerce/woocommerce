@@ -356,6 +356,31 @@ class Utils {
 	}
 
 	/**
+	 * Retrieves a legacy WooPayments WC Admin URL for persisted compatibility surfaces.
+	 *
+	 * These URLs intentionally preserve the historical WooPayments plugin path shape for
+	 * order notes and other durable merchant-facing records. Native admin code can redirect
+	 * the legacy path to the Core-owned Settings > Payments route when it is loaded.
+	 *
+	 * @param string $path  Legacy WooPayments WC Admin path.
+	 * @param array  $query Query parameters to append to the path.
+	 *
+	 * @return string Fully qualified legacy WC Admin URL.
+	 */
+	public static function wc_payments_legacy_admin_url( string $path, array $query = array() ): string {
+		return add_query_arg(
+			array_merge(
+				array(
+					'page' => 'wc-admin',
+					'path' => rawurlencode( $path ),
+				),
+				$query
+			),
+			admin_url( 'admin.php' )
+		);
+	}
+
+	/**
 	 * Get data from a WooCommerce API endpoint.
 	 *
 	 * @param string $endpoint Endpoint.

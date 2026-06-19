@@ -1764,4 +1764,20 @@ class UtilsTest extends WC_Unit_Test_Case {
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wp_locale = $tmp_local;
 	}
+
+	/**
+	 * @testdox Should build reference-shaped legacy WooPayments admin URLs for persisted records.
+	 */
+	public function test_wc_payments_legacy_admin_url_builds_reference_shaped_url(): void {
+		$url = Utils::wc_payments_legacy_admin_url(
+			'/payments/transactions/details',
+			array(
+				'id' => 'pi_123',
+			)
+		);
+
+		$this->assertStringContainsString( 'admin.php?page=wc-admin', $url );
+		$this->assertStringContainsString( 'path=%2Fpayments%2Ftransactions%2Fdetails', $url );
+		$this->assertStringContainsString( 'id=pi_123', $url );
+	}
 }

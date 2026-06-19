@@ -525,8 +525,8 @@ class WooPaymentsDisputeEventHandler {
 			$params['transaction_id'] = $balance_transaction_id;
 		}
 
-		return Utils::wc_payments_settings_url(
-			'/woopayments/transactions/details',
+		return Utils::wc_payments_legacy_admin_url(
+			'/payments/transactions/details',
 			$params
 		);
 	}

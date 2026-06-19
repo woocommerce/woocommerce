@@ -38,8 +38,10 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 		$sut->register();
 
 		$this->assertSame( 70, has_action( 'admin_menu', array( $sut, 'add_menu_items' ) ) );
+		$this->assertSame( 10, has_action( 'admin_init', array( $sut, 'redirect_legacy_payment_paths' ) ) );
 
 		remove_action( 'admin_menu', array( $sut, 'add_menu_items' ), 70 );
+		remove_action( 'admin_init', array( $sut, 'redirect_legacy_payment_paths' ), 10 );
 	}
 
 	/**
@@ -51,6 +53,48 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 		$sut->register();
 
 		$this->assertFalse( has_action( 'admin_menu', array( $sut, 'add_menu_items' ) ) );
+		$this->assertFalse( has_action( 'admin_init', array( $sut, 'redirect_legacy_payment_paths' ) ) );
+	}
+
+	/**
+	 * @testdox Should map legacy WooPayments WC Admin transaction URLs to native Settings Payments routes.
+	 */
+	public function test_maps_legacy_payment_transaction_details_url_to_native_route(): void {
+		$sut = $this->create_controller( true );
+
+		$url = $sut->get_legacy_payment_path_redirect_url(
+			array(
+				'page'           => 'wc-admin',
+				'path'           => '%2Fpayments%2Ftransactions%2Fdetails',
+				'id'             => 'pi_native',
+				'transaction_id' => 'txn_native',
+				'type'           => 'dispute',
+			)
+		);
+
+		$this->assertStringContainsString( 'admin.php?page=wc-settings&tab=checkout', $url );
+		$this->assertStringContainsString( 'path=/woopayments/transactions/details', $url );
+		$this->assertStringContainsString( 'id=pi_native', $url );
+		$this->assertStringContainsString( 'transaction_id=txn_native', $url );
+		$this->assertStringContainsString( 'type=dispute', $url );
+		$this->assertStringNotContainsString( 'page=wc-admin', $url );
+	}
+
+	/**
+	 * @testdox Should not redirect unrelated WC Admin paths.
+	 */
+	public function test_does_not_map_unrelated_wc_admin_paths(): void {
+		$sut = $this->create_controller( true );
+
+		$this->assertSame(
+			'',
+			$sut->get_legacy_payment_path_redirect_url(
+				array(
+					'page' => 'wc-admin',
+					'path' => '/analytics/revenue',
+				)
+			)
+		);
 	}
 
 	/**
