@@ -21,6 +21,7 @@ import {
 } from './utils';
 import { EmptyState, LiveStatusMessage, StatusMessage } from './table';
 import { getSettingsPaymentsProviderRouteUrl } from '../utils';
+import { SpotlightPromotion } from '../../promotions/spotlight';
 import '../style.scss';
 
 export const WooPaymentsDisputesPage = () => {
@@ -86,114 +87,125 @@ export const WooPaymentsDisputesPage = () => {
 	}
 
 	return (
-		<section
-			className="woocommerce-woopayments-money-movement"
-			aria-busy={ isLoading }
-		>
-			<h2>{ __( 'Disputes', 'woocommerce' ) }</h2>
-			<LiveStatusMessage isError={ !! errorMessage }>
-				{ liveStatusMessage }
-			</LiveStatusMessage>
-			{ isLoading && (
-				<StatusMessage>
-					{ __( 'Loading disputes…', 'woocommerce' ) }
-				</StatusMessage>
-			) }
-			{ errorMessage && <StatusMessage>{ errorMessage }</StatusMessage> }
-			{ ! isLoading && ! errorMessage && disputes.length === 0 && (
-				<EmptyState>
-					{ __( 'No disputes found.', 'woocommerce' ) }
-				</EmptyState>
-			) }
-			{ !! hasDisputes && (
-				<table className="woocommerce-woopayments-money-movement__table">
-					<thead>
-						<tr>
-							<th scope="col">{ __( 'Date', 'woocommerce' ) }</th>
-							<th scope="col">
-								{ __( 'Dispute', 'woocommerce' ) }
-							</th>
-							<th scope="col">
-								{ __( 'Status', 'woocommerce' ) }
-							</th>
-							<th scope="col">
-								{ __( 'Amount', 'woocommerce' ) }
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{ disputes.map( ( dispute ) => {
-							const id = getDisputeId( dispute );
-							const isActionable = isDisputeActionable( dispute );
-							const rowHref = isActionable
-								? getSettingsPaymentsProviderRouteUrl(
-										`/woopayments/disputes/challenge?id=${ encodeURIComponent(
+		<div className="woocommerce-woopayments-money-movement">
+			<SpotlightPromotion />
+			<section aria-busy={ isLoading }>
+				<h2>{ __( 'Disputes', 'woocommerce' ) }</h2>
+				<LiveStatusMessage isError={ !! errorMessage }>
+					{ liveStatusMessage }
+				</LiveStatusMessage>
+				{ isLoading && (
+					<StatusMessage>
+						{ __( 'Loading disputes…', 'woocommerce' ) }
+					</StatusMessage>
+				) }
+				{ errorMessage && (
+					<StatusMessage>{ errorMessage }</StatusMessage>
+				) }
+				{ ! isLoading && ! errorMessage && disputes.length === 0 && (
+					<EmptyState>
+						{ __( 'No disputes found.', 'woocommerce' ) }
+					</EmptyState>
+				) }
+				{ !! hasDisputes && (
+					<table className="woocommerce-woopayments-money-movement__table">
+						<thead>
+							<tr>
+								<th scope="col">
+									{ __( 'Date', 'woocommerce' ) }
+								</th>
+								<th scope="col">
+									{ __( 'Dispute', 'woocommerce' ) }
+								</th>
+								<th scope="col">
+									{ __( 'Status', 'woocommerce' ) }
+								</th>
+								<th scope="col">
+									{ __( 'Amount', 'woocommerce' ) }
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							{ disputes.map( ( dispute ) => {
+								const id = getDisputeId( dispute );
+								const isActionable =
+									isDisputeActionable( dispute );
+								const rowHref = isActionable
+									? getSettingsPaymentsProviderRouteUrl(
+											`/woopayments/disputes/challenge?id=${ encodeURIComponent(
+												id
+											) }`
+									  )
+									: getSettingsPaymentsProviderRouteUrl(
+											getTransactionDetailsRoute(
+												dispute
+											)
+									  );
+								const ariaLabel = isActionable
+									? sprintf(
+											/* translators: 1: dispute reason, 2: dispute ID. */
+											__(
+												'Challenge %1$s dispute %2$s',
+												'woocommerce'
+											),
+											formatLabel( dispute.reason ),
 											id
-										) }`
-								  )
-								: getSettingsPaymentsProviderRouteUrl(
-										getTransactionDetailsRoute( dispute )
-								  );
-							const ariaLabel = isActionable
-								? sprintf(
-										/* translators: 1: dispute reason, 2: dispute ID. */
-										__(
-											'Challenge %1$s dispute %2$s',
-											'woocommerce'
-										),
-										formatLabel( dispute.reason ),
-										id
-								  )
-								: sprintf(
-										/* translators: 1: dispute reason, 2: dispute ID. */
-										__(
-											'View transaction details for %1$s dispute %2$s',
-											'woocommerce'
-										),
-										formatLabel( dispute.reason ),
-										id
-								  );
-							const action = isActionable
-								? 'challenge'
-								: 'view_transaction';
+									  )
+									: sprintf(
+											/* translators: 1: dispute reason, 2: dispute ID. */
+											__(
+												'View transaction details for %1$s dispute %2$s',
+												'woocommerce'
+											),
+											formatLabel( dispute.reason ),
+											id
+									  );
+								const action = isActionable
+									? 'challenge'
+									: 'view_transaction';
 
-							return (
-								<tr key={ id }>
-									<td>
-										{ formatDate(
-											dispute.date || dispute.created
-										) }
-									</td>
-									<td>
-										<a
-											href={ rowHref }
-											aria-label={ ariaLabel }
-											onClick={ () =>
-												recordEvent(
-													'wcpay_disputes_row_action_click',
-													{
-														action,
-														dispute_id: id,
-													}
-												)
-											}
-										>
-											{ formatLabel( dispute.reason ) }
-										</a>
-									</td>
-									<td>{ formatLabel( dispute.status ) }</td>
-									<td>
-										{ formatAmount(
-											dispute.amount,
-											dispute.currency
-										) }
-									</td>
-								</tr>
-							);
-						} ) }
-					</tbody>
-				</table>
-			) }
-		</section>
+								return (
+									<tr key={ id }>
+										<td>
+											{ formatDate(
+												dispute.date || dispute.created
+											) }
+										</td>
+										<td>
+											<a
+												href={ rowHref }
+												aria-label={ ariaLabel }
+												onClick={ () =>
+													recordEvent(
+														'wcpay_disputes_row_action_click',
+														{
+															action,
+															dispute_id: id,
+														}
+													)
+												}
+											>
+												{ formatLabel(
+													dispute.reason
+												) }
+											</a>
+										</td>
+										<td>
+											{ formatLabel( dispute.status ) }
+										</td>
+										<td>
+											{ formatAmount(
+												dispute.amount,
+												dispute.currency
+											) }
+										</td>
+									</tr>
+								);
+							} ) }
+						</tbody>
+					</table>
+				) }
+			</section>
+		</div>
 	);
 };

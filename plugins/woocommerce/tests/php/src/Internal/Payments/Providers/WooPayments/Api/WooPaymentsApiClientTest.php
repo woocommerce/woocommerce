@@ -5,7 +5,9 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments\A
 
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiException;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsActivatePmPromotionRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiRequest;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsGetPmPromotionsRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use WC_Unit_Test_Case;
 use WP_Error;
@@ -2269,6 +2271,179 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $authorization_hook_called, 'Authorization summary requests should run the preserved request filter.' );
 		$this->assertStringContainsString( 'manual_capture=true', $authorization_path );
 		$this->assertStringContainsString( 'test_mode=0', $authorization_path );
+	}
+
+	/**
+	 * @testdox Should fetch payment method promotions through the preserved platform endpoint.
+	 */
+	public function test_get_pm_promotions_uses_preserved_platform_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					array(
+						'id'             => 'klarna-promo__spotlight',
+						'promo_id'       => 'klarna-promo',
+						'payment_method' => 'klarna',
+						'type'           => 'spotlight',
+						'title'          => 'Activate Klarna',
+						'description'    => 'Offer flexible payments.',
+						'cta_label'      => 'Activate now',
+						'tc_url'         => 'https://example.com/terms',
+						'tc_label'       => 'See terms',
+					),
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->get_pm_promotions(
+			array(
+				'dismissals' => array( 'klarna-promo__spotlight' => 1781740800 ),
+				'locale'     => 'en_US',
+			)
+		);
+		$query  = array();
+		parse_str( (string) wp_parse_url( $http_client->last_path, PHP_URL_QUERY ), $query );
+
+		$this->assertSame( 'klarna-promo__spotlight', $result[0]['id'] );
+		$this->assertSame( '/sites/123/wcpay/payment_method_promotions', strtok( $http_client->last_path, '?' ) );
+		$this->assertSame( 'GET', $http_client->last_method );
+		$this->assertSame( '0', $query['test_mode'] );
+		$this->assertSame( 'en_US', $query['locale'] );
+		$this->assertSame(
+			array( 'klarna-promo__spotlight' => 1781740800 ),
+			json_decode( (string) $query['dismissals'], true )
+		);
+	}
+
+	/**
+	 * @testdox Should activate payment method promotions through the preserved platform endpoint.
+	 */
+	public function test_activate_pm_promotion_uses_preserved_platform_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'success' => true ) ),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->activate_pm_promotion( 'klarna-promo__spotlight' );
+
+		$this->assertTrue( $result['success'] );
+		$this->assertSame( '/sites/123/wcpay/payment_method_promotions/klarna-promo__spotlight/activate', $http_client->last_path );
+		$this->assertSame( 'POST', $http_client->last_method );
+	}
+
+	/**
+	 * @testdox Should preserve payment method promotion legacy request filters.
+	 */
+	public function test_pm_promotion_methods_preserve_legacy_request_filters(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'success' => true ) ),
+		);
+
+		$get_hook_called      = false;
+		$activate_hook_called = false;
+		$get_filter           = function ( WooPaymentsApiRequest $request ) use ( &$get_hook_called ): WooPaymentsApiRequest {
+			$get_hook_called = true;
+			$this->assertSame( 'payment_method_promotions', $request->get_api() );
+			$this->assertSame( 'GET', $request->get_method() );
+			$request->set_param( 'locale', 'fr_FR' );
+
+			return $request;
+		};
+		$activate_filter      = function ( WooPaymentsApiRequest $request ) use ( &$activate_hook_called ): WooPaymentsApiRequest {
+			$activate_hook_called = true;
+			$this->assertSame( 'payment_method_promotions/klarna-promo__spotlight/activate', $request->get_api() );
+			$this->assertSame( 'POST', $request->get_method() );
+
+			return $request;
+		};
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+		add_filter( 'wcpay_get_pm_promotions_request', $get_filter );
+		add_filter( 'wcpay_activate_pm_promotion_request', $activate_filter );
+
+		try {
+			$sut->get_pm_promotions( array( 'locale' => 'en_US' ) );
+			$get_path = $http_client->last_path;
+
+			$sut->activate_pm_promotion( 'klarna-promo__spotlight' );
+		} finally {
+			remove_filter( 'wcpay_get_pm_promotions_request', $get_filter );
+			remove_filter( 'wcpay_activate_pm_promotion_request', $activate_filter );
+		}
+
+		$this->assertTrue( $get_hook_called, 'PM promotions list requests should run the preserved request filter.' );
+		$this->assertStringContainsString( 'locale=fr_FR', $get_path );
+		$this->assertTrue( $activate_hook_called, 'PM promotion activation requests should run the preserved request filter.' );
+	}
+
+	/**
+	 * @testdox Should expose payment method promotion filters as concrete legacy request objects.
+	 */
+	public function test_pm_promotion_methods_expose_concrete_legacy_request_object_aliases(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode( array( 'success' => true ) ),
+		);
+
+		$observed_get_request      = null;
+		$observed_activate_request = null;
+		$get_filter                = function ( \WCPay\Core\Server\Request\Get_PM_Promotions $request ) use ( &$observed_get_request ): \WCPay\Core\Server\Request\Get_PM_Promotions {
+			$observed_get_request = $request;
+			$this->assertSame( 'payment_method_promotions', $request->get_api() );
+			$this->assertSame( 'GET', $request->get_method() );
+			$this->assertTrue( $request->should_return_raw_response() );
+			$request->set_store_context_params( array( 'locale' => 'fr_FR' ) );
+
+			return $request;
+		};
+		$activate_filter           = function ( \WCPay\Core\Server\Request\Activate_PM_Promotion $request ) use ( &$observed_activate_request ): \WCPay\Core\Server\Request\Activate_PM_Promotion {
+			$observed_activate_request = $request;
+			$this->assertSame( 'klarna-promo__spotlight', $request->get_id() );
+			$this->assertSame( 'payment_method_promotions/klarna-promo__spotlight/activate', $request->get_api() );
+			$this->assertSame( 'POST', $request->get_method() );
+
+			return $request;
+		};
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+		add_filter( 'wcpay_get_pm_promotions_request', $get_filter );
+		add_filter( 'wcpay_activate_pm_promotion_request', $activate_filter );
+
+		try {
+			$sut->get_pm_promotions( array( 'locale' => 'en_US' ) );
+			$get_path = $http_client->last_path;
+
+			$sut->activate_pm_promotion( 'klarna-promo__spotlight' );
+		} finally {
+			remove_filter( 'wcpay_get_pm_promotions_request', $get_filter );
+			remove_filter( 'wcpay_activate_pm_promotion_request', $activate_filter );
+		}
+
+		$this->assertInstanceOf( WooPaymentsGetPmPromotionsRequest::class, $observed_get_request );
+		$this->assertInstanceOf( WooPaymentsActivatePmPromotionRequest::class, $observed_activate_request );
+		$this->assertStringContainsString( 'locale=fr_FR', $get_path );
 	}
 
 	/**

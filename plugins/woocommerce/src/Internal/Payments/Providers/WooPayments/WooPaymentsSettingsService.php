@@ -183,6 +183,13 @@ class WooPaymentsSettingsService {
 	private ?WooPaymentsWooPaySessionService $woopay_session_service = null;
 
 	/**
+	 * Payment method promotions service.
+	 *
+	 * @var WooPaymentsPmPromotionsService|null
+	 */
+	private ?WooPaymentsPmPromotionsService $pm_promotions_service = null;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
@@ -190,11 +197,13 @@ class WooPaymentsSettingsService {
 	 * @param WooPaymentsAccountService            $account_service        Native WooPayments account service.
 	 * @param WooPaymentsApiClient                 $api_client             Native WooPayments API client.
 	 * @param WooPaymentsWooPaySessionService|null $woopay_session_service Optional WooPay session service.
+	 * @param WooPaymentsPmPromotionsService|null  $pm_promotions_service  Optional PM promotions service.
 	 */
-	final public function init( WooPaymentsAccountService $account_service, WooPaymentsApiClient $api_client, ?WooPaymentsWooPaySessionService $woopay_session_service = null ): void {
+	final public function init( WooPaymentsAccountService $account_service, WooPaymentsApiClient $api_client, ?WooPaymentsWooPaySessionService $woopay_session_service = null, ?WooPaymentsPmPromotionsService $pm_promotions_service = null ): void {
 		$this->account_service        = $account_service;
 		$this->api_client             = $api_client;
 		$this->woopay_session_service = $woopay_session_service;
+		$this->pm_promotions_service  = $pm_promotions_service;
 	}
 
 	/**
@@ -236,7 +245,7 @@ class WooPaymentsSettingsService {
 			'duplicated_payment_method_ids'              => $this->get_duplicated_payment_method_ids(),
 			'dismissed_duplicate_payment_method_notices' => $this->get_dismissed_duplicate_payment_method_notices(),
 			'account_fees'                               => $this->get_account_fees(),
-			'pm_promotions'                              => array(),
+			'pm_promotions'                              => $this->get_pm_promotions_service()->get_visible_promotions() ?? array(),
 			'is_wcpay_enabled'                           => $this->is_yes( $settings['enabled'] ?? 'no' ),
 			'is_manual_capture_enabled'                  => $this->is_yes( $settings['manual_capture'] ?? 'no' ),
 			'is_test_mode_enabled'                       => $this->account_service->is_test_mode_enabled(),
@@ -380,6 +389,33 @@ class WooPaymentsSettingsService {
 	}
 
 	/**
+	 * Get the payment method promotions service.
+	 *
+	 * @return WooPaymentsPmPromotionsService
+	 */
+	private function get_pm_promotions_service(): WooPaymentsPmPromotionsService {
+		if ( $this->pm_promotions_service instanceof WooPaymentsPmPromotionsService ) {
+			return $this->pm_promotions_service;
+		}
+
+		try {
+			$service = function_exists( 'wc_get_container' ) ? wc_get_container()->get( WooPaymentsPmPromotionsService::class ) : null;
+		} catch ( Throwable $e ) {
+			$service = new WooPaymentsPmPromotionsService();
+			$service->init( $this->api_client, $this->account_service );
+		}
+
+		if ( ! $service instanceof WooPaymentsPmPromotionsService ) {
+			$service = new WooPaymentsPmPromotionsService();
+			$service->init( $this->api_client, $this->account_service );
+		}
+
+		$this->pm_promotions_service = $service;
+
+		return $this->pm_promotions_service;
+	}
+
+	/**
 	 * Update native WooPayments settings.
 	 *
 	 * @param array<string,mixed> $params Request parameters.
@@ -414,12 +450,19 @@ class WooPaymentsSettingsService {
 		}
 
 		if ( array_key_exists( 'enabled_payment_method_ids', $params ) ) {
-			$enabled_payment_method_ids = $this->sanitize_payment_method_ids(
+			$previous_enabled_payment_method_ids = $this->sanitize_payment_method_ids(
+				$this->get_array_setting( $settings, 'upe_enabled_payment_method_ids', array( 'card' ) ),
+				$available_payment_method_ids
+			);
+			$enabled_payment_method_ids          = $this->sanitize_payment_method_ids(
 				is_array( $params['enabled_payment_method_ids'] ) ? $params['enabled_payment_method_ids'] : array(),
 				$available_payment_method_ids
 			);
 			if ( $this->is_manual_capture_enabled_after_update( $params, $settings ) ) {
 				$enabled_payment_method_ids = $this->filter_manual_capture_payment_method_ids( $enabled_payment_method_ids );
+			}
+			foreach ( array_diff( $enabled_payment_method_ids, $previous_enabled_payment_method_ids ) as $payment_method_id ) {
+				$this->get_pm_promotions_service()->maybe_activate_promotion_for_payment_method( $payment_method_id );
 			}
 			$capability_error = $this->request_unrequested_payment_methods( $enabled_payment_method_ids );
 			if ( is_wp_error( $capability_error ) ) {

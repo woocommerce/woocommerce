@@ -24,6 +24,10 @@ jest.mock( '../money-movement/data', () => ( {
 	getWooPaymentsTransactionsSummary: jest.fn(),
 } ) );
 
+jest.mock( '../../promotions/spotlight', () => ( {
+	SpotlightPromotion: () => <div>Spotlight promotion</div>,
+} ) );
+
 const mockGetDeposit = getWooPaymentsDeposit as jest.MockedFunction<
 	typeof getWooPaymentsDeposit
 >;
@@ -61,6 +65,8 @@ describe( 'WooPayments payout details admin surface', () => {
 		} );
 
 		render( <WooPaymentsPayouts /> );
+
+		expect( screen.getByText( 'Spotlight promotion' ) ).toBeInTheDocument();
 
 		const detailsLink = await screen.findByRole( 'link', {
 			name: 'Jun 18, 2026 - view payout details for po_test',

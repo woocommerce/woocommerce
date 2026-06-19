@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPmPromotionsService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsSettingsService;
 use Exception;
 use WP_Error;
@@ -70,6 +71,13 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 * @var WooPaymentsSettingsService|null
 	 */
 	private ?WooPaymentsSettingsService $settings_service = null;
+
+	/**
+	 * The native WooPayments payment method promotions service.
+	 *
+	 * @var WooPaymentsPmPromotionsService|null
+	 */
+	private ?WooPaymentsPmPromotionsService $pm_promotions_service = null;
 
 	/**
 	 * Native payments runtime arbiter.
@@ -544,18 +552,20 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	/**
 	 * Initialize the class instance.
 	 *
-	 * @param Payments                          $payments        The general payments settings page service.
-	 * @param WooPaymentsService                $woopayments     The WooPayments-specific Payments settings page service.
-	 * @param WooPaymentsSettingsService|null   $settings_service Optional native WooPayments settings service.
-	 * @param NativePaymentsRuntimeArbiter|null $runtime_arbiter Optional native payments runtime arbiter.
+	 * @param Payments                            $payments        The general payments settings page service.
+	 * @param WooPaymentsService                  $woopayments     The WooPayments-specific Payments settings page service.
+	 * @param WooPaymentsSettingsService|null     $settings_service Optional native WooPayments settings service.
+	 * @param NativePaymentsRuntimeArbiter|null   $runtime_arbiter Optional native payments runtime arbiter.
+	 * @param WooPaymentsPmPromotionsService|null $pm_promotions_service Optional native WooPayments PM promotions service.
 	 *
 	 * @internal
 	 */
-	final public function init( Payments $payments, WooPaymentsService $woopayments, ?WooPaymentsSettingsService $settings_service = null, ?NativePaymentsRuntimeArbiter $runtime_arbiter = null ): void {
-		$this->payments         = $payments;
-		$this->woopayments      = $woopayments;
-		$this->settings_service = $settings_service;
-		$this->runtime_arbiter  = $runtime_arbiter;
+	final public function init( Payments $payments, WooPaymentsService $woopayments, ?WooPaymentsSettingsService $settings_service = null, ?NativePaymentsRuntimeArbiter $runtime_arbiter = null, ?WooPaymentsPmPromotionsService $pm_promotions_service = null ): void {
+		$this->payments              = $payments;
+		$this->woopayments           = $woopayments;
+		$this->settings_service      = $settings_service;
+		$this->runtime_arbiter       = $runtime_arbiter;
+		$this->pm_promotions_service = $pm_promotions_service;
 	}
 
 	/**
@@ -601,6 +611,47 @@ class WooPaymentsRestController extends RestApiControllerBase {
 							'required' => true,
 						),
 					),
+				),
+			),
+			$override
+		);
+
+		register_rest_route(
+			'wc/v3',
+			'/payments/pm-promotions',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'get_native_pm_promotions' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+				),
+			),
+			$override
+		);
+
+		register_rest_route(
+			'wc/v3',
+			'/payments/pm-promotions/(?P<promotion_id>[^/]+)/activate',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'activate_native_pm_promotion' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => $this->get_pm_promotion_route_args(),
+				),
+			),
+			$override
+		);
+
+		register_rest_route(
+			'wc/v3',
+			'/payments/pm-promotions/(?P<promotion_id>[^/]+)/dismiss',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'dismiss_native_pm_promotion' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => $this->get_pm_promotion_route_args(),
 				),
 			),
 			$override
@@ -791,6 +842,39 @@ class WooPaymentsRestController extends RestApiControllerBase {
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 		);
+	}
+
+	/**
+	 * Get validation args for payment method promotion action routes.
+	 *
+	 * @return array<string,array<string,mixed>>
+	 */
+	private function get_pm_promotion_route_args(): array {
+		return array(
+			'promotion_id' => array(
+				'required'          => true,
+				'type'              => 'string',
+				'validate_callback' => fn( $value ) => $this->validate_pm_promotion_id( $value ),
+			),
+		);
+	}
+
+	/**
+	 * Validate a payment method promotion ID.
+	 *
+	 * @param mixed $value Promotion ID.
+	 * @return WP_Error|true
+	 */
+	private function validate_pm_promotion_id( $value ) {
+		if ( ! is_string( $value ) || '' === $value || ! preg_match( '/^[A-Za-z0-9_-]+$/', $value ) ) {
+			return new WP_Error(
+				'rest_invalid_param',
+				esc_html__( 'Invalid payment method promotion ID.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		return true;
 	}
 
 	/**
@@ -1214,6 +1298,45 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	}
 
 	/**
+	 * Get visible native WooPayments payment method promotions.
+	 *
+	 * @return WP_REST_Response The response.
+	 */
+	protected function get_native_pm_promotions(): WP_REST_Response {
+		return rest_ensure_response( $this->get_pm_promotions_service()->get_visible_promotions() ?? array() );
+	}
+
+	/**
+	 * Activate a native WooPayments payment method promotion.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string,mixed>> $request
+	 * @return WP_REST_Response The response.
+	 */
+	protected function activate_native_pm_promotion( WP_REST_Request $request ): WP_REST_Response {
+		return rest_ensure_response(
+			array(
+				'success' => $this->get_pm_promotions_service()->activate_promotion( (string) $request->get_param( 'promotion_id' ) ),
+			)
+		);
+	}
+
+	/**
+	 * Dismiss a native WooPayments payment method promotion.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string,mixed>> $request
+	 * @return WP_REST_Response The response.
+	 */
+	protected function dismiss_native_pm_promotion( WP_REST_Request $request ): WP_REST_Response {
+		return rest_ensure_response(
+			array(
+				'success' => $this->get_pm_promotions_service()->dismiss_promotion( (string) $request->get_param( 'promotion_id' ) ),
+			)
+		);
+	}
+
+	/**
 	 * Upload a file for the native WooPayments settings page.
 	 *
 	 * @param WP_REST_Request $request The request object.
@@ -1408,6 +1531,19 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		}
 
 		return $this->settings_service;
+	}
+
+	/**
+	 * Get the native WooPayments payment method promotions service.
+	 *
+	 * @return WooPaymentsPmPromotionsService
+	 */
+	private function get_pm_promotions_service(): WooPaymentsPmPromotionsService {
+		if ( ! $this->pm_promotions_service instanceof WooPaymentsPmPromotionsService ) {
+			$this->pm_promotions_service = wc_get_container()->get( WooPaymentsPmPromotionsService::class );
+		}
+
+		return $this->pm_promotions_service;
 	}
 
 	/**

@@ -3,7 +3,13 @@
  */
 import { speak } from '@wordpress/a11y';
 import apiFetch from '@wordpress/api-fetch';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import {
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -14,6 +20,10 @@ import { WooPaymentsSettingsPage } from '../settings-page';
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 jest.mock( '@wordpress/a11y', () => ( {
 	speak: jest.fn(),
+} ) );
+
+jest.mock( '../../promotions/spotlight', () => ( {
+	SpotlightPromotion: () => <div>Spotlight promotion</div>,
 } ) );
 
 const mockApiFetch = apiFetch as jest.MockedFunction< typeof apiFetch >;
@@ -304,6 +314,7 @@ describe( 'WooPaymentsSettingsPage', () => {
 		expect(
 			screen.getByRole( 'heading', { name: 'WooPayments settings' } )
 		).toBeInTheDocument();
+		expect( screen.getByText( 'Spotlight promotion' ) ).toBeInTheDocument();
 		expect(
 			screen.getByRole( 'heading', { name: 'General' } )
 		).toBeInTheDocument();
@@ -529,6 +540,168 @@ describe( 'WooPaymentsSettingsPage', () => {
 
 		await userEvent.keyboard( '{Escape}' );
 		expect( cardFeeButton ).toHaveAttribute( 'aria-expanded', 'false' );
+	} );
+
+	it( 'renders badge payment method promotions on matching payment method rows', async () => {
+		mockUseGetSettings.mockReturnValue( {
+			account_country: 'US',
+			pm_promotions: [
+				{
+					id: 'klarna-badge',
+					promo_id: 'klarna-promo',
+					payment_method: 'klarna',
+					type: 'badge',
+					title: 'Limited offer',
+					description: 'Lower fees are available for Klarna.',
+					tc_url: 'https://example.com/terms',
+					tc_label: 'See terms',
+					badge_type: 'success',
+				},
+				{
+					id: 'affirm-spotlight',
+					promo_id: 'affirm-promo',
+					payment_method: 'affirm',
+					type: 'spotlight',
+					title: 'Activate Affirm',
+				},
+			],
+		} );
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'klarna',
+			'affirm',
+		] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active' },
+			klarna_payments: { status: 'active' },
+			affirm_payments: { status: 'active' },
+		} );
+		mockUseGetAccountFees.mockReturnValue( {
+			klarna: {
+				base: {
+					percentage_rate: 0.0599,
+					fixed_rate: 30,
+					currency: 'USD',
+				},
+			},
+		} );
+
+		const { container } = render( <WooPaymentsSettingsPage /> );
+
+		const badge = screen.getByRole( 'button', {
+			name: 'Limited offer promotion details',
+		} );
+		const klarnaRow = Array.from(
+			container.querySelectorAll(
+				'.woopayments-settings-payment-method-item'
+			)
+		).find( ( row ) => row.textContent?.includes( 'Klarna' ) );
+		expect( klarnaRow ).toBeDefined();
+		const feeButton = within( klarnaRow as HTMLElement ).getByRole(
+			'button',
+			{
+				name: 'From 5.99% + $0.30 fee details',
+			}
+		);
+
+		expect( badge ).toBeInTheDocument();
+		expect(
+			badge.closest(
+				'.woopayments-settings-payment-method-item__heading'
+			)
+		).not.toBeNull();
+		expect(
+			feeButton.closest(
+				'.woopayments-settings-payment-method-item__actions'
+			)
+		).not.toBeNull();
+		expect(
+			feeButton.closest(
+				'.woopayments-settings-payment-method-item__heading'
+			)
+		).toBeNull();
+		expect(
+			screen.queryByText( 'Activate Affirm' )
+		).not.toBeInTheDocument();
+
+		await userEvent.click( badge );
+
+		const detailsDialog = screen.getByRole( 'dialog', {
+			name: 'Limited offer promotion details',
+		} );
+		expect(
+			within( detailsDialog ).getByText(
+				'Lower fees are available for Klarna.'
+			)
+		).toBeInTheDocument();
+		expect(
+			within( detailsDialog ).getByRole( 'link', { name: /See terms/ } )
+		).toHaveAttribute( 'href', 'https://example.com/terms' );
+
+		const termsLink = within( detailsDialog ).getByRole( 'link', {
+			name: /See terms/,
+		} );
+		termsLink.focus();
+		expect( termsLink ).toHaveFocus();
+		fireEvent.keyDown( termsLink, { key: 'Escape' } );
+
+		await waitFor( () => {
+			expect(
+				screen.queryByRole( 'dialog', {
+					name: 'Limited offer promotion details',
+				} )
+			).not.toBeInTheDocument();
+		} );
+		expect( badge ).toHaveFocus();
+	} );
+
+	it( 'keeps active discount badges ahead of payment method promotion badges', () => {
+		mockUseGetSettings.mockReturnValue( {
+			account_country: 'US',
+			pm_promotions: [
+				{
+					id: 'klarna-badge',
+					promo_id: 'klarna-promo',
+					payment_method: 'klarna',
+					type: 'badge',
+					title: 'Limited offer',
+					description: 'Lower fees are available for Klarna.',
+					badge_type: 'success',
+				},
+			],
+		} );
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'klarna',
+		] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active' },
+			klarna_payments: { status: 'active' },
+		} );
+		mockUseGetAccountFees.mockReturnValue( {
+			klarna: {
+				base: {
+					percentage_rate: 0.029,
+					fixed_rate: 30,
+					currency: 'USD',
+				},
+				discount: [
+					{
+						currency: 'USD',
+						discount: 0.2,
+					},
+				],
+			},
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect( screen.getByText( '20% off fees' ) ).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', {
+				name: 'Limited offer promotion details',
+			} )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'renders and dismisses duplicate payment method notices', async () => {

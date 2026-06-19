@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController;
 use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsPmPromotionsService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsSettingsService;
 use PHPUnit\Framework\MockObject\MockObject;
 use WC_REST_Unit_Test_Case;
@@ -50,6 +51,11 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	private $mock_settings_service;
 
 	/**
+	 * @var MockObject|WooPaymentsPmPromotionsService
+	 */
+	private $mock_pm_promotions_service;
+
+	/**
 	 * @var MockObject|NativePaymentsRuntimeArbiter
 	 */
 	private $mock_runtime_arbiter;
@@ -70,10 +76,13 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
 
-		$this->mock_payments_service    = $this->getMockBuilder( Payments::class )->getMock();
-		$this->mock_woopayments_service = $this->getMockBuilder( WooPaymentsService::class )->getMock();
-		$this->mock_settings_service    = $this->getMockBuilder( WooPaymentsSettingsService::class )->getMock();
-		$this->mock_runtime_arbiter     = $this->getMockBuilder( NativePaymentsRuntimeArbiter::class )
+		$this->mock_payments_service      = $this->getMockBuilder( Payments::class )->getMock();
+		$this->mock_woopayments_service   = $this->getMockBuilder( WooPaymentsService::class )->getMock();
+		$this->mock_settings_service      = $this->getMockBuilder( WooPaymentsSettingsService::class )->getMock();
+		$this->mock_pm_promotions_service = $this->getMockBuilder( WooPaymentsPmPromotionsService::class )
+			->onlyMethods( array( 'get_visible_promotions', 'activate_promotion', 'dismiss_promotion' ) )
+			->getMock();
+		$this->mock_runtime_arbiter       = $this->getMockBuilder( NativePaymentsRuntimeArbiter::class )
 			->disableOriginalConstructor()
 			->onlyMethods( array( 'should_native_register' ) )
 			->getMock();
@@ -82,7 +91,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			->willReturn( true );
 
 		$this->sut = new WooPaymentsRestController();
-		$this->sut->init( $this->mock_payments_service, $this->mock_woopayments_service, $this->mock_settings_service, $this->mock_runtime_arbiter );
+		$this->sut->init( $this->mock_payments_service, $this->mock_woopayments_service, $this->mock_settings_service, $this->mock_runtime_arbiter, $this->mock_pm_promotions_service );
 		$this->sut->register_routes( true );
 	}
 
@@ -341,6 +350,94 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should expose visible native WooPayments payment method promotions.
+	 */
+	public function test_get_native_pm_promotions_by_manager(): void {
+		$promotions = array(
+			array(
+				'id'             => 'klarna-promo__spotlight',
+				'payment_method' => 'klarna',
+				'type'           => 'spotlight',
+			),
+		);
+
+		$this->mock_pm_promotions_service
+			->expects( $this->once() )
+			->method( 'get_visible_promotions' )
+			->willReturn( $promotions );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/payments/pm-promotions' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $promotions, $response->get_data() );
+	}
+
+	/**
+	 * @testdox Should activate native WooPayments payment method promotions.
+	 */
+	public function test_activate_native_pm_promotion_by_manager(): void {
+		$this->mock_pm_promotions_service
+			->expects( $this->once() )
+			->method( 'activate_promotion' )
+			->with( 'klarna-promo__spotlight' )
+			->willReturn( true );
+
+		$request  = new WP_REST_Request( 'POST', '/wc/v3/payments/pm-promotions/klarna-promo__spotlight/activate' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array( 'success' => true ), $response->get_data() );
+	}
+
+	/**
+	 * @testdox Should dismiss native WooPayments payment method promotions.
+	 */
+	public function test_dismiss_native_pm_promotion_by_manager(): void {
+		$this->mock_pm_promotions_service
+			->expects( $this->once() )
+			->method( 'dismiss_promotion' )
+			->with( 'klarna-promo__spotlight' )
+			->willReturn( true );
+
+		$request  = new WP_REST_Request( 'POST', '/wc/v3/payments/pm-promotions/klarna-promo__spotlight/dismiss' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array( 'success' => true ), $response->get_data() );
+	}
+
+	/**
+	 * @testdox Should reject encoded path separators in promotion action routes.
+	 */
+	public function test_native_pm_promotion_routes_reject_encoded_path_separators(): void {
+		$this->mock_pm_promotions_service
+			->expects( $this->never() )
+			->method( 'activate_promotion' );
+
+		$request  = new WP_REST_Request( 'POST', '/wc/v3/payments/pm-promotions/klarna%2Fbad/activate' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Should require payment gateway management permission for native payment method promotions.
+	 */
+	public function test_get_native_pm_promotions_requires_manager_permission(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'subscriber' ) ) );
+		$this->mock_pm_promotions_service
+			->expects( $this->never() )
+			->method( 'get_visible_promotions' );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/payments/pm-promotions' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
+	}
+
+	/**
 	 * @testdox Should accept nullable monthly anchor and keyed support address objects.
 	 */
 	public function test_update_native_settings_accepts_nullable_anchor_and_keyed_address(): void {
@@ -407,6 +504,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$routes = $this->server->get_routes();
 
 		$this->assertArrayNotHasKey( '/wc/v3/payments/settings', $routes );
+		$this->assertArrayNotHasKey( '/wc/v3/payments/pm-promotions', $routes );
 		$this->assertArrayNotHasKey( '/wc/v3/payments/file', $routes );
 		$this->assertArrayHasKey( self::ENDPOINT . '/onboarding', $routes );
 	}

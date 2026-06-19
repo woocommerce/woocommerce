@@ -37,6 +37,13 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 	private RecordingWooPaySessionService $woopay_session_service;
 
 	/**
+	 * Recording PM promotions service.
+	 *
+	 * @var RecordingPmPromotionsService
+	 */
+	private RecordingPmPromotionsService $pm_promotions_service;
+
+	/**
 	 * Original WooCommerce options mutated by focused settings-contract tests.
 	 *
 	 * @var array<string,mixed>
@@ -55,8 +62,9 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 
 		$this->api_client             = new RecordingSettingsApiClient();
 		$this->woopay_session_service = new RecordingWooPaySessionService();
+		$this->pm_promotions_service  = new RecordingPmPromotionsService();
 		$this->sut                    = new WooPaymentsSettingsService();
-		$this->sut->init( $this->create_account_service(), $this->api_client, $this->woopay_session_service );
+		$this->sut->init( $this->create_account_service(), $this->api_client, $this->woopay_session_service, $this->pm_promotions_service );
 	}
 
 	/**
@@ -69,6 +77,7 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 		delete_option( '_wcpay_feature_customer_multi_currency' );
 		delete_option( '_wcpay_feature_subscriptions' );
 		delete_option( '_wcpay_feature_stripe_billing' );
+		delete_option( '_wcpay_pm_promotion_dismissals' );
 		delete_option( 'wcpay_duplicate_payment_method_notices_dismissed' );
 		delete_option( 'wcpay_fraud_protection_welcome_tour_dismissed' );
 		delete_option( 'wcpay_frt_review_feature_active' );
@@ -213,14 +222,29 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 				'card' => array( 'legacy-gateway' ),
 			)
 		);
-		$this->woopay_session_service->appearance = array(
+		$this->woopay_session_service->appearance        = array(
 			'variables' => array(
 				'colorBackground' => '#ffffff',
 			),
 		);
-		$this->woopay_session_service->font_rules = array(
+		$this->woopay_session_service->font_rules        = array(
 			array(
 				'cssSrc' => 'https://fonts.googleapis.com/css2?family=Inter',
+			),
+		);
+		$this->pm_promotions_service->visible_promotions = array(
+			array(
+				'id'                   => 'klarna-promo__badge',
+				'promo_id'             => 'klarna-promo',
+				'payment_method'       => 'klarna',
+				'payment_method_title' => 'Klarna',
+				'type'                 => 'badge',
+				'title'                => 'Lower fees',
+				'description'          => 'Save on Klarna processing fees.',
+				'cta_label'            => 'Enable Klarna',
+				'tc_url'               => 'https://example.com/terms',
+				'tc_label'             => 'See terms',
+				'badge_type'           => 'success',
 			),
 		);
 
@@ -257,7 +281,7 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'unrequested', $settings['payment_method_statuses']['link_payments']['status'] );
 		$this->assertSame( array( 'currently_due' => array( 'tos_acceptance.date' ) ), $settings['payment_method_statuses']['link_payments']['requirements'] );
 		$this->assertSame( array( 'legacy-gateway' ), $settings['dismissed_duplicate_payment_method_notices']['card'] );
-		$this->assertSame( array(), $settings['pm_promotions'] );
+		$this->assertSame( $this->pm_promotions_service->visible_promotions, $settings['pm_promotions'] );
 		$this->assertSame(
 			array(
 				'base'       => array(
@@ -919,6 +943,67 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 			),
 			$this->api_client->capability_requests
 		);
+	}
+
+	/**
+	 * @testdox Should activate visible promotions before enabling newly selected payment methods.
+	 */
+	public function test_update_settings_activates_visible_promotions_before_enabling_methods(): void {
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'upe_enabled_payment_method_ids' => array( 'card' ),
+			)
+		);
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data'    => array(
+					'account_id'   => 'acct_native_test',
+					'is_live'      => true,
+					'capabilities' => array(
+						'card_payments'   => 'active',
+						'klarna_payments' => 'active',
+					),
+					'fees'         => array(
+						'card'   => array(),
+						'klarna' => array(),
+					),
+				),
+				'fetched' => time(),
+				'errored' => false,
+			)
+		);
+		$this->pm_promotions_service->visible_promotions = array(
+			array(
+				'id'             => 'klarna-promo__spotlight',
+				'promo_id'       => 'klarna-promo',
+				'payment_method' => 'klarna',
+				'type'           => 'spotlight',
+				'title'          => 'Activate Klarna',
+				'description'    => 'Offer flexible payments.',
+				'cta_label'      => 'Enable Klarna',
+				'tc_url'         => 'https://example.com/terms',
+				'tc_label'       => 'See terms',
+			),
+		);
+
+		$result = $this->sut->update_settings(
+			array(
+				'enabled_payment_method_ids' => array( 'card', 'klarna' ),
+			)
+		);
+		$stored = get_option( 'woocommerce_woocommerce_payments_settings' );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( array( 'klarna' ), $this->pm_promotions_service->maybe_activated_payment_methods );
+		$this->assertSame(
+			array( 'card' ),
+			$this->pm_promotions_service->enabled_payment_methods_at_activation['klarna'],
+			'Promotion activation must run while the PM is still visible, before settings persist it as enabled.'
+		);
+		$this->assertIsArray( $stored );
+		$this->assertSame( array( 'card', 'klarna' ), $stored['upe_enabled_payment_method_ids'] );
 	}
 
 	/**

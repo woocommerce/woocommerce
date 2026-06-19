@@ -22,6 +22,10 @@ jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
 
+jest.mock( '../../promotions/spotlight', () => ( {
+	SpotlightPromotion: () => <div>Spotlight promotion</div>,
+} ) );
+
 jest.mock( '../money-movement/data', () => ( {
 	getWooPaymentsDisputes: jest.fn(),
 	getWooPaymentsCharge: jest.fn(),
@@ -72,6 +76,8 @@ describe( 'WooPayments money movement pages', () => {
 		} );
 
 		render( <WooPaymentsTransactionsPage /> );
+
+		expect( screen.getByText( 'Spotlight promotion' ) ).toBeInTheDocument();
 
 		expect(
 			await screen.findByRole( 'link', {
@@ -148,6 +154,8 @@ describe( 'WooPayments money movement pages', () => {
 		} );
 
 		render( <WooPaymentsDisputesPage /> );
+
+		expect( screen.getByText( 'Spotlight promotion' ) ).toBeInTheDocument();
 
 		const challengeLink = await screen.findByRole( 'link', {
 			name: 'Challenge Fraudulent dispute dp_test',

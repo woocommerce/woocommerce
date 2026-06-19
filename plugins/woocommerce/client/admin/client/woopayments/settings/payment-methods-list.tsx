@@ -5,11 +5,13 @@ import {
 	Button,
 	CheckboxControl,
 	ExternalLink,
+	Icon,
 	Modal,
 	Notice,
 } from '@wordpress/components';
-import { useRef, useState } from '@wordpress/element';
+import { RawHTML, useEffect, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { info as infoIcon } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -19,6 +21,7 @@ import {
 	getPaymentMethodDefinition,
 	WooPaymentsPaymentMethodDefinition,
 } from './payment-method-definitions';
+import type { PmPromotion } from '../promotions/types';
 
 type PaymentMethodStatus = {
 	status?: string;
@@ -50,6 +53,7 @@ type PaymentMethodsListProps = {
 	enabledMethodIds: string[];
 	statuses: Record< string, PaymentMethodStatus | undefined >;
 	accountFees?: Record< string, FeeStructure | undefined >;
+	pmPromotions?: PmPromotion[];
 	duplicatedPaymentMethodIds?: DuplicatePaymentMethodNotices;
 	dismissedDuplicatePaymentMethodNotices?: DuplicatePaymentMethodNotices;
 	isManualCaptureEnabled: boolean;
@@ -560,6 +564,156 @@ const DiscountBadge = ( {
 	);
 };
 
+const PmPromotionBadge = ( {
+	promotion,
+	tooltipId,
+}: {
+	promotion?: PmPromotion;
+	tooltipId: string;
+} ) => {
+	const [ isTooltipOpen, setIsTooltipOpen ] = useState( false );
+	const triggerRef = useRef< HTMLButtonElement >( null );
+	const wrapperRef = useRef< HTMLDivElement >( null );
+	const shouldSuppressNextFocusOpenRef = useRef( false );
+
+	const restoreFocusToTrigger = () => {
+		shouldSuppressNextFocusOpenRef.current = true;
+		triggerRef.current?.focus();
+
+		const ownerWindow = triggerRef.current?.ownerDocument.defaultView;
+		ownerWindow?.setTimeout( () => {
+			shouldSuppressNextFocusOpenRef.current = false;
+		}, 0 );
+	};
+
+	const handleTriggerFocus = () => {
+		if ( shouldSuppressNextFocusOpenRef.current ) {
+			return;
+		}
+
+		setIsTooltipOpen( true );
+	};
+
+	useEffect( () => {
+		if ( ! isTooltipOpen || ! wrapperRef.current ) {
+			return;
+		}
+
+		const wrapper = wrapperRef.current;
+		const ownerDocument = wrapper.ownerDocument;
+		const handleKeyDown = ( event: KeyboardEvent ) => {
+			if (
+				event.key === 'Escape' &&
+				ownerDocument.activeElement &&
+				wrapper.contains( ownerDocument.activeElement )
+			) {
+				event.stopPropagation();
+				setIsTooltipOpen( false );
+				restoreFocusToTrigger();
+			}
+		};
+		const handleFocusIn = ( event: FocusEvent ) => {
+			if (
+				event.target instanceof Node &&
+				! wrapper.contains( event.target )
+			) {
+				setIsTooltipOpen( false );
+			}
+		};
+
+		ownerDocument.addEventListener( 'keydown', handleKeyDown, true );
+		ownerDocument.addEventListener( 'focusin', handleFocusIn );
+
+		return () => {
+			ownerDocument.removeEventListener( 'keydown', handleKeyDown, true );
+			ownerDocument.removeEventListener( 'focusin', handleFocusIn );
+		};
+	}, [ isTooltipOpen ] );
+	const handleEscape = ( event: React.KeyboardEvent< HTMLElement > ) => {
+		if ( event.key !== 'Escape' ) {
+			return;
+		}
+
+		event.stopPropagation();
+		setIsTooltipOpen( false );
+		restoreFocusToTrigger();
+	};
+
+	if ( ! promotion ) {
+		return null;
+	}
+
+	const badgeType = promotion.badge_type || 'success';
+	const hasTooltip = Boolean( promotion.description || promotion.tc_url );
+	const label = sprintf(
+		/* translators: %s: Promotion title. */
+		__( '%s promotion details', 'woocommerce' ),
+		promotion.title
+	);
+	const labelId = `${ tooltipId }-label`;
+
+	if ( ! hasTooltip ) {
+		return (
+			<span
+				className={ `woopayments-settings-payment-method-item__promotion-badge is-${ badgeType }` }
+			>
+				{ promotion.title }
+			</span>
+		);
+	}
+
+	return (
+		<div
+			ref={ wrapperRef }
+			className="woopayments-settings-payment-method-item__promotion-wrapper"
+		>
+			<button
+				ref={ triggerRef }
+				type="button"
+				className={ `woopayments-settings-payment-method-item__promotion-badge is-${ badgeType }` }
+				aria-label={ label }
+				aria-haspopup="dialog"
+				aria-expanded={ isTooltipOpen }
+				aria-controls={ tooltipId }
+				onClick={ () => setIsTooltipOpen( true ) }
+				onFocus={ handleTriggerFocus }
+				onKeyDown={ handleEscape }
+			>
+				{ promotion.title }
+				<Icon
+					className="woopayments-settings-payment-method-item__promotion-icon"
+					icon={ infoIcon }
+					size={ 14 }
+				/>
+			</button>
+			{ isTooltipOpen && (
+				<div
+					id={ tooltipId }
+					role="dialog"
+					aria-labelledby={ labelId }
+					className="woopayments-settings-payment-method-item__promotion-tooltip"
+				>
+					<span id={ labelId } className="screen-reader-text">
+						{ label }
+					</span>
+					{ promotion.description && (
+						<RawHTML>{ promotion.description }</RawHTML>
+					) }
+					{ promotion.tc_url && (
+						<ExternalLink
+							href={ promotion.tc_url }
+							onKeyDown={ handleEscape }
+						>
+							{ promotion.tc_label ||
+								__( 'See terms', 'woocommerce' ) }
+						</ExternalLink>
+					) }
+				</div>
+			) }
+		</div>
+	);
+};
+
 const DuplicatePaymentMethodNotice = ( {
 	paymentMethodId,
 	gatewayIds,
@@ -786,6 +940,7 @@ const PaymentMethodRow = ( {
 	enabledMethodIds,
 	statuses,
 	accountFees,
+	pmPromotions,
 	duplicatedPaymentMethodIds,
 	dismissedDuplicatePaymentMethodNotices,
 	isManualCaptureEnabled,
@@ -797,6 +952,7 @@ const PaymentMethodRow = ( {
 	enabledMethodIds: string[];
 	statuses: Record< string, PaymentMethodStatus | undefined >;
 	accountFees?: Record< string, FeeStructure | undefined >;
+	pmPromotions?: PmPromotion[];
 	duplicatedPaymentMethodIds?: DuplicatePaymentMethodNotices;
 	dismissedDuplicatePaymentMethodNotices?: DuplicatePaymentMethodNotices;
 	isManualCaptureEnabled: boolean;
@@ -829,6 +985,17 @@ const PaymentMethodRow = ( {
 	const duplicateGatewayIds =
 		duplicatedPaymentMethodIds?.[ definition.id ] || [];
 	const discountDescriptionId = `woopayments-settings-payment-method-${ definition.id }-discount-description`;
+	const promotionTooltipId = `woopayments-settings-payment-method-${ definition.id }-promotion-description`;
+	const discountBadgeText = getDiscountBadgeText(
+		feeStructure?.discount?.[ 0 ]
+	);
+	const badgePromotion = discountBadgeText
+		? undefined
+		: pmPromotions?.find(
+				( promotion ) =>
+					promotion.payment_method === definition.id &&
+					promotion.type === 'badge'
+		  );
 	const restoreFocusToRow = () => {
 		const checkbox = rowRef.current?.querySelector< HTMLInputElement >(
 			'input[type="checkbox"]:not(:disabled)'
@@ -895,17 +1062,23 @@ const PaymentMethodRow = ( {
 								{ availability.chip }
 							</span>
 						) }
-						<FeeDetails
-							feeStructure={ feeStructure }
-							tooltipId={ feeTooltipId }
-						/>
 						<DiscountBadge
 							feeStructure={ feeStructure }
 							descriptionId={ discountDescriptionId }
 						/>
+						<PmPromotionBadge
+							promotion={ badgePromotion }
+							tooltipId={ promotionTooltipId }
+						/>
 					</div>
 					<p id={ descriptionId }>{ definition.description }</p>
 					{ definition.id === 'card' && <CardBrandLogos /> }
+				</div>
+				<div className="woopayments-settings-payment-method-item__actions">
+					<FeeDetails
+						feeStructure={ feeStructure }
+						tooltipId={ feeTooltipId }
+					/>
 				</div>
 			</div>
 			{ duplicateGatewayIds.length > 0 && ! availability.notice && (
@@ -948,6 +1121,7 @@ export const WooPaymentsPaymentMethodsList = ( {
 	enabledMethodIds,
 	statuses,
 	accountFees,
+	pmPromotions,
 	duplicatedPaymentMethodIds,
 	dismissedDuplicatePaymentMethodNotices,
 	isManualCaptureEnabled,
@@ -994,6 +1168,7 @@ export const WooPaymentsPaymentMethodsList = ( {
 					enabledMethodIds={ enabledMethodIds }
 					statuses={ statuses }
 					accountFees={ accountFees }
+					pmPromotions={ pmPromotions }
 					duplicatedPaymentMethodIds={ duplicatedPaymentMethodIds }
 					dismissedDuplicatePaymentMethodNotices={
 						dismissedDuplicatePaymentMethodNotices

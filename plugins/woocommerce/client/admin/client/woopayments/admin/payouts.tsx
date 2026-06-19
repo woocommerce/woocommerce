@@ -15,6 +15,7 @@ import {
 	formatWooPaymentsAmount,
 } from './overview/utils';
 import { getSettingsPaymentsProviderRouteUrl } from './utils';
+import { SpotlightPromotion } from '../promotions/spotlight';
 import './style.scss';
 
 const getErrorMessage = ( error: unknown ) => {
@@ -91,6 +92,7 @@ export const WooPaymentsPayouts = () => {
 
 	return (
 		<div className="woocommerce-woopayments-payouts">
+			<SpotlightPromotion />
 			<section
 				className="woocommerce-woopayments-overview-card"
 				aria-busy={ isLoading }

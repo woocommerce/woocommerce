@@ -20,6 +20,7 @@ import {
 } from './utils';
 import { EmptyState, LiveStatusMessage, StatusMessage } from './table';
 import { getSettingsPaymentsProviderRouteUrl } from '../utils';
+import { SpotlightPromotion } from '../../promotions/spotlight';
 import '../style.scss';
 
 export const WooPaymentsTransactionsPage = () => {
@@ -88,88 +89,100 @@ export const WooPaymentsTransactionsPage = () => {
 	}
 
 	return (
-		<section
-			className="woocommerce-woopayments-money-movement"
-			aria-busy={ isLoading }
-		>
-			<h2>{ __( 'Transactions', 'woocommerce' ) }</h2>
-			<LiveStatusMessage isError={ !! errorMessage }>
-				{ liveStatusMessage }
-			</LiveStatusMessage>
-			{ isLoading && (
-				<StatusMessage>
-					{ __( 'Loading transactions…', 'woocommerce' ) }
-				</StatusMessage>
-			) }
-			{ errorMessage && <StatusMessage>{ errorMessage }</StatusMessage> }
-			{ ! isLoading && ! errorMessage && transactions.length === 0 && (
-				<EmptyState>
-					{ __( 'No transactions found.', 'woocommerce' ) }
-				</EmptyState>
-			) }
-			{ !! hasTransactions && (
-				<table className="woocommerce-woopayments-money-movement__table">
-					<thead>
-						<tr>
-							<th scope="col">{ __( 'Date', 'woocommerce' ) }</th>
-							<th scope="col">{ __( 'Type', 'woocommerce' ) }</th>
-							<th scope="col">
-								{ __( 'Customer', 'woocommerce' ) }
-							</th>
-							<th scope="col">
-								{ __( 'Amount', 'woocommerce' ) }
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{ transactions.map( ( transaction ) => {
-							const id = getResourceId( transaction );
+		<div className="woocommerce-woopayments-money-movement">
+			<SpotlightPromotion />
+			<section aria-busy={ isLoading }>
+				<h2>{ __( 'Transactions', 'woocommerce' ) }</h2>
+				<LiveStatusMessage isError={ !! errorMessage }>
+					{ liveStatusMessage }
+				</LiveStatusMessage>
+				{ isLoading && (
+					<StatusMessage>
+						{ __( 'Loading transactions…', 'woocommerce' ) }
+					</StatusMessage>
+				) }
+				{ errorMessage && (
+					<StatusMessage>{ errorMessage }</StatusMessage>
+				) }
+				{ ! isLoading &&
+					! errorMessage &&
+					transactions.length === 0 && (
+						<EmptyState>
+							{ __( 'No transactions found.', 'woocommerce' ) }
+						</EmptyState>
+					) }
+				{ !! hasTransactions && (
+					<table className="woocommerce-woopayments-money-movement__table">
+						<thead>
+							<tr>
+								<th scope="col">
+									{ __( 'Date', 'woocommerce' ) }
+								</th>
+								<th scope="col">
+									{ __( 'Type', 'woocommerce' ) }
+								</th>
+								<th scope="col">
+									{ __( 'Customer', 'woocommerce' ) }
+								</th>
+								<th scope="col">
+									{ __( 'Amount', 'woocommerce' ) }
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							{ transactions.map( ( transaction ) => {
+								const id = getResourceId( transaction );
 
-							return (
-								<tr key={ id }>
-									<td>
-										{ formatDate(
-											transaction.date ||
-												transaction.created
-										) }
-									</td>
-									<td>
-										<a
-											href={ getSettingsPaymentsProviderRouteUrl(
-												getTransactionDetailsRoute(
-													transaction
-												)
+								return (
+									<tr key={ id }>
+										<td>
+											{ formatDate(
+												transaction.date ||
+													transaction.created
 											) }
-											aria-label={ sprintf(
-												/* translators: 1: transaction type, 2: transaction ID. */
-												__(
-													'View transaction details for %1$s transaction %2$s',
-													'woocommerce'
-												),
-												formatLabel( transaction.type ),
-												id
+										</td>
+										<td>
+											<a
+												href={ getSettingsPaymentsProviderRouteUrl(
+													getTransactionDetailsRoute(
+														transaction
+													)
+												) }
+												aria-label={ sprintf(
+													/* translators: 1: transaction type, 2: transaction ID. */
+													__(
+														'View transaction details for %1$s transaction %2$s',
+														'woocommerce'
+													),
+													formatLabel(
+														transaction.type
+													),
+													id
+												) }
+											>
+												{ formatLabel(
+													transaction.type
+												) }
+											</a>
+										</td>
+										<td>
+											{ transaction.customer_name ||
+												transaction.customer_email ||
+												'-' }
+										</td>
+										<td>
+											{ formatAmount(
+												transaction.amount,
+												transaction.currency
 											) }
-										>
-											{ formatLabel( transaction.type ) }
-										</a>
-									</td>
-									<td>
-										{ transaction.customer_name ||
-											transaction.customer_email ||
-											'-' }
-									</td>
-									<td>
-										{ formatAmount(
-											transaction.amount,
-											transaction.currency
-										) }
-									</td>
-								</tr>
-							);
-						} ) }
-					</tbody>
-				</table>
-			) }
-		</section>
+										</td>
+									</tr>
+								);
+							} ) }
+						</tbody>
+					</table>
+				) }
+			</section>
+		</div>
 	);
 };

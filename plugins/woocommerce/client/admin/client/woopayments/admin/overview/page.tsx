@@ -16,6 +16,7 @@ import { AccountBalancesCard } from './components/account-balances-card';
 import { PayoutsOverviewCard } from './components/payouts-overview-card';
 import type { WooPaymentsDeposit, WooPaymentsDepositsOverview } from './types';
 import { getDefaultCurrency } from './utils';
+import { SpotlightPromotion } from '../../promotions/spotlight';
 
 const getErrorMessage = ( error: unknown ) => {
 	if ( error instanceof Error && error.message ) {
@@ -108,6 +109,7 @@ export const WooPaymentsOverviewPage = () => {
 	return (
 		<div className="woocommerce-woopayments-overview__content">
 			<WooPaymentsAccountSettings />
+			<SpotlightPromotion />
 			<div className="woocommerce-woopayments-overview__cards">
 				<AccountBalancesCard
 					isLoading={ isLoading }

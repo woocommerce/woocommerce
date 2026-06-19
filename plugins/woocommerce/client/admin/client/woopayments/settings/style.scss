@@ -208,9 +208,9 @@
 
 	&__main {
 		display: grid;
-		grid-template-columns: 32px 72px minmax(0, 1fr);
+		grid-template-columns: 32px 72px minmax(0, 1fr) auto;
 		gap: 16px;
-		align-items: flex-start;
+		align-items: center;
 
 		@include breakpoint("<782px") {
 			grid-template-columns: 32px minmax(0, 1fr);
@@ -278,6 +278,21 @@
 		}
 	}
 
+	&__actions {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		min-width: max-content;
+		margin-left: 16px;
+
+		@include breakpoint("<782px") {
+			grid-column: 2;
+			justify-content: flex-start;
+			margin-top: 8px;
+			margin-left: 0;
+		}
+	}
+
 	&__heading {
 		display: flex;
 		align-items: center;
@@ -304,8 +319,14 @@
 		display: inline-flex;
 	}
 
+	&__promotion-wrapper {
+		position: relative;
+		display: inline-flex;
+	}
+
 	&__fee-pill,
-	&__discount-badge {
+	&__discount-badge,
+	&__promotion-badge {
 		display: inline-flex;
 		align-items: center;
 		min-height: 20px;
@@ -315,13 +336,63 @@
 		line-height: 18px;
 	}
 
-	&__fee-pill {
+	&__fee-pill,
+	&__promotion-badge {
 		border: 1px solid $gray-300;
 		appearance: none;
 		background: $white;
 		color: $gray-900;
 		cursor: help;
 		font-family: inherit;
+	}
+
+	&__promotion-badge {
+		gap: 4px;
+		font-weight: 500;
+
+		&:not(button) {
+			cursor: default;
+		}
+
+		&.is-success {
+			border-color: #b8e6cd;
+			background: #e8f7f0;
+			color: #005c3a;
+		}
+
+		&.is-primary {
+			border-color: #d0e4ff;
+			background: #edf6ff;
+			color: #0a4b78;
+		}
+
+		&.is-light {
+			border-color: $gray-200;
+			background: $gray-100;
+			color: $gray-900;
+		}
+
+		&.is-warning {
+			border-color: #f0d96a;
+			background: #fcf9e8;
+			color: $gray-900;
+		}
+
+		&.is-alert {
+			border-color: #f0b7bf;
+			background: #f7ebec;
+			color: $alert-red;
+		}
+	}
+
+	&__fee-pill {
+		border-radius: 999px;
+		white-space: nowrap;
+	}
+
+	&__promotion-icon {
+		fill: currentColor;
+		flex: 0 0 auto;
 	}
 
 	&__discount-badge {
@@ -362,8 +433,46 @@
 		}
 	}
 
+	&__promotion-tooltip {
+		position: absolute;
+		z-index: 20;
+		left: 0;
+		top: calc(100% + 6px);
+		display: grid;
+		gap: 8px;
+		min-width: 240px;
+		max-width: 320px;
+		padding: 12px;
+		border-radius: 2px;
+		background: $gray-900;
+		color: $white;
+		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+		font-size: 12px;
+		line-height: 18px;
+		opacity: 0;
+		pointer-events: auto;
+		transform: translateY(-4px);
+		transition: opacity 120ms ease, transform 120ms ease;
+
+		a {
+			color: $white;
+			text-decoration: underline;
+		}
+
+		p {
+			margin: 0;
+			color: $white;
+		}
+	}
+
 	&__fee-wrapper:hover &__fees-tooltip,
 	&__fee-wrapper:focus-within &__fees-tooltip {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	&__promotion-wrapper:hover &__promotion-tooltip,
+	&__promotion-wrapper:focus-within &__promotion-tooltip {
 		opacity: 1;
 		transform: translateY(0);
 	}

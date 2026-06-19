@@ -399,6 +399,39 @@ class WooPaymentsApiClient {
 	}
 
 	/**
+	 * Retrieve visible WooPayments payment method promotions for the current store context.
+	 *
+	 * @param array<string,mixed> $store_context Store context parameters.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	public function get_pm_promotions( array $store_context ): array {
+		$request = WooPaymentsGetPmPromotionsRequest::from_store_context( $store_context );
+
+		return $this->request_with_legacy_request_filter(
+			$request,
+			'wcpay_get_pm_promotions_request'
+		);
+	}
+
+	/**
+	 * Activate a WooPayments payment method promotion.
+	 *
+	 * @param string $promotion_id Promotion ID.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the promotion ID or request is invalid.
+	 */
+	public function activate_pm_promotion( string $promotion_id ): array {
+		$this->validate_pm_promotion_id( $promotion_id );
+		$request = WooPaymentsActivatePmPromotionRequest::from_id( $promotion_id );
+
+		return $this->request_with_legacy_request_filter(
+			$request,
+			'wcpay_activate_pm_promotion_request'
+		);
+	}
+
+	/**
 	 * Retrieve the WooPayments timeline for an intent or order identifier.
 	 *
 	 * @param string $id Payment intent ID or order ID.
@@ -1481,6 +1514,19 @@ class WooPaymentsApiClient {
 	}
 
 	/**
+	 * Validate a payment method promotion ID before path interpolation.
+	 *
+	 * @param string $id Promotion ID.
+	 * @throws WooPaymentsApiException When the route parameter is invalid.
+	 */
+	private function validate_pm_promotion_id( string $id ): void {
+		if ( '' === $id || ! preg_match( '/^[A-Za-z0-9_-]+$/', $id ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message is internal application state, not HTML output.
+			throw new WooPaymentsApiException( __( 'Route param validation failed.', 'woocommerce' ), 'wcpay_route_validation_failure', 400 );
+		}
+	}
+
+	/**
 	 * Send a request through the provider transport.
 	 *
 	 * @param array<int|string,mixed> $params        Request params.
@@ -1640,6 +1686,26 @@ class WooPaymentsApiClient {
 
 		$request = WooPaymentsApiRequest::create( $params, $api, $method );
 
+		return $this->request_with_legacy_request_filter( $request, $hook );
+	}
+
+	/**
+	 * Send a concrete request after applying a legacy WooPayments request-object filter.
+	 *
+	 * @param WooPaymentsPaginatedListRequest $request Native request compatibility object.
+	 * @param string                          $hook    Legacy WooPayments request filter hook.
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the request fails.
+	 */
+	private function request_with_legacy_request_filter( WooPaymentsPaginatedListRequest $request, string $hook ): array {
+		if ( $request instanceof WooPaymentsGetPmPromotionsRequest ) {
+			WooPaymentsGetPmPromotionsRequest::register_legacy_aliases();
+		} elseif ( $request instanceof WooPaymentsActivatePmPromotionRequest ) {
+			WooPaymentsActivatePmPromotionRequest::register_legacy_aliases();
+		} else {
+			WooPaymentsApiRequest::register_legacy_aliases();
+		}
+
 		/**
 		 * Filters a WooPayments API request before native transport dispatch.
 		 *
@@ -1647,7 +1713,7 @@ class WooPaymentsApiClient {
 		 *
 		 * @since 11.0.0
 		 *
-		 * @param WooPaymentsApiRequest $request Native request compatibility object, aliased to legacy WooPayments request classes when the extension is absent.
+		 * @param WooPaymentsPaginatedListRequest $request Native request compatibility object, aliased to legacy WooPayments request classes when the extension is absent.
 		 */
 		$filtered_request = apply_filters( $hook, $request );
 

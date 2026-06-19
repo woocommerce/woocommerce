@@ -29,6 +29,8 @@ import { FraudProtectionSettings } from './fraud-protection';
 import { WooPaymentsPaymentMethodsList } from './payment-methods-list';
 import { PayoutBankAccount } from './payout-bank-account';
 import { SettingsBusyState } from './settings-busy-state';
+import type { PmPromotion } from '../promotions/types';
+import { SpotlightPromotion } from '../promotions/spotlight';
 import {
 	useAccountBusinessSupportEmail,
 	useAccountBusinessSupportPhone,
@@ -206,6 +208,18 @@ const asDuplicatePaymentMethodNotices = (
 	value && typeof value === 'object'
 		? ( value as DuplicatePaymentMethodNotices )
 		: {};
+const asPmPromotions = ( value: unknown ): PmPromotion[] =>
+	Array.isArray( value )
+		? value.filter(
+				( promotion ): promotion is PmPromotion =>
+					Boolean( promotion ) &&
+					typeof promotion === 'object' &&
+					'id' in promotion &&
+					'payment_method' in promotion &&
+					'type' in promotion &&
+					'title' in promotion
+		  )
+		: [];
 
 const isCustomizableExpressCheckoutMethod = (
 	methodId: ExpressCheckoutOverviewMethod
@@ -390,6 +404,7 @@ const PaymentMethodsSettingsSection = () => {
 	const duplicatedPaymentMethodIds = asDuplicatePaymentMethodNotices(
 		useGetDuplicatedPaymentMethodIds()
 	);
+	const pmPromotions = asPmPromotions( settings.pm_promotions );
 	const [
 		dismissedDuplicatePaymentMethodNotices,
 		setDismissedDuplicatePaymentMethodNotices,
@@ -458,6 +473,7 @@ const PaymentMethodsSettingsSection = () => {
 						>
 					}
 					accountFees={ accountFees }
+					pmPromotions={ pmPromotions }
 					duplicatedPaymentMethodIds={ duplicatedPaymentMethodIds }
 					dismissedDuplicatePaymentMethodNotices={
 						dismissedDuplicatePaymentMethodNotices
@@ -483,6 +499,7 @@ const BuyNowPayLaterSettingsSection = () => {
 	const duplicatedPaymentMethodIds = asDuplicatePaymentMethodNotices(
 		useGetDuplicatedPaymentMethodIds()
 	);
+	const pmPromotions = asPmPromotions( settings.pm_promotions );
 	const [
 		dismissedDuplicatePaymentMethodNotices,
 		setDismissedDuplicatePaymentMethodNotices,
@@ -539,6 +556,7 @@ const BuyNowPayLaterSettingsSection = () => {
 						>
 					}
 					accountFees={ accountFees }
+					pmPromotions={ pmPromotions }
 					duplicatedPaymentMethodIds={ duplicatedPaymentMethodIds }
 					dismissedDuplicatePaymentMethodNotices={
 						dismissedDuplicatePaymentMethodNotices
@@ -1238,6 +1256,7 @@ export const WooPaymentsSettingsPage = () => {
 				</p>
 			) : (
 				<SettingsBusyState isBusy={ isSaving }>
+					<SpotlightPromotion />
 					<GeneralSettingsSection />
 					<PaymentMethodsSettingsSection />
 					<BuyNowPayLaterSettingsSection />

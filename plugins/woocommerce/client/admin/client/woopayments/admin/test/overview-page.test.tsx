@@ -16,6 +16,10 @@ jest.mock( '~/woopayments/settings/account-settings', () => ( {
 	WooPaymentsAccountSettings: () => <div>WooPayments account settings</div>,
 } ) );
 
+jest.mock( '../../promotions/spotlight', () => ( {
+	SpotlightPromotion: () => <div>Spotlight promotion</div>,
+} ) );
+
 jest.mock( '../overview/data', () => ( {
 	getWooPaymentsDepositsOverview: jest.fn(),
 	getWooPaymentsRecentDeposits: jest.fn(),
@@ -58,6 +62,8 @@ describe( 'WooPaymentsOverviewPage', () => {
 		} );
 
 		render( <WooPaymentsOverviewPage /> );
+
+		expect( screen.getByText( 'Spotlight promotion' ) ).toBeInTheDocument();
 
 		await waitFor( () => {
 			expect( mockGetRecent ).toHaveBeenCalledWith( '' );
