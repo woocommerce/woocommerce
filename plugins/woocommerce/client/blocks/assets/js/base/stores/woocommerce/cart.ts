@@ -371,9 +371,13 @@ const { actions } = store< Store >(
 					targetQuantity = 1;
 				}
 
-				// Only treat as update if the item has a key (server-confirmed item).
-				// Optimistic items don't have keys, so we should add them instead.
-				const isUpdate = !! existingItem?.key;
+				// Endpoint selection is a pure function of the caller-supplied
+				// `key`, never of a line matched by id/variation. A keyless add
+				// always issues `add-item` with a delta, even when an existing
+				// line (including a server-keyed one) matches by product id, so
+				// the server owns cart-line identity for adds. Only an explicit
+				// caller `key` targets a specific line via `update-item`.
+				const isUpdate = !! key;
 				const endpoint = isUpdate ? 'update-item' : 'add-item';
 
 				// Track what changes we're making for notice comparison.
@@ -388,12 +392,16 @@ const { actions } = store< Store >(
 				// Prepare the item to send.
 				let itemToSend: OptimisticCartItem;
 				if ( isUpdate && existingItem ) {
-					// Server-confirmed item: include the key for update-item endpoint.
+					// Caller-keyed update: target the exact line by key and send
+					// the absolute target quantity to the update-item endpoint.
 					itemToSend = { ...existingItem, quantity: targetQuantity };
 				} else {
-					// New item or optimistic item: build fresh for add-item endpoint.
-					// For optimistic items (existingItem without key), calculate delta
-					// since add-item adds to existing quantity, not sets it.
+					// Keyless add: build a fresh payload for the add-item
+					// endpoint and never copy the matched line's key. add-item
+					// adds to the existing quantity rather than setting it, so
+					// when a line matches (by id/variation, possibly carrying a
+					// server key) we post the delta against its quantity; with
+					// no match we post the full target quantity.
 					const quantityToSend = existingItem
 						? targetQuantity - existingItem.quantity
 						: targetQuantity;
