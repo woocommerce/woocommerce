@@ -76,3 +76,15 @@ export const getWooPaymentsDeposit = async (
 		path: `${ DEPOSITS_PATH }/${ encodeURIComponent( depositId ) }`,
 		method: 'GET',
 	} );
+
+export const submitWooPaymentsInstantDeposit = async (
+	currency: string
+): Promise< WooPaymentsDeposit > =>
+	apiFetch< WooPaymentsDeposit >( {
+		path: DEPOSITS_PATH,
+		method: 'POST',
+		data: {
+			type: 'instant',
+			currency,
+		},
+	} );

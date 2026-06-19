@@ -1241,6 +1241,13 @@ describe( 'WooPaymentsSettingsPage', () => {
 			} )
 		).toBeInTheDocument();
 		expect(
+			within( section )
+				.getByRole( 'heading', {
+					name: 'Payout schedule',
+				} )
+				.closest( '.woopayments-settings-field-group' )
+		).toHaveAttribute( 'id', 'payout-schedule' );
+		expect(
 			within( section ).getByRole( 'heading', {
 				name: 'Payout bank account',
 			} )

@@ -170,7 +170,7 @@ describe( 'PayoutsOverviewCard', () => {
 		);
 
 		expect(
-			screen.getByText( /payouts are temporarily suspended/i )
+			screen.getByText( /Your payouts are temporarily suspended/i )
 		).toBeInTheDocument();
 		expect(
 			screen.queryByRole( 'link', { name: /change payout schedule/i } )
@@ -201,7 +201,7 @@ describe( 'PayoutsOverviewCard', () => {
 		);
 
 		expect(
-			screen.getByText( /payouts are temporarily suspended/i )
+			screen.getByText( /Your payouts are temporarily suspended/i )
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole( 'link', {
@@ -227,7 +227,9 @@ describe( 'PayoutsOverviewCard', () => {
 		);
 
 		expect(
-			screen.getByText( /below the minimum payout amount of \$5.00/i )
+			screen.getByText(
+				/Payouts are paused while your available funds balance remains below \$5.00/i
+			)
 		).toBeInTheDocument();
 
 		rerender(
@@ -246,7 +248,7 @@ describe( 'PayoutsOverviewCard', () => {
 		);
 
 		expect(
-			screen.getByText( /balance remains negative/i )
+			screen.getByText( /WooPayments balance remains negative/i )
 		).toBeInTheDocument();
 	} );
 
@@ -272,7 +274,9 @@ describe( 'PayoutsOverviewCard', () => {
 		);
 
 		expect(
-			screen.getByText( /a recent payout failed/i )
+			screen.getByText(
+				/Payouts are currently paused because a recent payout failed/i
+			)
 		).toBeInTheDocument();
 
 		const updateLink = screen.getByRole( 'link', {
@@ -305,7 +309,9 @@ describe( 'PayoutsOverviewCard', () => {
 		);
 
 		expect(
-			screen.getByText( 'Payouts are scheduled weekly on Monday.' )
+			screen.getByText(
+				'Available funds are automatically dispatched every Monday.'
+			)
 		).toBeInTheDocument();
 		expect( screen.getAllByText( '$10.00' ).length ).toBeGreaterThan( 0 );
 		expect( screen.getByRole( 'alert' ) ).toHaveTextContent(
@@ -383,6 +389,17 @@ describe( 'PayoutsOverviewCard', () => {
 		expect( screen.getByText( 'Status' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'Amount' ) ).toBeInTheDocument();
 		expect( screen.getAllByText( '$10.00' ).length ).toBeGreaterThan( 0 );
+		expect( screen.getByText( 'Paid' ) ).toHaveClass(
+			'woocommerce-woopayments-overview__status-chip',
+			'woocommerce-woopayments-overview__status-chip--paid'
+		);
+
+		expect(
+			screen.getByRole( 'link', { name: 'View payout po_test details' } )
+		).toHaveAttribute(
+			'href',
+			'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=%2Fwoopayments%2Fpayouts%2Fdetails&id=po_test'
+		);
 
 		const historyLink = screen.getByRole( 'link', {
 			name: 'View full payout history',
@@ -396,6 +413,166 @@ describe( 'PayoutsOverviewCard', () => {
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'wcpay_overview_deposits_view_history_click'
+		);
+	} );
+
+	it( 'uses reference payout schedule copy for daily and weekly payouts', () => {
+		const { rerender } = render(
+			<PayoutsOverviewCard
+				isLoading={ false }
+				errorMessage={ null }
+				overview={ createOverview( {
+					account: {
+						...createOverview().account,
+						deposits_schedule: {
+							interval: 'daily',
+						},
+					},
+				} ) }
+				recentPayouts={ [] }
+			/>
+		);
+
+		expect(
+			screen.getByText(
+				'Available funds are automatically dispatched every day.'
+			)
+		).toBeInTheDocument();
+
+		rerender(
+			<PayoutsOverviewCard
+				isLoading={ false }
+				errorMessage={ null }
+				overview={ createOverview() }
+				recentPayouts={ [] }
+			/>
+		);
+
+		expect(
+			screen.getByText(
+				'Available funds are automatically dispatched every Monday.'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'uses reference payout schedule copy for monthly and month-end payouts', () => {
+		const { rerender } = render(
+			<PayoutsOverviewCard
+				isLoading={ false }
+				errorMessage={ null }
+				overview={ createOverview( {
+					account: {
+						...createOverview().account,
+						deposits_schedule: {
+							interval: 'monthly',
+							monthly_anchor: 15,
+						},
+					},
+				} ) }
+				recentPayouts={ [] }
+			/>
+		);
+
+		expect(
+			screen.getByText(
+				'Available funds are automatically dispatched on the 15th of every month.'
+			)
+		).toBeInTheDocument();
+
+		rerender(
+			<PayoutsOverviewCard
+				isLoading={ false }
+				errorMessage={ null }
+				overview={ createOverview( {
+					account: {
+						...createOverview().account,
+						deposits_schedule: {
+							interval: 'monthly',
+							monthly_anchor: 31,
+						},
+					},
+				} ) }
+				recentPayouts={ [] }
+			/>
+		);
+
+		expect(
+			screen.getByText(
+				'Available funds are automatically dispatched on the last day of every month.'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'keeps payout schedule help copy visible', () => {
+		render(
+			<PayoutsOverviewCard
+				isLoading={ false }
+				errorMessage={ null }
+				overview={ createOverview() }
+				recentPayouts={ [] }
+			/>
+		);
+
+		expect(
+			screen.getByText(
+				/The timing and amount of your payouts may vary due to several factors\./
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'link', { name: /payout schedule guide/ } )
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/document/woopayments/payouts/payout-schedule/'
+		);
+	} );
+
+	it( 'shows the reference no-funds notice when funds are still pending', () => {
+		render(
+			<PayoutsOverviewCard
+				isLoading={ false }
+				errorMessage={ null }
+				overview={ createOverview( {
+					balance: {
+						available: [ { amount: 0, currency: 'usd' } ],
+						pending: [ { amount: 1500, currency: 'usd' } ],
+						instant: [],
+					},
+				} ) }
+				recentPayouts={ [] }
+			/>
+		);
+
+		expect(
+			screen.getByText( /You have no funds available/i )
+		).toBeInTheDocument();
+		expect( screen.getByRole( 'link', { name: /Why\?/ } ) ).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/document/woopayments/payouts/payout-schedule/#pending-funds'
+		);
+	} );
+
+	it( 'renders change payout schedule when the schedule can be changed', () => {
+		render(
+			<PayoutsOverviewCard
+				isLoading={ false }
+				errorMessage={ null }
+				overview={ createOverview() }
+				recentPayouts={ [ createDeposit() ] }
+			/>
+		);
+
+		const scheduleLink = screen.getByRole( 'link', {
+			name: 'Change payout schedule',
+		} );
+		expect( scheduleLink ).toHaveAttribute(
+			'href',
+			'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=%2Fwoopayments%2Fsettings#payout-schedule'
+		);
+
+		fireEvent.click( scheduleLink );
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'wcpay_overview_deposits_change_schedule_click'
 		);
 	} );
 } );

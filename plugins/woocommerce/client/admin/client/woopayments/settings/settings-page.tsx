@@ -250,13 +250,15 @@ const SettingsSection = ( {
 );
 
 const FieldGroup = ( {
+	id,
 	title,
 	children,
 }: {
+	id?: string;
 	title: string;
 	children: React.ReactNode;
 } ) => (
-	<div className="woopayments-settings-field-group">
+	<div className="woopayments-settings-field-group" id={ id }>
 		<h3>{ title }</h3>
 		{ children }
 	</div>
@@ -941,7 +943,10 @@ const PayoutsSettingsSection = () => {
 				</p>
 			}
 		>
-			<FieldGroup title={ __( 'Payout schedule', 'woocommerce' ) }>
+			<FieldGroup
+				id="payout-schedule"
+				title={ __( 'Payout schedule', 'woocommerce' ) }
+			>
 				{ isScheduleRestricted && (
 					<Notice status="warning" isDismissible={ false }>
 						<p>

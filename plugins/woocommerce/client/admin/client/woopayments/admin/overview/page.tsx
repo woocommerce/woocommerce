@@ -11,11 +11,12 @@ import { WooPaymentsAccountSettings } from '~/woopayments/settings/account-setti
 import {
 	getWooPaymentsDepositsOverview,
 	getWooPaymentsRecentDeposits,
+	submitWooPaymentsInstantDeposit,
 } from './data';
 import { AccountBalancesCard } from './components/account-balances-card';
 import { PayoutsOverviewCard } from './components/payouts-overview-card';
 import type { WooPaymentsDeposit, WooPaymentsDepositsOverview } from './types';
-import { getDefaultCurrency } from './utils';
+import { getSelectedBalanceCurrency } from './utils';
 import { SpotlightPromotion } from '../../promotions/spotlight';
 
 const getErrorMessage = ( error: unknown ) => {
@@ -41,7 +42,11 @@ export const WooPaymentsOverviewPage = () => {
 	const [ recentPayouts, setRecentPayouts ] = useState<
 		WooPaymentsDeposit[]
 	>( [] );
+	const [ selectedCurrency, setSelectedCurrency ] = useState< string | null >(
+		null
+	);
 	const [ isLoading, setIsLoading ] = useState( true );
+	const [ isPayoutsLoading, setIsPayoutsLoading ] = useState( false );
 	const [ overviewErrorMessage, setOverviewErrorMessage ] = useState<
 		string | null
 	>( null );
@@ -49,33 +54,36 @@ export const WooPaymentsOverviewPage = () => {
 		string | null
 	>( null );
 
+	const reloadOverviewAndPayouts = async ( currency: string ) => {
+		const deposit = await submitWooPaymentsInstantDeposit( currency );
+		const [ nextOverview, recent ] = await Promise.all( [
+			getWooPaymentsDepositsOverview(),
+			getWooPaymentsRecentDeposits( currency ),
+		] );
+
+		setOverview( nextOverview );
+		setOverviewErrorMessage( null );
+		setSelectedCurrency(
+			getSelectedBalanceCurrency( nextOverview, currency )
+		);
+		setRecentPayouts( recent.data );
+		setPayoutsErrorMessage( null );
+
+		return deposit;
+	};
+
 	useEffect( () => {
 		let isMounted = true;
 
 		const loadOverview = async () => {
 			setIsLoading( true );
 
-			const loadRecentPayouts = async ( currency: string ) => {
-				try {
-					const recent = await getWooPaymentsRecentDeposits(
-						currency
-					);
-
-					if ( isMounted ) {
-						setRecentPayouts( recent.data );
-						setPayoutsErrorMessage( null );
-					}
-				} catch ( error ) {
-					if ( isMounted ) {
-						setRecentPayouts( [] );
-						setPayoutsErrorMessage( getErrorMessage( error ) );
-					}
-				}
-			};
-
 			try {
 				const nextOverview = await getWooPaymentsDepositsOverview();
-				const currency = getDefaultCurrency( nextOverview );
+				const currency = getSelectedBalanceCurrency(
+					nextOverview,
+					null
+				);
 
 				if ( ! isMounted ) {
 					return;
@@ -83,15 +91,13 @@ export const WooPaymentsOverviewPage = () => {
 
 				setOverview( nextOverview );
 				setOverviewErrorMessage( null );
-
-				await loadRecentPayouts( currency );
+				setSelectedCurrency( currency );
 			} catch ( error ) {
 				if ( isMounted ) {
 					setOverview( null );
 					setOverviewErrorMessage( getErrorMessage( error ) );
+					setSelectedCurrency( '' );
 				}
-
-				await loadRecentPayouts( '' );
 			} finally {
 				if ( isMounted ) {
 					setIsLoading( false );
@@ -106,6 +112,44 @@ export const WooPaymentsOverviewPage = () => {
 		};
 	}, [] );
 
+	useEffect( () => {
+		if ( selectedCurrency === null ) {
+			return;
+		}
+
+		let isMounted = true;
+
+		const loadRecentPayouts = async () => {
+			setIsPayoutsLoading( true );
+
+			try {
+				const recent = await getWooPaymentsRecentDeposits(
+					selectedCurrency
+				);
+
+				if ( isMounted ) {
+					setRecentPayouts( recent.data );
+					setPayoutsErrorMessage( null );
+				}
+			} catch ( error ) {
+				if ( isMounted ) {
+					setRecentPayouts( [] );
+					setPayoutsErrorMessage( getErrorMessage( error ) );
+				}
+			} finally {
+				if ( isMounted ) {
+					setIsPayoutsLoading( false );
+				}
+			}
+		};
+
+		loadRecentPayouts();
+
+		return () => {
+			isMounted = false;
+		};
+	}, [ selectedCurrency ] );
+
 	return (
 		<div className="woocommerce-woopayments-overview__content">
 			<WooPaymentsAccountSettings />
@@ -115,12 +159,16 @@ export const WooPaymentsOverviewPage = () => {
 					isLoading={ isLoading }
 					errorMessage={ overviewErrorMessage }
 					overview={ overview }
+					selectedCurrency={ selectedCurrency || undefined }
+					onCurrencyChange={ setSelectedCurrency }
+					onInstantPayoutSubmit={ reloadOverviewAndPayouts }
 				/>
 				<PayoutsOverviewCard
-					isLoading={ isLoading }
+					isLoading={ isLoading || isPayoutsLoading }
 					errorMessage={ payoutsErrorMessage }
 					overview={ overview }
 					recentPayouts={ recentPayouts }
+					selectedCurrency={ selectedCurrency || undefined }
 				/>
 			</div>
 		</div>
