@@ -522,6 +522,15 @@ class WebflowMapper implements PlatformMapperInterface {
 
 			if ( $this->should_process( 'attributes' ) ) {
 				$variation['attributes'] = $this->resolve_variation_attributes( $sku_field, $property_lookup );
+				if ( empty( $variation['attributes'] ) ) {
+					wc_get_logger()->debug(
+						sprintf(
+							'Webflow variation %s resolved to zero attributes; WooCommerce will store it as an "Any" variation, which can collide with sibling variations.',
+							$variation['original_id'] ?? 'unknown'
+						),
+						array( 'source' => 'wc-migrator' )
+					);
+				}
 			}
 
 			if ( $this->should_process( 'images' ) ) {
