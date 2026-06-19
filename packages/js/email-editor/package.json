@@ -83,7 +83,7 @@
 	},
 	"dependencies": {
 		"@wordpress/api-fetch": "catalog:wp-min",
-		"@wordpress/base-styles": "catalog:wp-min",
+		"@wordpress/base-styles": "catalog:wp-bundled",
 		"@wordpress/block-editor": "catalog:wp-min",
 		"@wordpress/block-library": "catalog:wp-min",
 		"@wordpress/blocks": "catalog:wp-min",

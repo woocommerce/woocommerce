@@ -75,14 +75,14 @@
 		"@wordpress/a11y": "catalog:wp-min",
 		"@wordpress/admin-ui": "catalog:wp-bundled",
 		"@wordpress/api-fetch": "catalog:wp-min",
-		"@wordpress/base-styles": "catalog:wp-min",
+		"@wordpress/base-styles": "catalog:wp-bundled",
 		"@wordpress/blob": "catalog:wp-min",
 		"@wordpress/blocks": "catalog:wp-min",
 		"@wordpress/components": "catalog:wp-min",
 		"@wordpress/compose": "catalog:wp-min",
 		"@wordpress/core-data": "catalog:wp-min",
 		"@wordpress/data-controls": "catalog:wp-min",
-		"@wordpress/dataviews": "^4.17.0",
+		"@wordpress/dataviews": "catalog:wp-bundled",
 		"@wordpress/date": "catalog:wp-min",
 		"@wordpress/dom": "catalog:wp-min",
 		"@wordpress/dom-ready": "catalog:wp-min",
@@ -93,7 +93,7 @@
 		"@wordpress/html-entities": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
 		"@wordpress/icons": "catalog:wp-bundled",
-		"@wordpress/interface": "^5.24.0",
+		"@wordpress/interface": "catalog:wp-bundled",
 		"@wordpress/keycodes": "catalog:wp-min",
 		"@wordpress/media-utils": "catalog:wp-min",
 		"@wordpress/notices": "catalog:wp-min",
@@ -220,9 +220,6 @@
 		"webpack-dev-server": "4.15.x",
 		"webpack-fix-style-only-entries": "^0.6.1",
 		"whatwg-fetch": "^3.6.20"
-	},
-	"peerDependencies": {
-		"@wordpress/data": "^10.0.2"
 	},
 	"engines": {
 		"node": "^24.15.0"

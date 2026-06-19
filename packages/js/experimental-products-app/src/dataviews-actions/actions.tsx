@@ -9,8 +9,8 @@ import {
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
-import { dispatch } from '@wordpress/data';
-import { backup, edit, trash } from '@wordpress/icons';
+import { dispatch, useDispatch } from '@wordpress/data';
+import { backup, pencil, trash } from '@wordpress/icons';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
@@ -162,7 +162,7 @@ export const quickEditAction = ( {
 			: __( 'Quick edit', 'woocommerce' ),
 	isPrimary: true,
 	supportsBulk: true,
-	icon: edit,
+	icon: pencil,
 	isEligible( product ) {
 		return product.status !== 'trash';
 	},
@@ -257,6 +257,8 @@ const duplicateProduct = async ( items: ProductEntityRecord[] ) => {
 	const failedItems = items.filter(
 		( _, index ) => promiseResult[ index ].status === 'rejected'
 	);
+
+	// @ts-expect-error `createSuccessNotice` and `createErrorNotice` are not typed correctly in the WordPress types, but they do return void, not Promise.
 	const { createSuccessNotice, createErrorNotice } = dispatch( noticesStore );
 	const notice = getNoticeFromSettledResults( {
 		results: promiseResult,
@@ -373,6 +375,7 @@ export const moveToTrashAction = (): Action< ProductEntityRecord > => ( {
 	async callback( items, { onActionPerformed } ) {
 		const { deleteEntityRecord } = dispatch( coreStore );
 		const { createErrorNotice, createSuccessNotice } =
+			// @ts-expect-error `createSuccessNotice` and `createErrorNotice` are not typed correctly in the WordPress types, but they do return void, not Promise.
 			dispatch( noticesStore );
 
 		const results = await Promise.allSettled(
@@ -437,6 +440,7 @@ export const restoreAction = (): Action< ProductEntityRecord > => ( {
 			invalidateResolutionForStoreSelector,
 		} = dispatch( coreStore );
 		const { createErrorNotice, createSuccessNotice } =
+			// @ts-expect-error `createSuccessNotice` and `createErrorNotice` are not typed correctly in the WordPress types, but they do return void, not Promise.
 			dispatch( noticesStore );
 
 		const results = await Promise.allSettled(
@@ -504,6 +508,7 @@ export const permanentlyDeleteAction = (): Action< ProductEntityRecord > => ( {
 			const { deleteEntityRecord, invalidateResolutionForStoreSelector } =
 				dispatch( coreStore );
 			const { createErrorNotice, createSuccessNotice } =
+				// @ts-expect-error `createSuccessNotice` and `createErrorNotice` are not typed correctly in the WordPress types, but they do return void, not Promise.
 				dispatch( noticesStore );
 
 			const results = await Promise.allSettled(

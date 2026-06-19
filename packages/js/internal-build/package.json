@@ -55,7 +55,7 @@
 	},
 	"dependencies": {
 		"@automattic/color-studio": "^4.0.0",
-		"@wordpress/base-styles": "catalog:wp-min",
+		"@wordpress/base-styles": "catalog:wp-bundled",
 		"@wordpress/postcss-plugins-preset": "catalog:wp-min",
 		"chokidar": "^3.6.0",
 		"css-loader": "6.11.x",

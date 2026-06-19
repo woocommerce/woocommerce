@@ -136,7 +136,7 @@
 		"@woocommerce/jest-wordpress-version-compat": "workspace:*",
 		"@wordpress/api-fetch": "catalog:wp-min",
 		"@wordpress/babel-preset-default": "next",
-		"@wordpress/base-styles": "catalog:wp-min",
+		"@wordpress/base-styles": "catalog:wp-bundled",
 		"@wordpress/block-editor": "catalog:wp-min",
 		"@wordpress/block-library": "catalog:wp-min",
 		"@wordpress/blocks": "catalog:wp-min",
@@ -286,7 +286,6 @@
 		"wordpress-components-slotfill": "npm:@wordpress/components@29.5.4"
 	},
 	"peerDependencies": {
-		"@wordpress/data": "^10.0.2",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"
 	},
