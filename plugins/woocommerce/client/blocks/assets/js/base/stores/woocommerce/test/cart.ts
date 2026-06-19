@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import type { CartItem } from '@woocommerce/types';
+import type { Cart, CartItem } from '@woocommerce/types';
+import type { Notice } from '@woocommerce/stores/store-notices';
 
 /**
  * Internal dependencies
@@ -156,6 +157,79 @@ function seedCart( items: ( CartItem | OptimisticCartItem )[] ): void {
 		totals: {},
 		errors: [],
 	} as unknown as Store[ 'state' ][ 'cart' ];
+}
+
+/**
+ * Builds a minimal successful server cart payload from the provided lines.
+ *
+ * @param items The cart lines the server should report.
+ * @return A cart object shaped like a successful Store API cart response.
+ */
+function makeServerCart( items: CartItem[] ): Cart {
+	return {
+		items,
+		totals: {},
+		errors: [],
+	} as unknown as Cart;
+}
+
+/**
+ * Installs a `global.fetch` mock whose batch responses return a caller-supplied
+ * server cart instead of echoing the post-optimistic cart.
+ *
+ * This lets a test reproduce a server response that diverges from the
+ * optimistic state — e.g. a keyless add that the server resolves as a brand new
+ * standalone line while leaving a matched keyed meta line at its pre-add
+ * quantity. Each successful batch response carries `serverCart` as its body, so
+ * it becomes the action's `result.data` used for the notice diff.
+ *
+ * @param serverCart The cart the batch endpoint should report as server state.
+ */
+function mockBatchFetchReturning( serverCart: Cart ): void {
+	global.fetch = jest.fn(
+		async ( _url: RequestInfo | URL, init?: RequestInit ) => {
+			// The GET refresh has no body; reply with an empty cart and a nonce.
+			if ( ! init?.body ) {
+				return new Response(
+					JSON.stringify( { items: [], totals: {}, errors: [] } ),
+					{ headers: { Nonce: 'test-nonce-123' } }
+				);
+			}
+			const parsed = JSON.parse( init.body as string ) as {
+				requests: CapturedRequest[];
+			};
+			const responses = parsed.requests.map( () => ( {
+				status: 200,
+				body: serverCart,
+			} ) );
+			return new Response( JSON.stringify( { responses } ), {
+				headers: { Nonce: 'test-nonce-123' },
+			} );
+		}
+	) as unknown as typeof fetch;
+}
+
+/**
+ * Replaces the registered `updateNotices` action with a spy and returns the
+ * flat list of notices it receives across all invocations.
+ *
+ * The cart actions funnel every info/error notice through
+ * `actions.updateNotices`, resolved by property access at call time on the
+ * registered actions object. The caller `yield`s the result, and {@link
+ * runAction} only `await`s each yielded value; a yielded generator object would
+ * not be driven, so the spy records synchronously at call time and returns
+ * `undefined`. The spy is installed after {@link loadCartStore}.
+ *
+ * @return The accumulating list of notices passed to `updateNotices`.
+ */
+function spyOnUpdateNotices(): Notice[] {
+	const received: Notice[] = [];
+	const actions = mockRegisteredStore?.actions as Store[ 'actions' ];
+	actions.updateNotices = jest.fn( ( notices: Notice[] = [] ) => {
+		received.push( ...notices );
+		return undefined;
+	} ) as unknown as Store[ 'actions' ][ 'updateNotices' ];
+	return received;
 }
 
 /**
@@ -639,6 +713,281 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			);
 			expect( added ).toBeDefined();
 			expect( added?.quantity ).toBe( 2 );
+		} );
+	} );
+
+	describe( 'notice-diff suppression for keyless meta-only adds', () => {
+		// The quantity-changed info notice template the auto-UPDATE branch emits.
+		const QUANTITY_CHANGED = 'was changed to';
+
+		it( 'emits no quantity-changed notice for a keyless add resolved server-side as a new standalone line', async () => {
+			// The product is present only as a single keyed meta line at qty 3.
+			// A keyless add optimistically bumps that line to 4, but the server
+			// keeps the meta line at 3 and adds a separate standalone line. The
+			// keyless-scoped baseline (3) must be compared against the server
+			// quantity (3) so no spurious "quantity changed" notice fires.
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( {
+						key: 'server-key-abc',
+						id: 42,
+						quantity: 3,
+					} ),
+					makeKeyedLine( {
+						key: 'server-key-new',
+						id: 42,
+						quantity: 1,
+					} ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
+			] );
+			const notices = spyOnUpdateNotices();
+
+			await runAction(
+				actions.addCartItem( {
+					id: 42,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+
+			expect(
+				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
+			).toBe( false );
+		} );
+
+		it( 'still emits the quantity-changed notice for a keyed mini-cart stepper change returned at its pre-stepper quantity', async () => {
+			// A keyed update (explicit key + absolute quantity) is never recorded
+			// in the keyless baseline set, so the override does not apply. The
+			// server returning the line at its pre-stepper quantity (3) must still
+			// diff against the post-optimistic snapshot (5) and notify.
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( {
+						key: 'server-key-abc',
+						id: 42,
+						quantity: 3,
+					} ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
+			] );
+			const notices = spyOnUpdateNotices();
+
+			await runAction(
+				actions.addCartItem( {
+					id: 42,
+					key: 'server-key-abc',
+					quantity: 5,
+					type: 'simple',
+				} )
+			);
+
+			expect(
+				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
+			).toBe( true );
+		} );
+
+		it( 'still emits the quantity-changed notice when a keyless-add-bumped line diverges from its captured baseline', async () => {
+			// A genuine concurrent server change: the matched keyed line is
+			// reported at quantity 7, which differs from its pre-optimistic
+			// baseline of 3. The notice must still fire for that line.
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( {
+						key: 'server-key-abc',
+						id: 42,
+						quantity: 7,
+					} ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
+			] );
+			const notices = spyOnUpdateNotices();
+
+			await runAction(
+				actions.addCartItem( {
+					id: 42,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+
+			expect(
+				notices.some(
+					( n ) =>
+						n.notice.includes( QUANTITY_CHANGED ) &&
+						n.notice.includes( '7' )
+				)
+			).toBe( true );
+		} );
+
+		it( 'suppresses the notice for a keyless batch add resolved server-side as a new standalone line', async () => {
+			// Same meta-only scenario through the batch path: the matched keyed
+			// line is bumped optimistically to 4, the server keeps it at 3 and
+			// adds a standalone line. The batch must capture the baseline (3) and
+			// suppress the spurious notice.
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( {
+						key: 'server-key-abc',
+						id: 42,
+						quantity: 3,
+					} ),
+					makeKeyedLine( {
+						key: 'server-key-new',
+						id: 42,
+						quantity: 1,
+					} ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
+			] );
+			const notices = spyOnUpdateNotices();
+
+			await runAction(
+				actions.batchAddCartItems( [
+					{
+						id: 42,
+						quantityToAdd: 1,
+						type: 'simple',
+					},
+				] )
+			);
+
+			expect(
+				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
+			).toBe( false );
+		} );
+
+		it( 'captures the pre-optimistic baseline by value (it differs from the post-bump quantity)', async () => {
+			// Spy on the diff helper by observing behaviour: if the baseline were
+			// captured by reference (after the in-place bump), the server qty (3)
+			// would equal the captured value (3) only by coincidence. To prove the
+			// captured baseline is the pre-bump value and not the post-bump value
+			// (4), drive a server response equal to the post-bump quantity (4):
+			// against the post-bump value this would be silent, but against the
+			// pre-bump baseline (3) it is a genuine change and must notify.
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( {
+						key: 'server-key-abc',
+						id: 42,
+						quantity: 4,
+					} ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
+			] );
+			const notices = spyOnUpdateNotices();
+
+			await runAction(
+				actions.addCartItem( {
+					id: 42,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+
+			// Server qty 4 !== pre-optimistic baseline 3, so the notice fires.
+			// It would be wrongly suppressed if the baseline were the post-bump 4.
+			expect(
+				notices.some(
+					( n ) =>
+						n.notice.includes( QUANTITY_CHANGED ) &&
+						n.notice.includes( '4' )
+				)
+			).toBe( true );
+		} );
+
+		it( 'keeps the earliest captured baseline when the same key is bumped twice in one batch', async () => {
+			// Two keyless batch items for the same product bump the matched keyed
+			// line 3 -> 4 -> 5. The earliest baseline (3) must be retained. The
+			// server reports the line at 4: against the earliest baseline (3) this
+			// is a change and notifies; against a later baseline (4) it would be
+			// wrongly suppressed.
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( {
+						key: 'server-key-abc',
+						id: 42,
+						quantity: 4,
+					} ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
+			] );
+			const notices = spyOnUpdateNotices();
+
+			await runAction(
+				actions.batchAddCartItems( [
+					{ id: 42, quantityToAdd: 1, type: 'simple' },
+					{ id: 42, quantityToAdd: 1, type: 'simple' },
+				] )
+			);
+
+			expect(
+				notices.some(
+					( n ) =>
+						n.notice.includes( QUANTITY_CHANGED ) &&
+						n.notice.includes( '4' )
+				)
+			).toBe( true );
+		} );
+
+		it( 'leaves removeCartItem notice behavior unchanged (auto-DELETE still fires)', async () => {
+			// removeCartItem must not pass the new baseline; the auto-DELETE
+			// branch is untouched. Removing one of two lines while the server
+			// reports the OTHER line auto-removed must still emit a removal
+			// notice for that server-removed line.
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( {
+						key: 'server-key-keep',
+						id: 42,
+						quantity: 3,
+						name: 'Kept Product',
+					} ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( {
+					key: 'server-key-keep',
+					id: 42,
+					quantity: 3,
+					name: 'Kept Product',
+				} ),
+				makeKeyedLine( {
+					key: 'server-key-gone',
+					id: 7,
+					quantity: 1,
+					name: 'Vanished Product',
+				} ),
+			] );
+			const notices = spyOnUpdateNotices();
+
+			await runAction( actions.removeCartItem( 'server-key-keep' ) );
+
+			// The server-removed line (server-key-gone) was present in the
+			// post-optimistic snapshot and absent from the server cart, so the
+			// auto-DELETE notice must still fire.
+			expect(
+				notices.some( ( n ) => n.notice.includes( 'Vanished Product' ) )
+			).toBe( true );
 		} );
 	} );
 } );

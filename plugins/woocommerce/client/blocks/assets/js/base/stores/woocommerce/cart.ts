@@ -134,9 +134,22 @@ const generateInfoNotice = ( message: string ): Notice => ( {
 	dismissible: true,
 } );
 
+/**
+ * Pre-optimistic baselines for lines bumped in place by a keyless add.
+ *
+ * Maps a matched **keyed** line's `key` to the quantity it held **before** the
+ * keyless-add optimistic bump mutated it in place. Used by {@link
+ * getInfoNoticesFromCartUpdates} to diff such lines against their genuine
+ * pre-add quantity instead of the post-optimistic snapshot, so a keyless add the
+ * server resolves as a brand new standalone line does not emit a spurious
+ * "quantity changed" notice for the meta line it merely bumped optimistically.
+ */
+type KeylessAddBaselines = Map< string, number >;
+
 const getInfoNoticesFromCartUpdates = (
 	oldCart: Store[ 'state' ][ 'cart' ],
-	newCart: Cart
+	newCart: Cart,
+	keylessAddBaselines: KeylessAddBaselines = new Map()
 ): Notice[] => {
 	const oldItems = oldCart.items;
 	const newItems = newCart.items;
@@ -156,6 +169,16 @@ const getInfoNoticesFromCartUpdates = (
 	const autoUpdatedToNotify = newItems.filter( ( item ) => {
 		if ( ! isCartItem( item ) ) {
 			return false;
+		}
+		// A line bumped in place by a keyless add is diffed against its
+		// pre-optimistic baseline, not the post-optimistic snapshot, so the
+		// server keeping it at its pre-add quantity (because it created a new
+		// standalone line instead) does not read as a server-side change.
+		// Keyed `update-item` bumps are never recorded here, so their
+		// "your change was undone" notice keeps firing.
+		const baseline = keylessAddBaselines.get( item.key );
+		if ( baseline !== undefined ) {
+			return item.quantity !== baseline;
 		}
 		const old = oldItems.find( ( o ) => o.key === item.key );
 		return old && item.quantity !== old.quantity;
@@ -433,6 +456,13 @@ const { actions } = store< Store >(
 				// Capture cart state after optimistic updates for notice comparison.
 				let cartAfterOptimistic: typeof state.cart | null = null;
 
+				// Pre-optimistic baseline for a keyless add that bumped a matched
+				// keyed line in place. Captured by value before the bump so the
+				// notice diff compares the server quantity against the true pre-add
+				// quantity (see getInfoNoticesFromCartUpdates). Defaults empty, so
+				// keyed `update-item` bumps and pushed new lines contribute nothing.
+				const keylessAddBaselines: KeylessAddBaselines = new Map();
+
 				try {
 					const result = ( yield sendCartRequest( state, {
 						path: `/wc/store/v1/cart/${ endpoint }`,
@@ -440,6 +470,16 @@ const { actions } = store< Store >(
 						body: itemToSend,
 						applyOptimistic: () => {
 							if ( existingItem ) {
+								// Record the matched keyed line's quantity as a
+								// primitive before the in-place bump mutates it.
+								// Scoped to keyless adds (!isUpdate); keyed updates
+								// keep diffing against the post-optimistic snapshot.
+								if ( ! isUpdate && existingItem.key ) {
+									keylessAddBaselines.set(
+										existingItem.key,
+										existingItem.quantity
+									);
+								}
 								// Update existing item's quantity (whether server-confirmed or optimistic).
 								const isSoldIndividually =
 									isCartItem( existingItem ) &&
@@ -483,7 +523,8 @@ const { actions } = store< Store >(
 					) {
 						const infoNotices = getInfoNoticesFromCartUpdates(
 							cartAfterOptimistic,
-							cart
+							cart,
+							keylessAddBaselines
 						);
 						const errorNotices =
 							cart.errors.map( generateErrorNotice );
@@ -520,6 +561,7 @@ const { actions } = store< Store >(
 				try {
 					// Submit each item through the batcher. They'll be
 					// collected into a single batch request automatically.
+					const keylessAddBaselines: KeylessAddBaselines = new Map();
 					const promises = items.map( ( item, index ) => {
 						const existingItem = state.findItemInCart( {
 							id: item.id,
@@ -593,6 +635,23 @@ const { actions } = store< Store >(
 							body: itemToSend,
 							applyOptimistic: () => {
 								if ( existingItem ) {
+									// Record the matched keyed line's quantity as a
+									// primitive before the in-place bump. Scoped to
+									// keyless adds (!isUpdate); record only on the
+									// key's first bump so the earliest baseline wins
+									// across the batch.
+									if (
+										! isUpdate &&
+										existingItem.key &&
+										! keylessAddBaselines.has(
+											existingItem.key
+										)
+									) {
+										keylessAddBaselines.set(
+											existingItem.key,
+											existingItem.quantity
+										);
+									}
 									existingItem.quantity = quantity;
 								} else {
 									state.cart.items.push( itemToSend );
@@ -645,7 +704,8 @@ const { actions } = store< Store >(
 						if ( showCartUpdatesNotices ) {
 							const infoNotices = getInfoNoticesFromCartUpdates(
 								cartAfterOptimistic,
-								cart
+								cart,
+								keylessAddBaselines
 							);
 							const errorNotices =
 								cart.errors.map( generateErrorNotice );
