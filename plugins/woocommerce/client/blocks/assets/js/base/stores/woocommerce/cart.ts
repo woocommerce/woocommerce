@@ -517,11 +517,23 @@ const { actions } = store< Store >(
 						} else {
 							quantity = item.quantity ?? 1;
 						}
-						const isUpdate = !! existingItem?.key;
+						// Endpoint selection is a pure function of the
+						// caller-supplied `key`, never of a line matched by
+						// id/variation. This mirrors the single-item
+						// `addCartItem` path: a keyless batch item always
+						// issues `add-item` with a delta, even when an existing
+						// line (including a server-keyed one) matches by product
+						// id, so the server owns cart-line identity for adds.
+						// Only an explicit caller `key` targets a specific line
+						// via `update-item`.
+						const isUpdate = !! item.key;
 						const endpoint = isUpdate ? 'update-item' : 'add-item';
 
 						let itemToSend: OptimisticCartItem;
 						if ( isUpdate && existingItem ) {
+							// Caller-keyed update: target the exact line by key
+							// and send the absolute target quantity to the
+							// update-item endpoint.
 							itemToSend = {
 								key: existingItem.key,
 								id: existingItem.id,
@@ -533,6 +545,13 @@ const { actions } = store< Store >(
 								existingItem.key as string,
 							];
 						} else {
+							// Keyless add: build a fresh payload for the add-item
+							// endpoint and never copy the matched line's key.
+							// add-item adds to the existing quantity rather than
+							// setting it, so when a line matches (by
+							// id/variation, possibly carrying a server key) we
+							// post the delta against its quantity; with no match
+							// we post the full target quantity.
 							const quantityToSend = existingItem
 								? quantity - existingItem.quantity
 								: quantity;

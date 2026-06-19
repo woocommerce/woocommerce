@@ -402,4 +402,170 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( captured[ 1 ].body ).toEqual( captured[ 0 ].body );
 		} );
 	} );
+
+	describe( 'batchAddCartItems endpoint selection', () => {
+		it( 'issues add-item (never update-item) for a keyless batch item that matches a keyed line by product id', async () => {
+			const captured = mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			await runAction(
+				actions.batchAddCartItems( [
+					{
+						id: 42,
+						quantityToAdd: 1,
+						type: 'simple',
+					},
+				] )
+			);
+
+			expect( captured ).toHaveLength( 1 );
+			expect( captured[ 0 ].path ).toBe( '/wc/store/v1/cart/add-item' );
+			expect( captured[ 0 ].path ).not.toContain( 'update-item' );
+		} );
+
+		it( 'posts the requested delta (not the matched line absolute quantity) for a keyless batch item against a keyed line', async () => {
+			const captured = mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			await runAction(
+				actions.batchAddCartItems( [
+					{
+						id: 42,
+						quantityToAdd: 1,
+						type: 'simple',
+					},
+				] )
+			);
+
+			expect( captured[ 0 ].body.quantity ).toBe( 1 );
+			expect( captured[ 0 ].body.quantity ).not.toBe( 4 );
+		} );
+
+		it( 'never includes the matched line key in the request body for a keyless batch item', async () => {
+			const captured = mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { id: 42, quantity: 3, key: 'server-key-abc' } ),
+			] );
+
+			await runAction(
+				actions.batchAddCartItems( [
+					{
+						id: 42,
+						quantityToAdd: 1,
+						type: 'simple',
+					},
+				] )
+			);
+
+			expect( captured[ 0 ].body.key ).toBeUndefined();
+		} );
+
+		it( 'issues update-item with the absolute quantity for a batch item that supplies an explicit key', async () => {
+			const captured = mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { id: 42, quantity: 3, key: 'server-key-abc' } ),
+			] );
+
+			await runAction(
+				actions.batchAddCartItems( [
+					{
+						id: 42,
+						key: 'server-key-abc',
+						quantity: 5,
+						type: 'simple',
+					},
+				] )
+			);
+
+			expect( captured[ 0 ].path ).toBe(
+				'/wc/store/v1/cart/update-item'
+			);
+			expect( captured[ 0 ].body.quantity ).toBe( 5 );
+			expect( captured[ 0 ].body.key ).toBe( 'server-key-abc' );
+		} );
+
+		it( 'derives the keyless add-item delta identically to the single-item addCartItem path', async () => {
+			// Same seeded keyed line and same keyless request through both
+			// paths must produce the same endpoint and posted quantity.
+			const singleCaptured = mockBatchFetch();
+			const singleActions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+			await runAction(
+				singleActions.addCartItem( {
+					id: 42,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+
+			const batchCaptured = mockBatchFetch();
+			const batchActions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+			await runAction(
+				batchActions.batchAddCartItems( [
+					{
+						id: 42,
+						quantityToAdd: 1,
+						type: 'simple',
+					},
+				] )
+			);
+
+			expect( batchCaptured ).toHaveLength( 1 );
+			expect( singleCaptured ).toHaveLength( 1 );
+			expect( batchCaptured[ 0 ].path ).toBe( singleCaptured[ 0 ].path );
+			expect( batchCaptured[ 0 ].body.quantity ).toBe(
+				singleCaptured[ 0 ].body.quantity
+			);
+			expect( batchCaptured[ 0 ].body.key ).toBe(
+				singleCaptured[ 0 ].body.key
+			);
+		} );
+
+		it( 'optimistically bumps a matched keyed line in place on a keyless batch re-add (no duplicate line)', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			await runAction(
+				actions.batchAddCartItems( [
+					{
+						id: 42,
+						quantityToAdd: 1,
+						type: 'simple',
+					},
+				] )
+			);
+
+			expect( mockState.cart.items ).toHaveLength( 1 );
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( 4 );
+		} );
+
+		it( 'optimistically pushes a new line when no line matches a keyless batch item', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			await runAction(
+				actions.batchAddCartItems( [
+					{
+						id: 99,
+						quantityToAdd: 2,
+						type: 'simple',
+					},
+				] )
+			);
+
+			expect( mockState.cart.items ).toHaveLength( 2 );
+			const added = mockState.cart.items.find(
+				( item ) => item.id === 99
+			);
+			expect( added ).toBeDefined();
+			expect( added?.quantity ).toBe( 2 );
+		} );
+	} );
 } );
