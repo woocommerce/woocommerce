@@ -114,6 +114,9 @@ class WebflowFetcher implements PlatformFetcherInterface {
 		$this->ensure_category_cache_loaded( $site_id );
 		$this->decorate_items_with_categories( $items );
 
+		// The cursor is simply the next offset. Unlike Shopify's stable cursors, offset paging can
+		// skip or double-import items if the Webflow catalog changes (a product added or removed)
+		// between batches. Acceptable here given Webflow's API offers no stable cursor.
 		return array(
 			'items'         => $items,
 			'cursor'        => $has_next ? (string) $next : null,
