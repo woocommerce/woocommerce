@@ -158,4 +158,124 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( '36.99', WC()->cart->get_total( 'edit' ) );
 		$this->assertEquals( '6.17', WC()->cart->get_total_tax() );
 	}
+
+	/**
+	 * A fixed_cart $5 coupon on a $20 product yields a $5 discount and $15 total.
+	 */
+	public function test_fixed_cart_coupon_discounts_cart_total() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 20 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'fixed-cart-off',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '5',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$this->assertEqualsWithDelta( 5.0, WC()->cart->get_discount_total(), 0.001, 'fixed_cart $5 should discount $5' );
+		$this->assertEquals( '15.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ), 'fixed_cart $5 on $20 should total $15' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$coupon->delete( true );
+	}
+
+	/**
+	 * A percent 50% coupon on a $20 product yields a $10 discount and $10 total.
+	 */
+	public function test_percent_coupon_discounts_cart_total() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 20 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'percent-off',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '50',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$this->assertEqualsWithDelta( 10.0, WC()->cart->get_discount_total(), 0.001, 'percent 50% should discount $10' );
+		$this->assertEquals( '10.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ), 'percent 50% on $20 should total $10' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$coupon->delete( true );
+	}
+
+	/**
+	 * A fixed_product $7 coupon on a $20 product yields a $7 discount and $13 total.
+	 */
+	public function test_fixed_product_coupon_discounts_cart_total() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 20 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'fixed-product-off',
+			array(
+				'discount_type' => 'fixed_product',
+				'coupon_amount' => '7',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$this->assertEqualsWithDelta( 7.0, WC()->cart->get_discount_total(), 0.001, 'fixed_product $7 should discount $7' );
+		$this->assertEquals( '13.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ), 'fixed_product $7 on $20 should total $13' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$coupon->delete( true );
+	}
+
+	/**
+	 * Removing an applied coupon restores the cart to its undiscounted total.
+	 */
+	public function test_cart_total_restored_after_coupon_removed() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 20 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'fixed-cart-restore',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '5',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		// Sanity: coupon is applied.
+		$this->assertEquals( '15.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ), 'coupon should reduce total to $15' );
+
+		// Act: remove the coupon.
+		WC()->cart->remove_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		// Assert: total restored to base, discount cleared.
+		$this->assertEqualsWithDelta( 0.0, WC()->cart->get_discount_total(), 0.001, 'discount total should be cleared after removal' );
+		$this->assertEquals( '20.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ), 'total should return to $20 after coupon removed' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$coupon->delete( true );
+	}
 }
