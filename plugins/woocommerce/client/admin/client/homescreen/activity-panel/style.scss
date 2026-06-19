@@ -7,16 +7,27 @@
 		border: 1px solid $gray-200;
 		overflow: hidden;
 
-		&:first-child,
-		&.is-opened + .components-panel__body {
-			border-top-left-radius: 8px;
-			border-top-right-radius: 8px;
+		&:first-child {
+			border-radius: 8px 8px 0 0;
 		}
 
-		&:last-child,
+		&:last-child {
+			border-radius: 0 0 8px 8px;
+		}
+
+		&:only-child,
+		&.is-opened:first-child {
+			border-radius: 8px;
+		}
+
 		&.is-opened {
 			border-bottom-left-radius: 8px;
 			border-bottom-right-radius: 8px;
+		}
+
+		&.is-opened + .components-panel__body {
+			border-top-left-radius: 8px;
+			border-top-right-radius: 8px;
 		}
 
 		&.is-opened {
