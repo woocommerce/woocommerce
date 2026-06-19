@@ -229,6 +229,58 @@ class MockWebflowData {
 	}
 
 	/**
+	 * First page of the categories collection (cat-outerwear), total spanning two pages.
+	 *
+	 * @return string
+	 */
+	public static function categories_collection_items_page_one_body(): string {
+		return wp_json_encode(
+			array(
+				'items'      => array(
+					array(
+						'id'        => 'cat-outerwear',
+						'fieldData' => array(
+							'name' => 'Outerwear',
+							'slug' => 'outerwear',
+						),
+					),
+				),
+				'pagination' => array(
+					'limit'  => 100,
+					'offset' => 0,
+					'total'  => 2,
+				),
+			)
+		);
+	}
+
+	/**
+	 * Second page of the categories collection (cat-shirts), completing the two-page set.
+	 *
+	 * @return string
+	 */
+	public static function categories_collection_items_page_two_body(): string {
+		return wp_json_encode(
+			array(
+				'items'      => array(
+					array(
+						'id'        => 'cat-shirts',
+						'fieldData' => array(
+							'name' => 'Shirts',
+							'slug' => 'shirts',
+						),
+					),
+				),
+				'pagination' => array(
+					'limit'  => 100,
+					'offset' => 1,
+					'total'  => 2,
+				),
+			)
+		);
+	}
+
+	/**
 	 * Collections list response (one categories collection, one unrelated).
 	 *
 	 * @return string

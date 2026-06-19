@@ -232,6 +232,114 @@ class WebflowFetcherTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Category resolution is loaded once and reused across batches (guards against N+1).
+	 */
+	public function test_category_resolution_is_cached_across_batches(): void {
+		$counts = array(
+			'products'       => 0,
+			'collections'    => 0,
+			'category_items' => 0,
+		);
+
+		$cb = function ( $preempt, $args, $url ) use ( &$counts ) {
+			unset( $preempt, $args );
+			if ( false !== strpos( $url, '/collections/coll-cats/items' ) ) {
+				++$counts['category_items'];
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => MockWebflowData::categories_collection_items_response_body(),
+				);
+			}
+			if ( false !== strpos( $url, '/collections' ) ) {
+				++$counts['collections'];
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => MockWebflowData::collections_list_response_body(),
+				);
+			}
+			if ( false !== strpos( $url, '/products' ) ) {
+				++$counts['products'];
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => MockWebflowData::products_list_response_body(),
+				);
+			}
+			return array(
+				'response' => array( 'code' => 404 ),
+				'body'     => wp_json_encode( array( 'message' => 'Not stubbed: ' . $url ) ),
+			);
+		};
+		add_filter( 'pre_http_request', $cb, 10, 3 );
+		$this->http_filters[] = $cb;
+
+		$this->fetcher->fetch_batch( array( 'limit' => 2 ) );
+		$this->fetcher->fetch_batch(
+			array(
+				'limit'        => 2,
+				'after_cursor' => '2',
+			)
+		);
+
+		$this->assertSame( 2, $counts['products'], 'Products are fetched once per batch.' );
+		$this->assertSame( 1, $counts['collections'], 'Collections list is resolved once and cached across batches.' );
+		$this->assertSame( 1, $counts['category_items'], 'Category items are resolved once and cached across batches.' );
+	}
+
+	/**
+	 * The category-items pagination loop fetches every page, not just the first.
+	 */
+	public function test_category_items_pagination_fetches_all_pages(): void {
+		$category_items_calls = 0;
+
+		$cb = function ( $preempt, $args, $url ) use ( &$category_items_calls ) {
+			unset( $preempt, $args );
+			if ( false !== strpos( $url, '/collections/coll-cats/items' ) ) {
+				++$category_items_calls;
+				$body = ( false !== strpos( $url, 'offset=0' ) )
+					? MockWebflowData::categories_collection_items_page_one_body()
+					: MockWebflowData::categories_collection_items_page_two_body();
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => $body,
+				);
+			}
+			if ( false !== strpos( $url, '/collections' ) ) {
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => MockWebflowData::collections_list_response_body(),
+				);
+			}
+			if ( false !== strpos( $url, '/products' ) ) {
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => MockWebflowData::products_list_response_body(),
+				);
+			}
+			return array(
+				'response' => array( 'code' => 404 ),
+				'body'     => wp_json_encode( array( 'message' => 'Not stubbed: ' . $url ) ),
+			);
+		};
+		add_filter( 'pre_http_request', $cb, 10, 3 );
+		$this->http_filters[] = $cb;
+
+		$result = $this->fetcher->fetch_batch( array( 'limit' => 2 ) );
+
+		// Both pages (offset=0 then offset=1) must be requested.
+		$this->assertSame( 2, $category_items_calls );
+
+		// 'Shirts' lives only on page two, so the simple product resolves it only if page two loaded.
+		$first_item = $result['items'][0];
+		$names      = array_map(
+			static function ( $entry ) {
+				return $entry['name'];
+			},
+			$first_item->_resolved_categories
+		);
+		$this->assertContains( 'Shirts', $names );
+	}
+
+	/**
 	 * Test that when no categories collection exists, items still get an empty resolved-categories list.
 	 */
 	public function test_items_get_empty_categories_when_no_collection(): void {
