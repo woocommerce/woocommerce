@@ -6,6 +6,7 @@
 		"product-data-views": false,
 		"experimental-blocks": false,
 		"experimental-iapi-mini-cart": true,
+		"experimental-iapi-cart": false,
 		"coupons": true,
 		"core-profiler": true,
 		"customize-store": true,
