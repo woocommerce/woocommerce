@@ -13,6 +13,9 @@ use Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\Webflow\WebflowClient
 use WC_Unit_Test_Case;
 use WP_Error;
 
+// Shadows sleep() in the WebflowClient namespace so retry/backoff tests run instantly.
+require_once __DIR__ . '/functions-mock.php';
+
 /**
  * Tests for WebflowClient.
  */
@@ -167,6 +170,69 @@ class WebflowClientTest extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertStringContainsString( '403', $result->get_error_message() );
 		$this->assertStringContainsString( 'OAuthForbidden', $result->get_error_message() );
+	}
+
+	/**
+	 * Test that a 429 response is retried and a following success is returned.
+	 *
+	 * Also exercises the retry-after header parsing. sleep() is shadowed (see
+	 * functions-mock.php), so this does not actually wait.
+	 */
+	public function test_rest_request_retries_on_429_then_succeeds(): void {
+		$attempts = 0;
+		$this->add_http_filter(
+			function () use ( &$attempts ) {
+				++$attempts;
+				if ( 1 === $attempts ) {
+					return array(
+						'response' => array( 'code' => 429 ),
+						'headers'  => array( 'retry-after' => '1' ),
+						'body'     => wp_json_encode( array( 'message' => 'TooManyRequests' ) ),
+					);
+				}
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => wp_json_encode(
+						array(
+							'items'      => array(),
+							'pagination' => array( 'total' => 0 ),
+						)
+					),
+				);
+			}
+		);
+
+		$result = $this->client->rest_request( '/sites/site-123/products' );
+
+		$this->assertSame( 2, $attempts );
+		$this->assertNotInstanceOf( WP_Error::class, $result );
+		$this->assertIsObject( $result );
+		$this->assertSame( 0, (int) $result->pagination->total );
+	}
+
+	/**
+	 * Test that repeated 429 responses exhaust the retry budget and surface a WP_Error.
+	 */
+	public function test_rest_request_exhausts_retry_budget_on_repeated_429(): void {
+		$attempts = 0;
+		$this->add_http_filter(
+			function () use ( &$attempts ) {
+				++$attempts;
+				return array(
+					'response' => array( 'code' => 429 ),
+					'headers'  => array( 'retry-after' => '1' ),
+					'body'     => wp_json_encode( array( 'message' => 'TooManyRequests' ) ),
+				);
+			}
+		);
+
+		$result = $this->client->rest_request( '/sites/site-123/products' );
+
+		// Initial attempt + MAX_RETRIES (3) retries = 4 requests.
+		$this->assertSame( 4, $attempts );
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'api_error', $result->get_error_code() );
+		$this->assertStringContainsString( '429', $result->get_error_message() );
 	}
 
 	/**
