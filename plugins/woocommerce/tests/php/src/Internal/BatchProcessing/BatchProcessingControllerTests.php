@@ -278,6 +278,26 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Removing a processor from a corrupted list strips non-string values instead of fataling on array_diff().
+	 */
+	public function test_remove_processor_strips_non_string_values_without_fataling(): void {
+		// array_diff() string-casts its operands, so an object entry would fatal in PHP 8 without sanitizing first.
+		update_option(
+			BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME,
+			array( 'Processor\\A', new \stdClass(), array( 'corrupt' ), 'Processor\\B' ),
+			false
+		);
+
+		$this->assertTrue( $this->sut->remove_processor( 'Processor\\A' ) );
+
+		$this->assertSame(
+			array( 'Processor\\B' ),
+			$this->sut->get_enqueued_processors(),
+			'Removal must drop the target and strip non-string values, leaving only valid processor names.'
+		);
+	}
+
+	/**
 	 * @testdox Dequeuing a finished processor re-reads the freshest list, so a concurrently-added processor is not dropped.
 	 */
 	public function test_dequeue_processor_uses_fresh_state(): void {

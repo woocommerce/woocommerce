@@ -118,23 +118,8 @@ class BatchProcessingController {
 		 */
 		if ( $this->enqueued_list_needs_update( $this->get_enqueued_processors(), $processor_class_name ) ) {
 			$this->mutate_enqueued_processors(
-				static function ( array $pending_updates ) use ( $processor_class_name ): array {
-					/*
-					 * De-duplicate defensively. Historically this method compared the class name against array_keys()
-					 * rather than the stored values, so the same processor was appended on every call and bloated the
-					 * option. Building the unique list in a single pass heals stores already carrying duplicates on
-					 * their next enqueue while keeping only one entry per class name (so the cleanup stays bounded even
-					 * when the stored list ballooned to thousands of entries), and skips any non-string values a
-					 * corrupted option may hold.
-					 */
-					$deduplicated_updates = array();
-					$seen                 = array();
-					foreach ( $pending_updates as $value ) {
-						if ( is_string( $value ) && ! isset( $seen[ $value ] ) ) {
-							$seen[ $value ]         = true;
-							$deduplicated_updates[] = $value;
-						}
-					}
+				function ( array $pending_updates ) use ( $processor_class_name ): array {
+					$deduplicated_updates = $this->sanitize_processor_list( $pending_updates );
 					if ( ! in_array( $processor_class_name, $deduplicated_updates, true ) ) {
 						$deduplicated_updates[] = $processor_class_name;
 					}
@@ -144,6 +129,31 @@ class BatchProcessingController {
 		}
 
 		$this->schedule_watchdog_action( false, true );
+	}
+
+	/**
+	 * Reduce a processor list to unique, non-empty class-name strings, preserving order.
+	 *
+	 * The enqueued-processors option is a plain serialized array, so a corrupted option (or the historical
+	 * duplicate-accumulation bug) can leave it holding duplicates or non-string values. Sanitizing before any
+	 * comparison keeps the mutators safe and heals the stored list on the next write: in particular array_diff()
+	 * string-casts its operands and would fatal on an object entry in PHP 8, so removals run on the sanitized list.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param array $processors Raw processor list as read from the option.
+	 * @return array Sanitized list of unique class-name strings.
+	 */
+	private function sanitize_processor_list( array $processors ): array {
+		$sanitized = array();
+		$seen      = array();
+		foreach ( $processors as $value ) {
+			if ( is_string( $value ) && ! isset( $seen[ $value ] ) ) {
+				$seen[ $value ] = true;
+				$sanitized[]    = $value;
+			}
+		}
+		return $sanitized;
 	}
 
 	/**
@@ -569,12 +579,12 @@ class BatchProcessingController {
 		// batch finishes, not on a per-request hot path, so correctness is preferred over skipping the lock.
 		$removed = false;
 		$this->mutate_enqueued_processors(
-			static function ( array $pending_processes ) use ( $processor_class_name, &$removed ): array {
+			function ( array $pending_processes ) use ( $processor_class_name, &$removed ): array {
 				if ( ! in_array( $processor_class_name, $pending_processes, true ) ) {
 					return $pending_processes;
 				}
 				$removed = true;
-				return array_values( array_diff( $pending_processes, array( $processor_class_name ) ) );
+				return array_values( array_diff( $this->sanitize_processor_list( $pending_processes ), array( $processor_class_name ) ) );
 			}
 		);
 
@@ -615,12 +625,12 @@ class BatchProcessingController {
 		// always takes the lock and re-reads the freshest list rather than acting on a possibly-stale cached copy.
 		$was_enqueued = false;
 		$this->mutate_enqueued_processors(
-			static function ( array $enqueued_processors ) use ( $processor_class_name, &$was_enqueued ): array {
+			function ( array $enqueued_processors ) use ( $processor_class_name, &$was_enqueued ): array {
 				if ( ! in_array( $processor_class_name, $enqueued_processors, true ) ) {
 					return $enqueued_processors;
 				}
 				$was_enqueued = true;
-				return array_values( array_diff( $enqueued_processors, array( $processor_class_name ) ) );
+				return array_values( array_diff( $this->sanitize_processor_list( $enqueued_processors ), array( $processor_class_name ) ) );
 			}
 		);
 
