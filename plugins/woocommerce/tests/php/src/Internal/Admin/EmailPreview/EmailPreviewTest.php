@@ -254,6 +254,39 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Email preview downloadable items ignore downloads resolved from the dummy order.
+	 */
+	public function test_get_dummy_downloadable_items_returns_only_preview_downloads(): void {
+		$downloads = array(
+			array(
+				'product_name'   => 'Unexpected Dummy Product',
+				'product_id'     => 0,
+				'download_url'   => 'https://example.com/unexpected',
+				'download_name'  => 'Unexpected Download.pdf',
+				'access_expires' => time() + DAY_IN_SECONDS,
+			),
+		);
+
+		try {
+			$this->sut->set_up_filters();
+			/**
+			 * Filters the list of downloadable items for an order.
+			 *
+			 * @since 3.2.0
+			 *
+			 * @param array    $downloads Downloadable items.
+			 * @param WC_Order $order     Order object.
+			 */
+			$result = apply_filters( 'woocommerce_order_get_downloadable_items', $downloads, new PreviewOrder() );
+		} finally {
+			$this->sut->clean_up_filters();
+		}
+
+		$this->assertCount( 1, $result, 'Existing downloads from dummy order permission records must not be merged into preview output.' );
+		$this->assertSame( 'Sample Download File.pdf', $result[0]['download_name'], 'Preview output should keep the synthetic downloadable item.' );
+	}
+
+	/**
 	 * Test that downloadable product appears in email content.
 	 */
 	public function test_downloadable_product_in_email_content() {
