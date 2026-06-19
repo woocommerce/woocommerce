@@ -108,6 +108,13 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 	public const QUERY_STATUS = 'wc_woopayments_cutover_status';
 
 	/**
+	 * Transient that carries a one-time mandatory cutover status across plugin deactivation redirects.
+	 *
+	 * @var string
+	 */
+	private const NOTICE_STATUS_TRANSIENT = 'woocommerce_woopayments_native_cutover_status';
+
+	/**
 	 * Legacy operational queue hooks that still need native cutover disposition.
 	 *
 	 * @var string[]
@@ -134,6 +141,13 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 	 * @var NativePaymentsRuntimeArbiter
 	 */
 	private NativePaymentsRuntimeArbiter $arbiter;
+
+	/**
+	 * Cutover status produced during the current request.
+	 *
+	 * @var string
+	 */
+	private string $current_request_status = '';
 
 	/**
 	 * Legacy proxy.
@@ -243,9 +257,27 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 	 * @internal
 	 */
 	public function output_admin_notices(): void {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reads post-redirect status only; no state change is performed here.
-		$status = isset( $_GET[ self::QUERY_STATUS ] ) ? sanitize_key( wp_unslash( $_GET[ self::QUERY_STATUS ] ) ) : '';
+		$status                       = $this->current_request_status;
+		$is_current_request_status    = '' !== $status;
+		$this->current_request_status = '';
+
+		if ( '' === $status ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reads post-redirect status only; no state change is performed here.
+			$status = isset( $_GET[ self::QUERY_STATUS ] ) ? sanitize_key( wp_unslash( $_GET[ self::QUERY_STATUS ] ) ) : '';
+		}
+
+		if ( '' === $status ) {
+			$status = $this->consume_stored_notice_status();
+		}
+
+		if ( self::STATUS_DISABLED === $status && ! $is_current_request_status && $this->arbiter->is_plugin_runtime_active() ) {
+			$status = self::STATUS_BLOCKED;
+		}
+
 		if ( self::STATUS_DISABLED === $status ) {
+			if ( $is_current_request_status ) {
+				$this->delete_stored_notice_status();
+			}
 			$this->output_success_notice();
 			return;
 		}
@@ -430,16 +462,51 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 		}
 
 		if ( ! $this->is_cutover_ready() ) {
-			add_action( 'admin_notices', array( $this, 'output_blocked_notice' ) );
+			$this->set_current_request_status( self::STATUS_BLOCKED );
 			return;
 		}
 
+		$this->set_current_request_status( self::STATUS_DISABLED, true );
 		if ( $this->deactivate_woopayments_plugin() ) {
-			add_action( 'admin_notices', array( $this, 'output_success_notice' ) );
 			return;
 		}
 
-		add_action( 'admin_notices', array( $this, 'output_blocked_notice' ) );
+		$this->delete_stored_notice_status();
+		$this->set_current_request_status( self::STATUS_BLOCKED );
+	}
+
+	/**
+	 * Set the cutover notice status for the current request.
+	 *
+	 * @param string $status  Cutover notice status.
+	 * @param bool   $persist Whether to store the notice for the next request.
+	 */
+	private function set_current_request_status( string $status, bool $persist = false ): void {
+		$this->current_request_status = $status;
+		$_GET[ self::QUERY_STATUS ]   = $status;
+
+		if ( $persist ) {
+			set_transient( self::NOTICE_STATUS_TRANSIENT, $status, 10 * MINUTE_IN_SECONDS );
+		}
+	}
+
+	/**
+	 * Consume a stored cutover notice status.
+	 *
+	 * @return string Cutover status, or empty string when none is stored.
+	 */
+	private function consume_stored_notice_status(): string {
+		$status = get_transient( self::NOTICE_STATUS_TRANSIENT );
+		$this->delete_stored_notice_status();
+
+		return is_string( $status ) ? sanitize_key( $status ) : '';
+	}
+
+	/**
+	 * Delete the stored cutover notice status.
+	 */
+	private function delete_stored_notice_status(): void {
+		delete_transient( self::NOTICE_STATUS_TRANSIENT );
 	}
 
 	/**
