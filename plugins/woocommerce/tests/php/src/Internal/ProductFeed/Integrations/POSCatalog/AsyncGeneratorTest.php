@@ -148,6 +148,23 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that validate_status treats a failed job as invalid, so a status poll regenerates it
+	 * from scratch rather than leaving the client stuck on a terminal failure.
+	 */
+	public function test_validate_status_returns_false_for_failed_feed() {
+		$status = array(
+			'state'     => AsyncGenerator::STATE_FAILED,
+			'error'     => 'Something went wrong',
+			'failed_at' => time(),
+		);
+
+		$method = ( new ReflectionClass( $this->sut ) )->getMethod( 'validate_status' );
+		$method->setAccessible( true );
+
+		$this->assertFalse( $method->invoke( $this->sut, $status ) );
+	}
+
+	/**
 	 * Test that validate_status treats an in-progress job with a stale heartbeat as invalid.
 	 *
 	 * This is the recovery path for jobs whose process was killed (server timeout or out of
@@ -539,7 +556,8 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test that a continuation whose partial feed file has vanished fails rather than appending to a
-	 * non-existent file. Recovery (restart from scratch) then happens on the next status poll.
+	 * non-existent file, and that the next status poll transparently restarts generation from scratch
+	 * (the server owns recovery; the client never has to act on a failed status).
 	 */
 	public function test_feed_generation_fails_when_partial_file_missing() {
 		add_filter( 'woocommerce_product_feed_batch_size', fn() => 1 );
@@ -549,9 +567,14 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 
 		WC_Helper_Product::create_simple_product();
 
+		// Use the real (derived) option key so the action and the follow-up status poll act on the same job.
+		$key_method = ( new ReflectionClass( $this->sut ) )->getMethod( 'get_option_key' );
+		$key_method->setAccessible( true );
+		$option_key = $key_method->invoke( $this->sut, array() );
+
 		// A continuation pointing at a partial file that does not exist.
 		update_option(
-			self::OPTION_KEY,
+			$option_key,
 			array(
 				'state'           => AsyncGenerator::STATE_IN_PROGRESS,
 				'file_name'       => 'pos-catalog-feed-missing.json',
@@ -563,12 +586,17 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->sut->feed_generation_action( self::OPTION_KEY );
-		$status = get_option( self::OPTION_KEY );
+		$this->sut->feed_generation_action( $option_key );
+		$this->assertSame( AsyncGenerator::STATE_FAILED, get_option( $option_key )['state'] );
 
-		$this->assertSame( AsyncGenerator::STATE_FAILED, $status['state'] );
+		// Polling the failed job restarts it fresh, without the client forcing regeneration.
+		$status = $this->sut->get_status( array() );
+		$this->assertSame( AsyncGenerator::STATE_SCHEDULED, $status['state'] );
+		$this->assertSame( 0, $status['processed'] );
+		$this->assertArrayNotHasKey( 'file_name', $status );
 
 		as_unschedule_all_actions( AsyncGenerator::FEED_GENERATION_ACTION, array(), 'woo-product-feed' );
+		delete_option( $option_key );
 	}
 
 	/**
