@@ -12,23 +12,22 @@ const describeForCurrentWordPressTarget = isLatestMinusOneWordPress()
 	? describe.skip
 	: describe;
 
-let fieldExtensions: typeof import('./field').fieldExtensions;
-
-const renderTags = ( item: Partial< ProductEntityRecord > ) => {
-	if ( ! fieldExtensions.render ) {
-		throw new Error( 'tags render not implemented' );
-	}
-
-	const render = fieldExtensions.render as ( props: {
-		item: ProductEntityRecord;
-	} ) => unknown;
-
-	return render( {
-		item: item as ProductEntityRecord,
-	} );
-};
-
 describeForCurrentWordPressTarget( 'tags field', () => {
+	let fieldExtensions: typeof import('./field').fieldExtensions;
+
+	const renderTags = ( item: Partial< ProductEntityRecord > ) => {
+		if ( ! fieldExtensions.render ) {
+			throw new Error( 'tags render not implemented' );
+		}
+
+		const render = fieldExtensions.render as ( props: {
+			item: ProductEntityRecord;
+		} ) => unknown;
+
+		return render( {
+			item: item as ProductEntityRecord,
+		} );
+	};
 	beforeAll( async () => {
 		( { fieldExtensions } = await import( './field' ) );
 	} );

@@ -1904,9 +1904,6 @@ importers:
       '@testing-library/react':
         specifier: ^16.x.x
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@woocommerce/jest-wordpress-version-compat':
-        specifier: workspace:*
-        version: link:../jest-wordpress-version-compat
       '@wordpress/data':
         specifier: ^10.19.0
         version: 10.44.0(react@18.3.1)
@@ -1938,6 +1935,9 @@ importers:
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../internal-build
+      '@woocommerce/jest-wordpress-version-compat':
+        specifier: workspace:*
+        version: link:../jest-wordpress-version-compat
       babel-jest:
         specifier: 29.5.x
         version: 29.5.0(@babel/core@7.25.7)

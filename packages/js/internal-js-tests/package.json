@@ -57,7 +57,6 @@
 	"dependencies": {
 		"@testing-library/jest-dom": "^6.x.x",
 		"@testing-library/react": "^16.x.x",
-		"@woocommerce/jest-wordpress-version-compat": "workspace:*",
 		"@wordpress/i18n": "catalog:wp-min",
 		"@wordpress/private-apis": "catalog:wp-min",
 		"@wordpress/jest-console": "^5.4.0",
@@ -67,6 +66,7 @@
 		"@babel/core": "7.25.7",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
+		"@woocommerce/jest-wordpress-version-compat": "workspace:*",
 		"babel-jest": "29.5.x",
 		"eslint": "^8.55.0",
 		"jest": "29.5.x",
