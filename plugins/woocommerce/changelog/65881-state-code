@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix tax state code autocomplete so states can be found by typing their code
+Fix tax state code autocomplete: allow searching by state code and scope suggestions to the selected country
