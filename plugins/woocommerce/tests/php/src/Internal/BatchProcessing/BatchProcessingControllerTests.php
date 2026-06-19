@@ -191,7 +191,7 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'remove_processor' dequeues and unschedules a processor, and unschedules the watchdog if no more more processors are enqueued.
+	 * @testdox 'remove_processor' dequeues and unschedules a processor, and leaves the watchdog to self-terminate when no more processors are enqueued.
 	 */
 	public function test_remove_processor_when_no_others_remain_enqueued() {
 		$this->sut->enqueue_processor( get_class( $this->test_process ) );
@@ -207,7 +207,201 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 
 		$this->assertFalse( $this->sut->is_enqueued( get_class( $this->test_process ) ) );
 		$this->assertFalse( $this->sut->is_scheduled( get_class( $this->test_process ) ) );
-		$this->assertFalse( as_has_scheduled_action( $this->sut::WATCHDOG_ACTION_NAME ) );
+
+		/*
+		 * The watchdog is intentionally left scheduled rather than force-unscheduled: handle_watchdog_action()
+		 * returns without rescheduling itself once the queue is empty (so it self-terminates after one more run),
+		 * and keeping it in place means a processor enqueued concurrently with this removal is still picked up
+		 * instead of being stranded with no watchdog.
+		 */
+		$this->assertTrue(
+			as_has_scheduled_action( $this->sut::WATCHDOG_ACTION_NAME ),
+			'The watchdog should be left to self-terminate, not force-unscheduled, so concurrent enqueues are not stranded.'
+		);
+	}
+
+	/**
+	 * @testdox Enqueuing re-reads the freshest persisted list inside the critical section, merging with a concurrent write instead of clobbering it.
+	 */
+	public function test_enqueue_processor_merges_with_concurrent_write(): void {
+		global $wpdb;
+
+		// This request enqueues A, which also primes the request cache with array( A ).
+		$this->sut->enqueue_processor( 'Processor\\A' );
+
+		/*
+		 * Simulate a concurrent request that appended B and committed it to the database after this request
+		 * had already cached array( A ). Writing through $wpdb (rather than update_option()) deliberately leaves
+		 * the stale request cache in place, reproducing the cross-request read-modify-write race.
+		 */
+		$wpdb->update(
+			$wpdb->options,
+			array( 'option_value' => maybe_serialize( array( 'Processor\\A', 'Processor\\B' ) ) ),
+			array( 'option_name' => BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME )
+		);
+
+		$this->sut->enqueue_processor( 'Processor\\C' );
+
+		$this->assertSame(
+			array( 'Processor\\A', 'Processor\\B', 'Processor\\C' ),
+			$this->sut->get_enqueued_processors(),
+			'Enqueuing must merge with the concurrently-added processor (fresh read) rather than dropping it.'
+		);
+	}
+
+	/**
+	 * @testdox Removing a processor re-reads the freshest list, so a concurrently-added processor is not dropped.
+	 */
+	public function test_remove_processor_uses_fresh_state(): void {
+		global $wpdb;
+
+		update_option(
+			BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME,
+			array( 'Processor\\A', 'Processor\\B' ),
+			false
+		);
+
+		// A concurrent request appended C and committed it after this request cached array( A, B ).
+		$wpdb->update(
+			$wpdb->options,
+			array( 'option_value' => maybe_serialize( array( 'Processor\\A', 'Processor\\B', 'Processor\\C' ) ) ),
+			array( 'option_name' => BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME )
+		);
+
+		$this->sut->remove_processor( 'Processor\\A' );
+
+		$this->assertSame(
+			array( 'Processor\\B', 'Processor\\C' ),
+			$this->sut->get_enqueued_processors(),
+			'Removal must operate on the fresh list, preserving the concurrently-added processor.'
+		);
+	}
+
+	/**
+	 * @testdox Dequeuing a finished processor re-reads the freshest list, so a concurrently-added processor is not dropped.
+	 */
+	public function test_dequeue_processor_uses_fresh_state(): void {
+		global $wpdb;
+
+		update_option(
+			BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME,
+			array( 'Processor\\A', 'Processor\\B' ),
+			false
+		);
+
+		// A concurrent request appended C and committed it after this request cached array( A, B ).
+		$wpdb->update(
+			$wpdb->options,
+			array( 'option_value' => maybe_serialize( array( 'Processor\\A', 'Processor\\B', 'Processor\\C' ) ) ),
+			array( 'option_name' => BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME )
+		);
+
+		// dequeue_processor() is private; it is reached in production when a batch finishes. Invoke it directly.
+		$dequeue = new \ReflectionMethod( $this->sut, 'dequeue_processor' );
+		$dequeue->setAccessible( true );
+		$dequeue->invoke( $this->sut, 'Processor\\A' );
+
+		$this->assertSame(
+			array( 'Processor\\B', 'Processor\\C' ),
+			$this->sut->get_enqueued_processors(),
+			'Dequeuing must operate on the fresh list, preserving the concurrently-added processor.'
+		);
+	}
+
+	/**
+	 * @testdox Removing the last processor deletes that processor's stored state.
+	 */
+	public function test_remove_processor_clears_state_when_no_others_remain(): void {
+		$processor = get_class( $this->test_process );
+
+		$this->sut->enqueue_processor( $processor );
+
+		// Seed processor state so we can prove it gets cleared on removal.
+		$state_option = $this->get_processor_state_option_name( $processor );
+		update_option( $state_option, array( 'total_time_spent' => 5 ), false );
+
+		$this->sut->remove_processor( $processor );
+
+		$this->assertFalse(
+			get_option( $state_option ),
+			'Removing the last processor must delete its stored state, not leave it orphaned.'
+		);
+	}
+
+	/**
+	 * @testdox A mutating enqueue holds the named lock while persisting and releases it afterwards.
+	 */
+	public function test_enqueue_processor_holds_lock_during_write_and_releases_after(): void {
+		global $wpdb;
+
+		$lock_name = $this->get_lock_name();
+
+		$free_during_write = null;
+		add_filter(
+			'pre_update_option_' . BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME,
+			function ( $value ) use ( &$free_during_write, $wpdb, $lock_name ) {
+				// On this same DB session, IS_FREE_LOCK() returns '0' while the lock is held by this session.
+				$free_during_write = $wpdb->get_var( $wpdb->prepare( 'SELECT IS_FREE_LOCK(%s)', $lock_name ) );
+				return $value;
+			}
+		);
+
+		$this->sut->enqueue_processor( 'Processor\\A' );
+
+		$this->assertSame( '0', (string) $free_during_write, 'The named lock must be held while the option is written.' );
+		$this->assertSame(
+			'1',
+			(string) $wpdb->get_var( $wpdb->prepare( 'SELECT IS_FREE_LOCK(%s)', $lock_name ) ),
+			'The named lock must be released once the mutation completes.'
+		);
+	}
+
+	/**
+	 * @testdox When the named lock is held by another connection, the mutation still proceeds (best-effort) after the timeout.
+	 */
+	public function test_enqueue_processor_proceeds_when_lock_held_by_another_connection(): void {
+		$lock_name = $this->get_lock_name();
+
+		// Open a second, independent database connection and hold the lock there so the controller's own
+		// GET_LOCK on the request connection cannot acquire it within ENQUEUED_PROCESSORS_LOCK_TIMEOUT.
+		$other = new \wpdb( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
+		$other->query( $other->prepare( 'SELECT GET_LOCK(%s, %d)', $lock_name, 30 ) );
+
+		try {
+			$this->sut->enqueue_processor( 'Processor\\A' );
+
+			$this->assertContains(
+				'Processor\\A',
+				$this->sut->get_enqueued_processors(),
+				'The mutation must still persist when the lock cannot be acquired (best-effort fallback).'
+			);
+		} finally {
+			$other->query( $other->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_name ) );
+			$other->close();
+		}
+	}
+
+	/**
+	 * Resolve the controller's named-lock identifier via reflection so the test never drifts from production.
+	 *
+	 * @return string Lock name.
+	 */
+	private function get_lock_name(): string {
+		$method = new \ReflectionMethod( $this->sut, 'get_enqueued_processors_lock_name' );
+		$method->setAccessible( true );
+		return $method->invoke( $this->sut );
+	}
+
+	/**
+	 * Resolve the option name where a processor's state is stored, via reflection.
+	 *
+	 * @param string $processor_class_name Fully qualified processor class name.
+	 * @return string Option name.
+	 */
+	private function get_processor_state_option_name( string $processor_class_name ): string {
+		$method = new \ReflectionMethod( $this->sut, 'get_processor_state_option_name' );
+		$method->setAccessible( true );
+		return $method->invoke( $this->sut, $processor_class_name );
 	}
 
 	/**
