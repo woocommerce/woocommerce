@@ -412,6 +412,7 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 		$routes = $this->server->get_routes();
 		$this->assertArrayHasKey( '/wc/v3/payments/charges/(?P<charge_id>\\w+)', $routes );
 		$this->assertArrayHasKey( '/wc/v3/payments/payment_intents/(?P<payment_intent_id>\\w+)', $routes );
+		$this->assertArrayHasKey( '/wc/v3/payments/timeline/(?P<intention_id>\\w+)', $routes );
 
 		$controller = $this->create_payment_details_controller( false );
 		$controller->register();
@@ -460,6 +461,88 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 		$this->assertSame( 'get_payment_intention', $this->api_client->last_call['method'] );
 		$this->assertSame( 'pi_test', $this->api_client->last_call['intent_id'] );
 		$this->assertSame( 'txn_test', $data['charge']['balance_transaction']['id'] );
+	}
+
+	/**
+	 * @testdox Payment detail timeline route proxies the intention ID.
+	 */
+	public function test_payment_detail_timeline_route_proxies_intention_id(): void {
+		$this->api_client->response = array(
+			'data' => array(
+				array(
+					'type'    => 'captured',
+					'message' => 'Payment captured.',
+				),
+			),
+		);
+		$this->create_payment_details_controller( true )->register_routes();
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/payments/timeline/pi_test' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'get_timeline', $this->api_client->last_call['method'] );
+		$this->assertSame( 'pi_test', $this->api_client->last_call['intention_id'] );
+		$this->assertSame( 'captured', $data['data'][0]['type'] );
+	}
+
+	/**
+	 * @testdox Payment detail timeline adds local manual fraud outcomes for review timelines.
+	 */
+	public function test_payment_detail_timeline_adds_manual_fraud_outcome(): void {
+		$order = wc_create_order();
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$order->add_meta_data(
+			'_wcpay_fraud_outcome_manual_entry',
+			array(
+				'type'     => 'fraud_outcome_manual_approve',
+				'user'     => array(
+					'id'       => 1,
+					'username' => 'admin',
+				),
+				'action'   => 'approved',
+				'datetime' => 1781712200,
+			)
+		);
+		$order->save();
+
+		$this->api_client->responses = array(
+			'get_timeline'          => array(
+				'data' => array(
+					array(
+						'type'     => 'fraud_outcome_review',
+						'datetime' => 1781712000,
+					),
+					array(
+						'type'     => 'captured',
+						'datetime' => 1781711900,
+					),
+				),
+			),
+			'get_payment_intention' => array(
+				'id'       => 'pi_review',
+				'metadata' => array(
+					'order_id' => (string) $order->get_id(),
+				),
+			),
+		);
+		$this->create_payment_details_controller( true )->register_routes();
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/payments/timeline/pi_review' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'get_timeline', $this->api_client->calls[0]['method'] );
+		$this->assertSame( 'pi_review', $this->api_client->calls[0]['intention_id'] );
+		$this->assertSame( 'get_payment_intention', $this->api_client->calls[1]['method'] );
+		$this->assertSame( 'pi_review', $this->api_client->calls[1]['intent_id'] );
+		$this->assertSame(
+			array( 'fraud_outcome_manual_approve', 'fraud_outcome_review', 'captured' ),
+			wp_list_pluck( $data['data'], 'type' )
+		);
+		$this->assertSame( 'approved', $data['data'][0]['action'] );
 	}
 
 	/**

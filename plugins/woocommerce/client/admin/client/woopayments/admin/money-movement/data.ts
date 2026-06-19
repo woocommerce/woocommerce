@@ -19,6 +19,7 @@ import type {
 	WooPaymentsCharge,
 	WooPaymentsPaymentIntent,
 	WooPaymentsTransaction,
+	WooPaymentsTimelineResponse,
 } from './types';
 import { buildPathWithQuery } from './utils';
 import { serializeWooPaymentsAuthorizationsQuery } from './query';
@@ -77,6 +78,16 @@ export const getWooPaymentsPaymentIntent = (
 	apiFetch< WooPaymentsPaymentIntent >( {
 		path: `${ PAYMENTS_PATH }/payment_intents/${ encodeURIComponent(
 			paymentIntentId
+		) }`,
+		method: 'GET',
+	} );
+
+export const getWooPaymentsTimeline = (
+	timelineId: string
+): Promise< WooPaymentsTimelineResponse > =>
+	apiFetch< WooPaymentsTimelineResponse >( {
+		path: `${ PAYMENTS_PATH }/timeline/${ encodeURIComponent(
+			timelineId
 		) }`,
 		method: 'GET',
 	} );

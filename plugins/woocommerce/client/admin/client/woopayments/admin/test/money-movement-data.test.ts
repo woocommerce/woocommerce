@@ -13,7 +13,10 @@ import {
 	getWooPaymentsDisputeFileDetails,
 	getWooPaymentsDisputes,
 	getWooPaymentsDisputesExportUrl,
+	getWooPaymentsCharge,
+	getWooPaymentsPaymentIntent,
 	getWooPaymentsTransaction,
+	getWooPaymentsTimeline,
 	getWooPaymentsTransactionsExportUrl,
 	getWooPaymentsFraudOutcomeTransactions,
 	getWooPaymentsFraudOutcomeTransactionsSummary,
@@ -46,6 +49,9 @@ describe( 'WooPayments money movement data helpers', () => {
 			store_currency_is: 'usd',
 		} );
 		await getWooPaymentsTransaction( 'txn_test' );
+		await getWooPaymentsCharge( 'ch_test' );
+		await getWooPaymentsPaymentIntent( 'pi_test' );
+		await getWooPaymentsTimeline( 'pi_test' );
 		await getWooPaymentsTransactionSearch( 'Ada' );
 		await requestWooPaymentsTransactionsExport( {
 			deposit_id: 'po_test',
@@ -61,14 +67,26 @@ describe( 'WooPayments money movement data helpers', () => {
 			method: 'GET',
 		} );
 		expect( mockApiFetch ).toHaveBeenNthCalledWith( 3, {
-			path: '/wc/v3/payments/transactions/search?search_term=Ada',
+			path: '/wc/v3/payments/charges/ch_test',
 			method: 'GET',
 		} );
 		expect( mockApiFetch ).toHaveBeenNthCalledWith( 4, {
+			path: '/wc/v3/payments/payment_intents/pi_test',
+			method: 'GET',
+		} );
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 5, {
+			path: '/wc/v3/payments/timeline/pi_test',
+			method: 'GET',
+		} );
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 6, {
+			path: '/wc/v3/payments/transactions/search?search_term=Ada',
+			method: 'GET',
+		} );
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 7, {
 			path: '/wc/v3/payments/transactions/download?deposit_id=po_test',
 			method: 'POST',
 		} );
-		expect( mockApiFetch ).toHaveBeenNthCalledWith( 5, {
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 8, {
 			path: '/wc/v3/payments/transactions/download/export_test',
 			method: 'GET',
 		} );

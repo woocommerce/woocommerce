@@ -378,6 +378,36 @@
 	overflow-wrap: anywhere;
 }
 
+.woocommerce-woopayments-money-movement__copyable-value {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.woocommerce-woopayments-money-movement__stacked-value {
+	display: grid;
+	gap: 4px;
+}
+
+.woocommerce-woopayments-money-movement__timeline {
+	display: grid;
+	gap: 12px;
+	margin: 0;
+	padding-left: 20px;
+}
+
+.woocommerce-woopayments-money-movement__timeline li {
+	padding-left: 4px;
+}
+
+.woocommerce-woopayments-money-movement__timeline time {
+	color: #646970;
+	display: block;
+	font-size: 12px;
+	margin-top: 4px;
+}
+
 @media screen and (max-width: 782px) {
 	.woocommerce-woopayments-overview__cards,
 	.woocommerce-woopayments-overview__balance-grid {

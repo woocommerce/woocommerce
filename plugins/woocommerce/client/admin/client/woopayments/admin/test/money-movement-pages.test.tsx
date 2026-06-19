@@ -18,6 +18,7 @@ import {
 	getWooPaymentsCharge,
 	getWooPaymentsPaymentIntent,
 	getWooPaymentsTransaction,
+	getWooPaymentsTimeline,
 	getWooPaymentsTransactions,
 	getWooPaymentsTransactionsSummary,
 	getWooPaymentsTransactionsExportUrl,
@@ -141,6 +142,7 @@ jest.mock( '../money-movement/data', () => ( {
 	getWooPaymentsCharge: jest.fn(),
 	getWooPaymentsPaymentIntent: jest.fn(),
 	getWooPaymentsTransaction: jest.fn(),
+	getWooPaymentsTimeline: jest.fn(),
 	getWooPaymentsTransactions: jest.fn(),
 	getWooPaymentsTransactionsSummary: jest.fn(),
 	getWooPaymentsAuthorizations: jest.fn(),
@@ -168,6 +170,9 @@ const mockGetPaymentIntent = getWooPaymentsPaymentIntent as jest.MockedFunction<
 >;
 const mockGetTransaction = getWooPaymentsTransaction as jest.MockedFunction<
 	typeof getWooPaymentsTransaction
+>;
+const mockGetTimeline = getWooPaymentsTimeline as jest.MockedFunction<
+	typeof getWooPaymentsTimeline
 >;
 const mockGetTransactionsSummary =
 	getWooPaymentsTransactionsSummary as jest.MockedFunction<
@@ -226,6 +231,7 @@ describe( 'WooPayments money movement pages', () => {
 		mockGetCharge.mockReset();
 		mockGetPaymentIntent.mockReset();
 		mockGetTransaction.mockReset();
+		mockGetTimeline.mockReset();
 		mockGetTransactionsSummary.mockReset();
 		mockGetAuthorizations.mockReset();
 		mockGetAuthorizationsSummary.mockReset();
@@ -1027,14 +1033,49 @@ describe( 'WooPayments money movement pages', () => {
 	it( 'loads payment intent details when the route id is a payment intent', async () => {
 		mockGetPaymentIntent.mockResolvedValue( {
 			id: 'pi_test',
+			status: 'succeeded',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
 			charge: {
 				id: 'ch_test',
-				balance_transaction: { id: 'txn_test' },
+				balance_transaction: {
+					id: 'txn_test',
+					fee: 180,
+					net: 4820,
+				},
 				type: 'charge',
 				amount: 5000,
 				currency: 'usd',
 				created: 1781712000,
+				billing_details: {
+					email: 'ada@example.com',
+					name: 'Ada Lovelace',
+				},
+				payment_method_details: {
+					type: 'card',
+					card: {
+						brand: 'visa',
+						last4: '4242',
+					},
+				},
+				outcome: {
+					risk_level: 'normal',
+				},
+				order: {
+					id: 123,
+					number: '123',
+				},
 			},
+		} );
+		mockGetTimeline.mockResolvedValue( {
+			data: [
+				{
+					type: 'captured',
+					message: 'Payment captured.',
+					created: 1781712060,
+				},
+			],
 		} );
 
 		render(
@@ -1047,9 +1088,116 @@ describe( 'WooPayments money movement pages', () => {
 			</MemoryRouter>
 		);
 
-		expect( await screen.findByText( 'txn_test' ) ).toBeInTheDocument();
+		expect(
+			await screen.findByRole( 'heading', { name: 'Payment details' } )
+		).toBeInTheDocument();
+		expect( screen.getByText( 'pi_test' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'ch_test' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'txn_test' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Ada Lovelace' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'ada@example.com' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Order #123' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Visa ending in 4242' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Normal' ) ).toBeInTheDocument();
+		expect( screen.getAllByText( '$50.00' ).length ).toBeGreaterThan( 0 );
+		expect( screen.getByText( '$1.80' ) ).toBeInTheDocument();
+		expect( screen.getByText( '$48.20' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Payment captured.' ) ).toBeInTheDocument();
 		expect( mockGetPaymentIntent ).toHaveBeenCalledWith( 'pi_test' );
+		expect( mockGetTimeline ).toHaveBeenCalledWith( 'pi_test' );
 		expect( mockGetTransaction ).not.toHaveBeenCalled();
+	} );
+
+	it( 'renders reference-shaped timeline events with datetime values', async () => {
+		const eventDatetime = 1781712200;
+		const expectedEventDate = new Date(
+			eventDatetime * 1000
+		).toLocaleDateString( undefined, {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
+		} );
+
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_test',
+			charge: {
+				id: 'ch_test',
+				balance_transaction: { id: 'txn_test' },
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( {
+			data: [
+				{
+					type: 'fraud_outcome_manual_approve',
+					datetime: eventDatetime,
+					user: {
+						username: 'admin',
+					},
+				},
+			],
+		} );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_test&transaction_id=txn_test',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		expect(
+			await screen.findByText( 'Payment was approved by admin' )
+		).toBeInTheDocument();
+		expect(
+			screen.getAllByText( expectedEventDate ).length
+		).toBeGreaterThan( 0 );
+		expect( mockGetTimeline ).toHaveBeenCalledWith( 'pi_test' );
+	} );
+
+	it( 'announces timeline errors through the stable transaction detail status region', async () => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_test',
+			charge: {
+				id: 'ch_test',
+				balance_transaction: { id: 'txn_test' },
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+			},
+		} );
+		mockGetTimeline.mockRejectedValue(
+			new Error( 'Timeline provider failed.' )
+		);
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_test&transaction_id=txn_test',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		const statusRegion = screen.getByRole( 'status' );
+		expect( statusRegion ).toHaveTextContent(
+			'Loading transaction details…'
+		);
+		expect( await screen.findByText( 'pi_test' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'txn_test' ) ).toBeInTheDocument();
+		await waitFor( () =>
+			expect( statusRegion ).toHaveTextContent(
+				'Timeline provider failed.'
+			)
+		);
+		expect( screen.queryByRole( 'alert' ) ).not.toBeInTheDocument();
 	} );
 
 	it( 'loads charge details when the route id is a charge fallback', async () => {

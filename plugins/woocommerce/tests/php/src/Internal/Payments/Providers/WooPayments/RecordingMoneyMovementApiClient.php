@@ -26,11 +26,25 @@ class RecordingMoneyMovementApiClient extends WooPaymentsApiClient {
 	public array $last_call = array();
 
 	/**
+	 * Recorded calls in order.
+	 *
+	 * @var array<int,array<string,mixed>>
+	 */
+	public array $calls = array();
+
+	/**
 	 * Generic response.
 	 *
 	 * @var array<string,mixed>
 	 */
 	public array $response = array();
+
+	/**
+	 * Method-specific responses.
+	 *
+	 * @var array<string,array<string,mixed>>
+	 */
+	public array $responses = array();
 
 	/**
 	 * Get transactions.
@@ -139,7 +153,19 @@ class RecordingMoneyMovementApiClient extends WooPaymentsApiClient {
 	public function get_payment_intention( string $intent_id ): array {
 		$this->record( 'get_payment_intention', array( 'intent_id' => $intent_id ) );
 
-		return $this->response;
+		return $this->get_response( 'get_payment_intention' );
+	}
+
+	/**
+	 * Get timeline events.
+	 *
+	 * @param string $id Payment intent ID or order ID.
+	 * @return array<string,mixed>
+	 */
+	public function get_timeline( string $id ): array {
+		$this->record( 'get_timeline', array( 'intention_id' => $id ) );
+
+		return $this->get_response( 'get_timeline' );
 	}
 
 	/**
@@ -319,9 +345,20 @@ class RecordingMoneyMovementApiClient extends WooPaymentsApiClient {
 	 */
 	private function record( string $method, array $data ): void {
 		$this->last_call = array_merge( array( 'method' => $method ), $data );
+		$this->calls[]   = $this->last_call;
 
 		if ( null !== $this->exception ) {
 			throw $this->exception;
 		}
+	}
+
+	/**
+	 * Get the configured response for a method.
+	 *
+	 * @param string $method Method.
+	 * @return array<string,mixed>
+	 */
+	private function get_response( string $method ): array {
+		return $this->responses[ $method ] ?? $this->response;
 	}
 }

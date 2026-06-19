@@ -15,6 +15,11 @@ export interface WooPaymentsTransaction {
 	date?: number | string;
 	customer_name?: string;
 	customer_email?: string;
+	order?: WooPaymentsPaymentOrder;
+	payment_method_details?: WooPaymentsPaymentMethodDetails;
+	outcome?: WooPaymentsPaymentOutcome;
+	fee?: number;
+	net?: number;
 	status?: string;
 }
 
@@ -86,12 +91,16 @@ export interface WooPaymentsDispute {
 export interface WooPaymentsCharge {
 	id?: string;
 	payment_intent?: string;
-	balance_transaction?: string | { id?: string };
+	balance_transaction?: string | WooPaymentsBalanceTransaction;
 	type?: string;
 	amount?: number;
 	currency?: string;
 	created?: number | string;
 	date?: number | string;
+	billing_details?: WooPaymentsBillingDetails;
+	order?: WooPaymentsPaymentOrder;
+	payment_method_details?: WooPaymentsPaymentMethodDetails;
+	outcome?: WooPaymentsPaymentOutcome;
 	status?: string;
 }
 
@@ -104,7 +113,58 @@ export interface WooPaymentsPaymentIntent {
 	amount?: number;
 	currency?: string;
 	created?: number | string;
+	order?: WooPaymentsPaymentOrder;
 	status?: string;
+}
+
+export interface WooPaymentsBalanceTransaction {
+	id?: string;
+	fee?: number;
+	net?: number;
+	[ key: string ]: unknown;
+}
+
+export interface WooPaymentsBillingDetails {
+	email?: string;
+	name?: string;
+	[ key: string ]: unknown;
+}
+
+export interface WooPaymentsPaymentOrder {
+	id?: number | string;
+	number?: number | string;
+	[ key: string ]: unknown;
+}
+
+export interface WooPaymentsPaymentMethodDetails {
+	type?: string;
+	card?: {
+		brand?: string;
+		last4?: string;
+		[ key: string ]: unknown;
+	};
+	[ key: string ]: unknown;
+}
+
+export interface WooPaymentsPaymentOutcome {
+	risk_level?: string;
+	[ key: string ]: unknown;
+}
+
+export interface WooPaymentsTimelineEvent {
+	type?: string;
+	message?: string;
+	datetime?: number | string;
+	created?: number | string;
+	user?: {
+		username?: string;
+		[ key: string ]: unknown;
+	};
+	[ key: string ]: unknown;
+}
+
+export interface WooPaymentsTimelineResponse {
+	data?: WooPaymentsTimelineEvent[];
 }
 
 export interface WooPaymentsDisputeMetadata {
