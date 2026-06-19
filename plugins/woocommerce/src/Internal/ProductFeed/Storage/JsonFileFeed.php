@@ -136,8 +136,8 @@ class JsonFileFeed implements FeedInterface {
 		$this->entry_count = 0;
 		$this->file_name   = $this->generate_file_name();
 		$this->file_path   = $upload_dir['path'] . $this->file_name;
-		$this->open_handle( $this->file_path, 'w' );
-		fwrite( $this->file_handle, '[' );
+		$handle = $this->open_handle( $this->file_path, 'w' );
+		fwrite( $handle, '[' );
 
 		return $this->file_name;
 	}
@@ -221,12 +221,12 @@ class JsonFileFeed implements FeedInterface {
 	 *
 	 * @param string $path The file path to open.
 	 * @param string $mode The fopen() mode.
-	 * @return void
+	 * @return resource The opened file handle.
 	 * @throws Exception If the file cannot be opened.
 	 */
-	private function open_handle( string $path, string $mode ): void {
-		$this->file_handle = fopen( $path, $mode );
-		if ( false === $this->file_handle ) {
+	private function open_handle( string $path, string $mode ) {
+		$handle = fopen( $path, $mode );
+		if ( false === $handle ) {
 			throw new Exception(
 				esc_html(
 					sprintf(
@@ -237,6 +237,9 @@ class JsonFileFeed implements FeedInterface {
 				)
 			);
 		}
+
+		$this->file_handle = $handle;
+		return $handle;
 	}
 
 	/**

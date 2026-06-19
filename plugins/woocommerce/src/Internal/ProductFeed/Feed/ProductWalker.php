@@ -263,12 +263,8 @@ class ProductWalker {
 			&& ( $progress->total_batch_count <= 0 || ( $page - 1 ) < $progress->total_batch_count )
 		);
 
-		return $progress ?? WalkerProgress::from_wc_get_products_result(
-			(object) array(
-				'total'         => 0,
-				'max_num_pages' => 0,
-			)
-		);
+		// The do-while body always executes at least once and assigns $progress on the first iteration.
+		return $progress;
 	}
 
 	/**
