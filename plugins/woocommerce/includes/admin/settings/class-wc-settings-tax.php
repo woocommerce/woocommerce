@@ -201,7 +201,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			foreach ( $country_states as $code => $state ) {
 				$states[] = array(
 					'value'   => $code,
-					'label'   => esc_js( html_entity_decode( $state ) ),
+					'label'   => esc_js( html_entity_decode( $state, ENT_QUOTES ) ),
 					'country' => $country_code,
 				);
 			}
