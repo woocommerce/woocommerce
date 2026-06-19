@@ -69,7 +69,7 @@
 	<exclude-pattern>node_modules/*</exclude-pattern>
 
 	<!-- Skip the PHPStan temp directory -->
-	<exclude-pattern>tasks/phpstan/temp/*</exclude-pattern>
+	<exclude-pattern>phpstan-tmp/*</exclude-pattern>
 
 	<!-- Skip the build directory -->
 	<exclude-pattern>build/*</exclude-pattern>
