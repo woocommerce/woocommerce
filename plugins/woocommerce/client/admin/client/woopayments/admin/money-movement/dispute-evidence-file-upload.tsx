@@ -54,19 +54,28 @@ export const DisputeEvidenceFileUpload = ( {
 	onUploadStateChange,
 }: DisputeEvidenceFileUploadProps ) => {
 	const [ isUploading, setIsUploading ] = useState( false );
+	const rowRef = useRef< HTMLDivElement | null >( null );
 	const inputRef = useRef< HTMLInputElement | null >( null );
 	const inputId = `woocommerce-woopayments-dispute-evidence-${ field }`;
 	const fileName = getEvidenceFileName( file );
 	const currentFileSize = file?.size || 0;
-	const uploadLabel = sprintf(
-		/* translators: %s: evidence file field label. */
-		__( 'Upload %s', 'woocommerce' ),
-		label.toLowerCase()
-	);
+	const labelAlreadyContainsUpload = label
+		.toLowerCase()
+		.startsWith( 'upload ' );
+	const uploadLabel = labelAlreadyContainsUpload
+		? label
+		: sprintf(
+				/* translators: %s: evidence file field label. */
+				__( 'Upload %s', 'woocommerce' ),
+				label.toLowerCase()
+		  );
+	const removeFieldLabel = labelAlreadyContainsUpload
+		? label.replace( /^upload\s+/i, '' )
+		: label;
 	const removeLabel = sprintf(
 		/* translators: %s: evidence file field label. */
 		__( 'Remove %s', 'woocommerce' ),
-		label.toLowerCase()
+		removeFieldLabel.toLowerCase()
 	);
 	const isControlDisabled = disabled || isUploading;
 
@@ -152,7 +161,20 @@ export const DisputeEvidenceFileUpload = ( {
 		} finally {
 			setUploading( false );
 			if ( uploadSucceeded ) {
-				setTimeout( () => inputRef.current?.focus(), 0 );
+				setTimeout( () => {
+					const ownerDocument = rowRef.current?.ownerDocument;
+					const activeElement = ownerDocument?.activeElement;
+					const focusIsStillInUploadRow =
+						activeElement instanceof HTMLElement &&
+						!! rowRef.current?.contains( activeElement );
+
+					if (
+						activeElement === ownerDocument?.body ||
+						focusIsStillInUploadRow
+					) {
+						inputRef.current?.focus();
+					}
+				}, 0 );
 			}
 		}
 	};
@@ -171,7 +193,10 @@ export const DisputeEvidenceFileUpload = ( {
 	};
 
 	return (
-		<div className="woocommerce-woopayments-dispute-evidence-file">
+		<div
+			ref={ rowRef }
+			className="woocommerce-woopayments-dispute-evidence-file"
+		>
 			<div className="woocommerce-woopayments-dispute-evidence-file__main">
 				{ disabled ? (
 					<span className="woocommerce-woopayments-dispute-evidence-file__label">

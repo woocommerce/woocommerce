@@ -232,20 +232,355 @@ describe( 'WooPaymentsDisputeChallengePage', () => {
 			screen.getByRole( 'textbox', { name: 'Product description' } )
 		).toBeEnabled();
 		expect(
-			screen.getByRole( 'textbox', { name: 'Additional evidence' } )
-		).toBeEnabled();
-		expect( screen.getByLabelText( 'Upload receipt' ) ).toBeInTheDocument();
+			screen.queryByRole( 'textbox', { name: 'Additional evidence' } )
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByLabelText( 'Upload order receipt' )
+		).toBeInTheDocument();
 		expect(
 			screen.getByRole( 'button', { name: 'Save draft' } )
 		).toBeEnabled();
 		expect(
-			screen.getByRole( 'button', { name: 'Submit evidence' } )
+			screen.getByRole( 'button', { name: 'Continue' } )
 		).toBeEnabled();
+		expect(
+			screen.queryByRole( 'button', { name: 'Submit evidence' } )
+		).not.toBeInTheDocument();
 		expect(
 			screen.queryByText(
 				'Dispute evidence submission is not available in this native WooPayments admin surface yet.'
 			)
 		).not.toBeInTheDocument();
+	} );
+
+	it( 'should render recommended documents and autosave before the shipping step', async () => {
+		mockGetDispute.mockResolvedValue( makeDispute() );
+
+		renderChallengePage();
+
+		expect(
+			await screen.findByRole( 'heading', {
+				name: "Let's gather the basics",
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText( 'Recommended documents' )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				'While optional, we strongly recommend providing as many of these documents as possible. The following file types are supported: PDF, JPEG, and PNG.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'link', {
+				name: /Learn more about documents/i,
+			} )
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/document/woopayments/fraud-and-disputes/managing-disputes/#challenge-or-accept'
+		);
+		const productTypeSelect = screen.getByRole( 'combobox', {
+			name: 'Product type',
+		} );
+		expect(
+			Array.from( productTypeSelect.querySelectorAll( 'option' ) ).map(
+				( option ) => ( option as HTMLOptionElement ).textContent
+			)
+		).toEqual( [
+			'Physical products',
+			'Digital products',
+			'Offline service',
+			'Booking/Reservation',
+			'Event',
+			'Other',
+		] );
+		expect(
+			screen.getByLabelText( 'Upload customer communication' )
+		).toBeInTheDocument();
+		expect(
+			screen.getByLabelText( 'Upload order receipt' )
+		).toBeInTheDocument();
+		expect(
+			screen.getByLabelText(
+				'Upload prior undisputed transaction history'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.getByLabelText( "Upload customer's signature" )
+		).toBeInTheDocument();
+		expect(
+			screen.getByLabelText( 'Upload refund policy' )
+		).toBeInTheDocument();
+		expect(
+			screen.getByLabelText( 'Upload other documents' )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByLabelText( 'Upload shipping documentation' )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByLabelText( 'Upload proof of shipping' )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByLabelText( 'Upload cancellation policy' )
+		).not.toBeInTheDocument();
+
+		await userEvent.type(
+			screen.getByRole( 'textbox', { name: 'Product description' } ),
+			'Custom roasted coffee beans.'
+		);
+		await clickButton( 'Continue' );
+
+		await waitFor( () =>
+			expect( mockUpdateDispute ).toHaveBeenCalledWith(
+				'dp_test',
+				expect.objectContaining( {
+					submit: false,
+					evidence: expect.objectContaining( {
+						product_description: 'Custom roasted coffee beans.',
+					} ),
+				} )
+			)
+		);
+		expect( mockRecordEvent ).not.toHaveBeenCalledWith(
+			'wcpay_dispute_save_evidence_success',
+			expect.anything()
+		);
+		expect(
+			await screen.findByRole( 'heading', {
+				name: 'Add your shipping details',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'textbox', { name: 'Shipping carrier' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByLabelText( 'Upload proof of shipping' )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				'A receipt from the shipping carrier or a tracking number, for example.'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'should move focus to the active step heading after wizard navigation', async () => {
+		mockGetDispute.mockResolvedValue( makeDispute() );
+
+		renderChallengePage();
+
+		await screen.findByRole( 'button', { name: 'Continue' } );
+		await clickButton( 'Continue' );
+
+		expect(
+			await screen.findByRole( 'heading', {
+				name: 'Add your shipping details',
+			} )
+		).toHaveFocus();
+	} );
+
+	it( 'should use duplicate status to label duplicate-dispute evidence without adding unsupported fields', async () => {
+		mockGetDispute.mockResolvedValue(
+			makeDispute( {
+				reason: 'duplicate',
+			} )
+		);
+
+		renderChallengePage();
+
+		expect(
+			await screen.findByRole( 'group', {
+				name: 'Was this charge a duplicate?',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'heading', {
+				name: 'Was this charge a duplicate?',
+			} )
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByRole( 'radio', { name: /It was a duplicate/i } )
+		).toBeChecked();
+		expect(
+			screen.getByLabelText( 'Upload refund receipt' )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByLabelText( 'Upload refund receipt documentation' )
+		).not.toBeInTheDocument();
+
+		await userEvent.click(
+			screen.getByRole( 'radio', { name: /It was not a duplicate/i } )
+		);
+
+		expect(
+			screen.getByLabelText( 'Upload any additional receipts' )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByLabelText( 'Upload refund receipt' )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'should use refund status to label credit-not-processed evidence without adding unsupported fields', async () => {
+		mockGetDispute.mockResolvedValue(
+			makeDispute( {
+				reason: 'credit_not_processed',
+			} )
+		);
+
+		renderChallengePage();
+
+		expect(
+			await screen.findByRole( 'group', {
+				name: 'Refund status',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'heading', { name: 'Refund status' } )
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByRole( 'radio', { name: /Refund has been issued/i } )
+		).toBeChecked();
+		expect(
+			screen.getByLabelText( 'Upload refund receipt' )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByLabelText( 'Upload refund receipt documentation' )
+		).not.toBeInTheDocument();
+
+		await userEvent.click(
+			screen.getByRole( 'radio', { name: /Refund was not owed/i } )
+		);
+
+		expect(
+			screen.queryByLabelText( 'Upload refund receipt' )
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByLabelText( 'Upload refund policy' )
+		).toBeInTheDocument();
+	} );
+
+	it( 'should skip shipping and generate the review cover letter when shipping is not needed', async () => {
+		mockGetDispute.mockResolvedValue(
+			makeDispute( {
+				order: {
+					id: 123,
+					number: '123',
+					suggested_product_type: 'digital_product_or_service',
+				},
+			} )
+		);
+
+		renderChallengePage();
+		await screen.findByRole( 'heading', {
+			name: "Let's gather the basics",
+		} );
+		await userEvent.type(
+			screen.getByRole( 'textbox', { name: 'Product description' } ),
+			'Downloaded software.'
+		);
+		await clickButton( 'Continue' );
+
+		expect(
+			await screen.findByRole( 'heading', {
+				name: 'Review your cover letter',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'heading', {
+				name: 'Add your shipping details',
+			} )
+		).not.toBeInTheDocument();
+		expect(
+			(
+				screen.getByRole( 'textbox', {
+					name: 'Cover letter',
+				} ) as HTMLTextAreaElement
+			 ).value
+		).toContain( 'Downloaded software.' );
+	} );
+
+	it( 'should render the Visa compliance single-panel evidence flow', async () => {
+		mockGetDispute.mockResolvedValue(
+			makeDispute( {
+				reason: 'noncompliant',
+				enhanced_eligibility_types: [ 'visa_compliance' ],
+			} )
+		);
+
+		renderChallengePage();
+
+		expect(
+			await screen.findByRole( 'heading', {
+				name: 'Dispute information',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'heading', {
+				name: 'Tell us about the dispute',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'combobox', { name: 'Product type' } )
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByLabelText( 'Upload evidence' )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				'Submit any files you find relevant to this dispute.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.getByLabelText( 'Upload other documents' )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByLabelText( 'Upload customer communication' )
+		).not.toBeInTheDocument();
+		const details = screen.getByRole( 'textbox', {
+			name: 'Why do you disagree with this dispute?',
+		} );
+
+		expect( details ).toHaveAttribute( 'maxlength', '20000' );
+		mockUpdateDispute.mockResolvedValueOnce(
+			makeDispute( {
+				reason: 'noncompliant',
+				enhanced_eligibility_types: [ 'visa_compliance' ],
+			} )
+		);
+		await userEvent.type( details, 'The compliance dispute is incorrect.' );
+		await clickButton( 'Submit evidence' );
+
+		await waitFor( () =>
+			expect( mockUpdateDispute ).toHaveBeenCalledWith(
+				'dp_test',
+				expect.objectContaining( {
+					submit: true,
+					evidence: expect.objectContaining( {
+						uncategorized_text:
+							'The compliance dispute is incorrect.',
+					} ),
+				} )
+			)
+		);
+		expect(
+			await screen.findByText(
+				'Your response has been submitted under Visa’s compliance process.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				'Visa will review your submission under its network rules and determine the outcome of the dispute.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				'This review typically takes several weeks, but in some cases may take up to 3 months.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				/The outcome of this dispute will be determined by Visa./
+			)
+		).toBeInTheDocument();
 	} );
 
 	it( 'should render non-actionable disputes as read-only', async () => {
@@ -267,7 +602,7 @@ describe( 'WooPaymentsDisputeChallengePage', () => {
 			screen.getByRole( 'textbox', { name: 'Product description' } )
 		).toHaveAttribute( 'readonly' );
 		expect(
-			screen.queryByLabelText( 'Upload receipt' )
+			screen.queryByLabelText( 'Upload order receipt' )
 		).not.toBeInTheDocument();
 		expect(
 			screen.queryByRole( 'button', { name: 'Save draft' } )
@@ -365,7 +700,7 @@ describe( 'WooPaymentsDisputeChallengePage', () => {
 
 		expect( await screen.findByText( 'file_receipt' ) ).toBeInTheDocument();
 		await uploadFile(
-			'Upload receipt',
+			'Upload order receipt',
 			new File( [ 'replacement' ], 'replacement.pdf', {
 				type: 'application/pdf',
 			} )
@@ -421,7 +756,7 @@ describe( 'WooPaymentsDisputeChallengePage', () => {
 
 		renderChallengePage();
 		await screen.findByText( 'customer-email.pdf' );
-		await uploadFile( 'Upload receipt', tooLarge );
+		await uploadFile( 'Upload order receipt', tooLarge );
 
 		expect( await screen.findByRole( 'alert' ) ).toHaveTextContent(
 			'The selected files exceed the 4.5 MB dispute evidence limit.'
@@ -438,10 +773,10 @@ describe( 'WooPaymentsDisputeChallengePage', () => {
 		} );
 
 		renderChallengePage();
-		await uploadFile( 'Upload receipt' );
+		await uploadFile( 'Upload order receipt' );
 		expect( await screen.findByText( 'receipt.pdf' ) ).toBeInTheDocument();
 		expect( mockSpeak ).toHaveBeenCalledWith(
-			'Receipt uploaded.',
+			'Order receipt uploaded.',
 			'polite'
 		);
 		await clickButton( 'Save draft' );
@@ -523,9 +858,43 @@ describe( 'WooPaymentsDisputeChallengePage', () => {
 				dispute_id: 'dp_test',
 			} )
 		);
-		expect( mockSpeak ).toHaveBeenCalledWith(
-			'Evidence draft saved.',
-			'polite'
+		expect( mockSpeak ).toHaveBeenCalledWith( 'Evidence saved!', 'polite' );
+	} );
+
+	it( 'should clear stale shipping evidence when saving a non-shipping product type', async () => {
+		mockGetDispute.mockResolvedValue(
+			makeDispute( {
+				evidence: {
+					shipping_carrier: 'Old carrier',
+					shipping_tracking_number: '1Z999',
+					shipping_documentation: 'file_old_shipping',
+				},
+			} )
+		);
+
+		renderChallengePage();
+		await screen.findByRole( 'combobox', { name: 'Product type' } );
+		await userEvent.selectOptions(
+			screen.getByRole( 'combobox', { name: 'Product type' } ),
+			'digital_product_or_service'
+		);
+		await clickButton( 'Save draft' );
+
+		await waitFor( () =>
+			expect( mockUpdateDispute ).toHaveBeenCalledWith(
+				'dp_test',
+				expect.objectContaining( {
+					submit: false,
+					evidence: expect.objectContaining( {
+						shipping_carrier: '',
+						shipping_tracking_number: '',
+						shipping_documentation: '',
+					} ),
+					metadata: expect.objectContaining( {
+						__product_type: 'digital_product_or_service',
+					} ),
+				} )
+			)
 		);
 	} );
 
@@ -541,7 +910,7 @@ describe( 'WooPaymentsDisputeChallengePage', () => {
 		);
 
 		renderChallengePage();
-		await uploadFile( 'Upload receipt' );
+		await uploadFile( 'Upload order receipt' );
 
 		const saveButton = screen.getByRole( 'button', {
 			name: 'Save draft',
@@ -559,22 +928,65 @@ describe( 'WooPaymentsDisputeChallengePage', () => {
 		} );
 	} );
 
+	it( 'should not steal focus when an accepted upload finishes after the user moved focus', async () => {
+		mockGetDispute.mockResolvedValue( makeDispute() );
+		let resolveUpload: (
+			value: Awaited< ReturnType< typeof uploadWooPaymentsDisputeFile > >
+		) => void = () => {};
+		mockUploadFile.mockReturnValueOnce(
+			new Promise( ( resolve ) => {
+				resolveUpload = resolve;
+			} )
+		);
+
+		renderChallengePage();
+		await uploadFile( 'Upload order receipt' );
+
+		const saveButton = screen.getByRole( 'button', {
+			name: 'Save draft',
+		} );
+		saveButton.focus();
+		expect( saveButton ).toHaveFocus();
+
+		await act( async () => {
+			resolveUpload( {
+				id: 'file_receipt',
+				filename: 'receipt.pdf',
+				size: 7,
+			} );
+		} );
+
+		expect( await screen.findByText( 'receipt.pdf' ) ).toBeInTheDocument();
+		await waitFor( () => expect( saveButton ).toHaveFocus() );
+	} );
+
 	it( 'should confirm final submission and post submit=true', async () => {
 		mockGetDispute.mockResolvedValue( makeDispute() );
 
 		renderChallengePage();
+		await screen.findByRole( 'button', { name: 'Continue' } );
+		await clickButton( 'Continue' );
+		await screen.findByRole( 'heading', {
+			name: 'Add your shipping details',
+		} );
+		await clickButton( 'Continue' );
 		await screen.findByRole( 'button', { name: 'Submit evidence' } );
 		await clickButton( 'Submit evidence' );
 
-		expect( window.confirm ).toHaveBeenCalled();
+		expect( window.confirm ).toHaveBeenCalledWith(
+			'Are you sure you’re ready to submit this evidence? Evidence submissions are final.'
+		);
 		await waitFor( () =>
-			expect( mockUpdateDispute ).toHaveBeenCalledWith(
+			expect( mockUpdateDispute ).toHaveBeenLastCalledWith(
 				'dp_test',
-				expect.objectContaining( {
-					submit: true,
-				} )
+				expect.objectContaining( { submit: true } )
 			)
 		);
+		expect(
+			await screen.findByRole( 'heading', {
+				name: 'Thanks for sharing your response!',
+			} )
+		).toBeInTheDocument();
 		expect( mockRecordEvent ).toHaveBeenCalledWith(
 			'wcpay_dispute_submit_evidence_clicked',
 			expect.objectContaining( {
@@ -619,7 +1031,7 @@ describe( 'WooPaymentsDisputeChallengePage', () => {
 		mockUploadFile.mockRejectedValueOnce( new Error( 'Upload failed' ) );
 
 		renderChallengePage();
-		await uploadFile( 'Upload receipt' );
+		await uploadFile( 'Upload order receipt' );
 
 		expect( await screen.findByRole( 'alert' ) ).toHaveTextContent(
 			'Upload failed'

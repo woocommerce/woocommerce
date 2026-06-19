@@ -39,6 +39,24 @@
 	gap: 16px;
 }
 
+.woocommerce-woopayments-dispute-evidence__step,
+.woocommerce-woopayments-dispute-evidence__confirmation {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	display: grid;
+	gap: 8px;
+	padding: 16px;
+}
+
+.woocommerce-woopayments-dispute-evidence__step h3,
+.woocommerce-woopayments-dispute-evidence__step p,
+.woocommerce-woopayments-dispute-evidence__confirmation h3,
+.woocommerce-woopayments-dispute-evidence__confirmation h4,
+.woocommerce-woopayments-dispute-evidence__confirmation p {
+	margin: 0;
+}
+
 .woocommerce-woopayments-dispute-evidence__section {
 	background: #fff;
 	border: 1px solid #dcdcde;
@@ -55,18 +73,34 @@
 	padding: 0 4px;
 }
 
-.woocommerce-woopayments-dispute-evidence-file {
-	align-items: center;
+.woocommerce-woopayments-dispute-evidence__section h4,
+.woocommerce-woopayments-dispute-evidence__section-description,
+.woocommerce-woopayments-dispute-evidence__document-description {
+	margin: 0;
+}
+
+.woocommerce-woopayments-dispute-evidence__section-description,
+.woocommerce-woopayments-dispute-evidence__document-description {
+	color: #646970;
+}
+
+.woocommerce-woopayments-dispute-evidence__document {
 	border-top: 1px solid #f0f0f1;
 	display: grid;
-	gap: 12px;
-	grid-template-columns: minmax(0, 1fr) minmax(220px, max-content);
+	gap: 8px;
 	padding-top: 12px;
 }
 
-.woocommerce-woopayments-dispute-evidence-file:first-of-type {
+.woocommerce-woopayments-dispute-evidence__document:first-of-type {
 	border-top: 0;
 	padding-top: 0;
+}
+
+.woocommerce-woopayments-dispute-evidence-file {
+	align-items: center;
+	display: grid;
+	gap: 12px;
+	grid-template-columns: minmax(0, 1fr) minmax(220px, max-content);
 }
 
 .woocommerce-woopayments-dispute-evidence-file__main {
