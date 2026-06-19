@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Block add to cart: adding a product that is in the cart only inside a bundle (or only as a booking, add-on configuration, or recipient-differentiated line) now adds a new standalone line instead of showing an error or changing the existing line's quantity.
