@@ -34,6 +34,20 @@ class CustomerVerifyEmail extends WC_Email {
 	public $user_display_name;
 
 	/**
+	 * Customer email address. Populated by the email preview ({@see EmailPreview}) for the editor.
+	 *
+	 * @var string
+	 */
+	public $user_email;
+
+	/**
+	 * Customer login. Populated by the email preview ({@see EmailPreview}) for the editor.
+	 *
+	 * @var string
+	 */
+	public $user_login;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
