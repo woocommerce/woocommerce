@@ -476,6 +476,7 @@
 			],
 			"dependencies": [
 				"@wordpress/admin-ui",
+				"@wordpress/base-styles",
 				"@wordpress/dataviews",
 				"@wordpress/fields",
 				"@wordpress/icons",
