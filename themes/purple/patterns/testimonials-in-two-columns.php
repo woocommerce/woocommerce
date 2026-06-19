@@ -1,7 +1,7 @@
 <?php
 /**
  * Title: Testimonials in two columns
- * Slug: purple/testimonials-two-columns
+ * Slug: purple/testimonials-in-two-columns
  * Categories: testimonials, purple
  * Keywords: testimonials, text, media
  * Description: A section with a heading and a 2 column testimonial grid.
