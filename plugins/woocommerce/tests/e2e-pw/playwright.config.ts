@@ -140,11 +140,6 @@ const serialRunSpecs = [
 	// Mutates global checkout login/signup reminder options and flips
 	// `woocommerce_calc_taxes` (baseline is `yes`; this toggles it off then on).
 	'**/tests/checkout/checkout.spec.ts',
-	// Sets the global store currency and exercises the shared blocks cart page.
-	'**/tests/coupons/cart-block-coupons.spec.ts',
-	// Creates a global "Free Shipping" shipping zone (and US store address) that
-	// other workers' cart/checkout flows would pick up.
-	'**/tests/coupons/cart-checkout-restricted-coupons.spec.ts',
 	// Every spec toggles a global email feature flag via `setOption`:
 	// `editor-tracking-selectors`/`settings-email-listing` flip
 	// `woocommerce_feature_block_email_editor_enabled`, while `account-emails`/
