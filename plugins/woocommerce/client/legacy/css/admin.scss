@@ -3045,7 +3045,6 @@ ul.wc_coupon_list_block {
 
 .woocommerce_page_wc-orders,
 .post-type-shop_order {
-	// Apply the agreed team-wide 2-column grid sizing standard to the Order edit/new screens.
 	// `:has(#poststuff)` excludes the orders list screen (which doesn't render #poststuff).
 	// Total width is derived (not hardcoded) from the two column tokens plus the gap token:
 	// surface-width-xl (720) + padding-2xl (24) + surface-width-sm (320) = 1064px.
