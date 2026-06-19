@@ -9,7 +9,7 @@
 		border: 0;
 
 		&.is-opened {
-			margin-bottom: $gap-large;
+			margin-bottom: 0;
 
 			.components-panel__body-toggle {
 				border-bottom: 1px solid $gray-200;
@@ -34,6 +34,11 @@
 
 	.components-panel__body-toggle {
 		border-radius: 0;
+
+		&:focus:not(:focus-visible) {
+			box-shadow: none;
+			outline: none;
+		}
 
 		&:disabled {
 			opacity: 1;
