@@ -120,7 +120,8 @@ class ApiController {
 				$response['path'],
 				$response['file_name'],
 				$response['page'],
-				$response['entries_written']
+				$response['entries_written'],
+				$response['updated_at']
 			);
 		} catch ( \Exception $e ) {
 			wc_get_logger()->error(

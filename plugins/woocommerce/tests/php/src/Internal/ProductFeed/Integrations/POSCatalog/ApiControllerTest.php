@@ -90,9 +90,13 @@ class ApiControllerTest extends \WC_Unit_Test_Case {
 			->with( $fields ? array( '_product_fields' => $fields ) : array() )
 			->willReturn(
 				array(
-					'action_id' => 6789,
-					'path'      => '/tmp/random_path.json',
-					'url'       => 'https://example.com/feed.json',
+					'action_id'       => 6789,
+					'path'            => '/tmp/random_path.json',
+					'file_name'       => 'pos-catalog-feed.json',
+					'page'            => 3,
+					'entries_written' => 250,
+					'updated_at'      => time(),
+					'url'             => 'https://example.com/feed.json',
 				)
 			);
 
@@ -100,8 +104,12 @@ class ApiControllerTest extends \WC_Unit_Test_Case {
 		$response_data = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertArrayNotHasKey( 'action_id', $response_data );
-		$this->assertArrayNotHasKey( 'path', $response_data );
+
+		// Sensitive and internal-only fields must never be exposed to the client.
+		foreach ( array( 'action_id', 'path', 'file_name', 'page', 'entries_written', 'updated_at' ) as $internal_key ) {
+			$this->assertArrayNotHasKey( $internal_key, $response_data );
+		}
+
 		$this->assertArrayHasKey( 'url', $response_data );
 		$this->assertEquals( 'https://example.com/feed.json', $response_data['url'] );
 	}
