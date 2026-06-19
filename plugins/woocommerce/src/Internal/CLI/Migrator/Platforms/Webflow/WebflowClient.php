@@ -79,17 +79,20 @@ class WebflowClient {
 			$response      = wp_remote_request( $endpoint, $request_args );
 			$response_code = is_wp_error( $response ) ? 0 : (int) wp_remote_retrieve_response_code( $response );
 
-			if ( 429 === $response_code && $attempt < self::MAX_RETRIES ) {
+			if ( 429 !== $response_code ) {
+				return $this->process_response( $response, $path );
+			}
+
+			// Rate limited: back off and retry until the budget is exhausted. The final
+			// attempt falls through to the retry-budget error below rather than retrying.
+			if ( $attempt < self::MAX_RETRIES ) {
 				$retry_after = (int) wp_remote_retrieve_header( $response, 'retry-after' );
 				$delay       = $retry_after > 0 ? $retry_after : ( 2 ** $attempt );
 				$delay       = min( 30, max( 1, $delay ) );
 				if ( function_exists( 'sleep' ) ) {
 					sleep( $delay );
 				}
-				continue;
 			}
-
-			return $this->process_response( $response, $path );
 		}
 
 		return new \WP_Error( 'api_error', "REST request to {$path} exceeded retry budget after repeated 429 responses." );

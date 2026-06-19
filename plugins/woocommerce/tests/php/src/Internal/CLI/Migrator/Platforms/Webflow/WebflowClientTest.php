@@ -232,7 +232,7 @@ class WebflowClientTest extends WC_Unit_Test_Case {
 		$this->assertSame( 4, $attempts );
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'api_error', $result->get_error_code() );
-		$this->assertStringContainsString( '429', $result->get_error_message() );
+		$this->assertStringContainsString( 'retry budget', $result->get_error_message() );
 	}
 
 	/**
