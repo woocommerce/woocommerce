@@ -75,7 +75,7 @@
 		"@wordpress/a11y": "catalog:wp-min",
 		"@wordpress/admin-ui": "catalog:wp-bundled",
 		"@wordpress/api-fetch": "catalog:wp-min",
-		"@wordpress/base-styles": "catalog:wp-min",
+		"@wordpress/base-styles": "catalog:wp-bundled",
 		"@wordpress/blob": "catalog:wp-min",
 		"@wordpress/blocks": "catalog:wp-min",
 		"@wordpress/components": "catalog:wp-min",

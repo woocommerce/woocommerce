@@ -74,7 +74,7 @@
 		"@wordpress/notices": "catalog:wp-min",
 		"@wordpress/api-fetch": "catalog:wp-min",
 		"@wordpress/url": "catalog:wp-min",
-		"@wordpress/base-styles": "catalog:wp-min",
+		"@wordpress/base-styles": "6.20.0",
 		"clsx": "2.1.x",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"

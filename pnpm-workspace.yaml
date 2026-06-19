@@ -10,7 +10,6 @@ catalogs:
         '@types/wordpress__viewport': 5.5.3
         '@wordpress/a11y': 4.33.1
         '@wordpress/api-fetch': 7.33.1
-        '@wordpress/base-styles': 6.9.1
         '@wordpress/blob': 4.33.1
         '@wordpress/block-editor': 15.6.9
         '@wordpress/block-library': 9.33.10
@@ -66,6 +65,7 @@ catalogs:
         '@wordpress/interface': 9.18.5
         '@wordpress/undo-manager': 1.33.1
         '@wordpress/views': 1.0.8
+        '@wordpress/base-styles': 6.9.1
 
 packages:
     - 'packages/js/*'
