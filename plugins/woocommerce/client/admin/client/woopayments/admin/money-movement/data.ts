@@ -9,6 +9,7 @@ import apiFetch from '@wordpress/api-fetch';
 import type {
 	WooPaymentsDispute,
 	WooPaymentsDisputeFile,
+	WooPaymentsFraudOutcomeQuery,
 	WooPaymentsListResponse,
 	WooPaymentsMoneyMovementQuery,
 	WooPaymentsCharge,
@@ -87,6 +88,62 @@ export const requestWooPaymentsTransactionsExport = (
 		method: 'POST',
 	} );
 
+export const getWooPaymentsTransactionsExportUrl = (
+	exportId: string
+): Promise< Record< string, unknown > > =>
+	apiFetch< Record< string, unknown > >( {
+		path: `${ PAYMENTS_PATH }/transactions/download/${ encodeURIComponent(
+			exportId
+		) }`,
+		method: 'GET',
+	} );
+
+export const getWooPaymentsFraudOutcomeTransactions = (
+	query: WooPaymentsFraudOutcomeQuery = {}
+): Promise< WooPaymentsListResponse< WooPaymentsTransaction > > =>
+	apiFetch< WooPaymentsListResponse< WooPaymentsTransaction > >( {
+		path: buildPathWithQuery(
+			`${ PAYMENTS_PATH }/transactions/fraud-outcomes`,
+			query
+		),
+		method: 'GET',
+	} );
+
+export const getWooPaymentsFraudOutcomeTransactionsSummary = (
+	query: WooPaymentsFraudOutcomeQuery = {}
+): Promise< Record< string, unknown > > =>
+	apiFetch< Record< string, unknown > >( {
+		path: buildPathWithQuery(
+			`${ PAYMENTS_PATH }/transactions/fraud-outcomes/summary`,
+			query
+		),
+		method: 'GET',
+	} );
+
+export const getWooPaymentsFraudOutcomeTransactionSearch = (
+	searchTerm: string
+): Promise< Array< { label: string } > > =>
+	apiFetch< Array< { label: string } > >( {
+		path: buildPathWithQuery(
+			`${ PAYMENTS_PATH }/transactions/fraud-outcomes/search`,
+			{
+				search_term: searchTerm,
+			}
+		),
+		method: 'GET',
+	} );
+
+export const getWooPaymentsFraudOutcomeTransactionsExport = (
+	query: WooPaymentsFraudOutcomeQuery = {}
+): Promise< WooPaymentsListResponse< WooPaymentsTransaction > > =>
+	apiFetch< WooPaymentsListResponse< WooPaymentsTransaction > >( {
+		path: buildPathWithQuery(
+			`${ PAYMENTS_PATH }/transactions/fraud-outcomes/download`,
+			query
+		),
+		method: 'GET',
+	} );
+
 export const getWooPaymentsDisputes = (
 	query: WooPaymentsMoneyMovementQuery = {}
 ): Promise< WooPaymentsListResponse< WooPaymentsDispute > > =>
@@ -125,6 +182,16 @@ export const requestWooPaymentsDisputesExport = (
 			query
 		),
 		method: 'POST',
+	} );
+
+export const getWooPaymentsDisputesExportUrl = (
+	exportId: string
+): Promise< Record< string, unknown > > =>
+	apiFetch< Record< string, unknown > >( {
+		path: `${ PAYMENTS_PATH }/disputes/download/${ encodeURIComponent(
+			exportId
+		) }`,
+		method: 'GET',
 	} );
 
 export const updateWooPaymentsDispute = (

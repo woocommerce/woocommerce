@@ -89,6 +89,22 @@ export const getWooPaymentsDepositsSummary = async (
 		method: 'GET',
 	} );
 
+export const requestWooPaymentsDepositsExport = async (
+	query: WooPaymentsDepositsQuery = {}
+): Promise< Record< string, unknown > > =>
+	apiFetch< Record< string, unknown > >( {
+		path: buildPathWithQuery( `${ DEPOSITS_PATH }/download`, query ),
+		method: 'POST',
+	} );
+
+export const getWooPaymentsDepositsExportUrl = async (
+	exportId: string
+): Promise< Record< string, unknown > > =>
+	apiFetch< Record< string, unknown > >( {
+		path: `${ DEPOSITS_PATH }/download/${ encodeURIComponent( exportId ) }`,
+		method: 'GET',
+	} );
+
 export const getWooPaymentsDeposit = async (
 	depositId: string
 ): Promise< WooPaymentsDeposit > =>

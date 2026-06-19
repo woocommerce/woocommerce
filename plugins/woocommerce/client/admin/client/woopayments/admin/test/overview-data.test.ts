@@ -14,6 +14,8 @@ import {
 	getWooPaymentsOverviewDisputes,
 	getWooPaymentsOverviewShell,
 	getWooPaymentsRecentDeposits,
+	getWooPaymentsDepositsExportUrl,
+	requestWooPaymentsDepositsExport,
 } from '../overview/data';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
@@ -73,6 +75,23 @@ describe( 'WooPayments overview deposits data', () => {
 		} );
 		expect( mockApiFetch ).toHaveBeenNthCalledWith( 2, {
 			path: '/wc/v3/payments/deposits/po_test',
+			method: 'GET',
+		} );
+	} );
+
+	it( 'requests payout exports and export URLs from preserved endpoint names', async () => {
+		await requestWooPaymentsDepositsExport( {
+			store_currency_is: 'usd',
+			status_is: 'paid',
+		} );
+		await getWooPaymentsDepositsExportUrl( 'export_test' );
+
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 1, {
+			path: '/wc/v3/payments/deposits/download?store_currency_is=usd&status_is=paid',
+			method: 'POST',
+		} );
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 2, {
+			path: '/wc/v3/payments/deposits/download/export_test',
 			method: 'GET',
 		} );
 	} );

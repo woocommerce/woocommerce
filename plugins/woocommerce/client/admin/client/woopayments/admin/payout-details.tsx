@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useLocation } from 'react-router-dom';
 
 /**
@@ -15,8 +15,19 @@ import {
 	formatPayoutStatus,
 	formatWooPaymentsAmount,
 } from './overview/utils';
-import { getWooPaymentsTransactionsSummary } from './money-movement/data';
-import { getErrorMessage } from './money-movement/utils';
+import {
+	getWooPaymentsTransactions,
+	getWooPaymentsTransactionsSummary,
+} from './money-movement/data';
+import type { WooPaymentsTransaction } from './money-movement/types';
+import {
+	formatAmount,
+	formatDate,
+	formatLabel,
+	getErrorMessage,
+	getResourceId,
+	getTransactionDetailsRoute,
+} from './money-movement/utils';
 import { getSettingsPaymentsProviderRouteUrl } from './utils';
 import './style.scss';
 
@@ -70,6 +81,9 @@ const SummaryRow = ( {
 export const WooPaymentsPayoutDetailsPage = () => {
 	const [ payout, setPayout ] = useState< WooPaymentsDeposit | null >( null );
 	const [ summary, setSummary ] = useState< PayoutTransactionSummary >( {} );
+	const [ transactions, setTransactions ] = useState<
+		WooPaymentsTransaction[]
+	>( [] );
 	const [ isLoading, setIsLoading ] = useState( true );
 	const [ errorMessage, setErrorMessage ] = useState< string | null >( null );
 	const location = useLocation();
@@ -90,16 +104,26 @@ export const WooPaymentsPayoutDetailsPage = () => {
 			setIsLoading( true );
 
 			try {
-				const [ nextPayout, nextSummary ] = await Promise.all( [
-					getWooPaymentsDeposit( payoutId ),
-					getWooPaymentsTransactionsSummary( {
-						deposit_id: payoutId,
-					} ),
-				] );
+				const transactionsQuery = {
+					deposit_id: payoutId,
+					page: 1,
+					pagesize: 25,
+					sort: 'date',
+					direction: 'desc',
+				};
+				const [ nextPayout, nextSummary, nextTransactions ] =
+					await Promise.all( [
+						getWooPaymentsDeposit( payoutId ),
+						getWooPaymentsTransactionsSummary( {
+							deposit_id: payoutId,
+						} ),
+						getWooPaymentsTransactions( transactionsQuery ),
+					] );
 
 				if ( isMounted ) {
 					setPayout( nextPayout );
 					setSummary( nextSummary );
+					setTransactions( nextTransactions.data || [] );
 					setErrorMessage( null );
 				}
 			} catch ( error ) {
@@ -252,6 +276,70 @@ export const WooPaymentsPayoutDetailsPage = () => {
 								) }
 							/>
 						</dl>
+						{ transactions.length > 0 && (
+							<table className="woocommerce-woopayments-money-movement__table">
+								<thead>
+									<tr>
+										<th scope="col">
+											{ __( 'Date', 'woocommerce' ) }
+										</th>
+										<th scope="col">
+											{ __( 'Type', 'woocommerce' ) }
+										</th>
+										<th scope="col">
+											{ __( 'Amount', 'woocommerce' ) }
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									{ transactions.map( ( transaction ) => {
+										const transactionId =
+											getResourceId( transaction );
+
+										return (
+											<tr key={ transactionId }>
+												<td>
+													{ formatDate(
+														transaction.date ||
+															transaction.created
+													) }
+												</td>
+												<td>
+													<a
+														href={ getSettingsPaymentsProviderRouteUrl(
+															getTransactionDetailsRoute(
+																transaction
+															)
+														) }
+														aria-label={ sprintf(
+															/* translators: 1: transaction type, 2: transaction ID. */
+															__(
+																'View transaction details for %1$s transaction %2$s',
+																'woocommerce'
+															),
+															formatLabel(
+																transaction.type
+															),
+															transactionId
+														) }
+													>
+														{ formatLabel(
+															transaction.type
+														) }
+													</a>
+												</td>
+												<td>
+													{ formatAmount(
+														transaction.amount,
+														transaction.currency
+													) }
+												</td>
+											</tr>
+										);
+									} ) }
+								</tbody>
+							</table>
+						) }
 					</section>
 				</>
 			) }

@@ -11,7 +11,13 @@ import {
 	getWooPaymentsDispute,
 	getWooPaymentsDisputeFileDetails,
 	getWooPaymentsDisputes,
+	getWooPaymentsDisputesExportUrl,
 	getWooPaymentsTransaction,
+	getWooPaymentsTransactionsExportUrl,
+	getWooPaymentsFraudOutcomeTransactions,
+	getWooPaymentsFraudOutcomeTransactionsSummary,
+	getWooPaymentsFraudOutcomeTransactionsExport,
+	getWooPaymentsFraudOutcomeTransactionSearch,
 	getWooPaymentsTransactionSearch,
 	getWooPaymentsTransactions,
 	requestWooPaymentsDisputesExport,
@@ -43,6 +49,7 @@ describe( 'WooPayments money movement data helpers', () => {
 		await requestWooPaymentsTransactionsExport( {
 			deposit_id: 'po_test',
 		} );
+		await getWooPaymentsTransactionsExportUrl( 'export_test' );
 
 		expect( mockApiFetch ).toHaveBeenNthCalledWith( 1, {
 			path: '/wc/v3/payments/transactions?page=2&pagesize=25&sort=date&direction=desc&store_currency_is=usd',
@@ -59,6 +66,45 @@ describe( 'WooPayments money movement data helpers', () => {
 		expect( mockApiFetch ).toHaveBeenNthCalledWith( 4, {
 			path: '/wc/v3/payments/transactions/download?deposit_id=po_test',
 			method: 'POST',
+		} );
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 5, {
+			path: '/wc/v3/payments/transactions/download/export_test',
+			method: 'GET',
+		} );
+	} );
+
+	it( 'preserves fraud outcome endpoint paths and query names', async () => {
+		await getWooPaymentsFraudOutcomeTransactions( {
+			status: 'block',
+			page: 2,
+			pagesize: 25,
+			sort: 'date',
+			direction: 'desc',
+			search: 'Ada',
+		} );
+		await getWooPaymentsFraudOutcomeTransactionsSummary( {
+			status: 'block',
+		} );
+		await getWooPaymentsFraudOutcomeTransactionSearch( 'Ada' );
+		await getWooPaymentsFraudOutcomeTransactionsExport( {
+			status: 'block',
+		} );
+
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 1, {
+			path: '/wc/v3/payments/transactions/fraud-outcomes?status=block&page=2&pagesize=25&sort=date&direction=desc&search=Ada',
+			method: 'GET',
+		} );
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 2, {
+			path: '/wc/v3/payments/transactions/fraud-outcomes/summary?status=block',
+			method: 'GET',
+		} );
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 3, {
+			path: '/wc/v3/payments/transactions/fraud-outcomes/search?search_term=Ada',
+			method: 'GET',
+		} );
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 4, {
+			path: '/wc/v3/payments/transactions/fraud-outcomes/download?status=block',
+			method: 'GET',
 		} );
 	} );
 
@@ -78,6 +124,7 @@ describe( 'WooPayments money movement data helpers', () => {
 		await requestWooPaymentsDisputesExport( {
 			status_is: 'needs_response',
 		} );
+		await getWooPaymentsDisputesExportUrl( 'export_test' );
 
 		expect( mockApiFetch ).toHaveBeenNthCalledWith( 1, {
 			path: '/wc/v3/payments/disputes?page=1&pagesize=25&status_is=needs_response',
@@ -103,6 +150,10 @@ describe( 'WooPayments money movement data helpers', () => {
 		expect( mockApiFetch ).toHaveBeenNthCalledWith( 5, {
 			path: '/wc/v3/payments/disputes/download?status_is=needs_response',
 			method: 'POST',
+		} );
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 6, {
+			path: '/wc/v3/payments/disputes/download/export_test',
+			method: 'GET',
 		} );
 	} );
 

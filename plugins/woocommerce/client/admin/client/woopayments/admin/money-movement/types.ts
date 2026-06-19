@@ -132,9 +132,74 @@ export interface WooPaymentsMoneyMovementQuery {
 	sort?: string;
 	direction?: string;
 	search?: string | string[];
-	status_is?: string;
-	status_is_not?: string;
-	store_currency_is?: string;
-	deposit_id?: string;
+	loan_id_is?: string | string[];
+	status_is?: string | string[];
+	status_is_not?: string | string[];
+	store_currency_is?: string | string[];
+	type_is?: string | string[];
+	deposit_id?: string | string[];
+	date_after?: string | string[];
+	date_before?: string | string[];
+	date_between?: string | string[];
+	[ key: string ]: string | string[] | number | boolean | undefined;
+}
+
+export type WooPaymentsMoneyMovementQueryFilterParam =
+	| 'loan_id_is'
+	| 'deposit_id'
+	| 'store_currency_is'
+	| 'type_is'
+	| 'status_is'
+	| 'status_is_not'
+	| 'date_after'
+	| 'date_before'
+	| 'date_between';
+
+export type WooPaymentsMoneyMovementSortDirection = 'asc' | 'desc';
+
+export interface WooPaymentsMoneyMovementRouteLocation {
+	pathname?: string;
+	search?: string;
+}
+
+export type WooPaymentsMoneyMovementDataViewFilterOperator =
+	| 'is'
+	| 'isNot'
+	| 'isAny'
+	| 'isNone'
+	| 'isAll'
+	| 'isNotAll';
+
+export interface WooPaymentsMoneyMovementDataViewFilter {
+	field: string;
+	operator: WooPaymentsMoneyMovementDataViewFilterOperator;
+	value: unknown;
+}
+
+export interface WooPaymentsMoneyMovementDataView {
+	type: 'table';
+	search?: string;
+	filters?: WooPaymentsMoneyMovementDataViewFilter[];
+	sort?: {
+		field: string;
+		direction: WooPaymentsMoneyMovementSortDirection;
+	};
+	page?: number;
+	perPage?: number;
+	fields?: string[];
+	titleField?: string;
+	showTitle?: boolean;
+	layout?: Record< string, unknown >;
+}
+
+export interface WooPaymentsFraudOutcomeQuery {
+	status?: 'allow' | 'block' | 'review' | string;
+	page?: number;
+	pagesize?: number;
+	sort?: string;
+	direction?: string;
+	search?: string;
+	search_term?: string;
+	additional_status?: string;
 	[ key: string ]: string | string[] | number | boolean | undefined;
 }
