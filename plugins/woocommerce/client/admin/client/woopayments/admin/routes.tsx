@@ -16,6 +16,13 @@ const WooPaymentsSettingsChunk = lazy(
 		)
 );
 
+const WooPaymentsExpressCheckoutSettingsChunk = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "settings-payments-woopayments-express-checkout-settings" */ '../settings/express-checkout'
+		)
+);
+
 const WooPaymentsOverviewChunk = lazy(
 	() =>
 		import(
@@ -103,6 +110,17 @@ registerSettingsPaymentsProviderRoute( {
 	element: (
 		<Suspense fallback={ <LoadingFallback /> }>
 			<WooPaymentsSettingsChunk />
+		</Suspense>
+	),
+} );
+
+registerSettingsPaymentsProviderRoute( {
+	id: 'woopayments-express-checkout-settings',
+	path: '/woopayments/settings/express-checkout/:methodId',
+	order: 91,
+	element: (
+		<Suspense fallback={ <LoadingFallback /> }>
+			<WooPaymentsExpressCheckoutSettingsChunk />
 		</Suspense>
 	),
 } );

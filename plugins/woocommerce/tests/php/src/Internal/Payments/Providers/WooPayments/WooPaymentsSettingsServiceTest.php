@@ -30,14 +30,22 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 	private RecordingSettingsApiClient $api_client;
 
 	/**
+	 * Mock WooPay session service.
+	 *
+	 * @var RecordingWooPaySessionService
+	 */
+	private RecordingWooPaySessionService $woopay_session_service;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->api_client = new RecordingSettingsApiClient();
-		$this->sut        = new WooPaymentsSettingsService();
-		$this->sut->init( $this->create_account_service(), $this->api_client );
+		$this->api_client             = new RecordingSettingsApiClient();
+		$this->woopay_session_service = new RecordingWooPaySessionService();
+		$this->sut                    = new WooPaymentsSettingsService();
+		$this->sut->init( $this->create_account_service(), $this->api_client, $this->woopay_session_service );
 	}
 
 	/**
@@ -126,6 +134,7 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 				'data'    => array(
 					'account_id'              => 'acct_native_test',
 					'is_live'                 => true,
+					'platform_global_theme_support_enabled' => true,
 					'capabilities'            => array(
 						'card_payments' => 'active',
 						'link_payments' => 'unrequested',
@@ -185,6 +194,16 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 				'card' => array( 'legacy-gateway' ),
 			)
 		);
+		$this->woopay_session_service->appearance = array(
+			'variables' => array(
+				'colorBackground' => '#ffffff',
+			),
+		);
+		$this->woopay_session_service->font_rules = array(
+			array(
+				'cssSrc' => 'https://fonts.googleapis.com/css2?family=Inter',
+			),
+		);
 
 		$settings = $this->sut->get_settings();
 
@@ -205,9 +224,15 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $settings['is_saved_cards_enabled'] );
 		$this->assertTrue( $settings['is_woopay_enabled'] );
 		$this->assertTrue( $settings['is_woopay_global_theme_support_enabled'] );
+		$this->assertTrue( $settings['is_woopay_global_theme_support_eligible'] );
+		$this->assertTrue( $settings['is_express_checkout_in_payment_methods_list_supported'] );
 		$this->assertTrue( $settings['show_woopay_incompatibility_notice'] );
 		$this->assertSame( 'Custom WooPay message.', $settings['woopay_custom_message'] );
 		$this->assertSame( 'file_logo', $settings['woopay_store_logo'] );
+		$this->assertSame( array( 'variables' => array( 'colorBackground' => '#ffffff' ) ), $settings['woopay_appearance'] );
+		$this->assertSame( array( array( 'cssSrc' => 'https://fonts.googleapis.com/css2?family=Inter' ) ), $settings['woopay_font_rules'] );
+		$this->assertSame( get_bloginfo( 'name' ), $settings['store_name'] );
+		$this->assertSame( '', $settings['site_logo_url'] );
 		$this->assertSame( array( 'payment_request' ), $settings['express_checkout_product_methods'] );
 		$this->assertSame( 'active', $settings['payment_method_statuses']['card_payments']['status'] );
 		$this->assertSame( 'unrequested', $settings['payment_method_statuses']['link_payments']['status'] );
@@ -1016,6 +1041,7 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 			'account_communications_email',
 			'is_payment_request_enabled',
 			'is_express_checkout_in_payment_methods_enabled',
+			'is_express_checkout_in_payment_methods_list_supported',
 			'is_debug_log_enabled',
 			'payment_request_button_size',
 			'payment_request_button_type',
@@ -1025,9 +1051,14 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 			'is_card_present_eligible',
 			'is_woopay_enabled',
 			'is_woopay_global_theme_support_enabled',
+			'is_woopay_global_theme_support_eligible',
 			'show_woopay_incompatibility_notice',
 			'woopay_custom_message',
 			'woopay_store_logo',
+			'woopay_appearance',
+			'woopay_font_rules',
+			'store_name',
+			'site_logo_url',
 			'deposit_schedule_interval',
 			'deposit_schedule_monthly_anchor',
 			'deposit_schedule_weekly_anchor',

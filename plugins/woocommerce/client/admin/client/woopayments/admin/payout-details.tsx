@@ -14,10 +14,10 @@ import {
 	formatPayoutDate,
 	formatPayoutStatus,
 	formatWooPaymentsAmount,
-	getSettingsPaymentsProviderRouteUrl,
 } from './overview/utils';
 import { getWooPaymentsTransactionsSummary } from './money-movement/data';
 import { getErrorMessage } from './money-movement/utils';
+import { getSettingsPaymentsProviderRouteUrl } from './utils';
 import './style.scss';
 
 type PayoutTransactionSummary = Record< string, unknown >;

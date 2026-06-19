@@ -167,6 +167,7 @@
 	}
 
 	&__controls.components-card {
+		box-sizing: border-box;
 		width: 100%;
 		padding: 24px;
 		border-radius: 2px;

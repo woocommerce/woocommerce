@@ -20,7 +20,7 @@ import {
 	getTransactionDetailsRoute,
 } from './utils';
 import { EmptyState, LiveStatusMessage, StatusMessage } from './table';
-import { getSettingsPaymentsProviderRouteUrl } from '../overview/utils';
+import { getSettingsPaymentsProviderRouteUrl } from '../utils';
 import '../style.scss';
 
 export const WooPaymentsDisputesPage = () => {

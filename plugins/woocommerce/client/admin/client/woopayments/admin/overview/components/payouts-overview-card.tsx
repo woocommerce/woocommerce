@@ -16,8 +16,8 @@ import {
 	formatWooPaymentsAmount,
 	getAmountForCurrency,
 	getDefaultCurrency,
-	getSettingsPaymentsProviderRouteUrl,
 } from '../utils';
+import { getSettingsPaymentsProviderRouteUrl } from '../../utils';
 
 const formatScheduleAnchor = ( value: string ) =>
 	value.replace( /^\w/, ( match ) => match.toUpperCase() );

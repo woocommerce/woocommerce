@@ -2,7 +2,7 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -311,26 +311,66 @@ describe( 'WooPaymentsSettingsPage', () => {
 	it( 'keeps express payment methods out of the standard payment methods list', () => {
 		render( <WooPaymentsSettingsPage /> );
 
+		const paymentMethodsGroup = screen
+			.getByRole( 'heading', { name: 'Payment methods' } )
+			.closest( '.woopayments-settings-field-group' ) as HTMLElement;
+		const expressCheckoutsSection = screen
+			.getByRole( 'heading', { name: 'Express checkouts' } )
+			.closest( '.woopayments-settings-section' ) as HTMLElement;
+
 		expect(
-			screen.getByRole( 'checkbox', {
+			within( paymentMethodsGroup ).getByRole( 'checkbox', {
 				name: /Credit \/ Debit Cards/,
 			} )
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'checkbox', { name: /Affirm/ } )
-		).toBeInTheDocument();
-		expect(
-			screen.queryByRole( 'checkbox', { name: 'Amazon Pay' } )
+			within( paymentMethodsGroup ).queryByRole( 'checkbox', {
+				name: 'Amazon Pay',
+			} )
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByRole( 'checkbox', { name: 'Link by Stripe' } )
+			within( paymentMethodsGroup ).queryByRole( 'checkbox', {
+				name: 'Link by Stripe',
+			} )
 		).not.toBeInTheDocument();
 		expect(
-			screen.getByRole( 'checkbox', { name: 'Enable Amazon Pay' } )
+			within( expressCheckoutsSection ).getByRole( 'checkbox', {
+				name: 'Amazon Pay',
+			} )
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'checkbox', { name: 'Enable Link by Stripe' } )
+			within( expressCheckoutsSection ).getByRole( 'checkbox', {
+				name: 'Link by Stripe',
+			} )
 		).toBeDisabled();
+	} );
+
+	it( 'hides Link by Stripe when card payments are not enabled', () => {
+		mockUseEnabledPaymentMethodIds.mockReturnValue( [
+			[ 'amazon_pay', 'affirm' ],
+			noop,
+		] );
+		mockUseSelectedPaymentMethod.mockReturnValue( [
+			[ 'amazon_pay', 'affirm' ],
+			noop,
+		] );
+		mockUseUnselectedPaymentMethod.mockReturnValue( [
+			[ 'amazon_pay', 'affirm' ],
+			noop,
+		] );
+		mockUseLinkEnabledSettings.mockReturnValue( [ false, noop, false ] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const expressCheckoutsSection = screen
+			.getByRole( 'heading', { name: 'Express checkouts' } )
+			.closest( '.woopayments-settings-section' ) as HTMLElement;
+
+		expect(
+			within( expressCheckoutsSection ).queryByRole( 'checkbox', {
+				name: 'Link by Stripe',
+			} )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'renders payment methods with the reference row content', () => {
@@ -551,14 +591,36 @@ describe( 'WooPaymentsSettingsPage', () => {
 		).not.toBeInTheDocument();
 	} );
 
-	it( 'preserves the Book express checkout button type option', () => {
-		mockUsePaymentRequestButtonType.mockReturnValue( [ 'book', noop ] );
-
+	it( 'links customizable express checkout rows to native provider settings routes', () => {
 		render( <WooPaymentsSettingsPage /> );
 
-		expect(
-			screen.getByRole( 'combobox', { name: 'Button type' } )
-		).toHaveValue( 'book' );
+		const customizeLinks = [
+			screen.getByRole( 'link', { name: 'Customize WooPay' } ),
+			screen.getByRole( 'link', {
+				name: 'Customize Apple Pay / Google Pay',
+			} ),
+			screen.getByRole( 'link', { name: 'Customize Amazon Pay' } ),
+		];
+
+		expect( customizeLinks ).toHaveLength( 3 );
+		expect( customizeLinks[ 0 ] ).toHaveAttribute(
+			'href',
+			expect.stringContaining(
+				'path=%2Fwoopayments%2Fsettings%2Fexpress-checkout%2Fwoopay'
+			)
+		);
+		expect( customizeLinks[ 1 ] ).toHaveAttribute(
+			'href',
+			expect.stringContaining(
+				'path=%2Fwoopayments%2Fsettings%2Fexpress-checkout%2Fpayment_request'
+			)
+		);
+		expect( customizeLinks[ 2 ] ).toHaveAttribute(
+			'href',
+			expect.stringContaining(
+				'path=%2Fwoopayments%2Fsettings%2Fexpress-checkout%2Famazon_pay'
+			)
+		);
 	} );
 
 	it( 'shows the manual-capture conflict banner and disables incompatible methods', () => {
@@ -715,20 +777,21 @@ describe( 'WooPaymentsSettingsPage', () => {
 		expect( setTestMode ).toHaveBeenCalledWith( true );
 	} );
 
-	it( 'groups repeated express checkout location controls by payment method', () => {
+	it( 'keeps express checkout detail controls out of the overview page', () => {
 		render( <WooPaymentsSettingsPage /> );
 
 		expect(
-			screen.getByRole( 'group', {
-				name: 'Apple Pay and Google Pay locations',
-			} )
-		).toBeInTheDocument();
+			screen.queryByLabelText( 'Show on product page' )
+		).not.toBeInTheDocument();
 		expect(
-			screen.getByRole( 'group', { name: 'Amazon Pay locations' } )
-		).toBeInTheDocument();
+			screen.queryByLabelText( 'Show on cart page' )
+		).not.toBeInTheDocument();
 		expect(
-			screen.getByRole( 'group', { name: 'WooPay locations' } )
-		).toBeInTheDocument();
+			screen.queryByLabelText( 'Show on checkout page' )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'combobox', { name: 'Call to action' } )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'does not render payout schedule controls while scheduling is unavailable', () => {

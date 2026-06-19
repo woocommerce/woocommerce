@@ -13,8 +13,8 @@ import {
 	formatPayoutDate,
 	formatPayoutStatus,
 	formatWooPaymentsAmount,
-	getSettingsPaymentsProviderRouteUrl,
 } from './overview/utils';
+import { getSettingsPaymentsProviderRouteUrl } from './utils';
 import './style.scss';
 
 const getErrorMessage = ( error: unknown ) => {

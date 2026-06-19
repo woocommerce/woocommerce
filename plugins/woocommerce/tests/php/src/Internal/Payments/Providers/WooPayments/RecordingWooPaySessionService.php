@@ -54,6 +54,20 @@ class RecordingWooPaySessionService extends WooPaymentsWooPaySessionService {
 	public array $last_appearance = array();
 
 	/**
+	 * WooPay appearance response.
+	 *
+	 * @var array<string,mixed>
+	 */
+	public array $appearance = array();
+
+	/**
+	 * WooPay font rules response.
+	 *
+	 * @var array<int,array<string,string>>
+	 */
+	public array $font_rules = array();
+
+	/**
 	 * Whether appearance should be stored.
 	 *
 	 * @var bool
@@ -208,6 +222,24 @@ class RecordingWooPaySessionService extends WooPaymentsWooPaySessionService {
 		$this->last_appearance = $appearance;
 
 		return $this->appearance_stored;
+	}
+
+	/**
+	 * Get WooPay appearance data.
+	 *
+	 * @return array<string,mixed>
+	 */
+	public function get_woopay_appearance(): array {
+		return $this->appearance;
+	}
+
+	/**
+	 * Get WooPay font rules.
+	 *
+	 * @return array<int,array<string,string>>
+	 */
+	public function get_woopay_font_rules(): array {
+		return $this->font_rules;
 	}
 
 	/**

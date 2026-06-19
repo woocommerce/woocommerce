@@ -20,6 +20,7 @@ describe( 'Settings Payments provider route bootstrap', () => {
 				routes.map( ( { path: routePath } ) => routePath )
 			).toEqual( [
 				'/woopayments/settings',
+				'/woopayments/settings/express-checkout/:methodId',
 				'/woopayments/overview',
 				'/woopayments/payouts',
 				'/woopayments/payouts/details',

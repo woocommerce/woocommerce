@@ -39,7 +39,7 @@ describe( 'WooPayments Settings Payments routes', () => {
 	it( 'registers WooPayments under the Settings Payments route seam', () => {
 		const routes = getSettingsPaymentsProviderRoutes();
 
-		expect( routes ).toHaveLength( 11 );
+		expect( routes ).toHaveLength( 12 );
 		expect(
 			routes.map( ( { id, path: routePath, order } ) => ( {
 				id,
@@ -51,6 +51,11 @@ describe( 'WooPayments Settings Payments routes', () => {
 				id: 'woopayments-settings',
 				path: '/woopayments/settings',
 				order: 90,
+			},
+			{
+				id: 'woopayments-express-checkout-settings',
+				path: '/woopayments/settings/express-checkout/:methodId',
+				order: 91,
 			},
 			{
 				id: 'woopayments-overview',
@@ -122,6 +127,17 @@ describe( 'WooPayments Settings Payments routes', () => {
 
 		expect( source ).toContain(
 			'webpackChunkName: "settings-payments-woopayments-settings"'
+		);
+	} );
+
+	it( 'loads the express checkout settings route from a dedicated chunk', () => {
+		const source = fs.readFileSync(
+			path.resolve( __dirname, '../routes.tsx' ),
+			'utf8'
+		);
+
+		expect( source ).toContain(
+			'webpackChunkName: "settings-payments-woopayments-express-checkout-settings"'
 		);
 	} );
 

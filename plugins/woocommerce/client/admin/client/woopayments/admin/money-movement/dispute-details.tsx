@@ -9,7 +9,7 @@ import { useLocation } from 'react-router-dom';
  */
 import { getWooPaymentsDispute } from './data';
 import { getTransactionDetailsRoute } from './utils';
-import { getSettingsPaymentsProviderRouteUrl } from '../overview/utils';
+import { getSettingsPaymentsProviderRouteUrl } from '../utils';
 
 export const WooPaymentsDisputeDetailsRedirect = () => {
 	const location = useLocation();

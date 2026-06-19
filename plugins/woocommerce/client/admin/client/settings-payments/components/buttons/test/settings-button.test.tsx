@@ -102,6 +102,26 @@ describe( 'SettingsButton', () => {
 		expect( mockNavigateToUrl ).not.toHaveBeenCalled();
 	} );
 
+	it( 'routes WooPayments settings paths through React Router', () => {
+		const { getByRole } = render(
+			<Router>
+				<SettingsButton
+					gatewayProvider={ gatewayProvider }
+					settingsHref={
+						'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=%2Fwoopayments%2Fsettings%2Fexpress-checkout%2Fwoopay&from=settings-payments'
+					}
+				/>
+			</Router>
+		);
+
+		fireEvent.click( getByRole( 'button', { name: 'Manage' } ) );
+
+		expect( mockNavigate ).toHaveBeenCalledWith(
+			'/wp-admin/admin.php?page=wc-settings&tab=checkout&path=%2Fwoopayments%2Fsettings%2Fexpress-checkout%2Fwoopay&from=settings-payments'
+		);
+		expect( mockNavigateToUrl ).not.toHaveBeenCalled();
+	} );
+
 	it( 'leaves non-Reactified provider settings URLs on full-page navigation', () => {
 		const sectionSettingsHref =
 			'http://localhost/wp-admin/admin.php?page=wc-settings&tab=checkout&section=third_party&from=settings-payments';

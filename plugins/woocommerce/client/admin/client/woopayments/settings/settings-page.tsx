@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import apiFetch from '@wordpress/api-fetch';
 import {
 	Button,
 	Card,
@@ -13,13 +12,13 @@ import {
 	Spinner,
 	TextControl,
 } from '@wordpress/components';
-import { dispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
+import { getSettingsPaymentsProviderRouteUrl } from '../admin/utils';
 import { getWooPaymentsSettingsBootstrap } from './bootstrap';
 import {
 	saveOption,
@@ -36,7 +35,6 @@ import {
 	useAccountStatementDescriptorKanji,
 	useAdvancedFraudProtectionSettings,
 	useAmazonPayEnabledSettings,
-	useAmazonPayLocations,
 	useCardPresentEligible,
 	useCompletedWaitingPeriod,
 	useCurrentProtectionLevel,
@@ -50,7 +48,6 @@ import {
 	useDevMode,
 	useDismissedDuplicatePaymentMethodNotices,
 	useEnabledPaymentMethodIds,
-	useExpressCheckoutInPaymentMethodsEnabledSettings,
 	useGetAccountFees,
 	useGetAvailablePaymentMethodIds,
 	useGetDuplicatedPaymentMethodIds,
@@ -61,24 +58,15 @@ import {
 	useLinkEnabledSettings,
 	useManualCapture,
 	useMultiCurrency,
-	usePaymentRequestButtonBorderRadius,
-	usePaymentRequestButtonSize,
-	usePaymentRequestButtonTheme,
-	usePaymentRequestButtonType,
 	usePaymentRequestEnabledSettings,
-	usePaymentRequestLocations,
 	useSavedCards,
 	useSelectedPaymentMethod as getSelectedPaymentMethodSetting,
 	useSettings,
 	useTestMode,
 	useTestModeOnboarding,
 	useUnselectedPaymentMethod as getUnselectedPaymentMethodSetting,
-	useWooPayCustomMessage,
 	useWooPayEnabledSettings,
-	useWooPayGlobalThemeSupportEnabledSettings,
-	useWooPayLocations,
 	useWooPayShowIncompatibilityNotice,
-	useWooPayStoreLogo,
 	useWCPaySubscriptions,
 } from './data/hooks';
 import './data/store';
@@ -89,8 +77,6 @@ const HEADING_ID = 'woopayments-settings-page-heading';
 const ACCOUNT_STATEMENT_MAX_LENGTH = 22;
 const ACCOUNT_STATEMENT_MAX_LENGTH_KANJI = 17;
 const ACCOUNT_STATEMENT_MAX_LENGTH_KANA = 22;
-const MAX_LOGO_FILE_SIZE = 510000;
-
 type SettingsRecord = Record< string, unknown >;
 type StringSetter = ( value: string ) => void;
 type BooleanSetter = ( value: boolean ) => void;
@@ -112,9 +98,20 @@ type PaymentMethodStatus = {
 };
 type AccountFees = Record< string, Record< string, unknown > | undefined >;
 type DuplicatePaymentMethodNotices = Record< string, string[] | undefined >;
-type PaymentRequestButtonType = 'default' | 'buy' | 'donate' | 'book';
-type PaymentRequestButtonSize = 'small' | 'medium' | 'large';
-type PaymentRequestButtonTheme = 'dark' | 'light' | 'light-outline';
+type CustomizableExpressCheckoutMethod =
+	| 'woopay'
+	| 'payment_request'
+	| 'amazon_pay';
+type ExpressCheckoutOverviewMethod = CustomizableExpressCheckoutMethod | 'link';
+type ExpressCheckoutOverviewRow = {
+	id: ExpressCheckoutOverviewMethod;
+	title: string;
+	checked: boolean;
+	disabled: boolean;
+	onChange: ( value: boolean ) => void;
+	description: string;
+	notice: string;
+};
 
 const BNPL_METHOD_IDS = [ 'affirm', 'afterpay_clearpay', 'klarna' ];
 const EXPRESS_METHOD_IDS = [ 'payment_request', 'woopay', 'amazon_pay' ];
@@ -160,11 +157,9 @@ const asDuplicatePaymentMethodNotices = (
 		? ( value as DuplicatePaymentMethodNotices )
 		: {};
 
-const getLiteralValue = < T extends string >(
-	value: string,
-	allowedValues: readonly T[],
-	fallback: T
-): T => ( allowedValues.includes( value as T ) ? ( value as T ) : fallback );
+const isCustomizableExpressCheckoutMethod = (
+	methodId: ExpressCheckoutOverviewMethod
+): methodId is CustomizableExpressCheckoutMethod => methodId !== 'link';
 
 const SettingsSection = ( {
 	id,
@@ -508,107 +503,116 @@ const BuyNowPayLaterSettingsSection = () => {
 	);
 };
 
-const LocationCheckboxes = ( {
-	legend,
-	enabledLocations,
-	onChange,
-}: {
-	legend: string;
-	enabledLocations: string[];
-	onChange: (
-		location: 'product' | 'cart' | 'checkout',
-		value: boolean
-	) => void;
-} ) => (
-	<fieldset className="woopayments-settings-location-fieldset">
-		<legend className="screen-reader-text">{ legend }</legend>
-		<div className="woopayments-settings-location-grid">
-			{ (
-				[
-					[ 'product', __( 'Product pages', 'woocommerce' ) ],
-					[ 'cart', __( 'Cart', 'woocommerce' ) ],
-					[ 'checkout', __( 'Checkout', 'woocommerce' ) ],
-				] as const
-			 ).map( ( [ location, label ] ) => (
-				<CheckboxControl
-					key={ location }
-					checked={ enabledLocations.includes( location ) }
-					label={ label }
-					onChange={ ( value ) =>
-						onChange( location, Boolean( value ) )
-					}
-					__nextHasNoMarginBottom
-				/>
-			) ) }
-		</div>
-	</fieldset>
-);
-
 const ExpressCheckoutSettingsSection = () => {
 	const [ isPaymentRequestEnabled, setIsPaymentRequestEnabled ] =
 		usePaymentRequestEnabledSettings() as BooleanSetting;
-	const [
-		isExpressCheckoutInPaymentMethodsEnabled,
-		setIsExpressCheckoutInPaymentMethodsEnabled,
-	] = useExpressCheckoutInPaymentMethodsEnabledSettings() as BooleanSetting;
-	const [ isLinkEnabled, setIsLinkEnabled, isWooPayEnabled ] =
-		useLinkEnabledSettings() as [
-			boolean,
-			( isEnabled: boolean ) => void,
-			boolean
-		];
+	const [ isWooPayEnabled, setIsWooPayEnabled ] =
+		useWooPayEnabledSettings() as BooleanSetting;
+	const [ isLinkEnabled, setIsLinkEnabled ] = useLinkEnabledSettings() as [
+		boolean,
+		( isEnabled: boolean ) => void,
+		boolean
+	];
+	const [ enabledMethodIds ] =
+		useEnabledPaymentMethodIds() as StringArraySetting;
 	const [ isAmazonPayEnabled, setIsAmazonPayEnabled ] =
 		useAmazonPayEnabledSettings() as BooleanSetting;
 	const availablePaymentMethodIds = asStringArray(
 		useGetAvailablePaymentMethodIds()
 	);
-	const isLinkAvailable = availablePaymentMethodIds.includes( 'link' );
+	const isLinkAvailable =
+		enabledMethodIds.includes( 'card' ) &&
+		availablePaymentMethodIds.includes( 'link' );
 	const isAmazonPayAvailable =
 		availablePaymentMethodIds.includes( 'amazon_pay' );
-	const [ paymentRequestButtonType, setPaymentRequestButtonType ] =
-		usePaymentRequestButtonType() as StringSetting;
-	const [ paymentRequestButtonSize, setPaymentRequestButtonSize ] =
-		usePaymentRequestButtonSize() as StringSetting;
-	const [ paymentRequestButtonTheme, setPaymentRequestButtonTheme ] =
-		usePaymentRequestButtonTheme() as StringSetting;
-	const [
-		paymentRequestButtonBorderRadius,
-		setPaymentRequestButtonBorderRadius,
-	] = usePaymentRequestButtonBorderRadius() as [
-		number | string,
-		( value: number ) => void
+	const showWooPayIncompatibilityNotice = Boolean(
+		useWooPayShowIncompatibilityNotice()
+	);
+	let wooPayNotice = '';
+
+	if ( isLinkEnabled ) {
+		wooPayNotice = __(
+			'To enable WooPay, you must first disable Link by Stripe.',
+			'woocommerce'
+		);
+	} else if ( showWooPayIncompatibilityNotice ) {
+		wooPayNotice = __(
+			'One or more of your extensions are incompatible with WooPay.',
+			'woocommerce'
+		);
+	}
+
+	const getCustomizeUrl = ( methodId: CustomizableExpressCheckoutMethod ) =>
+		getSettingsPaymentsProviderRouteUrl(
+			`/woopayments/settings/express-checkout/${ methodId }?from=woopayments-settings`
+		);
+
+	const expressRows: ExpressCheckoutOverviewRow[] = [
+		{
+			id: 'woopay',
+			title: __( 'WooPay', 'woocommerce' ),
+			checked: isWooPayEnabled,
+			disabled: isLinkEnabled,
+			onChange: setIsWooPayEnabled,
+			description: isWooPayEnabled
+				? __(
+						'Boost conversion and customer loyalty by offering a single click, secure way to pay.',
+						'woocommerce'
+				  )
+				: __(
+						'Boost conversion and customer loyalty by offering a single click, secure way to pay. In order to use WooPay, you must agree to our WooCommerce Terms of Service and Privacy Policy.',
+						'woocommerce'
+				  ),
+			notice: wooPayNotice,
+		},
+		{
+			id: 'payment_request',
+			title: __( 'Apple Pay / Google Pay', 'woocommerce' ),
+			checked: isPaymentRequestEnabled,
+			disabled: false,
+			onChange: setIsPaymentRequestEnabled,
+			description: __(
+				'Allow customers to make payments using Apple Pay and Google Pay.',
+				'woocommerce'
+			),
+			notice: '',
+		},
 	];
-	const [ paymentRequestLocations, setPaymentRequestLocation ] =
-		usePaymentRequestLocations() as [
-			string[],
-			(
-				location: 'product' | 'cart' | 'checkout',
-				value: boolean
-			) => void
-		];
-	const [ amazonPayLocations, setAmazonPayLocation ] =
-		useAmazonPayLocations() as [
-			string[],
-			(
-				location: 'product' | 'cart' | 'checkout',
-				value: boolean
-			) => void
-		];
-	const buttonType = getLiteralValue< PaymentRequestButtonType >(
-		paymentRequestButtonType,
-		[ 'default', 'buy', 'donate', 'book' ],
-		'default'
-	);
-	const buttonSize = getLiteralValue< PaymentRequestButtonSize >(
-		paymentRequestButtonSize,
-		[ 'small', 'medium', 'large' ],
-		'medium'
-	);
-	const buttonTheme = getLiteralValue< PaymentRequestButtonTheme >(
-		paymentRequestButtonTheme,
-		[ 'dark', 'light', 'light-outline' ],
-		'dark'
-	);
+
+	if ( isLinkAvailable ) {
+		expressRows.push( {
+			id: 'link',
+			title: __( 'Link by Stripe', 'woocommerce' ),
+			checked: isLinkEnabled,
+			disabled: isWooPayEnabled,
+			onChange: setIsLinkEnabled,
+			description: __(
+				'Let customers use Link for faster checkout.',
+				'woocommerce'
+			),
+			notice: isWooPayEnabled
+				? __(
+						'To enable Link by Stripe, you must first disable WooPay.',
+						'woocommerce'
+				  )
+				: '',
+		} );
+	}
+
+	if ( isAmazonPayAvailable ) {
+		expressRows.push( {
+			id: 'amazon_pay',
+			title: __( 'Amazon Pay', 'woocommerce' ),
+			checked: isAmazonPayEnabled,
+			disabled: false,
+			onChange: setIsAmazonPayEnabled,
+			description: __(
+				'Allow customers to make payments using Amazon Pay.',
+				'woocommerce'
+			),
+			notice: '',
+		} );
+	}
 
 	return (
 		<SettingsSection
@@ -628,379 +632,51 @@ const ExpressCheckoutSettingsSection = () => {
 				</>
 			}
 		>
-			<FieldGroup
-				title={ __( 'Apple Pay and Google Pay', 'woocommerce' ) }
-			>
-				<CheckboxControl
-					checked={ isPaymentRequestEnabled }
-					label={ __(
-						'Enable Apple Pay and Google Pay',
-						'woocommerce'
-					) }
-					onChange={ ( value ) =>
-						setIsPaymentRequestEnabled( Boolean( value ) )
-					}
-					__nextHasNoMarginBottom
-				/>
-				<CheckboxControl
-					checked={ isExpressCheckoutInPaymentMethodsEnabled }
-					label={ __(
-						'Show express checkout in the payment methods list',
-						'woocommerce'
-					) }
-					onChange={ ( value ) =>
-						setIsExpressCheckoutInPaymentMethodsEnabled(
-							Boolean( value )
-						)
-					}
-					__nextHasNoMarginBottom
-				/>
-				<LocationCheckboxes
-					legend={ __(
-						'Apple Pay and Google Pay locations',
-						'woocommerce'
-					) }
-					enabledLocations={ paymentRequestLocations }
-					onChange={ setPaymentRequestLocation }
-				/>
-				<div className="woopayments-settings-control-grid">
-					<SelectControl
-						label={ __( 'Button type', 'woocommerce' ) }
-						value={ buttonType }
-						options={ [
-							{
-								label: __( 'Default', 'woocommerce' ),
-								value: 'default',
-							},
-							{
-								label: __( 'Buy', 'woocommerce' ),
-								value: 'buy',
-							},
-							{
-								label: __( 'Donate', 'woocommerce' ),
-								value: 'donate',
-							},
-							{
-								label: __( 'Book', 'woocommerce' ),
-								value: 'book',
-							},
-						] }
-						onChange={ setPaymentRequestButtonType }
-						__nextHasNoMarginBottom
-						__next40pxDefaultSize
-					/>
-					<SelectControl
-						label={ __( 'Button size', 'woocommerce' ) }
-						value={ buttonSize }
-						options={ [
-							{
-								label: __( 'Small', 'woocommerce' ),
-								value: 'small',
-							},
-							{
-								label: __( 'Medium', 'woocommerce' ),
-								value: 'medium',
-							},
-							{
-								label: __( 'Large', 'woocommerce' ),
-								value: 'large',
-							},
-						] }
-						onChange={ setPaymentRequestButtonSize }
-						__nextHasNoMarginBottom
-						__next40pxDefaultSize
-					/>
-					<SelectControl
-						label={ __( 'Button theme', 'woocommerce' ) }
-						value={ buttonTheme }
-						options={ [
-							{
-								label: __( 'Dark', 'woocommerce' ),
-								value: 'dark',
-							},
-							{
-								label: __( 'Light', 'woocommerce' ),
-								value: 'light',
-							},
-							{
-								label: __( 'Light outline', 'woocommerce' ),
-								value: 'light-outline',
-							},
-						] }
-						onChange={ setPaymentRequestButtonTheme }
-						__nextHasNoMarginBottom
-						__next40pxDefaultSize
-					/>
-					<TextControl
-						label={ __( 'Button border radius', 'woocommerce' ) }
-						type="number"
-						value={ String( paymentRequestButtonBorderRadius ) }
-						onChange={ ( value ) =>
-							setPaymentRequestButtonBorderRadius(
-								parseInt( value || '0', 10 )
-							)
-						}
-						__nextHasNoMarginBottom
-						__next40pxDefaultSize
-					/>
-				</div>
-			</FieldGroup>
-			{ isLinkAvailable && (
-				<FieldGroup title={ __( 'Link by Stripe', 'woocommerce' ) }>
-					<CheckboxControl
-						checked={ isLinkEnabled }
-						disabled={ isWooPayEnabled }
-						label={ __( 'Enable Link by Stripe', 'woocommerce' ) }
-						help={
-							isWooPayEnabled
-								? __(
-										'Disable WooPay before enabling Link by Stripe.',
-										'woocommerce'
-								  )
-								: __(
-										'Let customers use Link for faster checkout.',
-										'woocommerce'
-								  )
-						}
-						onChange={ ( value ) =>
-							setIsLinkEnabled( Boolean( value ) )
-						}
-						__nextHasNoMarginBottom
-					/>
-				</FieldGroup>
-			) }
-			{ isAmazonPayAvailable && (
-				<FieldGroup title={ __( 'Amazon Pay', 'woocommerce' ) }>
-					<CheckboxControl
-						checked={ isAmazonPayEnabled }
-						label={ __( 'Enable Amazon Pay', 'woocommerce' ) }
-						onChange={ ( value ) =>
-							setIsAmazonPayEnabled( Boolean( value ) )
-						}
-						__nextHasNoMarginBottom
-					/>
-					<LocationCheckboxes
-						legend={ __( 'Amazon Pay locations', 'woocommerce' ) }
-						enabledLocations={ amazonPayLocations }
-						onChange={ setAmazonPayLocation }
-					/>
-				</FieldGroup>
-			) }
-		</SettingsSection>
-	);
-};
-
-const WooPayLogoUpload = ( {
-	logoId,
-	setLogoId,
-}: {
-	logoId: string;
-	setLogoId: StringSetter;
-} ) => {
-	const [ isUploading, setIsUploading ] = useState( false );
-	const [ error, setError ] = useState< string | null >( null );
-	const [ uploadedFileName, setUploadedFileName ] = useState( '' );
-	const [ uploadStatusMessage, setUploadStatusMessage ] = useState( '' );
-
-	const handleUpload = async (
-		event: React.ChangeEvent< HTMLInputElement >
-	) => {
-		const file = event.target.files?.[ 0 ];
-
-		if ( ! file ) {
-			return;
-		}
-
-		if ( file.size > MAX_LOGO_FILE_SIZE ) {
-			const message = __(
-				'The selected logo exceeds the maximum file size.',
-				'woocommerce'
-			);
-			setError( message );
-			dispatch( 'core/notices' ).createErrorNotice( message );
-			event.target.value = '';
-			return;
-		}
-
-		const body = new FormData();
-		body.append( 'file', file );
-		body.append( 'purpose', 'business_logo' );
-
-		setIsUploading( true );
-		setError( null );
-		setUploadStatusMessage( '' );
-
-		try {
-			const uploadedFile = ( await apiFetch( {
-				path: '/wc/v3/payments/file',
-				method: 'post',
-				body,
-			} ) ) as { id?: string };
-
-			setLogoId( uploadedFile.id || '' );
-			setUploadedFileName( file.name );
-			setUploadStatusMessage(
-				sprintf(
-					/* translators: %s: Uploaded file name. */
-					__( 'Logo uploaded: %s', 'woocommerce' ),
-					file.name
-				)
-			);
-		} catch ( uploadError ) {
-			const message =
-				uploadError instanceof Error && uploadError.message
-					? uploadError.message
-					: __( 'Error uploading logo.', 'woocommerce' );
-
-			setError( message );
-			setLogoId( '' );
-			setUploadedFileName( '' );
-			setUploadStatusMessage( '' );
-			dispatch( 'core/notices' ).createErrorNotice( message );
-		} finally {
-			setIsUploading( false );
-			event.target.value = '';
-		}
-	};
-
-	return (
-		<div className="woopayments-settings-logo-upload">
-			<label htmlFor="woopayments-settings-woopay-logo">
-				{ __( 'Custom logo', 'woocommerce' ) }
-			</label>
-			<input
-				id="woopayments-settings-woopay-logo"
-				type="file"
-				accept="image/png,image/jpeg,image/gif,image/webp"
-				disabled={ isUploading }
-				onChange={ handleUpload }
-			/>
-			<p className="woopayments-settings-muted">
-				{ __(
-					'Upload a custom logo for the WooPay checkout experience.',
-					'woocommerce'
-				) }
-			</p>
-			{ isUploading && (
-				<p
-					aria-live="polite"
-					className="woopayments-settings-inline-status"
-				>
-					<Spinner />
-					{ __( 'Uploading logo…', 'woocommerce' ) }
-				</p>
-			) }
-			{ logoId && ! isUploading && (
-				<p
-					aria-live="polite"
-					className="woopayments-settings-inline-status"
-				>
-					{ sprintf(
-						/* translators: 1: Uploaded file name, 2: Uploaded file ID. */
-						__( 'Current logo file: %1$s (%2$s)', 'woocommerce' ),
-						uploadedFileName ||
-							__( 'Uploaded file', 'woocommerce' ),
-						logoId
-					) }
-					<Button
-						variant="link"
-						onClick={ () => {
-							setLogoId( '' );
-							setUploadedFileName( '' );
-							setUploadStatusMessage( '' );
-						} }
+			<ul className="woopayments-settings-express-checkout-list">
+				{ expressRows.map( ( row ) => (
+					<li
+						key={ row.id }
+						className="woopayments-settings-express-checkout-list__item"
 					>
-						{ __( 'Remove', 'woocommerce' ) }
-					</Button>
-				</p>
-			) }
-			{ uploadStatusMessage && ! isUploading && (
-				<span className="screen-reader-text" aria-live="polite">
-					{ uploadStatusMessage }
-				</span>
-			) }
-			{ error && (
-				<Notice status="error" isDismissible={ false }>
-					{ error }
-				</Notice>
-			) }
-		</div>
-	);
-};
-
-const WooPaySettingsSection = () => {
-	const [ isWooPayEnabled, setIsWooPayEnabled ] =
-		useWooPayEnabledSettings() as BooleanSetting;
-	const [
-		isWooPayGlobalThemeSupportEnabled,
-		setIsWooPayGlobalThemeSupportEnabled,
-	] = useWooPayGlobalThemeSupportEnabledSettings() as BooleanSetting;
-	const [ wooPayCustomMessage, setWooPayCustomMessage ] =
-		useWooPayCustomMessage() as StringSetting;
-	const [ wooPayStoreLogo, setWooPayStoreLogo ] =
-		useWooPayStoreLogo() as StringSetting;
-	const [ wooPayLocations, setWooPayLocation ] = useWooPayLocations() as [
-		string[],
-		( location: 'product' | 'cart' | 'checkout', value: boolean ) => void
-	];
-	const showIncompatibilityNotice = Boolean(
-		useWooPayShowIncompatibilityNotice()
-	);
-
-	return (
-		<SettingsSection
-			id="woopay"
-			title={ __( 'WooPay', 'woocommerce' ) }
-			description={
-				<p>
-					{ __(
-						'Configure WooPay accelerated checkout and the content shown to returning shoppers.',
-						'woocommerce'
-					) }
-				</p>
-			}
-		>
-			{ showIncompatibilityNotice && (
-				<Notice status="warning" isDismissible={ false }>
-					{ __(
-						'WooPay is not available for one or more active checkout settings.',
-						'woocommerce'
-					) }
-				</Notice>
-			) }
-			<CheckboxControl
-				checked={ isWooPayEnabled }
-				label={ __( 'Enable WooPay', 'woocommerce' ) }
-				onChange={ ( value ) => setIsWooPayEnabled( Boolean( value ) ) }
-				__nextHasNoMarginBottom
-			/>
-			<LocationCheckboxes
-				legend={ __( 'WooPay locations', 'woocommerce' ) }
-				enabledLocations={ wooPayLocations }
-				onChange={ setWooPayLocation }
-			/>
-			<CheckboxControl
-				checked={ isWooPayGlobalThemeSupportEnabled }
-				label={ __(
-					'Use your store theme for WooPay appearance',
-					'woocommerce'
-				) }
-				onChange={ ( value ) =>
-					setIsWooPayGlobalThemeSupportEnabled( Boolean( value ) )
-				}
-				__nextHasNoMarginBottom
-			/>
-			<TextControl
-				label={ __( 'Custom message', 'woocommerce' ) }
-				value={ wooPayCustomMessage }
-				onChange={ setWooPayCustomMessage }
-				__nextHasNoMarginBottom
-				__next40pxDefaultSize
-			/>
-			<WooPayLogoUpload
-				logoId={ wooPayStoreLogo }
-				setLogoId={ setWooPayStoreLogo }
-			/>
+						<div className="woopayments-settings-express-checkout-list__main">
+							<CheckboxControl
+								checked={ row.checked }
+								disabled={ row.disabled }
+								label={ row.title }
+								onChange={ ( value ) =>
+									row.onChange( Boolean( value ) )
+								}
+								__nextHasNoMarginBottom
+							/>
+							<div className="woopayments-settings-express-checkout-list__body">
+								<h3>{ row.title }</h3>
+								<p>{ row.description }</p>
+								{ row.notice && (
+									<Notice
+										status="warning"
+										isDismissible={ false }
+									>
+										{ row.notice }
+									</Notice>
+								) }
+							</div>
+							{ isCustomizableExpressCheckoutMethod( row.id ) && (
+								<Button
+									variant="secondary"
+									href={ getCustomizeUrl( row.id ) }
+									aria-label={ sprintf(
+										/* translators: %s: Express checkout payment method name. */
+										__( 'Customize %s', 'woocommerce' ),
+										row.title
+									) }
+								>
+									{ __( 'Customize', 'woocommerce' ) }
+								</Button>
+							) }
+						</div>
+					</li>
+				) ) }
+			</ul>
 		</SettingsSection>
 	);
 };
@@ -1458,8 +1134,13 @@ const AdvancedSettingsSection = () => {
 const SaveSettingsSection = ( { disabled }: { disabled?: boolean } ) => {
 	const { saveSettings, isSaving, isLoading, isDirty } = useSettings();
 	const [ statusMessage, setStatusMessage ] = useState( '' );
+	const isDisabled = isSaving || isLoading || disabled || ! isDirty;
 
 	const saveOnClick = async () => {
+		if ( isDisabled ) {
+			return;
+		}
+
 		setStatusMessage( '' );
 		const isSuccess = await saveSettings();
 		setStatusMessage(
@@ -1474,7 +1155,8 @@ const SaveSettingsSection = ( { disabled }: { disabled?: boolean } ) => {
 			<Button
 				variant="primary"
 				isBusy={ isSaving }
-				disabled={ isSaving || isLoading || disabled || ! isDirty }
+				disabled={ isDisabled }
+				accessibleWhenDisabled
 				onClick={ saveOnClick }
 			>
 				{ __( 'Save changes', 'woocommerce' ) }
@@ -1538,7 +1220,6 @@ export const WooPaymentsSettingsPage = () => {
 					<PaymentMethodsSettingsSection />
 					<BuyNowPayLaterSettingsSection />
 					<ExpressCheckoutSettingsSection />
-					<WooPaySettingsSection />
 					<TransactionsSettingsSection />
 					<PayoutsSettingsSection />
 					<NotificationsSettingsSection />

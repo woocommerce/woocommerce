@@ -176,16 +176,25 @@ class WooPaymentsSettingsService {
 	private WooPaymentsApiClient $api_client;
 
 	/**
+	 * WooPay session service.
+	 *
+	 * @var WooPaymentsWooPaySessionService|null
+	 */
+	private ?WooPaymentsWooPaySessionService $woopay_session_service = null;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param WooPaymentsAccountService $account_service Native WooPayments account service.
-	 * @param WooPaymentsApiClient      $api_client      Native WooPayments API client.
+	 * @param WooPaymentsAccountService            $account_service        Native WooPayments account service.
+	 * @param WooPaymentsApiClient                 $api_client             Native WooPayments API client.
+	 * @param WooPaymentsWooPaySessionService|null $woopay_session_service Optional WooPay session service.
 	 */
-	final public function init( WooPaymentsAccountService $account_service, WooPaymentsApiClient $api_client ): void {
-		$this->account_service = $account_service;
-		$this->api_client      = $api_client;
+	final public function init( WooPaymentsAccountService $account_service, WooPaymentsApiClient $api_client, ?WooPaymentsWooPaySessionService $woopay_session_service = null ): void {
+		$this->account_service        = $account_service;
+		$this->api_client             = $api_client;
+		$this->woopay_session_service = $woopay_session_service;
 	}
 
 	/**
@@ -254,6 +263,7 @@ class WooPaymentsSettingsService {
 			'account_communications_email'               => $account_fields['account_communications_email'],
 			'is_payment_request_enabled'                 => $this->is_yes( $settings['payment_request'] ?? 'yes' ),
 			'is_express_checkout_in_payment_methods_enabled' => $this->is_yes( $settings['express_checkout_in_payment_methods'] ?? 'no' ),
+			'is_express_checkout_in_payment_methods_list_supported' => true,
 			'is_debug_log_enabled'                       => $this->is_yes( $settings['enable_logging'] ?? 'no' ),
 			'payment_request_button_size'                => $this->get_string_setting( $settings, 'payment_request_button_size', 'medium' ),
 			'payment_request_button_type'                => $this->get_string_setting( $settings, 'payment_request_button_type', 'default' ),
@@ -263,9 +273,14 @@ class WooPaymentsSettingsService {
 			'is_card_present_eligible'                   => false,
 			'is_woopay_enabled'                          => $this->is_yes( $settings['platform_checkout'] ?? 'no' ),
 			'is_woopay_global_theme_support_enabled'     => $this->is_yes( $settings['is_woopay_global_theme_support_enabled'] ?? 'no' ),
+			'is_woopay_global_theme_support_eligible'    => $this->is_woopay_global_theme_support_eligible(),
 			'show_woopay_incompatibility_notice'         => (bool) get_option( 'woopay_invalid_extension_found', false ),
 			'woopay_custom_message'                      => $this->get_string_setting( $settings, 'platform_checkout_custom_message' ),
 			'woopay_store_logo'                          => $this->get_string_setting( $settings, 'platform_checkout_store_logo' ),
+			'woopay_appearance'                          => $this->get_woopay_appearance_for_settings(),
+			'woopay_font_rules'                          => $this->get_woopay_font_rules_for_settings(),
+			'store_name'                                 => get_bloginfo( 'name' ),
+			'site_logo_url'                              => $this->get_site_logo_url(),
 			'deposit_schedule_interval'                  => $account_fields['deposit_schedule_interval'],
 			'deposit_schedule_monthly_anchor'            => $account_fields['deposit_schedule_monthly_anchor'],
 			'deposit_schedule_weekly_anchor'             => $account_fields['deposit_schedule_weekly_anchor'],
@@ -279,6 +294,85 @@ class WooPaymentsSettingsService {
 			'express_checkout_cart_methods'              => $this->sanitize_payment_method_ids( $this->get_array_setting( $settings, 'express_checkout_cart_methods' ), self::EXPRESS_CHECKOUT_METHOD_IDS ),
 			'express_checkout_checkout_methods'          => $this->sanitize_payment_method_ids( $this->get_array_setting( $settings, 'express_checkout_checkout_methods' ), self::EXPRESS_CHECKOUT_METHOD_IDS ),
 		);
+	}
+
+	/**
+	 * Tell whether the connected account can use WooPay global theme support.
+	 *
+	 * @return bool
+	 */
+	private function is_woopay_global_theme_support_eligible(): bool {
+		$account_data = $this->account_service->get_cached_account_data();
+
+		return ! empty( $account_data['platform_global_theme_support_enabled'] );
+	}
+
+	/**
+	 * Get WooPay appearance data for the settings preview.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function get_woopay_appearance_for_settings(): array {
+		$service = $this->get_woopay_session_service();
+
+		return $service instanceof WooPaymentsWooPaySessionService ? $service->get_woopay_appearance() : array();
+	}
+
+	/**
+	 * Get WooPay font rules for the settings preview.
+	 *
+	 * @return array<int,array<string,string>>
+	 */
+	private function get_woopay_font_rules_for_settings(): array {
+		$service = $this->get_woopay_session_service();
+
+		return $service instanceof WooPaymentsWooPaySessionService ? $service->get_woopay_font_rules() : array();
+	}
+
+	/**
+	 * Get the site's logo URL for the settings preview.
+	 *
+	 * @return string
+	 */
+	private function get_site_logo_url(): string {
+		$logo_id = function_exists( 'get_theme_mod' ) ? get_theme_mod( 'custom_logo' ) : 0;
+
+		if ( ! $logo_id || ! function_exists( 'wp_get_attachment_image_url' ) ) {
+			return '';
+		}
+
+		$url = wp_get_attachment_image_url( (int) $logo_id, 'full' );
+
+		return is_string( $url ) ? $url : '';
+	}
+
+	/**
+	 * Get the WooPay session service when it is available.
+	 *
+	 * @return WooPaymentsWooPaySessionService|null
+	 */
+	private function get_woopay_session_service(): ?WooPaymentsWooPaySessionService {
+		if ( $this->woopay_session_service instanceof WooPaymentsWooPaySessionService ) {
+			return $this->woopay_session_service;
+		}
+
+		if ( ! function_exists( 'wc_get_container' ) ) {
+			return null;
+		}
+
+		try {
+			$service = wc_get_container()->get( WooPaymentsWooPaySessionService::class );
+		} catch ( Throwable $e ) {
+			return null;
+		}
+
+		if ( ! $service instanceof WooPaymentsWooPaySessionService ) {
+			return null;
+		}
+
+		$this->woopay_session_service = $service;
+
+		return $this->woopay_session_service;
 	}
 
 	/**

@@ -16,10 +16,8 @@ import type {
 	WooPaymentsCapitalLoan,
 	WooPaymentsCapitalSummary,
 } from './types';
-import {
-	formatWooPaymentsAmount,
-	getSettingsPaymentsProviderRouteUrl,
-} from '../overview/utils';
+import { formatWooPaymentsAmount } from '../overview/utils';
+import { getSettingsPaymentsProviderRouteUrl } from '../utils';
 import { getErrorMessage } from '../money-movement/utils';
 
 const getDateValue = ( value: string | number ): string | number => {
