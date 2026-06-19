@@ -200,14 +200,12 @@ class ClassicCartInteractivity implements RegisterHooksInterface {
 			BlocksSharedState::load_store_config( $consent );
 		}
 
-		/*
-		 * TODO (Phase 2 build wiring): register the 'woocommerce/classic-cart'
-		 * script module via AssetsController + the interactivity script-module
-		 * build, then enqueue it here:
-		 *   wp_enqueue_script_module( self::STORE_NAMESPACE );
-		 * Until the module is registered, enqueuing would warn, so it is left
-		 * out. The directive injection above is already build-independent.
-		 */
+		// The module is built from client/blocks/assets/js/classic-cart/frontend.ts
+		// (see webpack-config-interactive-blocks.js) and auto-registered by
+		// AssetsController::register_script_modules() from the combined asset
+		// file. Enqueuing before registration is a safe no-op until the build
+		// has run.
+		wp_enqueue_script_module( self::STORE_NAMESPACE );
 	}
 
 	/**
