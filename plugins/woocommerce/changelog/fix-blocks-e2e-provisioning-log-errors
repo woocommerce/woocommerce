@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Make the Blocks e2e provisioning idempotent (customer user and Test Helper APIs plugin) across the Core and Blocks setup paths, and drop a redundant `--fields=id` from the product attribute listing, removing benign errors from the test build log.
