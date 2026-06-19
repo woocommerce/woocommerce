@@ -41,19 +41,16 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 		$feed->start();
 		$feed->end();
 
-		// The file should be in `/tmp` at first.
+		// The file is written directly into the shared uploads directory.
 		$path = $feed->get_file_path();
-		$this->assertStringStartsWith( get_temp_dir(), $path );
+		$this->assertStringContainsString( 'uploads/product-feeds', $path );
 		$this->assertStringContainsString( gmdate( 'Y-m-d', $current_time ), $path );
 		$this->assertStringContainsString( wp_hash( 'test-feed' . gmdate( 'r', $current_time ) ), $path );
 		$this->assertTrue( file_exists( $path ) );
 		$this->assertEquals( '[]', file_get_contents( $path ) );
 
-		// Once a URL is retrieved, the file will be moved to the uploads dir.
-		$url   = $feed->get_file_url();
-		$path2 = $feed->get_file_path();
+		$url = $feed->get_file_url();
 		$this->assertNotNull( $url );
-		$this->assertStringContainsString( 'uploads/product-feeds', $path2 );
 		$this->assertStringEndsWith( '.json', (string) $url );
 		$this->assertStringContainsString( '/product-feeds/', (string) $url );
 	}
@@ -87,7 +84,8 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that a chunked feed written across begin/resume/finalize produces a single valid JSON array.
+	 * Test that a feed written across chunks (start fresh, flush, resume, end) produces a single
+	 * valid JSON array.
 	 */
 	public function test_chunked_feed_produces_valid_json_across_chunks() {
 		$chunk_one = array(
@@ -98,23 +96,23 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 			array( 'name' => 'Third' ),
 		);
 
-		// First chunk: begin the feed and write some entries, then flush (do not finalize).
+		// First chunk: start the feed and write some entries, then flush (do not end).
 		$feed       = new JsonFileFeed( 'test-feed' );
-		$identifier = $feed->begin();
+		$identifier = $feed->start();
 		foreach ( $chunk_one as $entry ) {
 			$feed->add_entry( $entry );
 		}
 		$entries_written = $feed->get_entry_count();
 		$feed->flush();
 
-		// Second (final) chunk: a fresh instance resumes the same feed and finalizes it, mirroring
-		// how a subsequent Action Scheduler action would run in its own process.
+		// Second (final) chunk: a fresh instance resumes the same feed and ends it, mirroring how a
+		// subsequent Action Scheduler action would run in its own process.
 		$feed_two = new JsonFileFeed( 'test-feed' );
-		$feed_two->resume( $identifier, $entries_written );
+		$feed_two->start( $identifier, $entries_written );
 		foreach ( $chunk_two as $entry ) {
 			$feed_two->add_entry( $entry );
 		}
-		$feed_two->finalize();
+		$feed_two->end();
 
 		$path = $feed_two->get_file_path();
 		$this->assertNotNull( $path );
@@ -129,13 +127,13 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_chunked_feed_handles_empty_first_chunk() {
 		$feed       = new JsonFileFeed( 'test-feed' );
-		$identifier = $feed->begin();
+		$identifier = $feed->start();
 		$feed->flush();
 
 		$feed_two = new JsonFileFeed( 'test-feed' );
-		$feed_two->resume( $identifier, 0 );
+		$feed_two->start( $identifier, 0 );
 		$feed_two->add_entry( array( 'name' => 'Only' ) );
-		$feed_two->finalize();
+		$feed_two->end();
 
 		$this->assertSame(
 			wp_json_encode( array( array( 'name' => 'Only' ) ) ),
@@ -144,18 +142,21 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that can_resume reports whether a chunked feed file exists to append to.
+	 * Test that start() resumes an existing partial feed, but falls back to a fresh feed (new
+	 * identifier) when the partial file no longer exists.
 	 */
-	public function test_can_resume_reflects_partial_file_existence() {
+	public function test_start_resumes_existing_feed_or_falls_back_to_fresh() {
 		$feed = new JsonFileFeed( 'test-feed' );
 
-		// Nothing started yet.
-		$this->assertFalse( $feed->can_resume( 'does-not-exist.json' ) );
-
-		// After begin() the partial file exists and can be resumed.
-		$identifier = $feed->begin();
+		// Resuming a feed that does not exist falls back to a fresh feed with a new identifier.
+		$fresh = $feed->start( 'does-not-exist.json' );
+		$this->assertNotSame( 'does-not-exist.json', $fresh );
 		$feed->flush();
-		$this->assertTrue( $feed->can_resume( $identifier ) );
+
+		// Resuming the just-created feed reuses the same identifier.
+		$feed_two = new JsonFileFeed( 'test-feed' );
+		$resumed  = $feed_two->start( $fresh );
+		$this->assertSame( $fresh, $resumed );
 	}
 
 	/**
@@ -163,12 +164,14 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_delete_removes_partial_feed_file() {
 		$feed       = new JsonFileFeed( 'test-feed' );
-		$identifier = $feed->begin();
+		$identifier = $feed->start();
 		$feed->flush();
-		$this->assertTrue( $feed->can_resume( $identifier ) );
+
+		$path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier;
+		$this->assertTrue( file_exists( $path ) );
 
 		$feed->delete( $identifier );
-		$this->assertFalse( $feed->can_resume( $identifier ) );
+		$this->assertFalse( file_exists( $path ) );
 	}
 
 	/**

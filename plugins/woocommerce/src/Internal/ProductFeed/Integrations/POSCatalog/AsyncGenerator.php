@@ -63,12 +63,16 @@ class AsyncGenerator {
 	const BATCH_SIZE = 100;
 
 	/**
-	 * The default number of products processed per chunk. Each chunk runs in its own action and
-	 * schedules the next, so this keeps individual runs short on large catalogs.
+	 * The chunk sizes (products processed per action) tried in descending order.
 	 *
-	 * @var int
+	 * Generation starts at the first (largest) size, which lets most catalogs finish in a single
+	 * action with no inter-action latency. Each time a run gets stuck — most likely killed because the
+	 * size was too large for the host — the effective size steps down one rung and is persisted, so
+	 * future runs (including the next request from the app) do not repeat the attempt that failed.
+	 *
+	 * @var int[]
 	 */
-	const DEFAULT_CHUNK_SIZE = 2500;
+	const CHUNK_SIZE_STEPS = array( 100000, 2500, 1000 );
 
 	/**
 	 * Integration instance.
@@ -119,19 +123,16 @@ class AsyncGenerator {
 				return $status;
 			}
 
-			// A stalled in-progress job whose cursor is intact is resumed from where it stopped
-			// (e.g. a chunk whose follow-up was never triggered because the host has no traffic or
-			// cron) rather than regenerated from scratch.
-			if ( $this->is_resumable( $status ) ) {
-				$status['updated_at'] = time();
-				update_option( $option_key, $status );
-
-				// Clear any stale pending actions, then re-arm the next chunk.
-				as_unschedule_all_actions( self::FEED_GENERATION_ACTION, array( $option_key ), 'woo-product-feed' );
-				$this->schedule_generation_action( $option_key );
-
-				return $status;
+			// An in-progress job that fails validation has a stale heartbeat: it was killed mid-run,
+			// most likely because the chunk size was too large for this host. Step the chunk size down
+			// so this and future jobs use a smaller, more reliable size.
+			if ( self::STATE_IN_PROGRESS === ( $status['state'] ?? '' ) ) {
+				$this->reduce_chunk_size( $option_key );
 			}
+
+			// Whatever made it invalid (stuck, expired, …), discard any partial feed it left behind
+			// and start fresh.
+			$this->discard_feed( $status );
 		}
 
 		// Clear all previous actions to avoid race conditions.
@@ -191,22 +192,6 @@ class AsyncGenerator {
 	}
 
 	/**
-	 * Determines whether a stalled in-progress job can be resumed from its cursor.
-	 *
-	 * A resumable job is one that was mid-generation and still records which feed file it was
-	 * building and which page it had reached. The partial feed file itself is validated later, when
-	 * the resumed chunk runs, so that a missing file falls back to a fresh start.
-	 *
-	 * @param array $status The feed generation status.
-	 * @return bool True if the job can be resumed rather than restarted.
-	 */
-	private function is_resumable( array $status ): bool {
-		return self::STATE_IN_PROGRESS === ( $status['state'] ?? '' )
-			&& ! empty( $status['file_name'] )
-			&& isset( $status['page'] );
-	}
-
-	/**
 	 * Action scheduler callback for the feed generation.
 	 *
 	 * @since 10.5.0
@@ -219,7 +204,13 @@ class AsyncGenerator {
 
 		// Only a scheduled (first chunk) or in-progress (continuation) job should be processed here.
 		if ( ! is_array( $status ) || ! in_array( $status['state'] ?? '', array( self::STATE_SCHEDULED, self::STATE_IN_PROGRESS ), true ) ) {
-			wc_get_logger()->error( 'Invalid feed generation status', array( 'status' => $status ) );
+			wc_get_logger()->error(
+				'Invalid feed generation status',
+				array(
+					'status'     => $status,
+					'chunk_size' => $this->get_effective_chunk_size( $option_key ),
+				)
+			);
 			return;
 		}
 
@@ -228,7 +219,13 @@ class AsyncGenerator {
 		// A continuation must know which feed file it is appending to. If it doesn't, the status is
 		// corrupt; bail and let the heartbeat-based recovery restart generation from scratch.
 		if ( ! $is_first_chunk && empty( $status['file_name'] ) ) {
-			wc_get_logger()->error( 'Invalid feed generation continuation status', array( 'status' => $status ) );
+			wc_get_logger()->error(
+				'Invalid feed generation continuation status',
+				array(
+					'status'     => $status,
+					'chunk_size' => $this->get_effective_chunk_size( $option_key ),
+				)
+			);
 			return;
 		}
 
@@ -242,21 +239,22 @@ class AsyncGenerator {
 
 			$feed = $this->integration->create_feed();
 
-			if ( ! $is_first_chunk && ! $feed->can_resume( (string) $status['file_name'] ) ) {
-				// The feed was supposed to be continued, but its partial file has vanished
-				// (e.g. cleaned up by the host). Start over rather than append to nothing.
-				$is_first_chunk = true;
-			}
+			// Start a fresh feed, or resume the one a previous chunk began. start() returns the
+			// identifier it actually used; a continuation whose partial file has vanished (e.g. cleaned
+			// up by the host) falls back to a fresh feed, which we detect by the returned identifier
+			// differing from the stored one — in which case the cursor is reset to start over.
+			$resume_identifier = $is_first_chunk ? null : (string) $status['file_name'];
+			$identifier        = $feed->start( $resume_identifier, (int) ( $status['entries_written'] ?? 0 ) );
 
-			if ( $is_first_chunk ) {
-				// Begin a brand-new feed and reset the cursor.
-				$status['file_name']       = $feed->begin();
+			if ( ( $status['file_name'] ?? null ) !== $identifier ) {
+				$status['file_name']       = $identifier;
 				$status['page']            = 1;
 				$status['processed']       = 0;
 				$status['entries_written'] = 0;
-			} else {
-				// Resume appending to the feed started by a previous chunk.
-				$feed->resume( (string) $status['file_name'], (int) ( $status['entries_written'] ?? 0 ) );
+
+				// Persist the new feed reference immediately so a job killed during its first batch can
+				// still be cleaned up (and polled) by the stuck-job recovery.
+				update_option( $option_key, $status );
 			}
 
 			$walker = ProductWalker::from_integration( $this->integration, $feed );
@@ -265,28 +263,33 @@ class AsyncGenerator {
 
 			$this->apply_mapper_args( $status['args'] ?? array() );
 
+			// The current effective chunk size determines how many batches this action processes before
+			// it finalizes (if complete) or schedules the next chunk. It starts large enough that most
+			// catalogs finish in one action, and shrinks if a previous run got stuck.
 			$start_page     = max( 1, (int) ( $status['page'] ?? 1 ) );
 			$base_processed = (int) ( $status['processed'] ?? 0 );
-			$progress       = $walker->walk_chunk(
-				$start_page,
-				$this->get_chunk_batch_count(),
+			$progress       = $walker->walk(
 				function ( WalkerProgress $progress ) use ( &$status, $option_key, $base_processed ) {
 					// Update progress (and the heartbeat) after every batch, so polling sees smooth
 					// progress within a chunk rather than a single jump at the chunk boundary.
 					$status = $this->update_progress( $status, $base_processed + $progress->processed_items, $progress->total_count );
 					update_option( $option_key, $status );
-				}
+				},
+				$start_page,
+				$this->get_chunk_batch_count( $option_key )
 			);
 
-			// Advance the cursor and cumulative counters.
+			// Advance the cursor and cumulative counters. The feed's entry count is already cumulative
+			// across chunks (start() seeds it with the running total when resuming), so it is stored
+			// as-is rather than added to the previous total.
 			$status                    = $this->update_progress( $status, $base_processed + $progress->processed_items, $progress->total_count );
-			$status['entries_written'] = (int) ( $status['entries_written'] ?? 0 ) + $feed->get_entry_count();
+			$status['entries_written'] = $feed->get_entry_count();
 			$status['page']            = $start_page + $progress->processed_batches;
 
 			$is_complete = $progress->total_batch_count <= 0 || (int) $status['page'] > $progress->total_batch_count;
 
 			if ( $is_complete ) {
-				$feed->finalize();
+				$feed->end();
 
 				$status['state']        = self::STATE_COMPLETED;
 				$status['progress']     = 100;
@@ -318,6 +321,7 @@ class AsyncGenerator {
 				array(
 					'error'      => $e->getMessage(),
 					'option_key' => $option_key,
+					'chunk_size' => $this->get_effective_chunk_size( $option_key ),
 				)
 			);
 
@@ -379,11 +383,12 @@ class AsyncGenerator {
 	}
 
 	/**
-	 * Returns the number of batches to process per chunk, derived from the configured chunk size.
+	 * Returns the number of batches to process per chunk, derived from the effective chunk size.
 	 *
+	 * @param string $option_key The option key for the feed generation status.
 	 * @return int The number of batches per chunk (at least 1).
 	 */
-	private function get_chunk_batch_count(): int {
+	private function get_chunk_batch_count( string $option_key ): int {
 		/**
 		 * Filters the number of products processed per chunk during feed generation.
 		 *
@@ -391,16 +396,81 @@ class AsyncGenerator {
 		 * every run short enough to finish well within Action Scheduler's failure period and the
 		 * host's request timeout. Larger chunks mean fewer actions but longer individual runs.
 		 *
+		 * Defaults to the effective chunk size, which starts large (so most catalogs finish in one
+		 * action) and shrinks automatically if a run gets stuck.
+		 *
 		 * @param int $chunk_size The number of products to process per chunk.
 		 *
 		 * @since 11.0.0
 		 */
-		$chunk_size = (int) apply_filters( 'woocommerce_product_feed_chunk_size', self::DEFAULT_CHUNK_SIZE );
+		$chunk_size = (int) apply_filters( 'woocommerce_product_feed_chunk_size', $this->get_effective_chunk_size( $option_key ) );
 		if ( $chunk_size < 1 ) {
-			$chunk_size = self::DEFAULT_CHUNK_SIZE;
+			$chunk_size = self::CHUNK_SIZE_STEPS[0];
 		}
 
 		return (int) max( 1, (int) ceil( $chunk_size / $this->get_batch_size() ) );
+	}
+
+	/**
+	 * Returns the option key under which the effective chunk size is persisted for a feed.
+	 *
+	 * The chunk size lives in its own option (a sibling of the status option) so it survives the
+	 * status being deleted when a job completes, expires, or is restarted — that is what lets a
+	 * shrunk chunk size carry over to the next request from the app.
+	 *
+	 * @param string $option_key The option key for the feed generation status.
+	 * @return string The option key for the effective chunk size.
+	 */
+	private function get_chunk_size_option_key( string $option_key ): string {
+		return $option_key . '_chunk_size';
+	}
+
+	/**
+	 * Returns the effective chunk size (products per action) currently in use for a feed.
+	 *
+	 * @param string $option_key The option key for the feed generation status.
+	 * @return int The effective chunk size, defaulting to the largest configured step.
+	 */
+	private function get_effective_chunk_size( string $option_key ): int {
+		$chunk_size = (int) get_option( $this->get_chunk_size_option_key( $option_key ), self::CHUNK_SIZE_STEPS[0] );
+
+		return $chunk_size > 0 ? $chunk_size : self::CHUNK_SIZE_STEPS[0];
+	}
+
+	/**
+	 * Steps the effective chunk size down to the next-smaller configured size and persists it.
+	 *
+	 * Called when a job gets stuck (its run was killed, most likely because the chunk size was too
+	 * large for this host). Once at the smallest configured size it stays there.
+	 *
+	 * @param string $option_key The option key for the feed generation status.
+	 * @return int The new effective chunk size.
+	 */
+	private function reduce_chunk_size( string $option_key ): int {
+		$current = $this->get_effective_chunk_size( $option_key );
+
+		// CHUNK_SIZE_STEPS is in descending order, so the first step smaller than the current size is
+		// the next rung down. If none is smaller, we are already at the smallest size.
+		$next = $current;
+		foreach ( self::CHUNK_SIZE_STEPS as $step ) {
+			if ( $step < $current ) {
+				$next = $step;
+				break;
+			}
+		}
+
+		update_option( $this->get_chunk_size_option_key( $option_key ), $next );
+
+		wc_get_logger()->warning(
+			'Product feed generation got stuck; reducing the chunk size for future runs.',
+			array(
+				'option_key'          => $option_key,
+				'previous_chunk_size' => $current,
+				'chunk_size'          => $next,
+			)
+		);
+
+		return $next;
 	}
 
 	/**

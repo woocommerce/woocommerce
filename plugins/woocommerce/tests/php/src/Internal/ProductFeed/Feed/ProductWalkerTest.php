@@ -206,9 +206,10 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 				}
 			);
 
-		// Make sure that the field is initiated, added to, and ended.
-		$mock_feed->expects( $this->once() )->method( 'start' );
-		$mock_feed->expects( $this->once() )->method( 'end' );
+		// The walker does not own the feed lifecycle (the caller starts/ends the feed); it only adds
+		// entries.
+		$mock_feed->expects( $this->never() )->method( 'start' );
+		$mock_feed->expects( $this->never() )->method( 'end' );
 		$mock_feed->expects( $this->exactly( $number_of_products - $validation_compensation ) )
 			->method( 'add_entry' )
 			->with( $this->isType( 'array' ) );
@@ -275,10 +276,10 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that walk_chunk processes a bounded number of batches, resumes from the right page,
+	 * Test that a bounded walk processes a limited number of batches, resumes from the right page,
 	 * stops at the last page, and never manages the feed lifecycle (start/end).
 	 */
-	public function test_walk_chunk_processes_bounded_pages_and_resumes() {
+	public function test_walk_processes_bounded_pages_and_resumes() {
 		$batch_size  = 2;
 		$total       = 6;
 		$total_pages = 3;
@@ -330,14 +331,14 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 		$walker->set_batch_size( $batch_size );
 
 		// First chunk: pages 1-2 (allotment of 2 batches reached).
-		$progress = $walker->walk_chunk( 1, 2 );
+		$progress = $walker->walk( null, 1, 2 );
 		$this->assertSame( $total, $progress->total_count );
 		$this->assertSame( $total_pages, $progress->total_batch_count );
 		$this->assertSame( 2, $progress->processed_batches );
 		$this->assertSame( 4, $progress->processed_items );
 
 		// Final chunk: resumes at page 3 and stops at the last page even though 2 batches were allowed.
-		$progress = $walker->walk_chunk( 3, 2 );
+		$progress = $walker->walk( null, 3, 2 );
 		$this->assertSame( 1, $progress->processed_batches );
 		$this->assertSame( 2, $progress->processed_items );
 	}

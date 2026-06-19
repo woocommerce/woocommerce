@@ -65,6 +65,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		parent::tearDown();
 
 		delete_option( self::OPTION_KEY );
+		delete_option( self::OPTION_KEY . '_chunk_size' );
 		remove_all_filters( 'woocommerce_product_feed_chunk_size' );
 		remove_all_filters( 'woocommerce_product_feed_batch_size' );
 		$this->test_container->reset_all_replacements();
@@ -351,6 +352,40 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that entries_written accumulates correctly across chunks rather than being double-counted.
+	 *
+	 * Each resumed chunk seeds the feed's entry count with the running total, so the feed already
+	 * reports the cumulative count; the status must store that count as-is, not add it on top of the
+	 * previous total (which would grow the value quadratically).
+	 */
+	public function test_feed_generation_tracks_cumulative_entries_written_across_chunks() {
+		// One product per database batch, one batch per chunk: three products means three chunks.
+		add_filter( 'woocommerce_product_feed_batch_size', fn() => 1 );
+		add_filter( 'woocommerce_product_feed_chunk_size', fn() => 1 );
+
+		$this->setup_real_feed_integration();
+
+		WC_Helper_Product::create_simple_product();
+		WC_Helper_Product::create_simple_product();
+		WC_Helper_Product::create_simple_product();
+
+		update_option( self::OPTION_KEY, array( 'state' => AsyncGenerator::STATE_SCHEDULED ) );
+
+		$iterations = 0;
+		do {
+			$this->sut->feed_generation_action( self::OPTION_KEY );
+			$status = get_option( self::OPTION_KEY );
+			++$iterations;
+		} while ( AsyncGenerator::STATE_IN_PROGRESS === $status['state'] && $iterations < 10 );
+
+		$this->assertSame( AsyncGenerator::STATE_COMPLETED, $status['state'] );
+		// Three products, one entry each: the cumulative count is 3, not 1 + 2 + 4 = 7.
+		$this->assertSame( 3, $status['entries_written'] );
+
+		wp_delete_file( $status['path'] );
+	}
+
+	/**
 	 * Test that the next chunk is scheduled even when another action with the same hook and group is
 	 * already pending or running. Action Scheduler's uniqueness check matches on hook + group only, so
 	 * a "unique" enqueue would be blocked here and generation would stall after the first chunk.
@@ -389,45 +424,71 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that polling a stalled in-progress job resumes it from its cursor instead of restarting.
-	 *
-	 * This covers a chunk whose follow-up was never triggered (e.g. a host with no traffic/cron):
-	 * the job should continue from its saved page, not throw away the work already done.
+	 * Test that polling a stalled in-progress job restarts it fresh and steps the chunk size down,
+	 * so the next attempt (and future requests) use a smaller, more reliable size.
 	 */
-	public function test_get_status_resumes_stalled_in_progress_job() {
+	public function test_get_status_reduces_chunk_size_and_restarts_when_stuck() {
+		$this->mock_integration->method( 'create_feed' )->willReturnCallback(
+			fn() => new JsonFileFeed( 'pos-catalog-feed-test' )
+		);
+
+		// A real partial feed left behind by the stuck (first, single-pass) attempt.
+		$partial    = new JsonFileFeed( 'pos-catalog-feed-test' );
+		$identifier = $partial->start();
+		$partial->flush();
+		$partial_path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier;
+		$this->assertTrue( file_exists( $partial_path ) );
+
 		$method = ( new ReflectionClass( $this->sut ) )->getMethod( 'get_option_key' );
 		$method->setAccessible( true );
 		$option_key = $method->invoke( $this->sut, array() );
 
-		$stale = array(
-			'state'           => AsyncGenerator::STATE_IN_PROGRESS,
-			'scheduled_at'    => time() - HOUR_IN_SECONDS,
-			'updated_at'      => time() - HOUR_IN_SECONDS,
-			'file_name'       => 'pos-catalog-feed-resume.json',
-			'page'            => 3,
-			'processed'       => 2500,
-			'total'           => 12000,
-			'entries_written' => 2500,
-			'progress'        => 20.83,
+		// A stuck in-progress job: stale heartbeat.
+		update_option(
+			$option_key,
+			array(
+				'state'      => AsyncGenerator::STATE_IN_PROGRESS,
+				'updated_at' => time() - HOUR_IN_SECONDS,
+				'file_name'  => $identifier,
+				'page'       => 3,
+				'processed'  => 50000,
+				'total'      => 120000,
+			)
 		);
-		update_option( $option_key, $stale );
 
 		$result = $this->sut->get_status( array() );
 
-		// Resumed, not restarted: cursor and counters are preserved.
-		$this->assertSame( AsyncGenerator::STATE_IN_PROGRESS, $result['state'] );
-		$this->assertSame( 3, $result['page'] );
-		$this->assertSame( 2500, $result['processed'] );
-		$this->assertSame( 12000, $result['total'] );
-		$this->assertSame( 'pos-catalog-feed-resume.json', $result['file_name'] );
-		// Heartbeat refreshed and the next chunk re-armed.
-		$this->assertGreaterThan( time() - 5, $result['updated_at'] );
-		$this->assertTrue(
-			as_has_scheduled_action( AsyncGenerator::FEED_GENERATION_ACTION, array( $option_key ), 'woo-product-feed' )
-		);
+		// Restarted from scratch (counters reset, partial discarded), not resumed.
+		$this->assertSame( AsyncGenerator::STATE_SCHEDULED, $result['state'] );
+		$this->assertSame( 0, $result['processed'] );
+		$this->assertArrayNotHasKey( 'file_name', $result );
+		$this->assertFalse( file_exists( $partial_path ) );
+
+		// Chunk size stepped down one rung (100000 -> 2500) and persisted for future runs.
+		$this->assertSame( 2500, (int) get_option( $option_key . '_chunk_size' ) );
 
 		as_unschedule_all_actions( AsyncGenerator::FEED_GENERATION_ACTION, array(), 'woo-product-feed' );
 		delete_option( $option_key );
+		delete_option( $option_key . '_chunk_size' );
+	}
+
+	/**
+	 * Test that the chunk size steps down through the configured ladder and stops at the smallest.
+	 */
+	public function test_chunk_size_steps_down_through_ladder() {
+		$method = ( new ReflectionClass( $this->sut ) )->getMethod( 'get_option_key' );
+		$method->setAccessible( true );
+		$option_key = $method->invoke( $this->sut, array() );
+
+		$reduce = ( new ReflectionClass( $this->sut ) )->getMethod( 'reduce_chunk_size' );
+		$reduce->setAccessible( true );
+
+		$this->assertSame( 2500, $reduce->invoke( $this->sut, $option_key ) );
+		$this->assertSame( 1000, $reduce->invoke( $this->sut, $option_key ) );
+		// Already at the smallest configured size: it stays there.
+		$this->assertSame( 1000, $reduce->invoke( $this->sut, $option_key ) );
+
+		delete_option( $option_key . '_chunk_size' );
 	}
 
 	/**
@@ -441,7 +502,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 
 		// A real partial feed file that force should discard.
 		$partial    = new JsonFileFeed( 'pos-catalog-feed-test' );
-		$identifier = $partial->begin();
+		$identifier = $partial->start();
 		$partial->flush();
 		$partial_path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier;
 		$this->assertTrue( file_exists( $partial_path ) );

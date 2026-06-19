@@ -16,50 +16,26 @@ namespace Automattic\WooCommerce\Internal\ProductFeed\Feed;
  */
 interface FeedInterface {
 	/**
-	 * Start the feed.
-	 * This can create an empty file, eventually put something in it, or add a database entry.
+	 * Start a feed, either fresh or by resuming one a previous chunk began.
 	 *
-	 * @return void
+	 * A feed may be written across several separate processes (e.g. one Action Scheduler action per
+	 * chunk), so it is created in a stable, shared location and identified by the returned value.
+	 * Pass that identifier back on a later chunk to keep appending to the same feed; pass nothing to
+	 * begin a new feed. If the identifier given no longer resolves to an existing feed, a fresh feed
+	 * is started instead — the returned identifier (which then differs from the one passed in) lets
+	 * the caller detect that fallback.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @param string|null $resume_identifier Identifier of an existing feed to resume, or null to start fresh.
+	 * @param int         $entries_written   The number of entries already written by previous chunks, used
+	 *                                        when resuming so separators are added correctly.
+	 * @return string The identifier of the feed that was started, to be passed back by later chunks.
 	 */
-	public function start(): void;
+	public function start( ?string $resume_identifier = null, int $entries_written = 0 ): string;
 
 	/**
-	 * Begin a new chunked feed.
-	 *
-	 * Unlike {@see start()}, a chunked feed is written across several separate processes
-	 * (e.g. one Action Scheduler action per chunk). This creates the (empty) feed in a
-	 * stable, shared location and returns an identifier that later chunks pass to
-	 * {@see resume()} to keep appending to the same feed.
-	 *
-	 * @since 11.0.0
-	 *
-	 * @return string An identifier for the feed, to be passed to resume() by later chunks.
-	 */
-	public function begin(): string;
-
-	/**
-	 * Determines whether an existing chunked feed can still be resumed.
-	 *
-	 * @since 11.0.0
-	 *
-	 * @param string $identifier The identifier returned by {@see begin()}.
-	 * @return bool True if the feed exists and can be appended to.
-	 */
-	public function can_resume( string $identifier ): bool;
-
-	/**
-	 * Resume appending to an existing chunked feed.
-	 *
-	 * @since 11.0.0
-	 *
-	 * @param string $identifier      The identifier returned by {@see begin()}.
-	 * @param int    $entries_written The number of entries already written by previous chunks.
-	 * @return void
-	 */
-	public function resume( string $identifier, int $entries_written ): void;
-
-	/**
-	 * Persist the current chunk without finalizing the feed.
+	 * Persist the current chunk and release the file handle without finalizing the feed.
 	 *
 	 * Called at the end of a chunk that is not the last one, so a later chunk can resume.
 	 *
@@ -70,20 +46,11 @@ interface FeedInterface {
 	public function flush(): void;
 
 	/**
-	 * Finalize a chunked feed, marking it complete and ready to be served.
-	 *
-	 * @since 11.0.0
-	 *
-	 * @return void
-	 */
-	public function finalize(): void;
-
-	/**
 	 * Delete a feed (e.g. a partial feed left by an abandoned chunked generation).
 	 *
 	 * @since 11.0.0
 	 *
-	 * @param string $identifier The identifier returned by {@see begin()}.
+	 * @param string $identifier The identifier returned by {@see start()}.
 	 * @return void
 	 */
 	public function delete( string $identifier ): void;
@@ -97,7 +64,7 @@ interface FeedInterface {
 	public function add_entry( array $entry ): void;
 
 	/**
-	 * End the feed.
+	 * End the feed, marking it complete and ready to be served.
 	 *
 	 * @return void
 	 */
