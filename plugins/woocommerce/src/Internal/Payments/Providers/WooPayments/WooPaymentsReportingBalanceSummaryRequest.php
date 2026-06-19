@@ -100,8 +100,8 @@ class WooPaymentsReportingBalanceSummaryRequest extends WooPaymentsPaginatedList
 			throw new WooPaymentsApiException(
 				sprintf(
 					// translators: %s: currency code.
-					__( '%s is not a valid currency code.', 'woocommerce' ),
-					$currency
+					esc_html__( '%s is not a valid currency code.', 'woocommerce' ),
+					esc_html( $currency )
 				),
 				'wcpay_core_invalid_request_parameter_currency_code',
 				400
@@ -136,8 +136,8 @@ class WooPaymentsReportingBalanceSummaryRequest extends WooPaymentsPaginatedList
 		throw new WooPaymentsApiException(
 			sprintf(
 				// translators: %s: request field name.
-				__( '%s must be a valid date-time.', 'woocommerce' ),
-				$field
+				esc_html__( '%s must be a valid date-time.', 'woocommerce' ),
+				esc_html( $field )
 			),
 			'wcpay_core_invalid_request_parameter_date',
 			400

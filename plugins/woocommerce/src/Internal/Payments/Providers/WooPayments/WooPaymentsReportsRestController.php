@@ -94,9 +94,9 @@ class WooPaymentsReportsRestController implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param NativePaymentsRuntimeArbiter        $arbiter         Runtime owner arbiter.
-	 * @param WooPaymentsApiClient                $api_client      Native WooPayments API client.
-	 * @param WooPaymentsAccountService           $account_service WooPayments account service.
+	 * @param NativePaymentsRuntimeArbiter         $arbiter         Runtime owner arbiter.
+	 * @param WooPaymentsApiClient                 $api_client      Native WooPayments API client.
+	 * @param WooPaymentsAccountService            $account_service WooPayments account service.
 	 * @param WooPaymentsMoneyMovementOrderService $order_service  Local order context service.
 	 */
 	final public function init(

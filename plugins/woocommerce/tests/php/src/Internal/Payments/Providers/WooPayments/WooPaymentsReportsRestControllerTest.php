@@ -39,7 +39,7 @@ class WooPaymentsReportsRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->api_client = new RecordingReportsApiClient();
+		$this->api_client               = new RecordingReportsApiClient();
 		$this->original_timezone_string = (string) get_option( 'timezone_string' );
 		update_option( 'timezone_string', 'UTC' );
 		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
@@ -321,9 +321,9 @@ class WooPaymentsReportsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$summary_request = new WP_REST_Request( 'GET', '/wc/v3/payments/reports/fees/summary' );
 		$summary_request->set_query_params(
 			array(
-				'deposit_id' => 'po_123',
-				'date_after' => '2026-06-01T00:00:00Z',
-				'type'       => array( 'charge' ),
+				'deposit_id'    => 'po_123',
+				'date_after'    => '2026-06-01T00:00:00Z',
+				'type'          => array( 'charge' ),
 				'user_timezone' => '+03:00',
 			)
 		);
@@ -343,12 +343,12 @@ class WooPaymentsReportsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$export_request = new WP_REST_Request( 'POST', '/wc/v3/payments/reports/fees/download' );
 		$export_request->set_query_params(
 			array(
-				'deposit_id' => 'po_123',
-				'date_before' => '2026-06-19T23:59:59Z',
-				'type'       => array( 'refund' ),
+				'deposit_id'    => 'po_123',
+				'date_before'   => '2026-06-19T23:59:59Z',
+				'type'          => array( 'refund' ),
 				'user_timezone' => '+03:00',
-				'user_email' => 'merchant@example.com',
-				'locale'     => 'en_US',
+				'user_email'    => 'merchant@example.com',
+				'locale'        => 'en_US',
 			)
 		);
 		$this->server->dispatch( $export_request );
@@ -473,9 +473,9 @@ class WooPaymentsReportsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	private function get_expected_routes(): array {
 		return array(
-			'/wc/v3/payments/reports/balance' => array( WP_REST_Server::READABLE ),
-			'/wc/v3/payments/reports/fees' => array( WP_REST_Server::READABLE ),
-			'/wc/v3/payments/reports/fees/summary' => array( WP_REST_Server::READABLE ),
+			'/wc/v3/payments/reports/balance'       => array( WP_REST_Server::READABLE ),
+			'/wc/v3/payments/reports/fees'          => array( WP_REST_Server::READABLE ),
+			'/wc/v3/payments/reports/fees/summary'  => array( WP_REST_Server::READABLE ),
 			'/wc/v3/payments/reports/fees/download' => array( WP_REST_Server::CREATABLE ),
 			'/wc/v3/payments/reports/fees/download/(?P<export_id>[^/\\\\%]+)' => array( WP_REST_Server::READABLE ),
 		);
