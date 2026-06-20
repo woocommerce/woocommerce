@@ -27,6 +27,7 @@ import {
 	formatLabel,
 	getErrorMessage,
 } from './utils';
+import { WooPaymentsTransactionDisputeDetails } from './transaction-dispute-details';
 import { LiveStatusMessage, StatusMessage } from './table';
 import '../style.scss';
 
@@ -179,6 +180,12 @@ const normalizeCharge = (
 		order: charge.order,
 		payment_method_details: charge.payment_method_details,
 		outcome: charge.outcome,
+		dispute: charge.dispute,
+		balance_transaction: charge.balance_transaction,
+		application_fee_amount: charge.application_fee_amount,
+		amount_refunded: charge.amount_refunded,
+		refunded: charge.refunded,
+		captured: charge.captured,
 		fee: getBalanceTransactionAmount( charge.balance_transaction, 'fee' ),
 		net: getBalanceTransactionAmount( charge.balance_transaction, 'net' ),
 		status: charge.status,
@@ -205,6 +212,7 @@ const normalizePaymentIntent = (
 		created: transaction.created || intent.created,
 		payment_intent_id: intent.id,
 		order: transaction.order || intent.order,
+		dispute: transaction.dispute || intent.dispute,
 		status: transaction.status || intent.status,
 	};
 };
@@ -469,6 +477,11 @@ export const WooPaymentsTransactionDetailsPage = () => {
 							/>
 						) }
 					</dl>
+					{ transaction.dispute && (
+						<WooPaymentsTransactionDisputeDetails
+							transaction={ transaction }
+						/>
+					) }
 					{ timelineErrorMessage && (
 						<StatusMessage isError>
 							{ timelineErrorMessage }

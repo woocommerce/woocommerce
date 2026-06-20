@@ -464,6 +464,10 @@
 	overflow-wrap: anywhere;
 }
 
+.woocommerce-woopayments-money-movement__details--nested {
+	margin-bottom: 16px;
+}
+
 .woocommerce-woopayments-money-movement__copyable-value {
 	align-items: center;
 	display: flex;
@@ -474,6 +478,28 @@
 .woocommerce-woopayments-money-movement__stacked-value {
 	display: grid;
 	gap: 4px;
+}
+
+.woocommerce-woopayments-money-movement__dispute-response {
+	display: grid;
+	gap: 12px;
+}
+
+.woocommerce-woopayments-money-movement__dispute-response p {
+	margin: 0;
+}
+
+.woocommerce-woopayments-money-movement__dispute-actions,
+.woocommerce-woopayments-money-movement__dispute-modal-actions {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.woocommerce-woopayments-money-movement__dispute-modal-actions {
+	justify-content: flex-end;
+	margin-top: 24px;
 }
 
 .woocommerce-woopayments-money-movement__timeline {
@@ -520,5 +546,11 @@
 
 	.woocommerce-woopayments-money-movement__details div {
 		grid-template-columns: 1fr;
+	}
+
+	.woocommerce-woopayments-money-movement__dispute-actions,
+	.woocommerce-woopayments-money-movement__dispute-modal-actions {
+		align-items: stretch;
+		flex-direction: column;
 	}
 }

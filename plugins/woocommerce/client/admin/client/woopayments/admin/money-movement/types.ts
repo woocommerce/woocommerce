@@ -18,6 +18,12 @@ export interface WooPaymentsTransaction {
 	order?: WooPaymentsPaymentOrder;
 	payment_method_details?: WooPaymentsPaymentMethodDetails;
 	outcome?: WooPaymentsPaymentOutcome;
+	dispute?: WooPaymentsDispute;
+	balance_transaction?: string | WooPaymentsBalanceTransaction;
+	application_fee_amount?: number;
+	amount_refunded?: number;
+	refunded?: boolean;
+	captured?: boolean;
 	fee?: number;
 	net?: number;
 	status?: string;
@@ -76,6 +82,8 @@ export interface WooPaymentsDispute {
 	evidence?: WooPaymentsDisputeEvidence;
 	evidence_details?: WooPaymentsDisputeEvidenceDetails;
 	metadata?: WooPaymentsDisputeMetadata;
+	balance_transactions?: Array< Record< string, unknown > >;
+	issuer_evidence?: Record< string, unknown > | null;
 	enhanced_eligibility_types?: string[];
 	order?: {
 		id?: number;
@@ -101,6 +109,11 @@ export interface WooPaymentsCharge {
 	order?: WooPaymentsPaymentOrder;
 	payment_method_details?: WooPaymentsPaymentMethodDetails;
 	outcome?: WooPaymentsPaymentOutcome;
+	dispute?: WooPaymentsDispute;
+	application_fee_amount?: number;
+	amount_refunded?: number;
+	refunded?: boolean;
+	captured?: boolean;
 	status?: string;
 }
 
@@ -110,6 +123,7 @@ export interface WooPaymentsPaymentIntent {
 	charges?: {
 		data?: WooPaymentsCharge[];
 	};
+	dispute?: WooPaymentsDispute;
 	amount?: number;
 	currency?: string;
 	created?: number | string;
@@ -121,6 +135,7 @@ export interface WooPaymentsBalanceTransaction {
 	id?: string;
 	fee?: number;
 	net?: number;
+	currency?: string;
 	[ key: string ]: unknown;
 }
 
@@ -170,6 +185,7 @@ export interface WooPaymentsTimelineResponse {
 export interface WooPaymentsDisputeMetadata {
 	/* eslint-disable @typescript-eslint/naming-convention -- provider metadata keys can include leading underscores. */
 	__product_type?: string;
+	__evidence_submitted_at?: string | number;
 	/* eslint-enable @typescript-eslint/naming-convention */
 	[ key: string ]: unknown;
 }

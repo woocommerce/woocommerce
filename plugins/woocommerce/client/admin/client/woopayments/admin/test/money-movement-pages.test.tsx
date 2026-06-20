@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -25,6 +25,7 @@ import {
 	getWooPaymentsAuthorizations,
 	getWooPaymentsAuthorizationsSummary,
 	getWooPaymentsDisputesExportUrl,
+	closeWooPaymentsDispute,
 	captureWooPaymentsAuthorization,
 	cancelWooPaymentsAuthorization,
 	requestWooPaymentsDisputesExport,
@@ -149,6 +150,7 @@ jest.mock( '../money-movement/data', () => ( {
 	getWooPaymentsAuthorizationsSummary: jest.fn(),
 	captureWooPaymentsAuthorization: jest.fn(),
 	cancelWooPaymentsAuthorization: jest.fn(),
+	closeWooPaymentsDispute: jest.fn(),
 	getWooPaymentsDisputesSummary: jest.fn(),
 	requestWooPaymentsTransactionsExport: jest.fn(),
 	getWooPaymentsTransactionsExportUrl: jest.fn(),
@@ -194,6 +196,9 @@ const mockCancelAuthorization =
 	cancelWooPaymentsAuthorization as jest.MockedFunction<
 		typeof cancelWooPaymentsAuthorization
 	>;
+const mockCloseDispute = closeWooPaymentsDispute as jest.MockedFunction<
+	typeof closeWooPaymentsDispute
+>;
 const mockGetDisputesSummary =
 	getWooPaymentsDisputesSummary as jest.MockedFunction<
 		typeof getWooPaymentsDisputesSummary
@@ -237,6 +242,7 @@ describe( 'WooPayments money movement pages', () => {
 		mockGetAuthorizationsSummary.mockReset();
 		mockCaptureAuthorization.mockReset();
 		mockCancelAuthorization.mockReset();
+		mockCloseDispute.mockReset();
 		mockGetDisputesSummary.mockReset();
 		mockRequestTransactionsExport.mockReset();
 		mockGetTransactionsExportUrl.mockReset();
@@ -835,7 +841,7 @@ describe( 'WooPayments money movement pages', () => {
 		);
 	} );
 
-	it( 'announces loaded disputes and routes actionable rows to challenge evidence', async () => {
+	it( 'announces loaded disputes and routes actionable rows to transaction details', async () => {
 		mockGetDisputes.mockResolvedValue( {
 			data: [
 				{
@@ -873,11 +879,11 @@ describe( 'WooPayments money movement pages', () => {
 		expect( screen.getByText( 'Spotlight promotion' ) ).toBeInTheDocument();
 
 		const challengeLink = await screen.findByRole( 'link', {
-			name: 'Respond now to fraudulent dispute dp_test',
+			name: 'Respond now to fraudulent dispute dp_test from transaction details',
 		} );
 		expect( challengeLink ).toHaveAttribute(
 			'href',
-			'http://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=%2Fwoopayments%2Fdisputes%2Fchallenge&id=dp_test'
+			'http://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=%2Fwoopayments%2Ftransactions%2Fdetails&id=ch_test'
 		);
 		expect(
 			screen.getByRole( 'link', {
@@ -921,11 +927,11 @@ describe( 'WooPayments money movement pages', () => {
 
 		expect(
 			await screen.findByRole( 'link', {
-				name: 'Respond now to fraudulent dispute dp_test',
+				name: 'Respond now to fraudulent dispute dp_test from transaction details',
 			} )
 		).toHaveAttribute(
 			'href',
-			'http://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=%2Fwoopayments%2Fdisputes%2Fchallenge&id=dp_test'
+			'http://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=%2Fwoopayments%2Ftransactions%2Fdetails&id=ch_test'
 		);
 		expect( mockGetDisputes ).toHaveBeenCalledWith(
 			expect.objectContaining( {
@@ -1106,6 +1112,523 @@ describe( 'WooPayments money movement pages', () => {
 		expect( mockGetPaymentIntent ).toHaveBeenCalledWith( 'pi_test' );
 		expect( mockGetTimeline ).toHaveBeenCalledWith( 'pi_test' );
 		expect( mockGetTransaction ).not.toHaveBeenCalled();
+	} );
+
+	it( 'renders awaiting-response dispute decisions from transaction details', async () => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_test',
+			status: 'succeeded',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			charge: {
+				id: 'ch_test',
+				balance_transaction: {
+					id: 'txn_test',
+					fee: 180,
+					net: 4820,
+				},
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				payment_intent: 'pi_test',
+				billing_details: {
+					email: 'ada@example.com',
+					name: 'Ada Lovelace',
+				},
+				payment_method_details: {
+					type: 'card',
+					card: {
+						brand: 'visa',
+						last4: '4242',
+					},
+				},
+				dispute: {
+					id: 'dp_test',
+					status: 'needs_response',
+					reason: 'fraudulent',
+					evidence_details: {
+						due_by: 1781913600,
+					},
+					amount: 5000,
+					currency: 'usd',
+				},
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_test&transaction_id=txn_test',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		expect(
+			await screen.findByRole( 'heading', { name: 'Dispute details' } )
+		).toBeInTheDocument();
+		expect( screen.getByText( 'Response needed' ) ).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'link', { name: 'Challenge dispute' } )
+		).toHaveAttribute(
+			'href',
+			'http://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=%2Fwoopayments%2Fdisputes%2Fchallenge&id=dp_test'
+		);
+		expect(
+			screen.getByRole( 'button', { name: 'Accept dispute' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'link', {
+				name: 'Learn more about responding to disputes',
+			} )
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/document/woopayments/fraud-and-disputes/managing-disputes/#responding'
+		);
+	} );
+
+	it( 'accepts a dispute from the transaction detail decision layer', async () => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_test',
+			status: 'succeeded',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			charge: {
+				id: 'ch_test',
+				balance_transaction: 'txn_test',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				payment_intent: 'pi_test',
+				dispute: {
+					id: 'dp_test',
+					status: 'needs_response',
+					reason: 'fraudulent',
+					amount: 5000,
+					currency: 'usd',
+				},
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+		mockCloseDispute.mockResolvedValue( {
+			id: 'dp_test',
+			status: 'lost',
+			reason: 'fraudulent',
+		} );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_test&transaction_id=txn_test',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		const acceptButton = await screen.findByRole( 'button', {
+			name: 'Accept dispute',
+		} );
+
+		await act( async () => {
+			await userEvent.click( acceptButton );
+		} );
+		expect(
+			screen.getByRole( 'heading', { name: 'Accept the dispute?' } )
+		).toBeInTheDocument();
+		const acceptDialog = screen.getByRole( 'dialog' );
+
+		await act( async () => {
+			await userEvent.click(
+				within( acceptDialog ).getByRole( 'button', {
+					name: 'Accept dispute',
+				} )
+			);
+		} );
+
+		await waitFor( () =>
+			expect( mockCloseDispute ).toHaveBeenCalledWith( 'dp_test' )
+		);
+		expect( mockCreateSuccessNotice ).toHaveBeenCalledWith(
+			'Dispute accepted.'
+		);
+		expect( await screen.findByText( 'Lost' ) ).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'heading', { name: 'Dispute details' } )
+		).toHaveFocus();
+	} );
+
+	it( 'does not steal focus after accepting a dispute when the modal was dismissed while pending', async () => {
+		let resolveCloseDispute: ( value: {
+			id: string;
+			status: string;
+			reason: string;
+		} ) => void = () => {};
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_test',
+			status: 'succeeded',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			charge: {
+				id: 'ch_test',
+				balance_transaction: 'txn_test',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				payment_intent: 'pi_test',
+				dispute: {
+					id: 'dp_test',
+					status: 'needs_response',
+					reason: 'fraudulent',
+					amount: 5000,
+					currency: 'usd',
+				},
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+		mockCloseDispute.mockReturnValue(
+			new Promise( ( resolve ) => {
+				resolveCloseDispute = resolve;
+			} )
+		);
+
+		render(
+			<>
+				<button type="button">Outside focus target</button>
+				<MemoryRouter
+					initialEntries={ [
+						'/woopayments/transactions/details?id=pi_test&transaction_id=txn_test',
+					] }
+				>
+					<WooPaymentsTransactionDetailsPage />
+				</MemoryRouter>
+			</>
+		);
+
+		const acceptButton = await screen.findByRole( 'button', {
+			name: 'Accept dispute',
+		} );
+
+		await act( async () => {
+			await userEvent.click( acceptButton );
+		} );
+		const acceptDialog = screen.getByRole( 'dialog' );
+		await act( async () => {
+			await userEvent.click(
+				within( acceptDialog ).getByRole( 'button', {
+					name: 'Accept dispute',
+				} )
+			);
+		} );
+		await waitFor( () =>
+			expect( mockCloseDispute ).toHaveBeenCalledWith( 'dp_test' )
+		);
+
+		await act( async () => {
+			await userEvent.click(
+				within( acceptDialog ).getByRole( 'button', {
+					name: 'Cancel',
+				} )
+			);
+		} );
+		const outsideFocusTarget = screen.getByRole( 'button', {
+			name: 'Outside focus target',
+		} );
+		outsideFocusTarget.focus();
+		expect( outsideFocusTarget ).toHaveFocus();
+
+		await act( async () => {
+			resolveCloseDispute( {
+				id: 'dp_test',
+				status: 'lost',
+				reason: 'fraudulent',
+			} );
+			await Promise.resolve();
+		} );
+
+		expect( await screen.findByText( 'Lost' ) ).toBeInTheDocument();
+		expect( outsideFocusTarget ).toHaveFocus();
+	} );
+
+	it( 'restores focus after accepting a dispute when the pending modal dismiss leaves focus unstable', async () => {
+		let resolveCloseDispute: ( value: {
+			id: string;
+			status: string;
+			reason: string;
+		} ) => void = () => {};
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_test',
+			status: 'succeeded',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			charge: {
+				id: 'ch_test',
+				balance_transaction: 'txn_test',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				payment_intent: 'pi_test',
+				dispute: {
+					id: 'dp_test',
+					status: 'needs_response',
+					reason: 'fraudulent',
+					amount: 5000,
+					currency: 'usd',
+				},
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+		mockCloseDispute.mockReturnValue(
+			new Promise( ( resolve ) => {
+				resolveCloseDispute = resolve;
+			} )
+		);
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_test&transaction_id=txn_test',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		const acceptButton = await screen.findByRole( 'button', {
+			name: 'Accept dispute',
+		} );
+
+		await act( async () => {
+			await userEvent.click( acceptButton );
+		} );
+		const acceptDialog = screen.getByRole( 'dialog' );
+		await act( async () => {
+			await userEvent.click(
+				within( acceptDialog ).getByRole( 'button', {
+					name: 'Accept dispute',
+				} )
+			);
+		} );
+		await waitFor( () =>
+			expect( mockCloseDispute ).toHaveBeenCalledWith( 'dp_test' )
+		);
+
+		await act( async () => {
+			await userEvent.click(
+				within( acceptDialog ).getByRole( 'button', {
+					name: 'Cancel',
+				} )
+			);
+		} );
+
+		await act( async () => {
+			resolveCloseDispute( {
+				id: 'dp_test',
+				status: 'lost',
+				reason: 'fraudulent',
+			} );
+			await Promise.resolve();
+		} );
+
+		expect( await screen.findByText( 'Lost' ) ).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'heading', { name: 'Dispute details' } )
+		).toHaveFocus();
+	} );
+
+	it( 'surfaces dispute accept failures from transaction details', async () => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_test',
+			charge: {
+				id: 'ch_test',
+				balance_transaction: 'txn_test',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				payment_intent: 'pi_test',
+				dispute: {
+					id: 'dp_test',
+					status: 'needs_response',
+					reason: 'fraudulent',
+				},
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+		mockCloseDispute.mockRejectedValue( new Error( 'Close failed' ) );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_test&transaction_id=txn_test',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		const acceptButton = await screen.findByRole( 'button', {
+			name: 'Accept dispute',
+		} );
+
+		await act( async () => {
+			await userEvent.click( acceptButton );
+		} );
+		const acceptDialog = screen.getByRole( 'dialog' );
+		await act( async () => {
+			await userEvent.click(
+				within( acceptDialog ).getByRole( 'button', {
+					name: 'Accept dispute',
+				} )
+			);
+		} );
+
+		await waitFor( () =>
+			expect( mockCreateErrorNotice ).toHaveBeenCalledWith(
+				'Close failed'
+			)
+		);
+	} );
+
+	it( 'shows inquiry refund guidance without issuing a refund inline', async () => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_test',
+			charge: {
+				id: 'ch_test',
+				balance_transaction: 'txn_test',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				payment_intent: 'pi_test',
+				dispute: {
+					id: 'dp_test',
+					status: 'warning_needs_response',
+					reason: 'product_not_received',
+				},
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_test&transaction_id=txn_test',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		expect(
+			await screen.findByRole( 'link', { name: 'Submit evidence' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'button', { name: 'Issue refund' } )
+		).toHaveAttribute( 'aria-disabled', 'true' );
+		expect(
+			screen.getByRole( 'button', { name: 'Issue refund' } )
+		).toHaveAccessibleDescription(
+			'Issue the refund from the full refund flow before responding to this inquiry.'
+		);
+	} );
+
+	it( 'renders resolved dispute guidance and submitted evidence links', async () => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_test',
+			charge: {
+				id: 'ch_test',
+				balance_transaction: 'txn_test',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				payment_intent: 'pi_test',
+				dispute: {
+					id: 'dp_test',
+					status: 'under_review',
+					reason: 'fraudulent',
+					metadata: {
+						__evidence_submitted_at: '1781712200',
+					},
+				},
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_test&transaction_id=txn_test',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		expect(
+			await screen.findByText(
+				"The customer's bank is reviewing your submitted evidence. This process can take more than 60 days."
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'link', { name: 'View submitted evidence' } )
+		).toHaveAttribute(
+			'href',
+			'http://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=%2Fwoopayments%2Fdisputes%2Fchallenge&id=dp_test'
+		);
+	} );
+
+	it.each( [
+		[
+			'won',
+			'You won this dispute. The disputed amount and dispute fee have been returned to your account.',
+		],
+		[
+			'lost',
+			'This dispute was lost. The disputed amount and dispute fee have been deducted from your account.',
+		],
+	] )( 'renders %s dispute outcome guidance', async ( status, message ) => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_test',
+			charge: {
+				id: 'ch_test',
+				balance_transaction: 'txn_test',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				payment_intent: 'pi_test',
+				dispute: {
+					id: 'dp_test',
+					status,
+					reason: 'fraudulent',
+				},
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_test&transaction_id=txn_test',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		expect( await screen.findByText( message ) ).toBeInTheDocument();
 	} );
 
 	it( 'renders reference-shaped timeline events with datetime values', async () => {

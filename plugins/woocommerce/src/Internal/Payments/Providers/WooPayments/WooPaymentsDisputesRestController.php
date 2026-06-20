@@ -67,18 +67,27 @@ class WooPaymentsDisputesRestController implements RegisterHooksInterface {
 	private WooPaymentsMoneyMovementOrderService $order_service;
 
 	/**
+	 * Dispute cache service.
+	 *
+	 * @var WooPaymentsDisputeCacheService
+	 */
+	private WooPaymentsDisputeCacheService $dispute_cache_service;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
 	 *
-	 * @param NativePaymentsRuntimeArbiter         $arbiter       Runtime owner arbiter.
-	 * @param WooPaymentsApiClient                 $api_client    Native WooPayments API client.
-	 * @param WooPaymentsMoneyMovementOrderService $order_service Local order context service.
+	 * @param NativePaymentsRuntimeArbiter         $arbiter               Runtime owner arbiter.
+	 * @param WooPaymentsApiClient                 $api_client            Native WooPayments API client.
+	 * @param WooPaymentsMoneyMovementOrderService $order_service         Local order context service.
+	 * @param WooPaymentsDisputeCacheService       $dispute_cache_service Dispute cache service.
 	 */
-	final public function init( NativePaymentsRuntimeArbiter $arbiter, WooPaymentsApiClient $api_client, WooPaymentsMoneyMovementOrderService $order_service ): void {
-		$this->arbiter       = $arbiter;
-		$this->api_client    = $api_client;
-		$this->order_service = $order_service;
+	final public function init( NativePaymentsRuntimeArbiter $arbiter, WooPaymentsApiClient $api_client, WooPaymentsMoneyMovementOrderService $order_service, WooPaymentsDisputeCacheService $dispute_cache_service ): void {
+		$this->arbiter               = $arbiter;
+		$this->api_client            = $api_client;
+		$this->order_service         = $order_service;
+		$this->dispute_cache_service = $dispute_cache_service;
 	}
 
 	/**
@@ -235,6 +244,7 @@ class WooPaymentsDisputesRestController implements RegisterHooksInterface {
 
 		try {
 			$response = $this->api_client->close_dispute( $dispute_id );
+			$this->dispute_cache_service->delete_dispute_caches();
 
 			$this->log_dispute_action( 'info', __( 'WooPayments dispute close completed.', 'woocommerce' ), $log_context );
 

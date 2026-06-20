@@ -68,9 +68,6 @@ const getSummaryTotal = ( summary: DisputesSummary ) => {
 const getSummaryCurrency = ( summary: DisputesSummary ) =>
 	typeof summary.currency === 'string' ? summary.currency : undefined;
 
-const getDisputeChallengeRoute = ( disputeId: string ) =>
-	`/woopayments/disputes/challenge?id=${ encodeURIComponent( disputeId ) }`;
-
 export const WooPaymentsDisputesPage = () => {
 	const [ disputes, setDisputes ] = useState< WooPaymentsDispute[] >( [] );
 	const [ totalCount, setTotalCount ] = useState( 0 );
@@ -146,18 +143,14 @@ export const WooPaymentsDisputesPage = () => {
 				render: ( { item }: { item: WooPaymentsDispute } ) => {
 					const id = getDisputeId( item );
 					const isActionable = isDisputeActionable( item );
-					const rowHref = isActionable
-						? getSettingsPaymentsProviderRouteUrl(
-								getDisputeChallengeRoute( id )
-						  )
-						: getSettingsPaymentsProviderRouteUrl(
-								getTransactionDetailsRoute( item )
-						  );
+					const rowHref = getSettingsPaymentsProviderRouteUrl(
+						getTransactionDetailsRoute( item )
+					);
 					const ariaLabel = isActionable
 						? sprintf(
 								/* translators: 1: dispute reason, 2: dispute ID. */
 								__(
-									'Respond now to %1$s dispute %2$s',
+									'Respond now to %1$s dispute %2$s from transaction details',
 									'woocommerce'
 								),
 								formatLabel( item.reason ).toLowerCase(),
@@ -173,7 +166,7 @@ export const WooPaymentsDisputesPage = () => {
 								id
 						  );
 					const action = isActionable
-						? 'challenge'
+						? 'respond_from_transaction_details'
 						: 'view_transaction';
 
 					return (

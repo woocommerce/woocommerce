@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\Payments\ProviderContract;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiException;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAuthorizationsListRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAuthorizationsRestController;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsDisputeCacheService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsDisputesRestController;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsFraudOutcomeTransactionsListRequest;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsMoneyMovementOrderService;
@@ -58,6 +59,9 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 		remove_all_filters( 'wcpay_get_fraud_outcome_transactions_search_autocomplete_request' );
 		remove_all_filters( 'wcpay_get_fraud_outcome_transactions_export_request' );
 		remove_all_filters( 'woocommerce_logging_class' );
+		delete_option( 'wcpay_dispute_status_counts_cache' );
+		delete_option( 'wcpay_test_dispute_status_counts_cache' );
+		delete_option( 'wcpay_active_dispute_cache' );
 		parent::tearDown();
 	}
 
@@ -1038,6 +1042,44 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox Dispute close deletes stale dispute caches after the platform accepts the close.
+	 */
+	public function test_dispute_close_deletes_stale_dispute_caches_after_platform_success(): void {
+		$this->create_disputes_controller( true )->register_routes();
+		update_option( 'wcpay_dispute_status_counts_cache', array( 'data' => array( 'needs_response' => 1 ) ) );
+		update_option( 'wcpay_test_dispute_status_counts_cache', array( 'data' => array( 'warning_needs_response' => 1 ) ) );
+		update_option( 'wcpay_active_dispute_cache', array( 'id' => 'dp_test' ) );
+		$this->api_client->response = array(
+			'id'     => 'dp_test',
+			'status' => 'lost',
+		);
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/payments/disputes/dp_test/close' ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertFalse( get_option( 'wcpay_dispute_status_counts_cache' ) );
+		$this->assertFalse( get_option( 'wcpay_test_dispute_status_counts_cache' ) );
+		$this->assertFalse( get_option( 'wcpay_active_dispute_cache' ) );
+	}
+
+	/**
+	 * @testdox Dispute close keeps dispute caches when the platform close fails.
+	 */
+	public function test_dispute_close_keeps_stale_dispute_caches_when_platform_fails(): void {
+		$this->create_disputes_controller( true )->register_routes();
+		update_option( 'wcpay_dispute_status_counts_cache', array( 'data' => array( 'needs_response' => 1 ) ) );
+		$this->api_client->exception = new WooPaymentsApiException( 'Close failed.', 'close_failed', 400 );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/payments/disputes/dp_test/close' ) );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame(
+			array( 'data' => array( 'needs_response' => 1 ) ),
+			get_option( 'wcpay_dispute_status_counts_cache' )
+		);
+	}
+
+	/**
 	 * @testdox Dispute update forwards draft evidence clearing fields unchanged.
 	 */
 	public function test_dispute_update_forwards_draft_evidence_clearing_fields(): void {
@@ -1249,7 +1291,7 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 	 */
 	private function create_disputes_controller( bool $native_register, ?WooPaymentsMoneyMovementOrderService $order_service = null ): WooPaymentsDisputesRestController {
 		$controller = new WooPaymentsDisputesRestController();
-		$controller->init( $this->create_arbiter( $native_register ), $this->api_client, $order_service ?? $this->create_order_service() );
+		$controller->init( $this->create_arbiter( $native_register ), $this->api_client, $order_service ?? $this->create_order_service(), new WooPaymentsDisputeCacheService() );
 
 		return $controller;
 	}
