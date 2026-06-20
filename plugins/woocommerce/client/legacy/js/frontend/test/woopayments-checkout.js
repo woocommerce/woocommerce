@@ -116,7 +116,44 @@ describe( 'WooPayments checkout', () => {
 			isCoreNativeCheckoutAvailable: true,
 			isShopperTrackingEnabled: true,
 			locale: 'en-US',
+			stylesCacheVersion: 'styles-v1',
 			platformTrackerNonce: 'tracks-nonce',
+			paymentMethodsConfig: {
+				card: {
+					cardBrandIcons: [
+						{
+							id: 'visa',
+							alt: 'Visa',
+							src: 'https://example.test/visa.svg',
+						},
+						{
+							id: 'mastercard',
+							alt: 'Mastercard',
+							src: 'https://example.test/mastercard.svg',
+						},
+						{
+							id: 'amex',
+							alt: 'American Express',
+							src: 'https://example.test/amex.svg',
+						},
+						{
+							id: 'discover',
+							alt: 'Discover',
+							src: 'https://example.test/discover.svg',
+						},
+						{
+							id: 'jcb',
+							alt: 'JCB',
+							src: 'https://example.test/jcb.svg',
+						},
+						{
+							id: 'unionpay',
+							alt: 'Union Pay',
+							src: 'https://example.test/unionpay.svg',
+						},
+					],
+				},
+			},
 			publishableKey: 'pk_test',
 			woopayPhoneLabel: 'Mobile phone number',
 			woopaySaveUserLabel:
@@ -170,6 +207,7 @@ describe( 'WooPayments checkout', () => {
 		delete window.Stripe;
 		delete window.navigator.clipboard;
 		window.fetch = originalFetch;
+		window.localStorage.clear();
 		document.body.innerHTML = '';
 		window.location.hash = '';
 	} );
@@ -191,10 +229,61 @@ describe( 'WooPayments checkout', () => {
 		expect( stripeElementsOptions ).toMatchObject( {
 			amount: 5000,
 			currency: 'gbp',
+			loader: 'never',
 			mode: 'payment',
 			paymentMethodCreation: 'manual',
 			paymentMethodTypes: [ 'card' ],
 		} );
+	} );
+
+	test( 'initializes classic Stripe Elements with cached appearance and font rules', () => {
+		const appearance = {
+			theme: 'stripe',
+			labels: 'floating',
+			rules: {
+				'.Input': {
+					fontSize: '16px',
+				},
+			},
+		};
+		const originalStyleSheets = document.styleSheets;
+		Object.defineProperty( document, 'styleSheets', {
+			configurable: true,
+			value: [
+				{
+					href: 'https://fonts.wp.com/inter.css',
+				},
+				{
+					href: 'https://example.test/theme.css',
+				},
+			],
+		} );
+		window.localStorage.setItem(
+			'wcpay_appearance_classic_checkout',
+			JSON.stringify( {
+				version: 'styles-v1',
+				appearance,
+			} )
+		);
+
+		try {
+			require( '../woopayments-checkout' );
+
+			expect( stripeElementsOptions ).toMatchObject( {
+				appearance,
+				fonts: [
+					{
+						cssSrc: 'https://fonts.wp.com/inter.css',
+					},
+				],
+				loader: 'never',
+			} );
+		} finally {
+			Object.defineProperty( document, 'styleSheets', {
+				configurable: true,
+				value: originalStyleSheets,
+			} );
+		}
 	} );
 
 	test( 'uses setup mode when the checkout total is zero', () => {
@@ -331,6 +420,121 @@ describe( 'WooPayments checkout', () => {
 		document.querySelector( '.js-woopayments-copy-test-number' ).click();
 
 		expect( writeText ).toHaveBeenCalledWith( '4242 4242 4242 4242' );
+	} );
+
+	test( 'hydrates card brand icons with a keyboard accessible popover', () => {
+		document.body.innerHTML =
+			'<form class="checkout">' +
+			'<input id="payment_method_woocommerce_payments" type="radio" ' +
+			'name="payment_method" value="woocommerce_payments" checked />' +
+			'<label for="payment_method_woocommerce_payments">Card ' +
+			'<span class="wcpay-core-card-brand-icons payment-methods--logos">' +
+			'<img src="https://example.test/visa.svg" alt="Visa" />' +
+			'</span></label>' +
+			'<div id="wcpay-core-payment-element"></div>' +
+			'</form>';
+
+		require( '../woopayments-checkout' );
+
+		const logos = document.querySelector(
+			'[data-testid="payment-methods-logos"]'
+		);
+
+		expect( logos ).not.toBeNull();
+		expect(
+			Array.from( logos.querySelectorAll( 'img' ) ).map(
+				( img ) => img.alt
+			)
+		).toEqual( [ 'Visa', 'Mastercard', 'American Express', 'Discover' ] );
+		expect(
+			logos.querySelector( '.payment-methods--logos-count' ).textContent
+		).toBe( '+ 2' );
+		expect( logos.getAttribute( 'aria-haspopup' ) ).toBe( 'dialog' );
+		expect( logos.getAttribute( 'aria-label' ) ).toBe(
+			'Show all supported credit card brands'
+		);
+
+		logos.dispatchEvent(
+			new window.KeyboardEvent( 'keydown', {
+				key: 'Enter',
+				bubbles: true,
+				cancelable: true,
+			} )
+		);
+
+		const popover = document.querySelector( '.logo-popover' );
+
+		expect( popover ).not.toBeNull();
+		expect( popover.getAttribute( 'aria-label' ) ).toBe(
+			'Supported credit card brands'
+		);
+		expect( popover.getAttribute( 'tabindex' ) ).toBe( '-1' );
+		expect(
+			document.getElementById( popover.getAttribute( 'aria-describedby' ) )
+				.textContent
+		).toBe( 'JCB, Union Pay' );
+		expect( document.activeElement ).toBe( popover );
+		expect(
+			Array.from( popover.querySelectorAll( 'img' ) ).map(
+				( img ) => img.alt
+			)
+		).toEqual( [ 'JCB', 'Union Pay' ] );
+
+		document.dispatchEvent(
+			new window.KeyboardEvent( 'keydown', {
+				key: 'Escape',
+				bubbles: true,
+			} )
+		);
+
+		expect( document.querySelector( '.logo-popover' ) ).toBeNull();
+		expect( document.activeElement ).toBe( logos );
+	} );
+
+	test( 'cleans up card brand logo resize handlers when checkout fragments replace payment markup', () => {
+		const addEventListener = jest.spyOn( window, 'addEventListener' );
+		const removeEventListener = jest.spyOn( window, 'removeEventListener' );
+		document.body.innerHTML =
+			'<form class="checkout">' +
+			'<input id="payment_method_woocommerce_payments" type="radio" ' +
+			'name="payment_method" value="woocommerce_payments" checked />' +
+			'<label for="payment_method_woocommerce_payments">Card ' +
+			'<span class="wcpay-core-card-brand-icons payment-methods--logos">' +
+			'<img src="https://example.test/visa.svg" alt="Visa" />' +
+			'</span></label>' +
+			'<div id="wcpay-core-payment-element"></div>' +
+			'</form>';
+
+		require( '../woopayments-checkout' );
+
+		const resizeHandlers = addEventListener.mock.calls
+			.filter( ( [ eventName ] ) => eventName === 'resize' )
+			.map( ( [ , handler ] ) => handler );
+
+		expect( resizeHandlers ).toHaveLength( 1 );
+
+		document.body.innerHTML =
+			'<form class="checkout">' +
+			'<input id="payment_method_woocommerce_payments" type="radio" ' +
+			'name="payment_method" value="woocommerce_payments" checked />' +
+			'<label for="payment_method_woocommerce_payments">Card ' +
+			'<span class="wcpay-core-card-brand-icons payment-methods--logos">' +
+			'<img src="https://example.test/visa.svg" alt="Visa" />' +
+			'</span></label>' +
+			'<div id="wcpay-core-payment-element"></div>' +
+			'</form>';
+
+		bodyEventHandlers.updated_checkout();
+
+		expect( removeEventListener ).toHaveBeenCalledWith(
+			'resize',
+			resizeHandlers[ 0 ]
+		);
+		expect(
+			addEventListener.mock.calls.filter(
+				( [ eventName ] ) => eventName === 'resize'
+			)
+		).toHaveLength( 2 );
 	} );
 
 	test( 'does not render WooPay express markup from the card checkout bundle', () => {

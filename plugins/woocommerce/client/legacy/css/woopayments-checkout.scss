@@ -101,6 +101,10 @@
 			align-items: center;
 			gap: 4px;
 
+			img {
+				float: none;
+			}
+
 			img:last-of-type {
 				margin-right: 0;
 			}
@@ -133,6 +137,27 @@
 			width: 38px;
 			height: 24px !important;
 			max-height: 24px !important;
+		}
+
+		.logo-popover {
+			background-color: #fff;
+			border: 1px solid #ddd;
+			border-radius: 3px;
+			padding: 8px;
+			box-sizing: border-box;
+			box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+			display: grid;
+			gap: 8px;
+			justify-content: center;
+			cursor: pointer;
+			position: absolute;
+			z-index: 1000;
+
+			> img {
+				box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+				width: 38px;
+				height: 24px;
+			}
 		}
 	}
 }

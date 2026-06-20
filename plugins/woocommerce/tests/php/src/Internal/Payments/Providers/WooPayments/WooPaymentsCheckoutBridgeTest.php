@@ -144,6 +144,32 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should expose Cartes Bancaires card branding for France merchants.
+	 */
+	public function test_get_payment_fields_js_config_includes_cartes_bancaires_for_france_merchants(): void {
+		$legacy_runtime  = $this->create_legacy_runtime_for_bridge();
+		$account_service = $this->create_account_service_for_bridge(
+			true,
+			array(
+				'country' => 'FR',
+			)
+		);
+		$legacy_runtime->method( 'get_gateway_prepared_customer_data' )->willReturn( array() );
+		$legacy_runtime->method( 'can_handle_checkout_bridge_callbacks' )->willReturn( true );
+
+		$bridge = new WooPaymentsCheckoutBridge();
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( false ), $this->create_frontend_styles_service_for_bridge(), $this->create_frontend_tracking_controller_for_bridge() );
+
+		$config = $bridge->get_payment_fields_js_config();
+		$icons  = $config['paymentMethodsConfig']['card']['cardBrandIcons'];
+
+		$this->assertSame( 'FR', $config['storeCountry'] );
+		$this->assertContains( 'cartes_bancaires', array_column( $icons, 'id' ) );
+		$this->assertContains( 'Cartes Bancaires', array_column( $icons, 'alt' ) );
+		$this->assertStringContainsString( '/assets/images/payment-methods/cartes_bancaires.svg', $icons[6]['src'] );
+	}
+
+	/**
 	 * @testdox Should enqueue core-owned checkout assets when rendering payment fields.
 	 */
 	public function test_payment_fields_enqueues_core_owned_assets_and_preserves_wcpay_config_filter(): void {

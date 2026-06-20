@@ -102,6 +102,25 @@ class NativeWooPaymentsGatewayTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should show Cartes Bancaires in the checkout gateway icon for France merchants.
+	 */
+	public function test_gateway_icon_includes_cartes_bancaires_for_france_merchants(): void {
+		$account_service = $this->getMockBuilder( WooPaymentsAccountService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'is_test_mode_enabled', 'get_cached_account_data' ) )
+			->getMock();
+		$account_service->method( 'is_test_mode_enabled' )->willReturn( false );
+		$account_service->method( 'get_cached_account_data' )->willReturn( array( 'country' => 'FR' ) );
+
+		$gateway = new NativeWooPaymentsGateway();
+		$gateway->init( new RecordingPaymentProcessingService(), new WooPaymentsProvider(), null, null, $account_service );
+
+		$icon = $gateway->get_icon();
+
+		$this->assertStringContainsString( '<span class="payment-methods--logos-count">+ 4</span>', $icon );
+	}
+
+	/**
 	 * @testdox Should expose saved-card support only when saved cards are enabled.
 	 */
 	public function test_saved_card_support_tracks_saved_cards_setting(): void {

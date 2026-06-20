@@ -62,6 +62,15 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	);
 
 	/**
+	 * France-only shopper-facing card brand icons.
+	 *
+	 * @var array<string,string>
+	 */
+	private const FR_CARD_BRAND_ICONS = array(
+		'cartes_bancaires' => 'Cartes Bancaires',
+	);
+
+	/**
 	 * Recommended payment methods cache key.
 	 */
 	private const RECOMMENDED_PAYMENT_METHODS_CACHE_KEY = 'woocommerce_woocommerce_payments_recommended_payment_methods';
@@ -584,8 +593,9 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 	 */
 	public function get_icon() {
 		$icons                 = array();
-		$brands                = array_slice( self::CARD_BRAND_ICONS, 0, 3, true );
-		$additional_icon_count = count( self::CARD_BRAND_ICONS ) - count( $brands );
+		$brand_labels          = $this->get_card_brand_icon_labels();
+		$brands                = array_slice( $brand_labels, 0, 3, true );
+		$additional_icon_count = count( $brand_labels ) - count( $brands );
 
 		if ( $this->is_test_mode() ) {
 			$badge_style = implode(
@@ -635,6 +645,42 @@ class NativeWooPaymentsGateway extends WC_Payment_Gateway_CC {
 		 * @return string
 		 */
 		return apply_filters( 'woocommerce_gateway_icon', $icon, $this->id );
+	}
+
+	/**
+	 * Get shopper-facing card brand labels for the connected account country.
+	 *
+	 * @return array<string,string>
+	 */
+	private function get_card_brand_icon_labels(): array {
+		if ( 'FR' === $this->get_account_country() ) {
+			return array_merge( self::CARD_BRAND_ICONS, self::FR_CARD_BRAND_ICONS );
+		}
+
+		return self::CARD_BRAND_ICONS;
+	}
+
+	/**
+	 * Get the connected account country, falling back to the store base country.
+	 *
+	 * @return string
+	 */
+	private function get_account_country(): string {
+		$account_data = $this->get_account_service()->get_cached_account_data();
+		$country      = isset( $account_data['country'] ) && is_scalar( $account_data['country'] )
+			? strtoupper( (string) $account_data['country'] )
+			: '';
+
+		if ( '' === $country && function_exists( 'WC' ) && WC() && WC()->countries ) {
+			$country = strtoupper( (string) WC()->countries->get_base_country() );
+		}
+
+		if ( false !== strpos( $country, ':' ) ) {
+			$base_country = strtok( $country, ':' );
+			$country      = is_string( $base_country ) ? $base_country : '';
+		}
+
+		return '' !== $country ? $country : 'US';
 	}
 
 	/**

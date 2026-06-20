@@ -133,6 +133,15 @@ class WooPaymentsCheckoutBridge {
 	);
 
 	/**
+	 * France-only shopper-facing card brand icons.
+	 *
+	 * @var array<string,string>
+	 */
+	private const FR_CARD_BRAND_ICONS = array(
+		'cartes_bancaires' => 'Cartes Bancaires',
+	);
+
+	/**
 	 * WooPayments legacy runtime.
 	 *
 	 * @var WooPaymentsLegacyRuntime
@@ -214,6 +223,7 @@ class WooPaymentsCheckoutBridge {
 			'enabledBillingFields'          => $this->get_enabled_billing_fields(),
 			'currency'                      => get_woocommerce_currency(),
 			'cartTotal'                     => $this->get_cart_total(),
+			'storeCountry'                  => $this->get_account_country(),
 			'cartContainsSubscription'      => $this->cart_contains_subscription(),
 			'stylesCacheVersion'            => $this->get_frontend_styles_service()->get_styles_cache_version(),
 			'forceNetworkSavedCards'        => $force_network_saved_cards,
@@ -458,7 +468,7 @@ class WooPaymentsCheckoutBridge {
 	private function get_card_brand_icons(): array {
 		$icons = array();
 
-		foreach ( self::CARD_BRAND_ICONS as $brand => $label ) {
+		foreach ( $this->get_card_brand_icon_labels() as $brand => $label ) {
 			$icons[] = array(
 				'id'  => $brand,
 				'alt' => $label,
@@ -467,6 +477,19 @@ class WooPaymentsCheckoutBridge {
 		}
 
 		return $icons;
+	}
+
+	/**
+	 * Get shopper-facing card brand labels for the connected account country.
+	 *
+	 * @return array<string,string>
+	 */
+	private function get_card_brand_icon_labels(): array {
+		if ( 'FR' === $this->get_account_country() ) {
+			return array_merge( self::CARD_BRAND_ICONS, self::FR_CARD_BRAND_ICONS );
+		}
+
+		return self::CARD_BRAND_ICONS;
 	}
 
 	/**
