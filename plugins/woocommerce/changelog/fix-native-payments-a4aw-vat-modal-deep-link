@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Open native WooPayments tax details deep links from provider settings.
