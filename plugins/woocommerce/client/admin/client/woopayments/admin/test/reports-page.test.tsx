@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
@@ -193,8 +199,61 @@ const balanceSummary = {
 	starting_balance: {
 		amount: 1000,
 	},
+	total_charges_captured: {
+		amount: 162672,
+		count: 8,
+	},
 	fees: {
-		amount: -123,
+		amount: -6064,
+	},
+	charge_fees: {
+		amount: -5958,
+	},
+	payout_fees: {
+		amount: -100,
+	},
+	reader_fees: {
+		amount: -150,
+	},
+	dispute_fees: {
+		amount: -1500,
+	},
+	fee_refunds: {
+		amount: 1644,
+	},
+	refunds: {
+		amount: -21500,
+		count: 3,
+	},
+	refund_failure: {
+		amount: -2000,
+		count: 1,
+	},
+	disputes: {
+		amount: -4000,
+		count: 1,
+	},
+	financing_payout: {
+		amount: 5000,
+		count: 1,
+	},
+	financing_paydown: {
+		amount: -500,
+		count: 1,
+	},
+	network_costs: {
+		amount: -250,
+		count: 1,
+	},
+	other_adjustments: {
+		amount: 750,
+		count: 1,
+	},
+	net_balance_change_in_the_period: {
+		amount: 132008,
+	},
+	payouts: {
+		amount: 1102608,
 		count: 2,
 	},
 	ending_balance: {
@@ -308,9 +367,35 @@ describe( 'WooPaymentsReportsPage', () => {
 		expect(
 			await screen.findByRole( 'heading', { name: 'Balance summary' } )
 		).toBeInTheDocument();
-		expect( screen.getByTestId( 'reports-dataviews' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Starting balance' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Ending balance' ) ).toBeInTheDocument();
+		const dataViews = screen.getByTestId( 'reports-dataviews' );
+		expect( dataViews ).toBeInTheDocument();
+		for ( const label of [
+			'Starting balance',
+			'Total charges captured',
+			'Fees',
+			'Charge fees',
+			'Payout fees',
+			'Reader costs',
+			'Dispute fees',
+			'Fee refunds',
+			'Refunds',
+			'Refund failures',
+			'Disputes',
+			'Financing payout',
+			'Financing paydown',
+			'Network costs',
+			'Other adjustments',
+			'Net balance change in the period',
+			'Payouts',
+			'Ending balance',
+		] ) {
+			expect(
+				within( dataViews ).getByText( label )
+			).toBeInTheDocument();
+		}
+		expect(
+			within( dataViews ).queryByText( 'Charges' )
+		).not.toBeInTheDocument();
 		expect( screen.getByLabelText( 'Date range' ) ).toBeInTheDocument();
 		expect( mockGetBalanceSummary ).toHaveBeenCalledWith( {
 			date_start: '2026-05-01T00:00:00.000Z',
@@ -331,9 +416,73 @@ describe( 'WooPaymentsReportsPage', () => {
 			tab: 'balance',
 		} );
 		expect( speak ).toHaveBeenCalledWith(
-			'3 balance report rows loaded.',
+			'18 balance report rows loaded.',
 			'polite'
 		);
+	} );
+
+	it( 'keeps the reference Balance anchor rows visible when activity rows are zero', async () => {
+		mockGetBalanceSummary.mockImplementationOnce( async () => {
+			await waitForNextTick();
+			return {
+				currency: 'usd',
+				starting_balance: {
+					amount: 0,
+				},
+				total_charges_captured: {
+					amount: 0,
+					count: 0,
+				},
+				fees: {
+					amount: 0,
+				},
+				net_balance_change_in_the_period: {
+					amount: 0,
+				},
+				payouts: {
+					amount: 0,
+					count: 0,
+				},
+				ending_balance: {
+					amount: 0,
+				},
+			};
+		} );
+
+		renderReportsPage();
+
+		expect(
+			await screen.findByRole( 'heading', {
+				name: 'No balance activity',
+			} )
+		).toBeInTheDocument();
+		const dataViews = screen.getByTestId( 'reports-dataviews' );
+
+		for ( const label of [
+			'Starting balance',
+			'Total charges captured',
+			'Fees',
+			'Net balance change in the period',
+			'Payouts',
+			'Ending balance',
+		] ) {
+			expect(
+				within( dataViews ).getByText( label )
+			).toBeInTheDocument();
+		}
+
+		for ( const label of [
+			'Reader costs',
+			'Charge fees',
+			'Payout fees',
+			'Refund failures',
+			'Network costs',
+		] ) {
+			expect(
+				within( dataViews ).queryByText( label )
+			).not.toBeInTheDocument();
+		}
+		expect( speak ).not.toHaveBeenCalled();
 	} );
 
 	it( 'lets merchants change the Balance period through the Date range selector', async () => {
@@ -497,7 +646,7 @@ describe( 'WooPaymentsReportsPage', () => {
 				.getByRole( 'heading', { name: 'No balance activity' } )
 				.closest( '[role="status"]' )
 		).toHaveTextContent(
-			'Your Balance summary will appear here once there is enough data to display.'
+			'No balance activity was found for the selected period. Summary rows are shown with zero amounts.'
 		);
 		expect(
 			screen.getByRole( 'button', { name: 'Apply April date filter' } )

@@ -63,6 +63,7 @@ type BalanceRow = {
 	label: string;
 	amount: number;
 	count?: number;
+	alwaysVisible?: boolean;
 };
 
 type BalanceDateFilterValue =
@@ -591,18 +592,39 @@ const getBalanceRows = ( summary: ReportsBalanceSummary ): BalanceRow[] =>
 			label: __( 'Starting balance', 'woocommerce' ),
 			amount: getBalanceAmount( summary.starting_balance ),
 			count: summary.starting_balance?.count,
+			alwaysVisible: true,
 		},
 		{
 			id: 'total_charges_captured',
-			label: __( 'Charges', 'woocommerce' ),
+			label: __( 'Total charges captured', 'woocommerce' ),
 			amount: getBalanceAmount( summary.total_charges_captured ),
 			count: summary.total_charges_captured?.count,
+			alwaysVisible: true,
 		},
 		{
 			id: 'fees',
 			label: __( 'Fees', 'woocommerce' ),
 			amount: getBalanceAmount( summary.fees ),
 			count: summary.fees?.count,
+			alwaysVisible: true,
+		},
+		{
+			id: 'charge_fees',
+			label: __( 'Charge fees', 'woocommerce' ),
+			amount: getBalanceAmount( summary.charge_fees ),
+			count: summary.charge_fees?.count,
+		},
+		{
+			id: 'dispute_fees',
+			label: __( 'Dispute fees', 'woocommerce' ),
+			amount: getBalanceAmount( summary.dispute_fees ),
+			count: summary.dispute_fees?.count,
+		},
+		{
+			id: 'fee_refunds',
+			label: __( 'Fee refunds', 'woocommerce' ),
+			amount: getBalanceAmount( summary.fee_refunds ),
+			count: summary.fee_refunds?.count,
 		},
 		{
 			id: 'refunds',
@@ -611,29 +633,81 @@ const getBalanceRows = ( summary: ReportsBalanceSummary ): BalanceRow[] =>
 			count: summary.refunds?.count,
 		},
 		{
+			id: 'refund_failure',
+			label: __( 'Refund failures', 'woocommerce' ),
+			amount: getBalanceAmount( summary.refund_failure ),
+			count: summary.refund_failure?.count,
+		},
+		{
 			id: 'disputes',
 			label: __( 'Disputes', 'woocommerce' ),
 			amount: getBalanceAmount( summary.disputes ),
 			count: summary.disputes?.count,
 		},
 		{
+			id: 'financing_payout',
+			label: __( 'Financing payout', 'woocommerce' ),
+			amount: getBalanceAmount( summary.financing_payout ),
+			count: summary.financing_payout?.count,
+		},
+		{
+			id: 'financing_paydown',
+			label: __( 'Financing paydown', 'woocommerce' ),
+			amount: getBalanceAmount( summary.financing_paydown ),
+			count: summary.financing_paydown?.count,
+		},
+		{
+			id: 'payout_fees',
+			label: __( 'Payout fees', 'woocommerce' ),
+			amount: getBalanceAmount( summary.payout_fees ),
+			count: summary.payout_fees?.count,
+		},
+		{
+			id: 'reader_fees',
+			label: __( 'Reader costs', 'woocommerce' ),
+			amount: getBalanceAmount( summary.reader_fees ),
+			count: summary.reader_fees?.count,
+		},
+		{
+			id: 'network_costs',
+			label: __( 'Network costs', 'woocommerce' ),
+			amount: getBalanceAmount( summary.network_costs ),
+			count: summary.network_costs?.count,
+		},
+		{
+			id: 'other_adjustments',
+			label: __( 'Other adjustments', 'woocommerce' ),
+			amount: getBalanceAmount( summary.other_adjustments ),
+			count: summary.other_adjustments?.count,
+		},
+		{
+			id: 'net_balance_change_in_the_period',
+			label: __( 'Net balance change in the period', 'woocommerce' ),
+			amount: getBalanceAmount(
+				summary.net_balance_change_in_the_period
+			),
+			count: summary.net_balance_change_in_the_period?.count,
+			alwaysVisible: true,
+		},
+		{
 			id: 'payouts',
 			label: __( 'Payouts', 'woocommerce' ),
 			amount: getBalanceAmount( summary.payouts ),
 			count: summary.payouts?.count,
+			alwaysVisible: true,
 		},
 		{
 			id: 'ending_balance',
 			label: __( 'Ending balance', 'woocommerce' ),
 			amount: getBalanceAmount( summary.ending_balance ),
 			count: summary.ending_balance?.count,
+			alwaysVisible: true,
 		},
 	].filter(
 		( row ) =>
-			row.id === 'starting_balance' ||
-			row.id === 'ending_balance' ||
+			row.alwaysVisible ||
 			row.amount !== 0 ||
-			row.count
+			Number( row.count ?? 0 ) > 0
 	);
 
 const hasBalanceActivity = ( rows: BalanceRow[] ) =>
@@ -713,6 +787,7 @@ const BalanceReport = ( { now }: { now: Date } ) => {
 		try {
 			const summary = await getWooPaymentsReportsBalanceSummary( query );
 			const rows = getBalanceRows( summary );
+			const rowsHaveActivity = hasBalanceActivity( rows );
 
 			if ( ! mountedRef.current ) {
 				return;
@@ -725,17 +800,19 @@ const BalanceReport = ( { now }: { now: Date } ) => {
 			} );
 			recordEvent( 'wcpay_reports_balance_load_success', {
 				currency: ( summary.currency || currency ).toLowerCase(),
-				has_activity: hasBalanceActivity( rows ),
+				has_activity: rowsHaveActivity,
 				visible_row_count: rows.length,
 			} );
-			speak(
-				sprintf(
-					/* translators: %d: number of balance rows loaded into the report. */
-					__( '%d balance report rows loaded.', 'woocommerce' ),
-					rows.length
-				),
-				'polite'
-			);
+			if ( rowsHaveActivity ) {
+				speak(
+					sprintf(
+						/* translators: %d: number of balance rows loaded into the report. */
+						__( '%d balance report rows loaded.', 'woocommerce' ),
+						rows.length
+					),
+					'polite'
+				);
+			}
 		} catch ( error ) {
 			if ( ! mountedRef.current ) {
 				return;
@@ -768,7 +845,7 @@ const BalanceReport = ( { now }: { now: Date } ) => {
 	const summary = state.data || {};
 	const rows = getBalanceRows( summary );
 	const hasActivity = hasBalanceActivity( rows );
-	const tableRows = state.error || ! hasActivity ? [] : rows;
+	const tableRows = state.error ? [] : rows;
 	const reportCurrency = summary.currency || currency;
 	const isInitialLoading = state.isLoading && ! state.data && ! state.error;
 	const fields = useMemo< Field< BalanceRow >[] >(
@@ -902,7 +979,7 @@ const BalanceReport = ( { now }: { now: Date } ) => {
 			<ReportState
 				title={ __( 'No balance activity', 'woocommerce' ) }
 				description={ __(
-					'Your Balance summary will appear here once there is enough data to display.',
+					'No balance activity was found for the selected period. Summary rows are shown with zero amounts.',
 					'woocommerce'
 				) }
 			/>

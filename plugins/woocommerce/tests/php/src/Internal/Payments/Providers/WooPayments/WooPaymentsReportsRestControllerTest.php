@@ -111,10 +111,17 @@ class WooPaymentsReportsRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_balance_report_forwards_sanitized_query(): void {
 		$this->create_controller( true, true )->register_routes();
 		$this->api_client->response = array(
-			'currency'         => 'usd',
-			'starting_balance' => array(
+			'currency'                         => 'usd',
+			'starting_balance'                 => array(
 				'amount' => 1000,
 				'count'  => 1,
+			),
+			'reader_fees'                      => array(
+				'amount' => -150,
+				'count'  => 1,
+			),
+			'net_balance_change_in_the_period' => array(
+				'amount' => 850,
 			),
 		);
 
@@ -141,6 +148,8 @@ class WooPaymentsReportsRestControllerTest extends WC_REST_Unit_Test_Case {
 			$this->api_client->last_call['query']
 		);
 		$this->assertSame( $this->api_client->response, $response->get_data() );
+		$this->assertSame( -150, $response->get_data()['reader_fees']['amount'] );
+		$this->assertSame( 850, $response->get_data()['net_balance_change_in_the_period']['amount'] );
 	}
 
 	/**
