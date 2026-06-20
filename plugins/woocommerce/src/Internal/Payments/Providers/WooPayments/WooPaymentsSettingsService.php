@@ -318,7 +318,35 @@ class WooPaymentsSettingsService {
 			'express_checkout_product_methods'           => $this->sanitize_payment_method_ids( $this->get_array_setting( $settings, 'express_checkout_product_methods' ), self::EXPRESS_CHECKOUT_METHOD_IDS ),
 			'express_checkout_cart_methods'              => $this->sanitize_payment_method_ids( $this->get_array_setting( $settings, 'express_checkout_cart_methods' ), self::EXPRESS_CHECKOUT_METHOD_IDS ),
 			'express_checkout_checkout_methods'          => $this->sanitize_payment_method_ids( $this->get_array_setting( $settings, 'express_checkout_checkout_methods' ), self::EXPRESS_CHECKOUT_METHOD_IDS ),
+			'express_checkout_preview'                   => $this->get_express_checkout_preview_settings(),
 		);
+	}
+
+	/**
+	 * Get public Stripe configuration used by the express checkout settings preview.
+	 *
+	 * @return array<string,array<string,string>>
+	 */
+	private function get_express_checkout_preview_settings(): array {
+		return array(
+			'stripe' => array(
+				'publishableKey' => $this->account_service->get_publishable_key(),
+				'accountId'      => $this->account_service->get_account_id(),
+				'locale'         => $this->get_stripe_locale(),
+			),
+		);
+	}
+
+	/**
+	 * Get a Stripe-compatible locale.
+	 *
+	 * @return string
+	 */
+	private function get_stripe_locale(): string {
+		$locale = function_exists( 'determine_locale' ) ? determine_locale() : get_locale();
+		$locale = strtolower( str_replace( '_', '-', (string) $locale ) );
+
+		return '' !== $locale ? $locale : 'auto';
 	}
 
 	/**

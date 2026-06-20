@@ -13,10 +13,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import {
-	ExpressCheckoutPreview,
-	ExpressCheckoutSettingsNotices,
-} from './notices';
+import { ExpressCheckoutPreview } from './express-checkout-preview';
+import { ExpressCheckoutSettingsNotices } from './notices';
 import {
 	usePaymentRequestButtonBorderRadius,
 	usePaymentRequestButtonSize,

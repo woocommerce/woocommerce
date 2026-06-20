@@ -6,10 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import {
-	ExpressCheckoutInlineNotice,
-	ExpressCheckoutPreviewFallback,
-} from './components';
+import { ExpressCheckoutInlineNotice } from './components';
 import {
 	useAmazonPayEnabledSettings,
 	useGetAvailablePaymentMethodIds,
@@ -99,9 +96,3 @@ export const ExpressCheckoutSettingsNotices = ( {
 		</>
 	);
 };
-
-export const ExpressCheckoutPreview = () => (
-	<div className="woopayments-express-checkout-settings__preview">
-		<ExpressCheckoutPreviewFallback />
-	</div>
-);

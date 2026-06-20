@@ -46,6 +46,14 @@ const mockUseAmazonPayEnabledSettings = jest.fn();
 const mockUseLinkEnabledSettings = jest.fn();
 const mockUseWooPayShowIncompatibilityNotice = jest.fn();
 const mockUseGetAvailablePaymentMethodIds = jest.fn();
+const originalLocation = window.location;
+const mockExpressCheckoutMount = jest.fn();
+const mockExpressCheckoutUnmount = jest.fn();
+const mockExpressCheckoutOn = jest.fn();
+const mockElementsCreate = jest.fn();
+const mockStripeElements = jest.fn();
+const mockStripe = jest.fn();
+const STRIPE_SCRIPT_URL = 'https://js.stripe.com/v3/';
 
 jest.mock( '../data/hooks', () => ( {
 	useSettings: () => mockUseSettings(),
@@ -81,6 +89,41 @@ jest.mock( '../bootstrap', () => ( {
 } ) );
 
 const noop = jest.fn();
+
+const setWindowProtocol = ( protocol: 'http:' | 'https:' ) => {
+	Object.defineProperty( window, 'location', {
+		configurable: true,
+		value: new URL( `${ protocol }//example.test/wp-admin/admin.php` ),
+	} );
+};
+
+const installStripeMock = () => {
+	mockExpressCheckoutMount.mockClear();
+	mockExpressCheckoutUnmount.mockClear();
+	mockExpressCheckoutOn.mockClear();
+	mockElementsCreate.mockClear();
+	mockStripeElements.mockClear();
+	mockStripe.mockClear();
+	mockExpressCheckoutOn.mockImplementation( ( eventName, callback ) => {
+		if ( eventName === 'ready' ) {
+			callback( {
+				availablePaymentMethods: {
+					applePay: true,
+					googlePay: true,
+				},
+			} );
+		}
+	} );
+	mockElementsCreate.mockReturnValue( {
+		mount: mockExpressCheckoutMount,
+		unmount: mockExpressCheckoutUnmount,
+		on: mockExpressCheckoutOn,
+	} );
+	mockStripeElements.mockReturnValue( { create: mockElementsCreate } );
+	mockStripe.mockReturnValue( { elements: mockStripeElements } );
+	( window as typeof window & { Stripe?: typeof mockStripe } ).Stripe =
+		mockStripe;
+};
 
 const setHookDefaults = () => {
 	mockSettingsBootstrap = {
@@ -133,6 +176,13 @@ const setHookDefaults = () => {
 			},
 		},
 		woopay_font_rules: [],
+		express_checkout_preview: {
+			stripe: {
+				publishableKey: 'pk_test_native',
+				accountId: 'acct_native_test',
+				locale: 'en-us',
+			},
+		},
 	} );
 	mockUseEnabledPaymentMethodIds.mockReturnValue( [ [ 'card' ], noop ] );
 	mockUsePaymentRequestEnabledSettings.mockReturnValue( [ true, noop ] );
@@ -181,7 +231,22 @@ describe( 'WooPaymentsExpressCheckoutSettings', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 		mockApiFetch.mockResolvedValue( { id: 'file_logo' } );
+		setWindowProtocol( 'http:' );
+		delete ( window as typeof window & { Stripe?: typeof mockStripe } )
+			.Stripe;
 		setHookDefaults();
+	} );
+
+	afterEach( () => {
+		Object.defineProperty( window, 'location', {
+			configurable: true,
+			value: originalLocation,
+		} );
+		delete ( window as typeof window & { Stripe?: typeof mockStripe } )
+			.Stripe;
+		document
+			.querySelectorAll( `script[src="${ STRIPE_SCRIPT_URL }"]` )
+			.forEach( ( script ) => script.remove() );
 	} );
 
 	it( 'fails closed for invalid express checkout method IDs', () => {
@@ -397,6 +462,207 @@ describe( 'WooPaymentsExpressCheckoutSettings', () => {
 		expect(
 			screen.getByText(
 				'Some appearance settings may be overridden in the express payment section of the Cart & Checkout blocks.'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'shows the activate-express-checkout notice when no previewable express checkouts are enabled', async () => {
+		mockUseWooPayEnabledSettings.mockReturnValue( [ false, noop ] );
+		mockUsePaymentRequestEnabledSettings.mockReturnValue( [ false, noop ] );
+
+		render(
+			<WooPaymentsExpressCheckoutSettings methodId="payment_request" />
+		);
+
+		expect(
+			await screen.findByText(
+				'To preview the express checkout buttons, activate at least one express checkout.',
+				{ selector: '.components-notice__content' }
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'renders a WooPay button preview and HTTP requirements notice without initializing Stripe', async () => {
+		installStripeMock();
+
+		render(
+			<WooPaymentsExpressCheckoutSettings methodId="payment_request" />
+		);
+
+		expect(
+			await screen.findByRole( 'button', {
+				name: /^WooPay$/i,
+			} )
+		).toHaveAccessibleDescription( 'Express checkout preview' );
+		expect(
+			screen.getByText(
+				/To preview the express checkout buttons, ensure your store uses HTTPS/,
+				{ selector: '.components-notice__content' }
+			)
+		).toBeInTheDocument();
+		expect( mockStripe ).not.toHaveBeenCalled();
+	} );
+
+	it( 'keeps the visible WooPay call to action in the preview accessible name', async () => {
+		mockUsePaymentRequestButtonType.mockReturnValue( [ 'buy', noop ] );
+
+		render(
+			<WooPaymentsExpressCheckoutSettings methodId="payment_request" />
+		);
+
+		expect(
+			await screen.findByRole( 'button', {
+				name: /^Buy with WooPay$/i,
+			} )
+		).toHaveAccessibleDescription( 'Express checkout preview' );
+	} );
+
+	it( 'mounts the live Stripe Express Checkout preview with native checkout loader behavior on HTTPS', async () => {
+		setWindowProtocol( 'https:' );
+		installStripeMock();
+
+		render(
+			<WooPaymentsExpressCheckoutSettings methodId="payment_request" />
+		);
+
+		await waitFor( () =>
+			expect( mockExpressCheckoutMount ).toHaveBeenCalled()
+		);
+		expect( mockStripe ).toHaveBeenCalledWith( 'pk_test_native', {
+			locale: 'en-us',
+			stripeAccount: 'acct_native_test',
+		} );
+		expect( mockStripeElements ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				mode: 'payment',
+				amount: 1000,
+				currency: 'usd',
+				loader: 'never',
+				appearance: {
+					variables: {
+						borderRadius: '4px',
+						spacingUnit: '6px',
+					},
+				},
+			} )
+		);
+		expect( mockElementsCreate ).toHaveBeenCalledWith(
+			'expressCheckout',
+			expect.objectContaining( {
+				buttonHeight: 40,
+				buttonTheme: {
+					applePay: 'black',
+					googlePay: 'black',
+				},
+				buttonType: {
+					applePay: 'plain',
+					googlePay: 'plain',
+				},
+				layout: { overflow: 'never' },
+				paymentMethods: expect.objectContaining( {
+					applePay: 'always',
+					googlePay: 'always',
+					amazonPay: 'never',
+					link: 'never',
+					paypal: 'never',
+					klarna: 'never',
+				} ),
+			} )
+		);
+	} );
+
+	it( 'loads Stripe.js before mounting the live preview when Stripe is not already available', async () => {
+		setWindowProtocol( 'https:' );
+		installStripeMock();
+		const stripeFactory = (
+			window as typeof window & { Stripe?: typeof mockStripe }
+		 ).Stripe;
+		delete ( window as typeof window & { Stripe?: typeof mockStripe } )
+			.Stripe;
+
+		render(
+			<WooPaymentsExpressCheckoutSettings methodId="payment_request" />
+		);
+
+		const stripeScript = document.querySelector(
+			`script[src="${ STRIPE_SCRIPT_URL }"]`
+		) as HTMLScriptElement;
+
+		expect( stripeScript ).toBeInTheDocument();
+
+		( window as typeof window & { Stripe?: typeof mockStripe } ).Stripe =
+			stripeFactory;
+		stripeScript.dispatchEvent( new Event( 'load' ) );
+
+		await waitFor( () =>
+			expect( mockExpressCheckoutMount ).toHaveBeenCalled()
+		);
+	} );
+
+	it( 'allows the Stripe.js preview to retry after a script load failure', async () => {
+		setWindowProtocol( 'https:' );
+
+		const { unmount } = render(
+			<WooPaymentsExpressCheckoutSettings methodId="payment_request" />
+		);
+
+		const failedStripeScript = document.querySelector(
+			`script[src="${ STRIPE_SCRIPT_URL }"]`
+		) as HTMLScriptElement;
+		failedStripeScript.dispatchEvent( new Event( 'error' ) );
+
+		expect(
+			await screen.findByText(
+				/Failed to preview the Apple Pay or Google Pay button/,
+				{ selector: '.components-notice__content' }
+			)
+		).toBeInTheDocument();
+
+		unmount();
+		installStripeMock();
+		const stripeFactory = (
+			window as typeof window & { Stripe?: typeof mockStripe }
+		 ).Stripe;
+		delete ( window as typeof window & { Stripe?: typeof mockStripe } )
+			.Stripe;
+
+		render(
+			<WooPaymentsExpressCheckoutSettings methodId="payment_request" />
+		);
+
+		const retryStripeScript = document.querySelector(
+			`script[src="${ STRIPE_SCRIPT_URL }"]`
+		) as HTMLScriptElement;
+
+		expect( retryStripeScript ).toBeInTheDocument();
+		expect( retryStripeScript ).not.toBe( failedStripeScript );
+
+		( window as typeof window & { Stripe?: typeof mockStripe } ).Stripe =
+			stripeFactory;
+		retryStripeScript.dispatchEvent( new Event( 'load' ) );
+
+		await waitFor( () =>
+			expect( mockExpressCheckoutMount ).toHaveBeenCalled()
+		);
+	} );
+
+	it( 'shows the failed-preview notice when Stripe reports no available wallets', async () => {
+		setWindowProtocol( 'https:' );
+		installStripeMock();
+		mockExpressCheckoutOn.mockImplementation( ( eventName, callback ) => {
+			if ( eventName === 'ready' ) {
+				callback( { availablePaymentMethods: null } );
+			}
+		} );
+
+		render(
+			<WooPaymentsExpressCheckoutSettings methodId="payment_request" />
+		);
+
+		expect(
+			await screen.findByText(
+				/Failed to preview the Apple Pay or Google Pay button/,
+				{ selector: '.components-notice__content' }
 			)
 		).toBeInTheDocument();
 	} );

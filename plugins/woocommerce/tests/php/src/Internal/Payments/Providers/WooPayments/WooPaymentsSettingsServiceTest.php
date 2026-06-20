@@ -164,6 +164,8 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 				'data'    => array(
 					'account_id'              => 'acct_native_test',
 					'is_live'                 => true,
+					'test_publishable_key'    => 'pk_test_native',
+					'live_publishable_key'    => 'pk_live_native',
 					'platform_global_theme_support_enabled' => true,
 					'capabilities'            => array(
 						'card_payments' => 'active',
@@ -280,6 +282,16 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( get_bloginfo( 'name' ), $settings['store_name'] );
 		$this->assertSame( '', $settings['site_logo_url'] );
 		$this->assertSame( array( 'payment_request' ), $settings['express_checkout_product_methods'] );
+		$this->assertSame(
+			array(
+				'stripe' => array(
+					'publishableKey' => 'pk_test_native',
+					'accountId'      => 'acct_native_test',
+					'locale'         => strtolower( str_replace( '_', '-', determine_locale() ) ),
+				),
+			),
+			$settings['express_checkout_preview']
+		);
 		$this->assertSame( 'active', $settings['payment_method_statuses']['card_payments']['status'] );
 		$this->assertSame( 'unrequested', $settings['payment_method_statuses']['link_payments']['status'] );
 		$this->assertSame( array( 'currently_due' => array( 'tos_acceptance.date' ) ), $settings['payment_method_statuses']['link_payments']['requirements'] );
@@ -1581,6 +1593,7 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 			'express_checkout_product_methods',
 			'express_checkout_cart_methods',
 			'express_checkout_checkout_methods',
+			'express_checkout_preview',
 		);
 	}
 }
