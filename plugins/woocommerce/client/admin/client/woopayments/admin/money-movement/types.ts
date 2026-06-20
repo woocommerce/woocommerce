@@ -15,8 +15,12 @@ export interface WooPaymentsTransaction {
 	date?: number | string;
 	customer_name?: string;
 	customer_email?: string;
+	billing_details?: WooPaymentsBillingDetails;
 	order?: WooPaymentsPaymentOrder;
+	metadata?: Record< string, unknown >;
+	payment_method?: string;
 	payment_method_details?: WooPaymentsPaymentMethodDetails;
+	sales_channel?: string;
 	outcome?: WooPaymentsPaymentOutcome;
 	dispute?: WooPaymentsDispute;
 	balance_transaction?: string | WooPaymentsBalanceTransaction;
@@ -123,7 +127,10 @@ export interface WooPaymentsCharge {
 	date?: number | string;
 	billing_details?: WooPaymentsBillingDetails;
 	order?: WooPaymentsPaymentOrder;
+	metadata?: Record< string, unknown >;
+	payment_method?: string;
 	payment_method_details?: WooPaymentsPaymentMethodDetails;
+	sales_channel?: string;
 	outcome?: WooPaymentsPaymentOutcome;
 	dispute?: WooPaymentsDispute;
 	application_fee_amount?: number;
@@ -143,7 +150,9 @@ export interface WooPaymentsPaymentIntent {
 	amount?: number;
 	currency?: string;
 	created?: number | string;
+	metadata?: Record< string, unknown >;
 	order?: WooPaymentsPaymentOrder;
+	sales_channel?: string;
 	status?: string;
 }
 
@@ -157,7 +166,17 @@ export interface WooPaymentsBalanceTransaction {
 
 export interface WooPaymentsBillingDetails {
 	email?: string;
+	formatted_address?: string;
 	name?: string;
+	address?: {
+		city?: string;
+		country?: string;
+		line1?: string;
+		line2?: string;
+		postal_code?: string;
+		state?: string;
+		[ key: string ]: unknown;
+	};
 	[ key: string ]: unknown;
 }
 
@@ -165,17 +184,38 @@ export interface WooPaymentsPaymentOrder {
 	id?: number | string;
 	number?: number | string;
 	url?: string;
+	customer_url?: string | null;
+	customer_name?: string;
+	customer_email?: string;
 	fraud_meta_box_type?: string;
+	ip_address?: string;
+	suggested_product_type?: string;
+	subscriptions?: WooPaymentsPaymentOrder[];
+	[ key: string ]: unknown;
+}
+
+interface WooPaymentsPaymentMethodCardDetails {
+	brand?: string;
+	checks?: {
+		address_line1_check?: string;
+		address_postal_code_check?: string;
+		cvc_check?: string;
+		[ key: string ]: unknown;
+	};
+	country?: string;
+	exp_month?: number | string;
+	exp_year?: number | string;
+	funding?: string;
+	last4?: string;
+	network?: string;
 	[ key: string ]: unknown;
 }
 
 export interface WooPaymentsPaymentMethodDetails {
 	type?: string;
-	card?: {
-		brand?: string;
-		last4?: string;
-		[ key: string ]: unknown;
-	};
+	card?: WooPaymentsPaymentMethodCardDetails;
+	card_present?: WooPaymentsPaymentMethodCardDetails;
+	interac_present?: WooPaymentsPaymentMethodCardDetails;
 	[ key: string ]: unknown;
 }
 

@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
  * Internal dependencies
  */
 import { formatWooPaymentsAmount } from '../overview/utils';
@@ -132,6 +137,28 @@ export const formatDate = ( value?: string | number ) => {
 	} );
 };
 
+export const formatDateTime = ( value?: string | number ) => {
+	if ( ! value ) {
+		return '-';
+	}
+
+	const timestamp =
+		typeof value === 'number' && value < 10000000000 ? value * 1000 : value;
+	const date = new Date( timestamp );
+
+	if ( Number.isNaN( date.getTime() ) ) {
+		return '-';
+	}
+
+	return date.toLocaleString( undefined, {
+		year: 'numeric',
+		month: 'short',
+		day: 'numeric',
+		hour: 'numeric',
+		minute: '2-digit',
+	} );
+};
+
 export const formatAmount = ( amount?: number, currency?: string ) =>
 	typeof amount === 'number'
 		? formatWooPaymentsAmount( amount, currency )
@@ -145,4 +172,37 @@ export const formatLabel = ( value?: string ) => {
 	return value
 		.replace( /_/g, ' ' )
 		.replace( /^\w/, ( match ) => match.toUpperCase() );
+};
+
+export const getChargeChannelLabel = (
+	paymentMethodType?: string,
+	metadata: Record< string, unknown > = {},
+	salesChannel?: string
+) => {
+	const explicitChannel =
+		typeof salesChannel === 'string' ? salesChannel : undefined;
+	const ippChannel =
+		typeof metadata.ipp_channel === 'string'
+			? metadata.ipp_channel
+			: undefined;
+	const channel = explicitChannel || ippChannel;
+
+	if (
+		paymentMethodType === 'card_present' ||
+		paymentMethodType === 'interac_present' ||
+		channel === 'mobile_pos' ||
+		channel === 'in_person' ||
+		channel === 'pos' ||
+		channel === 'terminal'
+	) {
+		return channel === 'mobile_pos'
+			? __( 'In-person (POS)', 'woocommerce' )
+			: __( 'In-person', 'woocommerce' );
+	}
+
+	if ( channel && channel !== 'online' && channel !== 'online_store' ) {
+		return formatLabel( channel );
+	}
+
+	return __( 'Online store', 'woocommerce' );
 };

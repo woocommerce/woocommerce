@@ -33,6 +33,7 @@ import {
 	requestWooPaymentsTransactionsExport,
 	refundWooPaymentsCharge,
 } from '../money-movement/data';
+import { getWooPaymentsAccountSettings } from '../../settings/api';
 
 const mockCreateSuccessNotice = jest.fn();
 const mockCreateErrorNotice = jest.fn();
@@ -162,6 +163,10 @@ jest.mock( '../money-movement/data', () => ( {
 	refundWooPaymentsCharge: jest.fn(),
 } ) );
 
+jest.mock( '../../settings/api', () => ( {
+	getWooPaymentsAccountSettings: jest.fn(),
+} ) );
+
 const mockGetTransactions = getWooPaymentsTransactions as jest.MockedFunction<
 	typeof getWooPaymentsTransactions
 >;
@@ -229,6 +234,10 @@ const mockGetDisputesExportUrl =
 	getWooPaymentsDisputesExportUrl as jest.MockedFunction<
 		typeof getWooPaymentsDisputesExportUrl
 	>;
+const mockGetAccountSettings =
+	getWooPaymentsAccountSettings as jest.MockedFunction<
+		typeof getWooPaymentsAccountSettings
+	>;
 
 const RouteChangeButton = ( { to }: { to: string } ) => {
 	const navigate = useNavigate();
@@ -238,6 +247,25 @@ const RouteChangeButton = ( { to }: { to: string } ) => {
 			Load another transaction
 		</button>
 	);
+};
+
+const getDetailValue = ( container: HTMLElement, label: string ) => {
+	const term = within( container ).getByText( label, {
+		selector: 'dt',
+	} );
+	const row = term.closest( 'div' );
+
+	if ( ! row ) {
+		throw new Error( `Unable to find detail row for ${ label }` );
+	}
+
+	const value = row.querySelector( 'dd' );
+
+	if ( ! value ) {
+		throw new Error( `Unable to find detail value for ${ label }` );
+	}
+
+	return value as HTMLElement;
 };
 
 describe( 'WooPayments money movement pages', () => {
@@ -250,6 +278,9 @@ describe( 'WooPayments money movement pages', () => {
 		window.localStorage.clear();
 		window.wcSettings = {
 			adminUrl: 'http://example.com/wp-admin',
+			countries: {
+				US: 'United States',
+			},
 		};
 		mockGetTransactions.mockReset();
 		mockGetDisputes.mockReset();
@@ -270,6 +301,22 @@ describe( 'WooPayments money movement pages', () => {
 		mockGetTransactionsExportUrl.mockReset();
 		mockRequestDisputesExport.mockReset();
 		mockGetDisputesExportUrl.mockReset();
+		mockGetAccountSettings.mockReset();
+		mockGetAccountSettings.mockResolvedValue( {
+			account: {
+				id: 'acct_live',
+				mode: 'live',
+				default_currency: 'usd',
+				connected: true,
+				working: true,
+				can_process_payments: true,
+				test_mode: false,
+				test_drive: false,
+				sandbox: false,
+				live: true,
+			},
+			urls: {},
+		} );
 		mockCreateSuccessNotice.mockReset();
 		mockCreateErrorNotice.mockReset();
 	} );
@@ -1065,26 +1112,43 @@ describe( 'WooPayments money movement pages', () => {
 			amount: 5000,
 			currency: 'usd',
 			created: 1781712000,
+			metadata: {
+				ipp_channel: 'online',
+			},
 			charge: {
 				id: 'ch_test',
+				payment_method: 'pm_card_visa',
 				balance_transaction: {
 					id: 'txn_test',
 					fee: 180,
 					net: 4820,
+					currency: 'usd',
 				},
 				type: 'charge',
 				amount: 5000,
 				currency: 'usd',
 				created: 1781712000,
+				amount_refunded: 1000,
 				billing_details: {
 					email: 'ada@example.com',
+					formatted_address: '1 Main Street<br/>New York, NY 10001',
 					name: 'Ada Lovelace',
 				},
 				payment_method_details: {
 					type: 'card',
 					card: {
 						brand: 'visa',
+						checks: {
+							address_line1_check: 'pass',
+							address_postal_code_check: 'fail',
+							cvc_check: 'pass',
+						},
+						country: 'US',
+						exp_month: 12,
+						exp_year: 2030,
+						funding: 'credit',
 						last4: '4242',
+						network: 'visa',
 					},
 				},
 				outcome: {
@@ -1093,6 +1157,18 @@ describe( 'WooPayments money movement pages', () => {
 				order: {
 					id: 123,
 					number: '123',
+					url: 'http://example.com/wp-admin/admin.php?page=wc-orders&action=edit&id=123',
+					customer_url:
+						'http://example.com/wp-admin/admin.php?page=wc-admin&path=/customers&filter=single_customer&customers=99',
+					customer_name: 'Ada Lovelace',
+					customer_email: 'ada@example.com',
+					subscriptions: [
+						{
+							id: 456,
+							number: '456',
+							url: 'http://example.com/wp-admin/admin.php?page=wc-orders&action=edit&id=456',
+						},
+					],
 				},
 			},
 		} );
@@ -1119,21 +1195,218 @@ describe( 'WooPayments money movement pages', () => {
 		expect(
 			await screen.findByRole( 'heading', { name: 'Payment details' } )
 		).toBeInTheDocument();
+
+		const summary = screen
+			.getByRole( 'heading', { name: 'Summary' } )
+			.closest( 'section' ) as HTMLElement;
+		expect( summary ).toBeInTheDocument();
+		expect(
+			within( summary ).getByText( 'Succeeded' )
+		).toBeInTheDocument();
+		expect(
+			within( summary ).getByText( 'Sales channel' )
+		).toBeInTheDocument();
+		expect(
+			within( summary ).getByText( 'Online store' )
+		).toBeInTheDocument();
+		expect(
+			within( summary ).getByRole( 'link', { name: 'Ada Lovelace' } )
+		).toHaveAttribute(
+			'href',
+			'http://example.com/wp-admin/admin.php?page=wc-admin&path=/customers&filter=single_customer&customers=99'
+		);
+		expect(
+			within( summary ).getByRole( 'link', { name: 'Order #123' } )
+		).toHaveAttribute(
+			'href',
+			'http://example.com/wp-admin/admin.php?page=wc-orders&action=edit&id=123'
+		);
+		expect(
+			within( summary ).getByRole( 'link', {
+				name: 'Subscription #456',
+			} )
+		).toHaveAttribute(
+			'href',
+			'http://example.com/wp-admin/admin.php?page=wc-orders&action=edit&id=456'
+		);
+		expect(
+			within( summary ).getByText( 'Visa ending in 4242' )
+		).toBeInTheDocument();
+		expect( within( summary ).getByText( 'Normal' ) ).toBeInTheDocument();
+		expect(
+			within( summary ).getAllByText( '$50.00' ).length
+		).toBeGreaterThan( 0 );
+		expect(
+			within( summary ).getByText( 'Refunded: -$10.00' )
+		).toBeInTheDocument();
+		expect( within( summary ).getByText( '$1.80' ) ).toBeInTheDocument();
+		expect( within( summary ).getByText( '$48.20' ) ).toBeInTheDocument();
+
+		const paymentMethod = screen
+			.getByRole( 'heading', { name: 'Payment method' } )
+			.closest( 'section' ) as HTMLElement;
+		expect( paymentMethod ).toBeInTheDocument();
+		expect(
+			within( paymentMethod ).getByText( '•••• 4242' )
+		).toBeInTheDocument();
+		expect(
+			within( paymentMethod ).getByText( '12 / 2030' )
+		).toBeInTheDocument();
+		expect(
+			within( paymentMethod ).getByText( 'Visa credit card' )
+		).toBeInTheDocument();
+		expect(
+			within( paymentMethod ).getByText( 'pm_card_visa' )
+		).toBeInTheDocument();
+		expect(
+			within( paymentMethod ).getByText( 'Ada Lovelace' )
+		).toBeInTheDocument();
+		expect(
+			within( paymentMethod ).getByText( 'ada@example.com' )
+		).toBeInTheDocument();
+		expect( getDetailValue( paymentMethod, 'Address' ) ).toHaveTextContent(
+			'1 Main Street'
+		);
+		expect( getDetailValue( paymentMethod, 'Address' ) ).toHaveTextContent(
+			'New York, NY 10001'
+		);
+		expect( getDetailValue( paymentMethod, 'Origin' ) ).toHaveTextContent(
+			'United States'
+		);
+		expect(
+			getDetailValue( paymentMethod, 'CVC check' )
+		).toHaveTextContent( 'Passed' );
+		expect(
+			getDetailValue( paymentMethod, 'Street check' )
+		).toHaveTextContent( 'Passed' );
+		expect(
+			getDetailValue( paymentMethod, 'Postal code check' )
+		).toHaveTextContent( 'Failed' );
+
+		expect(
+			screen.getByRole( 'heading', { name: 'Identifiers' } )
+		).toBeInTheDocument();
 		expect( screen.getByText( 'pi_test' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'ch_test' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'txn_test' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Ada Lovelace' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'ada@example.com' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Order #123' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Visa ending in 4242' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Normal' ) ).toBeInTheDocument();
-		expect( screen.getAllByText( '$50.00' ).length ).toBeGreaterThan( 0 );
-		expect( screen.getByText( '$1.80' ) ).toBeInTheDocument();
-		expect( screen.getByText( '$48.20' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'Payment captured.' ) ).toBeInTheDocument();
 		expect( mockGetPaymentIntent ).toHaveBeenCalledWith( 'pi_test' );
 		expect( mockGetTimeline ).toHaveBeenCalledWith( 'pi_test' );
 		expect( mockGetTransaction ).not.toHaveBeenCalled();
+	} );
+
+	it( 'derives in-person sales channels from card-present payment methods and merged intent metadata', async () => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_card_present',
+			status: 'succeeded',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			metadata: {
+				ipp_channel: 'mobile_pos',
+			},
+			charge: {
+				id: 'ch_card_present',
+				payment_intent: 'pi_card_present',
+				balance_transaction: 'txn_card_present',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				payment_method_details: {
+					type: 'card_present',
+					card_present: {
+						brand: 'visa',
+						last4: '4242',
+					},
+				},
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_card_present&transaction_id=txn_card_present',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		const summary = (
+			await screen.findByRole( 'heading', { name: 'Summary' } )
+		 ).closest( 'section' ) as HTMLElement;
+
+		expect( getDetailValue( summary, 'Sales channel' ) ).toHaveTextContent(
+			'In-person (POS)'
+		);
+		expect( getDetailValue( summary, 'Payment method' ) ).toHaveTextContent(
+			'Card ending in 4242'
+		);
+	} );
+
+	it( 'renders generic payment method details for non-card payment methods', async () => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_link',
+			status: 'succeeded',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			charge: {
+				id: 'ch_link',
+				payment_intent: 'pi_link',
+				balance_transaction: 'txn_link',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				payment_method: 'pm_link',
+				billing_details: {
+					email: 'ada@example.com',
+					name: 'Ada Lovelace',
+				},
+				payment_method_details: {
+					type: 'link',
+				},
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_link&transaction_id=txn_link',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		const paymentMethod = (
+			await screen.findByRole( 'heading', {
+				name: 'Payment method',
+			} )
+		 ).closest( 'section' ) as HTMLElement;
+
+		expect( getDetailValue( paymentMethod, 'Type' ) ).toHaveTextContent(
+			'Link'
+		);
+		expect( getDetailValue( paymentMethod, 'ID' ) ).toHaveTextContent(
+			'pm_link'
+		);
+		expect( getDetailValue( paymentMethod, 'Owner' ) ).toHaveTextContent(
+			'Ada Lovelace'
+		);
+		expect(
+			getDetailValue( paymentMethod, 'Owner email' )
+		).toHaveTextContent( 'ada@example.com' );
+		expect(
+			within( paymentMethod ).queryByText( 'Number' )
+		).not.toBeInTheDocument();
+		expect(
+			within( paymentMethod ).queryByText( 'CVC check' )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'opens the full refund modal from transaction details and reloads after a successful refund', async () => {
@@ -1345,6 +1618,80 @@ describe( 'WooPayments money movement pages', () => {
 		expect(
 			screen.queryByRole( 'button', { name: 'Transaction actions' } )
 		).not.toBeInTheDocument();
+		expect(
+			screen.getByText(
+				'This payment is not linked to a WooCommerce order.'
+			)
+		).toBeInTheDocument();
+		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
+			'Transaction details loaded. This payment is not linked to a WooCommerce order.'
+		);
+	} );
+
+	it( 'shows a payment detail test-mode notice for connected test accounts', async () => {
+		mockGetAccountSettings.mockResolvedValue( {
+			account: {
+				id: 'acct_test',
+				mode: 'test',
+				default_currency: 'usd',
+				connected: true,
+				working: true,
+				can_process_payments: true,
+				test_mode: true,
+				test_drive: true,
+				sandbox: false,
+				live: false,
+			},
+			urls: {},
+		} );
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_test_mode',
+			status: 'succeeded',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			charge: {
+				id: 'ch_test_mode',
+				payment_intent: 'pi_test_mode',
+				balance_transaction: 'txn_test_mode',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				captured: true,
+				amount_refunded: 0,
+				refunded: false,
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_test_mode&transaction_id=txn_test_mode',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		const notice = (
+			await screen.findByText( 'Viewing test payments.' )
+		 ).closest( '.components-notice' ) as HTMLElement;
+		expect( notice ).toBeInTheDocument();
+		expect(
+			within( notice ).getByText(
+				/Your WooPayments account is currently in test mode./
+			)
+		).toBeInTheDocument();
+		expect(
+			within( notice ).getByRole( 'link', {
+				name: 'WooPayments settings',
+			} )
+		).toHaveAttribute(
+			'href',
+			'http://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=%2Fwoopayments%2Fsettings'
+		);
 	} );
 
 	it( 'derives refund order ids from native order URLs when the detail payload omits the order id', async () => {

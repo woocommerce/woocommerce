@@ -20,7 +20,6 @@ import {
 import { moreVertical } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-import type { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 /**
@@ -51,7 +50,15 @@ import {
 	getErrorMessage,
 } from './utils';
 import { WooPaymentsTransactionDisputeDetails } from './transaction-dispute-details';
+import {
+	hasPaymentOrderContext,
+	WooPaymentsMissingOrderNotice,
+	WooPaymentsPaymentIdentifiersSection,
+	WooPaymentsPaymentMethodDetailsSection,
+	WooPaymentsPaymentSummarySection,
+} from './transaction-detail-sections';
 import { LiveStatusMessage, StatusMessage } from './table';
+import { WooPaymentsTestModeNotice } from '../test-mode-notice';
 import '../style.scss';
 
 type AuthorizationAction = 'capture' | 'cancel';
@@ -141,49 +148,12 @@ const getErrorStatus = ( error: unknown ) => {
 
 const isNotFoundError = ( error: unknown ) => getErrorStatus( error ) === 404;
 
-const DetailRow = ( { label, value }: { label: string; value: ReactNode } ) => (
-	<div>
-		<dt>{ label }</dt>
-		<dd>{ value }</dd>
-	</div>
-);
-
-const hasDisplayValue = ( value: unknown ) =>
-	value !== undefined && value !== null && value !== '';
-
 const getPaymentIntentId = (
 	transaction: WooPaymentsTransaction,
 	fallbackId: string
 ) =>
 	transaction.payment_intent_id ||
 	( fallbackId.startsWith( 'pi_' ) ? fallbackId : '' );
-
-const getPaymentMethodLabel = ( transaction: WooPaymentsTransaction ) => {
-	const method = transaction.payment_method_details;
-
-	if ( method?.type === 'card' && method.card?.brand && method.card.last4 ) {
-		return sprintf(
-			/* translators: 1: card brand, 2: last four card digits. */
-			__( '%1$s ending in %2$s', 'woocommerce' ),
-			formatLabel( method.card.brand ),
-			method.card.last4
-		);
-	}
-
-	return method?.type ? formatLabel( method.type ) : '';
-};
-
-const getOrderLabel = ( transaction: WooPaymentsTransaction ) => {
-	const orderId = transaction.order?.number || transaction.order?.id;
-
-	return orderId
-		? sprintf(
-				/* translators: %s: order number. */
-				__( 'Order #%s', 'woocommerce' ),
-				orderId
-		  )
-		: '';
-};
 
 const getOrderId = (
 	transaction: WooPaymentsTransaction,
@@ -359,9 +329,13 @@ const normalizeCharge = (
 		created: charge.created,
 		date: charge.date,
 		payment_intent_id: charge.payment_intent,
+		billing_details: charge.billing_details,
 		customer_name: charge.billing_details?.name,
 		customer_email: charge.billing_details?.email,
+		metadata: charge.metadata,
+		sales_channel: charge.sales_channel,
 		order: charge.order,
+		payment_method: charge.payment_method,
 		payment_method_details: charge.payment_method_details,
 		outcome: charge.outcome,
 		dispute: charge.dispute,
@@ -394,9 +368,15 @@ const normalizePaymentIntent = (
 		amount: transaction.amount ?? intent.amount,
 		currency: transaction.currency || intent.currency,
 		created: transaction.created || intent.created,
+		metadata: {
+			...( intent.metadata || {} ),
+			...( transaction.metadata || {} ),
+		},
 		payment_intent_id: intent.id,
 		order: transaction.order || intent.order,
 		dispute: transaction.dispute || intent.dispute,
+		sales_channel:
+			transaction.sales_channel || intent.sales_channel || undefined,
 		status: transaction.status || intent.status,
 	};
 };
@@ -750,6 +730,11 @@ export const WooPaymentsTransactionDetailsPage = () => {
 		liveStatusMessage = timelineErrorMessage;
 	} else if ( isLoading ) {
 		liveStatusMessage = loadingMessage;
+	} else if ( transaction && ! hasPaymentOrderContext( transaction ) ) {
+		liveStatusMessage = __(
+			'Transaction details loaded. This payment is not linked to a WooCommerce order.',
+			'woocommerce'
+		);
 	}
 
 	const paymentIntentId = transaction
@@ -758,10 +743,6 @@ export const WooPaymentsTransactionDetailsPage = () => {
 	const chargeId = transaction?.charge_id || '';
 	const transactionResourceId =
 		transaction?.transaction_id || transaction?.id || transactionId || id;
-	const paymentMethodLabel = transaction
-		? getPaymentMethodLabel( transaction )
-		: '';
-	const orderLabel = transaction ? getOrderLabel( transaction ) : '';
 	const hasPaymentDetails = !! ( paymentIntentId || chargeId );
 	const orderId = transaction ? getOrderId( transaction, authorization ) : 0;
 	const isFraudReview =
@@ -770,6 +751,12 @@ export const WooPaymentsTransactionDetailsPage = () => {
 		!! transaction && !! authorization && !! paymentIntentId && orderId > 0;
 	const showFraudReviewActions = showAuthorizationActions && isFraudReview;
 	const showCaptureNotice = showAuthorizationActions && ! isFraudReview;
+	const wcSettings = window.wcSettings as
+		| ( typeof window.wcSettings & {
+				countries?: Record< string, string >;
+		  } )
+		| undefined;
+	const countries = wcSettings?.countries || {};
 	const refundOrderId = transaction
 		? getTransactionOrderId( transaction )
 		: 0;
@@ -1105,6 +1092,12 @@ export const WooPaymentsTransactionDetailsPage = () => {
 			{ errorMessage && (
 				<StatusMessage isError>{ errorMessage }</StatusMessage>
 			) }
+			{ hasPaymentDetails && ! errorMessage && (
+				<WooPaymentsTestModeNotice
+					currentPage="payments"
+					isDetailsView
+				/>
+			) }
 			{ transaction && ! errorMessage && (
 				<>
 					{ authorizationErrorMessage && (
@@ -1173,185 +1166,105 @@ export const WooPaymentsTransactionDetailsPage = () => {
 							</Button>
 						</div>
 					) }
-					<dl className="woocommerce-woopayments-money-movement__details">
-						{ paymentIntentId && (
-							<DetailRow
-								label={ __( 'Payment ID', 'woocommerce' ) }
-								value={ paymentIntentId }
-							/>
-						) }
-						{ chargeId && (
-							<DetailRow
-								label={ __( 'Charge ID', 'woocommerce' ) }
-								value={ chargeId }
-							/>
-						) }
-						<DetailRow
-							label={ __( 'Transaction ID', 'woocommerce' ) }
-							value={ transactionResourceId }
-						/>
-						<DetailRow
-							label={ __( 'Type', 'woocommerce' ) }
-							value={ formatLabel( transaction.type ) }
-						/>
-						<DetailRow
-							label={ __( 'Date', 'woocommerce' ) }
-							value={ formatDate(
-								transaction.date || transaction.created
-							) }
-						/>
-						{ hasDisplayValue( transaction.status ) && (
-							<DetailRow
-								label={ __( 'Status', 'woocommerce' ) }
-								value={ formatLabel( transaction.status ) }
-							/>
-						) }
-						<DetailRow
-							label={ __( 'Amount', 'woocommerce' ) }
-							value={ formatAmount(
-								transaction.amount,
-								transaction.currency
-							) }
-						/>
-						{ hasDisplayValue( transaction.customer_name ) ||
-						hasDisplayValue( transaction.customer_email ) ? (
-							<DetailRow
-								label={ __( 'Customer', 'woocommerce' ) }
-								value={
-									<span className="woocommerce-woopayments-money-movement__stacked-value">
-										{ transaction.customer_name && (
-											<span>
-												{ transaction.customer_name }
-											</span>
-										) }
-										{ transaction.customer_email && (
-											<span>
-												{ transaction.customer_email }
-											</span>
-										) }
-									</span>
-								}
-							/>
-						) : null }
-						{ orderLabel && (
-							<DetailRow
-								label={ __( 'Order', 'woocommerce' ) }
-								value={ orderLabel }
-							/>
-						) }
-						{ paymentMethodLabel && (
-							<DetailRow
-								label={ __( 'Payment method', 'woocommerce' ) }
-								value={ paymentMethodLabel }
-							/>
-						) }
-						{ transaction.outcome?.risk_level && (
-							<DetailRow
-								label={ __( 'Risk evaluation', 'woocommerce' ) }
-								value={ formatLabel(
-									transaction.outcome.risk_level
-								) }
-							/>
-						) }
-						{ hasDisplayValue( transaction.fee ) && (
-							<DetailRow
-								label={ __( 'Fee', 'woocommerce' ) }
-								value={ formatAmount(
-									transaction.fee,
-									transaction.currency
-								) }
-							/>
-						) }
-						{ hasDisplayValue( transaction.net ) && (
-							<DetailRow
-								label={ __( 'Net amount', 'woocommerce' ) }
-								value={ formatAmount(
-									transaction.net,
-									transaction.currency
-								) }
-							/>
-						) }
-					</dl>
-					{ transaction.dispute && (
-						<WooPaymentsTransactionDisputeDetails
+					<div className="woocommerce-woopayments-money-movement__detail-sections">
+						<WooPaymentsPaymentSummarySection
 							transaction={ transaction }
 						/>
-					) }
-					{ showCaptureNotice && (
-						<section className="woocommerce-woopayments-overview-card woocommerce-woopayments-money-movement__authorization-notice">
-							<p>
-								{ __(
-									'You must capture this charge within the next 7 days.',
-									'woocommerce'
-								) }
-							</p>
-							<Button
-								variant="primary"
-								isBusy={ pendingAction === 'capture' }
-								disabled={ isAuthorizationActionPending }
-								accessibleWhenDisabled
-								onClick={
-									isAuthorizationActionPending
-										? undefined
-										: () =>
-												handleAuthorizationAction(
-													'capture'
-												)
-								}
-								aria-label={
-									pendingAction === 'capture'
-										? sprintf(
-												/* translators: %s: order ID. */
-												__(
-													'Capturing authorization for order #%s',
-													'woocommerce'
-												),
-												orderId
-										  )
-										: sprintf(
-												/* translators: %s: order ID. */
-												__(
-													'Capture authorization for order #%s',
-													'woocommerce'
-												),
-												orderId
-										  )
-								}
-							>
-								{ __( 'Capture', 'woocommerce' ) }
-							</Button>
-						</section>
-					) }
-					{ timelineErrorMessage && (
-						<StatusMessage isError>
-							{ timelineErrorMessage }
-						</StatusMessage>
-					) }
-					{ timelineEvents.length > 0 && (
-						<section className="woocommerce-woopayments-overview-card">
-							<h3>{ __( 'Timeline', 'woocommerce' ) }</h3>
-							<ol className="woocommerce-woopayments-money-movement__timeline">
-								{ timelineEvents.map( ( event, index ) => (
-									<li
-										key={ `${ event.type || 'event' }-${
-											getTimelineDate( event ) || index
-										}` }
-									>
-										<span>
-											{ getTimelineMessage( event ) }
-										</span>
-										{ getTimelineDate( event ) && (
-											<time>
-												{ formatDate(
-													getTimelineDate( event )
-												) }
-											</time>
-										) }
-									</li>
-								) ) }
-							</ol>
-						</section>
-					) }
+						<WooPaymentsMissingOrderNotice
+							transaction={ transaction }
+						/>
+						<WooPaymentsPaymentIdentifiersSection
+							paymentIntentId={ paymentIntentId }
+							chargeId={ chargeId }
+							transactionResourceId={ transactionResourceId }
+							type={ transaction.type }
+						/>
+						{ transaction.dispute && (
+							<WooPaymentsTransactionDisputeDetails
+								transaction={ transaction }
+							/>
+						) }
+						{ showCaptureNotice && (
+							<section className="woocommerce-woopayments-overview-card woocommerce-woopayments-money-movement__authorization-notice">
+								<p>
+									{ __(
+										'You must capture this charge within the next 7 days.',
+										'woocommerce'
+									) }
+								</p>
+								<Button
+									variant="primary"
+									isBusy={ pendingAction === 'capture' }
+									disabled={ isAuthorizationActionPending }
+									accessibleWhenDisabled
+									onClick={
+										isAuthorizationActionPending
+											? undefined
+											: () =>
+													handleAuthorizationAction(
+														'capture'
+													)
+									}
+									aria-label={
+										pendingAction === 'capture'
+											? sprintf(
+													/* translators: %s: order ID. */
+													__(
+														'Capturing authorization for order #%s',
+														'woocommerce'
+													),
+													orderId
+											  )
+											: sprintf(
+													/* translators: %s: order ID. */
+													__(
+														'Capture authorization for order #%s',
+														'woocommerce'
+													),
+													orderId
+											  )
+									}
+								>
+									{ __( 'Capture', 'woocommerce' ) }
+								</Button>
+							</section>
+						) }
+						<WooPaymentsPaymentMethodDetailsSection
+							transaction={ transaction }
+							countries={ countries }
+						/>
+						{ timelineErrorMessage && (
+							<StatusMessage isError>
+								{ timelineErrorMessage }
+							</StatusMessage>
+						) }
+						{ timelineEvents.length > 0 && (
+							<section className="woocommerce-woopayments-overview-card">
+								<h3>{ __( 'Timeline', 'woocommerce' ) }</h3>
+								<ol className="woocommerce-woopayments-money-movement__timeline">
+									{ timelineEvents.map( ( event, index ) => (
+										<li
+											key={ `${ event.type || 'event' }-${
+												getTimelineDate( event ) ||
+												index
+											}` }
+										>
+											<span>
+												{ getTimelineMessage( event ) }
+											</span>
+											{ getTimelineDate( event ) && (
+												<time>
+													{ formatDate(
+														getTimelineDate( event )
+													) }
+												</time>
+											) }
+										</li>
+									) ) }
+								</ol>
+							</section>
+						) }
+					</div>
 					{ isRefundModalOpen && (
 						<RefundModal
 							formattedAmount={ formatAmount(
