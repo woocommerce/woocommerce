@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore native WooPayments Blocks express checkout cart and WooPay parity.
