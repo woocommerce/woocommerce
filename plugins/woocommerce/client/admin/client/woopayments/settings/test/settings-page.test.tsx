@@ -378,6 +378,25 @@ const getFraudTourEventNames = () =>
 				eventName.startsWith( 'wcpay_fraud_protection_tour_' )
 		);
 
+const getRecordedEventCalls = ( expectedEventName: string ) =>
+	mockRecordEvent.mock.calls.filter(
+		( [ eventName ] ) => eventName === expectedEventName
+	);
+
+const getGatewayToggleEventCalls = ( expectedAction: string ) =>
+	getRecordedEventCalls( 'wcpay_gateway_toggle' ).filter(
+		( [ , properties ] ) =>
+			properties &&
+			typeof properties === 'object' &&
+			'action' in properties &&
+			properties.action === expectedAction
+	);
+
+const getGeneralSettingsSection = () =>
+	screen
+		.getByRole( 'heading', { name: 'General' } )
+		.closest( '.woopayments-settings-section' ) as HTMLElement;
+
 const setHookDefaults = () => {
 	mockUseSettings.mockReturnValue( {
 		isLoading: false,
@@ -2128,6 +2147,9 @@ describe( 'WooPaymentsSettingsPage', () => {
 
 		expect( setTestMode ).not.toHaveBeenCalled();
 		expect(
+			getRecordedEventCalls( 'wcpay_test_mode_enabled' )
+		).toHaveLength( 0 );
+		expect(
 			screen.getByRole( 'heading', {
 				name: 'Are you sure you want to enable test mode?',
 			} )
@@ -2136,6 +2158,254 @@ describe( 'WooPaymentsSettingsPage', () => {
 		fireEvent.click( screen.getByRole( 'button', { name: 'Enable' } ) );
 
 		expect( setTestMode ).toHaveBeenCalledWith( true );
+		expect( mockRecordEvent ).toHaveBeenCalledWith(
+			'wcpay_test_mode_enabled',
+			{ source: 'wcadmin-settings-page' }
+		);
+	} );
+
+	it( 'records Tracks when canceling the test mode confirmation modal', async () => {
+		const setTestMode = jest.fn();
+		mockUseTestMode.mockReturnValue( [ false, setTestMode ] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', { name: 'Enable test mode' } )
+		);
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Cancel' } )
+		);
+
+		expect( setTestMode ).not.toHaveBeenCalled();
+		expect(
+			getRecordedEventCalls( 'wcpay_test_mode_enabled' )
+		).toHaveLength( 0 );
+		expect( mockRecordEvent ).toHaveBeenCalledWith(
+			'wcpay_test_mode_modal_exit',
+			{ source: 'wcadmin-settings-page' }
+		);
+	} );
+
+	it( 'records Tracks when disabling test mode', async () => {
+		const setTestMode = jest.fn();
+		mockUseTestMode.mockReturnValue( [ true, setTestMode ] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', { name: 'Enable test mode' } )
+		);
+
+		expect( setTestMode ).toHaveBeenCalledWith( false );
+		expect( mockRecordEvent ).toHaveBeenCalledWith(
+			'wcpay_test_mode_disabled',
+			{ source: 'wcadmin-settings-page' }
+		);
+	} );
+
+	it( 'renders reference test-mode help links outside development mode', () => {
+		render( <WooPaymentsSettingsPage /> );
+
+		const section = getGeneralSettingsSection();
+
+		expect(
+			within( section ).getByRole( 'link', {
+				name: /test card numbers/,
+			} )
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/document/woopayments/testing-and-troubleshooting/testing/#test-cards'
+		);
+		expect(
+			within( section ).getByRole( 'link', { name: /Learn more/ } )
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/document/woopayments/testing-and-troubleshooting/testing/'
+		);
+	} );
+
+	it( 'renders reference test-mode help links in development mode', () => {
+		mockUseDevMode.mockReturnValue( true );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const section = getGeneralSettingsSection();
+
+		expect(
+			within( section ).getByRole( 'link', {
+				name: /WordPress environment/,
+			} )
+		).toHaveAttribute(
+			'href',
+			'https://make.wordpress.org/core/2020/08/27/wordpress-environment-types/'
+		);
+		expect(
+			within( section ).getByRole( 'link', { name: /Learn more/ } )
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/document/woopayments/testing-and-troubleshooting/testing/'
+		);
+		expect( section ).toHaveTextContent( 'WCPAY_DEV_MODE' );
+	} );
+
+	it( 'records Tracks when enabling WooPayments', async () => {
+		const setIsWCPayEnabled = jest.fn();
+		mockUseIsWCPayEnabled.mockReturnValue( [ false, setIsWCPayEnabled ] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', { name: 'Enable WooPayments' } )
+		);
+
+		expect( setIsWCPayEnabled ).toHaveBeenCalledWith( true );
+		expect( mockRecordEvent ).toHaveBeenCalledWith(
+			'wcpay_gateway_toggle',
+			{
+				action: 'enable',
+				context: 'wcpay-settings',
+			}
+		);
+	} );
+
+	it( 'requires confirmation before disabling WooPayments and records Tracks after confirm', async () => {
+		const setIsWCPayEnabled = jest.fn();
+		mockUseIsWCPayEnabled.mockReturnValue( [ true, setIsWCPayEnabled ] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', { name: 'Enable WooPayments' } )
+		);
+
+		expect( setIsWCPayEnabled ).not.toHaveBeenCalled();
+		expect( getGatewayToggleEventCalls( 'disable' ) ).toHaveLength( 0 );
+
+		const dialog = screen.getByRole( 'dialog', {
+			name: 'Disable WooPayments',
+		} );
+		expect(
+			within( dialog ).getByText(
+				'Payment methods that need WooPayments:'
+			)
+		).toBeInTheDocument();
+		expect(
+			within( dialog ).getByText( 'Credit / Debit Cards' )
+		).toBeInTheDocument();
+		expect( within( dialog ).getByText( 'Affirm' ) ).toBeInTheDocument();
+		expect(
+			within( dialog ).getByText( 'Apple Pay / Google Pay' )
+		).toBeInTheDocument();
+		expect(
+			within( dialog ).getByText( 'Amazon Pay' )
+		).toBeInTheDocument();
+		expect(
+			within( dialog ).getByText( 'Link by Stripe' )
+		).toBeInTheDocument();
+		expect( within( dialog ).getByText( 'WooPay' ) ).toBeInTheDocument();
+
+		await userEvent.click(
+			within( dialog ).getByRole( 'button', { name: 'Disable' } )
+		);
+
+		expect( setIsWCPayEnabled ).toHaveBeenCalledWith( false );
+		expect( mockRecordEvent ).toHaveBeenCalledWith(
+			'wcpay_gateway_toggle',
+			{
+				action: 'disable',
+				context: 'wcpay-settings',
+			}
+		);
+	} );
+
+	it( 'does not disable WooPayments or record disable telemetry when canceling the confirmation', async () => {
+		const setIsWCPayEnabled = jest.fn();
+		mockUseIsWCPayEnabled.mockReturnValue( [ true, setIsWCPayEnabled ] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', { name: 'Enable WooPayments' } )
+		);
+
+		const dialog = screen.getByRole( 'dialog', {
+			name: 'Disable WooPayments',
+		} );
+		await userEvent.click(
+			within( dialog ).getByRole( 'button', { name: 'Cancel' } )
+		);
+
+		expect( setIsWCPayEnabled ).not.toHaveBeenCalled();
+		expect( getGatewayToggleEventCalls( 'disable' ) ).toHaveLength( 0 );
+		expect(
+			screen.queryByRole( 'dialog', { name: 'Disable WooPayments' } )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'uses effective express availability for affected methods in the disable confirmation', async () => {
+		const setIsWCPayEnabled = jest.fn();
+		mockUseIsWCPayEnabled.mockReturnValue( [ true, setIsWCPayEnabled ] );
+		mockUseGetSettings.mockReturnValue( {
+			account_country: 'US',
+			store_currency: 'USD',
+			is_multi_currency_enabled: true,
+			feature_flags: {
+				...DEFAULT_FEATURE_FLAGS,
+				woopayExpressCheckout: false,
+			},
+			available_payment_method_ids: [
+				'card',
+				'link',
+				'affirm',
+				'amazon_pay',
+				'apple_pay',
+				'google_pay',
+			],
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', { name: 'Enable WooPayments' } )
+		);
+
+		const dialog = screen.getByRole( 'dialog', {
+			name: 'Disable WooPayments',
+		} );
+
+		expect(
+			within( dialog ).getByText( 'Amazon Pay' )
+		).toBeInTheDocument();
+		expect(
+			within( dialog ).queryByText( 'WooPay' )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'uses Amazon Pay actionability for affected methods in the disable confirmation', async () => {
+		const setIsWCPayEnabled = jest.fn();
+		mockUseIsWCPayEnabled.mockReturnValue( [ true, setIsWCPayEnabled ] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active' },
+			link_payments: { status: 'active' },
+			affirm_payments: { status: 'active' },
+			amazon_pay_payments: { status: 'pending' },
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', { name: 'Enable WooPayments' } )
+		);
+
+		const dialog = screen.getByRole( 'dialog', {
+			name: 'Disable WooPayments',
+		} );
+
+		expect(
+			within( dialog ).queryByText( 'Amazon Pay' )
+		).not.toBeInTheDocument();
+		expect( within( dialog ).getByText( 'WooPay' ) ).toBeInTheDocument();
 	} );
 
 	it( 'requires confirmation before enabling manual capture', async () => {
@@ -2211,7 +2481,7 @@ describe( 'WooPaymentsSettingsPage', () => {
 						live: false,
 					},
 					urls: {
-						setup: 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/onboarding',
+						setup: '#distinct-live-onboarding',
 					},
 				} );
 			}
@@ -2269,7 +2539,126 @@ describe( 'WooPaymentsSettingsPage', () => {
 			} )
 		).toHaveAttribute(
 			'href',
-			expect.stringContaining( 'from=wcpay-setup-live-payments' )
+			'#distinct-live-onboarding?source=wcadmin-settings-page&from=wcpay-setup-live-payments'
+		);
+		expect( mockRecordEvent ).toHaveBeenCalledWith(
+			'wcpay_setup_live_payments_modal_open',
+			{
+				from: 'WCPAY_SETTINGS',
+				source: 'wcadmin-settings-page',
+			}
+		);
+	} );
+
+	it( 'records setup-live Tracks when activating payments from the modal', async () => {
+		mockApiFetch.mockImplementation( ( options ) => {
+			const path = typeof options === 'string' ? options : options?.path;
+
+			if ( path === '/wc-admin/settings/payments/woopayments/account' ) {
+				return Promise.resolve( {
+					account: {
+						id: 'acct_test',
+						mode: 'test',
+						default_currency: 'usd',
+						connected: true,
+						working: true,
+						can_process_payments: true,
+						test_mode: true,
+						test_drive: true,
+						sandbox: false,
+						live: false,
+					},
+					urls: {
+						setup: '#distinct-live-onboarding',
+					},
+				} );
+			}
+
+			return Promise.resolve( {} );
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await screen.findByText( 'You are using a test account.' );
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Activate payments' } )
+		);
+
+		const dialog = screen.getByRole( 'dialog', {
+			name: 'Activate payments on your store',
+		} );
+		const activateButton = within( dialog ).getByRole( 'link', {
+			name: 'Activate payments',
+		} );
+		expect( activateButton ).toHaveAttribute(
+			'href',
+			'#distinct-live-onboarding?source=wcadmin-settings-page&from=wcpay-setup-live-payments'
+		);
+
+		await userEvent.click( activateButton );
+
+		expect( mockRecordEvent ).toHaveBeenCalledWith(
+			'wcpay_onboarding_flow_setup_live_payments',
+			{
+				from: 'WCPAY_SETTINGS',
+				source: 'wcadmin-settings-page',
+			}
+		);
+		expect( window.location.hash ).toBe(
+			'#distinct-live-onboarding?source=wcadmin-settings-page&from=wcpay-setup-live-payments'
+		);
+		expect( activateButton ).toHaveAttribute( 'aria-disabled', 'true' );
+	} );
+
+	it( 'records setup-live modal exit Tracks', async () => {
+		mockApiFetch.mockImplementation( ( options ) => {
+			const path = typeof options === 'string' ? options : options?.path;
+
+			if ( path === '/wc-admin/settings/payments/woopayments/account' ) {
+				return Promise.resolve( {
+					account: {
+						id: 'acct_test',
+						mode: 'test',
+						default_currency: 'usd',
+						connected: true,
+						working: true,
+						can_process_payments: true,
+						test_mode: true,
+						test_drive: true,
+						sandbox: false,
+						live: false,
+					},
+					urls: {
+						setup: 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/onboarding',
+					},
+				} );
+			}
+
+			return Promise.resolve( {} );
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await screen.findByText( 'You are using a test account.' );
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Activate payments' } )
+		);
+
+		const dialog = screen.getByRole( 'dialog', {
+			name: 'Activate payments on your store',
+		} );
+		await userEvent.click(
+			within( dialog ).getByRole( 'button', { name: 'Close' } )
+		);
+
+		await waitFor( () =>
+			expect( mockRecordEvent ).toHaveBeenCalledWith(
+				'wcpay_setup_live_payments_modal_exit',
+				{
+					from: 'WCPAY_SETTINGS',
+					source: 'wcadmin-settings-page',
+				}
+			)
 		);
 	} );
 
@@ -2316,6 +2705,10 @@ describe( 'WooPaymentsSettingsPage', () => {
 				name: 'Activate payments on your store',
 			} )
 		).toBeInTheDocument();
+		expect( mockRecordEvent ).toHaveBeenCalledWith(
+			'wcpay_settings_setup_live_payments_click',
+			{ source: 'wcadmin-settings-page' }
+		);
 	} );
 
 	it( 'renders the reference development-mode test-account warning copy', async () => {
@@ -2354,8 +2747,9 @@ describe( 'WooPaymentsSettingsPage', () => {
 		expect( heading.closest( 'p' ) ).toHaveTextContent(
 			'⚠️ Development mode is enabled for the store! There can be no live onboarding process while using development, testing, or staging WordPress environments!'
 		);
+		const noticeCopy = heading.closest( 'p' ) as HTMLElement;
 		expect(
-			screen.getByRole( 'link', {
+			within( noticeCopy ).getByRole( 'link', {
 				name: /WordPress environment/,
 			} )
 		).toHaveAttribute(
@@ -2986,6 +3380,110 @@ describe( 'WooPaymentsSettingsPage', () => {
 		).toHaveAttribute(
 			'src',
 			'https://woocommerce.survey.fm/woopay-disabled-merchants-feedback-triggered'
+		);
+	} );
+
+	it( 'records payment request setting changes after a successful save', async () => {
+		let isPaymentRequestEnabled = true;
+		mockUseGetSettings.mockImplementation( () => ( {
+			account_country: 'US',
+			store_currency: 'USD',
+			is_multi_currency_enabled: true,
+			is_payment_request_enabled: isPaymentRequestEnabled,
+			feature_flags: DEFAULT_FEATURE_FLAGS,
+			available_payment_method_ids: [
+				'card',
+				'link',
+				'affirm',
+				'amazon_pay',
+				'apple_pay',
+				'google_pay',
+			],
+		} ) );
+		mockSaveSettings.mockResolvedValue( true );
+
+		const { rerender } = render( <WooPaymentsSettingsPage /> );
+
+		isPaymentRequestEnabled = false;
+		rerender( <WooPaymentsSettingsPage /> );
+
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'button', { name: 'Save changes' } )
+			);
+		} );
+
+		expect( mockRecordEvent ).toHaveBeenCalledWith(
+			'wcpay_payment_request_settings_change',
+			{ enabled: 'no' }
+		);
+	} );
+
+	it( 'does not record payment request setting changes after a failed save', async () => {
+		let isPaymentRequestEnabled = true;
+		mockUseGetSettings.mockImplementation( () => ( {
+			account_country: 'US',
+			store_currency: 'USD',
+			is_multi_currency_enabled: true,
+			is_payment_request_enabled: isPaymentRequestEnabled,
+			feature_flags: DEFAULT_FEATURE_FLAGS,
+			available_payment_method_ids: [
+				'card',
+				'link',
+				'affirm',
+				'amazon_pay',
+				'apple_pay',
+				'google_pay',
+			],
+		} ) );
+		mockSaveSettings.mockResolvedValue( false );
+
+		const { rerender } = render( <WooPaymentsSettingsPage /> );
+
+		isPaymentRequestEnabled = false;
+		rerender( <WooPaymentsSettingsPage /> );
+
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'button', { name: 'Save changes' } )
+			);
+		} );
+
+		expect( mockRecordEvent ).not.toHaveBeenCalledWith(
+			'wcpay_payment_request_settings_change',
+			expect.anything()
+		);
+	} );
+
+	it( 'does not record unchanged payment request settings after a successful save', async () => {
+		mockUseGetSettings.mockImplementation( () => ( {
+			account_country: 'US',
+			store_currency: 'USD',
+			is_multi_currency_enabled: true,
+			is_payment_request_enabled: true,
+			feature_flags: DEFAULT_FEATURE_FLAGS,
+			available_payment_method_ids: [
+				'card',
+				'link',
+				'affirm',
+				'amazon_pay',
+				'apple_pay',
+				'google_pay',
+			],
+		} ) );
+		mockSaveSettings.mockResolvedValue( true );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'button', { name: 'Save changes' } )
+			);
+		} );
+
+		expect( mockRecordEvent ).not.toHaveBeenCalledWith(
+			'wcpay_payment_request_settings_change',
+			expect.anything()
 		);
 	} );
 

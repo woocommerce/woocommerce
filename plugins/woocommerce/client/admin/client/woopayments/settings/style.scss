@@ -625,6 +625,68 @@
 	}
 }
 
+.woopayments-settings-disable-modal {
+	.components-modal__content > div {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	p {
+		margin: 0;
+	}
+
+	&__payment-methods-list {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 8px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+
+		@include breakpoint("<782px") {
+			grid-template-columns: 1fr;
+		}
+
+		li {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			min-width: 0;
+			margin: 0;
+			color: $gray-900;
+			font-size: 13px;
+			line-height: 20px;
+		}
+	}
+
+	&__method-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex: 0 0 auto;
+		width: 32px;
+		height: 24px;
+		border: 1px solid $gray-200;
+		border-radius: 2px;
+		background: $white;
+		object-fit: contain;
+	}
+
+	&__method-icon--fallback {
+		color: $gray-700;
+		font-size: 12px;
+		font-weight: 600;
+		line-height: 1;
+	}
+
+	&__help {
+		color: $gray-700;
+		font-size: 13px;
+		line-height: 20px;
+	}
+}
+
 .woopayments-woopay-disable-feedback {
 	@media (min-width: 960px) {
 		max-height: calc(100% - 120px);

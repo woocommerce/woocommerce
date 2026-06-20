@@ -24,6 +24,7 @@ import {
 import { dispatch } from '@wordpress/data';
 import { __, _x, sprintf } from '@wordpress/i18n';
 import { PhoneNumberInput, validatePhoneNumber } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -41,10 +42,12 @@ import {
 	getPaymentMethodAvailability,
 	WooPaymentsPaymentMethodsList,
 } from './payment-methods-list';
-import type { WooPaymentsPaymentMethodDefinition } from './payment-method-definitions';
 import { PayoutBankAccount } from './payout-bank-account';
 import { SettingsBusyState } from './settings-busy-state';
 import { WooPayDisableFeedback } from './woopay-disable-feedback';
+import { WooPaymentsDisableConfirmationModal } from './disable-woopayments-modal';
+import { useWooPaymentsAffectedCheckoutMethods } from './affected-payment-methods';
+import { AMAZON_PAY_DEFINITION } from './amazon-pay-definition';
 import {
 	isAmazonPayExpressCheckoutAvailable,
 	isWooPayExpressCheckoutAvailable,
@@ -125,6 +128,12 @@ const SUPPORT_PHONE_INPUT_ID = 'account-business-support-phone-input';
 const FEEDBACK_THROTTLE_DAYS = 7;
 const MANUAL_CAPTURE_DOC_URL =
 	'https://woocommerce.com/document/woopayments/settings-guide/authorize-and-capture/';
+const TESTING_DOC_URL =
+	'https://woocommerce.com/document/woopayments/testing-and-troubleshooting/testing/';
+const TEST_CARDS_DOC_URL =
+	'https://woocommerce.com/document/woopayments/testing-and-troubleshooting/testing/#test-cards';
+const WORDPRESS_ENVIRONMENT_URL =
+	'https://make.wordpress.org/core/2020/08/27/wordpress-environment-types/';
 const EMAIL_ADDRESS_PATTERN =
 	/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9.-]+$/;
 type SettingsRecord = Record< string, unknown >;
@@ -179,19 +188,6 @@ const STANDARD_PAYMENT_METHOD_EXCLUDED_IDS = [
 	'google_pay',
 	'link',
 ];
-const AMAZON_PAY_DEFINITION: WooPaymentsPaymentMethodDefinition = {
-	id: 'amazon_pay',
-	label: __( 'Amazon Pay', 'woocommerce' ),
-	description: __(
-		'Allow customers to make payments using Amazon Pay.',
-		'woocommerce'
-	),
-	iconUrl: '',
-	stripeKey: 'amazon_pay_payments',
-	currencies: [],
-	allowsManualCapture: false,
-	allowsPayLater: false,
-};
 const asString = ( value: unknown, fallback = '' ) =>
 	typeof value === 'string' ? value : fallback;
 const asBoolean = ( value: unknown, fallback = false ) =>
@@ -540,6 +536,46 @@ const GeneralSettingsSection = () => {
 	const isDevModeEnabled = Boolean( useDevMode() );
 	const [ isTestModeModalVisible, setTestModeModalVisible ] =
 		useState( false );
+	const [ isDisableConfirmationVisible, setDisableConfirmationVisible ] =
+		useState( false );
+	const affectedMethods = useWooPaymentsAffectedCheckoutMethods();
+
+	const handleWooPaymentsEnabledChange = ( value: boolean ) => {
+		if ( ! value ) {
+			setDisableConfirmationVisible( true );
+			return;
+		}
+
+		setIsWCPayEnabled( true );
+		recordEvent( 'wcpay_gateway_toggle', {
+			action: 'enable',
+			context: 'wcpay-settings',
+		} );
+	};
+
+	const handleConfirmDisableWooPayments = () => {
+		setIsWCPayEnabled( false );
+		recordEvent( 'wcpay_gateway_toggle', {
+			action: 'disable',
+			context: 'wcpay-settings',
+		} );
+		setDisableConfirmationVisible( false );
+	};
+
+	const handleCloseTestModeModal = () => {
+		recordEvent( 'wcpay_test_mode_modal_exit', {
+			source: 'wcadmin-settings-page',
+		} );
+		setTestModeModalVisible( false );
+	};
+
+	const handleConfirmTestMode = () => {
+		recordEvent( 'wcpay_test_mode_enabled', {
+			source: 'wcadmin-settings-page',
+		} );
+		setIsTestModeEnabled( true );
+		setTestModeModalVisible( false );
+	};
 
 	return (
 		<>
@@ -567,8 +603,16 @@ const GeneralSettingsSection = () => {
 						__( 'Enable %s', 'woocommerce' ),
 						PROVIDER_NAME
 					) }
+					help={ sprintf(
+						/* translators: %s: Payment provider name. */
+						__(
+							'When enabled, payment methods powered by %s will appear on checkout.',
+							'woocommerce'
+						),
+						PROVIDER_NAME
+					) }
 					onChange={ ( value ) =>
-						setIsWCPayEnabled( Boolean( value ) )
+						handleWooPaymentsEnabledChange( Boolean( value ) )
 					}
 					__nextHasNoMarginBottom
 				/>
@@ -578,13 +622,51 @@ const GeneralSettingsSection = () => {
 						disabled={ isDevModeEnabled }
 						help={
 							isDevModeEnabled
-								? __(
-										'Test mode is active because your store is running in a development or staging environment.',
-										'woocommerce'
+								? createInterpolateElement(
+										__(
+											'Test mode is active because your store is running in a development or staging environment. To disable it, switch to a production <wpEnvLink>WordPress environment</wpEnvLink> or remove the WCPAY_DEV_MODE constant. <learnMoreLink>Learn more</learnMoreLink>',
+											'woocommerce'
+										),
+										{
+											wpEnvLink: (
+												<ExternalLink
+													href={
+														WORDPRESS_ENVIRONMENT_URL
+													}
+												>
+													<></>
+												</ExternalLink>
+											),
+											learnMoreLink: (
+												<ExternalLink
+													href={ TESTING_DOC_URL }
+												>
+													<></>
+												</ExternalLink>
+											),
+										}
 								  )
-								: __(
-										'Use test card numbers to simulate transactions before processing live payments.',
-										'woocommerce'
+								: createInterpolateElement(
+										__(
+											'Use <testCardHelpLink>test card numbers</testCardHelpLink> to simulate various transactions. <learnMoreLink>Learn more</learnMoreLink>',
+											'woocommerce'
+										),
+										{
+											testCardHelpLink: (
+												<ExternalLink
+													href={ TEST_CARDS_DOC_URL }
+												>
+													<></>
+												</ExternalLink>
+											),
+											learnMoreLink: (
+												<ExternalLink
+													href={ TESTING_DOC_URL }
+												>
+													<></>
+												</ExternalLink>
+											),
+										}
 								  )
 						}
 						label={
@@ -601,19 +683,26 @@ const GeneralSettingsSection = () => {
 								return;
 							}
 
+							recordEvent( 'wcpay_test_mode_disabled', {
+								source: 'wcadmin-settings-page',
+							} );
 							setIsTestModeEnabled( false );
 						} }
 						__nextHasNoMarginBottom
 					/>
 				) }
 			</SettingsSection>
+			{ isDisableConfirmationVisible && (
+				<WooPaymentsDisableConfirmationModal
+					affectedMethods={ affectedMethods }
+					onClose={ () => setDisableConfirmationVisible( false ) }
+					onConfirm={ handleConfirmDisableWooPayments }
+				/>
+			) }
 			{ isTestModeModalVisible && (
 				<TestModeConfirmationModal
-					onClose={ () => setTestModeModalVisible( false ) }
-					onConfirm={ () => {
-						setIsTestModeEnabled( true );
-						setTestModeModalVisible( false );
-					} }
+					onClose={ handleCloseTestModeModal }
+					onConfirm={ handleConfirmTestMode }
 				/>
 			) }
 		</>
@@ -1884,6 +1973,10 @@ const SaveSettingsSection = ( { disabled }: { disabled?: boolean } ) => {
 	const [ initialIsWooPayEnabled, setInitialIsWooPayEnabled ] = useState<
 		boolean | null
 	>( null );
+	const [
+		initialIsPaymentRequestEnabled,
+		setInitialIsPaymentRequestEnabled,
+	] = useState< boolean | null >( null );
 	const [ isWooPayDisableFeedbackOpen, setWooPayDisableFeedbackOpen ] =
 		useState( false );
 	const [ shouldFocusSavingError, setShouldFocusSavingError ] =
@@ -1895,7 +1988,15 @@ const SaveSettingsSection = ( { disabled }: { disabled?: boolean } ) => {
 		settings,
 		'is_woopay_enabled'
 	);
+	const hasPaymentRequestEnabledSetting =
+		Object.prototype.hasOwnProperty.call(
+			settings,
+			'is_payment_request_enabled'
+		);
 	const isWooPayEnabled = Boolean( settings.is_woopay_enabled );
+	const isPaymentRequestEnabled = Boolean(
+		settings.is_payment_request_enabled
+	);
 	const wooPayLastDisableDate = asString( settings.woopay_last_disable_date );
 
 	useEffect( () => {
@@ -1905,6 +2006,21 @@ const SaveSettingsSection = ( { disabled }: { disabled?: boolean } ) => {
 
 		setInitialIsWooPayEnabled( isWooPayEnabled );
 	}, [ hasWooPayEnabledSetting, initialIsWooPayEnabled, isWooPayEnabled ] );
+
+	useEffect( () => {
+		if (
+			initialIsPaymentRequestEnabled !== null ||
+			! hasPaymentRequestEnabledSetting
+		) {
+			return;
+		}
+
+		setInitialIsPaymentRequestEnabled( isPaymentRequestEnabled );
+	}, [
+		hasPaymentRequestEnabledSetting,
+		initialIsPaymentRequestEnabled,
+		isPaymentRequestEnabled,
+	] );
 
 	useEffect( () => {
 		setLocalWooPayLastDisableDate( wooPayLastDisableDate );
@@ -1950,6 +2066,20 @@ const SaveSettingsSection = ( { disabled }: { disabled?: boolean } ) => {
 
 		if ( hasWooPayEnabledSetting ) {
 			setInitialIsWooPayEnabled( isWooPayEnabled );
+		}
+
+		if (
+			hasPaymentRequestEnabledSetting &&
+			initialIsPaymentRequestEnabled !== null &&
+			initialIsPaymentRequestEnabled !== isPaymentRequestEnabled
+		) {
+			recordEvent( 'wcpay_payment_request_settings_change', {
+				enabled: isPaymentRequestEnabled ? 'yes' : 'no',
+			} );
+		}
+
+		if ( hasPaymentRequestEnabledSetting ) {
+			setInitialIsPaymentRequestEnabled( isPaymentRequestEnabled );
 		}
 	};
 

@@ -5,6 +5,7 @@ import { Button, ExternalLink, Modal, Notice } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -24,11 +25,13 @@ const WORDPRESS_ENVIRONMENT_URL =
 	'https://make.wordpress.org/core/2020/08/27/wordpress-environment-types/';
 const TEST_ACCOUNT_DEV_URL =
 	'https://woocommerce.com/document/woopayments/testing-and-troubleshooting/test-accounts/#developer-notes';
+const SETUP_LIVE_FROM = 'WCPAY_SETTINGS';
+const SETUP_LIVE_SOURCE = 'wcadmin-settings-page';
 
 const getSetupLiveUrl = ( setupUrl?: string ) =>
 	setupUrl
 		? addQueryArgs( setupUrl, {
-				source: 'wcadmin-settings-page',
+				source: SETUP_LIVE_SOURCE,
 				from: 'wcpay-setup-live-payments',
 		  } )
 		: undefined;
@@ -40,13 +43,37 @@ const SetupLivePaymentsModal = ( {
 	onClose: () => void;
 	setupUrl?: string;
 } ) => {
+	const [ isSubmitted, setSubmitted ] = useState( false );
 	const setupLiveUrl = getSetupLiveUrl( setupUrl );
+	const handleSetup = (
+		event: React.MouseEvent< HTMLAnchorElement | HTMLButtonElement >
+	) => {
+		if ( ! setupLiveUrl || isSubmitted ) {
+			event.preventDefault();
+			return;
+		}
+
+		setSubmitted( true );
+		recordEvent( 'wcpay_onboarding_flow_setup_live_payments', {
+			from: SETUP_LIVE_FROM,
+			source: SETUP_LIVE_SOURCE,
+		} );
+		window.location.href = setupLiveUrl;
+	};
+	const handleClose = () => {
+		setSubmitted( false );
+		recordEvent( 'wcpay_setup_live_payments_modal_exit', {
+			from: SETUP_LIVE_FROM,
+			source: SETUP_LIVE_SOURCE,
+		} );
+		onClose();
+	};
 
 	return (
 		<Modal
 			title={ __( 'Activate payments on your store', 'woocommerce' ) }
 			className="woopayments-settings-setup-live-modal"
-			onRequestClose={ onClose }
+			onRequestClose={ handleClose }
 		>
 			<div className="woopayments-settings-setup-live-modal__content">
 				<p>
@@ -78,7 +105,13 @@ const SetupLivePaymentsModal = ( {
 			</div>
 			{ setupLiveUrl && (
 				<div className="woopayments-settings-setup-live-modal__footer">
-					<Button variant="primary" href={ setupLiveUrl }>
+					<Button
+						variant="primary"
+						href={ setupLiveUrl }
+						isBusy={ isSubmitted }
+						aria-disabled={ isSubmitted }
+						onClick={ handleSetup }
+					>
 						{ __( 'Activate payments', 'woocommerce' ) }
 					</Button>
 				</div>
@@ -144,6 +177,9 @@ export const AccountModeNotice = ( {
 				! isDevModeEnabled &&
 				noticeState.setupUrl
 			) {
+				recordEvent( 'wcpay_settings_setup_live_payments_click', {
+					source: SETUP_LIVE_SOURCE,
+				} );
 				setModalVisible( true );
 			}
 		};
@@ -243,11 +279,18 @@ export const AccountModeNotice = ( {
 				{ isTestAccount && ! isDevModeEnabled && (
 					<Button
 						variant="secondary"
-						onClick={ () =>
+						onClick={ () => {
+							recordEvent(
+								'wcpay_setup_live_payments_modal_open',
+								{
+									from: SETUP_LIVE_FROM,
+									source: SETUP_LIVE_SOURCE,
+								}
+							);
 							document.dispatchEvent(
 								new CustomEvent( 'wcpay:activate_payments' )
-							)
-						}
+							);
+						} }
 					>
 						{ __( 'Activate payments', 'woocommerce' ) }
 					</Button>
