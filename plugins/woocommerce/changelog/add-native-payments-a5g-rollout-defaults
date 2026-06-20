@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Make native WooPayments rollout defaults explicit and keep mandatory cutover fail-closed.
