@@ -11,10 +11,17 @@ import {
 	TextControl,
 } from '@wordpress/components';
 import { dispatch } from '@wordpress/data';
-import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from '@wordpress/element';
+import { decodeEntities } from '@wordpress/html-entities';
 import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-import type { ReactNode } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -43,6 +50,12 @@ import './style.scss';
 type SettingsRecord = Record< string, unknown >;
 type StringSetting = [ string, ( value: string ) => void ];
 type AdvancedFraudProtectionSetting = [ unknown, ( value: unknown[] ) => void ];
+type WindowWithWooSettings = Window & {
+	wcSettings?: {
+		adminUrl?: string;
+		countries?: Record< string, string >;
+	};
+};
 
 const asSettingsRecord = ( value: unknown ): SettingsRecord =>
 	value && typeof value === 'object' ? ( value as SettingsRecord ) : {};
@@ -60,6 +73,16 @@ const asBoolean = ( value: unknown, fallback = false ) =>
 
 const CVC_VERIFICATION_DOC_URL =
 	'https://woocommerce.com/document/woopayments/fraud-and-disputes/fraud-protection/#advanced-configuration';
+const IP_ADDRESS_DOC_URL = 'https://simple.wikipedia.org/wiki/IP_address';
+const COMMON_CURRENCY_SYMBOLS: Record< string, string > = {
+	AUD: '$',
+	CAD: '$',
+	EUR: '€',
+	GBP: '£',
+	JPY: '¥',
+	NZD: '$',
+	USD: '$',
+};
 
 const ADVANCED_RULE_CARD_VIEW_EVENTS: Record< string, string > = {
 	'avs-mismatch-card':
@@ -104,6 +127,49 @@ const getFraudProtectionEnvironment = ( settings: SettingsRecord ) => {
 			true
 		),
 	};
+};
+
+type FraudProtectionEnvironment = ReturnType<
+	typeof getFraudProtectionEnvironment
+>;
+
+const getWooCommerceGeneralSettingsUrl = () => {
+	const adminUrl =
+		( window as WindowWithWooSettings ).wcSettings?.adminUrl || '';
+	const separator = adminUrl.endsWith( '/' ) || adminUrl === '' ? '' : '/';
+
+	return `${ adminUrl }${ separator }admin.php?page=wc-settings&tab=general`;
+};
+
+const getCountryNames = ( countryCodes: string[] ) => {
+	const countryNames =
+		( window as WindowWithWooSettings ).wcSettings?.countries || {};
+
+	return countryCodes.map( ( countryCode ) => {
+		return decodeEntities( countryNames[ countryCode ] || countryCode );
+	} );
+};
+
+const getCurrencySymbol = ( currency: string ) => {
+	const normalizedCurrency = currency.toUpperCase();
+
+	if ( COMMON_CURRENCY_SYMBOLS[ normalizedCurrency ] ) {
+		return COMMON_CURRENCY_SYMBOLS[ normalizedCurrency ];
+	}
+
+	try {
+		return (
+			new Intl.NumberFormat( undefined, {
+				style: 'currency',
+				currency: normalizedCurrency,
+			} )
+				.formatToParts( 0 )
+				.find( ( part ) => part.type === 'currency' )?.value ||
+			normalizedCurrency
+		);
+	} catch {
+		return normalizedCurrency;
+	}
 };
 
 const hasEnabledRule = ( settings: ProtectionSettingsUI ) =>
@@ -167,6 +233,158 @@ const validateThresholds = ( settings: ProtectionSettingsUI ) => {
 	}
 
 	return null;
+};
+
+const LoadingRuleCard = ( { id }: { id: string } ) => (
+	<Card
+		id={ id }
+		className="woopayments-fraud-protection-rule woopayments-fraud-protection-rule--loading"
+		aria-hidden="true"
+	>
+		<div className="woopayments-fraud-protection-rule__loading-title" />
+		<div className="woopayments-fraud-protection-rule__loading-line" />
+		<div className="woopayments-fraud-protection-rule__loading-line woopayments-fraud-protection-rule__loading-line--short" />
+	</Card>
+);
+
+const AllowedCountriesNotice = ( {
+	environment,
+	settings,
+}: {
+	environment: FraudProtectionEnvironment;
+	settings: ProtectionSettingsUI;
+} ) => {
+	if ( environment.allowedCountriesType === 'all' ) {
+		return null;
+	}
+
+	const countryNames = getCountryNames( environment.settingCountries );
+
+	if ( countryNames.length === 0 ) {
+		return null;
+	}
+
+	const internationalIpSetting =
+		settings[ Rules.RULE_INTERNATIONAL_IP_ADDRESS ];
+	const shouldBlock =
+		internationalIpSetting?.block ?? ! environment.isReviewFeatureActive;
+	const countries = countryNames.join( ', ' );
+	let message;
+
+	if ( environment.allowedCountriesType === 'specific' ) {
+		message = shouldBlock
+			? __(
+					'Orders from outside of the following countries will be blocked by the filter:',
+					'woocommerce'
+			  )
+			: __(
+					'Orders from outside of the following countries will be screened by the filter:',
+					'woocommerce'
+			  );
+	} else {
+		message = shouldBlock
+			? __(
+					'Orders from the following countries will be blocked by the filter:',
+					'woocommerce'
+			  )
+			: __(
+					'Orders from the following countries will be screened by the filter:',
+					'woocommerce'
+			  );
+	}
+
+	return (
+		<Notice status="info" isDismissible={ false }>
+			{ message } <strong>{ countries }</strong>
+		</Notice>
+	);
+};
+
+const getThresholdNotice = ( {
+	maximum,
+	minimum,
+	rangeMessage,
+	orderMessage,
+}: {
+	maximum: number;
+	minimum: number;
+	rangeMessage: string;
+	orderMessage: string;
+} ) => {
+	if ( ! minimum && ! maximum ) {
+		return (
+			<Notice status="warning" isDismissible={ false }>
+				{ rangeMessage }
+			</Notice>
+		);
+	}
+
+	if ( minimum && maximum && minimum > maximum ) {
+		return (
+			<Notice status="error" isDismissible={ false }>
+				{ orderMessage }
+			</Notice>
+		);
+	}
+
+	return null;
+};
+
+const AmountThresholdInput = ( {
+	currency,
+	currencySymbol,
+	id,
+	label,
+	onChange,
+	value,
+}: {
+	currency: string;
+	currencySymbol: string;
+	id: string;
+	label: string;
+	onChange: ( value: string ) => void;
+	value: string;
+} ) => {
+	const helpId = `${ id }__help`;
+	const currencyDescriptionId = `${ id }__currency`;
+
+	return (
+		<div className="woopayments-fraud-protection-rule__amount-control">
+			<label
+				className="woopayments-fraud-protection-rule__threshold-label"
+				htmlFor={ id }
+			>
+				{ label }
+			</label>
+			<div className="woopayments-fraud-protection-rule__currency-input">
+				<span
+					className="woopayments-fraud-protection-rule__currency-prefix"
+					aria-hidden="true"
+				>
+					{ currencySymbol }
+				</span>
+				<input
+					id={ id }
+					className="components-text-control__input is-next-40px-default-size"
+					type="number"
+					value={ value }
+					placeholder="0.00"
+					aria-describedby={ `${ helpId } ${ currencyDescriptionId }` }
+					onChange={ ( event ) => onChange( event.target.value ) }
+				/>
+			</div>
+			<p id={ helpId } className="components-base-control__help">
+				{ __( 'Leave blank for no limit', 'woocommerce' ) }
+			</p>
+			<span id={ currencyDescriptionId } className="screen-reader-text">
+				{ sprintf(
+					/* translators: %s: Store currency code, such as USD. */
+					__( 'Amount is in %s.', 'woocommerce' ),
+					currency.toUpperCase()
+				) }
+			</span>
+		</div>
+	);
 };
 
 const RuleDescription = ( { children }: { children: ReactNode } ) => (
@@ -292,10 +510,12 @@ const ThresholdControls = ( {
 	setting,
 	settings,
 	onSettingsChange,
+	environment,
 }: {
 	setting: string;
 	settings: ProtectionSettingsUI;
 	onSettingsChange: ( settings: ProtectionSettingsUI ) => void;
+	environment: FraudProtectionEnvironment;
 } ) => {
 	const settingUI = settings[ setting ];
 
@@ -319,25 +539,48 @@ const ThresholdControls = ( {
 		)
 			? settingUI
 			: null;
+		const minAmount = getFloatValue(
+			purchasePriceSetting?.min_amount ?? ''
+		);
+		const maxAmount = getFloatValue(
+			purchasePriceSetting?.max_amount ?? ''
+		);
+		const thresholdNotice = getThresholdNotice( {
+			minimum: minAmount,
+			maximum: maxAmount,
+			rangeMessage: __(
+				'A price range must be set for this filter to take effect.',
+				'woocommerce'
+			),
+			orderMessage: __(
+				'Maximum purchase price must be greater than the minimum purchase price.',
+				'woocommerce'
+			),
+		} );
+		const currencySymbol = getCurrencySymbol( environment.storeCurrency );
 
 		return (
-			<div className="woopayments-fraud-protection-rule__thresholds">
-				<TextControl
-					label={ __( 'Minimum order amount', 'woocommerce' ) }
-					type="number"
-					value={ `${ purchasePriceSetting?.min_amount ?? '' }` }
-					onChange={ updateField( 'min_amount' ) }
-					__nextHasNoMarginBottom
-					__next40pxDefaultSize
-				/>
-				<TextControl
-					label={ __( 'Maximum order amount', 'woocommerce' ) }
-					type="number"
-					value={ `${ purchasePriceSetting?.max_amount ?? '' }` }
-					onChange={ updateField( 'max_amount' ) }
-					__nextHasNoMarginBottom
-					__next40pxDefaultSize
-				/>
+			<div className="woopayments-fraud-protection-rule__threshold-details">
+				<h4>{ __( 'Limits', 'woocommerce' ) }</h4>
+				<div className="woopayments-fraud-protection-rule__thresholds">
+					<AmountThresholdInput
+						id="woopayments-fraud-protection-minimum-purchase-price"
+						label={ __( 'Minimum purchase price', 'woocommerce' ) }
+						value={ `${ purchasePriceSetting?.min_amount ?? '' }` }
+						currency={ environment.storeCurrency }
+						currencySymbol={ currencySymbol }
+						onChange={ updateField( 'min_amount' ) }
+					/>
+					<AmountThresholdInput
+						id="woopayments-fraud-protection-maximum-purchase-price"
+						label={ __( 'Maximum purchase price', 'woocommerce' ) }
+						value={ `${ purchasePriceSetting?.max_amount ?? '' }` }
+						currency={ environment.storeCurrency }
+						currencySymbol={ currencySymbol }
+						onChange={ updateField( 'max_amount' ) }
+					/>
+				</div>
+				{ thresholdNotice }
 			</div>
 		);
 	}
@@ -345,25 +588,60 @@ const ThresholdControls = ( {
 	const orderItemsSetting = isOrderItemsThresholdSetting( settingUI )
 		? settingUI
 		: null;
+	const minItems = getIntegerValue( orderItemsSetting?.min_items ?? '' );
+	const maxItems = getIntegerValue( orderItemsSetting?.max_items ?? '' );
+	const thresholdNotice = getThresholdNotice( {
+		minimum: minItems,
+		maximum: maxItems,
+		rangeMessage: __(
+			'An item range must be set for this filter to take effect.',
+			'woocommerce'
+		),
+		orderMessage: __(
+			'Maximum item count must be greater than the minimum item count.',
+			'woocommerce'
+		),
+	} );
+	const preventOrderItemsInvalidKey = (
+		event: KeyboardEvent< HTMLInputElement >
+	) => {
+		if ( /^[+\-.,eE]$/.test( event.key ) ) {
+			event.preventDefault();
+		}
+	};
 
 	return (
-		<div className="woopayments-fraud-protection-rule__thresholds">
-			<TextControl
-				label={ __( 'Minimum items', 'woocommerce' ) }
-				type="number"
-				value={ `${ orderItemsSetting?.min_items ?? '' }` }
-				onChange={ updateField( 'min_items' ) }
-				__nextHasNoMarginBottom
-				__next40pxDefaultSize
-			/>
-			<TextControl
-				label={ __( 'Maximum items', 'woocommerce' ) }
-				type="number"
-				value={ `${ orderItemsSetting?.max_items ?? '' }` }
-				onChange={ updateField( 'max_items' ) }
-				__nextHasNoMarginBottom
-				__next40pxDefaultSize
-			/>
+		<div className="woopayments-fraud-protection-rule__threshold-details">
+			<h4>{ __( 'Limits', 'woocommerce' ) }</h4>
+			<div className="woopayments-fraud-protection-rule__thresholds">
+				<TextControl
+					label={ __( 'Minimum items per order', 'woocommerce' ) }
+					type="number"
+					value={ `${ orderItemsSetting?.min_items ?? '' }` }
+					placeholder="0"
+					min="1"
+					step="1"
+					help={ __( 'Leave blank for no limit', 'woocommerce' ) }
+					onKeyDown={ preventOrderItemsInvalidKey }
+					onChange={ updateField( 'min_items' ) }
+					__nextHasNoMarginBottom
+					__next40pxDefaultSize
+				/>
+				<TextControl
+					label={ __( 'Maximum items per order', 'woocommerce' ) }
+					type="number"
+					value={ `${ orderItemsSetting?.max_items ?? '' }` }
+					placeholder="0"
+					min="1"
+					step="1"
+					help={ __( 'Leave blank for no limit', 'woocommerce' ) }
+					onKeyDown={ preventOrderItemsInvalidKey }
+					onChange={ updateField( 'max_items' ) }
+					__nextHasNoMarginBottom
+					__next40pxDefaultSize
+				/>
+			</div>
+			{ thresholdNotice }
 		</div>
 	);
 };
@@ -531,9 +809,33 @@ export const FraudProtectionAdvancedSettingsPage = () => {
 
 	if ( isLoading ) {
 		return (
-			<div role="status" aria-live="polite" aria-busy="true">
-				{ __( 'Loading WooPayments settings…', 'woocommerce' ) }
-			</div>
+			<section
+				className="woopayments-fraud-protection-advanced"
+				aria-busy="true"
+			>
+				<a
+					className="woopayments-fraud-protection-advanced__back-link"
+					href={ getSettingsPaymentsProviderRouteUrl(
+						'/woopayments/settings'
+					) }
+				>
+					{ __( 'Back to WooPayments settings', 'woocommerce' ) }
+				</a>
+				<h1>{ __( 'Advanced fraud protection', 'woocommerce' ) }</h1>
+				<div className="woopayments-fraud-protection-advanced__description">
+					<AdvancedFraudSettingsDescription />
+				</div>
+				<div role="status" aria-live="polite">
+					{ __( 'Loading fraud protection rules', 'woocommerce' ) }
+				</div>
+				<div className="woopayments-fraud-protection-advanced__rules">
+					{ Object.keys( ADVANCED_RULE_CARD_VIEW_EVENTS ).map(
+						( cardId ) => (
+							<LoadingRuleCard key={ cardId } id={ cardId } />
+						)
+					) }
+				</div>
+			</section>
 		);
 	}
 
@@ -544,7 +846,10 @@ export const FraudProtectionAdvancedSettingsPage = () => {
 		advancedFraudProtectionSettings === 'error';
 
 	return (
-		<section className="woopayments-fraud-protection-advanced">
+		<section
+			className="woopayments-fraud-protection-advanced"
+			aria-busy={ isSaving ? 'true' : undefined }
+		>
 			<a
 				className="woopayments-fraud-protection-advanced__back-link"
 				href={ getSettingsPaymentsProviderRouteUrl(
@@ -591,9 +896,19 @@ export const FraudProtectionAdvancedSettingsPage = () => {
 									status="warning"
 									isDismissible={ false }
 								>
-									{ __(
-										'AVS checks are commonly supported only for cards issued in the United States, Canada, and the United Kingdom. None of your selling locations support AVS, so this filter is unlikely to block any payments.',
-										'woocommerce'
+									{ createInterpolateElement(
+										__(
+											'AVS checks are commonly supported only for cards issued in the United States, Canada, and the United Kingdom. None of your <a>selling locations</a> support AVS, so this filter is unlikely to block any payments.',
+											'woocommerce'
+										),
+										{
+											a: (
+												// eslint-disable-next-line jsx-a11y/anchor-has-content
+												<a
+													href={ getWooCommerceGeneralSettingsUrl() }
+												/>
+											),
+										}
 									) }
 								</Notice>
 							) }
@@ -654,9 +969,26 @@ export const FraudProtectionAdvancedSettingsPage = () => {
 										'Enable International IP Address filter',
 										'woocommerce'
 									) }
-									description={ __(
-										'This filter screens for IP addresses outside of your supported countries. When enabled the payment will be blocked.',
-										'woocommerce'
+									description={ createInterpolateElement(
+										__(
+											'This filter screens for <ipAddressLink>IP addresses</ipAddressLink> outside of your <supportedCountriesLink>supported countries</supportedCountriesLink>. When enabled the payment will be blocked.',
+											'woocommerce'
+										),
+										{
+											ipAddressLink: (
+												<ExternalLink
+													href={ IP_ADDRESS_DOC_URL }
+												>
+													{ null }
+												</ExternalLink>
+											),
+											supportedCountriesLink: (
+												// eslint-disable-next-line jsx-a11y/anchor-has-content
+												<a
+													href={ getWooCommerceGeneralSettingsUrl() }
+												/>
+											),
+										}
 									) }
 									settings={ protectionSettingsUI }
 									onSettingsChange={
@@ -665,6 +997,12 @@ export const FraudProtectionAdvancedSettingsPage = () => {
 									isReviewFeatureActive={
 										environment.isReviewFeatureActive
 									}
+								/>
+							) }
+							{ ! supportsAllCountries && (
+								<AllowedCountriesNotice
+									environment={ environment }
+									settings={ protectionSettingsUI }
 								/>
 							) }
 							<RuleDescription>
@@ -688,9 +1026,20 @@ export const FraudProtectionAdvancedSettingsPage = () => {
 									'Enable IP Address Mismatch filter',
 									'woocommerce'
 								) }
-								description={ __(
-									"This filter screens for customer's IP address to see if it is in a different country than indicated in their billing address. When enabled the payment will be blocked.",
-									'woocommerce'
+								description={ createInterpolateElement(
+									__(
+										"This filter screens for customer's <a>IP address</a> to see if it is in a different country than indicated in their billing address. When enabled the payment will be blocked.",
+										'woocommerce'
+									),
+									{
+										a: (
+											<ExternalLink
+												href={ IP_ADDRESS_DOC_URL }
+											>
+												{ null }
+											</ExternalLink>
+										),
+									}
 								) }
 								settings={ protectionSettingsUI }
 								onSettingsChange={ updateProtectionSettingsUI }
@@ -771,6 +1120,7 @@ export const FraudProtectionAdvancedSettingsPage = () => {
 									onSettingsChange={
 										updateProtectionSettingsUI
 									}
+									environment={ environment }
 								/>
 							</RuleToggle>
 							<RuleDescription>
@@ -813,6 +1163,7 @@ export const FraudProtectionAdvancedSettingsPage = () => {
 									onSettingsChange={
 										updateProtectionSettingsUI
 									}
+									environment={ environment }
 								/>
 							</RuleToggle>
 							<RuleDescription>

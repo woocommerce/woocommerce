@@ -26,6 +26,10 @@
 .woopayments-fraud-protection-advanced__rules {
 	display: grid;
 	gap: 16px;
+
+	[role="status"] + & {
+		margin-top: 16px;
+	}
 }
 
 .woopayments-fraud-protection-rule {
@@ -38,9 +42,40 @@
 	}
 }
 
+.woopayments-fraud-protection-rule--loading {
+	display: grid;
+	gap: 12px;
+	min-height: 136px;
+}
+
+.woopayments-fraud-protection-rule__loading-title,
+.woopayments-fraud-protection-rule__loading-line {
+	display: block;
+	border-radius: 2px;
+	background: linear-gradient(90deg, #f0f0f1 0%, #f6f7f7 50%, #f0f0f1 100%);
+}
+
+.woopayments-fraud-protection-rule__loading-title {
+	width: 220px;
+	height: 24px;
+}
+
+.woopayments-fraud-protection-rule__loading-line {
+	width: 100%;
+	height: 16px;
+}
+
+.woopayments-fraud-protection-rule__loading-line--short {
+	width: 64%;
+}
+
 .woopayments-fraud-protection-rule__toggle {
 	display: grid;
 	gap: 16px;
+}
+
+.woopayments-fraud-protection-rule .components-notice {
+	margin: 0 0 16px;
 }
 
 .woopayments-fraud-protection-rule__description {
@@ -52,11 +87,93 @@
 	}
 }
 
+.woopayments-fraud-protection-rule__threshold-details {
+	margin: 0 0 8px 32px;
+
+	h4 {
+		margin: 0 0 12px;
+		font-size: 13px;
+		line-height: 20px;
+		font-weight: 600;
+	}
+
+	.components-notice {
+		margin: 8px 0 0;
+	}
+}
+
 .woopayments-fraud-protection-rule__thresholds {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 16px;
-	margin: 0 0 8px 32px;
+	margin: 0;
+}
+
+.woopayments-fraud-protection-rule__amount-control {
+	display: block;
+
+	.components-base-control__help {
+		margin: 8px 0 0;
+		color: #646970;
+	}
+}
+
+.woopayments-fraud-protection-rule__threshold-label {
+	display: block;
+	margin: 0 0 8px;
+	color: #1e1e1e;
+	font-size: 11px;
+	font-weight: 500;
+	line-height: 16px;
+	text-transform: uppercase;
+}
+
+.woopayments-fraud-protection-rule__currency-input {
+	display: flex;
+	align-items: center;
+	min-height: 40px;
+	border: 1px solid #8c8f94;
+	border-radius: 2px;
+	background: #fff;
+
+	&:focus-within {
+		border-color: #3858e9;
+		box-shadow: 0 0 0 1px #3858e9;
+	}
+
+	.components-text-control__input {
+		flex: 1 1 auto;
+		min-width: 0;
+		height: 40px;
+		border: 0;
+		box-shadow: none;
+		padding-left: 6px;
+
+		&:focus {
+			box-shadow: none;
+			outline: none;
+		}
+	}
+}
+
+.woopayments-fraud-protection-rule__currency-prefix {
+	flex: 0 0 auto;
+	padding-left: 12px;
+	color: #646970;
+	line-height: 1;
+}
+
+@media (max-width: 600px) {
+	.woopayments-fraud-protection-rule__thresholds {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (forced-colors: active) {
+	.woopayments-fraud-protection-rule__currency-input:focus-within {
+		outline: 2px solid Highlight;
+		outline-offset: 2px;
+	}
 }
 
 .woopayments-fraud-protection-advanced__footer {

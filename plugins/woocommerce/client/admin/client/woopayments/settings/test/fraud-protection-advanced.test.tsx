@@ -15,7 +15,12 @@ import {
 	readRuleset,
 	writeRuleset,
 } from '../fraud-protection/advanced/utils';
-import { Outcomes, Rules } from '../fraud-protection/advanced/constants';
+import {
+	CheckOperators,
+	Checks,
+	Outcomes,
+	Rules,
+} from '../fraud-protection/advanced/constants';
 
 const mockCreateErrorNotice = jest.fn();
 const mockSaveSettings = jest.fn();
@@ -93,6 +98,12 @@ type MockIntersectionObserverInstance = IntersectionObserver & {
 	observe: jest.Mock;
 	unobserve: jest.Mock;
 	disconnect: jest.Mock;
+};
+
+type WindowWithWooSettings = Window & {
+	wcSettings?: {
+		countries?: Record< string, string >;
+	};
 };
 
 let mockIntersectionObserverCallback: IntersectionObserverCallback;
@@ -250,7 +261,75 @@ describe( 'FraudProtectionAdvancedSettingsPage', () => {
 				IntersectionObserver?: typeof IntersectionObserver;
 			}
 		 ).IntersectionObserver;
+		( window as WindowWithWooSettings ).wcSettings = {
+			countries: {
+				CA: 'Canada',
+				CW: 'Cura&ccedil;ao',
+				RO: 'Romania',
+				US: 'United States',
+			},
+		};
 		setHookDefaults();
+	} );
+
+	it( 'renders advanced fraud rule placeholders while settings load', () => {
+		mockUseSettings.mockReturnValue( {
+			isLoading: true,
+			isSaving: false,
+			isDirty: false,
+			saveSettings: mockSaveSettings,
+		} );
+
+		render( <FraudProtectionAdvancedSettingsPage /> );
+
+		expect(
+			document.querySelector( '.woopayments-fraud-protection-advanced' )
+		).toHaveAttribute( 'aria-busy', 'true' );
+		expect(
+			screen.getByRole( 'link', { name: 'Back to WooPayments settings' } )
+		).toHaveAttribute(
+			'href',
+			expect.stringContaining( 'path=%2Fwoopayments%2Fsettings' )
+		);
+		expect(
+			screen.getByRole( 'heading', {
+				name: 'Advanced fraud protection',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'heading', { name: 'Filter configuration' } )
+		).toBeInTheDocument();
+		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
+			'Loading fraud protection rules'
+		);
+		expect(
+			document.querySelectorAll(
+				'.woopayments-fraud-protection-rule--loading'
+			)
+		).toHaveLength( ADVANCED_RULE_CARD_VIEW_EVENTS.length );
+		expect(
+			screen.queryByRole( 'checkbox', {
+				name: 'Enable AVS Mismatch filter',
+			} )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'marks the advanced fraud settings surface busy while saving', () => {
+		mockUseSettings.mockReturnValue( {
+			isLoading: false,
+			isSaving: true,
+			isDirty: true,
+			saveSettings: mockSaveSettings,
+		} );
+
+		render( <FraudProtectionAdvancedSettingsPage /> );
+
+		expect(
+			document.querySelector( '.woopayments-fraud-protection-advanced' )
+		).toHaveAttribute( 'aria-busy', 'true' );
+		expect(
+			screen.getByRole( 'button', { name: 'Save changes' } )
+		).toBeDisabled();
 	} );
 
 	it( 'renders the advanced fraud protection rule configuration page', () => {
@@ -299,6 +378,328 @@ describe( 'FraudProtectionAdvancedSettingsPage', () => {
 				'/document/woopayments/fraud-and-disputes/fraud-protection/#advanced-configuration'
 			)
 		);
+	} );
+
+	it( 'links AVS unsupported-location warning to selling locations settings', () => {
+		mockUseGetSettings.mockReturnValue( {
+			store_currency: 'USD',
+			fraud_protection: {
+				decline_on_avs_failure: true,
+				decline_on_cvc_failure: true,
+			},
+			fraud_protection_allowed_countries: {
+				type: 'specific',
+				countries: [ 'RO' ],
+			},
+			is_fraud_protection_review_feature_active: false,
+		} );
+
+		render( <FraudProtectionAdvancedSettingsPage /> );
+
+		expect( screen.getByText( /None of your/ ) ).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'link', { name: 'selling locations' } )
+		).toHaveAttribute( 'href', expect.stringContaining( 'tab=general' ) );
+	} );
+
+	it( 'renders International IP links and allowed-countries notice', () => {
+		mockUseGetSettings.mockReturnValue( {
+			store_currency: 'USD',
+			fraud_protection: {
+				decline_on_avs_failure: true,
+				decline_on_cvc_failure: true,
+			},
+			fraud_protection_allowed_countries: {
+				type: 'specific',
+				countries: [ 'US', 'CA' ],
+			},
+			is_fraud_protection_review_feature_active: false,
+		} );
+
+		render( <FraudProtectionAdvancedSettingsPage /> );
+
+		expect(
+			screen.getByRole( 'link', { name: /IP addresses/ } )
+		).toHaveAttribute(
+			'href',
+			'https://simple.wikipedia.org/wiki/IP_address'
+		);
+		expect(
+			screen.getByRole( 'link', { name: 'supported countries' } )
+		).toHaveAttribute( 'href', expect.stringContaining( 'tab=general' ) );
+		expect(
+			screen.getByText(
+				/Orders from outside of the following countries will be blocked by the filter/
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.getByText( 'United States, Canada' )
+		).toBeInTheDocument();
+	} );
+
+	it( 'renders screened allowed-country copy when fraud review outcomes are active', () => {
+		mockUseGetSettings.mockReturnValue( {
+			store_currency: 'USD',
+			fraud_protection: {
+				decline_on_avs_failure: true,
+				decline_on_cvc_failure: true,
+			},
+			fraud_protection_allowed_countries: {
+				type: 'specific',
+				countries: [ 'RO' ],
+			},
+			is_fraud_protection_review_feature_active: true,
+		} );
+
+		render( <FraudProtectionAdvancedSettingsPage /> );
+
+		expect(
+			screen.getByText(
+				/Orders from outside of the following countries will be screened by the filter/
+			)
+		).toBeInTheDocument();
+		expect( screen.getByText( 'Romania' ) ).toBeInTheDocument();
+	} );
+
+	it( 'renders all-except allowed-country copy', () => {
+		mockUseGetSettings.mockReturnValue( {
+			store_currency: 'USD',
+			fraud_protection: {
+				decline_on_avs_failure: true,
+				decline_on_cvc_failure: true,
+			},
+			fraud_protection_allowed_countries: {
+				type: 'all_except',
+				countries: [ 'RO' ],
+			},
+			is_fraud_protection_review_feature_active: false,
+		} );
+
+		render( <FraudProtectionAdvancedSettingsPage /> );
+
+		expect(
+			screen.getByText(
+				/Orders from the following countries will be blocked by the filter/
+			)
+		).toBeInTheDocument();
+		expect( screen.getByText( 'Romania' ) ).toBeInTheDocument();
+	} );
+
+	it( 'renders screened all-except allowed-country copy', () => {
+		mockUseGetSettings.mockReturnValue( {
+			store_currency: 'USD',
+			fraud_protection: {
+				decline_on_avs_failure: true,
+				decline_on_cvc_failure: true,
+			},
+			fraud_protection_allowed_countries: {
+				type: 'all_except',
+				countries: [ 'CW' ],
+			},
+			is_fraud_protection_review_feature_active: true,
+		} );
+
+		render( <FraudProtectionAdvancedSettingsPage /> );
+
+		expect(
+			screen.getByText(
+				/Orders from the following countries will be screened by the filter/
+			)
+		).toBeInTheDocument();
+		expect( screen.getByText( 'Curaçao' ) ).toBeInTheDocument();
+		expect(
+			screen.queryByText( 'Cura&ccedil;ao' )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'links IP Address Mismatch copy to an IP address explainer', () => {
+		render( <FraudProtectionAdvancedSettingsPage /> );
+
+		expect(
+			screen.getByRole( 'link', { name: /IP address/ } )
+		).toHaveAttribute(
+			'href',
+			'https://simple.wikipedia.org/wiki/IP_address'
+		);
+	} );
+
+	it( 'renders purchase price threshold limits with inline notices', async () => {
+		render( <FraudProtectionAdvancedSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', {
+				name: 'Enable Purchase Price Threshold filter',
+			} )
+		);
+
+		expect( screen.getByText( 'Limits' ) ).toBeInTheDocument();
+		expect(
+			screen.getByLabelText( 'Minimum purchase price' )
+		).toHaveAccessibleDescription(
+			'Leave blank for no limit Amount is in USD.'
+		);
+		expect(
+			screen.getByLabelText( 'Maximum purchase price' )
+		).toHaveAccessibleDescription(
+			'Leave blank for no limit Amount is in USD.'
+		);
+		expect(
+			screen.getAllByText( 'Leave blank for no limit' )
+		).toHaveLength( 2 );
+		expect( screen.getAllByText( '$' ) ).toHaveLength( 2 );
+		expect(
+			screen.getByText(
+				'A price range must be set for this filter to take effect.',
+				{ selector: '.components-notice__content' }
+			)
+		).toBeInTheDocument();
+
+		await userEvent.type(
+			screen.getByLabelText( 'Minimum purchase price' ),
+			'20'
+		);
+		await userEvent.type(
+			screen.getByLabelText( 'Maximum purchase price' ),
+			'10'
+		);
+
+		expect(
+			screen.getByText(
+				'Maximum purchase price must be greater than the minimum purchase price.',
+				{ selector: '.components-notice__content' }
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'renders order item threshold limits with inline notices', async () => {
+		render( <FraudProtectionAdvancedSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', {
+				name: 'Enable Order Items Threshold filter',
+			} )
+		);
+
+		expect( screen.getByText( 'Limits' ) ).toBeInTheDocument();
+		expect(
+			screen.getByLabelText( 'Minimum items per order' )
+		).toHaveAttribute( 'min', '1' );
+		expect(
+			screen.getByLabelText( 'Maximum items per order' )
+		).toHaveAttribute( 'step', '1' );
+		expect(
+			screen.getAllByText( 'Leave blank for no limit' )
+		).toHaveLength( 2 );
+		expect(
+			screen.getByText(
+				'An item range must be set for this filter to take effect.',
+				{ selector: '.components-notice__content' }
+			)
+		).toBeInTheDocument();
+
+		await userEvent.type(
+			screen.getByLabelText( 'Minimum items per order' ),
+			'5'
+		);
+		await userEvent.type(
+			screen.getByLabelText( 'Maximum items per order' ),
+			'3'
+		);
+
+		expect(
+			screen.getByText(
+				'Maximum item count must be greater than the minimum item count.',
+				{ selector: '.components-notice__content' }
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'saves a valid purchase-price minimum threshold', async () => {
+		mockSaveSettings.mockResolvedValueOnce( true );
+		render( <FraudProtectionAdvancedSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', {
+				name: 'Enable Purchase Price Threshold filter',
+			} )
+		);
+		await userEvent.type(
+			screen.getByLabelText( 'Minimum purchase price' ),
+			'20'
+		);
+
+		expect(
+			screen.queryByText(
+				'A price range must be set for this filter to take effect.',
+				{ selector: '.components-notice__content' }
+			)
+		).not.toBeInTheDocument();
+
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'button', { name: 'Save changes' } )
+			);
+			await Promise.resolve();
+		} );
+
+		expect( setAdvancedFraudProtectionSettings ).toHaveBeenCalledWith(
+			expect.arrayContaining( [
+				expect.objectContaining( {
+					key: Rules.RULE_PURCHASE_PRICE_THRESHOLD,
+					outcome: Outcomes.BLOCK,
+					check: expect.objectContaining( {
+						key: Checks.CHECK_ORDER_TOTAL,
+						operator: CheckOperators.OPERATOR_LT,
+						value: '2000|USD',
+					} ),
+				} ),
+			] )
+		);
+		expect( mockSaveSettings ).toHaveBeenCalled();
+	} );
+
+	it( 'saves a valid order-items maximum threshold', async () => {
+		mockSaveSettings.mockResolvedValueOnce( true );
+		render( <FraudProtectionAdvancedSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', {
+				name: 'Enable Order Items Threshold filter',
+			} )
+		);
+		await userEvent.type(
+			screen.getByLabelText( 'Maximum items per order' ),
+			'3'
+		);
+
+		expect(
+			screen.queryByText(
+				'An item range must be set for this filter to take effect.',
+				{ selector: '.components-notice__content' }
+			)
+		).not.toBeInTheDocument();
+
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'button', { name: 'Save changes' } )
+			);
+			await Promise.resolve();
+		} );
+
+		expect( setAdvancedFraudProtectionSettings ).toHaveBeenCalledWith(
+			expect.arrayContaining( [
+				expect.objectContaining( {
+					key: Rules.RULE_ORDER_ITEMS_THRESHOLD,
+					outcome: Outcomes.BLOCK,
+					check: expect.objectContaining( {
+						key: Checks.CHECK_ITEM_COUNT,
+						operator: CheckOperators.OPERATOR_GT,
+						value: 3,
+					} ),
+				} ),
+			] )
+		);
+		expect( mockSaveSettings ).toHaveBeenCalled();
 	} );
 
 	it( 'adds rule context to filter action radio groups for screen readers', async () => {
