@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Route native WooPayments dispute responses through payment details with dispute actions.
