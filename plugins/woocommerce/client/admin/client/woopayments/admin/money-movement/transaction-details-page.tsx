@@ -1,7 +1,9 @@
 /**
  * External dependencies
  */
-import { useEffect, useState } from '@wordpress/element';
+import { Button } from '@wordpress/components';
+import { dispatch } from '@wordpress/data';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import type { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -10,12 +12,16 @@ import { useLocation, useNavigate } from 'react-router-dom';
  * Internal dependencies
  */
 import {
+	cancelWooPaymentsAuthorization,
+	captureWooPaymentsAuthorization,
+	getWooPaymentsAuthorization,
 	getWooPaymentsCharge,
 	getWooPaymentsPaymentIntent,
 	getWooPaymentsTimeline,
 	getWooPaymentsTransaction,
 } from './data';
 import type {
+	WooPaymentsAuthorization,
 	WooPaymentsCharge,
 	WooPaymentsPaymentIntent,
 	WooPaymentsTimelineEvent,
@@ -30,6 +36,24 @@ import {
 import { WooPaymentsTransactionDisputeDetails } from './transaction-dispute-details';
 import { LiveStatusMessage, StatusMessage } from './table';
 import '../style.scss';
+
+type AuthorizationAction = 'capture' | 'cancel';
+type PendingAuthorizationAction = {
+	action: AuthorizationAction;
+	paymentIntentId: string;
+	routeKey: string;
+} | null;
+type NoticeDispatch = {
+	createSuccessNotice: ( message: string ) => void;
+	createErrorNotice: ( message: string ) => void;
+};
+type LoadTransactionOptions = {
+	shouldUpdate?: () => boolean;
+	setLoading?: boolean;
+};
+
+const AUTHORIZATION_ACTION_FOCUS_SELECTOR =
+	'.woocommerce-woopayments-money-movement__authorization-actions, .woocommerce-woopayments-money-movement__authorization-notice';
 
 const isPaymentIntentId = ( id: string ) => id.startsWith( 'pi_' );
 
@@ -65,6 +89,30 @@ const getBalanceTransactionAmount = (
 
 const getIntentCharge = ( intent: WooPaymentsPaymentIntent ) =>
 	intent.charge || intent.charges?.data?.[ 0 ] || {};
+
+const getNotices = () =>
+	dispatch( 'core/notices' ) as unknown as NoticeDispatch;
+
+const getErrorStatus = ( error: unknown ) => {
+	if ( ! error || typeof error !== 'object' ) {
+		return undefined;
+	}
+
+	if ( 'status' in error && typeof error.status === 'number' ) {
+		return error.status;
+	}
+
+	if ( 'data' in error && error.data && typeof error.data === 'object' ) {
+		const data = error.data;
+		if ( 'status' in data && typeof data.status === 'number' ) {
+			return data.status;
+		}
+	}
+
+	return undefined;
+};
+
+const isNotFoundError = ( error: unknown ) => getErrorStatus( error ) === 404;
 
 const DetailRow = ( { label, value }: { label: string; value: ReactNode } ) => (
 	<div>
@@ -108,6 +156,47 @@ const getOrderLabel = ( transaction: WooPaymentsTransaction ) => {
 				orderId
 		  )
 		: '';
+};
+
+const getOrderId = (
+	transaction: WooPaymentsTransaction,
+	authorization: WooPaymentsAuthorization | null
+) => {
+	const orderId = Number( authorization?.order_id ?? transaction.order?.id );
+
+	return Number.isFinite( orderId ) && orderId > 0 ? orderId : 0;
+};
+
+const getOrderFraudMetaBoxType = ( transaction: WooPaymentsTransaction ) => {
+	const fraudMetaBoxType = transaction.order?.fraud_meta_box_type;
+
+	return typeof fraudMetaBoxType === 'string' ? fraudMetaBoxType : '';
+};
+
+const isFraudReviewTransaction = ( transaction: WooPaymentsTransaction ) =>
+	transaction.status === 'requires_capture' &&
+	getOrderFraudMetaBoxType( transaction ) === 'review';
+
+const isAuthorizationEligible = (
+	transaction: WooPaymentsTransaction,
+	paymentIntentId: string
+) => {
+	if ( ! paymentIntentId || transaction.captured === true ) {
+		return false;
+	}
+
+	if (
+		transaction.refunded ||
+		( typeof transaction.amount_refunded === 'number' &&
+			transaction.amount_refunded > 0 )
+	) {
+		return false;
+	}
+
+	return (
+		transaction.status === 'requires_capture' ||
+		transaction.captured === false
+	);
 };
 
 const getTimelineUserName = ( event: WooPaymentsTimelineEvent ) =>
@@ -226,6 +315,12 @@ export const WooPaymentsTransactionDetailsPage = () => {
 	const [ timelineErrorMessage, setTimelineErrorMessage ] = useState<
 		string | null
 	>( null );
+	const [ authorizationErrorMessage, setAuthorizationErrorMessage ] =
+		useState< string | null >( null );
+	const [ authorization, setAuthorization ] =
+		useState< WooPaymentsAuthorization | null >( null );
+	const [ pendingAuthorizationAction, setPendingAuthorizationAction ] =
+		useState< PendingAuthorizationAction >( null );
 	const [ isLoading, setIsLoading ] = useState( true );
 	const [ errorMessage, setErrorMessage ] = useState< string | null >( null );
 	const location = useLocation();
@@ -233,16 +328,64 @@ export const WooPaymentsTransactionDetailsPage = () => {
 	const query = new URLSearchParams( location.search );
 	const id = query.get( 'id' ) || '';
 	const transactionId = query.get( 'transaction_id' ) || '';
+	const routeKey = `${ location.pathname }${ location.search }`;
+	const routeKeyRef = useRef( routeKey );
+	const paymentDetailsHeadingRef = useRef< HTMLHeadingElement | null >(
+		null
+	);
+	const shouldFocusDetailsHeadingRef = useRef( false );
 
 	useEffect( () => {
-		let isMounted = true;
+		routeKeyRef.current = routeKey;
+		setPendingAuthorizationAction( null );
+	}, [ routeKey ] );
 
-		const loadTransaction = async () => {
+	useEffect( () => {
+		if (
+			! shouldFocusDetailsHeadingRef.current ||
+			pendingAuthorizationAction
+		) {
+			return;
+		}
+
+		shouldFocusDetailsHeadingRef.current = false;
+		const heading = paymentDetailsHeadingRef.current;
+		const activeElement = heading?.ownerDocument.activeElement;
+		const shouldRestoreFocus =
+			activeElement === heading?.ownerDocument.body ||
+			( activeElement instanceof HTMLElement &&
+				!! activeElement.closest(
+					AUTHORIZATION_ACTION_FOCUS_SELECTOR
+				) );
+
+		if ( shouldRestoreFocus ) {
+			heading?.focus();
+		}
+	}, [
+		authorization,
+		errorMessage,
+		pendingAuthorizationAction,
+		transaction,
+	] );
+
+	const loadTransaction = useCallback(
+		async ( options: LoadTransactionOptions = {} ) => {
+			const shouldUpdate = options.shouldUpdate || ( () => true );
+			const shouldSetLoading = options.setLoading !== false;
+
+			if ( shouldSetLoading ) {
+				setIsLoading( true );
+			}
+
 			if ( ! id && ! transactionId ) {
-				setErrorMessage(
-					__( 'A transaction ID is required.', 'woocommerce' )
-				);
-				setIsLoading( false );
+				if ( shouldUpdate() ) {
+					setAuthorization( null );
+					setAuthorizationErrorMessage( null );
+					setErrorMessage(
+						__( 'A transaction ID is required.', 'woocommerce' )
+					);
+					setIsLoading( false );
+				}
 				return;
 			}
 
@@ -250,6 +393,8 @@ export const WooPaymentsTransactionDetailsPage = () => {
 				let nextTransaction: WooPaymentsTransaction;
 				let nextTimelineEvents: WooPaymentsTimelineEvent[] = [];
 				let nextTimelineErrorMessage: string | null = null;
+				let nextAuthorization: WooPaymentsAuthorization | null = null;
+				let nextAuthorizationErrorMessage: string | null = null;
 
 				if ( isPaymentIntentId( id ) ) {
 					nextTransaction = normalizePaymentIntent(
@@ -284,6 +429,38 @@ export const WooPaymentsTransactionDetailsPage = () => {
 					);
 				}
 
+				const nextPaymentIntentId = getPaymentIntentId(
+					nextTransaction,
+					id
+				);
+				if (
+					isAuthorizationEligible(
+						nextTransaction,
+						nextPaymentIntentId
+					)
+				) {
+					try {
+						const loadedAuthorization =
+							await getWooPaymentsAuthorization(
+								nextPaymentIntentId
+							);
+						nextAuthorization = loadedAuthorization?.captured
+							? null
+							: loadedAuthorization;
+					} catch ( authorizationError ) {
+						nextAuthorization = null;
+						if ( ! isNotFoundError( authorizationError ) ) {
+							nextAuthorizationErrorMessage = getErrorMessage(
+								authorizationError,
+								__(
+									'Unable to load WooPayments authorization details.',
+									'woocommerce'
+								)
+							);
+						}
+					}
+				}
+
 				const timelineId = getTimelineId( nextTransaction, id );
 				if ( timelineId ) {
 					try {
@@ -302,14 +479,20 @@ export const WooPaymentsTransactionDetailsPage = () => {
 					}
 				}
 
-				if ( isMounted ) {
+				if ( shouldUpdate() ) {
 					setTransaction( nextTransaction );
+					setAuthorization( nextAuthorization );
+					setAuthorizationErrorMessage(
+						nextAuthorizationErrorMessage
+					);
 					setTimelineEvents( nextTimelineEvents );
 					setTimelineErrorMessage( nextTimelineErrorMessage );
 					setErrorMessage( null );
 				}
 			} catch ( error ) {
-				if ( isMounted ) {
+				if ( shouldUpdate() ) {
+					setAuthorization( null );
+					setAuthorizationErrorMessage( null );
 					setTimelineEvents( [] );
 					setTimelineErrorMessage( null );
 					setErrorMessage(
@@ -323,24 +506,33 @@ export const WooPaymentsTransactionDetailsPage = () => {
 					);
 				}
 			} finally {
-				if ( isMounted ) {
+				if ( shouldUpdate() && shouldSetLoading ) {
 					setIsLoading( false );
 				}
 			}
-		};
+		},
+		[ id, location.pathname, location.search, navigate, transactionId ]
+	);
 
-		loadTransaction();
+	useEffect( () => {
+		let isMounted = true;
+
+		loadTransaction( {
+			shouldUpdate: () => isMounted,
+		} );
 
 		return () => {
 			isMounted = false;
 		};
-	}, [ id, location.pathname, location.search, navigate, transactionId ] );
+	}, [ loadTransaction ] );
 
 	const loadingMessage = __( 'Loading transaction details…', 'woocommerce' );
 	let liveStatusMessage = __( 'Transaction details loaded.', 'woocommerce' );
 
 	if ( errorMessage ) {
 		liveStatusMessage = errorMessage;
+	} else if ( authorizationErrorMessage ) {
+		liveStatusMessage = authorizationErrorMessage;
 	} else if ( timelineErrorMessage ) {
 		liveStatusMessage = timelineErrorMessage;
 	} else if ( isLoading ) {
@@ -358,18 +550,143 @@ export const WooPaymentsTransactionDetailsPage = () => {
 		: '';
 	const orderLabel = transaction ? getOrderLabel( transaction ) : '';
 	const hasPaymentDetails = !! ( paymentIntentId || chargeId );
+	const orderId = transaction ? getOrderId( transaction, authorization ) : 0;
+	const isFraudReview =
+		!! transaction && isFraudReviewTransaction( transaction );
+	const showAuthorizationActions =
+		!! transaction && !! authorization && !! paymentIntentId && orderId > 0;
+	const showFraudReviewActions = showAuthorizationActions && isFraudReview;
+	const showCaptureNotice = showAuthorizationActions && ! isFraudReview;
+	const pendingAction =
+		pendingAuthorizationAction?.routeKey === routeKey &&
+		pendingAuthorizationAction?.paymentIntentId === paymentIntentId
+			? pendingAuthorizationAction.action
+			: null;
+	const isAuthorizationActionPending = !! pendingAction;
+
+	const handleAuthorizationAction = async ( action: AuthorizationAction ) => {
+		if ( isAuthorizationActionPending ) {
+			return;
+		}
+
+		if ( ! paymentIntentId || ! orderId ) {
+			getNotices().createErrorNotice(
+				__(
+					'Unable to process this authorization because the order details are incomplete.',
+					'woocommerce'
+				)
+			);
+			return;
+		}
+
+		const actionRouteKey = routeKey;
+		const isCurrentActionRoute = () =>
+			routeKeyRef.current === actionRouteKey;
+		const activeElement =
+			paymentDetailsHeadingRef.current?.ownerDocument.activeElement;
+		const focusStartedInActionArea =
+			activeElement instanceof HTMLElement &&
+			!! activeElement.closest( AUTHORIZATION_ACTION_FOCUS_SELECTOR );
+
+		setPendingAuthorizationAction( {
+			action,
+			paymentIntentId,
+			routeKey: actionRouteKey,
+		} );
+
+		try {
+			if ( action === 'capture' ) {
+				await captureWooPaymentsAuthorization(
+					orderId,
+					paymentIntentId
+				);
+				if ( ! isCurrentActionRoute() ) {
+					return;
+				}
+				await loadTransaction( {
+					setLoading: false,
+					shouldUpdate: isCurrentActionRoute,
+				} );
+				if ( ! isCurrentActionRoute() ) {
+					return;
+				}
+				shouldFocusDetailsHeadingRef.current = focusStartedInActionArea;
+				getNotices().createSuccessNotice(
+					sprintf(
+						/* translators: %s: order ID. */
+						__(
+							'Payment for order #%s captured successfully.',
+							'woocommerce'
+						),
+						orderId
+					)
+				);
+			} else {
+				await cancelWooPaymentsAuthorization(
+					orderId,
+					paymentIntentId
+				);
+				if ( ! isCurrentActionRoute() ) {
+					return;
+				}
+				await loadTransaction( {
+					setLoading: false,
+					shouldUpdate: isCurrentActionRoute,
+				} );
+				if ( ! isCurrentActionRoute() ) {
+					return;
+				}
+				shouldFocusDetailsHeadingRef.current = focusStartedInActionArea;
+				getNotices().createSuccessNotice(
+					sprintf(
+						/* translators: %s: order ID. */
+						__(
+							'Payment for order #%s canceled successfully.',
+							'woocommerce'
+						),
+						orderId
+					)
+				);
+			}
+		} catch ( error ) {
+			getNotices().createErrorNotice(
+				sprintf(
+					/* translators: 1: action name, 2: order ID, 3: error message. */
+					__(
+						'Unable to %1$s authorization for order #%2$s. %3$s',
+						'woocommerce'
+					),
+					action,
+					orderId,
+					getErrorMessage(
+						error,
+						__(
+							'Please refresh the page and try again.',
+							'woocommerce'
+						)
+					)
+				)
+			);
+		} finally {
+			if ( isCurrentActionRoute() ) {
+				setPendingAuthorizationAction( null );
+			}
+		}
+	};
 
 	return (
 		<section
 			className="woocommerce-woopayments-money-movement"
 			aria-busy={ isLoading }
 		>
-			<h2>
+			<h2 ref={ paymentDetailsHeadingRef } tabIndex={ -1 }>
 				{ hasPaymentDetails
 					? __( 'Payment details', 'woocommerce' )
 					: __( 'Transaction details', 'woocommerce' ) }
 			</h2>
-			<LiveStatusMessage isError={ !! errorMessage }>
+			<LiveStatusMessage
+				isError={ !! errorMessage || !! authorizationErrorMessage }
+			>
 				{ liveStatusMessage }
 			</LiveStatusMessage>
 			{ isLoading && <StatusMessage>{ loadingMessage }</StatusMessage> }
@@ -378,6 +695,72 @@ export const WooPaymentsTransactionDetailsPage = () => {
 			) }
 			{ transaction && ! errorMessage && (
 				<>
+					{ authorizationErrorMessage && (
+						<StatusMessage isError>
+							{ authorizationErrorMessage }
+						</StatusMessage>
+					) }
+					{ showFraudReviewActions && (
+						<div className="woocommerce-woopayments-money-movement__authorization-actions">
+							<Button
+								variant="secondary"
+								isDestructive
+								isBusy={ pendingAction === 'cancel' }
+								disabled={ isAuthorizationActionPending }
+								accessibleWhenDisabled
+								onClick={
+									isAuthorizationActionPending
+										? undefined
+										: () =>
+												handleAuthorizationAction(
+													'cancel'
+												)
+								}
+								aria-label={
+									pendingAction === 'cancel'
+										? sprintf(
+												/* translators: %s: order ID. */
+												__(
+													'Blocking transaction for order #%s',
+													'woocommerce'
+												),
+												orderId
+										  )
+										: undefined
+								}
+							>
+								{ __( 'Block transaction', 'woocommerce' ) }
+							</Button>
+							<Button
+								variant="primary"
+								isBusy={ pendingAction === 'capture' }
+								disabled={ isAuthorizationActionPending }
+								accessibleWhenDisabled
+								onClick={
+									isAuthorizationActionPending
+										? undefined
+										: () =>
+												handleAuthorizationAction(
+													'capture'
+												)
+								}
+								aria-label={
+									pendingAction === 'capture'
+										? sprintf(
+												/* translators: %s: order ID. */
+												__(
+													'Approving transaction for order #%s',
+													'woocommerce'
+												),
+												orderId
+										  )
+										: undefined
+								}
+							>
+								{ __( 'Approve transaction', 'woocommerce' ) }
+							</Button>
+						</div>
+					) }
 					<dl className="woocommerce-woopayments-money-movement__details">
 						{ paymentIntentId && (
 							<DetailRow
@@ -481,6 +864,51 @@ export const WooPaymentsTransactionDetailsPage = () => {
 						<WooPaymentsTransactionDisputeDetails
 							transaction={ transaction }
 						/>
+					) }
+					{ showCaptureNotice && (
+						<section className="woocommerce-woopayments-overview-card woocommerce-woopayments-money-movement__authorization-notice">
+							<p>
+								{ __(
+									'You must capture this charge within the next 7 days.',
+									'woocommerce'
+								) }
+							</p>
+							<Button
+								variant="primary"
+								isBusy={ pendingAction === 'capture' }
+								disabled={ isAuthorizationActionPending }
+								accessibleWhenDisabled
+								onClick={
+									isAuthorizationActionPending
+										? undefined
+										: () =>
+												handleAuthorizationAction(
+													'capture'
+												)
+								}
+								aria-label={
+									pendingAction === 'capture'
+										? sprintf(
+												/* translators: %s: order ID. */
+												__(
+													'Capturing authorization for order #%s',
+													'woocommerce'
+												),
+												orderId
+										  )
+										: sprintf(
+												/* translators: %s: order ID. */
+												__(
+													'Capture authorization for order #%s',
+													'woocommerce'
+												),
+												orderId
+										  )
+								}
+							>
+								{ __( 'Capture', 'woocommerce' ) }
+							</Button>
+						</section>
 					) }
 					{ timelineErrorMessage && (
 						<StatusMessage isError>

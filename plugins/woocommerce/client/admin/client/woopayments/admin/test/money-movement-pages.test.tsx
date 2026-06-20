@@ -4,7 +4,7 @@
 import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useNavigate } from 'react-router-dom';
 
 /**
  * Internal dependencies
@@ -23,6 +23,7 @@ import {
 	getWooPaymentsTransactionsSummary,
 	getWooPaymentsTransactionsExportUrl,
 	getWooPaymentsAuthorizations,
+	getWooPaymentsAuthorization,
 	getWooPaymentsAuthorizationsSummary,
 	getWooPaymentsDisputesExportUrl,
 	closeWooPaymentsDispute,
@@ -147,6 +148,7 @@ jest.mock( '../money-movement/data', () => ( {
 	getWooPaymentsTransactions: jest.fn(),
 	getWooPaymentsTransactionsSummary: jest.fn(),
 	getWooPaymentsAuthorizations: jest.fn(),
+	getWooPaymentsAuthorization: jest.fn(),
 	getWooPaymentsAuthorizationsSummary: jest.fn(),
 	captureWooPaymentsAuthorization: jest.fn(),
 	cancelWooPaymentsAuthorization: jest.fn(),
@@ -184,6 +186,9 @@ const mockGetAuthorizations =
 	getWooPaymentsAuthorizations as jest.MockedFunction<
 		typeof getWooPaymentsAuthorizations
 	>;
+const mockGetAuthorization = getWooPaymentsAuthorization as jest.MockedFunction<
+	typeof getWooPaymentsAuthorization
+>;
 const mockGetAuthorizationsSummary =
 	getWooPaymentsAuthorizationsSummary as jest.MockedFunction<
 		typeof getWooPaymentsAuthorizationsSummary
@@ -220,6 +225,16 @@ const mockGetDisputesExportUrl =
 		typeof getWooPaymentsDisputesExportUrl
 	>;
 
+const RouteChangeButton = ( { to }: { to: string } ) => {
+	const navigate = useNavigate();
+
+	return (
+		<button type="button" onClick={ () => navigate( to ) }>
+			Load another transaction
+		</button>
+	);
+};
+
 describe( 'WooPayments money movement pages', () => {
 	let anchorClickSpy: jest.SpyInstance;
 
@@ -239,6 +254,7 @@ describe( 'WooPayments money movement pages', () => {
 		mockGetTimeline.mockReset();
 		mockGetTransactionsSummary.mockReset();
 		mockGetAuthorizations.mockReset();
+		mockGetAuthorization.mockReset();
 		mockGetAuthorizationsSummary.mockReset();
 		mockCaptureAuthorization.mockReset();
 		mockCancelAuthorization.mockReset();
@@ -1112,6 +1128,751 @@ describe( 'WooPayments money movement pages', () => {
 		expect( mockGetPaymentIntent ).toHaveBeenCalledWith( 'pi_test' );
 		expect( mockGetTimeline ).toHaveBeenCalledWith( 'pi_test' );
 		expect( mockGetTransaction ).not.toHaveBeenCalled();
+	} );
+
+	it( 'captures an uncaptured authorization from transaction details and reloads the detail data', async () => {
+		mockGetPaymentIntent
+			.mockResolvedValueOnce( {
+				id: 'pi_auth',
+				status: 'requires_capture',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				charge: {
+					id: 'ch_auth',
+					balance_transaction: 'txn_auth',
+					type: 'charge',
+					amount: 5000,
+					currency: 'usd',
+					created: 1781712000,
+					payment_intent: 'pi_auth',
+					captured: false,
+					amount_refunded: 0,
+					order: {
+						id: 123,
+						number: '123',
+					},
+				},
+			} )
+			.mockResolvedValueOnce( {
+				id: 'pi_auth',
+				status: 'succeeded',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				charge: {
+					id: 'ch_auth',
+					balance_transaction: 'txn_auth',
+					type: 'charge',
+					amount: 5000,
+					currency: 'usd',
+					created: 1781712000,
+					payment_intent: 'pi_auth',
+					captured: true,
+					amount_refunded: 0,
+					order: {
+						id: 123,
+						number: '123',
+					},
+				},
+			} );
+		mockGetAuthorization.mockResolvedValue( {
+			payment_intent_id: 'pi_auth',
+			order_id: 123,
+			captured: false,
+			created: '2026-06-12T10:30:00Z',
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+		mockCaptureAuthorization.mockResolvedValue( {
+			id: 'pi_auth',
+			status: 'succeeded',
+		} );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_auth&transaction_id=txn_auth',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		const captureButton = await screen.findByRole( 'button', {
+			name: 'Capture authorization for order #123',
+		} );
+
+		await act( async () => {
+			await userEvent.click( captureButton );
+		} );
+
+		await waitFor( () =>
+			expect( mockCaptureAuthorization ).toHaveBeenCalledWith(
+				123,
+				'pi_auth'
+			)
+		);
+		expect( mockCreateSuccessNotice ).toHaveBeenCalledWith(
+			'Payment for order #123 captured successfully.'
+		);
+		expect( mockGetPaymentIntent ).toHaveBeenCalledTimes( 2 );
+		expect( mockGetAuthorization ).toHaveBeenCalledTimes( 1 );
+		expect(
+			screen.queryByRole( 'button', {
+				name: 'Capture authorization for order #123',
+			} )
+		).not.toBeInTheDocument();
+		await waitFor( () =>
+			expect(
+				screen.getByRole( 'heading', { name: 'Payment details' } )
+			).toHaveFocus()
+		);
+	} );
+
+	it( 'keeps transaction detail capture pending while the authorization request is running', async () => {
+		let resolveCapture: ( value: unknown ) => void = () => undefined;
+		const capturePromise = new Promise( ( resolve ) => {
+			resolveCapture = resolve;
+		} );
+
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_auth',
+			status: 'requires_capture',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			charge: {
+				id: 'ch_auth',
+				balance_transaction: 'txn_auth',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				payment_intent: 'pi_auth',
+				captured: false,
+				amount_refunded: 0,
+				order: {
+					id: 123,
+					number: '123',
+				},
+			},
+		} );
+		mockGetAuthorization.mockResolvedValue( {
+			payment_intent_id: 'pi_auth',
+			order_id: 123,
+			captured: false,
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+		mockCaptureAuthorization.mockReturnValueOnce(
+			capturePromise as Promise< never >
+		);
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_auth&transaction_id=txn_auth',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		await userEvent.click(
+			await screen.findByRole( 'button', {
+				name: 'Capture authorization for order #123',
+			} )
+		);
+
+		const pendingCaptureButton = await screen.findByRole( 'button', {
+			name: 'Capturing authorization for order #123',
+		} );
+		expect( pendingCaptureButton ).not.toBeDisabled();
+		expect( pendingCaptureButton ).toHaveAttribute(
+			'aria-disabled',
+			'true'
+		);
+		expect( pendingCaptureButton ).toHaveFocus();
+
+		await act( async () => {
+			resolveCapture( {
+				id: 'pi_auth',
+				status: 'succeeded',
+			} );
+			await capturePromise;
+		} );
+	} );
+
+	it( 'does not overwrite a newer transaction detail route after a pending authorization action completes', async () => {
+		let resolveCapture: ( value: unknown ) => void = () => undefined;
+		const capturePromise = new Promise( ( resolve ) => {
+			resolveCapture = resolve;
+		} );
+
+		mockGetPaymentIntent
+			.mockResolvedValueOnce( {
+				id: 'pi_auth',
+				status: 'requires_capture',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				charge: {
+					id: 'ch_auth',
+					balance_transaction: 'txn_auth',
+					type: 'charge',
+					amount: 5000,
+					currency: 'usd',
+					created: 1781712000,
+					payment_intent: 'pi_auth',
+					captured: false,
+					amount_refunded: 0,
+					order: {
+						id: 123,
+						number: '123',
+					},
+				},
+			} )
+			.mockResolvedValueOnce( {
+				id: 'pi_other',
+				status: 'succeeded',
+				amount: 9900,
+				currency: 'usd',
+				created: 1781712100,
+				charge: {
+					id: 'ch_other',
+					balance_transaction: 'txn_other',
+					type: 'charge',
+					amount: 9900,
+					currency: 'usd',
+					created: 1781712100,
+					payment_intent: 'pi_other',
+					captured: true,
+					order: {
+						id: 456,
+						number: '456',
+					},
+				},
+			} );
+		mockGetAuthorization.mockResolvedValue( {
+			payment_intent_id: 'pi_auth',
+			order_id: 123,
+			captured: false,
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+		mockCaptureAuthorization.mockReturnValueOnce(
+			capturePromise as Promise< never >
+		);
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_auth&transaction_id=txn_auth',
+				] }
+			>
+				<RouteChangeButton to="/woopayments/transactions/details?id=pi_other&transaction_id=txn_other" />
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		await userEvent.click(
+			await screen.findByRole( 'button', {
+				name: 'Capture authorization for order #123',
+			} )
+		);
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Load another transaction' } )
+		);
+
+		expect( await screen.findByText( 'pi_other' ) ).toBeInTheDocument();
+
+		await act( async () => {
+			resolveCapture( {
+				id: 'pi_auth',
+				status: 'succeeded',
+			} );
+			await capturePromise;
+			await Promise.resolve();
+		} );
+
+		expect( screen.getByText( 'pi_other' ) ).toBeInTheDocument();
+		expect( screen.queryByText( 'pi_auth' ) ).not.toBeInTheDocument();
+		expect( mockGetPaymentIntent ).toHaveBeenCalledTimes( 2 );
+	} );
+
+	it( 'surfaces authorization action failures after navigating to another detail route', async () => {
+		let rejectCapture: ( error: Error ) => void = () => undefined;
+		const capturePromise = new Promise( ( resolve, reject ) => {
+			rejectCapture = reject;
+		} );
+
+		mockGetPaymentIntent
+			.mockResolvedValueOnce( {
+				id: 'pi_auth',
+				status: 'requires_capture',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				charge: {
+					id: 'ch_auth',
+					balance_transaction: 'txn_auth',
+					type: 'charge',
+					amount: 5000,
+					currency: 'usd',
+					created: 1781712000,
+					payment_intent: 'pi_auth',
+					captured: false,
+					amount_refunded: 0,
+					order: {
+						id: 123,
+						number: '123',
+					},
+				},
+			} )
+			.mockResolvedValueOnce( {
+				id: 'pi_other',
+				status: 'succeeded',
+				amount: 9900,
+				currency: 'usd',
+				created: 1781712100,
+				charge: {
+					id: 'ch_other',
+					balance_transaction: 'txn_other',
+					type: 'charge',
+					amount: 9900,
+					currency: 'usd',
+					created: 1781712100,
+					payment_intent: 'pi_other',
+					captured: true,
+					order: {
+						id: 456,
+						number: '456',
+					},
+				},
+			} );
+		mockGetAuthorization.mockResolvedValue( {
+			payment_intent_id: 'pi_auth',
+			order_id: 123,
+			captured: false,
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+		mockCaptureAuthorization.mockReturnValueOnce(
+			capturePromise as Promise< never >
+		);
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_auth&transaction_id=txn_auth',
+				] }
+			>
+				<RouteChangeButton to="/woopayments/transactions/details?id=pi_other&transaction_id=txn_other" />
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		await userEvent.click(
+			await screen.findByRole( 'button', {
+				name: 'Capture authorization for order #123',
+			} )
+		);
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Load another transaction' } )
+		);
+		expect( await screen.findByText( 'pi_other' ) ).toBeInTheDocument();
+
+		await act( async () => {
+			rejectCapture( new Error( 'Authorization already captured.' ) );
+			await capturePromise.catch( () => undefined );
+		} );
+
+		await waitFor( () =>
+			expect( mockCreateErrorNotice ).toHaveBeenCalledWith(
+				'Unable to capture authorization for order #123. Authorization already captured.'
+			)
+		);
+		expect( screen.getByText( 'pi_other' ) ).toBeInTheDocument();
+		expect( screen.queryByText( 'pi_auth' ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'does not steal focus after authorization action when focus moved while pending', async () => {
+		let resolveCapture: ( value: unknown ) => void = () => undefined;
+		const capturePromise = new Promise( ( resolve ) => {
+			resolveCapture = resolve;
+		} );
+
+		mockGetPaymentIntent
+			.mockResolvedValueOnce( {
+				id: 'pi_auth',
+				status: 'requires_capture',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				charge: {
+					id: 'ch_auth',
+					balance_transaction: 'txn_auth',
+					type: 'charge',
+					amount: 5000,
+					currency: 'usd',
+					created: 1781712000,
+					payment_intent: 'pi_auth',
+					captured: false,
+					amount_refunded: 0,
+					order: {
+						id: 123,
+						number: '123',
+					},
+				},
+			} )
+			.mockResolvedValueOnce( {
+				id: 'pi_auth',
+				status: 'succeeded',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				charge: {
+					id: 'ch_auth',
+					balance_transaction: 'txn_auth',
+					type: 'charge',
+					amount: 5000,
+					currency: 'usd',
+					created: 1781712000,
+					payment_intent: 'pi_auth',
+					captured: true,
+					amount_refunded: 0,
+					order: {
+						id: 123,
+						number: '123',
+					},
+				},
+			} );
+		mockGetAuthorization.mockResolvedValue( {
+			payment_intent_id: 'pi_auth',
+			order_id: 123,
+			captured: false,
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+		mockCaptureAuthorization.mockReturnValueOnce(
+			capturePromise as Promise< never >
+		);
+
+		render(
+			<>
+				<button type="button">Outside focus target</button>
+				<MemoryRouter
+					initialEntries={ [
+						'/woopayments/transactions/details?id=pi_auth&transaction_id=txn_auth',
+					] }
+				>
+					<WooPaymentsTransactionDetailsPage />
+				</MemoryRouter>
+			</>
+		);
+
+		await userEvent.click(
+			await screen.findByRole( 'button', {
+				name: 'Capture authorization for order #123',
+			} )
+		);
+		const outsideFocusTarget = screen.getByRole( 'button', {
+			name: 'Outside focus target',
+		} );
+		outsideFocusTarget.focus();
+		expect( outsideFocusTarget ).toHaveFocus();
+
+		await act( async () => {
+			resolveCapture( {
+				id: 'pi_auth',
+				status: 'succeeded',
+			} );
+			await capturePromise;
+		} );
+
+		await waitFor( () =>
+			expect( mockCreateSuccessNotice ).toHaveBeenCalledWith(
+				'Payment for order #123 captured successfully.'
+			)
+		);
+		expect( outsideFocusTarget ).toHaveFocus();
+	} );
+
+	it( 'surfaces transaction detail authorization action failures', async () => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_auth',
+			status: 'requires_capture',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			charge: {
+				id: 'ch_auth',
+				balance_transaction: 'txn_auth',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				payment_intent: 'pi_auth',
+				captured: false,
+				amount_refunded: 0,
+				order: {
+					id: 123,
+					number: '123',
+				},
+			},
+		} );
+		mockGetAuthorization.mockResolvedValue( {
+			payment_intent_id: 'pi_auth',
+			order_id: 123,
+			captured: false,
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+		mockCaptureAuthorization.mockRejectedValue(
+			new Error( 'Authorization already captured.' )
+		);
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_auth&transaction_id=txn_auth',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		const captureButton = await screen.findByRole( 'button', {
+			name: 'Capture authorization for order #123',
+		} );
+
+		await act( async () => {
+			await userEvent.click( captureButton );
+			await Promise.resolve();
+		} );
+
+		await waitFor( () =>
+			expect(
+				screen.getByRole( 'button', {
+					name: 'Capture authorization for order #123',
+				} )
+			).toBeEnabled()
+		);
+		expect(
+			screen.getByRole( 'button', {
+				name: 'Capture authorization for order #123',
+			} )
+		).toHaveFocus();
+
+		await waitFor( () =>
+			expect( mockCreateErrorNotice ).toHaveBeenCalledWith(
+				'Unable to capture authorization for order #123. Authorization already captured.'
+			)
+		);
+	} );
+
+	it( 'surfaces authorization detail load failures for otherwise capturable transactions', async () => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_auth',
+			status: 'requires_capture',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			charge: {
+				id: 'ch_auth',
+				balance_transaction: 'txn_auth',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				payment_intent: 'pi_auth',
+				captured: false,
+				amount_refunded: 0,
+				order: {
+					id: 123,
+					number: '123',
+				},
+			},
+		} );
+		mockGetAuthorization.mockRejectedValue( new Error( 'Auth API down.' ) );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_auth&transaction_id=txn_auth',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		expect(
+			await screen.findByText( 'Auth API down.', {
+				selector: '.woocommerce-woopayments-money-movement__status',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', {
+				name: 'Capture authorization for order #123',
+			} )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'approves a fraud-review transaction from transaction details', async () => {
+		let resolveCapture: ( value: unknown ) => void = () => undefined;
+		const capturePromise = new Promise( ( resolve ) => {
+			resolveCapture = resolve;
+		} );
+
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_review',
+			status: 'requires_capture',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			charge: {
+				id: 'ch_review',
+				balance_transaction: 'txn_review',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				payment_intent: 'pi_review',
+				captured: false,
+				amount_refunded: 0,
+				order: {
+					id: 123,
+					number: '123',
+					fraud_meta_box_type: 'review',
+				},
+			},
+		} );
+		mockGetAuthorization.mockResolvedValue( {
+			payment_intent_id: 'pi_review',
+			order_id: 123,
+			captured: false,
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+		mockCaptureAuthorization.mockReturnValueOnce(
+			capturePromise as Promise< never >
+		);
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_review&transaction_id=txn_review',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		expect(
+			await screen.findByRole( 'button', { name: 'Block transaction' } )
+		).toBeInTheDocument();
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Approve transaction' } )
+		);
+
+		await waitFor( () =>
+			expect( mockCaptureAuthorization ).toHaveBeenCalledWith(
+				123,
+				'pi_review'
+			)
+		);
+		const pendingApproveButton = await screen.findByRole( 'button', {
+			name: 'Approving transaction for order #123',
+		} );
+		expect( pendingApproveButton ).not.toBeDisabled();
+		expect( pendingApproveButton ).toHaveAttribute(
+			'aria-disabled',
+			'true'
+		);
+		expect( pendingApproveButton ).toHaveFocus();
+
+		await act( async () => {
+			resolveCapture( {
+				id: 'pi_review',
+				status: 'succeeded',
+			} );
+			await capturePromise;
+		} );
+
+		expect( mockCreateSuccessNotice ).toHaveBeenCalledWith(
+			'Payment for order #123 captured successfully.'
+		);
+	} );
+
+	it( 'blocks a fraud-review transaction from transaction details', async () => {
+		let resolveCancel: ( value: unknown ) => void = () => undefined;
+		const cancelPromise = new Promise( ( resolve ) => {
+			resolveCancel = resolve;
+		} );
+
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_review',
+			status: 'requires_capture',
+			charge: {
+				id: 'ch_review',
+				balance_transaction: 'txn_review',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				payment_intent: 'pi_review',
+				captured: false,
+				amount_refunded: 0,
+				order: {
+					id: 123,
+					number: '123',
+					fraud_meta_box_type: 'review',
+				},
+			},
+		} );
+		mockGetAuthorization.mockResolvedValue( {
+			payment_intent_id: 'pi_review',
+			order_id: 123,
+			captured: false,
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+		mockCancelAuthorization.mockReturnValueOnce(
+			cancelPromise as Promise< never >
+		);
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_review&transaction_id=txn_review',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		await userEvent.click(
+			await screen.findByRole( 'button', { name: 'Block transaction' } )
+		);
+
+		await waitFor( () =>
+			expect( mockCancelAuthorization ).toHaveBeenCalledWith(
+				123,
+				'pi_review'
+			)
+		);
+		const pendingBlockButton = await screen.findByRole( 'button', {
+			name: 'Blocking transaction for order #123',
+		} );
+		expect( pendingBlockButton ).not.toBeDisabled();
+		expect( pendingBlockButton ).toHaveAttribute( 'aria-disabled', 'true' );
+		expect( pendingBlockButton ).toHaveFocus();
+
+		await act( async () => {
+			resolveCancel( {
+				id: 'pi_review',
+				status: 'canceled',
+			} );
+			await cancelPromise;
+		} );
+
+		expect( mockCreateSuccessNotice ).toHaveBeenCalledWith(
+			'Payment for order #123 canceled successfully.'
+		);
 	} );
 
 	it( 'renders awaiting-response dispute decisions from transaction details', async () => {
