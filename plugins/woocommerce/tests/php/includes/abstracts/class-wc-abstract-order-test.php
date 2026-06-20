@@ -622,6 +622,86 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_taxes persists cart and shipping tax totals as order tax items, and updates existing items in-place on a second call.
+	 */
+	public function test_update_taxes_persists_cart_and_shipping_tax_totals(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// German standard 19% non-compound VAT rate.
+		$tax_rate    = array(
+			'tax_rate_country'  => 'DE',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '19.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = new WC_Order();
+
+		// Line item carrying $1.00 cart tax for the rate.
+		// WC_Order_Item_Product::set_taxes() requires both 'total' and 'subtotal' to be non-empty.
+		$line_item = new WC_Order_Item_Product();
+		$line_item->set_product( $product );
+		$line_item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => '1.00' ),
+				'subtotal' => array( $tax_rate_id => '1.00' ),
+			)
+		);
+		$order->add_item( $line_item );
+
+		// Shipping item carrying $0.50 shipping tax for the rate.
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_taxes( array( 'total' => array( $tax_rate_id => '0.50' ) ) );
+		$order->add_item( $shipping_item );
+
+		$order->save();
+		$order->update_taxes();
+
+		$tax_items = $order->get_taxes();
+		$this->assertCount( 1, $tax_items );
+
+		/** @var WC_Order_Item_Tax $tax_item */
+		$tax_item = reset( $tax_items );
+		// Confirm the German 19% VAT rate is correctly associated with the tax item.
+		$this->assertSame( 19.0, (float) $tax_item->get_rate_percent() );
+		// Cart and shipping taxes are accumulated from line items and persisted on the tax item.
+		$this->assertSame( 1.00, (float) $tax_item->get_tax_total() );
+		$this->assertSame( 0.50, (float) $tax_item->get_shipping_tax_total() );
+		// Order-level totals are rolled up from all tax items.
+		$this->assertSame( 1.00, (float) $order->get_cart_tax() );
+		$this->assertSame( 0.50, (float) $order->get_shipping_tax() );
+
+		// Second call: update line item taxes and verify existing tax item is updated in-place, not duplicated.
+		foreach ( $order->get_items() as $item ) {
+			if ( $item instanceof WC_Order_Item_Product ) {
+				$item->set_taxes(
+					array(
+						'total'    => array( $tax_rate_id => '2.00' ),
+						'subtotal' => array( $tax_rate_id => '2.00' ),
+					)
+				);
+				$item->save();
+			}
+		}
+
+		$order->update_taxes();
+
+		$tax_items_after = $order->get_taxes();
+		$this->assertCount( 1, $tax_items_after, 'update_taxes() must update the existing tax item, not create a duplicate.' );
+
+		$tax_item_after = reset( $tax_items_after );
+		$this->assertSame( 2.00, (float) $tax_item_after->get_tax_total() );
+		$this->assertSame( 0.50, (float) $tax_item_after->get_shipping_tax_total() );
+	}
+
+	/**
 	 * Get an order object with a fixed total COGS value.
 	 *
 	 * @return WC_Order

@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Add Tracks instrumentation to the floating header's Screen Options (gear) and Help (?) icon buttons. Fires `wcadmin_header_meta_icon_click` with `icon` and `action` (open/close) so engagement with these two icons can be measured.

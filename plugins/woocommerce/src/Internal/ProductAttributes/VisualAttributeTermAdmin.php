@@ -283,7 +283,7 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 
 		if ( $is_product_editor_screen && array_key_exists( 'wc-visual', wc_get_attribute_types() ) ) {
 			wp_enqueue_media();
-			WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-color-picker', true, array( 'wp-components' ) );
+			WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-picker', true, array( 'wp-components' ) );
 			return;
 		}
 
@@ -292,7 +292,7 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 
 		if ( $is_attribute_term_screen && VisualAttributeTermMeta::is_visual_attribute_taxonomy( $taxonomy ) ) {
 			wp_enqueue_media();
-			WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-color-picker', true, array( 'wp-components' ) );
+			WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-picker', true, array( 'wp-components' ) );
 		}
 	}
 

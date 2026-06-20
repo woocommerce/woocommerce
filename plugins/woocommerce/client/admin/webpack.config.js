@@ -61,9 +61,8 @@ const wcAdminPackages = [
 	'data',
 	'tracks',
 	'onboarding',
-	'block-templates',
 	'sanitize',
-	'settings-ui-sdk',
+	'settings-ui',
 	'remote-logging',
 	'email-editor',
 ];

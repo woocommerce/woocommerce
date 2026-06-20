@@ -77,7 +77,7 @@ class ProductQuery extends AbstractBlock {
 			2
 		);
 		add_filter(
-			'render_block',
+			'render_block_core/query',
 			array( $this, 'enqueue_styles' ),
 			10,
 			2
@@ -165,7 +165,7 @@ class ProductQuery extends AbstractBlock {
 	 * @return string The block content.
 	 */
 	public function enqueue_styles( string $block_content, array $block ) {
-		if ( 'core/query' === $block['blockName'] && self::is_woocommerce_variation( $block ) ) {
+		if ( self::is_woocommerce_variation( $block ) ) {
 			wp_enqueue_style( 'wc-blocks-style-product-query' );
 		}
 

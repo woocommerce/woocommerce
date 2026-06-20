@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Limit layered navigation count cache growth for product attributes and brands.

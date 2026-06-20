@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Rename the settings UI script handle from wc-settings-ui-sdk to wc-settings-ui (never shipped in a release).
