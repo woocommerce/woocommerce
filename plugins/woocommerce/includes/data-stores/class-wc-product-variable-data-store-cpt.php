@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Utilities\CallbackUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -433,7 +434,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 						// If we are getting prices for display, we need to account for taxes.
 						if ( $for_display ) {
-							if ( 'incl' === $tax_display_mode ) {
+							if ( TaxDisplayMode::INCLUSIVE === $tax_display_mode ) {
 								$price         = '' === $price ? '' : wc_get_price_including_tax(
 									$variation,
 									array(
@@ -613,7 +614,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 		if ( $for_display && wc_tax_enabled() ) {
 			$price_hash = array(
-				get_option( 'woocommerce_tax_display_shop', 'excl' ),
+				get_option( 'woocommerce_tax_display_shop', TaxDisplayMode::EXCLUSIVE ),
 				WC_Tax::get_rates(),
 				empty( WC()->customer ) ? false : WC()->customer->is_vat_exempt(),
 			);

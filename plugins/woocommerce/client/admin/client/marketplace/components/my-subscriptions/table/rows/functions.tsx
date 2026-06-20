@@ -3,7 +3,7 @@
  */
 import type { TableRow } from '@woocommerce/components/build-types/table/types';
 import { gmdateI18n } from '@wordpress/date';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, sprintf, TranslatableText } from '@wordpress/i18n';
 import { Icon, plugins } from '@wordpress/icons';
 import { createInterpolateElement } from '@wordpress/element';
 
@@ -359,14 +359,14 @@ export function expiry( subscription: Subscription ): TableRow {
 		};
 	}
 
-	let expiryDateElement = __( 'Never expires', 'woocommerce' );
+	let expiryDateElement = __< string >( 'Never expires', 'woocommerce' );
 
 	const expiryDate = subscription.expires;
 	if ( expiryDate ) {
 		expiryDateElement = gmdateI18n(
 			'j M, Y',
 			new Date( expiryDate * 1000 )
-		);
+		) as TranslatableText< string >;
 	}
 
 	const displayElement = (

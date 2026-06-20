@@ -51,6 +51,7 @@
 		"lint:php:changes:branch": "composer run-script lint-branch",
 		"lint:php:changes:staged": "composer run-script lint-staged",
 		"lint:php:fix": "composer run-script phpcbf",
+		"lint:php:no-new-functions": "php ./bin/check-new-functions.php HEAD origin/trunk",
 		"phpstan": "composer run-script phpstan",
 		"phpstan:baseline": "composer run-script phpstan:baseline",
 		"make:collection": "pnpm exec wc-api-tests make:collection",
@@ -894,6 +895,7 @@
 					},
 					"events": [
 						"pull_request",
+						"nightly-checks",
 						"release-checks",
 						"blocks-e2e-wp-latest-1"
 					],
@@ -974,7 +976,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@wordpress/browserslist-config": "next",
-		"@wordpress/e2e-test-utils-playwright": "wp-6.8",
+		"@wordpress/e2e-test-utils-playwright": "catalog:wp-min",
 		"@wordpress/env": "11.0.1-next.v.20260206T143.0",
 		"@wordpress/scripts": "30.6.0",
 		"@wordpress/stylelint-config": "^21.36.0",

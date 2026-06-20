@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\StockFilter;
 use WP_Query;
 use WC_Tax;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 /**
  * QueryBuilder class.
@@ -984,7 +985,7 @@ class QueryBuilder {
 		$base_tax_rates = WC_Tax::get_base_tax_rates( $tax_class );
 
 		// If prices are shown incl. tax, we want to remove the taxes from the filter amount to match prices stored excl. tax.
-		if ( 'incl' === $tax_display ) {
+		if ( TaxDisplayMode::INCLUSIVE === $tax_display ) {
 			/**
 			 * Filters if taxes should be removed from locations outside the store base location.
 			 *
@@ -1021,7 +1022,7 @@ class QueryBuilder {
 	 */
 	private function should_adjust_price_range_for_taxes() {
 		$display_setting      = get_option( 'woocommerce_tax_display_shop' ); // Tax display setting ('incl' or 'excl').
-		$price_storage_method = wc_prices_include_tax() ? 'incl' : 'excl';
+		$price_storage_method = wc_prices_include_tax() ? TaxDisplayMode::INCLUSIVE : TaxDisplayMode::EXCLUSIVE;
 
 		return $display_setting !== $price_storage_method;
 	}
