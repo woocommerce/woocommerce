@@ -93,6 +93,7 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'wcpay_dev_mode' );
 		remove_all_filters( 'wcpay_test_mode' );
 		remove_all_filters( 'wcpay_test_mode_onboarding' );
+		remove_all_filters( 'woocommerce_native_woopayments_gateway_duplicate_payment_method_ids' );
 		remove_all_actions( 'wc_payment_gateways_initialized' );
 		if ( function_exists( 'WC' ) && WC()->payment_gateways() ) {
 			WC()->payment_gateways()->payment_gateways = array();
@@ -384,6 +385,176 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array( 'woocommerce_payments', 'legacy_card_gateway' ),
 			$settings['duplicated_payment_method_ids']['card']
+		);
+	}
+
+	/**
+	 * @testdox Should expose Apple Pay and Google Pay duplicate clusters when native payment request is enabled.
+	 */
+	public function test_get_settings_exposes_apple_pay_google_pay_duplicate_cluster_when_payment_request_is_enabled(): void {
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'payment_request' => 'yes',
+			)
+		);
+		$this->mock_payment_gateways(
+			array(
+				$this->create_gateway( 'woocommerce_payments', 'yes' ),
+				$this->create_gateway( 'legacy_applepay_gateway', 'yes' ),
+				$this->create_gateway( 'stripe', 'yes', array( 'payment_request' => 'yes' ) ),
+				$this->create_gateway( 'disabled_googlepay_gateway', 'no' ),
+			)
+		);
+
+		$settings = $this->sut->get_settings();
+
+		$this->assertArrayHasKey(
+			'apple_pay_google_pay',
+			$settings['duplicated_payment_method_ids'],
+			'Native payment request support should expose the Apple Pay and Google Pay duplicate cluster.'
+		);
+		$this->assertEqualsCanonicalizing(
+			array(
+				'woocommerce_payments',
+				'legacy_applepay_gateway',
+				'stripe',
+			),
+			$settings['duplicated_payment_method_ids']['apple_pay_google_pay'],
+			'Native payment request support should cluster with enabled Apple Pay, Google Pay, or Stripe payment-request gateways.'
+		);
+	}
+
+	/**
+	 * @testdox Should expose Apple Pay and Google Pay duplicate clusters from explicit gateway declarations.
+	 */
+	public function test_get_settings_exposes_apple_pay_google_pay_duplicate_cluster_from_gateway_declarations(): void {
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'payment_request' => 'yes',
+			)
+		);
+		add_filter(
+			'woocommerce_native_woopayments_gateway_duplicate_payment_method_ids',
+			static function ( array $payment_method_ids, string $gateway_id ): array {
+				if ( 'declared_wallet_gateway' !== $gateway_id ) {
+					return $payment_method_ids;
+				}
+
+				return array_merge(
+					$payment_method_ids,
+					array(
+						'apple_pay_google_pay',
+						'invalid_payment_method',
+					)
+				);
+			},
+			10,
+			2
+		);
+		$this->mock_payment_gateways(
+			array(
+				$this->create_gateway( 'woocommerce_payments', 'yes' ),
+				$this->create_gateway( 'declared_wallet_gateway', 'yes' ),
+			)
+		);
+
+		$settings = $this->sut->get_settings();
+
+		$this->assertEqualsCanonicalizing(
+			array(
+				'woocommerce_payments',
+				'declared_wallet_gateway',
+			),
+			$settings['duplicated_payment_method_ids']['apple_pay_google_pay'],
+			'Gateway declarations should expose only supported duplicate payment method IDs.'
+		);
+	}
+
+	/**
+	 * @testdox Should expose Apple Pay and Google Pay duplicate clusters when native payment request uses its default enabled state.
+	 */
+	public function test_get_settings_exposes_apple_pay_google_pay_duplicate_cluster_when_payment_request_setting_is_missing(): void {
+		delete_option( 'woocommerce_woocommerce_payments_settings' );
+		$this->mock_payment_gateways(
+			array(
+				$this->create_gateway( 'woocommerce_payments', 'yes' ),
+				$this->create_gateway( 'legacy_googlepay_gateway', 'yes' ),
+			)
+		);
+
+		$settings = $this->sut->get_settings();
+
+		$this->assertArrayHasKey(
+			'apple_pay_google_pay',
+			$settings['duplicated_payment_method_ids'],
+			'Native payment request support defaults to enabled for unconfigured stores.'
+		);
+		$this->assertEqualsCanonicalizing(
+			array(
+				'woocommerce_payments',
+				'legacy_googlepay_gateway',
+			),
+			$settings['duplicated_payment_method_ids']['apple_pay_google_pay']
+		);
+	}
+
+	/**
+	 * @testdox Should omit Apple Pay and Google Pay duplicate clusters when native payment request is disabled.
+	 */
+	public function test_get_settings_omits_apple_pay_google_pay_duplicate_cluster_when_payment_request_is_disabled(): void {
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'payment_request' => 'no',
+			)
+		);
+		$this->mock_payment_gateways(
+			array(
+				$this->create_gateway( 'woocommerce_payments', 'yes' ),
+				$this->create_gateway( 'legacy_google_pay_gateway', 'yes' ),
+			)
+		);
+
+		$settings = $this->sut->get_settings();
+
+		$this->assertArrayNotHasKey(
+			'apple_pay_google_pay',
+			$settings['duplicated_payment_method_ids'],
+			'Apple Pay and Google Pay duplicates require native WooPayments payment request support.'
+		);
+	}
+
+	/**
+	 * @testdox Should omit Apple Pay and Google Pay duplicate clusters when third-party option-gated wallets are disabled.
+	 */
+	public function test_get_settings_omits_apple_pay_google_pay_duplicate_cluster_for_disabled_option_gated_wallets(): void {
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'payment_request' => 'yes',
+			)
+		);
+		$this->mock_payment_gateways(
+			array(
+				$this->create_gateway( 'woocommerce_payments', 'yes' ),
+				$this->create_gateway( 'stripe', 'yes', array( 'payment_request' => 'no' ) ),
+				$this->create_gateway( 'wallet_without_express_option', 'yes' ),
+				$this->create_gateway(
+					'wallet_with_disabled_express_option',
+					'yes',
+					array( 'express_checkout_enabled' => 'no' )
+				),
+			)
+		);
+
+		$settings = $this->sut->get_settings();
+
+		$this->assertArrayNotHasKey(
+			'apple_pay_google_pay',
+			$settings['duplicated_payment_method_ids'],
+			'Apple Pay and Google Pay duplicates should not include third-party gateways with disabled Stripe payment request or generic express options.'
 		);
 	}
 
@@ -1265,12 +1436,13 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 	/**
 	 * Create a lightweight gateway fixture.
 	 *
-	 * @param string $id      Gateway ID.
-	 * @param string $enabled Gateway enabled state.
+	 * @param string               $id      Gateway ID.
+	 * @param string               $enabled Gateway enabled state.
+	 * @param array<string,string> $options Gateway options.
 	 * @return object
 	 */
-	private function create_gateway( string $id, string $enabled ): object {
-		return new class( $id, $enabled ) {
+	private function create_gateway( string $id, string $enabled, array $options = array() ): object {
+		return new class( $id, $enabled, $options ) {
 			/**
 			 * Gateway ID.
 			 *
@@ -1286,14 +1458,27 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 			public string $enabled;
 
 			/**
+			 * Gateway options.
+			 *
+			 * @var array<string,string>
+			 */
+			private array $options;
+
+			/**
 			 * Initialize gateway fixture.
 			 *
-			 * @param string $id      Gateway ID.
-			 * @param string $enabled Gateway enabled state.
+			 * @param string               $id      Gateway ID.
+			 * @param string               $enabled Gateway enabled state.
+			 * @param array<string,string> $options Gateway options.
 			 */
-			public function __construct( string $id, string $enabled ) {
+			public function __construct(
+				string $id,
+				string $enabled,
+				array $options
+			) {
 				$this->id      = $id;
 				$this->enabled = $enabled;
+				$this->options = $options;
 			}
 
 			/**
@@ -1303,7 +1488,7 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 			 * @return string
 			 */
 			public function get_option( string $key ): string {
-				return 'no';
+				return $this->options[ $key ] ?? 'no';
 			}
 		};
 	}

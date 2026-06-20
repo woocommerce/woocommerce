@@ -831,6 +831,173 @@ describe( 'WooPaymentsSettingsPage', () => {
 		);
 	} );
 
+	it( 'renders express checkout legal links and read-more actions', () => {
+		mockUseWooPayEnabledSettings.mockReturnValue( [ false, noop ] );
+		mockUsePaymentRequestEnabledSettings.mockReturnValue( [ false, noop ] );
+		mockUseAmazonPayEnabledSettings.mockReturnValue( [ false, noop ] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const expressCheckoutsSection = screen
+			.getByRole( 'heading', { name: 'Express checkouts' } )
+			.closest( '.woopayments-settings-section' ) as HTMLElement;
+
+		expect(
+			within( expressCheckoutsSection ).getByRole( 'link', {
+				name: /^WooPay/,
+			} )
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/document/woopay-merchant-documentation/'
+		);
+		const linkHrefs = within( expressCheckoutsSection )
+			.getAllByRole( 'link' )
+			.map( ( link ) => link.getAttribute( 'href' ) );
+
+		expect( linkHrefs ).toEqual(
+			expect.arrayContaining( [
+				'https://wordpress.com/tos/',
+				'https://automattic.com/privacy/',
+				'https://woocommerce.com/usage-tracking/',
+				'https://stripe.com/apple-pay/legal',
+				'https://developer.apple.com/apple-pay/acceptable-use-guidelines-for-websites/',
+				'https://androidpay.developers.google.com/terms/sellertos',
+				'https://link.com/terms',
+				'https://link.com/privacy',
+				'https://woocommerce.com/document/woopayments/payment-methods/link-by-stripe/',
+				'https://stripe.com/legal/ssa',
+				'https://stripe.com/legal/amazon-pay',
+			] )
+		);
+	} );
+
+	it( 'uses payment method status to disable Amazon Pay in the express checkout overview', () => {
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active', requirements: [] },
+			link_payments: { status: 'active', requirements: [] },
+			amazon_pay_payments: {
+				status: 'inactive',
+				requirements: [ 'business_profile.url' ],
+			},
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const expressCheckoutsSection = screen
+			.getByRole( 'heading', { name: 'Express checkouts' } )
+			.closest( '.woopayments-settings-section' ) as HTMLElement;
+
+		expect(
+			within( expressCheckoutsSection ).getByRole( 'checkbox', {
+				name: 'Amazon Pay',
+			} )
+		).toBeDisabled();
+		expect(
+			within( expressCheckoutsSection ).getByText(
+				'More information is needed to finish setting up this payment method.'
+			)
+		).toBeInTheDocument();
+		expect(
+			within( expressCheckoutsSection )
+				.getAllByRole( 'link', { name: /Learn more/ } )
+				.find(
+					( link ) =>
+						link.getAttribute( 'href' ) ===
+						'https://woocommerce.com/document/woopayments/payment-methods/additional-payment-methods/#method-cant-be-enabled'
+				)
+		).toBeInTheDocument();
+	} );
+
+	it( 'renders Amazon Pay rejected status as an error notice in the express checkout overview', () => {
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active', requirements: [] },
+			link_payments: { status: 'active', requirements: [] },
+			amazon_pay_payments: {
+				status: 'rejected',
+				requirements: [],
+			},
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const expressCheckoutsSection = screen
+			.getByRole( 'heading', { name: 'Express checkouts' } )
+			.closest( '.woopayments-settings-section' ) as HTMLElement;
+		const rejectedNotice = within( expressCheckoutsSection )
+			.getByText(
+				'Your application to use Amazon Pay has been rejected. Need help? Contact support'
+			)
+			.closest( '.components-notice' );
+
+		expect( rejectedNotice ).toHaveClass( 'is-error' );
+	} );
+
+	it( 'renders and dismisses duplicate notices for Apple Pay and Google Pay express buttons', async () => {
+		const updateDismissedDuplicateNotices = jest.fn();
+		mockUseGetDuplicatedPaymentMethodIds.mockReturnValue( {
+			apple_pay_google_pay: [
+				'woocommerce_payments',
+				'legacy_apple_pay_gateway',
+			],
+		} );
+		mockUseDismissedDuplicatePaymentMethodNotices.mockReturnValue( [
+			{},
+			updateDismissedDuplicateNotices,
+		] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const expressCheckoutsSection = screen
+			.getByRole( 'heading', { name: 'Express checkouts' } )
+			.closest( '.woopayments-settings-section' ) as HTMLElement;
+
+		expect(
+			within( expressCheckoutsSection ).getAllByText(
+				( _content, element ) =>
+					Boolean(
+						element?.textContent?.includes(
+							'This payment method is enabled by other extensions.'
+						)
+					)
+			).length
+		).toBeGreaterThan( 0 );
+		expect(
+			within( expressCheckoutsSection ).getByRole( 'link', {
+				name: 'Review extensions',
+			} )
+		).toHaveAttribute( 'href', 'admin.php?page=wc-settings&tab=checkout' );
+
+		await userEvent.click(
+			within( expressCheckoutsSection ).getByRole( 'button', {
+				name: 'Close',
+			} )
+		);
+
+		expect( updateDismissedDuplicateNotices ).toHaveBeenCalledWith( {
+			apple_pay_google_pay: [
+				'woocommerce_payments',
+				'legacy_apple_pay_gateway',
+			],
+		} );
+		expect( mockApiFetch ).toHaveBeenCalledWith( {
+			path: '/wc/v3/payments/settings/wcpay_duplicate_payment_method_notices_dismissed',
+			method: 'post',
+			data: {
+				value: {
+					apple_pay_google_pay: [
+						'woocommerce_payments',
+						'legacy_apple_pay_gateway',
+					],
+				},
+			},
+		} );
+		expect(
+			within( expressCheckoutsSection ).getByRole( 'checkbox', {
+				name: 'Apple Pay / Google Pay',
+			} )
+		).toHaveFocus();
+	} );
+
 	it( 'shows the manual-capture conflict banner and disables incompatible methods', () => {
 		mockUseManualCapture.mockReturnValue( [ true, noop ] );
 		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
@@ -983,6 +1150,60 @@ describe( 'WooPaymentsSettingsPage', () => {
 		fireEvent.click( screen.getByRole( 'button', { name: 'Enable' } ) );
 
 		expect( setTestMode ).toHaveBeenCalledWith( true );
+	} );
+
+	it( 'requires confirmation before enabling manual capture', async () => {
+		const setManualCapture = jest.fn();
+		mockUseManualCapture.mockReturnValue( [ false, setManualCapture ] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', {
+				name: 'Issue an authorization on checkout and capture later',
+			} )
+		);
+
+		expect( setManualCapture ).not.toHaveBeenCalled();
+		expect(
+			screen.getByRole( 'dialog', { name: 'Enable manual capture' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				/Payments must be captured on the order details screen within 7 days of authorization/
+			)
+		).toBeInTheDocument();
+		expect(
+			within(
+				screen.getByRole( 'dialog', { name: 'Enable manual capture' } )
+			).getByText(
+				"Manual capture is available for card payments only. Payment methods that don't support it will be disabled."
+			)
+		).toBeInTheDocument();
+
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Enable manual capture' } )
+		);
+
+		expect( setManualCapture ).toHaveBeenCalledWith( true );
+	} );
+
+	it( 'disables manual capture without confirmation', async () => {
+		const setManualCapture = jest.fn();
+		mockUseManualCapture.mockReturnValue( [ true, setManualCapture ] );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', {
+				name: 'Issue an authorization on checkout and capture later',
+			} )
+		);
+
+		expect(
+			screen.queryByRole( 'dialog', { name: 'Enable manual capture' } )
+		).not.toBeInTheDocument();
+		expect( setManualCapture ).toHaveBeenCalledWith( false );
 	} );
 
 	it( 'renders the test-account switch-to-live notice and modal', async () => {
@@ -1587,6 +1808,109 @@ describe( 'WooPaymentsSettingsPage', () => {
 		expect(
 			screen.getByRole( 'button', { name: 'Save changes' } )
 		).toHaveAttribute( 'aria-disabled', 'true' );
+	} );
+
+	it( 'focuses the first field with server validation details after a failed save', async () => {
+		const scrollIntoView = jest.fn();
+		const originalScrollIntoView = Element.prototype.scrollIntoView;
+		const originalMatchMedia = window.matchMedia;
+		let savingError: unknown = null;
+
+		Element.prototype.scrollIntoView = scrollIntoView;
+		window.matchMedia = jest.fn().mockReturnValue( { matches: true } );
+		mockSaveSettings.mockImplementation( async () => {
+			savingError = {
+				data: {
+					details: {
+						unknown_server_field: {
+							message: 'This field is not rendered.',
+						},
+						account_business_support_email: {
+							message:
+								'Please enter a valid support email address.',
+						},
+						account_business_support_phone: {
+							message:
+								'Please enter a valid support phone number.',
+						},
+					},
+				},
+			};
+
+			return false;
+		} );
+		mockUseGetSavingError.mockImplementation( () => savingError );
+
+		try {
+			render( <WooPaymentsSettingsPage /> );
+
+			await act( async () => {
+				await userEvent.click(
+					screen.getByRole( 'button', { name: 'Save changes' } )
+				);
+			} );
+
+			const supportEmail = screen.getByRole( 'textbox', {
+				name: 'Support email',
+			} );
+
+			await waitFor( () => expect( supportEmail ).toHaveFocus() );
+			expect( scrollIntoView ).toHaveBeenCalledWith( {
+				behavior: 'auto',
+				block: 'center',
+			} );
+		} finally {
+			Element.prototype.scrollIntoView = originalScrollIntoView;
+			window.matchMedia = originalMatchMedia;
+		}
+	} );
+
+	it( 'focuses the notifications email field for server validation details', async () => {
+		const scrollIntoView = jest.fn();
+		const originalScrollIntoView = Element.prototype.scrollIntoView;
+		const originalMatchMedia = window.matchMedia;
+		let savingError: unknown = null;
+
+		Element.prototype.scrollIntoView = scrollIntoView;
+		window.matchMedia = jest.fn().mockReturnValue( { matches: true } );
+		mockSaveSettings.mockImplementation( async () => {
+			savingError = {
+				data: {
+					details: {
+						account_communications_email: {
+							message:
+								'Please enter a valid notifications email address.',
+						},
+					},
+				},
+			};
+
+			return false;
+		} );
+		mockUseGetSavingError.mockImplementation( () => savingError );
+
+		try {
+			render( <WooPaymentsSettingsPage /> );
+
+			await act( async () => {
+				await userEvent.click(
+					screen.getByRole( 'button', { name: 'Save changes' } )
+				);
+			} );
+
+			const notificationsEmail = screen.getByRole( 'textbox', {
+				name: 'Email address',
+			} );
+
+			await waitFor( () => expect( notificationsEmail ).toHaveFocus() );
+			expect( scrollIntoView ).toHaveBeenCalledWith( {
+				behavior: 'auto',
+				block: 'center',
+			} );
+		} finally {
+			Element.prototype.scrollIntoView = originalScrollIntoView;
+			window.matchMedia = originalMatchMedia;
+		}
 	} );
 
 	it( 'requires a support phone number before settings can be saved', () => {

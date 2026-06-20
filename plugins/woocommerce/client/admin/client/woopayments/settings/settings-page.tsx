@@ -13,7 +13,11 @@ import {
 	Spinner,
 	TextControl,
 } from '@wordpress/components';
-import { useEffect, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import { __, _x, sprintf } from '@wordpress/i18n';
 import { PhoneNumberInput, validatePhoneNumber } from '@woocommerce/components';
 
@@ -28,7 +32,12 @@ import {
 	updateDismissedDuplicatePaymentMethodNotices,
 } from './data/actions';
 import { FraudProtectionSettings } from './fraud-protection';
-import { WooPaymentsPaymentMethodsList } from './payment-methods-list';
+import {
+	DuplicatePaymentMethodNotice,
+	getPaymentMethodAvailability,
+	WooPaymentsPaymentMethodsList,
+} from './payment-methods-list';
+import type { WooPaymentsPaymentMethodDefinition } from './payment-method-definitions';
 import { PayoutBankAccount } from './payout-bank-account';
 import { SettingsBusyState } from './settings-busy-state';
 import { WooPayDisableFeedback } from './woopay-disable-feedback';
@@ -87,10 +96,19 @@ const ACCOUNT_STATEMENT_MAX_LENGTH_KANA = 22;
 const NOTIFICATIONS_EMAIL_ERROR_ID = 'woopayments-notifications-email-error';
 const NOTIFICATIONS_EMAIL_CONFIRM_ERROR_ID =
 	'woopayments-notifications-email-confirm-error';
+const NOTIFICATIONS_EMAIL_INPUT_ID = 'account-communications-email-input';
 const SUPPORT_EMAIL_ERROR_ID = 'woopayments-support-email-error';
 const SUPPORT_PHONE_ERROR_ID = 'woopayments-support-phone-error';
-const SUPPORT_PHONE_INPUT_ID = 'woopayments-support-phone-input';
+const ACCOUNT_STATEMENT_INPUT_ID = 'account-statement-descriptor-input';
+const ACCOUNT_STATEMENT_KANJI_INPUT_ID =
+	'account-statement-descriptor-kanji-input';
+const ACCOUNT_STATEMENT_KANA_INPUT_ID =
+	'account-statement-descriptor-kana-input';
+const SUPPORT_EMAIL_INPUT_ID = 'account-business-support-email-input';
+const SUPPORT_PHONE_INPUT_ID = 'account-business-support-phone-input';
 const FEEDBACK_THROTTLE_DAYS = 7;
+const MANUAL_CAPTURE_DOC_URL =
+	'https://woocommerce.com/document/woopayments/settings-guide/authorize-and-capture/';
 const EMAIL_ADDRESS_PATTERN =
 	/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9.-]+$/;
 type SettingsRecord = Record< string, unknown >;
@@ -125,8 +143,11 @@ type ExpressCheckoutOverviewRow = {
 	checked: boolean;
 	disabled: boolean;
 	onChange: ( value: boolean ) => void;
-	description: string;
-	notice: string;
+	description: React.ReactNode;
+	notice: React.ReactNode;
+	noticeStatus?: 'info' | 'warning' | 'error';
+	action?: React.ReactNode;
+	duplicatePaymentMethodId?: string;
 };
 
 const BNPL_METHOD_IDS = [ 'affirm', 'afterpay_clearpay', 'klarna' ];
@@ -137,8 +158,26 @@ const STANDARD_PAYMENT_METHOD_EXCLUDED_IDS = [
 	'google_pay',
 	'link',
 ];
+const AMAZON_PAY_DEFINITION: WooPaymentsPaymentMethodDefinition = {
+	id: 'amazon_pay',
+	label: __( 'Amazon Pay', 'woocommerce' ),
+	description: __(
+		'Allow customers to make payments using Amazon Pay.',
+		'woocommerce'
+	),
+	iconUrl: '',
+	stripeKey: 'amazon_pay_payments',
+	allowsManualCapture: false,
+	allowsPayLater: false,
+};
 const asString = ( value: unknown, fallback = '' ) =>
 	typeof value === 'string' ? value : fallback;
+
+const createTermsLink = ( href: string ) => (
+	<ExternalLink href={ href }>
+		<></>
+	</ExternalLink>
+);
 
 const getDaysSinceDate = ( date: string, now = new Date() ) => {
 	const parsedDate = new Date( date );
@@ -258,6 +297,54 @@ const getSavingErrorDetailMessage = ( value: unknown, key: string ) => {
 	return asString( detail.message );
 };
 
+const getSavingErrorDetails = ( value: unknown ) => {
+	const error = asSettingsRecord( value );
+	const data = asSettingsRecord( error.data );
+
+	return asSettingsRecord( data.details );
+};
+
+const getFieldInputId = ( settingKey: string ) => {
+	const fieldInputIds: Record< string, string > = {
+		account_statement_descriptor: ACCOUNT_STATEMENT_INPUT_ID,
+		account_statement_descriptor_kanji: ACCOUNT_STATEMENT_KANJI_INPUT_ID,
+		account_statement_descriptor_kana: ACCOUNT_STATEMENT_KANA_INPUT_ID,
+		account_communications_email: NOTIFICATIONS_EMAIL_INPUT_ID,
+		account_business_support_email: SUPPORT_EMAIL_INPUT_ID,
+		account_business_support_phone: SUPPORT_PHONE_INPUT_ID,
+	};
+
+	return (
+		fieldInputIds[ settingKey ] ||
+		`${ settingKey.replace( /_/g, '-' ) }-input`
+	);
+};
+
+const focusFirstSavingErrorField = ( savingError: unknown ) => {
+	const details = getSavingErrorDetails( savingError );
+	const element = Object.keys( details )
+		.map( ( fieldKey ) =>
+			document.getElementById( getFieldInputId( fieldKey ) )
+		)
+		.find(
+			( field ): field is HTMLElement =>
+				!! field && typeof field.focus === 'function'
+		);
+
+	if ( ! element ) {
+		return;
+	}
+
+	const reduceMotion =
+		typeof window.matchMedia === 'function' &&
+		window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
+	element.scrollIntoView?.( {
+		behavior: reduceMotion ? 'auto' : 'smooth',
+		block: 'center',
+	} );
+	element.focus( { preventScroll: true } );
+};
+
 const isValidEmailAddress = ( value: string ) =>
 	value === '' ||
 	( value.length <= 254 && EMAIL_ADDRESS_PATTERN.test( value ) );
@@ -265,6 +352,10 @@ const isValidEmailAddress = ( value: string ) =>
 const isCustomizableExpressCheckoutMethod = (
 	methodId: ExpressCheckoutOverviewMethod
 ): methodId is CustomizableExpressCheckoutMethod => methodId !== 'link';
+
+const getExpressCheckoutCheckboxId = (
+	methodId: ExpressCheckoutOverviewMethod
+) => `woopayments-express-checkout-${ methodId }-input`;
 
 const SettingsSection = ( {
 	id,
@@ -341,6 +432,51 @@ const TestModeConfirmationModal = ( {
 					{ __( 'Enable', 'woocommerce' ) }
 				</Button>
 			</div>
+		</div>
+	</Modal>
+);
+
+const ManualCaptureConfirmationModal = ( {
+	onClose,
+	onConfirm,
+}: {
+	onClose: () => void;
+	onConfirm: () => void;
+} ) => (
+	<Modal
+		title={ __( 'Enable manual capture', 'woocommerce' ) }
+		onRequestClose={ onClose }
+		className="woopayments-settings-modal"
+	>
+		<p>
+			<strong>
+				{ __(
+					'Payments must be captured on the order details screen within 7 days of authorization',
+					'woocommerce'
+				) }
+			</strong>
+			{ __(
+				', otherwise the authorization and order will be canceled.',
+				'woocommerce'
+			) }
+			<br />
+			<ExternalLink href={ MANUAL_CAPTURE_DOC_URL }>
+				{ __( 'Learn more about manual capture', 'woocommerce' ) }
+			</ExternalLink>
+		</p>
+		<Notice status="info" isDismissible={ false }>
+			{ __(
+				"Manual capture is available for card payments only. Payment methods that don't support it will be disabled.",
+				'woocommerce'
+			) }
+		</Notice>
+		<div className="woopayments-settings-modal__actions">
+			<Button variant="tertiary" onClick={ onClose }>
+				{ __( 'Cancel', 'woocommerce' ) }
+			</Button>
+			<Button variant="primary" onClick={ onConfirm }>
+				{ __( 'Enable manual capture', 'woocommerce' ) }
+			</Button>
 		</div>
 	</Modal>
 );
@@ -632,15 +768,43 @@ const ExpressCheckoutSettingsSection = () => {
 	const availablePaymentMethodIds = asStringArray(
 		useGetAvailablePaymentMethodIds()
 	);
+	const statuses = asSettingsRecord( useGetPaymentMethodStatuses() );
+	const duplicatedPaymentMethodIds = asDuplicatePaymentMethodNotices(
+		useGetDuplicatedPaymentMethodIds()
+	);
+	const [
+		dismissedDuplicatePaymentMethodNotices,
+		setDismissedDuplicatePaymentMethodNotices,
+	] = useDismissedDuplicatePaymentMethodNotices() as [
+		DuplicatePaymentMethodNotices,
+		typeof updateDismissedDuplicatePaymentMethodNotices
+	];
 	const isLinkAvailable =
 		enabledMethodIds.includes( 'card' ) &&
 		availablePaymentMethodIds.includes( 'link' );
 	const isAmazonPayAvailable =
 		availablePaymentMethodIds.includes( 'amazon_pay' );
+	const amazonPayAvailability = getPaymentMethodAvailability(
+		AMAZON_PAY_DEFINITION,
+		asSettingsRecord(
+			statuses[ AMAZON_PAY_DEFINITION.stripeKey ]
+		) as PaymentMethodStatus,
+		false
+	);
 	const showWooPayIncompatibilityNotice = Boolean(
 		useWooPayShowIncompatibilityNotice()
 	);
 	let wooPayNotice = '';
+
+	const onDismissDuplicateNotice = (
+		notices: Record< string, string[] >
+	) => {
+		setDismissedDuplicatePaymentMethodNotices( notices );
+		saveOption(
+			'wcpay_duplicate_payment_method_notices_dismissed',
+			notices
+		);
+	};
 
 	if ( isLinkEnabled ) {
 		wooPayNotice = __(
@@ -671,9 +835,25 @@ const ExpressCheckoutSettingsSection = () => {
 						'Boost conversion and customer loyalty by offering a single click, secure way to pay.',
 						'woocommerce'
 				  )
-				: __(
-						'Boost conversion and customer loyalty by offering a single click, secure way to pay. In order to use WooPay, you must agree to our WooCommerce Terms of Service and Privacy Policy.',
-						'woocommerce'
+				: createInterpolateElement(
+						__(
+							'Boost conversion and customer loyalty by offering a single click, secure way to pay. In order to use <wooPayLink>WooPay</wooPayLink>, you must agree to our <termsLink>WooCommerce Terms of Service</termsLink> and <privacyLink>Privacy Policy</privacyLink>. <trackingLink>Click here</trackingLink> to learn more about the data you will be sharing and opt-out options.',
+							'woocommerce'
+						),
+						{
+							wooPayLink: createTermsLink(
+								'https://woocommerce.com/document/woopay-merchant-documentation/'
+							),
+							termsLink: createTermsLink(
+								'https://wordpress.com/tos/'
+							),
+							privacyLink: createTermsLink(
+								'https://automattic.com/privacy/'
+							),
+							trackingLink: createTermsLink(
+								'https://woocommerce.com/usage-tracking/'
+							),
+						}
 				  ),
 			notice: wooPayNotice,
 		},
@@ -683,11 +863,33 @@ const ExpressCheckoutSettingsSection = () => {
 			checked: isPaymentRequestEnabled,
 			disabled: false,
 			onChange: setIsPaymentRequestEnabled,
-			description: __(
-				'Allow customers to make payments using Apple Pay and Google Pay.',
-				'woocommerce'
-			),
+			description: isPaymentRequestEnabled
+				? __(
+						'Allow customers to make payments using Apple Pay and Google Pay.',
+						'woocommerce'
+				  )
+				: createInterpolateElement(
+						__(
+							"Allow customers to make payments using Apple Pay and Google Pay. By enabling this feature, you agree to <appleStripeLink>Stripe</appleStripeLink> and <appleLink>Apple</appleLink>'s terms of use. By enabling this feature, you agree to <googleStripeLink>Stripe</googleStripeLink>, and <googleLink>Google</googleLink>'s terms of use.",
+							'woocommerce'
+						),
+						{
+							appleStripeLink: createTermsLink(
+								'https://stripe.com/apple-pay/legal'
+							),
+							appleLink: createTermsLink(
+								'https://developer.apple.com/apple-pay/acceptable-use-guidelines-for-websites/'
+							),
+							googleStripeLink: createTermsLink(
+								'https://stripe.com/apple-pay/legal'
+							),
+							googleLink: createTermsLink(
+								'https://androidpay.developers.google.com/terms/sellertos'
+							),
+						}
+				  ),
 			notice: '',
+			duplicatePaymentMethodId: 'apple_pay_google_pay',
 		},
 	];
 
@@ -698,16 +900,41 @@ const ExpressCheckoutSettingsSection = () => {
 			checked: isLinkEnabled,
 			disabled: isWooPayEnabled,
 			onChange: setIsLinkEnabled,
-			description: __(
-				'Let customers use Link for faster checkout.',
-				'woocommerce'
-			),
+			description: isLinkEnabled
+				? __(
+						'Let customers use Link for faster checkout.',
+						'woocommerce'
+				  )
+				: createInterpolateElement(
+						__(
+							'Let customers use Link for faster checkout. By enabling this feature, you agree to the <termsLink>Link by Stripe terms</termsLink>, and <privacyLink>Privacy Policy</privacyLink>.',
+							'woocommerce'
+						),
+						{
+							termsLink: createTermsLink(
+								'https://link.com/terms'
+							),
+							privacyLink: createTermsLink(
+								'https://link.com/privacy'
+							),
+						}
+				  ),
 			notice: isWooPayEnabled
 				? __(
 						'To enable Link by Stripe, you must first disable WooPay.',
 						'woocommerce'
 				  )
 				: '',
+			action: (
+				<Button
+					variant="secondary"
+					href="https://woocommerce.com/document/woopayments/payment-methods/link-by-stripe/"
+					target="_blank"
+					rel="noreferrer"
+				>
+					{ __( 'Read more', 'woocommerce' ) }
+				</Button>
+			),
 		} );
 	}
 
@@ -716,13 +943,24 @@ const ExpressCheckoutSettingsSection = () => {
 			id: 'amazon_pay',
 			title: __( 'Amazon Pay', 'woocommerce' ),
 			checked: isAmazonPayEnabled,
-			disabled: false,
+			disabled: ! amazonPayAvailability.isActionable,
 			onChange: setIsAmazonPayEnabled,
-			description: __(
-				'Allow customers to make payments using Amazon Pay.',
-				'woocommerce'
+			description: createInterpolateElement(
+				__(
+					"Allow customers to make payments using Amazon Pay. By activating this feature, you accept <stripeLink>Stripe</stripeLink> and <amazonLink>Amazon</amazonLink>'s terms of use.",
+					'woocommerce'
+				),
+				{
+					stripeLink: createTermsLink(
+						'https://stripe.com/legal/ssa'
+					),
+					amazonLink: createTermsLink(
+						'https://stripe.com/legal/amazon-pay'
+					),
+				}
 			),
-			notice: '',
+			notice: amazonPayAvailability.notice || '',
+			noticeStatus: amazonPayAvailability.noticeStatus,
 		} );
 	}
 
@@ -752,6 +990,7 @@ const ExpressCheckoutSettingsSection = () => {
 					>
 						<div className="woopayments-settings-express-checkout-list__main">
 							<CheckboxControl
+								id={ getExpressCheckoutCheckboxId( row.id ) }
 								checked={ row.checked }
 								disabled={ row.disabled }
 								label={ row.title }
@@ -765,7 +1004,7 @@ const ExpressCheckoutSettingsSection = () => {
 								<p>{ row.description }</p>
 								{ row.notice && (
 									<Notice
-										status="warning"
+										status={ row.noticeStatus || 'warning' }
 										isDismissible={ false }
 									>
 										{ row.notice }
@@ -785,7 +1024,37 @@ const ExpressCheckoutSettingsSection = () => {
 									{ __( 'Customize', 'woocommerce' ) }
 								</Button>
 							) }
+							{ row.action }
 						</div>
+						{ row.duplicatePaymentMethodId &&
+							duplicatedPaymentMethodIds[
+								row.duplicatePaymentMethodId
+							]?.length &&
+							! row.notice && (
+								<DuplicatePaymentMethodNotice
+									paymentMethodId={
+										row.duplicatePaymentMethodId
+									}
+									gatewayIds={
+										duplicatedPaymentMethodIds[
+											row.duplicatePaymentMethodId
+										] || []
+									}
+									dismissedNotices={
+										dismissedDuplicatePaymentMethodNotices
+									}
+									onDismiss={ onDismissDuplicateNotice }
+									onRestoreFocus={ () => {
+										document
+											.getElementById(
+												getExpressCheckoutCheckboxId(
+													row.id
+												)
+											)
+											?.focus();
+									} }
+								/>
+							) }
 					</li>
 				) ) }
 			</ul>
@@ -803,6 +1072,8 @@ const TransactionsSettingsSection = ( {
 		useSavedCards() as BooleanSetting;
 	const [ isManualCaptureEnabled, setIsManualCaptureEnabled ] =
 		useManualCapture() as BooleanSetting;
+	const [ isManualCaptureModalVisible, setManualCaptureModalVisible ] =
+		useState( false );
 	const [ accountStatementDescriptor, setAccountStatementDescriptor ] =
 		useAccountStatementDescriptor() as StringSetting;
 	const [
@@ -932,11 +1203,25 @@ const TransactionsSettingsSection = ( {
 						'Issue an authorization on checkout and capture later',
 						'woocommerce'
 					) }
-					onChange={ ( value ) =>
-						setIsManualCaptureEnabled( Boolean( value ) )
-					}
+					onChange={ ( value ) => {
+						if ( ! value ) {
+							setIsManualCaptureEnabled( false );
+							return;
+						}
+
+						setManualCaptureModalVisible( true );
+					} }
 					__nextHasNoMarginBottom
 				/>
+				{ isManualCaptureModalVisible && (
+					<ManualCaptureConfirmationModal
+						onClose={ () => setManualCaptureModalVisible( false ) }
+						onConfirm={ () => {
+							setIsManualCaptureEnabled( true );
+							setManualCaptureModalVisible( false );
+						} }
+					/>
+				) }
 			</FieldGroup>
 			<FieldGroup title={ __( 'Customer statements', 'woocommerce' ) }>
 				<p>
@@ -951,6 +1236,7 @@ const TransactionsSettingsSection = ( {
 					</Notice>
 				) }
 				<TextControl
+					id={ ACCOUNT_STATEMENT_INPUT_ID }
 					label={ __( 'Customer bank statement', 'woocommerce' ) }
 					value={ accountStatementDescriptor }
 					maxLength={ ACCOUNT_STATEMENT_MAX_LENGTH }
@@ -969,6 +1255,7 @@ const TransactionsSettingsSection = ( {
 				{ accountCountry === 'JP' && (
 					<div className="woopayments-settings-control-grid">
 						<TextControl
+							id={ ACCOUNT_STATEMENT_KANJI_INPUT_ID }
 							label={ __(
 								'Customer bank statement (kanji)',
 								'woocommerce'
@@ -980,6 +1267,7 @@ const TransactionsSettingsSection = ( {
 							__next40pxDefaultSize
 						/>
 						<TextControl
+							id={ ACCOUNT_STATEMENT_KANA_INPUT_ID }
 							label={ __(
 								'Customer bank statement (kana)',
 								'woocommerce'
@@ -1010,6 +1298,7 @@ const TransactionsSettingsSection = ( {
 							) }
 						</div>
 						<TextControl
+							id={ SUPPORT_EMAIL_INPUT_ID }
 							label={ __( 'Support email', 'woocommerce' ) }
 							help={ __(
 								'This may be visible on receipts, invoices, and automated emails from your store.',
@@ -1329,6 +1618,7 @@ const NotificationsSettingsSection = ( {
 					) }
 				</div>
 				<TextControl
+					id={ NOTIFICATIONS_EMAIL_INPUT_ID }
 					label={ __( 'Email address', 'woocommerce' ) }
 					type="email"
 					value={ email }
@@ -1519,11 +1809,14 @@ const AdvancedSettingsSection = () => {
 const SaveSettingsSection = ( { disabled }: { disabled?: boolean } ) => {
 	const { saveSettings, isSaving, isLoading, isDirty } = useSettings();
 	const settings = asSettingsRecord( useGetSettings() );
+	const savingError = useGetSavingError();
 	const [ statusMessage, setStatusMessage ] = useState( '' );
 	const [ initialIsWooPayEnabled, setInitialIsWooPayEnabled ] = useState<
 		boolean | null
 	>( null );
 	const [ isWooPayDisableFeedbackOpen, setWooPayDisableFeedbackOpen ] =
+		useState( false );
+	const [ shouldFocusSavingError, setShouldFocusSavingError ] =
 		useState( false );
 	const [ localWooPayLastDisableDate, setLocalWooPayLastDisableDate ] =
 		useState( asString( settings.woopay_last_disable_date ) );
@@ -1547,6 +1840,15 @@ const SaveSettingsSection = ( { disabled }: { disabled?: boolean } ) => {
 		setLocalWooPayLastDisableDate( wooPayLastDisableDate );
 	}, [ wooPayLastDisableDate ] );
 
+	useEffect( () => {
+		if ( ! shouldFocusSavingError ) {
+			return;
+		}
+
+		focusFirstSavingErrorField( savingError );
+		setShouldFocusSavingError( false );
+	}, [ savingError, shouldFocusSavingError ] );
+
 	const saveOnClick = async () => {
 		if ( isDisabled ) {
 			return;
@@ -1561,6 +1863,7 @@ const SaveSettingsSection = ( { disabled }: { disabled?: boolean } ) => {
 		);
 
 		if ( ! isSuccess ) {
+			setShouldFocusSavingError( true );
 			return;
 		}
 

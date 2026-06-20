@@ -166,6 +166,75 @@ describe( 'WooPayments settings data store', () => {
 		);
 	} );
 
+	it( 'suppresses the raw server error notice when saving settings fails with field-level details', async () => {
+		const settings = {
+			is_wcpay_enabled: true,
+		};
+		const error = {
+			server_error:
+				'The statement descriptor contains invalid characters.',
+			data: {
+				details: {
+					account_statement_descriptor: {
+						message:
+							'The statement descriptor contains invalid characters.',
+					},
+				},
+			},
+		};
+		mockGetSettings.mockReturnValue( settings );
+
+		const { saveSettings } = await import( '../data/actions' );
+		const action = saveSettings();
+
+		action.next();
+		action.next();
+		let result = action.throw( error );
+		while ( ! result.done ) {
+			result = action.next();
+		}
+
+		expect( result.value ).toBe( false );
+		expect( mockCreateErrorNotice ).toHaveBeenCalledTimes( 1 );
+		expect( mockCreateErrorNotice ).toHaveBeenCalledWith(
+			'Error saving settings.'
+		);
+	} );
+
+	it( 'shows the raw server error notice when saving settings fails without field-level details', async () => {
+		const settings = {
+			is_wcpay_enabled: true,
+		};
+		const error = {
+			server_error: 'The request could not be completed.',
+			data: {
+				details: {},
+			},
+		};
+		mockGetSettings.mockReturnValue( settings );
+
+		const { saveSettings } = await import( '../data/actions' );
+		const action = saveSettings();
+
+		action.next();
+		action.next();
+		let result = action.throw( error );
+		while ( ! result.done ) {
+			result = action.next();
+		}
+
+		expect( result.value ).toBe( false );
+		expect( mockCreateErrorNotice ).toHaveBeenCalledTimes( 2 );
+		expect( mockCreateErrorNotice ).toHaveBeenNthCalledWith(
+			1,
+			'Error saving settings.'
+		);
+		expect( mockCreateErrorNotice ).toHaveBeenNthCalledWith(
+			2,
+			'The request could not be completed.'
+		);
+	} );
+
 	it( 'saves allowlisted options through the preserved option endpoint', async () => {
 		mockDirectApiFetch.mockResolvedValue( {} );
 

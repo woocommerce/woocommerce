@@ -714,7 +714,7 @@ const PmPromotionBadge = ( {
 	);
 };
 
-const DuplicatePaymentMethodNotice = ( {
+export const DuplicatePaymentMethodNotice = ( {
 	paymentMethodId,
 	gatewayIds,
 	dismissedNotices,
@@ -786,7 +786,7 @@ const DuplicatePaymentMethodNotice = ( {
 	);
 };
 
-const getAvailability = (
+export const getPaymentMethodAvailability = (
 	definition: WooPaymentsPaymentMethodDefinition,
 	status: PaymentMethodStatus,
 	isManualCaptureEnabled: boolean
@@ -967,7 +967,7 @@ const PaymentMethodRow = ( {
 	const isEnabled = enabledMethodIds.includes( definition.id );
 	const isLocked = definition.id === 'card' && isEnabled;
 	const status = getStatus( definition, statuses );
-	const availability = getAvailability(
+	const availability = getPaymentMethodAvailability(
 		definition,
 		status,
 		isManualCaptureEnabled

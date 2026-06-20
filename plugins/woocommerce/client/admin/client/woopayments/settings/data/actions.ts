@@ -16,6 +16,9 @@ import { STORE_NAME } from './store-name';
 type SettingsValues = Record< string, unknown >;
 type SettingsSaveError = {
 	server_error?: string;
+	data?: {
+		details?: unknown;
+	};
 };
 type SettingsSaveResponse = {
 	data?: SettingsValues & {
@@ -23,6 +26,17 @@ type SettingsSaveResponse = {
 	};
 	payment_method_statuses?: unknown;
 };
+
+function hasFieldLevelErrorDetails( error: SettingsSaveError ) {
+	const details = error.data?.details;
+
+	return (
+		!! details &&
+		typeof details === 'object' &&
+		! Array.isArray( details ) &&
+		Object.keys( details ).length > 0
+	);
+}
 
 function updateSettingsValues( payload: SettingsValues ) {
 	return {
@@ -212,7 +226,7 @@ export function* saveSettings(): Generator<
 			__( 'Error saving settings.', 'woocommerce' )
 		);
 
-		if ( error?.server_error ) {
+		if ( error?.server_error && ! hasFieldLevelErrorDetails( error ) ) {
 			yield dispatch( 'core/notices' ).createErrorNotice(
 				error.server_error
 			);

@@ -111,6 +111,17 @@ class WooPaymentsSettingsService {
 		'afterpay_clearpay' => array( 'afterpay', 'clearpay' ),
 	);
 
+	private const PAYMENT_REQUEST_DUPLICATE_METHOD_ID = 'apple_pay_google_pay';
+
+	private const FILTER_GATEWAY_DUPLICATE_PAYMENT_METHOD_IDS = 'woocommerce_native_woopayments_gateway_duplicate_payment_method_ids';
+
+	private const PAYMENT_REQUEST_DUPLICATE_GATEWAY_KEYWORDS = array(
+		'apple_pay',
+		'applepay',
+		'google_pay',
+		'googlepay',
+	);
+
 	private const ALLOWED_OPTIONS = array(
 		'wcpay_multi_currency_setup_completed'             => 'bool',
 		'woocommerce_dismissed_todo_tasks'                 => 'array',
@@ -671,6 +682,7 @@ class WooPaymentsSettingsService {
 	private function get_duplicated_payment_method_ids(): array {
 		try {
 			$duplicate_candidates = array();
+			$settings             = $this->get_gateway_settings();
 
 			foreach ( $this->get_registered_payment_gateways() as $gateway ) {
 				if ( ! $this->is_gateway_enabled( $gateway ) ) {
@@ -680,6 +692,14 @@ class WooPaymentsSettingsService {
 				$gateway_id = $this->get_gateway_id( $gateway );
 				if ( '' === $gateway_id ) {
 					continue;
+				}
+
+				foreach ( $this->get_declared_duplicate_payment_method_ids_for_gateway( $gateway, $gateway_id ) as $payment_method_id ) {
+					$duplicate_candidates[ $payment_method_id ][] = $gateway_id;
+				}
+
+				if ( $this->is_payment_request_duplicate_gateway( $gateway, $gateway_id, $settings ) ) {
+					$duplicate_candidates[ self::PAYMENT_REQUEST_DUPLICATE_METHOD_ID ][] = $gateway_id;
 				}
 
 				$payment_method_id = $this->get_duplicate_payment_method_id_for_gateway( $gateway_id );
@@ -726,6 +746,41 @@ class WooPaymentsSettingsService {
 		}
 
 		return $duplicates;
+	}
+
+	/**
+	 * Get payment method duplicate declarations for a gateway.
+	 *
+	 * @param object $gateway    Payment gateway.
+	 * @param string $gateway_id Gateway ID.
+	 * @return string[]
+	 */
+	private function get_declared_duplicate_payment_method_ids_for_gateway( object $gateway, string $gateway_id ): array {
+		/**
+		 * Filters native WooPayments payment method IDs duplicated by a payment gateway.
+		 *
+		 * This gives gateway integrations a precise declaration path without relying on gateway ID
+		 * keywords or private option names. Return native method IDs such as "card" or the
+		 * synthetic express-wallet ID "apple_pay_google_pay".
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param string[] $payment_method_ids Native WooPayments payment method IDs duplicated by the gateway.
+		 * @param string   $gateway_id         Payment gateway ID.
+		 * @param object   $gateway            Payment gateway instance.
+		 */
+		$payment_method_ids = apply_filters(
+			self::FILTER_GATEWAY_DUPLICATE_PAYMENT_METHOD_IDS,
+			array(),
+			$gateway_id,
+			$gateway
+		);
+
+		if ( ! is_array( $payment_method_ids ) ) {
+			return array();
+		}
+
+		return $this->sanitize_duplicate_payment_method_ids( $payment_method_ids );
 	}
 
 	/**
@@ -800,6 +855,51 @@ class WooPaymentsSettingsService {
 	}
 
 	/**
+	 * Tell whether a gateway participates in the Apple Pay / Google Pay duplicate cluster.
+	 *
+	 * @param object              $gateway    Payment gateway.
+	 * @param string              $gateway_id Gateway ID.
+	 * @param array<string,mixed> $settings   Gateway settings.
+	 * @return bool
+	 */
+	private function is_payment_request_duplicate_gateway( object $gateway, string $gateway_id, array $settings ): bool {
+		if ( OrderPaymentStore::GATEWAY_ID === $gateway_id ) {
+			return $this->is_yes( $settings['payment_request'] ?? 'yes' );
+		}
+
+		if ( $this->is_woopayments_gateway_id( $gateway_id ) ) {
+			return false;
+		}
+
+		if ( $this->gateway_id_contains_keyword( $gateway_id, self::PAYMENT_REQUEST_DUPLICATE_GATEWAY_KEYWORDS ) ) {
+			return true;
+		}
+
+		if ( 'stripe' === $gateway_id && $this->is_gateway_option_enabled( $gateway, 'payment_request' ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Tell whether a gateway option is enabled.
+	 *
+	 * @param object $gateway Payment gateway.
+	 * @param string $key     Option key.
+	 * @return bool
+	 */
+	private function is_gateway_option_enabled( object $gateway, string $key ): bool {
+		if ( ! method_exists( $gateway, 'get_option' ) ) {
+			return false;
+		}
+
+		$value = $gateway->get_option( $key );
+
+		return is_scalar( $value ) && $this->is_yes( $value );
+	}
+
+	/**
 	 * Tell whether a gateway ID contains one of the given keywords.
 	 *
 	 * @param string   $gateway_id Gateway ID.
@@ -814,6 +914,31 @@ class WooPaymentsSettingsService {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Sanitize duplicate-detection payment method IDs.
+	 *
+	 * @param mixed[] $payment_method_ids Payment method IDs.
+	 * @return string[]
+	 */
+	private function sanitize_duplicate_payment_method_ids( array $payment_method_ids ): array {
+		$allowed_payment_method_ids = array_merge(
+			self::SUPPORTED_PAYMENT_METHOD_IDS,
+			array( self::PAYMENT_REQUEST_DUPLICATE_METHOD_ID )
+		);
+
+		return array_values(
+			array_unique(
+				array_filter(
+					array_map(
+						static fn( $payment_method_id ): string => is_scalar( $payment_method_id ) ? (string) $payment_method_id : '',
+						$payment_method_ids
+					),
+					static fn( string $payment_method_id ): bool => in_array( $payment_method_id, $allowed_payment_method_ids, true )
+				)
+			)
+		);
 	}
 
 	/**
