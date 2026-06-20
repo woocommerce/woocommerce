@@ -171,4 +171,34 @@ class NativePaymentsRuntimeArbiterTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $this->sut->is_native_runtime_enabled(), 'The native flag reports enabled even while the plugin still owns the runtime.' );
 	}
+
+	/**
+	 * @testdox Native runtime rollout default is fail-closed.
+	 */
+	public function test_native_runtime_rollout_default_is_fail_closed(): void {
+		$this->fake_plugin();
+
+		$this->assertFalse( NativePaymentsRuntimeArbiter::DEFAULT_NATIVE_RUNTIME_ENABLED );
+		$this->assertFalse( $this->sut->is_native_runtime_enabled(), 'Native runtime must stay default-off until the release rollout default is explicitly flipped.' );
+		$this->assertSame( NativePaymentsRuntimeArbiter::OWNER_NONE, $this->sut->get_runtime_owner(), 'With no plugin and default-off native runtime, nobody owns the runtime.' );
+	}
+
+	/**
+	 * @testdox Native runtime rollout filter receives the fail-closed default and can enable native.
+	 */
+	public function test_native_runtime_rollout_filter_receives_default_and_can_enable(): void {
+		$this->fake_plugin();
+		$observed_default = null;
+		add_filter(
+			NativePaymentsRuntimeArbiter::FILTER_NATIVE_ENABLED,
+			static function ( bool $enabled ) use ( &$observed_default ): bool {
+				$observed_default = $enabled;
+				return true;
+			}
+		);
+
+		$this->assertTrue( $this->sut->is_native_runtime_enabled(), 'The rollout filter should still be able to enable native runtime for controlled gates.' );
+		$this->assertSame( NativePaymentsRuntimeArbiter::DEFAULT_NATIVE_RUNTIME_ENABLED, $observed_default, 'The rollout filter should receive the explicit default value.' );
+		$this->assertSame( NativePaymentsRuntimeArbiter::OWNER_NATIVE, $this->sut->get_runtime_owner(), 'Native should own the runtime when the plugin is absent and the rollout filter enables native.' );
+	}
 }

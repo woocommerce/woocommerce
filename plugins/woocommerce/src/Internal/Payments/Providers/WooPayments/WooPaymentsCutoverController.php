@@ -45,6 +45,15 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 	public const FILTER_MANDATORY_CUTOVER_ENABLED = 'woocommerce_woopayments_native_mandatory_cutover_enabled';
 
 	/**
+	 * Default state for mandatory WooPayments native cutover.
+	 *
+	 * This intentionally remains false until the final A5 stage-boundary gates approve the release/default-on flip.
+	 *
+	 * @var bool
+	 */
+	public const DEFAULT_MANDATORY_CUTOVER_ENABLED = false;
+
+	/**
 	 * Filter that reports whether a core-owned WooPayments transport is ready to process after deactivation.
 	 *
 	 * @var string
@@ -618,7 +627,7 @@ class WooPaymentsCutoverController implements RegisterHooksInterface {
 		 *
 		 * @param bool $enabled Whether mandatory cutover is enabled.
 		 */
-		return (bool) apply_filters( self::FILTER_MANDATORY_CUTOVER_ENABLED, false );
+		return (bool) apply_filters( self::FILTER_MANDATORY_CUTOVER_ENABLED, self::DEFAULT_MANDATORY_CUTOVER_ENABLED );
 	}
 
 	/**

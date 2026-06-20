@@ -95,6 +95,15 @@ class NativePaymentsRuntimeArbiter {
 	const FILTER_NATIVE_ENABLED = 'woocommerce_native_payments_enabled';
 
 	/**
+	 * Default state for the native WooPayments runtime rollout.
+	 *
+	 * This intentionally remains false until the final A5 stage-boundary gates approve the release/default-on flip.
+	 *
+	 * @var bool
+	 */
+	public const DEFAULT_NATIVE_RUNTIME_ENABLED = false;
+
+	/**
 	 * The legacy proxy, used for mockable calls to global functions.
 	 *
 	 * @var LegacyProxy
@@ -171,9 +180,9 @@ class NativePaymentsRuntimeArbiter {
 		 *
 		 * @since 11.0.0
 		 *
-		 * @param bool $enabled Whether the native runtime is enabled. Default false.
+		 * @param bool $enabled Whether the native runtime is enabled.
 		 */
-		return (bool) apply_filters( self::FILTER_NATIVE_ENABLED, false );
+		return (bool) apply_filters( self::FILTER_NATIVE_ENABLED, self::DEFAULT_NATIVE_RUNTIME_ENABLED );
 	}
 
 	/**

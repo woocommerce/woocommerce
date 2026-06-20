@@ -334,6 +334,41 @@ class WooPaymentsCutoverControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Mandatory cutover rollout default is fail-closed.
+	 */
+	public function test_mandatory_cutover_rollout_default_is_fail_closed(): void {
+		$this->fake_wp_die_handler();
+		$this->enable_ready_cutover();
+
+		$this->assertFalse( WooPaymentsCutoverController::DEFAULT_MANDATORY_CUTOVER_ENABLED );
+		$this->sut->guard_woopayments_activation( NativePaymentsRuntimeArbiter::PLUGIN_FILE );
+		$this->assertTrue( true, 'Mandatory cutover remains fail-closed until the release rollout default is explicitly flipped.' );
+	}
+
+	/**
+	 * @testdox Mandatory cutover rollout filter receives the fail-closed default and can enable mandatory cutover.
+	 */
+	public function test_mandatory_cutover_rollout_filter_receives_default_and_can_enable(): void {
+		$this->fake_wp_die_handler();
+		$this->enable_ready_cutover();
+		$observed_default = null;
+		add_filter(
+			WooPaymentsCutoverController::FILTER_MANDATORY_CUTOVER_ENABLED,
+			static function ( bool $enabled ) use ( &$observed_default ): bool {
+				$observed_default = $enabled;
+				return true;
+			}
+		);
+
+		$this->expectException( WooPaymentsCutoverBlockedException::class );
+		try {
+			$this->sut->guard_woopayments_activation( NativePaymentsRuntimeArbiter::PLUGIN_FILE );
+		} finally {
+			$this->assertSame( WooPaymentsCutoverController::DEFAULT_MANDATORY_CUTOVER_ENABLED, $observed_default, 'The mandatory cutover filter should receive the explicit default value.' );
+		}
+	}
+
+	/**
 	 * @testdox Mandatory auto-deactivation does not require current user cutover capabilities.
 	 */
 	public function test_mandatory_auto_deactivation_does_not_require_current_user_cutover_capabilities(): void {
