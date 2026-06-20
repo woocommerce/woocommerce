@@ -15,10 +15,12 @@ import {
 import { ExpressCheckoutMethodIcons } from './method-icons';
 import {
 	asSettingsRecord,
+	getExpressCheckoutFeatureFlags,
 	isExpressCheckoutInPaymentMethodsListSupported,
 } from './settings-utils';
 import {
 	useExpressCheckoutInPaymentMethodsEnabledSettings,
+	useGetAvailablePaymentMethodIds,
 	useGetSettings,
 	usePaymentRequestEnabledSettings,
 	usePaymentRequestLocations,
@@ -26,6 +28,12 @@ import {
 
 export const PaymentRequestSettings = () => {
 	const settings = asSettingsRecord( useGetSettings() );
+	const featureFlags = getExpressCheckoutFeatureFlags( settings );
+	const availablePaymentMethodIds =
+		useGetAvailablePaymentMethodIds() as string[];
+	const isAmazonPayAvailable =
+		Array.isArray( availablePaymentMethodIds ) &&
+		availablePaymentMethodIds.includes( 'amazon_pay' );
 	const supportsPaymentMethodsListMode =
 		isExpressCheckoutInPaymentMethodsListSupported( settings );
 	const [ isPaymentRequestEnabled, setIsPaymentRequestEnabled ] =
@@ -51,6 +59,16 @@ export const PaymentRequestSettings = () => {
 	const isPaymentMethodsListMode =
 		supportsPaymentMethodsListMode &&
 		isExpressCheckoutInPaymentMethodsEnabled;
+	const paymentMethodsListModeHelp =
+		featureFlags.amazonPay && isAmazonPayAvailable
+			? __(
+					'Apple Pay, Google Pay, and Amazon Pay will appear as options in the payment methods list instead of as separate express checkout buttons.',
+					'woocommerce'
+			  )
+			: __(
+					'Apple Pay and Google Pay will appear as options in the payment methods list instead of as separate express checkout buttons.',
+					'woocommerce'
+			  );
 
 	return (
 		<>
@@ -94,10 +112,7 @@ export const PaymentRequestSettings = () => {
 							'Enable express checkout methods as options in the payment methods list',
 							'woocommerce'
 						) }
-						help={ __(
-							'Apple Pay and Google Pay will appear as options in the payment methods list instead of as separate express checkout buttons.',
-							'woocommerce'
-						) }
+						help={ paymentMethodsListModeHelp }
 						onChange={ ( value ) =>
 							setIsExpressCheckoutInPaymentMethodsEnabled(
 								Boolean( value )

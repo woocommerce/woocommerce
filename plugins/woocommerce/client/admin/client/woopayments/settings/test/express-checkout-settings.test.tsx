@@ -3,7 +3,7 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import { dispatch } from '@wordpress/data';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -89,6 +89,22 @@ jest.mock( '../bootstrap', () => ( {
 } ) );
 
 const noop = jest.fn();
+const DEFAULT_FEATURE_FLAGS = {
+	woopay: true,
+	woopayExpressCheckout: true,
+	isDynamicCheckoutPlaceOrderButtonEnabled: true,
+	amazonPay: true,
+};
+
+type WindowWithWooSettings = typeof window & {
+	wcSettings?: {
+		storePages?: {
+			privacy?: { permalink?: string };
+			terms?: { permalink?: string };
+		};
+	};
+};
+let originalWooSettings: WindowWithWooSettings[ 'wcSettings' ];
 
 const setWindowProtocol = ( protocol: 'http:' | 'https:' ) => {
 	Object.defineProperty( window, 'location', {
@@ -158,6 +174,12 @@ const setHookDefaults = () => {
 	mockUseGetSettings.mockReturnValue( {
 		is_express_checkout_in_payment_methods_list_supported: true,
 		is_woopay_global_theme_support_eligible: true,
+		feature_flags: DEFAULT_FEATURE_FLAGS,
+		available_payment_method_ids: [
+			'amazon_pay',
+			'apple_pay',
+			'google_pay',
+		],
 		site_logo_url: '',
 		store_name: 'Native test store',
 		woopay_appearance: {
@@ -231,6 +253,7 @@ describe( 'WooPaymentsExpressCheckoutSettings', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 		mockApiFetch.mockResolvedValue( { id: 'file_logo' } );
+		originalWooSettings = ( window as WindowWithWooSettings ).wcSettings;
 		setWindowProtocol( 'http:' );
 		delete ( window as typeof window & { Stripe?: typeof mockStripe } )
 			.Stripe;
@@ -247,6 +270,12 @@ describe( 'WooPaymentsExpressCheckoutSettings', () => {
 		document
 			.querySelectorAll( `script[src="${ STRIPE_SCRIPT_URL }"]` )
 			.forEach( ( script ) => script.remove() );
+		if ( undefined === originalWooSettings ) {
+			delete ( window as WindowWithWooSettings ).wcSettings;
+		} else {
+			( window as WindowWithWooSettings ).wcSettings =
+				originalWooSettings;
+		}
 	} );
 
 	it( 'fails closed for invalid express checkout method IDs', () => {
@@ -338,6 +367,11 @@ describe( 'WooPaymentsExpressCheckoutSettings', () => {
 				name: 'Enable express checkout methods as options in the payment methods list',
 			} )
 		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				'Apple Pay, Google Pay, and Amazon Pay will appear as options in the payment methods list instead of as separate express checkout buttons.'
+			)
+		).toBeInTheDocument();
 		expect( screen.getByLabelText( 'Show on product page' ) ).toBeChecked();
 		expect( screen.getByLabelText( 'Show on cart page' ) ).toBeChecked();
 		expect(
@@ -363,6 +397,105 @@ describe( 'WooPaymentsExpressCheckoutSettings', () => {
 			screen.queryByRole( 'checkbox', {
 				name: 'Enable express checkout methods as options in the payment methods list',
 			} )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'hides payment-methods-list mode when dynamic checkout placement is feature-disabled', async () => {
+		mockUseGetSettings.mockReturnValue( {
+			is_express_checkout_in_payment_methods_list_supported: true,
+			feature_flags: {
+				...DEFAULT_FEATURE_FLAGS,
+				isDynamicCheckoutPlaceOrderButtonEnabled: false,
+			},
+		} );
+		mockUseExpressCheckoutInPaymentMethodsEnabledSettings.mockReturnValue( [
+			true,
+			noop,
+		] );
+
+		const { unmount } = render(
+			<WooPaymentsExpressCheckoutSettings methodId="payment_request" />
+		);
+
+		expect(
+			await screen.findByRole( 'checkbox', {
+				name: 'Enable Apple Pay / Google Pay as express payment buttons',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'checkbox', {
+				name: 'Enable express checkout methods as options in the payment methods list',
+			} )
+		).not.toBeInTheDocument();
+		expect( screen.getByLabelText( 'Show on product page' ) ).toBeChecked();
+		expect( screen.getByLabelText( 'Show on cart page' ) ).toBeChecked();
+		expect(
+			screen.getByLabelText( 'Show on checkout page' )
+		).toBeChecked();
+
+		unmount();
+		render( <WooPaymentsExpressCheckoutSettings methodId="amazon_pay" /> );
+
+		await screen.findByRole( 'heading', { level: 1, name: 'Amazon Pay' } );
+		expect(
+			screen.queryByRole( 'checkbox', {
+				name: 'Enable express checkout methods as options in the payment methods list',
+			} )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'omits Amazon Pay from Apple Pay and Google Pay payment-methods-list help when Amazon Pay is unavailable', async () => {
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'apple_pay',
+			'google_pay',
+		] );
+
+		render(
+			<WooPaymentsExpressCheckoutSettings methodId="payment_request" />
+		);
+
+		await screen.findByRole( 'heading', {
+			level: 1,
+			name: 'Apple Pay / Google Pay',
+		} );
+		expect(
+			screen.getByText(
+				'Apple Pay and Google Pay will appear as options in the payment methods list instead of as separate express checkout buttons.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText(
+				'Apple Pay, Google Pay, and Amazon Pay will appear as options in the payment methods list instead of as separate express checkout buttons.'
+			)
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'omits Amazon Pay from Apple Pay and Google Pay payment-methods-list help when Amazon Pay is feature-disabled', async () => {
+		mockUseGetSettings.mockReturnValue( {
+			is_express_checkout_in_payment_methods_list_supported: true,
+			feature_flags: {
+				...DEFAULT_FEATURE_FLAGS,
+				amazonPay: false,
+			},
+		} );
+
+		render(
+			<WooPaymentsExpressCheckoutSettings methodId="payment_request" />
+		);
+
+		await screen.findByRole( 'heading', {
+			level: 1,
+			name: 'Apple Pay / Google Pay',
+		} );
+		expect(
+			screen.getByText(
+				'Apple Pay and Google Pay will appear as options in the payment methods list instead of as separate express checkout buttons.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText(
+				'Apple Pay, Google Pay, and Amazon Pay will appear as options in the payment methods list instead of as separate express checkout buttons.'
+			)
 		).not.toBeInTheDocument();
 	} );
 
@@ -464,6 +597,144 @@ describe( 'WooPaymentsExpressCheckoutSettings', () => {
 				'Some appearance settings may be overridden in the express payment section of the Cart & Checkout blocks.'
 			)
 		).toBeInTheDocument();
+	} );
+
+	it( 'does not render shared appearance notices when no other express checkout buttons share settings', async () => {
+		mockUseWooPayEnabledSettings.mockReturnValue( [ false, noop ] );
+		mockUseAmazonPayEnabledSettings.mockReturnValue( [ false, noop ] );
+
+		render(
+			<WooPaymentsExpressCheckoutSettings methodId="payment_request" />
+		);
+
+		await screen.findByRole( 'heading', {
+			level: 1,
+			name: 'Apple Pay / Google Pay',
+		} );
+		expect(
+			screen.queryByText( /These settings will also apply to/ )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText(
+				'Some appearance settings may be overridden in the express payment section of the Cart & Checkout blocks.'
+			)
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'excludes feature-disabled WooPay and Amazon Pay from shared appearance notices', async () => {
+		mockUseWooPayEnabledSettings.mockReturnValue( [ true, noop ] );
+		mockUseAmazonPayEnabledSettings.mockReturnValue( [ true, noop ] );
+		mockUseGetSettings.mockReturnValue( {
+			is_express_checkout_in_payment_methods_list_supported: true,
+			feature_flags: {
+				...DEFAULT_FEATURE_FLAGS,
+				woopay: false,
+				amazonPay: false,
+			},
+		} );
+
+		render(
+			<WooPaymentsExpressCheckoutSettings methodId="payment_request" />
+		);
+
+		await screen.findByRole( 'heading', {
+			level: 1,
+			name: 'Apple Pay / Google Pay',
+		} );
+		expect(
+			screen.queryByText( /These settings will also apply to/ )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText(
+				'Some appearance settings may be overridden in the express payment section of the Cart & Checkout blocks.'
+			)
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'excludes WooPay from shared appearance notices when WooPay Express Checkout is feature-disabled', async () => {
+		mockUseWooPayEnabledSettings.mockReturnValue( [ true, noop ] );
+		mockUseGetSettings.mockReturnValue( {
+			is_express_checkout_in_payment_methods_list_supported: true,
+			feature_flags: {
+				...DEFAULT_FEATURE_FLAGS,
+				woopayExpressCheckout: false,
+			},
+		} );
+
+		render(
+			<WooPaymentsExpressCheckoutSettings methodId="payment_request" />
+		);
+
+		await screen.findByRole( 'heading', {
+			level: 1,
+			name: 'Apple Pay / Google Pay',
+		} );
+		expect(
+			screen.getByText(
+				'These settings will also apply to the Amazon Pay button on your store.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText( /WooPay button on your store/ )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'keeps eligible WooPay in shared appearance notices when Amazon Pay is feature-disabled', async () => {
+		mockUseWooPayEnabledSettings.mockReturnValue( [ true, noop ] );
+		mockUseAmazonPayEnabledSettings.mockReturnValue( [ true, noop ] );
+		mockUseGetSettings.mockReturnValue( {
+			is_express_checkout_in_payment_methods_list_supported: true,
+			feature_flags: {
+				...DEFAULT_FEATURE_FLAGS,
+				amazonPay: false,
+			},
+		} );
+
+		render(
+			<WooPaymentsExpressCheckoutSettings methodId="payment_request" />
+		);
+
+		await screen.findByRole( 'heading', {
+			level: 1,
+			name: 'Apple Pay / Google Pay',
+		} );
+		expect(
+			screen.getByText(
+				'These settings will also apply to the WooPay button on your store.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText( /Amazon Pay buttons on your store/ )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'keeps eligible Amazon Pay in shared appearance notices when WooPay is feature-disabled', async () => {
+		mockUseWooPayEnabledSettings.mockReturnValue( [ true, noop ] );
+		mockUseAmazonPayEnabledSettings.mockReturnValue( [ true, noop ] );
+		mockUseGetSettings.mockReturnValue( {
+			is_express_checkout_in_payment_methods_list_supported: true,
+			feature_flags: {
+				...DEFAULT_FEATURE_FLAGS,
+				woopay: false,
+			},
+		} );
+
+		render(
+			<WooPaymentsExpressCheckoutSettings methodId="payment_request" />
+		);
+
+		await screen.findByRole( 'heading', {
+			level: 1,
+			name: 'Apple Pay / Google Pay',
+		} );
+		expect(
+			screen.getByText(
+				'These settings will also apply to the Amazon Pay button on your store.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText( /WooPay button on your store/ )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'shows the activate-express-checkout notice when no previewable express checkouts are enabled', async () => {
@@ -714,6 +985,124 @@ describe( 'WooPaymentsExpressCheckoutSettings', () => {
 		).not.toBeInTheDocument();
 	} );
 
+	it( 'does not render writable WooPay controls when the WooPay feature is unavailable', async () => {
+		mockUseGetSettings.mockReturnValue( {
+			is_express_checkout_in_payment_methods_list_supported: true,
+			feature_flags: {
+				...DEFAULT_FEATURE_FLAGS,
+				woopay: false,
+			},
+		} );
+
+		render( <WooPaymentsExpressCheckoutSettings methodId="woopay" /> );
+
+		await screen.findByRole( 'heading', { level: 1, name: 'WooPay' } );
+		const settingsPage = screen
+			.getByRole( 'heading', { level: 1, name: 'WooPay' } )
+			.closest( '.woopayments-express-checkout-settings' ) as HTMLElement;
+
+		expect(
+			within( settingsPage ).getByText(
+				'WooPay is not available for this store.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'checkbox', { name: 'Enable WooPay' } )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', { name: 'Save changes' } )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'does not render writable WooPay controls when WooPay Express Checkout is feature-disabled', async () => {
+		mockUseGetSettings.mockReturnValue( {
+			is_express_checkout_in_payment_methods_list_supported: true,
+			feature_flags: {
+				...DEFAULT_FEATURE_FLAGS,
+				woopayExpressCheckout: false,
+			},
+		} );
+
+		render( <WooPaymentsExpressCheckoutSettings methodId="woopay" /> );
+
+		await screen.findByRole( 'heading', { level: 1, name: 'WooPay' } );
+		const settingsPage = screen
+			.getByRole( 'heading', { level: 1, name: 'WooPay' } )
+			.closest( '.woopayments-express-checkout-settings' ) as HTMLElement;
+
+		expect(
+			within( settingsPage ).getByText(
+				'WooPay is not available for this store.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'checkbox', { name: 'Enable WooPay' } )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', { name: 'Save changes' } )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'does not render writable Amazon Pay controls when the Amazon Pay feature is unavailable', async () => {
+		mockUseGetSettings.mockReturnValue( {
+			is_express_checkout_in_payment_methods_list_supported: true,
+			feature_flags: {
+				...DEFAULT_FEATURE_FLAGS,
+				amazonPay: false,
+			},
+		} );
+
+		render( <WooPaymentsExpressCheckoutSettings methodId="amazon_pay" /> );
+
+		await screen.findByRole( 'heading', { level: 1, name: 'Amazon Pay' } );
+		const settingsPage = screen
+			.getByRole( 'heading', { level: 1, name: 'Amazon Pay' } )
+			.closest( '.woopayments-express-checkout-settings' ) as HTMLElement;
+
+		expect(
+			within( settingsPage ).getByText(
+				'Amazon Pay is not available for this store.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'checkbox', {
+				name: 'Enable Amazon Pay as an express payment button',
+			} )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', { name: 'Save changes' } )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'does not render writable Amazon Pay controls when Amazon Pay is unavailable for the account', async () => {
+		mockUseGetSettings.mockReturnValue( {
+			is_express_checkout_in_payment_methods_list_supported: true,
+			feature_flags: DEFAULT_FEATURE_FLAGS,
+			available_payment_method_ids: [ 'apple_pay', 'google_pay' ],
+		} );
+
+		render( <WooPaymentsExpressCheckoutSettings methodId="amazon_pay" /> );
+
+		await screen.findByRole( 'heading', { level: 1, name: 'Amazon Pay' } );
+		const settingsPage = screen
+			.getByRole( 'heading', { level: 1, name: 'Amazon Pay' } )
+			.closest( '.woopayments-express-checkout-settings' ) as HTMLElement;
+
+		expect(
+			within( settingsPage ).getByText(
+				'Amazon Pay is not available for this store.'
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'checkbox', {
+				name: 'Enable Amazon Pay as an express payment button',
+			} )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', { name: 'Save changes' } )
+		).not.toBeInTheDocument();
+	} );
+
 	it( 'renders WooPay detail controls and blocks WooPay while Link is enabled', async () => {
 		mockUseEnabledPaymentMethodIds.mockReturnValue( [
 			[ 'card', 'link' ],
@@ -721,6 +1110,19 @@ describe( 'WooPaymentsExpressCheckoutSettings', () => {
 		] );
 		mockUseWooPayEnabledSettings.mockReturnValue( [ false, noop ] );
 		mockUseWooPayStoreLogo.mockReturnValue( [ '', noop ] );
+		( window as WindowWithWooSettings ).wcSettings = {
+			...( ( window as WindowWithWooSettings ).wcSettings ?? {} ),
+			storePages: {
+				...( ( window as WindowWithWooSettings ).wcSettings
+					?.storePages ?? {} ),
+				privacy: {
+					permalink: 'https://example.test/privacy-policy/',
+				},
+				terms: {
+					permalink: 'https://example.test/terms-and-conditions/',
+				},
+			},
+		};
 
 		render( <WooPaymentsExpressCheckoutSettings methodId="woopay" /> );
 
@@ -741,6 +1143,32 @@ describe( 'WooPaymentsExpressCheckoutSettings', () => {
 		expect(
 			screen.getByText( /WooCommerce Terms of Service/ )
 		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'link', { name: /^WooPay/ } )
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/document/woopay-merchant-documentation/'
+		);
+		expect(
+			screen.getByRole( 'link', { name: /^privacy policy/ } )
+		).toHaveAttribute( 'href', 'https://example.test/privacy-policy/' );
+		expect(
+			screen.getByRole( 'link', {
+				name: /^terms of service/,
+			} )
+		).toHaveAttribute(
+			'href',
+			'https://example.test/terms-and-conditions/'
+		);
+		expect(
+			screen
+				.getAllByRole( 'link', { name: /^Learn more/ } )
+				.filter(
+					( link ) =>
+						link.getAttribute( 'href' ) ===
+						'https://woocommerce.com/document/woopay-merchant-documentation/#checkout-appearance'
+				)
+		).toHaveLength( 2 );
 		expect(
 			screen.getByLabelText( 'Checkout policies' )
 		).toBeInTheDocument();

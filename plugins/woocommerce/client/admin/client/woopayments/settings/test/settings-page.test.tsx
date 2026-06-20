@@ -169,13 +169,20 @@ jest.mock( '../data/hooks', () => ( {
 	useWooPayLocations: () => mockUseWooPayLocations(),
 	useAmazonPayLocations: () => mockUseAmazonPayLocations(),
 	useAmazonPayEnabledSettings: () => mockUseAmazonPayEnabledSettings(),
-	useLinkEnabledSettings: () => mockUseLinkEnabledSettings(),
+	useLinkEnabledSettings: ( isWooPayBlockingLink?: boolean ) =>
+		mockUseLinkEnabledSettings( isWooPayBlockingLink ),
 	useWooPayShowIncompatibilityNotice: () =>
 		mockUseWooPayShowIncompatibilityNotice(),
 	useGetSavingError: () => mockUseGetSavingError(),
 } ) );
 
 const noop = jest.fn();
+const DEFAULT_FEATURE_FLAGS = {
+	woopay: true,
+	woopayExpressCheckout: true,
+	isDynamicCheckoutPlaceOrderButtonEnabled: true,
+	amazonPay: true,
+};
 
 const getDefaultAccountResponse = ( {
 	documentsEnabled = true,
@@ -229,6 +236,7 @@ const setHookDefaults = () => {
 		account_country: 'US',
 		store_currency: 'USD',
 		is_multi_currency_enabled: true,
+		feature_flags: DEFAULT_FEATURE_FLAGS,
 		available_payment_method_ids: [
 			'card',
 			'link',
@@ -1154,6 +1162,193 @@ describe( 'WooPaymentsSettingsPage', () => {
 				'path=%2Fwoopayments%2Fsettings%2Fexpress-checkout%2Famazon_pay'
 			)
 		);
+	} );
+
+	it( 'hides the WooPay express checkout row when the WooPay feature flag is disabled', async () => {
+		const setIsLinkEnabled = jest.fn();
+
+		mockUseGetSettings.mockReturnValue( {
+			account_country: 'US',
+			store_currency: 'USD',
+			is_multi_currency_enabled: true,
+			feature_flags: {
+				...DEFAULT_FEATURE_FLAGS,
+				woopay: false,
+			},
+			available_payment_method_ids: [
+				'card',
+				'link',
+				'amazon_pay',
+				'apple_pay',
+				'google_pay',
+			],
+		} );
+		mockUseLinkEnabledSettings.mockImplementation(
+			( isWooPayBlockingLink?: boolean ) => {
+				const shouldBlockLink = isWooPayBlockingLink ?? true;
+				const setLinkEnabledIfNotBlocked = ( isEnabled: boolean ) => {
+					if ( shouldBlockLink ) {
+						return;
+					}
+
+					setIsLinkEnabled( isEnabled );
+				};
+
+				return [ false, setLinkEnabledIfNotBlocked, shouldBlockLink ];
+			}
+		);
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const expressCheckoutsSection = screen
+			.getByRole( 'heading', { name: 'Express checkouts' } )
+			.closest( '.woopayments-settings-section' ) as HTMLElement;
+
+		expect(
+			within( expressCheckoutsSection ).queryByRole( 'checkbox', {
+				name: 'WooPay',
+			} )
+		).not.toBeInTheDocument();
+		expect(
+			within( expressCheckoutsSection ).queryByRole( 'link', {
+				name: 'Customize WooPay',
+			} )
+		).not.toBeInTheDocument();
+		expect(
+			within( expressCheckoutsSection ).getByRole( 'checkbox', {
+				name: 'Amazon Pay',
+			} )
+		).toBeInTheDocument();
+		expect(
+			within( expressCheckoutsSection ).queryByText(
+				'To enable Link by Stripe, you must first disable WooPay.'
+			)
+		).not.toBeInTheDocument();
+
+		const linkCheckbox = within( expressCheckoutsSection ).getByRole(
+			'checkbox',
+			{
+				name: 'Link by Stripe',
+			}
+		);
+
+		expect( linkCheckbox ).toBeEnabled();
+		await userEvent.click( linkCheckbox );
+		expect( setIsLinkEnabled ).toHaveBeenCalledWith( true );
+	} );
+
+	it( 'hides the WooPay express checkout row when the WooPay Express Checkout feature flag is disabled', async () => {
+		const setIsLinkEnabled = jest.fn();
+
+		mockUseGetSettings.mockReturnValue( {
+			account_country: 'US',
+			store_currency: 'USD',
+			is_multi_currency_enabled: true,
+			feature_flags: {
+				...DEFAULT_FEATURE_FLAGS,
+				woopayExpressCheckout: false,
+			},
+			available_payment_method_ids: [
+				'card',
+				'link',
+				'amazon_pay',
+				'apple_pay',
+				'google_pay',
+			],
+		} );
+		mockUseLinkEnabledSettings.mockImplementation(
+			( isWooPayBlockingLink?: boolean ) => {
+				const shouldBlockLink = isWooPayBlockingLink ?? true;
+				const setLinkEnabledIfNotBlocked = ( isEnabled: boolean ) => {
+					if ( shouldBlockLink ) {
+						return;
+					}
+
+					setIsLinkEnabled( isEnabled );
+				};
+
+				return [ false, setLinkEnabledIfNotBlocked, shouldBlockLink ];
+			}
+		);
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const expressCheckoutsSection = screen
+			.getByRole( 'heading', { name: 'Express checkouts' } )
+			.closest( '.woopayments-settings-section' ) as HTMLElement;
+
+		expect(
+			within( expressCheckoutsSection ).queryByRole( 'checkbox', {
+				name: 'WooPay',
+			} )
+		).not.toBeInTheDocument();
+		expect(
+			within( expressCheckoutsSection ).queryByRole( 'link', {
+				name: 'Customize WooPay',
+			} )
+		).not.toBeInTheDocument();
+		expect(
+			within( expressCheckoutsSection ).getByRole( 'checkbox', {
+				name: 'Amazon Pay',
+			} )
+		).toBeInTheDocument();
+
+		const linkCheckbox = within( expressCheckoutsSection ).getByRole(
+			'checkbox',
+			{
+				name: 'Link by Stripe',
+			}
+		);
+
+		expect( linkCheckbox ).toBeEnabled();
+		await userEvent.click( linkCheckbox );
+		expect( setIsLinkEnabled ).toHaveBeenCalledWith( true );
+	} );
+
+	it( 'hides the Amazon Pay express checkout row when the Amazon Pay feature flag is disabled', () => {
+		mockUseGetSettings.mockReturnValue( {
+			account_country: 'US',
+			store_currency: 'USD',
+			is_multi_currency_enabled: true,
+			feature_flags: {
+				...DEFAULT_FEATURE_FLAGS,
+				amazonPay: false,
+			},
+			available_payment_method_ids: [
+				'card',
+				'link',
+				'amazon_pay',
+				'apple_pay',
+				'google_pay',
+			],
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const expressCheckoutsSection = screen
+			.getByRole( 'heading', { name: 'Express checkouts' } )
+			.closest( '.woopayments-settings-section' ) as HTMLElement;
+
+		expect(
+			within( expressCheckoutsSection ).queryByRole( 'checkbox', {
+				name: 'Amazon Pay',
+			} )
+		).not.toBeInTheDocument();
+		expect(
+			within( expressCheckoutsSection ).queryByRole( 'link', {
+				name: 'Customize Amazon Pay',
+			} )
+		).not.toBeInTheDocument();
+		expect(
+			within( expressCheckoutsSection ).getByRole( 'checkbox', {
+				name: 'Apple Pay / Google Pay',
+			} )
+		).toBeInTheDocument();
+		expect(
+			within( expressCheckoutsSection ).getByRole( 'checkbox', {
+				name: 'WooPay',
+			} )
+		).toBeInTheDocument();
 	} );
 
 	it( 'renders express checkout legal links and read-more actions', () => {

@@ -77,6 +77,9 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 		delete_option( '_wcpay_feature_customer_multi_currency' );
 		delete_option( '_wcpay_feature_subscriptions' );
 		delete_option( '_wcpay_feature_stripe_billing' );
+		delete_option( '_wcpay_feature_woopay_express_checkout' );
+		delete_option( '_wcpay_feature_dynamic_checkout_place_order_button' );
+		delete_option( '_wcpay_feature_amazon_pay' );
 		delete_option( '_wcpay_pm_promotion_dismissals' );
 		delete_option( 'wcpay_duplicate_payment_method_notices_dismissed' );
 		delete_option( 'wcpay_fraud_protection_welcome_tour_dismissed' );
@@ -162,19 +165,20 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 			'wcpay_account_data',
 			array(
 				'data'    => array(
-					'account_id'              => 'acct_native_test',
-					'is_live'                 => true,
-					'test_publishable_key'    => 'pk_test_native',
-					'live_publishable_key'    => 'pk_live_native',
+					'account_id'                 => 'acct_native_test',
+					'is_live'                    => true,
+					'platform_checkout_eligible' => true,
+					'test_publishable_key'       => 'pk_test_native',
+					'live_publishable_key'       => 'pk_live_native',
 					'platform_global_theme_support_enabled' => true,
-					'capabilities'            => array(
+					'capabilities'               => array(
 						'card_payments' => 'active',
 						'link_payments' => 'unrequested',
 					),
-					'capability_requirements' => array(
+					'capability_requirements'    => array(
 						'link_payments' => array( 'currently_due' => array( 'tos_acceptance.date' ) ),
 					),
-					'fees'                    => array(
+					'fees'                       => array(
 						'card'           => array(
 							'base'       => array(
 								'percentage_rate' => 0.029,
@@ -211,7 +215,7 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 							),
 						),
 					),
-					'store_currencies'        => array(
+					'store_currencies'           => array(
 						'default'   => 'usd',
 						'supported' => array( 'usd' ),
 					),
@@ -274,6 +278,15 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $settings['is_woopay_global_theme_support_enabled'] );
 		$this->assertTrue( $settings['is_woopay_global_theme_support_eligible'] );
 		$this->assertTrue( $settings['is_express_checkout_in_payment_methods_list_supported'] );
+		$this->assertSame(
+			array(
+				'woopay'                                   => true,
+				'woopayExpressCheckout'                    => true,
+				'isDynamicCheckoutPlaceOrderButtonEnabled' => true,
+				'amazonPay'                                => true,
+			),
+			$settings['feature_flags']
+		);
 		$this->assertTrue( $settings['show_woopay_incompatibility_notice'] );
 		$this->assertSame( 'Custom WooPay message.', $settings['woopay_custom_message'] );
 		$this->assertSame( 'file_logo', $settings['woopay_store_logo'] );
@@ -330,6 +343,83 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'is_migrating_stripe_billing', $settings );
 		$this->assertArrayNotHasKey( 'stripe_billing_subscription_count', $settings );
 		$this->assertArrayNotHasKey( 'stripe_billing_migrated_count', $settings );
+	}
+
+	/**
+	 * @testdox Should expose disabled express checkout feature flags without mutating saved settings.
+	 */
+	public function test_get_settings_exposes_disabled_express_checkout_feature_flags(): void {
+		update_option( '_wcpay_feature_woopay_express_checkout', '0' );
+		update_option( '_wcpay_feature_dynamic_checkout_place_order_button', '0' );
+		update_option( '_wcpay_feature_amazon_pay', '0' );
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'platform_checkout' => 'yes',
+			)
+		);
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data'    => array(
+					'account_id'                 => 'acct_native_test',
+					'is_live'                    => true,
+					'platform_checkout_eligible' => true,
+				),
+				'fetched' => time(),
+				'errored' => false,
+			)
+		);
+
+		$settings = $this->sut->get_settings();
+
+		$this->assertTrue( $settings['is_woopay_enabled'], 'The saved WooPay setting should remain independent of express feature flags.' );
+		$this->assertSame(
+			array(
+				'woopay'                                   => true,
+				'woopayExpressCheckout'                    => false,
+				'isDynamicCheckoutPlaceOrderButtonEnabled' => false,
+				'amazonPay'                                => false,
+			),
+			$settings['feature_flags']
+		);
+	}
+
+	/**
+	 * @testdox Should expose WooPay eligibility separately from the saved WooPay setting.
+	 */
+	public function test_get_settings_exposes_woopay_feature_eligibility_separately_from_saved_setting(): void {
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'platform_checkout' => 'yes',
+			)
+		);
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data'    => array(
+					'account_id'                 => 'acct_native_test',
+					'is_live'                    => true,
+					'platform_checkout_eligible' => false,
+				),
+				'fetched' => time(),
+				'errored' => false,
+			)
+		);
+
+		$settings = $this->sut->get_settings();
+
+		$this->assertTrue( $settings['is_woopay_enabled'], 'The saved WooPay setting should remain visible even when the account is not eligible.' );
+		$this->assertSame(
+			array(
+				'woopay'                                   => false,
+				'woopayExpressCheckout'                    => true,
+				'isDynamicCheckoutPlaceOrderButtonEnabled' => true,
+				'amazonPay'                                => true,
+			),
+			$settings['feature_flags']
+		);
 	}
 
 	/**
@@ -1590,6 +1680,7 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 			'fraud_protection',
 			'fraud_protection_allowed_countries',
 			'is_fraud_protection_review_feature_active',
+			'feature_flags',
 			'express_checkout_product_methods',
 			'express_checkout_cart_methods',
 			'express_checkout_checkout_methods',

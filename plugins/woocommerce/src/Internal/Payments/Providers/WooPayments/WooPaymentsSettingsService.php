@@ -28,6 +28,12 @@ class WooPaymentsSettingsService {
 
 	private const WCPAY_SUBSCRIPTIONS_FLAG_OPTION = '_wcpay_feature_subscriptions';
 
+	private const WOOPAY_EXPRESS_CHECKOUT_FLAG_OPTION = '_wcpay_feature_woopay_express_checkout';
+
+	private const DYNAMIC_CHECKOUT_PLACE_ORDER_BUTTON_FLAG_OPTION = '_wcpay_feature_dynamic_checkout_place_order_button';
+
+	private const AMAZON_PAY_FLAG_OPTION = '_wcpay_feature_amazon_pay';
+
 	private const SUPPORTED_PAYMENT_METHOD_IDS = array(
 		'alipay',
 		'amazon_pay',
@@ -266,6 +272,7 @@ class WooPaymentsSettingsService {
 			'is_wcpay_subscriptions_enabled'             => '1' === (string) get_option( self::WCPAY_SUBSCRIPTIONS_FLAG_OPTION, '0' ),
 			'is_wcpay_subscriptions_eligible'            => $this->is_subscriptions_eligible(),
 			'is_subscriptions_plugin_active'             => class_exists( 'WC_Subscriptions' ),
+			'feature_flags'                              => $this->get_feature_flags(),
 			'account_country'                            => $account_fields['account_country'],
 			'account_statement_descriptor'               => $account_fields['account_statement_descriptor'],
 			'account_statement_descriptor_kanji'         => $account_fields['account_statement_descriptor_kanji'],
@@ -358,6 +365,50 @@ class WooPaymentsSettingsService {
 		$account_data = $this->account_service->get_cached_account_data();
 
 		return ! empty( $account_data['platform_global_theme_support_enabled'] );
+	}
+
+	/**
+	 * Get feature flags consumed by the native WooPayments settings UI.
+	 *
+	 * @return array<string,bool>
+	 */
+	private function get_feature_flags(): array {
+		$is_woopay_eligible = $this->is_woopay_eligible();
+
+		return array(
+			'woopay'                                   => $is_woopay_eligible,
+			'woopayExpressCheckout'                    => $this->is_feature_flag_enabled( self::WOOPAY_EXPRESS_CHECKOUT_FLAG_OPTION, true ),
+			'isDynamicCheckoutPlaceOrderButtonEnabled' => $this->is_feature_flag_enabled( self::DYNAMIC_CHECKOUT_PLACE_ORDER_BUTTON_FLAG_OPTION, true ),
+			'amazonPay'                                => $this->is_feature_flag_enabled( self::AMAZON_PAY_FLAG_OPTION, true ),
+		);
+	}
+
+	/**
+	 * Tell whether the connected account can use WooPay surfaces.
+	 *
+	 * @return bool
+	 */
+	private function is_woopay_eligible(): bool {
+		if ( ! class_exists( 'Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute' ) ) {
+			return false;
+		}
+
+		$account_data = $this->account_service->get_cached_account_data();
+
+		return ! empty( $account_data['platform_checkout_eligible'] )
+			&& ! $this->account_service->is_account_rejected()
+			&& ! $this->account_service->is_account_under_review();
+	}
+
+	/**
+	 * Tell whether a WooPayments feature flag option is enabled.
+	 *
+	 * @param string $option_name Feature flag option name.
+	 * @param bool   $default_value Default flag value.
+	 * @return bool
+	 */
+	private function is_feature_flag_enabled( string $option_name, bool $default_value ): bool {
+		return '1' === (string) get_option( $option_name, $default_value ? '1' : '0' );
 	}
 
 	/**

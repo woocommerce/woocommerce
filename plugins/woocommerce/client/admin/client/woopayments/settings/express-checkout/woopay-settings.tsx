@@ -25,7 +25,11 @@ import {
 	ExpressCheckoutSettingsSection,
 } from './components';
 import { ExpressCheckoutMethodIcons } from './method-icons';
-import { asSettingsRecord, asString } from './settings-utils';
+import {
+	asSettingsRecord,
+	asString,
+	getExpressCheckoutFeatureFlags,
+} from './settings-utils';
 import {
 	useEnabledPaymentMethodIds,
 	useGetSettings,
@@ -39,6 +43,29 @@ import {
 import { WooPayPreview } from './woopay-preview';
 
 const MAX_LOGO_FILE_SIZE = 510000;
+const WOOPAY_MERCHANT_DOCS_URL =
+	'https://woocommerce.com/document/woopay-merchant-documentation/';
+const WOOPAY_CHECKOUT_APPEARANCE_DOCS_URL =
+	'https://woocommerce.com/document/woopay-merchant-documentation/#checkout-appearance';
+
+type WindowWithWooSettings = typeof window & {
+	wcSettings?: {
+		storePages?: {
+			privacy?: { permalink?: string };
+			terms?: { permalink?: string };
+		};
+	};
+};
+
+const getStorePagePermalink = ( page: 'privacy' | 'terms' ) => {
+	const storePages =
+		typeof window !== 'undefined'
+			? ( window as WindowWithWooSettings ).wcSettings?.storePages
+			: undefined;
+	const permalink = storePages?.[ page ]?.permalink;
+
+	return typeof permalink === 'string' && permalink ? permalink : undefined;
+};
 
 const WooPayLogoUpload = ( {
 	logoId,
@@ -185,6 +212,7 @@ const WooPayLogoUpload = ( {
 
 export const WooPaySettings = () => {
 	const settings = asSettingsRecord( useGetSettings() );
+	const featureFlags = getExpressCheckoutFeatureFlags( settings );
 	const [ enabledMethodIds ] = useEnabledPaymentMethodIds() as [ string[] ];
 	const [ isWooPayEnabled, setIsWooPayEnabled ] =
 		useWooPayEnabledSettings() as [ boolean, ( value: boolean ) => void ];
@@ -216,6 +244,22 @@ export const WooPaySettings = () => {
 	const previewFontRules = isWooPayGlobalThemeSupportEnabled
 		? settings.woopay_font_rules
 		: undefined;
+	const privacyPolicyPermalink = getStorePagePermalink( 'privacy' );
+	const termsOfServicePermalink = getStorePagePermalink( 'terms' );
+	const privacyPolicyHelp = privacyPolicyPermalink ? (
+		<ExternalLink href={ privacyPolicyPermalink }>
+			{ __( 'privacy policy', 'woocommerce' ) }
+		</ExternalLink>
+	) : (
+		__( 'privacy policy', 'woocommerce' )
+	);
+	const termsOfServiceHelp = termsOfServicePermalink ? (
+		<ExternalLink href={ termsOfServicePermalink }>
+			{ __( 'terms of service', 'woocommerce' ) }
+		</ExternalLink>
+	) : (
+		__( 'terms of service', 'woocommerce' )
+	);
 
 	return (
 		<>
@@ -264,7 +308,14 @@ export const WooPaySettings = () => {
 						) : (
 							<>
 								{ __(
-									'When enabled, customers will be able to checkout using WooPay. In order to use WooPay, you must agree to our ',
+									'When enabled, customers will be able to checkout using WooPay. In order to use ',
+									'woocommerce'
+								) }
+								<ExternalLink href={ WOOPAY_MERCHANT_DOCS_URL }>
+									{ __( 'WooPay', 'woocommerce' ) }
+								</ExternalLink>
+								{ __(
+									', you must agree to our ',
 									'woocommerce'
 								) }
 								<ExternalLink href="https://wordpress.com/tos/">
@@ -319,10 +370,21 @@ export const WooPaySettings = () => {
 								'Enable global theme support',
 								'woocommerce'
 							) }
-							help={ __(
-								"When enabled, WooPay checkout will be themed with your store's brand colors and fonts.",
-								'woocommerce'
-							) }
+							help={
+								<>
+									{ __(
+										"When enabled, WooPay checkout will be themed with your store's brand colors and fonts. ",
+										'woocommerce'
+									) }
+									<ExternalLink
+										href={
+											WOOPAY_CHECKOUT_APPEARANCE_DOCS_URL
+										}
+									>
+										{ __( 'Learn more', 'woocommerce' ) }
+									</ExternalLink>
+								</>
+							}
 							onChange={ ( value ) =>
 								setWooPayGlobalThemeSupport( Boolean( value ) )
 							}
@@ -335,10 +397,24 @@ export const WooPaySettings = () => {
 				) }
 				<TextareaControl
 					label={ __( 'Checkout policies', 'woocommerce' ) }
-					help={ __(
-						'Override the default privacy policy and terms of service, or add custom text to WooPay checkout.',
-						'woocommerce'
-					) }
+					help={
+						<>
+							{ __( 'Override the default ', 'woocommerce' ) }
+							{ privacyPolicyHelp }
+							{ __( ' and ', 'woocommerce' ) }
+							{ termsOfServiceHelp }
+							{ __(
+								', or add custom text to WooPay checkout. ',
+								'woocommerce'
+							) }
+							<ExternalLink
+								href={ WOOPAY_CHECKOUT_APPEARANCE_DOCS_URL }
+							>
+								{ __( 'Learn more', 'woocommerce' ) }
+							</ExternalLink>
+							{ __( '.', 'woocommerce' ) }
+						</>
+					}
 					value={ wooPayCustomMessage }
 					onChange={ setWooPayCustomMessage }
 					__nextHasNoMarginBottom
@@ -370,23 +446,25 @@ export const WooPaySettings = () => {
 					</div>
 				</BaseControl>
 			</ExpressCheckoutSettingsSection>
-			<ExpressCheckoutSettingsSection
-				className="woopayments-express-checkout-settings__general"
-				title={ __( 'Settings', 'woocommerce' ) }
-				description={
-					<>
-						<h2>{ __( 'Settings', 'woocommerce' ) }</h2>
-						<p>
-							{ __(
-								'Configure the display of WooPay buttons on your store.',
-								'woocommerce'
-							) }
-						</p>
-					</>
-				}
-			>
-				<ExpressCheckoutAppearanceSettings currentMethod="woopay" />
-			</ExpressCheckoutSettingsSection>
+			{ featureFlags.woopayExpressCheckout && (
+				<ExpressCheckoutSettingsSection
+					className="woopayments-express-checkout-settings__general"
+					title={ __( 'Settings', 'woocommerce' ) }
+					description={
+						<>
+							<h2>{ __( 'Settings', 'woocommerce' ) }</h2>
+							<p>
+								{ __(
+									'Configure the display of WooPay buttons on your store.',
+									'woocommerce'
+								) }
+							</p>
+						</>
+					}
+				>
+					<ExpressCheckoutAppearanceSettings currentMethod="woopay" />
+				</ExpressCheckoutSettingsSection>
+			) }
 		</>
 	);
 };

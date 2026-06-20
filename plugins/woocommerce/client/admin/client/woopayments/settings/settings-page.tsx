@@ -45,6 +45,10 @@ import type { WooPaymentsPaymentMethodDefinition } from './payment-method-defini
 import { PayoutBankAccount } from './payout-bank-account';
 import { SettingsBusyState } from './settings-busy-state';
 import { WooPayDisableFeedback } from './woopay-disable-feedback';
+import {
+	isAmazonPayExpressCheckoutAvailable,
+	isWooPayExpressCheckoutAvailable,
+} from './express-checkout/settings-utils';
 import type { PmPromotion } from '../promotions/types';
 import { SpotlightPromotion } from '../promotions/spotlight';
 import {
@@ -812,15 +816,16 @@ const BuyNowPayLaterSettingsSection = () => {
 };
 
 const ExpressCheckoutSettingsSection = () => {
+	const settings = asSettingsRecord( useGetSettings() );
+	const isWooPayExpressCheckoutAvailableForStore =
+		isWooPayExpressCheckoutAvailable( settings );
 	const [ isPaymentRequestEnabled, setIsPaymentRequestEnabled ] =
 		usePaymentRequestEnabledSettings() as BooleanSetting;
 	const [ isWooPayEnabled, setIsWooPayEnabled ] =
 		useWooPayEnabledSettings() as BooleanSetting;
-	const [ isLinkEnabled, setIsLinkEnabled ] = useLinkEnabledSettings() as [
-		boolean,
-		( isEnabled: boolean ) => void,
-		boolean
-	];
+	const [ isLinkEnabled, setIsLinkEnabled ] = useLinkEnabledSettings(
+		isWooPayExpressCheckoutAvailableForStore && isWooPayEnabled
+	) as [ boolean, ( isEnabled: boolean ) => void, boolean ];
 	const [ enabledMethodIds ] =
 		useEnabledPaymentMethodIds() as StringArraySetting;
 	const [ isAmazonPayEnabled, setIsAmazonPayEnabled ] =
@@ -843,7 +848,7 @@ const ExpressCheckoutSettingsSection = () => {
 		enabledMethodIds.includes( 'card' ) &&
 		availablePaymentMethodIds.includes( 'link' );
 	const isAmazonPayAvailable =
-		availablePaymentMethodIds.includes( 'amazon_pay' );
+		isAmazonPayExpressCheckoutAvailable( settings );
 	const amazonPayAvailability = getPaymentMethodAvailability(
 		AMAZON_PAY_DEFINITION,
 		asSettingsRecord(
@@ -883,8 +888,10 @@ const ExpressCheckoutSettingsSection = () => {
 			`/woopayments/settings/express-checkout/${ methodId }?from=woopayments-settings`
 		);
 
-	const expressRows: ExpressCheckoutOverviewRow[] = [
-		{
+	const expressRows: ExpressCheckoutOverviewRow[] = [];
+
+	if ( isWooPayExpressCheckoutAvailableForStore ) {
+		expressRows.push( {
 			id: 'woopay',
 			title: __( 'WooPay', 'woocommerce' ),
 			checked: isWooPayEnabled,
@@ -916,49 +923,51 @@ const ExpressCheckoutSettingsSection = () => {
 						}
 				  ),
 			notice: wooPayNotice,
-		},
-		{
-			id: 'payment_request',
-			title: __( 'Apple Pay / Google Pay', 'woocommerce' ),
-			checked: isPaymentRequestEnabled,
-			disabled: false,
-			onChange: setIsPaymentRequestEnabled,
-			description: isPaymentRequestEnabled
-				? __(
-						'Allow customers to make payments using Apple Pay and Google Pay.',
+		} );
+	}
+
+	expressRows.push( {
+		id: 'payment_request',
+		title: __( 'Apple Pay / Google Pay', 'woocommerce' ),
+		checked: isPaymentRequestEnabled,
+		disabled: false,
+		onChange: setIsPaymentRequestEnabled,
+		description: isPaymentRequestEnabled
+			? __(
+					'Allow customers to make payments using Apple Pay and Google Pay.',
+					'woocommerce'
+			  )
+			: createInterpolateElement(
+					__(
+						"Allow customers to make payments using Apple Pay and Google Pay. By enabling this feature, you agree to <appleStripeLink>Stripe</appleStripeLink> and <appleLink>Apple</appleLink>'s terms of use. By enabling this feature, you agree to <googleStripeLink>Stripe</googleStripeLink>, and <googleLink>Google</googleLink>'s terms of use.",
 						'woocommerce'
-				  )
-				: createInterpolateElement(
-						__(
-							"Allow customers to make payments using Apple Pay and Google Pay. By enabling this feature, you agree to <appleStripeLink>Stripe</appleStripeLink> and <appleLink>Apple</appleLink>'s terms of use. By enabling this feature, you agree to <googleStripeLink>Stripe</googleStripeLink>, and <googleLink>Google</googleLink>'s terms of use.",
-							'woocommerce'
+					),
+					{
+						appleStripeLink: createTermsLink(
+							'https://stripe.com/apple-pay/legal'
 						),
-						{
-							appleStripeLink: createTermsLink(
-								'https://stripe.com/apple-pay/legal'
-							),
-							appleLink: createTermsLink(
-								'https://developer.apple.com/apple-pay/acceptable-use-guidelines-for-websites/'
-							),
-							googleStripeLink: createTermsLink(
-								'https://stripe.com/apple-pay/legal'
-							),
-							googleLink: createTermsLink(
-								'https://androidpay.developers.google.com/terms/sellertos'
-							),
-						}
-				  ),
-			notice: '',
-			duplicatePaymentMethodId: 'apple_pay_google_pay',
-		},
-	];
+						appleLink: createTermsLink(
+							'https://developer.apple.com/apple-pay/acceptable-use-guidelines-for-websites/'
+						),
+						googleStripeLink: createTermsLink(
+							'https://stripe.com/apple-pay/legal'
+						),
+						googleLink: createTermsLink(
+							'https://androidpay.developers.google.com/terms/sellertos'
+						),
+					}
+			  ),
+		notice: '',
+		duplicatePaymentMethodId: 'apple_pay_google_pay',
+	} );
 
 	if ( isLinkAvailable ) {
 		expressRows.push( {
 			id: 'link',
 			title: __( 'Link by Stripe', 'woocommerce' ),
 			checked: isLinkEnabled,
-			disabled: isWooPayEnabled,
+			disabled:
+				isWooPayExpressCheckoutAvailableForStore && isWooPayEnabled,
 			onChange: setIsLinkEnabled,
 			description: isLinkEnabled
 				? __(
@@ -979,12 +988,13 @@ const ExpressCheckoutSettingsSection = () => {
 							),
 						}
 				  ),
-			notice: isWooPayEnabled
-				? __(
-						'To enable Link by Stripe, you must first disable WooPay.',
-						'woocommerce'
-				  )
-				: '',
+			notice:
+				isWooPayExpressCheckoutAvailableForStore && isWooPayEnabled
+					? __(
+							'To enable Link by Stripe, you must first disable WooPay.',
+							'woocommerce'
+					  )
+					: '',
 			action: (
 				<Button
 					variant="secondary"

@@ -10,7 +10,11 @@ import { __ } from '@wordpress/i18n';
  */
 import { getSettingsPaymentsProviderRouteUrl } from '../../admin/utils';
 import { ExpressCheckoutBusyState, ExpressCheckoutSaveBar } from './components';
-import { asSettingsRecord } from './settings-utils';
+import {
+	asSettingsRecord,
+	isAmazonPayExpressCheckoutAvailable,
+	isWooPayExpressCheckoutAvailable,
+} from './settings-utils';
 import { useGetSettings, useSettings } from '../data/hooks';
 import './style.scss';
 
@@ -44,6 +48,31 @@ const isExpressCheckoutMethodId = (
 	methodId: string
 ): methodId is ExpressCheckoutMethodId =>
 	[ 'woopay', 'payment_request', 'amazon_pay' ].includes( methodId );
+
+const isExpressCheckoutMethodAvailable = (
+	methodId: ExpressCheckoutMethodId,
+	settings: Record< string, unknown >
+) => {
+	if ( methodId === 'woopay' ) {
+		return isWooPayExpressCheckoutAvailable( settings );
+	}
+
+	if ( methodId === 'amazon_pay' ) {
+		return isAmazonPayExpressCheckoutAvailable( settings );
+	}
+
+	return true;
+};
+
+const getExpressCheckoutMethodUnavailableMessage = (
+	methodId: ExpressCheckoutMethodId
+) => {
+	if ( methodId === 'woopay' ) {
+		return __( 'WooPay is not available for this store.', 'woocommerce' );
+	}
+
+	return __( 'Amazon Pay is not available for this store.', 'woocommerce' );
+};
 
 export const WooPaymentsExpressCheckoutSettings = ( {
 	methodId,
@@ -84,6 +113,12 @@ export const WooPaymentsExpressCheckoutSettings = ( {
 		content = (
 			<Notice status="error" isDismissible={ false }>
 				{ __( 'Unable to load WooPayments settings.', 'woocommerce' ) }
+			</Notice>
+		);
+	} else if ( ! isExpressCheckoutMethodAvailable( methodId, settings ) ) {
+		content = (
+			<Notice status="warning" isDismissible={ false }>
+				{ getExpressCheckoutMethodUnavailableMessage( methodId ) }
 			</Notice>
 		);
 	} else {

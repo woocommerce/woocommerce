@@ -8,8 +8,14 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { ExpressCheckoutInlineNotice } from './components';
 import {
+	asSettingsRecord,
+	getExpressCheckoutFeatureFlags,
+	isWooPayExpressCheckoutAvailable,
+} from './settings-utils';
+import {
 	useAmazonPayEnabledSettings,
 	useGetAvailablePaymentMethodIds,
+	useGetSettings,
 	usePaymentRequestEnabledSettings,
 	useWooPayEnabledSettings,
 } from '../data/hooks';
@@ -58,35 +64,44 @@ export const ExpressCheckoutSettingsNotices = ( {
 		boolean
 	];
 	const [ isAmazonPayEnabled ] = useAmazonPayEnabledSettings() as [ boolean ];
+	const settings = asSettingsRecord( useGetSettings() );
+	const featureFlags = getExpressCheckoutFeatureFlags( settings );
 	const availablePaymentMethodIds =
 		useGetAvailablePaymentMethodIds() as string[];
 	const isAmazonPayAvailable =
 		availablePaymentMethodIds.includes( 'amazon_pay' );
+	const isWooPayEffectivelyEnabled =
+		isWooPayEnabled && isWooPayExpressCheckoutAvailable( settings );
+	const isAmazonPayEffectivelyEnabled =
+		isAmazonPayEnabled && featureFlags.amazonPay && isAmazonPayAvailable;
 	const enabledMethods = [
-		currentMethod !== 'woopay' && isWooPayEnabled && METHOD_LABELS.woopay,
+		currentMethod !== 'woopay' &&
+			isWooPayEffectivelyEnabled &&
+			METHOD_LABELS.woopay,
 		currentMethod !== 'payment_request' &&
 			isPaymentRequestEnabled &&
 			METHOD_LABELS.payment_request,
 		currentMethod !== 'amazon_pay' &&
-			isAmazonPayEnabled &&
-			isAmazonPayAvailable &&
+			isAmazonPayEffectivelyEnabled &&
 			METHOD_LABELS.amazon_pay,
 	].filter( Boolean ) as string[];
 
+	if ( enabledMethods.length === 0 ) {
+		return null;
+	}
+
 	return (
 		<>
-			{ enabledMethods.length > 0 && (
-				<ExpressCheckoutInlineNotice>
-					{ sprintf(
-						/* translators: %s: formatted list of express checkout buttons. */
-						__(
-							'These settings will also apply to the %s on your store.',
-							'woocommerce'
-						),
-						formatButtonList( enabledMethods )
-					) }
-				</ExpressCheckoutInlineNotice>
-			) }
+			<ExpressCheckoutInlineNotice>
+				{ sprintf(
+					/* translators: %s: formatted list of express checkout buttons. */
+					__(
+						'These settings will also apply to the %s on your store.',
+						'woocommerce'
+					),
+					formatButtonList( enabledMethods )
+				) }
+			</ExpressCheckoutInlineNotice>
 			<ExpressCheckoutInlineNotice>
 				{ __(
 					'Some appearance settings may be overridden in the express payment section of the Cart & Checkout blocks.',

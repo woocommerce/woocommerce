@@ -329,14 +329,15 @@ const usePaymentMethodEnabled = ( methodId: string ) => {
 export const useAmazonPayEnabledSettings = () =>
 	usePaymentMethodEnabled( 'amazon_pay' );
 
-export const useLinkEnabledSettings = () => {
+export const useLinkEnabledSettings = ( isWooPayBlockingLink?: boolean ) => {
 	const [ isLinkEnabled, updateIsLinkEnabled ] = usePaymentMethodEnabled(
 		'link'
 	) as [ boolean, ( isEnabled: boolean ) => void ];
 	const [ isWooPayEnabled ] = useWooPayEnabledSettings() as [ boolean ];
+	const shouldBlockLink = isWooPayBlockingLink ?? isWooPayEnabled;
 
 	const updateStripeLinkCheckout = ( isEnabled: boolean ) => {
-		if ( isWooPayEnabled ) {
+		if ( shouldBlockLink ) {
 			return;
 		}
 
@@ -347,7 +348,7 @@ export const useLinkEnabledSettings = () => {
 		}
 	};
 
-	return [ isLinkEnabled, updateStripeLinkCheckout, isWooPayEnabled ];
+	return [ isLinkEnabled, updateStripeLinkCheckout, shouldBlockLink ];
 };
 
 export const useWooPayShowIncompatibilityNotice = () =>
