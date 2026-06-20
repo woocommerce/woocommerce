@@ -21,6 +21,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_all_filters( 'wcpay_payment_fields_js_config' );
+		wp_set_current_user( 0 );
 		parent::tearDown();
 	}
 
@@ -62,7 +63,7 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $config['paymentMethodsConfig']['card']['forceNetworkSavedCards'] );
 		$this->assertSame( 'visa', $config['paymentMethodsConfig']['card']['cardBrandIcons'][0]['id'] );
 		$this->assertSame( 'Visa', $config['paymentMethodsConfig']['card']['cardBrandIcons'][0]['alt'] );
-		$this->assertStringContainsString( '/assets/images/payment-methods/visa.svg', $config['paymentMethodsConfig']['card']['cardBrandIcons'][0]['src'] );
+		$this->assertStringContainsString( '/assets/images/payment-methods-cards/visa.svg', $config['paymentMethodsConfig']['card']['cardBrandIcons'][0]['src'] );
 		$this->assertStringContainsString( '4000 0064 2000 0001', $config['paymentMethodsConfig']['card']['testingInstructions'] );
 		$this->assertStringContainsString( 'js-woopayments-copy-test-number', $config['paymentMethodsConfig']['card']['testingInstructions'] );
 		$this->assertStringContainsString( 'Click to copy the test number to clipboard', $config['paymentMethodsConfig']['card']['testingInstructions'] );
@@ -144,6 +145,48 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should hide the card save-payment checkbox for logged-in WooPay shoppers.
+	 */
+	public function test_get_payment_fields_js_config_hides_card_save_option_for_logged_in_woopay_shoppers(): void {
+		wp_set_current_user( self::factory()->user->create() );
+
+		$legacy_runtime  = $this->create_legacy_runtime_for_bridge();
+		$account_service = $this->create_account_service_for_bridge( true );
+		$legacy_runtime->method( 'get_gateway_prepared_customer_data' )->willReturn( array() );
+		$legacy_runtime->method( 'can_handle_checkout_bridge_callbacks' )->willReturn( true );
+
+		$bridge = new WooPaymentsCheckoutBridge();
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( true ), $this->create_frontend_styles_service_for_bridge(), $this->create_frontend_tracking_controller_for_bridge() );
+
+		$config = $bridge->get_payment_fields_js_config();
+
+		$this->assertTrue( $config['isSavedCardsEnabled'] );
+		$this->assertFalse( $config['paymentMethodsConfig']['card']['showSaveOption'] );
+	}
+
+	/**
+	 * @testdox Should hide saved-card controls when saved cards are disabled.
+	 */
+	public function test_get_payment_fields_js_config_hides_saved_card_controls_when_saved_cards_are_disabled(): void {
+		$legacy_runtime  = $this->create_legacy_runtime_for_bridge();
+		$account_service = $this->create_account_service_for_bridge(
+			true,
+			array( 'country' => 'RO' ),
+			array( 'saved_cards' => 'no' )
+		);
+		$legacy_runtime->method( 'get_gateway_prepared_customer_data' )->willReturn( array() );
+		$legacy_runtime->method( 'can_handle_checkout_bridge_callbacks' )->willReturn( true );
+
+		$bridge = new WooPaymentsCheckoutBridge();
+		$bridge->init( $legacy_runtime, $account_service, $this->create_woopay_session_service_for_bridge( false ), $this->create_frontend_styles_service_for_bridge(), $this->create_frontend_tracking_controller_for_bridge() );
+
+		$config = $bridge->get_payment_fields_js_config();
+
+		$this->assertFalse( $config['isSavedCardsEnabled'] );
+		$this->assertFalse( $config['paymentMethodsConfig']['card']['showSaveOption'] );
+	}
+
+	/**
 	 * @testdox Should expose Cartes Bancaires card branding for France merchants.
 	 */
 	public function test_get_payment_fields_js_config_includes_cartes_bancaires_for_france_merchants(): void {
@@ -166,7 +209,9 @@ class WooPaymentsCheckoutBridgeTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'FR', $config['storeCountry'] );
 		$this->assertContains( 'cartes_bancaires', array_column( $icons, 'id' ) );
 		$this->assertContains( 'Cartes Bancaires', array_column( $icons, 'alt' ) );
-		$this->assertStringContainsString( '/assets/images/payment-methods/cartes_bancaires.svg', $icons[6]['src'] );
+		$this->assertStringContainsString( '/assets/images/woopayments-card-brands/jcb.svg', $icons[4]['src'] );
+		$this->assertStringContainsString( '/assets/images/woopayments-card-brands/unionpay.svg', $icons[5]['src'] );
+		$this->assertStringContainsString( '/assets/images/payment-methods-cards/cartes_bancaires.svg', $icons[6]['src'] );
 	}
 
 	/**

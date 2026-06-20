@@ -37,10 +37,51 @@
 		transform: scale(0.9);
 	}
 
+	.woopay-button-content-card {
+		gap: 8px;
+		min-width: 0;
+		padding: 0 14px;
+	}
+
+	.woopay-button-logo {
+		align-items: center;
+		display: flex;
+		flex: 0 0 auto;
+	}
+
+	.woopay-button-separator {
+		background: currentcolor;
+		display: inline-block;
+		flex: 0 0 auto;
+		height: 1.4em;
+		opacity: 0.45;
+		width: 1px;
+	}
+
+	.woopay-button-card-brand {
+		flex: 0 1 auto;
+		font-size: 12px;
+		font-weight: 600;
+		line-height: 1;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.woopay-button-last4 {
+		flex: 0 0 auto;
+		font-size: 15px;
+		font-variant-numeric: tabular-nums;
+		line-height: 1;
+	}
+
 	svg {
 		display: inline-block;
 		flex: 0 0 auto;
 		width: 99px;
+	}
+
+	.woopay-button-logo svg {
+		width: 86px;
 	}
 
 	&[data-type="buy"],
@@ -115,5 +156,17 @@
 
 	.woopay-express-button:focus-visible {
 		outline: 2px solid ButtonText;
+	}
+
+	.woopay-button-separator {
+		background: ButtonText;
+		opacity: 1;
+	}
+}
+
+@media (max-width: 360px) {
+
+	.woopay-button-card-brand {
+		display: none;
 	}
 }

@@ -33,6 +33,7 @@ const cardBrandIcons = Array.isArray( cardConfig?.cardBrandIcons )
 const testModeBadgeLabel = __( 'Test Mode', 'woocommerce' );
 const ariaLabel = isTestMode ? `${ label } ${ testModeBadgeLabel }` : label;
 const saveUserRoots = new WeakMap();
+const copyTestNumberSuccessDuration = 2000;
 
 const TestModeBadge = () => {
 	if ( ! isTestMode ) {
@@ -267,6 +268,15 @@ const getReusablePaymentMethodTerms = ( value ) => {
 	);
 };
 
+const isLinkEnabled = () =>
+	Boolean(
+		settings.paymentMethodsConfig?.link !== undefined &&
+			settings.paymentMethodsConfig?.card !== undefined
+	);
+
+const getStripePaymentMethodTypes = () =>
+	isLinkEnabled() ? [ 'card', 'link' ] : [ 'card' ];
+
 const getStripeElementsOptions = () => {
 	const amount = Number( settings.cartTotal || 0 );
 	const options = {
@@ -274,7 +284,7 @@ const getStripeElementsOptions = () => {
 		loader: 'never',
 		currency: ( settings.currency || 'usd' ).toLowerCase(),
 		paymentMethodCreation: 'manual',
-		paymentMethodTypes: [ 'card' ],
+		paymentMethodTypes: getStripePaymentMethodTypes(),
 	};
 
 	const appearance = getBlocksCheckoutAppearance(
@@ -315,7 +325,7 @@ const getStripePaymentElementOptions = ( shouldSavePayment = false ) => ( {
 	wallets: {
 		applePay: 'never',
 		googlePay: 'never',
-		link: 'never',
+		link: isLinkEnabled() ? 'auto' : 'never',
 	},
 	terms: getReusablePaymentMethodTerms(
 		shouldSavePayment || settings.cartContainsSubscription
@@ -579,11 +589,29 @@ const WooPaymentsContent = ( {
 			);
 			const testNumber = button?.textContent?.trim();
 
-			if ( ! button || ! testNumber || ! window.navigator?.clipboard ) {
+			if ( ! button || ! testNumber ) {
 				return;
 			}
 
-			window.navigator.clipboard.writeText( testNumber );
+			event.preventDefault();
+			button.querySelector( 'i' )?.setAttribute( 'aria-hidden', 'true' );
+
+			if (
+				typeof window.navigator?.clipboard?.writeText === 'function'
+			) {
+				window.navigator.clipboard.writeText( testNumber );
+			} else if ( typeof window.prompt === 'function' ) {
+				// eslint-disable-next-line no-alert
+				window.prompt(
+					__( 'Copy test card number:', 'woocommerce' ),
+					testNumber
+				);
+			}
+
+			button.classList.add( 'state--success' );
+			window.setTimeout( () => {
+				button.classList.remove( 'state--success' );
+			}, copyTestNumberSuccessDuration );
 		};
 
 		document.addEventListener( 'click', copyTestNumber );
@@ -814,8 +842,8 @@ export const getWooPaymentsPaymentMethod = () => ( {
 	ariaLabel,
 	supports: {
 		features: settings?.supports ?? [],
-		showSavedCards: true,
-		showSaveOption: true,
+		showSavedCards: settings?.isSavedCardsEnabled ?? false,
+		showSaveOption: cardConfig?.showSaveOption ?? false,
 	},
 } );
 

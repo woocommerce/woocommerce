@@ -383,6 +383,47 @@ class WooPaymentsWooPaySessionServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should include the current frontend style extractor schema in the cache version.
+	 */
+	public function test_frontend_styles_cache_version_includes_current_extractor_schema(): void {
+		update_option( 'wcpay_styles_cache_version', 'version-one' );
+
+		$service = new WooPaymentsFrontendStylesService();
+
+		$this->assertSame( 'version-one|appearance-extractor-v3', $service->get_styles_cache_version() );
+	}
+
+	/**
+	 * @testdox Should enable WooPay first-party auth only when WooPay express checkout is available.
+	 */
+	public function test_first_party_auth_flag_requires_available_woopay_express_checkout(): void {
+		$this->assertTrue(
+			$this->create_service()->get_woopay_frontend_config( 'checkout' )['isWoopayFirstPartyAuthEnabled'],
+			'US eligible WooPay checkout should enable first-party auth.'
+		);
+
+		$this->assertFalse(
+			$this->create_service( array(), array( 'country' => 'CA' ) )->get_woopay_frontend_config( 'checkout' )['isWoopayFirstPartyAuthEnabled'],
+			'Non-US WooPay accounts should not enable first-party auth.'
+		);
+
+		$this->assertFalse(
+			$this->create_service( array(), array( 'platform_checkout_eligible' => false ) )->get_woopay_frontend_config( 'checkout' )['isWoopayFirstPartyAuthEnabled'],
+			'Accounts that are not eligible for platform checkout should not enable first-party auth.'
+		);
+
+		$this->assertFalse(
+			$this->create_service( array( 'platform_checkout' => 'no' ) )->get_woopay_frontend_config( 'checkout' )['isWoopayFirstPartyAuthEnabled'],
+			'Stores with WooPay disabled should not enable first-party auth.'
+		);
+
+		$this->assertFalse(
+			$this->create_service( array( 'express_checkout_checkout_methods' => array() ) )->get_woopay_frontend_config( 'checkout' )['isWoopayFirstPartyAuthEnabled'],
+			'Checkout contexts without WooPay express checkout should not enable first-party auth.'
+		);
+	}
+
+	/**
 	 * @testdox Should match the extension WooPay button style settings.
 	 */
 	public function test_uses_extension_woopay_button_style_settings(): void {
@@ -566,6 +607,27 @@ class WooPaymentsWooPaySessionServiceTest extends WC_Unit_Test_Case {
 				)
 			)
 		);
+	}
+
+	/**
+	 * @testdox Should ignore appearance stored before the current frontend style extractor schema.
+	 */
+	public function test_ignores_appearance_stored_before_current_frontend_style_extractor_schema(): void {
+		$sut        = $this->create_service();
+		$appearance = $this->get_valid_appearance();
+
+		update_option( 'wcpay_styles_cache_version', 'version-one' );
+		update_option(
+			'wcpay_woopay_checkout_appearance',
+			array(
+				'appearance' => $appearance,
+				'font_rules' => array(),
+				'version'    => 'version-one',
+			)
+		);
+
+		$this->assertSame( array(), $sut->get_woopay_appearance() );
+		$this->assertSame( array(), $sut->get_woopay_font_rules() );
 	}
 
 	/**

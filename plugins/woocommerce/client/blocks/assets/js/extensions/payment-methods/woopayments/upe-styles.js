@@ -1,5 +1,4 @@
 const CACHE_KEY_PREFIX = 'wcpay_appearance_';
-const PMME_RELATIVE_TEXT_SIZE = 0.875;
 const FONT_RULE_DOMAINS = [
 	'fonts.googleapis.com',
 	'fonts.gstatic.com',
@@ -157,8 +156,6 @@ const appearanceSelectors = {
 		containerSelectors: [
 			'.wp-block-woocommerce-checkout-order-summary-block',
 		],
-		pmmeRelativeTextSizeSelector:
-			'.wc-block-components-radio-control__label-group',
 	},
 };
 
@@ -438,6 +435,33 @@ const compositeAgainstWhite = ( color ) => ( {
 const normalizeParsedColorForStripe = ( color ) =>
 	toRgbString( color.a < 1 ? compositeAgainstWhite( color ) : color );
 
+const colorFunctionPatterns = [
+	/color\(\s*srgb\s+[+-]?\d*\.?\d+%?\s+[+-]?\d*\.?\d+%?\s+[+-]?\d*\.?\d+%?(?:\s*\/\s*[+-]?\d*\.?\d+%?)?\s*\)/gi,
+	/rgba?\(\s*[+-]?\d*\.?\d+%?\s+[+-]?\d*\.?\d+%?\s+[+-]?\d*\.?\d+%?(?:\s*\/\s*[+-]?\d*\.?\d+%?)?\s*\)/gi,
+	/rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(?:\s*,\s*(?:0?(\.\d+)?|1?(\.0+)?))?\s*\)/gi,
+];
+
+const containsAlphaColor = ( value ) => {
+	if ( typeof value !== 'string' ) {
+		return false;
+	}
+
+	return colorFunctionPatterns.some( ( pattern ) => {
+		pattern.lastIndex = 0;
+		let match = pattern.exec( value );
+
+		while ( match ) {
+			if ( parseColor( match[ 0 ] )?.a < 1 ) {
+				return true;
+			}
+
+			match = pattern.exec( value );
+		}
+
+		return false;
+	} );
+};
+
 export const normalizeAppearanceValueForStripe = ( value ) => {
 	if ( typeof value !== 'string' ) {
 		return value;
@@ -620,9 +644,13 @@ export const getFieldStyles = (
 
 	validProperties.forEach( ( camelCase ) => {
 		const dashedName = toDashed( camelCase );
-		const propertyValue = normalizeAppearanceValueForStripe(
-			styles.getPropertyValue( dashedName )
-		);
+		const rawPropertyValue = styles.getPropertyValue( dashedName );
+		if ( containsAlphaColor( rawPropertyValue ) ) {
+			return;
+		}
+
+		const propertyValue =
+			normalizeAppearanceValueForStripe( rawPropertyValue );
 		if ( ! propertyValue ) {
 			return;
 		}
@@ -704,38 +732,6 @@ export const getFontRulesFromPage = ( scope = document ) => {
 		.filter( Boolean );
 };
 
-const ensureFontSizeSmallerThan = (
-	selector,
-	fontSize,
-	percentage = PMME_RELATIVE_TEXT_SIZE,
-	scope = document
-) => {
-	const fontSizeNumber = parseFloat( fontSize );
-
-	if ( Number.isNaN( fontSizeNumber ) ) {
-		return fontSize;
-	}
-
-	const elem = scope.querySelector( selector );
-	if ( ! elem ) {
-		return `${ fontSizeNumber * percentage }px`;
-	}
-
-	const styles = ( scope.defaultView || window ).getComputedStyle( elem );
-	const targetFontSize = styles.getPropertyValue( 'font-size' );
-	const targetFontSizeNumber = parseFloat( targetFontSize ) * percentage;
-
-	if ( Number.isNaN( targetFontSizeNumber ) ) {
-		return fontSize;
-	}
-
-	if ( fontSizeNumber > targetFontSizeNumber ) {
-		return `${ targetFontSizeNumber }px`;
-	}
-
-	return `${ fontSizeNumber }px`;
-};
-
 const handleAppearanceForFloatingLabel = (
 	appearance,
 	floatingLabelStyles
@@ -791,6 +787,29 @@ const handleAppearanceForFloatingLabel = (
 	}
 
 	return appearance;
+};
+
+const usesFloatingLabelPattern = ( labelSelector, scope = document ) => {
+	let label;
+	try {
+		label = scope.querySelector( labelSelector );
+	} catch {
+		return true;
+	}
+
+	if ( ! label ) {
+		return true;
+	}
+
+	const position = ( scope.defaultView || window )
+		.getComputedStyle( label )
+		.getPropertyValue( 'position' );
+
+	if ( ! position ) {
+		return true;
+	}
+
+	return position === 'absolute' || position === 'fixed';
 };
 
 export const getAppearance = (
@@ -864,19 +883,14 @@ export const getAppearance = (
 		fontSizeBase: paragraphRules.fontSize,
 	};
 
-	if ( selectors.pmmeRelativeTextSizeSelector && globalRules.fontSizeBase ) {
-		globalRules.fontSizeBase = ensureFontSizeSmallerThan(
-			selectors.pmmeRelativeTextSizeSelector,
-			paragraphRules.fontSize,
-			PMME_RELATIVE_TEXT_SIZE,
-			scope
-		);
-	}
+	const isFloatingLabel =
+		elementsLocation === 'blocks_checkout' &&
+		usesFloatingLabelPattern( selectors.hiddenValidActiveLabel, scope );
 
 	let appearance = {
 		variables: globalRules,
 		theme: isColorLight( backgroundColor ) ? 'stripe' : 'night',
-		labels: 'floating',
+		labels: isFloatingLabel ? 'floating' : 'above',
 		rules: JSON.parse(
 			JSON.stringify( {
 				'.Input': inputRules,
@@ -895,15 +909,17 @@ export const getAppearance = (
 		),
 	};
 
-	appearance = handleAppearanceForFloatingLabel(
-		appearance,
-		getFieldStyles(
-			selectors.hiddenValidActiveLabel,
-			'.Label--floating',
-			null,
-			scope
-		)
-	);
+	if ( isFloatingLabel ) {
+		appearance = handleAppearanceForFloatingLabel(
+			appearance,
+			getFieldStyles(
+				selectors.hiddenValidActiveLabel,
+				'.Label--floating',
+				null,
+				scope
+			)
+		);
+	}
 
 	hiddenElementsForUPE.cleanup( scope );
 	return appearance;

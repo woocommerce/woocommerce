@@ -17,6 +17,8 @@ class WooPaymentsFrontendStylesService {
 
 	private const STYLES_CACHE_VERSION_OPTION = 'wcpay_styles_cache_version';
 
+	private const STYLES_CACHE_SCHEMA_VERSION = 'appearance-extractor-v3';
+
 	/**
 	 * Get the current frontend styles cache version.
 	 *
@@ -30,13 +32,13 @@ class WooPaymentsFrontendStylesService {
 		$version = get_option( self::STYLES_CACHE_VERSION_OPTION );
 
 		if ( is_scalar( $version ) && '' !== (string) $version ) {
-			return sanitize_text_field( (string) $version );
+			return $this->append_schema_version( sanitize_text_field( (string) $version ) );
 		}
 
 		$version = md5( (string) wp_get_theme()->get_stylesheet() . '|' . ( defined( 'WC_VERSION' ) ? WC_VERSION : '' ) );
 		update_option( self::STYLES_CACHE_VERSION_OPTION, $version, true );
 
-		return $version;
+		return $this->append_schema_version( $version );
 	}
 
 	/**
@@ -44,5 +46,15 @@ class WooPaymentsFrontendStylesService {
 	 */
 	public function invalidate_styles_cache_version(): void {
 		delete_option( self::STYLES_CACHE_VERSION_OPTION );
+	}
+
+	/**
+	 * Append the frontend style extractor schema version.
+	 *
+	 * @param string $version Theme/WooCommerce style cache version.
+	 * @return string
+	 */
+	private function append_schema_version( string $version ): string {
+		return $version . '|' . self::STYLES_CACHE_SCHEMA_VERSION;
 	}
 }

@@ -6,10 +6,12 @@ describe( 'WooPayments checkout', () => {
 	let bodyEventHandlers;
 	let elementsMock;
 	let mountPaymentElement;
+	let paymentElementOptions;
 	let stripeMock;
 	let stripeElementsOptions;
 	let submitElements;
 	let unmountPaymentElement;
+	let updatePaymentElement;
 	const originalFetch = window.fetch;
 
 	async function flushPromises() {
@@ -93,8 +95,10 @@ describe( 'WooPayments checkout', () => {
 		bodyEventHandlers = {};
 		submitElements = jest.fn( () => Promise.resolve( {} ) );
 		mountPaymentElement = jest.fn();
+		paymentElementOptions = null;
 		stripeElementsOptions = null;
 		unmountPaymentElement = jest.fn();
+		updatePaymentElement = jest.fn();
 		document.body.innerHTML =
 			'<form class="checkout">' +
 			'<input type="radio" name="payment_method" value="woocommerce_payments" checked />' +
@@ -120,6 +124,7 @@ describe( 'WooPayments checkout', () => {
 			platformTrackerNonce: 'tracks-nonce',
 			paymentMethodsConfig: {
 				card: {
+					isReusable: true,
 					cardBrandIcons: [
 						{
 							id: 'visa',
@@ -153,6 +158,9 @@ describe( 'WooPayments checkout', () => {
 						},
 					],
 				},
+				link: {
+					isReusable: false,
+				},
 			},
 			publishableKey: 'pk_test',
 			woopayPhoneLabel: 'Mobile phone number',
@@ -167,10 +175,14 @@ describe( 'WooPayments checkout', () => {
 				stripeElementsOptions = options;
 				elementsMock = {
 					submit: submitElements,
-					create: jest.fn( () => ( {
-						mount: mountPaymentElement,
-						unmount: unmountPaymentElement,
-					} ) ),
+					create: jest.fn( ( type, options ) => {
+						paymentElementOptions = options;
+						return {
+							mount: mountPaymentElement,
+							unmount: unmountPaymentElement,
+							update: updatePaymentElement,
+						};
+					} ),
 				};
 				return elementsMock;
 			} ),
@@ -199,6 +211,8 @@ describe( 'WooPayments checkout', () => {
 	} );
 
 	afterEach( () => {
+		jest.useRealTimers();
+		jest.restoreAllMocks();
 		delete global.jQuery;
 		delete global.$;
 		delete window.jQuery;
@@ -232,7 +246,7 @@ describe( 'WooPayments checkout', () => {
 			loader: 'never',
 			mode: 'payment',
 			paymentMethodCreation: 'manual',
-			paymentMethodTypes: [ 'card' ],
+			paymentMethodTypes: [ 'card', 'link' ],
 		} );
 	} );
 
@@ -286,6 +300,66 @@ describe( 'WooPayments checkout', () => {
 		}
 	} );
 
+	test( 'omits computed alpha color values from generated classic Stripe Elements appearance rules', () => {
+		document.body.innerHTML =
+			'<form class="checkout">' +
+			'<input type="radio" name="payment_method" value="woocommerce_payments" checked />' +
+			'<p class="form-row"><label for="billing_first_name">First name</label><input id="billing_first_name" type="text" /></p>' +
+			'<div id="wcpay-core-payment-element"></div>' +
+			'<button id="place_order" type="button">Place order</button>' +
+			'</form>';
+		jest.spyOn( window, 'getComputedStyle' ).mockImplementation(
+			( element ) => ( {
+				getPropertyValue: ( property ) => {
+					if ( element.id === 'billing_first_name' ) {
+						return (
+							{
+								border:
+									'1px solid color(srgb 0.168627 0.176471 0.184314 / 0.8)',
+								'border-color':
+									'color(srgb 0.168627 0.176471 0.184314 / 0.8)',
+								'border-style': 'solid',
+								'border-width': '1px',
+								'box-shadow':
+									'rgb(43 45 47 / 0.8) 0px 1px 2px',
+								color: 'rgb(43 45 47)',
+								'font-size': '16px',
+							}[ property ] || ''
+						);
+					}
+
+					return (
+						{
+							'background-color': 'rgb(255, 255, 255)',
+							color: 'rgb(43 45 47)',
+							'font-size': '16px',
+						}[ property ] || ''
+					);
+				},
+			} )
+		);
+
+		require( '../woopayments-checkout' );
+
+		expect( stripeElementsOptions.appearance.rules[ '.Input' ] ).toMatchObject(
+			{
+				borderStyle: 'solid',
+				borderWidth: '1px',
+				color: 'rgb(43, 45, 47)',
+				fontSize: '16px',
+			}
+		);
+		expect(
+			stripeElementsOptions.appearance.rules[ '.Input' ]
+		).not.toHaveProperty( 'border' );
+		expect(
+			stripeElementsOptions.appearance.rules[ '.Input' ]
+		).not.toHaveProperty( 'borderColor' );
+		expect(
+			stripeElementsOptions.appearance.rules[ '.Input' ]
+		).not.toHaveProperty( 'boxShadow' );
+	} );
+
 	test( 'uses setup mode when the checkout total is zero', () => {
 		window.wcpay_core_checkout_config.cartTotal = '0';
 
@@ -295,9 +369,50 @@ describe( 'WooPayments checkout', () => {
 			currency: 'gbp',
 			mode: 'setup',
 			paymentMethodCreation: 'manual',
-			paymentMethodTypes: [ 'card' ],
+			paymentMethodTypes: [ 'card', 'link' ],
 		} );
 		expect( stripeElementsOptions ).not.toHaveProperty( 'amount' );
+	} );
+
+	test( 'passes card PaymentElement fields, wallets, and terms options', () => {
+		require( '../woopayments-checkout' );
+
+		expect( elementsMock.create ).toHaveBeenCalledWith(
+			'payment',
+			expect.objectContaining( {
+				fields: {
+					billingDetails: {
+						name: 'never',
+						email: 'never',
+						phone: 'never',
+						address: {
+							country: 'never',
+							line1: 'never',
+							line2: 'never',
+							city: 'never',
+							state: 'never',
+							postalCode: 'never',
+						},
+					},
+				},
+				wallets: {
+					applePay: 'never',
+					googlePay: 'never',
+					link: 'auto',
+				},
+				terms: {
+					card: 'never',
+				},
+			} )
+		);
+		expect( paymentElementOptions ).toMatchObject( {
+			wallets: {
+				link: 'auto',
+			},
+			terms: {
+				card: 'never',
+			},
+		} );
 	} );
 
 	test( 'uses setup mode on the add-payment-method form', () => {
@@ -313,9 +428,40 @@ describe( 'WooPayments checkout', () => {
 			currency: 'gbp',
 			mode: 'setup',
 			paymentMethodCreation: 'manual',
-			paymentMethodTypes: [ 'card' ],
+			paymentMethodTypes: [ 'card', 'link' ],
 		} );
 		expect( stripeElementsOptions ).not.toHaveProperty( 'amount' );
+		expect( paymentElementOptions ).toMatchObject( {
+			wallets: {
+				link: 'never',
+			},
+		} );
+	} );
+
+	test( 'updates reusable card terms when the save-payment checkbox changes', () => {
+		document.body.innerHTML =
+			'<form class="checkout">' +
+			'<input type="radio" name="payment_method" value="woocommerce_payments" checked />' +
+			'<input id="wc-woocommerce_payments-new-payment-method" type="checkbox" checked />' +
+			'<div id="wcpay-core-payment-element"></div>' +
+			'</form>';
+
+		require( '../woopayments-checkout' );
+
+		document
+			.getElementById( 'wc-woocommerce_payments-new-payment-method' )
+			.dispatchEvent(
+				new window.Event( 'change', {
+					bubbles: true,
+					cancelable: true,
+				} )
+			);
+
+		expect( updatePaymentElement ).toHaveBeenCalledWith( {
+			terms: {
+				card: 'always',
+			},
+		} );
 	} );
 
 	test( 'handles PaymentIntent confirmation hashes through next actions', async () => {
@@ -403,7 +549,15 @@ describe( 'WooPayments checkout', () => {
 		);
 	} );
 
-	test( 'copies the test card number from checkout instructions', () => {
+	function renderTestNumberButton() {
+		document.body.innerHTML +=
+			'<button type="button" class="js-woopayments-copy-test-number">' +
+			'<i></i><span>4242 4242 4242 4242</span></button>';
+
+		return document.querySelector( '.js-woopayments-copy-test-number' );
+	}
+
+	test( 'prevents the default action when copying the test card number', () => {
 		const writeText = jest.fn();
 		Object.defineProperty( window.navigator, 'clipboard', {
 			value: {
@@ -411,15 +565,72 @@ describe( 'WooPayments checkout', () => {
 			},
 			configurable: true,
 		} );
-		document.body.innerHTML +=
-			'<button type="button" class="js-woopayments-copy-test-number">' +
-			'<i></i><span>4242 4242 4242 4242</span></button>';
+		const button = renderTestNumberButton();
+		const event = new window.MouseEvent( 'click', {
+			bubbles: true,
+			cancelable: true,
+		} );
 
 		require( '../woopayments-checkout' );
 
-		document.querySelector( '.js-woopayments-copy-test-number' ).click();
+		button.dispatchEvent( event );
+
+		expect( event.defaultPrevented ).toBe( true );
+	} );
+
+	test( 'copies the test card number with the Clipboard API', () => {
+		const writeText = jest.fn();
+		Object.defineProperty( window.navigator, 'clipboard', {
+			value: {
+				writeText,
+			},
+			configurable: true,
+		} );
+		const button = renderTestNumberButton();
+
+		require( '../woopayments-checkout' );
+
+		button.click();
 
 		expect( writeText ).toHaveBeenCalledWith( '4242 4242 4242 4242' );
+	} );
+
+	test( 'shows the test card number in a prompt when the Clipboard API is unavailable', () => {
+		const prompt = jest
+			.spyOn( window, 'prompt' )
+			.mockImplementation( () => null );
+		const button = renderTestNumberButton();
+
+		require( '../woopayments-checkout' );
+
+		button.click();
+
+		expect( prompt ).toHaveBeenCalledWith(
+			'Copy test card number:',
+			'4242 4242 4242 4242'
+		);
+	} );
+
+	test( 'shows and clears the copied state after copying the test card number', () => {
+		jest.useFakeTimers();
+		const writeText = jest.fn();
+		Object.defineProperty( window.navigator, 'clipboard', {
+			value: {
+				writeText,
+			},
+			configurable: true,
+		} );
+		const button = renderTestNumberButton();
+
+		require( '../woopayments-checkout' );
+
+		button.click();
+
+		expect( button.classList.contains( 'state--success' ) ).toBe( true );
+
+		jest.advanceTimersByTime( 2000 );
+
+		expect( button.classList.contains( 'state--success' ) ).toBe( false );
 	} );
 
 	test( 'hydrates card brand icons with a keyboard accessible popover', () => {

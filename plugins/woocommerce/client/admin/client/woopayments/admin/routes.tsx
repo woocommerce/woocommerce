@@ -157,13 +157,7 @@ const isRouteAvailable = ( routePath: string ) => {
 		settings.wcSettings?.admin?.woopaymentsSettings?.adminRouteAvailability
 			?.allowedRoutes;
 
-	if ( ! allowedRoutes ) {
-		return true;
-	}
-
-	return typeof allowedRoutes[ routePath ] === 'boolean'
-		? allowedRoutes[ routePath ]
-		: true;
+	return allowedRoutes?.[ routePath ] === true;
 };
 
 const LoadingFallback = () => (

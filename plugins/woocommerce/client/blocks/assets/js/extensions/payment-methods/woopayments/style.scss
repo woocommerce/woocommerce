@@ -136,8 +136,25 @@
 		transform: scale( 0.9 );
 	}
 
-	&:focus {
+	&:focus:not(:focus-visible) {
 		outline: none;
+	}
+
+	&:focus-visible,
+	&.state--success {
+		outline: 2px solid currentColor;
+		outline-offset: 2px;
+	}
+
+	&.state--success span {
+		text-decoration: underline;
+	}
+
+	@media ( forced-colors: active ) {
+
+		&.state--success {
+			outline-color: Highlight;
+		}
 	}
 }
 

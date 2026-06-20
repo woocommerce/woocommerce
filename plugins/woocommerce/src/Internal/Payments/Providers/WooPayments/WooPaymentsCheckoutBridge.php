@@ -142,6 +142,21 @@ class WooPaymentsCheckoutBridge {
 	);
 
 	/**
+	 * Shopper-facing card brand icon asset paths.
+	 *
+	 * @var array<string,string>
+	 */
+	private const CARD_BRAND_ICON_ASSETS = array(
+		'visa'             => 'payment-methods-cards/visa.svg',
+		'mastercard'       => 'payment-methods-cards/mastercard.svg',
+		'amex'             => 'payment-methods-cards/amex.svg',
+		'discover'         => 'payment-methods-cards/discover.svg',
+		'jcb'              => 'woopayments-card-brands/jcb.svg',
+		'unionpay'         => 'woopayments-card-brands/unionpay.svg',
+		'cartes_bancaires' => 'payment-methods-cards/cartes_bancaires.svg',
+	);
+
+	/**
 	 * WooPayments legacy runtime.
 	 *
 	 * @var WooPaymentsLegacyRuntime
@@ -211,6 +226,7 @@ class WooPaymentsCheckoutBridge {
 	 */
 	public function get_payment_fields_js_config(): array {
 		$force_network_saved_cards = $this->should_force_network_saved_cards();
+		$saved_cards_enabled       = $this->is_saved_cards_enabled();
 		$config                    = array(
 			'publishableKey'                => $this->get_account_service()->get_publishable_key(),
 			'accountId'                     => $this->get_account_service()->get_account_id(),
@@ -218,7 +234,7 @@ class WooPaymentsCheckoutBridge {
 			'gatewayId'                     => OrderPaymentStore::GATEWAY_ID,
 			'ajaxUrl'                       => admin_url( 'admin-ajax.php' ),
 			'wcAjaxUrl'                     => \WC_AJAX::get_endpoint( '%%endpoint%%' ),
-			'paymentMethodsConfig'          => $this->get_payment_methods_config(),
+			'paymentMethodsConfig'          => $this->get_payment_methods_config( $saved_cards_enabled ),
 			'testMode'                      => $this->get_account_service()->is_test_mode_enabled(),
 			'enabledBillingFields'          => $this->get_enabled_billing_fields(),
 			'currency'                      => get_woocommerce_currency(),
@@ -227,6 +243,7 @@ class WooPaymentsCheckoutBridge {
 			'cartContainsSubscription'      => $this->cart_contains_subscription(),
 			'stylesCacheVersion'            => $this->get_frontend_styles_service()->get_styles_cache_version(),
 			'forceNetworkSavedCards'        => $force_network_saved_cards,
+			'isSavedCardsEnabled'           => $saved_cards_enabled,
 			'customerData'                  => $this->get_legacy_runtime()->get_gateway_prepared_customer_data(),
 			'usesLegacySetupIntentBridge'   => false,
 			'usesLegacyOrderStatusBridge'   => false,
@@ -408,9 +425,10 @@ class WooPaymentsCheckoutBridge {
 	/**
 	 * Get the card-only payment method config for this slice.
 	 *
+	 * @param bool $saved_cards_enabled Whether saved cards are enabled.
 	 * @return array<string,array<string,mixed>>
 	 */
-	private function get_payment_methods_config(): array {
+	private function get_payment_methods_config( bool $saved_cards_enabled ): array {
 		$enabled_method_ids = $this->get_legacy_runtime()->get_gateway_upe_enabled_payment_method_ids();
 		if ( ! empty( $enabled_method_ids ) && ! in_array( 'card', $enabled_method_ids, true ) ) {
 			return array();
@@ -426,7 +444,7 @@ class WooPaymentsCheckoutBridge {
 				'isExpressCheckout'      => false,
 				'forceNetworkSavedCards' => $this->should_force_network_saved_cards(),
 				'cardBrandIcons'         => $this->get_card_brand_icons(),
-				'showSaveOption'         => true,
+				'showSaveOption'         => $this->should_show_card_save_option( $saved_cards_enabled ),
 				'supports'               => self::BLOCKS_SUPPORTS,
 				'testingInstructions'    => $this->get_card_testing_instructions(),
 			),
@@ -469,10 +487,11 @@ class WooPaymentsCheckoutBridge {
 		$icons = array();
 
 		foreach ( $this->get_card_brand_icon_labels() as $brand => $label ) {
-			$icons[] = array(
+			$asset_path = self::CARD_BRAND_ICON_ASSETS[ $brand ] ?? 'payment-methods/' . $brand . '.svg';
+			$icons[]    = array(
 				'id'  => $brand,
 				'alt' => $label,
-				'src' => WC()->plugin_url() . '/assets/images/payment-methods/' . $brand . '.svg',
+				'src' => WC()->plugin_url() . '/assets/images/' . $asset_path,
 			);
 		}
 
@@ -522,6 +541,31 @@ class WooPaymentsCheckoutBridge {
 	 */
 	private function should_force_network_saved_cards(): bool {
 		return $this->is_truthy_gateway_setting( 'force_network_saved_cards' ) || $this->should_use_stripe_platform_for_card_checkout();
+	}
+
+	/**
+	 * Tell whether saved cards are enabled in the gateway settings.
+	 *
+	 * @return bool
+	 */
+	private function is_saved_cards_enabled(): bool {
+		$value = $this->get_account_service()->get_gateway_setting( 'saved_cards', 'yes' );
+
+		return true === $value || 'yes' === $value || '1' === $value || 1 === $value;
+	}
+
+	/**
+	 * Tell whether card checkout should show the WooCommerce save-payment option.
+	 *
+	 * @param bool $saved_cards_enabled Whether saved cards are enabled.
+	 * @return bool
+	 */
+	private function should_show_card_save_option( bool $saved_cards_enabled ): bool {
+		if ( is_user_logged_in() && $this->get_woopay_session_service()->is_woopay_enabled() ) {
+			return false;
+		}
+
+		return $saved_cards_enabled && ! $this->cart_contains_subscription();
 	}
 
 	/**

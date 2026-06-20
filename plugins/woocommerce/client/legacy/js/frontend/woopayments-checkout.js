@@ -71,6 +71,7 @@
 		'form.checkout',
 		'body',
 	];
+	var copyTestNumberSuccessDuration = 2000;
 
 	function isSelectedGateway() {
 		return (
@@ -96,6 +97,7 @@
 	function copyTestNumber( event ) {
 		var button;
 		var testNumber;
+		var icon;
 
 		if ( ! ( event.target instanceof window.Element ) ) {
 			return;
@@ -104,11 +106,29 @@
 		button = event.target.closest( '.js-woopayments-copy-test-number' );
 		testNumber = button && button.textContent ? button.textContent.trim() : '';
 
-		if ( ! button || ! testNumber || ! window.navigator.clipboard ) {
+		if ( ! button || ! testNumber ) {
 			return;
 		}
 
-		window.navigator.clipboard.writeText( testNumber );
+		event.preventDefault();
+		icon = button.querySelector( 'i' );
+		if ( icon ) {
+			icon.setAttribute( 'aria-hidden', 'true' );
+		}
+
+		if (
+			window.navigator.clipboard &&
+			typeof window.navigator.clipboard.writeText === 'function'
+		) {
+			window.navigator.clipboard.writeText( testNumber );
+		} else if ( typeof window.prompt === 'function' ) {
+			window.prompt( 'Copy test card number:', testNumber );
+		}
+
+		button.classList.add( 'state--success' );
+		window.setTimeout( function () {
+			button.classList.remove( 'state--success' );
+		}, copyTestNumberSuccessDuration );
 	}
 
 	function recordUserEvent( eventName, eventProperties ) {
@@ -292,6 +312,37 @@
 		return toRgbString( color.a < 1 ? compositeAgainstWhite( color ) : color );
 	}
 
+	var colorFunctionPatterns = [
+		/color\(\s*srgb\s+[+-]?\d*\.?\d+%?\s+[+-]?\d*\.?\d+%?\s+[+-]?\d*\.?\d+%?(?:\s*\/\s*[+-]?\d*\.?\d+%?)?\s*\)/gi,
+		/rgba?\(\s*[+-]?\d*\.?\d+%?\s+[+-]?\d*\.?\d+%?\s+[+-]?\d*\.?\d+%?(?:\s*\/\s*[+-]?\d*\.?\d+%?)?\s*\)/gi,
+		/rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(?:\s*,\s*(?:0?(\.\d+)?|1?(\.0+)?))?\s*\)/gi,
+	];
+
+	function containsAlphaColor( value ) {
+		if ( typeof value !== 'string' ) {
+			return false;
+		}
+
+		return colorFunctionPatterns.some( function ( pattern ) {
+			var match;
+			var parsedColor;
+
+			pattern.lastIndex = 0;
+			match = pattern.exec( value );
+
+			while ( match ) {
+				parsedColor = parseColor( match[ 0 ] );
+				if ( parsedColor && parsedColor.a < 1 ) {
+					return true;
+				}
+
+				match = pattern.exec( value );
+			}
+
+			return false;
+		} );
+	}
+
 	function normalizeAppearanceValueForStripe( value ) {
 		if ( typeof value !== 'string' ) {
 			return value;
@@ -331,6 +382,101 @@
 		}
 
 		return normalizeAppearanceValueForStripe( value );
+	}
+
+	function isLinkEnabled() {
+		var paymentMethodsConfig = config.paymentMethodsConfig || {};
+
+		return (
+			paymentMethodsConfig.link !== undefined &&
+			paymentMethodsConfig.card !== undefined
+		);
+	}
+
+	function getStripePaymentMethodTypes() {
+		return isLinkEnabled() ? [ 'card', 'link' ] : [ 'card' ];
+	}
+
+	function getReusablePaymentMethodTerms( value ) {
+		var paymentMethodsConfig = config.paymentMethodsConfig || {};
+
+		return Object.keys( paymentMethodsConfig ).reduce( function (
+			terms,
+			paymentMethodId
+		) {
+			if (
+				paymentMethodId !== 'link' &&
+				paymentMethodsConfig[ paymentMethodId ].isReusable
+			) {
+				terms[ paymentMethodId ] = value;
+			}
+
+			return terms;
+		}, {} );
+	}
+
+	function isAddPaymentMethodForm() {
+		return !! document.getElementById( 'add_payment_method' );
+	}
+
+	function shouldSavePaymentMethod() {
+		var savePaymentMethodCheckbox = document.getElementById(
+			'wc-' + gatewayId + '-new-payment-method'
+		);
+
+		return !! (
+			savePaymentMethodCheckbox && savePaymentMethodCheckbox.checked
+		);
+	}
+
+	function getStripePaymentElementOptions() {
+		return {
+			fields: {
+				billingDetails: {
+					name: 'never',
+					email: 'never',
+					phone: 'never',
+					address: {
+						country: 'never',
+						line1: 'never',
+						line2: 'never',
+						city: 'never',
+						state: 'never',
+						postalCode: 'never',
+					},
+				},
+			},
+			wallets: {
+				applePay: 'never',
+				googlePay: 'never',
+				link:
+					isLinkEnabled() && ! isAddPaymentMethodForm()
+						? 'auto'
+						: 'never',
+			},
+			terms: getReusablePaymentMethodTerms(
+				shouldSavePaymentMethod() || config.cartContainsSubscription
+					? 'always'
+					: 'never'
+			),
+		};
+	}
+
+	function updatePaymentElementTerms( event ) {
+		if (
+			! event.target ||
+			event.target.id !== 'wc-' + gatewayId + '-new-payment-method' ||
+			! paymentElement ||
+			typeof paymentElement.update !== 'function'
+		) {
+			return;
+		}
+
+		paymentElement.update( {
+			terms: getReusablePaymentMethodTerms(
+				event.target.checked ? 'always' : 'never'
+			),
+		} );
 	}
 
 	function getBrightness( color ) {
@@ -387,9 +533,14 @@
 
 		styles = window.getComputedStyle( element );
 		return properties.reduce( function ( output, property ) {
-			var value = normalizeAppearanceValueForStripe(
-				styles.getPropertyValue( toDashed( property ) )
-			);
+			var rawValue = styles.getPropertyValue( toDashed( property ) );
+			var value;
+
+			if ( containsAlphaColor( rawValue ) ) {
+				return output;
+			}
+
+			value = normalizeAppearanceValueForStripe( rawValue );
 			if ( value ) {
 				output[ property ] = value;
 			}
@@ -714,19 +865,17 @@
 
 	function getStripeElementsOptions() {
 		var amount = Number( config.cartTotal || 0 );
-		var isAddPaymentMethodForm =
-			!! document.getElementById( 'add_payment_method' );
 		var appearance;
 		var fontRules;
 		var options = {
 			mode:
-				! isAddPaymentMethodForm && amount > 0 && isFinite( amount )
+				! isAddPaymentMethodForm() && amount > 0 && isFinite( amount )
 					? 'payment'
 					: 'setup',
 			loader: 'never',
 			currency: ( config.currency || 'usd' ).toLowerCase(),
 			paymentMethodCreation: 'manual',
-			paymentMethodTypes: [ 'card' ],
+			paymentMethodTypes: getStripePaymentMethodTypes(),
 		};
 
 		appearance = getClassicCheckoutAppearance();
@@ -1081,7 +1230,10 @@
 			stripeAccount: config.accountId || undefined,
 		} );
 		elements = stripe.elements( getStripeElementsOptions() );
-		paymentElement = elements.create( 'payment' );
+		paymentElement = elements.create(
+			'payment',
+			getStripePaymentElementOptions()
+		);
 		paymentElement.mount( container );
 		paymentElementContainer = container;
 	}
@@ -1303,6 +1455,7 @@
 		confirmRedirectIfPresent();
 		document.addEventListener( 'click', copyTestNumber );
 		document.addEventListener( 'click', recordPlaceOrderButtonClick );
+		document.addEventListener( 'change', updatePaymentElementTerms );
 		if ( document.getElementById( 'add_payment_method' ) ) {
 			document
 				.getElementById( 'add_payment_method' )

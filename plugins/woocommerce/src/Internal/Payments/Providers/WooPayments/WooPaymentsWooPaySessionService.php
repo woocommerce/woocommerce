@@ -394,20 +394,21 @@ class WooPaymentsWooPaySessionService {
 	 * @return array<string,mixed>
 	 */
 	public function get_woopay_frontend_config( string $context = 'checkout' ): array {
-		$is_woopay_enabled        = $this->is_woopay_enabled();
-		$is_country_available     = $this->is_woopay_country_available();
-		$is_global_theme_enabled  = $this->is_woopay_global_theme_support_enabled();
-		$should_show_woopay       = $this->should_show_woopay_button( $context );
-		$woopay_appearance        = $is_global_theme_enabled ? $this->get_woopay_appearance() : null;
-		$woopay_font_rules        = $is_global_theme_enabled ? $this->get_woopay_font_rules() : array();
-		$woopay_session_email     = $this->get_current_shopper_email();
-		$woopay_minimum_session   = $is_woopay_enabled ? $this->get_encrypted_minimum_session_data() : array();
-		$woopay_express_available = $is_woopay_enabled && $this->is_woopay_express_checkout_enabled_at( $context );
+		$is_woopay_enabled                 = $this->is_woopay_enabled();
+		$is_country_available              = $this->is_woopay_country_available();
+		$is_global_theme_enabled           = $this->is_woopay_global_theme_support_enabled();
+		$should_show_woopay                = $this->should_show_woopay_button( $context );
+		$woopay_appearance                 = $is_global_theme_enabled ? $this->get_woopay_appearance() : null;
+		$woopay_font_rules                 = $is_global_theme_enabled ? $this->get_woopay_font_rules() : array();
+		$woopay_session_email              = $this->get_current_shopper_email();
+		$woopay_minimum_session            = $is_woopay_enabled ? $this->get_encrypted_minimum_session_data() : array();
+		$woopay_express_available          = $is_woopay_enabled && $this->is_woopay_express_checkout_enabled_at( $context );
+		$woopay_first_party_auth_available = $woopay_express_available && $is_country_available;
 
 		return array(
 			'isWooPayEnabled'                   => $is_woopay_enabled,
 			'isWoopayExpressCheckoutEnabled'    => $woopay_express_available,
-			'isWoopayFirstPartyAuthEnabled'     => false,
+			'isWoopayFirstPartyAuthEnabled'     => $woopay_first_party_auth_available,
 			'isWooPayEmailInputEnabled'         => $is_woopay_enabled,
 			'isWooPayDirectCheckoutEnabled'     => $this->is_truthy_gateway_setting( 'is_woopay_direct_checkout_enabled' ),
 			'isWooPayGlobalThemeSupportEnabled' => $is_global_theme_enabled,

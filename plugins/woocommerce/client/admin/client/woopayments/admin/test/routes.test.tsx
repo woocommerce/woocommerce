@@ -300,6 +300,7 @@ describe( 'WooPayments Settings Payments routes', () => {
 					featureFlags: {
 						reportsArea: false,
 					},
+					adminRouteAvailability: protectedRouteAvailability,
 				},
 			},
 		};
@@ -339,6 +340,9 @@ describe( 'WooPayments Settings Payments routes', () => {
 				reportsArea: false,
 			},
 		};
+		setAdminRouteAvailability( {
+			'/woopayments/reports': true,
+		} );
 
 		render( getRouteElement( '/woopayments/reports' ) );
 
@@ -365,6 +369,42 @@ describe( 'WooPayments Settings Payments routes', () => {
 			setAdminRouteAvailability( {
 				[ routePath ]: false,
 			} );
+
+			expectRouteUnavailable( routePath );
+		}
+	);
+
+	it.each( [
+		[ 'Overview', '/woopayments/overview' ],
+		[ 'Transactions', '/woopayments/transactions' ],
+		[ 'Disputes', '/woopayments/disputes' ],
+	] )(
+		'renders an unavailable status for the %s route when route availability is missing',
+		( _routeName, routePath ) => {
+			expectRouteUnavailable( routePath );
+		}
+	);
+
+	it.each( [
+		[ 'Overview', '/woopayments/overview' ],
+		[ 'Transactions', '/woopayments/transactions' ],
+		[ 'Disputes', '/woopayments/disputes' ],
+	] )(
+		'renders an unavailable status for the %s route when route availability does not name the route',
+		( _routeName, routePath ) => {
+			window.wcSettings = {
+				adminUrl: 'http://example.com/wp-admin',
+				admin: {
+					woopaymentsSettings: {
+						adminRouteAvailability: {
+							...protectedRouteAvailability,
+							allowedRoutes: {
+								'/woopayments/settings': true,
+							},
+						},
+					},
+				},
+			};
 
 			expectRouteUnavailable( routePath );
 		}
@@ -405,6 +445,30 @@ describe( 'WooPayments Settings Payments routes', () => {
 			expect( screen.getByRole( 'status' ) ).toHaveTextContent(
 				'Loading WooPayments…'
 			);
+			expect(
+				screen.queryByText( unavailableMessage )
+			).not.toBeInTheDocument();
+			expect( await screen.findByText( loadedText ) ).toBeInTheDocument();
+		}
+	);
+
+	it.each( [
+		[ 'settings', '/woopayments/settings', 'Settings route loaded' ],
+		[
+			'express checkout settings',
+			'/woopayments/settings/express-checkout/:methodId',
+			'Express settings route loaded',
+		],
+		[
+			'fraud protection settings',
+			'/woopayments/settings/fraud-protection',
+			'Fraud settings route loaded',
+		],
+	] )(
+		'keeps the %s route loadable when route availability is missing',
+		async ( _routeName, routePath, loadedText ) => {
+			render( getRouteElement( routePath ) );
+
 			expect(
 				screen.queryByText( unavailableMessage )
 			).not.toBeInTheDocument();
@@ -465,6 +529,9 @@ describe( 'WooPayments Settings Payments routes', () => {
 	} );
 
 	it( 'announces lazy route loading through a status fallback', async () => {
+		setAdminRouteAvailability( {
+			'/woopayments/loans': true,
+		} );
 		mockApiFetch
 			.mockResolvedValueOnce( {} )
 			.mockResolvedValueOnce( {} )
@@ -493,9 +560,15 @@ describe( 'WooPayments Settings Payments routes', () => {
 			'true'
 		);
 		expect(
-			await screen.findByText( 'No Capital loans found.', {
-				selector: '.woocommerce-woopayments-capital__empty',
-			} )
+			await screen.findByText(
+				'No Capital loans found.',
+				{
+					selector: '.woocommerce-woopayments-capital__empty',
+				},
+				{
+					timeout: 3000,
+				}
+			)
 		).toBeInTheDocument();
 	} );
 

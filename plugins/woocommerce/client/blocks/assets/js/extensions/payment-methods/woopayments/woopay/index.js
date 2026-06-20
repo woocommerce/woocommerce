@@ -4,7 +4,7 @@
 import { registerExpressPaymentMethod } from '@woocommerce/blocks-registry';
 import { getPaymentMethodData } from '@woocommerce/settings';
 import { __, sprintf } from '@wordpress/i18n';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -15,6 +15,26 @@ const PAYMENT_METHOD_NAME = 'woocommerce_payments';
 const settings = getPaymentMethodData( PAYMENT_METHOD_NAME, {} );
 const supportedFeatures = settings.supports ||
 	settings.features || [ 'products' ];
+const preferredCardCacheKey = 'woopay_preferred_card';
+const wooPayConnectTimeout = 5000;
+const brandAliases = {
+	american_express: 'amex',
+	diners_club: 'diners',
+	union_pay: 'unionpay',
+};
+const brandDisplayNames = {
+	amex: __( 'American Express', 'woocommerce' ),
+	diners: __( 'Diners Club', 'woocommerce' ),
+	discover: __( 'Discover', 'woocommerce' ),
+	jcb: __( 'JCB', 'woocommerce' ),
+	mastercard: __( 'Mastercard', 'woocommerce' ),
+	unionpay: __( 'Union Pay', 'woocommerce' ),
+	visa: __( 'Visa', 'woocommerce' ),
+};
+let wooPayConnectPostMessagePromise = null;
+const wooPayConnectCallbacks = {};
+let wooPayConnectListenerAttached = false;
+let preferredCardFetchPromise = null;
 
 const WooPayIcon = () => (
 	<svg
@@ -55,6 +75,286 @@ const WooPayIconLight = () => (
 		/>
 	</svg>
 );
+
+const normalizeCardBrand = ( brand ) => brandAliases[ brand ] || brand;
+
+const isValidPreferredCard = ( card ) =>
+	Boolean(
+		card &&
+			typeof card.brand === 'string' &&
+			card.brand.length > 0 &&
+			typeof card.last4 === 'string' &&
+			/^\d{4}$/.test( card.last4 )
+	);
+
+const isSamePreferredCard = ( firstCard, secondCard ) =>
+	( ! firstCard && ! secondCard ) ||
+	( firstCard &&
+		secondCard &&
+		firstCard.brand === secondCard.brand &&
+		firstCard.last4 === secondCard.last4 );
+
+const getCachedPreferredCard = () => {
+	try {
+		const cached = window.localStorage.getItem( preferredCardCacheKey );
+		if ( ! cached ) {
+			return null;
+		}
+
+		const parsed = JSON.parse( cached );
+		return isValidPreferredCard( parsed ) ? parsed : null;
+	} catch ( error ) {
+		return null;
+	}
+};
+
+const setCachedPreferredCard = ( card ) => {
+	try {
+		if ( isValidPreferredCard( card ) ) {
+			window.localStorage.setItem(
+				preferredCardCacheKey,
+				JSON.stringify( {
+					brand: card.brand,
+					last4: card.last4,
+				} )
+			);
+			return;
+		}
+
+		window.localStorage.removeItem( preferredCardCacheKey );
+	} catch ( error ) {
+		return undefined;
+	}
+};
+
+const getPreferredCardDisplayName = ( preferredCard ) => {
+	const normalizedBrand = normalizeCardBrand( preferredCard.brand );
+
+	return brandDisplayNames[ normalizedBrand ] || normalizedBrand;
+};
+
+const getWooPayConnectOrigin = () => {
+	try {
+		return new window.URL( settings.woopayHost ).origin;
+	} catch ( error ) {
+		return '';
+	}
+};
+
+const getWooPayConnectUrl = () => {
+	if ( ! settings.woopayHost || ! window.URLSearchParams ) {
+		return settings.woopayHost ? `${ settings.woopayHost }/connect/` : '';
+	}
+
+	const params = new window.URLSearchParams( {
+		source_url: window.location.href,
+	} );
+
+	if ( settings.woopayMerchantId ) {
+		params.append( 'blogId', settings.woopayMerchantId );
+	}
+
+	if ( settings.testMode !== undefined ) {
+		params.append( 'testMode', settings.testMode ? 'true' : 'false' );
+	}
+
+	return `${ settings.woopayHost }/connect/?${ params.toString() }`;
+};
+
+const resolveWooPayConnectCallback = ( callbackName, value ) => {
+	if ( ! wooPayConnectCallbacks[ callbackName ] ) {
+		return;
+	}
+
+	wooPayConnectCallbacks[ callbackName ]( value );
+	delete wooPayConnectCallbacks[ callbackName ];
+};
+
+const attachWooPayConnectListener = () => {
+	if ( wooPayConnectListenerAttached ) {
+		return;
+	}
+
+	window.addEventListener( 'message', ( event ) => {
+		const data = event.data || {};
+		const origin = getWooPayConnectOrigin();
+
+		if ( ! origin || event.origin !== origin ) {
+			return;
+		}
+
+		switch ( data.action ) {
+			case 'set_preemptive_session_data_success':
+				resolveWooPayConnectCallback(
+					'setPreemptiveSessionData',
+					data.value || {}
+				);
+				break;
+			case 'set_preemptive_session_data_error':
+				resolveWooPayConnectCallback( 'setPreemptiveSessionData', {
+					is_error: true,
+				} );
+				break;
+			case 'get_preferred_payment_method_success':
+				resolveWooPayConnectCallback(
+					'getPreferredPaymentMethod',
+					data.value || null
+				);
+				break;
+		}
+	} );
+
+	wooPayConnectListenerAttached = true;
+};
+
+const getWooPayConnectPostMessage = () => {
+	const existingIframe = document.getElementById( 'woopay-connect-iframe' );
+
+	if ( wooPayConnectPostMessagePromise && existingIframe ) {
+		return wooPayConnectPostMessagePromise;
+	}
+
+	if ( wooPayConnectPostMessagePromise && ! existingIframe ) {
+		wooPayConnectPostMessagePromise = null;
+		preferredCardFetchPromise = null;
+	}
+
+	if ( existingIframe ) {
+		return Promise.resolve( ( message ) => {
+			existingIframe.contentWindow.postMessage(
+				message,
+				settings.woopayHost
+			);
+		} );
+	}
+
+	if ( ! settings.woopayHost ) {
+		return Promise.reject();
+	}
+
+	wooPayConnectPostMessagePromise = new Promise( ( resolve ) => {
+		const iframe = document.createElement( 'iframe' );
+		iframe.id = 'woopay-connect-iframe';
+		iframe.src = getWooPayConnectUrl();
+		iframe.height = 0;
+		iframe.width = 0;
+		iframe.title = __( 'WooPay Connect', 'woocommerce' );
+		iframe.style.border = 'none';
+		iframe.style.display = 'block';
+		iframe.style.visibility = 'hidden';
+		iframe.style.position = 'fixed';
+		iframe.style.height = '0';
+		iframe.style.width = '0';
+		iframe.style.pointerEvents = 'none';
+		iframe.addEventListener( 'load', () => {
+			resolve( ( message ) => {
+				iframe.contentWindow.postMessage(
+					message,
+					settings.woopayHost
+				);
+			} );
+		} );
+
+		document.body.appendChild( iframe );
+	} );
+
+	return wooPayConnectPostMessagePromise;
+};
+
+const sendWooPayConnectMessage = (
+	message,
+	callbackName,
+	fallback,
+	timeout
+) => {
+	attachWooPayConnectListener();
+
+	return new Promise( ( resolve ) => {
+		getWooPayConnectPostMessage()
+			.then( ( postMessage ) => {
+				let timeoutId;
+
+				wooPayConnectCallbacks[ callbackName ] = ( value ) => {
+					if ( timeoutId ) {
+						window.clearTimeout( timeoutId );
+					}
+
+					resolve( value );
+				};
+
+				if ( timeout ) {
+					timeoutId = window.setTimeout( () => {
+						resolveWooPayConnectCallback( callbackName, fallback );
+					}, wooPayConnectTimeout );
+				}
+
+				postMessage( message );
+			} )
+			.catch( () => {
+				resolve( fallback );
+			} );
+	} );
+};
+
+const sendPreemptiveSessionDataToWooPay = ( sessionData ) =>
+	sendWooPayConnectMessage(
+		{
+			action: 'setPreemptiveSessionData',
+			value: sessionData,
+		},
+		'setPreemptiveSessionData',
+		{
+			is_error: true,
+		},
+		true
+	);
+
+const fetchPreferredCardFromWooPay = () => {
+	if (
+		preferredCardFetchPromise &&
+		! document.getElementById( 'woopay-connect-iframe' )
+	) {
+		preferredCardFetchPromise = null;
+	}
+
+	if ( preferredCardFetchPromise ) {
+		return preferredCardFetchPromise;
+	}
+
+	preferredCardFetchPromise = sendWooPayConnectMessage(
+		{
+			action: 'getPreferredPaymentMethod',
+		},
+		'getPreferredPaymentMethod',
+		null,
+		true
+	).then( ( card ) => ( isValidPreferredCard( card ) ? card : null ) );
+
+	return preferredCardFetchPromise;
+};
+
+const usePreferredCard = () => {
+	const [ preferredCard, setPreferredCard ] = useState(
+		getCachedPreferredCard
+	);
+
+	useEffect( () => {
+		fetchPreferredCardFromWooPay()
+			.then( ( card ) => {
+				setCachedPreferredCard( card );
+				setPreferredCard( ( previousCard ) =>
+					isSamePreferredCard( card, previousCard )
+						? previousCard
+						: card
+				);
+			} )
+			.catch( () => {
+				return null;
+			} );
+	}, [] );
+
+	return preferredCard;
+};
 
 const getFieldValue = ( selector ) => {
 	const field = document.querySelector( selector );
@@ -145,6 +445,61 @@ const getWooPayMinimumSessionRedirectUrl = ( sessionData ) => {
 	return `${ settings.woopayHost }/woopay/?${ params.toString() }`;
 };
 
+const getWooPaySessionData = async () => {
+	const body = new window.URLSearchParams();
+	body.append( '_ajax_nonce', settings.woopaySessionNonce || '' );
+	appendWooPayRequestValue( body, 'appearance', settings.woopayAppearance );
+	appendWooPayRequestValue( body, 'font_rules', settings.woopayFontRules );
+	body.append( 'email', getWooPayEmail() );
+	body.append( 'user_session', settings.woopayUserSession || '' );
+	body.append( 'order_id', settings.order_id || '' );
+	body.append( 'key', settings.key || '' );
+	body.append( 'billing_email', settings.billing_email || '' );
+
+	return postWooPayAjax( 'get_woopay_session', body );
+};
+
+const getProductFormElement = () =>
+	document.querySelector( 'form.cart' ) ||
+	document.querySelector( 'form.wp-block-add-to-cart-with-options' );
+
+const isProductPageWooPayButton = () =>
+	( settings.woopayButton || {} ).context === 'product';
+
+const canInitializeProductWooPay = () => {
+	const form = getProductFormElement();
+
+	if ( ! isProductPageWooPayButton() || ! form ) {
+		return true;
+	}
+
+	const addToCartButton = form.querySelector( '.single_add_to_cart_button' );
+
+	return ! (
+		addToCartButton &&
+		( addToCartButton.disabled ||
+			addToCartButton.classList.contains( 'disabled' ) ||
+			addToCartButton.classList.contains(
+				'wc-variation-selection-needed'
+			) ||
+			addToCartButton.classList.contains(
+				'wc-variation-is-unavailable'
+			) )
+	);
+};
+
+const deleteSkipWooPayCookie = () => {
+	const cookies = document.cookie ? document.cookie.split( ';' ) : [];
+	const hasSkipCookie = cookies.some(
+		( cookie ) => cookie.trim() === 'skip_woopay=1'
+	);
+
+	if ( hasSkipCookie ) {
+		document.cookie =
+			'skip_woopay=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+	}
+};
+
 const normalizeButtonSize = ( buttonSettings ) => {
 	const heightSizeMap = new Map( [
 		[ '40', 'small' ],
@@ -190,13 +545,43 @@ const getWooPayButtonPrefix = ( type ) => {
 	return getWooPayButtonLabel( type ).replace( /\s*WooPay\s*$/, '' );
 };
 
-const WooPayButtonContent = ( { buttonSettings } ) => {
+const getWooPayButtonAriaLabel = ( type, preferredCard ) => {
+	if ( preferredCard ) {
+		return sprintf(
+			/* translators: %1$s: card brand display name, %2$s: last 4 card digits. */
+			__( 'WooPay with %1$s ending in %2$s', 'woocommerce' ),
+			getPreferredCardDisplayName( preferredCard ),
+			preferredCard.last4
+		);
+	}
+
+	return getWooPayButtonLabel( type );
+};
+
+const WooPayButtonContent = ( { buttonSettings, preferredCard } ) => {
 	const type = buttonSettings.type || 'default';
 	const prefix = getWooPayButtonPrefix( type );
 	const Icon =
 		( buttonSettings.theme || 'dark' ) === 'dark'
 			? WooPayIcon
 			: WooPayIconLight;
+
+	if ( preferredCard ) {
+		return (
+			<span className="button-content woopay-button-content-card">
+				<span className="woopay-button-logo">
+					<Icon />
+				</span>
+				<span className="woopay-button-separator" aria-hidden="true" />
+				<span className="woopay-button-card-brand" aria-hidden="true">
+					{ getPreferredCardDisplayName( preferredCard ) }
+				</span>
+				<span className="woopay-button-last4">
+					{ preferredCard.last4 }
+				</span>
+			</span>
+		);
+	}
 
 	return (
 		<span className="button-content">
@@ -210,6 +595,9 @@ const WooPayExpressContent = () => {
 	const buttonSettings = settings.woopayButton || {};
 	const buttonType = buttonSettings.type || 'default';
 	const eventSource = buttonSettings.context || 'checkout';
+	const preferredCard = usePreferredCard();
+	const isLoadingRef = useRef( false );
+	const [ isLoading, setIsLoading ] = useState( false );
 
 	useEffect( () => {
 		recordWooPaymentsUserEvent( settings, 'woopay_button_load', {
@@ -217,11 +605,7 @@ const WooPayExpressContent = () => {
 		} );
 	}, [ eventSource ] );
 
-	const initWooPay = async () => {
-		recordWooPaymentsUserEvent( settings, 'woopay_button_click', {
-			source: eventSource,
-		} );
-
+	const continueWooPay = async () => {
 		if ( ! settings.woopayUserSession ) {
 			const sessionData = await getWooPayMinimumSessionData();
 			const redirectUrl =
@@ -256,23 +640,107 @@ const WooPayExpressContent = () => {
 		}
 	};
 
+	const continueWooPayFirstPartyAuth = async () => {
+		let sessionData;
+
+		try {
+			sessionData = await getWooPaySessionData();
+		} catch ( error ) {
+			await continueWooPay();
+			return;
+		}
+
+		if ( ! isValidWooPayMinimumSessionData( sessionData ) ) {
+			await continueWooPay();
+			return;
+		}
+
+		const sessionResponse = await sendPreemptiveSessionDataToWooPay(
+			sessionData
+		);
+
+		if ( sessionResponse?.is_error ) {
+			await continueWooPay();
+			return;
+		}
+
+		if ( sessionResponse?.redirect_url ) {
+			window.location.href = sessionResponse.redirect_url;
+		}
+	};
+
+	const initWooPay = async ( event ) => {
+		if ( event?.preventDefault ) {
+			event.preventDefault();
+		}
+
+		if ( isLoadingRef.current ) {
+			return;
+		}
+
+		recordWooPaymentsUserEvent( settings, 'woopay_button_click', {
+			source: eventSource,
+		} );
+
+		deleteSkipWooPayCookie();
+
+		if ( ! canInitializeProductWooPay() ) {
+			return;
+		}
+
+		isLoadingRef.current = true;
+		setIsLoading( true );
+
+		try {
+			if ( settings.isWoopayFirstPartyAuthEnabled ) {
+				await continueWooPayFirstPartyAuth();
+			} else {
+				await continueWooPay();
+			}
+		} catch ( error ) {
+			// Keep the shopper on the current page if WooPay initialization fails.
+		} finally {
+			isLoadingRef.current = false;
+			setIsLoading( false );
+		}
+	};
+
+	const ariaLabel = getWooPayButtonAriaLabel( buttonType, preferredCard );
+	const buttonContent = (
+		<WooPayButtonContent
+			buttonSettings={ buttonSettings }
+			preferredCard={ preferredCard }
+		/>
+	);
+	const buttonProps = {
+		className: 'woopay-express-button',
+		'aria-label': ariaLabel,
+		'aria-disabled': isLoading || undefined,
+		'data-type': buttonType,
+		'data-theme': buttonSettings.theme || 'dark',
+		'data-size': normalizeButtonSize( buttonSettings ),
+		style: {
+			height: `${ buttonSettings.height || '48' }px`,
+			borderRadius: `${ buttonSettings.radius || '4' }px`,
+		},
+		onClick: initWooPay,
+	};
+
 	return (
 		<div className="wcpay-core-woopay-express">
-			<button
-				type="button"
-				className="woopay-express-button"
-				aria-label={ getWooPayButtonLabel( buttonType ) }
-				data-type={ buttonType }
-				data-theme={ buttonSettings.theme || 'dark' }
-				data-size={ normalizeButtonSize( buttonSettings ) }
-				style={ {
-					height: `${ buttonSettings.height || '48' }px`,
-					borderRadius: `${ buttonSettings.radius || '4' }px`,
-				} }
-				onClick={ initWooPay }
-			>
-				<WooPayButtonContent buttonSettings={ buttonSettings } />
-			</button>
+			{ settings.isWoopayFirstPartyAuthEnabled ? (
+				<a
+					{ ...buttonProps }
+					href={ settings.woopayHost || '#' }
+					tabIndex={ isLoading ? -1 : undefined }
+				>
+					{ buttonContent }
+				</a>
+			) : (
+				<button { ...buttonProps } disabled={ isLoading } type="button">
+					{ buttonContent }
+				</button>
+			) }
 		</div>
 	);
 };

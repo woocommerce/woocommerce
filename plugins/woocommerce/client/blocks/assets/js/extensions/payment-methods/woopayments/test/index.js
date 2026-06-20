@@ -11,6 +11,8 @@ import { registerExpressPaymentMethod } from '@woocommerce/blocks-registry';
 import registerWooPayments from '../index';
 import { recordWooPaymentsUserEvent } from '../tracks';
 import {
+	getAppearance,
+	getFieldStyles,
 	normalizeAppearanceForStripe,
 	normalizeAppearanceValueForStripe,
 } from '../upe-styles';
@@ -31,6 +33,7 @@ jest.mock( '@woocommerce/settings', () => ( {
 		stylesCacheVersion: 'styles-v1',
 		currency: 'USD',
 		forceNetworkSavedCards: true,
+		isSavedCardsEnabled: false,
 		initWooPayNonce: 'init-nonce',
 		isCoreNativeCheckoutAvailable: true,
 		isWooPayEnabled: true,
@@ -66,6 +69,7 @@ jest.mock( '@woocommerce/settings', () => ( {
 			card: {
 				title: 'Card',
 				isReusable: true,
+				showSaveOption: false,
 				cardBrandIcons: [
 					{
 						id: 'visa',
@@ -101,6 +105,9 @@ jest.mock( '@woocommerce/settings', () => ( {
 				testingInstructions:
 					'Use test card <button type="button" class="js-woopayments-copy-test-number" aria-label="Click to copy the test number to clipboard" title="Copy to clipboard"><i></i><span>4242 4242 4242 4242</span></button> or refer to our <a href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/testing/#test-cards" target="_blank">testing guide</a>.',
 			},
+			link: {
+				isReusable: false,
+			},
 		},
 		usesLegacyOrderStatusBridge: false,
 		ajaxUrl: 'https://example.test/wp-admin/admin-ajax.php',
@@ -111,6 +118,8 @@ const originalFetch = window.fetch;
 
 describe( 'wc-payment-method-woopayments', () => {
 	afterEach( () => {
+		jest.useRealTimers();
+		jest.restoreAllMocks();
 		delete window.Stripe;
 		delete window.navigator.clipboard;
 		window.fetch = originalFetch;
@@ -234,7 +243,7 @@ describe( 'wc-payment-method-woopayments', () => {
 		expect( window.fetch ).not.toHaveBeenCalled();
 	} );
 
-	it( 'enables WooCommerce saved-payment controls', () => {
+	it( 'honors backend saved-payment controls', () => {
 		const registration = registerWooPayments();
 
 		expect( registration.supports ).toEqual(
@@ -244,8 +253,8 @@ describe( 'wc-payment-method-woopayments', () => {
 					'subscriptions',
 					'multiple_subscriptions',
 				] ),
-				showSavedCards: true,
-				showSaveOption: true,
+				showSavedCards: false,
+				showSaveOption: false,
 			} )
 		);
 	} );
@@ -445,15 +454,7 @@ describe( 'wc-payment-method-woopayments', () => {
 		expect( screen.getByText( /testing guide/ ) ).toBeInTheDocument();
 	} );
 
-	it( 'copies the test card number from the checkout instructions', () => {
-		const writeText = jest.fn();
-		Object.defineProperty( window.navigator, 'clipboard', {
-			value: {
-				writeText,
-			},
-			configurable: true,
-		} );
-
+	function renderWooPaymentsContent() {
 		const registration = registerWooPayments();
 		const content = registration.content;
 
@@ -476,13 +477,77 @@ describe( 'wc-payment-method-woopayments', () => {
 			} )
 		);
 
-		fireEvent.click(
-			screen.getByRole( 'button', {
-				name: 'Click to copy the test number to clipboard',
-			} )
-		);
+		return screen.getByRole( 'button', {
+			name: 'Click to copy the test number to clipboard',
+		} );
+	}
+
+	it( 'prevents the default action when copying the test card number', () => {
+		const writeText = jest.fn();
+		Object.defineProperty( window.navigator, 'clipboard', {
+			value: {
+				writeText,
+			},
+			configurable: true,
+		} );
+		const button = renderWooPaymentsContent();
+		const event = new window.MouseEvent( 'click', {
+			bubbles: true,
+			cancelable: true,
+		} );
+
+		button.dispatchEvent( event );
+
+		expect( event.defaultPrevented ).toBe( true );
+	} );
+
+	it( 'copies the test card number with the Clipboard API', () => {
+		const writeText = jest.fn();
+		Object.defineProperty( window.navigator, 'clipboard', {
+			value: {
+				writeText,
+			},
+			configurable: true,
+		} );
+		const button = renderWooPaymentsContent();
+
+		fireEvent.click( button );
 
 		expect( writeText ).toHaveBeenCalledWith( '4242 4242 4242 4242' );
+	} );
+
+	it( 'shows the test card number in a prompt when the Clipboard API is unavailable', () => {
+		const prompt = jest
+			.spyOn( window, 'prompt' )
+			.mockImplementation( () => null );
+		const button = renderWooPaymentsContent();
+
+		fireEvent.click( button );
+
+		expect( prompt ).toHaveBeenCalledWith(
+			'Copy test card number:',
+			'4242 4242 4242 4242'
+		);
+	} );
+
+	it( 'shows and clears the copied state after copying the test card number', () => {
+		jest.useFakeTimers();
+		const writeText = jest.fn();
+		Object.defineProperty( window.navigator, 'clipboard', {
+			value: {
+				writeText,
+			},
+			configurable: true,
+		} );
+		const button = renderWooPaymentsContent();
+
+		fireEvent.click( button );
+
+		expect( button ).toHaveClass( 'state--success' );
+
+		jest.advanceTimersByTime( 2000 );
+
+		expect( button ).not.toHaveClass( 'state--success' );
 	} );
 
 	it( 'does not register WooPay express from the card payment method bundle', () => {
@@ -639,7 +704,7 @@ describe( 'wc-payment-method-woopayments', () => {
 				loader: 'never',
 				mode: 'setup',
 				paymentMethodCreation: 'manual',
-				paymentMethodTypes: [ 'card' ],
+				paymentMethodTypes: [ 'card', 'link' ],
 			} )
 		);
 		expect( elements.mock.calls[ 0 ][ 0 ] ).not.toHaveProperty( 'amount' );
@@ -664,7 +729,7 @@ describe( 'wc-payment-method-woopayments', () => {
 				wallets: {
 					applePay: 'never',
 					googlePay: 'never',
-					link: 'never',
+					link: 'auto',
 				},
 				terms: {
 					card: 'never',
@@ -827,6 +892,138 @@ describe( 'wc-payment-method-woopayments', () => {
 				},
 			},
 		} );
+	} );
+
+	it( 'omits computed alpha color values from generated Stripe Elements appearance rules', () => {
+		document.body.innerHTML = '<input id="wcpay-test-input" />';
+		const originalGetComputedStyle = window.getComputedStyle;
+		window.getComputedStyle = jest.fn( () => ( {
+			getPropertyValue: ( property ) =>
+				( {
+					border: '1px solid color(srgb 0.168627 0.176471 0.184314 / 0.8)',
+					'border-color':
+						'color(srgb 0.168627 0.176471 0.184314 / 0.8)',
+					'border-style': 'solid',
+					'border-width': '1px',
+					'box-shadow': 'rgb(43 45 47 / 0.8) 0px 1px 2px',
+					color: 'rgb(43 45 47)',
+					'font-size': '16px',
+				}[ property ] || '' ),
+		} ) );
+
+		try {
+			const rules = getFieldStyles( '#wcpay-test-input', '.Input' );
+
+			expect( rules ).toMatchObject( {
+				borderStyle: 'solid',
+				borderWidth: '1px',
+				color: 'rgb(43, 45, 47)',
+				fontSize: '16px',
+			} );
+			expect( rules ).not.toHaveProperty( 'border' );
+			expect( rules ).not.toHaveProperty( 'borderColor' );
+			expect( rules ).not.toHaveProperty( 'boxShadow' );
+		} finally {
+			window.getComputedStyle = originalGetComputedStyle;
+		}
+	} );
+
+	const makeBlocksAppearanceFixture = ( labelPosition = 'absolute' ) => {
+		document.body.innerHTML = `
+			<form class="wc-block-checkout__form">
+				<div class="wc-block-checkout__contact-fields">
+					<p class="wc-block-components-checkout-step__description">Pay with card.</p>
+					<div class="wc-block-components-text-input is-active">
+						<input id="email" value="shopper@example.test" />
+						<label for="email">Email address</label>
+					</div>
+					<div class="wc-block-components-radio-control__label-group">Card</div>
+				</div>
+				<div id="payment-method" class="wc-block-components-radio-control-accordion-option"></div>
+			</form>
+		`;
+
+		jest.spyOn( window, 'getComputedStyle' ).mockImplementation(
+			( element ) => ( {
+				getPropertyValue: ( property ) => {
+					if (
+						element.matches?.(
+							'.wc-block-components-radio-control__label-group'
+						)
+					) {
+						return (
+							{
+								'font-size': '12px',
+								'background-color': 'rgba(0, 0, 0, 0)',
+							}[ property ] || ''
+						);
+					}
+
+					if ( element.tagName === 'LABEL' ) {
+						return (
+							{
+								color: 'rgb(100, 105, 112)',
+								'font-size': '10px',
+								'line-height': '12px',
+								position: labelPosition,
+								transform: 'none',
+							}[ property ] || ''
+						);
+					}
+
+					if ( element.tagName === 'INPUT' ) {
+						return (
+							{
+								color: 'rgb(29, 35, 39)',
+								'font-size': '13px',
+								'line-height': '18px',
+								'padding-top': '10px',
+								'padding-bottom': '10px',
+							}[ property ] || ''
+						);
+					}
+
+					return (
+						{
+							'background-color': 'rgb(255, 255, 255)',
+							color: 'rgb(29, 35, 39)',
+							'font-size': '13px',
+						}[ property ] || ''
+					);
+				},
+			} )
+		);
+	};
+
+	it( 'keeps floating label padding compensation when the checkout label is positioned out of flow', () => {
+		makeBlocksAppearanceFixture( 'absolute' );
+
+		const appearance = getAppearance( 'blocks_checkout' );
+
+		expect( appearance.labels ).toBe( 'floating' );
+		expect( appearance.rules ).toHaveProperty( [ '.Label--floating' ] );
+		expect( appearance.rules[ '.Input' ].paddingTop ).toBe(
+			'calc(10px - 12px - 4px - 1px)'
+		);
+	} );
+
+	it( 'uses above labels without padding compensation when the checkout label is static', () => {
+		makeBlocksAppearanceFixture( 'static' );
+
+		const appearance = getAppearance( 'blocks_checkout' );
+
+		expect( appearance.labels ).toBe( 'above' );
+		expect( appearance.rules ).not.toHaveProperty( [ '.Label--floating' ] );
+		expect( appearance.rules[ '.Input' ].paddingTop ).toBe( '10px' );
+		expect( appearance.rules[ '.Input' ].paddingBottom ).toBe( '10px' );
+	} );
+
+	it( 'does not clamp the PaymentElement base font size to the payment method label size', () => {
+		makeBlocksAppearanceFixture( 'absolute' );
+
+		const appearance = getAppearance( 'blocks_checkout' );
+
+		expect( appearance.variables.fontSizeBase ).toBe( '13px' );
 	} );
 
 	it( 'shows reusable card terms when the shopper saves the payment method', async () => {
