@@ -442,6 +442,42 @@
 	margin-bottom: 16px;
 }
 
+.woocommerce-woopayments-money-movement__detail-header {
+	align-items: center;
+	display: flex;
+	gap: 16px;
+	justify-content: space-between;
+	margin-bottom: 16px;
+}
+
+.woocommerce-woopayments-money-movement__detail-header h2 {
+	margin: 0;
+}
+
+.woocommerce-woopayments-money-movement__refund-actions {
+	flex: 0 0 auto;
+}
+
+.woocommerce-woopayments-money-movement__refund-modal p {
+	margin-top: 0;
+}
+
+.woocommerce-woopayments-money-movement__refund-reason {
+	margin-top: 16px;
+}
+
+.woocommerce-woopayments-money-movement__refund-partial-link {
+	margin-bottom: 0;
+}
+
+.woocommerce-woopayments-money-movement__refund-modal-actions {
+	align-items: center;
+	display: flex;
+	gap: 8px;
+	justify-content: flex-end;
+	margin-top: 24px;
+}
+
 .woocommerce-woopayments-money-movement__authorization-notice {
 	justify-content: space-between;
 }
@@ -567,9 +603,15 @@
 
 	.woocommerce-woopayments-money-movement__dispute-actions,
 	.woocommerce-woopayments-money-movement__dispute-modal-actions,
+	.woocommerce-woopayments-money-movement__refund-modal-actions,
 	.woocommerce-woopayments-money-movement__authorization-actions,
 	.woocommerce-woopayments-money-movement__authorization-notice {
 		align-items: stretch;
+		flex-direction: column;
+	}
+
+	.woocommerce-woopayments-money-movement__detail-header {
+		align-items: flex-start;
 		flex-direction: column;
 	}
 }

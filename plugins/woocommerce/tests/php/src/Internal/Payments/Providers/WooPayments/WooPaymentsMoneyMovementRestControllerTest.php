@@ -38,6 +38,13 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 	private RecordingMoneyMovementApiClient $api_client;
 
 	/**
+	 * Test refund gateway initializer callback.
+	 *
+	 * @var callable|null
+	 */
+	private $refund_gateway_initializer = null;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -62,6 +69,14 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 		delete_option( 'wcpay_dispute_status_counts_cache' );
 		delete_option( 'wcpay_test_dispute_status_counts_cache' );
 		delete_option( 'wcpay_active_dispute_cache' );
+		if ( null !== $this->refund_gateway_initializer ) {
+			remove_action( 'wc_payment_gateways_initialized', $this->refund_gateway_initializer, 100 );
+			$this->refund_gateway_initializer = null;
+		}
+		if ( function_exists( 'WC' ) && WC()->payment_gateways() ) {
+			WC()->payment_gateways()->payment_gateways = array();
+			WC()->payment_gateways()->init();
+		}
 		parent::tearDown();
 	}
 
@@ -417,6 +432,7 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 		$this->assertArrayHasKey( '/wc/v3/payments/charges/(?P<charge_id>\\w+)', $routes );
 		$this->assertArrayHasKey( '/wc/v3/payments/payment_intents/(?P<payment_intent_id>\\w+)', $routes );
 		$this->assertArrayHasKey( '/wc/v3/payments/timeline/(?P<intention_id>\\w+)', $routes );
+		$this->assertArrayHasKey( '/wc/v3/payments/refund', $routes );
 
 		$controller = $this->create_payment_details_controller( false );
 		$controller->register();
@@ -428,6 +444,8 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 	 * @testdox Payment detail charge route proxies the charge ID.
 	 */
 	public function test_payment_detail_charge_route_proxies_charge_id(): void {
+		$order = $this->create_order_with_charge( 'ch_test', 'pi_test' );
+
 		$this->api_client->response = array(
 			'id'                  => 'ch_test',
 			'balance_transaction' => array( 'id' => 'txn_test' ),
@@ -442,17 +460,24 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 		$this->assertSame( 'get_charge', $this->api_client->last_call['method'] );
 		$this->assertSame( 'ch_test', $this->api_client->last_call['charge_id'] );
 		$this->assertSame( 'txn_test', $data['balance_transaction']['id'] );
+		$this->assertSame( $order->get_id(), $data['order']['id'] );
 	}
 
 	/**
 	 * @testdox Payment detail payment intent route proxies the intent ID.
 	 */
 	public function test_payment_detail_intent_route_proxies_intent_id(): void {
+		$order = $this->create_order_with_charge( 'ch_test', 'pi_test' );
+
 		$this->api_client->response = array(
-			'id'     => 'pi_test',
-			'charge' => array(
-				'id'                  => 'ch_test',
-				'balance_transaction' => array( 'id' => 'txn_test' ),
+			'id'      => 'pi_test',
+			'charges' => array(
+				'data' => array(
+					array(
+						'id'                  => 'ch_test',
+						'balance_transaction' => array( 'id' => 'txn_test' ),
+					),
+				),
 			),
 		);
 		$this->create_payment_details_controller( true )->register_routes();
@@ -464,7 +489,9 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( 'get_payment_intention', $this->api_client->last_call['method'] );
 		$this->assertSame( 'pi_test', $this->api_client->last_call['intent_id'] );
-		$this->assertSame( 'txn_test', $data['charge']['balance_transaction']['id'] );
+		$this->assertSame( 'txn_test', $data['charges']['data'][0]['balance_transaction']['id'] );
+		$this->assertSame( $order->get_id(), $data['order']['id'] );
+		$this->assertSame( $order->get_id(), $data['charges']['data'][0]['order']['id'] );
 	}
 
 	/**
@@ -562,6 +589,182 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 
 		$this->assertSame( 404, $response->get_status() );
 		$this->assertSame( 'wcpay_missing_charge', $data['code'] );
+	}
+
+	/**
+	 * @testdox Payment detail refund route creates an order-backed WooCommerce refund through the order gateway.
+	 */
+	public function test_payment_detail_refund_route_creates_order_backed_refund(): void {
+		$gateway = $this->register_refund_gateway( true );
+		$order   = $this->create_refundable_order_with_charge( '50.00', 'ch_order' );
+		$this->create_payment_details_controller( true )->register_routes();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/payments/refund' );
+		$request->set_body_params(
+			array(
+				'charge_id' => 'ch_order',
+				'amount'    => 5000,
+				'reason'    => 'requested_by_customer',
+				'order_id'  => $order->get_id(),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+		$refunds  = $order->get_refunds();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( 1, $refunds );
+		$this->assertSame( 50.0, (float) $refunds[0]->get_amount() );
+		$this->assertSame( 'requested_by_customer', $refunds[0]->get_reason() );
+		$this->assertTrue( $refunds[0]->get_refunded_payment() );
+		$this->assertSame( $refunds[0]->get_id(), $data['id'] );
+		$this->assertSame( $order->get_id(), $data['order_id'] );
+		$this->assertSame( '50.00', $data['amount'] );
+		$this->assertSame(
+			array(
+				array(
+					'order_id' => $order->get_id(),
+					'amount'   => 50.0,
+					'reason'   => 'requested_by_customer',
+				),
+			),
+			$gateway->refund_calls
+		);
+	}
+
+	/**
+	 * @testdox Payment detail refund route rejects refunds without a WooCommerce order.
+	 */
+	public function test_payment_detail_refund_route_rejects_missing_order(): void {
+		$this->create_payment_details_controller( true )->register_routes();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/payments/refund' );
+		$request->set_body_params(
+			array(
+				'charge_id' => 'ch_order',
+				'amount'    => 5000,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'wcpay_refund_missing_order', $data['code'] );
+	}
+
+	/**
+	 * @testdox Payment detail refund route rejects unknown orders with its own error code.
+	 */
+	public function test_payment_detail_refund_route_rejects_unknown_order(): void {
+		$this->create_payment_details_controller( true )->register_routes();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/payments/refund' );
+		$request->set_body_params(
+			array(
+				'charge_id' => 'ch_order',
+				'amount'    => 5000,
+				'order_id'  => 999999,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 404, $response->get_status() );
+		$this->assertSame( 'wcpay_refund_missing_order', $data['code'] );
+	}
+
+	/**
+	 * @testdox Payment detail refund route rejects charge IDs that do not belong to the order.
+	 */
+	public function test_payment_detail_refund_route_rejects_charge_order_mismatch(): void {
+		$this->register_refund_gateway( true );
+		$order = $this->create_refundable_order_with_charge( '50.00', 'ch_order' );
+		$this->create_payment_details_controller( true )->register_routes();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/payments/refund' );
+		$request->set_body_params(
+			array(
+				'charge_id' => 'ch_other',
+				'amount'    => 5000,
+				'reason'    => 'requested_by_customer',
+				'order_id'  => $order->get_id(),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( 'wcpay_refund_charge_order_mismatch', $data['code'] );
+		$this->assertCount( 0, $order->get_refunds() );
+	}
+
+	/**
+	 * @testdox Payment detail refund route validates the requested amount before creating a refund.
+	 */
+	public function test_payment_detail_refund_route_rejects_invalid_amounts(): void {
+		$this->register_refund_gateway( true );
+		$order = $this->create_refundable_order_with_charge( '50.00', 'ch_order' );
+		$this->create_payment_details_controller( true )->register_routes();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/payments/refund' );
+		$request->set_body_params(
+			array(
+				'charge_id' => 'ch_order',
+				'amount'    => 0,
+				'order_id'  => $order->get_id(),
+			)
+		);
+
+		$zero_response = $this->server->dispatch( $request );
+		$zero_data     = $zero_response->get_data();
+
+		$this->assertSame( 400, $zero_response->get_status() );
+		$this->assertSame( 'wcpay_refund_invalid_amount', $zero_data['code'] );
+
+		$request->set_body_params(
+			array(
+				'charge_id' => 'ch_order',
+				'amount'    => 5100,
+				'order_id'  => $order->get_id(),
+			)
+		);
+
+		$too_large_response = $this->server->dispatch( $request );
+		$too_large_data     = $too_large_response->get_data();
+
+		$this->assertSame( 400, $too_large_response->get_status() );
+		$this->assertSame( 'wcpay_refund_invalid_amount', $too_large_data['code'] );
+		$this->assertCount( 0, $order->get_refunds() );
+	}
+
+	/**
+	 * @testdox Payment detail refund route returns gateway failures without keeping a local refund row.
+	 */
+	public function test_payment_detail_refund_route_returns_gateway_failure(): void {
+		$this->register_refund_gateway( new \WP_Error( 'gateway_failed', 'Gateway failed.' ) );
+		$order = $this->create_refundable_order_with_charge( '50.00', 'ch_order' );
+		$this->create_payment_details_controller( true )->register_routes();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/payments/refund' );
+		$request->set_body_params(
+			array(
+				'charge_id' => 'ch_order',
+				'amount'    => 5000,
+				'order_id'  => $order->get_id(),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'wcpay_refund_payment_failed', $data['code'] );
+		$this->assertStringContainsString( 'Gateway failed.', $data['message'] );
+		$this->assertCount( 0, $order->get_refunds() );
 	}
 
 	/**
@@ -1318,7 +1521,7 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 	 */
 	private function create_payment_details_controller( bool $native_register ): WooPaymentsPaymentDetailsRestController {
 		$controller = new WooPaymentsPaymentDetailsRestController();
-		$controller->init( $this->create_arbiter( $native_register ), $this->api_client );
+		$controller->init( $this->create_arbiter( $native_register ), $this->api_client, $this->create_order_service() );
 
 		return $controller;
 	}
@@ -1377,6 +1580,93 @@ class WooPaymentsMoneyMovementRestControllerTest extends WC_REST_Unit_Test_Case 
 		$order->update_status( 'on-hold' );
 
 		return $order;
+	}
+
+	/**
+	 * Create a refundable WooPayments order.
+	 *
+	 * @param string $total     Order total.
+	 * @param string $charge_id WooPayments charge ID.
+	 * @return WC_Order
+	 */
+	private function create_refundable_order_with_charge( string $total, string $charge_id ): WC_Order {
+		$order = wc_create_order();
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		$order->set_total( $total );
+		$order->set_currency( 'USD' );
+		$order->set_payment_method( 'native_test_refund_gateway' );
+		$order->update_meta_data( '_charge_id', $charge_id );
+		$order->update_meta_data( '_intent_id', 'pi_order' );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Register a local refundable gateway for refund route tests.
+	 *
+	 * @param bool|\WP_Error $refund_result Gateway refund result.
+	 * @return \WC_Payment_Gateway&object{refund_calls: array<int,array<string,mixed>>}
+	 */
+	private function register_refund_gateway( $refund_result ): \WC_Payment_Gateway {
+		$gateway = new class( $refund_result ) extends \WC_Payment_Gateway {
+			/**
+			 * Refund result.
+			 *
+			 * @var bool|\WP_Error
+			 */
+			private $refund_result;
+
+			/**
+			 * Recorded refund calls.
+			 *
+			 * @var array<int,array<string,mixed>>
+			 */
+			public array $refund_calls = array();
+
+			/**
+			 * Constructor.
+			 *
+			 * @param bool|\WP_Error $refund_result Refund result.
+			 */
+			public function __construct( $refund_result ) {
+				$this->id            = 'native_test_refund_gateway';
+				$this->method_title  = 'Native test refund gateway';
+				$this->title         = 'Native test refund gateway';
+				$this->supports      = array( 'refunds' );
+				$this->refund_result = $refund_result;
+			}
+
+			/**
+			 * Process refund.
+			 *
+			 * @param int        $order_id Order ID.
+			 * @param float|null $amount   Amount.
+			 * @param string     $reason   Reason.
+			 * @return bool|\WP_Error
+			 */
+			public function process_refund( $order_id, $amount = null, $reason = '' ) {
+				$this->refund_calls[] = array(
+					'order_id' => (int) $order_id,
+					'amount'   => null === $amount ? null : (float) $amount,
+					'reason'   => (string) $reason,
+				);
+
+				return $this->refund_result;
+			}
+		};
+
+		$this->refund_gateway_initializer = static function ( \WC_Payment_Gateways $wc_payment_gateways ) use ( $gateway ): void {
+			$wc_payment_gateways->payment_gateways = array( $gateway );
+		};
+
+		add_action( 'wc_payment_gateways_initialized', $this->refund_gateway_initializer, 100 );
+
+		WC()->payment_gateways()->payment_gateways = array();
+		WC()->payment_gateways()->init();
+
+		return $gateway;
 	}
 
 	/**

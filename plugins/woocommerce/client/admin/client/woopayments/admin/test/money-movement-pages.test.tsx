@@ -31,6 +31,7 @@ import {
 	cancelWooPaymentsAuthorization,
 	requestWooPaymentsDisputesExport,
 	requestWooPaymentsTransactionsExport,
+	refundWooPaymentsCharge,
 } from '../money-movement/data';
 
 const mockCreateSuccessNotice = jest.fn();
@@ -158,6 +159,7 @@ jest.mock( '../money-movement/data', () => ( {
 	getWooPaymentsTransactionsExportUrl: jest.fn(),
 	requestWooPaymentsDisputesExport: jest.fn(),
 	getWooPaymentsDisputesExportUrl: jest.fn(),
+	refundWooPaymentsCharge: jest.fn(),
 } ) );
 
 const mockGetTransactions = getWooPaymentsTransactions as jest.MockedFunction<
@@ -201,6 +203,9 @@ const mockCancelAuthorization =
 	cancelWooPaymentsAuthorization as jest.MockedFunction<
 		typeof cancelWooPaymentsAuthorization
 	>;
+const mockRefundCharge = refundWooPaymentsCharge as jest.MockedFunction<
+	typeof refundWooPaymentsCharge
+>;
 const mockCloseDispute = closeWooPaymentsDispute as jest.MockedFunction<
 	typeof closeWooPaymentsDispute
 >;
@@ -258,6 +263,7 @@ describe( 'WooPayments money movement pages', () => {
 		mockGetAuthorizationsSummary.mockReset();
 		mockCaptureAuthorization.mockReset();
 		mockCancelAuthorization.mockReset();
+		mockRefundCharge.mockReset();
 		mockCloseDispute.mockReset();
 		mockGetDisputesSummary.mockReset();
 		mockRequestTransactionsExport.mockReset();
@@ -1128,6 +1134,414 @@ describe( 'WooPayments money movement pages', () => {
 		expect( mockGetPaymentIntent ).toHaveBeenCalledWith( 'pi_test' );
 		expect( mockGetTimeline ).toHaveBeenCalledWith( 'pi_test' );
 		expect( mockGetTransaction ).not.toHaveBeenCalled();
+	} );
+
+	it( 'opens the full refund modal from transaction details and reloads after a successful refund', async () => {
+		const refundablePaymentIntent = {
+			id: 'pi_refund',
+			status: 'succeeded',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			charge: {
+				id: 'ch_refund',
+				payment_intent: 'pi_refund',
+				balance_transaction: 'txn_refund',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				captured: true,
+				amount_refunded: 0,
+				refunded: false,
+				order: {
+					id: 123,
+					number: '123',
+					url: 'http://example.com/wp-admin/post.php?post=123&action=edit',
+				},
+			},
+		};
+		mockGetPaymentIntent
+			.mockResolvedValueOnce( refundablePaymentIntent )
+			.mockResolvedValueOnce( {
+				...refundablePaymentIntent,
+				charge: {
+					...refundablePaymentIntent.charge,
+					amount_refunded: 5000,
+					refunded: true,
+				},
+			} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+		mockRefundCharge.mockResolvedValue( {
+			id: 555,
+			order_id: 123,
+			amount: '50.00',
+			reason: '',
+			status: 'completed',
+		} );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_refund&transaction_id=txn_refund',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		const refundActionsButton = await screen.findByRole( 'button', {
+			name: 'Transaction actions',
+		} );
+		await act( async () => {
+			await userEvent.click( refundActionsButton );
+		} );
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'menuitem', { name: 'Refund in full' } )
+			);
+		} );
+
+		const dialog = await screen.findByRole( 'dialog', {
+			name: 'Refund transaction',
+		} );
+		expect(
+			within( dialog ).getByText( ( _content, element ) => {
+				return (
+					element?.tagName.toLowerCase() === 'p' &&
+					element.textContent ===
+						'This will issue a full refund of $50.00 to the customer.'
+				);
+			} )
+		).toBeInTheDocument();
+		expect(
+			within( dialog ).getByRole( 'link', { name: 'Go to the order' } )
+		).toHaveAttribute(
+			'href',
+			'http://example.com/wp-admin/post.php?post=123&action=edit'
+		);
+		await act( async () => {
+			await userEvent.click( within( dialog ).getByLabelText( 'Other' ) );
+		} );
+		await act( async () => {
+			await userEvent.click(
+				within( dialog ).getByRole( 'button', {
+					name: 'Refund transaction',
+				} )
+			);
+		} );
+
+		await waitFor( () =>
+			expect( mockRefundCharge ).toHaveBeenCalledWith( {
+				chargeId: 'ch_refund',
+				amount: 5000,
+				reason: null,
+				orderId: 123,
+			} )
+		);
+		expect( mockCreateSuccessNotice ).toHaveBeenCalledWith(
+			'Refunded payment #pi_refund.'
+		);
+		expect( mockGetPaymentIntent ).toHaveBeenCalledTimes( 2 );
+		await waitFor( () =>
+			expect(
+				screen.queryByRole( 'dialog', { name: 'Refund transaction' } )
+			).not.toBeInTheDocument()
+		);
+		await waitFor( () =>
+			expect(
+				screen.getByRole( 'heading', { name: 'Payment details' } )
+			).toHaveFocus()
+		);
+	} );
+
+	it( 'keeps partial refund navigation available when a full refund is no longer available', async () => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_partial_refund',
+			status: 'succeeded',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			charge: {
+				id: 'ch_partial_refund',
+				payment_intent: 'pi_partial_refund',
+				balance_transaction: 'txn_partial_refund',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				captured: true,
+				amount_refunded: 1000,
+				refunded: false,
+				order: {
+					id: 123,
+					number: '123',
+					url: 'http://example.com/wp-admin/post.php?post=123&action=edit',
+				},
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_partial_refund&transaction_id=txn_partial_refund',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		const refundActionsButton = await screen.findByRole( 'button', {
+			name: 'Transaction actions',
+		} );
+		await act( async () => {
+			await userEvent.click( refundActionsButton );
+		} );
+
+		expect(
+			screen.queryByRole( 'menuitem', { name: 'Refund in full' } )
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByRole( 'menuitem', { name: 'Partial refund' } )
+		).toBeInTheDocument();
+	} );
+
+	it( 'does not offer transaction detail refunds when the charge is not order-backed', async () => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_no_order',
+			status: 'succeeded',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			charge: {
+				id: 'ch_no_order',
+				payment_intent: 'pi_no_order',
+				balance_transaction: 'txn_no_order',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				captured: true,
+				amount_refunded: 0,
+				refunded: false,
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_no_order&transaction_id=txn_no_order',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		expect(
+			await screen.findByRole( 'heading', { name: 'Payment details' } )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', { name: 'Transaction actions' } )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'derives refund order ids from native order URLs when the detail payload omits the order id', async () => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_order_url',
+			status: 'succeeded',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			charge: {
+				id: 'ch_order_url',
+				payment_intent: 'pi_order_url',
+				balance_transaction: 'txn_order_url',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				captured: true,
+				amount_refunded: 0,
+				refunded: false,
+				order: {
+					number: '123',
+					url: 'http://example.com/wp-admin/admin.php?page=wc-orders&action=edit&id=123',
+				},
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_order_url&transaction_id=txn_order_url',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		const refundActionsButton = await screen.findByRole( 'button', {
+			name: 'Transaction actions',
+		} );
+		await act( async () => {
+			await userEvent.click( refundActionsButton );
+		} );
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'menuitem', { name: 'Refund in full' } )
+			);
+		} );
+		await act( async () => {
+			await userEvent.click(
+				await screen.findByLabelText( 'Requested by customer' )
+			);
+		} );
+		const refundButton = await screen.findByRole( 'button', {
+			name: 'Refund transaction',
+		} );
+		await act( async () => {
+			await userEvent.click( refundButton );
+		} );
+
+		await waitFor( () =>
+			expect( mockRefundCharge ).toHaveBeenCalledWith(
+				expect.objectContaining( {
+					orderId: 123,
+					reason: 'requested_by_customer',
+				} )
+			)
+		);
+	} );
+
+	it( 'warns when a full refund will close an open inquiry', async () => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_inquiry_refund',
+			status: 'succeeded',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			charge: {
+				id: 'ch_inquiry_refund',
+				payment_intent: 'pi_inquiry_refund',
+				balance_transaction: 'txn_inquiry_refund',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				captured: true,
+				amount_refunded: 0,
+				refunded: false,
+				order: {
+					id: 123,
+					number: '123',
+					url: 'http://example.com/wp-admin/post.php?post=123&action=edit',
+				},
+				dispute: {
+					id: 'du_inquiry',
+					status: 'warning_needs_response',
+					reason: 'fraudulent',
+				},
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_inquiry_refund&transaction_id=txn_inquiry_refund',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		const refundActionsButton = await screen.findByRole( 'button', {
+			name: 'Transaction actions',
+		} );
+		await act( async () => {
+			await userEvent.click( refundActionsButton );
+		} );
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'menuitem', { name: 'Refund in full' } )
+			);
+		} );
+
+		expect(
+			await screen.findByText(
+				'Issuing a refund will close the inquiry, returning the amount in question back to the cardholder. No additional fees apply.'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'keeps the refund modal open and dispatches an error notice when refunding fails', async () => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_refund_error',
+			status: 'succeeded',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			charge: {
+				id: 'ch_refund_error',
+				payment_intent: 'pi_refund_error',
+				balance_transaction: 'txn_refund_error',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				captured: true,
+				amount_refunded: 0,
+				refunded: false,
+				order: {
+					id: 123,
+					number: '123',
+					url: 'http://example.com/wp-admin/post.php?post=123&action=edit',
+				},
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+		mockRefundCharge.mockRejectedValue( new Error( 'Gateway failed.' ) );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_refund_error&transaction_id=txn_refund_error',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		const refundActionsButton = await screen.findByRole( 'button', {
+			name: 'Transaction actions',
+		} );
+		await act( async () => {
+			await userEvent.click( refundActionsButton );
+		} );
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'menuitem', { name: 'Refund in full' } )
+			);
+		} );
+		const refundButton = await screen.findByRole( 'button', {
+			name: 'Refund transaction',
+		} );
+		await act( async () => {
+			await userEvent.click( refundButton );
+		} );
+
+		await waitFor( () =>
+			expect( mockCreateErrorNotice ).toHaveBeenCalledWith(
+				'There has been an error refunding the payment #pi_refund_error. Please try again later. Gateway failed.'
+			)
+		);
+		expect(
+			screen.getByRole( 'dialog', { name: 'Refund transaction' } )
+		).toBeInTheDocument();
+		expect( mockGetPaymentIntent ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	it( 'captures an uncaptured authorization from transaction details and reloads the detail data', async () => {

@@ -59,6 +59,22 @@ export interface WooPaymentsAuthorizationActionResponse {
 	[ key: string ]: unknown;
 }
 
+export interface WooPaymentsRefundRequest {
+	chargeId: string;
+	amount: number;
+	reason: string | null;
+	orderId: number | string;
+}
+
+export interface WooPaymentsRefundResponse {
+	id?: number | string;
+	order_id?: number | string;
+	amount?: number | string;
+	reason?: string;
+	status?: string;
+	[ key: string ]: unknown;
+}
+
 export interface WooPaymentsDispute {
 	id?: string;
 	dispute_id?: string;
@@ -148,6 +164,8 @@ export interface WooPaymentsBillingDetails {
 export interface WooPaymentsPaymentOrder {
 	id?: number | string;
 	number?: number | string;
+	url?: string;
+	fraud_meta_box_type?: string;
 	[ key: string ]: unknown;
 }
 

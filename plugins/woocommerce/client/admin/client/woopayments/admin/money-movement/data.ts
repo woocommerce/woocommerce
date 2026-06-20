@@ -18,6 +18,8 @@ import type {
 	WooPaymentsMoneyMovementQuery,
 	WooPaymentsCharge,
 	WooPaymentsPaymentIntent,
+	WooPaymentsRefundRequest,
+	WooPaymentsRefundResponse,
 	WooPaymentsTransaction,
 	WooPaymentsTimelineResponse,
 } from './types';
@@ -180,6 +182,23 @@ export const cancelWooPaymentsAuthorization = (
 		method: 'POST',
 		data: {
 			payment_intent_id: paymentIntentId,
+		},
+	} );
+
+export const refundWooPaymentsCharge = ( {
+	chargeId,
+	amount,
+	reason,
+	orderId,
+}: WooPaymentsRefundRequest ): Promise< WooPaymentsRefundResponse > =>
+	apiFetch< WooPaymentsRefundResponse >( {
+		path: `${ PAYMENTS_PATH }/refund`,
+		method: 'POST',
+		data: {
+			charge_id: chargeId,
+			amount,
+			reason,
+			order_id: orderId,
 		},
 	} );
 

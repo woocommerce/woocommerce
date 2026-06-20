@@ -111,6 +111,41 @@ class WooPaymentsMoneyMovementOrderService {
 	}
 
 	/**
+	 * Add order context to a charge detail response.
+	 *
+	 * @param array<string,mixed> $charge Platform charge.
+	 * @return array<string,mixed>
+	 */
+	public function enrich_charge_response( array $charge ): array {
+		return $this->add_detail_order_info( $charge, $this->get_charge_id_from_charge_response( $charge ) );
+	}
+
+	/**
+	 * Add order context to a payment intent detail response and its embedded charges.
+	 *
+	 * @param array<string,mixed> $intent Platform payment intent.
+	 * @return array<string,mixed>
+	 */
+	public function enrich_payment_intent_response( array $intent ): array {
+		$intent = $this->add_detail_order_info( $intent, $this->get_charge_id_from_payment_intent( $intent ) );
+
+		if ( isset( $intent['charge'] ) && is_array( $intent['charge'] ) ) {
+			$intent['charge'] = $this->enrich_charge_response( $intent['charge'] );
+		}
+
+		if ( isset( $intent['charges'] ) && is_array( $intent['charges'] ) && isset( $intent['charges']['data'] ) && is_array( $intent['charges']['data'] ) ) {
+			foreach ( $intent['charges']['data'] as &$charge ) {
+				if ( is_array( $charge ) ) {
+					$charge = $this->enrich_charge_response( $charge );
+				}
+			}
+			unset( $charge );
+		}
+
+		return $intent;
+	}
+
+	/**
 	 * Add order context to a dispute list response.
 	 *
 	 * @param array<string,mixed> $response Platform response.
@@ -555,6 +590,51 @@ class WooPaymentsMoneyMovementOrderService {
 		$orders_by_charge_id = $this->get_orders_by_charge_ids( array( $charge_id ) );
 
 		return $orders_by_charge_id[ $charge_id ] ?? null;
+	}
+
+	/**
+	 * Get a charge ID from a charge response.
+	 *
+	 * @param array<string,mixed> $charge Charge response.
+	 * @return string
+	 */
+	private function get_charge_id_from_charge_response( array $charge ): string {
+		if ( isset( $charge['id'] ) && is_scalar( $charge['id'] ) ) {
+			return (string) $charge['id'];
+		}
+
+		return $this->get_charge_id_from_entity( $charge );
+	}
+
+	/**
+	 * Get a charge ID from a payment intent response.
+	 *
+	 * @param array<string,mixed> $intent Payment intent response.
+	 * @return string
+	 */
+	private function get_charge_id_from_payment_intent( array $intent ): string {
+		if ( isset( $intent['charge'] ) && is_scalar( $intent['charge'] ) ) {
+			return (string) $intent['charge'];
+		}
+
+		if ( isset( $intent['charge'] ) && is_array( $intent['charge'] ) ) {
+			return $this->get_charge_id_from_charge_response( $intent['charge'] );
+		}
+
+		if ( ! isset( $intent['charges'] ) || ! is_array( $intent['charges'] ) || ! isset( $intent['charges']['data'] ) || ! is_array( $intent['charges']['data'] ) ) {
+			return '';
+		}
+
+		foreach ( $intent['charges']['data'] as $charge ) {
+			if ( is_array( $charge ) ) {
+				$charge_id = $this->get_charge_id_from_charge_response( $charge );
+				if ( '' !== $charge_id ) {
+					return $charge_id;
+				}
+			}
+		}
+
+		return '';
 	}
 
 	/**

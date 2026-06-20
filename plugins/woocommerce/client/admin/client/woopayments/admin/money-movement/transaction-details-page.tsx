@@ -1,10 +1,25 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
+import {
+	Button,
+	DropdownMenu,
+	MenuGroup,
+	MenuItem,
+	Modal,
+	RadioControl,
+} from '@wordpress/components';
 import { dispatch } from '@wordpress/data';
-import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from '@wordpress/element';
+import { moreVertical } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
+import { recordEvent } from '@woocommerce/tracks';
 import type { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -19,10 +34,12 @@ import {
 	getWooPaymentsPaymentIntent,
 	getWooPaymentsTimeline,
 	getWooPaymentsTransaction,
+	refundWooPaymentsCharge,
 } from './data';
 import type {
 	WooPaymentsAuthorization,
 	WooPaymentsCharge,
+	WooPaymentsDispute,
 	WooPaymentsPaymentIntent,
 	WooPaymentsTimelineEvent,
 	WooPaymentsTransaction,
@@ -38,8 +55,18 @@ import { LiveStatusMessage, StatusMessage } from './table';
 import '../style.scss';
 
 type AuthorizationAction = 'capture' | 'cancel';
+type RefundReason =
+	| 'duplicate'
+	| 'fraudulent'
+	| 'requested_by_customer'
+	| 'other'
+	| null;
 type PendingAuthorizationAction = {
 	action: AuthorizationAction;
+	paymentIntentId: string;
+	routeKey: string;
+} | null;
+type PendingRefundAction = {
 	paymentIntentId: string;
 	routeKey: string;
 } | null;
@@ -52,8 +79,8 @@ type LoadTransactionOptions = {
 	setLoading?: boolean;
 };
 
-const AUTHORIZATION_ACTION_FOCUS_SELECTOR =
-	'.woocommerce-woopayments-money-movement__authorization-actions, .woocommerce-woopayments-money-movement__authorization-notice';
+const DETAIL_ACTION_FOCUS_SELECTOR =
+	'.woocommerce-woopayments-money-movement__authorization-actions, .woocommerce-woopayments-money-movement__authorization-notice, .woocommerce-woopayments-money-movement__refund-actions, .woocommerce-woopayments-money-movement__refund-modal';
 
 const isPaymentIntentId = ( id: string ) => id.startsWith( 'pi_' );
 
@@ -199,6 +226,74 @@ const isAuthorizationEligible = (
 	);
 };
 
+const getTransactionOrderId = ( transaction: WooPaymentsTransaction ) => {
+	const orderId = Number( transaction.order?.id );
+
+	if ( Number.isFinite( orderId ) && orderId > 0 ) {
+		return orderId;
+	}
+
+	const orderUrl =
+		typeof transaction.order?.url === 'string' ? transaction.order.url : '';
+
+	if ( ! orderUrl ) {
+		return 0;
+	}
+
+	try {
+		const url = new URL( orderUrl, 'http://example.com' );
+		const orderIdFromUrl = Number(
+			url.searchParams.get( 'id' ) || url.searchParams.get( 'post' )
+		);
+
+		return Number.isFinite( orderIdFromUrl ) && orderIdFromUrl > 0
+			? orderIdFromUrl
+			: 0;
+	} catch {
+		return 0;
+	}
+};
+
+const getTransactionOrderUrl = ( transaction: WooPaymentsTransaction ) =>
+	typeof transaction.order?.url === 'string' ? transaction.order.url : '';
+
+const isDisputeInquiry = ( dispute: WooPaymentsDispute ) =>
+	typeof dispute.status === 'string' &&
+	dispute.status.startsWith( 'warning' );
+
+const isDisputeAwaitingResponse = ( dispute: WooPaymentsDispute ) =>
+	dispute.status === 'needs_response' ||
+	dispute.status === 'warning_needs_response';
+
+const isDisputeRefundable = ( dispute?: WooPaymentsDispute ) => {
+	if ( ! dispute?.status ) {
+		return true;
+	}
+
+	return isDisputeInquiry( dispute ) || dispute.status === 'won';
+};
+
+const isTransactionPartiallyRefunded = (
+	transaction: WooPaymentsTransaction
+) =>
+	typeof transaction.amount_refunded === 'number' &&
+	transaction.amount_refunded > 0;
+
+const isTransactionRefundEligible = (
+	transaction: WooPaymentsTransaction,
+	refundOrderId: number
+) => {
+	if (
+		! refundOrderId ||
+		transaction.captured !== true ||
+		transaction.refunded
+	) {
+		return false;
+	}
+
+	return isDisputeRefundable( transaction.dispute );
+};
+
 const getTimelineUserName = ( event: WooPaymentsTimelineEvent ) =>
 	typeof event.user?.username === 'string' ? event.user.username : '';
 
@@ -306,6 +401,116 @@ const normalizePaymentIntent = (
 	};
 };
 
+const RefundModal = ( {
+	formattedAmount,
+	isOpenInquiry,
+	isRefundPending,
+	orderUrl,
+	reason,
+	onChangeReason,
+	onClose,
+	onRefund,
+}: {
+	formattedAmount: string;
+	isOpenInquiry: boolean;
+	isRefundPending: boolean;
+	orderUrl: string;
+	reason: RefundReason;
+	onChangeReason: ( value: RefundReason ) => void;
+	onClose: () => void;
+	onRefund: () => void;
+} ) => (
+	<Modal
+		className="woocommerce-woopayments-money-movement__refund-modal"
+		title={ __( 'Refund transaction', 'woocommerce' ) }
+		onRequestClose={ onClose }
+	>
+		{ isOpenInquiry && (
+			<p>
+				{ __(
+					'Issuing a refund will close the inquiry, returning the amount in question back to the cardholder. No additional fees apply.',
+					'woocommerce'
+				) }
+			</p>
+		) }
+		<p>
+			{ createInterpolateElement(
+				sprintf(
+					/* translators: %s: formatted refund amount. */
+					__(
+						'This will issue a full refund of <strong>%s</strong> to the customer.',
+						'woocommerce'
+					),
+					formattedAmount
+				),
+				{
+					strong: <strong />,
+				}
+			) }
+		</p>
+		<RadioControl
+			className="woocommerce-woopayments-money-movement__refund-reason"
+			label={ __( 'Select a reason (optional)', 'woocommerce' ) }
+			selected={ reason || undefined }
+			options={ [
+				{
+					label: __( 'Duplicate order', 'woocommerce' ),
+					value: 'duplicate',
+				},
+				{
+					label: __( 'Fraudulent', 'woocommerce' ),
+					value: 'fraudulent',
+				},
+				{
+					label: __( 'Requested by customer', 'woocommerce' ),
+					value: 'requested_by_customer',
+				},
+				{
+					label: __( 'Other', 'woocommerce' ),
+					value: 'other',
+				},
+			] }
+			onChange={ ( value ) => onChangeReason( value as RefundReason ) }
+		/>
+		{ orderUrl && (
+			<p className="woocommerce-woopayments-money-movement__refund-partial-link">
+				{ createInterpolateElement(
+					__(
+						'Need to refund part of the order? <link>Go to the order</link>.',
+						'woocommerce'
+					),
+					{
+						link: (
+							<a href={ orderUrl }>
+								{ __( 'Go to the order', 'woocommerce' ) }
+							</a>
+						),
+					}
+				) }
+			</p>
+		) }
+		<div className="woocommerce-woopayments-money-movement__refund-modal-actions">
+			<Button variant="tertiary" onClick={ onClose }>
+				{ __( 'Cancel', 'woocommerce' ) }
+			</Button>
+			<Button
+				variant="primary"
+				isBusy={ isRefundPending }
+				disabled={ isRefundPending }
+				accessibleWhenDisabled
+				onClick={ isRefundPending ? undefined : onRefund }
+				aria-label={
+					isRefundPending
+						? __( 'Refunding transaction', 'woocommerce' )
+						: undefined
+				}
+			>
+				{ __( 'Refund transaction', 'woocommerce' ) }
+			</Button>
+		</div>
+	</Modal>
+);
+
 export const WooPaymentsTransactionDetailsPage = () => {
 	const [ transaction, setTransaction ] =
 		useState< WooPaymentsTransaction | null >( null );
@@ -321,6 +526,10 @@ export const WooPaymentsTransactionDetailsPage = () => {
 		useState< WooPaymentsAuthorization | null >( null );
 	const [ pendingAuthorizationAction, setPendingAuthorizationAction ] =
 		useState< PendingAuthorizationAction >( null );
+	const [ pendingRefundAction, setPendingRefundAction ] =
+		useState< PendingRefundAction >( null );
+	const [ isRefundModalOpen, setIsRefundModalOpen ] = useState( false );
+	const [ refundReason, setRefundReason ] = useState< RefundReason >( null );
 	const [ isLoading, setIsLoading ] = useState( true );
 	const [ errorMessage, setErrorMessage ] = useState< string | null >( null );
 	const location = useLocation();
@@ -333,17 +542,22 @@ export const WooPaymentsTransactionDetailsPage = () => {
 	const paymentDetailsHeadingRef = useRef< HTMLHeadingElement | null >(
 		null
 	);
+	const refundActionsRef = useRef< HTMLDivElement | null >( null );
 	const shouldFocusDetailsHeadingRef = useRef( false );
 
 	useEffect( () => {
 		routeKeyRef.current = routeKey;
 		setPendingAuthorizationAction( null );
+		setPendingRefundAction( null );
+		setIsRefundModalOpen( false );
+		setRefundReason( null );
 	}, [ routeKey ] );
 
 	useEffect( () => {
 		if (
 			! shouldFocusDetailsHeadingRef.current ||
-			pendingAuthorizationAction
+			pendingAuthorizationAction ||
+			pendingRefundAction
 		) {
 			return;
 		}
@@ -354,9 +568,7 @@ export const WooPaymentsTransactionDetailsPage = () => {
 		const shouldRestoreFocus =
 			activeElement === heading?.ownerDocument.body ||
 			( activeElement instanceof HTMLElement &&
-				!! activeElement.closest(
-					AUTHORIZATION_ACTION_FOCUS_SELECTOR
-				) );
+				!! activeElement.closest( DETAIL_ACTION_FOCUS_SELECTOR ) );
 
 		if ( shouldRestoreFocus ) {
 			heading?.focus();
@@ -365,6 +577,7 @@ export const WooPaymentsTransactionDetailsPage = () => {
 		authorization,
 		errorMessage,
 		pendingAuthorizationAction,
+		pendingRefundAction,
 		transaction,
 	] );
 
@@ -557,12 +770,164 @@ export const WooPaymentsTransactionDetailsPage = () => {
 		!! transaction && !! authorization && !! paymentIntentId && orderId > 0;
 	const showFraudReviewActions = showAuthorizationActions && isFraudReview;
 	const showCaptureNotice = showAuthorizationActions && ! isFraudReview;
+	const refundOrderId = transaction
+		? getTransactionOrderId( transaction )
+		: 0;
+	const refundOrderUrl = transaction
+		? getTransactionOrderUrl( transaction )
+		: '';
+	const isRefundEligible =
+		!! transaction &&
+		isTransactionRefundEligible( transaction, refundOrderId );
+	const isPartiallyRefunded =
+		!! transaction && isTransactionPartiallyRefunded( transaction );
+	const showFullRefundAction = isRefundEligible && ! isPartiallyRefunded;
+	const showPartialRefundAction = isRefundEligible && !! refundOrderUrl;
+	const showRefundActions = showFullRefundAction || showPartialRefundAction;
+	const isOpenRefundInquiry =
+		!! transaction?.dispute &&
+		isDisputeInquiry( transaction.dispute ) &&
+		isDisputeAwaitingResponse( transaction.dispute );
 	const pendingAction =
 		pendingAuthorizationAction?.routeKey === routeKey &&
 		pendingAuthorizationAction?.paymentIntentId === paymentIntentId
 			? pendingAuthorizationAction.action
 			: null;
 	const isAuthorizationActionPending = !! pendingAction;
+	const isRefundPending =
+		pendingRefundAction?.routeKey === routeKey &&
+		pendingRefundAction?.paymentIntentId === paymentIntentId;
+
+	const focusRefundActions = () => {
+		const actionButton =
+			refundActionsRef.current?.querySelector( 'button' );
+		if ( actionButton instanceof HTMLButtonElement ) {
+			actionButton.focus();
+		}
+	};
+
+	const handleRefundModalClose = () => {
+		if ( isRefundPending ) {
+			return;
+		}
+
+		setIsRefundModalOpen( false );
+		window.setTimeout( focusRefundActions, 0 );
+	};
+
+	const handleRefundModalOpen = () => {
+		setRefundReason( null );
+		setIsRefundModalOpen( true );
+		recordEvent( 'payments_transactions_details_refund_modal_open', {
+			payment_intent_id: paymentIntentId,
+		} );
+	};
+
+	const handlePartialRefund = () => {
+		if ( ! refundOrderUrl ) {
+			return;
+		}
+
+		recordEvent( 'payments_transactions_details_partial_refund', {
+			payment_intent_id: paymentIntentId,
+			order_id: refundOrderId,
+		} );
+		window.location.href = refundOrderUrl;
+	};
+
+	const handleRefund = async () => {
+		if ( isRefundPending ) {
+			return;
+		}
+
+		if (
+			! transaction ||
+			! paymentIntentId ||
+			! chargeId ||
+			! refundOrderId ||
+			typeof transaction.amount !== 'number' ||
+			transaction.amount <= 0
+		) {
+			getNotices().createErrorNotice(
+				__(
+					'Unable to process this refund because the payment details are incomplete.',
+					'woocommerce'
+				)
+			);
+			return;
+		}
+
+		const refundRouteKey = routeKey;
+		const isCurrentRefundRoute = () =>
+			routeKeyRef.current === refundRouteKey;
+
+		setPendingRefundAction( {
+			paymentIntentId,
+			routeKey: refundRouteKey,
+		} );
+
+		try {
+			recordEvent( 'payments_transactions_details_refund_full', {
+				payment_intent_id: paymentIntentId,
+			} );
+
+			if ( isOpenRefundInquiry && transaction.dispute ) {
+				recordEvent( 'wcpay_dispute_inquiry_refund_click', {
+					dispute_id: transaction.dispute.id,
+					dispute_status: transaction.dispute.status,
+					dispute_reason: transaction.dispute.reason,
+					on_page: 'transaction_details',
+				} );
+			}
+
+			await refundWooPaymentsCharge( {
+				chargeId,
+				amount: transaction.amount,
+				reason: refundReason === 'other' ? null : refundReason,
+				orderId: refundOrderId,
+			} );
+			if ( ! isCurrentRefundRoute() ) {
+				return;
+			}
+
+			await loadTransaction( {
+				setLoading: false,
+				shouldUpdate: isCurrentRefundRoute,
+			} );
+			if ( ! isCurrentRefundRoute() ) {
+				return;
+			}
+
+			setIsRefundModalOpen( false );
+			setRefundReason( null );
+			shouldFocusDetailsHeadingRef.current = true;
+			getNotices().createSuccessNotice(
+				sprintf(
+					/* translators: %s: payment intent ID. */
+					__( 'Refunded payment #%s.', 'woocommerce' ),
+					paymentIntentId
+				)
+			);
+		} catch ( error ) {
+			const baseError = sprintf(
+				/* translators: %s: payment intent ID. */
+				__(
+					'There has been an error refunding the payment #%s. Please try again later.',
+					'woocommerce'
+				),
+				paymentIntentId
+			);
+			const errorDetail = getErrorMessage( error, '' );
+
+			getNotices().createErrorNotice(
+				errorDetail ? `${ baseError } ${ errorDetail }` : baseError
+			);
+		} finally {
+			if ( isCurrentRefundRoute() ) {
+				setPendingRefundAction( null );
+			}
+		}
+	};
 
 	const handleAuthorizationAction = async ( action: AuthorizationAction ) => {
 		if ( isAuthorizationActionPending ) {
@@ -586,7 +951,7 @@ export const WooPaymentsTransactionDetailsPage = () => {
 			paymentDetailsHeadingRef.current?.ownerDocument.activeElement;
 		const focusStartedInActionArea =
 			activeElement instanceof HTMLElement &&
-			!! activeElement.closest( AUTHORIZATION_ACTION_FOCUS_SELECTOR );
+			!! activeElement.closest( DETAIL_ACTION_FOCUS_SELECTOR );
 
 		setPendingAuthorizationAction( {
 			action,
@@ -679,11 +1044,58 @@ export const WooPaymentsTransactionDetailsPage = () => {
 			className="woocommerce-woopayments-money-movement"
 			aria-busy={ isLoading }
 		>
-			<h2 ref={ paymentDetailsHeadingRef } tabIndex={ -1 }>
-				{ hasPaymentDetails
-					? __( 'Payment details', 'woocommerce' )
-					: __( 'Transaction details', 'woocommerce' ) }
-			</h2>
+			<div className="woocommerce-woopayments-money-movement__detail-header">
+				<h2 ref={ paymentDetailsHeadingRef } tabIndex={ -1 }>
+					{ hasPaymentDetails
+						? __( 'Payment details', 'woocommerce' )
+						: __( 'Transaction details', 'woocommerce' ) }
+				</h2>
+				{ showRefundActions && (
+					<div
+						ref={ refundActionsRef }
+						className="woocommerce-woopayments-money-movement__refund-actions"
+					>
+						<DropdownMenu
+							icon={ moreVertical }
+							label={ __( 'Transaction actions', 'woocommerce' ) }
+							popoverProps={ {
+								position: 'bottom left',
+							} }
+						>
+							{ ( { onClose } ) => (
+								<MenuGroup>
+									{ showFullRefundAction && (
+										<MenuItem
+											onClick={ () => {
+												handleRefundModalOpen();
+												onClose();
+											} }
+										>
+											{ __(
+												'Refund in full',
+												'woocommerce'
+											) }
+										</MenuItem>
+									) }
+									{ showPartialRefundAction && (
+										<MenuItem
+											onClick={ () => {
+												handlePartialRefund();
+												onClose();
+											} }
+										>
+											{ __(
+												'Partial refund',
+												'woocommerce'
+											) }
+										</MenuItem>
+									) }
+								</MenuGroup>
+							) }
+						</DropdownMenu>
+					</div>
+				) }
+			</div>
 			<LiveStatusMessage
 				isError={ !! errorMessage || !! authorizationErrorMessage }
 			>
@@ -939,6 +1351,21 @@ export const WooPaymentsTransactionDetailsPage = () => {
 								) ) }
 							</ol>
 						</section>
+					) }
+					{ isRefundModalOpen && (
+						<RefundModal
+							formattedAmount={ formatAmount(
+								transaction.amount,
+								transaction.currency
+							) }
+							isOpenInquiry={ isOpenRefundInquiry }
+							isRefundPending={ !! isRefundPending }
+							orderUrl={ refundOrderUrl }
+							reason={ refundReason }
+							onChangeReason={ setRefundReason }
+							onClose={ handleRefundModalClose }
+							onRefund={ handleRefund }
+						/>
 					) }
 				</>
 			) }
