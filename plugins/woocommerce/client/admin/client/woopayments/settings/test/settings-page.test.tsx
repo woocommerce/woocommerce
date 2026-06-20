@@ -165,6 +165,8 @@ const setHookDefaults = () => {
 	} );
 	mockUseGetSettings.mockReturnValue( {
 		account_country: 'US',
+		store_currency: 'USD',
+		is_multi_currency_enabled: true,
 		available_payment_method_ids: [
 			'card',
 			'link',
@@ -924,12 +926,18 @@ describe( 'WooPaymentsSettingsPage', () => {
 			.getByRole( 'heading', { name: 'Express checkouts' } )
 			.closest( '.woopayments-settings-section' ) as HTMLElement;
 		const rejectedNotice = within( expressCheckoutsSection )
-			.getByText(
-				'Your application to use Amazon Pay has been rejected. Need help? Contact support'
-			)
+			.getByText( /Your application to use Amazon Pay has been rejected/ )
 			.closest( '.components-notice' );
 
 		expect( rejectedNotice ).toHaveClass( 'is-error' );
+		expect(
+			within( expressCheckoutsSection ).getByRole( 'link', {
+				name: /Contact support/,
+			} )
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/my-account/contact-support/'
+		);
 	} );
 
 	it( 'renders and dismisses duplicate notices for Apple Pay and Google Pay express buttons', async () => {
@@ -1128,6 +1136,307 @@ describe( 'WooPaymentsSettingsPage', () => {
 		expect(
 			screen.getByRole( 'checkbox', { name: 'Alipay' } )
 		).toBeDisabled();
+	} );
+
+	it( 'links inactive buy now pay later methods to the BNPL guidance', () => {
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'affirm',
+		] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active', requirements: [] },
+			affirm_payments: { status: 'inactive', requirements: [] },
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getByRole( 'checkbox', { name: 'Affirm' } )
+		).toBeDisabled();
+		expect(
+			screen
+				.getAllByRole( 'link', { name: /Learn more/ } )
+				.find(
+					( link ) =>
+						link.getAttribute( 'href' ) ===
+						'https://woocommerce.com/document/woopayments/payment-methods/buy-now-pay-later/#contact-support'
+				)
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/document/woopayments/payment-methods/buy-now-pay-later/#contact-support'
+		);
+	} );
+
+	it( 'renders delayed approval guidance for Alipay when approval is pending', () => {
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'alipay',
+		] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active', requirements: [] },
+			alipay_payments: { status: 'pending', requirements: [] },
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getByRole( 'checkbox', { name: 'Alipay' } )
+		).toBeDisabled();
+		expect( screen.getByText( 'Approval pending' ) ).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				/Your store must be live and fully functional before this payment method can be offered/
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.getByText( /Approval typically takes 2–3 days/ )
+		).toBeInTheDocument();
+		expect(
+			screen
+				.getAllByRole( 'link', { name: /Learn more/ } )
+				.find(
+					( link ) =>
+						link.getAttribute( 'href' ) ===
+						'https://woocommerce.com/document/woopayments/payment-methods/local-payment-methods/#approval-delays'
+				)
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/document/woopayments/payment-methods/local-payment-methods/#approval-delays'
+		);
+	} );
+
+	it( 'keeps generic pending guidance for non-delayed approval methods', () => {
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'klarna',
+		] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active', requirements: [] },
+			klarna_payments: { status: 'pending', requirements: [] },
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getByRole( 'checkbox', { name: 'Klarna' } )
+		).toBeDisabled();
+		expect(
+			screen.getByText(
+				"This payment method is pending approval. It won't be available at checkout until it's approved."
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText( /Approval typically takes 2–3 days/ )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'links pending verification guidance to the native payments overview route', () => {
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'sepa_debit',
+		] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active', requirements: [] },
+			sepa_debit_payments: {
+				status: 'pending_verification',
+				requirements: [],
+			},
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getByRole( 'checkbox', { name: 'SEPA Direct Debit' } )
+		).toBeDisabled();
+		expect(
+			screen.getByText(
+				/SEPA Direct Debit won't be available at checkout yet/
+			)
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'link', { name: /Payments overview/ } )
+		).toHaveAttribute(
+			'href',
+			expect.stringContaining( 'path=%2Fwoopayments%2Foverview' )
+		);
+	} );
+
+	it( 'renders rejected payment methods with a contact support link', () => {
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'affirm',
+		] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active', requirements: [] },
+			affirm_payments: {
+				status: 'rejected',
+				requirements: [],
+			},
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getByRole( 'checkbox', { name: 'Affirm' } )
+		).toBeDisabled();
+		expect(
+			screen
+				.getByText( /Your application to use Affirm has been rejected/ )
+				.closest( '.components-notice' )
+		).toHaveClass( 'is-error' );
+		expect(
+			screen.getByRole( 'link', { name: /Contact support/ } )
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/my-account/contact-support/'
+		);
+	} );
+
+	it( 'renders a missing-currency warning for enabled methods when multi-currency is off', () => {
+		mockUseGetSettings.mockReturnValue( {
+			account_country: 'US',
+			store_currency: 'USD',
+			is_multi_currency_enabled: false,
+		} );
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'bancontact',
+		] );
+		mockUseEnabledPaymentMethodIds.mockReturnValue( [
+			[ 'card', 'bancontact' ],
+			noop,
+		] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active', requirements: [] },
+			bancontact_payments: { status: 'active', requirements: [] },
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getByRole( 'checkbox', { name: 'Bancontact' } )
+		).not.toBeDisabled();
+		expect(
+			screen.getByText(
+				'Bancontact requires the EUR currency. Add EUR to your store to offer this payment method.'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'does not render a missing-currency warning for methods that are not enabled', () => {
+		mockUseGetSettings.mockReturnValue( {
+			account_country: 'US',
+			store_currency: 'USD',
+			is_multi_currency_enabled: false,
+		} );
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'bancontact',
+		] );
+		mockUseEnabledPaymentMethodIds.mockReturnValue( [ [ 'card' ], noop ] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active', requirements: [] },
+			bancontact_payments: { status: 'active', requirements: [] },
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const bancontactCheckbox = screen.getByRole( 'checkbox', {
+			name: 'Bancontact',
+		} );
+
+		expect( bancontactCheckbox ).toBeInTheDocument();
+		expect( bancontactCheckbox ).not.toBeDisabled();
+		expect( bancontactCheckbox ).not.toBeChecked();
+		expect(
+			screen.queryByText(
+				'Bancontact requires the EUR currency. Add EUR to your store to offer this payment method.'
+			)
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'renders a missing-currency warning with multiple supported currencies', () => {
+		mockUseGetSettings.mockReturnValue( {
+			account_country: 'US',
+			store_currency: 'AUD',
+			is_multi_currency_enabled: false,
+		} );
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'klarna',
+		] );
+		mockUseEnabledPaymentMethodIds.mockReturnValue( [
+			[ 'card', 'klarna' ],
+			noop,
+		] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active', requirements: [] },
+			klarna_payments: { status: 'active', requirements: [] },
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getByText(
+				'Klarna requires at least one of the following currencies: USD, GBP, EUR, DKK, NOK, or SEK. Add at least one of these currencies to your store to offer this payment method.'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'uses account-country payment method currencies for missing-currency warnings', () => {
+		mockUseGetSettings.mockReturnValue( {
+			account_country: 'JP',
+			store_currency: 'USD',
+			is_multi_currency_enabled: false,
+		} );
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'alipay',
+		] );
+		mockUseEnabledPaymentMethodIds.mockReturnValue( [
+			[ 'card', 'alipay' ],
+			noop,
+		] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active', requirements: [] },
+			alipay_payments: { status: 'active', requirements: [] },
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getByText(
+				'Alipay requires the JPY currency. Add JPY to your store to offer this payment method.'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'renders a missing-currency warning for JCB on non-JPY stores', () => {
+		mockUseGetSettings.mockReturnValue( {
+			account_country: 'US',
+			store_currency: 'USD',
+			is_multi_currency_enabled: false,
+		} );
+		mockUseGetAvailablePaymentMethodIds.mockReturnValue( [
+			'card',
+			'jcb',
+		] );
+		mockUseEnabledPaymentMethodIds.mockReturnValue( [
+			[ 'card', 'jcb' ],
+			noop,
+		] );
+		mockUseGetPaymentMethodStatuses.mockReturnValue( {
+			card_payments: { status: 'active', requirements: [] },
+			jcb_payments: { status: 'active', requirements: [] },
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.getByText(
+				'JCB requires the JPY currency. Add JPY to your store to offer this payment method.'
+			)
+		).toBeInTheDocument();
 	} );
 
 	it( 'requires confirmation before enabling test mode', () => {

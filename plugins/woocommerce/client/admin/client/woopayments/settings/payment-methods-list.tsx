@@ -9,7 +9,13 @@ import {
 	Modal,
 	Notice,
 } from '@wordpress/components';
-import { RawHTML, useEffect, useRef, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	RawHTML,
+	useEffect,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { info as infoIcon } from '@wordpress/icons';
 
@@ -22,6 +28,7 @@ import {
 	WooPaymentsPaymentMethodDefinition,
 } from './payment-method-definitions';
 import type { PmPromotion } from '../promotions/types';
+import { getSettingsPaymentsProviderRouteUrl } from '../admin/utils';
 
 type PaymentMethodStatus = {
 	status?: string;
@@ -57,6 +64,8 @@ type PaymentMethodsListProps = {
 	duplicatedPaymentMethodIds?: DuplicatePaymentMethodNotices;
 	dismissedDuplicatePaymentMethodNotices?: DuplicatePaymentMethodNotices;
 	isManualCaptureEnabled: boolean;
+	isMultiCurrencyEnabled?: boolean;
+	storeCurrency?: string;
 	accountCountry?: string;
 	onEnable: ( methodId: string ) => void;
 	onDisable: ( methodId: string ) => void;
@@ -68,7 +77,15 @@ type Availability = {
 	chip?: string;
 	chipType?: 'warning' | 'error';
 	notice?: React.ReactNode;
+	noticeSpokenMessage?: string;
 	noticeStatus?: 'info' | 'warning' | 'error';
+};
+
+type PaymentMethodAvailabilityOptions = {
+	enabledMethodIds?: string[];
+	isMultiCurrencyEnabled?: boolean;
+	overviewUrl?: string;
+	storeCurrency?: string;
 };
 
 const REQUIREMENTS_LABELS: Record< string, string > = {
@@ -106,6 +123,14 @@ const ZERO_DECIMAL_CURRENCY_CODES = new Set( [
 	'XOF',
 	'XPF',
 ] );
+const ADDITIONAL_PAYMENT_METHODS_DOCUMENTATION_URL =
+	'https://woocommerce.com/document/woopayments/payment-methods/additional-payment-methods/#method-cant-be-enabled';
+const BNPL_DOCUMENTATION_URL =
+	'https://woocommerce.com/document/woopayments/payment-methods/buy-now-pay-later/#contact-support';
+const DELAYED_APPROVAL_DOCUMENTATION_URL =
+	'https://woocommerce.com/document/woopayments/payment-methods/local-payment-methods/#approval-delays';
+const CONTACT_SUPPORT_URL =
+	'https://woocommerce.com/my-account/contact-support/';
 
 const getStatus = (
 	definition: WooPaymentsPaymentMethodDefinition,
@@ -121,6 +146,55 @@ const getRequirementLabels = ( requirements: unknown[] ) =>
 		.map(
 			( requirement ) => REQUIREMENTS_LABELS[ requirement ] || requirement
 		);
+
+const joinWithOr = ( items: string[] ): string => {
+	if ( items.length <= 1 ) {
+		return items[ 0 ] ?? '';
+	}
+
+	if ( items.length === 2 ) {
+		return sprintf(
+			/* translators: %1$s: First item, %2$s: second item in a list of two alternatives. */
+			__( '%1$s or %2$s', 'woocommerce' ),
+			items[ 0 ],
+			items[ 1 ]
+		);
+	}
+
+	return sprintf(
+		/* translators: %1$s: Comma-separated list of items, %2$s: last item in a list of alternatives. */
+		__( '%1$s, or %2$s', 'woocommerce' ),
+		items.slice( 0, -1 ).join( ', ' ),
+		items[ items.length - 1 ]
+	);
+};
+
+const getMissingCurrenciesMessage = (
+	paymentMethodLabel: string,
+	requiredCurrencies: string[]
+) => {
+	if ( requiredCurrencies.length === 1 ) {
+		return sprintf(
+			/* translators: %1$s: Payment method label, %2$s: required currency code. */
+			__(
+				'%1$s requires the %2$s currency. Add %2$s to your store to offer this payment method.',
+				'woocommerce'
+			),
+			paymentMethodLabel,
+			requiredCurrencies[ 0 ]
+		);
+	}
+
+	return sprintf(
+		/* translators: %1$s: Payment method label, %2$s: list of required currency codes. */
+		__(
+			'%1$s requires at least one of the following currencies: %2$s. Add at least one of these currencies to your store to offer this payment method.',
+			'woocommerce'
+		),
+		paymentMethodLabel,
+		joinWithOr( requiredCurrencies )
+	);
+};
 
 const PaymentMethodIcon = ( {
 	definition,
@@ -789,8 +863,15 @@ export const DuplicatePaymentMethodNotice = ( {
 export const getPaymentMethodAvailability = (
 	definition: WooPaymentsPaymentMethodDefinition,
 	status: PaymentMethodStatus,
-	isManualCaptureEnabled: boolean
+	isManualCaptureEnabled: boolean,
+	options: PaymentMethodAvailabilityOptions = {}
 ): Availability => {
+	const overviewUrl =
+		options.overviewUrl ||
+		getSettingsPaymentsProviderRouteUrl( '/woopayments/overview' );
+	const needsDelayedApprovalGuidance =
+		definition.id === 'alipay' || definition.id === 'wechat_pay';
+
 	switch ( status.status ) {
 		case 'inactive':
 			return {
@@ -802,28 +883,77 @@ export const getPaymentMethodAvailability = (
 							'More information is needed to finish setting up this payment method.',
 							'woocommerce'
 						) }{ ' ' }
-						<ExternalLink href="https://woocommerce.com/document/woopayments/payment-methods/additional-payment-methods/#method-cant-be-enabled">
+						<ExternalLink
+							href={
+								definition.allowsPayLater
+									? BNPL_DOCUMENTATION_URL
+									: ADDITIONAL_PAYMENT_METHODS_DOCUMENTATION_URL
+							}
+						>
 							{ __( 'Learn more', 'woocommerce' ) }
 						</ExternalLink>
 					</>
 				),
-				noticeStatus: 'warning',
-			};
-		case 'pending':
-			return {
-				isActionable: false,
-				chip: __( 'Approval pending', 'woocommerce' ),
-				notice: __(
-					"This payment method is pending approval. It won't be available at checkout until it's approved.",
+				noticeSpokenMessage: __(
+					'More information is needed to finish setting up this payment method. Learn more',
 					'woocommerce'
 				),
 				noticeStatus: 'warning',
 			};
+		case 'pending': {
+			const pendingNotice = needsDelayedApprovalGuidance ? (
+				<>
+					{ __(
+						'Your store must be live and fully functional before this payment method can be offered. Approval typically takes 2–3 days.',
+						'woocommerce'
+					) }{ ' ' }
+					<ExternalLink href={ DELAYED_APPROVAL_DOCUMENTATION_URL }>
+						{ __( 'Learn more', 'woocommerce' ) }
+					</ExternalLink>
+				</>
+			) : (
+				__(
+					"This payment method is pending approval. It won't be available at checkout until it's approved.",
+					'woocommerce'
+				)
+			);
+			const pendingNoticeSpokenMessage = needsDelayedApprovalGuidance
+				? __(
+						'Your store must be live and fully functional before this payment method can be offered. Approval typically takes 2–3 days. Learn more',
+						'woocommerce'
+				  )
+				: undefined;
+
+			return {
+				isActionable: false,
+				chip: __( 'Approval pending', 'woocommerce' ),
+				notice: pendingNotice,
+				noticeSpokenMessage: pendingNoticeSpokenMessage,
+				noticeStatus: 'warning',
+			};
+		}
 		case 'pending_verification':
 			return {
 				isActionable: false,
 				chip: __( 'Pending verification', 'woocommerce' ),
-				notice: sprintf(
+				notice: createInterpolateElement(
+					sprintf(
+						/* translators: %s: Payment method label. */
+						__(
+							"%s won't be available at checkout yet. To finish setting it up, review the required steps in <overviewLink>Payments overview</overviewLink>.",
+							'woocommerce'
+						),
+						definition.label
+					),
+					{
+						overviewLink: (
+							<a href={ overviewUrl }>
+								{ __( 'Payments overview', 'woocommerce' ) }
+							</a>
+						),
+					}
+				),
+				noticeSpokenMessage: sprintf(
 					/* translators: %s: Payment method label. */
 					__(
 						"%s won't be available at checkout yet. To finish setting it up, review the required steps in Payments overview.",
@@ -838,7 +968,24 @@ export const getPaymentMethodAvailability = (
 				isActionable: false,
 				chip: __( 'Rejected', 'woocommerce' ),
 				chipType: 'error',
-				notice: sprintf(
+				notice: createInterpolateElement(
+					sprintf(
+						/* translators: %s: Payment method label. */
+						__(
+							'Your application to use %s has been rejected. Need help? <contactSupportLink>Contact support</contactSupportLink>',
+							'woocommerce'
+						),
+						definition.label
+					),
+					{
+						contactSupportLink: (
+							<ExternalLink href={ CONTACT_SUPPORT_URL }>
+								<></>
+							</ExternalLink>
+						),
+					}
+				),
+				noticeSpokenMessage: sprintf(
 					/* translators: %s: Payment method label. */
 					__(
 						'Your application to use %s has been rejected. Need help? Contact support',
@@ -854,6 +1001,29 @@ export const getPaymentMethodAvailability = (
 		return {
 			isActionable: false,
 			chip: __( 'Unavailable with manual capture', 'woocommerce' ),
+		};
+	}
+
+	const storeCurrency = options.storeCurrency?.toUpperCase() || '';
+	const supportedCurrencies = definition.currencies.map( ( currency ) =>
+		currency.toUpperCase()
+	);
+
+	if (
+		options.isMultiCurrencyEnabled === false &&
+		definition.id !== 'card' &&
+		options.enabledMethodIds?.includes( definition.id ) &&
+		storeCurrency &&
+		supportedCurrencies.length > 0 &&
+		! supportedCurrencies.includes( storeCurrency )
+	) {
+		return {
+			isActionable: true,
+			notice: getMissingCurrenciesMessage(
+				definition.label,
+				supportedCurrencies
+			),
+			noticeStatus: 'warning',
 		};
 	}
 
@@ -944,6 +1114,8 @@ const PaymentMethodRow = ( {
 	duplicatedPaymentMethodIds,
 	dismissedDuplicatePaymentMethodNotices,
 	isManualCaptureEnabled,
+	isMultiCurrencyEnabled,
+	storeCurrency,
 	onEnable,
 	onDisable,
 	onDismissDuplicateNotice,
@@ -956,6 +1128,8 @@ const PaymentMethodRow = ( {
 	duplicatedPaymentMethodIds?: DuplicatePaymentMethodNotices;
 	dismissedDuplicatePaymentMethodNotices?: DuplicatePaymentMethodNotices;
 	isManualCaptureEnabled: boolean;
+	isMultiCurrencyEnabled?: boolean;
+	storeCurrency?: string;
 	onEnable: ( methodId: string ) => void;
 	onDisable: ( methodId: string ) => void;
 	onDismissDuplicateNotice?: ( notices: Record< string, string[] > ) => void;
@@ -970,17 +1144,27 @@ const PaymentMethodRow = ( {
 	const availability = getPaymentMethodAvailability(
 		definition,
 		status,
-		isManualCaptureEnabled
+		isManualCaptureEnabled,
+		{
+			enabledMethodIds,
+			isMultiCurrencyEnabled,
+			storeCurrency,
+		}
 	);
 	const requirements = Array.isArray( status.requirements )
 		? status.requirements
 		: [];
 	const statusId = `woopayments-settings-payment-method-${ definition.id }-status`;
 	const descriptionId = `woopayments-settings-payment-method-${ definition.id }-description`;
+	const noticeId = `woopayments-settings-payment-method-${ definition.id }-notice`;
 	const feeTooltipId = `woopayments-settings-payment-method-${ definition.id }-fees`;
-	const describedBy = availability.chip
-		? `${ descriptionId } ${ statusId }`
-		: descriptionId;
+	const describedBy = [
+		descriptionId,
+		availability.chip ? statusId : '',
+		availability.notice ? noticeId : '',
+	]
+		.filter( Boolean )
+		.join( ' ' );
 	const feeStructure = accountFees?.[ definition.id ];
 	const duplicateGatewayIds =
 		duplicatedPaymentMethodIds?.[ definition.id ] || [];
@@ -1097,8 +1281,9 @@ const PaymentMethodRow = ( {
 					status={ availability.noticeStatus || 'warning' }
 					isDismissible={ false }
 					className="woopayments-settings-payment-method-item__notice"
+					spokenMessage={ availability.noticeSpokenMessage }
 				>
-					{ availability.notice }
+					<span id={ noticeId }>{ availability.notice }</span>
 				</Notice>
 			) }
 			{ activationMethodId === definition.id && (
@@ -1125,6 +1310,8 @@ export const WooPaymentsPaymentMethodsList = ( {
 	duplicatedPaymentMethodIds,
 	dismissedDuplicatePaymentMethodNotices,
 	isManualCaptureEnabled,
+	isMultiCurrencyEnabled,
+	storeCurrency,
 	accountCountry,
 	onEnable,
 	onDisable,
@@ -1174,6 +1361,8 @@ export const WooPaymentsPaymentMethodsList = ( {
 						dismissedDuplicatePaymentMethodNotices
 					}
 					isManualCaptureEnabled={ isManualCaptureEnabled }
+					isMultiCurrencyEnabled={ isMultiCurrencyEnabled }
+					storeCurrency={ storeCurrency }
 					onEnable={ onEnable }
 					onDisable={ onDisable }
 					onDismissDuplicateNotice={ onDismissDuplicateNotice }

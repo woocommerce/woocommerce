@@ -167,11 +167,14 @@ const AMAZON_PAY_DEFINITION: WooPaymentsPaymentMethodDefinition = {
 	),
 	iconUrl: '',
 	stripeKey: 'amazon_pay_payments',
+	currencies: [],
 	allowsManualCapture: false,
 	allowsPayLater: false,
 };
 const asString = ( value: unknown, fallback = '' ) =>
 	typeof value === 'string' ? value : fallback;
+const asBoolean = ( value: unknown, fallback = false ) =>
+	typeof value === 'boolean' ? value : fallback;
 
 const createTermsLink = ( href: string ) => (
 	<ExternalLink href={ href }>
@@ -606,6 +609,11 @@ const PaymentMethodsSettingsSection = () => {
 	];
 	const [ isManualCaptureEnabled ] = useManualCapture() as BooleanSetting;
 	const accountCountry = asString( settings.account_country );
+	const storeCurrency = asString( settings.store_currency );
+	const isMultiCurrencyEnabled = asBoolean(
+		settings.is_multi_currency_enabled,
+		true
+	);
 	const onDismissDuplicateNotice = (
 		notices: Record< string, string[] >
 	) => {
@@ -658,6 +666,8 @@ const PaymentMethodsSettingsSection = () => {
 						dismissedDuplicatePaymentMethodNotices
 					}
 					isManualCaptureEnabled={ Boolean( isManualCaptureEnabled ) }
+					isMultiCurrencyEnabled={ isMultiCurrencyEnabled }
+					storeCurrency={ storeCurrency }
 					accountCountry={ accountCountry }
 					onEnable={ addPaymentMethod }
 					onDisable={ removePaymentMethod }
@@ -701,6 +711,11 @@ const BuyNowPayLaterSettingsSection = () => {
 	];
 	const [ isManualCaptureEnabled ] = useManualCapture() as BooleanSetting;
 	const accountCountry = asString( settings.account_country );
+	const storeCurrency = asString( settings.store_currency );
+	const isMultiCurrencyEnabled = asBoolean(
+		settings.is_multi_currency_enabled,
+		true
+	);
 	const onDismissDuplicateNotice = (
 		notices: Record< string, string[] >
 	) => {
@@ -741,6 +756,8 @@ const BuyNowPayLaterSettingsSection = () => {
 						dismissedDuplicatePaymentMethodNotices
 					}
 					isManualCaptureEnabled={ Boolean( isManualCaptureEnabled ) }
+					isMultiCurrencyEnabled={ isMultiCurrencyEnabled }
+					storeCurrency={ storeCurrency }
 					accountCountry={ accountCountry }
 					onEnable={ addPaymentMethod }
 					onDisable={ removePaymentMethod }

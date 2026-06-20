@@ -14,6 +14,7 @@ export type WooPaymentsPaymentMethodDefinition = {
 	description: string;
 	iconUrl: string;
 	stripeKey: string;
+	currencies: string[];
 	allowsManualCapture: boolean;
 	allowsPayLater: boolean;
 };
@@ -25,6 +26,144 @@ export type WooPaymentsCardBrand = {
 };
 
 const assetUrl = ( path: string ) => `${ WC_ASSET_URL || '' }${ path }`;
+
+const CURRENCIES = {
+	all: [],
+	aud: [ 'AUD' ],
+	cad: [ 'CAD' ],
+	chf: [ 'CHF' ],
+	cny: [ 'CNY' ],
+	dkk: [ 'DKK' ],
+	eur: [ 'EUR' ],
+	gbp: [ 'GBP' ],
+	hkd: [ 'HKD' ],
+	huf: [ 'HUF' ],
+	jpy: [ 'JPY' ],
+	nok: [ 'NOK' ],
+	nzd: [ 'NZD' ],
+	pln: [ 'PLN' ],
+	sek: [ 'SEK' ],
+	sgd: [ 'SGD' ],
+	usd: [ 'USD' ],
+	noneSupported: [ 'NONE_SUPPORTED' ],
+	affirm: [ 'USD', 'CAD' ],
+	afterpayClearpay: [ 'USD', 'CAD', 'AUD', 'NZD', 'GBP' ],
+	klarna: [ 'USD', 'GBP', 'EUR', 'DKK', 'NOK', 'SEK' ],
+	p24: [ 'EUR', 'PLN' ],
+};
+
+const ALIPAY_EUR_COUNTRIES = new Set( [
+	'AT',
+	'BE',
+	'BG',
+	'CY',
+	'CZ',
+	'DK',
+	'EE',
+	'FI',
+	'FR',
+	'DE',
+	'GR',
+	'IE',
+	'IT',
+	'LV',
+	'LT',
+	'LU',
+	'MT',
+	'NL',
+	'NO',
+	'PT',
+	'RO',
+	'SK',
+	'SI',
+	'ES',
+	'SE',
+	'CH',
+	'HR',
+] );
+
+const WECHAT_PAY_EUR_COUNTRIES = new Set( [
+	'AT',
+	'BE',
+	'FI',
+	'FR',
+	'DE',
+	'IE',
+	'IT',
+	'LU',
+	'NL',
+	'PT',
+	'ES',
+] );
+
+const getNormalizedAccountCountry = ( accountCountry?: string ) =>
+	accountCountry?.toUpperCase() || '';
+
+const getAlipayCurrencies = ( accountCountry?: string ) => {
+	const normalizedCountry = getNormalizedAccountCountry( accountCountry );
+
+	switch ( normalizedCountry ) {
+		case 'AU':
+			return CURRENCIES.aud;
+		case 'CA':
+			return CURRENCIES.cad;
+		case 'GB':
+			return CURRENCIES.gbp;
+		case 'HK':
+			return CURRENCIES.hkd;
+		case 'JP':
+			return CURRENCIES.jpy;
+		case 'NZ':
+			return CURRENCIES.nzd;
+		case 'SG':
+			return CURRENCIES.sgd;
+		case 'US':
+			return CURRENCIES.usd;
+		case 'HU':
+			return CURRENCIES.huf;
+	}
+
+	if ( ALIPAY_EUR_COUNTRIES.has( normalizedCountry ) ) {
+		return CURRENCIES.eur;
+	}
+
+	return CURRENCIES.cny;
+};
+
+const getWechatPayCurrencies = ( accountCountry?: string ) => {
+	const normalizedCountry = getNormalizedAccountCountry( accountCountry );
+
+	if ( WECHAT_PAY_EUR_COUNTRIES.has( normalizedCountry ) ) {
+		return CURRENCIES.eur;
+	}
+
+	switch ( normalizedCountry ) {
+		case 'AU':
+			return CURRENCIES.aud;
+		case 'CA':
+			return CURRENCIES.cad;
+		case 'DK':
+			return CURRENCIES.dkk;
+		case 'HK':
+			return CURRENCIES.hkd;
+		case 'JP':
+			return CURRENCIES.jpy;
+		case 'NO':
+			return CURRENCIES.nok;
+		case 'SG':
+			return CURRENCIES.sgd;
+		case 'SE':
+			return CURRENCIES.sek;
+		case 'CH':
+			return CURRENCIES.chf;
+		case 'GB':
+			return CURRENCIES.gbp;
+		case 'US':
+			return CURRENCIES.usd;
+	}
+
+	return CURRENCIES.noneSupported;
+};
 
 export const CARD_BRANDS: WooPaymentsCardBrand[] = [
 	{
@@ -74,6 +213,7 @@ export const CARD_BRANDS: WooPaymentsCardBrand[] = [
 const afterpayClearpayBase = {
 	id: 'afterpay_clearpay',
 	stripeKey: 'afterpay_clearpay_payments',
+	currencies: CURRENCIES.afterpayClearpay,
 	allowsManualCapture: false,
 	allowsPayLater: true,
 };
@@ -130,6 +270,7 @@ const PAYMENT_METHOD_DEFINITIONS: Record<
 		),
 		iconUrl: assetUrl( 'images/icons/credit-cards/visa.svg' ),
 		stripeKey: 'card_payments',
+		currencies: CURRENCIES.all,
 		allowsManualCapture: true,
 		allowsPayLater: false,
 	},
@@ -142,6 +283,7 @@ const PAYMENT_METHOD_DEFINITIONS: Record<
 		),
 		iconUrl: assetUrl( 'images/payment-methods/alipay.svg' ),
 		stripeKey: 'alipay_payments',
+		currencies: getAlipayCurrencies(),
 		allowsManualCapture: false,
 		allowsPayLater: false,
 	},
@@ -154,6 +296,7 @@ const PAYMENT_METHOD_DEFINITIONS: Record<
 		),
 		iconUrl: assetUrl( 'images/payment-methods/sepa.svg' ),
 		stripeKey: 'au_becs_debit_payments',
+		currencies: CURRENCIES.aud,
 		allowsManualCapture: false,
 		allowsPayLater: false,
 	},
@@ -166,6 +309,7 @@ const PAYMENT_METHOD_DEFINITIONS: Record<
 		),
 		iconUrl: assetUrl( 'images/payment-methods/bancontact.svg' ),
 		stripeKey: 'bancontact_payments',
+		currencies: CURRENCIES.eur,
 		allowsManualCapture: false,
 		allowsPayLater: false,
 	},
@@ -178,6 +322,7 @@ const PAYMENT_METHOD_DEFINITIONS: Record<
 		),
 		iconUrl: assetUrl( 'images/payment-methods/eps.svg' ),
 		stripeKey: 'eps_payments',
+		currencies: CURRENCIES.eur,
 		allowsManualCapture: false,
 		allowsPayLater: false,
 	},
@@ -190,6 +335,7 @@ const PAYMENT_METHOD_DEFINITIONS: Record<
 		),
 		iconUrl: assetUrl( 'images/payment-methods/giropay.svg' ),
 		stripeKey: 'giropay_payments',
+		currencies: CURRENCIES.eur,
 		allowsManualCapture: false,
 		allowsPayLater: false,
 	},
@@ -202,6 +348,7 @@ const PAYMENT_METHOD_DEFINITIONS: Record<
 		),
 		iconUrl: '',
 		stripeKey: 'grabpay_payments',
+		currencies: CURRENCIES.sgd,
 		allowsManualCapture: false,
 		allowsPayLater: false,
 	},
@@ -214,6 +361,7 @@ const PAYMENT_METHOD_DEFINITIONS: Record<
 		),
 		iconUrl: assetUrl( 'images/payment-methods/ideal.svg' ),
 		stripeKey: 'ideal_payments',
+		currencies: CURRENCIES.eur,
 		allowsManualCapture: false,
 		allowsPayLater: false,
 	},
@@ -226,6 +374,7 @@ const PAYMENT_METHOD_DEFINITIONS: Record<
 		),
 		iconUrl: assetUrl( 'images/payment-methods/jcb.svg' ),
 		stripeKey: 'jcb_payments',
+		currencies: CURRENCIES.jpy,
 		allowsManualCapture: false,
 		allowsPayLater: false,
 	},
@@ -238,6 +387,7 @@ const PAYMENT_METHOD_DEFINITIONS: Record<
 		),
 		iconUrl: assetUrl( 'images/payment-methods/multibanco.svg' ),
 		stripeKey: 'multibanco_payments',
+		currencies: CURRENCIES.eur,
 		allowsManualCapture: false,
 		allowsPayLater: false,
 	},
@@ -250,6 +400,7 @@ const PAYMENT_METHOD_DEFINITIONS: Record<
 		),
 		iconUrl: assetUrl( 'images/payment-methods/p24.svg' ),
 		stripeKey: 'p24_payments',
+		currencies: CURRENCIES.p24,
 		allowsManualCapture: false,
 		allowsPayLater: false,
 	},
@@ -262,6 +413,7 @@ const PAYMENT_METHOD_DEFINITIONS: Record<
 		),
 		iconUrl: assetUrl( 'images/payment-methods/sepa.svg' ),
 		stripeKey: 'sepa_debit_payments',
+		currencies: CURRENCIES.eur,
 		allowsManualCapture: false,
 		allowsPayLater: false,
 	},
@@ -274,6 +426,7 @@ const PAYMENT_METHOD_DEFINITIONS: Record<
 		),
 		iconUrl: assetUrl( 'images/payment-methods/sofort.svg' ),
 		stripeKey: 'sofort_payments',
+		currencies: CURRENCIES.eur,
 		allowsManualCapture: false,
 		allowsPayLater: false,
 	},
@@ -286,6 +439,7 @@ const PAYMENT_METHOD_DEFINITIONS: Record<
 		),
 		iconUrl: assetUrl( 'images/payment-methods/wechat.svg' ),
 		stripeKey: 'wechat_pay_payments',
+		currencies: getWechatPayCurrencies(),
 		allowsManualCapture: false,
 		allowsPayLater: false,
 	},
@@ -298,6 +452,7 @@ const PAYMENT_METHOD_DEFINITIONS: Record<
 		),
 		iconUrl: assetUrl( 'images/payment_methods/72x72/affirm.png' ),
 		stripeKey: 'affirm_payments',
+		currencies: CURRENCIES.affirm,
 		allowsManualCapture: false,
 		allowsPayLater: true,
 	},
@@ -310,6 +465,7 @@ const PAYMENT_METHOD_DEFINITIONS: Record<
 		),
 		iconUrl: assetUrl( 'images/payment_methods/72x72/klarna.png' ),
 		stripeKey: 'klarna_payments',
+		currencies: CURRENCIES.klarna,
 		allowsManualCapture: false,
 		allowsPayLater: true,
 	},
@@ -323,5 +479,25 @@ export const getPaymentMethodDefinition = (
 		return getAfterpayClearpayDefinition( accountCountry );
 	}
 
-	return PAYMENT_METHOD_DEFINITIONS[ methodId ];
+	const definition = PAYMENT_METHOD_DEFINITIONS[ methodId ];
+
+	if ( ! definition ) {
+		return undefined;
+	}
+
+	if ( methodId === 'alipay' ) {
+		return {
+			...definition,
+			currencies: getAlipayCurrencies( accountCountry ),
+		};
+	}
+
+	if ( methodId === 'wechat_pay' ) {
+		return {
+			...definition,
+			currencies: getWechatPayCurrencies( accountCountry ),
+		};
+	}
+
+	return definition;
 };
