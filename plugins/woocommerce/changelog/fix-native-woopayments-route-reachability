@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Route legacy WooPayments admin links to native Settings > Payments provider pages.
