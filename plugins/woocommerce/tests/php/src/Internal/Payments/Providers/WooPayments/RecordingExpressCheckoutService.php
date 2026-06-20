@@ -55,7 +55,7 @@ class RecordingExpressCheckoutService extends WooPaymentsExpressCheckoutService 
 			'checkout'        => array(
 				'currency_code'     => 'usd',
 				'currency_decimals' => 2,
-				'stripe_minor_unit' => 100,
+				'stripe_minor_unit' => 2,
 				'country_code'      => 'US',
 			),
 			'button_context'  => $context,

@@ -100,7 +100,7 @@ class WooPaymentsExpressCheckoutService {
 			'checkout'                    => array(
 				'currency_code'              => $currency,
 				'currency_decimals'          => $decimals,
-				'stripe_minor_unit'          => 10 ** $decimals,
+				'stripe_minor_unit'          => WooPaymentsCurrencyUtils::get_stripe_minor_unit_for_currency( $currency ),
 				'country_code'               => $this->get_store_base_country(),
 				'needs_shipping'             => function_exists( 'WC' ) && WC() && WC()->cart ? WC()->cart->needs_shipping() : false,
 				'needs_payer_phone'          => 'required' === get_option( 'woocommerce_checkout_phone_field', 'required' ),

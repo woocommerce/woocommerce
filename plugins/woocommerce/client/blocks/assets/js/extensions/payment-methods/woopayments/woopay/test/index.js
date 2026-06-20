@@ -22,6 +22,7 @@ jest.mock( '@woocommerce/settings', () => ( {
 		isCoreNativeCheckoutAvailable: true,
 		isWooPayEnabled: true,
 		shouldShowWooPayButton: true,
+		supports: [ 'products', 'subscriptions' ],
 		platformTrackerNonce: 'tracks-nonce',
 		isShopperTrackingEnabled: true,
 		ajaxUrl: 'https://example.test/wp-admin/admin-ajax.php',
@@ -78,6 +79,9 @@ describe( 'wc-payment-method-woopayments-woopay', () => {
 			expect.objectContaining( {
 				name: 'woopay',
 				ariaLabel: 'WooPay',
+				supports: {
+					features: [ 'products', 'subscriptions' ],
+				},
 			} )
 		);
 

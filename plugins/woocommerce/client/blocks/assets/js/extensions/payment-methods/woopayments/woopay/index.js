@@ -13,6 +13,8 @@ import { recordWooPaymentsUserEvent } from '../tracks';
 
 const PAYMENT_METHOD_NAME = 'woocommerce_payments';
 const settings = getPaymentMethodData( PAYMENT_METHOD_NAME, {} );
+const supportedFeatures = settings.supports ||
+	settings.features || [ 'products' ];
 
 const WooPayIcon = () => (
 	<svg
@@ -291,7 +293,7 @@ export const getWooPayExpressPaymentMethod = () => ( {
 		),
 	ariaLabel: __( 'WooPay', 'woocommerce' ),
 	supports: {
-		features: [ 'products' ],
+		features: supportedFeatures,
 	},
 } );
 

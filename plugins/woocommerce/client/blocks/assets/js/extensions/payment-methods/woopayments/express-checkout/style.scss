@@ -7,3 +7,27 @@
 	width: 100%;
 	min-height: 40px;
 }
+
+.wp-block-woocommerce-cart-express-payment-block,
+.wp-block-woocommerce-checkout-express-payment-block {
+	overflow: visible !important;
+}
+
+.wc-block-components-express-payment {
+	.wc-block-components-express-payment__content {
+		overflow: visible !important;
+	}
+
+	.wc-block-components-express-payment__event-buttons {
+		box-sizing: border-box;
+		overflow: visible !important;
+		padding: 0 4px;
+		width: 100%;
+
+		> div,
+		> li {
+			box-sizing: border-box;
+			overflow: visible !important;
+		}
+	}
+}

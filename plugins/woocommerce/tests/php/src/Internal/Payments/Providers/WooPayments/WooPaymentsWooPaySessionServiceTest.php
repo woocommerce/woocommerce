@@ -417,9 +417,36 @@ class WooPaymentsWooPaySessionServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( 'woopay' ), $params['enabled_methods'] );
 		$this->assertSame( get_bloginfo( 'name' ), $params['store_name'] );
 		$this->assertSame( 'usd', $params['checkout']['currency_code'] );
+		$this->assertSame( 2, $params['checkout']['stripe_minor_unit'] );
 		$this->assertSame( 'US', $params['checkout']['country_code'] );
 		$this->assertSame( 'default', $params['button']['type'] );
 		$this->assertArrayHasKey( 'isEceUsingConfirmationTokens', $params['flags'] );
+	}
+
+	/**
+	 * @testdox Should build WooPay express checkout params with Stripe zero-decimal currency units.
+	 */
+	public function test_woopay_express_checkout_params_use_stripe_zero_minor_unit_for_zero_decimal_currency(): void {
+		update_option( 'woocommerce_default_country', 'JP' );
+		update_option( 'woocommerce_currency', 'JPY' );
+
+		$params = $this->create_service()->get_express_checkout_params( 'checkout' );
+
+		$this->assertSame( 'jpy', $params['checkout']['currency_code'] );
+		$this->assertSame( 0, $params['checkout']['stripe_minor_unit'] );
+	}
+
+	/**
+	 * @testdox Should build WooPay express checkout params with Stripe two-decimal special-case currency units.
+	 */
+	public function test_woopay_express_checkout_params_keep_stripe_two_minor_unit_for_special_case_currency(): void {
+		update_option( 'woocommerce_default_country', 'UG' );
+		update_option( 'woocommerce_currency', 'UGX' );
+
+		$params = $this->create_service()->get_express_checkout_params( 'checkout' );
+
+		$this->assertSame( 'ugx', $params['checkout']['currency_code'] );
+		$this->assertSame( 2, $params['checkout']['stripe_minor_unit'] );
 	}
 
 	/**
