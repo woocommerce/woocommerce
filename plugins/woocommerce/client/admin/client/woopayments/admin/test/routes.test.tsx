@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import apiFetch from '@wordpress/api-fetch';
 import fs from 'fs';
 import path from 'path';
@@ -16,8 +16,106 @@ import {
 import { SettingsPaymentsWoopayments } from '~/settings-payments/settings-payments-woopayments';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+jest.mock( '../overview', () => () => 'Overview route loaded' );
+jest.mock(
+	'../money-movement/transactions',
+	() => () => 'Transactions route loaded'
+);
+jest.mock( '../money-movement/disputes', () => () => 'Disputes route loaded' );
+jest.mock( '../../settings', () => {
+	const React = jest.requireActual( 'react' );
+	const WooPaymentsSettingsPage = () =>
+		React.createElement(
+			'section',
+			{ 'aria-label': 'WooPayments settings' },
+			React.createElement( 'h1', null, 'WooPayments settings' ),
+			React.createElement( 'p', null, 'Loading WooPayments settings' )
+		);
+
+	return {
+		__esModule: true,
+		default: () => 'Settings route loaded',
+		WooPaymentsSettingsPage,
+	};
+} );
+jest.mock(
+	'../../settings/express-checkout',
+	() => () => 'Express settings route loaded'
+);
+jest.mock(
+	'../../settings/fraud-protection/advanced',
+	() => () => 'Fraud settings route loaded'
+);
 
 const mockApiFetch = apiFetch as jest.MockedFunction< typeof apiFetch >;
+
+const unavailableMessage = 'This WooPayments admin area is unavailable.';
+
+const protectedRouteAvailability = {
+	gatewayEnabled: true,
+	accountState: 'full',
+	allowedRoutes: {
+		'/woopayments/settings': true,
+		'/woopayments/overview': true,
+		'/woopayments/payouts': true,
+		'/woopayments/payouts/details': true,
+		'/woopayments/transactions': true,
+		'/woopayments/transactions/details': true,
+		'/woopayments/disputes': true,
+		'/woopayments/disputes/details': true,
+		'/woopayments/disputes/challenge': true,
+		'/woopayments/reports': true,
+		'/woopayments/card-readers': true,
+		'/woopayments/loans': true,
+		'/woopayments/documents': true,
+	},
+};
+
+const setAdminRouteAvailability = (
+	allowedRoutes: Record< string, boolean >
+) => {
+	window.wcSettings = {
+		adminUrl: 'http://example.com/wp-admin',
+		admin: {
+			woopaymentsSettings: {
+				adminRouteAvailability: {
+					...protectedRouteAvailability,
+					allowedRoutes: {
+						...protectedRouteAvailability.allowedRoutes,
+						...allowedRoutes,
+					},
+				},
+			},
+		},
+	};
+};
+
+const getRouteElement = ( routePath: string ) => {
+	const route = getSettingsPaymentsProviderRoutes().find(
+		( { path: registeredPath } ) => registeredPath === routePath
+	);
+
+	expect( route ).toBeDefined();
+	if ( ! route ) {
+		throw new Error(
+			`Expected the WooPayments route ${ routePath } to exist.`
+		);
+	}
+
+	return route.element;
+};
+
+const expectRouteUnavailable = ( routePath: string ) => {
+	render( getRouteElement( routePath ) );
+
+	expect( screen.getByRole( 'status' ) ).toHaveTextContent(
+		unavailableMessage
+	);
+	expect(
+		screen.queryByText( 'Loading WooPayments…' )
+	).not.toBeInTheDocument();
+	expect( mockApiFetch ).not.toHaveBeenCalled();
+};
 
 describe( 'WooPayments Settings Payments routes', () => {
 	beforeAll( async () => {
@@ -29,6 +127,11 @@ describe( 'WooPayments Settings Payments routes', () => {
 		window.wcSettings = {
 			adminUrl: 'http://example.com/wp-admin',
 		};
+		delete (
+			window as typeof window & {
+				wcpaySettings?: unknown;
+			}
+		 ).wcpaySettings;
 		mockApiFetch.mockReset();
 	} );
 
@@ -220,6 +323,145 @@ describe( 'WooPayments Settings Payments routes', () => {
 		expect(
 			screen.queryByText( 'Loading WooPayments…' )
 		).not.toBeInTheDocument();
+	} );
+
+	it( 'uses the legacy Reports feature flag when native settings do not provide one', () => {
+		(
+			window as typeof window & {
+				wcpaySettings?: {
+					featureFlags?: {
+						reportsArea?: boolean;
+					};
+				};
+			}
+		 ).wcpaySettings = {
+			featureFlags: {
+				reportsArea: false,
+			},
+		};
+
+		render( getRouteElement( '/woopayments/reports' ) );
+
+		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
+			'Reports are unavailable.'
+		);
+		expect(
+			screen.queryByText( 'Loading WooPayments…' )
+		).not.toBeInTheDocument();
+	} );
+
+	it.each( [
+		[ 'Capital', '/woopayments/loans' ],
+		[ 'Documents', '/woopayments/documents' ],
+		[ 'Card Readers', '/woopayments/card-readers' ],
+		[ 'Reports', '/woopayments/reports' ],
+		[ 'Payout details', '/woopayments/payouts/details' ],
+		[ 'Transaction details', '/woopayments/transactions/details' ],
+		[ 'Dispute details', '/woopayments/disputes/details' ],
+		[ 'Dispute challenge', '/woopayments/disputes/challenge' ],
+	] )(
+		'renders an unavailable status for the %s route when route availability denies access',
+		( _routeName, routePath ) => {
+			setAdminRouteAvailability( {
+				[ routePath ]: false,
+			} );
+
+			expectRouteUnavailable( routePath );
+		}
+	);
+
+	it.each( [
+		[ 'settings', '/woopayments/settings', 'Settings route loaded' ],
+		[
+			'express checkout settings',
+			'/woopayments/settings/express-checkout/:methodId',
+			'Express settings route loaded',
+		],
+		[
+			'fraud protection settings',
+			'/woopayments/settings/fraud-protection',
+			'Fraud settings route loaded',
+		],
+	] )(
+		'keeps the %s route loadable when protected admin routes are denied',
+		async ( _routeName, routePath, loadedText ) => {
+			setAdminRouteAvailability( {
+				'/woopayments/overview': false,
+				'/woopayments/payouts': false,
+				'/woopayments/payouts/details': false,
+				'/woopayments/transactions': false,
+				'/woopayments/transactions/details': false,
+				'/woopayments/disputes': false,
+				'/woopayments/disputes/details': false,
+				'/woopayments/disputes/challenge': false,
+				'/woopayments/reports': false,
+				'/woopayments/card-readers': false,
+				'/woopayments/loans': false,
+				'/woopayments/documents': false,
+			} );
+
+			render( getRouteElement( routePath ) );
+
+			expect( screen.getByRole( 'status' ) ).toHaveTextContent(
+				'Loading WooPayments…'
+			);
+			expect(
+				screen.queryByText( unavailableMessage )
+			).not.toBeInTheDocument();
+			expect( await screen.findByText( loadedText ) ).toBeInTheDocument();
+		}
+	);
+
+	it( 'keeps restricted-account routes available only for reduced-access surfaces', async () => {
+		setAdminRouteAvailability( {
+			'/woopayments/overview': true,
+			'/woopayments/transactions': true,
+			'/woopayments/disputes': true,
+			'/woopayments/payouts': false,
+			'/woopayments/reports': false,
+			'/woopayments/card-readers': false,
+			'/woopayments/loans': false,
+			'/woopayments/documents': false,
+		} );
+
+		const availableRoutes = [
+			{
+				path: '/woopayments/overview',
+				loadedText: 'Overview route loaded',
+			},
+			{
+				path: '/woopayments/transactions',
+				loadedText: 'Transactions route loaded',
+			},
+			{
+				path: '/woopayments/disputes',
+				loadedText: 'Disputes route loaded',
+			},
+		];
+
+		for ( const { loadedText, path: routePath } of availableRoutes ) {
+			render( getRouteElement( routePath ) );
+			expect( screen.getByRole( 'status' ) ).toHaveTextContent(
+				'Loading WooPayments…'
+			);
+			expect(
+				screen.queryByText( unavailableMessage )
+			).not.toBeInTheDocument();
+			expect( await screen.findByText( loadedText ) ).toBeInTheDocument();
+			cleanup();
+		}
+
+		[
+			'/woopayments/payouts',
+			'/woopayments/reports',
+			'/woopayments/card-readers',
+			'/woopayments/loans',
+			'/woopayments/documents',
+		].forEach( ( routePath ) => {
+			mockApiFetch.mockReset();
+			expectRouteUnavailable( routePath );
+			cleanup();
+		} );
 	} );
 
 	it( 'announces lazy route loading through a status fallback', async () => {

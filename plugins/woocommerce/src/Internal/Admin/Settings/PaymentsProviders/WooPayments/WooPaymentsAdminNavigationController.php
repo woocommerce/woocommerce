@@ -62,6 +62,10 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 
 	private const LEGACY_REPORTS_ROUTE = '/payments/reports';
 
+	private const LEGACY_CARD_READERS_ROUTE = '/payments/card-readers';
+
+	private const LEGACY_LOANS_ROUTE = '/payments/loans';
+
 	private const LEGACY_ROUTE_REDIRECTS = array(
 		'/payments/overview'             => self::PATH_OVERVIEW,
 		'/payments/deposits'             => self::PATH_PAYOUTS,
@@ -74,8 +78,8 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 		'/payments/disputes'             => self::PATH_DISPUTES,
 		'/payments/disputes/details'     => self::PATH_DISPUTE_DETAILS,
 		'/payments/disputes/challenge'   => self::PATH_DISPUTE_CHALLENGE,
-		'/payments/card-readers'         => self::PATH_CARD_READERS,
-		'/payments/loans'                => self::PATH_LOANS,
+		self::LEGACY_CARD_READERS_ROUTE  => self::PATH_CARD_READERS,
+		self::LEGACY_LOANS_ROUTE         => self::PATH_LOANS,
 		self::LEGACY_DOCUMENTS_ROUTE     => self::PATH_DOCUMENTS,
 		'/payments/settings'             => self::PATH_SETTINGS,
 	);
@@ -168,6 +172,8 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 		$feature_flags['reportsArea']                    = $this->account_service->is_reports_enabled();
 		$settings['woopaymentsSettings']['featureFlags'] = $feature_flags;
 
+		$settings['woopaymentsSettings']['adminRouteAvailability'] = $this->get_admin_route_availability();
+
 		return $settings;
 	}
 
@@ -212,11 +218,8 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 			return '';
 		}
 
-		if ( self::LEGACY_DOCUMENTS_ROUTE === $legacy_path && ! $this->account_service->is_documents_enabled() ) {
-			return '';
-		}
-
-		if ( self::LEGACY_REPORTS_ROUTE === $legacy_path && ! $this->account_service->is_reports_enabled() ) {
+		$route_availability = $this->get_admin_route_availability();
+		if ( true !== ( $route_availability['allowedRoutes'][ $target_path ] ?? false ) ) {
 			return '';
 		}
 
@@ -284,6 +287,71 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		return 'wc-settings' === $page && 'checkout' === $tab;
+	}
+
+	/**
+	 * Get native WooPayments admin route availability for protected routes.
+	 *
+	 * @return array{gatewayEnabled:bool,accountState:string,allowedRoutes:array<string,bool>}
+	 */
+	private function get_admin_route_availability(): array {
+		$gateway_enabled  = $this->account_service->is_gateway_enabled();
+		$restricted       = $this->account_service->is_account_rejected() || $this->account_service->is_account_under_review();
+		$valid_account    = $this->account_service->has_valid_account_for_admin_navigation();
+		$onboarding       = $gateway_enabled && ! $restricted && ! $valid_account && ( ! $this->account_service->has_account() || ! $this->account_service->is_details_submitted() );
+		$full_access      = $gateway_enabled && $valid_account && ! $restricted;
+		$reduced_access   = $gateway_enabled && $restricted;
+		$protected_access = $full_access || $reduced_access;
+
+		return array(
+			'gatewayEnabled' => $gateway_enabled,
+			'accountState'   => $this->get_admin_route_account_state( $gateway_enabled, $restricted, $valid_account, $onboarding ),
+			'allowedRoutes'  => array(
+				self::PATH_SETTINGS            => true,
+				self::PATH_ONBOARDING          => $onboarding,
+				self::PATH_OVERVIEW            => $protected_access,
+				self::PATH_PAYOUTS             => $full_access,
+				self::PATH_PAYOUT_DETAILS      => $full_access,
+				self::PATH_TRANSACTIONS        => $protected_access,
+				self::PATH_TRANSACTION_DETAILS => $protected_access,
+				self::PATH_DISPUTES            => $protected_access,
+				self::PATH_DISPUTE_DETAILS     => $protected_access,
+				self::PATH_DISPUTE_CHALLENGE   => $protected_access,
+				self::PATH_REPORTS             => $full_access && $this->account_service->is_reports_enabled(),
+				self::PATH_CARD_READERS        => $full_access && $this->account_service->is_card_present_eligible() && $this->account_service->has_card_readers_available(),
+				self::PATH_LOANS               => $full_access && $this->account_service->has_previous_capital_loans(),
+				self::PATH_DOCUMENTS           => $full_access && $this->account_service->is_documents_enabled(),
+			),
+		);
+	}
+
+	/**
+	 * Get a coarse account state label for native WooPayments admin route availability.
+	 *
+	 * @param bool $gateway_enabled Whether the WooPayments gateway is enabled.
+	 * @param bool $restricted      Whether the account is rejected or under review.
+	 * @param bool $valid_account   Whether the account can use admin navigation.
+	 * @param bool $onboarding      Whether the account should use the onboarding route.
+	 * @return string
+	 */
+	private function get_admin_route_account_state( bool $gateway_enabled, bool $restricted, bool $valid_account, bool $onboarding ): string {
+		if ( ! $gateway_enabled ) {
+			return 'disabled';
+		}
+
+		if ( $restricted ) {
+			return 'restricted';
+		}
+
+		if ( $onboarding ) {
+			return 'onboarding';
+		}
+
+		if ( $valid_account ) {
+			return 'full';
+		}
+
+		return 'unavailable';
 	}
 
 	/**

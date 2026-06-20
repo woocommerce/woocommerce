@@ -121,6 +121,11 @@ type WooPaymentsRouteWindow = typeof globalThis & {
 				featureFlags?: {
 					reportsArea?: boolean;
 				};
+				adminRouteAvailability?: {
+					gatewayEnabled?: boolean;
+					accountState?: string;
+					allowedRoutes?: Record< string, boolean >;
+				};
 			};
 		};
 	};
@@ -146,6 +151,21 @@ const getReportsAreaFeatureFlag = () => {
 	return typeof legacyFlag === 'boolean' ? legacyFlag : true;
 };
 
+const isRouteAvailable = ( routePath: string ) => {
+	const settings = globalThis as WooPaymentsRouteWindow;
+	const allowedRoutes =
+		settings.wcSettings?.admin?.woopaymentsSettings?.adminRouteAvailability
+			?.allowedRoutes;
+
+	if ( ! allowedRoutes ) {
+		return true;
+	}
+
+	return typeof allowedRoutes[ routePath ] === 'boolean'
+		? allowedRoutes[ routePath ]
+		: true;
+};
+
 const LoadingFallback = () => (
 	<div role="status" aria-live="polite" aria-busy="true">
 		{ sprintf(
@@ -156,20 +176,46 @@ const LoadingFallback = () => (
 	</div>
 );
 
+const WooPaymentsAdminAreaUnavailable = () => (
+	<div role="status" aria-live="polite">
+		{ __( 'This WooPayments admin area is unavailable.', 'woocommerce' ) }
+	</div>
+);
+
 const WooPaymentsReportsUnavailable = () => (
 	<div role="status" aria-live="polite">
 		{ __( 'Reports are unavailable.', 'woocommerce' ) }
 	</div>
 );
 
-const WooPaymentsReportsRoute = () =>
-	getReportsAreaFeatureFlag() ? (
-		<Suspense fallback={ <LoadingFallback /> }>
-			<WooPaymentsReportsChunk />
-		</Suspense>
+const WooPaymentsProtectedRoute = ( {
+	children,
+	path: routePath,
+}: {
+	children: JSX.Element;
+	path: string;
+} ) =>
+	isRouteAvailable( routePath ) ? (
+		<Suspense fallback={ <LoadingFallback /> }>{ children }</Suspense>
 	) : (
-		<WooPaymentsReportsUnavailable />
+		<WooPaymentsAdminAreaUnavailable />
 	);
+
+const WooPaymentsReportsRoute = () => {
+	if ( ! isRouteAvailable( '/woopayments/reports' ) ) {
+		return <WooPaymentsAdminAreaUnavailable />;
+	}
+
+	if ( getReportsAreaFeatureFlag() ) {
+		return (
+			<Suspense fallback={ <LoadingFallback /> }>
+				<WooPaymentsReportsChunk />
+			</Suspense>
+		);
+	}
+
+	return <WooPaymentsReportsUnavailable />;
+};
 
 registerSettingsPaymentsProviderRoute( {
 	id: 'woopayments-settings',
@@ -209,9 +255,9 @@ registerSettingsPaymentsProviderRoute( {
 	path: '/woopayments/overview',
 	order: 100,
 	element: (
-		<Suspense fallback={ <LoadingFallback /> }>
+		<WooPaymentsProtectedRoute path="/woopayments/overview">
 			<WooPaymentsOverviewChunk />
-		</Suspense>
+		</WooPaymentsProtectedRoute>
 	),
 } );
 
@@ -220,9 +266,9 @@ registerSettingsPaymentsProviderRoute( {
 	path: '/woopayments/payouts',
 	order: 110,
 	element: (
-		<Suspense fallback={ <LoadingFallback /> }>
+		<WooPaymentsProtectedRoute path="/woopayments/payouts">
 			<WooPaymentsPayoutsChunk />
-		</Suspense>
+		</WooPaymentsProtectedRoute>
 	),
 } );
 
@@ -231,9 +277,9 @@ registerSettingsPaymentsProviderRoute( {
 	path: '/woopayments/payouts/details',
 	order: 111,
 	element: (
-		<Suspense fallback={ <LoadingFallback /> }>
+		<WooPaymentsProtectedRoute path="/woopayments/payouts/details">
 			<WooPaymentsPayoutDetailsChunk />
-		</Suspense>
+		</WooPaymentsProtectedRoute>
 	),
 } );
 
@@ -242,9 +288,9 @@ registerSettingsPaymentsProviderRoute( {
 	path: '/woopayments/transactions',
 	order: 120,
 	element: (
-		<Suspense fallback={ <LoadingFallback /> }>
+		<WooPaymentsProtectedRoute path="/woopayments/transactions">
 			<WooPaymentsTransactionsChunk />
-		</Suspense>
+		</WooPaymentsProtectedRoute>
 	),
 } );
 
@@ -253,9 +299,9 @@ registerSettingsPaymentsProviderRoute( {
 	path: '/woopayments/transactions/details',
 	order: 121,
 	element: (
-		<Suspense fallback={ <LoadingFallback /> }>
+		<WooPaymentsProtectedRoute path="/woopayments/transactions/details">
 			<WooPaymentsTransactionDetailsChunk />
-		</Suspense>
+		</WooPaymentsProtectedRoute>
 	),
 } );
 
@@ -271,9 +317,9 @@ registerSettingsPaymentsProviderRoute( {
 	path: '/woopayments/disputes',
 	order: 123,
 	element: (
-		<Suspense fallback={ <LoadingFallback /> }>
+		<WooPaymentsProtectedRoute path="/woopayments/disputes">
 			<WooPaymentsDisputesChunk />
-		</Suspense>
+		</WooPaymentsProtectedRoute>
 	),
 } );
 
@@ -282,9 +328,9 @@ registerSettingsPaymentsProviderRoute( {
 	path: '/woopayments/disputes/details',
 	order: 124,
 	element: (
-		<Suspense fallback={ <LoadingFallback /> }>
+		<WooPaymentsProtectedRoute path="/woopayments/disputes/details">
 			<WooPaymentsDisputeDetailsChunk />
-		</Suspense>
+		</WooPaymentsProtectedRoute>
 	),
 } );
 
@@ -293,9 +339,9 @@ registerSettingsPaymentsProviderRoute( {
 	path: '/woopayments/disputes/challenge',
 	order: 125,
 	element: (
-		<Suspense fallback={ <LoadingFallback /> }>
+		<WooPaymentsProtectedRoute path="/woopayments/disputes/challenge">
 			<WooPaymentsDisputeChallengeChunk />
-		</Suspense>
+		</WooPaymentsProtectedRoute>
 	),
 } );
 
@@ -304,9 +350,9 @@ registerSettingsPaymentsProviderRoute( {
 	path: '/woopayments/card-readers',
 	order: 126,
 	element: (
-		<Suspense fallback={ <LoadingFallback /> }>
+		<WooPaymentsProtectedRoute path="/woopayments/card-readers">
 			<WooPaymentsCardReadersChunk />
-		</Suspense>
+		</WooPaymentsProtectedRoute>
 	),
 } );
 
@@ -315,9 +361,9 @@ registerSettingsPaymentsProviderRoute( {
 	path: '/woopayments/loans',
 	order: 127,
 	element: (
-		<Suspense fallback={ <LoadingFallback /> }>
+		<WooPaymentsProtectedRoute path="/woopayments/loans">
 			<WooPaymentsCapitalChunk />
-		</Suspense>
+		</WooPaymentsProtectedRoute>
 	),
 } );
 
@@ -326,8 +372,8 @@ registerSettingsPaymentsProviderRoute( {
 	path: '/woopayments/documents',
 	order: 128,
 	element: (
-		<Suspense fallback={ <LoadingFallback /> }>
+		<WooPaymentsProtectedRoute path="/woopayments/documents">
 			<WooPaymentsDocumentsChunk />
-		</Suspense>
+		</WooPaymentsProtectedRoute>
 	),
 } );

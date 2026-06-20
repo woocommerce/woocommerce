@@ -6,7 +6,9 @@ namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 use Automattic\WooCommerce\Internal\Payments\NativePaymentsRuntimeArbiter;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiException;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsCapitalRestController;
+use PHPUnit\Framework\MockObject\MockObject;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -80,6 +82,31 @@ class WooPaymentsCapitalRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_registers_no_routes_when_native_does_not_own_runtime(): void {
 		$this->sut = $this->create_controller( false );
+		$this->sut->register();
+
+		$this->assertFalse( has_action( 'rest_api_init', array( $this->sut, 'register_routes' ) ) );
+		$this->assertFalse( has_action( 'admin_init', array( $this->sut, 'redirect_loan_offer_request' ) ) );
+	}
+
+	/**
+	 * @testdox Capital routes are not registered when Capital is not eligible.
+	 */
+	public function test_registers_no_routes_when_capital_is_not_eligible(): void {
+		$this->sut = $this->create_controller( true, false );
+		$this->sut->register();
+
+		$this->assertFalse( has_action( 'rest_api_init', array( $this->sut, 'register_routes' ) ) );
+		$this->assertFalse( has_action( 'admin_init', array( $this->sut, 'redirect_loan_offer_request' ) ) );
+	}
+
+	/**
+	 * @testdox Capital routes are not registered when the account lacks full admin access.
+	 * @dataProvider provider_capital_admin_unavailable_account_states
+	 *
+	 * @param array<string,bool> $account_state Account state overrides.
+	 */
+	public function test_registers_no_routes_when_account_lacks_full_admin_access( array $account_state ): void {
+		$this->sut = $this->create_controller( true, true, $account_state );
 		$this->sut->register();
 
 		$this->assertFalse( has_action( 'rest_api_init', array( $this->sut, 'register_routes' ) ) );
@@ -201,6 +228,43 @@ class WooPaymentsCapitalRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Legacy loan offer query arg is ignored when Capital is not eligible.
+	 */
+	public function test_loan_offer_query_arg_is_ignored_when_capital_is_not_eligible(): void {
+		$this->sut                = $this->create_controller( true, false );
+		$_GET['wcpay-loan-offer'] = '';
+		add_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
+
+		try {
+			$this->sut->redirect_loan_offer_request();
+		} catch ( \RuntimeException $exception ) {
+			$this->fail( 'Capital-ineligible loan offer requests should not redirect: ' . $exception->getMessage() );
+		}
+
+		$this->assertSame( '', $this->api_client->last_call );
+	}
+
+	/**
+	 * @testdox Legacy loan offer query arg is ignored when the account lacks full admin access.
+	 * @dataProvider provider_capital_admin_unavailable_account_states
+	 *
+	 * @param array<string,bool> $account_state Account state overrides.
+	 */
+	public function test_loan_offer_query_arg_is_ignored_when_account_lacks_full_admin_access( array $account_state ): void {
+		$this->sut                = $this->create_controller( true, true, $account_state );
+		$_GET['wcpay-loan-offer'] = '';
+		add_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
+
+		try {
+			$this->sut->redirect_loan_offer_request();
+		} catch ( \RuntimeException $exception ) {
+			$this->fail( 'Full-admin-ineligible loan offer requests should not redirect: ' . $exception->getMessage() );
+		}
+
+		$this->assertSame( '', $this->api_client->last_call );
+	}
+
+	/**
 	 * @testdox Loan offer route redirects to the overview error notice when the API request fails.
 	 */
 	public function test_loan_offer_route_redirects_to_overview_error_when_api_fails(): void {
@@ -271,12 +335,44 @@ class WooPaymentsCapitalRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Account states that should not expose Capital admin surfaces.
+	 *
+	 * @return array<string,array{account_state:array<string,bool>}>
+	 */
+	public function provider_capital_admin_unavailable_account_states(): array {
+		return array(
+			'gateway disabled'    => array(
+				'account_state' => array(
+					'is_gateway_enabled' => false,
+				),
+			),
+			'invalid admin state' => array(
+				'account_state' => array(
+					'has_valid_account_for_admin_navigation' => false,
+				),
+			),
+			'rejected account'    => array(
+				'account_state' => array(
+					'is_account_rejected' => true,
+				),
+			),
+			'under review'        => array(
+				'account_state' => array(
+					'is_account_under_review' => true,
+				),
+			),
+		);
+	}
+
+	/**
 	 * Create a native Capital REST controller.
 	 *
-	 * @param bool $native_register Whether native should own route registration.
+	 * @param bool               $native_register            Whether native should own route registration.
+	 * @param bool               $has_previous_capital_loans Whether the account is Capital eligible.
+	 * @param array<string,bool> $account_state              Account state overrides.
 	 * @return WooPaymentsCapitalRestController
 	 */
-	private function create_controller( bool $native_register ): WooPaymentsCapitalRestController {
+	private function create_controller( bool $native_register, bool $has_previous_capital_loans = true, array $account_state = array() ): WooPaymentsCapitalRestController {
 		$arbiter = $this->getMockBuilder( NativePaymentsRuntimeArbiter::class )
 			->disableOriginalConstructor()
 			->onlyMethods( array( 'should_native_register' ) )
@@ -284,9 +380,40 @@ class WooPaymentsCapitalRestControllerTest extends WC_REST_Unit_Test_Case {
 		$arbiter->method( 'should_native_register' )->willReturn( $native_register );
 
 		$controller = new WooPaymentsCapitalRestController();
-		$controller->init( $arbiter, $this->api_client );
+		$controller->init( $arbiter, $this->api_client, $this->create_account_service( $has_previous_capital_loans, $account_state ) );
 
 		return $controller;
+	}
+
+	/**
+	 * Create a native account service test double.
+	 *
+	 * @param bool               $has_previous_capital_loans Whether the account is Capital eligible.
+	 * @param array<string,bool> $overrides                  Account state overrides.
+	 * @return WooPaymentsAccountService&MockObject
+	 */
+	private function create_account_service( bool $has_previous_capital_loans, array $overrides = array() ): WooPaymentsAccountService {
+		$state = array_merge(
+			array(
+				'has_previous_capital_loans'             => $has_previous_capital_loans,
+				'is_gateway_enabled'                     => true,
+				'has_valid_account_for_admin_navigation' => true,
+				'is_account_rejected'                    => false,
+				'is_account_under_review'                => false,
+			),
+			$overrides
+		);
+
+		$account_service = $this->getMockBuilder( WooPaymentsAccountService::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array_keys( $state ) )
+			->getMock();
+
+		foreach ( $state as $method => $value ) {
+			$account_service->method( $method )->willReturn( $value );
+		}
+
+		return $account_service;
 	}
 
 	/**

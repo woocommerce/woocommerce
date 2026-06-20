@@ -89,6 +89,173 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preload full admin route availability for a valid native account.
+	 */
+	public function test_preloads_full_admin_route_availability_for_valid_native_account(): void {
+		$sut = $this->create_controller(
+			true,
+			array(
+				'is_reports_enabled'         => true,
+				'is_documents_enabled'       => true,
+				'is_card_present_eligible'   => true,
+				'has_card_readers_available' => true,
+				'has_previous_capital_loans' => true,
+			)
+		);
+
+		$availability = $this->preload_route_availability( $sut );
+		$routes       = $availability['allowedRoutes'];
+
+		$this->assertTrue( $availability['gatewayEnabled'] );
+		$this->assertSame( 'full', $availability['accountState'] );
+		$this->assertTrue( $routes['/woopayments/settings'] );
+		$this->assertTrue( $routes['/woopayments/overview'] );
+		$this->assertTrue( $routes['/woopayments/payouts'] );
+		$this->assertTrue( $routes['/woopayments/payouts/details'] );
+		$this->assertTrue( $routes['/woopayments/transactions'] );
+		$this->assertTrue( $routes['/woopayments/transactions/details'] );
+		$this->assertTrue( $routes['/woopayments/disputes'] );
+		$this->assertTrue( $routes['/woopayments/disputes/details'] );
+		$this->assertTrue( $routes['/woopayments/disputes/challenge'] );
+		$this->assertTrue( $routes['/woopayments/reports'] );
+		$this->assertTrue( $routes['/woopayments/card-readers'] );
+		$this->assertTrue( $routes['/woopayments/loans'] );
+		$this->assertTrue( $routes['/woopayments/documents'] );
+	}
+
+	/**
+	 * @testdox Should preload reduced admin route availability for restricted native accounts.
+	 * @dataProvider provider_restricted_account_states
+	 *
+	 * @param array<string,bool> $account_state Account state overrides.
+	 */
+	public function test_preloads_restricted_admin_route_availability( array $account_state ): void {
+		$sut = $this->create_controller(
+			true,
+			array_merge(
+				$account_state,
+				array(
+					'is_reports_enabled'         => true,
+					'is_documents_enabled'       => true,
+					'is_card_present_eligible'   => true,
+					'has_card_readers_available' => true,
+					'has_previous_capital_loans' => true,
+				)
+			)
+		);
+
+		$availability = $this->preload_route_availability( $sut );
+		$routes       = $availability['allowedRoutes'];
+
+		$this->assertTrue( $availability['gatewayEnabled'] );
+		$this->assertSame( 'restricted', $availability['accountState'] );
+		$this->assertTrue( $routes['/woopayments/settings'] );
+		$this->assertTrue( $routes['/woopayments/overview'] );
+		$this->assertTrue( $routes['/woopayments/transactions'] );
+		$this->assertTrue( $routes['/woopayments/transactions/details'] );
+		$this->assertTrue( $routes['/woopayments/disputes'] );
+		$this->assertTrue( $routes['/woopayments/disputes/details'] );
+		$this->assertTrue( $routes['/woopayments/disputes/challenge'] );
+		$this->assertFalse( $routes['/woopayments/onboarding'] );
+		$this->assertFalse( $routes['/woopayments/payouts'] );
+		$this->assertFalse( $routes['/woopayments/payouts/details'] );
+		$this->assertFalse( $routes['/woopayments/reports'] );
+		$this->assertFalse( $routes['/woopayments/card-readers'] );
+		$this->assertFalse( $routes['/woopayments/loans'] );
+		$this->assertFalse( $routes['/woopayments/documents'] );
+	}
+
+	/**
+	 * @testdox Should preload unavailable admin route availability when the gateway is disabled.
+	 */
+	public function test_preloads_unavailable_admin_route_availability_when_gateway_is_disabled(): void {
+		$sut = $this->create_controller(
+			true,
+			array(
+				'is_gateway_enabled'                     => false,
+				'is_reports_enabled'                     => true,
+				'is_documents_enabled'                   => true,
+				'is_card_present_eligible'               => true,
+				'has_card_readers_available'             => true,
+				'has_previous_capital_loans'             => true,
+				'has_valid_account_for_admin_navigation' => true,
+			)
+		);
+
+		$availability = $this->preload_route_availability( $sut );
+		$routes       = $availability['allowedRoutes'];
+
+		$this->assertFalse( $availability['gatewayEnabled'] );
+		$this->assertSame( 'disabled', $availability['accountState'] );
+		$this->assertTrue( $routes['/woopayments/settings'] );
+		$this->assertFalse( $routes['/woopayments/onboarding'] );
+		$this->assertFalse( $routes['/woopayments/overview'] );
+		$this->assertFalse( $routes['/woopayments/transactions'] );
+		$this->assertFalse( $routes['/woopayments/disputes'] );
+		$this->assertFalse( $routes['/woopayments/reports'] );
+		$this->assertFalse( $routes['/woopayments/card-readers'] );
+		$this->assertFalse( $routes['/woopayments/loans'] );
+		$this->assertFalse( $routes['/woopayments/documents'] );
+	}
+
+	/**
+	 * @testdox Should preload onboarding-only admin route availability for accounts that are not ready.
+	 * @dataProvider provider_not_ready_account_states
+	 *
+	 * @param array<string,bool> $account_state Account state overrides.
+	 * @param string             $expected_title Expected menu item title.
+	 */
+	public function test_preloads_onboarding_only_admin_route_availability_for_accounts_that_are_not_ready( array $account_state, string $expected_title ): void {
+		unset( $expected_title );
+
+		$sut = $this->create_controller(
+			true,
+			array_merge(
+				$account_state,
+				array(
+					'is_reports_enabled'         => true,
+					'is_documents_enabled'       => true,
+					'is_card_present_eligible'   => true,
+					'has_card_readers_available' => true,
+					'has_previous_capital_loans' => true,
+				)
+			)
+		);
+
+		$availability = $this->preload_route_availability( $sut );
+		$routes       = $availability['allowedRoutes'];
+
+		$this->assertTrue( $availability['gatewayEnabled'] );
+		$this->assertSame( 'onboarding', $availability['accountState'] );
+		$this->assertTrue( $routes['/woopayments/settings'] );
+		$this->assertTrue( $routes['/woopayments/onboarding'] );
+		$this->assertFalse( $routes['/woopayments/overview'] );
+		$this->assertFalse( $routes['/woopayments/payouts'] );
+		$this->assertFalse( $routes['/woopayments/transactions'] );
+		$this->assertFalse( $routes['/woopayments/disputes'] );
+		$this->assertFalse( $routes['/woopayments/reports'] );
+		$this->assertFalse( $routes['/woopayments/card-readers'] );
+		$this->assertFalse( $routes['/woopayments/loans'] );
+		$this->assertFalse( $routes['/woopayments/documents'] );
+	}
+
+	/**
+	 * @testdox Should preload optional admin routes only when their account-service predicates are true.
+	 */
+	public function test_preloads_optional_admin_routes_only_when_available(): void {
+		$sut = $this->create_controller( true );
+
+		$routes = $this->preload_route_availability( $sut )['allowedRoutes'];
+
+		$this->assertTrue( $routes['/woopayments/settings'] );
+		$this->assertTrue( $routes['/woopayments/overview'] );
+		$this->assertFalse( $routes['/woopayments/reports'] );
+		$this->assertFalse( $routes['/woopayments/card-readers'] );
+		$this->assertFalse( $routes['/woopayments/loans'] );
+		$this->assertFalse( $routes['/woopayments/documents'] );
+	}
+
+	/**
 	 * @testdox Should not preload WooPayments route flags outside the Payments settings page.
 	 */
 	public function test_does_not_preload_reports_feature_flag_outside_payments_settings_request(): void {
@@ -227,6 +394,120 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 				array(
 					'page' => 'wc-admin',
 					'path' => '%2Fpayments%2Freports',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should not map legacy full-access WooPayments WC Admin URLs for restricted accounts.
+	 */
+	public function test_does_not_map_legacy_full_access_urls_for_restricted_accounts(): void {
+		$sut = $this->create_controller(
+			true,
+			array(
+				'is_account_under_review' => true,
+			)
+		);
+
+		$this->assertSame(
+			'',
+			$sut->get_legacy_payment_path_redirect_url(
+				array(
+					'page' => 'wc-admin',
+					'path' => '%2Fpayments%2Fdeposits',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should map legacy WooPayments WC Admin Card Readers URLs to the native route when Card Readers are available.
+	 */
+	public function test_maps_legacy_payment_card_readers_url_to_native_route_when_card_readers_are_available(): void {
+		$sut = $this->create_controller(
+			true,
+			array(
+				'is_card_present_eligible'   => true,
+				'has_card_readers_available' => true,
+			)
+		);
+
+		$url = $sut->get_legacy_payment_path_redirect_url(
+			array(
+				'page' => 'wc-admin',
+				'path' => '%2Fpayments%2Fcard-readers',
+			)
+		);
+
+		$this->assertStringContainsString( 'admin.php?page=wc-settings&tab=checkout', $url );
+		$this->assertStringContainsString( 'path=/woopayments/card-readers', $url );
+		$this->assertStringNotContainsString( 'page=wc-admin', $url );
+	}
+
+	/**
+	 * @testdox Should not map legacy WooPayments WC Admin Card Readers URLs when Card Readers are unavailable.
+	 */
+	public function test_does_not_map_legacy_payment_card_readers_url_when_card_readers_are_unavailable(): void {
+		$sut = $this->create_controller(
+			true,
+			array(
+				'is_card_present_eligible'   => true,
+				'has_card_readers_available' => false,
+			)
+		);
+
+		$this->assertSame(
+			'',
+			$sut->get_legacy_payment_path_redirect_url(
+				array(
+					'page' => 'wc-admin',
+					'path' => '%2Fpayments%2Fcard-readers',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should map legacy WooPayments WC Admin Capital URLs to the native route when Capital is available.
+	 */
+	public function test_maps_legacy_payment_capital_url_to_native_route_when_capital_is_available(): void {
+		$sut = $this->create_controller(
+			true,
+			array(
+				'has_previous_capital_loans' => true,
+			)
+		);
+
+		$url = $sut->get_legacy_payment_path_redirect_url(
+			array(
+				'page' => 'wc-admin',
+				'path' => '%2Fpayments%2Floans',
+			)
+		);
+
+		$this->assertStringContainsString( 'admin.php?page=wc-settings&tab=checkout', $url );
+		$this->assertStringContainsString( 'path=/woopayments/loans', $url );
+		$this->assertStringNotContainsString( 'page=wc-admin', $url );
+	}
+
+	/**
+	 * @testdox Should not map legacy WooPayments WC Admin Capital URLs when Capital is unavailable.
+	 */
+	public function test_does_not_map_legacy_payment_capital_url_when_capital_is_unavailable(): void {
+		$sut = $this->create_controller(
+			true,
+			array(
+				'has_previous_capital_loans' => false,
+			)
+		);
+
+		$this->assertSame(
+			'',
+			$sut->get_legacy_payment_path_redirect_url(
+				array(
+					'page' => 'wc-admin',
+					'path' => '%2Fpayments%2Floans',
 				)
 			)
 		);
@@ -698,6 +979,19 @@ class WooPaymentsAdminNavigationControllerTest extends WC_Unit_Test_Case {
 		$badge_service->method( 'get_uncaptured_transactions_count' )->willReturn( $counts['uncaptured_transactions'] );
 
 		return $badge_service;
+	}
+
+	/**
+	 * Preload admin route availability on a Payments settings request.
+	 *
+	 * @param WooPaymentsAdminNavigationController $controller Controller under test.
+	 * @return array{gatewayEnabled:bool,accountState:string,allowedRoutes:array<string,bool>}
+	 */
+	private function preload_route_availability( WooPaymentsAdminNavigationController $controller ): array {
+		$_GET['page'] = 'wc-settings';
+		$_GET['tab']  = 'checkout';
+
+		return $controller->preload_shared_settings( array() )['woopaymentsSettings']['adminRouteAvailability'];
 	}
 
 	/**
