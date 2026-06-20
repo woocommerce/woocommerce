@@ -13,6 +13,7 @@ import {
 import { dispatch } from '@wordpress/data';
 import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { recordEvent } from '@woocommerce/tracks';
 import type { ReactNode } from 'react';
 
 /**
@@ -59,6 +60,23 @@ const asBoolean = ( value: unknown, fallback = false ) =>
 
 const CVC_VERIFICATION_DOC_URL =
 	'https://woocommerce.com/document/woopayments/fraud-and-disputes/fraud-protection/#advanced-configuration';
+
+const ADVANCED_RULE_CARD_VIEW_EVENTS: Record< string, string > = {
+	'avs-mismatch-card':
+		'wcpay_fraud_protection_advanced_settings_card_avs_mismatch_viewed',
+	'cvc-verification-card':
+		'wcpay_fraud_protection_advanced_settings_card_cvc_verification_viewed',
+	'international-ip-address-card':
+		'wcpay_fraud_protection_advanced_settings_card_international_ip_address_card_viewed',
+	'ip-address-mismatch-card':
+		'wcpay_fraud_protection_advanced_settings_card_ip_address_mismatch_card_viewed',
+	'address-mismatch-card':
+		'wcpay_fraud_protection_advanced_settings_card_address_mismatch_viewed',
+	'purchase-price-threshold-card':
+		'wcpay_fraud_protection_advanced_settings_card_price_threshold_viewed',
+	'order-items-threshold-card':
+		'wcpay_fraud_protection_advanced_settings_card_items_threshold_viewed',
+};
 
 const getFraudProtectionEnvironment = ( settings: SettingsRecord ) => {
 	const fraudProtection = asSettingsRecord( settings.fraud_protection );
@@ -428,6 +446,44 @@ export const FraudProtectionAdvancedSettingsPage = () => {
 		return () => window.clearTimeout( focusTimeout );
 	}, [ validationError ] );
 
+	useEffect( () => {
+		if ( isLoading || typeof window.IntersectionObserver === 'undefined' ) {
+			return;
+		}
+
+		const viewedCardIds = new Set< string >();
+		const observer = new window.IntersectionObserver(
+			( entries, currentObserver ) => {
+				entries.forEach( ( entry ) => {
+					const cardId = entry.target.id;
+					const eventName = ADVANCED_RULE_CARD_VIEW_EVENTS[ cardId ];
+
+					if (
+						! entry.isIntersecting ||
+						! eventName ||
+						viewedCardIds.has( cardId )
+					) {
+						return;
+					}
+
+					viewedCardIds.add( cardId );
+					recordEvent( eventName );
+					currentObserver.unobserve( entry.target );
+				} );
+			}
+		);
+
+		Object.keys( ADVANCED_RULE_CARD_VIEW_EVENTS ).forEach( ( cardId ) => {
+			const card = document.getElementById( cardId );
+
+			if ( card ) {
+				observer.observe( card );
+			}
+		} );
+
+		return () => observer.disconnect();
+	}, [ isLoading ] );
+
 	const updateProtectionSettingsUI = (
 		nextSettings: ProtectionSettingsUI
 	) => {
@@ -460,12 +516,15 @@ export const FraudProtectionAdvancedSettingsPage = () => {
 			updateProtectionLevel( ProtectionLevel.ADVANCED );
 		}
 
-		updateAdvancedFraudProtectionSettings(
-			writeRuleset( protectionSettingsUI, environment )
-		);
+		const ruleset = writeRuleset( protectionSettingsUI, environment );
+
+		updateAdvancedFraudProtectionSettings( ruleset );
 		void Promise.resolve( saveSettings() ).then( ( didSave ) => {
 			if ( didSave !== false ) {
 				setIsDirty( false );
+				recordEvent( 'wcpay_fraud_protection_advanced_settings_saved', {
+					settings: JSON.stringify( ruleset ),
+				} );
 			}
 		} );
 	};

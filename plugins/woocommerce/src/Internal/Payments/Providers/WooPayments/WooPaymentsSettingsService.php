@@ -1530,8 +1530,9 @@ class WooPaymentsSettingsService {
 		$account_data = $this->account_service->get_cached_account_data();
 
 		return array(
-			'decline_on_avs_failure' => $this->get_account_bool_setting( $account_data, array( 'fraud_mitigation_settings', 'avs_check_enabled' ), true ),
-			'decline_on_cvc_failure' => $this->get_account_bool_setting( $account_data, array( 'fraud_mitigation_settings', 'cvc_check_enabled' ), true ),
+			'decline_on_avs_failure'    => $this->get_account_bool_setting( $account_data, array( 'fraud_mitigation_settings', 'avs_check_enabled' ), true ),
+			'decline_on_cvc_failure'    => $this->get_account_bool_setting( $account_data, array( 'fraud_mitigation_settings', 'cvc_check_enabled' ), true ),
+			'is_welcome_tour_dismissed' => (bool) get_option( 'wcpay_fraud_protection_welcome_tour_dismissed', false ),
 		);
 	}
 

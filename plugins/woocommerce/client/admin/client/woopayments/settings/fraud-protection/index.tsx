@@ -2,9 +2,10 @@
  * External dependencies
  */
 import { Button, Modal, Notice } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { lazy, Suspense, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { help } from '@wordpress/icons';
+import { recordEvent } from '@woocommerce/tracks';
 import type { MouseEvent } from 'react';
 
 /**
@@ -29,6 +30,12 @@ type AdvancedFraudProtectionSetting = [ unknown, ( value: unknown[] ) => void ];
 
 const asSettingsRecord = ( value: unknown ): SettingsRecord =>
 	value && typeof value === 'object' ? ( value as SettingsRecord ) : {};
+
+const FraudProtectionTour = lazy( () =>
+	import(
+		/* webpackChunkName: "settings-payments-woopayments-fraud-tour" */ './tour'
+	).then( ( module ) => ( { default: module.FraudProtectionTour } ) )
+);
 
 const getNestedBooleanOrUndefined = (
 	record: SettingsRecord,
@@ -82,6 +89,10 @@ const normalizeProtectionLevel = ( level: string ) =>
 	level === ProtectionLevel.ADVANCED
 		? ProtectionLevel.ADVANCED
 		: ProtectionLevel.BASIC;
+
+const isWelcomeTourDismissed = ( settings: SettingsRecord ) =>
+	asSettingsRecord( settings.fraud_protection ).is_welcome_tour_dismissed ===
+	true;
 
 const BasicFraudProtectionModal = ( {
 	onClose,
@@ -152,6 +163,12 @@ export const FraudProtectionSettings = () => {
 	const [ advancedFraudProtectionSettings ] =
 		useAdvancedFraudProtectionSettings() as AdvancedFraudProtectionSetting;
 	const settings = asSettingsRecord( useGetSettings() );
+	const hasFraudProtectionSettingsError =
+		advancedFraudProtectionSettings === 'error';
+	const shouldLoadFraudProtectionTour =
+		! hasFraudProtectionSettingsError &&
+		! isWelcomeTourDismissed( settings ) &&
+		typeof window.IntersectionObserver !== 'undefined';
 	const normalizedProtectionLevel =
 		normalizeProtectionLevel( protectionLevel );
 	const advancedSettingsUrl = getSettingsPaymentsProviderRouteUrl(
@@ -162,10 +179,11 @@ export const FraudProtectionSettings = () => {
 		advancedFraudProtectionSettings.length > 0;
 	const isAdvancedSelected =
 		normalizedProtectionLevel === ProtectionLevel.ADVANCED;
-	const hasFraudProtectionSettingsError =
-		advancedFraudProtectionSettings === 'error';
 
 	const onLevelChange = ( level: string ) => () => {
+		recordEvent( 'wcpay_fraud_protection_risk_level_preset_enabled', {
+			preset: level,
+		} );
 		setProtectionLevel( level );
 	};
 
@@ -189,6 +207,7 @@ export const FraudProtectionSettings = () => {
 				</Notice>
 			) }
 			<fieldset
+				id="fraud-protection-card-options"
 				disabled={ hasFraudProtectionSettingsError }
 				className="woopayments-fraud-protection-levels"
 			>
@@ -220,7 +239,12 @@ export const FraudProtectionSettings = () => {
 							variant="tertiary"
 							aria-haspopup="dialog"
 							aria-expanded={ isBasicModalOpen }
-							onClick={ () => setBasicModalOpen( true ) }
+							onClick={ () => {
+								recordEvent(
+									'wcpay_fraud_protection_basic_modal_viewed'
+								);
+								setBasicModalOpen( true );
+							} }
 						/>
 					</div>
 					<p className="woopayments-fraud-protection-levels__copy">
@@ -279,6 +303,11 @@ export const FraudProtectionSettings = () => {
 					onClose={ () => setBasicModalOpen( false ) }
 					settings={ settings }
 				/>
+			) }
+			{ shouldLoadFraudProtectionTour && (
+				<Suspense fallback={ null }>
+					<FraudProtectionTour />
+				</Suspense>
 			) }
 		</div>
 	);

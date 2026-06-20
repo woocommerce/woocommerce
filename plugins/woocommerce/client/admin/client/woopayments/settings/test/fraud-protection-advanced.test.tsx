@@ -4,6 +4,7 @@
 import { dispatch } from '@wordpress/data';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -29,6 +30,9 @@ jest.mock( '@wordpress/data', () => ( {
 		createErrorNotice: mockCreateErrorNotice,
 	} ) ),
 } ) );
+jest.mock( '@woocommerce/tracks', () => ( {
+	recordEvent: jest.fn(),
+} ) );
 
 jest.mock( '../data/hooks', () => ( {
 	useSettings: () => mockUseSettings(),
@@ -40,6 +44,92 @@ jest.mock( '../data/hooks', () => ( {
 
 const setProtectionLevel = jest.fn();
 const setAdvancedFraudProtectionSettings = jest.fn();
+const mockRecordEvent = recordEvent as jest.MockedFunction<
+	typeof recordEvent
+>;
+const ADVANCED_RULE_CARD_VIEW_EVENTS = [
+	[
+		'avs-mismatch-card',
+		'wcpay_fraud_protection_advanced_settings_card_avs_mismatch_viewed',
+	],
+	[
+		'cvc-verification-card',
+		'wcpay_fraud_protection_advanced_settings_card_cvc_verification_viewed',
+	],
+	[
+		'international-ip-address-card',
+		'wcpay_fraud_protection_advanced_settings_card_international_ip_address_card_viewed',
+	],
+	[
+		'ip-address-mismatch-card',
+		'wcpay_fraud_protection_advanced_settings_card_ip_address_mismatch_card_viewed',
+	],
+	[
+		'address-mismatch-card',
+		'wcpay_fraud_protection_advanced_settings_card_address_mismatch_viewed',
+	],
+	[
+		'purchase-price-threshold-card',
+		'wcpay_fraud_protection_advanced_settings_card_price_threshold_viewed',
+	],
+	[
+		'order-items-threshold-card',
+		'wcpay_fraud_protection_advanced_settings_card_items_threshold_viewed',
+	],
+] as const;
+
+const getAdvancedCardEventNames = () =>
+	mockRecordEvent.mock.calls
+		.map( ( [ eventName ] ) => eventName )
+		.filter(
+			( eventName ): eventName is string =>
+				typeof eventName === 'string' &&
+				eventName.startsWith(
+					'wcpay_fraud_protection_advanced_settings_card_'
+				)
+		);
+
+type MockIntersectionObserverInstance = IntersectionObserver & {
+	observe: jest.Mock;
+	unobserve: jest.Mock;
+	disconnect: jest.Mock;
+};
+
+let mockIntersectionObserverCallback: IntersectionObserverCallback;
+let mockIntersectionObserverInstance: MockIntersectionObserverInstance;
+
+const installMockIntersectionObserver = () => {
+	window.IntersectionObserver = jest.fn(
+		( callback: IntersectionObserverCallback ) => {
+			mockIntersectionObserverCallback = callback;
+			mockIntersectionObserverInstance = {
+				root: null,
+				rootMargin: '',
+				thresholds: [ 1 ],
+				observe: jest.fn(),
+				unobserve: jest.fn(),
+				disconnect: jest.fn(),
+				takeRecords: jest.fn( () => [] ),
+			} as MockIntersectionObserverInstance;
+
+			return mockIntersectionObserverInstance;
+		}
+	);
+};
+
+const intersectElement = ( target: Element ) => {
+	act( () => {
+		mockIntersectionObserverCallback(
+			[
+				{
+					isIntersecting: true,
+					target,
+				} as IntersectionObserverEntry,
+			],
+			mockIntersectionObserverInstance
+		);
+	} );
+};
 
 const setHookDefaults = () => {
 	mockUseSettings.mockReturnValue( {
@@ -155,6 +245,11 @@ describe( 'fraud protection advanced ruleset utilities', () => {
 describe( 'FraudProtectionAdvancedSettingsPage', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
+		delete (
+			window as typeof window & {
+				IntersectionObserver?: typeof IntersectionObserver;
+			}
+		 ).IntersectionObserver;
 		setHookDefaults();
 	} );
 
@@ -334,6 +429,117 @@ describe( 'FraudProtectionAdvancedSettingsPage', () => {
 			expect(
 				screen.getByRole( 'button', { name: 'Save changes' } )
 			).toBeDisabled()
+		);
+	} );
+
+	it( 'records advanced fraud settings when saving enabled filters', async () => {
+		mockSaveSettings.mockResolvedValueOnce( true );
+		mockUseGetSettings.mockReturnValue( {
+			store_currency: 'USD',
+			fraud_protection: {
+				decline_on_avs_failure: false,
+				decline_on_cvc_failure: true,
+			},
+			fraud_protection_allowed_countries: {
+				type: 'all',
+				countries: [],
+			},
+			is_fraud_protection_review_feature_active: false,
+		} );
+		render( <FraudProtectionAdvancedSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', {
+				name: 'Enable AVS Mismatch filter',
+			} )
+		);
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'button', { name: 'Save changes' } )
+			);
+			await Promise.resolve();
+		} );
+
+		await waitFor( () =>
+			expect( mockRecordEvent ).toHaveBeenCalledWith(
+				'wcpay_fraud_protection_advanced_settings_saved',
+				expect.any( Object )
+			)
+		);
+		const saveEvent = mockRecordEvent.mock.calls.find(
+			( [ eventName ] ) =>
+				eventName === 'wcpay_fraud_protection_advanced_settings_saved'
+		);
+		expect( saveEvent ).toBeDefined();
+		const properties = saveEvent?.[ 1 ] as { settings: string };
+		expect( JSON.parse( properties.settings ) ).toEqual( [
+			expect.objectContaining( {
+				key: Rules.RULE_AVS_VERIFICATION,
+				outcome: Outcomes.BLOCK,
+			} ),
+		] );
+	} );
+
+	it( 'does not record advanced fraud settings when saving enabled filters fails', async () => {
+		mockSaveSettings.mockResolvedValueOnce( false );
+		mockUseGetSettings.mockReturnValue( {
+			store_currency: 'USD',
+			fraud_protection: {
+				decline_on_avs_failure: false,
+				decline_on_cvc_failure: true,
+			},
+			fraud_protection_allowed_countries: {
+				type: 'all',
+				countries: [],
+			},
+			is_fraud_protection_review_feature_active: false,
+		} );
+		render( <FraudProtectionAdvancedSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', {
+				name: 'Enable AVS Mismatch filter',
+			} )
+		);
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Save changes' } )
+		);
+
+		await waitFor( () => expect( mockSaveSettings ).toHaveBeenCalled() );
+		expect(
+			mockRecordEvent.mock.calls.some(
+				( [ eventName ] ) =>
+					eventName ===
+					'wcpay_fraud_protection_advanced_settings_saved'
+			)
+		).toBe( false );
+	} );
+
+	it( 'records advanced rule card impressions once when cards become visible', () => {
+		installMockIntersectionObserver();
+		render( <FraudProtectionAdvancedSettingsPage /> );
+
+		ADVANCED_RULE_CARD_VIEW_EVENTS.forEach( ( [ cardId ] ) => {
+			const card = document.getElementById( cardId );
+			expect( card ).not.toBeNull();
+			expect(
+				mockIntersectionObserverInstance.observe
+			).toHaveBeenCalledWith( card );
+		} );
+
+		ADVANCED_RULE_CARD_VIEW_EVENTS.forEach( ( [ cardId ] ) => {
+			intersectElement(
+				document.getElementById( cardId ) as HTMLElement
+			);
+		} );
+		intersectElement(
+			document.getElementById( 'avs-mismatch-card' ) as HTMLElement
+		);
+
+		expect( getAdvancedCardEventNames() ).toEqual(
+			ADVANCED_RULE_CARD_VIEW_EVENTS.map(
+				( [ , eventName ] ) => eventName
+			)
 		);
 	} );
 

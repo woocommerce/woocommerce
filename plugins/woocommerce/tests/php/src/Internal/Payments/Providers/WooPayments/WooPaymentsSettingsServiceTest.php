@@ -463,11 +463,27 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 		);
 		$this->assertSame(
 			array(
-				'decline_on_avs_failure' => false,
-				'decline_on_cvc_failure' => true,
+				'decline_on_avs_failure'    => false,
+				'decline_on_cvc_failure'    => true,
+				'is_welcome_tour_dismissed' => false,
 			),
 			$settings['fraud_protection']
 		);
+	}
+
+	/**
+	 * @testdox Should expose fraud-protection welcome tour dismissed state.
+	 */
+	public function test_get_settings_exposes_fraud_protection_welcome_tour_dismissed_state(): void {
+		$settings = $this->sut->get_settings();
+
+		$this->assertArrayHasKey( 'is_welcome_tour_dismissed', $settings['fraud_protection'] );
+		$this->assertFalse( $settings['fraud_protection']['is_welcome_tour_dismissed'] );
+
+		update_option( 'wcpay_fraud_protection_welcome_tour_dismissed', true );
+		$settings = $this->sut->get_settings();
+
+		$this->assertTrue( $settings['fraud_protection']['is_welcome_tour_dismissed'] );
 	}
 
 	/**
