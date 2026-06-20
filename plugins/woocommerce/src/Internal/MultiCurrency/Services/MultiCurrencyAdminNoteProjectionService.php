@@ -7,6 +7,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\MultiCurrency\Services;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
+
 /**
  * Projects multi-currency WC Admin notes without saving or deleting notes.
  *
@@ -15,13 +17,14 @@ namespace Automattic\WooCommerce\Internal\MultiCurrency\Services;
  */
 class MultiCurrencyAdminNoteProjectionService {
 
-	private const NOTE_NAME       = 'wc-payments-notes-multi-currency-available';
-	private const NOTE_SETUP_URL  = 'admin.php?page=wc-admin&path=/payments/multi-currency-setup';
-	private const NOTE_SOURCE     = 'woocommerce-payments';
-	private const MIN_WC_VERSION  = '4.4.0';
-	private const NOTE_TYPE_INFO  = 'info';
-	private const ACTION_STATUS   = 'unactioned';
-	private const ADMIN_INIT_HOOK = 'admin_init';
+	private const NOTE_NAME           = 'wc-payments-notes-multi-currency-available';
+	private const NOTE_SETUP_PATH     = '/woopayments/settings';
+	private const NOTE_SETUP_FRAGMENT = 'advanced';
+	private const NOTE_SOURCE         = 'woocommerce-payments';
+	private const MIN_WC_VERSION      = '4.4.0';
+	private const NOTE_TYPE_INFO      = 'info';
+	private const ACTION_STATUS       = 'unactioned';
+	private const ADMIN_INIT_HOOK     = 'admin_init';
 
 	/**
 	 * Project admin note hook metadata.
@@ -66,7 +69,11 @@ class MultiCurrencyAdminNoteProjectionService {
 				array(
 					'name'    => self::NOTE_NAME,
 					'label'   => __( 'Set up now', 'woocommerce' ),
-					'query'   => self::NOTE_SETUP_URL,
+					'query'   => Utils::wc_payments_settings_url(
+						self::NOTE_SETUP_PATH,
+						array(),
+						self::NOTE_SETUP_FRAGMENT
+					),
 					'status'  => self::ACTION_STATUS,
 					'primary' => true,
 				),

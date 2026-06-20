@@ -339,12 +339,13 @@ class Utils {
 	 * Retrieves a URL to relative path inside WooCommerce admin Payments settings with
 	 * the provided query parameters.
 	 *
-	 * @param string|null $path  Relative path of the desired page.
-	 * @param array       $query Query parameters to append to the path.
+	 * @param string|null $path     Relative path of the desired page.
+	 * @param array       $query    Query parameters to append to the path.
+	 * @param string      $fragment URL fragment to append to the URL.
 	 *
 	 * @return string       Fully qualified URL pointing to the desired path.
 	 */
-	public static function wc_payments_settings_url( ?string $path = null, array $query = array() ): string {
+	public static function wc_payments_settings_url( ?string $path = null, array $query = array(), string $fragment = '' ): string {
 		$path = $path ? '&path=' . $path : '';
 
 		$query_string = '';
@@ -352,7 +353,9 @@ class Utils {
 			$query_string = '&' . http_build_query( $query );
 		}
 
-		return admin_url( 'admin.php?page=wc-settings&tab=checkout' . $path . $query_string );
+		$fragment = '' !== $fragment ? '#' . rawurlencode( $fragment ) : '';
+
+		return admin_url( 'admin.php?page=wc-settings&tab=checkout' . $path . $query_string . $fragment );
 	}
 
 	/**

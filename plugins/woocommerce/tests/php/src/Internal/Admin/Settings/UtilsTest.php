@@ -1766,6 +1766,24 @@ class UtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should append provider route fragments to native payments settings URLs.
+	 */
+	public function test_wc_payments_settings_url_appends_provider_route_fragment(): void {
+		$url = Utils::wc_payments_settings_url(
+			'/woopayments/settings',
+			array(
+				'from' => 'legacy-bookmark',
+			),
+			'advanced'
+		);
+
+		$this->assertSame(
+			admin_url( 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/settings&from=legacy-bookmark#advanced' ),
+			$url
+		);
+	}
+
+	/**
 	 * @testdox Should build reference-shaped legacy WooPayments admin URLs for persisted records.
 	 */
 	public function test_wc_payments_legacy_admin_url_builds_reference_shaped_url(): void {

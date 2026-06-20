@@ -114,7 +114,7 @@ class MultiCurrencyAdminNoteControllerTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Sell worldwide in multiple currencies', $saved_notes[0]['title'] );
 		$this->assertSame( 'woocommerce-payments', $saved_notes[0]['source'] );
 		$this->assertSame( 'Set up now', $saved_notes[0]['actions'][0]['label'] );
-		$this->assertSame( 'admin.php?page=wc-admin&path=/payments/multi-currency-setup', $saved_notes[0]['actions'][0]['query'] );
+		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/settings#advanced' ), $saved_notes[0]['actions'][0]['query'] );
 		$this->assertSame( 'unactioned', $saved_notes[0]['actions'][0]['status'] );
 		$this->assertTrue( $saved_notes[0]['actions'][0]['primary'] );
 	}

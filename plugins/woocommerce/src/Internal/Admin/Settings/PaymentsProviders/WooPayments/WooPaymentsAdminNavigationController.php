@@ -56,7 +56,13 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 
 	private const PATH_SETTINGS = '/woopayments/settings';
 
+	private const PATH_FRAUD_PROTECTION_SETTINGS = '/woopayments/settings/fraud-protection';
+
 	private const PATH_PAYOUT_DETAILS = '/woopayments/payouts/details';
+
+	private const SETTINGS_FRAGMENT_ADVANCED = 'advanced';
+
+	private const SETTINGS_FRAGMENT_PAYMENT_METHODS = 'payment-methods';
 
 	private const LEGACY_DOCUMENTS_ROUTE = '/payments/documents';
 
@@ -67,21 +73,27 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 	private const LEGACY_LOANS_ROUTE = '/payments/loans';
 
 	private const LEGACY_ROUTE_REDIRECTS = array(
-		'/payments/overview'             => self::PATH_OVERVIEW,
-		'/payments/deposits'             => self::PATH_PAYOUTS,
-		'/payments/deposits/details'     => self::PATH_PAYOUT_DETAILS,
-		'/payments/payouts'              => self::PATH_PAYOUTS,
-		'/payments/payouts/details'      => self::PATH_PAYOUT_DETAILS,
-		'/payments/transactions'         => self::PATH_TRANSACTIONS,
-		'/payments/transactions/details' => self::PATH_TRANSACTION_DETAILS,
-		self::LEGACY_REPORTS_ROUTE       => self::PATH_REPORTS,
-		'/payments/disputes'             => self::PATH_DISPUTES,
-		'/payments/disputes/details'     => self::PATH_DISPUTE_DETAILS,
-		'/payments/disputes/challenge'   => self::PATH_DISPUTE_CHALLENGE,
-		self::LEGACY_CARD_READERS_ROUTE  => self::PATH_CARD_READERS,
-		self::LEGACY_LOANS_ROUTE         => self::PATH_LOANS,
-		self::LEGACY_DOCUMENTS_ROUTE     => self::PATH_DOCUMENTS,
-		'/payments/settings'             => self::PATH_SETTINGS,
+		'/payments/connect'                    => self::PATH_ONBOARDING,
+		'/payments/onboarding'                 => self::PATH_ONBOARDING,
+		'/payments/onboarding/kyc'             => self::PATH_ONBOARDING,
+		'/payments/overview'                   => self::PATH_OVERVIEW,
+		'/payments/deposits'                   => self::PATH_PAYOUTS,
+		'/payments/deposits/details'           => self::PATH_PAYOUT_DETAILS,
+		'/payments/payouts'                    => self::PATH_PAYOUTS,
+		'/payments/payouts/details'            => self::PATH_PAYOUT_DETAILS,
+		'/payments/transactions'               => self::PATH_TRANSACTIONS,
+		'/payments/transactions/details'       => self::PATH_TRANSACTION_DETAILS,
+		self::LEGACY_REPORTS_ROUTE             => self::PATH_REPORTS,
+		'/payments/disputes'                   => self::PATH_DISPUTES,
+		'/payments/disputes/details'           => self::PATH_DISPUTE_DETAILS,
+		'/payments/disputes/challenge'         => self::PATH_DISPUTE_CHALLENGE,
+		self::LEGACY_CARD_READERS_ROUTE        => self::PATH_CARD_READERS,
+		self::LEGACY_LOANS_ROUTE               => self::PATH_LOANS,
+		self::LEGACY_DOCUMENTS_ROUTE           => self::PATH_DOCUMENTS,
+		'/payments/settings'                   => self::PATH_SETTINGS,
+		'/payments/fraud-protection'           => self::PATH_FRAUD_PROTECTION_SETTINGS,
+		'/payments/multi-currency-setup'       => self::PATH_SETTINGS,
+		'/payments/additional-payment-methods' => self::PATH_SETTINGS,
 	);
 
 	/**
@@ -208,10 +220,6 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 			return '';
 		}
 
-		if ( ! $this->account_service->is_gateway_enabled() ) {
-			return '';
-		}
-
 		$legacy_path = sanitize_text_field( rawurldecode( $this->get_raw_request_scalar( $request, 'path' ) ) );
 		$target_path = self::LEGACY_ROUTE_REDIRECTS[ $legacy_path ] ?? '';
 		if ( '' === $target_path ) {
@@ -219,11 +227,16 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 		}
 
 		$route_availability = $this->get_admin_route_availability();
+		if ( $this->is_legacy_setup_route( $legacy_path ) ) {
+			$target_path = $this->get_legacy_setup_route_redirect_path( $route_availability );
+		}
+
 		if ( true !== ( $route_availability['allowedRoutes'][ $target_path ] ?? false ) ) {
 			return '';
 		}
 
-		$query = array();
+		$query    = array();
+		$fragment = '';
 		foreach ( $request as $key => $value ) {
 			if ( in_array( $key, array( 'page', 'path' ), true ) || ! is_scalar( $value ) ) {
 				continue;
@@ -240,9 +253,55 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 		if ( self::LEGACY_REPORTS_ROUTE === $legacy_path && isset( $query['tab'] ) ) {
 			$query['report_tab'] = $query['tab'];
 			unset( $query['tab'] );
+		} else {
+			unset( $query['tab'] );
 		}
 
-		return Utils::wc_payments_settings_url( $target_path, $query );
+		if ( '/payments/multi-currency-setup' === $legacy_path ) {
+			$fragment = self::SETTINGS_FRAGMENT_ADVANCED;
+		}
+
+		if ( '/payments/additional-payment-methods' === $legacy_path ) {
+			$fragment = self::SETTINGS_FRAGMENT_PAYMENT_METHODS;
+		}
+
+		return Utils::wc_payments_settings_url( $target_path, $query, $fragment );
+	}
+
+	/**
+	 * Tell whether a legacy route is part of the setup/onboarding flow.
+	 *
+	 * @param string $legacy_path Legacy WooPayments WC Admin route path.
+	 * @return bool
+	 */
+	private function is_legacy_setup_route( string $legacy_path ): bool {
+		return in_array(
+			$legacy_path,
+			array(
+				'/payments/connect',
+				'/payments/onboarding',
+				'/payments/onboarding/kyc',
+			),
+			true
+		);
+	}
+
+	/**
+	 * Resolve setup-era deep links to the best available native account route.
+	 *
+	 * @param array{gatewayEnabled:bool,accountState:string,allowedRoutes:array<string,bool>} $route_availability Route availability.
+	 * @return string
+	 */
+	private function get_legacy_setup_route_redirect_path( array $route_availability ): string {
+		if ( true === ( $route_availability['allowedRoutes'][ self::PATH_ONBOARDING ] ?? false ) ) {
+			return self::PATH_ONBOARDING;
+		}
+
+		if ( true === ( $route_availability['allowedRoutes'][ self::PATH_OVERVIEW ] ?? false ) ) {
+			return self::PATH_OVERVIEW;
+		}
+
+		return self::PATH_SETTINGS;
 	}
 
 	/**
@@ -298,29 +357,30 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 		$gateway_enabled  = $this->account_service->is_gateway_enabled();
 		$restricted       = $this->account_service->is_account_rejected() || $this->account_service->is_account_under_review();
 		$valid_account    = $this->account_service->has_valid_account_for_admin_navigation();
-		$onboarding       = $gateway_enabled && ! $restricted && ! $valid_account && ( ! $this->account_service->has_account() || ! $this->account_service->is_details_submitted() );
-		$full_access      = $gateway_enabled && $valid_account && ! $restricted;
-		$reduced_access   = $gateway_enabled && $restricted;
+		$onboarding       = ! $restricted && ! $valid_account && ( ! $this->account_service->has_account() || ! $this->account_service->is_details_submitted() );
+		$full_access      = $valid_account && ! $restricted;
+		$reduced_access   = $restricted;
 		$protected_access = $full_access || $reduced_access;
 
 		return array(
 			'gatewayEnabled' => $gateway_enabled,
-			'accountState'   => $this->get_admin_route_account_state( $gateway_enabled, $restricted, $valid_account, $onboarding ),
+			'accountState'   => $this->get_admin_route_account_state( $restricted, $valid_account, $onboarding ),
 			'allowedRoutes'  => array(
-				self::PATH_SETTINGS            => true,
-				self::PATH_ONBOARDING          => $onboarding,
-				self::PATH_OVERVIEW            => $protected_access,
-				self::PATH_PAYOUTS             => $full_access,
-				self::PATH_PAYOUT_DETAILS      => $full_access,
-				self::PATH_TRANSACTIONS        => $protected_access,
-				self::PATH_TRANSACTION_DETAILS => $protected_access,
-				self::PATH_DISPUTES            => $protected_access,
-				self::PATH_DISPUTE_DETAILS     => $protected_access,
-				self::PATH_DISPUTE_CHALLENGE   => $protected_access,
-				self::PATH_REPORTS             => $full_access && $this->account_service->is_reports_enabled(),
-				self::PATH_CARD_READERS        => $full_access && $this->account_service->is_card_present_eligible() && $this->account_service->has_card_readers_available(),
-				self::PATH_LOANS               => $full_access && $this->account_service->has_previous_capital_loans(),
-				self::PATH_DOCUMENTS           => $full_access && $this->account_service->is_documents_enabled(),
+				self::PATH_SETTINGS                  => true,
+				self::PATH_FRAUD_PROTECTION_SETTINGS => true,
+				self::PATH_ONBOARDING                => $onboarding,
+				self::PATH_OVERVIEW                  => $protected_access,
+				self::PATH_PAYOUTS                   => $full_access,
+				self::PATH_PAYOUT_DETAILS            => $full_access,
+				self::PATH_TRANSACTIONS              => $protected_access,
+				self::PATH_TRANSACTION_DETAILS       => $protected_access,
+				self::PATH_DISPUTES                  => $protected_access,
+				self::PATH_DISPUTE_DETAILS           => $protected_access,
+				self::PATH_DISPUTE_CHALLENGE         => $protected_access,
+				self::PATH_REPORTS                   => $full_access && $this->account_service->is_reports_enabled(),
+				self::PATH_CARD_READERS              => $full_access && $this->account_service->is_card_present_eligible() && $this->account_service->has_card_readers_available(),
+				self::PATH_LOANS                     => $full_access && $this->account_service->has_previous_capital_loans(),
+				self::PATH_DOCUMENTS                 => $full_access && $this->account_service->is_documents_enabled(),
 			),
 		);
 	}
@@ -328,17 +388,12 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 	/**
 	 * Get a coarse account state label for native WooPayments admin route availability.
 	 *
-	 * @param bool $gateway_enabled Whether the WooPayments gateway is enabled.
 	 * @param bool $restricted      Whether the account is rejected or under review.
 	 * @param bool $valid_account   Whether the account can use admin navigation.
 	 * @param bool $onboarding      Whether the account should use the onboarding route.
 	 * @return string
 	 */
-	private function get_admin_route_account_state( bool $gateway_enabled, bool $restricted, bool $valid_account, bool $onboarding ): string {
-		if ( ! $gateway_enabled ) {
-			return 'disabled';
-		}
-
+	private function get_admin_route_account_state( bool $restricted, bool $valid_account, bool $onboarding ): string {
 		if ( $restricted ) {
 			return 'restricted';
 		}
@@ -363,7 +418,6 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 		if (
 			! current_user_can( self::CAPABILITY )
 			|| ! $this->arbiter->should_native_register()
-			|| ! $this->account_service->is_gateway_enabled()
 		) {
 			return;
 		}

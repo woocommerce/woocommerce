@@ -37,7 +37,8 @@ class MultiCurrencyAdminNoteProjectionServiceTest extends WC_Unit_Test_Case {
 	 * @testdox Should project multi-currency availability note manifest.
 	 */
 	public function test_projects_multi_currency_availability_note_manifest(): void {
-		$manifest = MultiCurrencyAdminNoteProjectionService::get_note_manifest();
+		$manifest  = MultiCurrencyAdminNoteProjectionService::get_note_manifest();
+		$setup_url = admin_url( 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/settings#advanced' );
 
 		$this->assertSame( 'wc-payments-notes-multi-currency-available', $manifest['name'] );
 		$this->assertSame( 'Sell worldwide in multiple currencies', $manifest['title'] );
@@ -53,13 +54,26 @@ class MultiCurrencyAdminNoteProjectionServiceTest extends WC_Unit_Test_Case {
 				array(
 					'name'    => 'wc-payments-notes-multi-currency-available',
 					'label'   => 'Set up now',
-					'query'   => 'admin.php?page=wc-admin&path=/payments/multi-currency-setup',
+					'query'   => $setup_url,
 					'status'  => 'unactioned',
 					'primary' => true,
 				),
 			),
 			$manifest['actions']
 		);
+	}
+
+	/**
+	 * @testdox Should project the native multi-currency setup URL.
+	 */
+	public function test_projects_native_multi_currency_setup_url(): void {
+		$manifest = MultiCurrencyAdminNoteProjectionService::get_note_manifest();
+		$action   = $manifest['actions'][0];
+
+		$this->assertStringContainsString( 'admin.php?page=wc-settings&tab=checkout', $action['query'] );
+		$this->assertStringContainsString( 'path=/woopayments/settings', $action['query'] );
+		$this->assertStringContainsString( '#advanced', $action['query'] );
+		$this->assertStringNotContainsString( 'section=', $action['query'] );
 	}
 
 	/**
