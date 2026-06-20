@@ -18,7 +18,7 @@
 <p class="has-text-align-center"><?php echo esc_html_x( 'The page you\'re looking for could not be found. Maybe try a search?', '404 error message', 'purple' ); ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:search {"label":"Search","showLabel":false,"placeholder":"Search...","buttonText":"Search","buttonUseIcon":false,"style":{"spacing":{"margin":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}},"borderColor":"theme-4"} /-->
+<!-- wp:search {"label":"<?php echo esc_html_x( 'Search', 'Search form label.', 'purple' ); ?>","showLabel":false,"placeholder":"<?php echo esc_attr_x( 'Search...', 'Search input field placeholder text.', 'purple' ); ?>","buttonText":"<?php echo esc_attr_x( 'Search', 'Button text. Verb.', 'purple' ); ?>","buttonUseIcon":false,"style":{"spacing":{"margin":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}},"borderColor":"theme-4"} /-->
 
 <!-- wp:spacer {"height":"var:preset|spacing|80"} -->
 <div style="height:var(--wp--preset--spacing--80)" aria-hidden="true" class="wp-block-spacer"></div>

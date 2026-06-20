@@ -24,24 +24,24 @@
 
 <!-- wp:jetpack/contact-form {"subject":"","to":"","jetpackCRM":true,"salesforceData":{"organizationId":"","sendToSalesforce":false},"mailpoet":{"listId":null,"listName":null,"enabledForForm":false},"className":"is-style-default"} -->
 <div class="wp-block-jetpack-contact-form is-style-default"><!-- wp:jetpack/field-name {"id":"","required":true,"fieldVariant":"name"} -->
-<div><!-- wp:jetpack/label {"label":"Name","requiredText":"(required)"} /-->
+<div><!-- wp:jetpack/label {"label":"<?php echo esc_attr_x( 'Name', 'Contact form field label.', 'purple' ); ?>","requiredText":"<?php echo esc_attr_x( '(required)', 'Contact form required field indicator.', 'purple' ); ?>"} /-->
 
 <!-- wp:jetpack/input {"style":{"border":{"radius":"5px","style":"solid","width":"1px"}}} /--></div>
 <!-- /wp:jetpack/field-name -->
 
 <!-- wp:jetpack/field-email {"id":"","required":true} -->
-<div><!-- wp:jetpack/label {"label":"Email","requiredText":"(required)"} /-->
+<div><!-- wp:jetpack/label {"label":"<?php echo esc_attr_x( 'Email', 'Contact form field label.', 'purple' ); ?>","requiredText":"<?php echo esc_attr_x( '(required)', 'Contact form required field indicator.', 'purple' ); ?>"} /-->
 
 <!-- wp:jetpack/input {"style":{"border":{"radius":"5px","style":"solid","width":"1px"}}} /--></div>
 <!-- /wp:jetpack/field-email -->
 
 <!-- wp:jetpack/field-textarea {"id":""} -->
-<div><!-- wp:jetpack/label {"label":"Message","requiredText":"(required)"} /-->
+<div><!-- wp:jetpack/label {"label":"<?php echo esc_attr_x( 'Message', 'Contact form field label.', 'purple' ); ?>","requiredText":"<?php echo esc_attr_x( '(required)', 'Contact form required field indicator.', 'purple' ); ?>"} /-->
 
 <!-- wp:jetpack/input {"type":"textarea","style":{"border":{"radius":"5px","style":"solid","width":"1px"}}} /--></div>
 <!-- /wp:jetpack/field-textarea -->
 
-<!-- wp:jetpack/button {"element":"button","text":"Submit","width":"","lock":{"remove":true}} /--></div>
+<!-- wp:jetpack/button {"element":"button","text":"<?php echo esc_attr_x( 'Submit', 'Contact form submit button.', 'purple' ); ?>","width":"","lock":{"remove":true}} /--></div>
 <!-- /wp:jetpack/contact-form --></div>
 <!-- /wp:column -->
 

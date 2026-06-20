@@ -27,7 +27,7 @@
 <!-- wp:accordion {"style":{"spacing":{"blockGap":"0","padding":{"top":"0","bottom":"0"},"margin":{"top":"0","bottom":"0"}}}} -->
 <div role="group" class="wp-block-accordion" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0"><!-- wp:accordion-item {"style":{"border":{"bottom":{"color":"var:preset|color|theme-6","width":"1px"},"top":[],"right":[],"left":[]}}} -->
 <div class="wp-block-accordion-item" style="border-bottom-color:var(--wp--preset--color--theme-6);border-bottom-width:1px"><!-- wp:accordion-heading {"level":3,"style":{"spacing":{"padding":{"top":"0.88rem","bottom":"0.88rem"}}}} -->
-<h3 class="wp-block-accordion-heading"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:0.88rem;padding-bottom:0.88rem"><span class="wp-block-accordion-heading__toggle-title">What’s the difference between cashmere and wool?</span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3>
+<h3 class="wp-block-accordion-heading"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:0.88rem;padding-bottom:0.88rem"><span class="wp-block-accordion-heading__toggle-title"><?php echo esc_html_x( 'What’s the difference between cashmere and wool?', 'FAQ question title.', 'purple' ); ?></span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3>
 <!-- /wp:accordion-heading -->
 
 <!-- wp:accordion-panel -->
@@ -39,7 +39,7 @@
 
 <!-- wp:accordion-item {"style":{"border":{"bottom":{"color":"var:preset|color|theme-6","width":"1px"},"top":[],"right":[],"left":[]}}} -->
 <div class="wp-block-accordion-item" style="border-bottom-color:var(--wp--preset--color--theme-6);border-bottom-width:1px"><!-- wp:accordion-heading {"level":3,"style":{"spacing":{"padding":{"top":"0.88rem","bottom":"0.88rem"}}}} -->
-<h3 class="wp-block-accordion-heading"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:0.88rem;padding-bottom:0.88rem"><span class="wp-block-accordion-heading__toggle-title">How should I wash my knitwear?</span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3>
+<h3 class="wp-block-accordion-heading"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:0.88rem;padding-bottom:0.88rem"><span class="wp-block-accordion-heading__toggle-title"><?php echo esc_html_x( 'How should I wash my knitwear?', 'FAQ question title.', 'purple' ); ?></span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3>
 <!-- /wp:accordion-heading -->
 
 <!-- wp:accordion-panel -->
@@ -51,7 +51,7 @@
 
 <!-- wp:accordion-item {"style":{"border":{"bottom":{"color":"var:preset|color|theme-6","width":"1px"},"top":[],"right":[],"left":[]}}} -->
 <div class="wp-block-accordion-item" style="border-bottom-color:var(--wp--preset--color--theme-6);border-bottom-width:1px"><!-- wp:accordion-heading {"level":3,"style":{"spacing":{"padding":{"top":"0.88rem","bottom":"0.88rem"}}}} -->
-<h3 class="wp-block-accordion-heading"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:0.88rem;padding-bottom:0.88rem"><span class="wp-block-accordion-heading__toggle-title">Why does my knitwear pill and how can I prevent it?</span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3>
+<h3 class="wp-block-accordion-heading"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:0.88rem;padding-bottom:0.88rem"><span class="wp-block-accordion-heading__toggle-title"><?php echo esc_html_x( 'Why does my knitwear pill and how can I prevent it?', 'FAQ question title.', 'purple' ); ?></span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3>
 <!-- /wp:accordion-heading -->
 
 <!-- wp:accordion-panel -->
@@ -63,7 +63,7 @@
 
 <!-- wp:accordion-item {"style":{"border":{"bottom":{"color":"var:preset|color|theme-6","width":"1px"},"top":[],"right":[],"left":[]}}} -->
 <div class="wp-block-accordion-item" style="border-bottom-color:var(--wp--preset--color--theme-6);border-bottom-width:1px"><!-- wp:accordion-heading {"level":3,"style":{"spacing":{"padding":{"top":"0.88rem","bottom":"0.88rem"}}}} -->
-<h3 class="wp-block-accordion-heading"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:0.88rem;padding-bottom:0.88rem"><span class="wp-block-accordion-heading__toggle-title">What materials are best for sensitive skin?</span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3>
+<h3 class="wp-block-accordion-heading"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:0.88rem;padding-bottom:0.88rem"><span class="wp-block-accordion-heading__toggle-title"><?php echo esc_html_x( 'What materials are best for sensitive skin?', 'FAQ question title.', 'purple' ); ?></span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3>
 <!-- /wp:accordion-heading -->
 
 <!-- wp:accordion-panel -->
@@ -75,7 +75,7 @@
 
 <!-- wp:accordion-item {"style":{"border":{"bottom":{"color":"var:preset|color|theme-6","width":"1px"},"top":[],"right":[],"left":[]}}} -->
 <div class="wp-block-accordion-item" style="border-bottom-color:var(--wp--preset--color--theme-6);border-bottom-width:1px"><!-- wp:accordion-heading {"level":3,"style":{"spacing":{"padding":{"top":"0.88rem","bottom":"0.88rem"}},"typography":{"fontStyle":"normal","fontWeight":"400"}},"fontSize":"medium"} -->
-<h3 class="wp-block-accordion-heading has-medium-font-size" style="font-style:normal;font-weight:400"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:0.88rem;padding-bottom:0.88rem"><span class="wp-block-accordion-heading__toggle-title">How do I store knitwear during warmer months?</span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3>
+<h3 class="wp-block-accordion-heading has-medium-font-size" style="font-style:normal;font-weight:400"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:0.88rem;padding-bottom:0.88rem"><span class="wp-block-accordion-heading__toggle-title"><?php echo esc_html_x( 'How do I store knitwear during warmer months?', 'FAQ question title.', 'purple' ); ?></span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3>
 <!-- /wp:accordion-heading -->
 
 <!-- wp:accordion-panel {"style":{"spacing":{"padding":{"bottom":"var:preset|spacing|30"}}}} -->

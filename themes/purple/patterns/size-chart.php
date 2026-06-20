@@ -8,10 +8,6 @@
  * Block Types: core/table
  */
 ?>
-<!-- wp:spacer {"height":"var:preset|spacing|60","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
-<div style="margin-top:0;margin-bottom:0;height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer -->
-
 <!-- wp:group {"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph  -->
 <p><?php esc_html_e('These size charts are a guide to help you find the right size for you. As many pieces are designed in a unique way, we suggest you also refer to the specific garment lengths and measurements provided in the product descriptions.', 'purple');?></p>
@@ -45,7 +41,3 @@
 <p><?php esc_html_e('ARM LENGTH: Measure from shoulder point to just below the wrist.', 'purple');?>   </p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
-
-<!-- wp:spacer {"height":"var:preset|spacing|60","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
-<div style="margin-top:0;margin-bottom:0;height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer -->

@@ -1,22 +1,18 @@
 <?php
 /**
- * Title: Reviews 6
- * Slug: purple/reviews-6
+ * Title: Reviews three columns
+ * Slug: purple/reviews-three-columns
  * Categories: testimonials
  * Keywords: reviews, testimonials, ratings, stars
  * Description: A three-column reviews section with star ratings, review text, and reviewer name.
  */
 ?>
-<!-- wp:group {"metadata":{"name":"Reviews"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"},"blockGap":"var:preset|spacing|40"}},"layout":{"type":"constrained","justifyContent":"center"}} -->
-<div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50)"><!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignwide"><!-- wp:heading {"align":"full","style":{"typography":{"textAlign":"left"}}} -->
-<h2 class="wp-block-heading has-text-align-left alignfull"><?php esc_html_e( 'Reviews', 'purple' ); ?></h2>
-<!-- /wp:heading --></div>
-<!-- /wp:group -->
+<!-- wp:group {"metadata":{"name":"Reviews","categories":["testimonials"],"patternName":"purple/reviews-three-columns"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"},"blockGap":"var:preset|spacing|40"}},"layout":{"type":"constrained","justifyContent":"center"}} -->
+<div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:heading {"align":"wide","style":{"typography":{"textAlign":"left"}}} -->
+<h2 class="wp-block-heading has-text-align-left alignwide"><?php esc_html_e( 'Reviews', 'purple' ); ?></h2>
+<!-- /wp:heading -->
 
-<!-- wp:group {"metadata":{"name":"Sections"},"align":"wide"} -->
-<div class="wp-block-group alignwide"><!-- wp:group {"metadata":{"name":"Section"}} -->
-<div class="wp-block-group"><!-- wp:columns {"metadata":{"name":"Items"},"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|40","left":"var:preset|spacing|30"}}}} -->
+<!-- wp:columns {"metadata":{"name":"Items"},"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"metadata":{"name":"Item"},"style":{"spacing":{"blockGap":"0.63rem"}}} -->
 <div class="wp-block-column"><!-- wp:jetpack/rating-star {"rating":4.5,"className":"is-style-filled"} -->
 <figure class="wp-block-jetpack-rating-star is-style-filled" style="text-align:left"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></figure>
@@ -59,6 +55,4 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns --></div>
-<!-- /wp:group --></div>
-<!-- /wp:group --></div>
 <!-- /wp:group -->
