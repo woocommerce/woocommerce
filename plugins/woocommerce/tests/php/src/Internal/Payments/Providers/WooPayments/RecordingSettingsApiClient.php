@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiException;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiClient;
 use WP_REST_Request;
 
@@ -24,6 +25,27 @@ class RecordingSettingsApiClient extends WooPaymentsApiClient {
 	 * @var array<int|string,mixed>|null
 	 */
 	public ?array $last_fraud_ruleset = null;
+
+	/**
+	 * Latest fraud ruleset response.
+	 *
+	 * @var array<string,mixed>|null
+	 */
+	public ?array $latest_fraud_ruleset_response = null;
+
+	/**
+	 * Latest fraud ruleset exception.
+	 *
+	 * @var WooPaymentsApiException|null
+	 */
+	public ?WooPaymentsApiException $latest_fraud_ruleset_exception = null;
+
+	/**
+	 * Latest fraud ruleset request count.
+	 *
+	 * @var int
+	 */
+	public int $latest_fraud_ruleset_requests = 0;
 
 	/**
 	 * Last upload request.
@@ -132,6 +154,22 @@ class RecordingSettingsApiClient extends WooPaymentsApiClient {
 		$this->last_fraud_ruleset = $ruleset_config;
 
 		return array( 'success' => true );
+	}
+
+	/**
+	 * Get latest fraud ruleset.
+	 *
+	 * @return array<string,mixed>
+	 * @throws WooPaymentsApiException When the test fixture is configured to fail.
+	 */
+	public function get_latest_fraud_ruleset(): array {
+		++$this->latest_fraud_ruleset_requests;
+
+		if ( $this->latest_fraud_ruleset_exception instanceof WooPaymentsApiException ) {
+			throw $this->latest_fraud_ruleset_exception;
+		}
+
+		return $this->latest_fraud_ruleset_response ?? array();
 	}
 
 	/**

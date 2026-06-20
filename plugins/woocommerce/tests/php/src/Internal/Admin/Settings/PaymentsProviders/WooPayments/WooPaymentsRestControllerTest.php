@@ -394,6 +394,62 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should round-trip the fraud settings error sentinel through the native settings POST route.
+	 */
+	public function test_update_native_settings_accepts_fraud_error_sentinel(): void {
+		$settings = array(
+			'is_debug_log_enabled'               => true,
+			'advanced_fraud_protection_settings' => 'error',
+		);
+
+		$this->mock_settings_service
+			->expects( $this->once() )
+			->method( 'update_settings' )
+			->with(
+				$this->callback(
+					static function ( array $params ): bool {
+						return true === $params['is_debug_log_enabled']
+							&& 'error' === $params['advanced_fraud_protection_settings'];
+					}
+				)
+			)
+			->willReturn( $settings );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/payments/settings' );
+		$request->set_body_params(
+			array(
+				'is_debug_log_enabled'               => true,
+				'advanced_fraud_protection_settings' => 'error',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $settings, $response->get_data() );
+	}
+
+	/**
+	 * @testdox Should reject unknown fraud settings strings before settings persistence.
+	 */
+	public function test_update_native_settings_rejects_unknown_fraud_settings_string(): void {
+		$this->mock_settings_service
+			->expects( $this->never() )
+			->method( 'update_settings' );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/payments/settings' );
+		$request->set_body_params(
+			array(
+				'advanced_fraud_protection_settings' => 'not_a_ruleset',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'] );
+		$this->assertArrayHasKey( 'advanced_fraud_protection_settings', $response->get_data()['data']['params'] );
+	}
+
+	/**
 	 * @testdox Should reject invalid payment method IDs before settings persistence.
 	 */
 	public function test_update_native_settings_rejects_invalid_payment_method_ids(): void {

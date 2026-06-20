@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Payments\Providers\WooPayments;
 
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsAccountService;
+use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\Api\WooPaymentsApiException;
 use Automattic\WooCommerce\Internal\Payments\Providers\WooPayments\WooPaymentsSettingsService;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WC_Unit_Test_Case;
@@ -1244,6 +1245,283 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refresh missing fraud rulesets from the platform.
+	 */
+	public function test_get_settings_refreshes_missing_fraud_ruleset_from_platform(): void {
+		$this->set_connected_account_data();
+		update_option( 'current_protection_level', 'advanced' );
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'advanced_fraud_protection_settings' => array(
+					array(
+						'key'     => 'stale_local_rule',
+						'outcome' => 'allow',
+						'check'   => array(
+							'key'      => 'item_count',
+							'operator' => 'greater_than',
+							'value'    => 1,
+						),
+					),
+				),
+			)
+		);
+		$this->api_client->latest_fraud_ruleset_response = array(
+			'ruleset_config' => $this->get_standard_fraud_ruleset_fixture(),
+		);
+
+		$result = $this->sut->get_settings();
+
+		$this->assertSame( 1, $this->api_client->latest_fraud_ruleset_requests );
+		$this->assertSame( 'standard', $result['current_protection_level'] );
+		$this->assertSame( 'standard', get_option( 'current_protection_level' ) );
+		$this->assertSame( $this->get_standard_fraud_ruleset_fixture(), $result['advanced_fraud_protection_settings'] );
+		$this->assertSame( $this->get_standard_fraud_ruleset_fixture(), get_transient( 'wcpay_fraud_protection_settings' ) );
+	}
+
+	/**
+	 * @testdox Should initialize Basic fraud ruleset when the platform has no ruleset.
+	 */
+	public function test_get_settings_initializes_basic_fraud_ruleset_when_platform_ruleset_is_missing(): void {
+		$this->set_connected_account_data();
+		update_option( 'current_protection_level', 'advanced' );
+		$this->api_client->latest_fraud_ruleset_exception = new WooPaymentsApiException(
+			'Ruleset not found.',
+			'wcpay_fraud_ruleset_not_found',
+			404
+		);
+
+		$result = $this->sut->get_settings();
+
+		$this->assertSame( 1, $this->api_client->latest_fraud_ruleset_requests );
+		$this->assertSame( array(), $this->api_client->last_fraud_ruleset );
+		$this->assertSame( array(), $result['advanced_fraud_protection_settings'] );
+		$this->assertSame( array(), get_transient( 'wcpay_fraud_protection_settings' ) );
+		$this->assertSame( 'basic', $result['current_protection_level'] );
+		$this->assertSame( 'basic', get_option( 'current_protection_level' ) );
+	}
+
+	/**
+	 * @testdox Should return fraud settings error when platform refresh fails.
+	 */
+	public function test_get_settings_returns_fraud_error_when_platform_refresh_fails(): void {
+		$this->set_connected_account_data();
+		update_option( 'current_protection_level', 'advanced' );
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'advanced_fraud_protection_settings' => array(
+					array(
+						'key'     => 'stale_local_rule',
+						'outcome' => 'allow',
+						'check'   => array(
+							'key'      => 'item_count',
+							'operator' => 'greater_than',
+							'value'    => 1,
+						),
+					),
+				),
+			)
+		);
+		$this->api_client->latest_fraud_ruleset_exception = new WooPaymentsApiException(
+			'Platform unavailable.',
+			'wcpay_server_error',
+			500
+		);
+
+		$result = $this->sut->get_settings();
+
+		$this->assertSame( 1, $this->api_client->latest_fraud_ruleset_requests );
+		$this->assertSame( 'error', $result['advanced_fraud_protection_settings'] );
+		$this->assertFalse( get_transient( 'wcpay_fraud_protection_settings' ) );
+		$this->assertNull( $this->api_client->last_fraud_ruleset );
+	}
+
+	/**
+	 * @testdox Should return fraud settings error when platform ruleset response is malformed.
+	 */
+	public function test_get_settings_returns_fraud_error_when_platform_ruleset_response_is_malformed(): void {
+		$this->set_connected_account_data();
+		update_option( 'current_protection_level', 'advanced' );
+		$this->api_client->latest_fraud_ruleset_response = array(
+			'ruleset_config' => array(
+				array(
+					'key'     => 'malformed_rule',
+					'outcome' => 'review',
+				),
+			),
+		);
+
+		$result = $this->sut->get_settings();
+
+		$this->assertSame( 1, $this->api_client->latest_fraud_ruleset_requests );
+		$this->assertSame( 'advanced', $result['current_protection_level'] );
+		$this->assertSame( 'advanced', get_option( 'current_protection_level' ) );
+		$this->assertSame( 'error', $result['advanced_fraud_protection_settings'] );
+		$this->assertFalse( get_transient( 'wcpay_fraud_protection_settings' ) );
+	}
+
+	/**
+	 * @testdox Should ignore the fraud error sentinel when saving unrelated settings.
+	 */
+	public function test_update_settings_ignores_fraud_error_sentinel_on_unrelated_save(): void {
+		$this->set_connected_account_data();
+		update_option( 'current_protection_level', 'standard' );
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'enable_logging' => 'no',
+			)
+		);
+
+		$result = $this->sut->update_settings(
+			array(
+				'is_debug_log_enabled'               => true,
+				'current_protection_level'           => 'standard',
+				'advanced_fraud_protection_settings' => 'error',
+			)
+		);
+		$stored = get_option( 'woocommerce_woocommerce_payments_settings' );
+
+		$this->assertIsArray( $result );
+		$this->assertIsArray( $stored );
+		$this->assertSame( 'yes', $stored['enable_logging'] );
+		$this->assertNull( $this->api_client->last_fraud_ruleset );
+	}
+
+	/**
+	 * @testdox Should save canonical fraud presets when the fraud error sentinel is round-tripped.
+	 */
+	public function test_update_settings_saves_canonical_fraud_preset_with_error_sentinel(): void {
+		$this->set_connected_account_data();
+		update_option( 'current_protection_level', 'advanced' );
+
+		$result = $this->sut->update_settings(
+			array(
+				'current_protection_level'           => 'standard',
+				'advanced_fraud_protection_settings' => 'error',
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 'standard', get_option( 'current_protection_level' ) );
+		$this->assertSame( $this->get_standard_fraud_ruleset_fixture(), $this->api_client->last_fraud_ruleset );
+		$this->assertSame( $this->get_standard_fraud_ruleset_fixture(), get_transient( 'wcpay_fraud_protection_settings' ) );
+	}
+
+	/**
+	 * @testdox Should not fetch fraud rulesets when no WooPayments account is connected.
+	 */
+	public function test_get_settings_does_not_fetch_fraud_ruleset_without_connected_account(): void {
+		update_option( 'current_protection_level', 'advanced' );
+		$this->api_client->latest_fraud_ruleset_response = array(
+			'ruleset_config' => $this->get_standard_fraud_ruleset_fixture(),
+		);
+
+		$result = $this->sut->get_settings();
+
+		$this->assertSame( 0, $this->api_client->latest_fraud_ruleset_requests );
+		$this->assertSame( 'advanced', $result['current_protection_level'] );
+		$this->assertSame( array(), $result['advanced_fraud_protection_settings'] );
+		$this->assertFalse( get_transient( 'wcpay_fraud_protection_settings' ) );
+	}
+
+	/**
+	 * @testdox Should refresh fraud rulesets only once per settings response.
+	 */
+	public function test_get_settings_refreshes_fraud_ruleset_once_per_settings_response(): void {
+		$this->set_connected_account_data();
+		$this->api_client->latest_fraud_ruleset_response = array(
+			'ruleset_config' => array(
+				array(
+					'key'     => 'custom_rule',
+					'outcome' => 'review',
+					'check'   => array(
+						'key'      => 'item_count',
+						'operator' => 'greater_than',
+						'value'    => 3,
+					),
+				),
+			),
+		);
+
+		$result = $this->sut->get_settings();
+
+		$this->assertSame( 1, $this->api_client->latest_fraud_ruleset_requests );
+		$this->assertSame( 'advanced', $result['current_protection_level'] );
+		$this->assertSame( 'advanced', get_option( 'current_protection_level' ) );
+		$this->assertSame( $this->api_client->latest_fraud_ruleset_response['ruleset_config'], $result['advanced_fraud_protection_settings'] );
+	}
+
+	/**
+	 * @testdox Should match review-enabled standard fraud rulesets fetched from the platform.
+	 */
+	public function test_get_settings_matches_review_enabled_standard_fraud_ruleset_from_platform(): void {
+		$this->set_connected_account_data();
+		update_option( 'wcpay_frt_review_feature_active', '1' );
+		$this->api_client->latest_fraud_ruleset_response = array(
+			'ruleset_config' => $this->get_standard_fraud_ruleset_fixture( 'review' ),
+		);
+
+		$result = $this->sut->get_settings();
+
+		$this->assertSame( 1, $this->api_client->latest_fraud_ruleset_requests );
+		$this->assertSame( 'standard', $result['current_protection_level'] );
+		$this->assertSame( 'standard', get_option( 'current_protection_level' ) );
+		$this->assertSame( $this->get_standard_fraud_ruleset_fixture( 'review' ), get_transient( 'wcpay_fraud_protection_settings' ) );
+	}
+
+	/**
+	 * @testdox Should match review-enabled high fraud rulesets fetched from the platform.
+	 */
+	public function test_get_settings_matches_review_enabled_high_fraud_ruleset_from_platform(): void {
+		$this->set_connected_account_data();
+		update_option( 'wcpay_frt_review_feature_active', '1' );
+		$this->api_client->latest_fraud_ruleset_response = array(
+			'ruleset_config' => $this->get_high_fraud_ruleset_fixture( 'review' ),
+		);
+
+		$result = $this->sut->get_settings();
+
+		$this->assertSame( 1, $this->api_client->latest_fraud_ruleset_requests );
+		$this->assertSame( 'high', $result['current_protection_level'] );
+		$this->assertSame( 'high', get_option( 'current_protection_level' ) );
+		$this->assertSame( $this->get_high_fraud_ruleset_fixture( 'review' ), get_transient( 'wcpay_fraud_protection_settings' ) );
+	}
+
+	/**
+	 * @testdox Should use cached fraud transient without fetching platform rulesets.
+	 */
+	public function test_get_settings_uses_cached_fraud_transient_without_platform_fetch(): void {
+		$this->set_connected_account_data();
+		update_option( 'current_protection_level', 'advanced' );
+		set_transient(
+			'wcpay_fraud_protection_settings',
+			array(
+				array(
+					'key'     => 'cached_rule',
+					'outcome' => 'review',
+					'check'   => array(
+						'key'      => 'item_count',
+						'operator' => 'greater_than',
+						'value'    => 3,
+					),
+				),
+			),
+			DAY_IN_SECONDS
+		);
+		$this->api_client->latest_fraud_ruleset_response = array(
+			'ruleset_config' => $this->get_standard_fraud_ruleset_fixture(),
+		);
+
+		$result = $this->sut->get_settings();
+
+		$this->assertSame( 0, $this->api_client->latest_fraud_ruleset_requests );
+		$this->assertSame( 'advanced', $result['current_protection_level'] );
+		$this->assertSame( 'cached_rule', $result['advanced_fraud_protection_settings'][0]['key'] );
+	}
+
+	/**
 	 * @testdox Should include the current payout interval when only a payout anchor changes.
 	 */
 	public function test_update_settings_includes_payout_interval_for_anchor_updates(): void {
@@ -1609,6 +1887,140 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 				return $this->options[ $key ] ?? 'no';
 			}
 		};
+	}
+
+	/**
+	 * Set connected account data for settings tests.
+	 */
+	private function set_connected_account_data(): void {
+		update_option(
+			'wcpay_account_data',
+			array(
+				'data'    => array(
+					'account_id'           => 'acct_native_test',
+					'is_live'              => true,
+					'test_publishable_key' => 'pk_test_native',
+					'live_publishable_key' => 'pk_live_native',
+					'capabilities'         => array(
+						'card_payments' => 'active',
+					),
+					'fees'                 => array(
+						'card' => array(),
+					),
+					'store_currencies'     => array(
+						'default'   => 'usd',
+						'supported' => array( 'usd' ),
+					),
+				),
+				'fetched' => time(),
+				'errored' => false,
+			)
+		);
+	}
+
+	/**
+	 * Get the standard fraud ruleset fixture.
+	 *
+	 * @param string $reviewable_outcome Outcome for review-capable standard preset rules.
+	 * @return array<int,array<string,mixed>>
+	 */
+	private function get_standard_fraud_ruleset_fixture( string $reviewable_outcome = 'block' ): array {
+		return array(
+			$this->get_fraud_rule_fixture(
+				'international_ip_address',
+				$reviewable_outcome,
+				$this->get_fraud_check_fixture( 'ip_country', 'in', '' )
+			),
+			$this->get_fraud_rule_fixture(
+				'order_items_threshold',
+				$reviewable_outcome,
+				$this->get_fraud_check_fixture( 'item_count', 'greater_than', 10 )
+			),
+			$this->get_fraud_rule_fixture(
+				'purchase_price_threshold',
+				$reviewable_outcome,
+				$this->get_fraud_check_fixture( 'order_total', 'greater_than', '100000|usd' )
+			),
+			$this->get_fraud_rule_fixture(
+				'ip_address_mismatch',
+				$reviewable_outcome,
+				$this->get_fraud_check_fixture( 'ip_billing_country_same', 'equals', false )
+			),
+		);
+	}
+
+	/**
+	 * Get the high fraud ruleset fixture.
+	 *
+	 * @param string $reviewable_outcome Outcome for review-capable high preset rules.
+	 * @return array<int,array<string,mixed>>
+	 */
+	private function get_high_fraud_ruleset_fixture( string $reviewable_outcome = 'block' ): array {
+		return array(
+			$this->get_fraud_rule_fixture(
+				'international_ip_address',
+				'block',
+				$this->get_fraud_check_fixture( 'ip_country', 'in', '' )
+			),
+			$this->get_fraud_rule_fixture(
+				'purchase_price_threshold',
+				'block',
+				$this->get_fraud_check_fixture( 'order_total', 'greater_than', '100000|usd' )
+			),
+			$this->get_fraud_rule_fixture(
+				'order_items_threshold',
+				$reviewable_outcome,
+				array(
+					'operator' => 'or',
+					'checks'   => array(
+						$this->get_fraud_check_fixture( 'item_count', 'less_than', 2 ),
+						$this->get_fraud_check_fixture( 'item_count', 'greater_than', 10 ),
+					),
+				)
+			),
+			$this->get_fraud_rule_fixture(
+				'address_mismatch',
+				$reviewable_outcome,
+				$this->get_fraud_check_fixture( 'billing_shipping_address_same', 'equals', false )
+			),
+			$this->get_fraud_rule_fixture(
+				'ip_address_mismatch',
+				$reviewable_outcome,
+				$this->get_fraud_check_fixture( 'ip_billing_country_same', 'equals', false )
+			),
+		);
+	}
+
+	/**
+	 * Get a fraud rule fixture.
+	 *
+	 * @param string              $key     Rule key.
+	 * @param string              $outcome Rule outcome.
+	 * @param array<string,mixed> $check   Rule check.
+	 * @return array<string,mixed>
+	 */
+	private function get_fraud_rule_fixture( string $key, string $outcome, array $check ): array {
+		return array(
+			'key'     => $key,
+			'outcome' => $outcome,
+			'check'   => $check,
+		);
+	}
+
+	/**
+	 * Get a fraud check fixture.
+	 *
+	 * @param string $key      Check key.
+	 * @param string $operator Check operator.
+	 * @param mixed  $value    Check value.
+	 * @return array<string,mixed>
+	 */
+	private function get_fraud_check_fixture( string $key, string $operator, $value ): array {
+		return array(
+			'key'      => $key,
+			'operator' => $operator,
+			'value'    => $value,
+		);
 	}
 
 	/**

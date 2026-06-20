@@ -759,7 +759,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			'express_checkout_checkout_methods'    => $this->get_string_array_arg( $express_method_ids ),
 			'payment_request_button_border_radius' => $this->get_typed_arg( 'integer' ),
 			'deposit_schedule_monthly_anchor'      => $this->get_typed_arg( array( 'integer', 'null' ) ),
-			'advanced_fraud_protection_settings'   => $this->get_typed_arg( 'array' ),
+			'advanced_fraud_protection_settings'   => $this->get_advanced_fraud_protection_settings_arg(),
 			'account_business_support_address'     => $this->get_typed_arg( 'object' ),
 		);
 
@@ -822,6 +822,44 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			'type'              => $type,
 			'required'          => false,
 			'validate_callback' => 'rest_validate_request_arg',
+		);
+	}
+
+	/**
+	 * Get a REST arg schema for advanced fraud protection settings.
+	 *
+	 * The settings GET contract can expose the string "error" sentinel when the platform ruleset is unavailable. The POST route must accept that sentinel for round-trips without accepting arbitrary strings as fraud rulesets.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function get_advanced_fraud_protection_settings_arg(): array {
+		return array(
+			'type'              => array( 'string', 'array' ),
+			'required'          => false,
+			'validate_callback' => static function ( $value, WP_REST_Request $request, string $param ) {
+				unset( $request );
+
+				$validation = rest_validate_value_from_schema(
+					$value,
+					array(
+						'type' => array( 'string', 'array' ),
+					),
+					$param
+				);
+				if ( is_wp_error( $validation ) ) {
+					return $validation;
+				}
+
+				if ( is_string( $value ) && 'error' !== $value ) {
+					return new WP_Error(
+						'rest_invalid_param',
+						esc_html__( 'The advanced fraud protection settings field accepts only the error sentinel or a ruleset array.', 'woocommerce' ),
+						array( 'status' => 400 )
+					);
+				}
+
+				return true;
+			},
 		);
 	}
 

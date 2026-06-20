@@ -939,6 +939,15 @@ class WooPaymentsApiClient {
 	}
 
 	/**
+	 * Get the latest fraud ruleset config for the connected account.
+	 *
+	 * @return array<string,mixed>
+	 */
+	public function get_latest_fraud_ruleset(): array {
+		return $this->request( array(), self::FRAUD_RULESET_API, 'GET' );
+	}
+
+	/**
 	 * Save fraud ruleset config for the connected account.
 	 *
 	 * @param array<int|string,mixed> $ruleset_config Ruleset config.

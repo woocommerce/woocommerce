@@ -207,6 +207,13 @@ class WooPaymentsSettingsService {
 	private ?WooPaymentsPmPromotionsService $pm_promotions_service = null;
 
 	/**
+	 * Whether fraud protection settings were refreshed for this service instance.
+	 *
+	 * @var bool
+	 */
+	private bool $fraud_protection_settings_refreshed = false;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
@@ -318,7 +325,7 @@ class WooPaymentsSettingsService {
 			'deposit_restrictions'                       => $account_fields['deposit_restrictions'],
 			'deposit_completed_waiting_period'           => $account_fields['deposit_completed_waiting_period'],
 			'current_protection_level'                   => $this->get_current_protection_level(),
-			'advanced_fraud_protection_settings'         => $this->get_advanced_fraud_protection_settings( $settings ),
+			'advanced_fraud_protection_settings'         => $this->get_advanced_fraud_protection_settings(),
 			'fraud_protection'                           => $this->get_fraud_protection_settings(),
 			'fraud_protection_allowed_countries'         => $this->get_fraud_protection_allowed_countries(),
 			'is_fraud_protection_review_feature_active'  => $this->is_fraud_protection_review_feature_active(),
@@ -1124,7 +1131,7 @@ class WooPaymentsSettingsService {
 				$this->account_service->refresh_account_data();
 			}
 
-			$fraud_settings = $this->get_changed_fraud_settings( $params, $settings );
+			$fraud_settings = $this->get_changed_fraud_settings( $params );
 			if ( null !== $fraud_settings ) {
 				$this->api_client->save_fraud_ruleset( $fraud_settings['ruleset_config'] );
 				set_transient( 'wcpay_fraud_protection_settings', $fraud_settings['ruleset_config'], DAY_IN_SECONDS );
@@ -1142,10 +1149,9 @@ class WooPaymentsSettingsService {
 	 * Get changed fraud settings from request parameters.
 	 *
 	 * @param array<string,mixed> $params   Request parameters.
-	 * @param array<string,mixed> $settings Current gateway settings.
 	 * @return array{protection_level:string,ruleset_config:array<int|string,mixed>}|null
 	 */
-	private function get_changed_fraud_settings( array $params, array $settings ): ?array {
+	private function get_changed_fraud_settings( array $params ): ?array {
 		if ( ! array_key_exists( 'current_protection_level', $params ) || ! array_key_exists( 'advanced_fraud_protection_settings', $params ) ) {
 			return null;
 		}
@@ -1155,12 +1161,32 @@ class WooPaymentsSettingsService {
 			return null;
 		}
 
+		$has_fraud_settings_error = 'error' === ( $params['advanced_fraud_protection_settings'] ?? null );
+		if ( $has_fraud_settings_error && 'advanced' === $protection_level ) {
+			return null;
+		}
+
 		$ruleset_config = $this->get_fraud_ruleset_for_protection_level( $protection_level, $params['advanced_fraud_protection_settings'] ?? array() );
 		if ( null === $ruleset_config ) {
 			return null;
 		}
+
+		if ( $has_fraud_settings_error ) {
+			$current_level = get_option( 'current_protection_level', 'basic' );
+			$current_level = is_scalar( $current_level ) ? (string) $current_level : 'basic';
+
+			if ( $current_level === $protection_level ) {
+				return null;
+			}
+
+			return array(
+				'protection_level' => $protection_level,
+				'ruleset_config'   => $ruleset_config,
+			);
+		}
+
 		$current_level = $this->get_current_protection_level();
-		$current_rules = $this->get_advanced_fraud_protection_settings( $settings );
+		$current_rules = $this->get_advanced_fraud_protection_settings();
 
 		if ( $current_level === $protection_level && $current_rules === $ruleset_config ) {
 			return null;
@@ -1244,11 +1270,13 @@ class WooPaymentsSettingsService {
 	 * @return array<int,array<string,mixed>>
 	 */
 	private function get_standard_fraud_ruleset(): array {
+		$reviewable_outcome = $this->get_reviewable_fraud_outcome();
+
 		return array(
-			$this->get_international_ip_address_rule( 'block' ),
-			$this->get_rule( 'order_items_threshold', 'block', $this->get_check( 'item_count', 'greater_than', 10 ) ),
-			$this->get_rule( 'purchase_price_threshold', 'block', $this->get_check( 'order_total', 'greater_than', $this->get_fraud_threshold_amount() ) ),
-			$this->get_rule( 'ip_address_mismatch', 'block', $this->get_check( 'ip_billing_country_same', 'equals', false ) ),
+			$this->get_international_ip_address_rule( $reviewable_outcome ),
+			$this->get_rule( 'order_items_threshold', $reviewable_outcome, $this->get_check( 'item_count', 'greater_than', 10 ) ),
+			$this->get_rule( 'purchase_price_threshold', $reviewable_outcome, $this->get_check( 'order_total', 'greater_than', $this->get_fraud_threshold_amount() ) ),
+			$this->get_rule( 'ip_address_mismatch', $reviewable_outcome, $this->get_check( 'ip_billing_country_same', 'equals', false ) ),
 		);
 	}
 
@@ -1258,12 +1286,14 @@ class WooPaymentsSettingsService {
 	 * @return array<int,array<string,mixed>>
 	 */
 	private function get_high_fraud_ruleset(): array {
+		$reviewable_outcome = $this->get_reviewable_fraud_outcome();
+
 		return array(
 			$this->get_international_ip_address_rule( 'block' ),
 			$this->get_rule( 'purchase_price_threshold', 'block', $this->get_check( 'order_total', 'greater_than', $this->get_fraud_threshold_amount() ) ),
 			$this->get_rule(
 				'order_items_threshold',
-				'block',
+				$reviewable_outcome,
 				array(
 					'operator' => 'or',
 					'checks'   => array(
@@ -1272,9 +1302,18 @@ class WooPaymentsSettingsService {
 					),
 				)
 			),
-			$this->get_rule( 'address_mismatch', 'block', $this->get_check( 'billing_shipping_address_same', 'equals', false ) ),
-			$this->get_rule( 'ip_address_mismatch', 'block', $this->get_check( 'ip_billing_country_same', 'equals', false ) ),
+			$this->get_rule( 'address_mismatch', $reviewable_outcome, $this->get_check( 'billing_shipping_address_same', 'equals', false ) ),
+			$this->get_rule( 'ip_address_mismatch', $reviewable_outcome, $this->get_check( 'ip_billing_country_same', 'equals', false ) ),
 		);
+	}
+
+	/**
+	 * Get the outcome used by rules that can send fraud decisions to review.
+	 *
+	 * @return string
+	 */
+	private function get_reviewable_fraud_outcome(): string {
+		return $this->is_fraud_protection_review_feature_active() ? 'review' : 'block';
 	}
 
 	/**
@@ -1490,6 +1529,8 @@ class WooPaymentsSettingsService {
 	 * @return string
 	 */
 	private function get_current_protection_level(): string {
+		$this->maybe_refresh_fraud_protection_settings();
+
 		$level = get_option( 'current_protection_level', 'basic' );
 
 		return is_scalar( $level ) ? (string) $level : 'basic';
@@ -1498,16 +1539,127 @@ class WooPaymentsSettingsService {
 	/**
 	 * Get advanced fraud protection settings.
 	 *
-	 * @param array<string,mixed> $settings Current gateway settings.
-	 * @return array<int|string,mixed>
+	 * @return array<int|string,mixed>|string
 	 */
-	private function get_advanced_fraud_protection_settings( array $settings ): array {
+	private function get_advanced_fraud_protection_settings() {
+		if ( ! $this->account_service->has_account() ) {
+			return array();
+		}
+
+		$this->maybe_refresh_fraud_protection_settings();
+
 		$ruleset = get_transient( 'wcpay_fraud_protection_settings' );
 		if ( is_array( $ruleset ) ) {
 			return $ruleset;
 		}
 
-		return $this->get_array_setting( $settings, 'advanced_fraud_protection_settings' );
+		return 'error';
+	}
+
+	/**
+	 * Refresh cached fraud protection settings from the platform when local cache is missing.
+	 *
+	 * @return void
+	 */
+	private function maybe_refresh_fraud_protection_settings(): void {
+		if ( $this->fraud_protection_settings_refreshed ) {
+			return;
+		}
+
+		if ( is_array( get_transient( 'wcpay_fraud_protection_settings' ) ) ) {
+			return;
+		}
+
+		$this->fraud_protection_settings_refreshed = true;
+
+		if ( ! $this->account_service->has_account() ) {
+			return;
+		}
+
+		try {
+			$latest_ruleset = $this->api_client->get_latest_fraud_ruleset();
+			$ruleset        = $latest_ruleset['ruleset_config'] ?? null;
+
+			if ( is_array( $ruleset ) && $this->is_valid_fraud_ruleset( $ruleset ) ) {
+				set_transient( 'wcpay_fraud_protection_settings', $ruleset, DAY_IN_SECONDS );
+				update_option( 'current_protection_level', $this->get_matching_fraud_protection_level( $ruleset ) );
+			} else {
+				$this->log_fraud_ruleset_refresh_warning( 'Native WooPayments fraud ruleset refresh returned an invalid ruleset.' );
+			}
+		} catch ( WooPaymentsApiException $e ) {
+			if ( 'wcpay_fraud_ruleset_not_found' !== $e->get_error_code() ) {
+				$this->log_fraud_ruleset_refresh_warning(
+					'Native WooPayments fraud ruleset refresh failed.',
+					array(
+						'error_code'  => $e->get_error_code(),
+						'http_status' => $e->get_http_code(),
+					)
+				);
+				return;
+			}
+
+			try {
+				$basic_ruleset = $this->get_fraud_ruleset_for_protection_level( 'basic', array() );
+				if ( ! is_array( $basic_ruleset ) ) {
+					return;
+				}
+
+				$this->api_client->save_fraud_ruleset( $basic_ruleset );
+				set_transient( 'wcpay_fraud_protection_settings', $basic_ruleset, DAY_IN_SECONDS );
+				update_option( 'current_protection_level', 'basic' );
+			} catch ( WooPaymentsApiException $save_exception ) {
+				$this->log_fraud_ruleset_refresh_warning(
+					'Native WooPayments fraud ruleset Basic initialization failed.',
+					array(
+						'error_code'  => $save_exception->get_error_code(),
+						'http_status' => $save_exception->get_http_code(),
+					)
+				);
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Match a ruleset config to a known protection level.
+	 *
+	 * @param array<int|string,mixed> $ruleset Ruleset config.
+	 * @return string
+	 */
+	private function get_matching_fraud_protection_level( array $ruleset ): string {
+		if ( array() === $ruleset ) {
+			return 'basic';
+		}
+
+		if ( $this->get_standard_fraud_ruleset() === $ruleset ) {
+			return 'standard';
+		}
+
+		if ( $this->get_high_fraud_ruleset() === $ruleset ) {
+			return 'high';
+		}
+
+		return 'advanced';
+	}
+
+	/**
+	 * Log fraud ruleset refresh warnings without interrupting admin settings responses.
+	 *
+	 * @param string              $message Warning message.
+	 * @param array<string,mixed> $context Log context.
+	 * @return void
+	 */
+	private function log_fraud_ruleset_refresh_warning( string $message, array $context = array() ): void {
+		if ( ! function_exists( 'wc_get_logger' ) ) {
+			return;
+		}
+
+		$context['source'] = 'woocommerce-woopayments-settings';
+		try {
+			wc_get_logger()->warning( $message, $context );
+		} catch ( Throwable $e ) {
+			unset( $e );
+		}
 	}
 
 	/**

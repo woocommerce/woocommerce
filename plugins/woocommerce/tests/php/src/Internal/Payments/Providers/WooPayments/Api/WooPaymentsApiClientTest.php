@@ -1383,6 +1383,45 @@ class WooPaymentsApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should read the latest fraud ruleset through the native fraud ruleset endpoint.
+	 */
+	public function test_get_latest_fraud_ruleset_reads_from_fraud_ruleset_endpoint(): void {
+		$http_client           = new FakeWooPaymentsHttpClient();
+		$http_client->blog_id  = 123;
+		$http_client->response = array(
+			'response' => array( 'code' => 200 ),
+			'headers'  => array( 'content-type' => 'application/json' ),
+			'body'     => wp_json_encode(
+				array(
+					'ruleset_config' => array(
+						array(
+							'key'     => 'avs_verification',
+							'outcome' => 'block',
+						),
+					),
+				)
+			),
+		);
+
+		$sut = new WooPaymentsApiClient();
+		$sut->init( $http_client, $this->create_account_service( false ) );
+
+		$result = $sut->get_latest_fraud_ruleset();
+
+		$this->assertSame(
+			array(
+				array(
+					'key'     => 'avs_verification',
+					'outcome' => 'block',
+				),
+			),
+			$result['ruleset_config']
+		);
+		$this->assertSame( '/sites/123/wcpay/fraud_ruleset?test_mode=0', $http_client->last_path );
+		$this->assertSame( 'GET', $http_client->last_method );
+	}
+
+	/**
 	 * @testdox Should fetch account data through the native accounts endpoint with the WooCommerce store ID.
 	 */
 	public function test_get_account_fetches_accounts_endpoint_with_store_id(): void {
