@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore native WooPayments express checkout settings feature flag and help copy parity.
