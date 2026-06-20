@@ -1,0 +1,13 @@
+.woocommerce-woopayments-documents-vat-modal {
+	&__content {
+		display: grid;
+		gap: 16px;
+		min-width: min(420px, 80vw);
+	}
+
+	&__actions {
+		display: flex;
+		gap: 8px;
+		justify-content: flex-end;
+	}
+}

@@ -64,6 +64,10 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 
 	private const SETTINGS_FRAGMENT_PAYMENT_METHODS = 'payment-methods';
 
+	private const VAT_DETAILS_REDIRECT_QUERY_ARG = 'woopayments-vat-details-redirect';
+
+	private const VAT_DETAILS_MODAL_QUERY_ARG = 'woopayments-vat-details-modal';
+
 	private const LEGACY_DOCUMENTS_ROUTE = '/payments/documents';
 
 	private const LEGACY_REPORTS_ROUTE = '/payments/reports';
@@ -152,6 +156,10 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 			add_action( 'admin_init', array( $this, 'redirect_legacy_payment_paths' ) );
 		}
 
+		if ( false === has_action( 'template_redirect', array( $this, 'redirect_vat_details_request' ) ) ) {
+			add_action( 'template_redirect', array( $this, 'redirect_vat_details_request' ) );
+		}
+
 		if ( false === has_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_shared_settings' ) ) ) {
 			add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_shared_settings' ) );
 		}
@@ -207,6 +215,49 @@ class WooPaymentsAdminNavigationController implements RegisterHooksInterface {
 
 		wp_safe_redirect( $redirect_url );
 		exit;
+	}
+
+	/**
+	 * Redirect temporary VAT details requests to the native provider settings route.
+	 *
+	 * @return void
+	 */
+	public function redirect_vat_details_request(): void {
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			return;
+		}
+
+		if ( function_exists( 'wp_doing_ajax' ) && wp_doing_ajax() ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only redirect for a temporary legacy compatibility URL.
+		$redirect_url = $this->get_vat_details_redirect_url( $_GET );
+		if ( '' === $redirect_url ) {
+			return;
+		}
+
+		wp_safe_redirect( $redirect_url );
+		exit;
+	}
+
+	/**
+	 * Get the native provider settings URL for temporary VAT details requests.
+	 *
+	 * @param array<string,mixed> $request Query request.
+	 * @return string
+	 */
+	public function get_vat_details_redirect_url( array $request ): string {
+		if ( ! isset( $request[ self::VAT_DETAILS_REDIRECT_QUERY_ARG ] ) ) {
+			return '';
+		}
+
+		return Utils::wc_payments_settings_url(
+			self::PATH_SETTINGS,
+			array(
+				self::VAT_DETAILS_MODAL_QUERY_ARG => 'true',
+			)
+		);
 	}
 
 	/**

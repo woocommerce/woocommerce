@@ -3,6 +3,8 @@
  */
 import { speak } from '@wordpress/a11y';
 import apiFetch from '@wordpress/api-fetch';
+import fs from 'fs';
+import nodePath from 'path';
 import {
 	act,
 	fireEvent,
@@ -23,6 +25,25 @@ jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 jest.mock( '@wordpress/a11y', () => ( {
 	speak: jest.fn(),
 } ) );
+
+const mockCreateErrorNotice = jest.fn();
+const mockCreateInfoNotice = jest.fn();
+
+jest.mock( '@wordpress/data', () => {
+	const actualData = jest.requireActual( '@wordpress/data' );
+
+	return {
+		...actualData,
+		dispatch: jest.fn( ( storeName, ...args ) =>
+			storeName === 'core/notices'
+				? {
+						createErrorNotice: mockCreateErrorNotice,
+						createInfoNotice: mockCreateInfoNotice,
+				  }
+				: actualData.dispatch( storeName, ...args )
+		),
+	};
+} );
 
 jest.mock( '../../promotions/spotlight', () => ( {
 	SpotlightPromotion: () => <div>Spotlight promotion</div>,
@@ -156,6 +177,47 @@ jest.mock( '../data/hooks', () => ( {
 
 const noop = jest.fn();
 
+const getDefaultAccountResponse = ( {
+	documentsEnabled = true,
+	hasSubmittedVatData = true,
+	country = 'US',
+}: {
+	documentsEnabled?: boolean;
+	hasSubmittedVatData?: boolean;
+	country?: string;
+} = {} ) => ( {
+	account: {
+		id: 'acct_live',
+		mode: 'live',
+		default_currency: 'usd',
+		connected: true,
+		working: true,
+		can_process_payments: true,
+		test_mode: false,
+		test_drive: false,
+		sandbox: false,
+		live: true,
+	},
+	documents: {
+		enabled: documentsEnabled,
+		has_submitted_vat_data: hasSubmittedVatData,
+		country,
+	},
+	urls: {
+		setup: 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/onboarding',
+	},
+} );
+
+const setSettingsPageUrl = ( query = '' ) => {
+	const suffix = query ? `&${ query }` : '';
+
+	window.history.replaceState(
+		null,
+		'',
+		`/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/woopayments/settings${ suffix }`
+	);
+};
+
 const setHookDefaults = () => {
 	mockUseSettings.mockReturnValue( {
 		isLoading: false,
@@ -280,27 +342,12 @@ const setHookDefaults = () => {
 describe( 'WooPaymentsSettingsPage', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
+		setSettingsPageUrl();
 		mockApiFetch.mockImplementation( ( options ) => {
 			const path = typeof options === 'string' ? options : options?.path;
 
 			if ( path === '/wc-admin/settings/payments/woopayments/account' ) {
-				return Promise.resolve( {
-					account: {
-						id: 'acct_live',
-						mode: 'live',
-						default_currency: 'usd',
-						connected: true,
-						working: true,
-						can_process_payments: true,
-						test_mode: false,
-						test_drive: false,
-						sandbox: false,
-						live: true,
-					},
-					urls: {
-						setup: 'admin.php?page=wc-settings&tab=checkout&path=/woopayments/onboarding',
-					},
-				} );
+				return Promise.resolve( getDefaultAccountResponse() );
 			}
 
 			if ( path === '/wc/v3/payments/deposits/overview-all' ) {
@@ -354,6 +401,282 @@ describe( 'WooPaymentsSettingsPage', () => {
 		expect(
 			screen.getByRole( 'button', { name: 'Save changes' } )
 		).toBeInTheDocument();
+	} );
+
+	it( 'keeps the tax details modal in a dedicated optional settings chunk with its styles', () => {
+		const settingsPageSource = fs.readFileSync(
+			nodePath.resolve( __dirname, '../settings-page.tsx' ),
+			'utf8'
+		);
+		const vatModalSource = fs.readFileSync(
+			nodePath.resolve(
+				__dirname,
+				'../../admin/documents/vat-modal.tsx'
+			),
+			'utf8'
+		);
+
+		expect( settingsPageSource ).toContain(
+			'webpackChunkName: "settings-payments-woopayments-vat-modal"'
+		);
+		expect( settingsPageSource ).not.toContain(
+			"import { WooPaymentsVatModal } from '../admin/documents/vat-modal'"
+		);
+		expect( vatModalSource ).toContain( "import './vat-modal.scss'" );
+	} );
+
+	it( 'opens the tax details modal from the VAT settings deep link when tax details are missing', async () => {
+		setSettingsPageUrl( 'woopayments-vat-details-modal=true' );
+		mockApiFetch.mockImplementation( ( options ) => {
+			const path = typeof options === 'string' ? options : options?.path;
+
+			if ( path === '/wc-admin/settings/payments/woopayments/account' ) {
+				return Promise.resolve(
+					getDefaultAccountResponse( {
+						documentsEnabled: true,
+						hasSubmittedVatData: false,
+						country: 'DE',
+					} )
+				);
+			}
+
+			return Promise.resolve( {} );
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		const dialog = await screen.findByRole( 'dialog', {
+			name: 'Set your tax details',
+		} );
+
+		expect(
+			within( dialog ).getByRole( 'checkbox', {
+				name: 'I have a valid VAT Number',
+			} )
+		).toBeInTheDocument();
+		expect( mockCreateErrorNotice ).not.toHaveBeenCalled();
+		expect( mockCreateInfoNotice ).not.toHaveBeenCalled();
+	} );
+
+	it( 'shows the unavailable tax details notice from the VAT settings deep link when documents are disabled', async () => {
+		setSettingsPageUrl( 'woopayments-vat-details-modal=true' );
+		mockApiFetch.mockImplementation( ( options ) => {
+			const path = typeof options === 'string' ? options : options?.path;
+
+			if ( path === '/wc-admin/settings/payments/woopayments/account' ) {
+				return Promise.resolve(
+					getDefaultAccountResponse( {
+						documentsEnabled: false,
+						hasSubmittedVatData: false,
+					} )
+				);
+			}
+
+			return Promise.resolve( {} );
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await waitFor( () =>
+			expect( mockCreateErrorNotice ).toHaveBeenCalledWith(
+				'Tax details collection is not available for your account.'
+			)
+		);
+		expect(
+			screen.queryByRole( 'dialog', { name: 'Set your tax details' } )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'shows the unavailable tax details notice from the VAT settings deep link when account data fails to load', async () => {
+		setSettingsPageUrl( 'woopayments-vat-details-modal=true' );
+		mockApiFetch.mockImplementation( ( options ) => {
+			const path = typeof options === 'string' ? options : options?.path;
+
+			if ( path === '/wc-admin/settings/payments/woopayments/account' ) {
+				return Promise.reject( new Error( 'Account unavailable' ) );
+			}
+
+			return Promise.resolve( {} );
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await waitFor( () =>
+			expect( mockCreateErrorNotice ).toHaveBeenCalledWith(
+				'Tax details collection is not available for your account.'
+			)
+		);
+		expect(
+			screen.queryByRole( 'dialog', { name: 'Set your tax details' } )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'shows the already-submitted tax details notice from the VAT settings deep link', async () => {
+		setSettingsPageUrl( 'woopayments-vat-details-modal=true' );
+		mockApiFetch.mockImplementation( ( options ) => {
+			const path = typeof options === 'string' ? options : options?.path;
+
+			if ( path === '/wc-admin/settings/payments/woopayments/account' ) {
+				return Promise.resolve(
+					getDefaultAccountResponse( {
+						documentsEnabled: true,
+						hasSubmittedVatData: true,
+					} )
+				);
+			}
+
+			return Promise.resolve( {} );
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await waitFor( () =>
+			expect( mockCreateInfoNotice ).toHaveBeenCalledWith(
+				'Tax details are already submitted.'
+			)
+		);
+		expect(
+			screen.queryByRole( 'dialog', { name: 'Set your tax details' } )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'removes only the VAT modal query arg when the tax details modal closes', async () => {
+		setSettingsPageUrl(
+			'woopayments-vat-details-modal=true&source=platform-email'
+		);
+		mockApiFetch.mockImplementation( ( options ) => {
+			const path = typeof options === 'string' ? options : options?.path;
+
+			if ( path === '/wc-admin/settings/payments/woopayments/account' ) {
+				return Promise.resolve(
+					getDefaultAccountResponse( {
+						documentsEnabled: true,
+						hasSubmittedVatData: false,
+					} )
+				);
+			}
+
+			return Promise.resolve( {} );
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await screen.findByRole( 'dialog', { name: 'Set your tax details' } );
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Cancel' } )
+		);
+		const query = new URLSearchParams( window.location.search );
+
+		expect( query.get( 'path' ) ).toBe( '/woopayments/settings' );
+		expect( query.get( 'source' ) ).toBe( 'platform-email' );
+		expect( query.has( 'woopayments-vat-details-modal' ) ).toBe( false );
+	} );
+
+	it( 'saves tax details from the deep-linked modal and clears the URL state', async () => {
+		setSettingsPageUrl( 'woopayments-vat-details-modal=true' );
+		mockApiFetch.mockImplementation( ( options ) => {
+			const path = typeof options === 'string' ? options : options?.path;
+
+			if ( path === '/wc-admin/settings/payments/woopayments/account' ) {
+				return Promise.resolve(
+					getDefaultAccountResponse( {
+						documentsEnabled: true,
+						hasSubmittedVatData: false,
+					} )
+				);
+			}
+
+			if ( path === '/wc/v3/payments/vat' ) {
+				return Promise.resolve( {
+					vat_number: null,
+					name: 'Example GmbH',
+					address: 'Alexanderplatz 1, Berlin',
+				} );
+			}
+
+			return Promise.resolve( {} );
+		} );
+
+		render( <WooPaymentsSettingsPage /> );
+
+		await screen.findByRole( 'dialog', { name: 'Set your tax details' } );
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Continue' } )
+		);
+		await userEvent.type(
+			await screen.findByRole( 'textbox', { name: 'Business name' } ),
+			'Example GmbH'
+		);
+		await userEvent.type(
+			screen.getByRole( 'textbox', { name: 'Address' } ),
+			'Alexanderplatz 1, Berlin'
+		);
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'button', { name: 'Confirm' } )
+			);
+		} );
+
+		await waitFor( () =>
+			expect( mockCreateInfoNotice ).toHaveBeenCalledWith(
+				'Tax details updated'
+			)
+		);
+		const getVatRequest = () =>
+			mockApiFetch.mock.calls
+				.map( ( [ options ] ) => options )
+				.find(
+					( options ) =>
+						typeof options !== 'string' &&
+						options?.path === '/wc/v3/payments/vat'
+				);
+		await waitFor( () =>
+			expect( getVatRequest() ).toMatchObject( {
+				method: 'POST',
+				data: {
+					vat_number: null,
+					name: 'Example GmbH',
+					address: 'Alexanderplatz 1, Berlin',
+				},
+			} )
+		);
+		await waitFor( () =>
+			expect(
+				screen.queryByRole( 'dialog', { name: 'Set your tax details' } )
+			).not.toBeInTheDocument()
+		);
+		expect(
+			new URLSearchParams( window.location.search ).has(
+				'woopayments-vat-details-modal'
+			)
+		).toBe( false );
+	} );
+
+	it( 'does not open or announce VAT details without the VAT settings deep link', async () => {
+		render( <WooPaymentsSettingsPage /> );
+
+		await waitFor( () =>
+			expect(
+				mockApiFetch.mock.calls.some( ( [ options ] ) => {
+					const path =
+						typeof options === 'string' ? options : options?.path;
+
+					return (
+						path ===
+						'/wc-admin/settings/payments/woopayments/account'
+					);
+				} )
+			).toBe( true )
+		);
+		expect(
+			screen.queryByRole( 'dialog', { name: 'Set your tax details' } )
+		).not.toBeInTheDocument();
+		expect( mockCreateErrorNotice ).not.toHaveBeenCalledWith(
+			'Tax details collection is not available for your account.'
+		);
+		expect( mockCreateInfoNotice ).not.toHaveBeenCalledWith(
+			'Tax details are already submitted.'
+		);
 	} );
 
 	it( 'keeps express payment methods out of the standard payment methods list', () => {

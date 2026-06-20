@@ -22,6 +22,7 @@ import type {
 	WooPaymentsVatDetails,
 	WooPaymentsVatValidationResponse,
 } from './types';
+import './vat-modal.scss';
 
 type WooPaymentsVatModalProps = {
 	country?: string;
@@ -74,6 +75,7 @@ export const WooPaymentsVatModal = ( {
 	const taxIdLabel = getTaxIdLabel( country );
 	const detailsFieldsRef = useRef< HTMLDivElement | null >( null );
 	const isClosedRef = useRef( false );
+	const hasFocusedDetailsFieldsRef = useRef( false );
 	const [ hasValidVatNumber, setHasValidVatNumber ] = useState( false );
 	const [ vatNumber, setVatNumber ] = useState( '' );
 	const [ details, setDetails ] = useState< WooPaymentsVatDetails | null >(
@@ -90,9 +92,15 @@ export const WooPaymentsVatModal = ( {
 
 	useEffect( () => {
 		if ( ! details ) {
+			hasFocusedDetailsFieldsRef.current = false;
 			return;
 		}
 
+		if ( hasFocusedDetailsFieldsRef.current ) {
+			return;
+		}
+
+		hasFocusedDetailsFieldsRef.current = true;
 		detailsFieldsRef.current
 			?.querySelector< HTMLInputElement >( 'input' )
 			?.focus();

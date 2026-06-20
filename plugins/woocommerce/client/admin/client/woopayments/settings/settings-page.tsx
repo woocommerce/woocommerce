@@ -15,9 +15,13 @@ import {
 } from '@wordpress/components';
 import {
 	createInterpolateElement,
+	lazy,
+	Suspense,
 	useEffect,
+	useRef,
 	useState,
 } from '@wordpress/element';
+import { dispatch } from '@wordpress/data';
 import { __, _x, sprintf } from '@wordpress/i18n';
 import { PhoneNumberInput, validatePhoneNumber } from '@woocommerce/components';
 
@@ -84,11 +88,19 @@ import {
 	useWooPayShowIncompatibilityNotice,
 	useWCPaySubscriptions,
 } from './data/hooks';
+import { getWooPaymentsAccountSettings } from './api';
+import type { WooPaymentsVatDetails } from '../admin/documents/types';
 import './data/store';
 import './settings-page-only.scss';
 import './style.scss';
 
 const PROVIDER_NAME = 'WooPayments';
+const VAT_DETAILS_MODAL_QUERY_PARAM = 'woopayments-vat-details-modal';
+const WooPaymentsVatModal = lazy( () =>
+	import(
+		/* webpackChunkName: "settings-payments-woopayments-vat-modal" */ '../admin/documents/vat-modal'
+	).then( ( module ) => ( { default: module.WooPaymentsVatModal } ) )
+);
 const HEADING_ID = 'woopayments-settings-page-heading';
 const ACCOUNT_STATEMENT_MAX_LENGTH = 22;
 const ACCOUNT_STATEMENT_MAX_LENGTH_KANJI = 17;
@@ -149,6 +161,11 @@ type ExpressCheckoutOverviewRow = {
 	action?: React.ReactNode;
 	duplicatePaymentMethodId?: string;
 };
+type VatDetailsModalState = {
+	isOpen: boolean;
+	country: string;
+	hasSubmittedVatData: boolean;
+};
 
 const BNPL_METHOD_IDS = [ 'affirm', 'afterpay_clearpay', 'klarna' ];
 const EXPRESS_METHOD_IDS = [ 'payment_request', 'woopay', 'amazon_pay' ];
@@ -181,6 +198,32 @@ const createTermsLink = ( href: string ) => (
 		<></>
 	</ExternalLink>
 );
+
+const isVatDetailsModalDeepLinkActive = () => {
+	if ( typeof window === 'undefined' ) {
+		return false;
+	}
+
+	return (
+		new URLSearchParams( window.location.search ).get(
+			VAT_DETAILS_MODAL_QUERY_PARAM
+		) === 'true'
+	);
+};
+
+const removeVatDetailsModalQueryParam = () => {
+	if ( typeof window === 'undefined' ) {
+		return;
+	}
+
+	const url = new URL( window.location.href );
+	url.searchParams.delete( VAT_DETAILS_MODAL_QUERY_PARAM );
+	window.history.replaceState(
+		window.history.state,
+		'',
+		`${ url.pathname }${ url.search }${ url.hash }`
+	);
+};
 
 const getDaysSinceDate = ( date: string, now = new Date() ) => {
 	const parsedDate = new Date( date );
@@ -1944,7 +1987,98 @@ export const WooPaymentsSettingsPage = () => {
 		useEnabledPaymentMethodIds() as StringArraySetting;
 	const [ isCardPresentEligible ] =
 		useCardPresentEligible() as BooleanSetting;
+	const [ vatDetailsModalState, setVatDetailsModalState ] =
+		useState< VatDetailsModalState >( {
+			isOpen: false,
+			country: '',
+			hasSubmittedVatData: false,
+		} );
+	const hasHandledVatDetailsDeepLink = useRef( false );
 	const hasSettings = Object.keys( settings ).length > 0;
+
+	useEffect( () => {
+		if (
+			hasHandledVatDetailsDeepLink.current ||
+			! isVatDetailsModalDeepLinkActive()
+		) {
+			return;
+		}
+
+		hasHandledVatDetailsDeepLink.current = true;
+		let isMounted = true;
+
+		getWooPaymentsAccountSettings()
+			.then( ( response ) => {
+				if ( ! isMounted ) {
+					return;
+				}
+
+				const documents = response.documents;
+				if ( ! documents?.enabled ) {
+					dispatch( 'core/notices' ).createErrorNotice(
+						__(
+							'Tax details collection is not available for your account.',
+							'woocommerce'
+						)
+					);
+					return;
+				}
+
+				if ( documents.has_submitted_vat_data ) {
+					dispatch( 'core/notices' ).createInfoNotice(
+						__(
+							'Tax details are already submitted.',
+							'woocommerce'
+						)
+					);
+					return;
+				}
+
+				setVatDetailsModalState( {
+					isOpen: true,
+					country: documents.country || '',
+					hasSubmittedVatData: false,
+				} );
+			} )
+			.catch( () => {
+				if ( ! isMounted ) {
+					return;
+				}
+
+				dispatch( 'core/notices' ).createErrorNotice(
+					__(
+						'Tax details collection is not available for your account.',
+						'woocommerce'
+					)
+				);
+			} );
+
+		return () => {
+			isMounted = false;
+		};
+	}, [] );
+
+	const closeVatDetailsModal = () => {
+		setVatDetailsModalState( ( current ) => ( {
+			...current,
+			isOpen: false,
+		} ) );
+		removeVatDetailsModalQueryParam();
+	};
+
+	const completeVatDetailsModal = ( details: WooPaymentsVatDetails ) => {
+		setVatDetailsModalState( ( current ) => ( {
+			...current,
+			isOpen: false,
+			hasSubmittedVatData: true,
+		} ) );
+		dispatch( 'core/notices' ).createInfoNotice(
+			__( 'Tax details updated', 'woocommerce' )
+		);
+		removeVatDetailsModalQueryParam();
+
+		return details;
+	};
 
 	return (
 		<section
@@ -2010,6 +2144,16 @@ export const WooPaymentsSettingsPage = () => {
 							! isNotificationEmailValid
 						}
 					/>
+					{ vatDetailsModalState.isOpen &&
+						! vatDetailsModalState.hasSubmittedVatData && (
+							<Suspense fallback={ null }>
+								<WooPaymentsVatModal
+									country={ vatDetailsModalState.country }
+									onClose={ closeVatDetailsModal }
+									onCompleted={ completeVatDetailsModal }
+								/>
+							</Suspense>
+						) }
 				</SettingsBusyState>
 			) }
 		</section>
