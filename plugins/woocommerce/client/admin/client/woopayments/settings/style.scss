@@ -125,12 +125,40 @@
 		}
 	}
 
-	&__loading {
-		display: inline-flex;
-		align-items: center;
-		gap: 8px;
-		margin: 0;
-		color: $gray-700;
+	.woopayments-settings-loadable-placeholder-group {
+		display: grid;
+		gap: 12px;
+	}
+
+	.woopayments-settings-loadable-placeholder {
+		display: block;
+		width: 100%;
+		height: 16px;
+		border-radius: 2px;
+		background-color: $gray-100;
+		animation: loading-fade 1.6s ease-in-out infinite;
+
+		&:nth-child(4n + 1) {
+			width: 88%;
+		}
+
+		&:nth-child(4n + 2) {
+			width: 72%;
+		}
+
+		&:nth-child(4n + 3) {
+			width: 54%;
+		}
+
+		&:nth-child(4n) {
+			width: 36%;
+		}
+	}
+
+	@media screen and ( prefers-reduced-motion: reduce ) {
+		.woopayments-settings-loadable-placeholder {
+			animation: none;
+		}
 	}
 }
 

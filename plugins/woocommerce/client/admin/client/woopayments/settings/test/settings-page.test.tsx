@@ -397,6 +397,16 @@ const getGeneralSettingsSection = () =>
 		.getByRole( 'heading', { name: 'General' } )
 		.closest( '.woopayments-settings-section' ) as HTMLElement;
 
+const getSettingsSectionByHeading = ( name: string | RegExp ) =>
+	screen
+		.getByRole( 'heading', { name } )
+		.closest( '.woopayments-settings-section' ) as HTMLElement;
+
+const getSectionLinkByHref = ( section: HTMLElement, href: string ) =>
+	within( section )
+		.getAllByRole( 'link' )
+		.find( ( link ) => link.getAttribute( 'href' ) === href );
+
 const setHookDefaults = () => {
 	mockUseSettings.mockReturnValue( {
 		isLoading: false,
@@ -587,6 +597,145 @@ describe( 'WooPaymentsSettingsPage', () => {
 		expect(
 			screen.getByRole( 'button', { name: 'Save changes' } )
 		).toBeInTheDocument();
+	} );
+
+	it( 'keeps settings sections visible with non-interactive placeholders while initial settings load', () => {
+		mockUseSettings.mockReturnValue( {
+			isLoading: true,
+			isSaving: false,
+			isDirty: false,
+			saveSettings: mockSaveSettings,
+		} );
+		mockUseGetSettings.mockReturnValue( {} );
+
+		const { container } = render( <WooPaymentsSettingsPage /> );
+
+		expect(
+			screen.queryByText( 'Loading WooPayments settings…' )
+		).not.toBeInTheDocument();
+		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
+			'WooPayments settings are loading.'
+		);
+		expect(
+			container.querySelector(
+				'.woopayments-settings-loading-state__content'
+			)
+		).toHaveAttribute( 'aria-busy', 'true' );
+		expect(
+			screen.getByRole( 'heading', { name: 'General' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'heading', {
+				name: 'Payments accepted on checkout',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'heading', { name: 'Buy now, pay later' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'heading', { name: 'Transactions' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'heading', { name: 'Payouts' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'heading', { name: 'Account notifications' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'heading', { name: 'Advanced settings' } )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', { name: 'Save changes' } )
+		).not.toBeInTheDocument();
+		expect(
+			container.querySelectorAll(
+				'.woopayments-settings-loadable-placeholder[aria-hidden="true"]'
+			).length
+		).toBeGreaterThan( 8 );
+	} );
+
+	it( 'renders reference section descriptions and documentation links', () => {
+		render( <WooPaymentsSettingsPage /> );
+
+		const paymentMethodsSection = getSettingsSectionByHeading(
+			'Payments accepted on checkout'
+		);
+		expect(
+			within( paymentMethodsSection ).getByText(
+				/Based on their device type, location, and purchase history/
+			)
+		).toBeInTheDocument();
+
+		const bnplSection = getSettingsSectionByHeading( 'Buy now, pay later' );
+		expect(
+			within( bnplSection ).getByText(
+				/Boost sales by offering customers additional buying power and flexible payment options./
+			)
+		).toBeInTheDocument();
+		expect(
+			getSectionLinkByHref(
+				bnplSection,
+				'https://woocommerce.com/document/woopayments/payment-methods/buy-now-pay-later/'
+			)
+		).toHaveTextContent( /Learn more/ );
+
+		const transactionsSection =
+			getSettingsSectionByHeading( 'Transactions' );
+		expect(
+			within( transactionsSection ).getByText(
+				"Update your store's configuration to ensure smooth transactions."
+			)
+		).toBeInTheDocument();
+		expect(
+			getSectionLinkByHref(
+				transactionsSection,
+				'https://woocommerce.com/document/woopayments/'
+			)
+		).toHaveTextContent( /View our documentation/ );
+		expect(
+			getSectionLinkByHref(
+				transactionsSection,
+				'https://woocommerce.com/document/woopayments/settings-guide/authorize-and-capture/'
+			)
+		).toHaveTextContent( /Learn more/ );
+		expect(
+			getSectionLinkByHref(
+				transactionsSection,
+				'https://woocommerce.com/in-person-payments/'
+			)
+		).toHaveTextContent( /In-Person Payments/ );
+
+		const payoutsSection = getSettingsSectionByHeading( 'Payouts' );
+		expect(
+			getSectionLinkByHref(
+				payoutsSection,
+				'https://woocommerce.com/document/woopayments/payouts/payout-schedule/'
+			)
+		).toHaveTextContent( /Learn more about pending schedules/ );
+
+		const notificationsSection = getSettingsSectionByHeading(
+			'Account notifications'
+		);
+		expect(
+			getSectionLinkByHref(
+				notificationsSection,
+				'https://woocommerce.com/document/woopayments/settings-guide/#account-notifications'
+			)
+		).toHaveTextContent( /Learn more/ );
+
+		const advancedSection =
+			getSettingsSectionByHeading( 'Advanced settings' );
+		expect(
+			within( advancedSection ).getByText(
+				'More options for specific payment needs.'
+			)
+		).toBeInTheDocument();
+		expect(
+			getSectionLinkByHref(
+				advancedSection,
+				'https://woocommerce.com/document/woopayments/settings-guide/#advanced-settings'
+			)
+		).toHaveTextContent( /View our documentation/ );
 	} );
 
 	it( 'keeps the tax details modal in a dedicated optional settings chunk with its styles', () => {

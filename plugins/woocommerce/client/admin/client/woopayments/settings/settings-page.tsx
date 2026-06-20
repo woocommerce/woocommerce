@@ -10,10 +10,10 @@ import {
 	Modal,
 	Notice,
 	SelectControl,
-	Spinner,
 	TextControl,
 } from '@wordpress/components';
 import {
+	Children,
 	createInterpolateElement,
 	lazy,
 	Suspense,
@@ -128,6 +128,17 @@ const SUPPORT_PHONE_INPUT_ID = 'account-business-support-phone-input';
 const FEEDBACK_THROTTLE_DAYS = 7;
 const MANUAL_CAPTURE_DOC_URL =
 	'https://woocommerce.com/document/woopayments/settings-guide/authorize-and-capture/';
+const BNPL_DOC_URL =
+	'https://woocommerce.com/document/woopayments/payment-methods/buy-now-pay-later/';
+const WOOPAYMENTS_DOC_URL = 'https://woocommerce.com/document/woopayments/';
+const PAYOUT_SCHEDULE_DOC_URL =
+	'https://woocommerce.com/document/woopayments/payouts/payout-schedule/';
+const NOTIFICATIONS_DOC_URL =
+	'https://woocommerce.com/document/woopayments/settings-guide/#account-notifications';
+const ADVANCED_SETTINGS_DOC_URL =
+	'https://woocommerce.com/document/woopayments/settings-guide/#advanced-settings';
+const IN_PERSON_PAYMENTS_DOC_URL =
+	'https://woocommerce.com/in-person-payments/';
 const TESTING_DOC_URL =
 	'https://woocommerce.com/document/woopayments/testing-and-troubleshooting/testing/';
 const TEST_CARDS_DOC_URL =
@@ -441,6 +452,196 @@ const FieldGroup = ( {
 		{ children }
 	</div>
 );
+
+const SettingsSectionLoadingPlaceholder = ( { lines }: { lines: number } ) => (
+	<div
+		className="woopayments-settings-loadable-placeholder-group"
+		aria-hidden="true"
+	>
+		{ Array.from( { length: lines }, ( _value, index ) => (
+			<span
+				key={ index }
+				className="woopayments-settings-loadable-placeholder"
+				aria-hidden="true"
+			/>
+		) ) }
+	</div>
+);
+
+const SettingsLoadingSections = () => {
+	const sections = [
+		{
+			id: 'general',
+			title: __( 'General', 'woocommerce' ),
+			lines: 5,
+			description: (
+				<p>
+					{ sprintf(
+						/* translators: %s: Payment provider name. */
+						__(
+							'Enable %s, test payments, and account mode settings.',
+							'woocommerce'
+						),
+						PROVIDER_NAME
+					) }
+				</p>
+			),
+		},
+		{
+			id: 'payment-methods',
+			title: __( 'Payments accepted on checkout', 'woocommerce' ),
+			lines: 8,
+			description: (
+				<p>
+					{ __(
+						'Based on their device type, location, and purchase history, your customers will only see the most relevant payment methods.',
+						'woocommerce'
+					) }
+				</p>
+			),
+		},
+		{
+			id: 'buy-now-pay-later-methods',
+			title: __( 'Buy now, pay later', 'woocommerce' ),
+			lines: 7,
+			description: (
+				<>
+					<p>
+						{ __(
+							'Boost sales by offering customers additional buying power and flexible payment options.',
+							'woocommerce'
+						) }
+					</p>
+					<ExternalLink href={ BNPL_DOC_URL }>
+						{ __( 'Learn more', 'woocommerce' ) }
+					</ExternalLink>
+				</>
+			),
+		},
+		{
+			id: 'express-checkouts',
+			title: __( 'Express checkouts', 'woocommerce' ),
+			lines: 8,
+			description: (
+				<p>
+					{ __(
+						'Let customers use their preferred express checkout options.',
+						'woocommerce'
+					) }
+				</p>
+			),
+		},
+		{
+			id: 'transactions',
+			title: __( 'Transactions', 'woocommerce' ),
+			lines: 8,
+			description: (
+				<>
+					<p>
+						{ __(
+							"Update your store's configuration to ensure smooth transactions.",
+							'woocommerce'
+						) }
+					</p>
+					<ExternalLink href={ WOOPAYMENTS_DOC_URL }>
+						{ __( 'View our documentation', 'woocommerce' ) }
+					</ExternalLink>
+				</>
+			),
+		},
+		{
+			id: 'payouts',
+			title: __( 'Payouts', 'woocommerce' ),
+			lines: 6,
+			description: (
+				<ExternalLink href={ PAYOUT_SCHEDULE_DOC_URL }>
+					{ __(
+						'Learn more about pending schedules',
+						'woocommerce'
+					) }
+				</ExternalLink>
+			),
+		},
+		{
+			id: 'notifications',
+			title: __( 'Account notifications', 'woocommerce' ),
+			lines: 4,
+			description: (
+				<>
+					<p>
+						{ __(
+							'Receive important notifications about your WooPayments account.',
+							'woocommerce'
+						) }
+					</p>
+					<ExternalLink href={ NOTIFICATIONS_DOC_URL }>
+						{ __( 'Learn more', 'woocommerce' ) }
+					</ExternalLink>
+				</>
+			),
+		},
+		{
+			id: 'fraud-protection',
+			title: __( 'Fraud protection', 'woocommerce' ),
+			lines: 5,
+			description: (
+				<p>
+					{ __(
+						'Help avoid unauthorized transactions and disputes by setting your fraud protection level.',
+						'woocommerce'
+					) }
+				</p>
+			),
+		},
+		{
+			id: 'advanced',
+			title: __( 'Advanced settings', 'woocommerce' ),
+			lines: 5,
+			description: (
+				<>
+					<p>
+						{ __(
+							'More options for specific payment needs.',
+							'woocommerce'
+						) }
+					</p>
+					<ExternalLink href={ ADVANCED_SETTINGS_DOC_URL }>
+						{ __( 'View our documentation', 'woocommerce' ) }
+					</ExternalLink>
+				</>
+			),
+		},
+	];
+
+	return (
+		<div className="woopayments-settings-loading-state">
+			<div
+				className="woopayments-settings-loading-state__status screen-reader-text"
+				role="status"
+				aria-live="polite"
+			>
+				{ __( 'WooPayments settings are loading.', 'woocommerce' ) }
+			</div>
+			<div
+				className="woopayments-settings-loading-state__content"
+				aria-busy="true"
+			>
+				{ sections.map( ( section ) => (
+					<SettingsSection
+						key={ section.id }
+						id={ section.id }
+						title={ section.title }
+						description={ section.description }
+					>
+						<SettingsSectionLoadingPlaceholder
+							lines={ section.lines }
+						/>
+					</SettingsSection>
+				) ) }
+			</div>
+		</div>
+	);
+};
 
 const TestModeConfirmationModal = ( {
 	onClose,
@@ -767,7 +968,7 @@ const PaymentMethodsSettingsSection = () => {
 			description={
 				<p>
 					{ __(
-						'Add and edit the payment methods customers can use at checkout.',
+						'Based on their device type, location, and purchase history, your customers will only see the most relevant payment methods.',
 						'woocommerce'
 					) }
 				</p>
@@ -867,12 +1068,17 @@ const BuyNowPayLaterSettingsSection = () => {
 			id="buy-now-pay-later-methods"
 			title={ __( 'Buy now, pay later', 'woocommerce' ) }
 			description={
-				<p>
-					{ __(
-						'Offer flexible payment options when they are available for your account.',
-						'woocommerce'
-					) }
-				</p>
+				<>
+					<p>
+						{ __(
+							'Boost sales by offering customers additional buying power and flexible payment options.',
+							'woocommerce'
+						) }
+					</p>
+					<ExternalLink href={ BNPL_DOC_URL }>
+						{ __( 'Learn more', 'woocommerce' ) }
+					</ExternalLink>
+				</>
 			}
 		>
 			<FieldGroup title={ __( 'Installment options', 'woocommerce' ) }>
@@ -1231,6 +1437,8 @@ const TransactionsSettingsSection = ( {
 		useSavedCards() as BooleanSetting;
 	const [ isManualCaptureEnabled, setIsManualCaptureEnabled ] =
 		useManualCapture() as BooleanSetting;
+	const [ isCardPresentEligible ] =
+		useCardPresentEligible() as BooleanSetting;
 	const [ isManualCaptureModalVisible, setManualCaptureModalVisible ] =
 		useState( false );
 	const [ accountStatementDescriptor, setAccountStatementDescriptor ] =
@@ -1326,12 +1534,17 @@ const TransactionsSettingsSection = ( {
 			id="transactions"
 			title={ __( 'Transactions', 'woocommerce' ) }
 			description={
-				<p>
-					{ __(
-						'Update transaction preferences, customer statements, and support contact details.',
-						'woocommerce'
-					) }
-				</p>
+				<>
+					<p>
+						{ __(
+							"Update your store's configuration to ensure smooth transactions.",
+							'woocommerce'
+						) }
+					</p>
+					<ExternalLink href={ WOOPAYMENTS_DOC_URL }>
+						{ __( 'View our documentation', 'woocommerce' ) }
+					</ExternalLink>
+				</>
 			}
 		>
 			<FieldGroup
@@ -1354,10 +1567,51 @@ const TransactionsSettingsSection = ( {
 				/>
 				<CheckboxControl
 					checked={ isManualCaptureEnabled }
-					help={ __(
-						'Authorize charges first and capture funds later.',
-						'woocommerce'
-					) }
+					help={
+						<>
+							{ Children.toArray(
+								createInterpolateElement(
+									__(
+										'Authorize charges first and capture funds later. <learnMoreLink>Learn more</learnMoreLink>.',
+										'woocommerce'
+									),
+									{
+										learnMoreLink: (
+											<ExternalLink
+												href={ MANUAL_CAPTURE_DOC_URL }
+											>
+												<></>
+											</ExternalLink>
+										),
+									}
+								)
+							) }
+							{ isCardPresentEligible && (
+								<>
+									{ ' ' }
+									{ Children.toArray(
+										createInterpolateElement(
+											__(
+												'The setting is not applied to <inPersonPaymentsLink>In-Person Payments</inPersonPaymentsLink> (please note that In-Person Payments should be captured within 2 days of authorization).',
+												'woocommerce'
+											),
+											{
+												inPersonPaymentsLink: (
+													<ExternalLink
+														href={
+															IN_PERSON_PAYMENTS_DOC_URL
+														}
+													>
+														<></>
+													</ExternalLink>
+												),
+											}
+										)
+									) }
+								</>
+							) }
+						</>
+					}
 					label={ __(
 						'Issue an authorization on checkout and capture later',
 						'woocommerce'
@@ -1580,16 +1834,24 @@ const PayoutsSettingsSection = () => {
 			id="payouts"
 			title={ __( 'Payouts', 'woocommerce' ) }
 			description={
-				<p>
-					{ sprintf(
-						/* translators: %s: Number of business days. */
-						__(
-							'Funds are available for payout %s business days after they are received.',
+				<>
+					<p>
+						{ sprintf(
+							/* translators: %s: Number of business days. */
+							__(
+								'Funds are available for payout %s business days after they are received.',
+								'woocommerce'
+							),
+							String( depositDelayDays )
+						) }
+					</p>
+					<ExternalLink href={ PAYOUT_SCHEDULE_DOC_URL }>
+						{ __(
+							'Learn more about pending schedules',
 							'woocommerce'
-						),
-						String( depositDelayDays )
-					) }
-				</p>
+						) }
+					</ExternalLink>
+				</>
 			}
 		>
 			<FieldGroup
@@ -1604,7 +1866,7 @@ const PayoutsSettingsSection = () => {
 								'woocommerce'
 							) }
 						</p>
-						<ExternalLink href="https://woocommerce.com/document/woopayments/payouts/payout-schedule/">
+						<ExternalLink href={ PAYOUT_SCHEDULE_DOC_URL }>
 							{ __( 'Learn more', 'woocommerce' ) }
 						</ExternalLink>
 					</Notice>
@@ -1617,7 +1879,7 @@ const PayoutsSettingsSection = () => {
 								'woocommerce'
 							) }
 						</p>
-						<ExternalLink href="https://woocommerce.com/document/woopayments/payouts/payout-schedule/">
+						<ExternalLink href={ PAYOUT_SCHEDULE_DOC_URL }>
 							{ __( 'Learn more', 'woocommerce' ) }
 						</ExternalLink>
 					</Notice>
@@ -1744,12 +2006,17 @@ const NotificationsSettingsSection = ( {
 			id="notifications"
 			title={ __( 'Account notifications', 'woocommerce' ) }
 			description={
-				<p>
-					{ __(
-						'Receive important notifications about your WooPayments account.',
-						'woocommerce'
-					) }
-				</p>
+				<>
+					<p>
+						{ __(
+							'Receive important notifications about your WooPayments account.',
+							'woocommerce'
+						) }
+					</p>
+					<ExternalLink href={ NOTIFICATIONS_DOC_URL }>
+						{ __( 'Learn more', 'woocommerce' ) }
+					</ExternalLink>
+				</>
 			}
 		>
 			<FieldGroup title={ __( 'Notifications email', 'woocommerce' ) }>
@@ -1870,12 +2137,17 @@ const AdvancedSettingsSection = () => {
 			id="advanced"
 			title={ __( 'Advanced settings', 'woocommerce' ) }
 			description={
-				<p>
-					{ __(
-						'Configure payment features that apply to specific store needs.',
-						'woocommerce'
-					) }
-				</p>
+				<>
+					<p>
+						{ __(
+							'More options for specific payment needs.',
+							'woocommerce'
+						) }
+					</p>
+					<ExternalLink href={ ADVANCED_SETTINGS_DOC_URL }>
+						{ __( 'View our documentation', 'woocommerce' ) }
+					</ExternalLink>
+				</>
 			}
 		>
 			<CheckboxControl
@@ -2242,13 +2514,7 @@ export const WooPaymentsSettingsPage = () => {
 			</header>
 
 			{ isLoading && ! hasSettings ? (
-				<p
-					className="woopayments-settings-page__loading"
-					aria-live="polite"
-				>
-					<Spinner />
-					{ __( 'Loading WooPayments settings…', 'woocommerce' ) }
-				</p>
+				<SettingsLoadingSections />
 			) : (
 				<SettingsBusyState isBusy={ isSaving }>
 					<SpotlightPromotion />
