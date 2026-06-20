@@ -20,6 +20,7 @@ import type {
 	WooPaymentsPaymentIntent,
 	WooPaymentsRefundRequest,
 	WooPaymentsRefundResponse,
+	WooPaymentsReaderChargeSummaryResponse,
 	WooPaymentsTransaction,
 	WooPaymentsTimelineResponse,
 } from './types';
@@ -92,6 +93,18 @@ export const getWooPaymentsTimeline = (
 			timelineId
 		) }`,
 		method: 'GET',
+	} );
+
+export const getWooPaymentsReaderChargeSummary = (
+	transactionId: string,
+	options: { signal?: AbortSignal } = {}
+): Promise< WooPaymentsReaderChargeSummaryResponse > =>
+	apiFetch< WooPaymentsReaderChargeSummaryResponse >( {
+		path: `${ PAYMENTS_PATH }/readers/charges/${ encodeURIComponent(
+			transactionId
+		) }`,
+		method: 'GET',
+		...( options.signal ? { signal: options.signal } : {} ),
 	} );
 
 export const getWooPaymentsTransactionSearch = (

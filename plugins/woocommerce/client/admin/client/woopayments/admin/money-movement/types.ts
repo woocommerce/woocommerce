@@ -240,6 +240,32 @@ export interface WooPaymentsTimelineResponse {
 	data?: WooPaymentsTimelineEvent[];
 }
 
+export interface WooPaymentsReaderChargeSummaryRow {
+	reader_id?: string;
+	readerId?: string;
+	status?: string;
+	transactions?: number | string;
+	transaction_count?: number | string;
+	fee?:
+		| number
+		| {
+				amount?: number;
+				currency?: string;
+				[ key: string ]: unknown;
+		  };
+	amount?: number;
+	currency?: string;
+	[ key: string ]: unknown;
+}
+
+export type WooPaymentsReaderChargeSummaryResponse =
+	| WooPaymentsReaderChargeSummaryRow[]
+	| {
+			data?: WooPaymentsReaderChargeSummaryRow[];
+			rows?: WooPaymentsReaderChargeSummaryRow[];
+			[ key: string ]: unknown;
+	  };
+
 export interface WooPaymentsDisputeMetadata {
 	/* eslint-disable @typescript-eslint/naming-convention -- provider metadata keys can include leading underscores. */
 	__product_type?: string;

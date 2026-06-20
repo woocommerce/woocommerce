@@ -17,6 +17,7 @@ import {
 	getWooPaymentsDisputesSummary,
 	getWooPaymentsCharge,
 	getWooPaymentsPaymentIntent,
+	getWooPaymentsReaderChargeSummary,
 	getWooPaymentsTransaction,
 	getWooPaymentsTimeline,
 	getWooPaymentsTransactions,
@@ -145,6 +146,7 @@ jest.mock( '../money-movement/data', () => ( {
 	getWooPaymentsDisputes: jest.fn(),
 	getWooPaymentsCharge: jest.fn(),
 	getWooPaymentsPaymentIntent: jest.fn(),
+	getWooPaymentsReaderChargeSummary: jest.fn(),
 	getWooPaymentsTransaction: jest.fn(),
 	getWooPaymentsTimeline: jest.fn(),
 	getWooPaymentsTransactions: jest.fn(),
@@ -179,6 +181,10 @@ const mockGetCharge = getWooPaymentsCharge as jest.MockedFunction<
 const mockGetPaymentIntent = getWooPaymentsPaymentIntent as jest.MockedFunction<
 	typeof getWooPaymentsPaymentIntent
 >;
+const mockGetReaderChargeSummary =
+	getWooPaymentsReaderChargeSummary as jest.MockedFunction<
+		typeof getWooPaymentsReaderChargeSummary
+	>;
 const mockGetTransaction = getWooPaymentsTransaction as jest.MockedFunction<
 	typeof getWooPaymentsTransaction
 >;
@@ -286,6 +292,7 @@ describe( 'WooPayments money movement pages', () => {
 		mockGetDisputes.mockReset();
 		mockGetCharge.mockReset();
 		mockGetPaymentIntent.mockReset();
+		mockGetReaderChargeSummary.mockReset();
 		mockGetTransaction.mockReset();
 		mockGetTimeline.mockReset();
 		mockGetTransactionsSummary.mockReset();
@@ -323,6 +330,7 @@ describe( 'WooPayments money movement pages', () => {
 
 	afterEach( () => {
 		anchorClickSpy.mockRestore();
+		jest.useRealTimers();
 	} );
 
 	it( 'announces loaded transactions and gives row links clear purpose', async () => {
@@ -1105,6 +1113,152 @@ describe( 'WooPayments money movement pages', () => {
 		);
 	} );
 
+	it( 'renders card reader fee details from the reader charge summary route', async () => {
+		mockGetReaderChargeSummary.mockResolvedValue( {
+			data: [
+				{
+					reader_id: 'tmr_reader_1',
+					status: 'active',
+					transactions: 3,
+					fee: {
+						amount: 1234,
+						currency: 'usd',
+					},
+				},
+			],
+		} );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=ch_reader_fee_123&transaction_id=txn_reader_fee_123&transaction_type=card_reader_fee',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		expect(
+			await screen.findByRole( 'heading', { name: 'Card readers' } )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText( 'Transaction details loaded.' )
+		).not.toBeInTheDocument();
+		expect( mockGetReaderChargeSummary ).toHaveBeenCalledWith(
+			'txn_reader_fee_123',
+			expect.objectContaining( {
+				signal: expect.any( Object ),
+			} )
+		);
+		expect( await screen.findByText( 'tmr_reader_1' ) ).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'columnheader', { name: 'Reader id' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'columnheader', { name: 'Status' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'columnheader', { name: 'Transactions' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'columnheader', { name: 'Fee' } )
+		).toBeInTheDocument();
+		expect( screen.getByText( 'Active' ) ).toBeInTheDocument();
+		expect( screen.getByText( '3' ) ).toBeInTheDocument();
+		expect( screen.getByText( '$12.34' ) ).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'button', { name: 'Download' } )
+		).toBeInTheDocument();
+		expect( mockGetCharge ).not.toHaveBeenCalled();
+		expect( mockGetPaymentIntent ).not.toHaveBeenCalled();
+		expect( mockGetTransaction ).not.toHaveBeenCalled();
+	} );
+
+	it( 'shows reader details errors from the card reader fee route', async () => {
+		mockGetReaderChargeSummary.mockRejectedValue(
+			new Error( 'Reader provider failed.' )
+		);
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=ch_reader_fee_123&transaction_id=txn_reader_fee_123&transaction_type=card_reader_fee',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		expect( await screen.findByRole( 'alert' ) ).toHaveTextContent(
+			'Readers details not loaded'
+		);
+		expect( mockGetReaderChargeSummary ).toHaveBeenCalledWith(
+			'txn_reader_fee_123',
+			expect.objectContaining( {
+				signal: expect.any( Object ),
+			} )
+		);
+	} );
+
+	it( 'shows an empty state for card reader fee routes without rows', async () => {
+		mockGetReaderChargeSummary.mockResolvedValue( {
+			data: [],
+		} );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=ch_reader_fee_123&transaction_id=txn_reader_fee_123&transaction_type=card_reader_fee',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		await screen.findByRole( 'heading', { name: 'Card readers' } );
+		expect(
+			screen.getAllByText( 'No reader details found.' )
+		).toHaveLength( 2 );
+		expect( screen.queryByRole( 'table' ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'times out stalled reader fee summary requests', async () => {
+		jest.useFakeTimers();
+		mockGetReaderChargeSummary.mockImplementation(
+			( _transactionId, options ) =>
+				new Promise( ( _resolve, reject ) => {
+					options?.signal?.addEventListener( 'abort', () => {
+						const error = new Error( 'Aborted' );
+						error.name = 'AbortError';
+						reject( error );
+					} );
+				} )
+		);
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=ch_reader_fee_123&transaction_id=txn_reader_fee_123&transaction_type=card_reader_fee',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		await screen.findByRole( 'heading', { name: 'Card readers' } );
+		expect( screen.getAllByText( 'Loading reader details…' ) ).toHaveLength(
+			2
+		);
+
+		await act( async () => {
+			jest.advanceTimersByTime( 15000 );
+		} );
+
+		expect( await screen.findByRole( 'alert' ) ).toHaveTextContent(
+			'Readers details not loaded. The request timed out.'
+		);
+	} );
+
 	it( 'loads payment intent details when the route id is a payment intent', async () => {
 		mockGetPaymentIntent.mockResolvedValue( {
 			id: 'pi_test',
@@ -1364,6 +1518,7 @@ describe( 'WooPayments money movement pages', () => {
 				payment_method: 'pm_link',
 				billing_details: {
 					email: 'ada@example.com',
+					formatted_address: '1 Main Street<br/>New York, NY 10001',
 					name: 'Ada Lovelace',
 				},
 				payment_method_details: {
@@ -1401,12 +1556,85 @@ describe( 'WooPayments money movement pages', () => {
 		expect(
 			getDetailValue( paymentMethod, 'Owner email' )
 		).toHaveTextContent( 'ada@example.com' );
+		expect( getDetailValue( paymentMethod, 'Address' ) ).toHaveTextContent(
+			'1 Main Street'
+		);
+		expect( getDetailValue( paymentMethod, 'Address' ) ).toHaveTextContent(
+			'New York, NY 10001'
+		);
 		expect(
 			within( paymentMethod ).queryByText( 'Number' )
 		).not.toBeInTheDocument();
 		expect(
 			within( paymentMethod ).queryByText( 'CVC check' )
 		).not.toBeInTheDocument();
+	} );
+
+	it( 'renders method-specific details for supported non-card payment methods', async () => {
+		mockGetPaymentIntent.mockResolvedValue( {
+			id: 'pi_ideal',
+			status: 'succeeded',
+			amount: 5000,
+			currency: 'usd',
+			created: 1781712000,
+			charge: {
+				id: 'ch_ideal',
+				payment_intent: 'pi_ideal',
+				balance_transaction: 'txn_ideal',
+				type: 'charge',
+				amount: 5000,
+				currency: 'usd',
+				created: 1781712000,
+				payment_method: 'pm_ideal',
+				billing_details: {
+					email: 'ada@example.test',
+					formatted_address: '123 Canal St<br/>Amsterdam',
+					name: 'Ada Buyer',
+				},
+				payment_method_details: {
+					type: 'ideal',
+					ideal: {
+						bank: 'ING',
+						bic: 'INGBNL2A',
+						iban_last4: '6789',
+						verified_name: 'Ada Buyer',
+					},
+				},
+			},
+		} );
+		mockGetTimeline.mockResolvedValue( { data: [] } );
+
+		render(
+			<MemoryRouter
+				initialEntries={ [
+					'/woopayments/transactions/details?id=pi_ideal&transaction_id=txn_ideal',
+				] }
+			>
+				<WooPaymentsTransactionDetailsPage />
+			</MemoryRouter>
+		);
+
+		const paymentMethod = (
+			await screen.findByRole( 'heading', {
+				name: 'Payment method',
+			} )
+		 ).closest( 'section' ) as HTMLElement;
+
+		expect(
+			getDetailValue( paymentMethod, 'Bank name' )
+		).toHaveTextContent( 'ING' );
+		expect( getDetailValue( paymentMethod, 'BIC' ) ).toHaveTextContent(
+			'INGBNL2A'
+		);
+		expect( getDetailValue( paymentMethod, 'IBAN' ) ).toHaveTextContent(
+			'6789'
+		);
+		expect(
+			getDetailValue( paymentMethod, 'Verified name' )
+		).toHaveTextContent( 'Ada Buyer' );
+		expect( getDetailValue( paymentMethod, 'Address' ) ).toHaveTextContent(
+			'123 Canal St'
+		);
 	} );
 
 	it( 'opens the full refund modal from transaction details and reloads after a successful refund', async () => {
@@ -3153,7 +3381,7 @@ describe( 'WooPayments money movement pages', () => {
 		expect( await screen.findByText( message ) ).toBeInTheDocument();
 	} );
 
-	it( 'renders reference-shaped timeline events with datetime values', async () => {
+	it( 'renders reference-shaped timeline event details with datetime values', async () => {
 		const eventDatetime = 1781712200;
 		const expectedEventDate = new Date(
 			eventDatetime * 1000
@@ -3177,6 +3405,28 @@ describe( 'WooPayments money movement pages', () => {
 		mockGetTimeline.mockResolvedValue( {
 			data: [
 				{
+					type: 'captured',
+					datetime: eventDatetime,
+					amount: 5000,
+					currency: 'usd',
+					fee: 180,
+					net: 4820,
+				},
+				{
+					type: 'partial_refund',
+					datetime: eventDatetime,
+					amount: 1000,
+					currency: 'usd',
+					reason: 'requested_by_customer',
+					acquirer_reference_number: 'arn_refund_123',
+				},
+				{
+					type: 'dispute.created',
+					datetime: eventDatetime,
+					amount: 1500,
+					currency: 'usd',
+				},
+				{
 					type: 'fraud_outcome_manual_approve',
 					datetime: eventDatetime,
 					user: {
@@ -3197,7 +3447,25 @@ describe( 'WooPayments money movement pages', () => {
 		);
 
 		expect(
-			await screen.findByText( 'Payment was approved by admin' )
+			await screen.findByText( 'Payment status changed to Paid.' )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText( 'A payment of $50.00 was successfully charged.' )
+		).toBeInTheDocument();
+		expect( screen.getByText( 'Fee: $1.80' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Net: $48.20' ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( 'A payment of $10.00 was successfully refunded.' )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText( 'Reason: Requested by customer' )
+		).toBeInTheDocument();
+		expect( screen.getByText( 'ARN: arn_refund_123' ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( 'A dispute was opened for $15.00.' )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText( 'Payment was approved by admin' )
 		).toBeInTheDocument();
 		expect(
 			screen.getAllByText( expectedEventDate ).length

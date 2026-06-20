@@ -43,12 +43,7 @@ import type {
 	WooPaymentsTimelineEvent,
 	WooPaymentsTransaction,
 } from './types';
-import {
-	formatAmount,
-	formatDate,
-	formatLabel,
-	getErrorMessage,
-} from './utils';
+import { formatAmount, getErrorMessage } from './utils';
 import { WooPaymentsTransactionDisputeDetails } from './transaction-dispute-details';
 import {
 	hasPaymentOrderContext,
@@ -57,7 +52,9 @@ import {
 	WooPaymentsPaymentMethodDetailsSection,
 	WooPaymentsPaymentSummarySection,
 } from './transaction-detail-sections';
+import { WooPaymentsCardReaderFeeDetails } from './transaction-card-reader-fee-details';
 import { LiveStatusMessage, StatusMessage } from './table';
+import { WooPaymentsTransactionTimeline } from './transaction-timeline';
 import { WooPaymentsTestModeNotice } from '../test-mode-notice';
 import '../style.scss';
 
@@ -263,41 +260,6 @@ const isTransactionRefundEligible = (
 
 	return isDisputeRefundable( transaction.dispute );
 };
-
-const getTimelineUserName = ( event: WooPaymentsTimelineEvent ) =>
-	typeof event.user?.username === 'string' ? event.user.username : '';
-
-const getTimelineMessage = ( event: WooPaymentsTimelineEvent ) => {
-	if ( event.message ) {
-		return event.message;
-	}
-
-	const userName = getTimelineUserName( event );
-	if ( event.type === 'fraud_outcome_manual_approve' ) {
-		return userName
-			? sprintf(
-					/* translators: %s: user display name. */
-					__( 'Payment was approved by %s', 'woocommerce' ),
-					userName
-			  )
-			: __( 'Payment was approved.', 'woocommerce' );
-	}
-
-	if ( event.type === 'fraud_outcome_manual_block' ) {
-		return userName
-			? sprintf(
-					/* translators: %s: user display name. */
-					__( 'Payment was blocked by %s', 'woocommerce' ),
-					userName
-			  )
-			: __( 'Payment was blocked.', 'woocommerce' );
-	}
-
-	return formatLabel( event.type );
-};
-
-const getTimelineDate = ( event: WooPaymentsTimelineEvent ) =>
-	event.datetime || event.created;
 
 const getTimelineId = (
 	transaction: WooPaymentsTransaction,
@@ -517,6 +479,8 @@ export const WooPaymentsTransactionDetailsPage = () => {
 	const query = new URLSearchParams( location.search );
 	const id = query.get( 'id' ) || '';
 	const transactionId = query.get( 'transaction_id' ) || '';
+	const transactionType = query.get( 'transaction_type' ) || '';
+	const isCardReaderFeeRoute = transactionType === 'card_reader_fee';
 	const routeKey = `${ location.pathname }${ location.search }`;
 	const routeKeyRef = useRef( routeKey );
 	const paymentDetailsHeadingRef = useRef< HTMLHeadingElement | null >(
@@ -532,6 +496,20 @@ export const WooPaymentsTransactionDetailsPage = () => {
 		setIsRefundModalOpen( false );
 		setRefundReason( null );
 	}, [ routeKey ] );
+
+	useEffect( () => {
+		if ( ! isCardReaderFeeRoute ) {
+			return;
+		}
+
+		setTransaction( null );
+		setTimelineEvents( [] );
+		setTimelineErrorMessage( null );
+		setAuthorization( null );
+		setAuthorizationErrorMessage( null );
+		setErrorMessage( null );
+		setIsLoading( false );
+	}, [ isCardReaderFeeRoute, routeKey ] );
 
 	useEffect( () => {
 		if (
@@ -710,6 +688,12 @@ export const WooPaymentsTransactionDetailsPage = () => {
 	useEffect( () => {
 		let isMounted = true;
 
+		if ( isCardReaderFeeRoute ) {
+			return () => {
+				isMounted = false;
+			};
+		}
+
 		loadTransaction( {
 			shouldUpdate: () => isMounted,
 		} );
@@ -717,7 +701,7 @@ export const WooPaymentsTransactionDetailsPage = () => {
 		return () => {
 			isMounted = false;
 		};
-	}, [ loadTransaction ] );
+	}, [ isCardReaderFeeRoute, loadTransaction ] );
 
 	const loadingMessage = __( 'Loading transaction details…', 'woocommerce' );
 	let liveStatusMessage = __( 'Transaction details loaded.', 'woocommerce' );
@@ -744,6 +728,7 @@ export const WooPaymentsTransactionDetailsPage = () => {
 	const transactionResourceId =
 		transaction?.transaction_id || transaction?.id || transactionId || id;
 	const hasPaymentDetails = !! ( paymentIntentId || chargeId );
+	const hasDetailPaymentSurface = isCardReaderFeeRoute || hasPaymentDetails;
 	const orderId = transaction ? getOrderId( transaction, authorization ) : 0;
 	const isFraudReview =
 		!! transaction && isFraudReviewTransaction( transaction );
@@ -1033,7 +1018,7 @@ export const WooPaymentsTransactionDetailsPage = () => {
 		>
 			<div className="woocommerce-woopayments-money-movement__detail-header">
 				<h2 ref={ paymentDetailsHeadingRef } tabIndex={ -1 }>
-					{ hasPaymentDetails
+					{ hasDetailPaymentSurface
 						? __( 'Payment details', 'woocommerce' )
 						: __( 'Transaction details', 'woocommerce' ) }
 				</h2>
@@ -1083,22 +1068,31 @@ export const WooPaymentsTransactionDetailsPage = () => {
 					</div>
 				) }
 			</div>
-			<LiveStatusMessage
-				isError={ !! errorMessage || !! authorizationErrorMessage }
-			>
-				{ liveStatusMessage }
-			</LiveStatusMessage>
+			{ ! isCardReaderFeeRoute && (
+				<LiveStatusMessage
+					isError={ !! errorMessage || !! authorizationErrorMessage }
+				>
+					{ liveStatusMessage }
+				</LiveStatusMessage>
+			) }
 			{ isLoading && <StatusMessage>{ loadingMessage }</StatusMessage> }
 			{ errorMessage && (
 				<StatusMessage isError>{ errorMessage }</StatusMessage>
 			) }
-			{ hasPaymentDetails && ! errorMessage && (
+			{ hasDetailPaymentSurface && ! errorMessage && (
 				<WooPaymentsTestModeNotice
 					currentPage="payments"
 					isDetailsView
 				/>
 			) }
-			{ transaction && ! errorMessage && (
+			{ isCardReaderFeeRoute && ! errorMessage && (
+				<div className="woocommerce-woopayments-money-movement__detail-sections">
+					<WooPaymentsCardReaderFeeDetails
+						transactionId={ transactionId || id }
+					/>
+				</div>
+			) }
+			{ transaction && ! errorMessage && ! isCardReaderFeeRoute && (
 				<>
 					{ authorizationErrorMessage && (
 						<StatusMessage isError>
@@ -1238,32 +1232,9 @@ export const WooPaymentsTransactionDetailsPage = () => {
 								{ timelineErrorMessage }
 							</StatusMessage>
 						) }
-						{ timelineEvents.length > 0 && (
-							<section className="woocommerce-woopayments-overview-card">
-								<h3>{ __( 'Timeline', 'woocommerce' ) }</h3>
-								<ol className="woocommerce-woopayments-money-movement__timeline">
-									{ timelineEvents.map( ( event, index ) => (
-										<li
-											key={ `${ event.type || 'event' }-${
-												getTimelineDate( event ) ||
-												index
-											}` }
-										>
-											<span>
-												{ getTimelineMessage( event ) }
-											</span>
-											{ getTimelineDate( event ) && (
-												<time>
-													{ formatDate(
-														getTimelineDate( event )
-													) }
-												</time>
-											) }
-										</li>
-									) ) }
-								</ol>
-							</section>
-						) }
+						<WooPaymentsTransactionTimeline
+							events={ timelineEvents }
+						/>
 					</div>
 					{ isRefundModalOpen && (
 						<RefundModal

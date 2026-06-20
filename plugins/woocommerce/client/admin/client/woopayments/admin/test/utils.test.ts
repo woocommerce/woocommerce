@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { getSettingsPaymentsProviderRouteUrl } from '../utils';
+import { getTransactionDetailsRoute } from '../money-movement/utils';
 import {
 	getBalanceCurrencyOptions,
 	getInstantBalanceForCurrency,
@@ -94,6 +95,22 @@ describe( 'getSettingsPaymentsProviderRouteUrl', () => {
 			)
 		).toBe(
 			'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=%2Fwoopayments%2Fsettings%2Ffraud-protection&from=woopayments-settings'
+		);
+	} );
+} );
+
+describe( 'getTransactionDetailsRoute', () => {
+	it( 'uses card reader fee metadata as the transaction detail type', () => {
+		expect(
+			getTransactionDetailsRoute( {
+				id: 'txn_reader_fee_123',
+				type: 'charge',
+				metadata: {
+					charge_type: 'card_reader_fee',
+				},
+			} )
+		).toBe(
+			'/woopayments/transactions/details?id=txn_reader_fee_123&transaction_type=card_reader_fee'
 		);
 	} );
 } );

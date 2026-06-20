@@ -22,6 +22,12 @@ import {
 
 type CardDetails = NonNullable< WooPaymentsPaymentMethodDetails[ 'card' ] >;
 type CountryMap = Record< string, string >;
+type NonCardPaymentMethodDetails = Record< string, unknown >;
+type NonCardPaymentMethodDetailField = {
+	label: string;
+	field: string;
+	format?: 'last4' | 'country';
+};
 
 const hasDisplayValue = ( value: unknown ) =>
 	value !== undefined && value !== null && value !== '';
@@ -164,6 +170,22 @@ const getPaymentMethodCardDetails = (
 	return typedDetails || method.card;
 };
 
+const getPaymentMethodTypedDetails = (
+	method: WooPaymentsPaymentMethodDetails
+): NonCardPaymentMethodDetails => {
+	const methodType = method.type;
+
+	if (
+		methodType &&
+		method[ methodType ] &&
+		typeof method[ methodType ] === 'object'
+	) {
+		return method[ methodType ] as NonCardPaymentMethodDetails;
+	}
+
+	return {};
+};
+
 export const getPaymentMethodLabel = (
 	transaction: WooPaymentsTransaction
 ) => {
@@ -197,6 +219,185 @@ export const getPaymentMethodLabel = (
 const isCardPaymentMethodType = ( type?: string ) =>
 	type === 'card' || type === 'card_present' || type === 'interac_present';
 
+const nonCardPaymentMethodDetailFields: Record<
+	string,
+	NonCardPaymentMethodDetailField[]
+> = {
+	amazon_pay: [
+		{
+			label: __( 'Amazon transaction ID', 'woocommerce' ),
+			field: 'transaction_id',
+		},
+	],
+	au_becs_debit: [
+		{
+			label: __( 'BSB', 'woocommerce' ),
+			field: 'bsb_number',
+		},
+		{
+			label: __( 'Account', 'woocommerce' ),
+			field: 'last4',
+			format: 'last4',
+		},
+	],
+	bancontact: [
+		{
+			label: __( 'Bank name', 'woocommerce' ),
+			field: 'bank_name',
+		},
+		{
+			label: __( 'BIC', 'woocommerce' ),
+			field: 'bic',
+		},
+		{
+			label: __( 'Verified name', 'woocommerce' ),
+			field: 'verified_name',
+		},
+	],
+	eps: [
+		{
+			label: __( 'Bank name', 'woocommerce' ),
+			field: 'bank',
+		},
+		{
+			label: __( 'Verified name', 'woocommerce' ),
+			field: 'verified_name',
+		},
+	],
+	giropay: [
+		{
+			label: __( 'Bank name', 'woocommerce' ),
+			field: 'bank_name',
+		},
+		{
+			label: __( 'BIC', 'woocommerce' ),
+			field: 'bic',
+		},
+	],
+	ideal: [
+		{
+			label: __( 'Bank name', 'woocommerce' ),
+			field: 'bank',
+		},
+		{
+			label: __( 'BIC', 'woocommerce' ),
+			field: 'bic',
+		},
+		{
+			label: __( 'IBAN', 'woocommerce' ),
+			field: 'iban_last4',
+			format: 'last4',
+		},
+		{
+			label: __( 'Verified name', 'woocommerce' ),
+			field: 'verified_name',
+		},
+	],
+	klarna: [
+		{
+			label: __( 'Category', 'woocommerce' ),
+			field: 'payment_method_category',
+		},
+		{
+			label: __( 'Preferred locale', 'woocommerce' ),
+			field: 'preferred_locale',
+		},
+	],
+	p24: [
+		{
+			label: __( 'Bank name', 'woocommerce' ),
+			field: 'bank',
+		},
+		{
+			label: __( 'Reference', 'woocommerce' ),
+			field: 'reference',
+		},
+		{
+			label: __( 'Verified name', 'woocommerce' ),
+			field: 'verified_name',
+		},
+	],
+	sepa_debit: [
+		{
+			label: __( 'IBAN', 'woocommerce' ),
+			field: 'last4',
+			format: 'last4',
+		},
+		{
+			label: __( 'Origin', 'woocommerce' ),
+			field: 'country',
+			format: 'country',
+		},
+	],
+	sofort: [
+		{
+			label: __( 'Bank code', 'woocommerce' ),
+			field: 'bank_code',
+		},
+		{
+			label: __( 'Bank name', 'woocommerce' ),
+			field: 'bank_name',
+		},
+		{
+			label: __( 'BIC', 'woocommerce' ),
+			field: 'bic',
+		},
+		{
+			label: __( 'IBAN', 'woocommerce' ),
+			field: 'iban_last4',
+			format: 'last4',
+		},
+		{
+			label: __( 'Verified name', 'woocommerce' ),
+			field: 'verified_name',
+		},
+		{
+			label: __( 'Origin', 'woocommerce' ),
+			field: 'country',
+			format: 'country',
+		},
+	],
+};
+
+const getCountryName = ( countryCode?: string, countries: CountryMap = {} ) => {
+	if ( ! countryCode ) {
+		return '';
+	}
+
+	return countries[ countryCode ] || countryCode;
+};
+
+const getPaymentMethodDetailValue = (
+	methodDetails: NonCardPaymentMethodDetails,
+	field: string,
+	countries: CountryMap = {},
+	format?: NonCardPaymentMethodDetailField[ 'format' ]
+): ReactNode => {
+	const value = methodDetails[ field ];
+
+	if ( ! hasDisplayValue( value ) ) {
+		return <Dash />;
+	}
+
+	if (
+		typeof value === 'string' ||
+		typeof value === 'number' ||
+		typeof value === 'boolean'
+	) {
+		if ( format === 'country' ) {
+			return getCountryName( String( value ), countries ) || <Dash />;
+		}
+
+		if ( format === 'last4' ) {
+			return `•••• ${ value }`;
+		}
+
+		return String( value );
+	}
+
+	return <Dash />;
+};
+
 const getPaymentMethodTypeLabel = ( card?: CardDetails ) => {
 	const brand = card?.network || card?.brand;
 	const funding = card?.funding;
@@ -219,14 +420,6 @@ const getPaymentMethodTypeLabel = ( card?: CardDetails ) => {
 		brandLabel,
 		String( funding ).toLowerCase()
 	);
-};
-
-const getCountryName = ( countryCode?: string, countries: CountryMap = {} ) => {
-	if ( ! countryCode ) {
-		return '';
-	}
-
-	return countries[ countryCode ] || countryCode;
 };
 
 const getCheckLabel = ( check?: string ) => {
@@ -518,6 +711,10 @@ export const WooPaymentsPaymentMethodDetailsSection = ( {
 	}
 
 	if ( ! isCardPaymentMethodType( method.type ) ) {
+		const methodSpecificFields =
+			nonCardPaymentMethodDetailFields[ method.type ] || [];
+		const methodDetails = getPaymentMethodTypedDetails( method );
+
 		return (
 			<section
 				className="woocommerce-woopayments-overview-card woocommerce-woopayments-money-movement__payment-method-card"
@@ -535,6 +732,20 @@ export const WooPaymentsPaymentMethodDetailsSection = ( {
 						label={ __( 'ID', 'woocommerce' ) }
 						value={ transaction.payment_method || <Dash /> }
 					/>
+					{ methodSpecificFields.map(
+						( { label, field, format } ) => (
+							<DetailRow
+								key={ field }
+								label={ label }
+								value={ getPaymentMethodDetailValue(
+									methodDetails,
+									field,
+									countries,
+									format
+								) }
+							/>
+						)
+					) }
 					<DetailRow
 						label={ __( 'Owner', 'woocommerce' ) }
 						value={ getCustomerName( transaction ) || <Dash /> }
@@ -542,6 +753,17 @@ export const WooPaymentsPaymentMethodDetailsSection = ( {
 					<DetailRow
 						label={ __( 'Owner email', 'woocommerce' ) }
 						value={ getCustomerEmail( transaction ) || <Dash /> }
+					/>
+					<DetailRow
+						label={ __( 'Address', 'woocommerce' ) }
+						value={
+							<StackedLines
+								lines={ getAddressLines(
+									transaction.billing_details,
+									countries
+								) }
+							/>
+						}
 					/>
 				</dl>
 			</section>

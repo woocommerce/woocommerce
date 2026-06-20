@@ -22,6 +22,7 @@ import {
 	getWooPaymentsFraudOutcomeTransactionsSummary,
 	getWooPaymentsFraudOutcomeTransactionsExport,
 	getWooPaymentsFraudOutcomeTransactionSearch,
+	getWooPaymentsReaderChargeSummary,
 	getWooPaymentsTransactionSearch,
 	getWooPaymentsTransactions,
 	requestWooPaymentsDisputesExport,
@@ -41,6 +42,8 @@ describe( 'WooPayments money movement data helpers', () => {
 	} );
 
 	it( 'preserves transactions endpoint paths and query names', async () => {
+		const readerSummaryAbortController = new AbortController();
+
 		await getWooPaymentsTransactions( {
 			page: 2,
 			pagesize: 25,
@@ -52,6 +55,9 @@ describe( 'WooPayments money movement data helpers', () => {
 		await getWooPaymentsCharge( 'ch_test' );
 		await getWooPaymentsPaymentIntent( 'pi_test' );
 		await getWooPaymentsTimeline( 'pi_test' );
+		await getWooPaymentsReaderChargeSummary( 'txn_reader_fee_123', {
+			signal: readerSummaryAbortController.signal,
+		} );
 		await getWooPaymentsTransactionSearch( 'Ada' );
 		await requestWooPaymentsTransactionsExport( {
 			deposit_id: 'po_test',
@@ -79,14 +85,19 @@ describe( 'WooPayments money movement data helpers', () => {
 			method: 'GET',
 		} );
 		expect( mockApiFetch ).toHaveBeenNthCalledWith( 6, {
+			path: '/wc/v3/payments/readers/charges/txn_reader_fee_123',
+			method: 'GET',
+			signal: readerSummaryAbortController.signal,
+		} );
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 7, {
 			path: '/wc/v3/payments/transactions/search?search_term=Ada',
 			method: 'GET',
 		} );
-		expect( mockApiFetch ).toHaveBeenNthCalledWith( 7, {
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 8, {
 			path: '/wc/v3/payments/transactions/download?deposit_id=po_test',
 			method: 'POST',
 		} );
-		expect( mockApiFetch ).toHaveBeenNthCalledWith( 8, {
+		expect( mockApiFetch ).toHaveBeenNthCalledWith( 9, {
 			path: '/wc/v3/payments/transactions/download/export_test',
 			method: 'GET',
 		} );

@@ -78,6 +78,7 @@ export const getTransactionDetailsRoute = ( item: {
 	charge_id?: string;
 	payment_intent_id?: string;
 	payment_intent?: string;
+	metadata?: Record< string, unknown >;
 	type?: string;
 	charge?:
 		| string
@@ -106,6 +107,9 @@ export const getTransactionDetailsRoute = ( item: {
 		item.transaction_id ||
 		balanceTransactionId ||
 		( item.id?.startsWith( 'txn_' ) ? item.id : '' );
+	const metadataChargeType = item.metadata?.charge_type;
+	const transactionType =
+		typeof metadataChargeType === 'string' ? metadataChargeType : item.type;
 
 	return buildPathWithQuery( '/woopayments/transactions/details', {
 		id: primaryId,
@@ -113,7 +117,7 @@ export const getTransactionDetailsRoute = ( item: {
 			transactionId && transactionId !== primaryId
 				? transactionId
 				: undefined,
-		transaction_type: item.type,
+		transaction_type: transactionType,
 	} );
 };
 
