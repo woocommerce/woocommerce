@@ -121,6 +121,7 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 				'payment_request_button_theme'           => 'dark',
 				'payment_request_button_border_radius'   => 12,
 				'platform_checkout'                      => 'yes',
+				'platform_checkout_last_disable_date'    => '2026-06-13',
 				'is_woopay_global_theme_support_enabled' => 'yes',
 				'platform_checkout_custom_message'       => 'Custom WooPay message.',
 				'platform_checkout_store_logo'           => 'file_logo',
@@ -266,6 +267,7 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $settings['is_wcpay_subscriptions_enabled'] );
 		$this->assertFalse( $settings['is_saved_cards_enabled'] );
 		$this->assertTrue( $settings['is_woopay_enabled'] );
+		$this->assertSame( '2026-06-13', $settings['woopay_last_disable_date'] );
 		$this->assertTrue( $settings['is_woopay_global_theme_support_enabled'] );
 		$this->assertTrue( $settings['is_woopay_global_theme_support_eligible'] );
 		$this->assertTrue( $settings['is_express_checkout_in_payment_methods_list_supported'] );
@@ -644,6 +646,90 @@ class WooPaymentsSettingsServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( '1', get_option( '_wcpay_feature_stripe_billing' ), 'Native settings must not mutate the Stripe Billing flag.' );
 		$this->assertSame( $stored['upe_enabled_payment_method_ids'], $result['enabled_payment_method_ids'] );
 		$this->assertSame( $store_setup_sync_count + 1, did_action( 'wcpay_store_setup_sync' ) );
+	}
+
+	/**
+	 * @testdox Should record the WooPay last disable date when WooPay is turned off.
+	 */
+	public function test_update_settings_records_woopay_last_disable_date_when_turning_woopay_off(): void {
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'platform_checkout' => 'yes',
+			)
+		);
+
+		$expected_dates = array( gmdate( 'Y-m-d' ) );
+
+		$result = $this->sut->update_settings(
+			array(
+				'is_woopay_enabled' => false,
+			)
+		);
+
+		$stored           = get_option( 'woocommerce_woocommerce_payments_settings' );
+		$expected_dates[] = gmdate( 'Y-m-d' );
+		$expected_dates   = array_values( array_unique( $expected_dates ) );
+
+		$this->assertIsArray( $result );
+		$this->assertIsArray( $stored );
+		$this->assertSame( 'no', $stored['platform_checkout'] );
+		$this->assertContains( $stored['platform_checkout_last_disable_date'], $expected_dates );
+		$this->assertSame( $stored['platform_checkout_last_disable_date'], $result['woopay_last_disable_date'] );
+	}
+
+	/**
+	 * @testdox Should keep the WooPay last disable date when WooPay is already off.
+	 */
+	public function test_update_settings_keeps_woopay_last_disable_date_when_woopay_was_already_off(): void {
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'platform_checkout'                   => 'no',
+				'platform_checkout_last_disable_date' => '2026-06-01',
+			)
+		);
+
+		$result = $this->sut->update_settings(
+			array(
+				'is_woopay_enabled' => false,
+			)
+		);
+
+		$stored = get_option( 'woocommerce_woocommerce_payments_settings' );
+
+		$this->assertIsArray( $result );
+		$this->assertIsArray( $stored );
+		$this->assertSame( 'no', $stored['platform_checkout'] );
+		$this->assertSame( '2026-06-01', $stored['platform_checkout_last_disable_date'] );
+		$this->assertSame( '2026-06-01', $result['woopay_last_disable_date'] );
+	}
+
+	/**
+	 * @testdox Should not record the WooPay last disable date when WooPay is omitted from the update.
+	 */
+	public function test_update_settings_does_not_record_woopay_last_disable_date_when_woopay_is_omitted(): void {
+		update_option(
+			'woocommerce_woocommerce_payments_settings',
+			array(
+				'platform_checkout'                   => 'yes',
+				'platform_checkout_last_disable_date' => '2026-06-01',
+			)
+		);
+
+		$result = $this->sut->update_settings(
+			array(
+				'is_manual_capture_enabled' => true,
+			)
+		);
+
+		$stored = get_option( 'woocommerce_woocommerce_payments_settings' );
+
+		$this->assertIsArray( $result );
+		$this->assertIsArray( $stored );
+		$this->assertSame( 'yes', $stored['platform_checkout'] );
+		$this->assertSame( '2026-06-01', $stored['platform_checkout_last_disable_date'] );
+		$this->assertSame( '2026-06-01', $result['woopay_last_disable_date'] );
 	}
 
 	/**

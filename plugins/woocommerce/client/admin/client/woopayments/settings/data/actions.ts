@@ -18,7 +18,7 @@ type SettingsSaveError = {
 	server_error?: string;
 };
 type SettingsSaveResponse = {
-	data?: {
+	data?: SettingsValues & {
 		payment_method_statuses?: unknown;
 	};
 	payment_method_statuses?: unknown;
@@ -196,6 +196,7 @@ export function* saveSettings(): Generator<
 
 		yield updateSettings( {
 			...settings,
+			...responseData,
 			payment_method_statuses:
 				responseData.payment_method_statuses ??
 				settings.payment_method_statuses,

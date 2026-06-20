@@ -281,6 +281,7 @@ class WooPaymentsSettingsService {
 			'is_saved_cards_enabled'                     => $this->is_yes( $settings['saved_cards'] ?? 'yes' ),
 			'is_card_present_eligible'                   => false,
 			'is_woopay_enabled'                          => $this->is_yes( $settings['platform_checkout'] ?? 'no' ),
+			'woopay_last_disable_date'                   => $this->get_string_setting( $settings, 'platform_checkout_last_disable_date' ),
 			'is_woopay_global_theme_support_enabled'     => $this->is_yes( $settings['is_woopay_global_theme_support_enabled'] ?? 'no' ),
 			'is_woopay_global_theme_support_eligible'    => $this->is_woopay_global_theme_support_eligible(),
 			'show_woopay_incompatibility_notice'         => (bool) get_option( 'woopay_invalid_extension_found', false ),
@@ -424,6 +425,7 @@ class WooPaymentsSettingsService {
 	public function update_settings( array $params ) {
 		$settings                     = $this->get_gateway_settings();
 		$available_payment_method_ids = $this->get_available_payment_method_ids( $settings );
+		$was_woopay_enabled           = $this->is_yes( $settings['platform_checkout'] ?? 'no' );
 		$error                        = $this->update_provider_backed_settings( $params, $settings );
 		if ( is_wp_error( $error ) ) {
 			return $error;
@@ -440,6 +442,10 @@ class WooPaymentsSettingsService {
 
 			list( $setting_key, $type ) = $mapping;
 			$settings[ $setting_key ]   = $this->normalize_setting_value( $params[ $request_key ], $type );
+		}
+
+		if ( array_key_exists( 'is_woopay_enabled', $params ) && $was_woopay_enabled && ! $this->is_yes( $settings['platform_checkout'] ?? 'no' ) ) {
+			$settings['platform_checkout_last_disable_date'] = gmdate( 'Y-m-d' );
 		}
 
 		if ( array_key_exists( 'woopay_custom_message', $params ) ) {

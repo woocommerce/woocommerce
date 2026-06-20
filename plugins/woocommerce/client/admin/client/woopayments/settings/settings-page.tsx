@@ -31,6 +31,7 @@ import { FraudProtectionSettings } from './fraud-protection';
 import { WooPaymentsPaymentMethodsList } from './payment-methods-list';
 import { PayoutBankAccount } from './payout-bank-account';
 import { SettingsBusyState } from './settings-busy-state';
+import { WooPayDisableFeedback } from './woopay-disable-feedback';
 import type { PmPromotion } from '../promotions/types';
 import { SpotlightPromotion } from '../promotions/spotlight';
 import {
@@ -89,6 +90,7 @@ const NOTIFICATIONS_EMAIL_CONFIRM_ERROR_ID =
 const SUPPORT_EMAIL_ERROR_ID = 'woopayments-support-email-error';
 const SUPPORT_PHONE_ERROR_ID = 'woopayments-support-phone-error';
 const SUPPORT_PHONE_INPUT_ID = 'woopayments-support-phone-input';
+const FEEDBACK_THROTTLE_DAYS = 7;
 const EMAIL_ADDRESS_PATTERN =
 	/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9.-]+$/;
 type SettingsRecord = Record< string, unknown >;
@@ -137,6 +139,21 @@ const STANDARD_PAYMENT_METHOD_EXCLUDED_IDS = [
 ];
 const asString = ( value: unknown, fallback = '' ) =>
 	typeof value === 'string' ? value : fallback;
+
+const getDaysSinceDate = ( date: string, now = new Date() ) => {
+	const parsedDate = new Date( date );
+
+	if ( Number.isNaN( parsedDate.getTime() ) ) {
+		return Number.POSITIVE_INFINITY;
+	}
+
+	const diffTime = Math.abs( now.getTime() - parsedDate.getTime() );
+
+	return Math.ceil( diffTime / ( 1000 * 60 * 60 * 24 ) );
+};
+
+const isWooPayDisableFeedbackThrottled = ( date: string ) =>
+	date !== '' && getDaysSinceDate( date ) < FEEDBACK_THROTTLE_DAYS;
 
 const asStringArray = ( value: unknown ) =>
 	Array.isArray( value )
@@ -1501,8 +1518,34 @@ const AdvancedSettingsSection = () => {
 
 const SaveSettingsSection = ( { disabled }: { disabled?: boolean } ) => {
 	const { saveSettings, isSaving, isLoading, isDirty } = useSettings();
+	const settings = asSettingsRecord( useGetSettings() );
 	const [ statusMessage, setStatusMessage ] = useState( '' );
+	const [ initialIsWooPayEnabled, setInitialIsWooPayEnabled ] = useState<
+		boolean | null
+	>( null );
+	const [ isWooPayDisableFeedbackOpen, setWooPayDisableFeedbackOpen ] =
+		useState( false );
+	const [ localWooPayLastDisableDate, setLocalWooPayLastDisableDate ] =
+		useState( asString( settings.woopay_last_disable_date ) );
 	const isDisabled = isSaving || isLoading || disabled || ! isDirty;
+	const hasWooPayEnabledSetting = Object.prototype.hasOwnProperty.call(
+		settings,
+		'is_woopay_enabled'
+	);
+	const isWooPayEnabled = Boolean( settings.is_woopay_enabled );
+	const wooPayLastDisableDate = asString( settings.woopay_last_disable_date );
+
+	useEffect( () => {
+		if ( initialIsWooPayEnabled !== null || ! hasWooPayEnabledSetting ) {
+			return;
+		}
+
+		setInitialIsWooPayEnabled( isWooPayEnabled );
+	}, [ hasWooPayEnabledSetting, initialIsWooPayEnabled, isWooPayEnabled ] );
+
+	useEffect( () => {
+		setLocalWooPayLastDisableDate( wooPayLastDisableDate );
+	}, [ wooPayLastDisableDate ] );
 
 	const saveOnClick = async () => {
 		if ( isDisabled ) {
@@ -1516,6 +1559,25 @@ const SaveSettingsSection = ( { disabled }: { disabled?: boolean } ) => {
 				? __( 'Settings saved.', 'woocommerce' )
 				: __( 'Error saving settings.', 'woocommerce' )
 		);
+
+		if ( ! isSuccess ) {
+			return;
+		}
+
+		if (
+			initialIsWooPayEnabled &&
+			! isWooPayEnabled &&
+			! isWooPayDisableFeedbackThrottled( localWooPayLastDisableDate )
+		) {
+			setWooPayDisableFeedbackOpen( true );
+			setLocalWooPayLastDisableDate(
+				new Date().toISOString().slice( 0, 10 )
+			);
+		}
+
+		if ( hasWooPayEnabledSetting ) {
+			setInitialIsWooPayEnabled( isWooPayEnabled );
+		}
 	};
 
 	return (
@@ -1538,6 +1600,13 @@ const SaveSettingsSection = ( { disabled }: { disabled?: boolean } ) => {
 					: statusMessage ||
 					  __( 'Settings are up to date.', 'woocommerce' ) }
 			</p>
+			{ isWooPayDisableFeedbackOpen && (
+				<WooPayDisableFeedback
+					onRequestClose={ () =>
+						setWooPayDisableFeedbackOpen( false )
+					}
+				/>
+			) }
 		</div>
 	);
 };

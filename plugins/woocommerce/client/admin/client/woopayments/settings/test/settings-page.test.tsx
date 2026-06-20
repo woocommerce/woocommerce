@@ -4,6 +4,7 @@
 import { speak } from '@wordpress/a11y';
 import apiFetch from '@wordpress/api-fetch';
 import {
+	act,
 	fireEvent,
 	render,
 	screen,
@@ -1629,6 +1630,137 @@ describe( 'WooPaymentsSettingsPage', () => {
 				'.woopayments-settings-busy-state__content'
 			)
 		).toHaveAttribute( 'aria-busy', 'true' );
+	} );
+
+	it( 'opens WooPay feedback after a successful save disables WooPay', async () => {
+		let isWooPayEnabled = true;
+		const setWooPayEnabled = jest.fn( ( value: boolean ) => {
+			isWooPayEnabled = value;
+		} );
+		mockUseGetSettings.mockImplementation( () => ( {
+			account_country: 'US',
+			is_woopay_enabled: isWooPayEnabled,
+			woopay_last_disable_date: '',
+			available_payment_method_ids: [
+				'card',
+				'link',
+				'affirm',
+				'amazon_pay',
+				'apple_pay',
+				'google_pay',
+			],
+		} ) );
+		mockUseWooPayEnabledSettings.mockImplementation( () => [
+			isWooPayEnabled,
+			setWooPayEnabled,
+		] );
+		mockSaveSettings.mockResolvedValue( true );
+
+		const { rerender } = render( <WooPaymentsSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', { name: 'WooPay' } )
+		);
+		rerender( <WooPaymentsSettingsPage /> );
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'button', { name: 'Save changes' } )
+			);
+		} );
+
+		const dialog = await screen.findByRole( 'dialog', {
+			name: 'WooPay feedback',
+		} );
+		expect(
+			within( dialog ).getByTitle( 'WooPay disable feedback' )
+		).toHaveAttribute(
+			'src',
+			'https://woocommerce.survey.fm/woopay-disabled-merchants-feedback-triggered'
+		);
+	} );
+
+	it( 'does not open WooPay feedback after a failed disable save', async () => {
+		let isWooPayEnabled = true;
+		const setWooPayEnabled = jest.fn( ( value: boolean ) => {
+			isWooPayEnabled = value;
+		} );
+		mockUseGetSettings.mockImplementation( () => ( {
+			account_country: 'US',
+			is_woopay_enabled: isWooPayEnabled,
+			woopay_last_disable_date: '',
+			available_payment_method_ids: [
+				'card',
+				'link',
+				'affirm',
+				'amazon_pay',
+				'apple_pay',
+				'google_pay',
+			],
+		} ) );
+		mockUseWooPayEnabledSettings.mockImplementation( () => [
+			isWooPayEnabled,
+			setWooPayEnabled,
+		] );
+		mockSaveSettings.mockResolvedValue( false );
+
+		const { rerender } = render( <WooPaymentsSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', { name: 'WooPay' } )
+		);
+		rerender( <WooPaymentsSettingsPage /> );
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'button', { name: 'Save changes' } )
+			);
+		} );
+
+		await waitFor( () => expect( mockSaveSettings ).toHaveBeenCalled() );
+		expect(
+			screen.queryByRole( 'dialog', { name: 'WooPay feedback' } )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'does not open WooPay feedback when the last disable date is recent', async () => {
+		let isWooPayEnabled = true;
+		const setWooPayEnabled = jest.fn( ( value: boolean ) => {
+			isWooPayEnabled = value;
+		} );
+		mockUseGetSettings.mockImplementation( () => ( {
+			account_country: 'US',
+			is_woopay_enabled: isWooPayEnabled,
+			woopay_last_disable_date: new Date().toISOString().slice( 0, 10 ),
+			available_payment_method_ids: [
+				'card',
+				'link',
+				'affirm',
+				'amazon_pay',
+				'apple_pay',
+				'google_pay',
+			],
+		} ) );
+		mockUseWooPayEnabledSettings.mockImplementation( () => [
+			isWooPayEnabled,
+			setWooPayEnabled,
+		] );
+		mockSaveSettings.mockResolvedValue( true );
+
+		const { rerender } = render( <WooPaymentsSettingsPage /> );
+
+		await userEvent.click(
+			screen.getByRole( 'checkbox', { name: 'WooPay' } )
+		);
+		rerender( <WooPaymentsSettingsPage /> );
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'button', { name: 'Save changes' } )
+			);
+		} );
+
+		await waitFor( () => expect( mockSaveSettings ).toHaveBeenCalled() );
+		expect(
+			screen.queryByRole( 'dialog', { name: 'WooPay feedback' } )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'renders fraud protection with the reference Basic and Advanced level controls', () => {

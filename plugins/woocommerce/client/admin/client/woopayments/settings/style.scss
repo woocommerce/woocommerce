@@ -625,6 +625,47 @@
 	}
 }
 
+.woopayments-woopay-disable-feedback {
+	@media (min-width: 960px) {
+		max-height: calc(100% - 120px);
+	}
+
+	.components-modal__content {
+		padding: 24px;
+	}
+
+	&__body {
+		width: min(600px, calc(100vw - 96px));
+	}
+
+	&__logo {
+		display: block;
+		height: 31px;
+		margin-bottom: 16px;
+	}
+
+	&__status {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin: 0 0 12px;
+		color: $gray-700;
+		font-size: 13px;
+		line-height: 20px;
+	}
+
+	&__iframe {
+		display: block;
+		width: 100%;
+		min-height: 650px;
+		border: 0;
+
+		@include breakpoint("<782px") {
+			min-height: 560px;
+		}
+	}
+}
+
 .woopayments-settings-inline-status {
 	display: flex;
 	align-items: center;

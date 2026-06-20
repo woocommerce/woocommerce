@@ -88,6 +88,7 @@ describe( 'WooPayments settings data store', () => {
 		};
 		const response = {
 			data: {
+				woopay_last_disable_date: '2026-06-20',
 				payment_method_statuses: {
 					card_payments: {
 						status: 'active',
@@ -112,7 +113,19 @@ describe( 'WooPayments settings data store', () => {
 			},
 		} );
 
-		action.next( response );
+		expect( action.next( response ).value ).toEqual( {
+			type: 'SET_SETTINGS',
+			data: {
+				...settings,
+				woopay_last_disable_date: '2026-06-20',
+				payment_method_statuses: {
+					card_payments: {
+						status: 'active',
+						requirements: [],
+					},
+				},
+			},
+		} );
 		action.next();
 		action.next();
 		const result = action.next();
