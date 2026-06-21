@@ -294,8 +294,8 @@ class FeaturesController {
 
 		$legacy_features = array(
 			'analytics'                          => array(
-				'name'                         => __( 'Analytics', 'woocommerce' ),
-				'description'                  => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
+				'name'                         => __( 'WooCommerce Analytics', 'woocommerce' ),
+				'description'                  => __( 'Enable the WooCommerce Analytics dashboard to track your store\'s key metrics. All data is stored within your Website.', 'woocommerce' ),
 				'option_key'                   => Analytics::TOGGLE_OPTION_NAME,
 				'is_experimental'              => false,
 				'enabled_by_default'           => true,
