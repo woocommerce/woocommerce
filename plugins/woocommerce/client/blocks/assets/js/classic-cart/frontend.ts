@@ -15,9 +15,11 @@
  *
  * See docs/internal-developers/iapi-classic-cart-migration/migration-plan.md.
  *
- * TODO: the new mutation actions (applyCoupon/removeCoupon/selectShippingRate/
- * updateCustomer/restoreItem) should ultimately live in the shared `woocommerce`
- * store (owned by Billow), not here.
+ * All cart mutations (add/remove item, coupons, shipping) live in the shared
+ * `woocommerce` store. This module's actions are thin classic-cart glue: read
+ * the server-rendered markup, call the shared mutation, then re-render. The
+ * exception is `restoreItem`, which has no Store API equivalent and falls back
+ * to the legacy server URL.
  */
 
 /**
@@ -32,19 +34,15 @@ type ClassicCartContext = {
 	coupon: string;
 };
 
-interface WooCartState {
-	restUrl: string;
-	nonce: string;
-}
-
 // Lock for our own private classic-cart store, so its state is mutable from
 // actions. The shared `woocommerce` store is accessed without a lock (its
 // public actions are reachable that way).
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: wooState, actions: wooActions } = store< {
-	state: WooCartState;
+// All cart mutations live in the shared `woocommerce` store; this module only
+// reads the classic markup and calls those actions, then re-renders.
+const { actions: wooActions } = store< {
 	actions: {
 		addCartItem: ( args: {
 			key?: string;
@@ -53,6 +51,15 @@ const { state: wooState, actions: wooActions } = store< {
 		} ) => Promise< unknown >;
 		removeCartItem: ( key: string ) => Promise< unknown >;
 		refreshCartItems: () => Promise< unknown >;
+		applyCoupon: ( code: string ) => Promise< unknown >;
+		removeCoupon: ( code: string ) => Promise< unknown >;
+		selectShippingRate: ( args: {
+			packageId: number;
+			rateId: string;
+		} ) => Promise< unknown >;
+		updateCustomer: ( data: {
+			shipping_address?: Record< string, string >;
+		} ) => Promise< unknown >;
 	};
 } >( 'woocommerce' );
 
@@ -108,28 +115,6 @@ function emitLegacyEvent( name: string, ...args: unknown[] ): void {
 	if ( w.jQuery ) {
 		w.jQuery( document.body ).trigger( name, args );
 	}
-}
-
-/**
- * Minimal Store API POST helper. Mirrors what the shared store does internally;
- * kept local for the spike for the endpoints the shared store does not expose.
- */
-async function storeApiPost(
-	path: string,
-	data: Record< string, unknown >
-): Promise< unknown > {
-	const response = await fetch(
-		`${ wooState.restUrl }wc/store/v1/${ path }`,
-		{
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Nonce: wooState.nonce,
-			},
-			body: JSON.stringify( data ),
-		}
-	);
-	return response.json();
 }
 
 const { actions } = store(
@@ -199,8 +184,7 @@ const { actions } = store(
 				}
 				state.isProcessing = true;
 				try {
-					yield storeApiPost( 'cart/apply-coupon', { code } );
-					yield wooActions.refreshCartItems();
+					yield wooActions.applyCoupon( code );
 					emitLegacyEvent( 'applied_coupon', code );
 					yield* rerenderCart();
 				} finally {
@@ -213,10 +197,7 @@ const { actions } = store(
 				const { coupon } = getContext< ClassicCartContext >();
 				state.isProcessing = true;
 				try {
-					yield storeApiPost( 'cart/remove-coupon', {
-						code: coupon,
-					} );
-					yield wooActions.refreshCartItems();
+					yield wooActions.removeCoupon( coupon );
 					emitLegacyEvent( 'removed_coupon', coupon );
 					yield* rerenderCart();
 				} finally {
@@ -234,11 +215,10 @@ const { actions } = store(
 				);
 				state.isProcessing = true;
 				try {
-					yield storeApiPost( 'cart/select-shipping-rate', {
-						package_id: packageId,
-						rate_id: rateId,
+					yield wooActions.selectShippingRate( {
+						packageId,
+						rateId,
 					} );
-					yield wooActions.refreshCartItems();
 					emitLegacyEvent( 'updated_shipping_method' );
 					yield* rerenderCart();
 				} finally {
@@ -253,16 +233,22 @@ const { actions } = store(
 				const data = new FormData( form );
 				state.isProcessing = true;
 				try {
-					yield storeApiPost( 'cart/update-customer', {
+					yield wooActions.updateCustomer( {
 						shipping_address: {
-							country: data.get( 'calc_shipping_country' ) ?? '',
-							state: data.get( 'calc_shipping_state' ) ?? '',
-							city: data.get( 'calc_shipping_city' ) ?? '',
-							postcode:
-								data.get( 'calc_shipping_postcode' ) ?? '',
+							country: String(
+								data.get( 'calc_shipping_country' ) ?? ''
+							),
+							state: String(
+								data.get( 'calc_shipping_state' ) ?? ''
+							),
+							city: String(
+								data.get( 'calc_shipping_city' ) ?? ''
+							),
+							postcode: String(
+								data.get( 'calc_shipping_postcode' ) ?? ''
+							),
 						},
 					} );
-					yield wooActions.refreshCartItems();
 					yield* rerenderCart();
 				} finally {
 					state.isProcessing = false;

@@ -79,6 +79,16 @@ export type Store = {
 	};
 	actions: {
 		removeCartItem: ( key: string ) => Promise< void >;
+		applyCoupon: ( code: string ) => Promise< void >;
+		removeCoupon: ( code: string ) => Promise< void >;
+		selectShippingRate: ( args: {
+			packageId: number;
+			rateId: string;
+		} ) => Promise< void >;
+		updateCustomer: ( data: {
+			billing_address?: Record< string, string >;
+			shipping_address?: Record< string, string >;
+		} ) => Promise< void >;
 		addCartItem: (
 			args: ClientCartItem,
 			options?: CartUpdateOptions
@@ -332,6 +342,63 @@ const { actions } = store< Store >(
 							true
 						);
 					}
+				} catch ( error ) {
+					actions.showNoticeError( error as Error );
+				}
+			},
+
+			*applyCoupon( code: string ): AsyncAction< void > {
+				try {
+					yield sendCartRequest( state, {
+						path: '/wc/store/v1/cart/apply-coupon',
+						method: 'POST',
+						body: { code },
+					} );
+				} catch ( error ) {
+					actions.showNoticeError( error as Error );
+				}
+			},
+
+			*removeCoupon( code: string ): AsyncAction< void > {
+				try {
+					yield sendCartRequest( state, {
+						path: '/wc/store/v1/cart/remove-coupon',
+						method: 'POST',
+						body: { code },
+					} );
+				} catch ( error ) {
+					actions.showNoticeError( error as Error );
+				}
+			},
+
+			*selectShippingRate( {
+				packageId,
+				rateId,
+			}: {
+				packageId: number;
+				rateId: string;
+			} ): AsyncAction< void > {
+				try {
+					yield sendCartRequest( state, {
+						path: '/wc/store/v1/cart/select-shipping-rate',
+						method: 'POST',
+						body: { package_id: packageId, rate_id: rateId },
+					} );
+				} catch ( error ) {
+					actions.showNoticeError( error as Error );
+				}
+			},
+
+			*updateCustomer( data: {
+				billing_address?: Record< string, string >;
+				shipping_address?: Record< string, string >;
+			} ): AsyncAction< void > {
+				try {
+					yield sendCartRequest( state, {
+						path: '/wc/store/v1/cart/update-customer',
+						method: 'POST',
+						body: data,
+					} );
 				} catch ( error ) {
 					actions.showNoticeError( error as Error );
 				}
