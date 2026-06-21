@@ -49,6 +49,13 @@ class ClassicCartInteractivity implements RegisterHooksInterface {
 	private const STORE_NAMESPACE = 'woocommerce/classic-cart';
 
 	/**
+	 * Style handle for the inline busy-state CSS.
+	 *
+	 * @var string
+	 */
+	private const STYLE_HANDLE = 'wc-classic-cart-iapi';
+
+	/**
 	 * Register hooks.
 	 *
 	 * @return void
@@ -75,6 +82,10 @@ class ClassicCartInteractivity implements RegisterHooksInterface {
 		if ( ! $this->is_iapi_cart_active() ) {
 			return;
 		}
+		// Removing 'wc-cart' also removes its localized `wc_cart_params` object.
+		// Extensions that read `wc_cart_params` on the cart page will not find it
+		// under the iAPI cart; this is a documented breaking change (see the
+		// migration plan's "Legacy mechanisms" section).
 		wp_dequeue_script( self::LEGACY_CART_SCRIPT_HANDLE );
 	}
 
@@ -101,6 +112,9 @@ class ClassicCartInteractivity implements RegisterHooksInterface {
 			$processor->set_attribute( 'data-wp-interactive', self::STORE_NAMESPACE );
 			$processor->set_attribute( 'data-wp-router-region', 'woocommerce-cart' );
 			$processor->set_attribute( 'data-wp-init', 'callbacks.setupLegacyBridge' );
+			// Busy state during a mutation (replaces the legacy blockUI overlay).
+			$processor->set_attribute( 'data-wp-bind--aria-busy', 'state.isProcessing' );
+			$processor->set_attribute( 'data-wp-class--is-cart-updating', 'state.isProcessing' );
 		}
 
 		// Decorate the remaining interactive controls.
@@ -121,6 +135,19 @@ class ClassicCartInteractivity implements RegisterHooksInterface {
 
 			if ( 'A' === $tag_name && $processor->has_class( 'shipping-calculator-button' ) ) {
 				$processor->set_attribute( 'data-wp-on--click', self::STORE_NAMESPACE . '::actions.toggleShippingCalculator' );
+				continue;
+			}
+
+			// Undo/restore link shown in the "item removed" notice.
+			if ( 'A' === $tag_name && $processor->has_class( 'restore-item' ) ) {
+				$processor->set_attribute( 'data-wp-on--click', self::STORE_NAMESPACE . '::actions.restoreItem' );
+				continue;
+			}
+
+			// Prevent the full-form POST when JS is active (quantities apply on
+			// change); the native submit still works without JS.
+			if ( 'FORM' === $tag_name && $processor->has_class( 'woocommerce-cart-form' ) ) {
+				$processor->set_attribute( 'data-wp-on--submit', self::STORE_NAMESPACE . '::actions.preventFormSubmit' );
 				continue;
 			}
 
@@ -211,6 +238,15 @@ class ClassicCartInteractivity implements RegisterHooksInterface {
 		// file. Enqueuing before registration is a safe no-op until the build
 		// has run.
 		wp_enqueue_script_module( self::STORE_NAMESPACE );
+
+		// Busy-state styling for the wrapper while a mutation is in flight.
+		// Inline-only style (no src), toggled by data-wp-class--is-cart-updating.
+		wp_register_style( self::STYLE_HANDLE, false, array(), \WC_VERSION );
+		wp_enqueue_style( self::STYLE_HANDLE );
+		wp_add_inline_style(
+			self::STYLE_HANDLE,
+			'.woocommerce .is-cart-updating{opacity:.6;pointer-events:none;}'
+		);
 	}
 
 	/**

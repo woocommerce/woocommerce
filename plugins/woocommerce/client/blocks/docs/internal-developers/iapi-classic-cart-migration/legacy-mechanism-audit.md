@@ -84,10 +84,39 @@ These are unused by the iAPI path but stay registered, so dependent code keeps w
 
 ## Open gaps to resolve before flag-on
 
-1. **Undo / restore item** — no Store API restore endpoint (see row in §1).
-2. **Busy-state visual parity** — replace blockUI overlay with an equivalent iAPI loading state.
-3. **a11y after morph** — focus management + `role="alert"` announcement that cart.js does today.
-4. **`wc_cart_params` consumers** — document the removal for extensions that read it on the cart page.
+Status as of the 2026-06-21 spike pass (verified live against the Studio site):
+
+1. **Busy-state visual parity** — DONE. Reactive `state.isProcessing` on the locked
+   classic-cart store toggles `aria-busy` + an `is-cart-updating` class (inline CSS), replacing
+   the blockUI overlay.
+2. **`wc_cart_params` consumers** — DONE (documented in `dequeue_legacy_cart()` and the plan).
+3. **No-JS form-submit prevention** — DONE. `preventFormSubmit` on the cart form (verified
+   `defaultPrevented`); the native POST still works without JS.
+4. **a11y after morph** — PARTIAL. `focusNotices()` moves focus to a server notice after each
+   re-render, but see the key finding below.
+
+### Key finding: Store API mutations bypass the legacy WC notice/undo system
+
+Routing mutations through Store API (`removeCartItem`, `apply-coupon`, …) does **not** emit the
+classic `wc_add_notice` messages that the legacy form/GET handlers produce. Consequences observed
+live:
+
+- **Undo / restore** — removing an item via Store API produces **no "item removed / Undo"
+  notice**, so the `restore-item` link is never rendered. The `restoreItem` action + directive are
+  in place but unreachable on this path. To keep undo: either replicate the notice + restore link
+  server-side after a Store API removal, or keep using the legacy GET remove URL for removals.
+- **Coupon / status messages** — "Coupon applied successfully", "Shipping costs updated", etc. do
+  not appear (error messages from the Store API response would still need surfacing). `focusNotices`
+  therefore usually has nothing to focus.
+
+This is the single biggest open question for the interactivity-only path: decide how cart notices
+are produced once mutations are JSON/Store-API driven rather than PHP-handler driven.
+
+### Implementation note (store locking)
+
+The classic-cart store must be registered **with a lock** (`{ lock: universalLock }`) for its own
+`state` to be mutable from actions (mirrors the Mini-Cart). The shared `woocommerce` store is
+accessed **without** a lock — passing one there breaks access to its public actions.
 
 ## Manual verification checklist (spike acceptance)
 
