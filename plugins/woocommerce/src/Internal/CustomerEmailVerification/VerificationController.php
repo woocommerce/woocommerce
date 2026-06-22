@@ -6,9 +6,10 @@ namespace Automattic\WooCommerce\Internal\CustomerEmailVerification;
 /**
  * Drives the customer email-verification UI on My Account and processes its requests.
  *
- * Verification uses a short-lived 6-digit code (OTP) the customer types into a form on the My
- * Account "Orders" panel — the same logged-in session that requested it. There is no verification
- * link, so an email client or security scanner that prefetches URLs cannot complete verification.
+ * Verification uses a short-lived 6-digit code (OTP) the customer types into a form on a My Account
+ * sub-page (/orders/verify/) — the same logged-in session that requested it. There is no
+ * verification link, so an email client or security scanner that prefetches URLs cannot complete
+ * verification.
  *
  * @since 11.0.0
  */
@@ -45,6 +46,12 @@ class VerificationController {
 	private const SEND_RATE_LIMIT = 60;
 
 	/**
+	 * Reserved value of the orders endpoint that renders the code-entry sub-page (/orders/verify/).
+	 * Reusing the orders endpoint's existing value segment avoids registering a new rewrite endpoint.
+	 */
+	private const VERIFY_VALUE = 'verify';
+
+	/**
 	 * Verification service.
 	 *
 	 * @var EmailVerificationService
@@ -52,30 +59,24 @@ class VerificationController {
 	private $service;
 
 	/**
-	 * Order linker, used to detect whether there are guest orders worth verifying for.
-	 *
-	 * @var OrderLinker
-	 */
-	private $order_linker;
-
-	/**
 	 * Constructor. Registers hooks.
 	 */
 	public function __construct() {
 		add_action( 'template_redirect', array( $this, 'maybe_process_request' ) );
 		add_action( 'woocommerce_before_account_orders', array( $this, 'render_prompt' ) );
+		// Render the form on the /orders/verify/ sub-page (priority 1, before the default orders list).
+		add_action( 'woocommerce_account_orders_endpoint', array( $this, 'maybe_render_on_orders_endpoint' ), 1 );
+		add_filter( 'woocommerce_endpoint_orders_title', array( $this, 'maybe_filter_orders_title' ) );
 	}
 
 	/**
 	 * Inject dependencies.
 	 *
 	 * @internal
-	 * @param EmailVerificationService $service      Verification service.
-	 * @param OrderLinker              $order_linker Order linker.
+	 * @param EmailVerificationService $service Verification service.
 	 */
-	final public function init( EmailVerificationService $service, OrderLinker $order_linker ): void {
-		$this->service      = $service;
-		$this->order_linker = $order_linker;
+	final public function init( EmailVerificationService $service ): void {
+		$this->service = $service;
 	}
 
 	/**
@@ -91,6 +92,14 @@ class VerificationController {
 
 		if ( $this->is_code_submission() ) {
 			$this->handle_code_submission();
+			return;
+		}
+
+		// On the /orders/verify/ sub-page, bounce anyone with nothing to verify back to orders. Done
+		// here, before output, because the rendering callback can't safely redirect.
+		if ( self::VERIFY_VALUE === get_query_var( 'orders' ) && ! $this->should_show_prompt() ) {
+			wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
+			exit;
 		}
 	}
 
@@ -130,7 +139,9 @@ class VerificationController {
 		// Keep digits only so spaces or stray characters in the pasted code don't cause a false mismatch.
 		$code = preg_replace( '/\D/', '', isset( $_POST[ self::CODE_FIELD ] ) ? sanitize_text_field( wp_unslash( $_POST[ self::CODE_FIELD ] ) ) : '' );
 
-		switch ( $this->service->verify_code( $user_id, (string) $code ) ) {
+		$result = $this->service->verify_code( $user_id, (string) $code );
+
+		switch ( $result ) {
 			case EmailVerificationService::RESULT_OK:
 				wc_add_notice( __( 'Your email address has been confirmed.', 'woocommerce' ) );
 				break;
@@ -157,7 +168,9 @@ class VerificationController {
 				break;
 		}
 
-		wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
+		// Verified customers go to their orders; everyone else stays on the form to try again.
+		$verified = EmailVerificationService::RESULT_OK === $result || $this->service->is_verified( $user_id );
+		wp_safe_redirect( $verified ? wc_get_account_endpoint_url( 'orders' ) : $this->verify_url() );
 		exit;
 	}
 
@@ -186,7 +199,7 @@ class VerificationController {
 
 		// A locked-out customer can only be verified another way (e.g. by the store owner); never mint.
 		if ( $this->service->is_locked_out( $user_id ) ) {
-			wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
+			wp_safe_redirect( $this->verify_url() );
 			exit;
 		}
 
@@ -197,16 +210,18 @@ class VerificationController {
 			$this->send_verification_email( $user_id );
 		}
 
-		wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
+		// Land on the /orders/verify/ sub-page, where the entry form is shown.
+		wp_safe_redirect( $this->verify_url() );
 		exit;
 	}
 
 	/**
 	 * Return whether the verification prompt should be shown for the current user.
 	 *
-	 * True only for a logged-in customer who is not yet verified, does not have a temporary
-	 * password (those confirm via their set-password link), and has at least one guest order that
-	 * could be linked (existence only; no details exposed).
+	 * True for a logged-in, unverified customer, except one still using a temporary password (those
+	 * confirm via their set-password link, so the temporary-password notice already covers it). This
+	 * must not depend on whether matching guest orders exist, because that would disclose order
+	 * existence before the customer proves they control the email address.
 	 *
 	 * @since 11.0.0
 	 *
@@ -229,20 +244,49 @@ class VerificationController {
 			return false;
 		}
 
-		return $this->order_linker->has_linkable_orders( $user_id );
+		return true;
 	}
 
 	/**
-	 * Render the verification prompt on the My Account "Orders" panel.
+	 * Render the verification prompt notice on the My Account "Orders" panel.
 	 *
-	 * Shows one of three states, derived from the user's stored verification state so the right
-	 * thing appears after a reload, a second tab, or the back button: a permanent-lockout message,
-	 * the code-entry form (when a code is pending), or the "send code" call to action.
+	 * The notice initiates the flow but does not host the form: a permanent-lockout message, a
+	 * pointer to the /orders/verify/ sub-page when a code is already pending, or the "send code" call
+	 * to action (which sends a code and redirects to the /orders/verify/ sub-page).
 	 *
 	 * @internal
 	 * @since 11.0.0
 	 */
 	public function render_prompt(): void {
+		if ( ! $this->should_show_prompt() ) {
+			return;
+		}
+
+		$user_id = get_current_user_id();
+
+		if ( $this->service->is_locked_out( $user_id ) ) {
+			$html = $this->get_locked_html();
+		} elseif ( $this->service->has_pending_code( $user_id ) ) {
+			$html = $this->get_pending_notice_html();
+		} else {
+			$html = $this->get_send_cta_html();
+		}
+
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- each helper escapes every interpolated value.
+		echo $html;
+	}
+
+	/**
+	 * Render the verification sub-page content: the code-entry form (or the lockout / send states).
+	 *
+	 * Reached from the orders prompt via {@see self::maybe_render_on_orders_endpoint()}. Access is
+	 * gated in {@see self::maybe_process_request()}, which redirects anyone with nothing to verify
+	 * back to orders before output.
+	 *
+	 * @internal
+	 * @since 11.0.0
+	 */
+	public function render_endpoint_content(): void {
 		if ( ! $this->should_show_prompt() ) {
 			return;
 		}
@@ -260,6 +304,53 @@ class VerificationController {
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- each helper escapes every interpolated value.
 		echo $html;
+	}
+
+	/**
+	 * Render the verification UI on the /orders/verify/ sub-page.
+	 *
+	 * Hooked early on the orders endpoint. When the orders value is the reserved "verify" token, this
+	 * renders the verification UI and removes the default orders-list output so only the form shows;
+	 * for any other value (a page number, or none) it is a no-op and the orders list renders normally.
+	 *
+	 * @internal
+	 * @param string $value The orders endpoint value (a page number, or the verify token).
+	 * @return void
+	 */
+	public function maybe_render_on_orders_endpoint( $value ): void {
+		if ( self::VERIFY_VALUE !== $value ) {
+			return;
+		}
+
+		remove_action( 'woocommerce_account_orders_endpoint', 'woocommerce_account_orders' );
+		$this->render_endpoint_content();
+	}
+
+	/**
+	 * Use a confirmation title on the /orders/verify/ sub-page instead of the default "Orders" title.
+	 *
+	 * @internal
+	 * @param string $title Default orders endpoint title.
+	 * @return string
+	 */
+	public function maybe_filter_orders_title( $title ): string {
+		if ( self::VERIFY_VALUE === get_query_var( 'orders' ) ) {
+			return __( 'Confirm your email address', 'woocommerce' );
+		}
+
+		return $title;
+	}
+
+	/**
+	 * URL of the /orders/verify/ sub-page that hosts the code-entry form.
+	 *
+	 * Reuses the orders endpoint's existing value segment, so no new rewrite rule (and no flush) is
+	 * needed for the URL to resolve.
+	 *
+	 * @return string
+	 */
+	private function verify_url(): string {
+		return wc_get_endpoint_url( 'orders', self::VERIFY_VALUE, wc_get_page_permalink( 'myaccount' ) );
 	}
 
 	/**
@@ -284,9 +375,26 @@ class VerificationController {
 
 		$notice = sprintf(
 			'<a href="%2$s" class="button wc-forward">%3$s</a> %1$s',
-			esc_html__( 'Confirm your email address to view past orders.', 'woocommerce' ),
+			esc_html__( 'Confirm your email address to link any past orders to your account.', 'woocommerce' ),
 			esc_url( $send_url ),
 			esc_html__( 'Send confirmation code', 'woocommerce' )
+		);
+
+		return wc_print_notice( $notice, 'notice', array(), true );
+	}
+
+	/**
+	 * Build the orders-panel notice shown when a code is already pending: a pointer to the
+	 * /orders/verify/ sub-page where the customer enters it.
+	 *
+	 * @return string Fully escaped HTML.
+	 */
+	private function get_pending_notice_html(): string {
+		$notice = sprintf(
+			'<a href="%2$s" class="button wc-forward">%3$s</a> %1$s',
+			esc_html__( 'We emailed you a confirmation code.', 'woocommerce' ),
+			esc_url( $this->verify_url() ),
+			esc_html__( 'Enter your code', 'woocommerce' )
 		);
 
 		return wc_print_notice( $notice, 'notice', array(), true );
@@ -320,7 +428,7 @@ class VerificationController {
 
 		return sprintf(
 			$template,
-			esc_url( wc_get_account_endpoint_url( 'orders' ) ),
+			esc_url( $this->verify_url() ),
 			// translators: %s: the customer's email address.
 			sprintf( esc_html__( 'Enter the 6-digit code that was sent to %s within 10 minutes to confirm your email address.', 'woocommerce' ), esc_html( $user->user_email ) ),
 			esc_url( $resend_url ),

@@ -136,6 +136,73 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The orders endpoint renders the verification form for the "verify" value and nothing otherwise.
+	 */
+	public function test_orders_endpoint_renders_form_on_verify_value(): void {
+		$user_id = wc_create_new_customer( 'orders-verify@example.com', 'ordersverify', 'pw' );
+		wp_set_current_user( $user_id );
+		$this->service->create_code( $user_id );
+
+		// A page-number value is a no-op (the orders list renders as usual).
+		ob_start();
+		$this->ctrl->maybe_render_on_orders_endpoint( '2' );
+		$this->assertSame( '', ob_get_clean(), 'A normal page value must not render the verification form.' );
+
+		// The reserved "verify" value renders the form.
+		ob_start();
+		$this->ctrl->maybe_render_on_orders_endpoint( 'verify' );
+		$html = (string) ob_get_clean();
+
+		// Restore the core orders-list callback the verify branch removed.
+		add_action( 'woocommerce_account_orders_endpoint', 'woocommerce_account_orders' );
+		wp_set_current_user( 0 );
+
+		$this->assertStringContainsString( 'name="wc_verify_email_code"', $html, 'The /orders/verify/ sub-page must render the entry form.' );
+	}
+
+	/**
+	 * @testdox The orders title becomes a confirmation title on the /orders/verify/ sub-page.
+	 */
+	public function test_orders_title_on_verify_subpage(): void {
+		set_query_var( 'orders', 'verify' );
+		$this->assertSame( 'Confirm your email address', $this->ctrl->maybe_filter_orders_title( 'Orders' ) );
+
+		set_query_var( 'orders', '2' );
+		$this->assertSame( 'Orders', $this->ctrl->maybe_filter_orders_title( 'Orders' ), 'A normal orders page keeps its title.' );
+
+		set_query_var( 'orders', '' );
+	}
+
+	/**
+	 * @testdox A verified customer who lands on the /orders/verify/ sub-page is redirected to orders.
+	 */
+	public function test_verify_subpage_redirects_verified_user_to_orders(): void {
+		$user_id = wc_create_new_customer( 'verified-endpoint@example.com', 'verifiedendpoint', 'pw' );
+		$this->service->mark_verified( $user_id );
+		wp_set_current_user( $user_id );
+
+		// Simulate a request on /orders/verify/ (get_query_var reads from $wp_query).
+		set_query_var( 'orders', 'verify' );
+
+		$redirect = '';
+		$abort    = static function ( $location ) {
+			throw new \RuntimeException( esc_html( (string) $location ) );
+		};
+		add_filter( 'wp_redirect', $abort );
+		try {
+			$this->ctrl->maybe_process_request();
+		} catch ( \RuntimeException $e ) {
+			$redirect = $e->getMessage();
+		} finally {
+			remove_filter( 'wp_redirect', $abort );
+			set_query_var( 'orders', '' );
+			wp_set_current_user( 0 );
+		}
+
+		$this->assertStringContainsString( 'orders', $redirect, 'A verified user with nothing to verify should be bounced to orders.' );
+	}
+
+	/**
 	 * Capture the code emitted by send_verification_email().
 	 *
 	 * @param int $user_id User to send to.

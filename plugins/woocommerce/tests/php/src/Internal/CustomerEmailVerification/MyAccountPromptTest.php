@@ -46,18 +46,6 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a linkable guest order for the given email.
-	 *
-	 * @param string $email Billing email to attach the guest order to.
-	 */
-	private function create_guest_order( string $email ): void {
-		$order = \WC_Helper_Order::create_order( 0 );
-		$order->set_billing_email( $email );
-		$order->set_customer_id( 0 );
-		$order->save();
-	}
-
-	/**
 	 * Render the My Account prompt and return its HTML.
 	 *
 	 * @return string
@@ -65,6 +53,17 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	private function render_prompt(): string {
 		ob_start();
 		$this->sut->render_prompt();
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Render the verify-account endpoint content and return its HTML.
+	 *
+	 * @return string
+	 */
+	private function render_endpoint(): string {
+		ob_start();
+		$this->sut->render_endpoint_content();
 		return (string) ob_get_clean();
 	}
 
@@ -123,43 +122,35 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_show_prompt returns true for an unverified customer with linkable guest orders.
+	 * @testdox should_show_prompt returns true for a logged-in unverified customer.
 	 */
 	public function test_should_show_prompt_returns_true_for_logged_in_unverified_customer(): void {
-		$email   = 'prompt-unverified@example.com';
-		$user_id = wc_create_new_customer( $email, 'promptunverified', 'pw' );
+		$user_id = wc_create_new_customer( 'prompt-unverified@example.com', 'promptunverified', 'pw' );
 		wp_set_current_user( $user_id );
 
-		// A linkable guest order must exist for the prompt to appear.
-		$this->create_guest_order( $email );
-
-		$this->assertTrue( $this->sut->should_show_prompt(), 'Unverified customers with linkable guest orders should see the prompt' );
+		$this->assertTrue( $this->sut->should_show_prompt(), 'Unverified customers should see the prompt' );
 	}
 
 	/**
-	 * @testdox should_show_prompt returns false for an unverified customer with no linkable guest orders.
+	 * @testdox should_show_prompt returns true for an unverified customer with no linkable guest orders.
 	 */
-	public function test_should_show_prompt_returns_false_without_linkable_orders(): void {
+	public function test_should_show_prompt_returns_true_without_linkable_orders(): void {
 		$user_id = wc_create_new_customer( 'prompt-no-orders@example.com', 'promptnoorders', 'pw' );
 		wp_set_current_user( $user_id );
 
-		$this->assertFalse( $this->sut->should_show_prompt(), 'Unverified customers with nothing to link should not see the prompt' );
+		$this->assertTrue( $this->sut->should_show_prompt(), 'Prompt visibility must not reveal whether matching guest orders exist' );
 	}
 
 	/**
 	 * @testdox should_show_prompt returns false for an account using a temporary password.
 	 */
 	public function test_should_show_prompt_returns_false_with_temporary_password(): void {
-		$email   = 'temp-pass@example.com';
-		$user_id = wc_create_new_customer( $email, 'temppassuser', 'pw' );
+		$user_id = wc_create_new_customer( 'temp-pass@example.com', 'temppassuser', 'pw' );
 		wp_set_current_user( $user_id );
-
-		// A linkable guest order exists, so only the temporary-password suppression should hide the prompt.
-		$this->create_guest_order( $email );
 
 		update_user_option( $user_id, 'default_password_nag', true, true );
 
-		$this->assertFalse( $this->sut->should_show_prompt(), 'Prompt should be hidden when the temporary-password notice covers verification' );
+		$this->assertFalse( $this->sut->should_show_prompt(), 'Temp-password accounts confirm via their set-password link, so the prompt is suppressed' );
 	}
 
 	/**
@@ -181,10 +172,8 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	 * @testdox The prompt shows a send-code call to action when no code is pending.
 	 */
 	public function test_prompt_renders_send_cta_when_no_code(): void {
-		$email   = 'cta-prompt@example.com';
-		$user_id = wc_create_new_customer( $email, 'ctapromptuser', 'pw' );
+		$user_id = wc_create_new_customer( 'cta-prompt@example.com', 'ctapromptuser', 'pw' );
 		wp_set_current_user( $user_id );
-		$this->create_guest_order( $email );
 
 		$html = $this->render_prompt();
 
@@ -193,33 +182,63 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The prompt shows the code-entry form when a code is pending.
+	 * @testdox The orders prompt links to the /orders/verify/ sub-page (not the form) when a code is pending.
 	 */
-	public function test_prompt_renders_code_form_when_pending(): void {
-		$email   = 'inbox-prompt@example.com';
-		$user_id = wc_create_new_customer( $email, 'inboxpromptuser', 'pw' );
+	public function test_orders_prompt_links_to_endpoint_when_pending(): void {
+		$user_id = wc_create_new_customer( 'inbox-prompt@example.com', 'inboxpromptuser', 'pw' );
 		wp_set_current_user( $user_id );
-		$this->create_guest_order( $email );
 
 		// A code was just sent.
 		$this->service->create_code( $user_id );
 
-		$html = $this->render_prompt();
+		$html         = $this->render_prompt();
+		$expected_url = wc_get_endpoint_url( 'orders', 'verify', wc_get_page_permalink( 'myaccount' ) );
 
-		$this->assertStringContainsString( 'name="wc_verify_email_code"', $html, 'A pending code should surface the entry form.' );
-		$this->assertStringContainsString( 'autocomplete="one-time-code"', $html, 'The input should opt into OTP autofill.' );
+		$this->assertStringContainsString( esc_url( $expected_url ), $html, 'The pending notice should point to the /orders/verify/ sub-page.' );
+		$this->assertStringNotContainsString( 'name="wc_verify_email_code"', $html, 'The form must not render on the orders panel.' );
+		$this->assertFalse( wp_script_is( 'wc-customer-email-verification', 'enqueued' ), 'The orders notice must not enqueue the form script.' );
+	}
+
+	// -------------------------------------------------------------------------
+	// render_endpoint_content()
+	// -------------------------------------------------------------------------
+
+	/**
+	 * @testdox The verify-account endpoint renders the code-entry form and enqueues its script when a code is pending.
+	 */
+	public function test_endpoint_renders_code_form_when_pending(): void {
+		$user_id = wc_create_new_customer( 'endpoint-form@example.com', 'endpointformuser', 'pw' );
+		wp_set_current_user( $user_id );
+
+		$this->service->create_code( $user_id );
+
+		$html = $this->render_endpoint();
+
+		$this->assertStringContainsString( 'name="wc_verify_email_code"', $html, 'A pending code should surface the entry form on the endpoint.' );
 		$this->assertStringContainsString( 'type="hidden" name="wc_verify_email_submit"', $html, 'The submit marker must be a hidden field so the button can be disabled while submitting without dropping it.' );
-		$this->assertTrue( wp_script_is( 'wc-customer-email-verification', 'enqueued' ), 'Rendering the form should enqueue its enhancement script.' );
+		$this->assertTrue( wp_script_is( 'wc-customer-email-verification', 'enqueued' ), 'Rendering the endpoint form should enqueue its enhancement script.' );
+	}
+
+	/**
+	 * @testdox The verify-account endpoint shows the contact-the-owner message once the user is locked out.
+	 */
+	public function test_endpoint_renders_locked_message_when_locked_out(): void {
+		$user_id = wc_create_new_customer( 'endpoint-locked@example.com', 'endpointlocked', 'pw' );
+		wp_set_current_user( $user_id );
+		$this->force_lockout( $user_id );
+
+		$html = $this->render_endpoint();
+
+		$this->assertStringContainsString( 'store owner', $html, 'A locked-out user should be told to contact the store owner.' );
+		$this->assertStringNotContainsString( 'name="wc_verify_email_code"', $html, 'A locked-out user must not see the entry form.' );
 	}
 
 	/**
 	 * @testdox The prompt shows a contact-the-owner message once the user is locked out.
 	 */
 	public function test_prompt_renders_locked_message_when_locked_out(): void {
-		$email   = 'locked-prompt@example.com';
-		$user_id = wc_create_new_customer( $email, 'lockedpromptuser', 'pw' );
+		$user_id = wc_create_new_customer( 'locked-prompt@example.com', 'lockedpromptuser', 'pw' );
 		wp_set_current_user( $user_id );
-		$this->create_guest_order( $email );
 
 		$this->force_lockout( $user_id );
 
