@@ -1534,15 +1534,10 @@ class WooPaymentsService {
 				);
 			}
 		} catch ( Exception $e ) {
-			// Catch any exceptions to allow for proper error handling and onboarding unlock.
-			$response = new WP_Error(
-				'woocommerce_woopayments_onboarding_client_api_exception',
-				esc_html__( 'An unexpected error happened while disabling the test account.', 'woocommerce' ),
-				array(
-					'code'    => $e->getCode(),
-					'message' => $e->getMessage(),
-					'trace'   => $e->getTrace(),
-				)
+			// Convert the exception to a WP_Error; the onboarding lock is released in the finally below.
+			$response = $this->get_onboarding_client_api_exception_error(
+				$e,
+				esc_html__( 'An unexpected error happened while disabling the test account.', 'woocommerce' )
 			);
 		} finally {
 			// Unlock before making the internal WooPayments request to avoid self-conflicting
@@ -1560,15 +1555,10 @@ class WooPaymentsService {
 					$params
 				);
 			} catch ( Exception $e ) {
-				// Catch any exceptions to allow for proper error handling and onboarding unlock.
-				$response = new WP_Error(
-					'woocommerce_woopayments_onboarding_client_api_exception',
-					esc_html__( 'An unexpected error happened while disabling the test account.', 'woocommerce' ),
-					array(
-						'code'    => $e->getCode(),
-						'message' => $e->getMessage(),
-						'trace'   => $e->getTrace(),
-					)
+				// Convert the exception to a WP_Error so the failure is surfaced to the caller.
+				$response = $this->get_onboarding_client_api_exception_error(
+					$e,
+					esc_html__( 'An unexpected error happened while disabling the test account.', 'woocommerce' )
 				);
 			}
 		}
@@ -1629,6 +1619,26 @@ class WooPaymentsService {
 		);
 
 		return $response;
+	}
+
+	/**
+	 * Build a WP_Error for an exception thrown while talking to the internal WooPayments onboarding API.
+	 *
+	 * @param Exception $e       The caught exception.
+	 * @param string    $message The human-readable, already-escaped error message.
+	 *
+	 * @return WP_Error
+	 */
+	private function get_onboarding_client_api_exception_error( Exception $e, string $message ): WP_Error {
+		return new WP_Error(
+			'woocommerce_woopayments_onboarding_client_api_exception',
+			$message,
+			array(
+				'code'    => $e->getCode(),
+				'message' => $e->getMessage(),
+				'trace'   => $e->getTrace(),
+			)
+		);
 	}
 
 	/**
