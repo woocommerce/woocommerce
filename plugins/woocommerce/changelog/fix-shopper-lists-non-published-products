@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Only save publicly available products to shopper lists.
+Only save published products to shopper lists.
