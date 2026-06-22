@@ -1,4 +1,4 @@
 Significance: patch
 Type: performance
 
-HPOS: rewrite order queries filtering by multiple statuses and ordered by creation date (such as the default order admin list query) as a UNION ALL of single-status queries, so each branch can be fully served by the type_status_date index regardless of optimizer heuristics. The rewrite is enabled by default only on stores where cached order counts for the queried statuses reach 500,000 (below that the regular query is already fast), is skipped for queries customized through query args or the existing clauses/SQL filters, and can be overridden either way via the new woocommerce_orders_table_query_status_union_optimization filter.
+HPOS: speed up the order admin list on large stores by rewriting multi-status order queries as per-status UNIONs.

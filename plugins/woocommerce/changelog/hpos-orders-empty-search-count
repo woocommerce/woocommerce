@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-HPOS: don't add the search filter to the order admin list query when the search term is empty, so such requests keep using cached order counts instead of running a potentially slow COUNT query.
