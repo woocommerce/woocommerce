@@ -1501,10 +1501,8 @@ class WooPaymentsService {
 		$event_props = array();
 		$source      = $this->validate_onboarding_source( $source );
 
-		$had_test_account    = false;
-		$had_sandbox_account = false;
-		$endpoint            = '';
-		$params              = array();
+		$endpoint = '';
+		$params   = array();
 
 		// Briefly lock the onboarding while Core determines the account transition to perform.
 		// The internal WooPayments endpoint must run after this lock is cleared because it may
@@ -1520,16 +1518,15 @@ class WooPaymentsService {
 				'source'       => $source,
 			);
 
-			// First, check if we have a test account to disable.
 			if ( $had_test_account ) {
-				// Call the WooPayments API to disable the test account and prepare for the switch to live.
+				// Prepare the WooPayments API disable call for Phase 2, after the lock is released.
 				$endpoint = '/wc/v3/payments/onboarding/test_drive_account/disable';
 				$params   = array(
 					'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
 					'source' => $source,
 				);
 			} elseif ( $had_sandbox_account ) {
-				// Call the WooPayments API to reset onboarding.
+				// Prepare the WooPayments API onboarding reset call for Phase 2, after the lock is released.
 				$endpoint = '/wc/v3/payments/onboarding/reset';
 				$params   = array(
 					'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
@@ -1553,6 +1550,7 @@ class WooPaymentsService {
 			$this->clear_onboarding_lock();
 		}
 
+		// Phase 2 assumes duplicate concurrent WooPayments endpoint calls are idempotent; unverified.
 		if ( ! is_wp_error( $response ) && ! empty( $endpoint ) ) {
 			try {
 				$response = $this->proxy->call_static(

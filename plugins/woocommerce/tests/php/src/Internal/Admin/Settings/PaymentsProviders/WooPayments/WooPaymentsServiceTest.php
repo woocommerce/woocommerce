@@ -8096,8 +8096,6 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	public function test_disable_test_account_preserves_internal_lock_failure_after_account_delete(): void {
 		$location = 'US';
 
-		$this->mock_working_wpcom_connection();
-
 		$account_is_connected = true;
 		$account_status       = array(
 			'status'           => 'complete',
@@ -8350,27 +8348,34 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	public function test_disable_test_account_self_heals_expired_onboarding_lock_before_internal_disable(): void {
 		$location = 'US';
 
-		$this->mock_working_wpcom_connection();
-
 		$account_exists = true;
 		$this->mock_account_state( $account_exists );
 
-		$endpoint_calls = 0;
+		$endpoint_calls              = 0;
+		$disable_test_account_result = function ( string $endpoint ) use ( &$account_exists, &$endpoint_calls ) {
+			if ( '/wc/v3/payments/onboarding/test_drive_account/disable' === $endpoint ) {
+				++$endpoint_calls;
+				$account_exists = false;
+
+				return new WP_Error(
+					'woocommerce_settings_payments_rest_error',
+					'Internal WooPayments bad request.',
+					array(
+						'code'    => 'wcpay_bad_request',
+						'message' => 'Internal WooPayments bad request.',
+						'data'    => array(
+							'status' => 400,
+						),
+					)
+				);
+			}
+
+			throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+		};
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint ) use ( &$account_exists, &$endpoint_calls ) {
-						if ( '/wc/v3/payments/onboarding/test_drive_account/disable' === $endpoint ) {
-							$endpoint_calls++;
-							$account_exists = false;
-
-							return array(
-								'success' => true,
-							);
-						}
-
-						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
-					},
+					'rest_endpoint_post_request' => $disable_test_account_result,
 				),
 			)
 		);
@@ -8380,9 +8385,15 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$updated_profile = array();
 		$this->mock_disable_test_account_option_state( $lock_value, $lock_changes, $updated_profile );
 
-		$result = $this->sut->disable_test_account( $location, 'test-from', 'test-source' );
+		try {
+			$this->sut->disable_test_account( $location, 'test-from', 'test-source' );
 
-		$this->assertSame( array( 'success' => true ), $result );
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertSame( 'woocommerce_woopayments_onboarding_client_api_error', $e->getErrorCode() );
+			$this->assertSame( \WP_Http::FAILED_DEPENDENCY, $e->getCode() );
+		}
+
 		$this->assertSame( 1, $endpoint_calls, 'The internal WooPayments endpoint should be called after the stale lock self-heals.' );
 		$this->assertSame( 0, $lock_value, 'The onboarding lock should finish normalized to 0.' );
 		$this->assertSame(
