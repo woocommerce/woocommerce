@@ -9,7 +9,7 @@ import {
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
-import { dispatch, useDispatch } from '@wordpress/data';
+import { dispatch } from '@wordpress/data';
 import { backup, pencil, trash } from '@wordpress/icons';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
