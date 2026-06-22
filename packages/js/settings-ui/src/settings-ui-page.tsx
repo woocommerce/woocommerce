@@ -49,6 +49,9 @@ type PendingNavigation = {
 	href: string;
 };
 
+const normalizeSection = ( section?: string ) =>
+	section === 'default' ? '' : section;
+
 const getInitialValues = ( schema: SettingsUISchema ): SettingsValues => {
 	const values: SettingsValues = {};
 
@@ -97,6 +100,15 @@ const getActionVariant = ( variant?: string ) =>
 	( [ 'primary', 'secondary', 'tertiary', 'link' ].includes( variant || '' )
 		? variant
 		: 'secondary' ) as 'primary' | 'secondary' | 'tertiary' | 'link';
+
+// TS unions erase at runtime, so guard the className interpolation against unexpected
+// strings from PHP-supplied schemas.
+const getBadgeIntent = ( intent?: string ) =>
+	[ 'default', 'info', 'success', 'warning', 'error' ].includes(
+		intent || ''
+	)
+		? intent
+		: 'default';
 
 const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>
 	schema.save || { adapter: 'form_post' };
@@ -387,6 +399,19 @@ const ShellHeader = ( {
 			</nav>
 		) : undefined;
 
+	const badges = shell.badges?.length
+		? shell.badges.map( ( badge, index ) => (
+				<span
+					className={ `wc-settings-ui-shell__badge wc-settings-ui-shell__badge--${ getBadgeIntent(
+						badge.intent
+					) }` }
+					key={ `${ badge.label }-${ index }` }
+				>
+					{ badge.label }
+				</span>
+		  ) )
+		: undefined;
+
 	const saveButtonLabel = __( 'Save', 'woocommerce' );
 
 	const actions = showSaveButton ? (
@@ -409,7 +434,9 @@ const ShellHeader = ( {
 			className="wc-settings-ui-shell"
 			headingLevel={ 1 }
 			title={ title }
+			subTitle={ shell.subtitle }
 			breadcrumbs={ breadcrumbs }
+			badges={ badges }
 			actions={ actions }
 			showSidebarToggle={ false }
 		>
@@ -497,7 +524,9 @@ export const SettingsUIPage = ( {
 	const context: SettingsFieldContext = useMemo(
 		() => ( {
 			page: page || schema.id,
-			section: section || schema.section,
+			section: normalizeSection(
+				typeof section === 'undefined' ? schema.section : section
+			),
 		} ),
 		[ page, schema.id, schema.section, section ]
 	);
