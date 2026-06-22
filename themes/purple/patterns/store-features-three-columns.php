@@ -7,8 +7,8 @@
  * Description: A three-column section with store featured services.
  */
 ?>
-<!-- wp:group {"metadata":{"name":"Small store features row with icons","categories":["purple"],"patternName":"purple/store-features-three-columns"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|80","bottom":"var:preset|spacing|80"}}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull" style="padding-top:var(--wp--preset--spacing--80);padding-bottom:var(--wp--preset--spacing--80)"><!-- wp:columns {"metadata":{"categories":["text","about"],"patternName":"purple/store-features-four-columns"},"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|50","left":"0"}}}} -->
+<!-- wp:group {"metadata":{"name":"Three columns of store features with icons","categories":["purple"],"patternName":"purple/store-features-three-columns","description":"A three-column section with store featured services."},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|80","bottom":"var:preset|spacing|80"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--80);padding-bottom:var(--wp--preset--spacing--80)"><!-- wp:columns {"metadata":{"categories":["text","about"],"patternName":"purple/store-features-four-columns"},"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|50","left":"0"}}}} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"width":"50%"} -->
 <div class="wp-block-column" style="flex-basis:50%"><!-- wp:group {"style":{"spacing":{"padding":{"right":"0","left":"0"},"blockGap":"var:preset|spacing|20"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center","verticalAlignment":"center"}} -->
 <div class="wp-block-group" style="padding-right:0;padding-left:0"><!-- wp:group {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|20"}}},"layout":{"type":"constrained"}} -->

@@ -8,8 +8,8 @@
  */
 ?>
 
-<!-- wp:group {"metadata":{"name":"Subscribe to newsletter section","categories":["purple"],"patternName":"purple/subscribe-to-newsletter"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull" style="padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:columns {"verticalAlignment":"center","align":"wide"} -->
+<!-- wp:group {"metadata":{"name":"Subscribe to newsletter section","categories":["purple"],"patternName":"purple/subscribe-to-newsletter","description":"A section with a heading and a newsletter subscription form."},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:columns {"verticalAlignment":"center","align":"wide"} -->
 <div class="wp-block-columns alignwide are-vertically-aligned-center"><!-- wp:column {"verticalAlignment":"center"} -->
 <div class="wp-block-column is-vertically-aligned-center"><!-- wp:heading -->
 <h2 class="wp-block-heading"><?php esc_html_e('Subscribe to our newsletter', 'purple');?></h2>

@@ -17,7 +17,7 @@
 <!-- wp:pattern {"slug":"purple/two-columns-highlights-sections"} /-->
 <!-- wp:pattern {"slug":"purple/about-2-columns-with-heading"} /-->
 <!-- wp:pattern {"slug":"purple/store-features-three-columns"} /-->
-<!-- wp:separator {"align":"full"} -->
-<hr class="wp-block-separator alignfull has-alpha-channel-opacity"/>
+<!-- wp:separator {"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<hr class="wp-block-separator alignfull has-alpha-channel-opacity" style="margin-top:0;margin-bottom:0"/>
 <!-- /wp:separator -->
 <!-- wp:pattern {"slug":"purple/subscribe-to-newsletter"} /-->

@@ -236,6 +236,9 @@
 							"color": "currentColor",
 							"width": "1px"
 						},
+						"color": {
+							"text": "var(--wp--preset--color--theme-2)"
+						},
 						"css": ".wp-block-button__link:not(.has-background):hover {background-color:color-mix(in srgb, currentColor 5%, transparent);}",
 						"spacing": {
 							"padding": {
