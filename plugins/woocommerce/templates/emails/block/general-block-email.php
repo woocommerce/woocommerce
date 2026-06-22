@@ -91,15 +91,15 @@ if ( 'customer_reset_password' === $email->id && isset( $reset_key, $user_id ) )
 	<?php
 endif;
 
-if ( 'customer_verify_email' === $email->id && $verify_url ) :
-	?>
-<!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button -->
-<div class="wp-block-button" style="display:inline-block"><a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( $verify_url ); ?>"><?php esc_html_e( 'Confirm email address', 'woocommerce' ); ?></a></div>
-<!-- /wp:button --></div>
-<!-- /wp:buttons -->
-	<?php
-endif;
+if ( 'customer_verify_email' === $email->id && $verify_url ) {
+	wc_get_template(
+		'emails/email-button.php',
+		array(
+			'url'   => $verify_url,
+			'label' => __( 'Confirm email address', 'woocommerce' ),
+		)
+	);
+}
 
 /**
  * Action hook for email classes to hook into the general block email template.

@@ -136,13 +136,7 @@ class VerificationController {
 			// cookie here would be exploitable as login CSRF (the logged-out nonce isn't browser-bound).
 			wc_add_notice( __( 'Your email address has been confirmed.', 'woocommerce' ) );
 		} elseif ( $current_user_id === $user_id && $this->service->is_verified( $user_id ) ) {
-			// The form was submitted twice (e.g. the JS auto-submit plus a manual click) and the key is
-			// already consumed. The address is verified, so reassure rather than show a misleading
-			// error. Guard against a duplicate when the first submission already queued the notice.
-			$confirmed_notice = __( 'Your email address has been confirmed.', 'woocommerce' );
-			if ( ! wc_has_notice( $confirmed_notice, 'success' ) ) {
-				wc_add_notice( $confirmed_notice );
-			}
+			wc_add_notice( __( 'Your email address has been confirmed.', 'woocommerce' ) );
 		} else {
 			wc_add_notice( __( 'This confirmation link is invalid or has expired. Please request a new one.', 'woocommerce' ), 'error' );
 		}
