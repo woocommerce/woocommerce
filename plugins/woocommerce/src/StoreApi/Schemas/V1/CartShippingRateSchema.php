@@ -176,6 +176,12 @@ class CartShippingRateSchema extends AbstractSchema {
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
+				'taxes_before_discount' => [
+					'description' => __( 'Taxes for this shipping rate before any discount, using the smallest unit of the currency.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
 				'discount_label'        => [
 					'description' => __( 'Discount label for this shipping rate.', 'woocommerce' ),
 					'type'        => 'string',
@@ -332,6 +338,7 @@ class CartShippingRateSchema extends AbstractSchema {
 				'price'                 => $this->prepare_money_response( $this->get_rate_prop( $rate, 'cost' ), wc_get_price_decimals() ),
 				'price_before_discount' => $discount['price_before_discount'],
 				'discount_amount'       => $discount['discount_amount'],
+				'taxes_before_discount' => $discount['taxes_before_discount'],
 				'discount_label'        => $discount['discount_label'],
 				'taxes'                 => $this->prepare_money_response( $taxes, wc_get_price_decimals() ),
 				'instance_id'           => $this->get_rate_prop( $rate, 'instance_id' ),
@@ -362,6 +369,7 @@ class CartShippingRateSchema extends AbstractSchema {
 			[
 				'price_before_discount' => '',
 				'discount_amount'       => '',
+				'taxes_before_discount' => '',
 				'discount_label'        => '',
 			],
 			$rate
@@ -371,21 +379,25 @@ class CartShippingRateSchema extends AbstractSchema {
 			$discount_data = [];
 		}
 
-		$price_before_discount = isset( $discount_data['price_before_discount'] ) ? $discount_data['price_before_discount'] : '';
-		$discount_amount       = isset( $discount_data['discount_amount'] ) ? $discount_data['discount_amount'] : '';
-		$discount_label        = isset( $discount_data['discount_label'] ) ? $discount_data['discount_label'] : '';
+		$price_before_discount = $discount_data['price_before_discount'] ?? '';
+		$discount_amount       = $discount_data['discount_amount'] ?? '';
+		$taxes_before_discount = $discount_data['taxes_before_discount'] ?? '';
+		$discount_label        = $discount_data['discount_label'] ?? '';
 		$price_decimals        = wc_get_price_decimals();
 
 		return [
-			'price_before_discount' => '' === $price_before_discount
-				? ''
-				: $this->prepare_money_response( $price_before_discount, $price_decimals ),
-			'discount_amount'       => '' === $discount_amount
-				? ''
-				: $this->prepare_money_response( $discount_amount, $price_decimals ),
-			'discount_label'        => '' === $discount_label
-				? ''
-				: $this->prepare_html_response( $discount_label ),
+			'price_before_discount' => is_numeric( $price_before_discount )
+				? $this->prepare_money_response( $price_before_discount, $price_decimals )
+				: '',
+			'discount_amount'       => is_numeric( $discount_amount )
+				? $this->prepare_money_response( $discount_amount, $price_decimals )
+				: '',
+			'taxes_before_discount' => is_numeric( $taxes_before_discount )
+				? $this->prepare_money_response( $taxes_before_discount, $price_decimals )
+				: '',
+			'discount_label'        => is_scalar( $discount_label )
+				? $this->prepare_html_response( $discount_label )
+				: '',
 		];
 	}
 

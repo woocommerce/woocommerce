@@ -87,6 +87,7 @@ class CartShippingRateSchemaTest extends WC_Unit_Test_Case {
 				return array(
 					'price_before_discount' => '10',
 					'discount_amount'       => '5',
+					'taxes_before_discount' => '1',
 					'discount_label'        => '<strong>Promo</strong>',
 				);
 			},
@@ -100,7 +101,36 @@ class CartShippingRateSchemaTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( '1000', $response['price_before_discount'] );
 		$this->assertSame( '500', $response['discount_amount'] );
+		$this->assertSame( '100', $response['taxes_before_discount'] );
 		$this->assertSame( 'Promo', $response['discount_label'] );
+	}
+
+	/**
+	 * @testdox Should ignore invalid filtered shipping rate discount data.
+	 */
+	public function test_get_rate_response_ignores_invalid_filtered_discount_data(): void {
+		$rate = new WC_Shipping_Rate( 'flat_rate:1', 'Flat rate', 5, array(), 'flat_rate' );
+
+		add_filter(
+			'woocommerce_store_api_shipping_rate_discount_data',
+			function() {
+				return array(
+					'price_before_discount' => 'invalid',
+					'discount_amount'       => array( 'invalid' ),
+					'taxes_before_discount' => new \stdClass(),
+					'discount_label'        => array( 'invalid' ),
+				);
+			}
+		);
+
+		$response = $this->invoke_get_rate_response( $rate );
+
+		remove_all_filters( 'woocommerce_store_api_shipping_rate_discount_data' );
+
+		$this->assertSame( '', $response['price_before_discount'] );
+		$this->assertSame( '', $response['discount_amount'] );
+		$this->assertSame( '', $response['taxes_before_discount'] );
+		$this->assertSame( '', $response['discount_label'] );
 	}
 
 	/**

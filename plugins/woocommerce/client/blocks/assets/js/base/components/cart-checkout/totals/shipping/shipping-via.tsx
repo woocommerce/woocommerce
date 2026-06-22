@@ -4,13 +4,17 @@
 import { decodeEntities } from '@wordpress/html-entities';
 import { useStoreCart } from '@woocommerce/base-context';
 import { getSelectedShippingRateNames } from '@woocommerce/base-utils';
+import type { CartShippingRate } from '@woocommerce/types';
 
 export const ShippingVia = ( {
 	showRateNames = true,
+	shippingRates: shippingRatesProp,
 }: {
 	showRateNames?: boolean;
+	shippingRates?: CartShippingRate[];
 } ): JSX.Element | null => {
-	const { shippingRates } = useStoreCart();
+	const { shippingRates: cartShippingRates } = useStoreCart();
+	const shippingRates = shippingRatesProp ?? cartShippingRates;
 	const rateNames = getSelectedShippingRateNames( shippingRates );
 	const discountLabels = Array.from(
 		new Set(

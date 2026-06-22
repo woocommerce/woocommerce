@@ -44,10 +44,17 @@ const renderShippingRatesControlOption = (
 	const priceWithTaxes = displayPricesIncludingTax
 		? parseInt( option.price, 10 ) + parseInt( option.taxes, 10 )
 		: parseInt( option.price, 10 );
+	const priceBeforeDiscount = parseInt(
+		option.price_before_discount || '',
+		10
+	);
+	const taxesBeforeDiscount = parseInt(
+		option.taxes_before_discount || '',
+		10
+	);
 	const priceBeforeDiscountWithTaxes = displayPricesIncludingTax
-		? parseInt( option.price_before_discount || '', 10 ) +
-		  parseInt( option.taxes, 10 )
-		: parseInt( option.price_before_discount || '', 10 );
+		? priceBeforeDiscount + taxesBeforeDiscount
+		: priceBeforeDiscount;
 	const showDiscountedPrice =
 		Number.isFinite( priceBeforeDiscountWithTaxes ) &&
 		priceBeforeDiscountWithTaxes > priceWithTaxes;

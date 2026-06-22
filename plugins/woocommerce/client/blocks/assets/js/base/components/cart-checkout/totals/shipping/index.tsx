@@ -70,7 +70,10 @@ export const TotalsShipping = ( {
 				}
 				description={
 					<>
-						<ShippingVia showRateNames={ hasMultipleRates } />
+						<ShippingVia
+							showRateNames={ hasMultipleRates }
+							shippingRates={ shippingRates }
+						/>
 						{ collaterals && (
 							<div className="wc-block-components-totals-shipping__collaterals">
 								{ collaterals }

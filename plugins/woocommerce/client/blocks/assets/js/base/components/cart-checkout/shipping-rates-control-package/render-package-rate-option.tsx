@@ -24,10 +24,17 @@ export const renderPackageRateOption = (
 	const priceWithTaxes: number = displayPricesIncludingTax
 		? parseInt( rate.price, 10 ) + parseInt( rate.taxes, 10 )
 		: parseInt( rate.price, 10 );
+	const priceBeforeDiscount = parseInt(
+		rate.price_before_discount || '',
+		10
+	);
+	const taxesBeforeDiscount = parseInt(
+		rate.taxes_before_discount || '',
+		10
+	);
 	const priceBeforeDiscountWithTaxes: number = displayPricesIncludingTax
-		? parseInt( rate.price_before_discount || '', 10 ) +
-		  parseInt( rate.taxes, 10 )
-		: parseInt( rate.price_before_discount || '', 10 );
+		? priceBeforeDiscount + taxesBeforeDiscount
+		: priceBeforeDiscount;
 	const showDiscountedPrice =
 		Number.isFinite( priceBeforeDiscountWithTaxes ) &&
 		priceBeforeDiscountWithTaxes > priceWithTaxes;
