@@ -1502,7 +1502,15 @@ class WooPaymentsService {
 		$source      = $this->validate_onboarding_source( $source );
 
 		$endpoint = '';
-		$params   = array();
+
+		// Both internal calls take the same parameters; only the endpoint differs per account type.
+		$params = array(
+			'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
+			'source' => $source,
+		);
+
+		// The same message is reused wherever an unexpected exception is converted to a WP_Error.
+		$exception_error_message = esc_html__( 'An unexpected error happened while disabling the test account.', 'woocommerce' );
 
 		// Briefly lock the onboarding while Core determines the account transition to perform.
 		// The internal WooPayments endpoint must run after this lock is cleared because it may
@@ -1521,24 +1529,13 @@ class WooPaymentsService {
 			if ( $had_test_account ) {
 				// Prepare the WooPayments API disable call for Phase 2, after the lock is released.
 				$endpoint = '/wc/v3/payments/onboarding/test_drive_account/disable';
-				$params   = array(
-					'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
-					'source' => $source,
-				);
 			} elseif ( $had_sandbox_account ) {
 				// Prepare the WooPayments API onboarding reset call for Phase 2, after the lock is released.
 				$endpoint = '/wc/v3/payments/onboarding/reset';
-				$params   = array(
-					'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
-					'source' => $source,
-				);
 			}
 		} catch ( Exception $e ) {
 			// Convert the exception to a WP_Error; the onboarding lock is released in the finally below.
-			$response = $this->get_onboarding_client_api_exception_error(
-				$e,
-				esc_html__( 'An unexpected error happened while disabling the test account.', 'woocommerce' )
-			);
+			$response = $this->get_onboarding_client_api_exception_error( $e, $exception_error_message );
 		} finally {
 			// Unlock before making the internal WooPayments request to avoid self-conflicting
 			// with WooPayments account cleanup and account.deleted webhook side effects.
@@ -1546,10 +1543,12 @@ class WooPaymentsService {
 		}
 
 		// Phase 2 runs after the shared lock is released to avoid the account.deleted webhook
-		// self-conflict. The WooPayments endpoint is not idempotent but fails safe: a duplicate
-		// concurrent call short-circuits on is_stripe_connected() === false and returns a benign
-		// "account does not exist" error rather than re-deleting the account. Request-scoped
-		// locking is deferred to the broader Core/WooPayments shared-lock contract.
+		// self-conflict. The WooPayments endpoint is not idempotent: a duplicate concurrent call is
+		// guarded against re-deleting the account (WooPayments overwrites its account cache before
+		// the delete, so is_stripe_connected() short-circuits), but it still surfaces to the second
+		// caller as a hard ApiException( FAILED_DEPENDENCY ) via the is_wp_error() check below.
+		// Request-scoped locking for that residual window is deferred to the broader
+		// Core/WooPayments shared-lock contract.
 		if ( ! is_wp_error( $response ) && ! empty( $endpoint ) ) {
 			try {
 				$response = $this->proxy->call_static(
@@ -1560,10 +1559,7 @@ class WooPaymentsService {
 				);
 			} catch ( Exception $e ) {
 				// Convert the exception to a WP_Error so the failure is surfaced to the caller.
-				$response = $this->get_onboarding_client_api_exception_error(
-					$e,
-					esc_html__( 'An unexpected error happened while disabling the test account.', 'woocommerce' )
-				);
+				$response = $this->get_onboarding_client_api_exception_error( $e, $exception_error_message );
 			}
 		}
 
