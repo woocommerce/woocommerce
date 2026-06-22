@@ -22,6 +22,9 @@ import {
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
 import './tax-recommendations.scss';
 
+const ANROK_LOGO_URL =
+	'https://woocommerce.com/wp-content/uploads/2026/01/Anrok-Logo.png';
+
 type TaxRecommendation = {
 	id: 'anrok-tax' | 'woocommerce-tax';
 	title: string;
@@ -283,11 +286,7 @@ const TaxRecommendations = () => {
 				'woocommerce'
 			),
 			productUrl: 'https://woocommerce.com/products/tax/',
-			pluginSlugs: [
-				'woocommerce-services',
-				'woocommerce-tax',
-				'woocommerce-shipping',
-			],
+			pluginSlugs: [ 'woocommerce-services', 'woocommerce-tax' ],
 			logo: (
 				<img
 					className="woocommerce-tax-recommendation-item__logo"
@@ -306,12 +305,11 @@ const TaxRecommendations = () => {
 			productUrl: 'https://woocommerce.com/products/anrok-tax/',
 			pluginSlugs: [ 'anrok-tax' ],
 			logo: (
-				<span
-					className="woocommerce-tax-recommendation-item__monogram"
-					aria-hidden="true"
-				>
-					A
-				</span>
+				<img
+					className="woocommerce-tax-recommendation-item__logo"
+					src={ ANROK_LOGO_URL }
+					alt=""
+				/>
 			),
 		},
 	];

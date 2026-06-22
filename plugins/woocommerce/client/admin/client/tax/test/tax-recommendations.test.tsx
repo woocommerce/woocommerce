@@ -90,23 +90,6 @@ describe( 'TaxRecommendations', () => {
 		expect( screen.getAllByText( 'Install' ) ).toHaveLength( 2 );
 	} );
 
-	it( 'shows WooCommerce Tax as active when a shipping-related Woo plugin is active', () => {
-		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
-			fn( () => ( {
-				getInstalledPlugins: () => [],
-				getActivePlugins: () => [ 'woocommerce-shipping' ],
-			} ) )
-		);
-
-		render( <TaxRecommendations /> );
-
-		expect( screen.getByText( 'WooCommerce Tax' ) ).toBeInTheDocument();
-		expect(
-			screen.getByLabelText( 'WooCommerce Tax is already active' )
-		).toBeInTheDocument();
-		expect( screen.getByText( 'Anrok' ) ).toBeInTheDocument();
-	} );
-
 	it( 'shows Activate when Anrok is installed but inactive', () => {
 		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
 			fn( () => ( {
