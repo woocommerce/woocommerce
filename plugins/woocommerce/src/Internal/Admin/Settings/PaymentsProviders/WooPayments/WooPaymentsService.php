@@ -1808,6 +1808,13 @@ class WooPaymentsService {
 	/**
 	 * Unlock the onboarding.
 	 *
+	 * WARNING: this writes 0 unconditionally and has no ownership check, so it clears whatever
+	 * lock is currently set — including one a concurrent request acquired. Only call it to
+	 * release a lock this same request set (e.g. in the finally that pairs with
+	 * set_onboarding_lock()). Do NOT call it after work that runs unlocked, where another
+	 * request may have taken the lock in the meantime. Safe concurrent release would require a
+	 * per-request token (compare-and-swap), which is deferred to the broader shared-lock work.
+	 *
 	 * @return void
 	 */
 	private function clear_onboarding_lock(): void {
