@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { render, screen, waitFor, within } from '@testing-library/react';
+import { act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -33,6 +34,13 @@ jest.mock( '../../settings-recommendations/dismissable-list', () => ( {
 jest.mock( '../../lib/notices', () => ( {
 	createNoticesFromResponse: () => null,
 } ) );
+
+const clickAndFlush = async ( element: Element ) => {
+	await act( async () => {
+		await userEvent.click( element );
+		await Promise.resolve();
+	} );
+};
 
 describe( 'TaxRecommendations', () => {
 	const installPluginsMock = jest.fn().mockResolvedValue( undefined );
@@ -124,7 +132,7 @@ describe( 'TaxRecommendations', () => {
 
 		expect( wooCommerceTaxItem ).not.toBeNull();
 
-		userEvent.click(
+		await clickAndFlush(
 			within( wooCommerceTaxItem as HTMLElement ).getByRole( 'button', {
 				name: 'Install',
 			} )
@@ -180,7 +188,7 @@ describe( 'TaxRecommendations', () => {
 
 		expect( wooCommerceTaxItem ).not.toBeNull();
 
-		userEvent.click(
+		await clickAndFlush(
 			within( wooCommerceTaxItem as HTMLElement ).getByRole( 'button', {
 				name: 'Activate',
 			} )
@@ -234,7 +242,7 @@ describe( 'TaxRecommendations', () => {
 
 		expect( wooCommerceTaxItem ).not.toBeNull();
 
-		userEvent.click(
+		await clickAndFlush(
 			within( wooCommerceTaxItem as HTMLElement ).getByRole( 'button', {
 				name: 'Install',
 			} )
@@ -266,7 +274,7 @@ describe( 'TaxRecommendations', () => {
 
 		expect( anrokItem ).not.toBeNull();
 
-		userEvent.click(
+		await clickAndFlush(
 			within( anrokItem as HTMLElement ).getByRole( 'button', {
 				name: 'Activate',
 			} )

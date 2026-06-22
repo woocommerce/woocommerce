@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 import userEvent from '@testing-library/user-event';
@@ -42,6 +42,13 @@ jest.mock( '@woocommerce/tracks', () => ( {
 jest.mock( '~/utils/features', () => ( {
 	isFeatureEnabled: jest.fn(),
 } ) );
+
+const clickAndFlush = async ( element: Element ) => {
+	await act( async () => {
+		await userEvent.click( element );
+		await Promise.resolve();
+	} );
+};
 
 const defaultSelectReturn = {
 	getActivePlugins: () => [],
@@ -432,7 +439,7 @@ describe( 'ShippingRecommendations', () => {
 			// Both cards are now rendered for US; the first "Install" button
 			// belongs to the WooCommerce Shipping card (first entry in the
 			// COUNTRY_EXTENSIONS_MAP for US).
-			userEvent.click( screen.getAllByText( 'Install' )[ 0 ] );
+			await clickAndFlush( screen.getAllByText( 'Install' )[ 0 ] );
 
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'shipping_partner_click',
@@ -469,7 +476,7 @@ describe( 'ShippingRecommendations', () => {
 			mockSelectForCountry( 'CA' );
 			render( <ShippingRecommendations /> );
 
-			userEvent.click( screen.getByText( 'Install' ) );
+			await clickAndFlush( screen.getByText( 'Install' ) );
 
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'shipping_partner_click',
@@ -505,7 +512,7 @@ describe( 'ShippingRecommendations', () => {
 			mockSelectForCountry( 'FR' );
 			render( <ShippingRecommendations /> );
 
-			userEvent.click( screen.getByText( 'Install' ) );
+			await clickAndFlush( screen.getByText( 'Install' ) );
 
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'shipping_partner_click',
@@ -543,7 +550,7 @@ describe( 'ShippingRecommendations', () => {
 			mockSelectForCountry( 'CA' );
 			render( <ShippingRecommendations /> );
 
-			userEvent.click( screen.getByText( 'Install' ) );
+			await clickAndFlush( screen.getByText( 'Install' ) );
 
 			await waitFor( () => {
 				expect( recordEvent ).toHaveBeenCalledWith(
@@ -575,7 +582,7 @@ describe( 'ShippingRecommendations', () => {
 			mockSelectForCountry( 'CA' );
 			render( <ShippingRecommendations /> );
 
-			userEvent.click( screen.getByText( 'Install' ) );
+			await clickAndFlush( screen.getByText( 'Install' ) );
 
 			await waitFor( () => {
 				expect( recordEvent ).toHaveBeenCalledWith(
@@ -613,7 +620,7 @@ describe( 'ShippingRecommendations', () => {
 			} );
 			render( <ShippingRecommendations /> );
 
-			userEvent.click( screen.getByText( 'Activate' ) );
+			await clickAndFlush( screen.getByText( 'Activate' ) );
 
 			await waitFor( () => {
 				expect( recordEvent ).toHaveBeenCalledWith(
@@ -649,7 +656,7 @@ describe( 'ShippingRecommendations', () => {
 			} );
 			render( <ShippingRecommendations /> );
 
-			userEvent.click( screen.getByText( 'Activate' ) );
+			await clickAndFlush( screen.getByText( 'Activate' ) );
 
 			await waitFor( () => {
 				expect( recordEvent ).toHaveBeenCalledWith(
@@ -724,7 +731,7 @@ describe( 'ShippingRecommendations', () => {
 			);
 			render( <ShippingRecommendations /> );
 
-			userEvent.click( screen.getByText( 'Activate' ) );
+			await clickAndFlush( screen.getByText( 'Activate' ) );
 
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'shipping_partner_click',
@@ -767,7 +774,7 @@ describe( 'ShippingRecommendations', () => {
 			} );
 			render( <ShippingRecommendations /> );
 
-			userEvent.click( screen.getByText( 'Activate' ) );
+			await clickAndFlush( screen.getByText( 'Activate' ) );
 
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'shipping_partner_click',
@@ -807,7 +814,7 @@ describe( 'ShippingRecommendations', () => {
 			} );
 			render( <ShippingRecommendations /> );
 
-			userEvent.click( screen.getByText( 'Activate' ) );
+			await clickAndFlush( screen.getByText( 'Activate' ) );
 
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'shipping_partner_click',
