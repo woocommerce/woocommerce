@@ -9,7 +9,7 @@ parameters:
 		- phpstan-stubs/stubs.php
 		- vendor/php-stubs/wordpress-tests-stubs/wordpress-tests-stubs.php
 	scanDirectories:
-	    - phpstan-stubs
+		- phpstan-stubs
 	paths:
 		- src
 		- tests
