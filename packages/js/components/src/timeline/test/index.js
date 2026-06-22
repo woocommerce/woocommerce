@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
-import * as dateModule from '@wordpress/date';
+import { dateI18n, format } from '@wordpress/date';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -13,14 +13,27 @@ import Timeline from '..';
 import mockData from './__mocks__/timeline-mock-data';
 import { groupItemsUsing, sortByDateUsing } from '../util.js';
 
+jest.mock( '@wordpress/date', () => {
+	const actualDateModule = jest.requireActual( '@wordpress/date' );
+
+	return {
+		...actualDateModule,
+		format: jest.fn( actualDateModule.format ),
+		dateI18n: jest.fn( actualDateModule.dateI18n ),
+	};
+} );
+
 describe( 'Timeline', () => {
+	const actualDateModule = jest.requireActual( '@wordpress/date' );
 	const timezoneTestItem = {
 		...mockData[ 1 ],
 		date: new Date( Date.UTC( 2020, 0, 20, 23, 45 ) ),
 	};
 
 	afterEach( () => {
-		jest.restoreAllMocks();
+		format.mockImplementation( actualDateModule.format );
+		dateI18n.mockImplementation( actualDateModule.dateI18n );
+		jest.clearAllMocks();
 	} );
 
 	test( 'Empty snapshot', () => {
@@ -34,11 +47,11 @@ describe( 'Timeline', () => {
 	} );
 
 	test( 'uses browser timezone date formatting by default', () => {
-		jest.spyOn( dateModule, 'format' ).mockImplementation(
+		format.mockImplementation(
 			( dateFormat, date ) =>
 				`browser:${ dateFormat }:${ date.toISOString() }`
 		);
-		jest.spyOn( dateModule, 'dateI18n' ).mockImplementation(
+		dateI18n.mockImplementation(
 			( dateFormat, date ) =>
 				`site:${ dateFormat }:${ date.toISOString() }`
 		);
@@ -62,11 +75,11 @@ describe( 'Timeline', () => {
 	} );
 
 	test( 'uses site timezone date formatting when requested', () => {
-		jest.spyOn( dateModule, 'format' ).mockImplementation(
+		format.mockImplementation(
 			( dateFormat, date ) =>
 				`browser:${ dateFormat }:${ date.toISOString() }`
 		);
-		jest.spyOn( dateModule, 'dateI18n' ).mockImplementation(
+		dateI18n.mockImplementation(
 			( dateFormat, date ) =>
 				`site:${ dateFormat }:${ date.toISOString() }`
 		);
