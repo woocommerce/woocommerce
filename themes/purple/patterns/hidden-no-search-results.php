@@ -1,10 +1,10 @@
 <?php
 /**
- * Title: 404
- * Slug: purple/hidden-no-search-results
+ * Title: No search results
+ * Slug: purple/no-search-results
  * Inserter: no
  */
 ?>
-<!-- wp:paragraph {"align":"left"} -->
+<!-- wp:paragraph {"align":"left","metadata":{"patternName":"purple/no-search-results","name":"No search results"},"style":{"typography":{"textAlign":"left"}}} -->
 <p class="has-text-align-left"><?php echo esc_html_x( 'No results were found using that search.', 'Text explaining that there are no results returned from a search', 'purple' ); ?></p>
 <!-- /wp:paragraph -->

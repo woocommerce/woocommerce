@@ -5,6 +5,6 @@
  * Inserter: no
  */
 ?>
-<!-- wp:heading {"level":1,"align":"wide","style":{"spacing":{"padding":{"bottom":"var:preset|spacing|50"}}}} -->
-<h1 class="wp-block-heading alignwide" style="padding-bottom:var(--wp--preset--spacing--50)"><?php esc_html_e( 'Blog', 'purple' ); ?></h1>
+<!-- wp:heading {"level":1,"metadata":{"patternName":"purple/hidden-blog-heading","name":"Hidden blog heading"},"align":"wide"} -->
+<h1 class="wp-block-heading alignwide"><?php esc_html_e( 'Blog', 'purple' ); ?></h1>
 <!-- /wp:heading -->
