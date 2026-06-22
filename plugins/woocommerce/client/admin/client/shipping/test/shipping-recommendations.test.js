@@ -87,7 +87,7 @@ describe( 'ShippingRecommendations', () => {
 		expect( installAndActivatePluginsMock ).not.toHaveBeenCalled();
 		expect( successNoticeMock ).not.toHaveBeenCalled();
 
-		await userEvent.click( screen.getByText( 'Get started' ) );
+		userEvent.click( screen.getByText( 'Get started' ) );
 
 		expect( installAndActivatePluginsMock ).toHaveBeenCalled();
 		await waitFor( () => {
