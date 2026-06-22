@@ -71,6 +71,33 @@ class FilesystemUtil {
 	}
 
 	/**
+	 * Get the content directory's root-relative path (e.g. "/wp-content").
+	 *
+	 * Resolves the path under which files inside the content directory are addressed,
+	 * honoring a relocated WP_CONTENT_DIR. When the content directory lives under
+	 * ABSPATH the path is derived from it directly; otherwise (e.g. Bedrock-style
+	 * layouts where it sits outside ABSPATH) it is derived from the content URL,
+	 * falling back to "/wp-content".
+	 *
+	 * @internal
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return string The content directory's root-relative path, e.g. "/wp-content" or "/app".
+	 */
+	public static function get_content_directory_relative_path(): string {
+		$abspath        = (string) Constants::get_constant( 'ABSPATH' );
+		$wp_content_dir = (string) Constants::get_constant( 'WP_CONTENT_DIR' );
+
+		if ( '' !== $abspath && 0 === strpos( $wp_content_dir, $abspath ) ) {
+			return '/' . substr( $wp_content_dir, strlen( $abspath ) );
+		}
+
+		$content_url_path = wp_parse_url( content_url(), PHP_URL_PATH );
+		return is_string( $content_url_path ) ? $content_url_path : '/wp-content';
+	}
+
+	/**
 	 * Check if a constant exists and is not null.
 	 *
 	 * @param string $name Constant name.

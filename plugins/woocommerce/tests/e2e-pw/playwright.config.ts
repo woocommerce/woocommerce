@@ -4,6 +4,11 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 
+/**
+ * Internal dependencies
+ */
+import { adminFile as BLOCKS_ADMIN_STATE } from './utils/blocks/constants';
+
 // __dirname is not natively available in ESM, but Playwright's config loader shims it.
 dotenv.config( { path: __dirname + '/.env' } );
 
@@ -13,6 +18,13 @@ if ( ! process.env.BASE_URL ) {
 	console.log(
 		'BASE_URL is not set. Using default: ' + process.env.BASE_URL
 	);
+}
+
+// The blocks setup project uses @wordpress/e2e-test-utils-playwright, which derives
+// the REST API root from WP_BASE_URL (its default is port 8889). Align it with the
+// suite's base URL so REST setup targets the same WordPress instance.
+if ( ! process.env.WP_BASE_URL ) {
+	process.env.WP_BASE_URL = process.env.BASE_URL;
 }
 
 const { BASE_URL, CI, E2E_MAX_FAILURES, REPEAT_EACH } = process.env;
@@ -95,6 +107,11 @@ export const setupProjects = [
 		testMatch: `site.setup.ts`,
 		dependencies: [ 'global authentication' ],
 	},
+	{
+		name: 'blocks setup',
+		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
+		testMatch: 'blocks-setup.ts',
+	},
 ];
 
 export default defineConfig( {
@@ -135,7 +152,7 @@ export default defineConfig( {
 				'**/api-tests/**',
 				/* Exclude PayPal tests, as they don't run well in parallel - see https://github.com/woocommerce/woocommerce/pull/63068. */
 				'**/tests/paypal/**',
-				/* Blocks specs are run by the Blocks e2e suite - see client/blocks/tests/e2e/playwright.config.ts. */
+				/* Blocks specs are run by the blocks-chromium and blocks-legacy-mini-cart projects below. */
 				'**/tests/blocks/**',
 			],
 			dependencies: [ 'site setup' ],
@@ -155,6 +172,32 @@ export default defineConfig( {
 			name: 'paypal-standard',
 			testMatch: [ '**/tests/paypal/**' ],
 			dependencies: [ 'site setup' ],
+		},
+		{
+			name: 'blocks-chromium',
+			testDir: `${ TESTS_ROOT_PATH }/tests/blocks`,
+			dependencies: [ 'blocks setup' ],
+			fullyParallel: true,
+			use: {
+				...devices[ 'Desktop Chrome' ],
+				storageState: BLOCKS_ADMIN_STATE,
+			},
+		},
+		{
+			name: 'blocks-legacy-mini-cart',
+			testDir: `${ TESTS_ROOT_PATH }/tests/blocks`,
+			testMatch: [
+				'**/mini-cart/**/*.spec.ts',
+				'**/add-to-cart-with-options/**/*.spec.ts',
+				'**/product-button/**/*.spec.ts',
+				'**/product-collection/**/*.spec.ts',
+			],
+			dependencies: [ 'blocks setup' ],
+			fullyParallel: true,
+			use: {
+				...devices[ 'Desktop Chrome' ],
+				storageState: BLOCKS_ADMIN_STATE,
+			},
 		},
 	],
 } );
