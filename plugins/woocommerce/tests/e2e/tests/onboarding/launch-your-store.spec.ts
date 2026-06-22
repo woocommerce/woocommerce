@@ -287,7 +287,7 @@ test.describe(
 	}
 );
 
-async function runComingSoonTests( themeContext = '' ) {
+function runComingSoonTests( themeContext = '' ) {
 	const testSuffix = themeContext ? ` (${ themeContext })` : '';
 
 	test( `Entire site coming soon mode${ testSuffix }`, async ( {
@@ -371,7 +371,7 @@ test.describe( 'Launch Your Store front end - logged out', () => {
 		}
 	} );
 
-	test.describe( 'Block Theme (Twenty Twenty Four)', async () => {
+	test.describe( 'Block Theme (Twenty Twenty Four)', () => {
 		test.beforeAll( async ( { baseURL } ) => {
 			await activateTheme( baseURL, 'twentytwentyfour' );
 		} );
@@ -381,10 +381,10 @@ test.describe( 'Launch Your Store front end - logged out', () => {
 			await activateTheme( baseURL, DEFAULT_THEME );
 		} );
 
-		await runComingSoonTests( 'Block Theme (Twenty Twenty Four)' );
+		runComingSoonTests( 'Block Theme (Twenty Twenty Four)' );
 	} );
 
-	test.describe( 'Classic Theme (Storefront)', async () => {
+	test.describe( 'Classic Theme (Storefront)', () => {
 		test.beforeAll( async ( { baseURL } ) => {
 			await activateTheme( baseURL, 'storefront' );
 		} );
@@ -394,6 +394,6 @@ test.describe( 'Launch Your Store front end - logged out', () => {
 			await activateTheme( baseURL, DEFAULT_THEME );
 		} );
 
-		await runComingSoonTests( 'Classic Theme (Storefront)' );
+		runComingSoonTests( 'Classic Theme (Storefront)' );
 	} );
 } );

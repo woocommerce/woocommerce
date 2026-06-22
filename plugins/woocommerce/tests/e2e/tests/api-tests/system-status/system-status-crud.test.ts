@@ -19,6 +19,7 @@ const expect = baseExpect.extend( {
 		let matcherResult: any;
 
 		try {
+			// eslint-disable-next-line playwright/no-standalone-expect -- Custom matcher definition, not a standalone assertion.
 			baseExpect( expectedTypes ).toContain( typeof received );
 			pass = true;
 		} catch ( e ) {

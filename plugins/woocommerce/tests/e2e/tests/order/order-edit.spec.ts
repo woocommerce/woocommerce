@@ -429,7 +429,9 @@ test.describe(
 		};
 
 		test.beforeAll( async () => {
-			( { source_url: downloadFile } = await getMediaBySlug( 'image-01' ) );
+			( { source_url: downloadFile } = await getMediaBySlug(
+				'image-01'
+			) );
 		} );
 
 		test.beforeEach( async ( { restApi } ) => {

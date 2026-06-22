@@ -48,6 +48,7 @@ const uq = faker.string.alphanumeric( 5 );
 		},
 	} );
 
+	// eslint-disable-next-line playwright/valid-title -- Title comes from the parametrized test data row.
 	test( testTitle, { tag: [ tags.SERVICES ] }, async ( { page } ) => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-settings&tab=shipping&section=classes'

@@ -1,11 +1,7 @@
 /**
- * External dependencies
- */
-import { test, expect } from '../../fixtures/fixtures';
-
-/**
  * Internal dependencies
  */
+import { test, expect } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 test.describe( 'Colour picker swatch height on Email settings', () => {

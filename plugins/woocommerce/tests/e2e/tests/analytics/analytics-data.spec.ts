@@ -324,7 +324,6 @@ test(
 			const downloadPromise = page.waitForEvent( 'download' );
 			await page.getByRole( 'button', { name: 'Download' } ).click();
 			const download = await downloadPromise;
-			// eslint-disable-next-line jest/no-try-expect
 			await expect( download.suggestedFilename() ).toContain(
 				'revenue.csv'
 			);
