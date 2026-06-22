@@ -6619,12 +6619,26 @@ img.help_tip {
 				margin-top: 0.25em;
 			}
 		}
+
 		&.woocommerce_variation h3 {
 			a.delete,
 			a.edit,
 			.sort {
 				margin-top: 0.45em;
 			}
+		}
+
+		&.woocommerce_attribute h3 .woocommerce-attribute-global-badge {
+			display: inline-block;
+			margin-left: 6px;
+			border-radius: 4px;
+			background: $gray-100;
+			padding: 4px 6px;
+			color: #3c434a;
+			font-size: 12px;
+			font-weight: 400;
+			line-height: 16px;
+			vertical-align: middle;
 		}
 
 		table {
