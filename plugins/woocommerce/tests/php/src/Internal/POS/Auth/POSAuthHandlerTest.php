@@ -219,4 +219,30 @@ class POSAuthHandlerTest extends WC_Unit_Test_Case {
 		$this->assertSame( $error, $returned, 'An existing auth error must pass through untouched' );
 		$this->assertSame( $this->device_admin_id, get_current_user_id(), 'No swap should occur when authentication already failed' );
 	}
+
+	/**
+	 * @testdox A determine-then-fallback sequence keeps the recorded device admin (no admin/staff mix-up).
+	 *
+	 * Locks in the fix for the bug Nadir flagged: after the primary swap the effective user is the
+	 * staff member, so a fallback that re-derived the "device admin" from get_current_user_id() would
+	 * record the staff id as the admin. resolve_swap()'s idempotency short-circuit prevents that.
+	 */
+	public function test_fallback_does_not_corrupt_device_admin_id(): void {
+		$ctx     = $this->mock_context( true, $this->cashier_id, POSRequestContext::INTENT_ORDER_CREATE );
+		$handler = $this->make_handler( $ctx );
+
+		// Primary swap on determine_current_user records the device admin and returns the staff id.
+		$this->assertSame( $this->cashier_id, $handler->maybe_swap( $this->device_admin_id ) );
+
+		// The fallback fires afterwards, with the staff member now the effective user.
+		wp_set_current_user( $this->cashier_id );
+		$handler->maybe_swap_after_fallback( null );
+
+		$this->assertSame(
+			$this->device_admin_id,
+			$handler->get_device_admin_id(),
+			'The recorded device admin must stay the admin after the fallback re-entry, never the staff id'
+		);
+		$this->assertSame( $this->cashier_id, get_current_user_id(), 'The effective user remains the staff member' );
+	}
 }

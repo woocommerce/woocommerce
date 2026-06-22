@@ -10,36 +10,23 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use WP_Error;
 
 /**
- * Swaps the effective current user to the named POS staff member for POS-originated requests,
- * implementing the "authenticate high, at determine_current_user" model.
+ * Swaps the effective current user to the named POS staff member for POS-originated requests
+ * ("authenticate high, at determine_current_user").
  *
- * The device authenticates first (Jetpack tunnel / Application Password) and resolves to a
- * shop-manager/admin user. For a POS-originated request (see POSRequestContext) naming a staff
- * member, this handler switches the effective user to that staff member, so downstream WP/Woo
- * logic — capability checks, order/refund authorship, logs — naturally sees the staff member as
- * the actor.
+ * The device authenticates first (Jetpack tunnel / Application Password) as a shop-manager/admin;
+ * for a POS request naming a staff member (see POSRequestContext) the effective user is switched to
+ * that staff member, so capability checks, order/refund authorship, and logs see them as the actor.
  *
- * POC credential note: the named staff id is currently TRUSTED as asserted (gated only by the
- * device-admin auth) — there is no per-request staff credential check. Authenticating the staff
- * (verify a PIN once at login/override, then carry a short-lived token on the request) is the
- * deferred v3.1 follow-up. Until then the swap + capability bridge are a plumbing demonstration,
- * not an enforcement boundary against a malicious till operator.
+ * The swap targets the named staff only if they hold the `woocommerce_pos_*` capability the
+ * operation requires — the authorizing actor (cashier for a sale, approving manager for an override
+ * refund). A cap-less initiator is recorded separately as attribution metadata, never swapped in.
  *
- * Swap-target rule: the swap targets the named staff member, and only if they genuinely hold the
- * `woocommerce_pos_*` capability the operation requires. That staff member is the authorizing actor
- * — for a normal sale the operator (cashier), and for a manager-approved override refund the
- * approving manager. A cap-less initiator (e.g. the cashier on an override refund) is never the
- * swap target; they are recorded separately as attribution metadata at insert time. If the named
- * staff does not hold the required cap, no swap happens and the request continues as the device
- * admin.
+ * POC note: the asserted staff id is TRUSTED (gated only by the device-admin auth); a per-request
+ * staff credential (verify a PIN once at login → carry a short-lived token) is the deferred follow-up.
  *
- * Hooks (both required):
- *  - `determine_current_user` @ 100 — primary. Runs after core Application Password (20) and WC
- *    auth (15), so the device admin is already resolved.
- *  - `rest_authentication_errors` @ 20 — safety net. WC's authentication_fallback sets the user via
- *    a bare wp_set_current_user() that bypasses the determine_current_user filter chain; without
- *    this the swap would be silently skipped on that path. Runs before REST dispatch's permission
- *    callbacks.
+ * Two hooks are needed: `determine_current_user` @100 (primary; after core/WC auth) and
+ * `rest_authentication_errors` @20 (safety net for WC's authentication_fallback, which sets the user
+ * via a bare wp_set_current_user() that bypasses the determine_current_user chain).
  *
  * @since 11.0.0
  * @internal
@@ -54,25 +41,19 @@ class POSAuthHandler implements RegisterHooksInterface {
 	private POSRequestContext $request_context;
 
 	/**
-	 * The device admin user id captured before the swap (0 if no swap happened).
+	 * Pre-swap device admin id, captured once when a swap is committed (0 if none).
 	 *
 	 * @var int
 	 */
 	private int $device_admin_id = 0;
 
 	/**
-	 * The staff user id swapped in (0 if no swap happened).
+	 * Staff id swapped in, set once when a swap is committed (0 if none). Doubles as the
+	 * "already resolved this request" guard.
 	 *
 	 * @var int
 	 */
 	private int $staff_user_id = 0;
-
-	/**
-	 * Whether the swap has already been applied this request (idempotency guard).
-	 *
-	 * @var bool
-	 */
-	private bool $swapped = false;
 
 	/**
 	 * Initialize dependencies via the DI container.
@@ -96,108 +77,81 @@ class POSAuthHandler implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Primary swap point on determine_current_user.
+	 * Primary swap on determine_current_user.
 	 *
 	 * @internal
 	 *
-	 * @param int|false $user_id The user id resolved by earlier auth callbacks (the device admin),
-	 *                           or false/0 if none.
-	 * @return int|false The staff user id when swapping, otherwise the input unchanged.
+	 * @param int|false $user_id The user id resolved by earlier auth callbacks (the device admin).
+	 * @return int|false The staff id when swapping, otherwise the input unchanged.
 	 */
 	public function maybe_swap( $user_id ) {
-		$staff_id = $this->decide_swap( (int) $user_id );
-		if ( $staff_id <= 0 ) {
-			return $user_id;
-		}
-
-		$this->record_swap( (int) $user_id, $staff_id );
-		return $staff_id;
+		$staff_id = $this->resolve_swap( (int) $user_id );
+		return $staff_id > 0 ? $staff_id : $user_id;
 	}
 
 	/**
-	 * Safety-net swap on rest_authentication_errors, covering the authentication_fallback path that
-	 * bypasses the determine_current_user filter chain.
+	 * Safety-net swap on rest_authentication_errors, covering WC's authentication_fallback path that
+	 * bypasses the determine_current_user filter chain. Returns $errors unchanged (a swap never
+	 * raises an auth error).
 	 *
 	 * @internal
 	 *
 	 * @param WP_Error|null|true $errors Current authentication error state.
-	 * @return WP_Error|null|true The input unchanged (a swap never raises an auth error).
+	 * @return WP_Error|null|true
 	 */
 	public function maybe_swap_after_fallback( $errors ) {
-		// Do not swap into an already-failed authentication, and do not re-swap.
-		if ( is_wp_error( $errors ) || $this->swapped ) {
+		if ( is_wp_error( $errors ) ) {
 			return $errors;
 		}
 
-		$device_id = get_current_user_id();
-		$staff_id  = $this->decide_swap( $device_id );
-		if ( $staff_id > 0 ) {
-			$this->record_swap( $device_id, $staff_id );
+		$staff_id = $this->resolve_swap( get_current_user_id() );
+		if ( $staff_id > 0 && get_current_user_id() !== $staff_id ) {
 			wp_set_current_user( $staff_id );
 		}
 
-		// Never convert a null/true auth state into an error.
 		return $errors;
 	}
 
 	/**
-	 * Decide whether to swap, and to whom, for the given pre-swap (device) user.
+	 * The single swap decision: return the staff id to run as, or 0 to leave the user unchanged.
 	 *
-	 * Returns the staff user id to swap to, or 0 to leave the user unchanged. All conditions must
-	 * hold: POS-originated request, device user is a real shop-manager/admin, the PIN verifies for
-	 * the presented staff, the staff has POS access, and — for a write — the staff holds the POS
-	 * capability the operation requires.
+	 * Reads top-to-bottom — POS request? POS admin? staffer exists with the cap? then commit.
+	 * Idempotent: once committed, later calls return the same staff id without re-evaluating, so a
+	 * post-swap current_user (which is the staff id) can never feed back in and be mistaken for the
+	 * device admin.
 	 *
-	 * @param int $device_user_id The resolved pre-swap (device admin) user id.
+	 * @param int $device_user_id The pre-swap (device admin) user id.
 	 * @return int
 	 */
-	private function decide_swap( int $device_user_id ): int {
-		if ( $this->swapped ) {
+	private function resolve_swap( int $device_user_id ): int {
+		if ( $this->staff_user_id > 0 ) {
 			return $this->staff_user_id;
 		}
 
+		// 1. POS-originated request?
 		if ( ! $this->request_context->is_pos_request() ) {
 			return 0;
 		}
 
-		// Never swap from an unauthenticated or non-privileged device user: the device must already
-		// be a real shop-manager/admin before a staff member can ride on top of it.
+		// 2. A real POS admin? Never swap up from user 0 or a non-manager device user.
 		if ( $device_user_id <= 0 || ! user_can( $device_user_id, 'manage_woocommerce' ) ) {
 			return 0;
 		}
 
+		// 3. Does the named staffer exist with POS access — and, for a write, the required cap?
 		$staff_id = $this->request_context->get_staff_id();
-		if ( $staff_id <= 0 ) {
+		if ( $staff_id <= 0 || ! Capabilities::has_pos_access( $staff_id ) ) {
 			return 0;
 		}
-
-		// POC: the staff id is trusted as asserted (gated by the device-admin auth above). There is
-		// no per-request staff credential check yet — authenticating the staff (verify a PIN once at
-		// login/override, then carry a short-lived token here) is the deferred v3.1 follow-up.
-		if ( ! Capabilities::has_pos_access( $staff_id ) ) {
-			return 0;
-		}
-
-		// Swap-target rule: for a write, the swapped-in staff must genuinely hold the required POS
-		// capability. Reads (null intent, e.g. the whoami route) require only POS access.
 		$required_cap = self::required_pos_cap_for_intent( $this->request_context->get_intent() );
 		if ( null !== $required_cap && ! Capabilities::user_has_pos_capability( $staff_id, $required_cap ) ) {
 			return 0;
 		}
 
-		return $staff_id;
-	}
-
-	/**
-	 * Record a completed swap (for the cap bridge / audit) and mark it applied.
-	 *
-	 * @param int $device_user_id The pre-swap device admin id.
-	 * @param int $staff_id       The staff id swapped in.
-	 */
-	private function record_swap( int $device_user_id, int $staff_id ): void {
+		// 4. Commit. device_admin_id is captured exactly once, here.
 		$this->device_admin_id = $device_user_id;
 		$this->staff_user_id   = $staff_id;
-		$this->swapped         = true;
+		return $staff_id;
 	}
 
 	/**
