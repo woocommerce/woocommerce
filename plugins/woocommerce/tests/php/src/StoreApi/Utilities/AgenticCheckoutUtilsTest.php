@@ -231,7 +231,7 @@ class AgenticCheckoutUtilsTest extends \WC_Unit_Test_Case {
 			$customer
 		);
 
-		$this->assertSame( 'O\\Brien', $customer->get_shipping_first_name(), 'Backslashes in name should be preserved.' );
+		$this->assertSame( 'O\\Brien', $customer->get_shipping_first_name(), 'Backslashes in the parsed first name should be preserved.' );
 		$this->assertSame( 'Apt 4\\B', $customer->get_shipping_address_1(), 'Backslashes in address line should be preserved.' );
 		$this->assertSame( 'Düsseldorf\\Nord', $customer->get_shipping_city(), 'Backslashes in city should be preserved.' );
 	}
@@ -250,7 +250,7 @@ class AgenticCheckoutUtilsTest extends \WC_Unit_Test_Case {
 			$customer
 		);
 
-		$this->assertSame( 'O\\Brien', $customer->get_billing_first_name(), 'Backslashes in name should be preserved.' );
+		$this->assertSame( 'O\\Brien', $customer->get_billing_first_name(), 'Backslashes in the parsed first name should be preserved.' );
 		$this->assertSame( 'Apt 4\\B', $customer->get_billing_address_1(), 'Backslashes in address line should be preserved.' );
 	}
 }
