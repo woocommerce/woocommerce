@@ -1001,14 +1001,9 @@ class WooPaymentsService {
 			);
 		} catch ( Exception $e ) {
 			// Catch any exceptions to allow for proper error handling and onboarding unlock.
-			$response = new WP_Error(
-				'woocommerce_woopayments_onboarding_client_api_exception',
-				esc_html__( 'An unexpected error happened while initializing the test account.', 'woocommerce' ),
-				array(
-					'code'    => $e->getCode(),
-					'message' => $e->getMessage(),
-					'trace'   => $e->getTrace(),
-				)
+			$response = $this->get_onboarding_client_api_exception_error(
+				$e,
+				esc_html__( 'An unexpected error happened while initializing the test account.', 'woocommerce' )
 			);
 		}
 
@@ -1138,14 +1133,9 @@ class WooPaymentsService {
 			);
 		} catch ( Exception $e ) {
 			// Catch any exceptions to allow for proper error handling and onboarding unlock.
-			$response = new WP_Error(
-				'woocommerce_woopayments_onboarding_client_api_exception',
-				esc_html__( 'An unexpected error happened while creating the KYC session.', 'woocommerce' ),
-				array(
-					'code'    => $e->getCode(),
-					'message' => $e->getMessage(),
-					'trace'   => $e->getTrace(),
-				)
+			$response = $this->get_onboarding_client_api_exception_error(
+				$e,
+				esc_html__( 'An unexpected error happened while creating the KYC session.', 'woocommerce' )
 			);
 		}
 
@@ -1251,14 +1241,9 @@ class WooPaymentsService {
 			);
 		} catch ( Exception $e ) {
 			// Catch any exceptions to allow for proper error handling and onboarding unlock.
-			$response = new WP_Error(
-				'woocommerce_woopayments_onboarding_client_api_exception',
-				esc_html__( 'An unexpected error happened while finalizing the KYC session.', 'woocommerce' ),
-				array(
-					'code'    => $e->getCode(),
-					'message' => $e->getMessage(),
-					'trace'   => $e->getTrace(),
-				)
+			$response = $this->get_onboarding_client_api_exception_error(
+				$e,
+				esc_html__( 'An unexpected error happened while finalizing the KYC session.', 'woocommerce' )
 			);
 		}
 
@@ -1426,14 +1411,9 @@ class WooPaymentsService {
 			}
 		} catch ( Exception $e ) {
 			// Catch any exceptions to allow for proper error handling and onboarding unlock.
-			$response = new WP_Error(
-				'woocommerce_woopayments_onboarding_client_api_exception',
-				esc_html__( 'An unexpected error happened while resetting onboarding.', 'woocommerce' ),
-				array(
-					'code'    => $e->getCode(),
-					'message' => $e->getMessage(),
-					'trace'   => $e->getTrace(),
-				)
+			$response = $this->get_onboarding_client_api_exception_error(
+				$e,
+				esc_html__( 'An unexpected error happened while resetting onboarding.', 'woocommerce' )
 			);
 		}
 
