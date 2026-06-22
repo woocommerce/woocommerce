@@ -9,12 +9,9 @@ use _WP_Dependency;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\Loader;
-<<<<<<< HEAD
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
-=======
 use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
->>>>>>> f03df666c8 (Add Settings UI section registry (#65813))
 /**
  * WCAdminAssets Class.
  */
@@ -465,18 +462,8 @@ class WCAdminAssets {
 		}
 
 		$dependencies = array_merge(
-<<<<<<< HEAD
 			array( 'wc-settings-ui-sdk' ),
-			array_filter(
-				$extension_handles,
-				static function ( $script_handle ): bool {
-					return is_string( $script_handle ) && '' !== $script_handle;
-				}
-			)
-=======
-			array( 'wc-settings-ui' ),
 			$context->get_script_handles()
->>>>>>> f03df666c8 (Add Settings UI section registry (#65813))
 		);
 
 		return array_values( array_unique( $dependencies ) );
