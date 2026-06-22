@@ -10,26 +10,18 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use WP_User;
 
 /**
- * Bridges isolated `woocommerce_pos_*` capabilities to the real Woo capabilities a POS write
- * requires, but only for the duration of a POS-originated request.
+ * Bridges the isolated `woocommerce_pos_*` capabilities to the real Woo caps a POS write needs, only
+ * for the duration of a POS-originated request.
  *
- * The POS caps are deliberately isolated — they are not mapped to core post-type caps — so a staff
- * member swapped in by POSAuthHandler would 403 on `/wc/v3/orders` etc., which check
- * `edit_shop_orders` / `publish_shop_orders`. This filter grants the minimal real cap for the
- * operation, scoped on three conditions so it can never leak:
- *
- *  1. The request is POS-originated (POSRequestContext::is_pos_request()).
- *  2. The request has a recognized write intent.
- *  3. The user being checked genuinely holds the `woocommerce_pos_*` capability the operation
- *     requires — which, by the swap-target rule, is exactly the swapped-in staff member.
- *
- * Because the grant keys on the user already holding the matching POS cap, there is no override
- * special case: the approving manager swapped in for an override refund already holds
- * `woocommerce_pos_issue_refunds`, so the same map applies. The filter is inert the instant the
- * request is not POS-originated, so it cannot bleed into other traffic in the same worker.
- *
- * The granted set is intentionally minimal and may be widened as real `current_user_can()` checks
- * in the save path are observed; do not pre-grant a broad map.
+ * The POS caps aren't mapped to core post-type caps, so a staff member swapped in by POSAuthHandler
+ * would 403 on `/wc/v3/orders` etc. (which check `edit_shop_orders` / `publish_shop_orders`). This
+ * filter grants the minimal real cap, scoped on three conditions so it can't leak: the request is
+ * POS-originated, it has a recognized write intent, and the user being checked already holds the
+ * matching `woocommerce_pos_*` cap — which, by the swap-target rule, is exactly the swapped-in staff
+ * member. That last check is also why there's no override special case (the approving manager already
+ * holds `woocommerce_pos_issue_refunds`). The grant is inert the instant the request isn't
+ * POS-originated, and intentionally minimal — widen it only as real `current_user_can()` checks in
+ * the save path are observed.
  *
  * @since 11.0.0
  * @internal
