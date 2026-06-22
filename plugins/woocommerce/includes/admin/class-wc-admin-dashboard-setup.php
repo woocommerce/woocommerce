@@ -96,88 +96,59 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		 * @return array
 		 */
 		private function get_task_header( $task ) {
-			$asset_url    = WC()->plugin_url() . '/assets/';
-			$task_json    = $task->get_json();
-			$task_headers = array(
-				'store_details'        => array(
-					'title'        => __( 'First, tell us about your store', 'woocommerce' ),
-					'content'      => __( 'Get your store up and running in no time. Add your store’s address to set up shipping, tax and payments faster.', 'woocommerce' ),
-					'button_label' => __( 'Add details', 'woocommerce' ),
-					'image_url'    => $asset_url . 'images/task_list/store-details-illustration.png',
-					'image_alt'    => __( 'Store location illustration', 'woocommerce' ),
-				),
-				'customize-store'      => array(
-					'title'        => __( 'Start customizing your store', 'woocommerce' ),
-					'content'      => __( 'Quickly create a beautiful looking store using our built-in store designer, or select a pre-built theme and customize it to fit your brand.', 'woocommerce' ),
-					'button_label' => __( 'Start customizing', 'woocommerce' ),
-					'image_url'    => $asset_url . 'images/task_list/customize-store-illustration.svg',
-					'image_alt'    => __( 'Customize your store illustration', 'woocommerce' ),
-				),
-				'tax'                  => array(
-					'title'        => __( 'Configure your tax settings', 'woocommerce' ),
-					'content'      => __( 'Choose to set up your tax rates manually, or use one of our tax automation tools.', 'woocommerce' ),
-					'button_label' => __( 'Collect sales tax', 'woocommerce' ),
-					'image_url'    => $asset_url . 'images/task_list/tax-illustration.svg',
-					'image_alt'    => __( 'Tax illustration', 'woocommerce' ),
-				),
-				'shipping'             => array(
-					'title'        => __( 'Get your products shipped', 'woocommerce' ),
-					'content'      => __( 'Choose where and how you’d like to ship your products, along with any fixed or calculated rates.', 'woocommerce' ),
-					'button_label' => __( 'Start shipping', 'woocommerce' ),
-					'image_url'    => $asset_url . 'images/task_list/shipping-illustration.svg',
-					'image_alt'    => __( 'Shipping illustration', 'woocommerce' ),
-				),
-				'marketing'            => array(
-					'title'        => __( 'Reach more customers', 'woocommerce' ),
-					'content'      => __( 'Start growing your business by showcasing your products on social media and Google, boost engagement with email marketing, and more!', 'woocommerce' ),
-					'button_label' => __( 'Grow your business', 'woocommerce' ),
-					'image_url'    => $asset_url . 'images/task_list/sales-illustration.svg',
-					'image_alt'    => __( 'Marketing illustration', 'woocommerce' ),
-				),
-				'payments'             => array(
-					'title'        => __( 'It’s time to get paid', 'woocommerce' ),
-					'content'      => __( 'Give your customers an easy and convenient way to pay! Set up one (or more!) of our fast and secure online or in person payment methods.', 'woocommerce' ),
-					'button_label' => __( 'Get paid', 'woocommerce' ),
-					'image_url'    => $asset_url . 'images/task_list/payment-illustration.svg',
-					'image_alt'    => __( 'Payment illustration', 'woocommerce' ),
-				),
-				'woocommerce-payments' => array(
-					'title'        => __( 'It’s time to get paid', 'woocommerce' ),
-					'content'      => __( 'Power your payments with a simple, all-in-one option. Verify your business details to start managing transactions with WooCommerce Payments.', 'woocommerce' ),
-					'button_label' => __( 'Get paid', 'woocommerce' ),
-					'image_url'    => $asset_url . 'images/task_list/payment-illustration.svg',
-					'image_alt'    => __( 'Payment illustration', 'woocommerce' ),
-				),
-				'products'             => array(
-					'title'        => __( 'List your products', 'woocommerce' ),
-					'content'      => __( 'Start selling by adding products or services to your store. Choose to list products manually, or import them from a different store.', 'woocommerce' ),
-					'button_label' => __( 'Add products', 'woocommerce' ),
-					'image_url'    => $asset_url . 'images/task_list/sales-section-illustration.svg',
-					'image_alt'    => __( 'Products illustration', 'woocommerce' ),
-				),
-				'purchase'             => array(
-					'title'        => $task->get_title(),
-					'content'      => __( 'Good choice! You chose to add amazing new features to your store. Continue to checkout to complete your purchase.', 'woocommerce' ),
-					'button_label' => __( 'Continue', 'woocommerce' ),
-					'image_url'    => $asset_url . 'images/task_list/purchase-illustration.png',
-					'image_alt'    => __( 'Purchase illustration', 'woocommerce' ),
-				),
-				'launch-your-store'    => array(
-					'title'        => __( 'Your store is ready for launch!', 'woocommerce' ),
-					'content'      => __( 'It’s time to celebrate – you’re ready to launch your store! Woo! Hit the button to preview your store and make it public.', 'woocommerce' ),
-					'button_label' => __( 'Launch store', 'woocommerce' ),
-					'image_url'    => $asset_url . 'images/task_list/launch-your-store-illustration.svg',
-					'image_alt'    => __( 'Launch your store illustration', 'woocommerce' ),
-				),
-			);
-
-			return $task_headers[ $task->get_id() ] ?? array(
+			$asset_url           = WC()->plugin_url() . '/assets/';
+			$task_json           = $task->get_json();
+			$default_task_header = array(
 				'title'        => $task->get_title(),
 				'content'      => $task_json['content'] ?? '',
 				'button_label' => $task_json['actionLabel'] ?? $task->get_title(),
 				'image_url'    => $asset_url . 'images/dashboard-widget-setup.png',
 				'image_alt'    => __( 'WooCommerce setup illustration', 'woocommerce' ),
 			);
+			$task_images         = array(
+				'store_details'        => array(
+					'image_url'    => $asset_url . 'images/task_list/store-details-illustration.png',
+					'image_alt'    => __( 'Store location illustration', 'woocommerce' ),
+				),
+				'customize-store'      => array(
+					'image_url'    => $asset_url . 'images/task_list/customize-store-illustration.svg',
+					'image_alt'    => __( 'Customize your store illustration', 'woocommerce' ),
+				),
+				'tax'                  => array(
+					'image_url'    => $asset_url . 'images/task_list/tax-illustration.svg',
+					'image_alt'    => __( 'Tax illustration', 'woocommerce' ),
+				),
+				'shipping'             => array(
+					'image_url'    => $asset_url . 'images/task_list/shipping-illustration.svg',
+					'image_alt'    => __( 'Shipping illustration', 'woocommerce' ),
+				),
+				'marketing'            => array(
+					'image_url'    => $asset_url . 'images/task_list/sales-illustration.svg',
+					'image_alt'    => __( 'Marketing illustration', 'woocommerce' ),
+				),
+				'payments'             => array(
+					'image_url'    => $asset_url . 'images/task_list/payment-illustration.svg',
+					'image_alt'    => __( 'Payment illustration', 'woocommerce' ),
+				),
+				'woocommerce-payments' => array(
+					'image_url'    => $asset_url . 'images/task_list/payment-illustration.svg',
+					'image_alt'    => __( 'Payment illustration', 'woocommerce' ),
+				),
+				'products'             => array(
+					'image_url'    => $asset_url . 'images/task_list/sales-section-illustration.svg',
+					'image_alt'    => __( 'Products illustration', 'woocommerce' ),
+				),
+				'purchase'             => array(
+					'image_url'    => $asset_url . 'images/task_list/purchase-illustration.png',
+					'image_alt'    => __( 'Purchase illustration', 'woocommerce' ),
+				),
+				'launch-your-store'    => array(
+					'image_url'    => $asset_url . 'images/task_list/launch-your-store-illustration.svg',
+					'image_alt'    => __( 'Launch your store illustration', 'woocommerce' ),
+				),
+			);
+
+			return array_merge( $default_task_header, $task_images[ $task->get_id() ] ?? array() );
 		}
 
 		/**

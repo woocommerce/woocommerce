@@ -99,30 +99,15 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Widget shows when task list is incomplete and store is pre-launch.
+	 * @testdox Widget shows when task list is incomplete.
 	 */
-	public function test_widget_shows_when_task_list_is_incomplete_and_store_is_pre_launch(): void {
-		delete_option( 'woocommerce_task_list_completed_lists' );
-		delete_option( 'woocommerce_task_list_hidden_lists' );
-		update_option( 'woocommerce_coming_soon', 'yes' );
-
-		$this->assertTrue(
-			$this->invoke_should_display_widget( $this->sut ),
-			'Widget should display even when the task list is incomplete and the store is pre-launch'
-		);
-	}
-
-	/**
-	 * @testdox Widget shows when store has launched and task list is incomplete.
-	 */
-	public function test_widget_shows_when_store_has_launched_and_task_list_incomplete(): void {
-		update_option( 'woocommerce_coming_soon', 'no' );
+	public function test_widget_shows_when_task_list_is_incomplete(): void {
 		delete_option( 'woocommerce_task_list_completed_lists' );
 		delete_option( 'woocommerce_task_list_hidden_lists' );
 
 		$this->assertTrue(
 			$this->invoke_should_display_widget( $this->sut ),
-			'Widget should display when store has launched even if task list is incomplete'
+			'Widget should display even when the task list is incomplete'
 		);
 	}
 

@@ -201,6 +201,9 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 						public function get_action_url() {
 							return 'payments';
 						}
+						public function get_action_label() {
+							return 'Configure payments';
+						}
 						public function is_complete() {
 							return false;
 						}
@@ -224,9 +227,9 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		$html = ob_get_clean();
 
 		$this->assertStringContainsString( 'dashboard-widget-finish-setup__in-progress', $html );
-		$this->assertStringContainsString( 'time to get paid', $html );
-		$this->assertStringContainsString( 'Give your customers an easy and convenient way to pay!', $html );
-		$this->assertStringContainsString( 'Get paid', $html );
+		$this->assertStringContainsString( 'Set up payments', $html );
+		$this->assertStringContainsString( 'Choose payment providers and enable payment methods at checkout.', $html );
+		$this->assertStringContainsString( 'Configure payments', $html );
 		$this->assertStringContainsString( 'payment-illustration.svg', $html );
 		$this->assertStringContainsString( 'Test account', $html );
 		$this->assertMatchesRegularExpression( '/<h3 class="dashboard-widget-finish-setup__title">.*Test account.*<\/h3>/s', $html );
