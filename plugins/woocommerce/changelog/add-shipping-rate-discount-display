@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add Store API shipping rate discount data and display discounted shipping prices in Cart and Checkout Blocks.
