@@ -4,6 +4,22 @@ set -e  # Exit immediately on error
 
 cd "$(dirname "$0")"  # Ensure we're in the script directory
 
+CLEANUP=true
+for arg in "$@"; do
+  if [ "$arg" = "--skip-cleanup" ]; then
+    CLEANUP=false
+    break
+  fi
+done
+
+cleanup() {
+  if [ "$CLEANUP" = true ]; then
+    echo "🧹 Cleaning up PHPStan directories."
+    rm -rf vendor/ temp/
+  fi
+}
+trap cleanup EXIT
+
 # Ensure composer is installed
 if ! command -v composer >/dev/null 2>&1; then
   echo "❌ Composer is not installed. Please install Composer first."
@@ -28,19 +44,5 @@ fi
 # Run PHPStan
 echo "▶️ Running PHPStan with config: $CONFIG_FILE"
 vendor/bin/phpstan analyse -c "$CONFIG_FILE" --memory-limit=2G
-
-# Clean up PHPStan directories by default unless --skip-cleanup is specified
-CLEANUP=true
-for arg in "$@"; do
-  if [ "$arg" = "--skip-cleanup" ]; then
-    CLEANUP=false
-    break
-  fi
-done
-
-if [ "$CLEANUP" = true ]; then
-  echo "🧹 Cleaning up PHPStan directories."
-  rm -rf vendor/ temp/
-fi
 
 echo "✅ PHPStan completed successfully."

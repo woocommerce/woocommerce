@@ -61,7 +61,8 @@
 					"optional": true,
 					"changes": [
 						"**/*.php",
-						"**/*.neon"
+						"**/*.neon",
+						"tasks/phpstan/**"
 					],
 					"events": [
 						"pull_request",
@@ -75,7 +76,8 @@
 					"optional": true,
 					"changes": [
 						"**/*.php",
-						"**/*.neon"
+						"**/*.neon",
+						"tasks/phpstan/**"
 					],
 					"events": [
 						"pull_request",
