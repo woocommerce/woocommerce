@@ -8217,12 +8217,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			$this->fail( 'Expected Error not thrown.' );
 		} catch ( \Error $e ) {
 			// The internal call runs in Phase 2, which only catches Exception, so a fatal \Error
-			// propagates by design. The lock was already cleared in Phase 1's finally beforehand.
-			$this->assertSame( 'Simulated engine failure.', $e->getMessage() );
+			// propagates by design. The lock must already be cleared by Phase 1's finally at this point.
+			$this->assertSame( 0, $lock_value, 'The lock is cleared in Phase 1 before the internal call, so it is already cleared when a Phase 2 \Error propagates.' );
 		}
 
-		$this->assertSame( 0, $lock_value, 'The onboarding lock is cleared in Phase 1 before the internal call, so it stays cleared even when that call throws.' );
-		$this->assertSame( array( $this->current_time, 0 ), $lock_changes );
+		$this->assertSame( array( $this->current_time, 0 ), $lock_changes, 'Core sets then clears its own preflight lock; a propagating \Error adds no further lock writes.' );
 	}
 
 	/**
@@ -8327,10 +8326,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mock_account_state( $account_exists );
 
 		$endpoint_calls              = 0;
-		$disable_test_account_result = function ( string $endpoint ) use ( &$account_exists, &$endpoint_calls ) {
+		$disable_test_account_result = function ( string $endpoint ) use ( &$endpoint_calls ) {
 			if ( '/wc/v3/payments/onboarding/test_drive_account/disable' === $endpoint ) {
 				++$endpoint_calls;
-				$account_exists = false;
 
 				return new WP_Error(
 					'woocommerce_settings_payments_rest_error',
@@ -8376,6 +8374,117 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			$lock_changes,
 			'Core should clear the stale lock, acquire and clear its preflight lock.'
 		);
+	}
+
+	/**
+	 * @testdox Should disable a sandbox account via the onboarding reset endpoint and clear the lock around it.
+	 */
+	public function test_disable_test_account_uses_reset_endpoint_for_sandbox_account(): void {
+		$location = 'US';
+
+		// A connected account that is neither a test-drive nor a live account is a sandbox account.
+		$this->mock_provider
+			->expects( $this->any() )
+			->method( 'is_account_connected' )
+			->willReturn( true );
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'get_account_status_data' )
+			->willReturn(
+				array(
+					'status'           => 'complete',
+					'testDrive'        => false,
+					'isLive'           => false,
+					'paymentsEnabled'  => true,
+					'detailsSubmitted' => true,
+				)
+			);
+		$this->mock_working_wpcom_connection();
+
+		$lock_value      = 0;
+		$lock_changes    = array();
+		$updated_profile = array();
+		$this->mock_disable_test_account_option_state( $lock_value, $lock_changes, $updated_profile );
+
+		$requested_endpoints = array();
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint ) use ( &$requested_endpoints ) {
+						$requested_endpoints[] = $endpoint;
+
+						return array(
+							'success' => true,
+						);
+					},
+				),
+			)
+		);
+
+		$result = $this->sut->disable_test_account( $location, 'test-from', 'test-source' );
+
+		$this->assertSame( array( 'success' => true ), $result, 'Disabling a sandbox account should succeed.' );
+		$this->assertSame(
+			array( '/wc/v3/payments/onboarding/reset' ),
+			$requested_endpoints,
+			'A sandbox account should be disabled via the onboarding reset endpoint, not the test-drive disable endpoint.'
+		);
+		$this->assertSame(
+			array( $this->current_time, 0 ),
+			$lock_changes,
+			'Core should set its preflight lock and clear it before the Phase 2 reset call.'
+		);
+		$this->assertSame( 0, $lock_value, 'The onboarding lock should be cleared after the reset call.' );
+		$this->assertNotEmpty( $updated_profile, 'NOX steps should be marked completed on a successful disable.' );
+	}
+
+	/**
+	 * @testdox Should make no internal request and still succeed when there is no test or sandbox account to disable.
+	 */
+	public function test_disable_test_account_makes_no_request_when_no_test_or_sandbox_account(): void {
+		$location = 'US';
+
+		// No connected account means there is neither a test-drive nor a sandbox account to disable.
+		$this->mock_provider
+			->expects( $this->any() )
+			->method( 'is_account_connected' )
+			->willReturn( false );
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'get_account_status_data' )
+			->willReturn( array() );
+		$this->mock_working_wpcom_connection();
+
+		$lock_value      = 0;
+		$lock_changes    = array();
+		$updated_profile = array();
+		$this->mock_disable_test_account_option_state( $lock_value, $lock_changes, $updated_profile );
+
+		$endpoint_calls = 0;
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function () use ( &$endpoint_calls ) {
+						++$endpoint_calls;
+
+						return array(
+							'success' => true,
+						);
+					},
+				),
+			)
+		);
+
+		$result = $this->sut->disable_test_account( $location, 'test-from', 'test-source' );
+
+		$this->assertSame( array( 'success' => true ), $result, 'The no-op disable should return a success response.' );
+		$this->assertSame( 0, $endpoint_calls, 'No internal WooPayments request should be made when there is no account to disable.' );
+		$this->assertSame(
+			array( $this->current_time, 0 ),
+			$lock_changes,
+			'Core should still set and clear its preflight lock even when the Phase 2 request is skipped.'
+		);
+		$this->assertSame( 0, $lock_value, 'The onboarding lock should be cleared after the no-op.' );
 	}
 
 	/**
@@ -9839,6 +9948,22 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$result = $this->invoke_private_method( 'get_onboarding_payment_methods_state', array( $location, $recommended_pms ) );
 		$this->assertArrayHasKey( 'apple_google', $result );
 		$this->assertFalse( $result['apple_google'], 'Explicit stored apple_google should take precedence over OR/recommended.' );
+	}
+
+	/**
+	 * Mock a working WPCOM connection.
+	 *
+	 * Required for onboarding step completion that depends on the WPCOM connection step.
+	 */
+	private function mock_working_wpcom_connection(): void {
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
 	}
 
 	/**
