@@ -1,5 +1,4 @@
-Timeline
-===
+# Timeline
 
 This is a timeline for displaying data, such as events, in chronological order.
 It accepts `items` for the timeline content and will order the data for you.
@@ -67,4 +66,5 @@ Name | Type | Default | Description
 `hideTimestamp` | Bool | `false` | Allows the user to hide the timestamp associated with this event
 
 Icon color can be customized by adding 1 of 3 classes to the icon element: `is-success` (green), `is-warning` (yellow), and `is-error` (red)
-  - If no class is provided the icon will be gray
+
+- If no class is provided the icon will be gray
