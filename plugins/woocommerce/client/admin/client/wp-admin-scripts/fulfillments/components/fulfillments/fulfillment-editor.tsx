@@ -143,7 +143,7 @@ export default function FulfillmentEditor( {
 								  __( 'Editing fulfillment #%s', 'woocommerce' )
 								: /* translators: %s: Fulfillment ID */
 								  __( 'Fulfillment #%s', 'woocommerce' ),
-							index + 1
+							( index + 1 ).toString()
 						)
 					}
 				</h3>

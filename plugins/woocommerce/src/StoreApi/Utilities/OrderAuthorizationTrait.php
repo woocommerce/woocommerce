@@ -25,7 +25,7 @@ trait OrderAuthorizationTrait {
 		try {
 			$order = wc_get_order( $order_id );
 
-			if ( ! $order ) {
+			if ( ! $order instanceof \WC_Order ) {
 				throw new RouteException( 'woocommerce_rest_invalid_order', esc_html__( 'Invalid order ID.', 'woocommerce' ), 404 );
 			}
 

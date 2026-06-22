@@ -271,7 +271,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 						</a>
 					) }
 				</td>
-				<td className="wc-block-cart-item__product">
+				<td role="rowheader" className="wc-block-cart-item__product">
 					<div className="wc-block-cart-item__wrap">
 						<ProductName
 							disabled={

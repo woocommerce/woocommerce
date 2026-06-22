@@ -44,7 +44,7 @@
         },
         {
             "code": "DZ-11",
-            "name": "Tamanghasset"
+            "name": "Tamanrasset"
         },
         {
             "code": "DZ-12",
@@ -193,6 +193,46 @@
         {
             "code": "DZ-48",
             "name": "Relizane"
+        },
+        {
+            "code": "DZ-49",
+            "name": "Timimoun"
+        },
+        {
+            "code": "DZ-50",
+            "name": "Bordj Badji Mokhtar"
+        },
+        {
+            "code": "DZ-51",
+            "name": "Ouled Djellal"
+        },
+        {
+            "code": "DZ-52",
+            "name": "Béni Abbès"
+        },
+        {
+            "code": "DZ-53",
+            "name": "In Salah"
+        },
+        {
+            "code": "DZ-54",
+            "name": "In Guezzam"
+        },
+        {
+            "code": "DZ-55",
+            "name": "Touggourt"
+        },
+        {
+            "code": "DZ-56",
+            "name": "Djanet"
+        },
+        {
+            "code": "DZ-57",
+            "name": "El Meghaier"
+        },
+        {
+            "code": "DZ-58",
+            "name": "El Meniaa"
         }
     ],
     "_links": {

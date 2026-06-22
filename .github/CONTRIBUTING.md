@@ -11,9 +11,9 @@ There are many ways to contribute to the project!
 - Submitting fixes, improvements, and enhancements.
 - To disclose a security issue to our team, [please submit a report via HackerOne](https://hackerone.com/automattic/).
 
-If you wish to contribute code, please read the information in the sections below. Then [fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) WooCommerce, commit your changes, and [submit a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) 🎉
+If you wish to contribute code, please read the information in the sections below and our [community contributions guidelines](https://developer.woocommerce.com/docs/contribution/contributing/community-contributions/). Then [fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) WooCommerce, commit your changes, and [submit a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) 🎉
 
-We use the `good first issue` label to mark issues that are suitable for new contributors. You can find all the issues with this label [here](https://github.com/woocommerce/woocommerce/issues?q=is%3Aopen+is%3Aissue+label%3A%22type%3A+good+first+issue%22).
+We use the `good first issue` label to mark issues that are suitable for new contributors. You can browse [all issues with the good first issue label](https://github.com/woocommerce/woocommerce/issues?q=is%3Aopen+is%3Aissue+label%3A%22type%3A+good+first+issue%22).
 
 WooCommerce is licensed under the GPLv3+, and all contributions to the project will be released under the same license. You maintain copyright over any contribution you make, and by submitting a pull request, you are agreeing to release that contribution under the GPLv3+ license.
 

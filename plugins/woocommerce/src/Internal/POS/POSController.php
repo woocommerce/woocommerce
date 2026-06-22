@@ -11,11 +11,10 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 /**
  * Feature orchestrator for the POS staff + attribution iteration.
  *
- * Gates the feature on both the parent `point_of_sale` feature and the dev-only
- * `point_of_sale_staff` sub-flag. The runtime surfaces — staff REST endpoint,
- * order/coupon attribution hooks, and the wp-admin Staff UI — register themselves
- * here as they are added in follow-up changes; until then on_init() is an
- * intentional no-op even when both flags are on.
+ * Gates the feature on the dev-only `point_of_sale_staff` flag. The runtime surfaces —
+ * staff REST endpoint, order/coupon attribution hooks, and the wp-admin Staff UI —
+ * register themselves here as they are added in follow-up changes; until then on_init()
+ * is an intentional no-op even when the flag is on.
  *
  * @since 11.0.0
  * @internal
@@ -23,7 +22,6 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 class POSController implements RegisterHooksInterface {
 
 	private const FEATURE_FLAG = 'point_of_sale_staff';
-	private const PARENT_FLAG  = 'point_of_sale';
 
 	/**
 	 * Features controller used to gate hook registration on the POS feature flags.
@@ -61,7 +59,7 @@ class POSController implements RegisterHooksInterface {
 	/**
 	 * Wire up the feature surface once translations are safe to load.
 	 *
-	 * No-op when either gating flag is off. Runtime surfaces are registered here
+	 * No-op when the gating flag is off. Runtime surfaces are registered here
 	 * as they are added in follow-up changes.
 	 *
 	 * @internal
@@ -69,9 +67,6 @@ class POSController implements RegisterHooksInterface {
 	 * @since 11.0.0
 	 */
 	public function on_init(): void {
-		if ( ! $this->features_controller->feature_is_enabled( self::PARENT_FLAG ) ) {
-			return;
-		}
 		if ( ! $this->features_controller->feature_is_enabled( self::FEATURE_FLAG ) ) {
 			return;
 		}

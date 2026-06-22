@@ -1,3 +1,4 @@
+const path = require( 'path' );
 const rulesDirPlugin = require( 'eslint-plugin-rulesdir' );
 rulesDirPlugin.RULES_DIR = `${ __dirname }/rules/blocks`;
 
@@ -15,14 +16,24 @@ module.exports = {
 		'jest/valid-title': 'off',
 		'testing-library/await-async-utils': 'off',
 		/*
-		 * The e2e-pw tests use dependencies from the parent woocommerce package.
-		 * This configuration tells ESLint to check both the local package.json
-		 * and the parent package.json when validating imports.
+		 * The e2e-pw tests use dependencies from the parent woocommerce package
+		 * (this directory has no package.json of its own). Resolve packageDir from
+		 * __dirname so the check is independent of ESLint's working directory: VS
+		 * Code / root-level ESLint can run from the monorepo root, and relative
+		 * entries would otherwise point at the wrong package.json.
+		 *
+		 * Both entries must point at directories that contain a package.json:
+		 * eslint-plugin-import throws on the first missing one and aborts the
+		 * whole dependency merge, so we list the parent woocommerce package and
+		 * the monorepo root rather than this dir.
 		 */
 		'import/no-extraneous-dependencies': [
 			'warn',
 			{
-				packageDir: [ '.', '../..' ],
+				packageDir: [
+					path.resolve( __dirname, '../..' ),
+					path.resolve( __dirname, '../../../..' ),
+				],
 			},
 		],
 	},
@@ -44,10 +55,10 @@ module.exports = {
 			},
 		},
 		/*
-		 * Blocks e2e subtree (migrated from client/blocks/tests/e2e during the
+		 * Blocks e2e subtree (migrated into the core e2e suite during the
 		 * QAO-185 merge). These files use the blocks alias universe, so they get
 		 * the type-aware parser pointed at tsconfig.blocks.json and the blocks
-		 * lint rules that previously lived in client/blocks/tests/e2e/.eslintrc.js.
+		 * lint rules that previously applied to the blocks e2e tree.
 		 */
 		{
 			files: [ 'tests/blocks/**', 'utils/blocks/**' ],

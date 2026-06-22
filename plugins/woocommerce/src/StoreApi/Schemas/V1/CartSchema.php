@@ -1,11 +1,12 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\Enums\WeightUnit;
+use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
-use WC_Tax;
 
 /**
  * CartSchema class.
@@ -370,7 +371,7 @@ class CartSchema extends AbstractSchema {
 			'has_calculated_shipping' => $cart->has_calculated_shipping(),
 			'shipping_rates'          => $this->get_item_responses_from_schema( $this->shipping_rate_schema, $shipping_packages ),
 			'items_count'             => $cart->get_cart_contents_count(),
-			'items_weight'            => wc_get_weight( $cart->get_cart_contents_weight(), 'g' ),
+			'items_weight'            => wc_get_weight( $cart->get_cart_contents_weight(), WeightUnit::GRAM ),
 			'cross_sells'             => $this->get_item_responses_from_schema( $this->cross_sells_item_schema, $cross_sells ),
 			'errors'                  => $cart_errors,
 			'payment_methods'         => array_values( wp_list_pluck( WC()->payment_gateways->get_available_payment_gateways(), 'id' ) ),
@@ -416,14 +417,15 @@ class CartSchema extends AbstractSchema {
 			return $tax_lines;
 		}
 
-		$cart_tax_totals = $cart->get_tax_totals();
-		$decimals        = wc_get_price_decimals();
+		$cart_tax_totals  = $cart->get_tax_totals();
+		$tax_rate_objects = wc_get_container()->get( TaxRateDataStore::class )->get_rate_objects_for_ids( array_column( $cart_tax_totals, 'tax_rate_id' ) );
+		$decimals         = wc_get_price_decimals();
 
 		foreach ( $cart_tax_totals as $cart_tax_total ) {
 			$tax_lines[] = array(
 				'name'  => $cart_tax_total->label,
 				'price' => $this->prepare_money_response( $cart_tax_total->amount, $decimals ),
-				'rate'  => WC_Tax::get_rate_percent( $cart_tax_total->tax_rate_id ),
+				'rate'  => \WC_Tax::get_rate_percent( $tax_rate_objects[ $cart_tax_total->tax_rate_id ] ?? $cart_tax_total->tax_rate_id ),
 			);
 		}
 
