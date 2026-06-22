@@ -3,6 +3,7 @@
  */
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import type { Page } from '@playwright/test';
+import { faker } from '@faker-js/faker';
 
 /**
  * Internal dependencies
@@ -18,8 +19,18 @@ const test = baseTest.extend( {
 		const products = {};
 
 		for ( const key of Object.values( keys ) ) {
+			// `getFakeProduct` names products with `faker.commerce.productName()`,
+			// which is NOT globally unique — concurrent workers can generate the
+			// same name. This spec searches the store-wide product picker by name
+			// and selects the matching option, so a duplicate name yields 2+
+			// options and a strict-mode violation. Suffix a random token to make
+			// each product name unique across workers.
+			const fakeProduct = getFakeProduct();
+			fakeProduct.name = `${
+				fakeProduct.name
+			} ${ faker.string.alphanumeric( 8 ) }`;
 			await restApi
-				.post( `${ WC_API_PATH }/products`, getFakeProduct() )
+				.post( `${ WC_API_PATH }/products`, fakeProduct )
 				.then( ( response ) => {
 					products[ key ] = response.data;
 				} );
