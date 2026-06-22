@@ -239,30 +239,64 @@ export class Editor extends CoreEditor {
 	}
 
 	/**
-	 * This is to avoid tests failing due to two notices appearing at the same
-	 * time. This is an upstream issue with the `saveSiteEditorEntities` method.
-	 * It should be removed once the upstream issue is fixed.
-	 *
-	 * @see https://github.com/WordPress/gutenberg/issues/69042
+	 * This extends the upstream `saveSiteEditorEntities` helper to handle cases
+	 * where the save panel opens even when the caller expected only the current
+	 * entity to be dirty.
 	 */
 	saveSiteEditorEntities = async ( {
 		isOnlyCurrentEntityDirty = false,
 	}: {
 		isOnlyCurrentEntityDirty?: boolean;
 	} = {} ) => {
-		try {
-			await new CoreEditor( { page: this.page } ).saveSiteEditorEntities(
-				{
-					isOnlyCurrentEntityDirty,
-				}
-			);
-		} catch ( error ) {
-			if (
-				! ( error instanceof Error ) ||
-				! error.message.includes( 'strict mode violation' )
-			) {
-				throw error;
+		const editorTopBar = this.page.getByRole( 'region', {
+			name: 'Editor top bar',
+		} );
+		const saveButton = editorTopBar.getByRole( 'button', {
+			name: 'Save',
+			exact: true,
+		} );
+		const publishButton = editorTopBar.getByRole( 'button', {
+			name: 'Publish',
+		} );
+		const saveNoticeDismissButton = this.page
+			.getByRole( 'button', { name: 'Dismiss this notice' } )
+			.filter( { hasText: /(updated|published)\./ } );
+
+		const staleSaveNoticeCount = await saveNoticeDismissButton.count();
+		for ( let i = 0; i < staleSaveNoticeCount; i++ ) {
+			const staleSaveNotice = saveNoticeDismissButton.first();
+			if ( ! ( await staleSaveNotice.isVisible() ) ) {
+				break;
 			}
+			await staleSaveNotice.click();
 		}
+
+		const buttonToClick = ( await saveButton.isVisible() )
+			? saveButton
+			: publishButton;
+
+		await buttonToClick.click();
+
+		const panelSaveButton = this.page
+			.getByRole( 'region', {
+				name: /(Editor publish|Save panel)/,
+			} )
+			.getByRole( 'button', { name: 'Save', exact: true } );
+		const saveNotice = saveNoticeDismissButton.first();
+
+		if ( isOnlyCurrentEntityDirty ) {
+			await expect(
+				panelSaveButton.or( saveNotice ).first()
+			).toBeVisible();
+		}
+
+		if (
+			! isOnlyCurrentEntityDirty ||
+			( await panelSaveButton.isVisible() )
+		) {
+			await panelSaveButton.click();
+		}
+
+		await expect( saveNotice ).toBeVisible();
 	};
 }
