@@ -177,6 +177,43 @@ class PickupLocationsRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should default missing address sub-keys when a partial address is provided.
+	 */
+	public function test_update_settings_defaults_partial_address_keys(): void {
+		wp_set_current_user( $this->shop_manager_id );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/pickup-locations' );
+		$request->set_param(
+			'pickup_locations',
+			array(
+				array(
+					'name'    => 'Warehouse',
+					// Only country supplied; the rest must be defaulted so
+					// ShippingController::filter_taxable_address() never reads a
+					// missing index once country is set.
+					'address' => array( 'country' => 'US' ),
+				),
+			)
+		);
+
+		$this->sut->update_settings( $request );
+
+		$saved = get_option( 'pickup_location_pickup_locations' );
+
+		$this->assertSame(
+			array(
+				'address_1' => '',
+				'city'      => '',
+				'state'     => '',
+				'postcode'  => '',
+				'country'   => 'US',
+			),
+			$saved[0]['address'],
+			'A provided address must carry every sub-key so downstream readers never hit undefined indexes.'
+		);
+	}
+
+	/**
 	 * @testdox Should preserve existing settings when only one param is sent.
 	 */
 	public function test_omitted_params_are_not_overwritten(): void {

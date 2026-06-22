@@ -203,12 +203,17 @@ class PickupLocationsRestController extends \WP_REST_Controller {
 				continue;
 			}
 
+			// Always emit every address key with a safe default. Downstream
+			// readers such as ShippingController::filter_taxable_address() access
+			// state/postcode/city unconditionally once country is set, so a
+			// partial address (e.g. only country) would trigger undefined-index
+			// notices.
 			$address = array();
 			if ( isset( $location['address'] ) && is_array( $location['address'] ) ) {
 				foreach ( array( 'address_1', 'city', 'state', 'postcode', 'country' ) as $field ) {
-					if ( isset( $location['address'][ $field ] ) ) {
-						$address[ $field ] = sanitize_text_field( (string) $location['address'][ $field ] );
-					}
+					$address[ $field ] = isset( $location['address'][ $field ] )
+						? sanitize_text_field( (string) $location['address'][ $field ] )
+						: '';
 				}
 			}
 
