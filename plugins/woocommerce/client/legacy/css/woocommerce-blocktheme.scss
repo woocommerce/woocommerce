@@ -4,6 +4,8 @@
 */
 @import "fonts";
 @import "variables";
+@import "mixins";
+@import "animation";
 
 /**
 * Layout
@@ -569,5 +571,23 @@ p.demo_store,
 		width: 6.8em;
 		font-family: monospace;
 		flex: 0;
+	}
+
+	// Disabled submit (the field is empty), set from JS as a progressive enhancement.
+	.button.wp-element-button[disabled] {
+		cursor: not-allowed;
+		opacity: 0.5;
+	}
+
+	// While the code is being submitted: hide the label and show the shared loader spinner.
+	&.is-submitting {
+		.button.wp-element-button {
+			position: relative;
+			color: transparent !important; // Hide the label so only the spinner is visible.
+			pointer-events: none;
+			opacity: 1;
+
+			@include loader();
+		}
 	}
 }
