@@ -9969,7 +9969,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	/**
 	 * Mock a WooPayments account state for test-drive disable tests.
 	 *
-	 * @param bool $account_exists Whether the account is currently connected.
+	 * @param bool &$account_exists Whether the account is currently connected.
 	 */
 	private function mock_account_state( bool &$account_exists ): void {
 		$this->mock_provider
@@ -9997,10 +9997,10 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	/**
 	 * Mock NOX lock and profile options for test-drive disable tests.
 	 *
-	 * @param mixed $lock_value The current lock value.
-	 * @param array $lock_changes Recorded lock writes.
-	 * @param array $updated_profile The current updated NOX profile.
-	 * @param array $stored_profile The initial stored NOX profile.
+	 * @param mixed &$lock_value      The current lock value.
+	 * @param array &$lock_changes    Recorded lock writes.
+	 * @param array &$updated_profile The current updated NOX profile.
+	 * @param array $stored_profile   The initial stored NOX profile.
 	 */
 	private function mock_disable_test_account_option_state( &$lock_value, array &$lock_changes, array &$updated_profile, array $stored_profile = array() ): void {
 		$this->mockable_proxy->register_function_mocks(
