@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.9.0-rc.1 2026-XX-XX =
+= 10.9.0-rc.1 2026-06-22 =
 
 **WooCommerce**
 
@@ -243,6 +243,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Validate product_query before using in WC_Product_Data_Store_CPT. [#64360](https://github.com/woocommerce/woocommerce/pull/64360)
 * Fix - Push notifications: cancel the safety-net Action Scheduler action on delivery by matching schedule and cancel on a single identity-keyed args shape, so stale actions no longer fire ~60s later (and the retry path can no longer produce duplicate pushes). [#65589](https://github.com/woocommerce/woocommerce/pull/65589)
 * Fix - Fix product filters not applying when Full Page Reload is enabled in the Product Collection block. [#65601](https://github.com/woocommerce/woocommerce/pull/65601)
+* Fix - Only save published products to shopper lists. [#65899](https://github.com/woocommerce/woocommerce/pull/65899)
 * Add - Add a "Save for later" link beneath each cart line item that saves the item to the saved-for-later shopper list and removes it from the cart on success. The link is only shown to logged-in users and is hidden in the mini-cart. [#65263](https://github.com/woocommerce/woocommerce/pull/65263)
 * Add - Add a configurable endpoint URL to the GraphQL settings section. [#64350](https://github.com/woocommerce/woocommerce/pull/64350)
 * Add - Add a configurable maximum query depth to the GraphQL settings section. [#64325](https://github.com/woocommerce/woocommerce/pull/64325)
@@ -295,6 +296,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Shopper Collections: add experimental wishlist support. [#65263](https://github.com/woocommerce/woocommerce/pull/65263)
 * Add - Surface update-available indicator in the block email editor (RSM-141) [#64675](https://github.com/woocommerce/woocommerce/pull/64675)
 * Add - Wire the Shopper Collection (Saved-for-later) block to the shopper-lists Store API via a private iAPI store, with server-side rendering of saved items, optimistic remove, and Move-to-cart for simple products. [#65263](https://github.com/woocommerce/woocommerce/pull/65263)
+* Add - Add a settings section registry so extensions can render sections in existing settings tabs with Settings UI. [#65866](https://github.com/woocommerce/woocommerce/pull/65866)
+* Add - Render the Add to Wishlist Button inside the Add to Cart + Options block as the last child when the (experimental) wishlist feature is enabled, without modifying the shipped template parts. [#65820](https://github.com/woocommerce/woocommerce/pull/65820)
 * Update - Add readonly variation attributes [#65255](https://github.com/woocommerce/woocommerce/pull/65255)
 * Update - Add three-way diff for block email template change-summary and selective apply when the new `_wc_email_template_last_core_render` post meta is present. [#64716](https://github.com/woocommerce/woocommerce/pull/64716)
 * Update - Add to Cart + Options: Variation Selector block now can use the same inner blocks as Product Filters [#64887](https://github.com/woocommerce/woocommerce/pull/64887)
@@ -316,6 +319,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Enable the push notifications feature by default. [#65572](https://github.com/woocommerce/woocommerce/pull/65572)
 * Update - Add styles for the settings UI number spin control (hide the native spinner, position the +/- buttons). [#65729](https://github.com/woocommerce/woocommerce/pull/65729)
 * Update - Update settings UI layout to the agreed design values: 720px container width, 16px spacing between stacked fields, and 24px between cards. [#65729](https://github.com/woocommerce/woocommerce/pull/65729)
+* Update - Rename the settings UI script handle from wc-settings-ui-sdk to wc-settings-ui (never shipped in a release). [#65893](https://github.com/woocommerce/woocommerce/pull/65893)
+* Update - Update settings UI layout to the agreed design values: 720px container width, 16px spacing between stacked fields, and 24px between cards. [#65893](https://github.com/woocommerce/woocommerce/pull/65893)
 * Dev - Add E2E tests for block email template update propagation. [#64817](https://github.com/woocommerce/woocommerce/pull/64817)
 * Dev - Add embedded product variation links to the WC REST API v4 products endpoint. [#64566](https://github.com/woocommerce/woocommerce/pull/64566)
 * Dev - Add extra flexibility to the authentication and authorization stages of the dual code+GraphQL API. [#64647](https://github.com/woocommerce/woocommerce/pull/64647)
