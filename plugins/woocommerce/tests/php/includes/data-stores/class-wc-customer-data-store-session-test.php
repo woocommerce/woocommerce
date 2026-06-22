@@ -172,4 +172,31 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 		$customer->set_billing_state( $location['state'] );
 		return $customer;
 	}
+
+	/**
+	 * Ensure that empty string values can be persisted in customer session.
+	 */
+	public function test_empty_field_can_be_persisted_in_session() {
+		WC()->session->init();
+
+		$customer = new WC_Customer();
+		$customer->set_email( 'test@example.com' );
+		$customer->set_shipping_address_2( 'Apt 1' );
+		$customer->save();
+
+		// Session says address_2 is now empty (user cleared it).
+		WC()->session->set(
+			'customer',
+			array(
+				'id'                 => (string) $customer->get_id(),
+				'date_modified'      => (string) $customer->get_date_modified( 'edit' ),
+				'shipping_address_2' => '',
+			)
+		);
+
+		$data_store = new WC_Customer_Data_Store_Session();
+		$data_store->read( $customer );
+
+		$this->assertSame( '', $customer->get_shipping_address_2() );
+	}
 }

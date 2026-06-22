@@ -36,8 +36,8 @@
 	],
 	"dependencies": {
 		"@woocommerce/sanitize": "workspace:*",
+		"@wordpress/admin-ui": "catalog:wp-bundled",
 		"@wordpress/a11y": "catalog:wp-min",
-		"@wordpress/admin-ui": "catalog:wp-min",
 		"@wordpress/components": "catalog:wp-min",
 		"@wordpress/element": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min"

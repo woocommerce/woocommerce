@@ -9,6 +9,7 @@ import type { Page } from '@playwright/test';
  */
 import { test as baseTest, expect } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { getMediaBySlug } from '../../utils/media';
 
 async function addImageFromLibrary(
 	page: Page,
@@ -50,14 +51,11 @@ const test = baseTest.extend( {
 		} );
 	},
 	productWithImage: async ( { restApi, product }, use ) => {
+		const { id: imageId } = await getMediaBySlug( 'image-01' );
 		let productWithImage;
 		await restApi
 			.put( `${ WC_API_PATH }/products/${ product.id }`, {
-				images: [
-					{
-						src: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_2_front.jpg',
-					},
-				],
+				images: [ { id: imageId } ],
 			} )
 			.then( ( response ) => {
 				productWithImage = response.data;
@@ -66,20 +64,15 @@ const test = baseTest.extend( {
 		await use( productWithImage );
 	},
 	productWithGallery: async ( { restApi, product }, use ) => {
+		const imageIds = await Promise.all(
+			[ 'image-01', 'image-02', 'image-03' ].map(
+				async ( slug ) => ( await getMediaBySlug( slug ) ).id
+			)
+		);
 		let productWithGallery;
 		await restApi
 			.put( `${ WC_API_PATH }/products/${ product.id }`, {
-				images: [
-					{
-						src: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_2_front.jpg',
-					},
-					{
-						src: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_2_back.jpg',
-					},
-					{
-						src: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_3_front.jpg',
-					},
-				],
+				images: imageIds.map( ( id ) => ( { id } ) ),
 			} )
 			.then( ( response ) => {
 				productWithGallery = response.data;
