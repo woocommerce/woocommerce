@@ -143,7 +143,7 @@ class WC_Frontend_Scripts {
 	 * @param  string   $path      Full URL of the script, or path of the script relative to the WordPress root directory.
 	 * @param  string[] $deps      An array of registered script handles this script depends on.
 	 * @param  string   $version   String specifying script version number, if it has one, which is added to the URL as a query string for cache busting purposes. If version is set to false, a version number is automatically added equal to current installed WordPress version. If set to null, no version is added.
-	 * @param  boolean  $in_footer Whether to enqueue the script before </body> instead of in the <head>. Default 'false'.
+	 * @param  bool|array{strategy?: string, in_footer?: bool} $in_footer Whether to enqueue the script before </body> (boolean), or an array of arguments such as 'strategy' and 'in_footer'. Default array( 'strategy' => 'defer' ).
 	 */
 	private static function register_script( $handle, $path, $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = array( 'strategy' => 'defer' ) ) {
 		self::$registered_scripts[] = $handle;
