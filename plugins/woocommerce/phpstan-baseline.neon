@@ -51420,7 +51420,7 @@ parameters:
 		-
 			message: '#^Ternary operator condition is always true\.$#'
 			identifier: ternary.alwaysTrue
-			count: 1
+			count: 2
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
@@ -54632,7 +54632,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Blocks/QueryFilters.php
-
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Registry\\Container\:\:register\(\) has no return type specified\.$#'

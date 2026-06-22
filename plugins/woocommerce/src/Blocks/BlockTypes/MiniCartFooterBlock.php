@@ -1,6 +1,9 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
+
+
 /**
  * MiniCartFooterBlock class.
  */
