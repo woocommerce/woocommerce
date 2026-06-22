@@ -43,19 +43,19 @@ class POSAuthHandler implements RegisterHooksInterface {
 	private POSRequestContext $request_context;
 
 	/**
-	 * Pre-swap device admin id, captured once when a swap is committed (0 if none).
+	 * Pre-swap device admin id, captured once when a swap is committed; null if no swap happened.
 	 *
-	 * @var int
+	 * @var int|null
 	 */
-	private int $device_admin_id = 0;
+	private ?int $device_admin_id = null;
 
 	/**
-	 * Staff id swapped in, set once when a swap is committed (0 if none). Doubles as the
+	 * Staff id swapped in, set once when a swap is committed; null until then. Doubles as the
 	 * "already resolved this request" guard.
 	 *
-	 * @var int
+	 * @var int|null
 	 */
-	private int $staff_user_id = 0;
+	private ?int $staff_user_id = null;
 
 	/**
 	 * Initialize dependencies via the DI container.
@@ -126,7 +126,7 @@ class POSAuthHandler implements RegisterHooksInterface {
 	 * @return int|null
 	 */
 	private function resolve_swap( int $device_user_id ): ?int {
-		if ( $this->staff_user_id > 0 ) {
+		if ( null !== $this->staff_user_id ) {
 			return $this->staff_user_id;
 		}
 
@@ -157,11 +157,11 @@ class POSAuthHandler implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The pre-swap device admin user id, or 0 if no swap happened this request.
+	 * The pre-swap device admin user id, or null if no swap happened this request.
 	 *
-	 * @return int
+	 * @return int|null
 	 */
-	public function get_device_admin_id(): int {
+	public function get_device_admin_id(): ?int {
 		return $this->device_admin_id;
 	}
 
