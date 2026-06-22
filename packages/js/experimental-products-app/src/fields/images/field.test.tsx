@@ -51,8 +51,8 @@ if ( isLatestWordPress() || isLatestMinusOneWordPress() ) {
 		it( 'skips because this feature works only when Gutenberg is installed', () => {} );
 	} );
 } else {
-	describe( 'images field', async () => {
-		const { fieldExtensions } = await import( './field' );
+	describe( 'images field', () => {
+		let fieldExtensions: typeof import('./field').fieldExtensions;
 
 		const buildProduct = (
 			overrides: Partial< ProductEntityRecord > = {}
@@ -95,6 +95,10 @@ if ( isLatestWordPress() || isLatestMinusOneWordPress() ) {
 
 		afterEach( () => {
 			jest.clearAllMocks();
+		} );
+
+		beforeAll( async () => {
+			( { fieldExtensions } = await import( './field' ) );
 		} );
 
 		it( 'replaces the current images with the selected media attachments', () => {

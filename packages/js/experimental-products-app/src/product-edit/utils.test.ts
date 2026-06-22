@@ -60,8 +60,8 @@ if ( isLatestWordPress() || isLatestMinusOneWordPress() ) {
 		it( 'skips because this feature works only when Gutenberg is installed', () => {} );
 	} );
 } else {
-	describe( 'product edit utils', async () => {
-		const { productFields } = await import( '../product-list/fields' );
+	describe( 'product edit utils', () => {
+		let productFields: typeof import('../product-list/fields').productFields;
 		const getSettingMock = getSetting as jest.Mock;
 		const mockCostOfGoodsSoldFeatureEnabled = ( isEnabled: boolean ) => {
 			getSettingMock.mockImplementation( ( name, fallback ) =>
@@ -106,6 +106,10 @@ if ( isLatestWordPress() || isLatestMinusOneWordPress() ) {
 
 		beforeEach( () => {
 			mockCostOfGoodsSoldFeatureEnabled( true );
+		} );
+
+		beforeAll( async () => {
+			( { productFields } = await import( '../product-list/fields' ) );
 		} );
 
 		it( 'returns the original values for a single selected product', () => {

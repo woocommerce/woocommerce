@@ -69,8 +69,9 @@ if ( isLatestWordPress() || isLatestMinusOneWordPress() ) {
 		it( 'skips because this feature works only when Gutenberg is installed', () => {} );
 	} );
 } else {
-	describe( 'downloadable field', async () => {
-		const { fieldExtensions } = await import( './field' );
+	describe( 'downloadable field', () => {
+		let fieldExtensions: typeof import('./field').fieldExtensions;
+
 		const buildProduct = (
 			overrides: Partial< ProductEntityRecord > = {}
 		): ProductEntityRecord =>
@@ -124,8 +125,99 @@ if ( isLatestWordPress() || isLatestMinusOneWordPress() ) {
 				writable: true,
 				value: jest.fn(),
 			} );
+		} );
 
-			it( 'uploads selected files to the media library before saving them as downloads', () => {
+		beforeAll( async () => {
+			( { fieldExtensions } = await import( './field' ) );
+		} );
+
+		it( 'uploads selected files to the media library before saving them as downloads', () => {
+			const { container, onChange } = renderEdit( buildProduct() );
+			const file = new File( [ 'manual' ], 'manual.pdf', {
+				type: 'application/pdf',
+			} );
+			const fileInput = container.querySelector(
+				'input[type="file"]'
+			) as HTMLInputElement;
+
+			fireEvent.change( fileInput, {
+				target: {
+					files: [ file ],
+				},
+			} );
+
+			expect( screen.getByText( /manual\.pdf/ ) ).toHaveTextContent(
+				'manual.pdf - uploading…'
+			);
+			expect( onChange ).not.toHaveBeenCalled();
+			expect( mockUploadMedia ).toHaveBeenCalledWith(
+				expect.objectContaining( {
+					filesList: [ file ],
+					onFileChange: expect.any( Function ),
+					onError: expect.any( Function ),
+				} )
+			);
+
+			act( () => {
+				mockUploadMedia.mock.calls[ 0 ][ 0 ].onFileChange( [
+					{
+						id: 34,
+						url: 'https://example.com/wp-content/uploads/manual.pdf',
+						title: 'Product manual',
+					},
+				] );
+			} );
+
+			expect( URL.revokeObjectURL ).toHaveBeenCalledWith(
+				'blob:download-file'
+			);
+			expect( onChange ).toHaveBeenCalledTimes( 1 );
+			expect( onChange ).toHaveBeenCalledWith( {
+				downloads: [
+					{
+						id: '34',
+						file: 'https://example.com/wp-content/uploads/manual.pdf',
+						name: 'Product manual',
+					},
+				],
+			} );
+			expect( screen.getByText( 'Product manual' ) ).toBeInTheDocument();
+		} );
+
+		it( 'removes the temporary download when upload fails', () => {
+			const { container, onChange } = renderEdit( buildProduct() );
+			const file = new File( [ 'manual' ], 'manual.pdf', {
+				type: 'application/pdf',
+			} );
+			const fileInput = container.querySelector(
+				'input[type="file"]'
+			) as HTMLInputElement;
+
+			fireEvent.change( fileInput, {
+				target: {
+					files: [ file ],
+				},
+			} );
+
+			act( () => {
+				mockUploadMedia.mock.calls[ 0 ][ 0 ].onError();
+			} );
+
+			expect( URL.revokeObjectURL ).toHaveBeenCalledWith(
+				'blob:download-file'
+			);
+			expect( onChange ).not.toHaveBeenCalled();
+			expect(
+				screen.queryByText( /manual\.pdf/ )
+			).not.toBeInTheDocument();
+		} );
+
+		it.each( [
+			[ 'missing media ID', { url: 'https://example.com/manual.pdf' } ],
+			[ 'missing media URL', { id: 34 } ],
+		] )(
+			'removes the temporary download when uploaded attachment has a %s',
+			( _name, attachment ) => {
 				const { container, onChange } = renderEdit( buildProduct() );
 				const file = new File( [ 'manual' ], 'manual.pdf', {
 					type: 'application/pdf',
@@ -139,64 +231,11 @@ if ( isLatestWordPress() || isLatestMinusOneWordPress() ) {
 						files: [ file ],
 					},
 				} );
-
-				expect( screen.getByText( /manual\.pdf/ ) ).toHaveTextContent(
-					'manual.pdf - uploading…'
-				);
-				expect( onChange ).not.toHaveBeenCalled();
-				expect( mockUploadMedia ).toHaveBeenCalledWith(
-					expect.objectContaining( {
-						filesList: [ file ],
-						onFileChange: expect.any( Function ),
-						onError: expect.any( Function ),
-					} )
-				);
 
 				act( () => {
 					mockUploadMedia.mock.calls[ 0 ][ 0 ].onFileChange( [
-						{
-							id: 34,
-							url: 'https://example.com/wp-content/uploads/manual.pdf',
-							title: 'Product manual',
-						},
+						attachment,
 					] );
-				} );
-
-				expect( URL.revokeObjectURL ).toHaveBeenCalledWith(
-					'blob:download-file'
-				);
-				expect( onChange ).toHaveBeenCalledTimes( 1 );
-				expect( onChange ).toHaveBeenCalledWith( {
-					downloads: [
-						{
-							id: '34',
-							file: 'https://example.com/wp-content/uploads/manual.pdf',
-							name: 'Product manual',
-						},
-					],
-				} );
-				expect(
-					screen.getByText( 'Product manual' )
-				).toBeInTheDocument();
-			} );
-
-			it( 'removes the temporary download when upload fails', () => {
-				const { container, onChange } = renderEdit( buildProduct() );
-				const file = new File( [ 'manual' ], 'manual.pdf', {
-					type: 'application/pdf',
-				} );
-				const fileInput = container.querySelector(
-					'input[type="file"]'
-				) as HTMLInputElement;
-
-				fireEvent.change( fileInput, {
-					target: {
-						files: [ file ],
-					},
-				} );
-
-				act( () => {
-					mockUploadMedia.mock.calls[ 0 ][ 0 ].onError();
 				} );
 
 				expect( URL.revokeObjectURL ).toHaveBeenCalledWith(
@@ -206,48 +245,7 @@ if ( isLatestWordPress() || isLatestMinusOneWordPress() ) {
 				expect(
 					screen.queryByText( /manual\.pdf/ )
 				).not.toBeInTheDocument();
-			} );
-
-			it.each( [
-				[
-					'missing media ID',
-					{ url: 'https://example.com/manual.pdf' },
-				],
-				[ 'missing media URL', { id: 34 } ],
-			] )(
-				'removes the temporary download when uploaded attachment has a %s',
-				( _name, attachment ) => {
-					const { container, onChange } = renderEdit(
-						buildProduct()
-					);
-					const file = new File( [ 'manual' ], 'manual.pdf', {
-						type: 'application/pdf',
-					} );
-					const fileInput = container.querySelector(
-						'input[type="file"]'
-					) as HTMLInputElement;
-
-					fireEvent.change( fileInput, {
-						target: {
-							files: [ file ],
-						},
-					} );
-
-					act( () => {
-						mockUploadMedia.mock.calls[ 0 ][ 0 ].onFileChange( [
-							attachment,
-						] );
-					} );
-
-					expect( URL.revokeObjectURL ).toHaveBeenCalledWith(
-						'blob:download-file'
-					);
-					expect( onChange ).not.toHaveBeenCalled();
-					expect(
-						screen.queryByText( /manual\.pdf/ )
-					).not.toBeInTheDocument();
-				}
-			);
-		} );
+			}
+		);
 	} );
 }
