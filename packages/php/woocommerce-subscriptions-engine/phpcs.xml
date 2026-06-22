@@ -69,7 +69,7 @@
 	<exclude-pattern>node_modules/*</exclude-pattern>
 
 	<!-- Skip the PHPStan temp directory -->
-	<exclude-pattern>phpstan-tmp/*</exclude-pattern>
+	<exclude-pattern>tasks/phpstan/temp/*</exclude-pattern>
 
 	<!-- Skip the PHPStan stubs: they mirror external symbols verbatim, so WPCS naming/structure rules do not apply. -->
 	<exclude-pattern>phpstan-stubs/*</exclude-pattern>

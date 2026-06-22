@@ -24,12 +24,7 @@
 		"automattic/jetpack-changelogger": "3.3.0",
 		"phpunit/phpunit": "^9.6",
 		"woocommerce/woocommerce-sniffs": "1.0.0",
-		"yoast/phpunit-polyfills": "^4.0",
-		"phpstan/phpstan": "^2.2",
-		"phpstan/phpstan-phpunit": "^2.0",
-		"php-stubs/woocommerce-stubs": "^10.8",
-		"php-stubs/wordpress-tests-stubs": "^7.0",
-		"szepeviktor/phpstan-wordpress": "^2.0"
+		"yoast/phpunit-polyfills": "^4.0"
 	},
 	"config": {
 		"platform": {

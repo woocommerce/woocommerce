@@ -1,2 +1,3 @@
-phpstan-tmp/
+tasks/phpstan/vendor/
+tasks/phpstan/temp/
 
