@@ -95,11 +95,20 @@ export type TaxChildProps = {
 /**
  * Check if WooCommerce Tax is supported for a given store country.
  *
- * @param {string} countryCode Country code.
+ * @param {string|null} countryCode Country code.
  * @return {boolean} If WooCommerce Tax is supported.
  */
-export const supportsWooCommerceTax = ( countryCode: string ): boolean =>
-	WOOCOMMERCE_TAX_SUPPORTED_COUNTRIES.includes( countryCode );
+export const supportsWooCommerceTax = (
+	countryCode: string | null
+): boolean => {
+	if ( ! countryCode ) {
+		return false;
+	}
+
+	return WOOCOMMERCE_TAX_SUPPORTED_COUNTRIES.includes(
+		countryCode.trim().toUpperCase()
+	);
+};
 
 /**
  * Check if a given country is supported by Avalara.
