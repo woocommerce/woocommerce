@@ -5,7 +5,6 @@ import { Button, CardFooter, ExternalLink } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { Children, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { Pill } from '@woocommerce/components';
 import { Text } from '@woocommerce/experimental';
 import { PluginNames, pluginsStore } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
@@ -30,7 +29,6 @@ type TaxRecommendation = {
 	productUrl: string;
 	logo: React.ReactNode;
 	pluginSlugs: string[];
-	isRecommended?: boolean;
 };
 
 const useInstallPlugin = () => {
@@ -88,7 +86,6 @@ const TaxRecommendationItem = ( {
 	pluginsBeingSetup,
 	onInstallClick,
 	onActivateClick,
-	isRecommended = false,
 	title,
 	description,
 	productUrl,
@@ -160,12 +157,7 @@ const TaxRecommendationItem = ( {
 		<div className="woocommerce-list__item-inner woocommerce-tax-recommendation-item">
 			<div className="woocommerce-list__item-before">{ logo }</div>
 			<div className="woocommerce-list__item-text">
-				<span className="woocommerce-list__item-title">
-					{ title }
-					{ isRecommended && (
-						<Pill>{ __( 'Recommended', 'woocommerce' ) }</Pill>
-					) }
-				</span>
+				<span className="woocommerce-list__item-title">{ title }</span>
 				<span className="woocommerce-list__item-content">
 					{ description }
 					<br />
@@ -303,7 +295,6 @@ const TaxRecommendations = () => {
 					alt=""
 				/>
 			),
-			isRecommended: true,
 		},
 		{
 			id: 'anrok-tax',

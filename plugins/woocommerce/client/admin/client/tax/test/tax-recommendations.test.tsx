@@ -68,9 +68,18 @@ describe( 'TaxRecommendations', () => {
 
 	it( 'renders WooCommerce Tax and Anrok with install buttons when no related plugins are present', () => {
 		render( <TaxRecommendations /> );
+		const wooCommerceTaxItem = screen
+			.getByText( 'WooCommerce Tax' )
+			.closest( '.woocommerce-list__item' );
 
+		expect( wooCommerceTaxItem ).not.toBeNull();
 		expect( screen.getByText( 'WooCommerce Tax' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'Anrok' ) ).toBeInTheDocument();
+		expect(
+			within( wooCommerceTaxItem as HTMLElement ).queryByText(
+				/^Recommended$/
+			)
+		).not.toBeInTheDocument();
 		expect( screen.getAllByText( 'Install' ) ).toHaveLength( 2 );
 	} );
 
