@@ -8125,35 +8125,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$lock_changes    = array();
 		$stored_profile  = array();
 		$updated_profile = array();
-		$this->mockable_proxy->register_function_mocks(
-			array(
-				'get_option'    => function ( $option_name, $default_value = null ) use ( &$lock_value, &$updated_profile, $stored_profile ) {
-					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						return $lock_value ?? $default_value;
-					}
-					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
-						return ! empty( $updated_profile ) ? $updated_profile : $stored_profile;
-					}
-
-					return $default_value;
-				},
-				'update_option' => function ( $option_name, $value ) use ( &$lock_value, &$lock_changes, &$updated_profile ) {
-					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						$lock_value     = $value;
-						$lock_changes[] = $value;
-
-						return true;
-					}
-					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
-						$updated_profile = $value;
-
-						return true;
-					}
-
-					return true;
-				},
-			)
-		);
+		$this->mock_disable_test_account_option_state( $lock_value, $lock_changes, $updated_profile, $stored_profile );
 
 		$requests_made = array();
 		$this->mockable_proxy->register_static_mocks(
