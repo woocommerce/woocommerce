@@ -178,6 +178,9 @@ function prepare( {
 	);
 
 	registry.install( cacheDirectory );
+	logger.info?.(
+		`Downloaded ${ plan.missingPackages.length } @wordpress package(s) for WordPress ${ wpVersion }.`
+	);
 
 	return createPrepareResult( {
 		cacheDirectory,

@@ -363,12 +363,15 @@ describe( 'cache', () => {
 			},
 		} );
 		const cacheRoot = path.join( cwd, '.cache' );
+		const logger = {
+			info: jest.fn(),
+		};
 
 		const result = prepareWithRegistry( {
 			cwd,
 			cacheRoot,
 			wpVersion: 'latest-1',
-			logger: false,
+			logger,
 		} );
 
 		expect( result.packages ).toEqual( [ '@wordpress/components' ] );
@@ -433,6 +436,12 @@ describe( 'cache', () => {
 		} );
 		expect( registry.install ).toHaveBeenCalledWith(
 			path.join( cacheRoot, 'latest-1' )
+		);
+		expect( logger.info ).toHaveBeenCalledWith(
+			'Preparing 4 @wordpress package(s) for WordPress latest-1.'
+		);
+		expect( logger.info ).toHaveBeenCalledWith(
+			'Downloaded 4 @wordpress package(s) for WordPress latest-1.'
 		);
 	} );
 
