@@ -10,6 +10,45 @@ import { TaskType } from '@woocommerce/data';
 export const AUTOMATION_PLUGINS = [ 'woocommerce-services' ];
 
 /**
+ * Countries where WooCommerce Tax automated taxes are supported.
+ *
+ * Mirrors the support gate used for automated taxes in core.
+ */
+export const WOOCOMMERCE_TAX_SUPPORTED_COUNTRIES = [
+	'US',
+	'CA',
+	'AU',
+	'GB',
+	'AT',
+	'BE',
+	'BG',
+	'HR',
+	'CY',
+	'CZ',
+	'DK',
+	'EE',
+	'FI',
+	'FR',
+	'DE',
+	'GR',
+	'HU',
+	'IE',
+	'IT',
+	'LV',
+	'LT',
+	'LU',
+	'MT',
+	'NL',
+	'PL',
+	'PT',
+	'RO',
+	'SK',
+	'SI',
+	'ES',
+	'SE',
+];
+
+/**
  * Check if a store has a complete address given general settings.
  *
  * @param {Object} generalSettings                             General settings.
@@ -52,6 +91,15 @@ export type TaxChildProps = {
 	task: TaskType;
 	children?: React.ReactNode;
 };
+
+/**
+ * Check if WooCommerce Tax is supported for a given store country.
+ *
+ * @param {string} countryCode Country code.
+ * @return {boolean} If WooCommerce Tax is supported.
+ */
+export const supportsWooCommerceTax = ( countryCode: string ): boolean =>
+	WOOCOMMERCE_TAX_SUPPORTED_COUNTRIES.includes( countryCode );
 
 /**
  * Check if a given country is supported by Avalara.

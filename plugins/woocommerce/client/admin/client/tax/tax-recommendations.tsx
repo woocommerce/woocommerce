@@ -3,10 +3,10 @@
  */
 import { Button, CardFooter, ExternalLink } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { Children, useState } from '@wordpress/element';
+import { Children, useEffect, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Text } from '@woocommerce/experimental';
-import { PluginNames, pluginsStore } from '@woocommerce/data';
+import { PluginNames, pluginsStore, settingsStore } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -19,7 +19,9 @@ import {
 	DismissableList,
 	DismissableListHeading,
 } from '../settings-recommendations/dismissable-list';
+import { supportsWooCommerceTax } from '../task-lists/fills/tax/utils';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
+import { getCountryCode } from '~/dashboard/utils';
 import './tax-recommendations.scss';
 
 const ANROK_LOGO_URL = 'https://ps.w.org/anrok-tax/assets/icon.svg';
@@ -263,17 +265,25 @@ const getPluginSlugForAction = (
 const TaxRecommendations = () => {
 	const [ pluginsBeingSetup, handleInstall, handleActivate ] =
 		useInstallPlugin();
-	const { activePlugins, installedPlugins } = useSelect( ( select ) => {
-		const { getActivePlugins, getInstalledPlugins } =
-			select( pluginsStore );
+	const { activePlugins, installedPlugins, countryCode } = useSelect(
+		( select ) => {
+			const settings = select( settingsStore ).getSettings( 'general' );
+			const { getActivePlugins, getInstalledPlugins } =
+				select( pluginsStore );
 
-		return {
-			activePlugins: getActivePlugins() ?? [],
-			installedPlugins: getInstalledPlugins() ?? [],
-		};
-	}, [] ) ?? {
+			return {
+				activePlugins: getActivePlugins() ?? [],
+				installedPlugins: getInstalledPlugins() ?? [],
+				countryCode: getCountryCode(
+					settings.general?.woocommerce_default_country
+				),
+			};
+		},
+		[]
+	) ?? {
 		activePlugins: [],
 		installedPlugins: [],
+		countryCode: '',
 	};
 
 	const recommendations: TaxRecommendation[] = [
@@ -312,11 +322,35 @@ const TaxRecommendations = () => {
 			),
 		},
 	];
+	const visibleRecommendations = recommendations.filter(
+		( recommendation ) =>
+			recommendation.id === 'anrok-tax' ||
+			supportsWooCommerceTax( countryCode )
+	);
+	const visiblePluginSlugs = visibleRecommendations
+		.map( ( recommendation ) => recommendation.pluginSlugs[ 0 ] )
+		.join( ',' );
+	const impressionFired = useRef( false );
+
+	useEffect( () => {
+		if (
+			countryCode &&
+			visibleRecommendations.length > 0 &&
+			! impressionFired.current
+		) {
+			recordEvent( 'tax_partner_impression', {
+				context: 'settings',
+				country: countryCode,
+				plugins: visiblePluginSlugs,
+			} );
+			impressionFired.current = true;
+		}
+	}, [ countryCode, visiblePluginSlugs, visibleRecommendations.length ] );
 
 	return (
 		<div className="woocommerce-recommended-tax-extensions-wrapper">
 			<TaxRecommendationsList>
-				{ recommendations.map( ( recommendation ) => {
+				{ visibleRecommendations.map( ( recommendation ) => {
 					const isPluginActive = recommendation.pluginSlugs.some(
 						( pluginSlug ) => activePlugins.includes( pluginSlug )
 					);

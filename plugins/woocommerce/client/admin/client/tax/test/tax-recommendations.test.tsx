@@ -45,17 +45,28 @@ describe( 'TaxRecommendations', () => {
 	const installPluginsMock = jest.fn().mockResolvedValue( undefined );
 	const activatePluginsMock = jest.fn().mockResolvedValue( undefined );
 	const createSuccessNoticeMock = jest.fn();
+	let installedPlugins: string[] = [];
+	let activePlugins: string[] = [];
+	let countryCode = 'US';
 
 	beforeEach( () => {
 		installPluginsMock.mockClear();
 		activatePluginsMock.mockClear();
 		createSuccessNoticeMock.mockClear();
 		( recordEvent as jest.Mock ).mockClear();
+		installedPlugins = [];
+		activePlugins = [];
+		countryCode = 'US';
 
 		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
 			fn( () => ( {
-				getInstalledPlugins: () => [],
-				getActivePlugins: () => [],
+				getSettings: () => ( {
+					general: {
+						woocommerce_default_country: countryCode,
+					},
+				} ),
+				getInstalledPlugins: () => installedPlugins,
+				getActivePlugins: () => activePlugins,
 			} ) )
 		);
 
@@ -81,18 +92,58 @@ describe( 'TaxRecommendations', () => {
 	} );
 
 	it( 'shows Activate when Anrok is installed but inactive', () => {
-		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
-			fn( () => ( {
-				getInstalledPlugins: () => [ 'anrok-tax' ],
-				getActivePlugins: () => [],
-			} ) )
-		);
+		installedPlugins = [ 'anrok-tax' ];
 
 		render( <TaxRecommendations /> );
 
 		expect( screen.getByText( 'WooCommerce Tax' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'Anrok' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'Activate' ) ).toBeInTheDocument();
+	} );
+
+	it( 'renders only Anrok for unsupported countries', () => {
+		countryCode = 'BR';
+
+		render( <TaxRecommendations /> );
+
+		expect(
+			screen.queryByText( 'WooCommerce Tax' )
+		).not.toBeInTheDocument();
+		expect( screen.getByText( 'Anrok' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Install' ) ).toBeInTheDocument();
+	} );
+
+	it( 'fires tax_partner_impression with both recommendations for supported countries', () => {
+		render( <TaxRecommendations /> );
+
+		expect( recordEvent ).toHaveBeenCalledWith( 'tax_partner_impression', {
+			context: 'settings',
+			country: 'US',
+			plugins: 'woocommerce-services,anrok-tax',
+		} );
+	} );
+
+	it( 'fires tax_partner_impression with only Anrok for unsupported countries', () => {
+		countryCode = 'BR';
+
+		render( <TaxRecommendations /> );
+
+		expect( recordEvent ).toHaveBeenCalledWith( 'tax_partner_impression', {
+			context: 'settings',
+			country: 'BR',
+			plugins: 'anrok-tax',
+		} );
+	} );
+
+	it( 'does not fire tax_partner_impression before the store country is available', () => {
+		countryCode = '';
+
+		render( <TaxRecommendations /> );
+
+		expect( recordEvent ).not.toHaveBeenCalledWith(
+			'tax_partner_impression',
+			expect.anything()
+		);
 	} );
 
 	it( 'installs WooCommerce Tax using the WooCommerce Services slug', async () => {
@@ -145,12 +196,7 @@ describe( 'TaxRecommendations', () => {
 	} );
 
 	it( 'activates the installed WooCommerce Tax alias when one is already present', async () => {
-		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
-			fn( () => ( {
-				getInstalledPlugins: () => [ 'woocommerce-tax' ],
-				getActivePlugins: () => [],
-			} ) )
-		);
+		installedPlugins = [ 'woocommerce-tax' ];
 
 		render( <TaxRecommendations /> );
 
@@ -231,12 +277,7 @@ describe( 'TaxRecommendations', () => {
 
 	it( 'records a failed tax_partner_activate event when activation fails', async () => {
 		activatePluginsMock.mockRejectedValueOnce( undefined );
-		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
-			fn( () => ( {
-				getInstalledPlugins: () => [ 'anrok-tax' ],
-				getActivePlugins: () => [],
-			} ) )
-		);
+		installedPlugins = [ 'anrok-tax' ];
 
 		render( <TaxRecommendations /> );
 
