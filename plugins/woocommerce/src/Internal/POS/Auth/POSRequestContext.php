@@ -128,7 +128,7 @@ class POSRequestContext {
 		}
 
 		if ( ! $this->rest_context_ready() ) {
-			return self::miss();
+			return self::non_pos_result();
 		}
 
 		$this->resolved = $this->compute();
@@ -151,14 +151,14 @@ class POSRequestContext {
 	 */
 	private function compute(): array {
 		if ( ! $this->features_controller->feature_is_enabled( self::FEATURE_FLAG ) ) {
-			return self::miss();
+			return self::non_pos_result();
 		}
 
 		// Store API has its own (guest) identity model on the shared determine_current_user hook —
 		// never treat its traffic as POS. Defensive: the wc/v3 write allowlist below already excludes it.
 		$route = $this->get_rest_route();
 		if ( '' === $route || 0 === strpos( $route, '/wc/store/' ) ) {
-			return self::miss();
+			return self::non_pos_result();
 		}
 
 		// Both POS headers are required: X-WC-POS-Staff-Id names who to act as, X-WC-POS-Request marks
@@ -169,7 +169,7 @@ class POSRequestContext {
 		$has_marker = isset( $_SERVER[ self::HEADER_POS_REQUEST ] )
 			&& '1' === sanitize_text_field( wp_unslash( $_SERVER[ self::HEADER_POS_REQUEST ] ) );
 		if ( $staff_id <= 0 || ! $has_marker ) {
-			return self::miss();
+			return self::non_pos_result();
 		}
 
 		$method = isset( $_SERVER['REQUEST_METHOD'] )
@@ -178,7 +178,7 @@ class POSRequestContext {
 
 		$intent = $this->intent_for_write( $route, $method );
 		if ( null === $intent ) {
-			return self::miss();
+			return self::non_pos_result();
 		}
 
 		return array(
@@ -193,7 +193,7 @@ class POSRequestContext {
 	 *
 	 * @return array{is_pos_request:bool,intent:string|null,staff_id:int}
 	 */
-	private static function miss(): array {
+	private static function non_pos_result(): array {
 		return array(
 			'is_pos_request' => false,
 			'intent'         => null,
@@ -225,33 +225,23 @@ class POSRequestContext {
 	}
 
 	/**
-	 * Derive the normalized REST route at determine_current_user time.
+	 * The current REST route at determine_current_user time, or '' if not resolvable yet.
 	 *
-	 * Prefers the parsed rest_route query var (set before serve_request, the source
-	 * StoreApi\Authentication uses); falls back to the rest_route query arg, then to parsing
-	 * REQUEST_URI relative to the REST prefix. Returns '' when not resolvable. Output has a single
-	 * leading slash and no query string.
+	 * Reads the parsed `rest_route` query var — the same source WC itself uses (e.g.
+	 * StoreApi\Authentication::is_request_to_store_api(), Utilities\RestApiUtil, and
+	 * wc_rest_should_load_namespace()). WP core's `WP::parse_request()` (wp-includes/class-wp.php)
+	 * populates it for both pretty and plain (?rest_route=…) permalinks, before REST serve_request
+	 * dispatches. An empty value keeps resolved() from memoizing (via rest_context_ready()), so a
+	 * too-early call simply re-evaluates once the route exists. Normalized to a single leading
+	 * slash, no query string.
 	 *
 	 * @return string
 	 */
 	private function get_rest_route(): string {
-		$route = '';
+		$route = isset( $GLOBALS['wp']->query_vars['rest_route'] )
+			? trim( (string) $GLOBALS['wp']->query_vars['rest_route'] )
+			: '';
 
-		if ( isset( $GLOBALS['wp'] ) && isset( $GLOBALS['wp']->query_vars['rest_route'] ) ) {
-			$route = (string) $GLOBALS['wp']->query_vars['rest_route'];
-		} elseif ( isset( $_GET['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$route = sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		} elseif ( isset( $_SERVER['REQUEST_URI'] ) ) {
-			$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
-			$prefix      = '/' . rest_get_url_prefix() . '/';
-			$pos         = strpos( $request_uri, $prefix );
-			if ( false !== $pos ) {
-				$route = substr( $request_uri, $pos + strlen( $prefix ) );
-				$route = (string) strtok( $route, '?' );
-			}
-		}
-
-		$route = trim( $route );
 		return '' === $route ? '' : '/' . ltrim( $route, '/' );
 	}
 }
