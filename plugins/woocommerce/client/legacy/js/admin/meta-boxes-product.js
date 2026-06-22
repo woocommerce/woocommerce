@@ -7,6 +7,15 @@ jQuery( function ( $ ) {
 	} );
 
 	function appendAttributeTermOption( select, term ) {
+		if (
+			! select ||
+			! term ||
+			term.term_id === undefined ||
+			term.name === undefined
+		) {
+			return;
+		}
+
 		const option = document.createElement( 'option' );
 		option.value = String( term.term_id );
 		option.selected = true;
@@ -1072,8 +1081,7 @@ jQuery( function ( $ ) {
 
 			const wrapper = this.closest( '.woocommerce_attribute' );
 			const attribute = wrapper ? wrapper.dataset.taxonomy : '';
-			const isVisualAttribute =
-				this.dataset.isVisualAttribute === 'yes';
+			const isVisualAttribute = this.dataset.isVisualAttribute === 'yes';
 
 			currentAttributeTermCreationContext = {
 				wrapper,
@@ -1465,9 +1473,9 @@ jQuery( function ( $ ) {
 	const setProductImageLink = $( '#set-post-thumbnail' );
 	// Escape the translated label before interpolating into the attribute so a
 	// translation containing quotes or markup cannot break the rendered span.
-	const tooltipMarkup = `<span class="woocommerce-help-tip" tabindex="0" aria-label="${
-		_.escape( woocommerce_admin_meta_boxes.i18n_product_image_tip )
-	}"></span>`;
+	const tooltipMarkup = `<span class="woocommerce-help-tip" tabindex="0" aria-label="${ _.escape(
+		woocommerce_admin_meta_boxes.i18n_product_image_tip
+	) }"></span>`;
 	const tooltipData = {
 		attribute: 'data-tip',
 		content: woocommerce_admin_meta_boxes.i18n_product_image_tip,

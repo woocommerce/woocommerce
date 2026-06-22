@@ -6630,7 +6630,7 @@ img.help_tip {
 
 		&.woocommerce_attribute h3 .woocommerce-attribute-global-badge {
 			display: inline-block;
-			margin-left: 6px;
+			margin-inline-start: 6px;
 			border-radius: 4px;
 			background: $gray-100;
 			padding: 4px 6px;
@@ -9780,7 +9780,7 @@ body.woocommerce-settings-payments-section_legacy {
 	gap: 6px;
 	vertical-align: middle;
 	margin-bottom: 1px;
-	margin-left: 2px;
+	margin-inline-start: 2px;
 }
 
 .select2-results__option .wc-admin-visual-attribute-term-option {

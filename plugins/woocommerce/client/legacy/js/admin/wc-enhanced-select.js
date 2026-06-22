@@ -24,22 +24,24 @@ jQuery( function ( $ ) {
 		const swatchStyle = getVisualTermSwatchStyle( term.visual );
 		const swatchClass =
 			'wc-admin-color-swatch' + ( swatchStyle ? '' : ' is-empty' );
-		const styleAttribute = swatchStyle
-			? ' style="' + swatchStyle + '"'
-			: '';
+		const wrapper = document.createElement( 'span' );
+		wrapper.className = 'wc-admin-visual-attribute-term-option';
 
-		return (
-			'<span class="wc-admin-visual-attribute-term-option">' +
-			'<span class="' +
-			swatchClass +
-			'"' +
-			styleAttribute +
-			' aria-hidden="true"></span>' +
-			'<span class="wc-admin-visual-attribute-term-label">' +
-			term.text +
-			'</span>' +
-			'</span>'
-		);
+		const swatch = document.createElement( 'span' );
+		swatch.className = swatchClass;
+		if ( swatchStyle ) {
+			swatch.setAttribute( 'style', swatchStyle );
+		}
+		swatch.setAttribute( 'aria-hidden', 'true' );
+
+		const label = document.createElement( 'span' );
+		label.className = 'wc-admin-visual-attribute-term-label';
+		label.textContent = term.text;
+
+		wrapper.appendChild( swatch );
+		wrapper.appendChild( label );
+
+		return wrapper;
 	}
 
 	function getTermDataWithVisual( $select, data ) {

@@ -72,10 +72,18 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 			return $terms;
 		}
 
-		$term_ids = wp_list_pluck( $terms, 'term_id' );
+		// Because `$terms` might be filtered by a plugin, make sure we only operate on valid terms.
+		$valid_terms = array_filter(
+			$terms,
+			static function ( $term ) {
+				return is_object( $term ) && isset( $term->term_id );
+			}
+		);
+
+		$term_ids = array_map( 'intval', wp_list_pluck( $valid_terms, 'term_id' ) );
 		$visuals  = VisualAttributeTermMeta::get_term_visuals( $term_ids );
 
-		foreach ( $terms as $term ) {
+		foreach ( $valid_terms as $term ) {
 			$term->visual = $visuals[ $term->term_id ] ?? VisualAttributeTermMeta::get_empty_visual();
 		}
 
