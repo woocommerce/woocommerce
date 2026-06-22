@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Patterns;
 
-use Automattic\WooCommerce\Admin\Features\Features;
-
 /**
  * PatternRegistry class.
  *
