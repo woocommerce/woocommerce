@@ -60,7 +60,7 @@ class WCAdminAssets {
 	 * @return string Folder path of asset.
 	 */
 	public static function get_path( $ext ) {
-		return ( $ext === 'css' ) ? WC_ADMIN_DIST_CSS_FOLDER : WC_ADMIN_DIST_JS_FOLDER;
+		return ( 'css' === $ext ) ? WC_ADMIN_DIST_CSS_FOLDER : WC_ADMIN_DIST_JS_FOLDER;
 	}
 
 	/**
@@ -90,7 +90,7 @@ class WCAdminAssets {
 		$suffix = '';
 
 		// Potentially enqueue minified JavaScript.
-		if ( $ext === 'js' ) {
+		if ( 'js' === $ext ) {
 			$script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
 			$suffix       = self::should_use_minified_js_file( $script_debug ) ? '.min' : '';
 		}
@@ -141,7 +141,7 @@ class WCAdminAssets {
 			return $script_nonmin_filename;
 		} else {
 			// could not find an asset file, throw an error.
-			throw new \Exception( 'Could not find asset registry for ' . $script_path_name );
+			throw new \Exception( 'Could not find asset registry for ' . esc_html( $script_path_name ) );
 		}
 	}
 
@@ -329,12 +329,8 @@ class WCAdminAssets {
 			'wc-navigation',
 			'wc-block-templates',
 			'wc-experimental-products-app',
-<<<<<<< HEAD
 			'wc-product-editor',
-			'wc-settings-ui-sdk',
-=======
 			'wc-settings-ui',
->>>>>>> c8a99b03ef (Rename @woocommerce/settings-ui-sdk to @woocommerce/settings-ui (#65719))
 			'wc-remote-logging',
 			'wc-sanitize',
 		);
@@ -353,12 +349,8 @@ class WCAdminAssets {
 			'wc-experimental-products-app',
 			'wc-experimental',
 			'wc-navigation',
-<<<<<<< HEAD
 			'wc-product-editor',
-			'wc-settings-ui-sdk',
-=======
 			'wc-settings-ui',
->>>>>>> c8a99b03ef (Rename @woocommerce/settings-ui-sdk to @woocommerce/settings-ui (#65719))
 			WC_ADMIN_APP,
 		);
 

@@ -28526,7 +28526,6 @@ snapshots:
       webpack-hot-middleware: 2.26.1
 
   '@pmmmwh/react-refresh-webpack-plugin@0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2(webpack@5.97.1(@swc/core@1.15.24)))(webpack-hot-middleware@2.26.1)(webpack@5.97.1(@swc/core@1.15.24))':
-<<<<<<< HEAD
     dependencies:
       ansi-html: 0.0.9
       core-js-pure: 3.49.0
@@ -28544,8 +28543,6 @@ snapshots:
       webpack-hot-middleware: 2.26.1
 
   '@pmmmwh/react-refresh-webpack-plugin@0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)':
-=======
->>>>>>> c8a99b03ef (Rename @woocommerce/settings-ui-sdk to @woocommerce/settings-ui (#65719))
     dependencies:
       ansi-html: 0.0.9
       core-js-pure: 3.49.0
