@@ -1,65 +1,65 @@
 type DeprecatedWcAdminFeatureFlags = {
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'activity-panels': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	analytics: boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'analytics-scheduled-import': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'experimental-iapi-mini-cart': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	coupons: boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'core-profiler': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'customize-store': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'customer-effort-score-tracks': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'import-products-task': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'experimental-fashion-sample-products': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'shipping-smart-defaults': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'shipping-setting-tour': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	homescreen: boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	marketing: boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'mobile-app-banner': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	onboarding: boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'onboarding-tasks': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'pattern-toolkit-full-composability': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'payment-gateway-suggestions': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'product-custom-fields': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	printful: boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'remote-inbox-notifications': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'remote-free-extensions': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'shipping-label-banner': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	subscriptions: boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'store-alerts': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'transient-notices': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'wc-pay-promotion': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'wc-pay-welcome-page': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'woo-mobile-welcome': boolean;
-	/** @deprecated This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
+	/** @deprecated Deprecated since WooCommerce 11.0. This WC Admin feature flag shim will be removed in WooCommerce 11.5. */
 	'launch-your-store': boolean;
 };
 

@@ -17,6 +17,11 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
  */
 class Features {
 	/**
+	 * WooCommerce version where WC Admin feature flag compatibility shims were deprecated.
+	 */
+	private const RETIRED_FEATURE_COMPATIBILITY_DEPRECATION_VERSION = '11.0.0';
+
+	/**
 	 * Class instance.
 	 *
 	 * @var Loader instance
@@ -442,7 +447,7 @@ class Features {
 	private static function warn_legacy_feature_compatibility_usage( $method, $feature ): void {
 		wc_deprecated_function(
 			sprintf( "%s( '%s' )", $method, $feature ),
-			'11.0.0',
+			self::RETIRED_FEATURE_COMPATIBILITY_DEPRECATION_VERSION,
 			sprintf(
 				'direct feature behavior checks. The %1$s WC Admin feature flag shim will be removed in WooCommerce %2$s.',
 				$feature,

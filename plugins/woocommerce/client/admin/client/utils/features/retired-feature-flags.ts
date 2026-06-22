@@ -3,6 +3,8 @@
  */
 import deprecated from '@wordpress/deprecated';
 
+export const RETIRED_FEATURE_FLAG_DEPRECATION_VERSION = '11.0.0';
+
 // Keep this dictionary in sync with $retired_feature_compatibility_removal_versions in
 // plugins/woocommerce/src/Admin/Features/Features.php.
 export const RETIRED_FEATURE_FLAGS = {
@@ -53,8 +55,7 @@ export const warnRetiredFeatureFlag = ( featureId: string ): void => {
 	const removalVersion = getRetiredFeatureFlagRemovalVersion( featureId );
 
 	deprecated( `wcAdminFeatures.${ featureId }`, {
-		version: '11.0.0',
-		alternative: 'direct feature behavior checks',
+		version: RETIRED_FEATURE_FLAG_DEPRECATION_VERSION,
 		plugin: 'WooCommerce',
 		hint: `The ${ featureId } WC Admin feature flag shim will be removed in WooCommerce ${
 			removalVersion ?? 'a future version'
