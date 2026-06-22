@@ -59,14 +59,8 @@ class BlockPatterns extends \WP_UnitTestCase {
 	 */
 	public function test_block_patterns_registration() {
 
-		ob_start();
-		include __DIR__ . '/patterns/mock-header.php';
-		$mock_header_content = ob_get_clean();
-
-		ob_start();
-		include __DIR__ . '/patterns/mock-footer.php';
-		$mock_footer_content = ob_get_clean();
-
+		// Content is no longer loaded eagerly. Patterns are registered with a
+		// `filePath` so core can load the content lazily on demand.
 		$this->pattern_registry
 			->expects( $this->exactly( 2 ) )
 			->method( 'register_block_pattern' )
@@ -85,7 +79,7 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-footer.php',
-						'content'       => $mock_footer_content,
+						'filePath'      => __DIR__ . '/patterns/mock-footer.php',
 					),
 				),
 				array(
@@ -102,7 +96,7 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-header.php',
-						'content'       => $mock_header_content,
+						'filePath'      => __DIR__ . '/patterns/mock-header.php',
 					),
 				),
 			);
@@ -128,9 +122,10 @@ class BlockPatterns extends \WP_UnitTestCase {
 
 		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data );
 
-		$expected_pattern            = $mock_patterns[0];
-		$expected_pattern['source']  = __DIR__ . '/patterns/mock-cached.php';
-		$expected_pattern['content'] = '';
+		$expected_pattern             = $mock_patterns[0];
+		$expected_pattern['source']   = __DIR__ . '/patterns/mock-cached.php';
+		$expected_pattern['content']  = '';
+		$expected_pattern['filePath'] = __DIR__ . '/patterns/mock-cached.php';
 
 		$this->pattern_registry
 			->expects( $this->exactly( 1 ) )
@@ -160,14 +155,8 @@ class BlockPatterns extends \WP_UnitTestCase {
 
 		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data );
 
-		ob_start();
-		include __DIR__ . '/patterns/mock-header.php';
-		$mock_header_content = ob_get_clean();
-
-		ob_start();
-		include __DIR__ . '/patterns/mock-footer.php';
-		$mock_footer_content = ob_get_clean();
-
+		// Content is no longer loaded eagerly. Patterns are registered with a
+		// `filePath` so core can load the content lazily on demand.
 		$this->pattern_registry
 			->expects( $this->exactly( 2 ) )
 			->method( 'register_block_pattern' )
@@ -186,7 +175,7 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-footer.php',
-						'content'       => $mock_footer_content,
+						'filePath'      => __DIR__ . '/patterns/mock-footer.php',
 					),
 				),
 				array(
@@ -203,7 +192,7 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-header.php',
-						'content'       => $mock_header_content,
+						'filePath'      => __DIR__ . '/patterns/mock-header.php',
 					),
 				),
 			);

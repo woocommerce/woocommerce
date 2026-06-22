@@ -81,23 +81,14 @@ class BlockPatterns {
 	}
 
 	/**
-	 * Loads the content of a pattern.
-	 *
-	 * @param string $pattern_path The path to the pattern.
-	 * @return string The content of the pattern.
-	 */
-	private function load_pattern_content( $pattern_path ) {
-		if ( ! file_exists( $pattern_path ) ) {
-			return '';
-		}
-
-		ob_start();
-		include $pattern_path;
-		return ob_get_clean();
-	}
-
-	/**
 	 * Register block patterns from core.
+	 *
+	 * The pattern content is not loaded here. Instead, each pattern is registered
+	 * with the absolute path to its source file (via the `filePath` property), so
+	 * that core's `WP_Block_Patterns_Registry` loads (and caches) the content
+	 * lazily, only when a pattern is actually requested. This avoids the cost of
+	 * `include`-ing all pattern files on every request (e.g. front-end, REST,
+	 * cron), where patterns are never consumed.
 	 *
 	 * @return void
 	 */
@@ -108,11 +99,9 @@ class BlockPatterns {
 
 		$patterns = $this->get_block_patterns();
 		foreach ( $patterns as $pattern ) {
-			$pattern_path      = $this->patterns_path . '/' . $pattern['source'];
-			$pattern['source'] = $pattern_path;
-
-			$content            = $this->load_pattern_content( $pattern_path );
-			$pattern['content'] = $content;
+			$pattern_path        = $this->patterns_path . '/' . $pattern['source'];
+			$pattern['source']   = $pattern_path;
+			$pattern['filePath'] = $pattern_path;
 
 			$this->pattern_registry->register_block_pattern( $pattern_path, $pattern );
 		}

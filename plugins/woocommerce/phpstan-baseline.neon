@@ -49786,12 +49786,6 @@ parameters:
 			path: src/Blocks/AssetsController.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockPatterns\:\:load_pattern_content\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockPatterns.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockPatterns\:\:set_pattern_cache\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
