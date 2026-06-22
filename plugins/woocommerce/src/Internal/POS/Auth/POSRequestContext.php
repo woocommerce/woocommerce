@@ -30,7 +30,6 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
  */
 class POSRequestContext {
 
-	private const PARENT_FLAG  = 'point_of_sale';
 	private const FEATURE_FLAG = 'point_of_sale_staff';
 
 	private const HEADER_POS_REQUEST  = 'HTTP_X_WC_POS_REQUEST';
@@ -151,8 +150,7 @@ class POSRequestContext {
 	 * @return array{is_pos_request:bool,intent:string|null,staff_id:int}
 	 */
 	private function compute(): array {
-		if ( ! $this->features_controller->feature_is_enabled( self::PARENT_FLAG )
-			|| ! $this->features_controller->feature_is_enabled( self::FEATURE_FLAG ) ) {
+		if ( ! $this->features_controller->feature_is_enabled( self::FEATURE_FLAG ) ) {
 			return self::miss();
 		}
 

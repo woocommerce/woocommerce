@@ -54,17 +54,15 @@ class POSRequestContextTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Build a SUT with the feature flags stubbed.
+	 * Build a SUT with the feature flag stubbed.
 	 *
-	 * @param bool $pos_enabled   Whether the parent point_of_sale flag is on.
 	 * @param bool $staff_enabled Whether the point_of_sale_staff flag is on.
 	 * @return POSRequestContext
 	 */
-	private function make_sut( bool $pos_enabled = true, bool $staff_enabled = true ): POSRequestContext {
+	private function make_sut( bool $staff_enabled = true ): POSRequestContext {
 		$features = $this->createMock( FeaturesController::class );
 		$features->method( 'feature_is_enabled' )->willReturnMap(
 			array(
-				array( 'point_of_sale', $pos_enabled ),
 				array( 'point_of_sale_staff', $staff_enabled ),
 			)
 		);
@@ -181,7 +179,7 @@ class POSRequestContextTest extends WC_Unit_Test_Case {
 	public function test_disabled_flag_is_not_pos(): void {
 		$this->arrange_request( '/wc/v3/orders', 'POST', $this->pos_headers() );
 
-		$this->assertFalse( $this->make_sut( true, false )->is_pos_request(), 'Sub-flag off must disable detection' );
+		$this->assertFalse( $this->make_sut( false )->is_pos_request(), 'Flag off must disable detection' );
 	}
 
 	/**
