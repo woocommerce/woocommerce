@@ -957,7 +957,8 @@ p.demo_store,
 		}
 
 		td {
-			border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+			border-top: 1px solid
+				color-mix(in srgb, currentColor 20%, transparent);
 			padding: 9px 12px;
 			vertical-align: middle;
 			line-height: 1.5em;
@@ -982,7 +983,8 @@ p.demo_store,
 		tfoot th,
 		tbody th {
 			font-weight: 700;
-			border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+			border-top: 1px solid
+				color-mix(in srgb, currentColor 20%, transparent);
 		}
 	}
 
@@ -1223,7 +1225,7 @@ p.demo_store,
 			align-items: center;
 			justify-content: flex-start;
 			gap: 0.7em;
-			margin: .7em 0;
+			margin: 0.7em 0;
 		}
 
 		&__input {
@@ -1238,13 +1240,13 @@ p.demo_store,
 		}
 
 		&__checkbox {
-			font-size: var(--wp--preset--font-size--small, .7em);
+			font-size: var(--wp--preset--font-size--small, 0.7em);
 			display: block;
 		}
 	}
 
 	:where(.wc_bis_form__input, .wc_bis_form__button) {
-		padding: .9rem 1.1rem;
+		padding: 0.9rem 1.1rem;
 		line-height: 1;
 	}
 
@@ -2291,6 +2293,65 @@ p.demo_store,
 .woocommerce-password-hint {
 	margin: 0.5em 0 0;
 	display: block;
+}
+
+/**
+* Account verification OTP form.
+*/
+.woocommerce-verify-email-form {
+	border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+	padding: 16px;
+	margin: 0 0 16px;
+	border-radius: 4px;
+	margin-trim: block;
+
+	> :first-child {
+		margin-top: 0;
+	}
+	> :last-child {
+		margin-bottom: 0;
+	}
+	.woocommerce-otp-input-wrapper {
+		display: flex;
+		align-items: stretch;
+		justify-content: center;
+		gap: 8px;
+
+		.button.wp-element-button {
+			margin: 0;
+		}
+	}
+	.woocommerce-otp-input.input-text {
+		font-size: 32px;
+		font-weight: 700;
+		letter-spacing: 0.4em;
+		text-indent: 0.4em;
+		font-variant-numeric: tabular-nums;
+		text-align: center;
+		line-height: 1;
+		color: black;
+		width: 6.8em;
+		font-family: monospace;
+		flex: 0;
+	}
+
+	// Disabled submit (the field is empty), set from JS as a progressive enhancement.
+	.button.wp-element-button[disabled] {
+		cursor: not-allowed;
+		opacity: 0.5;
+	}
+
+	// While the code is being submitted: hide the label and show the shared loader spinner.
+	&.is-submitting {
+		.button.wp-element-button {
+			position: relative;
+			color: transparent !important; // Hide the label so only the spinner is visible.
+			pointer-events: none;
+			opacity: 1;
+
+			@include loader();
+		}
+	}
 }
 
 /**

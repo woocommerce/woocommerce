@@ -12,6 +12,8 @@ use WC_Unit_Test_Case;
  */
 class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 
+	private const KEY_META = '_wc_email_verification_key';
+
 	/**
 	 * The System Under Test.
 	 *
@@ -60,25 +62,145 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A valid key should be accepted and an invalid key should be rejected.
+	 * @testdox create_code() returns a fresh, pending six-digit numeric code.
 	 */
-	public function test_token_round_trip(): void {
-		$user_id = wc_create_new_customer( 'c@example.com', 'userc', 'pw' );
+	public function test_create_code_returns_six_digit_code(): void {
+		$user_id = wc_create_new_customer( 'code@example.com', 'codeuser', 'pw' );
 
-		$key = $this->sut->create_verification_key( $user_id );
+		$code = $this->sut->create_code( $user_id );
 
-		$this->assertTrue( $this->sut->check_verification_key( $user_id, $key ), 'Valid key should be accepted' );
-		$this->assertFalse( $this->sut->check_verification_key( $user_id, 'wrong-key' ), 'Wrong key should be rejected' );
+		$this->assertMatchesRegularExpression( '/^\d{6}$/', $code, 'A code must be six digits' );
+		$this->assertTrue( $this->sut->has_pending_code( $user_id ), 'A freshly minted code should be pending' );
 	}
 
 	/**
-	 * @testdox A token is rejected after the account email changes, so it can't verify a different address.
+	 * @testdox A correct code verifies the user and consumes the pending code.
 	 */
-	public function test_token_rejected_after_email_change(): void {
-		$user_id = wc_create_new_customer( 'issued-for@example.com', 'tokenuser', 'pw' );
+	public function test_correct_code_verifies(): void {
+		$user_id = wc_create_new_customer( 'c@example.com', 'userc', 'pw' );
 
-		$key = $this->sut->create_verification_key( $user_id );
-		$this->assertTrue( $this->sut->check_verification_key( $user_id, $key ), 'Token should be valid for the email it was issued for' );
+		$code = $this->sut->create_code( $user_id );
+
+		$this->assertSame( EmailVerificationService::RESULT_OK, $this->sut->verify_code( $user_id, $code ) );
+		$this->assertTrue( $this->sut->is_verified( $user_id ), 'User should be verified after a correct code' );
+		$this->assertFalse( $this->sut->has_pending_code( $user_id ), 'The code should be consumed on success' );
+	}
+
+	/**
+	 * @testdox A wrong guess keeps the code pending until its attempts are exhausted, then burns it.
+	 */
+	public function test_wrong_code_burns_after_three_attempts(): void {
+		$user_id = wc_create_new_customer( 'd@example.com', 'userd', 'pw' );
+
+		$code  = $this->sut->create_code( $user_id );
+		$wrong = $this->wrong_code( $code );
+
+		$this->assertSame( EmailVerificationService::RESULT_WRONG, $this->sut->verify_code( $user_id, $wrong ) );
+		$this->assertSame( EmailVerificationService::RESULT_WRONG, $this->sut->verify_code( $user_id, $wrong ) );
+		$this->assertTrue( $this->sut->has_pending_code( $user_id ), 'Code should still be pending after two wrong guesses' );
+
+		$this->assertSame( EmailVerificationService::RESULT_BURNED, $this->sut->verify_code( $user_id, $wrong ) );
+		$this->assertFalse( $this->sut->has_pending_code( $user_id ), 'Code should be burned after the third wrong guess' );
+		$this->assertFalse( $this->sut->is_verified( $user_id ) );
+	}
+
+	/**
+	 * @testdox Verification fails closed and changes no state when the per-user lock can't be acquired.
+	 */
+	public function test_verify_code_fails_closed_without_lock(): void {
+		$user_id = wc_create_new_customer( 'lockfail@example.com', 'lockfailuser', 'pw' );
+		$code    = $this->sut->create_code( $user_id );
+
+		// Simulate losing the lock race: with the lock unavailable, the read-modify-write must not run,
+		// so a parallel flood of guesses can never advance the counters or verify behind a held lock.
+		$service = $this->getMockBuilder( EmailVerificationService::class )
+			->onlyMethods( array( 'acquire_lock' ) )
+			->getMock();
+		$service->method( 'acquire_lock' )->willReturn( false );
+
+		$result = $service->verify_code( $user_id, $code );
+
+		$this->assertSame( EmailVerificationService::RESULT_WRONG, $result, 'A lost lock must fail closed' );
+		$this->assertFalse( $this->sut->is_verified( $user_id ), 'No verification may happen without the lock' );
+		$this->assertTrue( $this->sut->has_pending_code( $user_id ), 'The pending code must be untouched' );
+		$this->assertFalse( $this->sut->is_locked_out( $user_id ), 'No failure may be recorded without the lock' );
+	}
+
+	/**
+	 * @testdox Ten cumulative wrong guesses lock the user out permanently, even from a correct code.
+	 */
+	public function test_lockout_after_ten_cumulative_failures(): void {
+		$user_id = wc_create_new_customer( 'lock@example.com', 'lockuser', 'pw' );
+
+		$this->assertFalse( $this->sut->is_locked_out( $user_id ) );
+
+		$current  = null;
+		$failures = 0;
+		while ( ! $this->sut->is_locked_out( $user_id ) && $failures < 15 ) {
+			if ( ! $this->sut->has_pending_code( $user_id ) ) {
+				$current = $this->sut->create_code( $user_id );
+			}
+			$this->sut->verify_code( $user_id, $this->wrong_code( (string) $current ) );
+			++$failures;
+		}
+
+		$this->assertTrue( $this->sut->is_locked_out( $user_id ), 'User should be locked out' );
+		$this->assertSame( 10, $failures, 'Lockout should take exactly ten cumulative failures' );
+
+		// Once locked out, even the (now-deleted) correct code path returns LOCKED.
+		$this->assertSame( EmailVerificationService::RESULT_LOCKED, $this->sut->verify_code( $user_id, '123456' ) );
+	}
+
+	/**
+	 * @testdox Verifying a user (e.g. by the store owner) lifts an existing lockout.
+	 */
+	public function test_mark_verified_clears_lockout(): void {
+		$user_id = wc_create_new_customer( 'unlock@example.com', 'unlockuser', 'pw' );
+		$this->force_lockout( $user_id );
+
+		$this->sut->mark_verified( $user_id );
+
+		$this->assertFalse( $this->sut->is_locked_out( $user_id ), 'Marking verified must clear the lockout' );
+		$this->assertTrue( $this->sut->is_verified( $user_id ) );
+	}
+
+	/**
+	 * @testdox Clearing verification also lifts an existing lockout.
+	 */
+	public function test_clear_verification_clears_lockout(): void {
+		$user_id = wc_create_new_customer( 'unlock2@example.com', 'unlockuser2', 'pw' );
+		$this->force_lockout( $user_id );
+
+		$this->sut->clear_verification( $user_id );
+
+		$this->assertFalse( $this->sut->is_locked_out( $user_id ), 'Clearing verification must clear the lockout' );
+	}
+
+	/**
+	 * @testdox An expired code is reported as expired and does not count as a failed guess.
+	 */
+	public function test_expired_code_not_counted_as_failure(): void {
+		$user_id = wc_create_new_customer( 'exp@example.com', 'expuser', 'pw' );
+
+		$code = $this->sut->create_code( $user_id );
+
+		// Age the stored code past the 10-minute TTL, keeping its hash and attempt count intact.
+		$parts    = explode( ':', (string) Users::get_site_user_meta( $user_id, self::KEY_META ), 4 );
+		$parts[0] = (string) ( time() - 11 * MINUTE_IN_SECONDS );
+		Users::update_site_user_meta( $user_id, self::KEY_META, implode( ':', $parts ) );
+
+		$this->assertSame( EmailVerificationService::RESULT_EXPIRED, $this->sut->verify_code( $user_id, $code ) );
+		$this->assertFalse( $this->sut->is_locked_out( $user_id ), 'An expiry must not move the user towards lockout' );
+		$this->assertFalse( $this->sut->has_pending_code( $user_id ), 'An expired code is no longer pending' );
+	}
+
+	/**
+	 * @testdox A code is void after the account email changes, so it can't verify a different address.
+	 */
+	public function test_code_void_after_email_change(): void {
+		$user_id = wc_create_new_customer( 'issued-for@example.com', 'codechange', 'pw' );
+
+		$code = $this->sut->create_code( $user_id );
 
 		wp_update_user(
 			array(
@@ -88,62 +210,12 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 		);
 		clean_user_cache( $user_id );
 
-		$this->assertFalse(
-			$this->sut->check_verification_key( $user_id, $key ),
-			'A token minted for the old email must not verify the new email'
+		$this->assertSame(
+			EmailVerificationService::RESULT_NONE,
+			$this->sut->verify_code( $user_id, $code ),
+			'A code minted for the old email must not verify the new email'
 		);
-	}
-
-	/**
-	 * @testdox A token still verifies after a non-email profile change (case-insensitive email match).
-	 */
-	public function test_token_accepted_after_non_email_change(): void {
-		$user_id = wc_create_new_customer( 'stable@example.com', 'stableuser', 'pw' );
-
-		$key = $this->sut->create_verification_key( $user_id );
-
-		wp_update_user(
-			array(
-				'ID'           => $user_id,
-				'display_name' => 'Renamed Customer',
-			)
-		);
-		clean_user_cache( $user_id );
-
-		$this->assertTrue(
-			$this->sut->check_verification_key( $user_id, $key ),
-			'A token must remain valid when the account email is unchanged'
-		);
-	}
-
-	/**
-	 * @testdox A legacy token stored without an email binding is still accepted.
-	 */
-	public function test_legacy_token_without_email_binding_is_accepted(): void {
-		$user_id = wc_create_new_customer( 'legacy@example.com', 'legacyuser', 'pw' );
-
-		$key = wp_generate_password( 20, false );
-		// Simulate a token stored before email binding was added (timestamp:key_hash, no email hash).
-		Users::update_site_user_meta( $user_id, '_wc_email_verification_key', time() . ':' . wp_fast_hash( $key ) );
-
-		$this->assertTrue(
-			$this->sut->check_verification_key( $user_id, $key ),
-			'Pre-existing two-part tokens must remain valid for backward compatibility'
-		);
-	}
-
-	/**
-	 * @testdox An expired token should be rejected.
-	 */
-	public function test_expired_token_is_rejected(): void {
-		$user_id = wc_create_new_customer( 'd@example.com', 'userd', 'pw' );
-		$key     = $this->sut->create_verification_key( $user_id );
-		// Rewrite the stored value's timestamp to be older than the expiry window, keeping the same hash.
-		$stored = (string) Users::get_site_user_meta( $user_id, '_wc_email_verification_key' );
-		$parts  = explode( ':', $stored, 2 );
-		$hash   = $parts[1];
-		Users::update_site_user_meta( $user_id, '_wc_email_verification_key', ( time() - DAY_IN_SECONDS - 10 ) . ':' . $hash );
-		$this->assertFalse( $this->sut->check_verification_key( $user_id, $key ) );
+		$this->assertFalse( $this->sut->is_verified( $user_id ) );
 	}
 
 	/**
@@ -197,5 +269,32 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 		clean_user_cache( $user_id );
 
 		$this->assertTrue( $this->sut->is_verified( $user_id ), 'Non-email profile changes must not invalidate verification' );
+	}
+
+	/**
+	 * Return a six-digit code guaranteed to differ from the given one.
+	 *
+	 * @param string $code The code to avoid.
+	 * @return string
+	 */
+	private function wrong_code( string $code ): string {
+		return '000000' === $code ? '111111' : '000000';
+	}
+
+	/**
+	 * Drive the service into a locked-out state for the given user.
+	 *
+	 * @param int $user_id User ID.
+	 */
+	private function force_lockout( int $user_id ): void {
+		$current = null;
+		$guard   = 0;
+		while ( ! $this->sut->is_locked_out( $user_id ) && $guard < 15 ) {
+			if ( ! $this->sut->has_pending_code( $user_id ) ) {
+				$current = $this->sut->create_code( $user_id );
+			}
+			$this->sut->verify_code( $user_id, $this->wrong_code( (string) $current ) );
+			++$guard;
+		}
 	}
 }

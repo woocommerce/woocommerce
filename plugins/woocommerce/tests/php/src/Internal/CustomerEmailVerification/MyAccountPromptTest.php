@@ -41,7 +41,7 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
 		wc_clear_notices();
-		unset( $GLOBALS['wp']->query_vars['orders'] );
+		wp_deregister_script( 'wc-customer-email-verification' );
 		parent::tearDown();
 	}
 
@@ -55,6 +55,35 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		$order->set_billing_email( $email );
 		$order->set_customer_id( 0 );
 		$order->save();
+	}
+
+	/**
+	 * Render the My Account prompt and return its HTML.
+	 *
+	 * @return string
+	 */
+	private function render_prompt(): string {
+		ob_start();
+		$this->sut->render_prompt();
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Drive the service into a locked-out state for the given user.
+	 *
+	 * @param int $user_id User ID.
+	 */
+	private function force_lockout( int $user_id ): void {
+		$current = null;
+		$guard   = 0;
+		while ( ! $this->service->is_locked_out( $user_id ) && $guard < 15 ) {
+			if ( ! $this->service->has_pending_code( $user_id ) ) {
+				$current = $this->service->create_code( $user_id );
+			}
+			$wrong = '000000' === $current ? '111111' : '000000';
+			$this->service->verify_code( $user_id, $wrong );
+			++$guard;
+		}
 	}
 
 	/**
@@ -117,55 +146,6 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $this->sut->should_show_prompt(), 'Unverified customers with nothing to link should not see the prompt' );
 	}
 
-	// -------------------------------------------------------------------------
-	// maybe_add_orders_notice()
-	// -------------------------------------------------------------------------
-
-	/**
-	 * @testdox The orders notice carries a resend call-to-action button when no link was sent recently.
-	 */
-	public function test_orders_notice_shows_cta_when_not_recently_sent(): void {
-		global $wp;
-		$email   = 'cta-prompt@example.com';
-		$user_id = wc_create_new_customer( $email, 'ctapromptuser', 'pw' );
-		wp_set_current_user( $user_id );
-
-		$this->create_guest_order( $email );
-
-		$wp->query_vars['orders'] = '';
-		wc_clear_notices();
-
-		$this->sut->maybe_add_orders_notice();
-
-		$notices = wc_get_notices( 'notice' );
-		$this->assertNotEmpty( $notices );
-		$this->assertStringContainsString( 'button wc-forward', $notices[0]['notice'], 'A prompt with no recent send should carry the resend button.' );
-	}
-
-	/**
-	 * @testdox Right after a send, the orders notice drops the resend call-to-action button.
-	 */
-	public function test_orders_notice_shows_check_inbox_without_cta_when_recently_sent(): void {
-		global $wp;
-		$email   = 'inbox-prompt@example.com';
-		$user_id = wc_create_new_customer( $email, 'inboxpromptuser', 'pw' );
-		wp_set_current_user( $user_id );
-
-		$this->create_guest_order( $email );
-
-		// A confirmation link was just sent.
-		$this->service->create_verification_key( $user_id );
-
-		$wp->query_vars['orders'] = '';
-		wc_clear_notices();
-
-		$this->sut->maybe_add_orders_notice();
-
-		$notices = wc_get_notices( 'notice' );
-		$this->assertNotEmpty( $notices );
-		$this->assertStringNotContainsString( 'button wc-forward', $notices[0]['notice'], 'The recently-sent notice must not carry a resend button.' );
-	}
-
 	/**
 	 * @testdox should_show_prompt returns false for an account using a temporary password.
 	 */
@@ -191,6 +171,62 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		$this->service->mark_verified( $user_id );
 
 		$this->assertFalse( $this->sut->should_show_prompt(), 'Verified customers should not see the prompt' );
+	}
+
+	// -------------------------------------------------------------------------
+	// render_prompt()
+	// -------------------------------------------------------------------------
+
+	/**
+	 * @testdox The prompt shows a send-code call to action when no code is pending.
+	 */
+	public function test_prompt_renders_send_cta_when_no_code(): void {
+		$email   = 'cta-prompt@example.com';
+		$user_id = wc_create_new_customer( $email, 'ctapromptuser', 'pw' );
+		wp_set_current_user( $user_id );
+		$this->create_guest_order( $email );
+
+		$html = $this->render_prompt();
+
+		$this->assertStringContainsString( 'wc_send_verification', $html, 'A prompt with no pending code should carry the send-code action.' );
+		$this->assertStringNotContainsString( 'name="wc_verify_email_code"', $html, 'No entry form should show before a code is sent.' );
+	}
+
+	/**
+	 * @testdox The prompt shows the code-entry form when a code is pending.
+	 */
+	public function test_prompt_renders_code_form_when_pending(): void {
+		$email   = 'inbox-prompt@example.com';
+		$user_id = wc_create_new_customer( $email, 'inboxpromptuser', 'pw' );
+		wp_set_current_user( $user_id );
+		$this->create_guest_order( $email );
+
+		// A code was just sent.
+		$this->service->create_code( $user_id );
+
+		$html = $this->render_prompt();
+
+		$this->assertStringContainsString( 'name="wc_verify_email_code"', $html, 'A pending code should surface the entry form.' );
+		$this->assertStringContainsString( 'autocomplete="one-time-code"', $html, 'The input should opt into OTP autofill.' );
+		$this->assertStringContainsString( 'type="hidden" name="wc_verify_email_submit"', $html, 'The submit marker must be a hidden field so the button can be disabled while submitting without dropping it.' );
+		$this->assertTrue( wp_script_is( 'wc-customer-email-verification', 'enqueued' ), 'Rendering the form should enqueue its enhancement script.' );
+	}
+
+	/**
+	 * @testdox The prompt shows a contact-the-owner message once the user is locked out.
+	 */
+	public function test_prompt_renders_locked_message_when_locked_out(): void {
+		$email   = 'locked-prompt@example.com';
+		$user_id = wc_create_new_customer( $email, 'lockedpromptuser', 'pw' );
+		wp_set_current_user( $user_id );
+		$this->create_guest_order( $email );
+
+		$this->force_lockout( $user_id );
+
+		$html = $this->render_prompt();
+
+		$this->assertStringContainsString( 'store owner', $html, 'A locked-out user should be told to contact the store owner.' );
+		$this->assertStringNotContainsString( 'name="wc_verify_email_code"', $html, 'A locked-out user must not see the entry form.' );
 	}
 
 	// -------------------------------------------------------------------------
@@ -256,11 +292,11 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		};
 		add_action( 'woocommerce_customer_verify_email_notification', $listener );
 
-		// First send (no existing key).
+		// First send (no existing code).
 		$_GET['_wpnonce'] = wp_create_nonce( 'woocommerce-send-verification-email' );
 		$this->dispatch_send_request();
 
-		// Second send — key was just created (seconds_since_last_key < 60).
+		// Second send — code was just created (seconds_since_last_key < 60).
 		$_GET['_wpnonce'] = wp_create_nonce( 'woocommerce-send-verification-email' );
 		$this->dispatch_send_request();
 
@@ -270,31 +306,54 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $notification_count, 'Notification should fire exactly once despite two send attempts within the rate-limit window' );
 	}
 
+	/**
+	 * @testdox handle_send_request does not mint a new code for a locked-out user.
+	 */
+	public function test_handle_send_request_does_not_mint_when_locked_out(): void {
+		$user_id = wc_create_new_customer( 'locked-send@example.com', 'lockedsenduser', 'pw' );
+		$this->force_lockout( $user_id );
+		wp_set_current_user( $user_id );
+
+		$notification_fired = false;
+		$listener           = static function () use ( &$notification_fired ) {
+			$notification_fired = true;
+		};
+		add_action( 'woocommerce_customer_verify_email_notification', $listener );
+
+		$_GET['_wpnonce'] = wp_create_nonce( 'woocommerce-send-verification-email' );
+		$this->dispatch_send_request();
+
+		remove_action( 'woocommerce_customer_verify_email_notification', $listener );
+		unset( $_GET['_wpnonce'] );
+
+		$this->assertFalse( $notification_fired, 'A locked-out user must not be able to mint fresh codes' );
+	}
+
 	// -------------------------------------------------------------------------
 	// EmailVerificationService::seconds_since_last_key()
 	// -------------------------------------------------------------------------
 
 	/**
-	 * @testdox seconds_since_last_key returns null when no key has been issued.
+	 * @testdox seconds_since_last_key returns null when no code has been issued.
 	 */
 	public function test_seconds_since_last_key_returns_null_with_no_key(): void {
 		$user_id = wc_create_new_customer( 'nokey@example.com', 'nokeyuser', 'pw' );
 
-		$this->assertNull( $this->service->seconds_since_last_key( $user_id ), 'Should return null when no key has been issued' );
+		$this->assertNull( $this->service->seconds_since_last_key( $user_id ), 'Should return null when no code has been issued' );
 	}
 
 	/**
-	 * @testdox seconds_since_last_key returns a small non-negative integer immediately after key creation.
+	 * @testdox seconds_since_last_key returns a small non-negative integer immediately after code creation.
 	 */
 	public function test_seconds_since_last_key_returns_small_value_after_key_creation(): void {
 		$user_id = wc_create_new_customer( 'freshkey@example.com', 'freshkeyuser', 'pw' );
-		$this->service->create_verification_key( $user_id );
+		$this->service->create_code( $user_id );
 
 		$elapsed = $this->service->seconds_since_last_key( $user_id );
 
-		$this->assertNotNull( $elapsed, 'Should return an integer after key creation' );
+		$this->assertNotNull( $elapsed, 'Should return an integer after code creation' );
 		$this->assertGreaterThanOrEqual( 0, $elapsed, 'Elapsed time should never be negative' );
 		// Generous upper bound: proves a real, recent elapsed value without being flaky on a slow runner.
-		$this->assertLessThan( 60, $elapsed, 'Elapsed time should be well within the rate-limit window after key creation' );
+		$this->assertLessThan( 60, $elapsed, 'Elapsed time should be well within the rate-limit window after code creation' );
 	}
 }

@@ -20,11 +20,11 @@ defined( 'ABSPATH' ) || exit;
 class CustomerVerifyEmail extends WC_Email {
 
 	/**
-	 * Verification link included in the email.
+	 * One-time verification code included in the email.
 	 *
 	 * @var string
 	 */
-	public $verify_url;
+	public $verify_code;
 
 	/**
 	 * Display name used to greet the customer.
@@ -96,16 +96,16 @@ class CustomerVerifyEmail extends WC_Email {
 	/**
 	 * Trigger the sending of this email.
 	 *
-	 * @param int    $user_id    The user ID to send the email to.
-	 * @param string $verify_url The verification link.
+	 * @param int    $user_id     The user ID to send the email to.
+	 * @param string $verify_code The one-time verification code.
 	 * @return void
 	 */
-	public function trigger( $user_id, $verify_url = '' ) {
+	public function trigger( $user_id, $verify_code = '' ) {
 		$this->setup_locale();
 
-		if ( $user_id && $verify_url ) {
+		if ( $user_id && $verify_code ) {
 			$this->object            = new WP_User( $user_id );
-			$this->verify_url        = $verify_url;
+			$this->verify_code       = $verify_code;
 			$this->recipient         = wp_unslash( $this->object->user_email );
 			$customer                = new WC_Customer( $user_id );
 			$first_name              = ! empty( $customer->get_billing_first_name() ) ? $customer->get_billing_first_name() : $this->object->first_name;
@@ -130,7 +130,7 @@ class CustomerVerifyEmail extends WC_Email {
 				'additional_content' => $this->get_additional_content(),
 				'user_display_name'  => $this->user_display_name,
 				'user_email'         => $this->object instanceof WP_User ? $this->object->user_email : '',
-				'verify_url'         => $this->verify_url,
+				'verify_code'        => $this->verify_code,
 				'blogname'           => $this->get_blogname(),
 				'sent_to_admin'      => false,
 				'plain_text'         => false,
@@ -152,7 +152,7 @@ class CustomerVerifyEmail extends WC_Email {
 				'additional_content' => $this->get_additional_content(),
 				'user_display_name'  => $this->user_display_name,
 				'user_email'         => $this->object instanceof WP_User ? $this->object->user_email : '',
-				'verify_url'         => $this->verify_url,
+				'verify_code'        => $this->verify_code,
 				'blogname'           => $this->get_blogname(),
 				'sent_to_admin'      => false,
 				'plain_text'         => true,
@@ -172,7 +172,7 @@ class CustomerVerifyEmail extends WC_Email {
 			array(
 				'user_display_name' => $this->user_display_name,
 				'user_email'        => $this->object instanceof WP_User ? $this->object->user_email : '',
-				'verify_url'        => $this->verify_url,
+				'verify_code'       => $this->verify_code,
 				'sent_to_admin'     => false,
 				'plain_text'        => false,
 				'email'             => $this,

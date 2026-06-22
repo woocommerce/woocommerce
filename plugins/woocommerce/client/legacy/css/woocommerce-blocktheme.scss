@@ -28,7 +28,6 @@
 .woocommerce {
 	button.button,
 	a.button {
-
 		&.disabled,
 		&:disabled,
 		&:disabled[disabled],
@@ -42,7 +41,6 @@
 	#respond input#submit,
 	input.button,
 	a.button.alt {
-
 		&:hover {
 			opacity: 0.9;
 		}
@@ -89,13 +87,14 @@
 
 		.woocommerce-tabs {
 			ul.tabs li.active {
-
 				&::before {
-					box-shadow: 2px 2px 0 var(--wp--preset--color--background, $contentbg);
+					box-shadow: 2px 2px 0
+						var(--wp--preset--color--background, $contentbg);
 				}
 
 				&::after {
-					box-shadow: -2px 2px 0 var(--wp--preset--color--background, $contentbg);
+					box-shadow: -2px 2px 0
+						var(--wp--preset--color--background, $contentbg);
 				}
 			}
 		}
@@ -122,7 +121,8 @@
 			}
 
 			.variations {
-				td, th {
+				td,
+				th {
 					word-break: normal;
 				}
 			}
@@ -152,8 +152,11 @@
 		}
 	}
 
-	.price, .woocommerce-grouped-product-list-item__price, .wc-block-components-product-price {
-		ins, bdi {
+	.price,
+	.woocommerce-grouped-product-list-item__price,
+	.wc-block-components-product-price {
+		ins,
+		bdi {
 			// Ensure discounted prices aren't underlined.
 			// For details see https://github.com/woocommerce/woocommerce-blocks/pull/5684.
 			text-decoration: none;
@@ -259,7 +262,7 @@ a.added_to_cart {
 		width: 70%;
 		border-collapse: collapse;
 
-		@media only screen and ( max-width: 768px ) {
+		@media only screen and (max-width: 768px) {
 			width: 100%;
 		}
 
@@ -308,7 +311,7 @@ a.added_to_cart {
 			padding: 0 1.1em;
 		}
 
-		@media only screen and ( max-width: 768px ) {
+		@media only screen and (max-width: 768px) {
 			.product-remove {
 				width: auto;
 			}
@@ -349,7 +352,7 @@ a.added_to_cart {
 		padding-left: 0;
 		font-size: var(--wp--preset--font-size--small);
 
-		@media only screen and ( max-width: 768px ) {
+		@media only screen and (max-width: 768px) {
 			flex-direction: column;
 		}
 
@@ -393,7 +396,7 @@ a.added_to_cart {
 			list-style: none;
 			padding: 1em 0;
 
-			@media only screen and ( max-width: 768px ) {
+			@media only screen and (max-width: 768px) {
 				padding: 0.35em 0;
 			}
 
@@ -498,7 +501,7 @@ a.added_to_cart {
 			font-size: var(--wp--preset--font-size--small);
 		}
 		.select2-results__option {
-			padding:  0.5rem 1.1rem;
+			padding: 0.5rem 1.1rem;
 		}
 	}
 }
@@ -526,4 +529,45 @@ p.demo_store,
 */
 .woocommerce .product-category mark.count {
 	background-color: transparent;
+}
+
+/**
+* Account verification OTP form.
+*/
+.woocommerce-verify-email-form {
+	border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+	padding: 16px;
+	margin: 0 0 16px;
+	border-radius: 4px;
+	margin-trim: block;
+
+	> :first-child {
+		margin-top: 0;
+	}
+	> :last-child {
+		margin-bottom: 0;
+	}
+	.woocommerce-otp-input-wrapper {
+		display: flex;
+		align-items: stretch;
+		justify-content: center;
+		gap: 8px;
+
+		.button.wp-element-button {
+			margin: 0;
+		}
+	}
+	.woocommerce-otp-input.input-text {
+		font-size: 32px;
+		font-weight: 700;
+		letter-spacing: 0.4em;
+		text-indent: 0.4em;
+		font-variant-numeric: tabular-nums;
+		text-align: center;
+		line-height: 1;
+		color: black;
+		width: 6.8em;
+		font-family: monospace;
+		flex: 0;
+	}
 }
