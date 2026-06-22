@@ -23,18 +23,6 @@
 		font-weight: 600;
 	}
 
-	.woocommerce-pill {
-		margin-left: $gap-smallest;
-		margin-top: $gap-smallest;
-		margin-bottom: $gap-smallest;
-		padding: 2px 8px;
-
-		@media (min-width: #{ ($break-mobile) }) {
-			margin-top: 0;
-			margin-bottom: 0;
-		}
-	}
-
 	.woocommerce-list__item-after .components-button {
 		margin-left: $gap-small;
 	}
