@@ -137,9 +137,6 @@ const serialRunSpecs = [
 	// Activates a custom-gateway test plugin globally, which would surface its extra
 	// payment button on every other worker's checkout.
 	'**/tests/checkout/checkout-shortcode-custom-place-order-button.spec.ts',
-	// Mutates global checkout login/signup reminder options and flips
-	// `woocommerce_calc_taxes` (baseline is `yes`; this toggles it off then on).
-	'**/tests/checkout/checkout.spec.ts',
 	// Every spec toggles a global email feature flag via `setOption`:
 	// `editor-tracking-selectors`/`settings-email-listing` flip
 	// `woocommerce_feature_block_email_editor_enabled`, while `account-emails`/

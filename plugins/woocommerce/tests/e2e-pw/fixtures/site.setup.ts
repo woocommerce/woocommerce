@@ -200,4 +200,26 @@ setup( 'setup site', async ( { baseURL, restApi } ) => {
 			enabled: true,
 		} );
 	} );
+
+	await setup.step( 'enable baseline free shipping', async () => {
+		// Provide one deterministic, always-available shipping method for every
+		// cart so specs that complete checkout don't each create/delete their own
+		// shipping zone. Concurrent zone churn makes shipping availability
+		// non-deterministic, which destabilises the block/classic checkout address
+		// rendering (a shipping method appearing or disappearing flips whether a
+		// separate billing group / "Use same address for billing" checkbox shows).
+		// Attach free shipping to zone 0 ("Locations not covered by your other
+		// zones"), the catch-all fallback, so any cart not matched by a more
+		// specific zone is offered free shipping. Free (cost 0) leaves order totals
+		// unchanged. Idempotent: only add the method if it isn't already there.
+		const { data: methods } = await restApi.get< { method_id: string }[] >(
+			`${ WC_API_PATH }/shipping/zones/0/methods`
+		);
+
+		if ( ! methods.some( ( m ) => m.method_id === 'free_shipping' ) ) {
+			await restApi.post( `${ WC_API_PATH }/shipping/zones/0/methods`, {
+				method_id: 'free_shipping',
+			} );
+		}
+	} );
 } );

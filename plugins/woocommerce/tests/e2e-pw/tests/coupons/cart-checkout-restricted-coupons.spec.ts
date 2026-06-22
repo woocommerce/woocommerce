@@ -7,6 +7,7 @@ import {
 	getOrderIdFromUrl,
 	WC_API_PATH,
 } from '@woocommerce/e2e-utils-playwright';
+import { faker } from '@faker-js/faker';
 
 /**
  * Internal dependencies
@@ -22,6 +23,15 @@ import {
 
 const includedProductName = 'Included test product';
 const includedCategoryName = 'Included Category';
+
+// Coupon codes are global: suffix each with a random token so a run never
+// collides with a concurrent or leftover coupon of the same code. WooCommerce
+// stores codes lowercased, so keep the suffix lowercase for the error-message
+// assertions (which echo the stored code) to match.
+const couponSuffix = faker.string.alphanumeric( 8 ).toLowerCase();
+const EXPIRED_COUPON = `expired-coupon-${ couponSuffix }`;
+const INCLUDED_COUPON = `product-and-category-included-${ couponSuffix }`;
+const EMAIL_RESTRICTED_COUPON = `email-restricted-${ couponSuffix }`;
 
 const applyCoupon = async ( page: Page, couponCode: string ) => {
 	const responsePromise = page.waitForResponse(
@@ -58,11 +68,7 @@ test.describe(
 	'Cart & Checkout Restricted Coupons',
 	{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
 	() => {
-		let firstProductId: number,
-			secondProductId: number,
-			firstCategoryId: number,
-			secondCategoryId: number,
-			shippingZoneId: number;
+		let firstProductId: number, firstCategoryId: number;
 		let codWasEnabled: boolean;
 		const couponBatchId: number[] = [];
 
@@ -85,18 +91,9 @@ test.describe(
 			// COD is enabled globally in site setup; guard defensively in case it
 			// is somehow off, and restore its prior state in afterAll.
 			codWasEnabled = await setGatewayEnabled( restApi, 'cod', true );
-			// add a shipping zone and method
-			await restApi
-				.post( `${ WC_API_PATH }/shipping/zones`, {
-					name: 'Free Shipping',
-				} )
-				.then( ( response: { data: { id: number } } ) => {
-					shippingZoneId = response.data.id;
-				} );
-			await restApi.post(
-				`${ WC_API_PATH }/shipping/zones/${ shippingZoneId }/methods`,
-				{ method_id: 'free_shipping' }
-			);
+			// Free shipping is provided by the baseline zone in site setup, so this
+			// spec no longer creates its own (catch-all) shipping zone — that zone
+			// added a shipping method to every concurrent worker's cart.
 			await restApi
 				.post( `${ WC_API_PATH }/products/categories`, {
 					name: includedCategoryName,
@@ -117,20 +114,20 @@ test.describe(
 
 			const residualCoupons = [
 				{
-					code: 'expired-coupon',
+					code: EXPIRED_COUPON,
 					discount_type: 'fixed_cart',
 					amount: '10.00',
 					date_expires: '2020-01-01T00:00:00',
 				},
 				{
-					code: 'product-and-category-included',
+					code: INCLUDED_COUPON,
 					discount_type: 'fixed_cart',
 					amount: '10.00',
 					product_ids: [ firstProductId ],
 					product_categories: [ firstCategoryId ],
 				},
 				{
-					code: 'email-restricted',
+					code: EMAIL_RESTRICTED_COUPON,
 					discount_type: 'fixed_cart',
 					amount: '25.00',
 					email_restrictions: [ 'homer@example.com' ],
@@ -167,11 +164,6 @@ test.describe(
 			} );
 
 			await setGatewayEnabled( restApi, 'cod', codWasEnabled );
-
-			await restApi.delete(
-				`${ WC_API_PATH }/shipping/zones/${ shippingZoneId }`,
-				{ force: true }
-			);
 		} );
 
 		test( 'rejected coupon surfaces its error in cart and checkout', async ( {
@@ -181,9 +173,11 @@ test.describe(
 			await test.step( 'cart', async () => {
 				await addAProductToCart( page, firstProductId );
 				await page.goto( CLASSIC_CART_PAGE.slug );
-				await applyCoupon( page, 'expired-coupon' );
+				await applyCoupon( page, EXPIRED_COUPON );
 				await expect(
-					page.getByText( 'Coupon "expired-coupon" has expired.' )
+					page.getByText(
+						`Coupon "${ EXPIRED_COUPON }" has expired.`
+					)
 				).toBeVisible();
 			} );
 
@@ -193,9 +187,11 @@ test.describe(
 				await addAProductToCart( page, firstProductId );
 				await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
 				await expandCouponForm( page );
-				await applyCoupon( page, 'expired-coupon' );
+				await applyCoupon( page, EXPIRED_COUPON );
 				await expect(
-					page.getByText( 'Coupon "expired-coupon" has expired.' )
+					page.getByText(
+						`Coupon "${ EXPIRED_COUPON }" has expired.`
+					)
 				).toBeVisible();
 			} );
 		} );
@@ -207,7 +203,7 @@ test.describe(
 			await test.step( 'cart', async () => {
 				await addAProductToCart( page, firstProductId );
 				await page.goto( CLASSIC_CART_PAGE.slug );
-				await applyCoupon( page, 'product-and-category-included' );
+				await applyCoupon( page, INCLUDED_COUPON );
 				await expect(
 					page.getByText( 'Coupon code applied successfully.' )
 				).toBeVisible();
@@ -219,7 +215,7 @@ test.describe(
 				await addAProductToCart( page, firstProductId );
 				await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
 				await expandCouponForm( page );
-				await applyCoupon( page, 'product-and-category-included' );
+				await applyCoupon( page, INCLUDED_COUPON );
 				await expect(
 					page.getByText( 'Coupon code applied successfully.' )
 				).toBeVisible();
@@ -234,7 +230,7 @@ test.describe(
 			await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
 			await fillBillingDetails( page, 'homer@example.com' );
 			await expandCouponForm( page );
-			await applyCoupon( page, 'email-restricted' );
+			await applyCoupon( page, EMAIL_RESTRICTED_COUPON );
 			await expect(
 				page.getByText( 'Coupon code applied successfully.' )
 			).toBeVisible();
@@ -249,7 +245,7 @@ test.describe(
 			await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
 			await fillBillingDetails( page, 'homer@example.com' );
 			await expandCouponForm( page );
-			await applyCoupon( page, 'email-restricted' );
+			await applyCoupon( page, EMAIL_RESTRICTED_COUPON );
 			await expect(
 				page.getByText( 'Coupon code applied successfully.' )
 			).toBeVisible();
@@ -257,7 +253,7 @@ test.describe(
 			await page.getByRole( 'button', { name: 'Place order' } ).click();
 			await expect(
 				page.getByText(
-					'Usage limit for coupon "email-restricted" has been reached.'
+					`Usage limit for coupon "${ EMAIL_RESTRICTED_COUPON }" has been reached.`
 				)
 			).toBeVisible();
 

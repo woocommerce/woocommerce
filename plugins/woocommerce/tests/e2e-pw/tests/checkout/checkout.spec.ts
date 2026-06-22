@@ -22,7 +22,7 @@ import {
 import { logInFromMyAccount } from '../../utils/login';
 import { setGatewayEnabled } from '../../utils/payment-gateways';
 import { updateIfNeeded, resetValue } from '../../utils/settings';
-import { setTaxCalculationEnabled } from '../../utils/taxes';
+import { assertTaxCalculationEnabled } from '../../utils/taxes';
 
 //todo handle other countries and states than the default (US, CA) when filling the addresses
 
@@ -128,14 +128,36 @@ async function fillBillingDetails( page: Page, data, createAccount: boolean ) {
 			.getByRole( 'textbox', { name: 'Email address' } )
 			.fill( data.email );
 
-		await fillBillingCheckoutBlocks( page, {
+		const addressDetails = {
 			firstName: data.first_name,
 			lastName: data.last_name,
 			address: data.address_1,
 			city: data.city,
 			zip: data.postcode,
 			phone: data.phone,
+		};
+
+		// In the block checkout the address form shown depends on whether the
+		// cart has a shipping method available: with one, it renders a shipping
+		// address (billing mirrors it via the checked "Use same address for
+		// billing"); with none, it renders a billing-only address. Fill whichever
+		// address group is rendered rather than assuming billing.
+		const shippingGroup = page.getByRole( 'group', {
+			name: 'Shipping address',
 		} );
+		const billingGroup = page.getByRole( 'group', {
+			name: 'Billing address',
+		} );
+		await shippingGroup
+			.or( billingGroup )
+			.first()
+			.waitFor( { state: 'visible' } );
+
+		if ( await shippingGroup.isVisible() ) {
+			await fillShippingCheckoutBlocks( page, addressDetails );
+		} else {
+			await fillBillingCheckoutBlocks( page, addressDetails );
+		}
 
 		if ( createAccount ) {
 			await page
@@ -153,10 +175,7 @@ const test = baseTest.extend( {
 	page: async ( { page, restApi }, use ) => {
 		await createClassicCheckoutPage();
 
-		const taxesWereEnabled = await setTaxCalculationEnabled(
-			restApi,
-			true
-		);
+		await assertTaxCalculationEnabled( restApi );
 
 		const loginAtCheckoutState = await updateIfNeeded(
 			'account/woocommerce_enable_checkout_login_reminder',
@@ -178,8 +197,6 @@ const test = baseTest.extend( {
 
 		// revert the settings to initial state
 
-		await setTaxCalculationEnabled( restApi, taxesWereEnabled );
-
 		await resetValue(
 			'account/woocommerce_enable_checkout_login_reminder',
 			loginAtCheckoutState
@@ -193,12 +210,18 @@ const test = baseTest.extend( {
 		await setGatewayEnabled( restApi, 'cod', codWasEnabled );
 		await setGatewayEnabled( restApi, 'bacs', bacsWasEnabled );
 	},
-	product: async ( { restApi }, use ) => {
+	product: async ( { restApi, tax }, use ) => {
 		let product;
 
 		// Using dec: 0 to avoid small rounding issues
 		await restApi
-			.post( `${ WC_API_PATH }/products`, getFakeProduct( { dec: 0 } ) )
+			.post( `${ WC_API_PATH }/products`, {
+				...getFakeProduct( { dec: 0 } ),
+				// Assign to this spec's own tax class so only this product is
+				// taxed; other workers' products use the standard class, which
+				// has no rate under the taxes-on baseline.
+				tax_class: tax.taxClassSlug,
+			} )
 			.then( ( response ) => {
 				product = response.data;
 			} );
@@ -210,26 +233,45 @@ const test = baseTest.extend( {
 		// } );
 	},
 	tax: async ( { restApi }, use ) => {
-		let tax;
-		await restApi
-			.post( `${ WC_API_PATH }/taxes`, {
+		await assertTaxCalculationEnabled( restApi );
+		// Tax calculation is enabled globally in site setup with no standard
+		// rate, so the shared baseline is tax-free. Create a dedicated tax class
+		// and a rate scoped to it; only the product assigned to this class (this
+		// spec's, see the `product` fixture) is taxed, so concurrent workers are
+		// never affected.
+		const className = `Checkout Spec ${ faker.string.alphanumeric( 8 ) }`;
+		const { data: taxClass } = await restApi.post(
+			`${ WC_API_PATH }/taxes/classes`,
+			{ name: className }
+		);
+
+		let rate;
+		try {
+			( { data: rate } = await restApi.post( `${ WC_API_PATH }/taxes`, {
 				country: 'US',
 				state: '*',
 				cities: '*',
 				postcodes: '*',
 				rate: '25',
-				name: 'US Tax',
+				name: 'Checkout Spec Tax',
 				shipping: false,
-			} )
-			.then( ( r ) => {
-				tax = r.data;
-			} );
-
-		await use( tax );
-
-		await restApi.delete( `${ WC_API_PATH }/taxes/${ tax.id }`, {
-			force: true,
-		} );
+				class: taxClass.slug,
+			} ) );
+			await use( { ...rate, taxClassSlug: taxClass.slug } );
+		} finally {
+			if ( rate ) {
+				await restApi
+					.delete( `${ WC_API_PATH }/taxes/${ rate.id }`, {
+						force: true,
+					} )
+					.catch( console.error );
+			}
+			await restApi
+				.delete( `${ WC_API_PATH }/taxes/classes/${ taxClass.slug }`, {
+					force: true,
+				} )
+				.catch( console.error );
+		}
 	},
 	customer: async ( { restApi }, use ) => {
 		const customerData = getFakeCustomer();
@@ -242,42 +284,15 @@ const test = baseTest.extend( {
 				customer.password = customerData.password;
 			} );
 
-		// add a shipping zone and method for the customer
-		let shippingZoneId: number;
-		await restApi
-			.post( `${ WC_API_PATH }/shipping/zones`, {
-				name: `Free Shipping ${ customerData.shipping.city }`,
-			} )
-			.then( ( response: { data: { id: number } } ) => {
-				shippingZoneId = response.data.id;
-			} );
-		await restApi.put(
-			`${ WC_API_PATH }/shipping/zones/${ shippingZoneId }/locations`,
-			[
-				{
-					code: `${ customerData.shipping.country }:${ customerData.shipping.state }`,
-					type: 'state',
-				},
-			]
-		);
-		await restApi.post(
-			`${ WC_API_PATH }/shipping/zones/${ shippingZoneId }/methods`,
-			{
-				method_id: 'free_shipping',
-			}
-		);
+		// Shipping is provided by the baseline free-shipping zone in site setup,
+		// so this fixture no longer creates its own zone (concurrent zone churn
+		// made shipping availability non-deterministic at checkout).
 
 		await use( customer );
 
 		await restApi.delete( `${ WC_API_PATH }/customers/${ customer.id }`, {
 			force: true,
 		} );
-		await restApi.delete(
-			`${ WC_API_PATH }/shipping/zones/${ shippingZoneId }`,
-			{
-				force: true,
-			}
-		);
 	},
 } );
 /* endregion */
@@ -384,11 +399,33 @@ checkoutPages.forEach( ( { name, slug } ) => {
 				false
 			);
 
-			// Make sure after login the user is redirected to the right checkout page
-			// Login from classic checkout redirects to default checkout page: https://github.com/woocommerce/woocommerce/issues/56205
-			// Workaround until bug is fixed: extra navigation the test checkout page
+			// The at-checkout login is submitted with assertSuccess=false, so it
+			// isn't fully awaited, and its redirect target is unreliable
+			// (https://github.com/woocommerce/woocommerce/issues/56205). Under
+			// parallel load the session can lag, leaving the checkout in a guest
+			// state with an empty contact email that blocks the order. Confirm the
+			// session is established via My account before returning to checkout.
+			await page.goto( 'my-account/' );
+			await expect(
+				page
+					.getByLabel( 'Account pages' )
+					.getByRole( 'link', { name: 'Log out' } )
+			).toBeVisible();
+
 			await page.goto( slug );
 			await expect( page.url() ).toContain( slug );
+
+			// Block checkout hydrates the logged-in customer's contact email
+			// asynchronously from the Store API cart; under parallel load that
+			// can lag behind navigation, leaving the field empty and blocking
+			// the order. Wait for it to populate before placing the order.
+			if ( ! isClassicCheckout( page ) ) {
+				await expect(
+					page
+						.getByRole( 'textbox', { name: 'Email address' } )
+						.first()
+				).not.toHaveValue( '' );
+			}
 
 			await checkOrderDetails( page, product, qty, tax );
 
