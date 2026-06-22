@@ -258,7 +258,7 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 		$this->assertTrue( wp_script_is( 'wc-flot', 'registered' ) );
 		$this->assertStringContainsString( 'class="wc-dashboard-widget-loading wc-status-widget-loading"', $html );
 		$this->assertStringContainsString( 'aria-busy="true"', $html );
-		$this->assertMatchesRegularExpression( '/<p><span class="spinner is-active"><\/span><span class="wc-dashboard-widget-loading__text">Loading status data\.\.\.<\/span><\/p>/', $html );
+		$this->assertStringContainsString( '<p><span class="spinner is-active"></span><span class="wc-dashboard-widget-loading__text">Loading status data...</span></p>', $html );
 	}
 
 	/**
@@ -271,7 +271,7 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'class="wc-dashboard-widget-loading wc-recent-reviews-widget-loading"', $html );
 		$this->assertStringContainsString( 'aria-busy="true"', $html );
-		$this->assertMatchesRegularExpression( '/<p><span class="spinner is-active"><\/span><span class="wc-dashboard-widget-loading__text">Loading reviews data\.\.\.<\/span><\/p>/', $html );
+		$this->assertStringContainsString( '<p><span class="spinner is-active"></span><span class="wc-dashboard-widget-loading__text">Loading reviews data...</span></p>', $html );
 	}
 
 	/**
