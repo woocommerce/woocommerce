@@ -16,11 +16,21 @@ $border-width: 1px;
 			margin: 0;
 			width: 100%;
 			overflow: hidden;
+			border-radius: $universal-border-radius;
 			// ensure the buttons don't create a horizontal layout shift
 			min-height: 48px;
 			// ensure the elements take space before the button is loaded
 			// 150 is the minimum width of the button; allows for
 			min-width: 150px;
+
+			&:focus-within {
+				outline: 2px solid $input-text-light;
+				outline-offset: -2px;
+
+				.has-dark-controls & {
+					outline-color: $input-text-dark;
+				}
+			}
 
 			> img {
 				width: 100%;
