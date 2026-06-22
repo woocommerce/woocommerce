@@ -1416,4 +1416,124 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$variation->delete( true );
 		$product->delete( true );
 	}
+
+	/**
+	 * Test check_cart_coupons handles deleted coupons gracefully.
+	 *
+	 * When a coupon has been applied to the cart but subsequently deleted from
+	 * the database (while stale data persists in a persistent object cache like
+	 * Redis), check_cart_coupons should remove the coupon gracefully instead of
+	 * throwing an uncaught fatal error.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/34066
+	 */
+	public function test_check_cart_coupons_handles_deleted_coupon_gracefully() {
+		$fixtures = new FixtureData();
+
+		// Create a product and add to cart.
+		$product = $fixtures->get_simple_product(
+			array(
+				'regular_price' => '10',
+			)
+		);
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		// Create and apply a coupon.
+		$coupon = $fixtures->get_coupon(
+			array(
+				'amount'        => '5',
+				'discount_type' => 'fixed_cart',
+			)
+		);
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		$this->assertContains( $coupon->get_code(), WC()->cart->get_applied_coupons() );
+
+		// Prime the code→ID lookup cache, then delete the post via raw SQL to
+		// bypass WooCommerce's cache-invalidation hooks. This reproduces the
+		// stale-cache scenario from persistent object caches (Redis/Memcached).
+		$coupon_id   = $coupon->get_id();
+		$coupon_code = $coupon->get_code();
+		$this->assertSame( $coupon_id, wc_get_coupon_id_by_code( $coupon_code ) );
+
+		global $wpdb;
+		$wpdb->delete( $wpdb->posts, array( 'ID' => $coupon_id ), array( '%d' ) );
+		$wpdb->delete( $wpdb->postmeta, array( 'post_id' => $coupon_id ), array( '%d' ) );
+		clean_post_cache( $coupon_id );
+
+		// Verify the lookup still returns the now-stale ID (cache not flushed).
+		$this->assertSame( $coupon_id, wc_get_coupon_id_by_code( $coupon_code ) );
+
+		// check_cart_coupons should NOT throw a fatal error.
+		WC()->cart->check_cart_coupons();
+
+		// The invalid coupon should have been removed from the cart.
+		$this->assertNotContains( $coupon->get_code(), WC()->cart->get_applied_coupons() );
+
+		// An error notice should be raised for the user.
+		$error_notices = wp_list_pluck( wc_get_notices( 'error' ), 'notice' );
+		$this->assertNotEmpty( $error_notices, 'Error notice should be queued when a deleted coupon is removed from the cart.' );
+
+		// Cleanup.
+		WC()->cart->empty_cart();
+		$product->delete( true );
+	}
+
+	/**
+	 * Test that deleting a coupon via wp_delete_post clears the code-to-ID lookup cache.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/34066
+	 */
+	public function test_wp_delete_post_clears_coupon_code_cache() {
+		$fixtures = new FixtureData();
+
+		$coupon = $fixtures->get_coupon(
+			array(
+				'amount'        => '5',
+				'discount_type' => 'fixed_cart',
+			)
+		);
+		$coupon_id   = $coupon->get_id();
+		$coupon_code = $coupon->get_code();
+
+		// Prime the lookup cache.
+		$this->assertSame( $coupon_id, wc_get_coupon_id_by_code( $coupon_code ) );
+
+		// Delete via wp_delete_post (the path that previously missed cache invalidation).
+		wp_delete_post( $coupon_id, true );
+
+		// The lookup cache should now be cleared.
+		$this->assertSame( 0, wc_get_coupon_id_by_code( $coupon_code ) );
+	}
+
+	/**
+	 * Test that trashing a coupon clears the code-to-ID lookup cache.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/34066
+	 */
+	public function test_trash_post_clears_coupon_code_cache() {
+		$fixtures = new FixtureData();
+
+		$coupon = $fixtures->get_coupon(
+			array(
+				'amount'        => '5',
+				'discount_type' => 'fixed_cart',
+			)
+		);
+		$coupon_id   = $coupon->get_id();
+		$coupon_code = $coupon->get_code();
+
+		// Prime the lookup cache.
+		$this->assertSame( $coupon_id, wc_get_coupon_id_by_code( $coupon_code ) );
+
+		// Trash the coupon.
+		wp_trash_post( $coupon_id );
+
+		// The lookup cache should now be cleared.
+		$this->assertSame( 0, wc_get_coupon_id_by_code( $coupon_code ) );
+
+		// Cleanup.
+		wp_delete_post( $coupon_id, true );
+	}
 }
