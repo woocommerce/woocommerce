@@ -106,9 +106,31 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE 'woocommerce\_%';" );
 	$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE 'widget\_woocommerce\_%';" );
 
-	// Delete usermeta. Covers the woocommerce_, _woocommerce_, wc_ and _wc_ key prefixes used by WooCommerce.
+	/*
+	 * Delete user meta created by WooCommerce.
+	 *
+	 * The woocommerce_ and _woocommerce_ prefixes are uniquely namespaced, so a LIKE wildcard is safe.
+	 * The wc_ / _wc_ namespace is only two characters: a blanket wc_% / _wc_% wildcard would also delete
+	 * other plugins' user meta and, critically, WordPress core's own role/capability meta (the
+	 * {prefix}capabilities and {prefix}user_level keys) on any site whose database table prefix is "wc_",
+	 * which would strip every user's roles and could lock the site out. We therefore match only
+	 * WooCommerce's own known wc_ / _wc_ user meta keys (including the wc_admin_ legacy prefix, the
+	 * _wc_egg_ easter-egg meta, and the per-site customer lookup meta, whose keys are suffixed with the
+	 * site's table prefix) rather than a blanket wildcard.
+	 *
+	 * Note: wp_usermeta is shared across a multisite network while this uninstall runs per site, so the
+	 * matching meta is removed network-wide, consistent with the woocommerce_ option/meta cleanup above.
+	 */
 	$wpdb->query(
-		"DELETE FROM $wpdb->usermeta WHERE meta_key LIKE 'woocommerce\_%' OR meta_key LIKE '\_woocommerce\_%' OR meta_key LIKE 'wc\_%' OR meta_key LIKE '\_wc\_%';"
+		"DELETE FROM $wpdb->usermeta WHERE
+			meta_key LIKE 'woocommerce\_%'
+			OR meta_key LIKE '\_woocommerce\_%'
+			OR meta_key LIKE 'wc\_admin\_%'
+			OR meta_key LIKE '\_wc\_egg\_%'
+			OR meta_key LIKE 'wc\_last\_order\_%'
+			OR meta_key LIKE 'wc\_order\_count\_%'
+			OR meta_key LIKE 'wc\_money\_spent\_%'
+			OR meta_key IN ( 'wc_last_active', 'wc_marketplace_suggestions_dismissed_suggestions' );"
 	);
 
 	// Delete our data from the post and post meta tables, and remove any additional tables we created.
