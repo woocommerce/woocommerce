@@ -31,6 +31,12 @@
 				border-bottom-left-radius: 0;
 				border-bottom-right-radius: 0;
 			}
+
+			.components-panel__row {
+				border-bottom-left-radius: inherit;
+				border-bottom-right-radius: inherit;
+				overflow: hidden;
+			}
 		}
 	}
 
