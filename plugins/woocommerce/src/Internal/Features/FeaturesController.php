@@ -560,7 +560,7 @@ class FeaturesController {
 			'point_of_sale_staff'                => array(
 				'name'                         => __( 'POS staff', 'woocommerce' ),
 				'description'                  => __(
-					'Experimental: POS staff management, roles, and order attribution. Requires Point of Sale to also be enabled.',
+					'Experimental: POS staff management, roles, and order attribution.',
 					'woocommerce'
 				),
 				'enabled_by_default'           => false,
@@ -570,20 +570,6 @@ class FeaturesController {
 				'is_experimental'              => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-				'setting'                      => array(
-					// Disable the toggle until the parent Point of Sale feature is enabled:
-					// POSController gates on it too, so enabling this alone has no effect.
-					'disabled' => function () {
-						return ! $this->feature_is_enabled( 'point_of_sale' );
-					},
-					'desc_tip' => function () {
-						if ( ! $this->feature_is_enabled( 'point_of_sale' ) ) {
-							return __( '⚠ Point of Sale must be enabled to use POS staff.', 'woocommerce' );
-						}
-
-						return '';
-					},
-				),
 			),
 			'fulfillments'                       => array(
 				'name'                         => __( 'Order Fulfillments', 'woocommerce' ),
