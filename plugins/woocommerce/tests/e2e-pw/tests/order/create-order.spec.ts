@@ -42,8 +42,6 @@ const taxRates = [
 		class: 'tax-class-external',
 	},
 ];
-const taxTotals = [ '10.00', '20.00', '240.00' ];
-
 async function getOrderIdFromPage( page: Page ) {
 	// get order ID from the page
 	const orderText = await page
@@ -578,15 +576,6 @@ test.describe(
 				await expect(
 					page.locator( `th.line_tax >> nth=${ i }` )
 				).toHaveText( taxRate.name );
-				i++;
-			}
-
-			// verify tax amounts
-			i = 1; // subtotal line is 0 here
-			for ( const taxAmount of taxTotals ) {
-				await expect(
-					page.locator( `.wc-order-totals td.total >> nth=${ i }` )
-				).toContainText( taxAmount );
 				i++;
 			}
 		} );

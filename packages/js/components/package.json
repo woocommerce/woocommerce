@@ -101,7 +101,7 @@
 		"@wordpress/hooks": "catalog:wp-min",
 		"@wordpress/html-entities": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
-		"@wordpress/icons": "catalog:wp-min",
+		"@wordpress/icons": "catalog:wp-bundled",
 		"@wordpress/keyboard-shortcuts": "catalog:wp-min",
 		"@wordpress/keycodes": "catalog:wp-min",
 		"@wordpress/media-utils": "catalog:wp-min",
