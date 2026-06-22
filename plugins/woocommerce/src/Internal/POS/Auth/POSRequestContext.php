@@ -49,11 +49,11 @@ class POSRequestContext {
 	private FeaturesController $features_controller;
 
 	/**
-	 * Memoized detection result, or null until resolved.
+	 * The resolved POS request context, memoized; null until detected.
 	 *
-	 * @var array{is_pos_request:bool,intent:string|null,staff_id:int}|null
+	 * @var array{is_pos_request:bool,intent:string|null,staff_id:int,initiator_id:int}|null
 	 */
-	private ?array $resolved = null;
+	private ?array $resolved_context = null;
 
 	/**
 	 * Initialize dependencies via the DI container.
@@ -75,7 +75,7 @@ class POSRequestContext {
 	 * @return bool
 	 */
 	public function is_pos_request(): bool {
-		return $this->resolved()['is_pos_request'];
+		return $this->resolved_context()['is_pos_request'];
 	}
 
 	/**
@@ -85,7 +85,7 @@ class POSRequestContext {
 	 * @return int
 	 */
 	public function get_staff_id(): int {
-		return $this->resolved()['staff_id'];
+		return $this->resolved_context()['staff_id'];
 	}
 
 	/**
@@ -95,44 +95,43 @@ class POSRequestContext {
 	 * @return string|null
 	 */
 	public function get_intent(): ?string {
-		return $this->resolved()['intent'];
+		return $this->resolved_context()['intent'];
 	}
 
 	/**
-	 * The initiator staff id from the `X-WC-POS-Initiator-Id` header (0 when absent).
+	 * The initiator staff id from the `X-WC-POS-Initiator-Id` header (0 when absent / not a POS request).
 	 *
 	 * The initiator is the staff member who initiated an action another staff member authorized (e.g.
-	 * the cashier on a manager-approved override refund). It is attribution context, not a credential,
-	 * so it never gates detection or the swap and is read on demand.
+	 * the cashier on a manager-approved override refund). It is attribution context, not a credential —
+	 * it never gates detection — but it is captured alongside the rest of the request context so every
+	 * header-derived value comes from the one memoized place (rather than re-reading $_SERVER here).
 	 *
 	 * @return int
 	 */
 	public function get_initiator_id(): int {
-		return isset( $_SERVER[ self::HEADER_INITIATOR_ID ] )
-			? absint( wp_unslash( $_SERVER[ self::HEADER_INITIATOR_ID ] ) )
-			: 0;
+		return $this->resolved_context()['initiator_id'];
 	}
 
 	/**
-	 * Resolve and memoize the detection result.
+	 * Return the request's resolved POS context, detecting it once and memoizing it.
 	 *
 	 * The determine_current_user filter can fire during bootstrap, before REST_REQUEST/the route
 	 * exist. A negative computed then must NOT be memoized, or the real REST dispatch (where the swap
 	 * matters) would read a stale false — so the result is only locked in once the REST context is ready.
 	 *
-	 * @return array{is_pos_request:bool,intent:string|null,staff_id:int}
+	 * @return array{is_pos_request:bool,intent:string|null,staff_id:int,initiator_id:int}
 	 */
-	private function resolved(): array {
-		if ( null !== $this->resolved ) {
-			return $this->resolved;
+	private function resolved_context(): array {
+		if ( null !== $this->resolved_context ) {
+			return $this->resolved_context;
 		}
 
 		if ( ! $this->rest_context_ready() ) {
 			return self::non_pos_result();
 		}
 
-		$this->resolved = $this->compute();
-		return $this->resolved;
+		$this->resolved_context = $this->detect_context();
+		return $this->resolved_context;
 	}
 
 	/**
@@ -145,11 +144,11 @@ class POSRequestContext {
 	}
 
 	/**
-	 * Compute detection from $_SERVER + the parsed REST route only.
+	 * Detect the POS request context from $_SERVER + the parsed REST route only.
 	 *
-	 * @return array{is_pos_request:bool,intent:string|null,staff_id:int}
+	 * @return array{is_pos_request:bool,intent:string|null,staff_id:int,initiator_id:int}
 	 */
-	private function compute(): array {
+	private function detect_context(): array {
 		if ( ! $this->features_controller->feature_is_enabled( self::FEATURE_FLAG ) ) {
 			return self::non_pos_result();
 		}
@@ -181,46 +180,79 @@ class POSRequestContext {
 			return self::non_pos_result();
 		}
 
+		// Attribution only (never gates detection): the staff member who initiated an action a
+		// different staff member authorized — e.g. the cashier on a manager-approved override refund.
+		$initiator_id = isset( $_SERVER[ self::HEADER_INITIATOR_ID ] )
+			? absint( wp_unslash( $_SERVER[ self::HEADER_INITIATOR_ID ] ) )
+			: 0;
+
 		return array(
 			'is_pos_request' => true,
 			'intent'         => $intent,
 			'staff_id'       => $staff_id,
+			'initiator_id'   => $initiator_id,
 		);
 	}
 
 	/**
 	 * The "not POS-originated" detection result.
 	 *
-	 * @return array{is_pos_request:bool,intent:string|null,staff_id:int}
+	 * @return array{is_pos_request:bool,intent:string|null,staff_id:int,initiator_id:int}
 	 */
 	private static function non_pos_result(): array {
 		return array(
 			'is_pos_request' => false,
 			'intent'         => null,
 			'staff_id'       => 0,
+			'initiator_id'   => 0,
 		);
 	}
 
 	/**
-	 * Map an allowlisted wc/v3 write route + method to an operation intent, or null.
+	 * Map a wc/v3 write to its operation intent, or null when the route + method isn't an allowlisted
+	 * POS write.
+	 *
+	 * This is the explicit allowlist of POS-attributable writes, kept as data so the eligible surface
+	 * reads at a glance and extends with one row. It is intentionally sparse — only the operations POS
+	 * performs (order create/update, refund create, coupon create), no deletes or coupon/refund
+	 * updates. The operation (create vs update) is distinguished by the route *shape* — a collection
+	 * (`/orders`) is a create, an item (`/orders/{id}`) is an update — not by the method, because WC
+	 * uses POST for both; `methods` only constrains what verbs are accepted.
 	 *
 	 * @param string $route  Normalized REST route (leading slash, no prefix/query).
 	 * @param string $method Uppercased HTTP method.
 	 * @return string|null
 	 */
 	private function intent_for_write( string $route, string $method ): ?string {
-		if ( 'POST' === $method && '/wc/v3/orders' === $route ) {
-			return self::INTENT_ORDER_CREATE;
+		$allowlist = array(
+			array(
+				'methods' => array( 'POST' ),
+				'pattern' => '#^/wc/v3/orders$#',
+				'intent'  => self::INTENT_ORDER_CREATE,
+			),
+			array(
+				'methods' => array( 'POST', 'PUT' ),
+				'pattern' => '#^/wc/v3/orders/\d+$#',
+				'intent'  => self::INTENT_ORDER_UPDATE,
+			),
+			array(
+				'methods' => array( 'POST' ),
+				'pattern' => '#^/wc/v3/orders/\d+/refunds$#',
+				'intent'  => self::INTENT_REFUND_CREATE,
+			),
+			array(
+				'methods' => array( 'POST' ),
+				'pattern' => '#^/wc/v3/coupons$#',
+				'intent'  => self::INTENT_COUPON_CREATE,
+			),
+		);
+
+		foreach ( $allowlist as $write ) {
+			if ( in_array( $method, $write['methods'], true ) && 1 === preg_match( $write['pattern'], $route ) ) {
+				return $write['intent'];
+			}
 		}
-		if ( 'POST' === $method && 1 === preg_match( '#^/wc/v3/orders/\d+/refunds$#', $route ) ) {
-			return self::INTENT_REFUND_CREATE;
-		}
-		if ( in_array( $method, array( 'POST', 'PUT' ), true ) && 1 === preg_match( '#^/wc/v3/orders/\d+$#', $route ) ) {
-			return self::INTENT_ORDER_UPDATE;
-		}
-		if ( 'POST' === $method && '/wc/v3/coupons' === $route ) {
-			return self::INTENT_COUPON_CREATE;
-		}
+
 		return null;
 	}
 
@@ -231,7 +263,7 @@ class POSRequestContext {
 	 * StoreApi\Authentication::is_request_to_store_api(), Utilities\RestApiUtil, and
 	 * wc_rest_should_load_namespace()). WP core's `WP::parse_request()` (wp-includes/class-wp.php)
 	 * populates it for both pretty and plain (?rest_route=…) permalinks, before REST serve_request
-	 * dispatches. An empty value keeps resolved() from memoizing (via rest_context_ready()), so a
+	 * dispatches. An empty value keeps resolved_context() from memoizing (via rest_context_ready()), so a
 	 * too-early call simply re-evaluates once the route exists. Normalized to a single leading
 	 * slash, no query string.
 	 *
