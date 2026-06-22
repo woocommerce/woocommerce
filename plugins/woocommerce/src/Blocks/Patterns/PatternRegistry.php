@@ -75,10 +75,6 @@ class PatternRegistry {
 			return;
 		}
 
-		if ( isset( $pattern_data['featureFlag'] ) && '' !== $pattern_data['featureFlag'] && ! Features::is_enabled( $pattern_data['featureFlag'] ) ) {
-			return;
-		}
-
 		// Title is a required property.
 		if ( ! isset( $pattern_data['title'] ) || ! $pattern_data['title'] ) {
 			_doing_it_wrong(
