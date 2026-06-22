@@ -126,6 +126,42 @@ describe( 'NativeSettingsField', () => {
 			).toBeInstanceOf( HTMLButtonElement );
 		} );
 
+		it( 'honors placeholder and disabled custom attributes for number inputs', () => {
+			const container = render(
+				<NativeSettingsField
+					{ ...makeProps(
+						{
+							...numberField,
+							customAttributes: {
+								...numberField.customAttributes,
+								disabled: 'true',
+								placeholder: 'Only configurable in code',
+							},
+						},
+						''
+					) }
+				/>
+			);
+
+			const input = container.querySelector( 'input[type="number"]' );
+			expect( input ).toBeInstanceOf( HTMLInputElement );
+			expect( input ).toHaveAttribute(
+				'placeholder',
+				'Only configurable in code'
+			);
+			expect( ( input as HTMLInputElement ).disabled ).toBe( true );
+			expect(
+				isSpinButtonDisabled(
+					getSpinButton( container, 'Increment Low stock threshold' )
+				)
+			).toBe( true );
+			expect(
+				isSpinButtonDisabled(
+					getSpinButton( container, 'Decrement Low stock threshold' )
+				)
+			).toBe( true );
+		} );
+
 		it( 'calls onChange with the stepped value and announces it when a spin button is clicked', () => {
 			const onChange = jest.fn();
 			const container = render(

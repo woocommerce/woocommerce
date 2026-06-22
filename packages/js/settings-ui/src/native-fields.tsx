@@ -45,6 +45,40 @@ const toStringValue = ( value: SettingsValue ) =>
 const isTextInputType = ( type: string ): type is TextInputType =>
 	textInputTypes.includes( type as TextInputType );
 
+const toBooleanCustomAttribute = (
+	value: string | number | boolean | undefined
+): boolean | undefined => {
+	if ( typeof value === 'undefined' ) {
+		return undefined;
+	}
+
+	return typeof value === 'boolean' ? value : true;
+};
+
+const toStringCustomAttribute = (
+	value: string | number | boolean | undefined
+): string | undefined => {
+	return typeof value === 'string' || typeof value === 'number'
+		? String( value )
+		: undefined;
+};
+
+const getNumberInputAttributes = (
+	customAttributes?: Record< string, string | number | boolean >
+) => {
+	const safeAttributes =
+		customAttributes && typeof customAttributes === 'object'
+			? customAttributes
+			: {};
+	const { disabled, placeholder, ...inputAttributes } = safeAttributes;
+
+	return {
+		disabled: toBooleanCustomAttribute( disabled ),
+		placeholder: toStringCustomAttribute( placeholder ),
+		inputAttributes,
+	};
+};
+
 const getHelp = ( description?: string ) =>
 	description ? (
 		<span
@@ -152,16 +186,18 @@ export const NativeSettingsField = ( {
 	}
 
 	if ( field.type === 'number' ) {
+		const numberInput = getNumberInputAttributes( field.customAttributes );
+
 		return (
 			<NumberSpinControl
 				id={ field.id }
 				label={ field.label }
 				help={ getHelp( field.description ) }
 				value={ toStringValue( value ) }
-				placeholder={ field.placeholder }
-				disabled={ field.disabled }
+				placeholder={ field.placeholder ?? numberInput.placeholder }
+				disabled={ field.disabled ?? numberInput.disabled }
 				onChange={ onChange }
-				inputAttributes={ field.customAttributes }
+				inputAttributes={ numberInput.inputAttributes }
 			/>
 		);
 	}
