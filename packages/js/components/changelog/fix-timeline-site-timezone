@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add site timezone support to the Timeline component.

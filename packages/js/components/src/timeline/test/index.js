@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
+import * as dateModule from '@wordpress/date';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -13,6 +14,15 @@ import mockData from './__mocks__/timeline-mock-data';
 import { groupItemsUsing, sortByDateUsing } from '../util.js';
 
 describe( 'Timeline', () => {
+	const timezoneTestItem = {
+		...mockData[ 1 ],
+		date: new Date( Date.UTC( 2020, 0, 20, 23, 45 ) ),
+	};
+
+	afterEach( () => {
+		jest.restoreAllMocks();
+	} );
+
 	test( 'Empty snapshot', () => {
 		const { container } = render( <Timeline /> );
 		expect( container ).toMatchSnapshot();
@@ -21,6 +31,63 @@ describe( 'Timeline', () => {
 	test( 'With data snapshot', () => {
 		const { container } = render( <Timeline items={ mockData } /> );
 		expect( container ).toMatchSnapshot();
+	} );
+
+	test( 'uses browser timezone date formatting by default', () => {
+		jest.spyOn( dateModule, 'format' ).mockImplementation(
+			( dateFormat, date ) =>
+				`browser:${ dateFormat }:${ date.toISOString() }`
+		);
+		jest.spyOn( dateModule, 'dateI18n' ).mockImplementation(
+			( dateFormat, date ) =>
+				`site:${ dateFormat }:${ date.toISOString() }`
+		);
+
+		const { container } = render(
+			<Timeline
+				items={ [ timezoneTestItem ] }
+				dateFormat="F j, Y"
+				clockFormat="g:ia"
+			/>
+		);
+
+		expect(
+			container.querySelector( '.woocommerce-timeline-group__title' )
+				.textContent
+		).toBe( 'browser:F j, Y:2020-01-20T23:45:00.000Z' );
+		expect(
+			container.querySelector( '.woocommerce-timeline-item__timestamp' )
+				.textContent
+		).toBe( 'browser:g:ia:2020-01-20T23:45:00.000Z' );
+	} );
+
+	test( 'uses site timezone date formatting when requested', () => {
+		jest.spyOn( dateModule, 'format' ).mockImplementation(
+			( dateFormat, date ) =>
+				`browser:${ dateFormat }:${ date.toISOString() }`
+		);
+		jest.spyOn( dateModule, 'dateI18n' ).mockImplementation(
+			( dateFormat, date ) =>
+				`site:${ dateFormat }:${ date.toISOString() }`
+		);
+
+		const { container } = render(
+			<Timeline
+				items={ [ timezoneTestItem ] }
+				dateFormat="F j, Y"
+				clockFormat="g:ia"
+				timezone="site"
+			/>
+		);
+
+		expect(
+			container.querySelector( '.woocommerce-timeline-group__title' )
+				.textContent
+		).toBe( 'site:F j, Y:2020-01-20T23:45:00.000Z' );
+		expect(
+			container.querySelector( '.woocommerce-timeline-item__timestamp' )
+				.textContent
+		).toBe( 'site:g:ia:2020-01-20T23:45:00.000Z' );
 	} );
 
 	describe( 'Timeline utilities', () => {
