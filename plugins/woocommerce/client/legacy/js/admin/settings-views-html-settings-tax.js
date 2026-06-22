@@ -21,6 +21,29 @@
 			$pagination        = $( '#rates-pagination, #rates-bottom-pagination' ),
 			$search_field      = $( '#rates-search .wc-tax-rates-search-field' ),
 			$submit            = $( '.woocommerce-save-button[type=submit]' ),
+			countryAutocompleteSource = function( request, response ) {
+				var term    = request.term.toLowerCase(),
+					matcher = new RegExp( $.ui.autocomplete.escapeRegex( term ), 'i' ),
+					matches = $.grep( data.countries, function( country ) {
+						return matcher.test( country.value ) || matcher.test( country.label );
+					} );
+
+				response( _.sortBy( matches, function( country ) {
+					var value = country.value.toLowerCase(),
+						label = country.label.toLowerCase();
+
+					if ( value === term ) {
+						return 0;
+					}
+					if ( 0 === value.indexOf( term ) ) {
+						return 1;
+					}
+					if ( 0 === label.indexOf( term ) ) {
+						return 2;
+					}
+					return 3;
+				} ) );
+			},
 			WCTaxTableModelConstructor = Backbone.Model.extend({
 				changes: {},
 				setRateAttribute: function( rateID, attribute, value ) {
@@ -154,7 +177,7 @@
 
 					// Initialize autocomplete for countries.
 					this.$el.find( 'td.country input' ).autocomplete({
-						source: data.countries,
+						source: countryAutocompleteSource,
 						minLength: 2
 					});
 
