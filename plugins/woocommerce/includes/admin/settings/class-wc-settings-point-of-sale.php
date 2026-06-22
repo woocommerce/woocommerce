@@ -7,9 +7,7 @@
 
 declare(strict_types=1);
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 

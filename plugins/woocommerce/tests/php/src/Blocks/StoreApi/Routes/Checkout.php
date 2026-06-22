@@ -13,6 +13,7 @@ use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Checkout as CheckoutRoute;
+use Automattic\WooCommerce\StoreApi\Routes\V1\CheckoutOrder as CheckoutOrderRoute;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
@@ -73,6 +74,8 @@ class Checkout extends MockeryTestCase {
 		$schema_controller = new SchemaController( $this->mock_extend );
 		$route             = new CheckoutRoute( $schema_controller, $schema_controller->get( 'checkout' ) );
 		register_rest_route( $route->get_namespace(), $route->get_path(), $route->get_args(), true );
+		$order_route = new CheckoutOrderRoute( $schema_controller, $schema_controller->get( 'checkout-order' ) );
+		register_rest_route( $order_route->get_namespace(), $order_route->get_path(), $order_route->get_args(), true );
 
 		$fixtures = new FixtureData();
 		$fixtures->payments_enable_bacs();
@@ -1555,6 +1558,60 @@ class Checkout extends MockeryTestCase {
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_invalid_address_country', $response->get_data()['code'] );
 		$this->assertStringContainsString( 'Sorry, we do not allow orders from the provided country (France)', $response->get_data()['message'] );
+	}
+
+	/**
+	 * @testdox Existing order payment should not persist address data when country validation fails.
+	 */
+	public function test_checkout_order_does_not_persist_invalid_country_address() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+		update_option( 'woocommerce_ship_to_countries', 'specific' );
+		update_option( 'woocommerce_specific_ship_to_countries', array( 'US' ) );
+
+		$order = \WC_Helper_Order::create_order( 0 );
+
+		$original_billing_country  = $order->get_billing_country();
+		$original_shipping_country = $order->get_shipping_country();
+		$original_total            = $order->get_total();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_query_params(
+			array(
+				'key'           => $order->get_order_key(),
+				'billing_email' => $order->get_billing_email(),
+			)
+		);
+		// Forbidden country (IN) on both addresses is what should trigger the rejection.
+		$invalid_address = array(
+			'first_name' => 'Test',
+			'last_name'  => 'Kumar',
+			'company'    => '',
+			'address_1'  => '1 MG Road',
+			'address_2'  => '',
+			'city'       => 'Mumbai',
+			'state'      => 'MH',
+			'postcode'   => '400001',
+			'country'    => 'IN',
+			'phone'      => '',
+		);
+		$request->set_body_params(
+			array(
+				'billing_address'  => array_merge( $invalid_address, array( 'email' => $order->get_billing_email() ) ),
+				'shipping_address' => $invalid_address,
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_invalid_address_country', $response->get_data()['code'] );
+
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( $original_billing_country, $stored_order->get_billing_country() );
+		$this->assertEquals( $original_shipping_country, $stored_order->get_shipping_country() );
+		$this->assertEquals( $original_total, $stored_order->get_total() );
 	}
 
 	/**

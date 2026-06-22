@@ -14,6 +14,7 @@ import {
 } from '../../../../../../../tests/integration/helpers/integration-test-editor';
 import '../';
 import '../../checkbox-list';
+import '../../chips';
 
 // Mock getSetting to return the taxonomy data we need
 jest.mock( '@woocommerce/settings', () => {
@@ -117,10 +118,6 @@ describe( 'Taxonomy Filter block', () => {
 
 			// Should display the taxonomy label as heading
 			expect( block.getByText( /Category/i ) ).toBeInTheDocument();
-
-			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
-			// opt out of without changing the visual output.
-			expect( console ).toHaveWarned();
 		} );
 	} );
 
@@ -230,7 +227,7 @@ describe( 'Taxonomy Filter block', () => {
 			await setup( {
 				taxonomy: 'product_cat',
 				showCounts: true,
-				displayStyle: 'dropdown',
+				displayStyle: 'woocommerce/product-filter-chips',
 				sortOrder: 'name-asc',
 				hideEmpty: false,
 			} );

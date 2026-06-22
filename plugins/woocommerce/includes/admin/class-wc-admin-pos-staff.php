@@ -61,8 +61,7 @@ class WC_Admin_POS_Staff {
 	 * @return bool
 	 */
 	public static function is_enabled(): bool {
-		return FeaturesUtil::feature_is_enabled( POSController::PARENT_FLAG )
-			&& FeaturesUtil::feature_is_enabled( POSController::FEATURE_FLAG );
+		return FeaturesUtil::feature_is_enabled( POSController::FEATURE_FLAG );
 	}
 
 	/**
