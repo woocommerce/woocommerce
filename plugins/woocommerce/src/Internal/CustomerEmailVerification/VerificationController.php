@@ -373,14 +373,11 @@ class VerificationController {
 			self::SEND_NONCE_ACTION
 		);
 
-		$notice = sprintf(
-			'<a href="%2$s" class="button wc-forward">%3$s</a> %1$s',
-			esc_html__( 'Confirm your email address to link any past orders to your account.', 'woocommerce' ),
-			esc_url( $send_url ),
-			esc_html__( 'Send confirmation code', 'woocommerce' )
+		return $this->button_notice(
+			__( 'Confirm your email address to link any past orders to your account.', 'woocommerce' ),
+			$send_url,
+			__( 'Send confirmation code', 'woocommerce' )
 		);
-
-		return wc_print_notice( $notice, 'notice', array(), true );
 	}
 
 	/**
@@ -390,11 +387,27 @@ class VerificationController {
 	 * @return string Fully escaped HTML.
 	 */
 	private function get_pending_notice_html(): string {
+		return $this->button_notice(
+			__( 'We emailed you a confirmation code.', 'woocommerce' ),
+			$this->verify_url(),
+			__( 'Enter your code', 'woocommerce' )
+		);
+	}
+
+	/**
+	 * Build a notice with a leading call-to-action button.
+	 *
+	 * @param string $text  Notice text.
+	 * @param string $url   Button URL.
+	 * @param string $label Button label.
+	 * @return string Fully escaped HTML.
+	 */
+	private function button_notice( string $text, string $url, string $label ): string {
 		$notice = sprintf(
 			'<a href="%2$s" class="button wc-forward">%3$s</a> %1$s',
-			esc_html__( 'We emailed you a confirmation code.', 'woocommerce' ),
-			esc_url( $this->verify_url() ),
-			esc_html__( 'Enter your code', 'woocommerce' )
+			esc_html( $text ),
+			esc_url( $url ),
+			esc_html( $label )
 		);
 
 		return wc_print_notice( $notice, 'notice', array(), true );
@@ -455,10 +468,8 @@ class VerificationController {
 	private function enqueue_form_script(): void {
 		$handle = 'wc-customer-email-verification';
 
-		if ( ! wp_script_is( $handle, 'registered' ) ) {
-			wp_register_script( $handle, false, array(), \WC_VERSION, true );
-		}
-
+		// Script-less handle that only carries the inline JS; re-registering is a no-op if it exists.
+		wp_register_script( $handle, false, array(), \WC_VERSION, true );
 		wp_enqueue_script( $handle );
 		wp_add_inline_script( $handle, $this->get_form_script() );
 	}
