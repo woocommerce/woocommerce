@@ -130,7 +130,7 @@ class ShopperListItem {
 	 * @param int   $product_or_variation_id Product or variation ID.
 	 * @param array $variation               Variation attributes keyed by attribute name.
 	 * @param int   $quantity                Saved quantity. Coerced to a minimum of 1.
-	 * @return self|null Null if the underlying product can't be resolved.
+	 * @return self|null Null if the underlying product can't be resolved or isn't publicly live.
 	 */
 	public static function from_product( int $product_or_variation_id, array $variation = array(), int $quantity = 1 ): ?self {
 		$product = wc_get_product( absint( $product_or_variation_id ) );
@@ -152,7 +152,7 @@ class ShopperListItem {
 			$variation    = array();
 		}
 
-		return new self(
+		$item = new self(
 			self::generate_key( $product_id, $variation_id, $variation ),
 			$product_id,
 			$variation_id,
@@ -161,6 +161,12 @@ class ShopperListItem {
 			current_time( 'mysql', true ),
 			$product->get_title()
 		);
+
+		if ( ! $item->is_live() ) {
+			return null;
+		}
+
+		return $item;
 	}
 
 	/**
