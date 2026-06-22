@@ -8197,11 +8197,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertCount( 1, $requests_made, 'The internal test-drive disable endpoint should be called once.' );
-		$this->assertSame( 0, $lock_value, 'The onboarding lock should finish normalized to 0.' );
+		$this->assertNull( $lock_value, 'The webhook-deleted onboarding lock should remain deleted after the internal request fails.' );
 		$this->assertSame(
-			array( $this->current_time, 0, null, 0 ),
+			array( $this->current_time, 0, null ),
 			$lock_changes,
-			'Core should set and clear its preflight lock, observe the webhook delete, and normalize it to 0.'
+			'Core should set and clear its preflight lock, then surface the webhook-triggered internal lock failure.'
 		);
 		$this->assertSame(
 			array(),
@@ -8247,7 +8247,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( 0, $lock_value, 'The onboarding lock should be cleared even when an unexpected error escapes.' );
-		$this->assertSame( array( $this->current_time, 0, 0 ), $lock_changes );
+		$this->assertSame( array( $this->current_time, 0 ), $lock_changes );
 	}
 
 	/**
@@ -8298,7 +8298,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( 0, $lock_value, 'The onboarding lock should be cleared after non-lock internal failures.' );
-		$this->assertSame( array( $this->current_time, 0, 0 ), $lock_changes );
+		$this->assertSame( array( $this->current_time, 0 ), $lock_changes );
 		$this->assertSame( array(), $updated_profile, 'NOX steps should not be marked completed when the disable failed.' );
 	}
 
@@ -8397,9 +8397,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $endpoint_calls, 'The internal WooPayments endpoint should be called after the stale lock self-heals.' );
 		$this->assertSame( 0, $lock_value, 'The onboarding lock should finish normalized to 0.' );
 		$this->assertSame(
-			array( 0, $this->current_time, 0, 0 ),
+			array( 0, $this->current_time, 0 ),
 			$lock_changes,
-			'Core should clear the stale lock, acquire and clear its preflight lock, and normalize the lock after the disable call.'
+			'Core should clear the stale lock, acquire and clear its preflight lock.'
 		);
 	}
 

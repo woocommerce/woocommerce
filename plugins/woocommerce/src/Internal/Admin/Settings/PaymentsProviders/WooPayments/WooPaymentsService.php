@@ -1570,9 +1570,6 @@ class WooPaymentsService {
 						'trace'   => $e->getTrace(),
 					)
 				);
-			} finally {
-				// Normalize the shared lock option after WooPayments webhooks may have deleted it.
-				$this->clear_onboarding_lock();
 			}
 		}
 
