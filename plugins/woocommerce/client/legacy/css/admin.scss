@@ -9760,6 +9760,34 @@ body.woocommerce-settings-payments-section_legacy {
 	}
 }
 
+.wc-admin-visual-attribute-term-option {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+
+	.wc-admin-color-swatch {
+		margin-right: 0;
+		flex-shrink: 0;
+		height: 16px;
+		width: 16px;
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+	}
+}
+
+.select2-selection__choice .wc-admin-visual-attribute-term-option {
+	gap: 6px;
+	vertical-align: middle;
+	margin-bottom: 1px;
+	margin-left: 2px;
+}
+
+.select2-results__option .wc-admin-visual-attribute-term-option {
+	margin-top: 2px;
+	width: 100%;
+}
+
 .wc-admin-visual-attribute-type fieldset {
 	display: flex;
 	gap: 1.5em;

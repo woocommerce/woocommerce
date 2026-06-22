@@ -6,6 +6,19 @@ jQuery( function ( $ ) {
 		isPageUnloading = true;
 	} );
 
+	function appendAttributeTermOption( select, term ) {
+		const option = document.createElement( 'option' );
+		option.value = String( term.term_id );
+		option.selected = true;
+		option.textContent = term.name;
+
+		if ( term.visual ) {
+			option.dataset.visual = JSON.stringify( term.visual );
+		}
+
+		select.appendChild( option );
+	}
+
 	// Scroll to first checked category
 	// https://github.com/scribu/wp-category-checklist-tree/blob/d1c3c1f449e1144542efa17dde84a9f52ade1739/category-checklist-tree.php
 	$( function () {
@@ -791,15 +804,12 @@ jQuery( function ( $ ) {
 							if ( currentItem && currentItem.length > 0 ) {
 								currentItem.prop( 'selected', 'selected' );
 							} else {
-								$wrapper
-									.find( 'select.attribute_values' )
-									.append(
-										'<option value="' +
-											term.term_id +
-											'" selected="selected">' +
-											term.name +
-											'</option>'
-									);
+								appendAttributeTermOption(
+									$wrapper.find(
+										'select.attribute_values'
+									)[ 0 ],
+									term
+								);
 							}
 						} );
 						$wrapper
@@ -1023,11 +1033,11 @@ jQuery( function ( $ ) {
 							'select.attribute_values'
 						);
 						if ( select ) {
-							const option = document.createElement( 'option' );
-							option.value = String( response.term_id );
-							option.selected = true;
-							option.textContent = response.name;
-							select.appendChild( option );
+							appendAttributeTermOption( select, {
+								term_id: response.term_id,
+								name: response.name,
+								visual: response.visual,
+							} );
 
 							// Trigger change event natively.
 							const changeEvent = new Event( 'change', {

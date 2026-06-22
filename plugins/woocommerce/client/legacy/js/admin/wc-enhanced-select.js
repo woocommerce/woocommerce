@@ -1,5 +1,97 @@
 /*global wc_enhanced_select_params */
 jQuery( function ( $ ) {
+	function getVisualTermSwatchStyle( visual ) {
+		if ( ! visual.type || ! visual.value ) {
+			return '';
+		}
+
+		if ( 'image' === visual.type ) {
+			return (
+				"background-image:url('" +
+				String( visual.value ).replace( /'/g, '%27' ) +
+				"')"
+			);
+		}
+
+		if ( 'color' === visual.type ) {
+			return 'background-color:' + visual.value;
+		}
+
+		return '';
+	}
+
+	function formatVisualTermOption( term ) {
+		const swatchStyle = getVisualTermSwatchStyle( term.visual );
+		const swatchClass =
+			'wc-admin-color-swatch' + ( swatchStyle ? '' : ' is-empty' );
+		const styleAttribute = swatchStyle
+			? ' style="' + swatchStyle + '"'
+			: '';
+
+		return (
+			'<span class="wc-admin-visual-attribute-term-option">' +
+			'<span class="' +
+			swatchClass +
+			'"' +
+			styleAttribute +
+			' aria-hidden="true"></span>' +
+			'<span class="wc-admin-visual-attribute-term-label">' +
+			term.text +
+			'</span>' +
+			'</span>'
+		);
+	}
+
+	function getTermDataWithVisual( $select, data ) {
+		if ( data.visual ) {
+			return data;
+		}
+
+		const $option = $select.find( 'option' ).filter( function () {
+			return $( this ).val() === String( data.id );
+		} );
+
+		if ( ! $option.length ) {
+			return data;
+		}
+
+		const visual = $option.data( 'visual' );
+
+		if ( ! visual ) {
+			return data;
+		}
+
+		return Object.assign( {}, data, { visual: visual } );
+	}
+
+	function updateVisualAttributeTermChoices( $select ) {
+		var $container = $select.next( '.select2-container' );
+
+		if ( ! $container.length ) {
+			return;
+		}
+
+		$container.find( '.select2-selection__choice' ).each( function () {
+			const $choice = $( this );
+			const data = $choice.data( 'data' );
+
+			if ( ! data ) {
+				return;
+			}
+
+			const $removeButton = $choice
+				.find( '.select2-selection__choice__remove' )
+				.detach();
+			const termData = getTermDataWithVisual( $select, data );
+
+			$choice
+				.empty()
+				.append( $removeButton )
+				.append( formatVisualTermOption( termData ) );
+			$choice.prop( 'title', termData.title || termData.text );
+		} );
+	}
+
 	function getEnhancedSelectFormatString() {
 		return {
 			language: {
@@ -431,6 +523,8 @@ jQuery( function ( $ ) {
 						var return_format = $( this ).data( 'return_id' )
 							? 'id'
 							: 'slug';
+						var isVisualAttribute =
+							'yes' === $( this ).data( 'isVisualAttribute' );
 
 						var select2_args = $.extend(
 							{
@@ -473,14 +567,24 @@ jQuery( function ( $ ) {
 											$.each(
 												data,
 												function ( id, term ) {
-													terms.push( {
+													var termData = {
 														id:
 															'id' ===
 															return_format
 																? term.term_id
 																: term.slug,
 														text: term.name,
-													} );
+													};
+
+													if ( isVisualAttribute ) {
+														termData.visual =
+															term.visual || {
+																type: 'none',
+																value: '',
+															};
+													}
+
+													terms.push( termData );
 												}
 											);
 										}
@@ -494,9 +598,32 @@ jQuery( function ( $ ) {
 							getEnhancedSelectFormatString()
 						);
 
-						$( this )
+						if ( isVisualAttribute ) {
+							select2_args.templateResult = function ( term ) {
+								if ( term.loading ) {
+									return term.text;
+								}
+
+								return formatVisualTermOption( term );
+							};
+						}
+
+						var $select = $( this );
+
+						$select
 							.selectWoo( select2_args )
 							.addClass( 'enhanced' );
+
+						if ( isVisualAttribute ) {
+							updateVisualAttributeTermChoices( $select );
+
+							$select.on(
+								'change.wcVisualAttributeTerms select2:select.wcVisualAttributeTerms',
+								function () {
+									updateVisualAttributeTermChoices( $select );
+								}
+							);
+						}
 					} );
 
 				$( ':input.wc-attribute-search' )
