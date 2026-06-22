@@ -180,9 +180,6 @@ const serialRunSpecs = [
 	// Toggles the global `woocommerce_cart_redirect_after_add` setting, which
 	// changes add-to-cart behavior for every other worker — not parallel-safe.
 	'**/tests/shop/cart-redirection.spec.ts',
-	// Sorts and paginates the store-wide shop listing, which other workers
-	// mutate by creating/deleting products — not parallel-safe.
-	'**/tests/shop/shop-search-browse-sort.spec.ts',
 	// Trashes and restores the global Shop page in a fixture; while trashed, every
 	// other worker's shop/cart/account navigation 404s.
 	'**/tests/shop/shop-title-after-deletion.spec.ts',
