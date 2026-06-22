@@ -1610,13 +1610,17 @@ class WooPaymentsService {
 	 * @return WP_Error
 	 */
 	private function get_onboarding_client_api_exception_error( Exception $e, string $message ): WP_Error {
+		// Deliberately exclude the exception stack trace from this error data. The data is
+		// passed to ApiException as additional data (documented as exposable in the error
+		// response) and is persisted to the NOX profile option by the onboarding step-failed
+		// handlers, so it must stay free of stack frames, whose arguments can carry file
+		// paths, tokens, and other sensitive values. Keep only these bounded scalars.
 		return new WP_Error(
 			'woocommerce_woopayments_onboarding_client_api_exception',
 			$message,
 			array(
 				'code'    => $e->getCode(),
 				'message' => $e->getMessage(),
-				'trace'   => $e->getTrace(),
 			)
 		);
 	}
