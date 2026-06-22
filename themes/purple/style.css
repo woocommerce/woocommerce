@@ -61,6 +61,151 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
     align-items: flex-start;
 }
 
+/* Catalog sort order select — CSS customizable select (base-select).
+ * Continues PR #82 exploration: https://github.com/woocommerce/woo-themes/pull/82
+ * Closed/open styles from Figma Dropdown/Default (1:6531) and Dropdown/Open Links (37:1153).
+ * Strip native chrome with appearance: none first; opt into base-select for the picker. */
+.woocommerce.wc-block-catalog-sorting {
+    font-size: var(--wp--preset--font-size--medium) !important;
+}
+
+.woocommerce.wc-block-catalog-sorting select.orderby {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: var(--wp--preset--color--theme-1);
+    background-image: url('data:image/svg+xml;utf8,<svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="%23111111"></path></svg>');
+    background-position: right center;
+    background-repeat: no-repeat;
+    background-size: 1.5em;
+    border: none;
+    border-radius: 0;
+    color: var(--wp--preset--color--theme-2);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--wp--preset--font-size--medium) !important;
+    font-weight: inherit;
+    line-height: 1.5625;
+    outline: none;
+    padding-block: 0;
+    padding-inline: 0 calc(1.5em + 10px);
+    vertical-align: middle;
+}
+
+@supports (appearance: base-select) {
+    .woocommerce.wc-block-catalog-sorting select.orderby,
+    .woocommerce.wc-block-catalog-sorting select.orderby::picker(select) {
+        appearance: base-select;
+        background-color: var(--wp--preset--color--theme-1);
+        border: none;
+    }
+
+    .woocommerce.wc-block-catalog-sorting select.orderby {
+        align-items: center;
+        background-image: none;
+        box-shadow: none;
+        display: inline-flex;
+        flex-direction: row;
+        gap: 10px;
+        outline: none;
+        padding: 0;
+    }
+
+    .woocommerce.wc-block-catalog-sorting select.orderby:not(:open) > option {
+        display: none;
+    }
+
+    .woocommerce.wc-block-catalog-sorting select.orderby:not(:open)::picker(select) {
+        display: none;
+    }
+
+    .woocommerce.wc-block-catalog-sorting select.orderby .orderby-button {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+        color: inherit;
+        cursor: pointer;
+        display: inline;
+        font: inherit;
+        margin: 0;
+        order: 0;
+        outline: 0;
+        padding: 0;
+    }
+
+    .woocommerce.wc-block-catalog-sorting select.orderby selectedcontent {
+        display: inline;
+        white-space: nowrap;
+    }
+
+    .woocommerce.wc-block-catalog-sorting select.orderby::picker-icon {
+        background-image: url('data:image/svg+xml;utf8,<svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="currentColor"></path></svg>');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: contain;
+        block-size: 1.5em;
+        color: var(--wp--preset--color--theme-2);
+        content: '';
+        flex-shrink: 0;
+        inline-size: 1.5em;
+        order: 1;
+        transition: rotate 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .woocommerce.wc-block-catalog-sorting select.orderby:open::picker-icon {
+        rotate: 180deg;
+    }
+
+    .woocommerce.wc-block-catalog-sorting select.orderby::picker(select) {
+        align-items: stretch;
+        background-color: var(--wp--preset--color--theme-1);
+        border-radius: 0;
+        box-sizing: border-box;
+        color: var(--wp--preset--color--theme-2);
+        display: flex;
+        flex-direction: column;
+        font-size: var(--wp--preset--font-size--medium);
+        gap: 0;
+        line-height: 1.5625;
+        margin-block-start: 12px;
+        min-width: anchor-size(width);
+        padding: 0;
+    }
+
+    .woocommerce.wc-block-catalog-sorting select.orderby:open::picker(select) {
+        border: 1px solid var(--wp--preset--color--theme-6);
+    }
+
+    .woocommerce.wc-block-catalog-sorting select.orderby option::checkmark {
+        content: '';
+    }
+
+    /* Open list items — padding per option so hover fills a padded row. */
+    .woocommerce.wc-block-catalog-sorting select.orderby option {
+        background-color: transparent;
+        box-sizing: border-box;
+        color: var(--wp--preset--color--theme-2);
+        font-size: var(--wp--preset--font-size--medium);
+        gap: 0;
+        line-height: 1.5625;
+        min-block-size: auto;
+        padding: 12px 18px;
+        white-space: nowrap;
+        width: 100%;
+    }
+
+    .woocommerce.wc-block-catalog-sorting select.orderby option:enabled:hover,
+    .woocommerce.wc-block-catalog-sorting select.orderby option:focus {
+        background-color: var(--wp--preset--color--theme-5);
+        outline: none;
+    }
+
+    /* Underline the closed label while the menu is open (Dropdown/Click, 1875:53421). */
+    .woocommerce.wc-block-catalog-sorting select.orderby:open selectedcontent {
+        text-decoration: underline;
+    }
+}
+
 /* Navigation dropdown panel — desktop only.
  * Above the mobile overlay breakpoint, give the submenu its own
  * floating-panel styling (page-color background + soft shadow).

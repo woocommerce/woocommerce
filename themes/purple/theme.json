@@ -489,6 +489,11 @@
 					"text": "var(--wp--preset--color--theme-4)"
 				}
 			},
+			"woocommerce/catalog-sorting": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--medium)"
+				}
+			},
 			"woocommerce/product-sale-badge": {
 				"typography": {
 					"fontSize":  "var(--wp--preset--font-size--small)",
