@@ -1203,6 +1203,22 @@ class WC_Emails {
 			return;
 		}
 
+		if ( 'no' === get_option( 'woocommerce_notify_backorder', 'yes' ) ) {
+			return;
+		}
+
+		/**
+		 * Determine if the current product should trigger a backorder notification.
+		 *
+		 * @param bool $send       Whether the backorder notification should be sent.
+		 * @param int  $product_id The backordered product id.
+		 *
+		 * @since 11.0.0
+		 */
+		if ( false === apply_filters( 'woocommerce_should_send_backorder_notification', true, $args['product']->get_id() ) ) {
+			return;
+		}
+
 		$stock_before         = $args['quantity'] + $args['product']->get_stock_quantity();
 		$backordered_quantity = $args['quantity'] - max( 0, $stock_before );
 
