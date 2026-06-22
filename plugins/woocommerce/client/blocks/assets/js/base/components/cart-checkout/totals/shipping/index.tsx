@@ -65,7 +65,7 @@ export const TotalsShipping = ( {
 				label={ rowLabel }
 				value={
 					hasSelectedRates
-						? renderShippingTotalValue( cartTotals )
+						? renderShippingTotalValue( cartTotals, shippingRates )
 						: placeholder
 				}
 				description={

@@ -169,6 +169,13 @@ describe( 'TotalsShipping', () => {
 
 	it( 'shows shipping discount label in the description', () => {
 		(
+			baseContextHooks.useOrderSummaryLoadingState as jest.MockedFunction<
+				typeof baseContextHooks.useOrderSummaryLoadingState
+			>
+		 ).mockReturnValue( {
+			isLoading: false,
+		} );
+		(
 			baseContextHooks.useStoreCart as jest.MockedFunction<
 				typeof baseContextHooks.useStoreCart
 			>
@@ -181,10 +188,24 @@ describe( 'TotalsShipping', () => {
 						{
 							...shippingRates[ 0 ].shipping_rates[ 0 ],
 							discount_label: 'Shipping discount applied',
+							price_before_discount: '3500',
+							taxes_before_discount: '0',
 						},
 					],
 				},
 			],
+			cartTotals: {
+				...mockPreviewCart.totals,
+				total_shipping: '0',
+				total_shipping_tax: '0',
+				currency_code: 'USD',
+				currency_symbol: '$',
+				currency_minor_unit: 2,
+				currency_decimal_separator: '.',
+				currency_prefix: '$',
+				currency_suffix: '',
+				currency_thousand_separator: ',',
+			},
 		} );
 
 		render(
@@ -195,6 +216,10 @@ describe( 'TotalsShipping', () => {
 
 		expect(
 			screen.getByText( 'Shipping discount applied' )
+		).toBeInTheDocument();
+		expect( document.querySelector( 'del' )?.textContent ).toContain( '35' );
+		expect(
+			screen.getByText( 'Free', { exact: true } )
 		).toBeInTheDocument();
 	} );
 

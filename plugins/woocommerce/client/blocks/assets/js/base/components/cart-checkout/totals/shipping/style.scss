@@ -71,6 +71,12 @@
 		@include font-size(small);
 		width: 100%;
 	}
+
+	.wc-block-components-totals-shipping__discounted-value {
+		display: inline-flex;
+		gap: $gap-smallest;
+		align-items: baseline;
+	}
 }
 
 // Extra classes for specificity.

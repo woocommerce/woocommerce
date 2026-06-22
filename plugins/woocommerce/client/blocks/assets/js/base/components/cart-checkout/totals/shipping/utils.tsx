@@ -2,10 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { getSetting } from '@woocommerce/settings';
 import {
 	getTotalShippingValue,
 	isPackageRateCollectable,
 } from '@woocommerce/base-utils';
+import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
+import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
 	isObject,
 	objectHasProp,
@@ -13,10 +16,46 @@ import {
 	CartResponseTotals,
 } from '@woocommerce/types';
 
-export const renderShippingTotalValue = ( values: CartResponseTotals ) => {
+export const renderShippingTotalValue = (
+	values: CartResponseTotals,
+	shippingRates: CartShippingRate[] = []
+) => {
 	const totalShippingValue = getTotalShippingValue( values );
+	const selectedDiscountedRate = shippingRates
+		.flatMap( ( shippingPackage ) => shippingPackage.shipping_rates )
+		.find( ( rate ) => rate.selected && rate.price_before_discount );
+	const priceBeforeDiscount = parseInt(
+		selectedDiscountedRate?.price_before_discount || '',
+		10
+	);
+	const taxesBeforeDiscount = parseInt(
+		selectedDiscountedRate?.taxes_before_discount || '',
+		10
+	);
+	const priceBeforeDiscountWithTaxes = getSetting(
+		'displayCartPricesIncludingTax',
+		false
+	)
+		? priceBeforeDiscount + taxesBeforeDiscount
+		: priceBeforeDiscount;
+
 	if ( totalShippingValue === 0 ) {
-		return <strong>{ __( 'Free', 'woocommerce' ) }</strong>;
+		return (
+			<span className="wc-block-checkout__shipping-option-price wc-block-components-totals-shipping__discounted-value">
+				{ Number.isFinite( priceBeforeDiscountWithTaxes ) &&
+					priceBeforeDiscountWithTaxes > 0 && (
+						<del className="wc-block-checkout__shipping-option-price--original">
+							<FormattedMonetaryAmount
+								currency={ getCurrencyFromPriceResponse( values ) }
+								value={ priceBeforeDiscountWithTaxes }
+							/>
+						</del>
+					) }
+				<span className="wc-block-checkout__shipping-option--free">
+					{ __( 'Free', 'woocommerce' ) }
+				</span>
+			</span>
+		);
 	}
 	return totalShippingValue;
 };
