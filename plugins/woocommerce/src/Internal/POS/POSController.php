@@ -12,7 +12,6 @@ use Automattic\WooCommerce\Internal\POS\Auth\POSCapBridge;
 use Automattic\WooCommerce\Internal\POS\CouponAttribution;
 use Automattic\WooCommerce\Internal\POS\OrderAttribution;
 use Automattic\WooCommerce\Internal\POS\RestApi\POSStaffController;
-use Automattic\WooCommerce\Internal\POS\RestApi\POSWhoamiController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
@@ -81,13 +80,6 @@ class POSController implements RegisterHooksInterface {
 	private POSCapBridge $cap_bridge;
 
 	/**
-	 * POC-only whoami debug REST controller.
-	 *
-	 * @var POSWhoamiController
-	 */
-	private POSWhoamiController $whoami_controller;
-
-	/**
 	 * Initialize dependencies via the DI container.
 	 *
 	 * @internal
@@ -99,7 +91,6 @@ class POSController implements RegisterHooksInterface {
 	 * @param UserFormIntegration $user_form_integration The Add New User form integration.
 	 * @param POSAuthHandler      $auth_handler          The server-side staff auth handler.
 	 * @param POSCapBridge        $cap_bridge            The POS-scoped capability bridge.
-	 * @param POSWhoamiController $whoami_controller     The POC-only whoami debug controller.
 	 */
 	final public function init(
 		FeaturesController $features_controller,
@@ -108,8 +99,7 @@ class POSController implements RegisterHooksInterface {
 		CouponAttribution $coupon_attribution,
 		UserFormIntegration $user_form_integration,
 		POSAuthHandler $auth_handler,
-		POSCapBridge $cap_bridge,
-		POSWhoamiController $whoami_controller
+		POSCapBridge $cap_bridge
 	): void {
 		$this->features_controller   = $features_controller;
 		$this->staff_controller      = $staff_controller;
@@ -118,7 +108,6 @@ class POSController implements RegisterHooksInterface {
 		$this->user_form_integration = $user_form_integration;
 		$this->auth_handler          = $auth_handler;
 		$this->cap_bridge            = $cap_bridge;
-		$this->whoami_controller     = $whoami_controller;
 	}
 
 	/**
@@ -188,7 +177,6 @@ class POSController implements RegisterHooksInterface {
 		$this->cap_bridge->register();
 
 		$this->staff_controller->register();
-		$this->whoami_controller->register();
 		$this->order_attribution->register();
 		$this->coupon_attribution->register();
 		$this->user_form_integration->register();
