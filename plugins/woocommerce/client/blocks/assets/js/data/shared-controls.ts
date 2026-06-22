@@ -154,9 +154,6 @@ const doApiFetchWithHeaders = ( options: APIFetchOptions ) =>
 			} )
 				.then( ( fetchResponse: unknown ) => {
 					if ( fetchResponse instanceof Response ) {
-						// QAO-524 PROBE (revert before merge): clone so the body
-						// can be inspected if JSON parsing fails.
-						const qao524Clone = fetchResponse.clone();
 						fetchResponse
 							.json()
 							.then( ( response: unknown ) => {
@@ -167,48 +164,9 @@ const doApiFetchWithHeaders = ( options: APIFetchOptions ) =>
 								processHeadersOnFetch( fetchResponse.headers );
 							} )
 							.catch( () => {
-								// QAO-524 PROBE: which endpoint returned non-JSON?
-								qao524Clone
-									.text()
-									.then( ( body: string ) => {
-										// eslint-disable-next-line no-console
-										console.error(
-											`[QAO524-PROBE json] site=a path=${
-												options.path
-											} url=${ options.url } finalUrl=${
-												fetchResponse.url
-											} redirected=${
-												fetchResponse.redirected
-											} resType=${
-												fetchResponse.type
-											} status=${
-												fetchResponse.status
-											} ct=${ fetchResponse.headers.get(
-												'content-type'
-											) } len=${
-												body.length
-											} body=${ JSON.stringify(
-												body.slice( 0, 1200 )
-											) }`
-										);
-									} )
-									.catch( () => {
-										// QAO-524 probe read is best-effort.
-									} );
 								reject( invalidJsonError );
 							} );
 					} else {
-						// QAO-524 PROBE (revert before merge)
-						// eslint-disable-next-line no-console
-						console.error(
-							`[QAO524-PROBE json] site=b path=${
-								options.path
-							} url=${
-								options.url
-							} not-a-Response value=${ String(
-								fetchResponse
-							).slice( 0, 120 ) }`
-						);
 						reject( invalidJsonError );
 					}
 				} )
@@ -222,12 +180,6 @@ const doApiFetchWithHeaders = ( options: APIFetchOptions ) =>
 						processHeadersOnFetch( errorResponse.headers );
 					}
 					if ( typeof errorResponse.json === 'function' ) {
-						// QAO-524 PROBE (revert before merge): clone so the error
-						// body can be inspected if it isn't JSON.
-						const qao524ErrClone =
-							typeof errorResponse.clone === 'function'
-								? errorResponse.clone()
-								: null;
 						// Parse error response before rejecting it.
 						errorResponse
 							.json()
@@ -235,35 +187,6 @@ const doApiFetchWithHeaders = ( options: APIFetchOptions ) =>
 								reject( error );
 							} )
 							.catch( () => {
-								// QAO-524 PROBE
-								if ( qao524ErrClone ) {
-									qao524ErrClone
-										.text()
-										.then( ( body: string ) => {
-											// eslint-disable-next-line no-console
-											console.error(
-												`[QAO524-PROBE json] site=c path=${
-													options.path
-												} url=${ options.url } status=${
-													errorResponse.status
-												} ct=${ errorResponse.headers?.get?.(
-													'content-type'
-												) } len=${
-													body.length
-												} body=${ JSON.stringify(
-													body.slice( 0, 200 )
-												) }`
-											);
-										} )
-										.catch( () => {
-											// QAO-524 probe read is best-effort.
-										} );
-								} else {
-									// eslint-disable-next-line no-console
-									console.error(
-										`[QAO524-PROBE json] site=c path=${ options.path } url=${ options.url } (uncloneable error response)`
-									);
-								}
 								reject( invalidJsonError );
 							} );
 					} else {

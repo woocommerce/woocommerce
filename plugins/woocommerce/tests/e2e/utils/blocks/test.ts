@@ -143,6 +143,22 @@ const test = base.extend<
 		// Dispose the current APIRequestContext to free up resources.
 		await page.request.dispose();
 
+		// Navigate away before resetting the DB so the page stops issuing
+		// Store API requests against a half-dropped database. Otherwise late
+		// in-flight fetches are served the WordPress install page (HTTP 200,
+		// text/html) and surface as "The response is not a valid JSON
+		// response." console noise.
+		try {
+			await page.goto( 'about:blank' );
+		} catch ( error ) {
+			// Ignore errors if page is already closed/navigated away.
+			// eslint-disable-next-line no-console
+			console.log(
+				'Failed to navigate away before DB reset:',
+				error.message
+			);
+		}
+
 		await wpCLI( `db reset --yes` );
 		// Reset the database to the initial state via snapshot import.
 		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
