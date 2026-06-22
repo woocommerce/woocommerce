@@ -198,7 +198,7 @@ class HandlerRegistry {
 					);
 				}
 
-				$products = array_map( 'wc_get_product', $product_reference );
+				$products = array_filter( array_map( 'wc_get_product', $product_reference ) );
 
 				if ( empty( $products ) ) {
 					return array(

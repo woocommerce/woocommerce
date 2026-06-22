@@ -240,6 +240,25 @@ class HandlerRegistry extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Upsells collection returns a no-results query when the product reference is missing instead of erroring.
+	 */
+	public function test_collection_upsells_missing_reference_returns_no_results() {
+		// The editor renders the preview before a product reference is resolved,
+		// so the reference arrives as array( null ) and wc_get_product( null ) is false.
+		$request = Utils::build_request();
+		$request->set_param(
+			'productCollectionQueryContext',
+			array(
+				'collection' => 'woocommerce/product-collection/upsells',
+			)
+		);
+
+		$result = $this->block_instance->update_rest_query_in_editor( array(), $request );
+
+		$this->assertSame( array( -1 ), $result['post__in'], 'A missing upsells reference should yield a no-results query, not a fatal.' );
+	}
+
+	/**
 	 * Tests that the cross-sells collection handler works as expected.
 	 */
 	public function test_collection_cross_sells() {
