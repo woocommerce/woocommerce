@@ -14,7 +14,8 @@
 		"test:php:ci": "pnpm test:php:unit && pnpm test:php:integration",
 		"test:php:unit": "composer run-script test:unit",
 		"test:php:integration": "composer run-script test:integration",
-		"env:test": "pnpm wp-env start --update"
+		"env:test": "pnpm wp-env start --update",
+		"postinstall": "composer install"
 	},
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
