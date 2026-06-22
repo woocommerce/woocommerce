@@ -23,6 +23,25 @@ class VariationSelectorAttribute extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-variation-selector-attribute';
 
 	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 * @return void
+	 */
+	protected function enqueue_data( array $attributes = array() ): void {
+		parent::enqueue_data( $attributes );
+
+		if ( is_admin() ) {
+			$this->asset_data_registry->add(
+				'experimentalVisualAttributes',
+				array_key_exists( 'wc-visual', wc_get_attribute_types() )
+			);
+		}
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.

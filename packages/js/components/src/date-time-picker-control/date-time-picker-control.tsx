@@ -486,7 +486,7 @@ export const DateTimePickerControl = forwardRef(
 									'Date input describing a selected date in format %s',
 									'woocommerce'
 								),
-								dateTimeFormat
+								dateTimeFormat ?? ''
 							) }
 							onFocus={ () => {
 								if ( isOpen ) {

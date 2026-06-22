@@ -15,10 +15,9 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 /**
  * Feature orchestrator for the POS staff + attribution iteration.
  *
- * Short-circuits on either the parent `point_of_sale` feature being off or the
- * dev-only `point_of_sale_staff` sub-flag being off. When both are on, wires up
- * the staff REST endpoint and the order-attribution lifecycle hooks via the DI
- * container.
+ * Gates the feature on the dev-only `point_of_sale_staff` flag. When on, wires up the staff REST
+ * endpoint, the order/coupon attribution lifecycle hooks, and the wp-admin Add New User integration
+ * via the DI container.
  *
  * @since 11.0.0
  * @internal
@@ -26,7 +25,6 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 class POSController implements RegisterHooksInterface {
 
 	public const FEATURE_FLAG = 'point_of_sale_staff';
-	public const PARENT_FLAG  = 'point_of_sale';
 
 	/**
 	 * Features controller used to gate hook registration on the POS feature flags.
@@ -135,16 +133,13 @@ class POSController implements RegisterHooksInterface {
 	/**
 	 * Wire up the feature surface once translations are safe to load.
 	 *
-	 * No-op when either gating flag is off.
+	 * No-op when the gating flag is off.
 	 *
 	 * @internal
 	 *
 	 * @since 11.0.0
 	 */
 	public function on_init(): void {
-		if ( ! $this->features_controller->feature_is_enabled( self::PARENT_FLAG ) ) {
-			return;
-		}
 		if ( ! $this->features_controller->feature_is_enabled( self::FEATURE_FLAG ) ) {
 			return;
 		}
