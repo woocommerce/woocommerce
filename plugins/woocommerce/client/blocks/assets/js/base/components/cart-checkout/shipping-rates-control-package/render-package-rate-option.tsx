@@ -59,15 +59,25 @@ export const renderPackageRateOption = (
 		</>
 	);
 
-	if ( priceWithTaxes === 0 && ! showDiscountedPrice ) {
+	if ( priceWithTaxes === 0 ) {
 		description = (
-			<span className="wc-block-components-shipping-rates-control__package__description--free">
-				{ __( 'Free', 'woocommerce' ) }
-				<span className="wc-block-components-shipping-rates-control__package__delivery_time">
-					{ rate.delivery_time &&
-						' — ' + decodeEntities( rate.delivery_time ) }
+			<>
+				{ showDiscountedPrice && (
+					<del className="wc-block-components-shipping-rates-control__package__price--original">
+						<FormattedMonetaryAmount
+							currency={ getCurrencyFromPriceResponse( rate ) }
+							value={ priceBeforeDiscountWithTaxes }
+						/>
+					</del>
+				) }
+				<span className="wc-block-components-shipping-rates-control__package__description--free">
+					{ __( 'Free', 'woocommerce' ) }
+					<span className="wc-block-components-shipping-rates-control__package__delivery_time">
+						{ rate.delivery_time &&
+							' — ' + decodeEntities( rate.delivery_time ) }
+					</span>
 				</span>
-			</span>
+			</>
 		);
 	}
 

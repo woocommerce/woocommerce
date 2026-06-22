@@ -167,6 +167,37 @@ describe( 'TotalsShipping', () => {
 		expect( screen.getByLabelText( 'Loading price…' ) ).toBeInTheDocument();
 	} );
 
+	it( 'shows shipping discount label in the description', () => {
+		(
+			baseContextHooks.useStoreCart as jest.MockedFunction<
+				typeof baseContextHooks.useStoreCart
+			>
+		 ).mockReturnValue( {
+			...baseContextHooks.useStoreCart(),
+			shippingRates: [
+				{
+					...shippingRates[ 0 ],
+					shipping_rates: [
+						{
+							...shippingRates[ 0 ].shipping_rates[ 0 ],
+							discount_label: 'Shipping discount applied',
+						},
+					],
+				},
+			],
+		} );
+
+		render(
+			<SlotFillProvider>
+				<TotalsShipping />
+			</SlotFillProvider>
+		);
+
+		expect(
+			screen.getByText( 'Shipping discount applied' )
+		).toBeInTheDocument();
+	} );
+
 	it( 'shows FREE if shipping cost is 0', () => {
 		// Set loading state to false
 		(

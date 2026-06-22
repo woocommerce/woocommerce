@@ -53,9 +53,19 @@ const renderShippingRatesControlOption = (
 		priceBeforeDiscountWithTaxes > priceWithTaxes;
 
 	const secondaryLabel =
-		priceWithTaxes === 0 && ! showDiscountedPrice ? (
-			<span className="wc-block-checkout__shipping-option--free">
-				{ __( 'Free', 'woocommerce' ) }
+		priceWithTaxes === 0 ? (
+			<span className="wc-block-checkout__shipping-option-price">
+				{ showDiscountedPrice && (
+					<del className="wc-block-checkout__shipping-option-price--original">
+						<FormattedMonetaryAmount
+							currency={ getCurrencyFromPriceResponse( option ) }
+							value={ priceBeforeDiscountWithTaxes }
+						/>
+					</del>
+				) }
+				<span className="wc-block-checkout__shipping-option--free">
+					{ __( 'Free', 'woocommerce' ) }
+				</span>
 			</span>
 		) : (
 			<span className="wc-block-checkout__shipping-option-price">
