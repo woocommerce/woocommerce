@@ -432,14 +432,11 @@ const ShellHeader = ( {
 	return (
 		<Page
 			className="wc-settings-ui-shell"
-			// @ts-expect-error `headingLevel` is not a valid prop for the current version of `@wordpress/admin-ui` but will be added in a future release. Remove this comment when the dependency is updated.
-			headingLevel={ 1 }
 			title={ title }
 			subTitle={ shell.subtitle }
 			breadcrumbs={ breadcrumbs }
 			badges={ badges }
 			actions={ actions }
-			showSidebarToggle={ false }
 		>
 			{ hasNavigation ? (
 				<div className="wc-settings-ui-shell__navigation">
