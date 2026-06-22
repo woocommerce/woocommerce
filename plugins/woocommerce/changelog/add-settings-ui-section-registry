@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a settings section registry so extensions can render sections in existing settings tabs with Settings UI.
