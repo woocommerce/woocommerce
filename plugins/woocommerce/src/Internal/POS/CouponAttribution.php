@@ -129,7 +129,7 @@ class CouponAttribution implements RegisterHooksInterface {
 	 */
 	private function resolve_initiator( WC_Coupon $coupon, int $actor_id ): ?WP_User {
 		$initiator_id = $this->request_context->get_initiator_id();
-		if ( $initiator_id <= 0 || $initiator_id === $actor_id ) {
+		if ( null === $initiator_id || $initiator_id === $actor_id ) {
 			return null;
 		}
 

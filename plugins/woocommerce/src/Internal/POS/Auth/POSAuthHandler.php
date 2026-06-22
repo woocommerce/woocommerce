@@ -142,7 +142,7 @@ class POSAuthHandler implements RegisterHooksInterface {
 
 		// 3. Does the named staffer exist with POS access — and, for a write, the required cap?
 		$staff_id = $this->request_context->get_staff_id();
-		if ( $staff_id <= 0 || ! Capabilities::has_pos_access( $staff_id ) ) {
+		if ( null === $staff_id || ! Capabilities::has_pos_access( $staff_id ) ) {
 			return null;
 		}
 		$required_cap = self::required_pos_cap_for_intent( $this->request_context->get_intent() );

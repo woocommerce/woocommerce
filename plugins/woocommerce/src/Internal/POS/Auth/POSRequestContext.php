@@ -51,7 +51,7 @@ class POSRequestContext {
 	/**
 	 * The resolved POS request context, memoized; null until detected.
 	 *
-	 * @var array{is_pos_request:bool,intent:string|null,staff_id:int,initiator_id:int}|null
+	 * @var array{is_pos_request:bool,intent:string|null,staff_id:int|null,initiator_id:int|null}|null
 	 */
 	private ?array $resolved_context = null;
 
@@ -79,12 +79,15 @@ class POSRequestContext {
 	}
 
 	/**
-	 * The staff user id asserted by the request header (0 when absent/invalid). Device-asserted; the
-	 * POC trusts it without a per-request credential check.
+	 * The staff user id asserted by the request header, or null when this isn't a resolved POS request.
 	 *
-	 * @return int
+	 * On a POS request it is always a real (positive) id — it gates detection, so a non-POS request has
+	 * no staff id (null) rather than a 0 sentinel. Device-asserted; the POC trusts it without a
+	 * per-request credential check.
+	 *
+	 * @return int|null
 	 */
-	public function get_staff_id(): int {
+	public function get_staff_id(): ?int {
 		return $this->resolved_context()['staff_id'];
 	}
 
@@ -99,16 +102,18 @@ class POSRequestContext {
 	}
 
 	/**
-	 * The initiator staff id from the `X-WC-POS-Initiator-Id` header (0 when absent / not a POS request).
+	 * The initiator staff id from the `X-WC-POS-Initiator-Id` header, or null when absent / not a POS
+	 * request. Unlike the staff id it is optional even on a POS request, so it is genuinely nullable
+	 * rather than a 0 sentinel.
 	 *
 	 * The initiator is the staff member who initiated an action another staff member authorized (e.g.
 	 * the cashier on a manager-approved override refund). It is attribution context, not a credential —
 	 * it never gates detection — but it is captured alongside the rest of the request context so every
 	 * header-derived value comes from the one memoized place (rather than re-reading $_SERVER here).
 	 *
-	 * @return int
+	 * @return int|null
 	 */
-	public function get_initiator_id(): int {
+	public function get_initiator_id(): ?int {
 		return $this->resolved_context()['initiator_id'];
 	}
 
@@ -119,7 +124,7 @@ class POSRequestContext {
 	 * exist. A negative computed then must NOT be memoized, or the real REST dispatch (where the swap
 	 * matters) would read a stale false — so the result is only locked in once the REST context is ready.
 	 *
-	 * @return array{is_pos_request:bool,intent:string|null,staff_id:int,initiator_id:int}
+	 * @return array{is_pos_request:bool,intent:string|null,staff_id:int|null,initiator_id:int|null}
 	 */
 	private function resolved_context(): array {
 		if ( null !== $this->resolved_context ) {
@@ -146,7 +151,7 @@ class POSRequestContext {
 	/**
 	 * Detect the POS request context from $_SERVER + the parsed REST route only.
 	 *
-	 * @return array{is_pos_request:bool,intent:string|null,staff_id:int,initiator_id:int}
+	 * @return array{is_pos_request:bool,intent:string|null,staff_id:int|null,initiator_id:int|null}
 	 */
 	private function detect_context(): array {
 		if ( ! $this->features_controller->feature_is_enabled( self::FEATURE_FLAG ) ) {
@@ -182,6 +187,7 @@ class POSRequestContext {
 
 		// Attribution only (never gates detection): the staff member who initiated an action a
 		// different staff member authorized — e.g. the cashier on a manager-approved override refund.
+		// Optional even on a POS request, so it is null (not 0) when absent or invalid.
 		$initiator_id = isset( $_SERVER[ self::HEADER_INITIATOR_ID ] )
 			? absint( wp_unslash( $_SERVER[ self::HEADER_INITIATOR_ID ] ) )
 			: 0;
@@ -190,21 +196,21 @@ class POSRequestContext {
 			'is_pos_request' => true,
 			'intent'         => $intent,
 			'staff_id'       => $staff_id,
-			'initiator_id'   => $initiator_id,
+			'initiator_id'   => $initiator_id > 0 ? $initiator_id : null,
 		);
 	}
 
 	/**
 	 * The "not POS-originated" detection result.
 	 *
-	 * @return array{is_pos_request:bool,intent:string|null,staff_id:int,initiator_id:int}
+	 * @return array{is_pos_request:bool,intent:string|null,staff_id:int|null,initiator_id:int|null}
 	 */
 	private static function non_pos_result(): array {
 		return array(
 			'is_pos_request' => false,
 			'intent'         => null,
-			'staff_id'       => 0,
-			'initiator_id'   => 0,
+			'staff_id'       => null,
+			'initiator_id'   => null,
 		);
 	}
 

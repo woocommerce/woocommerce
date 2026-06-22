@@ -229,22 +229,22 @@ class POSRequestContextTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_initiator_id is 0 on a POS request when the header is absent.
+	 * @testdox get_initiator_id is null on a POS request when the header is absent.
 	 */
-	public function test_get_initiator_id_absent_is_zero(): void {
+	public function test_get_initiator_id_absent_is_null(): void {
 		$this->arrange_request( '/wc/v3/orders', 'POST', $this->pos_headers() );
 
-		$this->assertSame( 0, $this->make_sut()->get_initiator_id() );
+		$this->assertNull( $this->make_sut()->get_initiator_id() );
 	}
 
 	/**
-	 * @testdox get_initiator_id is 0 on a non-POS request even if the header is present.
+	 * @testdox get_initiator_id is null on a non-POS request even if the header is present.
 	 */
-	public function test_get_initiator_id_is_zero_on_non_pos_request(): void {
+	public function test_get_initiator_id_is_null_on_non_pos_request(): void {
 		// Only the initiator header, no POS request shape: it's attribution context for a POS request,
 		// so there's no initiator to report outside one.
 		$this->arrange_request( '/wc/v3/orders', 'POST', array( 'HTTP_X_WC_POS_INITIATOR_ID' => '7' ) );
 
-		$this->assertSame( 0, $this->make_sut()->get_initiator_id() );
+		$this->assertNull( $this->make_sut()->get_initiator_id() );
 	}
 }

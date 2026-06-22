@@ -67,11 +67,11 @@ class CouponAttributionTest extends WC_Unit_Test_Case {
 	/**
 	 * Build the SUT with the POS-request flag and the initiator the header would carry.
 	 *
-	 * @param bool $is_pos       Whether the request is POS-originated.
-	 * @param int  $initiator_id The initiator id the X-WC-POS-Initiator-Id header carries (0 = none).
+	 * @param bool     $is_pos       Whether the request is POS-originated.
+	 * @param int|null $initiator_id The initiator id the X-WC-POS-Initiator-Id header carries (null = none).
 	 * @return CouponAttribution
 	 */
-	private function make_sut( bool $is_pos = true, int $initiator_id = 0 ): CouponAttribution {
+	private function make_sut( bool $is_pos = true, ?int $initiator_id = null ): CouponAttribution {
 		$ctx = $this->createMock( POSRequestContext::class );
 		$ctx->method( 'is_pos_request' )->willReturn( $is_pos );
 		$ctx->method( 'get_initiator_id' )->willReturn( $initiator_id );
@@ -97,7 +97,7 @@ class CouponAttributionTest extends WC_Unit_Test_Case {
 	 * @testdox Logs the actor (one info line) on a plain POS coupon write.
 	 */
 	public function test_logs_actor_without_initiator(): void {
-		$this->make_sut( true, 0 )->handle_post_insert( $this->make_coupon(), null, true );
+		$this->make_sut( true )->handle_post_insert( $this->make_coupon(), null, true );
 
 		$this->assertCount( 1, $this->fake_logger->info_calls, 'A POS coupon write should log the actor' );
 		$this->assertCount( 0, $this->fake_logger->warning_calls );
@@ -128,7 +128,7 @@ class CouponAttributionTest extends WC_Unit_Test_Case {
 	public function test_no_log_when_actor_lacks_pos_access(): void {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 
-		$this->make_sut( true, 0 )->handle_post_insert( $this->make_coupon(), null, true );
+		$this->make_sut( true )->handle_post_insert( $this->make_coupon(), null, true );
 
 		$this->assertCount( 0, $this->fake_logger->info_calls );
 	}

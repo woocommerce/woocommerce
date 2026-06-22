@@ -57,11 +57,11 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 	/**
 	 * Build the SUT with the POS-request flag and the initiator the header would carry.
 	 *
-	 * @param bool $is_pos       Whether the request is POS-originated.
-	 * @param int  $initiator_id The initiator id the X-WC-POS-Initiator-Id header carries (0 = none).
+	 * @param bool     $is_pos       Whether the request is POS-originated.
+	 * @param int|null $initiator_id The initiator id the X-WC-POS-Initiator-Id header carries (null = none).
 	 * @return OrderAttribution
 	 */
-	private function make_sut( bool $is_pos = true, int $initiator_id = 0 ): OrderAttribution {
+	private function make_sut( bool $is_pos = true, ?int $initiator_id = null ): OrderAttribution {
 		$ctx = $this->createMock( POSRequestContext::class );
 		$ctx->method( 'is_pos_request' )->willReturn( $is_pos );
 		$ctx->method( 'get_initiator_id' )->willReturn( $initiator_id );
@@ -95,7 +95,7 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 		$order = wc_create_order();
 		$order->save();
 
-		$this->make_sut( true, 0 )->handle_post_insert( $order, null, true );
+		$this->make_sut( true )->handle_post_insert( $order, null, true );
 
 		$notes = $this->pos_notes( $order->get_id() );
 		$this->assertCount( 1, $notes, 'A POS write should record one actor note' );
@@ -146,7 +146,7 @@ class OrderAttributionTest extends WC_Unit_Test_Case {
 		$order = wc_create_order();
 		$order->save();
 
-		$this->make_sut( true, 0 )->handle_post_insert( $order, null, true );
+		$this->make_sut( true )->handle_post_insert( $order, null, true );
 
 		$this->assertCount( 0, $this->pos_notes( $order->get_id() ), 'A non-staff current user is not attributed' );
 	}
