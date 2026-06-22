@@ -4,7 +4,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\CustomerEmailVerification;
 
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\EmailVerificationService;
-use Automattic\WooCommerce\Internal\CustomerEmailVerification\OrderLinker;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\VerificationController;
 use WC_Unit_Test_Case;
 
@@ -35,8 +34,8 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 		$this->service = wc_get_container()->get( EmailVerificationService::class );
 		// Resolving the controller also triggers its constructor (hooks) and init() (deps).
 		$this->ctrl = wc_get_container()->get( VerificationController::class );
-		// Resolve OrderLinker so its woocommerce_customer_email_verified hook is registered.
-		wc_get_container()->get( OrderLinker::class );
+		// Link guest orders on verification (the boot wires this in production; register it here for the test).
+		add_action( 'woocommerce_customer_email_verified', 'wc_update_new_customer_past_orders' );
 	}
 
 	/**
