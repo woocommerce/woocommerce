@@ -203,6 +203,7 @@ class Features {
 
 			foreach ( $always_loaded_feature_classes as $loaded_feature_class ) {
 				if ( is_a( $feature_class, $loaded_feature_class, true ) ) {
+					// Skip the outer features loop because this feature was already loaded.
 					continue 2;
 				}
 			}
