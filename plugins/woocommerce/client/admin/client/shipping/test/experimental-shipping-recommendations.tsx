@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
+import {
+	act,
+	render,
+	screen,
+	fireEvent,
+	waitFor,
+} from '@testing-library/react';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 import userEvent from '@testing-library/user-event';
