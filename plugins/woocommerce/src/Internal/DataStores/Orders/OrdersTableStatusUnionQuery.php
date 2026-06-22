@@ -7,7 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
-use Automattic\WooCommerce\Caches\OrderCountCache;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -89,17 +89,17 @@ class OrdersTableStatusUnionQuery {
 		}
 
 		$direction = $this->extract_order_direction( $clauses['orderby'] ?? '' );
-		if ( is_null( $direction ) ) {
+		if ( null === $direction ) {
 			return null;
 		}
 
 		$limit = $this->extract_limit( $clauses['limits'] ?? '' );
-		if ( is_null( $limit ) ) {
+		if ( null === $limit ) {
 			return null;
 		}
 
 		$types_and_statuses = $this->extract_types_and_statuses();
-		if ( is_null( $types_and_statuses ) ) {
+		if ( null === $types_and_statuses ) {
 			return null;
 		}
 		list( $types, $statuses ) = $types_and_statuses;
@@ -149,14 +149,14 @@ class OrdersTableStatusUnionQuery {
 
 	/**
 	 * Extracts the offset and row count from the LIMIT clause, or NULL when the query is unlimited or too deeply
-	 * paginated to benefit (each branch would have to fetch offset + row count rows). The digit cap also rejects
-	 * the "unlimited" sentinel row count.
+	 * paginated to benefit (each branch would have to fetch offset + row count rows). The offset + row count cap
+	 * also rejects the "unlimited" sentinel row count.
 	 *
 	 * @param string $limits The LIMIT clause, including the keyword.
 	 * @return int[]|null Array of [ offset, row count ], or NULL when ineligible.
 	 */
 	private function extract_limit( string $limits ): ?array {
-		if ( ! preg_match( '/^LIMIT (\d{1,7}), (\d{1,7})$/', $limits, $limit_parts ) ) {
+		if ( ! preg_match( '/^LIMIT (\d+), (\d+)$/', $limits, $limit_parts ) ) {
 			return null;
 		}
 
@@ -241,18 +241,19 @@ class OrdersTableStatusUnionQuery {
 					$status
 				);
 
-				$branches[] = 'SELECT id, date_created_gmt FROM ( ' . $branch . ' ) wco_branch_' . count( $branches );
+				$branches[] = 'SELECT id, date_created_gmt FROM ( ' . $branch . ' ) union' . count( $branches );
 			}
 		}
 
-		return 'SELECT id FROM ( ' . implode( ' UNION ALL ', $branches ) . " ) wco_candidates ORDER BY date_created_gmt {$direction} {$limits}";
+		return 'SELECT id FROM ( ' . implode( ' UNION ALL ', $branches ) . " ) candidates ORDER BY date_created_gmt {$direction} {$limits}";
 	}
 
 	/**
 	 * Returns whether the rewrite should be used for the given types and statuses.
 	 *
-	 * Enabled by default once the matching order count reaches MIN_ORDER_COUNT. Counts are read from the cache
-	 * without recomputing them, so the rewrite stays disabled while the cache is cold.
+	 * Enabled by default once the matching order count reaches MIN_ORDER_COUNT. Counts come from
+	 * OrderUtil::get_count_for_type() — the same facade the order admin list screen uses for its status counts —
+	 * which reads the order count cache and computes (and caches) the counts on a miss.
 	 *
 	 * @param string[] $types            Queried order types.
 	 * @param string[] $statuses         Queried order statuses.
@@ -260,20 +261,14 @@ class OrdersTableStatusUnionQuery {
 	 * @return bool Whether the rewrite should be used.
 	 */
 	private function is_enabled( array $types, array $statuses, bool $suppress_filters ): bool {
-		$count_cache  = new OrderCountCache();
 		$orders_count = 0;
 
 		foreach ( $types as $type ) {
-			$counts = $count_cache->get( $type, $statuses );
+			$counts = OrderUtil::get_count_for_type( $type );
 
-			// A cold count cache for a type (get() returns null when any of its queried statuses is missing)
-			// contributes nothing rather than disqualifying the whole check, so the fast path can kick in off the
-			// counts we already have without waiting for every type's cache to warm.
-			if ( is_null( $counts ) ) {
-				continue;
+			foreach ( $statuses as $status ) {
+				$orders_count += $counts[ $status ] ?? 0;
 			}
-
-			$orders_count += array_sum( $counts );
 		}
 
 		$enabled = $orders_count >= self::MIN_ORDER_COUNT;

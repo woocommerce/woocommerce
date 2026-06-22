@@ -938,10 +938,10 @@ class OrdersTableQuery {
 				compact( 'fields', 'join', 'where', 'groupby', 'orderby', 'limits' ),
 				$this->suppress_filters
 			);
-			$this->sql        = $status_union_sql ?? $this->sql;
-		} else {
-			$this->sql = $filtered_sql;
+			$filtered_sql     = $status_union_sql ?? $this->sql;
 		}
+
+		$this->sql = $filtered_sql;
 
 		$this->build_count_query( $fields, $join, $where, $groupby );
 	}
