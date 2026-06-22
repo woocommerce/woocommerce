@@ -338,6 +338,11 @@ test.describe( 'Product Reviews', () => {
 					trashNoticeText2?.includes( trashMessageSmart )
 			).toBeTruthy();
 
+			// The trash notice renders optimistically, before the trash AJAX
+			// commits. Wait for the row to actually leave the approved list so
+			// navigating to the Trash view does not abort the in-flight request.
+			await expect( reviewRow ).toBeHidden();
+
 			await page.click( 'a[href*="comment_status=trash"]' );
 
 			await expect(
