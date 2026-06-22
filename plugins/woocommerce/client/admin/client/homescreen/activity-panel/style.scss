@@ -5,22 +5,13 @@
 	.components-panel__body {
 		background: #fff;
 		border: 1px solid $gray-200;
-		overflow: hidden;
 
 		&:first-child {
-			border-radius: 8px 8px 0 0;
+			border-top-left-radius: 8px;
+			border-top-right-radius: 8px;
 		}
 
 		&:last-child {
-			border-radius: 0 0 8px 8px;
-		}
-
-		&:only-child,
-		&.is-opened:first-child {
-			border-radius: 8px;
-		}
-
-		&.is-opened {
 			border-bottom-left-radius: 8px;
 			border-bottom-right-radius: 8px;
 		}
@@ -32,6 +23,8 @@
 
 		&.is-opened {
 			margin-bottom: $gap-large;
+			border-bottom-left-radius: 8px;
+			border-bottom-right-radius: 8px;
 
 			.components-panel__body-toggle {
 				border-bottom: 1px solid $gray-200;
@@ -52,6 +45,7 @@
 		}
 	}
 
+	.components-panel__body-title,
 	.components-panel__body-toggle {
 		border-radius: inherit;
 
