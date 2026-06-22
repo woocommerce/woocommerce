@@ -236,13 +236,13 @@ class RefundSchema extends AbstractSchema {
 							'validate_callback' => 'rest_validate_request_arg',
 						),
 						'refund_total' => array(
-							'description'       => __( 'Total amount refunded for this item (including tax). If omitted or set to null, the backend computes it from the order line item\'s unit price multiplied by quantity. An explicit 0 is treated as a zero refund for this line item.', 'woocommerce' ),
+							'description'       => __( 'Optional: Total refunded for this item. Tax-inclusive when refund_tax is omitted (the backend splits out tax automatically); tax-exclusive (net subtotal) when refund_tax is supplied, in which case the line\'s total refund is refund_total + refund_tax. If omitted or set to null, the backend computes it from the order line item\'s unit price multiplied by quantity. A gross line refund that rounds to 0 is rejected.', 'woocommerce' ),
 							'type'              => array( 'number', 'null' ),
 							'context'           => self::VIEW_EDIT_EMBED_CONTEXT,
 							'validate_callback' => 'rest_validate_request_arg',
 						),
 						'refund_tax'   => array(
-							'description' => __( 'Optional: Taxes refunded for this item. If not provided, tax will be automatically extracted from refund_total using the order\'s tax rates.', 'woocommerce' ),
+							'description' => __( 'Optional: Taxes refunded for this item. If not provided, tax is automatically split out of the tax-inclusive refund_total using the line\'s own stored total-to-tax ratio (what was charged), not the order\'s current tax rates. When provided, refund_total is treated as the tax-exclusive subtotal and these taxes are added on top.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 							'default'     => array(),

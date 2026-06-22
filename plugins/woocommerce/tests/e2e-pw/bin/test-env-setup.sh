@@ -12,6 +12,13 @@ if [ ! -z ${CI+y} ]; then
     exit $?
 fi
 
+# In nightly runs WooCommerce is mounted via a wp-env mapping so it installs
+# under the canonical `woocommerce` folder; mapped plugins are not
+# auto-activated, so activate it before any WC-dependent setup below (e.g. the
+# `customer` role user). Harmless when WC is already active (PR/source-mapped).
+echo -e 'Activate WooCommerce \n'
+wp-env run tests-cli wp plugin activate woocommerce
+
 echo -e 'Install twentytwenty, twentytwentytwo and storefront themes \n'
 wp-env run tests-cli wp theme install storefront twentytwenty twentytwentytwo &
 

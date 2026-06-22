@@ -32,6 +32,10 @@ on:
         description: 'The release artifact name to download and run tests for.'
         required: false
         type: string
+      releaseTag:
+        description: 'Release tag to download the artifact from. Defaults to refName, then the current ref. Lets a branch run pull a published artifact (e.g. nightly) while keeping its own checkout.'
+        required: false
+        type: string
 
 concurrency:
   # Cancel concurrent jobs but not for push event. For push use the run_id to have a unique group.
@@ -179,7 +183,7 @@ jobs:
       - name: 'Update wp-env config'
         if: ${{ inputs.artifactName != '' }}
         env:
-          RELEASE_TAG: ${{ inputs.refName != '' && inputs.refName || github.ref_name }}
+          RELEASE_TAG: ${{ inputs.releaseTag != '' && inputs.releaseTag || ( inputs.refName != '' && inputs.refName || github.ref_name ) }}
           ARTIFACT_NAME: ${{ inputs.artifactName }}
           WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.projectPath }}
         run: node .github/workflows/scripts/override-wp-env-plugins.js
@@ -214,7 +218,7 @@ jobs:
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
           LAST_FAILED_RUN: ${{ vars.LAST_FAILED_RUN }}
           GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          PLUGIN_SLUG: ${{ inputs.refName == 'nightly' && 'woocommerce-trunk-nightly' || '' }} # required by test:plugincheck
+          PLUGIN_SLUG: '' # required by test:plugincheck; nightly installs under the canonical 'woocommerce' folder
           PLAYWRIGHT_JUNIT_SUITE_NAME: 'WooCommerce Core'
           PLAYWRIGHT_JUNIT_SUITE_ID: 'woocommerce-core'
         run: |
