@@ -84,6 +84,11 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 		$visuals  = VisualAttributeTermMeta::get_term_visuals( $term_ids );
 
 		foreach ( $valid_terms as $term ) {
+			/**
+			 * Term object with dynamic visual property.
+			 *
+			 * @var \stdClass $term
+			 */
 			$term->visual = $visuals[ $term->term_id ] ?? VisualAttributeTermMeta::get_empty_visual();
 		}
 
