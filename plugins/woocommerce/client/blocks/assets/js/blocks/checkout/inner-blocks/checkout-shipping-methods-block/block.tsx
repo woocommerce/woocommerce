@@ -71,11 +71,6 @@ const renderShippingRatesControlOption = (
 					currency={ getCurrencyFromPriceResponse( option ) }
 					value={ priceWithTaxes }
 				/>
-				{ showDiscountedPrice && option.discount_label && (
-					<span className="wc-block-checkout__shipping-option-discount-label">
-						{ decodeEntities( option.discount_label ) }
-					</span>
-				) }
 			</span>
 		);
 

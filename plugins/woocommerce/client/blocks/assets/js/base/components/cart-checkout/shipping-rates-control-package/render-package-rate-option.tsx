@@ -56,11 +56,6 @@ export const renderPackageRateOption = (
 					: null }
 				{ decodeEntities( rate.delivery_time ) }
 			</span>
-			{ showDiscountedPrice && rate.discount_label && (
-				<span className="wc-block-components-shipping-rates-control__package__discount-label">
-					{ decodeEntities( rate.discount_label ) }
-				</span>
-			) }
 		</>
 	);
 
