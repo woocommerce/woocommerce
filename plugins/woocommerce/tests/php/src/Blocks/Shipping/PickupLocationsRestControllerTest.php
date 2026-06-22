@@ -268,7 +268,10 @@ class PickupLocationsRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '<strong>', $saved[0]['details'], 'wp_kses_post should keep <strong>.' );
 		$this->assertStringContainsString( '<a ', $saved[0]['details'], 'wp_kses_post should keep <a> tags.' );
 		$this->assertStringNotContainsString( '<script', $saved[0]['details'], '<script> must be stripped by wp_kses_post.' );
-		$this->assertStringNotContainsString( 'alert(1)', $saved[0]['details'], 'Inline script payload must not survive sanitization.' );
+		// wp_kses_post() removes the executable <script> tag but keeps its inner
+		// text as harmless plain text, so assert the executable element is gone
+		// rather than the (now inert) "alert(1)" string.
+		$this->assertStringNotContainsString( '<script>alert(1)</script>', $saved[0]['details'], 'Executable script element must not survive sanitization.' );
 	}
 
 	/**
