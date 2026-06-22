@@ -22,8 +22,7 @@ import {
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
 import './tax-recommendations.scss';
 
-const ANROK_LOGO_URL =
-	'https://woocommerce.com/wp-content/uploads/2026/01/Anrok-Logo.png';
+const ANROK_LOGO_URL = 'https://ps.w.org/anrok-tax/assets/icon.svg';
 
 type TaxRecommendation = {
 	id: 'anrok-tax' | 'woocommerce-tax';
