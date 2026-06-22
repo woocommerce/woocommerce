@@ -1545,7 +1545,11 @@ class WooPaymentsService {
 			$this->clear_onboarding_lock();
 		}
 
-		// Phase 2 assumes duplicate concurrent WooPayments endpoint calls are idempotent; unverified.
+		// Phase 2 runs after the shared lock is released to avoid the account.deleted webhook
+		// self-conflict. The WooPayments endpoint is not idempotent but fails safe: a duplicate
+		// concurrent call short-circuits on is_stripe_connected() === false and returns a benign
+		// "account does not exist" error rather than re-deleting the account. Request-scoped
+		// locking is deferred to the broader Core/WooPayments shared-lock contract.
 		if ( ! is_wp_error( $response ) && ! empty( $endpoint ) ) {
 			try {
 				$response = $this->proxy->call_static(
