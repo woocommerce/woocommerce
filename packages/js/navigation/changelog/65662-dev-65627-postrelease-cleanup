@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add react-dom to peerDependencies to follow the monorepo convention of declaring react and react-dom together.

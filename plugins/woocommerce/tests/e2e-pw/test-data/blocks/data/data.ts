@@ -59,7 +59,7 @@ const customer = {
 };
 
 // Reviews are ordered by when they were created.
-// source: plugins/woocommerce/client/blocks/tests/e2e/bin/scripts/parallel/reviews.sh
+// source: plugins/woocommerce/tests/e2e-pw/bin/blocks/scripts/parallel/reviews.sh
 const hoodieReviews = [
 	{
 		name: `${ customer.first_name } ${ customer.last_name }`,

@@ -47,3 +47,6 @@
 # Email Editor integrations
 /plugins/woocommerce/src/Internal/EmailEditor/ @woocommerce/ballade
 /plugins/woocommerce/client/admin/client/wp-admin-scripts/email-editor-integration/ @woocommerce/ballade
+
+# Subscriptions Engine packages
+/packages/php/woocommerce-subscriptions-engine/ @woocommerce/chronos
