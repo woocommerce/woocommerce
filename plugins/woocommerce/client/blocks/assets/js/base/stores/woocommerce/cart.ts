@@ -137,7 +137,7 @@ const generateInfoNotice = ( message: string ): Notice => ( {
 /**
  * Pre-optimistic baselines for lines bumped in place by a keyless add.
  *
- * Maps a matched **keyed** line's `key` to the quantity it held **before** the
+ * Maps a matched keyed line's `key` to the quantity it held before the
  * keyless-add optimistic bump mutated it in place. Used by {@link
  * getInfoNoticesFromCartUpdates} to diff such lines against their genuine
  * pre-add quantity instead of the post-optimistic snapshot, so a keyless add the

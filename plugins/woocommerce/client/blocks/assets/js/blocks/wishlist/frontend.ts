@@ -144,7 +144,7 @@ type CartLine = WooCommerce[ 'state' ][ 'cart' ][ 'items' ][ number ];
  * the server owns cart-line identity for adds, so a product already present as
  * one line (e.g. a meta line) can be resolved into a new standalone line rather
  * than an in-place bump. Reading one id-matched line would then see no growth
- * and misread a correct add as a failure. Summing the quantity over **all**
+ * and misread a correct add as a failure. Summing the quantity over all
  * matching lines makes the comparison order-independent and robust to the
  * server splitting or merging lines.
  *
