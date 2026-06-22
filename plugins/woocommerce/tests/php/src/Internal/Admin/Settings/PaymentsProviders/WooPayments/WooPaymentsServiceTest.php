@@ -8091,7 +8091,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should preserve internal lock failures after the internal request deletes the account.
+	 * @testdox Should preserve an internal request failure even when the account.deleted webhook clears the shared lock.
 	 */
 	public function test_disable_test_account_preserves_internal_lock_failure_after_account_delete(): void {
 		$location = 'US';
@@ -8141,14 +8141,17 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 							// option (a delete_option call, which Core's update_option tracker does not see).
 							$lock_value = null;
 
+							// The internal test-drive disable endpoint surfaces every thrown exception as
+							// HTTP 400 / bad_request (disable_test_drive_account in the WooPayments client),
+							// so that is what rest_endpoint_post_request returns to Core here.
 							return new WP_Error(
 								'woocommerce_settings_payments_rest_error',
-								'REST request POST /wc/v3/payments/onboarding/test_drive_account/disable failed with: (woocommerce_woopayments_onboarding_locked) Another onboarding action is already in progress. Please wait for it to finish.',
+								'REST request POST /wc/v3/payments/onboarding/test_drive_account/disable failed with: (bad_request) Failed to disable the test-drive account.',
 								array(
-									'code'    => 'woocommerce_woopayments_onboarding_locked',
-									'message' => 'Another onboarding action is already in progress. Please wait for it to finish.',
+									'code'    => 'bad_request',
+									'message' => 'Failed to disable the test-drive account.',
 									'data'    => array(
-										'status' => 409,
+										'status' => 400,
 									),
 								)
 							);
@@ -8170,6 +8173,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertCount( 1, $requests_made, 'The internal test-drive disable endpoint should be called once.' );
+		// Core never re-writes the lock after Phase 1, so the webhook's delete (modeled as null)
+		// survives; the get_option mock resolves null via "$lock_value ?? $default_value", so a
+		// webhook-deleted lock and a Core-cleared 0 are indistinguishable to is_onboarding_locked().
 		$this->assertNull( $lock_value, 'The webhook-deleted onboarding lock should remain deleted after the internal request fails.' );
 		$this->assertSame(
 			array( $this->current_time, 0 ),
@@ -8435,7 +8441,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			'Core should set its preflight lock and clear it before the Phase 2 reset call.'
 		);
 		$this->assertSame( 0, $lock_value, 'The onboarding lock should be cleared after the reset call.' );
-		$this->assertNotEmpty( $updated_profile, 'NOX steps should be marked completed on a successful disable.' );
+		$this->assert_onboarding_step_completed( $updated_profile, $location, WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS );
+		$this->assert_onboarding_step_completed( $updated_profile, $location, WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT );
 	}
 
 	/**
@@ -8531,7 +8538,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			'Core should set its preflight lock and clear it before the Phase 2 disable call.'
 		);
 		$this->assertSame( 0, $lock_value, 'The onboarding lock should be cleared after the disable call.' );
-		$this->assertNotEmpty( $updated_profile, 'NOX steps should be marked completed on a successful test-drive disable.' );
+		$this->assert_onboarding_step_completed( $updated_profile, $location, WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS );
+		$this->assert_onboarding_step_completed( $updated_profile, $location, WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT );
 	}
 
 	/**
@@ -10069,17 +10077,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	/**
 	 * Mock a WooPayments account state for test-drive disable tests.
 	 *
-	 * @param bool &$account_exists Whether the account is currently connected.
+	 * @param bool $account_exists Whether the account is currently connected.
 	 */
-	private function mock_account_state( bool &$account_exists ): void {
+	private function mock_account_state( bool $account_exists ): void {
 		$this->mock_provider
 			->expects( $this->any() )
 			->method( 'is_account_connected' )
-			->willReturnCallback(
-				function () use ( &$account_exists ) {
-					return $account_exists;
-				}
-			);
+			->willReturn( $account_exists );
 		$this->mock_account_service
 			->expects( $this->any() )
 			->method( 'get_account_status_data' )
@@ -10131,6 +10135,28 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					return true;
 				},
 			)
+		);
+	}
+
+	/**
+	 * Assert that an onboarding step is recorded as completed in the NOX profile.
+	 *
+	 * @param array  $profile  The full NOX profile option value.
+	 * @param string $location The onboarding location (ISO 3166-1 alpha-2 country code).
+	 * @param string $step_id  The onboarding step ID that should be completed.
+	 */
+	private function assert_onboarding_step_completed( array $profile, string $location, string $step_id ): void {
+		$steps = $profile['onboarding'][ $location ]['steps'] ?? array();
+
+		$this->assertArrayHasKey(
+			$step_id,
+			$steps,
+			sprintf( 'The "%s" onboarding step should be recorded on a successful disable.', $step_id )
+		);
+		$this->assertArrayHasKey(
+			WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+			$steps[ $step_id ]['statuses'] ?? array(),
+			sprintf( 'The "%s" onboarding step should be marked completed on a successful disable.', $step_id )
 		);
 	}
 
