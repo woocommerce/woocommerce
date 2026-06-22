@@ -28,7 +28,7 @@ import {
  * Mini-Cart stepper.
  *
  * A "meta line" — a stand-in for a bundle child / booking / add-on / recipient
- * line — is simulated by the Task 8 helper plugin
+ * line — is simulated by the cart-line-identity helper plugin
  * (`woocommerce-blocks-test-cart-line-identity`), which attaches a unique
  * `cart_item_data` marker to a flagged add so core mints a distinct cart line
  * for the same product id. See `./utils.ts`.
@@ -37,12 +37,13 @@ import {
  * `product_wishlist` feature flag and are not registered in this e2e
  * environment, so their blocks cannot be placed on a page here. The notice
  * outcomes those consumers depend on — no spurious "quantity changed" info
- * notice on a meta-only add (Flow 8) and entry preservation on a genuine
- * rejection (Flow 9) — are asserted authoritatively at the store/consumer unit
- * level (Tasks 5, 6, 7). The cart-outcome substrate those consumers rely on is
- * still asserted end-to-end below: a meta-only keyless add creates a new
- * standalone line with no error notice (Flow 8), and a genuinely rejected add
- * leaves the cart unchanged and surfaces the server error (Flow 9).
+ * notice on a meta-only add and entry preservation on a genuine rejection —
+ * are asserted authoritatively at the store/consumer unit level (the cart
+ * store and saved-for-later / wishlist frontend unit tests). The cart-outcome
+ * substrate those consumers rely on is still asserted end-to-end below: a
+ * meta-only keyless add creates a new standalone line with no error notice,
+ * and a genuinely rejected add leaves the cart unchanged and surfaces the
+ * server error.
  */
 
 const test = base.extend< {
@@ -69,7 +70,7 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			await requestUtils.activatePlugin( CART_LINE_IDENTITY_PLUGIN );
 		} );
 
-		test( 'Flows 1 & 2: meta line present, no standalone — add creates a new line, meta line unchanged, no error notice', async ( {
+		test( 'Meta line present, no standalone — add creates a new line, meta line unchanged, no error notice', async ( {
 			page,
 			frontendUtils,
 		} ) => {
@@ -81,21 +82,21 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			// Keyless add of X through the ProductButton.
 			await frontendUtils.addToCart( PRODUCT_X.name );
 
-			// Flow 1: no error notice (in particular no "cannot update bundle
+			// No error notice (in particular no "cannot update bundle
 			// item" / store error) appears on the archive.
 			await expect(
 				page.locator( '.wc-block-components-notice-banner.is-error' )
 			).toHaveCount( 0 );
 
 			// Persisted cart: exactly two lines for X — the meta line still at
-			// quantity 1 (Flow 2) plus a new standalone line at quantity 1.
+			// quantity 1 plus a new standalone line at quantity 1.
 			await frontendUtils.goToCart();
 			expect(
 				await readCartLineQuantities( page, PRODUCT_X.name )
 			).toEqual( [ 1, 1 ] );
 		} );
 
-		test( 'Flow 4: both a standalone and a meta line — only the standalone increments', async ( {
+		test( 'Both a standalone and a meta line — only the standalone increments', async ( {
 			page,
 			frontendUtils,
 		} ) => {
@@ -127,7 +128,7 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			).toEqual( [ 1, 2 ] );
 		} );
 
-		test( 'Flow 8 (cart outcome): saved-for-later / wishlist meta-only add — keyless add creates a new standalone line with no error notice', async ( {
+		test( 'Saved-for-later / wishlist meta-only add (cart outcome) — keyless add creates a new standalone line with no error notice', async ( {
 			page,
 			frontendUtils,
 		} ) => {
@@ -137,10 +138,10 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			// a new standalone line beside the untouched meta line, no error
 			// notice. The consumer-specific guarantees (list entry removed, no
 			// spurious "quantity changed" info notice shown to the shopper) are
-			// covered authoritatively by the store/consumer unit tests
-			// (Tasks 5, 6, 7), because the saved-for-later and wishlist blocks
-			// are gated behind the `product_wishlist` feature flag and are not
-			// registered in this e2e environment.
+			// covered authoritatively by the store/consumer unit tests,
+			// because the saved-for-later and wishlist blocks are gated behind
+			// the `product_wishlist` feature flag and are not registered in
+			// this e2e environment.
 			await seedMetaLine( page, PRODUCT_X.id );
 
 			await frontendUtils.goToShop();
@@ -161,7 +162,7 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 		// Guest isolation, same rationale as above.
 		test.use( { storageState: guestFile } );
 
-		test( 'Flow 3: existing standalone line — add increments it', async ( {
+		test( 'Existing standalone line — add increments it', async ( {
 			page,
 			frontendUtils,
 		} ) => {
@@ -180,7 +181,7 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			).toEqual( [ 2 ] );
 		} );
 
-		test( 'Flow 5: not in cart — add creates a new line, no error notice', async ( {
+		test( 'Not in cart — add creates a new line, no error notice', async ( {
 			page,
 			frontendUtils,
 		} ) => {
@@ -199,13 +200,13 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			).toEqual( [ 1 ] );
 		} );
 
-		test( 'Flow 9 (cart outcome): genuine rejection leaves the cart unchanged and surfaces the error', async ( {
+		test( 'Genuine rejection (cart outcome) — leaves the cart unchanged and surfaces the error', async ( {
 			page,
 			frontendUtils,
 		} ) => {
 			// Saved-for-later / wishlist preserve the list entry when the add is
 			// genuinely rejected (entry preservation is asserted at unit level
-			// in Tasks 5, 6 since those blocks are not placeable here). The
+			// since those blocks are not placeable here). The
 			// cart-outcome substrate that decision relies on is asserted
 			// end-to-end: a server-rejected add leaves the cart unchanged and
 			// the server error surfaces. A sold-individually product already in
@@ -248,7 +249,7 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 	} );
 
 	test.describe( 'variation handling (Add to Cart with Options)', () => {
-		test( 'Flow 6: re-adding a variation increments its line; adding a different variation creates a new line', async ( {
+		test( 'Re-adding a variation increments its line; adding a different variation creates a new line', async ( {
 			page,
 			editor,
 			frontendUtils,
@@ -314,7 +315,7 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 	} );
 
 	test.describe( 'known-line quantity change (Mini-Cart stepper)', () => {
-		test( 'Flow 7: stepper updates the exact line with no spurious notice and no extra line', async ( {
+		test( 'Stepper updates the exact line with no spurious notice and no extra line', async ( {
 			page,
 			frontendUtils,
 			miniCartUtils,

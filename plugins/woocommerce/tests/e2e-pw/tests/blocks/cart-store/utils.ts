@@ -4,7 +4,7 @@
 import { Page, Locator } from '@playwright/test';
 
 /**
- * Activation slug of the Task 8 helper plugin
+ * Activation slug of the cart-line-identity helper plugin
  * (`test-plugins/blocks/cart-line-identity.php`). When active, an add-to-cart
  * request that carries the `cart_line_identity_marker` flag receives a unique
  * `cart_item_data` entry, so core's `generate_cart_id` mints a distinct cart
