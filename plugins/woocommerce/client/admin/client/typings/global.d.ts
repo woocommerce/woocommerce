@@ -117,14 +117,10 @@ declare global {
 			'product-data-views': boolean;
 			'experimental-blocks': boolean;
 			'minified-js': boolean;
-			navigation: boolean;
-			settings: boolean;
 			'settings-ui': boolean;
-			'use-wp-horizon': boolean;
 			'rest-api-v4': boolean;
 			'order-detail-redesign': boolean;
 			'product-variations-classic-redesign': boolean;
-			blueprint: boolean;
 		};
 		wp: {
 			updates?: {
