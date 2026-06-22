@@ -64,9 +64,8 @@ class PatternRegistryTest extends \WP_UnitTestCase {
 	 */
 	public function test_should_not_register_a_pattern_with_a_disabled_feature_flag() {
 		$pattern = [
-			'title'       => 'My Pattern',
-			'slug'        => 'my-pattern',
-			'featureFlag' => 'disabled-feature-flag',
+			'title' => 'My Pattern',
+			'slug'  => 'my-pattern',
 		];
 
 		$this->pattern_registry->register_block_pattern( 'source', $pattern, [] );
@@ -83,10 +82,9 @@ class PatternRegistryTest extends \WP_UnitTestCase {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_feature_flag' ) );
 
 		$pattern = [
-			'title'       => 'My Pattern',
-			'slug'        => 'my-pattern',
-			'content'     => 'My pattern content',
-			'featureFlag' => 'enabled-feature-flag',
+			'title'   => 'My Pattern',
+			'slug'    => 'my-pattern',
+			'content' => 'My pattern content',
 		];
 
 		$this->pattern_registry->register_block_pattern( 'source', $pattern, [] );
