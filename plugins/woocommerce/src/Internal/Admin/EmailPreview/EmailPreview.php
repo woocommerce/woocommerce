@@ -634,7 +634,7 @@ class EmailPreview {
 		add_filter( 'woocommerce_is_downloadable', array( $this, 'force_product_downloadable' ), 10, 1 );
 		add_filter( 'woocommerce_product_file', array( $this, 'provide_dummy_product_file' ), 10, 1 );
 		// Provide dummy downloadable items for email preview.
-		add_filter( 'woocommerce_order_get_downloadable_items', array( $this, 'get_dummy_downloadable_items' ), 10, 1 );
+		add_filter( 'woocommerce_order_get_downloadable_items', array( $this, 'get_dummy_downloadable_items' ) );
 	}
 
 	/**
@@ -733,10 +733,9 @@ class EmailPreview {
 	/**
 	 * Get dummy downloadable items for email preview.
 	 *
-	 * @param array $downloads Existing downloads.
 	 * @return array
 	 */
-	public function get_dummy_downloadable_items( $downloads ) {
+	public function get_dummy_downloadable_items() {
 		$dummy_downloads = array(
 			array(
 				'product_name'   => $this->get_dummy_downloadable_product()->get_name(),
@@ -747,7 +746,7 @@ class EmailPreview {
 			),
 		);
 
-		return array_merge( $downloads, $dummy_downloads );
+		return $dummy_downloads;
 	}
 
 	/**

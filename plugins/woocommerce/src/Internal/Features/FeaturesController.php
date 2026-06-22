@@ -684,6 +684,15 @@ class FeaturesController {
 			$this->add_feature_definition( $slug, $definition['name'], $definition );
 		}
 
+		// Preload option caches to minimize future queries for options that do not yet exist or are not set to autoload.
+		wp_prime_option_caches(
+			array_map(
+				static fn( $slug, $definition ) => $definition['option_key'] ?? sprintf( 'woocommerce_feature_%s_enabled', $slug ),
+				array_keys( $this->features ),
+				$this->features
+			)
+		);
+
 		$this->init_compatibility_info_by_feature();
 	}
 

@@ -140,17 +140,8 @@ final class Plan {
 	/**
 	 * Build a new, unsaved plan.
 	 *
-	 * @param int    $group_id Parent plan group id.
-	 * @param array{
-	 *     name: string,
-	 *     billing_policy: BillingPolicy,
-	 *     description?: string,
-	 *     options?: array<int, mixed>,
-	 *     delivery_policy?: DeliveryPolicy,
-	 *     pricing_policy?: PricingPolicy,
-	 *     category: string,
-	 *     extension_slug?: string,
-	 * } $args     Plan attributes.
+	 * @param int                  $group_id Parent plan group id.
+	 * @param array<string, mixed> $args     Plan attributes.
 	 * @throws InvalidArgumentException If pricing_policy entries fail validation.
 	 */
 	public static function create( int $group_id, array $args ): self {
