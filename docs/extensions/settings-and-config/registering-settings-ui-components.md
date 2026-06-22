@@ -48,7 +48,7 @@ registerSettingsExtension( {
 } );
 ```
 
-Registrations are scoped by settings page and, optionally, by section. This prevents one plugin from accidentally replacing another plugin's field behavior.
+Registrations are scoped by settings page and, optionally, by section. This prevents one plugin from accidentally replacing another plugin's field behavior. Omit `section` for a page-wide registration, use `section: ''` for the default section only, or pass a section id such as `section: 'payments'` for one named section.
 
 ## Component props
 
@@ -163,7 +163,24 @@ Resolution order is:
 
 ## Enqueue the component script
 
-Register your script in WordPress and return its handle from the settings UI adapter:
+Register your script in WordPress and return its handle from the settings integration that owns the fields.
+
+For a section registered under an existing tab, return the handle from the section object:
+
+```php
+<?php
+use Automattic\WooCommerce\Admin\Settings\SettingsSection;
+
+final class My_Plugin_Settings_Section extends SettingsSection {
+	// Other settings section methods omitted for brevity.
+
+	public function get_script_handles( WC_Settings_Page $parent_page ): array {
+		return array( 'my-plugin-settings-ui' );
+	}
+}
+```
+
+For a full settings tab that opts in through a `WC_Settings_Page` adapter, return the handle from the adapter:
 
 ```php
 <?php
