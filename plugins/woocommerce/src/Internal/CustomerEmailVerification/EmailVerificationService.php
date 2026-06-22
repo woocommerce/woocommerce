@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Internal\Utilities\Users;
  * This class is the single source of truth for whether a customer has proven they
  * control their account email address. It manages the verified status meta and the
  * short-lived, single-use numeric code (OTP) emailed to the customer, together with
- * the per-code attempt limit and the cumulative-failure lockout that protect it.
+ * the per-code attempt limit and the attempt-budget lockout that protect it.
  *
  * @since 11.0.0
  */
@@ -43,7 +43,7 @@ class EmailVerificationService {
 	public const RESULT_NONE = 'none';
 
 	/**
-	 * Result of {@see self::verify_code()}: too many cumulative failures; the user is locked out.
+	 * Result of {@see self::verify_code()}: the attempt budget is exhausted; the user is locked out.
 	 */
 	public const RESULT_LOCKED = 'locked';
 
@@ -58,10 +58,11 @@ class EmailVerificationService {
 	private const MAX_ATTEMPTS = 3;
 
 	/**
-	 * Cumulative wrong guesses (across all codes) before the user is permanently locked out of the
-	 * code flow and must contact the store owner (who can verify them from the admin).
+	 * Total guesses allowed (across all codes) before the user is permanently locked out of the code
+	 * flow and must contact the store owner (who can verify them from the admin). Stored as a
+	 * countdown in self::ATTEMPTS_META.
 	 */
-	private const MAX_FAILURES = 10;
+	private const ATTEMPT_BUDGET = 10;
 
 	/**
 	 * User meta key that stores the verified email address (lower-cased).
@@ -76,10 +77,14 @@ class EmailVerificationService {
 	private const KEY_META = '_wc_email_verification_key';
 
 	/**
-	 * User meta key that stores the cumulative wrong-guess count as a plain integer.
-	 * Spans codes (so requesting a new code does not reset it) and drives the permanent lockout.
+	 * User meta key that stores the number of guesses remaining as a plain integer, counting down
+	 * from self::ATTEMPT_BUDGET to 0 (locked). Spans codes (requesting a new code does not reset it).
+	 *
+	 * It counts down rather than up so the compare-and-swap in verify_code() always supplies a
+	 * previous value of "1".."10" — never "0", which update_user_meta() treats as empty and would
+	 * silently ignore, making the swap non-conditional.
 	 */
-	private const FAILURES_META = '_wc_email_verification_failures';
+	private const ATTEMPTS_META = '_wc_email_verification_attempts';
 
 	/**
 	 * Return whether the given user has verified their current account email address.
@@ -108,7 +113,7 @@ class EmailVerificationService {
 	/**
 	 * Mark the given user as having verified their current account email address.
 	 *
-	 * Stores the verified email address, clears any pending code and failure count, and
+	 * Stores the verified email address, clears any pending code and the attempts counter, and
 	 * fires the {@see 'woocommerce_customer_email_verified'} action. No-ops if the
 	 * user is already verified for their current email.
 	 *
@@ -131,7 +136,7 @@ class EmailVerificationService {
 		// Store the verified email (lower-cased) so the status self-invalidates if the account email later changes.
 		Users::update_site_user_meta( $user_id, self::VERIFIED_META, strtolower( $user->user_email ) );
 		Users::delete_site_user_meta( $user_id, self::KEY_META );
-		Users::delete_site_user_meta( $user_id, self::FAILURES_META );
+		Users::delete_site_user_meta( $user_id, self::ATTEMPTS_META );
 
 		/**
 		 * Fires after a customer has verified their email address.
@@ -146,7 +151,7 @@ class EmailVerificationService {
 	/**
 	 * Clear the email-verification status for the given user.
 	 *
-	 * Removes the verified-email meta, any pending code, and the cumulative failure count,
+	 * Removes the verified-email meta, any pending code, and the remaining-attempts counter,
 	 * effectively resetting the user to a clean unverified state (also lifting any lockout).
 	 *
 	 * @since 11.0.0
@@ -157,7 +162,7 @@ class EmailVerificationService {
 	public function clear_verification( int $user_id ): void {
 		Users::delete_site_user_meta( $user_id, self::VERIFIED_META );
 		Users::delete_site_user_meta( $user_id, self::KEY_META );
-		Users::delete_site_user_meta( $user_id, self::FAILURES_META );
+		Users::delete_site_user_meta( $user_id, self::ATTEMPTS_META );
 	}
 
 	/**
@@ -169,7 +174,7 @@ class EmailVerificationService {
 	 * the account email in effect at issuance (a code emailed to one address can never verify a
 	 * different address the account is later switched to). The attempt counter starts at zero.
 	 *
-	 * Minting a new code does not reset the cumulative failure count, so the lockout cannot be
+	 * Minting a new code does not reset the remaining-attempts counter, so the lockout cannot be
 	 * sidestepped by simply requesting fresh codes.
 	 *
 	 * @since 11.0.0
@@ -182,11 +187,12 @@ class EmailVerificationService {
 		$user       = get_user_by( 'id', $user_id );
 		$email_hash = $user instanceof \WP_User ? wp_fast_hash( strtolower( $user->user_email ) ) : '';
 
-		// Ensure the failure-counter row exists (at zero) so the compare-and-swap in verify_code() only
-		// ever updates, never inserts — concurrent first guesses would otherwise race into duplicate
-		// rows. Initialise only when absent, so resending a code never resets the count or the lockout.
-		if ( '' === (string) Users::get_site_user_meta( $user_id, self::FAILURES_META ) ) {
-			Users::update_site_user_meta( $user_id, self::FAILURES_META, '0' );
+		// Seed the remaining-attempts counter at the full budget so the compare-and-swap in
+		// verify_code() only ever updates, never inserts — concurrent first guesses would otherwise
+		// race into duplicate rows. Seed only when absent, so resending a code never resets the
+		// remaining count (and thus never lifts a lockout in progress).
+		if ( '' === (string) Users::get_site_user_meta( $user_id, self::ATTEMPTS_META ) ) {
+			Users::update_site_user_meta( $user_id, self::ATTEMPTS_META, (string) self::ATTEMPT_BUDGET );
 		}
 
 		Users::update_site_user_meta( $user_id, self::KEY_META, time() . ':' . wp_fast_hash( $code ) . ':' . $email_hash . ':0' );
@@ -197,15 +203,15 @@ class EmailVerificationService {
 	/**
 	 * Verify a submitted code for the given user and record the outcome.
 	 *
-	 * Before comparing the code, this claims a guess against the cumulative budget with a
-	 * compare-and-swap on the failure counter ({@see self::claim_attempt()}). That serialises
-	 * concurrent submissions into distinct slots, so a parallel flood can't each read the same counter
-	 * and slip past the cap — at most MAX_FAILURES codes are ever compared, and a loser under
-	 * contention is turned away ({@see self::RESULT_WRONG}) without a guess. Expired, missing, or
-	 * email-mismatched codes return before the counter moves, so they never count against the customer.
+	 * Before comparing the code, this claims a guess by decrementing the remaining-attempts budget
+	 * with a compare-and-swap ({@see self::claim_attempt()}). That serialises concurrent submissions
+	 * into distinct slots, so a parallel flood can't each read the same counter and slip past the
+	 * cap — at most ATTEMPT_BUDGET codes are ever compared, and a loser under contention is turned
+	 * away ({@see self::RESULT_WRONG}) without a guess. Expired, missing, or email-mismatched codes
+	 * return before the counter moves, so they never count against the customer.
 	 *
 	 * A correct code marks the user verified; reaching {@see self::MAX_ATTEMPTS} on one code burns it
-	 * (a new one must be requested) and reaching {@see self::MAX_FAILURES} locks the user out permanently.
+	 * (a new one must be requested) and exhausting the budget locks the user out permanently.
 	 *
 	 * @since 11.0.0
 	 *
@@ -214,9 +220,9 @@ class EmailVerificationService {
 	 * @return string One of the RESULT_* constants.
 	 */
 	public function verify_code( int $user_id, string $code ): string {
-		$failures = $this->get_failure_count( $user_id );
+		$remaining = $this->attempts_remaining( $user_id );
 
-		if ( $failures >= self::MAX_FAILURES ) {
+		if ( null !== $remaining && $remaining <= 0 ) {
 			return self::RESULT_LOCKED;
 		}
 
@@ -244,9 +250,15 @@ class EmailVerificationService {
 			}
 		}
 
-		// Claim this guess against the cumulative budget before comparing. If another request moved the
-		// counter first, we lose the swap and turn away without a guess (and without double-counting).
-		if ( ! $this->claim_attempt( $user_id, $failures ) ) {
+		// A live code exists, so create_code() must have created the counter row. If it is somehow
+		// missing, fail closed rather than letting the compare-and-swap re-insert it with a fresh budget.
+		if ( null === $remaining ) {
+			return self::RESULT_LOCKED;
+		}
+
+		// Claim this guess by decrementing the remaining budget before comparing. If another request
+		// moved the counter first, we lose the swap and turn away without a guess (no double-counting).
+		if ( ! $this->claim_attempt( $user_id, $remaining ) ) {
 			return self::RESULT_WRONG;
 		}
 
@@ -255,8 +267,8 @@ class EmailVerificationService {
 			return self::RESULT_OK;
 		}
 
-		// Wrong guess. The cumulative counter has already moved to $failures + 1.
-		if ( $failures + 1 >= self::MAX_FAILURES ) {
+		// Wrong guess. The budget has already dropped to $remaining - 1.
+		if ( $remaining - 1 <= 0 ) {
 			// That was the final allowed guess: lock out and drop the live code.
 			Users::delete_site_user_meta( $user_id, self::KEY_META );
 			return self::RESULT_LOCKED;
@@ -280,20 +292,21 @@ class EmailVerificationService {
 	}
 
 	/**
-	 * Atomically claim a guess against the cumulative failure budget via a compare-and-swap.
+	 * Atomically claim a guess by decrementing the remaining-attempts budget via a compare-and-swap.
 	 *
-	 * Moves the counter from $failures to $failures + 1 only while it still equals $failures, so
-	 * concurrent submissions are serialised into distinct slots and at most MAX_FAILURES ever pass.
-	 * The counter row is pre-created at zero by {@see self::create_code()} so this only ever updates,
-	 * never inserts (which would race into duplicate rows). Returns false when another request moved
-	 * the counter first.
+	 * Moves the counter from $remaining to $remaining - 1 only while it still equals $remaining, so
+	 * concurrent submissions are serialised into distinct slots and at most ATTEMPT_BUDGET ever pass.
+	 * $remaining is always 1..ATTEMPT_BUDGET here, so the previous value is never "0" — which
+	 * update_user_meta() treats as empty and would ignore, making the swap non-conditional. The row is
+	 * pre-created by {@see self::create_code()} so this only ever updates, never inserts (which would
+	 * race into duplicate rows). Returns false when another request moved the counter first.
 	 *
-	 * @param int $user_id  WordPress user ID.
-	 * @param int $failures The failure count this request observed.
+	 * @param int $user_id   WordPress user ID.
+	 * @param int $remaining The remaining count this request observed (>= 1).
 	 * @return bool True when this request claimed the slot.
 	 */
-	private function claim_attempt( int $user_id, int $failures ): bool {
-		return (bool) Users::update_site_user_meta( $user_id, self::FAILURES_META, (string) ( $failures + 1 ), (string) $failures );
+	private function claim_attempt( int $user_id, int $remaining ): bool {
+		return (bool) Users::update_site_user_meta( $user_id, self::ATTEMPTS_META, (string) ( $remaining - 1 ), (string) $remaining );
 	}
 
 	/**
@@ -314,10 +327,10 @@ class EmailVerificationService {
 	}
 
 	/**
-	 * Whether the user has exhausted the cumulative failure budget and is permanently locked out.
+	 * Whether the user has used up their attempt budget and is permanently locked out.
 	 *
 	 * The lockout only lifts when the user is verified another way (e.g. password reset) or the
-	 * store owner verifies them from the admin — both of which clear the failure count.
+	 * store owner verifies them from the admin — both of which clear the counter.
 	 *
 	 * @since 11.0.0
 	 *
@@ -325,17 +338,22 @@ class EmailVerificationService {
 	 * @return bool
 	 */
 	public function is_locked_out( int $user_id ): bool {
-		return $this->get_failure_count( $user_id ) >= self::MAX_FAILURES;
+		$remaining = $this->attempts_remaining( $user_id );
+
+		return null !== $remaining && $remaining <= 0;
 	}
 
 	/**
-	 * Return the cumulative wrong-guess count for the user.
+	 * Return the number of guesses the user has left, or null if the flow has not started (no counter
+	 * row yet).
 	 *
 	 * @param int $user_id WordPress user ID.
-	 * @return int
+	 * @return int|null
 	 */
-	private function get_failure_count( int $user_id ): int {
-		return (int) Users::get_site_user_meta( $user_id, self::FAILURES_META );
+	private function attempts_remaining( int $user_id ): ?int {
+		$raw = (string) Users::get_site_user_meta( $user_id, self::ATTEMPTS_META );
+
+		return '' === $raw ? null : (int) $raw;
 	}
 
 	/**

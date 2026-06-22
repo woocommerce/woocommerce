@@ -14,7 +14,7 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 
 	private const KEY_META = '_wc_email_verification_key';
 
-	private const FAILURES_META = '_wc_email_verification_failures';
+	private const ATTEMPTS_META = '_wc_email_verification_attempts';
 
 	/**
 	 * The System Under Test.
@@ -107,31 +107,31 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Minting a code initialises the failure counter to zero so the compare-and-swap never inserts.
+	 * @testdox Minting a code seeds the attempts counter at the full budget so the compare-and-swap never inserts.
 	 */
-	public function test_create_code_initialises_failure_counter(): void {
+	public function test_create_code_seeds_attempts_counter(): void {
 		$user_id = wc_create_new_customer( 'init@example.com', 'inituser', 'pw' );
 
-		$this->assertSame( '', (string) Users::get_site_user_meta( $user_id, self::FAILURES_META ), 'No counter before the flow starts' );
+		$this->assertSame( '', (string) Users::get_site_user_meta( $user_id, self::ATTEMPTS_META ), 'No counter before the flow starts' );
 
 		$this->sut->create_code( $user_id );
 
-		$this->assertSame( '0', (string) Users::get_site_user_meta( $user_id, self::FAILURES_META ), 'The first code must create the counter row at zero' );
+		$this->assertSame( '10', (string) Users::get_site_user_meta( $user_id, self::ATTEMPTS_META ), 'The first code must seed the counter at the full budget' );
 	}
 
 	/**
-	 * @testdox Resending a code preserves the cumulative failure count (it does not reset the lockout budget).
+	 * @testdox Resending a code preserves the remaining-attempts count (it does not lift the lockout budget).
 	 */
-	public function test_resending_a_code_preserves_failure_count(): void {
+	public function test_resending_a_code_preserves_remaining_attempts(): void {
 		$user_id = wc_create_new_customer( 'resend@example.com', 'resenduser', 'pw' );
 		$code    = $this->sut->create_code( $user_id );
 
 		$this->sut->verify_code( $user_id, $this->wrong_code( $code ) );
-		$this->assertSame( '1', (string) Users::get_site_user_meta( $user_id, self::FAILURES_META ), 'One wrong guess records one failure' );
+		$this->assertSame( '9', (string) Users::get_site_user_meta( $user_id, self::ATTEMPTS_META ), 'One wrong guess leaves nine of ten remaining' );
 
 		$this->sut->create_code( $user_id );
 
-		$this->assertSame( '1', (string) Users::get_site_user_meta( $user_id, self::FAILURES_META ), 'Resending must not reset the cumulative failure count' );
+		$this->assertSame( '9', (string) Users::get_site_user_meta( $user_id, self::ATTEMPTS_META ), 'Resending must not reset the remaining-attempts count' );
 	}
 
 	/**
