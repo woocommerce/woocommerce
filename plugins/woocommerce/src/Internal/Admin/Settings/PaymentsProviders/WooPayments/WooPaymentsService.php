@@ -1501,40 +1501,39 @@ class WooPaymentsService {
 		$event_props = array();
 		$source      = $this->validate_onboarding_source( $source );
 
-		// Lock the onboarding to prevent concurrent actions.
+		$had_test_account    = false;
+		$had_sandbox_account = false;
+		$endpoint            = '';
+		$params              = array();
+
+		// Briefly lock the onboarding while Core determines the account transition to perform.
+		// The internal WooPayments endpoint must run after this lock is cleared because it may
+		// trigger account deletion webhooks that also touch the shared NOX lock option.
 		$this->set_onboarding_lock();
 
 		try {
-			$has_test_account    = $this->has_test_account();
-			$has_sandbox_account = $this->has_sandbox_account();
+			$had_test_account    = $this->has_test_account();
+			$had_sandbox_account = $this->has_sandbox_account();
 
 			$event_props = array(
-				'account_type' => $has_test_account ? 'test_drive' : ( $has_sandbox_account ? 'sandbox' : 'unknown' ),
+				'account_type' => $had_test_account ? 'test_drive' : ( $had_sandbox_account ? 'sandbox' : 'unknown' ),
 				'source'       => $source,
 			);
 
 			// First, check if we have a test account to disable.
-			if ( $has_test_account ) {
+			if ( $had_test_account ) {
 				// Call the WooPayments API to disable the test account and prepare for the switch to live.
-				$response = $this->proxy->call_static(
-					Utils::class,
-					'rest_endpoint_post_request',
-					'/wc/v3/payments/onboarding/test_drive_account/disable',
-					array(
-						'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
-						'source' => $source,
-					)
+				$endpoint = '/wc/v3/payments/onboarding/test_drive_account/disable';
+				$params   = array(
+					'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
+					'source' => $source,
 				);
-			} elseif ( $has_sandbox_account ) {
+			} elseif ( $had_sandbox_account ) {
 				// Call the WooPayments API to reset onboarding.
-				$response = $this->proxy->call_static(
-					Utils::class,
-					'rest_endpoint_post_request',
-					'/wc/v3/payments/onboarding/reset',
-					array(
-						'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
-						'source' => $source,
-					)
+				$endpoint = '/wc/v3/payments/onboarding/reset';
+				$params   = array(
+					'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
+					'source' => $source,
 				);
 			}
 		} catch ( Exception $e ) {
@@ -1548,10 +1547,36 @@ class WooPaymentsService {
 					'trace'   => $e->getTrace(),
 				)
 			);
+		} finally {
+			// Unlock before making the internal WooPayments request to avoid self-conflicting
+			// with WooPayments account cleanup and account.deleted webhook side effects.
+			$this->clear_onboarding_lock();
 		}
 
-		// Unlock the onboarding after the API call finished or errored.
-		$this->clear_onboarding_lock();
+		if ( ! is_wp_error( $response ) && ! empty( $endpoint ) ) {
+			try {
+				$response = $this->proxy->call_static(
+					Utils::class,
+					'rest_endpoint_post_request',
+					$endpoint,
+					$params
+				);
+			} catch ( Exception $e ) {
+				// Catch any exceptions to allow for proper error handling and onboarding unlock.
+				$response = new WP_Error(
+					'woocommerce_woopayments_onboarding_client_api_exception',
+					esc_html__( 'An unexpected error happened while disabling the test account.', 'woocommerce' ),
+					array(
+						'code'    => $e->getCode(),
+						'message' => $e->getMessage(),
+						'trace'   => $e->getTrace(),
+					)
+				);
+			} finally {
+				// Normalize the shared lock option after WooPayments webhooks may have deleted it.
+				$this->clear_onboarding_lock();
+			}
+		}
 
 		// Make sure the onboarding mode is reset.
 		if ( class_exists( 'WC_Payments_Onboarding_Service' ) && defined( 'WC_Payments_Onboarding_Service::TEST_MODE_OPTION' ) ) {
