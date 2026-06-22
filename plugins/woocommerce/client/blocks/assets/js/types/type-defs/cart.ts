@@ -63,6 +63,9 @@ export interface CartShippingPackageShippingRate extends CurrencyInfo {
 	description: string;
 	delivery_time: string;
 	price: string;
+	price_before_discount?: string;
+	discount_amount?: string;
+	discount_label?: string;
 	taxes: string;
 	instance_id: number;
 	method_id: string;

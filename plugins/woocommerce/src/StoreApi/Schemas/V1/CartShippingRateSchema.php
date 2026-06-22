@@ -158,13 +158,31 @@ class CartShippingRateSchema extends AbstractSchema {
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
-				'price'         => [
+				'price'                 => [
 					'description' => __( 'Price of this shipping rate using the smallest unit of the currency.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
-				'taxes'         => [
+				'price_before_discount' => [
+					'description' => __( 'Price of this shipping rate before any discount, using the smallest unit of the currency.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
+				'discount_amount'       => [
+					'description' => __( 'Discount amount for this shipping rate, using the smallest unit of the currency.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
+				'discount_label'        => [
+					'description' => __( 'Discount label for this shipping rate.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
+				'taxes'                 => [
 					'description' => __( 'Taxes applied to this shipping rate using the smallest unit of the currency.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
@@ -302,20 +320,73 @@ class CartShippingRateSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_rate_response( $rate, $selected_rate = '' ) {
+		$discount = $this->get_rate_discount_response( $rate );
+		$taxes    = array_sum( (array) $this->get_rate_prop( $rate, 'taxes' ) );
+
 		return $this->prepare_currency_response(
 			[
-				'rate_id'       => $this->get_rate_prop( $rate, 'id' ),
-				'name'          => $this->prepare_html_response( $this->get_rate_prop( $rate, 'label' ) ),
-				'description'   => $this->prepare_html_response( $this->get_rate_prop( $rate, 'description' ) ),
-				'delivery_time' => $this->prepare_html_response( $this->get_rate_prop( $rate, 'delivery_time' ) ),
-				'price'         => $this->prepare_money_response( $this->get_rate_prop( $rate, 'cost' ), wc_get_price_decimals() ),
-				'taxes'         => $this->prepare_money_response( array_sum( (array) $this->get_rate_prop( $rate, 'taxes' ) ), wc_get_price_decimals() ),
-				'instance_id'   => $this->get_rate_prop( $rate, 'instance_id' ),
-				'method_id'     => $this->get_rate_prop( $rate, 'method_id' ),
-				'meta_data'     => $this->get_rate_meta_data( $rate ),
-				'selected'      => $selected_rate === $this->get_rate_prop( $rate, 'id' ),
+				'rate_id'               => $this->get_rate_prop( $rate, 'id' ),
+				'name'                  => $this->prepare_html_response( $this->get_rate_prop( $rate, 'label' ) ),
+				'description'           => $this->prepare_html_response( $this->get_rate_prop( $rate, 'description' ) ),
+				'delivery_time'         => $this->prepare_html_response( $this->get_rate_prop( $rate, 'delivery_time' ) ),
+				'price'                 => $this->prepare_money_response( $this->get_rate_prop( $rate, 'cost' ), wc_get_price_decimals() ),
+				'price_before_discount' => $discount['price_before_discount'],
+				'discount_amount'       => $discount['discount_amount'],
+				'discount_label'        => $discount['discount_label'],
+				'taxes'                 => $this->prepare_money_response( $taxes, wc_get_price_decimals() ),
+				'instance_id'           => $this->get_rate_prop( $rate, 'instance_id' ),
+				'method_id'             => $this->get_rate_prop( $rate, 'method_id' ),
+				'meta_data'             => $this->get_rate_meta_data( $rate ),
+				'selected'              => $selected_rate === $this->get_rate_prop( $rate, 'id' ),
 			]
 		);
+	}
+
+	/**
+	 * Gets shipping rate discount data for the response.
+	 *
+	 * @param WC_Shipping_Rate $rate Rate object.
+	 * @return array
+	 */
+	protected function get_rate_discount_response( $rate ) {
+		/**
+		 * Filters shipping rate discount data exposed by the Store API.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param array            $discount_data Discount data.
+		 * @param WC_Shipping_Rate $rate          The shipping rate.
+		 */
+		$discount_data = apply_filters(
+			'woocommerce_store_api_shipping_rate_discount_data',
+			[
+				'price_before_discount' => '',
+				'discount_amount'       => '',
+				'discount_label'        => '',
+			],
+			$rate
+		);
+
+		if ( ! is_array( $discount_data ) ) {
+			$discount_data = [];
+		}
+
+		$price_before_discount = isset( $discount_data['price_before_discount'] ) ? $discount_data['price_before_discount'] : '';
+		$discount_amount       = isset( $discount_data['discount_amount'] ) ? $discount_data['discount_amount'] : '';
+		$discount_label        = isset( $discount_data['discount_label'] ) ? $discount_data['discount_label'] : '';
+		$price_decimals        = wc_get_price_decimals();
+
+		return [
+			'price_before_discount' => '' === $price_before_discount
+				? ''
+				: $this->prepare_money_response( $price_before_discount, $price_decimals ),
+			'discount_amount'       => '' === $discount_amount
+				? ''
+				: $this->prepare_money_response( $discount_amount, $price_decimals ),
+			'discount_label'        => '' === $discount_label
+				? ''
+				: $this->prepare_html_response( $discount_label ),
+		];
 	}
 
 	/**

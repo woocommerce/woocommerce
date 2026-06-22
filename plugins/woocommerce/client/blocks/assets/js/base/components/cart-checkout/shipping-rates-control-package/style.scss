@@ -9,6 +9,19 @@
 		text-transform: none;
 	}
 
+	.wc-block-components-shipping-rates-control__package__price {
+		display: inline-flex;
+		gap: $gap-smallest;
+	}
+
+	.wc-block-components-shipping-rates-control__package__price--original {
+		opacity: 0.6;
+	}
+
+	.wc-block-components-shipping-rates-control__package__discount-label {
+		margin-left: $gap-smallest;
+	}
+
 	.wc-block-components-shipping-rates-control__package__description--free {
 		text-transform: uppercase;
 	}

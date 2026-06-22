@@ -74,6 +74,36 @@ class CartShippingRateSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should include filtered shipping rate discount data in API response.
+	 */
+	public function test_get_rate_response_includes_filtered_discount_data(): void {
+		$rate = new WC_Shipping_Rate( 'flat_rate:1', 'Flat rate', 5, array(), 'flat_rate' );
+
+		add_filter(
+			'woocommerce_store_api_shipping_rate_discount_data',
+			function( $discount_data, $shipping_rate ) use ( $rate ) {
+				$this->assertSame( $rate, $shipping_rate );
+
+				return array(
+					'price_before_discount' => '10',
+					'discount_amount'       => '5',
+					'discount_label'        => '<strong>Promo</strong>',
+				);
+			},
+			10,
+			2
+		);
+
+		$response = $this->invoke_get_rate_response( $rate );
+
+		remove_all_filters( 'woocommerce_store_api_shipping_rate_discount_data' );
+
+		$this->assertSame( '1000', $response['price_before_discount'] );
+		$this->assertSame( '500', $response['discount_amount'] );
+		$this->assertSame( 'Promo', $response['discount_label'] );
+	}
+
+	/**
 	 * Invoke the protected get_rate_response method.
 	 *
 	 * @param WC_Shipping_Rate $rate Rate object.

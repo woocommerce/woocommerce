@@ -37,21 +37,46 @@ import ReadMore from '@woocommerce/base-components/read-more';
 const renderShippingRatesControlOption = (
 	option: CartShippingPackageShippingRate
 ): PackageRateOption => {
-	const priceWithTaxes = getSetting( 'displayCartPricesIncludingTax', false )
+	const displayPricesIncludingTax = getSetting(
+		'displayCartPricesIncludingTax',
+		false
+	);
+	const priceWithTaxes = displayPricesIncludingTax
 		? parseInt( option.price, 10 ) + parseInt( option.taxes, 10 )
 		: parseInt( option.price, 10 );
-	const isSelected = option?.selected;
+	const priceBeforeDiscountWithTaxes = displayPricesIncludingTax
+		? parseInt( option.price_before_discount || '', 10 ) +
+		  parseInt( option.taxes, 10 )
+		: parseInt( option.price_before_discount || '', 10 );
+	const showDiscountedPrice =
+		Number.isFinite( priceBeforeDiscountWithTaxes ) &&
+		priceBeforeDiscountWithTaxes > priceWithTaxes;
 
 	const secondaryLabel =
-		priceWithTaxes === 0 ? (
+		priceWithTaxes === 0 && ! showDiscountedPrice ? (
 			<span className="wc-block-checkout__shipping-option--free">
 				{ __( 'Free', 'woocommerce' ) }
 			</span>
 		) : (
-			<FormattedMonetaryAmount
-				currency={ getCurrencyFromPriceResponse( option ) }
-				value={ priceWithTaxes }
-			/>
+			<span className="wc-block-checkout__shipping-option-price">
+				{ showDiscountedPrice && (
+					<del className="wc-block-checkout__shipping-option-price--original">
+						<FormattedMonetaryAmount
+							currency={ getCurrencyFromPriceResponse( option ) }
+							value={ priceBeforeDiscountWithTaxes }
+						/>
+					</del>
+				) }
+				<FormattedMonetaryAmount
+					currency={ getCurrencyFromPriceResponse( option ) }
+					value={ priceWithTaxes }
+				/>
+				{ showDiscountedPrice && option.discount_label && (
+					<span className="wc-block-checkout__shipping-option-discount-label">
+						{ decodeEntities( option.discount_label ) }
+					</span>
+				) }
+			</span>
 		);
 
 	return {
@@ -59,12 +84,11 @@ const renderShippingRatesControlOption = (
 		value: option.rate_id,
 		description: decodeEntities( option.delivery_time ),
 		secondaryLabel,
-		secondaryDescription:
-			isSelected && option.description ? (
-				<ReadMore maxLines={ 2 }>
-					{ decodeEntities( option.description ) }
-				</ReadMore>
-			) : undefined,
+		secondaryDescription: option.description ? (
+			<ReadMore maxLines={ 2 }>
+				{ decodeEntities( option.description ) }
+			</ReadMore>
+		) : undefined,
 	};
 };
 

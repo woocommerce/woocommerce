@@ -17,20 +17,38 @@ import { __ } from '@wordpress/i18n';
 export const renderPackageRateOption = (
 	rate: CartShippingPackageShippingRate
 ): PackageRateOption => {
-	const priceWithTaxes: number = getSetting(
+	const displayPricesIncludingTax = getSetting(
 		'displayCartPricesIncludingTax',
 		false
-	)
+	);
+	const priceWithTaxes: number = displayPricesIncludingTax
 		? parseInt( rate.price, 10 ) + parseInt( rate.taxes, 10 )
 		: parseInt( rate.price, 10 );
+	const priceBeforeDiscountWithTaxes: number = displayPricesIncludingTax
+		? parseInt( rate.price_before_discount || '', 10 ) +
+		  parseInt( rate.taxes, 10 )
+		: parseInt( rate.price_before_discount || '', 10 );
+	const showDiscountedPrice =
+		Number.isFinite( priceBeforeDiscountWithTaxes ) &&
+		priceBeforeDiscountWithTaxes > priceWithTaxes;
 
 	let description = (
 		<>
 			{ Number.isFinite( priceWithTaxes ) && (
-				<FormattedMonetaryAmount
-					currency={ getCurrencyFromPriceResponse( rate ) }
-					value={ priceWithTaxes }
-				/>
+				<span className="wc-block-components-shipping-rates-control__package__price">
+					{ showDiscountedPrice && (
+						<del className="wc-block-components-shipping-rates-control__package__price--original">
+							<FormattedMonetaryAmount
+								currency={ getCurrencyFromPriceResponse( rate ) }
+								value={ priceBeforeDiscountWithTaxes }
+							/>
+						</del>
+					) }
+					<FormattedMonetaryAmount
+						currency={ getCurrencyFromPriceResponse( rate ) }
+						value={ priceWithTaxes }
+					/>
+				</span>
 			) }
 			<span className="wc-block-components-shipping-rates-control__package__delivery_time">
 				{ Number.isFinite( priceWithTaxes ) && rate.delivery_time
@@ -38,10 +56,15 @@ export const renderPackageRateOption = (
 					: null }
 				{ decodeEntities( rate.delivery_time ) }
 			</span>
+			{ showDiscountedPrice && rate.discount_label && (
+				<span className="wc-block-components-shipping-rates-control__package__discount-label">
+					{ decodeEntities( rate.discount_label ) }
+				</span>
+			) }
 		</>
 	);
 
-	if ( priceWithTaxes === 0 ) {
+	if ( priceWithTaxes === 0 && ! showDiscountedPrice ) {
 		description = (
 			<span className="wc-block-components-shipping-rates-control__package__description--free">
 				{ __( 'Free', 'woocommerce' ) }
@@ -57,6 +80,9 @@ export const renderPackageRateOption = (
 		label: decodeEntities( rate.name ),
 		value: rate.rate_id,
 		description,
+		secondaryDescription: rate.description
+			? decodeEntities( rate.description )
+			: undefined,
 	};
 };
 

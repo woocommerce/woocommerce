@@ -13,6 +13,9 @@ export const generateShippingRate = ( {
 	instanceID,
 	methodID = name.toLowerCase().split( ' ' ).join( '_' ),
 	selected = false,
+	priceBeforeDiscount = '',
+	discountAmount = '',
+	discountLabel = '',
 	// eslint-disable-next-line @typescript-eslint/naming-convention -- meta_data comes from the API response.
 	meta_data = [],
 }: {
@@ -22,6 +25,9 @@ export const generateShippingRate = ( {
 	instanceID: number;
 	methodID?: string;
 	selected?: boolean;
+	priceBeforeDiscount?: string;
+	discountAmount?: string;
+	discountLabel?: string;
 	meta_data?: { key: string; value: string }[];
 } ): CartShippingPackageShippingRate => {
 	return {
@@ -30,6 +36,9 @@ export const generateShippingRate = ( {
 		description: '',
 		delivery_time: '',
 		price,
+		price_before_discount: priceBeforeDiscount,
+		discount_amount: discountAmount,
+		discount_label: discountLabel,
 		taxes: '0',
 		instance_id: instanceID,
 		method_id: methodID,

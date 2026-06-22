@@ -3,6 +3,19 @@
 		text-transform: uppercase;
 	}
 
+	.wc-block-checkout__shipping-option-price {
+		display: inline-flex;
+		gap: $gap-smallest;
+	}
+
+	.wc-block-checkout__shipping-option-price--original {
+		opacity: 0.6;
+	}
+
+	.wc-block-checkout__shipping-option-discount-label {
+		margin-left: $gap-smallest;
+	}
+
 	.wc-block-components-shipping-rates-control__no-results-notice {
 		margin: 0;
 		width: 100%;
