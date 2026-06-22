@@ -70,7 +70,15 @@
 <!-- /wp:group -->
 
 <!-- wp:paragraph {"style":{"typography":{"textAlign":"left"}}} -->
-<p class="has-text-align-left">&copy; <?php echo esc_html( gmdate( 'Y' ) ); ?> <?php esc_html_e( 'all rights reserved. Designed with', 'purple' ); ?> <a href="https://wordpress.org">WordPress</a>.</p>
+<p class="has-text-align-left">&copy; <?php echo esc_html( gmdate( 'Y' ) ); ?> <?php
+	/* Translators: WordPress link. */
+	$wordpress_link = '<a href="' . esc_url( __( 'https://wordpress.org', 'purple' ) ) . '" rel="nofollow">WordPress</a>';
+	echo sprintf(
+		/* Translators: Designed with WordPress */
+		esc_html__( 'All rights reserved. Designed with %1$s.', 'purple' ),
+		$wordpress_link
+	);
+	?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->

@@ -8,11 +8,8 @@
  * Description: A footer pattern with social links and navigation.
  */
 ?>
-<!-- wp:group {"metadata":{"name":"Default Footer"},"align":"full","className":"is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} --><div class="wp-block-group alignfull is-style-default" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0"><!-- wp:spacer {"height":"var:preset|spacing|50"} -->
-<div style="height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer -->
-
-<!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|50","left":"var:preset|spacing|50"}}}} -->
+<!-- wp:group {"metadata":{"name":"Footer","patternName":"purple/footer","description":"A footer pattern with social links and navigation.","categories":["footer","purple"]},"align":"full","className":"is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull is-style-default" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--50)"><!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|50","left":"var:preset|spacing|50"}}}} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"width":"40%"} -->
 <div class="wp-block-column" style="flex-basis:40%"><!-- wp:site-title {"level":0} /-->
 
@@ -22,8 +19,8 @@
 <div style="height:var(--wp--preset--spacing--30)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
 
-<!-- wp:social-links {"iconColor":"theme-2","iconColorValue":"#111111","size":"has-normal-icon-size","className":"is-style-logos-only","style":{"spacing":{"blockGap":{"left":"var:preset|spacing|30"}}}} -->
-<ul class="wp-block-social-links has-normal-icon-size has-icon-color is-style-logos-only"><!-- wp:social-link {"url":"#","service":"instagram"} /-->
+<!-- wp:social-links {"iconColor":"theme-2","iconColorValue":"#111111","size":"has-normal-icon-size","className":"is-style-logos-only","style":{"spacing":{"blockGap":{"left":"var:preset|spacing|30"},"margin":{"top":"var:preset|spacing|50"}}}} -->
+<ul class="wp-block-social-links has-normal-icon-size has-icon-color is-style-logos-only" style="margin-top:var(--wp--preset--spacing--50)"><!-- wp:social-link {"url":"#","service":"instagram"} /-->
 
 <!-- wp:social-link {"url":"#","service":"x"} /-->
 
@@ -36,80 +33,75 @@
 <!-- /wp:column -->
 
 <!-- wp:column {"width":"15%","layout":{"type":"default"}} -->
-<div class="wp-block-column" style="flex-basis:15%"><!-- wp:heading {"textAlign":"left","level":3} -->
-<h3 class="wp-block-heading has-text-align-left"><?php esc_html_e('Shop', 'purple');?></h3>
+<div class="wp-block-column" style="flex-basis:15%"><!-- wp:heading {"level":4,"style":{"typography":{"textAlign":"left"}}} -->
+<h4 class="wp-block-heading has-text-align-left"><?php esc_html_e( 'Shop', 'purple' ); ?></h4>
 <!-- /wp:heading -->
-
-<!-- wp:spacer {"height":"var:preset|spacing|20"} -->
-<div style="height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer -->
 
 <!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"flex","orientation":"vertical"}} -->
 <div class="wp-block-group"><!-- wp:navigation {"overlayMenu":"never","style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"flex","orientation":"vertical"}} -->
-<!-- wp:navigation-link {"label":"<?php esc_html_e('Ceramics', 'purple');?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Ceramics', 'purple' ); ?>","url":"#"} /-->
 
-<!-- wp:navigation-link {"label":"<?php esc_html_e('Furniture', 'purple');?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Furniture', 'purple' ); ?>","url":"#"} /-->
 
-<!-- wp:navigation-link {"label":"<?php esc_html_e('Accessories', 'purple');?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Accessories', 'purple' ); ?>","url":"#"} /-->
 
-<!-- wp:navigation-link {"label":"<?php esc_html_e('Clothing', 'purple');?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Clothing', 'purple' ); ?>","url":"#"} /-->
 <!-- /wp:navigation --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column -->
 
 <!-- wp:column {"width":"15%","layout":{"type":"default"}} -->
-<div class="wp-block-column" style="flex-basis:15%"><!-- wp:heading {"textAlign":"left","level":3} -->
-<h3 class="wp-block-heading has-text-align-left"><?php esc_html_e('Info', 'purple');?></h3>
+<div class="wp-block-column" style="flex-basis:15%"><!-- wp:heading {"level":4,"style":{"typography":{"textAlign":"left"}}} -->
+<h4 class="wp-block-heading has-text-align-left"><?php esc_html_e( 'Info', 'purple' ); ?></h4>
 <!-- /wp:heading -->
-
-<!-- wp:spacer {"height":"var:preset|spacing|20"} -->
-<div style="height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer -->
 
 <!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"flex","orientation":"vertical"}} -->
 <div class="wp-block-group"><!-- wp:navigation {"overlayMenu":"never","style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"flex","orientation":"vertical"}} -->
-<!-- wp:navigation-link {"label":"<?php esc_html_e('About', 'purple');?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'About', 'purple' ); ?>","url":"#"} /-->
 
-<!-- wp:navigation-link {"label":"<?php esc_html_e('Contact us', 'purple');?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Contact us', 'purple' ); ?>","url":"#"} /-->
 
-<!-- wp:navigation-link {"label":"<?php esc_html_e('FAQs', 'purple');?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'FAQs', 'purple' ); ?>","url":"#"} /-->
 
-<!-- wp:navigation-link {"label":"<?php esc_html_e('Blog', 'purple');?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Blog', 'purple' ); ?>","url":"#"} /-->
 <!-- /wp:navigation --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
 
-<!-- wp:spacer {"height":"var:preset|spacing|50"} -->
-<div style="height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer -->
-
-<!-- wp:spacer {"height":"var:preset|spacing|20"} -->
-<div style="height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer -->
-
-<!-- wp:group {"align":"wide","style":{"spacing":{"blockGap":"0"}},"layout":{"type":"default"}} -->
-<div class="wp-block-group alignwide"><!-- wp:spacer {"height":"var:preset|spacing|60","style":{"layout":[]}} -->
-<div style="height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer -->
-
-<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"0","left":"0"}}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
-<div class="wp-block-group alignfull" style="padding-right:0;padding-left:0"><!-- wp:paragraph {"align":"left","style":{"typography":{"textTransform":"uppercase"}}} -->
-<p class="has-text-align-left" style="text-transform:uppercase"><?php
-printf(
-	esc_html__( '© %s', 'purple' ),
-	esc_html( wp_date( 'Y' ) )
-);
-?></p>
+<!-- wp:group {"align":"wide","style":{"spacing":{"blockGap":"0","margin":{"top":"var:preset|spacing|50"},"padding":{"top":"var:preset|spacing|40"}}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
+<div class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--50);padding-top:var(--wp--preset--spacing--40)"><!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"0","left":"0"},"blockGap":"4px"},"typography":{"lineHeight":"1.71"}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"left"}} -->
+<div class="wp-block-group alignfull" style="padding-right:0;padding-left:0;line-height:1.71"><!-- wp:paragraph {"style":{"typography":{"textTransform":"uppercase","textAlign":"left"}},"fontSize":"small"} -->
+<p class="has-text-align-left has-small-font-size" style="text-transform:uppercase">&copy; <?php echo esc_html( gmdate( 'Y' ) ); ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"align":"left"} -->
-<p class="has-text-align-left"><?php esc_html_e('Designed with WordPress', 'purple');?></p>
+<!-- wp:site-title {"level":0,"style":{"typography":{"fontStyle":"normal","fontWeight":"300","textTransform":"none","letterSpacing":"0px"},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} /-->
+
+<!-- wp:paragraph {"style":{"typography":{"textAlign":"left"},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"fontSize":"small"} -->
+<p class="has-text-align-left has-link-color has-small-font-size"><?php
+	/* Translators: WordPress link. */
+	$wordpress_link = '<a href="' . esc_url( __( 'https://wordpress.org', 'purple' ) ) . '" rel="nofollow">WordPress</a>';
+	echo sprintf(
+		/* Translators: Designed with WordPress */
+		esc_html__( 'Designed with %1$s', 'purple' ),
+		$wordpress_link
+	);
+	?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:spacer {"height":"var:preset|spacing|60","style":{"layout":[]}} -->
-<div style="height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer --></div>
+<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|40"},"typography":{"lineHeight":"1.71"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+<div class="wp-block-group" style="line-height:1.71"><!-- wp:paragraph {"fontSize":"small"} -->
+<p class="has-small-font-size"><a href="#"><?php esc_html_e( 'Shipping & Returns', 'purple' ); ?></a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"fontSize":"small"} -->
+<p class="has-small-font-size"><a href="#"><?php esc_html_e( 'Shipping & Returns', 'purple' ); ?></a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"fontSize":"small"} -->
+<p class="has-small-font-size"><a href="#"><?php esc_html_e( 'Shipping & Returns', 'purple' ); ?></a></p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->

@@ -28,8 +28,8 @@
 <p class="has-theme-2-color has-text-color has-link-color has-medium-font-size" style="font-style:normal;font-weight:600;line-height:1.5"><?php esc_html_e('Customer care', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"fontSize":"small"} -->
-<p class="has-small-font-size"><?php esc_html_e('Mon - Fri, 10am - 9pm', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1.71"},"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2","fontSize":"small"} -->
+<p class="has-theme-2-color has-text-color has-link-color has-small-font-size" style="line-height:1.71"><?php esc_html_e('Mon - Fri, 10am - 9pm', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column --></div>
@@ -52,8 +52,8 @@
 <p class="has-theme-2-color has-text-color has-link-color has-medium-font-size" style="font-style:normal;font-weight:600;line-height:1.5"><?php esc_html_e('Gift Package', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"fontSize":"small"} -->
-<p class="has-small-font-size"><?php esc_html_e('Free packaging over $100', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1.71"},"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2","fontSize":"small"} -->
+<p class="has-theme-2-color has-text-color has-link-color has-small-font-size" style="line-height:1.71"><?php esc_html_e('Free packaging over $100', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column --></div>
@@ -80,8 +80,8 @@
 <p class="has-theme-2-color has-text-color has-link-color has-medium-font-size" style="font-style:normal;font-weight:600;line-height:1.5"><?php esc_html_e('Easy Returns', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"fontSize":"small"} -->
-<p class="has-small-font-size"><?php esc_html_e('40-day extended returns', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1.71"},"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2","fontSize":"small"} -->
+<p class="has-theme-2-color has-text-color has-link-color has-small-font-size" style="line-height:1.71"><?php esc_html_e('40-day extended returns', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column --></div>
@@ -104,8 +104,8 @@
 <p class="has-theme-2-color has-text-color has-link-color has-medium-font-size" style="font-style:normal;font-weight:600;line-height:1.5"><?php esc_html_e('Repair Service', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"fontSize":"small"} -->
-<p class="has-small-font-size"><?php esc_html_e('On-demand clothing repair', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1.71"},"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2","fontSize":"small"} -->
+<p class="has-theme-2-color has-text-color has-link-color has-small-font-size" style="line-height:1.71"><?php esc_html_e('On-demand clothing repair', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column --></div>
