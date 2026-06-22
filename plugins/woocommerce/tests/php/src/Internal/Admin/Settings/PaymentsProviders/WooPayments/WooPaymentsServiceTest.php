@@ -8131,14 +8131,15 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$account_status, &$lock_value, &$lock_changes, &$requests_made ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$account_status, &$lock_value, &$requests_made ) {
 						if ( '/wc/v3/payments/onboarding/test_drive_account/disable' === $endpoint ) {
 							$requests_made[] = $params;
 							$account_status  = array(
 								'error' => true,
 							);
-							$lock_value     = null;
-							$lock_changes[] = null;
+							// Simulate the WooPayments account.deleted webhook deleting the shared lock
+							// option (a delete_option call, which Core's update_option tracker does not see).
+							$lock_value = null;
 
 							return new WP_Error(
 								'woocommerce_settings_payments_rest_error',
@@ -8171,9 +8172,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $requests_made, 'The internal test-drive disable endpoint should be called once.' );
 		$this->assertNull( $lock_value, 'The webhook-deleted onboarding lock should remain deleted after the internal request fails.' );
 		$this->assertSame(
-			array( $this->current_time, 0, null ),
+			array( $this->current_time, 0 ),
 			$lock_changes,
-			'Core should set and clear its preflight lock, then surface the webhook-triggered internal lock failure.'
+			'Core should set and then clear its own preflight lock (two update_option writes); the webhook-triggered delete is not an update_option event.'
 		);
 		$this->assertSame(
 			array(),
@@ -8183,9 +8184,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should clear the onboarding lock when internal test account disable throws an unexpected error.
+	 * @testdox Should clear the onboarding lock before the internal disable call, even when that call throws an unexpected error.
 	 */
-	public function test_disable_test_account_clears_lock_when_internal_disable_throws_unexpected_error(): void {
+	public function test_disable_test_account_clears_lock_before_internal_disable_even_when_it_throws(): void {
 		$location = 'US';
 
 		$account_exists = true;
@@ -8215,10 +8216,12 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 			$this->fail( 'Expected Error not thrown.' );
 		} catch ( \Error $e ) {
+			// The internal call runs in Phase 2, which only catches Exception, so a fatal \Error
+			// propagates by design. The lock was already cleared in Phase 1's finally beforehand.
 			$this->assertSame( 'Simulated engine failure.', $e->getMessage() );
 		}
 
-		$this->assertSame( 0, $lock_value, 'The onboarding lock should be cleared even when an unexpected error escapes.' );
+		$this->assertSame( 0, $lock_value, 'The onboarding lock is cleared in Phase 1 before the internal call, so it stays cleared even when that call throws.' );
 		$this->assertSame( array( $this->current_time, 0 ), $lock_changes );
 	}
 
@@ -9836,20 +9839,6 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$result = $this->invoke_private_method( 'get_onboarding_payment_methods_state', array( $location, $recommended_pms ) );
 		$this->assertArrayHasKey( 'apple_google', $result );
 		$this->assertFalse( $result['apple_google'], 'Explicit stored apple_google should take precedence over OR/recommended.' );
-	}
-
-	/**
-	 * Mock a working WPCOM connection.
-	 */
-	private function mock_working_wpcom_connection(): void {
-		$this->mock_wpcom_connection_manager
-			->expects( $this->any() )
-			->method( 'is_connected' )
-			->willReturn( true );
-		$this->mock_wpcom_connection_manager
-			->expects( $this->any() )
-			->method( 'has_connected_owner' )
-			->willReturn( true );
 	}
 
 	/**
