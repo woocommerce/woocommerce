@@ -60,10 +60,23 @@ const toFiniteNumber = ( raw: unknown ): number | undefined => {
 	return undefined;
 };
 
-const stepDecimals = ( step: number ) => {
-	const fraction = String( step ).split( '.' )[ 1 ];
+const decimalPlaces = ( value: number ) => {
+	const normalized = String( value ).toLowerCase();
+
+	if ( normalized.includes( 'e-' ) ) {
+		const [ coefficient, exponent ] = normalized.split( 'e-' );
+		const coefficientDecimals = coefficient.split( '.' )[ 1 ]?.length ?? 0;
+		return Number( exponent ) + coefficientDecimals;
+	}
+
+	const fraction = normalized.split( '.' )[ 1 ];
 	return fraction ? fraction.length : 0;
 };
+
+const stepDecimals = ( ...values: number[] ) =>
+	Math.max( ...values.map( decimalPlaces ) );
+
+const MAX_TO_FIXED_PRECISION = 100;
 
 /**
  * A number input with explicit +/- spin buttons, per the settings designs.
@@ -102,9 +115,20 @@ export const NumberSpinControl = ( {
 			next = Math.min( max, next );
 		}
 
-		const nextValue = String(
-			Number( next.toFixed( stepDecimals( step ) ) )
+		const requiredPrecision = stepDecimals(
+			step,
+			current ?? 0,
+			min ?? 0,
+			max ?? 0
 		);
+		const precision = Math.min(
+			Math.max( requiredPrecision, 0 ),
+			MAX_TO_FIXED_PRECISION
+		);
+		const nextValue =
+			requiredPrecision > MAX_TO_FIXED_PRECISION
+				? String( next )
+				: String( Number( next.toFixed( precision ) ) );
 
 		onChange( nextValue );
 		// Focus stays on the spin button while the input updates, so the
