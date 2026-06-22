@@ -49,6 +49,9 @@ type PendingNavigation = {
 	href: string;
 };
 
+const normalizeSection = ( section?: string ) =>
+	section === 'default' ? '' : section;
+
 const getInitialValues = ( schema: SettingsUISchema ): SettingsValues => {
 	const values: SettingsValues = {};
 
@@ -429,14 +432,11 @@ const ShellHeader = ( {
 	return (
 		<Page
 			className="wc-settings-ui-shell"
-			// @ts-expect-error `headingLevel` is not a valid prop for the current version of `@wordpress/admin-ui` but will be added in a future release. Remove this comment when the dependency is updated.
-			headingLevel={ 1 }
 			title={ title }
 			subTitle={ shell.subtitle }
 			breadcrumbs={ breadcrumbs }
 			badges={ badges }
 			actions={ actions }
-			showSidebarToggle={ false }
 		>
 			{ hasNavigation ? (
 				<div className="wc-settings-ui-shell__navigation">
@@ -522,7 +522,9 @@ export const SettingsUIPage = ( {
 	const context: SettingsFieldContext = useMemo(
 		() => ( {
 			page: page || schema.id,
-			section: section || schema.section,
+			section: normalizeSection(
+				typeof section === 'undefined' ? schema.section : section
+			),
 		} ),
 		[ page, schema.id, schema.section, section ]
 	);
