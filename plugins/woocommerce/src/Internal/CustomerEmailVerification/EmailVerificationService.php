@@ -64,13 +64,6 @@ class EmailVerificationService {
 	private const MAX_FAILURES = 10;
 
 	/**
-	 * Seconds to wait for the per-user verification lock before failing closed. The locked section is
-	 * a few meta operations (milliseconds), so this never trips for a legitimate single submission;
-	 * it only bounds the wait when many guesses are submitted in parallel.
-	 */
-	private const LOCK_TIMEOUT_SECONDS = 5;
-
-	/**
 	 * User meta key that stores the verified email address (lower-cased).
 	 * The customer is considered verified only while this matches their current account email.
 	 */
@@ -189,6 +182,13 @@ class EmailVerificationService {
 		$user       = get_user_by( 'id', $user_id );
 		$email_hash = $user instanceof \WP_User ? wp_fast_hash( strtolower( $user->user_email ) ) : '';
 
+		// Ensure the failure-counter row exists (at zero) so the compare-and-swap in verify_code() only
+		// ever updates, never inserts — concurrent first guesses would otherwise race into duplicate
+		// rows. Initialise only when absent, so resending a code never resets the count or the lockout.
+		if ( '' === (string) Users::get_site_user_meta( $user_id, self::FAILURES_META ) ) {
+			Users::update_site_user_meta( $user_id, self::FAILURES_META, '0' );
+		}
+
 		Users::update_site_user_meta( $user_id, self::KEY_META, time() . ':' . wp_fast_hash( $code ) . ':' . $email_hash . ':0' );
 
 		return $code;
@@ -197,10 +197,15 @@ class EmailVerificationService {
 	/**
 	 * Verify a submitted code for the given user and record the outcome.
 	 *
-	 * The read-modify-write of the attempt and failure counters runs inside a per-user database lock
-	 * so concurrent submissions can't each read the same counters before any write lands, which would
-	 * otherwise let a parallel flood of guesses slip past the per-code and cumulative limits. If the
-	 * lock can't be acquired the attempt fails closed without touching any state.
+	 * Before comparing the code, this claims a guess against the cumulative budget with a
+	 * compare-and-swap on the failure counter ({@see self::claim_attempt()}). That serialises
+	 * concurrent submissions into distinct slots, so a parallel flood can't each read the same counter
+	 * and slip past the cap — at most MAX_FAILURES codes are ever compared, and a loser under
+	 * contention is turned away ({@see self::RESULT_WRONG}) without a guess. Expired, missing, or
+	 * email-mismatched codes return before the counter moves, so they never count against the customer.
+	 *
+	 * A correct code marks the user verified; reaching {@see self::MAX_ATTEMPTS} on one code burns it
+	 * (a new one must be requested) and reaching {@see self::MAX_FAILURES} locks the user out permanently.
 	 *
 	 * @since 11.0.0
 	 *
@@ -209,33 +214,9 @@ class EmailVerificationService {
 	 * @return string One of the RESULT_* constants.
 	 */
 	public function verify_code( int $user_id, string $code ): string {
-		if ( ! $this->acquire_lock( $user_id ) ) {
-			// Fail closed: never run the unserialised read-modify-write if we couldn't get the lock.
-			return self::RESULT_WRONG;
-		}
+		$failures = $this->get_failure_count( $user_id );
 
-		try {
-			return $this->do_verify_code( $user_id, $code );
-		} finally {
-			$this->release_lock( $user_id );
-		}
-	}
-
-	/**
-	 * Verify a submitted code and record the outcome. Must run under the per-user lock held by
-	 * {@see self::verify_code()}.
-	 *
-	 * A correct code marks the user verified. A wrong guess against a live code increments both the
-	 * per-code attempt counter and the cumulative failure counter; reaching {@see self::MAX_ATTEMPTS}
-	 * burns the code (a new one must be requested) and reaching {@see self::MAX_FAILURES} locks the
-	 * user out permanently. Expired or missing codes are not counted as guesses.
-	 *
-	 * @param int    $user_id WordPress user ID.
-	 * @param string $code    The plaintext code submitted by the customer.
-	 * @return string One of the RESULT_* constants.
-	 */
-	private function do_verify_code( int $user_id, string $code ): string {
-		if ( $this->is_locked_out( $user_id ) ) {
+		if ( $failures >= self::MAX_FAILURES ) {
 			return self::RESULT_LOCKED;
 		}
 
@@ -263,30 +244,20 @@ class EmailVerificationService {
 			}
 		}
 
+		// Claim this guess against the cumulative budget before comparing. If another request moved the
+		// counter first, we lose the swap and turn away without a guess (and without double-counting).
+		if ( ! $this->claim_attempt( $user_id, $failures ) ) {
+			return self::RESULT_WRONG;
+		}
+
 		if ( '' !== $code && wp_verify_fast_hash( $code, $hash ) ) {
 			$this->mark_verified( $user_id );
 			return self::RESULT_OK;
 		}
 
-		return $this->register_failed_attempt( $user_id, $timestamp, $hash, $email_hash, $attempts );
-	}
-
-	/**
-	 * Record a wrong guess against a live code and return the resulting status.
-	 *
-	 * @param int    $user_id    WordPress user ID.
-	 * @param int    $timestamp  Timestamp the live code was minted.
-	 * @param string $hash       Stored hash of the live code.
-	 * @param string $email_hash Stored email hash bound to the live code.
-	 * @param int    $attempts   Per-code attempts used so far (before this one).
-	 * @return string RESULT_LOCKED, RESULT_BURNED, or RESULT_WRONG.
-	 */
-	private function register_failed_attempt( int $user_id, int $timestamp, string $hash, string $email_hash, int $attempts ): string {
-		$failures = $this->get_failure_count( $user_id ) + 1;
-		Users::update_site_user_meta( $user_id, self::FAILURES_META, (string) $failures );
-
-		if ( $failures >= self::MAX_FAILURES ) {
-			// Permanent lockout: drop the live code too so nothing remains to guess against.
+		// Wrong guess. The cumulative counter has already moved to $failures + 1.
+		if ( $failures + 1 >= self::MAX_FAILURES ) {
+			// That was the final allowed guess: lock out and drop the live code.
 			Users::delete_site_user_meta( $user_id, self::KEY_META );
 			return self::RESULT_LOCKED;
 		}
@@ -309,44 +280,20 @@ class EmailVerificationService {
 	}
 
 	/**
-	 * Acquire the per-user verification lock.
+	 * Atomically claim a guess against the cumulative failure budget via a compare-and-swap.
 	 *
-	 * @param int $user_id WordPress user ID.
-	 * @return bool True when the lock was acquired.
-	 */
-	protected function acquire_lock( int $user_id ): bool {
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- GET_LOCK is a MySQL session lock, not a cacheable read.
-		return 1 === (int) $wpdb->get_var(
-			$wpdb->prepare( 'SELECT GET_LOCK(%s, %d)', $this->lock_name( $user_id ), self::LOCK_TIMEOUT_SECONDS )
-		);
-	}
-
-	/**
-	 * Release the per-user verification lock.
+	 * Moves the counter from $failures to $failures + 1 only while it still equals $failures, so
+	 * concurrent submissions are serialised into distinct slots and at most MAX_FAILURES ever pass.
+	 * The counter row is pre-created at zero by {@see self::create_code()} so this only ever updates,
+	 * never inserts (which would race into duplicate rows). Returns false when another request moved
+	 * the counter first.
 	 *
-	 * @param int $user_id WordPress user ID.
-	 * @return void
+	 * @param int $user_id  WordPress user ID.
+	 * @param int $failures The failure count this request observed.
+	 * @return bool True when this request claimed the slot.
 	 */
-	protected function release_lock( int $user_id ): void {
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Releasing a MySQL session lock.
-		$wpdb->query( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $this->lock_name( $user_id ) ) );
-	}
-
-	/**
-	 * Build the MySQL lock name for a user, namespaced with the table prefix and capped at MySQL's
-	 * 64-character lock-name limit.
-	 *
-	 * @param int $user_id WordPress user ID.
-	 * @return string
-	 */
-	private function lock_name( int $user_id ): string {
-		global $wpdb;
-
-		return substr( $wpdb->prefix . 'wc_verify_email_' . $user_id, 0, 64 );
+	private function claim_attempt( int $user_id, int $failures ): bool {
+		return (bool) Users::update_site_user_meta( $user_id, self::FAILURES_META, (string) ( $failures + 1 ), (string) $failures );
 	}
 
 	/**

@@ -14,6 +14,8 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 
 	private const KEY_META = '_wc_email_verification_key';
 
+	private const FAILURES_META = '_wc_email_verification_failures';
+
 	/**
 	 * The System Under Test.
 	 *
@@ -105,25 +107,31 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Verification fails closed and changes no state when the per-user lock can't be acquired.
+	 * @testdox Minting a code initialises the failure counter to zero so the compare-and-swap never inserts.
 	 */
-	public function test_verify_code_fails_closed_without_lock(): void {
-		$user_id = wc_create_new_customer( 'lockfail@example.com', 'lockfailuser', 'pw' );
+	public function test_create_code_initialises_failure_counter(): void {
+		$user_id = wc_create_new_customer( 'init@example.com', 'inituser', 'pw' );
+
+		$this->assertSame( '', (string) Users::get_site_user_meta( $user_id, self::FAILURES_META ), 'No counter before the flow starts' );
+
+		$this->sut->create_code( $user_id );
+
+		$this->assertSame( '0', (string) Users::get_site_user_meta( $user_id, self::FAILURES_META ), 'The first code must create the counter row at zero' );
+	}
+
+	/**
+	 * @testdox Resending a code preserves the cumulative failure count (it does not reset the lockout budget).
+	 */
+	public function test_resending_a_code_preserves_failure_count(): void {
+		$user_id = wc_create_new_customer( 'resend@example.com', 'resenduser', 'pw' );
 		$code    = $this->sut->create_code( $user_id );
 
-		// Simulate losing the lock race: with the lock unavailable, the read-modify-write must not run,
-		// so a parallel flood of guesses can never advance the counters or verify behind a held lock.
-		$service = $this->getMockBuilder( EmailVerificationService::class )
-			->onlyMethods( array( 'acquire_lock' ) )
-			->getMock();
-		$service->method( 'acquire_lock' )->willReturn( false );
+		$this->sut->verify_code( $user_id, $this->wrong_code( $code ) );
+		$this->assertSame( '1', (string) Users::get_site_user_meta( $user_id, self::FAILURES_META ), 'One wrong guess records one failure' );
 
-		$result = $service->verify_code( $user_id, $code );
+		$this->sut->create_code( $user_id );
 
-		$this->assertSame( EmailVerificationService::RESULT_WRONG, $result, 'A lost lock must fail closed' );
-		$this->assertFalse( $this->sut->is_verified( $user_id ), 'No verification may happen without the lock' );
-		$this->assertTrue( $this->sut->has_pending_code( $user_id ), 'The pending code must be untouched' );
-		$this->assertFalse( $this->sut->is_locked_out( $user_id ), 'No failure may be recorded without the lock' );
+		$this->assertSame( '1', (string) Users::get_site_user_meta( $user_id, self::FAILURES_META ), 'Resending must not reset the cumulative failure count' );
 	}
 
 	/**
