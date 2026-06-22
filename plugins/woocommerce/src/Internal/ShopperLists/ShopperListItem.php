@@ -134,7 +134,7 @@ class ShopperListItem {
 	 */
 	public static function from_product( int $product_or_variation_id, array $variation = array(), int $quantity = 1 ): ?self {
 		$product = wc_get_product( absint( $product_or_variation_id ) );
-		if ( ! $product ) {
+		if ( ! $product || ! self::product_is_live( $product ) ) {
 			return null;
 		}
 
@@ -152,7 +152,7 @@ class ShopperListItem {
 			$variation    = array();
 		}
 
-		$item = new self(
+		return new self(
 			self::generate_key( $product_id, $variation_id, $variation ),
 			$product_id,
 			$variation_id,
@@ -161,12 +161,6 @@ class ShopperListItem {
 			current_time( 'mysql', true ),
 			$product->get_title()
 		);
-
-		if ( ! $item->is_live() ) {
-			return null;
-		}
-
-		return $item;
 	}
 
 	/**
@@ -319,7 +313,16 @@ class ShopperListItem {
 	 */
 	public function is_live(): bool {
 		$product = $this->get_product();
-		if ( ! $product instanceof \WC_Product || ProductStatus::PUBLISH !== $product->get_status() ) {
+		return $product instanceof \WC_Product && self::product_is_live( $product );
+	}
+
+	/**
+	 * Whether a resolved product (and its parent, for variations) is `publish`.
+	 *
+	 * @param \WC_Product $product Resolved product or variation.
+	 */
+	private static function product_is_live( \WC_Product $product ): bool {
+		if ( ProductStatus::PUBLISH !== $product->get_status() ) {
 			return false;
 		}
 
