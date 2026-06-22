@@ -107,44 +107,44 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 			);
 			$task_images         = array(
 				'store_details'        => array(
-					'image_url'    => $asset_url . 'images/task_list/store-details-illustration.png',
-					'image_alt'    => __( 'Store location illustration', 'woocommerce' ),
+					'image_url' => $asset_url . 'images/task_list/store-details-illustration.png',
+					'image_alt' => __( 'Store location illustration', 'woocommerce' ),
 				),
 				'customize-store'      => array(
-					'image_url'    => $asset_url . 'images/task_list/customize-store-illustration.svg',
-					'image_alt'    => __( 'Customize your store illustration', 'woocommerce' ),
+					'image_url' => $asset_url . 'images/task_list/customize-store-illustration.svg',
+					'image_alt' => __( 'Customize your store illustration', 'woocommerce' ),
 				),
 				'tax'                  => array(
-					'image_url'    => $asset_url . 'images/task_list/tax-illustration.svg',
-					'image_alt'    => __( 'Tax illustration', 'woocommerce' ),
+					'image_url' => $asset_url . 'images/task_list/tax-illustration.svg',
+					'image_alt' => __( 'Tax illustration', 'woocommerce' ),
 				),
 				'shipping'             => array(
-					'image_url'    => $asset_url . 'images/task_list/shipping-illustration.svg',
-					'image_alt'    => __( 'Shipping illustration', 'woocommerce' ),
+					'image_url' => $asset_url . 'images/task_list/shipping-illustration.svg',
+					'image_alt' => __( 'Shipping illustration', 'woocommerce' ),
 				),
 				'marketing'            => array(
-					'image_url'    => $asset_url . 'images/task_list/sales-illustration.svg',
-					'image_alt'    => __( 'Marketing illustration', 'woocommerce' ),
+					'image_url' => $asset_url . 'images/task_list/sales-illustration.svg',
+					'image_alt' => __( 'Marketing illustration', 'woocommerce' ),
 				),
 				'payments'             => array(
-					'image_url'    => $asset_url . 'images/task_list/payment-illustration.svg',
-					'image_alt'    => __( 'Payment illustration', 'woocommerce' ),
+					'image_url' => $asset_url . 'images/task_list/payment-illustration.svg',
+					'image_alt' => __( 'Payment illustration', 'woocommerce' ),
 				),
 				'woocommerce-payments' => array(
-					'image_url'    => $asset_url . 'images/task_list/payment-illustration.svg',
-					'image_alt'    => __( 'Payment illustration', 'woocommerce' ),
+					'image_url' => $asset_url . 'images/task_list/payment-illustration.svg',
+					'image_alt' => __( 'Payment illustration', 'woocommerce' ),
 				),
 				'products'             => array(
-					'image_url'    => $asset_url . 'images/task_list/sales-section-illustration.svg',
-					'image_alt'    => __( 'Products illustration', 'woocommerce' ),
+					'image_url' => $asset_url . 'images/task_list/sales-section-illustration.svg',
+					'image_alt' => __( 'Products illustration', 'woocommerce' ),
 				),
 				'purchase'             => array(
-					'image_url'    => $asset_url . 'images/task_list/purchase-illustration.png',
-					'image_alt'    => __( 'Purchase illustration', 'woocommerce' ),
+					'image_url' => $asset_url . 'images/task_list/purchase-illustration.png',
+					'image_alt' => __( 'Purchase illustration', 'woocommerce' ),
 				),
 				'launch-your-store'    => array(
-					'image_url'    => $asset_url . 'images/task_list/launch-your-store-illustration.svg',
-					'image_alt'    => __( 'Launch your store illustration', 'woocommerce' ),
+					'image_url' => $asset_url . 'images/task_list/launch-your-store-illustration.svg',
+					'image_alt' => __( 'Launch your store illustration', 'woocommerce' ),
 				),
 			);
 
