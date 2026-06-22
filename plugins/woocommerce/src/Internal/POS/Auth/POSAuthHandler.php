@@ -25,8 +25,10 @@ use WP_Error;
  * staff credential (verify a PIN once at login → carry a short-lived token) is the deferred follow-up.
  *
  * Two hooks are needed: `determine_current_user` @100 (primary; after core/WC auth) and
- * `rest_authentication_errors` @20 (safety net for WC's authentication_fallback, which sets the user
- * via a bare wp_set_current_user() that bypasses the determine_current_user chain).
+ * `rest_authentication_errors` @20 — a safety net for when the device user is instead resolved by WC's
+ * authentication_fallback, a bare wp_set_current_user() (used when wp_get_current_user() runs before
+ * WooCommerce finishes loading) that bypasses the determine_current_user chain. Without it the swap
+ * would be silently skipped on that path.
  *
  * @since 11.0.0
  * @internal
@@ -86,7 +88,7 @@ class POSAuthHandler implements RegisterHooksInterface {
 	 */
 	public function maybe_swap( $user_id ) {
 		$staff_id = $this->resolve_swap( (int) $user_id );
-		return $staff_id > 0 ? $staff_id : $user_id;
+		return $staff_id ?? $user_id;
 	}
 
 	/**
@@ -105,7 +107,7 @@ class POSAuthHandler implements RegisterHooksInterface {
 		}
 
 		$staff_id = $this->resolve_swap( get_current_user_id() );
-		if ( $staff_id > 0 && get_current_user_id() !== $staff_id ) {
+		if ( null !== $staff_id && get_current_user_id() !== $staff_id ) {
 			wp_set_current_user( $staff_id );
 		}
 
@@ -113,7 +115,7 @@ class POSAuthHandler implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The single swap decision: return the staff id to run as, or 0 to leave the user unchanged.
+	 * The single swap decision: return the staff id to run as, or null to leave the user unchanged.
 	 *
 	 * Reads top-to-bottom — POS request? POS admin? staffer exists with the cap? then commit.
 	 * Idempotent: once committed, later calls return the same staff id without re-evaluating, so a
@@ -121,31 +123,31 @@ class POSAuthHandler implements RegisterHooksInterface {
 	 * device admin.
 	 *
 	 * @param int $device_user_id The pre-swap (device admin) user id.
-	 * @return int
+	 * @return int|null
 	 */
-	private function resolve_swap( int $device_user_id ): int {
+	private function resolve_swap( int $device_user_id ): ?int {
 		if ( $this->staff_user_id > 0 ) {
 			return $this->staff_user_id;
 		}
 
 		// 1. POS-originated request?
 		if ( ! $this->request_context->is_pos_request() ) {
-			return 0;
+			return null;
 		}
 
 		// 2. A real POS admin? Never swap up from user 0 or a non-manager device user.
 		if ( $device_user_id <= 0 || ! user_can( $device_user_id, 'manage_woocommerce' ) ) {
-			return 0;
+			return null;
 		}
 
 		// 3. Does the named staffer exist with POS access — and, for a write, the required cap?
 		$staff_id = $this->request_context->get_staff_id();
 		if ( $staff_id <= 0 || ! Capabilities::has_pos_access( $staff_id ) ) {
-			return 0;
+			return null;
 		}
 		$required_cap = self::required_pos_cap_for_intent( $this->request_context->get_intent() );
 		if ( null !== $required_cap && ! Capabilities::user_has_pos_capability( $staff_id, $required_cap ) ) {
-			return 0;
+			return null;
 		}
 
 		// 4. Commit. device_admin_id is captured exactly once, here.
