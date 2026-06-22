@@ -175,14 +175,20 @@ const doApiFetchWithHeaders = ( options: APIFetchOptions ) =>
 										console.error(
 											`[QAO524-PROBE json] site=a path=${
 												options.path
-											} url=${ options.url } status=${
+											} url=${ options.url } finalUrl=${
+												fetchResponse.url
+											} redirected=${
+												fetchResponse.redirected
+											} resType=${
+												fetchResponse.type
+											} status=${
 												fetchResponse.status
 											} ct=${ fetchResponse.headers.get(
 												'content-type'
 											) } len=${
 												body.length
 											} body=${ JSON.stringify(
-												body.slice( 0, 200 )
+												body.slice( 0, 1200 )
 											) }`
 										);
 									} )
