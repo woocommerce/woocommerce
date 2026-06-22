@@ -8488,6 +8488,106 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should disable a test-drive account via the test-drive endpoint and mark steps completed on success.
+	 */
+	public function test_disable_test_account_marks_steps_completed_on_successful_test_drive_disable(): void {
+		$location = 'US';
+
+		$account_exists = true;
+		$this->mock_account_state( $account_exists );
+		$this->mock_working_wpcom_connection();
+
+		$lock_value      = 0;
+		$lock_changes    = array();
+		$updated_profile = array();
+		$this->mock_disable_test_account_option_state( $lock_value, $lock_changes, $updated_profile );
+
+		$requested_endpoints = array();
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint ) use ( &$requested_endpoints ) {
+						$requested_endpoints[] = $endpoint;
+
+						return array(
+							'success' => true,
+						);
+					},
+				),
+			)
+		);
+
+		$result = $this->sut->disable_test_account( $location, 'test-from', 'test-source' );
+
+		$this->assertSame( array( 'success' => true ), $result, 'Disabling a test-drive account should succeed.' );
+		$this->assertSame(
+			array( '/wc/v3/payments/onboarding/test_drive_account/disable' ),
+			$requested_endpoints,
+			'A test-drive account should be disabled via the test-drive disable endpoint, not the onboarding reset endpoint.'
+		);
+		$this->assertSame(
+			array( $this->current_time, 0 ),
+			$lock_changes,
+			'Core should set its preflight lock and clear it before the Phase 2 disable call.'
+		);
+		$this->assertSame( 0, $lock_value, 'The onboarding lock should be cleared after the disable call.' );
+		$this->assertNotEmpty( $updated_profile, 'NOX steps should be marked completed on a successful test-drive disable.' );
+	}
+
+	/**
+	 * @testdox Should not write the onboarding lock during or after the Phase 2 internal call.
+	 */
+	public function test_disable_test_account_does_not_write_onboarding_lock_during_phase_2(): void {
+		// Guards the invariant that Phase 2 must not call clear_onboarding_lock(): because the lock
+		// is a shared, token-less option, an unconditional Phase 2 clear would stomp a concurrent
+		// request's freshly acquired lock. The proof is that no lock write happens once Phase 2 runs.
+		$location = 'US';
+
+		$account_exists = true;
+		$this->mock_account_state( $account_exists );
+		$this->mock_working_wpcom_connection();
+
+		$lock_value      = 0;
+		$lock_changes    = array();
+		$updated_profile = array();
+		$this->mock_disable_test_account_option_state( $lock_value, $lock_changes, $updated_profile );
+
+		$lock_writes_at_phase_2 = null;
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint ) use ( &$lock_changes, &$lock_writes_at_phase_2 ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/disable' === $endpoint ) {
+							// Snapshot the lock writes that happened before the internal call ran.
+							$lock_writes_at_phase_2 = $lock_changes;
+
+							return array(
+								'success' => true,
+							);
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		$result = $this->sut->disable_test_account( $location, 'test-from', 'test-source' );
+
+		$this->assertSame( array( 'success' => true ), $result, 'Disabling the test-drive account should succeed.' );
+		$this->assertSame(
+			array( $this->current_time, 0 ),
+			$lock_writes_at_phase_2,
+			'By the time the Phase 2 internal call runs, Core should have already set and cleared its preflight lock.'
+		);
+		$this->assertSame(
+			$lock_writes_at_phase_2,
+			$lock_changes,
+			'Phase 2 and the post-call step bookkeeping must not write the onboarding lock again; an extra write means an unconditional Phase 2 clear was re-introduced.'
+		);
+	}
+
+	/**
 	 * Test get_onboarding_kyc_session throws exception when extension is not active.
 	 *
 	 * @return void
