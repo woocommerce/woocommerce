@@ -34,40 +34,40 @@ class Features {
 	 * Keep this dictionary in sync with RETIRED_FEATURE_FLAGS in
 	 * plugins/woocommerce/client/admin/client/utils/features/retired-feature-flags.ts.
 	 *
-	 * @var array<string, string>
+	 * @var array<string, ?string>
 	 */
 	private static $retired_feature_compatibility_removal_versions = array(
-		'activity-panels'                      => '11.5',
-		'analytics'                            => '11.5',
-		'analytics-scheduled-import'           => '11.5',
-		'experimental-iapi-mini-cart'          => '11.5',
-		'coupons'                              => '11.5',
-		'core-profiler'                        => '11.5',
-		'customize-store'                      => '11.5',
-		'customer-effort-score-tracks'         => '11.5',
-		'import-products-task'                 => '11.5',
-		'experimental-fashion-sample-products' => '11.5',
-		'shipping-smart-defaults'              => '11.5',
-		'shipping-setting-tour'                => '11.5',
-		'homescreen'                           => '11.5',
-		'marketing'                            => '11.5',
-		'mobile-app-banner'                    => '11.5',
-		'onboarding'                           => '11.5',
-		'onboarding-tasks'                     => '11.5',
-		'pattern-toolkit-full-composability'   => '11.5',
-		'payment-gateway-suggestions'          => '11.5',
-		'product-custom-fields'                => '11.5',
-		'printful'                             => '11.5',
-		'remote-inbox-notifications'           => '11.5',
-		'remote-free-extensions'               => '11.5',
-		'shipping-label-banner'                => '11.5',
-		'subscriptions'                        => '11.5',
-		'store-alerts'                         => '11.5',
-		'transient-notices'                    => '11.5',
-		'wc-pay-promotion'                     => '11.5',
-		'wc-pay-welcome-page'                  => '11.5',
-		'woo-mobile-welcome'                   => '11.5',
-		'launch-your-store'                    => '11.5',
+		'activity-panels'                      => null,
+		'analytics'                            => null,
+		'analytics-scheduled-import'           => null,
+		'experimental-iapi-mini-cart'          => null,
+		'coupons'                              => null,
+		'core-profiler'                        => null,
+		'customize-store'                      => null,
+		'customer-effort-score-tracks'         => null,
+		'import-products-task'                 => null,
+		'experimental-fashion-sample-products' => null,
+		'shipping-smart-defaults'              => null,
+		'shipping-setting-tour'                => null,
+		'homescreen'                           => null,
+		'marketing'                            => null,
+		'mobile-app-banner'                    => null,
+		'onboarding'                           => null,
+		'onboarding-tasks'                     => null,
+		'pattern-toolkit-full-composability'   => null,
+		'payment-gateway-suggestions'          => null,
+		'product-custom-fields'                => null,
+		'printful'                             => null,
+		'remote-inbox-notifications'           => null,
+		'remote-free-extensions'               => null,
+		'shipping-label-banner'                => null,
+		'subscriptions'                        => null,
+		'store-alerts'                         => null,
+		'transient-notices'                    => null,
+		'wc-pay-promotion'                     => null,
+		'wc-pay-welcome-page'                  => null,
+		'woo-mobile-welcome'                   => null,
+		'launch-your-store'                    => null,
 	);
 
 	/**
@@ -432,10 +432,10 @@ class Features {
 	 * Gets the WooCommerce version where a legacy feature flag shim will be removed.
 	 *
 	 * @param string $feature Feature slug.
-	 * @return string
+	 * @return string|null
 	 */
 	private static function get_legacy_feature_compatibility_removal_version( $feature ) {
-		return self::$retired_feature_compatibility_removal_versions[ $feature ] ?? 'a future version';
+		return self::$retired_feature_compatibility_removal_versions[ $feature ] ?? null;
 	}
 
 	/**
@@ -445,13 +445,15 @@ class Features {
 	 * @param string $feature Feature slug.
 	 */
 	private static function warn_legacy_feature_compatibility_usage( $method, $feature ): void {
+		$removal_version = self::get_legacy_feature_compatibility_removal_version( $feature );
+
 		wc_deprecated_function(
 			sprintf( "%s( '%s' )", $method, $feature ),
 			self::RETIRED_FEATURE_COMPATIBILITY_DEPRECATION_VERSION,
 			sprintf(
-				'direct feature behavior checks. The %1$s WC Admin feature flag shim will be removed in WooCommerce %2$s.',
+				'direct feature behavior checks. The %1$s WC Admin feature flag shim will be removed in %2$s.',
 				$feature,
-				self::get_legacy_feature_compatibility_removal_version( $feature )
+				$removal_version ? 'WooCommerce ' . $removal_version : 'a future version of WooCommerce'
 			)
 		);
 	}
