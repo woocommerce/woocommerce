@@ -193,7 +193,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		$order = wc_get_order( $post_id );
-		if ( ! $order ) {
+		if ( ! $order instanceof \WC_Order ) {
 			return -1;
 		}
 		$customer_id = self::get_existing_customer_id_from_order( $order );
@@ -713,6 +713,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return array ($data, $format)
 	 */
 	public static function get_customer_order_data_and_format( $order, $customer_user = null ) {
+		if ( ! is_a( $order, 'WC_Order' ) ) {
+			return array( array(), array() );
+		}
+
 		if ( ! $order instanceof OverridesOrder ) {
 			if ( ! $order->get_id() ) {
 				return array( array(), array() );
