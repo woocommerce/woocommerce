@@ -32,6 +32,7 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 		}
 		add_action( 'created_term', array( $this, 'save_product_attribute_term_fields' ), 10, 3 );
 		add_action( 'edit_term', array( $this, 'save_product_attribute_term_fields' ), 10, 3 );
+		add_action( 'woocommerce_attribute_added', array( $this, 'maybe_seed_visual_attribute_terms' ), 10, 2 );
 
 		foreach ( wc_get_attribute_taxonomies() as $attribute ) {
 			$taxonomy = 'pa_' . $attribute->attribute_name;
@@ -312,6 +313,25 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 		}
 
 		VisualAttributeTermMeta::save_term_visual_from_request( (int) $term_id, $taxonomy, $_POST ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	}
+
+	/**
+	 * Seed default color terms for new wc-visual attributes.
+	 *
+	 * @internal
+	 *
+	 * @param int   $attribute_id Attribute ID.
+	 * @param array $data         Attribute data.
+	 * @return void
+	 *
+	 * @since 11.0.0
+	 */
+	public function maybe_seed_visual_attribute_terms( int $attribute_id, array $data ): void {
+		if ( $attribute_id <= 0 ) {
+			return;
+		}
+
+		VisualAttributeTermMeta::seed_visual_attribute_terms( $attribute_id, $data );
 	}
 
 	/**
