@@ -112,11 +112,16 @@ class UserProfileFieldTest extends WC_Unit_Test_Case {
 	public function test_save_verifies_new_email_when_changed_and_checked_together(): void {
 		$user_id = wc_create_new_customer( 'before-change@example.com', 'emailchange', 'pw' );
 
+		// A fresh instance so its constructor registers the profile_update hook within this test:
+		// the container caches a shared instance, so resolving it again would not re-add the hook.
+		$field = new UserProfileField();
+		$field->init( $this->service );
+
 		$_POST['wc_email_verified_nonce'] = wp_create_nonce( 'wc_email_verified_' . $user_id );
 		$_POST['wc_email_verified']       = '1';
 
-		// The field saves on profile_update, which fires after wp_update_user has written the new
-		// email, so verification must land on 'after-change@example.com', not the old address.
+		// Changing the email runs through wp_update_user, whose profile_update hook fires after the
+		// new address is written, so verification must land on the new address, not the old one.
 		wp_update_user(
 			array(
 				'ID'         => $user_id,
