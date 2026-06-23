@@ -19,22 +19,21 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
  * `wc/store/v1` and the public `wc/pos/v1` (used by the POS catalog feed). The
  * `internal` segment is deliberate: the cart/checkout shape is still a spike and
  * not a committed public contract, and keeping it out of `wc/store/v1` means no
- * Store API middleware (rate limiting, the cart-token session swap, …) applies
- * unless we add it explicitly. Registration is gated on the `point_of_sale`
- * feature so the routes exist exactly when POS does — there is no separate
- * enablement step for the mobile app.
+ * Store API request middleware (rate limiting, CORS, the checkout opt-in — all
+ * keyed on `wc/store/` in {@see \Automattic\WooCommerce\StoreApi\Authentication})
+ * applies unless we add it explicitly. Registration is gated on the
+ * `point_of_sale` feature so the routes exist exactly when POS does.
  *
- * Each POS route subclasses the corresponding Store API concrete route
- * (mirroring the agentic commerce pattern), so it reuses the Store API schema,
- * validation and response pipeline unchanged. The route subclasses are
- * deliberately near-empty: the POS-specific endpoint-shape changes are applied
- * here in {@see self::apply_pos_endpoint_overrides()} at registration time, and
- * the runtime behaviour changes live in the POS policy hooks. Keeping the
- * divergence in those two places (and out of the route bodies) means there is
- * one obvious spot to reason about how POS differs from the web Store API, and
- * less surface to drift if the web routes are refactored.
+ * Each POS route is adapter-style: it extends the abstract
+ * {@see \Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute} (the
+ * designed extension point, the same one agentic commerce builds on) and owns
+ * its own endpoint shape, delegating the cart/checkout work to the shared
+ * controllers and traits. Because each route declares its full `get_args()`
+ * (auth callback, the `cart_token` parameter, schema relaxations and all), this
+ * Controller is a thin register loop — there is no registration-time argument
+ * rewriting.
  *
- * Adding a route: write the subclass and add one entry to {@see ROUTE_CLASSES}.
+ * Adding a route: write the route class and add one entry to {@see ROUTE_CLASSES}.
  *
  * @internal Just for internal use.
  *
@@ -91,72 +90,8 @@ class Controller implements RegisterHooksInterface {
 			register_rest_route(
 				self::REST_NAMESPACE,
 				$route->get_path(),
-				$this->apply_pos_endpoint_overrides( $route, $route->get_args() )
+				$route->get_args()
 			);
 		}
-	}
-
-	/**
-	 * Apply the POS-specific endpoint-shape changes to a route's arguments at
-	 * registration time, keeping every divergence from the web Store API in one
-	 * place rather than scattered across route subclasses.
-	 *
-	 * For each endpoint definition (the int-keyed entries; the string-keyed
-	 * `schema`/`allow_batch` metadata is left untouched) this:
-	 *
-	 * - swaps the permission callback for the route's capability check;
-	 * - adds the `cart_token` URL parameter so mobile clients can carry the cart
-	 *   session without a custom header;
-	 * - on the checkout route only, declares the optional `customer_id` parameter
-	 *   so the order can be attributed to an existing customer account (the
-	 *   account lookup and attachment happen in {@see \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomerAccountPolicy});
-	 * - relaxes the schema-level `required` flag on billing/shipping address so
-	 *   POS can submit empty addresses at parse time (the deeper address
-	 *   validation is relaxed separately by the POS policy hooks). This is a
-	 *   no-op for routes without those args.
-	 *
-	 * @param object $route     The POS route instance (uses {@see PosRouteTrait}).
-	 * @param array  $endpoints Result of the route's `get_args()`.
-	 * @return array
-	 */
-	private function apply_pos_endpoint_overrides( object $route, array $endpoints ): array {
-		foreach ( $endpoints as $key => &$endpoint ) {
-			if ( ! is_int( $key ) || ! is_array( $endpoint ) || ! isset( $endpoint['methods'] ) ) {
-				continue;
-			}
-
-			$endpoint['permission_callback'] = array( $route, 'check_permission' );
-			$endpoint['args']                = array_merge(
-				$endpoint['args'] ?? array(),
-				array(
-					'cart_token' => array(
-						'description' => __( 'Cart session token returned by a prior POS Store API response. Pass it back on subsequent requests to keep the cart scoped to the same transaction.', 'woocommerce' ),
-						'type'        => 'string',
-						'context'     => array( 'view', 'edit' ),
-					),
-				)
-			);
-
-			// Order attribution only makes sense on the order-creating POST, so
-			// keep `customer_id` off the GET (read) endpoint.
-			$is_post = in_array( 'POST', array_map( 'strtoupper', (array) $endpoint['methods'] ), true );
-			if ( $route instanceof Checkout && $is_post ) {
-				$endpoint['args']['customer_id'] = array(
-					'description' => __( 'ID of an existing customer account to associate the order with. Omit for a guest sale. The order is attributed to the account, but cart pricing, coupons and tax still resolve as a guest.', 'woocommerce' ),
-					'type'        => 'integer',
-					'minimum'     => 1,
-					'context'     => array( 'view', 'edit' ),
-				);
-			}
-
-			foreach ( array( 'billing_address', 'shipping_address' ) as $address_arg ) {
-				if ( isset( $endpoint['args'][ $address_arg ] ) && is_array( $endpoint['args'][ $address_arg ] ) ) {
-					$endpoint['args'][ $address_arg ]['required'] = false;
-				}
-			}
-		}
-		unset( $endpoint );
-
-		return $endpoints;
 	}
 }

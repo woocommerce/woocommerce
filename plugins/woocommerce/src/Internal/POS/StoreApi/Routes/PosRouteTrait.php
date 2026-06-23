@@ -12,23 +12,25 @@ use WP_Error;
 use WP_REST_Request;
 
 /**
- * Shared POS-specific behaviour for routes that subclass Store API concrete
- * route classes (e.g. `StoreApi\Routes\V1\CartAddItem`).
+ * Shared POS-specific behaviour for the adapter-style POS routes, all of which
+ * extend {@see \Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute}
+ * (the designed extension point, as agentic commerce does) and own their own
+ * endpoint shape.
  *
- * This trait holds only what the Store API base classes call back on the route
- * instance itself: {@see self::requires_nonce()} and {@see self::has_cart_token()}
- * are invoked inside `AbstractCartRoute::get_response()`, and
- * {@see self::check_permission()} is wired up as the permission callback by
- * {@see Controller}. The cross-cutting endpoint-shape changes (permission
- * callback, the `cart_token` parameter, schema relaxations) live in the
- * Controller's registration loop, so the route subclasses stay near-empty and
- * there is a single place to reason about how POS diverges from the web Store
- * API.
+ * Two kinds of shared surface live here:
  *
- * The routes can't share a base class (each extends a different Store API
- * parent), so a trait keeps this shared surface in one file. Each consumer
- * declares a `REQUIRED_CAPABILITY` constant, resolved via `static::` in
- * {@see self::check_permission()}.
+ * - Seams the Store API base class calls back on the route instance:
+ *   {@see self::is_cookie_authenticated()} (consulted by `requires_nonce()`) and
+ *   {@see self::has_cart_token()} (consulted by `AbstractCartRoute::load_cart_session()`).
+ * - Helpers each route's own `get_args()` composes in: {@see self::check_permission()}
+ *   (the permission callback), {@see self::pos_cart_token_arg()} (the `cart_token`
+ *   parameter), and {@see self::pos_relax_address_required()} (the checkout
+ *   address relaxation). Keeping these in the trait means each route declares its
+ *   shape directly — there is no central registration-time rewriting step — while
+ *   the POS-common bits stay defined once.
+ *
+ * Each consumer declares a `REQUIRED_CAPABILITY` constant, resolved via
+ * `static::` in {@see self::check_permission()}.
  *
  * @internal Just for internal use.
  *
@@ -115,5 +117,42 @@ trait PosRouteTrait {
 		$this->has_cart_token       = true;
 
 		return true;
+	}
+
+	/**
+	 * The `cart_token` endpoint argument every POS route accepts, so mobile
+	 * clients can carry the cart session as a URL/body parameter when they can't
+	 * set the `Cart-Token` header (e.g. through the Jetpack tunnel). Routes merge
+	 * this into their own `get_args()`; {@see self::has_cart_token()} reads it back.
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	protected function pos_cart_token_arg(): array {
+		return array(
+			'cart_token' => array(
+				'description' => __( 'Cart session token returned by a prior POS Store API response. Pass it back on subsequent requests to keep the cart scoped to the same transaction.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => array( 'view', 'edit' ),
+			),
+		);
+	}
+
+	/**
+	 * Relax the schema-level `required` flag on the billing/shipping address args
+	 * so POS can submit an order with empty addresses at parse time (an in-person
+	 * sale usually has neither). The deeper address validation is relaxed
+	 * separately by {@see \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CheckoutAddressPolicy}.
+	 * A no-op for arg sets without those keys.
+	 *
+	 * @param array $args Endpoint args (typically from `get_endpoint_args_for_item_schema()`).
+	 * @return array
+	 */
+	protected function pos_relax_address_required( array $args ): array {
+		foreach ( array( 'billing_address', 'shipping_address' ) as $address_arg ) {
+			if ( isset( $args[ $address_arg ] ) && is_array( $args[ $address_arg ] ) ) {
+				$args[ $address_arg ]['required'] = false;
+			}
+		}
+		return $args;
 	}
 }

@@ -19,9 +19,9 @@ use Automattic\WooCommerce\StoreApi\Utilities\CustomFeesStore;
  * the cart/checkout POS routes there is no public Store API fee route to
  * subclass — a fee-write endpoint is POS-only — so this route is owned by POS
  * and extends {@see AbstractCartRoute} directly; only the reusable persistence
- * lives in the shared store. POS-specific endpoint-shape changes are applied by
- * {@see Controller} at registration; request-time auth comes from
- * {@see PosRouteTrait}, and {@see \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomFeesPolicy}
+ * lives in the shared store. Like the other adapter-style POS routes it owns its
+ * own endpoint shape (auth callback and `cart_token` parameter via
+ * {@see PosRouteTrait}), and {@see \Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\CustomFeesPolicy}
  * re-applies the stored fees on `woocommerce_cart_calculate_fees`.
  *
  * Negative/zero amounts are rejected: only positive fees are supported.
@@ -74,23 +74,26 @@ class CartAddFee extends AbstractCartRoute {
 			array(
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'get_response' ),
-				'permission_callback' => '__return_true',
-				'args'                => array(
-					'name'    => array(
-						'description' => __( 'Display name for the fee.', 'woocommerce' ),
-						'type'        => 'string',
-						'required'    => true,
+				'permission_callback' => array( $this, 'check_permission' ),
+				'args'                => array_merge(
+					array(
+						'name'    => array(
+							'description' => __( 'Display name for the fee.', 'woocommerce' ),
+							'type'        => 'string',
+							'required'    => true,
+						),
+						'amount'  => array(
+							'description' => __( 'Fee amount. Must be greater than zero; negative fees are not supported. Re-adding an identical fee is idempotent.', 'woocommerce' ),
+							'type'        => 'number',
+							'required'    => true,
+						),
+						'taxable' => array(
+							'description' => __( 'Whether the fee is taxable. Defaults to false.', 'woocommerce' ),
+							'type'        => 'boolean',
+							'default'     => false,
+						),
 					),
-					'amount'  => array(
-						'description' => __( 'Fee amount. Must be greater than zero; negative fees are not supported. Re-adding an identical fee is idempotent.', 'woocommerce' ),
-						'type'        => 'number',
-						'required'    => true,
-					),
-					'taxable' => array(
-						'description' => __( 'Whether the fee is taxable. Defaults to false.', 'woocommerce' ),
-						'type'        => 'boolean',
-						'default'     => false,
-					),
+					$this->pos_cart_token_arg()
 				),
 			),
 			'schema'      => array( $this->schema, 'get_public_item_schema' ),

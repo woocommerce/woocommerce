@@ -1,0 +1,3 @@
+Significance: patch
+Type: add
+Comment: Adapter-style variant of the POS Store API spike. The `wc/internal/pos/v1` cart/checkout routes now extend the abstract Store API cart route (the designed extension point, as agentic commerce does) and reuse the web checkout pipeline by composing a shared ProcessCheckoutTrait — extracted, behaviour-unchanged, from the web Checkout route — instead of subclassing the concrete web routes. Gated on the `point_of_sale` feature and not yet user-facing.
