@@ -16,6 +16,7 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -28,14 +29,12 @@ global $product;
 
 $columns           = apply_filters( 'woocommerce_product_thumbnails_columns', 4 );
 $post_thumbnail_id = $product->get_image_id();
-$media_items       = function_exists( 'wc_get_product_media_gallery_items' )
-	? wc_get_product_media_gallery_items( $product )
-	: array();
+$media_items       = ProductMediaGallery::get_product_media_gallery_items_for_display( $product );
 // The helper returns the full gallery order; product-thumbnails.php renders the remaining items.
 $first_media_item = $media_items[0] ?? array();
 $first_media_id   = isset( $first_media_item['id'] ) ? absint( $first_media_item['id'] ) : $post_thumbnail_id;
 $has_media        = ! empty( $first_media_item ) && 'placeholder' !== ( $first_media_item['source_type'] ?? '' );
-$is_video         = $has_media && 'video' === ( $first_media_item['media_type'] ?? '' ) && function_exists( 'wc_get_gallery_video_html' );
+$is_video         = $has_media && 'video' === ( $first_media_item['media_type'] ?? '' );
 $wrapper_classes   = apply_filters(
 	'woocommerce_single_product_image_gallery_classes',
 	array(
@@ -50,7 +49,7 @@ $wrapper_classes   = apply_filters(
 	<div class="woocommerce-product-gallery__wrapper">
 		<?php
 		if ( $is_video ) {
-			$html = wc_get_gallery_video_html( $first_media_item, true );
+			$html = ProductMediaGallery::get_gallery_video_html( $first_media_item, true );
 		} elseif ( $has_media && $first_media_id ) {
 			$html = wc_get_gallery_image_html( $first_media_id, true );
 		} else {

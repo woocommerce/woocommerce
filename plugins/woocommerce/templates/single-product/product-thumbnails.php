@@ -15,6 +15,8 @@
  * @version     11.0.0
  */
 
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
+
 defined( 'ABSPATH' ) || exit;
 
 // Note: `wc_get_gallery_image_html` was added in WC 3.3.2 and did not exist prior. This check protects against theme overrides being used on older versions of WC.
@@ -28,9 +30,7 @@ if ( ! $product || ! $product instanceof WC_Product ) {
 	return '';
 }
 
-$media_items = function_exists( 'wc_get_product_media_gallery_items' )
-	? wc_get_product_media_gallery_items( $product )
-	: array();
+$media_items = ProductMediaGallery::get_product_media_gallery_items_for_display( $product );
 
 if ( count( $media_items ) > 1 ) {
 	foreach ( array_slice( $media_items, 1 ) as $key => $media_item ) {
@@ -40,10 +40,10 @@ if ( count( $media_items ) > 1 ) {
 			continue;
 		}
 
-		$is_video = 'video' === ( $media_item['media_type'] ?? '' ) && function_exists( 'wc_get_gallery_video_html' );
+		$is_video = 'video' === ( $media_item['media_type'] ?? '' );
 
 		if ( $is_video ) {
-			$html = wc_get_gallery_video_html( $media_item, false );
+			$html = ProductMediaGallery::get_gallery_video_html( $media_item, false );
 		} else {
 			$html = wc_get_gallery_image_html( $attachment_id, false, $key );
 		}
