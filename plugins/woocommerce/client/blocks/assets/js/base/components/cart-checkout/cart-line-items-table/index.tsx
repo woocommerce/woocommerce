@@ -92,8 +92,10 @@ const CartLineItemsTable = ( {
 			</caption>
 			<thead>
 				<tr className="wc-block-cart-items__header">
+					{ /* Decorative image column, hidden from screen readers (see cart-line-item-row.tsx). */ }
 					<th
 						scope="col"
+						aria-hidden="true"
 						className="wc-block-cart-items__header-image"
 					>
 						<span>{ __( 'Product', 'woocommerce' ) }</span>
@@ -102,7 +104,9 @@ const CartLineItemsTable = ( {
 						scope="col"
 						className="wc-block-cart-items__header-product"
 					>
-						<span>{ __( 'Details', 'woocommerce' ) }</span>
+						<span className="screen-reader-text">
+							{ __( 'Details', 'woocommerce' ) }
+						</span>
 					</th>
 					<th
 						scope="col"

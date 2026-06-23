@@ -8,6 +8,9 @@
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:php": "composer run-script phpcbf",
 		"lint:lang:php": "composer run-script phpcs",
+		"phpstan": "cd tasks/phpstan && ./run-phpstan.sh",
+		"phpstan:php7": "cd tasks/phpstan && ./run-phpstan.sh php7",
+		"phpstan:php8": "cd tasks/phpstan && ./run-phpstan.sh",
 		"test:php:ci": "pnpm test:php:unit && pnpm test:php:integration",
 		"test:php:unit": "composer run-script test:unit",
 		"test:php:integration": "composer run-script test:integration",
@@ -46,6 +49,36 @@
 							"wpVersion": "latest"
 						}
 					},
+					"events": [
+						"pull_request",
+						"push"
+					]
+				},
+				{
+					"name": "PHPStan: PHP 7.4",
+					"testType": "static:analysis",
+					"command": "phpstan:php7",
+					"optional": true,
+					"changes": [
+						"**/*.php",
+						"**/*.neon",
+						"tasks/phpstan/**"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				},
+				{
+					"name": "PHPStan: PHP 8.4",
+					"testType": "static:analysis",
+					"command": "phpstan:php8",
+					"optional": true,
+					"changes": [
+						"**/*.php",
+						"**/*.neon",
+						"tasks/phpstan/**"
+					],
 					"events": [
 						"pull_request",
 						"push"
