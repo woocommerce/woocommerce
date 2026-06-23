@@ -60,7 +60,6 @@
 		"test:api": "pnpm test:e2e:default --project=api",
 		"test:api:hpos-off": "pnpm test:e2e:with-env default-hpos-disabled --project=api-hpos-disabled",
 		"test:api:object-cache": "pnpm test:e2e:with-env default-object-cache --project=api",
-		"test:e2e:core-all": "pnpm test:e2e:default --project=core-serial --project=core-parallel",
 		"test:e2e:core-serial": "pnpm test:e2e:default --project=core-serial",
 		"test:e2e:core-parallel": "pnpm test:e2e:default --project=core-parallel",
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
