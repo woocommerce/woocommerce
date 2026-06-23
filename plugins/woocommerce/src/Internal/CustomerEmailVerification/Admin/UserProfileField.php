@@ -36,8 +36,9 @@ class UserProfileField {
 	public function __construct() {
 		add_action( 'show_user_profile', array( $this, 'render' ) );
 		add_action( 'edit_user_profile', array( $this, 'render' ) );
-		add_action( 'personal_options_update', array( $this, 'save' ) );
-		add_action( 'edit_user_profile_update', array( $this, 'save' ) );
+		// Saved on profile_update (not the *_profile_update hooks) because that fires after the user
+		// record is written, so an email changed in the same save is already current when we verify it.
+		add_action( 'profile_update', array( $this, 'save' ) );
 	}
 
 	/**
@@ -57,7 +58,7 @@ class UserProfileField {
 	 * @param WP_User|mixed $user The user being edited.
 	 */
 	public function render( $user ): void {
-		if ( ! $user instanceof WP_User || ! current_user_can( 'edit_user', $user->ID ) ) {
+		if ( ! $user instanceof WP_User || ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
 
@@ -72,6 +73,7 @@ class UserProfileField {
 						<input type="checkbox" name="<?php echo esc_attr( self::FIELD ); ?>" id="<?php echo esc_attr( self::FIELD ); ?>" value="1" <?php checked( $this->service->is_verified( $user->ID ) ); ?> />
 						<?php esc_html_e( 'The customer has confirmed they own this email address.', 'woocommerce' ); ?>
 					</label>
+					<p class="description"><?php esc_html_e( 'Confirming the email address also links any past guest orders placed with it to this account.', 'woocommerce' ); ?></p>
 				</td>
 			</tr>
 		</table>
@@ -86,14 +88,15 @@ class UserProfileField {
 	public function save( $user_id ): void {
 		$user_id = (int) $user_id;
 
-		if ( ! current_user_can( 'edit_user', $user_id ) ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
 
 		$nonce = isset( $_POST[ self::NONCE_ACTION . '_nonce' ] ) ? sanitize_text_field( wp_unslash( $_POST[ self::NONCE_ACTION . '_nonce' ] ) ) : '';
 
-		// The nonce also guards against acting when our field was not rendered (which would
-		// otherwise clear verification on every profile save).
+		// profile_update fires on every wp_update_user() call, so the nonce is what scopes us to a
+		// profile-screen submission where our field was actually rendered; without it we would clear
+		// verification on every unrelated user update.
 		if ( ! wp_verify_nonce( $nonce, self::NONCE_ACTION . '_' . $user_id ) ) {
 			return;
 		}

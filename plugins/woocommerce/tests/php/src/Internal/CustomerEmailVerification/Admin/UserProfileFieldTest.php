@@ -90,4 +90,40 @@ class UserProfileFieldTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $this->service->is_verified( $user_id ), 'Without a valid nonce the checkbox must not take effect.' );
 	}
+
+	/**
+	 * @testdox A non-privileged user cannot self-verify their own email via a profile save.
+	 */
+	public function test_save_does_not_allow_non_privileged_self_verify(): void {
+		$user_id = wc_create_new_customer( 'self-verify@example.com', 'selfverify', 'pw' );
+		wp_set_current_user( $user_id );
+
+		$_POST['wc_email_verified_nonce'] = wp_create_nonce( 'wc_email_verified_' . $user_id );
+		$_POST['wc_email_verified']       = '1';
+
+		$this->sut->save( $user_id );
+
+		$this->assertFalse( $this->service->is_verified( $user_id ), 'A customer without manage_woocommerce must not be able to verify their own email.' );
+	}
+
+	/**
+	 * @testdox Changing the email and ticking verify in the same save verifies the new address.
+	 */
+	public function test_save_verifies_new_email_when_changed_and_checked_together(): void {
+		$user_id = wc_create_new_customer( 'before-change@example.com', 'emailchange', 'pw' );
+
+		$_POST['wc_email_verified_nonce'] = wp_create_nonce( 'wc_email_verified_' . $user_id );
+		$_POST['wc_email_verified']       = '1';
+
+		// The field saves on profile_update, which fires after wp_update_user has written the new
+		// email, so verification must land on 'after-change@example.com', not the old address.
+		wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => 'after-change@example.com',
+			)
+		);
+
+		$this->assertTrue( $this->service->is_verified( $user_id ), 'The newly saved email address should be verified.' );
+	}
 }
