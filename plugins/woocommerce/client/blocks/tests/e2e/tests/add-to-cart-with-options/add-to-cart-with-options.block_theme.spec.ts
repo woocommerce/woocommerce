@@ -1226,7 +1226,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		await page.goto( '/product/hoodie' );
+		// We intentionally test the V-Neck T-Shirt because it has variations
+		// using 'any' as a variation attribute.
+		await page.goto( '/product/v-neck-t-shirt/' );
 
 		const addToCartBlock = page.locator(
 			'.wp-block-add-to-cart-with-options'
@@ -1234,12 +1236,12 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const colorBlueOption = addToCartBlock
 			.getByRole( 'radiogroup', { name: 'Color' } )
 			.getByRole( 'radio', { name: 'Blue', exact: true } );
-		const logoYesOption = addToCartBlock
-			.getByRole( 'radiogroup', { name: 'Logo' } )
-			.getByRole( 'radio', { name: 'Yes', exact: true } );
+		const sizeLargeOption = addToCartBlock
+			.getByRole( 'radiogroup', { name: 'Size' } )
+			.getByRole( 'radio', { name: 'Large', exact: true } );
 
 		await colorBlueOption.click();
-		await logoYesOption.click();
+		await sizeLargeOption.click();
 
 		const addToCartButton = page.getByRole( 'button', {
 			name: 'Add to cart',
@@ -1248,7 +1250,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await addToCartButton.click();
 
 		await expect(
-			page.getByLabel( 'Quantity of Hoodie in your cart.' )
+			page.getByLabel( 'Quantity of V-Neck T-Shirt in your cart.' )
 		).toHaveValue( '1' );
 	} );
 
