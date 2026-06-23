@@ -49,7 +49,7 @@ const Timeline = ( {
 		<div className={ timelineClassName }>
 			<ul>
 				{ items
-					.reduce( groupItemsUsing( groupBy ), [] )
+					.reduce( groupItemsUsing( groupBy, timezone ), [] )
 					.map( addGroupTitles )
 					.sort( sortByDateUsing( orderBy ) )
 					.map( ( group ) => (

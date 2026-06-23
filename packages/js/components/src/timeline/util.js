@@ -2,6 +2,7 @@
  * External dependencies
  */
 import moment from 'moment';
+import { date as formatSiteDate } from '@wordpress/date';
 
 const orderByOptions = {
 	ASC: 'asc',
@@ -29,29 +30,51 @@ const sortByDateUsing = ( orderBy ) => {
 	}
 };
 
-const groupItemsUsing = ( groupBy ) => ( groups, newItem ) => {
-	// Helper functions defined to make the logic a bit more readable.
-	const hasSameMoment = ( group, item ) => {
-		return moment( group.date ).isSame( moment( item.date ), groupBy );
-	};
-	const groupIndexExists = ( index ) => index >= 0;
-	const groupForItem = groups.findIndex( ( group ) =>
-		hasSameMoment( group, newItem )
+const siteGroupDateFormats = {
+	[ groupByOptions.DAY ]: 'Y-m-d',
+	[ groupByOptions.WEEK ]: 'o-W',
+	[ groupByOptions.MONTH ]: 'Y-m',
+};
+
+const getSiteGroupKey = ( date, groupBy ) =>
+	formatSiteDate(
+		siteGroupDateFormats[ groupBy ] ||
+			siteGroupDateFormats[ groupByOptions.DAY ],
+		date
 	);
 
-	if ( ! groupIndexExists( groupForItem ) ) {
-		// Create new group for newItem.
-		return [
-			...groups,
-			{
-				date: newItem.date,
-				items: [ newItem ],
-			},
-		];
-	}
+const groupItemsUsing =
+	( groupBy, timezone = 'browser' ) =>
+	( groups, newItem ) => {
+		// Helper functions defined to make the logic a bit more readable.
+		const hasSameGroupKey = ( group, item ) => {
+			if ( timezone === 'site' ) {
+				return (
+					getSiteGroupKey( group.date, groupBy ) ===
+					getSiteGroupKey( item.date, groupBy )
+				);
+			}
 
-	groups[ groupForItem ].items.push( newItem );
-	return groups;
-};
+			return moment( group.date ).isSame( moment( item.date ), groupBy );
+		};
+		const groupIndexExists = ( index ) => index >= 0;
+		const groupForItem = groups.findIndex( ( group ) =>
+			hasSameGroupKey( group, newItem )
+		);
+
+		if ( ! groupIndexExists( groupForItem ) ) {
+			// Create new group for newItem.
+			return [
+				...groups,
+				{
+					date: newItem.date,
+					items: [ newItem ],
+				},
+			];
+		}
+
+		groups[ groupForItem ].items.push( newItem );
+		return groups;
+	};
 
 export { groupByOptions, groupItemsUsing, orderByOptions, sortByDateUsing };

@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
-import { dateI18n, format } from '@wordpress/date';
+import { date as formatSiteDate, dateI18n, format } from '@wordpress/date';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -18,6 +18,7 @@ jest.mock( '@wordpress/date', () => {
 
 	return {
 		...actualDateModule,
+		date: jest.fn( actualDateModule.date ),
 		format: jest.fn( actualDateModule.format ),
 		dateI18n: jest.fn( actualDateModule.dateI18n ),
 	};
@@ -31,6 +32,7 @@ describe( 'Timeline', () => {
 	};
 
 	afterEach( () => {
+		formatSiteDate.mockImplementation( actualDateModule.date );
 		format.mockImplementation( actualDateModule.format );
 		dateI18n.mockImplementation( actualDateModule.dateI18n );
 		jest.clearAllMocks();
@@ -101,6 +103,44 @@ describe( 'Timeline', () => {
 			container.querySelector( '.woocommerce-timeline-item__timestamp' )
 				.textContent
 		).toBe( 'site:g:ia:2020-01-20T23:45:00.000Z' );
+	} );
+
+	test( 'groups items using site timezone when requested', () => {
+		const timezoneBoundaryItems = [
+			{
+				...mockData[ 1 ],
+				date: new Date( Date.UTC( 2020, 0, 20, 23, 0 ) ),
+			},
+			{
+				...mockData[ 2 ],
+				date: new Date( Date.UTC( 2020, 0, 21, 1, 0 ) ),
+			},
+		];
+
+		formatSiteDate.mockImplementation( () => '2020-01-21' );
+		dateI18n.mockImplementation( ( dateFormat, date ) => {
+			if ( dateFormat === 'F j, Y' ) {
+				return 'January 21, 2020';
+			}
+
+			return `site:${ dateFormat }:${ date.toISOString() }`;
+		} );
+
+		const { container } = render(
+			<Timeline
+				items={ timezoneBoundaryItems }
+				dateFormat="F j, Y"
+				clockFormat="g:ia"
+				timezone="site"
+			/>
+		);
+
+		const groupTitles = container.querySelectorAll(
+			'.woocommerce-timeline-group__title'
+		);
+
+		expect( groupTitles ).toHaveLength( 1 );
+		expect( groupTitles[ 0 ].textContent ).toBe( 'January 21, 2020' );
 	} );
 
 	describe( 'Timeline utilities', () => {
