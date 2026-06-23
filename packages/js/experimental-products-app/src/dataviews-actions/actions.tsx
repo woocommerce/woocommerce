@@ -258,7 +258,7 @@ const duplicateProduct = async ( items: ProductEntityRecord[] ) => {
 		( _, index ) => promiseResult[ index ].status === 'rejected'
 	);
 
-	// @ts-expect-error `createSuccessNotice` and `createErrorNotice` are not typed correctly in the WordPress types, but they do return void, not Promise.
+	// @ts-expect-error `noticesStore` is not typed correctly in the WordPress types.
 	const { createSuccessNotice, createErrorNotice } = dispatch( noticesStore );
 	const notice = getNoticeFromSettledResults( {
 		results: promiseResult,
@@ -375,7 +375,7 @@ export const moveToTrashAction = (): Action< ProductEntityRecord > => ( {
 	async callback( items, { onActionPerformed } ) {
 		const { deleteEntityRecord } = dispatch( coreStore );
 		const { createErrorNotice, createSuccessNotice } =
-			// @ts-expect-error `createSuccessNotice` and `createErrorNotice` are not typed correctly in the WordPress types, but they do return void, not Promise.
+			// @ts-expect-error noticesStore is not typed correctly in the WordPress types.
 			dispatch( noticesStore );
 
 		const results = await Promise.allSettled(
@@ -440,7 +440,7 @@ export const restoreAction = (): Action< ProductEntityRecord > => ( {
 			invalidateResolutionForStoreSelector,
 		} = dispatch( coreStore );
 		const { createErrorNotice, createSuccessNotice } =
-			// @ts-expect-error `createSuccessNotice` and `createErrorNotice` are not typed correctly in the WordPress types, but they do return void, not Promise.
+			// @ts-expect-error noticesStore is not typed correctly in the WordPress types.
 			dispatch( noticesStore );
 
 		const results = await Promise.allSettled(
@@ -508,7 +508,7 @@ export const permanentlyDeleteAction = (): Action< ProductEntityRecord > => ( {
 			const { deleteEntityRecord, invalidateResolutionForStoreSelector } =
 				dispatch( coreStore );
 			const { createErrorNotice, createSuccessNotice } =
-				// @ts-expect-error `createSuccessNotice` and `createErrorNotice` are not typed correctly in the WordPress types, but they do return void, not Promise.
+				// @ts-expect-error noticesStore is not typed correctly in the WordPress types.
 				dispatch( noticesStore );
 
 			const results = await Promise.allSettled(
