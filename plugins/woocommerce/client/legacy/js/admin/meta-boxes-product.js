@@ -1302,10 +1302,10 @@ jQuery( function ( $ ) {
 	}
 
 	function addProductGalleryMediaItemActions( $item, $el ) {
-		$( '<ul />', {
-			class: 'actions',
-		} )
-			.append(
+		$item.append(
+			$( '<ul />', {
+				class: 'actions',
+			} ).append(
 				$( '<li />' ).append(
 					$( '<a />', {
 						href: '#',
@@ -1316,7 +1316,7 @@ jQuery( function ( $ ) {
 					} )
 				)
 			)
-			.appendTo( $item );
+		);
 
 		return $item;
 	}
@@ -1335,9 +1335,11 @@ jQuery( function ( $ ) {
 			.attr( 'data-media_type', 'image' )
 			.attr( 'data-source_type', 'attachment' );
 
-		$( '<img />', {
-			src: attachmentImage,
-		} ).appendTo( $item );
+		$item.append(
+			$( '<img />', {
+				src: attachmentImage,
+			} )
+		);
 
 		return addProductGalleryMediaItemActions( $item, $el );
 	}
@@ -1357,13 +1359,15 @@ jQuery( function ( $ ) {
 			.attr( 'data-source_type', 'attachment' )
 			.attr( 'data-poster_id', posterId );
 
-		$( '<video />', {
-			class: 'woocommerce-product-gallery__video-preview',
-			src: attachment.url,
-			preload: 'metadata',
-			muted: 'muted',
-			'aria-hidden': 'true',
-		} ).appendTo( $item );
+		$item.append(
+			$( '<video />', {
+				class: 'woocommerce-product-gallery__video-preview',
+				src: attachment.url,
+				preload: 'metadata',
+				muted: 'muted',
+				'aria-hidden': 'true',
+			} )
+		);
 
 		return addProductGalleryMediaItemActions( $item, $el );
 	}
