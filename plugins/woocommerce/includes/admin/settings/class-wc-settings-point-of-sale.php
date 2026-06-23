@@ -28,6 +28,22 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 		$this->label = __( 'Point of Sale', 'woocommerce' );
 
 		parent::__construct();
+		$this->maybe_show_staff_notices();
+	}
+
+	/**
+	 * Display POS staff notices when on the staff sub-section and the feature is enabled.
+	 *
+	 * @since 11.0.0
+	 */
+	private function maybe_show_staff_notices(): void {
+		if ( ! class_exists( 'WC_Admin_POS_Staff' ) || ! WC_Admin_POS_Staff::is_enabled() ) {
+			return;
+		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['section'] ) && 'staff' === $_GET['section'] ) {
+			WC_Admin_POS_Staff::notices();
+		}
 	}
 
 	/**
@@ -36,6 +52,45 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 	 * @var string
 	 */
 	public $icon = 'store';
+
+	/**
+	 * Get own sections.
+	 *
+	 * @since 11.0.0
+	 * @return array
+	 */
+	protected function get_own_sections() {
+		$sections = array(
+			'' => __( 'General', 'woocommerce' ),
+		);
+
+		if ( class_exists( 'WC_Admin_POS_Staff' ) && WC_Admin_POS_Staff::is_enabled() ) {
+			$sections['staff'] = __( 'Staff', 'woocommerce' );
+		}
+
+		return $sections;
+	}
+
+	/**
+	 * Output the settings.
+	 *
+	 * @since 11.0.0
+	 */
+	public function output(): void {
+		global $current_section, $hide_save_button;
+
+		if (
+			'staff' === $current_section
+			&& class_exists( 'WC_Admin_POS_Staff' )
+			&& WC_Admin_POS_Staff::is_enabled()
+		) {
+			$hide_save_button = true; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			WC_Admin_POS_Staff::page_output();
+			return;
+		}
+
+		parent::output();
+	}
 
 	/**
 	 * Get settings for the default section.

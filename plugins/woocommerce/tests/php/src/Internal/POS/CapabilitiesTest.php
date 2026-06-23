@@ -49,10 +49,11 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Default staff role is the stock subscriber role (no dedicated POS role yet).
+	 * @testdox Default staff role is the dedicated pos_staff role.
 	 */
-	public function test_default_staff_role_is_subscriber(): void {
-		$this->assertSame( 'subscriber', Capabilities::DEFAULT_STAFF_ROLE );
+	public function test_default_staff_role_is_pos_staff(): void {
+		$this->assertSame( 'pos_staff', Capabilities::DEFAULT_STAFF_ROLE );
+		$this->assertSame( Capabilities::POS_STAFF_ROLE, Capabilities::DEFAULT_STAFF_ROLE );
 	}
 
 	/**

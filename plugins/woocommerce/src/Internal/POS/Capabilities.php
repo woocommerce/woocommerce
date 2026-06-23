@@ -32,13 +32,21 @@ use WP_User;
 class Capabilities {
 
 	/**
-	 * Default WP role for brand-new POS-only accounts.
+	 * Dedicated WP role for brand-new POS-only accounts.
 	 *
 	 * POS access is keyed on `woocommerce_pos_*` capabilities, not this role (see
-	 * has_pos_access()), so new POS-only accounts use the stock `subscriber` role.
-	 * A dedicated `pos_staff` role is planned for a later iteration.
+	 * has_pos_access()). New POS-only accounts are created with the dedicated
+	 * `pos_staff` role (registered in WC_Install::create_roles()), which holds only
+	 * `read` — the customer/subscriber shape — so a POS-only user can manage their
+	 * own profile without gaining any non-POS capability. It is a label/default for
+	 * new accounts, never the authorization signal.
 	 */
-	public const DEFAULT_STAFF_ROLE = 'subscriber';
+	public const POS_STAFF_ROLE = 'pos_staff';
+
+	/**
+	 * Default WP role for brand-new POS-only accounts. Alias of POS_STAFF_ROLE.
+	 */
+	public const DEFAULT_STAFF_ROLE = self::POS_STAFF_ROLE;
 
 	/**
 	 * POS capability identifiers.
@@ -78,6 +86,16 @@ class Capabilities {
 	public const POS_PRESET_META_KEY = 'woocommerce_pos_preset';
 
 	/**
+	 * Preset identifier aliases.
+	 *
+	 * The canonical preset constants live on POSPreset; these aliases let callers
+	 * reference a preset as Capabilities::POS_PRESET_* alongside the cap constants.
+	 */
+	public const POS_PRESET_CASHIER = POSPreset::CASHIER;
+	public const POS_PRESET_MANAGER = POSPreset::MANAGER;
+	public const POS_PRESET_ADMIN   = POSPreset::ADMIN;
+
+	/**
 	 * All known POS capability identifiers.
 	 *
 	 * The canonical list of `woocommerce_pos_*` caps — used to test for POS access and, by the
@@ -97,6 +115,18 @@ class Capabilities {
 			self::CAP_MANAGE_STAFF,
 			self::CAP_EXIT_POS,
 		);
+	}
+
+	/**
+	 * All assignable POS presets, in ascending capability order.
+	 *
+	 * Convenience alias for POSPreset::get_all() so callers can resolve the preset
+	 * list through Capabilities alongside the cap/preset constants.
+	 *
+	 * @return string[]
+	 */
+	public static function assignable_pos_presets(): array {
+		return POSPreset::get_all();
 	}
 
 	/**
@@ -141,6 +171,23 @@ class Capabilities {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Whether a user holds a specific POS capability.
+	 *
+	 * Delegates to user_can() so the source of truth is the user's stored
+	 * capabilities — matching what /wp/v2/users and any other WP-native
+	 * introspection report.
+	 *
+	 * @param int    $user_id    Target user.
+	 * @param string $capability One of the self::CAP_* values.
+	 * @return bool
+	 *
+	 * @since 11.0.0
+	 */
+	public static function user_has_pos_capability( int $user_id, string $capability ): bool {
+		return user_can( $user_id, $capability );
 	}
 
 	/**

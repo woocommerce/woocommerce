@@ -6,22 +6,25 @@ namespace Automattic\WooCommerce\Internal\POS;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\POS\Admin\UserFormIntegration;
+use Automattic\WooCommerce\Internal\POS\CouponAttribution;
+use Automattic\WooCommerce\Internal\POS\OrderAttribution;
+use Automattic\WooCommerce\Internal\POS\RestApi\POSStaffController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
  * Feature orchestrator for the POS staff + attribution iteration.
  *
- * Gates the feature on the dev-only `point_of_sale_staff` flag. The runtime surfaces —
- * staff REST endpoint, order/coupon attribution hooks, and the wp-admin Staff UI —
- * register themselves here as they are added in follow-up changes; until then on_init()
- * is an intentional no-op even when the flag is on.
+ * Gates the feature on the dev-only `point_of_sale_staff` flag. When on, wires up the staff REST
+ * endpoint, the order/coupon attribution lifecycle hooks, and the wp-admin Add New User integration
+ * via the DI container.
  *
  * @since 11.0.0
  * @internal
  */
 class POSController implements RegisterHooksInterface {
 
-	private const FEATURE_FLAG = 'point_of_sale_staff';
+	public const FEATURE_FLAG = 'point_of_sale_staff';
 
 	/**
 	 * Features controller used to gate hook registration on the POS feature flags.
@@ -31,20 +34,62 @@ class POSController implements RegisterHooksInterface {
 	private FeaturesController $features_controller;
 
 	/**
+	 * REST controller for the /wc/pos/v1/staff endpoint.
+	 *
+	 * @var POSStaffController
+	 */
+	private POSStaffController $staff_controller;
+
+	/**
+	 * Order attribution lifecycle handler.
+	 *
+	 * @var OrderAttribution
+	 */
+	private OrderAttribution $order_attribution;
+
+	/**
+	 * Coupon attribution lifecycle handler.
+	 *
+	 * @var CouponAttribution
+	 */
+	private CouponAttribution $coupon_attribution;
+
+	/**
+	 * Wp-admin Add New User form integration.
+	 *
+	 * @var UserFormIntegration
+	 */
+	private UserFormIntegration $user_form_integration;
+
+	/**
 	 * Initialize dependencies via the DI container.
 	 *
 	 * @internal
 	 *
-	 * @param FeaturesController $features_controller The features controller.
+	 * @param FeaturesController  $features_controller   The features controller.
+	 * @param POSStaffController  $staff_controller      The staff REST controller.
+	 * @param OrderAttribution    $order_attribution     The order attribution lifecycle handler.
+	 * @param CouponAttribution   $coupon_attribution    The coupon attribution lifecycle handler.
+	 * @param UserFormIntegration $user_form_integration The Add New User form integration.
 	 */
-	final public function init( FeaturesController $features_controller ): void {
-		$this->features_controller = $features_controller;
+	final public function init(
+		FeaturesController $features_controller,
+		POSStaffController $staff_controller,
+		OrderAttribution $order_attribution,
+		CouponAttribution $coupon_attribution,
+		UserFormIntegration $user_form_integration
+	): void {
+		$this->features_controller   = $features_controller;
+		$this->staff_controller      = $staff_controller;
+		$this->order_attribution     = $order_attribution;
+		$this->coupon_attribution    = $coupon_attribution;
+		$this->user_form_integration = $user_form_integration;
 	}
 
 	/**
 	 * Register the feature surface.
 	 *
-	 * The feature-flag check is deferred to `on_init` because `feature_is_enabled()`
+	 * The feature-flag check is deferred to `init` because `feature_is_enabled()`
 	 * walks `FeaturesController::init_feature_definitions()`, which contains
 	 * `__( ..., 'woocommerce' )` calls. Evaluating those before `init` triggers
 	 * WP 6.7's "translation loading … too early" notice (and the headers-already-sent
@@ -54,13 +99,41 @@ class POSController implements RegisterHooksInterface {
 	 */
 	public function register(): void {
 		add_action( 'init', array( $this, 'on_init' ) );
+
+		// Defensive: flush rewrite rules when the gating flag is flipped, so any host
+		// where the wp-json catch-all rewrite is stale (managed hosting, page-cache
+		// plugins, partial wp-env state) doesn't 404 the new /wc/pos/* routes after
+		// the feature is enabled. REST dispatch normally doesn't depend on per-route
+		// rewrites, but the global wp-json rule must exist for any REST URL to work.
+		$flag_option = 'woocommerce_feature_' . self::FEATURE_FLAG . '_enabled';
+		add_action( 'add_option_' . $flag_option, array( $this, 'handle_flag_option_changed' ) );
+		add_action( 'update_option_' . $flag_option, array( $this, 'handle_flag_option_changed' ) );
+	}
+
+	/**
+	 * Schedule a rewrite-rule flush when the POS staff feature flag is toggled.
+	 *
+	 * Hooked on add_option_/update_option_ for the gating flag. Uses the standard
+	 * "schedule on shutdown" pattern so the flush doesn't run mid-admin-request
+	 * (which would slow the response and potentially clobber a redirect).
+	 *
+	 * @internal
+	 *
+	 * @since 11.0.0
+	 */
+	public function handle_flag_option_changed(): void {
+		add_action(
+			'shutdown',
+			static function () {
+				flush_rewrite_rules( false );
+			}
+		);
 	}
 
 	/**
 	 * Wire up the feature surface once translations are safe to load.
 	 *
-	 * No-op when the gating flag is off. Runtime surfaces are registered here
-	 * as they are added in follow-up changes.
+	 * No-op when the gating flag is off.
 	 *
 	 * @internal
 	 *
@@ -71,7 +144,9 @@ class POSController implements RegisterHooksInterface {
 			return;
 		}
 
-		// Runtime surfaces (staff REST endpoint, attribution hooks, admin Staff UI)
-		// register here as they are added in follow-up changes.
+		$this->staff_controller->register();
+		$this->order_attribution->register();
+		$this->coupon_attribution->register();
+		$this->user_form_integration->register();
 	}
 }
