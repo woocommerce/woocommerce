@@ -179,8 +179,8 @@ const { actions } = store(
 			},
 
 			// Undo / restore a removed item.
-			// OPEN QUESTION: Store API has no "restore" endpoint. For the spike we
-			// fall back to the server restore URL on the link, then re-render.
+			// OPEN QUESTION: Store API has no "restore" endpoint, so we fall back
+			// to the legacy server restore URL on the link, then re-render.
 			*restoreItem( event: Event ): Generator< unknown > {
 				event.preventDefault();
 				const { ref } = getElement();
