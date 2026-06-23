@@ -111,7 +111,7 @@ class ClassicCartInteractivity implements RegisterHooksInterface {
 		if ( $processor->next_tag( array( 'class_name' => 'woocommerce' ) ) ) {
 			$processor->set_attribute( 'data-wp-interactive', self::STORE_NAMESPACE );
 			$processor->set_attribute( 'data-wp-router-region', 'woocommerce-cart' );
-			$processor->set_attribute( 'data-wp-init', 'callbacks.setupLegacyBridge' );
+			$processor->set_attribute( 'data-wp-init', 'callbacks.setupCartSyncBridge' );
 			// Busy state during a mutation (replaces the legacy blockUI overlay).
 			$processor->set_attribute( 'data-wp-bind--aria-busy', 'state.isProcessing' );
 			$processor->set_attribute( 'data-wp-class--is-cart-updating', 'state.isProcessing' );

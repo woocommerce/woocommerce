@@ -298,23 +298,68 @@ const { actions } = store(
 			},
 		},
 		callbacks: {
-			// Bridge inbound legacy events so add-to-cart elsewhere refreshes us.
-			setupLegacyBridge(): void {
-				const w = window as unknown as {
-					jQuery?: ( t: unknown ) => {
-						on: ( e: string, cb: () => void ) => void;
-					};
-				};
-				if ( ! w.jQuery ) {
-					return;
-				}
-				w.jQuery( document ).on( 'added_to_cart wc_update_cart', () => {
+			// Refresh + re-render when the cart is mutated by ANY source on the
+			// page. Other iAPI blocks (wishlist "move to cart", Mini-Cart,
+			// add-to-cart) fire the native `wc-blocks_added_to_cart` /
+			// `wc-blocks_removed_from_cart` events on document; classic
+			// add-to-cart + extensions fire the jQuery `added_to_cart` /
+			// `wc_update_cart` events. We listen to both.
+			//
+			// Returns a cleanup so listeners aren't duplicated across re-renders.
+			setupCartSyncBridge(): () => void {
+				const syncFromCart = () => {
+					// Our own actions already re-render (and also fire these
+					// events via the shared store) — skip while one is in flight
+					// to avoid a double navigate.
+					if ( state.isProcessing ) {
+						return;
+					}
 					void wooActions.refreshCartItems().then( () =>
 						router.navigate( window.location.href, {
 							force: true,
 						} )
 					);
-				} );
+				};
+
+				document.addEventListener(
+					'wc-blocks_added_to_cart',
+					syncFromCart
+				);
+				document.addEventListener(
+					'wc-blocks_removed_from_cart',
+					syncFromCart
+				);
+
+				const w = window as unknown as {
+					jQuery?: ( t: unknown ) => {
+						on: ( e: string, cb: () => void ) => void;
+						off: ( e: string, cb: () => void ) => void;
+					};
+				};
+				const jq = w.jQuery;
+				if ( jq ) {
+					jq( document ).on(
+						'added_to_cart wc_update_cart',
+						syncFromCart
+					);
+				}
+
+				return () => {
+					document.removeEventListener(
+						'wc-blocks_added_to_cart',
+						syncFromCart
+					);
+					document.removeEventListener(
+						'wc-blocks_removed_from_cart',
+						syncFromCart
+					);
+					if ( jq ) {
+						jq( document ).off(
+							'added_to_cart wc_update_cart',
+							syncFromCart
+						);
+					}
+				};
 			},
 		},
 	},
