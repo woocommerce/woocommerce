@@ -41,7 +41,7 @@ registerBlockType( metadata, {
 			description: sprintf(
 				// translators: %s is the taxonomy label.
 				__(
-					`Enable customers to filter the product collection by selecting one or more %s terms.`,
+					'Enable customers to filter the product collection by %s.',
 					'woocommerce'
 				),
 				item.label

@@ -3,7 +3,7 @@
 	"apiVersion": 3,
 	"name": "woocommerce/product-filters",
 	"title": "Product Filters",
-	"description": "Let shoppers filter products displayed on the page.",
+	"description": "Enable customers to filter the product collection.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"supports": {

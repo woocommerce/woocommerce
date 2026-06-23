@@ -41,7 +41,7 @@ registerBlockType( metadata, {
 			description: sprintf(
 				// translators: %s is the attribute label.
 				__(
-					`Enable customers to filter the product collection by selecting one or more %s attributes.`,
+					'Enable customers to filter the product collection by %s.',
 					'woocommerce'
 				),
 				attribute.attribute_label

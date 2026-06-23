@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/product-filter-status",
 	"title": "Status Filter",
-	"description": "Let shoppers filter products by choosing stock status.",
+	"description": "Enable customers to filter the product collection by stock status.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",

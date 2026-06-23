@@ -155,7 +155,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 						help={
 							showFilterDrawer
 								? __(
-										'Shoppers tap the button to open filters.',
+										'Customers tap the button to open filters.',
 										'woocommerce'
 								  )
 								: __(
