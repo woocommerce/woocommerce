@@ -707,6 +707,11 @@
 			"area": "footer",
 			"name": "footer",
 			"title": "Footer"
+		},
+		{
+			"area": "footer",
+			"name": "footer-alternative",
+			"title": "Footer alternative"
 		}
 	],
 	"version": 3,

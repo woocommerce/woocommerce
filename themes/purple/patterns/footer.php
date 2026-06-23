@@ -77,14 +77,14 @@
 
 <!-- wp:site-title {"level":0,"style":{"typography":{"fontStyle":"normal","fontWeight":"300","textTransform":"none","letterSpacing":"0px"},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} /-->
 
-<!-- wp:paragraph {"style":{"typography":{"textAlign":"left"},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"fontSize":"small"} -->
-<p class="has-text-align-left has-link-color has-small-font-size"><?php
-	/* Translators: WordPress link. */
-	$wordpress_link = '<a href="' . esc_url( __( 'https://wordpress.org', 'purple' ) ) . '" rel="nofollow">WordPress</a>';
+<!-- wp:paragraph {"className":"underline-link","style":{"typography":{"textAlign":"left"},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} -->
+<p class="has-text-align-left underline-link has-theme-4-color has-text-color has-link-color has-small-font-size"><?php
+	/* Translators: WooCommerce link. */
+	$woocommerce_link = '<a href="' . esc_url( __( 'https://woocommerce.com/', 'purple' ) ) . '" rel="nofollow">WooCommerce</a>';
 	echo sprintf(
-		/* Translators: Designed with WordPress */
-		esc_html__( 'Designed with %1$s', 'purple' ),
-		$wordpress_link
+		/* Translators: Designed with WooCommerce */
+		esc_html__( 'All rights reserved. Designed with %1$s.', 'purple' ),
+		$woocommerce_link
 	);
 	?></p>
 <!-- /wp:paragraph --></div>

@@ -1,7 +1,7 @@
 <?php
 /**
- * Title: Store footer 2
- * Slug: purple/store-footer-2
+ * Title: Footer alternative
+ * Slug: purple/footer-alternative
  * Categories: footer
  * Keywords: footer, contact, social, links
  * Description: A three-column store footer with site title and address, contact info, social links, and a bottom row with legal links and copyright.
@@ -69,14 +69,14 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:paragraph {"style":{"typography":{"textAlign":"left"}}} -->
-<p class="has-text-align-left">&copy; <?php echo esc_html( gmdate( 'Y' ) ); ?> <?php
-	/* Translators: WordPress link. */
-	$wordpress_link = '<a href="' . esc_url( __( 'https://wordpress.org', 'purple' ) ) . '" rel="nofollow">WordPress</a>';
+<!-- wp:paragraph {"className":"underline-link","style":{"typography":{"textAlign":"left"},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} -->
+<p class="has-text-align-left underline-link has-theme-4-color has-text-color has-link-color has-small-font-size">&copy; <?php echo esc_html( gmdate( 'Y' ) ); ?> <?php
+	/* Translators: WooCommerce link. */
+	$woocommerce_link = '<a href="' . esc_url( __( 'https://woocommerce.com/', 'purple' ) ) . '" rel="nofollow">WooCommerce</a>';
 	echo sprintf(
-		/* Translators: Designed with WordPress */
+		/* Translators: Designed with WooCommerce */
 		esc_html__( 'All rights reserved. Designed with %1$s.', 'purple' ),
-		$wordpress_link
+		$woocommerce_link
 	);
 	?></p>
 <!-- /wp:paragraph --></div>

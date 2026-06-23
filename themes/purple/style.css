@@ -64,6 +64,11 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
     align-items: flex-start;
 }
 
+.wc-block-components-quantity-selector {
+    border-color: var(--wp--preset--color--theme-6);
+    border-radius: 0;
+}
+
 /* Catalog sort order select — CSS customizable select (base-select).
  * Continues PR #82 exploration: https://github.com/woocommerce/woo-themes/pull/82
  * Closed/open styles from Figma Dropdown/Default (1:6531) and Dropdown/Open Links (37:1153).
@@ -207,6 +212,42 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
     .woocommerce.wc-block-catalog-sorting select.orderby:open selectedcontent {
         text-decoration: underline;
     }
+}
+
+:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills) {
+    gap: var(--wp--preset--spacing--20);
+}
+
+:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill) {
+    border-color: var(--wp--preset--color--theme-4);
+    border-radius: 0;
+    font-size: var(--wp--preset--font-size--small);
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    line-height: 1.142;
+    padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--30);
+    text-transform: uppercase;
+}
+
+.woocommerce-page label.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill {
+    margin-bottom: 0;
+}
+
+.woocommerce-page label.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-name {
+    margin-bottom: 0;
+}
+
+:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:checked)) {
+    background-color: var(--wp--preset--color--theme-2);
+}
+
+.wp-block-accordion-heading__toggle:hover .wp-block-accordion-heading__toggle-title {
+    text-decoration: none;
+}
+
+.wp-block-woocommerce-product-review-content p {
+    margin-top: var(--wp--preset--spacing--30);
+    margin-bottom: 0;
 }
 
 /* Navigation dropdown panel — desktop only.
