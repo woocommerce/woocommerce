@@ -4,9 +4,8 @@
  * Enabled by the `experimental-iapi-cart` feature flag. The cart stays
  * PHP-rendered and hook-driven; this module only replaces the legacy jQuery
  * interaction layer (assets/js/frontend/cart.js):
- *   - mutations go through the shared Mini-Cart `woocommerce` store (optimistic
- *     + Store API), or directly to Store API for coupons/shipping which the
- *     shared store does not (yet) expose;
+ *   - mutations go through the shared `woocommerce` store (Store API, optimistic
+ *     where applicable);
  *   - after a mutation settles we re-render the server HTML via the
  *     Interactivity Router so every PHP hook/filter fires again, then move
  *     focus to any notice for screen-reader parity with the legacy script;
