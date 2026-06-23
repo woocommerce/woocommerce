@@ -81,7 +81,7 @@
 
 <!-- wp:pattern {"slug":"purple/related-products-collection"} /-->
 
-<!-- wp:pattern {"slug":"purple/left-aligned-product-right-text"} /-->
+<!-- wp:pattern {"slug":"purple/about-left-aligned-product-right-text"} /-->
 
 <!-- wp:pattern {"slug":"purple/categories-on-three-columns"} /-->
 

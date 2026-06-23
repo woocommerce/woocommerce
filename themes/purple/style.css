@@ -55,8 +55,11 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
     font-style: normal;
 }
 
-/* Checkbox alignment for reviews form */
+.wp-block-product-specifications-item__value p {
+    margin: 0
+}
 
+/* Checkbox alignment for reviews form */
 .wp-block-woocommerce-product-review-form .comment-form-cookies-consent {
     align-items: flex-start;
 }
