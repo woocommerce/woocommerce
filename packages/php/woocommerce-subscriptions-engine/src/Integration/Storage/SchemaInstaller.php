@@ -33,11 +33,11 @@ final class SchemaInstaller {
 	 * Schema version. Bump when the CREATE TABLE statements change so the
 	 * version-gated install runs dbDelta again.
 	 *
-	 * 1.0.0 - baseline plan and contract tables, including the nullable `extension_slug`
+	 * 0.0.1 - baseline plan and contract tables, including the nullable `extension_slug`
 	 *         column on plans and contracts.
-	 * 1.1.0 - plan lifecycle and manual ordering columns.
+	 * 0.1.0 - plan status and sort_order columns.
 	 */
-	const VERSION = '1.1.0';
+	const VERSION = '0.1.0';
 
 	/**
 	 * Option key tracking the installed schema version.
