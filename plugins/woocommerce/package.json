@@ -30,7 +30,7 @@
 		"env:dev": "pnpm wp-env start --update",
 		"env:down": "pnpm wp-env stop",
 		"env:performance-init": "./tests/performance/bin/init-environment.sh",
-		"env:restart": "pnpm wp-env destroy && pnpm wp-env start --update",
+		"env:restart": "pnpm wp-env destroy --force && pnpm wp-env start --update",
 		"env:start": "pnpm wp-env start",
 		"env:start:blocks": "pnpm wp-env start && bash ./tests/e2e/bin/blocks/test-env-setup.sh && pnpm playwright install chromium",
 		"env:stop": "pnpm wp-env stop",

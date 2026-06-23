@@ -20,8 +20,10 @@ $prefs["core/edit-site"]["welcomeGuidePage"] = false;
 $prefs["core/edit-site"]["welcomeGuideTemplate"] = false;
 update_user_meta( 1, "wp_persisted_preferences", $prefs );
 '
-# Activate the Test Helper APIs utility plugin.
-wp-env run tests-cli -- wp plugin activate e2e-test-helpers/test-helper-apis.php
+# Activate the Test Helper APIs utility plugin if not already activated.
+if ! wp-env run tests-cli -- wp plugin is-active e2e-test-helpers/test-helper-apis.php >/dev/null 2>&1; then
+	wp-env run tests-cli -- wp plugin activate e2e-test-helpers/test-helper-apis.php
+fi
 
 echo "Generating test translations"
 node $script_dir/generate-test-translations.js
