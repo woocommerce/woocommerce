@@ -287,4 +287,177 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 
 		$wp_filesystem = $original_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
+
+	/**
+	 * @testdox get_content_directory_relative_path() derives the path from WP_CONTENT_DIR when it lives under ABSPATH.
+	 * @dataProvider provider_content_dir_under_abspath
+	 *
+	 * @param string $abspath        The ABSPATH value to use.
+	 * @param string $wp_content_dir The WP_CONTENT_DIR value to use.
+	 * @param string $expected       The expected root-relative content path.
+	 */
+	public function test_get_content_directory_relative_path_under_abspath( string $abspath, string $wp_content_dir, string $expected ): void {
+		Constants::set_constant( 'ABSPATH', $abspath );
+		Constants::set_constant( 'WP_CONTENT_DIR', $wp_content_dir );
+
+		$this->assertSame( $expected, FilesystemUtil::get_content_directory_relative_path() );
+	}
+
+	/**
+	 * Data provider for content directories located under ABSPATH.
+	 *
+	 * @return array<array<string>>
+	 */
+	public function provider_content_dir_under_abspath(): array {
+		return array(
+			// Default layout.
+			array( '/var/www/html/', '/var/www/html/wp-content', '/wp-content' ),
+			// Renamed content directory.
+			array( '/var/www/html/', '/var/www/html/custom-content', '/custom-content' ),
+			// Nested content directory.
+			array( '/var/www/html/', '/var/www/html/wp/content', '/wp/content' ),
+			// WordPress in a subdirectory.
+			array( '/var/www/html/wp/', '/var/www/html/wp/wp-content', '/wp-content' ),
+		);
+	}
+
+	/**
+	 * @testdox get_content_directory_relative_path() falls back to the content URL path when WP_CONTENT_DIR is not under ABSPATH.
+	 * @dataProvider provider_content_dir_outside_abspath
+	 *
+	 * @param string $abspath        The ABSPATH value to use.
+	 * @param string $wp_content_dir The WP_CONTENT_DIR value to use.
+	 */
+	public function test_get_content_directory_relative_path_falls_back_to_content_url( string $abspath, string $wp_content_dir ): void {
+		Constants::set_constant( 'ABSPATH', $abspath );
+		Constants::set_constant( 'WP_CONTENT_DIR', $wp_content_dir );
+
+		// When the content directory is not under ABSPATH the path must come from the content URL,
+		// never from a bogus ABSPATH-relative substring of WP_CONTENT_DIR.
+		$expected = wp_parse_url( content_url(), PHP_URL_PATH );
+
+		$this->assertSame( $expected, FilesystemUtil::get_content_directory_relative_path() );
+	}
+
+	/**
+	 * Data provider for content directories that are not located under ABSPATH.
+	 *
+	 * @return array<array<string>>
+	 */
+	public function provider_content_dir_outside_abspath(): array {
+		return array(
+			// Bedrock-style sibling directory.
+			array( '/var/www/html/wp/', '/var/www/html/app' ),
+			// Sibling sharing a name prefix (must not false-match ABSPATH).
+			array( '/var/www/html/', '/var/www/htmlx/wp-content' ),
+			// Unrelated absolute path.
+			array( '/var/www/html/', '/totally/different/app' ),
+			// Empty ABSPATH.
+			array( '', '/var/www/html/wp-content' ),
+		);
+	}
+
+	/**
+	 * @testdox 'mkdir_p_not_indexable' writes the expected .htaccess based on the allow_file_access flag.
+	 *
+	 * @testWith [false, "deny from all"]
+	 *           [true, "Options -Indexes"]
+	 *
+	 * @param bool   $allow_file_access Whether file access should be allowed.
+	 * @param string $expected_htaccess The expected .htaccess content.
+	 */
+	public function test_mkdir_p_not_indexable_writes_expected_htaccess( bool $allow_file_access, string $expected_htaccess ): void {
+		$callback = fn() => 'direct';
+		add_filter( 'filesystem_method', $callback );
+
+		$dir = trailingslashit( get_temp_dir() ) . 'wc-mkdir-not-indexable-' . ( $allow_file_access ? 'allow' : 'deny' );
+		$this->delete_test_dir( $dir );
+
+		try {
+			FilesystemUtil::mkdir_p_not_indexable( $dir, $allow_file_access );
+
+			$wp_fs = FilesystemUtil::get_wp_filesystem();
+			$this->assertDirectoryExists( $dir, 'The directory should be created.' );
+			$this->assertSame(
+				$expected_htaccess,
+				trim( (string) $wp_fs->get_contents( trailingslashit( $dir ) . '.htaccess' ) ),
+				'The .htaccess content should reflect the allow_file_access flag.'
+			);
+			$this->assertTrue(
+				$wp_fs->exists( trailingslashit( $dir ) . 'index.html' ),
+				'An empty index.html should be created to prevent directory listing.'
+			);
+		} finally {
+			$this->delete_test_dir( $dir );
+			remove_filter( 'filesystem_method', $callback );
+		}
+	}
+
+	/**
+	 * @testdox 'mkdir_p_not_indexable' defaults to denying all access when no flag is passed.
+	 */
+	public function test_mkdir_p_not_indexable_defaults_to_deny_all(): void {
+		$callback = fn() => 'direct';
+		add_filter( 'filesystem_method', $callback );
+
+		$dir = trailingslashit( get_temp_dir() ) . 'wc-mkdir-not-indexable-default';
+		$this->delete_test_dir( $dir );
+
+		try {
+			FilesystemUtil::mkdir_p_not_indexable( $dir );
+
+			$wp_fs = FilesystemUtil::get_wp_filesystem();
+			$this->assertSame(
+				'deny from all',
+				trim( (string) $wp_fs->get_contents( trailingslashit( $dir ) . '.htaccess' ) ),
+				'Omitting the allow_file_access argument should keep the deny-all default.'
+			);
+		} finally {
+			$this->delete_test_dir( $dir );
+			remove_filter( 'filesystem_method', $callback );
+		}
+	}
+
+	/**
+	 * @testdox 'mkdir_p_not_indexable' leaves an existing directory's .htaccess untouched.
+	 */
+	public function test_mkdir_p_not_indexable_does_not_overwrite_existing_directory(): void {
+		$callback = fn() => 'direct';
+		add_filter( 'filesystem_method', $callback );
+
+		$dir = trailingslashit( get_temp_dir() ) . 'wc-mkdir-not-indexable-existing';
+		$this->delete_test_dir( $dir );
+
+		try {
+			// First call creates the directory with the deny-all default.
+			FilesystemUtil::mkdir_p_not_indexable( $dir );
+
+			// A later call requesting file access must not rewrite the existing .htaccess.
+			FilesystemUtil::mkdir_p_not_indexable( $dir, true );
+
+			$wp_fs = FilesystemUtil::get_wp_filesystem();
+			$this->assertSame(
+				'deny from all',
+				trim( (string) $wp_fs->get_contents( trailingslashit( $dir ) . '.htaccess' ) ),
+				'An existing directory should keep its original .htaccess.'
+			);
+		} finally {
+			$this->delete_test_dir( $dir );
+			remove_filter( 'filesystem_method', $callback );
+		}
+	}
+
+	/**
+	 * Removes a test directory and its contents if it exists.
+	 *
+	 * @param string $dir The directory to delete.
+	 * @return void
+	 */
+	private function delete_test_dir( string $dir ): void {
+		if ( ! is_dir( $dir ) ) {
+			return;
+		}
+
+		FilesystemUtil::get_wp_filesystem()->rmdir( $dir, true );
+	}
 }

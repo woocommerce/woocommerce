@@ -223,7 +223,7 @@ export class Editor extends CoreEditor {
 
 ### Content Templates
 
-We have created `RequestUtils.createPostFromFile()` and `RequestUtils.createTemplateFromFile()` utilities that enable creating complex content testing scenarios with Handlebars templates. The template files are kept in the [content-templates](../../tests/e2e/content-templates/) folder, so you can head there for some inspiration.
+We have created `RequestUtils.createPostFromFile()` and `RequestUtils.createTemplateFromFile()` utilities that enable creating complex content testing scenarios with Handlebars templates. The template files are kept in the [content-templates](../../../../tests/e2e-pw/content-templates/blocks/) folder, so you can head there for some inspiration.
 
 > [!IMPORTANT]
 > The Handlebars template filenames must be prefixed with the entity type. For posts, an example filename would be `post_with-filters.handlebars`, and for templates `template_archive-product_with-filters.handlebars`. Notice that the latter contains the slug of the template (`archive-product`) before the name (`with-filters`), separated with an underscore - it's necessary for the template to be properly loaded and created.

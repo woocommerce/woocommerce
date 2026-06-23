@@ -9,6 +9,7 @@ import { ApiClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { tags, expect, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { random } from '../../utils/helpers';
+import { getMediaBySlug } from '../../utils/media';
 
 test.use( { storageState: ADMIN_STATE_PATH } );
 
@@ -394,7 +395,8 @@ test.describe(
 			productId: number,
 			product2Id: number,
 			noProductOrderId: number,
-			initialGrantAccessAfterPaymentSetting: string;
+			initialGrantAccessAfterPaymentSetting: string,
+			downloadFile: string;
 
 		/**
 		 * Enable the "Grant access to downloadable products after payment" setting in WooCommerce > Settings > Products > Downloadable products.
@@ -426,6 +428,10 @@ test.describe(
 			} );
 		};
 
+		test.beforeAll( async () => {
+			( { source_url: downloadFile } = await getMediaBySlug( 'image-01' ) );
+		} );
+
 		test.beforeEach( async ( { restApi } ) => {
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
@@ -436,7 +442,7 @@ test.describe(
 						{
 							id: random(),
 							name: 'Single',
-							file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
+							file: downloadFile,
 						},
 					],
 				} )
@@ -455,7 +461,7 @@ test.describe(
 						{
 							id: random(),
 							name: 'Single',
-							file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
+							file: downloadFile,
 						},
 					],
 				} )

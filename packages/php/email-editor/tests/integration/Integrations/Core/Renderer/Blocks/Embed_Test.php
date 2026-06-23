@@ -726,6 +726,165 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Helper to mock the oEmbed HTTP response for video thumbnail lookups.
+	 *
+	 * @param string $endpoint_fragment Substring identifying the provider's oEmbed endpoint URL.
+	 * @param string $thumbnail_url Thumbnail URL to return in the mocked response.
+	 * @return callable The HTTP filter callback (for removal in cleanup).
+	 */
+	private function mock_oembed_thumbnail_response( string $endpoint_fragment, string $thumbnail_url ): callable {
+		$mock_oembed_response = wp_json_encode(
+			array(
+				'type'          => 'video',
+				'thumbnail_url' => $thumbnail_url,
+				'title'         => 'Test Video',
+			)
+		);
+
+		// Use pre_http_request filter to intercept oEmbed HTTP calls.
+		$filter_callback = function ( $preempt, $args, $url ) use ( $endpoint_fragment, $mock_oembed_response ) {
+			if ( strpos( $url, $endpoint_fragment ) !== false ) {
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => $mock_oembed_response,
+				);
+			}
+			return $preempt;
+		};
+
+		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+
+		return $filter_callback;
+	}
+
+	/**
+	 * Data provider for video provider oEmbed thumbnail rendering tests.
+	 *
+	 * @return array<string, array{array, string, string, array<string>}>
+	 */
+	public function video_embed_provider(): array {
+		return array(
+			// Vimeo URLs carry query parameters to verify they survive rendering (as &amp; in HTML).
+			'vimeo'              => array(
+				array(
+					'url'              => 'https://vimeo.com/123456789?w=500&h=281',
+					'providerNameSlug' => 'vimeo',
+				),
+				'vimeo.com/api/oembed',
+				'https://i.vimeocdn.com/video/123456789.jpg?w=500&h=281',
+				array( 'w=500', 'h=281' ),
+			),
+			'tiktok'             => array(
+				array(
+					'url'              => 'https://www.tiktok.com/@wordpress/video/7228005059881544986',
+					'providerNameSlug' => 'tiktok',
+				),
+				'tiktok.com/oembed',
+				'https://p16-sign.tiktokcdn-us.com/obj/tos-useast5-p-0068-tx/thumbnail.jpg',
+				array(),
+			),
+			// No providerNameSlug, so the dai.ly short URL exercises domain-based detection.
+			'dailymotion dai.ly' => array(
+				array( 'url' => 'https://dai.ly/x8x9abc' ),
+				'dailymotion.com/services/oembed',
+				'https://s1.dmcdn.net/v/X8x9abc/x720-thumbnail.jpg',
+				array(),
+			),
+		);
+	}
+
+	/**
+	 * Test that supported video provider embeds render as a video thumbnail with play button via the oEmbed API.
+	 *
+	 * @dataProvider video_embed_provider
+	 * @param array         $attrs Block attributes.
+	 * @param string        $endpoint_fragment Substring identifying the provider's oEmbed endpoint URL.
+	 * @param string        $thumbnail_url Thumbnail URL returned by the mocked oEmbed response.
+	 * @param array<string> $extra_expected_strings Additional strings expected in the rendered output.
+	 */
+	public function test_renders_video_provider_embed_via_oembed( array $attrs, string $endpoint_fragment, string $thumbnail_url, array $extra_expected_strings ): void {
+		// Mock the oEmbed HTTP response to avoid external calls in CI.
+		$filter_callback = $this->mock_oembed_thumbnail_response( $endpoint_fragment, $thumbnail_url );
+
+		$parsed_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => $attrs,
+			'innerHTML' => '<figure class="wp-block-embed is-type-video"><div class="wp-block-embed__wrapper">' . $attrs['url'] . '</div></figure>',
+		);
+
+		try {
+			$rendered = $this->embed_renderer->render( $parsed_embed['innerHTML'], $parsed_embed, $this->rendering_context );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+		}
+
+		// Should detect the provider and render as video with play button and thumbnail.
+		$this->assertNotEmpty( $rendered );
+		$this->assertStringContainsString( 'play2x.png', $rendered, 'Embed should render with play button' );
+		// Verify background-image is present (not stripped by WP_Style_Engine).
+		$this->assertStringContainsString( 'background-image', $rendered, 'Background image should be present in CSS' );
+		foreach ( $extra_expected_strings as $expected_string ) {
+			$this->assertStringContainsString( $expected_string, $rendered, 'Expected string missing from rendered embed' );
+		}
+	}
+
+	/**
+	 * Test that oEmbed thumbnail lookups count toward the per-render HTTP fetch cap.
+	 */
+	public function test_caps_oembed_thumbnail_fetches_at_five_per_render(): void {
+		$request_count   = 0;
+		$filter_callback = function ( $preempt, $args, $url ) use ( &$request_count ) {
+			if ( strpos( $url, 'vimeo.com/api/oembed' ) !== false ) {
+				++$request_count;
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => wp_json_encode(
+						array(
+							'type'          => 'video',
+							'thumbnail_url' => 'https://i.vimeocdn.com/video/123456789.jpg',
+						)
+					),
+				);
+			}
+			return $preempt;
+		};
+		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+
+		$urls = array();
+		try {
+			for ( $i = 1; $i <= 6; $i++ ) {
+				$url    = 'https://vimeo.com/10000000' . $i;
+				$urls[] = $url;
+
+				$parsed_block = array(
+					'blockName' => 'core/embed',
+					'attrs'     => array(
+						'url'              => $url,
+						'providerNameSlug' => 'vimeo',
+					),
+					'innerHTML' => '<figure class="wp-block-embed is-type-video"><div class="wp-block-embed__wrapper">' . $url . '</div></figure>',
+				);
+
+				$rendered = $this->embed_renderer->render( $parsed_block['innerHTML'], $parsed_block, $this->rendering_context );
+
+				if ( $i <= 5 ) {
+					$this->assertStringContainsString( 'background-image', $rendered, "Embed #{$i} should render with a thumbnail" );
+				} else {
+					$this->assertStringNotContainsString( 'background-image', $rendered, 'Embed #6 should NOT render with a thumbnail' );
+					$this->assertStringContainsString( '<a href="https://vimeo.com/100000006"', $rendered, 'Embed #6 should render as a link fallback' );
+				}
+			}
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+			foreach ( $urls as $url ) {
+				delete_transient( 'wc_email_vp_thumb_' . md5( $url ) );
+			}
+		}
+
+		$this->assertSame( 5, $request_count, 'Only five oEmbed thumbnail fetches should be made per render' );
+	}
+
+	/**
 	 * Helper to mock the embed page HTTP response for example.com URLs.
 	 *
 	 * @param string $embed_page_html HTML for the embed page response.
@@ -1139,6 +1298,73 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 				delete_transient( 'wc_email_embed_pg_' . md5( $url ) );
 			}
 		}
+	}
+
+	/**
+	 * Test that cached rich cards render even after the per-render fetch cap is exhausted.
+	 */
+	public function test_renders_cached_rich_card_after_fetch_cap_exhausted(): void {
+		// Pre-warm the embed page cache for one URL to simulate a previous render.
+		$cached_url = 'https://example.com/cached-post';
+		set_transient(
+			'wc_email_embed_pg_' . md5( $cached_url ),
+			array(
+				'title'         => 'Cached Card Title',
+				'thumbnail_url' => '',
+				'provider_name' => 'Example Blog',
+				'provider_url'  => 'https://example.com',
+				'excerpt'       => '',
+				'site_icon_url' => '',
+			),
+			DAY_IN_SECONDS
+		);
+
+		$embed_page_html = '<html><body><div class="wp-embed">'
+			. '<p class="wp-embed-heading"><a href="https://example.com/post" target="_top">Fetched Card Title</a></p>'
+			. '<div class="wp-embed-site-title"><a href="https://example.com" target="_top">'
+			. '<span>Example Blog</span></a></div>'
+			. '</div></body></html>';
+		$filter_callback = $this->mock_embed_page_for_example_com( $embed_page_html );
+
+		$urls = array();
+		try {
+			// Exhaust the five fetch slots with uncached embeds.
+			for ( $i = 1; $i <= 5; $i++ ) {
+				$url    = 'https://example.com/uncached-' . $i;
+				$urls[] = $url;
+
+				$parsed_block = array(
+					'blockName' => 'core/embed',
+					'attrs'     => array(
+						'url'              => $url,
+						'type'             => 'wp-embed',
+						'providerNameSlug' => 'example-blog',
+					),
+					'innerHTML' => '<figure class="wp-block-embed is-type-wp-embed"><div class="wp-block-embed__wrapper">' . $url . '</div></figure>',
+				);
+				$this->embed_renderer->render( $parsed_block['innerHTML'], $parsed_block, $this->rendering_context );
+			}
+
+			// The cached embed should still render as a rich card without an HTTP fetch.
+			$parsed_cached_block = array(
+				'blockName' => 'core/embed',
+				'attrs'     => array(
+					'url'              => $cached_url,
+					'type'             => 'wp-embed',
+					'providerNameSlug' => 'example-blog',
+				),
+				'innerHTML' => '<figure class="wp-block-embed is-type-wp-embed"><div class="wp-block-embed__wrapper">' . $cached_url . '</div></figure>',
+			);
+			$rendered            = $this->embed_renderer->render( $parsed_cached_block['innerHTML'], $parsed_cached_block, $this->rendering_context );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+			delete_transient( 'wc_email_embed_pg_' . md5( $cached_url ) );
+			foreach ( $urls as $url ) {
+				delete_transient( 'wc_email_embed_pg_' . md5( $url ) );
+			}
+		}
+
+		$this->assertStringContainsString( 'Cached Card Title', $rendered, 'Cached embed should render as a rich card after the fetch cap is exhausted' );
 	}
 
 	/**

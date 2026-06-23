@@ -271,7 +271,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				continue;
 			}
 
-			if ( update_user_meta( $customer->get_id(), $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {
+			$value = $customer->{"get_$prop"}( 'edit' );
+			$value = is_string( $value ) ? wp_slash( $value ) : $value;
+
+			if ( update_user_meta( $customer->get_id(), $meta_key, $value ) ) {
 				$updated_props[] = $prop;
 			}
 		}
@@ -297,7 +300,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				continue;
 			}
 
-			if ( update_user_meta( $customer->get_id(), $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {
+			$value = $customer->{"get_$prop"}( 'edit' );
+			$value = is_string( $value ) ? wp_slash( $value ) : $value;
+
+			if ( update_user_meta( $customer->get_id(), $meta_key, $value ) ) {
 				$updated_props[] = $prop;
 			}
 		}
@@ -322,7 +328,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				continue;
 			}
 
-			if ( update_user_meta( $customer->get_id(), $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {
+			$value = $customer->{"get_$prop"}( 'edit' );
+			$value = is_string( $value ) ? wp_slash( $value ) : $value;
+
+			if ( update_user_meta( $customer->get_id(), $meta_key, $value ) ) {
 				$updated_props[] = $prop;
 			}
 		}
