@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.9.0 2026-XX-XX =
+= 10.9.0 2026-06-23 =
 
 **WooCommerce**
 
@@ -244,6 +244,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Push notifications: cancel the safety-net Action Scheduler action on delivery by matching schedule and cancel on a single identity-keyed args shape, so stale actions no longer fire ~60s later (and the retry path can no longer produce duplicate pushes). [#65589](https://github.com/woocommerce/woocommerce/pull/65589)
 * Fix - Fix product filters not applying when Full Page Reload is enabled in the Product Collection block. [#65601](https://github.com/woocommerce/woocommerce/pull/65601)
 * Fix - Only save published products to shopper lists. [#65899](https://github.com/woocommerce/woocommerce/pull/65899)
+* Fix - Fix adding to cart variable products with an 'Any' attribute from the Add to Cart + Options block when in legacy mode [#65934](https://github.com/woocommerce/woocommerce/pull/65934)
 * Add - Add a "Save for later" link beneath each cart line item that saves the item to the saved-for-later shopper list and removes it from the cart on success. The link is only shown to logged-in users and is hidden in the mini-cart. [#65263](https://github.com/woocommerce/woocommerce/pull/65263)
 * Add - Add a configurable endpoint URL to the GraphQL settings section. [#64350](https://github.com/woocommerce/woocommerce/pull/64350)
 * Add - Add a configurable maximum query depth to the GraphQL settings section. [#64325](https://github.com/woocommerce/woocommerce/pull/64325)
