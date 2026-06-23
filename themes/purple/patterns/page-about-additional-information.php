@@ -12,4 +12,4 @@
 ?>
 <!-- wp:pattern {"slug":"purple/about-alternating-columns"} /-->
 <!-- wp:pattern {"slug":"purple/about-category-collection"} /-->
-<!-- wp:pattern {"slug":"purple/faq-question-list"} /-->
+<!-- wp:pattern {"slug":"purple/about-faq-question-list"} /-->
