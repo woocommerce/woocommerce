@@ -120,7 +120,7 @@ Timeline.propTypes = {
 	 */
 	clockFormat: PropTypes.string,
 	/**
-	 * Defines whether dates should be displayed in the browser timezone or the WordPress site timezone.
+	 * Defines whether dates are grouped and displayed using the browser timezone or the WordPress site timezone.
 	 */
 	timezone: PropTypes.oneOf( [ 'browser', 'site' ] ),
 };
