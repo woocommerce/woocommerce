@@ -60,6 +60,7 @@ export {
 } from './experimental-select-control/menu';
 export { default as ScrollTo } from './scroll-to';
 export { Sortable } from './sortable';
+export * from './sortable-list';
 export { ListItem } from './list-item';
 export { default as Spinner } from './spinner';
 export { default as Stepper, type StepperProps } from './stepper';

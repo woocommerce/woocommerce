@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add SortableList component for data-backed drag-and-drop reordering.
