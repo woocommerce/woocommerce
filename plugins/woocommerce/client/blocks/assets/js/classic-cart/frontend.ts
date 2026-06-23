@@ -14,11 +14,12 @@
  *
  * See docs/internal-developers/iapi-classic-cart-migration/migration-plan.md.
  *
- * All cart mutations (add/remove item, coupons, shipping) live in the shared
- * `woocommerce` store. This module's actions are thin classic-cart glue: read
- * the server-rendered markup, call the shared mutation, then re-render. The
- * exception is `restoreItem`, which has no Store API equivalent and falls back
- * to the legacy server URL.
+ * Cart-domain mutations shared with the Cart/Mini-Cart blocks (add/remove item,
+ * coupons) live in the shared `woocommerce` store; this module's handlers read
+ * the server-rendered markup, call the shared mutation, then re-render.
+ * Classic-cart-only mutations stay local here: shipping rate + customer address
+ * (not used by those blocks) hit Store API directly, and `restoreItem` (no Store
+ * API equivalent) falls back to the legacy server URL.
  */
 
 /**
@@ -33,15 +34,21 @@ type ClassicCartContext = {
 	coupon: string;
 };
 
-// Lock for our own private classic-cart store, so its state is mutable from
-// actions. The shared `woocommerce` store is accessed without a lock (its
-// public actions are reachable that way).
+// Lock for the private iAPI stores. Required to read the shared `woocommerce`
+// store's locked state and to make our own classic-cart store's state mutable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-// All cart mutations live in the shared `woocommerce` store; this module only
-// reads the classic markup and calls those actions, then re-renders.
-const { actions: wooActions } = store< {
+// Cart-domain mutations shared with the Cart/Mini-Cart blocks live in the shared
+// `woocommerce` store. Shipping rate + customer-address mutations are NOT used by
+// those blocks, so they stay local to this module (see selectShippingRate /
+// calculateShipping below) and hit Store API directly via `restUrl`/`nonce`.
+//
+// Access the shared store WITH the lock (like the Mini-Cart): reading its locked
+// `state` (restUrl/nonce) requires the lock — without it the cart mutations
+// silently break.
+const { state: wooState, actions: wooActions } = store< {
+	state: { restUrl: string; nonce: string };
 	actions: {
 		addCartItem: ( args: {
 			key?: string;
@@ -52,15 +59,8 @@ const { actions: wooActions } = store< {
 		refreshCartItems: () => Promise< unknown >;
 		applyCoupon: ( code: string ) => Promise< unknown >;
 		removeCoupon: ( code: string ) => Promise< unknown >;
-		selectShippingRate: ( args: {
-			packageId: number;
-			rateId: string;
-		} ) => Promise< unknown >;
-		updateCustomer: ( data: {
-			shipping_address?: Record< string, string >;
-		} ) => Promise< unknown >;
 	};
-} >( 'woocommerce' );
+} >( 'woocommerce', {}, { lock: universalLock } );
 
 // Declare the classic-cart store's own state up front (locked, since we own
 // this store) so the actions defined below can reference and mutate it. This
@@ -114,6 +114,29 @@ function emitLegacyEvent( name: string, ...args: unknown[] ): void {
 	if ( w.jQuery ) {
 		w.jQuery( document.body ).trigger( name, args );
 	}
+}
+
+/**
+ * Store API POST for the shipping endpoints that the shared store doesn't expose
+ * (select-shipping-rate, update-customer). Kept local to the classic cart since
+ * the Cart/Mini-Cart blocks don't use these actions.
+ */
+async function storeApiPost(
+	path: string,
+	data: Record< string, unknown >
+): Promise< unknown > {
+	const response = await fetch(
+		`${ wooState.restUrl }wc/store/v1/${ path }`,
+		{
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Nonce: wooState.nonce,
+			},
+			body: JSON.stringify( data ),
+		}
+	);
+	return response.json();
 }
 
 const { actions } = store(
@@ -214,10 +237,12 @@ const { actions } = store(
 				);
 				state.isProcessing = true;
 				try {
-					yield wooActions.selectShippingRate( {
-						packageId,
-						rateId,
+					yield storeApiPost( 'cart/select-shipping-rate', {
+						package_id: packageId,
+						rate_id: rateId,
 					} );
+					// Sync the shared store so the Mini-Cart reflects new totals.
+					yield wooActions.refreshCartItems();
 					emitLegacyEvent( 'updated_shipping_method' );
 					yield* rerenderCart();
 				} finally {
@@ -232,7 +257,7 @@ const { actions } = store(
 				const data = new FormData( form );
 				state.isProcessing = true;
 				try {
-					yield wooActions.updateCustomer( {
+					yield storeApiPost( 'cart/update-customer', {
 						shipping_address: {
 							country: String(
 								data.get( 'calc_shipping_country' ) ?? ''
@@ -248,6 +273,8 @@ const { actions } = store(
 							),
 						},
 					} );
+					// Sync the shared store so the Mini-Cart reflects new totals.
+					yield wooActions.refreshCartItems();
 					yield* rerenderCart();
 				} finally {
 					state.isProcessing = false;
