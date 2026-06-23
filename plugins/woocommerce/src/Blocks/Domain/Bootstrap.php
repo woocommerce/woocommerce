@@ -10,11 +10,9 @@ use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
 use Automattic\WooCommerce\Blocks\DependencyDetection;
-use Automattic\WooCommerce\Blocks\Patterns\AIPatterns;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
-use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Domain\Services\Notices;
 use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
 use Automattic\WooCommerce\Blocks\Domain\Services\GoogleAnalytics;
@@ -155,7 +153,6 @@ class Bootstrap {
 			$this->container->get( Notices::class )->init();
 
 			if ( is_admin() || $is_rest ) {
-				$this->container->get( AIPatterns::class );
 				$this->container->get( PTKPatternsStore::class );
 			}
 
@@ -163,8 +160,6 @@ class Bootstrap {
 				$this->container->get( TemplateOptions::class )->init();
 			}
 		}
-
-		$this->container->get( QueryFilters::class )->init();
 	}
 
 	/**
@@ -380,23 +375,11 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
-			AIPatterns::class,
-			function () {
-				return new AIPatterns();
-			}
-		);
-		$this->container->register(
 			ShippingController::class,
 			function ( $container ) {
 				$asset_api           = $container->get( AssetApi::class );
 				$asset_data_registry = $container->get( AssetDataRegistry::class );
 				return new ShippingController( $asset_api, $asset_data_registry );
-			}
-		);
-		$this->container->register(
-			QueryFilters::class,
-			function () {
-				return new QueryFilters();
 			}
 		);
 		$this->container->register(

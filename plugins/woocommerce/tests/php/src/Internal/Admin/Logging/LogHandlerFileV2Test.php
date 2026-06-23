@@ -192,7 +192,7 @@ MESSAGE;
 				'multibyte'   => '中文字',
 				'backslashes' => 'C:\MS-DOS\\',
 			),
-			$context_delineator . '{"multibyte":"中文字","backslashes":"C:\MS-DOS\"}',
+			$context_delineator . '{"multibyte":"中文字","backslashes":"C:\\\\MS-DOS\\\\"}',
 		);
 		yield 'backtrace boolean only' => array(
 			array( 'backtrace' => true ),
@@ -254,6 +254,70 @@ MESSAGE;
 		$expected_prefix = gmdate( 'c', $time ) . ' DEBUG ' . $message;
 
 		$this->assertEquals( $expected_prefix . $expected . "\n", $actual_content );
+	}
+
+	/**
+	 * Data provider for test_handle_context_is_valid_json.
+	 *
+	 * Only values whose types survive a JSON round trip belong here: a zero-fraction
+	 * float like 1.0 encodes to 1 and decodes back as an integer, failing assertSame().
+	 *
+	 * @return array
+	 */
+	public function provide_context_values(): array {
+		return array(
+			'namespaced class name' => array( array( 'class' => 'Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2' ) ),
+			'windows path'          => array( array( 'path' => 'C:\Windows\System32' ) ),
+			'double quotes'         => array( array( 'quote' => 'He said "hi" to "you"' ) ),
+			'newlines and tabs'     => array( array( 'multi' => "line1\nline2\ttab" ) ),
+			'multibyte characters'  => array( array( 'text' => '中文字 café 🎉' ) ),
+			'mixed scalar types'    => array(
+				array(
+					'i' => 7,
+					'f' => 3.14,
+					'b' => true,
+					'z' => null,
+				),
+			),
+			'combined'              => array(
+				array(
+					'class' => 'Automattic\WooCommerce\Foo',
+					'url'   => 'https://example.com/x',
+					'quote' => 'He said "hi"',
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testdox A log entry's CONTEXT is valid JSON that decodes back to the original context values.
+	 *
+	 * @dataProvider provide_context_values
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/62830
+	 *
+	 * @param array $context The context values to log, excluding the source.
+	 */
+	public function test_handle_context_is_valid_json( array $context ): void {
+		$this->sut->handle(
+			time(),
+			'debug',
+			'Test log entry.',
+			array_merge( array( 'source' => 'test' ), $context )
+		);
+
+		$paths = glob( Settings::get_log_directory() . '*.log' );
+		$this->assertCount( 1, $paths );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$content = file_get_contents( reset( $paths ) );
+		$this->assertStringContainsString( ' CONTEXT: ', $content );
+
+		// The handler appends the context as JSON after " CONTEXT: ".
+		$json    = explode( ' CONTEXT: ', $content, 2 )[1];
+		$decoded = json_decode( trim( $json ), true );
+
+		$this->assertSame( $context, $decoded );
 	}
 
 	/**

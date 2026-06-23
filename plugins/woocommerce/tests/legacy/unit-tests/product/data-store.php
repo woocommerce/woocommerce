@@ -1055,6 +1055,48 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Creating all variations follows the attribute's custom (menu_order) term order, not alphabetical order.
+	 */
+	public function test_create_all_product_variations_respects_custom_attribute_order() {
+		// Custom order is XS, S, M, L; alphabetical order by term name would be L, M, S, XS.
+		$attribute_data = WC_Helper_Product::create_attribute( 'size', array( 'XS', 'S', 'M', 'L' ) );
+		$term_ids       = $attribute_data['term_ids'];
+		foreach ( $term_ids as $index => $term_id ) {
+			update_term_meta( $term_id, 'order', $index + 1 );
+		}
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( $attribute_data['attribute_id'] );
+		$attribute->set_name( $attribute_data['attribute_taxonomy'] );
+		$attribute->set_options( $term_ids );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Custom Order Variable Product' );
+		$product->set_attributes( array( $attribute ) );
+		$product_id = $product->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$data_store->create_all_product_variations( wc_get_product( $product_id ) );
+		$data_store->sort_all_product_variations( $product_id );
+
+		$created_order = array();
+		foreach ( wc_get_product( $product_id )->get_children() as $variation_id ) {
+			$variation       = wc_get_product( $variation_id );
+			$created_order[] = $variation->get_attributes()['pa_size'];
+		}
+
+		$this->assertEquals(
+			array( 'xs', 's', 'm', 'l' ),
+			$created_order,
+			'Variations should be created in the attribute custom (menu_order) order, not alphabetical order.'
+		);
+
+		WC_Helper_Product::delete_attribute( $attribute_data['attribute_id'] );
+	}
+
+	/**
 	 * Test WC_Product_Data_Store_CPT::create_all_product_variations
 	 */
 	public function test_variable_create_all_product_variations_limits() {

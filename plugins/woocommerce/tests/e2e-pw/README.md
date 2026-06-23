@@ -52,7 +52,7 @@ Other ways of running tests (make sure you are in the `plugins/woocommerce` fold
 - `pnpm test:e2e` (usual, headless run)
 - `pnpm test:e2e --headed` (headed -- displaying browser window and test interactions)
 - `pnpm test:e2e --debug` (runs tests in debug mode)
-- `pnpm test:e2e basic.spec.js` (runs a single test file - `basic.spec.js` in this case)
+- `pnpm test:e2e page-loads.spec.ts` (runs a single test file - `page-loads.spec.ts` in this case)
 - `pnpm test:e2e ./tests/e2e-pw/tests/merchant` (runs all tests that are found in the `merchant` folder)
 - `pnpm test:e2e --ui` (open tests in [Playwright UI mode](https://playwright.dev/docs/test-ui-mode)).
 

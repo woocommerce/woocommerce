@@ -35,6 +35,10 @@ $radius-s:          2px !default;                                      // Small 
 // Adjacent work in #64280 adds $gray-700 and $gray-900 — coordinate on merge.
 $gray-100:          #f6f7f7 !default;                                  // Subtle backgrounds.
 $gray-200:          #dcdcde !default;                                  // Borders, dividers.
+$gray-400:          #cccccc !default;                                  // Matches Core $gray-400.
+
+// Spacing tokens — mirrors WP Design System naming.
+$grid-unit-60:      48px !default;                                     // Matches Core $grid-unit-60.
 
 // export vars as CSS vars
 :root {
