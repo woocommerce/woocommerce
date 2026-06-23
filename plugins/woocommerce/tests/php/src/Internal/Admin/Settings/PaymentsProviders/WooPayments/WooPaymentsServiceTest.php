@@ -8413,11 +8413,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mock_disable_test_account_option_state( $lock_value, $lock_changes, $updated_profile );
 
 		$requested_endpoints = array();
+		$requested_params    = array();
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint ) use ( &$requested_endpoints ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requested_endpoints, &$requested_params ) {
 						$requested_endpoints[] = $endpoint;
+						$requested_params[]    = $params;
 
 						return array(
 							'success' => true,
@@ -8435,6 +8437,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			$requested_endpoints,
 			'A sandbox account should be disabled via the onboarding reset endpoint, not the test-drive disable endpoint.'
 		);
+		// The Phase 2 payload must carry the caller's "from" and the validated source so a regression that
+		// routes correctly but drops or swaps these fails. "test-source" is not whitelisted, so the service
+		// normalizes it to the default via validate_onboarding_source().
+		$this->assertSame( 'test-from', $requested_params[0]['from'] ?? null, 'The reset request should forward the caller "from".' );
+		$this->assertSame( WooPaymentsService::SESSION_ENTRY_DEFAULT, $requested_params[0]['source'] ?? null, 'The reset request should carry the validated onboarding source.' );
 		$this->assertSame(
 			array( $this->current_time, 0 ),
 			$lock_changes,
@@ -8510,11 +8517,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mock_disable_test_account_option_state( $lock_value, $lock_changes, $updated_profile );
 
 		$requested_endpoints = array();
+		$requested_params    = array();
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint ) use ( &$requested_endpoints ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requested_endpoints, &$requested_params ) {
 						$requested_endpoints[] = $endpoint;
+						$requested_params[]    = $params;
 
 						return array(
 							'success' => true,
@@ -8532,6 +8541,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			$requested_endpoints,
 			'A test-drive account should be disabled via the test-drive disable endpoint, not the onboarding reset endpoint.'
 		);
+		// The Phase 2 payload must carry the caller's "from" and the validated source so a regression that
+		// routes correctly but drops or swaps these fails. "test-source" is not whitelisted, so the service
+		// normalizes it to the default via validate_onboarding_source().
+		$this->assertSame( 'test-from', $requested_params[0]['from'] ?? null, 'The disable request should forward the caller "from".' );
+		$this->assertSame( WooPaymentsService::SESSION_ENTRY_DEFAULT, $requested_params[0]['source'] ?? null, 'The disable request should carry the validated onboarding source.' );
 		$this->assertSame(
 			array( $this->current_time, 0 ),
 			$lock_changes,
