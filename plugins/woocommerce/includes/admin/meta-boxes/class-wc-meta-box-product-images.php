@@ -57,11 +57,9 @@ class WC_Meta_Box_Product_Images {
 					ProductMediaGallery::prime_attachment_caches( $product_media_gallery, true );
 
 					foreach ( $product_media_gallery as $media_item ) {
-						$attachment_id = absint( $media_item['id'] ?? 0 );
-						$media_type    = isset( $media_item['media_type'] ) && is_string( $media_item['media_type'] )
-							? sanitize_key( $media_item['media_type'] )
-							: 'image';
-						$poster_id     = absint( $media_item['poster_id'] ?? 0 );
+						$attachment_id = $media_item['id'];
+						$media_type    = $media_item['media_type'];
+						$poster_id     = $media_item['poster_id'] ?? 0;
 						$attachment    = 'video' === $media_type
 							? self::get_video_preview_html( $attachment_id )
 							: wp_get_attachment_image( $attachment_id, 'thumbnail' );

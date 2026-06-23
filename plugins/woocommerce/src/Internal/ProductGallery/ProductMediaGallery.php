@@ -404,14 +404,6 @@ class ProductMediaGallery {
 		$video_item['id']          = $attachment_id;
 		$video_item['position']    = isset( $item['position'] ) ? absint( $item['position'] ) : $fallback_position;
 
-		if ( ! empty( $item['settings'] ) && is_array( $item['settings'] ) ) {
-			$settings = self::normalize_video_settings( $item['settings'] );
-
-			if ( ! empty( $settings ) ) {
-				$video_item['settings'] = $settings;
-			}
-		}
-
 		if (
 			$poster_id &&
 			(
@@ -553,26 +545,6 @@ class ProductMediaGallery {
 		}
 
 		return $items;
-	}
-
-	/**
-	 * Normalize video media settings.
-	 *
-	 * @param array $settings Video media settings.
-	 * @return array
-	 */
-	private static function normalize_video_settings( array $settings ): array {
-		$normalized = array();
-
-		if ( ! empty( $settings['preload'] ) ) {
-			$preload = sanitize_key( $settings['preload'] );
-
-			if ( in_array( $preload, array( 'auto', 'metadata', 'none' ), true ) ) {
-				$normalized['preload'] = $preload;
-			}
-		}
-
-		return $normalized;
 	}
 
 	/**
