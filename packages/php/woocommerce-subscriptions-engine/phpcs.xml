@@ -71,6 +71,9 @@
 	<!-- Skip the PHPStan temp directory -->
 	<exclude-pattern>tasks/phpstan/temp/*</exclude-pattern>
 
+	<!-- Skip the PHPStan stubs: they mirror external symbols verbatim, so WPCS naming/structure rules do not apply. -->
+	<exclude-pattern>phpstan-stubs/*</exclude-pattern>
+
 	<!-- Skip the build directory -->
 	<exclude-pattern>build/*</exclude-pattern>
 </ruleset>
