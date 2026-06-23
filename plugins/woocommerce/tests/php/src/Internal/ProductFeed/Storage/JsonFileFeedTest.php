@@ -161,6 +161,44 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should throw when another process already holds the feed file lock, so overlapping writes cannot interleave.
+	 */
+	public function test_start_throws_when_feed_file_is_locked_by_another_process() {
+		// First process: start a feed and keep its handle open and exclusively locked (no flush/end).
+		$feed       = new JsonFileFeed( 'test-feed' );
+		$identifier = $feed->start();
+
+		// Second, overlapping process: a fresh instance resuming the same feed must fail to acquire the
+		// lock and throw rather than interleave its output into the file the first process is writing.
+		$feed_two = new JsonFileFeed( 'test-feed' );
+
+		try {
+			$this->expectException( \Exception::class );
+			$feed_two->start( $identifier );
+		} finally {
+			// Release the first process's lock so the test fixtures can be cleaned up.
+			$feed->flush();
+		}
+	}
+
+	/**
+	 * @testdox Should let a later process write the feed once the previous process releases the lock.
+	 */
+	public function test_start_succeeds_after_feed_file_lock_is_released() {
+		$feed       = new JsonFileFeed( 'test-feed' );
+		$identifier = $feed->start();
+		$feed->flush();
+
+		$feed_two = new JsonFileFeed( 'test-feed' );
+		$this->assertSame(
+			$identifier,
+			$feed_two->start( $identifier ),
+			'A resumed feed should acquire the lock once the previous holder released it.'
+		);
+		$feed_two->flush();
+	}
+
+	/**
 	 * Test that delete removes a partial feed file.
 	 */
 	public function test_delete_removes_partial_feed_file() {

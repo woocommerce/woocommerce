@@ -142,7 +142,8 @@ class JsonFileFeed implements FeedInterface {
 
 			// Seed the entry count so add_entry()'s separator accounts for entries already written.
 			$this->entry_count = $entries_written;
-			$this->open_handle( $this->file_path, 'a' );
+			$handle            = $this->open_handle( $this->file_path, 'a' );
+			$this->acquire_lock( $handle );
 
 			return $this->file_name;
 		}
@@ -150,7 +151,15 @@ class JsonFileFeed implements FeedInterface {
 		$this->entry_count = 0;
 		$this->file_name   = $this->generate_file_name();
 		$this->file_path   = $upload_dir['path'] . $this->file_name;
-		$handle            = $this->open_handle( $this->file_path, 'w' );
+
+		// Open with 'c' (create, do not truncate) rather than 'w' so the exclusive lock is acquired
+		// *before* any existing content is cleared. An overlapping process that fails to get the lock
+		// must not truncate a feed the lock holder is still writing; only once the lock is held is it
+		// safe to clear stale content and write the array from the top.
+		$handle = $this->open_handle( $this->file_path, 'c' );
+		$this->acquire_lock( $handle );
+		ftruncate( $handle, 0 );
+		rewind( $handle );
 		fwrite( $handle, '[' );
 
 		return $this->file_name;
@@ -189,6 +198,7 @@ class JsonFileFeed implements FeedInterface {
 		}
 
 		fwrite( $this->file_handle, ']' );
+		flock( $this->file_handle, LOCK_UN );
 		fclose( $this->file_handle );
 		$this->file_handle    = null;
 		$this->file_completed = true;
@@ -199,6 +209,7 @@ class JsonFileFeed implements FeedInterface {
 	 */
 	public function flush(): void {
 		if ( is_resource( $this->file_handle ) ) {
+			flock( $this->file_handle, LOCK_UN );
 			fclose( $this->file_handle );
 			$this->file_handle = null;
 		}
@@ -276,6 +287,38 @@ class JsonFileFeed implements FeedInterface {
 
 		$this->file_handle = $handle;
 		return $handle;
+	}
+
+	/**
+	 * Acquires an exclusive, non-blocking lock on the open feed file handle.
+	 *
+	 * A feed file is written across separate, short-lived processes (one Action Scheduler action per
+	 * chunk). A stuck in-progress job can be treated as stuck and have a fresh generation enqueued
+	 * while the original is still running, so two processes can end up writing the same file at once;
+	 * without mutual exclusion their unbuffered writes interleave into malformed JSON. The lock makes
+	 * each chunk's write to the shared file exclusive, so overlapping generations cannot interleave.
+	 *
+	 * The lock is advisory, which is sufficient because every writer goes through this class. It is
+	 * released when the handle is closed in flush()/end(), including when a process is killed and the
+	 * OS closes its descriptors — so a killed job leaves no stale lock, and its partial file is handled
+	 * by the heartbeat-based stuck-job recovery instead.
+	 *
+	 * @param resource $handle The open feed file handle.
+	 * @return void
+	 * @throws Exception If the lock is already held by another process.
+	 */
+	private function acquire_lock( $handle ): void {
+		if ( ! flock( $handle, LOCK_EX | LOCK_NB ) ) {
+			throw new Exception(
+				esc_html(
+					sprintf(
+						/* translators: %s: file path */
+						__( 'Feed file is locked by another generation process: %s', 'woocommerce' ),
+						$this->file_path
+					)
+				)
+			);
+		}
 	}
 
 	/**
