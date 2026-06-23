@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Make the Product Collection related-products handler test deterministic by dropping the force-display filter that pulled existing database products into the related set.

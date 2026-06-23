@@ -175,8 +175,11 @@ class HandlerRegistry extends \WP_UnitTestCase {
 
 		$expected_product_ids = array( 2, 3, 4 );
 
-		// This filter will turn off the data store so we don't need dummy products.
-		add_filter( 'woocommerce_product_related_posts_force_display', '__return_true', 0 );
+		// Reference 1 has no categories or tags; keep force-display off so
+		// wc_get_related_products() short-circuits to an empty set instead of querying the
+		// data store. The mocked woocommerce_related_products filter then drives the result,
+		// independent of any products in the database.
+		add_filter( 'woocommerce_product_related_posts_force_display', '__return_false', 0 );
 		$related_filter->expects( $this->exactly( 2 ) )
 			->method( '__invoke' )
 			->with( array(), 1 )
@@ -201,7 +204,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		);
 		$result_editor = $this->block_instance->update_rest_query_in_editor( array(), $request );
 
-		remove_filter( 'woocommerce_product_related_posts_force_display', '__return_true', 0 );
+		remove_filter( 'woocommerce_product_related_posts_force_display', '__return_false', 0 );
 		remove_filter( 'woocommerce_related_products', array( $related_filter, '__invoke' ) );
 
 		$this->assertEqualsCanonicalizing( $expected_product_ids, $result_frontend['post__in'] );
