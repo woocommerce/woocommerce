@@ -131,7 +131,8 @@ Run each with the flag **on**, then repeat with it **off** to confirm identical 
 - [ ] Select a shipping method → totals update.
 - [ ] Submit the shipping calculator → totals update.
 - [ ] Empty the cart (remove last item) → empty-cart view renders.
-- [ ] Add to cart from another block on the page → cart + Mini-Cart refresh.
+- [x] Add to cart from another block on the page → classic cart refreshes (verified: Wishlist
+  "move to cart" → classic cart updates via the native `wc-blocks_added_to_cart` event bridge).
 - [ ] A theme/extension listening on `updated_wc_div` / `updated_cart_totals` still reacts.
 - [ ] `cart-fragments.js` still refreshes the classic Mini-Cart.
 - [ ] No-JS (disable JS): form POST update, coupon, shipping calc all still work.

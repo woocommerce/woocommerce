@@ -69,7 +69,7 @@ Source: `client/legacy/js/frontend/cart.js`.
 | `shipping_calculator_submit` | `data-wp-on--submit` on calculator form | `updateCustomer` (NEW) | `POST cart/update-customer` |
 | `toggle_shipping` (slide panel) | pure UI: `data-wp-on--click` toggles context + `data-wp-class` | — | — |
 | `update_wc_div` / `update_cart_totals_div` (HTML swap) | replaced by `router.navigate()` morph | — | — |
-| listens `added_to_cart`, `wc_update_cart` | `data-wp-on-document--wc-blocks_added_to_cart` → `refreshCartItems` + `navigate()` | `refreshCartItems` (exists) | `GET cart` |
+| listens `added_to_cart`, `wc_update_cart` | `setupCartSyncBridge` listens on document for native `wc-blocks_added_to_cart`/`wc-blocks_removed_from_cart` (other iAPI blocks) **and** jQuery `added_to_cart`/`wc_update_cart` → `refreshCartItems` + `navigate()` | `refreshCartItems` (exists) | `GET cart` |
 | emits `updated_wc_div`, `updated_cart_totals`, `applied_coupon`, `removed_coupon`, `updated_shipping_method`, `wc_cart_emptied`, `item_removed_from_classic_cart` | re-emitted from iAPI actions via the legacy-events bridge | — | — |
 
 Store work = add `applyCoupon`, `removeCoupon`, `selectShippingRate`, `updateCustomer`,
@@ -171,11 +171,19 @@ iAPI has no event delegation, so directives sit on each element. Recommended ord
 Avoid editing template files directly (version bumps + theme-override drift). The long-term fix
 is rendering the cart through a block `render_callback`.
 
-## Backward-compat bridge
+## Backward-compat + cross-block sync bridge
 
-- **jQuery → native** for inbound events with the existing helper
-  (`client/blocks/assets/js/base/stores/woocommerce/legacy-events.ts`) — bridge `added_to_cart`
-  / `removed_from_cart` to `wc-blocks_*` and refresh, like the Mini-Cart `setupJQueryEventBridge`.
+- **Inbound cart-sync (DONE, verified)** — `setupCartSyncBridge` (a `data-wp-init` callback on the
+  wrapper) listens on `document` for **both**:
+    - the native iAPI events `wc-blocks_added_to_cart` / `wc-blocks_removed_from_cart` — what other
+      iAPI blocks emit via the shared store (e.g. Wishlist "move to cart", Mini-Cart, add-to-cart);
+      this is what makes a mutation in another block refresh the classic cart;
+    - the legacy jQuery `added_to_cart` / `wc_update_cart` events — classic add-to-cart + extensions.
+
+  On either, it runs `refreshCartItems()` + router `navigate()`. It's guarded by
+  `state.isProcessing` so the cart's own mutations (which also fire the native events via the shared
+  store) don't double-navigate, and it returns a cleanup so listeners aren't duplicated across
+  re-renders. Lesson: iAPI↔iAPI cart sync flows through the native `wc-blocks_*` events, not jQuery.
 - **Re-emit outbound jQuery events** (`updated_wc_div`, `updated_cart_totals`, `applied_coupon`,
   `removed_coupon`, `updated_shipping_method`, `wc_cart_emptied`) from the iAPI actions so
   analytics, themes and `cart-fragments.js` keep working.
