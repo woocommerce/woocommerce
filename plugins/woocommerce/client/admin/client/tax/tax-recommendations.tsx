@@ -291,7 +291,7 @@ const TaxRecommendations = () => {
 			id: 'woocommerce-tax',
 			title: __( 'WooCommerce Tax', 'woocommerce' ),
 			description: __(
-				'Automate sales tax calculations right from your WooCommerce dashboard.',
+				'Free, one-click tool to automate essential sales tax on every WooCommerce order.',
 				'woocommerce'
 			),
 			productUrl: 'https://woocommerce.com/products/tax/',
@@ -308,7 +308,7 @@ const TaxRecommendations = () => {
 			id: 'anrok-tax',
 			title: __( 'Anrok', 'woocommerce' ),
 			description: __(
-				'Support sales tax, VAT, and GST compliance with automated workflows from Anrok.',
+				'Advanced tax compliance for growing brands selling around the globe.',
 				'woocommerce'
 			),
 			productUrl: 'https://woocommerce.com/products/anrok-tax/',
