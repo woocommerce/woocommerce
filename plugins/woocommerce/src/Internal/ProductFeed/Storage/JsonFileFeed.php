@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\Internal\ProductFeed\Storage;
 
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedInterface;
+use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedLockException;
 use Exception;
 
 // This file works directly with local files. That's fine.
@@ -102,7 +103,8 @@ class JsonFileFeed implements FeedInterface {
 	 * @param string|null $resume_identifier Identifier of an existing feed to resume, or null to start fresh.
 	 * @param int         $entries_written   The number of entries already written by previous chunks.
 	 * @return string The identifier of the feed that was started.
-	 * @throws Exception If the feed directory or file cannot be created/opened, or a resumed feed is missing.
+	 * @throws Exception If the feed directory or file cannot be created/opened, a resumed feed is missing,
+	 *                   or the feed file is already locked by another generation process (FeedLockException).
 	 */
 	public function start( ?string $resume_identifier = null, int $entries_written = 0 ): string {
 		$upload_dir = $this->get_upload_dir();
@@ -305,11 +307,11 @@ class JsonFileFeed implements FeedInterface {
 	 *
 	 * @param resource $handle The open feed file handle.
 	 * @return void
-	 * @throws Exception If the lock is already held by another process.
+	 * @throws FeedLockException If the lock is already held by another process.
 	 */
 	private function acquire_lock( $handle ): void {
 		if ( ! flock( $handle, LOCK_EX | LOCK_NB ) ) {
-			throw new Exception(
+			throw new FeedLockException(
 				esc_html(
 					sprintf(
 						/* translators: %s: file path */
