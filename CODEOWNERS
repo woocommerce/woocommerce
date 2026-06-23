@@ -1,18 +1,21 @@
 # Monorepo CI and package managers manifests.
-/.github/ @woocommerce/flux
-**/composer.json @woocommerce/flux
-**/package.json @woocommerce/flux
+# TODO: Reassign owner; previously @woocommerce/flux (team removed).
+/.github/
+**/composer.json
+**/package.json
 
 # Monorepo tooling folders.
-/bin/ @woocommerce/flux
-/tools/ @woocommerce/flux
-/packages/js/eslint-plugin/ @woocommerce/flux
-/packages/js/dependency-extraction-webpack-plugin/ @woocommerce/flux
-/packages/js/e2e-utils-playwright/ @woocommerce/flux
+# TODO: Reassign owner; previously @woocommerce/flux (team removed).
+/bin/
+/tools/
+/packages/js/eslint-plugin/
+/packages/js/dependency-extraction-webpack-plugin/
+/packages/js/e2e-utils-playwright/
 
 # Files in root of repository
-/.* @woocommerce/flux
-/*.* @woocommerce/flux
+# TODO: Reassign owner for /.* and /*.*; previously @woocommerce/flux (team removed).
+/.*
+/*.*
 /changelog.txt
 /pnpm-lock.yaml
 

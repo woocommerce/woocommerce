@@ -1,19 +1,22 @@
 # See https://github.com/shufo/auto-assign-reviewer-by-files/blob/main/README.md for configuration format
-
-"*":
-  - team: flux
-
-".github/**/*":
-  - team: flux
-
-"bin/*":
-  - team: flux
+#
+# TODO: The paths below previously routed community PR reviews to `team: flux`
+# (team removed) and need a replacement reviewer team:
+#   "*"  (catch-all default)
+#   ".github/**/*"
+#   "bin/*"
+#   "packages/js/api/**/*"
+#   "packages/js/dependency-extraction-webpack-plugin/**/*"
+#   "packages/js/eslint-plugin/**/*"
+#   "packages/js/tracks/**/*"
+#   "plugins/woocommerce/**/*"
+#   "plugins/woocommerce-beta-tester/**/*"
+#   "tools/**/*"
+#   "**/composer.json"
+#   "**/package.json"
 
 "docs/**/*":
   - team: developer-advocacy
-
-"packages/js/api/**/*":
-  - team: flux
 
 "packages/js/components/**/*":
   - team: woo-fse
@@ -33,12 +36,6 @@
 "packages/js/date/**/*":
   - team: rubik
 
-"packages/js/dependency-extraction-webpack-plugin/**/*":
-  - team: flux
-
-"packages/js/eslint-plugin/**/*":
-  - team: flux
-
 "packages/js/experimental/**/*":
   - team: woo-fse
 
@@ -54,17 +51,11 @@
 "packages/js/onboarding/**/*":
   - team: rubik
 
-"packages/js/tracks/**/*":
-  - team: flux
-
 "packages/js/email-editor/**/*":
   - team: ballade
 
 "packages/php/email-editor/**/*":
   - team: ballade
-
-"plugins/woocommerce/**/*":
-  - team: flux
 
 "plugins/woocommerce/templates/**/*":
   - team: rubik
@@ -94,20 +85,8 @@
   - team: rubik
   - team: woo-fse
 
-"plugins/woocommerce-beta-tester/**/*":
-  - team: flux
-
 "plugins/woocommerce/src/Internal/EmailEditor/**/*":
   - team: ballade
 
 "plugins/woocommerce/client/admin/client/wp-admin-scripts/email-editor-integration/**/*":
   - team: ballade
-
-"tools/**/*":
-  - team: flux
-
-'**/composer.json':
-  - team: flux
-
-'**/package.json':
-  - team: flux
