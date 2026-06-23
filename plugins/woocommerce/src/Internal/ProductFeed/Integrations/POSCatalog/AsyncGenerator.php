@@ -120,6 +120,17 @@ class AsyncGenerator {
 				return $status;
 			}
 
+			// Surface a failed generation to the client once, then clear it so the next poll starts a
+			// fresh run. The POS clients are built to read `failed`, stop, and let their own scheduling
+			// drive the next attempt, so the server must report the failure rather than silently retry
+			// it. Clearing the status (rather than leaving it sticky) matters because those clients poll
+			// again with force=false, which would otherwise keep re-reading the same failure forever.
+			if ( self::STATE_FAILED === ( $status['state'] ?? '' ) ) {
+				$this->discard_feed( $status );
+				delete_option( $option_key );
+				return $status;
+			}
+
 			// A stuck in-progress job was most likely killed because the chunk size was too large for
 			// this host, so step it down for this and future runs.
 			if ( self::STATE_IN_PROGRESS === ( $status['state'] ?? '' ) ) {
@@ -585,9 +596,9 @@ class AsyncGenerator {
 	 * @return bool         True if the status is valid, false otherwise.
 	 */
 	private function validate_status( array $status ): bool {
-		// A failed job is terminal but not something the client should have to recover from: treat it as
-		// invalid so a status poll discards the partial feed and starts a fresh generation, the same way
-		// stuck and expired jobs are handled.
+		// A failed job is never served as-is. get_status() surfaces the failure to the client once and
+		// then clears it, so the client can react and its next poll starts a fresh run; force_regeneration()
+		// likewise treats it as invalid and regenerates. Either way it must not validate.
 		if ( self::STATE_FAILED === $status['state'] ) {
 			return false;
 		}
