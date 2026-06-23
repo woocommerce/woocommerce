@@ -37,7 +37,6 @@ type VariationOptionItem = {
 
 type Context = AddToCartWithOptionsStoreContext & {
 	name: string;
-	attributeSlug?: string;
 	selectedValue: string | null;
 	variationAttributeOptions: VariationOptionItem[];
 	autoselect: boolean;
@@ -184,7 +183,6 @@ export type VariableProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		state: {
 			selectedAttributes: SelectedAttributes[];
-			formAttributeValue: string;
 			selectableItems: readonly SelectableItem< {
 				visual?: VisualAttributeTerm;
 			} >[];
@@ -218,36 +216,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return [];
 				}
 				return context.selectedAttributes || [];
-			},
-			get formAttributeValue(): string {
-				const context = getContext< Context >();
-				if ( ! context ) {
-					return '';
-				}
-
-				const { attributeSlug, name, selectedValue } = context;
-				const { selectedAttributes } = state;
-
-				if ( Array.isArray( selectedAttributes ) ) {
-					const match = selectedAttributes.find(
-						( selectedAttribute ) =>
-							( attributeSlug &&
-								attributeNamesMatch(
-									selectedAttribute.attribute,
-									attributeSlug
-								) ) ||
-							attributeNamesMatch(
-								selectedAttribute.attribute,
-								name
-							)
-					);
-
-					if ( match?.value ) {
-						return match.value;
-					}
-				}
-
-				return selectedValue ?? '';
 			},
 			get selectableItems(): readonly SelectableItem< {
 				visual?: VisualAttributeTerm;
