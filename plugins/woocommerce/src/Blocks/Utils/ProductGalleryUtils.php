@@ -61,12 +61,9 @@ class ProductGalleryUtils {
 		$product_variation_image_ids = self::get_product_variation_image_ids( $product );
 		$is_placeholder_only         = 1 === count( $product_media_items ) && 0 === (int) ( $product_media_items[0]['id'] ?? 0 );
 
-		// If the media gallery only returned the placeholder, fall back to legacy gallery images.
+		// If the media gallery only returned the placeholder, fall back to gallery images.
 		if ( $is_placeholder_only && ! empty( $product->get_gallery_image_ids() ) ) {
 			$product_media_items = self::get_product_gallery_image_items( $product );
-		} elseif ( $is_placeholder_only && ! empty( $product_variation_image_ids ) ) {
-			// Drop the placeholder when variation images are available to populate the gallery.
-			$product_media_items = array();
 		}
 
 		$existing_ids = array_map( 'strval', self::get_media_ids( $product_media_items ) );
@@ -184,9 +181,6 @@ class ProductGalleryUtils {
 		}
 
 		$video_location = in_array( $video_location, array( 'dialog', 'gallery' ), true ) ? $video_location : 'gallery';
-		$settings       = isset( $media['settings'] ) && is_array( $media['settings'] ) ? $media['settings'] : array();
-		$preload        = $settings['preload'] ?? 'metadata';
-		$preload        = in_array( $preload, array( 'auto', 'metadata', 'none' ), true ) ? $preload : 'metadata';
 		$attrs          = array(
 			'aria-label'      => $media['alt'] ?? '',
 			'autoplay'        => 'autoplay',
@@ -196,7 +190,7 @@ class ProductGalleryUtils {
 			'loop'            => 'loop',
 			'muted'           => 'muted',
 			'playsinline'     => 'playsinline',
-			'preload'         => $preload,
+			'preload'         => 'metadata',
 			'src'             => $media['video_src'],
 		);
 
