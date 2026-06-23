@@ -32,7 +32,7 @@
 		"env:performance-init": "./tests/performance/bin/init-environment.sh",
 		"env:restart": "pnpm wp-env destroy && pnpm wp-env start --update",
 		"env:start": "pnpm wp-env start",
-		"env:start:blocks": "pnpm wp-env start && bash ./tests/e2e-pw/bin/blocks/test-env-setup.sh && pnpm playwright install chromium",
+		"env:start:blocks": "pnpm wp-env start && bash ./tests/e2e/bin/blocks/test-env-setup.sh && pnpm playwright install chromium",
 		"env:stop": "pnpm wp-env stop",
 		"env:test": "pnpm env:dev",
 		"env:perf": "pnpm env:dev && pnpm env:performance-init",
@@ -63,11 +63,11 @@
 		"test:e2e": "pnpm test:e2e:default --project=e2e",
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
-		"test:e2e:blocks": "pnpm playwright test --config=tests/e2e-pw/playwright.config.ts --project=blocks-chromium",
-		"test:e2e:blocks:performance": "pnpm playwright test --config=tests/e2e-pw/playwright.performance.config.ts --project=blocks-performance",
+		"test:e2e:blocks": "pnpm playwright test --config=tests/e2e/playwright.config.ts --project=blocks-chromium",
+		"test:e2e:blocks:performance": "pnpm playwright test --config=tests/e2e/playwright.performance.config.ts --project=blocks-performance",
 		"test:e2e:email-update-propagation:pr": "pnpm test:e2e:default --project=e2e --grep @pr tests/email-editor/update-propagation",
 		"test:e2e:email-update-propagation:nightly": "pnpm test:e2e:default --project=e2e tests/email-editor/update-propagation",
-		"test:e2e:with-env": "pnpm test:e2e:install && bash ./tests/e2e-pw/run-tests-with-env.sh",
+		"test:e2e:with-env": "pnpm test:e2e:install && bash ./tests/e2e/run-tests-with-env.sh",
 		"test:e2e:pressable": "pnpm test:e2e:with-env default-pressable",
 		"test:e2e:wpcom": "pnpm test:e2e:with-env default-wpcom",
 		"test:e2e:hpos-off": "pnpm test:e2e:with-env default-hpos-disabled --project=e2e-hpos-disabled",
@@ -75,7 +75,7 @@
 		"test:e2e:gb-nightly": "pnpm test:e2e:with-env gutenberg-nightly",
 		"ci:legacy-minicart-flag-off": "node ./bin/set-legacy-minicart-flag.js && php bin/generate-feature-config.php",
 		"test:e2e:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm test:e2e:default --project=legacy-mini-cart",
-		"test:e2e:blocks:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm playwright test --config=tests/e2e-pw/playwright.config.ts --project=blocks-legacy-mini-cart",
+		"test:e2e:blocks:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm playwright test --config=tests/e2e/playwright.config.ts --project=blocks-legacy-mini-cart",
 		"test:e2e:paypal-standard": "pnpm test:e2e:default --project=paypal-standard",
 		"test:php:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm test:php:env",
 		"test:env:start": "pnpm env:test",
@@ -95,7 +95,7 @@
 		"test:unit:watch": "pnpm test:php:watch",
 		"test:unit:env": "pnpm test:php:env",
 		"test:unit:env:watch": "pnpm test:php:env:watch",
-		"update-wp-env": "php ./tests/e2e-pw/bin/update-wp-env.php",
+		"update-wp-env": "php ./tests/e2e/bin/update-wp-env.php",
 		"watch:build": "pnpm watch:build:project",
 		"watch:build:admin": "pnpm watch:build:project:admin",
 		"watch:build:blocks": "pnpm watch:build:project:blocks",
@@ -288,7 +288,7 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/e2e-pw/**",
+						"tests/e2e/**",
 						".wp-env.json",
 						"woocommerce.php",
 						"uninstall.php"
@@ -304,7 +304,7 @@
 					],
 					"report": {
 						"resultsBlobName": "core-e2e-report",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				},
@@ -322,7 +322,7 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/e2e-pw/**",
+						"tests/e2e/**",
 						".wp-env.json",
 						"woocommerce.php",
 						"uninstall.php"
@@ -336,7 +336,7 @@
 					],
 					"report": {
 						"resultsBlobName": "legacy-core-e2e-report",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				},
@@ -349,7 +349,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e-pw/**"
+						"tests/e2e/**"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -365,7 +365,7 @@
 					},
 					"report": {
 						"resultsBlobName": "gutenberg-stable-e2e-report",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				},
@@ -378,7 +378,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e-pw/**"
+						"tests/e2e/**"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -393,7 +393,7 @@
 					},
 					"report": {
 						"resultsBlobName": "gutenberg-nightly-e2e-report",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				},
@@ -403,7 +403,7 @@
 					"command": "test:e2e:hpos-off",
 					"shardingArguments": [],
 					"changes": [
-						"tests/e2e-pw/**"
+						"tests/e2e/**"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -419,7 +419,7 @@
 					},
 					"report": {
 						"resultsBlobName": "core-e2e-reports-hpos-disabled",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				},
@@ -435,7 +435,7 @@
 						"--shard=5/5"
 					],
 					"changes": [
-						"tests/e2e-pw/**"
+						"tests/e2e/**"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -454,7 +454,7 @@
 					],
 					"report": {
 						"resultsBlobName": "core-e2e-report-php-8.5",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				},
@@ -470,7 +470,7 @@
 						"--shard=5/5"
 					],
 					"changes": [
-						"tests/e2e-pw/**"
+						"tests/e2e/**"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -489,7 +489,7 @@
 					],
 					"report": {
 						"resultsBlobName": "core-e2e-report-wp-latest-1",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				},
@@ -506,7 +506,7 @@
 						"--shard=5/5"
 					],
 					"changes": [
-						"tests/e2e-pw/**"
+						"tests/e2e/**"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -525,7 +525,7 @@
 					],
 					"report": {
 						"resultsBlobName": "core-e2e-report-wp-pre-release",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				},
@@ -540,10 +540,10 @@
 						"i18n/**/*.php",
 						"includes/**/*.php",
 						"src/**/*.php",
-						"tests/e2e-pw/bin/**",
-						"tests/e2e-pw/tests/api-tests/**",
-						"tests/e2e-pw/*.js",
-						"tests/e2e-pw/*.sh",
+						"tests/e2e/bin/**",
+						"tests/e2e/tests/api-tests/**",
+						"tests/e2e/*.js",
+						"tests/e2e/*.sh",
 						".wp-env.json",
 						"woocommerce.php",
 						"uninstall.php"
@@ -559,7 +559,7 @@
 					],
 					"report": {
 						"resultsBlobName": "core-api-report",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				},
@@ -574,10 +574,10 @@
 						"i18n/**/*.php",
 						"includes/**/*.php",
 						"src/**/*.php",
-						"tests/e2e-pw/bin/**",
-						"tests/e2e-pw/tests/api-tests/**",
-						"tests/e2e-pw/*.js",
-						"tests/e2e-pw/*.sh",
+						"tests/e2e/bin/**",
+						"tests/e2e/tests/api-tests/**",
+						"tests/e2e/*.js",
+						"tests/e2e/*.sh",
 						".wp-env.json",
 						"woocommerce.php",
 						"uninstall.php"
@@ -592,7 +592,7 @@
 					},
 					"report": {
 						"resultsBlobName": "core-api-report-hpos-disabled",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				},
@@ -639,10 +639,10 @@
 						"i18n/**/*.php",
 						"includes/**/*.php",
 						"src/**/*.php",
-						"tests/e2e-pw/bin/**",
-						"tests/e2e-pw/tests/api-tests/**",
-						"tests/e2e-pw/*.js",
-						"tests/e2e-pw/*.sh",
+						"tests/e2e/bin/**",
+						"tests/e2e/tests/api-tests/**",
+						"tests/e2e/*.js",
+						"tests/e2e/*.sh",
 						".wp-env.json",
 						"woocommerce.php",
 						"uninstall.php"
@@ -657,7 +657,7 @@
 					},
 					"report": {
 						"resultsBlobName": "core-api-report-object-cache",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				},
@@ -735,15 +735,15 @@
 						"src/Blocks/**/*.php",
 						"templates/**/*.php",
 						"templates/**/*.html",
-						"tests/e2e-pw/bin/blocks/**",
-						"tests/e2e-pw/fixtures/blocks-setup.ts",
-						"tests/e2e-pw/playwright.config.ts",
-						"tests/e2e-pw/content-templates/blocks/**",
-						"tests/e2e-pw/test-data/blocks/**",
-						"tests/e2e-pw/test-plugins/blocks/**",
-						"tests/e2e-pw/tests/blocks/**",
-						"tests/e2e-pw/themes/blocks/**",
-						"tests/e2e-pw/utils/blocks/**"
+						"tests/e2e/bin/blocks/**",
+						"tests/e2e/fixtures/blocks-setup.ts",
+						"tests/e2e/playwright.config.ts",
+						"tests/e2e/content-templates/blocks/**",
+						"tests/e2e/test-data/blocks/**",
+						"tests/e2e/test-plugins/blocks/**",
+						"tests/e2e/tests/blocks/**",
+						"tests/e2e/themes/blocks/**",
+						"tests/e2e/utils/blocks/**"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/block-library"
@@ -762,7 +762,7 @@
 					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				},
@@ -781,15 +781,15 @@
 						"src/Blocks/**/*.php",
 						"templates/**/*.php",
 						"templates/**/*.html",
-						"tests/e2e-pw/bin/blocks/**",
-						"tests/e2e-pw/fixtures/blocks-setup.ts",
-						"tests/e2e-pw/playwright.config.ts",
-						"tests/e2e-pw/content-templates/blocks/**",
-						"tests/e2e-pw/test-data/blocks/**",
-						"tests/e2e-pw/test-plugins/blocks/**",
-						"tests/e2e-pw/tests/blocks/**",
-						"tests/e2e-pw/themes/blocks/**",
-						"tests/e2e-pw/utils/blocks/**"
+						"tests/e2e/bin/blocks/**",
+						"tests/e2e/fixtures/blocks-setup.ts",
+						"tests/e2e/playwright.config.ts",
+						"tests/e2e/content-templates/blocks/**",
+						"tests/e2e/test-data/blocks/**",
+						"tests/e2e/test-plugins/blocks/**",
+						"tests/e2e/tests/blocks/**",
+						"tests/e2e/themes/blocks/**",
+						"tests/e2e/utils/blocks/**"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/block-library"
@@ -806,7 +806,7 @@
 					],
 					"report": {
 						"resultsBlobName": "legacy-blocks-e2e-report",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				},
@@ -828,15 +828,15 @@
 						"--shard=10/10"
 					],
 					"changes": [
-						"tests/e2e-pw/bin/blocks/**",
-						"tests/e2e-pw/fixtures/blocks-setup.ts",
-						"tests/e2e-pw/playwright.config.ts",
-						"tests/e2e-pw/content-templates/blocks/**",
-						"tests/e2e-pw/test-data/blocks/**",
-						"tests/e2e-pw/test-plugins/blocks/**",
-						"tests/e2e-pw/tests/blocks/**",
-						"tests/e2e-pw/themes/blocks/**",
-						"tests/e2e-pw/utils/blocks/**"
+						"tests/e2e/bin/blocks/**",
+						"tests/e2e/fixtures/blocks-setup.ts",
+						"tests/e2e/playwright.config.ts",
+						"tests/e2e/content-templates/blocks/**",
+						"tests/e2e/test-data/blocks/**",
+						"tests/e2e/test-plugins/blocks/**",
+						"tests/e2e/tests/blocks/**",
+						"tests/e2e/themes/blocks/**",
+						"tests/e2e/utils/blocks/**"
 					],
 					"onlyForDependencies": [],
 					"testEnv": {
@@ -854,7 +854,7 @@
 					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report-wp-pre-release",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				},
@@ -875,15 +875,15 @@
 						"--shard=10/10"
 					],
 					"changes": [
-						"tests/e2e-pw/bin/blocks/**",
-						"tests/e2e-pw/fixtures/blocks-setup.ts",
-						"tests/e2e-pw/playwright.config.ts",
-						"tests/e2e-pw/content-templates/blocks/**",
-						"tests/e2e-pw/test-data/blocks/**",
-						"tests/e2e-pw/test-plugins/blocks/**",
-						"tests/e2e-pw/tests/blocks/**",
-						"tests/e2e-pw/themes/blocks/**",
-						"tests/e2e-pw/utils/blocks/**"
+						"tests/e2e/bin/blocks/**",
+						"tests/e2e/fixtures/blocks-setup.ts",
+						"tests/e2e/playwright.config.ts",
+						"tests/e2e/content-templates/blocks/**",
+						"tests/e2e/test-data/blocks/**",
+						"tests/e2e/test-plugins/blocks/**",
+						"tests/e2e/tests/blocks/**",
+						"tests/e2e/themes/blocks/**",
+						"tests/e2e/utils/blocks/**"
 					],
 					"onlyForDependencies": [],
 					"testEnv": {
@@ -901,7 +901,7 @@
 					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report-wp-latest-1",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				},
@@ -916,7 +916,7 @@
 					],
 					"report": {
 						"resultsBlobName": "default-pressable-core-e2e-and-api",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				},
@@ -931,7 +931,7 @@
 					],
 					"report": {
 						"resultsBlobName": "default-wpcom-core-e2e-and-api",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				},
@@ -943,7 +943,7 @@
 					"changes": [
 						"includes/gateways/paypal/**/*.php",
 						"src/Gateways/PayPal/**/*.php",
-						"tests/e2e-pw/tests/paypal/**"
+						"tests/e2e/tests/paypal/**"
 					],
 					"events": [
 						"pull_request",
@@ -956,7 +956,7 @@
 					},
 					"report": {
 						"resultsBlobName": "core-e2e-report",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
 				}
