@@ -400,7 +400,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						title:
 							outOfStock && outOfStockOptionTitle
 								? outOfStockOptionTitle
-								: undefined,
+								: '',
 						index,
 						selected,
 						disabled,
