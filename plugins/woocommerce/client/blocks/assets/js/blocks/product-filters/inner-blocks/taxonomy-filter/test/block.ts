@@ -4,7 +4,7 @@
 import type { BlockAttributes } from '@wordpress/blocks';
 import '@testing-library/jest-dom';
 import { act, fireEvent, screen, within } from '@testing-library/react';
-
+import { isLatestMinusOneWordPress } from '@woocommerce/jest-wordpress-version-compat';
 /**
  * Internal dependencies
  */
@@ -102,6 +102,12 @@ describe( 'Taxonomy Filter block', () => {
 					/Please select a taxonomy to use this filter!/i
 				)
 			).toBeInTheDocument();
+			if ( isLatestMinusOneWordPress() ) {
+				// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
+				// opt out of without changing the visual output.
+				// eslint-disable-next-line jest/no-conditional-expect
+				expect( console ).toHaveWarned();
+			}
 		} );
 
 		test( 'should display taxonomy filter when taxonomy is selected', async () => {

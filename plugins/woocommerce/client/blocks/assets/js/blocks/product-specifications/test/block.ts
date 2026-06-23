@@ -4,6 +4,7 @@
 import type { BlockAttributes } from '@wordpress/blocks';
 import '@testing-library/jest-dom';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { isLatestMinusOneWordPress } from '@woocommerce/jest-wordpress-version-compat';
 
 /**
  * Internal dependencies
@@ -75,6 +76,13 @@ describe( 'Product Specifications block', () => {
 					name: /Show Attributes/i,
 				} )
 			).toBeChecked();
+
+			if ( isLatestMinusOneWordPress() ) {
+				// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
+				// opt out of without changing the visual output.
+				// eslint-disable-next-line jest/no-conditional-expect
+				expect( console ).toHaveWarned();
+			}
 		} );
 
 		test( 'should hide weight section when toggled off', async () => {
