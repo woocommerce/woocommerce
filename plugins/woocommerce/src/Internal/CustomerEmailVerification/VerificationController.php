@@ -208,6 +208,9 @@ class VerificationController {
 		$seconds_since = $this->service->seconds_since_last_key( $user_id );
 		if ( null === $seconds_since || $seconds_since >= self::SEND_RATE_LIMIT ) {
 			$this->send_verification_email( $user_id );
+			wc_add_notice( __( 'A new code has been sent. Please check your inbox.', 'woocommerce' ), 'success' );
+		} else {
+			wc_add_notice( __( 'A code was sent recently. Please check your inbox, or wait a moment before requesting a new one.', 'woocommerce' ), 'notice' );
 		}
 
 		// Land on the /orders/verify/ sub-page, where the entry form is shown.
@@ -296,7 +299,7 @@ class VerificationController {
 		if ( $this->service->is_locked_out( $user_id ) ) {
 			$html = $this->get_locked_html();
 		} elseif ( $this->service->has_pending_code( $user_id ) ) {
-			$this->enqueue_form_script();
+			$this->enqueue_form_assets();
 			$html = $this->get_code_form_html();
 		} else {
 			$html = $this->get_send_cta_html();
@@ -327,7 +330,10 @@ class VerificationController {
 	}
 
 	/**
-	 * Use a confirmation title on the /orders/verify/ sub-page instead of the default "Orders" title.
+	 * Force a clean "Orders" title on the /orders/verify/ sub-page.
+	 *
+	 * The sub-page reuses the orders endpoint's value slot, so WooCommerce would otherwise render the
+	 * title as "Orders (Page 0)". Other orders pages keep their default title.
 	 *
 	 * @internal
 	 * @param string $title Default orders endpoint title.
@@ -335,9 +341,8 @@ class VerificationController {
 	 */
 	public function maybe_filter_orders_title( $title ): string {
 		if ( self::VERIFY_VALUE === get_query_var( 'orders' ) ) {
-			return __( 'Confirm your email address', 'woocommerce' );
+			return __( 'Orders', 'woocommerce' );
 		}
-
 		return $title;
 	}
 
@@ -375,7 +380,7 @@ class VerificationController {
 
 		$notice = sprintf(
 			'<a href="%2$s" class="button wc-forward">%3$s</a> %1$s',
-			esc_html__( 'Confirm your email address to link any past orders to your account.', 'woocommerce' ),
+			esc_html__( 'Confirm your email address to link past orders to your account.', 'woocommerce' ),
 			esc_url( $send_url ),
 			esc_html__( 'Send confirmation code', 'woocommerce' )
 		);
@@ -392,7 +397,7 @@ class VerificationController {
 	private function get_pending_notice_html(): string {
 		$notice = sprintf(
 			'<a href="%2$s" class="button wc-forward">%3$s</a> %1$s',
-			esc_html__( 'We emailed you a confirmation code.', 'woocommerce' ),
+			esc_html__( 'We emailed you a confirmation code to confirm your email address.', 'woocommerce' ),
 			esc_url( $this->verify_url() ),
 			esc_html__( 'Enter your code', 'woocommerce' )
 		);
@@ -412,15 +417,14 @@ class VerificationController {
 			self::SEND_NONCE_ACTION
 		);
 
-		// The submit marker is a hidden field, not the button's name/value, so the form stays routable
-		// even when JavaScript disables the button while submitting.
 		$template = '
 <form method="post" action="%1$s" class="woocommerce-verify-email-form">
-<p>%2$s <a href="%3$s" class="wc-forward">%4$s</a></p>
+<p>%2$s</p>
 <div class="woocommerce-otp-input-wrapper">
-<input type="text" name="%5$s" placeholder="%6$s" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" class="input-text woocommerce-otp-input" aria-label="%7$s" />
-<button type="submit" class="wp-element-button button">%8$s</button>
+<input type="text" name="%3$s" aria-label="%4$s" placeholder="······" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required class="input-text woocommerce-otp-input" />
+<button type="submit" class="wp-element-button button">%5$s</button>
 </div>
+<p class="woocommerce-otp-resend">%6$s <a href="%7$s" class="wc-forward">%8$s</a></p>
 <input type="hidden" name="%9$s" value="1" />
 %10$s
 </form>
@@ -430,42 +434,105 @@ class VerificationController {
 			$template,
 			esc_url( $this->verify_url() ),
 			// translators: %s: the customer's email address.
-			sprintf( esc_html__( 'Enter the 6-digit code that was sent to %s within 10 minutes to confirm your email address.', 'woocommerce' ), esc_html( $user->user_email ) ),
-			esc_url( $resend_url ),
-			esc_html__( 'Resend code', 'woocommerce' ),
+			sprintf( esc_html__( 'Enter the 6-digit code that was sent to %s within 10 minutes to confirm your email address.', 'woocommerce' ), '<b>' . esc_html( $user->user_email ) . '</b>' ),
 			esc_attr( self::CODE_FIELD ),
-			esc_attr__( '······', 'woocommerce' ),
 			esc_attr__( 'Verification code', 'woocommerce' ),
-			esc_html__( 'Confirm', 'woocommerce' ),
+			esc_html__( 'Confirm email', 'woocommerce' ),
+			esc_html__( 'Didn\'t receive the code?', 'woocommerce' ),
+			esc_url( $resend_url ),
+			esc_html__( 'Resend a new one', 'woocommerce' ),
 			esc_attr( self::SUBMIT_FIELD ),
 			wp_nonce_field( self::VERIFY_NONCE_ACTION, '_wpnonce', true, false )
 		);
 	}
 
 	/**
-	 * Enqueue the progressive-enhancement script for the code-entry form.
+	 * Enqueue the code-entry form's inline CSS and progressive-enhancement JS.
 	 *
-	 * Loaded only when the form is rendered. It is a small inline footer script attached to a
-	 * script-less handle, so it needs no separate build step. The form works without it (the button
-	 * stays enabled and submits normally); the script just trims pasted input, auto-submits a complete
-	 * code that was pasted in, disables the empty-field submit, and shows a loading state while submitting.
+	 * Both attach to an empty-source handle and print only when the form renders, so neither ships
+	 * site-wide and no build step is needed. The form is fully usable without the JS: native
+	 * constraints (`required`, a 6-digit `pattern`) gate submission and `:invalid` styling dims the
+	 * button until a complete code is entered. The JS only adds niceties — it trims pasted input,
+	 * auto-submits a complete pasted code, and guards against a double submit.
 	 *
 	 * @return void
 	 */
-	private function enqueue_form_script(): void {
+	private function enqueue_form_assets(): void {
 		$handle = 'wc-customer-email-verification';
 
-		// Script-less handle that only carries the inline JS; re-registering is a no-op if it exists.
+		// Empty-source handle carrying only the inline CSS/JS; re-registering is a no-op if it exists.
+		wp_register_style( $handle, false, array(), \WC_VERSION );
+		wp_enqueue_style( $handle );
+		wp_add_inline_style( $handle, $this->get_form_styles() );
+
 		wp_register_script( $handle, false, array(), \WC_VERSION, true );
 		wp_enqueue_script( $handle );
 		wp_add_inline_script( $handle, $this->get_form_script() );
 	}
 
 	/**
+	 * The inline CSS for the code-entry form.
+	 *
+	 * Printed only on the verification sub-page (via {@see self::enqueue_form_assets()}) rather than in
+	 * the site-wide stylesheet. Selectors must stay in sync with {@see self::get_code_form_html()}. The
+	 * submit button is dimmed purely via CSS: `:invalid` (the input is `required` with a 6-digit
+	 * `pattern`) while the code is incomplete, and `.is-submitting` while the POST is in flight.
+	 *
+	 * @return string
+	 */
+	private function get_form_styles(): string {
+		return <<<'CSS'
+.woocommerce-verify-email-form {
+	text-align: center;
+	text-wrap: balance;
+	border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+	padding: 16px;
+	margin: 0 0 16px;
+	border-radius: 4px;
+}
+.woocommerce-verify-email-form .woocommerce-otp-input-wrapper {
+	display: inline-flex;
+	align-items: stretch;
+	justify-content: center;
+	flex-direction: column;
+	gap: 8px;
+	margin: 16px 0;
+}
+.woocommerce-verify-email-form .woocommerce-otp-input.input-text {
+	font-size: 32px;
+	font-weight: 700;
+	letter-spacing: 0.4em;
+	text-indent: 0.4em;
+	padding: 0.2em 0.4em;
+	font-variant-numeric: tabular-nums;
+	text-align: center;
+	line-height: 1;
+	color: black;
+	width: 6.8em;
+	font-family: monospace;
+	flex: 0;
+}
+.woocommerce-verify-email-form .woocommerce-otp-input-wrapper .button.wp-element-button {
+	margin: 0;
+}
+.woocommerce-verify-email-form .woocommerce-otp-input:invalid + .button.wp-element-button,
+.woocommerce-verify-email-form.is-submitting .button.wp-element-button {
+	cursor: not-allowed;
+	opacity: 0.5;
+}
+.woocommerce-verify-email-form .woocommerce-otp-resend {
+	font-size: var(--wp--preset--font-size--x-small, calc(var(--wp--preset--font-size--small, 14px) * 0.875));
+}
+CSS;
+	}
+
+	/**
 	 * The inline JavaScript that enhances the code-entry form.
 	 *
-	 * Selectors must stay in sync with {@see self::get_code_form_html()}: the
-	 * `.woocommerce-verify-email-form` form and its `wc_verify_email_code` input.
+	 * Pure progressive enhancement — the form works without it. Selectors must stay in sync with
+	 * {@see self::get_code_form_html()}: the `.woocommerce-verify-email-form` form and its
+	 * `wc_verify_email_code` input. The submit button's dimmed state is owned by CSS (`:invalid`), not
+	 * here; this only trims input, auto-submits a complete pasted code, and blocks a double submit.
 	 *
 	 * @return string
 	 */
@@ -475,38 +542,30 @@ class VerificationController {
 	var form = document.querySelector( '.woocommerce-verify-email-form' );
 	if ( ! form ) { return; }
 	var input = form.querySelector( 'input[name="wc_verify_email_code"]' );
-	var button = form.querySelector( 'button[type="submit"]' );
-	if ( ! input || ! button ) { return; }
-
-	function setSubmitting() {
-		if ( form.classList.contains( 'is-submitting' ) ) { return false; }
-		form.classList.add( 'is-submitting' );
-		input.readOnly = true;
-		button.disabled = true;
-		return true;
-	}
-
-	// Disable the submit button while the field is empty. Applied in JS so visitors without
-	// JavaScript keep a working button.
-	button.disabled = '' === input.value;
+	if ( ! input ) { return; }
 
 	input.addEventListener( 'input', function ( event ) {
 		// Trim whitespace and any non-digits (e.g. from a pasted code), capped at six digits.
 		var digits = input.value.replace( /\D/g, '' ).slice( 0, 6 );
 		if ( digits !== input.value ) { input.value = digits; }
-		button.disabled = '' === digits || form.classList.contains( 'is-submitting' );
 
 		// Auto-submit only a complete code that was pasted or dropped in — never while typing, so a
-		// mistyped digit can't submit the form by accident.
+		// mistyped digit can't submit by accident. requestSubmit() still runs native validation.
 		var inserted = event && event.inputType;
 		var pasted = 'insertFromPaste' === inserted || 'insertFromDrop' === inserted;
-		if ( pasted && 6 === digits.length && setSubmitting() ) {
-			if ( form.requestSubmit ) { form.requestSubmit(); } else { form.submit(); }
+		if ( pasted && 6 === digits.length && form.requestSubmit ) {
+			form.requestSubmit();
 		}
 	} );
 
-	form.addEventListener( 'submit', function () {
-		setSubmitting();
+	form.addEventListener( 'submit', function ( event ) {
+		// Block a double submit; .is-submitting also dims the button while the POST is in flight.
+		if ( form.classList.contains( 'is-submitting' ) ) {
+			event.preventDefault();
+			return;
+		}
+		form.classList.add( 'is-submitting' );
+		input.readOnly = true;
 	} );
 }() );
 JS;

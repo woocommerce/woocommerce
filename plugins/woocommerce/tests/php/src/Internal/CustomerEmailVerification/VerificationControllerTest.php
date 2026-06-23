@@ -160,14 +160,16 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The orders title becomes a confirmation title on the /orders/verify/ sub-page.
+	 * @testdox The verify sub-page title is normalised to "Orders" instead of the default "Orders (Page 0)".
 	 */
 	public function test_orders_title_on_verify_subpage(): void {
+		// The sub-page reuses the orders pagination slot, so WooCommerce titles it "Orders (Page 0)";
+		// the filter forces a clean "Orders".
 		set_query_var( 'orders', 'verify' );
-		$this->assertSame( 'Confirm your email address', $this->ctrl->maybe_filter_orders_title( 'Orders' ) );
+		$this->assertSame( 'Orders', $this->ctrl->maybe_filter_orders_title( 'Orders (Page 0)' ) );
 
 		set_query_var( 'orders', '2' );
-		$this->assertSame( 'Orders', $this->ctrl->maybe_filter_orders_title( 'Orders' ), 'A normal orders page keeps its title.' );
+		$this->assertSame( 'Orders (Page 2)', $this->ctrl->maybe_filter_orders_title( 'Orders (Page 2)' ), 'A normal orders page keeps its title.' );
 
 		set_query_var( 'orders', '' );
 	}

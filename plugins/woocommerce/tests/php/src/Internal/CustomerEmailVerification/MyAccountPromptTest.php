@@ -215,7 +215,7 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		$html = $this->render_endpoint();
 
 		$this->assertStringContainsString( 'name="wc_verify_email_code"', $html, 'A pending code should surface the entry form on the endpoint.' );
-		$this->assertStringContainsString( 'type="hidden" name="wc_verify_email_submit"', $html, 'The submit marker must be a hidden field so the button can be disabled while submitting without dropping it.' );
+		$this->assertStringContainsString( 'type="hidden" name="wc_verify_email_submit"', $html, 'The submit marker must be a hidden field so the form stays routable regardless of the submit button state.' );
 		$this->assertTrue( wp_script_is( 'wc-customer-email-verification', 'enqueued' ), 'Rendering the endpoint form should enqueue its enhancement script.' );
 	}
 
@@ -299,7 +299,7 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox handle_send_request suppresses a second send when issued within the rate-limit window.
+	 * @testdox handle_send_request suppresses a second send within the rate-limit window and tells the customer why.
 	 */
 	public function test_handle_send_request_suppresses_immediate_resend(): void {
 		$user_id = wc_create_new_customer( 'rate-limit@example.com', 'ratelimituser', 'pw' );
@@ -323,6 +323,7 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 		unset( $_GET['_wpnonce'] );
 
 		$this->assertSame( 1, $notification_count, 'Notification should fire exactly once despite two send attempts within the rate-limit window' );
+		$this->assertCount( 1, wc_get_notices( 'notice' ), 'A rate-limited resend must surface an informational notice instead of failing silently.' );
 	}
 
 	/**
