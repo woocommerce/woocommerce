@@ -100,6 +100,30 @@ class ProductMediaGallery {
 	}
 
 	/**
+	 * Get media gallery items for classic product gallery templates.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @return array
+	 *
+	 * @since 11.0.0
+	 */
+	public static function get_product_media_gallery_items_for_display( WC_Product $product ): array {
+		$media_items = self::get_product_media_gallery_items(
+			$product,
+			array(
+				'include_placeholder' => true,
+				'deduplicate'         => true,
+			)
+		);
+
+		self::prime_attachment_caches( $media_items, true );
+
+		return $media_items;
+	}
+
+	/**
 	 * Get video gallery items stored for a product.
 	 *
 	 * @param WC_Product $product Product object.
@@ -310,6 +334,147 @@ class ProductMediaGallery {
 		$attachment_id = isset( $media_item['id'] ) ? absint( $media_item['id'] ) : 0;
 
 		return $attachment_id ? (int) get_post_thumbnail_id( $attachment_id ) : 0;
+	}
+
+	/**
+	 * Get HTML for a classic product gallery video.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 *
+	 * @param array $media_item Product media gallery item.
+	 * @param bool  $main_video Whether this is the main gallery item.
+	 * @return string
+	 *
+	 * @since 11.0.0
+	 */
+	public static function get_gallery_video_html( array $media_item, bool $main_video = false ): string {
+		$attachment_id = isset( $media_item['id'] ) ? absint( $media_item['id'] ) : 0;
+		$video_src     = $attachment_id ? wp_get_attachment_url( $attachment_id ) : '';
+
+		if ( ! $video_src ) {
+			return '';
+		}
+
+		/**
+		 * Filters whether the single product gallery flexslider is enabled.
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param bool $enabled Whether flexslider is enabled.
+		 */
+		$flexslider        = (bool) apply_filters(
+			'woocommerce_single_product_flexslider_enabled',
+			get_theme_support( 'wc-product-gallery-slider' )
+		);
+		$gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
+		/**
+		 * Filters the product gallery thumbnail image size.
+		 *
+		 * @since 3.3.2
+		 *
+		 * @param string|array $size Image size.
+		 */
+		$thumbnail_size = apply_filters(
+			'woocommerce_gallery_thumbnail_size',
+			array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] )
+		);
+		/**
+		 * Filters the product gallery image size.
+		 *
+		 * @since 3.3.2
+		 *
+		 * @param string|array $size Image size.
+		 */
+		$image_size = apply_filters(
+			'woocommerce_gallery_image_size',
+			$flexslider || $main_video ? 'woocommerce_single' : $thumbnail_size
+		);
+		/**
+		 * Filters the product gallery full image size.
+		 *
+		 * @since 3.3.2
+		 *
+		 * @param string|array $size Image size.
+		 */
+		$full_size = apply_filters(
+			'woocommerce_gallery_full_size',
+			/**
+			 * Filters the product thumbnails large image size.
+			 *
+			 * @since 3.0.0
+			 *
+			 * @param string|array $size Image size.
+			 */
+			apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' )
+		);
+
+		$poster_id        = self::get_video_poster_id( $media_item );
+		$thumbnail_src    = $poster_id ? wp_get_attachment_image_src( $poster_id, $thumbnail_size ) : false;
+		$thumbnail_srcset = $poster_id ? wp_get_attachment_image_srcset( $poster_id, $thumbnail_size ) : false;
+		$thumbnail_sizes  = $poster_id ? wp_get_attachment_image_sizes( $poster_id, $thumbnail_size ) : false;
+		$poster_src       = $poster_id ? wp_get_attachment_image_src( $poster_id, $image_size ) : false;
+		$full_src         = $poster_id ? wp_get_attachment_image_src( $poster_id, $full_size ) : false;
+		$alt_text         = $poster_id
+			? trim( wp_strip_all_tags( get_post_meta( $poster_id, '_wp_attachment_image_alt', true ) ) )
+			: '';
+
+		if ( empty( $alt_text ) ) {
+			$video_title = get_post_field( 'post_title', $attachment_id );
+			$alt_text    = $video_title
+				? sprintf(
+					/* translators: %s is the video title. */
+					__( 'Video: %s', 'woocommerce' ),
+					$video_title
+				)
+				: '';
+		}
+
+		$full_width       = isset( $full_src[1] ) ? absint( $full_src[1] ) : 1000;
+		$full_height      = isset( $full_src[2] ) ? absint( $full_src[2] ) : 1000;
+		$full_src_url     = isset( $full_src[0] ) ? $full_src[0] : wc_placeholder_img_src( 'woocommerce_single' );
+		$video_attributes = array(
+			'autoplay'                => 'autoplay',
+			'class'                   => $main_video ? 'wp-post-video wp-post-image' : 'wp-post-video',
+			'src'                     => $video_src,
+			'loop'                    => 'loop',
+			'muted'                   => 'muted',
+			'playsinline'             => 'playsinline',
+			'preload'                 => 'metadata',
+			'data-caption'            => get_post_field( 'post_excerpt', $attachment_id ),
+			'data-src'                => $full_src_url,
+			'data-large_image'        => $full_src_url,
+			'data-large_image_width'  => $full_width,
+			'data-large_image_height' => $full_height,
+			'aria-label'              => $alt_text,
+		);
+
+		if ( false !== $poster_src && isset( $poster_src[0] ) ) {
+			$video_attributes['poster'] = $poster_src[0];
+		}
+
+		$thumbnail           = isset( $thumbnail_src[0] )
+			? $thumbnail_src[0]
+			: wc_placeholder_img_src( 'woocommerce_gallery_thumbnail' );
+		$thumbnail_video_src = isset( $thumbnail_src[0] ) ? '' : $video_src;
+
+		return sprintf(
+			'<div data-thumb="%1$s" data-thumb-alt="%2$s" data-thumb-srcset="%3$s" data-thumb-sizes="%4$s" data-thumb-video-src="%5$s" ' .
+			'class="woocommerce-product-gallery__image woocommerce-product-gallery__video"><a href="%6$s"><video %7$s></video></a></div>',
+			esc_url( $thumbnail ),
+			esc_attr( $alt_text ),
+			esc_attr( $thumbnail_srcset ? $thumbnail_srcset : '' ),
+			esc_attr( $thumbnail_sizes ? $thumbnail_sizes : '' ),
+			esc_url( $thumbnail_video_src ),
+			esc_url( $video_src ),
+			wc_implode_html_attributes(
+				array_filter(
+					$video_attributes,
+					static function ( $value ) {
+						return '' !== $value;
+					}
+				)
+			)
+		);
 	}
 
 	/**
