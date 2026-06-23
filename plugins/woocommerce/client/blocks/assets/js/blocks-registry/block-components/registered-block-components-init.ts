@@ -9,5 +9,3 @@ const registeredBlockComponents: Record<
 > = {};
 
 export { registeredBlockComponents };
-
-console.log( 'WIP - remove this' );
