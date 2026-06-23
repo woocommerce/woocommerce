@@ -14,7 +14,6 @@ use ActionScheduler_Store;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductWalker;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\WalkerProgress;
-use Automattic\WooCommerce\Internal\ProductFeed\Storage\JsonFileFeed;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -482,42 +481,16 @@ class AsyncGenerator {
 	 * @return void
 	 */
 	private function discard_feed( array $status ): void {
-		// Prefer the feed-owned identifier: FeedInterface::delete() validates the file name and only ever
-		// touches files inside the feed directory.
-		if ( ! empty( $status['file_name'] ) ) {
-			$this->integration->create_feed()->delete( (string) $status['file_name'] );
-			return;
-		}
+		// A completed feed exposes a full path; an in-progress chunked feed only tracks a file name.
+		// Reduce either to a plain identifier and let FeedInterface::delete() validate it and confine the
+		// deletion to the feed directory, so a tampered path read back from the option can never escape it.
+		$identifier = ! empty( $status['file_name'] )
+			? (string) $status['file_name']
+			: ( ! empty( $status['path'] ) ? wp_basename( (string) $status['path'] ) : '' );
 
-		// Legacy completed feeds stored only a full path. Delete it solely if it resolves to a file inside
-		// the feed directory, never an arbitrary path read back from the persisted option.
-		if ( ! empty( $status['path'] ) && $this->is_within_feed_dir( (string) $status['path'] ) ) {
-			wp_delete_file( (string) $status['path'] );
+		if ( '' !== $identifier ) {
+			$this->integration->create_feed()->delete( $identifier );
 		}
-	}
-
-	/**
-	 * Determines whether a path resolves to a file inside the product-feed upload directory.
-	 *
-	 * Guards deletions that fall back to a raw path persisted in the status option, so a corrupted or
-	 * tampered value can never remove a file outside the feed directory.
-	 *
-	 * @param string $path The absolute file path to check.
-	 * @return bool True if the path is inside the feed upload directory.
-	 */
-	private function is_within_feed_dir( string $path ): bool {
-		$upload_dir = wp_upload_dir( null, false );
-		if ( empty( $upload_dir['basedir'] ) ) {
-			return false;
-		}
-
-		$feed_dir  = realpath( $upload_dir['basedir'] . DIRECTORY_SEPARATOR . JsonFileFeed::UPLOAD_DIR );
-		$real_path = realpath( $path );
-		if ( false === $feed_dir || false === $real_path ) {
-			return false;
-		}
-
-		return 0 === strpos( $real_path, $feed_dir . DIRECTORY_SEPARATOR );
 	}
 
 	/**
