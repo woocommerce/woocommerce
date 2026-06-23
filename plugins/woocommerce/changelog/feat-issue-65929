@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Migrate MiniCart, MiniCartContents, CartLink, and their inner blocks to declare assets in block.json and adopt EnableBlockJsonAssetsTrait, removing legacy PHP-side asset override methods. Fix AbstractInnerBlock::register_block_type() to conditionally pass editor_style so block.json takes effect for migrated inner blocks.

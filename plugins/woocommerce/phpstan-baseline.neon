@@ -50164,12 +50164,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AbstractInnerBlock.php
 
 		-
-			message: '#^Parameter \#2 \$args of function register_block_type_from_metadata expects array\{api_version\?\: string, title\?\: string, category\?\: string\|null, parent\?\: array\<string\>\|null, ancestor\?\: array\<string\>\|null, allowed_blocks\?\: array\<string\>\|null, icon\?\: string\|null, description\?\: string, \.\.\.\}, array\{render_callback\: mixed, editor_style\: string\|null, style\: null, api_version\?\: int\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractInnerBlock.php
-
-		-
 			message: '#^@param Automattic\\WooCommerce\\Blocks\\BlockTypes\\WC_Product \$product does not accept actual type of parameter\: WC_Product\.$#'
 			identifier: parameter.phpDocType
 			count: 1

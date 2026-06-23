@@ -7,6 +7,8 @@ use Automattic\WooCommerce\Admin\Features\Features;
  * MiniCartTitleLabelBlock class.
  */
 class MiniCartTitleLabelBlock extends AbstractInnerBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *

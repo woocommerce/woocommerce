@@ -39,6 +39,8 @@
 			"default": null
 		}
 	},
+	"style": [ "wc-blocks-style", "wc-blocks-style-cart-link" ],
+	"editorStyle": "wc-blocks-editor-style",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

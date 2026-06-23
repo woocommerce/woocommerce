@@ -22,12 +22,12 @@ abstract class AbstractInnerBlock extends AbstractBlock {
 	protected function register_block_type() {
 		$block_settings = [
 			'render_callback' => $this->get_block_type_render_callback(),
-			'editor_style'    => $this->get_block_type_editor_style(),
-			'style'           => $this->get_block_type_style(),
 		];
 
-		if ( isset( $this->api_version ) ) {
-			$block_settings['api_version'] = intval( $this->api_version );
+		// Only override editor_style when PHP provides one — let block.json take effect otherwise.
+		$block_type_editor_style = $this->get_block_type_editor_style();
+		if ( $block_type_editor_style ) {
+			$block_settings['editor_style'] = $block_type_editor_style;
 		}
 
 		$metadata_path = $this->asset_api->get_block_metadata_path( $this->block_name, 'inner-blocks/' );

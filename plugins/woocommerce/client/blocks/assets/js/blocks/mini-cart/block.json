@@ -67,6 +67,8 @@
 			"default": "greater_than_zero"
 		}
 	},
+	"style": [ "wc-blocks-style", "wc-blocks-style-mini-cart", "wc-blocks-packages-style" ],
+	"editorStyle": "wc-blocks-editor-style",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

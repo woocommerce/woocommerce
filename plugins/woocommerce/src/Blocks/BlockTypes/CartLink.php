@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
  * CartLink class.
  */
 class CartLink extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
@@ -44,14 +45,5 @@ class CartLink extends AbstractBlock {
 			$text,
 			$aria_label
 		);
-	}
-
-	/**
-	 * Get the frontend script handle for this block type.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
 	}
 }

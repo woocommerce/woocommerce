@@ -7,6 +7,8 @@ use Automattic\WooCommerce\Admin\Features\Features;
  * EmptyMiniCartContentsBlock class.
  */
 class EmptyMiniCartContentsBlock extends AbstractInnerBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *

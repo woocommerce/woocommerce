@@ -8,6 +8,8 @@ use Automattic\WooCommerce\Enums\TaxDisplayMode;
  * MiniCartFooterBlock class.
  */
 class MiniCartFooterBlock extends AbstractInnerBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *

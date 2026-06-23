@@ -8,6 +8,8 @@ use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
  * FilledMiniCartContentsBlock class.
  */
 class FilledMiniCartContentsBlock extends AbstractInnerBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *

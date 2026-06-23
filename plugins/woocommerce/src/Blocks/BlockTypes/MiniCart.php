@@ -26,6 +26,7 @@ use Automattic\Block_Delimiter;
  */
 class MiniCart extends AbstractBlock {
 	use BlockHooksTrait;
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
@@ -114,6 +115,8 @@ class MiniCart extends AbstractBlock {
 	 * - Register the block with WordPress.
 	 */
 	protected function initialize() {
+		// Register the per-block style handle so block.json can reference it by name.
+		$this->asset_api->register_style( 'wc-blocks-style-mini-cart', $this->asset_api->get_block_asset_build_path( 'mini-cart', 'css' ), [], 'all', true );
 		parent::initialize();
 		add_action( 'wp_loaded', array( $this, 'register_empty_cart_message_block_pattern' ) );
 		add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 2 );
@@ -198,15 +201,6 @@ class MiniCart extends AbstractBlock {
 			'dependencies' => array(),
 		);
 		return $key ? $script[ $key ] : $script;
-	}
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return string[]
-	 */
-	protected function get_block_type_style() {
-		return array_merge( parent::get_block_type_style(), array( 'wc-blocks-packages-style' ) );
 	}
 
 	/**

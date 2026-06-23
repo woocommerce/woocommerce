@@ -34,6 +34,8 @@
 			"default": "480px"
 		}
 	},
+	"style": [ "wc-blocks-style", "wc-blocks-style-mini-cart-contents", "wc-blocks-packages-style" ],
+	"editorStyle": "wc-blocks-editor-style",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

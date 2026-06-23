@@ -33,6 +33,7 @@
 	},
 	"parent": [ "woocommerce/mini-cart-title-block" ],
 	"textdomain": "woocommerce",
+	"editorStyle": "wc-blocks-editor-style",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

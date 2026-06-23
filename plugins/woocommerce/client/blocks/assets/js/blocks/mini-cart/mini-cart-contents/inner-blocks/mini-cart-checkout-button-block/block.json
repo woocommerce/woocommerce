@@ -44,6 +44,7 @@
 	],
 	"parent": [ "woocommerce/mini-cart-footer-block" ],
 	"textdomain": "woocommerce",
+	"editorStyle": "wc-blocks-editor-style",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }
