@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Update Timeline date rendering to use localized timezone-aware formatting.
+Update Timeline date rendering from browser-local formatting to localized timezone-aware formatting.
