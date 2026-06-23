@@ -156,6 +156,32 @@ describe( 'Test Environment', () => {
 				} );
 			} );
 
+			it( 'should preserve latest offset when version resolution is disabled', async () => {
+				const envVars = await parseTestEnvConfig(
+					{
+						wpVersion: 'latest-1',
+					},
+					false
+				);
+
+				expect( envVars ).toEqual( {
+					WP_VERSION: 'latest-1',
+				} );
+			} );
+
+			it( 'should preserve gutenberg target when version resolution is disabled', async () => {
+				const envVars = await parseTestEnvConfig(
+					{
+						wpVersion: 'gutenberg',
+					},
+					false
+				);
+
+				expect( envVars ).toEqual( {
+					WP_VERSION: 'gutenberg',
+				} );
+			} );
+
 			it( 'should throw for latest offset that does not exist', async () => {
 				const expectation = () =>
 					parseTestEnvConfig( {

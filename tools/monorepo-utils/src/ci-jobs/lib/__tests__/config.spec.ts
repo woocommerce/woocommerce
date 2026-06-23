@@ -149,6 +149,47 @@ describe( 'Config', () => {
 			} );
 		} );
 
+		it( 'should parse test config with environment config and no start command', () => {
+			const parsed = parseCIConfig( {
+				name: 'foo',
+				config: {
+					ci: {
+						tests: [
+							{
+								name: 'default',
+								changes: '/src/**/*.{js,jsx,ts,tsx}',
+								command: 'foo',
+								testEnv: {
+									config: {
+										wpVersion: 'latest',
+									},
+								},
+							},
+						],
+					},
+				},
+			} );
+
+			expect( parsed ).toMatchObject( {
+				jobs: [
+					{
+						type: JobType.Test,
+						name: 'default',
+						changes: [
+							/^package\.json$/,
+							makeRe( '/src/**/*.{js,jsx,ts,tsx}' ),
+						],
+						command: 'foo',
+						testEnv: {
+							config: {
+								wpVersion: 'latest',
+							},
+						},
+					},
+				],
+			} );
+		} );
+
 		it( 'should parse test config with environment', () => {
 			const parsed = parseCIConfig( {
 				name: 'foo',

@@ -280,7 +280,7 @@ interface TestEnvConfig {
 	/**
 	 * The command that should be used to start the test environment.
 	 */
-	start: string;
+	start?: string;
 
 	/**
 	 * Any configuration variables that should be used when building the environment.
@@ -400,13 +400,15 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 			throw new ConfigError( 'The "testEnv" option must be an object.' );
 		}
 
-		if ( ! raw.testEnv.start || typeof raw.testEnv.start !== 'string' ) {
+		if ( raw.testEnv.start && typeof raw.testEnv.start !== 'string' ) {
 			throw new ConfigError(
-				'A string "start" option is required for test environments.'
+				'The test environment "start" option must be a string.'
 			);
 		}
 
-		validateCommandVars( raw.testEnv.start );
+		if ( raw.testEnv.start ) {
+			validateCommandVars( raw.testEnv.start );
+		}
 
 		config.testEnv = {
 			start: raw.testEnv.start,
