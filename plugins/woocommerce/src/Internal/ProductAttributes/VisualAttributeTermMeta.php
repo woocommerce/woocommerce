@@ -342,7 +342,7 @@ class VisualAttributeTermMeta {
 	 * @since 11.0.0
 	 */
 	public static function seed_visual_attribute_terms( int $attribute_id, array $data ): void {
-		if ( 0 === $attribute_id || ! isset( $data['attribute_type'] ) || 'wc-visual' !== $data['attribute_type'] || empty( $data['attribute_name'] ) ) {
+		if ( 0 >= $attribute_id || ! isset( $data['attribute_type'] ) || 'wc-visual' !== $data['attribute_type'] || empty( $data['attribute_name'] ) ) {
 			return;
 		}
 
