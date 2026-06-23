@@ -720,6 +720,10 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	 * the persisted status was corrupted or tampered with to point elsewhere.
 	 */
 	public function test_discard_feed_does_not_delete_path_outside_feed_dir() {
+		$this->mock_integration->method( 'create_feed' )->willReturnCallback(
+			fn() => new JsonFileFeed( 'pos-catalog-feed-test' )
+		);
+
 		// A sentinel file outside the feed directory that a tampered status path points at.
 		$outside = wp_upload_dir()['basedir'] . '/not-a-feed.json';
 		// phpcs:ignore WordPress.WP.AlternativeFunctions
@@ -738,6 +742,10 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	 * the feed directory.
 	 */
 	public function test_discard_feed_deletes_legacy_path_inside_feed_dir() {
+		$this->mock_integration->method( 'create_feed' )->willReturnCallback(
+			fn() => new JsonFileFeed( 'pos-catalog-feed-test' )
+		);
+
 		$partial    = new JsonFileFeed( 'pos-catalog-feed-test' );
 		$identifier = $partial->start();
 		$partial->flush();
