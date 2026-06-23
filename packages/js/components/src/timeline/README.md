@@ -53,6 +53,12 @@ Name | Type | Default | Description
 `clockFormat` | String | `'g:ia'` | PHP clock format string used to format times, see php.net/date
 `timezone` | String | `'browser'` | Timezone mode used to group and render dates and times. Dates are localized using WordPress date settings. Use `'browser'` to use the user's browser timezone, or `'site'` to use the WordPress site timezone.
 
+### Date formatting behavior
+
+Timeline localizes rendered dates and times using WordPress date settings. The default `browser` timezone mode keeps dates grouped and rendered in the user's browser timezone when the browser provides a timezone. If the browser timezone is unavailable, Timeline falls back to the previous `format()` behavior instead of switching to the WordPress site timezone.
+
+This means existing Timeline consumers may display localized month and day names after updating. Audit Timeline usage if locale-independent date strings are required. Use `@wordpress/date`'s `format()` before passing text to custom item content when a date string must ignore WordPress localization.
+
 ### `items` structure
 
 A list of items with properties:

@@ -147,6 +147,41 @@ describe( 'Timeline', () => {
 		).toBe( 'browser:g:ia:2020-01-20T23:45:00.000Z' );
 	} );
 
+	test( 'falls back to browser timezone formatting when browser timezone is empty', () => {
+		global.Intl = {
+			DateTimeFormat: () => ( {
+				resolvedOptions: () => ( {
+					timeZone: '',
+				} ),
+			} ),
+		};
+		format.mockImplementation(
+			( dateFormat, date ) =>
+				`browser:${ dateFormat }:${ date.toISOString() }`
+		);
+		dateI18n.mockImplementation(
+			( dateFormat, date, timezone ) =>
+				`localized:${ timezone }:${ dateFormat }:${ date.toISOString() }`
+		);
+
+		const { container } = render(
+			<Timeline
+				items={ [ timezoneTestItem ] }
+				dateFormat="F j, Y"
+				clockFormat="g:ia"
+			/>
+		);
+
+		expect(
+			container.querySelector( '.woocommerce-timeline-group__title' )
+				.textContent
+		).toBe( 'browser:F j, Y:2020-01-20T23:45:00.000Z' );
+		expect(
+			container.querySelector( '.woocommerce-timeline-item__timestamp' )
+				.textContent
+		).toBe( 'browser:g:ia:2020-01-20T23:45:00.000Z' );
+	} );
+
 	test( 'groups items using site timezone when requested', () => {
 		const timezoneBoundaryItems = [
 			{

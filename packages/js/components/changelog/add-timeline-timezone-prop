@@ -1,4 +1,4 @@
 Significance: minor
-Type: add
+Type: update
 
-Add localized timezone-aware formatting to the Timeline component.
+Update Timeline date rendering to use localized timezone-aware formatting.
