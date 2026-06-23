@@ -22,6 +22,19 @@ const wcAdminPackages = [
 	'onboarding',
 ];
 
+const getPackageFilePath = ( packageName, relativeFilePath ) =>
+	path.join(
+		path.dirname(
+			require.resolve( packageName, {
+				paths: [
+					path.resolve( __dirname, '../../node_modules/.pnpm/node_modules' ),
+				],
+			} )
+		),
+		'..',
+		relativeFilePath
+	);
+
 module.exports = ( storybookConfig ) => {
 	storybookConfig.module.rules = [
 		...storybookConfig.module.rules,
@@ -65,13 +78,14 @@ module.exports = ( storybookConfig ) => {
 				{
 					from: path.resolve( __dirname, 'wordpress/css' ),
 					to: 'wordpress/css/[name][ext]',
-				},
-				{
-					from: require.resolve(
-						'@wordpress/components/build-style/style.css'
-					),
-					to: 'wordpress/css/components.css',
-				},
+					},
+					{
+						from: getPackageFilePath(
+							'@wordpress/components',
+							'build-style/style.css'
+						),
+						to: 'wordpress/css/components.css',
+					},
 				{
 					from: path.resolve(
 						__dirname,

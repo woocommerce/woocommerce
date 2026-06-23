@@ -1,4 +1,17 @@
+const fs = require( 'fs' );
+const path = require( 'path' );
 const webpackOverride = require( '../webpack.config' );
+
+const optionalStories = [];
+if (
+	fs.existsSync(
+		path.resolve( __dirname, '../../../packages/js/product-editor/src' )
+	)
+) {
+	optionalStories.push(
+		'../../../packages/js/product-editor/src/**/*.(stories|story).@(js|tsx)'
+	);
+}
 
 const staticDirs = [
 	{
@@ -18,14 +31,14 @@ module.exports = {
 		// Introductory documentation
 		'../stories/**/*.mdx',
 		// WooCommerce Admin / @woocommerce/components components
-		'../../../packages/js/components/src/**/stories/*.story.@(js|tsx)',
-		// WooCommerce Admin / @woocommerce/experimental components
-		'../../../packages/js/experimental/src/**/stories/*.story.@(js|tsx)',
-		// WooCommerce Admin / @woocommerce/onboarding components
-		'../../../packages/js/onboarding/src/**/stories/*.story.@(js|tsx)',
-		'../../../packages/js/product-editor/src/**/*.(stories|story).@(js|tsx)',
-		'../../../plugins/woocommerce/client/admin/client/**/stories/*.story.@(js|tsx)',
-	],
+			'../../../packages/js/components/src/**/stories/*.story.@(js|tsx)',
+			// WooCommerce Admin / @woocommerce/experimental components
+			'../../../packages/js/experimental/src/**/stories/*.story.@(js|tsx)',
+			// WooCommerce Admin / @woocommerce/onboarding components
+			'../../../packages/js/onboarding/src/**/stories/*.story.@(js|tsx)',
+			...optionalStories,
+			'../../../plugins/woocommerce/client/admin/client/**/stories/*.story.@(js|tsx)',
+		],
 	refs: ( config, { configType } ) => {
 		if ( configType === 'DEVELOPMENT' ) {
 			// WooCommerce Blocks gets automatically on port 6006 run when you run pnpm --filter=@woocommerce/storybook watch:build
