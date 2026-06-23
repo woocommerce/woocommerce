@@ -406,4 +406,47 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		$cross_sell_2->delete( true );
 		$cross_sell_3->delete( true );
 	}
+
+	/**
+	 * @testdox Cross-sells collection does not leak a non-resolving reference id into the results.
+	 */
+	public function test_collection_cross_sells_excludes_unresolvable_reference_from_results() {
+		// A cart reference that no longer resolves to a product (e.g. deleted mid-session)
+		// must not surface as a cross-sell, even if a resolved cart product still lists it
+		// among its cross-sell ids.
+		$cart_product    = WC_Helper_Product::create_simple_product( false );
+		$real_cross_sell = WC_Helper_Product::create_simple_product();
+
+		// An id guaranteed not to resolve to a product.
+		$ghost      = WC_Helper_Product::create_simple_product();
+		$missing_id = $ghost->get_id();
+		$ghost->delete( true );
+
+		$cart_product->set_cross_sell_ids( array( $real_cross_sell->get_id(), $missing_id ) );
+		$cart_product->save();
+
+		$parsed_block                        = Utils::get_base_parsed_block();
+		$parsed_block['attrs']['collection'] = 'woocommerce/product-collection/cross-sells';
+		$this->block_instance->set_parsed_block( $parsed_block );
+
+		$block                                       = new \stdClass();
+		$block->context                              = $parsed_block['attrs'];
+		$block->context['productCollectionLocation'] = array(
+			'type'       => 'cart',
+			'sourceData' => array(
+				'productIds' => array( $cart_product->get_id(), $missing_id ),
+			),
+		);
+
+		$query_args = $this->block_instance->build_frontend_query( array(), $block, 1 );
+
+		$this->assertSame(
+			array( $real_cross_sell->get_id() ),
+			array_values( $query_args['post__in'] ),
+			'Only the resolvable cross-sell should remain; the non-resolving reference id must not leak.'
+		);
+
+		$cart_product->delete( true );
+		$real_cross_sell->delete( true );
+	}
 }
