@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Bump vendored `@wordpress/*` type declarations to the WordPress 6.9 (`wp-min`) versions and reapply the WooCommerce type overrides.

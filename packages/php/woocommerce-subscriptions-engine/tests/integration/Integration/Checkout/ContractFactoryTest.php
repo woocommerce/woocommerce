@@ -28,6 +28,10 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepositor
  */
 class ContractFactoryTest extends EngineIntegrationTestCase {
 
+	/**
+	 * @param int|null                              $max_cycles Maximum number of billing cycles, or null for unlimited.
+	 * @param array{length: int, unit: string}|null $trial      Native trial duration, or null for none.
+	 */
 	private function make_plan( ?int $max_cycles = null, ?array $trial = null ): Plan {
 		$group_id = ( new PlanGroupRepository() )->insert(
 			PlanGroup::create( array( 'name' => 'Coffee club' ) )
@@ -73,7 +77,6 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 
 		$contract = ( new ContractFactory() )->create_from_order( $order, $plan );
 
-		$this->assertInstanceOf( Contract::class, $contract );
 		$this->assertNotNull( $contract->get_id() );
 		$this->assertSame( ContractStatus::ACTIVE, $contract->get_status() );
 		$this->assertSame( 'USD', $contract->get_currency() );
@@ -89,6 +92,7 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 
 		// Order is tagged with the parent relation.
 		$tagged_order = wc_get_order( $order->get_id() );
+		$this->assertInstanceOf( WC_Order::class, $tagged_order );
 		$this->assertSame( (string) $contract->get_id(), $tagged_order->get_meta( OrderLinkage::META_CONTRACT_ID ) );
 		$this->assertSame( OrderLinkage::RELATION_PARENT, $tagged_order->get_meta( OrderLinkage::META_RELATION_TYPE ) );
 	}

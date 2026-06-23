@@ -96,4 +96,69 @@ class PricingPolicyTest extends TestCase {
 		$this->assertIsFloat( $policy->get_policies()[0]['value'] );
 		$this->assertIsFloat( $policy->get_one_time_fees()[0]['amount'] );
 	}
+
+	public function test_fees_normalize_to_typed_shape(): void {
+		$policy = PricingPolicy::from_array(
+			array(
+				'one_time_fees' => array(
+					array(
+						'kind'   => 'setup',
+						'amount' => 5,
+					),
+					array(
+						'kind'      => 'service',
+						'amount'    => 7,
+						'tax_class' => '',
+					),
+				),
+			)
+		);
+
+		$fees = $policy->get_one_time_fees();
+
+		// A fee without taxable/tax_class normalizes to taxable=false, tax_class=null.
+		$this->assertFalse( $fees[0]['taxable'] );
+		$this->assertNull( $fees[0]['tax_class'] );
+
+		// A supplied empty-string tax_class is preserved (not coerced to null),
+		// while a still-absent taxable normalizes to false.
+		$this->assertFalse( $fees[1]['taxable'] );
+		$this->assertSame( '', $fees[1]['tax_class'] );
+	}
+
+	/**
+	 * @dataProvider provide_taxable_values
+	 * @param mixed $supplied Raw taxable value as it might arrive from storage.
+	 * @param bool  $expected Expected normalized boolean.
+	 */
+	public function test_taxable_is_interpreted_as_a_real_boolean( $supplied, bool $expected ): void {
+		$policy = PricingPolicy::from_array(
+			array(
+				'one_time_fees' => array(
+					array(
+						'kind'    => 'setup',
+						'amount'  => 5,
+						'taxable' => $supplied,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( $expected, $policy->get_one_time_fees()[0]['taxable'] );
+	}
+
+	/**
+	 * @return array<string, array{0: mixed, 1: bool}>
+	 */
+	public function provide_taxable_values(): array {
+		return array(
+			'bool true'    => array( true, true ),
+			'bool false'   => array( false, false ),
+			'string true'  => array( 'true', true ),
+			'string false' => array( 'false', false ),
+			'string one'   => array( '1', true ),
+			'string zero'  => array( '0', false ),
+			'unrecognized' => array( 'maybe', false ),
+		);
+	}
 }
