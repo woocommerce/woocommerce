@@ -28,10 +28,4 @@ export const filtersPreview = [
 		value: 'instock',
 		label: __( 'In stock', 'woocommerce' ),
 	},
-	{
-		id: 'status_onsale',
-		type: __( 'Availability', 'woocommerce' ),
-		value: 'onsale',
-		label: __( 'On sale', 'woocommerce' ),
-	},
 ];
