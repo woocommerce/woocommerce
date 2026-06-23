@@ -8610,6 +8610,134 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should complete the post-disable bookkeeping for a test-drive account even if a concurrent request re-acquires the onboarding lock during the unlocked Phase 2 window.
+	 */
+	public function test_disable_test_account_completes_bookkeeping_when_lock_reacquired_during_phase_2_for_test_drive(): void {
+		$location = 'US';
+
+		$account_exists = true;
+		$this->mock_account_state( $account_exists );
+		$this->mock_working_wpcom_connection();
+
+		$lock_value      = 0;
+		$lock_changes    = array();
+		$updated_profile = array();
+		$this->mock_disable_test_account_option_state( $lock_value, $lock_changes, $updated_profile );
+
+		// Simulate a concurrent onboarding request acquiring the shared lock during the unlocked
+		// Phase 2 window: the internal disable mutation commits, but by the time Core runs its
+		// post-disable bookkeeping the lock is held again. Because the mutation has already
+		// happened, the bookkeeping must not re-check the lock (which would throw onboarding_locked
+		// after a successful mutation) and must not stomp the concurrent request's lock.
+		$current_time = $this->current_time;
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint ) use ( &$lock_value, $current_time ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/disable' === $endpoint ) {
+							// A concurrent request grabs the lock after Core released it for Phase 2.
+							$lock_value = $current_time;
+
+							return array(
+								'success' => true,
+							);
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		$result = $this->sut->disable_test_account( $location, 'test-from', 'test-source' );
+
+		$this->assertSame( array( 'success' => true ), $result, 'The disable should succeed even though the lock was re-acquired before the bookkeeping ran.' );
+		// The committed mutation's bookkeeping must run to completion instead of throwing an onboarding-locked error.
+		$this->assert_onboarding_step_completed( $updated_profile, $location, WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS );
+		$this->assert_onboarding_step_completed( $updated_profile, $location, WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT );
+		// Core must only set and release its own preflight lock; the post-disable bookkeeping must
+		// not write the lock at all, so the concurrent request's lock is left intact (not stomped to 0).
+		$this->assertSame(
+			array( $current_time, 0 ),
+			$lock_changes,
+			'Only the preflight set and release should be written; the post-disable bookkeeping must not write the lock.'
+		);
+		$this->assertSame(
+			$current_time,
+			$lock_value,
+			"The concurrent request's onboarding lock must remain intact after the bookkeeping completes."
+		);
+	}
+
+	/**
+	 * @testdox Should complete the post-reset bookkeeping for a sandbox account even if a concurrent request re-acquires the onboarding lock during the unlocked Phase 2 window.
+	 */
+	public function test_disable_test_account_completes_bookkeeping_when_lock_reacquired_during_phase_2_for_sandbox(): void {
+		$location = 'US';
+
+		// A connected account that is neither a test-drive nor a live account is a sandbox account.
+		$this->mock_provider
+			->expects( $this->any() )
+			->method( 'is_account_connected' )
+			->willReturn( true );
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'get_account_status_data' )
+			->willReturn(
+				array(
+					'status'           => 'complete',
+					'testDrive'        => false,
+					'isLive'           => false,
+					'paymentsEnabled'  => true,
+					'detailsSubmitted' => true,
+				)
+			);
+		$this->mock_working_wpcom_connection();
+
+		$lock_value      = 0;
+		$lock_changes    = array();
+		$updated_profile = array();
+		$this->mock_disable_test_account_option_state( $lock_value, $lock_changes, $updated_profile );
+
+		// Same race as the test-drive path, but for the sandbox reset endpoint.
+		$current_time = $this->current_time;
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint ) use ( &$lock_value, $current_time ) {
+						if ( '/wc/v3/payments/onboarding/reset' === $endpoint ) {
+							// A concurrent request grabs the lock after Core released it for Phase 2.
+							$lock_value = $current_time;
+
+							return array(
+								'success' => true,
+							);
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		$result = $this->sut->disable_test_account( $location, 'test-from', 'test-source' );
+
+		$this->assertSame( array( 'success' => true ), $result, 'The reset should succeed even though the lock was re-acquired before the bookkeeping ran.' );
+		$this->assert_onboarding_step_completed( $updated_profile, $location, WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS );
+		$this->assert_onboarding_step_completed( $updated_profile, $location, WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT );
+		$this->assertSame(
+			array( $current_time, 0 ),
+			$lock_changes,
+			'Only the preflight set and release should be written; the post-reset bookkeeping must not write the lock.'
+		);
+		$this->assertSame(
+			$current_time,
+			$lock_value,
+			"The concurrent request's onboarding lock must remain intact after the bookkeeping completes."
+		);
+	}
+
+	/**
 	 * Test get_onboarding_kyc_session throws exception when extension is not active.
 	 *
 	 * @return void

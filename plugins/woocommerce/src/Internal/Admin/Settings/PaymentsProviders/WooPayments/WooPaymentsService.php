@@ -472,6 +472,31 @@ class WooPaymentsService {
 	public function mark_onboarding_step_completed( string $step_id, string $location, bool $overwrite = false, ?string $source = self::SESSION_ENTRY_DEFAULT ): bool {
 		$this->check_if_onboarding_step_action_is_acceptable( $step_id, $location );
 
+		return $this->record_onboarding_step_completed( $step_id, $location, $overwrite, $source );
+	}
+
+	/**
+	 * Record an onboarding step as completed without re-checking whether a new onboarding action is allowed.
+	 *
+	 * This is for internal use only, by callers that have already committed an account mutation and
+	 * just need to sync the resulting NOX onboarding state. Unlike mark_onboarding_step_completed(),
+	 * it deliberately skips check_if_onboarding_step_action_is_acceptable() — including the shared
+	 * onboarding lock check — because the state change is the consequence of work that already
+	 * happened, not a new user action. Re-checking the lock here would let a concurrent request that
+	 * acquired the lock during an unlocked phase turn an already-successful mutation into an
+	 * onboarding-locked error. This mirrors mark_onboarding_step_failed() and
+	 * mark_onboarding_step_blocked(), which skip the same checks for the same reason.
+	 *
+	 * @param string      $step_id   The ID of the onboarding step.
+	 * @param string      $location  The location for which we are onboarding.
+	 *                               This is an ISO 3166-1 alpha-2 country code.
+	 * @param bool        $overwrite Whether to overwrite the step status if it is already completed and update the timestamp.
+	 * @param string|null $source    Optional. The source for the current onboarding flow.
+	 *                               If not provided, it will identify the source as the WC Admin Payments settings.
+	 *
+	 * @return bool Whether the onboarding step was marked as completed.
+	 */
+	private function record_onboarding_step_completed( string $step_id, string $location, bool $overwrite = false, ?string $source = self::SESSION_ENTRY_DEFAULT ): bool {
 		// Clear possible failed status for the step.
 		$this->clear_onboarding_step_failed( $step_id, $location );
 
@@ -1576,12 +1601,19 @@ class WooPaymentsService {
 			);
 		}
 
+		// The account mutation above has already committed, so the following is internal NOX state
+		// sync, not a new user action. Use the internal record path that does not re-check the
+		// onboarding lock: Phase 2 ran unlocked, so a concurrent request may now hold the lock, and
+		// re-checking it here would turn an already-successful disable into an onboarding-locked
+		// error (the shared, token-less lock also can't be safely reacquired around this bookkeeping).
+		// See record_onboarding_step_completed().
+
 		// For sanity, make sure the payment methods step is marked as completed.
 		// This is to avoid the user being prompted to set up payment methods again.
-		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_PAYMENT_METHODS, $location );
+		$this->record_onboarding_step_completed( self::ONBOARDING_STEP_PAYMENT_METHODS, $location );
 		// For sanity, make sure the test account step is marked as completed and not blocked or failed.
 		// After disabling a test account, the user should be prompted to set up a live account.
-		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+		$this->record_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		$this->clear_onboarding_step_blocked( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		// Clear the NOX profile data for the business verification step sub-step data.
