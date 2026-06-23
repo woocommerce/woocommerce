@@ -14,7 +14,6 @@ use ActionScheduler_Store;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductWalker;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\WalkerProgress;
-use Automattic\WooCommerce\Internal\ProductFeed\Storage\JsonFileFeed;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -118,6 +117,17 @@ class AsyncGenerator {
 
 		if ( is_array( $status ) ) {
 			if ( $this->validate_status( $status ) ) {
+				return $status;
+			}
+
+			// Surface a failed generation to the client once, then clear it so the next poll starts a
+			// fresh run. The POS clients are built to read `failed`, stop, and let their own scheduling
+			// drive the next attempt, so the server must report the failure rather than silently retry
+			// it. Clearing the status (rather than leaving it sticky) matters because those clients poll
+			// again with force=false, which would otherwise keep re-reading the same failure forever.
+			if ( self::STATE_FAILED === ( $status['state'] ?? '' ) ) {
+				$this->discard_feed( $status );
+				delete_option( $option_key );
 				return $status;
 			}
 
@@ -482,42 +492,16 @@ class AsyncGenerator {
 	 * @return void
 	 */
 	private function discard_feed( array $status ): void {
-		// Prefer the feed-owned identifier: FeedInterface::delete() validates the file name and only ever
-		// touches files inside the feed directory.
-		if ( ! empty( $status['file_name'] ) ) {
-			$this->integration->create_feed()->delete( (string) $status['file_name'] );
-			return;
-		}
+		// A completed feed exposes a full path; an in-progress chunked feed only tracks a file name.
+		// Reduce either to a plain identifier and let FeedInterface::delete() validate it and confine the
+		// deletion to the feed directory, so a tampered path read back from the option can never escape it.
+		$identifier = ! empty( $status['file_name'] )
+			? (string) $status['file_name']
+			: ( ! empty( $status['path'] ) ? wp_basename( (string) $status['path'] ) : '' );
 
-		// Legacy completed feeds stored only a full path. Delete it solely if it resolves to a file inside
-		// the feed directory, never an arbitrary path read back from the persisted option.
-		if ( ! empty( $status['path'] ) && $this->is_within_feed_dir( (string) $status['path'] ) ) {
-			wp_delete_file( (string) $status['path'] );
+		if ( '' !== $identifier ) {
+			$this->integration->create_feed()->delete( $identifier );
 		}
-	}
-
-	/**
-	 * Determines whether a path resolves to a file inside the product-feed upload directory.
-	 *
-	 * Guards deletions that fall back to a raw path persisted in the status option, so a corrupted or
-	 * tampered value can never remove a file outside the feed directory.
-	 *
-	 * @param string $path The absolute file path to check.
-	 * @return bool True if the path is inside the feed upload directory.
-	 */
-	private function is_within_feed_dir( string $path ): bool {
-		$upload_dir = wp_upload_dir( null, false );
-		if ( empty( $upload_dir['basedir'] ) ) {
-			return false;
-		}
-
-		$feed_dir  = realpath( $upload_dir['basedir'] . DIRECTORY_SEPARATOR . JsonFileFeed::UPLOAD_DIR );
-		$real_path = realpath( $path );
-		if ( false === $feed_dir || false === $real_path ) {
-			return false;
-		}
-
-		return 0 === strpos( $real_path, $feed_dir . DIRECTORY_SEPARATOR );
 	}
 
 	/**
@@ -612,9 +596,9 @@ class AsyncGenerator {
 	 * @return bool         True if the status is valid, false otherwise.
 	 */
 	private function validate_status( array $status ): bool {
-		// A failed job is terminal but not something the client should have to recover from: treat it as
-		// invalid so a status poll discards the partial feed and starts a fresh generation, the same way
-		// stuck and expired jobs are handled.
+		// A failed job is never served as-is. get_status() surfaces the failure to the client once and
+		// then clears it, so the client can react and its next poll starts a fresh run; force_regeneration()
+		// likewise treats it as invalid and regenerates. Either way it must not validate.
 		if ( self::STATE_FAILED === $status['state'] ) {
 			return false;
 		}
@@ -664,11 +648,21 @@ class AsyncGenerator {
 			 * Allows the heartbeat timeout for an `in_progress` feed to be changed. Past this point the
 			 * job is treated as stuck and regenerated.
 			 *
+			 * The default is kept comfortably larger than the per-batch time budget on purpose. The
+			 * heartbeat only refreshes between batches, so the longest gap a healthy job can produce is
+			 * roughly one batch (`woocommerce_product_feed_batch_time_limit`). A timeout at or near that
+			 * budget would let a single slow-but-valid batch look stuck, and recovery would then discard
+			 * the partial the live process is still writing. Deriving it as a multiple (with a floor)
+			 * keeps that margin even when the batch budget is raised via its own filter.
+			 *
 			 * @param int $stuck_time The stuck time in seconds.
 			 * @return int The stuck time in seconds.
 			 * @since 11.0.0
 			 */
-			$in_progress_timeout = apply_filters( 'woocommerce_product_feed_in_progress_timeout', 5 * MINUTE_IN_SECONDS );
+			$in_progress_timeout = apply_filters(
+				'woocommerce_product_feed_in_progress_timeout',
+				max( 15 * MINUTE_IN_SECONDS, 3 * $this->get_batch_time_limit() )
+			);
 			if ( time() - $last_activity > $in_progress_timeout ) {
 				return false;
 			}

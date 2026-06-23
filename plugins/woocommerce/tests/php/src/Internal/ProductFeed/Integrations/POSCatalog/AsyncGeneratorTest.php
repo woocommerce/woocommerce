@@ -148,8 +148,8 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that validate_status treats a failed job as invalid, so a status poll regenerates it
-	 * from scratch rather than leaving the client stuck on a terminal failure.
+	 * Test that validate_status treats a failed job as invalid, so a status poll surfaces the failure
+	 * and clears it rather than serving a terminal failure as a valid status.
 	 */
 	public function test_validate_status_returns_false_for_failed_feed() {
 		$status = array(
@@ -162,6 +162,52 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$method->setAccessible( true );
 
 		$this->assertFalse( $method->invoke( $this->sut, $status ) );
+	}
+
+	/**
+	 * @testdox Should surface a failed status to the client once, discard its partial feed, and clear it so the next poll starts fresh.
+	 */
+	public function test_get_status_surfaces_failed_then_clears_so_next_poll_restarts() {
+		$this->mock_integration->method( 'create_feed' )->willReturnCallback(
+			fn() => new JsonFileFeed( 'pos-catalog-feed-test' )
+		);
+
+		// A real partial feed file the failed status points at, so we can prove it is discarded.
+		$partial    = new JsonFileFeed( 'pos-catalog-feed-test' );
+		$identifier = $partial->start();
+		$partial->flush();
+		$partial_path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier;
+		$this->assertTrue( file_exists( $partial_path ) );
+
+		$key_method = ( new ReflectionClass( $this->sut ) )->getMethod( 'get_option_key' );
+		$key_method->setAccessible( true );
+		$option_key = $key_method->invoke( $this->sut, array() );
+
+		update_option(
+			$option_key,
+			array(
+				'state'     => AsyncGenerator::STATE_FAILED,
+				'error'     => 'Something went wrong',
+				'failed_at' => time(),
+				'file_name' => $identifier,
+			)
+		);
+
+		// The first poll surfaces the failure (with its error) to the client...
+		$status = $this->sut->get_status( array() );
+		$this->assertSame( AsyncGenerator::STATE_FAILED, $status['state'] );
+		$this->assertSame( 'Something went wrong', $status['error'] );
+
+		// ...and clears the stored status and the partial feed file.
+		$this->assertFalse( get_option( $option_key ), 'A failed poll should clear the stored status.' );
+		$this->assertFalse( file_exists( $partial_path ), 'A failed poll should discard the partial feed file.' );
+
+		// The next poll then starts a fresh generation.
+		$status = $this->sut->get_status( array() );
+		$this->assertSame( AsyncGenerator::STATE_SCHEDULED, $status['state'] );
+
+		as_unschedule_all_actions( AsyncGenerator::FEED_GENERATION_ACTION, array(), 'woo-product-feed' );
+		delete_option( $option_key );
 	}
 
 	/**
@@ -233,6 +279,51 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		add_filter( 'woocommerce_product_feed_in_progress_timeout', $callback );
 		$this->assertFalse( $method->invoke( $this->sut, $status ) );
 		remove_filter( 'woocommerce_product_feed_in_progress_timeout', $callback );
+	}
+
+	/**
+	 * @testdox Should keep an in-progress job valid when its heartbeat is older than one batch budget but within the stuck timeout, so a slow batch is not mistaken for stuck.
+	 */
+	public function test_validate_status_keeps_slow_but_valid_in_progress_feed_within_stuck_timeout() {
+		// A heartbeat older than the 5-minute per-batch budget (so it would trip a timeout set at that
+		// budget) but well within the derived stuck timeout, mirroring one slow-but-valid batch.
+		$status = array(
+			'state'        => AsyncGenerator::STATE_IN_PROGRESS,
+			'scheduled_at' => time() - 10 * MINUTE_IN_SECONDS,
+			'updated_at'   => time() - 6 * MINUTE_IN_SECONDS,
+		);
+
+		$method = ( new ReflectionClass( $this->sut ) )->getMethod( 'validate_status' );
+		$method->setAccessible( true );
+
+		$this->assertTrue(
+			$method->invoke( $this->sut, $status ),
+			'A heartbeat within the stuck timeout (but older than one batch budget) must not be treated as stuck.'
+		);
+	}
+
+	/**
+	 * @testdox Should scale the stuck timeout with the batch time limit so raising the batch budget keeps the safety margin.
+	 */
+	public function test_validate_status_stuck_timeout_scales_with_batch_time_limit() {
+		$status = array(
+			'state'        => AsyncGenerator::STATE_IN_PROGRESS,
+			'scheduled_at' => time() - 40 * MINUTE_IN_SECONDS,
+			'updated_at'   => time() - 30 * MINUTE_IN_SECONDS,
+		);
+
+		$method = ( new ReflectionClass( $this->sut ) )->getMethod( 'validate_status' );
+		$method->setAccessible( true );
+
+		// With the default batch budget the 30-minute-old heartbeat is past the derived stuck timeout...
+		$this->assertFalse( $method->invoke( $this->sut, $status ) );
+
+		// ...but raising the per-batch budget raises the derived stuck timeout (3x) with it, so the same
+		// heartbeat is no longer considered stuck.
+		$callback = fn() => 20 * MINUTE_IN_SECONDS;
+		add_filter( 'woocommerce_product_feed_batch_time_limit', $callback );
+		$this->assertTrue( $method->invoke( $this->sut, $status ) );
+		remove_filter( 'woocommerce_product_feed_batch_time_limit', $callback );
 	}
 
 	/**
@@ -556,8 +647,8 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test that a continuation whose partial feed file has vanished fails rather than appending to a
-	 * non-existent file, and that the next status poll transparently restarts generation from scratch
-	 * (the server owns recovery; the client never has to act on a failed status).
+	 * non-existent file, that the next status poll surfaces the failure to the client and clears it,
+	 * and that the poll after that starts a fresh generation.
 	 */
 	public function test_feed_generation_fails_when_partial_file_missing() {
 		add_filter( 'woocommerce_product_feed_batch_size', fn() => 1 );
@@ -589,7 +680,12 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$this->sut->feed_generation_action( $option_key );
 		$this->assertSame( AsyncGenerator::STATE_FAILED, get_option( $option_key )['state'] );
 
-		// Polling the failed job restarts it fresh, without the client forcing regeneration.
+		// The first poll surfaces the failure to the client and clears the stored status.
+		$status = $this->sut->get_status( array() );
+		$this->assertSame( AsyncGenerator::STATE_FAILED, $status['state'] );
+		$this->assertFalse( get_option( $option_key ) );
+
+		// The next poll then starts a fresh generation.
 		$status = $this->sut->get_status( array() );
 		$this->assertSame( AsyncGenerator::STATE_SCHEDULED, $status['state'] );
 		$this->assertSame( 0, $status['processed'] );
