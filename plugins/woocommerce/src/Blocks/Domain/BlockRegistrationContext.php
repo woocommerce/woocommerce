@@ -60,7 +60,54 @@ class BlockRegistrationContext {
 			return false;
 		}
 
+		// WooCommerce's own admin pages (Settings, Status, Analytics, Orders, ...) render no blocks. Core admin
+		// screens and the block/site editor are intentionally left registering.
+		if ( $this->is_woocommerce_admin_page() ) {
+			return false;
+		}
+
 		return true;
+	}
+
+	/**
+	 * Whether the request targets a WooCommerce-owned admin page (admin.php?page=wc-*).
+	 *
+	 * These are WooCommerce's own settings/status/analytics screens, which render no blocks. Only WooCommerce's
+	 * own pages are matched; core admin screens and the block/site editor are left registering. $pagenow is set
+	 * in wp-includes/vars.php before the plugins_loaded action, so it is available here.
+	 *
+	 * @return bool
+	 */
+	private function is_woocommerce_admin_page(): bool {
+		if ( ! is_admin() ) {
+			return false;
+		}
+
+		global $pagenow;
+		if ( 'admin.php' !== $pagenow ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the page slug only, no state change.
+		if ( ! isset( $_GET['page'] ) || ! is_string( $_GET['page'] ) ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the page slug only, no state change.
+		$page = sanitize_key( wp_unslash( $_GET['page'] ) );
+
+		// WooCommerce-owned admin page slugs. The WooCommerce Admin SPA (home, analytics, marketing) all use the
+		// wc-admin slug with a path query parameter.
+		$woocommerce_pages = array(
+			'wc-admin',
+			'wc-settings',
+			'wc-orders',
+			'wc-reports',
+			'wc-status',
+			'wc-addons',
+		);
+
+		return in_array( $page, $woocommerce_pages, true );
 	}
 
 	/**

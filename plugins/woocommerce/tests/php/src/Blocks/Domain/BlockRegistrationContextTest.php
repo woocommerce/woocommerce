@@ -26,12 +26,20 @@ class BlockRegistrationContextTest extends WC_Unit_Test_Case {
 	private string $original_uri;
 
 	/**
+	 * The original $pagenow, restored after each test.
+	 *
+	 * @var string
+	 */
+	private string $original_pagenow;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut          = new BlockRegistrationContext();
-		$this->original_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$this->sut              = new BlockRegistrationContext();
+		$this->original_uri     = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$this->original_pagenow = $GLOBALS['pagenow'] ?? '';
 	}
 
 	/**
@@ -39,8 +47,25 @@ class BlockRegistrationContextTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$_SERVER['REQUEST_URI'] = $this->original_uri;
-		unset( $_GET['rest_route'], $_GET['wc-ajax'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$GLOBALS['pagenow']     = $this->original_pagenow; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		unset( $_GET['rest_route'], $_GET['wc-ajax'], $_GET['page'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		set_current_screen( 'front' );
 		parent::tearDown();
+	}
+
+	/**
+	 * Simulate an admin page request: make is_admin() true and set $pagenow / the page query var.
+	 *
+	 * @param string $screen_id The admin screen id to set as current.
+	 * @param string $pagenow   The $pagenow value to simulate.
+	 * @param string $page      The ?page= query value to simulate (empty to leave unset).
+	 */
+	private function simulate_admin_page( string $screen_id, string $pagenow, string $page = '' ): void {
+		set_current_screen( $screen_id );
+		$GLOBALS['pagenow'] = $pagenow; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		if ( '' !== $page ) {
+			$_GET['page'] = $page;
+		}
 	}
 
 	/**
@@ -110,6 +135,64 @@ class BlockRegistrationContextTest extends WC_Unit_Test_Case {
 
 			'wc-ajax (add to cart)'        => array( '/?wc-ajax=add_to_cart', null, 'add_to_cart', false ),
 			'wc-ajax (empty value)'        => array( '/?wc-ajax=', null, '', true ),
+		);
+	}
+
+	/**
+	 * @testdox Should not register on a WooCommerce admin page (admin.php?page=wc-*).
+	 * @dataProvider woocommerce_admin_page_provider
+	 *
+	 * @param string $page The ?page= query value for the WooCommerce admin screen.
+	 */
+	public function test_should_not_register_on_woocommerce_admin_page( string $page ): void {
+		$_SERVER['REQUEST_URI'] = '/wp-admin/admin.php?page=' . $page;
+		$this->simulate_admin_page( 'woocommerce_page_' . $page, 'admin.php', $page );
+
+		$this->assertFalse(
+			$this->sut->should_register(),
+			sprintf( 'A WooCommerce admin page (page=%s) should not register blocks.', $page )
+		);
+	}
+
+	/**
+	 * Data provider for WooCommerce admin pages.
+	 *
+	 * @return array<string, array{0:string}>
+	 */
+	public function woocommerce_admin_page_provider(): array {
+		return array(
+			'wc-admin'    => array( 'wc-admin' ),
+			'wc-settings' => array( 'wc-settings' ),
+			'wc-orders'   => array( 'wc-orders' ),
+			'wc-reports'  => array( 'wc-reports' ),
+			'wc-status'   => array( 'wc-status' ),
+			'wc-addons'   => array( 'wc-addons' ),
+		);
+	}
+
+	/**
+	 * @testdox Should still register on a non-WooCommerce admin page.
+	 */
+	public function test_should_register_on_non_woocommerce_admin_page(): void {
+		$_SERVER['REQUEST_URI'] = '/wp-admin/admin.php?page=some-other-plugin';
+		$this->simulate_admin_page( 'toplevel_page_some-other-plugin', 'admin.php', 'some-other-plugin' );
+
+		$this->assertTrue(
+			$this->sut->should_register(),
+			'A non-WooCommerce admin page should still register blocks.'
+		);
+	}
+
+	/**
+	 * @testdox Should still register on the block editor screen.
+	 */
+	public function test_should_register_on_block_editor_screen(): void {
+		$_SERVER['REQUEST_URI'] = '/wp-admin/post-new.php';
+		$this->simulate_admin_page( 'post', 'post-new.php' );
+
+		$this->assertTrue(
+			$this->sut->should_register(),
+			'The block editor screen should still register blocks.'
 		);
 	}
 }
