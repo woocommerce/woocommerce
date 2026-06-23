@@ -405,7 +405,7 @@ final class Contract {
 		// this engine's flows, and these fields drive money and scheduling math. A
 		// corrupted cycle_count or schedule_source is rejected loudly here rather
 		// than silently mis-charging a renewal or mis-routing the schedule.
-		$cycle_count = self::coerce_nullable_int( $row['cycle_count'] ?? 0 );
+		$cycle_count = self::coerce_nullable_int( $row['cycle_count'] ?? null );
 		if ( null === $cycle_count ) {
 			throw new DomainException(
 				sprintf( 'Contract: stored cycle_count must be an integer, got %s.', gettype( $row['cycle_count'] ?? null ) )
