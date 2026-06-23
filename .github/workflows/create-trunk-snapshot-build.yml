@@ -3,6 +3,7 @@ on:
     workflow_dispatch:
 
 env:
+    ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
     SOURCE_REF: trunk
     TARGET_REF: trunk-snapshot
     RELEASE_ID: 256718410

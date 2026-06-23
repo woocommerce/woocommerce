@@ -47,13 +47,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+              class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-11"
               >
                 Search for items
@@ -77,13 +77,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
               tabindex="0"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -114,13 +114,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
               for="search-list-item-11-5"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -152,13 +152,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
               for="search-list-item-11-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -207,13 +207,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+            class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-11"
             >
               Search for items
@@ -237,13 +237,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
             tabindex="0"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -274,13 +274,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
             for="search-list-item-11-5"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -312,13 +312,13 @@ exports[`SearchListControl should render a search box and list of hierarchical o
             for="search-list-item-11-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -448,13 +448,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+              class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-0"
               >
                 Search for items
@@ -477,13 +477,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
               for="search-list-item-0-1"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -515,13 +515,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
               for="search-list-item-0-2"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -553,13 +553,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
               for="search-list-item-0-3"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -591,13 +591,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
               for="search-list-item-0-4"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -629,13 +629,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
               for="search-list-item-0-5"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -667,13 +667,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
               for="search-list-item-0-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -722,13 +722,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+            class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-0"
             >
               Search for items
@@ -751,13 +751,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
             for="search-list-item-0-1"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -789,13 +789,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
             for="search-list-item-0-2"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -827,13 +827,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
             for="search-list-item-0-3"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -865,13 +865,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
             for="search-list-item-0-4"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -903,13 +903,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
             for="search-list-item-0-5"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -941,13 +941,13 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
             for="search-list-item-0-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -1077,13 +1077,13 @@ exports[`SearchListControl should render a search box and list of options with a
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+              class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-1"
               >
                 Search for items
@@ -1106,13 +1106,13 @@ exports[`SearchListControl should render a search box and list of options with a
               for="search-list-item-1-1"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -1144,13 +1144,13 @@ exports[`SearchListControl should render a search box and list of options with a
               for="search-list-item-1-2"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -1182,13 +1182,13 @@ exports[`SearchListControl should render a search box and list of options with a
               for="search-list-item-1-3"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -1220,13 +1220,13 @@ exports[`SearchListControl should render a search box and list of options with a
               for="search-list-item-1-4"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -1258,13 +1258,13 @@ exports[`SearchListControl should render a search box and list of options with a
               for="search-list-item-1-5"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -1296,13 +1296,13 @@ exports[`SearchListControl should render a search box and list of options with a
               for="search-list-item-1-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -1351,13 +1351,13 @@ exports[`SearchListControl should render a search box and list of options with a
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+            class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-1"
             >
               Search for items
@@ -1380,13 +1380,13 @@ exports[`SearchListControl should render a search box and list of options with a
             for="search-list-item-1-1"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -1418,13 +1418,13 @@ exports[`SearchListControl should render a search box and list of options with a
             for="search-list-item-1-2"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -1456,13 +1456,13 @@ exports[`SearchListControl should render a search box and list of options with a
             for="search-list-item-1-3"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -1494,13 +1494,13 @@ exports[`SearchListControl should render a search box and list of options with a
             for="search-list-item-1-4"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -1532,13 +1532,13 @@ exports[`SearchListControl should render a search box and list of options with a
             for="search-list-item-1-5"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -1570,13 +1570,13 @@ exports[`SearchListControl should render a search box and list of options with a
             for="search-list-item-1-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -1706,13 +1706,13 @@ exports[`SearchListControl should render a search box and list of options, with 
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+              class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-10"
               >
                 Search for items
@@ -1788,13 +1788,13 @@ exports[`SearchListControl should render a search box and list of options, with 
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+            class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-10"
             >
               Search for items
@@ -1951,13 +1951,13 @@ exports[`SearchListControl should render a search box and list of options, with 
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+              class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-9"
               >
                 Testing search label
@@ -1980,13 +1980,13 @@ exports[`SearchListControl should render a search box and list of options, with 
               for="search-list-item-9-1"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -2018,13 +2018,13 @@ exports[`SearchListControl should render a search box and list of options, with 
               for="search-list-item-9-2"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -2056,13 +2056,13 @@ exports[`SearchListControl should render a search box and list of options, with 
               for="search-list-item-9-3"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -2094,13 +2094,13 @@ exports[`SearchListControl should render a search box and list of options, with 
               for="search-list-item-9-4"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -2132,13 +2132,13 @@ exports[`SearchListControl should render a search box and list of options, with 
               for="search-list-item-9-5"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -2170,13 +2170,13 @@ exports[`SearchListControl should render a search box and list of options, with 
               for="search-list-item-9-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -2225,13 +2225,13 @@ exports[`SearchListControl should render a search box and list of options, with 
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+            class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-9"
             >
               Testing search label
@@ -2254,13 +2254,13 @@ exports[`SearchListControl should render a search box and list of options, with 
             for="search-list-item-9-1"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -2292,13 +2292,13 @@ exports[`SearchListControl should render a search box and list of options, with 
             for="search-list-item-9-2"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -2330,13 +2330,13 @@ exports[`SearchListControl should render a search box and list of options, with 
             for="search-list-item-9-3"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -2368,13 +2368,13 @@ exports[`SearchListControl should render a search box and list of options, with 
             for="search-list-item-9-4"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -2406,13 +2406,13 @@ exports[`SearchListControl should render a search box and list of options, with 
             for="search-list-item-9-5"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -2444,13 +2444,13 @@ exports[`SearchListControl should render a search box and list of options, with 
             for="search-list-item-9-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -2580,13 +2580,13 @@ exports[`SearchListControl should render a search box and no options 1`] = `
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+              class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-4"
               >
                 Search for items
@@ -2650,13 +2650,13 @@ exports[`SearchListControl should render a search box and no options 1`] = `
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+            class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-4"
             >
               Search for items
@@ -2801,13 +2801,13 @@ exports[`SearchListControl should render a search box with a search term, and no
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+              class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-8"
               >
                 Search for items
@@ -2830,13 +2830,13 @@ exports[`SearchListControl should render a search box with a search term, and no
               for="search-list-item-8-1"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -2868,13 +2868,13 @@ exports[`SearchListControl should render a search box with a search term, and no
               for="search-list-item-8-2"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -2906,13 +2906,13 @@ exports[`SearchListControl should render a search box with a search term, and no
               for="search-list-item-8-3"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -2944,13 +2944,13 @@ exports[`SearchListControl should render a search box with a search term, and no
               for="search-list-item-8-4"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -2982,13 +2982,13 @@ exports[`SearchListControl should render a search box with a search term, and no
               for="search-list-item-8-5"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -3020,13 +3020,13 @@ exports[`SearchListControl should render a search box with a search term, and no
               for="search-list-item-8-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -3075,13 +3075,13 @@ exports[`SearchListControl should render a search box with a search term, and no
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+            class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-8"
             >
               Search for items
@@ -3104,13 +3104,13 @@ exports[`SearchListControl should render a search box with a search term, and no
             for="search-list-item-8-1"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -3142,13 +3142,13 @@ exports[`SearchListControl should render a search box with a search term, and no
             for="search-list-item-8-2"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -3180,13 +3180,13 @@ exports[`SearchListControl should render a search box with a search term, and no
             for="search-list-item-8-3"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -3218,13 +3218,13 @@ exports[`SearchListControl should render a search box with a search term, and no
             for="search-list-item-8-4"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -3256,13 +3256,13 @@ exports[`SearchListControl should render a search box with a search term, and no
             for="search-list-item-8-5"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -3294,13 +3294,13 @@ exports[`SearchListControl should render a search box with a search term, and no
             for="search-list-item-8-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -3430,13 +3430,13 @@ exports[`SearchListControl should render a search box with a search term, and on
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+              class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-5"
               >
                 Search for items
@@ -3459,13 +3459,13 @@ exports[`SearchListControl should render a search box with a search term, and on
               for="search-list-item-5-1"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -3497,13 +3497,13 @@ exports[`SearchListControl should render a search box with a search term, and on
               for="search-list-item-5-2"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -3535,13 +3535,13 @@ exports[`SearchListControl should render a search box with a search term, and on
               for="search-list-item-5-3"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -3573,13 +3573,13 @@ exports[`SearchListControl should render a search box with a search term, and on
               for="search-list-item-5-4"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -3611,13 +3611,13 @@ exports[`SearchListControl should render a search box with a search term, and on
               for="search-list-item-5-5"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -3649,13 +3649,13 @@ exports[`SearchListControl should render a search box with a search term, and on
               for="search-list-item-5-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -3704,13 +3704,13 @@ exports[`SearchListControl should render a search box with a search term, and on
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+            class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-5"
             >
               Search for items
@@ -3733,13 +3733,13 @@ exports[`SearchListControl should render a search box with a search term, and on
             for="search-list-item-5-1"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -3771,13 +3771,13 @@ exports[`SearchListControl should render a search box with a search term, and on
             for="search-list-item-5-2"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -3809,13 +3809,13 @@ exports[`SearchListControl should render a search box with a search term, and on
             for="search-list-item-5-3"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -3847,13 +3847,13 @@ exports[`SearchListControl should render a search box with a search term, and on
             for="search-list-item-5-4"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -3885,13 +3885,13 @@ exports[`SearchListControl should render a search box with a search term, and on
             for="search-list-item-5-5"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -3923,13 +3923,13 @@ exports[`SearchListControl should render a search box with a search term, and on
             for="search-list-item-5-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -4059,13 +4059,13 @@ exports[`SearchListControl should render a search box with a search term, and on
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+              class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-6"
               >
                 Search for items
@@ -4088,13 +4088,13 @@ exports[`SearchListControl should render a search box with a search term, and on
               for="search-list-item-6-3"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -4129,13 +4129,13 @@ exports[`SearchListControl should render a search box with a search term, and on
               for="search-list-item-6-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -4187,13 +4187,13 @@ exports[`SearchListControl should render a search box with a search term, and on
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+            class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-6"
             >
               Search for items
@@ -4216,13 +4216,13 @@ exports[`SearchListControl should render a search box with a search term, and on
             for="search-list-item-6-3"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -4257,13 +4257,13 @@ exports[`SearchListControl should render a search box with a search term, and on
             for="search-list-item-6-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -4435,7 +4435,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21ZM15.5303 8.46967C15.8232 8.76256 15.8232 9.23744 15.5303 9.53033L13.0607 12L15.5303 14.4697C15.8232 14.7626 15.8232 15.2374 15.5303 15.5303C15.2374 15.8232 14.7626 15.8232 14.4697 15.5303L12 13.0607L9.53033 15.5303C9.23744 15.8232 8.76256 15.8232 8.46967 15.5303C8.17678 15.2374 8.17678 14.7626 8.46967 14.4697L10.9393 12L8.46967 9.53033C8.17678 9.23744 8.17678 8.76256 8.46967 8.46967C8.76256 8.17678 9.23744 8.17678 9.53033 8.46967L12 10.9393L14.4697 8.46967C14.7626 8.17678 15.2374 8.17678 15.5303 8.46967Z"
+                      d="M12 4c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8Zm3.8 10.7-1.1 1.1-2.7-2.7-2.7 2.7-1.1-1.1 2.7-2.7-2.7-2.7 1.1-1.1 2.7 2.7 2.7-2.7 1.1 1.1-2.7 2.7 2.7 2.7Z"
                     />
                   </svg>
                 </button>
@@ -4447,13 +4447,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+              class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-2"
               >
                 Search for items
@@ -4476,13 +4476,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
               for="search-list-item-2-1"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -4514,13 +4514,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
               for="search-list-item-2-2"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -4546,7 +4546,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
-                          d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
+                          d="M16.5 7.5 10 13.9l-2.5-2.4-1 1 3.5 3.6 7.5-7.6z"
                         />
                       </svg>
                     </span>
@@ -4567,13 +4567,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
               for="search-list-item-2-3"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -4605,13 +4605,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
               for="search-list-item-2-4"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -4643,13 +4643,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
               for="search-list-item-2-5"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -4681,13 +4681,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
               for="search-list-item-2-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -4775,7 +4775,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21ZM15.5303 8.46967C15.8232 8.76256 15.8232 9.23744 15.5303 9.53033L13.0607 12L15.5303 14.4697C15.8232 14.7626 15.8232 15.2374 15.5303 15.5303C15.2374 15.8232 14.7626 15.8232 14.4697 15.5303L12 13.0607L9.53033 15.5303C9.23744 15.8232 8.76256 15.8232 8.46967 15.5303C8.17678 15.2374 8.17678 14.7626 8.46967 14.4697L10.9393 12L8.46967 9.53033C8.17678 9.23744 8.17678 8.76256 8.46967 8.46967C8.76256 8.17678 9.23744 8.17678 9.53033 8.46967L12 10.9393L14.4697 8.46967C14.7626 8.17678 15.2374 8.17678 15.5303 8.46967Z"
+                    d="M12 4c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8Zm3.8 10.7-1.1 1.1-2.7-2.7-2.7 2.7-1.1-1.1 2.7-2.7-2.7-2.7 1.1-1.1 2.7 2.7 2.7-2.7 1.1 1.1-2.7 2.7 2.7 2.7Z"
                   />
                 </svg>
               </button>
@@ -4787,13 +4787,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+            class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-2"
             >
               Search for items
@@ -4816,13 +4816,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
             for="search-list-item-2-1"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -4854,13 +4854,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
             for="search-list-item-2-2"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -4886,7 +4886,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
+                        d="M16.5 7.5 10 13.9l-2.5-2.4-1 1 3.5 3.6 7.5-7.6z"
                       />
                     </svg>
                   </span>
@@ -4907,13 +4907,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
             for="search-list-item-2-3"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -4945,13 +4945,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
             for="search-list-item-2-4"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -4983,13 +4983,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
             for="search-list-item-2-5"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -5021,13 +5021,13 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
             for="search-list-item-2-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -5196,7 +5196,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21ZM15.5303 8.46967C15.8232 8.76256 15.8232 9.23744 15.5303 9.53033L13.0607 12L15.5303 14.4697C15.8232 14.7626 15.8232 15.2374 15.5303 15.5303C15.2374 15.8232 14.7626 15.8232 14.4697 15.5303L12 13.0607L9.53033 15.5303C9.23744 15.8232 8.76256 15.8232 8.46967 15.5303C8.17678 15.2374 8.17678 14.7626 8.46967 14.4697L10.9393 12L8.46967 9.53033C8.17678 9.23744 8.17678 8.76256 8.46967 8.46967C8.76256 8.17678 9.23744 8.17678 9.53033 8.46967L12 10.9393L14.4697 8.46967C14.7626 8.17678 15.2374 8.17678 15.5303 8.46967Z"
+                      d="M12 4c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8Zm3.8 10.7-1.1 1.1-2.7-2.7-2.7 2.7-1.1-1.1 2.7-2.7-2.7-2.7 1.1-1.1 2.7 2.7 2.7-2.7 1.1 1.1-2.7 2.7 2.7 2.7Z"
                     />
                   </svg>
                 </button>
@@ -5238,7 +5238,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21ZM15.5303 8.46967C15.8232 8.76256 15.8232 9.23744 15.5303 9.53033L13.0607 12L15.5303 14.4697C15.8232 14.7626 15.8232 15.2374 15.5303 15.5303C15.2374 15.8232 14.7626 15.8232 14.4697 15.5303L12 13.0607L9.53033 15.5303C9.23744 15.8232 8.76256 15.8232 8.46967 15.5303C8.17678 15.2374 8.17678 14.7626 8.46967 14.4697L10.9393 12L8.46967 9.53033C8.17678 9.23744 8.17678 8.76256 8.46967 8.46967C8.76256 8.17678 9.23744 8.17678 9.53033 8.46967L12 10.9393L14.4697 8.46967C14.7626 8.17678 15.2374 8.17678 15.5303 8.46967Z"
+                      d="M12 4c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8Zm3.8 10.7-1.1 1.1-2.7-2.7-2.7 2.7-1.1-1.1 2.7-2.7-2.7-2.7 1.1-1.1 2.7 2.7 2.7-2.7 1.1 1.1-2.7 2.7 2.7 2.7Z"
                     />
                   </svg>
                 </button>
@@ -5250,13 +5250,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+            class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+              class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
             >
               <label
-                class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+                class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
                 for="inspector-text-control-3"
               >
                 Search for items
@@ -5279,13 +5279,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
               for="search-list-item-3-1"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -5317,13 +5317,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
               for="search-list-item-3-2"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -5349,7 +5349,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
-                          d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
+                          d="M16.5 7.5 10 13.9l-2.5-2.4-1 1 3.5 3.6 7.5-7.6z"
                         />
                       </svg>
                     </span>
@@ -5370,13 +5370,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
               for="search-list-item-3-3"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -5408,13 +5408,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
               for="search-list-item-3-4"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -5440,7 +5440,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
-                          d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
+                          d="M16.5 7.5 10 13.9l-2.5-2.4-1 1 3.5 3.6 7.5-7.6z"
                         />
                       </svg>
                     </span>
@@ -5461,13 +5461,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
               for="search-list-item-3-5"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -5499,13 +5499,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
               for="search-list-item-3-6"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                  class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <div
-                    class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                    class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                     data-wp-c16t="true"
                     data-wp-component="HStack"
                   >
@@ -5593,7 +5593,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21ZM15.5303 8.46967C15.8232 8.76256 15.8232 9.23744 15.5303 9.53033L13.0607 12L15.5303 14.4697C15.8232 14.7626 15.8232 15.2374 15.5303 15.5303C15.2374 15.8232 14.7626 15.8232 14.4697 15.5303L12 13.0607L9.53033 15.5303C9.23744 15.8232 8.76256 15.8232 8.46967 15.5303C8.17678 15.2374 8.17678 14.7626 8.46967 14.4697L10.9393 12L8.46967 9.53033C8.17678 9.23744 8.17678 8.76256 8.46967 8.46967C8.76256 8.17678 9.23744 8.17678 9.53033 8.46967L12 10.9393L14.4697 8.46967C14.7626 8.17678 15.2374 8.17678 15.5303 8.46967Z"
+                    d="M12 4c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8Zm3.8 10.7-1.1 1.1-2.7-2.7-2.7 2.7-1.1-1.1 2.7-2.7-2.7-2.7 1.1-1.1 2.7 2.7 2.7-2.7 1.1 1.1-2.7 2.7 2.7 2.7Z"
                   />
                 </svg>
               </button>
@@ -5635,7 +5635,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21ZM15.5303 8.46967C15.8232 8.76256 15.8232 9.23744 15.5303 9.53033L13.0607 12L15.5303 14.4697C15.8232 14.7626 15.8232 15.2374 15.5303 15.5303C15.2374 15.8232 14.7626 15.8232 14.4697 15.5303L12 13.0607L9.53033 15.5303C9.23744 15.8232 8.76256 15.8232 8.46967 15.5303C8.17678 15.2374 8.17678 14.7626 8.46967 14.4697L10.9393 12L8.46967 9.53033C8.17678 9.23744 8.17678 8.76256 8.46967 8.46967C8.76256 8.17678 9.23744 8.17678 9.53033 8.46967L12 10.9393L14.4697 8.46967C14.7626 8.17678 15.2374 8.17678 15.5303 8.46967Z"
+                    d="M12 4c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8Zm3.8 10.7-1.1 1.1-2.7-2.7-2.7 2.7-1.1-1.1 2.7-2.7-2.7-2.7 1.1-1.1 2.7 2.7 2.7-2.7 1.1 1.1-2.7 2.7 2.7 2.7Z"
                   />
                 </svg>
               </button>
@@ -5647,13 +5647,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+          class="components-base-control css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-2txpkp-StyledField ej5x27r3"
+            class="components-base-control__field css-sa9iwi-StyledField ej5x27r3"
           >
             <label
-              class="components-base-control__label css-1jylnrs-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
+              class="components-base-control__label css-xyu4la-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
               for="inspector-text-control-3"
             >
               Search for items
@@ -5676,13 +5676,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
             for="search-list-item-3-1"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -5714,13 +5714,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
             for="search-list-item-3-2"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -5746,7 +5746,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
+                        d="M16.5 7.5 10 13.9l-2.5-2.4-1 1 3.5 3.6 7.5-7.6z"
                       />
                     </svg>
                   </span>
@@ -5767,13 +5767,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
             for="search-list-item-3-3"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -5805,13 +5805,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
             for="search-list-item-3-4"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -5837,7 +5837,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
+                        d="M16.5 7.5 10 13.9l-2.5-2.4-1 1 3.5 3.6 7.5-7.6z"
                       />
                     </svg>
                   </span>
@@ -5858,13 +5858,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
             for="search-list-item-3-5"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
@@ -5896,13 +5896,13 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
             for="search-list-item-3-6"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-fothu4-Wrapper-boxSizingReset ej5x27r4"
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-1ymh5rp-Wrapper-boxSizingReset ej5x27r4"
             >
               <div
-                class="components-base-control__field css-6ve3yz-StyledField-deprecatedMarginField ej5x27r3"
+                class="components-base-control__field css-1s74ogk-StyledField-deprecatedMarginField ej5x27r3"
               >
                 <div
-                  class="components-flex components-h-stack css-1m5h1bg-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
+                  class="components-flex components-h-stack css-56qjkt-PolymorphicDiv-Flex-base-ItemsRow e19lxcc00"
                   data-wp-c16t="true"
                   data-wp-component="HStack"
                 >
