@@ -10,8 +10,8 @@
  * Description: An about page pattern.
  */
 ?>
-<!-- wp:pattern {"slug":"purple/store-features-three-columns"} /-->
-<!-- wp:pattern {"slug":"purple/left-aligned-text-right-image"} /-->
-<!-- wp:pattern {"slug":"purple/centered-text"} /-->
-<!-- wp:pattern {"slug":"purple/left-aligned-image-right-text"} /-->
+<!-- wp:pattern {"slug":"purple/store-features-three-columns-alternative"} /-->
+<!-- wp:pattern {"slug":"purple/about-left-aligned-text-right-image"} /-->
+<!-- wp:pattern {"slug":"purple/about-centered-text"} /-->
+<!-- wp:pattern {"slug":"purple/about-left-aligned-image-right-text"} /-->
 <!-- wp:pattern {"slug":"purple/about-features-2-columns"} /-->

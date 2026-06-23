@@ -14,8 +14,12 @@ Text Domain: purple
 Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blocks, block-patterns, custom-colors, custom-logo, custom-menu, block-styles, featured-images, full-site-editing, style-variations, template-editing, theme-options, rtl-language-support, sticky-post, threaded-comments, translation-ready
 */
 
-/* Add a transition state for buttons. */
+/* Utility class for underlined links. */
+.underline-link a {
+    text-decoration: underline;
+} 
 
+/* Add a transition state for buttons. */
 .wp-element-button {
     transition: border, background-color, color, box-shadow, opacity, filter;
     transition-duration: 0.15s;

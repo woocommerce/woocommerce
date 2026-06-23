@@ -24,9 +24,6 @@
 
 <!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"left","fontSize":"large","style":{"spacing":{"margin":{"top":"var:preset|spacing|20","left":"0"}},"typography":{"lineHeight":"1.55","fontStyle":"normal"}}} /-->
 
-<!-- wp:spacer {"height":"var:preset|spacing|40"} -->
-<div style="height:var(--wp--preset--spacing--40)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer -->
 <!-- /wp:woocommerce/product-template --></div>
 <!-- /wp:woocommerce/product-collection --></div>
 <!-- /wp:group -->
