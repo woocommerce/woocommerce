@@ -314,14 +314,10 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		}
 
 		$placeholder_attribute = 'data-wc-product-gallery-video-placeholder';
-		$bookmark              = 'woocommerce-product-gallery-large-image-video';
 
-		if ( ! $p->set_bookmark( $bookmark ) ) {
+		if ( ! $p->set_attribute( $placeholder_attribute, '1' ) ) {
 			return $image_html;
 		}
-
-		$p->set_attribute( $placeholder_attribute, '1' );
-		$p->release_bookmark( $bookmark );
 
 		$updated_html      = $p->get_updated_html();
 		$video_html        = ProductGalleryUtils::get_video_html( $attrs );
