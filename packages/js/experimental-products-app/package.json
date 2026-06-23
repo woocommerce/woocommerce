@@ -72,7 +72,7 @@
 		"@wordpress/ui": "next",
 		"@wordpress/theme": "0.12.0",
 		"@wordpress/notices": "5.44.0",
-		"@wordpress/api-fetch": "7.44.0",
+		"@wordpress/api-fetch": "catalog:wp-min",
 		"@wordpress/url": "catalog:wp-min",
 		"@wordpress/base-styles": "6.20.0",
 		"clsx": "2.1.x",
@@ -131,8 +131,7 @@
 		"watch:build:project:esm": "node build.mjs --watch"
 	},
 	"peerDependencies": {
-		"@types/react": "18.3.x",
-		"@wordpress/data": "^10.0.2",
+		"@wordpress/data": "^10.19.0",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"
 	},

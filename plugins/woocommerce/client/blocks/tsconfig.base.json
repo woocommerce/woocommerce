@@ -146,7 +146,7 @@
 				"assets/js/utils"
 			],
 			"@woocommerce/e2e-utils": [
-				"tests/e2e/utils"
+				"../../tests/e2e-pw/utils/blocks"
 			],
 			"@woocommerce/test-utils/msw": [
 				"tests/js/config/msw-setup"

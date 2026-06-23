@@ -15,9 +15,11 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\TaxBasedOn;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\Customers\SearchService as CustomersSearchService;
 use Automattic\WooCommerce\Internal\Orders\PaymentInfo;
+use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
@@ -2070,17 +2072,27 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
+		$tax_rate_objects = wc_get_container()->get( TaxRateDataStore::class )->get_rate_objects_for_ids( array_keys( $cart_taxes + $shipping_taxes ) );
+
 		foreach ( $existing_taxes as $tax ) {
+			$tax_rate_id = $tax->get_rate_id();
 			// Remove taxes which no longer exist for cart/shipping.
-			if ( ( ! array_key_exists( $tax->get_rate_id(), $cart_taxes ) && ! array_key_exists( $tax->get_rate_id(), $shipping_taxes ) ) || in_array( $tax->get_rate_id(), $saved_rate_ids, true ) ) {
+			if ( ( ! array_key_exists( $tax_rate_id, $cart_taxes ) && ! array_key_exists( $tax_rate_id, $shipping_taxes ) ) || in_array( $tax_rate_id, $saved_rate_ids, true ) ) {
 				$this->remove_item( $tax->get_id() );
 				continue;
 			}
-			$saved_rate_ids[] = $tax->get_rate_id();
-			$tax->set_rate( $tax->get_rate_id() );
-			$tax->set_tax_total( isset( $cart_taxes[ $tax->get_rate_id() ] ) ? $cart_taxes[ $tax->get_rate_id() ] : 0 );
-			$tax->set_label( WC_Tax::get_rate_label( $tax->get_rate_id() ) );
-			$tax->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax->get_rate_id() ] ) ? $shipping_taxes[ $tax->get_rate_id() ] : 0 );
+
+			$tax_rate_object_or_id = $tax_rate_objects[ $tax_rate_id ] ?? $tax_rate_id;
+
+			$tax->set_rate_id( $tax_rate_id );
+			$tax->set_rate_code( WC_Tax::get_rate_code( $tax_rate_object_or_id ) );
+			$tax->set_label( WC_Tax::get_rate_label( $tax_rate_object_or_id ) );
+			$tax->set_compound( WC_Tax::is_compound( $tax_rate_object_or_id ) );
+			$tax->set_rate_percent( WC_Tax::get_rate_percent_value( $tax_rate_object_or_id ) );
+			$tax->set_tax_total( $cart_taxes[ $tax_rate_id ] ?? 0 );
+			$tax->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
+
+			$saved_rate_ids[] = $tax_rate_id;
 			$tax->save();
 		}
 
@@ -2088,10 +2100,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// New taxes.
 		foreach ( $new_rate_ids as $tax_rate_id ) {
+			$tax_rate_object_or_id = $tax_rate_objects[ $tax_rate_id ] ?? $tax_rate_id;
+
 			$item = new WC_Order_Item_Tax();
-			$item->set_rate( $tax_rate_id );
-			$item->set_tax_total( isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] : 0 );
+			$item->set_rate_id( $tax_rate_id );
+			$item->set_rate_code( WC_Tax::get_rate_code( $tax_rate_object_or_id ) );
+			$item->set_label( WC_Tax::get_rate_label( $tax_rate_object_or_id ) );
+			$item->set_compound( WC_Tax::is_compound( $tax_rate_object_or_id ) );
+			$item->set_rate_percent( WC_Tax::get_rate_percent_value( $tax_rate_object_or_id ) );
+			$item->set_tax_total( $cart_taxes[ $tax_rate_id ] ?? 0 );
 			$item->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
+
 			$this->add_item( $item );
 		}
 
@@ -2264,15 +2283,26 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Get the items subtotal amount to display in the admin order screen.
 	 *
 	 * For stores with fixed end-prices (prices entered including tax with the
-	 * woocommerce_adjust_non_base_location_prices adjustment disabled), the cart
-	 * tax is removed so the displayed subtotal matches the ex-tax cart display.
+	 * woocommerce_adjust_non_base_location_prices adjustment disabled), the
+	 * line-item subtotal tax is removed so the displayed subtotal matches the
+	 * ex-tax cart display. Only line-item taxes are subtracted, not the fee tax
+	 * that get_cart_tax() would also include.
 	 *
 	 * @return float
 	 */
 	public function get_subtotal_amount_to_display() {
-		return $this->has_fixed_end_prices()
-			? (float) $this->get_subtotal() - (float) $this->get_cart_tax()
-			: (float) $this->get_subtotal();
+		if ( ! $this->has_fixed_end_prices() ) {
+			return (float) $this->get_subtotal();
+		}
+
+		$subtotal_tax = 0;
+		foreach ( $this->get_items() as $item ) {
+			if ( $item instanceof WC_Order_Item_Product ) {
+				$subtotal_tax += self::round_line_tax( (float) $item->get_subtotal_tax(), false );
+			}
+		}
+
+		return (float) $this->get_subtotal() - wc_round_tax_total( $subtotal_tax );
 	}
 
 	/**
@@ -2399,7 +2429,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_formatted_line_subtotal( $item, $tax_display = '' ) {
 		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
 
-		if ( 'excl' === $tax_display ) {
+		if ( TaxDisplayMode::EXCLUSIVE === $tax_display ) {
 			$ex_tax_label = $this->get_prices_include_tax() ? 1 : 0;
 
 			$subtotal = wc_price(
@@ -2439,7 +2469,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( ! $compound ) {
 
-			if ( 'incl' === $tax_display ) {
+			if ( TaxDisplayMode::INCLUSIVE === $tax_display ) {
 				$subtotal_taxes = 0;
 				foreach ( $this->get_items() as $item ) {
 					$subtotal_taxes += self::round_line_tax( (float) $item->get_subtotal_tax(), false );
@@ -2449,11 +2479,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			$subtotal = wc_price( $subtotal, array( 'currency' => $this->get_currency() ) );
 
-			if ( 'excl' === $tax_display && $this->get_prices_include_tax() && wc_tax_enabled() ) {
+			if ( TaxDisplayMode::EXCLUSIVE === $tax_display && $this->get_prices_include_tax() && wc_tax_enabled() ) {
 				$subtotal .= ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
 			}
 		} else {
-			if ( 'incl' === $tax_display ) {
+			if ( TaxDisplayMode::INCLUSIVE === $tax_display ) {
 				return '';
 			}
 
@@ -2487,7 +2517,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( 0 < abs( (float) $this->get_shipping_total() ) ) {
 
-			if ( 'excl' === $tax_display ) {
+			if ( TaxDisplayMode::EXCLUSIVE === $tax_display ) {
 
 				// Show shipping excluding tax.
 				$shipping = wc_price( $this->get_shipping_total(), array( 'currency' => $this->get_currency() ) );
@@ -2532,7 +2562,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 *
 		 * @since 2.7.0.
 		 */
-		return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_total_discount( 'excl' === $tax_display ), array( 'currency' => $this->get_currency() ) ), $this );
+		return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_total_discount( TaxDisplayMode::EXCLUSIVE === $tax_display ), array( 'currency' => $this->get_currency() ) ), $this );
 	}
 
 	/**
@@ -2607,7 +2637,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$total_rows[ 'fee_' . $fee->get_id() ] = array(
 					'type'  => 'fee',
 					'label' => $fee->get_name() . ':',
-					'value' => wc_price( 'excl' === $tax_display ? (float) $fee->get_total() : (float) $fee->get_total() + (float) $fee->get_total_tax(), array( 'currency' => $this->get_currency() ) ),
+					'value' => wc_price( TaxDisplayMode::EXCLUSIVE === $tax_display ? (float) $fee->get_total() : (float) $fee->get_total() + (float) $fee->get_total_tax(), array( 'currency' => $this->get_currency() ) ),
 				);
 			}
 		}
@@ -2622,7 +2652,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	protected function add_order_item_totals_tax_rows( &$total_rows, $tax_display ) {
 		// Tax for tax exclusive prices.
-		if ( 'excl' === $tax_display && wc_tax_enabled() ) {
+		if ( TaxDisplayMode::EXCLUSIVE === $tax_display && wc_tax_enabled() ) {
 			if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) {
 				foreach ( $this->get_tax_totals() as $code => $tax ) {
 					$total_rows[ sanitize_title( $code ) ] = array(

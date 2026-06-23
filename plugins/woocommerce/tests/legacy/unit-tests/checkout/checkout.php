@@ -364,4 +364,59 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 			'The customer-chosen value for an "Any" variation attribute must be persisted on the order line item.'
 		);
 	}
+
+	/**
+	 * @testdox Should not save checkout shipping fields as customer meta.
+	 *
+	 * @throws ReflectionException When unable to reflect the checkout method.
+	 */
+	public function test_process_customer_does_not_save_checkout_shipping_fields_as_customer_meta(): void {
+		$user_id = wp_create_user( 'checkout-shipping-fields-customer', 'password', 'checkout-shipping-fields-customer@example.com' );
+		$this->assertNotWPError( $user_id );
+		wp_set_current_user( $user_id );
+
+		$process_customer = new ReflectionMethod( WC_Checkout::class, 'process_customer' );
+		$process_customer->setAccessible( true );
+		$process_customer->invoke(
+			WC_Checkout::instance(),
+			array(
+				'billing_first_name' => 'Jane',
+				'billing_last_name'  => 'Customer',
+				'billing_email'      => 'checkout-shipping-fields-customer@example.com',
+				'shipping_address_1' => '123 Test Street',
+				'shipping_custom'    => 'custom shipping value',
+				'shipping_method'    => array( 'flat_rate:1' ),
+				'shipping_total'     => '5.00',
+				'shipping_tax'       => '0.50',
+			)
+		);
+
+		$this->assertSame(
+			'123 Test Street',
+			get_user_meta( $user_id, 'shipping_address_1', true ),
+			'Regular shipping address fields should still be saved as customer meta.'
+		);
+		$this->assertSame(
+			'custom shipping value',
+			get_user_meta( $user_id, 'shipping_custom', true ),
+			'Custom shipping fields should still be saved as customer meta.'
+		);
+		$this->assertSame(
+			'',
+			get_user_meta( $user_id, 'shipping_method', true ),
+			'The selected checkout shipping method should not be saved as customer meta.'
+		);
+		$this->assertSame(
+			'',
+			get_user_meta( $user_id, 'shipping_total', true ),
+			'Checkout shipping totals should not be saved as customer meta.'
+		);
+		$this->assertSame(
+			'',
+			get_user_meta( $user_id, 'shipping_tax', true ),
+			'Checkout shipping taxes should not be saved as customer meta.'
+		);
+
+		wp_set_current_user( 0 );
+	}
 }

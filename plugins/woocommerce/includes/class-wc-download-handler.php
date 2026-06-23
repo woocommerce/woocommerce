@@ -10,6 +10,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
+
 /**
  * Download handler class.
  */
@@ -310,9 +312,7 @@ class WC_Download_Handler {
 			);
 		}
 
-		$wp_content_dirname = ( 0 === strpos( WP_CONTENT_DIR, ABSPATH ) )
-			? '/' . substr( WP_CONTENT_DIR, strlen( ABSPATH ) )
-			: '/wp-content';
+		$wp_content_dirname = FilesystemUtil::get_content_directory_relative_path();
 
 		// See if path needs an abspath prepended to work.
 		if ( file_exists( ABSPATH . $file_path ) ) {
