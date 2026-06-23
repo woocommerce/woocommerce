@@ -26,7 +26,7 @@ const list = [
 
 describe( 'SearchListControl', () => {
 	test( 'should render a search box and list of options', () => {
-		render(
+		const component = render(
 			<SearchListControl
 				instanceId={ 1 }
 				list={ list }
@@ -35,9 +35,12 @@ describe( 'SearchListControl', () => {
 			/>
 		);
 
-		// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
-		// opt out of without changing the visual output.
-		expect( console ).toHaveWarned();
+		expect(
+			component.container.querySelector( SELECTORS.searchInput )
+		).toBeInTheDocument();
+		expect(
+			component.container.querySelectorAll( SELECTORS.listItems )
+		).toHaveLength( list.length );
 	} );
 
 	test( 'should render a search box with a search term, and only matching options, regardless of case sensitivity', () => {

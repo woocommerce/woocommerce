@@ -102,10 +102,6 @@ describe( 'Taxonomy Filter block', () => {
 					/Please select a taxonomy to use this filter!/i
 				)
 			).toBeInTheDocument();
-
-			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
-			// opt out of without changing the visual output.
-			expect( console ).toHaveWarned();
 		} );
 
 		test( 'should display taxonomy filter when taxonomy is selected', async () => {

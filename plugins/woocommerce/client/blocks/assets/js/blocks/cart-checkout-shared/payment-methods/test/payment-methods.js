@@ -53,34 +53,31 @@ jest.mock( '@woocommerce/blocks-components', () => {
 
 jest.mock( '@wordpress/data', () => {
 	const originalModule = jest.requireActual( '@wordpress/data' );
-	const originalBlockDataModule = jest.requireActual(
-		'@woocommerce/block-data'
-	);
-	return {
-		...originalModule,
-		select: jest.fn( ( storeDescriptor ) => {
-			const paymentStoreInMock = originalBlockDataModule.paymentStore;
-			const originalStore = originalModule.select( storeDescriptor );
-			if (
-				storeDescriptor === paymentStoreInMock ||
-				storeDescriptor === 'wc/store/payment'
-			) {
-				return {
-					...originalStore,
-					getState: () => {
-						const originalState = originalStore.getState();
-						return {
-							...originalState,
-							savedPaymentMethods: {},
-							availablePaymentMethods: {},
-							paymentMethodsInitialized: true,
-						};
-					},
-				};
-			}
-			return originalStore;
-		} ),
-	};
+	return jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData( {
+			select: jest.fn( ( storeDescriptor ) => {
+				const originalStore = originalModule.select( storeDescriptor );
+				if (
+					storeDescriptor === 'wc/store/payment' ||
+					storeDescriptor?.name === 'wc/store/payment'
+				) {
+					return {
+						...originalStore,
+						getState: () => {
+							const originalState = originalStore.getState();
+							return {
+								...originalState,
+								savedPaymentMethods: {},
+								availablePaymentMethods: {},
+								paymentMethodsInitialized: true,
+							};
+						},
+					};
+				}
+				return originalStore;
+			} ),
+		} );
 } );
 
 const registerMockPaymentMethodsByName = ( names ) => {

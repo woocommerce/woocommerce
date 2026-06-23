@@ -18,9 +18,13 @@ import type {
 import CustomerAddress from '../customer-address';
 
 // Mock all the data dependencies
-jest.mock( '@wordpress/data', () => ( {
-	useSelect: jest.fn(),
-} ) );
+jest.mock( '@wordpress/data', () =>
+	jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData( {
+			useSelect: jest.fn(),
+		} )
+);
 
 jest.mock( '@woocommerce/block-data', () => ( {
 	validationStore: 'wc/store/validation',

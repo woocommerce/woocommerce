@@ -47,6 +47,10 @@ const singletonWpModules = [
 	'@wordpress/rich-text',
 	'@wordpress/notices',
 ];
+const virtualMockedWpModules = [
+	'@wordpress/interactivity',
+	'@wordpress/interactivity-router',
+];
 
 // Compatibility runs need every mapped WordPress package and its singleton
 // dependencies to come from the selected compatibility cache.
@@ -167,12 +171,28 @@ const config = {
 	testEnvironment: 'jest-fixed-jsdom',
 };
 
+const removeVirtualMockedWpModuleMappers = ( jestConfig ) => {
+	return {
+		...jestConfig,
+		moduleNameMapper: Object.fromEntries(
+			Object.entries( jestConfig.moduleNameMapper ).filter(
+				( [ pattern ] ) =>
+					! virtualMockedWpModules.some(
+						( moduleName ) => pattern === `^${ moduleName }$`
+					)
+			)
+		),
+	};
+};
+
 // TODO: Migrate this custom Jest config to @woocommerce/internal-js-tests/jest-preset.js.
 if ( process.env.WP_VERSION ) {
-	module.exports = withWordPressDependencyCompat( config, {
-		cwd: rootDir,
-		wpVersion: process.env.WP_VERSION,
-	} );
+	module.exports = removeVirtualMockedWpModuleMappers(
+		withWordPressDependencyCompat( config, {
+			cwd: rootDir,
+			wpVersion: process.env.WP_VERSION,
+		} )
+	);
 } else {
 	if ( process.env.CI ) {
 		throw new Error( missingWpVersionMessage );

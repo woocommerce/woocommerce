@@ -26,12 +26,14 @@ jest.mock( '@woocommerce/base-context', () => ( {
 	useCheckoutAddress: () => mockUseCheckoutAddress(),
 } ) );
 
-jest.mock( '@wordpress/data', () => ( {
-	__esModule: true,
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-	useDispatch: jest.fn(),
-} ) );
+jest.mock( '@wordpress/data', () =>
+	jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData( {
+			useSelect: jest.fn(),
+			useDispatch: jest.fn(),
+		} )
+);
 
 wpData.useSelect.mockImplementation(
 	jest.fn().mockImplementation( ( passedMapSelect ) => {

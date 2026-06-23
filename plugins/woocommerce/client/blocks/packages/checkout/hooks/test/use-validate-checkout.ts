@@ -31,15 +31,19 @@ jest.mock( '@woocommerce/block-data', () => ( {
 	validationStore: 'wc/store/validation',
 } ) );
 
-jest.mock( '@wordpress/data', () => ( {
-	useDispatch: () => ( {
-		showAllValidationErrors: mockShowAllValidationErrors,
-		setValidationErrors: mockSetValidationErrors,
-	} ),
-	select: () => ( {
-		hasValidationErrors: mockHasValidationErrors,
-	} ),
-} ) );
+jest.mock( '@wordpress/data', () =>
+	jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData( {
+			useDispatch: () => ( {
+				showAllValidationErrors: mockShowAllValidationErrors,
+				setValidationErrors: mockSetValidationErrors,
+			} ),
+			select: () => ( {
+				hasValidationErrors: mockHasValidationErrors,
+			} ),
+		} )
+);
 
 const mockScrollIntoView = jest.fn();
 const mockFocus = jest.fn();

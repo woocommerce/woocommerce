@@ -11,17 +11,17 @@ import { getSetting } from '@woocommerce/settings';
  */
 import { Block } from '../block';
 
-jest.mock( '@wordpress/data', () => {
-	const originalModule = jest.requireActual( '@wordpress/data' );
-	return {
-		...originalModule,
-		useSelect: jest.fn( () => ( {
-			selectedProductType: {
-				slug: 'simple',
-			},
-		} ) ),
-	};
-} );
+jest.mock( '@wordpress/data', () =>
+	jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData( {
+			useSelect: jest.fn( () => ( {
+				selectedProductType: {
+					slug: 'simple',
+				},
+			} ) ),
+		} )
+);
 
 jest.mock( '@woocommerce/settings', () => ( {
 	getSetting: jest.fn().mockImplementation( ( param ) => {

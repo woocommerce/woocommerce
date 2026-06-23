@@ -12,7 +12,15 @@ import { STORE_KEY as SCHEMA_STORE_KEY } from '../../schema/constants';
 import { STORE_KEY } from '../constants';
 import { apiFetchWithHeadersControl } from '../../shared-controls';
 
-jest.mock( '@wordpress/data' );
+jest.mock( '@wordpress/data', () => {
+	return jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData( {
+			controls: {
+				resolveSelect: jest.fn(),
+			},
+		} );
+} );
 
 describe( 'getCollection', () => {
 	describe( 'yields with expected responses', () => {

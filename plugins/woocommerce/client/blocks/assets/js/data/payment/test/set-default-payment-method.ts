@@ -16,11 +16,12 @@ const originalSelect = jest.requireActual( '@wordpress/data' ).select;
 const originalDispatch = jest.requireActual( '@wordpress/data' ).dispatch;
 
 jest.mock( '@wordpress/data', () => {
-	return {
-		...jest.requireActual( '@wordpress/data' ),
-		select: jest.fn(),
-		dispatch: jest.fn(),
-	};
+	return jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData( {
+			select: jest.fn(),
+			dispatch: jest.fn(),
+		} );
 } );
 
 jest.mock( '@woocommerce/utils', () => {

@@ -36,10 +36,14 @@ jest.mock( '../../express-payment-methods', () =>
 	) )
 );
 
-jest.mock( '@wordpress/data', () => ( {
-	useSelect: jest.fn(),
-	dispatch: jest.fn(),
-} ) );
+jest.mock( '@wordpress/data', () =>
+	jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData( {
+			useSelect: jest.fn(),
+			dispatch: jest.fn(),
+		} )
+);
 
 jest.mock( '@woocommerce/settings', () => ( {
 	CURRENT_USER_IS_ADMIN: true,

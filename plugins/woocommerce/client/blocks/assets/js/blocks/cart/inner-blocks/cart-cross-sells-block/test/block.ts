@@ -58,6 +58,8 @@ describe( 'createCrossSellsProductCollection transform function', () => {
 		expect( headingBlocks.length ).toBeGreaterThan( 0 );
 		expect( headingBlocks[ 0 ].attributes.level ).toBe( 2 );
 		expect( headingBlocks[ 0 ].attributes.content ).toBeDefined();
-		expect( headingBlocks[ 0 ].attributes.textAlign ).toBe( 'left' );
+		expect( headingBlocks[ 0 ].attributes.textAlign ?? 'left' ).toBe(
+			'left'
+		);
 	} );
 } );

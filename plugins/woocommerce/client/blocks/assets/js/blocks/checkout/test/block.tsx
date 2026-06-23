@@ -44,8 +44,9 @@ import { defaultCartState } from '../../../data/cart/default-state';
 import Checkout from '../block';
 
 jest.mock( '@wordpress/data', () =>
-	// eslint-disable-next-line @typescript-eslint/no-var-requires -- Must use require due to Jest mock hoisting
-	require( '@woocommerce/blocks-test-utils/mock-editor-store' ).mockWordPressDataWithEditorStore()
+	jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-editor-store' )
+		.mockWordPressDataWithEditorStore()
 );
 
 jest.mock( '@wordpress/compose', () => ( {

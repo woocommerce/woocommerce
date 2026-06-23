@@ -8,7 +8,14 @@ import { select, dispatch } from '@wordpress/data';
  */
 import { hasNoticesOfType, removeNoticesByStatus } from '../notices';
 
-jest.mock( '@wordpress/data' );
+jest.mock( '@wordpress/data', () =>
+	jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData( {
+			select: jest.fn(),
+			dispatch: jest.fn(),
+		} )
+);
 
 describe( 'Notice utils', () => {
 	beforeEach( () => {

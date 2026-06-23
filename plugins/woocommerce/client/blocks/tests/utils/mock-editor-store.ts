@@ -7,39 +7,77 @@
  * register the store, but since we avoid the import, we need to register
  * a mock in tests.
  *
- * Usage (must use require, not import, due to Jest hoisting):
+ * Usage:
  * ```
  * jest.mock( '@wordpress/data', () =>
- *     require( '@woocommerce/blocks-test-utils/mock-editor-store' ).mockWordPressDataWithEditorStore()
+ *     jest
+ *         .requireActual( '@woocommerce/blocks-test-utils/mock-editor-store' )
+ *         .mockWordPressDataWithEditorStore()
  * );
  * ```
  */
+/**
+ * Internal dependencies
+ */
+import {
+	getActualWordPressData,
+	mockWordPressData,
+} from './mock-wordpress-data';
+
 export const mockWordPressDataWithEditorStore = () => {
-	// `jest.requireActual` bypasses the mock and loads the real module,
-	// avoiding the circular dependency that would occur with a plain
-	// `require( '@wordpress/data' )` inside a jest.mock factory.
-	const wpData = jest.requireActual( '@wordpress/data' );
-	const mockEditorStore = wpData.createReduxStore( 'core/editor', {
-		reducer: () => ( {} ),
-		selectors: {
-			getCurrentPostId: () => null,
-			getCurrentPostType: () => null,
-			getCurrentPost: () => null,
-			isCurrentPostPublished: () => false,
-			// wp-6.8: additional selectors that @wordpress/block-editor and
-			// @wordpress/editor components may call during inner-block
-			// rendering. Without these, inner blocks silently fail to render.
-			getEditorSettings: () => ( {} ),
-			getEditedPostAttribute: () => undefined,
-			getEditedPostSlug: () => '',
-			getEditorMode: () => 'visual',
-			getRenderingMode: () => 'all',
-			getPostTypeLabel: () => '',
-		},
-	} );
-	wpData.register( mockEditorStore );
-	return {
-		__esModule: true,
-		...wpData,
+	const wpData = getActualWordPressData();
+	const selectors = {
+		getCurrentPostId: () => null,
+		getCurrentPostType: () => null,
+		getCurrentPost: () => null,
+		isCurrentPostPublished: () => false,
+		// wp-6.8: additional selectors that @wordpress/block-editor and
+		// @wordpress/editor components may call during inner-block
+		// rendering. Without these, inner blocks silently fail to render.
+		getEditorSettings: () => ( {} ),
+		getEditedPostAttribute: () => undefined,
+		getEditedPostSlug: () => '',
+		getEditorMode: () => 'visual',
+		getRenderingMode: () => 'all',
+		getPostTypeLabel: () => '',
 	};
+
+	try {
+		const registerStore = wpData.registerStore;
+		if ( typeof registerStore !== 'function' ) {
+			throw new Error( '@wordpress/data registerStore is unavailable.' );
+		}
+
+		wpData.registerStore( 'core/editor', {
+			reducer: () => ( {} ),
+			selectors,
+		} );
+		return mockWordPressData();
+	} catch ( error ) {
+		const select = ( storeNameOrDescriptor ) => {
+			if (
+				storeNameOrDescriptor === 'core/editor' ||
+				storeNameOrDescriptor?.name === 'core/editor'
+			) {
+				return selectors;
+			}
+
+			return wpData.select( storeNameOrDescriptor );
+		};
+		const dispatch = ( storeNameOrDescriptor ) => {
+			if (
+				storeNameOrDescriptor === 'core/editor' ||
+				storeNameOrDescriptor?.name === 'core/editor'
+			) {
+				return {};
+			}
+
+			return wpData.dispatch( storeNameOrDescriptor );
+		};
+
+		return mockWordPressData( {
+			dispatch,
+			select,
+		} );
+	}
 };

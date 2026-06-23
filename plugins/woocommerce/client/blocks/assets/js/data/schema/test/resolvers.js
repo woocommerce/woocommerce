@@ -12,7 +12,15 @@ import { receiveRoutes } from '../actions';
 import { STORE_KEY } from '../constants';
 
 jest.mock( '@wordpress/data-controls' );
-jest.mock( '@wordpress/data' );
+jest.mock( '@wordpress/data', () => {
+	return jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData( {
+			controls: {
+				resolveSelect: jest.fn(),
+			},
+		} );
+} );
 
 describe( 'getRoute', () => {
 	it( 'yields select control response', () => {

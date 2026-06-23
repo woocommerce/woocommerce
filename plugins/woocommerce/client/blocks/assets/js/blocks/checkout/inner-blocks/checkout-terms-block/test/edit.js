@@ -8,30 +8,33 @@ import { render, queryByText } from '@testing-library/react';
  */
 import { Edit } from '../edit';
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn().mockImplementation( ( fn ) => {
-		const select = () => {
-			return {
-				getSelectionStart: () => ( {
-					clientId: null,
-				} ),
-				getSelectionEnd: () => ( {
-					clientId: null,
-				} ),
-				getFormatTypes: () => [],
-			};
-		};
+jest.mock( '@wordpress/data', () =>
+	jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData( {
+			useSelect: jest.fn().mockImplementation( ( fn ) => {
+				const select = () => {
+					return {
+						getSelectionStart: () => ( {
+							clientId: null,
+						} ),
+						getSelectionEnd: () => ( {
+							clientId: null,
+						} ),
+						getFormatTypes: () => [],
+					};
+				};
 
-		if ( typeof fn === 'function' ) {
-			return fn( select );
-		}
+				if ( typeof fn === 'function' ) {
+					return fn( select );
+				}
 
-		return {
-			isCaretWithinFormattedText: () => false,
-		};
-	} ),
-} ) );
+				return {
+					isCaretWithinFormattedText: () => false,
+				};
+			} ),
+		} )
+);
 
 jest.mock( '@wordpress/block-editor', () => ( {
 	...jest.requireActual( '@wordpress/block-editor' ),

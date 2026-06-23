@@ -41,19 +41,23 @@ jest.mock( '@wordpress/blocks', () => ( {
 	getBlockTypes: () => mockBlockTypes,
 } ) );
 
-jest.mock( '@wordpress/data', () => ( {
-	select: () => ( {
-		getBlock: () => mockParentBlock,
-	} ),
-	useDispatch: () => ( {
-		insertBlock: mockInsertBlock,
-		replaceBlock: mockReplaceBlock,
-	} ),
-	dispatch: () => ( {
-		insertBlock: mockInsertBlock,
-		replaceBlock: mockReplaceBlock,
-	} ),
-} ) );
+jest.mock( '@wordpress/data', () =>
+	jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData( {
+			select: () => ( {
+				getBlock: () => mockParentBlock,
+			} ),
+			useDispatch: () => ( {
+				insertBlock: mockInsertBlock,
+				replaceBlock: mockReplaceBlock,
+			} ),
+			dispatch: () => ( {
+				insertBlock: mockInsertBlock,
+				replaceBlock: mockReplaceBlock,
+			} ),
+		} )
+);
 
 jest.mock( '@woocommerce/utils', () => ( {
 	getInnerBlockByName: ( block: MockBlock | null, name: string ) => {

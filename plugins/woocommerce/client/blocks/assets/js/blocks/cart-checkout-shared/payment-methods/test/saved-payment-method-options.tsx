@@ -10,11 +10,13 @@ import * as wpData from '@wordpress/data';
  */
 import SavedPaymentMethodOptions from '../saved-payment-method-options';
 
-jest.mock( '@wordpress/data', () => ( {
-	__esModule: true,
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-} ) );
+jest.mock( '@wordpress/data', () =>
+	jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData( {
+			useSelect: jest.fn(),
+		} )
+);
 
 const mockedUseSelect = wpData.useSelect as jest.Mock;
 // Mock use select so we can override it when wc/store/checkout is accessed, but return the original select function if any other store is accessed.

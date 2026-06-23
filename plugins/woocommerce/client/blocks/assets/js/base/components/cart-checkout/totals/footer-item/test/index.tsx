@@ -13,11 +13,13 @@ import { previewCart as mockPreviewCart } from '@woocommerce/resource-previews';
  */
 import TotalsFooterItem from '../index';
 
-jest.mock( '@wordpress/data', () => ( {
-	__esModule: true,
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-} ) );
+jest.mock( '@wordpress/data', () =>
+	jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData( {
+			useSelect: jest.fn(),
+		} )
+);
 
 // Mock use select so we can override it when wc/store/checkout is accessed, but return the original select function if any other store is accessed.
 wpData.useSelect.mockImplementation(

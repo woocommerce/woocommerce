@@ -30,26 +30,27 @@ import { getRegisteredExpressPaymentMethods } from '../selectors';
 
 jest.mock( '@wordpress/data', () => {
 	const originalModule = jest.requireActual( '@wordpress/data' );
-	return {
-		...originalModule,
-		select: jest.fn( ( storeName ) => {
-			const originalStore = originalModule.select( storeName );
-			if ( storeName === 'wc/store/cart' ) {
-				return {
-					...originalStore,
-					hasFinishedResolution: jest.fn( ( selectorName ) => {
-						if ( selectorName === 'getCartTotals' ) {
-							return true;
-						}
-						return originalStore.hasFinishedResolution(
-							selectorName
-						);
-					} ),
-				};
-			}
-			return originalStore;
-		} ),
-	};
+	return jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData( {
+			select: jest.fn( ( storeName ) => {
+				const originalStore = originalModule.select( storeName );
+				if ( storeName === 'wc/store/cart' ) {
+					return {
+						...originalStore,
+						hasFinishedResolution: jest.fn( ( selectorName ) => {
+							if ( selectorName === 'getCartTotals' ) {
+								return true;
+							}
+							return originalStore.hasFinishedResolution(
+								selectorName
+							);
+						} ),
+					};
+				}
+				return originalStore;
+			} ),
+		} );
 } );
 
 jest.mock( '@woocommerce/settings', () => {

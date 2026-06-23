@@ -25,9 +25,13 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 } ) );
 
 const mockUseSelect = jest.fn();
-jest.mock( '@wordpress/data', () => ( {
-	useSelect: () => mockUseSelect(),
-} ) );
+jest.mock( '@wordpress/data', () =>
+	jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData( {
+			useSelect: () => mockUseSelect(),
+		} )
+);
 
 jest.mock( '@woocommerce/block-data', () => ( {
 	paymentStore: 'wc/store/payment',

@@ -47,10 +47,9 @@ const defaultUseStoreCartValue = {
 };
 
 jest.mock( '@wordpress/data', () => {
-	return {
-		__esModule: true,
-		...jest.requireActual( '@wordpress/data' ),
-	};
+	return jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData();
 } );
 
 jest.mock( '@woocommerce/settings', () => ( {

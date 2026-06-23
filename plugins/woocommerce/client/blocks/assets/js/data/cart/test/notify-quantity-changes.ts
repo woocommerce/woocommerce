@@ -14,7 +14,14 @@ import { notifyQuantityChanges } from '../notify-quantity-changes';
 // Deep clone an object to avoid mutating it later.
 const cloneObject = ( obj ) => JSON.parse( JSON.stringify( obj ) );
 
-jest.mock( '@wordpress/data' );
+jest.mock( '@wordpress/data', () =>
+	jest
+		.requireActual( '@woocommerce/blocks-test-utils/mock-wordpress-data' )
+		.mockWordPressData( {
+			dispatch: jest.fn(),
+			select: jest.fn(),
+		} )
+);
 
 const mockedCreateInfoNotice = jest.fn();
 dispatch.mockImplementation( ( store ) => {

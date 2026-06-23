@@ -75,10 +75,6 @@ describe( 'Product Specifications block', () => {
 					name: /Show Attributes/i,
 				} )
 			).toBeChecked();
-
-			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
-			// opt out of without changing the visual output.
-			expect( console ).toHaveWarned();
 		} );
 
 		test( 'should hide weight section when toggled off', async () => {
