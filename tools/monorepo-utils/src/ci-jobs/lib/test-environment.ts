@@ -272,27 +272,32 @@ export interface TestEnvVars {
  * @return {Promise.<Object>} The environment variables for the test environment.
  */
 export async function parseTestEnvConfig(
-	config: TestEnvConfigVars
+	config: TestEnvConfigVars,
+	resolveWPVersion = true
 ): Promise< TestEnvVars > {
 	const envVars: TestEnvVars = {};
 
 	// Convert `wp-env` configuration options to environment variables.
 	if ( config.wpVersion ) {
-		try {
-			const wpVersion = await parseWPVersion( config.wpVersion );
-			envVars.WP_VERSION = wpVersion.version;
-			envVars.WP_ENV_CORE = wpVersion.downloadUrl;
-		} catch ( error ) {
-			// Pre-release offers like beta or RC are not always available, and we should not throw if that's the case.
-			// We should only throw if the version is one that should always be available.
-			if (
-				! [ 'beta', 'rc', 'prerelease', 'pre-release' ].includes(
-					config.wpVersion
-				)
-			) {
-				throw new Error(
-					`Failed to parse WP version: ${ error.message }.`
-				);
+		if ( ! resolveWPVersion ) {
+			envVars.WP_VERSION = config.wpVersion;
+		} else {
+			try {
+				const wpVersion = await parseWPVersion( config.wpVersion );
+				envVars.WP_VERSION = wpVersion.version;
+				envVars.WP_ENV_CORE = wpVersion.downloadUrl;
+			} catch ( error ) {
+				// Pre-release offers like beta or RC are not always available, and we should not throw if that's the case.
+				// We should only throw if the version is one that should always be available.
+				if (
+					! [ 'beta', 'rc', 'prerelease', 'pre-release' ].includes(
+						config.wpVersion
+					)
+				) {
+					throw new Error(
+						`Failed to parse WP version: ${ error.message }.`
+					);
+				}
 			}
 		}
 	}

@@ -12,21 +12,6 @@ import { ProjectFileChanges } from './file-changes';
 import { ProjectNode } from './project-graph';
 import { TestEnvVars, parseTestEnvConfig } from './test-environment';
 
-const WORDPRESS_VERSION_COMPATIBILITY_TARGETS = [
-	{
-		label: 'WP packages latest',
-		wpVersion: 'latest',
-	},
-	{
-		label: 'WP packages latest-1',
-		wpVersion: 'latest-1',
-	},
-	{
-		label: 'Gutenberg packages',
-		wpVersion: 'gutenberg',
-	},
-];
-
 /**
  * A linting job.
  */
@@ -131,27 +116,6 @@ export function getShardedJobs(
 	}
 
 	return createdJobs;
-}
-
-function shouldCreateWordPressVersionCompatJobs(
-	jobConfig: TestJobConfig
-): boolean {
-	return jobConfig.testType === 'unit' && jobConfig.command === 'test:js';
-}
-
-function getWordPressVersionCompatJobs( job: TestJob ): TestJob[] {
-	return WORDPRESS_VERSION_COMPATIBILITY_TARGETS.map(
-		( { label, wpVersion } ) => {
-			const jobCopy = JSON.parse( JSON.stringify( job ) );
-			jobCopy.name = `${ job.name } [${ label }]`;
-			jobCopy.testEnv.envVars = {
-				...job.testEnv.envVars,
-				WP_VERSION: wpVersion,
-			};
-
-			return jobCopy;
-		}
-	);
 }
 
 /**
@@ -269,10 +233,16 @@ async function createTestJob(
 	// We want to make sure that we're including the configuration for
 	// any test environment that the job will need in order to run.
 	if ( config.testEnv ) {
+		const shouldCreateTestEnv = Boolean( config.testEnv.start );
 		createdJob.testEnv = {
-			shouldCreate: true,
-			envVars: await parseTestEnvConfig( config.testEnv.config ),
-			start: replaceCommandVars( config.testEnv.start, options ),
+			shouldCreate: shouldCreateTestEnv,
+			envVars: await parseTestEnvConfig(
+				config.testEnv.config,
+				shouldCreateTestEnv
+			),
+			start: config.testEnv.start
+				? replaceCommandVars( config.testEnv.start, options )
+				: undefined,
 		};
 	}
 
@@ -289,7 +259,10 @@ async function createTestJob(
 		return null;
 	}
 
-	if ( createdJob.testEnv.envVars.WP_VERSION ) {
+	if (
+		createdJob.testEnv.shouldCreate &&
+		createdJob.testEnv.envVars.WP_VERSION
+	) {
 		createdJob.name += ` [WP ${ createdJob.testEnv.envVars.WP_VERSION }]`;
 	}
 
@@ -426,11 +399,7 @@ async function createJobsForProject(
 
 				const shardedJobs = getShardedJobs( created, jobConfig );
 
-				newJobs.test.push(
-					...( shouldCreateWordPressVersionCompatJobs( jobConfig )
-						? shardedJobs.flatMap( getWordPressVersionCompatJobs )
-						: shardedJobs )
-				);
+				newJobs.test.push( ...shardedJobs );
 				break;
 			}
 		}

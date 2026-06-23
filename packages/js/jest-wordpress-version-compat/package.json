@@ -72,7 +72,7 @@
 			},
 			"tests": [
 				{
-					"name": "JavaScript",
+					"name": "JavaScript [WP packages latest]",
 					"command": "test:js",
 					"changes": [
 						"jest.config.json",
@@ -82,7 +82,48 @@
 					"events": [
 						"pull_request",
 						"push"
-					]
+					],
+					"testEnv": {
+						"config": {
+							"wpVersion": "latest"
+						}
+					}
+				},
+				{
+					"name": "JavaScript [WP packages latest-1]",
+					"command": "test:js",
+					"changes": [
+						"jest.config.json",
+						"src/**/*.js",
+						"test/**/*.js"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					],
+					"testEnv": {
+						"config": {
+							"wpVersion": "latest-1"
+						}
+					}
+				},
+				{
+					"name": "JavaScript [Gutenberg packages]",
+					"command": "test:js",
+					"changes": [
+						"jest.config.json",
+						"src/**/*.js",
+						"test/**/*.js"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					],
+					"testEnv": {
+						"config": {
+							"wpVersion": "gutenberg"
+						}
+					}
 				}
 			]
 		}
