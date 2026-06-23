@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix adding to cart variable products with an 'Any' attribute from the Add to Cart + Options block when in legacy mode
