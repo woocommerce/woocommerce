@@ -308,7 +308,7 @@ const TaxRecommendations = () => {
 			id: 'anrok-tax',
 			title: __( 'Anrok', 'woocommerce' ),
 			description: __(
-				'Advanced tax compliance for growing brands selling around the globe.',
+				'Advanced tax compliance for growing brands selling within the US and around the globe.',
 				'woocommerce'
 			),
 			productUrl: 'https://woocommerce.com/products/anrok-tax/',
