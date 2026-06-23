@@ -166,6 +166,18 @@ class POSAuthHandler implements RegisterHooksInterface {
 	}
 
 	/**
+	 * The staff id the swap committed to this request, or null if no swap happened.
+	 *
+	 * The committed swap is the proof that the device-admin auth + capability checks passed; POSCapBridge
+	 * uses it to scope its real-cap grant to the swapped-in staff member only.
+	 *
+	 * @return int|null
+	 */
+	public function get_swapped_staff_id(): ?int {
+		return $this->staff_user_id;
+	}
+
+	/**
 	 * Map an operation intent to the POS capability it requires, or null for reads.
 	 *
 	 * @param string|null $intent One of the POSRequestContext::INTENT_* constants, or null.

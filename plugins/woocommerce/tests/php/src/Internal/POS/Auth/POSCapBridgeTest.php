@@ -3,109 +3,132 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\POS\Auth;
 
+use Automattic\WooCommerce\Internal\POS\Auth\POSAuthHandler;
 use Automattic\WooCommerce\Internal\POS\Auth\POSCapBridge;
 use Automattic\WooCommerce\Internal\POS\Auth\POSRequestContext;
-use Automattic\WooCommerce\Internal\POS\Capabilities;
 use WC_Unit_Test_Case;
 use WP_User;
 
 /**
- * Tests for POSCapBridge — the request-scoped pos_* -> Woo capability bridge.
+ * Tests for POSCapBridge — grants real Woo caps only to the swapped-in staff member.
  */
 class POSCapBridgeTest extends WC_Unit_Test_Case {
 
 	/**
-	 * Build a mocked request context.
+	 * The staff member a device-admin swap committed to.
 	 *
-	 * @param bool        $is_pos Whether the request is POS-originated.
-	 * @param string|null $intent The resolved intent.
-	 * @return POSRequestContext
+	 * @var int
 	 */
-	private function mock_context( bool $is_pos, ?string $intent ): POSRequestContext {
-		$ctx = $this->createMock( POSRequestContext::class );
-		$ctx->method( 'is_pos_request' )->willReturn( $is_pos );
-		$ctx->method( 'get_intent' )->willReturn( $intent );
-		return $ctx;
+	private int $staff_id;
+
+	/**
+	 * A different user (e.g. directly authenticated, not the swap target).
+	 *
+	 * @var int
+	 */
+	private int $other_id;
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->staff_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		$this->other_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
 	}
 
 	/**
-	 * Build a bridge around a context.
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		wp_delete_user( $this->staff_id );
+		wp_delete_user( $this->other_id );
+		parent::tearDown();
+	}
+
+	/**
+	 * Build a bridge with a mocked write intent and a mocked committed-swap target.
 	 *
-	 * @param POSRequestContext $ctx The (mocked) request context.
+	 * @param string|null $intent           The resolved write intent.
+	 * @param int|null    $swapped_staff_id The staff id the device-admin swap committed to (null = no swap).
 	 * @return POSCapBridge
 	 */
-	private function make_bridge( POSRequestContext $ctx ): POSCapBridge {
+	private function make_bridge( ?string $intent, ?int $swapped_staff_id ): POSCapBridge {
+		$ctx = $this->createMock( POSRequestContext::class );
+		$ctx->method( 'get_intent' )->willReturn( $intent );
+
+		$auth = $this->createMock( POSAuthHandler::class );
+		$auth->method( 'get_swapped_staff_id' )->willReturn( $swapped_staff_id );
+
 		$bridge = new POSCapBridge();
-		$bridge->init( $ctx );
+		$bridge->init( $ctx, $auth );
 		return $bridge;
 	}
 
 	/**
-	 * Invoke the bridge filter with a capability map.
+	 * Run the bridge filter for the given user id, starting from an empty cap map.
 	 *
-	 * @param POSCapBridge        $bridge  The bridge.
-	 * @param array<string, bool> $allcaps The user's caps.
+	 * @param POSCapBridge $bridge  The bridge.
+	 * @param int          $user_id The user being cap-checked.
 	 * @return array<string, bool>
 	 */
-	private function run_filter( POSCapBridge $bridge, array $allcaps ): array {
-		return $bridge->grant_pos_caps( $allcaps, array(), array(), new WP_User( 0 ) );
+	private function granted_for( POSCapBridge $bridge, int $user_id ): array {
+		return $bridge->grant_pos_caps( array(), array(), array(), new WP_User( $user_id ) );
 	}
 
 	/**
-	 * @testdox Grants order caps when the user holds process_sales on an order create.
+	 * @testdox Grants order caps to the swapped-in staff member on an order create.
 	 */
-	public function test_grants_order_caps_for_process_sales(): void {
-		$bridge = $this->make_bridge( $this->mock_context( true, POSRequestContext::INTENT_ORDER_CREATE ) );
+	public function test_grants_order_caps_to_swapped_staff(): void {
+		$bridge = $this->make_bridge( POSRequestContext::INTENT_ORDER_CREATE, $this->staff_id );
 
-		$result = $this->run_filter( $bridge, array( Capabilities::CAP_PROCESS_SALES => true ) );
+		$result = $this->granted_for( $bridge, $this->staff_id );
 
-		$this->assertTrue( $result['publish_shop_orders'] ?? false, 'order create should grant publish_shop_orders' );
-		$this->assertTrue( $result['edit_shop_orders'] ?? false, 'order create should grant edit_shop_orders' );
+		$this->assertTrue( $result['publish_shop_orders'] ?? false );
+		$this->assertTrue( $result['edit_shop_orders'] ?? false );
 	}
 
 	/**
-	 * @testdox Grants refund caps when the user holds issue_refunds on a refund create.
+	 * @testdox Grants refund caps to the swapped-in staff member on a refund create.
 	 */
-	public function test_grants_refund_caps_for_issue_refunds(): void {
-		$bridge = $this->make_bridge( $this->mock_context( true, POSRequestContext::INTENT_REFUND_CREATE ) );
+	public function test_grants_refund_caps_to_swapped_staff(): void {
+		$bridge = $this->make_bridge( POSRequestContext::INTENT_REFUND_CREATE, $this->staff_id );
 
-		$result = $this->run_filter( $bridge, array( Capabilities::CAP_ISSUE_REFUNDS => true ) );
+		$result = $this->granted_for( $bridge, $this->staff_id );
 
-		$this->assertTrue( $result['publish_shop_orders'] ?? false, 'refund create should grant publish_shop_orders (refund is a shop_order-type post)' );
-		$this->assertTrue( $result['edit_shop_orders'] ?? false, 'refund create should grant edit_shop_orders' );
+		$this->assertTrue( $result['publish_shop_orders'] ?? false, 'refund create grants publish_shop_orders (refund is a shop_order-type post)' );
+		$this->assertTrue( $result['edit_shop_orders'] ?? false );
 	}
 
 	/**
-	 * @testdox Is inert when the request is not POS-originated.
-	 */
-	public function test_inert_when_not_pos_request(): void {
-		$bridge = $this->make_bridge( $this->mock_context( false, POSRequestContext::INTENT_ORDER_CREATE ) );
-
-		$result = $this->run_filter( $bridge, array( Capabilities::CAP_PROCESS_SALES => true ) );
-
-		$this->assertArrayNotHasKey( 'publish_shop_orders', $result, 'No Woo caps may be granted off a POS request' );
-	}
-
-	/**
-	 * @testdox Is inert when there is no write intent.
+	 * @testdox Grants nothing when there is no write intent.
 	 */
 	public function test_inert_when_no_intent(): void {
-		$bridge = $this->make_bridge( $this->mock_context( true, null ) );
+		$bridge = $this->make_bridge( null, $this->staff_id );
 
-		$result = $this->run_filter( $bridge, array( Capabilities::CAP_PROCESS_SALES => true ) );
-
-		$this->assertArrayNotHasKey( 'publish_shop_orders', $result );
+		$this->assertArrayNotHasKey( 'publish_shop_orders', $this->granted_for( $bridge, $this->staff_id ) );
 	}
 
 	/**
-	 * @testdox Does not grant when the user does not hold the matching POS capability.
+	 * @testdox Grants nothing without a committed swap, even on a POS write (no header self-escalation).
+	 *
+	 * The escalation flagged in review: a directly-authenticated user who holds an isolated POS cap and
+	 * sends the POS headers must NOT get real Woo caps. With no committed swap (get_swapped_staff_id()
+	 * is null), the bridge grants nothing even though the request looks like a POS write.
 	 */
-	public function test_no_grant_without_matching_pos_cap(): void {
-		// Refund intent, but the user only holds process_sales (a cashier) — no refund grant.
-		$bridge = $this->make_bridge( $this->mock_context( true, POSRequestContext::INTENT_REFUND_CREATE ) );
+	public function test_no_grant_without_committed_swap(): void {
+		$bridge = $this->make_bridge( POSRequestContext::INTENT_ORDER_CREATE, null );
 
-		$result = $this->run_filter( $bridge, array( Capabilities::CAP_PROCESS_SALES => true ) );
+		$this->assertArrayNotHasKey( 'edit_shop_orders', $this->granted_for( $bridge, $this->staff_id ) );
+	}
 
-		$this->assertArrayNotHasKey( 'edit_shop_orders', $result, 'A user without issue_refunds gets no refund bridge' );
+	/**
+	 * @testdox Grants nothing to a user other than the swapped-in staff member.
+	 */
+	public function test_no_grant_to_non_swapped_user(): void {
+		// Swap committed to staff_id; a different user being cap-checked gets nothing.
+		$bridge = $this->make_bridge( POSRequestContext::INTENT_ORDER_CREATE, $this->staff_id );
+
+		$this->assertArrayNotHasKey( 'edit_shop_orders', $this->granted_for( $bridge, $this->other_id ) );
 	}
 }
