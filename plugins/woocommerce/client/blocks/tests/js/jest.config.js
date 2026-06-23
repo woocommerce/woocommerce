@@ -6,6 +6,23 @@ const {
 const rootDir = path.resolve( __dirname, '../../' );
 const missingWpVersionMessage =
 	'WP_VERSION is not set. This test run is using the installed @wordpress packages and may not rely on a validated WordPress package environment. Set WP_VERSION=latest, WP_VERSION=latest-1, or WP_VERSION=gutenberg to run WordPress package compatibility tests.';
+const isGutenbergCompatRun = process.env.WP_VERSION === 'gutenberg';
+const defaultTransformIgnorePattern =
+	'/node_modules/(?!\\.pnpm/dinero\\.js|dinero\\.js)';
+const gutenbergTransformedPackages = [ 'uuid', '@arraypress/waveform-player' ];
+const gutenbergTransformIgnorePattern = [
+	'/node_modules/(?!(?:',
+	[
+		...gutenbergTransformedPackages.map(
+			( packageName ) =>
+				`\\.cache/jest-wordpress-version-compat/gutenberg/node_modules/${ packageName }`
+		),
+		'\\.pnpm/dinero\\.js',
+		'dinero\\.js',
+		...gutenbergTransformedPackages,
+	].join( '|' ),
+	'))',
+].join( '' );
 
 /**
  * WordPress packages that must resolve to a single instance across the test
@@ -130,10 +147,20 @@ const config = {
 	roots: [ '<rootDir>', '<rootDir>/../legacy/js' ],
 	resolver: '<rootDir>/tests/js/scripts/resolver.js',
 	transform: {
+		...( isGutenbergCompatRun
+			? Object.fromEntries(
+					gutenbergTransformedPackages.map( ( packageName ) => [
+						`node_modules/${ packageName }/(.+)`,
+						'<rootDir>/tests/js/scripts/babel-transformer.js',
+					] )
+			  )
+			: {} ),
 		'^.+\\.(js|ts|tsx)$': '<rootDir>/tests/js/scripts/babel-transformer.js',
 	},
 	transformIgnorePatterns: [
-		'/node_modules/(?!\\.pnpm/dinero\\.js|dinero\\.js)',
+		isGutenbergCompatRun
+			? gutenbergTransformIgnorePattern
+			: defaultTransformIgnorePattern,
 	],
 	verbose: true,
 	cacheDirectory: '<rootDir>/../../node_modules/.cache/jest',
