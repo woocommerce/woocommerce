@@ -2,6 +2,36 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.0](https://www.npmjs.com/package/@woocommerce/date/v/5.0.0) - 2026-06-10 
+
+-   Major - Update @wordpress/* dependencies to WordPress 6.8 minimum. [#64114]
+-   Major - Updated declared dependencies to React 18 and WordPress 6.6. [#53531]
+-   Minor - Bump jest package dependency to 29.5.x. [#60324]
+-   Minor - Fix typos in inline documentation. [#48640]
+-   Minor - Fix typos in README.md files. [#48569]
+-   Minor - Monorepo: bump pnpm version to 9.15.0. [#54189]
+-   Minor - Upgraded TypeScript in the monorepo to 5.7.2. [#53165]
+-   Patch - Bump wireit dependency version to latest. [#57299]
+-   Patch - CI: leverage composer packages cache in lint monorepo job. [#52054]
+-   Patch - Clean up CI job config options; remove unused cascading keys. [#55863]
+-   Patch - Comment: Fix comment typos across various files. [#50047]
+-   Patch - Comment: Fix typos in documentation. [#50282]
+-   Patch - Fix getStoreTimeZoneMoment() to check wcSettings.admin.timeZone when wcSettings.timeZone is not set. [#62872]
+-   Patch - Fix pnpm version to 9.1.3 to avoid dependency installation issues. [#50828]
+-   Patch - Monorepo: build RAM usage optimization. [#58861]
+-   Patch - Monorepo: consolidate @babel/* dependencies versions across the monorepo. [#56575]
+-   Patch - Monorepo: consolidate packages licenses to `GPL-2.0-or-later`. [#58941]
+-   Patch - Monorepo: consolidate syncpack config around React 17/18 usage. [#52022]
+-   Patch - Monorepo: consolidate TypeScript config files and JS test directories naming. [#52191]
+-   Patch - Monorepo: drop the unused `concurrently` package from dependencies. [#58765]
+-   Patch - Monorepo: refresh wireit dependencyOutputs configuration synchronization when installing dependencies. [#55095]
+-   Patch - Move the CommonJS build to prepack so day-to-day development only builds the ESM output. [#64876]
+-   Patch - Move TypeScript type-checking from the build to a new `lint:lang:types` script. Builds now emit types and JS without type-checking. [#65168]
+-   Patch - Replaced patched `@wordpress/data` types with opt-in internal package types. [#63483]
+-   Patch - Replaced wireit + tsc package build pipeline with a per-package esbuild script. [#65210]
+-   Patch - Update wireit to 0.14.10. [#54996]
+-   Patch - Use bundled moment-timezone directly to prevent crash when plugins clobber global moment. [#64021]
+
 ## [4.3.0](https://www.npmjs.com/package/@woocommerce/date/v/4.3.0) - 2024-06-11 
 
 -   Patch - Added in missing TS definitions in package.json [#34154]

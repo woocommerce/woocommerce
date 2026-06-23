@@ -13,6 +13,7 @@ concurrency:
   group: release-feature-freeze
 
 env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
   GIT_COMMITTER_NAME: 'WooCommerce Bot'
   GIT_COMMITTER_EMAIL: 'no-reply@woocommerce.com'
   GIT_AUTHOR_NAME: 'WooCommerce Bot'

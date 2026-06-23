@@ -62,6 +62,48 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Pending to cancelled order status changes trigger transactional email notifications.
+	 */
+	public function test_pending_to_cancelled_status_change_triggers_transactional_email_notifications(): void {
+		$hook             = 'woocommerce_order_status_pending_to_cancelled';
+		$captured_actions = array();
+		$email_actions    = function ( $actions ) use ( &$captured_actions, $hook ) {
+			$captured_actions = $actions;
+			return in_array( $hook, $actions, true ) ? array( $hook ) : array();
+		};
+
+		remove_action( $hook, array( 'WC_Emails', 'send_transactional_email' ), 10 );
+		remove_action( $hook, array( 'WC_Emails', 'queue_transactional_email' ), 10 );
+		add_filter( 'woocommerce_email_actions', $email_actions, 999 );
+		add_filter( 'woocommerce_defer_transactional_emails', '__return_false', 999 );
+
+		WC_Emails::init_transactional_emails();
+
+		remove_filter( 'woocommerce_email_actions', $email_actions, 999 );
+		remove_filter( 'woocommerce_defer_transactional_emails', '__return_false', 999 );
+
+		$this->assertContains( $hook, $captured_actions, 'Pending to cancelled status changes should be part of the default transactional email action list.' );
+		$this->assertSame( 10, has_action( $hook, array( 'WC_Emails', 'send_transactional_email' ) ), 'Pending to cancelled status changes should dispatch transactional emails.' );
+
+		remove_action( $hook, array( 'WC_Emails', 'send_transactional_email' ), 10 );
+	}
+
+	/**
+	 * @testdox Admin cancelled order email listens for pending to cancelled notifications.
+	 */
+	public function test_cancelled_order_email_listens_for_pending_to_cancelled_notifications(): void {
+		$email_object    = new WC_Emails();
+		$emails          = $email_object->get_emails();
+		$cancelled_email = $emails['WC_Email_Cancelled_Order'];
+
+		$this->assertSame(
+			10,
+			has_action( 'woocommerce_order_status_pending_to_cancelled_notification', array( $cancelled_email, 'trigger' ) ),
+			'Cancelled order emails should notify admins when a pending order is cancelled.'
+		);
+	}
+
+	/**
 	 * Test that order meta function outputs linked meta.
 	 */
 	public function test_order_meta() {

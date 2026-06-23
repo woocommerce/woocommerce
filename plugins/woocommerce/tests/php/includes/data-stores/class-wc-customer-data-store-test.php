@@ -61,6 +61,33 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A backslash in a customer address field survives a save/read round-trip.
+	 *
+	 * Addresses entered through the Store API (block checkout) are not magic-quoted, so the value
+	 * reaches the customer object unslashed (e.g. "apt 4\"). When the data store persists it via
+	 * WP's update_user_meta(), update_metadata() runs wp_unslash() on the value before writing,
+	 * stripping the backslash. The customer fix in PR #65643 only stops the Store API schema from
+	 * unslashing; the meta-persistence layer still corrupts the value for logged-in users.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/58214
+	 * @link https://github.com/woocommerce/woocommerce/pull/65643#pullrequestreview-4485832478
+	 */
+	public function test_backslash_in_address_survives_save_and_read(): void {
+		$customer = WC_Helper_Customer::create_customer();
+
+		$customer->set_billing_address_2( 'apt 4\\' );
+		$customer->save();
+
+		$read_customer = new WC_Customer( $customer->get_id() );
+
+		$this->assertSame(
+			'apt 4\\',
+			$read_customer->get_billing_address_2(),
+			'The trailing backslash should be preserved when the customer address is persisted and read back.'
+		);
+	}
+
+	/**
 	 * Handler for the wc_order_statuses filter, returns just 'pending" as the valid order statuses list.
 	 *
 	 * @return string[]

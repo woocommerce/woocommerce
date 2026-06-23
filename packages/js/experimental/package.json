@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/experimental",
-	"version": "3.3.0",
+	"version": "4.0.0",
 	"description": "WooCommerce experimental components.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -47,7 +47,7 @@
 		"@wordpress/components": "catalog:wp-min",
 		"@wordpress/element": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
-		"@wordpress/icons": "catalog:wp-min",
+		"@wordpress/icons": "catalog:wp-bundled",
 		"@wordpress/keycodes": "catalog:wp-min",
 		"clsx": "2.1.x",
 		"@woocommerce/sanitize": "workspace:*",
