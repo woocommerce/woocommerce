@@ -11,6 +11,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -138,11 +139,11 @@ class WC_Frontend_Scripts {
 	 * Register a script for use.
 	 *
 	 * @uses   wp_register_script()
-	 * @param  string   $handle    Name of the script. Should be unique.
-	 * @param  string   $path      Full URL of the script, or path of the script relative to the WordPress root directory.
-	 * @param  string[] $deps      An array of registered script handles this script depends on.
-	 * @param  string   $version   String specifying script version number, if it has one, which is added to the URL as a query string for cache busting purposes. If version is set to false, a version number is automatically added equal to current installed WordPress version. If set to null, no version is added.
-	 * @param  boolean  $in_footer Whether to enqueue the script before </body> instead of in the <head>. Default 'false'.
+	 * @param  string                                          $handle    Name of the script. Should be unique.
+	 * @param  string                                          $path      Full URL of the script, or path of the script relative to the WordPress root directory.
+	 * @param  string[]                                        $deps      An array of registered script handles this script depends on.
+	 * @param  string                                          $version   String specifying script version number, if it has one, which is added to the URL as a query string for cache busting purposes. If version is set to false, a version number is automatically added equal to current installed WordPress version. If set to null, no version is added.
+	 * @param  bool|array{strategy?: string, in_footer?: bool} $in_footer Whether to enqueue the script before </body> (boolean), or an array of arguments such as 'strategy' and 'in_footer'. Default array( 'strategy' => 'defer' ).
 	 */
 	private static function register_script( $handle, $path, $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = array( 'strategy' => 'defer' ) ) {
 		self::$registered_scripts[] = $handle;
@@ -153,11 +154,11 @@ class WC_Frontend_Scripts {
 	 * Register and enqueue a script for use.
 	 *
 	 * @uses   wp_enqueue_script()
-	 * @param  string   $handle    Name of the script. Should be unique.
-	 * @param  string   $path      Full URL of the script, or path of the script relative to the WordPress root directory.
-	 * @param  string[] $deps      An array of registered script handles this script depends on.
-	 * @param  string   $version   String specifying script version number, if it has one, which is added to the URL as a query string for cache busting purposes. If version is set to false, a version number is automatically added equal to current installed WordPress version. If set to null, no version is added.
-	 * @param  boolean  $in_footer Whether to enqueue the script before </body> instead of in the <head>. Default 'false'.
+	 * @param  string                                          $handle    Name of the script. Should be unique.
+	 * @param  string                                          $path      Full URL of the script, or path of the script relative to the WordPress root directory.
+	 * @param  string[]                                        $deps      An array of registered script handles this script depends on.
+	 * @param  string                                          $version   String specifying script version number, if it has one, which is added to the URL as a query string for cache busting purposes. If version is set to false, a version number is automatically added equal to current installed WordPress version. If set to null, no version is added.
+	 * @param  bool|array{strategy?: string, in_footer?: bool} $in_footer Whether to enqueue the script before </body> (boolean), or an array of arguments such as 'strategy' and 'in_footer'. Default array( 'strategy' => 'defer' ).
 	 */
 	private static function enqueue_script( $handle, $path = '', $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = array( 'strategy' => 'defer' ) ) {
 		if ( ! in_array( $handle, self::$registered_scripts, true ) && $path ) {
@@ -413,10 +414,25 @@ class WC_Frontend_Scripts {
 		$register_scripts = self::get_scripts();
 
 		foreach ( $register_scripts as $name => $props ) {
-			self::register_script( $name, $props['src'], $props['deps'], $props['version'] );
+			$is_legacy_handle = isset( $props['legacy_handle'] );
 
-			if ( isset( $props['legacy_handle'] ) ) {
-				self::register_script( $props['legacy_handle'], false, array( $name ), $props['version'], true );
+			/*
+			 * Scripts with legacy alias handles must use a blocking strategy.
+			 * WordPress (since 6.3) silently discards loading strategies on alias
+			 * scripts (registered with src=false). If the real script uses defer
+			 * but the alias cannot inherit it, the strategy mismatch breaks
+			 * dependency resolution for third-party code that depends on the
+			 * legacy handle (e.g. payment gateways using 'jquery-payment').
+			 *
+			 * Using blocking for both the real script and its alias ensures
+			 * consistent execution order through the dependency chain.
+			 */
+			$in_footer = $is_legacy_handle ? true : array( 'strategy' => 'defer' );
+
+			self::register_script( $name, $props['src'], $props['deps'], $props['version'], $in_footer );
+
+			if ( $is_legacy_handle ) {
+				self::register_script( $props['legacy_handle'], false, array( $name ), $props['version'], $in_footer );
 			}
 		}
 	}
@@ -543,7 +559,7 @@ class WC_Frontend_Scripts {
 		// Only enqueue the geolocation script if the Default Current Address is set to "Geolocate
 		// (with Page Caching Support) and outside of the cart, checkout, account and customizer preview.
 		if (
-			'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' )
+			DefaultCustomerAddress::GEOLOCATION_AJAX === get_option( 'woocommerce_default_customer_address' )
 			&& ! ( is_cart() || is_account_page() || is_checkout() || is_customize_preview() )
 		) {
 			$ua = strtolower( wc_get_user_agent() ); // Exclude common bots from geolocation by user agent.

@@ -120,10 +120,10 @@ class PendingNotificationStore {
 	 * @since 10.7.0
 	 */
 	private function schedule_safety_net( Notification $notification ): void {
-		$args = array(
-			'type'        => $notification->get_type(),
-			'resource_id' => $notification->get_resource_id(),
-		);
+		// Canonical, identity-keyed args shared with NotificationProcessor::cancel_safety_net().
+		// Action Scheduler matches stored args by exact equality, so both sides must derive
+		// them from the same place; see Notification::get_safety_net_args().
+		$args = $notification->get_safety_net_args();
 
 		if ( as_has_scheduled_action( NotificationProcessor::SAFETY_NET_HOOK, $args, NotificationProcessor::ACTION_SCHEDULER_GROUP ) ) {
 			return;
@@ -133,7 +133,8 @@ class PendingNotificationStore {
 			time() + NotificationProcessor::SAFETY_NET_DELAY,
 			NotificationProcessor::SAFETY_NET_HOOK,
 			$args,
-			NotificationProcessor::ACTION_SCHEDULER_GROUP
+			NotificationProcessor::ACTION_SCHEDULER_GROUP,
+			true
 		);
 	}
 

@@ -1,17 +1,9 @@
+@import "../../base/components/quantity-selector/style";
+
 :where(.wc-block-add-to-cart-with-options) {
 	:where(.quantity) {
 		display: inline-flex;
 		align-items: stretch;
-	}
-
-	/**
-	* This is a base style for the input text element in WooCommerce that prevents inputs from appearing too small.
-	*
-	* @link https://github.com/woocommerce/woocommerce/blob/95ca53675f2817753d484583c96ca9ab9f725172/plugins/woocommerce/client/legacy/css/woocommerce-blocktheme.scss#L203-L206
-	*/
-	:where(.quantity .input-text) {
-		font-size: var(--wp--preset--font-size--small);
-		padding: 0.9rem 1.1rem;
 	}
 }
 
@@ -24,10 +16,6 @@
 // templates), the quantity selector will stretch to the height of the container.
 :where(.wc-block-add-to-cart-with-options__quantity-selector .wc-block-components-quantity-selector) {
 	height: 100%;
-
-	:where(input[type="number"].qty) {
-		padding: 0.7rem 0;
-	}
 }
 
 :where(.wc-block-add-to-cart-with-options) {
@@ -60,7 +48,7 @@
 			margin: 0;
 			font-size: 0.8em;
 			box-sizing: content-box;
-			padding: 0.9rem 0;
+			padding: 0.9em 0;
 			margin-right: unset;
 			max-width: 3.631em; /* This value is based on the WC core styles. */
 

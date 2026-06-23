@@ -74,15 +74,31 @@ function enhancePatternWithParsedBlocks(
 	return enhancedPattern;
 }
 
+// Caches the regularized record keyed on the source entity record so repeated
+// calls with the same (referentially stable) record return the same object.
+// `@wordpress/core-data` memoizes `getEntityRecord`, so without this cache the
+// spread below would produce a new object on every selector call. That breaks
+// the referential stability `useSelect` relies on and drives an infinite
+// re-render loop (React error #185) for users who lack `edit_theme_options`,
+// because the `context: 'view'` branch — unlike `getEditedEntityRecord` — is
+// not otherwise memoized.
+const regularizedRecordCache = new WeakMap< object, object >();
+
 function regularizedGetEntityRecord( template ) {
 	if ( ! template ) {
 		return null;
 	}
-	return {
+	const cached = regularizedRecordCache.get( template );
+	if ( cached ) {
+		return cached;
+	}
+	const regularized = {
 		...template,
 		title: template?.title?.raw || template?.title || '',
 		content: template?.content?.raw || template?.content || '',
 	};
+	regularizedRecordCache.set( template, regularized );
+	return regularized;
 }
 
 export const isFeatureActive = createRegistrySelector(
@@ -212,7 +228,6 @@ export const getBlockPatternsForEmailTemplate = createRegistrySelector(
 
 export const canUserEditTemplates = createRegistrySelector(
 	( select ) => () => {
-		// @ts-expect-error Selector is not typed
 		return select( coreDataStore ).canUser( 'create', {
 			kind: 'postType',
 			name: 'wp_template',
@@ -309,7 +324,6 @@ export const getCurrentTemplateContent = () => {
 export const canUserEditGlobalEmailStyles = createRegistrySelector(
 	( select ) => () => {
 		const postId = select( storeName ).getGlobalStylesPostId();
-		// @ts-expect-error Selector is not typed
 		const canEdit = select( coreDataStore ).canUser( 'update', {
 			kind: 'root',
 			name: 'globalStyles',

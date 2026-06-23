@@ -658,6 +658,10 @@ class FileController {
 		$bytes = 0;
 		$path  = realpath( Settings::get_log_directory( false ) );
 
+		if ( empty( $path ) ) {
+			return 0;
+		}
+
 		if ( wp_is_writable( $path ) ) {
 			$iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $path, \FilesystemIterator::SKIP_DOTS ), \RecursiveIteratorIterator::CATCH_GET_CHILD );
 

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c9dcd2cbeb75aa25b1b43c237292c908",
+    "content-hash": "1c20aca790b18695041de2d8063e9858",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -1070,16 +1070,16 @@
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "3.9.3",
+            "version": "4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "c58cdbab17651303d406cd3b22cf9d75c71c986c"
+                "reference": "7321e865436e125a997de5ad95bdc8821c5a53e3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/c58cdbab17651303d406cd3b22cf9d75c71c986c",
-                "reference": "c58cdbab17651303d406cd3b22cf9d75c71c986c",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/7321e865436e125a997de5ad95bdc8821c5a53e3",
+                "reference": "7321e865436e125a997de5ad95bdc8821c5a53e3",
                 "shasum": ""
             },
             "require": {
@@ -1107,9 +1107,9 @@
             "homepage": "https://actionscheduler.org/",
             "support": {
                 "issues": "https://github.com/woocommerce/action-scheduler/issues",
-                "source": "https://github.com/woocommerce/action-scheduler/tree/3.9.3"
+                "source": "https://github.com/woocommerce/action-scheduler/tree/4.0.0"
             },
-            "time": "2025-07-15T09:32:30+00:00"
+            "time": "2026-06-16T15:01:01+00:00"
         },
         {
             "name": "woocommerce/blueprint",
@@ -1178,11 +1178,11 @@
         },
         {
             "name": "woocommerce/email-editor",
-            "version": "2.11.0",
+            "version": "2.14.0",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/email-editor",
-                "reference": "fee475d4f80a8a469c1c34fddea89e301adcb963"
+                "reference": "c73d7ed3745213cfe0b2b09289be5846d4dc0fe0"
             },
             "require": {
                 "php": ">=7.4"
@@ -2106,16 +2106,16 @@
         },
         {
             "name": "mockery/mockery",
-            "version": "1.6.6",
+            "version": "1.6.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mockery/mockery.git",
-                "reference": "b8e0bb7d8c604046539c1115994632c74dcb361e"
+                "reference": "1f4efdd7d3beafe9807b08156dfcb176d18f1699"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mockery/mockery/zipball/b8e0bb7d8c604046539c1115994632c74dcb361e",
-                "reference": "b8e0bb7d8c604046539c1115994632c74dcb361e",
+                "url": "https://api.github.com/repos/mockery/mockery/zipball/1f4efdd7d3beafe9807b08156dfcb176d18f1699",
+                "reference": "1f4efdd7d3beafe9807b08156dfcb176d18f1699",
                 "shasum": ""
             },
             "require": {
@@ -2127,10 +2127,8 @@
                 "phpunit/phpunit": "<8.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^8.5 || ^9.6.10",
-                "psalm/plugin-phpunit": "^0.18.4",
-                "symplify/easy-coding-standard": "^11.5.0",
-                "vimeo/psalm": "^4.30"
+                "phpunit/phpunit": "^8.5 || ^9.6.17",
+                "symplify/easy-coding-standard": "^12.1.14"
             },
             "type": "library",
             "autoload": {
@@ -2187,7 +2185,7 @@
                 "security": "https://github.com/mockery/mockery/security/advisories",
                 "source": "https://github.com/mockery/mockery"
             },
-            "time": "2023-08-09T00:03:52+00:00"
+            "time": "2024-05-16T03:13:13+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -5436,7 +5434,7 @@
         },
         {
             "name": "woocommerce/monorepo-plugin",
-            "version": "dev-add/phpstan",
+            "version": "dev-refactor/64839-admin-blocks-build-packages",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/monorepo-plugin",

@@ -31,14 +31,13 @@
 		"semver": "^7.5.4"
 	},
 	"devDependencies": {
-		"@types/node": "20.x.x",
+		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"oclif": "^2.7.0",
 		"shx": "^0.3.4",
 		"ts-node": "^10.9.2",
 		"tslib": "^2.6.2",
-		"typescript": "5.7.x",
-		"wireit": "0.14.12"
+		"typescript": "5.7.x"
 	},
 	"oclif": {
 		"bin": "package-release",
@@ -56,7 +55,7 @@
 		}
 	},
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"types": "dist/index.d.ts",
 	"config": {

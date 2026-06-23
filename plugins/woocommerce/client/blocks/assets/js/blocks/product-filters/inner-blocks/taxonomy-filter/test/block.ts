@@ -14,6 +14,7 @@ import {
 } from '../../../../../../../tests/integration/helpers/integration-test-editor';
 import '../';
 import '../../checkbox-list';
+import '../../chips';
 
 // Mock getSetting to return the taxonomy data we need
 jest.mock( '@woocommerce/settings', () => {
@@ -101,6 +102,10 @@ describe( 'Taxonomy Filter block', () => {
 					/Please select a taxonomy to use this filter!/i
 				)
 			).toBeInTheDocument();
+
+			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
+			// opt out of without changing the visual output.
+			expect( console ).toHaveWarned();
 		} );
 
 		test( 'should display taxonomy filter when taxonomy is selected', async () => {
@@ -173,6 +178,10 @@ describe( 'Taxonomy Filter block', () => {
 
 			expect( sortOrderSelect ).toBeInTheDocument();
 			expect( sortOrderSelect ).toHaveValue( 'count-desc' );
+
+			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
+			// opt out of without changing the visual output.
+			expect( console ).toHaveWarned();
 		} );
 
 		test( 'should allow changing sort order when enabled', () => {
@@ -218,7 +227,7 @@ describe( 'Taxonomy Filter block', () => {
 			await setup( {
 				taxonomy: 'product_cat',
 				showCounts: true,
-				displayStyle: 'dropdown',
+				displayStyle: 'woocommerce/product-filter-chips',
 				sortOrder: 'name-asc',
 				hideEmpty: false,
 			} );

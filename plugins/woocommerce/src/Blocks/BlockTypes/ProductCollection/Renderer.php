@@ -150,7 +150,7 @@ class Renderer {
 				if ( $is_enhanced_pagination_enabled && isset( $this->parsed_block ) ) {
 					$p->set_attribute(
 						'data-wp-router-region',
-						'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
+						'wc-product-collection-' . ( $this->parsed_block['attrs']['queryId'] ?? '0' )
 					);
 				}
 			}
@@ -257,7 +257,7 @@ class Renderer {
 	 */
 	private function handle_block_dimensions( $p, $block ) {
 		if ( isset( $block['attrs']['dimensions'] ) && isset( $block['attrs']['dimensions']['widthType'] ) ) {
-			if ( 'fixed' === $block['attrs']['dimensions']['widthType'] ) {
+			if ( 'fixed' === $block['attrs']['dimensions']['widthType'] && ! empty( $block['attrs']['dimensions']['fixedWidth'] ) ) {
 				$this->set_fixed_width_style( $p, $block['attrs']['dimensions']['fixedWidth'] );
 			}
 		}

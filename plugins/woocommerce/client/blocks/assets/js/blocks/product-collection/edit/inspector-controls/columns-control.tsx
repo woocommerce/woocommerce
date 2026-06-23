@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import {
 	RangeControl,
 	ToggleControl,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';

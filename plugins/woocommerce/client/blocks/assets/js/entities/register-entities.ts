@@ -8,6 +8,7 @@ import { dispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import { PRODUCT_ENTITY } from './product/constants';
+import { SETTINGS_ENTITY } from './settings/constants';
 
 const registered: string[] = [];
 
@@ -18,4 +19,13 @@ export const registerProductEntity = () => {
 	const { addEntities } = dispatch( coreStore );
 	addEntities( [ PRODUCT_ENTITY ] );
 	registered.push( PRODUCT_ENTITY.name );
+};
+
+export const registerSettingsEntity = () => {
+	if ( registered.includes( SETTINGS_ENTITY.name ) ) {
+		return;
+	}
+	const { addEntities } = dispatch( coreStore );
+	addEntities( [ SETTINGS_ENTITY ] );
+	registered.push( SETTINGS_ENTITY.name );
 };

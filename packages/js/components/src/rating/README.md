@@ -1,5 +1,4 @@
-Rating
-===
+# Rating
 
 Use `Rating` to display a set of stars, filled, empty or half-filled, that represents a
 rating in a scale between 0 and the prop `totalStars` (default 5).
@@ -20,12 +19,11 @@ Name | Type | Default | Description
 `className` | String | `null` | Additional CSS classes
 
 
-ProductRating
-===
+## ProductRating
 
 Display a set of stars representing the product's average rating.
 
-## Usage
+### Usage
 
 ```jsx
 // Use a real WooCommerce Product here.
@@ -38,15 +36,14 @@ const product = { average_rating: 3.5 };
 
 Name | Type | Default | Description
 --- | --- | --- | ---
-`product` | Object | `null` | (required) A product object containing a `average_rating`. See https://woocommerce.github.io/woocommerce-rest-api-docs/#products
+`product` | Object | `null` | (required) A product object containing a `average_rating`. See the [Products API documentation](https://developer.woocommerce.com/docs/apis/rest-api/v3/products/).
 
 
-ReviewRating
-===
+## ReviewRating
 
 Display a set of stars representing the review's rating.
 
-## Usage
+### Usage
 
 ```jsx
 // Use a real WooCommerce Review here.
@@ -59,4 +56,4 @@ const review = { rating: 5 };
 
 Name | Type | Default | Description
 --- | --- | --- | ---
-`review` | Object | `null` | (required) A review object containing a `rating`. See https://woocommerce.github.io/woocommerce-rest-api-docs/#retrieve-product-reviews
+`review` | Object | `null` | (required) A review object containing a `rating`. See the [Product Reviews API documentation](https://developer.woocommerce.com/docs/apis/rest-api/v3/product-reviews/#retrieve-a-product-review).

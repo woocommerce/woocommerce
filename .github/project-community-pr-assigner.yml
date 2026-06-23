@@ -54,9 +54,6 @@
 "packages/js/onboarding/**/*":
   - team: rubik
 
-"packages/js/product-editor/**/*":
-  - team: woo-fse
-
 "packages/js/tracks/**/*":
   - team: flux
 

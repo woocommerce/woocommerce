@@ -32,13 +32,6 @@ class OrdersTableQuery {
 	public const REGEX_SHORTHAND_DATES = '/([^.<>]*)(>=|<=|>|<|\.\.\.)([^.<>]+)/';
 
 	/**
-	 * Highest possible unsigned bigint value (unsigned bigints being the type of the `id` column).
-	 *
-	 * This is deliberately held as a string, rather than a numeric type, for inclusion within queries.
-	 */
-	private const MYSQL_MAX_UNSIGNED_BIGINT = '18446744073709551615';
-
-	/**
 	 * Names of all COT tables (orders, addresses, operational_data, meta) in the form 'table_id' => 'table name'.
 	 *
 	 * @var array
@@ -203,8 +196,8 @@ class OrdersTableQuery {
 		$this->args       = $args;
 		$this->query_args = $args; // Keep a copy of the original vars used to initialize the query.
 
-		// TODO: args to be implemented.
-		unset( $this->args['customer_note'], $this->args['name'] );
+		// TODO: 'name' arg (post_name equivalent) is not yet implemented for HPOS.
+		unset( $this->args['name'] );
 
 		$this->build_query();
 		if ( ! $this->maybe_override_query() ) {
@@ -544,7 +537,7 @@ class OrdersTableQuery {
 
 		// Add top-level date parameters to the date_query.
 		$tl_query = array();
-		foreach ( array( 'hour', 'minute', 'second', 'year', 'monthnum', 'week', 'day', 'year' ) as $tl_key ) {
+		foreach ( array( 'hour', 'minute', 'second', 'year', 'monthnum', 'week', 'day' ) as $tl_key ) {
 			if ( $this->arg_isset( $tl_key ) ) {
 				$tl_query[ $tl_key ] = $this->args[ $tl_key ];
 				unset( $this->args[ $tl_key ] );
@@ -698,8 +691,10 @@ class OrdersTableQuery {
 		}
 
 		if ( empty( $this->args['status'] ) || in_array( 'any', $this->args['status'], true ) ) {
-			// Querying for 'any' status or empty status, filter to valid statuses from wc_get_order_statuses().
-			$this->args['status'] = $valid_statuses;
+			// Querying for 'any' status or empty status, filter to valid statuses from wc_get_order_statuses(),
+			// excluding statuses marked as exclude_from_search (e.g. checkout-draft) to match WP_Query behavior.
+			$exclude              = get_post_stati( array( 'exclude_from_search' => true ) );
+			$this->args['status'] = array_diff( $valid_statuses, $exclude );
 		} elseif ( in_array( 'all', $this->args['status'], true ) ) {
 			// Querying for 'all' status does not filter by status at all.
 			$this->args['status'] = array();
@@ -854,9 +849,20 @@ class OrdersTableQuery {
 		$limits = '';
 
 		if ( ! empty( $this->limits ) && count( $this->limits ) === 2 ) {
-			list( $offset, $row_count ) = $this->limits;
-			$row_count                  = -1 === $row_count ? self::MYSQL_MAX_UNSIGNED_BIGINT : (int) $row_count;
-			$limits                     = 'LIMIT ' . (int) $offset . ', ' . $row_count;
+			$offset    = (int) ( $this->limits[0] ?? 0 );
+			$row_count = (int) ( $this->limits[1] ?? 0 );
+
+			if ( -1 === $row_count ) {
+				// For "unlimited" (-1) queries, mirror WP_Query's nopaging behavior and
+				// omit the LIMIT clause. When an offset is specified, MySQL requires a
+				// row count, so emit PHP_INT_MAX — portable across MySQL (well below
+				// its unsigned bigint max) and SQLite (its signed 64-bit max).
+				if ( $offset > 0 ) {
+					$limits = 'LIMIT ' . $offset . ', ' . PHP_INT_MAX;
+				}
+			} else {
+				$limits = 'LIMIT ' . $offset . ', ' . $row_count;
+			}
 		}
 
 		// GROUP BY.
@@ -897,11 +903,22 @@ class OrdersTableQuery {
 		$groupby = $groupby ? ( 'GROUP BY ' . $groupby ) : '';
 		$orderby = $orderby ? ( 'ORDER BY ' . $orderby ) : '';
 
+		// Performance note: simplify the query to allow the query optimizer to select a more efficient execution plan. As of
+		// version 10.9, this logic is implemented here as alternative changes above are getting flagged by regression analysis.
+		if ( '' === $join && "{$orders_table}.id" === $fields ) {
+			$groupby = '';
+		}
+
 		$this->sql = "SELECT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
 
+		$filtered_sql = $this->sql;
 		if ( ! $this->suppress_filters ) {
 			/**
 			 * Filters the completed SQL query.
+			 *
+			 * Note: queries left unmodified by this filter may later be rewritten for performance (see
+			 * OrdersTableStatusUnionQuery), in which case the SQL received here is not the SQL that ends up
+			 * being executed. Returning a modified query from this filter disables any such rewrite.
 			 *
 			 * @since 7.9.0
 			 *
@@ -909,8 +926,22 @@ class OrdersTableQuery {
 			 * @param OrdersTableQuery $query The OrdersTableQuery instance (passed by reference).
 			 * @param array            $args  Query args.
 			 */
-			$this->sql = apply_filters_ref_array( 'woocommerce_orders_table_query_sql', array( $this->sql, &$this, $this->args ) );
+			$filtered_sql = apply_filters_ref_array( 'woocommerce_orders_table_query_sql', array( $this->sql, &$this, $this->args ) );
 		}
+
+		if ( $filtered_sql === $this->sql ) {
+			// On large HPOS stores this multi-status, date-ordered query can get a slow plan (scanning millions of
+			// rows); rewriting it as a UNION of single-status queries lets the type_status_date index serve each
+			// branch. Only attempted when no 'woocommerce_orders_table_query_sql' callback changed the query. See
+			// OrdersTableStatusUnionQuery.
+			$status_union_sql = ( new OrdersTableStatusUnionQuery( $this ) )->get_sql(
+				compact( 'fields', 'join', 'where', 'groupby', 'orderby', 'limits' ),
+				$this->suppress_filters
+			);
+			$filtered_sql     = $status_union_sql ?? $this->sql;
+		}
+
+		$this->sql = $filtered_sql;
 
 		$this->build_count_query( $fields, $join, $where, $groupby );
 	}
@@ -1133,6 +1164,11 @@ class OrdersTableQuery {
 			$this->where[] = $this->where( $this->tables['orders'], $arg_key, '=', $this->args[ $arg_key ], $this->mappings['orders'][ $arg_key ]['type'] );
 		}
 
+		// customer_note allows empty string to match orders with no note, so it cannot use arg_isset (which skips '').
+		if ( isset( $this->args['customer_note'] ) ) {
+			$this->where[] = $this->where( $this->tables['orders'], 'customer_note', '=', $this->args['customer_note'], $this->mappings['orders']['customer_note']['type'] );
+		}
+
 		if ( $this->arg_isset( 'parent_exclude' ) ) {
 			$this->where[] = $this->where( $this->tables['orders'], 'parent_order_id', '!=', $this->args['parent_exclude'], 'int' );
 		}
@@ -1347,7 +1383,7 @@ class OrdersTableQuery {
 		$order   = $this->sanitize_order( $this->args['order'] ?? '' );
 		$orderby = $this->sanitize_order_orderby( $this->args['orderby'] ?? 'none' );
 
-		// Set orderby to an empty array by default. This will also be used if sanitize_order_orderby recieved "none".
+		// Set orderby to an empty array by default. This will also be used if sanitize_order_orderby received "none".
 		$this->orderby = array();
 
 		if ( 'include' === $orderby || 'post__in' === $orderby ) {
@@ -1424,9 +1460,14 @@ class OrdersTableQuery {
 			return;
 		}
 
-		if ( $this->limits ) {
+		$offset    = (int) ( $this->limits[0] ?? 0 );
+		$row_count = (int) ( $this->limits[1] ?? 0 );
+
+		if ( $row_count > 0 || $offset > 0 ) {
 			$this->found_orders  = absint( $wpdb->get_var( $this->count_sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$this->max_num_pages = (int) ceil( $this->found_orders / $this->args['limit'] );
+			$this->max_num_pages = $row_count > 0
+				? (int) ceil( $this->found_orders / $row_count )
+				: 0;
 		} else {
 			$this->found_orders = count( $this->orders );
 		}
