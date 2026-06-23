@@ -376,6 +376,9 @@
 					"text": "var(--wp--preset--color--theme-6)"
 				}
 			},
+			"core/table": {
+				"css": "& td, & th { border-color: var(--wp--preset--color--theme-6); }"
+			},
 			"core/site-title": {
 				"color": {
 					"text": "var(--wp--preset--color--theme-2)"
@@ -546,7 +549,7 @@
 			"background": "var(--wp--preset--color--theme-1)",
 			"text": "var(--wp--preset--color--theme-4)"
 		},
-		"css": "",
+		"css": ".wp-block-table td, .wp-block-table th { border-color: var(--wp--preset--color--theme-6); } .wp-block-table th { font-weight: 600; }",
 		"elements": {
 			"button": {
 				":hover": {
