@@ -208,7 +208,7 @@ class VerificationController {
 		$seconds_since = $this->service->seconds_since_last_key( $user_id );
 		if ( null === $seconds_since || $seconds_since >= self::SEND_RATE_LIMIT ) {
 			$this->send_verification_email( $user_id );
-			wc_add_notice( __( 'A new code has been sent. Please check your inbox.', 'woocommerce' ), 'success' );
+			wc_add_notice( __( 'A code has been sent to your email address. Please check your inbox.', 'woocommerce' ), 'success' );
 		} else {
 			wc_add_notice( __( 'A code was sent recently. Please check your inbox, or wait a moment before requesting a new one.', 'woocommerce' ), 'notice' );
 		}
@@ -380,7 +380,7 @@ class VerificationController {
 
 		$notice = sprintf(
 			'<a href="%2$s" class="button wc-forward">%3$s</a> %1$s',
-			esc_html__( 'Confirm your email address to link past orders to your account.', 'woocommerce' ),
+			esc_html__( 'Confirm your email address to check for past orders and link them to your account.', 'woocommerce' ),
 			esc_url( $send_url ),
 			esc_html__( 'Send confirmation code', 'woocommerce' )
 		);
@@ -543,6 +543,8 @@ CSS;
 	if ( ! form ) { return; }
 	var input = form.querySelector( 'input[name="wc_verify_email_code"]' );
 	if ( ! input ) { return; }
+
+	input.focus();
 
 	input.addEventListener( 'input', function ( event ) {
 		// Trim whitespace and any non-digits (e.g. from a pasted code), capped at six digits.
