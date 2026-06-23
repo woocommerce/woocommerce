@@ -151,7 +151,6 @@
 * Update - Add styles for the settings UI number spin control (hide the native spinner, position the +/- buttons). [#65729](https://github.com/woocommerce/woocommerce/pull/65729)
 * Update - Update settings UI layout to the agreed design values: 720px container width, 16px spacing between stacked fields, and 24px between cards. [#65729](https://github.com/woocommerce/woocommerce/pull/65729)
 * Update - Rename the settings UI script handle from wc-settings-ui-sdk to wc-settings-ui (never shipped in a release). [#65893](https://github.com/woocommerce/woocommerce/pull/65893)
-* Update - Update settings UI layout to the agreed design values: 720px container width, 16px spacing between stacked fields, and 24px between cards. [#65893](https://github.com/woocommerce/woocommerce/pull/65893)
 * Dev - Add E2E tests for block email template update propagation. [#64817](https://github.com/woocommerce/woocommerce/pull/64817)
 * Dev - Add embedded product variation links to the WC REST API v4 products endpoint. [#64566](https://github.com/woocommerce/woocommerce/pull/64566)
 * Dev - Add extra flexibility to the authentication and authorization stages of the dual code+GraphQL API. [#64647](https://github.com/woocommerce/woocommerce/pull/64647)
