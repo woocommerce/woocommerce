@@ -535,6 +535,13 @@ final class RenewalEngine {
 			)
 		);
 
+		// wc_get_orders() returns a list of orders for the default 'objects'
+		// return type; a non-array result (e.g. a paginated stdClass) means there
+		// is nothing to inspect, so no matching renewal exists.
+		if ( ! is_array( $orders ) ) {
+			return false;
+		}
+
 		foreach ( $orders as $order ) {
 			if ( ! $order instanceof WC_Order ) {
 				continue;
