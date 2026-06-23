@@ -29,8 +29,6 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 
 		parent::__construct();
 		$this->maybe_show_staff_notices();
-
-		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
 	}
 
 	/**
@@ -54,22 +52,6 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 	 * @var string
 	 */
 	public $icon = 'store';
-
-	/**
-	 * Add Point of Sale page to settings if the feature is enabled.
-	 *
-	 * @param array $pages Existing pages.
-	 * @return array|mixed
-	 *
-	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-	 */
-	public function add_settings_page( $pages ) {
-		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
-			return parent::add_settings_page( $pages );
-		} else {
-			return $pages;
-		}
-	}
 
 	/**
 	 * Get own sections.
