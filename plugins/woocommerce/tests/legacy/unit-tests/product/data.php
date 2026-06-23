@@ -208,9 +208,6 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 					'source_type' => 'attachment',
 					'id'          => $video_id,
 					'poster_id'   => $poster_id,
-					'settings'    => array(
-						'preload' => 'metadata',
-					),
 				),
 			),
 			$media_gallery,
@@ -259,9 +256,6 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 				'id'          => $video_id,
 				'position'    => 1,
 				'poster_id'   => $poster_id,
-				'settings'    => array(
-					'preload' => 'metadata',
-				),
 			),
 		);
 		$product                = new WC_Product_Simple();
