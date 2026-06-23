@@ -101,6 +101,36 @@ describe( 'TaxRecommendations', () => {
 		expect( screen.getByText( 'Activate' ) ).toBeInTheDocument();
 	} );
 
+	it( 'shows a disabled Active button when Anrok is already active', async () => {
+		activePlugins = [ 'anrok-tax' ];
+
+		render( <TaxRecommendations /> );
+
+		const activeButton = screen.getByRole( 'button', {
+			name: 'Anrok is already active',
+		} );
+
+		expect( activeButton ).toHaveTextContent( 'Active' );
+		expect( activeButton ).toHaveAttribute( 'aria-disabled', 'true' );
+
+		await clickAndFlush( activeButton );
+
+		expect( installPluginsMock ).not.toHaveBeenCalled();
+		expect( activatePluginsMock ).not.toHaveBeenCalled();
+	} );
+
+	it( 'shows Active for WooCommerce Tax when the services alias is active', () => {
+		activePlugins = [ 'woocommerce-services' ];
+
+		render( <TaxRecommendations /> );
+
+		expect(
+			screen.getByRole( 'button', {
+				name: 'WooCommerce Tax is already active',
+			} )
+		).toHaveTextContent( 'Active' );
+	} );
+
 	it( 'renders only Anrok for unsupported countries', () => {
 		countryCode = 'BR';
 
