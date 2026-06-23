@@ -14,6 +14,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -21,6 +22,8 @@ defined( 'ABSPATH' ) || exit;
  * Contract repository.
  */
 final class ContractRepository {
+
+	use ScalarCoercion;
 
 	/**
 	 * Address columns persisted to the addresses table.
@@ -225,13 +228,13 @@ final class ContractRepository {
 				SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS ),
 				array(
 					'contract_id'  => $contract_id,
-					'item_name'    => (string) ( $item['item_name'] ?? '' ),
-					'item_type'    => (string) ( $item['item_type'] ?? 'line_item' ),
-					'product_id'   => isset( $item['product_id'] ) ? (int) $item['product_id'] : null,
-					'variation_id' => isset( $item['variation_id'] ) ? (int) $item['variation_id'] : null,
-					'quantity'     => (string) ( $item['quantity'] ?? '1' ),
-					'subtotal'     => (string) ( $item['subtotal'] ?? '0' ),
-					'total'        => (string) ( $item['total'] ?? '0' ),
+					'item_name'    => self::coerce_string( $item['item_name'] ?? null ),
+					'item_type'    => self::coerce_string( $item['item_type'] ?? null, 'line_item' ),
+					'product_id'   => isset( $item['product_id'] ) ? self::coerce_int( $item['product_id'] ) : null,
+					'variation_id' => isset( $item['variation_id'] ) ? self::coerce_int( $item['variation_id'] ) : null,
+					'quantity'     => self::coerce_string( $item['quantity'] ?? null, '1' ),
+					'subtotal'     => self::coerce_string( $item['subtotal'] ?? null, '0' ),
+					'total'        => self::coerce_string( $item['total'] ?? null, '0' ),
 					'taxes'        => isset( $item['taxes'] ) ? wp_json_encode( $item['taxes'] ) : null,
 				)
 			);
@@ -254,7 +257,7 @@ final class ContractRepository {
 			);
 
 			foreach ( self::ADDRESS_COLUMNS as $column ) {
-				$record[ $column ] = isset( $address[ $column ] ) ? (string) $address[ $column ] : null;
+				$record[ $column ] = self::coerce_nullable_string( $address[ $column ] ?? null );
 			}
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -300,7 +303,14 @@ final class ContractRepository {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d ORDER BY id ASC", $contract_id ), ARRAY_A );
 
-		return is_array( $rows ) ? $rows : array();
+		$items = array();
+		foreach ( (array) $rows as $row ) {
+			if ( is_array( $row ) ) {
+				$items[] = $row;
+			}
+		}
+
+		return $items;
 	}
 
 	/**
@@ -318,8 +328,10 @@ final class ContractRepository {
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d", $contract_id ), ARRAY_A );
 
 		$by_type = array();
-		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
-			$by_type[ (string) $row['address_type'] ] = $row;
+		foreach ( (array) $rows as $row ) {
+			if ( is_array( $row ) ) {
+				$by_type[ self::coerce_string( $row['address_type'] ?? null ) ] = $row;
+			}
 		}
 
 		return $by_type;
@@ -342,8 +354,10 @@ final class ContractRepository {
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$table} WHERE contract_id = %d", $contract_id ), ARRAY_A );
 
 		$meta = array();
-		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
-			$meta[ (string) $row['meta_key'] ] = (string) $row['meta_value'];
+		foreach ( (array) $rows as $row ) {
+			if ( is_array( $row ) ) {
+				$meta[ self::coerce_string( $row['meta_key'] ?? null ) ] = self::coerce_string( $row['meta_value'] ?? null );
+			}
 		}
 
 		return $meta;

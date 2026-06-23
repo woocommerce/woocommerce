@@ -114,7 +114,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			)
 		);
 
-		$this->assertNull( $repo->find( $id )->get_extension_slug() );
+		$found = $repo->find( $id );
+		$this->assertInstanceOf( Contract::class, $found );
+		$this->assertNull( $found->get_extension_slug() );
 	}
 
 	public function test_update_persists_scheduling_fields(): void {
@@ -122,6 +124,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$id   = $repo->insert( $this->make_contract() );
 
 		$contract = $repo->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
 		$contract->set_status( ContractStatus::ON_HOLD );
 		$contract->set_next_payment_gmt( '2026-08-15 00:00:00' );
 		$contract->set_cycle_count( 3 );
@@ -130,6 +133,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertTrue( $repo->update( $contract ) );
 
 		$reloaded = $repo->find( $id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertSame( ContractStatus::ON_HOLD, $reloaded->get_status() );
 		$this->assertSame( '2026-08-15 00:00:00', $reloaded->get_next_payment_gmt() );
 		$this->assertSame( 3, $reloaded->get_cycle_count() );
@@ -141,6 +145,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$id   = $repo->insert( $this->make_contract() );
 
 		$contract = $repo->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
 		$this->assertCount( 1, $contract->get_items() );
 
 		// Re-create with a different set of items / meta and update.
@@ -170,7 +175,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertTrue( $repo->update( $mutated ) );
 
 		$reloaded = $repo->find( $id );
-		$items    = $reloaded->get_items();
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$items = $reloaded->get_items();
 		$this->assertCount( 1, $items );
 		$this->assertSame( 'Tea tin', $items[0]['item_name'] );
 		$this->assertSame( 'email', $reloaded->get_meta()['source_channel'] );
