@@ -35,8 +35,9 @@ final class SchemaInstaller {
 	 *
 	 * 1.0.0 - baseline plan and contract tables, including the nullable `extension_slug`
 	 *         column on plans and contracts.
+	 * 1.1.0 - plan lifecycle and manual ordering columns.
 	 */
-	const VERSION = '1.0.0';
+	const VERSION = '1.1.0';
 
 	/**
 	 * Option key tracking the installed schema version.
@@ -195,12 +196,15 @@ final class SchemaInstaller {
   inventory_policy JSON NULL,
   pricing_policy JSON NULL,
   category VARCHAR(32) NOT NULL DEFAULT 'SUBSCRIPTION',
+  status VARCHAR(20) NOT NULL DEFAULT 'active',
+  sort_order INT NOT NULL DEFAULT 0,
   extension_slug VARCHAR(64) NULL,
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,
   PRIMARY KEY  (id),
   KEY group_id (group_id),
   KEY category (category),
+  KEY status_sort (status, sort_order, id),
   KEY extension_slug (extension_slug)
 ) {$collate};";
 

@@ -298,7 +298,7 @@ final class Contract {
 		$meta = array();
 		if ( is_array( $value ) ) {
 			foreach ( $value as $key => $val ) {
-				$meta[ (string) $key ] = is_scalar( $val ) ? (string) $val : '';
+				$meta[ self::coerce_string( $key ) ] = self::coerce_string( $val );
 			}
 		}
 		return $meta;

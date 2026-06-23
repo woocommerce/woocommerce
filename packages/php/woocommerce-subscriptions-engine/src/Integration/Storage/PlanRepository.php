@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -18,12 +19,27 @@ defined( 'ABSPATH' ) || exit;
  */
 final class PlanRepository {
 
+	use ScalarCoercion;
+
 	/**
 	 * Policy columns stored as JSON.
 	 *
 	 * @var array<int, string>
 	 */
 	private const JSON_COLUMNS = array( 'options', 'billing_policy', 'delivery_policy', 'pricing_policy' );
+
+	/**
+	 * Columns callers may sort by through query().
+	 *
+	 * @var array<string, string>
+	 */
+	private const ORDERBY_COLUMNS = array(
+		'id'               => 'id',
+		'name'             => 'name',
+		'sort_order'       => 'sort_order',
+		'date_created_gmt' => 'date_created_gmt',
+		'date_updated_gmt' => 'date_updated_gmt',
+	);
 
 	/**
 	 * Insert a new plan and stamp its id back onto the entity.
@@ -51,6 +67,8 @@ final class PlanRepository {
 				'inventory_policy' => null,
 				'pricing_policy'   => null !== $data['pricing_policy'] ? wp_json_encode( $data['pricing_policy'] ) : null,
 				'category'         => $data['category'],
+				'status'           => $data['status'],
+				'sort_order'       => $data['sort_order'],
 				'extension_slug'   => $data['extension_slug'],
 				'date_created_gmt' => $now,
 				'date_updated_gmt' => $now,
@@ -85,11 +103,61 @@ final class PlanRepository {
 			return null;
 		}
 
-		foreach ( self::JSON_COLUMNS as $column ) {
-			$row[ $column ] = self::decode_json( $row[ $column ] ?? null );
+		return $this->hydrate_row( $row );
+	}
+
+	/**
+	 * Query plans.
+	 *
+	 * Supported args: limit, offset, search, status, extension_slug, orderby,
+	 * order. Results default to manual order, oldest id as a stable tiebreaker.
+	 *
+	 * @param array<string, mixed> $args Query args.
+	 * @return array<int, Plan>
+	 */
+	public function query( array $args = array() ): array {
+		global $wpdb;
+
+		$table  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+		$where  = $this->build_where_clauses( $args );
+		$order  = $this->build_order_clause( $args );
+		$limit  = max( 1, self::coerce_int( $args['limit'] ?? null, 50 ) );
+		$offset = max( 0, self::coerce_int( $args['offset'] ?? null, 0 ) );
+
+		$sql = "SELECT * FROM {$table}{$where} {$order} LIMIT %d OFFSET %d";
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
+		$rows = $wpdb->get_results( $wpdb->prepare( $sql, $limit, $offset ), ARRAY_A );
+		if ( ! is_array( $rows ) ) {
+			return array();
 		}
 
-		return Plan::from_storage( $row );
+		$plans = array();
+		foreach ( $rows as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+			$plans[] = $this->hydrate_row( self::string_keyed_array( $row ) );
+		}
+
+		return $plans;
+	}
+
+	/**
+	 * Count plans matching a query.
+	 *
+	 * Supported args are the filter args accepted by query().
+	 *
+	 * @param array<string, mixed> $args Query args.
+	 */
+	public function count( array $args = array() ): int {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+		$where = $this->build_where_clauses( $args );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}{$where}" );
 	}
 
 	/**
@@ -120,6 +188,8 @@ final class PlanRepository {
 				'delivery_policy'  => null !== $data['delivery_policy'] ? wp_json_encode( $data['delivery_policy'] ) : null,
 				'pricing_policy'   => null !== $data['pricing_policy'] ? wp_json_encode( $data['pricing_policy'] ) : null,
 				'category'         => $data['category'],
+				'status'           => $data['status'],
+				'sort_order'       => $data['sort_order'],
 				'extension_slug'   => $data['extension_slug'],
 				'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ),
 			),
@@ -148,6 +218,100 @@ final class PlanRepository {
 	}
 
 	/**
+	 * Persist manual sort-order values for plans.
+	 *
+	 * @param array<int, int> $sort_order_by_id Map of plan id => sort order.
+	 * @return bool True when every update succeeds.
+	 */
+	public function reorder( array $sort_order_by_id ): bool {
+		global $wpdb;
+
+		$ok  = true;
+		$now = gmdate( 'Y-m-d H:i:s' );
+
+		foreach ( $sort_order_by_id as $id => $sort_order ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+			$updated = $wpdb->update(
+				SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
+				array(
+					'sort_order'       => (int) $sort_order,
+					'date_updated_gmt' => $now,
+				),
+				array( 'id' => (int) $id )
+			);
+
+			$ok = $ok && false !== $updated;
+		}
+
+		return $ok;
+	}
+
+	/**
+	 * Build SQL WHERE clauses from supported query args.
+	 *
+	 * @param array<string, mixed> $args Query args.
+	 */
+	private function build_where_clauses( array $args ): string {
+		global $wpdb;
+
+		$clauses = array();
+
+		$status = self::coerce_string( $args['status'] ?? null );
+		if ( '' !== $status ) {
+			$clauses[] = $wpdb->prepare( 'status = %s', $status );
+		}
+
+		$extension_slug = self::coerce_string( $args['extension_slug'] ?? null );
+		if ( '' !== $extension_slug ) {
+			$clauses[] = $wpdb->prepare( 'extension_slug = %s', $extension_slug );
+		}
+
+		$search = self::coerce_string( $args['search'] ?? null );
+		if ( '' !== $search ) {
+			$like      = '%' . $wpdb->esc_like( $search ) . '%';
+			$clauses[] = $wpdb->prepare( '(name LIKE %s OR description LIKE %s)', $like, $like );
+		}
+
+		if ( empty( $clauses ) ) {
+			return '';
+		}
+
+		return ' WHERE ' . implode( ' AND ', $clauses );
+	}
+
+	/**
+	 * Build a safe ORDER BY clause from supported query args.
+	 *
+	 * @param array<string, mixed> $args Query args.
+	 */
+	private function build_order_clause( array $args ): string {
+		$orderby_arg = self::coerce_string( $args['orderby'] ?? null );
+		$orderby     = isset( self::ORDERBY_COLUMNS[ $orderby_arg ] )
+			? self::ORDERBY_COLUMNS[ $orderby_arg ]
+			: 'sort_order';
+		$order       = 'desc' === strtolower( self::coerce_string( $args['order'] ?? null ) ) ? 'DESC' : 'ASC';
+
+		if ( 'sort_order' === $orderby ) {
+			return "ORDER BY sort_order {$order}, id ASC";
+		}
+
+		return "ORDER BY {$orderby} {$order}, id ASC";
+	}
+
+	/**
+	 * Hydrate a database row into a plan.
+	 *
+	 * @param array<string, mixed> $row Raw row.
+	 */
+	private function hydrate_row( array $row ): Plan {
+		foreach ( self::JSON_COLUMNS as $column ) {
+			$row[ $column ] = self::decode_json( $row[ $column ] ?? null );
+		}
+
+		return Plan::from_storage( $row );
+	}
+
+	/**
 	 * Decode a JSON column into an array.
 	 *
 	 * A SQL NULL column stays null so nullable policy columns
@@ -169,5 +333,22 @@ final class PlanRepository {
 		$decoded = json_decode( $value, true );
 
 		return is_array( $decoded ) ? $decoded : array();
+	}
+
+	/**
+	 * Normalize a database row to string keys.
+	 *
+	 * @param array<array-key, mixed> $row Raw row.
+	 * @return array<string, mixed>
+	 */
+	private static function string_keyed_array( array $row ): array {
+		$data = array();
+		foreach ( $row as $key => $value ) {
+			if ( is_string( $key ) ) {
+				$data[ $key ] = $value;
+			}
+		}
+
+		return $data;
 	}
 }

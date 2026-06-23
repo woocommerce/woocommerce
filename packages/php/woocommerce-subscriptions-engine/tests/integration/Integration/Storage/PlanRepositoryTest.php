@@ -90,6 +90,8 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 						),
 					)
 				),
+				'status'         => Plan::STATUS_ARCHIVED,
+				'sort_order'     => 4,
 				'extension_slug' => 'lite',
 			)
 		);
@@ -105,6 +107,8 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'A monthly plan', $fetched->get_description() );
 		$this->assertSame( $group_id, $fetched->get_group_id() );
 		$this->assertSame( 'lite', $fetched->get_extension_slug() );
+		$this->assertSame( Plan::STATUS_ARCHIVED, $fetched->get_status() );
+		$this->assertSame( 4, $fetched->get_sort_order() );
 		$this->assertSame( 'month', $fetched->get_billing_policy()->get_period() );
 		$this->assertSame( 12, $fetched->get_billing_policy()->get_max_cycles() );
 		$this->assertNotNull( $fetched->get_pricing_policy() );
@@ -157,11 +161,101 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$id   = $repo->insert( $plan );
 
 		$plan->set_name( 'After' );
+		$plan->set_status( Plan::STATUS_ARCHIVED );
+		$plan->set_sort_order( 8 );
 		$this->assertTrue( $repo->update( $plan ) );
 
 		$updated = $repo->find( $id );
 		$this->assertInstanceOf( Plan::class, $updated );
 		$this->assertSame( 'After', $updated->get_name() );
+		$this->assertSame( Plan::STATUS_ARCHIVED, $updated->get_status() );
+		$this->assertSame( 8, $updated->get_sort_order() );
+	}
+
+	public function test_query_count_and_reorder_use_plan_lifecycle_fields(): void {
+		$group_id = $this->make_group();
+		$repo     = new PlanRepository();
+
+		$first    = Plan::create(
+			$group_id,
+			array(
+				'name'           => 'Alpha monthly',
+				'billing_policy' => BillingPolicy::from_array(
+					array(
+						'period'   => 'month',
+						'interval' => 1,
+					)
+				),
+				'status'         => Plan::STATUS_ACTIVE,
+				'sort_order'     => 1,
+				'extension_slug' => 'lite',
+			)
+		);
+		$second   = Plan::create(
+			$group_id,
+			array(
+				'name'           => 'Beta weekly',
+				'billing_policy' => BillingPolicy::from_array(
+					array(
+						'period'   => 'week',
+						'interval' => 1,
+					)
+				),
+				'status'         => Plan::STATUS_ACTIVE,
+				'sort_order'     => 2,
+				'extension_slug' => 'lite',
+			)
+		);
+		$archived = Plan::create(
+			$group_id,
+			array(
+				'name'           => 'Archived yearly',
+				'billing_policy' => BillingPolicy::from_array(
+					array(
+						'period'   => 'year',
+						'interval' => 1,
+					)
+				),
+				'status'         => Plan::STATUS_ARCHIVED,
+				'sort_order'     => 3,
+				'extension_slug' => 'lite',
+			)
+		);
+
+		$first_id    = $repo->insert( $first );
+		$second_id   = $repo->insert( $second );
+		$archived_id = $repo->insert( $archived );
+
+		$active = $repo->query(
+			array(
+				'status' => Plan::STATUS_ACTIVE,
+				'search' => 'weekly',
+			)
+		);
+
+		$this->assertCount( 1, $active );
+		$this->assertSame( $second_id, $active[0]->get_id() );
+		$this->assertSame( 1, $repo->count( array( 'status' => Plan::STATUS_ARCHIVED ) ) );
+
+		$this->assertTrue(
+			$repo->reorder(
+				array(
+					$first_id    => 9,
+					$second_id   => 1,
+					$archived_id => 2,
+				)
+			)
+		);
+
+		$ordered = $repo->query(
+			array(
+				'orderby' => 'sort_order',
+				'order'   => 'asc',
+				'limit'   => 3,
+			)
+		);
+
+		$this->assertSame( array( $second_id, $archived_id, $first_id ), array_map( static fn ( Plan $plan ): ?int => $plan->get_id(), $ordered ) );
 	}
 
 	public function test_delete_removes_the_row(): void {

@@ -6,7 +6,7 @@
  * Mirrors the `pricing_policy` JSON column shape. Shape:
  *   {
  *     policies: [
- *       { type: 'percentage'|'fixed_amount'|'price', value: float, starting_cycle?: int },
+ *       { type: 'percentage'|'fixed_amount'|'price'|'bogo', value: float, starting_cycle?: int, duration_cycles?: int },
  *       ...
  *     ],
  *     one_time_fees: [
@@ -41,7 +41,7 @@ final class PricingPolicy {
 	/**
 	 * Recurring price adjustments, applied in array order.
 	 *
-	 * @var array<int, array{type: string, value: float, starting_cycle?: int}>
+	 * @var array<int, array{type: string, value: float, starting_cycle?: int, duration_cycles?: int}>
 	 */
 	private $policies;
 
@@ -55,8 +55,8 @@ final class PricingPolicy {
 	/**
 	 * Build a pricing policy.
 	 *
-	 * @param array<int, array{type: string, value: float, starting_cycle?: int}>                   $policies      Recurring price adjustments.
-	 * @param array<int, array{kind: string, amount: float, taxable: bool, tax_class: string|null}> $one_time_fees One-time fees.
+	 * @param array<int, array{type: string, value: float, starting_cycle?: int, duration_cycles?: int}> $policies      Recurring price adjustments.
+	 * @param array<int, array{kind: string, amount: float, taxable: bool, tax_class: string|null}>      $one_time_fees One-time fees.
 	 */
 	public function __construct( array $policies, array $one_time_fees ) {
 		$this->policies      = $policies;
@@ -95,6 +95,9 @@ final class PricingPolicy {
 			if ( isset( $entry['starting_cycle'] ) && is_numeric( $entry['starting_cycle'] ) ) {
 				$policy['starting_cycle'] = (int) $entry['starting_cycle'];
 			}
+			if ( isset( $entry['duration_cycles'] ) && is_numeric( $entry['duration_cycles'] ) ) {
+				$policy['duration_cycles'] = (int) $entry['duration_cycles'];
+			}
 			$policies[] = $policy;
 		}
 
@@ -125,7 +128,7 @@ final class PricingPolicy {
 	/**
 	 * Recurring price adjustments. Each entry: `{type, value, starting_cycle?}`.
 	 *
-	 * @return array<int, array{type: string, value: float, starting_cycle?: int}>
+	 * @return array<int, array{type: string, value: float, starting_cycle?: int, duration_cycles?: int}>
 	 */
 	public function get_policies(): array {
 		return $this->policies;
@@ -148,8 +151,10 @@ final class PricingPolicy {
 	 *  - `type: 'percentage'`   -> `base_price * (100 - value) / 100`.
 	 *  - `type: 'fixed_amount'` -> `max(0, base_price - value)` (clamped at zero).
 	 *  - `type: 'price'`        -> `value` (replaces base price entirely).
+	 *  - `type: 'bogo'`         -> unchanged here; use calculate_line_total().
 	 *  - `starting_cycle` gate: skip the entry when `$cycle < starting_cycle`.
 	 *    A missing `starting_cycle` means the entry applies to all cycles.
+	 *  - `duration_cycles` gate: skip the entry once the duration window ends.
 	 *  - Entries are applied in array order; later entries operate on the result.
 	 *
 	 * One-time fees are intentionally not applied here.
@@ -161,7 +166,7 @@ final class PricingPolicy {
 		$price = $base_price;
 
 		foreach ( $this->policies as $policy ) {
-			if ( isset( $policy['starting_cycle'] ) && $cycle < (int) $policy['starting_cycle'] ) {
+			if ( ! $this->policy_applies_to_cycle( $policy, $cycle ) ) {
 				continue;
 			}
 
@@ -178,12 +183,46 @@ final class PricingPolicy {
 				case 'price':
 					$price = $value;
 					break;
+				case 'bogo':
+					break;
 				default:
 					break;
 			}
 		}
 
 		return $price;
+	}
+
+	/**
+	 * Apply the recurring policy chain to a line total for the given cycle.
+	 *
+	 * BOGO is quantity-aware: for whole quantities, buy-one-get-one-free means
+	 * every second unit is free. Fractional quantities fall back to the charged
+	 * unit price because there is no stable "free item" boundary to apply.
+	 *
+	 * @param float $unit_price The product's base unit price for this cycle.
+	 * @param float $quantity   Quantity on the line.
+	 * @param int   $cycle      1-indexed cycle number.
+	 */
+	public function calculate_line_total( float $unit_price, float $quantity, int $cycle = 1 ): float {
+		$effective_unit_price = $this->calculate_price( $unit_price, $cycle );
+		$total                = max( 0.0, $effective_unit_price * $quantity );
+
+		foreach ( $this->policies as $policy ) {
+			if ( ! $this->policy_applies_to_cycle( $policy, $cycle ) || 'bogo' !== (string) ( $policy['type'] ?? '' ) ) {
+				continue;
+			}
+
+			$whole_quantity = (int) $quantity;
+			if ( (float) $whole_quantity !== $quantity || $whole_quantity < 2 ) {
+				continue;
+			}
+
+			$paid_quantity = (int) ceil( $whole_quantity / 2 );
+			$total         = max( 0.0, $effective_unit_price * $paid_quantity );
+		}
+
+		return $total;
 	}
 
 	/**
@@ -196,5 +235,27 @@ final class PricingPolicy {
 			'policies'      => $this->policies,
 			'one_time_fees' => $this->one_time_fees,
 		);
+	}
+
+	/**
+	 * Whether a pricing policy entry applies to the requested cycle.
+	 *
+	 * @param array{starting_cycle?: int, duration_cycles?: int} $policy Policy entry.
+	 * @param int                                                $cycle  1-indexed cycle number.
+	 */
+	private function policy_applies_to_cycle( array $policy, int $cycle ): bool {
+		$starting_cycle = $policy['starting_cycle'] ?? 1;
+		if ( $cycle < $starting_cycle ) {
+			return false;
+		}
+
+		if ( isset( $policy['duration_cycles'] ) ) {
+			$last_cycle = $starting_cycle + $policy['duration_cycles'] - 1;
+			if ( $cycle > $last_cycle ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }

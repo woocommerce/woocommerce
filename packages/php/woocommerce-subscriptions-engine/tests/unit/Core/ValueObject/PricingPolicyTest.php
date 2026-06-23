@@ -74,6 +74,60 @@ class PricingPolicyTest extends TestCase {
 		$this->assertSame( 5.0, $policy->calculate_price( 50.0, 2 ) );
 	}
 
+	public function test_duration_cycles_limits_policy_window(): void {
+		$policy = PricingPolicy::from_array(
+			array(
+				'policies' => array(
+					array(
+						'type'            => 'percentage',
+						'value'           => 50,
+						'starting_cycle'  => 2,
+						'duration_cycles' => 2,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 100.0, $policy->calculate_price( 100.0, 1 ) );
+		$this->assertSame( 50.0, $policy->calculate_price( 100.0, 2 ) );
+		$this->assertSame( 50.0, $policy->calculate_price( 100.0, 3 ) );
+		$this->assertSame( 100.0, $policy->calculate_price( 100.0, 4 ) );
+	}
+
+	public function test_bogo_applies_to_line_total_without_changing_unit_price(): void {
+		$policy = PricingPolicy::from_array(
+			array(
+				'policies' => array(
+					array(
+						'type'  => 'bogo',
+						'value' => 1,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 10.0, $policy->calculate_price( 10.0 ) );
+		$this->assertSame( 10.0, $policy->calculate_line_total( 10.0, 2.0 ) );
+		$this->assertSame( 20.0, $policy->calculate_line_total( 10.0, 3.0 ) );
+	}
+
+	public function test_bogo_respects_cycle_window(): void {
+		$policy = PricingPolicy::from_array(
+			array(
+				'policies' => array(
+					array(
+						'type'            => 'bogo',
+						'value'           => 1,
+						'duration_cycles' => 1,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 10.0, $policy->calculate_line_total( 10.0, 2.0, 1 ) );
+		$this->assertSame( 20.0, $policy->calculate_line_total( 10.0, 2.0, 2 ) );
+	}
+
 	public function test_whole_number_values_normalize_to_float(): void {
 		$policy = PricingPolicy::from_array(
 			array(

@@ -77,6 +77,20 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'extension_slug', $column );
 	}
 
+	public function test_plans_table_has_status_and_sort_order_columns(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$status = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'status' ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sort_order = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'sort_order' ) );
+
+		$this->assertSame( 'status', $status );
+		$this->assertSame( 'sort_order', $sort_order );
+	}
+
 	public function test_contracts_table_has_extension_slug_column(): void {
 		global $wpdb;
 

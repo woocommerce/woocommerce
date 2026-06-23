@@ -30,7 +30,15 @@ final class Plan {
 
 	const DEFAULT_CATEGORY = 'SUBSCRIPTION';
 
-	const ALLOWED_POLICY_TYPES = array( 'percentage', 'fixed_amount', 'price' );
+	const DEFAULT_STATUS = 'active';
+
+	const STATUS_ACTIVE = 'active';
+
+	const STATUS_ARCHIVED = 'archived';
+
+	const ALLOWED_STATUSES = array( self::STATUS_ACTIVE, self::STATUS_ARCHIVED );
+
+	const ALLOWED_POLICY_TYPES = array( 'percentage', 'fixed_amount', 'price', 'bogo' );
 
 	/**
 	 * Plan id, or null before it is persisted.
@@ -96,6 +104,20 @@ final class Plan {
 	private $category;
 
 	/**
+	 * Merchant lifecycle status.
+	 *
+	 * @var string
+	 */
+	private $status;
+
+	/**
+	 * Manual display order.
+	 *
+	 * @var int
+	 */
+	private $sort_order;
+
+	/**
 	 * Owning extension slug, or null until owner semantics are assigned.
 	 *
 	 * @var string|null
@@ -114,6 +136,8 @@ final class Plan {
 	 * @param DeliveryPolicy|null $delivery_policy Optional delivery policy.
 	 * @param PricingPolicy|null  $pricing_policy  Optional pricing policy.
 	 * @param string              $category        Plan category.
+	 * @param string              $status          Merchant lifecycle status.
+	 * @param int                 $sort_order      Manual display order.
 	 * @param string|null         $extension_slug  Owning extension slug.
 	 */
 	private function __construct(
@@ -126,8 +150,12 @@ final class Plan {
 		?DeliveryPolicy $delivery_policy,
 		?PricingPolicy $pricing_policy,
 		string $category,
+		string $status,
+		int $sort_order,
 		?string $extension_slug
 	) {
+		self::validate_status( $status );
+
 		$this->id              = $id;
 		$this->group_id        = $group_id;
 		$this->name            = $name;
@@ -137,6 +165,8 @@ final class Plan {
 		$this->delivery_policy = $delivery_policy;
 		$this->pricing_policy  = $pricing_policy;
 		$this->category        = $category;
+		$this->status          = $status;
+		$this->sort_order      = $sort_order;
 		$this->extension_slug  = $extension_slug;
 	}
 
@@ -176,6 +206,8 @@ final class Plan {
 			$delivery_policy,
 			$pricing_policy,
 			self::coerce_string( $args['category'] ?? null, self::DEFAULT_CATEGORY ),
+			self::coerce_string( $args['status'] ?? null, self::DEFAULT_STATUS ),
+			self::coerce_int( $args['sort_order'] ?? null, 0 ),
 			self::coerce_nullable_string( $args['extension_slug'] ?? null )
 		);
 	}
@@ -209,6 +241,8 @@ final class Plan {
 			isset( $row['delivery_policy'] ) && is_array( $row['delivery_policy'] ) ? DeliveryPolicy::from_array( $row['delivery_policy'] ) : null,
 			$pricing_policy,
 			self::coerce_string( $row['category'] ?? null, self::DEFAULT_CATEGORY ),
+			self::coerce_string( $row['status'] ?? null, self::DEFAULT_STATUS ),
+			self::coerce_int( $row['sort_order'] ?? null, 0 ),
 			self::coerce_nullable_string( $row['extension_slug'] ?? null )
 		);
 	}
@@ -355,6 +389,40 @@ final class Plan {
 	}
 
 	/**
+	 * Merchant lifecycle status.
+	 */
+	public function get_status(): string {
+		return $this->status;
+	}
+
+	/**
+	 * Set the merchant lifecycle status.
+	 *
+	 * @param string $status Plan status.
+	 * @throws InvalidArgumentException If the status is unknown.
+	 */
+	public function set_status( string $status ): void {
+		self::validate_status( $status );
+		$this->status = $status;
+	}
+
+	/**
+	 * Manual display order.
+	 */
+	public function get_sort_order(): int {
+		return $this->sort_order;
+	}
+
+	/**
+	 * Set the manual display order.
+	 *
+	 * @param int $sort_order Sort order.
+	 */
+	public function set_sort_order( int $sort_order ): void {
+		$this->sort_order = $sort_order;
+	}
+
+	/**
 	 * Owning extension slug, or null.
 	 */
 	public function get_extension_slug(): ?string {
@@ -378,6 +446,24 @@ final class Plan {
 	}
 
 	/**
+	 * Apply this plan's pricing policy to a line total for the cycle.
+	 *
+	 * BOGO requires quantity context and is therefore represented here rather
+	 * than in the unit-price convenience method above.
+	 *
+	 * @param float $unit_price The product's base unit price for this cycle.
+	 * @param float $quantity   Quantity on the line.
+	 * @param int   $cycle      1-indexed cycle number.
+	 */
+	public function calculate_line_total( float $unit_price, float $quantity, int $cycle = 1 ): float {
+		if ( null === $this->pricing_policy ) {
+			return max( 0.0, $unit_price * $quantity );
+		}
+
+		return $this->pricing_policy->calculate_line_total( $unit_price, $quantity, $cycle );
+	}
+
+	/**
 	 * Serialize to the storage column shape (excluding generated id/timestamps).
 	 *
 	 * Policy value objects are returned as arrays; the repository JSON-encodes them.
@@ -394,16 +480,33 @@ final class Plan {
 			'delivery_policy' => null !== $this->delivery_policy ? $this->delivery_policy->to_array() : null,
 			'pricing_policy'  => null !== $this->pricing_policy ? $this->pricing_policy->to_array() : null,
 			'category'        => $this->category,
+			'status'          => $this->status,
+			'sort_order'      => $this->sort_order,
 			'extension_slug'  => $this->extension_slug,
 		);
+	}
+
+	/**
+	 * Validate a plan lifecycle status.
+	 *
+	 * @param string $status Status to validate.
+	 * @throws InvalidArgumentException If the status is unknown.
+	 */
+	private static function validate_status( string $status ): void {
+		if ( ! in_array( $status, self::ALLOWED_STATUSES, true ) ) {
+			throw new InvalidArgumentException(
+				sprintf( 'Plan: invalid status "%s".', $status )
+			);
+		}
 	}
 
 	/**
 	 * Validate every entry in a pricing policy's policies[] and one_time_fees[].
 	 *
 	 * Rules:
-	 *  - policies[].type is one of percentage, fixed_amount, price.
+	 *  - policies[].type is one of percentage, fixed_amount, price, bogo.
 	 *  - policies[].value is numeric and non-negative; percentage is capped at 100.
+	 *  - policies[].duration_cycles is optional, integer, and positive.
 	 *  - one_time_fees[].amount is numeric and non-negative.
 	 *  - one_time_fees[].taxable is a bool.
 	 *  - one_time_fees[].tax_class is string or null (preserves '' != null).
@@ -424,6 +527,7 @@ final class Plan {
 			$type           = $entry['type'] ?? null;
 			$value          = $entry['value'] ?? null;
 			$starting_cycle = $entry['starting_cycle'] ?? null;
+			$duration       = $entry['duration_cycles'] ?? null;
 
 			if ( ! is_string( $type ) || ! in_array( $type, self::ALLOWED_POLICY_TYPES, true ) ) {
 				$shown = is_scalar( $type ) ? (string) $type : gettype( $type );
@@ -462,6 +566,20 @@ final class Plan {
 				if ( $starting_cycle < 1 ) {
 					throw new InvalidArgumentException(
 						sprintf( 'pricing_policy.policies[%d]: starting_cycle must be at least 1, got %d', (int) $index, $starting_cycle )
+					);
+				}
+			}
+
+			if ( null !== $duration ) {
+				if ( ! is_int( $duration ) ) {
+					throw new InvalidArgumentException(
+						sprintf( 'pricing_policy.policies[%d]: duration_cycles must be an integer, got %s', (int) $index, gettype( $duration ) )
+					);
+				}
+
+				if ( $duration < 1 ) {
+					throw new InvalidArgumentException(
+						sprintf( 'pricing_policy.policies[%d]: duration_cycles must be at least 1, got %d', (int) $index, $duration )
 					);
 				}
 			}
