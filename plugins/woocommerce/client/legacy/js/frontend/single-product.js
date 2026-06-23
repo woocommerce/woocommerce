@@ -278,10 +278,12 @@ jQuery( function( $ ) {
 			start: function( slider ) {
 				$target.css( 'opacity', 1 );
 				gallery.syncVideoPlayback( slider.currentSlide );
+				gallery.syncVideoThumbnailPreviewOpacity();
 			},
 			after: function( slider ) {
 				gallery.initZoomForTarget( gallery.$images.eq( slider.currentSlide ) );
 				gallery.syncVideoPlayback( slider.currentSlide );
+				gallery.syncVideoThumbnailPreviewOpacity();
 			}
 		}, args );
 
@@ -292,6 +294,7 @@ jQuery( function( $ ) {
 			.on( 'click.wcProductGalleryVideoThumbs', '.flex-control-thumbs img', function() {
 				window.setTimeout( function() {
 					gallery.syncVideoPlayback();
+					gallery.syncVideoThumbnailPreviewOpacity();
 				}, 0 );
 			} );
 
@@ -365,14 +368,45 @@ jQuery( function( $ ) {
 				muted: 'muted',
 				playsinline: 'playsinline',
 				'aria-hidden': 'true',
+			} ).css( {
+				position: 'absolute',
+				top: 0,
+				right: 0,
+				bottom: 0,
+				left: 0,
+				width: '100%',
+				height: '100%',
+				objectFit: 'cover',
+				opacity: 0.5,
+				pointerEvents: 'none',
 			} );
 
 			$thumbItem
-				.addClass( 'woocommerce-product-gallery__video-thumbnail' );
+				.addClass( 'woocommerce-product-gallery__video-thumbnail' )
+				.css( 'position', 'relative' );
 			$thumb
 				.addClass( 'woocommerce-product-gallery__video-thumbnail-placeholder' )
+				.css( 'opacity', 0 )
 				.after( video );
 		} );
+
+		this.syncVideoThumbnailPreviewOpacity();
+	};
+
+	/**
+	 * Sync video thumbnail preview opacity with FlexSlider active state.
+	 */
+	ProductGallery.prototype.syncVideoThumbnailPreviewOpacity = function() {
+		this.$target
+			.find( '.flex-control-thumbs li.woocommerce-product-gallery__video-thumbnail' )
+			.each( function() {
+				const $thumbItem = $( this );
+				const isActive = $thumbItem.find( 'img.flex-active' ).length > 0;
+
+				$thumbItem
+					.find( '.woocommerce-product-gallery__video-thumbnail-preview' )
+					.css( 'opacity', isActive ? 1 : 0.5 );
+			} );
 	};
 
 	/**
@@ -532,6 +566,7 @@ jQuery( function( $ ) {
 			muted: 'muted',
 			loop: 'loop',
 			playsinline: 'playsinline',
+			style: 'display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;',
 			'aria-label': media.attr( 'aria-label' ) || '',
 		} );
 		const poster = media.attr( 'poster' );
@@ -542,6 +577,7 @@ jQuery( function( $ ) {
 
 		return $( '<div />', {
 			class: 'woocommerce-product-gallery__photoswipe-video-wrapper',
+			style: 'display:flex;align-items:center;justify-content:center;width:100%;height:100%;',
 		} )
 			.append( $video )
 			.prop( 'outerHTML' );
