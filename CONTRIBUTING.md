@@ -97,7 +97,7 @@ pnpm --filter='@woocommerce/admin-library' test:js
 pnpm --filter='@woocommerce/block-library' test:js
 ```
 
-See the [unit tests README](plugins/woocommerce/tests/README.md), [E2E tests README](plugins/woocommerce/tests/e2e-pw/README.md), and [performance tests README](plugins/woocommerce/tests/performance/README.md) for full details.
+See the [unit tests README](plugins/woocommerce/tests/README.md), [E2E tests README](plugins/woocommerce/tests/e2e/README.md), and [performance tests README](plugins/woocommerce/tests/performance/README.md) for full details.
 
 ## Linting and static analysis
 
@@ -138,7 +138,7 @@ For the full PR workflow, changelog conventions, and coding guidelines, see [Con
 
 ## Repository structure
 
-```
+```text
 plugins/                   # WordPress plugins
   woocommerce/             # WooCommerce Core plugin
     src/                   #   Modern PHP (PSR-4, DI container)

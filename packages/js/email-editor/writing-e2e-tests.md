@@ -70,7 +70,7 @@ test.describe('WooCommerce Email Editor', () => {
 
 ### 2. Test Organization
 
-- Place tests in `tests/e2e-pw/tests/email-editor/`
+- Place tests in `tests/e2e/tests/email-editor/`
 - Use descriptive file names with `.spec.js` extension
 - Group related tests using `test.describe()`
 - Use helper functions for common operations

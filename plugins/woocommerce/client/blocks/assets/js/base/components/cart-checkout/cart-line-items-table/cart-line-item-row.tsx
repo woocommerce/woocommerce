@@ -3,6 +3,7 @@
  */
 import clsx from 'clsx';
 import { __, sprintf } from '@wordpress/i18n';
+import { decodeEntities } from '@wordpress/html-entities';
 import { speak } from '@wordpress/a11y';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
 import ProductPrice from '@woocommerce/base-components/product-price';
@@ -20,7 +21,7 @@ import {
 } from '@woocommerce/blocks-checkout';
 import { forwardRef, useMemo } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/types';
-import { isBoolean, objectHasProp, Currency } from '@woocommerce/types';
+import { isBoolean, Currency } from '@woocommerce/types';
 import { getSetting, getSettingWithCoercion } from '@woocommerce/settings';
 import { Icon, trash } from '@wordpress/icons';
 import { calculateSaleAmount } from '@woocommerce/base-utils';
@@ -163,6 +164,8 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 			extensions,
 			arg,
 		} );
+		// `name` is a raw HTML string; decode entities for screen-reader text (aria-label, speak).
+		const decodedName = decodeEntities( name );
 
 		const regularAmountSingle = dinero( {
 			amount: parseInt( prices.raw_prices.regular_price, 10 ),
@@ -234,6 +237,8 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 
 		return (
 			<tr
+				// Restores the row role that `display: grid` strips in the responsive layout.
+				role="row"
 				data-cart-item-key={ lineItem.key }
 				className={ clsx(
 					'wc-block-cart-items__row',
@@ -245,14 +250,8 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 				ref={ ref }
 				tabIndex={ tabIndex }
 			>
-				{ /* If the image has no alt text, this link is unnecessary and can be hidden. */ }
-				<td
-					className="wc-block-cart-item__image"
-					aria-hidden={
-						! objectHasProp( firstImage, 'alt' ) || ! firstImage.alt
-					}
-				>
-					{ /* We don't need to make it focusable, because product name has the same link. */ }
+				{ /* Decorative image, hidden from screen readers so the row isn't announced as an empty "Product" cell. */ }
+				<td className="wc-block-cart-item__image" aria-hidden="true">
 					{ isProductHiddenFromCatalog ? (
 						<ProductImage
 							image={ firstImage }
@@ -271,7 +270,12 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 						</a>
 					) }
 				</td>
-				<td role="rowheader" className="wc-block-cart-item__product">
+				<td
+					role="rowheader"
+					// Name the rowheader after the product only, not the whole cell's contents.
+					aria-label={ decodedName }
+					className="wc-block-cart-item__product"
+				>
 					<div className="wc-block-cart-item__wrap">
 						<ProductName
 							disabled={
@@ -323,7 +327,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 											}
 										);
 									} }
-									itemName={ name }
+									itemName={ decodedName }
 								/>
 							) }
 							{ showRemoveItemLink && (
@@ -335,7 +339,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 											'Remove %s from cart',
 											'woocommerce'
 										),
-										name
+										decodedName
 									) }
 									onClick={ () => {
 										onRemove();
@@ -354,7 +358,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 													'%s has been removed from your cart.',
 													'woocommerce'
 												),
-												name
+												decodedName
 											)
 										);
 									} }
@@ -400,7 +404,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 													'%s has been saved for later and removed from your cart.',
 													'woocommerce'
 												),
-												name
+												decodedName
 											)
 										);
 									} }
