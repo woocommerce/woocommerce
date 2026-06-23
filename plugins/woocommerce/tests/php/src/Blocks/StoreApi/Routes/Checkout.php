@@ -2387,9 +2387,12 @@ class Checkout extends MockeryTestCase {
 
 		$method = new \ReflectionMethod( CheckoutRoute::class, 'get_request_payment_method' );
 		$method->setAccessible( true );
-		$result = $method->invoke( $route, $request );
 
-		remove_filter( 'woocommerce_available_payment_gateways', $counter );
+		try {
+			$result = $method->invoke( $route, $request );
+		} finally {
+			remove_filter( 'woocommerce_available_payment_gateways', $counter );
+		}
 
 		$this->assertNull( $result, 'No payment method should resolve to a null gateway.' );
 		$this->assertSame( 0, $gateway_resolution_count, 'Available payment gateways must not be resolved when no payment method is supplied.' );
@@ -2406,6 +2409,9 @@ class Checkout extends MockeryTestCase {
 		$order = new \WC_Order();
 		$order->save();
 
+		// This scenario depends on the order not needing payment, so the empty-method branch returns null instead of throwing.
+		$this->assertFalse( $order->needs_payment(), 'A zero-total order should not need payment in this scenario.' );
+
 		$order_property = new \ReflectionProperty( CheckoutOrderRoute::class, 'order' );
 		$order_property->setAccessible( true );
 		$order_property->setValue( $route, $order );
@@ -2421,11 +2427,13 @@ class Checkout extends MockeryTestCase {
 
 		$method = new \ReflectionMethod( CheckoutOrderRoute::class, 'get_request_payment_method' );
 		$method->setAccessible( true );
-		$result = $method->invoke( $route, $request );
 
-		remove_filter( 'woocommerce_available_payment_gateways', $counter );
-
-		$order->delete( true );
+		try {
+			$result = $method->invoke( $route, $request );
+		} finally {
+			remove_filter( 'woocommerce_available_payment_gateways', $counter );
+			$order->delete( true );
+		}
 
 		$this->assertNull( $result, 'No payment method on a zero-total order should resolve to a null gateway.' );
 		$this->assertSame( 0, $gateway_resolution_count, 'Available payment gateways must not be resolved when no payment method is supplied.' );
