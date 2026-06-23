@@ -10,13 +10,40 @@ type MockAddToCartWithOptionsStore = {
 			title?: string;
 			disabled: boolean;
 			hidden: boolean;
+			isUnavailable?: boolean;
 		} >;
+	};
+	actions: {
+		toggle: ( item?: {
+			value: string;
+			hidden?: boolean;
+			disabled?: boolean;
+		} ) => void;
 	};
 };
 
 let mockAddToCartWithOptionsStore: MockAddToCartWithOptionsStore | null = null;
 
-let mockContext: Record< string, unknown > = {};
+type MockContext = {
+	name: string;
+	selectedValue?: string | null;
+	selectedAttributes: Array< { attribute: string; value: string } >;
+	variationAttributeOptions: Array< {
+		id: string;
+		label: string;
+		value: string;
+		ariaLabel?: string;
+		title?: string;
+	} >;
+	disabledAttributesAction?: 'disable' | 'hide';
+	autoselect?: boolean;
+};
+
+let mockContext: MockContext = {
+	name: '',
+	selectedAttributes: [],
+	variationAttributeOptions: [],
+};
 
 const mockProductsState: {
 	mainProductInContext: ProductResponseItem | null;
@@ -44,6 +71,7 @@ jest.mock(
 				);
 				mockAddToCartWithOptionsStore = {
 					state: state as MockAddToCartWithOptionsStore[ 'state' ],
+					actions: definition.actions,
 				};
 				return mockAddToCartWithOptionsStore;
 			}
@@ -92,6 +120,8 @@ const createVariation = (
 
 describe( 'Add to Cart + Options variation selector frontend', () => {
 	beforeEach( () => {
+		// mockProductsState and mockContext are populated after requiring the
+		// module because selectableItems is a lazy getter evaluated by each test.
 		jest.isolateModules( () => {
 			require( '../frontend' );
 		} );
@@ -112,7 +142,7 @@ describe( 'Add to Cart + Options variation selector frontend', () => {
 		};
 	} );
 
-	it( 'disables out-of-stock variation options', () => {
+	it( 'keeps out-of-stock variation options selectable', () => {
 		expect(
 			mockAddToCartWithOptionsStore?.state.selectableItems
 		).toMatchObject( [
@@ -120,9 +150,19 @@ describe( 'Add to Cart + Options variation selector frontend', () => {
 			{
 				value: 'large',
 				title: 'Out of stock',
-				disabled: true,
+				disabled: false,
 				hidden: false,
+				isUnavailable: true,
 			},
+		] );
+
+		mockAddToCartWithOptionsStore?.actions.toggle(
+			mockAddToCartWithOptionsStore.state.selectableItems[ 1 ]
+		);
+
+		expect( mockContext.selectedValue ).toBe( 'large' );
+		expect( mockContext.selectedAttributes ).toEqual( [
+			{ attribute: 'Size', value: 'large' },
 		] );
 	} );
 
@@ -136,8 +176,9 @@ describe( 'Add to Cart + Options variation selector frontend', () => {
 			{
 				value: 'large',
 				title: 'Out of stock',
-				disabled: true,
-				hidden: true,
+				disabled: false,
+				hidden: false,
+				isUnavailable: true,
 			},
 		] );
 	} );
@@ -148,6 +189,26 @@ describe( 'Add to Cart + Options variation selector frontend', () => {
 			true,
 			false
 		);
+
+		expect(
+			mockAddToCartWithOptionsStore?.state.selectableItems
+		).toMatchObject( [
+			{ value: 'small', disabled: false, hidden: false },
+			{
+				value: 'large',
+				title: undefined,
+				disabled: true,
+				hidden: false,
+			},
+		] );
+	} );
+
+	it( 'disables non-purchasable variation options when only purchasable status is available', () => {
+		mockProductsState.productVariations[ 11 ] = {
+			id: 11,
+			type: 'variation',
+			is_purchasable: false,
+		} as ProductResponseItem;
 
 		expect(
 			mockAddToCartWithOptionsStore?.state.selectableItems

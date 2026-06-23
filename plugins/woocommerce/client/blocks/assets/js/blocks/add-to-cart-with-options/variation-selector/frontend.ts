@@ -170,11 +170,11 @@ const isAttributeValueValid = ( {
 const isVariationInStockAndPurchasable = (
 	variation: ProductResponseItem | ProductResponseVariationsItem
 ) => {
-	if (
-		'is_in_stock' in variation &&
-		'is_purchasable' in variation &&
-		( ! variation.is_in_stock || ! variation.is_purchasable )
-	) {
+	if ( 'is_in_stock' in variation && ! variation.is_in_stock ) {
+		return false;
+	}
+
+	if ( 'is_purchasable' in variation && ! variation.is_purchasable ) {
 		return false;
 	}
 
@@ -374,18 +374,19 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const outOfStockOptionTitle = getOutOfStockOptionTitle();
 
 				return variationAttributeOptions.map( ( row, index ) => {
-					const disabled = ! isAttributeValueValid( {
+					const invalid = ! isAttributeValueValid( {
 						attributeName: name,
 						attributeValue: row.value,
 						selectedAttributes,
 					} );
 					const outOfStock =
-						disabled &&
+						invalid &&
 						isAttributeValueOutOfStock( {
 							attributeName: name,
 							attributeValue: row.value,
 							selectedAttributes,
 						} );
+					const disabled = invalid && ! outOfStock;
 					const selected = selectedAttributes.some(
 						( attrObject ) =>
 							attributeNamesMatch( attrObject.attribute, name ) &&
@@ -399,11 +400,12 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						title:
 							outOfStock && outOfStockOptionTitle
 								? outOfStockOptionTitle
-								: row.title,
+								: undefined,
 						index,
 						selected,
 						disabled,
 						hidden: hideInvalid && disabled,
+						isUnavailable: outOfStock,
 						...( row.visual !== undefined && {
 							visual: row.visual,
 						} ),
