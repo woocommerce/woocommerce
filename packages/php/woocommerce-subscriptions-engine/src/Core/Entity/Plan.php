@@ -183,9 +183,22 @@ final class Plan {
 	/**
 	 * Hydrate from a stored row. Policy columns arrive JSON-decoded.
 	 *
+	 * The stored pricing policy is re-validated here: a WordPress database can be
+	 * mutated outside this engine's flows, and an out-of-range stored rule (a
+	 * negative or over-100 value) would otherwise feed billing math silently. We
+	 * fail loud on a corrupted row rather than risk a mischarge.
+	 *
 	 * @param array<string, mixed> $row Decoded plan row.
+	 * @throws InvalidArgumentException If the stored pricing_policy fails validation.
 	 */
 	public static function from_storage( array $row ): self {
+		$pricing_policy = isset( $row['pricing_policy'] ) && is_array( $row['pricing_policy'] )
+			? PricingPolicy::from_array( $row['pricing_policy'] )
+			: null;
+		if ( null !== $pricing_policy ) {
+			self::validate_pricing_policy( $pricing_policy );
+		}
+
 		return new self(
 			isset( $row['id'] ) ? self::coerce_int( $row['id'] ) : null,
 			self::coerce_int( $row['group_id'] ?? null ),
@@ -194,7 +207,7 @@ final class Plan {
 			is_array( $row['options'] ?? null ) ? $row['options'] : array(),
 			BillingPolicy::from_array( is_array( $row['billing_policy'] ?? null ) ? $row['billing_policy'] : array() ),
 			isset( $row['delivery_policy'] ) && is_array( $row['delivery_policy'] ) ? DeliveryPolicy::from_array( $row['delivery_policy'] ) : null,
-			isset( $row['pricing_policy'] ) && is_array( $row['pricing_policy'] ) ? PricingPolicy::from_array( $row['pricing_policy'] ) : null,
+			$pricing_policy,
 			self::coerce_string( $row['category'] ?? null, self::DEFAULT_CATEGORY ),
 			self::coerce_nullable_string( $row['extension_slug'] ?? null )
 		);

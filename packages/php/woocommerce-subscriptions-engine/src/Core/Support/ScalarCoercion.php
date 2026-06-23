@@ -45,21 +45,40 @@ trait ScalarCoercion {
 	}
 
 	/**
-	 * Coerce a value to an int, falling back to a default when it is not numeric.
+	 * Coerce a value to an int, falling back to a default when it is not an integer.
+	 *
+	 * Only genuine integers and integer-valued strings are accepted; fractional or
+	 * exponent forms (`1.5`, `1e2`) are rejected rather than silently truncated, so
+	 * a corrupted identifier or counter falls back instead of changing value.
 	 *
 	 * @param mixed $value    The raw value.
-	 * @param int   $fallback Returned when $value is not numeric.
+	 * @param int   $fallback Returned when $value is not an integer.
 	 */
 	private static function coerce_int( $value, int $fallback = 0 ): int {
-		return is_numeric( $value ) ? (int) $value : $fallback;
+		if ( is_int( $value ) ) {
+			return $value;
+		}
+
+		$validated = is_string( $value ) ? filter_var( $value, FILTER_VALIDATE_INT ) : false;
+
+		return false !== $validated ? $validated : $fallback;
 	}
 
 	/**
-	 * Coerce a value to an int, or null when it is not numeric.
+	 * Coerce a value to an int, or null when it is not an integer.
+	 *
+	 * Same integer-only rule as {@see self::coerce_int()}: fractional/exponent
+	 * forms are rejected rather than truncated.
 	 *
 	 * @param mixed $value The raw value.
 	 */
 	private static function coerce_nullable_int( $value ): ?int {
-		return is_numeric( $value ) ? (int) $value : null;
+		if ( is_int( $value ) ) {
+			return $value;
+		}
+
+		$validated = is_string( $value ) ? filter_var( $value, FILTER_VALIDATE_INT ) : false;
+
+		return false !== $validated ? $validated : null;
 	}
 }

@@ -104,10 +104,17 @@ final class PricingPolicy {
 			if ( ! is_array( $entry ) ) {
 				continue;
 			}
+			// Interpret taxable as a real boolean so a stored string like 'false'
+			// (truthy under !empty) does not flip a fee to taxable and change totals.
+			$taxable = false;
+			if ( array_key_exists( 'taxable', $entry ) ) {
+				$normalized_taxable = filter_var( $entry['taxable'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+				$taxable            = null !== $normalized_taxable ? $normalized_taxable : false;
+			}
 			$fees[] = array(
 				'kind'      => isset( $entry['kind'] ) && is_scalar( $entry['kind'] ) ? (string) $entry['kind'] : '',
 				'amount'    => isset( $entry['amount'] ) && is_numeric( $entry['amount'] ) ? (float) $entry['amount'] : 0.0,
-				'taxable'   => ! empty( $entry['taxable'] ),
+				'taxable'   => $taxable,
 				'tax_class' => ( array_key_exists( 'tax_class', $entry ) && is_scalar( $entry['tax_class'] ) ) ? (string) $entry['tax_class'] : null,
 			);
 		}

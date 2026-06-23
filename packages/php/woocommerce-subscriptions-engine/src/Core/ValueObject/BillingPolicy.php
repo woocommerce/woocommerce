@@ -24,6 +24,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 use DateTimeImmutable;
 use DateTimeZone;
 use DomainException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -34,6 +35,8 @@ defined( 'ABSPATH' ) || exit;
  * stored row, or via the constructor when building one in code.
  */
 final class BillingPolicy {
+
+	use ScalarCoercion;
 
 	/**
 	 * Period unit: 'day' | 'week' | 'month' | 'year'.
@@ -123,8 +126,8 @@ final class BillingPolicy {
 		return new self(
 			(string) $data['period'],
 			(int) $data['interval'],
-			isset( $data['min_cycles'] ) && is_numeric( $data['min_cycles'] ) ? (int) $data['min_cycles'] : null,
-			isset( $data['max_cycles'] ) && is_numeric( $data['max_cycles'] ) ? (int) $data['max_cycles'] : null,
+			self::coerce_nullable_int( $data['min_cycles'] ?? null ),
+			self::coerce_nullable_int( $data['max_cycles'] ?? null ),
 			$trial
 		);
 	}

@@ -125,4 +125,40 @@ class PricingPolicyTest extends TestCase {
 		$this->assertFalse( $fees[1]['taxable'] );
 		$this->assertSame( '', $fees[1]['tax_class'] );
 	}
+
+	/**
+	 * @dataProvider provide_taxable_values
+	 * @param mixed $supplied Raw taxable value as it might arrive from storage.
+	 * @param bool  $expected Expected normalized boolean.
+	 */
+	public function test_taxable_is_interpreted_as_a_real_boolean( $supplied, bool $expected ): void {
+		$policy = PricingPolicy::from_array(
+			array(
+				'one_time_fees' => array(
+					array(
+						'kind'    => 'setup',
+						'amount'  => 5,
+						'taxable' => $supplied,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( $expected, $policy->get_one_time_fees()[0]['taxable'] );
+	}
+
+	/**
+	 * @return array<string, array{0: mixed, 1: bool}>
+	 */
+	public function provide_taxable_values(): array {
+		return array(
+			'bool true'    => array( true, true ),
+			'bool false'   => array( false, false ),
+			'string true'  => array( 'true', true ),
+			'string false' => array( 'false', false ),
+			'string one'   => array( '1', true ),
+			'string zero'  => array( '0', false ),
+			'unrecognized' => array( 'maybe', false ),
+		);
+	}
 }

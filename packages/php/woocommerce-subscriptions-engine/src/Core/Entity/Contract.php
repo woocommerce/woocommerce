@@ -398,16 +398,29 @@ final class Contract {
 	 * @param array<int, array<string, mixed>>    $items     Item rows.
 	 * @param array<string, array<string, mixed>> $addresses Address rows keyed by type.
 	 * @param array<string, string>               $meta      Meta as key => value.
-	 * @throws DomainException If the stored cycle_count is negative.
+	 * @throws DomainException If the stored cycle_count or schedule_source is invalid.
 	 */
 	public static function from_storage( array $row, array $items = array(), array $addresses = array(), array $meta = array() ): self {
-		// Hydration is a trust boundary too: a corrupted or migrated row must not
-		// smuggle a negative cycle_count past the invariant set_cycle_count()
-		// enforces, since that would corrupt renewal cycle and idempotency math.
-		$cycle_count = self::coerce_int( $row['cycle_count'] ?? null );
+		// Hydration is a trust boundary: a WordPress database can be mutated outside
+		// this engine's flows, and these fields drive money and scheduling math. A
+		// corrupted cycle_count or schedule_source is rejected loudly here rather
+		// than silently mis-charging a renewal or mis-routing the schedule.
+		$cycle_count = self::coerce_nullable_int( $row['cycle_count'] ?? 0 );
+		if ( null === $cycle_count ) {
+			throw new DomainException(
+				sprintf( 'Contract: stored cycle_count must be an integer, got %s.', gettype( $row['cycle_count'] ?? null ) )
+			);
+		}
 		if ( $cycle_count < 0 ) {
 			throw new DomainException(
 				sprintf( 'Contract: stored cycle_count must be 0 or greater, got %d.', $cycle_count )
+			);
+		}
+
+		$schedule_source = self::coerce_string( $row['schedule_source'] ?? null, self::SCHEDULE_SOURCE_PRIMITIVE );
+		if ( ! in_array( $schedule_source, array( self::SCHEDULE_SOURCE_PRIMITIVE, self::SCHEDULE_SOURCE_GATEWAY ), true ) ) {
+			throw new DomainException(
+				sprintf( 'Contract: stored schedule source must be primitive or gateway, got "%s".', $schedule_source )
 			);
 		}
 
@@ -435,7 +448,7 @@ final class Contract {
 				'trial_end_gmt'        => $row['trial_end_gmt'] ?? null,
 				'end_gmt'              => $row['end_gmt'] ?? null,
 				'cycle_count'          => $cycle_count,
-				'schedule_source'      => $row['schedule_source'] ?? self::SCHEDULE_SOURCE_PRIMITIVE,
+				'schedule_source'      => $schedule_source,
 				'items'                => $items,
 				'addresses'            => $addresses,
 				'meta'                 => $meta,

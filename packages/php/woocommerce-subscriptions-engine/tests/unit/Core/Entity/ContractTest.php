@@ -57,6 +57,24 @@ class ContractTest extends TestCase {
 		Contract::from_storage( $this->valid_row( -1 ) );
 	}
 
+	public function test_from_storage_rejects_non_integer_cycle_count(): void {
+		$row                = $this->valid_row( 0 );
+		$row['cycle_count'] = '1.5';
+
+		$this->expectException( DomainException::class );
+
+		Contract::from_storage( $row );
+	}
+
+	public function test_from_storage_rejects_invalid_schedule_source(): void {
+		$row                    = $this->valid_row( 1 );
+		$row['schedule_source'] = 'bogus';
+
+		$this->expectException( DomainException::class );
+
+		Contract::from_storage( $row );
+	}
+
 	/**
 	 * A minimal, valid set of Contract::create() arguments.
 	 *
