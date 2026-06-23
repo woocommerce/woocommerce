@@ -3135,7 +3135,7 @@ if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
 
 			$product_categories = get_categories( $args );
 
-			if ( $cache_key && ! empty( $args['taxonomy'] ) ) {
+			if ( $cache_key && is_array( $args ) && ! empty( $args['taxonomy'] ) ) {
 				wp_cache_set( $cache_key, $product_categories, 'product_cat' );
 			}
 		}

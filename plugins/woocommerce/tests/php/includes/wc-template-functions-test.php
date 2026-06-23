@@ -15,6 +15,9 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	 */
 	private function create_category_tree(): int {
 		$parent = wp_insert_term( 'Test Parent', 'product_cat' );
+		if ( is_wp_error( $parent ) ) {
+			throw new \RuntimeException( esc_html( $parent->get_error_message() ) );
+		}
 		$parent_id = $parent['term_id'];
 
 		update_term_meta( $parent_id, 'display_type', 'both' );
@@ -25,6 +28,9 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 				'product_cat',
 				array( 'parent' => $parent_id )
 			);
+			if ( is_wp_error( $child ) ) {
+				throw new \RuntimeException( esc_html( $child->get_error_message() ) );
+			}
 
 			$product = \WC_Helper_Product::create_simple_product();
 			$product->set_category_ids( array( $child['term_id'] ) );
@@ -79,13 +85,11 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 		$parent_id = $this->create_category_tree();
 		$cache_key = 'product-category-hierarchy-' . $parent_id;
 
-		add_filter(
-			'woocommerce_product_subcategories_args',
-			function ( $args ) {
-				$args['taxonomy'] = '';
-				return $args;
-			}
-		);
+		$filter = function ( $args ) {
+			$args['taxonomy'] = '';
+			return $args;
+		};
+		add_filter( 'woocommerce_product_subcategories_args', $filter );
 
 		$result = woocommerce_get_product_subcategories( $parent_id );
 
@@ -93,6 +97,8 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertFalse( wp_cache_get( $cache_key, 'product_cat' ) );
 		// Result should be empty too (query with empty taxonomy returns nothing).
 		$this->assertEmpty( $result );
+
+		remove_filter( 'woocommerce_product_subcategories_args', $filter );
 	}
 
 	/**
@@ -102,18 +108,18 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 		$parent_id = $this->create_category_tree();
 		$cache_key = 'product-category-hierarchy-' . $parent_id;
 
-		add_filter(
-			'woocommerce_product_subcategories_args',
-			function ( $args ) {
-				unset( $args['taxonomy'] );
-				return $args;
-			}
-		);
+		$filter = function ( $args ) {
+			unset( $args['taxonomy'] );
+			return $args;
+		};
+		add_filter( 'woocommerce_product_subcategories_args', $filter );
 
 		woocommerce_get_product_subcategories( $parent_id );
 
 		// Cache should remain empty because taxonomy was removed.
 		$this->assertFalse( wp_cache_get( $cache_key, 'product_cat' ) );
+
+		remove_filter( 'woocommerce_product_subcategories_args', $filter );
 	}
 
 	/**
