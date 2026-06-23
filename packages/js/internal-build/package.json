@@ -69,12 +69,12 @@
 		"webpack-remove-empty-scripts": "1.0.x"
 	},
 	"devDependencies": {
-		"@types/wordpress__block-editor": "14.21.8",
+		"@types/wordpress__block-editor": "15.0.6",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/core-data": "7.19.6",
-		"@wordpress/data": "10.19.2",
-		"@wordpress/editor": "14.19.7",
-		"@wordpress/notices": "5.19.2",
+		"@wordpress/core-data": "7.33.9",
+		"@wordpress/data": "10.33.1",
+		"@wordpress/editor": "14.33.11",
+		"@wordpress/notices": "5.33.1",
 		"eslint": "^8.55.0",
 		"typescript": "5.7.x"
 	},

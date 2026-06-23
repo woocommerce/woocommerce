@@ -1,16 +1,13 @@
 /**
  * External dependencies
  */
-import {
-	Button,
-	CheckboxControl,
-	TextControl,
-	TextareaControl,
-} from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { paymentGatewaysStore, paymentSettingsStore } from '@woocommerce/data';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useMemo } from '@wordpress/element';
+import { DataForm } from '@wordpress/dataviews';
+import type { Field } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
@@ -18,6 +15,12 @@ import { useState, useEffect } from '@wordpress/element';
 import '../settings-payments-body.scss';
 import { Settings } from '~/settings-payments/components/settings';
 import { FieldPlaceholder } from '~/settings-payments/components/field-placeholder';
+import {
+	CheckboxEdit,
+	TextEdit,
+	TextareaEdit,
+	type OfflineFormValues,
+} from './dataform-controls';
 
 /**
  * This page is used to manage the settings for the Cheque payment gateway.
@@ -48,9 +51,7 @@ export const SettingsPaymentsCheque = () => {
 			invalidateResolutionForPaymentSettings,
 	} = useDispatch( paymentSettingsStore );
 
-	const [ formValues, setFormValues ] = useState<
-		Record< string, string | boolean | string[] >
-	>( {} );
+	const [ formValues, setFormValues ] = useState< OfflineFormValues >( {} );
 	const [ isSaving, setIsSaving ] = useState( false );
 	const [ hasChanges, setHasChanges ] = useState( false );
 
@@ -64,6 +65,45 @@ export const SettingsPaymentsCheque = () => {
 			} );
 		}
 	}, [ chequeSettings ] );
+
+	const fields: Field< OfflineFormValues >[] = useMemo(
+		() => [
+			{
+				id: 'enabled',
+				label: __( 'Enable check payments', 'woocommerce' ),
+				Edit: CheckboxEdit,
+			},
+			{
+				id: 'title',
+				label: __( 'Title', 'woocommerce' ),
+				description: __(
+					'Payment method name that the customer will see during checkout.',
+					'woocommerce'
+				),
+				placeholder: __( 'Check payments', 'woocommerce' ),
+				Edit: TextEdit,
+			},
+			{
+				id: 'description',
+				label: __( 'Description', 'woocommerce' ),
+				description: __(
+					'Payment method description that the customer will see during checkout.',
+					'woocommerce'
+				),
+				Edit: TextareaEdit,
+			},
+			{
+				id: 'instructions',
+				label: __( 'Instructions', 'woocommerce' ),
+				description: __(
+					'Instructions that will be added to the thank you page and emails.',
+					'woocommerce'
+				),
+				Edit: TextareaEdit,
+			},
+		],
+		[]
+	);
 
 	const saveSettings = () => {
 		if ( ! chequeSettings ) {
@@ -120,80 +160,30 @@ export const SettingsPaymentsCheque = () => {
 						) }
 					>
 						{ isLoading ? (
-							<FieldPlaceholder size="small" />
+							<>
+								<FieldPlaceholder size="small" />
+								<FieldPlaceholder size="medium" />
+								<FieldPlaceholder size="large" />
+								<FieldPlaceholder size="large" />
+							</>
 						) : (
-							<CheckboxControl
-								label={ __(
-									'Enable check payments',
-									'woocommerce'
-								) }
-								checked={ Boolean( formValues.enabled ) }
-								onChange={ ( checked ) => {
-									setFormValues( {
-										...formValues,
-										enabled: checked,
-									} );
-									setHasChanges( true );
+							<DataForm
+								data={ formValues }
+								fields={ fields }
+								form={ {
+									type: 'regular',
+									fields: [
+										'enabled',
+										'title',
+										'description',
+										'instructions',
+									],
 								} }
-							/>
-						) }
-						{ isLoading ? (
-							<FieldPlaceholder size="medium" />
-						) : (
-							<TextControl
-								label={ __( 'Title', 'woocommerce' ) }
-								help={ __(
-									'Payment method name that the customer will see during checkout.',
-									'woocommerce'
-								) }
-								placeholder={ __(
-									'Check payments',
-									'woocommerce'
-								) }
-								value={ String( formValues.title ) }
-								onChange={ ( value ) => {
-									setFormValues( {
-										...formValues,
-										title: value,
-									} );
-									setHasChanges( true );
-								} }
-							/>
-						) }
-						{ isLoading ? (
-							<FieldPlaceholder size="large" />
-						) : (
-							<TextareaControl
-								label={ __( 'Description', 'woocommerce' ) }
-								help={ __(
-									'Payment method description that the customer will see during checkout.',
-									'woocommerce'
-								) }
-								value={ String( formValues.description ) }
-								onChange={ ( value ) => {
-									setFormValues( {
-										...formValues,
-										description: value,
-									} );
-									setHasChanges( true );
-								} }
-							/>
-						) }
-						{ isLoading ? (
-							<FieldPlaceholder size="large" />
-						) : (
-							<TextareaControl
-								label={ __( 'Instructions', 'woocommerce' ) }
-								help={ __(
-									'Instructions that will be added to the thank you page and emails.',
-									'woocommerce'
-								) }
-								value={ String( formValues.instructions ) }
-								onChange={ ( value ) => {
-									setFormValues( {
-										...formValues,
-										instructions: value,
-									} );
+								onChange={ ( edits: OfflineFormValues ) => {
+									setFormValues( ( values ) => ( {
+										...values,
+										...edits,
+									} ) );
 									setHasChanges( true );
 								} }
 							/>

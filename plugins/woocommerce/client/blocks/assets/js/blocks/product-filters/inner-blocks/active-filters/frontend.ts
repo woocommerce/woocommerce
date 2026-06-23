@@ -12,6 +12,7 @@ import type {
 	RemovableItem,
 	RemovableItemsParentStore,
 } from '../../../../types/type-defs/removable-items';
+import { PRODUCT_FILTERS_STORE_NAME } from '../../constants';
 
 type RemovableItemContext = {
 	item: RemovableItem;
@@ -19,16 +20,13 @@ type RemovableItemContext = {
 
 const activeFiltersStore = {
 	state: {
-		get removableItems() {
-			const { activeFilters } = getContext< ProductFiltersContext >();
-			return activeFilters
-				.filter( ( f ) => !! f.value )
-				.map( ( f ) => ( {
-					id: f.type + '_' + f.value,
-					type: f.type,
-					value: f.value,
-					label: f.activeLabel,
-				} ) );
+		get removableItems(): RemovableItem[] {
+			return state.activeFilters.map( ( f ) => ( {
+				id: f.type + '_' + f.value,
+				type: f.type,
+				value: f.value,
+				label: f.activeLabel,
+			} ) );
 		},
 		get removeItemLabel() {
 			const { item } = getContext< RemovableItemContext >();
@@ -40,9 +38,8 @@ const activeFiltersStore = {
 			const label = typeof item?.label === 'string' ? item.label : '';
 			return template.replace( '{{label}}', label );
 		},
-		get hasActiveFilters() {
-			const { activeFilters } = getContext< ProductFiltersContext >();
-			return activeFilters.length > 0;
+		get hasActiveFilters(): boolean {
+			return state.activeFilters.length > 0;
 		},
 	},
 	actions: {
@@ -66,7 +63,6 @@ const activeFiltersStore = {
 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 activeFiltersStore satisfies RemovableItemsParentStore;
 
-const { actions } = store< ProductFiltersStore & typeof activeFiltersStore >(
-	'woocommerce/product-filters',
-	activeFiltersStore
-);
+const { state, actions } = store<
+	ProductFiltersStore & typeof activeFiltersStore
+>( PRODUCT_FILTERS_STORE_NAME, activeFiltersStore );

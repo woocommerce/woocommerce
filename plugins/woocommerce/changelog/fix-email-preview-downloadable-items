@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent email previews from showing unrelated dummy products as downloadable items.

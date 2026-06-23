@@ -67,6 +67,10 @@
 	&:hover {
 		background: transparent;
 	}
+
+	:where(.wc-block-product-filter-chips__label) {
+		text-decoration: line-through;
+	}
 }
 
 :where(.wc-block-product-filter-chips__label) {
