@@ -36358,18 +36358,6 @@ parameters:
 			path: includes/wc-user-functions.php
 
 		-
-			message: '#^Cannot access property \$ID on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
-			message: '#^Cannot access property \$user_email on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
 			message: '#^Cannot call method get_customer_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
