@@ -35,6 +35,7 @@ type VariationOptionItem = {
 	label: string;
 	value: string;
 	ariaLabel?: string;
+	title?: string;
 	visual?: VisualAttributeTerm;
 };
 
@@ -58,6 +59,16 @@ const { state: productsState } = store< ProductsStore >(
 	{},
 	{ lock: universalLock }
 );
+
+const getOutOfStockOptionTitle = () => {
+	const config = getConfig< {
+		variationOptionTooltips?: {
+			outOfStock?: string;
+		};
+	} >();
+
+	return config.variationOptionTooltips?.outOfStock;
+};
 
 const isAttributeValueValid = ( {
 	attributeName,
@@ -170,6 +181,106 @@ const isVariationInStockAndPurchasable = (
 	return true;
 };
 
+const isVariationOutOfStock = (
+	variation: ProductResponseItem | ProductResponseVariationsItem
+) => {
+	return 'is_in_stock' in variation && ! variation.is_in_stock;
+};
+
+const doSelectedAttributesMatchVariation = ( {
+	variation,
+	attributeName,
+	attributeValue,
+	selectedAttributes,
+}: {
+	variation: ProductResponseVariationsItem;
+	attributeName: string;
+	attributeValue: string;
+	selectedAttributes: SelectedAttributes[];
+} ) => {
+	const isCurrentAttributeSelected = selectedAttributes.some(
+		( selectedAttribute ) =>
+			attributeNamesMatch( selectedAttribute.attribute, attributeName )
+	);
+	const attributesToMatch = isCurrentAttributeSelected
+		? selectedAttributes.length - 1
+		: selectedAttributes.length;
+
+	const matchingAttributes = selectedAttributes.filter(
+		( selectedAttribute ) => {
+			const availableVariationAttributeValue = getVariationAttributeValue(
+				variation,
+				selectedAttribute.attribute
+			);
+
+			if (
+				availableVariationAttributeValue === selectedAttribute.value
+			) {
+				return true;
+			}
+
+			if ( availableVariationAttributeValue === null ) {
+				if (
+					! attributeNamesMatch(
+						selectedAttribute.attribute,
+						attributeName
+					) ||
+					attributeValue === selectedAttribute.value
+				) {
+					return true;
+				}
+			}
+			return false;
+		}
+	).length;
+
+	return matchingAttributes >= attributesToMatch;
+};
+
+const isAttributeValueOutOfStock = ( {
+	attributeName,
+	attributeValue,
+	selectedAttributes,
+}: {
+	attributeName: string;
+	attributeValue: string;
+	selectedAttributes: SelectedAttributes[];
+} ) => {
+	const { mainProductInContext: product } = productsState;
+
+	if ( ! product?.variations?.length ) {
+		return false;
+	}
+
+	return product.variations.some( ( variation ) => {
+		const variationData =
+			productsState.productVariations[ variation.id ] ?? variation;
+
+		if ( ! isVariationOutOfStock( variationData ) ) {
+			return false;
+		}
+
+		const variationAttrValue = getVariationAttributeValue(
+			variation,
+			attributeName
+		);
+
+		if (
+			variationAttrValue !== attributeValue &&
+			variationAttrValue !== null
+		) {
+			return false;
+		}
+
+		return doSelectedAttributesMatchVariation( {
+			variation,
+			attributeName,
+			attributeValue,
+			selectedAttributes,
+		} );
+	} );
+};
+
 /**
  * Return the product attributes and options from Store API format.
  *
@@ -260,12 +371,21 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return [];
 				}
 
+				const outOfStockOptionTitle = getOutOfStockOptionTitle();
+
 				return variationAttributeOptions.map( ( row, index ) => {
 					const disabled = ! isAttributeValueValid( {
 						attributeName: name,
 						attributeValue: row.value,
 						selectedAttributes,
 					} );
+					const outOfStock =
+						disabled &&
+						isAttributeValueOutOfStock( {
+							attributeName: name,
+							attributeValue: row.value,
+							selectedAttributes,
+						} );
 					const selected = selectedAttributes.some(
 						( attrObject ) =>
 							attributeNamesMatch( attrObject.attribute, name ) &&
@@ -276,6 +396,10 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						label: row.label,
 						value: row.value,
 						ariaLabel: row.ariaLabel || row.label,
+						title:
+							outOfStock && outOfStockOptionTitle
+								? outOfStockOptionTitle
+								: row.title,
 						index,
 						selected,
 						disabled,

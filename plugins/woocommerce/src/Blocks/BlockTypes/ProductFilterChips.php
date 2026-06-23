@@ -132,6 +132,7 @@ final class ProductFilterChips extends AbstractBlock {
 							data-wp-each-child
 							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							data-wp-bind--aria-checked="context.item.selected"
+							data-wp-bind--title="context.item.title"
 							data-wp-bind--disabled="context.item.disabled"
 							data-wp-bind--hidden="context.item.hidden"
 							data-wp-on--click="actions.toggle"
@@ -173,6 +174,8 @@ final class ProductFilterChips extends AbstractBlock {
 							data-wp-bind--aria-label="context.item.ariaLabel"
 							<?php if ( $has_visual_swatches ) : ?>
 								data-wp-bind--title="context.item.label"
+							<?php else : ?>
+								data-wp-bind--title="context.item.title"
 							<?php endif; ?>
 							data-wp-bind--value="context.item.value"
 							data-wp-bind--aria-checked="context.item.selected"

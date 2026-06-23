@@ -7,6 +7,7 @@ type MockAddToCartWithOptionsStore = {
 	state: {
 		selectableItems: Array< {
 			value: string;
+			title?: string;
 			disabled: boolean;
 			hidden: boolean;
 		} >;
@@ -50,7 +51,12 @@ jest.mock(
 			return {};
 		} ),
 		getContext: jest.fn( () => mockContext ),
-		getConfig: jest.fn( () => ( { errorMessages: {} } ) ),
+		getConfig: jest.fn( () => ( {
+			errorMessages: {},
+			variationOptionTooltips: {
+				outOfStock: 'Out of stock',
+			},
+		} ) ),
 		getElement: jest.fn( () => ( { ref: null } ) ),
 	} ),
 	{ virtual: true }
@@ -111,7 +117,12 @@ describe( 'Add to Cart + Options variation selector frontend', () => {
 			mockAddToCartWithOptionsStore?.state.selectableItems
 		).toMatchObject( [
 			{ value: 'small', disabled: false, hidden: false },
-			{ value: 'large', disabled: true, hidden: false },
+			{
+				value: 'large',
+				title: 'Out of stock',
+				disabled: true,
+				hidden: false,
+			},
 		] );
 	} );
 
@@ -122,7 +133,12 @@ describe( 'Add to Cart + Options variation selector frontend', () => {
 			mockAddToCartWithOptionsStore?.state.selectableItems
 		).toMatchObject( [
 			{ value: 'small', disabled: false, hidden: false },
-			{ value: 'large', disabled: true, hidden: true },
+			{
+				value: 'large',
+				title: 'Out of stock',
+				disabled: true,
+				hidden: true,
+			},
 		] );
 	} );
 
@@ -137,7 +153,55 @@ describe( 'Add to Cart + Options variation selector frontend', () => {
 			mockAddToCartWithOptionsStore?.state.selectableItems
 		).toMatchObject( [
 			{ value: 'small', disabled: false, hidden: false },
-			{ value: 'large', disabled: true, hidden: false },
+			{
+				value: 'large',
+				title: undefined,
+				disabled: true,
+				hidden: false,
+			},
+		] );
+	} );
+
+	it( 'does not show the out of stock title for invalid variation options', () => {
+		mockProductsState.mainProductInContext = {
+			...createProduct(),
+			variations: [
+				{
+					id: 10,
+					attributes: [
+						{ name: 'Color', value: 'red' },
+						{ name: 'Size', value: 'small' },
+					],
+				},
+				{
+					id: 11,
+					attributes: [
+						{ name: 'Color', value: 'blue' },
+						{ name: 'Size', value: 'large' },
+					],
+				},
+			],
+		} as ProductResponseItem;
+		mockProductsState.productVariations = {
+			10: createVariation( 10, true ),
+			11: createVariation( 11, true ),
+		};
+		mockContext = {
+			...mockContext,
+			name: 'Size',
+			selectedAttributes: [ { attribute: 'Color', value: 'red' } ],
+		};
+
+		expect(
+			mockAddToCartWithOptionsStore?.state.selectableItems
+		).toMatchObject( [
+			{ value: 'small', disabled: false, hidden: false },
+			{
+				value: 'large',
+				title: undefined,
+				disabled: true,
+				hidden: false,
+			},
 		] );
 	} );
 } );
