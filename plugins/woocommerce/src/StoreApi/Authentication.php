@@ -11,6 +11,38 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
  */
 class Authentication {
 	/**
+	 * The most recently validated cart token, or null if none has been validated yet.
+	 *
+	 * A request carries a single cart token, which is checked from more than one place
+	 * (session-handler selection and CORS). Remembering the last validated token lets the
+	 * JWT be decoded and signature-checked once instead of once per call site. The slot is
+	 * keyed by the full signed token, so distinct sessions never collide. A single slot
+	 * (rather than a growing map) keeps memory flat even when the Store API container reuses
+	 * this instance across requests on persistent PHP workers.
+	 *
+	 * @var string|null
+	 */
+	private ?string $validated_cart_token = null;
+
+	/**
+	 * Whether the most recently validated cart token ({@see $validated_cart_token}) is valid.
+	 *
+	 * @var bool
+	 */
+	private bool $validated_cart_token_is_valid = false;
+
+	/**
+	 * Expiry timestamp of the most recently validated cart token.
+	 *
+	 * Used to re-validate a memoized valid token once it has passed its expiry, so a token
+	 * cannot stay accepted across requests when this instance is reused on a persistent PHP
+	 * worker.
+	 *
+	 * @var int
+	 */
+	private int $validated_cart_token_exp = 0;
+
+	/**
 	 * Hook into WP lifecycle events. This is hooked by the StoreAPI class on `rest_api_init`.
 	 */
 	public function init() {
@@ -54,7 +86,7 @@ class Authentication {
 
 		$cart_token = wc_clean( wp_unslash( $_SERVER['HTTP_CART_TOKEN'] ?? '' ) );
 		$cart_token = is_string( $cart_token ) ? $cart_token : '';
-		if ( $cart_token && CartTokenUtils::validate_cart_token( $cart_token ) ) {
+		if ( $this->is_valid_cart_token( $cart_token ) ) {
 			return SessionHandler::class;
 		}
 		return $handler;
@@ -103,7 +135,7 @@ class Authentication {
 
 		// Allow preflight requests, certain http origins, and any origin if a cart token is present. Preflight requests
 		// are allowed because we'll be unable to validate cart token headers at that point.
-		if ( $this->is_preflight() || CartTokenUtils::validate_cart_token( $this->get_cart_token( $request ) ) || is_allowed_http_origin( $origin ) ) {
+		if ( $this->is_preflight() || $this->is_valid_cart_token( $this->get_cart_token( $request ) ) || is_allowed_http_origin( $origin ) ) {
 			$server->send_header( 'Access-Control-Allow-Origin', $origin );
 		}
 
@@ -150,6 +182,38 @@ class Authentication {
 	 */
 	protected function get_cart_token( \WP_REST_Request $request ) {
 		return wc_clean( wp_unslash( $request->get_header( 'Cart-Token' ) ?? '' ) );
+	}
+
+	/**
+	 * Validate a cart token, caching the result for the duration of the request.
+	 *
+	 * Both `maybe_use_store_api_session_handler()` and `send_cors_headers()` need to know
+	 * whether the request carries a valid cart token. The result is memoized to avoid
+	 * decoding and signature-checking the same JWT more than once per request. A memoized
+	 * valid token is re-validated once it passes its expiry, so a previously valid token
+	 * cannot stay accepted when this instance is reused across requests on a persistent PHP
+	 * worker.
+	 *
+	 * @param string $cart_token The cart token.
+	 * @return bool
+	 */
+	private function is_valid_cart_token( string $cart_token ): bool {
+		if ( '' === $cart_token ) {
+			return false;
+		}
+
+		$is_memoized = $cart_token === $this->validated_cart_token
+			&& ( ! $this->validated_cart_token_is_valid || time() <= $this->validated_cart_token_exp );
+
+		if ( ! $is_memoized ) {
+			$this->validated_cart_token          = $cart_token;
+			$this->validated_cart_token_is_valid = CartTokenUtils::validate_cart_token( $cart_token );
+			$this->validated_cart_token_exp      = $this->validated_cart_token_is_valid
+				? (int) CartTokenUtils::get_cart_token_payload( $cart_token )['exp']
+				: 0;
+		}
+
+		return $this->validated_cart_token_is_valid;
 	}
 
 	/**
