@@ -262,6 +262,49 @@ class HandlerRegistry extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Upsells collection does not leak a non-resolving reference id into the results.
+	 */
+	public function test_collection_upsells_excludes_unresolvable_reference_from_results() {
+		// A cart reference that no longer resolves to a product (e.g. deleted mid-session)
+		// must not surface as an upsell, even if a resolved cart product still lists it
+		// among its upsell ids.
+		$cart_product = WC_Helper_Product::create_simple_product( false );
+		$real_upsell  = WC_Helper_Product::create_simple_product();
+
+		// An id guaranteed not to resolve to a product.
+		$ghost      = WC_Helper_Product::create_simple_product();
+		$missing_id = $ghost->get_id();
+		$ghost->delete( true );
+
+		$cart_product->set_upsell_ids( array( $real_upsell->get_id(), $missing_id ) );
+		$cart_product->save();
+
+		$parsed_block                        = Utils::get_base_parsed_block();
+		$parsed_block['attrs']['collection'] = 'woocommerce/product-collection/upsells';
+		$this->block_instance->set_parsed_block( $parsed_block );
+
+		$block                                       = new \stdClass();
+		$block->context                              = $parsed_block['attrs'];
+		$block->context['productCollectionLocation'] = array(
+			'type'       => 'cart',
+			'sourceData' => array(
+				'productIds' => array( $cart_product->get_id(), $missing_id ),
+			),
+		);
+
+		$query_args = $this->block_instance->build_frontend_query( array(), $block, 1 );
+
+		$this->assertSame(
+			array( $real_upsell->get_id() ),
+			array_values( $query_args['post__in'] ),
+			'Only the resolvable upsell should remain; the non-resolving reference id must not leak.'
+		);
+
+		$cart_product->delete( true );
+		$real_upsell->delete( true );
+	}
+
+	/**
 	 * Tests that the cross-sells collection handler works as expected.
 	 */
 	public function test_collection_cross_sells() {
