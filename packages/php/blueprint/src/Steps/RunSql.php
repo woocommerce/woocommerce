@@ -9,6 +9,18 @@ namespace Automattic\WooCommerce\Blueprint\Steps;
  */
 class RunSql extends Step {
 	/**
+	 * Placeholder for the database table prefix.
+	 *
+	 * Exported SQL uses this placeholder in place of the source site's table
+	 * prefix. When the Blueprint is imported, the placeholder is replaced with
+	 * the importing site's prefix, so Blueprints remain portable across sites
+	 * that use different database table prefixes.
+	 *
+	 * @var string
+	 */
+	public const TABLE_PREFIX_PLACEHOLDER = '{WC_BLUEPRINT_TABLE_PREFIX}';
+
+	/**
 	 * Sql code to run.
 	 *
 	 * @var string

@@ -90,10 +90,11 @@ class ExportWCSettingsTax extends ExportWCSettings {
 	 */
 	private function generateTaxRateSteps( string $table ): array {
 		global $wpdb;
-		$table = $wpdb->prefix . $table;
+		$prefixed_table    = $wpdb->prefix . $table;
+		$placeholder_table = RunSql::TABLE_PREFIX_PLACEHOLDER . $table;
 		return array_map(
-			fn( $record ) => new RunSql( Util::array_to_insert_sql( $record, $table, 'replace into' ) ),
-			$wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i', $table ), ARRAY_A ),
+			fn( $record ) => new RunSql( Util::array_to_insert_sql( $record, $placeholder_table, 'replace into' ) ),
+			$wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i', $prefixed_table ), ARRAY_A ),
 		);
 	}
 }
