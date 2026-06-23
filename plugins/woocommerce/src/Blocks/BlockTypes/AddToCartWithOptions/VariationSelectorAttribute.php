@@ -121,6 +121,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 
 		$interactive_context = array(
 			'name'                      => $attribute_label,
+			'attributeSlug'             => $attribute_slug,
 			'variationAttributeOptions' => $variation_items,
 			'selectedValue'             => $default_selected,
 			'autoselect'                => $attributes['autoselect'] ?? false,
@@ -132,11 +133,20 @@ class VariationSelectorAttribute extends AbstractBlock {
 			'data-wp-init'        => 'callbacks.setDefaultSelectedAttribute',
 		);
 
+		// Hidden input for legacy form POST submissions (page refresh). Chips and
+		// dropdown UI elements do not include name="attribute_*" fields.
+		$hidden_attribute_input = sprintf(
+			'<input type="hidden" name="%1$s" value="%2$s" data-wp-bind--value="state.formAttributeValue" />',
+			esc_attr( $attribute_slug ),
+			esc_attr( $default_selected ?? '' )
+		);
+
 		return sprintf(
-			'<div %s %s>%s</div>',
+			'<div %s %s>%s%s</div>',
 			get_block_wrapper_attributes( $interactive_attributes ),
 			wp_interactivity_data_wp_context( $interactive_context ),
-			$inner_html
+			$inner_html,
+			$hidden_attribute_input
 		);
 	}
 
