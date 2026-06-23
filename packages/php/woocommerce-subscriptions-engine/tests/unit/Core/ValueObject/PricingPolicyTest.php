@@ -96,4 +96,31 @@ class PricingPolicyTest extends TestCase {
 		$this->assertIsFloat( $policy->get_policies()[0]['value'] );
 		$this->assertIsFloat( $policy->get_one_time_fees()[0]['amount'] );
 	}
+
+	public function test_fees_normalize_to_typed_shape(): void {
+		$policy = PricingPolicy::from_array(
+			array(
+				'one_time_fees' => array(
+					array(
+						'kind'   => 'setup',
+						'amount' => 5,
+					),
+					array(
+						'kind'      => 'service',
+						'amount'    => 7,
+						'tax_class' => '',
+					),
+				),
+			)
+		);
+
+		$fees = $policy->get_one_time_fees();
+
+		// A fee without taxable/tax_class normalizes to taxable=false, tax_class=null.
+		$this->assertFalse( $fees[0]['taxable'] );
+		$this->assertNull( $fees[0]['tax_class'] );
+
+		// A supplied empty-string tax_class is preserved (not coerced to null).
+		$this->assertSame( '', $fees[1]['tax_class'] );
+	}
 }

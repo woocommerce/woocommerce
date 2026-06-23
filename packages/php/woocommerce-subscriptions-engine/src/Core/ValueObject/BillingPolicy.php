@@ -123,8 +123,8 @@ final class BillingPolicy {
 		return new self(
 			(string) $data['period'],
 			(int) $data['interval'],
-			isset( $data['min_cycles'] ) ? (int) $data['min_cycles'] : null,
-			isset( $data['max_cycles'] ) ? (int) $data['max_cycles'] : null,
+			isset( $data['min_cycles'] ) && is_numeric( $data['min_cycles'] ) ? (int) $data['min_cycles'] : null,
+			isset( $data['max_cycles'] ) && is_numeric( $data['max_cycles'] ) ? (int) $data['max_cycles'] : null,
 			$trial
 		);
 	}
@@ -284,7 +284,7 @@ final class BillingPolicy {
 	/**
 	 * Normalize the trial duration.
 	 *
-	 * @param array{length: int, unit: string}|null $trial_duration The trial duration.
+	 * @param array<array-key, mixed>|null $trial_duration The trial duration.
 	 * @return array{length: int, unit: string}|null The normalized trial duration.
 	 * @throws DomainException If the trial duration is not valid.
 	 */

@@ -41,7 +41,7 @@ final class PricingPolicy {
 	/**
 	 * Recurring price adjustments, applied in array order.
 	 *
-	 * @var array<int, array{type: string, value: float, starting_cycle: ?int}>
+	 * @var array<int, array{type: string, value: float, starting_cycle?: int}>
 	 */
 	private $policies;
 
@@ -66,43 +66,45 @@ final class PricingPolicy {
 	/**
 	 * Hydrate from the JSON-decoded `pricing_policy` column shape.
 	 *
-	 * Missing top-level keys default to empty arrays. Numeric values are
-	 * normalized to float so a whole-number round-trip does not silently drift
-	 * from float to int and break type-strict comparisons downstream.
+	 * Missing top-level keys default to empty arrays. Each policy and fee entry is
+	 * normalized to exactly its documented shape: numeric values are coerced to
+	 * float so a whole-number round-trip does not silently drift from float to int
+	 * and break type-strict comparisons downstream, and missing keys take their
+	 * documented defaults (a fee with no `taxable` key becomes `taxable => false`).
+	 * The `tax_class` empty-string-vs-null distinction is preserved.
 	 *
-	 * @param array<string, mixed> $data Decoded pricing_policy row.
+	 * @param array<array-key, mixed> $data Decoded pricing_policy row.
 	 */
 	public static function from_array( array $data ): self {
 		$raw_policies = is_array( $data['policies'] ?? null ) ? $data['policies'] : array();
-		$policies     = array_values(
-			array_filter(
-				array_map(
-					static function ( $entry ): ?array {
-						if ( ! is_array( $entry ) ) {
-							return null;
-						}
-						if ( isset( $entry['value'] ) && is_numeric( $entry['value'] ) ) {
-							$entry['value'] = (float) $entry['value'];
-						}
-						return $entry;
-					},
-					$raw_policies
-				),
-				static function ( $entry ): bool {
-					return is_array( $entry );
-				}
-			)
-		);
+		$policies     = array();
+		foreach ( $raw_policies as $entry ) {
+			if ( ! is_array( $entry ) ) {
+				continue;
+			}
+			$policy = array(
+				'type'  => isset( $entry['type'] ) && is_scalar( $entry['type'] ) ? (string) $entry['type'] : '',
+				'value' => isset( $entry['value'] ) && is_numeric( $entry['value'] ) ? (float) $entry['value'] : 0.0,
+			);
+			if ( isset( $entry['starting_cycle'] ) && is_numeric( $entry['starting_cycle'] ) ) {
+				$policy['starting_cycle'] = (int) $entry['starting_cycle'];
+			}
+			$policies[] = $policy;
+		}
 
-		$fees = array_map(
-			static function ( array $entry ): array {
-				if ( isset( $entry['amount'] ) && is_numeric( $entry['amount'] ) ) {
-					$entry['amount'] = (float) $entry['amount'];
-				}
-				return $entry;
-			},
-			$data['one_time_fees'] ?? array()
-		);
+		$raw_fees = is_array( $data['one_time_fees'] ?? null ) ? $data['one_time_fees'] : array();
+		$fees     = array();
+		foreach ( $raw_fees as $entry ) {
+			if ( ! is_array( $entry ) ) {
+				continue;
+			}
+			$fees[] = array(
+				'kind'      => isset( $entry['kind'] ) && is_scalar( $entry['kind'] ) ? (string) $entry['kind'] : '',
+				'amount'    => isset( $entry['amount'] ) && is_numeric( $entry['amount'] ) ? (float) $entry['amount'] : 0.0,
+				'taxable'   => ! empty( $entry['taxable'] ),
+				'tax_class' => ( array_key_exists( 'tax_class', $entry ) && is_scalar( $entry['tax_class'] ) ) ? (string) $entry['tax_class'] : null,
+			);
+		}
 
 		return new self( $policies, $fees );
 	}
