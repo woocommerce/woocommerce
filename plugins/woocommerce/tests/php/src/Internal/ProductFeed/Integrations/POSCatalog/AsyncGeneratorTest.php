@@ -282,6 +282,51 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep an in-progress job valid when its heartbeat is older than one batch budget but within the stuck timeout, so a slow batch is not mistaken for stuck.
+	 */
+	public function test_validate_status_keeps_slow_but_valid_in_progress_feed_within_stuck_timeout() {
+		// A heartbeat older than the 5-minute per-batch budget (so it would trip a timeout set at that
+		// budget) but well within the derived stuck timeout, mirroring one slow-but-valid batch.
+		$status = array(
+			'state'        => AsyncGenerator::STATE_IN_PROGRESS,
+			'scheduled_at' => time() - 10 * MINUTE_IN_SECONDS,
+			'updated_at'   => time() - 6 * MINUTE_IN_SECONDS,
+		);
+
+		$method = ( new ReflectionClass( $this->sut ) )->getMethod( 'validate_status' );
+		$method->setAccessible( true );
+
+		$this->assertTrue(
+			$method->invoke( $this->sut, $status ),
+			'A heartbeat within the stuck timeout (but older than one batch budget) must not be treated as stuck.'
+		);
+	}
+
+	/**
+	 * @testdox Should scale the stuck timeout with the batch time limit so raising the batch budget keeps the safety margin.
+	 */
+	public function test_validate_status_stuck_timeout_scales_with_batch_time_limit() {
+		$status = array(
+			'state'        => AsyncGenerator::STATE_IN_PROGRESS,
+			'scheduled_at' => time() - 40 * MINUTE_IN_SECONDS,
+			'updated_at'   => time() - 30 * MINUTE_IN_SECONDS,
+		);
+
+		$method = ( new ReflectionClass( $this->sut ) )->getMethod( 'validate_status' );
+		$method->setAccessible( true );
+
+		// With the default batch budget the 30-minute-old heartbeat is past the derived stuck timeout...
+		$this->assertFalse( $method->invoke( $this->sut, $status ) );
+
+		// ...but raising the per-batch budget raises the derived stuck timeout (3x) with it, so the same
+		// heartbeat is no longer considered stuck.
+		$callback = fn() => 20 * MINUTE_IN_SECONDS;
+		add_filter( 'woocommerce_product_feed_batch_time_limit', $callback );
+		$this->assertTrue( $method->invoke( $this->sut, $status ) );
+		remove_filter( 'woocommerce_product_feed_batch_time_limit', $callback );
+	}
+
+	/**
 	 * Deletes every existing product so chunk-count assertions are deterministic regardless of any
 	 * products left in the (persistent) test database by other runs.
 	 */

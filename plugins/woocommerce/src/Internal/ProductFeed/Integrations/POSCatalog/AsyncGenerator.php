@@ -648,11 +648,21 @@ class AsyncGenerator {
 			 * Allows the heartbeat timeout for an `in_progress` feed to be changed. Past this point the
 			 * job is treated as stuck and regenerated.
 			 *
+			 * The default is kept comfortably larger than the per-batch time budget on purpose. The
+			 * heartbeat only refreshes between batches, so the longest gap a healthy job can produce is
+			 * roughly one batch (`woocommerce_product_feed_batch_time_limit`). A timeout at or near that
+			 * budget would let a single slow-but-valid batch look stuck, and recovery would then discard
+			 * the partial the live process is still writing. Deriving it as a multiple (with a floor)
+			 * keeps that margin even when the batch budget is raised via its own filter.
+			 *
 			 * @param int $stuck_time The stuck time in seconds.
 			 * @return int The stuck time in seconds.
 			 * @since 11.0.0
 			 */
-			$in_progress_timeout = apply_filters( 'woocommerce_product_feed_in_progress_timeout', 5 * MINUTE_IN_SECONDS );
+			$in_progress_timeout = apply_filters(
+				'woocommerce_product_feed_in_progress_timeout',
+				max( 15 * MINUTE_IN_SECONDS, 3 * $this->get_batch_time_limit() )
+			);
 			if ( time() - $last_activity > $in_progress_timeout ) {
 				return false;
 			}
