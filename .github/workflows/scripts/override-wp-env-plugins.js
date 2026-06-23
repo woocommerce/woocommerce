@@ -32,7 +32,7 @@ const wpEnvConfig = JSON.parse( fs.readFileSync( configPath, 'utf8' ) );
 // mapping (wp-env downloads and extracts it for us; the zip's top-level dir is
 // `woocommerce/`, the same one WordPress core unzips for a real user) and drop
 // the source entry from the plugin lists. Mapped plugins are not auto-activated,
-// so `tests/e2e-pw/bin/test-env-setup.sh` activates WooCommerce explicitly.
+// so `tests/e2e/bin/test-env-setup.sh` activates WooCommerce explicitly.
 const wooCommerceEntries = [ '.', '../woocommerce' ];
 
 let removed = 0;

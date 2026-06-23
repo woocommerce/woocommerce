@@ -57,8 +57,7 @@ client/blocks/
 │   ├── components/          # 23+ shared components
 │   └── prices/              # Price formatting and currency
 ├── tests/
-│   ├── js/                  # Jest unit tests
-│   └── e2e/                 # Playwright E2E tests
+│   └── js/                  # Jest unit tests
 ├── bin/                     # Build scripts (webpack configs, ESLint plugin)
 └── storybook/               # Storybook config
 ```
@@ -197,9 +196,9 @@ Webpack writes directly to `plugins/woocommerce/assets/client/blocks/` so PHP en
 
 ### Playwright E2E Tests
 
-- Config: `tests/e2e/playwright.config.ts`
+- Config: `../../tests/e2e/playwright.config.ts` (Blocks e2e now lives in the core e2e suite)
 - Test themes: `block-theme`, `classic-theme`, `block-theme-with-templates`
-- Setup script: `tests/e2e/bin/test-env-setup.sh`
+- Setup script: `../../tests/e2e/bin/blocks/test-env-setup.sh`
 - Uses MSW for API mocking, Allure for reporting
 
 ### PHP Tests
