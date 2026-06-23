@@ -2,7 +2,7 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { dateI18n, format } from '@wordpress/date';
+import { date as formatSiteDate, format } from '@wordpress/date';
 import PropTypes from 'prop-types';
 import { createElement } from '@wordpress/element';
 
@@ -13,7 +13,7 @@ const TimelineItem = ( {
 	timezone = 'browser',
 } ) => {
 	const itemClassName = clsx( 'woocommerce-timeline-item', className );
-	const formatTimelineDate = timezone === 'site' ? dateI18n : format;
+	const formatTimelineDate = timezone === 'site' ? formatSiteDate : format;
 	const itemTimeString = formatTimelineDate( clockFormat, item.date );
 
 	return (

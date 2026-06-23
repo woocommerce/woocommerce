@@ -51,7 +51,7 @@ Name | Type | Default | Description
 `groupBy` | String | `'day'` | How the items should be grouped, one of `'day'`, `'week'`, or `'month'`
 `dateFormat` | String | `'F j, Y'` | PHP date format string used to format dates, see php.net/date
 `clockFormat` | String | `'g:ia'` | PHP clock format string used to format times, see php.net/date
-`timezone` | String | `'browser'` | Timezone mode used to group and render dates and times. Use `'browser'` to use the user's browser timezone, or `'site'` to use the WordPress site timezone and locale.
+`timezone` | String | `'browser'` | Timezone mode used to group and render dates and times. Use `'browser'` to use the user's browser timezone, or `'site'` to use the WordPress site timezone.
 
 ### `items` structure
 

@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
-import { date as formatSiteDate, dateI18n, format } from '@wordpress/date';
+import { date as formatSiteDate, format } from '@wordpress/date';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -20,7 +20,6 @@ jest.mock( '@wordpress/date', () => {
 		...actualDateModule,
 		date: jest.fn( actualDateModule.date ),
 		format: jest.fn( actualDateModule.format ),
-		dateI18n: jest.fn( actualDateModule.dateI18n ),
 	};
 } );
 
@@ -34,7 +33,6 @@ describe( 'Timeline', () => {
 	afterEach( () => {
 		formatSiteDate.mockImplementation( actualDateModule.date );
 		format.mockImplementation( actualDateModule.format );
-		dateI18n.mockImplementation( actualDateModule.dateI18n );
 		jest.clearAllMocks();
 	} );
 
@@ -53,7 +51,7 @@ describe( 'Timeline', () => {
 			( dateFormat, date ) =>
 				`browser:${ dateFormat }:${ date.toISOString() }`
 		);
-		dateI18n.mockImplementation(
+		formatSiteDate.mockImplementation(
 			( dateFormat, date ) =>
 				`site:${ dateFormat }:${ date.toISOString() }`
 		);
@@ -81,7 +79,7 @@ describe( 'Timeline', () => {
 			( dateFormat, date ) =>
 				`browser:${ dateFormat }:${ date.toISOString() }`
 		);
-		dateI18n.mockImplementation(
+		formatSiteDate.mockImplementation(
 			( dateFormat, date ) =>
 				`site:${ dateFormat }:${ date.toISOString() }`
 		);
@@ -117,8 +115,11 @@ describe( 'Timeline', () => {
 			},
 		];
 
-		formatSiteDate.mockImplementation( () => '2020-01-21' );
-		dateI18n.mockImplementation( ( dateFormat, date ) => {
+		formatSiteDate.mockImplementation( ( dateFormat, date ) => {
+			if ( dateFormat === 'Y-m-d' ) {
+				return '2020-01-21';
+			}
+
 			if ( dateFormat === 'F j, Y' ) {
 				return 'January 21, 2020';
 			}
