@@ -144,6 +144,100 @@ describe( 'settings extension registry', () => {
 		).toBeUndefined();
 	} );
 
+	it( 'distinguishes page-wide, default-section, and named-section scopes', () => {
+		const pageWideComponent: SettingsFieldComponent = () => null;
+		const defaultSectionComponent: SettingsFieldComponent = () => null;
+		const namedSectionComponent: SettingsFieldComponent = () => null;
+
+		registerSettingsExtension( {
+			scope: { page: 'registry-section-scope' },
+			components: {
+				'page-wide': pageWideComponent,
+			},
+		} );
+		registerSettingsExtension( {
+			scope: { page: 'registry-section-scope', section: '' },
+			fieldOverrides: {
+				default_field: defaultSectionComponent,
+			},
+		} );
+		registerSettingsExtension( {
+			scope: { page: 'registry-section-scope', section: 'advanced' },
+			components: {
+				'named-section': namedSectionComponent,
+			},
+		} );
+
+		expect(
+			resolveFieldComponent(
+				{
+					id: 'field',
+					label: 'Field',
+					type: 'text',
+					component: 'page-wide',
+				},
+				{ page: 'registry-section-scope', section: 'advanced' }
+			)
+		).toBe( pageWideComponent );
+		expect(
+			resolveFieldComponent(
+				{
+					id: 'field',
+					label: 'Field',
+					type: 'text',
+					component: 'page-wide',
+				},
+				{ page: 'registry-section-scope', section: '' }
+			)
+		).toBe( pageWideComponent );
+		expect(
+			resolveFieldComponent(
+				{
+					id: 'default_field',
+					label: 'Field',
+					type: 'text',
+				},
+				{ page: 'registry-section-scope', section: '' }
+			)
+		).toBe( defaultSectionComponent );
+		expect(
+			resolveFieldComponent(
+				{
+					id: 'default_field',
+					label: 'Field',
+					type: 'text',
+				},
+				{ page: 'registry-section-scope', section: 'advanced' }
+			)
+		).toBeUndefined();
+		const warnSpy = jest
+			.spyOn( console, 'warn' )
+			.mockImplementation( jest.fn() );
+		expect(
+			resolveFieldComponent(
+				{
+					id: 'field',
+					label: 'Field',
+					type: 'text',
+					component: 'named-section',
+				},
+				{ page: 'registry-section-scope', section: '' }
+			)
+		).toBeUndefined();
+		warnSpy.mockRestore();
+		expect(
+			resolveFieldComponent(
+				{
+					id: 'field',
+					label: 'Field',
+					type: 'text',
+					component: 'named-section',
+				},
+				{ page: 'registry-section-scope', section: 'advanced' }
+			)
+		).toBe( namedSectionComponent );
+	} );
+
 	it( 'resolves visibility predicates by field and group scope', () => {
 		const fieldPredicate: SettingsVisibilityPredicate = () => true;
 		const groupPredicate: SettingsVisibilityPredicate = () => false;

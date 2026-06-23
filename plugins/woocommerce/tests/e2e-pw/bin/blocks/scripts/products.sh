@@ -3,7 +3,13 @@
 ###################################################################################################
 # Import sample products and regenerate product lookup tables
 ###################################################################################################
-wp import wp-content/plugins/woocommerce/sample-data/sample_products.xml --authors=skip
+# Resolve the active WooCommerce plugin directory instead of assuming a fixed
+# folder name. Locally and on PR CI the plugin is source-mapped as
+# `woocommerce`, but in nightly it is installed from the release zip as
+# `woocommerce-trunk-nightly`, so a hardcoded path would not exist there.
+wc_abspath=$(wp eval 'echo defined("WC_ABSPATH") ? WC_ABSPATH : "";')
+[ -n "$wc_abspath" ] || { echo "Could not resolve WC_ABSPATH; is WooCommerce active?" >&2; exit 1; }
+wp import "${wc_abspath}sample-data/sample_products.xml" --authors=skip
 wp wc tool run regenerate_product_lookup_tables --user=1
 
 # This is a hacky work around to fix product categories not having their parent category correctly assigned.
