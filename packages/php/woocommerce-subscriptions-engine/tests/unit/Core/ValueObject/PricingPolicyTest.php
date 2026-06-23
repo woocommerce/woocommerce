@@ -120,7 +120,9 @@ class PricingPolicyTest extends TestCase {
 		$this->assertFalse( $fees[0]['taxable'] );
 		$this->assertNull( $fees[0]['tax_class'] );
 
-		// A supplied empty-string tax_class is preserved (not coerced to null).
+		// A supplied empty-string tax_class is preserved (not coerced to null),
+		// while a still-absent taxable normalizes to false.
+		$this->assertFalse( $fees[1]['taxable'] );
 		$this->assertSame( '', $fees[1]['tax_class'] );
 	}
 }

@@ -535,9 +535,9 @@ final class RenewalEngine {
 			)
 		);
 
-		// wc_get_orders() returns a list of orders for the default 'objects'
-		// return type; a non-array result (e.g. a paginated stdClass) means there
-		// is nothing to inspect, so no matching renewal exists.
+		// This query does not paginate, so wc_get_orders() returns a plain list of
+		// orders. The guard narrows the declared WC_Order[]|stdClass return type and
+		// treats any unexpected non-array result as "no matching renewal".
 		if ( ! is_array( $orders ) ) {
 			return false;
 		}
