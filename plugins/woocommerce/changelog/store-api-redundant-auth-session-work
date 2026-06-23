@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Reduce duplicate cart-token validation on Store API requests, lowering per-request CPU work on high-traffic stores.
