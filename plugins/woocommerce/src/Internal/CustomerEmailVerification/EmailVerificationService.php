@@ -77,14 +77,27 @@ class EmailVerificationService {
 	private const KEY_META = '_wc_email_verification_key';
 
 	/**
-	 * User meta key that stores the number of guesses remaining as a plain integer, counting down
-	 * from self::ATTEMPT_BUDGET to 0 (locked). Spans codes (requesting a new code does not reset it).
-	 *
-	 * It counts down rather than up so the compare-and-swap in verify_code() always supplies a
-	 * previous value of "1".."10" — never "0", which update_user_meta() treats as empty and would
-	 * silently ignore, making the swap non-conditional.
+	 * User meta key for the number of guesses remaining, as a plain integer counting down from
+	 * self::ATTEMPT_BUDGET to 0 (locked out). Spans codes — requesting a new code does not reset it —
+	 * so the lockout can't be sidestepped by re-requesting. See {@see self::claim_attempt()} for why
+	 * it counts down rather than up.
 	 */
 	private const ATTEMPTS_META = '_wc_email_verification_attempts';
+
+	/**
+	 * The user's account email, lower-cased, or null when the user does not exist.
+	 *
+	 * Lower-casing here is the single normalisation point, so the verified-status match and the
+	 * code's email-binding hash stay consistent however the address was capitalised.
+	 *
+	 * @param int $user_id WordPress user ID.
+	 * @return string|null
+	 */
+	private function get_account_email( int $user_id ): ?string {
+		$user = get_user_by( 'id', $user_id );
+
+		return $user instanceof \WP_User ? strtolower( $user->user_email ) : null;
+	}
 
 	/**
 	 * Return whether the given user has verified their current account email address.
@@ -101,13 +114,8 @@ class EmailVerificationService {
 	public function is_verified( int $user_id ): bool {
 		$verified_email = (string) Users::get_site_user_meta( $user_id, self::VERIFIED_META );
 
-		if ( '' === $verified_email ) {
-			return false;
-		}
-
-		$user = get_user_by( 'id', $user_id );
-
-		return $user instanceof \WP_User && 0 === strcasecmp( $verified_email, $user->user_email );
+		// Both sides are lower-cased (stored that way, get_account_email() normalises), so === is exact.
+		return '' !== $verified_email && $verified_email === $this->get_account_email( $user_id );
 	}
 
 	/**
@@ -127,14 +135,14 @@ class EmailVerificationService {
 			return;
 		}
 
-		$user = get_user_by( 'id', $user_id );
+		$account_email = $this->get_account_email( $user_id );
 
-		if ( ! $user instanceof \WP_User ) {
+		if ( null === $account_email ) {
 			return;
 		}
 
-		// Store the verified email (lower-cased) so the status self-invalidates if the account email later changes.
-		Users::update_site_user_meta( $user_id, self::VERIFIED_META, strtolower( $user->user_email ) );
+		// Storing the email (not a bool) lets the status self-invalidate if the account email later changes.
+		Users::update_site_user_meta( $user_id, self::VERIFIED_META, $account_email );
 		Users::delete_site_user_meta( $user_id, self::KEY_META );
 		Users::delete_site_user_meta( $user_id, self::ATTEMPTS_META );
 
@@ -183,14 +191,13 @@ class EmailVerificationService {
 	 * @return string The plaintext 6-digit code.
 	 */
 	public function create_code( int $user_id ): string {
-		$code       = $this->generate_code();
-		$user       = get_user_by( 'id', $user_id );
-		$email_hash = $user instanceof \WP_User ? wp_fast_hash( strtolower( $user->user_email ) ) : '';
+		$code          = $this->generate_code();
+		$account_email = $this->get_account_email( $user_id );
+		$email_hash    = null !== $account_email ? wp_fast_hash( $account_email ) : '';
 
-		// Seed the remaining-attempts counter at the full budget so the compare-and-swap in
-		// verify_code() only ever updates, never inserts — concurrent first guesses would otherwise
-		// race into duplicate rows. Seed only when absent, so resending a code never resets the
-		// remaining count (and thus never lifts a lockout in progress).
+		// Seed the attempts counter only when absent: pre-creating the row keeps verify_code()'s
+		// compare-and-swap an update (never a racy insert), and not resetting it on resend means
+		// re-requesting codes can't lift a lockout in progress.
 		if ( '' === (string) Users::get_site_user_meta( $user_id, self::ATTEMPTS_META ) ) {
 			Users::update_site_user_meta( $user_id, self::ATTEMPTS_META, (string) self::ATTEMPT_BUDGET );
 		}
@@ -203,15 +210,11 @@ class EmailVerificationService {
 	/**
 	 * Verify a submitted code for the given user and record the outcome.
 	 *
-	 * Before comparing the code, this claims a guess by decrementing the remaining-attempts budget
-	 * with a compare-and-swap ({@see self::claim_attempt()}). That serialises concurrent submissions
-	 * into distinct slots, so a parallel flood can't each read the same counter and slip past the
-	 * cap — at most ATTEMPT_BUDGET codes are ever compared, and a loser under contention is turned
-	 * away ({@see self::RESULT_WRONG}) without a guess. Expired, missing, or email-mismatched codes
-	 * return before the counter moves, so they never count against the customer.
-	 *
-	 * A correct code marks the user verified; reaching {@see self::MAX_ATTEMPTS} on one code burns it
-	 * (a new one must be requested) and exhausting the budget locks the user out permanently.
+	 * Each guess first claims a slot from the remaining-attempts budget via {@see self::claim_attempt()},
+	 * so concurrent submissions can't slip past the cap. Expired, missing, or email-mismatched codes
+	 * return before a guess is claimed, so they never count against the customer. A correct code marks
+	 * the user verified; reaching {@see self::MAX_ATTEMPTS} on one code burns it (a fresh one must be
+	 * requested) and exhausting the budget locks the user out permanently.
 	 *
 	 * @since 11.0.0
 	 *
@@ -232,6 +235,12 @@ class EmailVerificationService {
 			return self::RESULT_NONE;
 		}
 
+		$account_email = $this->get_account_email( $user_id );
+
+		if ( null === $account_email ) {
+			return self::RESULT_NONE;
+		}
+
 		list( $timestamp, $hash, $email_hash, $attempts ) = $parsed;
 
 		if ( time() - $timestamp > self::OTP_TTL ) {
@@ -241,13 +250,9 @@ class EmailVerificationService {
 		}
 
 		// The code is void if the account email no longer matches the one it was minted for.
-		if ( '' !== $email_hash ) {
-			$user = get_user_by( 'id', $user_id );
-
-			if ( ! $user instanceof \WP_User || ! wp_verify_fast_hash( strtolower( $user->user_email ), $email_hash ) ) {
-				Users::delete_site_user_meta( $user_id, self::KEY_META );
-				return self::RESULT_NONE;
-			}
+		if ( ! wp_verify_fast_hash( $account_email, $email_hash ) ) {
+			Users::delete_site_user_meta( $user_id, self::KEY_META );
+			return self::RESULT_NONE;
 		}
 
 		// A live code exists, so create_code() must have created the counter row. If it is somehow
@@ -387,7 +392,7 @@ class EmailVerificationService {
 		$email_hash = (string) ( $parts[2] ?? '' );
 		$attempts   = (int) ( $parts[3] ?? 0 );
 
-		if ( '' === $hash ) {
+		if ( '' === $hash || '' === $email_hash || 0 === $timestamp ) {
 			return null;
 		}
 
