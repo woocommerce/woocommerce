@@ -161,10 +161,15 @@ test.describe( 'Payment Gateways API tests', () => {
 						'Flat rate': {
 							flat_rate: 'Any &quot;Flat rate&quot; method',
 						},
-						'Free shipping': {
+						// The shared site setup attaches a free shipping method
+						// instance to zone 0, which adds a per-instance entry
+						// (free_shipping:<id>) alongside the base option. The
+						// instance ID is non-deterministic, so only assert the
+						// base option and tolerate the baseline instance.
+						'Free shipping': expect.objectContaining( {
 							free_shipping:
 								'Any &quot;Free shipping&quot; method',
-						},
+						} ),
 						'Local pickup': {
 							pickup_location:
 								'Any &quot;Local pickup&quot; method',
