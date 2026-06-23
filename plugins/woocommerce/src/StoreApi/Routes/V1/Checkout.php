@@ -946,12 +946,13 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WC_Payment_Gateway|null
 	 */
 	private function get_request_payment_method( \WP_REST_Request $request ) {
-		$available_gateways     = WC()->payment_gateways->get_available_payment_gateways();
 		$request_payment_method = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
 
 		if ( empty( $request_payment_method ) ) {
 			return null;
 		}
+
+		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 		if ( ! isset( $available_gateways[ $request_payment_method ] ) ) {
 			$all_payment_gateways = WC()->payment_gateways->payment_gateways();
