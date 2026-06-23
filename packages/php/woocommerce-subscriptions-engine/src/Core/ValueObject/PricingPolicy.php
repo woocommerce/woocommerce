@@ -73,6 +73,12 @@ final class PricingPolicy {
 	 * documented defaults (a fee with no `taxable` key becomes `taxable => false`).
 	 * The `tax_class` empty-string-vs-null distinction is preserved.
 	 *
+	 * This method is the canonical normalization point for the `pricing_policy`
+	 * column: keys outside the documented entry shapes are intentionally dropped,
+	 * so a hydrate -> to_array round-trip will not carry them back. If extension
+	 * data ever needs to survive the round-trip, add a reserved pass-through key
+	 * to the shapes rather than accepting arbitrary keys.
+	 *
 	 * @param array<array-key, mixed> $data Decoded pricing_policy row.
 	 */
 	public static function from_array( array $data ): self {

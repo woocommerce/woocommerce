@@ -246,7 +246,10 @@ final class Contract {
 	}
 
 	/**
-	 * Coerce raw line-item rows to the typed item shape.
+	 * Filter raw items to retain only array-valued entries.
+	 *
+	 * Individual item field structure is not normalized here; each kept entry is
+	 * passed through as-is.
 	 *
 	 * @param mixed $value Raw items value.
 	 * @return array<int, array<string, mixed>>
@@ -304,10 +307,44 @@ final class Contract {
 	/**
 	 * Build a new, unsaved contract.
 	 *
+	 * Required: `selling_plan_id` and `origin_order_id` (positive integers),
+	 * `customer_id` (a non-negative integer; 0 is a guest), and `currency`,
+	 * `start_gmt` (non-empty strings). These are validated up front so an omitted
+	 * field fails loud here rather than coercing to a silent `0`/`''` and producing
+	 * an observably invalid contract. All other fields are optional and default in
+	 * the constructor.
+	 *
 	 * @param array<string, mixed> $args Contract attributes.
-	 * @throws DomainException If the contract attributes are not valid.
+	 * @throws DomainException If a required attribute is missing or invalid.
 	 */
 	public static function create( array $args ): self {
+		// customer_id 0 is a valid guest contract, so it is non-negative rather
+		// than strictly positive; an absent key is still rejected (null is not numeric).
+		$customer_id = $args['customer_id'] ?? null;
+		if ( ! is_numeric( $customer_id ) || (int) $customer_id < 0 ) {
+			throw new DomainException(
+				'Contract: customer_id is required and must be a non-negative integer.'
+			);
+		}
+
+		foreach ( array( 'selling_plan_id', 'origin_order_id' ) as $required_id ) {
+			$value = $args[ $required_id ] ?? null;
+			if ( ! is_numeric( $value ) || (int) $value <= 0 ) {
+				throw new DomainException(
+					sprintf( 'Contract: %s is required and must be a positive integer.', $required_id )
+				);
+			}
+		}
+
+		foreach ( array( 'currency', 'start_gmt' ) as $required_string ) {
+			$value = $args[ $required_string ] ?? null;
+			if ( ! is_scalar( $value ) || '' === (string) $value ) {
+				throw new DomainException(
+					sprintf( 'Contract: %s is required and must be a non-empty string.', $required_string )
+				);
+			}
+		}
+
 		$status = self::coerce_string( $args['status'] ?? null, ContractStatus::ACTIVE );
 		if ( ! ContractStatus::is_valid( $status ) ) {
 			throw new DomainException(
