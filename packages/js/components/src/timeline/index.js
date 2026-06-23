@@ -4,14 +4,13 @@
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
-import { date as formatSiteDate, format } from '@wordpress/date';
 import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import TimelineGroup from './timeline-group';
-import { sortByDateUsing, groupItemsUsing } from './util';
+import { formatTimelineDate, sortByDateUsing, groupItemsUsing } from './util';
 
 const Timeline = ( {
 	className = '',
@@ -25,7 +24,6 @@ const Timeline = ( {
 	timezone = 'browser',
 } ) => {
 	const timelineClassName = clsx( 'woocommerce-timeline', className );
-	const formatTimelineDate = timezone === 'site' ? formatSiteDate : format;
 
 	// Early return in case no data was passed to the component.
 	if ( ! items || items.length === 0 ) {
@@ -41,7 +39,7 @@ const Timeline = ( {
 	const addGroupTitles = ( group ) => {
 		return {
 			...group,
-			title: formatTimelineDate( dateFormat, group.date ),
+			title: formatTimelineDate( dateFormat, group.date, timezone ),
 		};
 	};
 

@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
-import { date as formatSiteDate, format } from '@wordpress/date';
+import { date as formatSiteDate, dateI18n, format } from '@wordpress/date';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -19,19 +19,23 @@ jest.mock( '@wordpress/date', () => {
 	return {
 		...actualDateModule,
 		date: jest.fn( actualDateModule.date ),
+		dateI18n: jest.fn( actualDateModule.dateI18n ),
 		format: jest.fn( actualDateModule.format ),
 	};
 } );
 
 describe( 'Timeline', () => {
 	const actualDateModule = jest.requireActual( '@wordpress/date' );
+	const originalIntl = global.Intl;
 	const timezoneTestItem = {
 		...mockData[ 1 ],
 		date: new Date( Date.UTC( 2020, 0, 20, 23, 45 ) ),
 	};
 
 	afterEach( () => {
+		global.Intl = originalIntl;
 		formatSiteDate.mockImplementation( actualDateModule.date );
+		dateI18n.mockImplementation( actualDateModule.dateI18n );
 		format.mockImplementation( actualDateModule.format );
 		jest.clearAllMocks();
 	} );
@@ -47,13 +51,20 @@ describe( 'Timeline', () => {
 	} );
 
 	test( 'uses browser timezone date formatting by default', () => {
+		global.Intl = {
+			DateTimeFormat: () => ( {
+				resolvedOptions: () => ( {
+					timeZone: 'Europe/London',
+				} ),
+			} ),
+		};
 		format.mockImplementation(
 			( dateFormat, date ) =>
 				`browser:${ dateFormat }:${ date.toISOString() }`
 		);
-		formatSiteDate.mockImplementation(
-			( dateFormat, date ) =>
-				`site:${ dateFormat }:${ date.toISOString() }`
+		dateI18n.mockImplementation(
+			( dateFormat, date, timezone ) =>
+				`localized:${ timezone }:${ dateFormat }:${ date.toISOString() }`
 		);
 
 		const { container } = render(
@@ -67,11 +78,11 @@ describe( 'Timeline', () => {
 		expect(
 			container.querySelector( '.woocommerce-timeline-group__title' )
 				.textContent
-		).toBe( 'browser:F j, Y:2020-01-20T23:45:00.000Z' );
+		).toBe( 'localized:Europe/London:F j, Y:2020-01-20T23:45:00.000Z' );
 		expect(
 			container.querySelector( '.woocommerce-timeline-item__timestamp' )
 				.textContent
-		).toBe( 'browser:g:ia:2020-01-20T23:45:00.000Z' );
+		).toBe( 'localized:Europe/London:g:ia:2020-01-20T23:45:00.000Z' );
 	} );
 
 	test( 'uses site timezone date formatting when requested', () => {
@@ -79,7 +90,7 @@ describe( 'Timeline', () => {
 			( dateFormat, date ) =>
 				`browser:${ dateFormat }:${ date.toISOString() }`
 		);
-		formatSiteDate.mockImplementation(
+		dateI18n.mockImplementation(
 			( dateFormat, date ) =>
 				`site:${ dateFormat }:${ date.toISOString() }`
 		);
@@ -103,6 +114,39 @@ describe( 'Timeline', () => {
 		).toBe( 'site:g:ia:2020-01-20T23:45:00.000Z' );
 	} );
 
+	test( 'falls back to browser timezone formatting when browser timezone is unavailable', () => {
+		global.Intl = {
+			DateTimeFormat: () => ( {
+				resolvedOptions: () => ( {} ),
+			} ),
+		};
+		format.mockImplementation(
+			( dateFormat, date ) =>
+				`browser:${ dateFormat }:${ date.toISOString() }`
+		);
+		dateI18n.mockImplementation(
+			( dateFormat, date, timezone ) =>
+				`localized:${ timezone }:${ dateFormat }:${ date.toISOString() }`
+		);
+
+		const { container } = render(
+			<Timeline
+				items={ [ timezoneTestItem ] }
+				dateFormat="F j, Y"
+				clockFormat="g:ia"
+			/>
+		);
+
+		expect(
+			container.querySelector( '.woocommerce-timeline-group__title' )
+				.textContent
+		).toBe( 'browser:F j, Y:2020-01-20T23:45:00.000Z' );
+		expect(
+			container.querySelector( '.woocommerce-timeline-item__timestamp' )
+				.textContent
+		).toBe( 'browser:g:ia:2020-01-20T23:45:00.000Z' );
+	} );
+
 	test( 'groups items using site timezone when requested', () => {
 		const timezoneBoundaryItems = [
 			{
@@ -120,6 +164,13 @@ describe( 'Timeline', () => {
 				return '2020-01-21';
 			}
 
+			if ( dateFormat === 'F j, Y' ) {
+				return 'January 21, 2020';
+			}
+
+			return `site:${ dateFormat }:${ date.toISOString() }`;
+		} );
+		dateI18n.mockImplementation( ( dateFormat, date ) => {
 			if ( dateFormat === 'F j, Y' ) {
 				return 'January 21, 2020';
 			}

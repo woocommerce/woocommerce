@@ -2,7 +2,7 @@
  * External dependencies
  */
 import moment from 'moment';
-import { date as formatSiteDate } from '@wordpress/date';
+import { date as formatSiteDate, dateI18n, format } from '@wordpress/date';
 
 const orderByOptions = {
 	ASC: 'asc',
@@ -43,6 +43,30 @@ const getSiteGroupKey = ( date, groupBy ) =>
 		date
 	);
 
+const getBrowserTimezone = () => {
+	try {
+		return Intl.DateTimeFormat().resolvedOptions().timeZone;
+	} catch ( error ) {
+		return undefined;
+	}
+};
+
+const formatTimelineDate = ( dateFormat, dateValue, timezone = 'browser' ) => {
+	if ( timezone === 'site' ) {
+		return dateI18n( dateFormat, dateValue );
+	}
+
+	const browserTimezone = getBrowserTimezone();
+
+	if ( browserTimezone ) {
+		return dateI18n( dateFormat, dateValue, browserTimezone );
+	}
+
+	// If the browser timezone is unavailable, preserve the previous behavior
+	// rather than falling back to dateI18n's default site timezone.
+	return format( dateFormat, dateValue );
+};
+
 const groupItemsUsing =
 	( groupBy, timezone = 'browser' ) =>
 	( groups, newItem ) => {
@@ -77,4 +101,10 @@ const groupItemsUsing =
 		return groups;
 	};
 
-export { groupByOptions, groupItemsUsing, orderByOptions, sortByDateUsing };
+export {
+	formatTimelineDate,
+	groupByOptions,
+	groupItemsUsing,
+	orderByOptions,
+	sortByDateUsing,
+};
