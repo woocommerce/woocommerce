@@ -321,7 +321,6 @@
 					"name": "JavaScript",
 					"command": "test:js",
 					"changes": [
-						".wp-env.json",
 						"webpack.config.js",
 						"babel.config.js",
 						"tsconfig.json",
