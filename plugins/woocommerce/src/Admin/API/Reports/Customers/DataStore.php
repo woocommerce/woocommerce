@@ -193,7 +193,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		$order = wc_get_order( $post_id );
-		if ( ! $order ) {
+		if ( ! $order instanceof \WC_Order ) {
 			return -1;
 		}
 		$customer_id = self::get_existing_customer_id_from_order( $order );
