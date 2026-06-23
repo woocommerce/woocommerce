@@ -36,7 +36,7 @@ final class SchemaInstaller {
 	 * 1.0.0 - baseline plan and contract tables, including the nullable `extension_slug`
 	 *         column on plans and contracts.
 	 */
-	const VERSION = '1.0.0';
+	const VERSION = '1.0.1';
 
 	/**
 	 * Option key tracking the installed schema version.
@@ -173,12 +173,12 @@ final class SchemaInstaller {
   name VARCHAR(255) NOT NULL,
   merchant_code VARCHAR(64) NULL,
   options_display JSON NULL,
-  app_id VARCHAR(64) NULL,
+  extension_slug VARCHAR(64) NULL,
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,
   PRIMARY KEY  (id),
   UNIQUE KEY merchant_code (merchant_code),
-  KEY app_id (app_id)
+  KEY extension_slug (extension_slug)
 ) {$collate};";
 
 		// `extension_slug` records the registered slug of the extension that created the
