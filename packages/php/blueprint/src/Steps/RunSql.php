@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Blueprint\Steps;
 
+use Automattic\WooCommerce\Blueprint\Util;
+
 /**
  * Class RunSql
  *
@@ -43,6 +45,24 @@ class RunSql extends Step {
 	public function __construct( string $sql, $name = 'schema.sql' ) {
 		$this->sql  = $sql;
 		$this->name = $name;
+	}
+
+	/**
+	 * Build a RunSql step for a database row, using the portable table-prefix
+	 * placeholder in place of the live database prefix.
+	 *
+	 * Pass the unprefixed table name (e.g. 'woocommerce_shipping_zones'). The
+	 * placeholder is prepended for you, so exported SQL stays portable across
+	 * sites with different table prefixes. On import, ImportRunSql resolves the
+	 * placeholder back to the importing site's prefix.
+	 *
+	 * @param array  $row   Row data keyed by column name.
+	 * @param string $table Unprefixed table name.
+	 * @param string $type  One of insert, insert ignore, replace into.
+	 * @return self
+	 */
+	public static function from_table_row( array $row, string $table, string $type = 'replace into' ): self {
+		return new self( (string) Util::array_to_insert_sql( $row, self::TABLE_PREFIX_PLACEHOLDER . $table, $type ) );
 	}
 
 	/**
