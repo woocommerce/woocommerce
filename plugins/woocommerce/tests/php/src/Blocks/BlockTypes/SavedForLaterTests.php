@@ -124,6 +124,48 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @return array<string, array{string, string, bool}>
+	 */
+	public function provider_register_hooked_block_on_template(): array {
+		$cart_only       = '<!-- wp:woocommerce/cart /-->';
+		$cart_with_block = '<!-- wp:woocommerce/cart /--><!-- wp:woocommerce/saved-for-later /-->';
+
+		return array(
+			// label                                    => array( template_content, template_slug, expected_hooked ).
+			'hooked after cart on cart template'         => array( $cart_only, 'page-cart', true ),
+			'not hooked on a non-cart template'          => array( $cart_only, 'page-checkout', false ),
+			'not hooked when already in template markup' => array( $cart_with_block, 'page-cart', false ),
+		);
+	}
+
+	/**
+	 * `register_hooked_block` also injects on the cart block template — block
+	 * themes that hardcode `woocommerce/cart` in `page-cart.html` run the
+	 * block-hooks pass with a `WP_Block_Template` context, not a `WP_Post`, so
+	 * the cart-page-post path never matches. Injection must happen for the
+	 * `page-cart` template and must not happen for any other template.
+	 *
+	 * @dataProvider provider_register_hooked_block_on_template
+	 *
+	 * @param string $template_content Markup of the template being hooked.
+	 * @param string $template_slug    Slug of the template context.
+	 * @param bool   $expected_hooked  Whether the block should end up in the hooked list.
+	 */
+	public function test_register_hooked_block_on_template( string $template_content, string $template_slug, bool $expected_hooked ): void {
+		$template          = new \WP_Block_Template();
+		$template->slug    = $template_slug;
+		$template->content = $template_content;
+
+		$hooked = $this->sut->register_hooked_block( array(), 'after', 'woocommerce/cart', $template );
+
+		if ( $expected_hooked ) {
+			$this->assertContains( 'woocommerce/saved-for-later', $hooked );
+		} else {
+			$this->assertNotContains( 'woocommerce/saved-for-later', $hooked );
+		}
+	}
+
+	/**
 	 * The auto-injected block ships with a seeded `core/heading` inner block so
 	 * fresh cart pages render the heading on the frontend out of the box. The
 	 * matching `null` push onto `innerContent` is what makes `WP_Block::render()`

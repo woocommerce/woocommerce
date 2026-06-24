@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Saved for Later now auto-injects on cart templates that hardcode the cart block, not only when the cart page uses core/post-content
