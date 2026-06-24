@@ -1,12 +1,12 @@
 <?php
 /**
- * Title: Hidden product grid with filters
+ * Title: Product grid with filters
  * Slug: purple/hidden-product-grid-with-filters
  * Inserter: no
  */
 ?>
 
-<!-- wp:group {"metadata":{"name":"Product grids with filters","patternName":"purple/hidden-product-grid-with-filters"},"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|60","bottom":"0"}}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":"Product grid with filters","patternName":"purple/hidden-product-grid-with-filters"},"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|60","bottom":"0"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--60);margin-bottom:0"><!-- wp:columns {"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"width":"22%"} -->
 <div class="wp-block-column" style="flex-basis:22%"><!-- wp:heading {"level":3,"style":{"margin":{"top":"0","bottom":"0"},"spacing":{"margin":{"top":"0","bottom":"0"}},"typography":{"lineHeight":1.6,"fontStyle":"normal","fontWeight":"400"}},"fontSize":"medium"} -->

@@ -22,7 +22,7 @@
 <!-- /wp:post-template -->
 
 <!-- wp:query-no-results -->
-<!-- wp:pattern {"slug":"purple/no-search-results"} /-->
+<!-- wp:pattern {"slug":"purple/hidden-no-search-results"} /-->
 <!-- /wp:query-no-results -->
 
 <!-- wp:group {"style":{"spacing":{"margin":{"top":"var:preset|spacing|50"},"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"layout":{"type":"default"}} -->
