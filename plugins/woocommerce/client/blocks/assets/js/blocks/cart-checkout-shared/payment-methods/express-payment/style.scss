@@ -17,19 +17,25 @@ $border-width: 1px;
 			width: 100%;
 			overflow: hidden;
 			border-radius: $universal-border-radius;
+			position: relative;
 			// ensure the buttons don't create a horizontal layout shift
 			min-height: 48px;
 			// ensure the elements take space before the button is loaded
 			// 150 is the minimum width of the button; allows for
 			min-width: 150px;
 
-			&:focus-within {
-				outline: 2px solid $input-text-light;
-				outline-offset: -2px;
+			&:focus-within::after {
+				border: 2px solid $input-text-light;
+				border-radius: inherit;
+				content: "";
+				inset: 0;
+				pointer-events: none;
+				position: absolute;
+				z-index: 1;
+			}
 
-				.has-dark-controls & {
-					outline-color: $input-text-dark;
-				}
+			.has-dark-controls &:focus-within::after {
+				border-color: $input-text-dark;
 			}
 
 			> img {
