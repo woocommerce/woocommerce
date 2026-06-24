@@ -414,6 +414,16 @@ final class Cycle {
 	}
 
 	/**
+	 * Link the cycle to its order. One of the few post-freeze-mutable fields (with
+	 * `status` and `reason`): the order id is stamped once the charge order exists.
+	 *
+	 * @param int $order_id Linked order id.
+	 */
+	public function set_order_id( int $order_id ): void {
+		$this->order_id = $order_id;
+	}
+
+	/**
 	 * Owning extension slug, or null.
 	 */
 	public function get_extension_slug(): ?string {

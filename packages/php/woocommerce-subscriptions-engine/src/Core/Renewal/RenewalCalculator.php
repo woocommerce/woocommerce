@@ -22,7 +22,10 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Renewal;
 
 use DateTimeImmutable;
+use DateTimeZone;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -79,5 +82,52 @@ final class RenewalCalculator {
 	 */
 	public static function next_bill_date( BillingPolicy $policy, DateTimeImmutable $current_period_start ): DateTimeImmutable {
 		return $policy->compute_next_renewal_from( $current_period_start );
+	}
+
+	/**
+	 * Compute the cycle the contract advances into after `$previous`.
+	 *
+	 * The next period starts where the previous one ended (`$previous`'s
+	 * `ends_at_gmt`) and runs one cadence forward, taken from the plan snapshot's
+	 * billing policy via {@see BillingPolicy::compute_next_renewal_from()} so the
+	 * one cadence-math path applies. For the flat recurring case the amount and
+	 * currency carry forward from `$previous` unchanged (proration / discount /
+	 * tax recompute is out of scope here; the order still materializes tax and
+	 * rounding). `$now` is passed for determinism and as the seam a later renewal
+	 * service uses; the boundaries here anchor on the previous period, not the
+	 * wall clock.
+	 *
+	 * @param Cycle             $previous The chain's most-recent (just-completed) cycle.
+	 * @param PlanSnapshot      $plan     The plan terms the cycle bills under (cadence source).
+	 * @param DateTimeImmutable $now      The current moment, injected by the integration layer.
+	 * @return NextCycleSpec The computed next-cycle shape (period + expected_total + currency).
+	 */
+	public static function compute_next_cycle( Cycle $previous, PlanSnapshot $plan, DateTimeImmutable $now ): NextCycleSpec {
+		unset( $now );
+
+		$policy = self::billing_policy_from_snapshot( $plan );
+
+		$period_start = new DateTimeImmutable( $previous->get_ends_at_gmt(), new DateTimeZone( 'UTC' ) );
+		$period_end   = $policy->compute_next_renewal_from( $period_start );
+
+		return new NextCycleSpec(
+			$period_start->format( 'Y-m-d H:i:s' ),
+			$period_end->format( 'Y-m-d H:i:s' ),
+			$previous->get_expected_total(),
+			$previous->get_currency()
+		);
+	}
+
+	/**
+	 * Reconstruct the plan's billing policy from a plan snapshot payload.
+	 *
+	 * @param PlanSnapshot $plan The plan snapshot whose cadence to read.
+	 * @return BillingPolicy The plan's billing policy.
+	 */
+	private static function billing_policy_from_snapshot( PlanSnapshot $plan ): BillingPolicy {
+		$payload        = $plan->to_array();
+		$billing_policy = $payload['billing_policy'] ?? null;
+
+		return BillingPolicy::from_array( is_array( $billing_policy ) ? $billing_policy : array() );
 	}
 }

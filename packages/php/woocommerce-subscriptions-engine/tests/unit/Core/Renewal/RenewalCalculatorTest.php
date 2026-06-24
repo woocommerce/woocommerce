@@ -12,8 +12,11 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\Renewal;
 use DateTimeImmutable;
 use DateTimeZone;
 use PHPUnit\Framework\TestCase;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Renewal\RenewalCalculator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\Renewal\RenewalCalculator
@@ -79,5 +82,97 @@ class RenewalCalculatorTest extends TestCase {
 
 		$this->assertSame( '2026-01-16 18:30:00', $next->format( 'Y-m-d H:i:s' ) );
 		$this->assertSame( 'UTC', $next->getTimezone()->getName() );
+	}
+
+	/**
+	 * Build a billed previous cycle whose period ends at `$ends_at`, on the given cadence.
+	 *
+	 * @param string $ends_at        The previous period end (and the next period start).
+	 * @param string $expected_total The previous cycle's expected total (the flat recurring amount).
+	 * @param string $period         Cadence period.
+	 * @param int    $interval       Cadence interval.
+	 */
+	private function previous_cycle( string $ends_at, string $expected_total = '19.99', string $period = 'month', int $interval = 1 ): Cycle {
+		return Cycle::create(
+			array(
+				'contract_id'    => 7,
+				'sequence_no'    => 1,
+				'count'          => 1,
+				'status'         => CycleStatus::billed(),
+				'starts_at_gmt'  => '2026-01-15 00:00:00',
+				'ends_at_gmt'    => $ends_at,
+				'expected_total' => $expected_total,
+				'currency'       => 'USD',
+				'plan_snapshot'  => PlanSnapshot::from_array(
+					array(
+						'selling_plan_id' => 7,
+						'billing_policy'  => array(
+							'period'   => $period,
+							'interval' => $interval,
+						),
+					)
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox compute_next_cycle starts the next period where the previous one ended.
+	 */
+	public function test_compute_next_cycle_period_starts_at_previous_period_end(): void {
+		$previous = $this->previous_cycle( '2026-02-15 00:00:00' );
+		$plan     = $previous->get_plan_snapshot();
+		$this->assertInstanceOf( PlanSnapshot::class, $plan );
+		$now = new DateTimeImmutable( '2026-02-15 00:00:00', new DateTimeZone( 'UTC' ) );
+
+		$spec = RenewalCalculator::compute_next_cycle( $previous, $plan, $now );
+
+		$this->assertSame( '2026-02-15 00:00:00', $spec->get_starts_at_gmt() );
+		$this->assertSame( '2026-03-15 00:00:00', $spec->get_ends_at_gmt() );
+	}
+
+	/**
+	 * @testdox compute_next_cycle carries the flat recurring amount and currency forward.
+	 */
+	public function test_compute_next_cycle_carries_amount_and_currency_forward(): void {
+		$previous = $this->previous_cycle( '2026-02-15 00:00:00', '24.50' );
+		$plan     = $previous->get_plan_snapshot();
+		$this->assertInstanceOf( PlanSnapshot::class, $plan );
+		$now = new DateTimeImmutable( '2026-02-15 00:00:00', new DateTimeZone( 'UTC' ) );
+
+		$spec = RenewalCalculator::compute_next_cycle( $previous, $plan, $now );
+
+		$this->assertSame( '24.50000000', $spec->get_expected_total() );
+		$this->assertSame( 'USD', $spec->get_currency() );
+	}
+
+	/**
+	 * @testdox compute_next_cycle honours the plan cadence interval and period.
+	 */
+	public function test_compute_next_cycle_honours_cadence(): void {
+		$previous = $this->previous_cycle( '2026-03-01 00:00:00', '19.99', 'week', 2 );
+		$plan     = $previous->get_plan_snapshot();
+		$this->assertInstanceOf( PlanSnapshot::class, $plan );
+		$now = new DateTimeImmutable( '2026-03-01 00:00:00', new DateTimeZone( 'UTC' ) );
+
+		$spec = RenewalCalculator::compute_next_cycle( $previous, $plan, $now );
+
+		$this->assertSame( '2026-03-01 00:00:00', $spec->get_starts_at_gmt() );
+		$this->assertSame( '2026-03-15 00:00:00', $spec->get_ends_at_gmt() );
+	}
+
+	/**
+	 * @testdox compute_next_cycle is calendar-aware for month-end roll-over.
+	 */
+	public function test_compute_next_cycle_is_calendar_aware(): void {
+		// 31 Jan + 1 month rolls to 3 Mar (matching DateTimeImmutable::modify()).
+		$previous = $this->previous_cycle( '2026-01-31 00:00:00' );
+		$plan     = $previous->get_plan_snapshot();
+		$this->assertInstanceOf( PlanSnapshot::class, $plan );
+		$now = new DateTimeImmutable( '2026-01-31 00:00:00', new DateTimeZone( 'UTC' ) );
+
+		$spec = RenewalCalculator::compute_next_cycle( $previous, $plan, $now );
+
+		$this->assertSame( '2026-03-03 00:00:00', $spec->get_ends_at_gmt() );
 	}
 }
