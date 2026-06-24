@@ -83,9 +83,10 @@ packages:
 # pnpm 10 emptied public-hoist-pattern (was ['*eslint*', '*prettier*']).
 # Also hoist react/react-dom so phantom deps in @wordpress/* packages resolve
 # (e.g. @wordpress/dataviews imports react-dom/client without declaring it).
-# uuid/memize are the same kind of phantom import: @wordpress/dataviews pulls in
-# uuid (admin client bundle), and @woocommerce/internal-js-tests' jest preset
-# require.resolve()s uuid + memize — none of them declare these, so hoist to root.
+# uuid/memize are the same kind of phantom import: @wordpress/dataviews's
+# bundle imports both, and @woocommerce/internal-js-tests' jest preset resolves
+# them via require.resolve(). None of those packages declare uuid or memize as a
+# dependency, so we hoist them to the repo root where every consumer can find them.
 publicHoistPattern:
     - '*eslint*'
     - '*prettier*'
