@@ -36,6 +36,62 @@ const getArrowsState = ( imageIndex: number, totalImages: number ) => ( {
 	isDisabledNext: imageIndex === totalImages - 1,
 } );
 
+const DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO = 0.25;
+
+const getVerticalIntersectionRatio = ( rect: DOMRect, rootRect: DOMRect ) => {
+	const height =
+		Math.min( rect.bottom, rootRect.bottom ) -
+		Math.max( rect.top, rootRect.top );
+
+	return Math.max( 0, height ) / rect.height;
+};
+
+const isDialogVideoInView = ( video: HTMLVideoElement ) => {
+	const scrollableContainer = video.closest( SELECTORS.dialogContent );
+
+	if ( ! scrollableContainer ) {
+		return false;
+	}
+
+	const videoRect = video.getBoundingClientRect();
+	const containerRect = scrollableContainer.getBoundingClientRect();
+
+	if ( ! videoRect.height ) {
+		return false;
+	}
+
+	return (
+		getVerticalIntersectionRatio( videoRect, containerRect ) >=
+		DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO
+	);
+};
+
+const isDialogVideoIntersectionInView = (
+	entry: IntersectionObserverEntry
+) => {
+	if ( ! entry.rootBounds || ! entry.boundingClientRect.height ) {
+		return false;
+	}
+
+	return (
+		getVerticalIntersectionRatio(
+			entry.boundingClientRect,
+			entry.rootBounds
+		) >= DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO
+	);
+};
+
+const syncVideoPlaybackState = (
+	video: HTMLVideoElement,
+	shouldPlay: boolean
+) => {
+	if ( shouldPlay && video.paused ) {
+		void video.play().catch( () => undefined );
+	} else if ( ! shouldPlay && ! video.paused ) {
+		video.pause();
+	}
+};
+
 const syncVideoElementPlayback = (
 	video: HTMLVideoElement,
 	selectedImageId: number,
@@ -43,18 +99,92 @@ const syncVideoElementPlayback = (
 	videoLocation?: ProductGalleryContext[ 'videoLocation' ]
 ) => {
 	const imageId = Number( video.getAttribute( 'data-image-id' ) ?? 0 );
-	const shouldPlayInDialog = videoLocation === 'dialog' && isDialogOpen;
+	const shouldPlayInDialog =
+		videoLocation === 'dialog' &&
+		isDialogOpen &&
+		isDialogVideoInView( video );
 	const shouldPlayInGallery =
 		videoLocation === 'gallery' &&
 		selectedImageId === imageId &&
 		! isDialogOpen;
 	const shouldPlay = shouldPlayInDialog || shouldPlayInGallery;
 
-	if ( shouldPlay ) {
-		void video.play().catch( () => undefined );
-	} else {
-		video.pause();
+	syncVideoPlaybackState( video, shouldPlay );
+};
+
+const syncDialogVideoPlayback = (
+	dialogContent: Element,
+	isDialogOpen: boolean
+) => {
+	dialogContent
+		.querySelectorAll< HTMLVideoElement >( 'video[data-image-id]' )
+		.forEach( ( video ) =>
+			syncVideoPlaybackState(
+				video,
+				isDialogOpen && isDialogVideoInView( video )
+			)
+		);
+};
+
+const dialogVideoPlaybackObservers = new WeakMap<
+	Element,
+	IntersectionObserver
+>();
+
+const disconnectDialogVideoPlaybackObserver = ( dialogContent: Element ) => {
+	const observer = dialogVideoPlaybackObservers.get( dialogContent );
+
+	if ( observer ) {
+		observer.disconnect();
+		dialogVideoPlaybackObservers.delete( dialogContent );
 	}
+};
+
+const observeDialogVideoPlayback = ( dialogContent: Element ) => {
+	if ( ! window.IntersectionObserver ) {
+		return;
+	}
+
+	disconnectDialogVideoPlaybackObserver( dialogContent );
+
+	const observer = new IntersectionObserver(
+		( entries: IntersectionObserverEntry[] ) => {
+			entries.forEach( ( entry ) => {
+				const video = entry.target;
+
+				if ( ! ( video instanceof HTMLVideoElement ) ) {
+					return;
+				}
+
+				syncVideoPlaybackState(
+					video,
+					document.body.classList.contains(
+						CLASSES.dialogOpenBody
+					) &&
+						isDialogVideoIntersectionInView( entry )
+				);
+			} );
+		},
+		{
+			threshold: [ 0, DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO, 1 ],
+		}
+	);
+
+	dialogContent
+		.querySelectorAll< HTMLVideoElement >( 'video[data-image-id]' )
+		.forEach( ( video ) => observer.observe( video ) );
+
+	dialogVideoPlaybackObservers.set( dialogContent, observer );
+};
+
+const syncScopedVideoElementPlayback = ( video: HTMLVideoElement ) => {
+	const { selectedImageId, isDialogOpen, videoLocation } = getContext();
+	syncVideoElementPlayback(
+		video,
+		selectedImageId,
+		isDialogOpen,
+		videoLocation
+	);
 };
 
 /** Read the `products` map from the WooCommerce iAPI config (or `{}`). */
@@ -767,6 +897,20 @@ const productGallery = {
 						32; // Arbitrary value for the header height.
 				}
 			}
+
+			const dialogContent = dialogRef.querySelector(
+				SELECTORS.dialogContent
+			);
+
+			if ( dialogContent ) {
+				if ( isDialogOpen ) {
+					observeDialogVideoPlayback( dialogContent );
+				} else {
+					disconnectDialogVideoPlaybackObserver( dialogContent );
+				}
+
+				syncDialogVideoPlayback( dialogContent, isDialogOpen );
+			}
 		},
 		syncVideoPlayback: () => {
 			const element = getElement()?.ref;
@@ -776,15 +920,7 @@ const productGallery = {
 			}
 
 			toggleImageVisibility( element );
-
-			const { selectedImageId, isDialogOpen, videoLocation } =
-				getContext();
-			syncVideoElementPlayback(
-				element,
-				selectedImageId,
-				isDialogOpen,
-				videoLocation
-			);
+			syncScopedVideoElementPlayback( element );
 		},
 		/** Per-image `data-wp-watch` callback that toggles visibility from `imageData`. */
 		toggleImageVisibility: () => {
