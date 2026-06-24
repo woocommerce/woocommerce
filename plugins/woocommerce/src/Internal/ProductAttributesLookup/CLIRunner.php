@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use WP_CLI;
 
 /**
@@ -382,10 +384,8 @@ class CLIRunner {
 
 		$was_enabled = 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' );
 
-		// phpcs:ignore Generic.Commenting.Todo.TaskFound
-		// TODO: adjust for non-CPT datastores (this is only used for the progress bar, though).
-		$products_count = wp_count_posts( 'product' );
-		$products_count = intval( $products_count->publish ) + intval( $products_count->pending ) + intval( $products_count->draft );
+		$products_count = ProductUtil::get_counts_for_type( 'product' );
+		$products_count = ( $products_count[ ProductStatus::PUBLISH ] ?? 0 ) + ( $products_count[ ProductStatus::PENDING ] ?? 0 ) + ( $products_count[ ProductStatus::DRAFT ] ?? 0 );
 
 		if ( ! $this->lookup_data_store->regeneration_is_in_progress() || array_key_exists( 'from-scratch', $assoc_args ) ) {
 			$info = $this->get_lookup_table_info();

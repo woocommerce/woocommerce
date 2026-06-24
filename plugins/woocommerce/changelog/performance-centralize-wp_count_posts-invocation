@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Centralize wp_count_posts invocations towards products.
