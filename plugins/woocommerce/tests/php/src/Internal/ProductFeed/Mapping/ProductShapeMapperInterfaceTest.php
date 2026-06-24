@@ -66,6 +66,23 @@ class ProductShapeMapperInterfaceTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The ProductShapeMapperInterface contract (param + return type) should be stable; changing it is a conscious BC decision.
+	 */
+	public function test_product_shape_mapper_interface_signature_is_stable(): void {
+		$method = new \ReflectionMethod( ProductShapeMapperInterface::class, 'map_product' );
+		$params = $method->getParameters();
+
+		$this->assertCount( 1, $params, 'map_product() should take exactly one parameter.' );
+		$this->assertSame( WC_Product::class, (string) $params[0]->getType(), 'map_product() should accept a WC_Product.' );
+		$this->assertSame( 'array', (string) $method->getReturnType(), 'map_product() should return an array.' );
+	}
+
+	/**
+	 * Demonstrates the decoupling-from-feed-machinery path: an implementation can be
+	 * instantiated and invoked with no container, validator, or feed present. This is a
+	 * structural/usability demonstration, not a signature guard — see
+	 * test_product_shape_mapper_interface_signature_is_stable() for the contract tripwire.
+	 *
 	 * @testdox A pull/query consumer should be able to use a shape mapper standalone, without any feed machinery.
 	 */
 	public function test_shape_mapper_is_usable_without_feed_machinery(): void {
