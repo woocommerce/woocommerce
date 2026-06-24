@@ -3,9 +3,11 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
 use Automattic\WooCommerce\Enums\ProductStatus;
-use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 /**
  * Products Task
@@ -33,7 +35,10 @@ class Products extends Task {
 		add_action( 'woocommerce_update_product', array( $this, 'maybe_set_has_product_transient' ), 10, 2 );
 		add_action( 'woocommerce_new_product', array( $this, 'maybe_set_has_product_transient' ), 10, 2 );
 		add_action( 'untrashed_post', array( $this, 'maybe_set_has_product_transient_on_untrashed_post' ) );
-		add_action( 'current_screen', array( $this, 'maybe_redirect_to_add_product_tasklist' ), 30, 0 );
+
+		if ( ! $this->is_complete() ) {
+			add_action( 'current_screen', array( $this, 'maybe_redirect_to_add_product_tasklist' ), 30, 0 );
+		}
 
 		add_action( 'trashed_post', array( $this, 'on_product_trashed' ) );
 		add_action( 'deleted_post_product', array( $this, 'on_product_deleted' ) );
@@ -339,13 +344,12 @@ class Products extends Task {
 	public function maybe_redirect_to_add_product_tasklist() {
 		$screen = get_current_screen();
 		if ( $screen && 'edit' === $screen->base && 'product' === $screen->post_type ) {
-			// wp_count_posts is cached.
-			$counts = (array) wp_count_posts( $screen->post_type );
-			unset( $counts['auto-draft'] );
-			$count = array_sum( $counts );
+			$counts = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
+			$count  = array_sum( $counts ) - ( $counts[ ProductStatus::AUTO_DRAFT ] ?? 0 );
 			if ( $count > 0 ) {
 				return;
 			}
+
 			wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&task=products' ) );
 			exit;
 		}
