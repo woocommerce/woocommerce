@@ -300,8 +300,16 @@ describe( 'Express payment methods', () => {
 				const paymentMethodItem = document.querySelector(
 					'#express-payment-method-paypal'
 				);
+				expect( paymentMethodItem ).not.toBeNull();
+
+				if ( ! paymentMethodItem ) {
+					throw new Error(
+						'Missing #express-payment-method-paypal in test DOM'
+					);
+				}
+
 				const iframe = document.createElement( 'iframe' );
-				paymentMethodItem?.appendChild( iframe );
+				paymentMethodItem.appendChild( iframe );
 
 				await act( async () => {
 					iframe.focus();
