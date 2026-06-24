@@ -1,14 +1,14 @@
 <?php
 /**
  * Title: Image on the left, description on the right
- * Slug: purple/left-aligned-image-description-button
+ * Slug: purple/about-left-aligned-image-description-button
  * Categories: purple
  * Keywords: about, text, media, image
  * Description: A section with an image on the left, description and button on the right.
  */
 ?>
 
-<!-- wp:group {"metadata":{"name":"Image on the left, description on the right","categories":["purple"],"patternName":"purple/left-aligned-image-description-button","description":"A section with an image on the left, description and button on the right."},"align":"full","className":"is-style-section-2","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"default"}} -->
+<!-- wp:group {"metadata":{"name":"Image on the left, description on the right","categories":["purple"],"patternName":"purple/about-left-aligned-image-description-button","description":"A section with an image on the left, description and button on the right."},"align":"full","className":"is-style-section-2","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"default"}} -->
 <div class="wp-block-group alignfull is-style-section-2" style="margin-top:0;margin-bottom:0"><!-- wp:columns {"align":"wide","className":"is-style-default","style":{"spacing":{"blockGap":{"top":"0","left":"0"}}}} -->
 <div class="wp-block-columns alignwide is-style-default"><!-- wp:column {"verticalAlignment":"center","width":"50%"} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:50%"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-placeholder.webp","alt":"<?php esc_attr_e('Placeholder image', 'purple');?>","dimRatio":0,"overlayColor":"theme-2","isUserOverlayColor":true,"sizeSlug":"large","style":{"dimensions":{"aspectRatio":"4/3"}},"layout":{"type":"default"}} -->

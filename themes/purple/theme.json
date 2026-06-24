@@ -76,8 +76,8 @@
 			"spacing-unit": "10"
 		},
 		"layout": {
-			"contentSize": "40.3125rem",
-			"wideSize": "90rem"
+			"contentSize": "645px",
+			"wideSize": "1340px"
 		},
 		"spacing": {
 			"defaultSpacingSizes": false,
@@ -348,23 +348,9 @@
 			},
 			"core/search": {
 				"border": {
-					"bottom": {
-						"style": "none",
-						"width": "0px"
-					},
-					"left": {
-						"style": "none",
-						"width": "0px"
-					},
-					"right": {
-						"style": "none",
-						"width": "0px"
-					},
-					"top": {
-						"style": "none",
-						"width": "0px"
-					}
-				}
+					"color": "var(--wp--preset--color--theme-6)"
+				},
+				"css": "& .wp-block-search__input { padding-inline: 12px; }"
 			},
 			"core/separator": {
 				"border": {

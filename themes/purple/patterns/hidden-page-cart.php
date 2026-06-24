@@ -6,15 +6,11 @@
  */
 ?>
 <!-- wp:woocommerce/page-content-wrapper {"page":"cart"} -->
-	<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
-	<main class="wp-block-group">
+	<!-- wp:group {"tagName":"main","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|40"}}},"layout":{"type":"constrained","contentSize":"1060px"}} -->
+	<main class="wp-block-group" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--40)">
 
-		<!-- wp:spacer {"height":"var:preset|spacing|60"} -->
-		<div style="height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
-		<!-- /wp:spacer -->
-
-		<!-- wp:heading {"align":"wide","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|40"}}}} -->
-		<h2 class="wp-block-heading alignwide" style="margin-bottom:var(--wp--preset--spacing--40)"><?php esc_html_e('Cart', 'purple');?></h2>
+		<!-- wp:heading {"level":1,"align":"wide","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|40"}}},"fontSize":"x-large"} -->
+		<h1 class="wp-block-heading alignwide has-x-large-font-size" style="margin-bottom:var(--wp--preset--spacing--40)"><?php esc_html_e('Cart', 'purple');?></h1>
 		<!-- /wp:heading -->
 
 		<!-- wp:woocommerce/store-notices /-->

@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Centered text
+ * Title: About centered text
  * Slug: purple/about-centered-text
  * Categories: purple
  * Keywords: about, text

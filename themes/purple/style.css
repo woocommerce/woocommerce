@@ -250,6 +250,17 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
     margin-bottom: 0;
 }
 
+.wp-block-woocommerce-cart-order-summary-heading-block textarea {
+    padding-left: 0;
+}
+
+.wc-block-cart-item__quantity {
+    margin-top: var(--wp--preset--spacing--30);
+}
+.wc-block-components-quantity-selector {
+    min-height: 44px;
+}
+
 /* Navigation dropdown panel — desktop only.
  * Above the mobile overlay breakpoint, give the submenu its own
  * floating-panel styling (page-color background + soft shadow).
