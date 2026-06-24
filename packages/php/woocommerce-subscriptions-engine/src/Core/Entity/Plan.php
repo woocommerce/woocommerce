@@ -14,6 +14,7 @@ use InvalidArgumentException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\DeliveryPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -24,6 +25,8 @@ defined( 'ABSPATH' ) || exit;
  * {@see self::from_storage()} when hydrating a stored row.
  */
 final class Plan {
+
+	use ScalarCoercion;
 
 	const DEFAULT_CATEGORY = 'SUBSCRIPTION';
 
@@ -146,41 +149,67 @@ final class Plan {
 	 */
 	public static function create( int $group_id, array $args ): self {
 		$pricing_policy = $args['pricing_policy'] ?? null;
+		if ( null !== $pricing_policy && ! $pricing_policy instanceof PricingPolicy ) {
+			throw new InvalidArgumentException( 'Plan: pricing_policy must be a PricingPolicy instance or null.' );
+		}
 		if ( null !== $pricing_policy ) {
 			self::validate_pricing_policy( $pricing_policy );
+		}
+
+		$billing_policy = $args['billing_policy'] ?? null;
+		if ( ! $billing_policy instanceof BillingPolicy ) {
+			throw new InvalidArgumentException( 'Plan: billing_policy is required and must be a BillingPolicy instance.' );
+		}
+
+		$delivery_policy = $args['delivery_policy'] ?? null;
+		if ( null !== $delivery_policy && ! $delivery_policy instanceof DeliveryPolicy ) {
+			throw new InvalidArgumentException( 'Plan: delivery_policy must be a DeliveryPolicy instance or null.' );
 		}
 
 		return new self(
 			null,
 			$group_id,
-			(string) $args['name'],
-			$args['description'] ?? null,
-			$args['options'] ?? array(),
-			$args['billing_policy'],
-			$args['delivery_policy'] ?? null,
+			self::coerce_string( $args['name'] ?? null ),
+			self::coerce_nullable_string( $args['description'] ?? null ),
+			is_array( $args['options'] ?? null ) ? $args['options'] : array(),
+			$billing_policy,
+			$delivery_policy,
 			$pricing_policy,
-			$args['category'] ?? self::DEFAULT_CATEGORY,
-			$args['extension_slug'] ?? null
+			self::coerce_string( $args['category'] ?? null, self::DEFAULT_CATEGORY ),
+			self::coerce_nullable_string( $args['extension_slug'] ?? null )
 		);
 	}
 
 	/**
 	 * Hydrate from a stored row. Policy columns arrive JSON-decoded.
 	 *
+	 * The stored pricing policy is re-validated here: a WordPress database can be
+	 * mutated outside this engine's flows, and an out-of-range stored rule (a
+	 * negative or over-100 value) would otherwise feed billing math silently. We
+	 * fail loud on a corrupted row rather than risk a mischarge.
+	 *
 	 * @param array<string, mixed> $row Decoded plan row.
+	 * @throws InvalidArgumentException If the stored pricing_policy fails validation.
 	 */
 	public static function from_storage( array $row ): self {
+		$pricing_policy = isset( $row['pricing_policy'] ) && is_array( $row['pricing_policy'] )
+			? PricingPolicy::from_array( $row['pricing_policy'] )
+			: null;
+		if ( null !== $pricing_policy ) {
+			self::validate_pricing_policy( $pricing_policy );
+		}
+
 		return new self(
-			isset( $row['id'] ) ? (int) $row['id'] : null,
-			(int) $row['group_id'],
-			(string) $row['name'],
-			isset( $row['description'] ) ? (string) $row['description'] : null,
+			isset( $row['id'] ) ? self::coerce_int( $row['id'] ) : null,
+			self::coerce_int( $row['group_id'] ?? null ),
+			self::coerce_string( $row['name'] ?? null ),
+			self::coerce_nullable_string( $row['description'] ?? null ),
 			is_array( $row['options'] ?? null ) ? $row['options'] : array(),
-			BillingPolicy::from_array( $row['billing_policy'] ),
+			BillingPolicy::from_array( is_array( $row['billing_policy'] ?? null ) ? $row['billing_policy'] : array() ),
 			isset( $row['delivery_policy'] ) && is_array( $row['delivery_policy'] ) ? DeliveryPolicy::from_array( $row['delivery_policy'] ) : null,
-			isset( $row['pricing_policy'] ) && is_array( $row['pricing_policy'] ) ? PricingPolicy::from_array( $row['pricing_policy'] ) : null,
-			(string) ( $row['category'] ?? self::DEFAULT_CATEGORY ),
-			isset( $row['extension_slug'] ) ? (string) $row['extension_slug'] : null
+			$pricing_policy,
+			self::coerce_string( $row['category'] ?? null, self::DEFAULT_CATEGORY ),
+			self::coerce_nullable_string( $row['extension_slug'] ?? null )
 		);
 	}
 

@@ -86,6 +86,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 				'meta_value' => (string) $contract_id,          // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			)
 		);
+		$this->assertIsArray( $orders );
 
 		return array_values(
 			array_filter(
@@ -122,16 +123,19 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order    = $this->make_origin_order();
 		$contract = $this->make_contract( $plan_id, $order->get_id() );
 
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
 		$engine = new RenewalEngine();
 
 		// No capability declared: scheduling is refused.
 		$this->assertFalse( $engine->schedule( $contract ) );
-		$this->assertFalse( RenewalScheduler::is_scheduled( $contract->get_id() ) );
+		$this->assertFalse( RenewalScheduler::is_scheduled( $contract_id ) );
 
 		// Declare it and the schedule sticks.
 		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
 		$this->assertTrue( $engine->schedule( $contract ) );
-		$this->assertTrue( RenewalScheduler::is_scheduled( $contract->get_id() ) );
+		$this->assertTrue( RenewalScheduler::is_scheduled( $contract_id ) );
 	}
 
 	public function test_schedule_replaces_existing_row(): void {
@@ -141,6 +145,9 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order    = $this->make_origin_order();
 		$contract = $this->make_contract( $plan_id, $order->get_id() );
 
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
 		$engine = new RenewalEngine();
 		$engine->schedule( $contract );
 		$engine->schedule( $contract );
@@ -149,7 +156,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$pending = as_get_scheduled_actions(
 			array(
 				'hook'   => RenewalScheduler::HOOK,
-				'args'   => array( $contract->get_id() ),
+				'args'   => array( $contract_id ),
 				'status' => \ActionScheduler_Store::STATUS_PENDING,
 			),
 			'ids'
@@ -164,22 +171,26 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order    = $this->make_origin_order();
 		$contract = $this->make_contract( $plan_id, $order->get_id() );
 
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
 		$engine        = new RenewalEngine();
-		$renewal_order = $engine->process_due( $contract->get_id() );
+		$renewal_order = $engine->process_due( $contract_id );
 
 		$this->assertInstanceOf( WC_Order::class, $renewal_order );
-		$this->assertSame( (string) $contract->get_id(), $renewal_order->get_meta( OrderLinkage::META_CONTRACT_ID ) );
+		$this->assertSame( (string) $contract_id, $renewal_order->get_meta( OrderLinkage::META_CONTRACT_ID ) );
 		$this->assertSame( OrderLinkage::RELATION_RENEWAL, $renewal_order->get_meta( OrderLinkage::META_RELATION_TYPE ) );
 		$this->assertSame( '19.99', $renewal_order->get_total() );
 
 		// Contract advanced: cycle_count incremented, next bill date moved one month.
-		$reloaded = ( new ContractRepository() )->find( $contract->get_id() );
+		$reloaded = ( new ContractRepository() )->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertSame( 1, $reloaded->get_cycle_count() );
 		$this->assertSame( '2026-03-15 00:00:00', $reloaded->get_next_payment_gmt() );
 		$this->assertSame( ContractStatus::ACTIVE, $reloaded->get_status() );
 
 		// Next cycle re-armed.
-		$this->assertTrue( RenewalScheduler::is_scheduled( $contract->get_id() ) );
+		$this->assertTrue( RenewalScheduler::is_scheduled( $contract_id ) );
 	}
 
 	public function test_process_due_is_idempotent_for_a_retried_cycle(): void {
@@ -191,28 +202,33 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$contract = $this->make_contract( $plan_id, $order->get_id() );
 		$engine   = new RenewalEngine();
 
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
 		// First fire creates the cycle-1 renewal and advances to cycle 1.
-		$first = $engine->process_due( $contract->get_id() );
+		$first = $engine->process_due( $contract_id );
 		$this->assertInstanceOf( WC_Order::class, $first );
 
 		// Simulate an Action Scheduler retry of the same due action: rewind the
 		// persisted contract to its pre-advance state (cycle 0, original next
 		// date) so the retry attempts cycle 1 again - exactly what a duplicate
 		// dispatch would do before the advance committed.
-		$rewound = $repo->find( $contract->get_id() );
+		$rewound = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $rewound );
 		$rewound->set_cycle_count( 0 );
 		$rewound->set_status( ContractStatus::ACTIVE );
 		$rewound->set_next_payment_gmt( '2026-02-15 00:00:00' );
 		$repo->update( $rewound );
 
-		$retry = $engine->process_due( $contract->get_id() );
+		$retry = $engine->process_due( $contract_id );
 
 		// The per-cycle guard suppresses the retry: no second order, no advance.
 		$this->assertNull( $retry );
 
-		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract->get_id(), 1 ) );
+		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract_id, 1 ) );
 
-		$reloaded = $repo->find( $contract->get_id() );
+		$reloaded = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertSame( 0, $reloaded->get_cycle_count() );
 	}
 
@@ -223,14 +239,18 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order    = $this->make_origin_order();
 		$contract = $this->make_contract( $plan_id, $order->get_id() );
 
-		$engine = new RenewalEngine();
-		$engine->process_due( $contract->get_id() );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
 
-		$reloaded = ( new ContractRepository() )->find( $contract->get_id() );
+		$engine = new RenewalEngine();
+		$engine->process_due( $contract_id );
+
+		$reloaded = ( new ContractRepository() )->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertSame( 1, $reloaded->get_cycle_count() );
 		$this->assertSame( ContractStatus::EXPIRED, $reloaded->get_status() );
 		$this->assertNull( $reloaded->get_next_payment_gmt() );
-		$this->assertFalse( RenewalScheduler::is_scheduled( $contract->get_id() ) );
+		$this->assertFalse( RenewalScheduler::is_scheduled( $contract_id ) );
 	}
 
 	public function test_process_due_skips_non_active_contract(): void {
@@ -242,9 +262,13 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$contract->set_status( ContractStatus::ON_HOLD );
 		( new ContractRepository() )->update( $contract );
 
-		$this->assertNull( ( new RenewalEngine() )->process_due( $contract->get_id() ) );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
 
-		$reloaded = ( new ContractRepository() )->find( $contract->get_id() );
+		$this->assertNull( ( new RenewalEngine() )->process_due( $contract_id ) );
+
+		$reloaded = ( new ContractRepository() )->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertSame( 0, $reloaded->get_cycle_count() );
 	}
 
@@ -259,15 +283,19 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order    = $this->make_origin_order();
 		$contract = $this->make_contract( $plan_id, $order->get_id() );
 
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
 		$engine = new RenewalEngine();
 		$engine->schedule( $contract );
-		$this->assertTrue( RenewalScheduler::is_scheduled( $contract->get_id() ) );
+		$this->assertTrue( RenewalScheduler::is_scheduled( $contract_id ) );
 
 		$this->assertTrue( $engine->cancel( $contract ) );
 
-		$reloaded = ( new ContractRepository() )->find( $contract->get_id() );
+		$reloaded = ( new ContractRepository() )->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertSame( ContractStatus::CANCELLED, $reloaded->get_status() );
-		$this->assertFalse( RenewalScheduler::is_scheduled( $contract->get_id() ) );
+		$this->assertFalse( RenewalScheduler::is_scheduled( $contract_id ) );
 	}
 
 	public function test_gateway_scheduled_contract_is_not_scheduled(): void {
@@ -290,7 +318,10 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		);
 		( new ContractRepository() )->insert( $contract );
 
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
 		$this->assertFalse( ( new RenewalEngine() )->schedule( $contract ) );
-		$this->assertFalse( RenewalScheduler::is_scheduled( $contract->get_id() ) );
+		$this->assertFalse( RenewalScheduler::is_scheduled( $contract_id ) );
 	}
 }

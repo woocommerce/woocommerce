@@ -37,7 +37,7 @@ final class DeliveryPolicy {
 	/**
 	 * Anchor entries. Each: `{type, day, month?}`.
 	 *
-	 * @var array<int, array<string, mixed>>
+	 * @var array<int, array<array-key, mixed>>
 	 */
 	private $anchors;
 
@@ -58,9 +58,9 @@ final class DeliveryPolicy {
 	/**
 	 * Build a delivery policy.
 	 *
-	 * @param array<int, array<string, mixed>> $anchors Anchor entries.
-	 * @param mixed                            $cutoff  Cutoff window.
-	 * @param mixed                            $intent  Delivery intent.
+	 * @param array<int, array<array-key, mixed>> $anchors Anchor entries.
+	 * @param mixed                               $cutoff  Cutoff window.
+	 * @param mixed                               $intent  Delivery intent.
 	 */
 	public function __construct( array $anchors, $cutoff, $intent ) {
 		$this->anchors = $anchors;
@@ -74,21 +74,26 @@ final class DeliveryPolicy {
 	 * Missing keys default to safe values - empty array for `anchors`, null for
 	 * `cutoff` and `intent`.
 	 *
-	 * @param array<string, mixed> $data Decoded delivery_policy row.
+	 * @param array<array-key, mixed> $data Decoded delivery_policy row.
 	 */
 	public static function from_array( array $data ): self {
-		$anchors = is_array( $data['anchors'] ?? null ) ? $data['anchors'] : array();
-		return new self(
-			$anchors,
-			$data['cutoff'] ?? null,
-			$data['intent'] ?? null
-		);
+		$anchors     = array();
+		$raw_anchors = $data['anchors'] ?? null;
+		if ( is_array( $raw_anchors ) ) {
+			foreach ( $raw_anchors as $anchor ) {
+				if ( is_array( $anchor ) ) {
+					$anchors[] = $anchor;
+				}
+			}
+		}
+
+		return new self( $anchors, $data['cutoff'] ?? null, $data['intent'] ?? null );
 	}
 
 	/**
 	 * Anchor entries describing when in the cycle a charge fires.
 	 *
-	 * @return array<int, array<string, mixed>>
+	 * @return array<int, array<array-key, mixed>>
 	 */
 	public function get_anchors(): array {
 		return $this->anchors;

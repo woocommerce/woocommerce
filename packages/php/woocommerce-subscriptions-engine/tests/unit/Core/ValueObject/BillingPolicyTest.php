@@ -150,12 +150,14 @@ class BillingPolicyTest extends TestCase {
 		);
 
 		if ( null === $expected_exception_message ) {
-			$this->assertInstanceOf( BillingPolicy::class, $policy );
 			$this->assertSame( $min_cycles, $policy->get_min_cycles() );
 			$this->assertSame( $max_cycles, $policy->get_max_cycles() );
 		}
 	}
 
+	/**
+	 * @return array<string, array{expected_exception_message: string|null, min_cycles: int|null, max_cycles: int|null}>
+	 */
 	public function provide_min_and_max_cycles_validation_cases(): array {
 		return array(
 			'min_cycles is 0, max_cycles is null'        => array(

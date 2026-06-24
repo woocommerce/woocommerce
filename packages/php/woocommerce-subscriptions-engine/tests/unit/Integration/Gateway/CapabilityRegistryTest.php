@@ -69,7 +69,9 @@ class CapabilityRegistryTest extends TestCase {
 		CapabilityRegistry::supports( 'dummy', GatewayCapabilities::RECURRING );
 
 		$calls = $GLOBALS['woocommerce_subscriptions_engine_test_apply_filters_calls'];
+		$this->assertIsArray( $calls );
 		$this->assertCount( 1, $calls );
+		$this->assertIsArray( $calls[0] );
 		$this->assertSame( CapabilityRegistry::CAPABILITY_CHECK_FILTER, $calls[0]['hook'] );
 		// The pre-filter value is the steps-1-2 result: true for a declared cap.
 		$this->assertTrue( $calls[0]['value'] );

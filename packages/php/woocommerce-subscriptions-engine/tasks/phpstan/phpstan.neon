@@ -1,0 +1,28 @@
+parameters:
+	level: 9
+	phpVersion: 80400
+	tmpDir: temp
+	bootstrapFiles:
+		- ../../vendor/autoload.php
+		- vendor/autoload.php
+		- vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
+		- vendor/php-stubs/woocommerce-stubs/woocommerce-packages-stubs.php
+		- ../../phpstan-stubs/stubs.php
+		- vendor/php-stubs/wordpress-tests-stubs/wordpress-tests-stubs.php
+	scanDirectories:
+		- ../../phpstan-stubs
+	paths:
+		- ../../src
+		- ../../tests
+	treatPhpDocTypesAsCertain: false
+
+	# Test bootstraps require the WP test framework at runtime, which PHPStan
+	# must not follow; exclude them from analysis (mirrors the email-editor task).
+	excludePaths:
+		analyseAndScan:
+			- ../../tests/unit/bootstrap.php
+			- ../../tests/integration/bootstrap.php
+
+includes:
+	- vendor/szepeviktor/phpstan-wordpress/extension.neon
+	- vendor/phpstan/phpstan-phpunit/extension.neon
