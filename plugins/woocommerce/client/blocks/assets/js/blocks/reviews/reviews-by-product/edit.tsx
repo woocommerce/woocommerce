@@ -110,33 +110,10 @@ const ReviewsByProductEditor = ( {
 						} )
 					}
 				>
-					<ToolsPanelItem
-						hasValue={ () =>
-							! attributes.showReviewRating ||
-							! attributes.showReviewerName ||
-							! attributes.showReviewImage ||
-							! attributes.showReviewDate ||
-							! attributes.showReviewContent ||
-							attributes.imageType !== 'reviewer'
-						}
-						label={ __( 'Review options', 'woocommerce' ) }
-						onDeselect={ () =>
-							setAttributes( {
-								showReviewRating: true,
-								showReviewerName: true,
-								showReviewImage: true,
-								showReviewDate: true,
-								showReviewContent: true,
-								imageType: 'reviewer',
-							} )
-						}
-						isShownByDefault
-					>
 						{ getSharedReviewContentControls(
 							attributes,
 							setAttributes
 						) }
-					</ToolsPanelItem>
 				</ToolsPanel>
 				<ToolsPanel
 					label={ __( 'List Settings', 'woocommerce' ) }
@@ -150,31 +127,10 @@ const ReviewsByProductEditor = ( {
 						} )
 					}
 				>
-					<ToolsPanelItem
-						hasValue={ () =>
-							! attributes.showOrderby ||
-							attributes.orderby !== 'most-recent' ||
-							attributes.reviewsOnPageLoad !== 10 ||
-							! attributes.showLoadMore ||
-							attributes.reviewsOnLoadMore !== 10
-						}
-						label={ __( 'List settings', 'woocommerce' ) }
-						onDeselect={ () =>
-							setAttributes( {
-								showOrderby: true,
-								orderby: 'most-recent',
-								reviewsOnPageLoad: 10,
-								showLoadMore: true,
-								reviewsOnLoadMore: 10,
-							} )
-						}
-						isShownByDefault
-					>
 						{ getSharedReviewListControls(
 							attributes,
 							setAttributes
 						) }
-					</ToolsPanelItem>
 				</ToolsPanel>
 			</InspectorControls>
 		);
