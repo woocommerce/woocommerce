@@ -10249,19 +10249,23 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * @param array $stored_profile   The initial stored NOX profile.
 	 */
 	private function mock_disable_test_account_option_state( &$lock_value, array &$lock_changes, array &$updated_profile, array $stored_profile = array() ): void {
+		// Track writes explicitly rather than inferring them from a non-empty profile, so that an
+		// intentional write of an empty profile is distinct from "never written" and reads do not
+		// silently fall back to the stored profile.
+		$profile_written = false;
 		$this->mockable_proxy->register_function_mocks(
 			array(
-				'get_option'    => function ( $option_name, $default_value = null ) use ( &$lock_value, &$updated_profile, $stored_profile ) {
+				'get_option'    => function ( $option_name, $default_value = null ) use ( &$lock_value, &$updated_profile, &$profile_written, $stored_profile ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
 						return $lock_value ?? $default_value;
 					}
 					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
-						return ! empty( $updated_profile ) ? $updated_profile : $stored_profile;
+						return $profile_written ? $updated_profile : $stored_profile;
 					}
 
 					return $default_value;
 				},
-				'update_option' => function ( $option_name, $value ) use ( &$lock_value, &$lock_changes, &$updated_profile ) {
+				'update_option' => function ( $option_name, $value ) use ( &$lock_value, &$lock_changes, &$updated_profile, &$profile_written ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
 						$lock_value     = $value;
 						$lock_changes[] = $value;
@@ -10270,6 +10274,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					}
 					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
 						$updated_profile = $value;
+						$profile_written = true;
 
 						return true;
 					}
