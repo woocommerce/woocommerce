@@ -289,6 +289,31 @@ class WC_Admin_Marketplace_Promotions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An OR rule whose operands are AND groups (arrays of rules) is accepted.
+	 */
+	public function test_or_rule_with_and_group_operands_is_accepted(): void {
+		// RemoteSpecs allows each OR operand to be an AND group (array of rules), not only a
+		// single rule. The validator must accept that shape so RuleEvaluator can evaluate it.
+		$this->set_rule_based_promo(
+			array(
+				array(
+					'type'     => 'or',
+					'operands' => array(
+						array( array( 'type' => 'pass' ) ),
+						// AND group that evaluates true.
+																						array( 'type' => 'fail' ),
+					),
+				),
+			)
+		);
+
+		$promotions = WC_Admin_Marketplace_Promotions::get_active_promotions();
+
+		$this->assertCount( 1, $promotions );
+		$this->assertSame( 'promo-card', $promotions[0]['format'] );
+	}
+
+	/**
 	 * @testdox An eligible promo targeting the Orders screen is returned with the order count.
 	 */
 	public function test_orders_promo_card_returned_when_targeting_orders(): void {

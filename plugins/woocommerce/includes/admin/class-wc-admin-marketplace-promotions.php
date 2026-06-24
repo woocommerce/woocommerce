@@ -154,9 +154,9 @@ class WC_Admin_Marketplace_Promotions {
 	 * The Orders list is a classic admin page, so the card is mounted via a
 	 * wp-admin-scripts entry (see ShippingLabelBanner for the same pattern).
 	 *
-	 * @since 11.0.0
-	 *
 	 * @return void
+	 *
+	 * @since 11.0.0
 	 */
 	public static function maybe_enqueue_orders_promo_card() {
 		if ( ! self::is_orders_screen() || null === self::get_orders_promo_card() ) {
@@ -174,11 +174,11 @@ class WC_Admin_Marketplace_Promotions {
 	 * server-side and passed to the script via a data attribute, so no additional data is
 	 * shared with WooCommerce.com.
 	 *
-	 * @since 11.0.0
-	 *
 	 * @param string $order_type The order type being listed.
 	 * @param string $which      The tablenav location: 'top' or 'bottom'.
 	 * @return void
+	 *
+	 * @since 11.0.0
 	 */
 	public static function render_orders_promo_card( $order_type = '', $which = '' ) {
 		if ( 'top' !== $which || 'shop_order' !== $order_type ) {
@@ -194,10 +194,10 @@ class WC_Admin_Marketplace_Promotions {
 	 * Hooked on the WordPress core manage_posts_extra_tablenav, which fires for every post
 	 * type, so this is gated to the shop_order list screen.
 	 *
-	 * @since 11.0.0
-	 *
 	 * @param string $which The tablenav location: 'top' or 'bottom'.
 	 * @return void
+	 *
+	 * @since 11.0.0
 	 */
 	public static function render_legacy_orders_promo_card( $which = '' ) {
 		$screen = get_current_screen();
@@ -394,8 +394,18 @@ class WC_Admin_Marketplace_Promotions {
 				return false;
 			}
 
-			if ( 'or' === $rule->type && ! self::rules_are_valid( $rule->operands ?? null ) ) {
-				return false;
+			if ( 'or' === $rule->type ) {
+				$operands = $rule->operands ?? null;
+				if ( ! is_array( $operands ) || 0 === count( $operands ) ) {
+					return false;
+				}
+
+				// Each OR operand may itself be a single rule or an AND group (array of rules).
+				foreach ( $operands as $operand ) {
+					if ( ! self::rules_are_valid( $operand ) ) {
+						return false;
+					}
+				}
 			}
 		}
 
