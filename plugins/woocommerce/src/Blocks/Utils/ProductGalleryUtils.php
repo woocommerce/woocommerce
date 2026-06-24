@@ -210,9 +210,16 @@ class ProductGalleryUtils {
 		$variation_gallery_ids = array();
 		if ( VariationGalleryPackage::is_enabled() ) {
 			$variation_gallery_ids = array_map( 'intval', $variation->get_gallery_image_ids() );
-			$variation_gallery_ids = array_filter( $variation_gallery_ids, 'wp_attachment_is_image' );
-			$variation_gallery_ids = array_values( $variation_gallery_ids );
+		} else {
+			// Compatibility with the legacy WooCommerce Additional Variation Images extension.
+			$legacy_gallery_image_ids = get_post_meta( $variation_id, '_wc_additional_variation_images', true );
+			if ( ! empty( $legacy_gallery_image_ids ) ) {
+				$variation_gallery_ids = array_map( 'intval', wp_parse_id_list( $legacy_gallery_image_ids ) );
+			}
 		}
+
+		$variation_gallery_ids = array_filter( $variation_gallery_ids, 'wp_attachment_is_image' );
+		$variation_gallery_ids = array_values( $variation_gallery_ids );
 
 		// No images from variation - full parent fallback.
 		if ( ! $featured_valid && empty( $variation_gallery_ids ) ) {
@@ -266,7 +273,17 @@ class ProductGalleryUtils {
 	public static function get_variation_gallery_image_ids( \WC_Product_Variation $variation ) {
 		$image_ids          = array();
 		$variation_image_id = (int) $variation->get_image_id();
-		$gallery_image_ids  = array_map( 'intval', $variation->get_gallery_image_ids() );
+
+		$gallery_image_ids = array();
+		if ( VariationGalleryPackage::is_enabled() ) {
+			$gallery_image_ids = array_map( 'intval', $variation->get_gallery_image_ids() );
+		} else {
+			// Compatibility with the legacy WooCommerce Additional Variation Images extension.
+			$legacy_gallery_image_ids = get_post_meta( $variation->get_id(), '_wc_additional_variation_images', true );
+			if ( ! empty( $legacy_gallery_image_ids ) ) {
+				$gallery_image_ids = array_map( 'intval', wp_parse_id_list( $legacy_gallery_image_ids ) );
+			}
+		}
 
 		if ( $variation_image_id ) {
 			$image_ids[] = $variation_image_id;

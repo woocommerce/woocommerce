@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add fallback compatibility for legacy additional variation images to the Product Gallery block
