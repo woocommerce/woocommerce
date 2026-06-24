@@ -1,0 +1,236 @@
+<?php
+/**
+ * Integration tests for ContractRepository.
+ *
+ * @package Automattic\WooCommerce\SubscriptionsEngine
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\Storage;
+
+use EngineIntegrationTestCase;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
+
+/**
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository
+ */
+class ContractRepositoryTest extends EngineIntegrationTestCase {
+
+	private function make_contract(): Contract {
+		return Contract::create(
+			array(
+				'customer_id'          => 42,
+				'currency'             => 'USD',
+				'selling_plan_id'      => 7,
+				'origin_order_id'      => 1001,
+				'extension_slug'       => 'lite',
+				'payment_method'       => 'woocommerce_payments',
+				'payment_method_title' => 'Credit card',
+				'payment_token_id'     => 55,
+				'billing_total'        => '19.99',
+				'start_gmt'            => '2026-06-15 00:00:00',
+				'next_payment_gmt'     => '2026-07-15 00:00:00',
+				'items'                => array(
+					array(
+						'item_name'  => 'Coffee bag',
+						'item_type'  => 'line_item',
+						'product_id' => 200,
+						'quantity'   => '1',
+						'subtotal'   => '19.99',
+						'total'      => '19.99',
+					),
+				),
+				'addresses'            => array(
+					Contract::ADDRESS_BILLING  => array(
+						'first_name' => 'Ada',
+						'last_name'  => 'Lovelace',
+						'country'    => 'US',
+						'email'      => 'ada@example.test',
+					),
+					Contract::ADDRESS_SHIPPING => array(
+						'first_name' => 'Ada',
+						'last_name'  => 'Lovelace',
+						'country'    => 'US',
+					),
+				),
+				'meta'                 => array(
+					'source_channel' => 'pdp',
+				),
+			)
+		);
+	}
+
+	public function test_contract_round_trips_with_children(): void {
+		$repo = new ContractRepository();
+
+		$id = $repo->insert( $this->make_contract() );
+		$this->assertGreaterThan( 0, $id );
+
+		$fetched = $repo->find( $id );
+
+		$this->assertInstanceOf( Contract::class, $fetched );
+		$this->assertSame( $id, $fetched->get_id() );
+		$this->assertSame( 42, $fetched->get_customer_id() );
+		$this->assertSame( 'USD', $fetched->get_currency() );
+		$this->assertSame( 'lite', $fetched->get_extension_slug() );
+		$this->assertSame( ContractStatus::ACTIVE, $fetched->get_status() );
+		$this->assertSame( '2026-07-15 00:00:00', $fetched->get_next_payment_gmt() );
+
+		// Payment instrument reference.
+		$instrument = $fetched->get_payment_instrument();
+		$this->assertSame( 55, $instrument->get_token_id() );
+		$this->assertSame( 'woocommerce_payments', $instrument->get_gateway() );
+
+		// Items.
+		$items = $fetched->get_items();
+		$this->assertCount( 1, $items );
+		$this->assertSame( 'Coffee bag', $items[0]['item_name'] );
+
+		// Addresses.
+		$addresses = $fetched->get_addresses();
+		$this->assertArrayHasKey( Contract::ADDRESS_BILLING, $addresses );
+		$this->assertArrayHasKey( Contract::ADDRESS_SHIPPING, $addresses );
+		$this->assertSame( 'Ada', $addresses[ Contract::ADDRESS_BILLING ]['first_name'] );
+
+		// Meta.
+		$this->assertSame( 'pdp', $fetched->get_meta()['source_channel'] );
+	}
+
+	public function test_extension_slug_defaults_to_null_when_unset(): void {
+		$repo = new ContractRepository();
+
+		$id = $repo->insert(
+			Contract::create(
+				array(
+					'customer_id'     => 1,
+					'currency'        => 'EUR',
+					'selling_plan_id' => 2,
+					'origin_order_id' => 3,
+					'start_gmt'       => '2026-06-15 00:00:00',
+				)
+			)
+		);
+
+		$found = $repo->find( $id );
+		$this->assertInstanceOf( Contract::class, $found );
+		$this->assertNull( $found->get_extension_slug() );
+	}
+
+	public function test_update_persists_scheduling_fields(): void {
+		$repo = new ContractRepository();
+		$id   = $repo->insert( $this->make_contract() );
+
+		$contract = $repo->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$contract->set_status( ContractStatus::ON_HOLD );
+		$contract->set_next_payment_gmt( '2026-08-15 00:00:00' );
+		$contract->set_cycle_count( 3 );
+		$contract->set_last_payment_gmt( '2026-07-15 00:00:00' );
+
+		$this->assertTrue( $repo->update( $contract ) );
+
+		$reloaded = $repo->find( $id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertSame( ContractStatus::ON_HOLD, $reloaded->get_status() );
+		$this->assertSame( '2026-08-15 00:00:00', $reloaded->get_next_payment_gmt() );
+		$this->assertSame( 3, $reloaded->get_cycle_count() );
+		$this->assertSame( '2026-07-15 00:00:00', $reloaded->get_last_payment_gmt() );
+	}
+
+	public function test_update_replaces_child_rows(): void {
+		$repo = new ContractRepository();
+		$id   = $repo->insert( $this->make_contract() );
+
+		$contract = $repo->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$this->assertCount( 1, $contract->get_items() );
+
+		// Re-create with a different set of items / meta and update.
+		$mutated = Contract::create(
+			array(
+				'customer_id'     => $contract->get_customer_id(),
+				'currency'        => $contract->get_currency(),
+				'selling_plan_id' => $contract->get_selling_plan_id(),
+				'origin_order_id' => $contract->get_origin_order_id(),
+				'start_gmt'       => $contract->get_start_gmt(),
+				'billing_total'   => $contract->get_billing_total(),
+				'items'           => array(
+					array(
+						'item_name'  => 'Tea tin',
+						'item_type'  => 'line_item',
+						'product_id' => 300,
+						'quantity'   => '2',
+						'subtotal'   => '24.00',
+						'total'      => '24.00',
+					),
+				),
+				'meta'            => array( 'source_channel' => 'email' ),
+			)
+		);
+		$mutated->set_id( $id );
+
+		$this->assertTrue( $repo->update( $mutated ) );
+
+		$reloaded = $repo->find( $id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$items = $reloaded->get_items();
+		$this->assertCount( 1, $items );
+		$this->assertSame( 'Tea tin', $items[0]['item_name'] );
+		$this->assertSame( 'email', $reloaded->get_meta()['source_channel'] );
+	}
+
+	public function test_update_throws_without_id(): void {
+		$this->expectException( \RuntimeException::class );
+		( new ContractRepository() )->update( $this->make_contract() );
+	}
+
+	public function test_update_rejects_deleted_contract_and_writes_no_orphans(): void {
+		global $wpdb;
+
+		$repo = new ContractRepository();
+		$id   = $repo->insert( $this->make_contract() );
+
+		// Simulate a concurrent delete: the contract row and its children are gone.
+		$this->assertTrue( $repo->delete( $id ) );
+
+		$stale = $this->make_contract();
+		$stale->set_id( $id );
+
+		try {
+			$repo->update( $stale );
+			$this->fail( 'Expected RuntimeException when updating a contract whose row no longer exists.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'no longer exists', $e->getMessage() );
+		}
+
+		// The guard fired before any child write, so no orphan rows were created.
+		$items_table = \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller::get_table_name(
+			\Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller::TABLE_CONTRACT_ITEMS
+		);
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$remaining = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$items_table} WHERE contract_id = %d", $id ) );
+
+		$this->assertSame( '0', $remaining );
+	}
+
+	public function test_delete_removes_contract_and_children(): void {
+		global $wpdb;
+
+		$repo = new ContractRepository();
+		$id   = $repo->insert( $this->make_contract() );
+
+		$this->assertTrue( $repo->delete( $id ) );
+		$this->assertNull( $repo->find( $id ) );
+
+		$items_table = \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller::get_table_name(
+			\Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller::TABLE_CONTRACT_ITEMS
+		);
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$remaining = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$items_table} WHERE contract_id = %d", $id ) );
+
+		$this->assertSame( '0', $remaining );
+	}
+}
