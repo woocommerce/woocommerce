@@ -60,38 +60,15 @@ class WC_Blocks_Utils {
 	}
 
 	/**
-	 * Check if a given page contains a particular block.
+	 * Determine if a page has a block in its content.
 	 *
-	 * @param int|WP_Post $page Page post ID or post object.
+	 * @param int|WP_Post $page       Page post ID or post object.
 	 * @param string      $block_name The name (id) of a block, e.g. `woocommerce/cart`.
-	 * @return bool Boolean value if the page contains the block or not. Null in case the page does not exist.
-	 */
-	public static function has_block_in_page( $page, $block_name ) {
-		$page_to_check = get_post( $page );
-		if ( null === $page_to_check ) {
-			return false;
-		}
-
-		$blocks = parse_blocks( $page_to_check->post_content );
-		return self::has_block_in_blocks( $blocks, $block_name );
-	}
-
-	/**
-	 * Recursively searches an array of blocks (and their innerBlocks).
+	 * @return bool True if the page contains the block, false otherwise.
 	 *
-	 * @param array  $blocks     Array of parsed blocks.
-	 * @param string $block_name The block name to search for.
-	 * @return bool True if the block is found, false otherwise.
+	 * @see has_block()
 	 */
-	private static function has_block_in_blocks( array $blocks, string $block_name ): bool {
-		foreach ( $blocks as $block ) {
-			if ( $block_name === $block['blockName'] ) {
-				return true;
-			}
-			if ( ! empty( $block['innerBlocks'] ) && self::has_block_in_blocks( $block['innerBlocks'], $block_name ) ) {
-				return true;
-			}
-		}
-		return false;
+	public static function has_block_in_page( $page, $block_name ): bool {
+		return has_block( $block_name, $page );
 	}
 }
