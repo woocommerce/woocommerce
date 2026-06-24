@@ -6133,12 +6133,6 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-product-attribute-inner.php
 
 		-
-			message: '#^Variable \$attribute might not be defined\.$#'
-			identifier: variable.undefined
-			count: 5
-			path: includes/admin/meta-boxes/views/html-product-attribute.php
-
-		-
 			message: '#^Variable \$metabox_class might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -8527,31 +8521,13 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot access property \$name on WP_Term\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot access property \$parent on WP_Error\|WP_Term\|null\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot access property \$slug on WP_Term\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot access property \$term_id on WP_Error\|WP_Term\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot access property \$term_id on WP_Term\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: includes/class-wc-ajax.php
@@ -46888,12 +46864,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
 
 		-
-			message: '#^Parameter \#1 \$task_list of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Task\:\:__construct\(\) expects Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\TaskList\|null, Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\TaskList given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
 			message: '#^Parameter \#2 \$product of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:maybe_set_has_product_transient\(\) expects Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -46907,12 +46877,6 @@ parameters:
 
 		-
 			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:maybe_set_has_product_transient\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
-			message: '#^Parameter \$task_list of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:__construct\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\TaskList\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
@@ -54824,7 +54788,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Blocks/QueryFilters.php
-
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Registry\\Container\:\:register\(\) has no return type specified\.$#'
@@ -70876,12 +70839,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property object\:\:\$min_price\.$#'
 			identifier: property.notFound
-			count: 1
-			path: src/StoreApi/Routes/V1/ProductCollectionData.php
-
-		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
 			count: 1
 			path: src/StoreApi/Routes/V1/ProductCollectionData.php
 
