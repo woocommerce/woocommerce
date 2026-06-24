@@ -13,7 +13,7 @@ import { test, expect } from '@playwright/test';
  * core_updated_customized for the merchant to review.
  *
  * Reviewing in Playwright UI mode:
- *   1. Run `npx playwright test --project=e2e tests/email-editor/update-propagation --ui`
+ *   1. Run `npx playwright test --project=core-serial tests/email-editor/update-propagation --ui`
  *   2. Filter the tree by `scope` and pick a test.
  *   3. The first test ("Non-opted-in") attaches a Tracks spy via the page fixture
  *      but performs no navigation or UI interaction. The other two tests are
