@@ -540,7 +540,7 @@
 			"background": "var(--wp--preset--color--theme-1)",
 			"text": "var(--wp--preset--color--theme-4)"
 		},
-		"css": ".wp-block-table td, .wp-block-table th { border-color: var(--wp--preset--color--theme-6); } .wp-block-table th { font-weight: 600; }",
+		"css": ".wp-block-table td, .wp-block-table th { border-color: var(--wp--preset--color--theme-6); } .wp-block-table th { font-weight: 600; } main { margin-block: 0; }",
 		"elements": {
 			"button": {
 				":hover": {
