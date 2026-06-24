@@ -298,10 +298,10 @@ class WC_Admin_Marketplace_Promotions_Test extends WC_Unit_Test_Case {
 			array(
 				array(
 					'type'     => 'or',
+					// Each operand is an AND group (array of rules); the first passes, so OR passes.
 					'operands' => array(
 						array( array( 'type' => 'pass' ) ),
-						// AND group that evaluates true.
-																						array( 'type' => 'fail' ),
+						array( array( 'type' => 'fail' ) ),
 					),
 				),
 			)

@@ -170,7 +170,18 @@ class WC_Admin_Marketplace_Promotions {
 		}
 
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'marketplace-orders-promo', true );
-		WCAdminAssets::register_style( 'marketplace-orders-promo', 'style', array( 'wp-components' ) );
+
+		// Enqueue the card stylesheet under a unique handle. WCAdminAssets::register_style() would
+		// register it as the shared `wc-admin-style` handle, which collides with other Orders-screen
+		// styles (e.g. Fulfillments) so that whichever enqueues first wins and the other is dropped.
+		$style_handle = 'wc-admin-marketplace-orders-promo';
+		wp_enqueue_style(
+			$style_handle,
+			WCAdminAssets::get_url( 'marketplace-orders-promo/style', 'css' ),
+			array( 'wp-components' ),
+			WCAdminAssets::get_file_version( 'css' )
+		);
+		wp_style_add_data( $style_handle, 'rtl', 'replace' );
 	}
 
 	/**
