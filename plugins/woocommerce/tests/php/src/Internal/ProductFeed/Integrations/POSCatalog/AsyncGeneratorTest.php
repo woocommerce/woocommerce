@@ -601,7 +601,8 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test that force_regeneration on a stalled in-progress job starts fresh and discards the
-	 * partial feed, rather than resuming it (which is what an ordinary status poll would do).
+	 * partial feed, rather than resuming it (which is what an ordinary status poll would do), and
+	 * that it steps the chunk size down just like a force=false poll does.
 	 */
 	public function test_force_regeneration_starts_fresh_for_stalled_job() {
 		$this->mock_integration->method( 'create_feed' )->willReturnCallback(
@@ -640,9 +641,12 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'file_name', $result );
 		// The partial feed file was discarded.
 		$this->assertFalse( file_exists( $partial_path ) );
+		// The stuck job's chunk size stepped down one rung (100000 -> 2500) and persisted for future runs.
+		$this->assertSame( 2500, (int) get_option( $option_key . '_chunk_size' ) );
 
 		as_unschedule_all_actions( AsyncGenerator::FEED_GENERATION_ACTION, array(), 'woo-product-feed' );
 		delete_option( $option_key );
+		delete_option( $option_key . '_chunk_size' );
 	}
 
 	/**
