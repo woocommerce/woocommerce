@@ -191,11 +191,13 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_is_new_install(): void {
-		// Determining if we are in a new install is based on the following three factors.
-		$version       = null;
-		$shop_id       = null;
-		$post_count    = 0;
-		$counted_posts = false;
+		// Determining if we are in a new install is based on the following factors.
+		$version         = false;
+		$shop_id         = null;
+		$post_count      = 0;
+		$counted_posts   = false;
+		$coming_soon     = 'yes';
+		$completed_lists = array();
 
 		$supply_version = function () use ( &$version ) {
 			return $version;
@@ -205,15 +207,25 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			return $shop_id;
 		};
 
-		$supply_post_count = function () use ( &$post_count ) {
+		$supply_post_count = function () use ( &$post_count, &$counted_posts ) {
 			$counted_posts = true;
 			return $post_count;
+		};
+
+		$supply_coming_soon = function () use ( &$coming_soon ) {
+			return $coming_soon;
+		};
+
+		$supply_completed_lists = function () use ( &$completed_lists ) {
+			return $completed_lists;
 		};
 
 		// Make it straightforward to test different values for our key variables.
 		add_filter( 'option_woocommerce_version', $supply_version );
 		add_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
 		add_filter( 'wp_count_posts', $supply_post_count );
+		add_filter( 'pre_option_woocommerce_coming_soon', $supply_coming_soon );
+		add_filter( 'pre_option_woocommerce_task_list_completed_lists', $supply_completed_lists );
 
 		$this->assertTrue( WC_Install::is_new_install(), 'We are in a new install if the WC version is null.' );
 
@@ -223,7 +235,15 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$post_count = 1;
 		$this->assertTrue( WC_Install::is_new_install(), 'We are in a new install if the WC version is null (even if the shop ID is set and we have one or more products).' );
 
-		$version = '9.0.0';
+		$version     = '9.0.0';
+		$coming_soon = 'no';
+		$this->assertFalse( WC_Install::is_new_install(), 'We are not in a new install if the store is live (coming soon is disabled).' );
+
+		$coming_soon     = 'yes';
+		$completed_lists = array( 'setup' );
+		$this->assertFalse( WC_Install::is_new_install(), 'We are not in a new install if onboarding has been completed.' );
+
+		$completed_lists = array();
 		$this->assertFalse( WC_Install::is_new_install(), 'We are not in a new install if the WC version is set, we have a shop ID and we have one or more products.' );
 
 		$shop_id = null;
@@ -239,9 +259,11 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse( $counted_posts, 'For established stores (version and shop ID both set), we do not need to count the number of existing products.' );
 
 		// Cleanup.
-		remove_filter( 'option_woocommerce_db_version', $supply_version );
+		remove_filter( 'option_woocommerce_version', $supply_version );
 		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
 		remove_filter( 'wp_count_posts', $supply_post_count );
+		remove_filter( 'pre_option_woocommerce_coming_soon', $supply_coming_soon );
+		remove_filter( 'pre_option_woocommerce_task_list_completed_lists', $supply_completed_lists );
 	}
 
 	/**
