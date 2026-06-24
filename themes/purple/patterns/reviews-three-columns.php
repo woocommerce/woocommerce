@@ -2,13 +2,13 @@
 /**
  * Title: Reviews three columns
  * Slug: purple/reviews-three-columns
- * Categories: testimonials
+ * Categories: testimonials, purple
  * Keywords: reviews, testimonials, ratings, stars
  * Description: A three-column reviews section with star ratings, review text, and reviewer name.
  * Viewport width: 1440
  */
 ?>
-<!-- wp:group {"metadata":{"name":"Reviews","categories":["testimonials"],"patternName":"purple/reviews-three-columns"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"},"blockGap":"var:preset|spacing|40"}},"layout":{"type":"constrained","justifyContent":"center"}} -->
+<!-- wp:group {"metadata":{"name":"Reviews","categories":["testimonials","purple"],"patternName":"purple/reviews-three-columns"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"},"blockGap":"var:preset|spacing|40"}},"layout":{"type":"constrained","justifyContent":"center"}} -->
 <div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:heading {"align":"wide","style":{"typography":{"textAlign":"left"}}} -->
 <h2 class="wp-block-heading has-text-align-left alignwide"><?php esc_html_e( 'Reviews', 'purple' ); ?></h2>
 <!-- /wp:heading -->

@@ -2,13 +2,13 @@
 /**
  * Title: Review: Heading on left, two columns of reviews on right
  * Slug: purple/reviews-heading-left
- * Categories: testimonials
+ * Categories: testimonials, purple
  * Keywords: reviews, testimonials, ratings, stars, columns
  * Description: A reviews section with the heading on the left and two columns containing four customer reviews on the right.
  * Viewport width: 1440
  */
 ?>
-<!-- wp:group {"metadata":{"name":"Reviews","categories":["testimonials"],"patternName":"purple/reviews-heading-left"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
+<!-- wp:group {"metadata":{"name":"Reviews","categories":["testimonials","purple"],"patternName":"purple/reviews-heading-left"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
 <div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:columns {"metadata":{"name":"Items"},"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column -->
 <div class="wp-block-column"><!-- wp:heading {"style":{"layout":{"selfStretch":"fixed","flexSize":"100%"}}} -->

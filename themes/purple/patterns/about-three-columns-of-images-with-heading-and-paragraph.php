@@ -2,14 +2,14 @@
 /**
  * Title: Three columns of images with heading and paragraph
  * Slug: purple/about-three-columns-of-images-with-heading-and-paragraph
- * Categories: about
+ * Categories: about, purple
  * Keywords: about, intro, columns, heading
  * Description: A section with a heading and short paragraph above a row of three image placeholders.
  * Viewport width: 1440
  */
 ?>
 
-<!-- wp:group {"metadata":{"name":"Three columns of images with heading and paragraph","categories":["about"],"patternName":"purple/about-three-columns-of-images-with-heading-and-paragraph"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"},"blockGap":"var:preset|spacing|40"}},"layout":{"type":"constrained","justifyContent":"center"}} -->
+<!-- wp:group {"metadata":{"name":"Three columns of images with heading and paragraph","categories":["about","purple"],"patternName":"purple/about-three-columns-of-images-with-heading-and-paragraph"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"},"blockGap":"var:preset|spacing|40"}},"layout":{"type":"constrained","justifyContent":"center"}} -->
 <div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50)"><!-- wp:group {"align":"wide","style":{"spacing":{"blockGap":"var:preset|spacing|40"}},"layout":{"type":"grid","columnCount":3,"minimumColumnWidth":"16rem"}} -->
 <div class="wp-block-group alignwide"><!-- wp:heading {"align":"wide","style":{"layout":{"columnSpan":2}}} -->
 <h2 class="wp-block-heading alignwide"><?php esc_html_e( 'A world filled with boundless potential', 'purple' ); ?></h2>

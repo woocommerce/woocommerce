@@ -2,14 +2,14 @@
 /**
  * Title: New arrival product
  * Slug: purple/new-arrival-product
- * Categories: purple
+ * Categories: woo-commerce, purple
  * Keywords: woo-commerce, new arrival, product, featured
  * Description: A new arrival product with a featured image, title, description and button.
  * Viewport width: 1440
  */
 ?>
 
-<!-- wp:group {"metadata":{"name":"New arrival product","patternName":"purple/new-arrival-product","description":"A new arrival product with a featured image, title, description and button.","categories":["purple"]},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"},"margin":{"top":"0","bottom":"0"}}},"backgroundColor":"theme-5","layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":"New arrival product","patternName":"purple/new-arrival-product","description":"A new arrival product with a featured image, title, description and button.","categories":["woo-commerce","purple"]},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"},"margin":{"top":"0","bottom":"0"}}},"backgroundColor":"theme-5","layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull has-theme-5-background-color has-background" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)"><!-- wp:image {"width":"220px","aspectRatio":"3/4","scale":"cover","sizeSlug":"full","linkDestination":"none","align":"center"} -->
 <figure class="wp-block-image aligncenter size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/socks.webp" alt="<?php esc_attr_e( 'Placeholder image', 'purple' ); ?>" style="aspect-ratio:3/4;object-fit:cover;width:220px;height:auto"/></figure>
 <!-- /wp:image -->

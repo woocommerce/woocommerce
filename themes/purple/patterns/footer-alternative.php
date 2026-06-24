@@ -2,7 +2,7 @@
 /**
  * Title: Footer alternative
  * Slug: purple/footer-alternative
- * Categories: footer
+ * Categories: footer, purple
  * Keywords: footer, contact, social, links
  * Block Types: core/template-part/footer
  * Description: A three-column store footer with site title and address, contact info, social links, and a bottom row with legal links and copyright.
@@ -10,7 +10,7 @@
  */
 ?>
 
-<!-- wp:group {"metadata":{"name":"Store Footer","categories":["footer"],"patternName":"purple/footer-alternative"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":"Store Footer","categories":["footer","purple"],"patternName":"purple/footer-alternative"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|20","left":"var:preset|spacing|20"}}}} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"width":"50%"} -->
 <div class="wp-block-column" style="flex-basis:50%"><!-- wp:site-title {"level":0} /-->

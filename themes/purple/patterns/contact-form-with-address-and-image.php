@@ -2,13 +2,13 @@
 /**
  * Title: Contact form with address and image
  * Slug: purple/contact-form-with-address-and-image
- * Categories: about, contact
+ * Categories: about, contact, purple
  * Keywords: contact, form, contact-form, address
  * Description: A contact section with heading, address, contact form, and image placeholder.
  * Viewport width: 1440
  */
 ?>
-<!-- wp:group {"metadata":{"name":"Contact","categories":["about","contact"],"patternName":"purple/contact-form-with-address-and-image"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
+<!-- wp:group {"metadata":{"name":"Contact","categories":["about","contact","purple"],"patternName":"purple/contact-form-with-address-and-image"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
 <div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--40)"><!-- wp:columns {"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"verticalAlignment":"center","width":""} -->
 <div class="wp-block-column is-vertically-aligned-center"><!-- wp:heading -->
