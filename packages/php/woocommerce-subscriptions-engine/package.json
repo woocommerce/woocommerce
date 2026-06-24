@@ -2,14 +2,87 @@
 	"name": "@automattic/woocommerce-subscriptions-engine",
 	"description": "Subscriptions engine for WooCommerce.",
 	"scripts": {
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:php": "composer run-script phpcbf",
-		"lint:lang:php": "composer run-script phpcs"
+		"lint:lang:php": "composer run-script phpcs",
+		"phpstan": "cd tasks/phpstan && ./run-phpstan.sh",
+		"phpstan:php7": "cd tasks/phpstan && ./run-phpstan.sh php7",
+		"phpstan:php8": "cd tasks/phpstan && ./run-phpstan.sh",
+		"test:php:ci": "pnpm test:php:unit && pnpm test:php:integration",
+		"test:php:unit": "composer run-script test:unit",
+		"test:php:integration": "composer run-script test:integration",
+		"env:test": "pnpm wp-env start --update",
+		"postinstall": "composer install"
 	},
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
 		"@wordpress/env": "11.0.1-next.v.20260206T143.0"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": [
+					"**/*.php",
+					"phpcs.xml"
+				]
+			},
+			"tests": [
+				{
+					"name": "PHP: 8.3 WP: latest",
+					"testType": "unit:php",
+					"command": "test:php:ci",
+					"changes": [
+						"composer.json",
+						"composer.lock",
+						"**/*.php",
+						"phpunit.xml",
+						".wp-env.json"
+					],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"phpVersion": "8.3",
+							"wpVersion": "latest"
+						}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
+				},
+				{
+					"name": "PHPStan: PHP 7.4",
+					"testType": "static:analysis",
+					"command": "phpstan:php7",
+					"changes": [
+						"**/*.php",
+						"**/*.neon",
+						"tasks/phpstan/**"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				},
+				{
+					"name": "PHPStan: PHP 8.4",
+					"testType": "static:analysis",
+					"command": "phpstan:php8",
+					"changes": [
+						"**/*.php",
+						"**/*.neon",
+						"tasks/phpstan/**"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
+		}
 	}
 }

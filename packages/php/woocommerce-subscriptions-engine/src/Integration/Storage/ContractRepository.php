@@ -14,6 +14,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -21,6 +22,8 @@ defined( 'ABSPATH' ) || exit;
  * Contract repository.
  */
 final class ContractRepository {
+
+	use ScalarCoercion;
 
 	/**
 	 * Address columns persisted to the addresses table.
@@ -78,6 +81,86 @@ final class ContractRepository {
 		$this->insert_meta( $id, $contract->get_meta() );
 
 		return $id;
+	}
+
+	/**
+	 * Persist changes to an existing contract and its child rows.
+	 *
+	 * Updates the contract row in place, then replaces the items, addresses,
+	 * and meta rows wholesale (delete-then-reinsert). Replacement rather than a
+	 * per-row diff keeps update() symmetric with insert() - the child tables
+	 * always reflect the entity's current arrays - at the cost of churning rows
+	 * that did not change. The renewal money-path mutates only contract-row
+	 * scheduling fields (next_payment_gmt, cycle_count, status, the *_gmt
+	 * stamps), so the child churn is rare in practice; revisit with a diffing
+	 * upsert if a high-frequency child-row writer appears.
+	 *
+	 * @param Contract $contract Contract to update. Must have an id whose row still exists.
+	 * @return bool True when the contract row was updated (or already current).
+	 * @throws \RuntimeException If the contract has no id, or its row no longer exists.
+	 */
+	public function update( Contract $contract ): bool {
+		global $wpdb;
+
+		$id = $contract->get_id();
+		if ( null === $id ) {
+			throw new \RuntimeException( 'Cannot update a contract that has no id. Use ContractRepository::insert() for a new contract.' );
+		}
+
+		$contracts_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// Guard against a stale id / concurrent delete before touching any table.
+		// `$wpdb->update()` returns 0 for both "matched, nothing changed" and "no
+		// row matched", so on its own it cannot tell that the parent is gone - and
+		// the child delete/reinsert below would then write orphan rows, since no
+		// foreign key enforces the relation. This narrows but does not fully close
+		// the race; the complete fix wraps the whole method in a transaction with
+		// SELECT ... FOR UPDATE, tracked as separate hardening (the integration
+		// suite's transaction-based isolation needs a test-safe approach first).
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$exists = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$contracts_table} WHERE id = %d", $id ) );
+		if ( null === $exists ) {
+			throw new \RuntimeException(
+				esc_html( sprintf( 'Cannot update contract %d: the contract row no longer exists (stale id or concurrent delete).', $id ) )
+			);
+		}
+
+		$data = $contract->to_storage();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$updated = $wpdb->update(
+			$contracts_table,
+			array_merge(
+				$data,
+				array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) )
+			),
+			array( 'id' => $id )
+		);
+
+		if ( false === $updated ) {
+			throw new \RuntimeException( 'Failed to update contract.' );
+		}
+
+		// Replace child rows so they mirror the entity's current arrays. Same
+		// delete set as delete(), minus the contract row itself.
+		foreach ( array(
+			SchemaInstaller::TABLE_CONTRACT_ITEMS,
+			SchemaInstaller::TABLE_CONTRACT_ADDRESSES,
+			SchemaInstaller::TABLE_CONTRACT_META,
+		) as $child ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->delete( SchemaInstaller::get_table_name( $child ), array( 'contract_id' => $id ) );
+		}
+
+		$this->insert_items( $id, $contract->get_items() );
+		$this->insert_addresses( $id, $contract->get_addresses() );
+		$this->insert_meta( $id, $contract->get_meta() );
+
+		// `$wpdb->update` returns 0 (int) when the row matched but no column
+		// changed - a successful no-op, not a failure. Only `false` is an error,
+		// and that path threw above; the "row no longer exists" case is ruled out
+		// by the existence guard at the top of this method.
+		return true;
 	}
 
 	/**
@@ -145,13 +228,13 @@ final class ContractRepository {
 				SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS ),
 				array(
 					'contract_id'  => $contract_id,
-					'item_name'    => (string) ( $item['item_name'] ?? '' ),
-					'item_type'    => (string) ( $item['item_type'] ?? 'line_item' ),
-					'product_id'   => isset( $item['product_id'] ) ? (int) $item['product_id'] : null,
-					'variation_id' => isset( $item['variation_id'] ) ? (int) $item['variation_id'] : null,
-					'quantity'     => (string) ( $item['quantity'] ?? '1' ),
-					'subtotal'     => (string) ( $item['subtotal'] ?? '0' ),
-					'total'        => (string) ( $item['total'] ?? '0' ),
+					'item_name'    => self::coerce_string( $item['item_name'] ?? null ),
+					'item_type'    => self::coerce_string( $item['item_type'] ?? null, 'line_item' ),
+					'product_id'   => isset( $item['product_id'] ) ? self::coerce_int( $item['product_id'] ) : null,
+					'variation_id' => isset( $item['variation_id'] ) ? self::coerce_int( $item['variation_id'] ) : null,
+					'quantity'     => self::coerce_string( $item['quantity'] ?? null, '1' ),
+					'subtotal'     => self::coerce_string( $item['subtotal'] ?? null, '0' ),
+					'total'        => self::coerce_string( $item['total'] ?? null, '0' ),
 					'taxes'        => isset( $item['taxes'] ) ? wp_json_encode( $item['taxes'] ) : null,
 				)
 			);
@@ -174,7 +257,7 @@ final class ContractRepository {
 			);
 
 			foreach ( self::ADDRESS_COLUMNS as $column ) {
-				$record[ $column ] = isset( $address[ $column ] ) ? (string) $address[ $column ] : null;
+				$record[ $column ] = self::coerce_nullable_string( $address[ $column ] ?? null );
 			}
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -220,7 +303,14 @@ final class ContractRepository {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d ORDER BY id ASC", $contract_id ), ARRAY_A );
 
-		return is_array( $rows ) ? $rows : array();
+		$items = array();
+		foreach ( (array) $rows as $row ) {
+			if ( is_array( $row ) ) {
+				$items[] = $row;
+			}
+		}
+
+		return $items;
 	}
 
 	/**
@@ -238,8 +328,10 @@ final class ContractRepository {
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d", $contract_id ), ARRAY_A );
 
 		$by_type = array();
-		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
-			$by_type[ (string) $row['address_type'] ] = $row;
+		foreach ( (array) $rows as $row ) {
+			if ( is_array( $row ) ) {
+				$by_type[ self::coerce_string( $row['address_type'] ?? null ) ] = $row;
+			}
 		}
 
 		return $by_type;
@@ -262,8 +354,10 @@ final class ContractRepository {
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$table} WHERE contract_id = %d", $contract_id ), ARRAY_A );
 
 		$meta = array();
-		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
-			$meta[ (string) $row['meta_key'] ] = (string) $row['meta_value'];
+		foreach ( (array) $rows as $row ) {
+			if ( is_array( $row ) ) {
+				$meta[ self::coerce_string( $row['meta_key'] ?? null ) ] = self::coerce_string( $row['meta_value'] ?? null );
+			}
 		}
 
 		return $meta;
