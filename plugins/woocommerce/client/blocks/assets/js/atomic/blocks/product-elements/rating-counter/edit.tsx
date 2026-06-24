@@ -7,7 +7,6 @@ import {
 	useBlockProps,
 } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
-import { useEffect } from '@wordpress/element';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
 
 /**
@@ -42,19 +41,6 @@ const Edit = (
 		isDescendentOfSingleProductTemplate = false;
 	}
 
-	useEffect( () => {
-		setAttributes( {
-			isDescendentOfQueryLoop,
-			isDescendentOfSingleProductBlock,
-			isDescendentOfSingleProductTemplate,
-		} );
-	}, [
-		setAttributes,
-		isDescendentOfQueryLoop,
-		isDescendentOfSingleProductBlock,
-		isDescendentOfSingleProductTemplate,
-	] );
-
 	return (
 		<>
 			<BlockControls>
@@ -66,7 +52,16 @@ const Edit = (
 				/>
 			</BlockControls>
 			<div { ...blockProps }>
-				<Block { ...blockAttrs } />
+				<Block
+					{ ...blockAttrs }
+					isDescendentOfQueryLoop={ isDescendentOfQueryLoop }
+					isDescendentOfSingleProductBlock={
+						isDescendentOfSingleProductBlock
+					}
+					isDescendentOfSingleProductTemplate={
+						isDescendentOfSingleProductTemplate
+					}
+				/>
 			</div>
 		</>
 	);

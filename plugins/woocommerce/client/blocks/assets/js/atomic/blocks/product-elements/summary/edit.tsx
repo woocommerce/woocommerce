@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect } from '@wordpress/element';
 import {
 	useBlockProps,
 	InspectorControls,
@@ -170,26 +169,22 @@ const Edit = ( {
 		isDescendentOfSingleProductTemplate = false;
 	}
 
-	useEffect(
-		() =>
-			setAttributes( {
-				isDescendentOfQueryLoop,
-				isDescendentOfSingleProductTemplate,
-				isDescendentOfSingleProductBlock,
-			} ),
-		[
-			setAttributes,
-			isDescendentOfQueryLoop,
-			isDescendentOfSingleProductTemplate,
-			isDescendentOfSingleProductBlock,
-		]
-	);
-
 	const { product } = useProduct( context.postId );
 
 	return (
 		<div { ...blockProps }>
-			<Block isAdmin={ true } { ...attributes } product={ product } />
+			<Block
+				isAdmin={ true }
+				{ ...attributes }
+				isDescendentOfQueryLoop={ isDescendentOfQueryLoop }
+				isDescendentOfSingleProductBlock={
+					isDescendentOfSingleProductBlock
+				}
+				isDescendentOfSingleProductTemplate={
+					isDescendentOfSingleProductTemplate
+				}
+				product={ product }
+			/>
 			<InspectorControls>
 				<ToolsPanel
 					label={ __( 'Settings', 'woocommerce' ) }

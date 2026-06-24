@@ -10,6 +10,7 @@ import { currencyDollar, Icon } from '@wordpress/icons';
 import save from '../save';
 import edit from './edit';
 import metadata from './block.json';
+import deprecated from './deprecated';
 
 const blockConfig = {
 	...metadata,
@@ -20,7 +21,8 @@ const blockConfig = {
 		/>
 	),
 	edit,
-	save,
+	save: () => null,
+	deprecated,
 };
 
 registerProductBlockType( blockConfig, {

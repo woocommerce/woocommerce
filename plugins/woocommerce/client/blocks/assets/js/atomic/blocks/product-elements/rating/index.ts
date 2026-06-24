@@ -11,12 +11,14 @@ import save from '../save';
 import edit from './edit';
 import { BLOCK_ICON as icon } from './constants';
 import metadata from './block.json';
+import deprecated from './deprecated';
 
 const blockConfig: BlockConfiguration = {
 	...metadata,
 	icon: { src: icon },
 	edit,
-	save,
+	save: () => null,
+	deprecated,
 };
 
 registerProductBlockType( blockConfig, {

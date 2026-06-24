@@ -16,6 +16,22 @@ import './upgrade';
 
 const deprecated = [
 	{
+		attributes: {
+			...metadata.attributes,
+			isDescendentOfQueryLoop: { type: 'boolean', default: false },
+			isDescendentOfSingleProductTemplate: {
+				type: 'boolean',
+				default: false,
+			},
+			isDescendentOfSingleProductBlock: {
+				type: 'boolean',
+				default: false,
+			},
+		},
+		save,
+		apiVersion: 3,
+	},
+	{
 		save,
 		migrate: ( attributes: BlockAttributes ) => {
 			// We don't deprecate attributes, but adding new ones.
@@ -38,7 +54,7 @@ const blockConfig = {
 	icon: { src: icon },
 	deprecated,
 	edit,
-	save,
+	save: () => null,
 };
 
 registerProductBlockType( blockConfig, {

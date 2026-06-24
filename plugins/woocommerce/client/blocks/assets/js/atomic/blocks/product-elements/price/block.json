@@ -5,16 +5,7 @@
 	"category": "woocommerce-product-elements",
 	"attributes": {
 		"productId": { "type": "number", "default": 0 },
-		"isDescendentOfQueryLoop": { "type": "boolean", "default": false },
-		"textAlign": { "type": "string", "default": "" },
-		"isDescendentOfSingleProductTemplate": {
-			"type": "boolean",
-			"default": false
-		},
-		"isDescendentOfSingleProductBlock": {
-			"type": "boolean",
-			"default": false
-		}
+		"textAlign": { "type": "string", "default": "" }
 	},
 	"usesContext": [ "query", "queryId", "postId" ],
 	"keywords": [ "WooCommerce" ],

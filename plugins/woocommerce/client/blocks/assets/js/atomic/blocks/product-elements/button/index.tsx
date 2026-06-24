@@ -9,6 +9,7 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 import edit from './edit';
 import save from './save';
+import deprecated from './deprecated';
 import metadata from './block.json';
 
 // @ts-expect-error: `metadata` currently does not have a type definition in WordPress core
@@ -26,5 +27,6 @@ registerBlockType( metadata, {
 		...metadata.attributes,
 	},
 	edit,
-	save,
+	save: () => null,
+	deprecated,
 } );

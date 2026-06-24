@@ -10,7 +10,6 @@ import {
 	InspectorControls,
 } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
-import { useEffect } from '@wordpress/element';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
 import { useProduct } from '@woocommerce/entities';
 import {
@@ -92,11 +91,6 @@ const Edit = ( {
 	const { product } = useProduct( context?.postId );
 	const isDescendentOfQueryLoop = Number.isFinite( context?.queryId );
 	const { width } = attributes;
-
-	useEffect(
-		() => setAttributes( { isDescendentOfQueryLoop } ),
-		[ setAttributes, isDescendentOfQueryLoop ]
-	);
 	return (
 		<>
 			<BlockControls>
@@ -117,6 +111,7 @@ const Edit = ( {
 				<Disabled>
 					<Block
 						{ ...{ ...attributes, ...context } }
+						isDescendentOfQueryLoop={ isDescendentOfQueryLoop }
 						product={ {
 							...product,
 							button_text: product?.button_text || '',
