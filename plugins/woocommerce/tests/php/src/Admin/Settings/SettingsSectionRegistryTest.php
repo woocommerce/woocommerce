@@ -22,6 +22,13 @@ use WC_Unit_Test_Case;
 class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Original request globals.
+	 *
+	 * @var array
+	 */
+	private array $original_get = array();
+
+	/**
 	 * Original current settings section.
 	 *
 	 * @var mixed
@@ -29,15 +36,25 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	private $original_current_section = null;
 
 	/**
+	 * Original current settings tab.
+	 *
+	 * @var mixed
+	 */
+	private $original_current_tab = null;
+
+	/**
 	 * Set up test environment.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
+		include_once WC_ABSPATH . 'includes/admin/class-wc-admin-settings.php';
 		include_once WC_ABSPATH . 'includes/admin/settings/class-wc-settings-page.php';
 
-		global $current_section;
+		global $current_section, $current_tab;
+		$this->original_get             = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->original_current_section = $current_section ?? null;
+		$this->original_current_tab     = $current_tab ?? null;
 
 		SettingsSectionRegistry::get_instance()->unregister_all();
 		SettingsUIRequestContext::reset();
@@ -47,8 +64,10 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	 * Tear down test environment.
 	 */
 	public function tearDown(): void {
-		global $current_section;
+		global $current_section, $current_tab;
+		$_GET            = $this->original_get;
 		$current_section = $this->original_current_section;
+		$current_tab     = $this->original_current_tab;
 
 		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
 		SettingsSectionRegistry::get_instance()->unregister_all();
@@ -107,6 +126,41 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should resolve a registered section native Settings UI page when provided.
+	 */
+	public function test_resolves_registered_section_native_settings_ui_page(): void {
+		$page = $this->get_parent_page();
+		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section_with_native_settings_ui_page() );
+
+		$settings_ui_page = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' )->get_settings_ui_page();
+
+		$this->assertInstanceOf( SettingsUIPageInterface::class, $settings_ui_page );
+		$this->assertSame( 'acme_native', $settings_ui_page->get_page_id() );
+		$this->assertSame( array( 'acme-native-settings-ui' ), $settings_ui_page->get_script_handles( 'acme_payments' ) );
+		$this->assertSame( 'custom', $settings_ui_page->get_save_adapter( 'acme_payments' ) );
+
+		$schema = $settings_ui_page->get_schema( 'acme_payments' );
+		$this->assertSame( 'acme_native', $schema['id'] );
+		$this->assertSame( 'native_tab', $schema['section'] );
+		$this->assertArrayHasKey( 'native_group', $schema['groups'] );
+		$this->assertArrayNotHasKey( 'registered_acme_payments_setting', $schema['groups'] );
+	}
+
+	/**
+	 * @testdox Should keep direct SettingsSectionInterface implementations on the default adapter path.
+	 */
+	public function test_direct_settings_section_interface_implementation_uses_default_adapter(): void {
+		$page = $this->get_parent_page();
+		SettingsSectionRegistry::get_instance()->register( $this->get_direct_registered_section() );
+
+		$settings_ui_page = SettingsUIRequestContext::for_settings_page( $page, 'direct_payments' )->get_settings_ui_page();
+
+		$this->assertInstanceOf( SettingsUIPageInterface::class, $settings_ui_page );
+		$this->assertSame( 'checkout', $settings_ui_page->get_page_id() );
+		$this->assertSame( array( 'direct-payments-settings-ui' ), $settings_ui_page->get_script_handles( 'direct_payments' ) );
+	}
+
+	/**
 	 * @testdox Should render a registered section through the settings UI when the feature is enabled.
 	 */
 	public function test_renders_registered_section_with_settings_ui(): void {
@@ -124,6 +178,63 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'data-wc-settings-ui="1"', $output );
 		$this->assertStringContainsString( 'data-wc-settings-page="checkout"', $output );
 		$this->assertStringNotContainsString( 'name="registered_acme_payments_setting"', $output );
+	}
+
+	/**
+	 * @testdox Should render a registered section native Settings UI page when provided.
+	 */
+	public function test_renders_registered_section_native_settings_ui_page(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section_with_native_settings_ui_page() );
+
+		global $current_section;
+		$current_section = 'acme_payments';
+		$page            = $this->get_parent_page();
+
+		ob_start();
+		$page->output();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'data-wc-settings-ui="1"', $output );
+		$this->assertStringContainsString( 'data-wc-settings-page="acme_native"', $output );
+		$this->assertStringNotContainsString( 'name="registered_acme_payments_setting"', $output );
+	}
+
+	/**
+	 * @testdox Should suppress legacy section navigation for registered section native Settings UI pages.
+	 */
+	public function test_suppresses_legacy_section_navigation_for_registered_native_settings_ui_page(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section_with_native_settings_ui_page() );
+
+		global $current_section, $current_tab;
+		$current_tab     = 'checkout';
+		$current_section = 'acme_payments';
+		$_GET['page']    = 'wc-settings';
+		$_GET['tab']     = 'checkout';
+		$_GET['section'] = 'acme_payments';
+
+		$page                   = $this->get_parent_page();
+		$original_settings      = $this->replace_wc_admin_settings_pages( array( $page ) );
+		$tabs                   = array( 'checkout' => 'Payments' );
+		$original_sections_hook = $this->replace_hook_callbacks( 'woocommerce_sections_checkout' );
+		$original_settings_hook = $this->replace_hook_callbacks( 'woocommerce_settings_checkout' );
+
+		add_action( 'woocommerce_sections_checkout', array( $page, 'output_sections' ) );
+		add_action( 'woocommerce_settings_checkout', array( $page, 'output' ) );
+
+		try {
+			ob_start();
+			include WC_ABSPATH . 'includes/admin/views/html-admin-settings.php';
+			$output = ob_get_clean();
+		} finally {
+			$this->restore_hook_callbacks( 'woocommerce_sections_checkout', $original_sections_hook );
+			$this->restore_hook_callbacks( 'woocommerce_settings_checkout', $original_settings_hook );
+			$this->replace_wc_admin_settings_pages( $original_settings );
+		}
+
+		$this->assertStringContainsString( 'data-wc-settings-page="acme_native"', $output );
+		$this->assertStringNotContainsString( 'class="subsubsub"', $output );
 	}
 
 	/**
@@ -267,5 +378,255 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 			}
 
 		};
+	}
+
+	/**
+	 * Build a registered section that provides a native Settings UI page.
+	 *
+	 * @return SettingsSectionInterface
+	 */
+	private function get_registered_section_with_native_settings_ui_page(): SettingsSectionInterface {
+		return new class() extends SettingsSection {
+			/**
+			 * Get the parent page id.
+			 *
+			 * @return string
+			 */
+			public function get_parent_page_id(): string {
+				return 'checkout';
+			}
+
+			/**
+			 * Get the section id.
+			 *
+			 * @return string
+			 */
+			public function get_id(): string {
+				return 'acme_payments';
+			}
+
+			/**
+			 * Get the section label.
+			 *
+			 * @return string
+			 */
+			public function get_label(): string {
+				return 'Acme Payments';
+			}
+
+			/**
+			 * Get legacy settings.
+			 *
+			 * @param \WC_Settings_Page $parent_page Parent settings page.
+			 * @return array
+			 */
+			public function get_settings( \WC_Settings_Page $parent_page ): array {
+				return array(
+					array(
+						'id'    => 'registered_acme_payments_setting',
+						'type'  => 'text',
+						'title' => 'Registered Acme Payments setting',
+					),
+				);
+			}
+
+			/**
+			 * Get the native Settings UI page.
+			 *
+			 * @param \WC_Settings_Page $parent_page Parent settings page.
+			 * @return SettingsUIPageInterface|null
+			 */
+			public function get_settings_ui_page( \WC_Settings_Page $parent_page ): ?SettingsUIPageInterface {
+				return new class() implements SettingsUIPageInterface {
+					/**
+					 * Get the page id.
+					 *
+					 * @return string
+					 */
+					public function get_page_id(): string {
+						return 'acme_native';
+					}
+
+					/**
+					 * Get the native schema.
+					 *
+					 * @param string $section Section id.
+					 * @return array
+					 */
+					public function get_schema( string $section ): array {
+						return array(
+							'id'      => 'acme_native',
+							'title'   => 'Acme native settings',
+							'section' => 'native_tab',
+							'shell'   => array(
+								'title'             => 'Acme native settings',
+								'sectionNavigation' => array(
+									array(
+										'id'     => 'native_tab',
+										'label'  => 'Native tab',
+										'href'   => 'https://example.com/native-tab',
+										'active' => true,
+									),
+								),
+							),
+							'groups'  => array(
+								'native_group' => array(
+									'id'     => 'native_group',
+									'title'  => 'Native group',
+									'fields' => array(),
+								),
+							),
+							'save'    => array(
+								'adapter' => 'custom',
+								'handler' => 'acme/save',
+							),
+						);
+					}
+
+					/**
+					 * Get script handles.
+					 *
+					 * @param string $section Section id.
+					 * @return string[]
+					 */
+					public function get_script_handles( string $section ): array {
+						return array( 'acme-native-settings-ui' );
+					}
+
+					/**
+					 * Get the save adapter.
+					 *
+					 * @param string $section Section id.
+					 * @return string
+					 */
+					public function get_save_adapter( string $section ): string {
+						return 'custom';
+					}
+				};
+			}
+		};
+	}
+
+	/**
+	 * Build a direct SettingsSectionInterface implementation.
+	 *
+	 * @return SettingsSectionInterface
+	 */
+	private function get_direct_registered_section(): SettingsSectionInterface {
+		return new class() implements SettingsSectionInterface {
+			/**
+			 * Get the parent page id.
+			 *
+			 * @return string
+			 */
+			public function get_parent_page_id(): string {
+				return 'checkout';
+			}
+
+			/**
+			 * Get the section id.
+			 *
+			 * @return string
+			 */
+			public function get_id(): string {
+				return 'direct_payments';
+			}
+
+			/**
+			 * Get the section label.
+			 *
+			 * @return string
+			 */
+			public function get_label(): string {
+				return 'Direct Payments';
+			}
+
+			/**
+			 * Get legacy settings.
+			 *
+			 * @param \WC_Settings_Page $parent_page Parent settings page.
+			 * @return array
+			 */
+			public function get_settings( \WC_Settings_Page $parent_page ): array {
+				return array(
+					array(
+						'id'    => 'direct_payments_setting',
+						'type'  => 'text',
+						'title' => 'Direct payments setting',
+					),
+				);
+			}
+
+			/**
+			 * Get script handles.
+			 *
+			 * @param \WC_Settings_Page $parent_page Parent settings page.
+			 * @return string[]
+			 */
+			public function get_script_handles( \WC_Settings_Page $parent_page ): array {
+				return array( 'direct-payments-settings-ui' );
+			}
+
+			/**
+			 * Get save adapter.
+			 *
+			 * @param \WC_Settings_Page $parent_page Parent settings page.
+			 * @return string
+			 */
+			public function get_save_adapter( \WC_Settings_Page $parent_page ): string {
+				return 'form_post';
+			}
+		};
+	}
+
+	/**
+	 * Replace callbacks for a hook.
+	 *
+	 * @param string $hook_name Hook name.
+	 * @return \WP_Hook|null Previous hook callbacks.
+	 */
+	private function replace_hook_callbacks( string $hook_name ): ?\WP_Hook {
+		global $wp_filter;
+
+		$previous_hook = isset( $wp_filter[ $hook_name ] ) ? clone $wp_filter[ $hook_name ] : null;
+		remove_all_actions( $hook_name );
+
+		return $previous_hook;
+	}
+
+	/**
+	 * Restore callbacks for a hook.
+	 *
+	 * @param string        $hook_name Hook name.
+	 * @param \WP_Hook|null $hook Previous hook callbacks.
+	 */
+	private function restore_hook_callbacks( string $hook_name, ?\WP_Hook $hook ): void {
+		remove_all_actions( $hook_name );
+
+		if ( ! $hook ) {
+			return;
+		}
+
+		foreach ( $hook->callbacks as $priority => $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				add_action( $hook_name, $callback['function'], $priority, $callback['accepted_args'] );
+			}
+		}
+	}
+
+	/**
+	 * Replace WC admin settings pages for a focused view test.
+	 *
+	 * @param array $settings_pages Settings page instances.
+	 * @return array Previous settings page instances.
+	 */
+	private function replace_wc_admin_settings_pages( array $settings_pages ): array {
+		$settings_property = new \ReflectionProperty( \WC_Admin_Settings::class, 'settings' );
+		$settings_property->setAccessible( true );
+
+		$previous_settings = (array) $settings_property->getValue();
+		$settings_property->setValue( null, $settings_pages );
+
+		return $previous_settings;
 	}
 }

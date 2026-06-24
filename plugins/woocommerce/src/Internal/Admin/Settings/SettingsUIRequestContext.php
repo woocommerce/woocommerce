@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\Settings\SettingsSectionRegistry;
+use Automattic\WooCommerce\Admin\Settings\SettingsSectionUIPageProviderInterface;
 use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 
 /**
@@ -347,6 +348,13 @@ class SettingsUIRequestContext {
 		$registered_section = SettingsSectionRegistry::get_instance()->get_registered( $settings_page->get_id(), $section );
 
 		if ( $registered_section ) {
+			if ( $registered_section instanceof SettingsSectionUIPageProviderInterface ) {
+				$settings_ui_page = $registered_section->get_settings_ui_page( $settings_page );
+				if ( $settings_ui_page instanceof SettingsUIPageInterface ) {
+					return $settings_ui_page;
+				}
+			}
+
 			return new RegisteredSettingsSectionAdapter( $settings_page, $registered_section );
 		}
 

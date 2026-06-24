@@ -10,7 +10,7 @@
 // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -47,7 +47,8 @@ if ( Features::is_enabled( 'settings-ui' ) ) {
 			continue;
 		}
 
-		$is_settings_ui_page       = $settings_page->get_settings_ui_page() instanceof SettingsUIPageInterface;
+		$context                   = SettingsUIRequestContext::for_settings_page( $settings_page, is_string( $current_section ) ? $current_section : '' );
+		$is_settings_ui_page       = $context->is_rendering_enabled();
 		$settings_ui_settings_page = $is_settings_ui_page ? $settings_page : null;
 		break;
 	}
