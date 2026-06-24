@@ -340,7 +340,7 @@ class Products extends Task {
 	public function maybe_redirect_to_add_product_tasklist() {
 		$screen = get_current_screen();
 		if ( $screen && 'edit' === $screen->base && 'product' === $screen->post_type ) {
-			$counts = ProductUtil::get_counts_for_type( 'product' );
+			$counts = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
 			$count  = array_sum( $counts ) - ( $counts[ ProductStatus::AUTO_DRAFT ] ?? 0 );
 			if ( $count > 0 ) {
 				return;

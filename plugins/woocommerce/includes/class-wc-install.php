@@ -852,7 +852,7 @@ class WC_Install {
 		return is_null( get_option( 'woocommerce_version', null ) )
 			|| (
 				-1 === wc_get_page_id( 'shop' )
-				&& 0 === array_sum( ProductUtil::get_counts_for_type( 'product' ) )
+				&& 0 === array_sum( wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' ) )
 			);
 	}
 

@@ -444,7 +444,7 @@ abstract class AbstractBlock {
 				'wordCountType' => _x( 'words', 'Word count type. Do not translate!', 'woocommerce' ),
 			];
 			if ( is_admin() && ! WC()->is_rest_api_request() ) {
-				$product_counts     = ProductUtil::get_counts_for_type( 'product' );
+				$product_counts     = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
 				$published_products = $product_counts[ ProductStatus::PUBLISH ] ?? 0;
 				$wc_blocks_config   = array_merge(
 					$wc_blocks_config,
