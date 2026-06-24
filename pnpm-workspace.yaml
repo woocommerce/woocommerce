@@ -83,12 +83,17 @@ packages:
 # pnpm 10 emptied public-hoist-pattern (was ['*eslint*', '*prettier*']).
 # Also hoist react/react-dom so phantom deps in @wordpress/* packages resolve
 # (e.g. @wordpress/dataviews imports react-dom/client without declaring it).
+# uuid/memize are the same kind of phantom import: @wordpress/dataviews pulls in
+# uuid (admin client bundle), and @woocommerce/internal-js-tests' jest preset
+# require.resolve()s uuid + memize — none of them declare these, so hoist to root.
 publicHoistPattern:
     - '*eslint*'
     - '*prettier*'
     - 'react'
     - 'react-dom'
     - '@use-gesture/react'
+    - 'uuid'
+    - 'memize'
 
 # Quality of life tweaks (migrated from .npmrc)
 childConcurrency: 8        # 5 by default

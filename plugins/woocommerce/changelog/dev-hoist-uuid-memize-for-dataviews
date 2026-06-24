@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Hoist uuid and memize in pnpm publicHoistPattern so the admin client build and JS tests resolve these @wordpress/dataviews and jest-preset phantom imports.
