@@ -2114,8 +2114,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->add_item( $item );
 		}
 
-		$this->set_shipping_tax( array_sum( $shipping_taxes ) );
-		$this->set_cart_tax( array_sum( $cart_taxes ) );
+		// Final rounding mirrors WC_Cart_Totals::calculate_totals() so order tax matches the value shown at checkout when per-rate sums land on a 0.5 boundary.
+		$this->set_shipping_tax( (string) NumberUtil::round( array_sum( $shipping_taxes ), wc_get_price_decimals() ) );
+		$this->set_cart_tax( (string) NumberUtil::round( array_sum( $cart_taxes ), wc_get_price_decimals() ) );
 		$this->save();
 	}
 
