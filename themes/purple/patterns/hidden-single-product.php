@@ -6,8 +6,8 @@
  */
 ?>
 
-<!-- wp:group {"metadata":{"name":"Single Product"},"align":"wide","style":{"spacing":{"blockGap":"0","padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"}}},"layout":{"type":"default"}} -->
-<div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50)"><!-- wp:woocommerce/store-notices /-->
+<!-- wp:group {"metadata":{"name":"Single Product"},"align":"wide","style":{"spacing":{"blockGap":"0"}}},"layout":{"type":"default"}} -->
+<div class="wp-block-group alignwide"><!-- wp:woocommerce/store-notices /-->
 
 <!-- wp:woocommerce/breadcrumbs /-->
 
