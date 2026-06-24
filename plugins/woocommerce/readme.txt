@@ -170,6 +170,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.9.1 2026-XX-XX =
+= 10.9.1 2026-06-24 =
+
+**WooCommerce**
+
+* Fix - Remove get_entry_count() from the product feed FeedInterface to restore backward compatibility. Requiring the method broke third-party implementations (e.g. older WooCommerce Stripe Gateway versions) that implement the interface without it. The method remains available on JsonFileFeed. [#65972](https://github.com/woocommerce/woocommerce/pull/65972)
+
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
