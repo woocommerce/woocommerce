@@ -1,12 +1,12 @@
 <?php
-declare( strict_types = 1 );
-
 /**
  * Addons Page
  *
  * @package  WooCommerce\Admin
  * @version  2.5.0
  */
+
+declare( strict_types = 1 );
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -72,6 +72,15 @@ class WC_Admin_Marketplace_Promotions {
 
 		self::$locale = ( self::$locale ?? get_user_locale() ) ?? 'en_US';
 		self::maybe_show_bubble_promotions();
+
+		// Contextual promo card on the Orders list (a classic, non-SPA admin page).
+		// admin_notices is hoisted into a hidden list by the WooCommerce admin layout, so the
+		// card is printed into the orders list table's own tablenav, which renders above the table.
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_orders_promo_card' ) );
+		// HPOS orders list.
+		add_action( 'woocommerce_order_list_table_extra_tablenav', array( __CLASS__, 'render_orders_promo_card' ), 10, 2 );
+		// Legacy (posts-based) orders list.
+		add_action( 'manage_posts_extra_tablenav', array( __CLASS__, 'render_legacy_orders_promo_card' ) );
 	}
 
 	/**
@@ -126,6 +135,136 @@ class WC_Admin_Marketplace_Promotions {
 	}
 
 	/**
+	 * Enqueue the Orders-screen promo card script when an eligible promo exists.
+	 *
+	 * The Orders list is a classic admin page, so the card is mounted via a
+	 * wp-admin-scripts entry (see ShippingLabelBanner for the same pattern).
+	 *
+	 * @return void
+	 */
+	public static function maybe_enqueue_orders_promo_card() {
+		if ( ! self::is_orders_screen() || null === self::get_orders_promo_card() ) {
+			return;
+		}
+
+		\Automattic\WooCommerce\Internal\Admin\WCAdminAssets::register_script( 'wp-admin-scripts', 'marketplace-orders-promo', true );
+	}
+
+	/**
+	 * Print the mount point for the Orders-screen promo card, above the orders table.
+	 *
+	 * Hooked on woocommerce_order_list_table_extra_tablenav. The promotion is rule-resolved
+	 * server-side and passed to the script via a data attribute, so no additional data is
+	 * shared with WooCommerce.com.
+	 *
+	 * @param string $order_type The order type being listed.
+	 * @param string $which      The tablenav location: 'top' or 'bottom'.
+	 * @return void
+	 */
+	public static function render_orders_promo_card( $order_type = '', $which = '' ) {
+		if ( 'top' !== $which || 'shop_order' !== $order_type ) {
+			return;
+		}
+
+		self::print_orders_promo_card();
+	}
+
+	/**
+	 * Print the mount point on the legacy (posts-based) orders list.
+	 *
+	 * Hooked on the WordPress core manage_posts_extra_tablenav, which fires for every post
+	 * type, so this is gated to the shop_order list screen.
+	 *
+	 * @param string $which The tablenav location: 'top' or 'bottom'.
+	 * @return void
+	 */
+	public static function render_legacy_orders_promo_card( $which = '' ) {
+		$screen = get_current_screen();
+		if ( 'top' !== $which || ! $screen || 'edit-shop_order' !== $screen->id ) {
+			return;
+		}
+
+		self::print_orders_promo_card();
+	}
+
+	/**
+	 * Print the promo card container for the orders list, if a card is eligible.
+	 *
+	 * @return void
+	 */
+	private static function print_orders_promo_card(): void {
+		$card = self::get_orders_promo_card();
+		if ( null === $card ) {
+			return;
+		}
+
+		printf(
+			'<div id="woocommerce-marketplace-orders-promo" class="woocommerce-marketplace-orders-promo" style="width:100%%;clear:both;" data-promotion="%s"></div>',
+			esc_attr( wp_json_encode( $card ) )
+		);
+	}
+
+	/**
+	 * Whether the current screen is the WooCommerce Orders list (HPOS or legacy).
+	 *
+	 * @return bool
+	 */
+	private static function is_orders_screen(): bool {
+		$screen = get_current_screen();
+		if ( ! $screen ) {
+			return false;
+		}
+
+		return in_array(
+			$screen->id,
+			array( 'woocommerce_page_wc-orders', 'admin_page_wc-orders', 'edit-shop_order' ),
+			true
+		);
+	}
+
+	/**
+	 * Get the first active promo card that targets the Orders screen, together with the
+	 * store's order count for instrumentation. Returns null when none is eligible.
+	 *
+	 * @return array|null
+	 */
+	public static function get_orders_promo_card() {
+		foreach ( self::get_active_promotions() as $promotion ) {
+			if ( ! is_array( $promotion ) || 'promo-card' !== ( $promotion['format'] ?? '' ) ) {
+				continue;
+			}
+
+			if ( ! self::promotion_targets_orders( $promotion ) ) {
+				continue;
+			}
+
+			return array(
+				'promotion'   => $promotion,
+				'order_count' => ( new \Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\OrdersProvider() )->get_order_count(),
+			);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Whether a promotion declares the Orders screen as a placement, via a
+	 * `pages` entry of `{ "page": "wc-orders" }`.
+	 *
+	 * @param array $promotion The promotion definition.
+	 * @return bool
+	 */
+	private static function promotion_targets_orders( array $promotion ): bool {
+		foreach ( (array) ( $promotion['pages'] ?? array() ) as $page ) {
+			if ( is_array( $page ) && 'wc-orders' === ( $page['page'] ?? '' ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Evaluate locally targeted promotions before they are exposed to JS.
 	 *
 	 * Supported stores convert matching rule-based promos into standard promo cards.
@@ -153,7 +292,7 @@ class WC_Admin_Marketplace_Promotions {
 			}
 
 			unset( $promotion['local_rules'] );
-			$promotion['format']     = 'promo-card';
+			$promotion['format']   = 'promo-card';
 			$resolved_promotions[] = $promotion;
 		}
 

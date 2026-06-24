@@ -16,6 +16,8 @@ import PercentSVG from './images/percent';
 
 interface PromoCardProps {
 	promotion: Promotion;
+	// Extra properties merged into the promotion Tracks events (e.g. order_count, surface).
+	eventProperties?: Record< string, unknown >;
 }
 
 const imageComponents = {
@@ -24,6 +26,7 @@ const imageComponents = {
 
 const PromoCard = ( {
 	promotion,
+	eventProperties = {},
 }: PromoCardProps ): React.ReactElement | null => {
 	const path = window.location.pathname + window.location.search;
 
@@ -41,6 +44,7 @@ const PromoCard = ( {
 			recordEvent( 'marketplace_promotion_viewed', {
 				path,
 				format: 'promo-card',
+				...eventProperties,
 			} );
 		}
 		// only run once
@@ -59,6 +63,7 @@ const PromoCard = ( {
 		recordEvent( 'marketplace_promotion_dismissed', {
 			path,
 			format: 'promo-card',
+			...eventProperties,
 		} );
 	};
 
@@ -67,6 +72,7 @@ const PromoCard = ( {
 			path,
 			target_uri: promotion.cta_link,
 			format: 'promo-card',
+			...eventProperties,
 		} );
 
 		return true;
