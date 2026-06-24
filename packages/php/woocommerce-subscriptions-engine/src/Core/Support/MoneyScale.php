@@ -1,14 +1,15 @@
 <?php
 /**
- * MoneyScale - shared normalization of money values to the storage decimal scale.
+ * MoneyScale - normalize money values to the storage decimal scale.
  *
- * Money columns are stored as DECIMAL(26,8), which reads back with eight
- * fractional digits. Normalizing on the way in too keeps an amount identical
- * before and after a save/load round-trip, so a freshly built entity and a
- * reloaded one compare equal. Both the cycle's `expected_total` and the
- * contract's live totals use this one scale.
- *
- * Lives in the WordPress-free Core zone.
+ * Money is stored as DECIMAL(26,8), mirroring WooCommerce's order tables: HPOS
+ * stores `total_amount` / `tax_amount` / `shipping_total_amount` /
+ * `discount_total_amount` as `decimal(26,8)`. That is a storage scale (precision
+ * headroom), not a display precision - amounts are still shown via
+ * `wc_get_price_decimals()`. Normalizing on the way in keeps a value identical
+ * across a save/load round-trip, so a freshly built entity and a reloaded one
+ * compare equal. Shared by the cycle's `expected_total` and the contract's live
+ * totals. WordPress-free Core zone.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Support
  */

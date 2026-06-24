@@ -1,29 +1,21 @@
 <?php
 /**
- * Contract - the stable, customer-facing identity of a subscription and the live
- * source of truth for its current state. Manages core data for the subscription
- * and enforces lifecycle transitions through {@see ContractStatus}.
+ * Contract - the stable identity of a subscription and the live source of truth
+ * for its current state. Enforces lifecycle transitions through {@see ContractStatus}.
  *
- * The contract is the live source of truth (the current reality, mutable): it
- * holds its stable identity, the live schedule (`next_payment_gmt`, which drives
- * the due scan), the latest/live snapshot references (`plan_snapshot_id` /
- * `items_snapshot_id`), and the live config values - the four totals
- * (`billing_total` / `discount_total` / `shipping_total` / `tax_total`) and the
- * four stamps (`last_payment_gmt` / `last_attempt_gmt` / `trial_end_gmt` /
- * `end_gmt`). These are LIVE VALUES, not caches of cycles. Sync is single-direction
- * downward (contract -> snapshot, contract -> cycle), never cycle -> contract: a
- * live change writes a new snapshot row and the contract repoints, and a billing
- * cycle freezes whatever the contract points at now.
+ * Being the live source of truth (mutable), it holds the live schedule
+ * (`next_payment_gmt`), the latest snapshot references (`plan_snapshot_id` /
+ * `items_snapshot_id`), and the live config values (the `*_total` totals and the
+ * `*_gmt` stamps). These are live values, not caches of cycles: sync flows one way
+ * down - a live change repoints the contract's snapshot, and a billing cycle freezes
+ * whatever the contract points at now - never cycle -> contract.
  *
- * The contract does not hold a cycle graph in memory; cycles are fetched on demand
- * through the repository. A chain is just the pair `(contract_id, kind)`; its head
- * and counters are derived from the cycle rows, so there is no generic per-contract
- * cycle count. `origin_order_id` is nullable (a manual/admin contract has no origin
- * order); for a checkout contract it equals cycle 1's `order_id`.
- *
- * Timestamps are GMT strings (`Y-m-d H:i:s`). Money totals are decimal-safe
- * strings normalized to the storage scale. The payment instrument is exposed as an
- * {@see InstrumentRef} rather than a live payment token.
+ * It holds no cycle graph in memory (cycles are fetched on demand), and a chain is
+ * just the pair `(contract_id, kind)` with its counters derived from the cycle rows.
+ * `origin_order_id` is nullable (a manual contract has none; for a checkout contract
+ * it equals cycle 1's `order_id`). Timestamps are GMT strings; money totals are
+ * decimal-safe strings on the storage scale; the payment instrument is exposed as an
+ * {@see InstrumentRef}.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity
  */
@@ -246,91 +238,40 @@ final class Contract {
 	/**
 	 * Use {@see self::create()} or {@see self::from_storage()}.
 	 *
-	 * Values are coerced to these types at the {@see self::create()} /
-	 * {@see self::from_storage()} boundary, so the constructor takes already-typed
-	 * arguments.
+	 * Coerces each attribute from `$data` (keyed by property name) to its property
+	 * type, so callers build a contract from a flat associative array rather than a
+	 * long positional argument list. Unknown keys are ignored; missing keys take the
+	 * documented per-field default.
 	 *
-	 * @param int|null                            $id                   Contract id, or null before save.
-	 * @param string                              $status               Lifecycle status.
-	 * @param int                                 $customer_id          Owning customer id.
-	 * @param string                              $currency             ISO-4217 currency code.
-	 * @param int                                 $selling_plan_id      Foreign key to the selling plan.
-	 * @param int|null                            $origin_order_id      Foreign key to the origin order, or null.
-	 * @param string|null                         $extension_slug       Owning extension slug, or null.
-	 * @param string|null                         $payment_method       Gateway code, or null.
-	 * @param string|null                         $payment_method_title Gateway title, or null.
-	 * @param int|null                            $payment_token_id     Payment token id, or null.
-	 * @param string                              $start_gmt            Start timestamp (GMT string).
-	 * @param string|null                         $next_payment_gmt     Live schedule (GMT string), or null.
-	 * @param int|null                            $plan_snapshot_id     Latest plan snapshot id, or null.
-	 * @param int|null                            $items_snapshot_id    Latest items snapshot id, or null.
-	 * @param string                              $billing_total        Live billing total (decimal-safe string).
-	 * @param string                              $discount_total       Live discount total (decimal-safe string).
-	 * @param string                              $shipping_total       Live shipping total (decimal-safe string).
-	 * @param string                              $tax_total            Live tax total (decimal-safe string).
-	 * @param string|null                         $last_payment_gmt     Last successful bill (GMT string), or null.
-	 * @param string|null                         $last_attempt_gmt     Last charge attempt (GMT string), or null.
-	 * @param string|null                         $trial_end_gmt        Trial end (GMT string), or null.
-	 * @param string|null                         $end_gmt              Contract end (GMT string), or null.
-	 * @param string                              $schedule_source      Who runs renewals.
-	 * @param array<int, array<string, mixed>>    $items                Line items.
-	 * @param array<string, array<string, mixed>> $addresses            Addresses keyed by type.
-	 * @param array<string, string>               $meta                 Contract meta as key => value.
+	 * @param array<string, mixed> $data Raw attributes keyed by property name.
 	 */
-	private function __construct(
-		?int $id,
-		string $status,
-		int $customer_id,
-		string $currency,
-		int $selling_plan_id,
-		?int $origin_order_id,
-		?string $extension_slug,
-		?string $payment_method,
-		?string $payment_method_title,
-		?int $payment_token_id,
-		string $start_gmt,
-		?string $next_payment_gmt,
-		?int $plan_snapshot_id,
-		?int $items_snapshot_id,
-		string $billing_total,
-		string $discount_total,
-		string $shipping_total,
-		string $tax_total,
-		?string $last_payment_gmt,
-		?string $last_attempt_gmt,
-		?string $trial_end_gmt,
-		?string $end_gmt,
-		string $schedule_source,
-		array $items,
-		array $addresses,
-		array $meta
-	) {
-		$this->id                   = $id;
-		$this->status               = $status;
-		$this->customer_id          = $customer_id;
-		$this->currency             = $currency;
-		$this->selling_plan_id      = $selling_plan_id;
-		$this->origin_order_id      = $origin_order_id;
-		$this->extension_slug       = $extension_slug;
-		$this->payment_method       = $payment_method;
-		$this->payment_method_title = $payment_method_title;
-		$this->payment_token_id     = $payment_token_id;
-		$this->start_gmt            = $start_gmt;
-		$this->next_payment_gmt     = $next_payment_gmt;
-		$this->plan_snapshot_id     = $plan_snapshot_id;
-		$this->items_snapshot_id    = $items_snapshot_id;
-		$this->billing_total        = $billing_total;
-		$this->discount_total       = $discount_total;
-		$this->shipping_total       = $shipping_total;
-		$this->tax_total            = $tax_total;
-		$this->last_payment_gmt     = $last_payment_gmt;
-		$this->last_attempt_gmt     = $last_attempt_gmt;
-		$this->trial_end_gmt        = $trial_end_gmt;
-		$this->end_gmt              = $end_gmt;
-		$this->schedule_source      = $schedule_source;
-		$this->items                = $items;
-		$this->addresses            = $addresses;
-		$this->meta                 = $meta;
+	private function __construct( array $data ) {
+		$this->id                   = self::coerce_nullable_int( $data['id'] ?? null );
+		$this->status               = self::coerce_string( $data['status'] ?? null, ContractStatus::ACTIVE );
+		$this->customer_id          = self::coerce_int( $data['customer_id'] ?? null );
+		$this->currency             = self::coerce_string( $data['currency'] ?? null );
+		$this->selling_plan_id      = self::coerce_int( $data['selling_plan_id'] ?? null );
+		$this->origin_order_id      = self::coerce_nullable_int( $data['origin_order_id'] ?? null );
+		$this->extension_slug       = self::coerce_nullable_string( $data['extension_slug'] ?? null );
+		$this->payment_method       = self::coerce_nullable_string( $data['payment_method'] ?? null );
+		$this->payment_method_title = self::coerce_nullable_string( $data['payment_method_title'] ?? null );
+		$this->payment_token_id     = self::coerce_nullable_int( $data['payment_token_id'] ?? null );
+		$this->start_gmt            = self::coerce_string( $data['start_gmt'] ?? null );
+		$this->next_payment_gmt     = self::coerce_nullable_string( $data['next_payment_gmt'] ?? null );
+		$this->plan_snapshot_id     = self::coerce_nullable_int( $data['plan_snapshot_id'] ?? null );
+		$this->items_snapshot_id    = self::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
+		$this->billing_total        = self::normalize_money( $data['billing_total'] ?? '0' );
+		$this->discount_total       = self::normalize_money( $data['discount_total'] ?? '0' );
+		$this->shipping_total       = self::normalize_money( $data['shipping_total'] ?? '0' );
+		$this->tax_total            = self::normalize_money( $data['tax_total'] ?? '0' );
+		$this->last_payment_gmt     = self::coerce_nullable_string( $data['last_payment_gmt'] ?? null );
+		$this->last_attempt_gmt     = self::coerce_nullable_string( $data['last_attempt_gmt'] ?? null );
+		$this->trial_end_gmt        = self::coerce_nullable_string( $data['trial_end_gmt'] ?? null );
+		$this->end_gmt              = self::coerce_nullable_string( $data['end_gmt'] ?? null );
+		$this->schedule_source      = self::coerce_string( $data['schedule_source'] ?? null, self::SCHEDULE_SOURCE_PRIMITIVE );
+		$this->items                = self::coerce_item_rows( $data['items'] ?? null );
+		$this->addresses            = self::coerce_address_map( $data['addresses'] ?? null );
+		$this->meta                 = self::coerce_meta_map( $data['meta'] ?? null );
 	}
 
 	/**
@@ -340,48 +281,20 @@ final class Contract {
 	 * @throws DomainException If the contract attributes are not valid.
 	 */
 	public static function create( array $args ): self {
-		$status = self::coerce_string( $args['status'] ?? null, ContractStatus::ACTIVE );
-		if ( ! ContractStatus::is_valid( $status ) ) {
-			throw new DomainException(
-				sprintf( 'Contract: invalid status "%s".', $status )
-			);
+		// A new contract is always unsaved; never adopt a caller-supplied id.
+		unset( $args['id'] );
+
+		$contract = new self( $args );
+
+		if ( ! ContractStatus::is_valid( $contract->status ) ) {
+			throw new DomainException( sprintf( 'Contract: invalid status "%s".', $contract->status ) );
 		}
 
-		$schedule_source = self::coerce_string( $args['schedule_source'] ?? null, self::SCHEDULE_SOURCE_PRIMITIVE );
-		if ( ! in_array( $schedule_source, array( self::SCHEDULE_SOURCE_PRIMITIVE, self::SCHEDULE_SOURCE_GATEWAY ), true ) ) {
-			throw new DomainException(
-				sprintf( 'Contract: invalid schedule source "%s".', $schedule_source )
-			);
+		if ( ! in_array( $contract->schedule_source, array( self::SCHEDULE_SOURCE_PRIMITIVE, self::SCHEDULE_SOURCE_GATEWAY ), true ) ) {
+			throw new DomainException( sprintf( 'Contract: invalid schedule source "%s".', $contract->schedule_source ) );
 		}
 
-		return new self(
-			null,
-			$status,
-			self::coerce_int( $args['customer_id'] ?? null ),
-			self::coerce_string( $args['currency'] ?? null ),
-			self::coerce_int( $args['selling_plan_id'] ?? null ),
-			self::coerce_nullable_int( $args['origin_order_id'] ?? null ),
-			is_string( $args['extension_slug'] ?? null ) ? $args['extension_slug'] : null,
-			is_string( $args['payment_method'] ?? null ) ? $args['payment_method'] : null,
-			is_string( $args['payment_method_title'] ?? null ) ? $args['payment_method_title'] : null,
-			isset( $args['payment_token_id'] ) ? self::coerce_int( $args['payment_token_id'] ) : null,
-			self::coerce_string( $args['start_gmt'] ?? null ),
-			self::coerce_nullable_string( $args['next_payment_gmt'] ?? null ),
-			self::coerce_nullable_int( $args['plan_snapshot_id'] ?? null ),
-			self::coerce_nullable_int( $args['items_snapshot_id'] ?? null ),
-			self::normalize_money( $args['billing_total'] ?? '0' ),
-			self::normalize_money( $args['discount_total'] ?? '0' ),
-			self::normalize_money( $args['shipping_total'] ?? '0' ),
-			self::normalize_money( $args['tax_total'] ?? '0' ),
-			self::coerce_nullable_string( $args['last_payment_gmt'] ?? null ),
-			self::coerce_nullable_string( $args['last_attempt_gmt'] ?? null ),
-			self::coerce_nullable_string( $args['trial_end_gmt'] ?? null ),
-			self::coerce_nullable_string( $args['end_gmt'] ?? null ),
-			$schedule_source,
-			self::coerce_item_rows( $args['items'] ?? null ),
-			self::coerce_address_map( $args['addresses'] ?? null ),
-			self::coerce_meta_map( $args['meta'] ?? null )
-		);
+		return $contract;
 	}
 
 	/**
@@ -394,32 +307,14 @@ final class Contract {
 	 */
 	public static function from_storage( array $row, array $items = array(), array $addresses = array(), array $meta = array() ): self {
 		return new self(
-			isset( $row['id'] ) ? self::coerce_int( $row['id'] ) : null,
-			self::coerce_string( $row['status'] ?? null ),
-			self::coerce_int( $row['customer_id'] ?? null ),
-			self::coerce_string( $row['currency'] ?? null ),
-			self::coerce_int( $row['selling_plan_id'] ?? null ),
-			self::coerce_nullable_int( $row['origin_order_id'] ?? null ),
-			isset( $row['extension_slug'] ) ? self::coerce_nullable_string( $row['extension_slug'] ) : null,
-			isset( $row['payment_method'] ) ? self::coerce_nullable_string( $row['payment_method'] ) : null,
-			isset( $row['payment_method_title'] ) ? self::coerce_nullable_string( $row['payment_method_title'] ) : null,
-			isset( $row['payment_token_id'] ) ? self::coerce_int( $row['payment_token_id'] ) : null,
-			self::coerce_string( $row['start_gmt'] ?? null ),
-			self::coerce_nullable_string( $row['next_payment_gmt'] ?? null ),
-			self::coerce_nullable_int( $row['plan_snapshot_id'] ?? null ),
-			self::coerce_nullable_int( $row['items_snapshot_id'] ?? null ),
-			self::normalize_money( $row['billing_total'] ?? '0' ),
-			self::normalize_money( $row['discount_total'] ?? '0' ),
-			self::normalize_money( $row['shipping_total'] ?? '0' ),
-			self::normalize_money( $row['tax_total'] ?? '0' ),
-			self::coerce_nullable_string( $row['last_payment_gmt'] ?? null ),
-			self::coerce_nullable_string( $row['last_attempt_gmt'] ?? null ),
-			self::coerce_nullable_string( $row['trial_end_gmt'] ?? null ),
-			self::coerce_nullable_string( $row['end_gmt'] ?? null ),
-			self::coerce_string( $row['schedule_source'] ?? null, self::SCHEDULE_SOURCE_PRIMITIVE ),
-			$items,
-			$addresses,
-			$meta
+			array_merge(
+				$row,
+				array(
+					'items'     => $items,
+					'addresses' => $addresses,
+					'meta'      => $meta,
+				)
+			)
 		);
 	}
 

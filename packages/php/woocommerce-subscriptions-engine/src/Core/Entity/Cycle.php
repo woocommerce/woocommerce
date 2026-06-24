@@ -180,64 +180,37 @@ final class Cycle {
 	/**
 	 * Use {@see self::create()} or {@see self::from_storage()}.
 	 *
-	 * Values are coerced to these scalar types at the {@see self::create()} /
-	 * {@see self::from_storage()} boundary, so the constructor takes already-typed
-	 * arguments.
+	 * Coerces each attribute from `$data` (keyed by property name) to its property
+	 * type, so callers build a cycle from a flat associative array rather than a long
+	 * positional argument list. Unknown keys are ignored; missing keys take the
+	 * documented per-field default.
 	 *
-	 * @param int|null           $id                Cycle id, or null before save.
-	 * @param int                $contract_id       Owning contract id.
-	 * @param int                $sequence_no       Position within the chain.
-	 * @param int|null           $count             Chargeable number, or null.
-	 * @param string             $kind              Chain kind.
-	 * @param CycleStatus        $status            Lifecycle status.
-	 * @param string|null        $reason            Open-ended annotation, or null.
-	 * @param string             $starts_at_gmt     Period start (GMT string).
-	 * @param string             $ends_at_gmt       Period end (GMT string).
-	 * @param string             $expected_total    Amount expected to be billed.
-	 * @param string             $currency          ISO-4217 currency code.
-	 * @param int|null           $plan_snapshot_id  Plan snapshot row id, or null.
-	 * @param int|null           $items_snapshot_id Items snapshot row id, or null.
-	 * @param int|null           $order_id          Linked order id, or null.
-	 * @param string|null        $extension_slug    Owning extension slug, or null.
-	 * @param PlanSnapshot|null  $plan_snapshot    Typed plan snapshot, or null.
-	 * @param ItemsSnapshot|null $items_snapshot   Typed items snapshot, or null.
+	 * The factories resolve the two fields the array shape cannot carry directly: the
+	 * typed {@see CycleStatus} (a `CycleStatus` instance or a status string, defaulting
+	 * to `pending`) and the chargeable `count` (already an `int|null`, since the
+	 * absent-vs-explicit-null distinction is settled per factory). The snapshot value
+	 * objects are likewise passed already typed.
+	 *
+	 * @param array<string, mixed> $data Raw attributes keyed by property name.
 	 */
-	private function __construct(
-		?int $id,
-		int $contract_id,
-		int $sequence_no,
-		?int $count,
-		string $kind,
-		CycleStatus $status,
-		?string $reason,
-		string $starts_at_gmt,
-		string $ends_at_gmt,
-		string $expected_total,
-		string $currency,
-		?int $plan_snapshot_id,
-		?int $items_snapshot_id,
-		?int $order_id,
-		?string $extension_slug,
-		?PlanSnapshot $plan_snapshot,
-		?ItemsSnapshot $items_snapshot
-	) {
-		$this->id                = $id;
-		$this->contract_id       = $contract_id;
-		$this->sequence_no       = $sequence_no;
-		$this->count             = $count;
-		$this->kind              = $kind;
-		$this->status            = $status;
-		$this->reason            = $reason;
-		$this->starts_at_gmt     = $starts_at_gmt;
-		$this->ends_at_gmt       = $ends_at_gmt;
-		$this->expected_total    = $expected_total;
-		$this->currency          = $currency;
-		$this->plan_snapshot_id  = $plan_snapshot_id;
-		$this->items_snapshot_id = $items_snapshot_id;
-		$this->order_id          = $order_id;
-		$this->extension_slug    = $extension_slug;
-		$this->plan_snapshot     = $plan_snapshot;
-		$this->items_snapshot    = $items_snapshot;
+	private function __construct( array $data ) {
+		$this->id                = self::coerce_nullable_int( $data['id'] ?? null );
+		$this->contract_id       = self::coerce_int( $data['contract_id'] ?? null );
+		$this->sequence_no       = self::coerce_int( $data['sequence_no'] ?? null );
+		$this->count             = isset( $data['count'] ) ? self::coerce_int( $data['count'] ) : null;
+		$this->kind              = self::coerce_string( $data['kind'] ?? null, self::KIND_BILLING );
+		$this->status            = self::coerce_status( $data['status'] ?? null );
+		$this->reason            = self::coerce_nullable_string( $data['reason'] ?? null );
+		$this->starts_at_gmt     = self::coerce_string( $data['starts_at_gmt'] ?? null );
+		$this->ends_at_gmt       = self::coerce_string( $data['ends_at_gmt'] ?? null );
+		$this->expected_total    = self::normalize_money( $data['expected_total'] ?? '0' );
+		$this->currency          = self::coerce_string( $data['currency'] ?? null );
+		$this->plan_snapshot_id  = self::coerce_nullable_int( $data['plan_snapshot_id'] ?? null );
+		$this->items_snapshot_id = self::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
+		$this->order_id          = self::coerce_nullable_int( $data['order_id'] ?? null );
+		$this->extension_slug    = self::coerce_nullable_string( $data['extension_slug'] ?? null );
+		$this->plan_snapshot     = ( $data['plan_snapshot'] ?? null ) instanceof PlanSnapshot ? $data['plan_snapshot'] : null;
+		$this->items_snapshot    = ( $data['items_snapshot'] ?? null ) instanceof ItemsSnapshot ? $data['items_snapshot'] : null;
 	}
 
 	/**
@@ -258,43 +231,19 @@ final class Cycle {
 			throw new DomainException( 'Cycle: contract_id is required.' );
 		}
 
-		$kind = self::coerce_string( $args['kind'] ?? null, self::KIND_BILLING );
-		self::assert_valid_kind( $kind );
-
-		$sequence_no = self::coerce_int( $args['sequence_no'] ?? null );
-		self::assert_valid_sequence_no( $sequence_no );
+		// A new cycle is always unsaved; never adopt a caller-supplied id.
+		unset( $args['id'] );
 
 		// Distinguish an absent count (defaults to 1, a counting cycle) from an
 		// explicit null (a non-counting cycle), which `?? 1` would conflate.
-		$count = self::normalize_count( array_key_exists( 'count', $args ) ? $args['count'] : 1 );
+		$args['count'] = self::normalize_count( array_key_exists( 'count', $args ) ? $args['count'] : 1 );
 
-		$status = $args['status'] ?? CycleStatus::pending();
-		if ( ! $status instanceof CycleStatus ) {
-			$status = CycleStatus::from( self::coerce_string( $status ) );
-		}
+		$cycle = new self( $args );
 
-		$plan_snapshot  = ( $args['plan_snapshot'] ?? null ) instanceof PlanSnapshot ? $args['plan_snapshot'] : null;
-		$items_snapshot = ( $args['items_snapshot'] ?? null ) instanceof ItemsSnapshot ? $args['items_snapshot'] : null;
+		self::assert_valid_kind( $cycle->kind );
+		self::assert_valid_sequence_no( $cycle->sequence_no );
 
-		return new self(
-			null,
-			self::coerce_int( $args['contract_id'] ),
-			$sequence_no,
-			$count,
-			$kind,
-			$status,
-			is_string( $args['reason'] ?? null ) ? $args['reason'] : null,
-			self::coerce_string( $args['starts_at_gmt'] ?? null ),
-			self::coerce_string( $args['ends_at_gmt'] ?? null ),
-			self::normalize_money( $args['expected_total'] ?? '0' ),
-			self::coerce_string( $args['currency'] ?? null ),
-			isset( $args['plan_snapshot_id'] ) ? self::coerce_int( $args['plan_snapshot_id'] ) : null,
-			isset( $args['items_snapshot_id'] ) ? self::coerce_int( $args['items_snapshot_id'] ) : null,
-			isset( $args['order_id'] ) ? self::coerce_int( $args['order_id'] ) : null,
-			is_string( $args['extension_slug'] ?? null ) ? $args['extension_slug'] : null,
-			$plan_snapshot,
-			$items_snapshot
-		);
+		return $cycle;
 	}
 
 	/**
@@ -310,27 +259,12 @@ final class Cycle {
 		$sequence_no = self::coerce_int( $row['sequence_no'] ?? null );
 		self::assert_valid_sequence_no( $sequence_no );
 
-		$count = array_key_exists( 'count', $row ) ? self::normalize_count( $row['count'] ) : null;
+		// The typed snapshot value objects are attached on load, never hydrated here.
+		unset( $row['plan_snapshot'], $row['items_snapshot'] );
 
-		return new self(
-			isset( $row['id'] ) ? self::coerce_int( $row['id'] ) : null,
-			self::coerce_int( $row['contract_id'] ?? null ),
-			$sequence_no,
-			$count,
-			$kind,
-			CycleStatus::from( self::coerce_string( $row['status'] ?? null ) ),
-			isset( $row['reason'] ) ? self::coerce_nullable_string( $row['reason'] ) : null,
-			self::coerce_string( $row['starts_at_gmt'] ?? null ),
-			self::coerce_string( $row['ends_at_gmt'] ?? null ),
-			self::normalize_money( $row['expected_total'] ?? '0' ),
-			self::coerce_string( $row['currency'] ?? null ),
-			isset( $row['plan_snapshot_id'] ) ? self::coerce_int( $row['plan_snapshot_id'] ) : null,
-			isset( $row['items_snapshot_id'] ) ? self::coerce_int( $row['items_snapshot_id'] ) : null,
-			isset( $row['order_id'] ) ? self::coerce_int( $row['order_id'] ) : null,
-			isset( $row['extension_slug'] ) ? self::coerce_nullable_string( $row['extension_slug'] ) : null,
-			null,
-			null
-		);
+		$row['count'] = array_key_exists( 'count', $row ) ? self::normalize_count( $row['count'] ) : null;
+
+		return new self( $row );
 	}
 
 	/**
@@ -654,6 +588,29 @@ final class Cycle {
 				sprintf( 'Cycle: sequence_no must be 1 or greater, got %d.', $sequence_no )
 			);
 		}
+	}
+
+	/**
+	 * Resolve a status input into a typed {@see CycleStatus}.
+	 *
+	 * Accepts an existing `CycleStatus` instance (passed through unchanged), null or
+	 * an absent value (defaults to `pending`, matching a newly billing cycle), or a
+	 * status string (validated via {@see CycleStatus::from()}).
+	 *
+	 * @param mixed $status Raw status value (a CycleStatus, null, or a status string).
+	 * @return CycleStatus
+	 * @throws DomainException If a status string is not a known status.
+	 */
+	private static function coerce_status( $status ): CycleStatus {
+		if ( $status instanceof CycleStatus ) {
+			return $status;
+		}
+
+		if ( null === $status ) {
+			return CycleStatus::pending();
+		}
+
+		return CycleStatus::from( self::coerce_string( $status ) );
 	}
 
 	/**
