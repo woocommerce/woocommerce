@@ -45766,12 +45766,6 @@ parameters:
 			path: src/Admin/Features/Blueprint/Exporters/ExportWCSettingsIntegrations.php
 
 		-
-			message: '#^Parameter \#1 \$sql of class Automattic\\WooCommerce\\Blueprint\\Steps\\RunSql constructor expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 6
-			path: src/Admin/Features/Blueprint/Exporters/ExportWCSettingsShipping.php
-
-		-
 			message: '#^Return type \(array\) of method Automattic\\WooCommerce\\Admin\\Features\\Blueprint\\Exporters\\ExportWCSettingsShipping\:\:export\(\) should be compatible with return type \(Automattic\\WooCommerce\\Blueprint\\Steps\\SetSiteOptions\) of method Automattic\\WooCommerce\\Admin\\Features\\Blueprint\\Exporters\\ExportWCSettings\:\:export\(\)$#'
 			identifier: method.childReturnType
 			count: 1
@@ -45782,12 +45776,6 @@ parameters:
 			identifier: method.childReturnType
 			count: 1
 			path: src/Admin/Features/Blueprint/Exporters/ExportWCSettingsShipping.php
-
-		-
-			message: '#^Parameter \#1 \$sql of class Automattic\\WooCommerce\\Blueprint\\Steps\\RunSql constructor expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/Blueprint/Exporters/ExportWCSettingsTax.php
 
 		-
 			message: '#^Return type \(array\) of method Automattic\\WooCommerce\\Admin\\Features\\Blueprint\\Exporters\\ExportWCSettingsTax\:\:export\(\) should be compatible with return type \(Automattic\\WooCommerce\\Blueprint\\Steps\\SetSiteOptions\) of method Automattic\\WooCommerce\\Admin\\Features\\Blueprint\\Exporters\\ExportWCSettings\:\:export\(\)$#'
