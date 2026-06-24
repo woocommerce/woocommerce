@@ -136,7 +136,7 @@ class ProductUtil {
 	 * @param string $post_type Post type (e.g. 'product', 'product_variation').
 	 * @return array<string,int>
 	 */
-	public static function get_counts_for_type( string $post_type ): array {
+	public function get_counts_for_type( string $post_type ): array {
 		// Performance note: integration point for upcoming persistent counters solution.
 		return array_map( 'intval', (array) wp_count_posts( $post_type ) );
 	}
