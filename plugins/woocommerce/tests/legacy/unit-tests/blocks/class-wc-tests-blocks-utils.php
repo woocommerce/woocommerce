@@ -1,6 +1,4 @@
 <?php
-declare( strict_types = 1 );
-
 /**
  * Tests for the WC_Data class.
  *
