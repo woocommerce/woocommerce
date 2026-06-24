@@ -54,7 +54,6 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 
 	public function tear_down(): void {
 		GatewayCapabilities::reset();
-		remove_all_actions( 'woocommerce_subscriptions_engine_scheduled_payment_' . self::GATEWAY_APPROVING );
 		parent::tear_down();
 	}
 
@@ -82,29 +81,6 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		( new PlanRepository() )->insert( $plan );
 
 		return $plan;
-	}
-
-	/**
-	 * Register an inline approving handler for `$gateway`: it marks the renewal order
-	 * paid synchronously (mirroring the dummy gateway), so process_due reads a paid
-	 * order immediately after attempt_charge.
-	 *
-	 * @param string $gateway Gateway id to wire the approving handler for.
-	 */
-	private function approve_charges_for( string $gateway ): void {
-		GatewayCapabilities::declare( $gateway, array( GatewayCapabilities::RECURRING ) );
-
-		add_action(
-			'woocommerce_subscriptions_engine_scheduled_payment_' . $gateway,
-			static function ( $amount, $renewal_order ): void {
-				unset( $amount );
-				if ( $renewal_order instanceof WC_Order && $renewal_order->needs_payment() ) {
-					$renewal_order->payment_complete();
-				}
-			},
-			10,
-			2
-		);
 	}
 
 	/**
@@ -235,9 +211,12 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox process_due is idempotent: a retried due action creates no second order.
+	 * @testdox process_due skips when a renewal order is already tagged for the cycle.
+	 *
+	 * Covers the order-meta pre-check: the first run tags a renewal order for the cycle, so
+	 * the retried due action is suppressed before a second cycle/order is created.
 	 */
-	public function test_process_due_is_idempotent_for_a_retried_cycle(): void {
+	public function test_process_due_skips_when_a_renewal_order_is_already_tagged(): void {
 		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
 
 		$plan_id     = $this->make_plan();
@@ -255,6 +234,55 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$this->assertNull( $retry );
 
 		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract_id, 1 ) );
+	}
+
+	/**
+	 * @testdox process_due skips when the cycle is already claimed (create-as-claim UNIQUE).
+	 *
+	 * Covers the claim_next_cycle catch path: a pending cycle for the target count exists with
+	 * NO tagged renewal order, so the order-meta pre-check finds nothing and process_due reaches
+	 * the append_cycle insert, which loses the UNIQUE(contract_id, kind, count) race. It returns
+	 * null and creates no duplicate cycle or order.
+	 */
+	public function test_process_due_skips_when_the_cycle_is_already_claimed(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		// Pre-claim cycle 2 pending directly (no tagged renewal order), so the order-meta
+		// pre-check does not fire and the claim collides on the UNIQUE index instead.
+		$repo     = new ContractRepository();
+		$previous = $repo->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $previous );
+		$claimed = Cycle::create(
+			array(
+				'contract_id'    => $contract_id,
+				'sequence_no'    => $previous->get_sequence_no() + 1,
+				'count'          => 2,
+				'status'         => CycleStatus::pending(),
+				'starts_at_gmt'  => '2026-02-15 00:00:00',
+				'ends_at_gmt'    => '2026-03-15 00:00:00',
+				'expected_total' => '19.99',
+				'currency'       => 'USD',
+			)
+		);
+		$repo->append_cycle( $claimed, $previous );
+
+		$result = ( new RenewalEngine() )->process_due( $contract_id );
+		$this->assertNull( $result );
+
+		// No renewal order was created for count 2, and only the one pre-claimed cycle exists.
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+
+		$at_count_2 = array_filter(
+			$repo->find_cycle_history( $contract_id ),
+			static function ( Cycle $cycle ): bool {
+				return 2 === $cycle->get_count();
+			}
+		);
+		$this->assertCount( 1, $at_count_2 );
 	}
 
 	/**
@@ -324,6 +352,10 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertSame( '2026-02-15 00:00:00', $reloaded->get_next_payment_gmt() );
 		$this->assertSame( ContractStatus::ACTIVE, $reloaded->get_status() );
+
+		// Failure bookkeeping: the attempt is recorded, but not a successful payment.
+		$this->assertNull( $reloaded->get_last_payment_gmt() );
+		$this->assertNotNull( $reloaded->get_last_attempt_gmt() );
 	}
 
 	/**
@@ -361,6 +393,70 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 			}
 		);
 		$this->assertCount( 1, $at_count_2 );
+	}
+
+	/**
+	 * @testdox process_due falls back to the live plan cadence when the cycle carries no snapshot.
+	 *
+	 * After cycle 1 is billed (terminal) find_current_cycle() hydrates it WITHOUT its snapshot
+	 * value objects, so resolve_plan_snapshot() rebuilds the cadence from the live selling plan.
+	 * The renewal advances normally on that fallback.
+	 */
+	public function test_process_due_falls_back_to_live_plan_when_cycle_has_no_snapshot(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		// Precondition: the billed head cycle carries no in-memory plan snapshot, so the
+		// money-path must use the live-plan fallback to know the cadence.
+		$repo = new ContractRepository();
+		$head = $repo->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertNull( $head->get_plan_snapshot() );
+
+		$renewal_order = ( new RenewalEngine() )->process_due( $contract_id );
+		$this->assertInstanceOf( WC_Order::class, $renewal_order );
+
+		// Advanced one monthly cadence from the live plan (cycle 1 ended 2026-02-15).
+		$reloaded = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertSame( '2026-03-15 00:00:00', $reloaded->get_next_payment_gmt() );
+
+		$cycle = $repo->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $cycle );
+		$this->assertSame( 2, $cycle->get_count() );
+		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
+	}
+
+	/**
+	 * @testdox process_due skips gracefully when the selling plan has been deleted.
+	 *
+	 * The settled cycle carries no snapshot and the live plan is gone, so the cadence is
+	 * unresolvable. process_due must skip (return null) rather than throw - a thrown
+	 * DomainException would make a scheduled action retry forever.
+	 */
+	public function test_process_due_skips_when_the_plan_is_deleted(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		// Delete the selling plan so the cadence can no longer be resolved.
+		( new PlanRepository() )->delete( $contract->get_selling_plan_id() );
+
+		$result = ( new RenewalEngine() )->process_due( $contract_id );
+		$this->assertNull( $result );
+
+		// No cycle 2 was claimed and no renewal order was created: the chain is still at count 1.
+		$repo = new ContractRepository();
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+		$this->assertSame( 1, $repo->max_count( $contract_id ) );
+		$head = $repo->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertSame( 1, $head->get_count() );
 	}
 
 	/**

@@ -57,6 +57,17 @@ final class RenewalEngine {
 	const RENEWAL_ORDER_CREATED_ACTION = 'woocommerce_subscriptions_engine_renewal_order_created';
 
 	/**
+	 * Action fired after a renewal cycle is billed and the schedule advanced, with
+	 * `( $contract, $cycle, $renewal_order )`.
+	 */
+	const RENEWAL_BILLED_ACTION = 'woocommerce_subscriptions_engine_renewal_billed';
+
+	/**
+	 * Action fired after a contract is cancelled, with `( $contract )`.
+	 */
+	const CONTRACT_CANCELLED_ACTION = 'woocommerce_subscriptions_engine_contract_cancelled';
+
+	/**
 	 * Logger source tag.
 	 */
 	const LOG_SOURCE = 'woocommerce-subscriptions-engine';
@@ -241,10 +252,24 @@ final class RenewalEngine {
 			return null;
 		}
 
+		// Resolve the next period from the plan cadence. A deleted/unresolvable plan is a
+		// recoverable data condition, not a fatal: skip (logging only) like the guards
+		// above so a scheduled action does not retry a permanent failure forever.
+		$spec = $this->compute_next_cycle_spec( $contract, $previous );
+		if ( null === $spec ) {
+			wc_get_logger()->warning(
+				sprintf( 'RenewalEngine::process_due(): cannot resolve the billing plan for contract %d - skipping. The selling plan may have been deleted.', $contract_id ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => $contract_id,
+				)
+			);
+			return null;
+		}
+
 		// Create-as-claim: the next cycle is inserted `pending` before any charge. A
 		// concurrent/duplicate fire loses the UNIQUE(contract_id, kind, count) race and
 		// is treated as an idempotent no-op.
-		$spec      = $this->compute_next_cycle_spec( $contract, $previous );
 		$new_cycle = $this->claim_next_cycle( $contract, $previous, $next_count, $spec );
 		if ( null === $new_cycle ) {
 			return null;
@@ -298,6 +323,13 @@ final class RenewalEngine {
 
 		RenewalScheduler::unschedule( $id );
 
+		/**
+		 * Fires after a contract is cancelled and its pending renewal cleared.
+		 *
+		 * @param Contract $contract The cancelled contract.
+		 */
+		do_action( self::CONTRACT_CANCELLED_ACTION, $contract );
+
 		return true;
 	}
 
@@ -327,30 +359,37 @@ final class RenewalEngine {
 	}
 
 	/**
-	 * Compute the shape of the next cycle from the previous one and the plan cadence.
+	 * Compute the shape of the next cycle from the previous one and the plan cadence, or
+	 * null when the plan cannot be resolved.
 	 *
 	 * Delegates the period + amount math to the pure {@see RenewalCalculator}. With no
-	 * previous cycle (a lean contract with no chain yet) there is nothing to advance
-	 * from, so the contract's live schedule and totals seed a single-cadence fallback so
-	 * the money-path stays drivable.
+	 * previous cycle (a lean contract with no chain yet) the period is computed from the
+	 * plan cadence anchored on the contract's live next-payment date (or now) and bills the
+	 * contract's live recurring total - a real one-cadence period, never zero-duration.
+	 * Returns null when the selling plan is gone so the caller can skip gracefully.
 	 *
 	 * @param Contract   $contract The contract being renewed.
 	 * @param Cycle|null $previous The chain's most-recent cycle, or null when empty.
-	 * @return NextCycleSpec The computed next-cycle shape.
+	 * @return NextCycleSpec|null The computed next-cycle shape, or null when unresolvable.
 	 */
-	private function compute_next_cycle_spec( Contract $contract, ?Cycle $previous ): NextCycleSpec {
+	private function compute_next_cycle_spec( Contract $contract, ?Cycle $previous ): ?NextCycleSpec {
+		$snapshot = $this->resolve_plan_snapshot( $contract, $previous );
+		if ( null === $snapshot ) {
+			return null;
+		}
+
 		$now = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
 
 		if ( null === $previous ) {
-			// No chain yet: anchor on the contract's live next-payment date (or now) and
-			// bill its live recurring total. A normal checkout contract always has cycle 1,
-			// so this only covers a lean/manual contract.
-			$start = $contract->get_next_payment_gmt() ?? $now->format( 'Y-m-d H:i:s' );
+			// No chain yet: anchor on the contract's live next-payment date (or now) and run
+			// one cadence forward, billing the live recurring total.
+			$start  = $contract->get_next_payment_gmt() ?? $now->format( 'Y-m-d H:i:s' );
+			$anchor = new DateTimeImmutable( $start, new DateTimeZone( 'UTC' ) );
 
-			return new NextCycleSpec( $start, $start, $contract->get_billing_total(), $contract->get_currency() );
+			return RenewalCalculator::compute_first_cycle( $snapshot, $anchor, $contract->get_billing_total(), $contract->get_currency() );
 		}
 
-		return RenewalCalculator::compute_next_cycle( $previous, $this->resolve_plan_snapshot( $contract, $previous ), $now );
+		return RenewalCalculator::compute_next_cycle( $previous, $snapshot, $now );
 	}
 
 	/**
@@ -417,7 +456,13 @@ final class RenewalEngine {
 	private function resolve_outcome( Contract $contract, Cycle $cycle, WC_Order $renewal_order, NextCycleSpec $spec ): void {
 		$now = gmdate( 'Y-m-d H:i:s' );
 
-		if ( $renewal_order->is_paid() ) {
+		// Re-fetch the order: a gateway handler that called payment_complete() on its own
+		// freshly-loaded instance leaves the passed object stale, which would misread a
+		// successful charge as unpaid. Read the paid state from the fresh instance.
+		$fresh = wc_get_order( $renewal_order->get_id() );
+		$paid  = $fresh instanceof WC_Order ? $fresh->is_paid() : $renewal_order->is_paid();
+
+		if ( $paid ) {
 			// CAS pending -> billed (the entity validates the transition) + link the order.
 			$cycle->set_status( CycleStatus::billed() );
 			$cycle->set_order_id( $renewal_order->get_id() );
@@ -427,6 +472,15 @@ final class RenewalEngine {
 			$contract->set_last_payment_gmt( $now );
 			$contract->set_last_attempt_gmt( $now );
 			$this->contracts->update( $contract );
+
+			/**
+			 * Fires after a renewal cycle is billed and the contract schedule advanced.
+			 *
+			 * @param Contract $contract      The renewed contract.
+			 * @param Cycle    $cycle         The newly-billed cycle.
+			 * @param WC_Order $renewal_order The paid renewal order.
+			 */
+			do_action( self::RENEWAL_BILLED_ACTION, $contract, $cycle, $renewal_order );
 
 			return;
 		}
@@ -441,23 +495,26 @@ final class RenewalEngine {
 	}
 
 	/**
-	 * Resolve the plan snapshot for the cadence computation.
+	 * Resolve the plan snapshot for the cadence computation, or null when none is
+	 * available.
 	 *
-	 * The previous cycle is the canonical source, but a settled (terminal) cycle is
-	 * hydrated without its snapshot value objects, so the snapshot is rebuilt from the
-	 * contract's selling plan when the cycle does not carry one. For the flat recurring
-	 * case the cadence is stable, so the live plan's policy matches the frozen one. When
-	 * the plan is gone, an empty snapshot lets {@see RenewalCalculator} fail loud rather
-	 * than silently mis-bill.
+	 * The previous cycle's frozen snapshot is the canonical source, but a settled
+	 * (terminal) cycle is hydrated without its snapshot value objects, so the snapshot is
+	 * rebuilt from the contract's selling plan when the cycle does not carry one (or there
+	 * is no previous cycle). For the flat recurring case the cadence is stable, so the live
+	 * plan's policy matches the frozen one. Returns null when the selling plan can no longer
+	 * be loaded (a deleted plan) so the caller can skip gracefully rather than mis-bill.
 	 *
-	 * @param Contract $contract The contract being renewed.
-	 * @param Cycle    $previous The chain's previous cycle.
-	 * @return PlanSnapshot The plan snapshot to compute the next cadence from.
+	 * @param Contract   $contract The contract being renewed.
+	 * @param Cycle|null $previous The chain's previous cycle, or null when the chain is empty.
+	 * @return PlanSnapshot|null The plan snapshot to compute the next cadence from, or null.
 	 */
-	private function resolve_plan_snapshot( Contract $contract, Cycle $previous ): PlanSnapshot {
-		$snapshot = $previous->get_plan_snapshot();
-		if ( $snapshot instanceof PlanSnapshot ) {
-			return $snapshot;
+	private function resolve_plan_snapshot( Contract $contract, ?Cycle $previous ): ?PlanSnapshot {
+		if ( null !== $previous ) {
+			$snapshot = $previous->get_plan_snapshot();
+			if ( $snapshot instanceof PlanSnapshot ) {
+				return $snapshot;
+			}
 		}
 
 		$plan = $this->plans->find( $contract->get_selling_plan_id() );
@@ -470,7 +527,7 @@ final class RenewalEngine {
 			);
 		}
 
-		return PlanSnapshot::from_array( array() );
+		return null;
 	}
 
 	/**

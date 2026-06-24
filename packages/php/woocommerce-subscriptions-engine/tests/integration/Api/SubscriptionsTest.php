@@ -43,30 +43,7 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 
 	public function tear_down(): void {
 		GatewayCapabilities::reset();
-		remove_all_actions( 'woocommerce_subscriptions_engine_scheduled_payment_' . self::GATEWAY );
 		parent::tear_down();
-	}
-
-	/**
-	 * Wire an inline approving handler: it marks the renewal order paid synchronously,
-	 * so renew_now reads a paid order immediately (mirrors woocommerce-gateway-dummy).
-	 *
-	 * @param string $gateway Gateway id to approve charges for.
-	 */
-	private function approve_charges_for( string $gateway ): void {
-		GatewayCapabilities::declare( $gateway, array( GatewayCapabilities::RECURRING ) );
-
-		add_action(
-			'woocommerce_subscriptions_engine_scheduled_payment_' . $gateway,
-			static function ( $amount, $renewal_order ): void {
-				unset( $amount );
-				if ( $renewal_order instanceof WC_Order && $renewal_order->needs_payment() ) {
-					$renewal_order->payment_complete();
-				}
-			},
-			10,
-			2
-		);
 	}
 
 	/**
@@ -148,6 +125,7 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$contract    = $this->sign_up_contract();
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
+		// Monthly plan, paid 2026-01-15: first renewal is one month out.
 		$this->assertSame( '2026-02-15 00:00:00', $contract->get_next_payment_gmt() );
 
 		// Renew: advance the chain a cycle through the facade.
@@ -164,7 +142,7 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$this->assertTrue( $cycle_two->get_status()->equals( CycleStatus::billed() ) );
 		$this->assertSame( $renewal_order->get_id(), $cycle_two->get_order_id() );
 
-		// The schedule advanced one cadence.
+		// The schedule advanced one cadence (cycle 1 ended 2026-02-15 + 1 month).
 		$after_renew = Subscriptions::get( $contract_id );
 		$this->assertInstanceOf( Contract::class, $after_renew );
 		$this->assertSame( '2026-03-15 00:00:00', $after_renew->get_next_payment_gmt() );

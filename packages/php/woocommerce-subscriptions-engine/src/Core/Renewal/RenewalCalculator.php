@@ -93,18 +93,16 @@ final class RenewalCalculator {
 	 * one cadence-math path applies. For the flat recurring case the amount and
 	 * currency carry forward from `$previous` unchanged (proration / discount /
 	 * tax recompute is out of scope here; the order still materializes tax and
-	 * rounding). `$now` is passed for determinism and as the seam a later renewal
-	 * service uses; the boundaries here anchor on the previous period, not the
-	 * wall clock.
+	 * rounding).
 	 *
 	 * @param Cycle             $previous The chain's most-recent (just-completed) cycle.
 	 * @param PlanSnapshot      $plan     The plan terms the cycle bills under (cadence source).
-	 * @param DateTimeImmutable $now      The current moment, injected by the integration layer.
+	 * @param DateTimeImmutable $now      The current moment. Reserved for the later RenewalService
+	 *                                    extraction; the flat recurring period anchors on the
+	 *                                    previous cycle's end, not the wall clock, so it is unused here.
 	 * @return NextCycleSpec The computed next-cycle shape (period + expected_total + currency).
 	 */
-	public static function compute_next_cycle( Cycle $previous, PlanSnapshot $plan, DateTimeImmutable $now ): NextCycleSpec {
-		unset( $now );
-
+	public static function compute_next_cycle( Cycle $previous, PlanSnapshot $plan, DateTimeImmutable $now ): NextCycleSpec { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		$policy = self::billing_policy_from_snapshot( $plan );
 
 		$period_start = new DateTimeImmutable( $previous->get_ends_at_gmt(), new DateTimeZone( 'UTC' ) );
@@ -115,6 +113,31 @@ final class RenewalCalculator {
 			$period_end->format( 'Y-m-d H:i:s' ),
 			$previous->get_expected_total(),
 			$previous->get_currency()
+		);
+	}
+
+	/**
+	 * Compute the first cycle for a chain with no previous cycle yet (a lean / manual
+	 * contract). The period runs one cadence forward from `$period_start`, billing the
+	 * supplied recurring amount and currency - a real one-cadence period, never
+	 * zero-duration. The normal checkout path always has cycle 1, so this only covers a
+	 * contract created without an origin cycle.
+	 *
+	 * @param PlanSnapshot      $plan           The plan terms the cycle bills under (cadence source).
+	 * @param DateTimeImmutable $period_start   The period start (the contract's live next-bill anchor).
+	 * @param string            $expected_total The recurring amount to bill.
+	 * @param string            $currency       ISO-4217 currency code.
+	 * @return NextCycleSpec The computed first-cycle shape.
+	 */
+	public static function compute_first_cycle( PlanSnapshot $plan, DateTimeImmutable $period_start, string $expected_total, string $currency ): NextCycleSpec {
+		$start = $period_start->setTimezone( new DateTimeZone( 'UTC' ) );
+		$end   = self::billing_policy_from_snapshot( $plan )->compute_next_renewal_from( $start );
+
+		return new NextCycleSpec(
+			$start->format( 'Y-m-d H:i:s' ),
+			$end->format( 'Y-m-d H:i:s' ),
+			$expected_total,
+			$currency
 		);
 	}
 
