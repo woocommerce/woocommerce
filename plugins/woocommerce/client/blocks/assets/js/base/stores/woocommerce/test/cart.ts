@@ -1007,7 +1007,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			).toBe( false );
 		} );
 
-		it( 'suppresses the quantity-changed notice for a keyless re-add when the server returns the line at pre-add + delta (AC2 single)', async () => {
+		it( 'suppresses the quantity-changed notice for a keyless re-add when the server returns the line at pre-add + delta', async () => {
 			// Pre-add: matched line at qty 3. Keyless add delta: +1.
 			// Expected total: 3 + 1 = 4. Server returns the line at 4.
 			// Since serverTotal (4) === expectedTotal (4), the add was exact →
@@ -1047,7 +1047,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			).toBe( false );
 		} );
 
-		it( 'suppresses the quantity-changed notice for a keyless batch re-add when the server total matches pre-add + sum of deltas (AC2 batch)', async () => {
+		it( 'suppresses the quantity-changed notice for a keyless batch re-add when the server total matches pre-add + sum of deltas', async () => {
 			// Pre-add: matched line at qty 3. Batch deltas: +1 and +1.
 			// A real /batch endpoint compounds server-side: each add-item
 			// sub-request runs sequentially against one WC_Cart session, so the
@@ -1083,7 +1083,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			).toBe( false );
 		} );
 
-		it( 'still emits the quantity-changed notice for a keyless batch re-add when the server total diverges from expected (AC3 batch)', async () => {
+		it( 'still emits the quantity-changed notice for a keyless batch re-add when the server total diverges from expected', async () => {
 			// Same setup: pre-add qty 3, batch (+1,+1), expectedTotal = 5.
 			// Server returns 6 (a genuine concurrent change or cap artefact).
 			// Since serverTotal (6) !== expectedTotal (5), do not suppress →
@@ -1119,7 +1119,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			).toBe( true );
 		} );
 
-		it( 'suppresses the notice for a keyless add when the client bumps a meta line but the server grows the standalone line (AC1 addCartItem)', async () => {
+		it( 'suppresses the notice for a keyless add when the client bumps a meta line but the server grows the standalone line', async () => {
 			// Product 42 occupies two lines: a meta-differentiated line ordered
 			// first (server-key-meta, qty 1) and a plain standalone line second
 			// (server-key-standalone, qty 1). findItemInCart matches the meta line
@@ -1173,8 +1173,9 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			).toBe( false );
 		} );
 
-		it( 'suppresses the notice for a keyless batch add when the client bumps a meta line but the server grows the standalone line (AC1 batchAddCartItems)', async () => {
-			// Same AC1 scenario through the batch path. Product 42 occupies two
+		it( 'suppresses the notice for a keyless batch add when the client bumps a meta line but the server grows the standalone line, through the batch path', async () => {
+			// Same meta-line/standalone-line scenario through the batch path.
+			// Product 42 occupies two
 			// lines: meta first (qty 1) then standalone (qty 1). The batch item
 			// bumps the meta line optimistically; the server grows the standalone
 			// line. Pre-add total: 1+1=2. Delta: +1. Expected total: 3.
@@ -1222,7 +1223,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			).toBe( false );
 		} );
 
-		it( 'suppresses the quantity-changed notice for a keyless variation re-add when the server returns the line at pre-add + delta (AC2 variation)', async () => {
+		it( 'suppresses the quantity-changed notice for a keyless variation re-add when the server returns the line at pre-add + delta', async () => {
 			// A variation line (type: variation, id: 42, variation: [Color:Red])
 			// is matched by id+variation. Keyless add delta: +1. Pre-add qty: 2.
 			// Expected total: 2+1=3. Server returns the variation line at 3.
