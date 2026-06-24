@@ -361,7 +361,7 @@ class WC_Post_Types {
 			apply_filters(
 				'woocommerce_register_post_type_product',
 				array(
-					'labels'              => array(
+					'labels'                          => array(
 						'name'                  => __( 'Products', 'woocommerce' ),
 						'singular_name'         => __( 'Product', 'woocommerce' ),
 						'all_items'             => __( 'All Products', 'woocommerce' ),
@@ -389,25 +389,26 @@ class WC_Post_Types {
 						'item_link'             => __( 'Product Link', 'woocommerce' ),
 						'item_link_description' => __( 'A link to a product.', 'woocommerce' ),
 					),
-					'description'         => __( 'This is where you can browse products in this store.', 'woocommerce' ),
-					'public'              => true,
-					'show_ui'             => true,
-					'menu_icon'           => 'dashicons-archive',
-					'capability_type'     => 'product',
-					'map_meta_cap'        => true,
-					'publicly_queryable'  => true,
-					'exclude_from_search' => false,
-					'hierarchical'        => false, // Hierarchical causes memory issues - WP loads all records!
-					'rewrite'             => $permalinks['product_rewrite_slug'] ? array(
-						'slug'       => $permalinks['product_rewrite_slug'],
-						'with_front' => false,
-						'feeds'      => true,
-					) : false,
-					'query_var'           => true,
-					'supports'            => $supports,
-					'has_archive'         => $has_archive,
-					'show_in_nav_menus'   => true,
-					'show_in_rest'        => true,
+					'description'                     => __( 'This is where you can browse products in this store.', 'woocommerce' ),
+					'public'                          => true,
+					'show_ui'                         => true,
+					'menu_icon'                       => 'dashicons-archive',
+					'capability_type'                 => 'product',
+					'map_meta_cap'                    => true,
+					'publicly_queryable'              => true,
+					'exclude_from_search'             => false,
+					'hierarchical'                    => false,
+					// Hierarchical causes memory issues - WP loads all records!
+											'rewrite' => $permalinks['product_rewrite_slug'] ? array(
+												'slug'  => $permalinks['product_rewrite_slug'],
+												'with_front' => false,
+												'feeds' => true,
+											) : false,
+					'query_var'                       => true,
+					'supports'                        => $supports,
+					'has_archive'                     => $has_archive,
+					'show_in_nav_menus'               => true,
+					'show_in_rest'                    => true,
 				)
 			)
 		);

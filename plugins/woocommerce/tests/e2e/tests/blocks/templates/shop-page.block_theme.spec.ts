@@ -2,11 +2,13 @@
  * External dependencies
  */
 import type { Page } from '@playwright/test';
-import { test, expect, wpCLI } from '@woocommerce/e2e-utils';
+import { test, expect, RequestUtils } from '@woocommerce/e2e-utils';
 
-const getShopPageId = async () => {
-	const cliOutput = await wpCLI( 'option get woocommerce_shop_page_id' );
-	const shopPageId = cliOutput.stdout.match( /\d+/ )?.pop();
+const getShopPageId = async ( requestUtils: RequestUtils ) => {
+	const pages = await requestUtils.rest( {
+		path: '/wp/v2/pages?slug=shop',
+	} );
+	const shopPageId = pages[ 0 ]?.id;
 
 	if ( ! shopPageId ) {
 		throw new Error( 'Shop page ID not found' );
@@ -28,10 +30,11 @@ test.describe( 'Shop page', () => {
 	test( 'template selector is not visible in the Page editor', async ( {
 		admin,
 		page,
+		requestUtils,
 	} ) => {
-		const shopPageId = await getShopPageId();
+		const shopPageId = await getShopPageId( requestUtils );
 
-		await admin.editPost( shopPageId );
+		await admin.editPost( String( shopPageId ) );
 
 		await expect( page.getByText( 'Template' ) ).toBeHidden();
 	} );
@@ -40,7 +43,7 @@ test.describe( 'Shop page', () => {
 		page,
 		requestUtils,
 	} ) => {
-		const shopPageId = await getShopPageId();
+		const shopPageId = await getShopPageId( requestUtils );
 
 		await page.goto( 'shop/' );
 		await expectShopTemplateToBeLoaded( page );
