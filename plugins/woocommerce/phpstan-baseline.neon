@@ -6133,12 +6133,6 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-product-attribute-inner.php
 
 		-
-			message: '#^Variable \$attribute might not be defined\.$#'
-			identifier: variable.undefined
-			count: 5
-			path: includes/admin/meta-boxes/views/html-product-attribute.php
-
-		-
 			message: '#^Variable \$metabox_class might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -8527,31 +8521,13 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot access property \$name on WP_Term\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot access property \$parent on WP_Error\|WP_Term\|null\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot access property \$slug on WP_Term\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot access property \$term_id on WP_Error\|WP_Term\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot access property \$term_id on WP_Term\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: includes/class-wc-ajax.php
@@ -12065,18 +12041,6 @@ parameters:
 			identifier: identical.alwaysTrue
 			count: 1
 			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Default value of the parameter \#5 \$in_footer \(array\<string, string\>\) of method WC_Frontend_Scripts\:\:enqueue_script\(\) is incompatible with type bool\.$#'
-			identifier: parameter.defaultValue
-			count: 1
-			path: includes/class-wc-frontend-scripts.php
-
-		-
-			message: '#^Default value of the parameter \#5 \$in_footer \(array\<string, string\>\) of method WC_Frontend_Scripts\:\:register_script\(\) is incompatible with type bool\.$#'
-			identifier: parameter.defaultValue
-			count: 1
-			path: includes/class-wc-frontend-scripts.php
 
 		-
 			message: '#^Method WC_Frontend_Scripts\:\:enqueue_block_assets\(\) has no return type specified\.$#'
@@ -36370,18 +36334,6 @@ parameters:
 			path: includes/wc-user-functions.php
 
 		-
-			message: '#^Cannot access property \$ID on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
-			message: '#^Cannot access property \$user_email on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
 			message: '#^Cannot call method get_customer_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -54849,7 +54801,6 @@ parameters:
 			count: 1
 			path: src/Blocks/QueryFilters.php
 
-
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Registry\\Container\:\:register\(\) has no return type specified\.$#'
 			identifier: missingType.return
@@ -70900,12 +70851,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property object\:\:\$min_price\.$#'
 			identifier: property.notFound
-			count: 1
-			path: src/StoreApi/Routes/V1/ProductCollectionData.php
-
-		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
 			count: 1
 			path: src/StoreApi/Routes/V1/ProductCollectionData.php
 

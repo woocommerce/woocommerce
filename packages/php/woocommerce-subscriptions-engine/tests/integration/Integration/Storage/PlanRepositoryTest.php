@@ -159,7 +159,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$plan->set_name( 'After' );
 		$this->assertTrue( $repo->update( $plan ) );
 
-		$this->assertSame( 'After', $repo->find( $id )->get_name() );
+		$updated = $repo->find( $id );
+		$this->assertInstanceOf( Plan::class, $updated );
+		$this->assertSame( 'After', $updated->get_name() );
 	}
 
 	public function test_delete_removes_the_row(): void {
