@@ -88,7 +88,7 @@ class WC_Tests_Page_Functions extends WC_Unit_Test_Case {
 		$wp_query->in_the_loop       = true;
 		$wp_query->queried_object    = $post;
 		$wp_query->queried_object_id = $page_id;
-		$wp_the_query                = $wp_query; // is_main_query() compares against this. phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_the_query                = $wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- is_main_query() compares against this.
 
 		return $page_id;
 	}
