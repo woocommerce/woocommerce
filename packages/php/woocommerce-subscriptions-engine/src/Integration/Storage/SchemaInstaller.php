@@ -32,7 +32,7 @@ final class SchemaInstaller {
 	 * 2.0.0 - cycle-chain model: contract as live source of truth (schedule, snapshot
 	 *         references, totals, stamps); immutable cycle records keyed on
 	 *         `(contract_id, kind)`; per-contract snapshots deduped by copy-forward.
-   * 2.1.0 - rename `app_id` to `extension_slug` in plan_groups table.
+	 * 2.1.0 - rename `app_id` to `extension_slug` in plan_groups table.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
