@@ -583,6 +583,115 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox The cycle crash-recovery lease column round-trips through append and update.
+	 */
+	public function test_cycle_claimed_until_round_trips(): void {
+		$id = $this->sut->insert( $this->make_contract() );
+
+		// Appended with a lease set.
+		$cycle = Cycle::create(
+			array(
+				'contract_id'    => $id,
+				'sequence_no'    => 1,
+				'count'          => 1,
+				'status'         => CycleStatus::pending(),
+				'starts_at_gmt'  => '2026-07-15 00:00:00',
+				'ends_at_gmt'    => '2026-08-15 00:00:00',
+				'expected_total' => '19.99',
+				'currency'       => 'USD',
+				'claimed_until'  => '2026-07-15 00:15:00',
+			)
+		);
+		$this->sut->append_cycle( $cycle );
+
+		$reloaded = $this->sut->find_current_cycle( $id );
+		$this->assertInstanceOf( Cycle::class, $reloaded );
+		$this->assertSame( '2026-07-15 00:15:00', $reloaded->get_claimed_until_gmt() );
+
+		// Cleared on update (a settled cycle holds no lease).
+		$reloaded->set_status( CycleStatus::billed() );
+		$reloaded->set_claimed_until_gmt( null );
+		$this->sut->update_cycle( $reloaded );
+
+		$settled = $this->sut->find_current_cycle( $id );
+		$this->assertInstanceOf( Cycle::class, $settled );
+		$this->assertNull( $settled->get_claimed_until_gmt() );
+	}
+
+	/**
+	 * @testdox find_due returns only active contracts whose next_payment has arrived, oldest first.
+	 */
+	public function test_find_due_returns_only_due_active_contracts_oldest_first(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+
+		$due_old    = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		$due_recent = $this->insert_contract_due_at( '2026-07-14 00:00:00', ContractStatus::ACTIVE );
+		$not_yet    = $this->insert_contract_due_at( '2026-08-15 00:00:00', ContractStatus::ACTIVE );
+		$on_hold    = $this->insert_contract_due_at( '2026-06-01 00:00:00', ContractStatus::ON_HOLD );
+
+		$ids = $this->sut->find_due( $now, 50 );
+
+		// Only the two due+active contracts, oldest-due first; the future and the non-active excluded.
+		$this->assertSame( array( $due_old, $due_recent ), $ids );
+		$this->assertNotContains( $not_yet, $ids );
+		$this->assertNotContains( $on_hold, $ids );
+	}
+
+	/**
+	 * @testdox find_due treats the cutoff as inclusive and excludes a null next_payment.
+	 */
+	public function test_find_due_is_inclusive_and_skips_null_schedule(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+
+		$exactly_due = $this->insert_contract_due_at( '2026-07-15 00:00:00', ContractStatus::ACTIVE );
+		$no_schedule = $this->insert_contract_due_at( null, ContractStatus::ACTIVE );
+
+		$ids = $this->sut->find_due( $now, 50 );
+
+		$this->assertContains( $exactly_due, $ids, 'A contract due exactly at the cutoff is included.' );
+		$this->assertNotContains( $no_schedule, $ids, 'A contract with no next_payment_gmt is never due.' );
+	}
+
+	/**
+	 * @testdox find_due honours the batch limit and offset, paging the backlog oldest first.
+	 */
+	public function test_find_due_honours_limit_and_offset(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+
+		$first  = $this->insert_contract_due_at( '2026-05-15 00:00:00', ContractStatus::ACTIVE );
+		$second = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		$third  = $this->insert_contract_due_at( '2026-07-01 00:00:00', ContractStatus::ACTIVE );
+
+		// The limit caps the batch from the oldest-due end.
+		$this->assertSame( array( $first, $second ), $this->sut->find_due( $now, 2 ) );
+
+		// The offset pages further into the backlog.
+		$this->assertSame( array( $third ), $this->sut->find_due( $now, 2, 2 ) );
+	}
+
+	/**
+	 * Insert a contract with the given schedule date and status, returning its id.
+	 *
+	 * @param string|null $next_payment_gmt The next-payment date, or null for no schedule.
+	 * @param string      $status           The contract status (a ContractStatus value).
+	 */
+	private function insert_contract_due_at( ?string $next_payment_gmt, string $status ): int {
+		$contract = Contract::create(
+			array(
+				'customer_id'      => 1,
+				'currency'         => 'USD',
+				'selling_plan_id'  => 7,
+				'origin_order_id'  => 1001,
+				'start_gmt'        => '2026-01-15 00:00:00',
+				'next_payment_gmt' => $next_payment_gmt,
+				'status'           => $status,
+			)
+		);
+
+		return $this->sut->insert( $contract );
+	}
+
+	/**
 	 * @testdox Consecutive cycles with an unchanged plan/items share one snapshot row each.
 	 */
 	public function test_copy_forward_reuses_unchanged_snapshots(): void {

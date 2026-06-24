@@ -18,7 +18,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage;
 
+use DateTimeImmutable;
+use DateTimeZone;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
@@ -246,6 +249,34 @@ final class ContractRepository {
 		}
 
 		return $contracts;
+	}
+
+	/**
+	 * Contract ids due for renewal at `$now`: active contracts whose `next_payment_gmt`
+	 * has arrived, oldest-due first. The batch dispatcher's scan - it returns ids only
+	 * (the money-path re-loads each), keyed on the `due_contract (status, next_payment_gmt)`
+	 * index. A null `next_payment_gmt` (no schedule) never matches the `<=` comparison.
+	 *
+	 * @param DateTimeImmutable $now    The cutoff moment; contracts due at or before it.
+	 * @param int               $limit  Maximum ids to return (the batch size).
+	 * @param int               $offset Rows to skip (for paging a backlog).
+	 * @return array<int, int> Due contract ids, oldest-due first.
+	 */
+	public function find_due( DateTimeImmutable $now, int $limit, int $offset = 0 ): array {
+		global $wpdb;
+
+		$table  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$cutoff = $now->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$table} WHERE status = %s AND next_payment_gmt IS NOT NULL AND next_payment_gmt <= %s ORDER BY next_payment_gmt ASC, id ASC LIMIT %d OFFSET %d", ContractStatus::ACTIVE, $cutoff, $limit, $offset ) );
+
+		$result = array();
+		foreach ( is_array( $ids ) ? $ids : array() as $id ) {
+			$result[] = ScalarCoercion::coerce_int( $id );
+		}
+
+		return $result;
 	}
 
 	/**
