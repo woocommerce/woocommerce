@@ -30,9 +30,12 @@ declare global {
 
 const data = window.wcOrdersPromo;
 
-// The orders list table is wrapped in a form: `#wc-orders-filter` (HPOS) or `#posts-filter`
-// (legacy). Insert the banner before it so it spans the full content width, above the table.
+// Insert the banner at the top of the list content, above the status filter links
+// (`.subsubsub`) and below any admin notices. Fall back to the list form
+// (`#wc-orders-filter` on HPOS, `#posts-filter` on the legacy list) if the status links
+// are not rendered (e.g. a single status view).
 const anchor =
+	document.querySelector( '.subsubsub' ) ||
 	document.getElementById( 'wc-orders-filter' ) ||
 	document.getElementById( 'posts-filter' );
 
