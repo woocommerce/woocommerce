@@ -78,9 +78,9 @@
 <!-- /wp:columns --></div>
 <!-- /wp:group -->
 
-<!-- wp:pattern {"slug":"purple/upsell-products-collection"} /-->
+<!-- wp:pattern {"slug":"purple/woocommerce-upsell-products-collection"} /-->
 
-<!-- wp:pattern {"slug":"purple/related-products-collection"} /-->
+<!-- wp:pattern {"slug":"purple/woocommerce-related-products-collection"} /-->
 
 <!-- wp:pattern {"slug":"purple/about-left-aligned-product-right-text"} /-->
 
