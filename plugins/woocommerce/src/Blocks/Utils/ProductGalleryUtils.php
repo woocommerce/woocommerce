@@ -193,6 +193,10 @@ class ProductGalleryUtils {
 			'src'             => $media['video_src'],
 		);
 
+		if ( 'dialog' === $video_location ) {
+			$attrs['data-wp-init--dialog-video-playback'] = 'callbacks.initDialogVideoPlayback';
+		}
+
 		if ( ! empty( $media['poster_id'] ) && ! empty( $media['poster_src'] ) ) {
 			$attrs['poster'] = $media['poster_src'];
 		}
