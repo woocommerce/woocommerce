@@ -87,7 +87,7 @@ const ReviewsByProductEditor = ( {
 						isShownByDefault
 					>
 						<ProductControl
-							selected={ attributes.productId || 0 }
+							selected={ attributes.productId ? [ attributes.productId ] : [] }
 							onChange={ ( value = [] ) => {
 								const id = value[ 0 ] ? value[ 0 ].id : 0;
 								setAttributes( { productId: id } );
@@ -161,7 +161,7 @@ const ReviewsByProductEditor = ( {
 				) }
 				<div className="wc-block-reviews__selection">
 					<ProductControl
-						selected={ attributes.productId || 0 }
+						selected={ attributes.productId ? [ attributes.productId ] : [] }
 						onChange={ ( value = [] ) => {
 							const id = value[ 0 ] ? value[ 0 ].id : 0;
 							setAttributes( { productId: id } );

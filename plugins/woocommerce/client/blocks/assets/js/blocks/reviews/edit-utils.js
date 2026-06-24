@@ -242,9 +242,9 @@ export const getSharedReviewListControls = ( attributes, setAttributes ) => {
 					label={ __( 'Order Product Reviews by', 'woocommerce' ) }
 					value={ attributes.orderby }
 					options={ [
-						{ label: 'Most recent', value: 'most-recent' },
-						{ label: 'Highest Rating', value: 'highest-rating' },
-						{ label: 'Lowest Rating', value: 'lowest-rating' },
+						{ label: __( 'Most recent', 'woocommerce' ), value: 'most-recent' },
+						{ label: __( 'Highest Rating', 'woocommerce' ), value: 'highest-rating' },
+						{ label: __( 'Lowest Rating', 'woocommerce' ), value: 'lowest-rating' },
 					] }
 					onChange={ ( orderby ) => setAttributes( { orderby } ) }
 				/>
