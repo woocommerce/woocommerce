@@ -1,14 +1,15 @@
 <?php
 /**
  * The seam between consumers and the renewal money-path: `schedule()` enqueues a
- * contract's next renewal, `process_due()` runs it when Action Scheduler fires.
- * Wraps Action Scheduler (whose hook names and dedup behaviour stay private) and
- * adds the contract-aware semantics: capability gating, the renewal order, the charge.
- * One AS job per contract; the AS coupling lives in {@see RenewalScheduler}.
+ * contract's next renewal, `process_due()` runs it when fired (by Action Scheduler
+ * or driven directly). Wraps Action Scheduler (whose hook names and dedup behaviour
+ * stay private) and adds the contract-aware semantics: capability gating, the renewal
+ * order, the charge. One AS job per contract; the AS coupling lives in {@see RenewalScheduler}.
  *
- * Advancing the chain at fire time (appending the next cycle, recording the outcome,
- * advancing `next_payment_gmt`, re-arming the next due moment) is the dispatcher
- * slice's money-path and is not built here, so this unit does not drive a live loop.
+ * `process_due()` advances the billing chain at fire time - it claims the next cycle
+ * `pending` (create-as-claim), charges its `expected_total`, then settles `billed` or
+ * `failed` and advances the contract schedule on success. It stays a single synchronous
+ * entry; re-arming the next due moment via a recurring scan is a later slice.
  *
  * Integration zone: WordPress-native. Action Scheduler, WC orders, gateways.
  *
@@ -25,10 +26,17 @@ use Throwable;
 use WC_Order;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Renewal\NextCycleSpec;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Renewal\RenewalCalculator;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway\CapabilityRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -61,12 +69,21 @@ final class RenewalEngine {
 	private $contracts;
 
 	/**
-	 * Build a renewal engine over the given contract repository.
+	 * Repository for loading the contract's selling plan (the cadence source).
+	 *
+	 * @var PlanRepository
+	 */
+	private $plans;
+
+	/**
+	 * Build a renewal engine over the given repositories.
 	 *
 	 * @param ContractRepository|null $contracts Contract repository; default instance when omitted.
+	 * @param PlanRepository|null     $plans     Plan repository; default instance when omitted.
 	 */
-	public function __construct( ?ContractRepository $contracts = null ) {
+	public function __construct( ?ContractRepository $contracts = null, ?PlanRepository $plans = null ) {
 		$this->contracts = $contracts ?? new ContractRepository();
+		$this->plans     = $plans ?? new PlanRepository();
 	}
 
 	/**
@@ -158,13 +175,19 @@ final class RenewalEngine {
 	 *
 	 * Loads the contract and skips (logging only, never throwing - AS would retry a
 	 * permanent failure forever) when it is gone, gateway-scheduled, or not active.
-	 * Then guards idempotency - if a renewal order for the next chargeable number in
-	 * the billing chain already exists, no second one is created (tolerating AS retries) -
-	 * and builds the renewal order and attempts the gateway charge. Advancing the chain
-	 * is the dispatcher slice's money-path, so this does not drive a live renewal loop.
+	 * Then advances the billing chain: it creates the next cycle `pending` as the
+	 * create-as-claim (the `UNIQUE(contract_id, kind, count)` index makes a concurrent
+	 * or retried fire a no-op), builds and charges the renewal order at that cycle's
+	 * `expected_total`, and resolves the outcome - on a paid order the cycle settles
+	 * `billed`, the order is linked, and the contract schedule advances one cadence; on
+	 * an unpaid order the cycle settles `failed` and the schedule is left untouched.
+	 *
+	 * Writes are ordered durable-intent-first (cycle create -> charge -> cycle resolve ->
+	 * contract advance) with no surrounding transaction. The single synchronous entry a
+	 * later batch dispatcher calls per-claimed-contract.
 	 *
 	 * @param int $contract_id Contract whose renewal cycle is firing.
-	 * @return WC_Order|null The created renewal order, or null when skipped.
+	 * @return WC_Order|null The created renewal order, or null when skipped/idempotent.
 	 */
 	public function process_due( int $contract_id ): ?WC_Order {
 		$contract = $this->contracts->find( $contract_id );
@@ -202,10 +225,11 @@ final class RenewalEngine {
 			return null;
 		}
 
-		$next_count = $this->next_chargeable_count( $contract_id );
+		$previous   = $this->contracts->find_current_cycle( $contract_id );
+		$next_count = $this->target_count( $previous );
 
-		// Idempotency: a renewal order already tagged for this number means the action
-		// already ran (AS retry, double-fire). Bail without creating a second order.
+		// Idempotency pre-check: a renewal order already tagged for this number means the
+		// action already ran (AS retry, double-fire). Bail before claiming a new cycle.
 		if ( $this->renewal_exists_for_cycle( $contract_id, $next_count ) ) {
 			wc_get_logger()->info(
 				sprintf( 'RenewalEngine::process_due(): renewal for contract %d cycle %d already exists - skipping (idempotent retry).', $contract_id, $next_count ),
@@ -217,9 +241,19 @@ final class RenewalEngine {
 			return null;
 		}
 
-		$renewal_order = $this->build_renewal_order( $contract, $next_count );
+		// Create-as-claim: the next cycle is inserted `pending` before any charge. A
+		// concurrent/duplicate fire loses the UNIQUE(contract_id, kind, count) race and
+		// is treated as an idempotent no-op.
+		$spec      = $this->compute_next_cycle_spec( $contract, $previous );
+		$new_cycle = $this->claim_next_cycle( $contract, $previous, $next_count, $spec );
+		if ( null === $new_cycle ) {
+			return null;
+		}
+
+		$renewal_order = $this->build_renewal_order( $contract, $next_count, $spec->get_expected_total() );
 		if ( null === $renewal_order ) {
-			// build_renewal_order logged the reason.
+			// build_renewal_order logged the reason. The claimed cycle stays pending for
+			// a later run/dunning to resolve; no schedule change is made here.
 			return null;
 		}
 
@@ -227,17 +261,19 @@ final class RenewalEngine {
 
 		$this->attempt_charge( $renewal_order, $contract );
 
-		// Advancing the chain and re-arming the next due moment is the dispatcher
-		// slice's money-path - deferred, so the loop is not driven from here.
+		$this->resolve_outcome( $contract, $new_cycle, $renewal_order, $spec );
 
 		return $renewal_order;
 	}
 
 	/**
-	 * Cancel `$contract`: transition to cancelled and clear its pending renewal.
+	 * Cancel `$contract`: transition to cancelled, close any mid-charge cycle, and clear
+	 * its pending renewal.
 	 *
-	 * Status moves through the Core state machine ({@see Contract::set_status()}),
-	 * which raises a `DomainException` on an illegal transition.
+	 * Status moves through the Core state machine ({@see Contract::set_status()}), which
+	 * raises a `DomainException` on an illegal transition. When the chain's most-recent
+	 * cycle is still `pending` (a charge caught mid-flight) it is transitioned `cancelled`
+	 * so a stale claim is not left open; a settled cycle is untouched.
 	 *
 	 * @param Contract $contract Contract to cancel. Must have an id.
 	 * @return bool True when the contract was cancelled and persisted.
@@ -250,9 +286,15 @@ final class RenewalEngine {
 		}
 
 		$contract->set_status( ContractStatus::CANCELLED );
-		// update() persists the contract-row cache/status ONLY. Closing the scheduled
-		// cycle and any chain/cycle head transition is the dispatcher money-path.
 		$this->contracts->update( $contract );
+
+		// Close a charge caught mid-flight: a still-pending head cycle is cancelled so no
+		// stale claim is left open. A settled (billed/failed/cancelled) cycle is left as is.
+		$current = $this->contracts->find_current_cycle( $id );
+		if ( null !== $current && $current->get_status()->equals( CycleStatus::pending() ) ) {
+			$current->set_status( CycleStatus::cancelled() );
+			$this->contracts->update_cycle( $current );
+		}
 
 		RenewalScheduler::unschedule( $id );
 
@@ -260,32 +302,191 @@ final class RenewalEngine {
 	}
 
 	/**
-	 * The next chargeable number in the contract's billing chain - one past the
-	 * per-chain `MAX(count)`, or 1 for a chain with no counting cycle yet. This is
-	 * the idempotency anchor the renewal order is tagged with.
+	 * The chargeable number this renewal targets - the idempotency anchor.
 	 *
-	 * @param int $contract_id Contract id.
-	 * @return int The next chargeable number.
+	 * One past the head cycle's count once it has settled forward (`billed`/`cancelled`):
+	 * the chain advances. While the head is still unsettled (`pending`/`failed`) the same
+	 * count is targeted again, so a retry resolves the in-flight cycle rather than skipping
+	 * a number - and the order-meta pre-check / the create-as-claim UNIQUE then make the
+	 * retry a no-op. A chain with no counting cycle yet starts at 1.
+	 *
+	 * @param Cycle|null $previous The chain's most-recent cycle, or null when empty.
+	 * @return int The chargeable number to target.
 	 */
-	private function next_chargeable_count( int $contract_id ): int {
-		$max = $this->contracts->max_count( $contract_id );
+	private function target_count( ?Cycle $previous ): int {
+		if ( null === $previous || null === $previous->get_count() ) {
+			return 1;
+		}
 
-		return null === $max ? 1 : $max + 1;
+		$count  = (int) $previous->get_count();
+		$status = $previous->get_status()->get_value();
+
+		$settled_forward = CycleStatus::BILLED === $status || CycleStatus::CANCELLED === $status;
+
+		return $settled_forward ? $count + 1 : $count;
+	}
+
+	/**
+	 * Compute the shape of the next cycle from the previous one and the plan cadence.
+	 *
+	 * Delegates the period + amount math to the pure {@see RenewalCalculator}. With no
+	 * previous cycle (a lean contract with no chain yet) there is nothing to advance
+	 * from, so the contract's live schedule and totals seed a single-cadence fallback so
+	 * the money-path stays drivable.
+	 *
+	 * @param Contract   $contract The contract being renewed.
+	 * @param Cycle|null $previous The chain's most-recent cycle, or null when empty.
+	 * @return NextCycleSpec The computed next-cycle shape.
+	 */
+	private function compute_next_cycle_spec( Contract $contract, ?Cycle $previous ): NextCycleSpec {
+		$now = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
+
+		if ( null === $previous ) {
+			// No chain yet: anchor on the contract's live next-payment date (or now) and
+			// bill its live recurring total. A normal checkout contract always has cycle 1,
+			// so this only covers a lean/manual contract.
+			$start = $contract->get_next_payment_gmt() ?? $now->format( 'Y-m-d H:i:s' );
+
+			return new NextCycleSpec( $start, $start, $contract->get_billing_total(), $contract->get_currency() );
+		}
+
+		return RenewalCalculator::compute_next_cycle( $previous, $this->resolve_plan_snapshot( $contract, $previous ), $now );
+	}
+
+	/**
+	 * Insert the next cycle `pending` as the create-as-claim. Returns the inserted cycle,
+	 * or null when the insert loses the `UNIQUE(contract_id, kind, count)` race (a
+	 * concurrent/duplicate fire) - treated as an idempotent no-op.
+	 *
+	 * @param Contract      $contract The contract being renewed.
+	 * @param Cycle|null    $previous The chain's previous cycle (for snapshot copy-forward), or null.
+	 * @param int           $count    The chargeable number to claim.
+	 * @param NextCycleSpec $spec     The computed next-cycle shape.
+	 * @return Cycle|null The inserted pending cycle, or null when the claim is lost.
+	 */
+	private function claim_next_cycle( Contract $contract, ?Cycle $previous, int $count, NextCycleSpec $spec ): ?Cycle {
+		$sequence_no = null === $previous ? 1 : $previous->get_sequence_no() + 1;
+
+		$cycle = Cycle::create(
+			array(
+				'contract_id'       => (int) $contract->get_id(),
+				'sequence_no'       => $sequence_no,
+				'count'             => $count,
+				'status'            => CycleStatus::pending(),
+				'starts_at_gmt'     => $spec->get_starts_at_gmt(),
+				'ends_at_gmt'       => $spec->get_ends_at_gmt(),
+				'expected_total'    => $spec->get_expected_total(),
+				'currency'          => $spec->get_currency(),
+				'extension_slug'    => $contract->get_extension_slug(),
+				'plan_snapshot_id'  => $contract->get_plan_snapshot_id(),
+				'items_snapshot_id' => $contract->get_items_snapshot_id(),
+			)
+		);
+
+		try {
+			$this->contracts->append_cycle( $cycle, $previous );
+		} catch ( Throwable $e ) {
+			// A duplicate (contract_id, kind, count) is rejected by the UNIQUE index: the
+			// cycle was already claimed by a concurrent/earlier fire. Idempotent no-op.
+			wc_get_logger()->info(
+				sprintf( 'RenewalEngine::process_due(): could not claim cycle %d for contract %d (already claimed) - skipping. %s', $count, (int) $contract->get_id(), $e->getMessage() ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => (int) $contract->get_id(),
+				)
+			);
+			return null;
+		}
+
+		return $cycle;
+	}
+
+	/**
+	 * Resolve the renewal outcome from the order's paid state.
+	 *
+	 * Paid -> CAS the cycle `pending -> billed`, link the order, advance the contract's
+	 * `next_payment_gmt` (the computed next period end) and `last_payment_gmt`, persist.
+	 * Not paid -> CAS the cycle `pending -> failed` (recording a reason) and leave the
+	 * contract schedule unchanged for a later dunning pass.
+	 *
+	 * @param Contract      $contract      The contract being renewed.
+	 * @param Cycle         $cycle         The claimed pending cycle to settle.
+	 * @param WC_Order      $renewal_order The charged renewal order.
+	 * @param NextCycleSpec $spec          The computed next-cycle shape (the next schedule date).
+	 */
+	private function resolve_outcome( Contract $contract, Cycle $cycle, WC_Order $renewal_order, NextCycleSpec $spec ): void {
+		$now = gmdate( 'Y-m-d H:i:s' );
+
+		if ( $renewal_order->is_paid() ) {
+			// CAS pending -> billed (the entity validates the transition) + link the order.
+			$cycle->set_status( CycleStatus::billed() );
+			$cycle->set_order_id( $renewal_order->get_id() );
+			$this->contracts->update_cycle( $cycle );
+
+			$contract->set_next_payment_gmt( $spec->get_ends_at_gmt() );
+			$contract->set_last_payment_gmt( $now );
+			$contract->set_last_attempt_gmt( $now );
+			$this->contracts->update( $contract );
+
+			return;
+		}
+
+		// Not paid: settle the cycle failed and leave the contract schedule for dunning.
+		$cycle->set_status( CycleStatus::failed() );
+		$cycle->set_reason( 'gateway-charge-not-settled' );
+		$this->contracts->update_cycle( $cycle );
+
+		$contract->set_last_attempt_gmt( $now );
+		$this->contracts->update( $contract );
+	}
+
+	/**
+	 * Resolve the plan snapshot for the cadence computation.
+	 *
+	 * The previous cycle is the canonical source, but a settled (terminal) cycle is
+	 * hydrated without its snapshot value objects, so the snapshot is rebuilt from the
+	 * contract's selling plan when the cycle does not carry one. For the flat recurring
+	 * case the cadence is stable, so the live plan's policy matches the frozen one. When
+	 * the plan is gone, an empty snapshot lets {@see RenewalCalculator} fail loud rather
+	 * than silently mis-bill.
+	 *
+	 * @param Contract $contract The contract being renewed.
+	 * @param Cycle    $previous The chain's previous cycle.
+	 * @return PlanSnapshot The plan snapshot to compute the next cadence from.
+	 */
+	private function resolve_plan_snapshot( Contract $contract, Cycle $previous ): PlanSnapshot {
+		$snapshot = $previous->get_plan_snapshot();
+		if ( $snapshot instanceof PlanSnapshot ) {
+			return $snapshot;
+		}
+
+		$plan = $this->plans->find( $contract->get_selling_plan_id() );
+		if ( $plan instanceof Plan ) {
+			return PlanSnapshot::from_array(
+				array(
+					'selling_plan_id' => $plan->get_id(),
+					'billing_policy'  => $plan->get_billing_policy()->to_array(),
+				)
+			);
+		}
+
+		return PlanSnapshot::from_array( array() );
 	}
 
 	/**
 	 * Build a renewal order cloned from the contract's origin order: clones
-	 * line/fee/shipping/tax/coupon items and addresses, applies the current cycle's
+	 * line/fee/shipping/tax/coupon items and addresses, applies the new cycle's
 	 * expected total as ground truth, attaches the contract's payment token, and tags
 	 * the renewal relation meta (contract id + chargeable number) so charge observers
 	 * and the idempotency check can find it. Returns null (logged) when the origin
 	 * order cannot be loaded or `wc_create_order()` fails.
 	 *
-	 * @param Contract $contract Contract being renewed.
-	 * @param int      $count    The chargeable number this order bills.
+	 * @param Contract $contract       Contract being renewed.
+	 * @param int      $count          The chargeable number this order bills.
+	 * @param string   $expected_total The new cycle's expected total (the price authority).
 	 * @return WC_Order|null The saved pending renewal order, or null on failure.
 	 */
-	private function build_renewal_order( Contract $contract, int $count ): ?WC_Order {
+	private function build_renewal_order( Contract $contract, int $count, string $expected_total ): ?WC_Order {
 		$origin_order_id = $contract->get_origin_order_id();
 		if ( null === $origin_order_id ) {
 			// A manual/admin contract has no origin order to clone from - not supported yet.
@@ -351,10 +552,10 @@ final class RenewalEngine {
 			$renewal_order->add_item( $clone );
 		}
 
-		// The current cycle's expected_total is the price authority - applied after
+		// The new cycle's expected_total is the price authority - applied after
 		// add_item() so the line items do not recompute over it. Reconstructing the
-		// granular discount/shipping/tax breakdown is the dispatcher money-path's job.
-		$renewal_order->set_total( $this->current_cycle_total( (int) $contract->get_id() ) );
+		// granular discount/shipping/tax breakdown is a later money-path's job.
+		$renewal_order->set_total( $expected_total );
 
 		$token_id = $instrument->get_token_id();
 		if ( null !== $token_id ) {
@@ -373,20 +574,6 @@ final class RenewalEngine {
 		$renewal_order->save();
 
 		return $renewal_order;
-	}
-
-	/**
-	 * The amount the contract's current cycle expects to bill (its `expected_total`).
-	 * A contract with no cycle yet yields '0', making the charge a no-op rather than a
-	 * fatal - the safe state for a contract with nothing to bill.
-	 *
-	 * @param int $contract_id The contract being renewed.
-	 * @return string Decimal-safe amount string.
-	 */
-	private function current_cycle_total( int $contract_id ): string {
-		$cycle = $this->contracts->find_current_cycle( $contract_id );
-
-		return null === $cycle ? '0' : $cycle->get_expected_total();
 	}
 
 	/**
