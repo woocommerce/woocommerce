@@ -2,7 +2,7 @@
  * External dependencies
  */
 import moment from 'moment';
-import momentTz from 'moment-timezone';
+import { getTimezoneOffset } from 'date-fns-tz';
 import { find, memoize } from 'lodash';
 import { __ } from '@wordpress/i18n';
 import { parse } from 'qs';
@@ -170,7 +170,7 @@ export function getRangeLabel( after: moment.Moment, before: moment.Moment ) {
 /**
  * Gets the current time in the store time zone if set.
  *
- * @return {string} - Datetime string.
+ * @return {moment.Moment} - Moment object in the store time zone.
  */
 export function getStoreTimeZoneMoment() {
 	const timeZone =
@@ -184,7 +184,18 @@ export function getStoreTimeZoneMoment() {
 		return moment().utcOffset( timeZone );
 	}
 
-	return momentTz.tz( timeZone );
+	// Named IANA zone (e.g. `America/New_York`). Resolve the current UTC
+	// offset with `date-fns-tz` (which uses the browser `Intl` API) rather
+	// than `moment-timezone`'s `.tz()`: the admin build externalises
+	// `moment-timezone` to the global `window.moment`, so a plugin replacing
+	// `window.moment` strips `.tz` and crashes Analytics (#64020).
+	const offsetInMinutes = getTimezoneOffset( timeZone ) / 60000;
+
+	if ( Number.isNaN( offsetInMinutes ) ) {
+		return moment();
+	}
+
+	return moment().utcOffset( offsetInMinutes );
 }
 
 /**
