@@ -60,6 +60,9 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		parent::tearDown();
 
 		delete_option( self::OPTION_KEY );
+		// Always clear the timeout filter here so a failed assertion in a test that registers it cannot
+		// leak it into later tests in the same process (tearDown runs even when a test fails).
+		remove_all_filters( 'woocommerce_product_feed_in_progress_timeout' );
 		$this->test_container->reset_all_replacements();
 	}
 
@@ -201,11 +204,10 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$method = ( new ReflectionClass( $this->sut ) )->getMethod( 'validate_status' );
 		$method->setAccessible( true );
 
-		// With a 10 second timeout, a 30 second old heartbeat is considered stale.
-		$callback = fn() => 10;
-		add_filter( 'woocommerce_product_feed_in_progress_timeout', $callback );
+		// With a 10 second timeout, a 30 second old heartbeat is considered stale. The filter is cleaned
+		// up in tearDown() so it cannot leak into later tests if the assertion fails.
+		add_filter( 'woocommerce_product_feed_in_progress_timeout', fn() => 10 );
 		$this->assertFalse( $method->invoke( $this->sut, $status ) );
-		remove_filter( 'woocommerce_product_feed_in_progress_timeout', $callback );
 	}
 
 	/**
