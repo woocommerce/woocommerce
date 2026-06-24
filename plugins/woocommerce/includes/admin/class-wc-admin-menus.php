@@ -66,6 +66,9 @@ class WC_Admin_Menus {
 		// Add endpoints custom URLs in Appearance > Menus > Pages.
 		add_action( 'admin_head-nav-menus.php', array( $this, 'add_nav_menu_meta_boxes' ) );
 
+		// Ensure WC taxonomy meta boxes are visible by default on the first visit to Appearance > Menus.
+		add_action( 'load-nav-menus.php', array( $this, 'register_default_nav_menu_meta_boxes_filter' ), 9 );
+
 		// Admin bar menus.
 		if ( apply_filters( 'woocommerce_show_admin_bar_visit_store', true ) ) {
 			add_action( 'admin_bar_menu', array( $this, 'admin_bar_menus' ), 31 );
@@ -424,6 +427,74 @@ class WC_Admin_Menus {
 	 */
 	public function add_nav_menu_meta_boxes() {
 		add_meta_box( 'woocommerce_endpoints_nav_link', __( 'WooCommerce endpoints', 'woocommerce' ), array( $this, 'nav_menu_links' ), 'nav-menus', 'side', 'low' );
+	}
+
+	/**
+	 * Ensure the Product Categories, Product Tags, and Brands meta boxes
+	 * are visible by default on the Appearance > Menus screen.
+	 *
+	 * WordPress's wp_initial_nav_menu_meta_boxes() hides every box except page,
+	 * post, custom-links, and category on a user's first visit. We intercept
+	 * the empty user option and return a hidden list that excludes the WC
+	 * taxonomy boxes, so WP's existing-user guard short-circuits and leaves
+	 * them visible.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return void
+	 */
+	public function register_default_nav_menu_meta_boxes_filter() {
+		add_filter( 'get_user_option_metaboxhidden_nav-menus', array( $this, 'filter_default_nav_menu_hidden_meta_boxes' ), 10, 3 );
+	}
+
+	/**
+	 * Filter the default hidden meta boxes for the Appearance > Menus screen.
+	 *
+	 * Only applies when the user has no saved preference for the nav-menus
+	 * screen. Returns a list of every registered nav-menus meta box except the
+	 * four core visible boxes and the three WC taxonomy boxes.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param mixed   $result Value for the user's option, or false if not set.
+	 * @param string  $option Name of the option being retrieved.
+	 * @param WP_User $user   WP_User object of the user whose option is being retrieved.
+	 * @return mixed The filtered option value.
+	 */
+	public function filter_default_nav_menu_hidden_meta_boxes( $result, $option, $user ) {
+		if ( false !== $result ) {
+			return $result;
+		}
+
+		if ( ! $user || ! isset( $GLOBALS['wp_meta_boxes']['nav-menus'] ) || ! is_array( $GLOBALS['wp_meta_boxes']['nav-menus'] ) ) {
+			return $result;
+		}
+
+		$visible = array(
+			'add-post-type-page',
+			'add-post-type-post',
+			'add-custom-links',
+			'add-category',
+			'add-product_cat',
+			'add-product_tag',
+		);
+
+		if ( taxonomy_exists( 'product_brand' ) ) {
+			$visible[] = 'add-product_brand';
+		}
+
+		$hidden = array();
+		foreach ( $GLOBALS['wp_meta_boxes']['nav-menus'] as $context => $priorities ) {
+			foreach ( (array) $priorities as $priority => $boxes ) {
+				foreach ( (array) $boxes as $box ) {
+					if ( isset( $box['id'] ) && ! in_array( $box['id'], $visible, true ) ) {
+						$hidden[] = $box['id'];
+					}
+				}
+			}
+		}
+
+		return $hidden;
 	}
 
 	/**
