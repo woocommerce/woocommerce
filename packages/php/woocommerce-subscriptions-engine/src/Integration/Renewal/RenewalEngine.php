@@ -535,6 +535,13 @@ final class RenewalEngine {
 			)
 		);
 
+		// This query does not paginate, so wc_get_orders() returns a plain list of
+		// orders. The guard narrows the declared WC_Order[]|stdClass return type and
+		// treats any unexpected non-array result as "no matching renewal".
+		if ( ! is_array( $orders ) ) {
+			return false;
+		}
+
 		foreach ( $orders as $order ) {
 			if ( ! $order instanceof WC_Order ) {
 				continue;
