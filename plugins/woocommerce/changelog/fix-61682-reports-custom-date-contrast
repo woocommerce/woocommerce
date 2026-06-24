@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Reports: fix insufficient color contrast on the custom date range text (WCAG AA).
