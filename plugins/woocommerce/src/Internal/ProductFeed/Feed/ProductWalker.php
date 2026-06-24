@@ -194,11 +194,11 @@ class ProductWalker {
 	}
 
 	/**
-	 * Walks through products, optionally limited to a single chunk of batches.
+	 * Walks through products, optionally limited to a bounded number of batches.
 	 *
 	 * The walker does not own the feed lifecycle: the caller is responsible for starting, flushing
-	 * and ending the feed. This lets a feed be written across several processes (one Action Scheduler
-	 * action per chunk) by resuming the same feed between calls.
+	 * and ending the feed. This lets a feed be written across several processes by resuming the same
+	 * feed between calls.
 	 *
 	 * Called with the defaults it walks every remaining page in one go; pass `$start_page` and
 	 * `$max_batches` to process a bounded slice and resume later from `processed_batches`.
@@ -225,7 +225,7 @@ class ProductWalker {
 		// Check how much memory is available at first.
 		$initial_available_memory = $this->memory_manager->get_available_memory();
 
-		$batches_in_chunk = 0;
+		$batches_processed = 0;
 		do {
 			$result   = $this->iterate( $this->query_args, $page, $this->per_page );
 			$iterated = count( $result->products );
@@ -236,7 +236,7 @@ class ProductWalker {
 			}
 			$progress->processed_items += $iterated;
 			++$progress->processed_batches;
-			++$batches_in_chunk;
+			++$batches_processed;
 			++$page;
 
 			if ( is_callable( $callback ) && $iterated > 0 ) {
@@ -256,8 +256,8 @@ class ProductWalker {
 			// If `wc_get_products()` returns less than the batch size, it was the last page.
 			$iterated === $this->per_page
 
-			// Stop once this chunk has processed its allotment of batches.
-			&& $batches_in_chunk < $max_batches
+			// Stop once this call has processed its requested number of batches.
+			&& $batches_processed < $max_batches
 
 			// For the cases where the above are true, make sure that we do not exceed the total number of pages.
 			&& ( $progress->total_batch_count <= 0 || ( $page - 1 ) < $progress->total_batch_count )
