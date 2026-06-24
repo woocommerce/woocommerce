@@ -90,6 +90,21 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox list returns recent contracts newest first.
+	 */
+	public function test_list_returns_recent_contracts(): void {
+		$first  = $this->sign_up_contract();
+		$second = $this->sign_up_contract();
+
+		$contracts = Subscriptions::list();
+		$ids       = array_map( static fn ( Contract $c ) => $c->get_id(), $contracts );
+
+		// Newest first, and both signups are present.
+		$this->assertSame( array( $second->get_id(), $first->get_id() ), array_slice( $ids, 0, 2 ) );
+		$this->assertInstanceOf( Contract::class, $contracts[0] );
+	}
+
+	/**
 	 * @testdox get_history returns the billing cycles newest first.
 	 */
 	public function test_get_history_returns_cycles(): void {

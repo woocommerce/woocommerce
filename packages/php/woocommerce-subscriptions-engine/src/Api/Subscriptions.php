@@ -46,6 +46,17 @@ final class Subscriptions {
 	}
 
 	/**
+	 * List the most-recent subscription contracts, newest first.
+	 *
+	 * @param int $limit  Maximum contracts to return.
+	 * @param int $offset Contracts to skip (for paging).
+	 * @return array<int, Contract> Contracts newest first.
+	 */
+	public static function list( int $limit = 20, int $offset = 0 ): array {
+		return ( new ContractRepository() )->list_recent( $limit, $offset );
+	}
+
+	/**
 	 * Fetch a window of the contract's billing cycle history, newest first.
 	 *
 	 * @param int $contract_id Contract id.

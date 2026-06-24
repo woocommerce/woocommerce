@@ -214,6 +214,32 @@ final class ContractRepository {
 	}
 
 	/**
+	 * A window of the most-recent contracts, newest first (id DESC) - the paginated read
+	 * for list screens. Hydrated lightweight (row only, no children) like {@see self::find_summary()}.
+	 *
+	 * @param int $limit  Maximum contracts to return.
+	 * @param int $offset Rows to skip (for paging).
+	 * @return array<int, Contract> Contracts newest first.
+	 */
+	public function list_recent( int $limit = 20, int $offset = 0 ): array {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} ORDER BY id DESC LIMIT %d OFFSET %d", $limit, $offset ), ARRAY_A );
+
+		$contracts = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			if ( is_array( $row ) ) {
+				$contracts[] = Contract::from_storage( self::as_string_keyed( $row ) );
+			}
+		}
+
+		return $contracts;
+	}
+
+	/**
 	 * Whether a contract row exists for `$id`.
 	 *
 	 * @param int $id Contract id.
