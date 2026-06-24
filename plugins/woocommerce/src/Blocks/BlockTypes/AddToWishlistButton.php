@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListRenderer;
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 
 /**
  * Add to Wishlist Button block.
@@ -46,6 +47,15 @@ final class AddToWishlistButton extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		// The block is registered unconditionally and shipped as a static
+		// inner block of the Add to Cart + Options template parts, so this
+		// render layer is the sole feature-flag gate: when the wishlist
+		// feature is off, output nothing and flag-off stores show no
+		// wishlist UI.
+		if ( ! wc_get_container()->get( ShopperListsController::class )->is_enabled( self::LIST_SLUG ) ) {
+			return '';
+		}
+
 		// Guests can't have a wishlist — bail before enqueuing assets or
 		// seeding state.
 		if ( ! is_user_logged_in() ) {

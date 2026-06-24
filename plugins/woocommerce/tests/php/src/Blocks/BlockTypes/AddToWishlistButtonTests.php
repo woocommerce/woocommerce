@@ -45,6 +45,12 @@ class AddToWishlistButtonTests extends WP_UnitTestCase {
 	public function setUp(): void {
 		parent::setUp();
 
+		// The block is registered unconditionally and shipped statically in
+		// the ATCWO template parts, so render() is the sole feature-flag gate.
+		// Turn the feature on so the "renders markup" tests exercise the full
+		// path; the flag-off case is covered explicitly below.
+		update_option( 'woocommerce_product_wishlist_enabled', 'yes' );
+
 		$reflection = new ReflectionClass( AddToWishlistButton::class );
 		$this->sut  = $reflection->newInstanceWithoutConstructor();
 
@@ -64,6 +70,7 @@ class AddToWishlistButtonTests extends WP_UnitTestCase {
 			WP_Block_Supports::$block_to_render = $this->previous_block_to_render;
 			$this->previous_block_to_render     = null;
 		}
+		delete_option( 'woocommerce_product_wishlist_enabled' );
 		parent::tearDown();
 	}
 
@@ -103,6 +110,28 @@ class AddToWishlistButtonTests extends WP_UnitTestCase {
 		$render->setAccessible( true );
 
 		return (string) $render->invoke( $this->sut, $attributes, '', $block );
+	}
+
+	/**
+	 * `render()` returns an empty string when the wishlist feature flag is off,
+	 * even for a logged-in shopper on a valid product. This is the render-layer
+	 * gate that keeps flag-off stores free of wishlist UI now that the block is
+	 * registered unconditionally and ships statically in the ATCWO template
+	 * parts.
+	 */
+	public function test_render_returns_empty_when_feature_disabled(): void {
+		update_option( 'woocommerce_product_wishlist_enabled', 'no' );
+
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $customer_id );
+
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$this->assertSame(
+			'',
+			$this->invoke_render( $this->build_block_stub( $product->get_id() ) ),
+			'Flag-off stores must render no wishlist UI.'
+		);
 	}
 
 	/**
