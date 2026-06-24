@@ -175,6 +175,18 @@ class OrderController {
 	}
 
 	/**
+	 * Validate an existing order's address data before the order is updated from the request.
+	 *
+	 * Runs before any request data is persisted so a rejected address cannot mutate the order.
+	 *
+	 * @throws RouteException Exception if invalid data is detected.
+	 * @param \WC_Order $order Order object.
+	 */
+	public function validate_existing_order_before_update( \WC_Order $order ): void {
+		$this->validate_addresses( $order, $order->needs_shipping() );
+	}
+
+	/**
 	 * Perform custom order validation via WooCommerce hooks.
 	 *
 	 * Allows plugins to perform custom validation before payment.

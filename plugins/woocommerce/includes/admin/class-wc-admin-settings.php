@@ -7,8 +7,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -62,9 +60,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'launch-your-store' ) ) {
 					$settings[] = include_once __DIR__ . '/settings/class-wc-settings-site-visibility.php';
 				}
-				if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
-					$settings[] = include_once __DIR__ . '/settings/class-wc-settings-point-of-sale.php';
-				}
+				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-point-of-sale.php';
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-advanced.php';
 
 				self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
@@ -79,27 +75,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						}
 					}
 				);
-
-				// Reset settings when features that affect settings are toggled.
-				add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( __CLASS__, 'reset_settings_pages_on_feature_change' ), 10, 2 );
 			}
 
 			return self::$settings;
-		}
-
-		/**
-		 * Reset settings when features that affect settings are toggled.
-		 *
-		 * @param string $feature_id The feature ID.
-		 * @param bool   $is_enabled Whether the feature is enabled.
-		 *
-		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-		 */
-		public static function reset_settings_pages_on_feature_change( $feature_id, $is_enabled ) {
-			if ( 'point_of_sale' === $feature_id && $is_enabled ) {
-				self::$settings = array();
-				self::get_settings_pages();
-			}
 		}
 
 		/**
