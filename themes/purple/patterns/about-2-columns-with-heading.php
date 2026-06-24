@@ -30,7 +30,7 @@
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
 
-<!-- wp:image {"sizeSlug":"full","linkDestination":"none","align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|60"}}}} -->
-<figure class="wp-block-image alignwide size-full" style="margin-top:var(--wp--preset--spacing--60)"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-placeholder.webp" alt="<?php esc_attr_e( 'Placeholder image', 'purple' ); ?>"/></figure>
+<!-- wp:image {"sizeSlug":"full","linkDestination":"none","align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|70"}}}} -->
+<figure class="wp-block-image alignwide size-full" style="margin-top:var(--wp--preset--spacing--70)"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-placeholder.webp" alt="<?php esc_attr_e( 'Placeholder image', 'purple' ); ?>"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group -->

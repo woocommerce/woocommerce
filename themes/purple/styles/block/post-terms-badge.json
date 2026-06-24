@@ -13,9 +13,9 @@
                     "background": "var(--wp--preset--color--theme-5)"
                 },
                 "spacing": {
-                    "padding": "var(--wp--preset--spacing--20)",
+                    "padding": "var(--wp--preset--spacing--10)",
                     "margin": {
-                        "right": "var(--wp--preset--spacing--20)"
+                        "right": "var(--wp--preset--spacing--10)"
                     }
                 }
             }

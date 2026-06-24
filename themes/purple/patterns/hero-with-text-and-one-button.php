@@ -17,8 +17,8 @@
 <h2 class="wp-block-heading has-text-align-center has-xx-large-font-size"><?php esc_html_e('Just landed', 'purple');?></h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"style":{"typography":{"textAlign":"center"},"spacing":{"margin":{"top":"var:preset|spacing|20"}}}} -->
-<p class="has-text-align-center" style="margin-top:var(--wp--preset--spacing--20)"><?php esc_html_e('Bold knits designed with care—for you and the planet.', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"textAlign":"center"},"spacing":{"margin":{"top":"var:preset|spacing|10"}}}} -->
+<p class="has-text-align-center" style="margin-top:var(--wp--preset--spacing--10)"><?php esc_html_e('Bold knits designed with care—for you and the planet.', 'purple');?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->

@@ -15,8 +15,8 @@
 <h2 class="wp-block-heading has-xx-large-font-size"><?php esc_html_e( 'Colorful knits, crafted to last', 'purple' ); ?></h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"var:preset|spacing|20"}}}} -->
-<p style="margin-top:var(--wp--preset--spacing--20)"><?php esc_html_e( 'Bold knits designed with care—for you and the planet.', 'purple' ); ?></p>
+<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"var:preset|spacing|10"}}}} -->
+<p style="margin-top:var(--wp--preset--spacing--10)"><?php esc_html_e( 'Bold knits designed with care—for you and the planet.', 'purple' ); ?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->

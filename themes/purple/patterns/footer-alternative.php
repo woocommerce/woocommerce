@@ -10,13 +10,13 @@
  */
 ?>
 
-<!-- wp:group {"metadata":{"name":"Store Footer","categories":["footer","purple"],"patternName":"purple/footer-alternative"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|20","left":"var:preset|spacing|20"}}}} -->
+<!-- wp:group {"metadata":{"name":"Store Footer","categories":["footer","purple"],"patternName":"purple/footer-alternative"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)"><!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|10","left":"var:preset|spacing|10"}}}} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"width":"50%"} -->
 <div class="wp-block-column" style="flex-basis:50%"><!-- wp:site-title {"level":0} /-->
 
-<!-- wp:group {"style":{"spacing":{"padding":{"right":"0","left":"0"},"margin":{"top":"var:preset|spacing|20"}}},"layout":{"type":"constrained","justifyContent":"left","contentSize":"260px"}} -->
-<div class="wp-block-group" style="margin-top:var(--wp--preset--spacing--20);padding-right:0;padding-left:0"><!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0.625rem"}}}} -->
+<!-- wp:group {"style":{"spacing":{"padding":{"right":"0","left":"0"},"margin":{"top":"var:preset|spacing|10"}}},"layout":{"type":"constrained","justifyContent":"left","contentSize":"260px"}} -->
+<div class="wp-block-group" style="margin-top:var(--wp--preset--spacing--10);padding-right:0;padding-left:0"><!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0.625rem"}}}} -->
 <p style="margin-top:0.625rem"><?php esc_html_e( '123 Example St.', 'purple' ); ?><br><?php esc_html_e( 'San Francisco, CA', 'purple' ); ?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
@@ -43,7 +43,7 @@
 <p class="has-theme-2-color has-text-color has-link-color" style="font-style:normal;font-weight:500"><?php esc_html_e( 'Follow us', 'purple' ); ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:social-links {"iconColor":"theme-2","iconColorValue":"#111111","size":"has-normal-icon-size","className":"is-style-logos-only","style":{"spacing":{"blockGap":{"left":"var:preset|spacing|30"},"margin":{"top":"0.625rem"}}}} -->
+<!-- wp:social-links {"iconColor":"theme-2","iconColorValue":"#111111","size":"has-normal-icon-size","className":"is-style-logos-only","style":{"spacing":{"blockGap":{"left":"var:preset|spacing|20"},"margin":{"top":"0.625rem"}}}} -->
 <ul class="wp-block-social-links has-normal-icon-size has-icon-color is-style-logos-only" style="margin-top:0.625rem"><!-- wp:social-link {"url":"#","service":"instagram"} /-->
 
 <!-- wp:social-link {"url":"#","service":"x"} /-->
@@ -53,8 +53,8 @@
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
 
-<!-- wp:group {"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|30"},"blockGap":"0.63rem"}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
-<div class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--30)"><!-- wp:group {"fontSize":"small","layout":{"type":"flex","flexWrap":"wrap"}} -->
+<!-- wp:group {"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|20"},"blockGap":"0.63rem"}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
+<div class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--20)"><!-- wp:group {"fontSize":"small","layout":{"type":"flex","flexWrap":"wrap"}} -->
 <div class="wp-block-group has-small-font-size"><!-- wp:paragraph -->
 <p><a href="#"><?php esc_html_e( 'Shipping & returns', 'purple' ); ?></a></p>
 <!-- /wp:paragraph -->

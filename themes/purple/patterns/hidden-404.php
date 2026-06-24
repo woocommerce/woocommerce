@@ -7,8 +7,8 @@
 ?>
 
 <!-- wp:group {"metadata":{"name":"Page not found"},"align":"full","layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull"><!-- wp:spacer {"height":"var:preset|spacing|80"} -->
-<div style="height:var(--wp--preset--spacing--80)" aria-hidden="true" class="wp-block-spacer"></div>
+<div class="wp-block-group alignfull"><!-- wp:spacer {"height":"var:preset|spacing|140"} -->
+<div style="height:var(--wp--preset--spacing--140)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
 
 <!-- wp:heading {"textAlign":"center","level":1,"align":"wide"} -->
@@ -19,10 +19,10 @@
 <p class="has-text-align-center"><?php echo esc_html_x( 'The page you\'re looking for could not be found. Maybe try a search?', '404 error message', 'purple' ); ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:search {"label":"<?php echo esc_html_x( 'Search', 'Search form label.', 'purple' ); ?>","showLabel":false,"placeholder":"<?php echo esc_attr_x( 'Search...', 'Search input field placeholder text.', 'purple' ); ?>","buttonText":"<?php echo esc_attr_x( 'Search', 'Button text. Verb.', 'purple' ); ?>","buttonUseIcon":false,"style":{"spacing":{"margin":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}},"borderColor":"theme-4"} /-->
+<!-- wp:search {"label":"<?php echo esc_html_x( 'Search', 'Search form label.', 'purple' ); ?>","showLabel":false,"placeholder":"<?php echo esc_attr_x( 'Search...', 'Search input field placeholder text.', 'purple' ); ?>","buttonText":"<?php echo esc_attr_x( 'Search', 'Button text. Verb.', 'purple' ); ?>","buttonUseIcon":false,"style":{"spacing":{"margin":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"borderColor":"theme-4"} /-->
 
-<!-- wp:spacer {"height":"var:preset|spacing|80"} -->
-<div style="height:var(--wp--preset--spacing--80)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- wp:spacer {"height":"var:preset|spacing|140"} -->
+<div style="height:var(--wp--preset--spacing--140)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
 </div>
 <!-- /wp:group -->

@@ -9,15 +9,15 @@
  */
 ?>
 
-<!-- wp:group {"metadata":{"name":"About","categories":["about","purple"],"patternName":"purple/about-left-aligned-heading-text-and-button-right-image"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
-<div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--40)"><!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|50","left":"var:preset|spacing|50"}}}} -->
+<!-- wp:group {"metadata":{"name":"About","categories":["about","purple"],"patternName":"purple/about-left-aligned-heading-text-and-button-right-image"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
+<div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30)"><!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|50","left":"var:preset|spacing|50"}}}} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"verticalAlignment":"center","layout":{"type":"constrained","contentSize":"580px","justifyContent":"left"}} -->
 <div class="wp-block-column is-vertically-aligned-center"><!-- wp:heading {"fontSize":"x-large"} -->
 <h2 class="wp-block-heading has-x-large-font-size"><?php esc_html_e( 'About', 'purple' ); ?></h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"var:preset|spacing|20"}}}} -->
-<p style="margin-top:var(--wp--preset--spacing--20)"><?php esc_html_e( 'Our mission is to challenge the status quo, embrace innovation, and create meaningful, lasting impact through everything we do. Driven by a vision to inspire change, push boundaries, we deliver work that truly makes a difference.', 'purple' ); ?></p>
+<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"var:preset|spacing|10"}}}} -->
+<p style="margin-top:var(--wp--preset--spacing--10)"><?php esc_html_e( 'Our mission is to challenge the status quo, embrace innovation, and create meaningful, lasting impact through everything we do. Driven by a vision to inspire change, push boundaries, we deliver work that truly makes a difference.', 'purple' ); ?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->

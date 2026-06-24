@@ -9,8 +9,8 @@
  */
 ?>
 
-<!-- wp:group {"metadata":{"name":"Reviews: heading on left, two columns of reviews on right","categories":["testimonials","purple"],"patternName":"purple/reviews-heading-left"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
-<div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:columns {"metadata":{"name":"Items"},"align":"wide"} -->
+<!-- wp:group {"metadata":{"name":"Reviews: heading on left, two columns of reviews on right","categories":["testimonials","purple"],"patternName":"purple/reviews-heading-left"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
+<div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)"><!-- wp:columns {"metadata":{"name":"Items"},"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column -->
 <div class="wp-block-column"><!-- wp:heading {"style":{"layout":{"selfStretch":"fixed","flexSize":"100%"}}} -->
 <h2 class="wp-block-heading"><?php esc_html_e( 'Reviews', 'purple' ); ?></h2>

@@ -42,8 +42,8 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 
 /* https://github.com/woocommerce/woocommerce/issues/59391 */
 .woocommerce-account .entry-content > .woocommerce {
-    padding-top: var(--wp--preset--spacing--60);
-    padding-bottom: var(--wp--preset--spacing--70);
+    padding-top: var(--wp--preset--spacing--70);
+    padding-bottom: var(--wp--preset--spacing--90);
 }
 
 /* WOOPRD-1561: My Account address styles. */
@@ -215,7 +215,7 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 }
 
 :where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills) {
-    gap: var(--wp--preset--spacing--20);
+    gap: var(--wp--preset--spacing--10);
 }
 
 :where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill) {
@@ -225,7 +225,7 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
     font-weight: 400;
     letter-spacing: 0.06em;
     line-height: 1.142;
-    padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--30);
+    padding: var(--wp--preset--spacing--10) var(--wp--preset--spacing--20);
     text-transform: uppercase;
 }
 
@@ -246,7 +246,7 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 }
 
 .wp-block-woocommerce-product-review-content p {
-    margin-top: var(--wp--preset--spacing--30);
+    margin-top: var(--wp--preset--spacing--20);
     margin-bottom: 0;
 }
 
@@ -255,7 +255,7 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 }
 
 .wc-block-cart-item__quantity {
-    margin-top: var(--wp--preset--spacing--30);
+    margin-top: var(--wp--preset--spacing--20);
 }
 .wc-block-components-quantity-selector {
     min-height: 44px;
