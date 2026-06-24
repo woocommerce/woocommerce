@@ -8,6 +8,7 @@
  * Viewport width: 1440
  */
 ?>
+
 <!-- wp:group {"metadata":{"categories":["purple"],"name":"Left-aligned image, text on the right","patternName":"purple/about-left-aligned-image-right-text","description":"An intro section with a heading, paragraph, button and image."},"align":"full","className":"alignfull","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|80","bottom":"var:preset|spacing|80"}}},"backgroundColor":"theme-5","layout":{"type":"constrained","justifyContent":"center"}} -->
 <div class="wp-block-group alignfull has-theme-5-background-color has-background" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--80);padding-bottom:var(--wp--preset--spacing--80)"><!-- wp:columns {"verticalAlignment":"center","align":"wide","style":{"spacing":{"blockGap":{"top":"0","left":"var:preset|spacing|50"}}}} -->
 <div class="wp-block-columns alignwide are-vertically-aligned-center"><!-- wp:column {"verticalAlignment":"center","width":"50%"} -->

@@ -4,8 +4,8 @@
  * Slug: purple/woocommerce-featured-products
  * Categories: woo-commerce, purple
  * Keywords: woo-commerce, products, featured, collection
- * Block Types: woocommerce/product-collection
  * Description: A section with a heading and a 4 column product grid.
+ * Block Types: woocommerce/product-collection
  * Viewport width: 1440
  */
 ?>

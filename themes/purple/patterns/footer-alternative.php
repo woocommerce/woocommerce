@@ -4,8 +4,8 @@
  * Slug: purple/footer-alternative
  * Categories: footer, purple
  * Keywords: footer, contact, social, links
- * Block Types: core/template-part/footer
  * Description: A three-column store footer with site title and address, contact info, social links, and a bottom row with legal links and copyright.
+ * Block Types: core/template-part/footer
  * Viewport width: 1440
  */
 ?>

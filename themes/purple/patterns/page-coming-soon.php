@@ -1,13 +1,13 @@
 <?php
 /**
- * Title: Coming Soon
+ * Title: Coming soon
  * Slug: purple/coming-soon
  * Categories: purple
  * Keywords: coming soon, starter, landing
+ * Description: A coming soon page pattern.
  * Block Types: core/post-content
  * Post Types: page, wp_template
  * Viewport width: 1440
- * Description: A coming soon page pattern.
  */
 ?>
 

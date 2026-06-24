@@ -4,11 +4,12 @@
  * Slug: purple/store-features-three-columns-alternative
  * Categories: purple
  * Keywords: about, text, media, columns
- * Description: A three-column section with store featured services.
+ * Description: A three-column store features section with an alternative icon layout.
  * Viewport width: 1440
  */
 ?>
-<!-- wp:group {"metadata":{"name":"Three columns of store features with icons alternative","categories":["purple"],"patternName":"purple/store-features-three-columns-alternative","description":"A three-column section with store featured services."},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
+
+<!-- wp:group {"metadata":{"name":"Three columns of store features with icons alternative","categories":["purple"],"patternName":"purple/store-features-three-columns-alternative","description":"A three-column store features section with an alternative icon layout."},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)"><!-- wp:columns {"metadata":{"categories":["text","about"],"patternName":"purple/store-features-four-columns"},"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|50","left":"0"}}}} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"width":"50%"} -->
 <div class="wp-block-column" style="flex-basis:50%"><!-- wp:group {"style":{"spacing":{"padding":{"right":"0","left":"0"},"blockGap":"var:preset|spacing|20"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center","verticalAlignment":"center"}} -->

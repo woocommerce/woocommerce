@@ -4,12 +4,13 @@
  * Slug: purple/page-home-alternative
  * Categories: purple
  * Keywords: starter
+ * Description: A shop homepage with hero, best sellers, testimonials, featured products, and newsletter signup.
  * Block Types: core/post-content
  * Post Types: page, wp_template
  * Viewport width: 1440
- * Description: A shop homepage pattern.
  */
 ?>
+
 <!-- wp:pattern {"slug":"purple/hero-with-text-and-one-button"} /-->
 <!-- wp:pattern {"slug":"purple/woocommerce-best-sellers-3-columns"} /-->
 <!-- wp:pattern {"slug":"purple/testimonials-in-two-columns"} /-->

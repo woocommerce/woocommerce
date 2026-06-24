@@ -9,6 +9,7 @@
  * Viewport width: 1440
  */
 ?>
+
 <!-- wp:group {"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph  -->
 <p><?php esc_html_e('These size charts are a guide to help you find the right size for you. As many pieces are designed in a unique way, we suggest you also refer to the specific garment lengths and measurements provided in the product descriptions.', 'purple');?></p>

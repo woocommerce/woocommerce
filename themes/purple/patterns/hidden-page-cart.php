@@ -5,6 +5,7 @@
  * Inserter: no
  */
 ?>
+
 <!-- wp:woocommerce/page-content-wrapper {"page":"cart"} -->
 	<!-- wp:group {"tagName":"main","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|40"}}},"layout":{"type":"constrained","contentSize":"1060px"}} -->
 	<main class="wp-block-group" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--40)">

@@ -8,6 +8,7 @@
  * Viewport width: 1440
  */
 ?>
+
 <!-- wp:group {"metadata":{"name":"Two columns highlights sections","patternName":"purple/two-columns-highlights-sections","description":"A section with 2 columns of highlights","categories":["purple"]},"align":"full","className":"is-style-section-1","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull is-style-section-1" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50)"><!-- wp:columns {"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column -->

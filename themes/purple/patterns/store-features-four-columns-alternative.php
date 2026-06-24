@@ -4,11 +4,12 @@
  * Slug: purple/store-features-four-columns-alternative
  * Categories: purple
  * Keywords: about, text, media, columns
- * Description: A four-column section with store featured services.
+ * Description: A four-column store features section with an alternative layout.
  * Viewport width: 1440
  */
 ?>
-<!-- wp:group {"metadata":{"name":"Four columns of store features with icons","categories":["purple"],"patternName":"purple/store-features-four-columns-alternative","description":"A four-column section with store featured services."},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"},"blockGap":"0","margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
+
+<!-- wp:group {"metadata":{"name":"Four columns of store features with icons","categories":["purple"],"patternName":"purple/store-features-four-columns-alternative","description":"A four-column store features section with an alternative layout."},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"},"blockGap":"0","margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:columns {"isStackedOnMobile":false,"align":"wide","style":{"spacing":{"blockGap":{"left":"0"}}}} -->
 <div class="wp-block-columns alignwide is-not-stacked-on-mobile"><!-- wp:column {"style":{"spacing":{"padding":{"top":"0","bottom":"0"}}}} -->
 <div class="wp-block-column" style="padding-top:0;padding-bottom:0"><!-- wp:columns {"metadata":{"categories":["text","about"],"patternName":"purple/store-features-four-columns-alternative"},"align":"wide","style":{"spacing":{"padding":{"top":"0","bottom":"0","left":"0","right":"0"},"blockGap":{"top":"var:preset|spacing|60","left":"0"}}}} -->

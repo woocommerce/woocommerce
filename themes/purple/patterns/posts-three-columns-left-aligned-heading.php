@@ -4,11 +4,12 @@
  * Slug: purple/posts-three-columns-left-aligned-heading
  * Categories: purple
  * Keywords: posts, blog, query, columns, grid
- * Description: A list of posts, 3 columns, with featured image, post date and title.
+ * Description: A list of posts in 3 columns with a left-aligned section heading.
  * Block Types: core/query
  * Viewport width: 1440
  */
 ?>
+
 <!-- wp:group {"metadata":{"name":"List of posts with left aligned heading","categories":["purple"],"patternName":"purple/posts-three-columns-left-aligned-heading"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50","left":"var:preset|spacing|50","right":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull" style="padding-top:var(--wp--preset--spacing--50);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50);padding-left:var(--wp--preset--spacing--50)"><!-- wp:group {"align":"wide","layout":{"type":"default"}} -->
 <div class="wp-block-group alignwide"><!-- wp:heading {"align":"wide","style":{"spacing":{"margin":{"bottom":"0","top":"0"}},"typography":{"textAlign":"left"}}} -->

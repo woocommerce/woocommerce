@@ -4,8 +4,8 @@
  * Slug: purple/upsell-products-collection
  * Categories: woo-commerce, purple
  * Keywords: woo-commerce, products, upsell, collection
- * Block Types: woocommerce/product-collection
  * Description: A section with a heading and a carousel of upsell products.
+ * Block Types: woocommerce/product-collection
  * Viewport width: 1440
  */
 ?>

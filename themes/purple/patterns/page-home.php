@@ -6,6 +6,7 @@
  * Template Types: front-page, index, home
  */
 ?>
+
 <!-- wp:pattern {"slug":"purple/hero-with-text-and-two-buttons"} /-->
 <!-- wp:pattern {"slug":"purple/woocommerce-new-arrivals"} /-->
 <!-- wp:pattern {"slug":"purple/two-columns-full-width-categories"} /-->

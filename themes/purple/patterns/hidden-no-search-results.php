@@ -5,6 +5,7 @@
  * Inserter: no
  */
 ?>
+
 <!-- wp:paragraph {"align":"left","metadata":{"patternName":"purple/no-search-results","name":"No search results"},"style":{"typography":{"textAlign":"left"}}} -->
 <p class="has-text-align-left"><?php echo esc_html_x( 'No results were found using that search.', 'Text explaining that there are no results returned from a search', 'purple' ); ?></p>
 <!-- /wp:paragraph -->

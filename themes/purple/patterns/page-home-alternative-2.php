@@ -4,12 +4,13 @@
  * Slug: purple/page-home-alternative-2
  * Categories: purple
  * Keywords: starter
+ * Description: A shop homepage with category highlights, new arrival feature, and store features.
  * Block Types: core/post-content
  * Post Types: page, wp_template
  * Viewport width: 1440
- * Description: A shop homepage pattern.
  */
 ?>
+
 <!-- wp:pattern {"slug":"purple/two-columns-full-width-categories"} /-->
 <!-- wp:pattern {"slug":"purple/new-arrival-product"} /-->
 <!-- wp:pattern {"slug":"purple/woocommerce-featured-products"} /-->

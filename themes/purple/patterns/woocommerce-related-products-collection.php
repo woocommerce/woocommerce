@@ -4,8 +4,8 @@
  * Slug: purple/related-products-collection
  * Categories: woo-commerce, purple
  * Keywords: woo-commerce, products, related, collection
- * Block Types: woocommerce/product-collection
  * Description: A section with a heading and a carousel of related products.
+ * Block Types: woocommerce/product-collection
  * Viewport width: 1440
  */
 ?>

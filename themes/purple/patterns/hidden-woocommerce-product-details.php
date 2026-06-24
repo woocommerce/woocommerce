@@ -5,6 +5,7 @@
  * Inserter: no
  */
 ?>
+
 <!-- wp:woocommerce/product-details -->
 <div class="wp-block-woocommerce-product-details"><!-- wp:woocommerce/accordion-group {"style":{"spacing":{"blockGap":"0"}}} -->
 <div class="wp-block-woocommerce-accordion-group"><!-- wp:woocommerce/accordion-item -->

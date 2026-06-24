@@ -4,12 +4,13 @@
  * Slug: purple/page-about-additional-information
  * Categories: purple
  * Keywords: starter
+ * Description: An about page with alternating columns, category collection, and FAQ.
  * Block Types: core/post-content
  * Post Types: page, wp_template
  * Viewport width: 1440
- * Description: An about page pattern.
  */
 ?>
+
 <!-- wp:pattern {"slug":"purple/about-alternating-columns"} /-->
 <!-- wp:pattern {"slug":"purple/about-category-collection"} /-->
 <!-- wp:pattern {"slug":"purple/about-faq-question-list"} /-->

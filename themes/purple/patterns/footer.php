@@ -4,8 +4,8 @@
  * Slug: purple/footer
  * Categories: footer, purple
  * Keywords: footer, contact, social, navigation, links
- * Block Types: core/template-part/footer
  * Description: A footer pattern with social links and navigation.
+ * Block Types: core/template-part/footer
  * Viewport width: 1440
  */
 ?>
