@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useState, useMemo } from '@wordpress/element';
-import { edit, external } from '@wordpress/icons';
+import { pencil, external } from '@wordpress/icons';
 import { Icon } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
@@ -14,14 +14,16 @@ import { DataViews, View } from '@wordpress/dataviews/wp'; // eslint-disable-lin
  */
 import { EmailType } from './settings-email-listing-slotfill';
 import { useTransactionalEmails } from './settings-email-listing-data';
+import { shouldShowReviewUpdate } from './settings-email-listing-update-state';
 import { Status, EMAIL_STATUSES } from './settings-email-listing-status';
 import { RecipientsList } from './settings-email-listing-recipients';
+import { UpdatesCell } from './settings-email-listing-update-cell';
 
 export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 	const [ view, setView ] = useState< View >( {
 		type: 'table',
 		search: '',
-		fields: [ 'recipients', 'status' ],
+		fields: [ 'recipients', 'status', 'updates' ],
 		filters: [],
 		page: 1,
 		perPage: 20,
@@ -104,26 +106,40 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				},
 				elements: EMAIL_STATUSES,
 			},
+			{
+				id: 'updates',
+				label: __( 'Updates', 'woocommerce' ),
+				enableHiding: true,
+				enableSorting: false,
+				getValue: ( { item }: { item: EmailType } ) =>
+					shouldShowReviewUpdate( item ) ? 'available' : 'none',
+				elements: [
+					{
+						value: 'available',
+						label: __( 'Update available', 'woocommerce' ),
+					},
+					{
+						value: 'none',
+						label: __( 'Up to date', 'woocommerce' ),
+					},
+				],
+				filterBy: {
+					operators: [ 'is' ],
+					isPrimary: true,
+				},
+				render: ( { item }: { item: EmailType } ) => (
+					<UpdatesCell post={ item } />
+				),
+			},
 		];
 	}, [ emailTypes ] );
 
 	const actions = useMemo(
 		() => [
 			{
-				id: 'preview',
-				label: __( 'Preview', 'woocommerce' ),
-				icon: <Icon icon={ external } />,
-				supportsBulk: false,
-				callback: ( items: EmailType[] ) => {
-					window.open( items[ 0 ].link );
-				},
-				isEligible: ( item: EmailType ) => !! item.post_id,
-				isPrimary: true,
-			},
-			{
 				id: 'edit',
 				label: __( 'Edit', 'woocommerce' ),
-				icon: <Icon icon={ edit } />,
+				icon: <Icon icon={ pencil } />,
 				supportsBulk: false,
 				callback: ( items: EmailType[] ) => {
 					const email = items[ 0 ];
@@ -141,6 +157,16 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 						);
 					}
 				},
+			},
+			{
+				id: 'preview',
+				label: __( 'Preview', 'woocommerce' ),
+				icon: <Icon icon={ external } />,
+				supportsBulk: false,
+				callback: ( items: EmailType[] ) => {
+					window.open( items[ 0 ].link );
+				},
+				isEligible: ( item: EmailType ) => !! item.post_id,
 				isPrimary: true,
 			},
 			{
@@ -156,8 +182,8 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				id: 'change-status',
 				label: ( items: EmailType[] ) =>
 					items[ 0 ].status === 'enabled'
-						? __( 'Disable email', 'woocommerce' )
-						: __( 'Enable email', 'woocommerce' ),
+						? __( 'Deactivate email', 'woocommerce' )
+						: __( 'Activate email', 'woocommerce' ),
 				supportsBulk: false,
 				isEligible: ( item: EmailType ) =>
 					item.status === 'enabled' || item.status === 'disabled',

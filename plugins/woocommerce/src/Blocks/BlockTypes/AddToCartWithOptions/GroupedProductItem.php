@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
-use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use WP_Block;
 
 /**
@@ -61,15 +60,17 @@ class GroupedProductItem extends AbstractBlock {
 
 		add_filter( 'render_block_context', array( $this, 'set_is_descendant_of_grouped_product_selector_context' ), 10, 2 );
 
-		// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
-		// `render_callback` and ensure that no wrapper markup is included.
-		$block_content = AddToCartWithOptionsUtils::render_block_with_context(
-			$block,
+		// Create new block with custom context.
+		$new_block = new WP_Block(
+			$block->parsed_block,
 			array(
 				'postType' => 'product',
 				'postId'   => $post->ID,
-			),
+			)
 		);
+
+		// Render with dynamic set to false to prevent calling render_callback.
+		$block_content = $new_block->render( array( 'dynamic' => false ) );
 
 		remove_filter( 'render_block_context', array( $this, 'set_is_descendant_of_grouped_product_selector_context' ) );
 
@@ -95,6 +96,7 @@ class GroupedProductItem extends AbstractBlock {
 
 		$content = '';
 
+		// No need to prime post caches here, children are already cached at this point.
 		$children = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
 
 		foreach ( $children as $child ) {

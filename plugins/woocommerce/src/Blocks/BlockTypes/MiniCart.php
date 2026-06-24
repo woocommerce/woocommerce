@@ -14,7 +14,9 @@ use Automattic\WooCommerce\Blocks\Utils\Utils;
 use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
 use Automattic\Block_Delimiter;
 
 /**
@@ -24,7 +26,6 @@ use Automattic\Block_Delimiter;
  */
 class MiniCart extends AbstractBlock {
 	use BlockHooksTrait;
-	use BlocksSharedState;
 
 	/**
 	 * Block name.
@@ -412,8 +413,6 @@ class MiniCart extends AbstractBlock {
 			return;
 		}
 
-		$site_url = site_url() ?? wp_guess_url();
-
 		if ( Utils::wp_version_compare( '6.3', '>=' ) ) {
 			$script_before = $wp_scripts->get_inline_script_data( $script->handle, 'before' );
 			$script_after  = $wp_scripts->get_inline_script_data( $script->handle, 'after' );
@@ -423,7 +422,7 @@ class MiniCart extends AbstractBlock {
 		}
 
 		$this->scripts_to_lazy_load[ $script->handle ] = array(
-			'src'          => preg_match( '|^(https?:)?//|', $script->src ) ? $script->src : $site_url . $script->src,
+			'src'          => Utils::get_absolute_script_url( $script->src ),
 			'version'      => $script->ver,
 			'before'       => $script_before,
 			'after'        => $script_after,
@@ -473,6 +472,14 @@ class MiniCart extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		/**
+		 * Do not render for logged-out users if the Coming Soon mode is enabled for store pages only.
+		 */
+		$coming_soon_helper = wc_get_container()->get( ComingSoonHelper::class );
+		if ( ! is_user_logged_in() && ! WC()->is_rest_api_request() && $coming_soon_helper->is_store_coming_soon() ) {
+			return '';
+		}
+
+		/**
 		 * In the cart and checkout pages, the block is either rendered hidden or removed.
 		 * It is not interactive, so it can fall back to the existing implementation.
 		 */
@@ -501,17 +508,18 @@ class MiniCart extends AbstractBlock {
 			wp_enqueue_script( $handle );
 		}
 
-		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
-		$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
-		$this->placeholder_image( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+		$consent = 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
+		BlocksSharedState::load_cart_state( $consent );
+		BlocksSharedState::load_store_config( $consent );
+		BlocksSharedState::load_placeholder_image( $consent );
 
 		$cart = $this->get_cart_instance();
 
 		if ( $cart ) {
 			$classes_styles                   = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 			$icon_color                       = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
-			$product_count_color              = isset( $attributes['productCountColor']['color'] ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
-			$styles                           = $product_count_color ? 'background:' . $product_count_color : '';
+			$product_count_color              = isset( $attributes['productCountColor']['color'] ) ? $attributes['productCountColor']['color'] : '';
+			$styles                           = $product_count_color ? 'background:' . esc_attr( $product_count_color ) : '';
 			$icon                             = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
 			$product_count_visibility         = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
 			$wrapper_classes                  = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
@@ -519,7 +527,7 @@ class MiniCart extends AbstractBlock {
 			$template_part_contents           = $this->get_template_part_contents( false );
 			$template_part_contents           = do_blocks( $this->process_template_contents( $template_part_contents ) );
 			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
-			$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === 'incl';
+			$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === TaxDisplayMode::INCLUSIVE;
 			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
 			$badge_is_visible                 = ( 'always' === $product_count_visibility ) || ( 'never' !== $product_count_visibility && $cart_item_count > 0 );
 			$formatted_subtotal               = '';
@@ -558,6 +566,7 @@ class MiniCart extends AbstractBlock {
 							? sprintf( $button_aria_label_template, $state['totalItemsInCart'] )
 							: sprintf( $button_aria_label_template, $state['totalItemsInCart'], $state['formattedSubtotal'] );
 					},
+					'productCountColor'  => $product_count_color,
 				)
 			);
 
@@ -569,7 +578,6 @@ class MiniCart extends AbstractBlock {
 				$this->get_full_block_name(),
 				array(
 					'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
-					'addToCartBehaviour'           => $attributes['addToCartBehaviour'],
 					'onCartClickBehaviour'         => $on_cart_click_behaviour,
 					'checkoutUrl'                  => wc_get_checkout_url(),
 					'buttonAriaLabelTemplate'      => $button_aria_label_template,
@@ -592,16 +600,20 @@ class MiniCart extends AbstractBlock {
 		
 			<div
 				data-wp-interactive="woocommerce/mini-cart"
-				data-wp-init="callbacks.setupEventListeners"
-				data-wp-init--refresh-cart-items="woocommerce::actions.refreshCartItems"
+				data-wp-init="callbacks.setupJQueryEventBridge"
+				data-wp-on-document--wc-blocks_added_to_cart="woocommerce::actions.refreshCartItems"
+				data-wp-on-document--wc-blocks_removed_from_cart="woocommerce::actions.refreshCartItems"
+				<?php if ( 'open_drawer' === $attributes['addToCartBehaviour'] ) : ?>
+				data-wp-on-document--wc-blocks_added_to_cart---open-drawer="actions.openDrawer"
+				<?php endif; ?>
 				data-wp-watch="callbacks.disableScrollingOnBody"
+				data-wp-init--mark-as-hydrated="callbacks.markAsHydrated"
 				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php echo wp_interactivity_data_wp_context( $context ); ?>
 				class="<?php echo esc_attr( $wrapper_classes ); ?>"
 				style="<?php echo esc_attr( $wrapper_styles ); ?>"
 			>
-				<button 
-					data-wp-init="callbacks.saveMiniCartButtonRef"
+				<button
 					data-wp-on--click="actions.openDrawer"
 					data-wp-bind--aria-label="state.buttonAriaLabel"
 					class="wc-block-mini-cart__button"
@@ -612,13 +624,20 @@ class MiniCart extends AbstractBlock {
 							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 							echo $icon;
 						?>
-						<?php if ( 'never' !== $product_count_visibility ) : ?>
-							<span data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.totalItemsInCart" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
+							<?php if ( 'never' !== $product_count_visibility ) : ?>
+								<span
+									data-wp-style--background-color="state.badgeBackgroundColor"
+									data-wp-style--color="state.badgeTextColor"
+									data-wp-bind--hidden="!state.badgeIsVisible"
+									data-wp-text="state.totalItemsInCart"
+									class="wc-block-mini-cart__badge"
+									style="<?php echo esc_attr( $styles ); ?>"
+								>
 							</span>
 						<?php endif; ?>
 					</span>
 					<?php if ( $cart_always_shows_price ) : ?>
-						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
+						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" translate="no" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
 						</span>
 						<?php if ( ! empty( $this->tax_label ) ) : ?>
 							<small
@@ -801,8 +820,8 @@ class MiniCart extends AbstractBlock {
 		$wrapper_styles  = $classes_styles['styles'];
 
 		$icon_color          = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
-		$product_count_color = isset( $attributes['productCountColor']['color'] ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
-		$styles              = $product_count_color ? 'background:' . $product_count_color : '';
+		$product_count_color = isset( $attributes['productCountColor']['color'] ) ? $attributes['productCountColor']['color'] : '';
+		$styles              = $product_count_color ? 'background:' . esc_attr( $product_count_color ) : '';
 		$icon                = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
 
 		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';

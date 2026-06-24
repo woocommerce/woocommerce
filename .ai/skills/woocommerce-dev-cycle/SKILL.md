@@ -14,7 +14,8 @@ Follow these guidelines for WooCommerce development workflow:
 1. **Running tests**: See [running-tests.md](running-tests.md) for PHP and JavaScript test commands, test environment setup, and troubleshooting
 2. **Code quality**: See [code-quality.md](code-quality.md) for linting and code style fixes
 3. **PHP linting patterns**: See [php-linting-patterns.md](php-linting-patterns.md) for common PHP linting issues and fixes
-4. **Markdown linting**: See [markdown-linting.md](markdown-linting.md) for markdown file linting and formatting
+4. **JS/TS i18n patterns**: See [js-i18n-patterns.md](js-i18n-patterns.md) for translatable string patterns and placeholder usage
+5. **Markdown linting**: See [markdown-linting.md](markdown-linting.md) for markdown file linting and formatting
 
 ## Development Workflow
 

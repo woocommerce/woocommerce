@@ -33,11 +33,11 @@ function TemplateNoResults() {
 				className="block-editor-inserter__no-results-icon"
 				icon={ blockDefault }
 			/>
-			<p>{ __( 'No recent templates.', 'woocommerce' ) }</p>
+			<p>{ __( 'No recent templates.', __i18n_text_domain__ ) }</p>
 			<p>
 				{ __(
 					'Your recent creations will appear here as soon as you begin.',
-					'woocommerce'
+					__i18n_text_domain__
 				) }
 			</p>
 		</div>
@@ -97,7 +97,7 @@ function TemplateListBox( {
 								<p>
 									{ __(
 										'rendering template',
-										'woocommerce'
+										__i18n_text_domain__
 									) }
 								</p>
 							}
@@ -139,9 +139,11 @@ export function TemplateList( {
 }: Props ) {
 	const filteredTemplates = useMemo(
 		() =>
-			templates.filter(
-				( template ) => template.category === selectedCategory
-			),
+			selectedCategory !== null && selectedCategory !== undefined
+				? templates.filter(
+						( template ) => template.category === selectedCategory
+				  )
+				: templates,
 		[ selectedCategory, templates ]
 	);
 
@@ -154,7 +156,7 @@ export function TemplateList( {
 						<p>
 							{ __(
 								'Templates created on the legacy editor will not appear here.',
-								'woocommerce'
+								__i18n_text_domain__
 							) }
 						</p>
 					</HStack>

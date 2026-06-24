@@ -233,4 +233,45 @@ class Video_Test extends \Email_Editor_Integration_Test_Case {
 		// Should apply minimum height for consistent video block appearance.
 		$this->assertStringContainsString( 'min-height:390px', $rendered );
 	}
+
+	/**
+	 * Test that video URLs with underscores are not truncated
+	 */
+	public function test_video_urls_with_underscores_are_not_truncated(): void {
+		$parsed_video_underscore = array(
+			'blockName' => 'core/video',
+			'attrs'     => array(
+				'poster' => 'https://example.com/poster.jpg',
+			),
+			'innerHTML' => '<figure class="wp-block-video wp-block-embed is-type-video is-provider-youtube"><div class="wp-block-embed__wrapper">https://www.youtube.com/watch?v=dQw4w9_WgXcQ</div></figure>',
+		);
+
+		$rendered = $this->video_renderer->render( '', $parsed_video_underscore, $this->rendering_context );
+
+		// The play button link should contain the full YouTube URL with the underscore intact.
+		$this->assertStringContainsString( 'dQw4w9_WgXcQ', $rendered, 'URL should not be truncated at underscore' );
+	}
+
+	/**
+	 * Test that poster URLs with query parameters work correctly
+	 */
+	public function test_poster_urls_with_query_parameters_work_correctly(): void {
+		$parsed_video_with_query = array(
+			'blockName' => 'core/video',
+			'attrs'     => array(
+				'poster' => 'https://example.com/poster.jpg?w=500&h=281',
+				'title'  => 'Sample Video',
+			),
+			'innerHTML' => '<figure class="wp-block-video"><video controls poster="https://example.com/poster.jpg?w=500&h=281"><source src="https://example.com/video.mp4" type="video/mp4" /></video></figure>',
+		);
+
+		$rendered = $this->video_renderer->render( '', $parsed_video_with_query, $this->rendering_context );
+
+		// Should contain background-image with query parameters.
+		// The key test is that background-image is present (not stripped by WP_Style_Engine).
+		$this->assertStringContainsString( 'background-image', $rendered, 'Background image should be present in CSS' );
+		// Verify query parameters are present.
+		$this->assertStringContainsString( 'w=500', $rendered, 'Query parameters should be present' );
+		$this->assertStringContainsString( 'h=281', $rendered, 'Query parameters should be present' );
+	}
 }

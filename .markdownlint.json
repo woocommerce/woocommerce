@@ -4,7 +4,17 @@
 	"MD007": { "indent": 4 },
 	"MD013": { "line_length": 9999 },
 	"MD024": { "siblings_only": true },
-	"MD033": { "allowed_elements": [ "video" ] },
+	"MD033": {
+		"allowed_elements": [
+			"h1",
+			"h2",
+			"h3",
+			"br",
+			"summary",
+			"details",
+			"video"
+		]
+	},
 	"no-hard-tabs": false,
 	"whitespace": false
 }

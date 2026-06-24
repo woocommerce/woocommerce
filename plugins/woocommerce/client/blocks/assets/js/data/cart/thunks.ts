@@ -21,6 +21,7 @@ import {
 	type ConfigOf,
 	type ActionCreatorsOf,
 } from '@wordpress/data/build-types/types';
+import { __ } from '@wordpress/i18n';
 import { cartStore } from '@woocommerce/block-data';
 
 /**
@@ -32,6 +33,7 @@ import {
 } from './notify-quantity-changes';
 import { updateCartErrorNotices } from './notify-errors';
 import { apiFetchWithHeaders } from '../shared-controls';
+import { isObject } from '../../types/type-guards/object';
 import {
 	getIsCustomerDataDirty,
 	setIsCustomerDataDirty,
@@ -61,13 +63,30 @@ export const receiveCart =
 		// Get the new cart data before showing updates.
 		const newCart = select.getCartData();
 
+		const cartItemsPendingDelete = select.getItemsPendingDelete();
+
 		notifyQuantityChanges( {
 			oldCart,
 			newCart,
 			cartItemsPendingQuantity: select.getItemsPendingQuantityUpdate(),
-			cartItemsPendingDelete: select.getItemsPendingDelete(),
+			cartItemsPendingDelete,
 			productsPendingAdd: select.getProductsPendingAdd(),
 		} );
+
+		// Clear pending delete status for items no longer in the cart.
+		// This handles cases where removing one item causes dependent items
+		// to also be removed server-side (e.g., bundled product children
+		// removed when their parent bundle is deleted).
+		if ( cartItemsPendingDelete.length > 0 ) {
+			const newCartItemKeys = new Set(
+				newCart.items.map( ( item ) => item.key )
+			);
+			cartItemsPendingDelete.forEach( ( key ) => {
+				if ( ! newCartItemKeys.has( key ) ) {
+					dispatch.itemIsPendingDelete( key, false );
+				}
+			} );
+		}
 
 		updateCartErrorNotices( newCart.errors, oldCartErrors );
 		dispatch.setErrorData( null );
@@ -122,19 +141,43 @@ export const applyExtensionCartUpdate =
 				data: { namespace: args.namespace, data: args.data },
 				cache: 'no-store',
 			} );
-			if ( args.overwriteDirtyCustomerData === true ) {
-				dispatch.receiveCart( response );
-				return response;
-			}
-			if ( getIsCustomerDataDirty() ) {
-				// If the customer data is dirty, we don't want to overwrite it with the response.
-				// Remove shipping and billing address from the response and then receive the cart.
+			// Determine which addresses should be overwritten in the store.
+			const raw = args.overwriteDirtyCustomerData;
+			const overwrite = isObject( raw )
+				? {
+						shipping_address: raw.shipping_address === true,
+						billing_address: raw.billing_address === true,
+				  }
+				: {
+						shipping_address: raw === true,
+						billing_address: raw === true,
+				  };
+
+			const isDirty = getIsCustomerDataDirty();
+
+			// Decide per-address: include it unless it's dirty and not being overwritten.
+			const includeShipping = overwrite.shipping_address || ! isDirty;
+			const includeBilling = overwrite.billing_address || ! isDirty;
+
+			if ( ! includeShipping || ! includeBilling ) {
 				const {
-					shipping_address: _,
-					billing_address: __,
-					...responseWithoutShippingOrBilling
+					shipping_address: _shipping,
+					billing_address: _billing,
+					...responseWithoutAddresses
 				} = response;
-				dispatch.receiveCart( responseWithoutShippingOrBilling );
+
+				const cartToReceive: Partial< CartResponse > = {
+					...responseWithoutAddresses,
+				};
+
+				if ( includeShipping ) {
+					cartToReceive.shipping_address = response.shipping_address;
+				}
+				if ( includeBilling ) {
+					cartToReceive.billing_address = response.billing_address;
+				}
+
+				dispatch.receiveCart( cartToReceive );
 				return response;
 			}
 			dispatch.receiveCart( response );
@@ -443,10 +486,68 @@ export const removeItemFromCart =
 	};
 
 /**
- * Persists a quantity change the for specified cart item:
+ * Saves a cart line item to the saved-for-later shopper list.
+ *
+ * On success, emits a `wc-blocks_store_sync_required` event with the saved
+ * item in `detail.item` so a `woocommerce/shopper-lists` iAPI store on the
+ * same page (rendered by a Saved for Later block) can splice the row
+ * into its local state — no extra GET, no race window between a slow
+ * refetch and concurrent mutations. Same envelope the cart's iAPI → wp.data
+ * sync uses to ship payloads (`detail.type === 'from_iAPI'` carries
+ * `quantityChanges`); this is the wp.data → iAPI direction of the same
+ * pattern.
+ *
+ * Removing the item from the cart is the caller's responsibility — keep the
+ * two awaits separate so save and remove errors can be reported distinctly.
+ *
+ * @param {string} cartItemKey Cart item to save.
+ */
+export const saveForLater =
+	( cartItemKey: string ) => async (): Promise< { key: string } > => {
+		if (
+			typeof cartItemKey !== 'string' ||
+			cartItemKey.trim().length === 0
+		) {
+			throw new Error(
+				__(
+					'A cart item is required to save it for later.',
+					'woocommerce'
+				)
+			);
+		}
+		const { response } = await apiFetchWithHeaders< {
+			response: { key: string };
+		} >( {
+			path: '/wc/store/v1/shopper-lists/saved-for-later/items',
+			method: 'POST',
+			data: { cart_item_key: cartItemKey },
+			cache: 'no-store',
+		} );
+
+		window.dispatchEvent(
+			new CustomEvent( 'wc-blocks_store_sync_required', {
+				detail: {
+					type: 'shopper-list-item-added',
+					slug: 'saved-for-later',
+					item: response,
+				},
+			} )
+		);
+
+		return response;
+	};
+
+/**
+ * Tracks AbortControllers per cart item for cancelling in-flight quantity requests.
+ */
+const quantityAbortControllers = new Map< string, AbortController >();
+
+/**
+ * Persists a quantity change for the specified cart item:
+ * - Aborts any in-flight request for the same item.
  * - Calls API to set quantity.
  * - If successful, yields action to update store.
- * - If error, yields action to store error.
+ * - If error (except AbortError), yields action to store error.
  *
  * @param {string} cartItemKey Cart item being updated.
  * @param {number} quantity    Specified (new) quantity.
@@ -462,6 +563,22 @@ export const changeCartItemQuantity =
 		if ( cartItem?.quantity === quantity ) {
 			return;
 		}
+
+		// Abort any existing in-flight request for this item.
+		const existingController = quantityAbortControllers.get( cartItemKey );
+		if ( existingController ) {
+			existingController.abort();
+		}
+
+		// Create new AbortController for this request.
+		const abortController =
+			typeof AbortController === 'undefined'
+				? null
+				: new AbortController();
+		if ( abortController ) {
+			quantityAbortControllers.set( cartItemKey, abortController );
+		}
+
 		try {
 			dispatch.itemIsPendingQuantity( cartItemKey );
 			const { response } = await apiFetchWithHeaders< {
@@ -474,18 +591,33 @@ export const changeCartItemQuantity =
 					quantity,
 				},
 				cache: 'no-store',
+				signal: abortController?.signal ?? null,
 			} );
+
 			dispatch.receiveCart( response );
 			return response;
 		} catch ( error ) {
+			// Don't treat aborted requests as errors - they were intentionally cancelled.
+			if (
+				error instanceof DOMException &&
+				error.name === 'AbortError'
+			) {
+				return;
+			}
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			return Promise.reject( error );
 		} finally {
+			// Clean up controller if it's still the current one for this item.
+			if (
+				quantityAbortControllers.get( cartItemKey ) === abortController
+			) {
+				quantityAbortControllers.delete( cartItemKey );
+			}
 			dispatch.itemIsPendingQuantity( cartItemKey, false );
 		}
 	};
 
-// Facilitates aborting fetch requests.
+// Facilitates aborting fetch requests for shipping rate selection.
 let abortController: AbortController | null = null;
 
 /**
@@ -522,8 +654,28 @@ export const selectShippingRate =
 			return;
 		}
 
+		const previousRates = select.getShippingRates();
+
 		try {
 			dispatch.shippingRatesBeingSelected( true );
+
+			// Optimistically update the selected flag so the UI (labels, totals)
+			// reflects the new rate immediately without waiting for the API.
+			dispatch.setCartData( {
+				shippingRates: previousRates.map( ( pkg ) => {
+					if ( packageId !== null && pkg.package_id !== packageId ) {
+						return pkg;
+					}
+					return {
+						...pkg,
+						shipping_rates: pkg.shipping_rates.map( ( rate ) => ( {
+							...rate,
+							selected: rate.rate_id === rateId,
+						} ) ),
+					};
+				} ),
+			} );
+
 			if ( abortController ) {
 				abortController.abort();
 			}
@@ -557,6 +709,11 @@ export const selectShippingRate =
 			dispatch.shippingRatesBeingSelected( false );
 			return response;
 		} catch ( error ) {
+			// Roll back the optimistic update so the UI reflects the server's
+			// actual selection rather than a rate the server never committed.
+			dispatch.setCartData( {
+				shippingRates: previousRates,
+			} );
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			dispatch.shippingRatesBeingSelected( false );
 			return Promise.reject( error );
@@ -619,6 +776,7 @@ export type Thunks =
 	| typeof removeCoupon
 	| typeof addItemToCart
 	| typeof removeItemFromCart
+	| typeof saveForLater
 	| typeof changeCartItemQuantity
 	| typeof selectShippingRate
 	| typeof updateCustomerData;

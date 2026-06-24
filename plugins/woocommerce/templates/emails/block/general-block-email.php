@@ -13,7 +13,9 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.5.0
+ * @version 11.0.0
+ *
+ * @var \WC_Order    $order      Order object.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -89,6 +91,18 @@ if ( 'customer_reset_password' === $email->id && isset( $reset_key, $user_id ) )
 	<?php
 endif;
 
+if ( 'customer_verify_email' === $email->id && $verify_code ) {
+	?>
+	<!-- wp:paragraph -->
+	<p><?php esc_html_e( 'Use this code to confirm your email address:', 'woocommerce' ); ?></p>
+	<!-- /wp:paragraph -->
+
+	<!-- wp:paragraph -->
+	<p style="font-size: 32px; font-weight: 700; letter-spacing: 0.4em; text-align: center;"><?php echo esc_html( $verify_code ); ?></p>
+	<!-- /wp:paragraph -->
+	<?php
+}
+
 /**
  * Action hook for email classes to hook into the general block email template.
  *
@@ -110,6 +124,7 @@ $emails_without_order_details = apply_filters( 'woocommerce_emails_general_block
 $accounts_related_emails = array(
 	'customer_reset_password',
 	'customer_new_account',
+	'customer_verify_email',
 );
 
 $emails_without_order_details = array_merge( $emails_without_order_details ?? array(), $accounts_related_emails );

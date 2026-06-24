@@ -5,7 +5,7 @@
  * @package WooCommerce\Emails
  */
 
-use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -79,9 +79,7 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Deleted', false ) ) :
 				$this->placeholders['{order_number}'] = $this->object->get_order_number();
 			}
 
-			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-			}
+			$this->send_notification();
 
 			$this->restore_locale();
 		}

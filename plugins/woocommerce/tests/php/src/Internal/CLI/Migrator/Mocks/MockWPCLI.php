@@ -72,9 +72,10 @@ class MockWPCLI {
 	/**
 	 * Mock debug method.
 	 *
-	 * @param string $message Debug message.
+	 * @param string      $message Debug message.
+	 * @param string|bool $group   Debug group.
 	 */
-	public static function debug( $message ): void {
+	public static function debug( $message, $group = false ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		self::$last_debug_message = $message;
 	}
 

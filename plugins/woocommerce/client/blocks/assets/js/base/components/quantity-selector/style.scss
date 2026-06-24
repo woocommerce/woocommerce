@@ -16,13 +16,12 @@
 	border-radius: $universal-border-radius;
 	box-sizing: border-box;
 	display: flex;
-	margin: 0 0 0.25em 0;
 	position: relative;
 	width: 107px;
 
 	// Extra label for specificity needed in the editor.
 	input.wc-block-components-quantity-selector__input {
-		@include font-regular-locked;
+		@include font-small-locked;
 		appearance: textfield;
 		background: transparent;
 		border: 0;
@@ -33,7 +32,6 @@
 		margin: 0;
 		min-width: 40px;
 		order: 2;
-		padding: 0.4em 0;
 		text-align: center;
 		vertical-align: middle;
 
@@ -86,6 +84,10 @@
 	&[hidden] {
 		display: none;
 	}
+}
+
+:where(.wc-block-components-quantity-selector .wc-block-components-quantity-selector__input) {
+	padding: 0.4em 0;
 }
 
 .theme-twentyseventeen {

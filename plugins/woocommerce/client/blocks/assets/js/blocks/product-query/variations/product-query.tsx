@@ -10,12 +10,11 @@ import { __ } from '@wordpress/i18n';
 import { stacks } from '@woocommerce/icons';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { select, subscribe } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
 import {
 	QueryBlockAttributes,
 	ProductQueryBlockQuery,
 } from '@woocommerce/blocks/product-query/types';
-import { isSiteEditorPage } from '@woocommerce/utils';
+import { isSiteEditorPage, CORE_EDITOR_STORE } from '@woocommerce/utils';
 import { isNumber, isString } from '@woocommerce/types';
 
 /**
@@ -46,7 +45,7 @@ const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 		),
 		name: PRODUCT_QUERY_VARIATION_NAME,
 		/* translators: "Products" is the name of the block. */
-		title: __( 'Products (Beta)', 'woocommerce' ),
+		title: __( 'Products (Deprecated)', 'woocommerce' ),
 		isActive: ( blockAttributes ) =>
 			blockAttributes.namespace === PRODUCT_QUERY_VARIATION_NAME,
 		icon: (
@@ -72,8 +71,7 @@ const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 let currentTemplateSlug: string | undefined;
 subscribe( () => {
 	const previousTemplateSlug = currentTemplateSlug;
-	// @ts-expect-error getEditedPostSlug is not typed
-	currentTemplateSlug = select( editorStore )?.getEditedPostSlug();
+	currentTemplateSlug = select( CORE_EDITOR_STORE )?.getEditedPostSlug?.();
 	if ( previousTemplateSlug === currentTemplateSlug ) {
 		return;
 	}

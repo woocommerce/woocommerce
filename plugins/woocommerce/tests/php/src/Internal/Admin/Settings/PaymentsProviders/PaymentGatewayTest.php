@@ -186,6 +186,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'description' => 'WooPay express checkout',
 							'icon'        => '', // The icon with an invalid URL is ignored.
 							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+							'notice'      => array(
+								'badge'     => '',
+								'message'   => '',
+								'link_text' => '',
+								'link_url'  => '',
+							),
 						),
 						array(
 							'id'          => 'card',
@@ -196,6 +202,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'description' => '<strong>Accepts</strong> <b>all major</b><em>credit</em> and <a href="#" target="_blank">debit cards</a>.',
 							'icon'        => 'https://example.com/card-icon.png',
 							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+							'notice'      => array(
+								'badge'     => '',
+								'message'   => '',
+								'link_text' => '',
+								'link_url'  => '',
+							),
 						),
 						array(
 							'id'          => 'basic2',
@@ -206,6 +218,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'description' => '',
 							'icon'        => '',
 							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+							'notice'      => array(
+								'badge'     => '',
+								'message'   => '',
+								'link_text' => '',
+								'link_url'  => '',
+							),
 						),
 						array(
 							'id'          => 'basic',
@@ -216,6 +234,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'description' => '',
 							'icon'        => '',
 							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_SECONDARY,
+							'notice'      => array(
+								'badge'     => '',
+								'message'   => '',
+								'link_text' => '',
+								'link_url'  => '',
+							),
 						),
 					),
 				),
@@ -1898,6 +1922,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 					'description' => 'WooPay express checkout',
 					'icon'        => 'https://example.com/icon.png',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_SECONDARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 				array(
 					'id'          => 'card',
@@ -1908,6 +1938,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 					'description' => 'Accepts all major credit and debit cards.',
 					'icon'        => 'https://example.com/card-icon.png',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 			),
 			$this->sut->get_recommended_payment_methods( $fake_gateway )
@@ -1962,6 +1998,12 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
 					// No icon.
 					'icon'        => '',
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 			),
 			$this->sut->get_recommended_payment_methods( $fake_gateway )
@@ -1978,6 +2020,102 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 			array(),
 			$this->sut->get_recommended_payment_methods( $fake_gateway )
 		);
+	}
+
+	/**
+	 * Test that recommended payment methods with a notice are standardized correctly.
+	 */
+	public function test_get_recommended_payment_methods_with_notice() {
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'recommended_payment_methods' => array(
+					array(
+						'id'      => 'p24',
+						'title'   => 'Przelewy24',
+						'enabled' => false,
+						'notice'  => array(
+							'badge'     => 'Additional verification required',
+							'message'   => 'Przelewy24 has strict requirements.',
+							'link_text' => 'Review requirements',
+							'link_url'  => 'https://woocommerce.com/document/woopayments/payment-methods/local-payment-methods/#p24-additional-requirements',
+						),
+					),
+				),
+			)
+		);
+
+		$result = $this->sut->get_recommended_payment_methods( $fake_gateway );
+
+		$this->assertCount( 1, $result );
+		$this->assertArrayHasKey( 'notice', $result[0] );
+		$this->assertSame( 'Additional verification required', $result[0]['notice']['badge'] );
+		$this->assertSame( 'Przelewy24 has strict requirements.', $result[0]['notice']['message'] );
+		$this->assertSame( 'Review requirements', $result[0]['notice']['link_text'] );
+		$this->assertSame(
+			'https://woocommerce.com/document/woopayments/payment-methods/local-payment-methods/#p24-additional-requirements',
+			$result[0]['notice']['link_url']
+		);
+	}
+
+	/**
+	 * Test that recommended payment methods without a notice have an empty notice.
+	 */
+	public function test_get_recommended_payment_methods_without_notice() {
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'recommended_payment_methods' => array(
+					array(
+						'id'    => 'card',
+						'title' => 'Card',
+					),
+				),
+			)
+		);
+
+		$result = $this->sut->get_recommended_payment_methods( $fake_gateway );
+
+		$this->assertCount( 1, $result );
+		$this->assertArrayHasKey( 'notice', $result[0] );
+		$this->assertSame( '', $result[0]['notice']['badge'] );
+		$this->assertSame( '', $result[0]['notice']['message'] );
+		$this->assertSame( '', $result[0]['notice']['link_text'] );
+		$this->assertSame( '', $result[0]['notice']['link_url'] );
+	}
+
+	/**
+	 * Test that notice fields are sanitized (HTML stripped from text, URL sanitized).
+	 */
+	public function test_get_recommended_payment_methods_notice_sanitization() {
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'recommended_payment_methods' => array(
+					array(
+						'id'     => 'p24',
+						'title'  => 'Przelewy24',
+						'notice' => array(
+							'badge'     => '<script>alert("xss")</script>Badge text',
+							'message'   => '<b>Bold</b> message with <script>xss</script>',
+							'link_text' => '<em>Link</em> text',
+							'link_url'  => 'javascript:alert(1)',
+						),
+					),
+				),
+			)
+		);
+
+		$result = $this->sut->get_recommended_payment_methods( $fake_gateway );
+
+		$this->assertCount( 1, $result );
+		// All text fields use sanitize_text_field() which calls wp_strip_all_tags()
+		// which removes all HTML tags and their content for script tags.
+		$this->assertSame( 'Badge text', $result[0]['notice']['badge'] );
+		$this->assertSame( 'Link text', $result[0]['notice']['link_text'] );
+		$this->assertSame( 'Bold message with', $result[0]['notice']['message'] );
+		// javascript: URLs should be sanitized away by wc_is_valid_url().
+		$this->assertSame( '', $result[0]['notice']['link_url'] );
 	}
 
 	/**
@@ -2178,5 +2316,367 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'messages', $gateway_details['onboarding'] );
 		$this->assertArrayHasKey( 'not_supported', $gateway_details['onboarding']['messages'] );
 		$this->assertEquals( 'This gateway is not supported in your country.', $gateway_details['onboarding']['messages']['not_supported'] );
+	}
+
+	/**
+	 * Test get_provider_links with empty country code does not cause issues.
+	 *
+	 * Empty country code is a valid input (parameter is optional) and should not trigger
+	 * any debug logging or errors.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/62380
+	 */
+	public function test_get_provider_links_with_empty_country_code() {
+		// Arrange - Create a gateway with provider links.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'provider_links' => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://example.com/docs',
+					),
+				),
+			)
+		);
+
+		// Act - Call with empty country code (the default when not provided).
+		$links = $this->sut->get_provider_links( $fake_gateway, '' );
+
+		// Assert - Should return links successfully without any issues.
+		$this->assertCount( 1, $links );
+		$this->assertEquals( PaymentsProviders::LINK_TYPE_DOCS, $links[0]['_type'] );
+		$this->assertEquals( 'https://example.com/docs', $links[0]['url'] );
+	}
+
+	/**
+	 * Test get_provider_links with various country code formats.
+	 *
+	 * This tests that valid ISO 3166-1 alpha-2 country codes work correctly,
+	 * while invalid (non-empty) country codes are handled gracefully.
+	 *
+	 * @dataProvider data_provider_country_codes
+	 *
+	 * @param string $country_code The country code to test.
+	 * @param bool   $is_valid     Whether the country code is valid.
+	 */
+	public function test_get_provider_links_with_various_country_codes( string $country_code, bool $is_valid ) {
+		// Arrange - Create a mock gateway with the get_provider_links method.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->addMethods( array( 'get_provider_links' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expected links to be returned by the mock.
+		$expected_links = array(
+			array(
+				'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+				'url'   => 'https://example.com/docs',
+			),
+		);
+
+		// The get_provider_links method should be called with the sanitized country code.
+		// For valid codes, it should receive the uppercase version.
+		// For invalid codes, it should receive an empty string.
+		$expected_code = $is_valid ? strtoupper( $country_code ) : '';
+		$gateway->expects( $this->once() )
+			->method( 'get_provider_links' )
+			->with( $expected_code )
+			->willReturn( $expected_links );
+
+		// Act.
+		$links = $this->sut->get_provider_links( $gateway, $country_code );
+
+		// Assert - Links should be returned regardless of country code validity.
+		$this->assertCount( 1, $links );
+		$this->assertEquals( PaymentsProviders::LINK_TYPE_DOCS, $links[0]['_type'] );
+	}
+
+	/**
+	 * Data provider for country code tests.
+	 *
+	 * @return array Test cases with country code and validity flag.
+	 */
+	public function data_provider_country_codes(): array {
+		return array(
+			'empty string (valid - optional parameter)'    => array( '', true ),
+			'valid US code'                                => array( 'US', true ),
+			'valid lowercase us code (auto-uppercased)'    => array( 'us', true ),
+			'valid GB code'                                => array( 'GB', true ),
+			'single character (invalid)'                   => array( 'U', false ),
+			'three characters (invalid)'                   => array( 'USA', false ),
+			'numeric country code (invalid for alpha-2)'   => array( '12', false ),
+			'mixed alphanumeric (invalid)'                 => array( 'U1', false ),
+			'whitespace only (invalid after sanitization)' => array( '  ', false ),
+			'special characters (invalid after sanitization)' => array( '@@', false ),
+		);
+	}
+
+	/**
+	 * Create a fake logger that tracks all log calls.
+	 *
+	 * Implements WC_Logger_Interface so it can be injected via the
+	 * woocommerce_logging_class filter.
+	 *
+	 * @return object A fake logger with tracking capabilities.
+	 */
+	private function create_fake_logger(): object {
+		// phpcs:disable Squiz.Commenting, Squiz.Classes.ClassFileName.NoMatch
+		return new class() implements \WC_Logger_Interface {
+			public array $debug_calls   = array();
+			public array $info_calls    = array();
+			public array $warning_calls = array();
+			public array $error_calls   = array();
+
+			public function add( $handle, $message, $level = \WC_Log_Levels::NOTICE ) {
+				unset( $handle, $message, $level ); // Avoid parameter not used PHPCS errors.
+				return true;
+			}
+
+			public function log( $level, $message, $context = array() ) {
+				unset( $level, $message, $context ); // Avoid parameter not used PHPCS errors.
+			}
+
+			public function emergency( $message, $context = array() ) {
+				unset( $message, $context ); // Avoid parameter not used PHPCS errors.
+			}
+
+			public function alert( $message, $context = array() ) {
+				unset( $message, $context ); // Avoid parameter not used PHPCS errors.
+			}
+
+			public function critical( $message, $context = array() ) {
+				unset( $message, $context ); // Avoid parameter not used PHPCS errors.
+			}
+
+			public function notice( $message, $context = array() ) {
+				unset( $message, $context ); // Avoid parameter not used PHPCS errors.
+			}
+
+			public function debug( $message, $context = array() ) {
+				$this->debug_calls[] = array(
+					'message' => $message,
+					'context' => $context,
+				);
+			}
+
+			public function info( $message, $context = array() ) {
+				$this->info_calls[] = array(
+					'message' => $message,
+					'context' => $context,
+				);
+			}
+
+			public function warning( $message, $context = array() ) {
+				$this->warning_calls[] = array(
+					'message' => $message,
+					'context' => $context,
+				);
+			}
+
+			public function error( $message, $context = array() ) {
+				$this->error_calls[] = array(
+					'message' => $message,
+					'context' => $context,
+				);
+			}
+
+			public function reset() {
+				$this->debug_calls   = array();
+				$this->info_calls    = array();
+				$this->warning_calls = array();
+				$this->error_calls   = array();
+			}
+
+			public function has_any_logs(): bool {
+				return ! empty( $this->debug_calls )
+					|| ! empty( $this->info_calls )
+					|| ! empty( $this->warning_calls )
+					|| ! empty( $this->error_calls );
+			}
+		};
+		// phpcs:enable Squiz.Commenting, Squiz.Classes.ClassFileName.NoMatch
+	}
+
+	/**
+	 * Test that NO logging is triggered for empty country code.
+	 *
+	 * Empty country code is a valid input (parameter is optional), so it should
+	 * not cause any logging at any level.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/62380
+	 */
+	public function test_get_provider_links_no_logging_for_empty_country_code() {
+		// Arrange.
+		$fake_logger = $this->create_fake_logger();
+
+		// Use the woocommerce_logging_class filter to inject the fake logger.
+		// Passing an object bypasses the cache check and uses the object directly.
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $fake_logger ) {
+				return $fake_logger;
+			}
+		);
+
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'provider_links' => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://example.com/docs',
+					),
+				),
+			)
+		);
+
+		// Act - Call with empty country code.
+		$this->sut->get_provider_links( $fake_gateway, '' );
+
+		// Assert - No logging should have occurred at any level.
+		$this->assertEmpty( $fake_logger->debug_calls, 'Debug logging should NOT be triggered for empty country code' );
+		$this->assertEmpty( $fake_logger->info_calls, 'Info logging should NOT be triggered for empty country code' );
+		$this->assertEmpty( $fake_logger->warning_calls, 'Warning logging should NOT be triggered for empty country code' );
+		$this->assertEmpty( $fake_logger->error_calls, 'Error logging should NOT be triggered for empty country code' );
+		$this->assertFalse( $fake_logger->has_any_logs(), 'No logging should occur for empty country code' );
+
+		// Clean up - Remove filter.
+		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
+	 * Test that NO logging is triggered for valid country codes.
+	 *
+	 * Valid ISO 3166-1 alpha-2 country codes should not cause any logging.
+	 *
+	 * @dataProvider data_provider_valid_country_codes_for_logging
+	 *
+	 * @param string $country_code The country code to test.
+	 */
+	public function test_get_provider_links_no_logging_for_valid_country_codes( string $country_code ) {
+		// Arrange.
+		$fake_logger = $this->create_fake_logger();
+
+		// Use the woocommerce_logging_class filter to inject the fake logger.
+		// Passing an object bypasses the cache check and uses the object directly.
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $fake_logger ) {
+				return $fake_logger;
+			}
+		);
+
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'provider_links' => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://example.com/docs',
+					),
+				),
+			)
+		);
+
+		// Act.
+		$this->sut->get_provider_links( $fake_gateway, $country_code );
+
+		// Assert - No logging should have occurred at any level.
+		$this->assertEmpty( $fake_logger->debug_calls, "Debug logging should NOT be triggered for valid country code: {$country_code}" );
+		$this->assertEmpty( $fake_logger->info_calls, "Info logging should NOT be triggered for valid country code: {$country_code}" );
+		$this->assertEmpty( $fake_logger->warning_calls, "Warning logging should NOT be triggered for valid country code: {$country_code}" );
+		$this->assertEmpty( $fake_logger->error_calls, "Error logging should NOT be triggered for valid country code: {$country_code}" );
+		$this->assertFalse( $fake_logger->has_any_logs(), "No logging should occur for valid country code: {$country_code}" );
+
+		// Clean up - Remove filter.
+		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
+	 * Data provider for valid country codes (no logging expected).
+	 *
+	 * @return array Test cases with valid country codes.
+	 */
+	public function data_provider_valid_country_codes_for_logging(): array {
+		return array(
+			'US'        => array( 'US' ),
+			'GB'        => array( 'GB' ),
+			'DE'        => array( 'DE' ),
+			'lowercase' => array( 'us' ), // Will be uppercased to valid "US".
+		);
+	}
+
+	/**
+	 * Test that debug logging IS triggered for invalid non-empty country codes.
+	 *
+	 * Invalid country codes (non-empty, not ISO 3166-1 alpha-2) should trigger
+	 * debug logging so developers can investigate.
+	 *
+	 * @dataProvider data_provider_invalid_country_codes_for_logging
+	 *
+	 * @param string $country_code The invalid country code to test.
+	 */
+	public function test_get_provider_links_logging_for_invalid_country_codes( string $country_code ) {
+		// Arrange.
+		$fake_logger = $this->create_fake_logger();
+
+		// Use the woocommerce_logging_class filter to inject the fake logger.
+		// Passing an object bypasses the cache check and uses the object directly.
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $fake_logger ) {
+				return $fake_logger;
+			}
+		);
+
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'provider_links' => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://example.com/docs',
+					),
+				),
+			)
+		);
+
+		// Act.
+		$this->sut->get_provider_links( $fake_gateway, $country_code );
+
+		// Assert - Debug logging SHOULD have been triggered for invalid country code.
+		$this->assertCount( 1, $fake_logger->debug_calls, "Debug logging SHOULD be triggered for invalid country code: {$country_code}" );
+		$this->assertEmpty( $fake_logger->info_calls, "Info logging should NOT be triggered for invalid country code: {$country_code}" );
+		$this->assertEmpty( $fake_logger->warning_calls, "Warning logging should NOT be triggered for invalid country code: {$country_code}" );
+		$this->assertEmpty( $fake_logger->error_calls, "Error logging should NOT be triggered for invalid country code: {$country_code}" );
+
+		// Verify the debug call has the expected context.
+		$debug_call = $fake_logger->debug_calls[0];
+		$this->assertStringContainsString( 'invalid country code', $debug_call['message'] );
+		$this->assertArrayHasKey( 'source', $debug_call['context'] );
+		$this->assertEquals( 'settings-payments', $debug_call['context']['source'] );
+		$this->assertArrayHasKey( 'gateway', $debug_call['context'] );
+		$this->assertEquals( 'gateway1', $debug_call['context']['gateway'] );
+		$this->assertArrayHasKey( 'country', $debug_call['context'] );
+
+		// Clean up - Remove filter.
+		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
+	 * Data provider for invalid country codes (logging expected).
+	 *
+	 * @return array Test cases with invalid country codes.
+	 */
+	public function data_provider_invalid_country_codes_for_logging(): array {
+		return array(
+			'three characters'   => array( 'USA' ),
+			'single character'   => array( 'U' ),
+			'numeric'            => array( '12' ),
+			'mixed alphanumeric' => array( 'U1' ),
+		);
 	}
 }

@@ -52,7 +52,7 @@ if ( wc_tax_enabled() ) {
 				<?php
 				if ( ! empty( $order_taxes ) ) :
 					foreach ( $order_taxes as $tax_id => $tax_item ) :
-						$tax_class      = wc_get_tax_class_by_tax_id( $tax_item['rate_id'] );
+						$tax_class      = wc_get_tax_class_by_tax_id( $tax_item['rate_id'] ?? 0 ) ?? '';
 						$tax_class_name = isset( $classes_options[ $tax_class ] ) ? $classes_options[ $tax_class ] : __( 'Tax', 'woocommerce' );
 						$column_label   = ! empty( $tax_item['label'] ) ? $tax_item['label'] : __( 'Tax', 'woocommerce' );
 						/* translators: %1$s: tax item name %2$s: tax class name  */
@@ -130,7 +130,7 @@ if ( wc_tax_enabled() ) {
 						$coupon_info = json_decode( $coupon_info, true );
 						$post_id     = $coupon_info[0]; //phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					} else {
-						$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' AND post_date < %s LIMIT 1;", wc_sanitize_coupon_code( $item->get_code() ), $order->get_date_created()->format( 'Y-m-d H:i:s' ) ) ); // phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited
+						$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE LOWER(post_title) = LOWER(%s) AND post_type = 'shop_coupon' AND post_status = 'publish' AND post_date < %s LIMIT 1;", wc_sanitize_coupon_code( $item->get_code() ), $order->get_date_created()->format( 'Y-m-d H:i:s' ) ) ); // phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited
 					}
 					$class = $order->is_editable() ? 'code editable' : 'code';
 					?>
@@ -171,19 +171,19 @@ if ( wc_tax_enabled() ) {
 				<td class="label"><?php esc_html_e( 'Items Subtotal:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
 				<td class="total">
-					<?php echo wc_price( $order->get_subtotal(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo wc_price( $order->get_subtotal_amount_to_display(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</td>
 			</tr>
 		<?php if ( 0 < $order->get_total_discount() ) : ?>
 			<tr>
-				<td class="label"><?php esc_html_e( 'Coupon(s):', 'woocommerce' ); ?></td>
+				<td class="label"><?php esc_html_e( 'Discount:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
 				<td class="total">-
 					<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</td>
 			</tr>
 		<?php endif; ?>
-		<?php if ( 0 < $order->get_total_fees() ) : ?>
+		<?php if ( abs( $order->get_total_fees() ) > 0 ) : ?>
 			<tr>
 				<td class="label"><?php esc_html_e( 'Fees:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
@@ -449,7 +449,7 @@ if ( wc_tax_enabled() ) {
 					</form>
 				</article>
 				<footer>
-					<div class="inner">
+					<div class="wc-backbone-modal-buttons">
 						<button id="btn-ok" class="button button-primary button-large"><?php esc_html_e( 'Add', 'woocommerce' ); ?></button>
 					</div>
 				</footer>
@@ -505,7 +505,7 @@ if ( wc_tax_enabled() ) {
 					</form>
 				</article>
 				<footer>
-					<div class="inner">
+					<div class="wc-backbone-modal-buttons">
 						<button id="btn-ok" class="button button-primary button-large"><?php esc_html_e( 'Add', 'woocommerce' ); ?></button>
 					</div>
 				</footer>

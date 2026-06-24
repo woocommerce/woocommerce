@@ -16,10 +16,10 @@ import './product-preview-modal.scss';
 
 interface ProductPreviewModalProps {
 	productTitle: string;
-	productVendor: JSX.Element | string | null;
+	productVendor: React.JSX.Element | string | null;
 	productIcon: string;
 	productId: number;
-	triggerRef: React.RefObject< HTMLAnchorElement >;
+	triggerRef: React.RefObject< HTMLAnchorElement | null >;
 	onOpen?: () => void;
 	onClose?: ( closeType?: string ) => void;
 }

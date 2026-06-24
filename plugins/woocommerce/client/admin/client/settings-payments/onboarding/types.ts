@@ -16,6 +16,19 @@ import {
 } from './providers/woopayments/steps/business-verification/types'; // To-do: Maybe move to @woocommerce/data
 
 /**
+ * Error object returned from the onboarding backend.
+ *
+ * The backend always sanitizes errors to include both fields.
+ * Fields may be empty strings if not provided by the upstream source.
+ *
+ * @see WooPaymentsService::sanitize_onboarding_step_errors()
+ */
+export interface OnboardingError {
+	message: string;
+	code: string;
+}
+
+/**
  * Props for the Onboarding Modal component.
  */
 export interface OnboardingModalProps {
@@ -128,10 +141,7 @@ export interface WooPaymentsProviderOnboardingStep {
 		// True when a sandbox (test-mode, non-test-drive) account is connected.
 		has_sandbox_account?: boolean;
 	};
-	errors?: {
-		message: string;
-		code: string;
-	}[];
+	errors?: OnboardingError[];
 }
 
 /**

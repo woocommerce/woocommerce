@@ -324,7 +324,7 @@ class WC_Logger implements WC_Logger_Interface {
 		}
 
 		foreach ( $this->get_handlers() as $handler ) {
-			if ( is_callable( array( $handler, 'clear' ) ) ) {
+			if ( $handler instanceof WC_Log_Handler && is_callable( array( $handler, 'clear' ) ) ) {
 				$handler->clear( $source, $quiet );
 			}
 		}

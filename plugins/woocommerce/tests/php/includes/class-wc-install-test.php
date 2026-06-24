@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 
@@ -8,9 +9,9 @@ use Automattic\WooCommerce\Admin\Notes\Note;
 class WC_Install_Test extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test if verify base table can detect missing table and adds/remove a notice.
+	 * Test if verify base table can detect missing tables and clear the stored missing table list.
 	 */
-	public function test_verify_base_tables_adds_and_remove_notice() {
+	public function test_verify_base_tables_stores_and_removes_missing_tables() {
 		global $wpdb;
 
 		// Remove drop filter because we do want to drop temp table if it exists.
@@ -38,13 +39,13 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 
 		$this->assertContains( $original_table_name, $missing_tables );
-		$this->assertContains( 'base_tables_missing', \WC_Admin_Notices::get_notices() );
+		$this->assertContains( $original_table_name, get_option( 'woocommerce_schema_missing_tables', array() ) );
 
 		// Ideally, no missing table anymore because we have switched back table name.
 		$missing_tables = \WC_Install::verify_base_tables();
 
 		$this->assertNotContains( $original_table_name, $missing_tables );
-		$this->assertNotContains( 'base_tables_missing', \WC_Admin_Notices::get_notices() );
+		$this->assertSame( array(), get_option( 'woocommerce_schema_missing_tables', array() ) );
 	}
 
 
@@ -81,7 +82,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 
 		// Ideally, no missing table because verify base tables created the table as well.
 		$this->assertNotContains( $original_table_name, $missing_tables );
-		$this->assertNotContains( 'base_tables_missing', \WC_Admin_Notices::get_notices() );
+		$this->assertSame( array(), get_option( 'woocommerce_schema_missing_tables', array() ) );
 	}
 
 	/**
@@ -127,7 +128,6 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		WC_Install::delete_obsolete_notes();
 
 		$this->assertEmpty( $data_store->get_notes_with_name( $note_name ) );
-
 	}
 
 	/**
@@ -354,6 +354,9 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_order_stats_schema_does_not_include_fulfillment_status_for_new_install_without_fulfillments_feature_enabled(): void {
+		// Ensure the fulfillments feature is disabled (a prior test class may have enabled it).
+		delete_option( 'woocommerce_feature_fulfillments_enabled' );
+
 		// Mock is_new_install to return true.
 		$version = null;
 		$shop_id = null;
@@ -479,5 +482,93 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'option_woocommerce_version', $supply_version );
 		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
 		remove_filter( 'pre_option_' . \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, $supply_column_status );
+	}
+
+	/**
+	 * @testdox Should return every actionscheduler_* table that exists in the database, each prefixed with the table prefix.
+	 */
+	public function test_get_action_scheduler_tables_matches_database_tables(): void {
+		global $wpdb;
+
+		// Action Scheduler is bundled with WooCommerce, so its tables exist in the test database. Comparing
+		// against the live schema (rather than re-listing the same hardcoded names the method returns) means
+		// this test fails if Action Scheduler ever adds, renames or drops a table and the method drifts out
+		// of sync, which would otherwise leave those tables behind on uninstall.
+		$actual_tables = $wpdb->get_col(
+			"SHOW TABLES LIKE '" . $wpdb->esc_like( $wpdb->prefix . 'actionscheduler_' ) . "%'"
+		);
+
+		$this->assertNotEmpty(
+			$actual_tables,
+			'No actionscheduler_* tables were found in the database; the test environment is not set up as expected.'
+		);
+
+		$reported_tables = WC_Install::get_action_scheduler_tables();
+
+		foreach ( $reported_tables as $table ) {
+			$this->assertStringStartsWith(
+				$wpdb->prefix,
+				$table,
+				"Action Scheduler table {$table} should be prefixed with the database table prefix."
+			);
+		}
+
+		sort( $actual_tables );
+		sort( $reported_tables );
+
+		$this->assertSame(
+			$actual_tables,
+			$reported_tables,
+			'get_action_scheduler_tables() should match the actionscheduler_* tables present in the database.'
+		);
+	}
+
+	/**
+	 * @testdox Should delete the placeholder image attachment and its meta.
+	 */
+	public function test_delete_placeholder_image_removes_attachment(): void {
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'woocommerce-placeholder',
+				'post_mime_type' => 'image/webp',
+				'post_status'    => 'inherit',
+				'post_type'      => 'attachment',
+			)
+		);
+		update_post_meta( $attachment_id, '_wp_attached_file', 'woocommerce-placeholder.webp' );
+		update_option( 'woocommerce_placeholder_image', $attachment_id );
+
+		WC_Install::delete_placeholder_image();
+
+		$this->assertNull( get_post( $attachment_id ), 'The placeholder attachment post should be deleted.' );
+		$this->assertSame(
+			'',
+			get_post_meta( $attachment_id, '_wp_attached_file', true ),
+			'The placeholder attachment meta should be deleted.'
+		);
+	}
+
+	/**
+	 * @testdox Should not delete a custom image set by the merchant as the placeholder.
+	 */
+	public function test_delete_placeholder_image_keeps_custom_attachment(): void {
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'merchant-logo',
+				'post_mime_type' => 'image/png',
+				'post_status'    => 'inherit',
+				'post_type'      => 'attachment',
+			)
+		);
+		update_post_meta( $attachment_id, '_wp_attached_file', '2026/06/merchant-logo.png' );
+		update_option( 'woocommerce_placeholder_image', $attachment_id );
+
+		WC_Install::delete_placeholder_image();
+
+		$this->assertInstanceOf(
+			WP_Post::class,
+			get_post( $attachment_id ),
+			'A custom merchant placeholder attachment should not be deleted.'
+		);
 	}
 }

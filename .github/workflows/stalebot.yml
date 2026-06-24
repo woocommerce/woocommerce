@@ -40,25 +40,6 @@ jobs:
                   close-pr-message: 'This PR was closed because it has been 1.5 months with no activity.'
                   delete-branch: true
                   ascending: true
-            - name: Process stale flaky tests issues
-              uses: actions/stale@v9.0.0
-              with:
-                  repo-token: ${{ secrets.GITHUB_TOKEN }}
-                  only-issue-labels: 'metric: flaky e2e test'
-                  exempt-issue-labels: 'type: skipped test'
-                  days-before-stale: -1
-                  days-before-close: -1
-                  days-before-issue-stale: 5
-                  days-before-issue-close: 2
-                  stale-issue-label: 'status: stale'
-                  stale-issue-message: 'This issue is being marked as stale due to inactivity. It will be auto-closed if no further activity occurs within the next 2 days.'
-                  close-issue-message: 'Auto-closed due to inactivity. Please re-open if you believe this issue is still valid.'
-                  close-issue-reason: 'not_planned'
-                  remove-stale-when-updated: true
-                  exempt-all-assignees: false
-                  enable-statistics: true
-                  ascending: true
-                  operations-per-run: 120
             - name: Remove stale PR approvals (over 30 days old)
               uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
               with:

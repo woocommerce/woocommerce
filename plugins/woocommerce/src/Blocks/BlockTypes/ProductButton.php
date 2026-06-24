@@ -14,7 +14,6 @@ use Automattic\WooCommerce\Enums\ProductType;
  */
 class ProductButton extends AbstractBlock {
 	use EnableBlockJsonAssetsTrait;
-	use BlocksSharedState;
 
 	/**
 	 * Block name.
@@ -47,7 +46,6 @@ class ProductButton extends AbstractBlock {
 	 */
 	protected function enqueue_assets( array $attributes, $content, $block ) {
 		parent::enqueue_assets( $attributes, $content, $block );
-		wp_enqueue_script( 'wp-a11y' );
 
 		if ( wp_is_block_theme() ) {
 			add_action(
@@ -100,7 +98,7 @@ class ProductButton extends AbstractBlock {
 			return '';
 		}
 
-		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+		BlocksSharedState::load_cart_state( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
 		$number_of_items_in_cart  = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
 		$is_product_purchasable   = $this->is_product_purchasable( $product );
@@ -148,8 +146,6 @@ class ProductButton extends AbstractBlock {
 
 		$context = array(
 			'quantityToAdd'    => $default_quantity,
-			'productId'        => $product->get_id(),
-			'productType'      => $product->get_type(),
 			'addToCartText'    => $add_to_cart_text,
 			'tempQuantity'     => $number_of_items_in_cart,
 			'animationStatus'  => 'IDLE',
@@ -171,6 +167,11 @@ class ProductButton extends AbstractBlock {
 				'href' => esc_url( $product->add_to_cart_url() ),
 				'rel'  => 'nofollow',
 			);
+
+			if ( $product->is_type( ProductType::EXTERNAL ) ) {
+				$attributes['target'] = '_blank';
+				$attributes['rel']    = 'nofollow noopener noreferrer';
+			}
 		}
 
 		wp_interactivity_config(
@@ -226,7 +227,6 @@ class ProductButton extends AbstractBlock {
 
 		$div_directives = '
 			data-wp-interactive="woocommerce/product-button"
-			data-wp-init="actions.refreshCartItems"
 		';
 
 		$context_directives = wp_interactivity_data_wp_context( $context );
@@ -342,6 +342,9 @@ class ProductButton extends AbstractBlock {
 	private function is_product_purchasable( $product ) {
 		if ( $product->is_type( ProductType::GROUPED ) ) {
 			$grouped_product_ids = $product->get_children();
+			if ( ! empty( $grouped_product_ids ) ) {
+				_prime_post_caches( $grouped_product_ids );
+			}
 			foreach ( $grouped_product_ids as $child ) {
 				$child_product = wc_get_product( $child );
 				if ( ! $child_product instanceof \WC_Product ) {

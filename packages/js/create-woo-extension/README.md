@@ -18,13 +18,37 @@ Navigate to the newly created folder and get started.
 
 ```bash
 cd my-extension-name
-npm install # Install dependencies
-npm run build # Build the javascript
+npm run start # Watch the javascript for changes
+
+# Local development with wp-env (optional)
 npm -g i @wordpress/env # If you don't already have wp-env
 wp-env start # Start Wordpress environment
 ```
 
 See the new plugin activated from the WordPress plugins page and navigate to `wp-admin/admin.php?page=wc-admin&path=%2Fmy-extension-name` to check it out.
+
+## Variants
+
+You can also create different types of WooCommerce extensions by specifying a variant.
+
+```bash
+npx @wordpress/create-block -t @woocommerce/create-woo-extension --variant=add-report my-extension-name
+```
+
+### Analytics Report Variants
+
+These variants create example extensions for modifying WooCommerce Analytics pages.
+
+- `add-report` - Creates a new example report page under the Analytics menu.
+- `dashboard-section` - Adds a custom section to the Analytics Overview area.
+- `sql-modification` - Adds a custom dropdown filter for SQL statements in the Products Analytics report. See the [Extending WooCommerce analytics Reports](https://developer.woocommerce.com/docs/features/analytics/extending-woocommerce-admin-reports/) tutorial for more information.
+- `table-column` - Adds new column(s) to the Products Analytics report.
+
+### Onboarding Variants
+
+These variants create example extensions for modifying the WooCommerce onboarding experience.
+
+- `add-task` - Creates a custom task for the onboarding task list. See the [Handling Merchant Onboarding](https://developer.woocommerce.com/docs/extensions/extension-onboarding/handling-merchant-onboarding/) tutorial for more information.
 
 ## Development
 

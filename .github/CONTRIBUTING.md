@@ -4,16 +4,16 @@ WooCommerce powers many online stores across the internet, and your help making 
 
 There are many ways to contribute to the project!
 
-- [Translating strings into your language](https://github.com/woocommerce/woocommerce/wiki/Translating-WooCommerce).
+- [Translating strings into your language](https://developer.woocommerce.com/docs/best-practices/localization-translation/translating-woocommerce/).
 - Answering questions on the various WooCommerce communities like the [WP.org support forums](https://wordpress.org/support/plugin/woocommerce/).
 - Testing open [issues](https://github.com/woocommerce/woocommerce/issues) or [pull requests](https://github.com/woocommerce/woocommerce/pulls) and sharing your findings in a comment.
 - Testing WooCommerce beta versions and release candidates. Those are announced in the [WooCommerce development blog](https://developer.woocommerce.com/blog/).
 - Submitting fixes, improvements, and enhancements.
 - To disclose a security issue to our team, [please submit a report via HackerOne](https://hackerone.com/automattic/).
 
-If you wish to contribute code, please read the information in the sections below. Then [fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) WooCommerce, commit your changes, and [submit a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) 🎉
+If you wish to contribute code, please read the information in the sections below and our [community contributions guidelines](https://developer.woocommerce.com/docs/contribution/contributing/community-contributions/). Then [fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) WooCommerce, commit your changes, and [submit a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) 🎉
 
-We use the `good first issue` label to mark issues that are suitable for new contributors. You can find all the issues with this label [here](https://github.com/woocommerce/woocommerce/issues?q=is%3Aopen+is%3Aissue+label%3A%22type%3A+good+first+issue%22).
+We use the `good first issue` label to mark issues that are suitable for new contributors. You can browse [all issues with the good first issue label](https://github.com/woocommerce/woocommerce/issues?q=is%3Aopen+is%3Aissue+label%3A%22type%3A+good+first+issue%22).
 
 WooCommerce is licensed under the GPLv3+, and all contributions to the project will be released under the same license. You maintain copyright over any contribution you make, and by submitting a pull request, you are agreeing to release that contribution under the GPLv3+ license.
 
@@ -23,24 +23,24 @@ If you have questions about the process to contribute code or want to discuss de
 
 Please take a moment to review the [project readme](https://github.com/woocommerce/woocommerce/blob/trunk/README.md) and our [development notes](https://github.com/woocommerce/woocommerce/blob/trunk/DEVELOPMENT.md), which cover the basics needed to start working on this project. You may also be interested in the following resources:
 
-- [How to set up WooCommerce development environment](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment)
-- [Git Flow](https://github.com/woocommerce/woocommerce/wiki/WooCommerce-Git-Flow)
-- [Minification of SCSS and JS](https://github.com/woocommerce/woocommerce/wiki/Minification-of-SCSS-and-JS)
-- [Naming conventions](https://github.com/woocommerce/woocommerce/wiki/Naming-conventions)
-- [String localisation guidelines](https://github.com/woocommerce/woocommerce/wiki/String-localisation-guidelines)
+- [How to set up WooCommerce development environment](https://developer.woocommerce.com/docs/contribution/contributing/#setting-up-your-development-environment)
+- [Git Flow](https://developer.woocommerce.com/docs/contribution/contributing/woocommerce-git-flow/)
+- [Minification of SCSS and JS](https://developer.woocommerce.com/docs/contribution/contributing/minification-of-SCSS-and-JS/)
+- [Naming conventions](https://developer.woocommerce.com/docs/contribution/contributing/naming-conventions/)
+- [String localisation guidelines](https://developer.woocommerce.com/docs/contribution/contributing/string-localisation-guidelines/)
 - [Running unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/README.md)
-- [Running e2e tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw#guide-for-writing-e2e-tests)
+- [Running e2e tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e#writing-e2e-tests)
 
 ## Coding Guidelines and Development 🛠
 
 - Ensure you stick to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/php/).
-- Run our build process described in the document on [how to set up WooCommerce development environment](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment), it will install our pre-commit hook, code sniffs, dependencies, and more.
+- Run our build process described in the document on [how to set up WooCommerce development environment](https://developer.woocommerce.com/docs/contribution/contributing/#setting-up-your-development-environment), it will install our pre-commit hook, code sniffs, dependencies, and more.
 - Before pushing commits to GitHub, check your code against our code standards. For PHP code in the WooCommerce Core project you can do this by running `pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes:branch`.
 - Whenever possible, please fix pre-existing code standards errors in code that you change.
-- Please consider adding appropriate tests related to your change if applicable such as unit, API and E2E tests. You can check the following guides for this purpose:
+- Please consider adding appropriate tests related to your change if applicable such as unit, API and E2E tests. You can check the following resources for this purpose:
     - [Writing unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/README.md#guide-for-writing-unit-tests).
-    - [Writing API tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests#guide-for-writing-api-tests).
-    - [Writing E2E tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw#guide-for-writing-e2e-tests).
+    - [API tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e/tests/api-tests).
+    - [Writing E2E tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e#writing-e2e-tests).
 - Ensure you use LF line endings in your code editor. Use [EditorConfig](http://editorconfig.org/) if your editor supports it so that indentation, line endings and other settings are auto configured.
 - When committing, reference your issue number (#1234) and include a note about the fix.
 - Ensure that your code supports the minimum supported versions of PHP and WordPress; this is shown at the top of the `readme.txt` file.

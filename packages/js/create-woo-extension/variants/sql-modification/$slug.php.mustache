@@ -1,0 +1,304 @@
+<?php
+/**
+ * Plugin Name: {{title}}
+{{#description}}
+ * Description: {{description}}
+{{/description}}
+ * Version: {{version}}
+{{#author}}
+ * Author: {{author}}
+{{/author}}
+ * Author URI: https://woocommerce.com
+ * Text Domain: {{textdomain}}
+ * Domain Path: /languages
+ *
+ * License: GNU General Public License v3.0
+ * License URI: http://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * @package {{namespace}}
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+if ( ! defined( '{{slugConstantCase}}_MAIN_PLUGIN_FILE' ) ) {
+	define( '{{slugConstantCase}}_MAIN_PLUGIN_FILE', __FILE__ );
+}
+
+require_once plugin_dir_path( __FILE__ ) . '/vendor/autoload_packages.php';
+
+use {{slugPascalCase}}\Admin\Setup;
+
+// phpcs:disable WordPress.Files.FileName
+
+/**
+ * WooCommerce fallback notice.
+ *
+ * @since {{version}}
+ */
+function {{slugSnakeCase}}_missing_wc_notice() {
+	/* translators: %s WC download URL link. */
+	echo '<div class="error"><p><strong>' . sprintf( esc_html__( '{{title}} requires WooCommerce to be installed and active. You can download %s here.', '{{textdomain}}' ), '<a href="https://woocommerce.com/" target="_blank">WooCommerce</a>' ) . '</strong></p></div>';
+}
+
+register_activation_hook( __FILE__, '{{slugSnakeCase}}_activate' );
+
+/**
+ * Activation hook.
+ *
+ * @since {{version}}
+ */
+function {{slugSnakeCase}}_activate() {
+	if ( ! class_exists( 'WooCommerce' ) ) {
+		add_action( 'admin_notices', '{{slugSnakeCase}}_missing_wc_notice' );
+		return;
+	}
+}
+
+if ( ! class_exists( '{{slugPascalCase}}' ) ) :
+	/**
+	 * The {{slugPascalCase}} class.
+	 */
+	class {{slugPascalCase}} {
+		/**
+		 * This class instance.
+		 *
+		 * @var \{{slugPascalCase}} single instance of this class.
+		 */
+		private static $instance;
+
+		/**
+		 * Constructor.
+		 */
+		public function __construct() {
+			if ( is_admin() ) {
+				new Setup();
+			}
+
+			// Register SQL modification hooks.
+			$this->register_query_arg_filters();
+			$this->register_join_filters();
+			$this->register_where_filters();
+			$this->register_select_filters();
+		}
+
+		/**
+		 * Register query argument filters for caching purposes.
+		 */
+		private function register_query_arg_filters() {
+			$query_arg_filters = array(
+				'woocommerce_analytics_revenue_query_args',
+				'woocommerce_analytics_orders_query_args',
+				'woocommerce_analytics_orders_stats_query_args',
+				'woocommerce_analytics_products_query_args',
+				'woocommerce_analytics_products_stats_query_args',
+				'woocommerce_analytics_categories_query_args',
+				'woocommerce_analytics_coupons_query_args',
+				'woocommerce_analytics_coupons_stats_query_args',
+				'woocommerce_analytics_taxes_query_args',
+				'woocommerce_analytics_taxes_stats_query_args',
+			);
+
+			foreach ( $query_arg_filters as $filter ) {
+				add_filter( $filter, array( $this, 'apply_currency_arg' ) );
+			}
+		}
+
+		/**
+		 * Register JOIN clause filters.
+		 */
+		private function register_join_filters() {
+			$join_filters = array(
+				'woocommerce_analytics_clauses_join_orders_subquery',
+				'woocommerce_analytics_clauses_join_orders_stats_total',
+				'woocommerce_analytics_clauses_join_orders_stats_interval',
+				'woocommerce_analytics_clauses_join_products_subquery',
+				'woocommerce_analytics_clauses_join_products_stats_total',
+				'woocommerce_analytics_clauses_join_products_stats_interval',
+				'woocommerce_analytics_clauses_join_categories_subquery',
+				'woocommerce_analytics_clauses_join_coupons_subquery',
+				'woocommerce_analytics_clauses_join_coupons_stats_total',
+				'woocommerce_analytics_clauses_join_coupons_stats_interval',
+				'woocommerce_analytics_clauses_join_taxes_subquery',
+				'woocommerce_analytics_clauses_join_taxes_stats_total',
+				'woocommerce_analytics_clauses_join_taxes_stats_interval',
+			);
+
+			foreach ( $join_filters as $filter ) {
+				add_filter( $filter, array( $this, 'add_join_subquery' ) );
+			}
+		}
+
+		/**
+		 * Register WHERE clause filters.
+		 */
+		private function register_where_filters() {
+			$where_filters = array(
+				'woocommerce_analytics_clauses_where_orders_subquery',
+				'woocommerce_analytics_clauses_where_orders_stats_total',
+				'woocommerce_analytics_clauses_where_orders_stats_interval',
+				'woocommerce_analytics_clauses_where_products_subquery',
+				'woocommerce_analytics_clauses_where_products_stats_total',
+				'woocommerce_analytics_clauses_where_products_stats_interval',
+				'woocommerce_analytics_clauses_where_categories_subquery',
+				'woocommerce_analytics_clauses_where_coupons_subquery',
+				'woocommerce_analytics_clauses_where_coupons_stats_total',
+				'woocommerce_analytics_clauses_where_coupons_stats_interval',
+				'woocommerce_analytics_clauses_where_taxes_subquery',
+				'woocommerce_analytics_clauses_where_taxes_stats_total',
+				'woocommerce_analytics_clauses_where_taxes_stats_interval',
+			);
+
+			foreach ( $where_filters as $filter ) {
+				add_filter( $filter, array( $this, 'add_where_subquery' ) );
+			}
+		}
+
+		/**
+		 * Register SELECT clause filters.
+		 */
+		private function register_select_filters() {
+			$select_filters = array(
+				'woocommerce_analytics_clauses_select_orders_subquery',
+				'woocommerce_analytics_clauses_select_orders_stats_total',
+				'woocommerce_analytics_clauses_select_orders_stats_interval',
+				'woocommerce_analytics_clauses_select_products_subquery',
+				'woocommerce_analytics_clauses_select_products_stats_total',
+				'woocommerce_analytics_clauses_select_products_stats_interval',
+				'woocommerce_analytics_clauses_select_categories_subquery',
+				'woocommerce_analytics_clauses_select_coupons_subquery',
+				'woocommerce_analytics_clauses_select_coupons_stats_total',
+				'woocommerce_analytics_clauses_select_coupons_stats_interval',
+				'woocommerce_analytics_clauses_select_taxes_subquery',
+				'woocommerce_analytics_clauses_select_taxes_stats_total',
+				'woocommerce_analytics_clauses_select_taxes_stats_interval',
+			);
+
+			foreach ( $select_filters as $filter ) {
+				add_filter( $filter, array( $this, 'add_select_subquery' ) );
+			}
+		}
+
+		/**
+		 * Add the query argument `currency` for caching purposes.
+		 *
+		 * @param array $args Query arguments.
+		 * @return array Augmented query arguments.
+		 */
+		public function apply_currency_arg( $args ) {
+			$currency = 'USD';
+
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended
+			if ( isset( $_GET['currency'] ) ) {
+				$currency = sanitize_text_field( wp_unslash( $_GET['currency'] ) );
+			}
+			// phpcs:enable
+
+			$args['currency'] = $currency;
+
+			return $args;
+		}
+
+		/**
+		 * Add a JOIN clause.
+		 *
+		 * @param array $clauses An array of JOIN query strings.
+		 * @return array Augmented clauses.
+		 */
+		public function add_join_subquery( $clauses ) {
+			global $wpdb;
+
+			$clauses[] = "JOIN {$wpdb->postmeta} currency_postmeta ON {$wpdb->prefix}wc_order_stats.order_id = currency_postmeta.post_id";
+
+			return $clauses;
+		}
+
+		/**
+		 * Add a WHERE clause.
+		 *
+		 * @param array $clauses An array of WHERE query strings.
+		 * @return array Augmented clauses.
+		 */
+		public function add_where_subquery( $clauses ) {
+			global $wpdb;
+
+			$currency = 'USD';
+
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended
+			if ( isset( $_GET['currency'] ) ) {
+				$currency = sanitize_text_field( wp_unslash( $_GET['currency'] ) );
+			}
+			// phpcs:enable
+
+			// Use $wpdb->prepare to safely escape the currency value for SQL.
+			$prepared_clause = $wpdb->prepare(
+				'AND currency_postmeta.meta_key = %s AND currency_postmeta.meta_value = %s',
+				'_order_currency',
+				$currency
+			);
+
+			$clauses[] = $prepared_clause;
+
+			return $clauses;
+		}
+
+		/**
+		 * Add a SELECT clause.
+		 *
+		 * @param array $clauses An array of SELECT query strings.
+		 * @return array Augmented clauses.
+		 */
+		public function add_select_subquery( $clauses ) {
+			$clauses[] = ', currency_postmeta.meta_value AS currency';
+
+			return $clauses;
+		}
+
+		/**
+		 * Cloning is forbidden.
+		 */
+		public function __clone() {
+			wc_doing_it_wrong( __FUNCTION__, __( 'Cloning is forbidden.', '{{textdomain}}' ), '{{version}}' );
+		}
+
+		/**
+		 * Unserializing instances of this class is forbidden.
+		 */
+		public function __wakeup() {
+			wc_doing_it_wrong( __FUNCTION__, __( 'Unserializing instances of this class is forbidden.', '{{textdomain}}' ), '{{version}}' );
+		}
+
+		/**
+		 * Gets the main instance.
+		 *
+		 * Ensures only one instance can be loaded.
+		 *
+		 * @return \{{slugPascalCase}}
+		 */
+		public static function instance() {
+
+			if ( null === self::$instance ) {
+				self::$instance = new self();
+			}
+
+			return self::$instance;
+		}
+	}
+endif;
+
+add_action( 'plugins_loaded', '{{slugSnakeCase}}_init', 10 );
+
+/**
+ * Initialize the plugin.
+ *
+ * @since {{version}}
+ */
+function {{slugSnakeCase}}_init() {
+	load_plugin_textdomain( '{{textdomain}}', false, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
+
+	if ( ! class_exists( 'WooCommerce' ) ) {
+		add_action( 'admin_notices', '{{slugSnakeCase}}_missing_wc_notice' );
+		return;
+	}
+
+	{{slugPascalCase}}::instance();
+}

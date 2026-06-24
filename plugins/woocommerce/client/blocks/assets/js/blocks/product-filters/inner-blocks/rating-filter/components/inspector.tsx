@@ -7,9 +7,12 @@ import { __ } from '@wordpress/i18n';
 import {
 	Flex,
 	FlexItem,
-	PanelBody,
 	RadioControl,
 	ToggleControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
 
 /**
@@ -63,62 +66,84 @@ export const Inspector = ( {
 
 	return (
 		<InspectorControls key="inspector">
-			<PanelBody title={ __( 'Display', 'woocommerce' ) }>
-				<RadioControl
+			<ToolsPanel
+				label={ __( 'Display', 'woocommerce' ) }
+				resetAll={ () => {
+					setAttributes( {
+						minRating: '0',
+						showCounts: false,
+					} );
+				} }
+			>
+				<ToolsPanelItem
+					hasValue={ () => minRating !== '0' }
 					label={ __( 'Minimum rating', 'woocommerce' ) }
-					selected={ minRating }
-					className="wc-block-rating-filter__rating-control"
-					options={ [
-						{
-							label: (
-								<MinimumRatingLabel
-									stars={ 4 }
-									ariaLabel={ __(
-										'Four stars and up',
-										'woocommerce'
-									) }
-								/>
-							),
-							value: '4',
-						},
-						{
-							label: (
-								<MinimumRatingLabel
-									stars={ 3 }
-									ariaLabel={ __(
-										'Three stars and up',
-										'woocommerce'
-									) }
-								/>
-							),
-							value: '3',
-						},
-						{
-							label: (
-								<MinimumRatingLabel
-									stars={ 2 }
-									ariaLabel={ __(
-										'Two stars and up',
-										'woocommerce'
-									) }
-								/>
-							),
-							value: '2',
-						},
-						{
-							label: __( 'No limit', 'woocommerce' ),
-							value: '0', // no limit
-						},
-					] }
-					onChange={ setMinRating }
-				/>
-				<ToggleControl
+					onDeselect={ () => setAttributes( { minRating: '0' } ) }
+					isShownByDefault
+				>
+					<RadioControl
+						label={ __( 'Minimum rating', 'woocommerce' ) }
+						selected={ minRating }
+						className="wc-block-rating-filter__rating-control"
+						options={ [
+							{
+								label: (
+									<MinimumRatingLabel
+										stars={ 4 }
+										ariaLabel={ __(
+											'Four stars and up',
+											'woocommerce'
+										) }
+									/>
+								),
+								value: '4',
+							},
+							{
+								label: (
+									<MinimumRatingLabel
+										stars={ 3 }
+										ariaLabel={ __(
+											'Three stars and up',
+											'woocommerce'
+										) }
+									/>
+								),
+								value: '3',
+							},
+							{
+								label: (
+									<MinimumRatingLabel
+										stars={ 2 }
+										ariaLabel={ __(
+											'Two stars and up',
+											'woocommerce'
+										) }
+									/>
+								),
+								value: '2',
+							},
+							{
+								label: __( 'No limit', 'woocommerce' ),
+								value: '0', // no limit
+							},
+						] }
+						onChange={ setMinRating }
+					/>
+				</ToolsPanelItem>
+				<ToolsPanelItem
+					hasValue={ () => showCounts === true }
 					label={ __( 'Product counts', 'woocommerce' ) }
-					checked={ showCounts }
-					onChange={ setCountVisibility }
-					__nextHasNoMarginBottom
-				/>
-			</PanelBody>
+					onDeselect={ () => setAttributes( { showCounts: false } ) }
+					isShownByDefault
+				>
+					<ToggleControl
+						label={ __( 'Product counts', 'woocommerce' ) }
+						checked={ showCounts }
+						onChange={ setCountVisibility }
+						__nextHasNoMarginBottom
+					/>
+				</ToolsPanelItem>
+			</ToolsPanel>
 		</InspectorControls>
 	);
 };

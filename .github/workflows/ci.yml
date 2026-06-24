@@ -2,17 +2,18 @@ name: 'CI'
 on:
   pull_request:
   push:
-    paths-ignore:
-      - 'docs/**'
-      - '**/changelog/**'
-      - '.cursor/**'
-      - '**/*.md'
-      - '**/changelog.txt'
-      - '.gitignore'
-      - '.coderabbit.yml'
-      - 'CODEOWNERS'
-      - '.github/**'
-      - '!.github/workflows/ci.yml'
+    paths:
+      - '**'
+      - '!docs/**'
+      - '!**/changelog/**'
+      - '!.cursor/**'
+      - '!**/*.md'
+      - '!**/changelog.txt'
+      - '!.gitignore'
+      - '!.coderabbit.yml'
+      - '!CODEOWNERS'
+      - '!.github/**'
+      - '.github/workflows/ci.yml'
     branches:
       - 'trunk'
       - 'release/*'
@@ -31,6 +32,10 @@ on:
         description: 'The release artifact name to download and run tests for.'
         required: false
         type: string
+      releaseTag:
+        description: 'Release tag to download the artifact from. Defaults to refName, then the current ref. Lets a branch run pull a published artifact (e.g. nightly) while keeping its own checkout.'
+        required: false
+        type: string
 
 concurrency:
   # Cancel concurrent jobs but not for push event. For push use the run_id to have a unique group.
@@ -38,6 +43,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
   FORCE_COLOR: 1
 
 jobs:
@@ -177,46 +183,15 @@ jobs:
       - name: 'Update wp-env config'
         if: ${{ inputs.artifactName != '' }}
         env:
-          RELEASE_TAG: ${{ inputs.refName != '' && inputs.refName || github.ref_name }}
+          RELEASE_TAG: ${{ inputs.releaseTag != '' && inputs.releaseTag || ( inputs.refName != '' && inputs.refName || github.ref_name ) }}
           ARTIFACT_NAME: ${{ inputs.artifactName }}
-          # band-aid to get the path to wp-env.json for blocks e2e tests, until they're migrated to plugins/woocommerce
-          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.testEnv.start == 'env:start:blocks' && 'plugins/woocommerce/client/blocks' || matrix.projectPath  }}
+          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.projectPath }}
         run: node .github/workflows/scripts/override-wp-env-plugins.js
 
       - name: 'Start Test Environment'
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
-        env: ${{ matrix.testEnv.envVars }}
-        run: |
-          # randomized wp-env ports to reduce the number of ports usage conflicts in the range of 1024 - 49151
-          min=10
-          max=99
-          randomized=$(( $RANDOM % ( $max - $min + 1 ) + $min ))
-          httpport="${randomized}80"
-          mysqlport="${randomized}36"
-
-          # provision the environment to propagate the randomized ports
-          echo "WP_ENV_TESTS_PORT=$httpport" >> "$GITHUB_ENV"
-          echo "WP_ENV_TESTS_MYSQL_PORT=$mysqlport" >> "$GITHUB_ENV"
-          # WP_BASE_URL is set only to satisfy blocks E2Es setup (setupRest).
-          echo "WP_BASE_URL=http://localhost:$httpport" >> "$GITHUB_ENV"
-          
-          WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
-
-      - name: 'Determine BuildKite Analytics Message'
-        env:
-          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-        run: |
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
-          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            MESSAGE="$PR_TITLE"
-          else
-            MESSAGE="${{ github.event_name }}"
-          fi
-          echo "BUILDKITE_ANALYTICS_MESSAGE=$MESSAGE" >> "$GITHUB_ENV"
-        shell: bash
+        run: pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
 
       - name: 'Resolve artifacts path'
         if: ${{ always() && matrix.report.resultsPath != '' }}
@@ -237,14 +212,13 @@ jobs:
           pattern: 'last-run__${{ strategy.job-index }}'
 
       - name: 'Run tests (${{ matrix.testType }})'
-        timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && 20 ) || ( matrix.testType == 'unit:php' && 10 ) ) ) || 360 }}
+        timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && 20 ) || ( matrix.testType == 'unit:php' && 15 ) ) ) || 360 }}
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
-          BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
           LAST_FAILED_RUN: ${{ vars.LAST_FAILED_RUN }}
           GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          PLUGIN_SLUG: ${{ inputs.refName == 'nightly' && 'woocommerce-trunk-nightly' || '' }} # required by test:plugincheck
+          PLUGIN_SLUG: '' # required by test:plugincheck; nightly installs under the canonical 'woocommerce' folder
           PLAYWRIGHT_JUNIT_SUITE_NAME: 'WooCommerce Core'
           PLAYWRIGHT_JUNIT_SUITE_ID: 'woocommerce-core'
         run: |
@@ -302,13 +276,6 @@ jobs:
         with:
           name: '${{ matrix.report.resultsBlobName }}__${{ strategy.job-index }}'
           path: ${{ env.ARTIFACTS_PATH }}
-
-      - name: 'Upload flaky test reports'
-        uses: actions/upload-artifact@v4
-        with:
-          name: flaky-tests-${{ strategy.job-index }}
-          path: ${{ env.ARTIFACTS_PATH }}/flaky-tests
-          if-no-files-found: ignore
 
   evaluate-project-jobs:
     # In order to add a required status check we need a consistent job that we can grab onto.
@@ -396,7 +363,7 @@ jobs:
 
   test-reports:
     name: 'Test reports - ${{ matrix.report }}'
-    needs: ['project-jobs', 'project-test-jobs', 'evaluate-project-jobs', 'report-flaky-tests']
+    needs: ['project-jobs', 'project-test-jobs', 'evaluate-project-jobs']
     if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && ( github.event_name != 'pull_request' || ( needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' && ! github.event.pull_request.head.repo.fork ) ) && needs.project-jobs.outputs.report-jobs != '[]' }}
     strategy:
       fail-fast: false
@@ -480,45 +447,6 @@ jobs:
               .addRaw('Note that it can take a few minutes for the reports to be generated and be available', true)
               .write();
 
-  report-flaky-tests:
-    name: 'Create issues for flaky tests'
-    if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' }}
-    needs: ['project-jobs', 'project-test-jobs', 'evaluate-project-jobs', 'alert-on-failure']
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      issues: write
-
-    steps:
-      - uses: 'actions/checkout@v4'
-        name: 'Checkout'
-        with:
-          ref: ${{ inputs.refName != '' && inputs.refName || '' }}
-          sparse-checkout: |
-              .github/actions/report-flaky-tests
-
-      - uses: 'actions/download-artifact@v4'
-        name: 'Download artifacts'
-        with:
-          pattern: flaky-tests*
-          path: flaky-tests
-          merge-multiple: true
-
-      - name: 'Merge flaky tests reports'
-        run: |
-          downloadPath='${{ steps.download-artifact.outputs.download-path || './flaky-tests' }}'
-          # make dir so that next step doesn't fail if it doesn't exist 
-          mkdir -p $downloadPath
-          # any output means there are reports
-          echo "FLAKY_REPORTS=$(ls -A $downloadPath | head -1)" >> $GITHUB_ENV
-
-      - name: 'Report flaky tests'
-        if: ${{ !!env.FLAKY_REPORTS }}
-        uses: './.github/actions/report-flaky-tests'
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          label: 'metric: flaky e2e test'
-
   validate-syncpack:
     name: 'Validate dependencies version'
     if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.identify-jobs-to-run.outputs.needs-syncpack-validation == 'true' }}
@@ -587,6 +515,11 @@ jobs:
             done
             echo "Populated filter: $filter"
 
+            if [ -z "$filter" ]; then
+                echo "No touched packages use changelogger; nothing to validate."
+                exit 0
+            fi
+
             pnpm --parallel --workspace-concurrency=10 --stream $filter changelog validate
 
   validate-markdown:
@@ -606,7 +539,7 @@ jobs:
           list-files: shell
           filters: |
             needs-markdown-linting:
-              - added|modified: '!(.github/**)/**/*.md'
+              - added|modified: '!(.github/**|.linear/**)/**/*.md'
               - added|modified: '*.md'
             needs-docs-build-validation:
               - 'docs/**/*.md'
@@ -616,17 +549,19 @@ jobs:
         with:
           node-version-file: .nvmrc
 
+      - name: 'Setup - pnpm'
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+
       - name: 'Validate - lint md-files'
         if: ${{ steps.target-changes.outputs.needs-markdown-linting }}
         shell: bash
-        run: |
-            npm install -g markdownlint-cli
-            markdownlint ${{ steps.target-changes.outputs.needs-markdown-linting_files }}
-          
+        run: pnpm dlx markdownlint-cli -- ${{ steps.target-changes.outputs.needs-markdown-linting_files }}
+
       - name: 'Validate - lint docs-files'
         if: ${{ always() && steps.target-changes.outputs.needs-docs-build-validation }}
         shell: bash
         working-directory: docs/_docu-tools
         run: |
-            npm install
-            npm run build -- --config ./utils/docusaurus-faster.deploy.config.js
+            pnpm install --ignore-workspace
+            pnpm run lint:markdown
+            pnpm exec docusaurus build --config ./utils/docusaurus-faster.deploy.config.js

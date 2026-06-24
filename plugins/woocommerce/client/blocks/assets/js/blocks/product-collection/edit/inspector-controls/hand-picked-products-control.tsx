@@ -10,7 +10,6 @@ import { __ } from '@wordpress/i18n';
 import { blocksConfig } from '@woocommerce/block-settings';
 import {
 	FormTokenField,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
@@ -175,12 +174,13 @@ export const HandPickedProductsControlField = ( {
 
 	return (
 		<FormTokenField
+			__next40pxDefaultSize
+			__nextHasNoMarginBottom
 			displayTransform={ transformTokenIntoProductName }
 			label={ __( 'Hand-Picked', 'woocommerce' ) }
 			onChange={ onTokenChange }
 			onInputChange={ isLargeCatalog ? handleSearch : undefined }
 			suggestions={ suggestions }
-			// @ts-expect-error Using experimental features
 			__experimentalValidateInput={ ( value: string ) =>
 				productsMap.has( value )
 			}

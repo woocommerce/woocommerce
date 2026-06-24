@@ -96,8 +96,18 @@ const EllipsisMenu = ( {
 		);
 	};
 
+	const handleMenuKeyDown = ( event: globalThis.KeyboardEvent ) => {
+		// Prevent page scroll when navigating menu with arrow keys.
+		if ( event.key === 'ArrowUp' || event.key === 'ArrowDown' ) {
+			event.preventDefault();
+		}
+	};
+
 	const renderMenu = ( renderContentArgs: CallbackProps ) => (
-		<NavigableMenu className="woocommerce-ellipsis-menu__content">
+		<NavigableMenu
+			className="woocommerce-ellipsis-menu__content"
+			onKeyDown={ handleMenuKeyDown }
+		>
 			{ renderContent( renderContentArgs ) }
 		</NavigableMenu>
 	);
