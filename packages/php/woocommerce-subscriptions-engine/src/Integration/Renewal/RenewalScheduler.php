@@ -1,19 +1,17 @@
 <?php
 /**
- * RenewalScheduler - the Action Scheduler bridge for renewal dispatch.
+ * RenewalScheduler - the superseded one-job-per-contract Action Scheduler bridge.
  *
- * Owns the AS hook and group conventions and keeps them behind
- * {@see RenewalEngine} so callers never couple to Action Scheduler hook names.
- * If the scheduling substrate ever changes, this is the only file that has to.
+ * @deprecated Superseded by the batch {@see RenewalDispatcher}, which scans the
+ * contract due-index on one recurring action instead of enqueuing a row per
+ * contract. {@see RenewalEngine::schedule()} no longer enqueues here; the only
+ * remaining use is {@see self::unschedule()} / {@see self::is_scheduled()} to
+ * clear or inspect any pre-existing per-contract rows. Left in place (unused for
+ * new scheduling) to drain leftovers; slated for removal once the consumer rewire
+ * lands.
  *
- * POC shape (one job per contract): each contract has at most one pending AS
- * row, keyed by contract id. This is deliberately NOT the batch dispatcher the
- * engine targets long-term (a few recurring jobs scanning a due index with
- * lease claims) - that arrives with the cycles/attempts reshape. Until then,
- * one-job-per-contract is the simplest thing that runs the money-path.
- *
- * Integration zone: WordPress-native. Calls Action Scheduler's `as_*()`
- * functions directly.
+ * Owns the AS hook and group conventions for those legacy rows. Integration zone:
+ * WordPress-native. Calls Action Scheduler's `as_*()` functions directly.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal
  */

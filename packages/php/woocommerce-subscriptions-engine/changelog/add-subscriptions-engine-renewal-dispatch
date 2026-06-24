@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add subscriptions engine batch renewal dispatcher, processing gate, and cycle lease columns.

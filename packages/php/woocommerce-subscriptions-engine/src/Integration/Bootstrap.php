@@ -15,6 +15,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway\CapabilityRegistry;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalDispatcher;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\PlansController;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
@@ -46,21 +47,36 @@ final class Bootstrap {
 
 		CapabilityRegistry::init();
 
-		// Register the Action Scheduler callback that dispatches a due renewal
-		// back into the engine. Must run on every boot (not just activation) so
-		// AS can fire scheduled renewals.
+		// Register the Action Scheduler callbacks that dispatch renewals back into the
+		// engine. Plain add_action calls, safe before Action Scheduler has loaded; must
+		// run on every boot (not just activation) so AS can fire the actions.
 		RenewalEngine::register_hooks();
 		PlansController::register_hooks();
+		RenewalDispatcher::register_hooks();
 
+		// The schema install and the recurring-action enqueue both need a later moment
+		// (the install reads options/runs dbDelta; the enqueue needs Action Scheduler's
+		// as_* functions). Run them on init, or immediately when init already fired.
 		if ( did_action( 'init' ) ) {
-			self::maybe_install_schema();
+			self::on_init();
 		} else {
-			add_action( 'init', array( __CLASS__, 'maybe_install_schema' ) );
+			add_action( 'init', array( __CLASS__, 'on_init' ) );
 		}
 	}
 
 	/**
+	 * Deferred boot work that needs the `init` moment: install/upgrade the schema and
+	 * ensure the recurring renewal dispatcher is scheduled.
+	 */
+	public static function on_init(): void {
+		SchemaInstaller::maybe_install();
+		RenewalDispatcher::ensure_scheduled();
+	}
+
+	/**
 	 * Install or upgrade the engine schema when it is missing or behind.
+	 *
+	 * @deprecated Folded into {@see self::on_init()}; retained for any external caller.
 	 */
 	public static function maybe_install_schema(): void {
 		SchemaInstaller::maybe_install();
