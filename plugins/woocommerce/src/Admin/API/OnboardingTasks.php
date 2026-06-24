@@ -7,12 +7,13 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingIndustries;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
-use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -512,8 +513,8 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return string Template contents.
 	 */
 	private static function get_homepage_template( $post_id ) {
-		$products = wp_count_posts( 'product' );
-		if ( $products->publish >= 4 ) {
+		$products = ProductUtil::get_counts_for_type( 'product' );
+		if ( ( $products[ ProductStatus::PUBLISH ] ?? 0 ) >= 4 ) {
 			$images   = self::sideload_homepage_images( $post_id, 1 );
 			$image_1  = ! empty( $images[0] ) ? $images[0] : '';
 			$template = self::get_homepage_cover_block( $image_1 ) . '
