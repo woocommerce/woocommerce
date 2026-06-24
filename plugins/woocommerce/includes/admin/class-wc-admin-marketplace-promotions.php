@@ -8,6 +8,12 @@
 
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\FailRuleProcessor;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\GetRuleProcessor;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\OrdersProvider;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -163,8 +169,8 @@ class WC_Admin_Marketplace_Promotions {
 			return;
 		}
 
-		\Automattic\WooCommerce\Internal\Admin\WCAdminAssets::register_script( 'wp-admin-scripts', 'marketplace-orders-promo', true );
-		\Automattic\WooCommerce\Internal\Admin\WCAdminAssets::register_style( 'marketplace-orders-promo', 'style', array( 'wp-components' ) );
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'marketplace-orders-promo', true );
+		WCAdminAssets::register_style( 'marketplace-orders-promo', 'style', array( 'wp-components' ) );
 	}
 
 	/**
@@ -270,7 +276,7 @@ class WC_Admin_Marketplace_Promotions {
 
 			self::$orders_promo_card = array(
 				'promotion'   => $promotion,
-				'order_count' => ( new \Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\OrdersProvider() )->get_order_count(),
+				'order_count' => ( new OrdersProvider() )->get_order_count(),
 			);
 			break;
 		}
@@ -349,7 +355,7 @@ class WC_Admin_Marketplace_Promotions {
 			return false;
 		}
 
-		return ( new \Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator() )
+		return ( new RuleEvaluator() )
 			->evaluate( $decoded_rules );
 	}
 
@@ -378,10 +384,10 @@ class WC_Admin_Marketplace_Promotions {
 				return false;
 			}
 
-			$processor = \Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\GetRuleProcessor::get_processor( $rule->type );
+			$processor = GetRuleProcessor::get_processor( $rule->type );
 
 			// Unknown types resolve to the fail processor; reject them so `not` cannot flip them to true.
-			if ( $processor instanceof \Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\FailRuleProcessor
+			if ( $processor instanceof FailRuleProcessor
 				&& 'fail' !== $rule->type ) {
 				return false;
 			}
