@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Optional contract for registered sections that provide a native Settings UI page.
  *
- * @since 10.9.0
+ * @since 11.0.0
  */
 interface SettingsSectionUIPageProviderInterface {
 
@@ -21,7 +21,7 @@ interface SettingsSectionUIPageProviderInterface {
 	 *
 	 * Return null to use the default registered section adapter.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 *
 	 * @param \WC_Settings_Page $parent_page Parent settings page.
 	 * @return SettingsUIPageInterface|null

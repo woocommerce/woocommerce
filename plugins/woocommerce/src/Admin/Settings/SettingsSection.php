@@ -19,7 +19,7 @@ abstract class SettingsSection implements SettingsSectionInterface, SettingsSect
 	/**
 	 * Get the native Settings UI page for this registered section.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 *
 	 * @param \WC_Settings_Page $parent_page Parent settings page.
 	 * @return SettingsUIPageInterface|null
