@@ -93,14 +93,10 @@ class WC_Admin_Marketplace_Promotions {
 		self::$locale = ( self::$locale ?? get_user_locale() ) ?? 'en_US';
 		self::maybe_show_bubble_promotions();
 
-		// Contextual promo card on the Orders list (a classic, non-SPA admin page).
-		// admin_notices is hoisted into a hidden list by the WooCommerce admin layout, so the
-		// card is printed into the orders list table's own tablenav, which renders above the table.
+		// Contextual promo card on the Orders list (a classic, non-SPA admin page). The script
+		// inserts the card above the orders table using the promo data localized in the enqueue
+		// step, which works the same on HPOS and the legacy posts list.
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_orders_promo_card' ) );
-		// HPOS orders list.
-		add_action( 'woocommerce_order_list_table_extra_tablenav', array( __CLASS__, 'render_orders_promo_card' ), 10, 2 );
-		// Legacy (posts-based) orders list.
-		add_action( 'manage_posts_extra_tablenav', array( __CLASS__, 'render_legacy_orders_promo_card' ) );
 	}
 
 	/**
@@ -155,21 +151,33 @@ class WC_Admin_Marketplace_Promotions {
 	}
 
 	/**
-	 * Enqueue the Orders-screen promo card script when an eligible promo exists.
+	 * Enqueue the Orders-screen promo card script and localize the resolved promo.
 	 *
-	 * The Orders list is a classic admin page, so the card is mounted via a
-	 * wp-admin-scripts entry (see ShippingLabelBanner for the same pattern).
+	 * The Orders list is a classic admin page, so the card is mounted by a wp-admin-scripts
+	 * entry that inserts it above the orders table (see ShippingLabelBanner for the same enqueue
+	 * pattern). The promotion is rule-resolved server-side and passed to the script, so no
+	 * additional data is shared with WooCommerce.com.
 	 *
 	 * @return void
 	 *
 	 * @since 11.0.0
 	 */
 	public static function maybe_enqueue_orders_promo_card() {
-		if ( ! self::is_orders_screen() || null === self::get_orders_promo_card() ) {
+		if ( ! self::is_orders_screen() ) {
+			return;
+		}
+
+		$card = self::get_orders_promo_card();
+		if ( null === $card ) {
 			return;
 		}
 
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'marketplace-orders-promo', true );
+		wp_add_inline_script(
+			'wc-admin-marketplace-orders-promo',
+			'window.wcOrdersPromo = ' . wp_json_encode( $card, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ) . ';',
+			'before'
+		);
 
 		// Enqueue the card stylesheet under a unique handle. WCAdminAssets::register_style() would
 		// register it as the shared `wc-admin-style` handle, which collides with other Orders-screen
@@ -182,64 +190,6 @@ class WC_Admin_Marketplace_Promotions {
 			WCAdminAssets::get_file_version( 'css' )
 		);
 		wp_style_add_data( $style_handle, 'rtl', 'replace' );
-	}
-
-	/**
-	 * Print the mount point for the Orders-screen promo card, above the orders table.
-	 *
-	 * Hooked on woocommerce_order_list_table_extra_tablenav. The promotion is rule-resolved
-	 * server-side and passed to the script via a data attribute, so no additional data is
-	 * shared with WooCommerce.com.
-	 *
-	 * @param string $order_type The order type being listed.
-	 * @param string $which      The tablenav location: 'top' or 'bottom'.
-	 * @return void
-	 *
-	 * @since 11.0.0
-	 */
-	public static function render_orders_promo_card( $order_type = '', $which = '' ) {
-		if ( 'top' !== $which || 'shop_order' !== $order_type ) {
-			return;
-		}
-
-		self::print_orders_promo_card();
-	}
-
-	/**
-	 * Print the mount point on the legacy (posts-based) orders list.
-	 *
-	 * Hooked on the WordPress core manage_posts_extra_tablenav, which fires for every post
-	 * type, so this is gated to the shop_order list screen.
-	 *
-	 * @param string $which The tablenav location: 'top' or 'bottom'.
-	 * @return void
-	 *
-	 * @since 11.0.0
-	 */
-	public static function render_legacy_orders_promo_card( $which = '' ) {
-		$screen = get_current_screen();
-		if ( 'top' !== $which || ! $screen || 'edit-shop_order' !== $screen->id ) {
-			return;
-		}
-
-		self::print_orders_promo_card();
-	}
-
-	/**
-	 * Print the promo card container for the orders list, if a card is eligible.
-	 *
-	 * @return void
-	 */
-	private static function print_orders_promo_card(): void {
-		$card = self::get_orders_promo_card();
-		if ( null === $card ) {
-			return;
-		}
-
-		printf(
-			'<div id="woocommerce-marketplace-orders-promo" class="woocommerce-marketplace-orders-promo" data-promotion="%s"></div>',
-			esc_attr( wp_json_encode( $card ) )
-		);
 	}
 
 	/**
