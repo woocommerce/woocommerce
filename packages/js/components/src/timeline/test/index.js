@@ -26,6 +26,7 @@ jest.mock( '@wordpress/date', () => {
 
 describe( 'Timeline', () => {
 	const actualDateModule = jest.requireActual( '@wordpress/date' );
+	const originalDateSettings = actualDateModule.getSettings();
 	const originalIntl = global.Intl;
 	const timezoneTestItem = {
 		...mockData[ 1 ],
@@ -33,6 +34,7 @@ describe( 'Timeline', () => {
 	};
 
 	afterEach( () => {
+		actualDateModule.setSettings( originalDateSettings );
 		global.Intl = originalIntl;
 		formatSiteDate.mockImplementation( actualDateModule.date );
 		dateI18n.mockImplementation( actualDateModule.dateI18n );
@@ -147,6 +149,39 @@ describe( 'Timeline', () => {
 		).toBe( 'browser:g:ia:2020-01-20T23:45:00.000Z' );
 	} );
 
+	test( 'falls back to browser timezone formatting when browser timezone lookup throws', () => {
+		global.Intl = {
+			DateTimeFormat: () => {
+				throw new Error( 'Timezone unavailable' );
+			},
+		};
+		format.mockImplementation(
+			( dateFormat, date ) =>
+				`browser:${ dateFormat }:${ date.toISOString() }`
+		);
+		dateI18n.mockImplementation(
+			( dateFormat, date, timezone ) =>
+				`localized:${ timezone }:${ dateFormat }:${ date.toISOString() }`
+		);
+
+		const { container } = render(
+			<Timeline
+				items={ [ timezoneTestItem ] }
+				dateFormat="F j, Y"
+				clockFormat="g:ia"
+			/>
+		);
+
+		expect(
+			container.querySelector( '.woocommerce-timeline-group__title' )
+				.textContent
+		).toBe( 'browser:F j, Y:2020-01-20T23:45:00.000Z' );
+		expect(
+			container.querySelector( '.woocommerce-timeline-item__timestamp' )
+				.textContent
+		).toBe( 'browser:g:ia:2020-01-20T23:45:00.000Z' );
+	} );
+
 	test( 'falls back to browser timezone formatting when browser timezone is empty', () => {
 		global.Intl = {
 			DateTimeFormat: () => ( {
@@ -194,16 +229,14 @@ describe( 'Timeline', () => {
 			},
 		];
 
-		formatSiteDate.mockImplementation( ( dateFormat, date ) => {
-			if ( dateFormat === 'Y-m-d' ) {
-				return '2020-01-21';
-			}
-
-			if ( dateFormat === 'F j, Y' ) {
-				return 'January 21, 2020';
-			}
-
-			return `site:${ dateFormat }:${ date.toISOString() }`;
+		actualDateModule.setSettings( {
+			...originalDateSettings,
+			timezone: {
+				offset: '9',
+				offsetFormatted: '+09:00',
+				string: '',
+				abbr: '',
+			},
 		} );
 		dateI18n.mockImplementation( ( dateFormat, date ) => {
 			if ( dateFormat === 'F j, Y' ) {

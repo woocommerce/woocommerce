@@ -55,7 +55,7 @@ Name | Type | Default | Description
 
 ### Date formatting
 
-Timeline localizes rendered dates and times using WordPress date settings. Use the `timezone` prop to choose whether dates are grouped and rendered in the user's browser timezone or the WordPress site timezone.
+Timeline localizes rendered dates and times using WordPress date settings. Use the `timezone` prop to choose whether dates are grouped and rendered in the user's browser timezone or the WordPress site timezone. When the browser timezone cannot be detected, `browser` mode uses non-localized browser formatting.
 
 ### `items` structure
 

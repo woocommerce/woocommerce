@@ -32,6 +32,8 @@ const sortByDateUsing = ( orderBy ) => {
 
 const siteGroupDateFormats = {
 	[ groupByOptions.DAY ]: 'Y-m-d',
+	// Site-timezone week grouping uses ISO week keys, while browser grouping
+	// preserves Moment's locale-aware week comparison behavior.
 	[ groupByOptions.WEEK ]: 'o-W',
 	[ groupByOptions.MONTH ]: 'Y-m',
 };
