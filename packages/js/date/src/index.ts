@@ -173,6 +173,12 @@ export function getRangeLabel( after: moment.Moment, before: moment.Moment ) {
  * @return {string | undefined} - IANA zone name or `±HH:mm` offset, if set.
  */
 function getStoreTimeZoneSetting() {
+	// Optional chaining does not protect the free `window` reference, so guard
+	// it for non-browser environments before falling back to the local moment.
+	if ( typeof window === 'undefined' ) {
+		return undefined;
+	}
+
 	return window.wcSettings?.timeZone || window.wcSettings?.admin?.timeZone;
 }
 

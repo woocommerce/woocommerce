@@ -1024,8 +1024,13 @@ describe( 'getChartTypeForQuery', () => {
 } );
 
 describe( 'getStoreTimeZoneMoment', () => {
+	const previousWcSettings = global.window.wcSettings;
+
 	afterEach( () => {
 		jest.restoreAllMocks();
+		// These tests mutate the global store settings; restore them so a
+		// leaked time zone cannot make later tests order-dependent.
+		global.window.wcSettings = previousWcSettings;
 	} );
 
 	it( 'should return the default moment when no timezone exists', () => {
