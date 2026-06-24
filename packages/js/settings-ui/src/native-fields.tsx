@@ -45,7 +45,9 @@ const toStringValue = ( value: SettingsValue ) =>
 const isTextInputType = ( type: string ): type is TextInputType =>
 	textInputTypes.includes( type as TextInputType );
 
-const toBooleanCustomAttribute = (
+// Use HTML boolean attribute presence semantics: disabled="false" still
+// means disabled, while a boolean false remains false.
+const toPresenceBooleanCustomAttribute = (
 	value: string | number | boolean | undefined
 ): boolean | undefined => {
 	if ( typeof value === 'undefined' ) {
@@ -56,11 +58,9 @@ const toBooleanCustomAttribute = (
 };
 
 const toStringCustomAttribute = (
-	value: string | number | boolean | undefined
+	value: string | number | undefined
 ): string | undefined => {
-	return typeof value === 'string' || typeof value === 'number'
-		? String( value )
-		: undefined;
+	return typeof value === 'undefined' ? undefined : String( value );
 };
 
 const getNumberInputAttributes = (
@@ -71,10 +71,12 @@ const getNumberInputAttributes = (
 			? customAttributes
 			: {};
 	const { disabled, placeholder, ...inputAttributes } = safeAttributes;
+	const placeholderAttribute =
+		typeof placeholder === 'boolean' ? undefined : placeholder;
 
 	return {
-		disabled: toBooleanCustomAttribute( disabled ),
-		placeholder: toStringCustomAttribute( placeholder ),
+		disabled: toPresenceBooleanCustomAttribute( disabled ),
+		placeholder: toStringCustomAttribute( placeholderAttribute ),
 		inputAttributes,
 	};
 };
