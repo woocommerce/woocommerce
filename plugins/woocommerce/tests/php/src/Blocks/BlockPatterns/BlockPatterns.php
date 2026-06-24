@@ -167,6 +167,35 @@ class BlockPatterns extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that a cached pattern with a missing or invalid source is skipped, so the source is never
+	 * dereferenced (which would raise a PHP warning) when building the pattern path.
+	 */
+	public function test_cached_pattern_with_invalid_source_is_skipped() {
+		$pattern_data = array(
+			'version'  => WOOCOMMERCE_VERSION,
+			'patterns' => array(
+				array(
+					'title'   => 'No Source',
+					'content' => '',
+				),
+				array(
+					'title'   => 'Invalid Source',
+					'source'  => array( 'not', 'a', 'string' ),
+					'content' => '',
+				),
+			),
+		);
+
+		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data );
+
+		$this->pattern_registry
+			->expects( $this->never() )
+			->method( 'register_block_pattern' );
+
+		$this->block_patterns->register_block_patterns();
+	}
+
+	/**
 	 * Tests if patterns are registered with the cached data.
 	 */
 	public function test_invalid_cached_block_patterns_registration() {
