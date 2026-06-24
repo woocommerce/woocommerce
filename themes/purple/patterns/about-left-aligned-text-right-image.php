@@ -5,6 +5,7 @@
  * Categories: purple
  * Keywords: about, text, intro
  * Description: A section with an image on the right, description on the left.
+ * Viewport width: 1440
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Left-aligned text, image on the right","categories":["purple"],"patternName":"purple/about-left-aligned-text-right-image","description":"A section with an image on the right, description on the left."},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"backgroundColor":"theme-5","layout":{"type":"constrained"}} -->

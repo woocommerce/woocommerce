@@ -5,6 +5,7 @@
  * Categories: purple
  * Keywords: text, call-to-action, columns
  * Description: A section with a heading and a newsletter subscription form.
+ * Viewport width: 1440
  */
 ?>
 

@@ -5,6 +5,7 @@
  * Categories: purple
  * Keywords: call-to-action, gallery, images
  * Description: A call to action with three images of different sizes.
+ * Viewport width: 1440
  */
 ?>
 

@@ -5,6 +5,7 @@
  * Categories: purple
  * Keywords: woo-commerce, featured, featured-selling, call-to-action
  * Description: A new arrival product with a featured image, title, description and button.
+ * Viewport width: 1440
  */
 ?>
 

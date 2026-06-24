@@ -5,6 +5,7 @@
  * Categories: testimonials, purple
  * Keywords: testimonials, text, media
  * Description: A testimonial with centered text and a logo.
+ * Viewport width: 1440
  */
 ?>
 

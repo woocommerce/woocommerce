@@ -5,6 +5,7 @@
  * Categories: purple
  * Keywords: woo-commerce, featured, featured-selling, call-to-action
  * Description: A section with a heading and a carousel of related products.
+ * Viewport width: 1440
  */
 ?>
 

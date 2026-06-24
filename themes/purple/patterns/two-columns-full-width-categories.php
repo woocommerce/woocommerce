@@ -5,6 +5,7 @@
  * Categories: woo-commerce, purple
  * Keywords: columns, gallery, media, featured, category
  * Description: A section with two full width Featured Category blocks.
+ * Viewport width: 1440
  */
 ?>
 

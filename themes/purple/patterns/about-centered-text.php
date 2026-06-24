@@ -5,6 +5,7 @@
  * Categories: purple
  * Keywords: about, text
  * Description: A description section aligned center.
+ * Viewport width: 1440
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Centered text","patternName":"purple/about-centered-text","description":"A description section aligned center.","categories":["purple"]},"align":"full","className":"is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|80","bottom":"var:preset|spacing|80"}},"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2","layout":{"type":"constrained"}} -->

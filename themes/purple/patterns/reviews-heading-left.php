@@ -5,6 +5,7 @@
  * Categories: testimonials
  * Keywords: reviews, testimonials, ratings, stars, columns
  * Description: A reviews section with the heading on the left and two columns containing four customer reviews on the right.
+ * Viewport width: 1440
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Reviews","categories":["testimonials"],"patternName":"purple/reviews-heading-left"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->

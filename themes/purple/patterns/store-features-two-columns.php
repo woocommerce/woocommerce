@@ -5,6 +5,7 @@
  * Categories: purple
  * Keywords: about, text, media, columns
  * Description: A two-column section with store featured services.
+ * Viewport width: 1440
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Small store features row with icons","categories":["purple"],"patternName":"purple/store-features-two-columns"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40","left":"var:preset|spacing|50","right":"var:preset|spacing|50"}}},"backgroundColor":"theme-5","layout":{"type":"constrained"}} -->

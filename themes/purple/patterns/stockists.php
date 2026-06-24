@@ -5,6 +5,7 @@
  * Categories: purple
  * Keywords: stockists, locations, columns
  * Description: A column layout to display stockists.
+ * Viewport width: 1440
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Stockists","categories":["purple"],"patternName":"purple/stockists"},"align":"full","style":{"spacing":{"padding":{"left":"var:preset|spacing|50","right":"var:preset|spacing|50","top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"layout":{"type":"constrained"}} -->

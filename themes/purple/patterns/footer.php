@@ -6,6 +6,7 @@
  * Keywords: footer, contact, social, navigation, links
  * Block Types: core/template-part/footer
  * Description: A footer pattern with social links and navigation.
+ * Viewport width: 1440
  */
 ?>
 

@@ -4,6 +4,7 @@
  * Slug: purple/upsell-products-collection
  * Categories: purple
  * Keywords: woo-commerce, products, upsell, collection
+ * Viewport width: 1440
  */
 ?>
 

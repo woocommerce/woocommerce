@@ -6,6 +6,7 @@
  * Keywords: posts, blog, query, columns, grid
  * Description: A list of posts, 3 columns, with featured image, post date and title.
  * Block Types: core/query
+ * Viewport width: 1440
  */
 ?>
 

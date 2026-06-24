@@ -5,6 +5,7 @@
  * Categories: woo-commerce, purple
  * Keywords: text, media, columns	
  * Description: A section with three columns of categories with images.
+ * Viewport width: 1440
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Categories on three columns","patternName":"purple/categories-on-three-columns","description":"A section with three columns of categories with images.","categories":["text","media","columns"]},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->

@@ -5,6 +5,7 @@
  * Categories: purple
  * Keywords: about, text, image, media
  * Description: A section with a heading, paragraph, a list of features with icons and an image.
+ * Viewport width: 1440
  */
 ?>
 <!-- wp:group {"metadata":{"categories":["purple"],"name":"Heading, image and list of features","patternName":"purple/about-features-2-columns","description":"A section with a heading, paragraph, a list of features with icons and an image."},"align":"full","className":"alignfull is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->

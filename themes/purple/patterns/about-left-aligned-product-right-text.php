@@ -5,6 +5,7 @@
  * Categories: purple
  * Keywords: about, text, intro
  * Description: A section with a product image and a large sized paragraph.
+ * Viewport width: 1440
  */
 ?>
 

@@ -5,6 +5,7 @@
  * Categories: about
  * Keywords: about, intro, columns, heading
  * Description: A section with a heading and short paragraph above a row of three image placeholders.
+ * Viewport width: 1440
  */
 ?>
 

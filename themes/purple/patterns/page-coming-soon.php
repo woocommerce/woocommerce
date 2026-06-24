@@ -6,7 +6,7 @@
  * Keywords: coming soon, starter, landing
  * Block Types: core/post-content
  * Post Types: page, wp_template
- * Viewport width: 1400
+ * Viewport width: 1440
  * Description: A coming soon page pattern.
  */
 ?>

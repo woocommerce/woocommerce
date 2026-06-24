@@ -5,6 +5,7 @@
  * Categories: about, purple
  * Keywords: about, text, image, media
  * Description: A section with alternating columns of text and an image.
+ * Viewport width: 1440
  */
 ?>
 

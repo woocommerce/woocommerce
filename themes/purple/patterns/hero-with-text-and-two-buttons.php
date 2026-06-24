@@ -5,6 +5,7 @@
  * Categories: purple
  * Keywords: banner, media, call-to-action
  * Description: A hero section with text and two buttons.
+ * Viewport width: 1440
  */
 ?>
 

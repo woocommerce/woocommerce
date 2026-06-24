@@ -6,6 +6,7 @@
  * Keywords: size chart, table
  * Description: A size chart table.
  * Block Types: core/table
+ * Viewport width: 1440
  */
 ?>
 <!-- wp:group {"layout":{"type":"constrained"}} -->

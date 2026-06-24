@@ -5,6 +5,7 @@
  * Categories: about
  * Keywords: about, intro, heading, image, button
  * Description: A two-column about section with text on one side and an image placeholder on the other.
+ * Viewport width: 1440
  */
 ?>
 

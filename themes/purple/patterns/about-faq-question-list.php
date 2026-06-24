@@ -5,6 +5,7 @@
  * Categories: about, purple
  * Keywords: faq, text
  * Description: A list of questions and answers.
+ * Viewport width: 1440
  */
 ?>
 

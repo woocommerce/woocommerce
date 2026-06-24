@@ -5,6 +5,7 @@
  * Categories: testimonials
  * Keywords: reviews, testimonials, ratings, stars
  * Description: A three-column reviews section with star ratings, review text, and reviewer name.
+ * Viewport width: 1440
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Reviews","categories":["testimonials"],"patternName":"purple/reviews-three-columns"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"},"blockGap":"var:preset|spacing|40"}},"layout":{"type":"constrained","justifyContent":"center"}} -->

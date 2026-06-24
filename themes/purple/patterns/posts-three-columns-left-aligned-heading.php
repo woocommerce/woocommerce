@@ -6,6 +6,7 @@
  * Keywords: posts, blog, query, columns, grid
  * Description: A list of posts, 3 columns, with featured image, post date and title.
  * Block Types: core/query
+ * Viewport width: 1440
  */
 ?>
 <!-- wp:group {"metadata":{"name":"List of posts with left aligned heading","categories":["purple"],"patternName":"purple/posts-three-columns-left-aligned-heading"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50","left":"var:preset|spacing|50","right":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->

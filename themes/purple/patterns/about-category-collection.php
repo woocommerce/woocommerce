@@ -5,6 +5,7 @@
  * Categories: purple
  * Keywords: about, text, image, media
  * Description: A section with a collection of categories with images.
+ * Viewport width: 1440
  */
 ?>
 

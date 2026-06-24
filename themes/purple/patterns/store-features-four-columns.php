@@ -5,6 +5,7 @@
  * Categories: purple
  * Keywords: about, text, media, columns
  * Description: A four-column section with store featured services.
+ * Viewport width: 1440
  */
 ?>
 

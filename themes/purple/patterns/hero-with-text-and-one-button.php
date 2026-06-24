@@ -5,6 +5,7 @@
  * Categories: woo-commerce, purple
  * Keywords: banner, media, call-to-action
  * Description: A hero section with text and one button.
+ * Viewport width: 1440
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Hero with text and two buttons","categories":["woo-commerce","purple"],"patternName":"purple/hero-with-text-and-one-button"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
