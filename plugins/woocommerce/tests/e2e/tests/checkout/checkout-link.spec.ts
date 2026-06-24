@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+import { faker } from '@faker-js/faker';
 
 /**
  * Internal dependencies
@@ -41,9 +42,14 @@ const test = baseTest.extend( {
 	},
 	coupon: async ( { restApi }, use ) => {
 		let coupon;
+		// Unique code per worker so parallel runs don't collide on a duplicate
+		// coupon code (WC rejects duplicates with a 400).
+		const code = `E2ECOUPON${ faker.string
+			.alphanumeric( 6 )
+			.toUpperCase() }`;
 		await restApi
 			.post( `${ WC_API_PATH }/coupons`, {
-				code: 'E2ECOUPON',
+				code,
 				discount_type: 'percent',
 				amount: '10',
 			} )
@@ -84,7 +90,7 @@ test.describe( 'Checkout Link Endpoint', () => {
 
 				// Assert coupon is applied
 				await expect(
-					page.getByText( 'Coupon: E2ECOUPON' )
+					page.getByText( `Coupon: ${ coupon.code }` )
 				).toBeVisible();
 			}
 		);
@@ -208,7 +214,7 @@ test.describe( 'Checkout Link Endpoint', () => {
 
 				// Assert coupon is applied
 				await expect(
-					page.getByText( 'Coupon: E2ECOUPON' )
+					page.getByText( `Coupon: ${ coupon.code }` )
 				).toBeVisible();
 			}
 		);

@@ -114,6 +114,85 @@ export const setupProjects = [
 	},
 ];
 
+/**
+ * Spec folders that must run serially in `core-serial` (they mutate global
+ * state or share fixtures). Every other folder under `tests/` runs in
+ * `core-parallel` by default, except the other-project folders in `nonCoreSpecs`.
+ */
+const serialRunSpecs = [
+	// Drains the whole store's Action Scheduler queue via `?process-waiting-actions`
+	// (other workers' order/product churn floods it past the 10s timeout) and asserts
+	// exact store-wide totals, polluted by concurrent orders.
+	'**/tests/analytics/analytics-data.spec.ts',
+	// Asserts store-wide `$0.00 / Orders 0`, polluted by concurrent orders.
+	'**/tests/analytics/analytics-access.spec.ts',
+	// Mutates the shared admin's `woocommerce_meta.dashboard_sections` and flips the
+	// global `woocommerce_analytics_scheduled_import` option (racing analytics-settings).
+	'**/tests/analytics/analytics-overview.spec.ts',
+	// Flips the global `woocommerce_default_customer_address` (geolocation) and
+	// `woocommerce_enable_ajax_add_to_cart` settings, which change add-to-cart
+	// behavior for every other worker. (`cart.spec.ts` runs in core-parallel — it
+	// scopes its tax rate to a dedicated tax class instead of toggling global tax.)
+	'**/tests/cart/add-to-cart.spec.ts',
+	// Activates a custom-gateway test plugin globally, which would surface its extra
+	// payment button on every other worker's checkout.
+	'**/tests/checkout/checkout-shortcode-custom-place-order-button.spec.ts',
+	// Every spec toggles a global email feature flag via `setOption`:
+	// `editor-tracking-selectors`/`settings-email-listing` flip
+	// `woocommerce_feature_block_email_editor_enabled`, while `account-emails`/
+	// `order-emails`/`settings-email` flip `woocommerce_feature_email_improvements_enabled`.
+	// Run in parallel they race on those options — one file's afterAll disables the
+	// editor (or flips improvements) mid-test for the others. Proven not parallel-safe:
+	// an email-only `core-parallel` run failed across all three clusters.
+	'**/tests/email/**/*.spec.ts',
+	// Each spec toggles the global `woocommerce_feature_block_email_editor_enabled`
+	// flag in beforeAll/afterAll; running the files concurrently races on that option
+	// (`e2e-options/update` returns 400 "Update option FAILED") and the first file's
+	// afterAll disables the editor mid-test for the others. Proven not parallel-safe.
+	'**/tests/email-editor/**/*.spec.ts',
+	// Mutate the global onboarding profile/options, site-visibility options and
+	// the active theme.
+	'**/tests/onboarding/**/*.spec.ts',
+	// Toggles the global `woocommerce_downloads_grant_access_after_payment` setting.
+	'**/tests/order/order-edit.spec.ts',
+	// Submits and deletes product reviews via the Review Order form while it runs;
+	// that concurrent churn on the shared reviews list makes `product-reviews`'
+	// trash/undo/re-trash flow intermittently fail (proven by bisect: moving it
+	// serial turns 3 consecutive product-reviews failures green).
+	'**/tests/order/review-order-page.spec.ts',
+	// Imports a fixed-content CSV (fixed SKUs/names) and asserts the imported rows
+	// on the store-wide product list — collides with concurrently created products.
+	'**/tests/product/product-import-csv.spec.ts',
+	// Mutate global WooCommerce settings (store address/currency/country, tax)
+	// that other workers' cart/checkout/storefront specs depend on.
+	'**/tests/settings/settings-general.spec.ts',
+	'**/tests/settings/settings-tax.spec.ts',
+	// Unchecks and saves `woocommerce_enable_reviews`, flipping that global option
+	// to `no` mid-run (restored only in afterAll). While off, the front-end Reviews
+	// tab and admin review management disappear — proven to deterministically fail 3
+	// `product/product-reviews.spec.ts` tests (shopper post + the edit/reply Reviews
+	// tab assertions). Also toggles the global `settings-ui` feature flag and resets
+	// ALL e2e feature flags in afterAll.
+	'**/tests/settings/settings-ui-feature-flag.spec.ts',
+	// Toggles the global `woocommerce_cart_redirect_after_add` setting, which
+	// changes add-to-cart behavior for every other worker — not parallel-safe.
+	'**/tests/shop/cart-redirection.spec.ts',
+	// Trashes and restores the global Shop page in a fixture; while trashed, every
+	// other worker's shop/cart/account navigation 404s.
+	'**/tests/shop/shop-title-after-deletion.spec.ts',
+];
+
+/**
+ * Spec folders owned by other Playwright projects — excluded from both core projects.
+ * PayPal tests don't run well in parallel (https://github.com/woocommerce/woocommerce/pull/63068);
+ * blocks specs need the `blocks setup` project and its storage state.
+ */
+const nonCoreSpecs = [
+	'**/api-tests/**',
+	'**/tests/paypal/**',
+	'**/tests/blocks/**',
+];
+
 export default defineConfig( {
 	timeout: 120 * 1000,
 	expect: { timeout: CI ? 20 * 1000 : 10 * 1000 },
@@ -121,7 +200,6 @@ export default defineConfig( {
 	testDir: `${ TESTS_ROOT_PATH }/tests`,
 	retries: CI ? 1 : 0,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
-	workers: 1,
 	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
 	reporter,
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
@@ -139,7 +217,7 @@ export default defineConfig( {
 		contextOptions: {
 			reducedMotion: 'reduce',
 		},
-		channel: 'chrome',
+		channel: 'chromium',
 		...devices[ 'Desktop Chrome' ],
 	},
 	snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}',
@@ -147,37 +225,40 @@ export default defineConfig( {
 	projects: [
 		...setupProjects,
 		{
-			name: 'e2e',
-			testIgnore: [
-				'**/api-tests/**',
-				/* Exclude PayPal tests, as they don't run well in parallel - see https://github.com/woocommerce/woocommerce/pull/63068. */
-				'**/tests/paypal/**',
-				/* Blocks specs are run by the blocks-chromium and blocks-legacy-mini-cart projects below. */
-				'**/tests/blocks/**',
-			],
+			name: 'core-serial',
+			testMatch: serialRunSpecs,
+			dependencies: [ 'site setup' ],
+			workers: 1,
+		},
+		{
+			name: 'core-parallel',
+			testIgnore: [ ...serialRunSpecs, ...nonCoreSpecs ],
 			dependencies: [ 'site setup' ],
 		},
 		{
 			name: 'api',
 			testMatch: '**/api-tests/**',
 			dependencies: [ 'site setup' ],
+			workers: 4,
 		},
 		{
 			name: 'legacy-mini-cart',
 			testMatch: [ '**/tests/cart/**', '**/tests/checkout/**' ],
 			testIgnore: [ '**/tests/blocks/**' ],
 			dependencies: [ 'site setup' ],
+			workers: 1,
 		},
 		{
 			name: 'paypal-standard',
 			testMatch: [ '**/tests/paypal/**' ],
 			dependencies: [ 'site setup' ],
+			workers: 1,
 		},
 		{
 			name: 'blocks-chromium',
 			testDir: `${ TESTS_ROOT_PATH }/tests/blocks`,
 			dependencies: [ 'blocks setup' ],
-			fullyParallel: true,
+			workers: 1,
 			use: {
 				...devices[ 'Desktop Chrome' ],
 				storageState: BLOCKS_ADMIN_STATE,
@@ -193,7 +274,7 @@ export default defineConfig( {
 				'**/product-collection/**/*.spec.ts',
 			],
 			dependencies: [ 'blocks setup' ],
-			fullyParallel: true,
+			workers: 1,
 			use: {
 				...devices[ 'Desktop Chrome' ],
 				storageState: BLOCKS_ADMIN_STATE,

@@ -383,7 +383,8 @@
 						"config": {
 							"wpVersion": "gutenberg"
 						}
-					}
+					},
+					"optional": true
 				}
 			]
 		}

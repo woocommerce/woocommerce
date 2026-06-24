@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-len
 const path = require( 'path' );
 const {
 	withWordPressDependencyCompat,
