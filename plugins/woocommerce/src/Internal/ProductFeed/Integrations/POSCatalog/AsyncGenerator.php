@@ -132,11 +132,9 @@ class AsyncGenerator {
 				return $status;
 			}
 
-			// A stuck in-progress job was most likely killed because the chunk size was too large for
-			// this host, so step it down for this and future runs.
-			if ( self::STATE_IN_PROGRESS === ( $status['state'] ?? '' ) ) {
-				$this->reduce_chunk_size( $option_key );
-			}
+			// A stuck in-progress job most likely died because its chunk was too large for this host;
+			// step the size down so the restart is more likely to fit.
+			$this->reduce_chunk_size_if_stuck( $status, $option_key );
 
 			// Whatever made the status invalid (stuck, expired, …), discard the partial feed and start fresh.
 			$this->discard_feed( $status );
@@ -410,6 +408,25 @@ class AsyncGenerator {
 	}
 
 	/**
+	 * Steps the chunk size down when an invalidated status was a stuck in-progress job.
+	 *
+	 * A stuck job was most likely killed because its chunk was too large for the host, so a smaller chunk
+	 * makes the restart more likely to fit. A genuine failure (state = failed) is a real error rather than
+	 * a size symptom and is intentionally excluded. Both recovery paths — an ordinary poll
+	 * ({@see get_status()}) and an explicit rebuild ({@see force_regeneration()}) — call this, so a stuck
+	 * job adapts the same way however it is recovered.
+	 *
+	 * @param array  $status     The invalidated status being discarded.
+	 * @param string $option_key The option key for the feed generation status.
+	 * @return void
+	 */
+	private function reduce_chunk_size_if_stuck( array $status, string $option_key ): void {
+		if ( self::STATE_IN_PROGRESS === ( $status['state'] ?? '' ) ) {
+			$this->reduce_chunk_size( $option_key );
+		}
+	}
+
+	/**
 	 * Steps the effective chunk size down to the next-smaller configured size and persists it.
 	 *
 	 * Called when a job gets stuck. Once at the smallest configured size it stays there.
@@ -533,6 +550,9 @@ class AsyncGenerator {
 		// scratch: discard any partial feed and clear the option so the restart starts clean.
 		if ( ! is_array( $status ) || ! $this->validate_status( $status ) ) {
 			if ( is_array( $status ) ) {
+				// A stuck in-progress job adapts its chunk size on a forced rebuild too, the same way an
+				// ordinary poll does, so the rebuild does not re-die at the size that just got it killed.
+				$this->reduce_chunk_size_if_stuck( $status, $option_key );
 				$this->discard_feed( $status );
 				delete_option( $option_key );
 			}
