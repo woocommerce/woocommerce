@@ -10,6 +10,7 @@ import {
 	cloneElement,
 	isValidElement,
 	useCallback,
+	useEffect,
 	useRef,
 	useState,
 } from '@wordpress/element';
@@ -71,6 +72,7 @@ const ExpressPaymentMethods = () => {
 	const paymentMethodInterface = usePaymentMethodInterface();
 	const previousActivePaymentMethod = useRef( activePaymentMethod );
 	const previousPaymentMethodData = useRef( paymentMethodData );
+	const expressPaymentWrapperRef = useRef< HTMLElement | null >( null );
 	const [ focusedExpressPaymentMethod, setFocusedExpressPaymentMethod ] =
 		useState< string | null >( null );
 
@@ -131,32 +133,55 @@ const ExpressPaymentMethods = () => {
 		]
 	);
 
-	const onExpressPaymentFocus = useCallback(
-		( paymentMethodId: string ) => () => {
-			setFocusedExpressPaymentMethod( paymentMethodId );
-		},
-		[]
-	);
+	const syncFocusedExpressPaymentMethod = useCallback( () => {
+		const wrapper = expressPaymentWrapperRef.current;
+		const activeElement = wrapper?.ownerDocument.activeElement;
 
-	const onExpressPaymentBlur = useCallback(
-		( paymentMethodId: string ) =>
-			( event: React.FocusEvent< HTMLElement > ) => {
-				const { currentTarget } = event;
+		if ( ! wrapper || ! ( activeElement instanceof Element ) ) {
+			setFocusedExpressPaymentMethod( null );
+			return;
+		}
 
-				setTimeout( () => {
-					if (
-						! currentTarget.contains(
-							currentTarget.ownerDocument.activeElement
-						)
-					) {
-						setFocusedExpressPaymentMethod( ( current ) =>
-							current === paymentMethodId ? null : current
-						);
-					}
-				}, 0 );
-			},
-		[]
-	);
+		const item = activeElement.closest( '[id^="express-payment-method-"]' );
+
+		if ( item && wrapper.contains( item ) ) {
+			setFocusedExpressPaymentMethod(
+				item.id.replace( 'express-payment-method-', '' )
+			);
+			return;
+		}
+
+		setFocusedExpressPaymentMethod( null );
+	}, [] );
+
+	useEffect( () => {
+		const wrapper = expressPaymentWrapperRef.current;
+
+		if ( ! wrapper ) {
+			return;
+		}
+
+		const doc = wrapper.ownerDocument;
+		const win = doc.defaultView;
+		const syncSoon = () => {
+			setTimeout( syncFocusedExpressPaymentMethod, 0 );
+		};
+
+		doc.addEventListener( 'focusin', syncFocusedExpressPaymentMethod );
+		doc.addEventListener( 'focusout', syncSoon );
+		win?.addEventListener( 'blur', syncSoon );
+		win?.addEventListener( 'focus', syncSoon );
+
+		return () => {
+			doc.removeEventListener(
+				'focusin',
+				syncFocusedExpressPaymentMethod
+			);
+			doc.removeEventListener( 'focusout', syncSoon );
+			win?.removeEventListener( 'blur', syncSoon );
+			win?.removeEventListener( 'focus', syncSoon );
+		};
+	}, [ syncFocusedExpressPaymentMethod ] );
 
 	/**
 	 * Calling setExpressPaymentError directly is deprecated.
@@ -216,8 +241,6 @@ const ExpressPaymentMethods = () => {
 							'wc-block-components-express-payment__event-button--focused':
 								focusedExpressPaymentMethod === id,
 						} ) }
-						onFocus={ onExpressPaymentFocus( id ) }
-						onBlur={ onExpressPaymentBlur( id ) }
 					>
 						{ cloneElement( expressPaymentMethod, {
 							...paymentMethodInterface,
@@ -239,7 +262,10 @@ const ExpressPaymentMethods = () => {
 
 	return (
 		<PaymentMethodErrorBoundary isEditor={ isEditor }>
-			<ExpressPayWrapper className="wc-block-components-express-payment__event-buttons">
+			<ExpressPayWrapper
+				className="wc-block-components-express-payment__event-buttons"
+				ref={ expressPaymentWrapperRef }
+			>
 				{ content }
 			</ExpressPayWrapper>
 		</PaymentMethodErrorBoundary>

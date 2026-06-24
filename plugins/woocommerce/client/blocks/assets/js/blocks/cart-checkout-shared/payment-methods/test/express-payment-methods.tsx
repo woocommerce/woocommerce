@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from '@testing-library/react';
 import { paymentStore } from '@woocommerce/block-data';
 import {
 	registerExpressPaymentMethod,
@@ -262,7 +268,10 @@ describe( 'Express payment methods', () => {
 					'#express-payment-method-paypal'
 				);
 
-				fireEvent.focus( button );
+				await act( async () => {
+					button.focus();
+					fireEvent.focusIn( button );
+				} );
 
 				await waitFor( () =>
 					expect( paymentMethodItem ).toHaveClass(
@@ -270,7 +279,13 @@ describe( 'Express payment methods', () => {
 					)
 				);
 
-				fireEvent.blur( button );
+				await act( async () => {
+					button.blur();
+					fireEvent.focusOut( button );
+					await new Promise( ( resolve ) =>
+						setTimeout( resolve, 0 )
+					);
+				} );
 
 				await waitFor( () =>
 					expect( paymentMethodItem ).not.toHaveClass(
