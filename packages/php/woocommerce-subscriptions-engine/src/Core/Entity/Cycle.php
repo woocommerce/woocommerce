@@ -1,32 +1,13 @@
 <?php
 /**
- * Cycle - one period in a chain `(contract_id, kind)`.
+ * Cycle - one period in a chain `(contract_id, kind)`, where a chain is the pair
+ * `(contract_id, kind)` with counters derived from its rows (not a stored entity).
  *
- * A chain is not a stored entity: it is the pair `(contract_id, kind)`, and its
- * head and counters are derived from the cycle rows. A cycle therefore knows the
- * contract it belongs to and its `kind`, plus its position (`sequence_no`,
- * monotonic from 1) and its chargeable number (`count`).
- *
- * `count` is the chargeable number within the chain and the per-charge
- * idempotency anchor `(contract_id, kind, count)`. It is nullable: a non-counting
- * cycle (for example a future trial period) carries no chargeable number, so
- * several null-count cycles may coexist in a chain.
- *
- * A cycle is an immutable billing record: it is created at billing, freezing the
- * contract's then-current snapshot references, period boundaries, and computed
- * `expected_total`. Its core values are frozen from construction - only `status`,
- * `order_id`, and the open-ended `reason` annotation may change afterwards. A
- * billing cycle is born `pending` and settles to `billed` or `failed`; the
- * checkout signup cycle is created directly `billed`. The snapshot-row ids and
- * the in-memory snapshot value objects are persistence bindings stamped once (the
- * repository records where a snapshot landed, or attaches the decoded value object
- * on load); they are not domain mutations and cannot be re-pointed once set.
- *
- * Money is a decimal-safe string; timestamps are GMT strings (`Y-m-d H:i:s`).
- * The cycle references its plan and items snapshots by id once persisted, and
- * may also carry the typed snapshot value objects in memory. Status is a typed
- * {@see CycleStatus}; `order_id` links the cycle to its WooCommerce order
- * (billing or shipping); `extension_slug` records the owner.
+ * An immutable billing record frozen at billing (snapshot references, period
+ * boundaries, `expected_total`); only `status`, `order_id`, and `reason` may change
+ * afterwards. The `count` is the chargeable number and idempotency anchor, nullable
+ * for non-counting cycles (e.g. a future trial). Money is a decimal-safe string;
+ * timestamps are GMT strings (`Y-m-d H:i:s`).
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity
  */
@@ -78,8 +59,8 @@ final class Cycle {
 	private $sequence_no;
 
 	/**
-	 * Chargeable number within the chain and the per-charge idempotency anchor,
-	 * or null for a non-counting cycle.
+	 * Chargeable number and per-charge idempotency anchor, or null for a
+	 * non-counting cycle.
 	 *
 	 * @var int|null
 	 */
@@ -93,14 +74,14 @@ final class Cycle {
 	private $kind;
 
 	/**
-	 * Lifecycle status as a typed value. See {@see CycleStatus}.
+	 * Lifecycle status. See {@see CycleStatus}.
 	 *
 	 * @var CycleStatus
 	 */
 	private $status;
 
 	/**
-	 * Open-ended human/audit annotation, or null. Any cycle may carry one.
+	 * Open-ended annotation, or null.
 	 *
 	 * @var string|null
 	 */
@@ -149,8 +130,8 @@ final class Cycle {
 	private $items_snapshot_id;
 
 	/**
-	 * Order id this cycle is linked to (billing or shipping), or null. A plain
-	 * reference - not 1:1, since an aggregate order may serve many cycles.
+	 * Linked order id (billing or shipping), or null. Not 1:1 - an aggregate order
+	 * may serve many cycles.
 	 *
 	 * @var int|null
 	 */
@@ -178,18 +159,8 @@ final class Cycle {
 	private $items_snapshot;
 
 	/**
-	 * Use {@see self::create()} or {@see self::from_storage()}.
-	 *
-	 * Coerces each attribute from `$data` (keyed by property name) to its property
-	 * type, so callers build a cycle from a flat associative array rather than a long
-	 * positional argument list. Unknown keys are ignored; missing keys take the
-	 * documented per-field default.
-	 *
-	 * The factories resolve the two fields the array shape cannot carry directly: the
-	 * typed {@see CycleStatus} (a `CycleStatus` instance or a status string, defaulting
-	 * to `pending`) and the chargeable `count` (already an `int|null`, since the
-	 * absent-vs-explicit-null distinction is settled per factory). The snapshot value
-	 * objects are likewise passed already typed.
+	 * Use {@see self::create()} or {@see self::from_storage()}. Coerces each attribute
+	 * to its property type; unknown keys are ignored, missing keys take the default.
 	 *
 	 * @param array<string, mixed> $data Raw attributes keyed by property name.
 	 */
@@ -234,8 +205,7 @@ final class Cycle {
 		// A new cycle is always unsaved; never adopt a caller-supplied id.
 		unset( $args['id'] );
 
-		// Distinguish an absent count (defaults to 1, a counting cycle) from an
-		// explicit null (a non-counting cycle), which `?? 1` would conflate.
+		// Absent count defaults to 1 (counting); explicit null means non-counting. `?? 1` would conflate them.
 		$args['count'] = self::normalize_count( array_key_exists( 'count', $args ) ? $args['count'] : 1 );
 
 		$cycle = new self( $args );
@@ -291,11 +261,8 @@ final class Cycle {
 	}
 
 	/**
-	 * Set the owning contract id.
-	 *
-	 * A cycle may be built with a placeholder contract id (0) before its contract
-	 * is persisted; the repository stamps the real id once the contract row has
-	 * one.
+	 * Set the owning contract id. A cycle may be built with a placeholder id (0)
+	 * before its contract is persisted; the repository stamps the real id later.
 	 *
 	 * @param int $contract_id Owning contract id.
 	 */
@@ -311,10 +278,7 @@ final class Cycle {
 	}
 
 	/**
-	 * Set the position within the chain.
-	 *
-	 * The chain `(contract_id, kind)` owns sequencing; the append path assigns the
-	 * next monotonic value, so this is intentionally simple.
+	 * Set the position within the chain (assigned by the append path).
 	 *
 	 * @param int $sequence_no Position, monotonic from 1.
 	 * @throws DomainException If `$sequence_no` is not positive.
@@ -368,11 +332,7 @@ final class Cycle {
 	}
 
 	/**
-	 * Annotate the cycle with an open-ended reason.
-	 *
-	 * The annotation is always writable (any cycle may carry one): it is one of the
-	 * few fields that may change after construction, alongside `status` and
-	 * `order_id`.
+	 * Annotate the cycle with an open-ended reason. Always writable.
 	 *
 	 * @param string|null $reason Reason text, or null to clear.
 	 */
@@ -416,12 +376,8 @@ final class Cycle {
 	}
 
 	/**
-	 * Record the plan snapshot row id once it is stored.
-	 *
-	 * A write-once persistence binding (like {@see self::set_id()}): the repository
-	 * stamps where the frozen plan snapshot landed in storage. It only fills an
-	 * unset id and never re-points an already-recorded one, so the frozen reference
-	 * cannot change.
+	 * Record the plan snapshot row id once it is stored. Write-once: only fills an
+	 * unset id, never re-points the frozen reference.
 	 *
 	 * @param int $plan_snapshot_id Snapshot row id.
 	 * @throws DomainException If a plan snapshot id is already recorded.
@@ -439,10 +395,8 @@ final class Cycle {
 	}
 
 	/**
-	 * Record the items snapshot row id once it is stored.
-	 *
-	 * The items companion to {@see self::set_plan_snapshot_id()}: a write-once
-	 * persistence binding that only fills an unset id.
+	 * Record the items snapshot row id once it is stored. Write-once companion to
+	 * {@see self::set_plan_snapshot_id()}.
 	 *
 	 * @param int $items_snapshot_id Snapshot row id.
 	 * @throws DomainException If an items snapshot id is already recorded.
@@ -474,11 +428,8 @@ final class Cycle {
 	}
 
 	/**
-	 * Attach the typed plan snapshot value object once.
-	 *
-	 * A write-once in-memory binding: the repository attaches the decoded snapshot
-	 * on load. It only fills an unset value object and never replaces one, so the
-	 * frozen snapshot a cycle carries cannot be swapped.
+	 * Attach the typed plan snapshot value object once. Write-once: only fills an
+	 * unset value object, never swaps the frozen snapshot.
 	 *
 	 * @param PlanSnapshot $plan_snapshot Snapshot value object.
 	 * @throws DomainException If a plan snapshot value object is already attached.
@@ -498,10 +449,8 @@ final class Cycle {
 	}
 
 	/**
-	 * Attach the typed items snapshot value object once.
-	 *
-	 * The items companion to {@see self::set_plan_snapshot()}: a write-once
-	 * in-memory binding that only fills an unset value object.
+	 * Attach the typed items snapshot value object once. Write-once companion to
+	 * {@see self::set_plan_snapshot()}.
 	 *
 	 * @param ItemsSnapshot $items_snapshot Snapshot value object.
 	 * @throws DomainException If an items snapshot value object is already attached.
@@ -514,10 +463,8 @@ final class Cycle {
 	}
 
 	/**
-	 * Serialize the cycle row (excluding the generated id/timestamps).
-	 *
-	 * The status is serialized as its plain string value; the typed
-	 * {@see CycleStatus} is an in-memory concern only.
+	 * Serialize the cycle row (excluding the generated id/timestamps). Status is
+	 * stored as its plain string value.
 	 *
 	 * @return array<string, mixed>
 	 */
@@ -541,11 +488,8 @@ final class Cycle {
 	}
 
 	/**
-	 * Guard a snapshot row-id stamp so it is write-once.
-	 *
-	 * Snapshot references are frozen: the repository records where a snapshot landed
-	 * exactly once. A second stamp would re-point a frozen reference, so it is
-	 * rejected.
+	 * Guard a snapshot row-id stamp so it is write-once; a second stamp would
+	 * re-point a frozen reference.
 	 *
 	 * @param string   $field   Field being stamped, for the error message.
 	 * @param int|null $current The currently recorded id (must be null to stamp).
@@ -560,12 +504,8 @@ final class Cycle {
 	}
 
 	/**
-	 * Validate a cycle kind.
-	 *
-	 * The kind is known-but-extensible: the billing kind is the one written today,
-	 * but a third party may introduce its own kind, so any non-empty kind is
-	 * accepted and only an empty kind is rejected. It is deliberately not a sealed
-	 * enum.
+	 * Validate a cycle kind. Known-but-extensible (deliberately not a sealed enum):
+	 * any non-empty kind is accepted so a third party may introduce its own.
 	 *
 	 * @param string $kind Kind to validate.
 	 * @throws DomainException If `$kind` is empty.
@@ -591,11 +531,9 @@ final class Cycle {
 	}
 
 	/**
-	 * Resolve a status input into a typed {@see CycleStatus}.
-	 *
-	 * Accepts an existing `CycleStatus` instance (passed through unchanged), null or
-	 * an absent value (defaults to `pending`, matching a newly billing cycle), or a
-	 * status string (validated via {@see CycleStatus::from()}).
+	 * Resolve a status input into a typed {@see CycleStatus}. A `CycleStatus` passes
+	 * through; null defaults to `pending`; a string is validated via
+	 * {@see CycleStatus::from()}.
 	 *
 	 * @param mixed $status Raw status value (a CycleStatus, null, or a status string).
 	 * @return CycleStatus

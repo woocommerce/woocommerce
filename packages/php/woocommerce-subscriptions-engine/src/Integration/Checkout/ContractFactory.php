@@ -1,29 +1,8 @@
 <?php
 /**
- * ContractFactory - builds and persists a Contract from a completed order.
- *
- * This is the entry point a consumer's checkout handler calls once an order
- * that contains a subscription product is paid: hand it the order plus the
- * selling {@see Plan} the customer chose, and it
- *
- *   1. builds the live Core {@see Contract} from the order's customer / currency /
- *      payment / line items / addresses, with its live schedule and live totals,
- *   2. builds the billing chain's first {@see Cycle} - cycle 1 IS the origin
- *      period: its `order_id` is the origin order, its `count` is 1 (no-trial),
- *      its period runs from the order's paid time to the first renewal date from
- *      the plan's {@see BillingPolicy}, and it carries typed plan + items
- *      snapshots; it is created directly `billed` since the origin order is paid,
- *   3. persists the contract and cycle 1 together through the repository create
- *      path, which freezes cycle 1's snapshots and records their ids on the
- *      contract too (its latest/live references), and
- *   4. links order <-> contract in both directions (the contract row's
- *      `origin_order_id` column plus the order-side {@see OrderLinkage} meta).
- *
- * Returns the persisted Contract. Scheduling the first renewal is a separate
- * step the caller drives through {@see RenewalEngine::schedule()} - the factory
- * builds the contract and the origin cycle and sets the live schedule; it does
- * not enqueue the Action Scheduler row, so a caller can create a contract without
- * arming the renewal path (e.g. a gateway-scheduled contract).
+ * Builds and persists a {@see Contract} (plus its origin {@see Cycle}) from a paid
+ * checkout order, and links order <-> contract in both directions. Does not schedule
+ * the first renewal - the caller arms that separately via {@see RenewalEngine::schedule()}.
  *
  * Integration zone: WordPress-native. Reads a live `WC_Order`; the order never
  * crosses into Core - only the snapshot values pulled off it do.
@@ -79,20 +58,11 @@ final class ContractFactory {
 	/**
 	 * Build, persist, and link a contract for `$order` on `$plan`.
 	 *
-	 * Cycle 1's `expected_total` and the contract's live `billing_total` are seeded
-	 * from the order total on the assumption that the first recurring bill equals the
-	 * order's recurring price; a caller that already knows the recurring total
-	 * (sign-up fees, first-cycle discounts) passes it via `$overrides['billing_total']`.
-	 * The live discount / shipping / tax totals are seeded from the order and can be
-	 * overridden the same way. Other `$overrides` keys are merged over the
-	 * order-derived contract defaults.
-	 *
-	 * The first renewal date (the contract's live schedule) comes
-	 * from {@see BillingPolicy::compute_first_renewal_from()} anchored on the
-	 * order's paid time (`date_paid`, falling back to "now"), so a native trial
-	 * delays the first bill correctly. A caller can override it via
-	 * `$overrides['next_payment_gmt']`. Cycle 1's period runs from the paid time
-	 * to that first renewal date.
+	 * The live totals (`billing_total` = cycle 1's `expected_total`, plus discount /
+	 * shipping / tax) are seeded from the order on the assumption the first recurring
+	 * bill equals the order's recurring price; the first renewal date is computed from
+	 * the plan's billing policy anchored on the paid time (so a native trial delays it).
+	 * Any of these, and any other `Contract::create()` field, can be replaced via `$overrides`.
 	 *
 	 * @param WC_Order             $order     The paid checkout order.
 	 * @param Plan                 $plan      The selling plan the customer chose. Must be persisted (have an id).
@@ -108,8 +78,8 @@ final class ContractFactory {
 			throw new \RuntimeException( 'ContractFactory::create_from_order(): the selling plan must be persisted (have an id) before a contract can reference it.' );
 		}
 
-		// An unsaved order reports id 0; persisting origin_order_id => 0 would link
-		// the contract to a non-existent order. Require a saved order up front.
+		// An unsaved order reports id 0, which would link the contract to a
+		// non-existent order. Require a saved order up front.
 		if ( ! $order->get_id() ) {
 			throw new \RuntimeException( 'ContractFactory::create_from_order(): the order must be persisted (have an id) before a contract can link to it.' );
 		}
@@ -119,14 +89,11 @@ final class ContractFactory {
 			? new DateTimeImmutable( '@' . $paid_date->getTimestamp() )
 			: new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
 
-		// The origin period starts when the order was paid (falling back to now when
-		// the order has no paid date), so the recorded contract start and cycle 1's
-		// period start match the moment its first renewal is measured from rather
-		// than drifting to processing time.
+		// Start from the paid time (not processing time) so the contract start, cycle 1's
+		// period start, and the renewal-measurement anchor all agree.
 		$period_start = $anchor->format( 'Y-m-d H:i:s' );
 
-		// The first renewal date: cycle 1's period end and the contract's next-bill
-		// cache. An override replaces the computed value.
+		// First renewal date: cycle 1's period end and the contract's next-bill cache.
 		$next_payment = isset( $overrides['next_payment_gmt'] )
 			? self::coerce_string( $overrides['next_payment_gmt'] )
 			: $plan->get_billing_policy()->compute_first_renewal_from( $anchor )->format( 'Y-m-d H:i:s' );
@@ -145,8 +112,7 @@ final class ContractFactory {
 			'payment_token_id'     => $this->extract_payment_token_id( $order ),
 			'start_gmt'            => $period_start,
 			'next_payment_gmt'     => $next_payment,
-			// Live config: the recurring totals the contract bills going forward,
-			// seeded from the order and overridable by the caller.
+			// Live recurring totals the contract bills going forward, seeded from the order.
 			'billing_total'        => $expected_total,
 			'discount_total'       => (string) $order->get_total_discount(),
 			'shipping_total'       => (string) $order->get_shipping_total(),
@@ -160,8 +126,6 @@ final class ContractFactory {
 
 		$origin_cycle = $this->build_origin_cycle( $order, $plan, $period_start, $next_payment, $expected_total, $currency );
 
-		// The repository create path inserts the contract, freezes cycle 1's
-		// snapshots, records their ids on the contract too, and inserts cycle 1.
 		$contract_id = $this->contracts->insert_with_origin_cycle( $contract, $origin_cycle );
 
 		$this->tag_origin_order( $order, $contract_id );
@@ -170,14 +134,10 @@ final class ContractFactory {
 	}
 
 	/**
-	 * Build the billing chain's cycle 1 - the origin period - for the contract.
+	 * Build the billing chain's cycle 1 - the immutable signup record.
 	 *
-	 * Cycle 1 is the immutable signup record: it is created directly `billed`
-	 * because the origin order is already paid. Its core values are frozen at
-	 * construction - `count` 1, `order_id` the origin order, period running from the
-	 * paid time to the first renewal date, owner slug, and the typed plan + items
-	 * snapshots the repository freezes on insert. Its `contract_id` is a placeholder
-	 * (0) the repository stamps once the contract row has an id.
+	 * Created directly `billed` (the origin order is already paid), with `count` 1 and
+	 * `contract_id` a placeholder (0) the repository stamps once the contract row has an id.
 	 *
 	 * @param WC_Order $order          The paid checkout order (the items / order-id source).
 	 * @param Plan     $plan           The selling plan (the plan-snapshot / owner source).
@@ -234,11 +194,8 @@ final class ContractFactory {
 	/**
 	 * Tag `$order` with the parent-relation meta for `$contract_id`.
 	 *
-	 * Best-effort: the contract row is already persisted and carries the
-	 * `origin_order_id` FK, so a failure here (a save listener throwing, a DB
-	 * hiccup) is logged and swallowed rather than failing contract creation -
-	 * the reverse lookup can be healed from the FK later. Mirrors the order
-	 * tagging the renewal engine applies to renewal orders.
+	 * Best-effort: the contract already carries the `origin_order_id` FK, so a failure
+	 * here is logged and swallowed (the order-side link can be rebuilt from the FK later).
 	 *
 	 * @param WC_Order $order       Order to tag.
 	 * @param int      $contract_id Contract id to write into the order meta.
@@ -268,11 +225,9 @@ final class ContractFactory {
 	/**
 	 * Map the order's line items to the contract item-row shape.
 	 *
-	 * Only `line_item` rows are carried onto the contract today (fees /
-	 * shipping / tax are reconstructed from the contract totals at renewal
-	 * time). The renewal-order builder clones the origin order's items, so the
-	 * contract items are a snapshot for inspection rather than the renewal
-	 * source of truth.
+	 * Only `line_item` rows are carried (fees / shipping / tax are reconstructed from
+	 * the contract totals at renewal). These are a snapshot for inspection, not the
+	 * renewal source of truth - the renewal-order builder clones the origin order's items.
 	 *
 	 * @param WC_Order $order The order to read items from.
 	 * @return array<int, array<string, mixed>>
@@ -316,13 +271,10 @@ final class ContractFactory {
 	/**
 	 * Best-effort extraction of the payment-token id from `$order`.
 	 *
-	 * Reads WooCommerce's per-order payment tokens, populated when a gateway
-	 * calls `$order->add_payment_token()` at checkout. WooCommerce's typical
-	 * pattern is one token per order with the most recently attached entry
-	 * being the one charged, so we read the last entry. Returns null when no
-	 * token is resolvable (manual gateways, or gateways that store their token
-	 * reference elsewhere) - the contract is then created without a token and a
-	 * later payment-method-change flow can attach one.
+	 * Reads WooCommerce's per-order payment tokens (populated when a gateway calls
+	 * `$order->add_payment_token()`); the last entry is the one charged. Returns null
+	 * when none is resolvable (manual gateways, or token stored elsewhere) - the contract
+	 * is then created without a token and a later payment-method change can attach one.
 	 *
 	 * @param WC_Order $order Order to read the token from.
 	 * @return int|null Token id, or null when none is resolvable.

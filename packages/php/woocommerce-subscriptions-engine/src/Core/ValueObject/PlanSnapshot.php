@@ -1,20 +1,13 @@
 <?php
 /**
  * PlanSnapshot - an immutable, point-in-time copy of the plan terms a cycle was
- * billed (or is being billed) under.
+ * billed under. Companion to {@see ItemsSnapshot}, referenced by cycles by id.
  *
- * Cycles reference a plan snapshot by id. Snapshots are NOT content-addressed:
- * identical consecutive plan terms are shared by copy-forward (a new cycle reuses
- * the previous cycle's snapshot id unless the terms actually changed), so this VO
- * carries no canonicalization or hashing. It is the typed, in-memory form; the
- * Integration binding serializes {@see self::to_payload()} to its stored column
- * and reconstructs via {@see self::from_payload()}.
- *
- * The `schema_version` is the payload-FORMAT version: it tells a reader how to
- * parse and, if needed, upcast the payload. It is explicitly NOT the plan's
- * content version (a plan changing its terms does not bump this).
- *
- * Lives in `Core\`: WordPress-free, no encoding, no hashing.
+ * NOT content-addressed: identical consecutive plan terms are shared by copy-forward,
+ * so this VO carries no canonicalization or hashing. The typed in-memory form; the
+ * Integration binding serializes via {@see self::to_payload()} and reconstructs via
+ * {@see self::from_payload()}. `schema_version` is the payload-FORMAT version (how to
+ * parse/upcast), not the plan's content version. WordPress-free Core zone.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject
  */
@@ -47,7 +40,7 @@ final class PlanSnapshot {
 
 	/**
 	 * Payload-format version, recorded on the snapshot row. NOT the plan's content
-	 * version - it tells a reader how to parse and upcast the payload.
+	 * version.
 	 *
 	 * @var int
 	 */
@@ -83,10 +76,8 @@ final class PlanSnapshot {
 	}
 
 	/**
-	 * Reconstruct a plan snapshot from a previously serialized payload.
-	 *
-	 * The companion to {@see self::to_payload()}: the Integration binding decodes
-	 * the stored payload and its `schema_version` column and rebuilds the VO.
+	 * Reconstruct a plan snapshot from a serialized payload. Companion to
+	 * {@see self::to_payload()}.
 	 *
 	 * @param array<string, mixed> $payload        Serialized plan terms payload.
 	 * @param int                  $schema_version Payload-format version the payload was written in.
@@ -105,10 +96,7 @@ final class PlanSnapshot {
 
 	/**
 	 * The id of the plan these terms were snapshotted from, or null when absent.
-	 *
-	 * The snapshot's weak link back to its source plan. Read from the typed
-	 * payload rather than by indexing the raw array at the call site, so a renamed
-	 * or missing key surfaces here (as null) instead of silently breaking the link.
+	 * A weak link back to the source plan; a missing key surfaces here as null.
 	 */
 	public function get_selling_plan_id(): ?int {
 		return isset( $this->data['selling_plan_id'] ) ? self::coerce_int( $this->data['selling_plan_id'] ) : null;
@@ -124,11 +112,8 @@ final class PlanSnapshot {
 	}
 
 	/**
-	 * The serialized payload for storage.
-	 *
-	 * The Integration binding encodes this to the stored column. There is no key
-	 * canonicalization: dedup is by copy-forward, not by a content hash, so the
-	 * payload is the plan terms as given.
+	 * The serialized payload for storage: the plan terms as given, no
+	 * canonicalization (dedup is by copy-forward, not a content hash).
 	 *
 	 * @return array<string, mixed>
 	 */

@@ -1,27 +1,13 @@
 <?php
 /**
- * CycleStatus - the cycle lifecycle state machine, as a value object.
+ * CycleStatus - the cycle lifecycle state machine, as an immutable value object.
+ * Owns the valid statuses and allowed transitions so an invalid state cannot be
+ * represented. Mirrors {@see ContractStatus}.
  *
- * Owns the set of valid cycle statuses and the allowed transitions between them.
- * A {@see Cycle} holds its status as a `CycleStatus` instance (not a raw string),
- * so an invalid state cannot be represented and transitions are validated by the
- * value itself. Mirrors {@see ContractStatus}'s transition logic.
- *
- * Two surfaces coexist: instance methods (used by the entity - construct with the
- * named factories {@see self::pending()} etc. or {@see self::from()}, compare
- * with {@see self::equals()}, move with {@see self::transition_to()}) and the
- * string-keyed static helpers ({@see self::all()}, {@see self::is_valid()}, ...)
- * that operate on the raw status strings used at the storage boundary.
- *
- * Charge lifecycle: a cycle is born `pending` when it bills (its values locked
- * at creation), then settles to `billed` on a successful charge or `failed` on a
- * declined one. Any non-settled cycle can be `cancelled`. Retry of a `failed`
- * cycle is a follow-up change, so for now a failed cycle can only be cancelled.
- *
- * Terminal for the cycle row are `billed` and `cancelled`: a billed cycle's
- * charge is done and a new cycle is appended next, while a cancelled cycle is
- * closed. `failed` is intentionally non-terminal so a follow-up change can add a
- * retry edge without reshaping the status set.
+ * Lifecycle: a cycle is born `pending`, settles to `billed` (terminal) or `failed`,
+ * and any non-settled cycle can be `cancelled` (terminal). `failed` is deliberately
+ * non-terminal so a later change can add a retry edge. Instance methods serve the
+ * entity; the static string helpers operate on raw strings at the storage boundary.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity
  */
@@ -177,14 +163,9 @@ final class CycleStatus {
 	}
 
 	/**
-	 * Whether a cycle may move from `$from` to `$to`.
-	 *
-	 * Unknown source or target statuses are reported as not allowed, so a row
-	 * that has drifted into an unrecognized state cannot be transitioned out of
-	 * a value we do not know how to reason about. Same-status calls
-	 * (`pending` -> `pending`) report false here; {@see Cycle::set_status()}
-	 * short-circuits no-ops before consulting this table so they do not surface
-	 * as exceptions to callers.
+	 * Whether a cycle may move from `$from` to `$to`. Unknown statuses report false.
+	 * Same-status calls also report false; {@see Cycle::set_status()} short-circuits
+	 * no-ops before consulting this table.
 	 *
 	 * @param string $from Current status.
 	 * @param string $to   Target status.
@@ -210,11 +191,8 @@ final class CycleStatus {
 	}
 
 	/**
-	 * Throw if `$from` -> `$to` is not an allowed transition.
-	 *
-	 * The canonical enforcement entry point: every status change flows through
-	 * here before the new status is applied, which makes "no nonsense states" a
-	 * structural guarantee rather than a code-review aspiration.
+	 * Throw if `$from` -> `$to` is not an allowed transition. The canonical
+	 * enforcement entry point every status change flows through.
 	 *
 	 * @param string $from Current status.
 	 * @param string $to   Target status.

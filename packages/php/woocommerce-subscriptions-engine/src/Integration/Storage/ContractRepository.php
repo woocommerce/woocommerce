@@ -1,30 +1,15 @@
 <?php
 /**
- * ContractRepository - persistence for the live {@see Contract} plus targeted
- * cycle access.
+ * Persistence for the live {@see Contract} (row + items / addresses / meta) plus
+ * targeted cycle access. Owns the $wpdb access across the contract-side tables.
  *
- * The contract row and its items / addresses / meta are persisted and loaded
- * through this repository, which owns the $wpdb access and spans the
- * contract-side tables. The contract is the live source of truth: its row carries
- * the live schedule, the latest/live snapshot references, and the live config
- * values. A chain is NOT a stored entity: it is the pair `(contract_id, kind)`,
- * and its head and counters are derived from the cycle rows. The `Contract` entity
- * never carries a cycle graph in memory, so cycles are reached through
- * purpose-built reads ({@see self::find_current_cycle()},
- * {@see self::find_cycle_history()}, {@see self::max_count()},
- * {@see self::find_cycles_by_order_id()}) and written one at a time
- * ({@see self::append_cycle()}, {@see self::update_cycle()}).
- *
- * There is no whole-graph `save()`. {@see self::insert()} / {@see self::update()}
- * write the contract row and only its changed children; {@see self::find()}
- * hydrates the contract (no cycles) while {@see self::find_summary()} reads only
- * the contract row for list / guard paths. {@see self::insert_with_origin_cycle()}
- * is the checkout create path: it inserts the contract, freezes the signup cycle's
- * snapshots, records those snapshot ids on the contract too, and inserts cycle 1.
- *
- * Snapshots are deduped by copy-forward: {@see self::append_cycle()} reuses the
- * previous cycle's snapshot id when the plan / items are unchanged, inserting a
- * new row through {@see SnapshotStore} only when they differ.
+ * The contract is the live source of truth. A chain is NOT a stored entity: it is
+ * the pair `(contract_id, kind)`, with its head and counters derived from the cycle
+ * rows. The entity never carries a cycle graph in memory, so cycles are reached
+ * through purpose-built reads ({@see self::find_current_cycle()}, {@see self::max_count()},
+ * etc.) and written one at a time ({@see self::append_cycle()}, {@see self::update_cycle()}).
+ * There is no whole-graph `save()`. Snapshots are deduped by copy-forward (reuse the
+ * previous cycle's snapshot id when plan / items are unchanged), via {@see SnapshotStore}.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage
  */
@@ -88,12 +73,10 @@ final class ContractRepository {
 	/**
 	 * Insert a new contract and its items, addresses, and meta.
 	 *
-	 * Durable-intent-first within the operation: the parent row is written, its
-	 * id captured, then the children. This is the seam a later transaction-handling
-	 * change wraps; it deliberately does not open a BEGIN/COMMIT now (a naive
-	 * transaction would commit the integration suite's outer test transaction, and
-	 * bare savepoints error in production without an ambient transaction), and the
-	 * pre-freeze dev tables make a transient partial write low-risk.
+	 * Durable-intent-first (parent row, then children) and the seam a later
+	 * transaction-handling change wraps; it does not open a transaction now (a naive
+	 * one would commit the integration suite's outer test transaction, and bare
+	 * savepoints error in production without an ambient transaction).
 	 *
 	 * @param Contract $contract Contract to insert.
 	 * @return int The new contract id.
@@ -132,19 +115,14 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Insert a contract together with its signup cycle (cycle 1).
+	 * Insert a contract together with its signup cycle (cycle 1) - the checkout
+	 * create path.
 	 *
-	 * The checkout create path. Sync is single-direction downward, so the order is
-	 * durable-intent-first: insert the contract -> freeze the signup cycle's plan /
-	 * items snapshots (which need the contract id) -> record those snapshot ids on
-	 * the contract too (its latest/live references) and update the contract row ->
-	 * insert cycle 1. Cycle 1 carries the same snapshot ids as the contract by
-	 * construction.
-	 *
-	 * The cycle is taken as built by the caller (the signup cycle is created
-	 * directly `billed`); this method only stamps its contract id, resolves its
-	 * snapshots, and inserts it. It is the operation-scoped seam a later
-	 * transaction-handling change wraps.
+	 * Durable-intent-first: insert the contract -> freeze the signup cycle's snapshots
+	 * (which need the contract id) -> record those ids on the contract and update its
+	 * row -> insert cycle 1 (which carries the same snapshot ids by construction). The
+	 * cycle is taken as built by the caller; this only stamps its contract id, resolves
+	 * its snapshots, and inserts it. The seam a later transaction-handling change wraps.
 	 *
 	 * @param Contract $contract The contract to insert.
 	 * @param Cycle    $cycle    The signup cycle (cycle 1), carrying its snapshot value objects.
@@ -154,8 +132,8 @@ final class ContractRepository {
 	public function insert_with_origin_cycle( Contract $contract, Cycle $cycle ): int {
 		$contract_id = $this->insert( $contract );
 
-		// The signup cycle is the first in its chain: no previous to copy-forward
-		// from, so its snapshots are inserted fresh and their ids stamped onto it.
+		// First cycle in its chain: no previous to copy-forward from, so its snapshots
+		// are inserted fresh and their ids stamped onto it.
 		$cycle->set_contract_id( $contract_id );
 		$this->resolve_cycle_snapshots( $cycle, null );
 
@@ -173,12 +151,10 @@ final class ContractRepository {
 	/**
 	 * Persist changes to an existing contract and its child rows.
 	 *
-	 * Updates the contract row in place, then reconciles the items, addresses,
-	 * and meta rows only when they differ from what is stored - an unchanged child
-	 * set is left untouched, so the common renewal-cache write (status,
-	 * next_payment_gmt) does not churn child rows. This is the operation-scoped
-	 * write seam a later transaction-handling change wraps; it does not open a
-	 * transaction now (see {@see self::insert()}).
+	 * Updates the contract row in place, then reconciles items / addresses / meta only
+	 * when they differ - so the common renewal-cache write (status, next_payment_gmt)
+	 * does not churn child rows. The write seam a later transaction-handling change
+	 * wraps; no transaction now (see {@see self::insert()}).
 	 *
 	 * @param Contract $contract Contract to update. Must have an id whose row still exists.
 	 * @return bool True when the contract row was updated (or already current).
@@ -199,12 +175,10 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Fetch a contract by id, hydrating the live entity (no cycles).
-	 *
-	 * Loads the contract row plus its items / addresses / meta into the live
-	 * {@see Contract}. Cycles are NOT hydrated onto the entity - they are reached
-	 * on demand through the targeted cycle reads. For list / guard paths that do
-	 * not need the children, use {@see self::find_summary()}.
+	 * Fetch a contract by id, hydrating the live entity with its items / addresses /
+	 * meta. Cycles are NOT hydrated - they are reached on demand through the targeted
+	 * cycle reads. For list / guard paths that do not need the children, use
+	 * {@see self::find_summary()}.
 	 *
 	 * @param int $id Contract id.
 	 * @return Contract|null Hydrated contract, or null if not found.
@@ -224,11 +198,8 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Lightweight read: the contract row only, no children.
-	 *
-	 * The contract row IS the live state, so for list screens and guards that need
-	 * the contract's identity and live schedule this reads it without paying to load
-	 * the children.
+	 * Lightweight read: the contract row only, no children. The row IS the live state,
+	 * so list screens and guards that need only identity + schedule avoid loading children.
 	 *
 	 * @param int $id Contract id.
 	 * @return Contract|null The contract (row only), or null if not found.
@@ -289,12 +260,9 @@ final class ContractRepository {
 	/**
 	 * Append a cycle to its chain `(contract_id, kind)`, copy-forwarding snapshots.
 	 *
-	 * Resolves the cycle's snapshot references first (durable-intent-first), then
-	 * inserts the cycle row and stamps the generated id back onto the entity. Each
-	 * snapshot is reused from `$previous` when the in-memory value object is absent
-	 * or carries the same payload + schema version as the previous cycle's stored
-	 * snapshot (copy-forward); otherwise a new snapshot row is inserted. The whole
-	 * append is the operation-scoped seam a later transaction-handling change wraps.
+	 * Resolves the cycle's snapshots (reused from `$previous` when unchanged, else
+	 * inserted fresh) then inserts the cycle row and stamps the generated id back onto
+	 * the entity. The seam a later transaction-handling change wraps.
 	 *
 	 * @param Cycle      $cycle    Cycle to append. Carries its contract id and kind.
 	 * @param Cycle|null $previous The chain's previous cycle, when copy-forward of its
@@ -332,21 +300,17 @@ final class ContractRepository {
 			array( 'id' => (int) $id )
 		);
 
-		// date_updated_gmt always changes, so a matched row reports 1 affected row;
-		// 0 means no row matched (a stale id or a concurrent delete) and must fail
-		// loudly rather than pass silently, mirroring the contract-row guard.
+		// date_updated_gmt always changes, so a matched row reports 1 affected row; 0
+		// means no row matched (stale id or concurrent delete) and must fail loudly.
 		if ( false === $updated || 0 === $updated ) {
 			throw new \RuntimeException( 'Cycle row not found during update (concurrent delete or stale id).' );
 		}
 	}
 
 	/**
-	 * The chain's most-recent cycle, or null when the chain is empty.
-	 *
-	 * The most-recent cycle is the highest `sequence_no` in `(contract_id, kind)` -
-	 * the last billing record appended. Its snapshots are decoded back into typed
-	 * value objects when it is still in flight (a non-terminal `pending` / `failed`
-	 * cycle); a settled record is returned without the extra snapshot reads.
+	 * The chain's most-recent cycle (highest `sequence_no` in `(contract_id, kind)`),
+	 * or null when the chain is empty. Snapshots are decoded into typed value objects
+	 * only for an in-flight cycle (see {@see self::hydrate_cycle()}).
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $kind        Chain kind. Defaults to billing.
@@ -368,11 +332,8 @@ final class ContractRepository {
 	}
 
 	/**
-	 * A window of a chain's cycle history, newest first.
-	 *
-	 * Paginated targeted read for history screens: the contract entity never holds
-	 * the cycle graph, so callers page through it here. Snapshots are decoded into
-	 * typed value objects for any in-flight (non-terminal) cycle in the window.
+	 * A window of a chain's cycle history, newest first - the paginated read for
+	 * history screens. Snapshots are decoded only for any in-flight cycle in the window.
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $kind        Chain kind. Defaults to billing.
@@ -399,12 +360,9 @@ final class ContractRepository {
 	}
 
 	/**
-	 * The highest `count` in a chain `(contract_id, kind)`, or null when none counts.
-	 *
-	 * This is the chain's chargeable count - the per-chain counter the dispatcher's
-	 * money-path advances (the next chargeable cycle is `MAX(count) + 1`). Returns
-	 * null for a chain with no counting cycles (for example one holding only
-	 * non-counting trial periods).
+	 * The highest `count` in a chain `(contract_id, kind)` - the chargeable counter the
+	 * dispatcher advances (next chargeable cycle is `MAX(count) + 1`). Returns null for a
+	 * chain with no counting cycles (e.g. one holding only non-counting trial periods).
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $kind        Chain kind. Defaults to billing.
@@ -422,11 +380,9 @@ final class ContractRepository {
 	}
 
 	/**
-	 * All cycles linked to `$order_id`, across kinds and contracts.
-	 *
-	 * `order_id` is a plain non-1:1 reference - an aggregate order may serve many
-	 * cycles, even across contracts - so querying by it is a first-class path that
-	 * returns every matching cycle. Snapshots are decoded for any in-flight cycle.
+	 * All cycles linked to `$order_id`, across kinds and contracts. `order_id` is a
+	 * non-1:1 reference (an aggregate order may serve many cycles), so this returns
+	 * every match. Snapshots are decoded for any in-flight cycle.
 	 *
 	 * @param int $order_id WooCommerce order id.
 	 * @return array<int, Cycle> Cycles linked to the order, oldest first.
@@ -450,14 +406,12 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Resolve a cycle's in-memory snapshot value objects into stored row ids.
+	 * Resolve a cycle's in-memory snapshot value objects into stored row ids (write-once).
 	 *
-	 * For each snapshot type: when the cycle carries a fresh value object and no
-	 * stored id yet, the value object is reused from `$previous` by copy-forward
-	 * when their payload + schema version match, or inserted as a new snapshot row,
-	 * and its id stamped onto the cycle (write-once). A cycle that already carries a
-	 * snapshot id (or no value object) is left as is - a frozen reference is never
-	 * re-pointed.
+	 * Per snapshot type: when the cycle carries a fresh value object and no stored id
+	 * yet, the id is copy-forwarded from `$previous` (when payload + schema version
+	 * match) or freshly inserted, then stamped onto the cycle. A cycle that already
+	 * carries an id is left as is - a frozen reference is never re-pointed.
 	 *
 	 * @param Cycle      $cycle    Cycle whose snapshots to resolve.
 	 * @param Cycle|null $previous The previous cycle to copy-forward from, or null.
@@ -495,19 +449,13 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Reuse the previous cycle's snapshot id when its payload matches, else insert.
-	 *
-	 * Copy-forward dedup: when `$previous_snapshot_id` points at a stored row whose
-	 * payload and schema version equal the new ones, that id is returned and no new
-	 * row is written; otherwise a fresh snapshot row is inserted and its id
-	 * returned.
+	 * Reuse the previous cycle's snapshot id when its payload + schema version match,
+	 * else insert a fresh row.
 	 *
 	 * The match is a strict comparison against the JSON-decoded stored payload, so
-	 * payload values must be JSON-round-trip-safe scalars: integers, and strings
-	 * (money as decimal strings, never PHP floats - a float would decode back as a
-	 * float and may not compare identical, defeating the reuse). Today's plan/items
-	 * payloads satisfy this; when money enters plan snapshots it must be carried as
-	 * a decimal string.
+	 * payload values must be JSON-round-trip-safe scalars: ints and strings (money as
+	 * decimal strings, never PHP floats - a float may not decode back identical,
+	 * defeating the reuse).
 	 *
 	 * @param int                      $contract_id          Owning contract id.
 	 * @param string                   $snapshot_type        Snapshot type (`plan` | `items`).
@@ -529,13 +477,9 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Hydrate a cycle row, decoding its snapshot ids into value objects in flight.
-	 *
-	 * The typed snapshot value objects are attached only for an in-flight
-	 * (non-terminal) cycle - a `pending` or `failed` record still being worked. A
-	 * settled record (`billed` / `cancelled`) is returned with its snapshot ids but
-	 * without the extra reads to decode their payloads; a caller that needs them can
-	 * read the snapshot rows explicitly.
+	 * Hydrate a cycle row, attaching typed snapshot value objects only for an in-flight
+	 * (non-terminal) cycle. A settled record keeps its snapshot ids but skips the extra
+	 * reads to decode their payloads.
 	 *
 	 * @param array<string, mixed> $row Cycle row.
 	 * @return Cycle The hydrated cycle.
@@ -651,13 +595,9 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Re-key a decoded payload as a string-keyed map.
-	 *
-	 * A JSON-decoded payload is statically an `array<int|string, mixed>` (its key
-	 * type is erased through json_decode), while a plan snapshot's payload is a
-	 * string-keyed map. The keys of a decoded JSON object are already strings, so
-	 * this re-key is a no-op for a real plan payload and exists to recover the
-	 * string-keyed type the value object models.
+	 * Re-key a decoded payload as a string-keyed map. A no-op at runtime (decoded JSON
+	 * object keys are already strings); it recovers the string-keyed type that
+	 * json_decode erases to `array<int|string, mixed>`.
 	 *
 	 * @param array<int|string, mixed> $payload Decoded payload.
 	 * @return array<string, mixed>
@@ -672,13 +612,9 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Shape a decoded payload as an ordered list of item rows.
-	 *
-	 * An items snapshot's payload is a list of associative item arrays, but the
-	 * decoded JSON is statically an `array<int|string, mixed>`. Each element that
-	 * is itself an array is re-keyed as a string-keyed row (its keys are already
-	 * strings); non-array elements are skipped. Recovers the value object's
-	 * modelled shape without trusting the erased JSON types.
+	 * Shape a decoded payload as an ordered list of item rows: each array element is
+	 * re-keyed as a string-keyed row, non-array elements skipped. Recovers the value
+	 * object's modelled shape without trusting the erased JSON types.
 	 *
 	 * @param array<int|string, mixed> $payload Decoded payload.
 	 * @return array<int, array<string, mixed>>
@@ -738,14 +674,11 @@ final class ContractRepository {
 	/**
 	 * Guard against a stale id / concurrent delete before touching any table.
 	 *
-	 * `$wpdb->update()` returns 0 for both "matched, nothing changed" and "no
-	 * row matched", so on its own it cannot tell that the parent is gone - and
-	 * a child reconcile would then write orphan rows, since no foreign key
-	 * enforces the relation. This narrows but does not fully close the race; the
-	 * complete fix wraps the write in a transaction with SELECT ... FOR UPDATE,
-	 * the operation-scoped seam a later transaction-handling change wraps (the
-	 * integration suite's transaction-based isolation needs a test-safe approach
-	 * first).
+	 * `$wpdb->update()` returns 0 for both "matched, nothing changed" and "no row
+	 * matched", so on its own it cannot tell the parent is gone - and a child reconcile
+	 * would then write orphan rows (no FK enforces the relation). This narrows but does
+	 * not fully close the race; the complete fix (a transaction with SELECT ... FOR UPDATE)
+	 * is the seam a later transaction-handling change wraps.
 	 *
 	 * @param int $id Contract id.
 	 * @throws \RuntimeException If the contract row no longer exists.
@@ -761,14 +694,10 @@ final class ContractRepository {
 	/**
 	 * Reconcile a contract's items, addresses, and meta rows only when they differ.
 	 *
-	 * Each child set is compared against what is stored - via a normalized
-	 * signature that both the loaded rows and the entity's arrays are projected
-	 * through, so MySQL's column coercion (DECIMAL padding, INT-as-string) is
-	 * applied to both sides and a no-op round-trip compares equal. An unchanged set
-	 * is left untouched; only a changed set is rewritten (delete-then-reinsert for
-	 * that one child table). This keeps the contract-row cache write (the common
-	 * renewal path) from churning child rows, while still letting an item / address
-	 * / meta edit propagate.
+	 * Each child set is compared via a normalized signature both the loaded rows and
+	 * the entity's arrays are projected through, so MySQL's column coercion (DECIMAL
+	 * padding, INT-as-string) applies to both sides and a no-op round-trip compares
+	 * equal. Only a changed set is rewritten (delete-then-reinsert for that one table).
 	 *
 	 * @param Contract $contract Contract whose children to reconcile. Must have an id.
 	 */
@@ -892,8 +821,8 @@ final class ContractRepository {
 		global $wpdb;
 
 		foreach ( $meta as $key => $value ) {
-			// These are the engine's own contract-meta columns, not post/order
-			// meta; the slow-meta-query heuristic does not apply.
+			// The engine's own contract-meta columns, not post/order meta; the
+			// slow-meta-query heuristic does not apply.
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			$wpdb->insert(
 				SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ),
@@ -958,8 +887,8 @@ final class ContractRepository {
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
 
-		// These are the engine's own contract-meta columns, not post/order meta;
-		// the slow-meta-query heuristic does not apply.
+		// The engine's own contract-meta columns, not post/order meta; the
+		// slow-meta-query heuristic does not apply.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$table} WHERE contract_id = %d", $contract_id ), ARRAY_A );
 
@@ -974,14 +903,10 @@ final class ContractRepository {
 	}
 
 	/**
-	 * A change-detection signature for an item set.
-	 *
-	 * Projects each item to the comparable columns and coerces money / count
-	 * fields to the fixed shape MySQL stores them in (DECIMAL scale, INT-as-string).
-	 * Applied to both the loaded rows and the entity's arrays in
-	 * {@see self::sync_children()}, so a no-op round-trip yields an equal signature
-	 * and the rows are not rewritten. The generated id, `contract_id`, and column
-	 * order are intentionally ignored.
+	 * A change-detection signature for an item set: each item projected to the
+	 * comparable columns, with money / count fields coerced to the fixed shape MySQL
+	 * stores (DECIMAL scale, INT-as-string) so a no-op round-trip compares equal in
+	 * {@see self::sync_children()}. The id, `contract_id`, and column order are ignored.
 	 *
 	 * @param array<int, array<string, mixed>> $items Item arrays (loaded rows or entity items).
 	 * @return array<int, array<string, string|null>> Per-item comparable projection.
@@ -1052,11 +977,8 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Normalize a taxes value to a comparable JSON string (or null).
-	 *
-	 * The taxes column stores JSON; the load path returns that JSON string while
-	 * the entity carries the decoded array. Re-encoding both to canonical JSON lets
-	 * the signatures compare regardless of which side a value came from.
+	 * Normalize a taxes value to canonical JSON (or null), so a loaded JSON string and
+	 * the entity's decoded array compare equal regardless of which side it came from.
 	 *
 	 * @param mixed $taxes A JSON string (loaded) or an array (entity), or null.
 	 * @return string|null Canonical JSON, or null when there is nothing to compare.

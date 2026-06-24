@@ -84,16 +84,15 @@ final class Contract {
 	private $selling_plan_id;
 
 	/**
-	 * Foreign key to the order that triggered this contract, or null for a
-	 * manual/admin contract with no origin order. For a checkout contract it equals
-	 * the first cycle's `order_id`.
+	 * Origin order id, or null for a manual contract. Equals cycle 1's `order_id`
+	 * for a checkout contract.
 	 *
 	 * @var int|null
 	 */
 	private $origin_order_id;
 
 	/**
-	 * Owning extension slug, or null until owner semantics are assigned.
+	 * Owning extension slug, or null.
 	 *
 	 * @var string|null
 	 */
@@ -128,17 +127,15 @@ final class Contract {
 	private $start_gmt;
 
 	/**
-	 * The live schedule: when the next renewal fires, or null. GMT string. This is
-	 * the live source of truth the due scan keys on; advancing it is what moves the
-	 * contract forward, and a billing cycle freezes its period from it.
+	 * Live schedule: when the next renewal fires, or null. GMT string. The due scan
+	 * keys on this; a billing cycle freezes its period from it.
 	 *
 	 * @var string|null
 	 */
 	private $next_payment_gmt;
 
 	/**
-	 * Latest/live plan snapshot row id, or null until one is recorded. A billing
-	 * cycle freezes whatever the contract points at now.
+	 * Latest/live plan snapshot row id, or null.
 	 *
 	 * @var int|null
 	 */
@@ -236,12 +233,8 @@ final class Contract {
 	private $meta;
 
 	/**
-	 * Use {@see self::create()} or {@see self::from_storage()}.
-	 *
-	 * Coerces each attribute from `$data` (keyed by property name) to its property
-	 * type, so callers build a contract from a flat associative array rather than a
-	 * long positional argument list. Unknown keys are ignored; missing keys take the
-	 * documented per-field default.
+	 * Use {@see self::create()} or {@see self::from_storage()}. Coerces each attribute
+	 * to its property type; unknown keys are ignored, missing keys take the default.
 	 *
 	 * @param array<string, mixed> $data Raw attributes keyed by property name.
 	 */
@@ -660,12 +653,8 @@ final class Contract {
 	}
 
 	/**
-	 * Shape a caller-supplied value into the line-item row list.
-	 *
-	 * A non-array value yields no items; each array element is re-keyed as a
-	 * string-keyed row to recover the item-row shape from an arbitrary input
-	 * array (whose key type is otherwise unknown), and non-array elements are
-	 * skipped.
+	 * Shape a caller-supplied value into the line-item row list. A non-array yields
+	 * no items; non-array elements are skipped.
 	 *
 	 * @param mixed $value Caller-supplied items.
 	 * @return array<int, array<string, mixed>>
@@ -686,11 +675,8 @@ final class Contract {
 	}
 
 	/**
-	 * Shape a caller-supplied value into the addresses map keyed by type.
-	 *
-	 * A non-array value yields an empty map; each array element is re-keyed as a
-	 * string-keyed address, under a string type key. Non-array elements are
-	 * skipped.
+	 * Shape a caller-supplied value into the addresses map keyed by type. A non-array
+	 * yields an empty map; non-array elements are skipped.
 	 *
 	 * @param mixed $value Caller-supplied addresses.
 	 * @return array<string, array<string, mixed>>
@@ -711,10 +697,8 @@ final class Contract {
 	}
 
 	/**
-	 * Shape a caller-supplied value into the meta map (string => string).
-	 *
-	 * A non-array value yields an empty map; each entry's key and value are
-	 * coerced to strings.
+	 * Shape a caller-supplied value into the meta map (string => string). A non-array
+	 * yields an empty map.
 	 *
 	 * @param mixed $value Caller-supplied meta.
 	 * @return array<string, string>
@@ -733,11 +717,8 @@ final class Contract {
 	}
 
 	/**
-	 * Re-key an array as a string-keyed map.
-	 *
-	 * Recovers the `array<string, mixed>` type the row shapes model from an
-	 * arbitrary array whose key type is otherwise `int|string`. String keys pass
-	 * through unchanged.
+	 * Re-key an array as a string-keyed map, recovering the `array<string, mixed>`
+	 * row shape from an otherwise `int|string`-keyed array.
 	 *
 	 * @param array<int|string, mixed> $value Array to re-key.
 	 * @return array<string, mixed>

@@ -1,25 +1,14 @@
 <?php
 /**
- * RenewalEngine - the seam between consumers and the renewal money-path.
+ * The seam between consumers and the renewal money-path: `schedule()` enqueues a
+ * contract's next renewal, `process_due()` runs it when Action Scheduler fires.
+ * Wraps Action Scheduler (whose hook names and dedup behaviour stay private) and
+ * adds the contract-aware semantics: capability gating, the renewal order, the charge.
+ * One AS job per contract; the AS coupling lives in {@see RenewalScheduler}.
  *
- * `schedule()` is what a consumer (or the checkout factory's caller) invokes
- * when a contract's next-payment date is set or moved; `process_due()` is what
- * Action Scheduler calls back into when the scheduled moment arrives. Action
- * Scheduler is the wrong thing to expose directly - hook names, group
- * conventions, and dedup behaviour are implementation choices the engine should
- * be free to change - so this class wraps them and adds the contract-aware
- * semantics (capability gating, the renewal order, the charge).
- *
- * The AS coupling lives in {@see RenewalScheduler}; this class delegates to it.
- * The schedule is read from the contract's live `next_payment_gmt` and the
- * chain's most-recent cycle through targeted cycle access.
- *
- * One AS job per contract. Advancing the chain at fire time - appending the next
- * cycle with `count = MAX(count) + 1`, recording the charge outcome on the cycle,
- * advancing the contract's live `next_payment_gmt`, and re-arming the next due
- * moment - is the dispatcher slice's money-path and is not built here, so this unit
- * does not drive a live renewal loop. The long-term batch dispatcher (a few
- * recurring jobs scanning a due index with lease claims) arrives with that slice.
+ * Advancing the chain at fire time (appending the next cycle, recording the outcome,
+ * advancing `next_payment_gmt`, re-arming the next due moment) is the dispatcher
+ * slice's money-path and is not built here, so this unit does not drive a live loop.
  *
  * Integration zone: WordPress-native. Action Scheduler, WC orders, gateways.
  *
@@ -74,9 +63,6 @@ final class RenewalEngine {
 	/**
 	 * Build a renewal engine over the given contract repository.
 	 *
-	 * The plan repository the advance path needs to read billing policy is
-	 * reintroduced with the dispatcher slice that rebuilds advancement.
-	 *
 	 * @param ContractRepository|null $contracts Contract repository; default instance when omitted.
 	 */
 	public function __construct( ?ContractRepository $contracts = null ) {
@@ -84,11 +70,8 @@ final class RenewalEngine {
 	}
 
 	/**
-	 * Register the Action Scheduler callback.
-	 *
-	 * Must run on every page load (not just activation) so AS can dispatch a
-	 * due action back into {@see self::process_due()}. Wired from
-	 * {@see \Automattic\WooCommerce\SubscriptionsEngine\Integration\Bootstrap}.
+	 * Register the Action Scheduler callback. Must run on every page load (not just
+	 * activation) so AS can dispatch a due action back into {@see self::handle_due_action()}.
 	 */
 	public static function register_hooks(): void {
 		add_action( RenewalScheduler::HOOK, array( __CLASS__, 'handle_due_action' ), 10, 1 );
@@ -97,9 +80,8 @@ final class RenewalEngine {
 	/**
 	 * Action Scheduler dispatch entry point - fires when a renewal is due.
 	 *
-	 * Static so it can be registered as a plain callback; constructs an engine
-	 * with default repositories and routes through the instance `process_due()`
-	 * so the dispatch path and any synchronous test driver share one code path.
+	 * Static so it can be registered as a plain callback; routes through the instance
+	 * `process_due()` so dispatch and any synchronous test driver share one code path.
 	 *
 	 * @param int $contract_id Contract whose renewal is firing.
 	 */
@@ -108,24 +90,15 @@ final class RenewalEngine {
 	}
 
 	/**
-	 * Schedule (or re-schedule) the next renewal for `$contract` at its
-	 * `next_payment_gmt`.
+	 * Schedule (or re-schedule) the next renewal for `$contract` at its `next_payment_gmt`.
 	 *
-	 * Re-scheduling replaces: at most one pending AS row exists per contract.
-	 * The clear-then-enqueue is unconditional, so callers moving the date
-	 * forward just call `schedule()` again.
-	 *
-	 * **Capability gate (the schedule-time guard).** A primitive-scheduled
-	 * contract is only enqueued when its gateway declares the `recurring`
-	 * capability via {@see CapabilityRegistry::supports()}. An incapable gateway
-	 * would create renewals nothing can charge, so we refuse at the boundary
-	 * (log + no enqueue) rather than failing later on a customer-facing order.
-	 * Gateway-scheduled contracts (`schedule_source = gateway`) are never
-	 * enqueued here - the gateway runs its own schedule; any stale primitive row
-	 * is cleared.
-	 *
-	 * Does nothing when the contract has no `next_payment_gmt` (nothing to
-	 * anchor on) - any stale row is cleared.
+	 * Clear-then-enqueue keeps at most one pending AS row per contract, so callers
+	 * moving the date forward just call `schedule()` again. Skips (and clears any stale
+	 * row) when the contract is gateway-scheduled (the gateway runs its own schedule) or
+	 * has no `next_payment_gmt`. Capability gate: a primitive-scheduled contract is only
+	 * enqueued when its gateway declares the `recurring` capability via
+	 * {@see CapabilityRegistry::supports()}, so renewals nothing can charge are refused
+	 * at the boundary rather than failing later on a customer-facing order.
 	 *
 	 * @param Contract $contract Contract to schedule. Must have an id.
 	 * @return bool True when an AS row was enqueued; false when scheduling was
@@ -137,8 +110,7 @@ final class RenewalEngine {
 			return false;
 		}
 
-		// Gateway-scheduled: the gateway owns the schedule. Clear any stale
-		// primitive row and bail.
+		// Gateway-scheduled: the gateway owns the schedule. Clear any stale row and bail.
 		if ( Contract::SCHEDULE_SOURCE_GATEWAY === $contract->get_schedule_source() ) {
 			RenewalScheduler::unschedule( $id );
 			return false;
@@ -171,9 +143,8 @@ final class RenewalEngine {
 
 		$when = new DateTimeImmutable( $next_payment_gmt, new DateTimeZone( 'UTC' ) );
 
-		// Clear-then-enqueue keeps the single-row-per-contract invariant: AS
-		// does not dedup on hook+args, so without the clear a re-schedule would
-		// leave two rows and fire twice.
+		// Clear-then-enqueue: AS does not dedup on hook+args, so without the clear a
+		// re-schedule would leave two rows and fire twice.
 		RenewalScheduler::unschedule( $id );
 		RenewalScheduler::schedule( $id, $when );
 
@@ -185,27 +156,12 @@ final class RenewalEngine {
 	/**
 	 * Run the renewal due for `$contract_id`. Fired by the AS hook.
 	 *
-	 * Steps:
-	 *  1. Load the contract; bail (log) if it is gone - a stale AS row firing
-	 *     against a deleted contract is not worth throwing over (AS would retry
-	 *     a permanent failure forever).
-	 *  2. Skip non-active contracts (on-hold / pending-cancellation / terminal).
-	 *     The lifecycle path should have cleared the AS row, but a row can slip
-	 *     through (migration, manual SQL); skipping is the safe default. Skip
-	 *     gateway-scheduled contracts the same way - the gateway owns the charge.
-	 *  3. Idempotency guard: if a renewal order for the next chargeable number in
-	 *     the billing chain already exists, do not create a second one. Tolerates
-	 *     AS retries without double-charging.
-	 *  4. Build the renewal order and attempt the gateway charge.
-	 *
-	 * Advancing the chain - appending the next cycle with `count = MAX(count) + 1`,
-	 * recording the charge outcome on the cycle, refreshing `next_payment_gmt`, and
-	 * re-arming the next due moment - is the dispatcher slice's money-path and is
-	 * not built here, so this unit does not drive a live renewal loop. The chain's
-	 * next chargeable number and the amount are read from the repository (the
-	 * per-chain `MAX(count)` and the current cycle's `expected_total`).
-	 *
-	 * Returns the renewal order, or null when the renewal was skipped.
+	 * Loads the contract and skips (logging only, never throwing - AS would retry a
+	 * permanent failure forever) when it is gone, gateway-scheduled, or not active.
+	 * Then guards idempotency - if a renewal order for the next chargeable number in
+	 * the billing chain already exists, no second one is created (tolerating AS retries) -
+	 * and builds the renewal order and attempts the gateway charge. Advancing the chain
+	 * is the dispatcher slice's money-path, so this does not drive a live renewal loop.
 	 *
 	 * @param int $contract_id Contract whose renewal cycle is firing.
 	 * @return WC_Order|null The created renewal order, or null when skipped.
@@ -248,9 +204,8 @@ final class RenewalEngine {
 
 		$next_count = $this->next_chargeable_count( $contract_id );
 
-		// Idempotency: a renewal order already tagged for the next chargeable
-		// number means this action already ran (AS retry, double-fire). Bail
-		// without creating a second order.
+		// Idempotency: a renewal order already tagged for this number means the action
+		// already ran (AS retry, double-fire). Bail without creating a second order.
 		if ( $this->renewal_exists_for_cycle( $contract_id, $next_count ) ) {
 			wc_get_logger()->info(
 				sprintf( 'RenewalEngine::process_due(): renewal for contract %d cycle %d already exists - skipping (idempotent retry).', $contract_id, $next_count ),
@@ -272,9 +227,8 @@ final class RenewalEngine {
 
 		$this->attempt_charge( $renewal_order, $contract );
 
-		// Advancing the chain (append the next cycle, record the outcome, advance
-		// the contract's live next_payment_gmt) and re-arming the next due moment is
-		// the dispatcher slice's money-path - deferred, so the loop is not driven from here.
+		// Advancing the chain and re-arming the next due moment is the dispatcher
+		// slice's money-path - deferred, so the loop is not driven from here.
 
 		return $renewal_order;
 	}
@@ -283,9 +237,7 @@ final class RenewalEngine {
 	 * Cancel `$contract`: transition to cancelled and clear its pending renewal.
 	 *
 	 * Status moves through the Core state machine ({@see Contract::set_status()}),
-	 * which raises a `DomainException` on an illegal transition (for example
-	 * cancelling an already-expired contract). On success the contract is
-	 * persisted and its AS row cleared.
+	 * which raises a `DomainException` on an illegal transition.
 	 *
 	 * @param Contract $contract Contract to cancel. Must have an id.
 	 * @return bool True when the contract was cancelled and persisted.
@@ -298,10 +250,8 @@ final class RenewalEngine {
 		}
 
 		$contract->set_status( ContractStatus::CANCELLED );
-		// For now update() persists the contract-row cache/status ONLY. Closing the
-		// scheduled cycle (status cancelled + reason) and any chain/cycle head
-		// transition is the dispatcher money-path; do not upgrade this to
-		// save() until that cycle-transition logic is wired.
+		// update() persists the contract-row cache/status ONLY. Closing the scheduled
+		// cycle and any chain/cycle head transition is the dispatcher money-path.
 		$this->contracts->update( $contract );
 
 		RenewalScheduler::unschedule( $id );
@@ -310,13 +260,9 @@ final class RenewalEngine {
 	}
 
 	/**
-	 * The next chargeable number in the contract's billing chain.
-	 *
-	 * The per-chain count is `MAX(count)` over the cycle rows; the next charge is
-	 * one past it. A chain with no counting cycle yet (none stored, or only
-	 * non-counting trial periods) starts at 1. This is the idempotency anchor the
-	 * renewal order is tagged with; the dispatcher slice is what actually appends
-	 * the cycle that carries this count.
+	 * The next chargeable number in the contract's billing chain - one past the
+	 * per-chain `MAX(count)`, or 1 for a chain with no counting cycle yet. This is
+	 * the idempotency anchor the renewal order is tagged with.
 	 *
 	 * @param int $contract_id Contract id.
 	 * @return int The next chargeable number.
@@ -328,14 +274,12 @@ final class RenewalEngine {
 	}
 
 	/**
-	 * Build a renewal order cloned from the contract's origin order.
-	 *
-	 * Clones line/fee/shipping/tax/coupon items and addresses from the origin,
-	 * applies the current cycle's expected total as ground truth, attaches the
-	 * contract's payment token, and tags the order with the renewal relation meta
-	 * (contract id + the chargeable number) so charge observers and the idempotency
-	 * check can find it. Returns null (logged) when the origin order cannot be
-	 * loaded or `wc_create_order()` fails.
+	 * Build a renewal order cloned from the contract's origin order: clones
+	 * line/fee/shipping/tax/coupon items and addresses, applies the current cycle's
+	 * expected total as ground truth, attaches the contract's payment token, and tags
+	 * the renewal relation meta (contract id + chargeable number) so charge observers
+	 * and the idempotency check can find it. Returns null (logged) when the origin
+	 * order cannot be loaded or `wc_create_order()` fails.
 	 *
 	 * @param Contract $contract Contract being renewed.
 	 * @param int      $count    The chargeable number this order bills.
@@ -344,8 +288,7 @@ final class RenewalEngine {
 	private function build_renewal_order( Contract $contract, int $count ): ?WC_Order {
 		$origin_order_id = $contract->get_origin_order_id();
 		if ( null === $origin_order_id ) {
-			// A manual/admin contract has no origin order to clone from. The renewal
-			// order path needs a source order, so it is not supported for these yet.
+			// A manual/admin contract has no origin order to clone from - not supported yet.
 			wc_get_logger()->error(
 				sprintf( 'RenewalEngine: cannot build renewal for contract %d - it has no origin order to clone.', (int) $contract->get_id() ),
 				array(
@@ -400,20 +343,17 @@ final class RenewalEngine {
 		$renewal_order->set_address( $origin->get_address( 'billing' ), 'billing' );
 		$renewal_order->set_address( $origin->get_address( 'shipping' ), 'shipping' );
 
-		// Clone every relevant line type. `set_id( 0 )` turns each clone into a
-		// fresh row attached to the renewal order rather than UPDATE-ing the
-		// origin's row.
+		// `set_id( 0 )` turns each clone into a fresh row on the renewal order rather
+		// than UPDATE-ing the origin's row.
 		foreach ( $origin->get_items( array( 'line_item', 'fee', 'shipping', 'tax', 'coupon' ) ) as $item ) {
 			$clone = clone $item;
 			$clone->set_id( 0 );
 			$renewal_order->add_item( $clone );
 		}
 
-		// The current cycle's expected_total is the price authority for the cycle -
-		// applied after add_item() so the line items do not recompute over it. The
-		// granular discount/shipping/tax breakdown lives in the cycle's items
-		// snapshot; reconstructing it onto the renewal order is the dispatcher
-		// money-path's job. For now only the order total is needed to compile and charge.
+		// The current cycle's expected_total is the price authority - applied after
+		// add_item() so the line items do not recompute over it. Reconstructing the
+		// granular discount/shipping/tax breakdown is the dispatcher money-path's job.
 		$renewal_order->set_total( $this->current_cycle_total( (int) $contract->get_id() ) );
 
 		$token_id = $instrument->get_token_id();
@@ -424,8 +364,8 @@ final class RenewalEngine {
 			}
 		}
 
-		// Tag with the renewal relation + the chargeable number this order bills, so
-		// the idempotency check can detect a duplicate fire for the same number.
+		// Tag the renewal relation + chargeable number so the idempotency check can
+		// detect a duplicate fire for the same number.
 		$renewal_order->update_meta_data( OrderLinkage::META_CONTRACT_ID, (string) $contract->get_id() );
 		$renewal_order->update_meta_data( OrderLinkage::META_RELATION_TYPE, OrderLinkage::RELATION_RENEWAL );
 		$renewal_order->update_meta_data( self::renewal_cycle_meta_key(), (string) $count );
@@ -436,13 +376,9 @@ final class RenewalEngine {
 	}
 
 	/**
-	 * The amount the contract's current cycle expects to bill.
-	 *
-	 * Reads the current cycle's `expected_total` through targeted cycle access. A
-	 * contract with no cycle yet yields '0' - the charge is then a no-op rather
-	 * than a fatal, which is the safe state for a contract with nothing to bill.
-	 * The full per-cycle money path - reconstructing the discount/shipping/tax
-	 * breakdown and appending the next cycle - lands with the dispatcher.
+	 * The amount the contract's current cycle expects to bill (its `expected_total`).
+	 * A contract with no cycle yet yields '0', making the charge a no-op rather than a
+	 * fatal - the safe state for a contract with nothing to bill.
 	 *
 	 * @param int $contract_id The contract being renewed.
 	 * @return string Decimal-safe amount string.
@@ -456,15 +392,10 @@ final class RenewalEngine {
 	/**
 	 * Attempt the gateway charge for `$renewal_order`.
 	 *
-	 * Mirrors WooCommerce Subscriptions' scheduled-payment dispatch: fire
-	 * `woocommerce_subscriptions_engine_scheduled_payment_{gateway}` with the
-	 * amount and the order so the contract's gateway (or its adapter) captures
-	 * using the stored token. The engine does not implement gateway charging
-	 * itself - it hands off to whatever gateway integration is registered, and
-	 * the resulting WC payment-complete / failed status is what downstream
-	 * accounting observes. A gateway that registers no handler leaves the order
-	 * `pending` (uncharged), which is the correct safe state for a contract
-	 * scheduled against a gateway that cannot actually charge.
+	 * Fires `woocommerce_subscriptions_engine_scheduled_payment_{gateway}` so the
+	 * registered gateway integration captures against the stored token; the engine does
+	 * not charge itself. A gateway that registers no handler leaves the order `pending`
+	 * (uncharged) - the safe state when it cannot actually charge.
 	 *
 	 * @param WC_Order $renewal_order The pending renewal order to charge.
 	 * @param Contract $contract      The contract being renewed.
@@ -479,21 +410,17 @@ final class RenewalEngine {
 
 		try {
 			/**
-			 * Fires to request a recurring charge for a renewal order.
-			 *
-			 * The contract's gateway (or a gateway adapter) hooks the
-			 * gateway-specific variant and captures against the stored token,
-			 * then transitions the order via the gateway's own
-			 * `payment_complete()` / failure handling.
+			 * Fires to request a recurring charge for a renewal order. The gateway (or its
+			 * adapter) captures against the stored token, then transitions the order via its
+			 * own `payment_complete()` / failure handling.
 			 *
 			 * @param float    $amount        The amount to charge.
 			 * @param WC_Order $renewal_order The renewal order being charged.
 			 */
 			do_action( 'woocommerce_subscriptions_engine_scheduled_payment_' . $gateway_id, $amount, $renewal_order );
 		} catch ( Throwable $e ) {
-			// A throwing gateway handler must not leave the AS action in a
-			// retry-forever loop or roll back the advance we already persisted.
-			// Log and move on; the order stays pending for dunning to pick up.
+			// A throwing gateway handler must not leave the AS action in a retry-forever
+			// loop. Log and move on; the order stays pending for dunning to pick up.
 			wc_get_logger()->error(
 				sprintf( 'RenewalEngine: gateway charge for renewal order %d (contract %d) threw: %s', $renewal_order->get_id(), (int) $contract->get_id(), $e->getMessage() ),
 				array(
@@ -506,16 +433,13 @@ final class RenewalEngine {
 	}
 
 	/**
-	 * Whether a renewal order tagged for `$contract_id` at `$cycle` already exists.
+	 * Whether a renewal order tagged for `$contract_id` at `$cycle` already exists -
+	 * the idempotency check for AS retries.
 	 *
-	 * The idempotency check for AS retries. Queries on the single most-selective
-	 * key (the contract id) via the flat `meta_key` / `meta_value` shortcut, then
-	 * narrows by relation type and cycle in PHP. The flat shortcut is used rather
-	 * than a three-clause `meta_query` because the legacy CPT order store (the
-	 * fallback under HPOS, and the only store with HPOS off) rejects `meta_query`
-	 * with `wc_doing_it_wrong` and drops it; the flat shortcut round-trips
-	 * through both stores. A contract has a handful of renewal orders, so the
-	 * in-memory narrowing is cheap.
+	 * Queries on the contract id via the flat `meta_key` / `meta_value` shortcut, then
+	 * narrows by relation type and cycle in PHP. The flat shortcut is used rather than a
+	 * `meta_query` because the legacy CPT order store rejects `meta_query` with
+	 * `wc_doing_it_wrong`; the shortcut round-trips through both stores.
 	 *
 	 * @param int $contract_id Contract id.
 	 * @param int $cycle       The cycle number the renewal would bill.
@@ -531,9 +455,8 @@ final class RenewalEngine {
 			)
 		);
 
-		// This query does not paginate, so wc_get_orders() returns a plain list of
-		// orders. The guard narrows the declared WC_Order[]|stdClass return type and
-		// treats any unexpected non-array result as "no matching renewal".
+		// Unpaginated, so wc_get_orders() returns a plain list. The guard narrows the
+		// declared return type and treats any non-array result as "no matching renewal".
 		if ( ! is_array( $orders ) ) {
 			return false;
 		}

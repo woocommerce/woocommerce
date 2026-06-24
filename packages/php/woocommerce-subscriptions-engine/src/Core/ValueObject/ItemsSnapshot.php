@@ -1,20 +1,12 @@
 <?php
 /**
  * ItemsSnapshot - an immutable, point-in-time copy of the line items a cycle was
- * billed (or is being billed) for.
+ * billed for. Companion to {@see PlanSnapshot}, referenced by cycles by id.
  *
- * The companion to {@see PlanSnapshot}: cycles reference an items snapshot by id.
- * Snapshots are NOT content-addressed - identical consecutive item sets are
- * shared by copy-forward (a new cycle reuses the previous cycle's snapshot id
- * unless the items actually changed), so this VO carries no canonicalization or
- * hashing. The item list is ordered (its sequence is part of its meaning) and is
- * kept as given.
- *
- * The `schema_version` is the payload-FORMAT version: it tells a reader how to
- * parse and, if needed, upcast the payload. It is explicitly NOT a content
- * version of the item set.
- *
- * Lives in `Core\`: WordPress-free, no encoding, no hashing.
+ * NOT content-addressed: identical consecutive item sets are shared by copy-forward,
+ * so this VO carries no canonicalization or hashing. The item list is ordered and
+ * kept as given. `schema_version` is the payload-FORMAT version (how to parse/upcast),
+ * not a content version. WordPress-free Core zone.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject
  */
@@ -43,8 +35,7 @@ final class ItemsSnapshot {
 	private $items;
 
 	/**
-	 * Payload-format version, recorded on the snapshot row. NOT a content version
-	 * - it tells a reader how to parse and upcast the payload.
+	 * Payload-format version, recorded on the snapshot row. NOT a content version.
 	 *
 	 * @var int
 	 */
@@ -80,10 +71,8 @@ final class ItemsSnapshot {
 	}
 
 	/**
-	 * Reconstruct an items snapshot from a previously serialized payload.
-	 *
-	 * The companion to {@see self::to_payload()}: the Integration binding decodes
-	 * the stored payload and its `schema_version` column and rebuilds the VO.
+	 * Reconstruct an items snapshot from a serialized payload. Companion to
+	 * {@see self::to_payload()}.
 	 *
 	 * @param array<int, array<string, mixed>> $payload        Serialized ordered line items.
 	 * @param int                              $schema_version Payload-format version the payload was written in.
@@ -110,11 +99,8 @@ final class ItemsSnapshot {
 	}
 
 	/**
-	 * The serialized payload for storage: the ordered line items.
-	 *
-	 * The Integration binding encodes this to the stored column. The list order is
-	 * preserved and there is no per-item key canonicalization: dedup is by
-	 * copy-forward, not by a content hash.
+	 * The serialized payload for storage: the ordered line items, no
+	 * canonicalization (dedup is by copy-forward, not a content hash).
 	 *
 	 * @return array<int, array<string, mixed>>
 	 */

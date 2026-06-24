@@ -1,25 +1,15 @@
 <?php
 /**
- * SnapshotStore - per-contract typed storage for cycle snapshot payloads.
+ * Per-contract typed storage for cycle snapshot payloads. Does the one thing
+ * copy-forward dedup leaves it - insert a typed snapshot row and return its id;
+ * deciding when to reuse an existing id is the caller's job (repository / factory),
+ * not this store's. There is no content hash or uniqueness constraint: copy-forward,
+ * not a UNIQUE index, is what keeps identical consecutive snapshots from duplicating.
  *
- * Cycles reference a plan snapshot and an items snapshot by id. Snapshots are
- * NOT content-addressed: a new cycle reuses the previous cycle's snapshot id
- * unless the plan/items actually changed (copy-forward dedup), so identical
- * consecutive cycles share a snapshot row by construction. This store therefore
- * does the one thing copy-forward leaves it: insert a typed snapshot row and
- * return its id. Deciding when to reuse an existing id instead of inserting is
- * the caller's job (the repository / factory), not this store's.
- *
- * A row is per contract and typed: `contract_id` scopes it, `snapshot_type`
- * (`plan` | `items`) labels it, `parent_id` is the weak link back to the source
- * (the plan a plan snapshot was taken from; null for items), and
- * `schema_version` is the payload-FORMAT version a reader parses/upcasts by - it
- * is explicitly NOT the plan's content version.
- *
- * Lives in the integration layer: JSON encoding happens here, never in `Core\`.
- * No foreign keys (MySQL 5.6 floor); there is no content hash and no
- * uniqueness constraint - copy-forward, not a UNIQUE index, is what keeps
- * identical consecutive snapshots from duplicating.
+ * A row is per contract and typed (`contract_id`, `snapshot_type`, a weak `parent_id`
+ * link to the source, and a `schema_version` that is the payload FORMAT version, NOT
+ * the plan's content version). Integration layer: JSON encoding happens here, never
+ * in `Core\`. No foreign keys (MySQL 5.6 floor).
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage
  */
@@ -39,13 +29,9 @@ final class SnapshotStore {
 	const TYPE_ITEMS = 'items';
 
 	/**
-	 * Insert a typed snapshot row and return its id.
-	 *
-	 * The payload is the typed value object's serialized form (produced WP-free
-	 * in `Core\`); it is JSON-encoded here into the row's LONGTEXT column. No
-	 * dedup happens at insert time - copy-forward reuse is decided by the caller,
-	 * which passes the prior cycle's snapshot id straight through when the
-	 * plan/items are unchanged rather than calling this method.
+	 * Insert a typed snapshot row and return its id. The payload (the value object's
+	 * WP-free serialized form) is JSON-encoded here into the LONGTEXT column. No dedup
+	 * at insert time - copy-forward reuse is the caller's job.
 	 *
 	 * @param int                      $contract_id    Owning contract id.
 	 * @param string                   $snapshot_type  Snapshot type (`plan` | `items`).
