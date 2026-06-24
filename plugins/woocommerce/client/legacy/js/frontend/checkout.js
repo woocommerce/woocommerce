@@ -43,8 +43,14 @@ jQuery( function ( $ ) {
 					// Trigger field-level validation (which adds `.woocommerce-invalid` to invalid fields)
 					$form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' );
 
-					// Check for validation errors (from validate_field handler)
-					if ( $form.find( '.woocommerce-invalid' ).length > 0 ) {
+					// Check for validation errors (from validate_field handler).
+					// Only consider visible fields: `validate_field` flags any empty
+					// required field regardless of visibility, so hidden fields (e.g.
+					// the collapsed "Ship to a different address?" shipping fields)
+					// would otherwise block submission even when the visible form is
+					// valid. The `.woocommerce-invalid` class lives on the `.form-row`,
+					// which is hidden when its section is collapsed.
+					if ( $form.find( '.woocommerce-invalid:visible' ).length > 0 ) {
 						hasError = true;
 					}
 
@@ -79,7 +85,7 @@ jQuery( function ( $ ) {
 
 					// Scroll to the first invalid field in DOM order
 					if ( hasError ) {
-						var $firstInvalidField = $form.find( '.woocommerce-invalid' ).first();
+						var $firstInvalidField = $form.find( '.woocommerce-invalid:visible' ).first();
 						if ( $firstInvalidField.length ) {
 							$( 'html, body' ).animate(
 								{

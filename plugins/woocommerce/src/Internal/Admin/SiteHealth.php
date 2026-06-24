@@ -682,7 +682,7 @@ class SiteHealth {
 			return false;
 		}
 
-		$product_count = ProductUtil::get_counts_for_type( 'product' );
+		$product_count = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
 
 		return ( $product_count[ ProductStatus::PUBLISH ] ?? 0 ) > 0 && 0 === wc_get_shipping_method_count();
 	}
