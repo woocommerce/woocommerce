@@ -155,6 +155,14 @@ For detailed test commands, see `woocommerce-dev-cycle` skill.
 - Never create standalone functions (always use class methods)
 - Tests require Docker environment
 
+## Backward Compatibility
+
+Any change to a **public or externally exposed** class, interface, function, or method signature is **high-risk** and **must state its backward-compatibility impact in the PR description** — regardless of whether the symbol lives in the `Internal` namespace. The `Internal` namespace is not a guarantee that a symbol is safe to change: third-party code implements and consumes some of these contracts in practice (for example, the WooCommerce Stripe Gateway implements `Internal\ProductFeed\Feed\FeedInterface`).
+
+**Adding a method to an interface that external code can implement must be flagged explicitly.** It is a backward-incompatible change: existing implementers fatal on load because they no longer satisfy the contract. Prefer a non-breaking alternative — add the method to the concrete class rather than the interface, introduce a separate new interface, or supply a default implementation via an abstract base class — and follow the deprecate-don't-rename policy for existing public symbols.
+
+> This rule exists because WooCommerce 10.9.0 was reverted on WP Cloud: PR #64394 added a required `get_entry_count(): int` method to `FeedInterface`, fataling older WooCommerce Stripe Gateway versions that implement it. Fixed in PR #65965.
+
 ## Block Development
 
 ### `block.json` Attribute Defaults
