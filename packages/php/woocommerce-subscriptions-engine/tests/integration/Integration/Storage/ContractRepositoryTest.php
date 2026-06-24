@@ -619,6 +619,91 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox reclaim_expired_cycle wins the CAS for an expired-lease pending cycle and extends the lease.
+	 */
+	public function test_reclaim_expired_cycle_succeeds_for_an_expired_lease(): void {
+		$id    = $this->sut->insert( $this->make_contract() );
+		$cycle = $this->append_pending_cycle_with_lease( $id, '2026-07-15 00:00:00' );
+
+		// Now is after the lease: the CAS predicate (claimed_until <= now) matches.
+		$won = $this->sut->reclaim_expired_cycle( (int) $cycle->get_id(), '2026-07-15 00:10:00', '2026-07-15 00:25:00' );
+		$this->assertTrue( $won, 'The first worker reclaims an expired-lease pending cycle.' );
+
+		$reloaded = $this->sut->find_current_cycle( $id );
+		$this->assertInstanceOf( Cycle::class, $reloaded );
+		$this->assertSame( '2026-07-15 00:25:00', $reloaded->get_claimed_until_gmt(), 'The lease is extended to the new moment.' );
+	}
+
+	/**
+	 * @testdox reclaim_expired_cycle arbitrates the two-worker race: the first wins, the second loses.
+	 *
+	 * The compare-and-set that prevents a double charge. Both workers find the same
+	 * expired-lease cycle; the first CAS matches the row and extends the lease into the
+	 * future, so the second CAS (predicate `claimed_until <= now`) matches zero rows and
+	 * loses. Exactly one worker reclaims, so the cycle is charged at most once.
+	 */
+	public function test_reclaim_expired_cycle_arbitrates_the_race(): void {
+		$id    = $this->sut->insert( $this->make_contract() );
+		$cycle = $this->append_pending_cycle_with_lease( $id, '2026-07-15 00:00:00' );
+
+		$cycle_id = (int) $cycle->get_id();
+
+		// Worker A: lease has expired (00:00 <= 00:10), so the CAS wins and extends to 00:25.
+		$first = $this->sut->reclaim_expired_cycle( $cycle_id, '2026-07-15 00:10:00', '2026-07-15 00:25:00' );
+		$this->assertTrue( $first, 'The first worker wins the reclaim.' );
+
+		// Worker B: same read, but the lease is now 00:25 (> 00:10), so the CAS matches zero rows.
+		$second = $this->sut->reclaim_expired_cycle( $cycle_id, '2026-07-15 00:10:00', '2026-07-15 00:40:00' );
+		$this->assertFalse( $second, 'The second worker loses the race: no double reclaim.' );
+
+		// The lease reflects only the winner's extension, never the loser's.
+		$reloaded = $this->sut->find_current_cycle( $id );
+		$this->assertInstanceOf( Cycle::class, $reloaded );
+		$this->assertSame( '2026-07-15 00:25:00', $reloaded->get_claimed_until_gmt() );
+	}
+
+	/**
+	 * @testdox reclaim_expired_cycle does not touch a settled (non-pending) cycle.
+	 */
+	public function test_reclaim_expired_cycle_skips_a_settled_cycle(): void {
+		$id    = $this->sut->insert( $this->make_contract() );
+		$cycle = $this->append_pending_cycle_with_lease( $id, '2026-07-15 00:00:00' );
+
+		// Settle it billed (clearing the lease, as the money-path does).
+		$cycle->set_status( CycleStatus::billed() );
+		$cycle->set_claimed_until_gmt( null );
+		$this->sut->update_cycle( $cycle );
+
+		$won = $this->sut->reclaim_expired_cycle( (int) $cycle->get_id(), '2026-07-15 00:10:00', '2026-07-15 00:25:00' );
+		$this->assertFalse( $won, 'A billed cycle is never reclaimable: the status predicate excludes it.' );
+	}
+
+	/**
+	 * Append a pending cycle 1 carrying a crash-recovery lease, returning it (with its id).
+	 *
+	 * @param int    $contract_id   Contract id.
+	 * @param string $claimed_until The lease expiry GMT string to stamp.
+	 */
+	private function append_pending_cycle_with_lease( int $contract_id, string $claimed_until ): Cycle {
+		$cycle = Cycle::create(
+			array(
+				'contract_id'    => $contract_id,
+				'sequence_no'    => 1,
+				'count'          => 1,
+				'status'         => CycleStatus::pending(),
+				'starts_at_gmt'  => '2026-07-15 00:00:00',
+				'ends_at_gmt'    => '2026-08-15 00:00:00',
+				'expected_total' => '19.99',
+				'currency'       => 'USD',
+				'claimed_until'  => $claimed_until,
+			)
+		);
+		$this->sut->append_cycle( $cycle );
+
+		return $cycle;
+	}
+
+	/**
 	 * @testdox find_due returns only active contracts whose next_payment has arrived, oldest first.
 	 */
 	public function test_find_due_returns_only_due_active_contracts_oldest_first(): void {

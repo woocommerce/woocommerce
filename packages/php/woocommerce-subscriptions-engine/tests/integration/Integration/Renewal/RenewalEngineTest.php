@@ -324,6 +324,13 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
 		$this->assertNull( $head->get_claimed_until_gmt() );
 
+		// The schedule advances to the RECLAIMED cycle's own end (2026-03-15), not a
+		// recomputed next period (2026-04-15) - a reclaim must not skip a billing cycle.
+		$reloaded = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertSame( '2026-03-15 00:00:00', $reloaded->get_next_payment_gmt() );
+		$this->assertNotNull( $reloaded->get_last_payment_gmt() );
+
 		// Exactly one billing cycle for count 2 (no duplicate claimed).
 		$at_count_2 = array_filter(
 			$repo->find_cycle_history( $contract_id ),

@@ -321,6 +321,11 @@ final class RenewalEngine {
 			return null;
 		}
 
+		// The cycle being settled is the price + period authority. For a fresh claim this is the
+		// cycle just computed; for a RECLAIM it is the existing stalled cycle, which carries its
+		// OWN stored period - so the order bills its expected_total and the schedule advances to
+		// its own ends_at_gmt, never to a freshly-computed next period (which would skip a whole
+		// billing cycle).
 		$renewal_order = $this->build_renewal_order( $contract, $next_count, $new_cycle->get_expected_total() );
 		if ( null === $renewal_order ) {
 			// build_renewal_order logged the reason. The claimed cycle stays pending for
@@ -435,15 +440,17 @@ final class RenewalEngine {
 	 *
 	 * Re-reads the chain head. When it is a `pending` cycle at `$count` whose
 	 * `claimed_until` lease has expired, that is a charge that crashed after claiming but
-	 * before settling: the lease is re-stamped (extending the window for this run) and the
-	 * cycle returned so the money-path resolves it. A still-leased pending cycle is an
-	 * active claim (a concurrent worker), and a settled cycle means the number is already
-	 * resolved - both are an idempotent no-op (null).
+	 * before settling - it is reclaimed through {@see ContractRepository::reclaim_expired_cycle()},
+	 * an atomic compare-and-set on `claimed_until <= now`. The CAS is the concurrency guard
+	 * here: among workers that all lost the create-as-claim insert and all read the same
+	 * expired cycle, only the one whose UPDATE matches the row wins (extending the lease);
+	 * the rest match zero rows and skip, so the cycle is charged exactly once. A still-leased
+	 * pending cycle (active claim) or a settled cycle is also a no-op (null).
 	 *
 	 * @param int       $contract_id The contract being renewed.
 	 * @param int       $count       The chargeable number that collided.
 	 * @param Throwable $error       The insert failure (for the skip log).
-	 * @return Cycle|null The reclaimed pending cycle, or null to skip.
+	 * @return Cycle|null The reclaimed pending cycle (this caller won the CAS), or null to skip.
 	 */
 	private function reclaim_or_skip( int $contract_id, int $count, Throwable $error ): ?Cycle {
 		$head = $this->contracts->find_current_cycle( $contract_id );
@@ -453,20 +460,34 @@ final class RenewalEngine {
 			&& $head->get_status()->equals( CycleStatus::pending() );
 
 		if ( $is_pending_at_count && $this->lease_has_expired( $head ) ) {
-			// Crash recovery: an earlier attempt claimed this cycle then died before
-			// settling it. Re-stamp the lease and resolve it on this run.
-			$head->set_claimed_until_gmt( $this->lease_until() );
-			$this->contracts->update_cycle( $head );
+			// Crash recovery, race-safe: only the caller whose CAS UPDATE matches the
+			// still-expired row reclaims it; a concurrent worker that already extended the
+			// lease leaves this caller matching zero rows, so it skips.
+			$head_id = (int) $head->get_id();
+			$won     = $this->contracts->reclaim_expired_cycle( $head_id, gmdate( 'Y-m-d H:i:s' ), $this->lease_until() );
 
+			if ( $won ) {
+				wc_get_logger()->info(
+					sprintf( 'RenewalEngine::process_due(): reclaiming stalled cycle %d for contract %d (lease expired) - re-attempting.', $count, $contract_id ),
+					array(
+						'source'      => self::LOG_SOURCE,
+						'contract_id' => $contract_id,
+					)
+				);
+
+				return $head;
+			}
+
+			// Another worker won the reclaim CAS between our read and write: skip.
 			wc_get_logger()->info(
-				sprintf( 'RenewalEngine::process_due(): reclaiming stalled cycle %d for contract %d (lease expired) - re-attempting.', $count, $contract_id ),
+				sprintf( 'RenewalEngine::process_due(): cycle %d for contract %d was reclaimed by another worker - skipping.', $count, $contract_id ),
 				array(
 					'source'      => self::LOG_SOURCE,
 					'contract_id' => $contract_id,
 				)
 			);
 
-			return $head;
+			return null;
 		}
 
 		// A live lease (concurrent worker) or an already-settled cycle: idempotent no-op.
@@ -513,12 +534,14 @@ final class RenewalEngine {
 	 * Resolve the renewal outcome from the order's paid state.
 	 *
 	 * Paid -> CAS the cycle `pending -> billed`, link the order, advance the contract's
-	 * `next_payment_gmt` (the cycle's own period end) and `last_payment_gmt`, persist. Not
-	 * paid -> CAS the cycle `pending -> failed` (recording a reason) and leave the contract
-	 * schedule unchanged for a later dunning pass.
+	 * `next_payment_gmt` and `last_payment_gmt`, persist. The next schedule date is the
+	 * billed cycle's OWN `ends_at_gmt` - the period actually charged - so a reclaimed cycle
+	 * (whose stored period predates a freshly-computed next period) advances exactly one
+	 * cadence, never skipping a billing cycle. Not paid -> CAS the cycle `pending -> failed`
+	 * (recording a reason) and leave the contract schedule unchanged for a later dunning pass.
 	 *
 	 * @param Contract $contract      The contract being renewed.
-	 * @param Cycle    $cycle         The claimed pending cycle to settle.
+	 * @param Cycle    $cycle         The claimed (or reclaimed) pending cycle being settled.
 	 * @param WC_Order $renewal_order The charged renewal order.
 	 */
 	private function resolve_outcome( Contract $contract, Cycle $cycle, WC_Order $renewal_order ): void {
@@ -542,6 +565,7 @@ final class RenewalEngine {
 			$cycle->set_claimed_until_gmt( null );
 			$this->contracts->update_cycle( $cycle );
 
+			// Advance to the period actually billed (this cycle's end), not a recomputed one.
 			$contract->set_next_payment_gmt( $cycle->get_ends_at_gmt() );
 			$contract->set_last_payment_gmt( $now );
 			$contract->set_last_attempt_gmt( $now );

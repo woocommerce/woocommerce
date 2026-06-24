@@ -374,6 +374,32 @@ final class ContractRepository {
 	}
 
 	/**
+	 * Atomically reclaim a stalled `pending` cycle whose crash-recovery lease has expired,
+	 * extending the lease to `$new_lease_until_gmt`. The compare-and-set that makes reclaim
+	 * race-safe: the predicate keys on `claimed_until <= $now_gmt`, so among concurrent
+	 * workers only the first to run the UPDATE matches a row - it writes the future lease,
+	 * after which every other worker's `<=` predicate matches zero rows.
+	 *
+	 * @param int    $cycle_id             The stalled cycle's id.
+	 * @param string $now_gmt              The current moment (GMT string); the lease-expiry cutoff.
+	 * @param string $new_lease_until_gmt  The extended lease expiry to stamp (GMT string).
+	 * @return bool True when this caller won the reclaim (exactly one row updated); false
+	 *              when another worker already reclaimed it (zero rows matched).
+	 */
+	public function reclaim_expired_cycle( int $cycle_id, string $now_gmt, string $new_lease_until_gmt ): bool {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET claimed_until = %s, date_updated_gmt = %s WHERE id = %d AND status = %s AND claimed_until IS NOT NULL AND claimed_until <= %s", $new_lease_until_gmt, gmdate( 'Y-m-d H:i:s' ), $cycle_id, CycleStatus::PENDING, $now_gmt ) );
+
+		// Exactly one row matched means this caller won the CAS; 0 means another worker
+		// already extended the lease (or the cycle settled) between read and write.
+		return false !== $result && 1 === $wpdb->rows_affected;
+	}
+
+	/**
 	 * The chain's most-recent cycle (highest `sequence_no` in `(contract_id, kind)`),
 	 * or null when the chain is empty. Snapshots are decoded into typed value objects
 	 * only for an in-flight cycle (see {@see self::hydrate_cycle()}).

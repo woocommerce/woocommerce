@@ -108,20 +108,25 @@ final class RenewalDispatcher {
 	 * Enqueue the recurring scan action when one is not already scheduled.
 	 *
 	 * Call once Action Scheduler is available (e.g. on `init`), since it uses the `as_*`
-	 * functions. Idempotent: it no-ops when a recurring action is already scheduled, so
-	 * repeated boots do not stack rows.
+	 * functions. Idempotent on two levels: the `is_scheduled()` fast-path skips the common
+	 * already-scheduled case, and the enqueue passes `$unique = true` so Action Scheduler
+	 * dedups at the store level even when two concurrent first-boots both pass the fast-path.
 	 */
 	public static function ensure_scheduled(): void {
 		if ( self::is_scheduled() ) {
 			return;
 		}
 
+		// $unique = true: Action Scheduler dedups at the store level, so two concurrent
+		// first-boots that both pass the is_scheduled() fast-path cannot create two
+		// perpetual recurring actions - only one is enqueued.
 		as_schedule_recurring_action(
 			time() + self::INTERVAL_SECONDS,
 			self::INTERVAL_SECONDS,
 			self::HOOK,
 			array(),
-			self::GROUP
+			self::GROUP,
+			true
 		);
 	}
 
