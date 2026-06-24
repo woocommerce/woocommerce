@@ -1228,7 +1228,9 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			// is matched by id+variation. Keyless add delta: +1. Pre-add qty: 2.
 			// Expected total: 2+1=3. Server returns the variation line at 3.
 			// Since serverTotal (3) === expectedTotal (3) → suppress.
-			const colorRedVariation = [ { attribute: 'Color', value: 'Red' } ] as CartItem[ 'variation' ];
+			const colorRedVariation = [
+				{ attribute: 'Color', value: 'Red' },
+			] as CartItem[ 'variation' ];
 			mockBatchFetchReturning(
 				makeServerCart( [
 					{

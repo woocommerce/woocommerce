@@ -604,7 +604,10 @@ const { actions } = store< Store >(
 				// was undone" notice keeps firing for steppers.
 				type ProductCapture = {
 					id: number;
-					variation?: CartVariationItem[] | SelectedAttributes[] | undefined;
+					variation?:
+						| CartVariationItem[]
+						| SelectedAttributes[]
+						| undefined;
 					preAddTotal: number;
 					deltaTotal: number;
 					preExistingKeys: string[];
@@ -758,7 +761,10 @@ const { actions } = store< Store >(
 					// this map, so the "your change was undone" notice keeps firing.
 					type BatchProductCapture = {
 						id: number;
-						variation?: CartVariationItem[] | SelectedAttributes[] | undefined;
+						variation?:
+							| CartVariationItem[]
+							| SelectedAttributes[]
+							| undefined;
 						preAddTotal: number;
 						deltaTotal: number;
 						preExistingKeys: string[];
@@ -840,7 +846,10 @@ const { actions } = store< Store >(
 							// here, before applyOptimistic mutates the cart. On
 							// subsequent encounters of the same product, add only
 							// the posted delta to the running deltaTotal.
-							const token = productToken( item.id, item.variation );
+							const token = productToken(
+								item.id,
+								item.variation
+							);
 							if ( ! batchProductCaptures.has( token ) ) {
 								const preExistingKeys: string[] = [];
 								let preAddTotal = 0;
@@ -854,7 +863,9 @@ const { actions } = store< Store >(
 									) {
 										preAddTotal += cartLine.quantity;
 										if ( cartLine.key ) {
-											preExistingKeys.push( cartLine.key );
+											preExistingKeys.push(
+												cartLine.key
+											);
 										}
 									}
 								}
