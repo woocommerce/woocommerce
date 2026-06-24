@@ -46864,12 +46864,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
 
 		-
-			message: '#^Parameter \#1 \$task_list of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Task\:\:__construct\(\) expects Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\TaskList\|null, Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\TaskList given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
 			message: '#^Parameter \#2 \$product of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:maybe_set_has_product_transient\(\) expects Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -46883,12 +46877,6 @@ parameters:
 
 		-
 			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:maybe_set_has_product_transient\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
-			message: '#^Parameter \$task_list of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:__construct\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\TaskList\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
