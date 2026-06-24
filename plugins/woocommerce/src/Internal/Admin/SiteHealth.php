@@ -8,7 +8,9 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Admin_Notices;
 use WC_Admin_Status;
@@ -680,9 +682,9 @@ class SiteHealth {
 			return false;
 		}
 
-		$product_count = wp_count_posts( 'product' );
+		$product_count = ProductUtil::get_counts_for_type( 'product' );
 
-		return $product_count->publish > 0 && 0 === wc_get_shipping_method_count();
+		return ( $product_count[ ProductStatus::PUBLISH ] ?? 0 ) > 0 && 0 === wc_get_shipping_method_count();
 	}
 
 	/**

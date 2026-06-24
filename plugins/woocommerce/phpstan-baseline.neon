@@ -70880,12 +70880,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/ProductCollectionData.php
 
 		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
-			count: 1
-			path: src/StoreApi/Routes/V1/ProductCollectionData.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\ProductCollectionData\:\:get_route_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1

@@ -4,8 +4,9 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Enums\ProductStatus;
-use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 /**
  * Products Task
@@ -339,10 +340,8 @@ class Products extends Task {
 	public function maybe_redirect_to_add_product_tasklist() {
 		$screen = get_current_screen();
 		if ( $screen && 'edit' === $screen->base && 'product' === $screen->post_type ) {
-			// wp_count_posts is cached.
-			$counts = (array) wp_count_posts( $screen->post_type );
-			unset( $counts['auto-draft'] );
-			$count = array_sum( $counts );
+			$counts = ProductUtil::get_counts_for_type( 'product' );
+			$count  = array_sum( $counts ) - ( $counts[ ProductStatus::AUTO_DRAFT ] ?? 0 );
 			if ( $count > 0 ) {
 				return;
 			}

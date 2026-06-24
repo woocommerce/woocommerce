@@ -21,6 +21,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersSta
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\{ OrderUtil, PluginUtil };
 
 defined( 'ABSPATH' ) || exit;
@@ -851,7 +852,7 @@ class WC_Install {
 		return is_null( get_option( 'woocommerce_version', null ) )
 			|| (
 				-1 === wc_get_page_id( 'shop' )
-				&& 0 === array_sum( (array) wp_count_posts( 'product' ) )
+				&& 0 === array_sum( ProductUtil::get_counts_for_type( 'product' ) )
 			);
 	}
 
