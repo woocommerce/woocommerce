@@ -24,6 +24,9 @@ permissions:
 concurrency:
   group: release-wporg-svn
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   validate-release:
     runs-on: ubuntu-latest

@@ -17,6 +17,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\I18nUtil;
@@ -277,10 +278,12 @@ class Controller extends WC_REST_Products_V2_Controller {
 	 * Get the images for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product Product instance.
-	 * @param string                          $image_size Image size to use for the src. Default 'full'.
 	 * @return array
 	 */
-	protected function get_images( $product, $image_size = 'full' ) {
+	protected function get_images( $product ) {
+		$image_size = $this->request['image_size'] ?? 'full';
+		$image_size = is_string( $image_size ) && '' !== $image_size ? sanitize_text_field( $image_size ) : 'full';
+
 		$images         = array();
 		$attachment_ids = array();
 
@@ -1454,7 +1457,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
+		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', WeightUnit::KILOGRAM ) );
 		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
 		$schema               = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',

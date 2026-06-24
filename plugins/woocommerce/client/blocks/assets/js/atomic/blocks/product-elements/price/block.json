@@ -50,7 +50,6 @@
 		"woocommerce/product-template",
 		"core/post-template"
 	],
-	"viewScriptModule": "product-price",
 	"style": "file:../product-price.css",
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

@@ -31,6 +31,9 @@ Object.defineProperty( window, 'location', {
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
+	useDispatch: jest.fn().mockReturnValue( {
+		createNotice: jest.fn(),
+	} ),
 	useSelect: jest.fn().mockImplementation( ( callback ) =>
 		callback( () => ( {
 			getInstalledPlugins: () => [],

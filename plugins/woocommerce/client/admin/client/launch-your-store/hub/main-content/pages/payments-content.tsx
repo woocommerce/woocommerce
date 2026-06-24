@@ -103,7 +103,7 @@ const InstallWooPaymentsStep = ( {
 		window.wcSettings?.admin?.woocommerce_payments_nox_profile
 			?.business_country_code || null;
 
-	let buttonText = __( 'Install', 'woocommerce' );
+	let buttonText = __< string >( 'Install', 'woocommerce' );
 
 	if ( isPluginInstalled && ! isPluginInstalling ) {
 		buttonText = __( 'Enable', 'woocommerce' );
