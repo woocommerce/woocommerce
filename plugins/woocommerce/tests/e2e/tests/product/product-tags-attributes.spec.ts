@@ -214,8 +214,11 @@ test.describe(
 		test( 'should see and sort tags page with all the products', async ( {
 			page,
 		} ) => {
-			await page.goto( 'shop/?orderby=date' );
-			await page.locator( `text=${ product1.name }` ).click();
+			// Navigate straight to the product by slug. Going through the
+			// shared, date-sorted shop listing is parallel-fragile: other
+			// workers' products can push this one onto a later page where the
+			// click would fail.
+			await page.goto( `product/${ product1Slug }` );
 			await page.getByRole( 'link', { name: productTagName1 } ).click();
 			await expect(
 				page.getByRole( 'heading', { name: productTagName1 } )

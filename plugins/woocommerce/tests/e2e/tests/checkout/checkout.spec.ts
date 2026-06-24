@@ -22,7 +22,10 @@ import {
 import { logInFromMyAccount } from '../../utils/login';
 import { setGatewayEnabled } from '../../utils/payment-gateways';
 import { updateIfNeeded, resetValue } from '../../utils/settings';
-import { assertTaxCalculationEnabled } from '../../utils/taxes';
+import {
+	assertTaxCalculationEnabled,
+	withScopedTaxClass,
+} from '../../utils/taxes';
 
 //todo handle other countries and states than the default (US, CA) when filling the addresses
 
@@ -233,45 +236,9 @@ const test = baseTest.extend( {
 		// } );
 	},
 	tax: async ( { restApi }, use ) => {
-		await assertTaxCalculationEnabled( restApi );
-		// Tax calculation is enabled globally in site setup with no standard
-		// rate, so the shared baseline is tax-free. Create a dedicated tax class
-		// and a rate scoped to it; only the product assigned to this class (this
-		// spec's, see the `product` fixture) is taxed, so concurrent workers are
-		// never affected.
-		const className = `Checkout Spec ${ faker.string.alphanumeric( 8 ) }`;
-		const { data: taxClass } = await restApi.post(
-			`${ WC_API_PATH }/taxes/classes`,
-			{ name: className }
-		);
-
-		let rate;
-		try {
-			( { data: rate } = await restApi.post( `${ WC_API_PATH }/taxes`, {
-				country: 'US',
-				state: '*',
-				cities: '*',
-				postcodes: '*',
-				rate: '25',
-				name: 'Checkout Spec Tax',
-				shipping: false,
-				class: taxClass.slug,
-			} ) );
-			await use( { ...rate, taxClassSlug: taxClass.slug } );
-		} finally {
-			if ( rate ) {
-				await restApi
-					.delete( `${ WC_API_PATH }/taxes/${ rate.id }`, {
-						force: true,
-					} )
-					.catch( console.error );
-			}
-			await restApi
-				.delete( `${ WC_API_PATH }/taxes/classes/${ taxClass.slug }`, {
-					force: true,
-				} )
-				.catch( console.error );
-		}
+		// The `product` fixture is assigned to this scoped class so only this
+		// spec's product is taxed; concurrent workers are unaffected.
+		await withScopedTaxClass( restApi, 'Checkout Spec', use );
 	},
 	customer: async ( { restApi }, use ) => {
 		const customerData = getFakeCustomer();

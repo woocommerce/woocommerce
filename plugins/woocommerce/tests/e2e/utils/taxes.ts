@@ -1,9 +1,19 @@
 /**
  * External dependencies
  */
+import { faker } from '@faker-js/faker';
 import { ApiClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 const CALC_TAXES_PATH = `${ WC_API_PATH }/settings/general/woocommerce_calc_taxes`;
+
+/**
+ * A created tax rate plus the slug of the dedicated tax class it is scoped to.
+ */
+export type ScopedTaxRate = {
+	id: number;
+	rate: string;
+	taxClassSlug: string;
+};
 
 /**
  * Assert that `woocommerce_calc_taxes` is `yes` and throw if it is not.
@@ -27,37 +37,65 @@ export async function assertTaxCalculationEnabled(
 }
 
 /**
- * Enable or disable tax calculation (`woocommerce_calc_taxes`) and return its
- * previous enabled state.
+ * Provide a tax rate scoped to its own dedicated tax class, then clean both up.
  *
- * The call is idempotent — it only issues a PUT when the current state differs
- * from the target — so passing the returned previous value back restores the
- * setting without an extra read.
+ * Tax calculation is enabled globally in site setup with no standard rate, so
+ * the shared baseline is tax-free. This creates a uniquely-named tax class and a
+ * 25% rate scoped to it; only products assigned to that class are taxed, so
+ * concurrent workers are never affected. The class and rate are always removed
+ * afterwards, even if the test body throws.
  *
- * Tax calculation is on by default in the shared site setup. Specs that need
- * to temporarily disable it (e.g. serial checkout/settings-tax specs) can
- * capture and restore the prior state:
+ * Use it from a Playwright fixture, passing the fixture's own `use` callback:
  *
- *     const wasEnabled = await setTaxCalculationEnabled( restApi, false );
- *     // ...test...
- *     await setTaxCalculationEnabled( restApi, wasEnabled );
+ *     tax: async ( { restApi }, use ) => {
+ *         await withScopedTaxClass( restApi, 'Cart Spec', use );
+ *     },
  *
  * @param restApi The REST API client (the `restApi` fixture).
- * @param enabled The target tax-calculation state.
- * @return The setting's enabled state before this call.
+ * @param label   Human-readable prefix for the tax class and rate names.
+ * @param use     Callback receiving the created rate and its tax class slug.
  */
-export async function setTaxCalculationEnabled(
+export async function withScopedTaxClass(
 	restApi: ApiClient,
-	enabled: boolean
-): Promise< boolean > {
-	const response = await restApi.get< { value: string } >( CALC_TAXES_PATH );
-	const wasEnabled = response.data.value === 'yes';
+	label: string,
+	use: ( tax: ScopedTaxRate ) => Promise< void >
+): Promise< void > {
+	await assertTaxCalculationEnabled( restApi );
 
-	if ( wasEnabled !== enabled ) {
-		await restApi.put( CALC_TAXES_PATH, {
-			value: enabled ? 'yes' : 'no',
-		} );
+	const className = `${ label } ${ faker.string.alphanumeric( 8 ) }`;
+	const { data: taxClass } = await restApi.post< { slug: string } >(
+		`${ WC_API_PATH }/taxes/classes`,
+		{ name: className }
+	);
+
+	let rate: { id: number; rate: string } | undefined;
+	try {
+		( { data: rate } = await restApi.post< { id: number; rate: string } >(
+			`${ WC_API_PATH }/taxes`,
+			{
+				country: 'US',
+				state: '*',
+				cities: '*',
+				postcodes: '*',
+				rate: '25',
+				name: `${ label } Tax`,
+				shipping: false,
+				class: taxClass.slug,
+			}
+		) );
+		await use( { ...rate, taxClassSlug: taxClass.slug } );
+	} finally {
+		if ( rate ) {
+			await restApi
+				.delete( `${ WC_API_PATH }/taxes/${ rate.id }`, {
+					force: true,
+				} )
+				.catch( console.error );
+		}
+		await restApi
+			.delete( `${ WC_API_PATH }/taxes/classes/${ taxClass.slug }`, {
+				force: true,
+			} )
+			.catch( console.error );
 	}
-
-	return wasEnabled;
 }

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { faker } from '@faker-js/faker';
 import {
 	addAProductToCart,
 	WC_API_PATH,
@@ -16,7 +15,7 @@ import { getFakeProduct } from '../../utils/data';
 import { createClassicCartPage, CLASSIC_CART_PAGE } from '../../utils/pages';
 import { checkCartContent } from '../../utils/cart';
 import { setGatewayEnabled } from '../../utils/payment-gateways';
-import { assertTaxCalculationEnabled } from '../../utils/taxes';
+import { withScopedTaxClass } from '../../utils/taxes';
 
 const cartPages = [ { name: 'blocks cart', slug: 'cart' }, CLASSIC_CART_PAGE ];
 
@@ -71,45 +70,9 @@ const test = baseTest.extend( {
 		}
 	},
 	tax: async ( { restApi }, use ) => {
-		await assertTaxCalculationEnabled( restApi );
-		// Tax calculation is enabled globally in site setup with no standard
-		// rate, so the shared baseline is tax-free. Create a dedicated tax class
-		// and a rate scoped to it; only products assigned to this class (this
-		// spec's, see the `products` fixture) are taxed, so concurrent workers
-		// are never affected.
-		const className = `Cart Spec ${ faker.string.alphanumeric( 8 ) }`;
-		const { data: taxClass } = await restApi.post(
-			`${ WC_API_PATH }/taxes/classes`,
-			{ name: className }
-		);
-
-		let rate;
-		try {
-			( { data: rate } = await restApi.post( `${ WC_API_PATH }/taxes`, {
-				country: 'US',
-				state: '*',
-				cities: '*',
-				postcodes: '*',
-				rate: '25',
-				name: 'Cart Spec Tax',
-				shipping: false,
-				class: taxClass.slug,
-			} ) );
-			await use( { ...rate, taxClassSlug: taxClass.slug } );
-		} finally {
-			if ( rate ) {
-				await restApi
-					.delete( `${ WC_API_PATH }/taxes/${ rate.id }`, {
-						force: true,
-					} )
-					.catch( console.error );
-			}
-			await restApi
-				.delete( `${ WC_API_PATH }/taxes/classes/${ taxClass.slug }`, {
-					force: true,
-				} )
-				.catch( console.error );
-		}
+		// Products in the `products` fixture are assigned to this scoped class so
+		// only this spec's products are taxed; concurrent workers are unaffected.
+		await withScopedTaxClass( restApi, 'Cart Spec', use );
 	},
 } );
 /* endregion */
