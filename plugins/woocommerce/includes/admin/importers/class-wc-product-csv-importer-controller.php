@@ -506,6 +506,8 @@ class WC_Product_CSV_Importer_Controller {
 		$sample       = current( $importer->get_raw_data() );
 
 		if ( empty( $sample ) ) {
+			$this->delete_uploaded_import_file();
+
 			$this->add_error(
 				__( 'The file is empty or using a different encoding than UTF-8, please try again with a new file.', 'woocommerce' ),
 				array(
@@ -520,6 +522,33 @@ class WC_Product_CSV_Importer_Controller {
 		}
 
 		include_once __DIR__ . '/views/html-csv-import-mapping.php';
+	}
+
+	/**
+	 * Delete an uploaded import file when it fails validation after upload.
+	 */
+	protected function delete_uploaded_import_file(): void {
+		$csv_import_util       = wc_get_container()->get( Automattic\WooCommerce\Internal\Admin\ImportExport\CSVUploadHelper::class );
+		$import_dir            = $csv_import_util->get_import_dir( false );
+		$normalized_file       = wp_normalize_path( $this->file );
+		$normalized_import_dir = trailingslashit( wp_normalize_path( $import_dir ) );
+
+		if ( 0 !== strpos( $normalized_file, $normalized_import_dir ) ) {
+			return;
+		}
+
+		$upload_dir          = wp_get_upload_dir();
+		$normalized_base_dir = trailingslashit( wp_normalize_path( $upload_dir['basedir'] ) );
+		$relative_file       = substr( $normalized_file, strlen( $normalized_base_dir ) );
+		$file_url            = trailingslashit( $upload_dir['baseurl'] ) . str_replace( '%2F', '/', rawurlencode( $relative_file ) );
+		$attachment_id       = attachment_url_to_postid( $file_url );
+
+		if ( $attachment_id ) {
+			wp_delete_attachment( $attachment_id, true );
+			return;
+		}
+
+		wp_delete_file( $this->file );
 	}
 
 	/**

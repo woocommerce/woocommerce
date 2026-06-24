@@ -15,10 +15,10 @@ const filePathOverride = path.resolve(
 	'tests/e2e/test-data/sample_products_override.csv'
 );
 const csvFilePathOctetStream = path.resolve(
-	'tests/e2e-pw/test-data/sample_products_with_0x1F_byte.csv'
+	'tests/e2e/test-data/sample_products_with_0x1F_byte.csv'
 );
 const notValidCsvFilePath = path.resolve(
-	'tests/e2e-pw/test-data/not_valid_csv_file.csv'
+	'tests/e2e/test-data/not_valid_csv_file.csv'
 );
 
 const productIds: number[] = [];
