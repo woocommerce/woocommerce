@@ -85,8 +85,6 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 	 * @testdox Product archive queries set queried_object to the Shop page.
 	 */
 	public function test_shop_page_sets_queried_object_on_product_archive(): void {
-		switch_theme( 'twentytwentyfour' );
-
 		$shop_page_id         = wp_insert_post(
 			array(
 				'post_type'   => 'page',
@@ -97,7 +95,15 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 		$default_shop_page_id = get_option( 'woocommerce_shop_page_id' );
 		update_option( 'woocommerce_shop_page_id', $shop_page_id );
 
-		$query = new WP_Query();
+		$query                       = new WP_Query(
+			array(
+				'post_type' => 'product',
+			)
+		);
+		$query->is_post_type_archive = true;
+		$query->is_archive           = true;
+		$query->is_tax               = false;
+		$query->is_home              = false;
 
 		global $wp_the_query, $wp_query;
 		$previous_wp_the_query = $wp_the_query;
@@ -105,13 +111,7 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 		$wp_the_query          = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wp_query              = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		$query->query_vars['post_type'] = 'product';
-		$query->is_post_type_archive    = true;
-		$query->is_archive              = true;
-		$query->is_tax                  = false;
-		$query->is_home                 = false;
-
-		WC()->query->pre_get_posts( $query );
+		$query->get_posts();
 
 		$this->assert_shop_page_queried_object( $query, $shop_page_id );
 
