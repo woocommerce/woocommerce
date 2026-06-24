@@ -72,7 +72,6 @@
 			]
 		},
 		"custom": {
-			"spacing-increment": "1",
 			"spacing-unit": "10"
 		},
 		"layout": {
@@ -87,37 +86,37 @@
 			"spacingSizes": [
 				{
 					"name": "2X-Small",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 1 * 1px), calc(var(--wp--custom--spacing-increment) * 2.42 * 1vw))",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 1 * 1px), calc(var(--wp--custom--spacing-unit) * 1 * 1px * 100vw / var(--wp--style--global--wide-size)))",
 					"slug": "20"
 				},
 				{
 					"name": "X-Small",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 2 * 1px), calc(var(--wp--custom--spacing-increment) * 3.38 * 1vw))",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 2 * 1px), calc(var(--wp--custom--spacing-unit) * 2 * 1px * 100vw / var(--wp--style--global--wide-size)))",
 					"slug": "30"
 				},
 				{
 					"name": "Small",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 3 * 1px), calc(var(--wp--custom--spacing-increment) * 4.35 * 1vw))",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 3 * 1px), calc(var(--wp--custom--spacing-unit) * 3 * 1px * 100vw / var(--wp--style--global--wide-size)))",
 					"slug": "40"
 				},
 				{
 					"name": "Regular",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 5 * 1px), calc(var(--wp--custom--spacing-increment) * 4.83 * 1vw))",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 5 * 1px), calc(var(--wp--custom--spacing-unit) * 5 * 1px * 100vw / var(--wp--style--global--wide-size)))",
 					"slug": "50"
 				},
 				{
 					"name": "Large",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 7 * 1px), calc(var(--wp--custom--spacing-increment) * 7.25 * 1vw))",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 7 * 1px), calc(var(--wp--custom--spacing-unit) * 7 * 1px * 100vw / var(--wp--style--global--wide-size)))",
 					"slug": "60"
 				},
 				{
 					"name": "Extra Large",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 9 * 1px), calc(var(--wp--custom--spacing-increment) * 12.08 * 1vw))",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 9 * 1px), calc(var(--wp--custom--spacing-unit) * 9 * 1px * 100vw / var(--wp--style--global--wide-size)))",
 					"slug": "70"
 				},
 				{
 					"name": "2X Large",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 14 * 1px), calc(var(--wp--custom--spacing-increment) * 16.91 * 1vw))",
+                    "size": "min(calc(var(--wp--custom--spacing-unit) * 14 * 1px), calc(var(--wp--custom--spacing-unit) * 14 * 1px * 100vw / var(--wp--style--global--wide-size)))",
 					"slug": "80"
 				}
 			]
