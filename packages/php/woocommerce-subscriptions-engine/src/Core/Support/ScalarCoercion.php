@@ -1,15 +1,9 @@
 <?php
 /**
- * ScalarCoercion - shared helpers for coercing untyped (mixed) values read from
- * decoded storage rows or caller-supplied argument maps into the scalar types the
- * entities and value objects declare.
- *
- * Hydration boundaries receive mixed data (JSON-decoded columns, $wpdb string
- * rows, loosely-typed $args). A blind (int)/(string) cast on such a value is
- * unsafe - an array or object would warn or fatal. These helpers guard first,
- * then cast, returning a documented default when the value is not coercible.
- *
- * Lives in the WordPress-free Core zone.
+ * ScalarCoercion - shared helpers coercing untyped (mixed) values from storage rows
+ * or argument maps into declared scalar types. Each guards before casting (a blind
+ * cast on an array/object would warn or fatal) and returns a default when the value
+ * is not coercible. WordPress-free Core zone.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Support
  */
@@ -45,11 +39,9 @@ trait ScalarCoercion {
 	}
 
 	/**
-	 * Coerce a value to an int, falling back to a default when it is not an integer.
-	 *
-	 * Only genuine integers and integer-valued strings are accepted; fractional or
-	 * exponent forms (`1.5`, `1e2`) are rejected rather than silently truncated, so
-	 * a corrupted identifier or counter falls back instead of changing value.
+	 * Coerce a value to an int, falling back when it is not an integer. Only genuine
+	 * integers and integer-valued strings pass; fractional/exponent forms (`1.5`,
+	 * `1e2`) fall back rather than being silently truncated.
 	 *
 	 * @param mixed $value    The raw value.
 	 * @param int   $fallback Returned when $value is not an integer.
@@ -80,5 +72,17 @@ trait ScalarCoercion {
 		$validated = is_string( $value ) ? filter_var( $value, FILTER_VALIDATE_INT ) : false;
 
 		return false !== $validated ? $validated : null;
+	}
+
+	/**
+	 * Coerce a value to a float, falling back when it is not numeric. The
+	 * money/decimal coercion: numbers and numeric strings (a DECIMAL column reads
+	 * back as one) pass; a non-numeric value falls back rather than casting to 0.0.
+	 *
+	 * @param mixed $value    The raw value.
+	 * @param float $fallback Returned when $value is not numeric.
+	 */
+	private static function coerce_float( $value, float $fallback = 0.0 ): float {
+		return is_numeric( $value ) ? (float) $value : $fallback;
 	}
 }
