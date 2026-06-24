@@ -3,7 +3,6 @@
  */
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from '@wordpress/element';
-import { speak } from '@wordpress/a11y';
 import {
 	DndContext,
 	KeyboardSensor,
@@ -31,16 +30,12 @@ import {
 	SortableListDefaultHandle,
 	SortableListHandle,
 	SortableListItem,
-	moveSortableItem,
 } from '../';
+import { moveSortableItem } from '../utils';
 
 const mockPointerDown = jest.fn();
 let mockDndContextProps: Record< string, any > = {};
 let mockSortableContextProps: Record< string, any > = {};
-
-jest.mock( '@wordpress/a11y', () => ( {
-	speak: jest.fn(),
-} ) );
 
 jest.mock( '@dnd-kit/core', () => ( {
 	DndContext: jest.fn( ( props ) => {
@@ -98,7 +93,9 @@ const items: TestItem[] = [
 ];
 
 const renderSortableList = (
-	props: Partial< React.ComponentProps< typeof SortableList< TestItem > > > = {}
+	props: Partial<
+		React.ComponentProps< typeof SortableList< TestItem > >
+	> = {}
 ) => {
 	const onChange = jest.fn();
 
@@ -139,7 +136,9 @@ describe( 'SortableList', () => {
 		renderSortableList();
 
 		expect( screen.getByText( 'Credit card' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Direct bank transfer' ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( 'Direct bank transfer' )
+		).toBeInTheDocument();
 		expect( screen.getByText( 'Cash on delivery' ) ).toBeInTheDocument();
 	} );
 
@@ -158,7 +157,12 @@ describe( 'SortableList', () => {
 			items[ 2 ],
 			items[ 0 ],
 		] );
-		expect( speak ).toHaveBeenCalledWith( 'Credit card dropped.', 'assertive' );
+		expect(
+			mockDndContextProps.accessibility.announcements.onDragEnd( {
+				active: { id: 'card' },
+				over: { id: 'cod' },
+			} )
+		).toBe( 'Credit card dropped.' );
 	} );
 
 	it( 'does not call onChange when dropped on itself', () => {
@@ -262,7 +266,9 @@ describe( 'SortableList', () => {
 			</SortableList>
 		);
 
-		fireEvent.pointerDown( screen.getByRole( 'button', { name: 'Drag to reorder' } ) );
+		fireEvent.pointerDown(
+			screen.getByRole( 'button', { name: 'Drag to reorder' } )
+		);
 
 		expect( mockPointerDown ).toHaveBeenCalled();
 	} );
@@ -322,9 +328,35 @@ describe( 'SortableList', () => {
 
 		expect( onDragStart ).toHaveBeenCalledWith( startEvent );
 		expect( onDragEnd ).toHaveBeenCalledWith( endEvent );
-		expect( speak ).toHaveBeenCalledWith(
-			'Credit card picked up.',
-			'assertive'
+		expect(
+			mockDndContextProps.accessibility.announcements.onDragStart( {
+				active: { id: 'card' },
+			} )
+		).toBe( 'Credit card picked up.' );
+	} );
+
+	it( 'overrides dnd-kit default announcements with localized strings', () => {
+		renderSortableList();
+
+		const { announcements } = mockDndContextProps.accessibility;
+
+		// Supplying announcements is what suppresses dnd-kit's built-in
+		// English defaults, preventing duplicate screen reader announcements.
+		expect( announcements ).toBeDefined();
+		expect(
+			announcements.onDragOver( {
+				active: { id: 'card' },
+				over: { id: 'bank' },
+			} )
+		).toBe( 'Credit card moved near Direct bank transfer.' );
+		expect(
+			announcements.onDragOver( {
+				active: { id: 'card' },
+				over: { id: 'card' },
+			} )
+		).toBeUndefined();
+		expect( announcements.onDragCancel( { active: { id: 'card' } } ) ).toBe(
+			'Credit card was dropped. Reordering cancelled.'
 		);
 	} );
 

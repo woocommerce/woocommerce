@@ -4,11 +4,9 @@
 import clsx from 'clsx';
 import { __, sprintf } from '@wordpress/i18n';
 import { createElement, useMemo, useState } from '@wordpress/element';
-import { speak } from '@wordpress/a11y';
 import {
-	type DragCancelEvent,
+	type Announcements,
 	type DragEndEvent,
-	type DragOverEvent,
 	type DragStartEvent,
 	type UniqueIdentifier,
 	closestCenter,
@@ -112,42 +110,10 @@ export const SortableList = < T, >( {
 	const handleDragStart = ( event: DragStartEvent ) => {
 		setActiveId( event.active.id );
 		onDragStart( event );
-		speak(
-			sprintf(
-				/* translators: %s: Sortable item label. */
-				__( '%s picked up.', 'woocommerce' ),
-				getLabel( event.active.id )
-			),
-			'assertive'
-		);
 	};
 
-	const handleDragOver = ( event: DragOverEvent ) => {
-		if ( ! event.over || event.active.id === event.over.id ) {
-			return;
-		}
-
-		speak(
-			sprintf(
-				/* translators: %1$s: Sortable item label. %2$s: Target item label. */
-				__( '%1$s moved near %2$s.', 'woocommerce' ),
-				getLabel( event.active.id ),
-				getLabel( event.over.id )
-			),
-			'polite'
-		);
-	};
-
-	const handleDragCancel = ( event: DragCancelEvent ) => {
+	const handleDragCancel = () => {
 		setActiveId( null );
-		speak(
-			sprintf(
-				/* translators: %s: Sortable item label. */
-				__( '%s was dropped. Reordering cancelled.', 'woocommerce' ),
-				getLabel( event.active.id )
-			),
-			'assertive'
-		);
 	};
 
 	const handleDragEnd = ( event: DragEndEvent ) => {
@@ -171,14 +137,49 @@ export const SortableList = < T, >( {
 		}
 
 		onChange( nextItems );
-		speak(
-			sprintf(
+	};
+
+	// Provide localized announcements through dnd-kit's own live region.
+	// Supplying these overrides dnd-kit's built-in English defaults, which would
+	// otherwise be announced in parallel and double up for screen reader users.
+	const announcements: Announcements = {
+		onDragStart( { active } ) {
+			return sprintf(
+				/* translators: %s: Sortable item label. */
+				__( '%s picked up.', 'woocommerce' ),
+				getLabel( active.id )
+			);
+		},
+		onDragOver( { active, over } ) {
+			if ( ! over || active.id === over.id ) {
+				return undefined;
+			}
+
+			return sprintf(
+				/* translators: %1$s: Sortable item label. %2$s: Target item label. */
+				__( '%1$s moved near %2$s.', 'woocommerce' ),
+				getLabel( active.id ),
+				getLabel( over.id )
+			);
+		},
+		onDragEnd( { active, over } ) {
+			if ( ! over || active.id === over.id ) {
+				return undefined;
+			}
+
+			return sprintf(
 				/* translators: %s: Sortable item label. */
 				__( '%s dropped.', 'woocommerce' ),
-				getLabel( event.active.id )
-			),
-			'assertive'
-		);
+				getLabel( active.id )
+			);
+		},
+		onDragCancel( { active } ) {
+			return sprintf(
+				/* translators: %s: Sortable item label. */
+				__( '%s was dropped. Reordering cancelled.', 'woocommerce' ),
+				getLabel( active.id )
+			);
+		},
 	};
 
 	const strategy =
@@ -210,6 +211,7 @@ export const SortableList = < T, >( {
 			<SortableListContext.Provider value={ { disabledIds } }>
 				<DndContext
 					accessibility={ {
+						announcements,
 						screenReaderInstructions: {
 							draggable: instructions,
 						},
@@ -218,7 +220,6 @@ export const SortableList = < T, >( {
 					modifiers={ modifiers }
 					onDragCancel={ handleDragCancel }
 					onDragEnd={ handleDragEnd }
-					onDragOver={ handleDragOver }
 					onDragStart={ handleDragStart }
 					sensors={ sensors }
 				>
