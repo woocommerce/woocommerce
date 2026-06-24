@@ -7150,7 +7150,7 @@ img.ui-datepicker-trigger {
 						box-shadow: 0 4px 0 0 #fff;
 
 						a {
-							color: #777;
+							color: #646970; // Gray 50 (WCAG AA contrast)
 						}
 					}
 
@@ -7168,7 +7168,7 @@ img.ui-datepicker-trigger {
 								margin: 0 10px 0 0;
 								background: transparent;
 								border: 0;
-								color: #777;
+								color: #646970; // Gray 50 (WCAG AA contrast)
 								text-align: center;
 								box-shadow: none;
 
