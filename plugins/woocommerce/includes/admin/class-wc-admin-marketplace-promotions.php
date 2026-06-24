@@ -154,6 +154,8 @@ class WC_Admin_Marketplace_Promotions {
 	 * The Orders list is a classic admin page, so the card is mounted via a
 	 * wp-admin-scripts entry (see ShippingLabelBanner for the same pattern).
 	 *
+	 * @since 11.0.0
+	 *
 	 * @return void
 	 */
 	public static function maybe_enqueue_orders_promo_card() {
@@ -172,6 +174,8 @@ class WC_Admin_Marketplace_Promotions {
 	 * server-side and passed to the script via a data attribute, so no additional data is
 	 * shared with WooCommerce.com.
 	 *
+	 * @since 11.0.0
+	 *
 	 * @param string $order_type The order type being listed.
 	 * @param string $which      The tablenav location: 'top' or 'bottom'.
 	 * @return void
@@ -189,6 +193,8 @@ class WC_Admin_Marketplace_Promotions {
 	 *
 	 * Hooked on the WordPress core manage_posts_extra_tablenav, which fires for every post
 	 * type, so this is gated to the shop_order list screen.
+	 *
+	 * @since 11.0.0
 	 *
 	 * @param string $which The tablenav location: 'top' or 'bottom'.
 	 * @return void
@@ -339,23 +345,61 @@ class WC_Admin_Marketplace_Promotions {
 		}
 
 		$decoded_rules = json_decode( wp_json_encode( $rules ) );
-		if ( ! is_array( $decoded_rules ) || empty( $decoded_rules ) ) {
+		if ( ! self::rules_are_valid( $decoded_rules ) ) {
 			return false;
-		}
-
-		foreach ( $decoded_rules as $decoded_rule ) {
-			if ( ! is_object( $decoded_rule ) || empty( $decoded_rule->type ) ) {
-				return false;
-			}
-
-			$processor = \Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\GetRuleProcessor::get_processor( $decoded_rule->type );
-			if ( ! $processor->validate( $decoded_rule ) ) {
-				return false;
-			}
 		}
 
 		return ( new \Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator() )
 			->evaluate( $decoded_rules );
+	}
+
+	/**
+	 * Recursively validate a rule (or array of rules) before evaluation.
+	 *
+	 * Validation must cover nested `not`/`or` operands: an empty or malformed operand
+	 * evaluates to false, and `not` would then flip that to true, showing the promo on a
+	 * malformed payload. Unknown rule types resolve to a fail processor (which validates
+	 * but always fails), so they are rejected here too. Anything not well-formed fails closed.
+	 *
+	 * @param mixed $rules A decoded rule object or array of rule objects.
+	 * @return bool
+	 */
+	private static function rules_are_valid( $rules ): bool {
+		if ( is_object( $rules ) ) {
+			$rules = array( $rules );
+		}
+
+		if ( ! is_array( $rules ) || 0 === count( $rules ) ) {
+			return false;
+		}
+
+		foreach ( $rules as $rule ) {
+			if ( ! is_object( $rule ) || empty( $rule->type ) ) {
+				return false;
+			}
+
+			$processor = \Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\GetRuleProcessor::get_processor( $rule->type );
+
+			// Unknown types resolve to the fail processor; reject them so `not` cannot flip them to true.
+			if ( $processor instanceof \Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\FailRuleProcessor
+				&& 'fail' !== $rule->type ) {
+				return false;
+			}
+
+			if ( ! $processor->validate( $rule ) ) {
+				return false;
+			}
+
+			if ( 'not' === $rule->type && ! self::rules_are_valid( $rule->operand ?? null ) ) {
+				return false;
+			}
+
+			if ( 'or' === $rule->type && ! self::rules_are_valid( $rule->operands ?? null ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**

@@ -33,12 +33,22 @@ class WC_Admin_Marketplace_Promotions_Test extends WC_Unit_Test_Case {
 	);
 
 	/**
+	 * Callback registered on option_active_plugins by tests that need a plugin to read as active.
+	 *
+	 * @var callable|null
+	 */
+	private $active_plugins_filter = null;
+
+	/**
 	 * Clean up state between tests.
 	 */
 	public function tearDown(): void {
 		delete_transient( WC_Admin_Marketplace_Promotions::TRANSIENT_NAME );
 		delete_option( 'woocommerce_allow_tracking' );
-		remove_all_filters( 'option_active_plugins' );
+		if ( null !== $this->active_plugins_filter ) {
+			remove_filter( 'option_active_plugins', $this->active_plugins_filter );
+			$this->active_plugins_filter = null;
+		}
 		$this->reset_orders_promo_cache();
 
 		parent::tearDown();
@@ -89,7 +99,12 @@ class WC_Admin_Marketplace_Promotions_Test extends WC_Unit_Test_Case {
 	 * @param array $local_rules The local_rules to attach.
 	 * @param array $pages       The pages the promo targets.
 	 */
-	private function set_rule_based_promo( array $local_rules, array $pages = array( array( 'page' => 'wc-admin', 'path' => '/' ) ) ): void {
+	private function set_rule_based_promo( array $local_rules, array $pages = array(
+		array(
+			'page' => 'wc-admin',
+			'path' => '/',
+		),
+	) ): void {
 		set_transient(
 			WC_Admin_Marketplace_Promotions::TRANSIENT_NAME,
 			array(
@@ -163,12 +178,11 @@ class WC_Admin_Marketplace_Promotions_Test extends WC_Unit_Test_Case {
 		// Force WooCommerce itself to read as an active plugin, then include its slug in the
 		// exclusion list. This proves not[ or[ plugins_activated... ] ] suppresses when ANY
 		// listed plugin is active (the encoding that a single plugins_activated list would get wrong).
-		add_filter(
-			'option_active_plugins',
-			static function (): array {
-				return array( 'woocommerce/woocommerce.php' );
-			}
-		);
+		// The callback is stored so tearDown removes only it, not unrelated filters on the hook.
+		$this->active_plugins_filter = static function (): array {
+			return array( 'woocommerce/woocommerce.php' );
+		};
+		add_filter( 'option_active_plugins', $this->active_plugins_filter );
 
 		$rules    = $this->pilot_rules();
 		$rules[3] = $this->add_on_exclusion_rule( array( 'woocommerce' ) );
@@ -215,6 +229,61 @@ class WC_Admin_Marketplace_Promotions_Test extends WC_Unit_Test_Case {
 	public function test_malformed_rule_based_promotions_fail_closed(): void {
 		// order_count with no value/operation is invalid and must not pass.
 		$this->set_rule_based_promo( array( array( 'type' => 'order_count' ) ) );
+
+		$this->assertSame( array(), WC_Admin_Marketplace_Promotions::get_active_promotions() );
+	}
+
+	/**
+	 * @testdox A `not` rule with an empty operand fails closed (does not flip to true).
+	 */
+	public function test_not_rule_with_empty_operand_fails_closed(): void {
+		// not( [] ) would evaluate to true (RuleEvaluator returns false for an empty rule set,
+		// which `not` flips), so the validator must reject the empty operand first.
+		$this->set_rule_based_promo(
+			array(
+				array(
+					'type'    => 'not',
+					'operand' => array(),
+				),
+			)
+		);
+
+		$this->assertSame( array(), WC_Admin_Marketplace_Promotions::get_active_promotions() );
+	}
+
+	/**
+	 * @testdox A `not` rule wrapping an unknown rule type fails closed.
+	 */
+	public function test_not_rule_with_unknown_nested_type_fails_closed(): void {
+		// An unknown type resolves to the fail processor; without rejecting it, `not` would
+		// flip its failure into a pass.
+		$this->set_rule_based_promo(
+			array(
+				array(
+					'type'    => 'not',
+					'operand' => array( 'type' => 'totally_unknown_rule_type' ),
+				),
+			)
+		);
+
+		$this->assertSame( array(), WC_Admin_Marketplace_Promotions::get_active_promotions() );
+	}
+
+	/**
+	 * @testdox A `not` rule wrapping an empty `or` fails closed.
+	 */
+	public function test_not_rule_with_empty_nested_or_fails_closed(): void {
+		$this->set_rule_based_promo(
+			array(
+				array(
+					'type'    => 'not',
+					'operand' => array(
+						'type'     => 'or',
+						'operands' => array(),
+					),
+				),
+			)
+		);
 
 		$this->assertSame( array(), WC_Admin_Marketplace_Promotions::get_active_promotions() );
 	}
