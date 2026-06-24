@@ -294,7 +294,7 @@ describe( 'Express payment methods', () => {
 				);
 			} );
 
-			it( 'should clear a focused express payment iframe when the window loses focus', async () => {
+			it( 'should keep a focused express payment iframe when the window loses focus', async () => {
 				render( <ExpressPaymentMethods /> );
 
 				const paymentMethodItem = document.querySelector(
@@ -319,7 +319,7 @@ describe( 'Express payment methods', () => {
 				} );
 
 				await waitFor( () =>
-					expect( paymentMethodItem ).not.toHaveClass(
+					expect( paymentMethodItem ).toHaveClass(
 						'wc-block-components-express-payment__event-button--focused'
 					)
 				);

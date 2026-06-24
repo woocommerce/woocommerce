@@ -73,6 +73,9 @@ const ExpressPaymentMethods = () => {
 	const previousActivePaymentMethod = useRef( activePaymentMethod );
 	const previousPaymentMethodData = useRef( paymentMethodData );
 	const expressPaymentWrapperRef = useRef< HTMLElement | null >( null );
+	const focusSyncIntervalRef = useRef< ReturnType<
+		typeof setInterval
+	> | null >( null );
 	const [ focusedExpressPaymentMethod, setFocusedExpressPaymentMethod ] =
 		useState< string | null >( null );
 
@@ -133,38 +136,71 @@ const ExpressPaymentMethods = () => {
 		]
 	);
 
-	const syncFocusedExpressPaymentMethod = useCallback( () => {
+	const stopFocusSyncInterval = useCallback( () => {
+		if ( focusSyncIntervalRef.current ) {
+			clearInterval( focusSyncIntervalRef.current );
+			focusSyncIntervalRef.current = null;
+		}
+	}, [] );
+
+	const getFocusedExpressPaymentMethod = useCallback( () => {
 		const wrapper = expressPaymentWrapperRef.current;
 		const activeElement = wrapper?.ownerDocument.activeElement;
 
 		if ( ! wrapper || ! ( activeElement instanceof Element ) ) {
-			setFocusedExpressPaymentMethod( null );
-			return;
+			return {
+				focusedPaymentMethod: null,
+				isExpressPaymentIframe: false,
+			};
 		}
 
 		const item = activeElement.closest( '[id^="express-payment-method-"]' );
+		const isExpressPaymentIframe =
+			activeElement instanceof HTMLIFrameElement &&
+			wrapper.contains( activeElement );
 
 		if ( item && wrapper.contains( item ) ) {
-			setFocusedExpressPaymentMethod(
-				item.id.replace( 'express-payment-method-', '' )
-			);
+			return {
+				focusedPaymentMethod: item.id.replace(
+					'express-payment-method-',
+					''
+				),
+				isExpressPaymentIframe,
+			};
+		}
+
+		return {
+			focusedPaymentMethod: null,
+			isExpressPaymentIframe: false,
+		};
+	}, [] );
+
+	const syncFocusedExpressPaymentMethod = useCallback( () => {
+		const { focusedPaymentMethod, isExpressPaymentIframe } =
+			getFocusedExpressPaymentMethod();
+
+		setFocusedExpressPaymentMethod( focusedPaymentMethod );
+
+		if ( ! isExpressPaymentIframe ) {
+			stopFocusSyncInterval();
 			return;
 		}
 
-		setFocusedExpressPaymentMethod( null );
-	}, [] );
+		if ( ! focusSyncIntervalRef.current ) {
+			focusSyncIntervalRef.current = setInterval( () => {
+				const {
+					focusedPaymentMethod: nextFocusedPaymentMethod,
+					isExpressPaymentIframe: nextIsExpressPaymentIframe,
+				} = getFocusedExpressPaymentMethod();
 
-	const clearFocusedExpressPaymentIframe = useCallback( () => {
-		const wrapper = expressPaymentWrapperRef.current;
-		const activeElement = wrapper?.ownerDocument.activeElement;
+				setFocusedExpressPaymentMethod( nextFocusedPaymentMethod );
 
-		if (
-			activeElement instanceof HTMLIFrameElement &&
-			wrapper?.contains( activeElement )
-		) {
-			setFocusedExpressPaymentMethod( null );
+				if ( ! nextIsExpressPaymentIframe ) {
+					stopFocusSyncInterval();
+				}
+			}, 100 );
 		}
-	}, [] );
+	}, [ getFocusedExpressPaymentMethod, stopFocusSyncInterval ] );
 
 	useEffect( () => {
 		const wrapper = expressPaymentWrapperRef.current;
@@ -181,22 +217,20 @@ const ExpressPaymentMethods = () => {
 
 		doc.addEventListener( 'focusin', syncFocusedExpressPaymentMethod );
 		doc.addEventListener( 'focusout', syncSoon );
-		win?.addEventListener( 'blur', clearFocusedExpressPaymentIframe );
+		win?.addEventListener( 'blur', syncFocusedExpressPaymentMethod );
 		win?.addEventListener( 'focus', syncSoon );
 
 		return () => {
+			stopFocusSyncInterval();
 			doc.removeEventListener(
 				'focusin',
 				syncFocusedExpressPaymentMethod
 			);
 			doc.removeEventListener( 'focusout', syncSoon );
-			win?.removeEventListener(
-				'blur',
-				clearFocusedExpressPaymentIframe
-			);
+			win?.removeEventListener( 'blur', syncFocusedExpressPaymentMethod );
 			win?.removeEventListener( 'focus', syncSoon );
 		};
-	}, [ clearFocusedExpressPaymentIframe, syncFocusedExpressPaymentMethod ] );
+	}, [ stopFocusSyncInterval, syncFocusedExpressPaymentMethod ] );
 
 	/**
 	 * Calling setExpressPaymentError directly is deprecated.
