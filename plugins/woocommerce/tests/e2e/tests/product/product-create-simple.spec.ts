@@ -9,6 +9,11 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { test as baseTest, expect, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { checkCartContent } from '../../utils/cart';
+import {
+	getFakeAttribute,
+	getFakeCategory,
+	getFakeTag,
+} from '../../utils/data';
 
 const productData = {
 	virtual: {
@@ -62,10 +67,13 @@ const test = baseTest.extend( {
 	category: async ( { restApi }, use ) => {
 		let category = {};
 
+		// Use a random term so parallel workers don't collide on the same
+		// `Date.now()` category name (which fails with a 400 term_exists).
 		await restApi
-			.post( `${ WC_API_PATH }/products/categories`, {
-				name: `cat_${ Date.now() }`,
-			} )
+			.post(
+				`${ WC_API_PATH }/products/categories`,
+				getFakeCategory( { extraRandomTerm: true } )
+			)
 			.then( ( response ) => {
 				category = response.data;
 			} );
@@ -85,6 +93,11 @@ for ( const productType of Object.keys( productData ) ) {
 		`can create a simple ${ productType } product`,
 		{ tag: [ tags.GUTENBERG ] },
 		async ( { page, category, product } ) => {
+			// Unique global tags per test, so parallel workers don't share the
+			// same product_tag terms.
+			const productTag1 = getFakeTag().name;
+			const productTag2 = getFakeTag().name;
+
 			await test.step( 'add new product', async () => {
 				await page.goto( 'wp-admin/post-new.php?post_type=product' );
 			} );
@@ -126,7 +139,7 @@ for ( const productType of Object.keys( productData ) ) {
 
 			await test.step( 'add product attributes', async () => {
 				// Product attributes
-				const attributeName = 'attribute name';
+				const attributeName = getFakeAttribute().name;
 				await page
 					.locator( '#woocommerce-product-data' )
 					.getByRole( 'link', { name: 'Attributes' } )
@@ -175,17 +188,20 @@ for ( const productType of Object.keys( productData ) ) {
 				// Tags
 				await page
 					.getByLabel( 'Add new tag' )
-					.fill( 'e2e,test products' );
+					.fill( `${ productTag1 },${ productTag2 }` );
 				await page
 					.getByRole( 'button', { name: 'Add', exact: true } )
 					.click();
+
 				await expect(
-					page.locator( '#tagsdiv-product_tag li' ).getByText( 'e2e' )
+					page.getByRole( 'button', {
+						name: `Remove term: ${ productTag1 }`,
+					} )
 				).toBeVisible();
 				await expect(
-					page
-						.locator( '#tagsdiv-product_tag li' )
-						.getByText( 'test products' )
+					page.getByRole( 'button', {
+						name: `Remove term: ${ productTag2 }`,
+					} )
 				).toBeVisible();
 			} );
 
@@ -314,11 +330,11 @@ for ( const productType of Object.keys( productData ) ) {
 
 				// Verify tags
 				await expect(
-					page.getByRole( 'link', { name: 'e2e', exact: true } )
+					page.getByRole( 'link', { name: productTag1, exact: true } )
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'link', {
-						name: 'test products',
+						name: productTag2,
 						exact: true,
 					} )
 				).toBeVisible();
@@ -329,8 +345,11 @@ for ( const productType of Object.keys( productData ) ) {
 				await page.context().clearCookies();
 				await page.reload();
 
+				// Use an exact match so the related-products block buttons
+				// ("Add to cart: <name>") that may show products created by
+				// parallel workers don't collide with the single product's button.
 				await page
-					.getByRole( 'button', { name: 'Add to cart' } )
+					.getByRole( 'button', { name: 'Add to cart', exact: true } )
 					.click();
 				await page.getByRole( 'link', { name: 'View cart' } ).click();
 

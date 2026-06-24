@@ -6133,12 +6133,6 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-product-attribute-inner.php
 
 		-
-			message: '#^Variable \$attribute might not be defined\.$#'
-			identifier: variable.undefined
-			count: 5
-			path: includes/admin/meta-boxes/views/html-product-attribute.php
-
-		-
 			message: '#^Variable \$metabox_class might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -8527,31 +8521,13 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot access property \$name on WP_Term\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot access property \$parent on WP_Error\|WP_Term\|null\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot access property \$slug on WP_Term\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot access property \$term_id on WP_Error\|WP_Term\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot access property \$term_id on WP_Term\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: includes/class-wc-ajax.php
@@ -54825,7 +54801,6 @@ parameters:
 			count: 1
 			path: src/Blocks/QueryFilters.php
 
-
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Registry\\Container\:\:register\(\) has no return type specified\.$#'
 			identifier: missingType.return
@@ -70876,12 +70851,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property object\:\:\$min_price\.$#'
 			identifier: property.notFound
-			count: 1
-			path: src/StoreApi/Routes/V1/ProductCollectionData.php
-
-		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
 			count: 1
 			path: src/StoreApi/Routes/V1/ProductCollectionData.php
 
