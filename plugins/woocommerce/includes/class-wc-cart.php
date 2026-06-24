@@ -1489,7 +1489,14 @@ class WC_Cart extends WC_Legacy_Cart {
 			} else {
 				$cart_item_key = $cart_id;
 
-				// Add item after merging with $cart_item_data - hook to allow plugins to modify cart item.
+				/**
+				 * Filter a cart item immediately before it is added to the cart, after merging with $cart_item_data.
+				 *
+				 * @since 2.0.0
+				 *
+				 * @param array  $cart_item     The cart item data being added.
+				 * @param string $cart_item_key The cart item key.
+				 */
 				$cart_item = apply_filters(
 					'woocommerce_add_cart_item',
 					array_merge(
