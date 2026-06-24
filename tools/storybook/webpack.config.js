@@ -27,7 +27,10 @@ const getPackageFilePath = ( packageName, relativeFilePath ) =>
 		path.dirname(
 			require.resolve( packageName, {
 				paths: [
-					path.resolve( __dirname, '../../node_modules/.pnpm/node_modules' ),
+					path.resolve(
+						__dirname,
+						'../../node_modules/.pnpm/node_modules'
+					),
 				],
 			} )
 		),
@@ -78,14 +81,14 @@ module.exports = ( storybookConfig ) => {
 				{
 					from: path.resolve( __dirname, 'wordpress/css' ),
 					to: 'wordpress/css/[name][ext]',
-					},
-					{
-						from: getPackageFilePath(
-							'@wordpress/components',
-							'build-style/style.css'
-						),
-						to: 'wordpress/css/components.css',
-					},
+				},
+				{
+					from: getPackageFilePath(
+						'@wordpress/components',
+						'build-style/style.css'
+					),
+					to: 'wordpress/css/components.css',
+				},
 				{
 					from: path.resolve(
 						__dirname,
