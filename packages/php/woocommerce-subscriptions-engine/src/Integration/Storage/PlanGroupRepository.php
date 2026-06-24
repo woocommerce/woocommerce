@@ -40,7 +40,7 @@ final class PlanGroupRepository {
 				'name'             => $data['name'],
 				'merchant_code'    => $data['merchant_code'],
 				'options_display'  => wp_json_encode( $data['options_display'] ),
-				'app_id'           => $data['app_id'],
+				'extension_slug'   => $data['extension_slug'],
 				'date_created_gmt' => $now,
 				'date_updated_gmt' => $now,
 			)
