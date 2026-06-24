@@ -53,10 +53,11 @@ export const PRODUCT_X = {
 export const seedMetaLine = async (
 	page: Page,
 	productId: number,
-	marker = 'meta-line'
+	marker?: string
 ) => {
+	const markerValue = marker ?? 'meta-line';
 	await page.goto(
-		`/?add-to-cart=${ productId }&${ CART_LINE_IDENTITY_FLAG }=${ marker }`
+		`/?add-to-cart=${ productId }&${ CART_LINE_IDENTITY_FLAG }=${ markerValue }`
 	);
 };
 
