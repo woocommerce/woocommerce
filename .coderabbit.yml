@@ -22,7 +22,9 @@ reviews:
         this is a backwards-incompatible change because existing implementers fatal on load (e.g. WooCommerce 10.9.0 was
         reverted on WP Cloud after a required method was added to `FeedInterface`). Suggest a non-breaking alternative
         such as adding the method to a concrete class, introducing a new interface, or providing a default via an
-        abstract base class.
+        abstract base class. For renames or removals of existing public symbols, follow the deprecate-don't-rename
+        policy: keep the original symbol with an `@deprecated` notice pointing to the replacement, rather than changing
+        it in place.
         When making any changes to code that deletes or modifies orders/products/customer data, make sure that there are
         sufficient checks in place to prevent accidental data loss. As an example, if deleting a draft order, check that
         the order status is indeed `draft` or `checkout-draft`. Also think about whether race conditions could occur and
