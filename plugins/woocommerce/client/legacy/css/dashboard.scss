@@ -88,6 +88,7 @@ ul.woocommerce_stats {
 	.wc_status_list {
 		overflow: hidden;
 		margin: 0;
+		border-radius: 0 0 var(--wc-card-border-radius, 8px) var(--wc-card-border-radius, 8px);
 
 		li {
 			width: 50%;
