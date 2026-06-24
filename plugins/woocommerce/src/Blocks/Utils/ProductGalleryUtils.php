@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
 /**
@@ -55,9 +56,7 @@ class ProductGalleryUtils {
 			return array();
 		}
 
-		$product_media_items         = function_exists( 'wc_get_product_media_gallery_items' )
-			? \wc_get_product_media_gallery_items( $product )
-			: self::get_product_gallery_image_items( $product );
+		$product_media_items         = ProductMediaGallery::get_product_media_gallery_items_for_display( $product );
 		$product_variation_image_ids = self::get_product_variation_image_ids( $product );
 		$is_placeholder_only         = 1 === count( $product_media_items ) && 0 === (int) ( $product_media_items[0]['id'] ?? 0 );
 
@@ -276,9 +275,7 @@ class ProductGalleryUtils {
 	 */
 	private static function get_video_data( $media_item, $size, $product_title, $index ) {
 		$video_id  = isset( $media_item['id'] ) ? (int) $media_item['id'] : 0;
-		$poster_id = function_exists( 'wc_get_gallery_video_poster_id' )
-			? \wc_get_gallery_video_poster_id( $media_item )
-			: 0;
+		$poster_id = ProductMediaGallery::get_video_poster_id( $media_item );
 		$poster    = self::get_image_data( $poster_id, $size, $product_title, $index );
 		$video_src = $video_id ? wp_get_attachment_url( $video_id ) : ( $media_item['url'] ?? '' );
 		$mime_type = $video_id ? get_post_mime_type( $video_id ) : '';

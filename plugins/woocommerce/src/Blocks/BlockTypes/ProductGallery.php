@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 
 /**
  * ProductGallery class.
@@ -128,7 +129,9 @@ class ProductGallery extends AbstractBlock {
 		}
 
 		$media_items       = ProductGalleryUtils::get_all_media_items( $product );
-		$default_media_ids = ProductGalleryUtils::get_media_ids( wc_get_product_media_gallery_items( $product ) );
+		$default_media_ids = ProductGalleryUtils::get_media_ids(
+			ProductMediaGallery::get_product_media_gallery_items_for_display( $product )
+		);
 
 		$number_of_media        = count( $default_media_ids );
 		$classname              = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
