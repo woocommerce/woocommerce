@@ -4,7 +4,7 @@
  * Slug: purple/two-columns-highlights-sections
  * Categories: purple
  * Keywords: about, columns, media, featured
- * Description: A section with 2 columns of highlights
+ * Description: A section with 2 columns of highlights.
  * Viewport width: 1440
  */
 ?>

@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Collection of categories with images	
+ * Title: Collection of categories with images
  * Slug: purple/about-category-collection
  * Categories: purple
  * Keywords: about, text, image, media

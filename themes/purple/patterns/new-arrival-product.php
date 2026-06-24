@@ -3,7 +3,7 @@
  * Title: New arrival product
  * Slug: purple/new-arrival-product
  * Categories: purple
- * Keywords: woo-commerce, featured, featured-selling, call-to-action
+ * Keywords: woo-commerce, new arrival, product, featured
  * Description: A new arrival product with a featured image, title, description and button.
  * Viewport width: 1440
  */

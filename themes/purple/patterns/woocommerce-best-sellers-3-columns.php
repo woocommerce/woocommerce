@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Best Sellers Collection
+ * Title: Best sellers collection, 3 columns
  * Slug: purple/woocommerce-best-sellers-3-columns
  * Categories: woo-commerce, purple
  * Keywords: woo-commerce, products, best sellers, collection

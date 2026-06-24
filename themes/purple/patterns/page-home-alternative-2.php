@@ -13,5 +13,5 @@
 <!-- wp:pattern {"slug":"purple/two-columns-full-width-categories"} /-->
 <!-- wp:pattern {"slug":"purple/new-arrival-product"} /-->
 <!-- wp:pattern {"slug":"purple/woocommerce-featured-products"} /-->
-<!-- wp:pattern {"slug":"purple/left-aligned-image-description-button"} /-->
+<!-- wp:pattern {"slug":"purple/about-left-aligned-image-description-button"} /-->
 <!-- wp:pattern {"slug":"purple/store-features-four-columns-alternative"} /-->

@@ -3,7 +3,7 @@
  * Title: Categories on three columns
  * Slug: purple/categories-on-three-columns
  * Categories: woo-commerce, purple
- * Keywords: text, media, columns	
+ * Keywords: text, media, columns
  * Description: A section with three columns of categories with images.
  * Viewport width: 1440
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Left-aligned heading, text and button, image  on the right
+ * Title: Left-aligned heading, text and button, image on the right
  * Slug: purple/about-left-aligned-heading-text-and-button-right-image
  * Categories: about
  * Keywords: about, intro, heading, image, button
