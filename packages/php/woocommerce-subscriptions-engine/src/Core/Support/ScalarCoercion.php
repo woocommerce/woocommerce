@@ -81,4 +81,20 @@ trait ScalarCoercion {
 
 		return false !== $validated ? $validated : null;
 	}
+
+	/**
+	 * Coerce a value to a float, falling back to a default when it is not numeric.
+	 *
+	 * Accepts genuine numbers and numeric strings (including decimal and exponent
+	 * forms); a non-numeric value (an array, an object, a non-numeric string)
+	 * falls back rather than casting to an unintended 0.0 or warning. This is the
+	 * money/decimal coercion: a DECIMAL column reads back as a numeric string, and
+	 * a decimal-string amount is numeric, so both pass through.
+	 *
+	 * @param mixed $value    The raw value.
+	 * @param float $fallback Returned when $value is not numeric.
+	 */
+	private static function coerce_float( $value, float $fallback = 0.0 ): float {
+		return is_numeric( $value ) ? (float) $value : $fallback;
+	}
 }

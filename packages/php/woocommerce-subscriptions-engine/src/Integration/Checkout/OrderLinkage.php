@@ -59,13 +59,13 @@ final class OrderLinkage {
 	const RELATION_RENEWAL = 'renewal';
 
 	/**
-	 * A switch order - customer moved between plans (later milestone).
+	 * A switch order - customer moved between plans (a follow-up change).
 	 */
 	const RELATION_SWITCH = 'switch';
 
 	/**
 	 * A resubscribe order - customer restarted a previously-cancelled contract
-	 * (later milestone).
+	 * (a follow-up change).
 	 */
 	const RELATION_RESUBSCRIBE = 'resubscribe';
 

@@ -6,19 +6,24 @@
  * that contains a subscription product is paid: hand it the order plus the
  * selling {@see Plan} the customer chose, and it
  *
- *   1. builds a Core {@see Contract} from the order's customer / currency /
- *      payment / totals / line items / addresses,
- *   2. seeds the first renewal date from the plan's {@see BillingPolicy}
- *      (honouring a native trial),
- *   3. persists it via {@see ContractRepository::insert()}, and
+ *   1. builds the live Core {@see Contract} from the order's customer / currency /
+ *      payment / line items / addresses, with its live schedule and live totals,
+ *   2. builds the billing chain's first {@see Cycle} - cycle 1 IS the origin
+ *      period: its `order_id` is the origin order, its `count` is 1 (no-trial),
+ *      its period runs from the order's paid time to the first renewal date from
+ *      the plan's {@see BillingPolicy}, and it carries typed plan + items
+ *      snapshots; it is created directly `billed` since the origin order is paid,
+ *   3. persists the contract and cycle 1 together through the repository create
+ *      path, which freezes cycle 1's snapshots and records their ids on the
+ *      contract too (its latest/live references), and
  *   4. links order <-> contract in both directions (the contract row's
  *      `origin_order_id` column plus the order-side {@see OrderLinkage} meta).
  *
  * Returns the persisted Contract. Scheduling the first renewal is a separate
  * step the caller drives through {@see RenewalEngine::schedule()} - the factory
- * builds the contract and sets `next_payment_gmt`; it does not enqueue the
- * Action Scheduler row, so a caller can create a contract without arming the
- * money-path (e.g. a gateway-scheduled contract).
+ * builds the contract and the origin cycle and sets the live schedule; it does
+ * not enqueue the Action Scheduler row, so a caller can create a contract without
+ * arming the renewal path (e.g. a gateway-scheduled contract).
  *
  * Integration zone: WordPress-native. Reads a live `WC_Order`; the order never
  * crosses into Core - only the snapshot values pulled off it do.
@@ -36,7 +41,12 @@ use Throwable;
 use WC_Order;
 use WC_Order_Item_Product;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 
 defined( 'ABSPATH' ) || exit;
@@ -45,6 +55,8 @@ defined( 'ABSPATH' ) || exit;
  * Order -> contract factory.
  */
 final class ContractFactory {
+
+	use ScalarCoercion;
 
 	/**
 	 * The repository the factory persists through.
@@ -67,23 +79,28 @@ final class ContractFactory {
 	/**
 	 * Build, persist, and link a contract for `$order` on `$plan`.
 	 *
-	 * Recurring totals are seeded from the order's totals on the assumption
-	 * that the first cycle's price equals the recurring price; a caller that
-	 * already knows the recurring totals (sign-up fees, first-cycle discounts)
-	 * passes them via `$overrides`, which are merged over the order-derived
-	 * defaults before the contract is built.
+	 * Cycle 1's `expected_total` and the contract's live `billing_total` are seeded
+	 * from the order total on the assumption that the first recurring bill equals the
+	 * order's recurring price; a caller that already knows the recurring total
+	 * (sign-up fees, first-cycle discounts) passes it via `$overrides['billing_total']`.
+	 * The live discount / shipping / tax totals are seeded from the order and can be
+	 * overridden the same way. Other `$overrides` keys are merged over the
+	 * order-derived contract defaults.
 	 *
-	 * The first `next_payment_gmt` comes from
-	 * {@see BillingPolicy::compute_first_renewal_from()} anchored on the order's
-	 * paid time (`date_paid`, falling back to "now"), so a native trial delays
-	 * the first bill correctly. A caller can override it via
-	 * `$overrides['next_payment_gmt']`.
+	 * The first renewal date (the contract's live schedule) comes
+	 * from {@see BillingPolicy::compute_first_renewal_from()} anchored on the
+	 * order's paid time (`date_paid`, falling back to "now"), so a native trial
+	 * delays the first bill correctly. A caller can override it via
+	 * `$overrides['next_payment_gmt']`. Cycle 1's period runs from the paid time
+	 * to that first renewal date.
 	 *
 	 * @param WC_Order             $order     The paid checkout order.
 	 * @param Plan                 $plan      The selling plan the customer chose. Must be persisted (have an id).
-	 * @param array<string, mixed> $overrides Optional explicit values for any Contract::create() field.
+	 * @param array<string, mixed> $overrides Optional explicit values: any Contract::create() field, plus
+	 *                                        `billing_total` (cycle 1's expected_total) and
+	 *                                        `next_payment_gmt` (the first renewal date / cycle 1's period end).
 	 * @return Contract The persisted contract, with its id assigned.
-	 * @throws \RuntimeException If the plan or order has no id, or the insert fails.
+	 * @throws \RuntimeException If the plan or order has no id, or a write fails.
 	 */
 	public function create_from_order( WC_Order $order, Plan $plan, array $overrides = array() ): Contract {
 		$plan_id = $plan->get_id();
@@ -97,43 +114,121 @@ final class ContractFactory {
 			throw new \RuntimeException( 'ContractFactory::create_from_order(): the order must be persisted (have an id) before a contract can link to it.' );
 		}
 
-		$now       = gmdate( 'Y-m-d H:i:s' );
 		$paid_date = $order->get_date_paid();
 		$anchor    = null !== $paid_date
 			? new DateTimeImmutable( '@' . $paid_date->getTimestamp() )
-			: new DateTimeImmutable( $now, new DateTimeZone( 'UTC' ) );
+			: new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
 
-		$next_payment = $plan->get_billing_policy()
-			->compute_first_renewal_from( $anchor )
-			->format( 'Y-m-d H:i:s' );
+		// The origin period starts when the order was paid (falling back to now when
+		// the order has no paid date), so the recorded contract start and cycle 1's
+		// period start match the moment its first renewal is measured from rather
+		// than drifting to processing time.
+		$period_start = $anchor->format( 'Y-m-d H:i:s' );
 
-		$defaults = array(
+		// The first renewal date: cycle 1's period end and the contract's next-bill
+		// cache. An override replaces the computed value.
+		$next_payment = isset( $overrides['next_payment_gmt'] )
+			? self::coerce_string( $overrides['next_payment_gmt'] )
+			: $plan->get_billing_policy()->compute_first_renewal_from( $anchor )->format( 'Y-m-d H:i:s' );
+
+		$expected_total = isset( $overrides['billing_total'] ) ? self::coerce_string( $overrides['billing_total'] ) : (string) $order->get_total();
+		$currency       = $order->get_currency();
+
+		$contract_defaults = array(
 			'customer_id'          => $order->get_customer_id(),
-			'currency'             => $order->get_currency(),
+			'currency'             => $currency,
 			'selling_plan_id'      => $plan_id,
 			'origin_order_id'      => $order->get_id(),
 			'extension_slug'       => $plan->get_extension_slug(),
 			'payment_method'       => '' !== $order->get_payment_method() ? $order->get_payment_method() : null,
 			'payment_method_title' => '' !== $order->get_payment_method_title() ? $order->get_payment_method_title() : null,
 			'payment_token_id'     => $this->extract_payment_token_id( $order ),
-			'billing_total'        => (string) $order->get_total(),
+			'start_gmt'            => $period_start,
+			'next_payment_gmt'     => $next_payment,
+			// Live config: the recurring totals the contract bills going forward,
+			// seeded from the order and overridable by the caller.
+			'billing_total'        => $expected_total,
 			'discount_total'       => (string) $order->get_total_discount(),
 			'shipping_total'       => (string) $order->get_shipping_total(),
 			'tax_total'            => (string) $order->get_total_tax(),
-			'start_gmt'            => $now,
-			'next_payment_gmt'     => $next_payment,
 			'items'                => $this->map_items( $order ),
 			'addresses'            => $this->map_addresses( $order ),
 			'meta'                 => array(),
 		);
 
-		$contract = Contract::create( array_merge( $defaults, $overrides ) );
+		$contract = Contract::create( array_merge( $contract_defaults, $overrides ) );
 
-		$id = $this->contracts->insert( $contract );
+		$origin_cycle = $this->build_origin_cycle( $order, $plan, $period_start, $next_payment, $expected_total, $currency );
 
-		$this->tag_origin_order( $order, $id );
+		// The repository create path inserts the contract, freezes cycle 1's
+		// snapshots, records their ids on the contract too, and inserts cycle 1.
+		$contract_id = $this->contracts->insert_with_origin_cycle( $contract, $origin_cycle );
+
+		$this->tag_origin_order( $order, $contract_id );
 
 		return $contract;
+	}
+
+	/**
+	 * Build the billing chain's cycle 1 - the origin period - for the contract.
+	 *
+	 * Cycle 1 is the immutable signup record: it is created directly `billed`
+	 * because the origin order is already paid. Its core values are frozen at
+	 * construction - `count` 1, `order_id` the origin order, period running from the
+	 * paid time to the first renewal date, owner slug, and the typed plan + items
+	 * snapshots the repository freezes on insert. Its `contract_id` is a placeholder
+	 * (0) the repository stamps once the contract row has an id.
+	 *
+	 * @param WC_Order $order          The paid checkout order (the items / order-id source).
+	 * @param Plan     $plan           The selling plan (the plan-snapshot / owner source).
+	 * @param string   $starts_at      Cycle 1's period start (the signup time, GMT string).
+	 * @param string   $ends_at        Cycle 1's period end (the first renewal date, GMT string).
+	 * @param string   $expected_total The amount cycle 1 billed (decimal-safe string).
+	 * @param string   $currency       ISO-4217 currency code.
+	 * @return Cycle The unsaved signup cycle, created `billed`.
+	 */
+	private function build_origin_cycle( WC_Order $order, Plan $plan, string $starts_at, string $ends_at, string $expected_total, string $currency ): Cycle {
+		return Cycle::create(
+			array(
+				'contract_id'    => 0,
+				'sequence_no'    => 1,
+				'count'          => 1,
+				'status'         => CycleStatus::billed(),
+				'order_id'       => $order->get_id(),
+				'extension_slug' => $plan->get_extension_slug(),
+				'starts_at_gmt'  => $starts_at,
+				'ends_at_gmt'    => $ends_at,
+				'expected_total' => $expected_total,
+				'currency'       => $currency,
+				'plan_snapshot'  => $this->build_plan_snapshot( $plan ),
+				'items_snapshot' => $this->build_items_snapshot( $order ),
+			)
+		);
+	}
+
+	/**
+	 * Build the typed plan snapshot for the origin cycle.
+	 *
+	 * @param Plan $plan The plan whose terms to snapshot.
+	 */
+	private function build_plan_snapshot( Plan $plan ): PlanSnapshot {
+		return PlanSnapshot::from_array(
+			array(
+				'selling_plan_id' => $plan->get_id(),
+				'name'            => $plan->get_name(),
+				'category'        => $plan->get_category(),
+				'billing_policy'  => $plan->get_billing_policy()->to_array(),
+			)
+		);
+	}
+
+	/**
+	 * Build the typed items snapshot for the origin cycle from the order.
+	 *
+	 * @param WC_Order $order The order whose line items to snapshot.
+	 */
+	private function build_items_snapshot( WC_Order $order ): ItemsSnapshot {
+		return ItemsSnapshot::from_items( $this->map_items( $order ) );
 	}
 
 	/**
