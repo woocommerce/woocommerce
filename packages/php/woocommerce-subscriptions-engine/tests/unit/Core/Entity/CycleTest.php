@@ -63,6 +63,15 @@ class CycleTest extends TestCase {
 		$this->assertNull( $cycle->get_items_snapshot_id() );
 	}
 
+	public function test_expected_total_preserves_a_large_realistic_amount(): void {
+		// Money normalizes through a float (the same path as core's wc_format_decimal),
+		// which is exact within double precision - so a realistic large amount with full
+		// 8-decimal scale round-trips unchanged.
+		$cycle = $this->make_pending( array( 'expected_total' => '12345.12345678' ) );
+
+		$this->assertSame( '12345.12345678', $cycle->get_expected_total() );
+	}
+
 	public function test_create_can_build_a_billed_cycle_directly(): void {
 		// The checkout signup cycle is created directly billed (the origin order is paid).
 		$cycle = $this->make_pending( array( 'status' => CycleStatus::billed() ) );

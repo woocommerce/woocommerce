@@ -6,10 +6,11 @@
  * stores `total_amount` / `tax_amount` / `shipping_total_amount` /
  * `discount_total_amount` as `decimal(26,8)`. That is a storage scale (precision
  * headroom), not a display precision - amounts are still shown via
- * `wc_get_price_decimals()`. Normalizing on the way in keeps a value identical
- * across a save/load round-trip, so a freshly built entity and a reloaded one
- * compare equal. Shared by the cycle's `expected_total` and the contract's live
- * totals. WordPress-free Core zone.
+ * `wc_get_price_decimals()`. Normalizing on the way in keeps a value stable across
+ * a save/load round-trip - exact within double precision (~15 significant digits,
+ * which covers every realistic amount), the same float path as core's
+ * `wc_format_decimal()`. Shared by the cycle's `expected_total` and the contract's
+ * live totals. WordPress-free Core zone.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Support
  */
