@@ -24,7 +24,8 @@ $border-width: 1px;
 			// 150 is the minimum width of the button; allows for
 			min-width: 150px;
 
-			&:focus-within::after {
+			&:focus-within::after,
+			&.wc-block-components-express-payment__event-button--focused::after {
 				border: 2px solid $input-text-light;
 				border-radius: inherit;
 				content: "";
@@ -34,7 +35,8 @@ $border-width: 1px;
 				z-index: 1;
 			}
 
-			.has-dark-controls &:focus-within::after {
+			.has-dark-controls &:focus-within::after,
+			.has-dark-controls &.wc-block-components-express-payment__event-button--focused::after {
 				border-color: $input-text-dark;
 			}
 

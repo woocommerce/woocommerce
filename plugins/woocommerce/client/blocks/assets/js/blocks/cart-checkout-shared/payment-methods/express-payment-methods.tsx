@@ -11,10 +11,12 @@ import {
 	isValidElement,
 	useCallback,
 	useRef,
+	useState,
 } from '@wordpress/element';
 import { useEditorContext } from '@woocommerce/base-context';
 import deprecated from '@wordpress/deprecated';
 import { useDispatch, useSelect } from '@wordpress/data';
+import clsx from 'clsx';
 import {
 	ActionCreatorsOf,
 	ConfigOf,
@@ -69,6 +71,8 @@ const ExpressPaymentMethods = () => {
 	const paymentMethodInterface = usePaymentMethodInterface();
 	const previousActivePaymentMethod = useRef( activePaymentMethod );
 	const previousPaymentMethodData = useRef( paymentMethodData );
+	const [ focusedExpressPaymentMethod, setFocusedExpressPaymentMethod ] =
+		useState< string | null >( null );
 
 	/**
 	 * onExpressPaymentClick should be triggered when the express payment button is clicked.
@@ -127,6 +131,33 @@ const ExpressPaymentMethods = () => {
 		]
 	);
 
+	const onExpressPaymentFocus = useCallback(
+		( paymentMethodId: string ) => () => {
+			setFocusedExpressPaymentMethod( paymentMethodId );
+		},
+		[]
+	);
+
+	const onExpressPaymentBlur = useCallback(
+		( paymentMethodId: string ) =>
+			( event: React.FocusEvent< HTMLElement > ) => {
+				const { currentTarget } = event;
+
+				setTimeout( () => {
+					if (
+						! currentTarget.contains(
+							currentTarget.ownerDocument.activeElement
+						)
+					) {
+						setFocusedExpressPaymentMethod( ( current ) =>
+							current === paymentMethodId ? null : current
+						);
+					}
+				}, 0 );
+			},
+		[]
+	);
+
 	/**
 	 * Calling setExpressPaymentError directly is deprecated.
 	 */
@@ -181,6 +212,12 @@ const ExpressPaymentMethods = () => {
 					<ExpressPayItem
 						key={ id }
 						id={ `express-payment-method-${ id }` }
+						className={ clsx( {
+							'wc-block-components-express-payment__event-button--focused':
+								focusedExpressPaymentMethod === id,
+						} ) }
+						onFocus={ onExpressPaymentFocus( id ) }
+						onBlur={ onExpressPaymentBlur( id ) }
 					>
 						{ cloneElement( expressPaymentMethod, {
 							...paymentMethodInterface,

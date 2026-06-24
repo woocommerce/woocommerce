@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { paymentStore } from '@woocommerce/block-data';
 import {
 	registerExpressPaymentMethod,
@@ -34,7 +34,7 @@ jest.mock( '../express-payment/express-payment-context', () => {
 const mockExpressPaymentMethodNames = [ 'paypal', 'google-pay', 'apple-pay' ];
 
 const MockExpressButton = jest.fn( ( { name } ) => (
-	<div className="boo">{ `${ name } button` }</div>
+	<button className="boo">{ `${ name } button` }</button>
 ) );
 
 const MockEditorExpressButton = jest.fn( ( { name } ) => (
@@ -252,6 +252,31 @@ describe( 'Express payment methods', () => {
 						)
 					).toHaveProperty( 'tagName', 'LI' );
 				} );
+			} );
+
+			it( 'should add a focused class to the active express payment method item', async () => {
+				render( <ExpressPaymentMethods /> );
+
+				const button = screen.getByText( 'paypal button' );
+				const paymentMethodItem = document.querySelector(
+					'#express-payment-method-paypal'
+				);
+
+				fireEvent.focus( button );
+
+				await waitFor( () =>
+					expect( paymentMethodItem ).toHaveClass(
+						'wc-block-components-express-payment__event-button--focused'
+					)
+				);
+
+				fireEvent.blur( button );
+
+				await waitFor( () =>
+					expect( paymentMethodItem ).not.toHaveClass(
+						'wc-block-components-express-payment__event-button--focused'
+					)
+				);
 			} );
 		} );
 		describe( 'In an editor context', () => {
