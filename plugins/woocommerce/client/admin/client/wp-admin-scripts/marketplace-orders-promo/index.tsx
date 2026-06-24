@@ -15,6 +15,7 @@ import { createRoot } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import './style.scss';
 import PromoCard from '~/marketplace/components/promo-card/promo-card';
 import { Promotion } from '~/marketplace/components/promotions/types';
 

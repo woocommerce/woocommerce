@@ -31,6 +31,20 @@ class WC_Admin_Marketplace_Promotions {
 	public static string $locale;
 
 	/**
+	 * Request-scoped cache of the eligible Orders-screen promo card (or null).
+	 *
+	 * @var array|null
+	 */
+	private static $orders_promo_card = null;
+
+	/**
+	 * Whether the Orders-screen promo card has been resolved this request.
+	 *
+	 * @var bool
+	 */
+	private static $orders_promo_card_resolved = false;
+
+	/**
 	 * On all admin pages, try go get Marketplace promotions every day.
 	 * Shows notice and adds menu badge to WooCommerce Extensions item
 	 * if the promotions API requests them.
@@ -148,6 +162,7 @@ class WC_Admin_Marketplace_Promotions {
 		}
 
 		\Automattic\WooCommerce\Internal\Admin\WCAdminAssets::register_script( 'wp-admin-scripts', 'marketplace-orders-promo', true );
+		\Automattic\WooCommerce\Internal\Admin\WCAdminAssets::register_style( 'marketplace-orders-promo', 'style', array( 'wp-components' ) );
 	}
 
 	/**
@@ -199,7 +214,7 @@ class WC_Admin_Marketplace_Promotions {
 		}
 
 		printf(
-			'<div id="woocommerce-marketplace-orders-promo" class="woocommerce-marketplace-orders-promo" style="width:100%%;clear:both;" data-promotion="%s"></div>',
+			'<div id="woocommerce-marketplace-orders-promo" class="woocommerce-marketplace-orders-promo" data-promotion="%s"></div>',
 			esc_attr( wp_json_encode( $card ) )
 		);
 	}
@@ -226,9 +241,18 @@ class WC_Admin_Marketplace_Promotions {
 	 * Get the first active promo card that targets the Orders screen, together with the
 	 * store's order count for instrumentation. Returns null when none is eligible.
 	 *
+	 * Resolved once per request (the enqueue and render hooks both need it).
+	 *
+	 * @internal Not a supported extension point.
 	 * @return array|null
 	 */
 	public static function get_orders_promo_card() {
+		if ( self::$orders_promo_card_resolved ) {
+			return self::$orders_promo_card;
+		}
+
+		self::$orders_promo_card_resolved = true;
+
 		foreach ( self::get_active_promotions() as $promotion ) {
 			if ( ! is_array( $promotion ) || 'promo-card' !== ( $promotion['format'] ?? '' ) ) {
 				continue;
@@ -238,13 +262,14 @@ class WC_Admin_Marketplace_Promotions {
 				continue;
 			}
 
-			return array(
+			self::$orders_promo_card = array(
 				'promotion'   => $promotion,
 				'order_count' => ( new \Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\OrdersProvider() )->get_order_count(),
 			);
+			break;
 		}
 
-		return null;
+		return self::$orders_promo_card;
 	}
 
 	/**

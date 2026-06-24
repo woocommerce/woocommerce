@@ -39,8 +39,22 @@ class WC_Admin_Marketplace_Promotions_Test extends WC_Unit_Test_Case {
 		delete_transient( WC_Admin_Marketplace_Promotions::TRANSIENT_NAME );
 		delete_option( 'woocommerce_allow_tracking' );
 		remove_all_filters( 'option_active_plugins' );
+		$this->reset_orders_promo_cache();
 
 		parent::tearDown();
+	}
+
+	/**
+	 * Clear the request-scoped Orders promo card cache between tests.
+	 */
+	private function reset_orders_promo_cache(): void {
+		$resolved = new ReflectionProperty( WC_Admin_Marketplace_Promotions::class, 'orders_promo_card_resolved' );
+		$resolved->setAccessible( true );
+		$resolved->setValue( null, false );
+
+		$card = new ReflectionProperty( WC_Admin_Marketplace_Promotions::class, 'orders_promo_card' );
+		$card->setAccessible( true );
+		$card->setValue( null, null );
 	}
 
 	/**
