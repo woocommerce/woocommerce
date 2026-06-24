@@ -10,48 +10,52 @@
  */
 class WC_Validation_Test extends \WC_Unit_Test_Case {
 	/**
-	 * Data provider for test_is_phone()
+	 * Data provider for test_is_phone().
 	 */
-	public function data_provider_test_is_phone() {
-		$enPhones = array(
-			array( true, WC_Validation::is_phone( '+00 000 00 00 000' ) ),
-			array( true, WC_Validation::is_phone( '+00-000-00-00-000' ) ),
-			array( true, WC_Validation::is_phone( '(000) 00 00 000' ) ),
-			array( true, WC_Validation::is_phone( '+00.000.00.00.000' ) ),
-			array( false, WC_Validation::is_phone( '+00 aaa dd ee fff' ) ),
+	public function data_provider_test_is_phone(): array {
+		return array(
+			array( true, '+00 000 00 00 000', null ),
+			array( true, '+00-000-00-00-000', null ),
+			array( true, '(000) 00 00 000', null ),
+			array( true, '+00.000.00.00.000', null ),
+			array( false, '+00 aaa dd ee fff', null ),
 		);
+	}
 
-		// Check non-English phone numbers, This test check Persian (Farsi) phone numbers.
-		$faPhoneValidation = function ( $valid, $phone, $country ) {
+	/**
+	 * Test phone validation (default behaviour).
+	 *
+	 * @dataProvider data_provider_test_is_phone
+	 *
+	 * @param bool        $expected Expected result.
+	 * @param string      $phone    Phone number to validate.
+	 * @param string|null $country  Country code.
+	 */
+	public function test_is_phone( bool $expected, string $phone, ?string $country ): void {
+		$this->assertSame( $expected, WC_Validation::is_phone( $phone, $country ) );
+	}
+
+	/**
+	 * The woocommerce_validate_phone filter can override the validation result.
+	 */
+	public function test_is_phone_filter_can_override_result(): void {
+		$callback = function ( $valid, $phone, $country ) {
 			$phone = str_replace(
 				array( '۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹' ),
 				range( 0, 9 ),
 				$phone
 			);
-
-			return preg_match( '/^(0|0098|\+98)?(9\d{9}|[1-8]\d{9,10})$/', $phone );
+			return (bool) preg_match( '/^(0|0098|\+98)?(9\d{9}|[1-8]\d{9,10})$/', $phone );
 		};
-		add_filter( 'woocommerce_validate_phone', $faPhoneValidation, 10, 3 );
-		$faPhones = array(
-			array( true, WC_Validation::is_phone( '+۹۸۹۱۵۱۱۱۲۲۳۳' ) ),
-			array( true, WC_Validation::is_phone( '۰۰۹۸۹۱۵۱۱۱۲۲۳۳' ) ),
-			array( true, WC_Validation::is_phone( '۰۹۱۵۱۱۱۲۲۳۳' ) ),
-		);
-		remove_filter( 'woocommerce_validate_phone', $faPhoneValidation );
 
-		return array_merge( $enPhones, $faPhones );
-	}
-
-	/**
-	 * Test phone validation.
-	 *
-	 * @param mixed $assert Expected value.
-	 * @param mixed $values Actual value.
-	 *
-	 * @dataProvider data_provider_test_is_phone
-	 */
-	public function test_is_phone( $assert, $values ) {
-		$this->assertEquals( $assert, $values );
+		add_filter( 'woocommerce_validate_phone', $callback, 10, 3 );
+		try {
+			$this->assertTrue( WC_Validation::is_phone( '+۹۸۹۱۵۱۱۱۲۲۳۳' ) );
+			$this->assertTrue( WC_Validation::is_phone( '۰۰۹۸۹۱۵۱۱۱۲۲۳۳' ) );
+			$this->assertTrue( WC_Validation::is_phone( '۰۹۱۵۱۱۱۲۲۳۳' ) );
+		} finally {
+			remove_filter( 'woocommerce_validate_phone', $callback, 10 );
+		}
 	}
 
 	/**
