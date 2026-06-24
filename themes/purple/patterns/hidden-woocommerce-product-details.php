@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce Product Details
+ * Title: WooCommerce product details
  * Slug: purple/hidden-woocommerce-product-details
  * Inserter: no
  */

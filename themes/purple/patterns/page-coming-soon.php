@@ -11,7 +11,7 @@
  */
 ?>
 
-<!-- wp:columns {"lock":{"move":false,"remove":false},"metadata":{"name":"Coming Soon: Split layout with image","categories":["purple"],"patternName":"purple/coming-soon"},"align":"full","className":"is-style-default","style":{"spacing":{"blockGap":{"top":"0","left":"0"},"margin":{"top":"0","bottom":"0"}}}} -->
+<!-- wp:columns {"lock":{"move":false,"remove":false},"metadata":{"name":"Coming soon: Split layout with image","categories":["purple"],"patternName":"purple/coming-soon"},"align":"full","className":"is-style-default","style":{"spacing":{"blockGap":{"top":"0","left":"0"},"margin":{"top":"0","bottom":"0"}}}} -->
 <div class="wp-block-columns alignfull is-style-default" style="margin-top:0;margin-bottom:0"><!-- wp:column {"verticalAlignment":"center","className":"is-style-default","style":{"spacing":{"padding":{"right":"var:preset|spacing|50","left":"var:preset|spacing|50","top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"}}}} -->
 <div class="wp-block-column is-vertically-aligned-center is-style-default" style="padding-top:var(--wp--preset--spacing--50);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50);padding-left:var(--wp--preset--spacing--50)"><!-- wp:group {"layout":{"type":"constrained","contentSize":"520px","justifyContent":"left"}} -->
 <div class="wp-block-group"><!-- wp:heading {"level":1} -->

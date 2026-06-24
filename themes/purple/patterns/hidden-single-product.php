@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce Single Product
+ * Title: WooCommerce single product
  * Slug: purple/hidden-single-product
  * Inserter: no
  */

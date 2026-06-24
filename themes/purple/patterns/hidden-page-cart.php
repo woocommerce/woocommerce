@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce Page Cart
+ * Title: WooCommerce page cart
  * Slug: purple/hidden-page-cart
  * Inserter: no
  */

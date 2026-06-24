@@ -10,7 +10,7 @@
  */
 ?>
 
-<!-- wp:group {"metadata":{"name":"List of posts with left aligned heading","categories":["purple"],"patternName":"purple/posts-three-columns-left-aligned-heading"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50","left":"var:preset|spacing|50","right":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":"List of posts with left aligned heading","categories":["purple"],"description":"A list of posts in 3 columns with a left-aligned section heading.","patternName":"purple/posts-three-columns-left-aligned-heading"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50","left":"var:preset|spacing|50","right":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull" style="padding-top:var(--wp--preset--spacing--50);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50);padding-left:var(--wp--preset--spacing--50)"><!-- wp:group {"align":"wide","layout":{"type":"default"}} -->
 <div class="wp-block-group alignwide"><!-- wp:heading {"align":"wide","style":{"spacing":{"margin":{"bottom":"0","top":"0"}},"typography":{"textAlign":"left"}}} -->
 <h2 class="wp-block-heading has-text-align-left alignwide" style="margin-top:0;margin-bottom:0"><?php esc_html_e( 'More from the journal', 'purple' ); ?></h2>

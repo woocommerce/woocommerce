@@ -20,7 +20,7 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"categories":["woocommerce"],"patternName":"purple/stockists"},"align":"full","style":{"spacing":{"margin":{"top":"var:preset|spacing|60"}}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"categories":["purple"],"patternName":"purple/stockists"},"align":"full","style":{"spacing":{"margin":{"top":"var:preset|spacing|60"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull" style="margin-top:var(--wp--preset--spacing--60)"><!-- wp:columns {"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|80"}}} -->
 <div class="wp-block-column"><!-- wp:group {"metadata":{"name":"Europe"},"layout":{"type":"default"}} -->
