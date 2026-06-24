@@ -30,6 +30,122 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->customer->set_is_vat_exempt( false );
 		WC()->session->set( 'wc_notices', null );
+		remove_all_filters( 'woocommerce_get_cart_contents' );
+		remove_all_filters( 'woocommerce_cache_cart_contents' );
+	}
+
+	/**
+	 * @testdox woocommerce_get_cart_contents runs once per calculate_totals(), not on every read.
+	 */
+	public function test_get_cart_contents_filter_runs_once_after_calculate_totals() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$calls    = 0;
+		$callback = function ( $contents ) use ( &$calls ) {
+			++$calls;
+			return $contents;
+		};
+
+		WC()->cart->add_to_cart( $product->get_id() );
+		add_filter( 'woocommerce_get_cart_contents', $callback );
+		WC()->cart->calculate_totals();
+
+		$calls = 0;
+		for ( $i = 0; $i < 5; $i++ ) {
+			WC()->cart->get_cart_contents();
+			WC()->cart->get_cart();
+			WC()->cart->is_empty();
+		}
+
+		$this->assertSame( 0, $calls, 'Filter should not run on reads served from the snapshot.' );
+
+		remove_filter( 'woocommerce_get_cart_contents', $callback );
+	}
+
+	/**
+	 * @testdox woocommerce_get_cart_contents re-runs after a cart mutation invalidates the snapshot.
+	 */
+	public function test_get_cart_contents_filter_reruns_after_mutation() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$calls    = 0;
+		$callback = function ( $contents ) use ( &$calls ) {
+			++$calls;
+			return $contents;
+		};
+
+		$key = WC()->cart->add_to_cart( $product->get_id() );
+		add_filter( 'woocommerce_get_cart_contents', $callback );
+		WC()->cart->calculate_totals();
+
+		$calls = 0;
+		WC()->cart->get_cart_contents();
+		$this->assertSame( 0, $calls, 'Read before mutation should be served from the snapshot.' );
+
+		WC()->cart->set_quantity( $key, 3, false );
+
+		$calls = 0;
+		WC()->cart->get_cart_contents();
+		$this->assertSame( 1, $calls, 'Filter should run again once a mutation invalidates the snapshot.' );
+
+		remove_filter( 'woocommerce_get_cart_contents', $callback );
+	}
+
+	/**
+	 * @testdox Modifications made by woocommerce_get_cart_contents persist across cached reads.
+	 */
+	public function test_get_cart_contents_filter_modifications_persist_in_snapshot() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$callback = function ( $contents ) {
+			foreach ( $contents as $key => $item ) {
+				$contents[ $key ]['snapshot_test_field'] = 'applied';
+			}
+			return $contents;
+		};
+
+		WC()->cart->add_to_cart( $product->get_id() );
+		add_filter( 'woocommerce_get_cart_contents', $callback );
+		WC()->cart->calculate_totals();
+
+		$first = WC()->cart->get_cart_contents();
+		$this->assertNotEmpty( $first, 'Cart should contain the added product.' );
+		foreach ( $first as $item ) {
+			$this->assertArrayHasKey( 'snapshot_test_field', $item, 'Filter-added field should be present on snapshot reads.' );
+			$this->assertSame( 'applied', $item['snapshot_test_field'], 'Filter-added value should be preserved.' );
+		}
+
+		$this->assertEquals( $first, WC()->cart->get_cart_contents(), 'Repeated cached reads should return identical contents.' );
+
+		remove_filter( 'woocommerce_get_cart_contents', $callback );
+	}
+
+	/**
+	 * @testdox Disabling woocommerce_cache_cart_contents restores per-read filter execution.
+	 */
+	public function test_cache_cart_contents_opt_out_runs_filter_per_read() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$calls    = 0;
+		$callback = function ( $contents ) use ( &$calls ) {
+			++$calls;
+			return $contents;
+		};
+
+		add_filter( 'woocommerce_cache_cart_contents', '__return_false' );
+		WC()->cart->add_to_cart( $product->get_id() );
+		add_filter( 'woocommerce_get_cart_contents', $callback );
+		WC()->cart->calculate_totals();
+
+		$calls = 0;
+		for ( $i = 0; $i < 3; $i++ ) {
+			WC()->cart->get_cart_contents();
+		}
+
+		$this->assertSame( 3, $calls, 'With caching disabled, the filter should run on every read.' );
+
+		remove_filter( 'woocommerce_get_cart_contents', $callback );
+		remove_filter( 'woocommerce_cache_cart_contents', '__return_false' );
 	}
 
 	/**

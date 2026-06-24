@@ -53,6 +53,18 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $removed_cart_contents = array();
 
 	/**
+	 * Filtered cart contents captured at calculate_totals() time and reused by
+	 * get_cart_contents() until the next mutation or recalculation. Null when not
+	 * primed, in which case reads run the woocommerce_get_cart_contents filter live
+	 * (the historical behaviour). This gives cart contents the same freshness
+	 * contract as cart totals: both are settled by calculate_totals() and frozen
+	 * together until the cart changes again.
+	 *
+	 * @var array|null
+	 */
+	protected $cart_contents_cache = null;
+
+	/**
 	 * Contains an array of coupon codes applied to the cart.
 	 *
 	 * @var array
@@ -168,6 +180,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array of cart items
 	 */
 	public function get_cart_contents() {
+		if ( null !== $this->cart_contents_cache ) {
+			return $this->cart_contents_cache;
+		}
 		return apply_filters( 'woocommerce_get_cart_contents', (array) $this->cart_contents );
 	}
 
@@ -415,6 +430,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function set_cart_contents( $value ) {
 		$this->cart_contents = (array) $value;
+		$this->reset_cart_contents_cache();
 	}
 
 	/**
@@ -426,6 +442,69 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function set_removed_cart_contents( $value = array() ) {
 		$this->removed_cart_contents = (array) $value;
+	}
+
+	/**
+	 * Invalidate the cached cart contents snapshot. Called on every mutation so the
+	 * next read either recalculates (re-priming the snapshot) or runs the filter live.
+	 *
+	 * @return void
+	 */
+	protected function reset_cart_contents_cache() {
+		$this->cart_contents_cache = null;
+	}
+
+	/**
+	 * Set or replace a single cart item and invalidate the contents snapshot.
+	 *
+	 * All element-level writes to $this->cart_contents should go through this method (or
+	 * unset_cart_item()/set_cart_contents()) so that invalidation can never be forgotten.
+	 *
+	 * @since 11.0.0
+	 * @param string $cart_item_key Cart item key.
+	 * @param array  $item          Cart item data.
+	 * @return void
+	 */
+	protected function set_cart_item( $cart_item_key, $item ) {
+		$this->cart_contents[ $cart_item_key ] = $item;
+		$this->reset_cart_contents_cache();
+	}
+
+	/**
+	 * Remove a single cart item and invalidate the contents snapshot.
+	 *
+	 * @since 11.0.0
+	 * @param string $cart_item_key Cart item key.
+	 * @return void
+	 */
+	protected function unset_cart_item( $cart_item_key ) {
+		unset( $this->cart_contents[ $cart_item_key ] );
+		$this->reset_cart_contents_cache();
+	}
+
+	/**
+	 * Capture the filtered cart contents as a snapshot reused by get_cart_contents()
+	 * until the next mutation or recalculation. Honours an opt-out for the rare
+	 * extension whose woocommerce_get_cart_contents filter must run on every read.
+	 *
+	 * @return void
+	 */
+	protected function prime_cart_contents_cache() {
+		/**
+		 * Filters whether cart contents are snapshotted at calculation time.
+		 *
+		 * Return false to force woocommerce_get_cart_contents to run on every read,
+		 * matching the historical behaviour for filters that depend on state changing
+		 * within a calculated window.
+		 *
+		 * @since 11.0.0
+		 * @param bool $enabled Whether to cache the filtered cart contents snapshot.
+		 */
+		if ( apply_filters( 'woocommerce_cache_cart_contents', true ) ) {
+			// Cache is null here (invalidated at the start of calculate_totals()), so the getter runs the
+			// woocommerce_get_cart_contents filter live and we store its result as the snapshot.
+			$this->cart_contents_cache = $this->get_cart_contents();
+		}
 	}
 
 	/**
@@ -703,7 +782,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		 */
 		do_action( 'woocommerce_before_cart_emptied', $clear_persistent_cart );
 
-		$this->cart_contents              = array();
+		$this->set_cart_contents( array() );
 		$this->removed_cart_contents      = array();
 		$this->shipping_methods           = array();
 		$this->coupon_discount_totals     = array();
@@ -863,7 +942,9 @@ class WC_Cart extends WC_Legacy_Cart {
 
 			if ( $product_to_check->is_sold_individually() && $values['quantity'] > 1 ) {
 				// Re-fetch and overwrite to reflect product changes made after item was added to cart.
-				$this->cart_contents[ $cart_item_key ]['data'] = $product_to_check;
+				$cart_item         = $this->cart_contents[ $cart_item_key ];
+				$cart_item['data'] = $product_to_check;
+				$this->set_cart_item( $cart_item_key, $cart_item );
 				$this->set_quantity( $cart_item_key, 1, false );
 				/* translators: %s: product name */
 				$errors->add( 'sold-individually', sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $product_to_check->get_name() ) );
@@ -1409,7 +1490,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				$cart_item_key = $cart_id;
 
 				// Add item after merging with $cart_item_data - hook to allow plugins to modify cart item.
-				$this->cart_contents[ $cart_item_key ] = apply_filters(
+				$cart_item = apply_filters(
 					'woocommerce_add_cart_item',
 					array_merge(
 						$cart_item_data,
@@ -1425,9 +1506,11 @@ class WC_Cart extends WC_Legacy_Cart {
 					),
 					$cart_item_key
 				);
+				$this->set_cart_item( $cart_item_key, $cart_item );
 			}
 
 			$this->cart_contents = apply_filters( 'woocommerce_cart_contents_changed', $this->cart_contents );
+			$this->reset_cart_contents_cache();
 
 			do_action( 'woocommerce_add_to_cart', $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data );
 
@@ -1456,7 +1539,7 @@ class WC_Cart extends WC_Legacy_Cart {
 
 			do_action( 'woocommerce_remove_cart_item', $cart_item_key, $this );
 
-			unset( $this->cart_contents[ $cart_item_key ] );
+			$this->unset_cart_item( $cart_item_key );
 
 			do_action( 'woocommerce_cart_item_removed', $cart_item_key, $this );
 
@@ -1473,9 +1556,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function restore_cart_item( $cart_item_key ) {
 		if ( isset( $this->removed_cart_contents[ $cart_item_key ] ) ) {
-			$restore_item                                  = $this->removed_cart_contents[ $cart_item_key ];
-			$this->cart_contents[ $cart_item_key ]         = $restore_item;
-			$this->cart_contents[ $cart_item_key ]['data'] = wc_get_product( $restore_item['variation_id'] ? $restore_item['variation_id'] : $restore_item['product_id'] );
+			$restore_item         = $this->removed_cart_contents[ $cart_item_key ];
+			$restore_item['data'] = wc_get_product( $restore_item['variation_id'] ? $restore_item['variation_id'] : $restore_item['product_id'] );
+			$this->set_cart_item( $cart_item_key, $restore_item );
 
 			do_action( 'woocommerce_restore_cart_item', $cart_item_key, $this );
 
@@ -1504,8 +1587,10 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		// Update qty.
-		$old_quantity                                      = $this->cart_contents[ $cart_item_key ]['quantity'];
-		$this->cart_contents[ $cart_item_key ]['quantity'] = $quantity;
+		$cart_item             = $this->cart_contents[ $cart_item_key ];
+		$old_quantity          = $cart_item['quantity'];
+		$cart_item['quantity'] = $quantity;
+		$this->set_cart_item( $cart_item_key, $cart_item );
 
 		do_action( 'woocommerce_after_cart_item_quantity_update', $cart_item_key, $quantity, $old_quantity, $this );
 
@@ -1543,10 +1628,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return void
 	 */
 	public function calculate_totals() {
+		// Invalidate the snapshot so reads during calculation run live against the settling cart.
+		$this->reset_cart_contents_cache();
 		$this->reset_totals();
 
 		if ( $this->is_empty() ) {
 			$this->session->set_session();
+			$this->prime_cart_contents_cache();
 			return;
 		}
 
@@ -1555,6 +1643,9 @@ class WC_Cart extends WC_Legacy_Cart {
 		new WC_Cart_Totals( $this );
 
 		do_action( 'woocommerce_after_calculate_totals', $this );
+
+		// Freeze the final settled contents so subsequent reads reuse them instead of re-running the filter.
+		$this->prime_cart_contents_cache();
 	}
 
 	/**

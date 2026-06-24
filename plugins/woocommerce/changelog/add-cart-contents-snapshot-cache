@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Cache the filtered cart contents at totals-calculation time so the woocommerce_get_cart_contents filter is not re-run on every read. Adds a woocommerce_cache_cart_contents filter to opt out and restore per-read execution.
