@@ -217,6 +217,7 @@ class WC_Admin_Marketplace_Promotions {
 	 * Resolved once per request (the enqueue and render hooks both need it).
 	 *
 	 * @internal Not a supported extension point.
+	 *
 	 * @return array|null
 	 */
 	public static function get_orders_promo_card() {
