@@ -846,8 +846,8 @@ describe( 'createMutationQueue', () => {
 				...stateHandler,
 			} );
 
-			// Should resolve immediately — nothing in progress.
-			await queue.waitForIdle();
+			// Should resolve immediately: nothing in progress.
+			await expect( queue.waitForIdle() ).resolves.toBeUndefined();
 		} );
 
 		it( 'resolves after the processing cycle completes', async () => {

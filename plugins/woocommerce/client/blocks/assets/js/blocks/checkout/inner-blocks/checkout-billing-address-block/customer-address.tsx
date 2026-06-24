@@ -31,15 +31,11 @@ const CustomerAddress = () => {
 	const { dispatchCheckoutEvent } = useStoreEvents();
 	const { isInitialized } = useCustomerData();
 
-	const { validationErrors } = useSelect(
-		( select ) => {
-			return {
-				validationErrors:
-					select( validationStore ).getValidationErrors(),
-			};
-		},
-		[ billingAddress ]
-	);
+	const { validationErrors } = useSelect( ( select ) => {
+		return {
+			validationErrors: select( validationStore ).getValidationErrors(),
+		};
+	}, [] );
 
 	useEffect( () => {
 		// Check if any billing field has validation errors
@@ -63,6 +59,7 @@ const CustomerAddress = () => {
 		editingBillingAddress,
 		billingAddress,
 		isInitialized,
+		setEditingBillingAddress,
 		validationErrors,
 	] );
 

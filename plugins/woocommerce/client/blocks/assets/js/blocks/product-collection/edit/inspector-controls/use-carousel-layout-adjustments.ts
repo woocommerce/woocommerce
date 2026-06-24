@@ -253,7 +253,7 @@ const useCarouselLayoutAdjustments = (
 	);
 
 	useEffect( () => {
-		if ( ! clientId ) {
+		if ( ! clientId || ! productCollectionBlock ) {
 			return;
 		}
 
@@ -278,7 +278,13 @@ const useCarouselLayoutAdjustments = (
 		}
 
 		previousLayoutType.current = displayLayout.type;
-	}, [ displayLayout.type, clientId, actions, collection ] );
+	}, [
+		displayLayout.type,
+		clientId,
+		actions,
+		collection,
+		productCollectionBlock,
+	] );
 };
 
 export default useCarouselLayoutAdjustments;

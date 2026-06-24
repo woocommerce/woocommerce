@@ -510,7 +510,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				// Let's not do anything if the user is typing in the input.
-				if ( ref === document.activeElement ) {
+				if ( ref === ref.ownerDocument.activeElement ) {
 					return;
 				}
 

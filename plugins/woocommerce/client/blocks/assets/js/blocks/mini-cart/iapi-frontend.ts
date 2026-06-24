@@ -337,9 +337,10 @@ store< MiniCart >(
 					if ( e.key === 'Tab' ) {
 						const { ref } = getElement();
 						const focusableElements = getFocusableElements( ref );
+						const activeElement = ref.ownerDocument.activeElement;
 						if (
 							e.shiftKey &&
-							document.activeElement === focusableElements?.[ 0 ]
+							activeElement === focusableElements?.[ 0 ]
 						) {
 							// Focus last element when shift+tab in the first one.
 							e.preventDefault();
@@ -348,7 +349,7 @@ store< MiniCart >(
 							]?.focus();
 						} else if (
 							! e.shiftKey &&
-							document.activeElement ===
+							activeElement ===
 								focusableElements?.[
 									focusableElements.length - 1
 								]

@@ -133,7 +133,7 @@ export const CheckoutEventsProvider = ( {
 		__internalSetRegisteredExpressPaymentMethods(
 			convertToPlainExpressPaymentMethods( registeredMethods )
 		);
-	}, [ registeredMethods ] );
+	}, [ __internalSetRegisteredExpressPaymentMethods, registeredMethods ] );
 
 	// Update the payment method store when paymentMethods or expressPaymentMethods changes.
 	// Ensure this happens in the editor even if paymentMethods is empty. This won't happen instantly when the objects

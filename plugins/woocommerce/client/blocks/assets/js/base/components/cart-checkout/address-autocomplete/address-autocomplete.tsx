@@ -240,7 +240,8 @@ export const AddressAutocomplete = ( {
 			const parentElement = inputElement.parentElement;
 			if ( parentElement ) {
 				// Store current focus state and cursor position
-				const hasFocus = document.activeElement === inputElement;
+				const hasFocus =
+					inputElement.ownerDocument.activeElement === inputElement;
 				const selectionStart = inputElement.selectionStart;
 				const selectionEnd = inputElement.selectionEnd;
 

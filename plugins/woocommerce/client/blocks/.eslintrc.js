@@ -161,6 +161,28 @@ const coreModules = [
 	'react-transition-group',
 ];
 
+const allowedExistingExperimentalWordPressImports = {
+	'@wordpress/block-editor': [
+		'__experimentalGetBorderClassesAndStyles',
+		'__experimentalGetColorClassesAndStyles',
+		'__experimentalGetElementClassName',
+		'__experimentalGetShadowClassesAndStyles',
+		'__experimentalGetSpacingClassesAndStyles',
+		'__experimentalUseBlockPreview',
+		'__experimentalUseBorderProps',
+		'__experimentalUseColorProps',
+	],
+	'@wordpress/components': [
+		'__experimentalHStack',
+		'__experimentalText',
+		'__experimentalToggleGroupControl',
+		'__experimentalToggleGroupControlOption',
+		'__experimentalToggleGroupControlOptionIcon',
+		'__experimentalToolsPanel',
+		'__experimentalToolsPanelItem',
+	],
+};
+
 module.exports = {
 	env: {
 		browser: true,
@@ -201,7 +223,8 @@ module.exports = {
 		'woocommerce/feature-flag': 'off',
 		'react-hooks/exhaustive-deps': 'error',
 		'react/jsx-fragments': [ 'error', 'syntax' ],
-		'@wordpress/no-global-active-element': 'warn',
+		'@wordpress/no-global-active-element': 'error',
+		'@wordpress/no-unsafe-wp-apis': 'error',
 		'@wordpress/i18n-text-domain': [
 			'error',
 			{
@@ -234,6 +257,14 @@ module.exports = {
 				ignoreGlobals: true,
 			},
 		],
+		'jsdoc/check-line-alignment': [
+			'error',
+			'always',
+			{
+				tags: [ 'param', 'arg', 'argument', 'property', 'prop' ],
+				preserveMainDescriptionPostDelimiter: true,
+			},
+		],
 		'react/react-in-jsx-scope': 'off',
 	},
 	overrides: [
@@ -259,6 +290,8 @@ module.exports = {
 			extends: [ 'plugin:jest/recommended' ],
 			rules: {
 				'jest/no-mocks-import': 'off',
+				'jest/no-disabled-tests': 'warn',
+				'jest/expect-expect': 'error',
 				// With React Testing library, it is expected use expect() in the waitFor() function: https://testing-library.com/docs/dom-testing-library/api-async/
 				'jest/no-standalone-expect': 'off',
 			},
@@ -278,9 +311,26 @@ module.exports = {
 			],
 			rules: {
 				'@typescript-eslint/no-explicit-any': 'error',
+				'react-hooks/exhaustive-deps': 'error',
+				'@wordpress/no-global-active-element': 'error',
+				'@wordpress/no-unsafe-wp-apis': 'error',
 				'no-use-before-define': 'off',
 				'@typescript-eslint/no-use-before-define': [ 'error' ],
 				'jsdoc/require-param': 'off',
+				'jsdoc/check-line-alignment': [
+					'error',
+					'always',
+					{
+						tags: [
+							'param',
+							'arg',
+							'argument',
+							'property',
+							'prop',
+						],
+						preserveMainDescriptionPostDelimiter: true,
+					},
+				],
 				'no-shadow': 'off',
 				'@typescript-eslint/no-shadow': [ 'error' ],
 				'@typescript-eslint/no-unused-vars': [
@@ -312,11 +362,11 @@ module.exports = {
 				// Explicitly turning this on because we need to catch import errors that we don't catch with TS right now
 				// due to it only being run in a checking capacity.
 				'import/named': 'error',
-				//  These should absolutely be linted, but due to there being a large number
-				//  of changes needed to fix for example `export *` of packages with only default exports
-				//  we will leave these as warnings for now until those can be fixed.
+				// `import/namespace` still has a larger backlog. `import/export`
+				// is strict so `export *` cannot be added for modules with
+				// only default exports.
 				'import/namespace': 'warn',
-				'import/export': 'warn',
+				'import/export': 'error',
 			},
 			settings: {
 				'import/parsers': {
@@ -377,6 +427,28 @@ module.exports = {
 							},
 						],
 					},
+				],
+			},
+		},
+		{
+			files: [
+				'assets/js/blocks/accordion/inner-blocks/accordion-header/edit.js',
+				'assets/js/blocks/accordion/inner-blocks/accordion-header/save.js',
+				'assets/js/blocks/accordion/inner-blocks/accordion-panel/edit.js',
+				'assets/js/blocks/accordion/inner-blocks/accordion-panel/save.js',
+				'assets/js/blocks/add-to-cart-with-options/grouped-product-selector/product-item/edit.tsx',
+				'assets/js/blocks/add-to-cart-with-options/variation-selector/attribute-name/edit.tsx',
+				'assets/js/blocks/add-to-cart-with-options/variation-selector/attribute/edit.tsx',
+				'assets/js/blocks/featured-items/with-edit-mode.tsx',
+				'assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/mini-cart-shopping-button-block/edit.tsx',
+				'assets/js/blocks/product-collection/edit/single-product-picker.tsx',
+				'assets/js/blocks/product-reviews/inner-blocks/review-form/form.tsx',
+			],
+			rules: {
+				// These APIs do not have stable replacements in the current WordPress packages.
+				'@wordpress/no-unsafe-wp-apis': [
+					'error',
+					allowedExistingExperimentalWordPressImports,
 				],
 			},
 		},

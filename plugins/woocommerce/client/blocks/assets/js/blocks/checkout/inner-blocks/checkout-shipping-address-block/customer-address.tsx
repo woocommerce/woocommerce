@@ -33,15 +33,11 @@ const CustomerAddress = () => {
 
 	const { isInitialized } = useCustomerData();
 
-	const { validationErrors } = useSelect(
-		( select ) => {
-			return {
-				validationErrors:
-					select( validationStore ).getValidationErrors(),
-			};
-		},
-		[ shippingAddress ]
-	);
+	const { validationErrors } = useSelect( ( select ) => {
+		return {
+			validationErrors: select( validationStore ).getValidationErrors(),
+		};
+	}, [] );
 
 	useEffect( () => {
 		// Check if any shipping field has validation errors
@@ -65,6 +61,7 @@ const CustomerAddress = () => {
 		editingShippingAddress,
 		shippingAddress,
 		isInitialized,
+		setEditingShippingAddress,
 		validationErrors,
 	] );
 

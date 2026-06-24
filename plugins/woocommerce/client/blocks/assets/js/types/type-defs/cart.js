@@ -14,15 +14,15 @@
 /**
  * @typedef {Object} CartItemImage
  *
- * @property {number} id        Image id.
- * @property {string} src       Full size image URL.
- * @property {string} thumbnail Thumbnail URL.
+ * @property {number} id               Image id.
+ * @property {string} src              Full size image URL.
+ * @property {string} thumbnail        Thumbnail URL.
  * @property {string} srcset           Full size image srcset for responsive images.
  * @property {string} sizes            Full size image sizes for responsive images.
  * @property {string} thumbnail_srcset Thumbnail srcset for responsive images.
  * @property {string} thumbnail_sizes  Thumbnail sizes for responsive images.
- * @property {string} name      Image name.
- * @property {string} alt       Image alternative text.
+ * @property {string} name             Image name.
+ * @property {string} alt              Image alternative text.
  */
 
 /**
