@@ -43,7 +43,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 					'name'            => 'Boxes',
 					'merchant_code'   => 'boxes',
 					'options_display' => array( array( 'name' => 'Size' ) ),
-					'app_id'          => 'wc-subscriptions',
+					'extension_slug'  => 'wc-subscriptions',
 				)
 			)
 		);
@@ -54,7 +54,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( $id, $fetched->get_id() );
 		$this->assertSame( 'Boxes', $fetched->get_name() );
 		$this->assertSame( 'boxes', $fetched->get_merchant_code() );
-		$this->assertSame( 'wc-subscriptions', $fetched->get_app_id() );
+		$this->assertSame( 'wc-subscriptions', $fetched->get_extension_slug() );
 		$this->assertSame( array( array( 'name' => 'Size' ) ), $fetched->get_options_display() );
 	}
 
