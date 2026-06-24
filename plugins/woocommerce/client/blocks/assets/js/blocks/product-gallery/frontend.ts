@@ -112,71 +112,6 @@ const syncVideoElementPlayback = (
 	syncVideoPlaybackState( video, shouldPlay );
 };
 
-const syncDialogVideoPlayback = (
-	dialogContent: Element,
-	isDialogOpen: boolean
-) => {
-	dialogContent
-		.querySelectorAll< HTMLVideoElement >( 'video[data-image-id]' )
-		.forEach( ( video ) =>
-			syncVideoPlaybackState(
-				video,
-				isDialogOpen && isDialogVideoInView( video )
-			)
-		);
-};
-
-const dialogVideoPlaybackObservers = new WeakMap<
-	Element,
-	IntersectionObserver
->();
-
-const disconnectDialogVideoPlaybackObserver = ( dialogContent: Element ) => {
-	const observer = dialogVideoPlaybackObservers.get( dialogContent );
-
-	if ( observer ) {
-		observer.disconnect();
-		dialogVideoPlaybackObservers.delete( dialogContent );
-	}
-};
-
-const observeDialogVideoPlayback = ( dialogContent: Element ) => {
-	if ( ! window.IntersectionObserver ) {
-		return;
-	}
-
-	disconnectDialogVideoPlaybackObserver( dialogContent );
-
-	const observer = new IntersectionObserver(
-		( entries: IntersectionObserverEntry[] ) => {
-			entries.forEach( ( entry ) => {
-				const video = entry.target;
-
-				if ( ! ( video instanceof HTMLVideoElement ) ) {
-					return;
-				}
-
-				syncVideoPlaybackState(
-					video,
-					document.body.classList.contains(
-						CLASSES.dialogOpenBody
-					) &&
-						isDialogVideoIntersectionInView( entry )
-				);
-			} );
-		},
-		{
-			threshold: [ 0, DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO, 1 ],
-		}
-	);
-
-	dialogContent
-		.querySelectorAll< HTMLVideoElement >( 'video[data-image-id]' )
-		.forEach( ( video ) => observer.observe( video ) );
-
-	dialogVideoPlaybackObservers.set( dialogContent, observer );
-};
-
 const syncScopedVideoElementPlayback = ( video: HTMLVideoElement ) => {
 	const { selectedImageId, isDialogOpen, videoLocation } = getContext();
 	syncVideoElementPlayback(
@@ -898,19 +833,50 @@ const productGallery = {
 				}
 			}
 
-			const dialogContent = dialogRef.querySelector(
-				SELECTORS.dialogContent
+		},
+		initDialogVideoPlayback: () => {
+			const element = getElement()?.ref;
+
+			if ( ! ( element instanceof HTMLVideoElement ) ) {
+				return;
+			}
+
+			if ( ! window.IntersectionObserver ) {
+				return () => element.pause();
+			}
+
+			const observer = new IntersectionObserver(
+				( entries: IntersectionObserverEntry[] ) => {
+					entries.forEach( ( entry ) => {
+						if ( entry.target !== element ) {
+							return;
+						}
+
+						const isDialogOpen = document.body.classList.contains(
+							CLASSES.dialogOpenBody
+						);
+						const shouldPlay =
+							isDialogOpen &&
+							isDialogVideoIntersectionInView( entry );
+
+						syncVideoPlaybackState( element, shouldPlay );
+					} );
+				},
+				{
+					threshold: [
+						0,
+						DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO,
+						1,
+					],
+				}
 			);
 
-			if ( dialogContent ) {
-				if ( isDialogOpen ) {
-					observeDialogVideoPlayback( dialogContent );
-				} else {
-					disconnectDialogVideoPlaybackObserver( dialogContent );
-				}
+			observer.observe( element );
 
-				syncDialogVideoPlayback( dialogContent, isDialogOpen );
-			}
+			return () => {
+				observer.disconnect();
+				element.pause();
+			};
 		},
 		syncVideoPlayback: () => {
 			const element = getElement()?.ref;
