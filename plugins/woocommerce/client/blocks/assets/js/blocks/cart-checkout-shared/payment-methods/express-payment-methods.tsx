@@ -154,6 +154,18 @@ const ExpressPaymentMethods = () => {
 		setFocusedExpressPaymentMethod( null );
 	}, [] );
 
+	const clearFocusedExpressPaymentIframe = useCallback( () => {
+		const wrapper = expressPaymentWrapperRef.current;
+		const activeElement = wrapper?.ownerDocument.activeElement;
+
+		if (
+			activeElement instanceof HTMLIFrameElement &&
+			wrapper?.contains( activeElement )
+		) {
+			setFocusedExpressPaymentMethod( null );
+		}
+	}, [] );
+
 	useEffect( () => {
 		const wrapper = expressPaymentWrapperRef.current;
 
@@ -169,7 +181,7 @@ const ExpressPaymentMethods = () => {
 
 		doc.addEventListener( 'focusin', syncFocusedExpressPaymentMethod );
 		doc.addEventListener( 'focusout', syncSoon );
-		win?.addEventListener( 'blur', syncSoon );
+		win?.addEventListener( 'blur', clearFocusedExpressPaymentIframe );
 		win?.addEventListener( 'focus', syncSoon );
 
 		return () => {
@@ -178,10 +190,13 @@ const ExpressPaymentMethods = () => {
 				syncFocusedExpressPaymentMethod
 			);
 			doc.removeEventListener( 'focusout', syncSoon );
-			win?.removeEventListener( 'blur', syncSoon );
+			win?.removeEventListener(
+				'blur',
+				clearFocusedExpressPaymentIframe
+			);
 			win?.removeEventListener( 'focus', syncSoon );
 		};
-	}, [ syncFocusedExpressPaymentMethod ] );
+	}, [ clearFocusedExpressPaymentIframe, syncFocusedExpressPaymentMethod ] );
 
 	/**
 	 * Calling setExpressPaymentError directly is deprecated.

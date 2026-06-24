@@ -293,6 +293,37 @@ describe( 'Express payment methods', () => {
 					)
 				);
 			} );
+
+			it( 'should clear a focused express payment iframe when the window loses focus', async () => {
+				render( <ExpressPaymentMethods /> );
+
+				const paymentMethodItem = document.querySelector(
+					'#express-payment-method-paypal'
+				);
+				const iframe = document.createElement( 'iframe' );
+				paymentMethodItem?.appendChild( iframe );
+
+				await act( async () => {
+					iframe.focus();
+					fireEvent.focusIn( iframe );
+				} );
+
+				await waitFor( () =>
+					expect( paymentMethodItem ).toHaveClass(
+						'wc-block-components-express-payment__event-button--focused'
+					)
+				);
+
+				await act( async () => {
+					window.dispatchEvent( new Event( 'blur' ) );
+				} );
+
+				await waitFor( () =>
+					expect( paymentMethodItem ).not.toHaveClass(
+						'wc-block-components-express-payment__event-button--focused'
+					)
+				);
+			} );
 		} );
 		describe( 'In an editor context', () => {
 			beforeEach( () => {
