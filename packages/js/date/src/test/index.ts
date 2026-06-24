@@ -1148,14 +1148,61 @@ describe( 'getStoreTimeZoneMoment', () => {
 		global.window.wcSettings = { timeZone: 'America/New_York' };
 
 		try {
-			const { primaryStart } = getLastPeriod( 'year', 'previous_period' );
+			const { primaryStart, primaryEnd, secondaryStart, secondaryEnd } =
+				getLastPeriod( 'year', 'previous_period' );
 
-			// January is EST (-300) even though the current offset is EDT.
+			// Every boundary lands in winter (EST, -300) even though the
+			// current offset is EDT, and each is anchored against its own date
+			// (not "now"), with its wall-clock preserved.
 			expect( primaryStart.utcOffset() ).toBe( -300 );
-			// Wall-clock midnight is preserved; only the offset is corrected.
 			expect( primaryStart.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
 				'2025-01-01T00:00:00'
 			);
+			expect( primaryEnd.utcOffset() ).toBe( -300 );
+			expect( primaryEnd.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2025-12-31T23:59:59'
+			);
+			expect( secondaryStart.utcOffset() ).toBe( -300 );
+			expect( secondaryStart.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2024-01-01T00:00:00'
+			);
+			expect( secondaryEnd.utcOffset() ).toBe( -300 );
+			expect( secondaryEnd.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2024-12-31T23:59:59'
+			);
+		} finally {
+			jest.useRealTimers();
+		}
+	} );
+
+	it( 'anchors getCurrentPeriod boundaries to their own dates across a DST transition (#64020)', () => {
+		// "Now" is summer (EDT, -240); the year-to-date range opens in winter
+		// (EST, -300). Each boundary must resolve its own date's offset, so a
+		// single "now" offset is not reused across the range. This also covers
+		// getCurrentPeriod, whose boundary math differs from getLastPeriod.
+		jest.useFakeTimers().setSystemTime(
+			new Date( '2026-07-15T12:00:00Z' )
+		);
+		global.window.wcSettings = { timeZone: 'America/New_York' };
+
+		try {
+			const { primaryStart, primaryEnd, secondaryStart, secondaryEnd } =
+				getCurrentPeriod( 'year', 'previous_year' );
+
+			// January is EST (-300); "now" in July is EDT (-240).
+			expect( primaryStart.utcOffset() ).toBe( -300 );
+			expect( primaryStart.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2026-01-01T00:00:00'
+			);
+			expect( primaryEnd.utcOffset() ).toBe( -240 );
+
+			// The previous-year comparison opens in winter and ends in summer,
+			// so its boundaries carry different offsets too.
+			expect( secondaryStart.utcOffset() ).toBe( -300 );
+			expect( secondaryStart.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2025-01-01T00:00:00'
+			);
+			expect( secondaryEnd.utcOffset() ).toBe( -240 );
 		} finally {
 			jest.useRealTimers();
 		}
