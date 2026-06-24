@@ -1212,7 +1212,6 @@ class WC_Emails {
 		 *
 		 * @param bool $send       Whether the backorder notification should be sent.
 		 * @param int  $product_id The backordered product id.
-		 *
 		 * @since 11.0.0
 		 */
 		if ( false === apply_filters( 'woocommerce_should_send_backorder_notification', true, $args['product']->get_id() ) ) {
