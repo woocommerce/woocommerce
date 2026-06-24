@@ -23,6 +23,7 @@ interface FeedInterface {
 	 * a later chunk to keep appending to the same feed; pass nothing to begin a new one.
 	 *
 	 * @since 10.5.0
+	 * @since 11.0.0 Added the `$resume_identifier` and `$entries_written` parameters.
 	 *
 	 * @param string|null $resume_identifier Identifier of an existing feed to resume, or null to start fresh.
 	 * @param int         $entries_written   The number of entries already written by previous chunks, so
