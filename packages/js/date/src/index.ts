@@ -168,13 +168,21 @@ export function getRangeLabel( after: moment.Moment, before: moment.Moment ) {
 }
 
 /**
+ * Reads the configured store time zone from `wcSettings`.
+ *
+ * @return {string | undefined} - IANA zone name or `±HH:mm` offset, if set.
+ */
+function getStoreTimeZoneSetting() {
+	return window.wcSettings?.timeZone || window.wcSettings?.admin?.timeZone;
+}
+
+/**
  * Gets the current time in the store time zone if set.
  *
  * @return {moment.Moment} - Moment object in the store time zone.
  */
 export function getStoreTimeZoneMoment() {
-	const timeZone =
-		window.wcSettings?.timeZone || window.wcSettings?.admin?.timeZone;
+	const timeZone = getStoreTimeZoneSetting();
 
 	if ( typeof timeZone !== 'string' || timeZone.length === 0 ) {
 		return moment();
@@ -196,6 +204,52 @@ export function getStoreTimeZoneMoment() {
 	}
 
 	return moment().utcOffset( offsetInMinutes );
+}
+
+/**
+ * Re-applies the store time zone's UTC offset for a moment's own date, keeping
+ * its wall-clock time. `getStoreTimeZoneMoment` resolves a named IANA zone's
+ * offset for "now", so a range boundary in a different DST period (e.g. last
+ * year/quarter) would otherwise be an hour off; this corrects each boundary
+ * against its own date. Fixed `±HH:mm` offsets and the no-zone case are
+ * returned unchanged (#64020).
+ *
+ * @param {moment.Moment} date - The moment to anchor.
+ * @return {moment.Moment} - The anchored moment.
+ */
+function anchorToStoreTimeZone( date: moment.Moment ) {
+	const timeZone = getStoreTimeZoneSetting();
+
+	if (
+		typeof timeZone !== 'string' ||
+		timeZone.length === 0 ||
+		[ '+', '-' ].includes( timeZone.charAt( 0 ) )
+	) {
+		return date;
+	}
+
+	const offsetInMinutes =
+		getTimezoneOffset( timeZone, date.toDate() ) / 60000;
+
+	return Number.isNaN( offsetInMinutes )
+		? date
+		: date.utcOffset( offsetInMinutes, true );
+}
+
+/**
+ * Anchors every boundary of a date range to the store time zone.
+ * See {@link anchorToStoreTimeZone}.
+ *
+ * @param {DateValue} range - The computed range.
+ * @return {DateValue} - The range with each boundary anchored.
+ */
+function anchorRangeToStoreTimeZone( range: DateValue ): DateValue {
+	return {
+		primaryStart: anchorToStoreTimeZone( range.primaryStart ),
+		primaryEnd: anchorToStoreTimeZone( range.primaryEnd ),
+		secondaryStart: anchorToStoreTimeZone( range.secondaryStart ),
+		secondaryEnd: anchorToStoreTimeZone( range.secondaryEnd ),
+	};
 }
 
 /**
@@ -241,12 +295,12 @@ export function getLastPeriod(
 		secondaryEnd = secondaryEnd.clone().endOf( 'month' );
 	}
 
-	return {
+	return anchorRangeToStoreTimeZone( {
 		primaryStart,
 		primaryEnd,
 		secondaryStart,
 		secondaryEnd,
-	};
+	} );
 }
 
 /**
@@ -279,12 +333,12 @@ export function getCurrentPeriod(
 			.add( daysSoFar + 1, 'days' )
 			.subtract( 1, 'seconds' );
 	}
-	return {
+	return anchorRangeToStoreTimeZone( {
 		primaryStart,
 		primaryEnd,
 		secondaryStart,
 		secondaryEnd,
-	};
+	} );
 }
 
 /**

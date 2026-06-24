@@ -1137,6 +1137,29 @@ describe( 'getStoreTimeZoneMoment', () => {
 			momentProtoWithTz.tz = originalProtoTz;
 		}
 	} );
+
+	it( 'keeps named-zone range boundaries DST-correct across a transition (#64020)', () => {
+		// "Now" is summer (EDT, UTC-4); the previous-year range lands in
+		// winter (EST, UTC-5). A single "now" offset would leave the boundary
+		// an hour off, so each boundary is re-anchored against its own date.
+		jest.useFakeTimers().setSystemTime(
+			new Date( '2026-07-15T12:00:00Z' )
+		);
+		global.window.wcSettings = { timeZone: 'America/New_York' };
+
+		try {
+			const { primaryStart } = getLastPeriod( 'year', 'previous_period' );
+
+			// January is EST (-300) even though the current offset is EDT.
+			expect( primaryStart.utcOffset() ).toBe( -300 );
+			// Wall-clock midnight is preserved; only the offset is corrected.
+			expect( primaryStart.format( 'YYYY-MM-DDTHH:mm:ss' ) ).toBe(
+				'2025-01-01T00:00:00'
+			);
+		} finally {
+			jest.useRealTimers();
+		}
+	} );
 } );
 
 describe( 'getDateFormatsForIntervalPhp', () => {
