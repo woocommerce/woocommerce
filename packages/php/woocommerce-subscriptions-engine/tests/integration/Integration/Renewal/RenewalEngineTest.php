@@ -325,6 +325,70 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox process_due builds the renewal order from the contract's own line items and addresses.
+	 */
+	public function test_process_due_builds_renewal_from_contract_items_and_addresses(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$product = new \WC_Product_Simple();
+		$product->set_name( 'Monthly Filters' );
+		$product->set_regular_price( '19.99' );
+		$product_id = (int) $product->save();
+
+		// Sign up from an order carrying a real recurring line item + addresses, so the contract
+		// stores them and the renewal builder has something other than the origin order to read.
+		$order = new WC_Order();
+		$order->set_currency( 'USD' );
+		$order->set_payment_method( self::GATEWAY_APPROVING );
+		$order->set_total( '39.98' );
+		$order->set_date_paid( '2026-01-15 00:00:00' );
+		$order->set_billing_address(
+			array(
+				'first_name' => 'Ada',
+				'last_name'  => 'Lovelace',
+				'country'    => 'US',
+				'email'      => 'ada@example.test',
+			)
+		);
+		$order->set_shipping_address(
+			array(
+				'first_name' => 'Ada',
+				'last_name'  => 'Lovelace',
+				'country'    => 'US',
+			)
+		);
+		$line = new \WC_Order_Item_Product();
+		$line->set_name( 'Monthly Filters' );
+		$line->set_product_id( $product_id );
+		$line->set_quantity( 2 );
+		$line->set_subtotal( '39.98' );
+		$line->set_total( '39.98' );
+		$order->add_item( $line );
+		$order->save();
+
+		$contract    = ( new ContractFactory() )->create_from_order( $order, $this->make_plan_object() );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$renewal_order = ( new RenewalEngine() )->process_due( $contract_id );
+		$this->assertInstanceOf( WC_Order::class, $renewal_order );
+
+		// Exactly the contract's recurring line item, carried from the contract.
+		$items = array_values( $renewal_order->get_items() );
+		$this->assertCount( 1, $items );
+		$item = $items[0];
+		$this->assertInstanceOf( \WC_Order_Item_Product::class, $item );
+		$this->assertSame( $product_id, $item->get_product_id() );
+		$this->assertSame( 'Monthly Filters', $item->get_name() );
+		$this->assertSame( 2, $item->get_quantity() );
+
+		// Addresses are taken from the contract, not re-read off the origin order.
+		$this->assertSame( 'Ada', $renewal_order->get_billing_first_name() );
+		$this->assertSame( 'US', $renewal_order->get_billing_country() );
+		$this->assertSame( 'US', $renewal_order->get_shipping_country() );
+	}
+
+	/**
 	 * @testdox process_due on a failed charge marks the cycle failed and leaves the schedule.
 	 */
 	public function test_process_due_marks_the_cycle_failed_when_the_charge_does_not_settle(): void {
@@ -434,32 +498,57 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox process_due skips gracefully when the selling plan has been deleted.
+	 * @testdox process_due skips gracefully when the cadence cannot be resolved at all.
 	 *
-	 * The settled cycle carries no snapshot and the live plan is gone, so the cadence is
-	 * unresolvable. process_due must skip (return null) rather than throw - a thrown
+	 * A lean contract carries no plan snapshot, so once its selling plan is deleted the cadence
+	 * is genuinely unresolvable. process_due must skip (return null) rather than throw - a thrown
 	 * DomainException would make a scheduled action retry forever.
 	 */
-	public function test_process_due_skips_when_the_plan_is_deleted(): void {
+	public function test_process_due_skips_when_the_cadence_is_unresolvable(): void {
+		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
+
+		$plan_id     = $this->make_plan();
+		$order       = $this->make_origin_order();
+		$contract    = $this->make_contract( $plan_id, $order->get_id() );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		// Delete the selling plan; the lean contract has no snapshot to fall back to.
+		( new PlanRepository() )->delete( $plan_id );
+
+		$result = ( new RenewalEngine() )->process_due( $contract_id );
+		$this->assertNull( $result );
+
+		// Nothing was claimed: no cycle, no renewal order.
+		$repo = new ContractRepository();
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 1 ) );
+		$this->assertNull( $repo->find_current_cycle( $contract_id ) );
+	}
+
+	/**
+	 * @testdox process_due renews from the contract's own plan snapshot even when the live plan is deleted.
+	 *
+	 * The contract's frozen snapshot is the cadence source of truth, so a deleted live selling
+	 * plan no longer blocks the renewal - the chain advances on the snapshot's terms.
+	 */
+	public function test_process_due_renews_from_contract_snapshot_when_live_plan_deleted(): void {
 		$this->approve_charges_for( self::GATEWAY_APPROVING );
 
 		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
-		// Delete the selling plan so the cadence can no longer be resolved.
+		// Delete the live selling plan; the contract keeps its frozen snapshot.
 		( new PlanRepository() )->delete( $contract->get_selling_plan_id() );
 
-		$result = ( new RenewalEngine() )->process_due( $contract_id );
-		$this->assertNull( $result );
+		$renewal_order = ( new RenewalEngine() )->process_due( $contract_id );
+		$this->assertInstanceOf( WC_Order::class, $renewal_order );
 
-		// No cycle 2 was claimed and no renewal order was created: the chain is still at count 1.
-		$repo = new ContractRepository();
-		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
-		$this->assertSame( 1, $repo->max_count( $contract_id ) );
-		$head = $repo->find_current_cycle( $contract_id );
-		$this->assertInstanceOf( Cycle::class, $head );
-		$this->assertSame( 1, $head->get_count() );
+		// Cycle 2 was billed from the snapshot's cadence.
+		$cycle = ( new ContractRepository() )->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $cycle );
+		$this->assertSame( 2, $cycle->get_count() );
+		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
 	}
 
 	/**

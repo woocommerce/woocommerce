@@ -371,7 +371,19 @@ final class RenewalEngine {
 		if ( $snapshot instanceof PlanSnapshot ) {
 			$payload = $snapshot->to_array();
 			if ( isset( $payload['billing_policy'] ) && is_array( $payload['billing_policy'] ) ) {
-				return BillingPolicy::from_array( self::string_keyed( $payload['billing_policy'] ) );
+				try {
+					return BillingPolicy::from_array( self::string_keyed( $payload['billing_policy'] ) );
+				} catch ( \DomainException $e ) {
+					// A corrupt stored policy must not crash the scheduled run; fall through to the
+					// live plan below so the renewal can still resolve on current terms.
+					wc_get_logger()->warning(
+						sprintf( 'RenewalEngine: contract %d has an unreadable plan-snapshot billing policy; falling back to the live plan. %s', (int) $contract->get_id(), $e->getMessage() ),
+						array(
+							'source'      => self::LOG_SOURCE,
+							'contract_id' => (int) $contract->get_id(),
+						)
+					);
+				}
 			}
 		}
 
@@ -507,32 +519,56 @@ final class RenewalEngine {
 			$renewal_order->set_payment_method_title( (string) $instrument->get_title() );
 		}
 
-		// Addresses come from the contract (its live source of truth), not the origin order.
+		// Addresses come from the contract (its live source of truth), not the origin order. The
+		// array setters only hydrate the order in memory (persisted by the save() below), unlike
+		// the legacy set_address() which writes post meta directly.
 		$addresses = $contract->get_addresses();
 		if ( isset( $addresses['billing'] ) && is_array( $addresses['billing'] ) ) {
-			$renewal_order->set_address( $addresses['billing'], 'billing' );
+			$renewal_order->set_billing_address( $addresses['billing'] );
 		}
 		if ( isset( $addresses['shipping'] ) && is_array( $addresses['shipping'] ) ) {
-			$renewal_order->set_address( $addresses['shipping'], 'shipping' );
+			$renewal_order->set_shipping_address( $addresses['shipping'] );
 		}
 
-		// Only the contract's recurring line items - the origin order's one-time cart items
-		// are deliberately excluded so a mixed checkout cannot leak onto a renewal.
-		foreach ( $contract->get_items() as $item ) {
-			$line = new WC_Order_Item_Product();
-			$line->set_name( self::item_string( $item, 'item_name' ) );
-			$line->set_product_id( self::item_int( $item, 'product_id' ) );
-			$line->set_variation_id( self::item_int( $item, 'variation_id' ) );
-			$line->set_quantity( max( 1, self::item_int( $item, 'quantity' ) ) );
-			$line->set_subtotal( self::item_string( $item, 'subtotal' ) );
-			$line->set_total( self::item_string( $item, 'total' ) );
-			$renewal_order->add_item( $line );
+		// Only the contract's recurring line items - the origin order's one-time cart items are
+		// deliberately excluded so a mixed checkout cannot leak onto a renewal. A line for a
+		// since-deleted product makes WC_Order_Item_Product::set_product_id() throw; treat the
+		// whole build as a recoverable skip (logged, null) rather than let it reach the scheduler
+		// as a permanent failure that retries forever.
+		try {
+			foreach ( $contract->get_items() as $item ) {
+				$line = new WC_Order_Item_Product();
+				$line->set_name( self::item_string( $item, 'item_name' ) );
+				$line->set_product_id( self::item_int( $item, 'product_id' ) );
+				$line->set_variation_id( self::item_int( $item, 'variation_id' ) );
+				$line->set_quantity( max( 1, self::item_int( $item, 'quantity' ) ) );
+				$line->set_subtotal( self::item_string( $item, 'subtotal' ) );
+				$line->set_total( self::item_string( $item, 'total' ) );
+				$renewal_order->add_item( $line );
+			}
+		} catch ( Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'RenewalEngine: cannot build renewal items for contract %d (a product may have been deleted): %s', (int) $contract->get_id(), $e->getMessage() ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => (int) $contract->get_id(),
+				)
+			);
+			return null;
 		}
 
 		// The new cycle's expected_total is the price authority - applied after add_item() so
 		// the line items do not recompute over it. Reconstructing the granular discount /
 		// shipping / tax breakdown is a later money-path's job.
 		$renewal_order->set_total( $expected_total );
+
+		// Tag the renewal relation + chargeable number so the idempotency check can detect a
+		// duplicate fire, and save before attaching the token so a crash between the two leaves
+		// the order findable (no duplicate charge on the retry).
+		$renewal_order->update_meta_data( OrderLinkage::META_CONTRACT_ID, (string) $contract->get_id() );
+		$renewal_order->update_meta_data( OrderLinkage::META_RELATION_TYPE, OrderLinkage::RELATION_RENEWAL );
+		$renewal_order->update_meta_data( self::renewal_cycle_meta_key(), (string) $count );
+		$renewal_order->save();
 
 		$token_id = $instrument->get_token_id();
 		if ( null !== $token_id ) {
@@ -541,14 +577,6 @@ final class RenewalEngine {
 				$renewal_order->add_payment_token( $token );
 			}
 		}
-
-		// Tag the renewal relation + chargeable number so the idempotency check can
-		// detect a duplicate fire for the same number.
-		$renewal_order->update_meta_data( OrderLinkage::META_CONTRACT_ID, (string) $contract->get_id() );
-		$renewal_order->update_meta_data( OrderLinkage::META_RELATION_TYPE, OrderLinkage::RELATION_RENEWAL );
-		$renewal_order->update_meta_data( self::renewal_cycle_meta_key(), (string) $count );
-
-		$renewal_order->save();
 
 		return $renewal_order;
 	}
