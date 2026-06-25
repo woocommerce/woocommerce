@@ -49,7 +49,6 @@
 	"peerDependencies": {
 		"@types/react": "18.3.x",
 		"@types/react-dom": "18.3.x",
-		"@wordpress/data": "^10.0.2",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"
 	},

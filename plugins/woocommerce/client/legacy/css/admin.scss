@@ -6619,12 +6619,26 @@ img.help_tip {
 				margin-top: 0.25em;
 			}
 		}
+
 		&.woocommerce_variation h3 {
 			a.delete,
 			a.edit,
 			.sort {
 				margin-top: 0.45em;
 			}
+		}
+
+		&.woocommerce_attribute h3 .woocommerce-attribute-global-badge {
+			display: inline-block;
+			margin-inline-start: 6px;
+			border-radius: 4px;
+			background: $gray-100;
+			padding: 4px 6px;
+			color: #3c434a;
+			font-size: 12px;
+			font-weight: 400;
+			line-height: 16px;
+			vertical-align: middle;
 		}
 
 		table {
@@ -9744,6 +9758,34 @@ body.woocommerce-settings-payments-section_legacy {
 		left: 0;
 		background: linear-gradient(to bottom right, transparent 47%, #7e8993 47%, #7e8993 53%, transparent 53%);
 	}
+}
+
+.wc-admin-visual-attribute-term-option {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+
+	.wc-admin-color-swatch {
+		margin-right: 0;
+		flex-shrink: 0;
+		height: 16px;
+		width: 16px;
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+	}
+}
+
+.select2-selection__choice .wc-admin-visual-attribute-term-option {
+	gap: 6px;
+	vertical-align: middle;
+	margin-bottom: 1px;
+	margin-inline-start: 2px;
+}
+
+.select2-results__option .wc-admin-visual-attribute-term-option {
+	margin-top: 2px;
+	width: 100%;
 }
 
 .wc-admin-visual-attribute-type fieldset {

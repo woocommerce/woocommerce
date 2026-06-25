@@ -432,13 +432,11 @@ const ShellHeader = ( {
 	return (
 		<Page
 			className="wc-settings-ui-shell"
-			headingLevel={ 1 }
 			title={ title }
 			subTitle={ shell.subtitle }
 			breadcrumbs={ breadcrumbs }
 			badges={ badges }
 			actions={ actions }
-			showSidebarToggle={ false }
 		>
 			{ hasNavigation ? (
 				<div className="wc-settings-ui-shell__navigation">

@@ -357,36 +357,13 @@
 			"isIgnored": true
 		},
 		{
-			"label": "@woocommerce/product-editor and admin-library must stay on @wordpress/interface ^5.24.0 because product-editor imports private build-module components that are not compatible with the wp-min catalog version yet.",
-			"dependencies": [
-				"@wordpress/interface"
-			],
-			"packages": [
-				"@woocommerce/product-editor",
-				"@woocommerce/admin-library"
-			],
-			"pinVersion": "^5.24.0"
-		},
-		{
 			"dependencies": [
 				"@wordpress/router",
 				"@wordpress/edit-site",
-				"@wordpress/private-apis",
-				"@wordpress/dataviews",
-				"@wordpress/icons"
+				"@wordpress/private-apis"
 			],
 			"packages": [
 				"@woocommerce/admin-library"
-			],
-			"isIgnored": true
-		},
-		{
-			"label": "Ignore all syncpack rules for experimental-products-app",
-			"dependencies": [
-				"**"
-			],
-			"packages": [
-				"@woocommerce/experimental-products-app"
 			],
 			"isIgnored": true
 		},
@@ -476,6 +453,22 @@
 			"isIgnored": true
 		},
 		{
+			"label": "experimental-products-app uses custom WordPress package versions",
+			"dependencies": [
+				"@wordpress/admin-ui",
+				"@wordpress/base-styles",
+				"@wordpress/dataviews",
+				"@wordpress/icons",
+				"@wordpress/router",
+				"@wordpress/theme",
+				"@wordpress/ui"
+			],
+			"packages": [
+				"@woocommerce/experimental-products-app"
+			],
+			"isIgnored": true
+		},
+		{
 			"label": "@wordpress/* dependencies that WooCommerce bundles instead of externalizing to WordPress",
 			"dependencyTypes": [
 				"prod",
@@ -483,8 +476,15 @@
 			],
 			"dependencies": [
 				"@wordpress/admin-ui",
+				"@wordpress/base-styles",
+				"@wordpress/dataviews",
+				"@wordpress/fields",
 				"@wordpress/icons",
-				"@wordpress/interface"
+				"@wordpress/interface",
+				"@wordpress/style-runtime",
+				"@wordpress/ui",
+				"@wordpress/undo-manager",
+				"@wordpress/views"
 			],
 			"packages": [
 				"**"
