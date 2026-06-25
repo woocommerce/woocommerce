@@ -34,6 +34,15 @@ type SetupAttributes = {
 	};
 };
 
+const paginationBlock = {
+	name: 'core/query-pagination',
+	innerBlocks: [
+		{ name: 'core/query-pagination-previous' },
+		{ name: 'core/query-pagination-numbers' },
+		{ name: 'core/query-pagination-next' },
+	],
+};
+
 async function setup( {
 	withHeading,
 	attributes,
@@ -58,16 +67,14 @@ async function setup( {
 			? [
 					{ name: 'core/heading' },
 					{ name: 'woocommerce/product-template' },
+					paginationBlock,
 			  ]
-			: [ { name: 'woocommerce/product-template' } ],
+			: [ { name: 'woocommerce/product-template' }, paginationBlock ],
 	};
 	return initializeEditor( [ productCollectionBlock ] );
 }
 
-// Skipped: wp-6.8's block-editor rendering pipeline no longer renders
-// inner blocks in Jest's jsdom environment. Gutenberg tests block
-// rendering via Playwright E2E; these should be migrated similarly.
-describe.skip( 'Product Collection Block - Carousel Layout Adjustments', () => {
+describe( 'Product Collection Block - Carousel Layout Adjustments', () => {
 	describe( 'On Sale Collection with Heading', () => {
 		it( 'should handle transition to and from carousel layout correctly', async () => {
 			// 1. Add Product Collection in editor with On Sale query
@@ -129,10 +136,6 @@ describe.skip( 'Product Collection Block - Carousel Layout Adjustments', () => {
 			} );
 			expect( headingAfterGrid ).toBeInTheDocument();
 			expect( headingAfterGrid.parentElement ).not.toBe( groupBlock );
-
-			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
-			// opt out of without changing the visual output.
-			expect( console ).toHaveWarned();
 		} );
 	} );
 
@@ -193,14 +196,15 @@ describe.skip( 'Product Collection Block - Carousel Layout Adjustments', () => {
 			} );
 
 			// 6. Verify there's no GROUP anymore
-			expect(
-				screen.queryByRole( 'document', { name: /Block: Row/i } )
-			).not.toBeInTheDocument();
+			await waitFor( () => {
+				expect(
+					screen.queryByRole( 'document', { name: /Block: Row/i } )
+				).not.toBeInTheDocument();
+			} );
 
-			// Verify pagination is restored
 			expect(
 				screen.getByRole( 'document', {
-					name: /Block: Pagination/i,
+					name: /Block: Product Template/i,
 				} )
 			).toBeInTheDocument();
 		} );

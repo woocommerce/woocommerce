@@ -4,8 +4,6 @@
 import { act, screen, waitFor } from '@testing-library/react';
 import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 import { type BlockAttributes } from '@wordpress/blocks';
-import { getAllByRole, getByLabelText } from '@testing-library/dom';
-import { userEvent } from '@testing-library/user-event';
 import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
@@ -28,6 +26,7 @@ import '../../../atomic/blocks/product-elements/button/index';
 import '../../../atomic/blocks/product-elements/title/index';
 import '../../product-template/index.tsx';
 import '../../product-collection/index.tsx';
+import { getAllowedBlocks } from '../../cart-checkout-shared/editor-utils';
 
 async function setup( attributes: BlockAttributes ) {
 	const testBlock = [ { name: 'woocommerce/cart', attributes } ];
@@ -65,93 +64,17 @@ describe( 'Cart block editor integration', () => {
 		} );
 	} );
 
-	// Skipped: wp-6.8's block-editor rendering pipeline no longer renders
-	// inner blocks in Jest's jsdom environment. Gutenberg tests block
-	// rendering via Playwright E2E; these should be migrated similarly.
-	it.skip( 'inner blocks can be added/removed by filters', async () => {
-		await setup( {} );
+	it( 'inner blocks can be added/removed by filters', () => {
+		expect(
+			getAllowedBlocks( 'woocommerce/cart-order-summary-block' )
+		).toEqual( expect.arrayContaining( [ 'core/table', 'core/audio' ] ) );
 
-		// Verify Cart block is properly initialized in the editor.
-		await waitFor( () => {
-			expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeVisible();
-			// Test Order Summary block - should have both Table and Audio options (specific filter applied).
-		} );
-
-		await waitFor( () => {
-			expect(
-				screen.getByLabelText( /^Block: Order Summary$/i )
-			).toBeVisible();
-		} );
-
-		await selectBlock( /^Block: Order Summary$/i );
-
-		const orderSummaryBlock = screen.getByLabelText(
-			/^Block: Order Summary$/i
+		expect( getAllowedBlocks( 'woocommerce/filled-cart-block' ) ).toEqual(
+			expect.arrayContaining( [ 'core/table' ] )
 		);
-
-		const orderSummaryAddButton = getByLabelText(
-			orderSummaryBlock,
-			/^Add block$/i
-		);
-
-		// Open the block inserter for Order Summary.
-		await act( async () => {
-			await userEvent.click( orderSummaryAddButton );
-		} );
-
-		const options = screen.getAllByRole( 'option' );
-		const tableOption = options.find(
-			( element ) => element.textContent === 'Table'
-		);
-		const audioOption = options.find(
-			( element ) => element.textContent === 'Audio'
-		);
-
-		await waitFor( () => {
-			// Verify Table option is available (should be available on all blocks).
-			expect( tableOption ).toBeVisible();
-
-			// Verify Audio option is available (added only for order summary block).
-			expect( audioOption ).toBeVisible();
-		} );
-
-		// Test Filled Cart block - should only have Table option (no block-specific Audio filter).
-		const filledCartBlock = screen.getByLabelText( /Block: Filled Cart/i );
-		await act( async () => {
-			await userEvent.click( filledCartBlock );
-		} );
-
-		if ( ! filledCartBlock.parentElement ) {
-			throw new Error( 'Filled Cart block parent element not found.' );
-		}
-
-		// Find and click the first "Add block" button within the Filled Cart context.
-		const filledCartAddButtons = getAllByRole(
-			filledCartBlock.parentElement,
-			'button',
-			{
-				name: /^Add block$/i,
-			}
-		);
-
-		// Open the block inserter for Filled Cart.
-		await act( async () => {
-			await userEvent.click( filledCartAddButtons[ 0 ] );
-		} );
-
-		// Verify Table option is still available (general filter applies to all cart blocks).
-		const filledCartTableOption = screen.getByRole( 'option', {
-			name: /Table/i,
-		} );
-		await waitFor( () => {
-			expect( filledCartTableOption ).toBeVisible();
-		} );
-
-		// Verify Audio option is NOT available (block-specific filter only applies to Order Summary).
-		const filledCartAudioOption = screen.queryByRole( 'option', {
-			name: /Audio/i,
-		} );
-		expect( filledCartAudioOption ).not.toBeInTheDocument();
+		expect(
+			getAllowedBlocks( 'woocommerce/filled-cart-block' )
+		).not.toContain( 'core/audio' );
 	} );
 
 	it( 'renders the Product collection cross-sells', async () => {
@@ -201,80 +124,17 @@ describe( 'Cart block editor integration', () => {
 		} );
 	} );
 
-	// Skipped: wp-6.8's block-editor rendering pipeline no longer renders
-	// inner blocks in Jest's jsdom environment. Gutenberg tests block
-	// rendering via Playwright E2E; these should be migrated similarly.
-	it.skip( 'can convert to Empty Cart block', async () => {
-		// Setup the cart block with default attributes (filled cart view)
-		await setup( {} );
+	it( 'can render the Empty Cart block view', async () => {
+		await setup( { currentView: 'woocommerce/empty-cart-block' } );
 
 		// Verify Cart block is properly initialized in the editor
 		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeVisible();
 
-		await selectBlock( /Block: Filled Cart/i );
-
 		const filledCartBlock = screen.getByLabelText( /Block: Filled Cart/i );
 		const emptyCartBlock = screen.getByLabelText( /Block: Empty Cart/i );
 
-		expect( filledCartBlock ).toBeVisible();
-		expect( filledCartBlock ).not.toHaveAttribute( 'hidden' );
 		expect( emptyCartBlock ).toBeInTheDocument();
-		expect( emptyCartBlock ).toHaveAttribute( 'hidden' );
-
-		await waitFor( () => {
-			expect(
-				screen.getByLabelText( /Block: Filled Cart$/i )
-			).toBeVisible();
-		} );
-
-		const selectParentBlockButton = screen.getByRole( 'button', {
-			name: /Select parent block: Cart/i,
-		} );
-
-		await act( async () => {
-			await userEvent.click( selectParentBlockButton );
-		} );
-
-		const switchViewButton = screen.getByRole( 'button', {
-			name: /Switch view/i,
-		} );
-
-		await act( async () => {
-			await userEvent.click( switchViewButton );
-		} );
-
-		expect( switchViewButton ).toHaveAttribute( 'aria-expanded', 'true' );
-
-		const emptyCartButton = screen.getByRole( 'menuitem', {
-			name: /Empty Cart/i,
-		} );
-
-		await act( async () => {
-			await userEvent.click( emptyCartButton );
-		} );
-
-		expect(
-			screen.getByLabelText( /^Block: Empty Cart$/i )
-		).toBeInTheDocument();
-		expect( emptyCartBlock ).toHaveAttribute( 'hidden', '' );
-		expect( emptyCartBlock ).toHaveAttribute( 'hidden' );
-
-		// Go back to filled cart
-		await act( async () => {
-			await userEvent.click( switchViewButton );
-		} );
-
-		expect( switchViewButton ).toHaveAttribute( 'aria-expanded', 'true' );
-
-		const filledCartButton = screen.getByRole( 'menuitem', {
-			name: /Filled Cart/i,
-		} );
-
-		await act( async () => {
-			await userEvent.click( filledCartButton );
-		} );
-
-		expect( emptyCartBlock ).toHaveAttribute( 'hidden' );
-		expect( filledCartBlock ).not.toHaveAttribute( 'hidden' );
+		expect( emptyCartBlock ).not.toHaveAttribute( 'hidden' );
+		expect( filledCartBlock ).toHaveAttribute( 'hidden' );
 	} );
 } );
