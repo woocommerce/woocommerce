@@ -43,12 +43,14 @@ $review_author_display = wc_trim_string( $review_author, 24 );
 	<h4 class="meta">
 		<a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>" title="<?php echo esc_attr( $product_name ); ?>"><?php echo wp_kses_post( $product_name_display ); ?></a>
 		<?php
-		/* translators: %s: review author */
+		$reviewed_by = sprintf(
+			// translators: %s: review author.
+			__( 'reviewed by %s', 'woocommerce' ),
+			'<span title="' . esc_attr( $review_author ) . '">' . esc_html( $review_author_display ) . '</span>'
+		);
+
 		echo wp_kses(
-			sprintf(
-				__( 'reviewed by %s', 'woocommerce' ),
-				'<span title="' . esc_attr( $review_author ) . '">' . esc_html( $review_author_display ) . '</span>'
-			),
+			$reviewed_by,
 			array(
 				'span' => array(
 					'title' => true,
