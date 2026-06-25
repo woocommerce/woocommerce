@@ -55,6 +55,7 @@ class CartItemUtils {
 	 *              or when the $cart_item array is malformed.
 	 */
 	public static function has_cart_item_data( array $cart_item ): bool {
+		// @phpstan-ignore isset.property (WC()->cart is declared non-null but can be null before WC fully initialises; the guard is load-bearing for early-bootstrap callers)
 		if ( ! isset( WC()->cart ) ) {
 			return false;
 		}
