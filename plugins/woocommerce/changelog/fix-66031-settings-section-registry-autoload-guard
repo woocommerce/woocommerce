@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a fatal error on WooCommerce admin screens when the SettingsSectionRegistry class cannot be autoloaded during an in-place upgrade by guarding the legacy settings section lookups with class_exists().

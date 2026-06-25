@@ -236,7 +236,9 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	 * @return bool
 	 */
 	private function is_registered_settings_section( $section ): bool {
-		if ( '' === (string) $section ) {
+		// The registry is autoloaded from src/; during the brief in-place-upgrade window a stale
+		// classmap may not resolve it yet, so guard to degrade gracefully instead of fataling.
+		if ( '' === (string) $section || ! class_exists( SettingsSectionRegistry::class ) ) {
 			return false;
 		}
 

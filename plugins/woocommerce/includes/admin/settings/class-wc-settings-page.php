@@ -266,6 +266,12 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 * @return array Settings array, each item being an associative array representing a setting.
 		 */
 		protected function get_settings_for_section_core( $section_id ) {
+			// The registry is autoloaded from src/; during the brief in-place-upgrade window a stale
+			// classmap may not resolve it yet, so guard to degrade gracefully instead of fataling.
+			if ( ! class_exists( SettingsSectionRegistry::class ) ) {
+				return array();
+			}
+
 			$registered_section = SettingsSectionRegistry::get_instance()->get_registered( $this->id, (string) $section_id );
 
 			return $registered_section ? $registered_section->get_settings( $this ) : array();
@@ -277,16 +283,21 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 * @return array
 		 */
 		public function get_sections() {
-			$sections            = $this->get_own_sections();
-			$registered_sections = SettingsSectionRegistry::get_instance()->get_sections_for_page( $this->id );
+			$sections = $this->get_own_sections();
 
-			foreach ( $registered_sections as $section_id => $section_label ) {
-				// Preserve sections declared by the settings page when a registered section uses the same id.
-				if ( array_key_exists( $section_id, $sections ) ) {
-					continue;
+			// The registry is autoloaded from src/; during the brief in-place-upgrade window a stale
+			// classmap may not resolve it yet, so guard to degrade gracefully instead of fataling.
+			if ( class_exists( SettingsSectionRegistry::class ) ) {
+				$registered_sections = SettingsSectionRegistry::get_instance()->get_sections_for_page( $this->id );
+
+				foreach ( $registered_sections as $section_id => $section_label ) {
+					// Preserve sections declared by the settings page when a registered section uses the same id.
+					if ( array_key_exists( $section_id, $sections ) ) {
+						continue;
+					}
+
+					$sections[ $section_id ] = $section_label;
 				}
-
-				$sections[ $section_id ] = $section_label;
 			}
 
 			/**
