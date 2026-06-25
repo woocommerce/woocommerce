@@ -234,7 +234,10 @@ export const SearchListItem = < T extends object = object >( {
 			) }
 		</div>
 	) : (
-		<div className={ classes }>
+		// Items can be enabled via the radios and checkboxes. But we make the
+		// whole row clickable for convenience.
+		// eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
+		<div className={ classes } onClick={ onSelect( item ) }>
 			{ isSingle ? (
 				<>
 					<input
@@ -246,6 +249,7 @@ export const SearchListItem = < T extends object = object >( {
 						onChange={ onSelect( item ) }
 						checked={ isSelected }
 						className="woocommerce-search-list__item-input"
+						onClick={ ( e ) => e.stopPropagation() }
 					/>
 
 					<label htmlFor={ id }>
@@ -266,6 +270,7 @@ export const SearchListItem = < T extends object = object >( {
 					onChange={ onSelect( item ) }
 					checked={ isSelected }
 					__nextHasNoMarginBottom={ true }
+					onClick={ ( e ) => e.stopPropagation() }
 				/>
 			) }
 
