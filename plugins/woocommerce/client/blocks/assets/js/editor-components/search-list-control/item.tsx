@@ -145,6 +145,13 @@ export const SearchListItem = < T extends object = object >( {
 		setExpandedPanelId( -1 );
 	}, [ isExpanded, item.id, item.parent, setExpandedPanelId ] );
 
+	// Non-selectable items (like Product Attributes) should look selecteed when
+	// all their descendants are selected, but look indeterminate when only some
+	// are selected.
+	const looksSelected =
+		isSelected ||
+		( ! isSelectable && areAllDescendantsSelected( item, selected ) );
+
 	return hasChildren ? (
 		<div
 			className={ classes }
@@ -179,9 +186,9 @@ export const SearchListItem = < T extends object = object >( {
 				<>
 					<CheckboxControl
 						className="woocommerce-search-list__item-input"
-						checked={ isSelected }
+						checked={ looksSelected }
 						indeterminate={
-							! isSelected &&
+							! looksSelected &&
 							areSomeDescendantsSelected( item, selected )
 						}
 						label={ getHighlightedName(
