@@ -102,7 +102,7 @@
 		// Separate consecutive sections rather than relying on the last child,
 		// so adding a new section (e.g. the site-visibility-badge toggle) does
 		// not remove the spacing between the sections above it.
-		& + .site-visibility-settings-slotfill-section {
+		+ .site-visibility-settings-slotfill-section {
 			margin-top: 16px;
 		}
 
