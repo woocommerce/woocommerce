@@ -137,9 +137,10 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * When the user ID is invalid (not logged in), the filter should not change the default value.
+	 * When the user ID is invalid, get_user_option short-circuits before the
+	 * filter is reached, so the default value stays unchanged.
 	 */
-	public function test_filter_returns_default_value_when_no_current_user() {
+	public function test_filter_does_not_reach_callback_when_user_not_logged_in() {
 		wp_set_current_user( 0 );
 
 		$menus = new WC_Admin_Menus();
@@ -148,6 +149,16 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 		$hidden = get_user_option( 'metaboxhidden_nav-menus' );
 
 		// get_user_option returns false for an invalid user ID, so the default filter should not be reached.
+		$this->assertFalse( $hidden );
+	}
+
+	/**
+	 * The callback should return the default value unchanged when no user object is passed.
+	 */
+	public function test_filter_returns_default_value_when_no_user_object() {
+		$menus  = new WC_Admin_Menus();
+		$hidden = $menus->filter_default_nav_menu_hidden_meta_boxes( false, 'metaboxhidden_nav-menus', null );
+
 		$this->assertFalse( $hidden );
 	}
 

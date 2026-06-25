@@ -439,6 +439,11 @@ class WC_Admin_Menus {
 	 * taxonomy boxes, so WP's existing-user guard short-circuits and leaves
 	 * them visible.
 	 *
+	 * The hidden list is recomputed on each Menus page visit until the user
+	 * saves a preference, because we are bypassing the core path that would
+	 * normally persist it. This is intentional and the cost is negligible
+	 * since it only runs on this admin screen.
+	 *
 	 * @since 11.0.0
 	 *
 	 * @return void
@@ -462,11 +467,13 @@ class WC_Admin_Menus {
 	 * @return mixed The filtered option value.
 	 */
 	public function filter_default_nav_menu_hidden_meta_boxes( $result, $option, $user ) {
+		global $wp_meta_boxes;
+
 		if ( false !== $result ) {
 			return $result;
 		}
 
-		if ( ! $user || ! isset( $GLOBALS['wp_meta_boxes']['nav-menus'] ) || ! is_array( $GLOBALS['wp_meta_boxes']['nav-menus'] ) ) {
+		if ( ! $user || ! isset( $wp_meta_boxes['nav-menus'] ) || ! is_array( $wp_meta_boxes['nav-menus'] ) ) {
 			return $result;
 		}
 
@@ -484,7 +491,7 @@ class WC_Admin_Menus {
 		}
 
 		$hidden = array();
-		foreach ( $GLOBALS['wp_meta_boxes']['nav-menus'] as $context => $priorities ) {
+		foreach ( $wp_meta_boxes['nav-menus'] as $context => $priorities ) {
 			foreach ( (array) $priorities as $priority => $boxes ) {
 				foreach ( (array) $boxes as $box ) {
 					if ( isset( $box['id'] ) && ! in_array( $box['id'], $visible, true ) ) {
