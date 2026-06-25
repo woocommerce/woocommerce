@@ -6,8 +6,11 @@ import { fireEvent, render, screen } from '@testing-library/react';
 /**
  * Internal dependencies
  */
-import { SearchListControl } from '..';
-import type { SearchListItem } from '../types';
+import { SearchListControl, SearchListItem } from '..';
+import type {
+	RenderItemArgs,
+	SearchListItem as SearchListItemType,
+} from '../types';
 
 const hierarchicalList = [
 	{ id: 1, name: 'Apricots', parent: 0, value: 'apricots' },
@@ -16,11 +19,18 @@ const hierarchicalList = [
 	{ id: 4, name: 'Guava', parent: 3, value: 'guava' },
 	{ id: 5, name: 'Lychee', parent: 0, value: 'lychee' },
 	{ id: 6, name: 'Mulberry', parent: 0, value: 'mulberry' },
-] as SearchListItem[];
+] as SearchListItemType[];
+
+const renderNonSelectableParentItem = ( args: RenderItemArgs ) => (
+	<SearchListItem { ...args } isSelectable={ ! args.item.children?.length } />
+);
 
 const renderHierarchicalControl = ( {
-	selected = [] as SearchListItem[],
+	selected = [] as SearchListItemType[],
 	onChange = jest.fn(),
+	renderItem = undefined as
+		| ( ( args: RenderItemArgs ) => JSX.Element )
+		| undefined,
 } = {} ) =>
 	render(
 		<SearchListControl
@@ -30,6 +40,7 @@ const renderHierarchicalControl = ( {
 			list={ hierarchicalList }
 			selected={ selected }
 			onChange={ onChange }
+			renderItem={ renderItem }
 		/>
 	);
 
@@ -80,7 +91,7 @@ describe( 'SearchListControl hierarchy interactions', () => {
 		fireEvent.click( screen.getByRole( 'checkbox', { name: 'Apricots' } ) );
 
 		const selectedIds = onChange.mock.calls[ 0 ][ 0 ].map(
-			( item: SearchListItem ) => item.id
+			( item: SearchListItemType ) => item.id
 		);
 		expect( selectedIds ).toEqual( [ 1, 2, 3, 4 ] );
 	} );
@@ -119,5 +130,101 @@ describe( 'SearchListControl hierarchy interactions', () => {
 
 		expect( apricotsCheckbox ).toBePartiallyChecked();
 		expect( elderberryCheckbox ).toBePartiallyChecked();
+	} );
+
+	describe( 'isSelectable', () => {
+		test( 'shows a non-selectable parent as checked when all descendants are selected', () => {
+			const { container } = renderHierarchicalControl( {
+				selected: hierarchicalList.filter( ( { id } ) =>
+					[ 2, 3, 4 ].includes( Number( id ) )
+				),
+				renderItem: renderNonSelectableParentItem,
+			} );
+
+			expandCategory( container, 'Apricots' );
+
+			expect(
+				screen.getByRole( 'checkbox', { name: 'Apricots' } )
+			).toBeChecked();
+		} );
+
+		test( 'shows a non-selectable parent as indeterminate when only some descendants are selected', () => {
+			const { container } = renderHierarchicalControl( {
+				selected: hierarchicalList.filter(
+					( { id } ) => Number( id ) === 4
+				),
+				renderItem: renderNonSelectableParentItem,
+			} );
+
+			expandCategory( container, 'Apricots' );
+
+			expect(
+				screen.getByRole( 'checkbox', { name: 'Apricots' } )
+			).toBePartiallyChecked();
+			expect(
+				screen.getByRole( 'checkbox', { name: 'Elderberry' } )
+			).toBeChecked();
+		} );
+
+		test( 'selects only descendants when a non-selectable parent checkbox is checked', () => {
+			const onChange = jest.fn();
+			const { container } = renderHierarchicalControl( {
+				onChange,
+				renderItem: renderNonSelectableParentItem,
+			} );
+
+			expandCategory( container, 'Apricots' );
+			fireEvent.click(
+				screen.getByRole( 'checkbox', { name: 'Apricots' } )
+			);
+
+			const selectedIds = onChange.mock.calls[ 0 ][ 0 ].map(
+				( item: SearchListItemType ) => item.id
+			);
+			expect( selectedIds ).toEqual( [ 2, 3, 4 ] );
+			expect( selectedIds ).not.toContain( 1 );
+		} );
+
+		test( 'deselects only descendants when a non-selectable parent checkbox is unchecked', () => {
+			const onChange = jest.fn();
+			const selected = hierarchicalList.filter( ( { id } ) =>
+				[ 2, 3, 4 ].includes( Number( id ) )
+			);
+			const { container } = renderHierarchicalControl( {
+				onChange,
+				selected,
+				renderItem: renderNonSelectableParentItem,
+			} );
+
+			expandCategory( container, 'Apricots' );
+			fireEvent.click(
+				screen.getByRole( 'checkbox', { name: 'Apricots' } )
+			);
+
+			expect( onChange ).toHaveBeenCalledWith( [] );
+		} );
+
+		test( 'selects remaining descendants when a partially selected non-selectable parent is checked', () => {
+			const onChange = jest.fn();
+			const selected = hierarchicalList.filter(
+				( { id } ) => Number( id ) === 4
+			);
+			const { container } = renderHierarchicalControl( {
+				onChange,
+				selected,
+				renderItem: renderNonSelectableParentItem,
+			} );
+
+			expandCategory( container, 'Apricots' );
+			fireEvent.click(
+				screen.getByRole( 'checkbox', { name: 'Apricots' } )
+			);
+
+			const selectedIds = onChange.mock.calls[ 0 ][ 0 ].map(
+				( item: SearchListItemType ) => item.id
+			);
+			expect( selectedIds ).toEqual( [ 4, 2, 3 ] );
+			expect( selectedIds ).not.toContain( 1 );
+		} );
 	} );
 } );
