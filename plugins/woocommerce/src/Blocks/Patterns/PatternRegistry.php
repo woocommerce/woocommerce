@@ -143,7 +143,7 @@ class PatternRegistry {
 		}
 
 		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
-		$pattern_data['title'] = translate_with_gettext_context( $pattern_data['title'], 'Pattern title', 'woocommerce' );
+		$pattern_data['title'] = translate_with_gettext_context( wp_strip_all_tags( html_entity_decode( (string) $pattern_data['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ), 'Pattern title', 'woocommerce' );
 		if ( ! empty( $pattern_data['description'] ) ) {
 			// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
 			$pattern_data['description'] = translate_with_gettext_context( $pattern_data['description'], 'Pattern description', 'woocommerce' );
@@ -174,7 +174,6 @@ class PatternRegistry {
 
 		register_block_pattern( $pattern_data['slug'], $pattern_data );
 	}
-
 
 	/**
 	 * Convert a kebab-case string to capital case.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Remove get_entry_count() from the product feed FeedInterface to restore backward compatibility. Requiring the method broke third-party implementations (e.g. older WooCommerce Stripe Gateway versions) that implement the interface without it. The method remains available on JsonFileFeed.

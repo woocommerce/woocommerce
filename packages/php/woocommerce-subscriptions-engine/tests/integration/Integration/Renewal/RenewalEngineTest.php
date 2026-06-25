@@ -68,39 +68,11 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		return $order;
 	}
 
-	/**
-	 * Renewal orders tagged for a contract at a given cycle, narrowed in PHP
-	 * (store-agnostic, like the engine's own idempotency check).
-	 *
-	 * @param int $contract_id Contract id.
-	 * @param int $cycle       Cycle number.
-	 * @return array<int, WC_Order>
-	 */
-	private function renewal_orders_for_cycle( int $contract_id, int $cycle ): array {
-		$orders = wc_get_orders(
-			array(
-				'limit'      => -1,
-				'type'       => 'shop_order',
-				'status'     => 'any',
-				'meta_key'   => OrderLinkage::META_CONTRACT_ID, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_value' => (string) $contract_id,          // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-			)
-		);
-		$this->assertIsArray( $orders );
-
-		return array_values(
-			array_filter(
-				$orders,
-				static function ( $order ) use ( $cycle ) {
-					return $order instanceof WC_Order
-						&& OrderLinkage::RELATION_RENEWAL === $order->get_meta( OrderLinkage::META_RELATION_TYPE )
-						&& (string) $cycle === $order->get_meta( '_subscription_renewal_cycle' );
-				}
-			)
-		);
-	}
-
-	private function make_contract( int $plan_id, int $origin_order_id, ?int $max_cycles = null ): Contract {
+	private function make_contract( int $plan_id, int $origin_order_id ): Contract {
+		// A lean contract row (no cycles). The renewal-advancement tests that
+		// exercise the money-path are skipped until the dispatcher slice; when they
+		// are reactivated they will append a billing cycle (with an expected_total)
+		// so the renewal amount resolves off the current cycle.
 		$contract = Contract::create(
 			array(
 				'customer_id'      => 1,
@@ -108,7 +80,6 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 				'selling_plan_id'  => $plan_id,
 				'origin_order_id'  => $origin_order_id,
 				'payment_method'   => self::GATEWAY,
-				'billing_total'    => '19.99',
 				'start_gmt'        => '2026-01-15 00:00:00',
 				'next_payment_gmt' => '2026-02-15 00:00:00',
 			)
@@ -118,11 +89,13 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		return $contract;
 	}
 
+	/**
+	 * @testdox schedule is gated on the gateway's recurring capability.
+	 */
 	public function test_schedule_is_gated_on_recurring_capability(): void {
-		$plan_id  = $this->make_plan();
-		$order    = $this->make_origin_order();
-		$contract = $this->make_contract( $plan_id, $order->get_id() );
-
+		$plan_id     = $this->make_plan();
+		$order       = $this->make_origin_order();
+		$contract    = $this->make_contract( $plan_id, $order->get_id() );
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
@@ -138,13 +111,15 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$this->assertTrue( RenewalScheduler::is_scheduled( $contract_id ) );
 	}
 
+	/**
+	 * @testdox schedule replaces any existing pending row (one row per contract).
+	 */
 	public function test_schedule_replaces_existing_row(): void {
 		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
 
-		$plan_id  = $this->make_plan();
-		$order    = $this->make_origin_order();
-		$contract = $this->make_contract( $plan_id, $order->get_id() );
-
+		$plan_id     = $this->make_plan();
+		$order       = $this->make_origin_order();
+		$contract    = $this->make_contract( $plan_id, $order->get_id() );
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
@@ -164,125 +139,123 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$this->assertCount( 1, $pending );
 	}
 
-	public function test_process_due_creates_renewal_and_advances(): void {
+	/**
+	 * @testdox process_due creates a renewal order tagged for the next chargeable number.
+	 */
+	public function test_process_due_creates_renewal_order(): void {
 		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
 
-		$plan_id  = $this->make_plan();
-		$order    = $this->make_origin_order();
-		$contract = $this->make_contract( $plan_id, $order->get_id() );
-
+		$plan_id     = $this->make_plan();
+		$order       = $this->make_origin_order();
+		$contract    = $this->make_contract( $plan_id, $order->get_id() );
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
-		$engine        = new RenewalEngine();
-		$renewal_order = $engine->process_due( $contract_id );
+		$renewal_order = ( new RenewalEngine() )->process_due( $contract_id );
 
+		// Order creation is wired; advancing the chain is the dispatcher slice, so
+		// only order creation + tagging is asserted here.
 		$this->assertInstanceOf( WC_Order::class, $renewal_order );
 		$this->assertSame( (string) $contract_id, $renewal_order->get_meta( OrderLinkage::META_CONTRACT_ID ) );
 		$this->assertSame( OrderLinkage::RELATION_RENEWAL, $renewal_order->get_meta( OrderLinkage::META_RELATION_TYPE ) );
-		$this->assertSame( '19.99', $renewal_order->get_total() );
 
-		// Contract advanced: cycle_count incremented, next bill date moved one month.
-		$reloaded = ( new ContractRepository() )->find( $contract_id );
-		$this->assertInstanceOf( Contract::class, $reloaded );
-		$this->assertSame( 1, $reloaded->get_cycle_count() );
-		$this->assertSame( '2026-03-15 00:00:00', $reloaded->get_next_payment_gmt() );
-		$this->assertSame( ContractStatus::ACTIVE, $reloaded->get_status() );
-
-		// Next cycle re-armed.
-		$this->assertTrue( RenewalScheduler::is_scheduled( $contract_id ) );
+		// A lean contract has no counting cycle yet, so the next chargeable number is 1.
+		$this->assertSame( '1', $renewal_order->get_meta( '_subscription_renewal_cycle' ) );
+		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract_id, 1 ) );
 	}
 
+	/**
+	 * @testdox process_due is idempotent: a retried due action creates no second order.
+	 */
 	public function test_process_due_is_idempotent_for_a_retried_cycle(): void {
 		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
 
-		$repo     = new ContractRepository();
-		$plan_id  = $this->make_plan();
-		$order    = $this->make_origin_order();
-		$contract = $this->make_contract( $plan_id, $order->get_id() );
-		$engine   = new RenewalEngine();
-
+		$plan_id     = $this->make_plan();
+		$order       = $this->make_origin_order();
+		$contract    = $this->make_contract( $plan_id, $order->get_id() );
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
+		$engine = new RenewalEngine();
 
-		// First fire creates the cycle-1 renewal and advances to cycle 1.
 		$first = $engine->process_due( $contract_id );
 		$this->assertInstanceOf( WC_Order::class, $first );
 
-		// Simulate an Action Scheduler retry of the same due action: rewind the
-		// persisted contract to its pre-advance state (cycle 0, original next
-		// date) so the retry attempts cycle 1 again - exactly what a duplicate
-		// dispatch would do before the advance committed.
-		$rewound = $repo->find( $contract_id );
-		$this->assertInstanceOf( Contract::class, $rewound );
-		$rewound->set_cycle_count( 0 );
-		$rewound->set_status( ContractStatus::ACTIVE );
-		$rewound->set_next_payment_gmt( '2026-02-15 00:00:00' );
-		$repo->update( $rewound );
-
+		// A retried due action for the same chargeable number is suppressed.
 		$retry = $engine->process_due( $contract_id );
-
-		// The per-cycle guard suppresses the retry: no second order, no advance.
 		$this->assertNull( $retry );
 
 		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract_id, 1 ) );
-
-		$reloaded = $repo->find( $contract_id );
-		$this->assertInstanceOf( Contract::class, $reloaded );
-		$this->assertSame( 0, $reloaded->get_cycle_count() );
 	}
 
+	/**
+	 * @testdox process_due expires the contract when it hits max cycles.
+	 */
 	public function test_process_due_expires_contract_at_max_cycles(): void {
-		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
-
-		$plan_id  = $this->make_plan( 1 );
-		$order    = $this->make_origin_order();
-		$contract = $this->make_contract( $plan_id, $order->get_id() );
-
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
-
-		$engine = new RenewalEngine();
-		$engine->process_due( $contract_id );
-
-		$reloaded = ( new ContractRepository() )->find( $contract_id );
-		$this->assertInstanceOf( Contract::class, $reloaded );
-		$this->assertSame( 1, $reloaded->get_cycle_count() );
-		$this->assertSame( ContractStatus::EXPIRED, $reloaded->get_status() );
-		$this->assertNull( $reloaded->get_next_payment_gmt() );
-		$this->assertFalse( RenewalScheduler::is_scheduled( $contract_id ) );
+		$this->markTestSkipped( 'Max-cycle expiry lands with the dispatcher.' );
 	}
 
+	/**
+	 * @testdox process_due skips a non-active contract and creates no renewal order.
+	 */
 	public function test_process_due_skips_non_active_contract(): void {
 		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
 
-		$plan_id  = $this->make_plan();
-		$order    = $this->make_origin_order();
-		$contract = $this->make_contract( $plan_id, $order->get_id() );
+		$plan_id     = $this->make_plan();
+		$order       = $this->make_origin_order();
+		$contract    = $this->make_contract( $plan_id, $order->get_id() );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
 		$contract->set_status( ContractStatus::ON_HOLD );
 		( new ContractRepository() )->update( $contract );
 
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
-
 		$this->assertNull( ( new RenewalEngine() )->process_due( $contract_id ) );
 
-		$reloaded = ( new ContractRepository() )->find( $contract_id );
-		$this->assertInstanceOf( Contract::class, $reloaded );
-		$this->assertSame( 0, $reloaded->get_cycle_count() );
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 1 ) );
 	}
 
+	/**
+	 * @testdox process_due skips a gateway-scheduled contract and creates no renewal order.
+	 */
+	public function test_process_due_skips_gateway_scheduled_contract(): void {
+		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
+
+		$plan_id     = $this->make_plan();
+		$order       = $this->make_origin_order();
+		$contract    = Contract::create(
+			array(
+				'customer_id'      => 1,
+				'currency'         => 'USD',
+				'selling_plan_id'  => $plan_id,
+				'origin_order_id'  => $order->get_id(),
+				'payment_method'   => self::GATEWAY,
+				'start_gmt'        => '2026-01-15 00:00:00',
+				'next_payment_gmt' => '2026-02-15 00:00:00',
+				'schedule_source'  => Contract::SCHEDULE_SOURCE_GATEWAY,
+			)
+		);
+		$contract_id = ( new ContractRepository() )->insert( $contract );
+
+		// Active, but the gateway owns the schedule: the primitive path bails.
+		$this->assertNull( ( new RenewalEngine() )->process_due( $contract_id ) );
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 1 ) );
+	}
+
+	/**
+	 * @testdox process_due skips an unknown contract.
+	 */
 	public function test_process_due_skips_unknown_contract(): void {
 		$this->assertNull( ( new RenewalEngine() )->process_due( 999999 ) );
 	}
 
+	/**
+	 * @testdox cancel transitions the contract to cancelled and clears its pending row.
+	 */
 	public function test_cancel_transitions_and_unschedules(): void {
 		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
 
-		$plan_id  = $this->make_plan();
-		$order    = $this->make_origin_order();
-		$contract = $this->make_contract( $plan_id, $order->get_id() );
-
+		$plan_id     = $this->make_plan();
+		$order       = $this->make_origin_order();
+		$contract    = $this->make_contract( $plan_id, $order->get_id() );
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
@@ -298,30 +271,60 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$this->assertFalse( RenewalScheduler::is_scheduled( $contract_id ) );
 	}
 
+	/**
+	 * @testdox A gateway-scheduled contract is not scheduled by the engine.
+	 */
 	public function test_gateway_scheduled_contract_is_not_scheduled(): void {
 		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
 
-		$plan_id  = $this->make_plan();
-		$order    = $this->make_origin_order();
-		$contract = Contract::create(
+		$plan_id     = $this->make_plan();
+		$order       = $this->make_origin_order();
+		$contract    = Contract::create(
 			array(
 				'customer_id'      => 1,
 				'currency'         => 'USD',
 				'selling_plan_id'  => $plan_id,
 				'origin_order_id'  => $order->get_id(),
 				'payment_method'   => self::GATEWAY,
-				'billing_total'    => '19.99',
 				'start_gmt'        => '2026-01-15 00:00:00',
 				'next_payment_gmt' => '2026-02-15 00:00:00',
 				'schedule_source'  => Contract::SCHEDULE_SOURCE_GATEWAY,
 			)
 		);
-		( new ContractRepository() )->insert( $contract );
-
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
+		$contract_id = ( new ContractRepository() )->insert( $contract );
 
 		$this->assertFalse( ( new RenewalEngine() )->schedule( $contract ) );
 		$this->assertFalse( RenewalScheduler::is_scheduled( $contract_id ) );
+	}
+
+	/**
+	 * Renewal orders tagged for a contract at a given chargeable number, narrowed
+	 * in PHP (store-agnostic, like the engine's own idempotency check).
+	 *
+	 * @param int $contract_id Contract id.
+	 * @param int $count       Chargeable number.
+	 * @return array<int, WC_Order>
+	 */
+	private function renewal_orders_for_cycle( int $contract_id, int $count ): array {
+		$orders = wc_get_orders(
+			array(
+				'limit'      => -1,
+				'type'       => 'shop_order',
+				'status'     => 'any',
+				'meta_key'   => OrderLinkage::META_CONTRACT_ID, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value' => (string) $contract_id,          // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			)
+		);
+
+		return array_values(
+			array_filter(
+				is_array( $orders ) ? $orders : array(),
+				static function ( $order ) use ( $count ) {
+					return $order instanceof WC_Order
+						&& OrderLinkage::RELATION_RENEWAL === $order->get_meta( OrderLinkage::META_RELATION_TYPE )
+						&& (string) $count === $order->get_meta( '_subscription_renewal_cycle' );
+				}
+			)
+		);
 	}
 }

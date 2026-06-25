@@ -45766,12 +45766,6 @@ parameters:
 			path: src/Admin/Features/Blueprint/Exporters/ExportWCSettingsIntegrations.php
 
 		-
-			message: '#^Parameter \#1 \$sql of class Automattic\\WooCommerce\\Blueprint\\Steps\\RunSql constructor expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 6
-			path: src/Admin/Features/Blueprint/Exporters/ExportWCSettingsShipping.php
-
-		-
 			message: '#^Return type \(array\) of method Automattic\\WooCommerce\\Admin\\Features\\Blueprint\\Exporters\\ExportWCSettingsShipping\:\:export\(\) should be compatible with return type \(Automattic\\WooCommerce\\Blueprint\\Steps\\SetSiteOptions\) of method Automattic\\WooCommerce\\Admin\\Features\\Blueprint\\Exporters\\ExportWCSettings\:\:export\(\)$#'
 			identifier: method.childReturnType
 			count: 1
@@ -45782,12 +45776,6 @@ parameters:
 			identifier: method.childReturnType
 			count: 1
 			path: src/Admin/Features/Blueprint/Exporters/ExportWCSettingsShipping.php
-
-		-
-			message: '#^Parameter \#1 \$sql of class Automattic\\WooCommerce\\Blueprint\\Steps\\RunSql constructor expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/Blueprint/Exporters/ExportWCSettingsTax.php
 
 		-
 			message: '#^Return type \(array\) of method Automattic\\WooCommerce\\Admin\\Features\\Blueprint\\Exporters\\ExportWCSettingsTax\:\:export\(\) should be compatible with return type \(Automattic\\WooCommerce\\Blueprint\\Steps\\SetSiteOptions\) of method Automattic\\WooCommerce\\Admin\\Features\\Blueprint\\Exporters\\ExportWCSettings\:\:export\(\)$#'
@@ -46864,12 +46852,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
 
 		-
-			message: '#^Parameter \#1 \$task_list of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Task\:\:__construct\(\) expects Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\TaskList\|null, Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\TaskList given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
 			message: '#^Parameter \#2 \$product of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:maybe_set_has_product_transient\(\) expects Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -46883,12 +46865,6 @@ parameters:
 
 		-
 			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:maybe_set_has_product_transient\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
-			message: '#^Parameter \$task_list of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:__construct\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\TaskList\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
@@ -47734,13 +47710,13 @@ parameters:
 			path: src/Admin/Notes/Notes.php
 
 		-
-			message: '#^Binary operation "/" between 0\|float and int\<min, \-1\>\|int\<1, max\>\|string results in an error\.$#'
+			message: '#^Binary operation "/" between 0\|float and int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: src/Admin/Overrides/Order.php
 
 		-
-			message: '#^Binary operation "/" between float and int\<min, \-1\>\|int\<1, max\>\|string results in an error\.$#'
+			message: '#^Binary operation "/" between float and int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: src/Admin/Overrides/Order.php
@@ -47830,13 +47806,13 @@ parameters:
 			path: src/Admin/Overrides/Order.php
 
 		-
-			message: '#^Binary operation "/" between 0\|float and int\<min, \-1\>\|int\<1, max\>\|string results in an error\.$#'
+			message: '#^Binary operation "/" between 0\|float and int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: src/Admin/Overrides/OrderRefund.php
 
 		-
-			message: '#^Binary operation "/" between float and int\<min, \-1\>\|int\<1, max\>\|string results in an error\.$#'
+			message: '#^Binary operation "/" between float and int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: src/Admin/Overrides/OrderRefund.php
