@@ -144,7 +144,15 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( 3, $first_policy['duration_cycles'] );
 		$this->assertSame( 'setup', $first_fee['kind'] );
 
-		$list = $this->request( 'GET', self::BASE, array(), array( 'search' => 'plus', 'extension_slug' => self::EXTENSION_SLUG ) );
+		$list = $this->request(
+			'GET',
+			self::BASE,
+			array(),
+			array(
+				'search'         => 'plus',
+				'extension_slug' => self::EXTENSION_SLUG,
+			)
+		);
 		$this->assertSame( 200, $list->get_status() );
 		$this->assertSame( '1', $list->get_headers()['X-WP-Total'] );
 		$this->assertCount( 1, $this->response_data( $list ) );
@@ -199,21 +207,30 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$archived = $this->request(
 			'PATCH',
 			self::BASE . '/' . $first,
-			array( 'extension_slug' => self::EXTENSION_SLUG, 'status' => Plan::STATUS_ARCHIVED )
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'status'         => Plan::STATUS_ARCHIVED,
+			)
 		);
 		$this->assertSame( Plan::STATUS_ARCHIVED, $this->response_data( $archived )['status'] );
 
 		$restored = $this->request(
 			'PATCH',
 			self::BASE . '/' . $first,
-			array( 'extension_slug' => self::EXTENSION_SLUG, 'status' => Plan::STATUS_ACTIVE )
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'status'         => Plan::STATUS_ACTIVE,
+			)
 		);
 		$this->assertSame( Plan::STATUS_ACTIVE, $this->response_data( $restored )['status'] );
 
 		$reordered = $this->request(
 			'POST',
 			self::BASE . '/reorder',
-			array( 'extension_slug' => self::EXTENSION_SLUG, 'ids' => array( $second, $first ) )
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'ids'            => array( $second, $first ),
+			)
 		);
 		$this->assertSame( 200, $reordered->get_status() );
 
@@ -238,7 +255,9 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 	/**
 	 * Create a basic plan and return its id.
 	 *
-	 * @param string $name Name.
+	 * @param string $name           Plan name.
+	 * @param string $extension_slug Extension slug.
+	 * @return int Plan id.
 	 */
 	private function create_plan( string $name, string $extension_slug = self::EXTENSION_SLUG ): int {
 		$response = $this->request(

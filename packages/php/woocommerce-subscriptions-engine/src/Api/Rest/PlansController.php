@@ -108,36 +108,36 @@ final class PlansController extends WP_REST_Controller {
 							'type'        => 'string',
 							'required'    => true,
 						),
-						'page' => array(
+						'page'           => array(
 							'description' => __( 'Page number for the plan query.', 'woocommerce-subscriptions-engine' ),
 							'type'        => 'integer',
 							'required'    => false,
 						),
-						'per_page' => array(
+						'per_page'       => array(
 							'description' => __( 'Number of plans per page for the plan query.', 'woocommerce-subscriptions-engine' ),
 							'type'        => 'integer',
 							'required'    => false,
 							'default'     => self::DEFAULT_PER_PAGE,
 						),
-						'search' => array(
+						'search'         => array(
 							'description' => __( 'Search term for the plan query.', 'woocommerce-subscriptions-engine' ),
 							'type'        => 'string',
 							'required'    => false,
 						),
-						'status' => array(
+						'status'         => array(
 							'description' => __( 'Status of the plans to query.', 'woocommerce-subscriptions-engine' ),
 							'type'        => 'string',
 							'required'    => false,
 							'enum'        => array( Plan::STATUS_ACTIVE, Plan::STATUS_ARCHIVED ),
 						),
-						'orderby' => array(
+						'orderby'        => array(
 							'description' => __( 'Order by field for the plan query.', 'woocommerce-subscriptions-engine' ),
 							'type'        => 'string',
 							'required'    => false,
 							'enum'        => array( 'id', 'name', 'status', 'sort_order' ),
 							'default'     => 'sort_order',
 						),
-						'order' => array(
+						'order'          => array(
 							'description' => __( 'Order direction for the plan query.', 'woocommerce-subscriptions-engine' ),
 							'type'        => 'string',
 							'required'    => false,
@@ -217,7 +217,7 @@ final class PlansController extends WP_REST_Controller {
 
 		if ( 'any' === $extension_slug ) {
 			$extension_slugs = null;
-		} else if ( str_contains( $extension_slug, ',' ) ) {
+		} elseif ( str_contains( $extension_slug, ',' ) ) {
 			$extension_slugs = explode( ',', $extension_slug );
 		} else {
 			$extension_slugs = array( $extension_slug );
