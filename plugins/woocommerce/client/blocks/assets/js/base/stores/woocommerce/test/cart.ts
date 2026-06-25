@@ -1316,6 +1316,262 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 	} );
 
+	describe( 'findItemInCart meta-exclusion guard', () => {
+		it( 'returns undefined (no match) for a keyless lookup when the cart contains only a meta line for that product', async () => {
+			// A line with has_cart_item_data: true is a meta-differentiated line
+			// (e.g. a bundle child or add-on). The keyless matcher must not return
+			// it as the standalone line for the product. The derived count should
+			// be 0 (undefined match).
+			await loadCartStore();
+			seedCart( [
+				makeKeyedLine( {
+					key: 'meta-key-1',
+					id: 42,
+					quantity: 2,
+					has_cart_item_data: true,
+				} ),
+			] );
+
+			const result = mockState.findItemInCart( { id: 42 } );
+
+			expect( result ).toBeUndefined();
+		} );
+
+		it( 'returns only the standalone line when the cart has both a standalone and a meta line for the same product', async () => {
+			// When a product has two lines — one standalone (has_cart_item_data
+			// falsy) and one meta (has_cart_item_data: true) — the keyless matcher
+			// must return only the standalone line.
+			const standaloneLine = makeKeyedLine( {
+				key: 'standalone-key',
+				id: 42,
+				quantity: 1,
+				has_cart_item_data: false,
+			} );
+			await loadCartStore();
+			seedCart( [
+				standaloneLine,
+				makeKeyedLine( {
+					key: 'meta-key',
+					id: 42,
+					quantity: 3,
+					has_cart_item_data: true,
+				} ),
+			] );
+
+			const result = mockState.findItemInCart( { id: 42 } );
+
+			expect( result ).toBe( standaloneLine );
+			expect( result?.key ).toBe( 'standalone-key' );
+		} );
+
+		it( 'returns only the standalone line when the meta line appears before the standalone line in the cart', async () => {
+			// Order must not matter: even when the meta line is first in the
+			// array, the matcher must skip it and return the standalone line.
+			const standaloneLine = makeKeyedLine( {
+				key: 'standalone-key',
+				id: 42,
+				quantity: 1,
+				has_cart_item_data: false,
+			} );
+			await loadCartStore();
+			seedCart( [
+				makeKeyedLine( {
+					key: 'meta-key',
+					id: 42,
+					quantity: 3,
+					has_cart_item_data: true,
+				} ),
+				standaloneLine,
+			] );
+
+			const result = mockState.findItemInCart( { id: 42 } );
+
+			expect( result ).toBe( standaloneLine );
+			expect( result?.key ).toBe( 'standalone-key' );
+		} );
+
+		it( 'continues to match the correct variation standalone line and excludes a same-product meta line', async () => {
+			// For variation products, the meta-exclusion guard must AND with the
+			// attribute check: only the variation line that matches both attributes
+			// and has_cart_item_data falsy should be returned. A meta line with
+			// matching attributes must be excluded.
+			const colorRedVariation = [
+				{ attribute: 'Color', value: 'Red' },
+			] as CartItem[ 'variation' ];
+			const standaloneLine = {
+				...makeKeyedLine( {
+					key: 'var-standalone',
+					id: 42,
+					quantity: 2,
+					has_cart_item_data: false,
+				} ),
+				type: 'variation',
+				variation: colorRedVariation,
+			} as CartItem;
+			await loadCartStore();
+			seedCart( [
+				{
+					...makeKeyedLine( {
+						key: 'var-meta',
+						id: 42,
+						quantity: 5,
+						has_cart_item_data: true,
+					} ),
+					type: 'variation',
+					variation: colorRedVariation,
+				} as CartItem,
+				standaloneLine,
+			] );
+
+			const result = mockState.findItemInCart( {
+				id: 42,
+				type: 'variation',
+				variation: colorRedVariation,
+			} );
+
+			expect( result ).toBe( standaloneLine );
+			expect( result?.key ).toBe( 'var-standalone' );
+		} );
+
+		it( 'returns undefined when no variation in the cart matches the requested attributes', async () => {
+			// A request for a variation that is not in the cart at all must
+			// return undefined, even if other variations exist.
+			const colorRedVariation = [
+				{ attribute: 'Color', value: 'Red' },
+			] as CartItem[ 'variation' ];
+			const colorBlueVariation = [
+				{ attribute: 'Color', value: 'Blue' },
+			] as CartItem[ 'variation' ];
+			await loadCartStore();
+			seedCart( [
+				{
+					...makeKeyedLine( {
+						key: 'var-blue',
+						id: 42,
+						quantity: 1,
+						has_cart_item_data: false,
+					} ),
+					type: 'variation',
+					variation: colorBlueVariation,
+				} as CartItem,
+			] );
+
+			const result = mockState.findItemInCart( {
+				id: 42,
+				type: 'variation',
+				variation: colorRedVariation,
+			} );
+
+			expect( result ).toBeUndefined();
+		} );
+
+		it( 'returns the line for a keyed lookup regardless of has_cart_item_data (keyed lookups unaffected)', async () => {
+			// The key short-circuit runs before the meta-exclusion guard, so
+			// keyed lookups — e.g. the mini-cart stepper — always return the
+			// exact line with that key, whether it is a meta line or not.
+			const metaLine = makeKeyedLine( {
+				key: 'meta-key',
+				id: 42,
+				quantity: 2,
+				has_cart_item_data: true,
+			} );
+			await loadCartStore();
+			seedCart( [ metaLine ] );
+
+			const result = mockState.findItemInCart( {
+				id: 42,
+				key: 'meta-key',
+			} );
+
+			expect( result ).toBe( metaLine );
+		} );
+
+		it( 'treats an optimistic line without has_cart_item_data as plain and returns it from a keyless lookup', async () => {
+			// OptimisticCartItem does not carry has_cart_item_data (the field is
+			// absent — undefined). The guard must be falsy-safe: undefined is
+			// treated as falsy (plain), so the optimistic line IS matched. This
+			// preserves rapid-click compounding and the common re-add count.
+			const optimisticLine: OptimisticCartItem = {
+				id: 42,
+				quantity: 1,
+				type: 'simple',
+			};
+			await loadCartStore();
+			seedCart( [ optimisticLine ] );
+
+			const result = mockState.findItemInCart( { id: 42 } );
+
+			expect( result ).toBe( optimisticLine );
+		} );
+
+		it( 'lineMatchesProduct still includes meta lines when summing the pre-add total (meta-inclusive, unchanged)', async () => {
+			// lineMatchesProduct is intentionally meta-inclusive. It sums ALL
+			// lines of a product — including meta lines — for the pre-add total
+			// and the keyless-add suppress-keys baseline. This diverges from
+			// findItemInCart on purpose.
+			//
+			// Verification: the cart holds a meta line (qty 2) and a standalone
+			// line (qty 1) for product 42. A keyless add (+1) computes its
+			// suppress-key baseline using lineMatchesProduct, which counts both
+			// lines → preAddTotal = 3, deltaTotal = 1, expectedTotal = 4.
+			// The server returns the standalone line at 2 and the meta line
+			// unchanged at 2 → serverTotal = 4. Because serverTotal (4) ===
+			// expectedTotal (4), the pre-existing keys are suppressed and no
+			// spurious "quantity changed" notice fires.
+			//
+			// If lineMatchesProduct had been changed to skip meta lines it would
+			// compute preAddTotal = 1 (standalone only), expectedTotal = 2, and
+			// compare against serverTotal = 4 → mismatch → notice fires, failing
+			// the assertion below.
+			const QUANTITY_CHANGED = 'was changed to';
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( {
+						key: 'standalone-key',
+						id: 42,
+						quantity: 2,
+					} ),
+					makeKeyedLine( {
+						key: 'meta-key',
+						id: 42,
+						quantity: 2,
+						has_cart_item_data: true,
+					} ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( {
+					key: 'standalone-key',
+					id: 42,
+					quantity: 1,
+					has_cart_item_data: false,
+				} ),
+				makeKeyedLine( {
+					key: 'meta-key',
+					id: 42,
+					quantity: 2,
+					has_cart_item_data: true,
+				} ),
+			] );
+			const notices = spyOnUpdateNotices();
+
+			await runAction(
+				actions.addCartItem( {
+					id: 42,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+
+			// Server total (2+2=4) === expected total (3+1=4) → suppress.
+			// No "quantity changed" notice must fire.
+			expect(
+				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
+			).toBe( false );
+		} );
+	} );
+
 	describe( 'genuine add-path cap surfaces as an error notice (not an auto-update notice)', () => {
 		// The quantity-changed info notice template the auto-UPDATE branch emits.
 		const QUANTITY_CHANGED = 'was changed to';

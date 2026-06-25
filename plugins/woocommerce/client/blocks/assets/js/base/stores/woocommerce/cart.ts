@@ -44,7 +44,15 @@ export type OptimisticCartItem = {
 	id: number;
 	quantity: number;
 	variation?: CartVariationItem[];
-	type: string;
+	/**
+	 * The cart line type (e.g. `"simple"`, `"variation"`). Present on
+	 * server-confirmed lines in `state.cart.items`; absent on optimistically
+	 * created lines before the server round-trip completes. The keyless
+	 * `findItemInCart` matcher reads this field off lines already in the cart
+	 * state — never off the action argument — so callers of `addCartItem` and
+	 * `batchAddCartItems` do not need to supply it.
+	 */
+	type?: string;
 };
 
 export type ClientCartItem = Omit<
@@ -289,7 +297,7 @@ const getInfoNoticesFromCartUpdates = (
 	// We pass the optimistic snapshot as oldCart, so user-initiated removals
 	// are already absent and do not generate spurious notices here.
 	const autoDeletedToNotify = oldItems.filter(
-		( old ) =>
+		( old ): old is CartItem =>
 			isCartItem( old ) &&
 			! newItems.some( ( item ) => old.key === item.key )
 	);
@@ -302,7 +310,7 @@ const getInfoNoticesFromCartUpdates = (
 	// quantity difference on those lines is an intentional add result, not a
 	// server-initiated change. Keyed update-item lines and removeCartItem lines
 	// are never in suppressKeys, so their notice behavior is unchanged.
-	const autoUpdatedToNotify = newItems.filter( ( item ) => {
+	const autoUpdatedToNotify = newItems.filter( ( item ): item is CartItem => {
 		if ( ! isCartItem( item ) ) {
 			return false;
 		}
@@ -310,7 +318,7 @@ const getInfoNoticesFromCartUpdates = (
 			return false; // The action proved this product's add was exact.
 		}
 		const old = oldItems.find( ( o ) => o.key === item.key );
-		return old && item.quantity !== old.quantity;
+		return !! ( old && item.quantity !== old.quantity );
 	} );
 	return [
 		...autoDeletedToNotify.map( ( item ) =>
@@ -417,6 +425,22 @@ const { actions } = store< Store >(
 				return state.cart.items.find( ( cartItem ) => {
 					if ( key ) {
 						return key === cartItem.key;
+					}
+					// Exclude meta-differentiated lines from the per-product
+					// (keyless) match. A line carries `has_cart_item_data: true`
+					// when it was created with additional item metadata (e.g. a
+					// bundle child, booking, or add-on configuration) and is
+					// therefore not the standalone line that the product button
+					// count reflects. The guard is falsy-safe: `OptimisticCartItem`
+					// lacks the field entirely (`undefined` → falsy), so optimistic
+					// plain lines are still matched and rapid-click compounding is
+					// preserved. Keyed lookups are unaffected because they
+					// short-circuit on the `key` check above.
+					if (
+						! key &&
+						( cartItem as CartItem ).has_cart_item_data
+					) {
+						return false;
 					}
 					if ( cartItem.type === 'variation' ) {
 						if (

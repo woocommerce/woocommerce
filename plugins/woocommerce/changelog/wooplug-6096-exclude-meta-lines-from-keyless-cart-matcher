@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Block add to cart: the product button in-cart count now reflects only the standalone quantity; meta-differentiated lines (bundle children, bookings, add-on configurations) for the same product are no longer counted as the standalone line.
