@@ -10,12 +10,14 @@
  * the action-visibility flags. Consumers tolerate unknown fields, so this shape is
  * ADDITIVE: new fields may be added; existing ones are never removed or repurposed.
  *
- * It joins the contract row, the plan's billing cadence ({@see PlanRepository}), the
- * contract's last-updated stamp, and the order-side {@see OrderLinkage} relation into one
- * place so the controller stays a thin transport shell. Live WC objects never leave this
- * class: related orders are read here and reduced to plain arrays before they are
- * returned. A contract whose plan row is gone degrades to an empty cadence rather than
- * fataling.
+ * It shapes entirely from the (enriched) contract plus two facade reads: the billing
+ * cadence comes off the contract's own frozen plan snapshot ({@see Contract::get_plan_snapshot()},
+ * hydrated by the facade) - NOT a live {@see \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository}
+ * join - and the related orders come from {@see Subscriptions::get_related_orders()}. The
+ * contract's last-updated stamp is the one remaining repository read. Live WC objects never
+ * leave this class: related orders are reduced to plain arrays before they are returned. A
+ * contract with no hydrated plan snapshot (or one whose snapshot carries no cadence) degrades
+ * to an empty cadence rather than fataling.
  *
  * List-row shape:
  *   id, status, status_label, next_payment, payment_method_title, total
@@ -37,13 +39,12 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api\Rest;
 
 use WC_Order;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Subscriptions;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -68,21 +69,12 @@ final class ContractPresenter {
 	private $contracts;
 
 	/**
-	 * Plan repository, for the billing cadence on the contract's plan.
-	 *
-	 * @var PlanRepository
-	 */
-	private $plans;
-
-	/**
 	 * Build the presenter.
 	 *
 	 * @param ContractRepository|null $contracts Contract repository; default instance when omitted.
-	 * @param PlanRepository|null     $plans     Plan repository; default instance when omitted.
 	 */
-	public function __construct( ?ContractRepository $contracts = null, ?PlanRepository $plans = null ) {
+	public function __construct( ?ContractRepository $contracts = null ) {
 		$this->contracts = $contracts ?? new ContractRepository();
-		$this->plans     = $plans ?? new PlanRepository();
 	}
 
 	/**
@@ -179,36 +171,17 @@ final class ContractPresenter {
 	/**
 	 * Related orders for a contract, as presentation rows, newest first.
 	 *
-	 * Reads the orders tagged with this contract via the order-side {@see OrderLinkage}
-	 * meta (the flat `meta_key`/`meta_value` shortcut, which round-trips through both the
-	 * HPOS and legacy order stores). Each order is reduced to a plain presentation row
-	 * before returning - no `WC_Order` escapes.
+	 * Sources the live orders through the {@see Subscriptions::get_related_orders()} facade
+	 * (so the presenter stays facade-only, never reaching into the order-linkage internals)
+	 * and reduces each to a plain presentation row before returning - no `WC_Order` escapes.
 	 *
 	 * @param int $contract_id Contract id.
 	 * @return array<int, array<string, mixed>>
 	 */
 	private function related_orders( int $contract_id ): array {
-		$orders = wc_get_orders(
-			array(
-				'limit'      => -1,
-				'status'     => 'any',
-				'type'       => 'shop_order',
-				'orderby'    => 'date',
-				'order'      => 'DESC',
-				'meta_key'   => OrderLinkage::META_CONTRACT_ID, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_value' => (string) $contract_id,          // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-			)
-		);
-
-		if ( ! is_array( $orders ) ) {
-			return array();
-		}
-
 		$rows = array();
-		foreach ( $orders as $order ) {
-			if ( $order instanceof WC_Order ) {
-				$rows[] = $this->order_to_row( $order );
-			}
+		foreach ( Subscriptions::get_related_orders( $contract_id ) as $order ) {
+			$rows[] = $this->order_to_row( $order );
 		}
 
 		return $rows;
@@ -438,29 +411,33 @@ final class ContractPresenter {
 	}
 
 	/**
-	 * The contract's billing cadence (`period`, `interval`) from its plan.
+	 * The contract's billing cadence (`period`, `interval`) from its frozen plan snapshot.
 	 *
-	 * A contract whose plan row no longer exists degrades to an empty period and a zero
-	 * interval, which the presentation layer renders as a price with no cadence suffix
-	 * rather than fataling.
+	 * Read off the contract's hydrated plan snapshot ({@see Contract::get_plan_snapshot()}),
+	 * so the cadence is the one the contract is billed under even after the live plan it came
+	 * from is edited or deleted - no live plan-repository join. A contract with no hydrated
+	 * snapshot (or a snapshot carrying no cadence) degrades to an empty period and a zero
+	 * interval, which the presentation layer renders as a price with no cadence suffix rather
+	 * than fataling.
 	 *
 	 * @param Contract $contract The contract.
 	 * @return array{period: string, interval: int}
 	 */
 	private function billing_cadence( Contract $contract ): array {
-		$plan = $this->plans->find( $contract->get_selling_plan_id() );
-		if ( ! $plan instanceof Plan ) {
-			return array(
-				'period'   => '',
-				'interval' => 0,
-			);
+		$snapshot = $contract->get_plan_snapshot();
+		if ( null !== $snapshot ) {
+			$policy = $snapshot->get_billing_policy();
+			if ( $policy instanceof BillingPolicy ) {
+				return array(
+					'period'   => $policy->get_period(),
+					'interval' => $policy->get_interval(),
+				);
+			}
 		}
 
-		$policy = $plan->get_billing_policy();
-
 		return array(
-			'period'   => $policy->get_period(),
-			'interval' => $policy->get_interval(),
+			'period'   => '',
+			'interval' => 0,
 		);
 	}
 
