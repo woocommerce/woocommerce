@@ -30,7 +30,7 @@ const Edit = ( props: EditProps ) => {
 					'core/heading',
 					{
 						level: 3,
-						content: __( 'Status', 'woocommerce' ),
+						content: __( 'Availability', 'woocommerce' ),
 						style: {
 							spacing: {
 								margin: {
@@ -90,7 +90,7 @@ const Edit = ( props: EditProps ) => {
 			<InitialDisabled>
 				<BlockContextProvider
 					value={ {
-						woocommerceSelectableItems: {
+						'woocommerce/selectableItems': {
 							items,
 							selectionMode: 'multiple' as const,
 							storeNamespace: 'woocommerce/product-filters',

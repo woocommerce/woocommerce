@@ -55,10 +55,33 @@ class ItemEligibility {
 	public const ORDER_META_KEY = '_review_order_id';
 
 	/**
-	 * Per-request cache for the "did this email review this product on this
-	 * order" lookup, keyed by `order_id|product_id|email`. Value is a
-	 * `WP_Comment` when one matches, or `null` when the slot has been checked
-	 * and nothing matches (so a second call doesn't re-query).
+	 * Commentmeta key storing the variation id this review was submitted for.
+	 *
+	 * Always present on reviews written through the Review Order page. Simple
+	 * products store `0`. Lets variable-product orders distinguish "Small" from
+	 * "Medium" rows that share a parent product.
+	 *
+	 * @since 10.9.0
+	 */
+	public const VARIATION_META_KEY = '_review_variation_id';
+
+	/**
+	 * Commentmeta key storing a snapshot of the variation's attribute summary
+	 * (e.g. `"Size: Small, Colour: Red"`) at the moment the review was written.
+	 *
+	 * Captured at write time so historical reviews stay readable even if the
+	 * variation is later retired or its attribute taxonomies change.
+	 *
+	 * @since 10.9.0
+	 */
+	public const VARIATION_SUMMARY_META_KEY = '_review_variation_summary';
+
+	/**
+	 * Per-request cache for the "did this email review this product (and this
+	 * variation) on this order" lookup, keyed by
+	 * `order_id|product_id|variation_id|email`. Value is a `WP_Comment` when
+	 * one matches, or `null` when the slot has been checked and nothing
+	 * matches (so a second call doesn't re-query).
 	 *
 	 * @var array<string, ?WP_Comment>
 	 */
@@ -87,6 +110,37 @@ class ItemEligibility {
 			10,
 			2
 		);
+
+		// Surface the variation summary captured at submission time on the
+		// single-product Reviews tab, so a review for "Size: Small" doesn't
+		// render indistinguishably from one for "Size: Medium" on the parent
+		// product page.
+		add_action(
+			'woocommerce_review_before_comment_text',
+			array( self::class, 'render_variation_summary' )
+		);
+	}
+
+	/**
+	 * Echo the variation summary snapshot for a review comment, when present.
+	 *
+	 * Wired onto `woocommerce_review_before_comment_text` so the snapshot
+	 * stored in `_review_variation_summary` (set by the Customer Review
+	 * Request submission flow) appears immediately above the review body on
+	 * the single-product Reviews tab. Comments without the meta render
+	 * unchanged.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param \WP_Comment $comment Review comment being rendered.
+	 */
+	public static function render_variation_summary( \WP_Comment $comment ): void {
+		$summary = (string) get_comment_meta( (int) $comment->comment_ID, self::VARIATION_SUMMARY_META_KEY, true );
+		if ( '' === $summary ) {
+			return;
+		}
+
+		echo '<p class="woocommerce-review__variation-summary">' . esc_html( $summary ) . '</p>';
 	}
 
 	/**
@@ -114,11 +168,14 @@ class ItemEligibility {
 		}
 
 		$product_ids = array();
+		$slots       = array();
 		foreach ( $items as $item ) {
 			if ( $item instanceof WC_Order_Item_Product ) {
 				$pid = (int) $item->get_product_id();
+				$vid = (int) $item->get_variation_id();
 				if ( $pid > 0 ) {
-					$product_ids[ $pid ] = $pid;
+					$product_ids[ $pid ]                                       = $pid;
+					$slots[ self::cache_key( $order_id, $pid, $vid, $email ) ] = true;
 				}
 			}
 		}
@@ -128,6 +185,11 @@ class ItemEligibility {
 		}
 
 		self::$preloaded[ $preload_key ] = true;
+
+		// Default every (product, variation) slot to null so subsequent reads don't re-query.
+		foreach ( $slots as $slot_key => $_ ) {
+			self::$review_cache[ $slot_key ] = null;
+		}
 
 		// Scope to this order's reviews only: a customer who buys the same
 		// product on a later order shouldn't see their old review here.
@@ -149,18 +211,14 @@ class ItemEligibility {
 			)
 		);
 
-		// Default every product id to null so subsequent reads don't re-query.
-		foreach ( $product_ids as $pid ) {
-			self::$review_cache[ self::cache_key( $order_id, $pid, $email ) ] = null;
-		}
-
 		if ( is_array( $comments ) ) {
 			foreach ( $comments as $comment ) {
 				if ( ! $comment instanceof WP_Comment ) {
 					continue;
 				}
-				$key = self::cache_key( $order_id, (int) $comment->comment_post_ID, $email );
-				if ( null === ( self::$review_cache[ $key ] ?? null ) ) {
+				$vid = (int) get_comment_meta( (int) $comment->comment_ID, self::VARIATION_META_KEY, true );
+				$key = self::cache_key( $order_id, (int) $comment->comment_post_ID, $vid, $email );
+				if ( isset( $slots[ $key ] ) && null === self::$review_cache[ $key ] ) {
 					self::$review_cache[ $key ] = $comment;
 				}
 			}
@@ -188,14 +246,16 @@ class ItemEligibility {
 	 *
 	 * @param WC_Order_Item_Product $item  Order line item.
 	 * @param WC_Order              $order Order being reviewed.
-	 * @return array{status:string, comment:?WP_Comment, product_id:int}
+	 * @return array{status:string, comment:?WP_Comment, product_id:int, variation_id:int}
 	 */
 	public static function decide( WC_Order_Item_Product $item, WC_Order $order ): array {
-		$product_id = (int) $item->get_product_id();
-		$result     = array(
-			'status'     => self::STATUS_FORM,
-			'comment'    => null,
-			'product_id' => $product_id,
+		$product_id   = (int) $item->get_product_id();
+		$variation_id = (int) $item->get_variation_id();
+		$result       = array(
+			'status'       => self::STATUS_FORM,
+			'comment'      => null,
+			'product_id'   => $product_id,
+			'variation_id' => $variation_id,
 		);
 
 		if ( $product_id <= 0 || ! comments_open( $product_id ) ) {
@@ -203,7 +263,7 @@ class ItemEligibility {
 			return $result;
 		}
 
-		$result['comment'] = self::find_existing_review( $product_id, $order );
+		$result['comment'] = self::find_existing_review( $product_id, $variation_id, $order );
 		return $result;
 	}
 
@@ -220,7 +280,11 @@ class ItemEligibility {
 	 * @return array{rating:int, text:string, comment_id:int}
 	 */
 	public static function prefill_for_item( WC_Order_Item_Product $item, WC_Order $order ): array {
-		$existing = self::find_existing_review( (int) $item->get_product_id(), $order );
+		$existing = self::find_existing_review(
+			(int) $item->get_product_id(),
+			(int) $item->get_variation_id(),
+			$order
+		);
 		if ( ! $existing instanceof WP_Comment ) {
 			return array(
 				'rating'     => 0,
@@ -239,6 +303,107 @@ class ItemEligibility {
 			'text'       => (string) $existing->comment_content,
 			'comment_id' => (int) $existing->comment_ID,
 		);
+	}
+
+	/**
+	 * Render the variation's attribute summary as a single flat line.
+	 *
+	 * Used both at write time (snapshotted into `_review_variation_summary`)
+	 * and at render time by the Review Order row template, so the two places
+	 * always agree on what label the customer sees and what the comment
+	 * stores. Restricted to actual variation attribute slugs so personalisation
+	 * / add-on / engraving / gift-message meta from third-party plugins isn't
+	 * accidentally folded into the public review snapshot. Returns an empty
+	 * string for simple products or when the variation product can no longer
+	 * be loaded to identify its attribute slugs.
+	 *
+	 * Keys in the line item meta are stored without the `attribute_` prefix
+	 * (see `WC_Order_Item_Product::set_variation()`), so we strip the prefix
+	 * from the live variation's attribute keys to match.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param WC_Order_Item_Product $item Order line item.
+	 */
+	public static function format_variation_summary( WC_Order_Item_Product $item ): string {
+		$variation_id = (int) $item->get_variation_id();
+		if ( $variation_id <= 0 ) {
+			return '';
+		}
+
+		$variation = wc_get_product( $variation_id );
+		if ( ! $variation instanceof \WC_Product_Variation ) {
+			return '';
+		}
+
+		$attributes = array();
+		foreach ( array_keys( (array) $variation->get_variation_attributes() ) as $attribute_key ) {
+			$slug = str_replace( 'attribute_', '', (string) $attribute_key );
+			if ( '' === $slug ) {
+				continue;
+			}
+			$value = $item->get_meta( $slug, true );
+			if ( '' === $value || null === $value ) {
+				continue;
+			}
+			$attributes[ $slug ] = $value;
+		}
+
+		if ( empty( $attributes ) ) {
+			return '';
+		}
+
+		return (string) wc_get_formatted_variation( $attributes, true );
+	}
+
+	/**
+	 * Whether an order has at least one item the customer can still review.
+	 *
+	 * Walks the same eligible-items list and per-item decisions the page
+	 * renders, so the answer matches what `customer-review-order.php` would
+	 * show: items with `STATUS_SKIP` (reviews disabled on the product, or
+	 * site-wide via `woocommerce_enable_reviews`) and items already reviewed
+	 * on this order are excluded. Any remaining `STATUS_FORM` row without a
+	 * matching review counts as actionable.
+	 *
+	 * Callers in the email pipeline use this to short-circuit scheduling and
+	 * sending when the customer would otherwise land on the empty-state page.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param WC_Order $order Order being inspected.
+	 * @return bool True when at least one item is still reviewable.
+	 */
+	public static function has_actionable_items( WC_Order $order ): bool {
+		/**
+		 * Filter the eligible items considered when deciding whether the
+		 * Customer Review Request email should fire for an order.
+		 *
+		 * Same hook the page template, submission handler, and endpoint use,
+		 * so all four entry points agree on the eligible-items set.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param WC_Order_Item[] $items Order line items.
+		 * @param WC_Order        $order The order being inspected.
+		 */
+		$items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
+		self::preload_for_items( $items, $order );
+
+		foreach ( $items as $item ) {
+			if ( ! $item instanceof WC_Order_Item_Product ) {
+				continue;
+			}
+			$decision = self::decide( $item, $order );
+			if ( self::STATUS_SKIP === $decision['status'] ) {
+				continue;
+			}
+			if ( ! ( $decision['comment'] instanceof WP_Comment ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -278,22 +443,24 @@ class ItemEligibility {
 	}
 
 	/**
-	 * Look up the customer's review for a product on this order.
+	 * Look up the customer's review for a specific (product, variation) row on
+	 * this order.
 	 *
 	 * @since 10.8.0
 	 *
-	 * @param int      $product_id Product id.
-	 * @param WC_Order $order      Order being reviewed.
+	 * @param int      $product_id   Product id.
+	 * @param int      $variation_id Variation id (0 for simple products).
+	 * @param WC_Order $order        Order being reviewed.
 	 * @return WP_Comment|null
 	 */
-	private static function find_existing_review( int $product_id, WC_Order $order ): ?WP_Comment {
+	private static function find_existing_review( int $product_id, int $variation_id, WC_Order $order ): ?WP_Comment {
 		$email    = $order->get_billing_email();
 		$order_id = (int) $order->get_id();
 		if ( '' === $email || $order_id <= 0 || $product_id <= 0 ) {
 			return null;
 		}
 
-		$key = self::cache_key( $order_id, $product_id, $email );
+		$key = self::cache_key( $order_id, $product_id, $variation_id, $email );
 		if ( array_key_exists( $key, self::$review_cache ) ) {
 			return self::$review_cache[ $key ];
 		}
@@ -309,9 +476,14 @@ class ItemEligibility {
 				'orderby'            => 'comment_date_gmt',
 				'order'              => 'DESC',
 				'meta_query'         => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post_id + author_email.
+					'relation' => 'AND',
 					array(
 						'key'   => self::ORDER_META_KEY,
 						'value' => (string) $order_id,
+					),
+					array(
+						'key'   => self::VARIATION_META_KEY,
+						'value' => (string) $variation_id,
 					),
 				),
 			)
@@ -332,11 +504,12 @@ class ItemEligibility {
 	/**
 	 * Build the per-request cache key.
 	 *
-	 * @param int    $order_id   Order id.
-	 * @param int    $product_id Product id.
-	 * @param string $email      Customer email.
+	 * @param int    $order_id     Order id.
+	 * @param int    $product_id   Product id.
+	 * @param int    $variation_id Variation id (0 for simple products).
+	 * @param string $email        Customer email.
 	 */
-	private static function cache_key( int $order_id, int $product_id, string $email ): string {
-		return $order_id . '|' . $product_id . '|' . $email;
+	private static function cache_key( int $order_id, int $product_id, int $variation_id, string $email ): string {
+		return $order_id . '|' . $product_id . '|' . $variation_id . '|' . $email;
 	}
 }

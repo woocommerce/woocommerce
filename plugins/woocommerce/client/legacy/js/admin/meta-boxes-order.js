@@ -1405,6 +1405,17 @@ jQuery( function ( $ ) {
 				$( 'ul.order_notes' ).prepend( response );
 				$( '#woocommerce-order-notes' ).unblock();
 				$( '#add_order_note' ).val( '' );
+
+				// Announce the result to screen readers (WCAG 4.1.3).
+				if ( window.wp && window.wp.a11y && 'function' === typeof window.wp.a11y.speak ) {
+					var message = 'customer' === data.note_type
+						? woocommerce_admin_meta_boxes.i18n_customer_order_note_added
+						: woocommerce_admin_meta_boxes.i18n_order_note_added;
+					if ( message ) {
+						window.wp.a11y.speak( message, 'polite' );
+					}
+				}
+
 				window.wcTracks.recordEvent( 'order_edit_add_order_note', {
 					order_id: woocommerce_admin_meta_boxes.post_id,
 					note_type: data.note_type || 'private',

@@ -35,10 +35,13 @@ permissions:
 concurrency:
   group: release-bump-version-${{ inputs.branch }}
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   bump-version:
     name: Bump WooCommerce Version
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     steps:
       - name: Normalize branch input
         id: normalize-branch

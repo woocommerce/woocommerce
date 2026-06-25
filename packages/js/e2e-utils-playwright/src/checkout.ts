@@ -16,6 +16,9 @@ const addressLabels: Record< AddressType, string > = {
 	billing: 'Billing address',
 };
 
+const addressFieldVisibilityTimeout = 20_000;
+const addressFieldProbeTimeout = 1000;
+
 /**
  * Sets a field value based on its element type (select or input).
  *
@@ -30,6 +33,48 @@ async function setDynamicFieldType( field: Locator, value: string ) {
 	} else {
 		await field.fill( value );
 	}
+}
+
+/**
+ * Ensures address fields are editable before filling them.
+ *
+ * Checkout address forms may be rendered either expanded, or collapsed behind
+ * an edit button when an existing customer already has an address. This helper
+ * accepts both valid states so tests do not need to click edit buttons manually.
+ *
+ * @param page - Playwright page object
+ * @param type - The address type ('shipping' or 'billing')
+ */
+async function ensureAddressFieldsEditable( page: Page, type: AddressType ) {
+	const label = addressLabels[ type ];
+	const addressGroup = page.getByRole( 'group', { name: label } );
+	const firstNameField = addressGroup.getByLabel( 'First name' );
+
+	await addressGroup.waitFor( {
+		state: 'visible',
+		timeout: addressFieldVisibilityTimeout,
+	} );
+
+	try {
+		await firstNameField.waitFor( {
+			state: 'visible',
+			timeout: addressFieldProbeTimeout,
+		} );
+		return;
+	} catch {
+		const editButton = page.getByRole( 'button', {
+			name: `Edit ${ label.toLowerCase() }`,
+		} );
+
+		if ( await editButton.isVisible() ) {
+			await editButton.click();
+		}
+	}
+
+	await firstNameField.waitFor( {
+		state: 'visible',
+		timeout: addressFieldVisibilityTimeout,
+	} );
 }
 
 /**
@@ -66,6 +111,8 @@ async function fillCheckoutBlocks(
 	} = details;
 
 	const label = addressLabels[ type ];
+
+	await ensureAddressFieldsEditable( page, type );
 
 	await page
 		.getByRole( 'group', { name: label } )
@@ -192,6 +239,8 @@ async function fillCheckoutBlocks(
 /**
  * Convenience function to fill Shipping Address fields.
  *
+ * Opens a collapsed shipping address form automatically before filling fields.
+ *
  * @param page            - Playwright page object
  * @param shippingDetails - See CheckoutDetails type for available fields
  */
@@ -204,6 +253,8 @@ export async function fillShippingCheckoutBlocks(
 
 /**
  * Convenience function to fill Billing Address fields.
+ *
+ * Opens a collapsed billing address form automatically before filling fields.
  *
  * @param page           - Playwright page object
  * @param billingDetails - See CheckoutDetails type for available fields

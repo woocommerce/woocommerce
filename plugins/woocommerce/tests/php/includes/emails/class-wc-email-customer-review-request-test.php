@@ -257,6 +257,33 @@ class WC_Email_Customer_Review_Request_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox trigger() skips orders whose items all have reviews disabled.
+	 *
+	 * Eligibility can change between scheduling and sending — e.g. the admin
+	 * disables product reviews site-wide during the delay window — so the
+	 * email gates on `ItemEligibility::has_actionable_items()` at send time.
+	 */
+	public function test_trigger_skips_when_no_actionable_items(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_reviews_allowed( false );
+		$product->save();
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( 1, $product );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+		$this->sut->trigger( $order->get_id() );
+		$after = count( $mailer->mock_sent );
+
+		$this->assertSame( $before, $after, 'Review-request email must not dispatch when nothing on the order is reviewable.' );
+	}
+
+	/**
 	 * @testdox The woocommerce_review_order_eligible_statuses filter widens the eligible set for trigger().
 	 */
 	public function test_trigger_eligible_statuses_filter_can_widen(): void {

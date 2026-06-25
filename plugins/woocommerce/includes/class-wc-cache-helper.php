@@ -50,8 +50,16 @@ class WC_Cache_Helper {
 		if ( ! is_blog_installed() ) {
 			return $headers;
 		}
-		$page_ids = array_filter( array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ), wc_get_page_id( 'myaccount' ) ) );
 
+		// Optimization note: this is the earliest stage at which we can bulk-prime pages data. As a result, we
+		// prime data for all pages used in is_page checks across the core, even if only a subset is required here.
+		$pages                    = array( 'cart', 'checkout', 'coming_soon', 'myaccount', 'shop', 'terms' );
+		$woocommerce_page_options = array_map( static fn ( string $page ) => sprintf( 'woocommerce_%s_page_id', $page ), $pages );
+		wp_prime_option_caches( $woocommerce_page_options );
+		$woocommerce_page_ids = array_combine( $pages, array_map( static fn ( string $page ) => wc_get_page_id( $page ), $pages ) );
+		_prime_post_caches( array_values( array_filter( $woocommerce_page_ids ) ), false, false );
+
+		$page_ids = array_filter( array( $woocommerce_page_ids['cart'], $woocommerce_page_ids['checkout'], $woocommerce_page_ids['myaccount'] ) );
 		if ( ! is_page( $page_ids ) ) {
 			return $headers;
 		}

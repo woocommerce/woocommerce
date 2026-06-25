@@ -15,10 +15,8 @@ import { MARKETPLACE_PATH } from '../constants';
 
 /**
  * Search component.
- *
- * @return {JSX.Element} Search component.
  */
-function Search(): JSX.Element {
+function Search(): React.JSX.Element {
 	const [ searchTerm, setSearchTerm ] = useState( '' );
 	const searchPlaceholder = __( 'Search Marketplace', 'woocommerce' );
 

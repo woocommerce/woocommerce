@@ -134,6 +134,7 @@ const coreModules = [
 	'@woocommerce/stores/store-notices',
 	'@woocommerce/stores/woocommerce/cart',
 	'@woocommerce/stores/woocommerce/products',
+	'@woocommerce/stores/woocommerce/shopper-lists',
 	'@woocommerce/tracks',
 	'@woocommerce/data',
 	'@woocommerce/customer-effort-score',
@@ -348,6 +349,35 @@ module.exports = {
 				'@typescript-eslint/no-explicit-any': 'off',
 				'@typescript-eslint/no-shadow': 'off',
 				'no-shadow': 'off',
+			},
+		},
+		{
+			files: [
+				'assets/js/blocks/cart/**/block.{ts,tsx}',
+				'assets/js/blocks/checkout/**/block.{ts,tsx}',
+				'assets/js/blocks/**/frontend.{ts,tsx}',
+				'assets/js/base/**/*.{ts,tsx}',
+			],
+			excludedFiles: [
+				'**/edit.{ts,tsx}',
+				'**/*.test.{ts,tsx}',
+				'**/test/**',
+				'**/stories/**',
+			],
+			rules: {
+				'no-restricted-imports': [
+					'error',
+					{
+						paths: [
+							...restrictedImports,
+							{
+								name: '@wordpress/components',
+								message:
+									'@wordpress/components must not ship to the storefront. Use it only in edit.tsx.',
+							},
+						],
+					},
+				],
 			},
 		},
 	],

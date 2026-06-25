@@ -243,63 +243,8 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should perform a deep merge so partial updates preserve unrelated sub-fields.
-	 *
-	 * Locks in the contract for forward-compatible sub-fields. When stored preferences contain
-	 * multiple sub-fields per pref (e.g. RSM-1550's `min_amount` alongside `enabled`), a partial
-	 * update that only sends one sub-field must not clobber the others. With a shallow merge
-	 * (`array_merge`), the entire sub-object is replaced; with a deep merge
-	 * (`array_replace_recursive`), only the specified sub-fields are overridden.
-	 *
-	 * Today's schema only has `enabled` per pref, so the bug is invisible. This test extends
-	 * the schema via an anonymous subclass to exercise the multi-sub-field case the future
-	 * tickets rely on.
 	 */
 	public function test_save_preferences_deep_merges_partial_updates(): void {
-		$service = new class() extends NotificationPreferencesService {
-			/**
-			 * Extended schema for the test: a second sub-field alongside `enabled`.
-			 *
-			 * @return array<string, array<string, mixed>>
-			 */
-			public function get_defaults(): array {
-				return array(
-					'store_order' => array(
-						'enabled'    => true,
-						'min_amount' => 0,
-					),
-				);
-			}
-
-			/**
-			 * Permissive sanitize for the test: preserve every sub-key in the default shape,
-			 * coercing to the type implied by its default value.
-			 *
-			 * @param string               $key           Preference key.
-			 * @param array                $value         Submitted sub-options.
-			 * @param array<string, mixed> $default_shape Default sub-options.
-			 * @return array<string, mixed>
-			 */
-			protected function sanitize_value( string $key, array $value, array $default_shape ): array {
-				$sanitized = array();
-				foreach ( $default_shape as $sub_key => $sub_default ) {
-					if ( ! array_key_exists( $sub_key, $value ) ) {
-						$sanitized[ $sub_key ] = $sub_default;
-						continue;
-					}
-					if ( is_bool( $sub_default ) ) {
-						$sanitized[ $sub_key ] = (bool) $value[ $sub_key ];
-					} elseif ( is_int( $sub_default ) ) {
-						$sanitized[ $sub_key ] = (int) $value[ $sub_key ];
-					} else {
-						$sanitized[ $sub_key ] = $value[ $sub_key ];
-					}
-				}
-				return $sanitized;
-			}
-		};
-		$service->init( $this->data_store );
-
-		// Stored state already has a non-default `min_amount`.
 		$this->data_store->method( 'read' )->willReturn(
 			array(
 				'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
@@ -312,7 +257,6 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		// Verify that a partial update of just `enabled` preserves `min_amount`.
 		$this->data_store
 			->expects( $this->once() )
 			->method( 'write' )
@@ -321,12 +265,12 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 				$this->callback(
 					function ( $envelope ) {
 						$prefs = $envelope['preferences']['store_order'];
-						return false === $prefs['enabled'] && 500 === $prefs['min_amount'];
+						return false === $prefs['enabled'] && 500.0 === $prefs['min_amount'];
 					}
 				)
 			);
 
-		$service->save_preferences(
+		$this->sut->save_preferences(
 			$this->user_id,
 			array( 'store_order' => array( 'enabled' => false ) )
 		);
@@ -341,11 +285,259 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $defaults );
 		$this->assertArrayHasKey( 'store_order', $defaults );
 		$this->assertArrayHasKey( 'store_review', $defaults );
+		$this->assertArrayHasKey( 'store_stock', $defaults );
 
 		foreach ( $defaults as $type => $shape ) {
 			$this->assertIsArray( $shape, "Default for {$type} should be an object/array." );
 			$this->assertArrayHasKey( 'enabled', $shape, "Default for {$type} should have an `enabled` sub-field." );
 			$this->assertIsBool( $shape['enabled'] );
 		}
+	}
+
+	/**
+	 * @testdox Should default min_amount to null in store_order defaults.
+	 */
+	public function test_get_defaults_includes_min_amount_for_store_order(): void {
+		$defaults = $this->sut->get_defaults();
+
+		$this->assertArrayHasKey( 'min_amount', $defaults['store_order'] );
+		$this->assertNull( $defaults['store_order']['min_amount'] );
+	}
+
+	/**
+	 * @testdox Should preserve explicit null min_amount.
+	 */
+	public function test_sanitize_preserves_null_min_amount(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+
+		$result = $this->sut->save_preferences(
+			$this->user_id,
+			array( 'store_order' => array( 'min_amount' => null ) )
+		);
+
+		$this->assertNull( $result['store_order']['min_amount'] );
+	}
+
+	/**
+	 * @testdox Should fall back to null when min_amount is non-positive.
+	 */
+	public function test_sanitize_falls_back_to_null_for_non_positive_min_amount(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+
+		$result = $this->sut->save_preferences(
+			$this->user_id,
+			array( 'store_order' => array( 'min_amount' => -50 ) )
+		);
+
+		$this->assertNull( $result['store_order']['min_amount'] );
+
+		$result = $this->sut->save_preferences(
+			$this->user_id,
+			array( 'store_order' => array( 'min_amount' => 0 ) )
+		);
+
+		$this->assertNull( $result['store_order']['min_amount'] );
+	}
+
+	/**
+	 * @testdox Should coerce string min_amount to float.
+	 */
+	public function test_sanitize_coerces_min_amount_to_float(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+
+		$result = $this->sut->save_preferences(
+			$this->user_id,
+			array( 'store_order' => array( 'min_amount' => '50' ) )
+		);
+
+		$this->assertSame( 50.0, $result['store_order']['min_amount'] );
+	}
+
+	/**
+	 * @testdox Should default max_rating to null in store_review defaults.
+	 */
+	public function test_get_defaults_includes_max_rating_for_store_review(): void {
+		$defaults = $this->sut->get_defaults();
+
+		$this->assertArrayHasKey( 'max_rating', $defaults['store_review'] );
+		$this->assertNull( $defaults['store_review']['max_rating'] );
+	}
+
+	/**
+	 * @testdox Should preserve explicit null max_rating.
+	 */
+	public function test_sanitize_preserves_null_max_rating(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+
+		$result = $this->sut->save_preferences(
+			$this->user_id,
+			array( 'store_review' => array( 'max_rating' => null ) )
+		);
+
+		$this->assertNull( $result['store_review']['max_rating'] );
+	}
+
+	/**
+	 * @testdox Should fall back to null when max_rating is out of range.
+	 *
+	 * @testWith [0]
+	 *           [-3]
+	 *           [6]
+	 *           [10]
+	 *
+	 * @param int $value The invalid value.
+	 */
+	public function test_sanitize_falls_back_to_null_for_out_of_range_max_rating( int $value ): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+
+		$result = $this->sut->save_preferences(
+			$this->user_id,
+			array( 'store_review' => array( 'max_rating' => $value ) )
+		);
+
+		$this->assertNull( $result['store_review']['max_rating'] );
+	}
+
+	/**
+	 * @testdox Should coerce string max_rating to int.
+	 */
+	public function test_sanitize_coerces_max_rating_to_int(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+
+		$result = $this->sut->save_preferences(
+			$this->user_id,
+			array( 'store_review' => array( 'max_rating' => '3' ) )
+		);
+
+		$this->assertSame( 3, $result['store_review']['max_rating'] );
+	}
+
+	/**
+	 * @testdox Should perform a deep merge so a partial update of enabled preserves existing max_rating.
+	 */
+	public function test_save_preferences_deep_merges_max_rating(): void {
+		$this->data_store->method( 'read' )->willReturn(
+			array(
+				'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
+				'preferences'    => array(
+					'store_review' => array(
+						'enabled'    => true,
+						'max_rating' => 3,
+					),
+				),
+			)
+		);
+
+		$this->data_store
+			->expects( $this->once() )
+			->method( 'write' )
+			->with(
+				$this->anything(),
+				$this->callback(
+					function ( $envelope ) {
+						$prefs = $envelope['preferences']['store_review'];
+						return false === $prefs['enabled'] && 3 === $prefs['max_rating'];
+					}
+				)
+			);
+
+		$this->sut->save_preferences(
+			$this->user_id,
+			array( 'store_review' => array( 'enabled' => false ) )
+		);
+	}
+
+	/**
+	 * @testdox Should include stock sub-flag defaults for store_stock.
+	 */
+	public function test_get_defaults_includes_stock_sub_flags(): void {
+		$defaults = $this->sut->get_defaults();
+
+		$this->assertArrayHasKey( 'low_stock', $defaults['store_stock'] );
+		$this->assertTrue( $defaults['store_stock']['low_stock'] );
+		$this->assertArrayHasKey( 'out_of_stock', $defaults['store_stock'] );
+		$this->assertTrue( $defaults['store_stock']['out_of_stock'] );
+		$this->assertArrayHasKey( 'on_backorder', $defaults['store_stock'] );
+		$this->assertTrue( $defaults['store_stock']['on_backorder'] );
+	}
+
+	/**
+	 * @testdox Should coerce stock sub-flags to booleans.
+	 */
+	public function test_sanitize_coerces_stock_sub_flags_to_bool(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+
+		$result = $this->sut->save_preferences(
+			$this->user_id,
+			array(
+				'store_stock' => array(
+					'low_stock'    => 1,
+					'out_of_stock' => 0,
+				),
+			)
+		);
+
+		$this->assertTrue( $result['store_stock']['low_stock'] );
+		$this->assertFalse( $result['store_stock']['out_of_stock'] );
+	}
+
+	/**
+	 * @testdox Should drop unknown sub-fields within store_stock.
+	 */
+	public function test_save_preferences_drops_unknown_stock_sub_fields(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+
+		$result = $this->sut->save_preferences(
+			$this->user_id,
+			array(
+				'store_stock' => array(
+					'enabled'       => true,
+					'low_stock'     => true,
+					'unknown_event' => true,
+				),
+			)
+		);
+
+		$this->assertArrayHasKey( 'store_stock', $result );
+		$this->assertArrayNotHasKey( 'unknown_event', $result['store_stock'] );
+	}
+
+	/**
+	 * @testdox Should deep-merge partial store_stock updates preserving unrelated sub-fields.
+	 */
+	public function test_save_preferences_deep_merges_stock_sub_flags(): void {
+		$this->data_store->method( 'read' )->willReturn(
+			array(
+				'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
+				'preferences'    => array(
+					'store_stock' => array(
+						'enabled'      => true,
+						'low_stock'    => true,
+						'out_of_stock' => true,
+						'on_backorder' => false,
+					),
+				),
+			)
+		);
+
+		$this->data_store
+			->expects( $this->once() )
+			->method( 'write' )
+			->with(
+				$this->anything(),
+				$this->callback(
+					function ( $envelope ) {
+						$prefs = $envelope['preferences']['store_stock'];
+						return false === $prefs['low_stock']
+							&& true === $prefs['out_of_stock']
+							&& false === $prefs['on_backorder'];
+					}
+				)
+			);
+
+		$this->sut->save_preferences(
+			$this->user_id,
+			array( 'store_stock' => array( 'low_stock' => false ) )
+		);
 	}
 }

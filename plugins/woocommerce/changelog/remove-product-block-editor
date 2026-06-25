@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove the deprecated product block editor feature, package, routes, assets, and extension APIs.

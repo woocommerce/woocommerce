@@ -47,6 +47,7 @@ dist/
 oclif.manifest.json
 
 # Project files
+.pnpm-store/
 node_modules/
 vendor/
 
@@ -117,6 +118,7 @@ changes.json
 .claude/docs/analysis/
 .claude/docs/research/
 CLAUDE.local.md
+.agents/
 
 # AI agent scratchpad and temp (scaffold-project)
 .agents/scratchpad/**
@@ -136,3 +138,5 @@ CLAUDE.local.md
 
 # Docusaurus
 .docusaurus
+
+.mcp.json

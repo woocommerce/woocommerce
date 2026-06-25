@@ -23,7 +23,7 @@ export interface TrackEvents {
 
 export default function SubscriptionsExpiredExpiringNotice(
 	props: SubscriptionsExpiredExpiringNoticeProps
-): JSX.Element | null {
+): React.JSX.Element | null {
 	const { type } = props;
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 	const eventKeys: Record< string, TrackEvents > = {

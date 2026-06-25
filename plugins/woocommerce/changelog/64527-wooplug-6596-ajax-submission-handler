@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add the AJAX submission handler that turns the Review Order form into product reviews — one verified-buyer comment per rated row, per-row outcome, `comment_moderation` honoured.

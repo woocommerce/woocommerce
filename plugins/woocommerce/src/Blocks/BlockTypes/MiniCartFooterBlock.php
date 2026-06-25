@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 /**
  * MiniCartFooterBlock class.
@@ -43,7 +44,7 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 		$cart                             = $this->get_cart_instance();
 		$subtotal_label                   = __( 'Subtotal', 'woocommerce' );
 		$other_costs_label                = $this->get_totals_item_description();
-		$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === 'incl';
+		$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === TaxDisplayMode::INCLUSIVE;
 		$subtotal                         = $display_cart_price_including_tax ? $cart->get_subtotal_tax() : $cart->get_subtotal();
 		$formatted_subtotal               = '';
 		$html                             = new \WP_HTML_Tag_Processor( wc_price( $subtotal ) );
@@ -75,7 +76,7 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 				<span class="wc-block-components-totals-item__label">
 					<?php echo esc_html( $subtotal_label ); ?>
 				</span>
-				<span data-wp-text="woocommerce/mini-cart::state.formattedSubtotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value">
+				<span data-wp-text="woocommerce/mini-cart::state.formattedSubtotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value notranslate">
 				</span>
 				<div class="wc-block-components-totals-item__description">
 					<?php echo esc_html( $other_costs_label ); ?>

@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Remove no longer needed render_block_with_context() util
+
+

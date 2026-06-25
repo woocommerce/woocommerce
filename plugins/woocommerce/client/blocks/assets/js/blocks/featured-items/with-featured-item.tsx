@@ -218,6 +218,8 @@ export const withFeaturedItem =
 
 		const renderInnerBlocks = () => {
 			if ( product ) {
+				const innerBlocksTemplate =
+					FEATURED_PRODUCT_DEFAULT_TEMPLATE( product );
 				return (
 					<BlockContextProvider
 						value={ { postId: product.id, postType: 'product' } }
@@ -228,9 +230,7 @@ export const withFeaturedItem =
 						>
 							<div className={ `${ className }__inner-blocks` }>
 								<InnerBlocks
-									template={ FEATURED_PRODUCT_DEFAULT_TEMPLATE(
-										product
-									) }
+									template={ innerBlocksTemplate }
 									templateLock={ false }
 								/>
 							</div>

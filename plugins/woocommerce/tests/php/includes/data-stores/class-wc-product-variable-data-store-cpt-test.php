@@ -541,6 +541,49 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The woocommerce_variable_product_taxes_influence_price filter can override the default decision.
+	 *
+	 * @testWith [true,  true,  true,  true,  true]
+	 *           [true,  true,  true,  false, false]
+	 *           [false, true,  false, true,  true]
+	 *           [true,  false, false, true,  true]
+	 *           [false, false, false, true,  true]
+	 *           [true,  false, false, false, false]
+	 *
+	 * @param bool $taxable_product  Product is taxable or not.
+	 * @param bool $tax_has_rates    Product tax has defined rates or not.
+	 * @param bool $expected_default Value the filter callback should receive as the default decision.
+	 * @param bool $filter_returns   Value the filter callback will return.
+	 * @param bool $expected         Expected return value from taxes_influence_price.
+	 */
+	public function test_taxes_influence_price_filter_overrides_default( bool $taxable_product, bool $tax_has_rates, bool $expected_default, bool $filter_returns, bool $expected ) {
+		add_filter( 'wc_tax_enabled', '__return_true' );
+		add_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
+		add_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
+
+		$received_default = null;
+		$received_product = null;
+		$filter_callback  = function ( $default_value, $product ) use ( $filter_returns, &$received_default, &$received_product ) {
+			$received_default = $default_value;
+			$received_product = $product;
+			return $filter_returns;
+		};
+		add_filter( 'woocommerce_variable_product_taxes_influence_price', $filter_callback, 10, 2 );
+
+		$product             = WC_Helper_Product::create_variation_product();
+		$extended_data_store = $this->get_data_store_with_public_taxes_influence_price();
+
+		$this->assertSame( $expected, $extended_data_store->taxes_influence_price( $product ) );
+		$this->assertSame( $expected_default, $received_default, 'Filter callback should receive the default decision.' );
+		$this->assertSame( $product->get_id(), $received_product->get_id(), 'Filter callback should receive the product being evaluated.' );
+
+		remove_filter( 'woocommerce_variable_product_taxes_influence_price', $filter_callback, 10 );
+		remove_filter( 'wc_tax_enabled', '__return_true' );
+		remove_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
+		remove_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
+	}
+
+	/**
 	 * @testdox read_prices does separate caching for prices for display and not for display when they are different.
 	 *
 	 * @testWith [true]
@@ -781,6 +824,51 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$this->assertSame( $sizes[ $index ], get_post_meta( $child_id, 'attribute_size-size', true ) );
 			$this->assertSame( $sizes[ $index ], get_post_meta( $child_id, 'attribute_Size/Size', true ) );
 		}
+		$product->delete();
+	}
+
+	/**
+	 * @testdox read_product_data does not record variable product transient names in the notoptions cache when a persistent object cache is in use.
+	 */
+	public function test_read_product_data_does_not_prime_transients_with_object_cache() {
+		$product    = WC_Helper_Product::create_variation_product();
+		$product_id = $product->get_id();
+
+		$option_names = array(
+			'_transient_wc_var_prices_' . $product_id,
+			'_transient_timeout_wc_var_prices_' . $product_id,
+			'_transient_wc_product_children_' . $product_id,
+			'_transient_timeout_wc_product_children_' . $product_id,
+		);
+
+		// Simulate a persistent object cache and start from a clean notoptions cache.
+		$previous = wp_using_ext_object_cache( true );
+
+		try {
+			wp_cache_delete( 'notoptions', 'options' );
+
+			// Force a fresh read so read_product_data() runs.
+			$data_store = new WC_Product_Variable_Data_Store_CPT();
+			$fresh      = new WC_Product_Variable();
+			$fresh->set_id( $product_id );
+			$data_store->read( $fresh );
+
+			$notoptions = wp_cache_get( 'notoptions', 'options' );
+		} finally {
+			// Always restore. Cast to bool because wp_using_ext_object_cache( null ) is a
+			// no-op, which would otherwise leak the simulated true state into later tests.
+			wp_using_ext_object_cache( (bool) $previous );
+		}
+
+		$notoptions = is_array( $notoptions ) ? $notoptions : array();
+		foreach ( $option_names as $option_name ) {
+			$this->assertArrayNotHasKey(
+				$option_name,
+				$notoptions,
+				'Variable product transient option names must not be added to notoptions when a persistent object cache is active.'
+			);
+		}
+
 		$product->delete();
 	}
 }
