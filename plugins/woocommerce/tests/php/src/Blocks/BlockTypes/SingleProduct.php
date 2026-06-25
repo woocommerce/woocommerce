@@ -147,4 +147,29 @@ class SingleProduct extends \WP_UnitTestCase {
 			$this->delete_product_with_gallery_attachments( $data );
 		}
 	}
+
+	/**
+	 * @testdox Single Product scopes Product Quantity and Product Button to the same add to cart context.
+	 */
+	public function test_product_quantity_and_button_share_product_add_to_cart_context(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->save();
+
+		try {
+			$markup = do_blocks(
+				'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} -->
+<div class="wp-block-woocommerce-single-product woocommerce">
+<!-- wp:woocommerce/add-to-cart-with-options-quantity-selector /-->
+<!-- wp:woocommerce/product-button /-->
+</div>
+<!-- /wp:woocommerce/single-product -->'
+			);
+
+			$this->assertStringContainsString( 'woocommerce/products::', $markup, 'The Single Product wrapper should expose the product data context.' );
+			$this->assertStringContainsString( 'woocommerce/add-to-cart::', $markup, 'The Single Product wrapper should expose the product add to cart context when Product Quantity is present.' );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+		}
+	}
 }

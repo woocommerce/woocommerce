@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
+use Automattic\WooCommerce\Blocks\Utils\ProductAddToCartUtils;
 use WP_Block;
 
 /**
@@ -135,6 +136,13 @@ class ProductTemplate extends AbstractBlock {
 				' . $product_context_directive . '
 				data-wp-key="product-item-' . $product_id . '"
 			';
+
+			if ( str_contains( $block_content, 'wp-block-add-to-cart-with-options-quantity-selector' ) ) {
+				$block_content = ProductAddToCartUtils::wrap_content(
+					$block_content,
+					wc_get_product( $product_id )
+				);
+			}
 
 			// Wrap the render inner blocks in a `li` element with the appropriate post classes.
 			$post_classes = implode( ' ', get_post_class( 'wc-block-product' ) );

@@ -5,14 +5,15 @@ import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/products';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import {
+	getAddToCartPayload,
+	type AddToCartContext,
+} from '@woocommerce/stores/woocommerce/add-to-cart';
 
 /**
  * Internal dependencies
  */
-import type {
-	Context as AddToCartWithOptionsContext,
-	AddToCartWithOptionsStore,
-} from '../../../../blocks/add-to-cart-with-options/frontend';
+import type { AddToCartWithOptionsStore } from '../../../../blocks/add-to-cart-with-options/frontend';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -43,6 +44,16 @@ type ServerState = {
 	};
 };
 
+const getAddToCartContext = () => {
+	try {
+		return getContext< AddToCartContext >(
+			'woocommerce/add-to-cart'
+		);
+	} catch {
+		return undefined;
+	}
+};
+
 const { state: wooState } = store< WooCommerce >(
 	'woocommerce',
 	{},
@@ -70,13 +81,11 @@ const productButtonStore = {
 				return 0;
 			}
 
-			const formContext = getContext< AddToCartWithOptionsContext >(
-				'woocommerce/add-to-cart-with-options'
-			);
+			const addToCartContext = getAddToCartContext();
 
 			const item = wooState.findItemInCart( {
 				id: product.id,
-				variation: formContext?.selectedAttributes,
+				variation: addToCartContext?.selectedAttributes,
 			} );
 
 			return item?.quantity ?? 0;
@@ -161,11 +170,7 @@ const productButtonStore = {
 			// Pass quantityToAdd as a delta. The cart store will add this
 			// to the current quantity, ensuring rapid clicks compound correctly.
 			yield actions.addCartItem(
-				{
-					id: product.id,
-					quantityToAdd: context.quantityToAdd,
-					type: product.type,
-				},
+				getAddToCartPayload( product, context.quantityToAdd ),
 				{
 					showCartUpdatesNotices: false,
 				}

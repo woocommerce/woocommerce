@@ -155,7 +155,16 @@ class AddToCartWithOptions extends AbstractBlock {
 	 * @return array Modified block context.
 	 */
 	public function set_is_descendant_of_add_to_cart_with_options_context( $context, $block ) {
-		if ( 'woocommerce/product-button' === $block['blockName'] ) {
+		if (
+			in_array(
+				$block['blockName'],
+				array(
+					'woocommerce/product-button',
+					'woocommerce/add-to-cart-with-options-quantity-selector',
+				),
+				true
+			)
+		) {
 			$context['woocommerce/isDescendantOfAddToCartWithOptions'] = true;
 		}
 

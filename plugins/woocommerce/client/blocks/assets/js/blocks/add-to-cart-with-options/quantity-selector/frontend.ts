@@ -2,11 +2,18 @@
  * External dependencies
  */
 import { store, getContext, getElement } from '@wordpress/interactivity';
+import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce/add-to-cart';
+import type { AddToCartStore } from '@woocommerce/stores/woocommerce/add-to-cart';
+
 /**
  * Internal dependencies
  */
-import type { AddToCartWithOptionsStore } from '../frontend';
+import type {
+	AddToCartWithOptionsStore,
+	Context as AddToCartWithOptionsContext,
+} from '../frontend';
 
 export type Context = {
 	allowZero?: boolean;
@@ -23,11 +30,104 @@ const { state: productsState } = store< ProductsStore >(
 	{ lock: universalLock }
 );
 
-const addToCartWithOptionsStore = store< AddToCartWithOptionsStore >(
+type OptionalAddToCartWithOptionsStore = {
+	state: Partial< AddToCartWithOptionsStore[ 'state' ] >;
+	actions: Partial< AddToCartWithOptionsStore[ 'actions' ] >;
+};
+
+const addToCartWithOptionsStore = store< OptionalAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{},
 	{ lock: universalLock }
 );
+
+const addToCartStore = store< AddToCartStore >(
+	'woocommerce/add-to-cart',
+	{},
+	{ lock: universalLock }
+);
+
+const getProductsContext = () => {
+	try {
+		return getContext< { productId?: number; variationId?: number | null } >(
+			'woocommerce/products'
+		);
+	} catch {
+		return undefined;
+	}
+};
+
+const getProductInContext = () => {
+	try {
+		const product = productsState.productInContext;
+		if ( product ) {
+			return product;
+		}
+	} catch {
+		// Fall back to raw IDs below.
+	}
+
+	const productsContext = getProductsContext();
+	const productId =
+		productsContext && 'productId' in productsContext
+			? productsContext.productId
+			: productsState.productId;
+	const variationId =
+		productsContext && 'variationId' in productsContext
+			? productsContext.variationId
+			: productsState.variationId;
+
+	return (
+		( variationId && productsState.productVariations?.[ variationId ] ) ||
+		( productId && productsState.products?.[ productId ] ) ||
+		null
+	);
+};
+
+const getAddToCartWithOptionsContext = () => {
+	try {
+		return getContext< AddToCartWithOptionsContext >(
+			'woocommerce/add-to-cart-with-options'
+		);
+	} catch {
+		return undefined;
+	}
+};
+
+const getCurrentQuantity = ( productId: number, fallback = 0 ): number => {
+	const addToCartWithOptionsContext = getAddToCartWithOptionsContext();
+	const addToCartWithOptionsQuantity =
+		addToCartWithOptionsContext?.quantity?.[ productId ] ??
+		addToCartWithOptionsStore.state.quantity?.[ productId ];
+	const addToCartQuantity =
+		addToCartStore.state.quantityInContext?.[ productId ];
+	const quantity = addToCartQuantity ?? addToCartWithOptionsQuantity;
+
+	return quantity === undefined ? fallback : quantity;
+};
+
+const setQuantity = ( productId: number, value: number ) => {
+	addToCartStore.actions.setQuantity( productId, value );
+
+	if (
+		getAddToCartWithOptionsContext()?.quantity &&
+		addToCartWithOptionsStore.actions.setQuantity
+	) {
+		addToCartWithOptionsStore.actions.setQuantity( productId, value );
+	}
+
+	if ( Number.isNaN( value ) ) {
+		return;
+	}
+
+	document
+		.querySelectorAll< HTMLInputElement >(
+			`[data-wc-product-add-to-cart-product-id="${ productId }"] .qty`
+		)
+		.forEach( ( input ) => {
+			input.value = value.toString();
+		} );
+};
 
 export type QuantitySelectorStore = {
 	state: {
@@ -52,7 +152,7 @@ store< QuantitySelectorStore >(
 	{
 		state: {
 			get allowsQuantityChange(): boolean {
-				const product = productsState.productInContext;
+				const product = getProductInContext();
 
 				if ( ! product ) {
 					return true;
@@ -61,17 +161,14 @@ store< QuantitySelectorStore >(
 				return product.is_in_stock && ! product.sold_individually;
 			},
 			get allowsDecrease() {
-				const { quantity } = addToCartWithOptionsStore.state;
-
-				const product = productsState.productInContext;
+				const product = getProductInContext();
 
 				if ( ! product ) {
 					return true;
 				}
 
 				const { id, add_to_cart: addToCart } = product;
-
-				const currentQuantity = quantity[ id ] || 0;
+				const currentQuantity = getCurrentQuantity( id );
 
 				const { allowZero } = getContext< Context >();
 				return (
@@ -80,33 +177,30 @@ store< QuantitySelectorStore >(
 				);
 			},
 			get allowsIncrease() {
-				const { quantity } = addToCartWithOptionsStore.state;
-
-				const product = productsState.productInContext;
+				const product = getProductInContext();
 
 				if ( ! product ) {
 					return true;
 				}
 
 				const { id, add_to_cart: addToCart } = product;
-
-				const currentQuantity = quantity[ id ] || 0;
+				const currentQuantity = getCurrentQuantity( id );
 
 				return (
 					currentQuantity + addToCart.multiple_of <= addToCart.maximum
 				);
 			},
 			get inputQuantity(): number {
-				const product = productsState.productInContext;
+				const product = getProductInContext();
 
 				if ( ! product ) {
 					return 0;
 				}
 
-				const quantity =
-					addToCartWithOptionsStore.state.quantity?.[ product.id ];
-
-				return quantity === undefined ? 0 : quantity;
+				return getCurrentQuantity(
+					product.id,
+					product.add_to_cart.minimum
+				);
 			},
 		},
 		actions: {
@@ -117,7 +211,7 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const product = productsState.productInContext;
+				const product = getProductInContext();
 
 				if ( ! product ) {
 					return;
@@ -132,10 +226,7 @@ store< QuantitySelectorStore >(
 					Math.min( maximum, currentValue + multipleOf )
 				);
 
-				addToCartWithOptionsStore.actions.setQuantity(
-					productId,
-					newValue
-				);
+				setQuantity( productId, newValue );
 			},
 			decreaseQuantity: () => {
 				const { allowZero, inputElement } = getContext< Context >();
@@ -144,7 +235,7 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const product = productsState.productInContext;
+				const product = getProductInContext();
 
 				if ( ! product ) {
 					return;
@@ -169,10 +260,7 @@ store< QuantitySelectorStore >(
 				}
 
 				if ( newValue !== currentValue ) {
-					addToCartWithOptionsStore.actions.setQuantity(
-						productId,
-						newValue
-					);
+					setQuantity( productId, newValue );
 				}
 			},
 			// We need to listen to blur events instead of change events because
@@ -181,7 +269,7 @@ store< QuantitySelectorStore >(
 			handleQuantityBlur: () => {
 				const { allowZero, inputElement } = getContext< Context >();
 
-				const product = productsState.productInContext;
+				const product = getProductInContext();
 
 				if ( ! product ) {
 					return;
@@ -194,10 +282,7 @@ store< QuantitySelectorStore >(
 					allowZero &&
 					( isValueNaN || inputElement?.valueAsNumber === 0 )
 				) {
-					addToCartWithOptionsStore.actions.setQuantity(
-						productId,
-						0
-					);
+					setQuantity( productId, 0 );
 					return;
 				}
 
@@ -207,10 +292,7 @@ store< QuantitySelectorStore >(
 				const newValue =
 					! isNaN( value ) && value > 0 ? value : addToCart.minimum;
 
-				addToCartWithOptionsStore.actions.setQuantity(
-					productId,
-					newValue
-				);
+				setQuantity( productId, newValue );
 			},
 			handleQuantityCheckboxChange: () => {
 				const element = getElement();
@@ -219,16 +301,13 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const product = productsState.productInContext;
+				const product = getProductInContext();
 
 				if ( ! product ) {
 					return;
 				}
 
-				addToCartWithOptionsStore.actions.setQuantity(
-					product.id,
-					element.ref.checked ? 1 : 0
-				);
+				setQuantity( product.id, element.ref.checked ? 1 : 0 );
 			},
 		},
 		callbacks: {
@@ -239,6 +318,19 @@ store< QuantitySelectorStore >(
 					const inputElement =
 						ref.querySelector< HTMLInputElement >( '.qty' );
 					context.inputElement = inputElement;
+
+					const product = getProductInContext();
+					if ( product && inputElement ) {
+						const inputValue = inputElement.valueAsNumber;
+						const initialQuantity = Number.isNaN( inputValue )
+							? product.add_to_cart.minimum
+							: inputValue;
+
+						addToCartStore.actions.initializeQuantity(
+							product.id,
+							initialQuantity
+						);
+					}
 				}
 			},
 		},

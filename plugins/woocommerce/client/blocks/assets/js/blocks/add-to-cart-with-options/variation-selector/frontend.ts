@@ -9,7 +9,9 @@ import {
 } from '@wordpress/interactivity';
 import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce/add-to-cart';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import type { AddToCartStore } from '@woocommerce/stores/woocommerce/add-to-cart';
 import type { ProductResponseItem } from '@woocommerce/types';
 
 /**
@@ -52,6 +54,12 @@ const universalLock =
 
 const { state: productsState } = store< ProductsStore >(
 	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
+
+const addToCartStore = store< AddToCartStore >(
+	'woocommerce/add-to-cart',
 	{},
 	{ lock: universalLock }
 );
@@ -265,6 +273,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 		},
 		actions: {
 			setAttribute( attribute: string, value: string ) {
+				addToCartStore.actions.setAttribute( attribute, value );
+
 				const { selectedAttributes } = getContext< Context >();
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
@@ -294,6 +304,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 			},
 			removeAttribute( attribute: string ) {
+				addToCartStore.actions.removeAttribute( attribute );
+
 				const { selectedAttributes } = getContext< Context >();
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>

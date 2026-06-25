@@ -58,6 +58,8 @@ const entries = {
 		'./assets/js/base/stores/store-notices.ts',
 	'@woocommerce/stores/woocommerce/products':
 		'./assets/js/base/stores/woocommerce/products.ts',
+	'@woocommerce/stores/woocommerce/add-to-cart':
+		'./assets/js/base/stores/woocommerce/add-to-cart.ts',
 	'@woocommerce/stores/woocommerce/shopper-lists':
 		'./assets/js/base/stores/woocommerce/shopper-lists.ts',
 };

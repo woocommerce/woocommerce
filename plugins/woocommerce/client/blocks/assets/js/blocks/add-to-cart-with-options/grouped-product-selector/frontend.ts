@@ -94,7 +94,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
-				const { quantity, selectedAttributes, groupedProductIds } =
+				const { quantity, selectedAttributes, groupedProductIds = [] } =
 					getContext< AddToCartWithOptionsStoreContext >();
 
 				const addedItems: ClientCartItem[] = [];

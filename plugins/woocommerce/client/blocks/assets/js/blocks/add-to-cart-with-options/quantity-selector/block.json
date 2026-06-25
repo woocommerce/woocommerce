@@ -4,8 +4,7 @@
 	"description": "Display an input field customers can use to select the number of products to add to their cart. ",
 	"category": "woocommerce-product-elements",
 	"keywords": [ "WooCommerce" ],
-	"usesContext": [ "postId" ],
-	"ancestor": [ "woocommerce/add-to-cart-with-options" ],
+	"usesContext": [ "postId", "woocommerce/isDescendantOfAddToCartWithOptions" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"supports": {

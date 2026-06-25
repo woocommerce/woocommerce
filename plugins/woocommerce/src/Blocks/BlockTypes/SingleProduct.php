@@ -1,8 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Utils\ProductDataUtils;
-use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Blocks\Utils\ProductAddToCartUtils;
 
 /**
  * SingleProduct class.
@@ -207,6 +206,25 @@ class SingleProduct extends AbstractBlock {
 		}
 
 		$updated_html = $html->get_updated_html();
+
+		if ( str_contains( $updated_html, 'wp-block-add-to-cart-with-options-quantity-selector' ) ) {
+			// WordPress 6.8 supports one context namespace per element, so the
+			// product data and add-to-cart intent contexts have to be nested.
+			$updated_html_with_add_to_cart_context = preg_replace_callback(
+				'/\A(\s*<div\b[^>]*>)(.*)(<\/div>\s*)\z/s',
+				function ( $matches ) use ( $product ) {
+					return $matches[1]
+						. ProductAddToCartUtils::wrap_content( $matches[2], $product )
+						. $matches[3];
+				},
+				$updated_html,
+				1
+			);
+
+			if ( is_string( $updated_html_with_add_to_cart_context ) ) {
+				$updated_html = $updated_html_with_add_to_cart_context;
+			}
+		}
 
 		return parent::render( $attributes, $updated_html, $block );
 	}

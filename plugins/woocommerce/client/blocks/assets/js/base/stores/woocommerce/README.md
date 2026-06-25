@@ -5,6 +5,7 @@ This folder contains the Interactivity API (iAPI) stores that WooCommerce blocks
 Stores in this folder:
 
 -   [`woocommerce/products`](#woocommerceproducts-store) — server-populated cache of product and variation data in Store API format.
+-   `woocommerce/add-to-cart` — product-scoped shopper intent such as quantity and selected attributes.
 -   `woocommerce/cart` — cart state and actions (with mutation batching for performance).
 
 ---

@@ -26,8 +26,8 @@ export type Context = {
 	selectedAttributes: SelectedAttributes[];
 	quantity: Record< number, number >;
 	validationErrors: AddToCartError[];
-	tempQuantity: number;
-	groupedProductIds: number[];
+	tempQuantity?: number;
+	groupedProductIds?: number[];
 };
 
 export type AddToCartError = {
@@ -202,11 +202,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 					};
 				}
 
-				const parentProduct = productsState.findProduct( {
-					id: productsState.productId,
-					selectedAttributes: context.selectedAttributes,
-				} );
-				if ( parentProduct?.type === 'grouped' ) {
+				if ( context.groupedProductIds?.length ) {
 					actions.validateGroupedProductQuantity();
 				} else {
 					actions.validateQuantity( productId, value );
