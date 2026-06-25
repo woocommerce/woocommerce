@@ -103,21 +103,20 @@ class ProductImage extends AbstractBlock {
 	private function render_anchor( $product, $on_sale_badge, $product_image, $attributes, $inner_blocks_content ) {
 		$product_permalink = $product->get_permalink();
 
-		$is_link        = isset( $attributes['showProductLink'] ) ? $attributes['showProductLink'] : true;
-		$href_attribute = $is_link ? sprintf( 'href="%s"', esc_url( $product_permalink ) ) : 'href="#" onclick="return false;"';
-		$wrapper_style  = ! $is_link ? 'pointer-events: none; cursor: default;' : '';
-		$directive      = $is_link ? 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"' : '';
+		$is_link = isset( $attributes['showProductLink'] ) ? $attributes['showProductLink'] : true;
 
 		$inner_blocks_container = sprintf(
 			'<div class="wc-block-components-product-image__inner-container">%s</div>',
 			$inner_blocks_content
 		);
 
+		if ( ! $is_link ) {
+			return $on_sale_badge . $product_image . $inner_blocks_container;
+		}
+
 		return sprintf(
-			'<a %1$s style="%2$s" %3$s>%4$s%5$s%6$s</a>',
-			$href_attribute,
-			esc_attr( $wrapper_style ),
-			$directive,
+			'<a href="%1$s" data-wp-on--click="woocommerce/product-collection::actions.viewProduct">%2$s%3$s%4$s</a>',
+			esc_url( $product_permalink ),
 			$on_sale_badge,
 			$product_image,
 			$inner_blocks_container
@@ -172,7 +171,13 @@ class ProductImage extends AbstractBlock {
 		$target_image_id = $provided_image_id_is_valid ? $image_id : $featured_image_id;
 
 		if ( ! $target_image_id ) {
-			return wc_placeholder_img( $image_size, array( 'style' => $image_style ) );
+			return wc_placeholder_img(
+				$image_size,
+				array(
+					'style'         => $image_style,
+					'data-image-id' => 0,
+				)
+			);
 		}
 
 		$alt_text = get_post_meta( $target_image_id, '_wp_attachment_image_alt', true );

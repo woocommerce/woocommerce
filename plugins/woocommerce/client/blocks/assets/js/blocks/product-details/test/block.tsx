@@ -158,10 +158,6 @@ describe( 'Product Details block', () => {
 			expect(
 				within( table ).getByText( /Medium, Large/i )
 			).toBeVisible();
-
-			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
-			// opt out of without changing the visual output.
-			expect( console ).toHaveWarned();
 		} );
 
 		test( 'should auto-remove block when product has no specifications', async () => {

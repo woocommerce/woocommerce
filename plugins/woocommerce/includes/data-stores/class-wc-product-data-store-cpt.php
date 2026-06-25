@@ -1562,7 +1562,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return $count;
 		}
 
-		$attributes = wc_list_pluck( array_filter( $product->get_attributes(), 'wc_attributes_array_filter_variation' ), 'get_slugs' );
+		$variation_attributes = array_filter( $product->get_attributes(), 'wc_attributes_array_filter_variation' );
+		$attributes           = array();
+
+		foreach ( $variation_attributes as $attribute_key => $attribute ) {
+			if ( $attribute->is_taxonomy() && taxonomy_exists( $attribute->get_name() ) ) {
+				// Respect the attribute's configured term order (e.g. custom "menu_order") instead of
+				// the alphabetical order returned from the cached object terms. See get_slugs(), which
+				// preserves the order of the options read in read_attributes() via wc_get_object_terms().
+				$attributes[ $attribute_key ] = wc_get_product_terms( $product->get_id(), $attribute->get_name(), array( 'fields' => 'slugs' ) );
+			} else {
+				$attributes[ $attribute_key ] = $attribute->get_slugs();
+			}
+		}
 
 		if ( empty( $attributes ) ) {
 			return $count;
@@ -1621,18 +1633,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function sort_all_product_variations( $parent_id ) {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
+		$index = 1;
 		$ids   = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product_variation' AND post_parent = %d AND post_status in ( 'publish', 'private' ) ORDER BY menu_order ASC, ID ASC",
 				$parent_id
 			)
 		);
-		$index = 1;
 
 		foreach ( $ids as $id ) {
-			// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
-			$wpdb->update( $wpdb->posts, array( 'menu_order' => ( $index++ ) ), array( 'ID' => absint( $id ) ) );
+			$product_id = absint( $id );
+			$updated    = (bool) $wpdb->update( $wpdb->posts, array( 'menu_order' => ( $index++ ) ), array( 'ID' => $product_id ) );
+			if ( $updated ) {
+				clean_post_cache( $product_id );
+			}
 		}
 	}
 

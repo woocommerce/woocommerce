@@ -13,7 +13,7 @@ On this page, we will share some guidelines to help you assess the impact degree
 ## You should mark a Pull Request as High-Impact if
 
 - It adds a **new feature** to WooCommerce, except if it's behind a feature flag.
-- Modifies **critical functionality** (see the [critical flows list](/docs/contribution/contributing/api-critical-flows/)).
+- Modifies **critical functionality** that shoppers or merchants rely on to run a store.
 - It fixes a **high-priority bug** (this includes Blocks fix releases core version bumps).
 - It contains a **security fix**.
 - Updates **SQL queries**.

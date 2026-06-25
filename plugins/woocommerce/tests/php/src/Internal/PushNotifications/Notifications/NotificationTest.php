@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Notifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\StockNotification;
 use InvalidArgumentException;
 use WC_Unit_Test_Case;
 
@@ -60,6 +61,7 @@ class NotificationTest extends WC_Unit_Test_Case {
 	 * @testdox from_array should create correct notification for $type type.
 	 * @testWith ["store_order", "Automattic\\WooCommerce\\Internal\\PushNotifications\\Notifications\\NewOrderNotification"]
 	 *           ["store_review", "Automattic\\WooCommerce\\Internal\\PushNotifications\\Notifications\\NewReviewNotification"]
+	 *           ["store_stock", "Automattic\\WooCommerce\\Internal\\PushNotifications\\Notifications\\StockNotification"]
 	 *
 	 * @param string $type           The notification type.
 	 * @param string $expected_class The expected class name.
@@ -143,5 +145,37 @@ class NotificationTest extends WC_Unit_Test_Case {
 			->getMock();
 
 		$this->assertSame( $expected, $notification->should_send_to_user( $pref_value ) );
+	}
+
+	/**
+	 * @testdox from_array should call hydrate() on classes that implement it.
+	 */
+	public function test_from_array_hydrates_extra_fields(): void {
+		$notification = Notification::from_array(
+			array(
+				'type'        => 'store_stock',
+				'resource_id' => 42,
+				'event_type'  => 'out_of_stock',
+			)
+		);
+
+		$this->assertInstanceOf( StockNotification::class, $notification );
+		$this->assertSame( 'out_of_stock', $notification->get_event_type() );
+	}
+
+	/**
+	 * @testdox from_array should not break for types without hydrate() when extra data is present.
+	 */
+	public function test_from_array_ignores_extra_fields_for_types_without_hydrate(): void {
+		$notification = Notification::from_array(
+			array(
+				'type'        => 'store_order',
+				'resource_id' => 42,
+				'extra'       => 'should be ignored',
+			)
+		);
+
+		$this->assertInstanceOf( NewOrderNotification::class, $notification );
+		$this->assertSame( 42, $notification->get_resource_id() );
 	}
 }

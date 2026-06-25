@@ -11,12 +11,27 @@
 		"./assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/**/block.json",
 		"./storybook/**/*",
 		"./tests/integration/**/*",
-		"./tests/js/**/*"
+		"./tests/js/**/*",
+		"./tests/utils/**/*"
 	],
 	"exclude": [
 		"./storybook/build",
 		"./storybook/webpack.config.js",
 		"./storybook/preview.js",
 		"./bin"
+	],
+	"compilerOptions": {
+		"composite": true
+	},
+	"references": [
+		{
+			"path": "../../../../packages/js/email-editor"
+		},
+		{
+			"path": "../../../../packages/js/sanitize"
+		},
+		{
+			"path": "../../../../packages/js/tracks"
+		}
 	]
 }

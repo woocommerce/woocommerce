@@ -13,6 +13,7 @@ use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Checkout as CheckoutRoute;
+use Automattic\WooCommerce\StoreApi\Routes\V1\CheckoutOrder as CheckoutOrderRoute;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
@@ -73,6 +74,8 @@ class Checkout extends MockeryTestCase {
 		$schema_controller = new SchemaController( $this->mock_extend );
 		$route             = new CheckoutRoute( $schema_controller, $schema_controller->get( 'checkout' ) );
 		register_rest_route( $route->get_namespace(), $route->get_path(), $route->get_args(), true );
+		$order_route = new CheckoutOrderRoute( $schema_controller, $schema_controller->get( 'checkout-order' ) );
+		register_rest_route( $order_route->get_namespace(), $order_route->get_path(), $order_route->get_args(), true );
 
 		$fixtures = new FixtureData();
 		$fixtures->payments_enable_bacs();
@@ -1558,6 +1561,60 @@ class Checkout extends MockeryTestCase {
 	}
 
 	/**
+	 * @testdox Existing order payment should not persist address data when country validation fails.
+	 */
+	public function test_checkout_order_does_not_persist_invalid_country_address() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+		update_option( 'woocommerce_ship_to_countries', 'specific' );
+		update_option( 'woocommerce_specific_ship_to_countries', array( 'US' ) );
+
+		$order = \WC_Helper_Order::create_order( 0 );
+
+		$original_billing_country  = $order->get_billing_country();
+		$original_shipping_country = $order->get_shipping_country();
+		$original_total            = $order->get_total();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_query_params(
+			array(
+				'key'           => $order->get_order_key(),
+				'billing_email' => $order->get_billing_email(),
+			)
+		);
+		// Forbidden country (IN) on both addresses is what should trigger the rejection.
+		$invalid_address = array(
+			'first_name' => 'Test',
+			'last_name'  => 'Kumar',
+			'company'    => '',
+			'address_1'  => '1 MG Road',
+			'address_2'  => '',
+			'city'       => 'Mumbai',
+			'state'      => 'MH',
+			'postcode'   => '400001',
+			'country'    => 'IN',
+			'phone'      => '',
+		);
+		$request->set_body_params(
+			array(
+				'billing_address'  => array_merge( $invalid_address, array( 'email' => $order->get_billing_email() ) ),
+				'shipping_address' => $invalid_address,
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_invalid_address_country', $response->get_data()['code'] );
+
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( $original_billing_country, $stored_order->get_billing_country() );
+		$this->assertEquals( $original_shipping_country, $stored_order->get_shipping_country() );
+		$this->assertEquals( $original_total, $stored_order->get_total() );
+	}
+
+	/**
 	 * Helper method to register custom order status.
 	 *
 	 * @param string $status_name             Custom status name to register.
@@ -2246,7 +2303,18 @@ class Checkout extends MockeryTestCase {
 		remove_action( 'woocommerce_store_api_checkout_order_processed', $fail_hook, 999 );
 
 		// Second POST on the same session should reuse the existing pending order.
-		$second_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		$session_order_id_during_retry = null;
+		$capture_session_order_id      = function () use ( &$session_order_id_during_retry ) {
+			$session_order_id_during_retry = (int) WC()->session->get( 'store_api_draft_order' );
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $capture_session_order_id, 999, 0 );
+
+		try {
+			$second_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		} finally {
+			remove_action( 'woocommerce_store_api_checkout_order_processed', $capture_session_order_id, 999 );
+		}
+
 		$this->assertEquals( 200, $second_response->get_status(), print_r( $second_response->get_data(), true ) );
 
 		$second_order_id = (int) $second_response->get_data()['order_id'];
@@ -2255,7 +2323,8 @@ class Checkout extends MockeryTestCase {
 			$second_order_id,
 			'Second POST must reuse the existing pending order, not create a new one (regression: issue #64792).'
 		);
-		$this->assertSame( $first_order_id, (int) WC()->session->get( 'store_api_draft_order' ), 'Session pointer should still reference the reused order.' );
+		$this->assertSame( $first_order_id, $session_order_id_during_retry, 'Session pointer should reference the reused order while the second POST is being processed.' );
+		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ), 'Successful checkout should clear the draft order pointer when the cart is emptied.' );
 	}
 
 	/**

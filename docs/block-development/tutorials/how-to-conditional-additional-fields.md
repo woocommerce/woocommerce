@@ -27,12 +27,24 @@ The basic structure looks like this:
 
 ```php
 'required' => [
-    // Define when to hide here
+    // Define when the field must be filled in here
 ],
 'hidden' => [
-    // Define when to hide here
+    // Define when the field should be hidden here
 ]
 ```
+
+## Where Each Field's Value Is Stored
+
+Conditions are evaluated against a single JSON structure (internally called the *document object*) that mirrors the state of the cart, the customer, and the checkout. To reference another field in a condition, you need to point at the correct subtree for that field's `location`.
+
+| Field's `location` | Subtree the value lives in | Path to use in conditions |
+| --- | --- | --- |
+| `contact` | `customer.additional_fields` | `customer.additional_fields.<field-id>` |
+| `order` | `checkout.additional_fields` | `checkout.additional_fields.<field-id>` |
+| `address` | `customer.billing_address` and `customer.shipping_address`. Also `customer.address` when the field being evaluated is itself at `address`. | `customer.billing_address.<field-id>` or `customer.shipping_address.<field-id>` or `customer.address.<field-id>` |
+
+Each field's value only appears in the subtree above, so a condition that points at the wrong subtree will silently have no effect.
 
 ## Common Conditional Scenarios
 
@@ -111,7 +123,7 @@ woocommerce_register_additional_checkout_field(
 				'properties' => [
 					'totals' => [
 						'properties' => [
-							'totalPrice' => [
+							'total_price' => [
 								'maximum' => 50000 // Hide if cart total is less than $500 (in cents)
 							]
 						]
@@ -168,10 +180,12 @@ woocommerce_register_additional_checkout_field(
 
 ### Show Fields Based on Other Field Values
 
-Create dependent fields where one field’s visibility depends on another field’s value:
+Create dependent fields where one field's visibility depends on another field's value. The schema path is determined by the **source field's `location`** (see [Where Each Field's Value Is Stored](#where-each-fields-value-is-stored)), not the dependent field's.
+
+Same-location example: both fields at `order`, so the rule looks under `checkout.additional_fields`.
 
 ```php
-// First field - service type selection
+// Source (order location) - value at checkout.additional_fields.<id>.
 woocommerce_register_additional_checkout_field(
 	array(
 		'id'       => 'my-plugin/service-type',
@@ -186,7 +200,7 @@ woocommerce_register_additional_checkout_field(
 	)
 );
 
-// Second field - only show when "custom" is selected
+// Dependent - shown only when "custom" is selected.
 woocommerce_register_additional_checkout_field(
 	array(
 		'id'       => 'my-plugin/custom-requirements',
@@ -205,7 +219,7 @@ woocommerce_register_additional_checkout_field(
 					]
 				]
 			]
-							],
+		],
 		'hidden' => [
 			'checkout' => [
 				'properties' => [
@@ -214,6 +228,57 @@ woocommerce_register_additional_checkout_field(
 							'my-plugin/service-type' => [
 								'not' => [
 									'const' => 'custom'
+								]
+							]
+						]
+					]
+				]
+			]
+		]
+	)
+);
+```
+
+For a `contact` or `address` source field the shape is identical; swap the path for the one in the [lookup table](#where-each-fields-value-is-stored).
+
+### Mixing Locations
+
+The two fields don't have to share a `location`. The rule always follows the source; see the [lookup table](#where-each-fields-value-is-stored) for the subtree mapping.
+
+:::warning
+
+Address-location values are **not** stored under `additional_fields`. Assuming `additional_fields` is the universal path is a common cause of rules that silently have no effect.
+
+:::
+
+```php
+woocommerce_register_additional_checkout_field(
+	array(
+		'id'       => 'my-plugin/customer-type',
+		'label'    => __('Customer type', 'your-text-domain'),
+		'location' => 'address',
+		'type'     => 'select',
+		'options'  => array(
+			array( 'value' => 'private',  'label' => __('Private', 'your-text-domain') ),
+			array( 'value' => 'business', 'label' => __('Business', 'your-text-domain') ),
+		),
+	)
+);
+
+woocommerce_register_additional_checkout_field(
+	array(
+		'id'       => 'my-plugin/invoice-notes',
+		'label'    => __('Invoice notes', 'your-text-domain'),
+		'location' => 'order',
+		'type'     => 'text',
+		'hidden' => [
+			'customer' => [
+				'properties' => [
+					'billing_address' => [
+						'properties' => [
+							'my-plugin/customer-type' => [
+								'not' => [
+									'const' => 'business'
 								]
 							]
 						]
@@ -287,7 +352,7 @@ add_action( 'woocommerce_init', function() {
 						]
 					]
 				]
-								],
+			],
 			'hidden' => [
 				'checkout' => [
 					'properties' => [
@@ -348,9 +413,11 @@ add_action( 'woocommerce_init', function() {
 
 You can create conditions based on various checkout data:
 
-1. Cart information: Total price, items, shipping rates, coupons, weight
-2. Customer data: ID, billing/shipping addresses, email
-3. Other additional fields: Reference values from other custom fields and more!
+1. Cart information under `cart.*`: `total_price`, `items`, `shipping_rates`, `coupons`, `items_weight`, `needs_shipping`, `prefers_collection`, and more.
+2. Customer data under `customer.*`: `id`, `billing_address`, `shipping_address`, the contextual `address`, and `additional_fields` for contact-location values.
+3. Checkout data under `checkout.*`: `payment_method`, `create_account`, `customer_note`, and `additional_fields` for order-location values.
+
+When referencing another additional checkout field, pick the subtree that matches that field's `location`. See [Where Each Field's Value Is Stored](#where-each-fields-value-is-stored).
 
 ## Next Steps
 

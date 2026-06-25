@@ -90,7 +90,6 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\MarketingCampaigns',
 			'Automattic\WooCommerce\Admin\API\MarketingCampaignTypes',
 			'Automattic\WooCommerce\Admin\API\Options',
-			'Automattic\WooCommerce\Admin\API\Settings',
 			'Automattic\WooCommerce\Admin\API\PaymentGatewaySuggestions',
 			'Automattic\WooCommerce\Admin\API\Themes',
 			'Automattic\WooCommerce\Admin\API\Plugins',
@@ -102,6 +101,7 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\OnboardingPlugins',
 			'Automattic\WooCommerce\Admin\API\OnboardingProducts',
 			'Automattic\WooCommerce\Admin\API\MobileAppMagicLink',
+			'Automattic\WooCommerce\Admin\API\MobileAppQRLogin',
 			'Automattic\WooCommerce\Admin\API\ShippingPartnerSuggestions',
 		);
 
@@ -186,11 +186,12 @@ class Init {
 				'Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\Controller',
 			);
 
-			if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
-				$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\AnalyticsImports';
-			}
+			// Registered whenever analytics is enabled (not gated on the
+			// scheduled-import feature): the status endpoint reports failed
+			// order imports in both immediate and scheduled modes.
+			$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\AnalyticsImports';
 
-			// The performance indicators controllerq must be registered last, after other /stats endpoints have been registered.
+			// The performance indicators controller must be registered last, after other /stats endpoints have been registered.
 			$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';
 		}
 

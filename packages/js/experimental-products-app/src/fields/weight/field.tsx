@@ -45,6 +45,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		return (
 			<InputControl
 				label={ field.label }
+				placeholder={ field.placeholder }
 				value={ data.weight }
 				onChange={ ( event ) =>
 					onChange( { weight: event.target.value } )

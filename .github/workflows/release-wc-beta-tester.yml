@@ -8,6 +8,9 @@ on:
                 description: 'The version number for the release'
                 required: true
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
     release:
         name: Run release scripts

@@ -11,7 +11,8 @@ export interface RemovableItemsContext {
 }
 
 export type RemovableItemsBlockContext = {
-	woocommerceRemovableItems: RemovableItemsContext;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	'woocommerce/removableItems': RemovableItemsContext;
 };
 
 /**

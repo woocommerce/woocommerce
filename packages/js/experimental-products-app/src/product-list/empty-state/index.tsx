@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { EmptyState } from '@wordpress/ui';
+import { Button, EmptyState } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -15,7 +15,20 @@ type EmptyStateCopy = {
 	description: string;
 };
 
-function getEmptyStateCopy( tab: StatusTab ): EmptyStateCopy {
+function getEmptyStateCopy(
+	tab: StatusTab,
+	isSearchOrFilterResult: boolean
+): EmptyStateCopy {
+	if ( isSearchOrFilterResult ) {
+		return {
+			title: __( 'No products match your filters', 'woocommerce' ),
+			description: __(
+				'Try clearing some filters or adjusting your search query.',
+				'woocommerce'
+			),
+		};
+	}
+
 	switch ( tab ) {
 		case 'publish':
 			return {
@@ -62,11 +75,20 @@ function getEmptyStateCopy( tab: StatusTab ): EmptyStateCopy {
 }
 
 type ProductListEmptyStateProps = {
+	isSearchOrFilterResult?: boolean;
+	onClearFilters?: () => void;
 	tab: StatusTab;
 };
 
-export function ProductListEmptyState( { tab }: ProductListEmptyStateProps ) {
-	const { title, description } = getEmptyStateCopy( tab );
+export function ProductListEmptyState( {
+	isSearchOrFilterResult = false,
+	onClearFilters,
+	tab,
+}: ProductListEmptyStateProps ) {
+	const { title, description } = getEmptyStateCopy(
+		tab,
+		isSearchOrFilterResult
+	);
 
 	return (
 		<EmptyState.Root className="woocommerce-product-list__empty-state">
@@ -74,7 +96,16 @@ export function ProductListEmptyState( { tab }: ProductListEmptyStateProps ) {
 				<ProductListEmptyStateIcon />
 			</EmptyState.Visual>
 			<EmptyState.Title>{ title }</EmptyState.Title>
-			<EmptyState.Description>{ description }</EmptyState.Description>
+			<EmptyState.Description className="woocommerce-product-list__empty-state-description">
+				{ description }
+			</EmptyState.Description>
+			{ isSearchOrFilterResult && onClearFilters && (
+				<EmptyState.Actions>
+					<Button variant="outline" onClick={ onClearFilters }>
+						{ __( 'Clear filters', 'woocommerce' ) }
+					</Button>
+				</EmptyState.Actions>
+			) }
 		</EmptyState.Root>
 	);
 }

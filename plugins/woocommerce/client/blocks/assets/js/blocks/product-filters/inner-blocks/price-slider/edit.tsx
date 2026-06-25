@@ -56,7 +56,7 @@ const PriceSliderEdit = ( {
 		customSlider,
 	} = attributes;
 
-	const rangeInput = context.woocommerceRangeInput;
+	const rangeInput = context[ 'woocommerce/rangeInput' ];
 	const { isLoading } = rangeInput ?? {};
 
 	const blockProps = useBlockProps( {

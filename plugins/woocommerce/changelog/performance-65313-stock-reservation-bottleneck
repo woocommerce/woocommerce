@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Optimized the stock reservation SQL to prevent blocking order status updates.

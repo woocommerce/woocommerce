@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Add aria-label to payment methods list for improved screen reader accessibility
