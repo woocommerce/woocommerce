@@ -1336,11 +1336,11 @@ jQuery( function ( $ ) {
 					data.date_to = window.prompt(
 						woocommerce_admin_meta_boxes_variations.i18n_scheduled_sale_end
 					);
-					if ( null === data.date_from || '' === data.date_from ) {
+					if ( null === data.date_from ) {
 						data.date_from = false;
 					}
 
-					if ( null === data.date_to || '' === data.date_to ) {
+					if ( null === data.date_to ) {
 						data.date_to = false;
 					}
 
