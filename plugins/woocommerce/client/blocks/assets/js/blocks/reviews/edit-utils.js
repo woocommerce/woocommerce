@@ -255,11 +255,11 @@ export const getSharedReviewListControls = ( attributes, setAttributes ) => {
 							value: 'most-recent',
 						},
 						{
-							label: __( 'Highest Rating', 'woocommerce' ),
+							label: __( 'Highest rating', 'woocommerce' ),
 							value: 'highest-rating',
 						},
 						{
-							label: __( 'Lowest Rating', 'woocommerce' ),
+							label: __( 'Lowest rating', 'woocommerce' ),
 							value: 'lowest-rating',
 						},
 					] }
