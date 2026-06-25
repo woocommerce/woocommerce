@@ -48848,12 +48848,6 @@ parameters:
 			path: src/Admin/Overrides/OrderRefund.php
 
 		-
-			message: '#^Property Automattic\\WooCommerce\\Admin\\Overrides\\OrderRefund\:\:\$customer_id \(int\) does not accept false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Admin/Overrides/OrderRefund.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Overrides\\ThemeUpgrader\:\:install\(\) has invalid return type Automattic\\WooCommerce\\Admin\\Overrides\\WP_Error\.$#'
 			identifier: class.notFound
 			count: 1
