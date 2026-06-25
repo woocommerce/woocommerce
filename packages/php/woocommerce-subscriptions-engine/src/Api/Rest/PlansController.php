@@ -217,6 +217,7 @@ final class PlansController extends WP_REST_Controller {
 
 		if ( 'any' === $extension_slug ) {
 			$extension_slugs = null;
+		// @phpstan-ignore function.notFound (str_contains is added as a shim in WordPress core)
 		} elseif ( str_contains( $extension_slug, ',' ) ) {
 			$extension_slugs = explode( ',', $extension_slug );
 		} else {
