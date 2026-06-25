@@ -374,8 +374,8 @@ class WC_Query {
 			$q->is_comment_feed = false;
 		}
 
-		$shop_page      = null;
-		$shop_page_id   = wc_get_page_id( 'shop' );
+		$shop_page    = null;
+		$shop_page_id = wc_get_page_id( 'shop' );
 
 		// Special check for shops with the PRODUCT POST TYPE ARCHIVE on front.
 		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === $shop_page_id ) {
