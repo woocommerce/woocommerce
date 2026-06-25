@@ -843,17 +843,31 @@ class WC_Install {
 	/**
 	 * Is this a brand new WC install?
 	 *
-	 * A brand new install has no version yet. Also treat empty installs as 'new'.
+	 * A brand-new installation has no version yet. Also treat empty installations as 'new'.
 	 *
-	 * @since  3.2.0
+	 * @since 11.0.0 returns false early for stores that are already live or have completed onboarding.
+	 * @since 3.2.0
+	 *
 	 * @return boolean
 	 */
 	public static function is_new_install() {
-		return is_null( get_option( 'woocommerce_version', null ) )
-			|| (
-				-1 === wc_get_page_id( 'shop' )
-				&& 0 === array_sum( wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' ) )
-			);
+		// Performance note: woocommerce_version is absent before the very first install routine completes.
+		if ( false === get_option( 'woocommerce_version' ) ) {
+			return true;
+		}
+
+		// Performance note: verify if the store is live. This option is auto-loaded, and verification is essentially free.
+		if ( 'no' === get_option( 'woocommerce_coming_soon', 'yes' ) ) {
+			return false;
+		}
+
+		// Performance note: verify if onboarding is complete. This option is auto-loaded, and verification is essentially free.
+		if ( in_array( 'setup', (array) get_option( 'woocommerce_task_list_completed_lists', array() ), true ) ) {
+			return false;
+		}
+
+		// Performance note: this is the original fallback. The store setup is incomplete, and even with a cold cache, we do not anticipate performance issues.
+		return -1 === wc_get_page_id( 'shop' ) && 0 === array_sum( wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' ) );
 	}
 
 	/**
