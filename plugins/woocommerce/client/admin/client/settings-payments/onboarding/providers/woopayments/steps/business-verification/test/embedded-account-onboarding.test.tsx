@@ -132,7 +132,8 @@ describe( 'EmbeddedAccountOnboarding', () => {
 		await waitFor( () =>
 			expect( mockOnInitializationError ).toHaveBeenCalledWith( {
 				reason: 'init_error',
-				message: 'Network unavailable.',
+				message:
+					'Unable to start the business verification session. If this problem persists, please contact support.',
 			} )
 		);
 		expect(
@@ -161,4 +162,24 @@ describe( 'EmbeddedAccountOnboarding', () => {
 			);
 		}
 	);
+
+	it.each( [
+		[ 'en_US', 'en-US' ],
+		[ ' sr_Latn_RS ', 'sr-Latn-RS' ],
+	] )( 'normalizes locale %p to %p', async ( locale, expectedLocale ) => {
+		mockCreateEmbeddedKycSession.mockResolvedValue(
+			createSession( { locale } )
+		);
+
+		renderEmbeddedAccountOnboarding();
+
+		expect(
+			await screen.findByTestId( 'connect-account-onboarding' )
+		).toBeInTheDocument();
+		expect( mockLoadConnectAndInitialize ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				locale: expectedLocale,
+			} )
+		);
+	} );
 } );

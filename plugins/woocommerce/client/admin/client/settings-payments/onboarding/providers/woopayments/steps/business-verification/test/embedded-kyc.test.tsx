@@ -107,7 +107,7 @@ describe( 'EmbeddedKyc', () => {
 
 		expect(
 			screen.getByText(
-				"Unable to start onboarding. This may be caused by your site's security or server configuration. Please check our documentation and contact support if this error persists.",
+				"We couldn't load this step. This can happen when your site's security or server settings block a required connection to Stripe. Check the setup requirements, or contact support if the error persists.",
 				{ selector: '.woopayments-banner-notice__content' }
 			)
 		).toBeInTheDocument();
@@ -121,7 +121,7 @@ describe( 'EmbeddedKyc', () => {
 			screen.queryByTestId( 'embedded-account-onboarding' )
 		).not.toBeInTheDocument();
 		expect( mockRecordPaymentsOnboardingEvent ).toHaveBeenCalledWith(
-			'woopayments_onboarding_modal_kyc_load_failed',
+			'woopayments_onboarding_modal_kyc_load_error',
 			{
 				reason: 'timeout',
 				collect_payout_requirements: false,
@@ -158,7 +158,7 @@ describe( 'EmbeddedKyc', () => {
 			}
 		);
 		expect( mockRecordPaymentsOnboardingEvent ).not.toHaveBeenCalledWith(
-			'woopayments_onboarding_modal_kyc_load_failed',
+			'woopayments_onboarding_modal_kyc_load_error',
 			expect.anything()
 		);
 	} );
@@ -180,11 +180,41 @@ describe( 'EmbeddedKyc', () => {
 			screen.getByRole( 'link', { name: 'Learn more' } )
 		).toBeInTheDocument();
 		expect( mockRecordPaymentsOnboardingEvent ).toHaveBeenCalledWith(
-			'woopayments_onboarding_modal_kyc_load_failed',
+			'woopayments_onboarding_modal_kyc_load_error',
 			{
 				reason: 'load_error',
 				error_type: 'api_connection_error',
 				error_message: 'Stripe failed to load.',
+				collect_payout_requirements: false,
+				source: 'settings',
+			}
+		);
+	} );
+
+	it( 'shows HTTPS-specific copy when Stripe reports an invalid request', () => {
+		render( <EmbeddedKyc /> );
+
+		act( () => {
+			mockEmbeddedAccountOnboardingProps.onLoadError?.( {
+				error: {
+					type: 'invalid_request_error',
+					message: 'This application requires HTTPS.',
+				},
+				elementTagName: 'connect-account-onboarding',
+			} );
+		} );
+
+		expect(
+			screen.getByText(
+				'Payment activation through our financial partner requires HTTPS and cannot be completed.'
+			)
+		).toBeInTheDocument();
+		expect( mockRecordPaymentsOnboardingEvent ).toHaveBeenCalledWith(
+			'woopayments_onboarding_modal_kyc_load_error',
+			{
+				reason: 'load_error',
+				error_type: 'invalid_request_error',
+				error_message: 'This application requires HTTPS.',
 				collect_payout_requirements: false,
 				source: 'settings',
 			}
@@ -206,11 +236,36 @@ describe( 'EmbeddedKyc', () => {
 			screen.getByRole( 'link', { name: 'Learn more' } )
 		).toBeInTheDocument();
 		expect( mockRecordPaymentsOnboardingEvent ).toHaveBeenCalledWith(
-			'woopayments_onboarding_modal_kyc_load_failed',
+			'woopayments_onboarding_modal_kyc_load_error',
 			{
 				reason: 'bad_session',
 				error_message: 'Unable to start onboarding.',
 				received_keys: 'unexpected',
+				collect_payout_requirements: false,
+				source: 'settings',
+			}
+		);
+	} );
+
+	it( 'omits initialization error messages from analytics', () => {
+		render( <EmbeddedKyc /> );
+
+		act( () => {
+			mockEmbeddedAccountOnboardingProps.onInitializationError?.( {
+				reason: 'init_error',
+				message: 'Network failed for https://internal.example/token.',
+			} );
+		} );
+
+		expect(
+			screen.getByText(
+				"We couldn't load this step. This can happen when your site's security or server settings block a required connection to Stripe. Check the setup requirements, or contact support if the error persists."
+			)
+		).toBeInTheDocument();
+		expect( mockRecordPaymentsOnboardingEvent ).toHaveBeenCalledWith(
+			'woopayments_onboarding_modal_kyc_load_error',
+			{
+				reason: 'init_error',
 				collect_payout_requirements: false,
 				source: 'settings',
 			}
@@ -238,7 +293,7 @@ describe( 'EmbeddedKyc', () => {
 		).not.toBeInTheDocument();
 		expect( mockRecordPaymentsOnboardingEvent ).toHaveBeenCalledTimes( 1 );
 		expect( mockRecordPaymentsOnboardingEvent ).toHaveBeenCalledWith(
-			'woopayments_onboarding_modal_kyc_load_failed',
+			'woopayments_onboarding_modal_kyc_load_error',
 			expect.objectContaining( { reason: 'timeout' } )
 		);
 	} );

@@ -41,7 +41,11 @@ const embeddedKycLoadTimeoutMs = 20000;
 const embeddedKycTroubleshootingUrl =
 	'https://woocommerce.com/document/woopayments/startup-guide/#requirements';
 const embeddedKycFailureMessage = __(
-	"Unable to start onboarding. This may be caused by your site's security or server configuration. Please check our documentation and contact support if this error persists.",
+	"We couldn't load this step. This can happen when your site's security or server settings block a required connection to Stripe. Check the setup requirements, or contact support if the error persists.",
+	'woocommerce'
+);
+const embeddedKycHttpsFailureMessage = __(
+	'Payment activation through our financial partner requires HTTPS and cannot be completed.',
 	'woocommerce'
 );
 
@@ -54,7 +58,7 @@ const getFailureTrackingDetails = (
 		details.error_type = failure.errorType;
 	}
 
-	if ( failure.message ) {
+	if ( failure.message && failure.reason !== 'init_error' ) {
 		details.error_message = failure.message;
 	}
 
@@ -64,6 +68,25 @@ const getFailureTrackingDetails = (
 
 	return details;
 };
+
+const getFailureNoticeMessage = ( failure: EmbeddedKycLoadFailure ) => {
+	if (
+		failure.reason === 'load_error' &&
+		failure.errorType === 'invalid_request_error'
+	) {
+		return embeddedKycHttpsFailureMessage;
+	}
+
+	return embeddedKycFailureMessage;
+};
+
+const getFailureNoticeStatus = (
+	failure: EmbeddedKycLoadFailure
+): 'error' | 'warning' =>
+	failure.reason === 'load_error' &&
+	failure.errorType === 'invalid_request_error'
+		? 'warning'
+		: 'error';
 
 const EmbeddedKyc: React.FC< Props > = ( {
 	collectPayoutRequirements = false,
@@ -91,7 +114,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 			setLoading( false );
 			setLoadFailure( failure );
 			recordPaymentsOnboardingEvent(
-				'woopayments_onboarding_modal_kyc_load_failed',
+				'woopayments_onboarding_modal_kyc_load_error',
 				{
 					reason: failure.reason,
 					collect_payout_requirements: collectPayoutRequirements,
@@ -180,7 +203,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 			{ loadFailure && (
 				<BannerNotice
 					className="woopayments-banner-notice--embedded-kyc"
-					status="error"
+					status={ getFailureNoticeStatus( loadFailure ) }
 					isDismissible={ false }
 					actions={ [
 						{
@@ -196,7 +219,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 						},
 					] }
 				>
-					{ embeddedKycFailureMessage }
+					{ getFailureNoticeMessage( loadFailure ) }
 				</BannerNotice>
 			) }
 			{ loading && (

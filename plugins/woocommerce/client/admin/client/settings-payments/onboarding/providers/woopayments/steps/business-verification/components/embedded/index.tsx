@@ -65,6 +65,11 @@ const getObjectKeys = ( value: unknown ): string[] =>
 const isNonEmptyString = ( value: unknown ): value is string =>
 	typeof value === 'string' && value.trim() !== '';
 
+const normalizeLocale = ( value: unknown ): string =>
+	isNonEmptyString( value )
+		? value.trim().replace( /_/g, '-' )
+		: defaultLocale;
+
 const validateEmbeddedKycSessionCreateResult = (
 	result: unknown
 ):
@@ -102,9 +107,7 @@ const validateEmbeddedKycSessionCreateResult = (
 		...( session as unknown as EmbeddedKycSession ),
 		clientSecret: session.clientSecret,
 		publishableKey: session.publishableKey,
-		locale: isNonEmptyString( session.locale )
-			? session.locale
-			: defaultLocale,
+		locale: normalizeLocale( session.locale ),
 	};
 
 	return { result: { session: normalizedSession } };
@@ -153,17 +156,14 @@ const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
 						overlays: 'drawer',
 						...appearance,
 					},
-					locale: locale.replace( '_', '-' ),
+					locale,
 				} );
 
 				setStripeConnectInstance( instance );
 			} catch ( err ) {
 				setInitializationError( {
 					reason: 'init_error',
-					message:
-						err instanceof Error
-							? err.message
-							: genericInitializationError,
+					message: genericInitializationError,
 				} );
 			} finally {
 				setLoading( false );
