@@ -61,7 +61,7 @@ test.describe(
 			await test.step( 'go to Linked Products', async () => {
 				await expect( async () => {
 					await page
-						.getByRole( 'link', { name: 'Linked Products' } )
+						.getByRole( 'tab', { name: 'Linked Products' } )
 						.click();
 
 					// Sometimes the click on link is too fast and the initial tab (General) is still visible

@@ -142,7 +142,7 @@ for ( const productType of Object.keys( productData ) ) {
 				const attributeName = getFakeAttribute().name;
 				await page
 					.locator( '#woocommerce-product-data' )
-					.getByRole( 'link', { name: 'Attributes' } )
+					.getByRole( 'tab', { name: 'Attributes' } )
 					.click();
 				await page
 					.getByPlaceholder( 'e.g. length or weight' )
@@ -208,9 +208,7 @@ for ( const productType of Object.keys( productData ) ) {
 			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( productData[ productType ].shipping ) {
 				await test.step( 'add shipping details', async () => {
-					await page
-						.getByRole( 'link', { name: 'Shipping' } )
-						.click();
+					await page.getByRole( 'tab', { name: 'Shipping' } ).click();
 					await expect(
 						page.getByText( 'Shipping class', { exact: true } )
 					).toBeVisible();
@@ -250,7 +248,7 @@ for ( const productType of Object.keys( productData ) ) {
 					).toBeChecked();
 
 					// Add a download link
-					await page.getByRole( 'link', { name: 'General' } ).click();
+					await page.getByRole( 'tab', { name: 'General' } ).click();
 					await page
 						.getByRole( 'link', { name: 'Add File' } )
 						.click();

@@ -60,13 +60,13 @@ async function goToAttributesTab( page: Page ) {
 	await expect(
 		page
 			.locator( '.attribute_tab' )
-			.getByRole( 'link', { name: 'Variations' } )
+			.getByRole( 'tab', { name: 'Variations' } )
 	).toBeHidden();
 
 	await test.step( 'Go to the "Attributes" tab.', async () => {
 		const attributesTab = page
 			.locator( '.attribute_tab' )
-			.getByRole( 'link', { name: 'Attributes' } );
+			.getByRole( 'tab', { name: 'Attributes' } );
 
 		await attributesTab.click();
 	} );

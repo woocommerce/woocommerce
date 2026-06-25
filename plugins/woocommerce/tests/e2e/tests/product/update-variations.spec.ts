@@ -115,7 +115,7 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		await test.step( 'Click on the "Variations" tab.', async () => {
 			await expect( async () => {
 				await page
-					.getByRole( 'link', { name: 'Variations' } )
+					.getByRole( 'tab', { name: 'Variations' } )
 					.last()
 					.click();
 
