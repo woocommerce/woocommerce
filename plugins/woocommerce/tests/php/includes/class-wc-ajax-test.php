@@ -610,15 +610,16 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * @testdox Should not set variation sale end date when bulk schedule end date is blank.
 	 */
 	public function test_bulk_sale_schedule_ignores_blank_end_date(): void {
-		$product      = WC_Helper_Product::create_variation_product();
-		$variation_id = $product->get_children()[0];
-		$method       = new ReflectionMethod( WC_AJAX::class, 'variation_bulk_action_variable_sale_schedule' );
+		$variation = new WC_Product_Variation();
+		$variation->save();
+
+		$method = new ReflectionMethod( WC_AJAX::class, 'variation_bulk_action_variable_sale_schedule' );
 		$method->setAccessible( true );
 
 		$method->invokeArgs(
 			null,
 			array(
-				array( $variation_id ),
+				array( $variation->get_id() ),
 				array(
 					'date_from' => '2026-07-01',
 					'date_to'   => '',
@@ -626,10 +627,12 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			)
 		);
 
-		$variation = wc_get_product( $variation_id );
+		$variation = wc_get_product( $variation->get_id() );
 
 		$this->assertSame( '2026-07-01 00:00:00', $variation->get_date_on_sale_from( 'edit' )->date( 'Y-m-d H:i:s' ), 'The sale start date should be applied.' );
 		$this->assertNull( $variation->get_date_on_sale_to( 'edit' ), 'The sale end date should remain empty when the bulk action end date is blank.' );
+
+		$variation->delete( true );
 	}
 
 	/**
