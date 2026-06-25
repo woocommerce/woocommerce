@@ -81,42 +81,42 @@
 		"spacing": {
 			"defaultSpacingSizes": false,
 			"spacingScale": {
-                "steps": 1
-            },
+				"steps": 1
+			},
 			"spacingSizes": [
 				{
 					"name": "2X-Small",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 1 * 1px), calc(var(--wp--custom--spacing-unit) * 1 * 1px * 100vw / var(--wp--style--global--wide-size)))",
+					"size": "min(calc(var(--wp--custom--spacing-unit) * 1 * 1px), calc(var(--wp--custom--spacing-unit) * 1 * 1px * 100vw / var(--wp--style--global--wide-size)))",
 					"slug": "10"
 				},
 				{
 					"name": "X-Small",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 2 * 1px), calc(var(--wp--custom--spacing-unit) * 2 * 1px * 100vw / var(--wp--style--global--wide-size)))",
+					"size": "min(calc(var(--wp--custom--spacing-unit) * 2 * 1px), calc(var(--wp--custom--spacing-unit) * 2 * 1px * 100vw / var(--wp--style--global--wide-size)))",
 					"slug": "20"
 				},
 				{
 					"name": "Small",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 3 * 1px), calc(var(--wp--custom--spacing-unit) * 3 * 1px * 100vw / var(--wp--style--global--wide-size)))",
+					"size": "min(calc(var(--wp--custom--spacing-unit) * 3 * 1px), calc(var(--wp--custom--spacing-unit) * 3 * 1px * 100vw / var(--wp--style--global--wide-size)))",
 					"slug": "30"
 				},
 				{
 					"name": "Regular",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 5 * 1px), calc(var(--wp--custom--spacing-unit) * 5 * 1px * 100vw / var(--wp--style--global--wide-size)))",
+					"size": "min(calc(var(--wp--custom--spacing-unit) * 5 * 1px), calc(var(--wp--custom--spacing-unit) * 5 * 1px * 100vw / var(--wp--style--global--wide-size)))",
 					"slug": "50"
 				},
 				{
 					"name": "Large",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 7 * 1px), calc(var(--wp--custom--spacing-unit) * 7 * 1px * 100vw / var(--wp--style--global--wide-size)))",
+					"size": "min(calc(var(--wp--custom--spacing-unit) * 7 * 1px), calc(var(--wp--custom--spacing-unit) * 7 * 1px * 100vw / var(--wp--style--global--wide-size)))",
 					"slug": "70"
 				},
 				{
 					"name": "Extra Large",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 9 * 1px), calc(var(--wp--custom--spacing-unit) * 9 * 1px * 100vw / var(--wp--style--global--wide-size)))",
+					"size": "min(calc(var(--wp--custom--spacing-unit) * 9 * 1px), calc(var(--wp--custom--spacing-unit) * 9 * 1px * 100vw / var(--wp--style--global--wide-size)))",
 					"slug": "90"
 				},
 				{
 					"name": "2X Large",
-                    "size": "min(calc(var(--wp--custom--spacing-unit) * 14 * 1px), calc(var(--wp--custom--spacing-unit) * 14 * 1px * 100vw / var(--wp--style--global--wide-size)))",
+					"size": "min(calc(var(--wp--custom--spacing-unit) * 14 * 1px), calc(var(--wp--custom--spacing-unit) * 14 * 1px * 100vw / var(--wp--style--global--wide-size)))",
 					"slug": "140"
 				}
 			]
@@ -135,8 +135,8 @@
 								"file:./assets/fonts/inter/InterVariable.woff2"
 							],
 							"fontWeight": "100 900",
-                            "fontStretch": "normal",
-                            "fontStyle": "normal",
+							"fontStretch": "normal",
+							"fontStyle": "normal",
 							"fontFamily": "Inter"
 						},
 						{
@@ -145,7 +145,7 @@
 							],
 							"fontWeight": "100 900",
 							"fontStyle": "italic",
-                            "fontStretch": "normal",
+							"fontStretch": "normal",
 							"fontFamily": "Inter"
 						}
 					]
@@ -251,10 +251,10 @@
 				}
 			},
 			"core/columns": {
-                "spacing": {
-                    "blockGap": "var(--wp--preset--spacing--50)"
-                }
-            },
+				"spacing": {
+					"blockGap": "var(--wp--preset--spacing--50)"
+				}
+			},
 			"core/cover": {
 				"color": {
 					"text": "var(--wp--preset--color--theme-1)"

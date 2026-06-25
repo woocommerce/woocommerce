@@ -16,14 +16,14 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 
 /* Utility class for underlined links. */
 .underline-link a {
-    text-decoration: underline;
+	text-decoration: underline;
 } 
 
 /* Add a transition state for buttons. */
 .wp-element-button {
-    transition: border, background-color, color, box-shadow, opacity, filter;
-    transition-duration: 0.15s;
-    transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+	transition: border, background-color, color, box-shadow, opacity, filter;
+	transition-duration: 0.15s;
+	transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Styles for WooCommerce blocks that can't be styled via the editor yet. */
@@ -33,40 +33,40 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 .wc-block-components-checkout-order-summary__title,
 .wc-block-components-totals-coupon,
 .wc-block-components-totals-item {
-    color: var(--wp--preset--color--theme-2);
+	color: var(--wp--preset--color--theme-2);
 }
 
 .wp-block-woocommerce-product-gallery-is-layout-flex {
-    gap: var(--wp--preset--spacing--50);
+	gap: var(--wp--preset--spacing--50);
 }
 
 /* https://github.com/woocommerce/woocommerce/issues/59391 */
 .woocommerce-account .entry-content > .woocommerce {
-    padding-top: var(--wp--preset--spacing--70);
-    padding-bottom: var(--wp--preset--spacing--90);
+	padding-top: var(--wp--preset--spacing--70);
+	padding-bottom: var(--wp--preset--spacing--90);
 }
 
 /* WOOPRD-1561: My Account address styles. */
 .woocommerce-account .addresses .title .edit {
-    float: none;
+	float: none;
 }
 
 .woocommerce-account .addresses address {
-    font-style: normal;
+	font-style: normal;
 }
 
 .wp-block-product-specifications-item__value p {
-    margin: 0
+	margin: 0
 }
 
 /* Checkbox alignment for reviews form */
 .wp-block-woocommerce-product-review-form .comment-form-cookies-consent {
-    align-items: flex-start;
+	align-items: flex-start;
 }
 
 .wc-block-components-quantity-selector {
-    border-color: var(--wp--preset--color--theme-6);
-    border-radius: 0;
+	border-color: var(--wp--preset--color--theme-6);
+	border-radius: 0;
 }
 
 /* Catalog sort order select — CSS customizable select (base-select).
@@ -74,191 +74,191 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
  * Closed/open styles from Figma Dropdown/Default (1:6531) and Dropdown/Open Links (37:1153).
  * Strip native chrome with appearance: none first; opt into base-select for the picker. */
 .woocommerce.wc-block-catalog-sorting {
-    font-size: var(--wp--preset--font-size--medium) !important;
+	font-size: var(--wp--preset--font-size--medium) !important;
 }
 
 .woocommerce.wc-block-catalog-sorting select.orderby {
-    -webkit-appearance: none;
-    appearance: none;
-    background-color: var(--wp--preset--color--theme-1);
-    background-image: url('data:image/svg+xml;utf8,<svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="%23111111"></path></svg>');
-    background-position: right center;
-    background-repeat: no-repeat;
-    background-size: 1.5em;
-    border: none;
-    border-radius: 0;
-    color: var(--wp--preset--color--theme-2);
-    cursor: pointer;
-    font-family: inherit;
-    font-size: var(--wp--preset--font-size--medium) !important;
-    font-weight: inherit;
-    line-height: 1.5625;
-    outline: none;
-    padding-block: 0;
-    padding-inline: 0 calc(1.5em + 10px);
-    vertical-align: middle;
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: var(--wp--preset--color--theme-1);
+	background-image: url('data:image/svg+xml;utf8,<svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="%23111111"></path></svg>');
+	background-position: right center;
+	background-repeat: no-repeat;
+	background-size: 1.5em;
+	border: none;
+	border-radius: 0;
+	color: var(--wp--preset--color--theme-2);
+	cursor: pointer;
+	font-family: inherit;
+	font-size: var(--wp--preset--font-size--medium) !important;
+	font-weight: inherit;
+	line-height: 1.5625;
+	outline: none;
+	padding-block: 0;
+	padding-inline: 0 calc(1.5em + 10px);
+	vertical-align: middle;
 }
 
 @supports (appearance: base-select) {
-    .woocommerce.wc-block-catalog-sorting select.orderby,
-    .woocommerce.wc-block-catalog-sorting select.orderby::picker(select) {
-        appearance: base-select;
-        background-color: var(--wp--preset--color--theme-1);
-        border: none;
-    }
+	.woocommerce.wc-block-catalog-sorting select.orderby,
+	.woocommerce.wc-block-catalog-sorting select.orderby::picker(select) {
+		appearance: base-select;
+		background-color: var(--wp--preset--color--theme-1);
+		border: none;
+	}
 
-    .woocommerce.wc-block-catalog-sorting select.orderby {
-        align-items: center;
-        background-image: none;
-        box-shadow: none;
-        display: inline-flex;
-        flex-direction: row;
-        gap: 10px;
-        outline: none;
-        padding: 0;
-    }
+	.woocommerce.wc-block-catalog-sorting select.orderby {
+		align-items: center;
+		background-image: none;
+		box-shadow: none;
+		display: inline-flex;
+		flex-direction: row;
+		gap: 10px;
+		outline: none;
+		padding: 0;
+	}
 
-    .woocommerce.wc-block-catalog-sorting select.orderby:not(:open) > option {
-        display: none;
-    }
+	.woocommerce.wc-block-catalog-sorting select.orderby:not(:open) > option {
+		display: none;
+	}
 
-    .woocommerce.wc-block-catalog-sorting select.orderby:not(:open)::picker(select) {
-        display: none;
-    }
+	.woocommerce.wc-block-catalog-sorting select.orderby:not(:open)::picker(select) {
+		display: none;
+	}
 
-    .woocommerce.wc-block-catalog-sorting select.orderby .orderby-button {
-        appearance: none;
-        background: transparent;
-        border: 0;
-        box-shadow: none;
-        color: inherit;
-        cursor: pointer;
-        display: inline;
-        font: inherit;
-        margin: 0;
-        order: 0;
-        outline: 0;
-        padding: 0;
-    }
+	.woocommerce.wc-block-catalog-sorting select.orderby .orderby-button {
+		appearance: none;
+		background: transparent;
+		border: 0;
+		box-shadow: none;
+		color: inherit;
+		cursor: pointer;
+		display: inline;
+		font: inherit;
+		margin: 0;
+		order: 0;
+		outline: 0;
+		padding: 0;
+	}
 
-    .woocommerce.wc-block-catalog-sorting select.orderby selectedcontent {
-        display: inline;
-        white-space: nowrap;
-    }
+	.woocommerce.wc-block-catalog-sorting select.orderby selectedcontent {
+		display: inline;
+		white-space: nowrap;
+	}
 
-    .woocommerce.wc-block-catalog-sorting select.orderby::picker-icon {
-        background-image: url('data:image/svg+xml;utf8,<svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="currentColor"></path></svg>');
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: contain;
-        block-size: 1.5em;
-        color: var(--wp--preset--color--theme-2);
-        content: '';
-        flex-shrink: 0;
-        inline-size: 1.5em;
-        order: 1;
-        transition: rotate 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
+	.woocommerce.wc-block-catalog-sorting select.orderby::picker-icon {
+		background-image: url('data:image/svg+xml;utf8,<svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="currentColor"></path></svg>');
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: contain;
+		block-size: 1.5em;
+		color: var(--wp--preset--color--theme-2);
+		content: '';
+		flex-shrink: 0;
+		inline-size: 1.5em;
+		order: 1;
+		transition: rotate 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+	}
 
-    .woocommerce.wc-block-catalog-sorting select.orderby:open::picker-icon {
-        rotate: 180deg;
-    }
+	.woocommerce.wc-block-catalog-sorting select.orderby:open::picker-icon {
+		rotate: 180deg;
+	}
 
-    .woocommerce.wc-block-catalog-sorting select.orderby::picker(select) {
-        align-items: stretch;
-        background-color: var(--wp--preset--color--theme-1);
-        border-radius: 0;
-        box-sizing: border-box;
-        color: var(--wp--preset--color--theme-2);
-        display: flex;
-        flex-direction: column;
-        font-size: var(--wp--preset--font-size--medium);
-        gap: 0;
-        line-height: 1.5625;
-        margin-block-start: 12px;
-        min-width: anchor-size(width);
-        padding: 0;
-    }
+	.woocommerce.wc-block-catalog-sorting select.orderby::picker(select) {
+		align-items: stretch;
+		background-color: var(--wp--preset--color--theme-1);
+		border-radius: 0;
+		box-sizing: border-box;
+		color: var(--wp--preset--color--theme-2);
+		display: flex;
+		flex-direction: column;
+		font-size: var(--wp--preset--font-size--medium);
+		gap: 0;
+		line-height: 1.5625;
+		margin-block-start: 12px;
+		min-width: anchor-size(width);
+		padding: 0;
+	}
 
-    .woocommerce.wc-block-catalog-sorting select.orderby:open::picker(select) {
-        border: 1px solid var(--wp--preset--color--theme-6);
-    }
+	.woocommerce.wc-block-catalog-sorting select.orderby:open::picker(select) {
+		border: 1px solid var(--wp--preset--color--theme-6);
+	}
 
-    .woocommerce.wc-block-catalog-sorting select.orderby option::checkmark {
-        content: '';
-    }
+	.woocommerce.wc-block-catalog-sorting select.orderby option::checkmark {
+		content: '';
+	}
 
-    /* Open list items — padding per option so hover fills a padded row. */
-    .woocommerce.wc-block-catalog-sorting select.orderby option {
-        background-color: transparent;
-        box-sizing: border-box;
-        color: var(--wp--preset--color--theme-2);
-        font-size: var(--wp--preset--font-size--medium);
-        gap: 0;
-        line-height: 1.5625;
-        min-block-size: auto;
-        padding: 12px 18px;
-        white-space: nowrap;
-        width: 100%;
-    }
+	/* Open list items — padding per option so hover fills a padded row. */
+	.woocommerce.wc-block-catalog-sorting select.orderby option {
+		background-color: transparent;
+		box-sizing: border-box;
+		color: var(--wp--preset--color--theme-2);
+		font-size: var(--wp--preset--font-size--medium);
+		gap: 0;
+		line-height: 1.5625;
+		min-block-size: auto;
+		padding: 12px 18px;
+		white-space: nowrap;
+		width: 100%;
+	}
 
-    .woocommerce.wc-block-catalog-sorting select.orderby option:enabled:hover,
-    .woocommerce.wc-block-catalog-sorting select.orderby option:focus {
-        background-color: var(--wp--preset--color--theme-5);
-        outline: none;
-    }
+	.woocommerce.wc-block-catalog-sorting select.orderby option:enabled:hover,
+	.woocommerce.wc-block-catalog-sorting select.orderby option:focus {
+		background-color: var(--wp--preset--color--theme-5);
+		outline: none;
+	}
 
-    /* Underline the closed label while the menu is open (Dropdown/Click, 1875:53421). */
-    .woocommerce.wc-block-catalog-sorting select.orderby:open selectedcontent {
-        text-decoration: underline;
-    }
+	/* Underline the closed label while the menu is open (Dropdown/Click, 1875:53421). */
+	.woocommerce.wc-block-catalog-sorting select.orderby:open selectedcontent {
+		text-decoration: underline;
+	}
 }
 
 :where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills) {
-    gap: var(--wp--preset--spacing--10);
+	gap: var(--wp--preset--spacing--10);
 }
 
 :where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill) {
-    border-color: var(--wp--preset--color--theme-4);
-    border-radius: 0;
-    font-size: var(--wp--preset--font-size--small);
-    font-weight: 400;
-    letter-spacing: 0.06em;
-    line-height: 1.142;
-    padding: var(--wp--preset--spacing--10) var(--wp--preset--spacing--20);
-    text-transform: uppercase;
+	border-color: var(--wp--preset--color--theme-4);
+	border-radius: 0;
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 400;
+	letter-spacing: 0.06em;
+	line-height: 1.142;
+	padding: var(--wp--preset--spacing--10) var(--wp--preset--spacing--20);
+	text-transform: uppercase;
 }
 
 .woocommerce-page label.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill {
-    margin-bottom: 0;
+	margin-bottom: 0;
 }
 
 .woocommerce-page label.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-name {
-    margin-bottom: 0;
+	margin-bottom: 0;
 }
 
 :where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:checked)) {
-    background-color: var(--wp--preset--color--theme-2);
+	background-color: var(--wp--preset--color--theme-2);
 }
 
 .wp-block-accordion-heading__toggle:hover .wp-block-accordion-heading__toggle-title {
-    text-decoration: none;
+	text-decoration: none;
 }
 
 .wp-block-woocommerce-product-review-content p {
-    margin-top: var(--wp--preset--spacing--20);
-    margin-bottom: 0;
+	margin-top: var(--wp--preset--spacing--20);
+	margin-bottom: 0;
 }
 
 .wp-block-woocommerce-cart-order-summary-heading-block textarea {
-    padding-left: 0;
+	padding-left: 0;
 }
 
 .wc-block-cart-item__quantity {
-    margin-top: var(--wp--preset--spacing--20);
+	margin-top: var(--wp--preset--spacing--20);
 }
 .wc-block-components-quantity-selector {
-    min-height: 44px;
+	min-height: 44px;
 }
 
 /* Navigation dropdown panel — desktop only.
@@ -280,9 +280,9 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
  * This lives in style.css (rather than theme.json's css field)
  * because that field strips @media queries during sanitization. */
 @media (min-width: 600px) {
-    :root .wp-block-navigation:not(.has-background) .wp-block-navigation__submenu-container {
-        background-color: var(--wp--preset--color--theme-1);
-        border: none;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-    }
+	:root .wp-block-navigation:not(.has-background) .wp-block-navigation__submenu-container {
+		background-color: var(--wp--preset--color--theme-1);
+		border: none;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+	}
 }
