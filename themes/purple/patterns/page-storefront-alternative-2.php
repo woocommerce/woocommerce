@@ -1,7 +1,7 @@
 <?php
 /**
- * Title: Shop homepage alternative 2
- * Slug: purple/page-home-alternative-2
+ * Title: Storefront alternative 2
+ * Slug: purple/page-storefront-alternative-2
  * Categories: purple
  * Keywords: starter
  * Description: A shop homepage with category highlights, new arrival feature, and store features.
