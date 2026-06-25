@@ -23,6 +23,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Api;
 use WC_Order;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\RelatedOrders;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Hold;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\PeriodEndCancellation;
@@ -40,13 +41,17 @@ defined( 'ABSPATH' ) || exit;
 final class Subscriptions {
 
 	/**
-	 * Fetch a subscription contract by id.
+	 * Fetch a subscription contract by id, with its frozen plan terms hydrated.
+	 *
+	 * The returned contract carries its plan snapshot ({@see Contract::get_plan_snapshot()}),
+	 * so a consumer reads the billing cadence straight off the snapshot - no live
+	 * plan-repository join.
 	 *
 	 * @param int $contract_id Contract id.
 	 * @return Contract|null The contract, or null when none exists.
 	 */
 	public static function get( int $contract_id ): ?Contract {
-		return ( new ContractRepository() )->find( $contract_id );
+		return ( new ContractRepository() )->find_with_snapshot( $contract_id );
 	}
 
 	/**
@@ -71,7 +76,9 @@ final class Subscriptions {
 	 *
 	 * Owner-scoped by construction: the customer id is supplied by the caller (the
 	 * authenticated user at the REST boundary), never inferred, so it never returns
-	 * another customer's contracts. Returns interim {@see Contract} entities.
+	 * another customer's contracts. Returns interim {@see Contract} entities, each with its
+	 * frozen plan terms hydrated ({@see Contract::get_plan_snapshot()}) so a list row's
+	 * cadence is read off the snapshot.
 	 *
 	 * @param int $customer_id Owning customer id.
 	 * @param int $limit       Maximum contracts to return.
@@ -95,6 +102,9 @@ final class Subscriptions {
 	 * asymmetric not-found rule), so a caller cannot probe for the existence of a
 	 * contract it does not own.
 	 *
+	 * The returned contract carries its frozen plan terms ({@see Contract::get_plan_snapshot()}),
+	 * so the cadence is read off the snapshot with no live plan-repository join.
+	 *
 	 * @param int $contract_id Contract id.
 	 * @param int $customer_id Customer that must own the contract.
 	 * @return Contract|null The contract when owned by `$customer_id`, else null.
@@ -105,7 +115,7 @@ final class Subscriptions {
 			return null;
 		}
 
-		return $contracts->find( $contract_id );
+		return $contracts->find_with_snapshot( $contract_id );
 	}
 
 	/**
@@ -117,6 +127,20 @@ final class Subscriptions {
 	 */
 	public static function get_history( int $contract_id, int $limit = 20 ): array {
 		return ( new ContractRepository() )->find_cycle_history( $contract_id, Cycle::KIND_BILLING, $limit );
+	}
+
+	/**
+	 * The orders related to a contract (the origin order, plus renewals / switches /
+	 * resubscribes), newest first - the portal detail's related-orders read kept
+	 * facade-only so a consumer never reaches into the order-linkage internals.
+	 *
+	 * Returns live `WC_Order` objects; presentation shaping is the caller's job.
+	 *
+	 * @param int $contract_id Contract id.
+	 * @return array<int, WC_Order> Related orders, newest first.
+	 */
+	public static function get_related_orders( int $contract_id ): array {
+		return ( new RelatedOrders() )->for_contract( $contract_id );
 	}
 
 	/**

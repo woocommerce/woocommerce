@@ -20,6 +20,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanGroup;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanGroupRepository;
@@ -48,11 +49,13 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Sign up a contract via the checkout factory (cycle 1 billed).
+	 * Sign up a contract via the checkout factory (cycle 1 billed). The monthly plan's
+	 * cadence is frozen onto the contract's plan snapshot at signup.
 	 *
+	 * @param int $customer_id Owning customer id; 0 leaves the order customer unset.
 	 * @return Contract The persisted contract with cycle 1 billed.
 	 */
-	private function sign_up_contract(): Contract {
+	private function sign_up_contract( int $customer_id = 0 ): Contract {
 		$group_id = ( new PlanGroupRepository() )->insert( PlanGroup::create( array( 'name' => 'Club' ) ) );
 		$plan     = Plan::create(
 			$group_id,
@@ -70,9 +73,28 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$order->set_payment_method( self::GATEWAY );
 		$order->set_total( '19.99' );
 		$order->set_date_paid( '2026-01-15 00:00:00' );
+		if ( $customer_id > 0 ) {
+			$order->set_customer_id( $customer_id );
+		}
 		$order->save();
 
 		return ( new ContractFactory() )->create_from_order( $order, $plan );
+	}
+
+	/**
+	 * Repoint the live plan a contract was created under to a different cadence, to prove
+	 * a read sources cadence from the frozen snapshot rather than the live plan.
+	 *
+	 * @param Contract      $contract The contract whose live plan to mutate.
+	 * @param BillingPolicy $policy   The new live cadence.
+	 */
+	private function repoint_live_plan( Contract $contract, BillingPolicy $policy ): void {
+		$plans = new PlanRepository();
+		$plan  = $plans->find( $contract->get_selling_plan_id() );
+		$this->assertInstanceOf( Plan::class, $plan );
+
+		$plan->set_billing_policy( $policy );
+		$plans->update( $plan );
 	}
 
 	/**
@@ -88,6 +110,71 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$this->assertSame( $contract_id, $loaded->get_id() );
 
 		$this->assertNull( Subscriptions::get( 999999 ) );
+	}
+
+	/**
+	 * @testdox get hydrates the contract's frozen plan terms, and the snapshot wins over a changed live plan.
+	 */
+	public function test_get_hydrates_the_plan_snapshot_and_snapshot_wins(): void {
+		$contract    = $this->sign_up_contract();
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		// Edit the live plan AFTER signup: the frozen snapshot must not move with it.
+		$this->repoint_live_plan( $contract, new BillingPolicy( 'year', 2, null, null, null ) );
+
+		$loaded = Subscriptions::get( $contract_id );
+		$this->assertInstanceOf( Contract::class, $loaded );
+
+		$snapshot = $loaded->get_plan_snapshot();
+		$this->assertInstanceOf( PlanSnapshot::class, $snapshot, 'get() must hydrate the plan snapshot.' );
+
+		$policy = $snapshot->get_billing_policy();
+		$this->assertInstanceOf( BillingPolicy::class, $policy );
+		// Frozen monthly cadence, NOT the live plan's edited yearly cadence.
+		$this->assertSame( 'month', $policy->get_period() );
+		$this->assertSame( 1, $policy->get_interval() );
+	}
+
+	/**
+	 * @testdox get_related_orders returns the contract's linked orders (the origin order).
+	 */
+	public function test_get_related_orders_returns_the_linked_orders(): void {
+		$contract    = $this->sign_up_contract();
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$orders = Subscriptions::get_related_orders( $contract_id );
+
+		$this->assertCount( 1, $orders );
+		$this->assertInstanceOf( WC_Order::class, $orders[0] );
+		$this->assertSame( $contract->get_origin_order_id(), $orders[0]->get_id() );
+	}
+
+	/**
+	 * @testdox get_related_orders is empty for a contract with no linked orders.
+	 */
+	public function test_get_related_orders_is_empty_when_none_are_linked(): void {
+		$this->assertSame( array(), Subscriptions::get_related_orders( 987654 ) );
+	}
+
+	/**
+	 * @testdox list_for_customer hydrates each row's frozen plan terms.
+	 */
+	public function test_list_for_customer_hydrates_the_plan_snapshot(): void {
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$this->assertIsInt( $customer_id );
+
+		$this->sign_up_contract( $customer_id );
+
+		$contracts = Subscriptions::list_for_customer( $customer_id );
+		$this->assertCount( 1, $contracts );
+
+		$snapshot = $contracts[0]->get_plan_snapshot();
+		$this->assertInstanceOf( PlanSnapshot::class, $snapshot, 'list_for_customer must hydrate each row\'s plan snapshot.' );
+		$policy = $snapshot->get_billing_policy();
+		$this->assertInstanceOf( BillingPolicy::class, $policy );
+		$this->assertSame( 'month', $policy->get_period() );
 	}
 
 	/**

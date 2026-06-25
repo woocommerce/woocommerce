@@ -204,6 +204,27 @@ final class ContractRepository {
 	}
 
 	/**
+	 * Fetch a contract by id like {@see self::find()}, additionally hydrating its frozen
+	 * plan terms ({@see Contract::get_plan_snapshot()}) from `plan_snapshot_id` - the read
+	 * path the customer-portal facade uses so a consumer reads the billing cadence straight
+	 * off the snapshot, with no live {@see PlanRepository} join. The bare {@see self::find()}
+	 * stays lean for the action paths that do not need the cadence.
+	 *
+	 * @param int $id Contract id.
+	 * @return Contract|null Hydrated contract (with its plan snapshot when present), or null if not found.
+	 */
+	public function find_with_snapshot( int $id ): ?Contract {
+		$contract = $this->find( $id );
+		if ( null === $contract ) {
+			return null;
+		}
+
+		$this->hydrate_plan_snapshot( $contract );
+
+		return $contract;
+	}
+
+	/**
 	 * Lightweight read: the contract row only, no children. The row IS the live state,
 	 * so list screens and guards that need only identity + schedule avoid loading children.
 	 *
@@ -358,6 +379,11 @@ final class ContractRepository {
 	 * args, so the shape can widen without a signature change. Ordered by id DESC (monotonic
 	 * with creation) so the list is newest-first and stable for paging.
 	 *
+	 * Each row is row-only (no items / addresses / meta), but its frozen plan terms are
+	 * hydrated ({@see Contract::get_plan_snapshot()}) so the list rows carry the billing
+	 * cadence off the snapshot - one extra snapshot read per contract (an accepted N+1
+	 * pre-freeze; the list page sizes are bounded by the REST controller).
+	 *
 	 * @param int                       $customer_id Owning customer id.
 	 * @param array<string, mixed>|null $args        {
 	 *     Optional. Query args.
@@ -389,7 +415,9 @@ final class ContractRepository {
 		$contracts = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$contracts[] = Contract::from_storage( self::as_string_keyed( $row ) );
+				$contract = Contract::from_storage( self::as_string_keyed( $row ) );
+				$this->hydrate_plan_snapshot( $contract );
+				$contracts[] = $contract;
 			}
 		}
 
@@ -853,6 +881,21 @@ final class ContractRepository {
 		}
 
 		$cycle->set_id( (int) $wpdb->insert_id );
+	}
+
+	/**
+	 * Hydrate a contract's frozen plan terms from its `plan_snapshot_id`, when present.
+	 *
+	 * A no-op for a contract with no plan snapshot (a manually-seeded contract), so the
+	 * cadence accessor on it returns null and the consumer degrades to "no cadence".
+	 *
+	 * @param Contract $contract Contract to hydrate in place.
+	 */
+	private function hydrate_plan_snapshot( Contract $contract ): void {
+		$snapshot = $this->find_plan_snapshot( $contract->get_plan_snapshot_id() );
+		if ( $snapshot instanceof PlanSnapshot ) {
+			$contract->set_plan_snapshot( $snapshot );
+		}
 	}
 
 	/**
