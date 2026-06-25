@@ -36,6 +36,21 @@ import type {
 } from './types';
 import './style.scss';
 
+const isExpandedOrDescendantIsExpanded = (
+	item: SearchListItemProps,
+	expandedPanelId: number
+): boolean => {
+	if ( item.id === expandedPanelId ) {
+		return true;
+	}
+	if ( Array.isArray( item.children ) && item.children.length > 0 ) {
+		return item.children.some( ( child ) =>
+			isExpandedOrDescendantIsExpanded( child, expandedPanelId )
+		);
+	}
+	return false;
+};
+
 const defaultRenderListItem = ( args: RenderItemArgs ): JSX.Element => {
 	return <SearchListItem { ...args } />;
 };
@@ -65,15 +80,13 @@ const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
 		<>
 			{ list.map( ( item ) => {
 				const childrenCount = item.children?.length ?? 0;
-				const isSelected =
-					childrenCount && ! isSingle
-						? item.children?.every( ( { id } ) =>
-								selected.find(
-									( selectedItem ) => selectedItem.id === id
-								)
-						  )
-						: !! selected.find( ( { id } ) => id === item.id );
-				const isExpanded = childrenCount && expandedPanelId === item.id;
+				const isSelected = !! selected.find(
+					( { id } ) => id === item.id
+				);
+				const isExpanded = isExpandedOrDescendantIsExpanded(
+					item,
+					expandedPanelId
+				);
 				const totalChildrenForItem = totalChildren?.[ item.id ];
 				const hasMoreChildren =
 					typeof totalChildrenForItem === 'number' &&

@@ -16,6 +16,46 @@ import type {
 } from './types';
 import { getHighlightedName, getBreadcrumbsForDisplay } from './utils';
 
+const isExpandedOrDescendantIsExpanded = (
+	item: SearchListItemProps,
+	expandedPanelId: number
+): boolean => {
+	if ( item.id === expandedPanelId ) {
+		return true;
+	}
+	if ( Array.isArray( item.children ) && item.children.length > 0 ) {
+		return item.children.some( ( child ) =>
+			isExpandedOrDescendantIsExpanded( child, expandedPanelId )
+		);
+	}
+	return false;
+};
+
+const isSomeChildrenSelected = (
+	item: SearchListItemProps,
+	selected: SearchListItemProps[]
+): boolean => {
+	return ( item.children as SearchListItemProps[] ).some( ( child ) =>
+		selected.find(
+			( selectedItem ) =>
+				selectedItem.id === child.id ||
+				isSomeChildrenSelected( child, selected )
+		)
+	);
+};
+
+const getItemWithDescendants = (
+	item: SearchListItemProps
+): SearchListItemProps[] => {
+	const descendants = item.children?.map( ( child ) =>
+		getItemWithDescendants( child )
+	);
+	if ( ! descendants ) {
+		return [ item ];
+	}
+	return [ item, ...descendants.flat() ];
+};
+
 const Count = ( { label }: { label: string | React.ReactNode | number } ) => {
 	return (
 		<span className="woocommerce-search-list__item-count">{ label }</span>
@@ -62,7 +102,10 @@ export const SearchListItem = < T extends object = object >( {
 		item.count !== null;
 	const hasBreadcrumbs = !! item.breadcrumbs?.length;
 	const hasChildren = !! item.children?.length;
-	const isExpanded = expandedPanelId === item.id;
+	const isExpanded = isExpandedOrDescendantIsExpanded(
+		item,
+		expandedPanelId
+	);
 	const classes = clsx(
 		[ 'woocommerce-search-list__item', `depth-${ depth }`, className ],
 		{
@@ -84,7 +127,15 @@ export const SearchListItem = < T extends object = object >( {
 	const id = `${ name }-${ item.id }`;
 
 	const togglePanel = useCallback( () => {
-		setExpandedPanelId( isExpanded ? -1 : Number( item.id ) );
+		if ( ! isExpanded ) {
+			setExpandedPanelId( Number( item.id ) );
+			return;
+		}
+		if ( item.parent ) {
+			setExpandedPanelId( Number( item.parent ) );
+			return;
+		}
+		setExpandedPanelId( -1 );
 	}, [ isExpanded, item.id, setExpandedPanelId ] );
 
 	return hasChildren ? (
@@ -122,28 +173,22 @@ export const SearchListItem = < T extends object = object >( {
 					<CheckboxControl
 						className="woocommerce-search-list__item-input"
 						checked={ isSelected }
-						{ ...( ! isSelected &&
-						// We know that `item.children` is not `undefined` because
-						// we are here only if `hasChildren` is `true`.
-						( item.children as SearchListItemProps[] ).some(
-							( child ) =>
-								selected.find(
-									( selectedItem ) =>
-										selectedItem.id === child.id
-								)
-						)
-							? { indeterminate: true }
-							: {} ) }
+						indeterminate={
+							! isSelected &&
+							isSomeChildrenSelected( item, selected )
+						}
 						label={ getHighlightedName(
 							decodeEntities( item.name ),
 							search
 						) }
 						onChange={ () => {
+							const itemWithDescendants =
+								getItemWithDescendants( item );
 							if ( isSelected ) {
 								onSelect(
 									arrayDifferenceBy(
 										selected,
-										item.children as SearchListItemProps[],
+										itemWithDescendants,
 										'id'
 									)
 								)();
@@ -151,7 +196,7 @@ export const SearchListItem = < T extends object = object >( {
 								onSelect(
 									arrayUnionBy(
 										selected,
-										item.children as SearchListItemProps[],
+										itemWithDescendants,
 										'id'
 									)
 								)();
