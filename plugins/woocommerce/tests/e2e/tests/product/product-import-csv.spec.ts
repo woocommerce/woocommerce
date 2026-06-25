@@ -165,18 +165,16 @@ test.describe( 'Import Products from a CSV file', () => {
 	} );
 
 	test(
-		'should show error message if you go without providing CSV file',
+		'should button disabled if no CSV file is provided',
 		{ tag: [ tags.NOT_E2E, tags.NON_CRITICAL ] },
 		async ( { page } ) => {
 			await page.goto(
 				'wp-admin/edit.php?post_type=product&page=product_importer'
 			);
 
-			// verify the error message if you go without providing CSV file
-			await page.locator( 'button[value="Continue"]' ).click();
-			await expect( page.locator( 'div.error.inline' ) ).toContainText(
-				errorMessage
-			);
+			await expect(
+				page.locator( 'button[value="Continue"]' )
+			).toBeDisabled();
 		}
 	);
 
