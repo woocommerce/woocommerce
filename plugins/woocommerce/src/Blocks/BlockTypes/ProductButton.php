@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\StoreApi\Utilities\CartItemUtils;
 
 /**
  * ProductButton class.
@@ -319,18 +320,49 @@ class ProductButton extends AbstractBlock {
 	}
 
 	/**
-	 * Get the number of items in the cart for a given product id.
+	 * Get the total quantity of plain (non-meta-differentiated) cart lines for a given parent product ID.
 	 *
-	 * @param number $product_id The product id.
-	 * @return number The number of items in the cart.
+	 * Iterates {@see WC_Cart::get_cart_contents()} and sums the `quantity` of every
+	 * line that (a) belongs to the given parent product ID and (b) is a plain,
+	 * standalone line as determined by the shared
+	 * {@see CartItemUtils::has_cart_item_data()} predicate.
+	 *
+	 * Meta-differentiated lines — those whose cart key was generated with non-empty
+	 * `cart_item_data` (e.g. bundle components, subscription switches) — are
+	 * intentionally excluded so that the server-rendered seed count is consistent
+	 * with the client-side "Add to cart" / "%d in cart" logic in the Interactivity
+	 * API store.
+	 *
+	 * The seed is parent-scoped: it sums plain lines of the parent product ID
+	 * regardless of variation. The hydrated client value (variation-aware, from the
+	 * Store API) is the reactive source of truth that corrects any parent-vs-variation
+	 * difference after hydration.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param int $product_id The parent product ID whose plain cart lines are summed.
+	 * @return int The total quantity across plain cart lines for this product,
+	 *             or 0 when the cart is unavailable or contains no matching lines.
 	 */
 	private function get_cart_item_quantities_by_product_id( $product_id ) {
+		// @phpstan-ignore isset.property (WC()->cart is declared non-null but can be null before WC fully initialises)
 		if ( ! isset( WC()->cart ) ) {
 			return 0;
 		}
 
-		$cart = WC()->cart->get_cart_item_quantities();
-		return isset( $cart[ $product_id ] ) ? $cart[ $product_id ] : 0;
+		$quantity = 0;
+
+		foreach ( WC()->cart->get_cart_contents() as $cart_item ) {
+			if ( (int) ( $cart_item['product_id'] ?? 0 ) !== (int) $product_id ) {
+				continue;
+			}
+			if ( CartItemUtils::has_cart_item_data( $cart_item ) ) {
+				continue;
+			}
+			$quantity += (int) ( $cart_item['quantity'] ?? 0 );
+		}
+
+		return $quantity;
 	}
 
 	/**
