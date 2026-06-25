@@ -13,24 +13,22 @@ test.describe(
 	'Search, browse by categories and sort items in the shop',
 	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
 	() => {
-		let categories = [];
+		// One dedicated category holds all of this spec's products, so browsing
+		// and sorting happen on the category archive — which only ever lists this
+		// spec's own products. That keeps the spec immune to the store-wide shop
+		// listing that other parallel workers pollute by creating/deleting
+		// products (and to its 16-per-page pagination).
+		let category;
 		let products = [];
 
 		test.beforeAll( async ( { restApi } ) => {
 			await restApi
-				.post( `${ WC_API_PATH }/products/categories/batch`, {
-					create: [
-						getFakeCategory( { extraRandomTerm: true } ),
-						getFakeCategory( { extraRandomTerm: true } ),
-						getFakeCategory( { extraRandomTerm: true } ),
-					],
-				} )
+				.post(
+					`${ WC_API_PATH }/products/categories`,
+					getFakeCategory( { extraRandomTerm: true } )
+				)
 				.then( ( response ) => {
-					categories = response.data.create;
-
-					if ( categories.map( ( c ) => c.id ).includes( 0 ) ) {
-						console.log( JSON.stringify( response.data ) );
-					}
+					category = response.data;
 				} )
 				.catch( ( error: { response: unknown } ) => {
 					console.error( error.response );
@@ -41,15 +39,15 @@ test.describe(
 					create: [
 						{
 							...getFakeProduct( { regular_price: '979.99' } ),
-							categories: [ { id: categories[ 0 ].id } ],
+							categories: [ { id: category.id } ],
 						},
 						{
 							...getFakeProduct( { regular_price: '989.99' } ),
-							categories: [ { id: categories[ 1 ].id } ],
+							categories: [ { id: category.id } ],
 						},
 						{
 							...getFakeProduct( { regular_price: '999.99' } ),
-							categories: [ { id: categories[ 2 ].id } ],
+							categories: [ { id: category.id } ],
 						},
 					],
 				} )
@@ -63,18 +61,10 @@ test.describe(
 
 		test.afterAll( async ( { restApi } ) => {
 			await restApi.post( `${ WC_API_PATH }/products/batch`, {
-				delete: [
-					products[ 0 ].id,
-					products[ 1 ].id,
-					products[ 2 ].id,
-				],
+				delete: products.map( ( product ) => product.id ),
 			} );
 			await restApi.post( `${ WC_API_PATH }/products/categories/batch`, {
-				delete: [
-					categories[ 0 ].id,
-					categories[ 1 ].id,
-					categories[ 2 ].id,
-				],
+				delete: [ category.id ],
 			} );
 		} );
 
@@ -98,13 +88,12 @@ test.describe(
 		test( 'should let user browse products by categories', async ( {
 			page,
 		} ) => {
-			await test.step( 'Go to the shop and browse by the category', async () => {
-				await page.goto( 'shop/' );
-				await page.locator( `text=${ products[ 1 ].name }` ).click();
+			await test.step( 'Open a product and browse to its category via the breadcrumb', async () => {
+				await page.goto( products[ 1 ].permalink );
 				await page
 					.getByLabel( 'Breadcrumb' )
 					.getByRole( 'link', {
-						name: categories[ 1 ].name,
+						name: category.name,
 						exact: true,
 					} )
 					.click();
@@ -112,7 +101,7 @@ test.describe(
 
 			await test.step( 'Ensure the category page contains all the relevant products', async () => {
 				await expect(
-					page.getByRole( 'heading', { name: categories[ 1 ].name } )
+					page.getByRole( 'heading', { name: category.name } )
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'heading', {
@@ -132,73 +121,46 @@ test.describe(
 		test( 'should let user sort the products in the shop', async ( {
 			page,
 		} ) => {
-			await test.step( 'Go to the shop and sort by price high to low', async () => {
-				await page.goto( 'shop/' );
-				await expect(
-					page.getByLabel(
-						new RegExp(
-							`Add to cart: ["|“]${ products[ 0 ].name }["|”]`
-						)
-					)
-				).toBeVisible();
+			const categoryUrl = `product-category/${ category.slug }/`;
 
-				// sort by price high to low
+			// Reads the displayed price of every product on the (isolated)
+			// category archive, in DOM order, as plain numbers.
+			const getDisplayedPrices = async () => {
+				const priceTexts = await page
+					.locator( 'li.product .woocommerce-Price-amount' )
+					.allInnerTexts();
+				return priceTexts.map( ( text ) =>
+					parseFloat( text.replace( /[^0-9.]/g, '' ) )
+				);
+			};
+
+			await test.step( 'Sort by price high to low', async () => {
+				await page.goto( categoryUrl );
 				await page
 					.getByLabel( 'Shop order' )
 					.selectOption( 'price-desc' );
 				await page.waitForURL( /.*?orderby=price-desc.*/ );
-
-				await expect(
-					page.getByText( 'Add to cart View cart' ).nth( 2 )
-				).toBeVisible();
-
-				// Check that the priciest appears before the cheapest in the list
-				const highToLowList = await page
-					.getByRole( 'listitem' )
-					.getByRole( 'heading' )
-					.allInnerTexts();
-				const highToLow_index_priciest = highToLowList.indexOf(
-					`${ products[ 2 ].name }`
+				await expect( page.locator( 'li.product' ) ).toHaveCount(
+					products.length
 				);
-				const highToLow_index_cheapest = highToLowList.indexOf(
-					`${ products[ 0 ].name }`
-				);
-				expect( highToLow_index_priciest ).toBeLessThan(
-					highToLow_index_cheapest
+
+				const prices = await getDisplayedPrices();
+				expect( prices ).toEqual(
+					[ ...prices ].sort( ( a, b ) => b - a )
 				);
 			} );
 
-			await test.step( 'Go to the shop and sort by price low to high', async () => {
-				await page.goto( 'shop/' );
-				await expect(
-					page.getByLabel(
-						new RegExp(
-							`Add to cart: ["|“]${ products[ 0 ].name }["|”]`
-						)
-					)
-				).toBeVisible();
-
-				// sort by price low to high
+			await test.step( 'Sort by price low to high', async () => {
+				await page.goto( categoryUrl );
 				await page.getByLabel( 'Shop order' ).selectOption( 'price' );
-				await page.waitForURL( /.*?orderby=price.*/ );
-
-				await expect(
-					page.getByText( 'Add to cart View cart' ).nth( 2 )
-				).toBeVisible();
-
-				// Check that the cheapest appears before the priciest in the list
-				const lowToHighList = await page
-					.getByRole( 'listitem' )
-					.getByRole( 'heading' )
-					.allInnerTexts();
-				const lowToHigh_index_priciest = lowToHighList.indexOf(
-					`${ products[ 2 ].name }`
+				await page.waitForURL( /.*?orderby=price(?:&|$).*/ );
+				await expect( page.locator( 'li.product' ) ).toHaveCount(
+					products.length
 				);
-				const lowToHigh_index_cheapest = lowToHighList.indexOf(
-					`${ products[ 0 ].name }`
-				);
-				expect( lowToHigh_index_cheapest ).toBeLessThan(
-					lowToHigh_index_priciest
+
+				const prices = await getDisplayedPrices();
+				expect( prices ).toEqual(
+					[ ...prices ].sort( ( a, b ) => a - b )
 				);
 			} );
 		} );

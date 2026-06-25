@@ -232,14 +232,15 @@ test.describe( 'Merchant > Customer List', () => {
 			await page.getByRole( 'button', { name: 'Download' } ).click();
 			const download = await downloadPromise;
 
-			const today = new Date();
-			const year = today.getFullYear();
-			const month = String( today.getMonth() + 1 ).padStart( 2, '0' );
-			const day = String( today.getDate() ).padStart( 2, '0' );
+			// The date in the filename is generated server-side (WordPress
+			// timezone), which can differ from the test runner's local date
+			// around a midnight boundary. Assert the filename structure with a
+			// YYYY-MM-DD date rather than pinning an exact local date, which is
+			// what this step actually verifies (the orderby/order/path encoding).
+			const filenamePattern =
+				/^customers_\d{4}-\d{2}-\d{2}_orderby-date-last-active_order-desc_page-wc-admin_path--customers\.csv$/;
 
-			const filename = `customers_${ year }-${ month }-${ day }_orderby-date-last-active_order-desc_page-wc-admin_path--customers.csv`;
-
-			await expect( download.suggestedFilename() ).toBe( filename );
+			expect( download.suggestedFilename() ).toMatch( filenamePattern );
 		} );
 	} );
 

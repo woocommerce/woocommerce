@@ -8,25 +8,21 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  */
 import { test as baseTest, expect } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-
-const simpleProductName = 'Export Simple Product';
-const variableProductName = 'Export Variable Product';
+import { getFakeProduct } from '../../utils/data';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
 	productsFixture: async ( { restApi }, use ) => {
 		const products = {};
 
-		let response = await restApi.post( `${ WC_API_PATH }/products`, {
-			name: simpleProductName,
-			type: 'simple',
-			regular_price: '15',
-		} );
+		let response = await restApi.post(
+			`${ WC_API_PATH }/products`,
+			getFakeProduct()
+		);
 		products.simple = await response.data;
 
 		response = await restApi.post( `${ WC_API_PATH }/products`, {
-			name: variableProductName,
-			type: 'variable',
+			...getFakeProduct( { type: 'variable' } ),
 			attributes: [
 				{
 					name: 'Size',
