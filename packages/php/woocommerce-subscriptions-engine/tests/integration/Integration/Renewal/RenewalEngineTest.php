@@ -190,25 +190,22 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	 * @testdox process_due creates a renewal order tagged for the next chargeable number.
 	 */
 	public function test_process_due_creates_renewal_order(): void {
-		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
 
-		$plan_id     = $this->make_plan();
-		$order       = $this->make_origin_order();
-		$contract    = $this->make_contract( $plan_id, $order->get_id() );
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
 		$renewal_order = ( new RenewalEngine() )->process_due( $contract_id );
 
-		// Order creation is wired; advancing the chain is the dispatcher slice, so
-		// only order creation + tagging is asserted here.
+		// The renewal order is created and tagged with the renewal relation + chargeable number.
 		$this->assertInstanceOf( WC_Order::class, $renewal_order );
 		$this->assertSame( (string) $contract_id, $renewal_order->get_meta( OrderLinkage::META_CONTRACT_ID ) );
 		$this->assertSame( OrderLinkage::RELATION_RENEWAL, $renewal_order->get_meta( OrderLinkage::META_RELATION_TYPE ) );
 
-		// A lean contract has no counting cycle yet, so the next chargeable number is 1.
-		$this->assertSame( '1', $renewal_order->get_meta( '_subscription_renewal_cycle' ) );
-		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract_id, 1 ) );
+		// The chain holds cycle 1 (from signup), so the renewal targets the next number, 2.
+		$this->assertSame( '2', $renewal_order->get_meta( '_subscription_renewal_cycle' ) );
+		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
 	}
 
 	/**
@@ -218,11 +215,9 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	 * the retried due action is suppressed before a second cycle/order is created.
 	 */
 	public function test_process_due_skips_when_a_renewal_order_is_already_tagged(): void {
-		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
+		GatewayCapabilities::declare( self::GATEWAY_DECLINING, array( GatewayCapabilities::RECURRING ) );
 
-		$plan_id     = $this->make_plan();
-		$order       = $this->make_origin_order();
-		$contract    = $this->make_contract( $plan_id, $order->get_id() );
+		$contract    = $this->sign_up_contract( self::GATEWAY_DECLINING );
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 		$engine = new RenewalEngine();
@@ -230,11 +225,12 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$first = $engine->process_due( $contract_id );
 		$this->assertInstanceOf( WC_Order::class, $first );
 
-		// A retried due action for the same chargeable number is suppressed.
+		// The charge did not settle, so the head stays at the same chargeable number; a retried
+		// due action is suppressed by the order-meta pre-check rather than creating a second order.
 		$retry = $engine->process_due( $contract_id );
 		$this->assertNull( $retry );
 
-		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract_id, 1 ) );
+		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
 	}
 
 	/**
@@ -498,23 +494,21 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox process_due skips gracefully when the cadence cannot be resolved at all.
+	 * @testdox process_due skips a contract that has no billing chain to advance.
 	 *
-	 * A lean contract carries no plan snapshot, so once its selling plan is deleted the cadence
-	 * is genuinely unresolvable. process_due must skip (return null) rather than throw - a thrown
-	 * DomainException would make a scheduled action retry forever.
+	 * Checkout always creates cycle 1, so a chainless (lean / manual) contract is a case the
+	 * engine does not renew. process_due must skip (return null) rather than silently bill it as
+	 * cycle 1 or throw - a thrown error would make a scheduled action retry forever.
 	 */
-	public function test_process_due_skips_when_the_cadence_is_unresolvable(): void {
+	public function test_process_due_skips_a_contract_with_no_billing_chain(): void {
 		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
 
+		// A lean contract is persisted with no cycle chain.
 		$plan_id     = $this->make_plan();
 		$order       = $this->make_origin_order();
 		$contract    = $this->make_contract( $plan_id, $order->get_id() );
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
-
-		// Delete the selling plan; the lean contract has no snapshot to fall back to.
-		( new PlanRepository() )->delete( $plan_id );
 
 		$result = ( new RenewalEngine() )->process_due( $contract_id );
 		$this->assertNull( $result );

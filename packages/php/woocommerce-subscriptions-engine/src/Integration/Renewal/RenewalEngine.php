@@ -232,7 +232,21 @@ final class RenewalEngine {
 			return null;
 		}
 
-		$previous   = $this->contracts->find_current_cycle( $contract_id );
+		$previous = $this->contracts->find_current_cycle( $contract_id );
+		if ( null === $previous ) {
+			// No billing chain to advance: checkout always creates cycle 1, so a chainless
+			// contract is a manual/corrupt case the engine does not renew. Skip without throwing
+			// (never silently bill it as cycle 1) so a scheduled action does not retry forever.
+			wc_get_logger()->warning(
+				sprintf( 'RenewalEngine::process_due(): contract %d has no billing chain to advance - skipping.', $contract_id ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => $contract_id,
+				)
+			);
+			return null;
+		}
+
 		$next_count = $this->target_count( $previous );
 
 		// Idempotency pre-check: a renewal order already tagged for this number means the
@@ -269,9 +283,9 @@ final class RenewalEngine {
 			$policy,
 			array(
 				'contract_id'       => $contract_id,
-				'sequence_no'       => null === $previous ? 1 : $previous->get_sequence_no() + 1,
+				'sequence_no'       => $previous->get_sequence_no() + 1,
 				'count'             => $next_count,
-				'period_start'      => $this->period_anchor( $contract, $previous ),
+				'period_start'      => $previous->get_ends_at_gmt(),
 				'expected_total'    => $contract->get_billing_total(),
 				'currency'          => $contract->get_currency(),
 				'extension_slug'    => $contract->get_extension_slug(),
@@ -305,26 +319,23 @@ final class RenewalEngine {
 	/**
 	 * The chargeable number this renewal targets - the idempotency anchor.
 	 *
-	 * One past the head cycle's count once it has settled forward (`billed`/`cancelled`):
-	 * the chain advances. While the head is still unsettled (`pending`/`failed`) the same
-	 * count is targeted again, so a retry resolves the in-flight cycle rather than skipping
-	 * a number - and the order-meta pre-check / the create-as-claim UNIQUE then make the
-	 * retry a no-op. A chain with no counting cycle yet starts at 1.
+	 * One past the head cycle's count once it has settled forward (`billed`/`cancelled`): the
+	 * chain advances. While the head is still unsettled (`pending`/`failed`) the same count is
+	 * targeted again, so a retry resolves the in-flight cycle rather than skipping a number - and
+	 * the order-meta pre-check / the create-as-claim UNIQUE then make the retry a no-op.
 	 *
-	 * @param Cycle|null $previous The chain's most-recent cycle, or null when empty.
+	 * Only called once a billing chain exists ({@see self::process_due()} skips a chainless
+	 * contract), so the head must carry a count; a countless head is a corrupt chain to refuse.
+	 *
+	 * @param Cycle $previous The chain's most-recent cycle.
 	 * @return int The chargeable number to target.
-	 * @throws \RuntimeException If a non-empty chain's head cycle has no count to advance from.
+	 * @throws \RuntimeException If the head cycle has no count to advance from.
 	 */
-	private function target_count( ?Cycle $previous ): int {
-		// No chain yet (a lean / manually-created contract): the first chargeable cycle is 1.
-		if ( null === $previous ) {
-			return 1;
-		}
-
+	private function target_count( Cycle $previous ): int {
 		$count = $previous->get_count();
 		if ( null === $count ) {
 			// A counting renewal advances off the head cycle's count; a head with no count is a
-			// corrupt chain we must not silently bill against (a silent 1 could collide or skip).
+			// corrupt chain we refuse to bill against rather than guess a number.
 			throw new \RuntimeException(
 				sprintf(
 					'RenewalEngine::target_count(): contract %d head cycle %d has no count to advance from.',
@@ -338,22 +349,6 @@ final class RenewalEngine {
 		$settled_forward = CycleStatus::BILLED === $status || CycleStatus::CANCELLED === $status;
 
 		return $settled_forward ? (int) $count + 1 : (int) $count;
-	}
-
-	/**
-	 * The period anchor the next cycle runs forward from: the previous cycle's end, or - for a
-	 * chain with no cycle yet - the contract's live next-payment date (falling back to now).
-	 *
-	 * @param Contract   $contract The contract being renewed.
-	 * @param Cycle|null $previous The chain's most-recent cycle, or null when empty.
-	 * @return string The anchor as a GMT `Y-m-d H:i:s` string.
-	 */
-	private function period_anchor( Contract $contract, ?Cycle $previous ): string {
-		if ( null !== $previous ) {
-			return $previous->get_ends_at_gmt();
-		}
-
-		return $contract->get_next_payment_gmt() ?? gmdate( 'Y-m-d H:i:s' );
 	}
 
 	/**
