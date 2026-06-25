@@ -53,17 +53,32 @@ import {
  *
  * Shorthand for setting new nested query parameters.
  */
+export const getUpdatedQuery = (
+	query: ProductCollectionQuery,
+	queryParams: Partial< ProductCollectionQuery >
+): ProductCollectionQuery => ( {
+	...query,
+	...queryParams,
+	...( queryParams.taxQuery && {
+		taxQuery: {
+			...query.taxQuery,
+			...queryParams.taxQuery,
+		},
+	} ),
+} );
+
 export function setQueryAttribute(
 	block: BlockEditProps< ProductCollectionAttributes >,
 	queryParams: Partial< ProductCollectionQuery >
 ) {
-	const { query } = block.attributes;
+	const currentBlock = select( blockEditorStore ).getBlock( block.clientId );
+	const currentAttributes = currentBlock?.attributes as
+		| ProductCollectionAttributes
+		| undefined;
+	const query = currentAttributes?.query || block.attributes.query;
 
 	block.setAttributes( {
-		query: {
-			...query,
-			...queryParams,
-		},
+		query: getUpdatedQuery( query, queryParams ),
 	} );
 }
 
