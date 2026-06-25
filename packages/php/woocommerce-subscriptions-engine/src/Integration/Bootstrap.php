@@ -14,6 +14,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration;
 
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\ContractsController;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway\CapabilityRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalDispatcher;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine;
@@ -53,6 +54,15 @@ final class Bootstrap {
 		( new RenewalEngine() )->register_hooks();
 		PlansController::register_hooks();
 		( new RenewalDispatcher() )->register_hooks();
+
+		// Register the customer-portal REST routes. Routes must be registered on
+		// `rest_api_init`, where core gathers them for the live server.
+		add_action(
+			'rest_api_init',
+			static function (): void {
+				( new ContractsController() )->register_routes();
+			}
+		);
 
 		// Deferred boot work, each on the most specific moment it needs: the schema install
 		// reads options and runs dbDelta, so it waits for `init`; the recurring-action
