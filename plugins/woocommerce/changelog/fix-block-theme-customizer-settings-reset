@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reset WooCommerce Customizer catalog and image settings when switching to a block theme.
