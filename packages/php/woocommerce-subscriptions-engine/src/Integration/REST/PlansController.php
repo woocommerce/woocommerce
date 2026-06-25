@@ -36,7 +36,9 @@ final class PlansController extends WP_REST_Controller {
 
 	private const REST_NAMESPACE = 'wc/v3';
 
-	private const REST_BASE = 'subscriptions-engine/plans';
+	private const REST_BASE = 'subscriptions-engine';
+
+	private const REST_PLANS_SUFFIX = 'plans';
 
 	private const MAX_PER_PAGE = 100;
 
@@ -64,7 +66,8 @@ final class PlansController extends WP_REST_Controller {
 	 */
 	public function __construct( ?PlanRepository $plan_repository = null, ?PlanGroupRepository $plan_group_repository = null ) {
 		$this->namespace             = self::REST_NAMESPACE;
-		$this->rest_base             = self::REST_BASE;
+		$this->rest_prefix           = self::REST_BASE;
+		$this->rest_suffix           = self::REST_PLANS_SUFFIX;
 		$this->plan_repository       = $plan_repository ?? new PlanRepository();
 		$this->plan_group_repository = $plan_group_repository ?? new PlanGroupRepository();
 	}
@@ -87,13 +90,24 @@ final class PlansController extends WP_REST_Controller {
 	public function register_routes(): void {
 		register_rest_route(
 			self::REST_NAMESPACE,
-			'/' . self::REST_BASE,
+			'/' . self::REST_BASE . '/(?P<extension_slug>[a-zA-Z0-9_-]+)/' . self::REST_PLANS_SUFFIX . '/definitions',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_definitions' ),
+					'permission_callback' => array( $this, 'permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/' . self::REST_BASE . '/(?P<extension_slug>[a-zA-Z0-9_-]+)/' . self::REST_PLANS_SUFFIX,
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'permissions_check' ),
-					'args'                => $this->get_collection_params(),
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
@@ -107,19 +121,7 @@ final class PlansController extends WP_REST_Controller {
 
 		register_rest_route(
 			self::REST_NAMESPACE,
-			'/' . self::REST_BASE . '/definitions',
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_definitions' ),
-					'permission_callback' => array( $this, 'permissions_check' ),
-				),
-			)
-		);
-
-		register_rest_route(
-			self::REST_NAMESPACE,
-			'/' . self::REST_BASE . '/reorder',
+			'/' . self::REST_BASE . '/(?P<extension_slug>[a-zA-Z0-9_-]+)/' . self::REST_PLANS_SUFFIX . '/reorder',
 			array(
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
@@ -131,7 +133,7 @@ final class PlansController extends WP_REST_Controller {
 
 		register_rest_route(
 			self::REST_NAMESPACE,
-			'/' . self::REST_BASE . '/(?P<id>[\d]+)',
+			'/' . self::REST_BASE . '/(?P<extension_slug>[a-zA-Z0-9_-]+)/' . self::REST_PLANS_SUFFIX . '/(?P<id>[\d]+)',
 			array(
 				'args'   => array(
 					'id' => array(
@@ -171,11 +173,17 @@ final class PlansController extends WP_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_items( $request ) {
+		$extension_slug = $this->string_param( $request, 'extension_slug' );
+		if ( '' === $extension_slug ) {
+			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
+		}
+
 		$page     = max( 1, self::coerce_int( $request->get_param( 'page' ), 1 ) );
 		$per_page = $this->resolve_per_page( $request );
 		$args     = array(
-			'limit'  => $per_page,
-			'offset' => ( $page - 1 ) * $per_page,
+			'limit'          => $per_page,
+			'offset'         => ( $page - 1 ) * $per_page,
+			'extension_slug' => $extension_slug,
 		);
 
 		foreach ( array( 'search', 'status', 'orderby', 'order' ) as $key ) {
@@ -213,7 +221,12 @@ final class PlansController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( $request ) {
-		$plan = $this->plan_repository->find( self::coerce_int( $request->get_param( 'id' ) ) );
+		$extension_slug = $this->string_param( $request, 'extension_slug' );
+		if ( '' === $extension_slug ) {
+			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
+		}
+
+		$plan = $this->plan_repository->find( self::coerce_int( $request->get_param( 'id' ) ), $extension_slug );
 		if ( ! $plan instanceof Plan ) {
 			return $this->not_found_error();
 		}
@@ -228,6 +241,11 @@ final class PlansController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function create_item( $request ) {
+		$extension_slug = $this->string_param( $request, 'extension_slug' );
+		if ( '' === $extension_slug ) {
+			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
+		}
+
 		$name = $this->string_param( $request, 'name' );
 		if ( '' === $name ) {
 			return $this->invalid_error( __( 'Plan name is required.', 'woocommerce-subscriptions-engine' ) );
@@ -244,7 +262,7 @@ final class PlansController extends WP_REST_Controller {
 				array(
 					'name'            => $name,
 					'options_display' => array(),
-					'app_id'          => 'woocommerce-subscriptions-engine',
+					'extension_slug'  => $extension_slug,
 				)
 			);
 			$group_id       = $this->plan_group_repository->insert( $group );
@@ -260,7 +278,7 @@ final class PlansController extends WP_REST_Controller {
 					'category'       => $this->string_param( $request, 'category', Plan::DEFAULT_CATEGORY ),
 					'status'         => $this->string_param( $request, 'status', Plan::STATUS_ACTIVE ),
 					'sort_order'     => self::coerce_int( $request->get_param( 'sort_order' ) ),
-					'extension_slug' => $this->nullable_string_param( $request, 'extension_slug' ),
+					'extension_slug' => $extension_slug,
 				)
 			);
 			$this->plan_repository->insert( $plan );
@@ -281,7 +299,12 @@ final class PlansController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_item( $request ) {
-		$plan = $this->plan_repository->find( self::coerce_int( $request->get_param( 'id' ) ) );
+		$extension_slug = $this->string_param( $request, 'extension_slug' );
+		if ( '' === $extension_slug ) {
+			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
+		}
+
+		$plan = $this->plan_repository->find( self::coerce_int( $request->get_param( 'id' ) ), $extension_slug );
 		if ( ! $plan instanceof Plan ) {
 			return $this->not_found_error();
 		}
@@ -342,6 +365,11 @@ final class PlansController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function reorder_items( $request ) {
+		$extension_slug = $this->string_param( $request, 'extension_slug' );
+		if ( '' === $extension_slug ) {
+			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
+		}
+
 		$ids = $request->get_param( 'ids' );
 		if ( ! is_array( $ids ) ) {
 			return $this->invalid_error( __( 'ids must be an array of plan ids.', 'woocommerce-subscriptions-engine' ) );
@@ -358,7 +386,7 @@ final class PlansController extends WP_REST_Controller {
 			$response_ids[]          = $id;
 		}
 
-		if ( ! $this->plan_repository->reorder( $sort_order_by_id ) ) {
+		if ( ! $this->plan_repository->reorder( $extension_slug, $sort_order_by_id ) ) {
 			return new WP_Error(
 				'woocommerce_subscriptions_engine_reorder_failed',
 				__( 'Plan reorder failed.', 'woocommerce-subscriptions-engine' ),

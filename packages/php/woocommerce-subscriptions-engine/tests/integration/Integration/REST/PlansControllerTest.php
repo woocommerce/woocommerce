@@ -19,7 +19,9 @@ use WP_REST_Response;
  */
 class PlansControllerTest extends EngineIntegrationTestCase {
 
-	private const BASE = '/wc/v3/subscriptions-engine/plans';
+	private const EXTENSION_SLUG = 'woocommerce-subscriptions-lite';
+
+	private const BASE = '/wc/v3/subscriptions-engine/' . self::EXTENSION_SLUG . '/plans';
 
 	/**
 	 * Admin user id.
@@ -60,7 +62,6 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			array(
 				'name'           => 'Monthly',
 				'description'    => 'Ships every month',
-				'extension_slug' => 'woocommerce-subscriptions-lite',
 				'billing_policy' => array(
 					'period'         => 'month',
 					'interval'       => 1,
@@ -93,7 +94,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$created_data = $this->response_data( $created );
 		$this->assertSame( 'global', $created_data['scope'] );
 		$this->assertSame( Plan::STATUS_ACTIVE, $created_data['status'] );
-		$this->assertSame( 'woocommerce-subscriptions-lite', $created_data['extension_slug'] );
+		$this->assertSame( self::EXTENSION_SLUG, $created_data['extension_slug'] );
 
 		$id = $this->int_value( $created_data, 'id' );
 

@@ -86,12 +86,15 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Fetch a plan by id.
+	 * Fetch a plan by id and (optionally) extension slug.
+	 * Most usages from applications should specify the extension slug
+	 * to guard against cross-application collisions.
 	 *
-	 * @param int $id Plan id.
+	 * @param int         $id             Plan id.
+	 * @param string|null $extension_slug Extension slug to filter plans by.
 	 * @return Plan|null Hydrated plan, or null if not found.
 	 */
-	public function find( int $id ): ?Plan {
+	public function find( int $id, ?string $extension_slug = null ): ?Plan {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
@@ -100,6 +103,9 @@ final class PlanRepository {
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ), ARRAY_A );
 
 		if ( null === $row ) {
+			return null;
+		}
+		if ( null !== $extension_slug && '' !== $extension_slug && $row['extension_slug'] !== $extension_slug ) {
 			return null;
 		}
 
@@ -200,44 +206,56 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Delete a plan by id.
+	 * Delete a plan by id and (optionally) extension slug.
+	 * Most usages from applications should specify the extension slug
+	 * to guard against cross-application operations.
 	 *
-	 * @param int $id Plan id.
+	 * @param int         $id             Plan id.
+	 * @param string|null $extension_slug Extension slug for the plan.
 	 * @return bool True when a row was removed.
 	 */
-	public function delete( int $id ): bool {
+	public function delete( int $id, ?string $extension_slug = null ): bool {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$deleted = $wpdb->delete(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
-			array( 'id' => $id )
+		$where = array(
+			'id' => $id,
 		);
+		if ( null !== $extension_slug ) {
+			$where['extension_slug'] = $extension_slug;
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$deleted = $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ), $where );
 
 		return (bool) $deleted;
 	}
 
 	/**
-	 * Persist manual sort-order values for plans.
+	 * Persist manual sort-order values for plans. Extension
 	 *
+	 * @param string          $extension_slug   Extension slug for the plans to operate on.
 	 * @param array<int, int> $sort_order_by_id Map of plan id => sort order.
 	 * @return bool True when every update succeeds.
 	 */
-	public function reorder( array $sort_order_by_id ): bool {
+	public function reorder( string $extension_slug, array $sort_order_by_id ): bool {
 		global $wpdb;
 
 		$ok  = true;
 		$now = gmdate( 'Y-m-d H:i:s' );
 
+		$plans_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+
 		foreach ( $sort_order_by_id as $id => $sort_order ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			$updated = $wpdb->update(
-				SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
+				$plans_table,
 				array(
 					'sort_order'       => (int) $sort_order,
 					'date_updated_gmt' => $now,
 				),
-				array( 'id' => (int) $id )
+				array(
+					'id'             => (int) $id,
+					'extension_slug' => $extension_slug,
+				)
 			);
 
 			$ok = $ok && false !== $updated;
