@@ -7,7 +7,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Rest;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Api\Rest;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanGroup;

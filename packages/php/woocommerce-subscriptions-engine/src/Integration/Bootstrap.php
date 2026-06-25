@@ -16,7 +16,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Integration;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway\CapabilityRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\REST\PlansController;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\PlansController;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 defined( 'ABSPATH' ) || exit;
