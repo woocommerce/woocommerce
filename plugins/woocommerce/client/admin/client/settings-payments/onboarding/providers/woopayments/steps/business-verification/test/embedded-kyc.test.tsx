@@ -96,6 +96,14 @@ describe( 'EmbeddedKyc', () => {
 		jest.useRealTimers();
 	} );
 
+	it( 'announces the loading state while waiting for the embedded loader', () => {
+		render( <EmbeddedKyc /> );
+
+		expect(
+			screen.getByRole( 'status', { name: 'Loading onboarding…' } )
+		).toBeInTheDocument();
+	} );
+
 	it( 'shows a unified error when the embedded loader does not start before the timeout', () => {
 		jest.useFakeTimers();
 
@@ -105,12 +113,12 @@ describe( 'EmbeddedKyc', () => {
 			jest.advanceTimersByTime( 20000 );
 		} );
 
-		expect(
-			screen.getByText(
-				"We couldn't load this step. This can happen when your site's security or server settings block a required connection to Stripe. Check the setup requirements, or contact support if the error persists.",
-				{ selector: '.woopayments-banner-notice__content' }
-			)
-		).toBeInTheDocument();
+		const noticeMessage = screen.getByText(
+			"We couldn't load this step. This can happen when your site's security or server settings block a required connection to Stripe. Check the setup requirements, or contact support if the error persists."
+		);
+
+		expect( noticeMessage ).toBeInTheDocument();
+		expect( noticeMessage.closest( '[tabindex="-1"]' ) ).toHaveFocus();
 		expect(
 			screen.getByRole( 'link', { name: 'Learn more' } )
 		).toHaveAttribute(

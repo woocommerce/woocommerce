@@ -20,6 +20,7 @@ import { __ } from '@wordpress/i18n';
 import { createEmbeddedKycSession } from '../../utils/actions';
 import appearance from './appearance';
 import {
+	type EmbeddedAccountInitializationFailure,
 	EmbeddedKycSession,
 	EmbeddedKycSessionCreateResult,
 	OnboardingFields,
@@ -30,14 +31,6 @@ import { useOnboardingContext } from '../../../../data/onboarding-context';
 interface EmbeddedComponentProps {
 	onLoaderStart?: ( { elementTagName }: LoaderStart ) => void;
 	onLoadError?: ( { error, elementTagName }: LoadError ) => void;
-}
-
-type EmbeddedAccountInitializationFailureReason = 'bad_session' | 'init_error';
-
-export interface EmbeddedAccountInitializationFailure {
-	reason: EmbeddedAccountInitializationFailureReason;
-	message: string;
-	receivedKeys?: string[];
 }
 
 interface EmbeddedAccountOnboardingProps extends EmbeddedComponentProps {

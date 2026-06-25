@@ -182,4 +182,29 @@ describe( 'EmbeddedAccountOnboarding', () => {
 			} )
 		);
 	} );
+
+	it( 'passes session credentials through to Stripe for a valid session', async () => {
+		renderEmbeddedAccountOnboarding();
+
+		expect(
+			await screen.findByTestId( 'connect-account-onboarding' )
+		).toBeInTheDocument();
+
+		const [ firstInitializeCall ] = mockLoadConnectAndInitialize.mock.calls;
+		const initializeOptions = firstInitializeCall?.[ 0 ];
+
+		if ( ! initializeOptions ) {
+			throw new Error( 'Expected Stripe initialization options.' );
+		}
+
+		expect( initializeOptions ).toEqual(
+			expect.objectContaining( {
+				publishableKey: 'test-key',
+				locale: 'en-US',
+			} )
+		);
+		await expect( initializeOptions.fetchClientSecret() ).resolves.toBe(
+			'test-secret'
+		);
+	} );
 } );

@@ -13,10 +13,8 @@ import StripeSpinner from '../../../components/stripe-spinner';
 import BannerNotice from '../../../components/banner-notice';
 import { useBusinessVerificationContext } from '../data/business-verification-context';
 import { finalizeEmbeddedKycSession } from '../utils/actions';
-import {
-	type EmbeddedAccountInitializationFailure,
-	EmbeddedAccountOnboarding,
-} from '../components/embedded';
+import { EmbeddedAccountOnboarding } from '../components/embedded';
+import { type EmbeddedAccountInitializationFailure } from '../types';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 
 interface Props {
@@ -46,6 +44,11 @@ const embeddedKycFailureMessage = __(
 );
 const embeddedKycHttpsFailureMessage = __(
 	'Payment activation through our financial partner requires HTTPS and cannot be completed.',
+	'woocommerce'
+);
+const embeddedKycLoadingMessage = __( 'Loading onboarding…', 'woocommerce' );
+const embeddedKycFinalizingMessage = __(
+	'Finalizing onboarding…',
 	'woocommerce'
 );
 
@@ -102,6 +105,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 	const [ loadFailure, setLoadFailure ] =
 		useState< EmbeddedKycLoadFailure | null >( null );
 	const loadFailureRef = useRef( false );
+	const loadFailureNoticeRef = useRef< HTMLDivElement >( null );
 	const fallbackUrl = currentStep?.actions?.kyc_fallback?.href ?? '';
 
 	const failEmbeddedKycLoad = useCallback(
@@ -137,6 +141,19 @@ const EmbeddedKyc: React.FC< Props > = ( {
 
 		return () => window.clearTimeout( timerId );
 	}, [ failEmbeddedKycLoad, finalizingSession, loadFailure, loading ] );
+
+	useEffect( () => {
+		if ( ! loadFailure ) {
+			return;
+		}
+
+		const notice = loadFailureNoticeRef.current;
+		const activeElement = notice?.ownerDocument.activeElement ?? null;
+
+		if ( notice && ! notice.contains( activeElement ) ) {
+			notice.focus();
+		}
+	}, [ loadFailure ] );
 
 	const handleStepChange = ( step: string ) => {
 		recordPaymentsOnboardingEvent(
@@ -192,43 +209,55 @@ const EmbeddedKyc: React.FC< Props > = ( {
 		} );
 	};
 
-	const handleInitializationError = (
-		failure: EmbeddedAccountInitializationFailure
-	) => {
-		failEmbeddedKycLoad( failure );
-	};
+	const handleInitializationError = useCallback(
+		( failure: EmbeddedAccountInitializationFailure ) => {
+			failEmbeddedKycLoad( failure );
+		},
+		[ failEmbeddedKycLoad ]
+	);
 
 	return (
 		<>
 			{ loadFailure && (
-				<BannerNotice
-					className="woopayments-banner-notice--embedded-kyc"
-					status={ getFailureNoticeStatus( loadFailure ) }
-					isDismissible={ false }
-					actions={ [
-						{
-							label: __( 'Learn more', 'woocommerce' ),
-							variant: 'primary',
-							url: embeddedKycTroubleshootingUrl,
-							urlTarget: '_blank',
-						},
-						{
-							label: __( 'Cancel', 'woocommerce' ),
-							variant: 'link',
-							url: fallbackUrl,
-						},
-					] }
-				>
-					{ getFailureNoticeMessage( loadFailure ) }
-				</BannerNotice>
+				<div ref={ loadFailureNoticeRef } tabIndex={ -1 }>
+					<BannerNotice
+						className="woopayments-banner-notice--embedded-kyc"
+						status={ getFailureNoticeStatus( loadFailure ) }
+						isDismissible={ false }
+						actions={ [
+							{
+								label: __( 'Learn more', 'woocommerce' ),
+								variant: 'primary',
+								url: embeddedKycTroubleshootingUrl,
+								urlTarget: '_blank',
+							},
+							{
+								label: __( 'Cancel', 'woocommerce' ),
+								variant: 'link',
+								url: fallbackUrl,
+							},
+						] }
+					>
+						{ getFailureNoticeMessage( loadFailure ) }
+					</BannerNotice>
+				</div>
 			) }
 			{ loading && (
-				<div className="embedded-kyc-loader-wrapper padded">
+				<div
+					className="embedded-kyc-loader-wrapper padded"
+					role="status"
+				>
+					<span className="screen-reader-text">
+						{ embeddedKycLoadingMessage }
+					</span>
 					<StripeSpinner />
 				</div>
 			) }
 			{ finalizingSession && (
-				<div className="embedded-kyc-loader-wrapper">
+				<div className="embedded-kyc-loader-wrapper" role="status">
+					<span className="screen-reader-text">
+						{ embeddedKycFinalizingMessage }
+					</span>
 					<StripeSpinner />
 				</div>
 			) }
