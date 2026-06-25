@@ -310,6 +310,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 				'value'   => 'Details',
 				'display' => new stdClass(),
 			);
+			$item_data[] = 'Malformed item data';
 
 			return $item_data;
 		};
@@ -333,6 +334,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'file-a.pdf', $html );
 		$this->assertStringNotContainsString( 'Extra', $html );
 		$this->assertStringNotContainsString( 'Details', $html );
+		$this->assertStringNotContainsString( 'Malformed item data', $html );
 	}
 
 	/**
@@ -348,6 +350,12 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 				'key'   => 'Attachments',
 				'value' => array( 'file-a.pdf', 'file-b.pdf' ),
 			);
+			$item_data[] = array(
+				'key'     => 'Extra',
+				'value'   => 'Details',
+				'display' => new stdClass(),
+			);
+			$item_data[] = 'Malformed item data';
 
 			return $item_data;
 		};
@@ -367,6 +375,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( "Gift wrap: Included\n", $output );
+		$this->assertStringNotContainsString( 'Malformed item data', $output );
 	}
 
 	public function test_hidden_field() {
