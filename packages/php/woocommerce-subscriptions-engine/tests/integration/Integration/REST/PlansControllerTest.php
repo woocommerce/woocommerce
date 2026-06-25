@@ -19,9 +19,9 @@ use WP_REST_Response;
  */
 class PlansControllerTest extends EngineIntegrationTestCase {
 
-	private const EXTENSION_SLUG = 'woocommerce-subscriptions-lite';
+	private const BASE = '/wc/v3/subscriptions-engine/plans';
 
-	private const BASE = '/wc/v3/subscriptions-engine/' . self::EXTENSION_SLUG . '/plans';
+	private const EXTENSION_SLUG = 'woocommerce-subscriptions-lite';
 
 	/**
 	 * Admin user id.
@@ -48,7 +48,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 	public function test_collection_requires_manage_woocommerce(): void {
 		wp_set_current_user( 0 );
 
-		$response = rest_do_request( new WP_REST_Request( 'GET', self::BASE ) );
+		$response = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
 
 		$this->assertSame( 401, $response->get_status() );
 	}
@@ -60,6 +60,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			'POST',
 			self::BASE,
 			array(
+				'extension_slug' => self::EXTENSION_SLUG,
 				'name'           => 'Monthly',
 				'description'    => 'Ships every month',
 				'billing_policy' => array(
@@ -102,6 +103,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			'PATCH',
 			self::BASE . '/' . $id,
 			array(
+				'extension_slug' => self::EXTENSION_SLUG,
 				'name'           => 'Monthly plus',
 				'billing_policy' => array(
 					'period'   => 'week',
@@ -142,10 +144,50 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( 3, $first_policy['duration_cycles'] );
 		$this->assertSame( 'setup', $first_fee['kind'] );
 
-		$list = $this->request( 'GET', self::BASE, array(), array( 'search' => 'plus' ) );
+		$list = $this->request( 'GET', self::BASE, array(), array( 'search' => 'plus', 'extension_slug' => self::EXTENSION_SLUG ) );
 		$this->assertSame( 200, $list->get_status() );
 		$this->assertSame( '1', $list->get_headers()['X-WP-Total'] );
 		$this->assertCount( 1, $this->response_data( $list ) );
+	}
+
+	public function test_list_with_multiple_extension_slugs_returns_all_plans(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$first_id  = $this->create_plan( 'First', self::EXTENSION_SLUG );
+		$second_id = $this->create_plan( 'Second', 'woocommerce-subscriptions-test' );
+
+		$list = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => implode( ',', array( self::EXTENSION_SLUG, 'woocommerce-subscriptions-test' ) ) ) );
+		$this->assertSame( 200, $list->get_status() );
+		$this->assertSame( '2', $list->get_headers()['X-WP-Total'] );
+		$response_data = $this->response_data( $list );
+		$this->assertIsArray( $response_data );
+		$first_data  = $this->array_value( $response_data, 0 );
+		$second_data = $this->array_value( $response_data, 1 );
+		$this->assertCount( 2, $response_data );
+		$this->assertSame( $first_id, $this->int_value( $first_data, 'id' ) );
+		$this->assertSame( self::EXTENSION_SLUG, $first_data['extension_slug'] );
+		$this->assertSame( $second_id, $this->int_value( $second_data, 'id' ) );
+		$this->assertSame( 'woocommerce-subscriptions-test', $second_data['extension_slug'] );
+	}
+
+	public function test_list_with_any_extension_slug_returns_all_plans(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$first_id  = $this->create_plan( 'First', self::EXTENSION_SLUG );
+		$second_id = $this->create_plan( 'Second', 'woocommerce-subscriptions-test' );
+
+		$list = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => 'any' ) );
+		$this->assertSame( 200, $list->get_status() );
+		$this->assertSame( '2', $list->get_headers()['X-WP-Total'] );
+		$response_data = $this->response_data( $list );
+		$this->assertIsArray( $response_data );
+		$first_data  = $this->array_value( $response_data, 0 );
+		$second_data = $this->array_value( $response_data, 1 );
+		$this->assertCount( 2, $response_data );
+		$this->assertSame( $first_id, $this->int_value( $first_data, 'id' ) );
+		$this->assertSame( self::EXTENSION_SLUG, $first_data['extension_slug'] );
+		$this->assertSame( $second_id, $this->int_value( $second_data, 'id' ) );
+		$this->assertSame( 'woocommerce-subscriptions-test', $second_data['extension_slug'] );
 	}
 
 	public function test_archive_restore_and_reorder(): void {
@@ -157,25 +199,25 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$archived = $this->request(
 			'PATCH',
 			self::BASE . '/' . $first,
-			array( 'status' => Plan::STATUS_ARCHIVED )
+			array( 'extension_slug' => self::EXTENSION_SLUG, 'status' => Plan::STATUS_ARCHIVED )
 		);
 		$this->assertSame( Plan::STATUS_ARCHIVED, $this->response_data( $archived )['status'] );
 
 		$restored = $this->request(
 			'PATCH',
 			self::BASE . '/' . $first,
-			array( 'status' => Plan::STATUS_ACTIVE )
+			array( 'extension_slug' => self::EXTENSION_SLUG, 'status' => Plan::STATUS_ACTIVE )
 		);
 		$this->assertSame( Plan::STATUS_ACTIVE, $this->response_data( $restored )['status'] );
 
 		$reordered = $this->request(
 			'POST',
 			self::BASE . '/reorder',
-			array( 'ids' => array( $second, $first ) )
+			array( 'extension_slug' => self::EXTENSION_SLUG, 'ids' => array( $second, $first ) )
 		);
 		$this->assertSame( 200, $reordered->get_status() );
 
-		$list = $this->request( 'GET', self::BASE );
+		$list = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
 		$ids  = array();
 		foreach ( $this->response_data( $list ) as $row ) {
 			$this->assertIsArray( $row );
@@ -211,7 +253,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 	 *
 	 * @param string $name Name.
 	 */
-	private function create_plan( string $name ): int {
+	private function create_plan( string $name, string $extension_slug = self::EXTENSION_SLUG ): int {
 		$response = $this->request(
 			'POST',
 			self::BASE,
@@ -221,6 +263,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 					'period'   => 'month',
 					'interval' => 1,
 				),
+				'extension_slug' => $extension_slug,
 			)
 		);
 

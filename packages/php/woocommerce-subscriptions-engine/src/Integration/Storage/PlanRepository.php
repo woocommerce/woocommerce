@@ -283,6 +283,22 @@ final class PlanRepository {
 		if ( '' !== $extension_slug ) {
 			$clauses[] = $wpdb->prepare( 'extension_slug = %s', $extension_slug );
 		}
+		
+		if ( isset( $args['extension_slugs'] ) && is_array( $args['extension_slugs'] ) ) {
+			$extension_slugs = array_values(
+				array_filter(
+					$args['extension_slugs'],
+					function ( $possible_slug ) {
+						return is_string( $possible_slug );
+					}
+				)
+			);
+
+			if ( [] !== $extension_slugs ) {
+				$in_clause = 'extension_slug IN (' . implode( ',', array_fill( 0, count( $extension_slugs ), '%s' ) ) . ')';
+				$clauses[] = $wpdb->prepare( $in_clause, $extension_slugs );
+			}
+		}
 
 		$search = self::coerce_string( $args['search'] ?? null );
 		if ( '' !== $search ) {

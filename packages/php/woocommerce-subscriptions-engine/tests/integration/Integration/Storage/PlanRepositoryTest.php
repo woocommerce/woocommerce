@@ -239,6 +239,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 
 		$this->assertTrue(
 			$repo->reorder(
+				'lite',
 				array(
 					$first_id    => 9,
 					$second_id   => 1,
