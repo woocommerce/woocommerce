@@ -447,10 +447,6 @@ final class PlansController extends WP_REST_Controller {
 						'value' => 'price',
 						'label' => __( 'Fixed price', 'woocommerce-subscriptions-engine' ),
 					),
-					array(
-						'value' => 'bogo',
-						'label' => __( 'Buy one get one', 'woocommerce-subscriptions-engine' ),
-					),
 				),
 				'pricing_scopes' => array(
 					array(

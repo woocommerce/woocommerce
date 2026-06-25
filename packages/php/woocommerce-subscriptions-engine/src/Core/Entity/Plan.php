@@ -38,7 +38,7 @@ final class Plan {
 
 	const ALLOWED_STATUSES = array( self::STATUS_ACTIVE, self::STATUS_ARCHIVED );
 
-	const ALLOWED_POLICY_TYPES = array( 'percentage', 'fixed_amount', 'price', 'bogo' );
+	const ALLOWED_POLICY_TYPES = array( 'percentage', 'fixed_amount', 'price' );
 
 	/**
 	 * Plan id, or null before it is persisted.
@@ -504,7 +504,7 @@ final class Plan {
 	 * Validate every entry in a pricing policy's policies[] and one_time_fees[].
 	 *
 	 * Rules:
-	 *  - policies[].type is one of percentage, fixed_amount, price, bogo.
+	 *  - policies[].type is one of percentage, fixed_amount, price.
 	 *  - policies[].value is numeric and non-negative; percentage is capped at 100.
 	 *  - policies[].duration_cycles is optional, integer, and positive.
 	 *  - one_time_fees[].amount is numeric and non-negative.

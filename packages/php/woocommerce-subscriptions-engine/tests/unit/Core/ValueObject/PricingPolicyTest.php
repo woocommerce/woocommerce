@@ -94,40 +94,6 @@ class PricingPolicyTest extends TestCase {
 		$this->assertSame( 100.0, $policy->calculate_price( 100.0, 4 ) );
 	}
 
-	public function test_bogo_applies_to_line_total_without_changing_unit_price(): void {
-		$policy = PricingPolicy::from_array(
-			array(
-				'policies' => array(
-					array(
-						'type'  => 'bogo',
-						'value' => 1,
-					),
-				),
-			)
-		);
-
-		$this->assertSame( 10.0, $policy->calculate_price( 10.0 ) );
-		$this->assertSame( 10.0, $policy->calculate_line_total( 10.0, 2.0 ) );
-		$this->assertSame( 20.0, $policy->calculate_line_total( 10.0, 3.0 ) );
-	}
-
-	public function test_bogo_respects_cycle_window(): void {
-		$policy = PricingPolicy::from_array(
-			array(
-				'policies' => array(
-					array(
-						'type'            => 'bogo',
-						'value'           => 1,
-						'duration_cycles' => 1,
-					),
-				),
-			)
-		);
-
-		$this->assertSame( 10.0, $policy->calculate_line_total( 10.0, 2.0, 1 ) );
-		$this->assertSame( 20.0, $policy->calculate_line_total( 10.0, 2.0, 2 ) );
-	}
-
 	public function test_whole_number_values_normalize_to_float(): void {
 		$policy = PricingPolicy::from_array(
 			array(

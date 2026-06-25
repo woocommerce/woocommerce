@@ -6,7 +6,7 @@
  * Mirrors the `pricing_policy` JSON column shape. Shape:
  *   {
  *     policies: [
- *       { type: 'percentage'|'fixed_amount'|'price'|'bogo', value: float, starting_cycle?: int, duration_cycles?: int },
+ *       { type: 'percentage'|'fixed_amount'|'price', value: float, starting_cycle?: int, duration_cycles?: int },
  *       ...
  *     ],
  *     one_time_fees: [
@@ -151,7 +151,6 @@ final class PricingPolicy {
 	 *  - `type: 'percentage'`   -> `base_price * (100 - value) / 100`.
 	 *  - `type: 'fixed_amount'` -> `max(0, base_price - value)` (clamped at zero).
 	 *  - `type: 'price'`        -> `value` (replaces base price entirely).
-	 *  - `type: 'bogo'`         -> unchanged here; use calculate_line_total().
 	 *  - `starting_cycle` gate: skip the entry when `$cycle < starting_cycle`.
 	 *    A missing `starting_cycle` means the entry applies to all cycles.
 	 *  - `duration_cycles` gate: skip the entry once the duration window ends.
@@ -183,8 +182,6 @@ final class PricingPolicy {
 				case 'price':
 					$price = $value;
 					break;
-				case 'bogo':
-					break;
 				default:
 					break;
 			}
@@ -209,7 +206,7 @@ final class PricingPolicy {
 		$total                = max( 0.0, $effective_unit_price * $quantity );
 
 		foreach ( $this->policies as $policy ) {
-			if ( ! $this->policy_applies_to_cycle( $policy, $cycle ) || 'bogo' !== (string) ( $policy['type'] ?? '' ) ) {
+			if ( ! $this->policy_applies_to_cycle( $policy, $cycle ) ) {
 				continue;
 			}
 
