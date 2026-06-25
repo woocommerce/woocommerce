@@ -98,8 +98,6 @@ const productCategories = [
 ];
 const productAttributes = [ 'Color', 'Size' ];
 
-const errorMessage = 'File is empty. Please upload something more substantial.';
-
 test.describe( 'Import Products from a CSV file', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
