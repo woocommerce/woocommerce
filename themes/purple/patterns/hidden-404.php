@@ -11,10 +11,10 @@
 <h1 class="wp-block-heading alignwide has-text-align-center" id="page-not-found"><?php echo esc_html_x( 'Page not found', 'Heading for a web page that is not found', 'purple' ); ?></h1>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"align":"center"} -->
-<p class="has-text-align-center"><?php echo esc_html_x( 'The page you\'re looking for could not be found. Maybe try a search?', '404 error message', 'purple' ); ?></p>
+<!-- wp:paragraph {"style":{"typography":{"textAlign":"center"},"spacing":{"margin":{"top":"var:preset|spacing|30"}}}} -->
+<p class="has-text-align-center" style="margin-top:var(--wp--preset--spacing--30)"><?php echo esc_html_x( 'The page you\'re looking for could not be found. Maybe try a search?', '404 error message', 'purple' ); ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:search {"label":"<?php echo esc_html_x( 'Search', 'Search form label.', 'purple' ); ?>","showLabel":false,"placeholder":"<?php echo esc_attr_x( 'Search...', 'Search input field placeholder text.', 'purple' ); ?>","buttonText":"<?php echo esc_attr_x( 'Search', 'Button text. Verb.', 'purple' ); ?>","buttonUseIcon":false,"style":{"spacing":{"margin":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"borderColor":"theme-4"} /-->
+<!-- wp:pattern {"slug":"purple/hidden-search"} /-->
 </div>
 <!-- /wp:group -->

@@ -10,8 +10,8 @@
  */
 ?>
 
-<!-- wp:group {"layout":{"type":"constrained"}} -->
-<div class="wp-block-group"><!-- wp:paragraph  -->
+<!-- wp:group {"style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group" style="margin-top:0;margin-bottom:0"><!-- wp:paragraph  -->
 <p><?php esc_html_e('These size charts are a guide to help you find the right size for you. As many pieces are designed in a unique way, we suggest you also refer to the specific garment lengths and measurements provided in the product descriptions.', 'purple');?></p>
 <!-- /wp:paragraph -->
 

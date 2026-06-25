@@ -9,8 +9,8 @@
  */
 ?>
 
-<!-- wp:group {"metadata":{"name":"FAQ list of questions and answers","description":"A list of questions and answers.","categories":["about","purple"],"patternName":"purple/about-faq-question-list"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|90","bottom":"var:preset|spacing|90"}}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull" style="padding-top:var(--wp--preset--spacing--90);padding-bottom:var(--wp--preset--spacing--90)"><!-- wp:heading {"className":"wp-block-heading","style":{"typography":{"textAlign":"center"}}} -->
+<!-- wp:group {"metadata":{"name":"FAQ list of questions and answers","description":"A list of questions and answers.","categories":["about","purple"],"patternName":"purple/about-faq-question-list"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|90","bottom":"var:preset|spacing|90"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--90);padding-bottom:var(--wp--preset--spacing--90)"><!-- wp:heading {"className":"wp-block-heading","style":{"typography":{"textAlign":"center"}}} -->
 <h2 class="wp-block-heading has-text-align-center"><?php esc_html_e( 'Frequently Asked Questions', 'purple' ); ?></h2>
 <!-- /wp:heading -->
 
