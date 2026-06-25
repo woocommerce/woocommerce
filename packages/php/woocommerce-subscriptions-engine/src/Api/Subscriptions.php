@@ -23,6 +23,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Api;
 use WC_Order;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 
@@ -53,7 +54,12 @@ final class Subscriptions {
 	 * @return array<int, Contract> Contracts newest first.
 	 */
 	public static function list( int $limit = 20, int $offset = 0 ): array {
-		return ( new ContractRepository() )->list_recent( $limit, $offset );
+		return ( new ContractRepository() )->query(
+			array(
+				'limit'  => $limit,
+				'offset' => $offset,
+			)
+		);
 	}
 
 	/**
@@ -79,7 +85,7 @@ final class Subscriptions {
 			return false;
 		}
 
-		return ( new RenewalEngine() )->cancel( $contract );
+		return ( new Cancellation() )->cancel( $contract );
 	}
 
 	/**

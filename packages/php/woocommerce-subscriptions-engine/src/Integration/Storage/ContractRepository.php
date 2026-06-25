@@ -214,15 +214,26 @@ final class ContractRepository {
 	}
 
 	/**
-	 * A window of the most-recent contracts, newest first (id DESC) - the paginated read
-	 * for list screens. Hydrated lightweight (row only, no children) like {@see self::find_summary()}.
+	 * Query a window of contracts for list screens, newest first (id DESC). Hydrated
+	 * lightweight (row only, no children) like {@see self::find_summary()}.
 	 *
-	 * @param int $limit  Maximum contracts to return.
-	 * @param int $offset Rows to skip (for paging).
+	 * Takes a WooCommerce-style args array (cf. `wc_get_orders()`) rather than positional
+	 * paging args, so the shape can widen to status / search / sort without a signature
+	 * change. Only the paging args are honoured for now.
+	 *
+	 * @param array<string, mixed> $args {
+	 *     Optional. Query args.
+	 *
+	 *     @type int $limit  Maximum contracts to return. Default 20.
+	 *     @type int $offset Rows to skip (for paging). Default 0.
+	 * }
 	 * @return array<int, Contract> Contracts newest first.
 	 */
-	public function list_recent( int $limit = 20, int $offset = 0 ): array {
+	public function query( array $args = array() ): array {
 		global $wpdb;
+
+		$limit  = isset( $args['limit'] ) && is_numeric( $args['limit'] ) ? (int) $args['limit'] : 20;
+		$offset = isset( $args['offset'] ) && is_numeric( $args['offset'] ) ? (int) $args['offset'] : 0;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
@@ -563,10 +574,13 @@ final class ContractRepository {
 	/**
 	 * Decode a stored plan snapshot row into a typed value object.
 	 *
+	 * Public so the renewal money-path can resolve a contract's own frozen plan terms
+	 * (the cadence to bill the next cycle under) from its `plan_snapshot_id`.
+	 *
 	 * @param int|null $snapshot_id Snapshot row id, or null.
 	 * @return PlanSnapshot|null The decoded value object, or null.
 	 */
-	private function find_plan_snapshot( ?int $snapshot_id ): ?PlanSnapshot {
+	public function find_plan_snapshot( ?int $snapshot_id ): ?PlanSnapshot {
 		$decoded = $this->find_snapshot_payload( $snapshot_id );
 		if ( null === $decoded ) {
 			return null;

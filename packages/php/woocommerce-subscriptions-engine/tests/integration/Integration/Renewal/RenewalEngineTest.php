@@ -21,6 +21,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalScheduler;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
@@ -537,7 +538,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$engine->schedule( $contract );
 		$this->assertTrue( RenewalScheduler::is_scheduled( $contract_id ) );
 
-		$this->assertTrue( $engine->cancel( $contract ) );
+		$this->assertTrue( ( new Cancellation() )->cancel( $contract ) );
 
 		$reloaded = ( new ContractRepository() )->find( $contract_id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
@@ -571,7 +572,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		);
 		$repo->append_cycle( $pending, $previous );
 
-		$this->assertTrue( ( new RenewalEngine() )->cancel( $contract ) );
+		$this->assertTrue( ( new Cancellation() )->cancel( $contract ) );
 
 		// The contract is terminal and the pending cycle is cancelled.
 		$reloaded = $repo->find( $contract_id );
@@ -591,7 +592,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
-		$this->assertTrue( ( new RenewalEngine() )->cancel( $contract ) );
+		$this->assertTrue( ( new Cancellation() )->cancel( $contract ) );
 
 		// Cycle 1 stays billed (only a pending head is closed by cancel).
 		$head = ( new ContractRepository() )->find_current_cycle( $contract_id );
