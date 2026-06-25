@@ -139,6 +139,10 @@ class VisualAttributeTermMetaTest extends WC_Unit_Test_Case {
 			$this->assertIsArray( $terms, 'Terms should be returned for the taxonomy.' );
 			$this->assertCount( 9, $terms, 'Nine default color terms should be created.' );
 
+			$black_term = get_term_by( 'slug', 'black', $taxonomy );
+			$this->assertInstanceOf( \WP_Term::class, $black_term, 'Black term should be seeded with the canonical English slug.' );
+			$this->assertSame( __( 'Black', 'woocommerce' ), $black_term->name, 'Term name should be the translated label, not hardcoded English.' );
+
 			foreach ( $terms as $term ) {
 				$term_ids[] = (int) $term->term_id;
 				$color      = get_term_meta( $term->term_id, 'color', true );

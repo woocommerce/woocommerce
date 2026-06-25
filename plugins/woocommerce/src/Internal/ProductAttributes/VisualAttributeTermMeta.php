@@ -34,21 +34,56 @@ class VisualAttributeTermMeta {
 	public const TYPE_NONE = 'none';
 
 	/**
-	 * Default color terms to create for a new wc-visual attribute.
+	 * Get the default color terms to create for a new wc-visual attribute.
 	 *
-	 * @var array<string, string>
+	 * Labels are translatable so the store locale controls the display name,
+	 * while the slug stays in English to keep the canonical term identity
+	 * across languages and re-seeding idempotent.
+	 *
+	 * @return array<string, array{label: string, color: string}>
+	 *
+	 * @since 11.0.0
 	 */
-	private const DEFAULT_COLOR_TERMS = array(
-		'Black'  => '#121212',
-		'White'  => '#FFFFFF',
-		'Gray'   => '#6E6E6E',
-		'Red'    => '#D32F2F',
-		'Blue'   => '#1976D2',
-		'Green'  => '#388E3C',
-		'Yellow' => '#FBE02D',
-		'Pink'   => '#EC407A',
-		'Brown'  => '#5D4037',
-	);
+	private static function get_default_color_terms(): array {
+		return array(
+			'black'  => array(
+				'label' => __( 'Black', 'woocommerce' ),
+				'color' => '#121212',
+			),
+			'white'  => array(
+				'label' => __( 'White', 'woocommerce' ),
+				'color' => '#FFFFFF',
+			),
+			'gray'   => array(
+				'label' => __( 'Gray', 'woocommerce' ),
+				'color' => '#6E6E6E',
+			),
+			'red'    => array(
+				'label' => __( 'Red', 'woocommerce' ),
+				'color' => '#D32F2F',
+			),
+			'blue'   => array(
+				'label' => __( 'Blue', 'woocommerce' ),
+				'color' => '#1976D2',
+			),
+			'green'  => array(
+				'label' => __( 'Green', 'woocommerce' ),
+				'color' => '#388E3C',
+			),
+			'yellow' => array(
+				'label' => __( 'Yellow', 'woocommerce' ),
+				'color' => '#FBE02D',
+			),
+			'pink'   => array(
+				'label' => __( 'Pink', 'woocommerce' ),
+				'color' => '#EC407A',
+			),
+			'brown'  => array(
+				'label' => __( 'Brown', 'woocommerce' ),
+				'color' => '#5D4037',
+			),
+		);
+	}
 
 	/**
 	 * Get an empty visual term value.
@@ -352,20 +387,18 @@ class VisualAttributeTermMeta {
 			register_taxonomy( $taxonomy, array( 'product' ) );
 		}
 
-		foreach ( self::DEFAULT_COLOR_TERMS as $name => $color ) {
-			$slug = sanitize_title( $name );
-
+		foreach ( self::get_default_color_terms() as $slug => $term ) {
 			if ( get_term_by( 'slug', $slug, $taxonomy ) ) {
 				continue;
 			}
 
-			$result = wp_insert_term( $name, $taxonomy, array( 'slug' => $slug ) );
+			$result = wp_insert_term( $term['label'], $taxonomy, array( 'slug' => $slug ) );
 
 			if ( is_wp_error( $result ) || empty( $result['term_id'] ) ) {
 				continue;
 			}
 
-			self::save_term_visual( (int) $result['term_id'], $color, 0 );
+			self::save_term_visual( (int) $result['term_id'], $term['color'], 0 );
 		}
 	}
 }
