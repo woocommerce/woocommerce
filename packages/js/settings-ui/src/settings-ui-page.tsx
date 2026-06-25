@@ -563,13 +563,13 @@ export const SettingsUIPage = ( {
 	}, [] );
 
 	const submitSettingsForm = useCallback( () => {
-		allowNavigation();
-
 		const form = document.getElementById( 'mainform' );
 
 		if ( ! ( form instanceof HTMLFormElement ) ) {
 			return;
 		}
+
+		allowNavigation();
 
 		const saveButton = document.querySelector( '.woocommerce-save-button' );
 
