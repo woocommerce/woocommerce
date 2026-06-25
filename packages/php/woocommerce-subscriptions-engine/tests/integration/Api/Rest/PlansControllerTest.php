@@ -7,7 +7,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\REST;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\Rest;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use EngineIntegrationTestCase;
@@ -15,7 +15,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 
 /**
- * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\REST\PlansController
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Rest\PlansController
  */
 class PlansControllerTest extends EngineIntegrationTestCase {
 

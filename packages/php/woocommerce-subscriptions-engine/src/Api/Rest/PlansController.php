@@ -2,12 +2,12 @@
 /**
  * REST controller for subscription engine plans.
  *
- * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\REST
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Rest
  */
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\REST;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Rest;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanGroup;
@@ -16,6 +16,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanGroupRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\RESTPermissions;
 use InvalidArgumentException;
 use Throwable;
 use WP_Error;
@@ -31,7 +32,6 @@ defined( 'ABSPATH' ) || exit;
  */
 final class PlansController extends WP_REST_Controller {
 
-	use AdminPermission;
 	use ScalarCoercion;
 
 	private const REST_NAMESPACE = 'wc/v3';
@@ -57,16 +57,25 @@ final class PlansController extends WP_REST_Controller {
 	private $plan_group_repository;
 
 	/**
+	 * REST permissions.
+	 *
+	 * @var RESTPermissions
+	 */
+	private $rest_permissions;
+
+	/**
 	 * Construct the controller.
 	 *
-	 * @param PlanRepository|null      $plan_repository  Plans repository.
+	 * @param PlanRepository|null      $plan_repository       Plans repository.
 	 * @param PlanGroupRepository|null $plan_group_repository Plan groups repository.
+	 * @param RESTPermissions|null     $rest_permissions      REST permissions.
 	 */
-	public function __construct( ?PlanRepository $plan_repository = null, ?PlanGroupRepository $plan_group_repository = null ) {
+	public function __construct( ?PlanRepository $plan_repository = null, ?PlanGroupRepository $plan_group_repository = null, ?RESTPermissions $rest_permissions = null ) {
 		$this->namespace             = self::REST_NAMESPACE;
 		$this->rest_base             = self::REST_BASE;
 		$this->plan_repository       = $plan_repository ?? new PlanRepository();
 		$this->plan_group_repository = $plan_group_repository ?? new PlanGroupRepository();
+		$this->rest_permissions      = $rest_permissions ?? new RESTPermissions();
 	}
 
 	/**
@@ -203,7 +212,7 @@ final class PlansController extends WP_REST_Controller {
 	 * @return true|WP_Error
 	 */
 	public function permissions_check( $request ) {
-		return $this->require_admin_permission();
+		return $this->rest_permissions->require_admin_permission();
 	}
 
 	/**
