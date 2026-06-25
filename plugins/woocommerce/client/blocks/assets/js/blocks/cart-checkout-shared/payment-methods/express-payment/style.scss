@@ -26,20 +26,15 @@ $border-width: 1px;
 
 			&:focus-within::after,
 			&.wc-block-components-express-payment__event-button--focused::after {
-				border: 2px solid $input-text-light;
+				border: 2px solid $studio-blue;
 				border-radius: inherit;
-				box-shadow: inset 0 0 0 1px $input-text-dark;
+				box-shadow: inset 0 0 0 1px $white;
 				content: "";
 				inset: 0;
+				outline: 3px solid transparent;
 				pointer-events: none;
 				position: absolute;
 				z-index: 1;
-			}
-
-			.has-dark-controls &:focus-within::after,
-			.has-dark-controls &.wc-block-components-express-payment__event-button--focused::after {
-				border-color: $input-text-dark;
-				box-shadow: inset 0 0 0 1px $input-text-light;
 			}
 
 			> img {
