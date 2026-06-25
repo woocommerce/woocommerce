@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hide shipping rates when free shipping is available only after the woocommerce_package_rates filter has run, so plugins that remove free shipping no longer leave the customer with no rates.

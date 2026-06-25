@@ -70,6 +70,60 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox paid shipping rates remain visible when a plugin removes free shipping via woocommerce_package_rates filter.
+	 *
+	 * @return void
+	 */
+	public function test_calculate_shipping_for_hide_rates_when_free_after_filter_removes_free_shipping() {
+		update_option( 'woocommerce_shipping_hide_rates_when_free', 'yes' );
+
+		$flat_rate     = new WC_Shipping_Flat_Rate( 1 );
+		$free_shipping = new WC_Shipping_Free_Shipping( 1 );
+		$local_pickup  = new WC_Shipping_Local_Pickup( 1 );
+
+		// phpcs:disable Squiz.Commenting
+		$custom_pickup = new class() extends WC_Shipping_Method {
+			public $id       = 'custom_pickup';
+			public $supports = array( 'local-pickup' );
+			public function get_rates_for_package( $package ) {
+				return array( 'custom_pickup:1' => new WC_Shipping_Rate( 'custom_pickup:1', 'Pickup Location', 5, array(), 'custom_pickup' ) );
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$shipping_methods_hook = fn () => array( $flat_rate, $free_shipping, $local_pickup, $custom_pickup );
+		$remove_free_shipping  = function ( $rates ) {
+			unset( $rates['free_shipping:1'] );
+			return $rates;
+		};
+
+		add_action( 'woocommerce_shipping_methods', $shipping_methods_hook );
+		add_filter( 'woocommerce_package_rates', $remove_free_shipping, 10, 2 );
+
+		try {
+			$result = $this->sut->calculate_shipping_for_package(
+				array(
+					'contents'      => array(),
+					'contents_cost' => 10,
+					'destination'   => array(
+						'country'  => 'US',
+						'state'    => 'CA',
+						'postcode' => '00000',
+					),
+				),
+			);
+
+			$this->assertArrayHasKey( 'flat_rate:1', $result['rates'] );
+			$this->assertArrayHasKey( 'local_pickup:1', $result['rates'] );
+			$this->assertArrayHasKey( 'custom_pickup:1', $result['rates'] );
+			$this->assertArrayNotHasKey( 'free_shipping:1', $result['rates'] );
+		} finally {
+			remove_filter( 'woocommerce_package_rates', $remove_free_shipping, 10 );
+			remove_action( 'woocommerce_shipping_methods', $shipping_methods_hook );
+		}
+	}
+
+	/**
 	 * @testdox package rates filter doesn't cause errors when accessing non-existent rates with arithmetic operations
 	 *
 	 * @dataProvider provide_test_package_rates_filter_error_handling

@@ -358,6 +358,22 @@ class WC_Shipping {
 				}
 			}
 
+			/**
+			 * Filter the calculated shipping rates.
+			 *
+			 * @see https://gist.github.com/woogists/271654709e1d27648546e83253c1a813 for cache invalidation methods.
+			 * @since 2.0.0
+			 * @param array $package['rates'] Package rates.
+			 * @param array $package Package of cart items.
+			 */
+			$package['rates'] = apply_filters( 'woocommerce_package_rates', $package['rates'], $package );
+
+			// Package rates should be an array, if it was filtered into a non-array, reset it. Don't reset to the
+			// unfiltered value, as e.g. a 3pd could have set it to "false" to remove rates.
+			if ( ! is_array( $package['rates'] ) ) {
+				$package['rates'] = array();
+			}
+
 			// Hide shipping rates when free shipping is available.
 			if ( 'yes' === get_option( 'woocommerce_shipping_hide_rates_when_free', 'no' ) ) {
 				$free_shipping = array();
@@ -377,22 +393,6 @@ class WC_Shipping {
 				if ( ! empty( $free_shipping ) ) {
 					$package['rates'] = array_merge( $free_shipping, $local_pickup );
 				}
-			}
-
-			/**
-			 * Filter the calculated shipping rates.
-			 *
-			 * @see https://gist.github.com/woogists/271654709e1d27648546e83253c1a813 for cache invalidation methods.
-			 * @since 2.0.0
-			 * @param array $package['rates'] Package rates.
-			 * @param array $package Package of cart items.
-			 */
-			$package['rates'] = apply_filters( 'woocommerce_package_rates', $package['rates'], $package );
-
-			// Package rates should be an array, if it was filtered into a non-array, reset it. Don't reset to the
-			// unfiltered value, as e.g. a 3pd could have set it to "false" to remove rates.
-			if ( ! is_array( $package['rates'] ) ) {
-				$package['rates'] = array();
 			}
 
 			// Store in session to avoid recalculation.
