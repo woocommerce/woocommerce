@@ -462,10 +462,14 @@ final class RenewalEngine {
 		$fresh = wc_get_order( $renewal_order->get_id() );
 		$paid  = $fresh instanceof WC_Order ? $fresh->is_paid() : $renewal_order->is_paid();
 
+		// The renewal order exists regardless of the charge outcome, so record it on the
+		// cycle either way - a failed/pending cycle still references its order for dunning
+		// and admin visibility.
+		$cycle->set_order_id( $renewal_order->get_id() );
+
 		if ( $paid ) {
-			// CAS pending -> billed (the entity validates the transition) + link the order.
+			// CAS pending -> billed (the entity validates the transition).
 			$cycle->set_status( CycleStatus::billed() );
-			$cycle->set_order_id( $renewal_order->get_id() );
 			$this->contracts->update_cycle( $cycle );
 
 			$contract->set_next_payment_gmt( $spec->get_ends_at_gmt() );

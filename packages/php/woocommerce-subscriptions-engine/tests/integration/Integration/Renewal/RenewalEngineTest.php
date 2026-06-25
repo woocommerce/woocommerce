@@ -342,10 +342,12 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$repo  = new ContractRepository();
 		$cycle = $repo->find_current_cycle( $contract_id );
 
-		// Cycle 2 exists but failed; not linked to a paid order.
+		// Cycle 2 exists and failed, but the renewal order is recorded on it even though the
+		// charge did not settle (for dunning + admin visibility).
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( 2, $cycle->get_count() );
 		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::failed() ) );
+		$this->assertSame( $renewal_order->get_id(), $cycle->get_order_id() );
 
 		// The contract schedule is untouched (left for dunning), still active.
 		$reloaded = $repo->find( $contract_id );
