@@ -1,3 +1,3 @@
 Significance: patch
 Type: dev
-Comment: Register the Add to Wishlist Button block unconditionally and include it statically in the Add to Cart + Options template parts, gating it solely at the block's render layer. No change for shoppers on flag-off stores.
+Comment: Register the Add to Wishlist Button and Wishlist blocks unconditionally, include the button statically in the Add to Cart + Options template parts, and gate both blocks solely at their render layer. No change for shoppers on flag-off stores.

@@ -560,15 +560,15 @@ final class BlockTypesController {
 			$block_types[] = 'SavedForLater';
 		}
 
-		// Registered unconditionally so it can live as a static inner block of
-		// the Add to Cart + Options template parts. All flag-driven behavior is
-		// gated at the block's render layer (it returns an empty string when the
+		// Wishlist blocks are registered unconditionally. AddToWishlistButton
+		// has to be, since it ships as a static inner block of the Add to Cart
+		// + Options template parts; Wishlist follows the same model so both are
+		// consistently available in the editor. All flag-driven behavior lives
+		// at each block's render layer (both return an empty string when the
 		// wishlist feature is off), so flag-off stores render no wishlist UI.
+		// The My Account wishlist endpoint and Store API routes stay flag-gated.
 		$block_types[] = 'AddToWishlistButton';
-
-		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled( 'wishlist' ) ) {
-			$block_types[] = 'Wishlist';
-		}
+		$block_types[] = 'Wishlist';
 
 		if ( wp_is_block_theme() ) {
 			$block_types[] = 'AddToCartWithOptions\AddToCartWithOptions';

@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListRenderer;
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 
 /**
  * Wishlist block.
@@ -45,6 +46,15 @@ final class Wishlist extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		// The block is registered unconditionally, so this render layer is the
+		// feature-flag gate: when the wishlist feature is off, output nothing.
+		// The My Account endpoint that normally renders this block is itself
+		// flag-gated, but the block can also be merchant-placed on any page,
+		// where this guard keeps flag-off stores free of wishlist UI.
+		if ( ! wc_get_container()->get( ShopperListsController::class )->is_enabled( self::LIST_SLUG ) ) {
+			return '';
+		}
+
 		// Guests have no personal list — bail before enqueuing assets or
 		// seeding state. The My Account endpoint isn't reachable for
 		// guests, but the block can also be placed by a merchant on any
