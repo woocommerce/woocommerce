@@ -136,7 +136,7 @@ export const SearchListItem = < T extends object = object >( {
 			return;
 		}
 		setExpandedPanelId( -1 );
-	}, [ isExpanded, item.id, setExpandedPanelId ] );
+	}, [ isExpanded, item.id, item.parent, setExpandedPanelId ] );
 
 	return hasChildren ? (
 		<div
@@ -203,6 +203,7 @@ export const SearchListItem = < T extends object = object >( {
 							}
 						} }
 						onClick={ ( e ) => e.stopPropagation() }
+						__nextHasNoMarginBottom={ true }
 					/>
 
 					{ showCount ? (
@@ -212,7 +213,7 @@ export const SearchListItem = < T extends object = object >( {
 			) }
 		</div>
 	) : (
-		<label htmlFor={ id } className={ classes }>
+		<div className={ classes }>
 			{ isSingle ? (
 				<>
 					<input
@@ -224,9 +225,11 @@ export const SearchListItem = < T extends object = object >( {
 						onChange={ onSelect( item ) }
 						checked={ isSelected }
 						className="woocommerce-search-list__item-input"
-					></input>
+					/>
 
-					<ItemLabel item={ item } search={ search } />
+					<label htmlFor={ id }>
+						<ItemLabel item={ item } search={ search } />
+					</label>
 				</>
 			) : (
 				<CheckboxControl
@@ -241,11 +244,12 @@ export const SearchListItem = < T extends object = object >( {
 					) }
 					onChange={ onSelect( item ) }
 					checked={ isSelected }
+					__nextHasNoMarginBottom={ true }
 				/>
 			) }
 
 			{ showCount ? <Count label={ countLabel || item.count } /> : null }
-		</label>
+		</div>
 	);
 };
 
