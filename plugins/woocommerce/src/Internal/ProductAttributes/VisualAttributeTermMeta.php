@@ -36,10 +36,6 @@ class VisualAttributeTermMeta {
 	/**
 	 * Get the default color terms to create for a new wc-visual attribute.
 	 *
-	 * Labels are translatable so the store locale controls the display name,
-	 * while the slug stays in English to keep the canonical term identity
-	 * across languages and re-seeding idempotent.
-	 *
 	 * @return array<string, array{label: string, color: string}>
 	 *
 	 * @since 11.0.0
@@ -377,12 +373,21 @@ class VisualAttributeTermMeta {
 	 * @since 11.0.0
 	 */
 	public static function seed_visual_attribute_terms( int $attribute_id, array $data ): void {
-		if ( 0 >= $attribute_id || ! isset( $data['attribute_type'] ) || 'wc-visual' !== $data['attribute_type'] || empty( $data['attribute_name'] ) ) {
+		if (
+			0 >= $attribute_id ||
+			! isset( $data['attribute_type'], $data['attribute_name'] ) ||
+			! is_string( $data['attribute_type'] ) ||
+			'wc-visual' !== $data['attribute_type'] ||
+			! is_string( $data['attribute_name'] ) ||
+			'' === trim( $data['attribute_name'] )
+		) {
 			return;
 		}
 
 		$taxonomy = wc_attribute_taxonomy_name( $data['attribute_name'] );
 
+		// Taxonomy is registered on init from the cached list but not yet available
+		// at woocommerce_attribute_added time (cache invalidated after the hook).
 		if ( ! taxonomy_exists( $taxonomy ) ) {
 			register_taxonomy( $taxonomy, array( 'product' ) );
 		}

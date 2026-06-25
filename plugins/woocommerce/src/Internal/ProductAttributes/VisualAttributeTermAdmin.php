@@ -327,10 +327,6 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 	 * @since 11.0.0
 	 */
 	public function maybe_seed_visual_attribute_terms( int $attribute_id, array $data ): void {
-		if ( $attribute_id <= 0 ) {
-			return;
-		}
-
 		VisualAttributeTermMeta::seed_visual_attribute_terms( $attribute_id, $data );
 	}
 
