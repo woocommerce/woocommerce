@@ -79,8 +79,14 @@ test.describe( 'In-cart count reflects only the standalone line', () => {
 		// Seed: Beanie is in the cart only as a meta-differentiated line.
 		await seedMetaLine( page, PRODUCT_X.id );
 
-		// Navigate to the shop; don't wait for the iAPI store to hydrate yet
-		// so we can catch the server-rendered (pre-hydration) text.
+		// Register the Store API cart response listener BEFORE navigating so
+		// we can await it after the page loads (waitForResponse must be set up
+		// before the response fires, or it times out).
+		const cartResponse = page.waitForResponse(
+			'**/wp-json/wc/store/v1/cart**'
+		);
+
+		// Navigate to the shop.
 		await page.goto( '/shop' );
 
 		// Server-rendered (first-paint) button text — this is what the PHP seed
@@ -95,15 +101,13 @@ test.describe( 'In-cart count reflects only the standalone line', () => {
 
 		// After the iAPI store hydrates the button must still show "Add to cart"
 		// — not a non-zero count — because the only Beanie line is a meta line.
-		// Wait for the cart store to have hydrated by watching for the Store API
-		// cart response, then re-assert.
-		await page.waitForResponse( '**/wp-json/wc/store/v1/cart**' );
+		// Wait for the Store API cart response (hydration fetch), then re-assert.
+		await cartResponse;
 		await expect( btn ).toHaveText( 'Add to cart' );
 
-		// Confirm there was no transient flash to a non-zero value.
-		// Because we already waited for networkidle before the second assertion,
-		// any optimistic/hydration update that would have shown a count would
-		// have resolved; the button must still read "Add to cart".
+		// Confirm there was no transient flash to a non-zero value. Because
+		// hydration has completed (cart response received above), any
+		// optimistic update that would have shown a count has already resolved.
 		await expect( btn ).not.toHaveText( /\d+ in cart/ );
 	} );
 
