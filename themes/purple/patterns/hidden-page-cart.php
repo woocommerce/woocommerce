@@ -10,8 +10,8 @@
 	<!-- wp:group {"tagName":"main","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|30"}}},"layout":{"type":"constrained","contentSize":"1060px"}} -->
 	<main class="wp-block-group" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--30)">
 
-		<!-- wp:heading {"level":1,"align":"wide","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|30"}}},"fontSize":"x-large"} -->
-		<h1 class="wp-block-heading alignwide has-x-large-font-size" style="margin-bottom:var(--wp--preset--spacing--30)"><?php esc_html_e('Cart', 'purple');?></h1>
+		<!-- wp:heading {"level":1,"align":"wide","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|30"}}},"fontSize":"xx-large"} -->
+		<h1 class="wp-block-heading alignwide has-xx-large-font-size" style="margin-bottom:var(--wp--preset--spacing--30)"><?php esc_html_e('Cart', 'purple');?></h1>
 		<!-- /wp:heading -->
 
 		<!-- wp:woocommerce/store-notices /-->
