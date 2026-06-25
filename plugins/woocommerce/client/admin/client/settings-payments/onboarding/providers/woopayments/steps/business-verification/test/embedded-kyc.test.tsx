@@ -84,6 +84,18 @@ const mockContexts = () => {
 	} );
 };
 
+const getFailureNotice = (): HTMLElement => {
+	const notice = screen
+		.getByRole( 'link', { name: 'Learn more' } )
+		.closest< HTMLElement >( '[tabindex="-1"]' );
+
+	if ( ! notice ) {
+		throw new Error( 'Expected focused failure notice.' );
+	}
+
+	return notice;
+};
+
 describe( 'EmbeddedKyc', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
@@ -99,9 +111,9 @@ describe( 'EmbeddedKyc', () => {
 	it( 'announces the loading state while waiting for the embedded loader', () => {
 		render( <EmbeddedKyc /> );
 
-		expect(
-			screen.getByRole( 'status', { name: 'Loading onboarding…' } )
-		).toBeInTheDocument();
+		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
+			'Loading onboarding…'
+		);
 	} );
 
 	it( 'shows a unified error when the embedded loader does not start before the timeout', () => {
@@ -113,12 +125,12 @@ describe( 'EmbeddedKyc', () => {
 			jest.advanceTimersByTime( 20000 );
 		} );
 
-		const noticeMessage = screen.getByText(
+		const notice = getFailureNotice();
+
+		expect( notice ).toHaveTextContent(
 			"We couldn't load this step. This can happen when your site's security or server settings block a required connection to Stripe. Check the setup requirements, or contact support if the error persists."
 		);
-
-		expect( noticeMessage ).toBeInTheDocument();
-		expect( noticeMessage.closest( '[tabindex="-1"]' ) ).toHaveFocus();
+		expect( notice ).toHaveFocus();
 		expect(
 			screen.getByRole( 'link', { name: 'Learn more' } )
 		).toHaveAttribute(
@@ -212,11 +224,9 @@ describe( 'EmbeddedKyc', () => {
 			} );
 		} );
 
-		expect(
-			screen.getByText(
-				'Payment activation through our financial partner requires HTTPS and cannot be completed.'
-			)
-		).toBeInTheDocument();
+		expect( getFailureNotice() ).toHaveTextContent(
+			'Payment activation through our financial partner requires HTTPS and cannot be completed.'
+		);
 		expect( mockRecordPaymentsOnboardingEvent ).toHaveBeenCalledWith(
 			'woopayments_onboarding_modal_kyc_load_error',
 			{
@@ -265,11 +275,9 @@ describe( 'EmbeddedKyc', () => {
 			} );
 		} );
 
-		expect(
-			screen.getByText(
-				"We couldn't load this step. This can happen when your site's security or server settings block a required connection to Stripe. Check the setup requirements, or contact support if the error persists."
-			)
-		).toBeInTheDocument();
+		expect( getFailureNotice() ).toHaveTextContent(
+			"We couldn't load this step. This can happen when your site's security or server settings block a required connection to Stripe. Check the setup requirements, or contact support if the error persists."
+		);
 		expect( mockRecordPaymentsOnboardingEvent ).toHaveBeenCalledWith(
 			'woopayments_onboarding_modal_kyc_load_error',
 			{
