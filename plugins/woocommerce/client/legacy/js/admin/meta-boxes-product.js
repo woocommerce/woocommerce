@@ -1648,18 +1648,12 @@ jQuery( function ( $ ) {
 						).removeClass(
 							'wc-product-images__placeholder--gallery'
 						);
-						$el.css( {
-							width: '100%',
-							height: $list.width() + 'px',
-						} );
 					} else {
-						const gw = Math.floor( ( $list.width() - 16 ) / 3 );
 						$el.addClass(
 							'wc-product-images__placeholder--gallery'
 						).removeClass(
 							'wc-product-images__placeholder--featured'
 						);
-						$el.css( { width: gw + 'px', height: gw + 'px' } );
 					}
 					return;
 				}
@@ -1697,10 +1691,7 @@ jQuery( function ( $ ) {
 		$list.on( 'click', '.wc-product-images__remove', function ( e ) {
 			e.preventDefault();
 			const $item = $( this ).closest( '.wc-product-images__image' );
-			const $next =
-				$item.next( '.wc-product-images__image' ).length > 0
-					? $item.next( '.wc-product-images__image' )
-					: $addSlot;
+			const $next = getNextFocusAfterRemoval( $item );
 			$item.remove();
 			syncIds();
 			$next.trigger( 'focus' );

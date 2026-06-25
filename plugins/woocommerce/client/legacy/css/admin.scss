@@ -5668,7 +5668,15 @@ img.help_tip {
 	}
 
 	.wc-product-images__placeholder--featured {
-		width: 100% !important;
+		aspect-ratio: 1 / 1;
+		flex: 0 0 100%;
+		width: 100%;
+	}
+
+	.wc-product-images__placeholder--gallery {
+		aspect-ratio: 1 / 1;
+		flex: 0 0 calc((100% - (2 * var(--wc-product-images-grid-gap))) / 3);
+		width: calc((100% - (2 * var(--wc-product-images-grid-gap))) / 3);
 	}
 
 	// Add-slot — always at end of list

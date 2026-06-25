@@ -175,6 +175,32 @@ class WC_Meta_Box_Product_Images {
 	}
 
 	/**
+	 * Parse a posted comma-separated image IDs field.
+	 *
+	 * @param mixed $posted_value Posted field value.
+	 * @return int[]
+	 */
+	private static function parse_posted_image_ids( $posted_value ): array {
+		if ( is_array( $posted_value ) ) {
+			$posted_value = wp_unslash( $posted_value );
+			$posted_value = array_filter( $posted_value, 'is_scalar' );
+			$posted_value = implode( ',', array_map( 'strval', $posted_value ) );
+		}
+
+		if ( ! is_scalar( $posted_value ) ) {
+			return array();
+		}
+
+		$raw_ids = sanitize_text_field( wp_unslash( (string) $posted_value ) );
+
+		if ( '' === $raw_ids ) {
+			return array();
+		}
+
+		return array_filter( array_map( 'absint', explode( ',', $raw_ids ) ) );
+	}
+
+	/**
 	 * Save meta box data.
 	 *
 	 * @param int     $post_id Post ID.
@@ -207,17 +233,11 @@ class WC_Meta_Box_Product_Images {
 
 		if ( isset( $_POST['product_image_gallery'] ) ) {
 			// Legacy gallery field remains canonical. Core handles the featured image via _thumbnail_id.
-			$raw_gallery = isset( $_POST['product_image_gallery'] ) && is_scalar( $_POST['product_image_gallery'] )
-				? sanitize_text_field( wp_unslash( (string) $_POST['product_image_gallery'] ) )
-				: '';
-			$gallery_ids = '' === $raw_gallery ? array() : array_filter( array_map( 'absint', explode( ',', $raw_gallery ) ) );
+			$gallery_ids = self::parse_posted_image_ids( $_POST['product_image_gallery'] );
 			$product->set_gallery_image_ids( $gallery_ids );
 		} else {
 			// Fallback for non-UI callers that submit the unified field only.
-			$raw_ids   = is_scalar( $_POST['wc_product_image_ids'] )
-				? sanitize_text_field( wp_unslash( (string) $_POST['wc_product_image_ids'] ) )
-				: '';
-			$image_ids = '' === $raw_ids ? array() : array_filter( array_map( 'absint', explode( ',', $raw_ids ) ) );
+			$image_ids = self::parse_posted_image_ids( $_POST['wc_product_image_ids'] );
 			$product->set_image_ids( $image_ids );
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.Missing

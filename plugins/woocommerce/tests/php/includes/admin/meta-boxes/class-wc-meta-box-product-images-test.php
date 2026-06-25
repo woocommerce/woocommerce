@@ -92,6 +92,24 @@ class WC_Meta_Box_Product_Images_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should normalize array-shaped posted image fields.
+	 */
+	public function test_save_normalizes_array_shaped_posted_image_fields(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$saved_product = $this->save_product_images(
+			$product,
+			array(
+				'product-type'         => array( 'simple' ),
+				'wc_product_image_ids' => array( '12', '34,56', array( '78' ) ),
+			)
+		);
+
+		$this->assertSame( array( 12, 34, 56 ), $saved_product->get_image_ids( 'edit' ), 'Array-shaped image ID fields should be normalized before saving.' );
+		$this->assertTrue( $saved_product->is_type( 'simple' ), 'Invalid product type input should fall back to the stored product type.' );
+	}
+
+	/**
 	 * @testdox Should fall back to the stored product type when none is posted.
 	 */
 	public function test_save_falls_back_to_stored_product_type_when_none_is_posted(): void {
