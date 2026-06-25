@@ -45,7 +45,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 				onDeselect={ () => setAttributes( { showReviewRating: true } ) }
 				isShownByDefault
 			>
-				<div style={ { display: 'flex', flexDirection: 'column', gap: '24px' } }>
+				<div className="wc-block-reviews__tools-panel-item-container">
 					<ToggleControl
 						__nextHasNoMarginBottom
 						label={ __( 'Product rating', 'woocommerce' ) }
@@ -114,7 +114,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 				}
 				isShownByDefault
 			>
-				<div style={ { display: 'flex', flexDirection: 'column', gap: '24px' } }>
+				<div className="wc-block-reviews__tools-panel-item-container">
 					<ToggleControl
 						__nextHasNoMarginBottom
 						label={ __( 'Image', 'woocommerce' ) }
@@ -137,38 +137,42 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 							>
 								<ToggleGroupControlOption
 									value="reviewer"
-									label={ __( 'Reviewer photo', 'woocommerce' ) }
+									label={ __(
+										'Reviewer photo',
+										'woocommerce'
+									) }
 								/>
 								<ToggleGroupControlOption
 									value="product"
 									label={ __( 'Product', 'woocommerce' ) }
 								/>
 							</ToggleGroupControl>
-							{ attributes.imageType === 'reviewer' && ! showAvatars && (
-								<Notice
-									className="wc-block-base-control-notice"
-									isDismissible={ false }
-								>
-									{ createInterpolateElement(
-										__(
-											'Reviewer photo is disabled in your <a>site settings</a>.',
-											'woocommerce'
-										),
-										{
-											a: (
-												// eslint-disable-next-line jsx-a11y/anchor-has-content
-												<a
-													href={ getAdminLink(
-														'options-discussion.php'
-													) }
-													target="_blank"
-													rel="noopener noreferrer"
-												/>
+							{ attributes.imageType === 'reviewer' &&
+								! showAvatars && (
+									<Notice
+										className="wc-block-base-control-notice"
+										isDismissible={ false }
+									>
+										{ createInterpolateElement(
+											__(
+												'Reviewer photo is disabled in your <a>site settings</a>.',
+												'woocommerce'
 											),
-										}
-									) }
-								</Notice>
-							) }
+											{
+												a: (
+													// eslint-disable-next-line jsx-a11y/anchor-has-content
+													<a
+														href={ getAdminLink(
+															'options-discussion.php'
+														) }
+														target="_blank"
+														rel="noopener noreferrer"
+													/>
+												),
+											}
+										) }
+									</Notice>
+								) }
 						</>
 					) }
 				</div>
@@ -193,7 +197,9 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 			<ToolsPanelItem
 				hasValue={ () => ! attributes.showReviewContent }
 				label={ __( 'Review content', 'woocommerce' ) }
-				onDeselect={ () => setAttributes( { showReviewContent: true } ) }
+				onDeselect={ () =>
+					setAttributes( { showReviewContent: true } )
+				}
 				isShownByDefault
 			>
 				<ToggleControl
@@ -228,7 +234,9 @@ export const getSharedReviewListControls = ( attributes, setAttributes ) => {
 					label={ __( 'Order by', 'woocommerce' ) }
 					checked={ attributes.showOrderby }
 					onChange={ () =>
-						setAttributes( { showOrderby: ! attributes.showOrderby } )
+						setAttributes( {
+							showOrderby: ! attributes.showOrderby,
+						} )
 					}
 				/>
 			</ToolsPanelItem>
@@ -242,9 +250,18 @@ export const getSharedReviewListControls = ( attributes, setAttributes ) => {
 					label={ __( 'Order Product Reviews by', 'woocommerce' ) }
 					value={ attributes.orderby }
 					options={ [
-						{ label: __( 'Most recent', 'woocommerce' ), value: 'most-recent' },
-						{ label: __( 'Highest Rating', 'woocommerce' ), value: 'highest-rating' },
-						{ label: __( 'Lowest Rating', 'woocommerce' ), value: 'lowest-rating' },
+						{
+							label: __( 'Most recent', 'woocommerce' ),
+							value: 'most-recent',
+						},
+						{
+							label: __( 'Highest Rating', 'woocommerce' ),
+							value: 'highest-rating',
+						},
+						{
+							label: __( 'Lowest Rating', 'woocommerce' ),
+							value: 'lowest-rating',
+						},
 					] }
 					onChange={ ( orderby ) => setAttributes( { orderby } ) }
 				/>
@@ -272,17 +289,22 @@ export const getSharedReviewListControls = ( attributes, setAttributes ) => {
 				}
 				label={ __( 'Load more', 'woocommerce' ) }
 				onDeselect={ () =>
-					setAttributes( { showLoadMore: true, reviewsOnLoadMore: 10 } )
+					setAttributes( {
+						showLoadMore: true,
+						reviewsOnLoadMore: 10,
+					} )
 				}
 				isShownByDefault
 			>
-				<div style={ { display: 'flex', flexDirection: 'column', gap: '24px' } }>
+				<div className="wc-block-reviews__tools-panel-item-container">
 					<ToggleControl
 						__nextHasNoMarginBottom
 						label={ __( 'Load more', 'woocommerce' ) }
 						checked={ attributes.showLoadMore }
 						onChange={ () =>
-							setAttributes( { showLoadMore: ! attributes.showLoadMore } )
+							setAttributes( {
+								showLoadMore: ! attributes.showLoadMore,
+							} )
 						}
 					/>
 					{ attributes.showLoadMore && (

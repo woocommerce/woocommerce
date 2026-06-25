@@ -87,7 +87,11 @@ const ReviewsByProductEditor = ( {
 						isShownByDefault
 					>
 						<ProductControl
-							selected={ attributes.productId ? [ attributes.productId ] : [] }
+							selected={
+								attributes.productId
+									? [ attributes.productId ]
+									: []
+							}
 							onChange={ ( value = [] ) => {
 								const id = value[ 0 ] ? value[ 0 ].id : 0;
 								setAttributes( { productId: id } );
@@ -110,10 +114,10 @@ const ReviewsByProductEditor = ( {
 						} )
 					}
 				>
-						{ getSharedReviewContentControls(
-							attributes,
-							setAttributes
-						) }
+					{ getSharedReviewContentControls(
+						attributes,
+						setAttributes
+					) }
 				</ToolsPanel>
 				<ToolsPanel
 					label={ __( 'List Settings', 'woocommerce' ) }
@@ -127,10 +131,7 @@ const ReviewsByProductEditor = ( {
 						} )
 					}
 				>
-						{ getSharedReviewListControls(
-							attributes,
-							setAttributes
-						) }
+					{ getSharedReviewListControls( attributes, setAttributes ) }
 				</ToolsPanel>
 			</InspectorControls>
 		);
@@ -161,7 +162,9 @@ const ReviewsByProductEditor = ( {
 				) }
 				<div className="wc-block-reviews__selection">
 					<ProductControl
-						selected={ attributes.productId ? [ attributes.productId ] : [] }
+						selected={
+							attributes.productId ? [ attributes.productId ] : []
+						}
 						onChange={ ( value = [] ) => {
 							const id = value[ 0 ] ? value[ 0 ].id : 0;
 							setAttributes( { productId: id } );

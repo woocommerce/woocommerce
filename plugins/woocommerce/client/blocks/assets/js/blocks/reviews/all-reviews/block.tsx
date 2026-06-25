@@ -88,10 +88,7 @@ const AllReviewsEditor = ( {
 						} )
 					}
 				>
-					{ getSharedReviewListControls(
-						attributes,
-						setAttributes
-					) }
+					{ getSharedReviewListControls( attributes, setAttributes ) }
 				</ToolsPanel>
 			</InspectorControls>
 		);

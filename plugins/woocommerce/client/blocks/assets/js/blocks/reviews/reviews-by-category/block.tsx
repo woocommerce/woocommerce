@@ -105,10 +105,10 @@ const ReviewsByCategoryEditor = ( {
 							}
 						/>
 					</ToolsPanelItem>
-						{ getSharedReviewContentControls(
-							attributes,
-							setAttributes
-						) }
+					{ getSharedReviewContentControls(
+						attributes,
+						setAttributes
+					) }
 				</ToolsPanel>
 				<ToolsPanel
 					label={ __( 'List Settings', 'woocommerce' ) }
@@ -122,10 +122,7 @@ const ReviewsByCategoryEditor = ( {
 						} )
 					}
 				>
-						{ getSharedReviewListControls(
-							attributes,
-							setAttributes
-						) }
+					{ getSharedReviewListControls( attributes, setAttributes ) }
 				</ToolsPanel>
 			</InspectorControls>
 		);
