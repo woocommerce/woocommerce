@@ -21,6 +21,9 @@ catalogs:
     '@wordpress/interface':
       specifier: 9.18.5
       version: 9.18.5
+    '@wordpress/ui':
+      specifier: 0.15.1
+      version: 0.15.1
   wp-min:
     '@types/wordpress__block-editor':
       specifier: 15.0.6
@@ -2966,6 +2969,9 @@ importers:
       '@wordpress/router':
         specifier: 0.7.0
         version: 0.7.0(react@18.3.1)
+      '@wordpress/ui':
+        specifier: catalog:wp-bundled
+        version: 0.15.1(@date-fns/tz@1.4.1)(date-fns@3.6.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@14.16.1)
       '@wordpress/url':
         specifier: catalog:wp-min
         version: 4.33.1
