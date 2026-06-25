@@ -17,6 +17,11 @@ import {
 	initializeEditor,
 	selectBlock,
 } from '../../../../../tests/integration/helpers/integration-test-editor';
+import {
+	headingBlockName,
+	INNER_BLOCKS_PAGINATION_TEMPLATE,
+	productTemplateBlockName,
+} from '../constants';
 import { LayoutOptions } from '../types';
 import '../';
 import '../../next-previous-buttons';
@@ -32,15 +37,6 @@ type SetupAttributes = {
 		inherit?: boolean;
 		__woocommerceOnSale?: boolean;
 	};
-};
-
-const paginationBlock = {
-	name: 'core/query-pagination',
-	innerBlocks: [
-		{ name: 'core/query-pagination-previous' },
-		{ name: 'core/query-pagination-numbers' },
-		{ name: 'core/query-pagination-next' },
-	],
 };
 
 async function setup( {
@@ -65,11 +61,14 @@ async function setup( {
 		},
 		innerBlocks: withHeading
 			? [
-					{ name: 'core/heading' },
-					{ name: 'woocommerce/product-template' },
-					paginationBlock,
+					[ headingBlockName ],
+					[ productTemplateBlockName ],
+					INNER_BLOCKS_PAGINATION_TEMPLATE,
 			  ]
-			: [ { name: 'woocommerce/product-template' }, paginationBlock ],
+			: [
+					[ productTemplateBlockName ],
+					INNER_BLOCKS_PAGINATION_TEMPLATE,
+			  ],
 	};
 	return initializeEditor( [ productCollectionBlock ] );
 }
