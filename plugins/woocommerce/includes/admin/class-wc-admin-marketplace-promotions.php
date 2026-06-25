@@ -23,11 +23,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Admin_Marketplace_Promotions {
 
-	const CRON_NAME           = 'woocommerce_marketplace_cron_fetch_promotions';
-	const RULE_BASED_FORMAT   = 'rule-based-promo-card';
-	const TRANSIENT_NAME      = 'woocommerce_marketplace_promotions_v2';
-	const TRANSIENT_LIFE_SPAN = DAY_IN_SECONDS;
-	const PROMOTIONS_API_URL  = 'https://woocommerce.com/wp-json/wccom-extensions/3.0/promotions';
+	const CRON_NAME             = 'woocommerce_marketplace_cron_fetch_promotions';
+	const RULE_BASED_FORMAT     = 'rule-based-promo-card';
+	const TRANSIENT_NAME        = 'woocommerce_marketplace_promotions_v2';
+	const TRANSIENT_LIFE_SPAN   = DAY_IN_SECONDS;
+	const PROMOTIONS_API_URL    = 'https://woocommerce.com/wp-json/wccom-extensions/3.0/promotions';
+	const DISMISSED_PROMOS_META = '_wc_marketplace_dismissed_promos';
 
 	/**
 	 * The user's locale, for example en_US.
@@ -73,6 +74,10 @@ class WC_Admin_Marketplace_Promotions {
 
 		// Fetch promotions from the API and store them in a transient.
 		add_action( self::CRON_NAME, array( __CLASS__, 'update_promotions' ) );
+
+		// Registered on every request so the promo dismissal endpoint is available; the
+		// rest_api_init action only fires during REST requests, and init (priority 11) runs first.
+		add_action( 'rest_api_init', array( __CLASS__, 'register_rest_routes' ) );
 
 		if (
 			( defined( 'DOING_AJAX' ) && DOING_AJAX )
@@ -173,9 +178,20 @@ class WC_Admin_Marketplace_Promotions {
 		}
 
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'marketplace-orders-promo', true );
+
+		// Pass the REST dismiss URL + nonce so the script persists a dismissal with a plain fetch.
+		// rest_url() yields a working URL under any permalink structure, and this avoids depending
+		// on apiFetch being configured on this classic (non-SPA) admin page.
+		$payload = array_merge(
+			$card,
+			array(
+				'dismiss_url'   => esc_url_raw( rest_url( 'wc-admin/marketplace-promotions/dismiss' ) ),
+				'dismiss_nonce' => wp_create_nonce( 'wp_rest' ),
+			)
+		);
 		wp_add_inline_script(
 			'wc-admin-marketplace-orders-promo',
-			'window.wcOrdersPromo = ' . wp_json_encode( $card, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ) . ';',
+			'window.wcOrdersPromo = ' . wp_json_encode( $payload, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ) . ';',
 			'before'
 		);
 
@@ -227,6 +243,8 @@ class WC_Admin_Marketplace_Promotions {
 
 		self::$orders_promo_card_resolved = true;
 
+		$dismissed = self::get_dismissed_promo_ids();
+
 		foreach ( self::get_active_promotions() as $promotion ) {
 			if ( ! is_array( $promotion ) || 'promo-card' !== ( $promotion['format'] ?? '' ) ) {
 				continue;
@@ -236,7 +254,14 @@ class WC_Admin_Marketplace_Promotions {
 				continue;
 			}
 
+			// An id is required so the card can be dismissed permanently; skip ones already dismissed.
+			$id = isset( $promotion['id'] ) ? (string) $promotion['id'] : '';
+			if ( '' === $id || in_array( $id, $dismissed, true ) ) {
+				continue;
+			}
+
 			self::$orders_promo_card = array(
+				'id'          => $id,
 				'promotion'   => $promotion,
 				'order_count' => ( new OrdersProvider() )->get_order_count(),
 			);
@@ -261,6 +286,68 @@ class WC_Admin_Marketplace_Promotions {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get the promo ids the current user has permanently dismissed.
+	 *
+	 * @return string[]
+	 */
+	private static function get_dismissed_promo_ids(): array {
+		$dismissed = get_user_meta( get_current_user_id(), self::DISMISSED_PROMOS_META, true );
+
+		return is_array( $dismissed ) ? array_values( array_filter( array_map( 'strval', $dismissed ) ) ) : array();
+	}
+
+	/**
+	 * Register the REST route used to permanently dismiss an Orders promo card.
+	 *
+	 * @internal
+	 *
+	 * @return void
+	 */
+	public static function register_rest_routes() {
+		register_rest_route(
+			'wc-admin',
+			'/marketplace-promotions/dismiss',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( __CLASS__, 'handle_dismiss_request' ),
+				'permission_callback' => static function () {
+					return current_user_can( 'manage_woocommerce' );
+				},
+				'args'                => array(
+					'id' => array(
+						'type'              => 'string',
+						'required'          => true,
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => static function ( $value ) {
+							return is_string( $value ) && '' !== trim( $value );
+						},
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Permanently dismiss a promo card for the current user.
+	 *
+	 * @internal
+	 *
+	 * @param \WP_REST_Request $request The dismiss request.
+	 * @return \WP_REST_Response
+	 */
+	public static function handle_dismiss_request( \WP_REST_Request $request ): \WP_REST_Response {
+		$id        = (string) $request->get_param( 'id' );
+		$dismissed = self::get_dismissed_promo_ids();
+
+		if ( ! in_array( $id, $dismissed, true ) ) {
+			$dismissed[] = $id;
+			update_user_meta( get_current_user_id(), self::DISMISSED_PROMOS_META, $dismissed );
+		}
+
+		return rest_ensure_response( array( 'dismissed' => true ) );
 	}
 
 	/**

@@ -18,6 +18,9 @@ interface PromoCardProps {
 	promotion: Promotion;
 	// Extra properties merged into the promotion Tracks events (e.g. order_count, surface).
 	eventProperties?: Record< string, unknown >;
+	// Called on dismiss. When provided, replaces the default localStorage dismissal so the
+	// caller can persist it elsewhere (e.g. server-side, per user).
+	onDismiss?: () => void;
 }
 
 const imageComponents = {
@@ -27,6 +30,7 @@ const imageComponents = {
 const PromoCard = ( {
 	promotion,
 	eventProperties = {},
+	onDismiss,
 }: PromoCardProps ): React.ReactElement | null => {
 	const path = window.location.pathname + window.location.search;
 
@@ -55,10 +59,15 @@ const PromoCard = ( {
 
 	const handleDismiss = () => {
 		setIsVisible( false );
-		localStorage.setItem(
-			'wc-marketplaceDismissedPromos',
-			JSON.stringify( getDismissedURIs().concat( path ) )
-		);
+
+		if ( onDismiss ) {
+			onDismiss();
+		} else {
+			localStorage.setItem(
+				'wc-marketplaceDismissedPromos',
+				JSON.stringify( getDismissedURIs().concat( path ) )
+			);
+		}
 
 		recordEvent( 'marketplace_promotion_dismissed', {
 			path,

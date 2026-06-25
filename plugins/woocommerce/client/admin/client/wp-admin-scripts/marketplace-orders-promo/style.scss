@@ -2,7 +2,7 @@
 // (whose default layout stacks vertically for the marketplace grid) into a horizontal banner.
 .woocommerce-marketplace-orders-promo {
 	clear: both;
-	margin: 0 0 16px;
+	margin: 16px 0;
 
 	.promo-card {
 		// Flat card chrome consistent with other order-screen banners.

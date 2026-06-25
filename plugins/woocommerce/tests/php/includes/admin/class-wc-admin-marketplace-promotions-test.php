@@ -50,6 +50,7 @@ class WC_Admin_Marketplace_Promotions_Test extends WC_Unit_Test_Case {
 			$this->active_plugins_filter = null;
 		}
 		$this->reset_orders_promo_cache();
+		wp_set_current_user( 0 );
 
 		parent::tearDown();
 	}
@@ -109,6 +110,7 @@ class WC_Admin_Marketplace_Promotions_Test extends WC_Unit_Test_Case {
 			WC_Admin_Marketplace_Promotions::TRANSIENT_NAME,
 			array(
 				array(
+					'id'            => 'product-add-ons-orders',
 					'date_from_gmt' => '2025-01-01 00:00:00',
 					'date_to_gmt'   => '2099-01-01 00:00:00',
 					'format'        => WC_Admin_Marketplace_Promotions::RULE_BASED_FORMAT,
@@ -324,6 +326,7 @@ class WC_Admin_Marketplace_Promotions_Test extends WC_Unit_Test_Case {
 		$card = WC_Admin_Marketplace_Promotions::get_orders_promo_card();
 
 		$this->assertIsArray( $card );
+		$this->assertSame( 'product-add-ons-orders', $card['id'] );
 		$this->assertSame( 'promo-card', $card['promotion']['format'] );
 		$this->assertSame( 'See Product Add-Ons', $card['promotion']['cta_label']['en_US'] );
 		$this->assertArrayHasKey( 'order_count', $card );
@@ -347,5 +350,61 @@ class WC_Admin_Marketplace_Promotions_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_orders_promo_card_null_when_no_promotions(): void {
 		$this->assertNull( WC_Admin_Marketplace_Promotions::get_orders_promo_card() );
+	}
+
+	/**
+	 * @testdox An Orders promo without an id is never shown (it could not be dismissed).
+	 */
+	public function test_orders_promo_card_requires_an_id(): void {
+		set_transient(
+			WC_Admin_Marketplace_Promotions::TRANSIENT_NAME,
+			array(
+				array(
+					'date_from_gmt' => '2025-01-01 00:00:00',
+					'date_to_gmt'   => '2099-01-01 00:00:00',
+					'format'        => 'promo-card',
+					'pages'         => array( array( 'page' => 'wc-orders' ) ),
+					'title'         => array( 'en_US' => 'No id here' ),
+				),
+			)
+		);
+
+		$this->assertNull( WC_Admin_Marketplace_Promotions::get_orders_promo_card() );
+	}
+
+	/**
+	 * @testdox A promo the current user has dismissed is not shown.
+	 */
+	public function test_orders_promo_card_skipped_when_dismissed(): void {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+		update_user_meta( $user_id, WC_Admin_Marketplace_Promotions::DISMISSED_PROMOS_META, array( 'product-add-ons-orders' ) );
+
+		$this->set_rule_based_promo( $this->pilot_rules(), array( array( 'page' => 'wc-orders' ) ) );
+
+		$this->assertNull( WC_Admin_Marketplace_Promotions::get_orders_promo_card() );
+	}
+
+	/**
+	 * @testdox The dismiss endpoint records the promo id once, per user.
+	 */
+	public function test_dismiss_request_persists_per_user(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+
+		$request = new WP_REST_Request( 'POST', '/wc-admin/marketplace-promotions/dismiss' );
+		$request->set_param( 'id', 'product-add-ons-orders' );
+
+		$response = WC_Admin_Marketplace_Promotions::handle_dismiss_request( $request );
+		$this->assertTrue( $response->get_data()['dismissed'] );
+
+		$dismissed = get_user_meta( $user_id, WC_Admin_Marketplace_Promotions::DISMISSED_PROMOS_META, true );
+		$this->assertSame( array( 'product-add-ons-orders' ), $dismissed );
+
+		// Idempotent: dismissing again does not duplicate the id.
+		WC_Admin_Marketplace_Promotions::handle_dismiss_request( $request );
+		$this->assertCount( 1, get_user_meta( $user_id, WC_Admin_Marketplace_Promotions::DISMISSED_PROMOS_META, true ) );
 	}
 }
