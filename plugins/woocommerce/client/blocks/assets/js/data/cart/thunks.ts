@@ -217,7 +217,10 @@ export const applyExtensionCartUpdate =
 				return response;
 			}
 			dispatch.receiveCart( response );
-			syncPrefersCollectionFromSelectedShippingRates( response, registry );
+			syncPrefersCollectionFromSelectedShippingRates(
+				response,
+				registry
+			);
 			return response;
 		} catch ( error ) {
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
