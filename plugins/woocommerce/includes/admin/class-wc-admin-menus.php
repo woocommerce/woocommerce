@@ -491,7 +491,7 @@ class WC_Admin_Menus {
 		}
 
 		$hidden = array();
-		foreach ( $wp_meta_boxes['nav-menus'] as $context => $priorities ) {
+		foreach ( $wp_meta_boxes['nav-menus'] as $priorities ) {
 			foreach ( (array) $priorities as $priority => $boxes ) {
 				foreach ( (array) $boxes as $box ) {
 					if ( isset( $box['id'] ) && ! in_array( $box['id'], $visible, true ) ) {

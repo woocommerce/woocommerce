@@ -40,7 +40,11 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		if ( null !== $this->brand_taxonomy_backup && $this->brand_taxonomy_backup instanceof WP_Taxonomy ) {
-			$GLOBALS['wp_taxonomies']['product_brand'] = $this->brand_taxonomy_backup;
+			register_taxonomy(
+				$this->brand_taxonomy_backup->name,
+				$this->brand_taxonomy_backup->object_type,
+				(array) $this->brand_taxonomy_backup
+			);
 		}
 		global $wp_meta_boxes;
 		$wp_meta_boxes = $this->wp_meta_boxes_backup;
