@@ -109,13 +109,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 				return false;
 			} );
 
-			var uploadInput  = jQuery( '#upload' );
-			var fileUrlInput = jQuery( '#woocommerce-importer-file-url' );
-			var submitButton = jQuery( '.woocommerce-importer .button-next' );
+			const uploadInput  = jQuery( '#upload' );
+			const fileUrlInput = jQuery( '#woocommerce-importer-file-url' );
+			const submitButton = jQuery( '.woocommerce-importer .button-next' );
 
 			function updateSubmitButton() {
-				var hasFile    = uploadInput.length && uploadInput.val().trim().length > 0;
-				var hasFileUrl = fileUrlInput.length && fileUrlInput.val().trim().length > 0;
+				const hasFile    = uploadInput.length && uploadInput.val().trim().length > 0;
+				const hasFileUrl = fileUrlInput.length && fileUrlInput.val().trim().length > 0;
 				submitButton.prop( 'disabled', ! hasFile && ! hasFileUrl );
 			}
 
