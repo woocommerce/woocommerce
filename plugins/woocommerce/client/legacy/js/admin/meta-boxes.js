@@ -175,6 +175,9 @@ jQuery( function ( $ ) {
 			$( 'div.panel-wrap' ).each( function () {
 				const $panel_wrap = $( this );
 				$panel_wrap
+					.find( 'ul.wc-tabs' )
+					.attr( 'role', 'tablist' );
+				$panel_wrap
 					.find( 'ul.wc-tabs > li > a[href^="#"]' )
 					.each( function () {
 						const $tab = $( this );
