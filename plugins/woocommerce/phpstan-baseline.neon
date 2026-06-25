@@ -1723,18 +1723,6 @@ parameters:
 			path: includes/admin/class-wc-admin-brands.php
 
 		-
-			message: '#^Call to method get_id\(\) on an unknown class Task\.$#'
-			identifier: class.notFound
-			count: 1
-			path: includes/admin/class-wc-admin-dashboard-setup.php
-
-		-
-			message: '#^Call to method get_json\(\) on an unknown class Task\.$#'
-			identifier: class.notFound
-			count: 1
-			path: includes/admin/class-wc-admin-dashboard-setup.php
-
-		-
 			message: '#^Cannot call method get_viewable_tasks\(\) on array\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -1773,18 +1761,6 @@ parameters:
 		-
 			message: '#^Method WC_Admin_Dashboard_Setup\:\:set_task_list\(\) has parameter \$task_list with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/admin/class-wc-admin-dashboard-setup.php
-
-		-
-			message: '#^Parameter \#1 \$task of method WC_Admin_Dashboard_Setup\:\:get_button_link\(\) expects Task, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/class-wc-admin-dashboard-setup.php
-
-		-
-			message: '#^Parameter \$task of method WC_Admin_Dashboard_Setup\:\:get_button_link\(\) has invalid type Task\.$#'
-			identifier: class.notFound
 			count: 1
 			path: includes/admin/class-wc-admin-dashboard-setup.php
 
@@ -7913,12 +7889,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/admin/settings/views/html-webhooks-edit.php
-
-		-
-			message: '#^Parameter \#1 \$text of function esc_html expects string, \(float\|int\) given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/views/html-admin-dashboard-setup.php
 
 		-
 			message: '#^Variable \$button_link might not be defined\.$#'
@@ -49724,12 +49694,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/AssetsController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockPatterns\:\:load_pattern_content\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockPatterns.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockPatterns\:\:set_pattern_cache\(\) has no return type specified\.$#'

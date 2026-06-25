@@ -149,8 +149,18 @@ class PatternRegistry {
 			$pattern_data['description'] = translate_with_gettext_context( $pattern_data['description'], 'Pattern description', 'woocommerce' );
 		}
 
-		if ( empty( $pattern_data['content'] ) ) {
+		// A pattern is registrable as long as it provides either inline content
+		// or a `filePath` that core can load lazily (WP 6.5+). Bail only when
+		// neither is available.
+		if ( empty( $pattern_data['content'] ) && empty( $pattern_data['filePath'] ) ) {
 			return;
+		}
+
+		// When a `filePath` is provided, let core load the content lazily on
+		// demand. Drop any empty `content` so core falls back to `filePath`
+		// instead of registering an empty pattern.
+		if ( ! empty( $pattern_data['filePath'] ) && empty( $pattern_data['content'] ) ) {
+			unset( $pattern_data['content'] );
 		}
 
 		$category_labels = $this->get_category_labels();
