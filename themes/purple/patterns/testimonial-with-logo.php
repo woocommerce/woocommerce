@@ -14,11 +14,11 @@
 <h2 class="wp-block-heading has-text-align-center has-small-font-size" style="font-style:normal;letter-spacing:0.08rem;line-height:1.28;text-transform:uppercase"><?php esc_html_e('In the press', 'purple');?></h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"style":{"typography":{"textAlign":"center"},"spacing":{"margin":{"top":"var:preset|spacing|70"}},"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2","fontSize":"large"} -->
-<p class="has-text-align-center has-theme-2-color has-text-color has-link-color has-large-font-size" style="margin-top:var(--wp--preset--spacing--70)"><?php esc_html_e('“With high-quality materials and expert craftsmanship, our products are built to last and exceed your expectations.”', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"textAlign":"center"},"spacing":{"margin":{"top":"var:preset|spacing|50"}},"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2","fontSize":"large"} -->
+<p class="has-text-align-center has-theme-2-color has-text-color has-link-color has-large-font-size" style="margin-top:var(--wp--preset--spacing--50)"><?php esc_html_e('“With high-quality materials and expert craftsmanship, our products are built to last and exceed your expectations.”', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:image {"width":"130px","sizeSlug":"full","linkDestination":"none","align":"center","style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}}} -->
-<figure class="wp-block-image aligncenter size-full is-resized" style="margin-top:var(--wp--preset--spacing--50)"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/logo-3.webp" alt="<?php esc_attr_e('Brand logo', 'purple');?>" style="width:130px;height:auto"/></figure>
+<!-- wp:image {"width":"130px","sizeSlug":"full","linkDestination":"none","align":"center","style":{"spacing":{"margin":{"top":"var:preset|spacing|30"}}}} -->
+<figure class="wp-block-image aligncenter size-full is-resized" style="margin-top:var(--wp--preset--spacing--30)"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/logo-3.webp" alt="<?php esc_attr_e('Brand logo', 'purple');?>" style="width:130px;height:auto"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group -->

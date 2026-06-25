@@ -6,12 +6,8 @@
  */
 ?>
 
-<!-- wp:group {"metadata":{"name":"Page not found"},"align":"full","layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull"><!-- wp:spacer {"height":"var:preset|spacing|140"} -->
-<div style="height:var(--wp--preset--spacing--140)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer -->
-
-<!-- wp:heading {"textAlign":"center","level":1,"align":"wide"} -->
+<!-- wp:group {"metadata":{"name":"Page not found"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|140","bottom":"var:preset|spacing|140"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--140);padding-bottom:var(--wp--preset--spacing--140)"><!-- wp:heading {"textAlign":"center","level":1,"align":"wide"} -->
 <h1 class="wp-block-heading alignwide has-text-align-center" id="page-not-found"><?php echo esc_html_x( 'Page not found', 'Heading for a web page that is not found', 'purple' ); ?></h1>
 <!-- /wp:heading -->
 
@@ -20,9 +16,5 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:search {"label":"<?php echo esc_html_x( 'Search', 'Search form label.', 'purple' ); ?>","showLabel":false,"placeholder":"<?php echo esc_attr_x( 'Search...', 'Search input field placeholder text.', 'purple' ); ?>","buttonText":"<?php echo esc_attr_x( 'Search', 'Button text. Verb.', 'purple' ); ?>","buttonUseIcon":false,"style":{"spacing":{"margin":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"borderColor":"theme-4"} /-->
-
-<!-- wp:spacer {"height":"var:preset|spacing|140"} -->
-<div style="height:var(--wp--preset--spacing--140)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer -->
 </div>
 <!-- /wp:group -->

@@ -1,26 +1,16 @@
-<!-- wp:template-part {"slug":"header"} /-->
+<!-- wp:template-part {"slug":"header","theme":"purple"} /-->
 
-<!-- wp:group {"tagName":"main","metadata":{"name":"Main"},"style":{"spacing":{"blockGap":"0","margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|70"}}},"layout":{"type":"default"}} -->
-<main class="wp-block-group" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--70)"><!-- wp:group {"metadata":{"name":"Page Title"},"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group"><!-- wp:post-featured-image /-->
+<!-- wp:group {"tagName":"main","metadata":{"name":"Main"},"style":{"spacing":{"blockGap":"0","margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"default"}} -->
+<main class="wp-block-group" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)">
+	<!-- wp:group {"metadata":{"name":"Page Title"},"layout":{"type":"constrained"}} -->
+	<div class="wp-block-group"><!-- wp:post-featured-image /-->
 
-<!-- wp:spacer {"height":"var:preset|spacing|30"} -->
-<div style="height:var(--wp--preset--spacing--30)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer -->
+		<!-- wp:post-title {"style":{"typography":{"textAlign":"left"},"spacing":{"margin":{"top":"var:preset|spacing|30"}}}} /-->
+	</div>
+	<!-- /wp:group -->
 
-<!-- wp:post-title {"textAlign":"left","fontSize":"xx-large"} /-->
-
-<!-- wp:spacer {"height":"var:preset|spacing|30"} -->
-<div style="height:var(--wp--preset--spacing--30)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer --></div>
+	<!-- wp:post-content {"style":{"spacing":{"margin":{"top":"var:preset|spacing|30"}}},"layout":{"type":"constrained"}} /-->
+</main>
 <!-- /wp:group -->
 
-<!-- wp:post-content {"layout":{"type":"constrained"}} /-->
-
-<!-- wp:spacer {"height":"var:preset|spacing|140","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
-<div style="margin-top:0;margin-bottom:0;height:var(--wp--preset--spacing--140)" aria-hidden="true" class="wp-block-spacer"></div>
-<!-- /wp:spacer --></main>
-<!-- /wp:group -->
-    
-<!-- wp:template-part {"slug":"footer"} /-->
-    
+<!-- wp:template-part {"slug":"footer","theme":"purple"} /-->

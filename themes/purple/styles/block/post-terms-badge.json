@@ -7,15 +7,33 @@
         "core/post-terms"
     ],
     "styles": {
+        "css": "display: flex; flex-wrap: wrap; gap: var(--wp--preset--spacing--10); justify-content: center;",
+        "typography": {
+            "fontSize": "var(--wp--preset--font-size--small)",
+            "lineHeight": "1.71",
+            "fontWeight": "400"
+        },
         "elements": {
             "link": {
                 "color": {
+                    "text": "var(--wp--preset--color--theme-2)",
                     "background": "var(--wp--preset--color--theme-5)"
                 },
+                "typography": {
+                    "textDecoration": "none"
+                },
                 "spacing": {
-                    "padding": "var(--wp--preset--spacing--10)",
-                    "margin": {
-                        "right": "var(--wp--preset--spacing--10)"
+                    "padding": {
+                        "top": "4px",
+                        "right": "var(--wp--preset--spacing--10)",
+                        "bottom": "4px",
+                        "left": "var(--wp--preset--spacing--10)"
+                    }
+                },
+                "css": "display: inline-block; box-sizing: border-box;",
+                ":hover": {
+                    "typography": {
+                        "textDecoration": "none"
                     }
                 }
             }

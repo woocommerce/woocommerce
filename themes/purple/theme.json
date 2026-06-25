@@ -255,6 +255,23 @@
                     "blockGap": "var(--wp--preset--spacing--50)"
                 }
             },
+			"core/cover": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-1)"
+				},
+				"elements": {
+					"heading": {
+						"color": {
+							"text": "var(--wp--preset--color--theme-1)"
+						}
+					},
+					"link": {
+						"color": {
+							"text": "var(--wp--preset--color--theme-1)"
+						}
+					}
+				}
+			},
 			"core/comment-author-name": {
 				"typography": {
 					"fontSize": "var(--wp--preset--font-size--medium)"
@@ -267,7 +284,8 @@
 			},
 			"core/comment-date": {
 				"typography": {
-					"fontSize": "var(--wp--preset--font-size--small)"
+					"fontSize": "var(--wp--preset--font-size--small)",
+					"lineHeight": "1.71"
 				},
 				"color": {
 					"text": "var(--wp--preset--color--theme-4)"
@@ -276,11 +294,37 @@
 			"core/comment-edit-link": {
 				"typography": {
 					"fontSize": "var(--wp--preset--font-size--small)"
+				},
+				"elements": {
+					"link": {
+						"typography": {
+							"textDecoration": "underline"
+						}
+					}
 				}
 			},
 			"core/comment-reply-link": {	
 				"typography": {
 					"fontSize": "var(--wp--preset--font-size--small)"
+				},
+				"elements": {
+					"link": {
+						"typography": {
+							"textDecoration": "underline"
+						}
+					}
+				}
+			},
+			"core/comments-pagination": {
+				"elements": {
+					"link": {
+						"color": {
+							"text": "var(--wp--preset--color--theme-2)"
+						},
+						"typography": {
+							"textDecoration": "underline"
+						}
+					}
 				}
 			},
 			"core/navigation": {
@@ -308,7 +352,14 @@
 			},
 			"core/post-date": {
 				"typography": {
-					"fontSize": "var(--wp--preset--font-size--small)" 
+					"fontSize": "var(--wp--preset--font-size--small)",
+					"lineHeight": "1.71"
+				}
+			},
+			"core/post-excerpt": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--large)",
+					"lineHeight": "1.55"
 				}
 			},
 			"core/post-terms": {
@@ -334,7 +385,7 @@
 			},
 			"core/post-title": {
 				"typography": {
-					"fontSize": "var(--wp--preset--font-size--large)",
+					"fontSize": "var(--wp--preset--font-size--xx-large)",
 					"fontWeight": "500"
 				}
 			},
