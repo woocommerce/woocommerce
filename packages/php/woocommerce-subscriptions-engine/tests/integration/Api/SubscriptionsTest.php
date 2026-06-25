@@ -21,6 +21,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanGroup;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanGroupRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
@@ -168,5 +169,101 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$after_cancel = Subscriptions::get( $contract_id );
 		$this->assertInstanceOf( Contract::class, $after_cancel );
 		$this->assertSame( ContractStatus::CANCELLED, $after_cancel->get_status() );
+	}
+
+	/**
+	 * Seed a contract for a customer at a status, returning its id.
+	 *
+	 * @param int    $customer_id Owning customer.
+	 * @param string $status      Contract status.
+	 */
+	private function seed_for_customer( int $customer_id, string $status = ContractStatus::ACTIVE ): int {
+		$contract = Contract::create(
+			array(
+				'customer_id'      => $customer_id,
+				'status'           => $status,
+				'currency'         => 'USD',
+				'selling_plan_id'  => 1,
+				'start_gmt'        => '2026-01-01 00:00:00',
+				'next_payment_gmt' => '2099-02-01 00:00:00',
+				'billing_total'    => '19.99',
+			)
+		);
+
+		return ( new ContractRepository() )->insert( $contract );
+	}
+
+	/**
+	 * @testdox list_for_customer returns only the requested customer's contracts.
+	 */
+	public function test_list_for_customer_is_owner_scoped(): void {
+		$mine_a = $this->seed_for_customer( 41 );
+		$mine_b = $this->seed_for_customer( 41 );
+		$theirs = $this->seed_for_customer( 42 );
+
+		$ids = array_map(
+			static fn ( Contract $c ) => (int) $c->get_id(),
+			Subscriptions::list_for_customer( 41 )
+		);
+
+		$this->assertContains( $mine_a, $ids );
+		$this->assertContains( $mine_b, $ids );
+		$this->assertNotContains( $theirs, $ids );
+		$this->assertCount( 2, $ids );
+	}
+
+	/**
+	 * @testdox get_for_customer returns the contract when the customer owns it.
+	 */
+	public function test_get_for_customer_returns_the_owned_contract(): void {
+		$id = $this->seed_for_customer( 43 );
+
+		$contract = Subscriptions::get_for_customer( $id, 43 );
+
+		$this->assertInstanceOf( Contract::class, $contract );
+		$this->assertSame( $id, $contract->get_id() );
+	}
+
+	/**
+	 * @testdox get_for_customer is null for both a foreign owner and an unknown id (asymmetric).
+	 */
+	public function test_get_for_customer_is_null_for_foreign_and_unknown(): void {
+		$id = $this->seed_for_customer( 44 );
+
+		$this->assertNull( Subscriptions::get_for_customer( $id, 45 ), 'foreign-owned reads as not found' );
+		$this->assertNull( Subscriptions::get_for_customer( 987654, 44 ), 'unknown id reads as not found' );
+	}
+
+	/**
+	 * @testdox the lifecycle verbs return false for an unknown contract.
+	 */
+	public function test_lifecycle_actions_return_false_for_an_unknown_contract(): void {
+		$this->assertFalse( Subscriptions::hold( 987654 ) );
+		$this->assertFalse( Subscriptions::reactivate( 987654 ) );
+		$this->assertFalse( Subscriptions::cancel_at_period_end( 987654 ) );
+	}
+
+	/**
+	 * @testdox the portal lifecycle runs through the facade: hold, reactivate, cancel at period end.
+	 */
+	public function test_portal_lifecycle_hold_reactivate_cancel_at_period_end(): void {
+		$contract    = $this->sign_up_contract();
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$this->assertTrue( Subscriptions::hold( $contract_id ) );
+		$held = Subscriptions::get( $contract_id );
+		$this->assertInstanceOf( Contract::class, $held );
+		$this->assertSame( ContractStatus::ON_HOLD, $held->get_status() );
+
+		$this->assertTrue( Subscriptions::reactivate( $contract_id ) );
+		$active = Subscriptions::get( $contract_id );
+		$this->assertInstanceOf( Contract::class, $active );
+		$this->assertSame( ContractStatus::ACTIVE, $active->get_status() );
+
+		$this->assertTrue( Subscriptions::cancel_at_period_end( $contract_id ) );
+		$pending = Subscriptions::get( $contract_id );
+		$this->assertInstanceOf( Contract::class, $pending );
+		$this->assertSame( ContractStatus::PENDING_CANCELLATION, $pending->get_status() );
 	}
 }
