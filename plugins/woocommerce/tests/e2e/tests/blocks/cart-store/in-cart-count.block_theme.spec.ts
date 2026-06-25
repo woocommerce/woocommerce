@@ -2,11 +2,11 @@
  * External dependencies
  */
 import { test as base, expect, guestFile } from '@woocommerce/e2e-utils';
-import config from '../../../../../client/admin/config/core.json';
 
 /**
  * Internal dependencies
  */
+import config from '../../../../../client/admin/config/core.json';
 import AddToCartWithOptionsPage from '../add-to-cart-with-options/add-to-cart-with-options.page';
 import {
 	CART_LINE_IDENTITY_PLUGIN,
@@ -95,9 +95,9 @@ test.describe( 'In-cart count reflects only the standalone line', () => {
 
 		// After the iAPI store hydrates the button must still show "Add to cart"
 		// — not a non-zero count — because the only Beanie line is a meta line.
-		// Wait for the cart store to have hydrated by watching for the network
-		// response from the Store API cart endpoint, then re-assert.
-		await page.waitForLoadState( 'networkidle' );
+		// Wait for the cart store to have hydrated by watching for the Store API
+		// cart response, then re-assert.
+		await page.waitForResponse( '**/wp-json/wc/store/v1/cart**' );
 		await expect( btn ).toHaveText( 'Add to cart' );
 
 		// Confirm there was no transient flash to a non-zero value.
@@ -177,9 +177,9 @@ test.describe( 'In-cart count reflects only the standalone line', () => {
 
 		// Reload /shop to exercise the server seed path; then let the store hydrate.
 		await page.goto( '/shop' );
-		await page.waitForLoadState( 'networkidle' );
 
 		// Only the standalone line (qty 1) should be counted; the meta line is excluded.
+		// `toHaveText` auto-retries until the iAPI store hydrates and updates the button.
 		const btn = productButton( page, PRODUCT_X.id );
 		await expect( btn ).toHaveText( '1 in cart' );
 	} );
@@ -197,11 +197,11 @@ test.describe( 'In-cart count reflects only the standalone line', () => {
 
 		// Navigate to /shop and wait for the store to hydrate.
 		await frontendUtils.goToShop();
-		await page.waitForLoadState( 'networkidle' );
 
 		const btn = productButton( page, PRODUCT_X.id );
 
 		// Pre-click: meta-only cart ⇒ no standalone line ⇒ "Add to cart".
+		// `toHaveText` auto-retries, so it waits for hydration before asserting.
 		await expect( btn ).toHaveText( 'Add to cart' );
 
 		// Click the ProductButton — a plain, keyless add through the iAPI store —
