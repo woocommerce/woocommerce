@@ -3,7 +3,7 @@
  * Title: Shop homepage
  * Slug: purple/home
  * Inserter: no
- * Template Types: front-page, index, home
+ * Template Types: front-page
  */
 ?>
 
