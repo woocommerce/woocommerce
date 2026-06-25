@@ -17,8 +17,13 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+/*
+ * Non-semantic markup is used intentionally: this data is not a list of terms and definitions,
+ * so the previously used <dl>/<dt>/<dd> tags were announced incorrectly by screen readers.
+ * See https://github.com/woocommerce/woocommerce/issues/61076.
+ */
 ?>
-<?php // Non-semantic markup is used intentionally: this data is not a list of terms and definitions, so the previously used <dl>/<dt>/<dd> tags were announced incorrectly by screen readers. See https://github.com/woocommerce/woocommerce/issues/61076. ?>
 <div class="variation">
 	<?php foreach ( $item_data as $data ) : ?>
 		<div class="<?php echo sanitize_html_class( 'variation-' . $data['key'] ); ?> variation-label"><?php echo wp_kses_post( $data['key'] ); ?>:</div>
