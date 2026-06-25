@@ -63,19 +63,22 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	 * PHPUnit run, silently skipping every later test. Throwing from the wp_redirect
 	 * filter aborts control flow before exit so the test survives to assert.
 	 */
-	private function dispatch_send_request(): void {
-		$abort = static function ( $location ): void {
-			throw new \RuntimeException( esc_html( (string) $location ) );
+	private function dispatch_send_request(): string {
+		$location = '';
+		$abort    = static function ( $loc ): void {
+			throw new \RuntimeException( esc_html( (string) $loc ) );
 		};
 		add_filter( 'wp_redirect', $abort );
 		try {
 			$this->sut->handle_send_request();
 		} catch ( \RuntimeException $e ) {
 			// Expected: handle_send_request() redirects and exits.
-			unset( $e );
+			$location = $e->getMessage();
 		} finally {
 			remove_filter( 'wp_redirect', $abort );
 		}
+
+		return $location;
 	}
 
 	// -------------------------------------------------------------------------
@@ -235,13 +238,33 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 
 		// Second send — key was just created (seconds_since_last_key < 60).
 		$_GET['_wpnonce'] = wp_create_nonce( 'woocommerce-send-verification-email' );
-		$this->dispatch_send_request();
+		$throttled        = $this->dispatch_send_request();
 
 		remove_action( 'woocommerce_customer_verify_email_notification', $listener );
 		unset( $_GET['_wpnonce'] );
 
 		$this->assertSame( 1, $notification_count, 'Notification should fire exactly once despite two send attempts within the rate-limit window' );
-		$this->assertCount( 1, wc_get_notices( 'notice' ), 'A rate-limited resend must surface an informational notice instead of failing silently.' );
+		$this->assertStringContainsString( 'wc_verify_notice=throttled', $throttled, 'A rate-limited resend must surface the throttled result notice instead of failing silently.' );
+	}
+
+	/**
+	 * @testdox print_result_notice prints the matching notice for a known result code and nothing for an unknown one.
+	 */
+	public function test_print_result_notice_renders_only_known_codes(): void {
+		$_GET['wc_verify_notice'] = 'sent';
+		ob_start();
+		$this->sut->print_result_notice();
+		$sent_html = (string) ob_get_clean();
+
+		$_GET['wc_verify_notice'] = 'not-a-real-code';
+		ob_start();
+		$this->sut->print_result_notice();
+		$unknown_html = (string) ob_get_clean();
+
+		unset( $_GET['wc_verify_notice'] );
+
+		$this->assertStringContainsString( 'check your inbox', $sent_html, 'A known result code should print its notice.' );
+		$this->assertSame( '', $unknown_html, 'An unknown result code should print nothing (no stray notice).' );
 	}
 
 	// -------------------------------------------------------------------------

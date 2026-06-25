@@ -58,6 +58,11 @@ class VerificationController {
 	private const SUBMIT_FIELD = 'wc_verify_email_submit';
 
 	/**
+	 * Query param carrying a one-off result code to print as a notice on the account page.
+	 */
+	private const NOTICE_PARAM = 'wc_verify_notice';
+
+	/**
 	 * Minimum seconds between sends (rate limit).
 	 */
 	private const SEND_RATE_LIMIT = 60;
@@ -74,6 +79,7 @@ class VerificationController {
 	 */
 	public function __construct() {
 		add_action( 'template_redirect', array( $this, 'maybe_process_request' ) );
+		add_action( 'woocommerce_before_account_orders', array( $this, 'print_result_notice' ), 5 );
 		add_action( 'woocommerce_before_account_orders', array( $this, 'render_prompt' ) );
 	}
 
@@ -153,9 +159,7 @@ class VerificationController {
 		$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
 
 		if ( ! wp_verify_nonce( $nonce, self::VERIFY_NONCE_ACTION ) ) {
-			wc_add_notice( __( 'Invalid request. Please try again.', 'woocommerce' ), 'error' );
-			wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
-			exit;
+			$this->redirect_with_result( 'invalid' );
 		}
 
 		$user_id = isset( $_POST[ self::USER_PARAM ] ) ? absint( wp_unslash( $_POST[ self::USER_PARAM ] ) ) : 0;
@@ -174,17 +178,16 @@ class VerificationController {
 
 		// Logged in as someone else: refuse rather than silently switching accounts.
 		if ( $current_user_id !== $user_id ) {
-			wc_add_notice( __( 'Unable to confirm this email while you are logged in to a different account. Please log out and open the link again.', 'woocommerce' ), 'error' );
-		} elseif ( $this->process_verification( $user_id, $key ) || $this->service->is_verified( $user_id ) ) {
-			// Second clause: a double submit (e.g. JS auto-submit racing the no-JS button) finds the key
-			// already consumed but the user verified — show success, not a stale "link expired" error.
-			wc_add_notice( __( 'Your email address has been confirmed.', 'woocommerce' ) );
-		} else {
-			wc_add_notice( __( 'This confirmation link is invalid or has expired. Please request a new one.', 'woocommerce' ), 'error' );
+			$this->redirect_with_result( 'mismatch' );
 		}
 
-		wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
-		exit;
+		// Second clause: a double submit (e.g. JS auto-submit racing the no-JS button) finds the key
+		// already consumed but the user verified — show success, not a stale "link expired" error.
+		if ( $this->process_verification( $user_id, $key ) || $this->service->is_verified( $user_id ) ) {
+			$this->redirect_with_result( 'confirmed' );
+		}
+
+		$this->redirect_with_result( 'expired' );
 	}
 
 	/**
@@ -279,9 +282,7 @@ class VerificationController {
 		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
 
 		if ( ! wp_verify_nonce( $nonce, self::SEND_NONCE_ACTION ) ) {
-			wc_add_notice( __( 'Invalid request. Please try again.', 'woocommerce' ), 'error' );
-			wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
-			exit;
+			$this->redirect_with_result( 'invalid' );
 		}
 
 		// Only send a fresh link once the last one is outside the rate-limit window; otherwise the
@@ -289,13 +290,10 @@ class VerificationController {
 		$seconds_since = $this->service->seconds_since_last_key( $user_id );
 		if ( null === $seconds_since || $seconds_since >= self::SEND_RATE_LIMIT ) {
 			$this->send_verification_email( $user_id );
-			wc_add_notice( __( 'A confirmation link has been sent to your email address. Please check your inbox.', 'woocommerce' ), 'success' );
-		} else {
-			wc_add_notice( __( 'A confirmation link was sent recently. Please check your inbox, or wait a moment before requesting a new one.', 'woocommerce' ), 'notice' );
+			$this->redirect_with_result( 'sent' );
 		}
 
-		wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
-		exit;
+		$this->redirect_with_result( 'throttled' );
 	}
 
 	/**
@@ -348,10 +346,15 @@ class VerificationController {
 		$seconds_since = $this->service->seconds_since_last_key( $user_id );
 
 		if ( null !== $seconds_since && $seconds_since <= self::SEND_RATE_LIMIT ) {
-			wc_print_notice(
-				esc_html__( 'Confirm your email address to check for past orders. A confirmation link was sent recently — please check your inbox.', 'woocommerce' ),
-				'notice'
-			);
+			// A just-sent/throttled result notice (from the redirect) already points to the inbox this
+			// page load, so don't print a second "check your inbox" alongside it.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display-only, no state change.
+			if ( ! isset( $_GET[ self::NOTICE_PARAM ] ) ) {
+				wc_print_notice(
+					esc_html__( 'Confirm your email address to check for past orders. A confirmation link was sent recently — please check your inbox.', 'woocommerce' ),
+					'notice'
+				);
+			}
 			return;
 		}
 
@@ -368,6 +371,61 @@ class VerificationController {
 		);
 
 		wc_print_notice( $notice, 'notice' );
+	}
+
+	/**
+	 * Print the one-off result notice carried by the {@see self::NOTICE_PARAM} query arg, if any.
+	 *
+	 * Send/confirm actions redirect here with a result code rather than queuing a session notice, so the
+	 * page shows exactly the current request's outcome — re-running an action can't stack notices.
+	 *
+	 * @internal
+	 * @since 11.0.0
+	 */
+	public function print_result_notice(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display-only, no state change.
+		$code   = isset( $_GET[ self::NOTICE_PARAM ] ) ? sanitize_key( wp_unslash( $_GET[ self::NOTICE_PARAM ] ) ) : '';
+		$notice = $this->result_notice( $code );
+
+		if ( null !== $notice ) {
+			wc_print_notice( esc_html( $notice[0] ), $notice[1] );
+		}
+	}
+
+	/**
+	 * Map a redirect result code to its [ message, notice type ], or null for an unknown code.
+	 *
+	 * @param string $code Result code from a send/confirm redirect.
+	 * @return array{0: string, 1: string}|null
+	 */
+	private function result_notice( string $code ): ?array {
+		switch ( $code ) {
+			case 'sent':
+				return array( __( 'A confirmation link has been sent to your email address. Please check your inbox.', 'woocommerce' ), 'success' );
+			case 'throttled':
+				return array( __( 'A confirmation link was sent recently. Please check your inbox, or wait a moment before requesting a new one.', 'woocommerce' ), 'notice' );
+			case 'confirmed':
+				return array( __( 'Your email address has been confirmed.', 'woocommerce' ), 'success' );
+			case 'expired':
+				return array( __( 'This confirmation link is invalid or has expired. Please request a new one.', 'woocommerce' ), 'error' );
+			case 'mismatch':
+				return array( __( 'Unable to confirm this email while you are logged in to a different account. Please log out and open the link again.', 'woocommerce' ), 'error' );
+			case 'invalid':
+				return array( __( 'Invalid request. Please try again.', 'woocommerce' ), 'error' );
+			default:
+				return null;
+		}
+	}
+
+	/**
+	 * Redirect to the orders section carrying a one-off result code, then exit.
+	 *
+	 * @param string $code Result code understood by {@see self::result_notice()}.
+	 * @return never
+	 */
+	private function redirect_with_result( string $code ): void {
+		wp_safe_redirect( add_query_arg( self::NOTICE_PARAM, $code, wc_get_account_endpoint_url( 'orders' ) ) );
+		exit;
 	}
 
 	/**

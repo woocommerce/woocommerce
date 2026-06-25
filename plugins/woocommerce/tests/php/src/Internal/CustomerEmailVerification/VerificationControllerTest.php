@@ -51,15 +51,12 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 		$key = $this->key_from_url( $verify_url );
 
 		wp_set_current_user( $user_id );
-		$redirect        = $this->submit_confirm( $user_id, $key, wp_create_nonce( 'woocommerce-verify-email' ) );
-		$success_notices = wc_get_notices( 'success' );
-		wc_clear_notices();
+		$redirect = $this->submit_confirm( $user_id, $key, wp_create_nonce( 'woocommerce-verify-email' ) );
 		wp_set_current_user( 0 );
 
 		$this->assertTrue( $this->service->is_verified( $user_id ), 'Confirming as the link owner should verify the address' );
 		$this->assertSame( $user_id, wc_get_order( $order->get_id() )->get_customer_id(), 'Guest order should link to the verified customer' );
-		$this->assertNotEmpty( $success_notices, 'A confirmation notice should be shown' );
-		$this->assertStringContainsString( 'orders', $redirect, 'Should redirect to the Orders endpoint' );
+		$this->assertStringContainsString( 'wc_verify_notice=confirmed', $redirect, 'Should redirect to the Orders endpoint carrying the confirmed result notice' );
 	}
 
 	/**
@@ -120,15 +117,13 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 		$key      = $this->service->create_verification_key( $owner_id );
 
 		wp_set_current_user( $other_id );
-		$this->submit_confirm( $owner_id, $key, wp_create_nonce( 'woocommerce-verify-email' ) );
-		$error_notices = wc_get_notices( 'error' );
-		wc_clear_notices();
+		$redirect = $this->submit_confirm( $owner_id, $key, wp_create_nonce( 'woocommerce-verify-email' ) );
 		wp_set_current_user( 0 );
 
 		$this->assertFalse( $this->service->is_verified( $owner_id ), 'The link owner must not be verified by another account' );
 		$this->assertFalse( $this->service->is_verified( $other_id ), 'The logged-in different account must not be verified' );
 		$this->assertTrue( $this->service->has_pending_key( $owner_id ), 'A cross-account submission must not consume the key' );
-		$this->assertNotEmpty( $error_notices, 'A cross-account submission should produce an error notice' );
+		$this->assertStringContainsString( 'wc_verify_notice=mismatch', $redirect, 'A cross-account submission should surface the mismatch result notice' );
 	}
 
 	/**
@@ -139,14 +134,12 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 		$key     = $this->service->create_verification_key( $user_id );
 
 		wp_set_current_user( $user_id );
-		$this->submit_confirm( $user_id, $key, 'not-a-valid-nonce' );
-		$error_notices = wc_get_notices( 'error' );
-		wc_clear_notices();
+		$redirect = $this->submit_confirm( $user_id, $key, 'not-a-valid-nonce' );
 		wp_set_current_user( 0 );
 
 		$this->assertFalse( $this->service->is_verified( $user_id ), 'An invalid nonce must not verify the address' );
 		$this->assertTrue( $this->service->has_pending_key( $user_id ), 'An invalid nonce must not consume the key' );
-		$this->assertNotEmpty( $error_notices, 'An invalid request should produce an error notice' );
+		$this->assertStringContainsString( 'wc_verify_notice=invalid', $redirect, 'An invalid request should surface the invalid result notice' );
 	}
 
 	/**
@@ -157,13 +150,11 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 		$this->service->create_verification_key( $user_id );
 
 		wp_set_current_user( $user_id );
-		$this->submit_confirm( $user_id, 'totally-wrong-key', wp_create_nonce( 'woocommerce-verify-email' ) );
-		$error_notices = wc_get_notices( 'error' );
-		wc_clear_notices();
+		$redirect = $this->submit_confirm( $user_id, 'totally-wrong-key', wp_create_nonce( 'woocommerce-verify-email' ) );
 		wp_set_current_user( 0 );
 
 		$this->assertFalse( $this->service->is_verified( $user_id ), 'A wrong key must not verify the address' );
-		$this->assertNotEmpty( $error_notices, 'A wrong key should produce an error notice' );
+		$this->assertStringContainsString( 'wc_verify_notice=expired', $redirect, 'A wrong key should surface the expired result notice' );
 	}
 
 	/**
@@ -174,17 +165,14 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 		$key     = $this->service->create_verification_key( $user_id );
 
 		wp_set_current_user( $user_id );
-		$nonce = wp_create_nonce( 'woocommerce-verify-email' );
-		$this->submit_confirm( $user_id, $key, $nonce );
-		$this->submit_confirm( $user_id, $key, $nonce );
-		$error_notices   = wc_get_notices( 'error' );
-		$success_notices = wc_get_notices( 'success' );
-		wc_clear_notices();
+		$nonce  = wp_create_nonce( 'woocommerce-verify-email' );
+		$first  = $this->submit_confirm( $user_id, $key, $nonce );
+		$second = $this->submit_confirm( $user_id, $key, $nonce );
 		wp_set_current_user( 0 );
 
 		$this->assertTrue( $this->service->is_verified( $user_id ), 'The first submission should verify the address' );
-		$this->assertEmpty( $error_notices, 'A repeat submission once verified must not error' );
-		$this->assertCount( 2, $success_notices, 'Each submission once verified should report success' );
+		$this->assertStringContainsString( 'wc_verify_notice=confirmed', $first, 'The first submission should report success' );
+		$this->assertStringContainsString( 'wc_verify_notice=confirmed', $second, 'A repeat submission once verified should also report success, not a stale error' );
 	}
 
 	/**
