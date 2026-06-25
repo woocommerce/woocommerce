@@ -335,10 +335,10 @@ class WC_Admin_Marketplace_Promotions {
 	 *
 	 * @internal
 	 *
-	 * @param \WP_REST_Request $request The dismiss request.
+	 * @param \WP_REST_Request<array<string, mixed>> $request The dismiss request.
 	 * @return \WP_REST_Response
 	 */
-	public static function handle_dismiss_request( \WP_REST_Request $request ): \WP_REST_Response {
+	public static function handle_dismiss_request( \WP_REST_Request $request ): \WP_REST_Response { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
 		$id        = (string) $request->get_param( 'id' );
 		$dismissed = self::get_dismissed_promo_ids();
 
@@ -399,7 +399,12 @@ class WC_Admin_Marketplace_Promotions {
 			return false;
 		}
 
-		$decoded_rules = json_decode( wp_json_encode( $rules ) );
+		$encoded_rules = wp_json_encode( $rules );
+		if ( false === $encoded_rules ) {
+			return false;
+		}
+
+		$decoded_rules = json_decode( $encoded_rules );
 		if ( ! self::rules_are_valid( $decoded_rules ) ) {
 			return false;
 		}
