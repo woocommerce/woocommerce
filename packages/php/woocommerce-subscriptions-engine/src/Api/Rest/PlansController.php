@@ -96,18 +96,6 @@ final class PlansController extends WP_REST_Controller {
 	public function register_routes(): void {
 		register_rest_route(
 			self::REST_NAMESPACE,
-			'/' . self::REST_BASE . '/definitions',
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_definitions' ),
-					'permission_callback' => array( $this, 'permissions_check' ),
-				),
-			)
-		);
-
-		register_rest_route(
-			self::REST_NAMESPACE,
 			'/' . self::REST_BASE,
 			array(
 				array(
@@ -219,7 +207,7 @@ final class PlansController extends WP_REST_Controller {
 	 * Get a paginated plan list.
 	 *
 	 * @param WP_REST_Request $request Request.
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_items( $request ) {
 		$extension_slug = $this->string_param( $request, 'extension_slug' );
@@ -452,75 +440,6 @@ final class PlansController extends WP_REST_Controller {
 		}
 
 		return rest_ensure_response( array( 'ids' => $response_ids ) );
-	}
-
-	/**
-	 * Return schema-driven definitions consumed by admin UIs.
-	 *
-	 * @param WP_REST_Request $request Request.
-	 * @return WP_REST_Response
-	 */
-	public function get_definitions( $request ) {
-		return rest_ensure_response(
-			array(
-				'statuses'       => array(
-					array(
-						'value' => Plan::STATUS_ACTIVE,
-						'label' => __( 'Active', 'woocommerce-subscriptions-engine' ),
-					),
-					array(
-						'value' => Plan::STATUS_ARCHIVED,
-						'label' => __( 'Archived', 'woocommerce-subscriptions-engine' ),
-					),
-				),
-				'billing_units'  => array(
-					array(
-						'value' => 'day',
-						'label' => __( 'Day', 'woocommerce-subscriptions-engine' ),
-					),
-					array(
-						'value' => 'week',
-						'label' => __( 'Week', 'woocommerce-subscriptions-engine' ),
-					),
-					array(
-						'value' => 'month',
-						'label' => __( 'Month', 'woocommerce-subscriptions-engine' ),
-					),
-					array(
-						'value' => 'year',
-						'label' => __( 'Year', 'woocommerce-subscriptions-engine' ),
-					),
-				),
-				'pricing_types'  => array(
-					array(
-						'value' => 'percentage',
-						'label' => __( 'Percentage', 'woocommerce-subscriptions-engine' ),
-					),
-					array(
-						'value' => 'fixed_amount',
-						'label' => __( 'Fixed amount', 'woocommerce-subscriptions-engine' ),
-					),
-					array(
-						'value' => 'price',
-						'label' => __( 'Fixed price', 'woocommerce-subscriptions-engine' ),
-					),
-				),
-				'pricing_scopes' => array(
-					array(
-						'value' => 'all',
-						'label' => __( 'All cycles', 'woocommerce-subscriptions-engine' ),
-					),
-					array(
-						'value' => 'first',
-						'label' => __( 'First cycle', 'woocommerce-subscriptions-engine' ),
-					),
-					array(
-						'value' => 'n_cycles',
-						'label' => __( 'First N cycles', 'woocommerce-subscriptions-engine' ),
-					),
-				),
-			)
-		);
 	}
 
 	/**

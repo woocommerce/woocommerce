@@ -226,19 +226,6 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( $second, $first ), $ids );
 	}
 
-	public function test_definitions_endpoint_returns_form_options(): void {
-		wp_set_current_user( $this->admin_id );
-
-		$response = rest_do_request( new WP_REST_Request( 'GET', self::BASE . '/definitions' ) );
-
-		$this->assertSame( 200, $response->get_status() );
-		$data = $this->response_data( $response );
-		$this->assertArrayHasKey( 'statuses', $data );
-		$this->assertArrayHasKey( 'billing_units', $data );
-		$this->assertArrayHasKey( 'pricing_types', $data );
-		$this->assertArrayHasKey( 'pricing_scopes', $data );
-	}
-
 	public function test_delete_route_is_not_exposed(): void {
 		wp_set_current_user( $this->admin_id );
 		$id = $this->create_plan( 'Delete guard' );
