@@ -346,6 +346,102 @@ final class ContractRepository {
 	}
 
 	/**
+	 * Customer-scoped contract list, newest first - the customer portal's list read.
+	 *
+	 * Hits the `(customer_id, status)` index: scopes to the owner, applies the optional
+	 * status filter, and pages. Returns lightweight (row only, no children) {@see Contract}
+	 * entities like {@see self::query()} / {@see self::find_summary()} - enough for a list
+	 * row without a per-contract child read. An empty result means "this customer has no
+	 * matching contracts"; it is never null.
+	 *
+	 * Takes a WooCommerce-style args array (cf. {@see self::query()}) rather than positional
+	 * args, so the shape can widen without a signature change. Ordered by id DESC (monotonic
+	 * with creation) so the list is newest-first and stable for paging.
+	 *
+	 * @param int                       $customer_id Owning customer id.
+	 * @param array<string, mixed>|null $args        {
+	 *     Optional. Query args.
+	 *
+	 *     @type int    $limit  Maximum contracts to return. Default 20.
+	 *     @type int    $offset Rows to skip (for paging). Default 0.
+	 *     @type string $status Optional status filter (one of {@see \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus}).
+	 * }
+	 * @return array<int, Contract> Contracts the customer owns, newest first.
+	 */
+	public function find_by_customer_id( int $customer_id, ?array $args = null ): array {
+		global $wpdb;
+
+		$args   = $args ?? array();
+		$limit  = isset( $args['limit'] ) && is_numeric( $args['limit'] ) ? (int) $args['limit'] : 20;
+		$offset = isset( $args['offset'] ) && is_numeric( $args['offset'] ) ? (int) $args['offset'] : 0;
+		$status = isset( $args['status'] ) && is_string( $args['status'] ) && '' !== $args['status'] ? $args['status'] : null;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		if ( null === $status ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE customer_id = %d ORDER BY id DESC LIMIT %d OFFSET %d", $customer_id, $limit, $offset ), ARRAY_A );
+		} else {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE customer_id = %d AND status = %s ORDER BY id DESC LIMIT %d OFFSET %d", $customer_id, $status, $limit, $offset ), ARRAY_A );
+		}
+
+		$contracts = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			if ( is_array( $row ) ) {
+				$contracts[] = Contract::from_storage( self::as_string_keyed( $row ) );
+			}
+		}
+
+		return $contracts;
+	}
+
+	/**
+	 * Whether `$contract_id` is owned by `$customer_id` - the portal's ownership guard.
+	 *
+	 * A single indexed read returning false for BOTH an unknown contract and a contract
+	 * owned by someone else, so the caller cannot distinguish "not yours" from "does not
+	 * exist". The asymmetric not-found / anti-IDOR rule lives at the REST boundary; this
+	 * just answers the ownership question without leaking which case it is.
+	 *
+	 * @param int $contract_id Contract id.
+	 * @param int $customer_id Customer to check ownership against.
+	 */
+	public function is_owned_by( int $contract_id, int $customer_id ): bool {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$found = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d AND customer_id = %d", $contract_id, $customer_id ) );
+
+		return null !== $found;
+	}
+
+	/**
+	 * The contract's last-updated timestamp (the storage-managed `date_updated_gmt`
+	 * column), or null when the row is gone.
+	 *
+	 * The {@see Contract} entity intentionally does not carry the storage-managed
+	 * `date_*_gmt` columns (they are not part of its `to_storage()` shape), but the portal
+	 * detail read surfaces "last updated" as a first-class date - so it is read directly
+	 * here rather than smuggled onto the entity.
+	 *
+	 * @param int $id Contract id.
+	 * @return string|null GMT string, or null if the row no longer exists.
+	 */
+	public function find_last_updated_gmt( int $id ): ?string {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$value = $wpdb->get_var( $wpdb->prepare( "SELECT date_updated_gmt FROM {$table} WHERE id = %d", $id ) );
+
+		return null === $value ? null : (string) $value;
+	}
+
+	/**
 	 * Whether a contract row exists for `$id`.
 	 *
 	 * @param int $id Contract id.
