@@ -99,8 +99,28 @@
 	.site-visibility-settings-slotfill-section {
 		max-width: 650px;
 
-		&:last-child {
+		// Separate consecutive sections rather than relying on the last child,
+		// so adding a new section (e.g. the site-visibility-badge toggle) does
+		// not remove the spacing between the sections above it.
+		& + .site-visibility-settings-slotfill-section {
 			margin-top: 16px;
+		}
+
+		// Toggle alignment rules apply to every toggle in a section, including
+		// top-level toggles that are not nested in the `-content` wrapper.
+		.components-toggle-control {
+			margin: 0;
+
+			.components-h-stack {
+				align-items: baseline;
+			}
+		}
+
+		.components-base-control__field {
+			p {
+				margin-top: 6px;
+				margin-bottom: 0;
+			}
 		}
 
 		.site-visibility-settings-slotfill-section-content {
@@ -111,21 +131,6 @@
 
 			&.is-hidden {
 				display: none;
-			}
-
-			.components-toggle-control {
-				margin: 0;
-
-				.components-h-stack {
-					align-items: baseline;
-				}
-			}
-
-			.components-base-control__field {
-				p {
-					margin-top: 6px;
-					margin-bottom: 0;
-				}
 			}
 		}
 	}
