@@ -28,6 +28,7 @@ $border-width: 1px;
 			&.wc-block-components-express-payment__event-button--focused::after {
 				border: 2px solid $input-text-light;
 				border-radius: inherit;
+				box-shadow: inset 0 0 0 1px $input-text-dark;
 				content: "";
 				inset: 0;
 				pointer-events: none;
@@ -38,6 +39,7 @@ $border-width: 1px;
 			.has-dark-controls &:focus-within::after,
 			.has-dark-controls &.wc-block-components-express-payment__event-button--focused::after {
 				border-color: $input-text-dark;
+				box-shadow: inset 0 0 0 1px $input-text-light;
 			}
 
 			> img {
