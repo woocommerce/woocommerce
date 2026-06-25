@@ -239,8 +239,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					<?php echo wp_kses( $sparkline, $sparkline_allowed_html ); ?>
 					<?php
 						printf(
-							/* translators: 1: top seller product title 2: top seller quantity */
-							esc_html__( 'Top seller this month %1$s (sold %2$d)', 'woocommerce' ),
+							/* translators: 1: top seller product title 2: top seller quantity sold */
+							esc_html( _n( 'Top seller this month %1$s (%2$d sale)', 'Top seller this month %1$s (%2$d sales)', $top_seller->qty, 'woocommerce' ) ),
 							'<strong>' . get_the_title( $top_seller->product_id ) . '</strong>',
 							$top_seller->qty
 						); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped

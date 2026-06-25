@@ -101,7 +101,7 @@ ul.woocommerce_stats {
 
 			a {
 				display: block;
-				padding: 9px 12px;
+				padding: 9px 12px 9px 44px;
 				position: relative;
 				font-size: 13px;
 				line-height: 1.5;
@@ -136,13 +136,16 @@ ul.woocommerce_stats {
 
 					@include icon_dashicons( "\f14c" );
 					font-size: 20px;
-					position: relative;
+					position: absolute;
+					top: 50%;
+					left: 12px;
+					transform: translateY(-50%);
 					width: 20px;
-					line-height: 1;
+					height: 20px;
+					line-height: 20px;
 					color: $wp-admin-icon-gray;
-					float: left;
-					margin-right: 12px;
-					margin-bottom: 12px;
+					float: none;
+					margin: 0;
 				}
 			}
 		}
@@ -176,7 +179,7 @@ ul.woocommerce_stats {
 			border-right: 1px solid #ececec;
 
 			a::before {
-				content: "\f121";
+				content: "\f469";
 			}
 		}
 
@@ -191,14 +194,14 @@ ul.woocommerce_stats {
 			border-right: 1px solid #ececec;
 
 			a::before {
-				content: "\f534";
+				content: "\f14c";
 			}
 		}
 
 		li.out-of-stock {
 
 			a::before {
-				content: "\f153";
+				content: "\f158";
 			}
 		}
 	}
@@ -293,7 +296,7 @@ ul.woocommerce_stats {
 			left: 0;
 			letter-spacing: 0.1em;
 			letter-spacing: 0\9; // IE8 & below hack ;-(
-			color: $wp-admin-icon-gray;
+			color: $wp-admin-text-gray;
 		}
 	}
 }
