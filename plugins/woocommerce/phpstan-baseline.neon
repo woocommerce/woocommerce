@@ -47710,13 +47710,13 @@ parameters:
 			path: src/Admin/Notes/Notes.php
 
 		-
-			message: '#^Binary operation "/" between 0\|float and int\<min, \-1\>\|int\<1, max\>\|string results in an error\.$#'
+			message: '#^Binary operation "/" between 0\|float and int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: src/Admin/Overrides/Order.php
 
 		-
-			message: '#^Binary operation "/" between float and int\<min, \-1\>\|int\<1, max\>\|string results in an error\.$#'
+			message: '#^Binary operation "/" between float and int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: src/Admin/Overrides/Order.php
@@ -47806,13 +47806,13 @@ parameters:
 			path: src/Admin/Overrides/Order.php
 
 		-
-			message: '#^Binary operation "/" between 0\|float and int\<min, \-1\>\|int\<1, max\>\|string results in an error\.$#'
+			message: '#^Binary operation "/" between 0\|float and int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: src/Admin/Overrides/OrderRefund.php
 
 		-
-			message: '#^Binary operation "/" between float and int\<min, \-1\>\|int\<1, max\>\|string results in an error\.$#'
+			message: '#^Binary operation "/" between float and int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: src/Admin/Overrides/OrderRefund.php
