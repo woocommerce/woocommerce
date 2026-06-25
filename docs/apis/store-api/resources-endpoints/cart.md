@@ -45,6 +45,7 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
 			"backorders_allowed": false,
 			"show_backorder_badge": false,
 			"sold_individually": false,
+			"has_cart_item_data": false,
 			"permalink": "https://local.wordpress.test/product/beanie-with-logo/",
 			"images": [
 				{
@@ -112,6 +113,7 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
 			"backorders_allowed": false,
 			"show_backorder_badge": false,
 			"sold_individually": false,
+			"has_cart_item_data": false,
 			"permalink": "https://local.wordpress.test/product/belt/",
 			"images": [
 				{
