@@ -167,6 +167,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		wp_set_current_user( 0 );
 
+		add_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ), 11 );
+		$this->reset_abilities_loader_initialized();
+
 		parent::tearDown();
 	}
 
@@ -539,6 +542,78 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		foreach ( self::CANONICAL_ABILITY_IDS as $ability_id ) {
 			$this->assertNotNull( wp_get_ability( $ability_id ), "{$ability_id} should remain registered." );
 		}
+	}
+
+	/**
+	 * @testdox Should remove the vendor abilities-api REST init hook on WordPress 6.9+.
+	 */
+	public function test_vendor_rest_init_hook_removed_on_wp_69_plus(): void {
+		global $wp_version;
+
+		if ( version_compare( $wp_version, '6.9', '<' ) ) {
+			$this->markTestSkipped( 'Requires WordPress 6.9+.' );
+		}
+
+		$this->reset_abilities_loader_initialized();
+
+		$vendor_callback = array( 'WP_REST_Abilities_Init', 'register_routes' );
+		add_action( 'rest_api_init', $vendor_callback, 11 );
+
+		$this->assertNotFalse( has_action( 'rest_api_init', $vendor_callback ), 'Vendor rest_api_init hook should be present before init.' );
+
+		AbilitiesLoader::init();
+
+		$this->assertFalse( has_action( 'rest_api_init', $vendor_callback ), 'Vendor rest_api_init hook should be removed on WordPress 6.9+.' );
+	}
+
+	/**
+	 * @testdox Should preserve the vendor abilities-api REST init hook on WordPress 6.8 and earlier.
+	 */
+	public function test_vendor_rest_init_hook_preserved_before_wp_69(): void {
+		global $wp_version;
+
+		if ( version_compare( $wp_version, '6.9', '>=' ) ) {
+			$this->markTestSkipped( 'Requires WordPress before 6.9.' );
+		}
+
+		$this->reset_abilities_loader_initialized();
+
+		$vendor_callback = array( 'WP_REST_Abilities_Init', 'register_routes' );
+		add_action( 'rest_api_init', $vendor_callback, 11 );
+
+		$this->assertNotFalse( has_action( 'rest_api_init', $vendor_callback ), 'Vendor rest_api_init hook should be present before init.' );
+
+		AbilitiesLoader::init();
+
+		$this->assertNotFalse( has_action( 'rest_api_init', $vendor_callback ), 'Vendor rest_api_init hook should be preserved on WordPress <6.9.' );
+	}
+
+	/**
+	 * @testdox Should remove only the vendor REST hook and leave other vendor hooks untouched on WordPress 6.9+.
+	 */
+	public function test_vendor_rest_init_hook_removed_without_touching_other_hooks_on_wp_69_plus(): void {
+		global $wp_version;
+
+		if ( version_compare( $wp_version, '6.9', '<' ) ) {
+			$this->markTestSkipped( 'Requires WordPress 6.9+.' );
+		}
+
+		$this->reset_abilities_loader_initialized();
+
+		$vendor_callback       = array( 'WP_REST_Abilities_Init', 'register_routes' );
+		$assets_callback       = array( 'WP_Abilities_Assets_Init', 'register_assets' );
+		$admin_assets_callback = array( 'WP_Abilities_Assets_Init', 'admin_enqueue_scripts' );
+
+		add_action( 'rest_api_init', $vendor_callback, 11 );
+
+		$assets_before       = has_action( 'init', $assets_callback );
+		$admin_assets_before = has_action( 'admin_enqueue_scripts', $admin_assets_callback );
+
+		AbilitiesLoader::init();
+
+		$this->assertFalse( has_action( 'rest_api_init', $vendor_callback ), 'Vendor rest_api_init hook should be removed.' );
+		$this->assertSame( $assets_before, has_action( 'init', $assets_callback ), 'Vendor init asset hook should be untouched.' );
+		$this->assertSame( $admin_assets_before, has_action( 'admin_enqueue_scripts', $admin_assets_callback ), 'Vendor admin_enqueue_scripts hook should be untouched.' );
 	}
 
 	/**
@@ -2403,6 +2478,15 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->set_order_modified_date_for_query_test( $order, $date_modified );
 
 		return $order;
+	}
+
+	/**
+	 * Reset the AbilitiesLoader initialized flag so init() can be tested.
+	 */
+	private function reset_abilities_loader_initialized(): void {
+		$reflection = new \ReflectionProperty( AbilitiesLoader::class, 'initialized' );
+		$reflection->setAccessible( true );
+		$reflection->setValue( null, false );
 	}
 
 	/**
