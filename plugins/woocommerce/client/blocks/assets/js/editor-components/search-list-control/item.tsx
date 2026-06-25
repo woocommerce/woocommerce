@@ -16,47 +16,6 @@ import type {
 } from './types';
 import { getHighlightedName, getBreadcrumbsForDisplay } from './utils';
 
-const isExpandedOrDescendantIsExpanded = (
-	item: SearchListItemProps,
-	expandedPanelId: number
-): boolean => {
-	if ( item.id === expandedPanelId ) {
-		return true;
-	}
-	if ( Array.isArray( item.children ) && item.children.length > 0 ) {
-		return item.children.some( ( child ) =>
-			isExpandedOrDescendantIsExpanded( child, expandedPanelId )
-		);
-	}
-	return false;
-};
-
-const isSomeChildrenSelected = (
-	item: SearchListItemProps,
-	selected: SearchListItemProps[]
-): boolean => {
-	return ( item.children as SearchListItemProps[] ).some( ( child ) =>
-		selected.find(
-			( selectedItem ) =>
-				selectedItem.id === child.id ||
-				isSomeChildrenSelected( child, selected )
-		)
-	);
-};
-
-const areAllDescendantsSelected = (
-	item: SearchListItemProps,
-	selected: SearchListItemProps[]
-): boolean => {
-	return ( item.children as SearchListItemProps[] ).every( ( child ) =>
-		selected.find(
-			( selectedItem ) =>
-				selectedItem.id === child.id ||
-				areAllDescendantsSelected( child, selected )
-		)
-	);
-};
-
 const getItemDescendants = (
 	item: SearchListItemProps
 ): SearchListItemProps[] => {
@@ -68,6 +27,39 @@ const getItemDescendants = (
 		return [];
 	}
 	return descendants.flat();
+};
+
+const isExpandedOrDescendantIsExpanded = (
+	item: SearchListItemProps,
+	expandedPanelId: number
+): boolean => {
+	if ( item.id === expandedPanelId ) {
+		return true;
+	}
+	const descendants = getItemDescendants( item );
+	return descendants.some(
+		( descendant ) => descendant.id === expandedPanelId
+	);
+};
+
+const areSomeDescendantsSelected = (
+	item: SearchListItemProps,
+	selected: SearchListItemProps[]
+): boolean => {
+	const descendants = getItemDescendants( item );
+	return descendants.some( ( descendant ) =>
+		selected.find( ( selectedItem ) => selectedItem.id === descendant.id )
+	);
+};
+
+const areAllDescendantsSelected = (
+	item: SearchListItemProps,
+	selected: SearchListItemProps[]
+): boolean => {
+	const descendants = getItemDescendants( item );
+	return descendants.every( ( descendant ) =>
+		selected.find( ( selectedItem ) => selectedItem.id === descendant.id )
+	);
 };
 
 const Count = ( { label }: { label: string | React.ReactNode | number } ) => {
@@ -190,7 +182,7 @@ export const SearchListItem = < T extends object = object >( {
 						checked={ isSelected }
 						indeterminate={
 							! isSelected &&
-							isSomeChildrenSelected( item, selected )
+							areSomeDescendantsSelected( item, selected )
 						}
 						label={ getHighlightedName(
 							decodeEntities( item.name ),
