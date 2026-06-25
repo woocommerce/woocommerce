@@ -1,11 +1,20 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\StoreApi\Utilities\CartItemUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductItemTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
 
 /**
  * CartItemSchema class.
+ *
+ * Defines the schema and serialisation for a single cart line item in the
+ * Store API. Extends ItemSchema with cart-specific fields such as
+ * quantity limits, totals, and the {@see CartItemSchema::has_cart_item_data}
+ * predicate, which signals whether a line was originally added with
+ * differentiating cart_item_data (e.g. bundle children, subscription switches).
  */
 class CartItemSchema extends ItemSchema {
 	use ProductItemTrait;
@@ -25,10 +34,48 @@ class CartItemSchema extends ItemSchema {
 	const IDENTIFIER = 'cart-item';
 
 	/**
+	 * Returns the cart-item schema properties, merging the parent item
+	 * properties with the cart-only has_cart_item_data boolean.
+	 *
+	 * The has_cart_item_data field is intentionally placed here (not in the
+	 * shared ItemSchema base) because it depends on the live cart's
+	 * generate_cart_id() method, which is not available on order line items
+	 * served by OrderItemSchema.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return array Schema properties array keyed by property name.
+	 */
+	public function get_properties() {
+		return array_merge(
+			parent::get_properties(),
+			array(
+				'has_cart_item_data' => array(
+					'description' => __( 'True when this cart line carries differentiating item metadata (e.g. a bundle child, booking, or add-on configuration) and is therefore not the standalone line for the product.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+			)
+		);
+	}
+
+	/**
 	 * Convert a WooCommerce cart item to an object suitable for the response.
 	 *
-	 * @param array $cart_item Cart item array.
-	 * @return array
+	 * Returns an array whose keys match the properties declared in
+	 * {@see CartItemSchema::get_properties()}.  The has_cart_item_data entry
+	 * is computed via {@see CartItemUtils::has_cart_item_data()} and is true
+	 * when the line was originally added with non-empty cart_item_data (e.g.
+	 * a bundle component, booking extra, or subscription switch).
+	 *
+	 * @since 11.0.0 Added has_cart_item_data field.
+	 *
+	 * @param array $cart_item Cart item array from WC()->cart->cart_contents.
+	 *                         Required keys: 'key', 'data' (WC_Product), 'product_id',
+	 *                         'variation_id', 'variation', 'quantity', 'line_subtotal',
+	 *                         'line_subtotal_tax', 'line_total', 'line_tax'.
+	 * @return array Response array, or an empty array when $cart_item carries no valid WC_Product.
 	 */
 	public function get_item_response( $cart_item ) {
 		$product = $cart_item['data'] ?? false;
@@ -80,6 +127,7 @@ class CartItemSchema extends ItemSchema {
 				]
 			),
 			'catalog_visibility'   => $product->get_catalog_visibility(),
+			'has_cart_item_data'   => CartItemUtils::has_cart_item_data( $cart_item ),
 			self::EXTENDING_KEY    => $this->get_extended_data( self::IDENTIFIER, $cart_item ),
 		];
 	}

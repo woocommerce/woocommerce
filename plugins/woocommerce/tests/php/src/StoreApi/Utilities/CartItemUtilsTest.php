@@ -79,8 +79,8 @@ class CartItemUtilsTest extends \WC_Unit_Test_Case {
 	 * @testdox Should return true for a simple-product line whose stored key was generated with non-empty cart_item_data.
 	 */
 	public function test_returns_true_for_simple_product_line_with_cart_item_data(): void {
-		$cart_item_data    = array( '_bundle' => 'bundle-parent-123' );
-		$meta_key          = WC()->cart->generate_cart_id( $this->product_id, 0, array(), $cart_item_data );
+		$cart_item_data = array( '_bundle' => 'bundle-parent-123' );
+		$meta_key       = WC()->cart->generate_cart_id( $this->product_id, 0, array(), $cart_item_data );
 
 		$cart_item = array(
 			'key'          => $meta_key,
@@ -172,8 +172,8 @@ class CartItemUtilsTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_returns_false_when_cart_is_unavailable(): void {
 		// Temporarily detach the cart from the WC instance.
-		$original_cart      = WC()->cart;
-		WC()->cart          = null; // phpcs:ignore
+		$original_cart = WC()->cart;
+		WC()->cart     = null; // phpcs:ignore
 
 		$cart_item = array(
 			'key'          => 'some-key',

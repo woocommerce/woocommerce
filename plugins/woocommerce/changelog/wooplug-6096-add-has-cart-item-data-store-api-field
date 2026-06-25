@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add has_cart_item_data readonly boolean to the Store API cart-item response so clients can distinguish plain standalone lines from meta-differentiated lines (e.g. bundle children, bookings, add-ons) without exposing raw cart_item_data.
