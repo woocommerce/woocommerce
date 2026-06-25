@@ -35,6 +35,7 @@ curl "https://example-store.com/wp-json/wc/store/v1/cart/items"
 		"backorders_allowed": false,
 		"show_backorder_badge": false,
 		"sold_individually": true,
+		"has_cart_item_data": false,
 		"permalink": "https://store.local/product/beanie/",
 		"images": [
 			{
@@ -115,6 +116,7 @@ curl "https://example-store.com/wp-json/wc/store/v1/cart/items"
 		"backorders_allowed": false,
 		"show_backorder_badge": false,
 		"sold_individually": false,
+		"has_cart_item_data": false,
 		"permalink": "https://store.local/product/hoodie/?attribute_pa_color=red&attribute_logo=No",
 		"images": [
 			{
@@ -227,6 +229,7 @@ curl "https://example-store.com/wp-json/wc/store/v1/cart/items/c74d97b01eae257e4
 	"backorders_allowed": false,
 	"show_backorder_badge": false,
 	"sold_individually": true,
+	"has_cart_item_data": false,
 	"permalink": "https://store.local/product/beanie/",
 	"images": [
 		{
