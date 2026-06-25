@@ -6,18 +6,29 @@ namespace Automattic\WooCommerce\Internal\CustomerEmailVerification;
 /**
  * Drives the customer email-verification UI on My Account and processes its verify-links.
  *
- * Verification uses a one-time link emailed to the customer. Opening it lands on a lightweight
- * interstitial that auto-submits a POST; verification completes on that POST and ONLY when the
- * request is authenticated as the link's target user.
+ * Verification uses a one-time link emailed to the customer. Opening the link verifies the address
+ * directly — but ONLY when the request is authenticated as the link's target user. The login gate is
+ * the control, not the HTTP verb.
  *
- * That login requirement is what makes a link safe here:
+ * This intentionally mirrors WordPress core's own email-change confirmation links, which likewise
+ * complete a sensitive change on an authenticated GET carrying an unguessable secret — no interstitial,
+ * form, or nonce — relying on the auth gate plus the secret:
  *
- * - An email client or security scanner that prefetches the link is never logged in as the customer,
- *   so a prefetch (even one that executes the interstitial's JS) can never complete verification.
+ * - Administration email change: wp-admin/options.php (`adminhash`) —
+ *   https://github.com/WordPress/WordPress/blob/master/wp-admin/options.php
+ * - Profile email change: wp-admin/user-edit.php (`newuseremail`) —
+ *   https://github.com/WordPress/WordPress/blob/master/wp-admin/user-edit.php
+ *
+ * What makes the link safe:
+ *
+ * - A prefetch (email client or security scanner) is never logged in as the customer, so it can never
+ *   reach the verify branch — it only ever sees the My Account login. It cannot consume the key.
+ * - The key is a one-time, time-limited secret bound by hash to the account's current email, so it is
+ *   inert without an authenticated session as the target: a leaked key cannot be spent by anyone who is
+ *   not already that user (which is also why, like core, it is safe to carry the key in the URL).
  * - An attacker who registered an account with someone else's email can't read the victim's inbox, so
  *   never receives the link; and the victim can only reach a logged-in-as-target state by resetting the
- *   password, which invalidates the attacker's session — locking the attacker out rather than linking
- *   the victim's orders to them.
+ *   password, which invalidates the attacker's session.
  *
  * No auth cookie is ever minted by the link (that would be exploitable as login CSRF): a logged-out
  * visitor is shown the My Account login on the link itself, and signing in returns them to the link
@@ -33,29 +44,19 @@ class VerificationController {
 	private const SEND_NONCE_ACTION = 'woocommerce-send-verification-email';
 
 	/**
-	 * Nonce action used to protect the confirm-email form submission.
-	 */
-	private const VERIFY_NONCE_ACTION = 'woocommerce-verify-email';
-
-	/**
 	 * Query param used to trigger the send-verification request.
 	 */
 	private const SEND_PARAM = 'wc_send_verification';
 
 	/**
-	 * Query/form param carrying the plaintext verification key.
+	 * Query param carrying the plaintext verification key.
 	 */
 	private const KEY_PARAM = 'wc_verify_email_key';
 
 	/**
-	 * Query/form param carrying the target user ID.
+	 * Query param carrying the target user ID.
 	 */
 	private const USER_PARAM = 'wc_verify_email_user';
-
-	/**
-	 * Hidden form field marking a confirm submission.
-	 */
-	private const SUBMIT_FIELD = 'wc_verify_email_submit';
 
 	/**
 	 * Query param carrying a one-off result code to print as a notice on the account page.
@@ -94,13 +95,11 @@ class VerificationController {
 	}
 
 	/**
-	 * Route an incoming request: a send request, a confirm submission, or an opened verify-link.
+	 * Route an incoming request: a send request or an opened verify-link.
 	 *
 	 * Opening the emailed link is a GET, which email clients and security scanners routinely prefetch.
-	 * A logged-out GET (including any prefetch) only renders the My Account login; a logged-in GET renders
-	 * the interstitial. Verification happens solely on the authenticated POST the interstitial submits
-	 * ({@see self::handle_confirm_submission()}), so neither a prefetch nor a logged-out visit can consume
-	 * the key.
+	 * Verification is gated on authentication ({@see self::handle_verify_link()}), so a prefetch — always
+	 * logged out — only ever reaches the My Account login and can never consume the key.
 	 *
 	 * @since 11.0.0
 	 */
@@ -110,22 +109,11 @@ class VerificationController {
 			return;
 		}
 
-		if ( $this->is_confirm_submission() ) {
-			$this->handle_confirm_submission();
-			return;
-		}
-
+		// No nonce on the verify-link: like WordPress core's email-change confirmation links, the
+		// unguessable one-time key is the CSRF defence and the login gate is the authority.
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET[ self::KEY_PARAM ], $_GET[ self::USER_PARAM ] ) ) {
-			// Logged out (including a prefetcher): let the My Account login render instead of the
-			// interstitial, with a notice. The verify params stay in the page URL, so signing in returns
-			// the visitor here (via the login form's referer) where, now authenticated, they verify.
-			if ( ! is_user_logged_in() ) {
-				wc_add_notice( __( 'You need to be logged in to confirm your email address.', 'woocommerce' ), 'notice' );
-				return;
-			}
-
-			$this->render_confirm_page(
+			$this->handle_verify_link(
 				absint( wp_unslash( $_GET[ self::USER_PARAM ] ) ),
 				sanitize_text_field( wp_unslash( $_GET[ self::KEY_PARAM ] ) )
 			);
@@ -134,134 +122,57 @@ class VerificationController {
 	}
 
 	/**
-	 * Whether the current request is a submission of the confirm form (JS auto-submit or no-JS button).
+	 * Verify the address from an opened verify-link — gated on being logged in as the link's target user.
 	 *
-	 * @return bool
-	 */
-	private function is_confirm_submission(): bool {
-		$method = isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) : 'GET';
-
-		// Nonce is verified in handle_confirm_submission(); this only routes the request.
-		return 'POST' === $method && isset( $_POST[ self::SUBMIT_FIELD ] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
-	}
-
-	/**
-	 * Verify the address after the interstitial submits the confirm form.
-	 *
-	 * The login gate lives here: verification only completes when the request is authenticated as the
-	 * link's target user. A logged-out submission verifies no one and bounces back to the link's login
-	 * (it normally never fires — logged-out visitors get the login on the GET); a visitor logged in as a
-	 * different account is refused.
+	 * The login gate is the control: verification, and key consumption, happen ONLY on the path where the
+	 * request is authenticated as $user_id. A prefetch or any logged-out visit is shown the My Account
+	 * login and never touches the key; a visitor logged in as a different account is refused without
+	 * consuming it. This is the same shape as WordPress core's email-change confirmation links
+	 * (wp-admin/options.php `adminhash`, wp-admin/user-edit.php `newuseremail`): a sensitive change
+	 * completed on an authenticated GET carrying an unguessable secret.
 	 *
 	 * @since 11.0.0
+	 *
+	 * @param int    $user_id Target user ID from the link.
+	 * @param string $key     Plaintext verification key from the link.
+	 * @return void
 	 */
-	private function handle_confirm_submission(): void {
-		$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
-
-		if ( ! wp_verify_nonce( $nonce, self::VERIFY_NONCE_ACTION ) ) {
-			$this->redirect_with_result( 'invalid' );
+	private function handle_verify_link( int $user_id, string $key ): void {
+		// The key rides in the URL, so keep this response off caches and out of third-party Referer
+		// headers (the logged-out branch renders a themed front-end page that may load such assets).
+		nocache_headers();
+		if ( ! headers_sent() ) {
+			header( 'Referrer-Policy: no-referrer' );
 		}
-
-		$user_id = isset( $_POST[ self::USER_PARAM ] ) ? absint( wp_unslash( $_POST[ self::USER_PARAM ] ) ) : 0;
-		$key     = isset( $_POST[ self::KEY_PARAM ] ) ? sanitize_text_field( wp_unslash( $_POST[ self::KEY_PARAM ] ) ) : '';
 
 		$current_user_id = get_current_user_id();
 
-		// Logged out: never verify, and never consume the key. Bounce back to the verify-link, which (now
-		// without a session) renders the My Account login; the notice and post-login return are handled
-		// there. Normally unreachable — a logged-out visitor is shown the login on the GET, before the
-		// interstitial's POST — but covers a session that lapsed between the interstitial and its submit.
+		// Logged out (including any prefetcher): never verify, never consume the key. Render the My
+		// Account login; the verify params stay in the URL so signing in returns here to complete it.
 		if ( ! $current_user_id ) {
-			wp_safe_redirect( $this->service->build_verification_url_for_key( $user_id, $key ) );
-			exit;
+			wc_add_notice( __( 'You need to be logged in to confirm your email address.', 'woocommerce' ), 'notice' );
+			return;
 		}
 
-		// Logged in as someone else: refuse rather than silently switching accounts.
+		// Logged in as someone else: refuse rather than silently switching accounts. The key is untouched.
 		if ( $current_user_id !== $user_id ) {
 			$this->redirect_with_result( 'mismatch' );
 		}
 
-		// Second clause: a double submit (e.g. JS auto-submit racing the no-JS button) finds the key
-		// already consumed but the user verified — show success, not a stale "link expired" error.
-		if ( $this->process_verification( $user_id, $key ) || $this->service->is_verified( $user_id ) ) {
+		// Authenticated as the target — the only path that consumes the key and verifies.
+		if ( $this->process_verification( $user_id, $key ) ) {
 			$this->redirect_with_result( 'confirmed' );
 		}
 
+		// Already verified (e.g. the link re-opened after the key was spent): land on Orders quietly,
+		// without repeating the success notice for a confirmation that already happened.
+		if ( $this->service->is_verified( $user_id ) ) {
+			wp_safe_redirect( wc_get_account_endpoint_url( 'orders' ) );
+			exit;
+		}
+
+		// Authenticated as the target, but the key is invalid or expired and they are not verified.
 		$this->redirect_with_result( 'expired' );
-	}
-
-	/**
-	 * Output the lightweight confirm interstitial for an opened verify-link and stop.
-	 *
-	 * Performs no verification — a prefetch of the link only renders this. The page auto-submits its
-	 * POST form via JavaScript and shows a manual button when JS is unavailable.
-	 *
-	 * @param int    $user_id User ID from the link.
-	 * @param string $key     Plaintext verification key from the link.
-	 * @return void
-	 */
-	private function render_confirm_page( int $user_id, string $key ): void {
-		nocache_headers();
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_confirm_page_html() escapes every interpolated value.
-		echo $this->get_confirm_page_html( $user_id, $key );
-		exit;
-	}
-
-	/**
-	 * Build the confirm-interstitial HTML. Kept separate from output/exit so it is unit-testable.
-	 *
-	 * The key is reflected back only into a same-origin POST form on a noindex page carrying a
-	 * referrer-policy of no-referrer, so it is not handed to third-party origins or search engines.
-	 *
-	 * @param int    $user_id User ID from the link.
-	 * @param string $key     Plaintext verification key from the link.
-	 * @return string Fully escaped, self-contained HTML document.
-	 */
-	private function get_confirm_page_html( int $user_id, string $key ): string {
-		$heading = __( 'Confirm your email address', 'woocommerce' );
-		$intro   = __( 'Confirm your email address to link your past orders to your account.', 'woocommerce' );
-		$button  = __( 'Confirm email address', 'woocommerce' );
-
-		$template = '<!DOCTYPE html>
-<html %1$s>
-<head>
-<meta charset="%2$s" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="robots" content="noindex, nofollow" />
-<meta name="referrer" content="no-referrer" />
-<title>%3$s</title>
-</head>
-<body>
-<main class="wc-verify-email" style="max-width:32em;margin:4em auto;text-align:center;font-family:sans-serif;">
-<h1>%3$s</h1>
-<p>%4$s</p>
-<form id="wc-verify-email-form" method="post" action="%5$s">
-%6$s
-<input type="hidden" name="%7$s" value="1" />
-<input type="hidden" name="%8$s" value="%9$s" />
-<input type="hidden" name="%10$s" value="%11$s" />
-<button type="submit" style="font-size:1em;padding:0.75em 1.5em;cursor:pointer;">%12$s</button>
-</form>
-<script>document.getElementById( "wc-verify-email-form" ).submit();</script>
-</main>
-</body>
-</html>';
-
-		return sprintf(
-			$template,
-			get_language_attributes(),
-			esc_attr( get_bloginfo( 'charset' ) ),
-			esc_html( $heading ),
-			esc_html( $intro ),
-			esc_url( wc_get_page_permalink( 'myaccount' ) ),
-			wp_nonce_field( self::VERIFY_NONCE_ACTION, '_wpnonce', true, false ),
-			esc_attr( self::SUBMIT_FIELD ),
-			esc_attr( self::USER_PARAM ),
-			esc_attr( (string) $user_id ),
-			esc_attr( self::KEY_PARAM ),
-			esc_attr( $key ),
-			esc_html( $button )
-		);
 	}
 
 	/**
