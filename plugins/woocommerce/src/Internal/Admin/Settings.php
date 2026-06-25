@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Marketplace_Suggestions;
@@ -143,7 +144,7 @@ class Settings {
 
 		//phpcs:ignore
 		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );
-		$preload_data_endpoints['jetpackStatus'] = '/jetpack/v4/connection';
+
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$preload_data = array_reduce(
 				array_values( $preload_data_endpoints ),
@@ -154,6 +155,8 @@ class Settings {
 		//phpcs:ignore
 		$preload_options = apply_filters( 'woocommerce_admin_preload_options', array() );
 		if ( ! empty( $preload_options ) ) {
+			// Prime caches to reduce future queries.
+			wp_prime_option_caches( $preload_options );
 			foreach ( $preload_options as $option ) {
 				$settings['preloadOptions'][ $option ] = get_option( $option );
 			}
@@ -219,10 +222,18 @@ class Settings {
 		//phpcs:ignore
 		$settings['variationTitleAttributesSeparator'] = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', new \WC_Product() );
 
+		$settings = $this->add_settings_ui_schema( $settings );
+
+		// Performance note: refer back to https://github.com/woocommerce/woocommerce/pull/41092: unconditionally loading /jetpack/v4/connection.
+		// As automattic/jetpack-connection package is a direct dependency, we can return the Jetpack connection status via its public API.
+		$settings['dataEndpoints'] = $settings['dataEndpoints'] ?? array();
+		try {
+			$settings['dataEndpoints']['jetpackStatus'] = \Automattic\Jetpack\Connection\REST_Connector::connection_status( false );
+		} catch ( \Throwable $e ) {
+			$settings['dataEndpoints']['jetpackStatus'] = array();
+		}
+
 		if ( ! empty( $preload_data_endpoints ) ) {
-			$settings['dataEndpoints'] = isset( $settings['dataEndpoints'] )
-				? $settings['dataEndpoints']
-				: array();
 			foreach ( $preload_data_endpoints as $key => $endpoint ) {
 				// Handle error case: rest_do_request() doesn't guarantee success.
 				if ( empty( $preload_data[ $endpoint ] ) ) {
@@ -348,6 +359,34 @@ class Settings {
 				'date_completed' => 'date_completed',
 			),
 		);
+
+		if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
+			$settings[] = array(
+				'id'          => 'woocommerce_analytics_scheduled_import',
+				'option_key'  => 'woocommerce_analytics_scheduled_import',
+				'label'       => __( 'Updates', 'woocommerce' ),
+				'description' => __( 'Controls how analytics data is imported from orders.', 'woocommerce' ),
+				'type'        => 'radio',
+				'default'     => null, // Default to null so we can know if it's a new site or an existing site. New sites will have the option set.
+				'options'     => array(
+					'yes' => __( 'Scheduled (recommended)', 'woocommerce' ),
+					'no'  => __( 'Immediately', 'woocommerce' ),
+				),
+			);
+
+			// Add hidden setting for the import interval to display in the client side.
+			$import_interval = \Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::get_import_interval();
+			$import_interval = absint( $import_interval );
+			// Format the import interval to a human-readable string.
+			$import_interval_string = human_time_diff( 0, $import_interval );
+			$settings[]             = array(
+				'id'         => 'woocommerce_analytics_import_interval',
+				'option_key' => 'woocommerce_analytics_import_interval',
+				'type'       => 'hidden',
+				'default'    => $import_interval_string,
+			);
+		}
+
 		return $settings;
 	}
 
@@ -367,6 +406,38 @@ class Settings {
 				$settings['wcAdminSettings'][ $setting['id'] ] = $setting['value'];
 			}
 		}
+		return $settings;
+	}
+
+	/**
+	 * Add the settings UI schema for the current classic settings page.
+	 *
+	 * @param array $settings Array of component settings.
+	 * @return array
+	 */
+	private function add_settings_ui_schema( array $settings ): array {
+		$context = SettingsUIRequestContext::get_current();
+		if ( ! $context ) {
+			return $settings;
+		}
+
+		$schema = $context->get_schema();
+		if ( ! is_array( $schema ) ) {
+			return $settings;
+		}
+
+		$page_id     = $context->get_page_id();
+		$section_key = $context->get_current_section_key();
+
+		if ( ! isset( $settings['settingsUI'] ) || ! is_array( $settings['settingsUI'] ) ) {
+			$settings['settingsUI'] = array();
+		}
+		if ( ! isset( $settings['settingsUI'][ $page_id ] ) || ! is_array( $settings['settingsUI'][ $page_id ] ) ) {
+			$settings['settingsUI'][ $page_id ] = array();
+		}
+
+		$settings['settingsUI'][ $page_id ][ $section_key ] = $schema;
+
 		return $settings;
 	}
 }

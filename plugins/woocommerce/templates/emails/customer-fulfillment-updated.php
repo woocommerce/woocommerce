@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\HTML
- * @version 10.1.0
+ * @version 10.8.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -32,6 +32,14 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 	<p><?php echo esc_html__( 'Some details of your shipment have recently been updated. This may include tracking information, item contents, or delivery status.', 'woocommerce' ); ?></p>
 	<p><?php echo esc_html__( 'Here’s the latest info we have:', 'woocommerce' ); ?></p>
 </div>
+
+<?php
+$customer_note_text = is_scalar( $customer_note ?? null ) ? trim( (string) $customer_note ) : '';
+if ( '' !== $customer_note_text ) :
+	?>
+<p><strong><?php echo esc_html__( 'Note from the store:', 'woocommerce' ); ?></strong></p>
+<blockquote><?php echo wp_kses_post( wpautop( wptexturize( $customer_note_text ) ) ); ?></blockquote>
+<?php endif; ?>
 
 <?php
 
@@ -81,7 +89,7 @@ do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_
  * Show user-defined additional content - this is set in each email's settings.
  */
 if ( $additional_content ) {
-	echo '<table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td class="email-additional-content">';
+	echo '<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation"><tr><td class="email-additional-content">';
 	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
 	echo '</td></tr></table>';
 }

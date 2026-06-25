@@ -174,4 +174,114 @@ class RateLimitsTests extends WP_Test_REST_TestCase {
 			$get_rate_limiting_id->invokeArgs( $authentication, array( false ) )
 		);
 	}
+
+	/**
+	 * Provides test cases for is_only_post_request() method.
+	 *
+	 * @return array[] Test cases with REQUEST_METHOD, override header, and expected result.
+	 */
+	public function provide_is_only_post_request_test_cases(): array {
+		return array(
+			'pure POST request without override header'    => array(
+				'method'   => 'POST',
+				'override' => null,
+				'expected' => true,
+			),
+			'POST request overridden to PUT via header'    => array(
+				'method'   => 'POST',
+				'override' => 'PUT',
+				'expected' => false,
+			),
+			'POST request overridden to DELETE via header' => array(
+				'method'   => 'POST',
+				'override' => 'DELETE',
+				'expected' => false,
+			),
+			'POST request with POST override header (redundant)' => array(
+				'method'   => 'POST',
+				'override' => 'POST',
+				'expected' => true,
+			),
+			'POST request with empty override header'      => array(
+				'method'   => 'POST',
+				'override' => '',
+				'expected' => true,
+			),
+			'GET request without override header'          => array(
+				'method'   => 'GET',
+				'override' => null,
+				'expected' => false,
+			),
+			'GET request with POST override - method precedence' => array(
+				'method'   => 'GET',
+				'override' => 'POST',
+				'expected' => false,
+			),
+			'PUT request without override header'          => array(
+				'method'   => 'PUT',
+				'override' => null,
+				'expected' => false,
+			),
+			'DELETE request without override header'       => array(
+				'method'   => 'DELETE',
+				'override' => null,
+				'expected' => false,
+			),
+			'PATCH request without override header'        => array(
+				'method'   => 'PATCH',
+				'override' => null,
+				'expected' => false,
+			),
+			'POST request overridden to PATCH via header'  => array(
+				'method'   => 'POST',
+				'override' => 'PATCH',
+				'expected' => false,
+			),
+		);
+	}
+
+	/**
+	 * Tests that is_only_post_request() correctly identifies true POST requests
+	 * and rejects requests with X-HTTP-Method-Override header set to another method.
+	 *
+	 * @dataProvider provide_is_only_post_request_test_cases
+	 *
+	 * @param string      $method   The REQUEST_METHOD value.
+	 * @param string|null $override The X-HTTP-Method-Override header value, or null if unset.
+	 * @param bool        $expected The expected return value.
+	 *
+	 * @return void
+	 * @throws ReflectionException On failing invoked private method through reflection class.
+	 */
+	public function test_is_only_post_request_method( string $method, ?string $override, bool $expected ) {
+		$original_server = $_SERVER;
+
+		try {
+			$authentication          = new ReflectionClass( Authentication::class );
+			$is_only_post_request    = $authentication->getMethod( 'is_only_post_request' );
+			$authentication_instance = $authentication->newInstance();
+			$is_only_post_request->setAccessible( true );
+
+			$_SERVER['REQUEST_METHOD'] = $method;
+
+			if ( null === $override ) {
+				unset( $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] );
+			} else {
+				$_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] = $override;
+			}
+
+			$this->assertSame(
+				$expected,
+				$is_only_post_request->invoke( $authentication_instance ),
+				sprintf(
+					'is_only_post_request() should return %s for REQUEST_METHOD=%s with override=%s',
+					$expected ? 'true' : 'false',
+					$method,
+					$override ?? 'null'
+				)
+			);
+		} finally {
+			$_SERVER = $original_server;
+		}
+	}
 }

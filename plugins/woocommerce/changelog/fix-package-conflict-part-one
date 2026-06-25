@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update email-editor dependency in WooCommerce composer.json to load the mirrored version

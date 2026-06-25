@@ -45,11 +45,11 @@
 	},
 	"ancestor": [
 		"woocommerce/all-products",
+		"woocommerce/featured-product",
 		"woocommerce/single-product",
 		"woocommerce/product-template",
 		"core/post-template"
 	],
-	"viewScriptModule": "product-price",
 	"style": "file:../product-price.css",
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

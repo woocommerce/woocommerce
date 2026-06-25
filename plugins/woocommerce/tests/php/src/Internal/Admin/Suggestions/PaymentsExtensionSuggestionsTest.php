@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Suggestions;
 
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestionIncentives;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
 use WC_Unit_Test_Case;
@@ -164,7 +165,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'CH' => 8,
 			'AG' => 5,
 			'AI' => 3,
-			'AR' => 4,
+			'AR' => 5,
 			'AW' => 3,
 			'BS' => 5,
 			'BB' => 5,
@@ -172,11 +173,11 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'BM' => 5,
 			'BO' => 2,
 			'BQ' => 3,
-			'BR' => 5,
+			'BR' => 6,
 			'VG' => 3,
 			'KY' => 5,
-			'CL' => 4,
-			'CO' => 4,
+			'CL' => 5,
+			'CO' => 5,
 			'CR' => 5,
 			'CW' => 3,
 			'DM' => 5,
@@ -192,11 +193,11 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'HN' => 5,
 			'JM' => 5,
 			'MQ' => 4,
-			'MX' => 6,
+			'MX' => 7,
 			'NI' => 5,
 			'PA' => 5,
 			'PY' => 2,
-			'PE' => 4,
+			'PE' => 5,
 			'KN' => 5,
 			'LC' => 5,
 			'SX' => 3,
@@ -204,7 +205,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'SR' => 3,
 			'TT' => 5,
 			'TC' => 5,
-			'UY' => 4,
+			'UY' => 5,
 			'VI' => 3,
 			'VE' => 3,
 			'AU' => 12,
@@ -284,14 +285,14 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'BH' => 3,
 			'IQ' => 1,
 			'IL' => 2,
-			'JO' => 3,
+			'JO' => 4,
 			'KW' => 3,
 			'LB' => 1,
 			'OM' => 4,
 			'PK' => 3,
 			'QA' => 3,
-			'SA' => 4,
-			'AE' => 7,
+			'SA' => 5,
+			'AE' => 8,
 			'YE' => 1,
 			'AD' => 3,
 			'AF' => 1,
@@ -475,7 +476,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'CH' => 8,
 			'AG' => 5,
 			'AI' => 3,
-			'AR' => 4,
+			'AR' => 5,
 			'AW' => 3,
 			'BS' => 5,
 			'BB' => 5,
@@ -483,11 +484,11 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'BM' => 5,
 			'BO' => 2,
 			'BQ' => 3,
-			'BR' => 5,
+			'BR' => 6,
 			'VG' => 3,
 			'KY' => 5,
-			'CL' => 4,
-			'CO' => 4,
+			'CL' => 5,
+			'CO' => 5,
 			'CR' => 5,
 			'CW' => 3,
 			'DM' => 5,
@@ -503,11 +504,11 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'HN' => 5,
 			'JM' => 5,
 			'MQ' => 4,
-			'MX' => 6,
+			'MX' => 7,
 			'NI' => 5,
 			'PA' => 5,
 			'PY' => 2,
-			'PE' => 4,
+			'PE' => 5,
 			'KN' => 5,
 			'LC' => 5,
 			'SX' => 3,
@@ -515,7 +516,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'SR' => 3,
 			'TT' => 5,
 			'TC' => 5,
-			'UY' => 4,
+			'UY' => 5,
 			'VI' => 3,
 			'VE' => 3,
 			'AU' => 12,
@@ -595,14 +596,14 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'BH' => 3,
 			'IQ' => 1,
 			'IL' => 2,
-			'JO' => 3,
+			'JO' => 4,
 			'KW' => 3,
 			'LB' => 1,
 			'OM' => 4,
 			'PK' => 3,
 			'QA' => 3,
-			'SA' => 4,
-			'AE' => 7,
+			'SA' => 5,
+			'AE' => 8,
 			'YE' => 1,
 			'AD' => 3,
 			'AF' => 1,
@@ -700,10 +701,11 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 		$extensions = $this->sut->get_country_extensions( 'MX' );
 
 		// Assert.
-		$this->assertCount( 6, $extensions );
+		$this->assertCount( 7, $extensions );
 		$this->assertSame(
 			array(
 				PaymentsExtensionSuggestions::STRIPE,
+				PaymentsExtensionSuggestions::MERCADO_PAGO,
 				PaymentsExtensionSuggestions::PAYPAL_FULL_STACK,
 				PaymentsExtensionSuggestions::VISA,
 				PaymentsExtensionSuggestions::PAYPAL_WALLET,
@@ -717,34 +719,207 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 		// It should have the preferred tag.
 		$this->assertContains( PaymentsExtensionSuggestions::TAG_PREFERRED, $stripe['tags'] );
 
-		$klarna = $extensions[4];
+		$mercado_pago = $extensions[1];
+		// The links should include the country-specific Mercado Pago URLs merged with the base details.
+		$this->assertEqualsCanonicalizing(
+			array(
+				// These are coming from the per-country details.
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+					'url'   => 'https://www.mercadopago.com.mx/costs-section',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+					'url'   => 'https://www.mercadopago.com.mx/ayuda/terminos-y-politicas_194',
+				),
+				// These are base details for the suggestion.
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+					'url'   => 'https://woocommerce.com/products/mercado-pago-checkout/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+					'url'   => 'https://woocommerce.com/document/mercado-pago/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=mercado-pago-checkout',
+				),
+			),
+			$mercado_pago['links']
+		);
+
+		$klarna = $extensions[5];
 		// The links should be the expected ones.
 		$this->assertEqualsCanonicalizing(
 			array(
 				// These are coming from the per-country details.
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_PRICING,
+					'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 					'url'   => 'https://www.klarna.com/mx/negocios/',
 				),
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_TERMS,
+					'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 					'url'   => 'https://www.klarna.com/mx/terminos-y-condiciones/',
 				),
 				// These are base details for the suggestion.
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'https://woocommerce.com/products/klarna-payments/',
 				),
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_DOCS,
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 					'url'   => 'https://woocommerce.com/document/klarna-payments/',
 				),
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_SUPPORT,
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=klarna-payments',
 				),
 			),
 			$klarna['links']
+		);
+	}
+
+	/**
+	 * Test that Mercado Pago is the preferred provider, Visa is demoted, and the country-localized links are merged
+	 * across the 5 LATAM markets where Mercado Pago has primary placement (AR, CL, CO, PE, UY).
+	 *
+	 * @dataProvider data_provider_mercado_pago_preferred_markets
+	 *
+	 * @param string $country_code    ISO 3166-1 alpha-2 country code.
+	 * @param string $mercadopago_tld TLD path for the country (e.g. `com.ar`, `cl`).
+	 */
+	public function test_get_country_extensions_with_mercado_pago_as_preferred_provider( string $country_code, string $mercadopago_tld ) {
+		// Act.
+		$extensions = $this->sut->get_country_extensions( $country_code );
+
+		// Assert ordering: Mercado Pago first, Visa demoted into the "other payment options" group.
+		$this->assertSame(
+			array(
+				PaymentsExtensionSuggestions::MERCADO_PAGO,
+				PaymentsExtensionSuggestions::PAYPAL_FULL_STACK,
+				PaymentsExtensionSuggestions::VISA,
+				PaymentsExtensionSuggestions::PAYPAL_WALLET,
+				PaymentsExtensionSuggestions::HELIOPAY,
+			),
+			array_column( $extensions, 'id' ),
+			"Mercado Pago should be the first suggestion in {$country_code}, with Visa demoted."
+		);
+
+		$mercado_pago = $extensions[0];
+		$this->assertContains(
+			PaymentsExtensionSuggestions::TAG_PREFERRED,
+			$mercado_pago['tags'],
+			"Mercado Pago should carry the preferred tag in {$country_code}."
+		);
+
+		$visa = $extensions[2];
+		$this->assertNotContains(
+			PaymentsExtensionSuggestions::TAG_PREFERRED,
+			$visa['tags'],
+			"Visa should not carry the preferred tag in {$country_code}."
+		);
+
+		// The country-localized PRICING/TERMS links should be merged on top of the base ABOUT/DOCS/SUPPORT links.
+		$this->assertEqualsCanonicalizing(
+			array(
+				// These are coming from the per-country details.
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+					'url'   => "https://www.mercadopago.{$mercadopago_tld}/costs-section",
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+					'url'   => "https://www.mercadopago.{$mercadopago_tld}/ayuda/terminos-y-politicas_194",
+				),
+				// These are base details for the suggestion.
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+					'url'   => 'https://woocommerce.com/products/mercado-pago-checkout/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+					'url'   => 'https://woocommerce.com/document/mercado-pago/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=mercado-pago-checkout',
+				),
+			),
+			$mercado_pago['links']
+		);
+	}
+
+	/**
+	 * Data provider for the markets where Mercado Pago is the preferred provider.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function data_provider_mercado_pago_preferred_markets(): array {
+		return array(
+			'Argentina' => array( 'AR', 'com.ar' ),
+			'Chile'     => array( 'CL', 'cl' ),
+			'Colombia'  => array( 'CO', 'com.co' ),
+			'Peru'      => array( 'PE', 'com.pe' ),
+			'Uruguay'   => array( 'UY', 'com.uy' ),
+		);
+	}
+
+	/**
+	 * Test that in Brazil, Stripe stays preferred and Mercado Pago is the first entry in "other payment options"
+	 * with its Portuguese-localized links merged on top of the base details.
+	 */
+	public function test_get_country_extensions_with_mercado_pago_in_other_options_for_br() {
+		// Act.
+		$extensions = $this->sut->get_country_extensions( 'BR' );
+
+		// Assert ordering: Stripe preferred, Mercado Pago at index 1.
+		$this->assertSame(
+			array(
+				PaymentsExtensionSuggestions::STRIPE,
+				PaymentsExtensionSuggestions::MERCADO_PAGO,
+				PaymentsExtensionSuggestions::PAYPAL_FULL_STACK,
+				PaymentsExtensionSuggestions::VISA,
+				PaymentsExtensionSuggestions::PAYPAL_WALLET,
+				PaymentsExtensionSuggestions::HELIOPAY,
+			),
+			array_column( $extensions, 'id' )
+		);
+
+		$stripe = $extensions[0];
+		$this->assertContains( PaymentsExtensionSuggestions::TAG_PREFERRED, $stripe['tags'] );
+
+		// Mercado Pago should NOT carry the preferred tag in Brazil — Stripe stays primary per the 10.8 fallback.
+		$mercado_pago = $extensions[1];
+		$this->assertNotContains( PaymentsExtensionSuggestions::TAG_PREFERRED, $mercado_pago['tags'] );
+
+		// BR uses Portuguese paths (`ajuda/termos-e-politicas`) vs. Spanish (`ayuda/terminos-y-politicas`) in the other markets.
+		$this->assertEqualsCanonicalizing(
+			array(
+				// These are coming from the per-country details.
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+					'url'   => 'https://www.mercadopago.com.br/costs-section',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+					'url'   => 'https://www.mercadopago.com.br/ajuda/termos-e-politicas_194',
+				),
+				// These are base details for the suggestion.
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+					'url'   => 'https://woocommerce.com/products/mercado-pago-checkout/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+					'url'   => 'https://woocommerce.com/document/mercado-pago/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=mercado-pago-checkout',
+				),
+			),
+			$mercado_pago['links']
 		);
 	}
 

@@ -29,3 +29,9 @@
 		color: inherit;
 	}
 }
+
+// It allows the `.wc-block-components-quantity-selector` height: 100% to work
+// when the block contents are wrapped in a <Disabled> component.
+:where(.wc-block-add-to-cart-with-options__quantity-selector .components-disabled) {
+	display: contents;
+}

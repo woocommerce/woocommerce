@@ -90,4 +90,37 @@ class ArrayUtil {
 
 		return array_values( $merged );
 	}
+
+	/**
+	 * Recursively filters null values from an array.
+	 *
+	 * This method removes all null values from the array, including nested arrays.
+	 * Array keys are preserved for associative arrays. For lists (sequential numeric
+	 * keys starting from 0), the array is reindexed to maintain the list structure.
+	 *
+	 * @param array $arr The array to filter.
+	 *
+	 * @return array The filtered array with null values removed.
+	 */
+	public static function filter_null_values_recursive( array $arr ): array {
+		$is_list  = self::array_is_list( $arr );
+		$filtered = array();
+
+		foreach ( $arr as $key => $value ) {
+			// Skip null values.
+			if ( is_null( $value ) ) {
+				continue;
+			}
+
+			// Recursively filter nested arrays.
+			if ( is_array( $value ) ) {
+				$filtered[ $key ] = self::filter_null_values_recursive( $value );
+			} else {
+				$filtered[ $key ] = $value;
+			}
+		}
+
+		// Reindex if the original array was a list.
+		return $is_list ? array_values( $filtered ) : $filtered;
+	}
 }

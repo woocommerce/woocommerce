@@ -211,9 +211,9 @@ describe( 'Testing cart', () => {
 		render( <CartBlock /> );
 
 		await waitFor( () =>
-			expect( screen.getAllByRole( 'cell' )[ 1 ] ).toHaveTextContent(
-				'16€'
-			)
+			expect(
+				document.querySelector( '.wc-block-cart-item__total' )
+			).toHaveTextContent( '16€' )
 		);
 	} );
 
@@ -275,7 +275,11 @@ describe( 'Testing cart', () => {
 		render( <CartBlock /> );
 
 		await waitFor( () => {
-			expect( screen.queryAllByText( /Remove item/i ).length ).toBe( 1 );
+			expect(
+				screen.queryAllByRole( 'button', {
+					name: /Remove .* from cart/i,
+				} ).length
+			).toBe( 1 );
 		} );
 	} );
 } );

@@ -172,7 +172,7 @@ class WC_Helper_Product {
 		$product->set_props(
 			array(
 				'name' => 'Dummy Variable Product',
-				'sku'  => 'DUMMY VARIABLE SKU',
+				'sku'  => 'DUMMY VARIABLE SKU' . microtime(),
 			)
 		);
 

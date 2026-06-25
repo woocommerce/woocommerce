@@ -12,19 +12,26 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.1.0
+ * @version 10.8.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
-$text_align = is_rtl() ? 'right' : 'left';
-
 $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
-$heading_class              = $email_improvements_enabled ? 'email-order-detail-heading' : '';
-$order_table_class          = $email_improvements_enabled ? 'email-order-details' : '';
-$order_total_text_align     = $email_improvements_enabled ? 'right' : 'left';
+$block_email_editor_enabled = FeaturesUtil::feature_is_enabled( 'block_email_editor' );
+/**
+ * Filter whether to display the section divider in the email body.
+ *
+ * @since 10.6.0
+ * @param bool $display_section_divider Whether to display the section divider. Default true.
+ */
+$display_section_divider   = (bool) apply_filters( 'woocommerce_email_body_display_section_divider', true );
+$heading_class             = $email_improvements_enabled ? 'email-order-detail-heading' : '';
+$order_table_class         = $email_improvements_enabled ? 'email-order-details' : '';
+$order_total_text_align    = $email_improvements_enabled ? 'right' : 'left';
+$order_quantity_text_align = $email_improvements_enabled ? 'right' : 'left';
 
 if ( $email_improvements_enabled ) {
 	add_filter( 'woocommerce_order_shipping_to_display_shipped_via', '__return_false' );
@@ -41,45 +48,81 @@ if ( $email_improvements_enabled ) {
  */
 do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text, $email ); ?>
 
-<h2 class="<?php echo esc_attr( $heading_class ); ?>">
-	<?php
-	if ( $email_improvements_enabled ) {
-		echo wp_kses_post( __( 'Order summary', 'woocommerce' ) );
-	}
-	if ( $sent_to_admin ) {
-		$before = '<a class="link" href="' . esc_url( $order->get_edit_order_url() ) . '">';
-		$after  = '</a>';
-	} else {
-		$before = '';
-		$after  = '';
-	}
-	if ( $email_improvements_enabled ) {
-		echo '<br><span>';
-	}
-	/* translators: %s: Order ID. */
-	$order_number_string = __( '[Order #%s]', 'woocommerce' );
-	if ( $email_improvements_enabled ) {
-		/* translators: %s: Order ID. */
-		$order_number_string = __( 'Order #%s', 'woocommerce' );
-	}
-	echo wp_kses_post( $before . sprintf( $order_number_string . $after . ' (<time datetime="%s">%s</time>)', $order->get_order_number(), $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ) );
-	if ( $email_improvements_enabled ) {
-		echo '</span>';
-	}
+<?php
+$order_details_heading = '';
+if ( $email_improvements_enabled ) {
+	/**
+	 * Filter the heading text shown in the order details section of emails.
+	 *
+	 * @since 10.8.0
+	 * @param string   $heading The heading text.
+	 * @param WC_Order $order   Order object.
+	 * @param WC_Email $email   Email object.
+	 */
+	$order_details_heading = apply_filters( 'woocommerce_email_order_details_heading', __( 'Order summary', 'woocommerce' ), $order, $email );
+}
+
+/**
+ * Filter whether to display the order number in the order details heading of emails.
+ *
+ * @since 10.8.0
+ * @param bool     $display Whether to display the order number. Default true.
+ * @param WC_Order $order   Order object.
+ * @param WC_Email $email   Email object.
+ */
+$display_order_number = (bool) apply_filters( 'woocommerce_email_display_order_number', true, $order, $email );
+
+if ( $order_details_heading || $display_order_number ) :
 	?>
-</h2>
+	<h2 class="<?php echo esc_attr( $heading_class ); ?>">
+		<?php
+		if ( $order_details_heading ) {
+			echo wp_kses_post( $order_details_heading );
+		}
+		if ( $display_order_number ) {
+			if ( $sent_to_admin ) {
+				$before = '<a class="link" href="' . esc_url( $order->get_edit_order_url() ) . '"' . ( $block_email_editor_enabled ? ' style="text-decoration: none;"' : '' ) . '>';
+				$after  = '</a>';
+			} else {
+				$before = '';
+				$after  = '';
+			}
+			if ( $email_improvements_enabled ) {
+				// Only output <br> when both a heading and order number are shown; otherwise, avoid leading line break.
+				if ( $order_details_heading ) {
+					echo '<br><span>';
+				} else {
+					echo '<span>';
+				}
+			}
+			/* translators: %s: Order ID. */
+			$order_number_string = __( '[Order #%s]', 'woocommerce' );
+			if ( $email_improvements_enabled ) {
+				/* translators: %s: Order ID. */
+				$order_number_string = __( 'Order #%s', 'woocommerce' );
+			}
+			echo wp_kses_post( $before . sprintf( $order_number_string . $after . ' (<time datetime="%s">%s</time>)', $order->get_order_number(), $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ) );
+			if ( $email_improvements_enabled ) {
+				echo '</span>';
+			}
+		}
+		?>
+	</h2>
+	<?php
+endif;
+?>
 
 <div style="margin-bottom: <?php echo $email_improvements_enabled ? '24px' : '40px'; ?>;">
 	<table class="td font-family <?php echo esc_attr( $order_table_class ); ?>" cellspacing="0" cellpadding="6" style="width: 100%;" border="1">
-		<?php if ( ! $email_improvements_enabled ) { ?>
+		<?php if ( ! $block_email_editor_enabled ) : ?>
 		<thead>
 			<tr>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></th>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Price', 'woocommerce' ); ?></th>
+				<th class="td text-align-left" scope="col"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
+				<th class="td text-align-<?php echo esc_attr( $order_quantity_text_align ); ?>" scope="col"><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></th>
+				<th class="td text-align-<?php echo esc_attr( $order_total_text_align ); ?>" scope="col"><?php esc_html_e( 'Price', 'woocommerce' ); ?></th>
 			</tr>
 		</thead>
-		<?php } ?>
+		<?php endif; ?>
 		<tbody>
 			<?php
 			$image_size = $email_improvements_enabled ? 48 : 32;
@@ -95,52 +138,58 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 			);
 			?>
 		</tbody>
-		<tfoot>
-			<?php
-			$item_totals       = $order->get_order_item_totals();
-			$item_totals_count = count( $item_totals );
-
-			if ( $item_totals ) {
-				$i = 0;
-				foreach ( $item_totals as $total ) {
-					$i++;
-					$last_class = ( $i === $item_totals_count ) ? ' order-totals-last' : '';
-					?>
-					<tr class="order-totals order-totals-<?php echo esc_attr( $total['type'] ?? 'unknown' ); ?><?php echo esc_attr( $last_class ); ?>">
-						<th class="td text-align-left" scope="row" colspan="2" style="<?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>">
-							<?php
-							echo wp_kses_post( $total['label'] ) . ' ';
-							if ( $email_improvements_enabled ) {
-								echo isset( $total['meta'] ) ? wp_kses_post( $total['meta'] ) : '';
-							}
-							?>
-						</th>
-						<td class="td text-align-<?php echo esc_attr( $order_total_text_align ); ?>" style="<?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo wp_kses_post( $total['value'] ); ?></td>
-					</tr>
-					<?php
-				}
-			}
-			if ( $order->get_customer_note() && ! $email_improvements_enabled ) {
-				?>
-				<tr>
-					<th class="td text-align-left" scope="row" colspan="2"><?php esc_html_e( 'Note:', 'woocommerce' ); ?></th>
-					<td class="td text-align-left"><?php echo wp_kses( nl2br( wc_wptexturize_order_note( $order->get_customer_note() ) ), array() ); ?></td>
-				</tr>
-				<?php
-			}
-			if ( $order->get_customer_note() && $email_improvements_enabled ) {
-				?>
-				<tr class="order-customer-note">
-					<td class="td text-align-left" colspan="3">
-						<b><?php esc_html_e( 'Customer note', 'woocommerce' ); ?></b><br>
-						<?php echo wp_kses( nl2br( wc_wptexturize_order_note( $order->get_customer_note() ) ), array( 'br' => array() ) ); ?>
-					</td>
-				</tr>
-				<?php
-			}
-			?>
-		</tfoot>
 	</table>
+	<?php if ( $display_section_divider ) : ?>
+		<hr style="border: 0; border-top: 1px solid #1E1E1E; border-top-color: rgba(30, 30, 30, 0.2); margin: 20px 0;">
+	<?php endif; ?>
+	<table class="td font-family <?php echo esc_attr( $order_table_class ); ?>" cellspacing="0" cellpadding="6" style="width: 100%;" border="1">
+		<?php
+		$item_totals       = $order->get_order_item_totals();
+		$item_totals_count = count( $item_totals );
+
+		if ( $item_totals ) {
+			$i = 0;
+			foreach ( $item_totals as $total ) {
+				++$i;
+				$last_class = ( $i === $item_totals_count ) ? ' order-totals-last' : '';
+				?>
+				<tr class="order-totals order-totals-<?php echo esc_attr( $total['type'] ?? 'unknown' ); ?><?php echo esc_attr( $last_class ); ?>">
+					<th class="td text-align-left" scope="row" colspan="2" style="<?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>">
+						<?php
+						echo wp_kses_post( $total['label'] ) . ' ';
+						if ( $email_improvements_enabled ) {
+							echo isset( $total['meta'] ) ? wp_kses_post( $total['meta'] ) : '';
+						}
+						?>
+					</th>
+					<td class="td text-align-<?php echo esc_attr( $order_total_text_align ); ?>" style="<?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo wp_kses_post( $total['value'] ); ?></td>
+				</tr>
+				<?php
+			}
+		}
+		if ( $order->get_customer_note() && ! $email_improvements_enabled ) {
+			?>
+			<tr>
+				<th class="td text-align-left" scope="row" colspan="2"><?php esc_html_e( 'Note:', 'woocommerce' ); ?></th>
+				<td class="td text-align-left"><?php echo wp_kses( nl2br( wc_wptexturize_order_note( $order->get_customer_note() ) ), array() ); ?></td>
+			</tr>
+			<?php
+		}
+		?>
+	</table>
+	<?php if ( $order->get_customer_note() && $email_improvements_enabled ) { ?>
+		<?php if ( $display_section_divider ) : ?>
+			<hr style="border: 0; border-top: 1px solid #1E1E1E; border-top-color: rgba(30, 30, 30, 0.2); margin: 20px 0;">
+		<?php endif; ?>
+		<table class="td font-family <?php echo esc_attr( $order_table_class ); ?>" cellspacing="0" cellpadding="6" style="width: 100%;" border="1" role="presentation">
+			<tr class="order-customer-note">
+				<td class="td text-align-left">
+					<b><?php esc_html_e( 'Customer note', 'woocommerce' ); ?></b><br>
+					<?php echo wp_kses( nl2br( wc_wptexturize_order_note( $order->get_customer_note() ) ), array( 'br' => array() ) ); ?>
+				</td>
+			</tr>
+		</table>
+	<?php } ?>
 </div>
 
 <?php

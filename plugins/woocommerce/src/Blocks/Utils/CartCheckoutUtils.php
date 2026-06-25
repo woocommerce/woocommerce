@@ -27,13 +27,13 @@ class CartCheckoutUtils {
 	 * This is determined by looking at the global $post object and comparing it to the post ID defined in settings,
 	 * or checking the page contents for a block or shortcode.
 	 *
-	 * This function cannot be used accurately before the `pre_get_posts` action has been run.
+	 * This function cannot be used accurately before the `wp` action has been run.
 	 *
 	 * @param string $page_type The page type to check for.
 	 * @return bool|null
 	 */
 	private static function is_page_type( string $page_type ): ?bool {
-		if ( ! did_action( 'pre_get_posts' ) ) {
+		if ( ! did_action( 'wp' ) ) {
 			return null;
 		}
 
@@ -185,7 +185,7 @@ class CartCheckoutUtils {
 	 * Migrate checkout block field visibility attributes to settings when using the checkout block.
 	 *
 	 * This migration routine is called if the options (woocommerce_checkout_phone_field, woocommerce_checkout_company_field,
-	 * woocommerce_checkout_address_2_field) are not set. They are not set by default; they were orignally set by the
+	 * woocommerce_checkout_address_2_field) are not set. They are not set by default; they were originally set by the
 	 * customizer interface of the legacy shortcode based checkout.
 	 *
 	 * Once migration is initiated, the settings will be updated and will not trigger this routine again.
@@ -305,11 +305,13 @@ class CartCheckoutUtils {
 	 * Checks if the template overriding the page loads the page content or not.
 	 * Templates by default load the page content, but if that block is deleted the content can get out of sync with the one presented in the page editor.
 	 *
+	 * @since 10.9.0
+	 *
 	 * @param string $block The block to check.
 	 *
 	 * @return bool true if the template has out of sync content.
 	 */
-	public static function is_overriden_by_custom_template_content( string $block ): bool {
+	public static function is_overridden_by_custom_template_content( string $block ): bool {
 
 		$block = str_replace( 'woocommerce/', '', $block );
 
@@ -324,6 +326,21 @@ class CartCheckoutUtils {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Checks if the template overriding the page loads the page content or not.
+	 * Templates by default load the page content, but if that block is deleted the content can get out of sync with the one presented in the page editor.
+	 *
+	 * @deprecated 10.9.0 Use is_overridden_by_custom_template_content() instead.
+	 *
+	 * @param string $block The block to check.
+	 *
+	 * @return bool true if the template has out of sync content.
+	 */
+	public static function is_overriden_by_custom_template_content( string $block ): bool {
+		wc_deprecated_function( __METHOD__, '10.9.0', 'is_overridden_by_custom_template_content' );
+		return self::is_overridden_by_custom_template_content( $block );
 	}
 
 	/**
@@ -503,5 +520,48 @@ class CartCheckoutUtils {
 	 */
 	public static function has_cart_page() {
 		return wc_get_page_permalink( 'cart', -1 ) !== -1;
+	}
+
+	/**
+	 * Get product IDs from a user's persistent cart.
+	 *
+	 * This method retrieves product IDs stored in the user's persistent cart meta.
+	 * It can be used for abandoned cart emails, cart-based product collections,
+	 * and other scenarios where cart products need to be retrieved for a user.
+	 *
+	 * @param int|null    $user_id    The user ID. If not provided, will attempt to look up by email.
+	 * @param string|null $user_email The user email. Used to lookup user if ID not provided.
+	 * @return array<int> Array of product IDs from the user's cart, or empty array if none found.
+	 */
+	public static function get_cart_product_ids_for_user( ?int $user_id, ?string $user_email ) {
+		if ( empty( $user_id ) && ! empty( $user_email ) ) {
+			$user = get_user_by( 'email', $user_email );
+			if ( $user ) {
+				$user_id = $user->ID;
+			}
+		}
+
+		if ( empty( $user_id ) ) {
+			return array();
+		}
+
+		$cart_meta = get_user_meta( $user_id, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+
+		if ( empty( $cart_meta ) || ! is_array( $cart_meta ) || empty( $cart_meta['cart'] ) ) {
+			return array();
+		}
+
+		return array_values(
+			array_unique(
+				array_filter(
+					array_map(
+						function ( $cart_item ) {
+							return isset( $cart_item['product_id'] ) ? intval( $cart_item['product_id'] ) : 0;
+						},
+						$cart_meta['cart']
+					)
+				)
+			)
+		);
 	}
 }

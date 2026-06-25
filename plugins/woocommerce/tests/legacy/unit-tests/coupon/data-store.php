@@ -56,10 +56,19 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 	 */
 	public function test_coupon_cache_deletion() {
 		$coupon = WC_Helper_Coupon::create_coupon( 'test' );
+
+		// Prime the cache.
+		$hashed_code = md5( wc_strtolower( $coupon->get_code() ) );
+		$cache_name  = WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed_code;
+		wc_get_coupon_id_by_code( $coupon->get_code() );
+
+		$ids = wp_cache_get( $cache_name, 'coupons' );
+
+		$this->assertNotEquals( false, $ids, sprintf( 'Object cache for %s was not primed correctly.', $cache_name ) );
+
 		$coupon->delete( true );
 
-		$cache_name = WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $coupon->get_code();
-		$ids        = wp_cache_get( $cache_name, 'coupons' );
+		$ids = wp_cache_get( $cache_name, 'coupons' );
 
 		$this->assertEquals( false, $ids, sprintf( 'Object cache for %s was not removed upon deletion of coupon.', $cache_name ) );
 	}

@@ -247,4 +247,95 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 			$this->assertTrue( true );
 		}
 	}
+
+	/**
+	 * Test wc_update_1040_cleanup_legacy_ptk_patterns_fetching removes the obsolete option and actions.
+	 *
+	 * @return void
+	 */
+	public function test_wc_update_1040_cleanup_legacy_ptk_patterns_fetching() {
+		// Set up the option that should be removed.
+		add_option( 'last_fetch_patterns_request', time() );
+		$this->assertNotFalse( get_option( 'last_fetch_patterns_request' ), 'Option should exist before update' );
+
+		// Schedule legacy actions that should be removed.
+		as_schedule_single_action( time(), 'fetch_patterns' );
+		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns' ), 'fetch_patterns action should exist before update' );
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		wc_update_1040_cleanup_legacy_ptk_patterns_fetching();
+
+		// Verify the option was removed.
+		$this->assertFalse( get_option( 'last_fetch_patterns_request' ), 'Option should be removed after update' );
+
+		// Verify the actions were removed.
+		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns' ), 'fetch_patterns action should be removed after update' );
+	}
+
+	/**
+	 * @testdox Migration converts legacy 'no' (not immediate) to new 'yes' (scheduled).
+	 */
+	public function test_migrate_analytics_import_option_legacy_no_becomes_yes(): void {
+		delete_option( 'woocommerce_analytics_scheduled_import' );
+		update_option( 'woocommerce_analytics_immediate_import', 'no' );
+
+		wc_update_1080_migrate_analytics_import_option();
+
+		$this->assertSame( 'yes', get_option( 'woocommerce_analytics_scheduled_import' ) );
+		$this->assertFalse( get_option( 'woocommerce_analytics_immediate_import' ) );
+	}
+
+	/**
+	 * @testdox Migration converts legacy 'yes' (immediate) to new 'no' (not scheduled).
+	 */
+	public function test_migrate_analytics_import_option_legacy_yes_becomes_no(): void {
+		delete_option( 'woocommerce_analytics_scheduled_import' );
+		update_option( 'woocommerce_analytics_immediate_import', 'yes' );
+
+		wc_update_1080_migrate_analytics_import_option();
+
+		$this->assertSame( 'no', get_option( 'woocommerce_analytics_scheduled_import' ) );
+		$this->assertFalse( get_option( 'woocommerce_analytics_immediate_import' ) );
+	}
+
+	/**
+	 * @testdox Migration does nothing when legacy option is absent.
+	 */
+	public function test_migrate_analytics_import_option_no_legacy_option(): void {
+		delete_option( 'woocommerce_analytics_immediate_import' );
+		delete_option( 'woocommerce_analytics_scheduled_import' );
+
+		wc_update_1080_migrate_analytics_import_option();
+
+		$this->assertFalse( get_option( 'woocommerce_analytics_scheduled_import' ) );
+	}
+
+	/**
+	 * @testdox Migration preserves existing new option and deletes legacy.
+	 */
+	public function test_migrate_analytics_import_option_new_option_already_exists(): void {
+		update_option( 'woocommerce_analytics_scheduled_import', 'yes' );
+		update_option( 'woocommerce_analytics_immediate_import', 'yes' );
+
+		wc_update_1080_migrate_analytics_import_option();
+
+		$this->assertSame( 'yes', get_option( 'woocommerce_analytics_scheduled_import' ) );
+		$this->assertFalse( get_option( 'woocommerce_analytics_immediate_import' ) );
+	}
+
+	/**
+	 * @testdox Migration sets the point_of_sale feature flag option to yes regardless of the previous value.
+	 */
+	public function test_wc_update_1100_enable_point_of_sale_feature(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		update_option( 'woocommerce_feature_point_of_sale_enabled', 'no' );
+		wc_update_1100_enable_point_of_sale_feature();
+		$this->assertSame( 'yes', get_option( 'woocommerce_feature_point_of_sale_enabled' ) );
+
+		delete_option( 'woocommerce_feature_point_of_sale_enabled' );
+		wc_update_1100_enable_point_of_sale_feature();
+		$this->assertSame( 'yes', get_option( 'woocommerce_feature_point_of_sale_enabled' ) );
+	}
 }

@@ -11,6 +11,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -19,6 +20,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Frontend scripts class.
+ *
+ * These scripts are enqueued in the frontend of the store.  The registered script handles in this class
+ * can be used to enqueue the scripts in the frontend by third party plugins and the handles will follow
+ * WooCommerce's L-1 support policy.  Scripts registered outside of this class do not guarantee support
+ * and can be removed in future versions of WooCommerce.
  */
 class WC_Frontend_Scripts {
 
@@ -50,31 +56,7 @@ class WC_Frontend_Scripts {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
 		add_action( 'wp_print_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
 		add_action( 'wp_print_footer_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
-		add_action( 'shutdown', array( __CLASS__, 'add_legacy_script_warnings' ) );
-	}
-
-	/**
-	 * Add warnings for deprecated script handles.
-	 */
-	public static function add_legacy_script_warnings() {
-		$scripts = self::get_scripts();
-
-		foreach ( $scripts as $handle => $script ) {
-			if ( ! isset( $script['legacy_handle'] ) ) {
-				continue;
-			}
-
-			$exists = wp_script_is( $script['legacy_handle'] );
-
-			if ( $exists ) {
-				wc_deprecated_argument(
-					'wp_enqueue_script',
-					'10.3.0',
-					/* translators: %1$s: new script handle, %2$s: previous script handle */
-					sprintf( __( 'Please use the new handle %1$s in place of the previous handle %2$s.', 'woocommerce' ), $handle, $script['legacy_handle'] )
-				);
-			}
-		}
+		add_action( 'enqueue_block_assets', array( __CLASS__, 'enqueue_block_assets' ) );
 	}
 
 	/**
@@ -116,16 +98,31 @@ class WC_Frontend_Scripts {
 					'media'   => 'all',
 					'has_rtl' => true,
 				),
-				'woocommerce-blocktheme'  => wp_is_block_theme() ? array(
-					'src'     => self::get_asset_url( 'assets/css/woocommerce-blocktheme.css' ),
-					'deps'    => '',
-					'version' => $version,
-					'media'   => 'all',
-					'has_rtl' => true,
-				) : false,
 			)
 		);
 		return is_array( $styles ) ? array_filter( $styles ) : array();
+	}
+
+	/**
+	 * Enqueue styles for block assets (both editor and frontend).
+	 * This ensures compatibility with WordPress 6.9+ requirements.
+	 */
+	public static function enqueue_block_assets() {
+		if ( ! wp_is_block_theme() ) {
+			return;
+		}
+
+		$version = Constants::get_constant( 'WC_VERSION' );
+
+		wp_enqueue_style(
+			'woocommerce-blocktheme',
+			self::get_asset_url( 'assets/css/woocommerce-blocktheme.css' ),
+			array(),
+			$version,
+			'all'
+		);
+
+		wp_style_add_data( 'woocommerce-blocktheme', 'rtl', 'replace' );
 	}
 
 	/**
@@ -142,11 +139,11 @@ class WC_Frontend_Scripts {
 	 * Register a script for use.
 	 *
 	 * @uses   wp_register_script()
-	 * @param  string   $handle    Name of the script. Should be unique.
-	 * @param  string   $path      Full URL of the script, or path of the script relative to the WordPress root directory.
-	 * @param  string[] $deps      An array of registered script handles this script depends on.
-	 * @param  string   $version   String specifying script version number, if it has one, which is added to the URL as a query string for cache busting purposes. If version is set to false, a version number is automatically added equal to current installed WordPress version. If set to null, no version is added.
-	 * @param  boolean  $in_footer Whether to enqueue the script before </body> instead of in the <head>. Default 'false'.
+	 * @param  string                                          $handle    Name of the script. Should be unique.
+	 * @param  string                                          $path      Full URL of the script, or path of the script relative to the WordPress root directory.
+	 * @param  string[]                                        $deps      An array of registered script handles this script depends on.
+	 * @param  string                                          $version   String specifying script version number, if it has one, which is added to the URL as a query string for cache busting purposes. If version is set to false, a version number is automatically added equal to current installed WordPress version. If set to null, no version is added.
+	 * @param  bool|array{strategy?: string, in_footer?: bool} $in_footer Whether to enqueue the script before </body> (boolean), or an array of arguments such as 'strategy' and 'in_footer'. Default array( 'strategy' => 'defer' ).
 	 */
 	private static function register_script( $handle, $path, $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = array( 'strategy' => 'defer' ) ) {
 		self::$registered_scripts[] = $handle;
@@ -157,11 +154,11 @@ class WC_Frontend_Scripts {
 	 * Register and enqueue a script for use.
 	 *
 	 * @uses   wp_enqueue_script()
-	 * @param  string   $handle    Name of the script. Should be unique.
-	 * @param  string   $path      Full URL of the script, or path of the script relative to the WordPress root directory.
-	 * @param  string[] $deps      An array of registered script handles this script depends on.
-	 * @param  string   $version   String specifying script version number, if it has one, which is added to the URL as a query string for cache busting purposes. If version is set to false, a version number is automatically added equal to current installed WordPress version. If set to null, no version is added.
-	 * @param  boolean  $in_footer Whether to enqueue the script before </body> instead of in the <head>. Default 'false'.
+	 * @param  string                                          $handle    Name of the script. Should be unique.
+	 * @param  string                                          $path      Full URL of the script, or path of the script relative to the WordPress root directory.
+	 * @param  string[]                                        $deps      An array of registered script handles this script depends on.
+	 * @param  string                                          $version   String specifying script version number, if it has one, which is added to the URL as a query string for cache busting purposes. If version is set to false, a version number is automatically added equal to current installed WordPress version. If set to null, no version is added.
+	 * @param  bool|array{strategy?: string, in_footer?: bool} $in_footer Whether to enqueue the script before </body> (boolean), or an array of arguments such as 'strategy' and 'in_footer'. Default array( 'strategy' => 'defer' ).
 	 */
 	private static function enqueue_script( $handle, $path = '', $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = array( 'strategy' => 'defer' ) ) {
 		if ( ! in_array( $handle, self::$registered_scripts, true ) && $path ) {
@@ -218,180 +215,194 @@ class WC_Frontend_Scripts {
 		$version = Constants::get_constant( 'WC_VERSION' );
 
 		$scripts = array(
-			'selectWoo'                  => array(
+			'selectWoo'                    => array(
 				'src'     => self::get_asset_url( 'assets/js/selectWoo/selectWoo.full' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
 				'version' => '1.0.9-wc.' . $version,
 			),
-			'wc-account-i18n'            => array(
+			'wc-account-i18n'              => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/account-i18n' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
 				'version' => $version,
 			),
-			'wc-add-payment-method'      => array(
+			'wc-add-payment-method'        => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/add-payment-method' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'woocommerce' ),
+				'deps'    => array( 'jquery', 'woocommerce', 'wc-custom-place-order-button' ),
 				'version' => $version,
 			),
-			'wc-add-to-cart'             => array(
+			'wc-add-to-cart'               => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/add-to-cart' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'wc-jquery-blockui' ),
 				'version' => $version,
 			),
-			'wc-add-to-cart-variation'   => array(
+			'wc-add-to-cart-variation'     => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/add-to-cart-variation' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'wp-util', 'wc-jquery-blockui' ),
 				'version' => $version,
 			),
-			'wc-address-i18n'            => array(
+			'wc-address-i18n'              => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/address-i18n' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'wc-country-select' ),
 				'version' => $version,
 			),
-			'wc-back-in-stock-form'      => array(
+			'wc-back-in-stock-form'        => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/back-in-stock-form' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
 				'version' => $version,
 			),
-			'wc-cart'                    => array(
+			'wc-cart'                      => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/cart' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ),
 				'version' => $version,
 			),
-			'wc-cart-fragments'          => array(
+			'wc-cart-fragments'            => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/cart-fragments' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'wc-js-cookie' ),
 				'version' => $version,
 			),
-			'wc-checkout'                => array(
+			'wc-checkout'                  => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/checkout' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ),
+				'deps'    => array(
+					'jquery',
+					'woocommerce',
+					'wc-country-select',
+					'wc-address-i18n',
+					'wc-custom-place-order-button',
+				),
 				'version' => $version,
 			),
-			'wc-country-select'          => array(
+			'wc-country-select'            => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/country-select' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
 				'version' => $version,
 			),
-			'wc-credit-card-form'        => array(
+			'wc-credit-card-form'          => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/credit-card-form' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'wc-jquery-payment' ),
 				'version' => $version,
 			),
-			'wc-dompurify'               => array(
+			'wc-custom-place-order-button' => array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/utils/custom-place-order-button' . $suffix . '.js' ),
+				'deps'    => array( 'jquery' ),
+				'version' => $version,
+			),
+			'wc-dompurify'                 => array(
 				'src'     => self::get_asset_url( 'assets/js/dompurify/purify' . $suffix . '.js' ),
 				'deps'    => array(),
 				'version' => $version,
 			),
-			'wc-flexslider'              => array(
+			'wc-flexslider'                => array(
 				'src'           => self::get_asset_url( 'assets/js/flexslider/jquery.flexslider' . $suffix . '.js' ),
 				'deps'          => array( 'jquery' ),
 				'version'       => '2.7.2-wc.' . $version,
 				'legacy_handle' => 'flexslider',
 			),
-			'wc-geolocation'             => array(
+			'wc-geolocation'               => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/geolocation' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
 				'version' => $version,
 			),
-			'wc-jquery-blockui'          => array(
+			'wc-jquery-blockui'            => array(
 				'src'           => self::get_asset_url( 'assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js' ),
 				'deps'          => array( 'jquery' ),
 				'version'       => '2.7.0-wc.' . $version,
 				'legacy_handle' => 'jquery-blockui',
 			),
-			'wc-jquery-cookie'           => array( // deprecated.
+			'wc-jquery-cookie'             => array(
 				'src'           => self::get_asset_url( 'assets/js/jquery-cookie/jquery.cookie' . $suffix . '.js' ),
 				'deps'          => array( 'jquery' ),
 				'version'       => '1.4.1-wc.' . $version,
 				'legacy_handle' => 'jquery-cookie',
 			),
-			'wc-jquery-payment'          => array(
-				'src'     => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
-				'deps'    => array( 'jquery' ),
-				'version' => '3.0.0-wc.' . $version,
+			'wc-jquery-payment'            => array(
+				'src'           => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
+				'deps'          => array( 'jquery' ),
+				'version'       => '3.0.0-wc.' . $version,
+				'legacy_handle' => 'jquery-payment',
 			),
-			'wc-jquery-tiptip'           => array(
+			'wc-jquery-tiptip'             => array(
 				'src'           => self::get_asset_url( 'assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js' ),
 				'deps'          => array( 'jquery', 'wc-dompurify' ),
 				'version'       => $version,
 				'legacy_handle' => 'jquery-tiptip',
 			),
-			'wc-js-cookie'               => array(
+			'wc-js-cookie'                 => array(
 				'src'           => self::get_asset_url( 'assets/js/js-cookie/js.cookie' . $suffix . '.js' ),
 				'deps'          => array(),
 				'version'       => '2.1.4-wc.' . $version,
 				'legacy_handle' => 'js-cookie',
 			),
-			'wc-lost-password'           => array(
+			'wc-lost-password'             => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/lost-password' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'woocommerce' ),
 				'version' => $version,
 			),
-			'wc-password-strength-meter' => array(
+			'wc-password-strength-meter'   => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/password-strength-meter' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'password-strength-meter' ),
 				'version' => $version,
 			),
-			'wc-photoswipe'              => array(
+			'wc-photoswipe'                => array(
 				'src'           => self::get_asset_url( 'assets/js/photoswipe/photoswipe' . $suffix . '.js' ),
 				'deps'          => array(),
 				'version'       => '4.1.1-wc.' . $version,
 				'legacy_handle' => 'photoswipe',
 			),
-			'wc-photoswipe-ui-default'   => array(
+			'wc-photoswipe-ui-default'     => array(
 				'src'           => self::get_asset_url( 'assets/js/photoswipe/photoswipe-ui-default' . $suffix . '.js' ),
 				'deps'          => array( 'wc-photoswipe' ),
 				'version'       => '4.1.1-wc.' . $version,
 				'legacy_handle' => 'photoswipe-ui-default',
 			),
-			'wc-prettyPhoto'             => array( // deprecated.
+			'wc-prettyPhoto'               => array( // deprecated.
 				'src'           => self::get_asset_url( 'assets/js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js' ),
 				'deps'          => array( 'jquery' ),
 				'version'       => '3.1.6-wc.' . $version,
 				'legacy_handle' => 'prettyPhoto',
 			),
-			'wc-prettyPhoto-init'        => array( // deprecated.
+			'wc-prettyPhoto-init'          => array( // deprecated.
 				'src'           => self::get_asset_url( 'assets/js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js' ),
 				'deps'          => array( 'jquery', 'wc-prettyPhoto' ),
 				'version'       => $version,
 				'legacy_handle' => 'prettyPhoto-init',
 			),
-			'wc-select2'                 => array(
+			'wc-select2'                   => array(
 				'src'           => self::get_asset_url( 'assets/js/select2/select2.full' . $suffix . '.js' ),
 				'deps'          => array( 'jquery' ),
 				'version'       => '4.0.3-wc.' . $version,
 				'legacy_handle' => 'select2',
 			),
-			'wc-single-product'          => array(
+			'wc-single-product'            => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/single-product' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
 				'version' => $version,
 			),
-			'wc-zoom'                    => array(
+			'wc-zoom'                      => array(
 				'src'           => self::get_asset_url( 'assets/js/zoom/jquery.zoom' . $suffix . '.js' ),
 				'deps'          => array( 'jquery' ),
 				'version'       => '1.7.21-wc.' . $version,
 				'legacy_handle' => 'zoom',
 			),
-			'woocommerce'                => array(
+			'woocommerce'                  => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/woocommerce' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'wc-jquery-blockui', 'wc-js-cookie' ),
 				'version' => $version,
 			),
 		);
 
-		$scripts['wc-address-autocomplete-common'] = array(
-			'src'     => self::get_asset_url( 'assets/js/frontend/utils/address-autocomplete-common' . $suffix . '.js' ),
-			'deps'    => array(),
-			'version' => $version,
-		);
+		if ( wc_string_to_bool( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) === true ) {
+			$scripts['wc-address-autocomplete-common'] = array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/utils/address-autocomplete-common' . $suffix . '.js' ),
+				'deps'    => array(),
+				'version' => $version,
+			);
 
-		$scripts['wc-address-autocomplete'] = array(
-			'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
-			'deps'    => array( 'wc-address-autocomplete-common', 'wc-dompurify' ),
-			'version' => $version,
-		);
+			$scripts['wc-address-autocomplete'] = array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
+				'deps'    => array( 'wc-address-autocomplete-common', 'wc-dompurify' ),
+				'version' => $version,
+			);
+		}
 
 		return $scripts;
 	}
@@ -403,10 +414,25 @@ class WC_Frontend_Scripts {
 		$register_scripts = self::get_scripts();
 
 		foreach ( $register_scripts as $name => $props ) {
-			self::register_script( $name, $props['src'], $props['deps'], $props['version'] );
+			$is_legacy_handle = isset( $props['legacy_handle'] );
 
-			if ( isset( $props['legacy_handle'] ) ) {
-				self::register_script( $props['legacy_handle'], $props['src'], $props['deps'], $props['version'] );
+			/*
+			 * Scripts with legacy alias handles must use a blocking strategy.
+			 * WordPress (since 6.3) silently discards loading strategies on alias
+			 * scripts (registered with src=false). If the real script uses defer
+			 * but the alias cannot inherit it, the strategy mismatch breaks
+			 * dependency resolution for third-party code that depends on the
+			 * legacy handle (e.g. payment gateways using 'jquery-payment').
+			 *
+			 * Using blocking for both the real script and its alias ensures
+			 * consistent execution order through the dependency chain.
+			 */
+			$in_footer = $is_legacy_handle ? true : array( 'strategy' => 'defer' );
+
+			self::register_script( $name, $props['src'], $props['deps'], $props['version'], $in_footer );
+
+			if ( $is_legacy_handle ) {
+				self::register_script( $props['legacy_handle'], false, array( $name ), $props['version'], $in_footer );
 			}
 		}
 	}
@@ -444,12 +470,14 @@ class WC_Frontend_Scripts {
 			),
 		);
 
-		$register_styles['wc-address-autocomplete'] = array(
-			'src'     => self::get_asset_url( 'assets/css/address-autocomplete.css' ),
-			'deps'    => array(),
-			'version' => $version,
-			'has_rtl' => false,
-		);
+		if ( wc_string_to_bool( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) === true ) {
+			$register_styles['wc-address-autocomplete'] = array(
+				'src'     => self::get_asset_url( 'assets/css/address-autocomplete.css' ),
+				'deps'    => array(),
+				'version' => $version,
+				'has_rtl' => false,
+			);
+		}
 
 		foreach ( $register_styles as $name => $props ) {
 			self::register_style( $name, $props['src'], $props['deps'], $props['version'], 'all', $props['has_rtl'] );
@@ -491,14 +519,16 @@ class WC_Frontend_Scripts {
 			self::enqueue_script( 'wc-checkout' );
 		}
 
-		$address_provider_service = wc_get_container()->get( AddressProviderController::class );
-		if ( $address_provider_service && method_exists( $address_provider_service, 'get_providers' ) ) {
-			$registered_providers = $address_provider_service->get_providers();
-			if ( is_array( $registered_providers ) && count( $registered_providers ) > 0 ) {
-				// Always enqueue the common module if providers are registered.
-				self::enqueue_script( 'wc-address-autocomplete-common' );
-				self::enqueue_script( 'wc-address-autocomplete' );
-				self::enqueue_style( 'wc-address-autocomplete' );
+		if ( wc_string_to_bool( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) === true ) {
+			$address_provider_service = wc_get_container()->get( AddressProviderController::class );
+			if ( $address_provider_service && method_exists( $address_provider_service, 'get_providers' ) ) {
+				$registered_providers = $address_provider_service->get_providers();
+				if ( is_array( $registered_providers ) && count( $registered_providers ) > 0 ) {
+					// Always enqueue the common module if providers are registered.
+					self::enqueue_script( 'wc-address-autocomplete-common' );
+					self::enqueue_script( 'wc-address-autocomplete' );
+					self::enqueue_style( 'wc-address-autocomplete' );
+				}
 			}
 		}
 
@@ -529,7 +559,7 @@ class WC_Frontend_Scripts {
 		// Only enqueue the geolocation script if the Default Current Address is set to "Geolocate
 		// (with Page Caching Support) and outside of the cart, checkout, account and customizer preview.
 		if (
-			'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' )
+			DefaultCustomerAddress::GEOLOCATION_AJAX === get_option( 'woocommerce_default_customer_address' )
 			&& ! ( is_cart() || is_account_page() || is_checkout() || is_customize_preview() )
 		) {
 			$ua = strtolower( wc_get_user_agent() ); // Exclude common bots from geolocation by user agent.
@@ -664,6 +694,7 @@ class WC_Frontend_Scripts {
 					'debug_mode'                => Constants::is_true( 'WP_DEBUG' ),
 					/* translators: %s: Order history URL on My Account section */
 					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
+					'gateways_with_custom_place_order_button' => self::get_gateways_with_custom_place_order_button(),
 				);
 				break;
 			case 'wc-address-autocomplete-common':
@@ -729,6 +760,11 @@ class WC_Frontend_Scripts {
 					'cart_redirect_after_add' => get_option( 'woocommerce_cart_redirect_after_add' ),
 				);
 				break;
+			case 'wc-add-payment-method':
+				$params = array(
+					'gateways_with_custom_place_order_button' => self::get_gateways_with_custom_place_order_button(),
+				);
+				break;
 			case 'wc-add-to-cart-variation':
 				// We also need the wp.template for this script :).
 				wc_get_template( 'single-product/add-to-cart/variation.php' );
@@ -772,6 +808,31 @@ class WC_Frontend_Scripts {
 		$params = apply_filters_deprecated( $handle . '_params', array( $params ), '3.0.0', 'woocommerce_get_script_data' );
 
 		return apply_filters( 'woocommerce_get_script_data', $params, $handle );
+	}
+
+	/**
+	 * Get a list of payment gateway IDs that have custom place order buttons.
+	 *
+	 * @return array List of gateway IDs with custom place order buttons.
+	 */
+	private static function get_gateways_with_custom_place_order_button() {
+		$gateways_with_custom_button = array();
+
+		if ( ! WC()->payment_gateways() ) {
+			return $gateways_with_custom_button;
+		}
+
+		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+
+		foreach ( $available_gateways as $gateway ) {
+			// phpcs:ignore Squiz.PHP.CommentedOutCode.Found -- Type hint for PHPStan.
+			/* @var WC_Payment_Gateway $gateway */
+			if ( true === $gateway->has_custom_place_order_button ) {
+				$gateways_with_custom_button[] = $gateway->id;
+			}
+		}
+
+		return $gateways_with_custom_button;
 	}
 
 	/**

@@ -218,6 +218,45 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_query_string_form_fields with nested array params.
+	 *
+	 * @dataProvider provide_nested_array_cases
+	 *
+	 * @param string $url            URL to parse.
+	 * @param string $expected_name  Expected hidden field name attribute.
+	 * @param string $expected_value Expected hidden field value attribute.
+	 * @return void
+	 */
+	public function test_wc_query_string_form_fields_nested_arrays( string $url, string $expected_name, string $expected_value ): void {
+		$html = wc_query_string_form_fields( $url, array(), '', true );
+
+		$this->assertStringContainsString( 'name="' . $expected_name . '"', $html );
+		$this->assertStringContainsString( 'value="' . $expected_value . '"', $html );
+		$this->assertStringNotContainsString( '{dot}', $html );
+		$this->assertStringNotContainsString( '{plus}', $html );
+	}
+
+	/**
+	 * Data provider for test_wc_query_string_form_fields_nested_arrays.
+	 *
+	 * @return array[]
+	 */
+	public function provide_nested_array_cases(): array {
+		return array(
+			// Baseline: nested params without any special chars.
+			'nested baseline'      => array( 'https://x/?products[1][id]=12345', 'products[1][id]', '12345' ),
+			// Nested params with dots in nested keys.
+			'dot in nested key'    => array( 'https://x/?products[1.5][id]=12345', 'products[1.5][id]', '12345' ),
+			// Nested params with dots in nested values.
+			'dot in nested value'  => array( 'https://x/?products[1][price]=12.50', 'products[1][price]', '12.50' ),
+			// Same as dot-in-key case but with + instead of .
+			'plus in nested key'   => array( 'https://x/?products[a+b][id]=12345', 'products[a+b][id]', '12345' ),
+			// Same as dot-in-value case but with + instead of .
+			'plus in nested value' => array( 'https://x/?products[1][label]=hello+world', 'products[1][label]', 'hello+world' ),
+		);
+	}
+
+	/**
 	 * Test test_wc_get_pay_buttons().
 	 */
 	public function test_wc_get_pay_buttons() {
@@ -410,5 +449,113 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		// by defaulting to page 0 and still add appropriate aria-labels to maintain accessibility.
 		$this->assertStringContainsString( 'aria-label="Page 0"', $output );
 		$this->assertStringContainsString( 'aria-label="Page 0"', $output );
+	}
+
+	/**
+	 * Test that hidden field with label does not have "for" attribute.
+	 */
+	public function test_hidden_field_with_label() {
+		$actual_html = woocommerce_form_field(
+			'test_hidden',
+			array(
+				'type'   => 'hidden',
+				'id'     => 'test_hidden_field',
+				'label'  => 'Test Label',
+				'return' => true,
+			),
+			'test value'
+		);
+
+		// Should contain label without "for" attribute.
+		$this->assertStringContainsString( '<label class="">', $actual_html );
+		$this->assertStringNotContainsString( 'for=', $actual_html );
+		$this->assertStringContainsString( 'Test Label', $actual_html );
+	}
+
+	/**
+	 * Test that country field with one country uses a readonly text input.
+	 */
+	public function test_country_field_single_country() {
+		// Mock WC()->countries to return only one country.
+		$mock_countries = $this->getMockBuilder( WC_Countries::class )
+			->onlyMethods( array( 'get_allowed_countries' ) )
+			->getMock();
+
+		$mock_countries->method( 'get_allowed_countries' )
+			->willReturn( array( 'US' => 'United States' ) );
+
+		// Store original countries object.
+		$original_countries = WC()->countries;
+		WC()->countries     = $mock_countries;
+
+		$actual_html = woocommerce_form_field(
+			'billing_country',
+			array(
+				'type'   => 'country',
+				'id'     => 'billing_country',
+				'label'  => 'Country / Region',
+				'return' => true,
+			),
+			'US'
+		);
+
+		// Restore original countries object.
+		WC()->countries = $original_countries;
+
+		// Should contain label "for" attribute pointing to the select.
+		$this->assertStringContainsString( 'for="billing_country"', $actual_html );
+		$this->assertStringContainsString( 'Country / Region', $actual_html );
+		// Should contain single-option select styled as plain text.
+		$this->assertStringContainsString( '<select', $actual_html );
+		$this->assertStringContainsString( 'country_to_state--single', $actual_html );
+		$this->assertStringContainsString( 'value="US"', $actual_html );
+		$this->assertStringContainsString( '>United States</option>', $actual_html );
+		// Should NOT have strong tag, hidden input, or text input.
+		$this->assertStringNotContainsString( '<strong>', $actual_html );
+		$this->assertStringNotContainsString( 'type="hidden"', $actual_html );
+		$this->assertStringNotContainsString( 'type="text"', $actual_html );
+	}
+
+	/**
+	 * Test that country field with multiple countries has "for" attribute.
+	 */
+	public function test_country_field_multiple_countries() {
+		// Mock WC()->countries to return multiple countries.
+		$mock_countries = $this->getMockBuilder( WC_Countries::class )
+			->onlyMethods( array( 'get_allowed_countries' ) )
+			->getMock();
+
+		$mock_countries->method( 'get_allowed_countries' )
+			->willReturn(
+				array(
+					'US' => 'United States',
+					'CA' => 'Canada',
+				)
+			);
+
+		// Store original countries object.
+		$original_countries = WC()->countries;
+		WC()->countries     = $mock_countries;
+
+		$actual_html = woocommerce_form_field(
+			'billing_country',
+			array(
+				'type'   => 'country',
+				'id'     => 'billing_country',
+				'label'  => 'Country / Region',
+				'return' => true,
+			),
+			'US'
+		);
+
+		// Restore original countries object.
+		WC()->countries = $original_countries;
+
+		// Should contain label with "for" attribute.
+		$this->assertStringContainsString( 'for="billing_country"', $actual_html );
+		$this->assertStringContainsString( 'Country / Region', $actual_html );
+		// Should contain select dropdown.
+		$this->assertStringContainsString( '<select', $actual_html );
+		$this->assertStringNotContainsString( 'type="hidden"', $actual_html );
 	}
 }

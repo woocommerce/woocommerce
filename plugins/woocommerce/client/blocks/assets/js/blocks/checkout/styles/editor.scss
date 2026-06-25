@@ -86,6 +86,11 @@ body.wc-lock-selected-block--remove {
 	.wc-block-components-totals-wrapper {
 		box-sizing: border-box;
 	}
+	.wp-block-woocommerce-checkout-order-summary-cart-items-block {
+		.wc-block-components-totals-wrapper {
+			border-top: 0;
+		}
+	}
 }
 
 // The editor includes extra markup that impacts the flex layout.

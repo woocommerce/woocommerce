@@ -53,10 +53,10 @@ class ShippingZoneSchema extends AbstractSchema {
 				'default'     => 0,
 			),
 			'locations' => array(
-				'description' => __( 'Array of locations for this zone. Can be empty array but must be explicitly provided.', 'woocommerce' ),
+				'description' => __( 'Array of locations for this zone. Omit or pass an empty array for an "Everywhere" zone.', 'woocommerce' ),
 				'type'        => 'array',
 				'context'     => array( 'view', 'edit' ),
-				'required'    => true,
+				'required'    => false,
 				'items'       => array(
 					'type'       => 'object',
 					'properties' => array(
@@ -125,7 +125,7 @@ class ShippingZoneSchema extends AbstractSchema {
 			'id'        => $zone->get_id(),
 			'name'      => $zone->get_zone_name(),
 			'order'     => $zone->get_zone_order(),
-			'locations' => $this->get_formatted_zone_locations( $zone, isset( $request['id'] ) ? 'detailed' : 'summary' ),
+			'locations' => $this->get_formatted_zone_locations( $zone ),
 			'methods'   => $this->get_formatted_zone_methods( $zone ),
 		);
 	}
@@ -134,10 +134,9 @@ class ShippingZoneSchema extends AbstractSchema {
 	 * Get array of location objects for API response.
 	 *
 	 * @param WC_Shipping_Zone $zone Shipping zone object.
-	 * @param string           $view The view for which the API is requested ('summary' or 'detailed').
 	 * @return array Array of location objects with code, type, and name.
 	 */
-	protected function get_formatted_zone_locations( WC_Shipping_Zone $zone, string $view = 'summary' ): array {
+	protected function get_formatted_zone_locations( WC_Shipping_Zone $zone ): array {
 		if ( 0 === $zone->get_id() ) {
 			return array();
 		}

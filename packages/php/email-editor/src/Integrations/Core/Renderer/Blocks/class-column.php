@@ -37,14 +37,9 @@ class Column extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
-		$content = '';
-		foreach ( $parsed_block['innerBlocks'] ?? array() as $block ) {
-			$content .= render_block( $block );
-		}
-
 		return str_replace(
 			'{column_content}',
-			$content,
+			$this->get_inner_content( $block_content ),
 			$this->get_block_wrapper( $block_content, $parsed_block, $rendering_context )
 		);
 	}
@@ -72,7 +67,7 @@ class Column extends Abstract_Block_Renderer {
 		$is_stretched = empty( $block_attributes['verticalAlignment'] ) || 'stretch' === $block_attributes['verticalAlignment'];
 
 		$padding_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'padding' ) );
-		$padding_styles = Styles_Helper::extend_block_styles( $padding_styles, array( 'text-align' => 'left' ) );
+		$padding_styles = Styles_Helper::extend_block_styles( $padding_styles, array( 'text-align' => $rendering_context->get_default_text_align() ) );
 
 		$cell_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background', 'background-color', 'color' ) );
 		$cell_styles = Styles_Helper::extend_block_styles(
@@ -108,19 +103,43 @@ class Column extends Abstract_Block_Renderer {
 		);
 
 		$inner_cell_attrs = array(
-			'align' => 'left',
+			'align' => $rendering_context->get_default_text_align(),
 			'style' => $padding_styles['css'],
 		);
 
 		$inner_table = Table_Wrapper_Helper::render_table_wrapper( '{column_content}', $inner_table_attrs, $inner_cell_attrs );
 
+		// Apply physical side padding from email_attrs (set by Spacing_Preprocessor for columns blockGap).
+		$gap_padding_side  = $rendering_context->get_start_side();
+		$gap_padding_value = $parsed_block['email_attrs'][ 'padding-' . $gap_padding_side ] ?? null;
+		if ( $gap_padding_value ) {
+			$gap_padding_styles = wp_style_engine_get_styles( array( 'spacing' => array( 'padding' => array( $gap_padding_side => $gap_padding_value ) ) ) );
+			$wrapper_styles     = Styles_Helper::extend_block_styles( $wrapper_styles, $gap_padding_styles['declarations'] ?? array() );
+		}
+
 		// Create the outer td element (since this is meant to be used within a columns structure).
 		$wrapper_cell_attrs = array(
 			'class' => $wrapper_classname,
 			'style' => $wrapper_styles['css'],
-			'width' => Styles_Helper::parse_value( $block_attributes['width'] ),
+			'width' => $this->get_width_attribute_value( $block_attributes['width'] ),
 		);
 
 		return Table_Wrapper_Helper::render_table_cell( $inner_table, $wrapper_cell_attrs );
+	}
+
+	/**
+	 * Returns a table cell width attribute value.
+	 *
+	 * @param string $width Column width.
+	 * @return string
+	 */
+	private function get_width_attribute_value( $width ): string {
+		$parsed_width = Styles_Helper::parse_value( $width );
+
+		if ( is_string( $width ) && preg_match( '/%\s*$/', $width ) ) {
+			return $parsed_width . '%';
+		}
+
+		return (string) $parsed_width;
 	}
 }

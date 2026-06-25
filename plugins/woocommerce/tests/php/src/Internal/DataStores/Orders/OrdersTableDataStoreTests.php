@@ -596,6 +596,77 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox Restoring an HPOS order from trash does not re-fire transactional email dispatch, but still fires the status transition actions.
+	 */
+	public function test_cot_datastore_untrash_suspends_email_dispatch_but_keeps_status_actions() {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$this->sut->trash_order( $order );
+		$this->sut->read( $order );
+
+		$status_action_count       = 0;
+		$status_notification_count = 0;
+		$status_action             = function ( $order_id ) use ( $order, &$status_action_count ) {
+			if ( $order->get_id() === $order_id ) {
+				++$status_action_count;
+			}
+		};
+		$notification_action       = function ( $order_id ) use ( $order, &$status_notification_count ) {
+			if ( $order->get_id() === $order_id ) {
+				++$status_notification_count;
+			}
+		};
+
+		add_action( 'woocommerce_order_status_completed', $status_action );
+		add_action( 'woocommerce_order_status_completed_notification', $notification_action );
+
+		try {
+			$this->assertTrue( $this->sut->untrash_order( $order ) );
+		} finally {
+			remove_action( 'woocommerce_order_status_completed', $status_action );
+			remove_action( 'woocommerce_order_status_completed_notification', $notification_action );
+		}
+
+		$this->assertSame( OrderStatus::COMPLETED, $order->get_status() );
+		// The status transition action still fires so 3rd-party integrations keep working.
+		$this->assertSame( 1, $status_action_count );
+		// The _notification action (which transactional emails listen to) must NOT fire on restore.
+		$this->assertSame( 0, $status_notification_count );
+	}
+
+	/**
+	 * @testdox After untrash, the WC_Emails transactional dispatch listeners are reinstated.
+	 */
+	public function test_cot_datastore_untrash_restores_email_dispatch_after_save() {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$this->sut->trash_order( $order );
+		$this->sut->read( $order );
+
+		$dispatch_callbacks_before = array(
+			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'send_transactional_email' ) ),
+			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'queue_transactional_email' ) ),
+		);
+
+		$this->assertTrue( $this->sut->untrash_order( $order ) );
+
+		$dispatch_callbacks_after = array(
+			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'send_transactional_email' ) ),
+			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'queue_transactional_email' ) ),
+		);
+
+		$this->assertSame( $dispatch_callbacks_before, $dispatch_callbacks_after );
+	}
+
+	/**
 	 * @testDox Tests the `delete()` method on the COT datastore -- full deletes.
 	 *
 	 * @return void
@@ -684,6 +755,92 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			)
 		);
 		$this->assertEquals( 1, count( $query->orders ) );
+	}
+
+	/**
+	 * @testDox Tests that 'status' query var handles 'any' and 'all' correctly (excluding/including internal statuses).
+	 *
+	 * @return void
+	 */
+	public function test_cot_query_status_any_and_all() {
+		$this->disable_cot_sync();
+
+		// Create orders with valid WooCommerce statuses.
+		$order_pending = new WC_Order();
+		$this->switch_data_store( $order_pending, $this->sut );
+		$order_pending->set_status( OrderStatus::PENDING );
+		$order_pending->save();
+
+		$order_processing = new WC_Order();
+		$this->switch_data_store( $order_processing, $this->sut );
+		$order_processing->set_status( OrderStatus::PROCESSING );
+		$order_processing->save();
+
+		$order_completed = new WC_Order();
+		$this->switch_data_store( $order_completed, $this->sut );
+		$order_completed->set_status( OrderStatus::COMPLETED );
+		$order_completed->save();
+
+		// Create order with internal WordPress status (auto-draft).
+		$order_auto_draft = new WC_Order();
+		$this->switch_data_store( $order_auto_draft, $this->sut );
+		$order_auto_draft->set_status( OrderStatus::AUTO_DRAFT );
+		$order_auto_draft->save();
+
+		// Create order with checkout-draft status (registered WooCommerce status via DraftOrders service).
+		$order_checkout_draft = new WC_Order();
+		$this->switch_data_store( $order_checkout_draft, $this->sut );
+		$order_checkout_draft->set_status( 'checkout-draft' );
+		$order_checkout_draft->save();
+
+		// Test 'status' => 'any' - should return only valid WooCommerce statuses, excluding statuses with exclude_from_search=true (checkout-draft, auto-draft).
+		$query = new OrdersTableQuery( array( 'status' => 'any' ) );
+		$this->assertEquals( 3, count( $query->orders ), "status='any' should return only merchant-facing WooCommerce statuses" );
+		$this->assertContains( $order_pending->get_id(), $query->orders, "status='any' should include pending orders" );
+		$this->assertContains( $order_processing->get_id(), $query->orders, "status='any' should include processing orders" );
+		$this->assertContains( $order_completed->get_id(), $query->orders, "status='any' should include completed orders" );
+		$this->assertNotContains( $order_checkout_draft->get_id(), $query->orders, "status='any' should exclude checkout-draft orders (exclude_from_search)" );
+		$this->assertNotContains( $order_auto_draft->get_id(), $query->orders, "status='any' should exclude auto-draft orders (internal WordPress status)" );
+
+		// Test 'status' => 'all' - should return all statuses without filtering.
+		$query = new OrdersTableQuery( array( 'status' => 'all' ) );
+		$this->assertEquals( 5, count( $query->orders ), "status='all' should return all orders regardless of status" );
+		$this->assertContains( $order_pending->get_id(), $query->orders, "status='all' should include pending orders" );
+		$this->assertContains( $order_processing->get_id(), $query->orders, "status='all' should include processing orders" );
+		$this->assertContains( $order_completed->get_id(), $query->orders, "status='all' should include completed orders" );
+		$this->assertContains( $order_auto_draft->get_id(), $query->orders, "status='all' should include auto-draft orders" );
+		$this->assertContains( $order_checkout_draft->get_id(), $query->orders, "status='all' should include checkout-draft orders" );
+
+		// Test that internal statuses can still be queried explicitly.
+		$query = new OrdersTableQuery( array( 'status' => OrderStatus::AUTO_DRAFT ) );
+		$this->assertEquals( 1, count( $query->orders ), 'Internal statuses can be queried explicitly' );
+		$this->assertContains( $order_auto_draft->get_id(), $query->orders, 'Explicit query for auto-draft should return auto-draft order' );
+
+		$query = new OrdersTableQuery( array( 'status' => 'checkout-draft' ) );
+		$this->assertEquals( 1, count( $query->orders ), 'Internal statuses can be queried explicitly' );
+		$this->assertContains( $order_checkout_draft->get_id(), $query->orders, 'Explicit query for checkout-draft should return checkout-draft order' );
+
+		// Test with array of statuses including 'any'.
+		$query = new OrdersTableQuery( array( 'status' => array( 'any' ) ) );
+		$this->assertEquals( 3, count( $query->orders ), "status=['any'] should work same as status='any'" );
+
+		// Test empty status (should behave like 'any') - historical and WP_Query like behavior.
+		$query = new OrdersTableQuery( array( 'status' => '' ) );
+		$this->assertEquals( 3, count( $query->orders ), "Empty status should behave like 'any' and return only merchant-facing WooCommerce statuses" );
+		$this->assertContains( $order_pending->get_id(), $query->orders, 'Empty status should include pending orders' );
+		$this->assertContains( $order_processing->get_id(), $query->orders, 'Empty status should include processing orders' );
+		$this->assertContains( $order_completed->get_id(), $query->orders, 'Empty status should include completed orders' );
+		$this->assertNotContains( $order_checkout_draft->get_id(), $query->orders, 'Empty status should exclude checkout-draft orders (exclude_from_search)' );
+		$this->assertNotContains( $order_auto_draft->get_id(), $query->orders, 'Empty status should exclude auto-draft orders (internal WordPress status)' );
+
+		// Test omitted status (should behave like 'any').
+		$query = new OrdersTableQuery( array() );
+		$this->assertEquals( 3, count( $query->orders ), "Omitted status should behave like 'any' and return only merchant-facing WooCommerce statuses" );
+		$this->assertContains( $order_pending->get_id(), $query->orders, 'Omitted status should include pending orders' );
+		$this->assertContains( $order_processing->get_id(), $query->orders, 'Omitted status should include processing orders' );
+		$this->assertContains( $order_completed->get_id(), $query->orders, 'Omitted status should include completed orders' );
+		$this->assertNotContains( $order_checkout_draft->get_id(), $query->orders, 'Omitted status should exclude checkout-draft orders (exclude_from_search)' );
+		$this->assertNotContains( $order_auto_draft->get_id(), $query->orders, 'Omitted status should exclude auto-draft orders (internal WordPress status)' );
 	}
 
 	/**
@@ -1139,6 +1296,16 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		);
 		$this->assertCount( 12, $query->orders, 'A limit of -1 can successfully be combined with an offset.' );
 		$this->assertEquals( array_slice( $test_orders, 18 ), $query->orders, 'The expected dataset is supplied when an offset is combined with a limit of -1.' );
+		$this->assertEquals(
+			30,
+			$query->found_orders,
+			'A limit of -1 combined with an offset still calculates all found orders.'
+		);
+		$this->assertEquals(
+			0,
+			$query->max_num_pages,
+			'A limit of -1 combined with an offset is treated as unpaged.'
+		);
 
 		$query = new OrdersTableQuery( array( 'limit' => 5 ) );
 		$this->assertCount( 5, $query->orders, 'Limits are respected when applied.' );
@@ -1287,6 +1454,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_read_with_direct_meta_write() {
 		$this->toggle_cot_feature_and_usage( true );
 		$this->enable_cot_sync();
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 		$order = $this->create_complex_cot_order();
 
 		$post_object = get_post( $order->get_id() );
@@ -1302,6 +1470,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->sut->read( $refreshed_order );
 
 		$this->assertEquals( array( 'key' => 'value' ), $refreshed_order->get_meta( 'my_custom_meta' ) );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -1310,6 +1479,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_read_multiple_with_direct_write() {
 		$this->enable_cot_sync();
 		$this->toggle_cot_feature_and_usage( true );
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 		$order       = $this->create_complex_cot_order();
 		$order_total = $order->get_total();
 		$order->add_meta_data( 'custom_meta_1', 'custom_value_1' );
@@ -1339,6 +1509,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'custom_value_4', $refreshed_order->get_meta( 'custom_meta_4' ) );
 		$this->assertEquals( 'custom_value_1_updated', $refreshed_order->get_meta( 'custom_meta_1' ) );
 		$this->assertEquals( '', $refreshed_order->get_meta( 'custom_meta_2' ) );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -1347,6 +1518,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_is_post_different_from_order() {
 		$this->toggle_cot_feature_and_usage( true );
 		$this->enable_cot_sync();
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 		$order                         = $this->create_complex_cot_order();
 		$post_order_comparison_closure = function ( $order ) {
 			$post_order = $this->get_post_orders_for_ids( array( $order->get_id() => $order ) )[ $order->get_id() ];
@@ -1369,6 +1541,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->sut->read( $r_order );
 		$this->assertFalse( $post_order_comparison_closure->call( $this->sut, $r_order ) );
 		$this->assertEquals( array( 'key' => 'value' ), $r_order->get_meta( 'my_custom_meta' ) );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -1395,6 +1568,148 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		};
 
 		$this->assertFalse( $post_order_comparison_closure->call( $this->sut ) );
+	}
+
+	/**
+	 * @testdox Test sync-on-read with date and metadata differences.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $with_metadata Whether to add a new metadata to the post version of the order.
+	 */
+	public function test_sync_on_read_with_date_differences( $with_metadata = false ) {
+		global $wpdb;
+
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
+
+		$now    = time() - ( 10 * MINUTE_IN_SECONDS );
+		$before = $now - ( 10 * MINUTE_IN_SECONDS );
+
+		$order = new \WC_Order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->set_billing_first_name( 'Duke' );
+		$order->save();
+
+		$order->set_date_modified( $before );
+		$order->save();
+
+		// Refresh order from HPOS datastore.
+		$order = wc_get_order( $order->get_id() );
+
+		// Confirm post version exists and that both have the same modified date.
+		$this->assertSame( 'shop_order', get_post_type( $order->get_id() ) );
+		$this->assertEquals( $order->get_date_modified( 'edit' )->getTimestamp(), $before );
+		$this->assertEquals( get_post_modified_time( 'U', true, $order->get_id() ), $before );
+
+		// Update the posts modified date and confirm the change was made.
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', $now ),
+			),
+			array(
+				'ID' => $order->get_id(),
+			)
+		);
+		clean_post_cache( $order->get_id() );
+		$this->assertEquals( get_post_modified_time( 'U', true, $order->get_id() ), $now );
+
+		// Add a new metadata so sync-on-read does something.
+		if ( $with_metadata ) {
+			add_post_meta( $order->get_id(), 'foo', 'bar' );
+		}
+
+		// Trigger sync-on-read by re-reading the order and compare dates again.
+		$sync_on_read_triggered = false;
+		add_action(
+			'woocommerce_hpos_post_record_migrated_on_read',
+			function ( $o ) use ( &$sync_on_read_triggered, $order ) {
+				$sync_on_read_triggered = $o->get_id() === $order->get_id();
+			}
+		);
+
+		$this->reset_order_data_store_state( $this->sut );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $sync_on_read_triggered );
+		remove_all_actions( 'woocommerce_hpos_post_record_migrated_on_read' );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
+
+		// Compare dates again.
+		$this->assertEquals( $order->get_date_modified( 'edit' )->getTimestamp(), $now );
+		$this->assertEquals( get_post_modified_time( 'U', true, $order->get_id() ), $now );
+	}
+
+	/**
+	 * @testdox Confirm that sync on read doesn't run by default and can be enabled via filter.
+	 */
+	public function test_sync_on_read_on_and_off(): void {
+		global $wpdb;
+
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$now    = time() - ( 10 * MINUTE_IN_SECONDS );
+		$before = $now - ( 10 * MINUTE_IN_SECONDS );
+
+		$order = new \WC_Order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		// Set the HPOS modified date to the past.
+		$order->set_date_modified( $before );
+		$order->save();
+
+		// Make the post version newer (would normally trigger sync on read).
+		$wpdb->update(
+			$wpdb->posts,
+			array( 'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', $now ) ),
+			array( 'ID' => $order->get_id() )
+		);
+		clean_post_cache( $order->get_id() );
+
+		// Track whether sync on read fires.
+		$sync_on_read_triggered = false;
+		add_action(
+			'woocommerce_hpos_post_record_migrated_on_read',
+			function () use ( &$sync_on_read_triggered ) {
+				$sync_on_read_triggered = true;
+			}
+		);
+
+		// Read order without filter — sync on read should NOT trigger.
+		$this->reset_order_data_store_state( $this->sut );
+		wc_get_order( $order->get_id() );
+		$this->assertFalse( $sync_on_read_triggered, 'Sync on read should not trigger by default.' );
+
+		// Enable sync on read via filter.
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
+
+		// Read order with filter — sync on read SHOULD trigger (post is newer).
+		$this->reset_order_data_store_state( $this->sut );
+		wc_get_order( $order->get_id() );
+		$this->assertTrue( $sync_on_read_triggered, 'Sync on read should trigger when enabled and post is newer.' );
+
+		// Reset and make the post version older — sync on read should NOT trigger even with filter.
+		$sync_on_read_triggered = false;
+		$order->set_date_modified( $now );
+		$order->save();
+
+		$wpdb->update(
+			$wpdb->posts,
+			array( 'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', $before ) ),
+			array( 'ID' => $order->get_id() )
+		);
+		clean_post_cache( $order->get_id() );
+
+		$this->reset_order_data_store_state( $this->sut );
+		wc_get_order( $order->get_id() );
+		$this->assertFalse( $sync_on_read_triggered, 'Sync on read should not trigger when post is older.' );
+
+		remove_all_actions( 'woocommerce_hpos_post_record_migrated_on_read' );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -2158,6 +2473,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_read_multiple_dont_sync_again_for_same_order() {
 		$this->toggle_cot_feature_and_usage( true );
 		$this->disable_cot_sync();
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 		$order = $this->create_complex_cot_order();
 		$this->sut->backfill_post_record( $order );
 		$this->enable_cot_sync();
@@ -2174,6 +2490,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertTrue( $should_sync_callable->call( $this->sut, $order ) );
 		$this->sut->read_multiple( $orders );
 		$this->assertFalse( $should_sync_callable->call( $this->sut, $order ) );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 		$this->toggle_cot_feature_and_usage( false );
 	}
 
@@ -2932,8 +3249,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 */
 	private function reset_order_data_store_state( $sut ) {
 		$reset_state = function () use ( $sut ) {
-			self::$backfilling_order_ids = array();
-			self::$reading_order_ids     = array();
+			self::$backfilling_order_ids  = array();
+			self::$reading_order_ids      = array();
+			self::$sync_on_read_order_ids = array();
 		};
 		$reset_state->call( $sut );
 		wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->flush();
@@ -3813,5 +4131,96 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$sync = wc_get_container()->get( DataSynchronizer::class );
 		$sync->process_batch( array( $order_id ) );
 		$this->assertEquals( false, (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$this->sut::get_orders_table_name()} WHERE id = %d", $order_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	/**
+	 * @testdox needs_processing returns correct result when COGS filter triggers get_items() during order hydration.
+	 *
+	 * Reproduces GitHub issue #62173: woocommerce_new_order fires before items are in DB.
+	 * If a hook loads the order and triggers get_items() (e.g., via COGS filter calling get_data()),
+	 * empty items get cached. The fix invalidates the cache when items are saved.
+	 */
+	public function test_needs_processing_with_cogs_filter_triggering_get_items() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cogs_feature();
+
+		$this->assertTrue(
+			OrderUtil::orders_cache_usage_is_enabled(),
+			'Order cache must be enabled for this test.'
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_virtual( false );
+		$product->set_downloadable( false );
+		$product->save();
+
+		// COGS filter that calls get_data() (which calls get_items()), priming empty items.
+		$cogs_filter = function ( $cogs_value, $order ) {
+			$order->get_data();
+			return $cogs_value;
+		};
+		add_filter( 'woocommerce_load_order_cogs_value', $cogs_filter, 10, 2 );
+
+		// Load order during woocommerce_new_order (before items are in DB), caching it with empty items.
+		$new_order_hook = function ( $order_id ) {
+			wc_get_order( $order_id );
+		};
+		add_action( 'woocommerce_new_order', $new_order_hook, 10, 1 );
+
+		// Create order with item. woocommerce_new_order fires before save_items().
+		$order = new WC_Order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10,
+				'total'    => 10,
+			)
+		);
+		$order->add_item( $item );
+		$order->save();
+		$order_id = $order->get_id();
+
+		remove_filter( 'woocommerce_load_order_cogs_value', $cogs_filter, 10 );
+		remove_action( 'woocommerce_new_order', $new_order_hook, 10 );
+
+		// Without fix: returns cached order with empty items. With fix: fresh data from DB.
+		$fresh_order = wc_get_order( $order_id );
+
+		$this->assertCount( 1, $fresh_order->get_items(), 'Order should have items from DB.' );
+		$this->assertTrue( $fresh_order->needs_processing(), 'Order with physical product should need processing.' );
+	}
+
+	/**
+	 * Verifies that needs_processing caching functions as intended.
+	 */
+	public function test_needs_processing_caching_correctness(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->save();
+
+		$order = new WC_Order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10,
+				'total'    => 10,
+			)
+		);
+		$order->add_item( $item );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$this->assertTrue( $order->needs_processing() );
+		$this->assertSame( 1, wp_cache_get( 'order-needs-processing-' . $order_id, 'orders' ) );
+
+		wp_cache_set( 'order-needs-processing-' . $order_id, 0, 'orders' );
+		$this->assertFalse( $order->needs_processing() );
+		$this->assertSame( 0, wp_cache_get( 'order-needs-processing-' . $order_id, 'orders' ) );
+
+		$order->delete();
+		$product->delete();
 	}
 }

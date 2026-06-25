@@ -12,6 +12,27 @@ use WP_Filesystem_Base;
  * FilesystemUtil class.
  */
 class FilesystemUtil {
+
+	/**
+	 * `.htaccess` directive that prevents directory listing while still allowing direct access to files.
+	 */
+	public const HTACCESS_ALLOW_FILE_ACCESS = 'Options -Indexes';
+
+	/**
+	 * `.htaccess` directive that denies all access to a directory's contents.
+	 */
+	public const HTACCESS_DENY_ALL = 'deny from all';
+
+	/**
+	 * Transient key for tracking FTP filesystem initialization failures.
+	 */
+	private const FTP_INIT_FAILURE_TRANSIENT = 'wc_ftp_filesystem_init_failed';
+
+	/**
+	 * Cooldown period in minutes before retrying a failed FTP connection.
+	 */
+	private const FTP_INIT_COOLDOWN_MINUTES = 2;
+
 	/**
 	 * Wrapper to retrieve the class instance contained in the $wp_filesystem global, after initializing if necessary.
 	 *
@@ -21,12 +42,10 @@ class FilesystemUtil {
 	public static function get_wp_filesystem(): WP_Filesystem_Base {
 		global $wp_filesystem;
 
-		if ( ! $wp_filesystem instanceof WP_Filesystem_Base ) {
-			$initialized = self::initialize_wp_filesystem();
+		$initialized = ( $wp_filesystem instanceof WP_Filesystem_Base ) || self::initialize_wp_filesystem();
 
-			if ( false === $initialized ) {
-				throw new Exception( 'The WordPress filesystem could not be initialized.' );
-			}
+		if ( ! $initialized || ! self::is_usable_ftp_filesystem( $wp_filesystem ) ) {
+			throw new Exception( 'The WordPress filesystem could not be initialized.' );
 		}
 
 		return $wp_filesystem;
@@ -49,6 +68,33 @@ class FilesystemUtil {
 		}
 
 		return 'direct';
+	}
+
+	/**
+	 * Get the content directory's root-relative path (e.g. "/wp-content").
+	 *
+	 * Resolves the path under which files inside the content directory are addressed,
+	 * honoring a relocated WP_CONTENT_DIR. When the content directory lives under
+	 * ABSPATH the path is derived from it directly; otherwise (e.g. Bedrock-style
+	 * layouts where it sits outside ABSPATH) it is derived from the content URL,
+	 * falling back to "/wp-content".
+	 *
+	 * @internal
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return string The content directory's root-relative path, e.g. "/wp-content" or "/app".
+	 */
+	public static function get_content_directory_relative_path(): string {
+		$abspath        = (string) Constants::get_constant( 'ABSPATH' );
+		$wp_content_dir = (string) Constants::get_constant( 'WP_CONTENT_DIR' );
+
+		if ( '' !== $abspath && 0 === strpos( $wp_content_dir, $abspath ) ) {
+			return '/' . substr( $wp_content_dir, strlen( $abspath ) );
+		}
+
+		$content_url_path = wp_parse_url( content_url(), PHP_URL_PATH );
+		return is_string( $content_url_path ) ? $content_url_path : '/wp-content';
 	}
 
 	/**
@@ -82,7 +128,7 @@ class FilesystemUtil {
 			throw new \Exception( esc_html( sprintf( 'Could not create directory: %s.', wp_basename( $path ) ) ) );
 		}
 
-		$htaccess_content = $allow_file_access ? 'Options -Indexes' : 'deny from all';
+		$htaccess_content = $allow_file_access ? self::HTACCESS_ALLOW_FILE_ACCESS : self::HTACCESS_DENY_ALL;
 
 		$files = array(
 			'.htaccess'  => $htaccess_content,
@@ -114,15 +160,59 @@ class FilesystemUtil {
 		if ( 'direct' === $method ) {
 			$initialized = WP_Filesystem();
 		} elseif ( false !== $method ) {
+			$is_ftp = in_array( $method, array( 'ftpext', 'ftpsockets' ), true );
+
+			if ( $is_ftp && get_transient( self::FTP_INIT_FAILURE_TRANSIENT ) ) {
+				return false;
+			}
+
 			// See https://core.trac.wordpress.org/changeset/56341.
 			ob_start();
 			$credentials = request_filesystem_credentials( '' );
 			ob_end_clean();
 
 			$initialized = $credentials && WP_Filesystem( $credentials );
+
+			if ( $is_ftp ) {
+				if ( ! $initialized ) {
+					// A fixed cooldown is used instead of exponential backoff since this handles a non-critical
+					// edge case (broken FTP filesystem during logging) that most sites will never encounter.
+					set_transient( self::FTP_INIT_FAILURE_TRANSIENT, true, self::FTP_INIT_COOLDOWN_MINUTES * MINUTE_IN_SECONDS );
+					error_log( sprintf( 'WooCommerce: FTP filesystem connection failed. Please check your FTP credentials. Retrying in %d minutes.', self::FTP_INIT_COOLDOWN_MINUTES ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				} else {
+					delete_transient( self::FTP_INIT_FAILURE_TRANSIENT );
+				}
+			}
 		}
 
 		return is_null( $initialized ) ? false : $initialized;
+	}
+
+	/**
+	 * Check if an FTP-based filesystem instance is usable.
+	 *
+	 * Checks both the connection resource and the error state. The connection
+	 * resource can be null if PHP's max execution time interrupted ftp_connect()
+	 * before it completed, leaving the instance in a broken state without errors.
+	 *
+	 * @param WP_Filesystem_Base $wp_filesystem The filesystem instance to check.
+	 * @return bool False if FTP-based and unusable, true otherwise.
+	 */
+	private static function is_usable_ftp_filesystem( WP_Filesystem_Base $wp_filesystem ): bool {
+		$has_broken_state = false;
+		$has_errors       = false;
+
+		if ( 'ftpext' === $wp_filesystem->method ) {
+			$has_broken_state = empty( $wp_filesystem->link );
+			$has_errors       = is_wp_error( $wp_filesystem->errors ) && $wp_filesystem->errors->has_errors();
+		}
+
+		if ( 'ftpsockets' === $wp_filesystem->method ) {
+			$has_broken_state = empty( $wp_filesystem->ftp );
+			$has_errors       = is_wp_error( $wp_filesystem->errors ) && $wp_filesystem->errors->has_errors();
+		}
+
+		return ! $has_broken_state && ! $has_errors;
 	}
 
 	/**

@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import { DispatchFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
  */
 import { CrudActions, CrudSelectors } from '../crud/types';
+import { DispatchFromMap } from '../types';
 
 export type ShippingZone = {
 	id: number;

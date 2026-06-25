@@ -115,7 +115,7 @@
 					.woocommerce-edit-site-site-hub__view-mode-toggle-container {
 						height: 64px;
 						padding: 16px 12px 0 0;
-						color: #ccc;
+						color: $gray-400;
 						width: auto;
 					}
 
@@ -177,7 +177,7 @@
 						.edit-site-site-icon__icon {
 							width: 32px;
 							height: 32px;
-							fill: #ccc;
+							fill: $gray-400;
 						}
 					}
 
@@ -281,6 +281,7 @@
 								align-self: stretch;
 								width: 348px;
 								border: 1.5px solid transparent;
+								max-width: 100%;
 
 								&.all-tasks-complete {
 									svg {
@@ -288,7 +289,7 @@
 									}
 								}
 
-								&:hover {
+								&:hover:not(.all-tasks-complete) {
 									background: #ededed;
 									color: $gray-600;
 								}

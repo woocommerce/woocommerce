@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Coming Soon With Header and Footer
+ * Title: Coming Soon with Header and Footer
  * Slug: woocommerce/page-coming-soon-with-header-footer
  * Categories: WooCommerce
  * Template Types: coming-soon

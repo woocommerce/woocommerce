@@ -118,9 +118,11 @@ const MyComponent = () => {
 }
 ```
 
-### Importing WooCommerce (React) hooks
+### Importing WooCommerce utilities and React hooks
 
-Currently, none of our hooks are designed to be used externally, so trying to import hooks such as `useStoreCart` is not supported. Instead, getting the data from the [`wc/store/...`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/data-store/) data stores is preferred.
+Some checkout utilities and React hooks are available for external use from `@woocommerce/blocks-checkout`. See the [Checkout Utilities](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/checkout-utilities/) documentation for available utilities.
+
+For accessing store data, using the [`wc/store/...`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/data-store/) data stores is preferred over importing internal hooks like `useStoreCart`.
 
 ## Back-end extensibility
 

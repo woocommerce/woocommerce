@@ -654,7 +654,19 @@ class WC_Form_Handler {
 			$cart_item     = WC()->cart->get_cart_item( $cart_item_key );
 
 			if ( $cart_item ) {
-				WC()->cart->remove_cart_item( $cart_item_key );
+				$removed = WC()->cart->remove_cart_item( $cart_item_key );
+
+				if ( $removed ) {
+					/**
+					 * Fires when a cart item is removed from a user request.
+					 *
+					 * @param string   $cart_item_key Cart item key.
+					 * @param \WC_Cart $cart          Cart object.
+					 *
+					 * @since 10.6.0
+					 */
+					do_action( 'internal_woocommerce_cart_item_removed_from_user_request', $cart_item_key, WC()->cart );
+				}
 
 				$product = wc_get_product( $cart_item['product_id'] );
 
@@ -725,8 +737,21 @@ class WC_Form_Handler {
 					}
 
 					if ( $passed_validation ) {
+						$old_quantity = $values['quantity'];
 						WC()->cart->set_quantity( $cart_item_key, $quantity, false );
 						$cart_updated = true;
+
+						/**
+						 * Fires when a cart item quantity is updated from a user request.
+						 *
+						 * @param string   $cart_item_key Cart item key.
+						 * @param int|float $quantity     New quantity.
+						 * @param int|float $old_quantity Old quantity.
+						 * @param \WC_Cart $cart          Cart object.
+						 *
+						 * @since 10.6.0
+						 */
+						do_action( 'internal_woocommerce_cart_item_updated_from_user_request', $cart_item_key, $quantity, $old_quantity, WC()->cart );
 					}
 				}
 			}
@@ -838,6 +863,7 @@ class WC_Form_Handler {
 
 		if ( ProductType::VARIABLE === $add_to_cart_handler || ProductType::VARIATION === $add_to_cart_handler ) {
 			$was_added_to_cart = self::add_to_cart_handler_variable( $product_id );
+			$product_id        = ! empty( $_REQUEST['variation_id'] ) ? absint( wp_unslash( $_REQUEST['variation_id'] ) ) : $product_id; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		} elseif ( ProductType::GROUPED === $add_to_cart_handler ) {
 			$was_added_to_cart = self::add_to_cart_handler_grouped( $product_id );
 		} elseif ( has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ) {
@@ -848,6 +874,18 @@ class WC_Form_Handler {
 
 		// If we added the product to the cart we can now optionally do a redirect.
 		if ( $was_added_to_cart && 0 === wc_notice_count( 'error' ) ) {
+			$quantity = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			/**
+			 * Fires when an item is added to the cart from a user request.
+			 *
+			 * @param int       $product_id Product ID.
+			 * @param int|float $quantity   Quantity added to the cart.
+			 *
+			 * @since 10.6.0
+			 */
+			do_action( 'internal_woocommerce_cart_item_added_from_user_request', $product_id, $quantity );
+
 			$url = apply_filters( 'woocommerce_add_to_cart_redirect', $url, $adding_to_cart );
 
 			if ( $url ) {
@@ -868,6 +906,11 @@ class WC_Form_Handler {
 	 * @return bool success or not
 	 */
 	private static function add_to_cart_handler_simple( $product_id ) {
+		if ( ! WC()->cart ) {
+			wc_doing_it_wrong( __FUNCTION__, 'Cart is not initialized.', '10.5.0' );
+			return false;
+		}
+
 		$quantity          = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
@@ -959,8 +1002,19 @@ class WC_Form_Handler {
 
 		// Prevent parent variable product from being added to cart.
 		if ( empty( $variation_id ) && $product && $product->is_type( ProductType::VARIABLE ) ) {
-			/* translators: 1: product link, 2: product name */
-			wc_add_notice( sprintf( __( 'Please choose product options by visiting <a href="%1$s" title="%2$s">%2$s</a>.', 'woocommerce' ), esc_url( get_permalink( $product_id ) ), esc_html( $product->get_name() ) ), 'error' );
+			$current_url        = isset( $_SERVER['REQUEST_URI'] ) ? wp_parse_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH ) : '';
+			$product_url        = wp_parse_url( get_permalink( $product_id ), PHP_URL_PATH );
+			$is_in_product_page = $current_url && $product_url && untrailingslashit( $current_url ) === untrailingslashit( $product_url );
+
+			if ( $is_in_product_page ) {
+				/* translators: 1: product name */
+				$error_message = sprintf( __( 'Please choose product options for %1$s.', 'woocommerce' ), esc_html( $product->get_name() ) );
+			} else {
+				/* translators: 1: product link, 2: product name */
+				$error_message = sprintf( __( 'Please choose product options by visiting <a href="%1$s" title="%2$s">%2$s</a>.', 'woocommerce' ), esc_url( get_permalink( $product_id ) ), esc_html( $product->get_name() ) );
+			}
+
+			wc_add_notice( $error_message, 'error' );
 
 			return false;
 		}

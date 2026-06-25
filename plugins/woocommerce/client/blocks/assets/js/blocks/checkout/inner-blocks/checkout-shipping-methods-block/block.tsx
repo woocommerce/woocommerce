@@ -27,6 +27,7 @@ import type {
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import type { ReactElement } from 'react';
 import { useMemo } from '@wordpress/element';
+import ReadMore from '@woocommerce/base-components/read-more';
 
 /**
  * Renders a shipping rate control option.
@@ -39,6 +40,7 @@ const renderShippingRatesControlOption = (
 	const priceWithTaxes = getSetting( 'displayCartPricesIncludingTax', false )
 		? parseInt( option.price, 10 ) + parseInt( option.taxes, 10 )
 		: parseInt( option.price, 10 );
+	const isSelected = option?.selected;
 
 	const secondaryLabel =
 		priceWithTaxes === 0 ? (
@@ -57,7 +59,12 @@ const renderShippingRatesControlOption = (
 		value: option.rate_id,
 		description: decodeEntities( option.delivery_time ),
 		secondaryLabel,
-		secondaryDescription: decodeEntities( option.description ),
+		secondaryDescription:
+			isSelected && option.description ? (
+				<ReadMore maxLines={ 2 }>
+					{ decodeEntities( option.description ) }
+				</ReadMore>
+			) : undefined,
 	};
 };
 

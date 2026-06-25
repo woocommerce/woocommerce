@@ -1,0 +1,29 @@
+name: 'Auto-assign milestone on merge'
+
+on:
+  pull_request_target:
+    types: [closed]
+    branches: [trunk]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  assign-milestone:
+    name: 'Assign milestone if so instructed'
+    if: github.event.pull_request.merged == true && github.event.pull_request.milestone == null
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/workflows/scripts
+
+      - name: Assign milestone
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/assign-milestone-on-merge.js');
+            await script({ github, context, core });

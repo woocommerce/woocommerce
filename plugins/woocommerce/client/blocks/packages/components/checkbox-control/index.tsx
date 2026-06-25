@@ -12,9 +12,9 @@ import { forwardRef } from '@wordpress/element';
 import './style.scss';
 
 export type CheckboxControlProps = {
-	label?: string | React.ReactNode;
+	label?: ReactNode;
 	onChange: ( value: boolean ) => void;
-	children?: ReactNode | null | undefined;
+	children?: ReactNode;
 	hasError?: boolean;
 	errorId?: string;
 	errorMessage?: string;
@@ -74,7 +74,7 @@ export const CheckboxControl = forwardRef<
 						className="wc-block-components-checkbox__input"
 						type="checkbox"
 						onChange={ ( event ) =>
-							onChange( event.target.checked )
+							onChange?.( event.target.checked )
 						}
 						aria-invalid={ hasError === true }
 						checked={ checked }
@@ -85,7 +85,6 @@ export const CheckboxControl = forwardRef<
 					<svg
 						className="wc-block-components-checkbox__mark"
 						aria-hidden="true"
-						xmlns="http://www.w3.org/2000/svg"
 						viewBox="0 0 24 20"
 					>
 						<path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />

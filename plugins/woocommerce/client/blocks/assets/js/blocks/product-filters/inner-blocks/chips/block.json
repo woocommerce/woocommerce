@@ -10,12 +10,16 @@
 	"ancestor": [
 		"woocommerce/product-filter-attribute",
 		"woocommerce/product-filter-taxonomy",
-		"woocommerce/product-filter-status"
+		"woocommerce/product-filter-status",
+		"woocommerce/add-to-cart-with-options-variation-selector-attribute"
 	],
 	"supports": {
-		"interactivity": true
+		"interactivity": true,
+		"woocommerce": {
+			"innerBlockDisplayStyle": true
+		}
 	},
-	"usesContext": [ "filterData" ],
+	"usesContext": [ "woocommerce/selectableItems", "woocommerce/attributeId" ],
 	"attributes": {
 		"chipText": {
 			"type": "string"

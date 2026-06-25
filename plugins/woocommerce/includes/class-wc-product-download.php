@@ -9,6 +9,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\URL;
 
 defined( 'ABSPATH' ) || exit;
@@ -32,12 +33,20 @@ class WC_Product_Download implements ArrayAccess {
 	);
 
 	/**
+	 * Extra data array.
+	 *
+	 * @since 10.6.0
+	 * @var array
+	 */
+	protected $extra_data = array();
+
+	/**
 	 * Returns all data for this object.
 	 *
 	 * @return array
 	 */
 	public function get_data() {
-		return $this->data;
+		return array_merge( $this->extra_data, $this->data );
 	}
 
 	/**
@@ -179,13 +188,41 @@ class WC_Product_Download implements ArrayAccess {
 		if ( 'relative' !== $this->get_type_of_file_path() ) {
 			return true;
 		}
-		$file_url = $this->get_file();
-		if ( '..' === substr( $file_url, 0, 2 ) || '/' !== substr( $file_url, 0, 1 ) ) {
-			$file_url = realpath( ABSPATH . $file_url );
-		} elseif ( substr( WP_CONTENT_DIR, strlen( untrailingslashit( ABSPATH ) ) ) === substr( $file_url, 0, strlen( substr( WP_CONTENT_DIR, strlen( untrailingslashit( ABSPATH ) ) ) ) ) ) {
-			$file_url = realpath( WP_CONTENT_DIR . substr( $file_url, 11 ) );
-		}
+
+		$file_url = $this->get_absolute_file_path( $this->get_file() );
+
 		return apply_filters( 'woocommerce_downloadable_file_exists', file_exists( $file_url ), $this->get_file() );
+	}
+
+	/**
+	 * Resolve a stored "relative" download file reference to an absolute filesystem path.
+	 *
+	 * A relative reference can be expressed either against the WordPress root (ABSPATH)
+	 * or as a root-relative path into the content directory; this resolves both, honoring
+	 * a relocated WP_CONTENT_DIR.
+	 *
+	 * @param string $file_url The stored file reference, of "relative" type.
+	 * @return string|false The absolute filesystem path, the reference unchanged, or false if realpath() fails.
+	 */
+	private function get_absolute_file_path( $file_url ) {
+		// Paths starting with ".." or not starting with "/" are taken relative to ABSPATH.
+		$is_abspath_relative = '..' === substr( $file_url, 0, 2 ) || '/' !== substr( $file_url, 0, 1 );
+		if ( $is_abspath_relative ) {
+			return realpath( ABSPATH . $file_url );
+		}
+
+		// Root-relative paths into the content directory are resolved against WP_CONTENT_DIR.
+		// Match the content dirname only at a path-segment boundary, so a content dir such as
+		// "/app" does not false-match an unrelated path like "/application/...".
+		$content_dirname     = FilesystemUtil::get_content_directory_relative_path();
+		$is_content_relative = $file_url === $content_dirname || 0 === strpos( $file_url, trailingslashit( $content_dirname ) );
+		if ( $is_content_relative ) {
+			$path_within_content_dir = substr( $file_url, strlen( $content_dirname ) );
+			return realpath( WP_CONTENT_DIR . $path_within_content_dir );
+		}
+
+		// Not an ABSPATH- or content-relative path; leave it untouched.
+		return $file_url;
 	}
 
 	/**
@@ -268,6 +305,17 @@ class WC_Product_Download implements ArrayAccess {
 	*/
 
 	/**
+	 * Set extra data by key.
+	 *
+	 * @since 10.6.0
+	 * @param string $key   Extra data key.
+	 * @param mixed  $value Extra data value.
+	 */
+	public function set_extra_data( string $key, $value ): void {
+		$this->extra_data[ $key ] = $value;
+	}
+
+	/**
 	 * Set ID.
 	 *
 	 * @param string $value Download ID.
@@ -331,6 +379,27 @@ class WC_Product_Download implements ArrayAccess {
 	| Getters
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Get all extra data.
+	 *
+	 * @since 10.6.0
+	 * @return array
+	 */
+	public function get_all_extra_data() {
+		return $this->extra_data;
+	}
+
+	/**
+	 * Get extra data by key.
+	 *
+	 * @since 10.6.0
+	 * @param string $key Extra data key.
+	 * @return mixed
+	 */
+	public function get_extra_data( string $key ) {
+		return $this->extra_data[ $key ] ?? null;
+	}
 
 	/**
 	 * Get id.
@@ -398,6 +467,9 @@ class WC_Product_Download implements ArrayAccess {
 				if ( is_callable( array( $this, "get_$offset" ) ) ) {
 					return $this->{"get_$offset"}();
 				}
+				if ( isset( $this->extra_data[ $offset ] ) ) {
+					return $this->extra_data[ $offset ];
+				}
 				break;
 		}
 		return '';
@@ -415,7 +487,9 @@ class WC_Product_Download implements ArrayAccess {
 			default:
 				if ( is_callable( array( $this, "set_$offset" ) ) ) {
 					$this->{"set_$offset"}( $value );
+					break;
 				}
+				$this->extra_data[ $offset ] = $value;
 				break;
 		}
 	}
@@ -436,6 +510,6 @@ class WC_Product_Download implements ArrayAccess {
 	 */
 	#[\ReturnTypeWillChange]
 	public function offsetExists( $offset ) {
-		return in_array( $offset, array_keys( $this->data ), true );
+		return in_array( $offset, array_merge( array_keys( $this->data ), array_keys( $this->extra_data ) ), true );
 	}
 }

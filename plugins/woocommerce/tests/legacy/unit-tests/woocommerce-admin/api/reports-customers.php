@@ -40,6 +40,20 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 				'role' => 'administrator',
 			)
 		);
+
+		// Disable report caching for this test class — these tests exercise
+		// query semantics, not cache behaviour.  A separate issue (#64557)
+		// tracks the cache-invalidation timing bug that stable cache keys
+		// have surfaced.
+		add_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
+	}
+
+	/**
+	 * Clean up after tests.
+	 */
+	public function tearDown(): void {
+		remove_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
+		parent::tearDown();
 	}
 
 	/**
@@ -64,6 +78,9 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'id', $schema );
 		$this->assertArrayHasKey( 'user_id', $schema );
 		$this->assertArrayHasKey( 'name', $schema );
+		$this->assertArrayHasKey( 'first_name', $schema );
+		$this->assertArrayHasKey( 'last_name', $schema );
+		$this->assertArrayHasKey( 'email', $schema );
 		$this->assertArrayHasKey( 'username', $schema );
 		$this->assertArrayHasKey( 'country', $schema );
 		$this->assertArrayHasKey( 'city', $schema );
@@ -91,7 +108,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertCount( 15, $properties );
+		$this->assertCount( 18, $properties );
 		$this->assert_report_item_schema( $properties );
 	}
 

@@ -2,7 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
-use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 /**
  * Cart class.
@@ -33,6 +33,26 @@ class Cart extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 		add_action( 'wp_loaded', array( $this, 'register_patterns' ) );
+		add_action( 'wp', array( $this, 'disable_wp_emoji' ) );
+	}
+
+	/**
+	 * Remove WordPress emoji detection script on pages containing this block.
+	 *
+	 * The wp-emoji MutationObserver converts emoji text nodes to <img> elements
+	 * when React hydrates or re-renders, corrupting the DOM tree and crashing the block.
+	 * The wp-exclude-emoji class on the wrapper only prevents the initial parse, not the
+	 * MutationObserver, so the script must be removed entirely.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @return void
+	 */
+	public function disable_wp_emoji() {
+		if ( has_block( $this->get_full_block_name() ) ) {
+			remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+			remove_action( 'wp_print_styles', 'print_emoji_styles' );
+		}
 	}
 
 	/**
@@ -236,40 +256,38 @@ class Cart extends AbstractBlock {
 
 		$this->asset_data_registry->add( 'countryData', CartCheckoutUtils::get_country_data() );
 		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ) );
-		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', 'incl' === get_option( 'woocommerce_tax_display_cart' ) );
+		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', TaxDisplayMode::INCLUSIVE === get_option( 'woocommerce_tax_display_cart' ) );
 		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled() );
 		$this->asset_data_registry->add( 'couponsEnabled', wc_coupons_enabled() );
 		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled() );
 		$this->asset_data_registry->add( 'hasDarkEditorStyleSupport', current_theme_supports( 'dark-editor-style' ) );
 		$this->asset_data_registry->register_page_id( isset( $attributes['checkoutPageId'] ) ? $attributes['checkoutPageId'] : 0 );
 		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
-
-		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings();
-		$local_pickup_method_ids  = LocalPickupUtils::get_local_pickup_method_ids();
-
-		$this->asset_data_registry->add( 'localPickupEnabled', $pickup_location_settings['enabled'] );
-		$this->asset_data_registry->add( 'collectableMethodIds', $local_pickup_method_ids );
 		$this->asset_data_registry->add( 'shippingMethodsExist', CartCheckoutUtils::shipping_methods_exist() > 0 );
 
 		$is_block_editor = $this->is_block_editor();
 
-		if ( $is_block_editor && ! $this->asset_data_registry->exists( 'localPickupLocations' ) ) {
-			// Locations are passed to the client in admin to show a realistic preview in the editor.
-			$this->asset_data_registry->add(
-				'localPickupLocations',
-				array_filter(
-					array_map(
-						function ( $location ) {
-							if ( ! $location['enabled'] ) {
-								return null;
-							}
-							$location['formatted_address'] = wc()->countries->get_formatted_address( $location['address'], ', ' );
-							return $location;
-						},
-						get_option( 'pickup_location_pickup_locations', array() )
-					)
-				)
-			);
+		// Check `current_user_can` so we can show notices about incompatible extensions in the front-end to admins too.
+		if ( ( $is_block_editor || current_user_can( 'manage_woocommerce' ) ) && ! $this->asset_data_registry->exists( 'incompatibleExtensions' ) ) {
+			if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) && function_exists( 'get_plugins' ) ) {
+				$declared_extensions     = \Automattic\WooCommerce\Utilities\FeaturesUtil::get_compatible_plugins_for_feature( 'cart_checkout_blocks' );
+				$all_plugins             = \get_plugins();
+				$incompatible_extensions = array_reduce(
+					$declared_extensions['incompatible'],
+					function ( array $acc, $item ) use ( $all_plugins ) {
+						$plugin      = $all_plugins[ $item ] ?? null;
+						$plugin_id   = $plugin['TextDomain'] ?? dirname( $item );
+						$plugin_name = $plugin['Name'] ?? $plugin_id;
+						$acc[]       = [
+							'id'    => $plugin_id,
+							'title' => $plugin_name,
+						];
+						return $acc;
+					},
+					[]
+				);
+				$this->asset_data_registry->add( 'incompatibleExtensions', $incompatible_extensions );
+			}
 		}
 
 		// Hydrate the following data depending on admin or frontend context.

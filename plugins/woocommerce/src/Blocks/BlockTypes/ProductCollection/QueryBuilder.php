@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\StockFilter;
 use WP_Query;
 use WC_Tax;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 /**
  * QueryBuilder class.
@@ -140,11 +141,14 @@ class QueryBuilder {
 	 * @param bool  $is_exclude_applied_filters Whether to exclude the applied filters or not.
 	 */
 	public function get_final_frontend_query( $collection_args, $query, $page = 1, $is_exclude_applied_filters = false ) {
-		$product_ids = $query['post__in'] ?? array();
-		$offset      = $query['offset'] ?? 0;
-		$per_page    = $query['perPage'] ?? 9;
-		$order       = $query['order'] ?? 'asc';
-		$search      = $query['search'] ?? '';
+		$product_ids  = $query['post__in'] ?? array();
+		$offset_raw   = $query['offset'] ?? 0;
+		$per_page_raw = $query['perPage'] ?? null;
+		$query_id     = $query['queryId'] ?? null;
+		$offset       = is_numeric( $offset_raw ) ? max( 0, (int) $offset_raw ) : 0;
+		$per_page     = is_numeric( $per_page_raw ) ? max( 1, (int) $per_page_raw ) : 9;
+		$order        = $query['order'] ?? 'asc';
+		$search       = $query['search'] ?? '';
 
 		$common_query_values = array(
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
@@ -190,6 +194,7 @@ class QueryBuilder {
 				'featured'            => $featured,
 				'timeFrame'           => $time_frame,
 				'priceRange'          => $price_range,
+				'queryId'             => $query_id,
 			),
 			$is_exclude_applied_filters
 		);
@@ -254,7 +259,10 @@ class QueryBuilder {
 		$query,
 		$is_exclude_applied_filters = false
 	) {
-		$orderby_query    = $query['orderby'] ? $this->get_custom_orderby_query( $query['orderby'] ) : array();
+		$query_id         = is_int( $query['queryId'] ?? null ) ? $query['queryId'] : null;
+		$orderby_query    = $query['orderby']
+			? $this->get_custom_orderby_query( $query['orderby'], $query_id, $query )
+			: array();
 		$on_sale_query    = $this->get_on_sale_products_query( $query['on_sale'] );
 		$stock_query      = $this->get_stock_status_query( $query['stock_status'] );
 		$visibility_query = is_array( $query['stock_status'] ) ? $this->get_product_visibility_query( $stock_query, $query['stock_status'] ) : array();
@@ -652,6 +660,66 @@ class QueryBuilder {
 	}
 
 	/**
+	 * Return a query that filters products by taxonomy terms.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @return array
+	 */
+	private function get_filter_by_taxonomy_query() {
+
+		$container       = wc_get_container();
+		$params_handler  = $container->get( \Automattic\WooCommerce\Internal\ProductFilters\Params::class );
+		$taxonomy_params = $params_handler->get_param( 'taxonomy' );
+
+		if ( empty( $taxonomy_params ) ) {
+			return array();
+		}
+
+		$tax_queries = array();
+
+		foreach ( $taxonomy_params as $taxonomy_slug => $param_key ) {
+			$param_value = get_query_var( $param_key );
+
+			// Adding is_string check to avoid invalid query parameters for the taxonomy.
+			if ( ! is_string( $param_value ) || empty( $param_value ) ) {
+				continue;
+			}
+
+			// Define $term_values by exploding the string.
+			$term_values = explode( ',', $param_value );
+
+			// Sanitize and filter (removes empty strings).
+			$term_slugs = array_values( array_filter( array_map( 'sanitize_title', $term_values ) ) );
+
+			if ( empty( $term_slugs ) ) {
+				continue;
+			}
+
+			$tax_queries[] = array(
+				'taxonomy' => $taxonomy_slug,
+				'field'    => 'slug',
+				'terms'    => $term_slugs,
+				'operator' => 'IN',
+			);
+		}
+
+		if ( empty( $tax_queries ) ) {
+			return array();
+		}
+
+		return array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery
+			'tax_query' => array(
+				array(
+					'relation' => 'AND',
+					...$tax_queries,
+				),
+			),
+		);
+	}
+
+	/**
 	 * Merge two array recursively but replace the non-array values instead of
 	 * merging them. The merging strategy:
 	 *
@@ -727,6 +795,7 @@ class QueryBuilder {
 			'attributes_filter'   => $this->get_filter_by_attributes_query(),
 			'stock_status_filter' => $this->get_filter_by_stock_status_query(),
 			'rating_filter'       => $this->get_filter_by_rating_query(),
+			'taxonomy_filter'     => $this->get_filter_by_taxonomy_query(),
 		);
 	}
 
@@ -916,7 +985,7 @@ class QueryBuilder {
 		$base_tax_rates = WC_Tax::get_base_tax_rates( $tax_class );
 
 		// If prices are shown incl. tax, we want to remove the taxes from the filter amount to match prices stored excl. tax.
-		if ( 'incl' === $tax_display ) {
+		if ( TaxDisplayMode::INCLUSIVE === $tax_display ) {
 			/**
 			 * Filters if taxes should be removed from locations outside the store base location.
 			 *
@@ -953,7 +1022,7 @@ class QueryBuilder {
 	 */
 	private function should_adjust_price_range_for_taxes() {
 		$display_setting      = get_option( 'woocommerce_tax_display_shop' ); // Tax display setting ('incl' or 'excl').
-		$price_storage_method = wc_prices_include_tax() ? 'incl' : 'excl';
+		$price_storage_method = wc_prices_include_tax() ? TaxDisplayMode::INCLUSIVE : TaxDisplayMode::EXCLUSIVE;
 
 		return $display_setting !== $price_storage_method;
 	}
@@ -1039,11 +1108,13 @@ class QueryBuilder {
 	/**
 	 * Return query params to support custom sort values
 	 *
-	 * @param string $orderby  Sort order option.
+	 * @param string   $orderby  Sort order option.
+	 * @param int|null $query_id Product Collection query ID, or null to leave random ordering unseeded.
+	 * @param array    $query    Product Collection query context.
 	 *
 	 * @return array
 	 */
-	private function get_custom_orderby_query( $orderby ) {
+	private function get_custom_orderby_query( $orderby, ?int $query_id = null, $query = array() ) {
 		if ( ! in_array( $orderby, $this->custom_order_opts, true ) || 'post__in' === $orderby ) {
 			return array( 'orderby' => $orderby );
 		}
@@ -1074,8 +1145,16 @@ class QueryBuilder {
 		}
 
 		if ( 'random' === $orderby ) {
+			if ( null === $query_id ) {
+				return array(
+					'orderby' => 'rand',
+				);
+			}
+
+			$seed = Utils::get_random_order_seed( $query_id, $query );
+
 			return array(
-				'orderby' => 'rand',
+				'orderby' => 'RAND(' . $seed . ')',
 			);
 		}
 

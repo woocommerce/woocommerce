@@ -25,7 +25,7 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 * @param string $hook The hook to trigger.
 	 * @param array  $args Arguments to pass when the hook triggers.
 	 * @param string $group The group to assign this job to.
-	 * @return string The action ID.
+	 * @return int The action ID.
 	 */
 	public function add( $hook, $args = array(), $group = '' ) {
 		return $this->schedule_single( time(), $hook, $args, $group );
@@ -38,7 +38,7 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 * @param string $hook The hook to trigger.
 	 * @param array  $args Arguments to pass when the hook triggers.
 	 * @param string $group The group to assign this job to.
-	 * @return string The action ID.
+	 * @return int The action ID.
 	 */
 	public function schedule_single( $timestamp, $hook, $args = array(), $group = '' ) {
 		return as_schedule_single_action( $timestamp, $hook, $args, $group );
@@ -52,7 +52,7 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 * @param string $hook The hook to trigger.
 	 * @param array  $args Arguments to pass when the hook triggers.
 	 * @param string $group The group to assign this job to.
-	 * @return string The action ID.
+	 * @return int The action ID.
 	 */
 	public function schedule_recurring( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '' ) {
 		return as_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args, $group );
@@ -76,7 +76,7 @@ class WC_Action_Queue implements WC_Queue_Interface {
 	 * @param string $hook The hook to trigger.
 	 * @param array  $args Arguments to pass when the hook triggers.
 	 * @param string $group The group to assign this job to.
-	 * @return string The action ID
+	 * @return int The action ID
 	 */
 	public function schedule_cron( $timestamp, $cron_schedule, $hook, $args = array(), $group = '' ) {
 		return as_schedule_cron_action( $timestamp, $cron_schedule, $hook, $args, $group );

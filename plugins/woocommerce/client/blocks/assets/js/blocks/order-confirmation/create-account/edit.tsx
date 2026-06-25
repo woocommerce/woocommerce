@@ -5,17 +5,21 @@ import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import type { TemplateArray, BlockAttributes } from '@wordpress/blocks';
 import {
-	Disabled,
-	PanelBody,
-	ToggleControl,
-	ExternalLink,
-} from '@wordpress/components';
-import {
 	InnerBlocks,
 	useBlockProps,
 	InspectorControls,
 } from '@wordpress/block-editor';
 import { getSetting, ADMIN_URL } from '@woocommerce/settings';
+import {
+	Disabled,
+	PanelBody,
+	ToggleControl,
+	ExternalLink,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -110,22 +114,42 @@ export const Edit = ( {
 			</Disabled>
 			{ ! generatePassword && (
 				<InspectorControls>
-					<PanelBody title={ __( 'Style', 'woocommerce' ) }>
-						<ToggleControl
-							label={ __( 'Dark mode inputs', 'woocommerce' ) }
-							help={ __(
-								'Inputs styled specifically for use on dark background colors.',
-								'woocommerce'
-							) }
-							checked={ attributes.hasDarkControls }
-							onChange={ () =>
-								setAttributes( {
-									hasDarkControls:
-										! attributes.hasDarkControls,
-								} )
+					<ToolsPanel
+						label={ __( 'Style', 'woocommerce' ) }
+						resetAll={ () => {
+							setAttributes( { hasDarkControls: false } );
+						} }
+					>
+						<ToolsPanelItem
+							hasValue={ () =>
+								attributes.hasDarkControls === true
 							}
-						/>
-					</PanelBody>
+							label={ __( 'Dark mode inputs', 'woocommerce' ) }
+							onDeselect={ () =>
+								setAttributes( { hasDarkControls: false } )
+							}
+							isShownByDefault
+						>
+							<ToggleControl
+								__nextHasNoMarginBottom
+								label={ __(
+									'Dark mode inputs',
+									'woocommerce'
+								) }
+								help={ __(
+									'Inputs styled specifically for use on dark background colors.',
+									'woocommerce'
+								) }
+								checked={ attributes.hasDarkControls }
+								onChange={ () =>
+									setAttributes( {
+										hasDarkControls:
+											! attributes.hasDarkControls,
+									} )
+								}
+							/>
+						</ToolsPanelItem>
+					</ToolsPanel>
 				</InspectorControls>
 			) }
 			<InspectorControls>

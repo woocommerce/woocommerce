@@ -35,6 +35,7 @@ class DateRangeFilterPicker extends Component {
 		if (
 			date &&
 			date._isAMomentObject &&
+			date.isValid() &&
 			typeof date.format === 'function'
 		) {
 			return date.format( format );
@@ -140,7 +141,7 @@ class DateRangeFilterPicker extends Component {
 		return (
 			<div className="woocommerce-filters-filter">
 				<span className="woocommerce-filters-label">
-					{ __( 'Date range', 'woocommerce' ) }:
+					{ __( 'Date range', 'woocommerce' ) }
 				</span>
 				<Dropdown
 					contentClassName={ contentClasses }

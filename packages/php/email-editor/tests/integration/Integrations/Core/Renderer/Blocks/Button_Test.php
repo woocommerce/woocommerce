@@ -234,4 +234,21 @@ class Button_Test extends \Email_Editor_Integration_Test_Case {
 		// because of special email HTML markup.
 		$this->assertStringContainsString( 'color:#fff', $output );
 	}
+
+	/**
+	 * Test it preserves data-link-href attribute for personalization tags
+	 */
+	public function testItPreservesDataLinkHref(): void {
+		$parsed_button              = $this->parsed_button;
+		$parsed_button['innerHTML'] = '<div class="wp-block-button"><a href="#" data-link-href="[trackable-link url=\'test\']" class="wp-block-button__link">Button Text</a></div>';
+
+		$output = $this->button_renderer->render(
+			$parsed_button['innerHTML'],
+			$parsed_button,
+			$this->rendering_context
+		);
+
+		// Note: esc_attr() encodes single quotes as &#039;.
+		$this->assertStringContainsString( 'data-link-href="[trackable-link url=&#039;test&#039;]"', $output );
+	}
 }

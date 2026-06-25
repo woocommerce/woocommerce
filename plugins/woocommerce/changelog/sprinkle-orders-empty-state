@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Reduce the visual weight of legacy admin empty states to align with WordPress admin styling.

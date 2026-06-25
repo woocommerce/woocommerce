@@ -318,7 +318,25 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 		// Taxes - if not an array and not set to false, calc tax based on cost and passed calc_tax variable. This saves shipping methods having to do complex tax calculations.
 		if ( ! is_array( $taxes ) && false !== $taxes && $total_cost > 0 && $this->is_taxable() ) {
-			$taxes = 'per_item' === $args['calc_tax'] ? $this->get_taxes_per_item( $args['cost'] ) : WC_Tax::calc_shipping_tax( $total_cost, WC_Tax::get_shipping_tax_rates() );
+			if ( 'per_item' === $args['calc_tax'] ) {
+				$taxes = $this->get_taxes_per_item( $args['cost'] );
+			} else {
+				$shipping_tax_rates = WC_Tax::get_shipping_tax_rates();
+				$taxes              = WC_Tax::calc_shipping_tax( $total_cost, $shipping_tax_rates );
+			}
+
+			/**
+			 * Filter whether shipping prices include tax.
+			 *
+			 * @since 10.6.0
+			 * @param bool $shipping_prices_include_tax Whether shipping cost includes tax. Default false.
+			 */
+			$shipping_prices_include_tax = wc_string_to_bool( apply_filters( 'woocommerce_shipping_prices_include_tax', false ) );
+
+			// If prices include tax, convert gross to net.
+			if ( $shipping_prices_include_tax && ! empty( $taxes ) ) {
+				$total_cost = $total_cost - array_sum( $taxes );
+			}
 		}
 
 		// Round the total cost after taxes have been calculated.
@@ -378,7 +396,14 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 					continue;
 				}
 
-				$item_taxes = WC_Tax::calc_shipping_tax( $amount, WC_Tax::get_shipping_tax_rates( $cart[ $cost_key ]['data']->get_tax_class() ) );
+				$cart_item_data = $cart[ $cost_key ]['data'];
+				if ( is_object( $cart_item_data ) && is_callable( array( $cart_item_data, 'get_tax_class' ) ) ) {
+					$tax_class = $cart_item_data->get_tax_class();
+				} else {
+					$tax_class = null;
+				}
+				$item_tax_rates = WC_Tax::get_shipping_tax_rates( $tax_class );
+				$item_taxes     = WC_Tax::calc_shipping_tax( $amount, $item_tax_rates );
 
 				// Sum the item taxes.
 				foreach ( array_keys( $taxes + $item_taxes ) as $key ) {
@@ -388,7 +413,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 			// Add any cost for the order - order costs are in the key 'order'.
 			if ( isset( $costs['order'] ) ) {
-				$item_taxes = WC_Tax::calc_shipping_tax( $costs['order'], WC_Tax::get_shipping_tax_rates() );
+				$order_tax_rates = WC_Tax::get_shipping_tax_rates();
+				$item_taxes      = WC_Tax::calc_shipping_tax( $costs['order'], $order_tax_rates );
 
 				// Sum the item taxes.
 				foreach ( array_keys( $taxes + $item_taxes ) as $key ) {
@@ -597,130 +623,5 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		}
 
 		return update_option( $this->get_instance_option_key(), apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_settings_values', $this->instance_settings, $this ), 'yes' );
-	}
-
-	/**
-	 * Update instance settings from REST API request.
-	 *
-	 * This method handles validation and saving of shipping method settings from REST API requests.
-	 *
-	 * @since 9.4.0
-	 * @param array $settings Settings to update (key-value pairs with clean field names, e.g., ['title' => 'Express', 'cost' => '10']).
-	 * @return true|\WP_Error True on success, WP_Error on validation failure.
-	 */
-	public function update_instance_settings_from_api( $settings ) {
-		if ( ! is_array( $settings ) ) {
-			return new \WP_Error(
-				'woocommerce_rest_shipping_method_invalid_settings',
-				__( 'Settings must be an array.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$this->init_instance_settings();
-		$instance_settings = $this->instance_settings;
-
-		/**
-		 * Key Transformation Explanation:
-		 *
-		 * The get_field_value() method (from WC_Settings_API) was designed for admin forms
-		 * where POST data has prefixed keys like 'woocommerce_flat_rate_1_title'.
-		 *
-		 * Internally, get_field_value() does this:
-		 *   $field_key = $this->get_field_key($key);  // e.g., 'woocommerce_flat_rate_1_title'
-		 *   $value = $post_data[$field_key];          // Looks for the PREFIXED key
-		 *
-		 * Since REST API sends clean JSON keys (e.g., 'title', 'cost'), we must transform
-		 * them to prefixed keys before passing to get_field_value(), or it will return null.
-		 *
-		 * Example:
-		 *   REST API sends: ['title' => 'Express']
-		 *   We transform to: ['woocommerce_flat_rate_1_title' => 'Express']
-		 *   Then get_field_value('title', ...) finds the value at 'woocommerce_flat_rate_1_title'
-		 */
-		$post_data = array();
-		foreach ( $settings as $key => $value ) {
-			$field_key               = $this->get_field_key( $key );
-			$post_data[ $field_key ] = $value;
-		}
-
-		// Validate and sanitize each field using get_field_value().
-		$form_fields = $this->get_instance_form_fields();
-		foreach ( $settings as $key => $value ) {
-			if ( isset( $form_fields[ $key ] ) ) {
-				try {
-					$instance_settings[ $key ] = $this->get_field_value( $key, $form_fields[ $key ], $post_data );
-				} catch ( \Exception $e ) {
-					return new \WP_Error(
-						'woocommerce_rest_shipping_method_invalid_setting',
-						$e->getMessage(),
-						array( 'status' => 400 )
-					);
-				}
-			}
-		}
-
-		// Save to database.
-		/**
-		 * Filter the instance settings values before saving.
-		 *
-		 * @since 9.4.0
-		 * @param array                $instance_settings Instance settings.
-		 * @param WC_Shipping_Method   $this              Shipping method instance.
-		 */
-		$filtered_settings = apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_settings_values', $instance_settings, $this );
-		$result            = update_option( $this->get_instance_option_key(), $filtered_settings );
-
-		if ( $result ) {
-			$this->instance_settings = $instance_settings;
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Update shipping method from REST API request.
-	 *
-	 * Handles updating settings, enabled status, and order from REST API requests.
-	 * This method can be used by any API version (v2, v3, v4) for consistent behavior.
-	 *
-	 * @since 9.4.0
-	 * @param \WC_Shipping_Zone $zone Zone object that contains this method.
-	 * @param int               $instance_id Method instance ID.
-	 * @param array             $data Request data containing 'settings', 'enabled', and/or 'order'.
-	 * @return true|\WP_Error True on success, WP_Error on validation failure.
-	 */
-	public function update_from_api_request( $zone, $instance_id, $data ) {
-		// Update settings if present.
-		if ( isset( $data['settings'] ) ) {
-			$result = $this->update_instance_settings_from_api( $data['settings'] );
-			if ( is_wp_error( $result ) ) {
-				return $result;
-			}
-		}
-
-		// Update order if present.
-		if ( isset( $data['order'] ) ) {
-			$zone->set_method_order( $instance_id, absint( $data['order'] ) );
-			$this->method_order = absint( $data['order'] );
-		}
-
-		// Update enabled status if present.
-		if ( isset( $data['enabled'] ) ) {
-			$zone->set_method_enabled( $instance_id, $data['enabled'] );
-			$this->enabled = $data['enabled'] ? 'yes' : 'no';
-		}
-
-		return true;
-	}
-
-	/**
-	 * Set shipping method enabled status.
-	 *
-	 * @param bool $enabled Whether the method is enabled.
-	 * @return void
-	 */
-	public function set_enabled( $enabled ) {
-		$this->enabled = wc_string_to_bool( $enabled ) ? 'yes' : 'no';
 	}
 }

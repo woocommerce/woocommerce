@@ -20,15 +20,10 @@
 	},
 	"example": {
 		"attributes": {
-			"isPreview": true,
 			"className": "wc-block-mini-cart--preview"
 		}
 	},
 	"attributes": {
-		"isPreview": {
-			"type": "boolean",
-			"default": false
-		},
 		"miniCartIcon": {
 			"type": "string",
 			"default": "cart"

@@ -24,7 +24,21 @@ class WC_Notes_Refund_Returns {
 	 * Attach hooks.
 	 */
 	public static function init() {
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'on_newly_installed' ) );
 		add_filter( 'woocommerce_get_note_from_db', array( __CLASS__, 'get_note_from_db' ), 10, 1 );
+	}
+
+	/**
+	 * Add the note when WooCommerce is newly installed.
+	 *
+	 * @since 10.5.0
+	 * @return void
+	 */
+	public static function on_newly_installed() {
+		$page_id = get_option( 'woocommerce_refund_returns_page_id' );
+		if ( $page_id ) {
+			self::possibly_add_note( $page_id );
+		}
 	}
 
 	/**
@@ -33,6 +47,10 @@ class WC_Notes_Refund_Returns {
 	 * @param int $page_id The ID of the page.
 	 */
 	public static function possibly_add_note( $page_id ) {
+		if ( ! WC()->is_wc_admin_active() ) {
+			return;
+		}
+
 		$data_store = \WC_Data_Store::load( 'admin-note' );
 
 		// Do we already have this note?

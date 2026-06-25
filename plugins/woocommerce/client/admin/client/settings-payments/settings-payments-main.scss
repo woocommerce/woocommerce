@@ -43,18 +43,6 @@
 	}
 }
 
-// Align the nav tabs with the overall page spacings for page internal consistency,
-// although not cross settings pages consistency.
-body.woocommerce-settings-payments-tab {
-	.nav-tab-wrapper {
-		padding-left: $grid-unit-60;
-
-		@media screen and (max-width: $break-xlarge) {
-			padding-left: $grid-unit-30;
-		}
-	}
-}
-
 .settings-payments-main__container {
 	margin: 0 -30px;
 	padding-bottom: 32px;
@@ -114,6 +102,21 @@ body.woocommerce-settings-payments-tab {
 				cursor: pointer;
 				padding-top: 8px;
 				margin-left: auto;
+				border-radius: 2px;
+
+				&:focus {
+					outline: 1.5px solid var(--wp-admin-theme-color, #007cba);
+					outline-offset: -1.5px;
+				}
+
+				&:focus:not(:focus-visible) {
+					outline: none;
+				}
+
+				&:focus-visible {
+					outline: 1.5px solid var(--wp-admin-theme-color, #007cba);
+					outline-offset: -1.5px;
+				}
 
 				&-icon {
 					border-left: 1px solid $gray-200;
@@ -155,9 +158,16 @@ body.woocommerce-settings-payments-tab {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
+			width: 100%;
+			background: none;
+			border: none;
+			padding: 0;
+			cursor: pointer;
+			text-align: left;
 
-			&:hover {
-				cursor: pointer;
+			&:focus {
+				outline: 2px solid var(--wp-admin-theme-color, #007cba);
+				outline-offset: 2px;
 			}
 
 			&__title {
@@ -191,6 +201,20 @@ body.woocommerce-settings-payments-tab {
 
 			.components-button {
 				color: $gray-900;
+			}
+
+			/* Screen reader only text for accessibility */
+			.screen-reader-text {
+				border: 0;
+				clip: rect(1px, 1px, 1px, 1px);
+				clip-path: inset(50%);
+				height: 1px;
+				margin: -1px;
+				overflow: hidden;
+				padding: 0;
+				position: absolute;
+				width: 1px;
+				word-wrap: normal !important;
 			}
 		}
 

@@ -33,7 +33,6 @@ import {
 	isWooPayments,
 	getWooPaymentsFromProviders,
 	providersContainWooPaymentsNeedsSetup,
-	getWooPaymentsTestDriveAccountLink,
 	isIncentiveDismissedEarlierThanTimestamp,
 	isActionIncentive,
 	recordPaymentsEvent,
@@ -325,12 +324,6 @@ export const SettingsPaymentsMain = () => {
 						location: businessCountry,
 					},
 				} );
-			}
-
-			// A fail-safe to ensure that the onboarding URL is set for WooPayments.
-			// Note: We should get rid of this sooner rather than later!
-			if ( ! onboardingUrl && isWooPayments( paymentsEntity.id ) ) {
-				onboardingUrl = getWooPaymentsTestDriveAccountLink();
 			}
 
 			setInstallingPlugin( paymentsEntity.id );

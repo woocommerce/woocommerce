@@ -40,7 +40,8 @@ class WooCommercePayments extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Get paid with WooPayments', 'woocommerce' );
+		/* translators: %s: Payment provider name. */
+		return sprintf( __( 'Get paid with %s', 'woocommerce' ), 'WooPayments' );
 	}
 
 	/**

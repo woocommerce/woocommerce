@@ -101,6 +101,37 @@ class List_Block_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it does not double margin-top between render_content() and add_spacer().
+	 */
+	public function testItDoesNotDoubleMarginTop(): void {
+		$parsed_list                = $this->parsed_list;
+		$parsed_list['email_attrs'] = array(
+			'margin-top' => '20px',
+		);
+		$rendered                   = $this->list_renderer->render( '<ul><li>Item 1</li></ul>', $parsed_list, $this->rendering_context );
+		$this->assertStringContainsString( 'margin-top:20px', $rendered );
+		// The inner wrapper div has margin-top, but the outer email-block-layout should not.
+		$this->assertStringNotContainsString( 'email-block-layout" style="margin-top', $rendered );
+	}
+
+	/**
+	 * Test outer spacer uses RTL alignment.
+	 */
+	public function testItUsesRtlOuterSpacerAlignment(): void {
+		$theme_controller = $this->di_container->get( Theme_Controller::class );
+		$rtl_context      = new Rendering_Context( $theme_controller->get_theme(), array( 'is_rtl' => true ) );
+
+		$rendered = $this->list_renderer->render( '<ul><li>Item 1</li></ul>', $this->parsed_list, $rtl_context );
+
+		$right_aligned_table_position = strpos( $rendered, 'align="right"' );
+		$layout_class_position        = strpos( $rendered, 'email-block-layout' );
+
+		$this->assertNotFalse( $right_aligned_table_position );
+		$this->assertNotFalse( $layout_class_position );
+		$this->assertGreaterThan( $right_aligned_table_position, $layout_class_position );
+	}
+
+	/**
 	 * Test it preserves custom set colors
 	 */
 	public function testItPreservesCustomSetColors(): void {

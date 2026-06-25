@@ -2,23 +2,26 @@
  * External dependencies
  */
 import { store, getContext, getElement } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/product-data';
-import type { HTMLElementEvent } from '@woocommerce/types';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
-
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 /**
  * Internal dependencies
  */
-import { getProductData } from '../frontend';
 import type { AddToCartWithOptionsStore } from '../frontend';
 
 export type Context = {
-	productId: number;
+	allowZero?: boolean;
+	inputElement?: HTMLInputElement | null;
 };
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
 
 const addToCartWithOptionsStore = store< AddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
@@ -26,47 +29,21 @@ const addToCartWithOptionsStore = store< AddToCartWithOptionsStore >(
 	{ lock: universalLock }
 );
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
-	{},
-	{ lock: universalLock }
-);
-
-/**
- * Manually dispatches a 'change' event on the quantity input element.
- *
- * When users click the plus/minus stepper buttons, no 'change' event is fired
- * since there is no direct interaction with the input. However, some extensions
- * rely on the change event to detect quantity changes. This function ensures
- * those extensions continue working by programmatically dispatching the event.
- *
- * @see https://github.com/woocommerce/woocommerce/issues/53031
- *
- * @param inputElement - The quantity input element to dispatch the event on.
- */
-export const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
-	const event = new Event( 'change', { bubbles: true } );
-	inputElement.dispatchEvent( event );
-};
-
 export type QuantitySelectorStore = {
 	state: {
+		allowsQuantityChange: boolean;
 		allowsDecrease: boolean;
 		allowsIncrease: boolean;
+		inputQuantity: number;
 	};
 	actions: {
-		increaseQuantity: (
-			event: HTMLElementEvent< HTMLButtonElement >
-		) => void;
-		decreaseQuantity: (
-			event: HTMLElementEvent< HTMLButtonElement >
-		) => void;
-		handleQuantityBlur: (
-			event: HTMLElementEvent< HTMLInputElement >
-		) => void;
-		handleQuantityCheckboxChange: (
-			event: HTMLElementEvent< HTMLInputElement >
-		) => void;
+		increaseQuantity: () => void;
+		decreaseQuantity: () => void;
+		handleQuantityBlur: () => void;
+		handleQuantityCheckboxChange: () => void;
+	};
+	callbacks: {
+		storeInputElementRef: () => void;
 	};
 };
 
@@ -74,139 +51,121 @@ store< QuantitySelectorStore >(
 	'woocommerce/add-to-cart-with-options-quantity-selector',
 	{
 		state: {
-			get allowsDecrease() {
-				const { quantity, selectedAttributes } =
-					addToCartWithOptionsStore.state;
+			get allowsQuantityChange(): boolean {
+				const product = productsState.productInContext;
 
-				// Note: in grouped products, this will be the parent product.
-				// We handle grouped products decrease differently because we
-				// allow setting the quantity to 0.
-				const productObject = getProductData(
-					productDataState.productId,
-					selectedAttributes
-				);
-
-				if ( ! productObject ) {
+				if ( ! product ) {
 					return true;
 				}
 
-				if ( productObject.type === 'grouped' ) {
-					const { productId } = getContext< Context >();
+				return product.is_in_stock && ! product.sold_individually;
+			},
+			get allowsDecrease() {
+				const { quantity } = addToCartWithOptionsStore.state;
 
-					return quantity[ productId ] > 0;
+				const product = productsState.productInContext;
+
+				if ( ! product ) {
+					return true;
 				}
 
-				const { id, min, step } = productObject;
+				const { id, add_to_cart: addToCart } = product;
 
 				const currentQuantity = quantity[ id ] || 0;
 
-				return currentQuantity - step >= min;
+				const { allowZero } = getContext< Context >();
+				return (
+					( allowZero && currentQuantity > 0 ) ||
+					currentQuantity - addToCart.multiple_of >= addToCart.minimum
+				);
 			},
 			get allowsIncrease() {
-				const { quantity, selectedAttributes } =
-					addToCartWithOptionsStore.state;
+				const { quantity } = addToCartWithOptionsStore.state;
 
-				const { productId } = getContext< Context >();
+				const product = productsState.productInContext;
 
-				const productObject = getProductData(
-					productId,
-					selectedAttributes
-				);
-
-				if ( ! productObject ) {
+				if ( ! product ) {
 					return true;
 				}
 
-				const { id, max, step } = productObject;
+				const { id, add_to_cart: addToCart } = product;
 
 				const currentQuantity = quantity[ id ] || 0;
 
-				return currentQuantity + step <= max;
+				return (
+					currentQuantity + addToCart.multiple_of <= addToCart.maximum
+				);
+			},
+			get inputQuantity(): number {
+				const product = productsState.productInContext;
+
+				if ( ! product ) {
+					return 0;
+				}
+
+				const quantity =
+					addToCartWithOptionsStore.state.quantity?.[ product.id ];
+
+				return quantity === undefined ? 0 : quantity;
 			},
 		},
 		actions: {
-			increaseQuantity: (
-				event: HTMLElementEvent< HTMLButtonElement >
-			) => {
-				const inputElement =
-					event.target.parentElement?.querySelector( '.qty' );
+			increaseQuantity: () => {
+				const { inputElement } = getContext< Context >();
 
 				if ( ! ( inputElement instanceof HTMLInputElement ) ) {
 					return;
 				}
 
-				const currentValue = Number( inputElement.value ) || 0;
+				const product = productsState.productInContext;
 
-				const { productId } = getContext< Context >();
-				const { selectedAttributes } = addToCartWithOptionsStore.state;
-
-				const productObject = getProductData(
-					productId,
-					selectedAttributes
-				);
-
-				let newValue = currentValue + 1;
-				if ( productObject ) {
-					const { max, min, step } = productObject;
-					newValue = currentValue + step;
-					newValue = Math.max( min, Math.min( max, newValue ) );
+				if ( ! product ) {
+					return;
 				}
+
+				const currentValue = Number( inputElement.value ) || 0;
+				const { id: productId, add_to_cart: addToCart } = product;
+				const { minimum, maximum, multiple_of: multipleOf } = addToCart;
+
+				const newValue = Math.max(
+					minimum,
+					Math.min( maximum, currentValue + multipleOf )
+				);
 
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,
 					newValue
 				);
-				inputElement.value = newValue.toString();
-				dispatchChangeEvent( inputElement );
 			},
-			decreaseQuantity: (
-				event: HTMLElementEvent< HTMLButtonElement >
-			) => {
-				const inputElement =
-					event.target.parentElement?.querySelector( '.qty' );
+			decreaseQuantity: () => {
+				const { allowZero, inputElement } = getContext< Context >();
 
 				if ( ! ( inputElement instanceof HTMLInputElement ) ) {
 					return;
 				}
 
-				const currentValue = Number( inputElement.value ) || 0;
+				const product = productsState.productInContext;
 
-				const { productId } = getContext< Context >();
-				const { selectedAttributes } = addToCartWithOptionsStore.state;
-
-				const parentProductObject = getProductData(
-					productDataState.productId,
-					selectedAttributes
-				);
-
-				let productObject = parentProductObject;
-
-				if ( parentProductObject?.type === 'grouped' ) {
-					productObject = getProductData(
-						productId,
-						selectedAttributes
-					);
+				if ( ! product ) {
+					return;
 				}
 
-				let newValue = currentValue - 1;
+				const currentValue = Number( inputElement.value ) || 0;
+				const { id: productId, add_to_cart: addToCart } = product;
+				const { minimum, maximum, multiple_of: multipleOf } = addToCart;
 
-				if ( productObject ) {
-					const { min, step } = productObject;
-					newValue = currentValue - step;
-
-					if ( newValue < min ) {
-						// In grouped product children, we allow decreasing the value
-						// down to 0, even if the minimum value is greater than 0.
-						if ( parentProductObject?.type === 'grouped' ) {
-							if ( currentValue > min ) {
-								newValue = min;
-							} else {
-								newValue = 0;
-							}
-						} else {
-							newValue = min;
-						}
-					}
+				let newValue = currentValue - multipleOf;
+				if (
+					allowZero &&
+					newValue < minimum &&
+					currentValue === minimum
+				) {
+					newValue = 0;
+				} else {
+					newValue = Math.min(
+						maximum,
+						Math.max( minimum, newValue )
+					);
 				}
 
 				if ( newValue !== currentValue ) {
@@ -214,78 +173,44 @@ store< QuantitySelectorStore >(
 						productId,
 						newValue
 					);
-
-					inputElement.value = newValue.toString();
-					dispatchChangeEvent( inputElement );
 				}
 			},
 			// We need to listen to blur events instead of change events because
 			// the change event isn't triggered in invalid numbers (ie: writing
 			// letters) if the current value is already invalid or an empty string.
-			handleQuantityBlur: (
-				event: HTMLElementEvent< HTMLInputElement >
-			) => {
-				const { selectedAttributes } = addToCartWithOptionsStore.state;
-				let min = 1;
-				const productObject = getProductData(
-					productDataState.productId,
-					selectedAttributes
-				);
+			handleQuantityBlur: () => {
+				const { allowZero, inputElement } = getContext< Context >();
 
-				if ( ! productObject ) {
+				const product = productsState.productInContext;
+
+				if ( ! product ) {
 					return;
 				}
 
-				const { productId } = getContext< Context >();
+				const { id: productId, add_to_cart: addToCart } = product;
+				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
 
-				// In grouped products, we reset invalid inputs to ''.
 				if (
-					( Number.isNaN( event.target.valueAsNumber ) ||
-						event.target.valueAsNumber === 0 ) &&
-					productObject.type === 'grouped'
+					allowZero &&
+					( isValueNaN || inputElement?.valueAsNumber === 0 )
 				) {
 					addToCartWithOptionsStore.actions.setQuantity(
 						productId,
 						0
 					);
-					if ( Number.isNaN( event.target.valueAsNumber ) ) {
-						event.target.value = '';
-					}
-					dispatchChangeEvent( event.target );
 					return;
 				}
 
-				let childProductObject = null;
-
-				if ( productObject.type === 'grouped' ) {
-					childProductObject = getProductData(
-						productId,
-						selectedAttributes
-					);
-
-					if ( ! childProductObject ) {
-						return;
-					}
-				} else {
-					childProductObject = productObject;
-				}
-
-				min = childProductObject.min;
-
-				// In other product types, we reset inputs to `min` if they are
-				// 0 or NaN.
+				// In other product types, we reset inputs to `minimum` if they
+				// are 0 or NaN.
+				const value = inputElement?.valueAsNumber ?? NaN;
 				const newValue =
-					Number.isFinite( event.target.valueAsNumber ) &&
-					event.target.valueAsNumber > 0
-						? event.target.valueAsNumber
-						: min;
+					! isNaN( value ) && value > 0 ? value : addToCart.minimum;
 
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,
 					newValue
 				);
-				event.target.value = newValue.toString();
-				dispatchChangeEvent( event.target );
 			},
 			handleQuantityCheckboxChange: () => {
 				const element = getElement();
@@ -294,12 +219,27 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const { productId } = getContext< Context >();
+				const product = productsState.productInContext;
+
+				if ( ! product ) {
+					return;
+				}
 
 				addToCartWithOptionsStore.actions.setQuantity(
-					productId,
+					product.id,
 					element.ref.checked ? 1 : 0
 				);
+			},
+		},
+		callbacks: {
+			storeInputElementRef: () => {
+				const { ref } = getElement();
+				if ( ref ) {
+					const context = getContext< Context >();
+					const inputElement =
+						ref.querySelector< HTMLInputElement >( '.qty' );
+					context.inputElement = inputElement;
+				}
 			},
 		},
 	},

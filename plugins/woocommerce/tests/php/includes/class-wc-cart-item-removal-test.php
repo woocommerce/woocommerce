@@ -246,26 +246,37 @@ class WC_Cart_Item_Removal_Test extends \WC_Unit_Test_Case {
 	 */
 	public function data_provider_clean_up_returns_early() {
 		return array(
-			'404 page'            => array(
-				'is_404'      => true,
-				'is_singular' => false,
-				'is_archive'  => false,
-				'is_search'   => false,
-				'undo_item'   => null,
+			'404 page'               => array(
+				'is_404'       => true,
+				'is_singular'  => false,
+				'is_archive'   => false,
+				'is_search'    => false,
+				'undo_item'    => null,
+				'removed_item' => null,
 			),
-			'non-page request'    => array(
-				'is_404'      => false,
-				'is_singular' => false,
-				'is_archive'  => false,
-				'is_search'   => false,
-				'undo_item'   => null,
+			'non-page request'       => array(
+				'is_404'       => false,
+				'is_singular'  => false,
+				'is_archive'   => false,
+				'is_search'    => false,
+				'undo_item'    => null,
+				'removed_item' => null,
 			),
-			'undo_item parameter' => array(
-				'is_404'      => false,
-				'is_singular' => true,
-				'is_archive'  => false,
-				'is_search'   => false,
-				'undo_item'   => 'test_key',
+			'undo_item parameter'    => array(
+				'is_404'       => false,
+				'is_singular'  => true,
+				'is_archive'   => false,
+				'is_search'    => false,
+				'undo_item'    => 'test_key',
+				'removed_item' => null,
+			),
+			'removed_item parameter' => array(
+				'is_404'       => false,
+				'is_singular'  => true,
+				'is_archive'   => false,
+				'is_search'    => false,
+				'undo_item'    => null,
+				'removed_item' => '1',
 			),
 		);
 	}
@@ -274,13 +285,14 @@ class WC_Cart_Item_Removal_Test extends \WC_Unit_Test_Case {
 	 * Test clean_up_removed_cart_contents returns early for various conditions.
 	 *
 	 * @dataProvider data_provider_clean_up_returns_early
-	 * @param bool   $is_404      Whether this is a 404 page.
-	 * @param bool   $is_singular Whether this is a singular page.
-	 * @param bool   $is_archive  Whether this is an archive page.
-	 * @param bool   $is_search   Whether this is a search page.
-	 * @param string $undo_item   The undo_item GET parameter value.
+	 * @param bool        $is_404       Whether this is a 404 page.
+	 * @param bool        $is_singular  Whether this is a singular page.
+	 * @param bool        $is_archive   Whether this is an archive page.
+	 * @param bool        $is_search    Whether this is a search page.
+	 * @param string|null $undo_item    The undo_item GET parameter value.
+	 * @param string|null $removed_item The removed_item GET parameter value.
 	 */
-	public function test_clean_up_removed_cart_contents_returns_early( $is_404, $is_singular, $is_archive, $is_search, $undo_item ) {
+	public function test_clean_up_removed_cart_contents_returns_early( $is_404, $is_singular, $is_archive, $is_search, $undo_item, $removed_item ) {
 		// Set up removed cart contents.
 		$cart_item_key = $this->cart->add_to_cart( $this->product->get_id(), 2 );
 		$this->cart->remove_cart_item( $cart_item_key );
@@ -290,6 +302,10 @@ class WC_Cart_Item_Removal_Test extends \WC_Unit_Test_Case {
 
 		if ( $undo_item ) {
 			$_GET['undo_item'] = $undo_item;
+		}
+
+		if ( $removed_item ) {
+			$_GET['removed_item'] = $removed_item;
 		}
 
 		global $wp_query;
@@ -308,6 +324,10 @@ class WC_Cart_Item_Removal_Test extends \WC_Unit_Test_Case {
 
 		if ( $undo_item ) {
 			unset( $_GET['undo_item'] );
+		}
+
+		if ( $removed_item ) {
+			unset( $_GET['removed_item'] );
 		}
 
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited

@@ -1,18 +1,18 @@
 # Monorepo CI and package managers manifests.
-/.github/ @woocommerce/flux
-**/composer.json @woocommerce/flux
-**/package.json @woocommerce/flux
+/.github/ @nerrad
+**/composer.json @nerrad
+**/package.json @nerrad
 
 # Monorepo tooling folders.
-/bin/ @woocommerce/flux
-/tools/ @woocommerce/flux
-/packages/js/eslint-plugin/ @woocommerce/flux
-/packages/js/dependency-extraction-webpack-plugin/ @woocommerce/flux
-/packages/js/e2e-utils-playwright/ @woocommerce/flux
+/bin/ @nerrad
+/tools/ @nerrad
+/packages/js/eslint-plugin/ @nerrad
+/packages/js/dependency-extraction-webpack-plugin/ @nerrad
+/packages/js/e2e-utils-playwright/ @nerrad
 
 # Files in root of repository
-/.* @woocommerce/flux
-/*.* @woocommerce/flux
+/.* @nerrad
+/*.* @nerrad
 /changelog.txt
 /pnpm-lock.yaml
 
@@ -39,3 +39,14 @@
 /plugins/woocommerce/client/blocks/assets/js/blocks/mini-cart @woocommerce/rubik
 /plugins/woocommerce/client/blocks/assets/js/blocks/order-confirmation @woocommerce/rubik
 /plugins/woocommerce/client/blocks/packages/checkout @woocommerce/rubik
+
+# Email Editor packages
+/packages/js/email-editor/ @woocommerce/ballade
+/packages/php/email-editor/ @woocommerce/ballade
+
+# Email Editor integrations
+/plugins/woocommerce/src/Internal/EmailEditor/ @woocommerce/ballade
+/plugins/woocommerce/client/admin/client/wp-admin-scripts/email-editor-integration/ @woocommerce/ballade
+
+# Subscriptions Engine packages
+/packages/php/woocommerce-subscriptions-engine/ @woocommerce/chronos

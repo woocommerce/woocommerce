@@ -1,4 +1,0 @@
-Significance: major
-Type: performance
-
-Change loading of WooCommerce Analytics REST namespace to be on-demand.

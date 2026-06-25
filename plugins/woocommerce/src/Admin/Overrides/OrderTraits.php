@@ -9,6 +9,8 @@ namespace Automattic\WooCommerce\Admin\Overrides;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\OrderItemType;
+
 /**
  * OrderTraits class.
  */
@@ -32,7 +34,10 @@ trait OrderTraits {
 		// For example, if 2 items are refunded from an order with 4 items. The remaining 2 items should have the shipping fee of the refunded items distributed to them.
 		$order_items = null !== $order_items_count ? $order_items_count : $this->get_item_count();
 
-		if ( 0 === $order_items ) {
+		// Bail when there are no items to distribute the shipping across, to avoid dividing by zero.
+		// A loose check is used so a float 0.0 count is also treated as zero. Stores that allow decimal
+		// quantities (e.g. some Point of Sale plugins) make the item count a float, which a strict 0 === check would miss.
+		if ( ! $order_items ) {
 			return 0;
 		}
 
@@ -63,7 +68,10 @@ trait OrderTraits {
 		// For example, if 2 items are refunded from an order with 4 items. The remaining 2 items should have the shipping tax of the refunded items distributed to them.
 		$order_items = null !== $order_items_count ? $order_items_count : $this->get_item_count();
 
-		if ( 0 === $order_items ) {
+		// Bail when there are no items to distribute the shipping tax across, to avoid dividing by zero.
+		// A loose check is used so a float 0.0 count is also treated as zero. Stores that allow decimal
+		// quantities (e.g. some Point of Sale plugins) make the item count a float, which a strict 0 === check would miss.
+		if ( ! $order_items ) {
 			return 0;
 		}
 
@@ -74,7 +82,7 @@ trait OrderTraits {
 
 		if ( null === $shipping_tax_amount ) {
 			$order_taxes         = $this->get_taxes();
-			$line_items_shipping = $this->get_items( 'shipping' );
+			$line_items_shipping = $this->get_items( OrderItemType::SHIPPING );
 			foreach ( $line_items_shipping as $item_id => $shipping_item ) {
 				$tax_data = $shipping_item->get_taxes();
 				if ( $tax_data ) {

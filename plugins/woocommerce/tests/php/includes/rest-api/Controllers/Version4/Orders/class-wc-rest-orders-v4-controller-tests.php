@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderCouponS
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderFeeSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderTaxSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderShippingSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
 
 /**
  * Orders Controller tests for V4 REST API.
@@ -89,8 +90,10 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order_tax_schema      = new OrderTaxSchema();
 		$order_shipping_schema = new OrderShippingSchema();
 
+		$data_utils = new DataUtils();
+
 		$this->order_schema = new OrderSchema();
-		$this->order_schema->init( $order_item_schema, $order_coupon_schema, $order_fee_schema, $order_tax_schema, $order_shipping_schema );
+		$this->order_schema->init( $order_item_schema, $order_coupon_schema, $order_fee_schema, $order_tax_schema, $order_shipping_schema, $data_utils );
 
 		// Create utils instances.
 		$collection_query  = new \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\CollectionQuery();
@@ -857,73 +860,6 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test edge case: meta data filtering with include_meta.
-	 */
-	public function test_meta_data_include_filtering(): void {
-		$order = $this->create_test_order();
-		$order->add_meta_data( 'test_meta_1', 'value_1', true );
-		$order->add_meta_data( 'test_meta_2', 'value_2', true );
-		$order->add_meta_data( 'internal_meta', 'internal_value', true );
-		$order->save();
-
-		$request = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
-		$request->set_param( 'include_meta', array( 'test_meta_1', 'test_meta_2' ) );
-		$response = $this->server->dispatch( $request );
-
-		$this->assertEquals( 200, $response->get_status() );
-		$response_data = $response->get_data();
-
-		$this->assertArrayHasKey( 'meta_data', $response_data );
-		$this->assertCount( 2, $response_data['meta_data'] );
-
-		$meta_keys = array_map(
-			function ( $meta_item ) {
-				return $meta_item['key'];
-			},
-			$response_data['meta_data']
-		);
-
-		$this->assertContains( 'test_meta_1', $meta_keys );
-		$this->assertContains( 'test_meta_2', $meta_keys );
-		$this->assertNotContains( 'internal_meta', $meta_keys );
-
-		$order->delete( true );
-	}
-
-	/**
-	 * Test edge case: meta data filtering with exclude_meta.
-	 */
-	public function test_meta_data_exclude_filtering(): void {
-		$order = $this->create_test_order();
-		$order->add_meta_data( 'test_meta_1', 'value_1', true );
-		$order->add_meta_data( 'test_meta_2', 'value_2', true );
-		$order->add_meta_data( 'internal_meta', 'internal_value', true );
-		$order->save();
-
-		$request = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
-		$request->set_param( 'exclude_meta', 'test_meta_1' );
-		$response = $this->server->dispatch( $request );
-
-		$this->assertEquals( 200, $response->get_status() );
-		$response_data = $response->get_data();
-
-		$this->assertArrayHasKey( 'meta_data', $response_data );
-
-		$meta_keys = array_map(
-			function ( $meta_item ) {
-				return $meta_item['key'];
-			},
-			$response_data['meta_data']
-		);
-
-		$this->assertNotContains( 'test_meta_1', $meta_keys );
-		$this->assertContains( 'test_meta_2', $meta_keys );
-		$this->assertContains( 'internal_meta', $meta_keys );
-
-		$order->delete( true );
-	}
-
-	/**
 	 * Test edge case: created_via filtering when COT is enabled.
 	 */
 	public function test_created_via_filtering_with_cot_enabled(): void {
@@ -985,7 +921,11 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order = wc_get_order( $order_id );
 		$this->assertEquals( OrderStatus::TRASH, $order->get_status( 'edit' ) );
 
-		$order->delete( true );
+		// Force deletion, skip trash.
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/orders/' . $order_id );
+		$request->set_param( 'force', true );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 204, $response->get_status() );
 	}
 
 	/**

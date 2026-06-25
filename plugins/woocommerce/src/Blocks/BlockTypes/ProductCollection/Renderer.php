@@ -133,8 +133,8 @@ class Renderer {
 				'hideNextPreviousButtons' => false,
 				'isDisabledPrevious'      => true,
 				'isDisabledNext'          => false,
-				'ariaLabelPrevious'       => __( 'Scroll products left', 'woocommerce' ),
-				'ariaLabelNext'           => __( 'Scroll products right', 'woocommerce' ),
+				'ariaLabelPrevious'       => __( 'Previous products', 'woocommerce' ),
+				'ariaLabelNext'           => __( 'Next products', 'woocommerce' ),
 			);
 
 			if ( $collection ) {
@@ -150,7 +150,7 @@ class Renderer {
 				if ( $is_enhanced_pagination_enabled && isset( $this->parsed_block ) ) {
 					$p->set_attribute(
 						'data-wp-router-region',
-						'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
+						'wc-product-collection-' . ( $this->parsed_block['attrs']['queryId'] ?? '0' )
 					);
 				}
 			}
@@ -197,14 +197,12 @@ class Renderer {
 					class="wc-block-components-notice-banner"
 					data-wp-init="callbacks.scrollIntoView"
 					data-wp-class--is-error="state.isError"
-					data-wp-class--is-success ="state.isSuccess"
+					data-wp-class--is-success="state.isSuccess"
 					data-wp-class--is-info="state.isInfo"
 					data-wp-class--is-dismissible="context.notice.dismissible"
 					data-wp-bind--role="state.role"
+					data-wp-watch="callbacks.injectIcon"
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
-						<path data-wp-bind--d="state.iconPath"></path>
-					</svg>
 					<div class="wc-block-components-notice-banner__content">
 						<span data-wp-init="callbacks.renderNoticeContent" aria-live="assertive" aria-atomic="true"></span>
 					</div>
@@ -259,7 +257,7 @@ class Renderer {
 	 */
 	private function handle_block_dimensions( $p, $block ) {
 		if ( isset( $block['attrs']['dimensions'] ) && isset( $block['attrs']['dimensions']['widthType'] ) ) {
-			if ( 'fixed' === $block['attrs']['dimensions']['widthType'] ) {
+			if ( 'fixed' === $block['attrs']['dimensions']['widthType'] && ! empty( $block['attrs']['dimensions']['fixedWidth'] ) ) {
 				$this->set_fixed_width_style( $p, $block['attrs']['dimensions']['fixedWidth'] );
 			}
 		}

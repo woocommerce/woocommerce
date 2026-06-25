@@ -69,19 +69,29 @@ const getButtonText = ( {
 const AddToCartButtonAdminSide = ( {
 	product,
 	isDescendantOfAddToCartWithOptions,
+	collection,
 }: {
 	product: ProductEntityResponse;
 	isDescendantOfAddToCartWithOptions: boolean | undefined;
+	collection?: string;
 } ): JSX.Element => {
+	const isCartContents =
+		collection === 'woocommerce/product-collection/cart-contents';
+
 	const isExternal = product.type === 'external';
 	// We need to use the button_text for external products
 	const singleTextToRender = isExternal
 		? product.button_text
 		: product.add_to_cart?.single_text;
 
-	const buttonText = isDescendantOfAddToCartWithOptions
-		? singleTextToRender
-		: product.add_to_cart?.text;
+	let buttonText: string | undefined;
+	if ( isCartContents ) {
+		buttonText = __( 'Finish checkout', 'woocommerce' );
+	} else {
+		buttonText = isDescendantOfAddToCartWithOptions
+			? singleTextToRender
+			: product.add_to_cart?.text;
+	}
 
 	return (
 		<button
@@ -107,6 +117,7 @@ const AddToCartButton = ( {
 	isDescendantOfAddToCartWithOptions,
 	className,
 	style,
+	collection,
 }: AddToCartButtonAttributes ): JSX.Element => {
 	const {
 		id,
@@ -119,20 +130,36 @@ const AddToCartButton = ( {
 	const { dispatchStoreEvent } = useStoreEvents();
 	const { cartQuantity, addingToCart, addToCart } = useStoreAddToCart( id );
 	const addedToCart = Number.isFinite( cartQuantity ) && cartQuantity > 0;
+
+	// Check if this is a cart-contents collection
+	const isCartContents =
+		collection === 'woocommerce/product-collection/cart-contents';
+
 	const allowAddToCart = ! hasOptions && isPurchasable && isInStock;
 	const buttonAriaLabel = decodeEntities(
 		productCartDetails?.description || ''
 	);
-	const buttonText = getButtonText( {
-		cartQuantity,
-		productCartDetails,
-		isDescendantOfAddToCartWithOptions,
-	} );
+	const buttonText = isCartContents
+		? __( 'Finish checkout', 'woocommerce' )
+		: getButtonText( {
+				cartQuantity,
+				productCartDetails,
+				isDescendantOfAddToCartWithOptions,
+		  } );
 
-	const ButtonTag = allowAddToCart ? 'button' : 'a';
+	const ButtonTag = allowAddToCart && ! isCartContents ? 'button' : 'a';
 	const buttonProps = {} as HTMLAnchorElement & { onClick: () => void };
 
-	if ( ! allowAddToCart ) {
+	if ( isCartContents ) {
+		// For cart contents, always link to cart page
+		buttonProps.href = CART_URL;
+		buttonProps.rel = 'nofollow';
+		buttonProps.onClick = () => {
+			dispatchStoreEvent( 'cart-view-link', {
+				product,
+			} );
+		};
+	} else if ( ! allowAddToCart ) {
 		buttonProps.href = permalink;
 		buttonProps.rel = 'nofollow';
 		buttonProps.onClick = () => {
@@ -208,7 +235,10 @@ const AddToCartButtonPlaceholder = ( {
 	className,
 	style,
 	blockClientId,
-}: AddToCartButtonPlaceholderAttributes ): JSX.Element => {
+	collection,
+}: AddToCartButtonPlaceholderAttributes & {
+	collection?: string;
+} ): JSX.Element => {
 	const {
 		current: currentProductType,
 		registerListener,
@@ -224,10 +254,18 @@ const AddToCartButtonPlaceholder = ( {
 		}
 	}, [ blockClientId, registerListener, unregisterListener ] );
 
-	const buttonText =
-		currentProductType?.slug === 'external'
-			? __( 'Buy product', 'woocommerce' )
-			: __( 'Add to cart', 'woocommerce' );
+	const isCartContents =
+		collection === 'woocommerce/product-collection/cart-contents';
+
+	let buttonText: string;
+	if ( isCartContents ) {
+		buttonText = __( 'Finish checkout', 'woocommerce' );
+	} else {
+		buttonText =
+			currentProductType?.slug === 'external'
+				? __( 'Buy product', 'woocommerce' )
+				: __( 'Add to cart', 'woocommerce' );
+	}
 
 	return (
 		<button
@@ -247,7 +285,7 @@ const AddToCartButtonPlaceholder = ( {
 };
 
 export const Block = ( props: BlockAttributes ): JSX.Element => {
-	const { className, textAlign, blockClientId } = props;
+	const { className, textAlign, blockClientId, collection } = props;
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product, isLoading } = useProductDataContext( {
@@ -286,6 +324,7 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 									'woocommerce/isDescendantOfAddToCartWithOptions'
 								]
 							}
+							collection={ collection }
 						/>
 					) }
 					{ ! showNewAddToCartButton &&
@@ -301,6 +340,7 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 									]
 								}
 								productEntity={ props.product }
+								collection={ collection }
 							/>
 						) : (
 							<AddToCartButtonPlaceholder
@@ -308,6 +348,7 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 								className={ styleProps.className }
 								isLoading={ isLoading ?? false }
 								blockClientId={ blockClientId }
+								collection={ collection }
 							/>
 						) ) }
 				</>

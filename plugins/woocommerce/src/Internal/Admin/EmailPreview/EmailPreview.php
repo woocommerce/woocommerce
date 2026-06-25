@@ -12,10 +12,12 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Throwable;
 use WC_Email;
 use WC_Order;
+use WC_Order_Item_Product;
+use WC_Order_Item_Shipping;
 use WC_Product;
+use WC_Product_Download;
 use WC_Product_Variation;
 use WP_User;
-use WC_Order_Item_Shipping;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -29,6 +31,7 @@ class EmailPreview {
 	const USER_OBJECT_EMAILS = array(
 		'WC_Email_Customer_New_Account',
 		'WC_Email_Customer_Reset_Password',
+		'Automattic\WooCommerce\Internal\CustomerEmailVerification\Emails\CustomerVerifyEmail',
 	);
 
 	const TRANSIENT_PREVIEW_EMAIL_IMPROVEMENTS = 'woocommerce_preview_email_improvements';
@@ -199,6 +202,10 @@ class EmailPreview {
 			$this->email->user_email = $object->user_email;
 			$this->email->user_login = $object->user_login;
 
+			if ( property_exists( $this->email, 'user_display_name' ) ) {
+				$this->email->user_display_name = $object->first_name;
+			}
+
 			if ( property_exists( $this->email, 'reset_key' ) ) {
 				$this->email->reset_key = 'reset_key';
 			}
@@ -211,11 +218,15 @@ class EmailPreview {
 				$this->email->user_id = 0;
 			}
 
+			if ( property_exists( $this->email, 'verify_code' ) ) {
+				$this->email->verify_code = '123456';
+			}
+
 			$this->email->set_object( $object );
 		} else {
 			$object = $this->get_dummy_order();
 			if ( 'WC_Email_Customer_Note' === $email_type ) {
-				$this->email->customer_note = $object->get_customer_note();
+				$this->email->customer_note = __( "This is an order note sent from the Admin to the customer during fulfillment when you add a new Order Note and choose to send it to the customer.\n\nIt can be multiple lines.", 'woocommerce' );
 			}
 			if ( 'WC_Email_Customer_Refunded_Order' === $email_type ) {
 				$this->email->partial_refund = false;
@@ -371,42 +382,89 @@ class EmailPreview {
 		$variation            = $this->get_dummy_product_variation();
 		$downloadable_product = $this->get_dummy_downloadable_product();
 
-		$order = new WC_Order();
+		// PreviewOrder keeps its id at 0 so it can never read from or write to a
+		// real order. It surfaces a display number via get_order_number() instead.
+		$order = new PreviewOrder();
+
+		// Create and add product items manually without saving to database.
+		// Use add_item() instead of add_product() to avoid immediate database writes.
 		if ( $product ) {
-			$order->add_product( $product, 2 );
+			$item = new WC_Order_Item_Product();
+			$item->set_props(
+				array(
+					'name'         => $product->get_name(),
+					'tax_class'    => $product->get_tax_class(),
+					'product_id'   => $product->get_id(),
+					'variation_id' => 0,
+					'quantity'     => 2,
+					'subtotal'     => $product->get_price() * 2,
+					'total'        => $product->get_price() * 2,
+				)
+			);
+			$order->add_item( $item );
 		}
 		if ( $variation ) {
-			$order->add_product( $variation );
+			$item = new WC_Order_Item_Product();
+			$item->set_props(
+				array(
+					'name'         => $variation->get_name(),
+					'tax_class'    => $variation->get_tax_class(),
+					'product_id'   => $variation->get_parent_id(),
+					'variation_id' => $variation->get_id(),
+					'variation'    => $variation->get_attributes(),
+					'quantity'     => 1,
+					'subtotal'     => $variation->get_price(),
+					'total'        => $variation->get_price(),
+				)
+			);
+			$order->add_item( $item );
 		}
 		if ( $downloadable_product ) {
-			$order->add_product( $downloadable_product );
+			$item = new WC_Order_Item_Product();
+			$item->set_props(
+				array(
+					'name'         => $downloadable_product->get_name(),
+					'tax_class'    => $downloadable_product->get_tax_class(),
+					'product_id'   => $downloadable_product->get_id(),
+					'variation_id' => 0,
+					'quantity'     => 1,
+					'subtotal'     => $downloadable_product->get_price(),
+					'total'        => $downloadable_product->get_price(),
+				)
+			);
+			$order->add_item( $item );
 		}
-		$order->set_id( 12345 );
+
 		$order->set_date_created( time() );
 		$order->set_currency( 'USD' );
 		$order->set_discount_total( 10 );
-		$order->set_shipping_total( 5 );
-		$order->set_total( 80 );
 		$order->set_payment_method_title( __( 'Direct bank transfer', 'woocommerce' ) );
 		$order->set_transaction_id( '999999999' );
 		$order->set_customer_note( __( "This is a customer note. Customers can add a note to their order on checkout.\n\nIt can be multiple lines. If there's no note, this section is hidden.", 'woocommerce' ) );
 
 		$order = $this->apply_dummy_order_status( $order );
 
-		// Add shipping method.
-		$shipping_item = new WC_Order_Item_Shipping();
-		$shipping_item->set_props(
-			array(
-				'method_title' => __( 'Flat rate', 'woocommerce' ),
-				'method_id'    => 'flat_rate',
-				'total'        => '5.00',
-			)
-		);
-		$order->add_item( $shipping_item );
+		$show_shipping_details = $this->should_show_shipping_details( $order );
+		$order->set_shipping_total( $show_shipping_details ? 5 : 0 );
+		$order->set_total( $show_shipping_details ? 80 : 75 );
+
+		if ( $show_shipping_details ) {
+			$shipping_item = new WC_Order_Item_Shipping();
+			$shipping_item->set_props(
+				array(
+					'method_title' => __( 'Flat rate', 'woocommerce' ),
+					'method_id'    => 'flat_rate',
+					'total'        => '5.00',
+				)
+			);
+			$order->add_item( $shipping_item );
+		}
 
 		$address = $this->get_dummy_address();
 		$order->set_billing_address( $address );
-		$order->set_shipping_address( $address );
+		if ( $show_shipping_details ) {
+			$order->set_shipping_address( $address );
+		}
 
 		/**
 		 * A dummy WC_Order used in email preview.
@@ -577,8 +635,8 @@ class EmailPreview {
 	 */
 	public function set_up_filters() {
 		$this->switch_to_site_locale();
-		// Always show shipping address in the preview email.
-		add_filter( 'woocommerce_order_needs_shipping_address', array( $this, 'enable_shipping_address' ) );
+		// Show shipping address in preview emails unless preview shipping details are hidden.
+		add_filter( 'woocommerce_order_needs_shipping_address', array( $this, 'enable_shipping_address' ), 10, 3 );
 		// Email templates fetch product from the database to show additional information, which are not
 		// saved in WC_Order_Item_Product. This filter enables fetching that data also in email preview.
 		add_filter( 'woocommerce_order_item_product', array( $this, 'get_dummy_product_when_not_set' ), 10, 1 );
@@ -590,7 +648,7 @@ class EmailPreview {
 		add_filter( 'woocommerce_is_downloadable', array( $this, 'force_product_downloadable' ), 10, 1 );
 		add_filter( 'woocommerce_product_file', array( $this, 'provide_dummy_product_file' ), 10, 1 );
 		// Provide dummy downloadable items for email preview.
-		add_filter( 'woocommerce_order_get_downloadable_items', array( $this, 'get_dummy_downloadable_items' ), 10, 1 );
+		add_filter( 'woocommerce_order_get_downloadable_items', array( $this, 'get_dummy_downloadable_items' ) );
 	}
 
 	/**
@@ -608,13 +666,34 @@ class EmailPreview {
 	}
 
 	/**
-	 * Enable shipping address in the preview email. Not using __return_true so
-	 * we don't accidentally remove the same filter used by other plugin or theme.
+	 * Enable shipping address in the preview email unless shipping details are hidden.
 	 *
-	 * @return true
+	 * @param bool          $needs_shipping_address Current value.
+	 * @param array         $hidden_shipping_methods Hidden shipping method IDs.
+	 * @param WC_Order|null $order Order object.
+	 * @return bool
 	 */
-	public function enable_shipping_address() {
-		return true;
+	public function enable_shipping_address( $needs_shipping_address = true, $hidden_shipping_methods = array(), $order = null ) {
+		return $this->should_show_shipping_details( $order );
+	}
+
+	/**
+	 * Check whether preview shipping details should be shown.
+	 *
+	 * @param WC_Order|null $order Preview order object.
+	 * @return bool
+	 */
+	private function should_show_shipping_details( $order = null ) {
+		/**
+		 * Filters whether shipping details should be shown in email previews.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param bool          $show_shipping_details Whether to show shipping details. Default true.
+		 * @param WC_Order|null $order Preview order object.
+		 * @param string|null   $email_type Email type being previewed.
+		 */
+		return (bool) apply_filters( 'woocommerce_email_preview_show_shipping_details', true, $order, $this->email_type );
 	}
 
 	/**
@@ -662,14 +741,14 @@ class EmailPreview {
 	/**
 	 * Provide a dummy product file so product->has_file() returns true in preview.
 	 *
-	 * @param array|null $file Current file array or null.
-	 * @return array|null
+	 * @param WC_Product_Download|array|null $file Current file object, array, or null.
+	 * @return WC_Product_Download|array|null
 	 */
 	public function provide_dummy_product_file( $file ) {
 		/**
 		 * Filters whether the current request is an email preview.
 		 *
-		 * When true, provide a dummy product file array so downloadable template parts
+		 * When true, provide a dummy product file so downloadable template parts
 		 * can render during preview.
 		 *
 		 * @since 9.6.0
@@ -677,10 +756,11 @@ class EmailPreview {
 		 * @param bool $is_email_preview Whether preview mode is active.
 		 */
 		if ( apply_filters( 'woocommerce_is_email_preview', false ) ) {
-			return array(
-				'name' => __( 'Sample Download File.pdf', 'woocommerce' ),
-				'file' => 'sample-download.pdf',
-			);
+			$dummy_file = new WC_Product_Download();
+			$dummy_file->set_id( 'preview-dummy' );
+			$dummy_file->set_name( __( 'Sample Download File.pdf', 'woocommerce' ) );
+			$dummy_file->set_file( 'sample-download.pdf' );
+			return $dummy_file;
 		}
 		return $file;
 	}
@@ -688,10 +768,9 @@ class EmailPreview {
 	/**
 	 * Get dummy downloadable items for email preview.
 	 *
-	 * @param array $downloads Existing downloads.
 	 * @return array
 	 */
-	public function get_dummy_downloadable_items( $downloads ) {
+	public function get_dummy_downloadable_items() {
 		$dummy_downloads = array(
 			array(
 				'product_name'   => $this->get_dummy_downloadable_product()->get_name(),
@@ -702,7 +781,7 @@ class EmailPreview {
 			),
 		);
 
-		return array_merge( $downloads, $dummy_downloads );
+		return $dummy_downloads;
 	}
 
 	/**

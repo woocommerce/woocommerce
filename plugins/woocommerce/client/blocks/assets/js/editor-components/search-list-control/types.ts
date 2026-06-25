@@ -7,6 +7,13 @@ import { Require } from '@woocommerce/types';
 interface ItemProps< T extends object = object > {
 	// Depth, non-zero if the list is hierarchical.
 	depth?: number;
+	// Text to display for the load more button.
+	loadMoreChildrenText?: string | undefined;
+	// Callback for loading more children.
+	onLoadMoreChildren?: ( () => void ) | undefined;
+	// Map of parent item IDs to their total number of children.
+	// Value is null when total is unknown, and 0 when known to have no children.
+	totalChildren?: { [ key: string ]: number | null } | undefined;
 	// Callback for selecting the item.
 	onSelect: (
 		item: SearchListItem< T > | SearchListItem< T >[]
@@ -119,6 +126,13 @@ export interface SearchListControlProps< T extends object = object > {
 	list: SearchListItem< T >[];
 	// Messages displayed or read to the user. Configure these to reflect your object type.
 	messages?: Partial< SearchListMessages >;
+	// Text to display for the load more button.
+	loadMoreChildrenText?: string | undefined;
+	// Callback for loading more children.
+	onLoadMoreChildren?: ( () => void ) | undefined;
+	// Map of parent item IDs to their total number of children.
+	// Value is null when total is unknown, and 0 when known to have no children.
+	totalChildren?: { [ key: string ]: number | null } | undefined;
 	// Callback fired when selected items change, whether added, cleared, or removed. Passed an array of item objects (as passed in via props.list).
 	onChange: ( search: SearchListItem< T >[] ) => void;
 	// Callback fired when the search field is used.

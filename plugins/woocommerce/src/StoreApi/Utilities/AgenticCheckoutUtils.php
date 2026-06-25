@@ -332,26 +332,24 @@ class AgenticCheckoutUtils {
 	}
 
 	/**
-	 * Check if the Agentic Checkout feature is enabled.
+	 * Validate that the request is signed with Jetpack blog token.
 	 *
-	 * V1 implementation: Returns true if feature is enabled (no auth check).
-	 * Future: Implement Bearer token authentication.
+	 * @since 10.6.0
 	 *
-	 * @return bool|\WP_Error True if authorized, WP_Error otherwise.
+	 * @return true|\WP_Error True if valid, WP_Error otherwise.
 	 */
-	public static function is_authorized() {
-		// Check if feature is enabled.
-		$features_controller = wc_get_container()->get( FeaturesController::class );
-		if ( ! $features_controller->feature_is_enabled( 'agentic_checkout' ) ) {
-			return new \WP_Error(
-				'woocommerce_rest_agentic_checkout_disabled',
-				__( 'Agentic Checkout API is not enabled.', 'woocommerce' ),
-				array( 'status' => 403 )
-			);
+	public static function validate_jetpack_request() {
+		if ( class_exists( 'Automattic\Jetpack\Connection\Rest_Authentication' ) ) {
+			if ( \Automattic\Jetpack\Connection\Rest_Authentication::is_signed_with_blog_token() ) {
+				return true;
+			}
 		}
 
-		// V1: Allow all requests (implement proper auth in future).
-		return true;
+		return new \WP_Error(
+			'rest_forbidden',
+			__( 'This endpoint requires Jetpack blog token authentication.', 'woocommerce' ),
+			array( 'status' => 401 )
+		);
 	}
 
 	/**

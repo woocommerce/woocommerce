@@ -22,6 +22,7 @@ export interface BlockAttributes {
 	blockClientId?: string;
 	product?: ProductEntityResponse | undefined;
 	isAdmin?: boolean | undefined;
+	collection?: string | undefined;
 }
 
 export interface AddToCartProductDetails {
@@ -53,4 +54,5 @@ export interface AddToCartButtonAttributes {
 		button_text: string;
 	};
 	textAlign?: ( WithClass & WithStyle ) | undefined;
+	collection?: string | undefined;
 }

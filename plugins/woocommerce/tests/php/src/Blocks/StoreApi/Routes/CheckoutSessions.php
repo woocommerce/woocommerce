@@ -14,11 +14,14 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\Agentic\Enums\Specs\ErrorCode;
 use Automattic\WooCommerce\StoreApi\RoutesController;
+use Automattic\WooCommerce\Tests\Internal\Admin\Agentic\AgenticTestHelpers;
 
 /**
  * CheckoutSessions Controller Tests.
  */
 class CheckoutSessions extends ControllerTestCase {
+	use AgenticTestHelpers;
+
 	/**
 	 * Products created for tests.
 	 *
@@ -43,6 +46,9 @@ class CheckoutSessions extends ControllerTestCase {
 
 		// Enable the agentic_checkout feature.
 		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
+
+		// Set up Jetpack blog token authentication.
+		$this->mock_jetpack_blog_token_auth();
 
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
@@ -89,6 +95,9 @@ class CheckoutSessions extends ControllerTestCase {
 
 		// Reset customer state to clean state.
 		$this->reset_customer_state();
+
+		// Reset Jetpack auth state.
+		$this->reset_jetpack_auth_state();
 	}
 
 	/**
@@ -487,18 +496,6 @@ class CheckoutSessions extends ControllerTestCase {
 			$this->assertIsString( $link['type'] );
 			$this->assertIsString( $link['url'] );
 		}
-	}
-
-	/**
-	 * Test feature flag disabled returns 403.
-	 */
-	public function test_feature_flag_disabled_returns_403() {
-		// Disable feature.
-		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
-
-		$response = $this->create_session( $this->create_checkout_request() );
-
-		$this->assertEquals( 403, $response->get_status() );
 	}
 
 	/**
@@ -1339,5 +1336,76 @@ class CheckoutSessions extends ControllerTestCase {
 		$this->assertArrayHasKey( 'code', $data );
 		$this->assertArrayHasKey( 'message', $data );
 		$this->assertStringContainsString( 'cannot be updated', $data['message'] );
+	}
+
+	/**
+	 * Test that creating a checkout session without Jetpack authentication fails.
+	 */
+	public function test_create_session_without_jetpack_auth_fails() {
+		// Clear Jetpack authentication to simulate unauthenticated request.
+		$this->mock_jetpack_auth_failure();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
+		$request->set_body_params( $this->create_checkout_request() );
+		$response = rest_get_server()->dispatch( $request );
+
+		// Should return 401 error.
+		$this->assertEquals( 401, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'rest_forbidden', $data['code'] );
+		$this->assertStringContainsString( 'Jetpack blog token', $data['message'] );
+	}
+
+	/**
+	 * Test that updating a checkout session without Jetpack authentication fails.
+	 */
+	public function test_update_session_without_jetpack_auth_fails() {
+		// Create a session first with valid auth.
+		$create_response = $this->create_session( $this->create_checkout_request() );
+		$create_data     = $create_response->get_data();
+		$session_id      = $create_data['id'];
+
+		// Clear Jetpack authentication to simulate unauthenticated request.
+		$this->mock_jetpack_auth_failure();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions/' . $session_id );
+		$request->set_body_params(
+			array(
+				'buyer' => array(
+					'first_name' => 'Test',
+				),
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+
+		// Should return 401 error.
+		$this->assertEquals( 401, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'rest_forbidden', $data['code'] );
+	}
+
+	/**
+	 * Test that Jetpack authentication works when re-established after failure.
+	 */
+	public function test_jetpack_auth_recovery() {
+		// First request without auth should fail.
+		$this->mock_jetpack_auth_failure();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
+		$request->set_body_params( $this->create_checkout_request() );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 401, $response->get_status() );
+
+		// Re-establish Jetpack authentication.
+		$this->mock_jetpack_blog_token_auth();
+
+		// Second request with auth should succeed.
+		$response = $this->create_session( $this->create_checkout_request() );
+		$this->assertEquals( 200, $response->get_status() );
 	}
 }

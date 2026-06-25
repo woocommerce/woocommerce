@@ -1,0 +1,46 @@
+<?php
+
+namespace {{slugPascalCase}};
+
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task as BaseTask;
+
+/**
+ * Custom task class.
+ */
+class Task extends BaseTask {
+	/**
+	 * Get the task ID.
+	 *
+	 * @return string
+	 */
+	public function get_id() {
+		return '{{slugSnakeCase}}-task';
+	}
+
+	/**
+	 * Title.
+	 *
+	 * @return string
+	 */
+	public function get_title() {
+		return __( '{{title}}', '{{textdomain}}' );
+	}
+
+	/**
+	 * Content.
+	 *
+	 * @return string
+	 */
+	public function get_content() {
+		return __( 'Add your task description here for display in the task list.', '{{textdomain}}' );
+	}
+
+	/**
+	 * Time.
+	 *
+	 * @return string
+	 */
+	public function get_time() {
+		return __( '2 minutes', '{{textdomain}}' );
+	}
+}
