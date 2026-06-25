@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Internal\ProductFeed\Feed;
 
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\IntegrationInterface;
+use Automattic\WooCommerce\Internal\ProductFeed\Mapping\ProductShapeMapperInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Utils\MemoryManager;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -32,9 +33,9 @@ class ProductWalker {
 	/**
 	 * The product mapper.
 	 *
-	 * @var ProductMapperInterface
+	 * @var ProductShapeMapperInterface
 	 */
-	private ProductMapperInterface $mapper;
+	private ProductShapeMapperInterface $mapper;
 
 	/**
 	 * The feed.
@@ -83,15 +84,15 @@ class ProductWalker {
 	 *
 	 * This class will not be available through DI. Instead, it needs to be instantiated directly.
 	 *
-	 * @param ProductMapperInterface $mapper The product mapper.
-	 * @param FeedValidatorInterface $validator The feed validator.
-	 * @param FeedInterface          $feed The feed.
-	 * @param ProductLoader          $product_loader The product loader.
-	 * @param MemoryManager          $memory_manager The memory manager.
-	 * @param array                  $query_args The query arguments.
+	 * @param ProductShapeMapperInterface $mapper The product mapper.
+	 * @param FeedValidatorInterface      $validator The feed validator.
+	 * @param FeedInterface               $feed The feed.
+	 * @param ProductLoader               $product_loader The product loader.
+	 * @param MemoryManager               $memory_manager The memory manager.
+	 * @param array                       $query_args The query arguments.
 	 */
 	private function __construct(
-		ProductMapperInterface $mapper,
+		ProductShapeMapperInterface $mapper,
 		FeedValidatorInterface $validator,
 		FeedInterface $feed,
 		ProductLoader $product_loader,

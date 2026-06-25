@@ -490,7 +490,7 @@ class WC_Tracker {
 	 * @return array
 	 */
 	public static function get_product_counts() {
-		$product_count_data = ProductUtil::get_counts_for_type( 'product' );
+		$product_count_data = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
 		$product_count      = array( 'total' => $product_count_data[ ProductStatus::PUBLISH ] ?? 0 );
 
 		$product_statuses = get_terms( 'product_type', array( 'hide_empty' => 0 ) );

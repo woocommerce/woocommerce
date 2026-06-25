@@ -31,10 +31,8 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				'experimental/wc/admin/products/shipping-classes'
 			);
 			return {
-				shippingClasses:
-					// @ts-expect-error - The store return type lives in Woo core.
-					( store?.getProductShippingClasses?.() ??
-						[] ) as ProductShippingClass[],
+				shippingClasses: ( store?.getProductShippingClasses?.() ??
+					[] ) as ProductShippingClass[],
 			};
 		}, [] );
 

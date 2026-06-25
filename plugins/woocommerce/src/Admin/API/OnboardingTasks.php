@@ -513,7 +513,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return string Template contents.
 	 */
 	private static function get_homepage_template( $post_id ) {
-		$products = ProductUtil::get_counts_for_type( 'product' );
+		$products = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
 		if ( ( $products[ ProductStatus::PUBLISH ] ?? 0 ) >= 4 ) {
 			$images   = self::sideload_homepage_images( $post_id, 1 );
 			$image_1  = ! empty( $images[0] ) ? $images[0] : '';

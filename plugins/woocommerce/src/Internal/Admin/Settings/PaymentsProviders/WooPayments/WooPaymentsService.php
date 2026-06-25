@@ -472,6 +472,31 @@ class WooPaymentsService {
 	public function mark_onboarding_step_completed( string $step_id, string $location, bool $overwrite = false, ?string $source = self::SESSION_ENTRY_DEFAULT ): bool {
 		$this->check_if_onboarding_step_action_is_acceptable( $step_id, $location );
 
+		return $this->record_onboarding_step_completed( $step_id, $location, $overwrite, $source );
+	}
+
+	/**
+	 * Record an onboarding step as completed without re-checking whether a new onboarding action is allowed.
+	 *
+	 * This is for internal use only, by callers that have already committed an account mutation and
+	 * just need to sync the resulting NOX onboarding state. Unlike mark_onboarding_step_completed(),
+	 * it deliberately skips check_if_onboarding_step_action_is_acceptable() — including the shared
+	 * onboarding lock check — because the state change is the consequence of work that already
+	 * happened, not a new user action. Re-checking the lock here would let a concurrent request that
+	 * acquired the lock during an unlocked phase turn an already-successful mutation into an
+	 * onboarding-locked error. This mirrors mark_onboarding_step_failed() and
+	 * mark_onboarding_step_blocked(), which skip the same checks for the same reason.
+	 *
+	 * @param string      $step_id   The ID of the onboarding step.
+	 * @param string      $location  The location for which we are onboarding.
+	 *                               This is an ISO 3166-1 alpha-2 country code.
+	 * @param bool        $overwrite Whether to overwrite the step status if it is already completed and update the timestamp.
+	 * @param string|null $source    Optional. The source for the current onboarding flow.
+	 *                               If not provided, it will identify the source as the WC Admin Payments settings.
+	 *
+	 * @return bool Whether the onboarding step was marked as completed.
+	 */
+	private function record_onboarding_step_completed( string $step_id, string $location, bool $overwrite = false, ?string $source = self::SESSION_ENTRY_DEFAULT ): bool {
 		// Clear possible failed status for the step.
 		$this->clear_onboarding_step_failed( $step_id, $location );
 
@@ -1001,14 +1026,9 @@ class WooPaymentsService {
 			);
 		} catch ( Exception $e ) {
 			// Catch any exceptions to allow for proper error handling and onboarding unlock.
-			$response = new WP_Error(
-				'woocommerce_woopayments_onboarding_client_api_exception',
-				esc_html__( 'An unexpected error happened while initializing the test account.', 'woocommerce' ),
-				array(
-					'code'    => $e->getCode(),
-					'message' => $e->getMessage(),
-					'trace'   => $e->getTrace(),
-				)
+			$response = $this->get_onboarding_client_api_exception_error(
+				$e,
+				esc_html__( 'An unexpected error happened while initializing the test account.', 'woocommerce' )
 			);
 		}
 
@@ -1138,14 +1158,9 @@ class WooPaymentsService {
 			);
 		} catch ( Exception $e ) {
 			// Catch any exceptions to allow for proper error handling and onboarding unlock.
-			$response = new WP_Error(
-				'woocommerce_woopayments_onboarding_client_api_exception',
-				esc_html__( 'An unexpected error happened while creating the KYC session.', 'woocommerce' ),
-				array(
-					'code'    => $e->getCode(),
-					'message' => $e->getMessage(),
-					'trace'   => $e->getTrace(),
-				)
+			$response = $this->get_onboarding_client_api_exception_error(
+				$e,
+				esc_html__( 'An unexpected error happened while creating the KYC session.', 'woocommerce' )
 			);
 		}
 
@@ -1251,14 +1266,9 @@ class WooPaymentsService {
 			);
 		} catch ( Exception $e ) {
 			// Catch any exceptions to allow for proper error handling and onboarding unlock.
-			$response = new WP_Error(
-				'woocommerce_woopayments_onboarding_client_api_exception',
-				esc_html__( 'An unexpected error happened while finalizing the KYC session.', 'woocommerce' ),
-				array(
-					'code'    => $e->getCode(),
-					'message' => $e->getMessage(),
-					'trace'   => $e->getTrace(),
-				)
+			$response = $this->get_onboarding_client_api_exception_error(
+				$e,
+				esc_html__( 'An unexpected error happened while finalizing the KYC session.', 'woocommerce' )
 			);
 		}
 
@@ -1426,14 +1436,9 @@ class WooPaymentsService {
 			}
 		} catch ( Exception $e ) {
 			// Catch any exceptions to allow for proper error handling and onboarding unlock.
-			$response = new WP_Error(
-				'woocommerce_woopayments_onboarding_client_api_exception',
-				esc_html__( 'An unexpected error happened while resetting onboarding.', 'woocommerce' ),
-				array(
-					'code'    => $e->getCode(),
-					'message' => $e->getMessage(),
-					'trace'   => $e->getTrace(),
-				)
+			$response = $this->get_onboarding_client_api_exception_error(
+				$e,
+				esc_html__( 'An unexpected error happened while resetting onboarding.', 'woocommerce' )
 			);
 		}
 
@@ -1501,57 +1506,67 @@ class WooPaymentsService {
 		$event_props = array();
 		$source      = $this->validate_onboarding_source( $source );
 
-		// Lock the onboarding to prevent concurrent actions.
+		$endpoint = '';
+
+		// Both internal calls take the same parameters; only the endpoint differs per account type.
+		$params = array(
+			'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
+			'source' => $source,
+		);
+
+		// The same message is reused wherever an unexpected exception is converted to a WP_Error.
+		$exception_error_message = esc_html__( 'An unexpected error happened while disabling the test account.', 'woocommerce' );
+
+		// Briefly lock the onboarding while Core determines the account transition to perform.
+		// The internal WooPayments endpoint must run after this lock is cleared because it may
+		// trigger account deletion webhooks that also touch the shared NOX lock option.
 		$this->set_onboarding_lock();
 
 		try {
-			$has_test_account    = $this->has_test_account();
-			$has_sandbox_account = $this->has_sandbox_account();
+			$had_test_account    = $this->has_test_account();
+			$had_sandbox_account = $this->has_sandbox_account();
 
 			$event_props = array(
-				'account_type' => $has_test_account ? 'test_drive' : ( $has_sandbox_account ? 'sandbox' : 'unknown' ),
+				'account_type' => $had_test_account ? 'test_drive' : ( $had_sandbox_account ? 'sandbox' : 'unknown' ),
 				'source'       => $source,
 			);
 
-			// First, check if we have a test account to disable.
-			if ( $has_test_account ) {
-				// Call the WooPayments API to disable the test account and prepare for the switch to live.
-				$response = $this->proxy->call_static(
-					Utils::class,
-					'rest_endpoint_post_request',
-					'/wc/v3/payments/onboarding/test_drive_account/disable',
-					array(
-						'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
-						'source' => $source,
-					)
-				);
-			} elseif ( $has_sandbox_account ) {
-				// Call the WooPayments API to reset onboarding.
-				$response = $this->proxy->call_static(
-					Utils::class,
-					'rest_endpoint_post_request',
-					'/wc/v3/payments/onboarding/reset',
-					array(
-						'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
-						'source' => $source,
-					)
-				);
+			if ( $had_test_account ) {
+				// Prepare the WooPayments API disable call for Phase 2, after the lock is released.
+				$endpoint = '/wc/v3/payments/onboarding/test_drive_account/disable';
+			} elseif ( $had_sandbox_account ) {
+				// Prepare the WooPayments API onboarding reset call for Phase 2, after the lock is released.
+				$endpoint = '/wc/v3/payments/onboarding/reset';
 			}
 		} catch ( Exception $e ) {
-			// Catch any exceptions to allow for proper error handling and onboarding unlock.
-			$response = new WP_Error(
-				'woocommerce_woopayments_onboarding_client_api_exception',
-				esc_html__( 'An unexpected error happened while disabling the test account.', 'woocommerce' ),
-				array(
-					'code'    => $e->getCode(),
-					'message' => $e->getMessage(),
-					'trace'   => $e->getTrace(),
-				)
-			);
+			// Convert the exception to a WP_Error; the onboarding lock is released in the finally below.
+			$response = $this->get_onboarding_client_api_exception_error( $e, $exception_error_message );
+		} finally {
+			// Unlock before making the internal WooPayments request to avoid self-conflicting
+			// with WooPayments account cleanup and account.deleted webhook side effects.
+			$this->clear_onboarding_lock();
 		}
 
-		// Unlock the onboarding after the API call finished or errored.
-		$this->clear_onboarding_lock();
+		// Phase 2 runs after the shared lock is released to avoid the account.deleted webhook
+		// self-conflict. The WooPayments endpoint is not idempotent: a duplicate concurrent call is
+		// guarded against re-deleting the account (WooPayments overwrites its account cache before
+		// the delete, so is_stripe_connected() short-circuits), but it still surfaces to the second
+		// caller as a hard ApiException( FAILED_DEPENDENCY ) via the is_wp_error() check below.
+		// Request-scoped locking for that residual window is deferred to the broader
+		// Core/WooPayments shared-lock contract.
+		if ( ! is_wp_error( $response ) && ! empty( $endpoint ) ) {
+			try {
+				$response = $this->proxy->call_static(
+					Utils::class,
+					'rest_endpoint_post_request',
+					$endpoint,
+					$params
+				);
+			} catch ( Exception $e ) {
+				// Convert the exception to a WP_Error so the failure is surfaced to the caller.
+				$response = $this->get_onboarding_client_api_exception_error( $e, $exception_error_message );
+			}
+		}
 
 		// Make sure the onboarding mode is reset.
 		if ( class_exists( 'WC_Payments_Onboarding_Service' ) && defined( 'WC_Payments_Onboarding_Service::TEST_MODE_OPTION' ) ) {
@@ -1586,12 +1601,19 @@ class WooPaymentsService {
 			);
 		}
 
+		// The account mutation above has already committed, so the following is internal NOX state
+		// sync, not a new user action. Use the internal record path that does not re-check the
+		// onboarding lock: Phase 2 ran unlocked, so a concurrent request may now hold the lock, and
+		// re-checking it here would turn an already-successful disable into an onboarding-locked
+		// error (the shared, token-less lock also can't be safely reacquired around this bookkeeping).
+		// See record_onboarding_step_completed().
+
 		// For sanity, make sure the payment methods step is marked as completed.
 		// This is to avoid the user being prompted to set up payment methods again.
-		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_PAYMENT_METHODS, $location );
+		$this->record_onboarding_step_completed( self::ONBOARDING_STEP_PAYMENT_METHODS, $location );
 		// For sanity, make sure the test account step is marked as completed and not blocked or failed.
 		// After disabling a test account, the user should be prompted to set up a live account.
-		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+		$this->record_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		$this->clear_onboarding_step_blocked( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		// Clear the NOX profile data for the business verification step sub-step data.
@@ -1609,6 +1631,30 @@ class WooPaymentsService {
 		);
 
 		return $response;
+	}
+
+	/**
+	 * Build a WP_Error for an exception thrown while talking to the internal WooPayments onboarding API.
+	 *
+	 * @param Exception $e       The caught exception.
+	 * @param string    $message The human-readable, already-escaped error message.
+	 *
+	 * @return WP_Error
+	 */
+	private function get_onboarding_client_api_exception_error( Exception $e, string $message ): WP_Error {
+		// Deliberately exclude the exception stack trace from this error data. The data is
+		// passed to ApiException as additional data (documented as exposable in the error
+		// response) and is persisted to the NOX profile option by the onboarding step-failed
+		// handlers, so it must stay free of stack frames, whose arguments can carry file
+		// paths, tokens, and other sensitive values. Keep only these bounded scalars.
+		return new WP_Error(
+			'woocommerce_woopayments_onboarding_client_api_exception',
+			$message,
+			array(
+				'code'    => $e->getCode(),
+				'message' => $e->getMessage(),
+			)
+		);
 	}
 
 	/**
@@ -1777,6 +1823,17 @@ class WooPaymentsService {
 
 	/**
 	 * Unlock the onboarding.
+	 *
+	 * WARNING: this writes 0 unconditionally and has no ownership check, so it clears whatever
+	 * lock is currently set — including one a concurrent request acquired. Call it only when
+	 * clearing the lock is safe regardless of ownership:
+	 *   - to release a lock this same request set (e.g. in the finally that pairs with
+	 *     set_onboarding_lock()); or
+	 *   - to self-heal a lock that has already exceeded its TTL (see is_onboarding_locked()),
+	 *     where the stale timestamp means no live request is expected to still hold it.
+	 * Do NOT call it after work that runs unlocked, where another request may have taken the
+	 * lock in the meantime. Safe concurrent release would require a per-request token
+	 * (compare-and-swap), which is deferred to the broader shared-lock work.
 	 *
 	 * @return void
 	 */
