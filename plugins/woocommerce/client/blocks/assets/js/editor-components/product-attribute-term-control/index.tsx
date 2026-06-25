@@ -73,6 +73,7 @@ const ProductAttributeTermControl = ( {
 					className={ clsx( classes ) }
 					item={ item }
 					isLoading={ isLoadingAttributes }
+					isSelectable={ false }
 					disabled={ item.count === 0 }
 					name={ `attributes-${ instanceId }` }
 					countLabel={ sprintf(

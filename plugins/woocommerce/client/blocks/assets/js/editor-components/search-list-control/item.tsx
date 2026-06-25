@@ -44,16 +44,30 @@ const isSomeChildrenSelected = (
 	);
 };
 
-const getItemWithDescendants = (
+const areAllDescendantsSelected = (
+	item: SearchListItemProps,
+	selected: SearchListItemProps[]
+): boolean => {
+	return ( item.children as SearchListItemProps[] ).every( ( child ) =>
+		selected.find(
+			( selectedItem ) =>
+				selectedItem.id === child.id ||
+				areAllDescendantsSelected( child, selected )
+		)
+	);
+};
+
+const getItemDescendants = (
 	item: SearchListItemProps
 ): SearchListItemProps[] => {
-	const descendants = item.children?.map( ( child ) =>
-		getItemWithDescendants( child )
-	);
+	const descendants = item.children?.map( ( child ) => [
+		child,
+		...getItemDescendants( child ),
+	] );
 	if ( ! descendants ) {
-		return [ item ];
+		return [];
 	}
-	return [ item, ...descendants.flat() ];
+	return descendants.flat();
 };
 
 const Count = ( { label }: { label: string | React.ReactNode | number } ) => {
@@ -87,6 +101,7 @@ export const SearchListItem = < T extends object = object >( {
 	controlId = '',
 	item,
 	isSelected,
+	isSelectable = true,
 	isSingle,
 	onSelect,
 	search = '',
@@ -182,13 +197,20 @@ export const SearchListItem = < T extends object = object >( {
 							search
 						) }
 						onChange={ () => {
-							const itemWithDescendants =
-								getItemWithDescendants( item );
-							if ( isSelected ) {
+							const descendants = getItemDescendants( item );
+							const itemsToToggle = isSelectable
+								? [ item, ...descendants ]
+								: [ ...descendants ];
+							const allDescendantsAreSelected =
+								areAllDescendantsSelected( item, selected );
+							if (
+								( isSelectable && isSelected ) ||
+								( ! isSelectable && allDescendantsAreSelected )
+							) {
 								onSelect(
 									arrayDifferenceBy(
 										selected,
-										itemWithDescendants,
+										itemsToToggle,
 										'id'
 									)
 								)();
@@ -196,7 +218,7 @@ export const SearchListItem = < T extends object = object >( {
 								onSelect(
 									arrayUnionBy(
 										selected,
-										itemWithDescendants,
+										itemsToToggle,
 										'id'
 									)
 								)();
