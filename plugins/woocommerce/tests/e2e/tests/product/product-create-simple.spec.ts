@@ -127,7 +127,7 @@ for ( const productType of Object.keys( productData ) ) {
 					.getByLabel( 'Regular price ($)' )
 					.fill( productData[ productType ].regularPrice );
 				await page
-					.getByRole( 'link' )
+					.getByRole( 'tab' )
 					.filter( { hasText: 'Inventory' } )
 					.click();
 
@@ -164,7 +164,7 @@ for ( const productType of Object.keys( productData ) ) {
 			await test.step( 'add product advanced information', async () => {
 				// Advanced information
 				await page
-					.getByRole( 'link' )
+					.getByRole( 'tab' )
 					.filter( { hasText: 'Advanced' } )
 					.first()
 					.click();
