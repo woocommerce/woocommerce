@@ -7,7 +7,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\Rest;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Api\Rest;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use EngineIntegrationTestCase;
@@ -15,7 +15,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 
 /**
- * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Rest\PlansController
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\PlansController
  */
 class PlansControllerTest extends EngineIntegrationTestCase {
 
@@ -178,6 +178,40 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'woocommerce-subscriptions-test', $second_data['extension_slug'] );
 	}
 
+	public function test_list_trims_and_deduplicates_extension_slugs(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$first_id  = $this->create_plan( 'First', self::EXTENSION_SLUG );
+		$second_id = $this->create_plan( 'Second', 'woocommerce-subscriptions-test' );
+
+		$list = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG . ', ' . self::EXTENSION_SLUG . ',woocommerce-subscriptions-test' ) );
+
+		$this->assertSame( 200, $list->get_status() );
+		$this->assertSame( '2', $list->get_headers()['X-WP-Total'] );
+		$response_data = $this->response_data( $list );
+		$this->assertCount( 2, $response_data );
+		$this->assertSame(
+			array( $first_id, $second_id ),
+			array_map(
+				function ( $row ): int {
+					$this->assertIsArray( $row );
+					return $this->int_value( $row, 'id' );
+				},
+				$response_data
+			)
+		);
+	}
+
+	public function test_list_rejects_invalid_extension_slug_lists(): void {
+		wp_set_current_user( $this->admin_id );
+
+		foreach ( array( 'any,' . self::EXTENSION_SLUG, self::EXTENSION_SLUG . ',', ',' . self::EXTENSION_SLUG, 'lite,,test' ) as $extension_slug ) {
+			$list = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => $extension_slug ) );
+
+			$this->assertSame( 400, $list->get_status(), 'Failed for extension_slug=' . $extension_slug );
+		}
+	}
+
 	public function test_list_with_any_extension_slug_returns_all_plans(): void {
 		wp_set_current_user( $this->admin_id );
 
@@ -196,6 +230,59 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( self::EXTENSION_SLUG, $first_data['extension_slug'] );
 		$this->assertSame( $second_id, $this->int_value( $second_data, 'id' ) );
 		$this->assertSame( 'woocommerce-subscriptions-test', $second_data['extension_slug'] );
+	}
+
+	public function test_single_plan_routes_reject_wildcard_and_list_extension_slugs(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$id = $this->create_plan( 'Scoped' );
+
+		foreach ( array( 'any', self::EXTENSION_SLUG . ',woocommerce-subscriptions-test' ) as $extension_slug ) {
+			$this->assertSame( 400, $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => $extension_slug ) )->get_status() );
+			$this->assertSame(
+				400,
+				$this->request(
+					'PATCH',
+					self::BASE . '/' . $id,
+					array(
+						'extension_slug' => $extension_slug,
+						'name'           => 'Invalid scope',
+					)
+				)->get_status()
+			);
+			$this->assertSame(
+				400,
+				$this->request(
+					'POST',
+					self::BASE . '/reorder',
+					array(
+						'extension_slug' => $extension_slug,
+						'ids'            => array( $id ),
+					)
+				)->get_status()
+			);
+		}
+	}
+
+	public function test_create_rejects_wildcard_and_list_extension_slugs(): void {
+		wp_set_current_user( $this->admin_id );
+
+		foreach ( array( 'any', self::EXTENSION_SLUG . ',woocommerce-subscriptions-test' ) as $extension_slug ) {
+			$response = $this->request(
+				'POST',
+				self::BASE,
+				array(
+					'name'           => 'Invalid scope',
+					'billing_policy' => array(
+						'period'   => 'month',
+						'interval' => 1,
+					),
+					'extension_slug' => $extension_slug,
+				)
+			);
+
+			$this->assertSame( 400, $response->get_status() );
+		}
 	}
 
 	public function test_archive_restore_and_reorder(): void {

@@ -210,17 +210,9 @@ final class PlansController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_items( $request ) {
-		$extension_slug = $this->string_param( $request, 'extension_slug' );
-		if ( '' === $extension_slug ) {
-			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
-		}
-
-		if ( 'any' === $extension_slug ) {
-			$extension_slugs = null;
-		} elseif ( false !== strpos( $extension_slug, ',' ) ) {
-			$extension_slugs = explode( ',', $extension_slug );
-		} else {
-			$extension_slugs = array( $extension_slug );
+		$extension_slugs = $this->get_multiple_extension_slugs( $request );
+		if ( $extension_slugs instanceof WP_Error ) {
+			return $extension_slugs;
 		}
 
 		$page     = max( 1, self::coerce_int( $request->get_param( 'page' ), 1 ) );
@@ -266,9 +258,9 @@ final class PlansController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( $request ) {
-		$extension_slug = $this->string_param( $request, 'extension_slug' );
-		if ( '' === $extension_slug ) {
-			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
+		$extension_slug = $this->get_single_extension_slug( $request );
+		if ( $extension_slug instanceof WP_Error ) {
+			return $extension_slug;
 		}
 
 		$plan = $this->plan_repository->find( self::coerce_int( $request->get_param( 'id' ) ), $extension_slug );
@@ -286,9 +278,9 @@ final class PlansController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function create_item( $request ) {
-		$extension_slug = $this->string_param( $request, 'extension_slug' );
-		if ( '' === $extension_slug ) {
-			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
+		$extension_slug = $this->get_single_extension_slug( $request );
+		if ( $extension_slug instanceof WP_Error ) {
+			return $extension_slug;
 		}
 
 		$name = $this->string_param( $request, 'name' );
@@ -344,9 +336,9 @@ final class PlansController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_item( $request ) {
-		$extension_slug = $this->string_param( $request, 'extension_slug' );
-		if ( '' === $extension_slug ) {
-			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
+		$extension_slug = $this->get_single_extension_slug( $request );
+		if ( $extension_slug instanceof WP_Error ) {
+			return $extension_slug;
 		}
 
 		$plan = $this->plan_repository->find( self::coerce_int( $request->get_param( 'id' ) ), $extension_slug );
@@ -410,9 +402,9 @@ final class PlansController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function reorder_items( $request ) {
-		$extension_slug = $this->string_param( $request, 'extension_slug' );
-		if ( '' === $extension_slug ) {
-			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
+		$extension_slug = $this->get_single_extension_slug( $request );
+		if ( $extension_slug instanceof WP_Error ) {
+			return $extension_slug;
 		}
 
 		$ids = $request->get_param( 'ids' );
@@ -665,6 +657,71 @@ final class PlansController extends WP_REST_Controller {
 
 		$group->set_name( $name );
 		$this->plan_group_repository->update( $group );
+	}
+
+	/**
+	 * Get multiple, valid extension slugs from an incoming request.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return array<int, string>|null|WP_Error Slugs, null for wildcard, or validation error.
+	 */
+	private function get_multiple_extension_slugs( WP_REST_Request $request ) {
+		$raw = $request->get_param( 'extension_slug' );
+		if ( null === $raw ) {
+			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
+		}
+		$raw_string = trim( self::coerce_string( $raw ) );
+		if ( '' === $raw_string ) {
+			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
+		}
+
+		if ( 'any' === $raw_string ) {
+			return null;
+		}
+
+		$slugs = array();
+		foreach ( explode( ',', $raw_string ) as $possible_slug ) {
+			$slug = trim( $possible_slug );
+			if ( '' === $slug || 'any' === $slug || ! $this->is_valid_extension_slug( $slug ) ) {
+				return $this->invalid_error( __( 'extension_slug must be "any" or a comma-separated list of extension slugs.', 'woocommerce-subscriptions-engine' ) );
+			}
+
+			$slugs[ $slug ] = $slug;
+		}
+
+		return array_values( $slugs );
+	}
+
+	/**
+	 * Get a single, valid extension slug from an incoming request.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return string|WP_Error Slug or validation error.
+	 */
+	private function get_single_extension_slug( WP_REST_Request $request ) {
+		$raw = $request->get_param( 'extension_slug' );
+		if ( null === $raw ) {
+			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
+		}
+		$raw_string = trim( self::coerce_string( $raw ) );
+		if ( '' === $raw_string ) {
+			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
+		}
+
+		if ( 'any' === $raw_string || false !== strpos( $raw_string, ',' ) || ! $this->is_valid_extension_slug( $raw_string ) ) {
+			return $this->invalid_error( __( 'extension_slug must be a concrete extension slug.', 'woocommerce-subscriptions-engine' ) );
+		}
+
+		return $raw_string;
+	}
+
+	/**
+	 * Whether a value is a valid extension slug.
+	 *
+	 * @param string $slug Possible extension slug.
+	 */
+	private function is_valid_extension_slug( string $slug ): bool {
+		return '' !== $slug && sanitize_key( $slug ) === $slug;
 	}
 
 	/**
