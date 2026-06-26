@@ -124,4 +124,69 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( '70.00', $offer['priceSpecification'][0]['price'] );
 		$this->assertEquals( get_woocommerce_currency(), $offer['priceCurrency'] );
 	}
+
+	/**
+	 * When a variable product page is requested for a single, fully-specified variation, the offer
+	 * should describe that variation with a single Offer and exact price (no AggregateOffer range),
+	 * and reference the parent product group.
+	 *
+	 * @return void
+	 */
+	public function test_variable_product_with_selected_variation_uses_single_offer(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		// Uniquely identifies the "huge / red / 0" variation priced at 16.
+		$_GET['attribute_pa_size']   = 'huge';
+		$_GET['attribute_pa_colour'] = 'red';
+		$_GET['attribute_pa_number'] = '0';
+
+		try {
+			$this->structured_data->generate_product_data( $product );
+			$data  = $this->structured_data->get_data();
+			$offer = $data[0]['offers'][0];
+
+			$this->assertEquals( 'Offer', $offer['@type'] );
+			$this->assertEquals( '16.00', $offer['price'] );
+			$this->assertArrayNotHasKey( 'lowPrice', $offer );
+			$this->assertArrayNotHasKey( 'highPrice', $offer );
+			$this->assertEquals( get_woocommerce_currency(), $offer['priceCurrency'] );
+
+			// The variation is grouped under the parent product (Google `item_group_id`).
+			$this->assertEquals( $product->get_sku(), $data[0]['inProductGroupWithID'] );
+			// The variation's own SKU is used.
+			$this->assertEquals( 'DUMMY SKU VARIABLE HUGE RED 0', $data[0]['sku'] );
+		} finally {
+			unset( $_GET['attribute_pa_size'], $_GET['attribute_pa_colour'], $_GET['attribute_pa_number'] );
+		}
+	}
+
+	/**
+	 * Without a fully-specified variation selection, the variable product keeps the AggregateOffer
+	 * price range (no behavior change).
+	 *
+	 * @return void
+	 */
+	public function test_variable_product_without_full_selection_uses_aggregate_offer(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		// Only one of the three variation attributes is provided: ambiguous, so fall back to aggregate.
+		$_GET['attribute_pa_size'] = 'huge';
+
+		try {
+			$this->structured_data->generate_product_data( $product );
+			$data  = $this->structured_data->get_data();
+			$offer = $data[0]['offers'][0];
+
+			$this->assertEquals( 'AggregateOffer', $offer['@type'] );
+			$this->assertArrayHasKey( 'lowPrice', $offer );
+			$this->assertArrayHasKey( 'highPrice', $offer );
+			$this->assertArrayNotHasKey( 'inProductGroupWithID', $data[0] );
+		} finally {
+			unset( $_GET['attribute_pa_size'] );
+		}
+	}
 }
