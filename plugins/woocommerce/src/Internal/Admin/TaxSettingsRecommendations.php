@@ -61,7 +61,7 @@ class TaxSettingsRecommendations {
 			'/tax/recommendations/dismiss',
 			array(
 				array(
-					'methods'             => \WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'dismiss' ),
 					'permission_callback' => array( $this, 'permissions_check' ),
 				),
@@ -72,18 +72,28 @@ class TaxSettingsRecommendations {
 	/**
 	 * Check whether the current user can dismiss the recommendations.
 	 *
-	 * @return bool
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return bool|\WP_Error
 	 */
-	public function permissions_check() {
-		return current_user_can( 'manage_woocommerce' );
+	public function permissions_check( \WP_REST_Request $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found, Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_cannot_edit',
+				__( 'Sorry, you are not allowed to dismiss these recommendations.', 'woocommerce' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
+		return true;
 	}
 
 	/**
 	 * Persist the dismissal of the recommended tax solutions card.
 	 *
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
 	 * @return \WP_REST_Response
 	 */
-	public function dismiss() {
+	public function dismiss( \WP_REST_Request $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found, Squiz.Commenting.FunctionComment.IncorrectTypeHint
 		update_option( self::DISMISSED_OPTION_NAME, 'yes' );
 
 		return new \WP_REST_Response( array( 'dismissed' => true ), 200 );

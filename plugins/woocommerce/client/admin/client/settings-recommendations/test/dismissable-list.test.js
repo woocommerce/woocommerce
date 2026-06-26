@@ -97,3 +97,55 @@ describe( 'DismissableList', () => {
 		);
 	} );
 } );
+
+describe( 'DismissableList (controlled mode)', () => {
+	beforeEach( () => {
+		// In controlled mode (no dismissOptionName) the visibility selector
+		// short-circuits to null, so the Options API is never consulted.
+		useSelect.mockImplementation( ( fn ) => fn( () => ( {} ) ) );
+		useDispatch.mockReturnValue( { updateOptions: () => null } );
+	} );
+
+	it( 'renders its children when isDismissed is false', () => {
+		render(
+			<DismissableList isDismissed={ false }>
+				<span>controlled children</span>
+			</DismissableList>
+		);
+
+		expect(
+			screen.queryByText( 'controlled children' )
+		).toBeInTheDocument();
+	} );
+
+	it( 'does not render its children when isDismissed is true', () => {
+		render(
+			<DismissableList isDismissed={ true }>
+				<span>controlled children</span>
+			</DismissableList>
+		);
+
+		expect(
+			screen.queryByText( 'controlled children' )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'calls onDismiss without touching the legacy Options API when no option name is provided', () => {
+		const handleDismissMock = jest.fn();
+		const updateOptionsMock = jest.fn();
+		useDispatch.mockReturnValue( { updateOptions: updateOptionsMock } );
+		render(
+			<DismissableList isDismissed={ false }>
+				<DismissableListHeading onDismiss={ handleDismissMock }>
+					controlled heading
+				</DismissableListHeading>
+			</DismissableList>
+		);
+
+		userEvent.click( screen.getByTitle( 'Task List Options' ) );
+		userEvent.click( screen.getByText( 'Hide this' ) );
+
+		expect( handleDismissMock ).toHaveBeenCalled();
+		expect( updateOptionsMock ).not.toHaveBeenCalled();
+	} );
+} );
