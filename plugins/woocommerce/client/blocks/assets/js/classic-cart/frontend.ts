@@ -146,6 +146,18 @@ const { actions } = store(
 		actions: {
 			// Quantity changed on a cart row -> update via shared store, re-render.
 			*changeQuantity(): Generator< unknown > {
+				// Reentrancy guard: drop repeat activations while a mutation is in
+				// flight. The re-render is slow (Store API mutation + the navigate
+				// round-trip), so the row stays on screen and clickable; a second
+				// activation would POST against an already-mutated/removed key and
+				// surface "Cart item no longer exists". The busy class
+				// (`is-cart-updating` -> `pointer-events:none`) is applied
+				// reactively a tick later, so a fast second click can slip past it;
+				// this synchronous guard is the reliable block. Mirrors the legacy
+				// cart.js behaviour of blocking the cart during a request.
+				if ( state.isProcessing ) {
+					return;
+				}
 				const { cartItemKey } = getContext< ClassicCartContext >();
 				const { ref } = getElement();
 				const quantity = parseInt(
@@ -167,6 +179,9 @@ const { actions } = store(
 			// Remove item link.
 			*removeItem( event: Event ): Generator< unknown > {
 				event.preventDefault();
+				if ( state.isProcessing ) {
+					return; // Reentrancy guard; see changeQuantity.
+				}
 				const { cartItemKey } = getContext< ClassicCartContext >();
 				state.isProcessing = true;
 				try {
@@ -183,6 +198,9 @@ const { actions } = store(
 			// to the legacy server restore URL on the link, then re-render.
 			*restoreItem( event: Event ): Generator< unknown > {
 				event.preventDefault();
+				if ( state.isProcessing ) {
+					return; // Reentrancy guard; see changeQuantity.
+				}
 				const { ref } = getElement();
 				const href = ( ref as HTMLAnchorElement ).href;
 				state.isProcessing = true;
@@ -197,6 +215,9 @@ const { actions } = store(
 
 			*applyCoupon( event: Event ): Generator< unknown > {
 				event.preventDefault();
+				if ( state.isProcessing ) {
+					return; // Reentrancy guard; see changeQuantity.
+				}
 				const input = document.getElementById(
 					'coupon_code'
 				) as HTMLInputElement | null;
@@ -216,6 +237,9 @@ const { actions } = store(
 
 			*removeCoupon( event: Event ): Generator< unknown > {
 				event.preventDefault();
+				if ( state.isProcessing ) {
+					return; // Reentrancy guard; see changeQuantity.
+				}
 				const { coupon } = getContext< ClassicCartContext >();
 				state.isProcessing = true;
 				try {
@@ -228,6 +252,9 @@ const { actions } = store(
 			},
 
 			*selectShippingRate(): Generator< unknown > {
+				if ( state.isProcessing ) {
+					return; // Reentrancy guard; see changeQuantity.
+				}
 				const { ref } = getElement();
 				const rateId = ( ref as HTMLInputElement ).value;
 				// `index` maps to the shipping package on the classic markup.
@@ -253,6 +280,9 @@ const { actions } = store(
 			// Shipping calculator submit -> set customer address, re-render.
 			*calculateShipping( event: Event ): Generator< unknown > {
 				event.preventDefault();
+				if ( state.isProcessing ) {
+					return; // Reentrancy guard; see changeQuantity.
+				}
 				const form = getElement().ref as HTMLFormElement;
 				const data = new FormData( form );
 				state.isProcessing = true;

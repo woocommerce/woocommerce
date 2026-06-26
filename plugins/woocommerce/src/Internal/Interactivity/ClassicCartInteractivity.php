@@ -239,13 +239,21 @@ class ClassicCartInteractivity implements RegisterHooksInterface {
 		// has run.
 		wp_enqueue_script_module( self::STORE_NAMESPACE );
 
-		// Busy-state styling for the wrapper while a mutation is in flight.
-		// Inline-only style (no src), toggled by data-wp-class--is-cart-updating.
+		// Busy-state styling while a mutation is in flight: a single overlay over
+		// the whole cart (dim + block pointer events), replacing the legacy
+		// blockUI overlay. Note: is-cart-updating is added to the .woocommerce
+		// element itself, so the selector is compound (.woocommerce.is-cart-updating),
+		// not descendant. Inline-only style (no src).
+		//
+		// We deliberately keep this coarse overlay rather than disabling each
+		// control in place (data-wp-bind--disabled / aria-disabled per element):
+		// the spike is about testing feasibility, not polishing the pending-state
+		// UX. In-place disabling is the nicer end state but out of scope here.
 		wp_register_style( self::STYLE_HANDLE, false, array(), \WC_VERSION );
 		wp_enqueue_style( self::STYLE_HANDLE );
 		wp_add_inline_style(
 			self::STYLE_HANDLE,
-			'.woocommerce .is-cart-updating{opacity:.6;pointer-events:none;}'
+			'.woocommerce.is-cart-updating{opacity:.6;pointer-events:none;}'
 		);
 	}
 
