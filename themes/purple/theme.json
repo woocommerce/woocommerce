@@ -7,6 +7,10 @@
 		{
 			"name": "template-page-w-cover",
 			"title": "Page with Cover"
+		},
+		{
+			"name": "archive-product-without-filters",
+			"title": "Product Catalog (No Filters)"
 		}
 	],
 	"settings": {
