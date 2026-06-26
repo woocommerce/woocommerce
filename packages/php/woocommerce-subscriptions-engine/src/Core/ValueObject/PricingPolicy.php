@@ -253,9 +253,9 @@ final class PricingPolicy {
 
 		if ( is_int( $value ) ) {
 			$int_value = $value;
-		} else if ( is_float( $value ) && floor( $value ) === $value ) {
+		} elseif ( is_float( $value ) && floor( $value ) === $value ) {
 			$int_value = (int) $value;
-		} else if ( is_string( $value ) ) {
+		} elseif ( is_string( $value ) ) {
 			$validated = filter_var( $value, FILTER_VALIDATE_INT );
 			if ( false !== $validated ) {
 				$int_value = $validated;
