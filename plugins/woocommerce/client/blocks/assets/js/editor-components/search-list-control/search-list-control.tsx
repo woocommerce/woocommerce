@@ -38,8 +38,11 @@ import './style.scss';
 
 const isExpandedOrDescendantIsExpanded = (
 	item: SearchListItemProps,
-	expandedPanelId: number
+	expandedPanelId: number | null
 ): boolean => {
+	if ( expandedPanelId === null ) {
+		return false;
+	}
 	if ( item.id === expandedPanelId ) {
 		return true;
 	}
@@ -265,7 +268,7 @@ export const SearchListControl = < T extends object = object >(
 	} = props;
 
 	const [ search, setSearch ] = useState( '' );
-	const useExpandedPanelId = useState< number >( -1 );
+	const useExpandedPanelId = useState< number | null >( null );
 	const instanceId = useInstanceId( SearchListControl );
 	const messages = useMemo(
 		() => ( { ...defaultMessages, ...customMessages } ),

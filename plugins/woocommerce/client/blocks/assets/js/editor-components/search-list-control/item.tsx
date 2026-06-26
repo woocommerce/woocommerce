@@ -31,8 +31,11 @@ const getItemDescendants = (
 
 const isExpandedOrDescendantIsExpanded = (
 	item: SearchListItemProps,
-	expandedPanelId: number
+	expandedPanelId: number | null
 ): boolean => {
+	if ( expandedPanelId === null ) {
+		return false;
+	}
 	if ( item.id === expandedPanelId ) {
 		return true;
 	}
@@ -142,7 +145,7 @@ export const SearchListItem = < T extends object = object >( {
 			setExpandedPanelId( Number( item.parent ) );
 			return;
 		}
-		setExpandedPanelId( -1 );
+		setExpandedPanelId( null );
 	}, [ isExpanded, item.id, item.parent, setExpandedPanelId ] );
 
 	// Non-selectable items (like Product Attributes) should look selecteed when
