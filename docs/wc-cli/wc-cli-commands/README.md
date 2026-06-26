@@ -27,7 +27,7 @@ wp wc [command] --help
 ## Commands
 
 | Command | Description |
-|---|---|
+| --- | --- |
 | [wc blueprint](/docs/wc-cli/wc-cli-commands/wc-blueprint/) | Imports and exports WooCommerce Blueprints. |
 | [wc com](/docs/wc-cli/wc-cli-commands/wc-com/) | Interacts with extensions from the WooCommerce.com marketplace via CLI. |
 | [wc customer](/docs/wc-cli/wc-cli-commands/wc-customer/) | Manage WooCommerce customer resources. |
