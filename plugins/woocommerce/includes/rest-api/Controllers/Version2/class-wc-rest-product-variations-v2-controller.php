@@ -8,7 +8,6 @@
  * @since   3.0.0
  */
 
-use Automattic\WooCommerce\Enums\DimensionUnit;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
@@ -791,7 +790,7 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	 */
 	public function get_item_schema() {
 		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
-		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', DimensionUnit::CENTIMETER ) );
+		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
 		$schema               = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => $this->post_type,
