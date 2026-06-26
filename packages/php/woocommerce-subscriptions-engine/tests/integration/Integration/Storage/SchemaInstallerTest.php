@@ -18,8 +18,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstall
  */
 class SchemaInstallerTest extends EngineIntegrationTestCase {
 
-	use ScalarCoercion;
-
 	/**
 	 * The baseline tables the installer owns, including the cycle tables.
 	 *
@@ -459,7 +457,7 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		$names = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$names[] = self::coerce_string( $row['Key_name'] ?? null );
+				$names[] = ScalarCoercion::coerce_string( $row['Key_name'] ?? null );
 			}
 		}
 
@@ -483,8 +481,8 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		usort(
 			$rows,
 			static function ( $a, $b ): int {
-				$a_seq = is_array( $a ) ? self::coerce_int( $a['Seq_in_index'] ?? null ) : 0;
-				$b_seq = is_array( $b ) ? self::coerce_int( $b['Seq_in_index'] ?? null ) : 0;
+				$a_seq = is_array( $a ) ? ScalarCoercion::coerce_int( $a['Seq_in_index'] ?? null ) : 0;
+				$b_seq = is_array( $b ) ? ScalarCoercion::coerce_int( $b['Seq_in_index'] ?? null ) : 0;
 
 				return $a_seq <=> $b_seq;
 			}
@@ -493,7 +491,7 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		$columns = array();
 		foreach ( $rows as $row ) {
 			if ( is_array( $row ) ) {
-				$columns[] = self::coerce_string( $row['Column_name'] ?? null );
+				$columns[] = ScalarCoercion::coerce_string( $row['Column_name'] ?? null );
 			}
 		}
 
@@ -519,7 +517,7 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 
 		foreach ( $rows as $row ) {
 			// Non_unique = 0 marks a UNIQUE index.
-			if ( is_array( $row ) && '0' !== self::coerce_string( $row['Non_unique'] ?? null ) ) {
+			if ( is_array( $row ) && '0' !== ScalarCoercion::coerce_string( $row['Non_unique'] ?? null ) ) {
 				return false;
 			}
 		}

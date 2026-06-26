@@ -26,8 +26,6 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Plan {
 
-	use ScalarCoercion;
-
 	const DEFAULT_CATEGORY = 'SUBSCRIPTION';
 
 	const DEFAULT_STATUS = 'active';
@@ -199,16 +197,16 @@ final class Plan {
 		return new self(
 			null,
 			$group_id,
-			self::coerce_string( $args['name'] ?? null ),
-			self::coerce_nullable_string( $args['description'] ?? null ),
+			ScalarCoercion::coerce_string( $args['name'] ?? null ),
+			ScalarCoercion::coerce_nullable_string( $args['description'] ?? null ),
 			is_array( $args['options'] ?? null ) ? $args['options'] : array(),
 			$billing_policy,
 			$delivery_policy,
 			$pricing_policy,
-			self::coerce_string( $args['category'] ?? null, self::DEFAULT_CATEGORY ),
-			self::coerce_string( $args['status'] ?? null, self::DEFAULT_STATUS ),
-			self::coerce_int( $args['sort_order'] ?? null, 0 ),
-			self::coerce_nullable_string( $args['extension_slug'] ?? null )
+			ScalarCoercion::coerce_string( $args['category'] ?? null, self::DEFAULT_CATEGORY ),
+			ScalarCoercion::coerce_string( $args['status'] ?? null, self::DEFAULT_STATUS ),
+			ScalarCoercion::coerce_int( $args['sort_order'] ?? null, 0 ),
+			ScalarCoercion::coerce_nullable_string( $args['extension_slug'] ?? null )
 		);
 	}
 
@@ -232,18 +230,18 @@ final class Plan {
 		}
 
 		return new self(
-			isset( $row['id'] ) ? self::coerce_int( $row['id'] ) : null,
-			self::coerce_int( $row['group_id'] ?? null ),
-			self::coerce_string( $row['name'] ?? null ),
-			self::coerce_nullable_string( $row['description'] ?? null ),
+			isset( $row['id'] ) ? ScalarCoercion::coerce_int( $row['id'] ) : null,
+			ScalarCoercion::coerce_int( $row['group_id'] ?? null ),
+			ScalarCoercion::coerce_string( $row['name'] ?? null ),
+			ScalarCoercion::coerce_nullable_string( $row['description'] ?? null ),
 			is_array( $row['options'] ?? null ) ? $row['options'] : array(),
 			BillingPolicy::from_array( is_array( $row['billing_policy'] ?? null ) ? $row['billing_policy'] : array() ),
 			isset( $row['delivery_policy'] ) && is_array( $row['delivery_policy'] ) ? DeliveryPolicy::from_array( $row['delivery_policy'] ) : null,
 			$pricing_policy,
-			self::coerce_string( $row['category'] ?? null, self::DEFAULT_CATEGORY ),
-			self::coerce_string( $row['status'] ?? null, self::DEFAULT_STATUS ),
-			self::coerce_int( $row['sort_order'] ?? null, 0 ),
-			self::coerce_nullable_string( $row['extension_slug'] ?? null )
+			ScalarCoercion::coerce_string( $row['category'] ?? null, self::DEFAULT_CATEGORY ),
+			ScalarCoercion::coerce_string( $row['status'] ?? null, self::DEFAULT_STATUS ),
+			ScalarCoercion::coerce_int( $row['sort_order'] ?? null, 0 ),
+			ScalarCoercion::coerce_nullable_string( $row['extension_slug'] ?? null )
 		);
 	}
 
