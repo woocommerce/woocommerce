@@ -531,8 +531,18 @@
 
 		h1 {
 			padding-left: $gap-smaller * 2;
-			// This is the same as the Payments settings header.
-			// This is used to keep the UI consistent across when navigating to the offline payments settings page.
+			// This title renders as an inline
+			// <h1.woocommerce-layout__header-heading> in the page content,
+			// outside the floating header, so the shared
+			// `.woocommerce-layout__header .woocommerce-layout__header-heading`
+			// rule (which scopes heading typography to the floating header) no
+			// longer reaches it. Restore the 16px / 500 size explicitly;
+			// otherwise the heading falls back to the default wp-admin h1 (23px)
+			// and its 9px top padding, so also trim padding-top to 4px to
+			// vertically center it against the back button.
+			padding-top: 4px;
+			font-size: 16px;
+			font-weight: 500;
 			line-height: 38px;
 			color: #3c434a;
 		}
