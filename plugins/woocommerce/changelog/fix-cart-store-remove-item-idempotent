@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make the cart Interactivity store's removeCartItem idempotent so re-entrant removals of the same item no longer error with "Cart item no longer exists or is invalid".

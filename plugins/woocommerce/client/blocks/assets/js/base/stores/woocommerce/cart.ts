@@ -286,6 +286,16 @@ const { actions } = store< Store >(
 		},
 		actions: {
 			*removeCartItem( key: string ): AsyncAction< void > {
+				// Idempotency guard: if the item is already gone from cart state
+				// (e.g. a re-entrant remove of the same key while the first is
+				// still settling, or after it optimistically removed the item),
+				// there's nothing to do. Skipping avoids sending a remove for a
+				// key the server has already dropped, which fails with
+				// "Cart item no longer exists or is invalid".
+				if ( ! state.cart.items.some( ( item ) => item.key === key ) ) {
+					return;
+				}
+
 				// Track what changes we're making for the sync event.
 				const quantityChanges: QuantityChanges = {
 					cartItemsPendingDelete: [ key ],
