@@ -170,6 +170,8 @@ jobs:
             core.setOutput( 'nextStable', newVersion.replace( /-(dev|(beta|rc)\.\d+)/, '' ) );
             core.setOutput( 'clearChangelog', '' === prerelease );
             core.setOutput( 'prMilestone', `${ baseVersion }.0` );
+            // Stable version of the cycle being frozen (used to resolve $$next-version$$ on trunk).
+            core.setOutput( 'currentStable', `${ baseVersion }.0` );
 
       - name: Bump version in files
         env:
@@ -205,6 +207,15 @@ jobs:
             echo "::error::No changes to commit."
             exit 1
           fi
+
+      - name: Replace $$next-version$$ tokens for the frozen cycle
+        if: ${{ inputs.bump-type == 'dev' }}
+        env:
+          CURRENT_STABLE: ${{ steps.compute-new-version.outputs.currentStable }}
+        run: |
+          # On the trunk dev bump (code freeze), resolve any $$next-version$$ tokens to the
+          # version that just shipped, so they are not re-resolved to a later version next cycle.
+          bash ./tools/replace-next-version-tag.sh "$CURRENT_STABLE"
 
       - name: Open PR with changes
         env:

@@ -71,8 +71,8 @@ plugins/woocommerce/
 **Version Management:**
 
 - Current version in `plugins/woocommerce/includes/class-woocommerce.php` → `$version` property
-- Used for `@since` annotations (remove `-dev` suffix)
-- When changing template files (PHP files used to display UI on the front-end) the version in their header should be updated to the current version, without the `-dev` suffix.
+- For `@since` and `@deprecated` annotations, use the placeholder token `$$next-version$$` instead of hardcoding a version. The release tooling replaces it with the actual version at code freeze, so you never have to guess which release your change lands in. The same token works in `wc_deprecated_function()`, `wc_deprecated_hook()`, `wc_deprecated_argument()`, `wc_doing_it_wrong()`, their WordPress core equivalents, and `do_action_deprecated()` / `apply_filters_deprecated()`. Replacement is handled by `tools/replace-next-version-tag.sh`.
+- When changing template files (PHP files used to display UI on the front-end) the version in their header should be updated to the current version, without the `-dev` suffix. Template `@version` headers are not covered by the `$$next-version$$` placeholder.
 
 **JavaScript:**
 
