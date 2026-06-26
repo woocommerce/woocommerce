@@ -49,6 +49,8 @@ type PendingNavigation = {
 	href: string;
 };
 
+const FORM_POST_REDIRECT_INPUT_NAME = 'wc_settings_ui_redirect_to';
+
 const normalizeSection = ( section?: string ) =>
 	section === 'default' ? '' : section;
 
@@ -115,6 +117,21 @@ const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>
 
 const clearLegacyFormPrompt = () => {
 	window.onbeforeunload = null;
+};
+
+const setFormPostRedirectInput = ( form: HTMLFormElement, href: string ) => {
+	let redirectInput = form.querySelector< HTMLInputElement >(
+		`input[name="${ FORM_POST_REDIRECT_INPUT_NAME }"]`
+	);
+
+	if ( ! redirectInput ) {
+		redirectInput = document.createElement( 'input' );
+		redirectInput.type = 'hidden';
+		redirectInput.name = FORM_POST_REDIRECT_INPUT_NAME;
+		form.appendChild( redirectInput );
+	}
+
+	redirectInput.value = href;
 };
 
 const shouldPromptForNavigation = ( event: MouseEvent ) => {
@@ -562,27 +579,31 @@ export const SettingsUIPage = ( {
 		clearLegacyFormPrompt();
 	}, [] );
 
-	const submitSettingsForm = useCallback( () => {
-		const form = document.getElementById( 'mainform' );
+	const submitSettingsForm = useCallback(
+		( redirectTo?: string ) => {
+			const form = document.getElementById( 'mainform' );
 
-		if ( ! ( form instanceof HTMLFormElement ) ) {
-			return;
-		}
+			if ( ! ( form instanceof HTMLFormElement ) ) {
+				return;
+			}
 
-		allowNavigation();
+			if ( typeof redirectTo === 'string' && redirectTo ) {
+				setFormPostRedirectInput( form, redirectTo );
+			}
 
-		const saveButton = document.querySelector( '.woocommerce-save-button' );
+			allowNavigation();
 
-		if (
-			saveButton instanceof HTMLButtonElement &&
-			saveButton.form === form
-		) {
-			form.requestSubmit( saveButton );
-			return;
-		}
+			const saveButton = form.querySelector( '.woocommerce-save-button' );
 
-		form.requestSubmit();
-	}, [ allowNavigation ] );
+			if ( saveButton instanceof HTMLButtonElement ) {
+				form.requestSubmit( saveButton );
+				return;
+			}
+
+			form.requestSubmit();
+		},
+		[ allowNavigation ]
+	);
 
 	const setValues = useCallback(
 		( nextValues: Partial< SettingsValues > ) => {
@@ -736,7 +757,7 @@ export const SettingsUIPage = ( {
 		}
 
 		if ( saveStrategy.adapter === 'form_post' ) {
-			submitSettingsForm();
+			submitSettingsForm( pendingNavigation.href );
 			return;
 		}
 
