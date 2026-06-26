@@ -56,16 +56,22 @@ import {
 export const getUpdatedQuery = (
 	query: ProductCollectionQuery,
 	queryParams: Partial< ProductCollectionQuery >
-): ProductCollectionQuery => ( {
-	...query,
-	...queryParams,
-	...( queryParams.taxQuery && {
-		taxQuery: {
-			...query.taxQuery,
-			...queryParams.taxQuery,
-		},
-	} ),
-} );
+): ProductCollectionQuery => {
+	const { taxQuery, ...queryParamsWithoutTaxQuery } = queryParams;
+	const hasTaxQueryUpdates =
+		taxQuery && typeof taxQuery === 'object' && ! Array.isArray( taxQuery );
+
+	return {
+		...query,
+		...queryParamsWithoutTaxQuery,
+		...( hasTaxQueryUpdates && {
+			taxQuery: {
+				...query.taxQuery,
+				...taxQuery,
+			},
+		} ),
+	};
+};
 
 export function setQueryAttribute(
 	block: BlockEditProps< ProductCollectionAttributes >,

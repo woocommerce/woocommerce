@@ -71,4 +71,32 @@ describe( 'getUpdatedQuery', () => {
 			product_tag: [ 2 ],
 		} );
 	} );
+
+	it( 'preserves taxQuery when a taxonomy update is invalid', () => {
+		const query = getQuery( {
+			taxQuery: {
+				product_cat: [ 1 ],
+				product_tag: [ 2 ],
+			},
+		} );
+
+		expect(
+			getUpdatedQuery( query, {
+				taxQuery: undefined,
+			} ).taxQuery
+		).toEqual( {
+			product_cat: [ 1 ],
+			product_tag: [ 2 ],
+		} );
+
+		expect(
+			getUpdatedQuery( query, {
+				taxQuery:
+					null as unknown as ProductCollectionQuery[ 'taxQuery' ],
+			} ).taxQuery
+		).toEqual( {
+			product_cat: [ 1 ],
+			product_tag: [ 2 ],
+		} );
+	} );
 } );
