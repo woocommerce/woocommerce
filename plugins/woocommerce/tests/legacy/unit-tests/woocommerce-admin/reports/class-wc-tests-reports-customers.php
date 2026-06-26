@@ -31,7 +31,8 @@ class WC_Admin_Tests_Reports_Customer extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
-		$customer_id = DataStore::get_customer_id_by_user_id( $customer->get_id() ); // This is the customer ID from lookup table.
+		$customer_id = DataStore::get_customer_id_by_user_id( $customer->get_id() );
+		// This is the customer ID from lookup table.
 
 		// Create 3 orders.
 		foreach ( range( 1, 3 ) as $i ) {
@@ -87,7 +88,8 @@ class WC_Admin_Tests_Reports_Customer extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
-		$customer_id = DataStore::get_customer_id_by_user_id( $customer->get_id() ); // This is the customer ID from lookup table.
+		$customer_id = DataStore::get_customer_id_by_user_id( $customer->get_id() );
+		// This is the customer ID from lookup table.
 
 		// Customer should remain in lookup table after first order deleted.
 		$order1->delete( true );
@@ -192,6 +194,67 @@ class WC_Admin_Tests_Reports_Customer extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $rows, 'Guest row should still exist.' );
 		$this->assertNull( $rows[0]->user_id, 'Guest row user_id should remain NULL for normal registration.' );
 	}
+
+	/**
+	 * Test that get_or_create_customer_from_order() handles a plain WC_Order
+	 * (not the Overrides\Order subclass) without a fatal error.
+	 *
+	 * This is a regression test for the scenario described in issue #64338,
+	 * where get_customer_first_name/get_customer_last_name do not exist on plain WC_Order.
+	 *
+	 * @covers \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::get_or_create_customer_from_order
+	 */
+	public function test_get_or_create_customer_from_plain_wc_order() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Build a plain WC_Order directly, bypassing the woocommerce_order_class filter
+		// that normally swaps in the Overrides\Order subclass. This is the exact path
+		// that produced the production fatal.
+		$order = new WC_Order();
+		$order->set_billing_first_name( 'Jane' );
+		$order->set_billing_last_name( 'Doe' );
+		$order->set_billing_email( 'jane.doe.plain@example.com' );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		$customer_id = \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::get_or_create_customer_from_order( $order );
+
+		$this->assertNotFalse( $customer_id, 'Should return a customer ID for a plain WC_Order without fataling.' );
+		$this->assertIsInt( $customer_id, 'Returned customer ID should be an integer.' );
+	}
+
+	/**
+	 * Test that get_customer_order_data_and_format() cascades through date_modified
+	 * and date_paid when date_created is null, and ultimately falls back to null
+	 * rather than stamping an incorrect current timestamp.
+	 *
+	 * @covers \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::get_customer_order_data_and_format
+	 */
+	public function test_date_last_active_falls_back_when_date_created_is_null() {
+		$order = $this->createMock( \Automattic\WooCommerce\Admin\Overrides\Order::class );
+		$order->method( 'get_id' )->willReturn( 0 );
+		$order->method( 'get_date_created' )->willReturn( null );
+		$order->method( 'get_date_modified' )->willReturn( null );
+		$order->method( 'get_date_paid' )->willReturn( null );
+		$order->method( 'get_user_id' )->willReturn( 0 );
+		$order->method( 'get_billing_email' )->willReturn( 'test@example.com' );
+		$order->method( 'get_billing_first_name' )->willReturn( 'Test' );
+		$order->method( 'get_billing_last_name' )->willReturn( 'User' );
+		$order->method( 'get_billing_city' )->willReturn( '' );
+		$order->method( 'get_billing_state' )->willReturn( '' );
+		$order->method( 'get_billing_postcode' )->willReturn( '' );
+		$order->method( 'get_billing_country' )->willReturn( '' );
+		$order->method( 'get_customer_first_name' )->willReturn( 'Test' );
+		$order->method( 'get_customer_last_name' )->willReturn( 'User' );
+
+		list( $data, ) = \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::get_customer_order_data_and_format( $order );
+
+		$this->assertNull(
+			$data['date_last_active'],
+			'date_last_active must be null (not the current timestamp) when all date fields are null.'
+		);
+	}
+
 
 	/**
 	 * Get a customer's record from the database.
