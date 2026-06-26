@@ -19,6 +19,16 @@ class CustomizerSettings implements RegisterHooksInterface {
 	public const BACKUP_OPTION_NAME = 'woocommerce_classic_theme_customizer_settings';
 
 	/**
+	 * Option used to store whether Store Notice was active in a classic theme.
+	 */
+	private const ENABLE_STORE_NOTICE_IN_CLASSIC_THEME_OPTION = 'woocommerce_enable_store_notice_in_classic_theme';
+
+	/**
+	 * Option used to store whether Store Notice is active.
+	 */
+	private const STORE_NOTICE_ACTIVE_OPTION = 'woocommerce_demo_store';
+
+	/**
 	 * Product catalog and image Customizer settings with their block-theme defaults.
 	 */
 	private const CUSTOMIZER_SETTINGS = array(
@@ -71,9 +81,30 @@ class CustomizerSettings implements RegisterHooksInterface {
 	 */
 	public function reset_or_restore_customizer_settings( $old_name, $old_theme ) {
 		if ( ! $old_theme->is_block_theme() && wp_is_block_theme() ) {
+			$this->disable_store_notice_for_block_theme();
 			$this->reset_settings();
 		} elseif ( $old_theme->is_block_theme() && ! wp_is_block_theme() ) {
+			$this->restore_store_notice_for_classic_theme();
 			$this->restore_settings();
+		}
+	}
+
+	/**
+	 * Update Store Notice visibility when switching between classic and block themes.
+	 *
+	 * @internal
+	 *
+	 * @param string    $old_name Old theme name.
+	 * @param \WP_Theme $old_theme Instance of the old theme.
+	 * @return void
+	 *
+	 * @since 11.0.0
+	 */
+	public function update_store_notice_visible_on_theme_switch( $old_name, $old_theme ) {
+		if ( ! $old_theme->is_block_theme() && wp_is_block_theme() ) {
+			$this->disable_store_notice_for_block_theme();
+		} elseif ( $old_theme->is_block_theme() && ! wp_is_block_theme() ) {
+			$this->restore_store_notice_for_classic_theme();
 		}
 	}
 
@@ -131,6 +162,36 @@ class CustomizerSettings implements RegisterHooksInterface {
 		}
 
 		delete_option( self::BACKUP_OPTION_NAME );
+	}
+
+	/**
+	 * Disable Store Notice for block themes and remember if it should be restored.
+	 *
+	 * @return void
+	 */
+	private function disable_store_notice_for_block_theme() {
+		if ( ! is_store_notice_showing() ) {
+			return;
+		}
+
+		update_option( self::STORE_NOTICE_ACTIVE_OPTION, wc_bool_to_string( false ) );
+		add_option( self::ENABLE_STORE_NOTICE_IN_CLASSIC_THEME_OPTION, wc_bool_to_string( true ) );
+	}
+
+	/**
+	 * Restore Store Notice when switching back to a classic theme.
+	 *
+	 * @return void
+	 */
+	private function restore_store_notice_for_classic_theme() {
+		$enable_store_notice_in_classic_theme = wc_string_to_bool( get_option( self::ENABLE_STORE_NOTICE_IN_CLASSIC_THEME_OPTION, 'no' ) );
+
+		if ( ! $enable_store_notice_in_classic_theme ) {
+			return;
+		}
+
+		update_option( self::STORE_NOTICE_ACTIVE_OPTION, wc_bool_to_string( true ) );
+		delete_option( self::ENABLE_STORE_NOTICE_IN_CLASSIC_THEME_OPTION );
 	}
 
 	/**

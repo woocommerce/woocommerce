@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Internal\Theme\CustomizerSettings;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -4703,7 +4704,6 @@ function wc_set_hooked_blocks_version() {
  */
 function wc_after_switch_theme( $old_name, $old_theme ) {
 	wc_set_hooked_blocks_version_on_theme_switch( $old_name, $old_theme );
-	wc_update_store_notice_visible_on_theme_switch( $old_name, $old_theme );
 }
 
 /**
@@ -4719,30 +4719,7 @@ function wc_after_switch_theme( $old_name, $old_theme ) {
  * @return void
  */
 function wc_update_store_notice_visible_on_theme_switch( $old_name, $old_theme ) {
-	$enable_store_notice_in_classic_theme_option = 'woocommerce_enable_store_notice_in_classic_theme';
-	$is_store_notice_active_option               = 'woocommerce_demo_store';
-
-	if ( ! $old_theme->is_block_theme() && wp_is_block_theme() ) {
-		/*
-		 * When switching from a classic theme to a block theme, check if the store notice is active,
-		 * if it is, disable it but set an option to re-enable it when switching back to a classic theme.
-		 */
-		if ( is_store_notice_showing() ) {
-			update_option( $is_store_notice_active_option, wc_bool_to_string( false ) );
-			add_option( $enable_store_notice_in_classic_theme_option, wc_bool_to_string( true ) );
-		}
-	} elseif ( $old_theme->is_block_theme() && ! wp_is_block_theme() ) {
-		/*
-		 * When switching from a block theme to a clasic theme, check if we have set the option to
-		 * re-enable the store notice. If so, re-enable it.
-		 */
-		$enable_store_notice_in_classic_theme = wc_string_to_bool( get_option( $enable_store_notice_in_classic_theme_option, 'no' ) );
-
-		if ( $enable_store_notice_in_classic_theme ) {
-			update_option( $is_store_notice_active_option, wc_bool_to_string( true ) );
-			delete_option( $enable_store_notice_in_classic_theme_option );
-		}
-	}
+	wc_get_container()->get( CustomizerSettings::class )->update_store_notice_visible_on_theme_switch( $old_name, $old_theme );
 }
 
 /**

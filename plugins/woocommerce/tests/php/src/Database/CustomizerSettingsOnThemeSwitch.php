@@ -48,6 +48,16 @@ class CustomizerSettingsOnThemeSwitch extends WC_Unit_Test_Case {
 	);
 
 	/**
+	 * Option used to store whether Store Notice was active in a classic theme.
+	 */
+	private const ENABLE_STORE_NOTICE_IN_CLASSIC_THEME_OPTION = 'woocommerce_enable_store_notice_in_classic_theme';
+
+	/**
+	 * Option used to store whether Store Notice is active.
+	 */
+	private const STORE_NOTICE_ACTIVE_OPTION = 'woocommerce_demo_store';
+
+	/**
 	 * Run before each test.
 	 */
 	public function setUp(): void {
@@ -58,6 +68,7 @@ class CustomizerSettingsOnThemeSwitch extends WC_Unit_Test_Case {
 
 		$this->delete_backup();
 		$this->reset_customizer_settings();
+		$this->delete_store_notice_options();
 	}
 
 	/**
@@ -69,6 +80,7 @@ class CustomizerSettingsOnThemeSwitch extends WC_Unit_Test_Case {
 
 		$this->delete_backup();
 		$this->reset_customizer_settings();
+		$this->delete_store_notice_options();
 
 		parent::tearDown();
 	}
@@ -176,6 +188,56 @@ class CustomizerSettingsOnThemeSwitch extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should disable Store Notice when switching from a classic theme to a block theme.
+	 */
+	public function test_disables_store_notice_when_switching_from_classic_to_block_theme(): void {
+		update_option( self::STORE_NOTICE_ACTIVE_OPTION, 'yes' );
+
+		switch_theme( 'twentytwentyfour' );
+		check_theme_switched();
+
+		$this->assertSame(
+			'no',
+			get_option( self::STORE_NOTICE_ACTIVE_OPTION ),
+			'Expected Store Notice to be disabled when switching from a classic theme to a block theme.'
+		);
+
+		switch_theme( 'storefront' );
+		check_theme_switched();
+
+		$this->assertSame(
+			'yes',
+			get_option( self::STORE_NOTICE_ACTIVE_OPTION ),
+			'Expected Store Notice to be enabled when switching back to a classic theme that had Store Notice enabled.'
+		);
+	}
+
+	/**
+	 * @testdox Should keep Store Notice disabled when switching back to a classic theme that had it disabled.
+	 */
+	public function test_keeps_store_notice_disabled_when_switching_back_to_classic_theme(): void {
+		update_option( self::STORE_NOTICE_ACTIVE_OPTION, 'no' );
+
+		switch_theme( 'twentytwentyfour' );
+		check_theme_switched();
+
+		$this->assertSame(
+			'no',
+			get_option( self::STORE_NOTICE_ACTIVE_OPTION ),
+			'Expected Store Notice to stay disabled when switching from a classic theme to a block theme.'
+		);
+
+		switch_theme( 'storefront' );
+		check_theme_switched();
+
+		$this->assertSame(
+			'no',
+			get_option( self::STORE_NOTICE_ACTIVE_OPTION ),
+			'Expected Store Notice to stay disabled when switching back to a classic theme that had Store Notice disabled.'
+		);
+	}
+
+	/**
 	 * Update Customizer settings.
 	 *
 	 * @param array<string, mixed> $settings Settings.
@@ -203,5 +265,15 @@ class CustomizerSettingsOnThemeSwitch extends WC_Unit_Test_Case {
 	 */
 	private function delete_backup(): void {
 		delete_option( CustomizerSettings::BACKUP_OPTION_NAME );
+	}
+
+	/**
+	 * Delete Store Notice theme switch options.
+	 *
+	 * @return void
+	 */
+	private function delete_store_notice_options(): void {
+		delete_option( self::ENABLE_STORE_NOTICE_IN_CLASSIC_THEME_OPTION );
+		delete_option( self::STORE_NOTICE_ACTIVE_OPTION );
 	}
 }
