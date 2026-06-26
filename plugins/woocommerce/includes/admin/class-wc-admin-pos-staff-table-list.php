@@ -82,11 +82,17 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	 */
 	public function column_user( $user ) {
 		$output = '<strong>';
-		if ( current_user_can( 'edit_user', $user->ID ) ) {
-			$output .= '<a href="' . esc_url( add_query_arg( array( 'user_id' => $user->ID ), admin_url( 'user-edit.php' ) ) ) . '">';
+
+		// get_edit_user_link() routes to profile.php for the current user and
+		// user-edit.php for everyone else (and is empty without the cap), so the
+		// return flag survives instead of being dropped by a self-edit redirect.
+		$edit_url = get_edit_user_link( $user->ID );
+		if ( $edit_url ) {
+			$edit_url = add_query_arg( WC_Admin_POS_Staff::EDIT_USER_RETURN_PARAM, '1', $edit_url );
+			$output  .= '<a href="' . esc_url( $edit_url ) . '">';
 		}
 		$output .= esc_html( $user->display_name );
-		if ( current_user_can( 'edit_user', $user->ID ) ) {
+		if ( $edit_url ) {
 			$output .= '</a>';
 		}
 		$output .= '</strong>';

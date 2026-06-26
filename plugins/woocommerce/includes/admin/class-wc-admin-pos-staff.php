@@ -32,6 +32,13 @@ class WC_Admin_POS_Staff {
 	private const EDIT_PICK_USER = 'pick-user';
 
 	/**
+	 * Query flag marking a WP user-edit link that came from the staff list, so the
+	 * edit screen can offer a way back. Public so the staff table's User column
+	 * can set it on its links.
+	 */
+	public const EDIT_USER_RETURN_PARAM = 'pos_staff_return';
+
+	/**
 	 * Submitted form values from a failed save submission, keyed by field name.
 	 *
 	 * Set by save() before it bails on error so the edit view can re-render the
@@ -52,7 +59,7 @@ class WC_Admin_POS_Staff {
 	public function __construct() {
 		add_action( 'admin_init', array( $this, 'actions' ) );
 		add_action( 'admin_head', array( $this, 'styles' ) );
-		add_action( 'all_admin_notices', array( $this, 'render_user_new_back_link' ) );
+		add_action( 'all_admin_notices', array( $this, 'render_back_to_staff_link' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_pick_user_cta' ), 20 );
 		add_filter( 'woocommerce_json_search_found_customers', array( $this, 'relabel_picker_search_results' ) );
 	}
@@ -103,27 +110,35 @@ class WC_Admin_POS_Staff {
 	}
 
 	/**
-	 * Render a "Back to staff" link atop the Add-new-staff (user-new.php) screen.
+	 * Render a "Back to staff" link atop the core user screens we deep-link into.
 	 *
-	 * The Staff list deep-links to user-new.php?pos_staff=1 to create a POS-only
-	 * account, so give that core screen the same back affordance as the rest of
-	 * the POS staff pages. all_admin_notices outputs near the top of the admin
-	 * content area (above the page title) on every screen.
+	 * The Staff list links out to two WP screens: user-new.php (create a POS-only
+	 * account, flagged with pos_staff=1) and the user edit screen (review a staff
+	 * member, flagged with EDIT_USER_RETURN_PARAM). Give both the same back
+	 * affordance as the rest of the POS staff pages. all_admin_notices outputs
+	 * near the top of the admin content area, above the page title.
 	 *
 	 * @internal
 	 *
 	 * @since 11.0.0
 	 */
-	public function render_user_new_back_link(): void {
+	public function render_back_to_staff_link(): void {
 		global $pagenow;
 
-		if ( 'user-new.php' !== $pagenow || ! self::is_enabled() ) {
+		if ( ! self::is_enabled() ) {
 			return;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only screen check, no state change.
-		$flag = isset( $_GET[ UserFormIntegration::REQUEST_FLAG_PARAM ] ) ? sanitize_text_field( wp_unslash( $_GET[ UserFormIntegration::REQUEST_FLAG_PARAM ] ) ) : '';
-		if ( '1' !== $flag ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only screen detection, no state change.
+		$from_add  = 'user-new.php' === $pagenow
+			&& isset( $_GET[ UserFormIntegration::REQUEST_FLAG_PARAM ] )
+			&& '1' === sanitize_text_field( wp_unslash( $_GET[ UserFormIntegration::REQUEST_FLAG_PARAM ] ) );
+		$from_edit = in_array( $pagenow, array( 'user-edit.php', 'profile.php' ), true )
+			&& isset( $_GET[ self::EDIT_USER_RETURN_PARAM ] )
+			&& '1' === sanitize_text_field( wp_unslash( $_GET[ self::EDIT_USER_RETURN_PARAM ] ) );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		if ( ! $from_add && ! $from_edit ) {
 			return;
 		}
 
