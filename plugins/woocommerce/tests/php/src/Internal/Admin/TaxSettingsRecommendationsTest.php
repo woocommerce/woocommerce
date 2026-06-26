@@ -25,7 +25,11 @@ class TaxSettingsRecommendationsTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = new TaxSettingsRecommendations();
-		$this->sut->register_routes();
+		$this->sut->init();
+
+		// Routes must register on rest_api_init; firing it runs init()'s callback.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'rest_api_init' );
 	}
 
 	/**
