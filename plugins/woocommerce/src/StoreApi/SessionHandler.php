@@ -136,7 +136,12 @@ final class SessionHandler extends WC_Session {
 	 * @return array
 	 */
 	private function get_persistent_cart_contents( int $user_id ): array {
-		/** This filter is documented in includes/class-wc-cart-session.php */
+		/**
+		 * Filters whether the persistent cart is enabled.
+		 *
+		 * @since 3.4.0
+		 * @param bool $enabled Whether the persistent cart is enabled. Default true.
+		 */
 		if ( ! apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			return array();
 		}
