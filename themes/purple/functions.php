@@ -260,3 +260,59 @@ if ( ! function_exists( 'purple_remove_upsells' ) ) :
 endif;
 
 add_action( 'init', 'purple_remove_upsells' );
+
+require_once get_template_directory() . '/includes/cart-page-content.php';
+
+if ( ! function_exists( 'purple_filter_woocommerce_create_pages' ) ) :
+	/**
+	 * Seed Purple's cart block markup when WooCommerce creates store pages.
+	 *
+	 * @param array<string, array<string, mixed>> $pages Page definitions keyed by slug.
+	 * @return array<string, array<string, mixed>>
+	 */
+	function purple_filter_woocommerce_create_pages( array $pages ): array {
+		if ( isset( $pages['cart'] ) ) {
+			$pages['cart']['content'] = purple_get_cart_page_content();
+		}
+
+		return $pages;
+	}
+
+endif;
+
+add_filter( 'woocommerce_create_pages', 'purple_filter_woocommerce_create_pages' );
+
+if ( ! function_exists( 'purple_sync_cart_page_content' ) ) :
+	/**
+	 * Sync the Cart page post content to Purple's default markup once per site.
+	 *
+	 * Runs on theme activation so existing stores pick up the cart block without
+	 * duplicating it in the block template.
+	 */
+	function purple_sync_cart_page_content(): void {
+		if ( ! function_exists( 'wc_get_page_id' ) ) {
+			return;
+		}
+
+		if ( (int) get_theme_mod( 'purple_cart_page_content_version', 0 ) >= 1 ) {
+			return;
+		}
+
+		$cart_page_id = wc_get_page_id( 'cart' );
+		if ( $cart_page_id <= 0 ) {
+			return;
+		}
+
+		wp_update_post(
+			array(
+				'ID'           => $cart_page_id,
+				'post_content' => purple_get_cart_page_content(),
+			)
+		);
+
+		set_theme_mod( 'purple_cart_page_content_version', 1 );
+	}
+
+endif;
+
+add_action( 'after_switch_theme', 'purple_sync_cart_page_content' );

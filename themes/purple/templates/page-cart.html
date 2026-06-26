@@ -1,5 +1,21 @@
-<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
- 
-<!-- wp:pattern {"slug":"purple/hidden-page-cart"} /-->
- 
-<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->
+<!-- wp:template-part {"slug":"header","theme":"purple","tagName":"header"} /-->
+
+<!-- wp:woocommerce/page-content-wrapper {"page":"cart"} -->
+<!-- wp:group {"tagName":"main","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|30"}}},"layout":{"type":"constrained","contentSize":"1060px"}} -->
+<main class="wp-block-group" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--30)">
+
+	<!-- wp:heading {"level":1,"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|30"}}},"fontSize":"xx-large"} -->
+	<h1 class="wp-block-heading alignwide has-xx-large-font-size" style="margin-bottom:var(--wp--preset--spacing--30)">Cart</h1>
+	<!-- /wp:heading -->
+
+	<!-- wp:woocommerce/store-notices /-->
+
+	<!-- wp:post-content {"layout":{"type":"constrained"}} /-->
+
+</main>
+<!-- /wp:group -->
+
+<!-- wp:pattern {"slug":"purple/woocommerce-upsell-products-collection"} /-->
+<!-- /wp:woocommerce/page-content-wrapper -->
+
+<!-- wp:template-part {"slug":"footer","theme":"purple","tagName":"footer"} /-->
