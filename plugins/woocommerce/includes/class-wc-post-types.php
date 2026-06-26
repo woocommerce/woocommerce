@@ -33,9 +33,14 @@ class WC_Post_Types {
 		// Similar logic exists in flush_rewrite_rules_on_shop_page_save(), but REST saves need a queued flush.
 		add_action(
 			'save_post_page',
-			static function ( $post_id ) {
-				self::queue_rewrite_rules_on_shop_page_save( $post_id );
-			}
+			static function ( $post_id, $post, $update ) {
+				if ( ! $update ) {
+					return;
+				}
+				self::queue_rewrite_rules_on_shop_page_save( $post_id, $post );
+			},
+			10,
+			3
 		);
 		add_filter( 'gutenberg_can_edit_post_type', array( __CLASS__, 'gutenberg_can_edit_post_type' ), 10, 2 );
 		add_filter( 'use_block_editor_for_post_type', array( __CLASS__, 'gutenberg_can_edit_post_type' ), 10, 2 );
@@ -389,26 +394,25 @@ class WC_Post_Types {
 						'item_link'             => __( 'Product Link', 'woocommerce' ),
 						'item_link_description' => __( 'A link to a product.', 'woocommerce' ),
 					),
-					'description'                     => __( 'This is where you can browse products in this store.', 'woocommerce' ),
-					'public'                          => true,
-					'show_ui'                         => true,
-					'menu_icon'                       => 'dashicons-archive',
-					'capability_type'                 => 'product',
-					'map_meta_cap'                    => true,
-					'publicly_queryable'              => true,
-					'exclude_from_search'             => false,
-					'hierarchical'                    => false,
-					// Hierarchical causes memory issues - WP loads all records!
-											'rewrite' => $permalinks['product_rewrite_slug'] ? array(
-												'slug'  => $permalinks['product_rewrite_slug'],
-												'with_front' => false,
-												'feeds' => true,
-											) : false,
-					'query_var'                       => true,
-					'supports'                        => $supports,
-					'has_archive'                     => $has_archive,
-					'show_in_nav_menus'               => true,
-					'show_in_rest'                    => true,
+					'description'         => __( 'This is where you can browse products in this store.', 'woocommerce' ),
+					'public'              => true,
+					'show_ui'             => true,
+					'menu_icon'           => 'dashicons-archive',
+					'capability_type'     => 'product',
+					'map_meta_cap'        => true,
+					'publicly_queryable'  => true,
+					'exclude_from_search' => false,
+					'hierarchical'        => false, // Hierarchical causes memory issues - WP loads all records!
+					'rewrite'             => $permalinks['product_rewrite_slug'] ? array(
+						'slug'       => $permalinks['product_rewrite_slug'],
+						'with_front' => false,
+						'feeds'      => true,
+					) : false,
+					'query_var'           => true,
+					'supports'            => $supports,
+					'has_archive'         => $has_archive,
+					'show_in_nav_menus'   => true,
+					'show_in_rest'        => true,
 				)
 			)
 		);
@@ -690,12 +694,20 @@ class WC_Post_Types {
 	/**
 	 * Queue rewrite rules to be flushed after the shop page (or its ancestors) gets saved.
 	 *
-	 * @param int $post_id Post ID.
+	 * @param int          $post_id Post ID.
+	 * @param WP_Post|null $post    Post object.
 	 */
-	private static function queue_rewrite_rules_on_shop_page_save( $post_id ): void {
+	private static function queue_rewrite_rules_on_shop_page_save( $post_id, $post = null ): void {
 		$post_id = absint( $post_id );
 
 		if ( ! $post_id || wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+			return;
+		}
+
+		$post_status = $post instanceof WP_Post ? $post->post_status : get_post_status( $post_id );
+
+		// Keep the existing behavior where a trashed shop page still serves the product archive at its previous URL.
+		if ( 'trash' === $post_status ) {
 			return;
 		}
 
