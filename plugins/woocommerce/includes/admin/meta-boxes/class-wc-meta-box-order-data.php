@@ -310,7 +310,7 @@ class WC_Meta_Box_Order_Data {
 					do_action( 'woocommerce_admin_order_data_after_payment_info', $order );
 				?>
 				<div class="order_data_column_container">
-					<div class="order_data_column">
+					<div class="order_data_column order_data_column_general">
 						<h3><?php esc_html_e( 'General', 'woocommerce' ); ?></h3>
 
 						<p class="form-field form-field-wide">
@@ -414,7 +414,7 @@ class WC_Meta_Box_Order_Data {
 						</p>
 						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
-					<div class="order_data_column">
+					<div class="order_data_column order_data_column_billing">
 						<h3>
 							<?php esc_html_e( 'Billing', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
@@ -552,7 +552,7 @@ class WC_Meta_Box_Order_Data {
 						</div>
 						<?php do_action( 'woocommerce_admin_order_data_after_billing_address', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
-					<div class="order_data_column">
+					<div class="order_data_column order_data_column_shipping">
 						<h3>
 							<?php esc_html_e( 'Shipping', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
@@ -663,7 +663,7 @@ class WC_Meta_Box_Order_Data {
 								?>
 								<p class="form-field form-field-wide">
 									<label for="customer_note"><?php esc_html_e( 'Customer provided note', 'woocommerce' ); ?>:</label>
-									<textarea rows="1" cols="40" name="customer_note" tabindex="6" id="excerpt" placeholder="<?php esc_attr_e( 'Customer notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses( $order->get_customer_note(), array( 'br' => array() ) ); ?></textarea>
+									<textarea rows="1" cols="40" name="customer_note" tabindex="6" id="customer_note" placeholder="<?php esc_attr_e( 'Customer notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses( $order->get_customer_note(), array( 'br' => array() ) ); ?></textarea>
 								</p>
 							<?php endif; ?>
 						</div>
