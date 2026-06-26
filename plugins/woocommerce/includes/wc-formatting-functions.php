@@ -412,7 +412,14 @@ function wc_clean( $var ) {
 }
 
 /**
- * Function wp_scrub_utf8 with recursive array support.
+ * Sanitize data to valid UTF-8 with recursive array support.
+ *
+ * Replaces invalid byte sequences with the Unicode replacement character (U+FFFD).
+ * Prior to WooCommerce 11.0.0, this function returned an empty string for invalid UTF-8 input
+ * and was gated by the blog_charset setting.
+ *
+ * @since 11.0.0 Behavior changed: invalid bytes are replaced with U+FFFD instead of
+ *               returning an empty string. Wraps wp_scrub_utf8() instead of wp_check_invalid_utf8().
  *
  * @param string|array $var Data to sanitize.
  * @return string|array

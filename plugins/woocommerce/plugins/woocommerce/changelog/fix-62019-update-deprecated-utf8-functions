@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Update deprecated UTF-8 functions for WordPress 6.9 compatibility by replacing wp_check_invalid_utf8() with wp_scrub_utf8() and utf8_encode() with mb_convert_encoding().
