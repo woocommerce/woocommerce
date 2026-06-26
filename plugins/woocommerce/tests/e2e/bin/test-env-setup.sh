@@ -50,12 +50,14 @@ echo -e 'Install Plugin-check utility plugin \n'
 wp-env run tests-cli wp plugin install plugin-check --activate
 
 echo -e 'Add Customer user \n'
-wp-env run tests-cli wp user create customer customer@woocommercecoree2etestsuite.com \
-	--user_pass=password \
-	--role=customer \
-	--first_name='Jane' \
-	--last_name='Smith' \
-	--user_registered='2022-01-01 12:23:45'
+if ! wp-env run tests-cli wp user get customer --field=ID >/dev/null 2>&1; then
+	wp-env run tests-cli wp user create customer customer@woocommercecoree2etestsuite.com \
+		--user_pass=password \
+		--role=customer \
+		--first_name='Jane' \
+		--last_name='Smith' \
+		--user_registered='2022-01-01 12:23:45'
+fi
 
 echo -e 'Update Blog Name \n'
 wp-env run tests-cli wp option update blogname 'WooCommerce Core E2E Test Suite'

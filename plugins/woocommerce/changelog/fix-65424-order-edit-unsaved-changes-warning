@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix false "unsaved changes" warning when editing orders with customer notes

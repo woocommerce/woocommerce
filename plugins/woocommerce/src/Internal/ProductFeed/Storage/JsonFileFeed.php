@@ -197,7 +197,14 @@ class JsonFileFeed implements FeedInterface {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Get the number of entries that have been added to the feed.
+	 *
+	 * This reflects the rows actually written to the feed, which may be fewer
+	 * than the number of products iterated by `ProductWalker` because the
+	 * validator can silently drop entries before they reach `add_entry()`.
+	 *
+	 * @since 10.9.0
+	 * @return int Number of entries added to the feed.
 	 */
 	public function get_entry_count(): int {
 		return $this->entry_count;

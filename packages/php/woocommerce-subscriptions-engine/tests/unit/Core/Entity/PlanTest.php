@@ -138,4 +138,29 @@ class PlanTest extends TestCase {
 		$this->assertSame( 3, $storage['group_id'] );
 		$this->assertIsArray( $storage['billing_policy'] );
 	}
+
+	public function test_from_storage_rejects_corrupted_stored_pricing_policy(): void {
+		$this->expectException( InvalidArgumentException::class );
+
+		// A stored row whose pricing policy was tampered with outside engine flows
+		// (percentage over 100) must fail loud on hydration, not feed billing math.
+		Plan::from_storage(
+			array(
+				'group_id'       => 1,
+				'name'           => 'Corrupted',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+				'pricing_policy' => array(
+					'policies' => array(
+						array(
+							'type'  => 'percentage',
+							'value' => 150,
+						),
+					),
+				),
+			)
+		);
+	}
 }
