@@ -15,12 +15,12 @@ use WC_Order;
 /**
  * Schedules and cancels the automated abandoned-cart recovery email via Action Scheduler.
  *
- * Listens for new orders in an abandoned-checkout status to enqueue a single
+ * Listens for new orders in the `pending` status to enqueue a single
  * `woocommerce_send_abandoned_cart_recovery_notification` action that fires
  * after `WC_Email_Customer_Abandoned_Cart_Recovery::AUTO_SEND_DELAY_SECONDS`.
- * The pending action is cancelled when the order transitions out of the
- * abandoned set or is trashed/deleted, so a customer who completes checkout
- * before the delay elapses never receives the nudge.
+ * The pending action is cancelled when the order transitions out of `pending`
+ * or is trashed/deleted, so a customer who completes checkout before the delay
+ * elapses never receives the nudge.
  *
  * Per-order idempotency is enforced two ways: a scheduled-at meta key blocks
  * re-scheduling for the same order, and the trigger-time send gate refuses to
@@ -65,7 +65,7 @@ class Scheduler {
 	 */
 	final public function init(): void {
 		add_action( 'woocommerce_new_order', array( $this, 'handle_new_order' ), 10, 2 );
-		// Catch every transition out of the abandoned set (processing, completed,
+		// Catch every transition out of `pending` (processing, completed,
 		// cancelled, failed, refunded, custom statuses…) so the pending send is
 		// unscheduled regardless of which status the order moves to.
 		add_action( 'woocommerce_order_status_changed', array( $this, 'handle_status_changed' ), 10, 3 );
@@ -75,11 +75,11 @@ class Scheduler {
 	}
 
 	/**
-	 * Schedule the automated send when an abandoned-state order is created.
+	 * Schedule the automated send when a `pending` order is created.
 	 *
-	 * No-op when the order is not in an abandoned status, when the email is
-	 * disabled or suppressed, when the merchant has opted out of automated
-	 * sends, or when this order already has a pending or completed send.
+	 * No-op when the order is not `pending`, when the email is disabled or
+	 * suppressed, when the merchant has opted out of automated sends, or when
+	 * this order already has a pending or completed send.
 	 *
 	 * @internal
 	 *
@@ -95,7 +95,7 @@ class Scheduler {
 			return;
 		}
 
-		if ( ! in_array( $order->get_status(), array( OrderStatus::PENDING, OrderStatus::CHECKOUT_DRAFT ), true ) ) {
+		if ( OrderStatus::PENDING !== $order->get_status() ) {
 			return;
 		}
 
@@ -125,13 +125,9 @@ class Scheduler {
 
 	/**
 	 * Unschedule the pending recovery send whenever the order leaves the
-	 * abandoned set. `woocommerce_order_status_changed` fires for every
+	 * `pending` status. `woocommerce_order_status_changed` fires for every
 	 * transition, so a single listener covers processing / completed /
 	 * cancelled / failed / refunded / custom statuses in one place.
-	 *
-	 * Transitions inside the abandoned set (pending → checkout-draft and
-	 * vice versa) are no-ops so a customer who switches between classic and
-	 * Blocks checkout doesn't lose their pending nudge.
 	 *
 	 * @internal
 	 *
@@ -140,11 +136,7 @@ class Scheduler {
 	 * @param string $new_status New status (sans `wc-` prefix).
 	 */
 	public function handle_status_changed( int $order_id, string $old_status, string $new_status ): void {
-		$abandoned     = array( OrderStatus::PENDING, OrderStatus::CHECKOUT_DRAFT );
-		$was_abandoned = in_array( $old_status, $abandoned, true );
-		$is_abandoned  = in_array( $new_status, $abandoned, true );
-
-		if ( ! $was_abandoned || $is_abandoned ) {
+		if ( OrderStatus::PENDING !== $old_status || OrderStatus::PENDING === $new_status ) {
 			return;
 		}
 
@@ -157,7 +149,7 @@ class Scheduler {
 	 * Hooked directly into `woocommerce_trash_order` and
 	 * `woocommerce_before_delete_order` for the trash/delete lifecycle events,
 	 * and called from `handle_status_changed()` for every transition out of
-	 * the abandoned set.
+	 * `pending`.
 	 *
 	 * @internal
 	 *

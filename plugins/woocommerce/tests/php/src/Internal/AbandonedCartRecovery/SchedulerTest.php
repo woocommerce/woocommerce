@@ -233,20 +233,6 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox handle_new_order() also schedules for checkout-draft orders (Blocks Store API parks mid-flow orders there).
-	 */
-	public function test_handle_new_order_schedules_for_checkout_draft_order(): void {
-		$order = OrderHelper::create_order();
-		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
-		$order->save();
-
-		$this->sut->handle_new_order( $order->get_id() );
-
-		$fresh = wc_get_order( $order->get_id() );
-		$this->assertNotEmpty( $fresh->get_meta( Scheduler::SCHEDULED_META_KEY ) );
-	}
-
-	/**
 	 * @testdox handle_new_order() is a no-op when the order is created in a non-abandoned status (e.g. processing).
 	 */
 	public function test_handle_new_order_skips_non_abandoned_status(): void {
@@ -361,19 +347,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox handle_status_changed() leaves the schedule alone on a transition within the abandoned set (pending ↔ checkout-draft).
-	 */
-	public function test_handle_status_changed_leaves_schedule_within_abandoned_set(): void {
-		$order = $this->schedule_for_pending_order();
-
-		$this->sut->handle_status_changed( $order->get_id(), OrderStatus::PENDING, OrderStatus::CHECKOUT_DRAFT );
-
-		$fresh = wc_get_order( $order->get_id() );
-		$this->assertNotEmpty( $fresh->get_meta( Scheduler::SCHEDULED_META_KEY ), 'In-set transitions must not cancel the queued send.' );
-	}
-
-	/**
-	 * @testdox handle_status_changed() does nothing when the previous status was already outside the abandoned set — nothing to cancel.
+	 * @testdox handle_status_changed() does nothing when the previous status was already outside `pending` — nothing to cancel.
 	 */
 	public function test_handle_status_changed_noop_when_old_status_already_outside_set(): void {
 		$order = OrderHelper::create_order();
