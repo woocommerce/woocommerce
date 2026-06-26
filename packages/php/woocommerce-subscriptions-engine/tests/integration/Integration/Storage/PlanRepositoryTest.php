@@ -43,7 +43,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 					'name'            => 'Boxes',
 					'merchant_code'   => 'boxes',
 					'options_display' => array( array( 'name' => 'Size' ) ),
-					'app_id'          => 'wc-subscriptions',
+					'extension_slug'  => 'wc-subscriptions',
 				)
 			)
 		);
@@ -54,7 +54,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( $id, $fetched->get_id() );
 		$this->assertSame( 'Boxes', $fetched->get_name() );
 		$this->assertSame( 'boxes', $fetched->get_merchant_code() );
-		$this->assertSame( 'wc-subscriptions', $fetched->get_app_id() );
+		$this->assertSame( 'wc-subscriptions', $fetched->get_extension_slug() );
 		$this->assertSame( array( array( 'name' => 'Size' ) ), $fetched->get_options_display() );
 	}
 
@@ -159,7 +159,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$plan->set_name( 'After' );
 		$this->assertTrue( $repo->update( $plan ) );
 
-		$this->assertSame( 'After', $repo->find( $id )->get_name() );
+		$updated = $repo->find( $id );
+		$this->assertInstanceOf( Plan::class, $updated );
+		$this->assertSame( 'After', $updated->get_name() );
 	}
 
 	public function test_delete_removes_the_row(): void {

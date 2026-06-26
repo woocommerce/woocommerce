@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update the e2e test path in the writing-e2e-tests doc after the core e2e directory rename.
