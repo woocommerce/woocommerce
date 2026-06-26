@@ -292,9 +292,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertCount( 1, $repo->query( array( 'extension_slugs' => null ) ) );
 		$this->assertSame( 1, $repo->count( array( 'extension_slugs' => null ) ) );
 
-		// Empty string is ignored and treated as null/any in find().
-		$this->assertInstanceOf( Plan::class, $repo->find( $id, '' ) );
-
+		$this->assertNull( $repo->find( $id, '' ) );
 		$this->assertNull( $repo->find( $id, 'bad slug' ) );
 		$this->assertCount( 0, $repo->query( array( 'extension_slug' => '' ) ) );
 		$this->assertSame( 0, $repo->count( array( 'extension_slug' => '' ) ) );

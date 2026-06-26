@@ -101,7 +101,7 @@ final class PlanRepository {
 
 		$extension_clause = '';
 		$params           = array( $id );
-		if ( self::is_valid_extension_slug( $extension_slug ) ) {
+		if ( null !== $extension_slug && 'any' !== $extension_slug ) {
 			$extension_clause = ' AND extension_slug = %s';
 			$params[]         = $extension_slug;
 		}
@@ -114,9 +114,6 @@ final class PlanRepository {
 		);
 
 		if ( null === $row ) {
-			return null;
-		}
-		if ( self::is_valid_extension_slug( $extension_slug ) && $row['extension_slug'] !== $extension_slug ) {
 			return null;
 		}
 
