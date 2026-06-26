@@ -1085,7 +1085,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 						$value = mb_convert_encoding( $value, 'UTF-8', 'UTF-8' );
 					}
 				} else {
-					$value = wp_check_invalid_utf8( $value, true );
+					$value = wp_scrub_utf8( $value );
 				}
 
 				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $value );

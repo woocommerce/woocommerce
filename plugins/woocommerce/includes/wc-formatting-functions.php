@@ -412,7 +412,7 @@ function wc_clean( $var ) {
 }
 
 /**
- * Function wp_check_invalid_utf8 with recursive array support.
+ * Function wp_scrub_utf8 with recursive array support.
  *
  * @param string|array $var Data to sanitize.
  * @return string|array
@@ -421,7 +421,7 @@ function wc_check_invalid_utf8( $var ) {
 	if ( is_array( $var ) ) {
 		return array_map( 'wc_check_invalid_utf8', $var );
 	} else {
-		return wp_check_invalid_utf8( $var );
+		return wp_scrub_utf8( $var );
 	}
 }
 

@@ -890,7 +890,7 @@ function wc_print_js() {
 
 	if ( ! empty( $wc_queued_js ) ) {
 		// Sanitize.
-		$wc_queued_js = wp_check_invalid_utf8( $wc_queued_js );
+		$wc_queued_js = wp_scrub_utf8( $wc_queued_js );
 		$wc_queued_js = preg_replace( '/&#(x)?0*(?(1)27|39);?/i', "'", $wc_queued_js );
 		$wc_queued_js = str_replace( "\r", '', $wc_queued_js );
 
