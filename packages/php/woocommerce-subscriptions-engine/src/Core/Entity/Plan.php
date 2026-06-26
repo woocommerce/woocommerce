@@ -26,17 +26,17 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Plan {
 
-	const DEFAULT_CATEGORY = 'SUBSCRIPTION';
+	public const DEFAULT_CATEGORY = 'SUBSCRIPTION';
 
-	const DEFAULT_STATUS = 'active';
+	public const DEFAULT_STATUS = 'active';
 
-	const STATUS_ACTIVE = 'active';
+	public const STATUS_ACTIVE = 'active';
 
-	const STATUS_ARCHIVED = 'archived';
+	public const STATUS_ARCHIVED = 'archived';
 
-	const ALLOWED_STATUSES = array( self::STATUS_ACTIVE, self::STATUS_ARCHIVED );
+	public const ALLOWED_STATUSES = array( self::STATUS_ACTIVE, self::STATUS_ARCHIVED );
 
-	const ALLOWED_POLICY_TYPES = array( 'percentage', 'fixed_amount', 'price' );
+	public const ALLOWED_POLICY_TYPES = array( 'percentage', 'fixed_amount', 'price' );
 
 	/**
 	 * Plan id, or null before it is persisted.
