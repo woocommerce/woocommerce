@@ -1,0 +1,34 @@
+name: 'Test: replace-next-version-tag.sh'
+
+on:
+    pull_request:
+        paths:
+            - 'tools/replace-next-version-tag.sh'
+            - 'tools/tests/replace-next-version-tag.test.sh'
+            - '.github/workflows/test-replace-next-version-tag.yml'
+    push:
+        paths:
+            - 'tools/replace-next-version-tag.sh'
+            - 'tools/tests/replace-next-version-tag.test.sh'
+            - '.github/workflows/test-replace-next-version-tag.yml'
+        branches:
+            - 'trunk'
+            - 'release/*'
+
+permissions:
+    contents: read
+
+concurrency:
+    group: test-replace-next-version-tag-${{ github.event_name == 'push' && github.run_id || github.event_name }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    test-replace-next-version-tag:
+        name: 'Run replace-next-version-tag.sh test'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+
+            - name: 'Run test'
+              run: bash tools/tests/replace-next-version-tag.test.sh
