@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Improve product and variation creation performance by avoiding redundant internal meta existence checks.
