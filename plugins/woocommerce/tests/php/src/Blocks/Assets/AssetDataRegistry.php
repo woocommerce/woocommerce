@@ -17,6 +17,8 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 	private $registry;
 
 	protected function setUp(): void {
+		parent::setUp();
+
 		$this->registry = new AssetDataRegistryMock(
 			Package::container()->get( API::class )
 		);
