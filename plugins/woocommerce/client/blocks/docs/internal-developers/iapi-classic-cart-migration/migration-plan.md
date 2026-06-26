@@ -18,6 +18,24 @@ This mirrors the Mini-Cart precedent — **with one deliberate difference**:
 > store JSON). We do **not** do that. We reuse the Mini-Cart store's **mutation actions and
 > event bridge**, but keep PHP as the renderer and re-render server HTML after each change.
 
+## Success criteria
+
+What "good enough to pursue" means, grouped by who it has to be true for. (`[open]` = not met yet.)
+
+1. **Shoppers don't notice (experience & performance)** — no UX downgrade; same flows and markup;
+   cart performance kept with no visible slowdown.
+2. **Extenders & themes keep working (extensibility & parity)** — feature parity with the legacy
+   cart; all PHP hooks and filters keep firing; templates not edited (no version bumps, theme
+   overrides keep working); accessibility kept; legacy cart jQuery events keep firing for
+   extensions/analytics (**[open]** — `updated_wc_div`, `updated_cart_totals`, `wc_cart_emptied`
+   still to do); PHP notices still surface (**[open]** — `wc_add_notice` is bypassed by Store API
+   mutations); no-JS not regressed.
+3. **Fits the iAPI architecture (engineering)** — reuse the shared `woocommerce` store for shared
+   cart-domain mutations; keep classic-cart-only behavior in a thin `woocommerce/classic-cart`
+   store; stay in sync with other iAPI blocks; flag-gated and reversible; no new cart variant.
+4. **We can prove it (verification)** — cart e2e passes with the flag on (**[partly]** — removal
+   tests fail; see the audit); phpcs, phpstan, eslint clean; module builds.
+
 ## Architecture
 
 Three moving parts:
@@ -61,19 +79,30 @@ Source: `client/legacy/js/frontend/cart.js`.
 | --- | --- | --- | --- |
 | `quantity_update` / `update_cart` | `data-wp-on--change` on qty input → update item, then `navigate()` | `addCartItem` (update path, exists) | `POST cart/update-item` |
 | `input_changed` (enable "Update cart") | qty applies on change; "Update cart" becomes no-JS fallback | — | — |
-| `apply_coupon` | `data-wp-on--submit` → action | `applyCoupon` (NEW) | `POST cart/apply-coupon` |
-| `remove_coupon_clicked` | `data-wp-on--click` on remove-coupon link | `removeCoupon` (NEW) | `POST cart/remove-coupon` |
-| `item_remove_clicked` | `data-wp-on--click` on `.product-remove > a` | `removeCartItem` (exists) | `POST cart/remove-item` |
-| `item_restore_clicked` (undo) | `data-wp-on--click` (open question — no Store API restore) | `restoreCartItem` (NEW, TBD) | re-add via `add-item`, or keep server URL + `navigate()` |
-| `shipping_method_selected` | `data-wp-on--change` on shipping radios | `selectShippingRate` (NEW) | `POST cart/select-shipping-rate` |
-| `shipping_calculator_submit` | `data-wp-on--submit` on calculator form | `updateCustomer` (NEW) | `POST cart/update-customer` |
+| `apply_coupon` | `data-wp-on--click` → action | `applyCoupon` (shared store, via batch queue) | `POST cart/apply-coupon` |
+| `remove_coupon_clicked` | `data-wp-on--click` on remove-coupon link | `removeCoupon` (shared store, via batch queue) | `POST cart/remove-coupon` |
+| `item_remove_clicked` | `data-wp-on--click` on `.product-remove > a` | `removeCartItem` (shared store) | `POST cart/remove-item` |
+| `item_restore_clicked` (undo) | `data-wp-on--click` (open question — no Store API restore) | `restoreItem` (local; falls back to the legacy server URL + `navigate()`) | — |
+| `shipping_method_selected` | `data-wp-on--change` on shipping radios | `selectShippingRate` (local classic-cart store; direct Store API) | `POST cart/select-shipping-rate` |
+| `shipping_calculator_submit` | `data-wp-on--submit` on calculator form | `updateCustomer` (local classic-cart store; direct Store API) | `POST cart/update-customer` |
 | `toggle_shipping` (slide panel) | pure UI: `data-wp-on--click` toggles context + `data-wp-class` | — | — |
 | `update_wc_div` / `update_cart_totals_div` (HTML swap) | replaced by `router.navigate()` morph | — | — |
 | listens `added_to_cart`, `wc_update_cart` | `setupCartSyncBridge` listens on document for native `wc-blocks_added_to_cart`/`wc-blocks_removed_from_cart` (other iAPI blocks) **and** jQuery `added_to_cart`/`wc_update_cart` → `refreshCartItems` + `navigate()` | `refreshCartItems` (exists) | `GET cart` |
 | emits `updated_wc_div`, `updated_cart_totals`, `applied_coupon`, `removed_coupon`, `updated_shipping_method`, `wc_cart_emptied`, `item_removed_from_classic_cart` | re-emitted from iAPI actions via the legacy-events bridge | — | — |
 
-Store work = add `applyCoupon`, `removeCoupon`, `selectShippingRate`, `updateCustomer`,
-`restoreCartItem` to the shared store. Items / refresh already exist.
+**Store split (decided during the spike).** Cart-domain mutations that the Cart/Mini-Cart blocks
+*also* use live in the shared `woocommerce` store: `applyCoupon` + `removeCoupon` were added there
+(alongside the existing `addCartItem` / `removeCartItem` / `refreshCartItems`), routed through its
+batch queue. Mutations the blocks *don't* use stay **local** to the `woocommerce/classic-cart`
+store — `selectShippingRate` + `updateCustomer` call Store API directly, and `restoreItem` falls back
+to the legacy server URL (no Store API restore endpoint). Rule of thumb: shared = what the blocks
+share; local = classic-cart-only glue (the directive handlers, the re-render, busy state, the event
+bridge).
+
+The classic-cart store accesses the shared store **with** the lock
+(`store('woocommerce', {}, { lock: universalLock })`) because it reads the shared store's locked
+state (`restUrl` / `nonce`) for the direct shipping calls; reading locked state without the lock
+silently breaks the mutations. Its own state is likewise locked so it stays mutable from actions.
 
 ## Legacy mechanisms removed / retained
 
@@ -184,9 +213,11 @@ is rendering the cart through a block `render_callback`.
   `state.isProcessing` so the cart's own mutations (which also fire the native events via the shared
   store) don't double-navigate, and it returns a cleanup so listeners aren't duplicated across
   re-renders. Lesson: iAPI↔iAPI cart sync flows through the native `wc-blocks_*` events, not jQuery.
-- **Re-emit outbound jQuery events** (`updated_wc_div`, `updated_cart_totals`, `applied_coupon`,
-  `removed_coupon`, `updated_shipping_method`, `wc_cart_emptied`) from the iAPI actions so
-  analytics, themes and `cart-fragments.js` keep working.
+- **Re-emit outbound jQuery events** from the iAPI actions so analytics and themes that listen on
+  them keep working. Done so far: `applied_coupon`, `removed_coupon`, `updated_shipping_method`,
+  and `item_removed_from_classic_cart`. Still to do: `updated_wc_div`, `updated_cart_totals`, and
+  `wc_cart_emptied` (these were tied to the legacy HTML-swap mechanism, so they need firing after
+  the router re-render / on the empty-cart transition).
 - **Fragments** — the store already calls `triggerAddedToCartEvent`; keep `cart-fragments.js`
   enqueued so the Mini-Cart hash/cookie refresh path is preserved.
 
@@ -209,9 +240,57 @@ is rendering the cart through a block `render_callback`.
 
 ## Open questions / risks
 
-- **Undo/restore** — no Store API "restore last removed" endpoint; decide re-add vs keep-server-URL.
-- **Double round-trip** — mutation (Store API) then `navigate()` (page GET). Acceptable for the
-  spike; optimize later via a Store-API-rendered cart fragment or selective `data-wp-text`.
+### Decisions to make before flag-on
+
+**Notices.** The main one. Cart notices fall in a gap between two systems, and our re-render
+conflicts with both:
+
+- PHP session notices (`wc_add_notice` → `woocommerce_output_all_notices`) are what the classic cart
+  and extensions use. Our `navigate()` re-render runs `woocommerce_output_all_notices`, so a notice
+  already in the session does show. The problem: Store API mutations don't add the transactional
+  ones ("coupon applied", "item removed / Undo"); the Store API `NoticeHandler` only forwards
+  *error* notices. So there's nothing to render.
+- iAPI store-notices (`woocommerce/store-notices`) render notices client-side from a `notices` array
+  held in a store-notices region's context. To use them in the classic cart we'd render that region
+  and `addNotice` into it. But `navigate()` morphs the cart region from fresh server HTML, so a
+  notice added client-side is wiped on the next re-render: the notice is there, then the navigate
+  replaces the region and it's gone.
+
+So the server doesn't create the transactional notices, and client-added ones don't survive the
+re-render. What it would take: produce the notices server-side so the re-render includes them (the
+mutation adds the `wc_add_notice`, or keep the legacy server endpoints for the notice-bearing flows
+like undo); or render the store-notices region **outside** the router re-render region so the morph
+doesn't wipe it, and drive it from the store; or extend the Store API `NoticeHandler` to carry
+success/info notices and surface them through that persistent region. Undo/restore depends on this
+(the Undo link rides on the "item removed" notice).
+
+**Slower interface, and the double round-trip.** A main blocker. Every change is two server trips:
+the Store API mutation, then a full `navigate()` re-render of the PHP cart. That's what preserves
+extensibility (the hooks/filters re-run), but it trades away the iAPI benefit (re-fetch + morph
+instead of reactive updates) and makes the cart noticeably slower than the block cart. It's also
+error-prone under that latency: repeat clicks before the slow re-render lands fire duplicate requests
+against an already-mutated item ("Cart item no longer exists"). Mitigations applied: a synchronous
+reentrancy guard per action (classic-cart store), a busy overlay over the cart while a mutation is
+pending (a coarse `.is-cart-updating` overlay — we kept this rather than disabling each control in
+place, since polishing the pending-state UX is out of spike scope), and making the shared store's
+`removeCartItem` idempotent (split out as a separate trunk PR, #66051). The root cost remains. Open question:
+is the double round-trip the right trade for the cart, or do we invest in avoiding the navigate
+(Store-API-rendered fragment, or selective `data-wp-text`) and offering iAPI extensibility points so
+extensions move off the PHP hooks over time? Avoiding the navigate is real work and changes the
+extensibility story.
+
+**Extension surface and risk.** The cart has a large hook/filter surface and this approach keeps all
+of it; we've only tested on a clean store. We still need to see how it behaves on a store with many
+extensions, where the risk is higher (conflicting hooks, markup assumptions, notices).
+
+**Where the classic-cart behavior lives.** Some functionality the classic cart needs is missing from
+the shared `woocommerce` store (shipping rate, customer address, undo/restore); we kept it in a
+separate `woocommerce/classic-cart` store. Decision: keep a separate store for the legacy surface,
+or fold these into the shared store as core features? The block is the default cart, so the shared
+store is the canonical one; adding classic-only actions there has a cost.
+
+### Finer risks
+
 - **Directive injection brittleness** under heavy theme/template customization → long-term move
   to a block `render_callback`.
 - **Two carts mutating state** — ensure cart.js is fully dequeued when the flag is on.

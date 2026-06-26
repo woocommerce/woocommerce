@@ -55,8 +55,8 @@ Status legend:
 | --- | --- | --- | --- |
 | `toggle_shipping` | Slide the calculator panel, set `aria-expanded` | iAPI UI: context bool + `data-wp-class` / `data-wp-bind--aria-expanded` | Covered |
 | `country_to_state_changed` | Triggered select2 re-init | Re-emit the event after morph for select2-based fields | Covered (note) — verify with a select2 country field |
-| `shipping_method_selected` | AJAX `update_shipping_method`, totals refresh, focus restore, `updated_shipping_method` | `selectShippingRate` (NEW) → `navigate()`; restore focus; event re-emitted | Covered (note) — new store action |
-| `shipping_calculator_submit` | `calc_shipping` POST, full refresh | `updateCustomer` (NEW) → `navigate()` | Covered (note) — new store action |
+| `shipping_method_selected` | AJAX `update_shipping_method`, totals refresh, focus restore, `updated_shipping_method` | `selectShippingRate` (local classic-cart action; direct Store API + `refreshCartItems`) → `navigate()`; event re-emitted | Covered (note) — local action (blocks don't use it) |
+| `shipping_calculator_submit` | `calc_shipping` POST, full refresh | `updateCustomer` (local classic-cart action; direct Store API + `refreshCartItems`) → `navigate()` | Covered (note) — local action (blocks don't use it) |
 
 ## 2. `wc_cart_params` + AJAX nonces
 
@@ -86,9 +86,16 @@ These are unused by the iAPI path but stay registered, so dependent code keeps w
 
 Status as of the 2026-06-21 spike pass (verified live against the Studio site):
 
-1. **Busy-state visual parity** — DONE. Reactive `state.isProcessing` on the locked
-   classic-cart store toggles `aria-busy` + an `is-cart-updating` class (inline CSS), replacing
-   the blockUI overlay.
+1. **Busy-state overlay** — DONE (corrected). Reactive `state.isProcessing` on the locked
+   classic-cart store toggles `aria-busy` + an `is-cart-updating` class on the `.woocommerce`
+   wrapper, dimming the cart and blocking pointer events while a mutation is in flight (replacing the
+   blockUI overlay). NOTE: the original inline CSS used a descendant selector
+   (`.woocommerce .is-cart-updating`) while the class lands on the `.woocommerce` element itself, so
+   it never matched and the cart did not visibly disable — fixed to the compound
+   `.woocommerce.is-cart-updating`. We deliberately kept this coarse overlay rather than disabling
+   each control in place (`data-wp-bind--disabled` / `aria-disabled` per element): in-place disabling
+   is the nicer end state, but polishing the pending-state UX is out of spike scope. See the
+   double-round-trip finding below.
 2. **`wc_cart_params` consumers** — DONE (documented in `dequeue_legacy_cart()` and the plan).
 3. **No-JS form-submit prevention** — DONE. `preventFormSubmit` on the cart form (verified
    `defaultPrevented`); the native POST still works without JS.
@@ -109,28 +116,71 @@ live:
   not appear (error messages from the Store API response would still need surfacing). `focusNotices`
   therefore usually has nothing to focus.
 
-This is the single biggest open question for the interactivity-only path: decide how cart notices
-are produced once mutations are JSON/Store-API driven rather than PHP-handler driven.
+This is one of the two biggest open questions for the interactivity-only path: decide how cart
+notices are produced once mutations are JSON/Store-API driven rather than PHP-handler driven.
+
+### Key finding: the double round-trip makes the cart slow and rapid interaction error-prone
+
+Every change is two server trips — the Store API mutation, then a full `navigate()` re-render of the
+PHP cart so the hooks/filters re-run. That is the cost of keeping the hooks, but it makes the cart
+noticeably slower than the block cart (which updates reactively), and it makes rapid interaction
+error-prone: clicking remove several times before the slow re-render lands fired duplicate requests
+against an already-removed item, surfacing "Cart item no longer exists or is invalid" (logged by the
+shared store's `showNoticeError`).
+
+Mitigations applied during the spike:
+
+- a **synchronous reentrancy guard** at the top of each mutating action in the classic-cart store
+  (`if ( state.isProcessing ) return;`), since the reactive busy class lands a tick late;
+- a **busy overlay** over the cart while a mutation is pending (the busy-state item above; a coarse
+  overlay, not in-place per-control disabling, which is out of spike scope);
+- making the shared store's **`removeCartItem` idempotent** (no-op when the key is already gone from
+  `state.cart.items`) — split out as its own trunk PR, since it also benefits the Cart block and
+  Mini-Cart.
+
+These stop the error, not the slowness. The root cost — re-rendering server HTML on every change —
+remains. Resolving it means avoiding the navigate (a Store-API-rendered cart fragment, or selective
+reactive updates) and offering iAPI extensibility points so extensions can move off the PHP hooks;
+that is real follow-up work and the other main blocker alongside notices.
 
 ### Implementation note (store locking)
 
 The classic-cart store must be registered **with a lock** (`{ lock: universalLock }`) for its own
-`state` to be mutable from actions (mirrors the Mini-Cart). The shared `woocommerce` store is
-accessed **without** a lock — passing one there breaks access to its public actions.
+`state` to be mutable from actions (mirrors the Mini-Cart). The shared `woocommerce` store is also
+accessed **with** the lock — that's required to read its locked `state` (`restUrl` / `nonce`), which
+the local shipping actions use; reading locked state without the lock silently breaks the mutations.
+(Destructuring only `actions` works without a lock, but reading `state` does not.)
+
+## E2e results (flag ON)
+
+Ran `tests/e2e-pw/tests/cart/cart.spec.ts` against wp-env with `experimental-iapi-cart` enabled
+(twice, same outcome): **3 passed, 2 failed, 1 skipped.**
+
+- ✓ blocks-cart add/remove/quantity/checkout flow.
+- ✘ classic-cart **"undo product removal"** — fails at "verify undo link appears". This is the notice
+  gap above: Store API `removeCartItem` emits no "item removed / Undo" notice, so there's no link.
+- ✘ classic-cart **add/remove/quantity/checkout** — fails at "can remove the last product"
+  (empty-cart state not reached in time). Reproducible in a clean wp-env, but the same flow passes
+  in manual testing, so it reads as a removal re-render timing issue under Playwright, not a flat
+  break. Needs a look (distinct from the notice gap).
+
+Both failures are on the **removal** path; non-removal classic-cart flows pass. To re-run: stop the
+Studio site (wp-env dev needs port 8888), then `pnpm env:start` and
+`pnpm test:e2e:default --project=e2e tests/cart/cart.spec.ts` (node 24).
 
 ## Manual verification checklist (spike acceptance)
 
 Run each with the flag **on**, then repeat with it **off** to confirm identical outcomes.
 
 - [ ] Change a quantity → totals + Mini-Cart update; no full reload.
-- [ ] Remove an item → row goes, totals update, undo notice appears.
-- [ ] Undo a removed item → item restored.
+- [ ] Remove an item → row goes, totals update. (Undo notice does NOT appear — notice gap; e2e ✘.)
+- [ ] Undo a removed item → item restored. (Blocked by the notice gap: no undo link is rendered.)
 - [ ] Apply a valid coupon → discount row + success notice.
 - [ ] Apply an invalid coupon → coupon error shown under the field, announced.
 - [ ] Remove a coupon → discount row gone.
 - [ ] Select a shipping method → totals update.
 - [ ] Submit the shipping calculator → totals update.
-- [ ] Empty the cart (remove last item) → empty-cart view renders.
+- [ ] Empty the cart (remove last item) → empty-cart view renders. (Passes manually; e2e ✘ — timing.)
 - [x] Add to cart from another block on the page → classic cart refreshes (verified: Wishlist
   "move to cart" → classic cart updates via the native `wc-blocks_added_to_cart` event bridge).
 - [ ] A theme/extension listening on `updated_wc_div` / `updated_cart_totals` still reacts.
