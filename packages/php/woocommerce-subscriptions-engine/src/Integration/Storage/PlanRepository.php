@@ -19,8 +19,6 @@ defined( 'ABSPATH' ) || exit;
  */
 final class PlanRepository {
 
-	use ScalarCoercion;
-
 	/**
 	 * Policy columns stored as JSON.
 	 *
@@ -135,8 +133,8 @@ final class PlanRepository {
 
 		$table  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 		$order  = $this->build_order_clause( $args );
-		$limit  = max( 1, self::coerce_int( $args['limit'] ?? null, 50 ) );
-		$offset = max( 0, self::coerce_int( $args['offset'] ?? null, 0 ) );
+		$limit  = max( 1, ScalarCoercion::coerce_int( $args['limit'] ?? null, 50 ) );
+		$offset = max( 0, ScalarCoercion::coerce_int( $args['offset'] ?? null, 0 ) );
 
 		// phpcs:ignore Generic.Arrays.DisallowShortArraySyntax.Found
 		[
@@ -293,7 +291,7 @@ final class PlanRepository {
 			? array_unique(
 				array_map(
 					static function ( $matched_id ): int {
-						return self::coerce_int( $matched_id );
+						return ScalarCoercion::coerce_int( $matched_id );
 					},
 					$matched_ids
 				)
@@ -335,7 +333,7 @@ final class PlanRepository {
 		$clauses = array();
 		$params  = array();
 
-		$status = self::coerce_string( $args['status'] ?? null );
+		$status = ScalarCoercion::coerce_string( $args['status'] ?? null );
 		if ( '' !== $status ) {
 			$clauses[] = 'status = %s';
 			$params[]  = $status;
@@ -381,7 +379,7 @@ final class PlanRepository {
 			}
 		}
 
-		$search = self::coerce_string( $args['search'] ?? null );
+		$search = ScalarCoercion::coerce_string( $args['search'] ?? null );
 		if ( '' !== $search ) {
 			$like      = '%' . $wpdb->esc_like( $search ) . '%';
 			$clauses[] = '(name LIKE %s OR description LIKE %s)';
@@ -408,11 +406,11 @@ final class PlanRepository {
 	 * @param array<string, mixed> $args Query args.
 	 */
 	private function build_order_clause( array $args ): string {
-		$orderby_arg = self::coerce_string( $args['orderby'] ?? null );
+		$orderby_arg = ScalarCoercion::coerce_string( $args['orderby'] ?? null );
 		$orderby     = isset( self::ORDERBY_COLUMNS[ $orderby_arg ] )
 			? self::ORDERBY_COLUMNS[ $orderby_arg ]
 			: 'sort_order';
-		$order       = 'desc' === strtolower( self::coerce_string( $args['order'] ?? null ) ) ? 'DESC' : 'ASC';
+		$order       = 'desc' === strtolower( ScalarCoercion::coerce_string( $args['order'] ?? null ) ) ? 'DESC' : 'ASC';
 
 		if ( 'sort_order' === $orderby ) {
 			return "ORDER BY sort_order {$order}, id ASC";

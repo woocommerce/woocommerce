@@ -32,8 +32,6 @@ defined( 'ABSPATH' ) || exit;
  */
 final class ContractRepository {
 
-	use ScalarCoercion;
-
 	/**
 	 * Address columns persisted to the addresses table.
 	 *
@@ -814,13 +812,13 @@ final class ContractRepository {
 				SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS ),
 				array(
 					'contract_id'  => $contract_id,
-					'item_name'    => self::coerce_string( $item['item_name'] ?? null ),
-					'item_type'    => self::coerce_string( $item['item_type'] ?? null, 'line_item' ),
-					'product_id'   => isset( $item['product_id'] ) ? self::coerce_int( $item['product_id'] ) : null,
-					'variation_id' => isset( $item['variation_id'] ) ? self::coerce_int( $item['variation_id'] ) : null,
-					'quantity'     => self::coerce_string( $item['quantity'] ?? null, '1' ),
-					'subtotal'     => self::coerce_string( $item['subtotal'] ?? null, '0' ),
-					'total'        => self::coerce_string( $item['total'] ?? null, '0' ),
+					'item_name'    => ScalarCoercion::coerce_string( $item['item_name'] ?? null ),
+					'item_type'    => ScalarCoercion::coerce_string( $item['item_type'] ?? null, 'line_item' ),
+					'product_id'   => isset( $item['product_id'] ) ? ScalarCoercion::coerce_int( $item['product_id'] ) : null,
+					'variation_id' => isset( $item['variation_id'] ) ? ScalarCoercion::coerce_int( $item['variation_id'] ) : null,
+					'quantity'     => ScalarCoercion::coerce_string( $item['quantity'] ?? null, '1' ),
+					'subtotal'     => ScalarCoercion::coerce_string( $item['subtotal'] ?? null, '0' ),
+					'total'        => ScalarCoercion::coerce_string( $item['total'] ?? null, '0' ),
 					'taxes'        => isset( $item['taxes'] ) ? wp_json_encode( $item['taxes'] ) : null,
 				)
 			);
@@ -843,7 +841,7 @@ final class ContractRepository {
 			);
 
 			foreach ( self::ADDRESS_COLUMNS as $column ) {
-				$record[ $column ] = isset( $address[ $column ] ) ? self::coerce_string( $address[ $column ] ) : null;
+				$record[ $column ] = isset( $address[ $column ] ) ? ScalarCoercion::coerce_string( $address[ $column ] ) : null;
 			}
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -909,7 +907,7 @@ final class ContractRepository {
 		$by_type = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$by_type[ self::coerce_string( $row['address_type'] ?? null ) ] = self::as_string_keyed( $row );
+				$by_type[ ScalarCoercion::coerce_string( $row['address_type'] ?? null ) ] = self::as_string_keyed( $row );
 			}
 		}
 
@@ -935,7 +933,7 @@ final class ContractRepository {
 		$meta = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$meta[ self::coerce_string( $row['meta_key'] ?? null ) ] = self::coerce_string( $row['meta_value'] ?? null );
+				$meta[ ScalarCoercion::coerce_string( $row['meta_key'] ?? null ) ] = ScalarCoercion::coerce_string( $row['meta_value'] ?? null );
 			}
 		}
 
@@ -956,13 +954,13 @@ final class ContractRepository {
 
 		foreach ( $items as $item ) {
 			$signature[] = array(
-				'item_name'    => self::coerce_string( $item['item_name'] ?? null ),
-				'item_type'    => self::coerce_string( $item['item_type'] ?? null, 'line_item' ),
-				'product_id'   => isset( $item['product_id'] ) ? (string) self::coerce_int( $item['product_id'] ) : null,
-				'variation_id' => isset( $item['variation_id'] ) ? (string) self::coerce_int( $item['variation_id'] ) : null,
-				'quantity'     => number_format( self::coerce_float( $item['quantity'] ?? 1 ), 4, '.', '' ),
-				'subtotal'     => number_format( self::coerce_float( $item['subtotal'] ?? 0 ), 8, '.', '' ),
-				'total'        => number_format( self::coerce_float( $item['total'] ?? 0 ), 8, '.', '' ),
+				'item_name'    => ScalarCoercion::coerce_string( $item['item_name'] ?? null ),
+				'item_type'    => ScalarCoercion::coerce_string( $item['item_type'] ?? null, 'line_item' ),
+				'product_id'   => isset( $item['product_id'] ) ? (string) ScalarCoercion::coerce_int( $item['product_id'] ) : null,
+				'variation_id' => isset( $item['variation_id'] ) ? (string) ScalarCoercion::coerce_int( $item['variation_id'] ) : null,
+				'quantity'     => number_format( ScalarCoercion::coerce_float( $item['quantity'] ?? 1 ), 4, '.', '' ),
+				'subtotal'     => number_format( ScalarCoercion::coerce_float( $item['subtotal'] ?? 0 ), 8, '.', '' ),
+				'total'        => number_format( ScalarCoercion::coerce_float( $item['total'] ?? 0 ), 8, '.', '' ),
 				'taxes'        => $this->taxes_signature( $item['taxes'] ?? null ),
 			);
 		}
@@ -986,7 +984,7 @@ final class ContractRepository {
 		foreach ( $addresses as $type => $address ) {
 			$record = array();
 			foreach ( self::ADDRESS_COLUMNS as $column ) {
-				$value             = isset( $address[ $column ] ) ? self::coerce_string( $address[ $column ] ) : '';
+				$value             = isset( $address[ $column ] ) ? ScalarCoercion::coerce_string( $address[ $column ] ) : '';
 				$record[ $column ] = '' !== $value ? $value : null;
 			}
 
