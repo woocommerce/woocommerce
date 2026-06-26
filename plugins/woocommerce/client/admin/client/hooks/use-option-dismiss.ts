@@ -24,13 +24,20 @@ export const useOptionDismiss = ( optionName: string ): DismissState => {
 		( select ) => {
 			const { getOption, hasFinishedResolution } = select( optionsStore );
 
+			// Read the option first so the resolver is always triggered. Calling
+			// `getOption` is what kicks off the fetch; gating it behind the
+			// resolution check (e.g. via `||` short-circuit) would mean it is
+			// never called while unresolved, so resolution would never start and
+			// the card would stay hidden forever.
+			const value = getOption( optionName );
+
 			const hasResolved = hasFinishedResolution( 'getOption', [
 				optionName,
 			] );
 
 			// Treat "not yet resolved" as dismissed so the card does not flash
 			// before the option value is known.
-			return ! hasResolved || getOption( optionName ) === 'yes';
+			return ! hasResolved || value === 'yes';
 		},
 		[ optionName ]
 	);
