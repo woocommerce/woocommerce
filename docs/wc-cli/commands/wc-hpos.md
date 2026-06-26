@@ -13,15 +13,21 @@ Displays a summary of HPOS settings and sync status for the site.
 
 ## wc hpos enable
 
+Set custom order tables as the authoritative order datastore after running compatibility and sync checks.
+
 - `--for-new-shop` - Enable HPOS only if this is a new shop, regardless of whether tables are in sync.
 - `--with-sync` - Also enable compatibility mode, which keeps the HPOS and posts datastores in sync.
 - `--ignore-plugin-compatibility` - Enable HPOS even if active plugins are incompatible with HPOS.
 
 ## wc hpos disable
 
+Set the posts datastore as authoritative after confirming HPOS and posts tables are in sync.
+
 - `--with-sync` - Also disable compatibility mode, which stops keeping the HPOS and posts datastores in sync.
 
 ## wc hpos compatibility-info
+
+Show WooCommerce-aware plugins known to be compatible, incompatible, or uncertain for HPOS.
 
 - `--include-inactive` - Include inactive plugins in the compatibility lists.
 - `--display-filenames` - Display plugin file names instead of plugin names.
@@ -40,11 +46,15 @@ Prints the number of orders pending sync.
 
 ## wc hpos sync
 
+Sync order data between the custom order tables and the core WordPress post tables.
+
 - `--batch-size` - The number of orders to process in each batch.
 
 Default: 500
 
 ## wc hpos verify_data
+
+Verify migrated order data with original posts data.
 
 - `--batch-size` - The number of orders to verify in each batch.
 - `--start-from` - Order ID to start from.
@@ -57,6 +67,8 @@ Default batch size: 500
 
 ## wc hpos diff `<order_id>`
 
+Display differences for an order between the HPOS and posts datastores.
+
 - `--format` - Render output in a particular format.
 
 Default: table
@@ -64,6 +76,8 @@ Default: table
 Options: table, csv, json, yaml
 
 ## wc hpos backfill `<order_id>`
+
+Backfill an order from either the HPOS or posts datastore.
 
 - `--from` - Source datastore. (*Required*)
 - `--to` - Destination datastore. (*Required*)
@@ -73,6 +87,8 @@ Options: table, csv, json, yaml
 Datastore options: hpos, posts
 
 ## wc hpos cleanup `<all|id|range>...`
+
+Remove redundant data from the postmeta table for migrated orders when HPOS is enabled.
 
 - `--batch-size` - Number of orders to process per batch. Applies only when cleaning up all orders.
 - `--force` - Clean up post meta even if the post appears to have been updated more recently than the order.

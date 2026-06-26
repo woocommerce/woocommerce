@@ -3,7 +3,11 @@ title: wc webhook
 sidebar_label: wc webhook
 ---
 
+Manage WooCommerce webhook resources.
+
 ## wc webhook list
+
+List all webhooks.
 
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--page` - Current page of the collection.
@@ -27,6 +31,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc webhook create
 
+Create a new webhook.
+
 - `--name` - A friendly name for the webhook.
 - `--status` - Webhook status.
 - `--topic` - Webhook topic. (*Required*)
@@ -35,6 +41,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--porcelain` - Output just the id when the operation is successful.
 
 ## wc webhook get `<id>`
+
+Get a single webhook.
 
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
@@ -47,6 +55,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc webhook update `<id>`
 
+Update an existing webhook.
+
 - `--name` - A friendly name for the webhook.
 - `--status` - Webhook status.
 - `--topic` - Webhook topic.
@@ -54,6 +64,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--porcelain` - Output just the id when the operation is successful.
 
 ## wc webhook delete `<id>`
+
+Delete an existing webhook.
 
 - `--force` - Required to be true, as resource does not support trashing.
 - `--porcelain` - Output just the id when the operation is successful.

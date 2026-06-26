@@ -3,7 +3,11 @@ title: wc tax
 sidebar_label: wc tax
 ---
 
+Manage WooCommerce tax resources.
+
 ## wc tax list
+
+List all taxes.
 
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--page` - Current page of the collection.
@@ -25,6 +29,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc tax create
 
+Create a new tax.
+
 - `--country` - Country ISO 3166 code.
 - `--state` - State code.
 - `--postcode` - Postcode / ZIP.
@@ -40,6 +46,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc tax get `<id>`
 
+Get a single tax.
+
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -50,6 +58,8 @@ Default: table
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc tax update `<id>`
+
+Update an existing tax.
 
 - `--country` - Country ISO 3166 code.
 - `--state` - State code.
@@ -65,6 +75,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--porcelain` - Output just the id when the operation is successful.
 
 ## wc tax delete `<id>`
+
+Delete an existing tax.
 
 - `--force` - Required to be true, as resource does not support trashing.
 - `--porcelain` - Output just the id when the operation is successful.

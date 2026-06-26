@@ -3,7 +3,11 @@ title: wc product_tag
 sidebar_label: wc product_tag
 ---
 
+Manage WooCommerce product tag resources.
+
 ## wc product_tag list
+
+List all product tags.
 
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--page` - Current page of the collection.
@@ -27,12 +31,16 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc product_tag create
 
+Create a new product tag.
+
 - `--name` - Name for the resource. (*Required*)
 - `--slug` - An alphanumeric identifier for the resource unique to its type.
 - `--description` - HTML description of the resource.
 - `--porcelain` - Output just the id when the operation is successful.
 
 ## wc product_tag get `<id>`
+
+Get a single product tag.
 
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
@@ -45,12 +53,16 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc product_tag update `<id>`
 
+Update an existing product tag.
+
 - `--name` - Tag name.
 - `--slug` - An alphanumeric identifier for the resource unique to its type.
 - `--description` - HTML description of the resource.
 - `--porcelain` - Output just the id when the operation is successful.
 
 ## wc product_tag delete `<id>`
+
+Delete an existing product tag.
 
 - `--force` - Required to be true, as resource does not support trashing.
 - `--porcelain` - Output just the id when the operation is successful.

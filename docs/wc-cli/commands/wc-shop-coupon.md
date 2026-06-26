@@ -3,7 +3,11 @@ title: wc shop_coupon
 sidebar_label: wc shop_coupon
 ---
 
+Manage WooCommerce shop coupon resources.
+
 ## wc shop_coupon list
+
+List all shop coupons.
 
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--page` - Current page of the collection.
@@ -26,6 +30,8 @@ Default: table
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc shop_coupon create
+
+Create a new shop coupon.
 
 - `--code` - Coupon code. (*Required*)
 - `--amount` - The amount of discount. Should always be numeric, even if setting a percentage.
@@ -51,6 +57,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc shop_coupon get `<id>`
 
+Get a single shop coupon.
+
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -61,6 +69,8 @@ Default: table
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc shop_coupon update `<id>`
+
+Update an existing shop coupon.
 
 - `--code` - Coupon code.
 - `--amount` - The amount of discount. Should always be numeric, even if setting a percentage.
@@ -85,6 +95,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--porcelain` - Output just the id when the operation is successful.
 
 ## wc shop_coupon delete `<id>`
+
+Delete an existing shop coupon.
 
 - `--force` - Whether to bypass trash and force deletion.
 - `--porcelain` - Output just the id when the operation is successful.

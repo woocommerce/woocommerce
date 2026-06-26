@@ -3,7 +3,11 @@ title: wc customer
 sidebar_label: wc customer
 ---
 
+Manage WooCommerce customer resources.
+
 ## wc customer list
+
+List all customers.
 
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--page` - Current page of the collection.
@@ -26,6 +30,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc customer create
 
+Create a new customer.
+
 - `--email` - New user email address. (*Required*)
 - `--first_name` - Customer first name.
 - `--last_name` - Customer last name.
@@ -38,6 +44,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc customer get `<id>`
 
+Get a single customer.
+
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -48,6 +56,8 @@ Default: table
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc customer update `<id>`
+
+Update an existing customer.
 
 - `--email` - The email address for the customer.
 - `--first_name` - Customer first name.
@@ -60,6 +70,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--porcelain` - Output just the id when the operation is successful.
 
 ## wc customer delete `<id>`
+
+Delete an existing customer.
 
 - `--force` - Required to be true, as resource does not support trashing.
 - `--reassign` - ID to reassign posts to.

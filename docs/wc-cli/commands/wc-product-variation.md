@@ -3,7 +3,11 @@ title: wc product_variation
 sidebar_label: wc product_variation
 ---
 
+Manage WooCommerce product variation resources.
+
 ## wc product_variation list `<product_id>`
+
+List all product variations.
 
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--page` - Current page of the collection.
@@ -43,6 +47,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc product_variation create `<product_id>`
 
+Create a new product variation.
+
 - `--description` - Variation description.
 - `--sku` - Unique identifier.
 - `--regular_price` - Variation regular price.
@@ -74,6 +80,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc product_variation get `<product_id>` `<id>`
 
+Get a single product variation.
+
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -84,6 +92,8 @@ Default: table
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc product_variation update `<product_id>` `<id>`
+
+Update an existing product variation.
 
 - `--description` - Variation description.
 - `--sku` - Unique identifier.
@@ -115,6 +125,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--porcelain` - Output just the id when the operation is successful.
 
 ## wc product_variation delete `<product_id>` `<id>`
+
+Delete an existing product variation.
 
 - `--force` - Whether to bypass trash and force deletion.
 - `--porcelain` - Output just the id when the operation is successful.

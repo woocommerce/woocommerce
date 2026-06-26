@@ -3,7 +3,11 @@ title: wc product
 sidebar_label: wc product
 ---
 
+Manage WooCommerce product resources.
+
 ## wc product list
+
+List all products.
 
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--page` - Current page of the collection.
@@ -42,6 +46,8 @@ Default: table
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc product create
+
+Create a new product.
 
 - `--name` - Product name.
 - `--slug` - Product slug.
@@ -91,6 +97,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc product get `<id>`
 
+Get a single product.
+
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -101,6 +109,8 @@ Default: table
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc product update `<id>`
+
+Update an existing product.
 
 - `--name` - Product name.
 - `--slug` - Product slug.
@@ -149,6 +159,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--porcelain` - Output just the id when the operation is successful.
 
 ## wc product delete `<id>`
+
+Delete an existing product.
 
 - `--force` - Whether to bypass trash and force deletion.
 - `--porcelain` - Output just the id when the operation is successful.

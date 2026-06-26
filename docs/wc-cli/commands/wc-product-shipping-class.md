@@ -3,7 +3,11 @@ title: wc product_shipping_class
 sidebar_label: wc product_shipping_class
 ---
 
+Manage WooCommerce product shipping class resources.
+
 ## wc product_shipping_class list
+
+List all product shipping classes.
 
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--page` - Current page of the collection.
@@ -27,12 +31,16 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc product_shipping_class create
 
+Create a new product shipping class.
+
 - `--name` - Name for the resource. (*Required*)
 - `--slug` - An alphanumeric identifier for the resource unique to its type.
 - `--description` - HTML description of the resource.
 - `--porcelain` - Output just the id when the operation is successful.
 
 ## wc product_shipping_class get `<id>`
+
+Get a single product shipping class.
 
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
@@ -45,12 +53,16 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc product_shipping_class update `<id>`
 
+Update an existing product shipping class.
+
 - `--name` - Shipping class name.
 - `--slug` - An alphanumeric identifier for the resource unique to its type.
 - `--description` - HTML description of the resource.
 - `--porcelain` - Output just the id when the operation is successful.
 
 ## wc product_shipping_class delete `<id>`
+
+Delete an existing product shipping class.
 
 - `--force` - Required to be true, as resource does not support trashing.
 - `--porcelain` - Output just the id when the operation is successful.

@@ -3,7 +3,11 @@ title: wc shop_order
 sidebar_label: wc shop_order
 ---
 
+Manage WooCommerce shop order resources.
+
 ## wc shop_order list
+
+List all shop orders.
 
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--page` - Current page of the collection.
@@ -32,6 +36,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc shop_order create
 
+Create a new shop order.
+
 - `--parent_id` - Parent order ID.
 - `--status` - Order status.
 - `--currency` - Currency the order was created with, in ISO format.
@@ -52,6 +58,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc shop_order get `<id>`
 
+Get a single shop order.
+
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -62,6 +70,8 @@ Default: table
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc shop_order update `<id>`
+
+Update an existing shop order.
 
 - `--parent_id` - Parent order ID.
 - `--status` - Order status.
@@ -82,6 +92,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--porcelain` - Output just the id when the operation is successful.
 
 ## wc shop_order delete `<id>`
+
+Delete an existing shop order.
 
 - `--force` - Whether to bypass trash and force deletion.
 - `--porcelain` - Output just the id when the operation is successful.
