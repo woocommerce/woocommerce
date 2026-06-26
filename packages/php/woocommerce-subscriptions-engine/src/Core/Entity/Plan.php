@@ -446,10 +446,10 @@ final class Plan {
 	}
 
 	/**
-	 * Apply this plan's pricing policy to a line total for the cycle.
+	 * Calculate the line total for this plan and cycle.
 	 *
-	 * BOGO requires quantity context and is therefore represented here rather
-	 * than in the unit-price convenience method above.
+	 * When no pricing policy is set, this returns unit_price * quantity. Otherwise
+	 * the plan delegates to its pricing policy.
 	 *
 	 * @param float $unit_price The product's base unit price for this cycle.
 	 * @param float $quantity   Quantity on the line.

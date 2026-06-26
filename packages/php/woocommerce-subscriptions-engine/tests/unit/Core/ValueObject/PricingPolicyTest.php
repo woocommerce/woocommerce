@@ -40,6 +40,21 @@ class PricingPolicyTest extends TestCase {
 		$this->assertSame( 90.0, $policy->calculate_price( 100.0 ) );
 	}
 
+	public function test_line_total_uses_effective_unit_price_for_quantity(): void {
+		$policy = PricingPolicy::from_array(
+			array(
+				'policies' => array(
+					array(
+						'type'  => 'percentage',
+						'value' => 10,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 270.0, $policy->calculate_line_total( 100.0, 3.0 ) );
+	}
+
 	public function test_fixed_amount_is_clamped_at_zero(): void {
 		$policy = PricingPolicy::from_array(
 			array(
