@@ -27,6 +27,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 
+use InvalidArgumentException;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -92,11 +94,11 @@ final class PricingPolicy {
 				'type'  => isset( $entry['type'] ) && is_scalar( $entry['type'] ) ? (string) $entry['type'] : '',
 				'value' => isset( $entry['value'] ) && is_numeric( $entry['value'] ) ? (float) $entry['value'] : 0.0,
 			);
-			if ( isset( $entry['starting_cycle'] ) && is_numeric( $entry['starting_cycle'] ) ) {
-				$policy['starting_cycle'] = (int) $entry['starting_cycle'];
+			if ( isset( $entry['starting_cycle'] ) ) {
+				$policy['starting_cycle'] = self::normalize_cycle( $entry['starting_cycle'], 'starting_cycle' );
 			}
-			if ( isset( $entry['duration_cycles'] ) && is_numeric( $entry['duration_cycles'] ) ) {
-				$policy['duration_cycles'] = (int) $entry['duration_cycles'];
+			if ( isset( $entry['duration_cycles'] ) ) {
+				$policy['duration_cycles'] = self::normalize_cycle( $entry['duration_cycles'], 'duration_cycles' );
 			}
 			$policies[] = $policy;
 		}
@@ -236,5 +238,34 @@ final class PricingPolicy {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Normalize a cycle gate value, which must be an integer value.
+	 * Throws exceptions for invalid values.
+	 *
+	 * @param mixed  $value Raw field value.
+	 * @param string $field Field name.
+	 * @throws InvalidArgumentException If the value is not a whole number.
+	 */
+	private static function normalize_cycle( $value, string $field ): int {
+		if ( is_int( $value ) ) {
+			return $value;
+		}
+
+		if ( is_float( $value ) && floor( $value ) === $value ) {
+			return (int) $value;
+		}
+
+		if ( is_string( $value ) ) {
+			$validated = filter_var( $value, FILTER_VALIDATE_INT );
+			if ( false !== $validated ) {
+				return $validated;
+			}
+		}
+
+		throw new InvalidArgumentException(
+			sprintf( 'pricing_policy.policies[].%s must be an integer number.', $field )
+		);
 	}
 }
