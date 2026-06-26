@@ -366,7 +366,7 @@ class WC_Post_Types {
 			apply_filters(
 				'woocommerce_register_post_type_product',
 				array(
-					'labels'                          => array(
+					'labels'              => array(
 						'name'                  => __( 'Products', 'woocommerce' ),
 						'singular_name'         => __( 'Product', 'woocommerce' ),
 						'all_items'             => __( 'All Products', 'woocommerce' ),
@@ -706,14 +706,10 @@ class WC_Post_Types {
 
 		$post_status = $post instanceof WP_Post ? $post->post_status : get_post_status( $post_id );
 
-		// Keep the existing behavior where a trashed shop page still serves the product archive at its previous URL.
-		if ( 'trash' === $post_status ) {
-			return;
-		}
-
 		$shop_page_id = wc_get_page_id( 'shop' );
 
-		if ( 0 >= $shop_page_id ) {
+		// Keep the existing behavior where a trashed shop page still serves the product archive at its previous URL.
+		if ( 0 >= $shop_page_id || 'trash' === $post_status ) {
 			return;
 		}
 
