@@ -16,7 +16,8 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
  * namespace and could therefore recognise a POS request purely from the URI —
  * the shared-routes approach runs POS over the very same `wc/store/v1`
  * cart/checkout routes the web storefront uses. There is no namespace to key
- * off, so a request is recognised as POS only when all four hold:
+ * off, so {@see self::is_pos_request()} recognises POS *intent* from three
+ * request-level signals:
  *
  *   1. the `point_of_sale` feature is enabled (no POS, nothing to do);
  *   2. the POS client explicitly marked the request as POS — an
@@ -24,31 +25,28 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
  *      that can't set custom headers (the Jetpack tunnel). This marker is what
  *      keeps a logged-in store manager's *own web checkout* — same route, same
  *      capability — from being mistaken for a POS sale: the web storefront never
- *      sends it;
+ *      sends it; and
  *   3. the request targets a Store API cart / checkout / batch route (so a stray
  *      `?pos=1` on a frontend page a manager is browsing can't engage the cart
- *      policy hooks); and
- *   4. the caller can `manage_woocommerce`. The marker only declares intent;
- *      this capability is what authorises the POS behaviour, so a guest who
- *      forges the marker gets a normal (rejected) web checkout, never a
- *      no-payment oversold POS order.
+ *      policy hooks).
  *
- * Two consequences of (4) shape this class:
+ * Intent is not authorisation. The `manage_woocommerce` capability that
+ * authorises POS behaviour is checked separately, by {@see PolicyHooks\CapabilityGate},
+ * which rejects a marked-but-unauthorised request (e.g. a guest forging the
+ * marker) with a 401/403 at the very start of dispatch — before any other POS
+ * policy runs. Keeping the capability out of `is_pos_request()` is deliberate:
+ * the three intent signals all live on the request and so survive the
+ * mid-request guest swap that {@see PolicyHooks\CurrentUserSwap} performs,
+ * whereas a live `current_user_can()` check would flip to false the moment the
+ * user is dropped to a guest and silently disable every later policy hook. Once
+ * the gate has rejected unauthorised intent up front, every hook that fires
+ * afterwards can trust the marker alone, so no verdict has to be latched.
  *
- * - Capability is only knowable once REST authentication has resolved, which is
- *   long after the policy hooks are *registered* (in the WooCommerce
- *   constructor). So detection is evaluated lazily, per filter callback, not at
- *   registration time. Each policy hook installs its filter unconditionally and
- *   asks here whether to act.
- * - {@see PolicyHooks\CurrentUserSwap} drops the current user to a guest partway
- *   through the request. A live `current_user_can()` check would flip to false
- *   the moment that happens, silently disabling every later policy hook. To
- *   avoid that, the first positive verdict is latched for the rest of the
- *   request (PHP processes serve one request, so this is request-scoped).
- *
- * The `rest_route` GET-parameter fallback mirrors core's proxied-request
- * handling: requests through the Jetpack tunnel carry the route there rather
- * than in the URI path.
+ * Detection is still evaluated lazily, per filter callback, rather than at
+ * registration time (the request globals aren't populated when the policy hooks
+ * are wired up in the WooCommerce constructor). The `rest_route` GET-parameter
+ * fallback mirrors core's proxied-request handling: requests through the Jetpack
+ * tunnel carry the route there rather than in the URI path.
  *
  * @internal Just for internal use.
  *
@@ -62,16 +60,6 @@ class Context {
 	 * @var bool|null
 	 */
 	private static $test_override = null;
-
-	/**
-	 * Latched positive verdict for the current request. Once detection returns
-	 * true it stays true, so the guest swap performed mid-request by
-	 * {@see PolicyHooks\CurrentUserSwap} can't retroactively turn POS handling
-	 * off. Null until the first positive detection.
-	 *
-	 * @var true|null
-	 */
-	private static $latched = null;
 
 	/**
 	 * REST route fragments that identify a POS cart/checkout request. POS reuses
@@ -106,7 +94,12 @@ class Context {
 	private const MARKER_PARAM = 'pos';
 
 	/**
-	 * Whether the current request is a POS Store API request.
+	 * Whether the current request carries POS intent: the feature is enabled, the
+	 * request is marked as POS, and it targets a Store API cart/checkout route.
+	 *
+	 * Authorisation (the operator capability) is enforced separately by
+	 * {@see PolicyHooks\CapabilityGate}; see the class docblock for why it is not
+	 * part of this check.
 	 *
 	 * @return bool
 	 */
@@ -115,21 +108,26 @@ class Context {
 			return self::$test_override;
 		}
 
-		if ( true === self::$latched ) {
-			return true;
-		}
-
-		$is_pos = self::detect();
-
-		if ( $is_pos ) {
-			self::$latched = true;
-		}
-
-		return $is_pos;
+		return self::detect();
 	}
 
 	/**
-	 * Evaluate the three POS conditions against the live request and current user.
+	 * Whether the current user holds the capability required to operate POS.
+	 *
+	 * The capability authorises POS behaviour but — unlike the marker — does not
+	 * survive the mid-request guest swap, so it is intentionally not part of
+	 * {@see self::is_pos_request()}. {@see PolicyHooks\CapabilityGate} evaluates
+	 * it once, up front, against the authenticated operator; any other caller
+	 * must likewise check it before that swap runs.
+	 *
+	 * @return bool
+	 */
+	public static function current_user_can_operate_pos(): bool {
+		return current_user_can( self::REQUIRED_CAPABILITY );
+	}
+
+	/**
+	 * Evaluate the three POS intent signals against the live request.
 	 *
 	 * @return bool
 	 */
@@ -142,11 +140,7 @@ class Context {
 			return false;
 		}
 
-		if ( ! self::targets_cart_or_checkout_route() ) {
-			return false;
-		}
-
-		return current_user_can( self::REQUIRED_CAPABILITY );
+		return self::targets_cart_or_checkout_route();
 	}
 
 	/**
@@ -208,16 +202,11 @@ class Context {
 	 * Override POS request detection for testing.
 	 *
 	 * Pass true/false to force a value, or null to clear and revert to live
-	 * detection. Clearing also drops the latched verdict so tests don't leak
-	 * POS context into one another within the same process.
+	 * detection.
 	 *
 	 * @param bool|null $value Override value.
 	 */
 	public static function set_test_override( ?bool $value ): void {
 		self::$test_override = $value;
-
-		if ( null === $value ) {
-			self::$latched = null;
-		}
 	}
 }

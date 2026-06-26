@@ -9,12 +9,12 @@ use WC_Unit_Test_Case;
 /**
  * Tests for the POS Store API Context primitive.
  *
- * In the shared-routes design a request is POS only when the `point_of_sale`
- * feature is on, the client explicitly marked it as POS (X-WooCommerce-POS
- * header or `pos` param), the request targets a Store API cart/checkout route,
- * AND the caller can `manage_woocommerce`. Detection is also latched: the first
- * positive verdict sticks for the rest of the request so the mid-request guest
- * swap can't turn it off.
+ * In the shared-routes design `is_pos_request()` reports POS *intent*: the
+ * `point_of_sale` feature is on, the client explicitly marked the request as POS
+ * (X-WooCommerce-POS header or `pos` param), and it targets a Store API
+ * cart/checkout route. The operator capability is a separate concern reported by
+ * `current_user_can_operate_pos()` and enforced by the CapabilityGate, so intent
+ * is marker-based and survives the mid-request guest swap without latching.
  *
  * @covers \Automattic\WooCommerce\Internal\POS\StoreApi\Context
  */
@@ -82,7 +82,7 @@ class ContextTest extends WC_Unit_Test_Case {
 
 		// Detection requires the feature on; force it for these tests.
 		update_option( 'woocommerce_feature_point_of_sale_enabled', 'yes' );
-		// Clear any latched verdict from a previous test in this process.
+		// Clear any override leaked from a previous test in this process.
 		Context::set_test_override( null );
 	}
 
@@ -183,14 +183,35 @@ class ContextTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox is_pos_request returns false for an unauthenticated shopper even with the marker.
+	 * Intent is marker-based, not capability-based: a guest forging the marker is
+	 * still "POS intent" here. The CapabilityGate is what rejects them — this
+	 * method must not, or its verdict would flip when the user is swapped to guest.
+	 *
+	 * @testdox is_pos_request reports intent regardless of capability (guest with marker on a cart route).
 	 */
-	public function test_returns_false_for_guest_even_with_marker(): void {
+	public function test_is_pos_request_ignores_capability(): void {
 		wp_set_current_user( 0 );
 		$_SERVER['REQUEST_URI'] = '/wp-json/wc/store/v1/cart/add-item';
 		$this->set_pos_marker();
 
-		$this->assertFalse( Context::is_pos_request() );
+		$this->assertTrue( Context::is_pos_request() );
+	}
+
+	/**
+	 * @testdox current_user_can_operate_pos is true for a manager and false for a guest or shopper.
+	 */
+	public function test_current_user_can_operate_pos_reflects_capability(): void {
+		wp_set_current_user( $this->admin_id );
+		$this->assertTrue( Context::current_user_can_operate_pos() );
+
+		$subscriber_id = $this->factory()->user->create( array( 'role' => 'subscriber' ) );
+		wp_set_current_user( $subscriber_id );
+		$this->assertFalse( Context::current_user_can_operate_pos() );
+
+		wp_set_current_user( 0 );
+		$this->assertFalse( Context::current_user_can_operate_pos() );
+
+		wp_delete_user( $subscriber_id );
 	}
 
 	/**
@@ -229,18 +250,20 @@ class ContextTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox a positive verdict is latched so a later guest swap can't turn POS off.
+	 * The whole reason the capability is not part of intent: the verdict must be
+	 * stable across the mid-request guest swap. Because intent is marker-based, it
+	 * stays true with no latching once the user drops to a guest.
+	 *
+	 * @testdox is_pos_request stays true across the mid-request guest swap.
 	 */
-	public function test_verdict_is_latched_across_user_swap(): void {
+	public function test_is_pos_request_is_stable_across_user_swap(): void {
 		wp_set_current_user( $this->admin_id );
 		$_SERVER['REQUEST_URI'] = '/wp-json/wc/store/v1/checkout';
 		$this->set_pos_marker();
 
-		// First evaluation latches true while the manager is authenticated.
 		$this->assertTrue( Context::is_pos_request() );
 
-		// CurrentUserSwap would drop the user to a guest mid-request; the verdict
-		// must survive that.
+		// CurrentUserSwap drops the user to a guest mid-request; intent survives.
 		wp_set_current_user( 0 );
 		$this->assertTrue( Context::is_pos_request() );
 	}
@@ -259,14 +282,14 @@ class ContextTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox clearing the override drops the latched verdict.
+	 * @testdox clearing the override reverts to live detection.
 	 */
-	public function test_clearing_override_resets_latch(): void {
+	public function test_clearing_override_reverts_to_live_detection(): void {
 		Context::set_test_override( true );
 		$this->assertTrue( Context::is_pos_request() );
 
-		// Clearing must reset the latch so the next request starts fresh; with a
-		// guest, no marker and no POS URI, detection is now false.
+		// Clearing reverts to live detection; with no marker and no POS URI it is
+		// now false.
 		Context::set_test_override( null );
 		wp_set_current_user( 0 );
 		unset( $_SERVER['REQUEST_URI'], $_SERVER['HTTP_X_WOOCOMMERCE_POS'] );
