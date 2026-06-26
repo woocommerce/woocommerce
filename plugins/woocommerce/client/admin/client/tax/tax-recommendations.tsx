@@ -7,8 +7,9 @@ import { Children, useEffect, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Text } from '@woocommerce/experimental';
 import { PluginNames, pluginsStore, settingsStore } from '@woocommerce/data';
-import { getAdminLink } from '@woocommerce/settings';
+import { getAdminLink, getSetting } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -207,49 +208,67 @@ const TaxRecommendationsList = ( {
 	children,
 }: {
 	children: React.ReactNode;
-} ) => (
-	<DismissableList
-		className="woocommerce-recommended-tax-extensions"
-		dismissOptionName="woocommerce_settings_tax_recommendations_hidden"
-	>
-		<DismissableListHeading>
-			<Text variant="title.small" as="p" size="20" lineHeight="28px">
-				{ __( 'Recommended tax solutions', 'woocommerce' ) }
-			</Text>
-			<Text
-				className="woocommerce-recommended-tax__header-heading"
-				variant="caption"
-				as="p"
-				size="12"
-				lineHeight="16px"
-			>
-				{ __(
-					'Explore tax extensions that can help automate calculations and compliance for your store.',
-					'woocommerce'
-				) }
-			</Text>
-		</DismissableListHeading>
-		<ul className="woocommerce-list">
-			{ Children.map( children, ( item ) => (
-				<li className="woocommerce-list__item">{ item }</li>
-			) ) }
-		</ul>
-		<CardFooter>
-			<TrackedLink
-				message={ __(
-					// translators: {{Link}} is a placeholder for a html element.
-					'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more tax solutions.',
-					'woocommerce'
-				) }
-				targetUrl={ getAdminLink(
-					'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations'
-				) }
-				linkType="wc-admin"
-				eventName="settings_tax_recommendation_visit_marketplace_click"
-			/>
-		</CardFooter>
-	</DismissableList>
-);
+} ) => {
+	const [ isDismissed, setIsDismissed ] = useState< boolean >(
+		getSetting( 'taxRecommendationsHidden', false )
+	);
+
+	const handleDismiss = () => {
+		// Optimistically hide the card, then persist the dismissal site-wide.
+		setIsDismissed( true );
+		apiFetch( {
+			path: '/wc-admin/tax/recommendations/dismiss',
+			method: 'POST',
+		} ).catch( () => {
+			// Restore the card if the request fails so the state stays accurate.
+			setIsDismissed( false );
+		} );
+	};
+
+	return (
+		<DismissableList
+			className="woocommerce-recommended-tax-extensions"
+			isDismissed={ isDismissed }
+		>
+			<DismissableListHeading onDismiss={ handleDismiss }>
+				<Text variant="title.small" as="p" size="20" lineHeight="28px">
+					{ __( 'Recommended tax solutions', 'woocommerce' ) }
+				</Text>
+				<Text
+					className="woocommerce-recommended-tax__header-heading"
+					variant="caption"
+					as="p"
+					size="12"
+					lineHeight="16px"
+				>
+					{ __(
+						'Explore tax extensions that can help automate calculations and compliance for your store.',
+						'woocommerce'
+					) }
+				</Text>
+			</DismissableListHeading>
+			<ul className="woocommerce-list">
+				{ Children.map( children, ( item ) => (
+					<li className="woocommerce-list__item">{ item }</li>
+				) ) }
+			</ul>
+			<CardFooter>
+				<TrackedLink
+					message={ __(
+						// translators: {{Link}} is a placeholder for a html element.
+						'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more tax solutions.',
+						'woocommerce'
+					) }
+					targetUrl={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations'
+					) }
+					linkType="wc-admin"
+					eventName="settings_tax_recommendation_visit_marketplace_click"
+				/>
+			</CardFooter>
+		</DismissableList>
+	);
+};
 
 const getPluginSlugForAction = (
 	pluginSlugs: string[],

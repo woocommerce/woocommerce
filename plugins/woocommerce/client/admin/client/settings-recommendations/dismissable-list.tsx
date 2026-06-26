@@ -29,9 +29,13 @@ export const DismissableListHeading = ( {
 
 	const handleDismissClick = () => {
 		onDismiss();
-		updateOptions( {
-			[ dismissOptionName ]: 'yes',
-		} );
+		// When no option name is provided the list is controlled by the parent
+		// (e.g. persisted as a user preference), so skip the legacy Options API.
+		if ( dismissOptionName ) {
+			updateOptions( {
+				[ dismissOptionName ]: 'yes',
+			} );
+		}
 	};
 
 	return (
@@ -59,25 +63,41 @@ export const DismissableList = ( {
 	children,
 	className,
 	dismissOptionName,
+	isDismissed,
 }: {
 	children: React.ReactNode;
 	className?: string;
-	dismissOptionName: string;
+	/**
+	 * Legacy Options API option name used to persist the dismissal. Omit when
+	 * the parent controls dismissal (e.g. via a dedicated endpoint) and pass
+	 * `isDismissed` instead.
+	 */
+	dismissOptionName?: string;
+	/**
+	 * Controlled dismissal state. Only used when `dismissOptionName` is omitted.
+	 */
+	isDismissed?: boolean;
 } ) => {
-	const isVisible = useSelect(
+	const optionIsVisible = useSelect(
 		( select ) => {
+			if ( ! dismissOptionName ) {
+				return null;
+			}
+
 			const { getOption, hasFinishedResolution } = select( optionsStore );
 
 			const hasFinishedResolving = hasFinishedResolution( 'getOption', [
 				dismissOptionName,
 			] );
 
-			const isDismissed = getOption( dismissOptionName ) === 'yes';
-
-			return hasFinishedResolving && ! isDismissed;
+			return (
+				hasFinishedResolving && getOption( dismissOptionName ) !== 'yes'
+			);
 		},
 		[ dismissOptionName ]
 	);
+
+	const isVisible = dismissOptionName ? optionIsVisible : ! isDismissed;
 
 	if ( ! isVisible ) {
 		return null;
@@ -88,7 +108,7 @@ export const DismissableList = ( {
 			size="medium"
 			className={ clsx( 'woocommerce-dismissable-list', className ) }
 		>
-			<OptionNameContext.Provider value={ dismissOptionName }>
+			<OptionNameContext.Provider value={ dismissOptionName ?? '' }>
 				{ children }
 			</OptionNameContext.Provider>
 		</Card>
