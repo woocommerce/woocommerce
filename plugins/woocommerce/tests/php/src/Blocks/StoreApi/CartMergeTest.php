@@ -270,14 +270,14 @@ class CartMergeTest extends WC_Unit_Test_Case {
 	/**
 	 * Set a protected property on an object via reflection.
 	 *
-	 * @param object $object Target object.
-	 * @param string $name   Property name.
-	 * @param mixed  $value  Value to set.
+	 * @param object $instance Target object.
+	 * @param string $name     Property name.
+	 * @param mixed  $value    Value to set.
 	 */
-	private function set_protected_property( object $object, string $name, $value ): void {
-		$property = new \ReflectionProperty( $object, $name );
+	private function set_protected_property( object $instance, string $name, $value ): void {
+		$property = new \ReflectionProperty( $instance, $name );
 		$property->setAccessible( true );
-		$property->setValue( $object, $value );
+		$property->setValue( $instance, $value );
 	}
 
 	/**
