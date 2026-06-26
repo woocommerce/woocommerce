@@ -1016,15 +1016,15 @@ importers:
       '@wordpress/i18n':
         specifier: catalog:wp-min
         version: 6.6.1
+      date-fns-tz:
+        specifier: ^3.2.0
+        version: 3.2.0(date-fns@4.1.0)
       lodash:
         specifier: ^4.17.0
         version: 4.17.21
       moment:
         specifier: ^2.29.4
         version: 2.30.1
-      moment-timezone:
-        specifier: ^0.5.43
-        version: 0.5.48
       qs:
         specifier: ^6.11.2
         version: 6.15.1
@@ -13663,6 +13663,11 @@ packages:
 
   date-fns-jalali@4.1.0-0:
     resolution: {integrity: sha512-hTIP/z+t+qKwBDcmmsnmjWTduxCg+5KfdqWQvb2X/8C9+knYY6epN/pfxdDuyVlSVeFz0sM5eEfwIUQ70U4ckg==, tarball: https://registry.npmjs.org/date-fns-jalali/-/date-fns-jalali-4.1.0-0.tgz}
+
+  date-fns-tz@3.2.0:
+    resolution: {integrity: sha512-sg8HqoTEulcbbbVXeg84u5UnlsQa8GS5QXMqjjYIhS4abEVVKIUwe0/l/UhrZdKaL/W5eWZNlbTeEIiOXTcsBQ==, tarball: https://registry.npmjs.org/date-fns-tz/-/date-fns-tz-3.2.0.tgz}
+    peerDependencies:
+      date-fns: ^3.0.0 || ^4.0.0
 
   date-fns@2.30.0:
     resolution: {integrity: sha512-fnULvOpxnC5/Vg3NCiWelDsLiUc9bRwAPs/+LfTLNvetFCtCTN+yQz15C/fs4AwX1R9K5GLtLfn8QW+dWisaAw==, tarball: https://registry.npmjs.org/date-fns/-/date-fns-2.30.0.tgz}
@@ -41592,6 +41597,10 @@ snapshots:
   dataloader@2.2.2: {}
 
   date-fns-jalali@4.1.0-0: {}
+
+  date-fns-tz@3.2.0(date-fns@4.1.0):
+    dependencies:
+      date-fns: 4.1.0
 
   date-fns@2.30.0:
     dependencies:

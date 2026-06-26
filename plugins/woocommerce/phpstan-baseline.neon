@@ -52162,12 +52162,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCollection/HandlerRegistry.php
 
 		-
-			message: '#^Cannot call method get_upsell_ids\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/HandlerRegistry.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\HandlerRegistry\:\:get_cart_product_ids\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
