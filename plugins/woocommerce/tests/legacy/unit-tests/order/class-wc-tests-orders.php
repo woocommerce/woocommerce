@@ -212,4 +212,36 @@ class WC_Tests_Orders extends WC_Unit_Test_Case {
 		$order->calculate_totals();
 		$this->assertEquals( 250 - 65, $order->get_cogs_total_value() );
 	}
+
+	/**
+	 * Test that get_shipping_to_display() shows a "Free" indicator instead of
+	 * duplicating the shipping method title when the shipping cost is zero.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/66002
+	 */
+	public function test_get_shipping_to_display_free_shipping_does_not_duplicate_method_name() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 23.85 );
+		$product->save();
+
+		$shipping_rate = new WC_Shipping_Rate( 'free_shipping', 'Royal Mail 1st Class: Free', '0', array(), 'free_shipping' );
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_props(
+			array(
+				'method_title' => $shipping_rate->label,
+				'method_id'    => $shipping_rate->id,
+				'total'        => wc_format_decimal( $shipping_rate->cost ),
+				'taxes'        => $shipping_rate->taxes,
+			)
+		);
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->add_item( $shipping_item );
+		$order->calculate_totals( true );
+
+		$this->assertEquals( 'Royal Mail 1st Class: Free', $order->get_shipping_method() );
+		$this->assertEquals( 'Free', $order->get_shipping_to_display() );
+		$this->assertNotEquals( $order->get_shipping_method(), $order->get_shipping_to_display() );
+	}
 }
