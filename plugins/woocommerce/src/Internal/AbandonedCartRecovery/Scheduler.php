@@ -15,18 +15,27 @@ use WC_Order;
 /**
  * Schedules and cancels the automated abandoned-cart recovery email via Action Scheduler.
  *
- * Listens for new orders in the `pending` status to enqueue a single
+ * Listens for orders entering an abandoned-checkout status — `pending` (classic
+ * checkout) and `checkout-draft` (Blocks Store API) — to enqueue a single
  * `woocommerce_send_abandoned_cart_recovery_notification` action that fires
  * after `WC_Email_Customer_Abandoned_Cart_Recovery::AUTO_SEND_DELAY_SECONDS`.
- * The pending action is cancelled when the order transitions out of `pending`
- * or is trashed/deleted, so a customer who completes checkout before the delay
- * elapses never receives the nudge.
+ * The pending action is cancelled when the order transitions out of the
+ * abandoned set or is trashed/deleted, so a customer who completes checkout
+ * before the delay elapses never receives the nudge.
+ *
+ * Two creation-time hooks are needed because `woocommerce_new_order` is
+ * suppressed for draft-status creates and only fires on a transition *out of* a
+ * draft status: `handle_new_order()` (on `woocommerce_new_order`) catches
+ * classic `pending` orders, and `handle_order_update()` (on
+ * `woocommerce_update_order`) catches `checkout-draft` orders that the Store API
+ * parks and re-saves while the customer is mid-checkout.
  *
  * Per-order idempotency is enforced two ways: a scheduled-at meta key blocks
- * re-scheduling for the same order, and the trigger-time send gate refuses to
+ * re-scheduling for the same order (including the frequent `woocommerce_update_order`
+ * re-fires while a draft is edited), and the trigger-time send gate refuses to
  * dispatch when `META_KEY_SENT_AT` is already populated. Together these handle
- * duplicate `woocommerce_new_order` fires, duplicate AS action firings, and
- * the race between a manual send and the still-pending automated send.
+ * duplicate creation fires, duplicate AS action firings, and the race between a
+ * manual send and the still-pending automated send.
  *
  * The container auto-calls `init()` after instantiation; resolution is driven
  * by `WooCommerce::maybe_init_abandoned_cart_recovery()`, hooked on `init`
@@ -65,9 +74,7 @@ class Scheduler {
 	 */
 	final public function init(): void {
 		add_action( 'woocommerce_new_order', array( $this, 'handle_new_order' ), 10, 2 );
-		// Catch every transition out of `pending` (processing, completed,
-		// cancelled, failed, refunded, custom statuses…) so the pending send is
-		// unscheduled regardless of which status the order moves to.
+		add_action( 'woocommerce_update_order', array( $this, 'handle_order_update' ), 10, 2 );
 		add_action( 'woocommerce_order_status_changed', array( $this, 'handle_status_changed' ), 10, 3 );
 		add_action( 'woocommerce_trash_order', array( $this, 'handle_cancellation' ), 10, 1 );
 		add_action( 'woocommerce_before_delete_order', array( $this, 'handle_cancellation' ), 10, 1 );
@@ -75,11 +82,12 @@ class Scheduler {
 	}
 
 	/**
-	 * Schedule the automated send when a `pending` order is created.
+	 * Schedule the automated send when a classic `pending` order is created.
 	 *
-	 * No-op when the order is not `pending`, when the email is disabled or
-	 * suppressed, when the merchant has opted out of automated sends, or when
-	 * this order already has a pending or completed send.
+	 * Fires on `woocommerce_new_order`, which the data store suppresses for draft
+	 * creates — so this path only sees `pending` orders (classic checkout, and
+	 * draft→pending transitions). `checkout-draft` orders are handled by
+	 * `handle_order_update()` instead.
 	 *
 	 * @internal
 	 *
@@ -88,14 +96,65 @@ class Scheduler {
 	 *                                falls back to a lookup only when absent.
 	 */
 	public function handle_new_order( int $order_id, $order = null ): void {
-		if ( ! $order instanceof WC_Order ) {
-			$order = wc_get_order( $order_id );
-		}
-		if ( ! $order instanceof WC_Order ) {
+		$order = $this->resolve_order( $order_id, $order );
+		if ( ! $order instanceof WC_Order || OrderStatus::PENDING !== $order->get_status() ) {
 			return;
 		}
 
-		if ( OrderStatus::PENDING !== $order->get_status() ) {
+		$this->maybe_schedule_recovery( $order );
+	}
+
+	/**
+	 * Schedule the automated send for a `checkout-draft` order the Blocks Store
+	 * API parks mid-checkout.
+	 *
+	 * Draft creates emit no creation hook, but the Store API re-saves the draft
+	 * as the customer fills in checkout, firing `woocommerce_update_order` while
+	 * the order is still `checkout-draft`. Gating on that status keeps the (very
+	 * frequent) non-draft updates cheap; the `SCHEDULED_META_KEY` guard absorbs
+	 * the repeated draft re-saves.
+	 *
+	 * @internal
+	 *
+	 * @param int           $order_id The updated order ID.
+	 * @param WC_Order|null $order    The order object passed by `woocommerce_update_order`;
+	 *                                falls back to a lookup only when absent.
+	 */
+	public function handle_order_update( int $order_id, $order = null ): void {
+		$order = $this->resolve_order( $order_id, $order );
+		if ( ! $order instanceof WC_Order || OrderStatus::CHECKOUT_DRAFT !== $order->get_status() ) {
+			return;
+		}
+
+		$this->maybe_schedule_recovery( $order );
+	}
+
+	/**
+	 * Queue the recovery send for an abandoned-status order and record the
+	 * scheduled-at meta, unless a gate blocks it.
+	 *
+	 * No-op when the email is disabled or suppressed, when the merchant has opted
+	 * out of automated sends, or when this order already has a pending or
+	 * completed send. The caller is responsible for the status check.
+	 *
+	 * @param WC_Order $order The abandoned-status order to schedule for.
+	 */
+	private function maybe_schedule_recovery( WC_Order $order ): void {
+		// Cheapest exit first: once scheduled (or already sent), every later
+		// woocommerce_update_order fire for the same draft bails here, before the
+		// mailer lookup and the suppression filter run.
+		if ( '' !== (string) $order->get_meta( self::SCHEDULED_META_KEY ) ) {
+			return;
+		}
+
+		if ( '' !== (string) $order->get_meta( WC_Email_Customer_Abandoned_Cart_Recovery::META_KEY_SENT_AT ) ) {
+			return;
+		}
+
+		// A checkout-draft can reach this status before the shopper enters an
+		// email. Don't queue a send that would only bail at trigger time for lack
+		// of a recipient — it just churns the Action Scheduler table.
+		if ( ! is_email( $order->get_billing_email() ) ) {
 			return;
 		}
 
@@ -108,26 +167,42 @@ class Scheduler {
 			return;
 		}
 
-		if ( '' !== (string) $order->get_meta( self::SCHEDULED_META_KEY ) ) {
-			return;
-		}
-
-		if ( '' !== (string) $order->get_meta( WC_Email_Customer_Abandoned_Cart_Recovery::META_KEY_SENT_AT ) ) {
-			return;
-		}
-
 		$when = time() + WC_Email_Customer_Abandoned_Cart_Recovery::AUTO_SEND_DELAY_SECONDS;
-		as_schedule_single_action( $when, self::ACTION_HOOK, array( $order_id ) );
+		as_schedule_single_action( $when, self::ACTION_HOOK, array( $order->get_id() ) );
 
+		// Meta-only write (not save()) to avoid a re-entrant order save from inside the hook.
 		$order->update_meta_data( self::SCHEDULED_META_KEY, (string) $when );
 		$order->save_meta_data();
 	}
 
 	/**
-	 * Unschedule the pending recovery send whenever the order leaves the
-	 * `pending` status. `woocommerce_order_status_changed` fires for every
+	 * Resolve the order object from the hook arguments, falling back to a lookup
+	 * only when the passed object is absent.
+	 *
+	 * @param int           $order_id The order ID.
+	 * @param WC_Order|null $order    The order object passed by the hook, if any.
+	 * @return WC_Order|null The resolved order, or null when it cannot be loaded.
+	 */
+	private function resolve_order( int $order_id, $order ): ?WC_Order {
+		if ( $order instanceof WC_Order ) {
+			return $order;
+		}
+
+		$order = wc_get_order( $order_id );
+
+		return $order instanceof WC_Order ? $order : null;
+	}
+
+	/**
+	 * Unschedule the queued recovery send whenever the order leaves the
+	 * abandoned set. `woocommerce_order_status_changed` fires for every
 	 * transition, so a single listener covers processing / completed /
 	 * cancelled / failed / refunded / custom statuses in one place.
+	 *
+	 * Transitions inside the abandoned set (`pending` ↔ `checkout-draft`) are
+	 * no-ops so a customer who moves between classic and Blocks checkout — or
+	 * whose draft is promoted to `pending` at the payment step — keeps the
+	 * queued nudge.
 	 *
 	 * @internal
 	 *
@@ -136,7 +211,11 @@ class Scheduler {
 	 * @param string $new_status New status (sans `wc-` prefix).
 	 */
 	public function handle_status_changed( int $order_id, string $old_status, string $new_status ): void {
-		if ( OrderStatus::PENDING !== $old_status || OrderStatus::PENDING === $new_status ) {
+		$abandoned     = array( OrderStatus::PENDING, OrderStatus::CHECKOUT_DRAFT );
+		$was_abandoned = in_array( $old_status, $abandoned, true );
+		$is_abandoned  = in_array( $new_status, $abandoned, true );
+
+		if ( ! $was_abandoned || $is_abandoned ) {
 			return;
 		}
 
@@ -149,16 +228,14 @@ class Scheduler {
 	 * Hooked directly into `woocommerce_trash_order` and
 	 * `woocommerce_before_delete_order` for the trash/delete lifecycle events,
 	 * and called from `handle_status_changed()` for every transition out of
-	 * `pending`.
+	 * the abandoned set.
 	 *
 	 * @internal
 	 *
 	 * @param int $order_id The affected order ID.
 	 */
 	public function handle_cancellation( int $order_id ): void {
-		// Always attempt to unschedule, even when the order or meta is missing,
-		// so an out-of-sync meta value cannot leave a stray scheduled send.
-		// `as_unschedule_action()` is a no-op when no matching action exists.
+		// Unschedule unconditionally so a stale meta value can't orphan an action; no-ops when nothing matches.
 		as_unschedule_action( self::ACTION_HOOK, array( $order_id ) );
 
 		$order = wc_get_order( $order_id );

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Auto-send the abandoned cart recovery email for checkout-draft (Blocks) orders in addition to pending orders, scheduling on woocommerce_update_order while the order is parked in checkout-draft.
