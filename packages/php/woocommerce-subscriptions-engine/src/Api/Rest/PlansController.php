@@ -419,6 +419,9 @@ final class PlansController extends WP_REST_Controller {
 			if ( null === $id || $id <= 0 ) {
 				return $this->invalid_error( __( 'ids must contain only positive integers.', 'woocommerce-subscriptions-engine' ) );
 			}
+			if ( isset( $sort_order_by_id[ $id ] ) ) {
+				return $this->invalid_error( __( 'ids must not contain duplicate plan ids.', 'woocommerce-subscriptions-engine' ) );
+			}
 			$sort_order_by_id[ $id ] = $index;
 			$response_ids[]          = $id;
 		}

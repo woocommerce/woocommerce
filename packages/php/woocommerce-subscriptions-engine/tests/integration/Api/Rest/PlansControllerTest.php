@@ -330,6 +330,24 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( $second, $first ), $ids );
 	}
 
+	public function test_reorder_rejects_duplicate_ids(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$first  = $this->create_plan( 'First' );
+		$second = $this->create_plan( 'Second' );
+
+		$reordered = $this->request(
+			'POST',
+			self::BASE . '/reorder',
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'ids'            => array( $second, $first, $second ),
+			)
+		);
+
+		$this->assertSame( 400, $reordered->get_status() );
+	}
+
 	public function test_delete_route_is_not_exposed(): void {
 		wp_set_current_user( $this->admin_id );
 		$id = $this->create_plan( 'Delete guard' );
