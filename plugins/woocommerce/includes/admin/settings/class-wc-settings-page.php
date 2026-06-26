@@ -139,6 +139,13 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			}
 
 			$section = is_string( $current_section ) ? $current_section : '';
+
+			// The request context (and the registry it resolves) are autoloaded from src/; during the
+			// brief in-place-upgrade window they may not resolve yet, so skip gracefully instead of fataling.
+			if ( ! class_exists( SettingsUIRequestContext::class ) ) {
+				return $classes;
+			}
+
 			$context = SettingsUIRequestContext::for_settings_page( $this, $section );
 
 			if ( ! $context->is_rendering_enabled() ) {
@@ -360,9 +367,15 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			global $current_section;
 
 			$section = is_string( $current_section ) ? $current_section : '';
-			$context = SettingsUIRequestContext::for_settings_page( $this, $section );
 
-			if ( $context->is_rendering_enabled() ) {
+			// The request context (and the registry it resolves) are autoloaded from src/; during the
+			// brief in-place-upgrade window they may not resolve yet. Fall through to legacy rendering
+			// instead of fataling.
+			$context = class_exists( SettingsUIRequestContext::class )
+				? SettingsUIRequestContext::for_settings_page( $this, $section )
+				: null;
+
+			if ( $context && $context->is_rendering_enabled() ) {
 				$settings_ui_page = $context->get_settings_ui_page();
 				assert( $settings_ui_page instanceof SettingsUIPageInterface );
 
