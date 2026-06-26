@@ -295,28 +295,31 @@ final class PlansController extends WP_REST_Controller {
 
 		try {
 			$billing_policy = $this->associative_array( $billing_policy, 'billing_policy must be an object.' );
-			$group          = PlanGroup::create(
+			$plan_args      = array(
+				'name'           => $name,
+				'description'    => $this->nullable_string_param( $request, 'description' ),
+				'options'        => array(),
+				'billing_policy' => BillingPolicy::from_array( $billing_policy ),
+				'pricing_policy' => $this->pricing_policy_from_param( $request->get_param( 'pricing_policy' ), null ),
+				'category'       => $this->string_param( $request, 'category', Plan::DEFAULT_CATEGORY ),
+				'status'         => $this->string_param( $request, 'status', Plan::STATUS_ACTIVE ),
+				'sort_order'     => self::coerce_int( $request->get_param( 'sort_order' ) ),
+				'extension_slug' => $extension_slug,
+			);
+			Plan::create( 0, $plan_args );
+
+			$group    = PlanGroup::create(
 				array(
 					'name'            => $name,
 					'options_display' => array(),
 					'extension_slug'  => $extension_slug,
 				)
 			);
-			$group_id       = $this->plan_group_repository->insert( $group );
+			$group_id = $this->plan_group_repository->insert( $group );
 
 			$plan = Plan::create(
 				$group_id,
-				array(
-					'name'           => $name,
-					'description'    => $this->nullable_string_param( $request, 'description' ),
-					'options'        => array(),
-					'billing_policy' => BillingPolicy::from_array( $billing_policy ),
-					'pricing_policy' => $this->pricing_policy_from_param( $request->get_param( 'pricing_policy' ), null ),
-					'category'       => $this->string_param( $request, 'category', Plan::DEFAULT_CATEGORY ),
-					'status'         => $this->string_param( $request, 'status', Plan::STATUS_ACTIVE ),
-					'sort_order'     => self::coerce_int( $request->get_param( 'sort_order' ) ),
-					'extension_slug' => $extension_slug,
-				)
+				$plan_args
 			);
 			$this->plan_repository->insert( $plan );
 		} catch ( Throwable $e ) {
