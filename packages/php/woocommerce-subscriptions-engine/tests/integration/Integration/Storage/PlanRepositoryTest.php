@@ -278,6 +278,50 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( $second_id, $archived_id, $first_id ), array_map( static fn ( Plan $plan ): ?int => $plan->get_id(), $ordered ) );
 	}
 
+	/**
+	 * Search terms that previously looked like placeholders after LIKE wildcards.
+	 *
+	 * @return array<string, array<int, string>>
+	 */
+	public function prepare_specifier_search_terms_provider(): array {
+		return array(
+			'starts with s' => array( 'status-specifier-regression' ),
+			'starts with d' => array( 'daily-specifier-regression' ),
+			'starts with f' => array( 'fixed-specifier-regression' ),
+			'starts with F' => array( 'Featured-specifier-regression' ),
+			'starts with i' => array( 'intro-specifier-regression' ),
+		);
+	}
+
+	/**
+	 * @dataProvider prepare_specifier_search_terms_provider
+	 *
+	 * @param string $search Search term.
+	 */
+	public function test_query_search_terms_starting_with_prepare_specifiers( string $search ): void {
+		$group_id = $this->make_group();
+		$repo     = new PlanRepository();
+
+		$this->make_plan( $repo, $group_id, 'Unrelated prepare regression plan', 'lite' );
+		$expected_id = $this->make_plan( $repo, $group_id, $search . ' plan', 'lite' );
+
+		$query_args = array(
+			'extension_slug' => 'lite',
+			'status'         => Plan::STATUS_ACTIVE,
+			'search'         => $search,
+			'orderby'        => 'id',
+			'order'          => 'asc',
+			'limit'          => 10,
+			'offset'         => 0,
+		);
+		$plans      = $repo->query( $query_args );
+
+		$this->assertCount( 1, $plans );
+		$this->assertSame( $expected_id, $plans[0]->get_id() );
+
+		$this->assertSame( 1, $repo->count( $query_args ) );
+	}
+
 	public function test_invalid_extension_scopes_do_not_return_unscoped_results(): void {
 		$group_id = $this->make_group();
 		$repo     = new PlanRepository();
