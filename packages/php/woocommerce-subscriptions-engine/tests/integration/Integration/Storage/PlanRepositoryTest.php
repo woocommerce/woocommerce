@@ -34,6 +34,25 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		return ( new PlanGroupRepository() )->insert( $group );
 	}
 
+	private function make_plan( PlanRepository $repo, int $group_id, string $name, string $extension_slug, int $sort_order = 0 ): int {
+		return $repo->insert(
+			Plan::create(
+				$group_id,
+				array(
+					'name'           => $name,
+					'billing_policy' => BillingPolicy::from_array(
+						array(
+							'period'   => 'month',
+							'interval' => 1,
+						)
+					),
+					'extension_slug' => $extension_slug,
+					'sort_order'     => $sort_order,
+				)
+			)
+		);
+	}
+
 	public function test_plan_group_round_trips(): void {
 		$repo = new PlanGroupRepository();
 
@@ -257,6 +276,69 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		);
 
 		$this->assertSame( array( $second_id, $archived_id, $first_id ), array_map( static fn ( Plan $plan ): ?int => $plan->get_id(), $ordered ) );
+	}
+
+	public function test_invalid_extension_scopes_do_not_return_unscoped_results(): void {
+		$group_id = $this->make_group();
+		$repo     = new PlanRepository();
+
+		$id = $this->make_plan( $repo, $group_id, 'Scoped', 'lite' );
+
+		$this->assertInstanceOf( Plan::class, $repo->find( $id, 'any' ) );
+		// Test with extension_slugs array.
+		$this->assertCount( 1, $repo->query( array( 'extension_slugs' => array( 'any' ) ) ) );
+		$this->assertSame( 1, $repo->count( array( 'extension_slugs' => array( 'any' ) ) ) );
+		// Test with null extension_slugs.
+		$this->assertCount( 1, $repo->query( array( 'extension_slugs' => null ) ) );
+		$this->assertSame( 1, $repo->count( array( 'extension_slugs' => null ) ) );
+
+		// Empty string is ignored and treated as null/any in find().
+		$this->assertInstanceOf( Plan::class, $repo->find( $id, '' ) );
+
+		$this->assertNull( $repo->find( $id, 'bad slug' ) );
+		$this->assertCount( 0, $repo->query( array( 'extension_slug' => '' ) ) );
+		$this->assertSame( 0, $repo->count( array( 'extension_slug' => '' ) ) );
+		$this->assertCount( 0, $repo->query( array( 'extension_slugs' => array( 'lite', '' ) ) ) );
+		$this->assertCount( 0, $repo->query( array( 'extension_slugs' => array( 'bad slug' ) ) ) );
+	}
+
+	public function test_reorder_fails_before_updates_when_an_id_is_missing_or_outside_extension(): void {
+		$group_id = $this->make_group();
+		$repo     = new PlanRepository();
+
+		$first_id = $this->make_plan( $repo, $group_id, 'First', 'lite', 1 );
+		$other_id = $this->make_plan( $repo, $group_id, 'Other', 'other-extension', 2 );
+
+		$this->assertFalse(
+			$repo->reorder(
+				'lite',
+				array(
+					$first_id => 9,
+					999999    => 1,
+				)
+			)
+		);
+
+		$first = $repo->find( $first_id, 'lite' );
+		$this->assertInstanceOf( Plan::class, $first );
+		$this->assertSame( 1, $first->get_sort_order() );
+
+		$this->assertFalse(
+			$repo->reorder(
+				'lite',
+				array(
+					$first_id => 9,
+					$other_id => 1,
+				)
+			)
+		);
+
+		$first = $repo->find( $first_id, 'lite' );
+		$other = $repo->find( $other_id, 'other-extension' );
+		$this->assertInstanceOf( Plan::class, $first );
+		$this->assertInstanceOf( Plan::class, $other );
+		$this->assertSame( 1, $first->get_sort_order() );
+		$this->assertSame( 2, $other->get_sort_order() );
 	}
 
 	public function test_delete_removes_the_row(): void {

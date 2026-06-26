@@ -99,13 +99,24 @@ final class PlanRepository {
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ), ARRAY_A );
+		$extension_clause = '';
+		$params           = array( $id );
+		if ( self::is_valid_extension_slug( $extension_slug ) ) {
+			$extension_clause = ' AND extension_slug = %s';
+			$params[]         = $extension_slug;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$row = $wpdb->get_row(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d {$extension_clause}", $params ),
+			ARRAY_A
+		);
 
 		if ( null === $row ) {
 			return null;
 		}
-		if ( null !== $extension_slug && '' !== $extension_slug && $row['extension_slug'] !== $extension_slug ) {
+		if ( self::is_valid_extension_slug( $extension_slug ) && $row['extension_slug'] !== $extension_slug ) {
 			return null;
 		}
 
@@ -230,7 +241,7 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Persist manual sort-order values for plans. Extension
+	 * Persist manual sort-order values for plans in one extension.
 	 *
 	 * @param string          $extension_slug   Extension slug for the plans to operate on.
 	 * @param array<int, int> $sort_order_by_id Map of plan id => sort order.
@@ -239,10 +250,43 @@ final class PlanRepository {
 	public function reorder( string $extension_slug, array $sort_order_by_id ): bool {
 		global $wpdb;
 
+		if ( ! self::is_valid_extension_slug( $extension_slug ) ) {
+			return false;
+		}
+
+		if ( array() === $sort_order_by_id ) {
+			return true;
+		}
+
 		$ok  = true;
 		$now = gmdate( 'Y-m-d H:i:s' );
 
 		$plans_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+		$ids         = array_map( 'intval', array_keys( $sort_order_by_id ) );
+		foreach ( $ids as $id ) {
+			if ( $id <= 0 ) {
+				return false;
+			}
+		}
+
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+		$params       = array_merge( array( $extension_slug ), $ids );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
+		$matched_ids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$plans_table} WHERE extension_slug = %s AND id IN ({$placeholders})", $params ) );
+		$matched_ids = is_array( $matched_ids )
+			? array_unique(
+				array_map(
+					static function ( $matched_id ): int {
+						return self::coerce_int( $matched_id );
+					},
+					$matched_ids
+				)
+			)
+			: array();
+		if ( count( $matched_ids ) !== count( $ids ) ) {
+			return false;
+		}
 
 		foreach ( $sort_order_by_id as $id => $sort_order ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -279,23 +323,41 @@ final class PlanRepository {
 			$clauses[] = $wpdb->prepare( 'status = %s', $status );
 		}
 
-		$extension_slug = self::coerce_string( $args['extension_slug'] ?? null );
-		if ( '' !== $extension_slug ) {
-			$clauses[] = $wpdb->prepare( 'extension_slug = %s', $extension_slug );
+		if ( array_key_exists( 'extension_slug', $args ) ) {
+			if ( self::is_valid_extension_slug( $args['extension_slug'] ) ) {
+				$clauses[] = $wpdb->prepare( 'extension_slug = %s', $args['extension_slug'] );
+			} else {
+				$clauses[] = '0 = 1';
+			}
 		}
 
-		if ( isset( $args['extension_slugs'] ) && is_array( $args['extension_slugs'] ) ) {
-			$extension_slugs = array_values(
-				array_filter(
-					$args['extension_slugs'],
-					function ( $possible_slug ) {
-						return is_string( $possible_slug );
-					}
-				)
-			);
+		if ( array_key_exists( 'extension_slugs', $args ) && null !== $args['extension_slugs'] ) {
+			$are_extension_slugs_valid = false;
 
-			if ( array() !== $extension_slugs ) {
-				$clauses[] = $wpdb->prepare( 'extension_slug IN (' . implode( ',', array_fill( 0, count( $extension_slugs ), '%s' ) ) . ')', $extension_slugs );
+			if ( is_array( $args['extension_slugs'] ) ) {
+				if ( 1 === count( $args['extension_slugs'] ) && 'any' === reset( $args['extension_slugs'] ) ) {
+					$are_extension_slugs_valid = true;
+				} else {
+					$possible_slugs = array_values( $args['extension_slugs'] );
+					$valid_slugs    = array();
+					foreach ( $possible_slugs as $possible_slug ) {
+						if ( self::is_valid_extension_slug( $possible_slug ) && is_string( $possible_slug ) ) {
+							$valid_slugs[ $possible_slug ] = $possible_slug;
+						}
+					}
+
+					// Require all slugs to be valid before running the query.
+					if ( array() !== $valid_slugs && count( $valid_slugs ) === count( $possible_slugs ) ) {
+						$are_extension_slugs_valid = true;
+
+						$extension_slugs = array_values( $valid_slugs );
+						$clauses[]       = $wpdb->prepare( 'extension_slug IN (' . implode( ',', array_fill( 0, count( $extension_slugs ), '%s' ) ) . ')', $extension_slugs );
+					}
+				}
+			}
+
+			if ( ! $are_extension_slugs_valid ) {
+				$clauses[] = '0 = 1';
 			}
 		}
 
@@ -329,6 +391,21 @@ final class PlanRepository {
 		}
 
 		return "ORDER BY {$orderby} {$order}, id ASC";
+	}
+
+	/**
+	 * Whether a value is a valid concrete extension slug.
+	 *
+	 * @param mixed $slug Possible extension slug.
+	 */
+	private static function is_valid_extension_slug( $slug ): bool {
+		if ( ! is_string( $slug ) ) {
+			return false;
+		}
+		if ( '' === $slug || 'any' === $slug ) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
