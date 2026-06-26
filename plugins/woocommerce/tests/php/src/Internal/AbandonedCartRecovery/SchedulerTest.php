@@ -86,7 +86,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox init() registers the new-order, status-changed, trash, delete, and AS-callback hooks so a fresh container resolve wires the schedule + cancel + dispatch listeners in one place.
+	 * @testdox init() registers the new-order, update-order, status-changed, trash, delete, and AS-callback hooks so a fresh container resolve wires the schedule + cancel + dispatch listeners in one place.
 	 */
 	public function test_init_registers_hooks(): void {
 		// setUp() pre-registers ACTION_HOOK so the dispatch test works without
@@ -106,6 +106,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$this->sut->init();
 
 		$this->assertNotFalse( has_action( 'woocommerce_new_order', array( $this->sut, 'handle_new_order' ) ) );
+		$this->assertNotFalse( has_action( 'woocommerce_update_order', array( $this->sut, 'handle_order_update' ) ) );
 		$this->assertNotFalse( has_action( 'woocommerce_order_status_changed', array( $this->sut, 'handle_status_changed' ) ) );
 		$this->assertNotFalse( has_action( 'woocommerce_trash_order', array( $this->sut, 'handle_cancellation' ) ) );
 		$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->sut, 'handle_cancellation' ) ) );
@@ -334,6 +335,152 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox handle_order_update() schedules the AS action and records the scheduled-at meta for a checkout-draft order — the Blocks Store API path, where woocommerce_new_order never fires.
+	 */
+	public function test_handle_order_update_schedules_for_checkout_draft_order(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+
+		$this->sut->handle_order_update( $order->get_id() );
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertNotEmpty(
+			$fresh->get_meta( Scheduler::SCHEDULED_META_KEY ),
+			'Scheduled-at meta must be populated after handle_order_update() schedules a checkout-draft send.'
+		);
+		$this->assertNotFalse(
+			as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ),
+			'An AS action must be queued for the checkout-draft order.'
+		);
+	}
+
+	/**
+	 * @testdox handle_order_update() is a no-op for a non-draft order (e.g. pending) — those are scheduled by handle_new_order, so the update path must not also handle them.
+	 */
+	public function test_handle_order_update_skips_non_draft_status(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+
+		$this->sut->handle_order_update( $order->get_id() );
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertSame( '', $fresh->get_meta( Scheduler::SCHEDULED_META_KEY ) );
+		$this->assertFalse( as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+	}
+
+	/**
+	 * @testdox handle_order_update() does not schedule a checkout-draft order that has no billing email yet — avoids queuing an Action Scheduler job that would only bail at trigger time for lack of a recipient.
+	 */
+	public function test_handle_order_update_skips_checkout_draft_without_recipient(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->set_billing_email( '' );
+		$order->save();
+
+		$this->sut->handle_order_update( $order->get_id() );
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertSame( '', $fresh->get_meta( Scheduler::SCHEDULED_META_KEY ) );
+		$this->assertFalse( as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+	}
+
+	/**
+	 * @testdox handle_order_update() does not stack schedules: the Store API re-saves a draft many times, but the SCHEDULED_META_KEY guard leaves exactly one queued send.
+	 */
+	public function test_handle_order_update_is_idempotent(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+
+		// Simulate the Store API firing woocommerce_update_order several times as
+		// the customer works through checkout.
+		$this->sut->handle_order_update( $order->get_id() );
+		$first_when = (string) wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY );
+
+		$this->sut->handle_order_update( $order->get_id() );
+		$this->sut->handle_order_update( $order->get_id() );
+		$second_when = (string) wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY );
+
+		$this->assertSame( $first_when, $second_when, 'Repeated draft updates must not reschedule the send.' );
+
+		$scheduled = as_get_scheduled_actions(
+			array(
+				'hook' => Scheduler::ACTION_HOOK,
+				'args' => array( $order->get_id() ),
+			),
+			'ids'
+		);
+		$this->assertCount( 1, $scheduled, 'Repeated draft updates must leave exactly one scheduled action, not one per fire.' );
+	}
+
+	/**
+	 * @testdox A checkout-draft order scheduled via handle_order_update() is not re-scheduled when it later becomes pending and fires handle_new_order() — the two scheduling hooks share the SCHEDULED_META_KEY guard, so a draft promoted at the payment step keeps its single send.
+	 */
+	public function test_draft_then_pending_does_not_double_schedule(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+
+		$this->sut->handle_order_update( $order->get_id() );
+		$draft_when = (string) wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY );
+		$this->assertNotEmpty( $draft_when, 'Precondition: the checkout-draft order must be scheduled.' );
+
+		// Customer proceeds to payment: the draft is promoted to pending, which
+		// fires woocommerce_new_order → handle_new_order.
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$this->sut->handle_new_order( $order->get_id() );
+
+		$pending_when = (string) wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY );
+		$this->assertSame( $draft_when, $pending_when, 'The pending transition must not reschedule an already-scheduled draft.' );
+
+		$scheduled = as_get_scheduled_actions(
+			array(
+				'hook' => Scheduler::ACTION_HOOK,
+				'args' => array( $order->get_id() ),
+			),
+			'ids'
+		);
+		$this->assertCount( 1, $scheduled, 'A draft promoted to pending must still have exactly one scheduled send.' );
+	}
+
+	/**
+	 * @testdox A checkout-draft order re-saved through the live woocommerce_update_order path is scheduled — the wiring-level companion proving the Store API re-save (not just a direct method call) reaches the scheduler.
+	 */
+	public function test_checkout_draft_order_is_scheduled_through_live_woocommerce_update_order(): void {
+		// Park an order in checkout-draft the way the Blocks Store API does. Do
+		// this before wiring init() so the setup saves don't fire the scheduler.
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+
+		$this->assertSame(
+			'',
+			wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY ),
+			'Sanity: the draft must not be scheduled before the live hooks are wired.'
+		);
+
+		// Wire the production hooks, then reproduce the Store API re-saving the
+		// draft as the customer fills in checkout — a real save that fires
+		// woocommerce_update_order while the order is still checkout-draft.
+		$this->sut->init();
+		$order->set_billing_email( 'shopper@example.com' );
+		$order->save();
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertNotEmpty(
+			$fresh->get_meta( Scheduler::SCHEDULED_META_KEY ),
+			'A checkout-draft order re-saved through the live woocommerce_update_order path must be scheduled.'
+		);
+		$this->assertNotFalse(
+			as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ),
+			'The live update path must queue an AS action for the checkout-draft order.'
+		);
+	}
+
+	/**
 	 * @testdox handle_status_changed() cancels the pending send when the order transitions out of the abandoned set (e.g. pending → processing).
 	 */
 	public function test_handle_status_changed_cancels_on_exit_from_abandoned_set(): void {
@@ -347,7 +494,42 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox handle_status_changed() does nothing when the previous status was already outside `pending` — nothing to cancel.
+	 * @testdox handle_status_changed() cancels the queued send when a checkout-draft order leaves the abandoned set (checkout-draft → processing).
+	 */
+	public function test_handle_status_changed_cancels_when_checkout_draft_completes(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+		$this->sut->handle_order_update( $order->get_id() );
+		$this->assertNotEmpty(
+			wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY ),
+			'Precondition: the checkout-draft order must be scheduled before the transition.'
+		);
+
+		$this->sut->handle_status_changed( $order->get_id(), OrderStatus::CHECKOUT_DRAFT, OrderStatus::PROCESSING );
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertSame( '', $fresh->get_meta( Scheduler::SCHEDULED_META_KEY ) );
+		$this->assertFalse( as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+	}
+
+	/**
+	 * @testdox handle_status_changed() leaves the schedule alone on a transition within the abandoned set (pending → checkout-draft) so moving between classic and Blocks checkout keeps the queued nudge.
+	 */
+	public function test_handle_status_changed_leaves_schedule_within_abandoned_set(): void {
+		$order = $this->schedule_for_pending_order();
+
+		$this->sut->handle_status_changed( $order->get_id(), OrderStatus::PENDING, OrderStatus::CHECKOUT_DRAFT );
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertNotEmpty(
+			$fresh->get_meta( Scheduler::SCHEDULED_META_KEY ),
+			'In-set transitions must not cancel the queued send.'
+		);
+	}
+
+	/**
+	 * @testdox handle_status_changed() does nothing when the previous status was already outside the abandoned set — nothing to cancel.
 	 */
 	public function test_handle_status_changed_noop_when_old_status_already_outside_set(): void {
 		$order = OrderHelper::create_order();
