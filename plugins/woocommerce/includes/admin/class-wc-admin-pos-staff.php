@@ -52,6 +52,150 @@ class WC_Admin_POS_Staff {
 	public function __construct() {
 		add_action( 'admin_init', array( $this, 'actions' ) );
 		add_action( 'admin_head', array( $this, 'styles' ) );
+		add_action( 'all_admin_notices', array( $this, 'render_user_new_back_link' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_pick_user_cta' ), 20 );
+		add_filter( 'woocommerce_json_search_found_customers', array( $this, 'relabel_picker_search_results' ) );
+	}
+
+	/**
+	 * On the picker, relabel the submit button to "Edit staff" for existing staff.
+	 *
+	 * A picked user who already has POS access carries the "already staff" tag on
+	 * their search result, so the form will route them to their edit screen — flip
+	 * the CTA to match. Attached to wc-enhanced-select (which the picker's
+	 * customer-search field already depends on) so jQuery and select2 load first.
+	 *
+	 * @internal
+	 *
+	 * @since 11.0.0
+	 */
+	public function enqueue_pick_user_cta(): void {
+		if ( ! $this->is_pos_staff_settings_page() ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only screen check, no state change.
+		$edit_param = isset( $_GET['edit-staff'] ) ? sanitize_text_field( wp_unslash( $_GET['edit-staff'] ) ) : '';
+		if ( self::EDIT_PICK_USER !== $edit_param ) {
+			return;
+		}
+
+		wp_enqueue_script( 'wc-enhanced-select' );
+		wp_add_inline_script(
+			'wc-enhanced-select',
+			sprintf(
+				'jQuery( function( $ ) {
+					var picker = $( "#user_id" ), cta = $( "#pick_pos_staff" );
+					if ( ! picker.length || ! cta.length ) { return; }
+					var continueLabel = cta.val(), editLabel = %1$s, staffMarker = %2$s;
+					picker.on( "select2:select", function( e ) {
+						var text = ( e.params.data && e.params.data.text ) || "";
+						cta.val( staffMarker && -1 !== text.indexOf( staffMarker ) ? editLabel : continueLabel );
+					} );
+					picker.on( "select2:unselect select2:clear", function() {
+						cta.val( continueLabel );
+					} );
+				} );',
+				wp_json_encode( __( 'Edit staff', 'woocommerce' ) ),
+				wp_json_encode( esc_html__( 'Already POS staff', 'woocommerce' ) )
+			)
+		);
+	}
+
+	/**
+	 * Render a "Back to staff" link atop the Add-new-staff (user-new.php) screen.
+	 *
+	 * The Staff list deep-links to user-new.php?pos_staff=1 to create a POS-only
+	 * account, so give that core screen the same back affordance as the rest of
+	 * the POS staff pages. all_admin_notices outputs near the top of the admin
+	 * content area (above the page title) on every screen.
+	 *
+	 * @internal
+	 *
+	 * @since 11.0.0
+	 */
+	public function render_user_new_back_link(): void {
+		global $pagenow;
+
+		if ( 'user-new.php' !== $pagenow || ! self::is_enabled() ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only screen check, no state change.
+		$flag = isset( $_GET[ UserFormIntegration::REQUEST_FLAG_PARAM ] ) ? sanitize_text_field( wp_unslash( $_GET[ UserFormIntegration::REQUEST_FLAG_PARAM ] ) ) : '';
+		if ( '1' !== $flag ) {
+			return;
+		}
+
+		printf(
+			'<p class="wc-pos-staff-back-to-staff" style="margin:1.5em 0 0 2px;"><a href="%1$s" style="text-decoration:none;"><span class="dashicons dashicons-arrow-left-alt2" aria-hidden="true" style="vertical-align:middle;"></span> %2$s</a></p>',
+			esc_url( self::list_url() ),
+			esc_html__( 'Back to staff', 'woocommerce' )
+		);
+	}
+
+	/**
+	 * Re-label the picker's customer-search results and tag existing staff.
+	 *
+	 * WC's customer search labels users by billing name + customer email, both
+	 * empty for POS-only accounts (collapsing to "(#18 &ndash; )"). Scoped — by
+	 * the picker referer — to this screen only, rebuild each label from the
+	 * display name (falling back to login), drop the dash when there's no email,
+	 * and append an "Already POS staff" tag for users who already have access, so
+	 * both the dropdown and the chosen value make their status clear.
+	 *
+	 * @internal
+	 *
+	 * @param array<int|string, string> $found Found users keyed by ID.
+	 * @return array<int|string, string>
+	 */
+	public function relabel_picker_search_results( array $found ): array {
+		$referer = (string) wp_get_referer();
+		if (
+			false === strpos( $referer, 'section=staff' )
+			|| false === strpos( $referer, 'edit-staff=' . self::EDIT_PICK_USER )
+		) {
+			return $found;
+		}
+
+		// Plain text, not an HTML span: select2 renders the label as HTML in the
+		// dropdown but shows the chosen value's markup literally, so a tag would
+		// leak "<span ...>" into the selection.
+		$staff_tag = ' — ' . esc_html__( 'Already POS staff', 'woocommerce' );
+
+		$relabeled = array();
+		foreach ( $found as $id => $label ) {
+			$user = get_userdata( (int) $id );
+			if ( ! $user ) {
+				$relabeled[ $id ] = $label;
+				continue;
+			}
+
+			$name = '' !== trim( (string) $user->display_name ) ? $user->display_name : $user->user_login;
+
+			if ( '' !== trim( (string) $user->user_email ) ) {
+				$relabeled[ $id ] = sprintf(
+					/* translators: 1: user name, 2: user ID, 3: user email. */
+					esc_html__( '%1$s (#%2$d &ndash; %3$s)', 'woocommerce' ),
+					esc_html( $name ),
+					(int) $id,
+					esc_html( $user->user_email )
+				);
+			} else {
+				$relabeled[ $id ] = sprintf(
+					/* translators: 1: user name, 2: user ID. */
+					esc_html__( '%1$s (#%2$d)', 'woocommerce' ),
+					esc_html( $name ),
+					(int) $id
+				);
+			}
+
+			if ( POSCapabilities::has_pos_access( (int) $id ) ) {
+				$relabeled[ $id ] .= $staff_tag;
+			}
+		}
+
+		return $relabeled;
 	}
 
 	/**
@@ -127,24 +271,19 @@ class WC_Admin_POS_Staff {
 			),
 			admin_url( 'user-new.php' )
 		);
-		$grant_url = add_query_arg(
-			array(
-				'page'       => 'wc-settings',
-				'tab'        => 'point-of-sale',
-				'section'    => 'staff',
-				'edit-staff' => self::EDIT_PICK_USER,
-			),
-			admin_url( 'admin.php' )
-		);
+		$grant_url = self::list_url( array( 'edit-staff' => self::EDIT_PICK_USER ) );
 
+		// Use core's list-header pattern (as on Webhooks / REST API): a normal
+		// block <h2> with inline .page-title-action buttons. The standard top
+		// margin lines the heading up with the General sub-page's section title.
 		echo '<div class="wc-pos-staff-page">';
-		echo '<div class="wc-pos-staff-header">';
-		echo '<h2 class="wc-table-list-header">' . esc_html__( 'Staff', 'woocommerce' ) . '</h2>';
-		echo '<a href="' . esc_url( $add_url ) . '" class="page-title-action">'
-			. esc_html__( 'Add new staff', 'woocommerce' ) . '</a>';
-		echo '<a href="' . esc_url( $grant_url ) . '" class="page-title-action">'
-			. esc_html__( 'Grant access to existing user', 'woocommerce' ) . '</a>';
-		echo '</div>';
+		echo '<h2 class="wc-table-list-header">'
+			. esc_html__( 'Staff', 'woocommerce' )
+			. ' <a href="' . esc_url( $add_url ) . '" class="page-title-action">'
+			. esc_html__( 'Add new staff', 'woocommerce' ) . '</a>'
+			. ' <a href="' . esc_url( $grant_url ) . '" class="page-title-action">'
+			. esc_html__( 'Grant access to existing user', 'woocommerce' ) . '</a>'
+			. '</h2>';
 		echo '<p class="wc-pos-staff-description">';
 		esc_html_e( 'Assign a Point of Sale role to a user and set their PIN.', 'woocommerce' );
 		echo '</p>';
@@ -155,50 +294,19 @@ class WC_Admin_POS_Staff {
 	/**
 	 * Render the "Grant POS access to existing user" picker page.
 	 *
-	 * Fronts the regular edit screen: the admin picks a user via the
-	 * wc-customer-search autocomplete, the form POSTs back to this page, and
-	 * the action handler redirects them to ?edit-staff=<id> to finish setup.
+	 * Fronts the regular edit screen: the admin picks a user via the user-search
+	 * autocomplete, the form POSTs back to this page, and the action handler
+	 * redirects them to ?edit-staff=<id> to finish setup.
 	 *
 	 * @since 11.0.0
 	 */
 	private static function pick_user_output(): void {
-		$assigned_user_ids_csv = self::existing_staff_user_ids_csv();
-
-		$form_action_url = add_query_arg(
-			array(
-				'page'       => 'wc-settings',
-				'tab'        => 'point-of-sale',
-				'section'    => 'staff',
-				'edit-staff' => self::EDIT_PICK_USER,
-			),
-			admin_url( 'admin.php' )
-		);
+		$form_action_url = self::list_url( array( 'edit-staff' => self::EDIT_PICK_USER ) );
+		$list_url        = self::list_url();
 
 		echo '<div class="wc-pos-staff-page">';
 		include __DIR__ . '/settings/views/html-pos-staff-pick-user.php';
 		echo '</div>';
-	}
-
-	/**
-	 * CSV of user IDs that already have POS access.
-	 *
-	 * Fed to the wc-customer-search dropdown via its `data-exclude` attribute so
-	 * the AJAX search doesn't surface users we'd reject server-side anyway.
-	 *
-	 * @return string
-	 */
-	private static function existing_staff_user_ids_csv(): string {
-		$user_query = new \WP_User_Query(
-			array_merge(
-				POSCapabilities::pos_staff_user_query_args(),
-				array(
-					'fields' => 'ID',
-					'number' => -1,
-				)
-			)
-		);
-
-		return implode( ',', array_map( 'intval', $user_query->get_results() ) );
 	}
 
 	/**
@@ -235,6 +343,11 @@ class WC_Admin_POS_Staff {
 		if ( '' !== $retry_pos_preset && in_array( $retry_pos_preset, $assignable_pos_presets, true ) ) {
 			$current_pos_preset = $retry_pos_preset;
 		}
+
+		// Post back to the same edit URL so a failed save (e.g. PIN collision)
+		// re-renders the form pre-filled instead of bouncing to the list view.
+		$form_action_url = self::list_url( array( 'edit-staff' => $user_id ) );
+		$list_url        = self::list_url();
 
 		echo '<div class="wc-pos-staff-page">';
 		include __DIR__ . '/settings/views/html-pos-staff-edit.php';
@@ -300,17 +413,7 @@ class WC_Admin_POS_Staff {
 			return;
 		}
 
-		wp_safe_redirect(
-			add_query_arg(
-				array(
-					'page'       => 'wc-settings',
-					'tab'        => 'point-of-sale',
-					'section'    => 'staff',
-					'edit-staff' => $user_id,
-				),
-				admin_url( 'admin.php' )
-			)
-		);
+		wp_safe_redirect( self::list_redirect_url( array( 'edit-staff' => $user_id ) ) );
 		exit();
 	}
 
@@ -397,25 +500,38 @@ class WC_Admin_POS_Staff {
 	}
 
 	/**
+	 * Build the staff list URL, optionally with extra query args merged in.
+	 *
+	 * Single source of truth for the WooCommerce → Settings → Point of Sale →
+	 * Staff route, reused by the list redirect and by the edit/pick screens'
+	 * back, cancel, and form-action links so the route isn't hand-written in
+	 * several places.
+	 *
+	 * @param array<string, scalar> $extra Extra query args to merge in.
+	 * @return string
+	 */
+	private static function list_url( array $extra = array() ): string {
+		return add_query_arg(
+			array_merge(
+				array(
+					'page'    => 'wc-settings',
+					'tab'     => 'point-of-sale',
+					'section' => 'staff',
+				),
+				$extra
+			),
+			admin_url( 'admin.php' )
+		);
+	}
+
+	/**
 	 * Build a redirect URL back to the staff list with the given query args.
 	 *
 	 * @param array<string, scalar> $extra Extra query args to merge in.
 	 * @return string
 	 */
 	private static function list_redirect_url( array $extra = array() ): string {
-		return esc_url_raw(
-			add_query_arg(
-				array_merge(
-					array(
-						'page'    => 'wc-settings',
-						'tab'     => 'point-of-sale',
-						'section' => 'staff',
-					),
-					$extra
-				),
-				admin_url( 'admin.php' )
-			)
-		);
+		return esc_url_raw( self::list_url( $extra ) );
 	}
 
 	/**
@@ -449,20 +565,35 @@ class WC_Admin_POS_Staff {
 				padding: 0 !important;
 			}
 
-			.woocommerce .wc-pos-staff-page .wc-pos-staff-header {
-				display: flex;
-				align-items: baseline;
-				gap: 12px;
-				margin-bottom: 0.2em;
-			}
-
-			.woocommerce .wc-pos-staff-page .wc-pos-staff-header .wc-table-list-header {
-				margin: 0;
-			}
-
 			.woocommerce .wc-pos-staff-page .wc-pos-staff-description {
 				margin: 0 0 8px;
 				color: #50575e;
+			}
+
+			/*
+			Centre the action buttons on the heading text. Core only sets
+			vertical-align on .page-title-action in its mobile media query, so on
+			desktop they sit on the text baseline and 3px high; override both so
+			they line up with "Staff".
+			*/
+			.woocommerce .wc-pos-staff-page .wc-table-list-header .page-title-action {
+				vertical-align: middle;
+				top: 0;
+			}
+
+			/*
+			The User row's value is plain text, so it misses the label-centering
+			top padding WP 7.0 adds for tall inputs and floats above the label.
+			Push the value down to meet the label rather than moving the label,
+			which must stay aligned with the role/PIN labels below it.
+			*/
+			.woocommerce .wc-pos-staff-page #pos-staff-fields .wc-pos-staff-user-row td {
+				vertical-align: top;
+				padding-top: 20px;
+			}
+
+			.wc-wp-version-gte-70 .woocommerce .wc-pos-staff-page #pos-staff-fields .wc-pos-staff-user-row td {
+				padding-top: 25px;
 			}
 
 			.woocommerce .wc-pos-staff-page .column-pin_status {

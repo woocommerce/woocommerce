@@ -16,17 +16,17 @@ defined( 'ABSPATH' ) || exit;
 /*
  * Template variables passed from WC_Admin_POS_Staff::pick_user_output().
  *
- * @var string $assigned_user_ids_csv CSV of user IDs already assigned a POS preset.
- * @var string $form_action_url       Action URL to post the picker form back to.
+ * @var string $form_action_url Action URL to post the picker form back to.
+ * @var string $list_url        Staff list URL for the back + cancel links.
  */
 
-if ( ! isset( $assigned_user_ids_csv, $form_action_url ) ) {
+if ( ! isset( $form_action_url, $list_url ) ) {
 	return;
 }
 ?>
 
 <div id="pos-staff-fields" class="settings-panel">
-	<h2><?php esc_html_e( 'Grant POS access to existing user', 'woocommerce' ); ?></h2>
+	<?php wc_back_header( __( 'Grant POS access to existing user', 'woocommerce' ), __( 'Back to staff', 'woocommerce' ), $list_url ); ?>
 
 	<form method="post" action="<?php echo esc_url( $form_action_url ); ?>">
 		<table class="form-table" role="presentation">
@@ -42,12 +42,10 @@ if ( ! isset( $assigned_user_ids_csv, $form_action_url ) ) {
 							name="user_id"
 							style="width: 50%;"
 							data-placeholder="<?php esc_attr_e( 'Search by name, email, or login&hellip;', 'woocommerce' ); ?>"
-							data-allow_clear="true"
-							data-exclude="<?php echo esc_attr( $assigned_user_ids_csv ); ?>"
 							required>
 						</select>
 						<p class="description">
-							<?php esc_html_e( 'Continue to the next step to assign a POS role and set a PIN.', 'woocommerce' ); ?>
+							<?php esc_html_e( 'Continue to the next step to assign a POS role and set a PIN. Users who already have POS access are tagged in the results.', 'woocommerce' ); ?>
 						</p>
 					</td>
 				</tr>
@@ -57,7 +55,7 @@ if ( ! isset( $assigned_user_ids_csv, $form_action_url ) ) {
 		<?php wp_nonce_field( 'woocommerce-pos-staff-pick', 'woocommerce_pos_staff_pick_nonce' ); ?>
 		<p class="submit">
 			<?php submit_button( __( 'Continue', 'woocommerce' ), 'primary', 'pick_pos_staff', false ); ?>
-			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=point-of-sale&section=staff' ) ); ?>">
+			<a class="button" href="<?php echo esc_url( $list_url ); ?>">
 				<?php esc_html_e( 'Cancel', 'woocommerce' ); ?>
 			</a>
 		</p>
