@@ -347,13 +347,14 @@ final class PlansController extends WP_REST_Controller {
 		}
 
 		try {
+			$sync_group_name = null;
 			if ( $request->has_param( 'name' ) ) {
 				$name = $this->string_param( $request, 'name' );
 				if ( '' === $name ) {
 					return $this->invalid_error( __( 'Plan name is required.', 'woocommerce-subscriptions-engine' ) );
 				}
 				$plan->set_name( $name );
-				$this->sync_group_name( $plan, $name );
+				$sync_group_name = $name;
 			}
 
 			if ( $request->has_param( 'description' ) ) {
@@ -387,6 +388,9 @@ final class PlansController extends WP_REST_Controller {
 				$plan->set_sort_order( self::coerce_int( $request->get_param( 'sort_order' ) ) );
 			}
 
+			if ( null !== $sync_group_name ) {
+				$this->sync_group_name( $plan, $sync_group_name );
+			}
 			$this->plan_repository->update( $plan );
 		} catch ( Throwable $e ) {
 			return $this->invalid_error( $e->getMessage() );
