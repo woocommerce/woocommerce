@@ -169,6 +169,260 @@ function wc_rest_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
 }
 
 /**
+ * Action Scheduler callback to process pending product images.
+ *
+ * @since 11.0.0
+ * @param int $product_id Product ID.
+ */
+function wc_rest_process_pending_product_images( $product_id ) {
+	$product = wc_get_product( $product_id );
+	if ( ! $product ) {
+		delete_post_meta( $product_id, '_wc_rest_pending_images' );
+		return;
+	}
+
+	$pending = get_post_meta( $product_id, '_wc_rest_pending_images', true );
+	if ( ! is_array( $pending ) || empty( $pending['images'] ) ) {
+		return;
+	}
+
+	$images        = $pending['images'];
+	$gallery       = array();
+	$processed_ids = array();
+	$failed_srcs   = array();
+	$featured_set  = false;
+
+	foreach ( $images as $index => $image ) {
+		$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+		$is_new_upload = false;
+
+		if ( 0 === $attachment_id && isset( $image['src'] ) ) {
+			$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
+
+			if ( is_wp_error( $upload ) ) {
+				/**
+				 * Filters whether to suppress image upload errors in async REST API image processing.
+				 *
+				 * @since 11.0.0
+				 */
+				if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $product_id, $images ) ) {
+					$failed_srcs[] = array(
+						'src'   => $image['src'],
+						'error' => $upload->get_error_message(),
+					);
+				}
+				continue;
+			}
+
+			$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product_id );
+			$is_new_upload = true;
+		}
+
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+			$failed_srcs[] = array(
+				'src'   => isset( $image['src'] ) ? $image['src'] : '',
+				'error' => sprintf( '#%s is not a valid image.', $attachment_id ),
+			);
+			continue;
+		}
+
+		if ( $is_new_upload && $attachment_id > 0 ) {
+			$processed_ids[] = $attachment_id;
+		}
+
+		if ( 0 === $index ) {
+			$product->set_image_id( $attachment_id );
+			wc_product_attach_featured_image( $attachment_id, $product, false );
+			$featured_set = true;
+		} else {
+			$gallery[] = $attachment_id;
+		}
+
+		if ( ! empty( $image['alt'] ) ) {
+			update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
+		}
+		if ( ! empty( $image['name'] ) ) {
+			wp_update_post(
+				array(
+					'ID'         => $attachment_id,
+					'post_title' => $image['name'],
+				)
+			);
+		}
+	}
+
+	if ( $featured_set ) {
+		$product->set_gallery_image_ids( $gallery );
+	}
+
+	$product->save();
+
+	if ( ! empty( $failed_srcs ) ) {
+		update_post_meta( $product_id, '_wc_rest_image_processing_errors', $failed_srcs );
+	} else {
+		delete_post_meta( $product_id, '_wc_rest_image_processing_errors' );
+	}
+
+	delete_post_meta( $product_id, '_wc_rest_pending_images' );
+
+	/**
+	 * Fires after async product images have been processed.
+	 *
+	 * @since 11.0.0
+	 * @param int   $product_id    Product ID.
+	 * @param array $processed_ids IDs of attachments that were created.
+	 * @param array $failed_srcs   Images that failed to process, with src and error.
+	 */
+	do_action( 'woocommerce_rest_api_async_images_processed', $product_id, $processed_ids, $failed_srcs );
+}
+
+/**
+ * Action Scheduler callback to process a pending variation image.
+ *
+ * @since 11.0.0
+ * @param int $variation_id Variation ID.
+ */
+function wc_rest_process_pending_variation_image( $variation_id ) {
+	$variation = wc_get_product( $variation_id );
+	if ( ! $variation ) {
+		delete_post_meta( $variation_id, '_wc_rest_pending_image' );
+		return;
+	}
+
+	$pending = get_post_meta( $variation_id, '_wc_rest_pending_image', true );
+	if ( ! is_array( $pending ) ) {
+		return;
+	}
+
+	$errors  = array();
+	$success = false;
+
+	if ( isset( $pending['src'] ) ) {
+		$upload = wc_rest_upload_image_from_url( esc_url_raw( $pending['src'] ) );
+		if ( is_wp_error( $upload ) ) {
+			$errors[] = array(
+				'src'   => $pending['src'],
+				'error' => $upload->get_error_message(),
+			);
+		} else {
+			$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $variation_id );
+			if ( $attachment_id && wp_attachment_is_image( $attachment_id ) ) {
+				$variation->set_image_id( $attachment_id );
+				$variation->save();
+				$success = true;
+			}
+		}
+	} elseif ( isset( $pending['id'] ) ) {
+		$attachment_id = absint( $pending['id'] );
+		if ( wp_attachment_is_image( $attachment_id ) ) {
+			$variation->set_image_id( $attachment_id );
+			$variation->save();
+			$success = true;
+		} else {
+			$errors[] = array(
+				'id'    => $pending['id'],
+				'error' => sprintf( '#%s is not a valid image.', $attachment_id ),
+			);
+		}
+	}
+
+	if ( ! empty( $errors ) ) {
+		update_post_meta( $variation_id, '_wc_rest_image_processing_errors', $errors );
+	} else {
+		delete_post_meta( $variation_id, '_wc_rest_image_processing_errors' );
+	}
+
+	delete_post_meta( $variation_id, '_wc_rest_pending_image' );
+}
+
+/**
+ * Action Scheduler callback to process a pending category image.
+ *
+ * @since 11.0.0
+ * @param int $term_id Term ID.
+ */
+function wc_rest_process_pending_category_image( $term_id ) {
+	$pending = get_term_meta( $term_id, '_wc_rest_pending_image', true );
+	if ( ! is_array( $pending ) ) {
+		return;
+	}
+
+	$errors  = array();
+	$success = false;
+
+	if ( isset( $pending['src'] ) ) {
+		$upload = wc_rest_upload_image_from_url( esc_url_raw( $pending['src'] ) );
+		if ( is_wp_error( $upload ) ) {
+			$errors[] = array(
+				'src'   => $pending['src'],
+				'error' => $upload->get_error_message(),
+			);
+		} else {
+			$image_id = wc_rest_set_uploaded_image_as_attachment( $upload );
+			if ( $image_id && wp_attachment_is_image( $image_id ) ) {
+				update_term_meta( $term_id, 'thumbnail_id', $image_id );
+				if ( ! empty( $pending['alt'] ) ) {
+					update_post_meta( $image_id, '_wp_attachment_image_alt', wc_clean( $pending['alt'] ) );
+				}
+				if ( ! empty( $pending['name'] ) ) {
+					wp_update_post(
+						array(
+							'ID'         => $image_id,
+							'post_title' => wc_clean( $pending['name'] ),
+						)
+					);
+				}
+				$success = true;
+			}
+		}
+	} elseif ( isset( $pending['id'] ) ) {
+		$image_id = absint( $pending['id'] );
+		if ( wp_attachment_is_image( $image_id ) ) {
+			update_term_meta( $term_id, 'thumbnail_id', $image_id );
+			if ( ! empty( $pending['alt'] ) ) {
+				update_post_meta( $image_id, '_wp_attachment_image_alt', wc_clean( $pending['alt'] ) );
+			}
+			if ( ! empty( $pending['name'] ) ) {
+				wp_update_post(
+					array(
+						'ID'         => $image_id,
+						'post_title' => wc_clean( $pending['name'] ),
+					)
+				);
+			}
+			$success = true;
+		} else {
+			$errors[] = array(
+				'id'    => $pending['id'],
+				'error' => sprintf( '#%s is not a valid image.', $image_id ),
+			);
+		}
+	}
+
+	if ( ! empty( $errors ) ) {
+		update_term_meta( $term_id, '_wc_rest_image_processing_errors', $errors );
+	} else {
+		delete_term_meta( $term_id, '_wc_rest_image_processing_errors' );
+	}
+
+	delete_term_meta( $term_id, '_wc_rest_pending_image' );
+}
+
+/**
+ * Schedule async image processing for a product via Action Scheduler.
+ *
+ * @since 11.0.0
+ * @param int $product_id Product ID.
+ * @return false|int Scheduled action ID or false if AS not available.
+ */
+function wc_rest_schedule_async_image_processing( $product_id ) {
+	if ( ! function_exists( 'as_schedule_single_action' ) ) {
+		return false;
+	}
+	return as_schedule_single_action( time(), 'wc_rest_process_pending_product_images', array( $product_id ), 'woocommerce-rest-api-images' );
+}
+
+/**
  * Validate reports request arguments.
  *
  * @since 2.6.0
@@ -458,3 +712,8 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
 	 */
 	return apply_filters( 'wc_rest_should_load_namespace', str_starts_with( $rest_route, $ns ), $ns, $rest_route, $known_namespaces );
 }
+
+// Action Scheduler hooks for async image processing.
+add_action( 'wc_rest_process_pending_product_images', 'wc_rest_process_pending_product_images', 10, 1 );
+add_action( 'wc_rest_process_pending_variation_image', 'wc_rest_process_pending_variation_image', 10, 1 );
+add_action( 'wc_rest_process_pending_category_image', 'wc_rest_process_pending_category_image', 10, 1 );

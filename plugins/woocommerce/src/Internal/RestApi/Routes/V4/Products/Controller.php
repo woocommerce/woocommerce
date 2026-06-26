@@ -123,6 +123,13 @@ class Controller extends WC_REST_Products_V2_Controller {
 	private $processed_attachment_ids_for_request = array();
 
 	/**
+	 * Pending images for async processing via Action Scheduler.
+	 *
+	 * @var array
+	 */
+	private $pending_async_images = array();
+
+	/**
 	 * Register the routes for products.
 	 */
 	public function register_routes() {
@@ -1412,7 +1419,14 @@ class Controller extends WC_REST_Products_V2_Controller {
 
 		// Check for featured/gallery images, upload it and set it.
 		if ( isset( $request['images'] ) ) {
-			$product = $this->set_product_images( $product, $request['images'] );
+			if ( ! empty( $request['images_async'] ) && ! empty( $request['images'] ) ) {
+				// Both CREATE and UPDATE: buffer for scheduling after save.
+				$this->pending_async_images = $request['images'];
+				$product->set_image_id( '' );
+				$product->set_gallery_image_ids( array() );
+			} else {
+				$product = $this->set_product_images( $product, $request['images'] );
+			}
 		}
 
 		// Allow set meta_data.
@@ -1983,6 +1997,18 @@ class Controller extends WC_REST_Products_V2_Controller {
 							),
 						),
 					),
+				),
+				'images_processing'     => array(
+					'description' => __( 'Whether product images are being processed asynchronously.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'images_async'          => array(
+					'description' => __( 'Process images asynchronously via Action Scheduler instead of during the request.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'default'     => false,
+					'context'     => array( 'edit' ),
 				),
 				'has_options'           => array(
 					'description' => __( 'Shows if the product needs to be configured before it can be bought.', 'woocommerce' ),
@@ -2571,6 +2597,11 @@ class Controller extends WC_REST_Products_V2_Controller {
 			$this->add_cogs_info_to_returned_product_data( $data, $object_data );
 		}
 
+		$pending = get_post_meta( $object_data->get_id(), '_wc_rest_pending_images', true );
+		if ( is_array( $pending ) && ! empty( $pending ) ) {
+			$data['images_processing'] = true;
+		}
+
 		$data['add_to_cart'] = array(
 			'url'         => $object_data->add_to_cart_url(),
 			'description' => $object_data->add_to_cart_description(),
@@ -2608,9 +2639,60 @@ class Controller extends WC_REST_Products_V2_Controller {
 					wp_delete_attachment( (int) $attachment_id, true );
 				}
 			}
+		} elseif ( ! empty( $this->pending_async_images ) && ! empty( $response->data ) ) {
+			$product_id = $response->data['id'];
+			update_post_meta( $product_id, '_wc_rest_pending_images', array( 'images' => $this->pending_async_images ) );
+			$scheduled = wc_rest_schedule_async_image_processing( $product_id );
+			if ( false !== $scheduled ) {
+				$response->data['images']            = array();
+				$response->data['images_processing'] = true;
+			} else {
+				// Fallback: process images synchronously when Action Scheduler is unavailable.
+				delete_post_meta( $product_id, '_wc_rest_pending_images' );
+				$product = wc_get_product( $product_id );
+				if ( $product instanceof \WC_Product ) {
+					$product = $this->set_product_images( $product, $this->pending_async_images );
+					$product->save();
+				}
+			}
 		}
 
 		$this->processed_attachment_ids_for_request = array();
+		$this->pending_async_images                 = array();
+
+		return $response;
+	}
+
+	/**
+	 * Update a single item.
+	 * Handles async image scheduling after successful update.
+	 *
+	 * @since 11.0.0
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function update_item( $request ) {
+		$response = parent::update_item( $request );
+
+		if ( ! is_wp_error( $response ) && ! empty( $this->pending_async_images ) && ! empty( $response->data ) ) {
+			$product_id = $response->data['id'];
+			update_post_meta( $product_id, '_wc_rest_pending_images', array( 'images' => $this->pending_async_images ) );
+			$scheduled = wc_rest_schedule_async_image_processing( $product_id );
+			if ( false !== $scheduled ) {
+				$response->data['images']            = array();
+				$response->data['images_processing'] = true;
+			} else {
+				// Fallback: process images synchronously when Action Scheduler is unavailable.
+				delete_post_meta( $product_id, '_wc_rest_pending_images' );
+				$product = wc_get_product( $product_id );
+				if ( $product instanceof \WC_Product ) {
+					$product = $this->set_product_images( $product, $this->pending_async_images );
+					$product->save();
+				}
+			}
+		}
+
+		$this->pending_async_images = array();
 
 		return $response;
 	}

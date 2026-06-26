@@ -45,6 +45,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	private $exclude_status = array();
 
 	/**
+	 * Pending image for async processing via Action Scheduler.
+	 *
+	 * @var array|null
+	 */
+	private $pending_async_image = null;
+
+	/**
 	 * Register the routes for products.
 	 */
 	public function register_routes() {
@@ -175,6 +182,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			$this->add_cogs_info_to_returned_product_data( $data, $object );
 		}
 
+		$pending = get_post_meta( $object->get_id(), '_wc_rest_pending_image', true );
+		if ( is_array( $pending ) && ! empty( $pending ) ) {
+			$data['images_processing'] = true;
+		}
+
 		$response = rest_ensure_response( $data );
 		$response->add_links( $this->prepare_links( $object, $request ) );
 
@@ -227,7 +239,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Thumbnail.
 		if ( isset( $request['image'] ) ) {
 			if ( is_array( $request['image'] ) ) {
-				$variation = $this->set_variation_image( $variation, $request['image'] );
+				if ( ! empty( $request['image_async'] ) ) {
+					// Both CREATE and UPDATE: buffer for scheduling after save.
+					$this->pending_async_image = $request['image'];
+					$variation->set_image_id( '' );
+				} else {
+					$variation = $this->set_variation_image( $variation, $request['image'] );
+				}
 			} else {
 				$variation->set_image_id( '' );
 			}
@@ -863,6 +881,18 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 						),
 					),
 				),
+				'images_processing'     => array(
+					'description' => __( 'Whether variation image is being processed asynchronously.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'image_async'           => array(
+					'description' => __( 'Process image asynchronously via Action Scheduler instead of during the request.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'default'     => false,
+					'context'     => array( 'edit' ),
+				),
 				'gallery_image_ids'     => array(
 					'description' => __( 'Variation gallery image IDs, excluding the featured image (which is set via "image"). Mirrors how galleries work on parent products.', 'woocommerce' ),
 					'type'        => 'array',
@@ -1391,5 +1421,73 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		}
 
 		return $where;
+	}
+
+	/**
+	 * Create a single variation.
+	 * Handles async image scheduling when image_async is set.
+	 *
+	 * @since 11.0.0
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function create_item( $request ) {
+		$response = parent::create_item( $request );
+
+		if ( ! is_wp_error( $response ) && ! is_null( $this->pending_async_image ) && ! empty( $response->data ) ) {
+			$variation_id = $response->data['id'];
+			update_post_meta( $variation_id, '_wc_rest_pending_image', $this->pending_async_image );
+			if ( function_exists( 'as_schedule_single_action' ) ) {
+				as_schedule_single_action( time(), 'wc_rest_process_pending_variation_image', array( $variation_id ), 'woocommerce-rest-api-images' );
+				$response->data['image']             = array();
+				$response->data['images_processing'] = true;
+			} else {
+				// Fallback: process image synchronously when Action Scheduler is unavailable.
+				delete_post_meta( $variation_id, '_wc_rest_pending_image' );
+				$variation = wc_get_product( $variation_id );
+				if ( $variation instanceof \WC_Product_Variation ) {
+					$variation = $this->set_variation_image( $variation, $this->pending_async_image );
+					$variation->save();
+				}
+			}
+		}
+
+		$this->pending_async_image = null;
+
+		return $response;
+	}
+
+	/**
+	 * Update a single variation.
+	 * Handles async image scheduling when image_async is set.
+	 *
+	 * @since 11.0.0
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function update_item( $request ) {
+		$response = parent::update_item( $request );
+
+		if ( ! is_wp_error( $response ) && ! is_null( $this->pending_async_image ) && ! empty( $response->data ) ) {
+			$variation_id = $response->data['id'];
+			update_post_meta( $variation_id, '_wc_rest_pending_image', $this->pending_async_image );
+			if ( function_exists( 'as_schedule_single_action' ) ) {
+				as_schedule_single_action( time(), 'wc_rest_process_pending_variation_image', array( $variation_id ), 'woocommerce-rest-api-images' );
+				$response->data['image']             = array();
+				$response->data['images_processing'] = true;
+			} else {
+				// Fallback: process image synchronously when Action Scheduler is unavailable.
+				delete_post_meta( $variation_id, '_wc_rest_pending_image' );
+				$variation = wc_get_product( $variation_id );
+				if ( $variation instanceof \WC_Product_Variation ) {
+					$variation = $this->set_variation_image( $variation, $this->pending_async_image );
+					$variation->save();
+				}
+			}
+		}
+
+		$this->pending_async_image = null;
+
+		return $response;
 	}
 }

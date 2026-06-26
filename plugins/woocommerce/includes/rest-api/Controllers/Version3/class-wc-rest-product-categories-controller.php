@@ -68,6 +68,11 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 			);
 		}
 
+		$pending = get_term_meta( $item->term_id, '_wc_rest_pending_image', true );
+		if ( is_array( $pending ) && ! empty( $pending ) ) {
+			$data['images_processing'] = true;
+		}
+
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
 		$data    = $this->filter_response_by_context( $data, $context );
@@ -193,6 +198,18 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 						),
 					),
 				),
+				'images_processing' => array(
+					'description' => __( 'Whether category image is being processed asynchronously.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'images_async' => array(
+					'description' => __( 'Process image asynchronously via Action Scheduler instead of during the request.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'default'     => false,
+					'context'     => array( 'edit' ),
+				),
 				'menu_order'  => array(
 					'description' => __( 'Menu order, used to custom sort the resource.', 'woocommerce' ),
 					'type'        => 'integer',
@@ -231,6 +248,15 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 		}
 
 		if ( isset( $request['image'] ) ) {
+			if ( ! empty( $request['images_async'] ) ) {
+				update_term_meta( $id, '_wc_rest_pending_image', $request['image'] );
+				if ( function_exists( 'as_schedule_single_action' ) ) {
+					as_schedule_single_action( time(), 'wc_rest_process_pending_category_image', array( $id ), 'woocommerce-rest-api-images' );
+					return true;
+				}
+				// Fallback: fall through to synchronous image handling below.
+			}
+
 			if ( empty( $request['image']['id'] ) && ! empty( $request['image']['src'] ) ) {
 				$upload = wc_rest_upload_image_from_url( esc_url_raw( $request['image']['src'] ) );
 
