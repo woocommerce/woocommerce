@@ -279,9 +279,17 @@ is the double round-trip the right trade for the cart, or do we invest in avoidi
 extensions move off the PHP hooks over time? Avoiding the navigate is real work and changes the
 extensibility story.
 
-**Extension surface and risk.** The cart has a large hook/filter surface and this approach keeps all
-of it; we've only tested on a clean store. We still need to see how it behaves on a store with many
-extensions, where the risk is higher (conflicting hooks, markup assumptions, notices).
+Note on the hook surface: dropping the PHP refetch means we'd have to account for far more hooks than
+the Cart/Checkout blocks support today — re-supporting every existing cart hook at the
+iAPI level is a large effort. Team Billow has started scoping a **curated list of extensibility
+points** instead; that's a smaller, more tractable scope than blanket hook support, and it's the path
+that would let us drop the refetch without trying to preserve the full hook surface. This direction
+looks more promising than re-rendering server HTML on every change.
+
+**Extension surface and risk (not fully tested).** The cart has a large hook/filter surface and this
+approach keeps all of it. The impact on extensions was not fully tested: only basic interaction
+(Points and Rewards) on an otherwise clean store. We still need extensive testing on a store with
+many extensions, where the risk is higher (conflicting hooks, markup assumptions, notices).
 
 **Where the classic-cart behavior lives.** Some functionality the classic cart needs is missing from
 the shared `woocommerce` store (shipping rate, customer address, undo/restore); we kept it in a
