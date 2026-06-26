@@ -232,6 +232,38 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'woocommerce-subscriptions-test', $second_data['extension_slug'] );
 	}
 
+	public function test_list_can_order_by_status(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$active_before = $this->create_plan( 'Active before' );
+		$archived      = $this->create_plan( 'Archived' );
+		$active_after  = $this->create_plan( 'Active after' );
+
+		$archived_response = $this->request(
+			'PATCH',
+			self::BASE . '/' . $archived,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'status'         => Plan::STATUS_ARCHIVED,
+			)
+		);
+		$this->assertSame( 200, $archived_response->get_status() );
+
+		$list = $this->request(
+			'GET',
+			self::BASE,
+			array(),
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'orderby'        => 'status',
+				'order'          => 'desc',
+			)
+		);
+
+		$this->assertSame( 200, $list->get_status() );
+		$this->assertSame( array( $archived, $active_before, $active_after ), $this->response_ids( $list ) );
+	}
+
 	public function test_single_plan_routes_reject_wildcard_and_list_extension_slugs(): void {
 		wp_set_current_user( $this->admin_id );
 
@@ -414,6 +446,22 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertIsArray( $data );
 
 		return $data;
+	}
+
+	/**
+	 * Get response item ids.
+	 *
+	 * @param WP_REST_Response $response Response.
+	 * @return array<int, int>
+	 */
+	private function response_ids( WP_REST_Response $response ): array {
+		$ids = array();
+		foreach ( $this->response_data( $response ) as $row ) {
+			$this->assertIsArray( $row );
+			$ids[] = $this->int_value( $row, 'id' );
+		}
+
+		return $ids;
 	}
 
 	/**
