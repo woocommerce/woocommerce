@@ -691,7 +691,10 @@ class ProductCollectionPage {
 			`.woocommerce-product-${ taxonomy }`
 		);
 		await taxonomyContainer.waitFor();
-		await taxonomyContainer.getByText( term, { exact: true } ).check();
+		await taxonomyContainer
+			.getByRole( 'checkbox', { name: term } )
+			.first()
+			.click();
 		await this.refreshLocators( 'editor' );
 	}
 
@@ -707,7 +710,11 @@ class ProductCollectionPage {
 			`.woocommerce-product-${ taxonomy }`
 		);
 		await taxonomyContainer.waitFor();
-		await taxonomyContainer.getByText( term, { exact: true } ).uncheck();
+
+		await taxonomyContainer
+			.getByRole( 'checkbox', { name: term } )
+			.first()
+			.click();
 		await this.refreshLocators( 'editor' );
 	}
 

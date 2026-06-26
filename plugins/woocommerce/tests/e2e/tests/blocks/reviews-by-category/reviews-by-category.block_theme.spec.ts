@@ -30,12 +30,14 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		page,
 		editor,
 	} ) => {
-		const categoryCheckbox = editor.canvas.getByRole( 'checkbox', {
+		const blockLocator = await editor.getBlockByName( BLOCK_NAME );
+		const categoryCheckbox = blockLocator.getByRole( 'checkbox', {
 			name: 'Clothing',
+			exact: true,
 		} );
 		await categoryCheckbox.check();
 		await expect( categoryCheckbox ).toBeChecked();
-		const doneButton = editor.canvas.getByRole( 'button', {
+		const doneButton = blockLocator.getByRole( 'button', {
 			name: 'Done',
 		} );
 		await doneButton.click();
