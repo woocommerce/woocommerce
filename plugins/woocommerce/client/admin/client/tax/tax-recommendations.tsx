@@ -7,7 +7,7 @@ import { Children, useEffect, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Text } from '@woocommerce/experimental';
 import { PluginNames, pluginsStore, settingsStore } from '@woocommerce/data';
-import { getAdminLink, getSetting } from '@woocommerce/settings';
+import { getAdminLink } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -23,6 +23,7 @@ import {
 import { supportsWooCommerceTax } from '../task-lists/fills/tax/utils';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
 import { getCountryCode } from '~/dashboard/utils';
+import { getAdminSetting } from '~/utils/admin-settings';
 import './tax-recommendations.scss';
 
 const ANROK_LOGO_URL = 'https://ps.w.org/anrok-tax/assets/icon.svg';
@@ -210,7 +211,7 @@ const TaxRecommendationsList = ( {
 	children: React.ReactNode;
 } ) => {
 	const [ isDismissed, setIsDismissed ] = useState< boolean >(
-		getSetting( 'taxRecommendationsHidden', false )
+		getAdminSetting( 'taxRecommendationsHidden', false )
 	);
 
 	const handleDismiss = () => {
