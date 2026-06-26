@@ -9,7 +9,6 @@ import { Text } from '@woocommerce/experimental';
 import { PluginNames, pluginsStore, settingsStore } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
-import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -24,6 +23,7 @@ import { supportsWooCommerceTax } from '../task-lists/fills/tax/utils';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
 import { getCountryCode } from '~/dashboard/utils';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { useEndpointDismiss } from '~/hooks/use-endpoint-dismiss';
 import './tax-recommendations.scss';
 
 const ANROK_LOGO_URL = 'https://ps.w.org/anrok-tax/assets/icon.svg';
@@ -210,28 +210,17 @@ const TaxRecommendationsList = ( {
 }: {
 	children: React.ReactNode;
 } ) => {
-	const [ isDismissed, setIsDismissed ] = useState< boolean >(
+	const { isDismissed, onDismiss } = useEndpointDismiss(
+		'/wc-admin/tax/recommendations/dismiss',
 		getAdminSetting( 'taxRecommendationsHidden', false )
 	);
-
-	const handleDismiss = () => {
-		// Optimistically hide the card, then persist the dismissal site-wide.
-		setIsDismissed( true );
-		apiFetch( {
-			path: '/wc-admin/tax/recommendations/dismiss',
-			method: 'POST',
-		} ).catch( () => {
-			// Restore the card if the request fails so the state stays accurate.
-			setIsDismissed( false );
-		} );
-	};
 
 	return (
 		<DismissableList
 			className="woocommerce-recommended-tax-extensions"
 			isDismissed={ isDismissed }
 		>
-			<DismissableListHeading onDismiss={ handleDismiss }>
+			<DismissableListHeading onDismiss={ onDismiss }>
 				<Text variant="title.small" as="p" size="20" lineHeight="28px">
 					{ __( 'Recommended tax solutions', 'woocommerce' ) }
 				</Text>

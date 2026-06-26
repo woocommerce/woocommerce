@@ -76,10 +76,22 @@ class TaxSettingsRecommendations {
 	 * Persist the dismissal of the recommended tax solutions card.
 	 *
 	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
-	 * @return \WP_REST_Response
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function dismiss( \WP_REST_Request $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found, Squiz.Commenting.FunctionComment.IncorrectTypeHint
-		update_option( self::DISMISSED_OPTION_NAME, 'yes' );
+		// Already dismissed: update_option() returns false when the value is
+		// unchanged, which is not a failure, so report success directly.
+		if ( 'yes' === get_option( self::DISMISSED_OPTION_NAME ) ) {
+			return new \WP_REST_Response( array( 'dismissed' => true ), 200 );
+		}
+
+		if ( ! update_option( self::DISMISSED_OPTION_NAME, 'yes' ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_tax_recommendations_dismiss_failed',
+				__( 'The dismissal could not be saved.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
 
 		return new \WP_REST_Response( array( 'dismissed' => true ), 200 );
 	}

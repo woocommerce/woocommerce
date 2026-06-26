@@ -1,12 +1,9 @@
 /**
  * External dependencies
  */
-import { useDispatch, useSelect } from '@wordpress/data';
 import { Button, Card, CardHeader } from '@wordpress/components';
-import { optionsStore } from '@woocommerce/data';
 import { EllipsisMenu } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
-import { createContext, useContext } from '@wordpress/element';
 import clsx from 'clsx';
 
 /**
@@ -14,9 +11,14 @@ import clsx from 'clsx';
  */
 import './dismissable-list.scss';
 
-// using a context provider for the option name so that the option name prop doesn't need to be passed to the `DismissableListHeading` too
-const OptionNameContext = createContext( '' );
-
+/**
+ * Presentational heading for a {@link DismissableList}. Renders the card header
+ * and an ellipsis menu with a "Hide this" action that invokes `onDismiss`.
+ *
+ * Persistence is intentionally not handled here — the parent owns the dismissal
+ * state and supplies `onDismiss` (typically from a dismiss hook such as
+ * `useOptionDismiss` or `useEndpointDismiss`).
+ */
 export const DismissableListHeading = ( {
 	onDismiss = () => null,
 	children,
@@ -24,20 +26,6 @@ export const DismissableListHeading = ( {
 	children: React.ReactNode;
 	onDismiss?: () => void;
 } ) => {
-	const { updateOptions } = useDispatch( optionsStore );
-	const dismissOptionName = useContext( OptionNameContext );
-
-	const handleDismissClick = () => {
-		onDismiss();
-		// Persist via the legacy Options API only in option-backed mode. In
-		// controlled mode (no option name) the parent handles persistence.
-		if ( dismissOptionName ) {
-			updateOptions( {
-				[ dismissOptionName ]: 'yes',
-			} );
-		}
-	};
-
 	return (
 		<CardHeader>
 			<div className="woocommerce-dismissable-list__header">
@@ -48,7 +36,7 @@ export const DismissableListHeading = ( {
 					label={ __( 'Task List Options', 'woocommerce' ) }
 					renderContent={ () => (
 						<div className="woocommerce-dismissable-list__controls">
-							<Button onClick={ handleDismissClick }>
+							<Button onClick={ onDismiss }>
 								{ __( 'Hide this', 'woocommerce' ) }
 							</Button>
 						</div>
@@ -59,47 +47,27 @@ export const DismissableListHeading = ( {
 	);
 };
 
+/**
+ * Pure UI wrapper for a dismissable recommendation card. Renders nothing when
+ * `isDismissed` is true, otherwise wraps `children` in a `Card`.
+ *
+ * This component holds no persistence logic. Callers manage the dismissal state
+ * with a hook and pass the resulting `isDismissed` here and `onDismiss` to the
+ * nested {@link DismissableListHeading}.
+ */
 export const DismissableList = ( {
 	children,
 	className,
-	dismissOptionName,
 	isDismissed,
 }: {
 	children: React.ReactNode;
 	className?: string;
 	/**
-	 * Legacy Options API option name used to persist the dismissal. Omit when
-	 * the parent controls dismissal (e.g. via a dedicated endpoint) and pass
-	 * `isDismissed` instead.
-	 */
-	dismissOptionName?: string;
-	/**
-	 * Controlled dismissal state. Only used when `dismissOptionName` is omitted.
+	 * Whether the card has been dismissed. When true the component renders null.
 	 */
 	isDismissed?: boolean;
 } ) => {
-	const optionIsVisible = useSelect(
-		( select ) => {
-			if ( ! dismissOptionName ) {
-				return null;
-			}
-
-			const { getOption, hasFinishedResolution } = select( optionsStore );
-
-			const hasFinishedResolving = hasFinishedResolution( 'getOption', [
-				dismissOptionName,
-			] );
-
-			return (
-				hasFinishedResolving && getOption( dismissOptionName ) !== 'yes'
-			);
-		},
-		[ dismissOptionName ]
-	);
-
-	const isVisible = dismissOptionName ? optionIsVisible : ! isDismissed;
-
-	if ( ! isVisible ) {
+	if ( isDismissed ) {
 		return null;
 	}
 
@@ -108,9 +76,7 @@ export const DismissableList = ( {
 			size="medium"
 			className={ clsx( 'woocommerce-dismissable-list', className ) }
 		>
-			<OptionNameContext.Provider value={ dismissOptionName ?? '' }>
-				{ children }
-			</OptionNameContext.Provider>
+			{ children }
 		</Card>
 	);
 };
