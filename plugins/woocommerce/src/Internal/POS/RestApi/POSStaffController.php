@@ -135,12 +135,29 @@ class POSStaffController extends RestApiControllerBase {
 				continue;
 			}
 
+			// Caps reported to the client are derived from the assigned preset.
+			//
+			// DEBUG ONLY — remove before release. When WP_DEBUG is on, report the
+			// user's ACTUAL held POS caps instead, so the per-cap debug toggles on
+			// the wp-admin Staff form (which edit real caps without touching the
+			// preset meta) are observable on the client. For normally-managed staff
+			// the two are identical, so production behavior is unchanged.
+			$capabilities = Capabilities::capabilities_for_preset( $preset );
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				$capabilities = array();
+				foreach ( Capabilities::all_pos_capabilities() as $cap ) {
+					if ( ! empty( $user->allcaps[ $cap ] ) ) {
+						$capabilities[ $cap ] = true;
+					}
+				}
+			}
+
 			$staff[] = array(
 				'user_id'      => (int) $user->ID,
 				'user_login'   => (string) $user->user_login,
 				'display_name' => (string) $user->display_name,
 				'preset'       => $preset,
-				'capabilities' => Capabilities::capabilities_for_preset( $preset ),
+				'capabilities' => $capabilities,
 				'pin'          => $pin_record,
 			);
 		}

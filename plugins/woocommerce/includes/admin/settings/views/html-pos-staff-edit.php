@@ -13,6 +13,7 @@
 declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Internal\POS\Admin\POSAccessFields;
+use Automattic\WooCommerce\Internal\POS\Capabilities;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -74,5 +75,54 @@ $submit_label = $has_pos_access
 				<?php esc_html_e( 'Cancel', 'woocommerce' ); ?>
 			</a>
 		</p>
+
+		<?php
+		/*
+		 * ----------------------------------------------------------------------
+		 * DEBUG ONLY — remove before release.
+		 *
+		 * Per-capability checkboxes for toggling individual woocommerce_pos_* caps
+		 * on this user, to test client behavior when a staff member is missing a
+		 * specific cap. Saving writes the caps directly via add_cap()/remove_cap()
+		 * to match exactly what is checked, bypassing the preset bundle above — so
+		 * a single cap can be turned off without dropping the others. The preset
+		 * meta is left as-is, so the role label may no longer match the actual
+		 * caps; that is expected for this tool. `formnovalidate` lets it post
+		 * without the required role/PIN fields. Gated behind WP_DEBUG so it never
+		 * renders in production (the whole Staff UI is also behind the
+		 * point_of_sale_staff dev feature flag).
+		 * ----------------------------------------------------------------------
+		 */
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) :
+			?>
+			<div class="wc-pos-staff-debug" style="margin-top:24px;padding:12px 16px;border:1px dashed #b32d2e;background:#fcf0f1;max-width:600px;">
+				<p style="margin:0 0 6px;font-weight:600;color:#b32d2e;">
+					<?php esc_html_e( 'Debug: edit individual POS capabilities (WP_DEBUG only)', 'woocommerce' ); ?>
+				</p>
+				<p class="description" style="margin:0 0 10px;">
+					<?php esc_html_e( 'Toggle individual POS capabilities for this user, independent of the role above. Use it to test client behavior when a staff member lacks a capability. Saving here writes the checked caps exactly as shown.', 'woocommerce' ); ?>
+				</p>
+				<ul style="margin:0 0 10px;list-style:none;">
+					<?php foreach ( Capabilities::all_pos_capabilities() as $debug_cap ) : ?>
+						<li style="margin:0 0 4px;">
+							<label>
+								<input
+									type="checkbox"
+									name="debug_pos_caps[]"
+									value="<?php echo esc_attr( $debug_cap ); ?>"
+									<?php checked( user_can( $user_id, $debug_cap ) ); ?>
+								/>
+								<code><?php echo esc_html( $debug_cap ); ?></code>
+							</label>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+				<button type="submit" name="debug_set_pos_caps" value="1" class="button" formnovalidate>
+					<?php esc_html_e( 'Save POS caps (debug)', 'woocommerce' ); ?>
+				</button>
+			</div>
+			<?php
+		endif;
+		?>
 	</form>
 </div>

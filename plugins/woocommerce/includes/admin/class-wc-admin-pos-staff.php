@@ -399,6 +399,14 @@ class WC_Admin_POS_Staff {
 			return;
 		}
 
+		// DEBUG ONLY (see html-pos-staff-edit.php): write the target user's POS caps
+		// from the per-cap checkbox group, so a single cap can be toggled off to
+		// test client behavior. Gated behind WP_DEBUG, matching the form control.
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG && isset( $_POST['debug_set_pos_caps'] ) ) {
+			$this->debug_set_pos_caps();
+			return;
+		}
+
 		if ( isset( $_POST['save_pos_staff'] ) ) {
 			$this->save();
 		}
@@ -481,6 +489,57 @@ class WC_Admin_POS_Staff {
 
 		$flash = $is_granting ? array( 'added' => '1' ) : array( 'saved' => '1' );
 		wp_safe_redirect( self::list_redirect_url( $flash ) );
+		exit();
+	}
+
+	/**
+	 * DEBUG ONLY — set the target user's POS capabilities from the checkbox group.
+	 *
+	 * Writes each woocommerce_pos_* cap directly with add_cap()/remove_cap() to
+	 * match exactly what was checked, bypassing the preset bundle so a single cap
+	 * can be removed to test client behavior when a staff member lacks it. Only
+	 * the known caps in all_pos_capabilities() are touched, so an injected cap
+	 * name in the POST is ignored. The preset meta is intentionally left as-is
+	 * (it may no longer describe the cap set). Reuses the edit form's nonce and
+	 * is gated behind WP_DEBUG at both the render and dispatch sites. Remove
+	 * before release.
+	 */
+	private function debug_set_pos_caps(): void {
+		check_admin_referer( 'woocommerce-pos-staff-edit', 'woocommerce_pos_staff_nonce' );
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( esc_html__( 'You do not have permission to manage POS staff.', 'woocommerce' ) );
+		}
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- verified by check_admin_referer above.
+		$user_id = isset( $_POST['user_id'] ) ? absint( wp_unslash( $_POST['user_id'] ) ) : 0;
+		$checked = isset( $_POST['debug_pos_caps'] )
+			? array_map( 'sanitize_text_field', wp_unslash( (array) $_POST['debug_pos_caps'] ) )
+			: array();
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		$user = $user_id ? get_userdata( $user_id ) : false;
+		if ( ! $user ) {
+			WC_Admin_Settings::add_error( __( 'Invalid user.', 'woocommerce' ) );
+			return;
+		}
+
+		foreach ( POSCapabilities::all_pos_capabilities() as $cap ) {
+			if ( in_array( $cap, $checked, true ) ) {
+				$user->add_cap( $cap );
+			} else {
+				$user->remove_cap( $cap );
+			}
+		}
+
+		wp_safe_redirect(
+			self::list_redirect_url(
+				array(
+					'edit-staff'       => $user_id,
+					'debug_caps_saved' => '1',
+				)
+			)
+		);
 		exit();
 	}
 
@@ -675,6 +734,11 @@ class WC_Admin_POS_Staff {
 
 		if ( isset( $_GET['removed'] ) ) {
 			WC_Admin_Settings::add_message( __( 'POS access removed.', 'woocommerce' ) );
+		}
+
+		// DEBUG ONLY — see debug_set_pos_caps(). Remove before release.
+		if ( isset( $_GET['debug_caps_saved'] ) ) {
+			WC_Admin_Settings::add_message( __( 'Debug: POS capabilities updated.', 'woocommerce' ) );
 		}
 		// phpcs:enable
 	}
