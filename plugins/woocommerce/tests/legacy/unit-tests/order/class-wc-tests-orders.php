@@ -217,7 +217,7 @@ class WC_Tests_Orders extends WC_Unit_Test_Case {
 	 * Test that get_shipping_to_display() shows a "Free" indicator instead of
 	 * duplicating the shipping method title when the shipping cost is zero.
 	 *
-	 * @link https://github.com/woocommerce/woocommerce/issues/66002
+	 * @link https://github.com/woocommerce/woocommerce/issues/65904
 	 */
 	public function test_get_shipping_to_display_free_shipping_does_not_duplicate_method_name() {
 		$product = WC_Helper_Product::create_simple_product();
