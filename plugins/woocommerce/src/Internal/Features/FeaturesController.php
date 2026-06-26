@@ -168,6 +168,7 @@ class FeaturesController {
 		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'display_email_improvements_feedback_notice' ), 10, 2 );
 		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'flag_abandoned_cart_recovery_enabled_notice' ), 10, 2 );
 		add_action( 'woocommerce_settings_advanced', array( $this, 'maybe_render_abandoned_cart_recovery_enabled_notice' ), 1 );
+		add_filter( 'woocommerce_settings-advanced', array( $this, 'add_point_of_sale_setting_for_rest_api' ), 10, 1 ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 	}
 
 	/**
@@ -293,19 +294,11 @@ class FeaturesController {
 
 		$legacy_features = array(
 			'analytics'                          => array(
-				'name'                         => __( 'Analytics', 'woocommerce' ),
-				'description'                  => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
+				'name'                         => __( 'WooCommerce Analytics', 'woocommerce' ),
+				'description'                  => __( 'Enable WooCommerce Analytics to track your store\'s key metrics and view them in a detailed dashboard. All data stays within your store.', 'woocommerce' ),
 				'option_key'                   => Analytics::TOGGLE_OPTION_NAME,
 				'is_experimental'              => false,
 				'enabled_by_default'           => true,
-				'disable_ui'                   => false,
-				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-			),
-			'product_block_editor'               => array(
-				'name'                         => __( 'New product editor', 'woocommerce' ),
-				'description'                  => __( 'Try the new product editor (Beta)', 'woocommerce' ),
-				'is_experimental'              => true,
 				'disable_ui'                   => false,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
@@ -459,11 +452,10 @@ class FeaturesController {
 					'Send a reminder email to shoppers who didn\'t finish checking out.',
 					'woocommerce'
 				),
-				// Skip compatibility checks like the other opt-in transactional-email features.
-				'skip_compatibility_checks'    => true,
+				'skip_compatibility_checks'    => false,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'enabled_by_default'           => false,
-				'is_experimental'              => false,
+				'is_experimental'              => true,
 			),
 			'email_improvements'                 => array(
 				'name'                         => __( 'Email improvements', 'woocommerce' ),
@@ -557,20 +549,13 @@ class FeaturesController {
 					'Enable Point of Sale functionality in the WooCommerce mobile apps.',
 					'woocommerce'
 				),
+				'is_experimental'              => false,
 				'enabled_by_default'           => true,
-				'disable_ui'                   => false,
-
-				/*
-				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
-				* but we wish to handle compatibility checking in a similar fashion to legacy features. The
-				* rational for setting legacy to true is therefore similar to that of the 'order_attribution'
-				* feature.
-				*
-				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
-				*/
+				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-				'is_experimental'              => true,
+				'deprecated_since'             => '11.0.0',
+				'deprecated_value'             => true,
 			),
 			'fulfillments'                       => array(
 				'name'                         => __( 'Order Fulfillments', 'woocommerce' ),
@@ -633,7 +618,7 @@ class FeaturesController {
 					'Enable push notifications for the WooCommerce mobile apps to receive order notifications and store updates.',
 					'woocommerce'
 				),
-				'enabled_by_default'           => false,
+				'enabled_by_default'           => true,
 				'is_experimental'              => true,
 				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => false,
@@ -698,6 +683,15 @@ class FeaturesController {
 		foreach ( $legacy_features as $slug => $definition ) {
 			$this->add_feature_definition( $slug, $definition['name'], $definition );
 		}
+
+		// Preload option caches to minimize future queries for options that do not yet exist or are not set to autoload.
+		wp_prime_option_caches(
+			array_map(
+				static fn( $slug, $definition ) => $definition['option_key'] ?? sprintf( 'woocommerce_feature_%s_enabled', $slug ),
+				array_keys( $this->features ),
+				$this->features
+			)
+		);
 
 		$this->init_compatibility_info_by_feature();
 	}
@@ -842,14 +836,6 @@ class FeaturesController {
 				}
 				$features[ $feature_id ]['is_enabled'] = $is_enabled;
 			}
-		}
-
-		// We're deprecating the product block editor feature in favor of a v3 coming out.
-		// We want to hide this setting in the UI for users that don't have it enabled.
-		// If users have it enabled, we won't hide it until they explicitly disable it.
-		if ( isset( $features['product_block_editor'] )
-			&& ! $this->feature_is_enabled( 'product_block_editor' ) ) {
-			$features['product_block_editor']['disable_ui'] = true;
 		}
 
 		if ( isset( $features['wc-visual-attribute'] ) && ! wp_is_block_theme() ) {
@@ -1351,6 +1337,34 @@ class FeaturesController {
 			$sections['features'] = __( 'Features', 'woocommerce' );
 		}
 		return $sections;
+	}
+
+	/**
+	 * Handler for the 'woocommerce_settings-advanced' hook, which defines the settings
+	 * exposed in the wc/v3 settings REST API for the 'advanced' group. It appends the
+	 * Point of Sale feature flag setting.
+	 *
+	 * This is a compatibility shim for the WooCommerce mobile apps: app versions released
+	 * before the point_of_sale feature became always enabled (deprecated in 11.0.0) read and
+	 * write this setting via wc/v3/settings/advanced/woocommerce_feature_point_of_sale_enabled
+	 * to decide whether POS can be used. The setting is no longer rendered in the admin UI;
+	 * this shim can be removed once those app versions are no longer supported.
+	 *
+	 * @param array $settings The settings of the 'advanced' group, as exposed in the REST API.
+	 * @return array The updated settings array.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function add_point_of_sale_setting_for_rest_api( $settings ): array {
+		$settings[] = array(
+			'id'          => 'woocommerce_feature_point_of_sale_enabled',
+			'option_key'  => 'woocommerce_feature_point_of_sale_enabled',
+			'label'       => __( 'Point of Sale', 'woocommerce' ),
+			'description' => __( 'Enable Point of Sale functionality in the WooCommerce mobile apps.', 'woocommerce' ),
+			'type'        => 'checkbox',
+			'default'     => 'yes',
+		);
+		return $settings;
 	}
 
 	/**
@@ -2023,8 +2037,8 @@ class FeaturesController {
 	/**
 	 * Changes the feature given it's id, a toggle value and nonce as a query param.
 	 *
-	 * `/wp-admin/post.php?product_block_editor=1&_feature_nonce=1234`, 1 for on
-	 * `/wp-admin/post.php?product_block_editor=0&_feature_nonce=1234`, 0 for off
+	 * `/wp-admin/post.php?feature_id=1&_feature_nonce=1234`, 1 for on
+	 * `/wp-admin/post.php?feature_id=0&_feature_nonce=1234`, 0 for off
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */

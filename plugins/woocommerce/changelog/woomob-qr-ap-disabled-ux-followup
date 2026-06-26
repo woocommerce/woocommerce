@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Better UX when WooCommerce mobile-app sign-in is unavailable because application passwords are disabled. wc-admin now probes a new `/qr-login-availability` REST endpoint up-front and renders a permanently-disabled card (with a "Why am I seeing this?" expander listing typical causes) instead of optimistically mounting the QR component, spinning, and only then showing a generic error. The structural `application_passwords_unavailable` ERROR-state suppresses the "Try again" retry button since retrying cannot change the site's AP configuration.

@@ -6,7 +6,9 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use WC_Tax;
 
@@ -356,8 +358,14 @@ class ProductQuery implements QueryClausesGenerator {
 			_prime_post_caches( $results['results'] );
 		}
 
+		$objects = array_map( 'wc_get_product', $results['results'] );
+
+		// Batch-prime image attachment caches for the whole collection, rather than once per
+		// product when ProductSchema::get_images() runs during serialization.
+		wc_get_container()->get( ProductUtil::class )->prime_image_caches( $objects );
+
 		return array(
-			'objects' => array_map( 'wc_get_product', $results['results'] ),
+			'objects' => $objects,
 			'total'   => $results['total'],
 			'pages'   => $results['pages'],
 		);
@@ -543,7 +551,7 @@ class ProductQuery implements QueryClausesGenerator {
 	 */
 	protected function adjust_price_filters_for_displayed_taxes() {
 		$display  = get_option( 'woocommerce_tax_display_shop' );
-		$database = wc_prices_include_tax() ? 'incl' : 'excl';
+		$database = wc_prices_include_tax() ? TaxDisplayMode::INCLUSIVE : TaxDisplayMode::EXCLUSIVE;
 
 		return $display !== $database;
 	}
@@ -573,7 +581,7 @@ class ProductQuery implements QueryClausesGenerator {
 		$base_tax_rates = WC_Tax::get_base_tax_rates( $tax_class );
 
 		// If prices are shown incl. tax, we want to remove the taxes from the filter amount to match prices stored excl. tax.
-		if ( 'incl' === $tax_display ) {
+		if ( TaxDisplayMode::INCLUSIVE === $tax_display ) {
 			/**
 			 * Filters if taxes should be removed from locations outside the store base location.
 			 *

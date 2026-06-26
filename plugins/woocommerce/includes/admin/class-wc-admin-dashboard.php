@@ -42,11 +42,12 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * Init dashboard widgets.
 		 */
 		public function init() {
+			wp_add_dashboard_widget( 'woocommerce_dashboard_status', __( 'WooCommerce Status', 'woocommerce' ), array( $this, 'status_widget' ), null, null, 'normal', 'high' );
+
 			// Reviews Widget.
-			if ( current_user_can( 'publish_shop_orders' ) && post_type_supports( 'product', 'comments' ) ) {
-				wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce Recent Reviews', 'woocommerce' ), array( $this, 'recent_reviews' ) );
+			if ( 'yes' === get_option( 'woocommerce_enable_reviews', 'yes' ) && current_user_can( 'publish_shop_orders' ) && post_type_supports( 'product', 'comments' ) ) {
+				wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce Recent Reviews', 'woocommerce' ), array( $this, 'recent_reviews' ), null, null, 'normal', 'high' );
 			}
-			wp_add_dashboard_widget( 'woocommerce_dashboard_status', __( 'WooCommerce Status', 'woocommerce' ), array( $this, 'status_widget' ) );
 
 			// Network Order Widget.
 			if ( is_multisite() && is_main_site() ) {
@@ -71,9 +72,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				return false;
 			}
 
-			$has_permission           = current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'manage_woocommerce' ) || current_user_can( 'publish_shop_orders' );
-			$task_completed_or_hidden = 'yes' === get_option( 'woocommerce_task_list_complete' ) || 'yes' === get_option( 'woocommerce_task_list_hidden' );
-			return $task_completed_or_hidden && $has_permission;
+			return current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'manage_woocommerce' ) || current_user_can( 'publish_shop_orders' );
 		}
 
 		/**
@@ -136,6 +135,10 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 			$version = Constants::get_constant( 'WC_VERSION' );
 
+			if ( ! wp_script_is( 'wc-flot', 'registered' ) ) {
+				wp_register_script( 'wc-flot', WC()->plugin_url() . '/assets/js/jquery-flot/jquery.flot' . $suffix . '.js', array( 'jquery' ), $version, true );
+			}
+
 			wp_enqueue_script( 'wc-status-widget', WC()->plugin_url() . '/assets/js/admin/wc-status-widget' . $suffix . '.js', array( 'jquery', 'wc-flot' ), $version, true );
 			wp_enqueue_script( 'wc-status-widget-async', WC()->plugin_url() . '/assets/js/admin/wc-status-widget-async' . $suffix . '.js', array( 'jquery' ), $version, true );
 
@@ -150,8 +153,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			);
 
 			// Display loading placeholder.
-			echo '<div id="wc-status-widget-loading" class="wc-status-widget-loading">';
-			echo '<p>' . esc_html__( 'Loading status data...', 'woocommerce' ) . ' <span class="spinner is-active"></span></p>';
+			echo '<div id="wc-status-widget-loading" class="wc-dashboard-widget-loading wc-status-widget-loading" aria-busy="true">';
+			echo '<p><span class="spinner is-active"></span><span class="wc-dashboard-widget-loading__text">' . esc_html__( 'Loading status data...', 'woocommerce' ) . '</span></p>';
 			echo '</div>';
 			echo '<div id="wc-status-widget-content" style="display:none;"></div>';
 		}
@@ -217,7 +220,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					<?php
 						printf(
 							/* translators: %s: net sales */
-							esc_html__( '%s net sales this month', 'woocommerce' ),
+							esc_html__( 'Net sales this month %s', 'woocommerce' ),
 							'<strong>' . wc_price( $report_data->net_sales ) . '</strong>'
 						); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 					?>
@@ -236,8 +239,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					<?php echo wp_kses( $sparkline, $sparkline_allowed_html ); ?>
 					<?php
 						printf(
-							/* translators: 1: top seller product title 2: top seller quantity */
-							esc_html__( '%1$s top seller this month (sold %2$d)', 'woocommerce' ),
+							/* translators: 1: top seller product title 2: top seller quantity sold */
+							esc_html( _n( 'Top seller this month %1$s (%2$d sale)', 'Top seller this month %1$s (%2$d sales)', $top_seller->qty, 'woocommerce' ) ),
 							'<strong>' . get_the_title( $top_seller->product_id ) . '</strong>',
 							$top_seller->qty
 						); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
@@ -285,22 +288,26 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			<li class="processing-orders">
 			<a href="<?php echo esc_url( admin_url( 'edit.php?post_status=wc-processing&post_type=shop_order' ) ); ?>">
 				<?php
-					printf(
-						/* translators: %s: order count */
-						_n( '<strong>%s order</strong> awaiting processing', '<strong>%s orders</strong> awaiting processing', $processing_count, 'woocommerce' ),
-						$processing_count
-					); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: order count */
+							_n( 'Awaiting processing <strong>%s order</strong>', 'Awaiting processing <strong>%s orders</strong>', $processing_count, 'woocommerce' ),
+							$processing_count
+						)
+					);
 				?>
 				</a>
 			</li>
 			<li class="on-hold-orders">
 				<a href="<?php echo esc_url( admin_url( 'edit.php?post_status=wc-on-hold&post_type=shop_order' ) ); ?>">
 				<?php
-					printf(
-						/* translators: %s: order count */
-						_n( '<strong>%s order</strong> on-hold', '<strong>%s orders</strong> on-hold', $on_hold_count, 'woocommerce' ),
-						$on_hold_count
-					); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: order count */
+							_n( 'On-hold <strong>%s order</strong>', 'On-hold <strong>%s orders</strong>', $on_hold_count, 'woocommerce' ),
+							$on_hold_count
+						)
+					);
 				?>
 				</a>
 			</li>
@@ -390,22 +397,26 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			<li class="low-in-stock">
 				<a href="<?php echo esc_url( $lowstock_url ); ?>">
 				<?php
-					printf(
-						/* translators: %s: order count */
-						_n( '<strong>%s product</strong> low in stock', '<strong>%s products</strong> low in stock', $lowinstock_count, 'woocommerce' ),
-						$lowinstock_count
-					); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: order count */
+							_n( 'Low in stock <strong>%s product</strong>', 'Low in stock <strong>%s products</strong>', $lowinstock_count, 'woocommerce' ),
+							$lowinstock_count
+						)
+					);
 				?>
 				</a>
 			</li>
 			<li class="out-of-stock">
 				<a href="<?php echo esc_url( $outofstock_url ); ?>">
 				<?php
-					printf(
-						/* translators: %s: order count */
-						_n( '<strong>%s product</strong> out of stock', '<strong>%s products</strong> out of stock', $outofstock_count, 'woocommerce' ),
-						$outofstock_count
-					); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: order count */
+							_n( 'Out of stock <strong>%s product</strong>', 'Out of stock <strong>%s products</strong>', $outofstock_count, 'woocommerce' ),
+							$outofstock_count
+						)
+					);
 				?>
 				</a>
 			</li>
@@ -493,8 +504,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			);
 
 			// Display loading placeholder.
-			echo '<div id="wc-recent-reviews-widget-loading" class="wc-recent-reviews-widget-loading">';
-			echo '<p>' . esc_html__( 'Loading reviews data...', 'woocommerce' ) . ' <span class="spinner is-active"></span></p>';
+			echo '<div id="wc-recent-reviews-widget-loading" class="wc-dashboard-widget-loading wc-recent-reviews-widget-loading" aria-busy="true">';
+			echo '<p><span class="spinner is-active"></span><span class="wc-dashboard-widget-loading__text">' . esc_html__( 'Loading reviews data...', 'woocommerce' ) . '</span></p>';
 			echo '</div>';
 			echo '<div id="wc-recent-reviews-widget-content" style="display:none;"></div>';
 		}

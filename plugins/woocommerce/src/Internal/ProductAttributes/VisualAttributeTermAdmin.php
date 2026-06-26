@@ -55,6 +55,44 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 		}
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_visual_attribute_script' ) );
+		add_filter( 'woocommerce_json_search_found_product_attribute_terms', array( $this, 'add_visual_data_to_attribute_terms' ), 10, 2 );
+	}
+
+	/**
+	 * Add visual swatch data to attribute term search results.
+	 *
+	 * @internal
+	 *
+	 * @param array|\WP_Error $terms    The list of matched terms.
+	 * @param string          $taxonomy The terms taxonomy.
+	 * @return array|\WP_Error
+	 */
+	public function add_visual_data_to_attribute_terms( $terms, string $taxonomy ) {
+		if ( is_wp_error( $terms ) || empty( $terms ) || ! VisualAttributeTermMeta::is_visual_attribute_taxonomy( $taxonomy ) ) {
+			return $terms;
+		}
+
+		// Because `$terms` might be filtered by a plugin, make sure we only operate on valid terms.
+		$valid_terms = array_filter(
+			$terms,
+			static function ( $term ) {
+				return is_object( $term ) && isset( $term->term_id );
+			}
+		);
+
+		$term_ids = array_map( 'intval', wp_list_pluck( $valid_terms, 'term_id' ) );
+		$visuals  = VisualAttributeTermMeta::get_term_visuals( $term_ids );
+
+		foreach ( $valid_terms as $term ) {
+			/**
+			 * Term object with dynamic visual property.
+			 *
+			 * @var \stdClass $term
+			 */
+			$term->visual = $visuals[ $term->term_id ] ?? VisualAttributeTermMeta::get_empty_visual();
+		}
+
+		return $terms;
 	}
 
 	/**
@@ -283,7 +321,7 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 
 		if ( $is_product_editor_screen && array_key_exists( 'wc-visual', wc_get_attribute_types() ) ) {
 			wp_enqueue_media();
-			WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-color-picker', true, array( 'wp-components' ) );
+			WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-picker', true, array( 'wp-components' ) );
 			return;
 		}
 
@@ -292,7 +330,7 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 
 		if ( $is_attribute_term_screen && VisualAttributeTermMeta::is_visual_attribute_taxonomy( $taxonomy ) ) {
 			wp_enqueue_media();
-			WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-color-picker', true, array( 'wp-components' ) );
+			WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-picker', true, array( 'wp-components' ) );
 		}
 	}
 

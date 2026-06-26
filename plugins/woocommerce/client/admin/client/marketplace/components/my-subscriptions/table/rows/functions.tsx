@@ -3,7 +3,7 @@
  */
 import type { TableRow } from '@woocommerce/components/build-types/table/types';
 import { gmdateI18n } from '@wordpress/date';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, sprintf, TranslatableText } from '@wordpress/i18n';
 import { Icon, plugins } from '@wordpress/icons';
 import { createInterpolateElement } from '@wordpress/element';
 
@@ -35,7 +35,7 @@ import { getAdminSetting } from '../../../../../utils/admin-settings';
 type StatusBadge = {
 	text: string;
 	level: StatusLevel;
-	explanation?: string | JSX.Element;
+	explanation?: string | React.JSX.Element;
 };
 
 function getStatusBadge(
@@ -210,7 +210,7 @@ function getStatusBadge(
 function getVersion(
 	subscription: Subscription,
 	table: MySubscriptionsTable
-): string | JSX.Element {
+): string | React.JSX.Element {
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
 	if ( subscription.local.version === subscription.version ) {
@@ -359,14 +359,14 @@ export function expiry( subscription: Subscription ): TableRow {
 		};
 	}
 
-	let expiryDateElement = __( 'Never expires', 'woocommerce' );
+	let expiryDateElement = __< string >( 'Never expires', 'woocommerce' );
 
 	const expiryDate = subscription.expires;
 	if ( expiryDate ) {
 		expiryDateElement = gmdateI18n(
 			'j M, Y',
 			new Date( expiryDate * 1000 )
-		);
+		) as TranslatableText< string >;
 	}
 
 	const displayElement = (
