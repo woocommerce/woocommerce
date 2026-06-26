@@ -1,0 +1,89 @@
+{
+	"name": "@woocommerce/internal-build",
+	"version": "1.0.0",
+	"description": "Shared build tooling for the WooCommerce monorepo: esbuild helpers, webpack/SCSS config, shared tsconfig, and WordPress ambient type overrides.",
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"engines": {
+		"node": "^24.15.0"
+	},
+	"private": true,
+	"type": "module",
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/internal-build/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"module": "build-module/index.js",
+	"types": "build-types/index.d.ts",
+	"exports": {
+		".": {
+			"wc-source": "./src/index.ts",
+			"types": "./build-types/index.d.ts",
+			"import": "./build-module/index.js"
+		},
+		"./style-build": {
+			"require": "./src/style-build/index.cjs"
+		},
+		"./configs/tsconfig.json": "./configs/tsconfig.json",
+		"./type-overrides/*": "./type-overrides/*",
+		"./styles/*": "./styles/*"
+	},
+	"files": [
+		"build-module",
+		"build-types",
+		"configs",
+		"src/style-build",
+		"styles",
+		"type-overrides",
+		"scripts"
+	],
+	"scripts": {
+		"build": "pnpm build:project",
+		"build:project": "pnpm --stream '/^build:project:.*$/'",
+		"build:project:lib": "tsc --build src/tsconfig.json",
+		"build:project:type-overrides": "node scripts/generate-types.mjs generate",
+		"postinstall": "pnpm build:project",
+		"type-overrides:update-patch": "node scripts/generate-types.mjs update-patch",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint src"
+	},
+	"dependencies": {
+		"@automattic/color-studio": "^4.0.0",
+		"@wordpress/base-styles": "catalog:wp-min",
+		"@wordpress/postcss-plugins-preset": "catalog:wp-min",
+		"chokidar": "^3.6.0",
+		"css-loader": "6.11.x",
+		"esbuild": "^0.24.0",
+		"glob": "^10.3.10",
+		"json2php": "^0.0.7",
+		"mini-css-extract-plugin": "2.9.x",
+		"postcss-loader": "4.3.x",
+		"rtlcss": "4.3.x",
+		"sass-loader": "10.5.x",
+		"webpack-remove-empty-scripts": "1.0.x"
+	},
+	"devDependencies": {
+		"@types/wordpress__block-editor": "14.21.8",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"@wordpress/core-data": "7.19.6",
+		"@wordpress/data": "10.19.2",
+		"@wordpress/editor": "14.19.7",
+		"@wordpress/notices": "5.19.2",
+		"eslint": "^8.55.0",
+		"typescript": "5.7.x"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,jsx,ts,tsx,cjs}"
+			}
+		}
+	}
+}

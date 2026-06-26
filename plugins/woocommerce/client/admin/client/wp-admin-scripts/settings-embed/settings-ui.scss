@@ -1,0 +1,435 @@
+@import "@wordpress/admin-ui/build-style/style.css";
+
+body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
+	background-color: #fff;
+
+	#mainform,
+	#wpcontent,
+	#wpbody-content,
+	.wrap.woocommerce {
+		background-color: #fff;
+	}
+
+	#mainform {
+		padding: 0 48px 48px;
+	}
+
+	#mainform > .submit {
+		display: none;
+	}
+
+	#mainform .subsubsub:not(.list-table-filters) {
+		border-bottom: 1px solid #f0f0f0;
+		box-sizing: border-box;
+		color: transparent;
+		display: flex;
+		float: none;
+		gap: 0;
+		margin: 0 -48px 48px;
+		overflow-x: auto;
+		padding: 0 48px;
+		width: auto;
+
+		li {
+			color: transparent;
+			margin: 0;
+			padding: 0;
+		}
+
+		li a,
+		li:first-child a,
+		li:last-child a {
+			align-items: center;
+			color: #1e1e1e;
+			display: inline-flex;
+			font-size: 13px;
+			font-weight: 500;
+			height: 48px;
+			line-height: 20px;
+			margin: 0;
+			padding: 0 16px;
+			position: relative;
+			text-decoration: none;
+			white-space: nowrap;
+
+			&:focus,
+			&:hover,
+			&:active {
+				box-shadow: none;
+				color: var(--wp-admin-theme-color, #3858e9);
+				outline: none;
+			}
+
+			&.current {
+				color: #1e1e1e;
+				font-weight: 500;
+
+				&::after {
+					background: var(--wp-admin-theme-color, #3858e9);
+					border-radius: 999px;
+					bottom: 0;
+					content: "";
+					height: 2px;
+					left: 0;
+					position: absolute;
+					right: 0;
+				}
+			}
+		}
+
+		+ br.clear {
+			display: none;
+		}
+	}
+
+	.wc-settings-ui-shell.admin-ui-page {
+		box-sizing: border-box;
+		color: #1e1e1e;
+		font-size: 13px;
+		height: auto;
+		line-height: 20px;
+		margin: 0 -48px;
+	}
+
+	.wc-settings-ui-shell .admin-ui-page__header {
+		padding-left: 48px;
+		padding-right: 48px;
+		position: static;
+	}
+
+	.wc-settings-ui-shell {
+		&:has(.wc-settings-ui-shell__navigation) .admin-ui-page__header {
+			border-bottom: 0;
+		}
+	}
+
+	.wc-settings-ui-shell .admin-ui-page__header-title {
+		font-size: 20px;
+		font-weight: 500;
+		line-height: 24px;
+	}
+
+	.wc-settings-ui-shell__breadcrumbs {
+		color: #757575;
+		font-size: 12px;
+		line-height: 16px;
+		margin: 0 0 8px;
+	}
+
+	.wc-settings-ui-shell__breadcrumb {
+		&:not(:last-child)::after {
+			content: "/";
+			margin: 0 8px;
+		}
+
+		a {
+			color: #505050;
+			text-decoration: none;
+
+			&:focus,
+			&:hover {
+				color: var(--wp-admin-theme-color, #3858e9);
+			}
+		}
+	}
+
+	.wc-settings-ui-shell__navigation {
+		border-bottom: 1px solid #f0f0f0;
+		margin: 0;
+		width: 100%;
+	}
+
+	.wc-settings-ui-shell__tabs {
+		background: #fff;
+		box-sizing: border-box;
+		display: flex;
+		margin: 0 !important;
+		overflow-x: auto;
+		padding: 0 48px;
+		width: 100%;
+	}
+
+	.wc-settings-ui-shell__tabs--secondary {
+		border-bottom: 0;
+	}
+
+	.wc-settings-ui-shell__tab {
+		align-items: center;
+		color: #1e1e1e;
+		display: inline-flex;
+		font-size: 13px;
+		font-weight: 500;
+		height: 48px;
+		line-height: 20px;
+		padding: 0 16px;
+		position: relative;
+		text-decoration: none;
+		white-space: nowrap;
+
+		&:focus,
+		&:hover,
+		&:active {
+			box-shadow: none;
+			color: var(--wp-admin-theme-color, #3858e9);
+			outline: none;
+		}
+
+		&.is-active {
+			color: #1e1e1e;
+
+			&::after {
+				background: var(--wp-admin-theme-color, #3858e9);
+				border-radius: 999px;
+				bottom: 0;
+				content: "";
+				height: 2px;
+				left: 0;
+				position: absolute;
+				right: 0;
+			}
+		}
+	}
+
+	.wc-settings-ui-shell__notice.components-notice {
+		margin: 24px 48px 0;
+	}
+
+	.wc-settings-ui {
+		box-sizing: border-box;
+		margin: 32px auto 48px;
+		// WPDS surface-width/xl.
+		max-width: 720px;
+	}
+
+	.wc-settings-ui__section {
+		margin: 0 0 24px;
+	}
+
+	.wc-settings-ui__section-card {
+		background: #fff;
+		border: 1px solid #e0e0e0;
+		border-radius: 4px;
+		box-sizing: border-box;
+		padding: 24px;
+		width: 100%;
+	}
+
+	.wc-settings-ui__section-header {
+		align-items: flex-start;
+		display: flex;
+		gap: 24px;
+		justify-content: space-between;
+		margin-bottom: 24px;
+	}
+
+	.wc-settings-ui__section-heading {
+		min-width: 0;
+	}
+
+	.wc-settings-ui__section-header h2 {
+		color: #1e1e1e;
+		font-size: 15px;
+		font-weight: 500;
+		line-height: 20px;
+		margin: 0;
+	}
+
+	.wc-settings-ui__section-description {
+		color: #757575;
+		font-size: 13px;
+		line-height: 20px;
+		margin: 8px 0 0;
+
+		p {
+			margin: 0 0 8px;
+		}
+
+		p:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	.wc-settings-ui__section-actions {
+		display: flex;
+		flex: 0 0 auto;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.wc-settings-ui__section-fields {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	.wc-settings-ui__field {
+		margin: 0;
+		width: 100%;
+	}
+
+	.wc-settings-ui__info {
+		background: #f6f7f7;
+		border-radius: 4px;
+		padding: 16px;
+
+		strong {
+			display: block;
+			margin-bottom: 4px;
+		}
+
+		p {
+			margin: 0;
+		}
+	}
+
+	.wc-settings-ui__control.components-base-control {
+		margin-bottom: 0;
+		width: 100%;
+	}
+
+	.wc-settings-ui__control {
+		.components-base-control__field {
+			margin-bottom: 0;
+		}
+
+		.components-base-control__help {
+			color: #757575;
+			font-size: 13px;
+			line-height: 20px;
+			margin-top: 8px;
+		}
+	}
+
+	.wc-settings-ui__number-control {
+		position: relative;
+	}
+
+	// Owned input skin: deliberately not borrowing internal
+	// @wordpress/components classnames, which carry no compatibility
+	// guarantee. Values mirror the 40px TextControl input.
+	.wc-settings-ui__number-control-input {
+		appearance: textfield;
+		border: 1px solid #949494;
+		border-radius: 2px;
+		box-shadow: 0 0 0 transparent;
+		box-sizing: border-box;
+		font-family: inherit;
+		// Fonts smaller than 16px cause mobile Safari to zoom on focus.
+		font-size: 16px;
+		line-height: normal;
+		margin: 0;
+		min-height: 40px;
+		padding: 6px 12px;
+		// Keep typed values clear of the spin buttons.
+		padding-right: 64px;
+		transition: box-shadow 0.1s linear;
+		width: 100%;
+
+		@media (min-width: 600px) {
+			font-size: 13px;
+		}
+
+		&:focus {
+			border-color: var(--wp-admin-theme-color);
+			box-shadow: 0 0 0 0.5px var(--wp-admin-theme-color);
+			outline: 2px solid transparent;
+		}
+
+		&::-webkit-inner-spin-button,
+		&::-webkit-outer-spin-button {
+			appearance: none;
+			margin: 0;
+		}
+	}
+
+	.wc-settings-ui__number-control-spin-buttons {
+		display: flex;
+		position: absolute;
+		right: 6px;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
+	.wc-settings-ui__unsaved-changes-modal {
+		.components-modal__header {
+			min-height: 72px;
+			padding: 24px 32px 8px;
+		}
+
+		.components-modal__header-heading {
+			font-size: 20px;
+			font-weight: 500;
+			line-height: 24px;
+		}
+
+		.components-modal__content {
+			padding: 4px 32px 32px;
+		}
+
+		p {
+			font-size: 13px;
+			line-height: 20px;
+			margin: 0;
+		}
+	}
+
+	.wc-settings-ui__unsaved-changes-actions {
+		display: flex;
+		gap: 8px;
+		justify-content: flex-end;
+		margin-top: 24px;
+	}
+
+	@media (max-width: 960px) {
+		#mainform {
+			padding: 0 24px 32px;
+		}
+
+		#mainform .subsubsub:not(.list-table-filters) {
+			margin-left: -24px;
+			margin-right: -24px;
+			padding-left: 24px;
+			padding-right: 24px;
+		}
+
+		// Match the base `.wc-settings-ui-shell.admin-ui-page` specificity so
+		// this breakpoint's full-bleed margin actually overrides the -48px
+		// base value instead of losing the cascade.
+		.wc-settings-ui-shell.admin-ui-page {
+			margin-left: -24px;
+			margin-right: -24px;
+		}
+
+		.wc-settings-ui-shell .admin-ui-page__header {
+			padding-left: 24px;
+			padding-right: 24px;
+		}
+
+		.wc-settings-ui-shell__tabs {
+			padding-left: 24px;
+			padding-right: 24px;
+		}
+
+		.wc-settings-ui-shell__notice.components-notice {
+			margin-left: 24px;
+			margin-right: 24px;
+		}
+
+		.wc-settings-ui {
+			margin: 48px 24px 32px;
+			max-width: none;
+		}
+
+		.wc-settings-ui__section-card {
+			padding: 24px;
+		}
+
+		.wc-settings-ui__section-header {
+			display: block;
+		}
+
+		.wc-settings-ui__section-actions {
+			margin-top: 16px;
+		}
+	}
+}

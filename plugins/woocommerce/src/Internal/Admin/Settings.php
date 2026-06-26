@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Marketplace_Suggestions;
@@ -143,7 +144,7 @@ class Settings {
 
 		//phpcs:ignore
 		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );
-		$preload_data_endpoints['jetpackStatus'] = '/jetpack/v4/connection';
+
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$preload_data = array_reduce(
 				array_values( $preload_data_endpoints ),
@@ -221,10 +222,18 @@ class Settings {
 		//phpcs:ignore
 		$settings['variationTitleAttributesSeparator'] = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', new \WC_Product() );
 
+		$settings = $this->add_settings_ui_schema( $settings );
+
+		// Performance note: refer back to https://github.com/woocommerce/woocommerce/pull/41092: unconditionally loading /jetpack/v4/connection.
+		// As automattic/jetpack-connection package is a direct dependency, we can return the Jetpack connection status via its public API.
+		$settings['dataEndpoints'] = $settings['dataEndpoints'] ?? array();
+		try {
+			$settings['dataEndpoints']['jetpackStatus'] = \Automattic\Jetpack\Connection\REST_Connector::connection_status( false );
+		} catch ( \Throwable $e ) {
+			$settings['dataEndpoints']['jetpackStatus'] = array();
+		}
+
 		if ( ! empty( $preload_data_endpoints ) ) {
-			$settings['dataEndpoints'] = isset( $settings['dataEndpoints'] )
-				? $settings['dataEndpoints']
-				: array();
 			foreach ( $preload_data_endpoints as $key => $endpoint ) {
 				// Handle error case: rest_do_request() doesn't guarantee success.
 				if ( empty( $preload_data[ $endpoint ] ) ) {
@@ -398,5 +407,107 @@ class Settings {
 			}
 		}
 		return $settings;
+	}
+
+	/**
+	 * Add the settings UI schema for the current classic settings page.
+	 *
+	 * @param array $settings Array of component settings.
+	 * @return array
+	 */
+	private function add_settings_ui_schema( array $settings ): array {
+		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'settings-ui' ) || ! current_user_can( 'manage_woocommerce' ) ) {
+			return $settings;
+		}
+
+		$settings_ui_page = $this->get_current_settings_ui_page();
+		if ( ! $settings_ui_page ) {
+			return $settings;
+		}
+
+		$section     = $this->get_current_settings_section();
+		$section_key = '' === $section ? 'default' : $section;
+		$page_id     = $settings_ui_page->get_page_id();
+
+		if ( ! isset( $settings['settingsUI'] ) || ! is_array( $settings['settingsUI'] ) ) {
+			$settings['settingsUI'] = array();
+		}
+		if ( ! isset( $settings['settingsUI'][ $page_id ] ) || ! is_array( $settings['settingsUI'][ $page_id ] ) ) {
+			$settings['settingsUI'][ $page_id ] = array();
+		}
+
+		try {
+			$settings['settingsUI'][ $page_id ][ $section_key ] = $settings_ui_page->get_schema( $section );
+		} catch ( \Throwable $e ) {
+			$GLOBALS['wc_settings_ui_schema_failed'][ $page_id ][ $section_key ] = true;
+
+			if ( $e instanceof \Exception ) {
+				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
+			}
+		}
+
+		return $settings;
+	}
+
+	/**
+	 * Get the settings UI adapter for the current settings tab.
+	 *
+	 * @return SettingsUIPageInterface|null
+	 */
+	private function get_current_settings_ui_page(): ?SettingsUIPageInterface {
+		if ( ! class_exists( '\WC_Admin_Settings' ) ) {
+			return null;
+		}
+
+		$current_tab = $this->get_current_settings_tab();
+		foreach ( \WC_Admin_Settings::get_settings_pages() as $settings_page ) {
+			if ( ! $settings_page instanceof \WC_Settings_Page || $settings_page->get_id() !== $current_tab ) {
+				continue;
+			}
+
+			$settings_ui_page = $settings_page->get_settings_ui_page();
+			return $settings_ui_page instanceof SettingsUIPageInterface ? $settings_ui_page : null;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get the current WooCommerce settings tab.
+	 *
+	 * @return string
+	 */
+	private function get_current_settings_tab(): string {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if ( ! isset( $_GET['tab'] ) ) {
+			return 'general';
+		}
+
+		$tab = wp_unslash( $_GET['tab'] );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		if ( ! is_string( $tab ) ) {
+			return 'general';
+		}
+
+		$tab = sanitize_title( $tab );
+		return '' !== $tab ? $tab : 'general';
+	}
+
+	/**
+	 * Get the current WooCommerce settings section.
+	 *
+	 * @return string
+	 */
+	private function get_current_settings_section(): string {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if ( ! isset( $_GET['section'] ) ) {
+			return '';
+		}
+
+		$section = wp_unslash( $_GET['section'] );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		return is_string( $section ) ? sanitize_title( $section ) : '';
 	}
 }

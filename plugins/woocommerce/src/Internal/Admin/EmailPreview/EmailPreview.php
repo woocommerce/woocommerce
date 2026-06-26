@@ -372,8 +372,9 @@ class EmailPreview {
 		$variation            = $this->get_dummy_product_variation();
 		$downloadable_product = $this->get_dummy_downloadable_product();
 
-		$order = new WC_Order();
-		$order->set_id( 12345 );
+		// PreviewOrder keeps its id at 0 so it can never read from or write to a
+		// real order. It surfaces a display number via get_order_number() instead.
+		$order = new PreviewOrder();
 
 		// Create and add product items manually without saving to database.
 		// Use add_item() instead of add_product() to avoid immediate database writes.

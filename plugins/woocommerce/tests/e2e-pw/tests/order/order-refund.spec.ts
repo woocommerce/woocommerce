@@ -111,10 +111,10 @@ test.describe.serial(
 
 			// Verify system note was added
 			await expect(
-				page.locator( '.system-note >> nth=0' )
-			).toContainText(
-				'Order status changed from Completed to Refunded.'
-			);
+				page.locator( '.system-note' ).filter( {
+					hasText: 'Order status changed from Completed to Refunded.',
+				} )
+			).toBeVisible();
 		} );
 
 		// this test relies on the previous test, so should refactor
@@ -219,10 +219,11 @@ test.describe(
 
 			// Verify stock reduction system note was added
 			await expect(
-				page.locator( '.system-note >> nth=1' )
-			).toContainText(
-				/Stock levels reduced: Product with stock \(10→8\)/
-			);
+				page.locator( '.system-note' ).filter( {
+					hasText:
+						/Stock levels reduced: Product with stock \(10→8\)/,
+				} )
+			).toBeVisible();
 
 			// Click the Refund button
 			await page.locator( 'button.refund-items' ).click();
@@ -243,8 +244,10 @@ test.describe(
 
 			// Verify restock system note was added
 			await expect(
-				page.locator( '.system-note >> nth=0' )
-			).toContainText( /Item #\d+ stock increased from 8 to 10./ );
+				page.locator( '.system-note' ).filter( {
+					hasText: /Item #\d+ stock increased from 8 to 10./,
+				} )
+			).toBeVisible();
 		} );
 	}
 );

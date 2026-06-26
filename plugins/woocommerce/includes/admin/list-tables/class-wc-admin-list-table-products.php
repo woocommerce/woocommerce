@@ -57,6 +57,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );
 		add_filter( 'posts_clauses', array( $this, 'posts_clauses' ), 10, 2 );
+		add_filter( 'the_posts', array( $this, 'prime_thumbnail_caches' ), 10, 2 );
 		add_action( 'manage_product_posts_custom_column', array( $this, 'add_sample_product_badge' ), 9, 2 );
 
 		$cogs_controller              = wc_get_container()->get( CostOfGoodsSoldController::class );
@@ -65,17 +66,34 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	}
 
 	/**
+	 * Prime featured image caches for product queries to avoid individual queries during rendering.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param \WP_Post[] $posts Posts from WP Query.
+	 * @param \WP_Query  $query Current query.
+	 * @return array
+	 */
+	public function prime_thumbnail_caches( $posts, $query ) {
+		if ( $query instanceof \WP_Query && 'product' === $query->get( 'post_type' ) ) {
+			update_post_thumbnail_cache( $query );
+		}
+
+		return $posts;
+	}
+
+	/**
 	 * Render blank state.
 	 */
 	protected function render_blank_state() {
-		echo '<div class="woocommerce-BlankState">';
+		echo '<div class="woocommerce-BlankState woocommerce-BlankState--products">';
 
 		echo '<h2 class="woocommerce-BlankState-message">' . esc_html__( 'Ready to start selling something awesome?', 'woocommerce' ) . '</h2>';
 
 		echo '<div class="woocommerce-BlankState-buttons">';
 
-		echo '<a class="woocommerce-BlankState-cta button-primary button" href="' . esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ) . '">' . esc_html__( 'Create Product', 'woocommerce' ) . '</a>';
-		echo '<a class="woocommerce-BlankState-cta button" href="' . esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) . '">' . esc_html__( 'Start Import', 'woocommerce' ) . '</a>';
+		echo '<a class="woocommerce-BlankState-cta button button-secondary" href="' . esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ) . '">' . esc_html__( 'Create Product', 'woocommerce' ) . '</a>';
+		echo '<a class="woocommerce-BlankState-cta button button-secondary" href="' . esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) . '">' . esc_html__( 'Start Import', 'woocommerce' ) . '</a>';
 
 		echo '</div>';
 

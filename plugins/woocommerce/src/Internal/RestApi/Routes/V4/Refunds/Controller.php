@@ -15,11 +15,13 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
 use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundPreviewSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundSchema;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use WP_Http;
 use WP_Error;
+use WC_Order;
 use WC_Order_Refund;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -46,9 +48,16 @@ class Controller extends AbstractController {
 	/**
 	 * Schema class for this route.
 	 *
-	 * @var OrderSchema
+	 * @var RefundSchema
 	 */
 	protected $item_schema;
+
+	/**
+	 * Schema class for preview responses.
+	 *
+	 * @var RefundPreviewSchema
+	 */
+	protected $preview_schema;
 
 	/**
 	 * Collection query class.
@@ -67,13 +76,16 @@ class Controller extends AbstractController {
 	/**
 	 * Initialize the controller.
 	 *
-	 * @param RefundSchema    $item_schema Refund schema class.
-	 * @param CollectionQuery $collection_query Collection query class.
-	 * @param DataUtils       $data_utils Data utils class.
 	 * @internal
+	 *
+	 * @param RefundSchema        $item_schema Refund schema class.
+	 * @param RefundPreviewSchema $preview_schema Preview schema class.
+	 * @param CollectionQuery     $collection_query Collection query class.
+	 * @param DataUtils           $data_utils Data utils class.
 	 */
-	final public function init( RefundSchema $item_schema, CollectionQuery $collection_query, DataUtils $data_utils ) {
+	final public function init( RefundSchema $item_schema, RefundPreviewSchema $preview_schema, CollectionQuery $collection_query, DataUtils $data_utils ) {
 		$this->item_schema      = $item_schema;
+		$this->preview_schema   = $preview_schema;
 		$this->collection_query = $collection_query;
 		$this->data_utils       = $data_utils;
 	}
@@ -152,6 +164,56 @@ class Controller extends AbstractController {
 					),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/preview',
+			array(
+				// permission_callback below intentionally uses the create-refund capability:
+				// preview is read-only but logically part of the refund-creation flow, so it
+				// requires the same capability. This prevents read-only-API clients from
+				// probing refund state on orders they cannot act on.
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'preview_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => array(
+						'order_id'   => array(
+							'description'       => __( 'The ID of the order to preview a refund for.', 'woocommerce' ),
+							'type'              => 'integer',
+							'required'          => true,
+							'minimum'           => 1,
+							'validate_callback' => 'rest_validate_request_arg',
+						),
+						'line_items' => array(
+							'description'       => __( 'Line items to include in the refund preview.', 'woocommerce' ),
+							'type'              => 'array',
+							'required'          => true,
+							'minItems'          => 1,
+							'validate_callback' => 'rest_validate_request_arg',
+							'items'             => array(
+								'type'                 => 'object',
+								'required'             => array( 'line_item_id', 'quantity' ),
+								'additionalProperties' => false,
+								'properties'           => array(
+									'line_item_id' => array(
+										'description' => __( 'ID of the original order line item.', 'woocommerce' ),
+										'type'        => 'integer',
+										'minimum'     => 1,
+									),
+									'quantity'     => array(
+										'description' => __( 'Quantity to refund.', 'woocommerce' ),
+										'type'        => 'integer',
+										'minimum'     => 1,
+									),
+								),
+							),
+						),
+					),
+				),
+				'schema' => array( $this, 'get_public_preview_schema' ),
 			)
 		);
 
@@ -372,6 +434,93 @@ class Controller extends AbstractController {
 	}
 
 	/**
+	 * Preview a refund without creating it.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 *
+	 * @since 10.9.0
+	 */
+	public function preview_item( $request ) {
+		$order = wc_get_order( $request['order_id'] );
+
+		// wc_get_order returns WC_Order|WC_Order_Refund|false; only a WC_Order
+		// (shop_order) is previewable here — refunds and missing IDs are rejected.
+		if ( ! $order instanceof WC_Order ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		$validation_error = $this->data_utils->validate_preview_line_items( $request['line_items'], $order );
+
+		if ( is_wp_error( $validation_error ) ) {
+			$error_data = $validation_error->get_error_data();
+			$status     = is_array( $error_data ) && isset( $error_data['status'] ) ? (int) $error_data['status'] : WP_Http::BAD_REQUEST;
+			return $this->get_route_error_response_from_object( $validation_error, $status );
+		}
+
+		try {
+			$preview = $this->data_utils->build_refund_preview( $order, $request['line_items'] );
+		} catch ( \InvalidArgumentException $e ) {
+			// validate_preview_line_items above should have caught any bad input.
+			// If build_refund_preview still throws InvalidArgumentException, treat
+			// it as a server-side invariant violation, log for observability, and
+			// return a generic message (do not leak internal IDs to clients).
+			wc_get_logger()->error(
+				sprintf( 'Refund preview invariant violation on order %d: %s', $order->get_id(), $e->getMessage() ),
+				array( 'source' => 'wc-v4-refunds' )
+			);
+			return $this->get_route_error_response(
+				'invalid_preview_request',
+				__( 'The refund preview could not be generated due to an unexpected error.', 'woocommerce' ),
+				WP_Http::INTERNAL_SERVER_ERROR
+			);
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Refund preview unexpected error on order %d: %s', $order->get_id(), $e->getMessage() ),
+				array( 'source' => 'wc-v4-refunds' )
+			);
+			return $this->get_route_error_response(
+				'unexpected_preview_error',
+				__( 'An unexpected error occurred while generating the refund preview.', 'woocommerce' ),
+				WP_Http::INTERNAL_SERVER_ERROR
+			);
+		}
+
+		// Final guard: even when per-line validation passes, the aggregate
+		// preview total can still exceed the order's remaining refundable
+		// amount (e.g. an amount-only partial refund applied previously).
+		// Reject up-front so the eventual create call doesn't fail with the
+		// generic 'cannot_create_refund' error from wc_create_refund.
+		// `total` is already tax-inclusive; compare directly against max_refundable.
+		$preview_total_with_tax = abs( (float) $preview['total'] );
+		if ( $preview_total_with_tax > (float) $preview['max_refundable'] ) {
+			return $this->get_route_error_response(
+				'preview_exceeds_max_refundable',
+				sprintf(
+					/* translators: 1: requested preview total including tax, 2: remaining refundable */
+					__( 'Requested refund preview (%1$s) exceeds the remaining refundable amount (%2$s).', 'woocommerce' ),
+					wc_format_decimal( $preview_total_with_tax, wc_get_price_decimals() ),
+					$preview['max_refundable']
+				),
+				WP_Http::UNPROCESSABLE_ENTITY
+			);
+		}
+
+		return rest_ensure_response( $preview );
+	}
+
+	/**
+	 * Get the public schema for the preview endpoint.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @return array
+	 */
+	public function get_public_preview_schema(): array {
+		return $this->preview_schema->get_item_schema();
+	}
+
+	/**
 	 * Delete a single item.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -386,7 +535,7 @@ class Controller extends AbstractController {
 
 		$request->set_param( 'context', 'edit' );
 
-		$response = new WP_REST_Response( null, 204 );
+		$response = new WP_REST_Response( null, WP_Http::NO_CONTENT );
 		$result   = $refund->delete( true );
 
 		if ( ! $result ) {

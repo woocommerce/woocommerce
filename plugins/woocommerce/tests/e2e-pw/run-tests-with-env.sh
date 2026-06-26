@@ -82,6 +82,17 @@ echo "Using config file: $configFile"
 echo "Arguments: $*"
 title
 
+# Activate the `wc-source` conditional export so Playwright resolves
+# `@woocommerce/*` workspace packages to their TypeScript source instead of
+# their built `build/index.js`. Playwright bundles esbuild and transpiles
+# imported `.ts` on the fly, so this skips the pre-build step for these
+# packages. `--conditions` stacks with NODE_OPTIONS already in the env.
+#
+# Playwright has no built-in config for custom export conditions; setting
+# NODE_OPTIONS is the documented workaround.
+# See https://github.com/microsoft/playwright/issues/33684.
+export NODE_OPTIONS="${NODE_OPTIONS:-} --conditions=wc-source"
+
 pnpm playwright test --config="$configFile" "$@"
 
 

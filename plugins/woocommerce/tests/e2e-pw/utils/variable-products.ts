@@ -28,7 +28,7 @@ const productIds: number[] = [];
 /**
  * The `attributes` property to be used in the request payload for creating a variable product through the REST API.
  *
- * @see {@link [Product - Attributes properties](https://woocommerce.github.io/woocommerce-rest-api-docs/#product-attributes-properties)}
+ * @see {@link [Product - Attributes properties](https://developer.woocommerce.com/docs/apis/rest-api/v3/products/#product---attributes-properties)}
  */
 const productAttributes = [
 	{
@@ -54,7 +54,7 @@ const productAttributes = [
 /**
  * Request payload for creating variations.
  *
- * @see {@link [Product variation properties](https://woocommerce.github.io/woocommerce-rest-api-docs/#product-variation-properties)}
+ * @see {@link [Product variation properties](https://developer.woocommerce.com/docs/apis/rest-api/v3/product-variations/#product-variation-properties)}
  */
 const sampleVariations = [
 	{
@@ -113,7 +113,7 @@ const sampleVariations = [
 /**
  * Create a variable product using the WooCommerce REST API.
  *
- * @param {{ name: string, visible: boolean, variation: boolean, options: string[] }[]} attributes List of attributes. See [Product - Attributes properties](https://woocommerce.github.io/woocommerce-rest-api-docs/#product-attributes-properties).
+ * @param {{ name: string, visible: boolean, variation: boolean, options: string[] }[]} attributes List of attributes. See [Product - Attributes properties](https://developer.woocommerce.com/docs/apis/rest-api/v3/products/#product---attributes-properties).
  * @return {Promise<number>} ID of the created variable product
  */
 async function createVariableProduct( attributes: ProductAttribute[] = [] ) {

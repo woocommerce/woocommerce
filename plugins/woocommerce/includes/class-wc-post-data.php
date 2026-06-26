@@ -113,9 +113,18 @@ class WC_Post_Data {
 	public static function do_deferred_product_sync() {
 		global $wc_deferred_product_sync;
 
-		if ( ! empty( $wc_deferred_product_sync ) ) {
-			$wc_deferred_product_sync = wp_parse_id_list( $wc_deferred_product_sync );
-			array_walk( $wc_deferred_product_sync, array( __CLASS__, 'deferred_product_sync' ) );
+		// Syncing a product may defer more products (e.g. from hooks fired while saving it),
+		// so the queue is drained in rounds, syncing each product at most once.
+		$processed = array();
+		while ( ! empty( $wc_deferred_product_sync ) ) {
+			$product_ids              = array_diff( wp_parse_id_list( $wc_deferred_product_sync ), $processed );
+			$wc_deferred_product_sync = array();
+
+			foreach ( $product_ids as $product_id ) {
+				self::deferred_product_sync( $product_id );
+			}
+
+			$processed = array_merge( $processed, $product_ids );
 		}
 	}
 
@@ -146,6 +155,16 @@ class WC_Post_Data {
 	public static function transition_post_status( $new_status, $old_status, $post ) {
 		if ( ( ProductStatus::PUBLISH === $new_status || ProductStatus::PUBLISH === $old_status ) && in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
 			self::delete_product_query_transients();
+		}
+
+		if ( ProductStatus::PUBLISH === $new_status && ProductStatus::PUBLISH !== $old_status && in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
+			/**
+			 * Fires when a product or product variation transitions to published status.
+			 *
+			 * @since 10.8.0
+			 * @param int $product_id The product or variation ID.
+			 */
+			do_action( 'woocommerce_product_published', $post->ID );
 		}
 	}
 

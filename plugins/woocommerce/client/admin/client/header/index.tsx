@@ -19,7 +19,6 @@ import {
 	OrderAttributionInstallBanner,
 	BANNER_TYPE_HEADER as ORDER_ATTRIBUTION_INSTALL_BANNER_TYPE_HEADER,
 } from '~/order-attribution-install-banner';
-import { isTaskListActive } from '~/hooks/use-tasklists-state';
 import { BaseHeader } from './shared';
 
 export const PAGE_TITLE_FILTER = 'woocommerce_admin_header_page_title';
@@ -66,14 +65,11 @@ export const Header = ( {
 	const isAnalyticsOverviewScreen =
 		isWCAdmin() && getPath() === '/analytics/overview';
 
-	const showReminderBar = Boolean( isTaskListActive( 'setup' ) );
-
 	return (
 		<BaseHeader
 			isEmbedded={ false }
 			sections={ sections }
 			query={ query }
-			showReminderBar={ showReminderBar }
 			leftAlign={ ! showLaunchYourStoreStatus }
 		>
 			{ showLaunchYourStoreStatus && <LaunchYourStoreStatus /> }

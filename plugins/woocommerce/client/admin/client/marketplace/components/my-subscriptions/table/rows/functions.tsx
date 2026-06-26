@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { TableRow } from '@woocommerce/components/build-types/table/types';
+import type { TableRow } from '@woocommerce/components/build-types/table/types';
 import { gmdateI18n } from '@wordpress/date';
 import { __, sprintf } from '@wordpress/i18n';
 import { Icon, plugins } from '@wordpress/icons';
@@ -35,7 +35,7 @@ import { getAdminSetting } from '../../../../../utils/admin-settings';
 type StatusBadge = {
 	text: string;
 	level: StatusLevel;
-	explanation?: string | JSX.Element;
+	explanation?: string | React.JSX.Element;
 };
 
 function getStatusBadge(
@@ -210,7 +210,7 @@ function getStatusBadge(
 function getVersion(
 	subscription: Subscription,
 	table: MySubscriptionsTable
-): string | JSX.Element {
+): string | React.JSX.Element {
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
 	if ( subscription.local.version === subscription.version ) {

@@ -451,7 +451,7 @@ EOT;
 
 	/**
 	 * JSON can be passed in some more complicated objects, like the payment gateway settings array.
-	 * This function decodes the json (if present) and tries to get it's value.
+	 * This function decodes the json (if present) and tries to get its value.
 	 *
 	 * @param array $arr Array that will be scanned for JSON encoded values.
 	 *

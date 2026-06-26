@@ -99,7 +99,7 @@ We isolate our tests from each other by resetting the database to its initial st
 
 ### Plugins
 
-To use a custom plugin with your tests, first create the plugin PHP file and save it to the [test plugins folder](../../tests/e2e/plugins/). Here's a handy snippet to help you get started:
+To use a custom plugin with your tests, first create the plugin PHP file and save it to the [test plugins folder](../../../../tests/e2e-pw/test-plugins/blocks/). Here's a handy snippet to help you get started:
 
 ```php
 // plugins/my-fancy-plugin.php
@@ -156,7 +156,7 @@ test.beforeEach( async ( { page, requestUtils } ) => {
 
 #### Adding a new theme
 
-If you've created a custom theme and want to use it in your tests, save it in the [test themes folder](../../tests/e2e/themes/). Check out the themes that are already there for inspiration. The activation part was explained above, so you're good to go!
+If you've created a custom theme and want to use it in your tests, save it in the [test themes folder](../../../../tests/e2e-pw/themes/blocks/). Check out the themes that are already there for inspiration. The activation part was explained above, so you're good to go!
 
 ### Utilities
 
@@ -223,7 +223,7 @@ export class Editor extends CoreEditor {
 
 ### Content Templates
 
-We have created `RequestUtils.createPostFromFile()` and `RequestUtils.createTemplateFromFile()` utilities that enable creating complex content testing scenarios with Handlebars templates. The template files are kept in the [content-templates](../../tests/e2e/content-templates/) folder, so you can head there for some inspiration.
+We have created `RequestUtils.createPostFromFile()` and `RequestUtils.createTemplateFromFile()` utilities that enable creating complex content testing scenarios with Handlebars templates. The template files are kept in the [content-templates](../../../../tests/e2e-pw/content-templates/blocks/) folder, so you can head there for some inspiration.
 
 > [!IMPORTANT]
 > The Handlebars template filenames must be prefixed with the entity type. For posts, an example filename would be `post_with-filters.handlebars`, and for templates `template_archive-product_with-filters.handlebars`. Notice that the latter contains the slug of the template (`archive-product`) before the name (`with-filters`), separated with an underscore - it's necessary for the template to be properly loaded and created.

@@ -12,9 +12,9 @@
 				"wp-cli.yml": "./wp-cli.yml",
 				"wp-content/plugins/woocommerce/blocks-bin": "./bin",
 				"wp-content/plugins/woocommerce/blocks-bin/playwright": "./tests/e2e/bin",
-				"wp-content/plugins/woocommerce-blocks-test-plugins": "./tests/e2e/plugins",
+				"wp-content/plugins/woocommerce-blocks-test-plugins": "../../tests/e2e-pw/test-plugins/blocks",
 				"wp-content/plugins/woocommerce-test-plugins": "../../tests/e2e-pw/bin",
-				"wp-content/themes": "./tests/e2e/themes",
+				"wp-content/themes": "../../tests/e2e-pw/themes/blocks",
 				"wp-content/themes/storefront": "https://downloads.wordpress.org/theme/storefront.latest-stable.zip",
 				"wp-content/themes/twentytwentyfour": "https://downloads.wordpress.org/theme/twentytwentyfour.latest-stable.zip"
 			}

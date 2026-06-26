@@ -152,6 +152,7 @@ test.describe( 'Reports API tests', () => {
 							tax: expect.any( String ),
 							shipping: expect.any( String ),
 							discount: expect.any( String ),
+							refunds: expect.any( String ),
 							customers: expect.any( Number ),
 						},
 					} ),

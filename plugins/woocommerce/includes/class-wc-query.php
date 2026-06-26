@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -787,7 +788,7 @@ class WC_Query {
 		 * Adjust if the store taxes are not displayed how they are stored.
 		 * Kicks in when prices excluding tax are displayed including tax.
 		 */
-		if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
+		if ( wc_tax_enabled() && TaxDisplayMode::INCLUSIVE === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
 			$tax_class = apply_filters( 'woocommerce_price_filter_widget_tax_class', '' ); // Uses standard tax class.
 			$tax_rates = WC_Tax::get_rates( $tax_class );
 
@@ -981,6 +982,11 @@ class WC_Query {
 	 * @return array
 	 */
 	public static function get_main_meta_query() {
+		// PHPStan infers $product_query as non-nullable from other call sites. See https://github.com/woocommerce/woocommerce/pull/64360#issuecomment-4360066970.
+		// @phpstan-ignore-next-line isset.property See above.
+		if ( ! isset( self::$product_query ) ) {
+			return array();
+		}
 		$args       = self::$product_query->query_vars;
 		$meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
 
@@ -993,6 +999,11 @@ class WC_Query {
 	public static function get_main_search_query_sql() {
 		global $wpdb;
 
+		// PHPStan infers $product_query as non-nullable from other call sites. See https://github.com/woocommerce/woocommerce/pull/64360#issuecomment-4360066970.
+		// @phpstan-ignore-next-line isset.property See above.
+		if ( ! isset( self::$product_query ) ) {
+			return '';
+		}
 		$args         = self::$product_query->query_vars;
 		$search_terms = isset( $args['search_terms'] ) ? $args['search_terms'] : array();
 		$sql          = array();

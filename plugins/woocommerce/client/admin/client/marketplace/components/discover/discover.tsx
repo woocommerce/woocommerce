@@ -15,7 +15,7 @@ import { ProductCardType, ProductType } from '../product-list/types';
 import './discover.scss';
 import { recordMarketplaceView } from '~/marketplace/utils/tracking';
 
-export default function Discover(): JSX.Element | null {
+export default function Discover(): React.JSX.Element | null {
 	const [ productGroups, setProductGroups ] = useState<
 		Array< ProductGroup >
 	>( [] );

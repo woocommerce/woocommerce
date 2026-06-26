@@ -1,0 +1,54 @@
+.woocommerce-grouped-products-edit {
+	&__chip-thumbnail {
+		width: 19px;
+		height: 19px;
+		border-radius: 50%;
+		object-fit: cover;
+		margin-left: 1px;
+
+		&--empty {
+			background-color: var(--wp-components-color-gray-100);
+		}
+	}
+
+	&__option {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		width: 100%;
+		// Override the base searchable-chip-select rule that bolds selected
+		// items; grouped products should keep regular weight across all rows.
+		font-weight: var(--wpds-typography-font-weight-regular, 400);
+	}
+
+	// Always-present placeholder that reserves space for the checkmark, so the
+	// thumbnail / label columns stay aligned whether or not the row is
+	// selected. base-ui's <ItemIndicator> only renders its DOM when selected,
+	// so the placeholder wrapper handles the slot layout.
+	&__option-indicator {
+		display: inline-flex;
+		flex-shrink: 0;
+		align-items: center;
+		justify-content: center;
+		width: 16px;
+		height: 16px;
+		color: var(--wp-components-color-foreground, #1e1e1e);
+	}
+
+	&__option-thumbnail {
+		width: 32px;
+		height: 32px;
+		flex-shrink: 0;
+		border-radius: 4px;
+		object-fit: cover;
+		background-color: var(--wp-components-color-gray-100);
+	}
+
+	&__option-label {
+		flex: 1 1 auto;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}

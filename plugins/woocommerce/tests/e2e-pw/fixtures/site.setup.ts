@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { request } from '@playwright/test';
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -9,6 +10,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { test as setup } from './fixtures';
 import { setComingSoon } from '../utils/coming-soon';
 import { skipOnboardingWizard } from '../utils/onboarding';
+import { setOption } from '../utils/options';
 
 setup( 'setup site', async ( { baseURL, restApi } ) => {
 	await setup.step( 'configure HPOS', async () => {
@@ -61,6 +63,19 @@ setup( 'setup site', async ( { baseURL, restApi } ) => {
 		const enabledOption = response.data.options[ dataValue ];
 		console.log(
 			`HPOS configuration (woocommerce_custom_orders_table_enabled): ${ dataValue } - ${ enabledOption }`
+		);
+	} );
+
+	await setup.step( 'enable product object caching', async () => {
+		// Always run e2e with product object caching on (the new-install default), so any
+		// flow that bypasses the product CRUD/cache interfaces surfaces as a failure. Set
+		// explicitly rather than relying on the new-install default, so the state is
+		// deterministic regardless of how the test site's DB was provisioned.
+		await setOption(
+			request,
+			baseURL,
+			'woocommerce_feature_product_instance_caching_enabled',
+			'yes'
 		);
 	} );
 

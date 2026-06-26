@@ -168,6 +168,37 @@ Still, here's a few tips to get you started:
 Playwright's Best Practices guide is a good
 read: [Playwright Best Practices](https://playwright.dev/docs/best-practices).
 
+## Test helper plugins
+
+Some E2E suites need fixture mechanisms that can't be expressed cleanly with REST or WP-CLI alone — for example, filter-driven content overrides, server-side event mirroring, or synchronous triggers for normally-scheduled jobs. These ship as small PHP plugins under `tests/e2e-pw/test-plugins/`, mounted via `.wp-env.json`'s `plugins` array.
+
+### `wc-email-template-sync-test-helper`
+
+Powers the `tests/email-editor/update-propagation/` suite (RSM-146). Exposes:
+
+- Option-driven filter overrides for `woocommerce_email_block_template_html`, `woocommerce_email_template_sync_opted_in_emails`, and `woocommerce_transactional_emails_for_block_editor`.
+- A server-side Tracks event recorder, controlled by option `wc_test_tracks_enabled`.
+- A fake `WC_Email` subclass (`fake_thirdparty`) gated by option `wc_test_fake_third_party_email_enabled` for third-party-email scope tests.
+- REST endpoints under `/wp-json/wc-email-test-helper/v1/` for seeding posts, triggering sweeps and backfill synchronously, draining the Tracks log, and writing typed option values.
+
+The plugin is dormant when its driving options are empty. It has a `WP_DEBUG` plus `X-Playwright` header safety rail to prevent accidental activation outside test contexts.
+
+If a test fails with `404` on `/wp-json/wc-email-test-helper/v1/health`, the plugin isn't loaded — run `pnpm env:restart`.
+
+The PR-tier subset of these tests can be run locally with:
+
+```sh
+pnpm test:e2e:email-update-propagation:pr
+```
+
+To run the full suite (the PR-tier plus nightly-only scenarios):
+
+```sh
+pnpm test:e2e:email-update-propagation:nightly
+```
+
+In CI, the full suite runs as part of the existing "Core e2e tests" job — no separate workflow entry is required.
+
 ## Test reports
 
 The tests would generate three kinds of reports after the run:

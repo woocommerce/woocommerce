@@ -19,6 +19,11 @@ if [ -d "$BUILD_DIR" ]; then
     rm -rf "$BUILD_DIR"
 fi
 
+# Install JS dependencies. The mirror workflow does not run `pnpm install`
+# before invoking us, so node_modules may be missing.
+echo "Installing JS dependencies..."
+pnpm install --filter "@automattic/woocommerce-analytics" --frozen-lockfile
+
 # Build JS assets first
 echo "Building JS assets..."
 pnpm run build-production

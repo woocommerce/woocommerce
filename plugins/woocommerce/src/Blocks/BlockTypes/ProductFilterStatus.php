@@ -108,23 +108,33 @@ final class ProductFilterStatus extends AbstractBlock {
 		$query                   = $filter_params[ self::STOCK_STATUS_QUERY_VAR ] ?? '';
 		$selected_stock_statuses = array_filter( explode( ',', $query ) );
 
+		$show_counts    = $attributes['showCounts'] ?? false;
 		$filter_options = array_map(
-			function ( $item ) use ( $stock_statuses, $selected_stock_statuses ) {
-				return array(
-					'label'    => $stock_statuses[ $item['status'] ],
-					'value'    => $item['status'],
-					'selected' => in_array( $item['status'], $selected_stock_statuses, true ),
-					'count'    => $item['count'],
-					'type'     => 'status',
+			function ( $item ) use ( $stock_statuses, $selected_stock_statuses, $show_counts ) {
+				$label  = $stock_statuses[ $item['status'] ];
+				$option = array(
+					'id'        => 'status-' . $item['status'],
+					'label'     => $label,
+					'ariaLabel' => $label,
+					'value'     => $item['status'],
+					'selected'  => in_array( $item['status'], $selected_stock_statuses, true ),
+					'type'      => 'status',
 				);
+
+				if ( $show_counts ) {
+					$option['count'] = $item['count'];
+				}
+
+				return $option;
 			},
 			$stock_status_data
 		);
 
 		$filter_context = array(
-			'items'      => array_values( $filter_options ),
-			'showCounts' => $attributes['showCounts'] ?? false,
-			'groupLabel' => __( 'Status', 'woocommerce' ),
+			'items'          => array_values( $filter_options ),
+			'selectionMode'  => 'multiple',
+			'storeNamespace' => 'woocommerce/product-filters',
+			'groupLabel'     => __( 'Status', 'woocommerce' ),
 		);
 
 		$wrapper_attributes = array(
@@ -135,6 +145,7 @@ final class ProductFilterStatus extends AbstractBlock {
 					/* translators: {{label}} is the status filter item label. */
 					'activeLabelTemplate' => __( 'Status: {{label}}', 'woocommerce' ),
 					'filterType'          => 'status',
+					'items'               => $filter_context['items'],
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
@@ -153,7 +164,7 @@ final class ProductFilterStatus extends AbstractBlock {
 			array_reduce(
 				$block->parsed_block['innerBlocks'],
 				function ( $carry, $parsed_block ) use ( $filter_context ) {
-					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					$carry .= ( new \WP_Block( $parsed_block, array( 'woocommerce/selectableItems' => $filter_context ) ) )->render();
 					return $carry;
 				},
 				''

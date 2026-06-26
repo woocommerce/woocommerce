@@ -96,7 +96,7 @@ PHPStan configuration is stored in `phpstan.neon` at the root of the plugin dire
 -   [WooCommerce Documentation](https://woocommerce.com/)
 -   [WooCommerce Developer Documentation](https://github.com/woocommerce/woocommerce/wiki)
 -   [WooCommerce Code Reference](https://woocommerce.com/wc-apidocs/)
--   [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/)
+-   [WooCommerce REST API Docs](https://developer.woocommerce.com/docs/apis/rest-api/)
 
 ## A Note for Extension Developers
 

@@ -16,6 +16,12 @@ import { admin } from '../test-data/data';
 
 export const test = baseTest.extend( {
 	restApi: async ( { baseURL }, use ) => {
+		if ( ! baseURL ) {
+			throw new Error(
+				'Playwright baseURL is required to use the restApi fixture.'
+			);
+		}
+
 		await use(
 			createClient( baseURL, {
 				type: 'basic',
