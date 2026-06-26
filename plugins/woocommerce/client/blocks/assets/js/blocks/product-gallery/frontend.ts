@@ -42,8 +42,9 @@ const getVerticalIntersectionRatio = ( rect: DOMRect, rootRect: DOMRect ) => {
 	const height =
 		Math.min( rect.bottom, rootRect.bottom ) -
 		Math.max( rect.top, rootRect.top );
+	const referenceHeight = Math.min( rect.height, rootRect.height );
 
-	return Math.max( 0, height ) / rect.height;
+	return referenceHeight ? Math.max( 0, height ) / referenceHeight : 0;
 };
 
 const isDialogVideoInView = ( video: HTMLVideoElement ) => {
@@ -55,10 +56,6 @@ const isDialogVideoInView = ( video: HTMLVideoElement ) => {
 
 	const videoRect = video.getBoundingClientRect();
 	const containerRect = scrollableContainer.getBoundingClientRect();
-
-	if ( ! videoRect.height ) {
-		return false;
-	}
 
 	return (
 		getVerticalIntersectionRatio( videoRect, containerRect ) >=
@@ -841,7 +838,14 @@ const productGallery = {
 				return;
 			}
 
-			if ( ! window.IntersectionObserver ) {
+			const scrollableContainer = element.closest(
+				SELECTORS.dialogContent
+			);
+
+			if (
+				! scrollableContainer ||
+				! window.IntersectionObserver
+			) {
 				return () => element.pause();
 			}
 
@@ -863,6 +867,7 @@ const productGallery = {
 					} );
 				},
 				{
+					root: scrollableContainer,
 					threshold: [
 						0,
 						DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO,

@@ -194,6 +194,7 @@ class ProductGalleryUtils {
 		);
 
 		if ( 'dialog' === $video_location ) {
+			unset( $attrs['autoplay'] );
 			$attrs['data-wp-init--dialog-video-playback'] = 'callbacks.initDialogVideoPlayback';
 		}
 
