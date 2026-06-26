@@ -127,32 +127,32 @@ function wc_get_dimension( $dimension, $to_unit, $from_unit = '' ) {
 	// Unify all units to cm first.
 	if ( $from_unit !== $to_unit ) {
 		switch ( $from_unit ) {
-			case DimensionUnit::INCHES:
+			case DimensionUnit::INCH:
 				$dimension *= 2.54;
 				break;
-			case DimensionUnit::METERS:
+			case DimensionUnit::METER:
 				$dimension *= 100;
 				break;
-			case DimensionUnit::MILLIMETERS:
+			case DimensionUnit::MILLIMETER:
 				$dimension *= 0.1;
 				break;
-			case DimensionUnit::YARDS:
+			case DimensionUnit::YARD:
 				$dimension *= 91.44;
 				break;
 		}
 
 		// Output desired unit.
 		switch ( $to_unit ) {
-			case DimensionUnit::INCHES:
+			case DimensionUnit::INCH:
 				$dimension *= 0.3937;
 				break;
-			case DimensionUnit::METERS:
+			case DimensionUnit::METER:
 				$dimension *= 0.01;
 				break;
-			case DimensionUnit::MILLIMETERS:
+			case DimensionUnit::MILLIMETER:
 				$dimension *= 10;
 				break;
-			case DimensionUnit::YARDS:
+			case DimensionUnit::YARD:
 				$dimension *= 0.010936133;
 				break;
 		}

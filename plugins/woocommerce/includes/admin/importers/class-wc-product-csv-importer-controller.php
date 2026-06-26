@@ -607,7 +607,7 @@ class WC_Product_CSV_Importer_Controller {
 	 */
 	protected function auto_map_columns( $raw_headers, $num_indexes = true ) {
 		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
-		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', DimensionUnit::CENTIMETERS ) );
+		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', DimensionUnit::CENTIMETER ) );
 
 		$default_columns = array(
 			__( 'ID', 'woocommerce' )                      => 'id',
@@ -786,7 +786,7 @@ class WC_Product_CSV_Importer_Controller {
 
 		// Available options.
 		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
-		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', DimensionUnit::CENTIMETERS ) );
+		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', DimensionUnit::CENTIMETER ) );
 		$options              = array(
 			'id'                 => __( 'ID', 'woocommerce' ),
 			'type'               => __( 'Type', 'woocommerce' ),

@@ -262,7 +262,7 @@ class Controller extends AbstractController {
 				 *
 				 * @param array $dimension_units Array of dimension unit strings.
 				 */
-				$valid_units = apply_filters( 'woocommerce_dimension_units', array( DimensionUnit::METERS, DimensionUnit::CENTIMETERS, DimensionUnit::MILLIMETERS, DimensionUnit::INCHES, DimensionUnit::YARDS ) );
+				$valid_units = apply_filters( 'woocommerce_dimension_units', array( DimensionUnit::METER, DimensionUnit::CENTIMETER, DimensionUnit::MILLIMETER, DimensionUnit::INCH, DimensionUnit::YARD ) );
 				if ( ! in_array( $value, $valid_units, true ) ) {
 					return new WP_Error(
 						'rest_invalid_param',

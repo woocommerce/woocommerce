@@ -203,7 +203,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</label>
 				<label class="change-input">
 					<?php
-					$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', DimensionUnit::CENTIMETERS ) );
+					$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', DimensionUnit::CENTIMETER ) );
 					?>
 					<input
 						type="text"

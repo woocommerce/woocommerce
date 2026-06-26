@@ -15,33 +15,33 @@ final class DimensionUnit {
 	 *
 	 * @var string
 	 */
-	public const METERS = 'm';
+	public const METER = 'm';
 
 	/**
 	 * Centimeters.
 	 *
 	 * @var string
 	 */
-	public const CENTIMETERS = 'cm';
+	public const CENTIMETER = 'cm';
 
 	/**
 	 * Millimeters.
 	 *
 	 * @var string
 	 */
-	public const MILLIMETERS = 'mm';
+	public const MILLIMETER = 'mm';
 
 	/**
 	 * Inches.
 	 *
 	 * @var string
 	 */
-	public const INCHES = 'in';
+	public const INCH = 'in';
 
 	/**
 	 * Yards.
 	 *
 	 * @var string
 	 */
-	public const YARDS = 'yd';
+	public const YARD = 'yd';
 }
