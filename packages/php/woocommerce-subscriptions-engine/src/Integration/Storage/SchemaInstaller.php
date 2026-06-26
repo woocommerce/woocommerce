@@ -32,13 +32,14 @@ final class SchemaInstaller {
 	 * 2.0.0 - cycle-chain model: contract as live source of truth (schedule, snapshot
 	 *         references, totals, stamps); immutable cycle records keyed on
 	 *         `(contract_id, kind)`; per-contract snapshots deduped by copy-forward.
+	 * 2.1.0 - rename `app_id` to `extension_slug` in plan_groups table.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
 	 * on an earlier schema must drop and recreate the tables (and clear VERSION_OPTION)
 	 * to pick up such changes - in-place ALTERs and backfills arrive with the freeze.
 	 */
-	const VERSION = '2.0.0';
+	const VERSION = '2.1.0';
 
 	/**
 	 * Option key tracking the installed schema version.
@@ -179,12 +180,12 @@ final class SchemaInstaller {
   name VARCHAR(255) NOT NULL,
   merchant_code VARCHAR(64) NULL,
   options_display JSON NULL,
-  app_id VARCHAR(64) NULL,
+  extension_slug VARCHAR(64) NULL,
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,
   PRIMARY KEY  (id),
   UNIQUE KEY merchant_code (merchant_code),
-  KEY app_id (app_id)
+  KEY extension_slug (extension_slug)
 ) {$collate};";
 
 		// `extension_slug` records the creating extension's registered slug. Nullable
