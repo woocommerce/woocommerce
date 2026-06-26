@@ -249,23 +249,25 @@ final class PricingPolicy {
 	 * @throws InvalidArgumentException If the value is not a whole number.
 	 */
 	private static function normalize_cycle( $value, string $field ): int {
+		$int_value = null;
+
 		if ( is_int( $value ) ) {
-			return $value;
-		}
-
-		if ( is_float( $value ) && floor( $value ) === $value ) {
-			return (int) $value;
-		}
-
-		if ( is_string( $value ) ) {
+			$int_value = $value;
+		} else if ( is_float( $value ) && floor( $value ) === $value ) {
+			$int_value = (int) $value;
+		} else if ( is_string( $value ) ) {
 			$validated = filter_var( $value, FILTER_VALIDATE_INT );
 			if ( false !== $validated ) {
-				return $validated;
+				$int_value = $validated;
 			}
 		}
 
+		if ( null !== $int_value && $int_value >= 0 ) {
+			return $int_value;
+		}
+
 		throw new InvalidArgumentException(
-			sprintf( 'pricing_policy.policies[].%s must be an integer number.', $field )
+			sprintf( 'pricing_policy.policies[].%s must be a positive integer.', $field )
 		);
 	}
 }
