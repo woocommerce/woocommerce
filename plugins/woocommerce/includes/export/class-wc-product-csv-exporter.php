@@ -6,6 +6,7 @@
  * @version 3.1.0
  */
 
+use Automattic\WooCommerce\Enums\DimensionUnit;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -123,7 +124,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 */
 	public function get_default_column_names() {
 		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
-		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
+		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', DimensionUnit::CENTIMETER ) );
 
 		$default_columns = array(
 			'id'                 => __( 'ID', 'woocommerce' ),
