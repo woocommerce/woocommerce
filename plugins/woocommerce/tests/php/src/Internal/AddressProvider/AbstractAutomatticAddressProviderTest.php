@@ -1057,12 +1057,80 @@ class AbstractAutomatticAddressProviderTest extends TestCase {
 			}
 		);
 
+		// Set up WP query vars so is_wc_endpoint_url( 'edit-address' ) returns true.
+		global $wp;
+		$wp->query_vars = array(
+			'edit-address' => 'billing',
+		);
+		WC()->query->init_query_vars();
+
 		// Call load_scripts.
 		$provider->load_scripts();
 
 		// Check if script is registered and enqueued.
 		$this->assertTrue( wp_script_is( 'a8c-address-autocomplete-service', 'registered' ) );
 		$this->assertTrue( wp_script_is( 'a8c-address-autocomplete-service', 'enqueued' ) );
+
+		// Clean up filters and globals.
+		remove_all_filters( 'woocommerce_is_checkout' );
+		remove_all_filters( 'woocommerce_is_account_page' );
+		$wp->query_vars = array();
+	}
+
+	/**
+	 * Test load_scripts does not enqueue on account pages that are not edit-address.
+	 */
+	public function test_load_scripts_skips_on_non_edit_address_account_pages() {
+		$provider = new class() extends AbstractAutomatticAddressProvider {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id   = 'test-provider';
+				$this->name = 'Test Provider';
+				parent::__construct();
+			}
+
+			/**
+			 * Get address service JWT.
+			 *
+			 * @return string
+			 */
+			public function get_address_service_jwt() {
+				return JsonWebToken::create(
+					array(
+						'iss' => 'test-issuer',
+						'aud' => 'test-audience',
+						'exp' => time() + 3600,
+						'iat' => time(),
+					),
+					'test-secret'
+				);
+			}
+		};
+
+		// Mock is_checkout() to return false.
+		add_filter(
+			'woocommerce_is_checkout',
+			function () {
+				return false;
+			}
+		);
+
+		// Mock is_account_page() to return true.
+		add_filter(
+			'woocommerce_is_account_page',
+			function () {
+				return true;
+			}
+		);
+
+		// No edit-address query var set, so is_wc_endpoint_url( 'edit-address' ) returns false.
+		// Call load_scripts.
+		$provider->load_scripts();
+
+		// Check that script was not enqueued.
+		$this->assertFalse( wp_script_is( 'a8c-address-autocomplete-service', 'enqueued' ) );
 
 		// Clean up filters.
 		remove_all_filters( 'woocommerce_is_checkout' );

@@ -275,7 +275,7 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 			return;
 		}
 
-		if ( ! is_checkout() && ! is_account_page() ) {
+		if ( ! is_checkout() && ! ( is_account_page() && is_wc_endpoint_url( 'edit-address' ) ) ) {
 			return;
 		}
 
