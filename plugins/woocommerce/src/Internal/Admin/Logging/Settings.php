@@ -83,7 +83,9 @@ class Settings {
 						$filesystem = FilesystemUtil::get_wp_filesystem_direct();
 						$filesystem->put_contents( $dir . '.htaccess', 'deny from all' );
 						$filesystem->put_contents( $dir . 'index.html', '' );
-					} catch ( Exception $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- The directory exists; the no-listing files are best-effort.
+					} catch ( Exception $exception ) {
+						// Best-effort: the directory exists and stays usable without the no-listing files, but log a trace.
+						error_log( 'WooCommerce: could not write log directory protection files: ' . $exception->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 					}
 				}
 			}

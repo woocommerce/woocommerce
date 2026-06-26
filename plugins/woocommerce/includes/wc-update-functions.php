@@ -2838,15 +2838,15 @@ function wc_update_870_prevent_listing_of_transient_files_directory() {
 		return;
 	}
 
-	// Use a direct filesystem because the transient files directory is inside
-	// wp-content/uploads and is web-server writable; honoring FS_METHOD here is
-	// unnecessary and breaks when FS_METHOD points at an FTP transport without
-	// complete credentials.
+	// Use a direct filesystem: the transient files directory is inside wp-content/uploads and is
+	// web-server writable, so honoring FS_METHOD is unnecessary and breaks on FTP-without-credentials setups.
 	try {
 		$wp_filesystem = FilesystemUtil::get_wp_filesystem_direct();
 		$wp_filesystem->put_contents( $default_transient_files_dir . '/.htaccess', 'deny from all' );
 		$wp_filesystem->put_contents( $default_transient_files_dir . '/index.html', '' );
-	} catch ( \Exception $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- The migration is best-effort; the directory remains usable without the no-listing files.
+	} catch ( \Exception $exception ) {
+		// Best-effort: the directory remains usable without the no-listing files, but log so the failure leaves a trace.
+		error_log( 'WooCommerce: wc_update_870 could not write transient files directory protection files: ' . $exception->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 	}
 }
 

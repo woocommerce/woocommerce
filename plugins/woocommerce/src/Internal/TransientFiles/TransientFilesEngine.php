@@ -108,10 +108,8 @@ class TransientFilesEngine implements RegisterHooksInterface {
 					throw new Exception( "Can't create directory: $transient_files_directory" );
 				}
 
-				// Create infrastructure to prevent listing the contents of the transient files directory.
-				// Use a direct filesystem because this directory lives under wp-content/uploads
-				// and is web-server writable; honoring FS_METHOD here is unnecessary and breaks
-				// when FS_METHOD points at an FTP transport without complete credentials.
+				// Prevent listing the directory contents. Use a direct filesystem: this dir is web-server-writable
+				// under wp-content/uploads, so honoring FS_METHOD is unnecessary and breaks FTP-without-creds setups.
 				$wp_filesystem = FilesystemUtil::get_wp_filesystem_direct();
 				$wp_filesystem->put_contents( $transient_files_directory . '/.htaccess', 'deny from all' );
 				$wp_filesystem->put_contents( $transient_files_directory . '/index.html', '' );

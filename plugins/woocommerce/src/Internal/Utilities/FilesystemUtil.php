@@ -35,13 +35,12 @@ class FilesystemUtil {
 	private const FTP_INIT_COOLDOWN_MINUTES = 2;
 
 	/**
-	 * Memoized direct filesystem instance. Only ever holds a genuine
-	 * WP_Filesystem_Direct; the defensive fallback is never cached so a later
-	 * call can retry direct rather than pin a non-direct instance.
+	 * Memoized direct filesystem. Only ever holds a genuine WP_Filesystem_Direct;
+	 * the defensive fallback is never cached so a later call can retry direct.
 	 *
 	 * @var WP_Filesystem_Base|null
 	 */
-	private static $cached_direct_filesystem = null;
+	private static ?WP_Filesystem_Base $cached_direct_filesystem = null;
 
 	/**
 	 * Wrapper to retrieve the class instance contained in the $wp_filesystem global, after initializing if necessary.
@@ -70,14 +69,8 @@ class FilesystemUtil {
 	 * sites where FS_METHOD is set to an FTP-based method without complete
 	 * credentials, even though the target paths are directly writable.
 	 *
-	 * Defensive fallback: WP_Filesystem_Direct has shipped with WordPress core
-	 * since 2.5.0, so under normal conditions this method always returns a
-	 * direct instance. If the class file is somehow unavailable (corrupted
-	 * core install, an unusual non-WP runtime, an aggressive opcache eviction)
-	 * or instantiation throws, fall back to {@see self::get_wp_filesystem()}
-	 * with a _doing_it_wrong notice. Callers in the fallback path may still
-	 * fail on misconfigured FS_METHOD setups, but at least the operation gets
-	 * a chance to succeed instead of immediately fataling on a missing class.
+	 * Defensive fallback: if WP_Filesystem_Direct cannot be loaded or instantiated,
+	 * fall back to {@see self::get_wp_filesystem()} with a _doing_it_wrong notice.
 	 *
 	 * @since 11.0.0
 	 *
@@ -86,24 +79,18 @@ class FilesystemUtil {
 	 *                   filesystem fail to initialize (the fallback path).
 	 */
 	public static function get_wp_filesystem_direct(): WP_Filesystem_Base {
-		if ( self::$cached_direct_filesystem instanceof WP_Filesystem_Base ) {
+		if ( null !== self::$cached_direct_filesystem ) {
 			return self::$cached_direct_filesystem;
 		}
 
-		if ( ! class_exists( 'WP_Filesystem_Base' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
-		}
-		if ( ! class_exists( 'WP_Filesystem_Direct' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
-		}
+		// require_once is a no-op if the class is already loaded, so no class_exists guard is needed.
+		require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
+		require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
 
 		if ( class_exists( 'WP_Filesystem_Direct' ) ) {
 			try {
-				// WP_Filesystem_Direct::chmod()/put_contents() fall back to the
-				// FS_CHMOD_* constants when no explicit mode is passed. Core only
-				// defines them inside WP_Filesystem(), which we deliberately skip,
-				// so define them here (mirroring core) to avoid an undefined
-				// constant fatal when those defaults are used.
+				// WP_Filesystem_Direct::chmod()/put_contents() use the FS_CHMOD_* constants when no mode is
+				// passed; core only defines them in WP_Filesystem(), which we skip, so mirror them here.
 				if ( ! defined( 'FS_CHMOD_DIR' ) ) {
 					define( 'FS_CHMOD_DIR', ( fileperms( ABSPATH ) & 0777 | 0755 ) );
 				}
@@ -123,10 +110,8 @@ class FilesystemUtil {
 			'11.0.0'
 		);
 
-		// Deliberately not cached: the fallback may be a non-direct (e.g. FTP)
-		// instance, and pinning it would silently route every later "direct"
-		// caller in this request through FS_METHOD. Returning it uncached lets
-		// a subsequent call retry the direct instance once the class is loadable.
+		// Deliberately uncached: the fallback may be a non-direct (FTP) instance, and caching it would pin
+		// every later "direct" caller to FS_METHOD; leaving it uncached lets a later call retry direct.
 		return self::get_wp_filesystem();
 	}
 
