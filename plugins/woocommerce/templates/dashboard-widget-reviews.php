@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.5.0
+ * @version 11.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -23,6 +23,11 @@ defined( 'ABSPATH' ) || exit;
  * @var $product \WC_Product
  * @var $comment \WP_Comment
  */
+
+$product_name          = $product->get_name();
+$product_name_display  = wc_trim_string( $product_name, 40 );
+$review_author         = get_comment_author( $comment->comment_ID );
+$review_author_display = wc_trim_string( $review_author, 24 );
 
 ?>
 
@@ -36,10 +41,22 @@ defined( 'ABSPATH' ) || exit;
 	<?php echo wc_get_rating_html( (int) get_comment_meta( $comment->comment_ID, 'rating', true ) ); ?>
 
 	<h4 class="meta">
-		<a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>"><?php echo wp_kses_post( $product->get_name() ); ?></a>
+		<a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>" title="<?php echo esc_attr( $product_name ); ?>"><?php echo wp_kses_post( $product_name_display ); ?></a>
 		<?php
-		/* translators: %s: review author */
-		printf( esc_html__( 'reviewed by %s', 'woocommerce' ), esc_html( get_comment_author( $comment->comment_ID ) ) );
+		$reviewed_by = sprintf(
+			// translators: %s: review author.
+			__( 'reviewed by %s', 'woocommerce' ),
+			'<span title="' . esc_attr( $review_author ) . '">' . esc_html( $review_author_display ) . '</span>'
+		);
+
+		echo wp_kses(
+			$reviewed_by,
+			array(
+				'span' => array(
+					'title' => true,
+				),
+			)
+		);
 		?>
 	</h4>
 

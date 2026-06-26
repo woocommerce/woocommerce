@@ -1,3 +1,9 @@
 .wc-block-reviews__selection {
 	width: 100%;
 }
+
+.wc-block-reviews__tools-panel-item-container {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+}
