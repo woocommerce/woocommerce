@@ -140,4 +140,23 @@ class CustomerSwapTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( $sentinel, $result );
 	}
+
+	/**
+	 * When CapabilityGate has already rejected the request, the customer must be
+	 * left untouched and the error passed through unchanged.
+	 *
+	 * @testdox swap_customer does not swap when an earlier gate already returned an error.
+	 */
+	public function test_does_not_swap_when_dispatch_already_errored(): void {
+		Context::set_test_override( true );
+
+		$sentinel      = new WC_Customer( 0, true );
+		WC()->customer = $sentinel;
+
+		$error  = new \WP_Error( 'woocommerce_pos_rest_forbidden', 'Forbidden.', array( 'status' => 403 ) );
+		$result = $this->sut->swap_customer( $error );
+
+		$this->assertSame( $error, $result );
+		$this->assertSame( $sentinel, WC()->customer, 'A rejected request must not have its customer swapped.' );
+	}
 }

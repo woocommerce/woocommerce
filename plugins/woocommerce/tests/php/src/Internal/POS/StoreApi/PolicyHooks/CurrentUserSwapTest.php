@@ -99,4 +99,25 @@ class CurrentUserSwapTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( $sentinel, $result );
 	}
+
+	/**
+	 * When CapabilityGate has already rejected the request, the user must be left
+	 * untouched and the error passed through unchanged.
+	 *
+	 * @testdox swap_to_guest does not swap when an earlier gate already returned an error.
+	 */
+	public function test_does_not_swap_when_dispatch_already_errored(): void {
+		Context::set_test_override( true );
+
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		$error  = new \WP_Error( 'woocommerce_pos_rest_forbidden', 'Forbidden.', array( 'status' => 403 ) );
+		$result = $this->sut->swap_to_guest( $error );
+
+		$this->assertSame( $error, $result );
+		$this->assertSame( $admin_id, get_current_user_id(), 'A rejected request must not have its user swapped.' );
+
+		wp_delete_user( $admin_id );
+	}
 }

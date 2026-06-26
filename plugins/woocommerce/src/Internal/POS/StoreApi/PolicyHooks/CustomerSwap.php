@@ -52,9 +52,9 @@ class CustomerSwap implements RegisterHooksInterface {
 	 * with no address. Returns the dispatch result unchanged to decline
 	 * short-circuiting the route's actual callback.
 	 *
-	 * Runs at priority 11, after {@see CurrentUserSwap} (priority 10) has both
-	 * latched the POS verdict and dropped the user to guest, so the
-	 * `is_pos_request()` check here reads the latched value.
+	 * Runs at priority 11, after {@see CapabilityGate} (priority 5) has authorised
+	 * the request and {@see CurrentUserSwap} (priority 10) has dropped the user to
+	 * a guest.
 	 *
 	 * @param mixed $dispatch_result Existing dispatch short-circuit value.
 	 * @return mixed
@@ -62,6 +62,11 @@ class CustomerSwap implements RegisterHooksInterface {
 	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
 	public function swap_customer( $dispatch_result ) {
+		// CapabilityGate (priority 5) rejected this request — don't touch the customer.
+		if ( is_wp_error( $dispatch_result ) ) {
+			return $dispatch_result;
+		}
+
 		if ( ! Context::is_pos_request() ) {
 			return $dispatch_result;
 		}

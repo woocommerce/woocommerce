@@ -26,12 +26,12 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
  * so concurrent requests stay isolated) and intentionally not restored, so the
  * post-response shutdown phase also sees the guest.
  *
- * This hook is also where POS context gets *latched*: it runs on
- * `rest_dispatch_request` while the cashier is still the current user, so its
- * `Context::is_pos_request()` check resolves the `manage_woocommerce` capability
- * and pins the verdict before the very next line drops the user to a guest.
- * Every later policy hook then reads that latched verdict rather than
- * re-evaluating the (now-guest) capability. See {@see Context}.
+ * Authorisation has already happened by the time this runs: {@see CapabilityGate}
+ * fires earlier on the same `rest_dispatch_request` hook (priority 5) and rejects
+ * any marked-but-unauthorised request, so a request that reaches this swap is a
+ * genuine, authorised POS request. After the swap the operator capability is
+ * gone, which is exactly why detection keys off the request marker rather than
+ * the capability — see {@see Context}.
  *
  * @internal Just for internal use.
  *
@@ -55,22 +55,23 @@ class CurrentUserSwap implements RegisterHooksInterface {
 	 * On POS requests, swap the global current WP user to guest (0). Returns the
 	 * dispatch result unchanged to decline short-circuiting the dispatch.
 	 *
-	 * The `is_pos_request()` call here runs before the swap, while the cashier is
-	 * still authenticated, so it both authorises and latches the POS verdict for
-	 * the remainder of the request.
-	 *
 	 * @param mixed $dispatch_result Existing dispatch short-circuit value (null = don't short-circuit).
 	 * @return mixed
 	 *
 	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
 	public function swap_to_guest( $dispatch_result ) {
+		// CapabilityGate (priority 5) rejected this request — don't touch the user.
+		if ( is_wp_error( $dispatch_result ) ) {
+			return $dispatch_result;
+		}
+
 		if ( ! Context::is_pos_request() ) {
 			return $dispatch_result;
 		}
 
-		// Capability check already passed by this point — it's safe to drop
-		// the authenticated identity for the remainder of the request.
+		// The capability was verified by CapabilityGate before this point, so it's
+		// safe to drop the authenticated identity for the remainder of the request.
 		wp_set_current_user( 0 );
 
 		return $dispatch_result;
