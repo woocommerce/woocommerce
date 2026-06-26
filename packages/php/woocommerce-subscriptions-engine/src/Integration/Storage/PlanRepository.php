@@ -37,6 +37,7 @@ final class PlanRepository {
 		'id'               => 'id',
 		'name'             => 'name',
 		'sort_order'       => 'sort_order',
+		'status'           => 'status',
 		'date_created_gmt' => 'date_created_gmt',
 		'date_updated_gmt' => 'date_updated_gmt',
 	);
