@@ -1,5 +1,4 @@
-SortableList
-===
+# SortableList
 
 `SortableList` renders data-backed sortable UI with mouse, touch, and keyboard support.
 
@@ -100,4 +99,3 @@ Name | Type | Default | Description
 `orientation` | `'vertical' \| 'horizontal'` | `'vertical'` | Sets the sorting strategy and axis restriction.
 `instructions` | `string` | localized default | Screen-reader instructions for keyboard sorting.
 `children` | `ReactNode \| render function` | `undefined` | Renders `SortableListItem` children.
-
