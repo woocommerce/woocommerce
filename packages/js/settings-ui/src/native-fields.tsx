@@ -45,6 +45,42 @@ const toStringValue = ( value: SettingsValue ) =>
 const isTextInputType = ( type: string ): type is TextInputType =>
 	textInputTypes.includes( type as TextInputType );
 
+// Use HTML boolean attribute presence semantics: disabled="false" still
+// means disabled, while a boolean false remains false.
+const toPresenceBooleanCustomAttribute = (
+	value: string | number | boolean | undefined
+): boolean | undefined => {
+	if ( typeof value === 'undefined' ) {
+		return undefined;
+	}
+
+	return typeof value === 'boolean' ? value : true;
+};
+
+const toStringCustomAttribute = (
+	value: string | number | undefined
+): string | undefined => {
+	return typeof value === 'undefined' ? undefined : String( value );
+};
+
+const getNumberInputAttributes = (
+	customAttributes?: Record< string, string | number | boolean >
+) => {
+	const safeAttributes =
+		customAttributes && typeof customAttributes === 'object'
+			? customAttributes
+			: {};
+	const { disabled, placeholder, ...inputAttributes } = safeAttributes;
+	const placeholderAttribute =
+		typeof placeholder === 'boolean' ? undefined : placeholder;
+
+	return {
+		disabled: toPresenceBooleanCustomAttribute( disabled ),
+		placeholder: toStringCustomAttribute( placeholderAttribute ),
+		inputAttributes,
+	};
+};
+
 const getHelp = ( description?: string ) =>
 	description ? (
 		<span
@@ -152,16 +188,18 @@ export const NativeSettingsField = ( {
 	}
 
 	if ( field.type === 'number' ) {
+		const numberInput = getNumberInputAttributes( field.customAttributes );
+
 		return (
 			<NumberSpinControl
 				id={ field.id }
 				label={ field.label }
 				help={ getHelp( field.description ) }
 				value={ toStringValue( value ) }
-				placeholder={ field.placeholder }
-				disabled={ field.disabled }
+				placeholder={ field.placeholder ?? numberInput.placeholder }
+				disabled={ field.disabled ?? numberInput.disabled }
 				onChange={ onChange }
-				inputAttributes={ field.customAttributes }
+				inputAttributes={ numberInput.inputAttributes }
 			/>
 		);
 	}

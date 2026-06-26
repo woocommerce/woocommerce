@@ -663,7 +663,7 @@ class WC_Meta_Box_Order_Data {
 								?>
 								<p class="form-field form-field-wide">
 									<label for="customer_note"><?php esc_html_e( 'Customer provided note', 'woocommerce' ); ?>:</label>
-									<textarea rows="1" cols="40" name="customer_note" tabindex="6" id="excerpt" placeholder="<?php esc_attr_e( 'Customer notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses( $order->get_customer_note(), array( 'br' => array() ) ); ?></textarea>
+									<textarea rows="1" cols="40" name="customer_note" tabindex="6" id="customer_note" placeholder="<?php esc_attr_e( 'Customer notes about the order', 'woocommerce' ); ?>"><?php echo wp_kses( $order->get_customer_note(), array( 'br' => array() ) ); ?></textarea>
 								</p>
 							<?php endif; ?>
 						</div>

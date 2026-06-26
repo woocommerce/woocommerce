@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { faker } from '@faker-js/faker';
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -8,7 +9,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  */
 import { expect, test } from '../../fixtures/fixtures';
 
-const randomNum = new Date().getTime().toString();
+const randomNum = faker.string.alphanumeric( 10 );
 const customer = {
 	username: `customer${ randomNum }`,
 	password: 'password',

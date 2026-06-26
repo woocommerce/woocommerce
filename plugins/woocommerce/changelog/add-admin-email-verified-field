@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a user profile control so admins can view and set a customer's email-confirmation status.
