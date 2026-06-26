@@ -21,7 +21,6 @@ export * from './product-name';
 export * from './product-price';
 export { default as ProductRating } from './product-rating';
 export { default as QuantitySelector } from './quantity-selector';
-export type { QuantitySelectorProps } from './quantity-selector/types';
 export * from './read-more';
 export * from './reviews';
 export * from './select';
