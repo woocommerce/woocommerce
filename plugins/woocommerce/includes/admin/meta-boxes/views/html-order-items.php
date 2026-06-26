@@ -471,7 +471,23 @@ if ( wc_tax_enabled() ) {
 				</header>
 				<article>
 					<form action="" method="post">
-						<table class="widefat">
+						<p class="search-box">
+							<label class="screen-reader-text" for="add_order_tax_search"><?php esc_html_e( 'Search tax rates:', 'woocommerce' ); ?></label>
+							<span class="screen-reader-text" id="add_order_tax_search_description">
+								<?php echo esc_html_x( 'Search by name, code, class, rate, or ID.', 'tax rate search input help', 'woocommerce' ); ?>
+							</span>
+							<input
+								type="search"
+								id="add_order_tax_search"
+								name="s"
+								data-wc-tax-rate-search
+								aria-describedby="add_order_tax_search_description"
+								placeholder="<?php echo esc_attr_x( 'Search', 'tax rate search input placeholder', 'woocommerce' ); ?>"
+							/>
+							<button type="submit" class="button"><?php esc_html_e( 'Search tax rates', 'woocommerce' ); ?></button>
+						</p>
+						<br class="clear" />
+						<table class="widefat striped wc-tax-rate-results" data-wc-tax-rate-results data-per_page="10">
 							<thead>
 								<tr>
 									<th>&nbsp;</th>
@@ -481,27 +497,51 @@ if ( wc_tax_enabled() ) {
 									<th><?php esc_html_e( 'Rate %', 'woocommerce' ); ?></th>
 								</tr>
 							</thead>
-						<?php
-						$rates = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name LIMIT 100" );
-						foreach ( $rates as $rate ) {
-							echo '
-									<tr>
-										<td><input type="radio" id="add_order_tax_' . absint( $rate->tax_rate_id ) . '" name="add_order_tax" value="' . absint( $rate->tax_rate_id ) . '" /></td>
-										<td><label for="add_order_tax_' . absint( $rate->tax_rate_id ) . '">' . esc_html( WC_Tax::get_rate_label( $rate ) ) . '</label></td>
-										<td>' . ( isset( $classes_options[ $rate->tax_rate_class ] ) ? esc_html( $classes_options[ $rate->tax_rate_class ] ) : '-' ) . '</td>
-										<td>' . esc_html( WC_Tax::get_rate_code( $rate ) ) . '</td>
-										<td>' . esc_html( WC_Tax::get_rate_percent( $rate ) ) . '</td>
-									</tr>
-								';
-						}
-						?>
+							<tbody>
+								<tr class="no-items">
+									<td class="colspanchange wc-tax-rate-status" colspan="5"><?php esc_html_e( 'Loading tax rates&hellip;', 'woocommerce' ); ?></td>
+								</tr>
+							</tbody>
 						</table>
-						<?php if ( absint( $wpdb->get_var( "SELECT COUNT(tax_rate_id) FROM {$wpdb->prefix}woocommerce_tax_rates;" ) ) > 100 ) : ?>
-							<p>
-								<label for="manual_tax_rate_id"><?php esc_html_e( 'Or, enter tax rate ID:', 'woocommerce' ); ?></label><br/>
-								<input type="number" name="manual_tax_rate_id" id="manual_tax_rate_id" step="1" placeholder="<?php esc_attr_e( 'Optional', 'woocommerce' ); ?>" />
-							</p>
-						<?php endif; ?>
+						<div class="tablenav bottom">
+							<div class="tablenav-pages" data-wc-tax-rate-pagination data-page="1" data-total-pages="1">
+								<span class="displaying-num"></span>
+								<span class="pagination-links">
+									<button type="button" class="first-page button" disabled>
+										<span class="screen-reader-text"><?php esc_html_e( 'First page', 'woocommerce' ); ?></span>
+										<span aria-hidden="true">&laquo;</span>
+									</button>
+									<button type="button" class="prev-page button" disabled>
+										<span class="screen-reader-text"><?php esc_html_e( 'Previous page', 'woocommerce' ); ?></span>
+										<span aria-hidden="true">&lsaquo;</span>
+									</button>
+									<span class="paging-input">
+										<label for="add_order_tax_current_page" class="screen-reader-text"><?php esc_html_e( 'Current page', 'woocommerce' ); ?></label>
+										<input class="current-page" id="add_order_tax_current_page" type="text" name="paged" value="1" size="1" aria-describedby="add-order-tax-table-paging" />
+										<span class="tablenav-paging-text" id="add-order-tax-table-paging">
+											<?php
+											echo wp_kses_post(
+												sprintf(
+													/* translators: %s: total number of pages. */
+													__( 'of %s', 'woocommerce' ),
+													'<span class="total-pages">1</span>'
+												)
+											);
+											?>
+										</span>
+									</span>
+									<button type="button" class="next-page button" disabled>
+										<span class="screen-reader-text"><?php esc_html_e( 'Next page', 'woocommerce' ); ?></span>
+										<span aria-hidden="true">&rsaquo;</span>
+									</button>
+									<button type="button" class="last-page button" disabled>
+										<span class="screen-reader-text"><?php esc_html_e( 'Last page', 'woocommerce' ); ?></span>
+										<span aria-hidden="true">&raquo;</span>
+									</button>
+								</span>
+							</div>
+							<br class="clear" />
+						</div>
 					</form>
 				</article>
 				<footer>

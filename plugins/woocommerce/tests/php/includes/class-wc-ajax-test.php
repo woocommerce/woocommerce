@@ -379,6 +379,71 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * Test tax rate JSON search supports searching rate details and location codes.
+	 */
+	public function test_json_search_tax_rates_supports_pagination_and_location_search(): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		$first_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '7.2500',
+				'tax_rate_name'     => 'California base rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_update_tax_rate_postcodes( $first_rate_id, '90001' );
+
+		$second_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '8.8750',
+				'tax_rate_name'     => 'New York base rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 2,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_update_tax_rate_postcodes( $second_rate_id, '10001' );
+
+		try {
+			$_GET['security'] = wp_create_nonce( 'search-tax-rates' );
+			$_GET['term']     = '10001';
+			$_GET['page']     = 1;
+			$_GET['per_page'] = 1;
+
+			$response = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 1, $response['pagination']['page'] );
+			$this->assertSame( 1, $response['pagination']['per_page'] );
+			$this->assertSame( 1, $response['pagination']['total'] );
+			$this->assertFalse( $response['pagination']['has_next'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $second_rate_id, $response['results'][0]['id'] );
+			$this->assertSame( 'New York base rate', $response['results'][0]['label'] );
+			$this->assertSame( 'US-NY-NEW YORK BASE RATE-1', $response['results'][0]['rate_code'] );
+			$this->assertSame( '8.8750%', $response['results'][0]['rate_percent'] );
+		} finally {
+			unset( $_GET['security'], $_GET['term'], $_GET['page'], $_GET['per_page'] );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rate_locations', array( 'tax_rate_id' => $first_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rate_locations', array( 'tax_rate_id' => $second_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $first_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $second_rate_id ) );
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
 	 * Describe JSON search, particularly as it relates to handling searches for users in a
 	 * multisite context (it should generally not be possible to retrieve information about
 	 * users who have not been added to the current blog).

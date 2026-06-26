@@ -1199,6 +1199,167 @@ jQuery( function ( $ ) {
 						$( document.body ).trigger( 'wc-enhanced-select-init' );
 					} );
 				}
+
+				if ( 'wc-modal-add-tax' === target ) {
+					wc_meta_boxes_order_items.backbone.init_tax_rate_modal( $( this ) );
+				}
+			},
+
+			init_tax_rate_modal: function( modal ) {
+				var load_tax_rates = function( page ) {
+					wc_meta_boxes_order_items.backbone.search_tax_rates( modal, page );
+				};
+
+				modal.on( 'submit', 'form', function( event ) {
+					event.preventDefault();
+					load_tax_rates( 1 );
+				} );
+
+				modal.on( 'click', '.first-page', function() {
+					load_tax_rates( 1 );
+				} );
+
+				modal.on( 'click', '.prev-page', function() {
+					var current_page = parseInt( modal.find( '[data-wc-tax-rate-pagination]' ).data( 'page' ), 10 ) || 1;
+					load_tax_rates( Math.max( 1, current_page - 1 ) );
+				} );
+
+				modal.on( 'click', '.next-page', function() {
+					var current_page = parseInt( modal.find( '[data-wc-tax-rate-pagination]' ).data( 'page' ), 10 ) || 1;
+					load_tax_rates( current_page + 1 );
+				} );
+
+				modal.on( 'click', '.last-page', function() {
+					var total_pages = parseInt( modal.find( '[data-wc-tax-rate-pagination]' ).data( 'total-pages' ), 10 ) || 1;
+					load_tax_rates( total_pages );
+				} );
+
+				modal.on( 'keydown', '.current-page', function( event ) {
+					if ( 13 !== event.which ) {
+						return;
+					}
+
+					event.preventDefault();
+
+					var total_pages = parseInt( modal.find( '[data-wc-tax-rate-pagination]' ).data( 'total-pages' ), 10 ) || 1,
+						page        = parseInt( $( this ).val(), 10 ) || 1;
+
+					load_tax_rates( Math.min( Math.max( 1, page ), total_pages ) );
+				} );
+
+				load_tax_rates( 1 );
+			},
+
+			search_tax_rates: function( modal, page ) {
+				var table      = modal.find( '[data-wc-tax-rate-results]' ),
+					table_body = table.find( 'tbody' ),
+					pagination = modal.find( '[data-wc-tax-rate-pagination]' ),
+					term       = modal.find( '[data-wc-tax-rate-search]' ).val(),
+					per_page   = parseInt( table.data( 'per_page' ), 10 ) || 10;
+
+				table_body.html( wc_meta_boxes_order_items.backbone.tax_rate_status_row( wc_enhanced_select_params.i18n_searching ) );
+				pagination.find( '.button, .current-page' ).prop( 'disabled', true );
+
+				$.ajax( {
+					url:      woocommerce_admin_meta_boxes.ajax_url,
+					dataType: 'json',
+					type:     'GET',
+					data:     {
+						action:   'woocommerce_json_search_tax_rates',
+						security: wc_enhanced_select_params.search_tax_rates_nonce,
+						term:     term,
+						page:     page,
+						per_page: per_page
+					},
+					success: function( response ) {
+						wc_meta_boxes_order_items.backbone.render_tax_rate_results( modal, response );
+					},
+					error: function() {
+						table_body.html(
+							wc_meta_boxes_order_items.backbone.tax_rate_status_row(
+								wc_enhanced_select_params.i18n_ajax_error
+							)
+						);
+						pagination.find( '.current-page' ).prop( 'disabled', false );
+					}
+				} );
+			},
+
+			tax_rate_status_row: function( message ) {
+				return $( '<tr class="no-items"></tr>' ).append(
+					$( '<td class="colspanchange wc-tax-rate-status" colspan="5"></td>' ).text( message )
+				);
+			},
+
+			tax_rate_empty_state_row: function() {
+				return $( '<tr class="no-items"></tr>' ).append(
+					$( '<td class="colspanchange wc-tax-rate-empty" colspan="5"></td>' ).append(
+						$( '<p class="wc-tax-rate-empty-title"></p>' ).text( wc_enhanced_select_params.i18n_no_tax_rates ),
+						$( '<p class="wc-tax-rate-empty-description"></p>' ).text( wc_enhanced_select_params.i18n_no_tax_rates_help ),
+						$( '<p class="wc-tax-rate-empty-action"></p>' ).append(
+							$( '<a></a>', {
+								class: 'woocommerce-BlankState-cta button',
+								href:  wc_enhanced_select_params.tax_rates_settings_url
+							} ).text( wc_enhanced_select_params.i18n_tax_settings )
+						)
+					)
+				);
+			},
+
+			tax_rate_result_row: function( rate ) {
+				var input_id = 'add_order_tax_' + rate.id,
+					radio    = $( '<input />', {
+						type:  'radio',
+						id:    input_id,
+						name:  'add_order_tax',
+						value: rate.id
+					} );
+
+				return $( '<tr></tr>' ).append(
+					$( '<td></td>' ).append( radio ),
+					$( '<td></td>' ).append( $( '<label></label>', { 'for': input_id } ).text( rate.label ) ),
+					$( '<td></td>' ).text( rate.tax_class ),
+					$( '<td></td>' ).text( rate.rate_code ),
+					$( '<td></td>' ).text( rate.rate_percent )
+				);
+			},
+
+			render_tax_rate_results: function( modal, response ) {
+				var table_body   = modal.find( '[data-wc-tax-rate-results] tbody' ),
+					pagination   = modal.find( '[data-wc-tax-rate-pagination]' ),
+					count        = pagination.find( '.displaying-num' ),
+					results      = response.results || [],
+					meta         = response.pagination || {},
+					total        = parseInt( meta.total, 10 ) || 0,
+					total_pages  = parseInt( meta.total_pages, 10 ) || 1,
+					current_page = parseInt( meta.page, 10 ) || 1,
+					search_term  = ( modal.find( '[data-wc-tax-rate-search]' ).val() || '' ).trim();
+
+				table_body.empty();
+
+				if ( ! results.length ) {
+					if ( ! search_term.length && 0 === total ) {
+						table_body.append( wc_meta_boxes_order_items.backbone.tax_rate_empty_state_row() );
+					} else {
+						table_body.append(
+							wc_meta_boxes_order_items.backbone.tax_rate_status_row(
+								wc_enhanced_select_params.i18n_no_matches
+							)
+						);
+					}
+				} else {
+					$.each( results, function( index, rate ) {
+						table_body.append( wc_meta_boxes_order_items.backbone.tax_rate_result_row( rate ) );
+					} );
+				}
+
+				pagination.data( 'page', current_page );
+				pagination.data( 'total-pages', total_pages );
+				pagination.find( '.current-page' ).val( current_page ).prop( 'disabled', false );
+				pagination.find( '.total-pages' ).text( total_pages );
+				pagination.find( '.first-page, .prev-page' ).prop( 'disabled', ! meta.has_prev );
+				pagination.find( '.next-page, .last-page' ).prop( 'disabled', ! meta.has_next );
+				count.text( total ? meta.displaying_num : '' );
 			},
 
 			response: function( e, target, data ) {

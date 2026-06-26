@@ -187,6 +187,7 @@ class WC_AJAX {
 			'add_order_note',
 			'delete_order_note',
 			'json_search_order_metakeys',
+			'json_search_tax_rates',
 			'json_search_products',
 			'json_search_products_and_variations',
 			'json_search_downloadable_products_and_variations',
@@ -1792,6 +1793,111 @@ class WC_AJAX {
 			wc_delete_order_note( $note_id );
 		}
 		wp_die();
+	}
+
+	/**
+	 * Search for tax rates and return json.
+	 *
+	 * @return void
+	 */
+	public static function json_search_tax_rates() {
+		check_ajax_referer( 'search-tax-rates', 'security' );
+
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			wp_die( -1 );
+		}
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$term     = isset( $_GET['term'] ) ? (string) wc_clean( wp_unslash( $_GET['term'] ) ) : '';
+		$page     = ! empty( $_GET['page'] ) ? absint( $_GET['page'] ) : 1;
+		$per_page = ! empty( $_GET['per_page'] ) ? absint( $_GET['per_page'] ) : absint( apply_filters( 'woocommerce_json_search_limit', 30 ) );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		global $wpdb;
+
+		$page            = max( 1, $page );
+		$per_page        = max( 1, min( $per_page, 100 ) );
+		$offset          = ( $page - 1 ) * $per_page;
+		$tax_rates       = $wpdb->prefix . 'woocommerce_tax_rates';
+		$tax_locations   = $wpdb->prefix . 'woocommerce_tax_rate_locations';
+		$classes         = wc_get_product_tax_class_options();
+		$found_tax_rates = array();
+		$where           = '';
+		$where_args      = array();
+
+		if ( '' !== $term ) {
+			$like       = '%' . $wpdb->esc_like( $term ) . '%';
+			$where      = "
+				WHERE CAST(tax_rates.tax_rate_id AS CHAR) LIKE %s
+					OR tax_rates.tax_rate_name LIKE %s
+					OR tax_rates.tax_rate_country LIKE %s
+					OR tax_rates.tax_rate_state LIKE %s
+					OR tax_rates.tax_rate_class LIKE %s
+					OR tax_rates.tax_rate LIKE %s
+					OR tax_locations.location_code LIKE %s
+			";
+			$where_args = array( $like, $like, $like, $like, $like, $like, $like );
+		}
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$count_query = "
+			SELECT COUNT(DISTINCT tax_rates.tax_rate_id)
+			FROM {$tax_rates} tax_rates
+			LEFT JOIN {$tax_locations} tax_locations
+				ON tax_rates.tax_rate_id = tax_locations.tax_rate_id
+			{$where}
+		";
+
+		$total = $where_args
+			? absint( $wpdb->get_var( $wpdb->prepare( $count_query, $where_args ) ) )
+			: absint( $wpdb->get_var( $count_query ) );
+
+		$rates = $wpdb->get_results(
+			$wpdb->prepare(
+				"
+				SELECT DISTINCT tax_rates.*
+				FROM {$tax_rates} tax_rates
+				LEFT JOIN {$tax_locations} tax_locations
+					ON tax_rates.tax_rate_id = tax_locations.tax_rate_id
+				{$where}
+				ORDER BY tax_rates.tax_rate_name, tax_rates.tax_rate_id
+				LIMIT %d OFFSET %d
+				",
+				array_merge( $where_args, array( $per_page, $offset ) )
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		foreach ( $rates as $rate ) {
+			$tax_class = isset( $classes[ $rate->tax_rate_class ] ) ? $classes[ $rate->tax_rate_class ] : __( 'Tax', 'woocommerce' );
+
+			$found_tax_rates[] = array(
+				'id'           => absint( $rate->tax_rate_id ),
+				'label'        => wp_strip_all_tags( WC_Tax::get_rate_label( $rate ) ),
+				'tax_class'    => wp_strip_all_tags( $tax_class ),
+				'rate_code'    => wp_strip_all_tags( WC_Tax::get_rate_code( $rate ) ),
+				'rate_percent' => wp_strip_all_tags( WC_Tax::get_rate_percent( $rate ) ),
+			);
+		}
+
+		wp_send_json(
+			array(
+				'results'    => $found_tax_rates,
+				'pagination' => array(
+					'page'           => $page,
+					'per_page'       => $per_page,
+					'total'          => $total,
+					'total_pages'    => $total ? (int) ceil( $total / $per_page ) : 1,
+					'has_prev'       => $page > 1,
+					'has_next'       => $page * $per_page < $total,
+					'displaying_num' => sprintf(
+						/* translators: %s: number of tax rates. */
+						_n( '%s item', '%s items', $total, 'woocommerce' ),
+						number_format_i18n( $total )
+					),
+				),
+			)
+		);
 	}
 
 	/**
