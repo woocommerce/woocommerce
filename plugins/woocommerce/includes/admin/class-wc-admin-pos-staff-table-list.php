@@ -239,13 +239,17 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 			admin_url( 'admin.php' )
 		);
 
-		$post_url = add_query_arg(
-			array(
-				'page'    => 'wc-settings',
-				'tab'     => 'point-of-sale',
-				'section' => 'staff',
+		$remove_url = wp_nonce_url(
+			add_query_arg(
+				array(
+					'page'             => 'wc-settings',
+					'tab'              => 'point-of-sale',
+					'section'          => 'staff',
+					'remove-pos-staff' => $user->ID,
+				),
+				admin_url( 'admin.php' )
 			),
-			admin_url( 'admin.php' )
+			'remove-pos-staff'
 		);
 
 		$confirm = sprintf(
@@ -254,18 +258,17 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 			$user->display_name
 		);
 
-		// Inline onclick is robust against script-load order and event-bubbling edge
-		// cases. wp_json_encode renders a safely-quoted JS string literal that we then
-		// drop into the HTML attribute through esc_attr.
+		// wp_json_encode renders a safely-quoted JS string literal that we drop
+		// into the onclick attribute via esc_attr.
 		$onclick = sprintf( 'return confirm(%s);', wp_json_encode( $confirm ) );
 
-		$remove  = '<form method="post" action="' . esc_url( $post_url ) . '" class="wc-pos-staff-remove-staff-form" style="display:inline;">';
-		$remove .= wp_nonce_field( 'remove-pos-staff', 'woocommerce_pos_staff_remove_nonce', true, false );
-		$remove .= '<input type="hidden" name="user_id" value="' . esc_attr( (string) $user->ID ) . '" />';
-		$remove .= '<button type="submit" name="remove_pos_staff" class="button-link submitdelete" onclick="' . esc_attr( $onclick ) . '">'
+		// A nonced GET link (WP's list-table convention for Trash/Delete) rather
+		// than a per-row <form>, which would nest inside WC's settings #mainform
+		// — invalid HTML that drops the first row's form and leaves its button
+		// unstyled.
+		$remove = '<a href="' . esc_url( $remove_url ) . '" class="wc-pos-staff-remove-link submitdelete" onclick="' . esc_attr( $onclick ) . '">'
 			. esc_html__( 'Remove POS access', 'woocommerce' )
-			. '</button>';
-		$remove .= '</form>';
+			. '</a>';
 
 		return array(
 			'<a href="' . esc_url( $edit_url ) . '">' . esc_html__( 'Edit', 'woocommerce' ) . '</a>',

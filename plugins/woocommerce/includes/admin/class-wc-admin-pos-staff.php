@@ -253,6 +253,14 @@ class WC_Admin_POS_Staff {
 			return;
 		}
 
+		// Remove is a nonced GET link (WP's list-table convention), so handle it
+		// before the POST-only gate below.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified in remove_staff().
+		if ( isset( $_GET['remove-pos-staff'] ) ) {
+			$this->remove_staff();
+			return;
+		}
+
 		if ( 'POST' !== ( isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) : '' ) ) {
 			return;
 		}
@@ -260,11 +268,6 @@ class WC_Admin_POS_Staff {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['pick_pos_staff'] ) ) {
 			$this->handle_pick_user();
-			return;
-		}
-
-		if ( isset( $_POST['remove_pos_staff'] ) ) {
-			$this->remove_staff();
 			return;
 		}
 
@@ -373,13 +376,14 @@ class WC_Admin_POS_Staff {
 	 * keeps the pos_staff label when it is the user's only role.
 	 */
 	private function remove_staff(): void {
-		check_admin_referer( 'remove-pos-staff', 'woocommerce_pos_staff_remove_nonce' );
+		check_admin_referer( 'remove-pos-staff' );
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_die( esc_html__( 'You do not have permission to manage POS staff.', 'woocommerce' ) );
 		}
 
-		$user_id = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- verified by check_admin_referer above.
+		$user_id = isset( $_GET['remove-pos-staff'] ) ? absint( wp_unslash( $_GET['remove-pos-staff'] ) ) : 0;
 		if ( ! $user_id || ! POSCapabilities::has_pos_access( $user_id ) ) {
 			wp_die( esc_html__( 'Invalid user or user does not have POS access.', 'woocommerce' ) );
 		}
@@ -491,6 +495,18 @@ class WC_Admin_POS_Staff {
 
 			.woocommerce .wc-pos-staff-page .wc-pos-staff-pos-only {
 				color: #50575e;
+			}
+
+			/*
+			Remove POS access is destructive: use WP/WC's delete-link red instead
+			of the default admin link blue.
+			*/
+			.woocommerce .wc-pos-staff-page .wc-pos-staff-remove-link {
+				color: #b32d2e;
+			}
+
+			.woocommerce .wc-pos-staff-page .wc-pos-staff-remove-link:hover {
+				color: #8a2424;
 			}
 		</style>
 		<?php
