@@ -193,9 +193,7 @@ final class PricingPolicy {
 	/**
 	 * Apply the recurring policy chain to a line total for the given cycle.
 	 *
-	 * BOGO is quantity-aware: for whole quantities, buy-one-get-one-free means
-	 * every second unit is free. Fractional quantities fall back to the charged
-	 * unit price because there is no stable "free item" boundary to apply.
+	 * Line totals use the effective unit price produced by calculate_price().
 	 *
 	 * @param float $unit_price The product's base unit price for this cycle.
 	 * @param float $quantity   Quantity on the line.
@@ -203,23 +201,7 @@ final class PricingPolicy {
 	 */
 	public function calculate_line_total( float $unit_price, float $quantity, int $cycle = 1 ): float {
 		$effective_unit_price = $this->calculate_price( $unit_price, $cycle );
-		$total                = max( 0.0, $effective_unit_price * $quantity );
-
-		foreach ( $this->policies as $policy ) {
-			if ( ! $this->policy_applies_to_cycle( $policy, $cycle ) ) {
-				continue;
-			}
-
-			$whole_quantity = (int) $quantity;
-			if ( (float) $whole_quantity !== $quantity || $whole_quantity < 2 ) {
-				continue;
-			}
-
-			$paid_quantity = (int) ceil( $whole_quantity / 2 );
-			$total         = max( 0.0, $effective_unit_price * $paid_quantity );
-		}
-
-		return $total;
+		return max( 0.0, $effective_unit_price * $quantity );
 	}
 
 	/**
