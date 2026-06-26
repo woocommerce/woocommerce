@@ -15,6 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * written through a dedicated REST endpoint instead of the deprecated Options
  * REST API (whose allowlist is frozen). This keeps the dismissal working in all
  * environments, including non-production.
+ *
+ * @internal
  */
 class TaxSettingsRecommendations {
 
@@ -107,6 +109,10 @@ class TaxSettingsRecommendations {
 	 * @return array
 	 */
 	public function preload_settings( $settings ) {
+		if ( ! is_array( $settings ) ) {
+			return $settings;
+		}
+
 		$settings['taxRecommendationsHidden'] = 'yes' === get_option( self::DISMISSED_OPTION_NAME );
 
 		return $settings;
