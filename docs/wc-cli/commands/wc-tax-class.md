@@ -1,7 +1,6 @@
 ---
 title: wc tax_class
 sidebar_label: wc tax_class
-sidebar_position: 26
 ---
 
 ## wc tax_class list
@@ -20,8 +19,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--name` - Tax class name. (*Required*)
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc tax_class delete [id]
+## wc tax_class delete `<slug>`
 
-- `--slug` - Unique slug for the resource.
 - `--force` - Required to be true, as resource does not support trashing.
 - `--porcelain` - Output just the id when the operation is successful.

@@ -1,7 +1,6 @@
 ---
 title: wc product
 sidebar_label: wc product
-sidebar_position: 9
 ---
 
 ## wc product list
@@ -90,9 +89,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--meta_data` - Meta data.
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc product get [id]
+## wc product get `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -102,9 +100,8 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-## wc product update [id]
+## wc product update `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--name` - Product name.
 - `--slug` - Product slug.
 - `--type` - Product type.
@@ -151,8 +148,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--meta_data` - Meta data.
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc product delete [id]
+## wc product delete `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--force` - Whether to bypass trash and force deletion.
 - `--porcelain` - Output just the id when the operation is successful.

@@ -1,7 +1,6 @@
 ---
 title: wc com
 sidebar_label: wc com
-sidebar_position: 2
 ---
 
 ## wc com connect
@@ -29,7 +28,6 @@ Options: product_slug, product_name, auto_renew, expires_on, expired, sites_max,
 
 ## wc com extension install `<extension>...`
 
-- `<extension>...` - One or more plugins to install from the available extensions. Accepts plugin slugs.
 - `--force` - If set, the command will overwrite any installed version of the extension without prompting for confirmation.
 - `--activate` - If set, after installation, the plugin will activate it.
 - `--activate-network` - If set, the plugin will be network activated immediately after installation

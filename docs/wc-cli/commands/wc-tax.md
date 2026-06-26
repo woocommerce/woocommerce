@@ -1,7 +1,6 @@
 ---
 title: wc tax
 sidebar_label: wc tax
-sidebar_position: 25
 ---
 
 ## wc tax list
@@ -39,9 +38,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--class` - Tax class.
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc tax get [id]
+## wc tax get `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -51,9 +49,8 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-## wc tax update [id]
+## wc tax update `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--country` - Country ISO 3166 code.
 - `--state` - State code.
 - `--postcode` - Postcode / ZIP.
@@ -67,8 +64,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--class` - Tax class.
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc tax delete [id]
+## wc tax delete `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--force` - Required to be true, as resource does not support trashing.
 - `--porcelain` - Output just the id when the operation is successful.

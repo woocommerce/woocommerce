@@ -1,7 +1,6 @@
 ---
 title: wc hpos
 sidebar_label: wc hpos
-sidebar_position: 5
 ---
 
 Commands for managing High-Performance Order Storage (HPOS). For detailed examples, see [HPOS CLI tools](/docs/features/high-performance-order-storage/cli-tools/).

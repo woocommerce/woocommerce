@@ -1,7 +1,6 @@
 ---
 title: wc customer
 sidebar_label: wc customer
-sidebar_position: 3
 ---
 
 ## wc customer list
@@ -37,9 +36,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--meta_data` - Meta data.
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc customer get [id]
+## wc customer get `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -49,9 +47,8 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-## wc customer update [id]
+## wc customer update `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--email` - The email address for the customer.
 - `--first_name` - Customer first name.
 - `--last_name` - Customer last name.
@@ -62,9 +59,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--meta_data` - Meta data.
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc customer delete [id]
+## wc customer delete `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--force` - Required to be true, as resource does not support trashing.
 - `--reassign` - ID to reassign posts to.
 - `--porcelain` - Output just the id when the operation is successful.

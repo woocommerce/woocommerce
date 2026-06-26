@@ -1,7 +1,6 @@
 ---
 title: wc palt
 sidebar_label: wc palt
-sidebar_position: 8
 ---
 
 Commands for managing the product attributes lookup table. The table stores denormalized product attribute term data used to speed up catalog filtering.

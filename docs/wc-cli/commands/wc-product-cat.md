@@ -1,7 +1,6 @@
 ---
 title: wc product_cat
 sidebar_label: wc product_cat
-sidebar_position: 12
 ---
 
 ## wc product_cat list
@@ -37,9 +36,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--menu_order` - Menu order, used to custom sort the resource.
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc product_cat get [id]
+## wc product_cat get `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -49,9 +47,8 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-## wc product_cat update [id]
+## wc product_cat update `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--name` - Category name.
 - `--slug` - An alphanumeric identifier for the resource unique to its type.
 - `--parent` - The ID for the parent of the resource.
@@ -61,8 +58,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--menu_order` - Menu order, used to custom sort the resource.
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc product_cat delete [id]
+## wc product_cat delete `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--force` - Required to be true, as resource does not support trashing.
 - `--porcelain` - Output just the id when the operation is successful.

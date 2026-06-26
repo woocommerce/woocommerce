@@ -1,12 +1,10 @@
 ---
 title: wc product_variation
 sidebar_label: wc product_variation
-sidebar_position: 16
 ---
 
 ## wc product_variation list `<product_id>`
 
-- `--product_id` - Unique identifier for the variable product.
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--page` - Current page of the collection.
 - `--per_page` - Maximum number of items to be returned in result set. Defaults to 100 items.
@@ -45,7 +43,6 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc product_variation create `<product_id>`
 
-- `--product_id` - Unique identifier for the variable product.
 - `--description` - Variation description.
 - `--sku` - Unique identifier.
 - `--regular_price` - Variation regular price.
@@ -75,10 +72,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--meta_data` - Meta data.
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc product_variation get `<product_id>` [id]
+## wc product_variation get `<product_id>` `<id>`
 
-- `--product_id` - Unique identifier for the variable product.
-- `--id` - Unique identifier for the variation.
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -88,10 +83,8 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-## wc product_variation update `<product_id>` [id]
+## wc product_variation update `<product_id>` `<id>`
 
-- `--product_id` - Unique identifier for the variable product.
-- `--id` - Unique identifier for the variation.
 - `--description` - Variation description.
 - `--sku` - Unique identifier.
 - `--regular_price` - Variation regular price.
@@ -121,9 +114,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--meta_data` - Meta data.
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc product_variation delete `<product_id>` [id]
+## wc product_variation delete `<product_id>` `<id>`
 
-- `--product_id` - Unique identifier for the variable product.
-- `--id` - Unique identifier for the variation.
 - `--force` - Whether to bypass trash and force deletion.
 - `--porcelain` - Output just the id when the operation is successful.

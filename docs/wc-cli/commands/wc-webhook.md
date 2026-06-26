@@ -1,7 +1,6 @@
 ---
 title: wc webhook
 sidebar_label: wc webhook
-sidebar_position: 29
 ---
 
 ## wc webhook list
@@ -35,9 +34,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--delivery_url` - Webhook delivery URL. (*Required*)
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc webhook get [id]
+## wc webhook get `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -47,17 +45,15 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-## wc webhook update [id]
+## wc webhook update `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--name` - A friendly name for the webhook.
 - `--status` - Webhook status.
 - `--topic` - Webhook topic.
 - `--secret` - Secret key used to generate a hash of the delivered webhook and provided in the request headers. This will default is a MD5 hash from the current user's ID|username if not provided.
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc webhook delete [id]
+## wc webhook delete `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--force` - Required to be true, as resource does not support trashing.
 - `--porcelain` - Output just the id when the operation is successful.

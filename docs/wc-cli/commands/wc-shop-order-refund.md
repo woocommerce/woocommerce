@@ -1,12 +1,10 @@
 ---
 title: wc shop_order_refund
 sidebar_label: wc shop_order_refund
-sidebar_position: 24
 ---
 
 ## wc shop_order_refund list `<order_id>`
 
-- `--order_id` - The order ID.
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--page` - Current page of the collection.
 - `--per_page` - Maximum number of items to be returned in result set. Defaults to 100 items.
@@ -31,7 +29,6 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc shop_order_refund create `<order_id>`
 
-- `--order_id` - The order ID.
 - `--amount` - Refund amount.
 - `--reason` - Reason for refund.
 - `--refunded_by` - User ID of user who created the refund.
@@ -40,10 +37,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--api_refund` - When true, the payment gateway API is used to generate the refund.
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc shop_order_refund get `<order_id>` [id]
+## wc shop_order_refund get `<order_id>` `<id>`
 
-- `--order_id` - The order ID.
-- `--id` - Unique identifier for the resource.
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -53,9 +48,7 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-## wc shop_order_refund delete `<order_id>` [id]
+## wc shop_order_refund delete `<order_id>` `<id>`
 
-- `--order_id` - The order ID.
-- `--id` - Unique identifier for the resource.
 - `--force` - Required to be true, as resource does not support trashing.
 - `--porcelain` - Output just the id when the operation is successful.

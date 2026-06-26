@@ -1,7 +1,6 @@
 ---
 title: wc product_tag
 sidebar_label: wc product_tag
-sidebar_position: 15
 ---
 
 ## wc product_tag list
@@ -33,9 +32,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--description` - HTML description of the resource.
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc product_tag get [id]
+## wc product_tag get `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -45,16 +43,14 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-## wc product_tag update [id]
+## wc product_tag update `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--name` - Tag name.
 - `--slug` - An alphanumeric identifier for the resource unique to its type.
 - `--description` - HTML description of the resource.
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc product_tag delete [id]
+## wc product_tag delete `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--force` - Required to be true, as resource does not support trashing.
 - `--porcelain` - Output just the id when the operation is successful.

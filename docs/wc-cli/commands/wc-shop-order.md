@@ -1,7 +1,6 @@
 ---
 title: wc shop_order
 sidebar_label: wc shop_order
-sidebar_position: 23
 ---
 
 ## wc shop_order list
@@ -51,9 +50,8 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--set_paid` - Define if the order is paid. It will set the status to processing and reduce stock items.
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc shop_order get [id]
+## wc shop_order get `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -63,9 +61,8 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-## wc shop_order update [id]
+## wc shop_order update `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--parent_id` - Parent order ID.
 - `--status` - Order status.
 - `--currency` - Currency the order was created with, in ISO format.
@@ -84,8 +81,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--set_paid` - Define if the order is paid. It will set the status to processing and reduce stock items.
 - `--porcelain` - Output just the id when the operation is successful.
 
-## wc shop_order delete [id]
+## wc shop_order delete `<id>`
 
-- `--id` - Unique identifier for the resource.
 - `--force` - Whether to bypass trash and force deletion.
 - `--porcelain` - Output just the id when the operation is successful.

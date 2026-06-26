@@ -1,7 +1,6 @@
 ---
 title: wc tool
 sidebar_label: wc tool
-sidebar_position: 27
 ---
 
 ## wc tool list
@@ -14,6 +13,5 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-## wc tool run [id]
+## wc tool run `<id>`
 
-- `--id` - The id for the resource.
