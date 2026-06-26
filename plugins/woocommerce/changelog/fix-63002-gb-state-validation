@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fix block checkout showing a required state/county validation error on first visit for countries where the state field is optional, such as the UK.
+
+

@@ -60,6 +60,7 @@ const ValidatedTextInput = forwardRef<
 			validateOnMount = true,
 			instanceId: preferredInstanceId = '',
 			icon = null,
+			required,
 			...rest
 		},
 		forwardedRef
@@ -67,8 +68,9 @@ const ValidatedTextInput = forwardRef<
 		// True on mount.
 		const [ isPristine, setIsPristine ] = useState( true );
 
-		// Track incoming value.
+		// Track incoming value and required prop.
 		const previousValue = usePrevious( value );
+		const previousRequired = usePrevious( required );
 
 		// Ref for the input element.
 		const inputRef = useRef< HTMLInputElement >( null );
@@ -246,6 +248,22 @@ const ValidatedTextInput = forwardRef<
 			validateInput,
 		] );
 
+		/**
+		 * Re-validate when the required prop changes.
+		 *
+		 * This clears stale validation errors that were set while the input was
+		 * required (e.g. during the initial empty-country cart state) but should no
+		 * longer apply once the field becomes optional (e.g. after the country locale
+		 * is resolved). The effect is gated on isPristine and previousRequired so it
+		 * does not duplicate the mount validation effect.
+		 */
+		useEffect( () => {
+			if ( isPristine || previousRequired === required ) {
+				return;
+			}
+			validateInput( true );
+		}, [ isPristine, previousRequired, required, validateInput ] );
+
 		// Remove validation errors when unmounted.
 		useEffect( () => {
 			return () => {
@@ -285,6 +303,7 @@ const ValidatedTextInput = forwardRef<
 						feedback
 					)
 				}
+				required={ required }
 				ref={ inputRef }
 				onChange={ ( newValue ) => {
 					// Hide errors while typing.
