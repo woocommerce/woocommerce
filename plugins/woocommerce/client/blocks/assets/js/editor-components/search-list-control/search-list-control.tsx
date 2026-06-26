@@ -23,7 +23,11 @@ import { useInstanceId } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { getFilteredList, defaultMessages } from './utils';
+import {
+	getFilteredList,
+	defaultMessages,
+	isExpandedOrDescendantIsExpanded,
+} from './utils';
 import SearchListItem from './item';
 import Tag from '../tag';
 import type {
@@ -35,24 +39,6 @@ import type {
 	SearchListItemsContainerProps,
 } from './types';
 import './style.scss';
-
-const isExpandedOrDescendantIsExpanded = (
-	item: SearchListItemProps,
-	expandedPanelId: number | null
-): boolean => {
-	if ( expandedPanelId === null ) {
-		return false;
-	}
-	if ( item.id === expandedPanelId ) {
-		return true;
-	}
-	if ( Array.isArray( item.children ) && item.children.length > 0 ) {
-		return item.children.some( ( child ) =>
-			isExpandedOrDescendantIsExpanded( child, expandedPanelId )
-		);
-	}
-	return false;
-};
 
 const defaultRenderListItem = ( args: RenderItemArgs ): JSX.Element => {
 	return <SearchListItem { ...args } />;

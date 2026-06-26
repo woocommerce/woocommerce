@@ -14,7 +14,11 @@ import type {
 	RenderItemArgs,
 	SearchListItem as SearchListItemProps,
 } from './types';
-import { getHighlightedName, getBreadcrumbsForDisplay } from './utils';
+import {
+	getHighlightedName,
+	getBreadcrumbsForDisplay,
+	isExpandedOrDescendantIsExpanded,
+} from './utils';
 
 const getItemDescendants = (
 	item: SearchListItemProps
@@ -27,22 +31,6 @@ const getItemDescendants = (
 		return [];
 	}
 	return descendants.flat();
-};
-
-const isExpandedOrDescendantIsExpanded = (
-	item: SearchListItemProps,
-	expandedPanelId: number | null
-): boolean => {
-	if ( expandedPanelId === null ) {
-		return false;
-	}
-	if ( item.id === expandedPanelId ) {
-		return true;
-	}
-	const descendants = getItemDescendants( item );
-	return descendants.some(
-		( descendant ) => descendant.id === expandedPanelId
-	);
 };
 
 const areSomeDescendantsSelected = (
@@ -94,6 +82,7 @@ export const SearchListItem = < T extends object = object >( {
 	className,
 	depth = 0,
 	controlId = '',
+	disabled = false,
 	item,
 	isSelected,
 	isSelectable = true,
@@ -148,7 +137,7 @@ export const SearchListItem = < T extends object = object >( {
 		setExpandedPanelId( null );
 	}, [ isExpanded, item.id, item.parent, setExpandedPanelId ] );
 
-	// Non-selectable items (like Product Attributes) should look selecteed when
+	// Non-selectable items (like Product Attributes) should look selected when
 	// all their descendants are selected, but look indeterminate when only some
 	// are selected.
 	const looksSelected =
@@ -175,6 +164,7 @@ export const SearchListItem = < T extends object = object >( {
 						onChange={ onSelect( item ) }
 						onClick={ ( e ) => e.stopPropagation() }
 						checked={ isSelected }
+						disabled={ disabled }
 						className="woocommerce-search-list__item-input"
 						{ ...props }
 					/>
@@ -190,6 +180,7 @@ export const SearchListItem = < T extends object = object >( {
 					<CheckboxControl
 						className="woocommerce-search-list__item-input"
 						checked={ looksSelected }
+						disabled={ disabled }
 						indeterminate={
 							! looksSelected &&
 							areSomeDescendantsSelected( item, selected )
@@ -240,7 +231,10 @@ export const SearchListItem = < T extends object = object >( {
 		// Items can be enabled via the radios and checkboxes. But we make the
 		// whole row clickable for convenience.
 		// eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
-		<div className={ classes } onClick={ onSelect( item ) }>
+		<div
+			className={ classes }
+			onClick={ disabled ? undefined : onSelect( item ) }
+		>
 			{ isSingle ? (
 				<>
 					<input
@@ -251,6 +245,7 @@ export const SearchListItem = < T extends object = object >( {
 						value={ item.value }
 						onChange={ onSelect( item ) }
 						checked={ isSelected }
+						disabled={ disabled }
 						className="woocommerce-search-list__item-input"
 						onClick={ ( e ) => e.stopPropagation() }
 					/>
@@ -272,6 +267,7 @@ export const SearchListItem = < T extends object = object >( {
 					) }
 					onChange={ onSelect( item ) }
 					checked={ isSelected }
+					disabled={ disabled }
 					__nextHasNoMarginBottom={ true }
 					onClick={ ( e ) => e.stopPropagation() }
 				/>
