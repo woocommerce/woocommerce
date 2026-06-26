@@ -29,8 +29,8 @@ export const DismissableListHeading = ( {
 
 	const handleDismissClick = () => {
 		onDismiss();
-		// When no option name is provided the list is controlled by the parent
-		// (e.g. persisted as a user preference), so skip the legacy Options API.
+		// Persist via the legacy Options API only in option-backed mode. In
+		// controlled mode (no option name) the parent handles persistence.
 		if ( dismissOptionName ) {
 			updateOptions( {
 				[ dismissOptionName ]: 'yes',
