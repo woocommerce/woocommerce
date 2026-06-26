@@ -36,14 +36,127 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 	color: var(--wp--preset--color--theme-2);
 }
 
+.wp-block-woocommerce-checkout .wc-block-components-title {
+	font-size: var(--wp--preset--font-size--large);
+	line-height: 1.18;
+}
+
+.wc-block-components-form .wc-block-components-checkout-step {
+	margin-bottom: var(--wp--preset--spacing--50);
+}
+
+.wc-block-components-checkout-step__heading-container {
+	margin-bottom: var(--wp--preset--spacing--20);
+}
+
+.wp-block-woocommerce-checkout-order-summary-block {
+	border-radius: 0;
+}
+
+.wp-block-woocommerce-checkout .wc-block-components-text-input:not(.has-error) input,
+.wp-block-woocommerce-checkout .wc-block-components-textarea:not(.has-error),
+.wp-block-woocommerce-checkout .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__select,
+.wp-block-woocommerce-checkout .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__container,
+.wp-block-woocommerce-checkout .wc-block-components-checkbox__input[type="checkbox"] {
+	border-color: var(--wp--preset--color--theme-6);
+	border-radius: 0;
+}
+
+.wp-block-woocommerce-checkout .wc-block-components-text-input:not(.has-error) input:focus,
+.wp-block-woocommerce-checkout .wc-block-components-textarea:not(.has-error):focus,
+.wp-block-woocommerce-checkout .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__select:focus {
+	border-color: var(--wp--preset--color--theme-6);
+	box-shadow: 0 0 0 0.5px var(--wp--preset--color--theme-6);
+}
+
 .wp-block-woocommerce-product-gallery-is-layout-flex {
 	gap: var(--wp--preset--spacing--50);
 }
 
-/* https://github.com/woocommerce/woocommerce/issues/59391 */
+/* My Account — classic shortcode UI; https://github.com/woocommerce/woocommerce/issues/59391 */
+.woocommerce-account {
+	--wc-form-border-color: var(--wp--preset--color--theme-6);
+	--wc-form-border-radius: 0;
+}
+
 .woocommerce-account .entry-content > .woocommerce {
 	padding-top: var(--wp--preset--spacing--70);
 	padding-bottom: var(--wp--preset--spacing--90);
+}
+
+.woocommerce-account form .form-row:not(.woocommerce-invalid) .input-text,
+.woocommerce-account form .form-row:not(.woocommerce-invalid) select,
+.woocommerce-account form .form-row:not(.woocommerce-invalid) textarea,
+.woocommerce-account .woocommerce-Input:not([type="hidden"]),
+.woocommerce-account .select2-container .select2-selection {
+	border-color: var(--wp--preset--color--theme-6);
+	border-radius: 0;
+}
+
+.woocommerce-account form .form-row:not(.woocommerce-invalid) .input-text:focus,
+.woocommerce-account form .form-row:not(.woocommerce-invalid) select:focus,
+.woocommerce-account form .form-row:not(.woocommerce-invalid) textarea:focus,
+.woocommerce-account .woocommerce-Input:not([type="hidden"]):focus,
+.woocommerce-account .select2-container--open .select2-selection,
+.woocommerce-account .select2-container--focus .select2-selection {
+	border-color: var(--wp--preset--color--theme-6);
+}
+
+.woocommerce form.checkout_coupon,
+.woocommerce form.login,
+.woocommerce form.register {
+	border: none;
+	padding: 0;
+}
+
+.woocommerce form .form-row {
+	padding: 0;
+	margin-bottom: var(--wp--preset--spacing--20);
+}
+
+.woocommerce form .form-row label:not(:has(input[type="checkbox"])) {
+	font-size: var(--wp--preset--font-size--medium);
+	line-height: 1.71;
+	margin-bottom: 5px;
+}
+
+.woocommerce form .form-row label:has(input[type="checkbox"]) {
+	align-items: center;
+	display: inline-flex;
+	font-size: var(--wp--preset--font-size--medium);
+	gap: 0.5em;
+	line-height: 1;
+	margin: 0;
+}
+
+.woocommerce-form-login .form-row:has(.woocommerce-form-login__submit) {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0;
+}
+
+.woocommerce-form-login .woocommerce-form-login__rememberme {
+	margin: 0;
+}
+
+.woocommerce-form-login .woocommerce-form-login__submit {
+	float: none;
+	margin: 0;
+	order: -1;
+}
+
+.woocommerce-account h2:has(+ .woocommerce-form-login) {
+	margin-block: var(--wp--preset--spacing--30);
+}
+
+.woocommerce-LostPassword.lost_password {
+	margin-bottom: 0;
+	margin-top: var(--wp--preset--spacing--50);
+}
+
+.woocommerce-MyAccount-content a:where(:not(.button):not(.wp-element-button)) {
+	text-decoration: underline;
 }
 
 /* WOOPRD-1561: My Account address styles. */

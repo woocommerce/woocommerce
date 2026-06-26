@@ -86,37 +86,37 @@
 			"spacingSizes": [
 				{
 					"name": "2X-Small",
-					"size": "min(calc(var(--wp--custom--spacing-unit) * 1 * 1px), calc(var(--wp--custom--spacing-unit) * 1 * 1px * 100vw / var(--wp--style--global--wide-size)))",
+					"size": "clamp(10px, calc(var(--wp--custom--spacing-unit) * 1 * 1px * 100vw / var(--wp--style--global--wide-size)), calc(var(--wp--custom--spacing-unit) * 1 * 1px))",
 					"slug": "10"
 				},
 				{
 					"name": "X-Small",
-					"size": "min(calc(var(--wp--custom--spacing-unit) * 2 * 1px), calc(var(--wp--custom--spacing-unit) * 2 * 1px * 100vw / var(--wp--style--global--wide-size)))",
+					"size": "clamp(14px, calc(var(--wp--custom--spacing-unit) * 2 * 1px * 100vw / var(--wp--style--global--wide-size)), calc(var(--wp--custom--spacing-unit) * 2 * 1px))",
 					"slug": "20"
 				},
 				{
 					"name": "Small",
-					"size": "min(calc(var(--wp--custom--spacing-unit) * 3 * 1px), calc(var(--wp--custom--spacing-unit) * 3 * 1px * 100vw / var(--wp--style--global--wide-size)))",
+					"size": "clamp(21px, calc(var(--wp--custom--spacing-unit) * 3 * 1px * 100vw / var(--wp--style--global--wide-size)), calc(var(--wp--custom--spacing-unit) * 3 * 1px))",
 					"slug": "30"
 				},
 				{
 					"name": "Regular",
-					"size": "min(calc(var(--wp--custom--spacing-unit) * 5 * 1px), calc(var(--wp--custom--spacing-unit) * 5 * 1px * 100vw / var(--wp--style--global--wide-size)))",
+					"size": "clamp(30px, calc(var(--wp--custom--spacing-unit) * 5 * 1px * 100vw / var(--wp--style--global--wide-size)), calc(var(--wp--custom--spacing-unit) * 5 * 1px))",
 					"slug": "50"
 				},
 				{
 					"name": "Large",
-					"size": "min(calc(var(--wp--custom--spacing-unit) * 7 * 1px), calc(var(--wp--custom--spacing-unit) * 7 * 1px * 100vw / var(--wp--style--global--wide-size)))",
+					"size": "clamp(50px, calc(var(--wp--custom--spacing-unit) * 7 * 1px * 100vw / var(--wp--style--global--wide-size)), calc(var(--wp--custom--spacing-unit) * 7 * 1px))",
 					"slug": "70"
 				},
 				{
 					"name": "Extra Large",
-					"size": "min(calc(var(--wp--custom--spacing-unit) * 9 * 1px), calc(var(--wp--custom--spacing-unit) * 9 * 1px * 100vw / var(--wp--style--global--wide-size)))",
+					"size": "clamp(50px, calc(var(--wp--custom--spacing-unit) * 9 * 1px * 100vw / var(--wp--style--global--wide-size)), calc(var(--wp--custom--spacing-unit) * 9 * 1px))",
 					"slug": "90"
 				},
 				{
 					"name": "2X Large",
-					"size": "min(calc(var(--wp--custom--spacing-unit) * 14 * 1px), calc(var(--wp--custom--spacing-unit) * 14 * 1px * 100vw / var(--wp--style--global--wide-size)))",
+					"size": "clamp(70px, calc(var(--wp--custom--spacing-unit) * 14 * 1px * 100vw / var(--wp--style--global--wide-size)), calc(var(--wp--custom--spacing-unit) * 14 * 1px))",
 					"slug": "140"
 				}
 			]
@@ -608,8 +608,8 @@
 				"spacing": {
 					"padding": {
 						"bottom": "0.75rem",
-						"left": "var(--wp--preset--spacing--20)",
-						"right": "var(--wp--preset--spacing--20)",
+						"left": "1.25rem",
+						"right": "1.25rem",
 						"top": "0.75rem"
 					}
 				},
