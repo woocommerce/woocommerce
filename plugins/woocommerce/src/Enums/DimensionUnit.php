@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Enums;
 /**
  * Enum class for the possible values of the 'woocommerce_dimension_unit' option.
  *
- * @since 10.8.0
+ * @since 11.0.0
  */
 final class DimensionUnit {
 	/**
