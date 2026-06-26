@@ -697,6 +697,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
 	 *
+	 * Subclasses that override this method to write custom product-type meta should also override
+	 * update_post_meta_internal() so those writes run during object creation.
+	 *
 	 * @param WC_Product $product Product object.
 	 * @param bool       $force Force update. Used during create.
 	 * @since 3.0.0
@@ -708,6 +711,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 	/**
 	 * Internal implementation of update_post_meta() that also knows whether the product is being created.
+	 *
+	 * Subclasses that override update_post_meta() to write custom product-type meta should also override
+	 * this method so those writes run during object creation.
 	 *
 	 * @param WC_Product $product Product object.
 	 * @param bool       $force Force update. Used during create.

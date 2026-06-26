@@ -396,6 +396,24 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Creating a grouped product persists children on the initial save.
+	 */
+	public function test_grouped_product_create_persists_children_on_initial_save(): void {
+		$child_1 = WC_Helper_Product::create_simple_product();
+		$child_2 = WC_Helper_Product::create_simple_product();
+
+		$product = new WC_Product_Grouped();
+		$product->set_name( 'Grouped product' );
+		$product->set_children( array( $child_1->get_id(), $child_2->get_id() ) );
+		$product->save();
+
+		$product_id = $product->get_id();
+
+		$this->assertSame( array( $child_1->get_id(), $child_2->get_id() ), get_post_meta( $product_id, '_children', true ) );
+		$this->assertSame( array( $child_1->get_id(), $child_2->get_id() ), wc_get_product( $product_id )->get_children() );
+	}
+
+	/**
 	 * Test update_product_sales updates on the meta-entry.
 	 */
 	public function test_update_product_sales_meta_update(): void {
