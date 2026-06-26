@@ -28,28 +28,11 @@ class TaxSettingsRecommendations {
 	const DISMISSED_OPTION_NAME = 'woocommerce_settings_tax_recommendations_hidden';
 
 	/**
-	 * Class instance.
+	 * Class initialization, to be executed when the class is resolved by the container.
 	 *
-	 * @var TaxSettingsRecommendations instance
+	 * @internal
 	 */
-	protected static $instance = null;
-
-	/**
-	 * Get class instance.
-	 *
-	 * @return object Instance.
-	 */
-	public static function get_instance() {
-		if ( null === self::$instance ) {
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-
-	/**
-	 * Hook into WooCommerce.
-	 */
-	public function __construct() {
+	final public function init(): void {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
 	}

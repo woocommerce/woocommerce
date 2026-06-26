@@ -69,8 +69,8 @@ class Loader {
 		Settings::get_instance();
 		SiteHealth::get_instance();
 		SystemStatusReport::get_instance();
-		TaxSettingsRecommendations::get_instance();
 
+		wc_get_container()->get( TaxSettingsRecommendations::class );
 		wc_get_container()->get( Reviews::class );
 		wc_get_container()->get( ReviewsCommentsOverrides::class );
 
