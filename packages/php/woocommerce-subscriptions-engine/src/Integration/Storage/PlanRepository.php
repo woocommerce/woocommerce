@@ -134,15 +134,20 @@ final class PlanRepository {
 		global $wpdb;
 
 		$table  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
-		$where  = $this->build_where_clauses( $args );
 		$order  = $this->build_order_clause( $args );
 		$limit  = max( 1, self::coerce_int( $args['limit'] ?? null, 50 ) );
 		$offset = max( 0, self::coerce_int( $args['offset'] ?? null, 0 ) );
 
-		$sql = "SELECT * FROM {$table}{$where} {$order} LIMIT %d OFFSET %d";
+		// phpcs:ignore Generic.Arrays.DisallowShortArraySyntax.Found
+		[
+			'sql'    => $where_sql,
+			'params' => $where_params,
+		] = $this->build_where_clause( $args );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
-		$rows = $wpdb->get_results( $wpdb->prepare( $sql, $limit, $offset ), ARRAY_A );
+		$params = array( ...$where_params, $limit, $offset );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table}{$where_sql} {$order} LIMIT %d OFFSET %d", $params ), ARRAY_A );
 		if ( ! is_array( $rows ) ) {
 			return array();
 		}
@@ -169,10 +174,22 @@ final class PlanRepository {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
-		$where = $this->build_where_clauses( $args );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}{$where}" );
+		// phpcs:ignore Generic.Arrays.DisallowShortArraySyntax.Found
+		[
+			'sql'    => $where_sql,
+			'params' => $where_params,
+		] = $this->build_where_clause( $args );
+
+		if ( array() === $where_params ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$result = $wpdb->get_var( "SELECT COUNT(*) FROM {$table}{$where_sql}" );
+		} else {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			$result = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table}{$where_sql}", $where_params ) );
+		}
+
+		return (int) $result;
 	}
 
 	/**
@@ -307,23 +324,27 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Build SQL WHERE clauses from supported query args.
+	 * Build SQL WHERE clauses and params from supported query args.
 	 *
 	 * @param array<string, mixed> $args Query args.
+	 * @return array{sql: string, params: array<int, mixed>}
 	 */
-	private function build_where_clauses( array $args ): string {
+	private function build_where_clause( array $args ): array {
 		global $wpdb;
 
 		$clauses = array();
+		$params  = array();
 
 		$status = self::coerce_string( $args['status'] ?? null );
 		if ( '' !== $status ) {
-			$clauses[] = $wpdb->prepare( 'status = %s', $status );
+			$clauses[] = 'status = %s';
+			$params[]  = $status;
 		}
 
 		if ( array_key_exists( 'extension_slug', $args ) ) {
 			if ( self::is_valid_extension_slug( $args['extension_slug'] ) ) {
-				$clauses[] = $wpdb->prepare( 'extension_slug = %s', $args['extension_slug'] );
+				$clauses[] = 'extension_slug = %s';
+				$params[]  = $args['extension_slug'];
 			} else {
 				$clauses[] = '0 = 1';
 			}
@@ -349,7 +370,8 @@ final class PlanRepository {
 						$are_extension_slugs_valid = true;
 
 						$extension_slugs = array_values( $valid_slugs );
-						$clauses[]       = $wpdb->prepare( 'extension_slug IN (' . implode( ',', array_fill( 0, count( $extension_slugs ), '%s' ) ) . ')', $extension_slugs );
+						$clauses[]       = 'extension_slug IN (' . implode( ',', array_fill( 0, count( $extension_slugs ), '%s' ) ) . ')';
+						$params          = array_merge( $params, $extension_slugs );
 					}
 				}
 			}
@@ -362,14 +384,22 @@ final class PlanRepository {
 		$search = self::coerce_string( $args['search'] ?? null );
 		if ( '' !== $search ) {
 			$like      = '%' . $wpdb->esc_like( $search ) . '%';
-			$clauses[] = $wpdb->prepare( '(name LIKE %s OR description LIKE %s)', $like, $like );
+			$clauses[] = '(name LIKE %s OR description LIKE %s)';
+			$params[]  = $like;
+			$params[]  = $like;
 		}
 
 		if ( empty( $clauses ) ) {
-			return '';
+			return array(
+				'sql'    => '',
+				'params' => array(),
+			);
 		}
 
-		return ' WHERE ' . implode( ' AND ', $clauses );
+		return array(
+			'sql'    => ' WHERE ' . implode( ' AND ', $clauses ),
+			'params' => $params,
+		);
 	}
 
 	/**
