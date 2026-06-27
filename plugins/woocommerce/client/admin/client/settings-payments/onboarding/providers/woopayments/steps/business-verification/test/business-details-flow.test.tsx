@@ -16,6 +16,63 @@ import BusinessDetails from '../sections/business-details';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 
+jest.mock( '@wordpress/components', () => {
+	const ReactModule = jest.requireActual< typeof import('react') >( 'react' );
+
+	return {
+		Button: ReactModule.forwardRef(
+			(
+				{
+					children,
+					isBusy,
+					variant,
+					...props
+				}: React.ButtonHTMLAttributes< HTMLButtonElement > & {
+					isBusy?: boolean;
+					variant?: string;
+				},
+				ref: React.Ref< HTMLButtonElement >
+			) => (
+				<button
+					{ ...props }
+					ref={ ref }
+					data-busy={ isBusy ? 'true' : undefined }
+					data-variant={ variant }
+				>
+					{ children }
+				</button>
+			)
+		),
+		TextControl: ReactModule.forwardRef(
+			(
+				{
+					label,
+					onChange,
+					value,
+					...props
+				}: React.InputHTMLAttributes< HTMLInputElement > & {
+					label?: string;
+					onChange?: ( value: string ) => void;
+				},
+				ref: React.Ref< HTMLInputElement >
+			) => (
+				<>
+					{ label && <span>{ label }</span> }
+					<input
+						{ ...props }
+						ref={ ref }
+						aria-label={ label }
+						value={ value }
+						onChange={ ( event ) =>
+							onChange?.( event.target.value )
+						}
+					/>
+				</>
+			)
+		),
+	};
+} );
+
 jest.mock( '../../../data/onboarding-context', () => ( {
 	useOnboardingContext: jest.fn(),
 } ) );
@@ -36,6 +93,7 @@ const mockNextStep = jest.fn();
 const fields = {
 	available_countries: {
 		GB: 'United Kingdom (UK)',
+		JP: 'Japan',
 		US: 'United States (US)',
 	},
 	business_types: [
@@ -71,6 +129,30 @@ const fields = {
 					name: 'Individual',
 					description: '',
 					structures: [],
+				},
+			],
+		},
+		{
+			key: 'JP',
+			name: 'Japan',
+			types: [
+				{
+					key: 'individual',
+					name: 'Individual',
+					description: '',
+					structures: [],
+				},
+				{
+					key: 'company',
+					name: 'Company',
+					description: '',
+					requires_structure: false,
+					structures: [
+						{
+							key: 'sole_proprietorship',
+							name: 'Sole proprietorship',
+						},
+					],
 				},
 			],
 		},
@@ -205,6 +287,42 @@ describe( 'Business details onboarding flow', () => {
 			self_assessment: {
 				business_type: 'individual',
 				'company.structure': undefined,
+			},
+			source: 'settings',
+		} );
+	} );
+
+	it( 'continues without showing optional business structure selection', async () => {
+		renderBusinessDetailsForm( {
+			country: 'JP',
+			business_type: 'company',
+			'company.structure': 'sole_proprietorship',
+			mcc: '5812',
+		} );
+
+		expect(
+			screen.queryByRole( 'combobox', {
+				name: 'What category of legal entity identify your business?',
+			} )
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByRole( 'combobox', {
+				name: /What type of goods or services does your business sell?/,
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText( /By using WooPayments/ )
+		).toBeInTheDocument();
+
+		await waitFor( () => expect( mockApiFetch ).toHaveBeenCalled() );
+		const savePayload = mockApiFetch.mock.calls.at( -1 )?.[ 0 ].data;
+
+		expect( savePayload ).toEqual( {
+			self_assessment: {
+				country: 'JP',
+				business_type: 'company',
+				'company.structure': undefined,
+				mcc: '5812',
 			},
 			source: 'settings',
 		} );
