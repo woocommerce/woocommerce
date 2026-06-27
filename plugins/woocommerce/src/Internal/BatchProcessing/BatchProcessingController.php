@@ -140,7 +140,11 @@ class BatchProcessingController {
 			$time += apply_filters( 'woocommerce_batch_processor_watchdog_delay_seconds', HOUR_IN_SECONDS );
 		}
 
-		if ( ! as_has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
+		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
+		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
+		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
+
+		if ( ! call_user_func( $has_scheduled_action, self::WATCHDOG_ACTION_NAME ) ) {
 			as_schedule_single_action(
 				$time,
 				self::WATCHDOG_ACTION_NAME,
@@ -326,7 +330,11 @@ class BatchProcessingController {
 	 * @return bool True if a batch processing action is already scheduled for the processor.
 	 */
 	public function is_scheduled( string $processor_class_name ): bool {
-		return as_has_scheduled_action( self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ) );
+		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
+		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
+		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
+
+		return (bool) call_user_func( $has_scheduled_action, self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ) );
 	}
 
 	/**

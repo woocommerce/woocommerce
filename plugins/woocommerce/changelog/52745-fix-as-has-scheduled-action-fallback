@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add a fallback for the remaining `as_has_scheduled_action()` calls (batch processing watchdog/scheduling and transient files cleanup) so a very old bundled Action Scheduler from another plugin can no longer cause a fatal "undefined function" error.
