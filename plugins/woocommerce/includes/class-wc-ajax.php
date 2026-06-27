@@ -1826,17 +1826,43 @@ class WC_AJAX {
 		$where_args      = array();
 
 		if ( '' !== $term ) {
-			$like       = '%' . $wpdb->esc_like( $term ) . '%';
-			$where      = "
-				WHERE CAST(tax_rates.tax_rate_id AS CHAR) LIKE %s
+			$like              = '%' . $wpdb->esc_like( $term ) . '%';
+			$where             = "
+				WHERE (
+					CAST(tax_rates.tax_rate_id AS CHAR) LIKE %s
 					OR tax_rates.tax_rate_name LIKE %s
 					OR tax_rates.tax_rate_country LIKE %s
 					OR tax_rates.tax_rate_state LIKE %s
 					OR tax_rates.tax_rate_class LIKE %s
 					OR tax_rates.tax_rate LIKE %s
 					OR tax_locations.location_code LIKE %s
-			";
-			$where_args = array( $like, $like, $like, $like, $like, $like, $like );
+				";
+			$where_args        = array( $like, $like, $like, $like, $like, $like, $like );
+			$matching_classes  = array();
+			$normalized_search = sanitize_title( $term );
+
+			foreach ( $classes as $class_slug => $class_label ) {
+				if (
+					false !== stripos( $class_label, $term )
+					|| (
+						'' !== $normalized_search
+						&& '' !== $class_slug
+						&& false !== stripos( $class_slug, $normalized_search )
+					)
+				) {
+					$matching_classes[] = $class_slug;
+				}
+			}
+
+			if ( $matching_classes ) {
+				$class_placeholders = implode( ',', array_fill( 0, count( $matching_classes ), '%s' ) );
+				$where             .= " OR tax_rates.tax_rate_class IN ({$class_placeholders})";
+				$where_args         = array_merge( $where_args, $matching_classes );
+			}
+
+			$where .= '
+				)
+			';
 		}
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared

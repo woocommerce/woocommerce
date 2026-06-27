@@ -444,6 +444,76 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * Test tax rate JSON search supports searching visible tax class labels.
+	 */
+	public function test_json_search_tax_rates_supports_tax_class_label_search(): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		$tax_class              = WC_Tax::create_tax_class( 'Reduced rate', 'reduced-rate' );
+		$created_tax_class_slug = is_wp_error( $tax_class ) ? null : $tax_class['slug'];
+
+		$standard_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '7.2500',
+				'tax_rate_name'     => 'California base rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$reduced_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '4.0000',
+				'tax_rate_name'     => 'Reduced class rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 2,
+				'tax_rate_class'    => 'reduced-rate',
+			)
+		);
+
+		try {
+			$_GET['security'] = wp_create_nonce( 'search-tax-rates' );
+			$_GET['page']     = 1;
+			$_GET['per_page'] = 10;
+
+			$_GET['term'] = 'Standard';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 1, $response['pagination']['total'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $standard_rate_id, $response['results'][0]['id'] );
+			$this->assertSame( 'Standard', $response['results'][0]['tax_class'] );
+
+			$_GET['term'] = 'Reduced rate';
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 1, $response['pagination']['total'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $reduced_rate_id, $response['results'][0]['id'] );
+			$this->assertSame( 'Reduced rate', $response['results'][0]['tax_class'] );
+		} finally {
+			unset( $_GET['security'], $_GET['term'], $_GET['page'], $_GET['per_page'] );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $standard_rate_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $reduced_rate_id ) );
+			if ( $created_tax_class_slug ) {
+				WC_Tax::delete_tax_class_by( 'slug', $created_tax_class_slug );
+			}
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
 	 * Describe JSON search, particularly as it relates to handling searches for users in a
 	 * multisite context (it should generally not be possible to retrieve information about
 	 * users who have not been added to the current blog).
