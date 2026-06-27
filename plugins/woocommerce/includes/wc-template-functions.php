@@ -4549,14 +4549,21 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
 				unset( $item_data[ $key ] );
 				continue;
 			}
-			foreach ( $data as $data_value ) {
-				if ( ! is_scalar( $data_value ) ) {
-					unset( $item_data[ $key ] );
-					continue 2;
-				}
+			// Resolve the label and display value that will actually be rendered.
+			// Only these two values are escaped during output, so guard against
+			// non-scalar values here to prevent fatals while preserving rows whose
+			// non-rendered fields (or a non-scalar `value` with a scalar `display`)
+			// would still render correctly.
+			$label   = ! empty( $data['key'] ) ? $data['key'] : ( $data['name'] ?? '' );
+			$display = ! empty( $data['display'] ) ? $data['display'] : ( $data['value'] ?? '' );
+
+			if ( ! is_scalar( $label ) || ! is_scalar( $display ) ) {
+				unset( $item_data[ $key ] );
+				continue;
 			}
-			$item_data[ $key ]['key']     = ! empty( $data['key'] ) ? $data['key'] : $data['name'];
-			$item_data[ $key ]['display'] = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
+
+			$item_data[ $key ]['key']     = $label;
+			$item_data[ $key ]['display'] = $display;
 		}
 
 		// Output flat or in list format.

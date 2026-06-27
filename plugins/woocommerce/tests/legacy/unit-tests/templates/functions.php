@@ -378,6 +378,90 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'Malformed item data', $output );
 	}
 
+	/**
+	 * Test wc_get_formatted_cart_item_data renders rows when only the non-rendered
+	 * fields are non-scalar, since the classic cart renders just the label and display.
+	 */
+	public function test_wc_get_formatted_cart_item_data_renders_scalar_display_with_non_scalar_value() {
+		$filter = function ( $item_data ) {
+			// Non-scalar `value`, but a scalar `display` — should render using `display`.
+			$item_data[] = array(
+				'key'     => 'Attachments',
+				'value'   => array( 'file-a.pdf', 'file-b.pdf' ),
+				'display' => '2 files',
+			);
+			// Scalar rendered fields alongside a non-scalar field that is never rendered.
+			$item_data[] = array(
+				'key'      => 'Custom',
+				'value'    => 'Shown',
+				'display'  => 'Shown',
+				'_private' => array( 'internal' => 'data' ),
+			);
+
+			return $item_data;
+		};
+
+		add_filter( 'woocommerce_get_item_data', $filter );
+
+		try {
+			$html = wc_get_formatted_cart_item_data(
+				array(
+					'data'      => new WC_Product_Simple(),
+					'variation' => array(),
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_get_item_data', $filter );
+		}
+
+		// Both rows render, using their scalar display values.
+		$this->assertStringContainsString( 'Attachments', $html );
+		$this->assertStringContainsString( '2 files', $html );
+		$this->assertStringContainsString( 'Custom', $html );
+		$this->assertStringContainsString( 'Shown', $html );
+		// The non-scalar value must not leak into the output.
+		$this->assertStringNotContainsString( 'file-a.pdf', $html );
+	}
+
+	/**
+	 * Test wc_get_formatted_cart_item_data renders rows when only the non-rendered
+	 * fields are non-scalar, in flat output.
+	 */
+	public function test_wc_get_formatted_cart_item_data_renders_scalar_display_with_non_scalar_value_in_flat_output() {
+		$filter = function ( $item_data ) {
+			$item_data[] = array(
+				'key'     => 'Attachments',
+				'value'   => array( 'file-a.pdf', 'file-b.pdf' ),
+				'display' => '2 files',
+			);
+			$item_data[] = array(
+				'key'      => 'Custom',
+				'value'    => 'Shown',
+				'display'  => 'Shown',
+				'_private' => array( 'internal' => 'data' ),
+			);
+
+			return $item_data;
+		};
+
+		add_filter( 'woocommerce_get_item_data', $filter );
+
+		try {
+			$output = wc_get_formatted_cart_item_data(
+				array(
+					'data'      => new WC_Product_Simple(),
+					'variation' => array(),
+				),
+				true
+			);
+		} finally {
+			remove_filter( 'woocommerce_get_item_data', $filter );
+		}
+
+		$this->assertSame( "Attachments: 2 files\nCustom: Shown\n", $output );
+		$this->assertStringNotContainsString( 'file-a.pdf', $output );
+	}
+
 	public function test_hidden_field() {
 		$actual_html   = woocommerce_form_field(
 			'test',
