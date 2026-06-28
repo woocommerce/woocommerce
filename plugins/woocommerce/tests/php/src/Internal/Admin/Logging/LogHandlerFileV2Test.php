@@ -416,6 +416,48 @@ MESSAGE;
 	}
 
 	/**
+	 * @testdox Check that delete_logs_before_timestamp advances past a fully vetoed batch.
+	 */
+	public function test_delete_logs_before_timestamp_advances_past_vetoed_batch() {
+		$current_time = time();
+		$past_time    = strtotime( '-5 days' );
+
+		// Create 101 expired files. Only the last one should be deletable.
+		$expired_count = 101;
+		foreach ( range( 1, $expired_count ) as $suffix ) {
+			$this->sut->handle( $past_time, 'debug', 'old.', array( 'source' => "source-{$suffix}" ) );
+		}
+
+		// Allow only the last file to be deleted.
+		$filter = function ( $delete, $file ) {
+			unset( $delete );
+			$basename = basename( $file->get_path() );
+			return false !== strpos( $basename, 'source-101' );
+		};
+		add_filter( 'woocommerce_logger_delete_expired_file', $filter, 10, 2 );
+
+		try {
+			$result = $this->sut->delete_logs_before_timestamp( strtotime( '-3 days' ) );
+		} finally {
+			remove_filter( 'woocommerce_logger_delete_expired_file', $filter, 10 );
+		}
+
+		$this->assertEquals( 1, $result );
+
+		$paths = glob( Settings::get_log_directory() . '*.log' );
+		// 100 vetoed files, 1 wc_logger summary file.
+		$this->assertCount( 101, $paths );
+
+		$paths = glob( Settings::get_log_directory() . 'wc_logger*.log' );
+		$this->assertCount( 1, $paths );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$actual_content  = file_get_contents( reset( $paths ) );
+		$expected_string = '1 expired log file was deleted.';
+		$this->assertStringContainsString( $expected_string, $actual_content );
+	}
+
+	/**
 	 * @testdox Check that the handle method does not throw an error when passed a non-array context.
 	 */
 	public function test_handle_context_does_not_throw_error_non_array_contexts() {

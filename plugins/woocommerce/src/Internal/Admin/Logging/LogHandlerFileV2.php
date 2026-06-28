@@ -235,6 +235,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 		}
 
 		$deleted = 0;
+		$skipped = 0;
 
 		// Fetch and delete in batches so that sites with more than the default
 		// per-page of log files don't leave expired files behind.
@@ -245,6 +246,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 					'date_start'  => 1,
 					'date_end'    => $timestamp,
 					'per_page'    => self::DELETE_BATCH_SIZE,
+					'offset'      => $skipped,
 				)
 			);
 
@@ -271,22 +273,23 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 				}
 			);
 
-			$file_count = count( $files );
-			if ( $file_count < 1 ) {
-				break;
+			$file_count       = count( $files );
+			$vetoed_count     = $fetched_count - $file_count;
+			$deleted_in_batch = 0;
+			if ( $file_count > 0 ) {
+				$file_ids = array_map(
+					fn( $file ) => $file->get_file_id(),
+					$files
+				);
+
+				$deleted_in_batch = $this->file_controller->delete_files( $file_ids );
+				$deleted         += $deleted_in_batch;
 			}
 
-			$file_ids = array_map(
-				fn( $file ) => $file->get_file_id(),
-				$files
-			);
-
-			$deleted_in_batch = $this->file_controller->delete_files( $file_ids );
-			if ( $deleted_in_batch < 1 ) {
-				break;
-			}
-
-			$deleted += $deleted_in_batch;
+			// Deleted files disappear from the directory, so only vetoed files
+			// need to be skipped. If no progress was made, skip the full page to
+			// avoid retrying a permanently vetoed or undeletable batch forever.
+			$skipped += $deleted_in_batch > 0 ? $vetoed_count : $fetched_count;
 		} while ( self::DELETE_BATCH_SIZE === $fetched_count );
 
 		if ( $deleted > 0 ) {
