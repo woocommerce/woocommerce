@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Logging;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\{ LogHandlerFileV2, Settings };
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\File;
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use WC_Unit_Test_Case;
 
 /**
@@ -422,13 +423,22 @@ MESSAGE;
 		$current_time = time();
 		$past_time    = strtotime( '-5 days' );
 
-		// Create 101 expired files. Only the last one should be deletable.
-		$expired_count = 101;
+		// Create 100 vetoed files, then the single allowed file. Files are sorted
+		// by modified time descending, so the 100 vetoed files normally land on the
+		// first 100-file page. Touch the allowed file to an older mtime so it is
+		// guaranteed to fall on the next page and forces pagination to advance past
+		// a fully vetoed batch.
+		$expired_count = 100;
 		foreach ( range( 1, $expired_count ) as $suffix ) {
 			$this->sut->handle( $past_time, 'debug', 'old.', array( 'source' => "source-{$suffix}" ) );
 		}
+		$this->sut->handle( $past_time, 'debug', 'old.', array( 'source' => 'source-101' ) );
 
-		// Allow only the last file to be deleted.
+		$allowed_paths = glob( Settings::get_log_directory() . '*source-101*.log' );
+		$this->assertCount( 1, $allowed_paths );
+		FilesystemUtil::get_wp_filesystem()->touch( reset( $allowed_paths ), $past_time - 1 );
+
+		// Allow only the older file to be deleted.
 		$filter = function ( $delete, $file ) {
 			unset( $delete );
 			$basename = basename( $file->get_path() );
