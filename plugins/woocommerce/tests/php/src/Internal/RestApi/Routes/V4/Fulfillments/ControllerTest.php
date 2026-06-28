@@ -445,6 +445,84 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Regression test: on the single-item route a customer must not be able to read another
+	 * order's fulfillment by passing an order they own as the `order_id` query parameter. The
+	 * order authorized against is derived from the fulfillment itself, not from the request
+	 * `order_id`, so the non-owner is rejected and no fulfillment data is returned.
+	 */
+	public function test_permission_check_customer_cannot_read_other_orders_fulfillment_via_spoofed_order_id() {
+		$attacker_user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$attacker_order   = WC_Helper_Order::create_order( $attacker_user_id );
+
+		wp_set_current_user( $attacker_user_id );
+
+		// Request the victim's fulfillment while passing an order the attacker owns.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$request->set_param( 'order_id', $attacker_order->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertArrayNotHasKey( 'id', $data );
+
+		// Without the spoofed order_id the non-owner is likewise rejected.
+		$control_request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$control_response = rest_get_server()->dispatch( $control_request );
+		$this->assertSame( 403, $control_response->get_status() );
+
+		WC_Helper_Order::delete_order( $attacker_order->get_id() );
+		wp_delete_user( $attacker_user_id );
+	}
+
+	/**
+	 * Guards the route-detection choice: the single-item route is detected from the URL (route)
+	 * params, not from has_param()/get_param() which also match query args. So pairing another
+	 * customer's order_id with a fulfillment_id the caller owns (both as query args) on the
+	 * collection route must still authorize against order_id and be rejected for a non-owner, rather
+	 * than letting the query fulfillment_id move authorization to the caller's own order.
+	 */
+	public function test_permission_check_customer_cannot_read_other_orders_collection_via_query_fulfillment_id() {
+		$attacker_user_id     = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$attacker_order       = WC_Helper_Order::create_order( $attacker_user_id );
+		$attacker_fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => $attacker_order->get_id() )
+		);
+
+		wp_set_current_user( $attacker_user_id );
+
+		// Collection request: victim order_id, plus a fulfillment_id the attacker owns, both as query args.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments' );
+		$request->set_param( 'order_id', $this->test_order->get_id() );
+		$request->set_param( 'fulfillment_id', $attacker_fulfillment->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertArrayNotHasKey( 'id', $data );
+
+		WC_Helper_Order::delete_order( $attacker_order->get_id() );
+		wp_delete_user( $attacker_user_id );
+	}
+
+	/**
+	 * The order owner can still read their own fulfillment on the single-item route (no order_id
+	 * needed): the order is derived from the fulfillment, confirming the fix does not block
+	 * legitimate access.
+	 */
+	public function test_permission_check_customer_can_read_own_single_fulfillment() {
+		wp_set_current_user( $this->customer_user_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( $this->test_fulfillment->get_id(), $data['id'] );
+	}
+
+	/**
 	 * Test schema validation for get fulfillments
 	 */
 	public function test_get_fulfillments_schema() {

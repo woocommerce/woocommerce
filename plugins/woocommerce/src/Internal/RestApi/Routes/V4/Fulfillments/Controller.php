@@ -309,14 +309,21 @@ class Controller extends AbstractController {
 		// Fetch the order first if there's an order_id in the request.
 		$order = null;
 
-		// If there's an order_id in the request, try to get the order.
-		if ( $request->has_param( 'order_id' ) ) {
+		// fulfillment_id is a route (path) parameter on the single-item endpoints only. Detect it via
+		// the URL params rather than has_param()/get_param(), which also match query-string args, so a
+		// stray ?fulfillment_id= on the collection route cannot change which order is authorized.
+		$url_params     = $request->get_url_params();
+		$is_single_item = isset( $url_params['fulfillment_id'] );
+
+		// Collection route: authorize against the order_id query arg.
+		if ( ! $is_single_item && $request->has_param( 'order_id' ) ) {
 			$order_id = (int) $request->get_param( 'order_id' );
 			$order    = wc_get_order( $order_id );
 		}
 
-		// If there's a fulfillment_id in the request, try to get the order from the fulfillment.
-		if ( ! $order && $request->has_param( 'fulfillment_id' ) ) {
+		// Single-item routes: derive the order from the requested fulfillment so authorization targets
+		// the same order the handler acts on; any request-supplied order_id is ignored.
+		if ( ! $order && $is_single_item ) {
 			$fulfillment_id = (int) $request->get_param( 'fulfillment_id' );
 			if ( $fulfillment_id ) {
 				try {

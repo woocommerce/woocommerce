@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Authorize the experimental wc/v4 single fulfillment endpoints against the fulfillment's own order so a customer cannot read another order's fulfillment by supplying an order_id they own.
