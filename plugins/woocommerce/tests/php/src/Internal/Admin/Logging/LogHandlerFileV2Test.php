@@ -380,6 +380,42 @@ MESSAGE;
 	}
 
 	/**
+	 * @testdox Check that delete_logs_before_timestamp deletes more than 20 expired log files in one run.
+	 */
+	public function test_delete_logs_before_timestamp_deletes_more_than_default_per_page() {
+		$current_time = time();
+		$past_time    = strtotime( '-5 days' );
+
+		// Create more expired files than a single delete batch can remove (batch size is 100).
+		$expired_count = 101;
+		foreach ( range( 1, $expired_count ) as $suffix ) {
+			$this->sut->handle( $past_time, 'debug', 'old.', array( 'source' => "source-{$suffix}" ) );
+		}
+
+		// Add a couple of non-expired files as well.
+		$this->sut->handle( $current_time, 'debug', 'new!', array( 'source' => 'fresh1' ) );
+		$this->sut->handle( $current_time, 'debug', 'new!', array( 'source' => 'fresh2' ) );
+
+		$paths = glob( Settings::get_log_directory() . '*.log' );
+		$this->assertCount( $expired_count + 2, $paths );
+
+		$result = $this->sut->delete_logs_before_timestamp( strtotime( '-3 days' ) );
+		$this->assertEquals( $expired_count, $result );
+
+		$paths = glob( Settings::get_log_directory() . '*.log' );
+		// wc_logger plus two fresh files.
+		$this->assertCount( 3, $paths );
+
+		$paths = glob( Settings::get_log_directory() . 'wc_logger*.log' );
+		$this->assertCount( 1, $paths );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$actual_content  = file_get_contents( reset( $paths ) );
+		$expected_string = '101 expired log files were deleted.';
+		$this->assertStringContainsString( $expected_string, $actual_content );
+	}
+
+	/**
 	 * @testdox Check that the handle method does not throw an error when passed a non-array context.
 	 */
 	public function test_handle_context_does_not_throw_error_non_array_contexts() {
