@@ -577,8 +577,8 @@ const { actions } = store< Store >(
 					// how much delta is already accounted for in the running
 					// optimistic total; with no match we post the full target
 					// quantity. The matched line is never sent as an absolute
-					// quantity: per the iron rule the posted amount is a function
-					// of the delta, not of the match.
+					// quantity: the posted amount is a function of the delta,
+					// not of the match.
 					const quantityToSend = existingItem
 						? targetQuantity - existingItem.quantity
 						: targetQuantity;
@@ -650,7 +650,7 @@ const { actions } = store< Store >(
 						body: itemToSend,
 						applyOptimistic: () => {
 							if ( existingItem ) {
-								// Iron rule: this in-place bump is render-only. It
+								// This in-place bump is render-only. It
 								// makes the common re-add flicker-free, but it must
 								// never feed back into endpoint selection or the
 								// posted amount — those are already fixed above as a
@@ -822,8 +822,8 @@ const { actions } = store< Store >(
 							// setting it — so a match (by id/variation, possibly
 							// carrying a server key) only tells us how much delta is
 							// already accounted for; with no match we post the full
-							// target quantity. Per the iron rule the matched line is
-							// never sent as an absolute quantity.
+							// target quantity. The matched line is never sent as an
+							// absolute quantity.
 							const quantityToSend = existingItem
 								? quantity - existingItem.quantity
 								: quantity;
@@ -892,7 +892,7 @@ const { actions } = store< Store >(
 							body: itemToSend,
 							applyOptimistic: () => {
 								if ( existingItem ) {
-									// Iron rule (same as addCartItem): this in-place
+									// As in addCartItem, this in-place
 									// bump is render-only and must never feed back into
 									// endpoint selection or the posted amount, which are
 									// already fixed above as a pure function of
