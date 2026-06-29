@@ -52,6 +52,7 @@ interface TestJob {
 	shardNumber: number;
 	optional: boolean;
 	testType: string;
+	usesSharedPluginBuild?: boolean;
 	report: TestJobReport;
 }
 
@@ -61,6 +62,35 @@ interface TestJob {
 interface Jobs {
 	lint: LintJob[];
 	test: TestJob[];
+}
+
+const SHARED_PLUGIN_BUILD_TEST_TYPES = new Set( [
+	'e2e',
+	'api',
+	'performance',
+] );
+
+/**
+ * Determines whether a job should reuse a shared WooCommerce plugin build.
+ *
+ * Local WooCommerce browser/API/performance jobs all create a wp-env instance
+ * and otherwise repeat the same full plugin build in every matrix entry. PHP
+ * unit jobs are intentionally excluded because they use the optimized backend
+ * build path and run against the source checkout/test layout.
+ *
+ * @param {string}        projectName The name of the project that the job is for.
+ * @param {TestJobConfig} config      The config object for the test job.
+ * @return {boolean} True when the job should use a shared plugin build.
+ */
+function shouldUseSharedPluginBuild(
+	projectName: string,
+	config: TestJobConfig
+): boolean {
+	return (
+		projectName === '@woocommerce/plugin-woocommerce' &&
+		!! config.testEnv &&
+		SHARED_PLUGIN_BUILD_TEST_TYPES.has( config.testType )
+	);
 }
 
 /**
@@ -229,6 +259,10 @@ async function createTestJob(
 		optional: config.optional,
 		testType: config.testType,
 	};
+
+	if ( shouldUseSharedPluginBuild( projectName, config ) ) {
+		createdJob.usesSharedPluginBuild = true;
+	}
 
 	// We want to make sure that we're including the configuration for
 	// any test environment that the job will need in order to run.

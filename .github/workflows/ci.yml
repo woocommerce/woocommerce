@@ -83,6 +83,8 @@ jobs:
       lint-jobs: ${{ steps.project-jobs.outputs.lint-jobs }}
       test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
       report-jobs: ${{ steps.project-jobs.outputs.report-jobs }}
+      shared-plugin-build-needed: ${{ steps.project-jobs.outputs.shared-plugin-build-needed }}
+      shared-plugin-build-has-required-consumers: ${{ steps.project-jobs.outputs.shared-plugin-build-has-required-consumers }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -153,43 +155,15 @@ jobs:
       - name: 'Lint'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
-  split-test-jobs:
-    name: 'Split Test Jobs'
+  woocommerce-plugin-build-artifact:
+    name: "Build WooCommerce plugin artifact${{ needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' && ' (optional)' || '' }}"
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     needs: 'project-jobs'
-    if: ${{ !cancelled() && needs.project-jobs.result == 'success' }}
-    outputs:
-      regular-test-jobs: ${{ steps.split-test-jobs.outputs.regular-test-jobs }}
-      local-e2e-test-jobs: ${{ steps.split-test-jobs.outputs.local-e2e-test-jobs }}
-    steps:
-      - name: 'Split local e2e test jobs'
-        id: 'split-test-jobs'
-        env:
-          RELEASE_ARTIFACT_NAME: ${{ inputs.artifactName }}
-          TEST_JOBS: ${{ needs.project-jobs.outputs.test-jobs }}
-        run: |
-          if [[ -n "$RELEASE_ARTIFACT_NAME" ]]; then
-            echo "Release artifact provided; keeping all e2e jobs in the regular test matrix."
-            echo "regular-test-jobs=$TEST_JOBS" >> "$GITHUB_OUTPUT"
-            echo "local-e2e-test-jobs=[]" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          regular_test_jobs=$( jq -c '[ .[] | select( ( .testType == "e2e" and .testEnv.shouldCreate == true ) | not ) ]' <<< "$TEST_JOBS" )
-          local_e2e_test_jobs=$( jq -c '[ .[] | select( .testType == "e2e" and .testEnv.shouldCreate == true ) ]' <<< "$TEST_JOBS" )
-
-          echo "regular-test-jobs=$regular_test_jobs" >> "$GITHUB_OUTPUT"
-          echo "local-e2e-test-jobs=$local_e2e_test_jobs" >> "$GITHUB_OUTPUT"
-
-  e2e-build-artifacts:
-    name: 'Build e2e plugin artifact'
-    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
-    needs: [ 'project-jobs', 'split-test-jobs' ]
-    if: ${{ !cancelled() && needs.project-jobs.result == 'success' && needs.split-test-jobs.outputs.local-e2e-test-jobs != '[]' }}
+    if: ${{ !cancelled() && needs.project-jobs.result == 'success' && inputs.artifactName == '' && needs.project-jobs.outputs.shared-plugin-build-needed == 'true' }}
     permissions:
       contents: read
     env:
-      E2E_BUILD_ARTIFACT_NAME: e2e-woocommerce-plugin-${{ github.run_id }}-${{ github.run_attempt }}
+      WOOCOMMERCE_PLUGIN_ARTIFACT_NAME: woocommerce-plugin-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -210,10 +184,10 @@ jobs:
           ZIP_COMPRESSION_LEVEL: '1'
         run: pnpm --filter='@woocommerce/plugin-woocommerce' build:zip
 
-      - name: 'Upload e2e plugin artifact'
+      - name: 'Upload WooCommerce plugin artifact'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.E2E_BUILD_ARTIFACT_NAME }}
+          name: ${{ env.WOOCOMMERCE_PLUGIN_ARTIFACT_NAME }}
           path: plugins/woocommerce/woocommerce.zip
           if-no-files-found: error
           retention-days: 1
@@ -223,14 +197,14 @@ jobs:
   project-test-jobs:
     name: '${{ matrix.name }}'
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
-    needs: [ 'project-jobs', 'split-test-jobs' ]
-    if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.split-test-jobs.outputs.regular-test-jobs != '[]' }}
+    needs: [ 'project-jobs', 'woocommerce-plugin-build-artifact' ]
+    if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' && ( needs.woocommerce-plugin-build-artifact.result == 'success' || needs.woocommerce-plugin-build-artifact.result == 'skipped' || needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' ) }}
     env: ${{ matrix.testEnv.envVars }}
     strategy:
       fail-fast: false
       max-parallel: 30
       matrix:
-        include: ${{ fromJSON( needs.split-test-jobs.outputs.regular-test-jobs ) }}
+        include: ${{ fromJSON( needs.project-jobs.outputs.test-jobs ) }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -242,10 +216,30 @@ jobs:
         id: 'install-monorepo'
         with:
           install: '${{ matrix.projectName }}...'
-          build: ${{ matrix.projectName }}
+          build: ${{ ( matrix.usesSharedPluginBuild == true && inputs.artifactName == '' && 'false' ) || matrix.projectName }}
           build-type: ${{ ( matrix.testType == 'unit:php' && 'backend' ) || ( matrix.testType == 'unit' && 'dependencies' ) || 'full' }}
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && ( matrix.testType == 'e2e' || matrix.testType == 'performance' ) }}
           pull-package-deps: '${{ matrix.projectName }}'
+
+      - name: 'Download WooCommerce plugin artifact'
+        if: ${{ matrix.usesSharedPluginBuild == true && inputs.artifactName == '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: woocommerce-plugin-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ github.workspace }}/woocommerce-plugin-artifact
+
+      - name: 'Prepare WooCommerce plugin artifact'
+        if: ${{ matrix.usesSharedPluginBuild == true && inputs.artifactName == '' }}
+        run: |
+          unzip -q "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/woocommerce.zip" -d "$GITHUB_WORKSPACE/woocommerce-plugin-artifact"
+          test -f "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/woocommerce/woocommerce.php"
+
+      - name: 'Use WooCommerce plugin artifact in wp-env'
+        if: ${{ matrix.usesSharedPluginBuild == true && inputs.artifactName == '' }}
+        env:
+          PLUGIN_PATH: ${{ github.workspace }}/woocommerce-plugin-artifact/woocommerce
+          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.projectPath }}
+        run: node .github/workflows/scripts/override-wp-env-plugins.js
 
       - name: 'Update wp-env config'
         if: ${{ inputs.artifactName != '' }}
@@ -344,139 +338,6 @@ jobs:
           name: '${{ matrix.report.resultsBlobName }}__${{ strategy.job-index }}'
           path: ${{ env.ARTIFACTS_PATH }}
 
-  project-local-e2e-jobs:
-    name: '${{ matrix.name }}'
-    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
-    needs: [ 'project-jobs', 'split-test-jobs', 'e2e-build-artifacts' ]
-    if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.split-test-jobs.outputs.local-e2e-test-jobs != '[]' && needs.e2e-build-artifacts.result == 'success' }}
-    env: ${{ matrix.testEnv.envVars }}
-    strategy:
-      fail-fast: false
-      max-parallel: 30
-      matrix:
-        include: ${{ fromJSON( needs.split-test-jobs.outputs.local-e2e-test-jobs ) }}
-    steps:
-      - uses: 'actions/checkout@v4'
-        name: 'Checkout'
-        with:
-          ref: ${{ inputs.refName != '' && inputs.refName || '' }}
-
-      - uses: './.github/actions/setup-woocommerce-monorepo'
-        name: 'Install Monorepo'
-        id: 'install-monorepo'
-        with:
-          install: '${{ matrix.projectName }}...'
-          build: 'false'
-          build-type: 'full'
-          pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && ( matrix.testType == 'e2e' || matrix.testType == 'performance' ) }}
-          pull-package-deps: '${{ matrix.projectName }}'
-
-      - name: 'Download WooCommerce plugin artifact'
-        uses: actions/download-artifact@v4
-        with:
-          name: e2e-woocommerce-plugin-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ github.workspace }}/e2e-plugin-artifact
-
-      - name: 'Prepare WooCommerce plugin artifact'
-        run: |
-          unzip -q "$GITHUB_WORKSPACE/e2e-plugin-artifact/woocommerce.zip" -d "$GITHUB_WORKSPACE/e2e-plugin-artifact"
-          test -f "$GITHUB_WORKSPACE/e2e-plugin-artifact/woocommerce/woocommerce.php"
-
-      - name: 'Use WooCommerce plugin artifact in wp-env'
-        env:
-          PLUGIN_PATH: ${{ github.workspace }}/e2e-plugin-artifact/woocommerce
-          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.projectPath }}
-        run: node .github/workflows/scripts/override-wp-env-plugins.js
-
-      - name: 'Start Test Environment'
-        id: 'prepare-test-environment'
-        if: ${{ matrix.testEnv.shouldCreate }}
-        run: pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
-
-      - name: 'Resolve artifacts path'
-        if: ${{ always() && matrix.report.resultsPath != '' }}
-        # Blocks e2e use a relative path which is not supported by actions/upload-artifact@v4
-        # https://github.com/actions/upload-artifact/issues/176
-        env:
-          ARTIFACTS_PATH: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
-        run: |
-          # first runs will probably not have the directory, so we need to create it so that realpath doesn't fail
-          mkdir -p $ARTIFACTS_PATH
-          echo "ARTIFACTS_PATH=$(realpath $ARTIFACTS_PATH)" >> $GITHUB_ENV
-
-      - name: 'Download Playwright last run info'
-        id: 'download-last-run-info'
-        if: ${{ always() && matrix.report.resultsPath != '' && matrix.testType == 'e2e' }}
-        uses: actions/download-artifact@v4
-        with:
-          pattern: 'last-run__local-e2e-${{ strategy.job-index }}'
-
-      - name: 'Run tests (${{ matrix.testType }})'
-        timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && 20 ) || ( matrix.testType == 'unit:php' && 15 ) ) ) || 360 }}
-        env:
-          E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
-          CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
-          LAST_FAILED_RUN: ${{ vars.LAST_FAILED_RUN }}
-          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          PLUGIN_SLUG: ${{ inputs.refName == 'nightly' && 'woocommerce-trunk-nightly' || '' }} # required by test:plugincheck
-          PLAYWRIGHT_JUNIT_SUITE_NAME: 'WooCommerce Core'
-          PLAYWRIGHT_JUNIT_SUITE_ID: 'woocommerce-core'
-        run: |
-          lastRunFile="${{ steps.download-last-run-info.outputs.download-path }}/last-run__local-e2e-${{ strategy.job-index }}/.last-run.json"
-          lastRunFileDest="$ARTIFACTS_PATH/.last-run.json"
-
-          if [ -f "$lastRunFile" ]; then
-              echo "Found last run info file: \"$lastRunFile\""
-              echo "Moving to destination: \"$lastRunFileDest\""
-              mkdir -p "$ARTIFACTS_PATH"
-              mv "$lastRunFile" "$lastRunFileDest"
-          else
-              echo "No last run info file found. Searched for: \"$lastRunFile\""
-          fi
-
-          lastRunFlag=""
-          if [ -f "$lastRunFileDest" ]; then
-            # Playwright last run info is available, parse the file and check if there are failed tests
-            cat "$lastRunFileDest"
-            failedTests=$(jq '.failedTests | length' "$lastRunFileDest")
-
-            # Only if there are failed tests, we want to use the --last-failed flag.
-            # The run will fail if we're using the flag and there are no failed tests.
-            if [ "$failedTests" -gt 0 ]; then
-              if [ "$LAST_FAILED_RUN" == "1" ]; then
-                echo "Found failed tests, running only failed tests"
-                # Add shard 1/1 to override the default shard value. No tests will run for shards > 1.
-                # The clean way would be to replace the shard flag from the command, but this also works.
-                lastRunFlag="--last-failed --shard=1/1"
-              else
-                echo "Found failed tests, but LAST_FAILED_RUN is switched off. Running all tests."
-              fi
-            else
-                echo "No failed tests found, running all tests"
-            fi
-          fi
-
-          # Finally, run the tests
-          pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $lastRunFlag
-
-      - name: 'Upload Playwright last run info'
-        # always upload the last run info, even if the test run passed
-        if: ${{ always() && matrix.report.resultsPath != '' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: 'last-run__local-e2e-${{ strategy.job-index }}'
-          path: '${{ env.ARTIFACTS_PATH }}/.last-run.json'
-          if-no-files-found: ignore
-          include-hidden-files: true
-          overwrite: true
-
-      - name: 'Upload artifacts'
-        if: ${{ always() && matrix.report.resultsPath != '' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: '${{ matrix.report.resultsBlobName }}__local-e2e-${{ strategy.job-index }}'
-          path: ${{ env.ARTIFACTS_PATH }}
-
   evaluate-project-jobs:
     # In order to add a required status check we need a consistent job that we can grab onto.
     # Since we are dynamically generating a matrix for the project jobs, however, we can't
@@ -485,7 +346,7 @@ jobs:
     # on the results of the other jobs in the workflow.
     name: 'Evaluate Project Job Statuses'
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
-    needs: [ 'project-jobs', 'split-test-jobs', 'e2e-build-artifacts', 'project-lint-jobs', 'project-test-jobs', 'project-local-e2e-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
+    needs: [ 'project-jobs', 'woocommerce-plugin-build-artifact', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
     # This job must run for all trigger types (not just PRs) so that alert-on-failure can access its outputs
     if: ${{ !cancelled() }}
     outputs:
@@ -517,7 +378,7 @@ jobs:
   alert-on-failure:
     name: 'Report results on Slack'
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
-    needs: ['project-jobs', 'project-lint-jobs', 'project-test-jobs', 'project-local-e2e-jobs', 'evaluate-project-jobs']
+    needs: ['project-jobs', 'project-lint-jobs', 'project-test-jobs', 'evaluate-project-jobs']
     if: ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce' }}
     env:
       NON_SUCCESSFUL_JOBS: ${{ needs.evaluate-project-jobs.outputs.non_successful_jobs }}
@@ -560,11 +421,10 @@ jobs:
           pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "$CHECKS_TYPE build jobs matrix" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
           pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "$CHECKS_TYPE linting" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
           pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE tests" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json" --jobs-list "Failed:###$FAILED_JOBS"
-          pnpm utils slack-test-report -c "${{ needs.project-local-e2e-jobs.result }}" -r "$CHECKS_TYPE local e2e tests" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json" --jobs-list "Failed:###$FAILED_JOBS"
 
   test-reports:
     name: 'Test reports - ${{ matrix.report }}'
-    needs: ['project-jobs', 'project-test-jobs', 'project-local-e2e-jobs', 'evaluate-project-jobs']
+    needs: ['project-jobs', 'project-test-jobs', 'evaluate-project-jobs']
     if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && ( github.event_name != 'pull_request' || ( needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' && ! github.event.pull_request.head.repo.fork ) ) && needs.project-jobs.outputs.report-jobs != '[]' }}
     strategy:
       fail-fast: false

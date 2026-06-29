@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { JobType, testTypes } from '../config';
+import { JobType, TestJobConfig, testTypes } from '../config';
 import { createJobsForChanges, getShardedJobs } from '../job-processing';
 import { parseTestEnvConfig } from '../test-environment';
 
@@ -1069,6 +1069,128 @@ describe( 'Job Processing', () => {
 				},
 				testType: 'unit',
 			} );
+		} );
+
+		it.each( [ 'e2e', 'api', 'performance' ] as const )(
+			'should mark local WooCommerce %s jobs for shared plugin builds',
+			async ( testType ) => {
+				jest.mocked( parseTestEnvConfig ).mockResolvedValue( {} );
+
+				const jobs = await createJobsForChanges(
+					{
+						name: '@woocommerce/plugin-woocommerce',
+						path: 'plugins/woocommerce',
+						ciConfig: {
+							jobs: [
+								{
+									type: JobType.Test,
+									testType,
+									name: 'Default',
+									shardingArguments: [],
+									events: [],
+									changes: [ /test.js$/ ],
+									command: 'test-cmd',
+									testEnv: {
+										start: 'test-start',
+										config: {},
+									},
+								},
+							],
+						},
+						dependencies: [],
+					},
+					{
+						'@woocommerce/plugin-woocommerce': [ 'test.js' ],
+					},
+					{}
+				);
+
+				expect( jobs.test ).toHaveLength( 1 );
+				expect( jobs.test[ 0 ].usesSharedPluginBuild ).toBe( true );
+			}
+		);
+
+		it.each( [
+			[ 'unit:php', true ],
+			[ 'e2e', false ],
+			[ 'api', false ],
+			[ 'performance', false ],
+		] as const )(
+			'should not mark WooCommerce %s jobs for shared plugin builds when local env is %s',
+			async ( testType, hasTestEnv ) => {
+				jest.mocked( parseTestEnvConfig ).mockResolvedValue( {} );
+
+				const testJob: TestJobConfig = {
+					type: JobType.Test,
+					testType,
+					name: 'Default',
+					shardingArguments: [],
+					events: [],
+					changes: [ /test.js$/ ],
+					command: 'test-cmd',
+				};
+
+				if ( hasTestEnv ) {
+					testJob.testEnv = {
+						start: 'test-start',
+						config: {},
+					};
+				}
+
+				const jobs = await createJobsForChanges(
+					{
+						name: '@woocommerce/plugin-woocommerce',
+						path: 'plugins/woocommerce',
+						ciConfig: {
+							jobs: [ testJob ],
+						},
+						dependencies: [],
+					},
+					{
+						'@woocommerce/plugin-woocommerce': [ 'test.js' ],
+					},
+					{}
+				);
+
+				expect( jobs.test ).toHaveLength( 1 );
+				expect( jobs.test[ 0 ].usesSharedPluginBuild ).toBeUndefined();
+			}
+		);
+
+		it( 'should not mark non-WooCommerce jobs for shared plugin builds', async () => {
+			jest.mocked( parseTestEnvConfig ).mockResolvedValue( {} );
+
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType: 'e2e',
+								name: 'Default',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+								testEnv: {
+									start: 'test-start',
+									config: {},
+								},
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test[ 0 ].usesSharedPluginBuild ).toBeUndefined();
 		} );
 
 		it( 'should trigger all jobs for a single node with changes set to "true"', async () => {
