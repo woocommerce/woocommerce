@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Stabilize the "customer can login at checkout" e2e test: reload the block checkout until the logged-in customer's contact email hydrates from the Store API cart, so a lagged or guest-rendered checkout under parallel load no longer leaves the email empty and blocks the order.

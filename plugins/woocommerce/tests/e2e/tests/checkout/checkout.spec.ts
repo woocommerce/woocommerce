@@ -39,6 +39,21 @@ function isClassicCheckout( page: Page ) {
 	return page.url().includes( CLASSIC_CHECKOUT_PAGE.slug );
 }
 
+// Block checkout hydrates the logged-in customer's contact email asynchronously
+// from the Store API cart; under parallel load that can lag behind navigation,
+// or the page can render in a guest state with an empty contact email that
+// blocks the order. Reload to force a fresh cart fetch with the established
+// session, retrying until the email populates.
+async function reloadUntilCheckoutEmailHydrates( page: Page ) {
+	const contactEmail = page
+		.getByRole( 'textbox', { name: 'Email address' } )
+		.first();
+	await expect( async () => {
+		await page.reload();
+		await expect( contactEmail ).not.toHaveValue( '', { timeout: 5000 } );
+	} ).toPass( { timeout: 30000 } );
+}
+
 async function checkOrderDetails( page: Page, product, qty: number, tax ) {
 	const expectedTotalPrice = (
 		parseFloat( product.price ) *
@@ -382,16 +397,10 @@ checkoutPages.forEach( ( { name, slug } ) => {
 			await page.goto( slug );
 			await expect( page.url() ).toContain( slug );
 
-			// Block checkout hydrates the logged-in customer's contact email
-			// asynchronously from the Store API cart; under parallel load that
-			// can lag behind navigation, leaving the field empty and blocking
-			// the order. Wait for it to populate before placing the order.
+			// Make sure the logged-in customer's email is populated before
+			// placing the order (see helper above).
 			if ( ! isClassicCheckout( page ) ) {
-				await expect(
-					page
-						.getByRole( 'textbox', { name: 'Email address' } )
-						.first()
-				).not.toHaveValue( '' );
+				await reloadUntilCheckoutEmailHydrates( page );
 			}
 
 			await checkOrderDetails( page, product, qty, tax );
