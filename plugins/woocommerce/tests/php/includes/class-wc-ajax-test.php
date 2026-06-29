@@ -461,7 +461,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			$this->assertSame( $second_rate_id, $response['results'][0]['id'] );
 			$this->assertSame( 'Pagination fixture New York rate', $response['results'][0]['label'] );
 			$this->assertSame( 'US-NY-PAGINATION FIXTURE NEW YORK RATE-1', $response['results'][0]['rate_code'] );
-			$this->assertSame( '8.8750%', $response['results'][0]['rate_percent'] );
+			$this->assertSame( '8.875%', $response['results'][0]['rate_percent'] );
 		} finally {
 			unset( $_GET['security'], $_GET['term'], $_GET['page'], $_GET['per_page'] );
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rate_locations', array( 'tax_rate_id' => $first_rate_id ) );
