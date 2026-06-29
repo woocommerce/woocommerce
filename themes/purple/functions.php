@@ -245,6 +245,34 @@ endif;
 
 add_action( 'wp_enqueue_scripts', 'purple_styles' );
 
+if ( ! function_exists( 'purple_scripts' ) ) :
+	/**
+	 * Enqueue front-end scripts.
+	 *
+	 * Loads the small helper that aligns the navigation dropdowns with the
+	 * bottom of the header (see assets/js/navigation-dropdown.js).
+	 *
+	 * @since purple 1.0
+	 *
+	 * @return void
+	 */
+	function purple_scripts() {
+		wp_enqueue_script(
+			'purple-navigation-dropdown',
+			get_stylesheet_directory_uri() . '/assets/js/navigation-dropdown.js',
+			array(),
+			wp_get_theme()->get( 'Version' ),
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+			)
+		);
+	}
+
+endif;
+
+add_action( 'wp_enqueue_scripts', 'purple_scripts' );
+
 if ( ! function_exists( 'purple_remove_upsells' ) ) :
 	/**
 	 * Remove upsells from product description.

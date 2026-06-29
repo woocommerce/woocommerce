@@ -374,28 +374,234 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 	min-height: 44px;
 }
 
-/* Navigation dropdown panel — desktop only.
- * Above the mobile overlay breakpoint, give the submenu its own
- * floating-panel styling (page-color background + soft shadow).
- * Below 600px the nav opens as a full overlay and WordPress's own
- * styles already render flat submenus, so this rule stays out.
- *
- * The :root prefix lifts this above WordPress core's hardcoded
- * .wp-block-navigation:not(.has-background) .wp-block-navigation__submenu-container
- * rule on specificity alone, so we win the cascade WITHOUT !important.
- * That matters: a Navigation background color set in the editor is
- * applied with !important (or inline), so an !important here would
- * override the user's choice. Without it, the user's color wins and
- * this rule only supplies the themed default. The :not(.has-background)
- * guard mirrors core so we also stay out of the way when the user has
- * set their own nav background.
- *
- * This lives in style.css (rather than theme.json's css field)
- * because that field strips @media queries during sanitization. */
+/* Submenu text colour — beats core's default black on :not(.has-text-color). */
+:root .wp-block-navigation .wp-block-navigation__submenu-container,
+:root .wp-block-navigation .wp-block-navigation__submenu-container :where(a, button).wp-block-navigation-item__content {
+	color: var(--wp--preset--color--theme-2);
+}
+
+/* Navigation: desktop flyout panels and small-screen overlay accordion.
+ * In style.css (not theme.json) because theme.json strips @media queries.
+ * :root / :not(.has-background) prefixes beat core without !important. */
 @media (min-width: 600px) {
-	:root .wp-block-navigation:not(.has-background) .wp-block-navigation__submenu-container {
-		background-color: var(--wp--preset--color--theme-1);
-		border: none;
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+	/* Keep dropdown hit targets above page content. */
+	.wp-site-blocks > .wp-block-template-part:has(.wp-block-navigation),
+	.wp-site-blocks > header.wp-block-template-part:has(.wp-block-navigation) {
+		position: relative;
+		z-index: 10;
+	}
+
+	:root .wp-block-navigation:not(.has-background) {
+		/* Panel surface: page background, theme-6 outline, min 250px. */
+		& .wp-block-navigation__submenu-container,
+		& .has-child:not(.open-on-click):hover > .wp-block-navigation__submenu-container,
+		& .has-child .wp-block-navigation-submenu__toggle[aria-expanded="true"] ~ .wp-block-navigation__submenu-container {
+			background-color: var(--wp--preset--color--theme-1);
+			box-shadow: none;
+			border: 1px solid var(--wp--preset--color--theme-6);
+			padding-block: 0;
+			min-width: 250px;
+		}
+
+		/* Top-level panel: drop to header bottom (--purple-nav-dropdown-offset from JS). */
+		& > .wp-block-navigation__container > .wp-block-navigation-item.has-child,
+		&.wp-block-navigation__container > .wp-block-navigation-item.has-child {
+			&:hover,
+			&:focus-within {
+				z-index: 5;
+			}
+
+			/* Pointer bridge across the gap down to the panel. */
+			&::after {
+				content: "";
+				position: absolute;
+				left: 0;
+				right: 0;
+				top: 100%;
+				height: var(--purple-nav-dropdown-offset, calc(1.875rem + 0.6875rem));
+				background: transparent;
+				pointer-events: auto;
+				z-index: 2;
+			}
+
+			& > .wp-block-navigation__submenu-container {
+				top: calc(100% + var(--purple-nav-dropdown-offset, calc(1.875rem + 0.6875rem)));
+				left: -1.25rem;
+				z-index: 3;
+
+				&::after {
+					content: "";
+					position: absolute;
+					left: 0;
+					right: 0;
+					bottom: 100%;
+					height: var(--purple-nav-dropdown-offset, calc(1.875rem + 0.6875rem));
+					background: transparent;
+					pointer-events: auto;
+				}
+			}
+		}
+
+		/* Dropdown rows: padding, chevron inset, hover highlight. */
+		& .wp-block-navigation__submenu-container {
+			& .wp-block-navigation-item__content {
+				padding: 1.25rem;
+			}
+
+			& .wp-block-navigation__submenu-icon {
+				margin-right: 1.25rem;
+			}
+
+			& .wp-block-navigation-item:hover,
+			& .wp-block-navigation-item:focus-within {
+				background-color: var(--wp--preset--color--theme-5);
+
+				& > .wp-block-navigation-item__content {
+					text-decoration: underline;
+				}
+			}
+		}
+	}
+}
+
+/* Fixed rem spacing — fluid presets clamp to a 20px floor on narrow viewports. */
+@media (max-width: 599px) {
+	:root .wp-block-navigation .wp-block-navigation__responsive-container.is-menu-open:not(.disable-default-overlay) {
+		/* Full-bleed overlay; horizontal indent lives on the links. */
+		padding-left: 0;
+		padding-right: 0;
+
+		/* Close button only — not the menu rows. */
+		& .wp-block-navigation__responsive-container-close {
+			top: 1.25rem;
+			right: 1.25rem;
+		}
+
+		& .wp-block-navigation__responsive-container-content {
+			padding-left: 0;
+			padding-right: 0;
+			align-items: stretch;
+
+			& .wp-block-navigation__container,
+			& .wp-block-navigation__submenu-container {
+				gap: 0;
+			}
+
+			& .wp-block-navigation__container {
+				align-items: stretch;
+			}
+
+			/* Submenu panels: full width, no core 2rem inset. */
+			& .has-child .wp-block-navigation__submenu-container,
+			& .wp-block-navigation__submenu-container {
+				width: 100%;
+				max-width: none;
+				min-width: 0;
+				padding-block: 0.625rem;
+				padding-inline: 0;
+			}
+
+			& .wp-block-navigation__submenu-container .wp-block-navigation-item {
+				padding: 0;
+				margin: 0;
+			}
+
+			/* Top-level row height. */
+			& .wp-block-navigation-item__content {
+				padding-top: 1.125rem;
+				padding-bottom: 1.125rem;
+			}
+
+			/* Top-level horizontal inset. */
+			& > .wp-block-navigation__container > .wp-block-navigation-item > .wp-block-navigation-item__content {
+				padding-left: 1.25rem;
+				padding-right: 1.25rem;
+			}
+
+			/* Submenu link inset by nesting depth (30px / 60px / 80px). */
+			& .has-child .wp-block-navigation__submenu-container > .wp-block-navigation-item > .wp-block-navigation-item__content {
+				padding: 0.625rem 1.25rem 0.625rem 1.875rem;
+			}
+
+			& .wp-block-navigation__submenu-container .wp-block-navigation__submenu-container > .wp-block-navigation-item > .wp-block-navigation-item__content {
+				padding: 0.625rem 1.25rem 0.625rem 3.75rem;
+			}
+
+			& .wp-block-navigation__submenu-container .wp-block-navigation__submenu-container .wp-block-navigation__submenu-container > .wp-block-navigation-item > .wp-block-navigation-item__content {
+				padding: 0.625rem 1.25rem 0.625rem 5rem;
+			}
+
+			/* Parent rows: label + chevron grid; submenu collapses below. */
+			& .wp-block-navigation-item.has-child {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) auto;
+				align-items: center;
+				width: 100%;
+
+				& > .wp-block-navigation-item__content {
+					grid-column: 1;
+					grid-row: 1;
+					width: auto;
+					min-width: 0;
+				}
+
+				& > .wp-block-navigation__submenu-container {
+					grid-column: 1 / -1;
+					grid-row: 2;
+					display: none;
+				}
+
+				/* Core hides overlay chevrons — restore the toggle. */
+				& > .wp-block-navigation__submenu-icon,
+				& > .wp-block-navigation-submenu__toggle {
+					grid-column: 2;
+					grid-row: 1;
+					display: flex;
+					visibility: visible;
+					align-items: center;
+					justify-content: center;
+					flex-shrink: 0;
+					width: 24px;
+					height: 24px;
+					margin: 0;
+					padding-right: 1.25rem;
+					box-sizing: content-box;
+
+					& svg {
+						display: block;
+						width: 12px;
+						height: 12px;
+						stroke: currentColor;
+						transform: rotate(-90deg);
+						transition: transform 0.1s ease;
+					}
+				}
+
+				/* Open accordion section (.is-submenu-open toggled in JS). */
+				&.is-submenu-open {
+					& > .wp-block-navigation-item__content {
+						text-decoration: underline;
+					}
+
+					& > .wp-block-navigation__submenu-container {
+						display: block;
+						background-color: var(--wp--preset--color--theme-5) !important;
+					}
+
+					& > .wp-block-navigation__submenu-icon svg,
+					& > .wp-block-navigation-submenu__toggle svg {
+						transform: rotate(0deg);
+					}
+				}
+			}
+
+			/* Leaf links span the full row width. */
+			& .wp-block-navigation-item:not(.has-child) > .wp-block-navigation-item__content,
+			& .wp-block-navigation__submenu-container .wp-block-navigation-item:not(.has-child) > .wp-block-navigation-item__content {
+				display: block;
+				width: 100%;
+				box-sizing: border-box;
+			}
+		}
 	}
 }
