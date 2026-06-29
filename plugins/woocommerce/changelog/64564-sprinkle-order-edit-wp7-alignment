@@ -1,4 +1,4 @@
 Significance: minor
-Type: add
+Type: tweak
 
-Align the Order Edit meta boxes with WordPress 7.0 admin design, move the order trash action into a new "more actions" menu, and add the woocommerce_order_actions_menu_items filter so extensions can add items to that menu.
+Align the Order Edit meta boxes with WordPress 7.0 admin design and preserve the legacy order trash action surface with sentence-case copy.
