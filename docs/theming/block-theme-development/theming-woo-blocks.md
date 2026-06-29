@@ -42,13 +42,27 @@ Block themes can customize those templates in the following ways:
 
 The `page-cart.html` and `page-checkout.html` templates should render the content from the assigned Cart and Checkout pages. Add layout, headers, footers, and other template-level content around the page content, but keep the Cart and Checkout blocks in the corresponding page content.
 
-WooCommerce's default templates use the `woocommerce/page-content-wrapper` block with `core/post-content` inside it:
+WooCommerce's default `page-cart.html` template uses the `woocommerce/page-content-wrapper` block with `woocommerce/store-notices`, `core/post-title`, and `core/post-content` inside it:
 
 ```html
 <!-- wp:woocommerce/page-content-wrapper {"page":"cart"} -->
 <!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
 <main class="wp-block-group">
-    <!-- wp:post-title {"align":"wide","level":1} /-->
+    <!-- wp:woocommerce/store-notices /-->
+    <!-- wp:post-title {"align":"wide", "level":1} /-->
+    <!-- wp:post-content {"align":"wide"} /-->
+</main>
+<!-- /wp:group -->
+<!-- /wp:woocommerce/page-content-wrapper -->
+```
+
+The default `page-checkout.html` template uses the same wrapper and store notices, but renders page content without a page title:
+
+```html
+<!-- wp:woocommerce/page-content-wrapper {"page":"checkout"} -->
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+    <!-- wp:woocommerce/store-notices /-->
     <!-- wp:post-content {"align":"wide"} /-->
 </main>
 <!-- /wp:group -->
