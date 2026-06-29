@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/product-filter-price-slider",
 	"title": "Price Slider",
-	"description": "Enable customers to choose a price range with a slider.",
+	"description": "Let shoppers choose a price range with a slider.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"supports": {

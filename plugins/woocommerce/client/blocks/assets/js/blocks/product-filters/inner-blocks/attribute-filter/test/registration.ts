@@ -36,10 +36,12 @@ jest.mock( '@woocommerce/settings', () => {
 
 describe( 'Attribute Filter block registration', () => {
 	test( 'describes attribute variations without implying sidebar attribute selection', () => {
-		const blockType = getBlockType( 'woocommerce/product-filter-attribute' );
+		const blockType = getBlockType(
+			'woocommerce/product-filter-attribute'
+		);
 
 		expect( blockType?.variations?.[ 0 ].description ).toBe(
-			'Enable customers to filter the product collection by Color.'
+			'Let shoppers filter products by color.'
 		);
 	} );
 } );

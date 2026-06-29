@@ -95,7 +95,7 @@ describe( 'Taxonomy Filter block', () => {
 			);
 
 			expect( blockType?.variations?.[ 0 ].description ).toBe(
-				'Enable customers to filter the product collection by Category.'
+				'Let shoppers filter products by category.'
 			);
 		} );
 	} );
