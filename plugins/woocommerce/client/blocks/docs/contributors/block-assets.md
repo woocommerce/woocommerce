@@ -11,7 +11,7 @@
     -   [AbstractBlock::enqueue_data](#abstractblockenqueue_data)
 -   [woocommerce_shared_settings deprecated filter](#woocommerce_shared_settings-deprecated-filter)
 
-[Block Types](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/Blocks/BlockTypes) are often responsible for enqueuing script assets that make blocks functional on both the front-end and within the editor. Additionally, some block scripts require extra data from the server and thus have extra dependencies that need to be loaded.
+[Block Types](https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/src/BlockTypes) are often responsible for enqueuing script assets that make blocks functional on both the front-end and within the editor. Additionally, some block scripts require extra data from the server and thus have extra dependencies that need to be loaded.
 
 For performance reasons the blocks plugin ensures assets and asset data is made available only as needed.
 
@@ -19,7 +19,7 @@ For performance reasons the blocks plugin ensures assets and asset data is made 
 
 Assets are needed when we know a block will be rendered.
 
-In the context of [Block Types](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/Blocks/BlockTypes), assets and asset data is enqueued within the block `render()` method.
+In the context of [Block Types](https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/src/BlockTypes), assets and asset data is enqueued within the block `render()` method.
 
 In an admin editor context we must also ensure asset _data_ is available when the `enqueue_block_editor_assets` hook is fired. That is because block scripts are enqueued ready for the Block Inserter, but the block may not be rendered.
 
@@ -44,7 +44,7 @@ These rules also apply to styles.
 
 ## Using the `AbstractBlock` class
 
-The [`AbstractBlock` class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/BlockTypes/AbstractBlock.php) has some helper methods to make asset management easier. Most Block Types in this plugin extend this class.
+The [`AbstractBlock` class](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/BlockTypes/AbstractBlock.php) has some helper methods to make asset management easier. Most Block Types in this plugin extend this class.
 
 ### AbstractBlock::render
 
@@ -98,3 +98,4 @@ wc.wcSettings.getSetting( 'key' );
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/contributors/block-assets.md)
 
 <!-- /FEEDBACK -->
+
