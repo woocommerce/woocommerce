@@ -421,23 +421,25 @@ class WC_Checkout {
 				 */
 				do_action( 'woocommerce_resume_order', $order_id );
 
-				// If stock was already reduced for this order, restore it before removing
-				// the items. The item-level `_reduced_stock` metadata lives on the order
-				// item rows and is deleted along with them; losing it breaks both the
-				// cancel-restore path (wc_increase_stock_levels reads it to know how much
-				// to restore) and the admin-update path (wc_adjust_line_item_product_stock
-				// uses it to avoid a double-reduction). Restoring now means the resumed
-				// order's stock lifecycle starts clean.
+				// When stock was already reduced for this order, the per-item
+				// `_reduced_stock` metadata lives on the order item rows and is destroyed
+				// by remove_order_items() below. set_data_from_cart() then rebuilds fresh
+				// line items with no `_reduced_stock`, which breaks stock accounting:
+				// wc_reduce_stock_levels() would reduce a second time on the next payment
+				// attempt (double reduction), and wc_maybe_adjust_line_item_product_stock()
+				// would mis-calculate the admin-update delta.
 				//
-				// Pass $order (object) not $order_id (int) so set_stock_reduced updates
-				// both post-meta and the in-memory WC_Order property; the order is saved
-				// later in this method and would otherwise overwrite the flag back to true.
+				// Rather than restore stock and reset the order flag (which desyncs when
+				// `woocommerce_can_restore_order_stock` blocks the restore while the flag is
+				// cleared anyway), we keep the order in its reduced state and carry the
+				// per-item `_reduced_stock` accounting across the rebuild. The flag stays
+				// true; the captured values are re-applied after the cart rebuild and before
+				// save(). See $reduced_stock_by_product reconciliation below.
 				//
 				// @since 11.0.0
+				$reduced_stock_by_product = array();
 				if ( $order->get_data_store()->get_stock_reduced( $order_id ) ) {
-					wc_increase_stock_levels( $order );
-					// Object form (not int) intentional — see block comment above.
-					$order->get_data_store()->set_stock_reduced( $order, false );
+					$reduced_stock_by_product = $this->get_preserved_reduced_stock( $order );
 				}
 
 				// Remove all items - we will re-add them later.
@@ -482,6 +484,15 @@ class WC_Checkout {
 			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
 			$order->set_payment_method( isset( $available_gateways[ $data['payment_method'] ] ) ? $available_gateways[ $data['payment_method'] ] : $data['payment_method'] );
 			$this->set_data_from_cart( $order );
+
+			// Re-apply the `_reduced_stock` accounting captured before the items were
+			// rebuilt, so the resumed order keeps an accurate record of how much stock
+			// has already been deducted. Runs after set_data_from_cart() has added the
+			// fresh line items and before save() persists them. Empty unless the order
+			// was resumed in a stock-reduced state.
+			if ( $reduced_stock_by_product ) {
+				$this->restore_reduced_stock_meta( $order, $reduced_stock_by_product );
+			}
 
 			if ( $order->has_cogs() && $this->cogs_is_enabled() ) {
 				$order->calculate_cogs_total_value();
@@ -618,6 +629,102 @@ class WC_Checkout {
 
 			// Add item to order and save.
 			$order->add_item( $item );
+		}
+	}
+
+	/**
+	 * Capture the per-item `_reduced_stock` accounting from an order that is about to
+	 * have its line items rebuilt during a resume.
+	 *
+	 * The returned map is keyed by product identity (`product_id|variation_id`) using the
+	 * same identity computation create_order_line_items() applies, so the rebuilt items can
+	 * be matched back to their preserved values. Only line items that carry a positive
+	 * `_reduced_stock` are included.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param WC_Order $order Order whose current line items hold the reduced-stock meta.
+	 * @return array Map of `product_id|variation_id` => array( 'reduced_stock' => float, 'quantity' => float ).
+	 */
+	protected function get_preserved_reduced_stock( $order ) {
+		$preserved = array();
+
+		foreach ( $order->get_items() as $item ) {
+			if ( ! $item->is_type( 'line_item' ) ) {
+				continue;
+			}
+
+			$reduced_stock = wc_stock_amount( $item->get_meta( '_reduced_stock', true ) );
+
+			if ( $reduced_stock <= 0 ) {
+				continue;
+			}
+
+			$key = $item->get_product_id() . '|' . $item->get_variation_id();
+
+			// If multiple lines resolve to the same product identity, aggregate them so the
+			// total reduced stock is preserved rather than overwritten by the last line.
+			if ( isset( $preserved[ $key ] ) ) {
+				$preserved[ $key ]['reduced_stock'] += $reduced_stock;
+				$preserved[ $key ]['quantity']      += wc_stock_amount( $item->get_quantity() );
+			} else {
+				$preserved[ $key ] = array(
+					'reduced_stock' => $reduced_stock,
+					'quantity'      => wc_stock_amount( $item->get_quantity() ),
+				);
+			}
+		}
+
+		return $preserved;
+	}
+
+	/**
+	 * Re-apply preserved `_reduced_stock` accounting to the rebuilt line items of a resumed
+	 * order, before the order is saved.
+	 *
+	 * Matching is by product identity (`product_id|variation_id`). When the rebuilt quantity
+	 * equals the preserved quantity the preserved value is reused verbatim. When it differs,
+	 * the value is reconciled by clamping it to the new quantity: `_reduced_stock` records how
+	 * many units of this line have already been deducted from product stock, and that figure
+	 * must never exceed the line quantity. Otherwise wc_maybe_adjust_line_item_product_stock()
+	 * would compute a negative delta and spuriously restore stock on a later admin update.
+	 * Clamping down is safe because the surplus reduction has no line to belong to after the
+	 * cart shrank; clamping never invents reductions, so the next wc_reduce_stock_levels() run
+	 * still tops up any shortfall.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param WC_Order $order     Order with freshly rebuilt line items.
+	 * @param array    $preserved Preserved values from get_preserved_reduced_stock().
+	 */
+	protected function restore_reduced_stock_meta( $order, $preserved ) {
+		foreach ( $order->get_items() as $item ) {
+			if ( ! $item->is_type( 'line_item' ) ) {
+				continue;
+			}
+
+			$key = $item->get_product_id() . '|' . $item->get_variation_id();
+
+			if ( ! isset( $preserved[ $key ] ) ) {
+				continue;
+			}
+
+			$new_quantity  = wc_stock_amount( $item->get_quantity() );
+			$reduced_stock = $preserved[ $key ]['reduced_stock'];
+
+			// Reconcile when the cart quantity changed: a line's reduced stock can never
+			// exceed its own quantity.
+			if ( $new_quantity !== $preserved[ $key ]['quantity'] ) {
+				$reduced_stock = min( $reduced_stock, $new_quantity );
+			}
+
+			if ( $reduced_stock <= 0 ) {
+				continue;
+			}
+
+			// Operate on the in-memory item; the order is saved later in create_order(), which
+			// persists this meta along with the rebuilt line items.
+			$item->update_meta_data( '_reduced_stock', $reduced_stock );
 		}
 	}
 

@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Prevent order items from being lost when order resume fails between removing items and saving the order.
+Fix double stock reduction when a failed order is resumed at checkout, by preserving the per-item reduced-stock accounting across the order-item rebuild.

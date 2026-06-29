@@ -368,20 +368,22 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Resuming a failed order restores stock and resets _order_stock_reduced.
+	 * @testdox Resuming a failed order preserves _reduced_stock across the item rebuild.
 	 *
-	 * Regression for #36702: when remove_order_items() is called during order resumption,
-	 * the item-level _reduced_stock metadata is destroyed along with the items. Without
-	 * an explicit restore-then-reset, the order-level _order_stock_reduced flag stays 'yes'.
-	 * On cancellation, wc_increase_stock_levels() skips items with no _reduced_stock meta
-	 * so stock is never restored. On admin order update, wc_adjust_line_item_product_stock()
-	 * reads _reduced_stock=0 on the fresh items and double-reduces stock.
+	 * Regression for #36702: when remove_order_items() runs during order resumption, the
+	 * item-level _reduced_stock metadata is destroyed along with the items, and
+	 * set_data_from_cart() rebuilds fresh line items with no _reduced_stock. The order stays
+	 * flagged _order_stock_reduced=true, so on the next payment attempt wc_reduce_stock_levels()
+	 * sees no _reduced_stock on the new items and reduces a SECOND time (double reduction).
 	 *
-	 * This test drives the full lifecycle: real stock reduction via an on-hold transition,
-	 * then a failed transition (no stock change), then a cart-hash-matched resume that must
-	 * restore stock before removing items and reset the flag to false.
+	 * The fix keeps the order in its reduced state and carries the per-item _reduced_stock
+	 * accounting across the rebuild rather than restoring stock and clearing the flag (which
+	 * desyncs when woocommerce_can_restore_order_stock blocks the restore). This test drives
+	 * real stock reduction via an on-hold transition, resumes the order through create_order(),
+	 * and asserts the resumed line item still carries _reduced_stock so a subsequent reduce is
+	 * a no-op instead of double-counting.
 	 */
-	public function test_resuming_failed_order_restores_stock_and_resets_flag() {
+	public function test_resuming_failed_order_preserves_reduced_stock() {
 		update_option( 'woocommerce_manage_stock', 'yes' );
 
 		$product = WC_Helper_Product::create_simple_product(
@@ -391,7 +393,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		$data = array(
 			'ship_to_different_address' => false,
@@ -406,11 +408,11 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$order = wc_get_order( $order_id );
 
 		// Transition to on-hold: fires wc_maybe_reduce_stock_levels, which calls
-		// wc_reduce_stock_levels() (sets _reduced_stock on items) and sets the
-		// _order_stock_reduced flag to true.
+		// wc_reduce_stock_levels() to set _reduced_stock on the items and the
+		// _order_stock_reduced flag to true. This is the real reduction path; the meta is
+		// never injected manually.
 		$order->update_status( 'on-hold' );
 
-		// Confirm stock was actually reduced and the flag is set.
 		$this->assertSame(
 			9,
 			wc_get_product( $product->get_id() )->get_stock_quantity(),
@@ -421,35 +423,121 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			'_order_stock_reduced must be true after stock is reduced.'
 		);
 
-		// Simulate payment failure: on-hold → failed. No stock hook fires for 'failed'.
+		// Simulate payment failure: on-hold -> failed. No stock hook fires for 'failed'.
 		$order->update_status( 'failed' );
 
-		$this->assertSame(
-			9,
-			wc_get_product( $product->get_id() )->get_stock_quantity(),
-			'Stock must still be 9 after the failed transition.'
-		);
-
-		// Second checkout attempt: same cart, same cart hash → create_order() resumes
-		// the existing failed order instead of creating a new one.
+		// Second checkout attempt: same cart, same cart hash, so create_order() resumes the
+		// existing failed order instead of creating a new one.
 		WC()->session->set( 'order_awaiting_payment', $order_id );
 
 		$order_id_2 = $this->sut->create_order( $data );
 		$this->assertIsInt( $order_id_2 );
 		$this->assertSame( $order_id, $order_id_2, 'create_order() should resume the existing failed order.' );
 
-		// The fix must have restored stock before wiping items.
+		// Stock is intentionally NOT restored on resume; the order stays reduced.
 		$this->assertSame(
-			10,
+			9,
 			wc_get_product( $product->get_id() )->get_stock_quantity(),
-			'Stock must be restored to 10 after resume.'
+			'Stock must remain at 9 after resume; the resumed order keeps its reduced state.'
 		);
 
-		// The flag must be reset so the next reduction cycle (e.g. payment success)
-		// is not blocked by wc_maybe_reduce_stock_levels's early-return guard.
-		$this->assertFalse(
+		// The order-level flag stays true because the reduction was preserved, not undone.
+		$this->assertTrue(
 			wc_get_order( $order_id )->get_data_store()->get_stock_reduced( $order_id ),
-			'_order_stock_reduced must be reset to false after resume.'
+			'_order_stock_reduced must remain true after resume.'
+		);
+
+		// The core guard: the rebuilt line item must carry the preserved _reduced_stock.
+		// This is what fails if restore_reduced_stock_meta() is removed; without it the
+		// fresh items have no _reduced_stock and this assertion sees an empty value.
+		$resumed_order = wc_get_order( $order_id_2 );
+		$resumed_items = $resumed_order->get_items();
+		$this->assertCount( 1, $resumed_items, 'Resumed order should have exactly one line item.' );
+
+		$resumed_item = current( $resumed_items );
+		$this->assertSame(
+			1.0,
+			wc_stock_amount( $resumed_item->get_meta( '_reduced_stock', true ) ),
+			'Resumed line item must carry the preserved _reduced_stock of 1.'
+		);
+
+		// Delete-the-fix consequence, asserted directly: a further reduce must be a no-op
+		// because _reduced_stock is present. Without the fix, _reduced_stock would be 0/empty
+		// and this call would drop stock from 9 to 8 (the double reduction this PR prevents).
+		wc_reduce_stock_levels( $order_id_2 );
+
+		$this->assertSame(
+			9,
+			wc_get_product( $product->get_id() )->get_stock_quantity(),
+			'A subsequent reduce must not double-count; stock stays at 9.'
+		);
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Resuming a failed order reconciles _reduced_stock when the cart quantity shrinks.
+	 *
+	 * Companion to test_resuming_failed_order_preserves_reduced_stock covering the reconcile
+	 * branch: when the resumed cart asks for fewer units than were originally reduced, the
+	 * preserved _reduced_stock is clamped to the new quantity so a line never records more
+	 * reduced stock than its own quantity (which would make wc_maybe_adjust_line_item_product_stock()
+	 * compute a negative delta and spuriously restore stock on a later admin update).
+	 */
+	public function test_resuming_failed_order_clamps_reduced_stock_on_quantity_decrease() {
+		update_option( 'woocommerce_manage_stock', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product(
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 10,
+			)
+		);
+
+		// Reduce 3 units on the first pass.
+		WC()->cart->add_to_cart( $product->get_id(), 3 );
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'payment_method'            => WC_Gateway_BACS::ID,
+			'billing_email'             => 'customer@example.com',
+		);
+
+		$order_id = $this->sut->create_order( $data );
+		$order    = wc_get_order( $order_id );
+		$order->update_status( 'on-hold' );
+
+		$this->assertSame(
+			7,
+			wc_get_product( $product->get_id() )->get_stock_quantity(),
+			'Stock must be reduced to 7 after reducing 3 units.'
+		);
+
+		$order->update_status( 'failed' );
+
+		// Resume with a smaller cart: 1 unit. The cart hash will differ, so to exercise the
+		// resume path we rebuild the cart to the new quantity and force the awaiting-payment
+		// session key; create_order() recomputes the hash from the current cart.
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$order->set_cart_hash( WC()->cart->get_cart_hash() );
+		$order->save();
+		WC()->session->set( 'order_awaiting_payment', $order_id );
+
+		$order_id_2 = $this->sut->create_order( $data );
+		$this->assertSame( $order_id, $order_id_2, 'create_order() should resume the existing failed order.' );
+
+		$resumed_item = current( wc_get_order( $order_id_2 )->get_items() );
+		$this->assertSame(
+			1.0,
+			wc_stock_amount( $resumed_item->get_quantity() ),
+			'Resumed line item quantity should reflect the smaller cart (1).'
+		);
+		$this->assertSame(
+			1.0,
+			wc_stock_amount( $resumed_item->get_meta( '_reduced_stock', true ) ),
+			'_reduced_stock must be clamped to the new quantity (1), not the original 3.'
 		);
 
 		WC()->cart->empty_cart();
