@@ -87,7 +87,7 @@ class FilesystemUtil {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
 		require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
 
-		if ( class_exists( 'WP_Filesystem_Direct' ) ) {
+		if ( class_exists( WP_Filesystem_Direct::class ) ) {
 			try {
 				// WP_Filesystem_Direct::chmod()/put_contents() use the FS_CHMOD_* constants when no mode is
 				// passed; core only defines them in WP_Filesystem(), which we skip, so mirror them here.
