@@ -19,7 +19,6 @@ use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewReviewNotifica
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\StockNotificationRecoveryHandler;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\StockNotificationTrigger;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WC_Logger;
 use Exception;
 
@@ -124,9 +123,8 @@ class PushNotifications {
 
 	/**
 	 * Determines if local push notification functionality should be enabled.
-	 * Push notifications require both the feature flag to be enabled and
-	 * Jetpack to be connected. Memoize the value so we only check once per
-	 * request.
+	 * Push notifications require Jetpack to be connected. Memoize the value so
+	 * we only check once per request.
 	 *
 	 * @return bool
 	 *
@@ -134,11 +132,6 @@ class PushNotifications {
 	 */
 	public function should_be_enabled(): bool {
 		if ( null !== $this->enabled ) {
-			return $this->enabled;
-		}
-
-		if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
-			$this->enabled = false;
 			return $this->enabled;
 		}
 
