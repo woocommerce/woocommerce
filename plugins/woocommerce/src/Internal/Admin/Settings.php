@@ -409,7 +409,16 @@ class Settings {
 	 * @return array
 	 */
 	private function add_settings_ui_schema( array $settings ): array {
-		$context = SettingsUIRequestContext::get_current();
+		try {
+			if ( ! class_exists( SettingsUIRequestContext::class ) ) {
+				return $settings;
+			}
+
+			$context = SettingsUIRequestContext::get_current();
+		} catch ( \Throwable $e ) {
+			return $settings;
+		}
+
 		if ( ! $context ) {
 			return $settings;
 		}

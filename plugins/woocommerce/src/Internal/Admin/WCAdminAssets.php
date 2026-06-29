@@ -456,7 +456,16 @@ class WCAdminAssets {
 	 * @return array
 	 */
 	private function get_settings_ui_script_dependencies(): array {
-		$context = SettingsUIRequestContext::get_current();
+		try {
+			if ( ! class_exists( SettingsUIRequestContext::class ) ) {
+				return array();
+			}
+
+			$context = SettingsUIRequestContext::get_current();
+		} catch ( \Throwable $e ) {
+			return array();
+		}
+
 		if ( ! $context ) {
 			return array();
 		}

@@ -257,12 +257,20 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 * Settings section registry instance, or null when the modern settings SDK is unavailable.
 		 *
 		 * The class can be missing mid-update: a 10.9 copy of this file may load before the autoloader
-		 * class map knows the new registry, so a direct call would fatal with "class not found".
+		 * class map can safely resolve the new registry, so a direct call would fatal.
 		 *
 		 * @return SettingsSectionRegistry|null
 		 */
 		protected function get_settings_section_registry() {
-			return class_exists( SettingsSectionRegistry::class ) ? SettingsSectionRegistry::get_instance() : null;
+			try {
+				if ( ! class_exists( SettingsSectionRegistry::class ) ) {
+					return null;
+				}
+
+				return SettingsSectionRegistry::get_instance();
+			} catch ( \Throwable $e ) {
+				return null;
+			}
 		}
 
 		/**
@@ -272,7 +280,15 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 * @return SettingsUIRequestContext|null
 		 */
 		protected function get_settings_ui_request_context( $section ) {
-			return class_exists( SettingsUIRequestContext::class ) ? SettingsUIRequestContext::for_settings_page( $this, $section ) : null;
+			try {
+				if ( ! class_exists( SettingsUIRequestContext::class ) ) {
+					return null;
+				}
+
+				return SettingsUIRequestContext::for_settings_page( $this, $section );
+			} catch ( \Throwable $e ) {
+				return null;
+			}
 		}
 
 		/**
