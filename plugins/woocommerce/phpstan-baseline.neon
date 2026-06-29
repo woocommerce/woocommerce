@@ -52090,12 +52090,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductButton.php
 
 		-
-			message: '#^Property WooCommerce\:\:\$cart \(WC_Cart\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
-			count: 1
-			path: src/Blocks/BlockTypes/ProductButton.php
-
-		-
 			message: '#^Static property Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductButton\:\:\$cart is never read, only written\.$#'
 			identifier: property.onlyWritten
 			count: 1
