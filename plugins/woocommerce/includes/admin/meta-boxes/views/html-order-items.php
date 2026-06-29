@@ -490,11 +490,14 @@ if ( wc_tax_enabled() ) {
 						<table class="widefat striped wc-tax-rate-results" data-wc-tax-rate-results data-per_page="10">
 							<thead>
 								<tr>
-									<th>&nbsp;</th>
-									<th><?php esc_html_e( 'Rate name', 'woocommerce' ); ?></th>
-									<th><?php esc_html_e( 'Tax class', 'woocommerce' ); ?></th>
-									<th><?php esc_html_e( 'Rate code', 'woocommerce' ); ?></th>
-									<th><?php esc_html_e( 'Rate %', 'woocommerce' ); ?></th>
+									<th scope="col">
+										<span class="screen-reader-text"><?php esc_html_e( 'Select tax rate', 'woocommerce' ); ?></span>
+										<span aria-hidden="true">&nbsp;</span>
+									</th>
+									<th scope="col"><?php esc_html_e( 'Rate name', 'woocommerce' ); ?></th>
+									<th scope="col"><?php esc_html_e( 'Tax class', 'woocommerce' ); ?></th>
+									<th scope="col"><?php esc_html_e( 'Rate code', 'woocommerce' ); ?></th>
+									<th scope="col"><?php esc_html_e( 'Rate %', 'woocommerce' ); ?></th>
 								</tr>
 							</thead>
 							<tbody>

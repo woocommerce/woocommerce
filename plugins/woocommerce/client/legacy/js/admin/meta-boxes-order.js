@@ -1259,6 +1259,7 @@ jQuery( function ( $ ) {
 
 				table_body.html( wc_meta_boxes_order_items.backbone.tax_rate_status_row( wc_enhanced_select_params.i18n_searching ) );
 				pagination.find( '.button, .current-page' ).prop( 'disabled', true );
+				wc_meta_boxes_order_items.backbone.announce_tax_rate_status( wc_enhanced_select_params.i18n_searching );
 
 				$.ajax( {
 					url:      woocommerce_admin_meta_boxes.ajax_url,
@@ -1280,9 +1281,16 @@ jQuery( function ( $ ) {
 								wc_enhanced_select_params.i18n_ajax_error
 							)
 						);
+						wc_meta_boxes_order_items.backbone.announce_tax_rate_status( wc_enhanced_select_params.i18n_ajax_error );
 						pagination.find( '.current-page' ).prop( 'disabled', false );
 					}
 				} );
+			},
+
+			announce_tax_rate_status: function( message ) {
+				if ( message && window.wp && window.wp.a11y && 'function' === typeof window.wp.a11y.speak ) {
+					window.wp.a11y.speak( message, 'polite' );
+				}
 			},
 
 			tax_rate_status_row: function( message ) {
@@ -1307,16 +1315,28 @@ jQuery( function ( $ ) {
 			},
 
 			tax_rate_result_row: function( rate ) {
-				var input_id = 'add_order_tax_' + rate.id,
-					radio    = $( '<input />', {
-						type:  'radio',
-						id:    input_id,
-						name:  'add_order_tax',
-						value: rate.id
+				var input_id       = 'add_order_tax_' + rate.id,
+					description_id = input_id + '_description',
+					description    = wc_enhanced_select_params.i18n_tax_rate_details
+						.replace( '%1$s', rate.tax_class || '' )
+						.replace( '%2$s', rate.rate_code || '' )
+						.replace( '%3$s', rate.rate_percent || '' ),
+					radio          = $( '<input />', {
+						type:               'radio',
+						id:                 input_id,
+						name:               'add_order_tax',
+						value:              rate.id,
+						'aria-describedby': description_id
 					} );
 
 				return $( '<tr></tr>' ).append(
-					$( '<td></td>' ).append( radio ),
+					$( '<td></td>' ).append(
+						radio,
+						$( '<span></span>', {
+							class: 'screen-reader-text',
+							id:    description_id
+						} ).text( description )
+					),
 					$( '<td></td>' ).append( $( '<label></label>', { 'for': input_id } ).text( rate.label ) ),
 					$( '<td></td>' ).text( rate.tax_class ),
 					$( '<td></td>' ).text( rate.rate_code ),
@@ -1333,24 +1353,29 @@ jQuery( function ( $ ) {
 					total        = parseInt( meta.total, 10 ) || 0,
 					total_pages  = parseInt( meta.total_pages, 10 ) || 1,
 					current_page = parseInt( meta.page, 10 ) || 1,
-					search_term  = ( modal.find( '[data-wc-tax-rate-search]' ).val() || '' ).trim();
+					search_term  = ( modal.find( '[data-wc-tax-rate-search]' ).val() || '' ).trim(),
+					announcement = '';
 
 				table_body.empty();
 
 				if ( ! results.length ) {
 					if ( ! search_term.length && 0 === total ) {
 						table_body.append( wc_meta_boxes_order_items.backbone.tax_rate_empty_state_row() );
+						announcement = wc_enhanced_select_params.i18n_no_tax_rates + ' ' +
+							wc_enhanced_select_params.i18n_no_tax_rates_help;
 					} else {
 						table_body.append(
 							wc_meta_boxes_order_items.backbone.tax_rate_status_row(
 								wc_enhanced_select_params.i18n_no_matches
 							)
 						);
+						announcement = wc_enhanced_select_params.i18n_no_matches;
 					}
 				} else {
 					$.each( results, function( index, rate ) {
 						table_body.append( wc_meta_boxes_order_items.backbone.tax_rate_result_row( rate ) );
 					} );
+					announcement = meta.displaying_num || '';
 				}
 
 				pagination.data( 'page', current_page );
@@ -1360,6 +1385,7 @@ jQuery( function ( $ ) {
 				pagination.find( '.first-page, .prev-page' ).prop( 'disabled', ! meta.has_prev );
 				pagination.find( '.next-page, .last-page' ).prop( 'disabled', ! meta.has_next );
 				count.text( total ? meta.displaying_num : '' );
+				wc_meta_boxes_order_items.backbone.announce_tax_rate_status( announcement );
 			},
 
 			response: function( e, target, data ) {

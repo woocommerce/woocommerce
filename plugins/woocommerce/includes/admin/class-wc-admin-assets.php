@@ -420,6 +420,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_no_tax_rates'               => _x( 'No tax rates have been set up yet.', 'order tax rate empty state', 'woocommerce' ),
 					'i18n_no_tax_rates_help'          => _x( 'Set up tax rates or enable automated tax calculation before adding tax to this order.', 'order tax rate empty state', 'woocommerce' ),
 					'i18n_tax_settings'               => _x( 'Go to tax settings', 'order tax rate empty state action', 'woocommerce' ),
+					'i18n_tax_rate_details'           => _x( 'Tax class: %1$s. Rate code: %2$s. Rate: %3$s.', 'tax rate option screen reader details', 'woocommerce' ),
 					'tax_rates_settings_url'          => admin_url( 'admin.php?page=wc-settings&tab=tax' ),
 					'ajax_url'                        => admin_url( 'admin-ajax.php' ),
 					'search_products_nonce'           => wp_create_nonce( 'search-products' ),
