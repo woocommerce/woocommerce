@@ -16,7 +16,7 @@ import {
 } from './utils';
 
 /**
- * E2E flows for "In-cart count reflects only the standalone line".
+ * End-to-end tests for "In-cart count reflects only the standalone line".
  *
  * Background: the ProductButton block (and the Add to Cart with Options
  * button) must show the count for the *standalone* line — the line the
@@ -40,10 +40,10 @@ import {
  * same product id — a stand-in for a bundle child / booking / add-on /
  * recipient line, since those extensions are not installed in e2e.
  *
- * Flows 1–5 and 7 run as a guest so each test gets an isolated empty cart
- * via a fresh guest session cookie. Flow 6 (variation-aware count via Add to
- * Cart with Options) runs with admin credentials because it must update the
- * site editor's single-product template before navigating to the frontend.
+ * Most tests run as a guest so each gets an isolated empty cart via a fresh
+ * guest session cookie. The variation-aware test (via Add to Cart with
+ * Options) runs with admin credentials because it must update the site
+ * editor's single-product template before navigating to the frontend.
  */
 
 const test = base.extend< {
@@ -55,7 +55,7 @@ const test = base.extend< {
 } );
 
 // ---------------------------------------------------------------------------
-// Flows 1–5 and 7: Guest isolation.
+// Guest tests: isolated empty cart per test.
 //
 // Each test runs as a guest so it gets a brand-new browser context with no
 // session cookie, i.e. an isolated empty cart. The helper plugin is
@@ -69,11 +69,10 @@ test.describe( 'In-cart count reflects only the standalone line', () => {
 	} );
 
 	// -------------------------------------------------------------------------
-	// Flow 1: Bundle-child-only line shows "Add to cart" (server seed + after
-	// hydration). Acceptance criterion 1; also exercises criterion 6 (initial-
-	// render correctness via the server seed).
+	// Bundle-child-only line shows "Add to cart" (server seed + after
+	// hydration), including initial-render correctness via the server seed.
 	// -------------------------------------------------------------------------
-	test( 'Flow 1: bundle-child-only product shows "Add to cart" on server paint and after hydration, with no non-zero flash', async ( {
+	test( 'bundle-child-only product shows "Add to cart" on server paint and after hydration, with no non-zero flash', async ( {
 		page,
 	} ) => {
 		// Seed: Beanie is in the cart only as a meta-differentiated line.
@@ -112,10 +111,10 @@ test.describe( 'In-cart count reflects only the standalone line', () => {
 	} );
 
 	// -------------------------------------------------------------------------
-	// Flow 2: No-JS / server-seed-only render shows "Add to cart" for a
-	// bundle-child-only product. Acceptance criterion 6.
+	// No-JS / server-seed-only render shows "Add to cart" for a
+	// bundle-child-only product.
 	// -------------------------------------------------------------------------
-	test( 'Flow 2: with JavaScript disabled, the server-rendered button shows "Add to cart" for a bundle-child-only product', async ( {
+	test( 'with JavaScript disabled, the server-rendered button shows "Add to cart" for a bundle-child-only product', async ( {
 		page,
 		browser,
 	} ) => {
@@ -145,9 +144,9 @@ test.describe( 'In-cart count reflects only the standalone line', () => {
 	} );
 
 	// -------------------------------------------------------------------------
-	// Flow 3: Standalone line shows its quantity. Acceptance criterion 2.
+	// Standalone line shows its quantity.
 	// -------------------------------------------------------------------------
-	test( 'Flow 3: standalone line at quantity 2 shows "2 in cart"', async ( {
+	test( 'standalone line at quantity 2 shows "2 in cart"', async ( {
 		page,
 		frontendUtils,
 	} ) => {
@@ -165,10 +164,9 @@ test.describe( 'In-cart count reflects only the standalone line', () => {
 	} );
 
 	// -------------------------------------------------------------------------
-	// Flow 4: Both standalone and bundle-child lines — count only the standalone.
-	// Acceptance criterion 3.
+	// Both standalone and bundle-child lines — count only the standalone.
 	// -------------------------------------------------------------------------
-	test( 'Flow 4: with both a standalone (qty 1) and a meta line, the button shows "1 in cart"', async ( {
+	test( 'with both a standalone (qty 1) and a meta line, the button shows "1 in cart"', async ( {
 		page,
 		frontendUtils,
 	} ) => {
@@ -189,10 +187,9 @@ test.describe( 'In-cart count reflects only the standalone line', () => {
 	} );
 
 	// -------------------------------------------------------------------------
-	// Flow 5: Reactive update when a standalone line appears (0 → 1).
-	// Acceptance criterion 4; Requirement 6 (reactive update).
+	// Reactive update when a standalone line appears (0 → 1).
 	// -------------------------------------------------------------------------
-	test( 'Flow 5: after adding against a meta-only product, the button reactively updates from "Add to cart" to "1 in cart"', async ( {
+	test( 'after adding against a meta-only product, the button reactively updates from "Add to cart" to "1 in cart"', async ( {
 		page,
 		frontendUtils,
 	} ) => {
@@ -218,10 +215,9 @@ test.describe( 'In-cart count reflects only the standalone line', () => {
 	} );
 
 	// -------------------------------------------------------------------------
-	// Flow 7: Mini-Cart total badge unaffected (regression guard).
-	// Acceptance criterion 7.
+	// Mini-Cart total badge unaffected (regression guard).
 	// -------------------------------------------------------------------------
-	test( 'Flow 7: the Mini-Cart total item-count badge counts all items, including the bundle-child / meta line', async ( {
+	test( 'the Mini-Cart total item-count badge counts all items, including the bundle-child / meta line', async ( {
 		page,
 		frontendUtils,
 	} ) => {
@@ -255,20 +251,18 @@ test.describe( 'In-cart count reflects only the standalone line', () => {
 } );
 
 // ---------------------------------------------------------------------------
-// Flow 6: Variation counts preserved (Add to Cart with Options).
+// Variation counts preserved (Add to Cart with Options).
 //
-// This flow requires admin credentials to update the single-product template
+// This test requires admin credentials to update the single-product template
 // via the site editor. It runs in its own describe block without the guest
 // storage state override, so the default admin storage state applies.
-//
-// Acceptance criterion 5; Requirement 5.
 // ---------------------------------------------------------------------------
 test.describe( 'In-cart count reflects only the standalone line — variation handling', () => {
 	test.beforeEach( async ( { requestUtils } ) => {
 		await requestUtils.activatePlugin( CART_LINE_IDENTITY_PLUGIN );
 	} );
 
-	test( 'Flow 6: the count is variation-aware — selected in-cart variation shows "1 in cart"; a not-in-cart variation shows "Add to cart"', async ( {
+	test( 'the count is variation-aware — selected in-cart variation shows "1 in cart"; a not-in-cart variation shows "Add to cart"', async ( {
 		page,
 		editor,
 		addToCartWithOptionsPage,

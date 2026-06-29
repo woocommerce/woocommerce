@@ -16,8 +16,7 @@ import type { OptimisticCartItem } from '../../../base/stores/woocommerce/cart';
  * by TypeScript (via `ts:check`) and processed by Babel for Jest, any mismatch
  * between the interface declaration and the objects constructed here will
  * surface either as a compile-time error (under `ts:check`) or a runtime
- * assertion failure (under `test:js`). Both paths are required by the task's
- * acceptance criteria.
+ * assertion failure (under `test:js`).
  */
 
 /** Minimum valid skeleton for the nested shape requirements of `CartItem`. */
