@@ -135,11 +135,9 @@ class WC_Admin_Meta_Boxes {
 		add_meta_box( 'woocommerce-product-images', __( 'Product gallery', 'woocommerce' ), 'WC_Meta_Box_Product_Images::output', 'product', 'side', 'low' );
 
 		// Orders.
-		global $post;
-		$order = ( $post instanceof WP_Post ) ? wc_get_order( $post ) : null;
 		foreach ( wc_get_order_types( 'order-meta-boxes' ) as $type ) {
 			$order_type_object = get_post_type_object( $type );
-			OrderEdit::add_order_meta_boxes( $type, $order_type_object->labels->singular_name, $order instanceof WC_Order ? $order : null );
+			OrderEdit::add_order_meta_boxes( $type, $order_type_object->labels->singular_name );
 		}
 
 		// Coupons.

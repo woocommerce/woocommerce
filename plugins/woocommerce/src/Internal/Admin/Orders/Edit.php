@@ -70,60 +70,43 @@ class Edit {
 	/**
 	 * Hooks all meta-boxes for order edit page. This is static since this may be called by post edit form rendering.
 	 *
-	 * @param string        $screen_id Screen ID.
-	 * @param string        $title     Title of the page.
-	 * @param WC_Order|null $order     Optional. The order being edited. When provided, drives default visibility for content-aware meta boxes.
+	 * @param string $screen_id Screen ID.
+	 * @param string $title     Title of the page.
 	 */
-	public static function add_order_meta_boxes( string $screen_id, string $title, ?WC_Order $order = null ) {
+	public static function add_order_meta_boxes( string $screen_id, string $title ) {
 		/* Translators: %s order type name. */
 		add_meta_box( 'woocommerce-order-data', sprintf( __( '%s data', 'woocommerce' ), $title ), 'WC_Meta_Box_Order_Data::output', $screen_id, 'normal', 'high' );
 		add_meta_box( 'woocommerce-order-items', __( 'Items', 'woocommerce' ), 'WC_Meta_Box_Order_Items::output', $screen_id, 'normal', 'high' );
 		/* Translators: %s order type name. */
 		add_meta_box( 'woocommerce-order-notes', sprintf( __( '%s notes', 'woocommerce' ), $title ), 'WC_Meta_Box_Order_Notes::output', $screen_id, 'side', 'default' );
 		add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable product permissions', 'woocommerce' ) . wc_help_tip( __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) ), 'WC_Meta_Box_Order_Downloads::output', $screen_id, 'normal', 'default' );
-		self::maybe_hide_downloads_meta_box_by_default( $screen_id, $order );
+		self::hide_downloads_meta_box_by_default( $screen_id );
 		/* Translators: %s order type name. */
 		add_meta_box( 'woocommerce-order-actions', sprintf( __( '%s actions', 'woocommerce' ), $title ), 'WC_Meta_Box_Order_Actions::output', $screen_id, 'side', 'high' );
 		self::maybe_register_order_attribution( $screen_id, $title );
 	}
 
 	/**
-	 * Hide the Downloadable product permissions meta box on orders without downloadable items.
+	 * Hide the Downloadable product permissions meta box by default on the order edit screen.
 	 *
-	 * The meta box stays registered so it remains available in the Screen Options panel. This filter
-	 * runs on every page load so the order-content-based default applies consistently regardless of
-	 * any prior Screen Options preferences the user may have saved on the order edit screen.
+	 * Download permissions are managed automatically by WooCommerce, so manual control is niche.
+	 * We hide the meta box by default to keep the order screen trimmed down. The box stays
+	 * registered, so a merchant who needs it can re-enable it via Screen Options — and because
+	 * this uses the `default_hidden_meta_boxes` filter (which only applies when a user has no
+	 * saved Screen Options preference for the screen), that choice persists for that user.
 	 *
-	 * @param string        $screen_id Screen ID the meta box was registered against.
-	 * @param WC_Order|null $order     The order being edited. When null, visibility is left unchanged.
+	 * Extensions that need to override this can hook WordPress core's `default_hidden_meta_boxes`
+	 * filter directly.
+	 *
+	 * Registration is scoped to the given screen id. In practice the only order type that opts
+	 * into order meta boxes is `shop_order`, so the legacy loop in WC_Admin_Meta_Boxes calls this
+	 * once; the HPOS path also calls it once. The closure short-circuits on any non-matching screen.
+	 *
+	 * @param string $screen_id Screen ID the meta box was registered against.
 	 */
-	private static function maybe_hide_downloads_meta_box_by_default( string $screen_id, ?WC_Order $order ): void {
-		if ( ! $order instanceof WC_Order ) {
-			return;
-		}
-
-		/**
-		 * Filters whether the Downloadable product permissions meta box is hidden on the order edit screen.
-		 *
-		 * The decision is re-applied on every page load. Returning true forces the meta box into the screen's hidden list; returning false leaves the user's Screen Options preference intact.
-		 *
-		 * @param bool     $hidden Whether the meta box should be hidden. Defaults to true when the order has no downloadable items.
-		 * @param WC_Order $order  The order being edited.
-		 *
-		 * @since 10.9.0
-		 */
-		$hidden_default = (bool) apply_filters(
-			'woocommerce_order_downloads_meta_box_hidden',
-			! $order->has_downloadable_item(),
-			$order
-		);
-
-		if ( ! $hidden_default ) {
-			return;
-		}
-
+	private static function hide_downloads_meta_box_by_default( string $screen_id ): void {
 		add_filter(
-			'hidden_meta_boxes',
+			'default_hidden_meta_boxes',
 			static function ( $hidden, $screen ) use ( $screen_id ) {
 				if ( ! $screen instanceof \WP_Screen || $screen->id !== $screen_id ) {
 					return $hidden;
@@ -207,7 +190,7 @@ class Edit {
 
 		$this->add_save_meta_boxes();
 		$this->handle_order_update();
-		$this->add_order_meta_boxes( $this->screen_id, __( 'Order', 'woocommerce' ), $this->order );
+		$this->add_order_meta_boxes( $this->screen_id, __( 'Order', 'woocommerce' ) );
 		$this->add_order_specific_meta_box();
 		$this->add_order_taxonomies_meta_box();
 

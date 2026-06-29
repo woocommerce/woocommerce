@@ -1,4 +1,4 @@
 Significance: patch
 Type: tweak
 
-Hide the Downloadable product permissions metabox by default on orders without downloadable items. Users can re-enable it via Screen Options.
+Hide the Downloadable product permissions metabox by default on the order edit screen. Merchants can re-enable it via Screen Options.

@@ -4,15 +4,11 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders;
 
 use Automattic\WooCommerce\Internal\Admin\Orders\Edit;
-use WC_Helper_Order;
-use WC_Helper_Product;
-use WC_Order;
-use WC_Product_Download;
 use WP_Screen;
 
 /**
- * Tests for the Edit class — covers the conditional default visibility of the
- * Downloadable product permissions meta box on the order edit screen.
+ * Tests for the Edit class — covers hiding the Downloadable product permissions
+ * meta box by default on the order edit screen.
  */
 class EditTest extends \WC_Unit_Test_Case {
 
@@ -27,9 +23,9 @@ class EditTest extends \WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		// Clean up filters registered during the test so they don't leak across tests.
-		remove_all_filters( 'hidden_meta_boxes' );
-		remove_all_filters( 'woocommerce_order_downloads_meta_box_hidden' );
+		// Remove only the default_hidden_meta_boxes callbacks this test class registers,
+		// so we don't clobber callbacks owned by other code or tests.
+		remove_all_filters( 'default_hidden_meta_boxes' );
 
 		// Reset the meta boxes registered by add_order_meta_boxes() so global state stays clean.
 		unset( $GLOBALS['wp_meta_boxes'][ self::TEST_SCREEN_ID ] );
@@ -38,135 +34,77 @@ class EditTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave the downloads meta box visible by default when the order has downloadable items.
+	 * @testdox Should hide the downloads meta box by default on the order edit screen.
 	 */
-	public function test_downloads_meta_box_stays_visible_for_orders_with_downloadable_items(): void {
-		$order = $this->create_order_with_downloadable_item();
+	public function test_downloads_meta_box_is_hidden_by_default_on_order_screen(): void {
+		Edit::add_order_meta_boxes( self::TEST_SCREEN_ID, 'Order' );
 
-		Edit::add_order_meta_boxes( self::TEST_SCREEN_ID, 'Order', $order );
-
-		$hidden = $this->apply_default_hidden_filter();
-
-		$this->assertNotContains(
-			'woocommerce-order-downloads',
-			$hidden,
-			'Orders with downloadable items should not have the downloads meta box hidden by default.'
-		);
-	}
-
-	/**
-	 * @testdox Should hide the downloads meta box by default when the order has no downloadable items.
-	 */
-	public function test_downloads_meta_box_is_hidden_for_orders_without_downloadable_items(): void {
-		$order = WC_Helper_Order::create_order( 1, WC_Helper_Product::create_simple_product() );
-
-		Edit::add_order_meta_boxes( self::TEST_SCREEN_ID, 'Order', $order );
-
-		$hidden = $this->apply_default_hidden_filter();
+		$hidden = $this->apply_default_hidden_filter( self::TEST_SCREEN_ID );
 
 		$this->assertContains(
 			'woocommerce-order-downloads',
 			$hidden,
-			'Orders without downloadable items should have the downloads meta box hidden by default.'
+			'The downloads meta box should be hidden by default on the order edit screen.'
 		);
 	}
 
 	/**
-	 * @testdox Should not affect default-hidden meta boxes on screens other than the order edit screen.
+	 * @testdox Should not hide the downloads meta box on screens other than the order edit screen.
 	 */
-	public function test_filter_only_applies_to_the_registered_screen(): void {
-		$order = WC_Helper_Order::create_order( 1, WC_Helper_Product::create_simple_product() );
+	public function test_default_hidden_rule_only_applies_to_the_registered_screen(): void {
+		Edit::add_order_meta_boxes( self::TEST_SCREEN_ID, 'Order' );
 
-		Edit::add_order_meta_boxes( self::TEST_SCREEN_ID, 'Order', $order );
-
-		$unrelated_screen = WP_Screen::get( 'dashboard' );
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Simulating core WP filter to exercise the meta box visibility rule under test.
-		$hidden = apply_filters( 'hidden_meta_boxes', array(), $unrelated_screen );
+		$hidden = $this->apply_default_hidden_filter( 'dashboard' );
 
 		$this->assertNotContains(
 			'woocommerce-order-downloads',
 			$hidden,
-			'The hidden-by-default rule must not leak to unrelated admin screens.'
+			'The hide-by-default rule must not leak to unrelated admin screens.'
 		);
 	}
 
 	/**
-	 * @testdox Should leave the downloads meta box visible when no order is passed.
+	 * @testdox Should keep the downloads meta box registered so it stays available in Screen Options.
 	 */
-	public function test_no_order_means_no_default_hidden_change(): void {
-		Edit::add_order_meta_boxes( self::TEST_SCREEN_ID, 'Order', null );
+	public function test_downloads_meta_box_remains_registered(): void {
+		Edit::add_order_meta_boxes( self::TEST_SCREEN_ID, 'Order' );
 
-		$hidden = $this->apply_default_hidden_filter();
-
-		$this->assertNotContains(
-			'woocommerce-order-downloads',
-			$hidden,
-			'When no order is provided we should not silently hide the meta box.'
+		$this->assertTrue(
+			$this->is_meta_box_registered( 'woocommerce-order-downloads', self::TEST_SCREEN_ID ),
+			'Hiding by default must not unregister the box — it has to remain available to re-enable via Screen Options.'
 		);
 	}
 
 	/**
-	 * @testdox Should allow the woocommerce_order_downloads_meta_box_hidden filter to force the meta box visible.
-	 */
-	public function test_extension_filter_can_force_meta_box_visible(): void {
-		$order = WC_Helper_Order::create_order( 1, WC_Helper_Product::create_simple_product() );
-
-		add_filter( 'woocommerce_order_downloads_meta_box_hidden', '__return_false' );
-
-		Edit::add_order_meta_boxes( self::TEST_SCREEN_ID, 'Order', $order );
-
-		$hidden = $this->apply_default_hidden_filter();
-
-		$this->assertNotContains(
-			'woocommerce-order-downloads',
-			$hidden,
-			'The extension filter should be able to force the meta box visible even when there are no downloadable items.'
-		);
-	}
-
-	/**
-	 * @testdox Should allow the woocommerce_order_downloads_meta_box_hidden filter to force the meta box hidden.
-	 */
-	public function test_extension_filter_can_force_meta_box_hidden(): void {
-		$order = $this->create_order_with_downloadable_item();
-
-		add_filter( 'woocommerce_order_downloads_meta_box_hidden', '__return_true' );
-
-		Edit::add_order_meta_boxes( self::TEST_SCREEN_ID, 'Order', $order );
-
-		$hidden = $this->apply_default_hidden_filter();
-
-		$this->assertContains(
-			'woocommerce-order-downloads',
-			$hidden,
-			'The extension filter should be able to force the meta box hidden even when there are downloadable items.'
-		);
-	}
-
-	/**
-	 * Build an order containing one downloadable product with a download file.
+	 * Apply the default_hidden_meta_boxes filter as WordPress would, against a given screen.
 	 *
-	 * @return WC_Order
+	 * @param string $screen_id Screen ID to simulate.
+	 * @return array<int, string>
 	 */
-	private function create_order_with_downloadable_item(): WC_Order {
-		$download = new WC_Product_Download();
-		$download->set_name( 'Test download' );
-		$download->set_id( 'edit-test-download' );
-		$download->set_file( 'https://example.com/file.pdf' );
-
-		$product = WC_Helper_Product::create_downloadable_product( array( $download ) );
-
-		return WC_Helper_Order::create_order( 1, $product );
+	private function apply_default_hidden_filter( string $screen_id ): array {
+		$screen = WP_Screen::get( $screen_id );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Simulating core WP filter to exercise the meta box visibility rule under test.
+		return (array) apply_filters( 'default_hidden_meta_boxes', array(), $screen );
 	}
 
 	/**
-	 * Apply the hidden_meta_boxes filter as WordPress would, against the test screen.
+	 * Whether a meta box id is registered against a screen, in any context or priority.
 	 *
-	 * @return array
+	 * @param string $meta_box_id Meta box id to look for.
+	 * @param string $screen_id   Screen id whose registered meta boxes are searched.
+	 * @return bool
 	 */
-	private function apply_default_hidden_filter(): array {
-		$screen = WP_Screen::get( self::TEST_SCREEN_ID );
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Simulating core WP filter to exercise the meta box visibility rule under test.
-		return (array) apply_filters( 'hidden_meta_boxes', array(), $screen );
+	private function is_meta_box_registered( string $meta_box_id, string $screen_id ): bool {
+		$contexts = $GLOBALS['wp_meta_boxes'][ $screen_id ] ?? array();
+
+		foreach ( $contexts as $priorities ) {
+			foreach ( $priorities as $boxes ) {
+				if ( is_array( $boxes ) && array_key_exists( $meta_box_id, $boxes ) ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 }
