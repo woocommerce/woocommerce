@@ -41469,59 +41469,7 @@ parameters:
 			count: 3
 			path: src/Admin/API/Reports/Customers/DataStore.php
 
-		-
-			message: '#^Call to an undefined method object\:\:get_billing_city\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
 
-		-
-			message: '#^Call to an undefined method object\:\:get_billing_country\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_billing_email\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_billing_postcode\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_billing_state\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_customer_first_name\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_customer_last_name\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_date_created\(\)\.$#'
-			identifier: method.notFound
-			count: 3
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_email\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
 
 		-
 			message: '#^Call to an undefined method object\:\:get_id\(\)\.$#'
@@ -41529,26 +41477,10 @@ parameters:
 			count: 1
 			path: src/Admin/API/Reports/Customers/DataStore.php
 
-		-
-			message: '#^Call to an undefined method object\:\:get_user_id\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Admin/API/Reports/Customers/DataStore.php
 
-		-
-			message: '#^Call to an undefined method object\:\:get_username\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
 
 		-
 			message: '#^Cannot call method get_id\(\) on Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\WC_Order\|WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Cannot call method get_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Admin/API/Reports/Customers/DataStore.php
@@ -41669,18 +41601,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$customer_id of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_last_order\(\) expects int, int\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Parameter \#1 \$order of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_customer_order_data_and_format\(\) expects object, WC_Order\|WC_Order_Refund\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Parameter \#1 \$order of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_existing_customer_id_from_order\(\) expects object, WC_Order\|WC_Order_Refund\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Admin/API/Reports/Customers/DataStore.php
@@ -47824,12 +47744,6 @@ parameters:
 			path: src/Admin/Overrides/OrderRefund.php
 
 		-
-			message: '#^Parameter \#1 \$order of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_or_create_customer_from_order\(\) expects object, WC_Order\|WC_Order_Refund\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Overrides/OrderRefund.php
-
-		-
 			message: '#^Parameter \$item of method Automattic\\WooCommerce\\Admin\\Overrides\\OrderRefund\:\:get_item_cart_tax_amount\(\) has invalid type Automattic\\WooCommerce\\Admin\\Overrides\\WC_Order_Item\.$#'
 			identifier: class.notFound
 			count: 1
@@ -47855,12 +47769,6 @@ parameters:
 
 		-
 			message: '#^Property Automattic\\WooCommerce\\Admin\\Overrides\\OrderRefund\:\:\$customer_id \(int\) does not accept bool\|int\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Admin/Overrides/OrderRefund.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Admin\\Overrides\\OrderRefund\:\:\$customer_id \(int\) does not accept false\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: src/Admin/Overrides/OrderRefund.php

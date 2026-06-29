@@ -30,6 +30,18 @@ class WC_Post_Types {
 		add_filter( 'rest_api_allowed_post_types', array( __CLASS__, 'rest_api_allowed_post_types' ) );
 		add_action( 'woocommerce_after_register_post_type', array( __CLASS__, 'maybe_flush_rewrite_rules' ) );
 		add_action( 'woocommerce_flush_rewrite_rules', array( __CLASS__, 'flush_rewrite_rules' ) );
+		// Similar logic exists in flush_rewrite_rules_on_shop_page_save(), but REST saves need a queued flush.
+		add_action(
+			'save_post_page',
+			static function ( $post_id, $post, $update ) {
+				if ( ! $update ) {
+					return;
+				}
+				self::queue_rewrite_rules_on_shop_page_save( $post_id, $post );
+			},
+			10,
+			3
+		);
 		add_filter( 'gutenberg_can_edit_post_type', array( __CLASS__, 'gutenberg_can_edit_post_type' ), 10, 2 );
 		add_filter( 'use_block_editor_for_post_type', array( __CLASS__, 'gutenberg_can_edit_post_type' ), 10, 2 );
 	}
@@ -676,6 +688,33 @@ class WC_Post_Types {
 		if ( 'yes' === get_option( 'woocommerce_queue_flush_rewrite_rules' ) ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
 			self::flush_rewrite_rules();
+		}
+	}
+
+	/**
+	 * Queue rewrite rules to be flushed after the shop page (or its ancestors) gets saved.
+	 *
+	 * @param int          $post_id Post ID.
+	 * @param WP_Post|null $post    Post object.
+	 */
+	private static function queue_rewrite_rules_on_shop_page_save( $post_id, $post = null ): void {
+		$post_id = absint( $post_id );
+
+		if ( ! $post_id || wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+			return;
+		}
+
+		$post_status = $post instanceof WP_Post ? $post->post_status : get_post_status( $post_id );
+
+		$shop_page_id = wc_get_page_id( 'shop' );
+
+		// Keep the existing behavior where a trashed shop page still serves the product archive at its previous URL.
+		if ( 0 >= $shop_page_id || 'trash' === $post_status ) {
+			return;
+		}
+
+		if ( $shop_page_id === $post_id || in_array( $post_id, get_post_ancestors( $shop_page_id ), true ) ) {
+			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		}
 	}
 

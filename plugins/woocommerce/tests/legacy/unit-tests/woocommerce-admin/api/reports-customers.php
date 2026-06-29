@@ -782,6 +782,222 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that get_or_create_customer_from_order works with a plain WC_Order (not Overrides\Order).
+	 *
+	 * Bug condition: When a plain WC_Order is passed, get_customer_first_name() does not exist,
+	 * causing a fatal error. The fix should convert to Overrides\Order internally.
+	 *
+	 * Validates: Requirements 1.1, 1.2
+	 */
+	public function test_get_or_create_customer_from_plain_wc_order() {
+		// Remove the filter that converts WC_Order to Overrides\Order so we get a plain WC_Order.
+		remove_filter( 'woocommerce_order_class', array( \Automattic\WooCommerce\Admin\Overrides\Order::class, 'order_class_name' ), 10 );
+
+		$order = new \WC_Order();
+		$order->set_billing_first_name( 'Plain' );
+		$order->set_billing_last_name( 'Order' );
+		$order->set_billing_email( 'plain.order@example.com' );
+		$order->set_date_created( time() );
+		$order->save();
+
+		// Restore the filter.
+		add_filter( 'woocommerce_order_class', array( \Automattic\WooCommerce\Admin\Overrides\Order::class, 'order_class_name' ), 10, 3 );
+
+		$customer_id = CustomersDataStore::get_or_create_customer_from_order( $order );
+
+		$this->assertIsInt( $customer_id );
+		$this->assertGreaterThan( 0, $customer_id );
+
+		// Verify the converted order resolved billing names via Overrides\Order.
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'wc_customer_lookup';
+		$record     = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$table_name} WHERE customer_id = %d", $customer_id ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+
+		$this->assertEquals( 'Plain', $record->first_name );
+		$this->assertEquals( 'Order', $record->last_name );
+		$this->assertEquals( 'plain.order@example.com', $record->email );
+		$this->assertNotNull( $record->date_last_active );
+	}
+
+	/**
+	 * Test that get_or_create_customer_from_order returns false for unsaved orders.
+	 *
+	 * Bug condition: An unsaved order has get_id() === 0. Constructing
+	 * new OverridesOrder( 0 ) returns an empty order, which would write
+	 * a blank customer row.
+	 */
+	public function test_get_or_create_customer_from_unsaved_order() {
+		// Remove the filter that converts WC_Order to Overrides\Order so we get a plain WC_Order.
+		remove_filter( 'woocommerce_order_class', array( \Automattic\WooCommerce\Admin\Overrides\Order::class, 'order_class_name' ), 10 );
+
+		$order = new \WC_Order();
+		$order->set_billing_first_name( 'Unsaved' );
+		$order->set_billing_last_name( 'Order' );
+		$order->set_billing_email( 'unsaved@example.com' );
+		// Do NOT call save() — order has no ID yet.
+
+		$result = CustomersDataStore::get_or_create_customer_from_order( $order );
+
+		$this->assertFalse( $result );
+
+		// Restore the filter.
+		add_filter( 'woocommerce_order_class', array( \Automattic\WooCommerce\Admin\Overrides\Order::class, 'order_class_name' ), 10, 3 );
+	}
+
+	/**
+	 * Test that get_customer_order_data_and_format handles null date_created without fatal.
+	 *
+	 * Bug condition: When get_date_created('edit') returns null, calling ->getTimestamp() on null
+	 * causes a fatal error. The fix should handle null dates gracefully.
+	 *
+	 * Validates: Requirements 1.3
+	 */
+	public function test_get_customer_order_data_with_null_date_created() {
+		$order = new \Automattic\WooCommerce\Admin\Overrides\Order();
+		$order->set_billing_first_name( 'NullDate' );
+		$order->set_billing_last_name( 'Test' );
+		$order->set_billing_email( 'nulldate@example.com' );
+		$order->save();
+
+		// Force all date fields to null after save (simulates edge case / corrupted data).
+		// Since the order is already an OverridesOrder, the instanceof check passes
+		// and no re-instantiation from DB occurs.
+		$order->set_date_created( null );
+		$order->set_date_modified( null );
+
+		// This should not fatal — date_last_active should be null when all dates are null.
+		list( $data, $format ) = CustomersDataStore::get_customer_order_data_and_format( $order );
+
+		$this->assertNull( $data['date_last_active'] );
+	}
+
+	/**
+	 * Test that sync_order_customer handles a non-existent order ID without fatal.
+	 *
+	 * Bug condition: When wc_get_order() returns false for a non-existent order,
+	 * the code proceeds to call methods on false, causing a fatal error.
+	 * The fix should return -1 gracefully.
+	 *
+	 * Validates: Requirements 1.2
+	 */
+	public function test_sync_order_customer_with_nonexistent_order() {
+		// Use a very high order ID that doesn't exist.
+		$result = CustomersDataStore::sync_order_customer( 999999 );
+
+		$this->assertEquals( -1, $result );
+	}
+
+	/**
+	 * Test that get_or_create_customer_from_order preserves correct behavior with Overrides\Order.
+	 *
+	 * Preservation: Overrides\Order with billing name and valid date_created produces
+	 * a customer record with correct first_name, last_name, and date_last_active.
+	 *
+	 * Validates: Requirements 3.1, 3.2
+	 */
+	public function test_overrides_order_customer_creation_preserved() {
+		$order = new \Automattic\WooCommerce\Admin\Overrides\Order();
+		$order->set_billing_first_name( 'Preserved' );
+		$order->set_billing_last_name( 'Customer' );
+		$order->set_billing_email( 'preserved.customer@example.com' );
+		$order->set_date_created( time() );
+		$order->save();
+
+		$customer_id = CustomersDataStore::get_or_create_customer_from_order( $order );
+
+		// Returns an int customer ID.
+		$this->assertIsInt( $customer_id );
+		$this->assertGreaterThan( 0, $customer_id );
+
+		// Verify customer record has correct first_name/last_name (from billing since no user_id).
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'wc_customer_lookup';
+		$record     = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$table_name} WHERE customer_id = %d", $customer_id ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+
+		$this->assertEquals( 'Preserved', $record->first_name );
+		$this->assertEquals( 'Customer', $record->last_name );
+
+		// date_last_active matches the order's date_created formatted as Y-m-d H:i:s.
+		$expected_date = gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() );
+		$this->assertEquals( $expected_date, $record->date_last_active );
+	}
+
+	/**
+	 * Test that get_or_create_customer_from_order preserves correct behavior with a registered user.
+	 *
+	 * Preservation: Overrides\Order with a registered user produces a customer record
+	 * with correct user_id and username from the WC_Customer.
+	 *
+	 * Validates: Requirements 3.3
+	 */
+	public function test_overrides_order_registered_user_preserved() {
+		// Create a WordPress user to associate with the order.
+		$user_id = wp_insert_user(
+			array(
+				'user_login' => 'preserveduser',
+				'user_pass'  => 'password',
+				'user_email' => 'preserveduser@example.com',
+				'first_name' => 'RegFirst',
+				'last_name'  => 'RegLast',
+				'role'       => 'customer',
+			)
+		);
+
+		$order = new \Automattic\WooCommerce\Admin\Overrides\Order();
+		$order->set_customer_id( $user_id );
+		$order->set_billing_first_name( 'BillingFirst' );
+		$order->set_billing_last_name( 'BillingLast' );
+		$order->set_billing_email( 'preserveduser@example.com' );
+		$order->set_date_created( time() );
+		$order->save();
+
+		$customer_id = CustomersDataStore::get_or_create_customer_from_order( $order );
+
+		// Returns an int customer ID.
+		$this->assertIsInt( $customer_id );
+		$this->assertGreaterThan( 0, $customer_id );
+
+		// Verify customer record has correct user_id and username from WC_Customer.
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'wc_customer_lookup';
+		$record     = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$table_name} WHERE customer_id = %d", $customer_id ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+
+		$this->assertEquals( $user_id, (int) $record->user_id );
+		$this->assertEquals( 'preserveduser', $record->username );
+	}
+
+	/**
+	 * Test that calling get_or_create_customer_from_order twice for the same order
+	 * returns the same customer_id without creating a duplicate.
+	 *
+	 * Preservation: Existing customer record for same order returns existing customer_id.
+	 *
+	 * Validates: Requirements 3.4
+	 */
+	public function test_existing_customer_not_duplicated() {
+		$order = new \Automattic\WooCommerce\Admin\Overrides\Order();
+		$order->set_billing_first_name( 'NoDupe' );
+		$order->set_billing_last_name( 'Test' );
+		$order->set_billing_email( 'nodupe@example.com' );
+		$order->set_date_created( time() );
+		$order->save();
+
+		$customer_id_first  = CustomersDataStore::get_or_create_customer_from_order( $order );
+		$customer_id_second = CustomersDataStore::get_or_create_customer_from_order( $order );
+
+		// Both calls return the same customer_id (no duplicate created).
+		$this->assertIsInt( $customer_id_first );
+		$this->assertIsInt( $customer_id_second );
+		$this->assertEquals( $customer_id_first, $customer_id_second );
+	}
+
+	/**
 	 * Test get_last_order.
 	 */
 	public function test_get_last_order() {
