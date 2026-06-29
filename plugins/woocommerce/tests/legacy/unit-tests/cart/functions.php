@@ -88,6 +88,53 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_clear_cart_after_payment() clears the cart when the order products match the cart products.
+	 */
+	public function test_wc_clear_cart_after_payment_clears_matching_cart() {
+		global $wp;
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = WC_Helper_Order::create_order( 1, $product );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 4 );
+
+		$wp->query_vars['order-received'] = $order->get_id();
+		$_GET['key']                      = $order->get_order_key();
+
+		wc_clear_cart_after_payment();
+
+		unset( $wp->query_vars['order-received'], $_GET['key'] );
+
+		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
+	}
+
+	/**
+	 * Test wc_clear_cart_after_payment() preserves the cart when the order products do not match the cart products.
+	 */
+	public function test_wc_clear_cart_after_payment_preserves_different_cart() {
+		global $wp;
+
+		$order_product = WC_Helper_Product::create_simple_product();
+		$cart_product  = WC_Helper_Product::create_simple_product();
+		$order         = WC_Helper_Order::create_order( 1, $order_product );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $cart_product->get_id(), 1 );
+
+		$wp->query_vars['order-received'] = $order->get_id();
+		$_GET['key']                      = $order->get_order_key();
+
+		wc_clear_cart_after_payment();
+
+		unset( $wp->query_vars['order-received'], $_GET['key'] );
+
+		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
+
+		WC()->cart->empty_cart();
+	}
+
+	/**
 	 * Test wc_format_list_of_items().
 	 *
 	 * @since 2.4

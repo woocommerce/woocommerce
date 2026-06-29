@@ -68,10 +68,6 @@ abstract class WC_Gateway_Paypal_Response {
 		if ( ! $order->has_status( array( OrderStatus::PROCESSING, OrderStatus::COMPLETED ) ) ) {
 			$order->add_order_note( $note );
 			$order->payment_complete( $txn_id );
-
-			if ( isset( WC()->cart ) ) {
-				WC()->cart->empty_cart();
-			}
 		}
 	}
 
@@ -83,9 +79,5 @@ abstract class WC_Gateway_Paypal_Response {
 	 */
 	protected function payment_on_hold( $order, $reason = '' ) {
 		$order->update_status( OrderStatus::ON_HOLD, $reason );
-
-		if ( isset( WC()->cart ) ) {
-			WC()->cart->empty_cart();
-		}
 	}
 }

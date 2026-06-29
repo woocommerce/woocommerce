@@ -177,6 +177,7 @@ function wc_clear_cart_after_payment() {
 
 	$should_clear_cart_after_payment = false;
 	$after_payment                   = false;
+	$order                           = null;
 
 	// If the order has been received, clear the cart.
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
@@ -203,6 +204,37 @@ function wc_clear_cart_after_payment() {
 			$should_clear_cart_after_payment = ! $order->has_status( array( OrderStatus::FAILED, OrderStatus::PENDING, OrderStatus::CANCELLED ) );
 			$after_payment                   = true;
 		}
+	}
+
+	// If the order is different from the cart, don't clear the cart. This can happen if the user has multiple tabs open and completes a different order than the one in the cart.
+	if ( $order instanceof WC_Order && ! WC()->cart->is_empty() ) {
+		$order_products = array();
+		$cart_products  = array();
+
+		foreach ( $order->get_items() as $item ) {
+			$product_id = $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id();
+
+			if ( ! $product_id ) {
+				continue;
+			}
+
+			$order_products[ $product_id ] = ( $order_products[ $product_id ] ?? 0 ) + (int) $item->get_quantity();
+		}
+
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			$product_id = ! empty( $cart_item['variation_id'] ) ? $cart_item['variation_id'] : $cart_item['product_id'];
+
+			if ( ! $product_id ) {
+				continue;
+			}
+
+			$cart_products[ $product_id ] = ( $cart_products[ $product_id ] ?? 0 ) + (int) $cart_item['quantity'];
+		}
+
+		ksort( $order_products );
+		ksort( $cart_products );
+
+		$should_clear_cart_after_payment = $order_products === $cart_products;
 	}
 
 	// If it doesn't look like a payment happened, bail early.

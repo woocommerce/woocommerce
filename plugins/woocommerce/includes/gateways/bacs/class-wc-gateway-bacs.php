@@ -410,9 +410,6 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 			$order->payment_complete();
 		}
 
-		// Remove cart.
-		WC()->cart->empty_cart();
-
 		// Return thankyou redirect.
 		return array(
 			'result'   => 'success',
