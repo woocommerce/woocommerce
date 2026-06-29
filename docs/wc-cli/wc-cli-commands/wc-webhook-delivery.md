@@ -14,9 +14,9 @@ List all webhook deliveries.
 - `--field` - Get the value of an individual field.
 - `--format` - Render response in a particular format.
 
-Default: table
+    Default: table
 
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
+    Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc webhook_delivery get `<webhook_id>` `<id>`
 
@@ -27,6 +27,6 @@ Get a single webhook delivery.
 - `--field` - Get the value of an individual field.
 - `--format` - Render response in a particular format.
 
-Default: table
+    Default: table
 
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
+    Options: table, json, csv, yaml, headers, body, envelope

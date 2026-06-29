@@ -31,7 +31,7 @@ List all product variations.
 - `--tag` - Limit result set to products assigned a specific tag ID.
 - `--shipping_class` - Limit result set to products assigned a specific shipping class ID.
 - `--attribute` - Limit result set to products with a specific attribute.
-- `--attribute_term` - Limit result set to products with a specific attribute term ID (required an assigned attribute).
+- `--attribute_term` - Limit result set to products with a specific attribute term ID (requires an assigned attribute).
 - `--tax_class` - Limit result set to products with a specific tax class.
 - `--in_stock` - Limit result set to products in stock or out of stock.
 - `--on_sale` - Limit result set to products on sale.
@@ -41,9 +41,9 @@ List all product variations.
 - `--field` - Get the value of an individual field.
 - `--format` - Render response in a particular format.
 
-Default: table
+    Default: table
 
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
+    Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc product_variation create `<product_id>`
 
@@ -56,7 +56,7 @@ Create a new product variation.
 - `--date_on_sale_from` - Start date of sale price, in the site's timezone.
 - `--date_on_sale_from_gmt` - Start date of sale price, as GMT.
 - `--date_on_sale_to` - End date of sale price, in the site's timezone.
-- `--date_on_sale_to_gmt` - End date of sale price, in the site's timezone.
+- `--date_on_sale_to_gmt` - End date of sale price, as GMT.
 - `--visible` - Define if the attribute is visible on the "Additional information" tab in the product's page.
 - `--virtual` - If the variation is virtual.
 - `--downloadable` - If the variation is downloadable.
@@ -87,9 +87,9 @@ Get a single product variation.
 - `--field` - Get the value of an individual field.
 - `--format` - Render response in a particular format.
 
-Default: table
+    Default: table
 
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
+    Options: table, json, csv, yaml, headers, body, envelope
 
 ## wc product_variation update `<product_id>` `<id>`
 
@@ -102,7 +102,7 @@ Update an existing product variation.
 - `--date_on_sale_from` - Start date of sale price, in the site's timezone.
 - `--date_on_sale_from_gmt` - Start date of sale price, as GMT.
 - `--date_on_sale_to` - End date of sale price, in the site's timezone.
-- `--date_on_sale_to_gmt` - End date of sale price, in the site's timezone.
+- `--date_on_sale_to_gmt` - End date of sale price, as GMT.
 - `--visible` - Define if the attribute is visible on the "Additional information" tab in the product's page.
 - `--virtual` - If the variation is virtual.
 - `--downloadable` - If the variation is downloadable.

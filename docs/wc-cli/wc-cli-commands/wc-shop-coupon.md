@@ -25,9 +25,9 @@ List all shop coupons.
 - `--field` - Get the value of an individual field.
 - `--format` - Render response in a particular format.
 
-Default: table
+    Default: table
 
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
+    Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc shop_coupon create
 
@@ -64,9 +64,9 @@ Get a single shop coupon.
 - `--field` - Get the value of an individual field.
 - `--format` - Render response in a particular format.
 
-Default: table
+    Default: table
 
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
+    Options: table, json, csv, yaml, headers, body, envelope
 
 ## wc shop_coupon update `<id>`
 

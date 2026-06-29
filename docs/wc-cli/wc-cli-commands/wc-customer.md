@@ -24,9 +24,9 @@ List all customers.
 - `--field` - Get the value of an individual field.
 - `--format` - Render response in a particular format.
 
-Default: table
+    Default: table
 
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
+    Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc customer create
 
@@ -51,9 +51,9 @@ Get a single customer.
 - `--field` - Get the value of an individual field.
 - `--format` - Render response in a particular format.
 
-Default: table
+    Default: table
 
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
+    Options: table, json, csv, yaml, headers, body, envelope
 
 ## wc customer update `<id>`
 

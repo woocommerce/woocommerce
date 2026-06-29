@@ -25,9 +25,9 @@ List all product shipping classes.
 - `--field` - Get the value of an individual field.
 - `--format` - Render response in a particular format.
 
-Default: table
+    Default: table
 
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
+    Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc product_shipping_class create
 
@@ -47,9 +47,9 @@ Get a single product shipping class.
 - `--field` - Get the value of an individual field.
 - `--format` - Render response in a particular format.
 
-Default: table
+    Default: table
 
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
+    Options: table, json, csv, yaml, headers, body, envelope
 
 ## wc product_shipping_class update `<id>`
 

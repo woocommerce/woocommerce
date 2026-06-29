@@ -50,20 +50,21 @@ Sync order data between the custom order tables and the core WordPress post tabl
 
 - `--batch-size` - The number of orders to process in each batch.
 
-Default: 500
+    Default: 500
 
 ## wc hpos verify_data
 
 Verify migrated order data with original posts data.
 
 - `--batch-size` - The number of orders to verify in each batch.
+
+    Default: 500
+
 - `--start-from` - Order ID to start from.
 - `--end-at` - Order ID to end at.
 - `--verbose` - Output errors as they happen in each batch instead of aggregating them at the end.
 - `--order-types` - Comma-separated list of order types to verify. Defaults to `wc_get_order_types( 'cot-migration' )`.
 - `--re-migrate` - Attempt to re-migrate orders that fail verification. Use only after confirming the destination datastore should be overwritten.
-
-Default batch size: 500
 
 ## wc hpos diff `<order_id>`
 
@@ -71,9 +72,9 @@ Display differences for an order between the HPOS and posts datastores.
 
 - `--format` - Render output in a particular format.
 
-Default: table
+    Default: table
 
-Options: table, csv, json, yaml
+    Options: table, csv, json, yaml
 
 ## wc hpos backfill `<order_id>`
 
@@ -91,6 +92,7 @@ Datastore options: hpos, posts
 Remove redundant data from the postmeta table for migrated orders when HPOS is enabled.
 
 - `--batch-size` - Number of orders to process per batch. Applies only when cleaning up all orders.
-- `--force` - Clean up post meta even if the post appears to have been updated more recently than the order.
 
-Default batch size: 500
+    Default: 500
+
+- `--force` - Clean up post meta even if the post appears to have been updated more recently than the order.

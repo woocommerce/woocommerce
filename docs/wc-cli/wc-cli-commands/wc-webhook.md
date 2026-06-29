@@ -25,9 +25,9 @@ List all webhooks.
 - `--field` - Get the value of an individual field.
 - `--format` - Render response in a particular format.
 
-Default: table
+    Default: table
 
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
+    Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc webhook create
 
@@ -49,9 +49,9 @@ Get a single webhook.
 - `--field` - Get the value of an individual field.
 - `--format` - Render response in a particular format.
 
-Default: table
+    Default: table
 
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
+    Options: table, json, csv, yaml, headers, body, envelope
 
 ## wc webhook update `<id>`
 
@@ -60,7 +60,7 @@ Update an existing webhook.
 - `--name` - A friendly name for the webhook.
 - `--status` - Webhook status.
 - `--topic` - Webhook topic.
-- `--secret` - Secret key used to generate a hash of the delivered webhook and provided in the request headers. This will default is a MD5 hash from the current user's ID|username if not provided.
+- `--secret` - Secret key used to generate a hash of the delivered webhook and provided in the request headers. The default is an MD5 hash from the current user's ID|username if not provided.
 - `--porcelain` - Output just the id when the operation is successful.
 
 ## wc webhook delete `<id>`

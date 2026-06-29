@@ -19,7 +19,7 @@ Disables usage of the product attributes lookup table.
 
 Displays information about the product attributes lookup table.
 
-## wc palt regenerate_for_product `<product-id>`
+## wc palt regenerate_for_product `<product_id>`
 
 Regenerate product attributes lookup table data for one product.
 
@@ -54,4 +54,4 @@ Regenerate the product attributes lookup table immediately without using schedul
 - `--disable-db-optimization` - Do not use optimized database access even if products are stored as custom post types.
 - `--batch-size` - How many products to process in each iteration of the loop.
 
-Default batch size: 10
+    Default: 10

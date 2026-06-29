@@ -9,21 +9,21 @@ Manage WooCommerce product review resources.
 
 List all product reviews.
 
-- `--id` - Unique identifier for the variation.
+- `--id` - Unique identifier for the review.
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
 - `--format` - Render response in a particular format.
 
-Default: table
+    Default: table
 
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
+    Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ## wc product_review create `<product_id>`
 
 Create a new product review.
 
-- `--id` - Unique identifier for the variation.
+- `--id` - Unique identifier for the review.
 - `--review` - Review content. (*Required*)
 - `--date_created` - The date the review was created, in the site's timezone.
 - `--date_created_gmt` - The date the review was created, as GMT.
@@ -41,9 +41,9 @@ Get a single product review.
 - `--field` - Get the value of an individual field.
 - `--format` - Render response in a particular format.
 
-Default: table
+    Default: table
 
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
+    Options: table, json, csv, yaml, headers, body, envelope
 
 ## wc product_review update `<product_id>` `<id>`
 
