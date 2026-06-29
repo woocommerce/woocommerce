@@ -177,8 +177,14 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			| ExpressPaymentMethodConfigInstance
 	) => {
 		if ( express ) {
-			const { name, title, description, gatewayId, supports } =
-				paymentMethod as ExpressPaymentMethodConfigInstance;
+			const {
+				name,
+				title,
+				description,
+				gatewayId,
+				supports,
+				paymentMethodId,
+			} = paymentMethod as ExpressPaymentMethodConfigInstance;
 
 			availablePaymentMethods = {
 				...availablePaymentMethods,
@@ -187,6 +193,7 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 					title,
 					description,
 					gatewayId,
+					paymentMethodId: paymentMethodId ?? name,
 					supportsStyle: supports?.style,
 				},
 			};
