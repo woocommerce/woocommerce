@@ -2134,176 +2134,134 @@ ul.wc_coupon_list_block {
 	}
 }
 
-// Let the "more actions" menu float out over the panel below instead of being
-// clipped: the postbox is overflow: hidden by default, which traps the popover.
-#poststuff #woocommerce-order-actions {
-	overflow: visible;
-}
-
 .order_actions {
 	margin: 0;
 	padding: 0;
-	display: flex;
-	flex-direction: column;
 	list-style: none;
 
 	li {
-		border-top: 1px solid $gray-200;
-		padding: 16px 12px;
+		padding: 6px 0;
 		margin: 0;
 		line-height: 1.6em;
+		float: left;
+		width: 50%;
+		text-align: center;
 
-		&:first-child {
-			border-top: 0;
+		a {
+			float: none;
+			text-align: center;
+			text-decoration: underline;
 		}
 
-		// Save row: primary Update/Create button on the left, with tertiary
-		// actions tucked behind a kebab "more actions" menu on the right. Keeping
-		// the destructive trash action out of the primary surface (and a deliberate
-		// two-step away) follows the unified admin header pattern and removes the
-		// large red target that previously sat right beside the save button.
-		&.wc-order-save-action {
-			display: flex;
-			flex-direction: row;
-			align-items: stretch;
-			gap: 8px;
-
-			button.save_order {
-				flex: 1;
-				// Reset the legacy 1px button margin so the row doesn't overflow.
-				margin: 0;
-			}
+		&.wide {
+			width: auto;
+			float: none;
+			clear: both;
+			padding: 6px;
+			text-align: left;
+			overflow: hidden;
 		}
 
-		// The customer stock-notification edit/create screens reuse this
-		// submitbox markup but keep the legacy save row (#delete-action +
-		// .save_order, no kebab). Restore its original side-by-side layout so
-		// this order-edit redesign doesn't regress those screens. The
-		// :has(#delete-action) guard keeps this off the order screen and off
-		// any extension-injected `<li class="wide">` panels. Migrating those
-		// templates to the new design is tracked as a follow-up.
-		&.wide:has(#delete-action) {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			gap: 8px;
-
-			.save_order {
-				margin: 0;
-			}
+		#delete-action {
+			line-height: 25px;
+			vertical-align: middle;
+			text-align: left;
+			float: left;
 		}
 
-		.wc-order-actions-menu {
-			position: relative;
-			flex-shrink: 0;
-
-			// Square icon button sized to match the WP 7.0 button height.
-			&__toggle {
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				width: 40px;
-				min-height: 40px;
-				padding: 0;
-				margin: 0;
-				// Neutral resting colour so the icon (currentColor) reads as a gray
-				// "more" affordance rather than the secondary button's blue. Matches
-				// the @wordpress/components icon-button convention.
-				color: $gray-900;
-			}
-
-			&__icon {
-				width: 24px;
-				height: 24px;
-				// Inherit the button colour (Gutenberg keeps the SVG fill-less and
-				// drives it via currentColor); map to the system colour in forced
-				// colours so the kebab stays visible in high-contrast modes.
-				fill: currentColor;
-
-				@media (forced-colors: active) {
-					fill: CanvasText;
-				}
-			}
-
-			// Floating popover anchored below the toggle, styled like a Gutenberg
-			// dropdown: white surface, hairline border, and a lift shadow so it
-			// reads as floating over the panel rather than part of it.
-			&__list {
-				position: absolute;
-				right: 0;
-				top: calc(100% + 4px);
-				z-index: 10;
-				// Hug the content (items are white-space: nowrap) instead of
-				// stretching to a fixed width, with a small floor to stay tidy.
-				width: max-content;
-				min-width: 120px;
-				margin: 0;
-				padding: 4px;
-				list-style: none;
-				background: #fff;
-				border: 1px solid $gray-200;
-				border-radius: 4px;
-				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-
-				li {
-					padding: 0;
-					margin: 0;
-					border: 0;
-					line-height: normal;
-				}
-			}
-
-			// Menu items render as neutral rows like a standard dropdown — the rule
-			// targets the role, so the built-in trash action and anything an
-			// extension adds look consistent regardless of source. (Overrides the
-			// red WP core gives `.submitdelete`, since the kebab already provides
-			// the friction that the red used to signal.)
-			a[role="menuitem"] {
-				display: block;
-				padding: 8px 12px;
-				border-radius: 2px;
-				color: $gray-900;
-				text-decoration: none;
-				white-space: nowrap;
-				cursor: pointer;
-
-				&:hover,
-				&:focus {
-					background: $gray-100;
-					color: $gray-900;
-				}
-
-				&:focus {
-					box-shadow: inset 0 0 0 1.5px var(--wp-admin-theme-color, #2271b1);
-					// Transparent outline so forced-colors / Windows High Contrast
-					// paints a focus ring (box-shadow is ignored there). Mirrors
-					// Gutenberg's button-style focus.
-					outline: 2px solid transparent;
-					outline-offset: -2px;
-				}
-			}
+		.save_order {
+			float: right;
 		}
 
-		// Action row (top): select + Apply button. Replaces the legacy
-		// float layout where the Apply button was forced to width: 24px
-		// (a squished pill) and the select to a hardcoded 225px (overflowed
-		// on narrow sidebars).
 		&#actions {
-			display: flex;
-			gap: 8px;
-			align-items: stretch;
-
-			select {
-				flex: 1;
-				min-width: 0; // prevent flex blow-out on long option labels.
-				box-sizing: border-box;
-			}
+			overflow: hidden;
 
 			.button {
-				flex-shrink: 0;
+				width: 24px;
 				box-sizing: border-box;
-				// Same legacy 1px margin reset as the save button.
-				margin: 0;
+				float: right;
+			}
+
+			select {
+				width: 225px;
+				box-sizing: border-box;
+				float: left;
+			}
+		}
+	}
+}
+
+body.post-type-shop_order,
+body.woocommerce_page_wc-orders {
+	.order_actions {
+		display: flex;
+		flex-direction: column;
+
+		li {
+			border-top: 1px solid $gray-200;
+			padding: 16px 12px;
+			float: none;
+			width: auto;
+			text-align: left;
+
+			&:first-child {
+				border-top: 0;
+			}
+
+			&.wide {
+				padding: 16px 12px;
+			}
+
+			// Save row: keep the legacy trash link in its usual position while
+			// clearing old button margins that overflow under WP 7.0 sizing.
+			&.wide:has(.save_order) {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 8px;
+
+				#delete-action {
+					line-height: 40px;
+					text-align: left;
+					float: none;
+
+					&:not(:has(*)) {
+						display: none;
+					}
+				}
+
+				.save_order {
+					flex-shrink: 0;
+					margin: 0 0 0 auto;
+					float: none;
+				}
+			}
+
+			// Action row (top): select + Apply button. Replaces the legacy
+			// float layout where the Apply button was forced to width: 24px
+			// (a squished pill) and the select to a hardcoded 225px (overflowed
+			// on narrow sidebars).
+			&#actions {
+				display: flex;
+				gap: 8px;
+				align-items: stretch;
+
+				select {
+					flex: 1;
+					min-width: 0; // prevent flex blow-out on long option labels.
+					width: auto;
+					box-sizing: border-box;
+					float: none;
+				}
+
+				.button {
+					flex-shrink: 0;
+					width: auto;
+					box-sizing: border-box;
+					// Reset the legacy 1px button margin so the row doesn't overflow.
+					margin: 0;
+					float: none;
+				}
 			}
 		}
 	}

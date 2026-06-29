@@ -33,9 +33,8 @@ class WC_Meta_Box_Order_Actions {
 		OrderUtil::init_theorder_object( $post );
 		$order = $theorder;
 
-		$order_id         = $order->get_id();
-		$order_actions    = self::get_available_order_actions_for_order( $order );
-		$order_menu_items = self::get_order_actions_menu_items( $order );
+		$order_id      = $order->get_id();
+		$order_actions = self::get_available_order_actions_for_order( $order );
 		?>
 		<ul class="order_actions submitbox">
 
@@ -59,28 +58,24 @@ class WC_Meta_Box_Order_Actions {
 				<button class="button wc-reload"><span><?php esc_html_e( 'Apply', 'woocommerce' ); ?></span></button>
 			</li>
 
-			<li class="wide wc-order-save-action">
-				<button type="submit" class="button save_order button-primary" name="save" value="<?php echo OrderStatus::AUTO_DRAFT === $order->get_status() ? esc_attr__( 'Create', 'woocommerce' ) : esc_attr__( 'Update', 'woocommerce' ); ?>"><?php echo OrderStatus::AUTO_DRAFT === $order->get_status() ? esc_html__( 'Create', 'woocommerce' ) : esc_html__( 'Update', 'woocommerce' ); ?></button>
+			<li class="wide">
+				<div id="delete-action">
+					<?php
+					if ( current_user_can( 'delete_post', $order_id ) ) {
 
-				<?php if ( ! empty( $order_menu_items ) ) : ?>
-					<div class="wc-order-actions-menu">
-						<button type="button" class="button wc-order-actions-menu__toggle" aria-haspopup="menu" aria-expanded="false" aria-controls="wc-order-actions-menu" aria-label="<?php esc_attr_e( 'More order actions', 'woocommerce' ); ?>">
-							<svg class="wc-order-actions-menu__icon" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M13 19h-2v-2h2v2zm0-6h-2v-2h2v2zm0-6h-2V5h2v2z" /></svg>
-						</button>
-						<ul id="wc-order-actions-menu" class="wc-order-actions-menu__list" role="menu" aria-label="<?php esc_attr_e( 'More order actions', 'woocommerce' ); ?>" hidden>
-							<?php foreach ( $order_menu_items as $menu_item ) : ?>
-								<?php
-								if ( empty( $menu_item['label'] ) || empty( $menu_item['url'] ) ) {
-									continue;
-								}
-								?>
-								<li role="none">
-									<a class="<?php echo esc_attr( isset( $menu_item['class'] ) ? $menu_item['class'] : '' ); ?>" role="menuitem" tabindex="-1" href="<?php echo esc_url( $menu_item['url'] ); ?>"><?php echo esc_html( $menu_item['label'] ); ?></a>
-								</li>
-							<?php endforeach; ?>
-						</ul>
-					</div>
-				<?php endif; ?>
+						if ( ! EMPTY_TRASH_DAYS ) {
+							$delete_text = __( 'Delete permanently', 'woocommerce' );
+						} else {
+							$delete_text = __( 'Move to trash', 'woocommerce' );
+						}
+						?>
+						<a class="submitdelete deletion" href="<?php echo esc_url( self::get_trash_or_delete_order_link( $order_id ) ); ?>"><?php echo esc_html( $delete_text ); ?></a>
+						<?php
+					}
+					?>
+				</div>
+
+				<button type="submit" class="button save_order button-primary" name="save" value="<?php echo OrderStatus::AUTO_DRAFT === $order->get_status() ? esc_attr__( 'Create', 'woocommerce' ) : esc_attr__( 'Update', 'woocommerce' ); ?>"><?php echo OrderStatus::AUTO_DRAFT === $order->get_status() ? esc_html__( 'Create', 'woocommerce' ) : esc_html__( 'Update', 'woocommerce' ); ?></button>
 			</li>
 
 			<?php
@@ -120,45 +115,6 @@ class WC_Meta_Box_Order_Actions {
 		}
 
 		return get_delete_post_link( $order_id );
-	}
-
-	/**
-	 * Get the items for the order "more actions" menu.
-	 *
-	 * The destructive trash/delete action is included by default when the current
-	 * user can delete the order. Each item is rendered as a menu item that inherits
-	 * the menu's styling and keyboard accessibility.
-	 *
-	 * @since 11.0.0
-	 *
-	 * @param WC_Order $order The order object.
-	 * @return array Array of menu items keyed by a unique slug. Each item is an array with:
-	 *               'label' (string, required), 'url' (string, required) and 'class' (string, optional).
-	 */
-	private static function get_order_actions_menu_items( $order ) {
-		$menu_items = array();
-
-		if ( current_user_can( 'delete_post', $order->get_id() ) ) {
-			$menu_items['trash'] = array(
-				'label' => EMPTY_TRASH_DAYS ? __( 'Move to trash', 'woocommerce' ) : __( 'Delete permanently', 'woocommerce' ),
-				'url'   => self::get_trash_or_delete_order_link( $order->get_id() ),
-				'class' => 'submitdelete deletion',
-			);
-		}
-
-		/**
-		 * Filters the items shown in the order "more actions" menu on the order edit screen.
-		 *
-		 * Extensions can add their own items; each is rendered as a menu item with the
-		 * menu's shared styling and keyboard accessibility.
-		 *
-		 * @since 11.0.0
-		 *
-		 * @param array    $menu_items Array of menu items keyed by a unique slug. Each item is an
-		 *                             array with 'label' and 'url' keys and an optional 'class' key.
-		 * @param WC_Order $order      The order object.
-		 */
-		return apply_filters( 'woocommerce_order_actions_menu_items', $menu_items, $order );
 	}
 
 	/**
