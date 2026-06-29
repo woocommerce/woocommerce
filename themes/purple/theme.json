@@ -95,17 +95,17 @@
 				},
 				{
 					"name": "X-Small",
-					"size": "clamp(14px, calc(var(--wp--custom--spacing-unit) * 2 * 1px * 100vw / var(--wp--style--global--wide-size)), calc(var(--wp--custom--spacing-unit) * 2 * 1px))",
+					"size": "clamp(20px, calc(var(--wp--custom--spacing-unit) * 2 * 1px * 100vw / var(--wp--style--global--wide-size)), calc(var(--wp--custom--spacing-unit) * 2 * 1px))",
 					"slug": "20"
 				},
 				{
 					"name": "Small",
-					"size": "clamp(21px, calc(var(--wp--custom--spacing-unit) * 3 * 1px * 100vw / var(--wp--style--global--wide-size)), calc(var(--wp--custom--spacing-unit) * 3 * 1px))",
+					"size": "clamp(20px, calc(var(--wp--custom--spacing-unit) * 3 * 1px * 100vw / var(--wp--style--global--wide-size)), calc(var(--wp--custom--spacing-unit) * 3 * 1px))",
 					"slug": "30"
 				},
 				{
 					"name": "Regular",
-					"size": "clamp(30px, calc(var(--wp--custom--spacing-unit) * 5 * 1px * 100vw / var(--wp--style--global--wide-size)), calc(var(--wp--custom--spacing-unit) * 5 * 1px))",
+					"size": "clamp(20px, calc(var(--wp--custom--spacing-unit) * 5 * 1px * 100vw / var(--wp--style--global--wide-size)), calc(var(--wp--custom--spacing-unit) * 5 * 1px))",
 					"slug": "50"
 				},
 				{
@@ -166,6 +166,7 @@
 					"slug": "small"
 				},
 				{
+					"fluid": false,
 					"name": "Medium",
 					"size": "1rem",
 					"slug": "medium"
@@ -731,12 +732,12 @@
 		{
 			"area": "header",
 			"name": "header",
-			"title": "Header"
+			"title": "Header default"
 		},
 		{
 			"area": "header",
 			"name": "checkout-header",
-			"title": "Checkout Header"
+			"title": "Checkout header"
 		},
 		{
 			"area": "header",
@@ -746,7 +747,7 @@
 		{
 			"area": "footer",
 			"name": "footer",
-			"title": "Footer"
+			"title": "Footer default"
 		},
 		{
 			"area": "footer",
