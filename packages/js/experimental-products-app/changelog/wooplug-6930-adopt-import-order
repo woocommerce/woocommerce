@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove obsolete @woocommerce/dependency-group eslint-disable directives following the switch to import/order in @woocommerce/eslint-plugin.

@@ -18,7 +18,6 @@ import {
 	// @ts-ignore
 	BlockContextProvider,
 } from '@wordpress/block-editor';
-// eslint-disable-next-line @woocommerce/dependency-group
 import { createBlocksFromInnerBlocksTemplate } from '@wordpress/blocks';
 
 /**
