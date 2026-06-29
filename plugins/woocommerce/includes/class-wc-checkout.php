@@ -917,7 +917,7 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'phone', $format, true ) ) {
-					$country      = isset( $data[ $fieldset_key . '_country' ] ) ? $data[ $fieldset_key . '_country' ] : WC()->customer->{"get_{$fieldset_key}_country"}();
+					$country = $data[ $fieldset_key . '_country' ] ?? WC()->customer->{"get_{$fieldset_key}_country"}();
 					// This is a safe sanitize to prevent copy-paste issues with invisible chars. Won't ensure validation.
 					$data[ $key ] = wc_remove_non_displayable_chars( $data[ $key ] );
 
