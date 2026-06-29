@@ -45,6 +45,10 @@ class Shipping extends Task {
 	 * @return string
 	 */
 	public function get_title() {
+		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
+			return __( 'Set up shipping', 'woocommerce' );
+		}
+
 		return __( 'Select your shipping options', 'woocommerce' );
 	}
 
@@ -54,6 +58,10 @@ class Shipping extends Task {
 	 * @return string
 	 */
 	public function get_content() {
+		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
+			return '';
+		}
+
 		return __(
 			"Set your store location and where you'll ship to.",
 			'woocommerce'
@@ -66,6 +74,10 @@ class Shipping extends Task {
 	 * @return string
 	 */
 	public function get_time() {
+		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
+			return '';
+		}
+
 		return __( '1 minute', 'woocommerce' );
 	}
 
@@ -75,6 +87,10 @@ class Shipping extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
+		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
+			return false;
+		}
+
 		return self::has_shipping_zones();
 	}
 
@@ -85,11 +101,6 @@ class Shipping extends Task {
 	 */
 	public function can_view() {
 		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
-			if ( 'yes' === get_option( 'woocommerce_admin_created_default_shipping_zones' ) ) {
-				// If the user has already created a default shipping zone, we don't need to show the task.
-				return false;
-			}
-
 			/**
 			 * Do not display the task when:
 			 * - The store sells digital products only
@@ -128,6 +139,10 @@ class Shipping extends Task {
 	 * @return string
 	 */
 	public function get_action_url() {
+		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
+			return admin_url( 'admin.php?page=wc-admin&task=shipping&_shipping_native_state=reset' );
+		}
+
 		return self::has_shipping_zones()
 			? admin_url( 'admin.php?page=wc-settings&tab=shipping' )
 			: null;

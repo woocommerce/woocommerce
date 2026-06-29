@@ -118,6 +118,62 @@
 	}
 }
 
+body.woocommerce-shipping-native-full-page {
+	background: #f0f0f0;
+
+	#adminmenumain,
+	#wpfooter,
+	.update-nag,
+	.woocommerce-store-alerts,
+	.woocommerce-message,
+	.notice,
+	.error,
+	.updated {
+		display: none;
+	}
+
+	#wpcontent {
+		margin-left: 0 !important;
+		padding-left: 0;
+	}
+
+	#wpbody {
+		display: block;
+	}
+
+	.woocommerce-layout__header {
+		left: 0;
+		width: 100%;
+	}
+
+	.woocommerce-layout__primary {
+		margin-right: 0;
+		margin-left: 0;
+	}
+
+	.woocommerce-layout .woocommerce-layout__main {
+		padding-right: 0;
+	}
+
+	.woocommerce-task-shipping-recommendation {
+		padding-right: $gutter-large;
+		padding-left: $gutter-large;
+	}
+
+	&.has-woocommerce-navigation {
+		#wpbody {
+			padding-left: 0;
+		}
+	}
+
+	@include breakpoint("<782px") {
+		.woocommerce-task-shipping-recommendation {
+			padding-right: $gap;
+			padding-left: $gap;
+		}
+	}
+}
+
 .is-wp-toolbar-disabled {
 	#wpadminbar {
 		display: none !important;

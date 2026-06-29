@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { Component } from '@wordpress/element';
+import { Component, useEffect, useState } from '@wordpress/element';
 import { Button, Card, CardBody } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { filter } from 'lodash';
@@ -39,6 +39,7 @@ import {
 } from './shipping-providers/partners';
 import { TermsOfService } from '~/task-lists/components/terms-of-service';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
+import { ShippingRecommendation } from '../experimental-shipping-recommendation/shipping-recommendation';
 
 export const hasInstallableSlug = ( shippingMethod ) =>
 	typeof shippingMethod?.slug === 'string' &&
@@ -851,15 +852,70 @@ const ShippingWrapper = compose(
 	} )
 )( Shipping );
 
+export const isNativeShippingTaskEnabled = () =>
+	Boolean(
+		window.wcAdminFeatures &&
+			window.wcAdminFeatures[ 'shipping-smart-defaults' ]
+	) ||
+	document.body.classList.contains(
+		'woocommerce-feature-enabled-shipping-smart-defaults'
+	);
+
+const useNativeShippingTaskEnabled = () => {
+	const [ isEnabled, setIsEnabled ] = useState(
+		isNativeShippingTaskEnabled()
+	);
+
+	useEffect( () => {
+		const updateIsEnabled = () => {
+			setIsEnabled( isNativeShippingTaskEnabled() );
+		};
+		updateIsEnabled();
+
+		const observer = new window.MutationObserver( updateIsEnabled );
+		observer.observe( document.body, {
+			attributeFilter: [ 'class' ],
+			attributes: true,
+		} );
+
+		return () => {
+			observer.disconnect();
+		};
+	}, [] );
+
+	return isEnabled;
+};
+
+export const ShippingTaskContent = ( { onComplete, query, task } ) => {
+	const isNativeEnabled = useNativeShippingTaskEnabled();
+
+	if ( isNativeEnabled ) {
+		return (
+			<ShippingRecommendation
+				activePlugins={ [] }
+				isJetpackConnected={ false }
+				isResolving={ false }
+				onComplete={ onComplete }
+				query={ query }
+				task={ task }
+			/>
+		);
+	}
+
+	return <ShippingWrapper onComplete={ onComplete } task={ task } />;
+};
+
 registerPlugin( 'wc-admin-onboarding-task-shipping', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="shipping">
-			{ ( { onComplete, task } ) => {
-				return (
-					<ShippingWrapper onComplete={ onComplete } task={ task } />
-				);
-			} }
+			{ ( { onComplete, query, task } ) => (
+				<ShippingTaskContent
+					onComplete={ onComplete }
+					query={ query }
+					task={ task }
+				/>
+			) }
 		</WooOnboardingTask>
 	),
 } );

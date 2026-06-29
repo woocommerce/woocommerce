@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { TaskType } from '@woocommerce/data';
-import userEvent from '@testing-library/user-event';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -11,60 +10,6 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { ShippingRecommendation as _ShippingRecommendation } from '../shipping-recommendation';
 import { ShippingRecommendationProps, TaskProps } from '../types';
-import { redirectToWCSSettings } from '../utils';
-
-jest.mock( '../../tax/utils', () => ( {
-	hasCompleteAddress: jest.fn().mockReturnValue( true ),
-} ) );
-
-jest.mock( '../utils', () => ( {
-	redirectToWCSSettings: jest.fn(),
-} ) );
-
-jest.mock( '@woocommerce/components', () => {
-	const originalModule = jest.requireActual( '@woocommerce/components' );
-
-	return {
-		__esModule: true,
-		...originalModule,
-		Plugins: jest.fn().mockReturnValue( <div>MockedPlugins</div> ),
-		Spinner: jest.fn().mockReturnValue( null ),
-	};
-} );
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useDispatch: jest.fn().mockImplementation( () => {
-		return {
-			createNotice: jest.fn(),
-			installAndActivatePlugins: jest.fn(),
-		};
-	} ),
-	useSelect: jest.fn().mockImplementation( ( fn ) =>
-		fn( () => ( {
-			getActivePlugins: jest.fn().mockReturnValue( [] ),
-			getInstalledPlugins: jest.fn().mockReturnValue( [] ),
-			isPluginsRequesting: jest.fn().mockReturnValue( false ),
-			getSettings: () => ( {
-				general: {
-					woocommerce_default_country: 'US',
-				},
-			} ),
-			getCountries: () => [],
-			getLocales: () => [],
-			getLocale: () => 'en',
-			hasFinishedResolution: () => true,
-			getOption: ( key: string ) => {
-				return {
-					wcshipping_options: {
-						tos_accepted: true,
-					},
-					woocommerce_setup_jetpack_opted_in: 1,
-				}[ key ];
-			},
-		} ) )
-	),
-} ) );
 
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
@@ -82,74 +27,240 @@ const taskProps: TaskProps = {
 	} as TaskType,
 };
 
-const ShippingRecommendation = ( props: ShippingRecommendationProps ) => {
-	return <_ShippingRecommendation { ...taskProps } { ...props } />;
+const defaultProps: ShippingRecommendationProps = {
+	activePlugins: [],
+	isJetpackConnected: false,
+	isResolving: false,
+};
+
+const ShippingRecommendation = (
+	props: Partial< ShippingRecommendationProps > = {}
+) => {
+	return (
+		<_ShippingRecommendation
+			{ ...taskProps }
+			{ ...defaultProps }
+			{ ...props }
+		/>
+	);
+};
+
+const mockWindowLocation = () => {
+	const originalLocation = window.location;
+	const mockLocation = {
+		href: 'test',
+	} as Location;
+
+	Object.defineProperty( window, 'location', {
+		configurable: true,
+		value: mockLocation,
+	} );
+
+	return {
+		mockLocation,
+		restore: () => {
+			Object.defineProperty( window, 'location', {
+				configurable: true,
+				value: originalLocation,
+			} );
+		},
+	};
+};
+
+const startWooShippingSetup = () => {
+	fireEvent.click( screen.getByRole( 'button', { name: 'Set up' } ) );
 };
 
 describe( 'ShippingRecommendation', () => {
-	test( 'should show plugins step when woocommerce-shipping is not installed and activated', () => {
-		const { getByText } = render(
-			<ShippingRecommendation
-				isJetpackConnected={ false }
-				isResolving={ false }
-				activePlugins={ [ 'foo' ] }
-			/>
-		);
-		expect( getByText( 'MockedPlugins' ) ).toBeInTheDocument();
+	afterEach( () => {
+		jest.clearAllMocks();
+		jest.useRealTimers();
 	} );
 
-	test( 'should show connect step when WooCommerce Shipping is activated but not yet connected', () => {
-		const { getByRole } = render(
-			<ShippingRecommendation
-				isJetpackConnected={ false }
-				isResolving={ false }
-				activePlugins={ [ 'woocommerce-shipping' ] }
-			/>
-		);
+	test( 'starts with the shipping providers hub', () => {
+		render( <ShippingRecommendation /> );
+
 		expect(
-			getByRole( 'button', { name: 'Connect' } )
+			screen.getByRole( 'heading', { name: 'Shipping providers' } )
+		).toBeInTheDocument();
+		expect( screen.queryByText( 'Store setup' ) ).not.toBeInTheDocument();
+		expect( screen.getByText( 'Woo Shipping' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Shippo' ) ).toBeInTheDocument();
+		expect(
+			screen.getAllByRole( 'button', { name: 'Install' } )
+		).toHaveLength( 3 );
+	} );
+
+	test( 'uses a scoped shipping task page class while mounted', () => {
+		document.documentElement.classList.add( 'wp-toolbar' );
+
+		const { unmount } = render( <ShippingRecommendation /> );
+
+		expect( document.body ).toHaveClass(
+			'woocommerce-shipping-native-task-page'
+		);
+		expect( document.body ).not.toHaveClass(
+			'woocommerce-shipping-native-full-page'
+		);
+		expect( document.body ).not.toHaveClass( 'is-wp-toolbar-disabled' );
+		expect( document.documentElement ).toHaveClass( 'wp-toolbar' );
+
+		unmount();
+
+		expect( document.body ).not.toHaveClass(
+			'woocommerce-shipping-native-task-page'
+		);
+
+		document.documentElement.classList.remove( 'wp-toolbar' );
+	} );
+
+	test( 'opens the inline setup method choice from Woo Shipping', () => {
+		render( <ShippingRecommendation /> );
+
+		startWooShippingSetup();
+
+		expect(
+			screen.getByRole( 'heading', {
+				name: 'How should Woo set up shipping?',
+			} )
+		).toBeInTheDocument();
+		expect( screen.queryByText( 'Store setup' ) ).not.toBeInTheDocument();
+		expect(
+			screen.getByRole( 'radio', {
+				name: /Start with Woo recommendations/,
+			} )
+		).toBeChecked();
+		expect( screen.getByText( 'Set up manually' ) ).toBeInTheDocument();
+	} );
+
+	test( 'shows the prototype breadcrumb in the shipping setup header', () => {
+		const { container } = render( <ShippingRecommendation /> );
+
+		startWooShippingSetup();
+
+		expect(
+			screen.getByRole( 'button', { name: 'Shipping' } )
+		).toBeInTheDocument();
+		expect( screen.getByText( 'Woo Shipping' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Not set up' ) ).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				'Manage zones, rates, labels, packages, and your Woo Shipping connection.'
+			)
+		).toBeInTheDocument();
+		expect(
+			container.querySelector( '.shipping-native-prototype-header' )
 		).toBeInTheDocument();
 	} );
 
-	test( 'should show "complete task" button when WooCommerce Shipping is activated and Jetpack is connected', () => {
-		const { getByRole } = render(
-			<ShippingRecommendation
-				isJetpackConnected={ true }
-				isResolving={ false }
-				activePlugins={ [ 'woocommerce-shipping' ] }
-			/>
-		);
+	test( 'moves from setup method to selected regions and review rates', () => {
+		render( <ShippingRecommendation /> );
+
+		startWooShippingSetup();
+		fireEvent.click( screen.getByRole( 'button', { name: 'Continue' } ) );
+
 		expect(
-			getByRole( 'button', { name: 'Complete task' } )
+			screen.getByRole( 'heading', {
+				name: 'Where you ship',
+			} )
 		).toBeInTheDocument();
+		expect(
+			screen.getByText( 'Countries and regions' )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'button', { name: 'Canada (13)' } )
+		).toBeInTheDocument();
+
+		fireEvent.click( screen.getByRole( 'button', { name: 'Continue' } ) );
+
+		expect(
+			screen.getByRole( 'heading', { name: 'Review rates' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText( 'Starting rates based on stores like yours' )
+		).toBeInTheDocument();
+		expect( screen.getByText( 'Contiguous US' ) ).toBeInTheDocument();
+		expect(
+			screen.getAllByText( 'Standard shipping' ).length
+		).toBeGreaterThan( 0 );
 	} );
 
-	test( 'should automatically be redirected when all steps are completed', () => {
-		render(
-			<ShippingRecommendation
-				isJetpackConnected={ true }
-				isResolving={ false }
-				activePlugins={ [ 'woocommerce-shipping' ] }
-			/>
+	test( 'opens the delivery options side panel from review rates', () => {
+		render( <ShippingRecommendation /> );
+
+		startWooShippingSetup();
+		fireEvent.click( screen.getByRole( 'button', { name: 'Continue' } ) );
+		fireEvent.click( screen.getByRole( 'button', { name: 'Continue' } ) );
+
+		const contiguousZone = screen
+			.getByText( 'Contiguous US' )
+			.closest( '.shipping-setup-rates-zone' );
+		expect( contiguousZone ).not.toBeNull();
+		fireEvent.click(
+			within( contiguousZone as HTMLElement ).getByRole( 'button', {
+				name: 'Edit delivery options',
+			} )
 		);
 
-		expect( redirectToWCSSettings ).toHaveBeenCalled();
+		expect(
+			screen.getByRole( 'dialog', {
+				name: 'Set up delivery options: Contiguous US',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.getAllByText( 'Standard shipping' ).length
+		).toBeGreaterThan( 0 );
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Save delivery options' } )
+		);
+
+		expect( screen.queryByRole( 'dialog' ) ).not.toBeInTheDocument();
 	} );
 
-	test( 'should allow location step to be manually navigated', async () => {
-		const { getByText } = render(
-			<ShippingRecommendation
-				isJetpackConnected={ true }
-				isResolving={ false }
-				activePlugins={ [] }
-			/>
+	test( 'simulates connection success and shows the zones and rates hub preview', () => {
+		jest.useFakeTimers();
+		render( <ShippingRecommendation /> );
+
+		startWooShippingSetup();
+		fireEvent.click( screen.getByRole( 'button', { name: 'Continue' } ) );
+		fireEvent.click( screen.getByRole( 'button', { name: 'Continue' } ) );
+		fireEvent.click( screen.getByRole( 'button', { name: 'Continue' } ) );
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: 'Connect to WordPress.com',
+			} )
 		);
 
-		await userEvent.click( getByText( 'Set store location' ) );
-		expect( getByText( 'Address' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Connecting' ) ).toBeInTheDocument();
+
+		act( () => {
+			jest.advanceTimersByTime( 1000 );
+		} );
+
+		expect(
+			screen.getByRole( 'heading', {
+				name: 'You’re ready to use shipping!',
+			} )
+		).toBeInTheDocument();
+
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Go to view zones and rates' } )
+		);
+
+		expect(
+			screen.getByRole( 'heading', { name: '5 zones' } )
+		).toBeInTheDocument();
+		expect( screen.queryByText( 'Store setup' ) ).not.toBeInTheDocument();
+		expect(
+			screen.getByRole( 'button', {
+				name: 'Zones & rates',
+			} )
+		).toBeInTheDocument();
 	} );
 
 	test( 'should trigger event tasklist_shipping_recommendation_visit_marketplace_click when clicking the WooCommerce Marketplace link', () => {
+		const { restore } = mockWindowLocation();
+
 		render( <ShippingRecommendation /> );
 
 		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
@@ -158,20 +269,14 @@ describe( 'ShippingRecommendation', () => {
 			'tasklist_shipping_recommendation_visit_marketplace_click',
 			{}
 		);
+
+		restore();
 	} );
 
-	test( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
+	test( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', () => {
 		const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
 		( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
-
-		const mockLocation = {
-			href: 'test',
-		} as Location;
-
-		mockLocation.href = 'test';
-		Object.defineProperty( global.window, 'location', {
-			value: mockLocation,
-		} );
+		const { mockLocation, restore } = mockWindowLocation();
 
 		render( <ShippingRecommendation /> );
 
@@ -180,5 +285,7 @@ describe( 'ShippingRecommendation', () => {
 		expect( mockLocation.href ).toContain(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping'
 		);
+
+		restore();
 	} );
 } );

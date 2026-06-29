@@ -9,29 +9,24 @@ import { getAdminLink } from '@woocommerce/settings';
  * Internal dependencies
  */
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
-import { ShippingNativeInlineSetup } from './native-inline-setup';
-import { ShippingRecommendationProps, TaskProps } from './types';
+import { ShippingNativeInlineSetup } from '../task-lists/fills/experimental-shipping-recommendation/native-inline-setup';
+import './native-shipping-settings.scss';
 
-const useShippingNativeTaskPage = () => {
+const NativeShippingSettings = () => {
 	useEffect( () => {
-		document.body.classList.add( 'woocommerce-shipping-native-task-page' );
+		document.body.classList.add(
+			'woocommerce-shipping-native-settings-page'
+		);
 
 		return () => {
 			document.body.classList.remove(
-				'woocommerce-shipping-native-task-page'
+				'woocommerce-shipping-native-settings-page'
 			);
 		};
 	}, [] );
-};
-
-export const ShippingRecommendation = (
-	props: TaskProps & ShippingRecommendationProps
-) => {
-	void props;
-	useShippingNativeTaskPage();
 
 	return (
-		<div className="woocommerce-task-shipping-recommendation">
+		<div className="woocommerce-shipping-native-settings">
 			<ShippingNativeInlineSetup />
 			<TrackedLink
 				textProps={ {
@@ -44,7 +39,7 @@ export const ShippingRecommendation = (
 					'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
 					'woocommerce'
 				) }
-				eventName="tasklist_shipping_recommendation_visit_marketplace_click"
+				eventName="settings_shipping_recommendation_visit_marketplace_click"
 				targetUrl={ getAdminLink(
 					'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
 				) }
@@ -53,3 +48,5 @@ export const ShippingRecommendation = (
 		</div>
 	);
 };
+
+export default NativeShippingSettings;

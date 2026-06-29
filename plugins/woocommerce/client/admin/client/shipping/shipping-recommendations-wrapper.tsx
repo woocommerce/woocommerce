@@ -9,7 +9,19 @@ import { lazy, Suspense } from '@wordpress/element';
 import { EmbeddedBodyProps } from '../embedded-body-layout/embedded-body-props';
 import RecommendationsEligibilityWrapper from '../settings-recommendations/recommendations-eligibility-wrapper';
 
+const isShippingNativeSpike = () =>
+	window.wcAdminFeatures[ 'shipping-smart-defaults' ] &&
+	new URLSearchParams( window.location.search ).has(
+		'_shipping_native_spike'
+	);
+
 const ShippingRecommendationsLoader = lazy( () => {
+	if ( isShippingNativeSpike() ) {
+		return import(
+			/* webpackChunkName: "shipping-native-settings" */ './native-shipping-settings'
+		);
+	}
+
 	if ( window.wcAdminFeatures[ 'shipping-smart-defaults' ] ) {
 		return import(
 			/* webpackChunkName: "shipping-recommendations" */ './experimental-shipping-recommendations'
@@ -41,6 +53,14 @@ export const ShippingRecommendations = ( {
 
 	if ( Boolean( zone_id ) ) {
 		return null;
+	}
+
+	if ( isShippingNativeSpike() ) {
+		return (
+			<Suspense fallback={ null }>
+				<ShippingRecommendationsLoader />
+			</Suspense>
+		);
 	}
 
 	return (

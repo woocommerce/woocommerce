@@ -95,3 +95,15 @@
 .woocommerce-layout__inbox-panel-header.your-store-today {
 	display: none;
 }
+
+body.woocommerce-shipping-native-task-page {
+	.woocommerce-homescreen,
+	.woocommerce-task-dashboard__container,
+	.woocommerce-task-shipping-recommendation,
+	.woocommerce-shipping-native.shipping-native-prototype-flow {
+		width: 100%;
+		max-width: none;
+		margin-right: 0;
+		margin-left: 0;
+	}
+}

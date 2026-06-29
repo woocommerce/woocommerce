@@ -6,7 +6,6 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\ReviewShippingOptions;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -117,6 +116,15 @@ class TaskLists {
 			'LaunchYourStore',
 		);
 
+		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
+			$tasks = array_values( array_diff( $tasks, array( 'Shipping' ) ) );
+
+			$payments_task_index    = array_search( 'Payments', $tasks, true );
+			$shipping_task_position = false === $payments_task_index ? count( $tasks ) : $payments_task_index + 1;
+
+			array_splice( $tasks, $shipping_task_position, 0, 'Shipping' );
+		}
+
 		if ( Features::is_enabled( 'core-profiler' ) ) {
 			$key = array_search( 'StoreDetails', $tasks, true );
 			if ( false !== $key ) {
@@ -160,29 +168,6 @@ class TaskLists {
 				),
 			)
 		);
-
-		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
-			self::add_task(
-				'extended',
-				new ReviewShippingOptions(
-					self::get_list( 'extended' )
-				)
-			);
-
-			// Tasklist that will never be shown in homescreen,
-			// used for having tasks that are accessed by other means.
-			self::add_list(
-				array(
-					'id'           => 'secret_tasklist',
-					'hidden_id'    => 'setup',
-					'tasks'        => array(
-						'ExperimentalShippingRecommendation',
-					),
-					'event_prefix' => 'secret_tasklist_',
-					'visible'      => false,
-				)
-			);
-		}
 
 		if ( has_filter( 'woocommerce_admin_experimental_onboarding_tasklists' ) ) {
 			/**

@@ -21,9 +21,14 @@ const possiblyImportProductTask = async () => {
 
 possiblyImportProductTask();
 
-if (
-	window.wcAdminFeatures &&
-	window.wcAdminFeatures[ 'shipping-smart-defaults' ]
-) {
+const isFeatureEnabled = ( feature: string ) =>
+	Boolean(
+		window.wcAdminFeatures?.[ feature ] ||
+			document.body.classList.contains(
+				`woocommerce-feature-enabled-${ feature }`
+			)
+	);
+
+if ( isFeatureEnabled( 'shipping-smart-defaults' ) ) {
 	import( './experimental-shipping-recommendation' );
 }

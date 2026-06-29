@@ -31,6 +31,7 @@ const eligibleSelectReturn = {
 
 describe( 'ShippingRecommendations', () => {
 	beforeEach( () => {
+		window.history.pushState( {}, '', '/' );
 		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
 			fn( () => eligibleSelectReturn )
 		);
@@ -78,6 +79,26 @@ describe( 'ShippingRecommendations', () => {
 			/>
 		);
 		expect( queryByText( 'WooCommerce Shipping' ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'should render the shipping native spike even when marketplace suggestions are disabled', () => {
+		window.history.pushState( {}, '', '/?_shipping_native_spike=1' );
+		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
+			fn( () => ( {
+				...eligibleSelectReturn,
+				getOption: () => 'no',
+			} ) )
+		);
+		const { getByText } = render(
+			<ShippingRecommendations
+				page="wc-settings"
+				tab="shipping"
+				section={ undefined }
+				zone_id={ undefined }
+			/>
+		);
+
+		expect( getByText( 'WooCommerce Shipping' ) ).toBeInTheDocument();
 	} );
 
 	it( 'should not render when user is not allowed', () => {

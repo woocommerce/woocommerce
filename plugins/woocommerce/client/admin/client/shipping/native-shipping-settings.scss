@@ -1,0 +1,46 @@
+body.woocommerce-shipping-native-settings-page {
+	#mainform {
+		display: none;
+	}
+
+	#wpfooter {
+		display: none;
+	}
+
+	&.woocommerce-shipping-native-screen-providers,
+	&.woocommerce-shipping-native-screen-setup,
+	&.woocommerce-shipping-native-screen-hub {
+		#wpbody-content > .wrap.woocommerce {
+			display: none;
+		}
+	}
+
+	.woocommerce-shipping-native-settings {
+		margin-bottom: 64px;
+	}
+
+	&.woocommerce-shipping-native-screen-providers,
+	&.woocommerce-shipping-native-screen-setup,
+	&.woocommerce-shipping-native-screen-hub {
+		.woocommerce-shipping-native-settings {
+			margin-right: -30px;
+			margin-left: -30px;
+		}
+	}
+
+	.woocommerce-shipping-native.shipping-native-prototype-flow {
+		max-width: none;
+		margin: 0;
+	}
+
+	.shipping-provider-choice.is-settings-surface {
+		max-width: none;
+		margin: 0;
+	}
+
+	.woocommerce-task-marketplace-link {
+		display: none;
+		padding-top: 24px;
+		padding-bottom: 24px;
+	}
+}

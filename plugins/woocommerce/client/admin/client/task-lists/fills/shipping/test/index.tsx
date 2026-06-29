@@ -8,7 +8,7 @@ import { TaskType } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { Shipping, hasInstallableSlug } from '../index';
+import { Shipping, ShippingTaskContent, hasInstallableSlug } from '../index';
 
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
@@ -25,8 +25,23 @@ jest.mock( '~/utils/features', () => ( {
 } ) );
 
 describe( 'Shipping', () => {
+	const getAdminWindow = () =>
+		window as unknown as {
+			wcAdminFeatures?: Record< string, boolean >;
+		};
+
+	let originalWcAdminFeatures: Record< string, boolean > | undefined;
+
 	beforeEach( () => {
 		jest.clearAllMocks();
+		originalWcAdminFeatures = getAdminWindow().wcAdminFeatures;
+	} );
+
+	afterEach( () => {
+		getAdminWindow().wcAdminFeatures = originalWcAdminFeatures;
+		document.body.classList.remove(
+			'woocommerce-feature-enabled-shipping-smart-defaults'
+		);
 	} );
 
 	const props = {
@@ -52,6 +67,52 @@ describe( 'Shipping', () => {
 		name: 'Envia',
 		slug: '',
 	};
+
+	it( 'renders the native shipping prototype for task=shipping when smart defaults are enabled', () => {
+		getAdminWindow().wcAdminFeatures = {
+			...originalWcAdminFeatures,
+			'shipping-smart-defaults': true,
+		};
+
+		render(
+			<ShippingTaskContent
+				onComplete={ props.onComplete }
+				query={ {} }
+				task={ props.task }
+			/>
+		);
+
+		expect(
+			screen.getByRole( 'heading', { name: 'Shipping providers' } )
+		).toBeInTheDocument();
+		expect( screen.getByText( 'Woo Shipping' ) ).toBeInTheDocument();
+		expect(
+			screen.queryByText( 'Set your store location' )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'renders the native shipping prototype when the smart defaults body class is present', () => {
+		getAdminWindow().wcAdminFeatures = undefined;
+		document.body.classList.add(
+			'woocommerce-feature-enabled-shipping-smart-defaults'
+		);
+
+		render(
+			<ShippingTaskContent
+				onComplete={ props.onComplete }
+				query={ {} }
+				task={ props.task }
+			/>
+		);
+
+		expect(
+			screen.getByRole( 'heading', { name: 'Shipping providers' } )
+		).toBeInTheDocument();
+		expect( screen.getByText( 'Woo Shipping' ) ).toBeInTheDocument();
+		expect(
+			screen.queryByText( 'Set your store location' )
+		).not.toBeInTheDocument();
+	} );
 
 	it( 'should trigger event tasklist_shipping_visit_marketplace_click when clicking the WooCommerce Marketplace link', () => {
 		render( <Shipping { ...props } /> );
