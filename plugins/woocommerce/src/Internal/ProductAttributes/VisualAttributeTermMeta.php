@@ -34,54 +34,6 @@ class VisualAttributeTermMeta {
 	public const TYPE_NONE = 'none';
 
 	/**
-	 * Get the default color terms to create for a new wc-visual attribute.
-	 *
-	 * @return array<string, array{label: string, color: string}>
-	 *
-	 * @since 11.0.0
-	 */
-	private static function get_default_color_terms(): array {
-		return array(
-			'black'  => array(
-				'label' => __( 'Black', 'woocommerce' ),
-				'color' => '#121212',
-			),
-			'white'  => array(
-				'label' => __( 'White', 'woocommerce' ),
-				'color' => '#FFFFFF',
-			),
-			'gray'   => array(
-				'label' => __( 'Gray', 'woocommerce' ),
-				'color' => '#6E6E6E',
-			),
-			'red'    => array(
-				'label' => __( 'Red', 'woocommerce' ),
-				'color' => '#D32F2F',
-			),
-			'blue'   => array(
-				'label' => __( 'Blue', 'woocommerce' ),
-				'color' => '#1976D2',
-			),
-			'green'  => array(
-				'label' => __( 'Green', 'woocommerce' ),
-				'color' => '#388E3C',
-			),
-			'yellow' => array(
-				'label' => __( 'Yellow', 'woocommerce' ),
-				'color' => '#FBE02D',
-			),
-			'pink'   => array(
-				'label' => __( 'Pink', 'woocommerce' ),
-				'color' => '#EC407A',
-			),
-			'brown'  => array(
-				'label' => __( 'Brown', 'woocommerce' ),
-				'color' => '#5D4037',
-			),
-		);
-	}
-
-	/**
 	 * Get an empty visual term value.
 	 *
 	 * @return array{type: string, value: string}
@@ -359,51 +311,5 @@ class VisualAttributeTermMeta {
 		}
 
 		return '';
-	}
-
-	/**
-	 * Create default color terms for a newly created wc-visual attribute.
-	 *
-	 * @param int   $attribute_id Attribute ID.
-	 * @param array $data         Attribute data from woocommerce_attribute_added.
-	 * @return void
-	 *
-	 * @internal
-	 *
-	 * @since 11.0.0
-	 */
-	public static function seed_visual_attribute_terms( int $attribute_id, array $data ): void {
-		if (
-			0 >= $attribute_id ||
-			! isset( $data['attribute_type'], $data['attribute_name'] ) ||
-			! is_string( $data['attribute_type'] ) ||
-			'wc-visual' !== $data['attribute_type'] ||
-			! is_string( $data['attribute_name'] ) ||
-			'' === trim( $data['attribute_name'] )
-		) {
-			return;
-		}
-
-		$taxonomy = wc_attribute_taxonomy_name( $data['attribute_name'] );
-
-		// Taxonomy is registered on init from the cached list but not yet available
-		// at woocommerce_attribute_added time (cache invalidated after the hook).
-		if ( ! taxonomy_exists( $taxonomy ) ) {
-			register_taxonomy( $taxonomy, array( 'product' ) );
-		}
-
-		foreach ( self::get_default_color_terms() as $slug => $term ) {
-			if ( get_term_by( 'slug', $slug, $taxonomy ) ) {
-				continue;
-			}
-
-			$result = wp_insert_term( $term['label'], $taxonomy, array( 'slug' => $slug ) );
-
-			if ( is_wp_error( $result ) || empty( $result['term_id'] ) ) {
-				continue;
-			}
-
-			self::save_term_visual( (int) $result['term_id'], $term['color'], 0 );
-		}
 	}
 }

@@ -32,7 +32,6 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 		}
 		add_action( 'created_term', array( $this, 'save_product_attribute_term_fields' ), 10, 3 );
 		add_action( 'edit_term', array( $this, 'save_product_attribute_term_fields' ), 10, 3 );
-		add_action( 'woocommerce_attribute_added', array( $this, 'maybe_seed_visual_attribute_terms' ), 10, 2 );
 
 		foreach ( wc_get_attribute_taxonomies() as $attribute ) {
 			$taxonomy = 'pa_' . $attribute->attribute_name;
@@ -316,21 +315,6 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Seed default color terms for new wc-visual attributes.
-	 *
-	 * @internal
-	 *
-	 * @param int   $attribute_id Attribute ID.
-	 * @param array $data         Attribute data.
-	 * @return void
-	 *
-	 * @since 11.0.0
-	 */
-	public function maybe_seed_visual_attribute_terms( int $attribute_id, array $data ): void {
-		VisualAttributeTermMeta::seed_visual_attribute_terms( $attribute_id, $data );
-	}
-
-	/**
 	 * Add visual column for product attribute terms.
 	 *
 	 * @internal
@@ -415,5 +399,104 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 	 */
 	private function get_current_taxonomy(): string {
 		return isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	}
+
+	/**
+	 * Get the default color terms to create for a new wc-visual attribute.
+	 *
+	 * @return array<string, array{label: string, color: string}>
+	 *
+	 * @since 11.0.0
+	 */
+	private static function get_default_color_terms(): array {
+		return array(
+			'black'  => array(
+				'label' => __( 'Black', 'woocommerce' ),
+				'color' => '#121212',
+			),
+			'white'  => array(
+				'label' => __( 'White', 'woocommerce' ),
+				'color' => '#FFFFFF',
+			),
+			'gray'   => array(
+				'label' => __( 'Gray', 'woocommerce' ),
+				'color' => '#6E6E6E',
+			),
+			'red'    => array(
+				'label' => __( 'Red', 'woocommerce' ),
+				'color' => '#D32F2F',
+			),
+			'blue'   => array(
+				'label' => __( 'Blue', 'woocommerce' ),
+				'color' => '#1976D2',
+			),
+			'green'  => array(
+				'label' => __( 'Green', 'woocommerce' ),
+				'color' => '#388E3C',
+			),
+			'yellow' => array(
+				'label' => __( 'Yellow', 'woocommerce' ),
+				'color' => '#FBE02D',
+			),
+			'pink'   => array(
+				'label' => __( 'Pink', 'woocommerce' ),
+				'color' => '#EC407A',
+			),
+			'brown'  => array(
+				'label' => __( 'Brown', 'woocommerce' ),
+				'color' => '#5D4037',
+			),
+		);
+	}
+
+	/**
+	 * Seed default color terms for a newly created wc-visual attribute.
+	 *
+	 * @internal
+	 *
+	 * @param int   $attribute_id Attribute ID.
+	 * @param array $data         Attribute data containing attribute_type and attribute_name.
+	 * @return void
+	 *
+	 * @since 11.0.0
+	 */
+	public static function seed_visual_attribute_terms( int $attribute_id, array $data ): void {
+		if (
+			0 >= $attribute_id ||
+			! isset( $data['attribute_type'], $data['attribute_name'] ) ||
+			! is_string( $data['attribute_type'] ) ||
+			'wc-visual' !== $data['attribute_type'] ||
+			! is_string( $data['attribute_name'] ) ||
+			'' === trim( $data['attribute_name'] )
+		) {
+			return;
+		}
+
+		$attribute = wc_get_attribute( $attribute_id );
+		$taxonomy  = wc_attribute_taxonomy_name( $data['attribute_name'] );
+
+		if ( ! $attribute || $taxonomy !== $attribute->slug ) {
+			return;
+		}
+
+		// Taxonomy is registered on init from the cached list but not yet available
+		// at process_add_attribute time (cache invalidated after wc_create_attribute).
+		if ( ! taxonomy_exists( $taxonomy ) ) {
+			register_taxonomy( $taxonomy, array( 'product' ) );
+		}
+
+		foreach ( self::get_default_color_terms() as $slug => $term ) {
+			if ( get_term_by( 'slug', $slug, $taxonomy ) ) {
+				continue;
+			}
+
+			$result = wp_insert_term( $term['label'], $taxonomy, array( 'slug' => $slug ) );
+
+			if ( is_wp_error( $result ) || empty( $result['term_id'] ) ) {
+				continue;
+			}
+
+			VisualAttributeTermMeta::save_term_visual( (int) $result['term_id'], $term['color'], 0 );
+		}
 	}
 }
