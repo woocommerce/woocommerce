@@ -879,8 +879,10 @@ const { actions } = store< Store >(
 							} else {
 								// Same product seen again in this batch — add delta.
 								const capture =
-									batchProductCaptures.get( token )!;
-								capture.deltaTotal += quantityToSend;
+									batchProductCaptures.get( token );
+								if ( capture ) {
+									capture.deltaTotal += quantityToSend;
+								}
 							}
 						}
 
