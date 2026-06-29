@@ -61,7 +61,7 @@ class WC_Admin_Post_Types {
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_filter( 'default_hidden_meta_boxes', array( $this, 'hidden_meta_boxes' ), 10, 2 );
-		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ) );
+		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ), 5 );
 
 		include_once __DIR__ . '/class-wc-admin-upload-downloadable-product.php';
 
@@ -754,7 +754,7 @@ class WC_Admin_Post_Types {
 		$current_featured   = wc_bool_to_string( $product_object->get_featured() );
 		$visibility_options = wc_get_product_visibility_options();
 		?>
-		<div class="misc-pub-section" id="catalog-visibility">
+		<div class="misc-pub-section misc-pub-catalog-visibility" id="catalog-visibility">
 			<?php esc_html_e( 'Catalog visibility:', 'woocommerce' ); ?>
 			<strong id="catalog-visibility-display">
 				<?php
