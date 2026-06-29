@@ -46,9 +46,10 @@ const PromoCard = ( {
 	useEffect( () => {
 		if ( isVisible ) {
 			recordEvent( 'marketplace_promotion_viewed', {
+				// Custom properties first so the authoritative fields below win.
+				...eventProperties,
 				path,
 				format: 'promo-card',
-				...eventProperties,
 			} );
 		}
 		// only run once
@@ -70,18 +71,18 @@ const PromoCard = ( {
 		}
 
 		recordEvent( 'marketplace_promotion_dismissed', {
+			...eventProperties,
 			path,
 			format: 'promo-card',
-			...eventProperties,
 		} );
 	};
 
 	const handleClick = () => {
 		recordEvent( 'marketplace_promotion_actioned', {
+			...eventProperties,
 			path,
 			target_uri: promotion.cta_link,
 			format: 'promo-card',
-			...eventProperties,
 		} );
 
 		return true;
