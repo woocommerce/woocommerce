@@ -88,16 +88,19 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_clear_cart_after_payment() clears the cart when the order products match the cart products.
+	 * Test wc_clear_cart_after_payment() clears the cart when the order cart hash matches the cart hash.
 	 */
-	public function test_wc_clear_cart_after_payment_clears_matching_cart() {
+	public function test_wc_clear_cart_after_payment_clears_matching_cart_hash() {
 		global $wp;
 
 		$product = WC_Helper_Product::create_simple_product();
-		$order   = WC_Helper_Order::create_order( 1, $product );
 
 		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $product->get_id(), 4 );
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_cart_hash( WC()->cart->get_cart_hash() );
+		$order->save();
 
 		$wp->query_vars['order-received'] = $order->get_id();
 		$_GET['key']                      = $order->get_order_key();
@@ -110,17 +113,18 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_clear_cart_after_payment() preserves the cart when the order products do not match the cart products.
+	 * Test wc_clear_cart_after_payment() preserves the cart when the order cart hash does not match the cart hash.
 	 */
-	public function test_wc_clear_cart_after_payment_preserves_different_cart() {
+	public function test_wc_clear_cart_after_payment_preserves_different_cart_hash() {
 		global $wp;
 
-		$order_product = WC_Helper_Product::create_simple_product();
-		$cart_product  = WC_Helper_Product::create_simple_product();
-		$order         = WC_Helper_Order::create_order( 1, $order_product );
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = WC_Helper_Order::create_order( 1, $product );
+		$order->set_cart_hash( 'different-cart-hash' );
+		$order->save();
 
 		WC()->cart->empty_cart();
-		WC()->cart->add_to_cart( $cart_product->get_id(), 1 );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		$wp->query_vars['order-received'] = $order->get_id();
 		$_GET['key']                      = $order->get_order_key();
