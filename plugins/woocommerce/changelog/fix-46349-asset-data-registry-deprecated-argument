@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Warn when deprecated AssetDataRegistry key check arguments are explicitly provided.

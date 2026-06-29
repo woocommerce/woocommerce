@@ -218,8 +218,8 @@ class EmailPreview {
 				$this->email->user_id = 0;
 			}
 
-			if ( property_exists( $this->email, 'verify_code' ) ) {
-				$this->email->verify_code = '123456';
+			if ( property_exists( $this->email, 'verify_url' ) ) {
+				$this->email->verify_url = 'https://example.com/verify-email';
 			}
 
 			$this->email->set_object( $object );

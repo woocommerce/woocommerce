@@ -197,6 +197,34 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox query returns contracts newest first, lightweight, honouring limit/offset.
+	 */
+	public function test_query_orders_newest_first_with_paging(): void {
+		$first  = $this->sut->insert( $this->make_contract() );
+		$second = $this->sut->insert( $this->make_contract() );
+		$third  = $this->sut->insert( $this->make_contract() );
+
+		// Newest first (id DESC), and hydrated lightweight (row only, no children).
+		$all = $this->sut->query();
+		$this->assertSame( array( $third, $second, $first ), array_map( static fn ( Contract $c ) => $c->get_id(), $all ) );
+		$this->assertInstanceOf( Contract::class, $all[0] );
+		$this->assertSame( array(), $all[0]->get_items() );
+
+		// Limit caps the window from the newest end.
+		$limited = $this->sut->query( array( 'limit' => 2 ) );
+		$this->assertSame( array( $third, $second ), array_map( static fn ( Contract $c ) => $c->get_id(), $limited ) );
+
+		// Offset skips from the newest end.
+		$offset = $this->sut->query(
+			array(
+				'limit'  => 2,
+				'offset' => 1,
+			)
+		);
+		$this->assertSame( array( $second, $first ), array_map( static fn ( Contract $c ) => $c->get_id(), $offset ) );
+	}
+
+	/**
 	 * @testdox A manual/admin contract with a null origin order round-trips.
 	 */
 	public function test_contract_round_trips_a_null_origin_order(): void {
