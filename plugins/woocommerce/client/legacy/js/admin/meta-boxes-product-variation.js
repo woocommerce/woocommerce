@@ -1347,8 +1347,8 @@ jQuery( function ( $ ) {
 					if ( false === data.date_to && false === data.date_from ) {
 						cancel = true;
 					} else if ( data.date_from && data.date_to ) {
-						var from_ts = Date.parse( data.date_from ),
-							to_ts = Date.parse( data.date_to );
+						const from_ts = Date.parse( data.date_from );
+						const to_ts = Date.parse( data.date_to );
 
 						if (
 							! isNaN( from_ts ) &&
