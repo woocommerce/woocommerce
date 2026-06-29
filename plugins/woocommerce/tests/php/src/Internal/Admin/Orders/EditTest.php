@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Internal\Admin\Orders\Edit;
 use WP_Screen;
 
 /**
- * Tests for the Edit class — covers hiding the Downloadable product permissions
+ * Tests for the Edit class. Covers hiding the Downloadable product permissions
  * meta box by default on the order edit screen.
  */
 class EditTest extends \WC_Unit_Test_Case {
@@ -71,7 +71,7 @@ class EditTest extends \WC_Unit_Test_Case {
 
 		$this->assertTrue(
 			$this->is_meta_box_registered( 'woocommerce-order-downloads', self::TEST_SCREEN_ID ),
-			'Hiding by default must not unregister the box — it has to remain available to re-enable via Screen Options.'
+			'Hiding by default must not unregister the box; it has to remain available to re-enable via Screen Options.'
 		);
 	}
 

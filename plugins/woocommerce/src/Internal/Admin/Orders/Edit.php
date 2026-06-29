@@ -91,7 +91,7 @@ class Edit {
 	 *
 	 * Download permissions are managed automatically by WooCommerce, so manual control is niche.
 	 * We hide the meta box by default to keep the order screen trimmed down. The box stays
-	 * registered, so a merchant who needs it can re-enable it via Screen Options — and because
+	 * registered, so a merchant who needs it can re-enable it via Screen Options. And because
 	 * this uses the `default_hidden_meta_boxes` filter (which only applies when a user has no
 	 * saved Screen Options preference for the screen), that choice persists for that user.
 	 *
