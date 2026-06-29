@@ -1804,30 +1804,34 @@ class WC_AJAX {
 		check_ajax_referer( 'search-tax-rates', 'security' );
 
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
-			wp_die( -1 );
+			wp_die( '-1' );
 		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$term     = isset( $_GET['term'] ) ? (string) wc_clean( wp_unslash( $_GET['term'] ) ) : '';
-		$page     = ! empty( $_GET['page'] ) ? absint( $_GET['page'] ) : 1;
-		$per_page = ! empty( $_GET['per_page'] ) ? absint( $_GET['per_page'] ) : absint( apply_filters( 'woocommerce_json_search_limit', 30 ) );
+		$term = '';
+		if ( isset( $_GET['term'] ) && is_scalar( $_GET['term'] ) ) {
+			$clean_term = wc_clean( wp_unslash( (string) $_GET['term'] ) );
+			$term       = is_string( $clean_term ) ? $clean_term : '';
+		}
+
+		$page     = ! empty( $_GET['page'] ) && is_scalar( $_GET['page'] ) ? absint( wp_unslash( (string) $_GET['page'] ) ) : 1;
+		$per_page = ! empty( $_GET['per_page'] ) && is_scalar( $_GET['per_page'] ) ? absint( wp_unslash( (string) $_GET['per_page'] ) ) : absint( apply_filters( 'woocommerce_json_search_limit', 30 ) );
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		global $wpdb;
 
 		$page            = max( 1, $page );
 		$per_page        = max( 1, min( $per_page, 100 ) );
-		$offset          = ( $page - 1 ) * $per_page;
 		$tax_rates       = $wpdb->prefix . 'woocommerce_tax_rates';
 		$tax_locations   = $wpdb->prefix . 'woocommerce_tax_rate_locations';
 		$classes         = wc_get_product_tax_class_options();
 		$found_tax_rates = array();
 		$where           = '';
-		$where_args      = array();
 
 		if ( '' !== $term ) {
 			$like              = '%' . $wpdb->esc_like( $term ) . '%';
-			$where             = "
+			$where             = $wpdb->prepare(
+				'
 				WHERE (
 					CAST(tax_rates.tax_rate_id AS CHAR) LIKE %s
 					OR tax_rates.tax_rate_name LIKE %s
@@ -1836,8 +1840,15 @@ class WC_AJAX {
 					OR tax_rates.tax_rate_class LIKE %s
 					OR tax_rates.tax_rate LIKE %s
 					OR tax_locations.location_code LIKE %s
-				";
-			$where_args        = array( $like, $like, $like, $like, $like, $like, $like );
+				',
+				$like,
+				$like,
+				$like,
+				$like,
+				$like,
+				$like,
+				$like
+			);
 			$matching_classes  = array();
 			$normalized_search = sanitize_title( $term );
 
@@ -1855,9 +1866,13 @@ class WC_AJAX {
 			}
 
 			if ( $matching_classes ) {
-				$class_placeholders = implode( ',', array_fill( 0, count( $matching_classes ), '%s' ) );
-				$where             .= " OR tax_rates.tax_rate_class IN ({$class_placeholders})";
-				$where_args         = array_merge( $where_args, $matching_classes );
+				$class_conditions = array();
+
+				foreach ( $matching_classes as $matching_class ) {
+					$class_conditions[] = $wpdb->prepare( 'tax_rates.tax_rate_class = %s', $matching_class );
+				}
+
+				$where .= ' OR ( ' . implode( ' OR ', $class_conditions ) . ' )';
 			}
 
 			$where .= '
@@ -1865,18 +1880,21 @@ class WC_AJAX {
 			';
 		}
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$count_query = "
-			SELECT COUNT(DISTINCT tax_rates.tax_rate_id)
-			FROM {$tax_rates} tax_rates
-			LEFT JOIN {$tax_locations} tax_locations
-				ON tax_rates.tax_rate_id = tax_locations.tax_rate_id
-			{$where}
-		";
-
-		$total = $where_args
-			? absint( $wpdb->get_var( $wpdb->prepare( $count_query, $where_args ) ) )
-			: absint( $wpdb->get_var( $count_query ) );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		$total       = absint(
+			$wpdb->get_var(
+				"
+				SELECT COUNT(DISTINCT tax_rates.tax_rate_id)
+				FROM {$tax_rates} tax_rates
+				LEFT JOIN {$tax_locations} tax_locations
+					ON tax_rates.tax_rate_id = tax_locations.tax_rate_id
+				{$where}
+				"
+			)
+		);
+		$total_pages = $total ? (int) ceil( $total / $per_page ) : 1;
+		$page        = min( $page, $total_pages );
+		$offset      = ( $page - 1 ) * $per_page;
 
 		$rates = $wpdb->get_results(
 			$wpdb->prepare(
@@ -1889,10 +1907,11 @@ class WC_AJAX {
 				ORDER BY tax_rates.tax_rate_name, tax_rates.tax_rate_id
 				LIMIT %d OFFSET %d
 				",
-				array_merge( $where_args, array( $per_page, $offset ) )
+				$per_page,
+				$offset
 			)
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 		foreach ( $rates as $rate ) {
 			$tax_class = isset( $classes[ $rate->tax_rate_class ] ) ? $classes[ $rate->tax_rate_class ] : __( 'Tax', 'woocommerce' );
@@ -1913,9 +1932,9 @@ class WC_AJAX {
 					'page'           => $page,
 					'per_page'       => $per_page,
 					'total'          => $total,
-					'total_pages'    => $total ? (int) ceil( $total / $per_page ) : 1,
+					'total_pages'    => $total_pages,
 					'has_prev'       => $page > 1,
-					'has_next'       => $page * $per_page < $total,
+					'has_next'       => $page < $total_pages,
 					'displaying_num' => sprintf(
 						/* translators: %s: number of tax rates. */
 						_n( '%s item', '%s items', $total, 'woocommerce' ),

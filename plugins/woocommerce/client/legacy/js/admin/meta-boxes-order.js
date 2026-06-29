@@ -1255,7 +1255,10 @@ jQuery( function ( $ ) {
 					table_body = table.find( 'tbody' ),
 					pagination = modal.find( '[data-wc-tax-rate-pagination]' ),
 					term       = modal.find( '[data-wc-tax-rate-search]' ).val(),
-					per_page   = parseInt( table.data( 'per_page' ), 10 ) || 10;
+					per_page   = parseInt( table.data( 'per_page' ), 10 ) || 10,
+					request_id = Date.now() + '-' + Math.random();
+
+				modal.data( 'wc-tax-rate-request-id', request_id );
 
 				table_body.html( wc_meta_boxes_order_items.backbone.tax_rate_status_row( wc_enhanced_select_params.i18n_searching ) );
 				pagination.find( '.button, .current-page' ).prop( 'disabled', true );
@@ -1273,18 +1276,35 @@ jQuery( function ( $ ) {
 						per_page: per_page
 					},
 					success: function( response ) {
+						if ( request_id !== modal.data( 'wc-tax-rate-request-id' ) ) {
+							return;
+						}
+
 						wc_meta_boxes_order_items.backbone.render_tax_rate_results( modal, response );
 					},
 					error: function() {
+						if ( request_id !== modal.data( 'wc-tax-rate-request-id' ) ) {
+							return;
+						}
+
 						table_body.html(
 							wc_meta_boxes_order_items.backbone.tax_rate_status_row(
 								wc_enhanced_select_params.i18n_ajax_error
 							)
 						);
 						wc_meta_boxes_order_items.backbone.announce_tax_rate_status( wc_enhanced_select_params.i18n_ajax_error );
-						pagination.find( '.current-page' ).prop( 'disabled', false );
+						wc_meta_boxes_order_items.backbone.reset_tax_rate_pagination( pagination );
 					}
 				} );
+			},
+
+			reset_tax_rate_pagination: function( pagination ) {
+				pagination.data( 'page', 1 );
+				pagination.data( 'total-pages', 1 );
+				pagination.find( '.displaying-num' ).text( '' );
+				pagination.find( '.total-pages' ).text( 1 );
+				pagination.find( '.current-page' ).val( 1 ).prop( 'disabled', false );
+				pagination.find( '.first-page, .prev-page, .next-page, .last-page' ).prop( 'disabled', true );
 			},
 
 			announce_tax_rate_status: function( message ) {

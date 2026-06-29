@@ -391,7 +391,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 				'tax_rate_country'  => 'US',
 				'tax_rate_state'    => 'CA',
 				'tax_rate'          => '7.2500',
-				'tax_rate_name'     => 'California base rate',
+				'tax_rate_name'     => 'Pagination fixture California rate',
 				'tax_rate_priority' => 1,
 				'tax_rate_compound' => 0,
 				'tax_rate_shipping' => 1,
@@ -406,7 +406,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 				'tax_rate_country'  => 'US',
 				'tax_rate_state'    => 'NY',
 				'tax_rate'          => '8.8750',
-				'tax_rate_name'     => 'New York base rate',
+				'tax_rate_name'     => 'Pagination fixture New York rate',
 				'tax_rate_priority' => 1,
 				'tax_rate_compound' => 0,
 				'tax_rate_shipping' => 1,
@@ -418,7 +418,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		try {
 			$_GET['security'] = wp_create_nonce( 'search-tax-rates' );
-			$_GET['term']     = '10001';
+			$_GET['term']     = 'Pagination fixture';
 			$_GET['page']     = 1;
 			$_GET['per_page'] = 1;
 
@@ -426,12 +426,41 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 			$this->assertSame( 1, $response['pagination']['page'] );
 			$this->assertSame( 1, $response['pagination']['per_page'] );
+			$this->assertSame( 2, $response['pagination']['total'] );
+			$this->assertSame( 2, $response['pagination']['total_pages'] );
+			$this->assertFalse( $response['pagination']['has_prev'] );
+			$this->assertTrue( $response['pagination']['has_next'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $first_rate_id, $response['results'][0]['id'] );
+
+			$_GET['page'] = 2;
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 2, $response['pagination']['page'] );
+			$this->assertFalse( $response['pagination']['has_next'] );
+			$this->assertTrue( $response['pagination']['has_prev'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $second_rate_id, $response['results'][0]['id'] );
+
+			$_GET['page'] = 99;
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 2, $response['pagination']['page'] );
+			$this->assertCount( 1, $response['results'] );
+			$this->assertSame( $second_rate_id, $response['results'][0]['id'] );
+
+			$_GET['term'] = '10001';
+			$_GET['page'] = 1;
+			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+
+			$this->assertSame( 1, $response['pagination']['page'] );
+			$this->assertSame( 1, $response['pagination']['per_page'] );
 			$this->assertSame( 1, $response['pagination']['total'] );
 			$this->assertFalse( $response['pagination']['has_next'] );
 			$this->assertCount( 1, $response['results'] );
 			$this->assertSame( $second_rate_id, $response['results'][0]['id'] );
-			$this->assertSame( 'New York base rate', $response['results'][0]['label'] );
-			$this->assertSame( 'US-NY-NEW YORK BASE RATE-1', $response['results'][0]['rate_code'] );
+			$this->assertSame( 'Pagination fixture New York rate', $response['results'][0]['label'] );
+			$this->assertSame( 'US-NY-PAGINATION FIXTURE NEW YORK RATE-1', $response['results'][0]['rate_code'] );
 			$this->assertSame( '8.8750%', $response['results'][0]['rate_percent'] );
 		} finally {
 			unset( $_GET['security'], $_GET['term'], $_GET['page'], $_GET['per_page'] );
@@ -485,23 +514,37 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		try {
 			$_GET['security'] = wp_create_nonce( 'search-tax-rates' );
 			$_GET['page']     = 1;
-			$_GET['per_page'] = 10;
+			$_GET['per_page'] = 100;
 
 			$_GET['term'] = 'Standard';
 			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+			$rate_ids     = array_column( $response['results'], 'id' );
 
-			$this->assertSame( 1, $response['pagination']['total'] );
-			$this->assertCount( 1, $response['results'] );
-			$this->assertSame( $standard_rate_id, $response['results'][0]['id'] );
-			$this->assertSame( 'Standard', $response['results'][0]['tax_class'] );
+			$this->assertContains( $standard_rate_id, $rate_ids );
+			$standard_results = array_filter(
+				$response['results'],
+				function ( $result ) use ( $standard_rate_id ) {
+					return $standard_rate_id === $result['id'];
+				}
+			);
+			$standard_result  = current( $standard_results );
+			$this->assertIsArray( $standard_result );
+			$this->assertSame( 'Standard', $standard_result['tax_class'] );
 
 			$_GET['term'] = 'Reduced rate';
 			$response     = $this->do_ajax( 'woocommerce_json_search_tax_rates' );
+			$rate_ids     = array_column( $response['results'], 'id' );
 
-			$this->assertSame( 1, $response['pagination']['total'] );
-			$this->assertCount( 1, $response['results'] );
-			$this->assertSame( $reduced_rate_id, $response['results'][0]['id'] );
-			$this->assertSame( 'Reduced rate', $response['results'][0]['tax_class'] );
+			$this->assertContains( $reduced_rate_id, $rate_ids );
+			$reduced_results = array_filter(
+				$response['results'],
+				function ( $result ) use ( $reduced_rate_id ) {
+					return $reduced_rate_id === $result['id'];
+				}
+			);
+			$reduced_result  = current( $reduced_results );
+			$this->assertIsArray( $reduced_result );
+			$this->assertSame( 'Reduced rate', $reduced_result['tax_class'] );
 		} finally {
 			unset( $_GET['security'], $_GET['term'], $_GET['page'], $_GET['per_page'] );
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_id' => $standard_rate_id ) );

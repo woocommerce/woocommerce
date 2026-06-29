@@ -460,7 +460,7 @@ if ( wc_tax_enabled() ) {
 </script>
 
 <script type="text/template" id="tmpl-wc-modal-add-tax">
-	<div class="wc-backbone-modal">
+	<div class="wc-backbone-modal wc-modal-add-tax">
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
@@ -502,7 +502,7 @@ if ( wc_tax_enabled() ) {
 							</thead>
 							<tbody>
 								<tr class="no-items">
-									<td class="colspanchange wc-tax-rate-status" colspan="5"><?php esc_html_e( 'Loading tax rates&hellip;', 'woocommerce' ); ?></td>
+									<td class="colspanchange wc-tax-rate-status" colspan="5"><?php esc_html_e( 'Loading tax rates…', 'woocommerce' ); ?></td>
 								</tr>
 							</tbody>
 						</table>

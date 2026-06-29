@@ -7914,7 +7914,7 @@ table.bar_chart {
 }
 
 .wc-backbone-modal-main {
-	padding-bottom: calc( 2.5em + 40px );
+	padding-bottom: calc( 1.5rem + 40px );
 
 	header,
 	article {
@@ -8078,7 +8078,7 @@ table.bar_chart {
 		right: 0;
 		bottom: 0;
 		z-index: 100;
-		padding: 1.25em 2em;
+		padding: 1em 2em 1.5em;
 
 		.inner {
 			display: flex;
@@ -8094,6 +8094,16 @@ table.bar_chart {
 			.button {
 				margin-bottom: 0;
 			}
+		}
+	}
+}
+
+.wc-modal-add-tax {
+	.wc-backbone-modal-main {
+		padding-bottom: calc( 2.5em + 40px );
+
+		footer {
+			padding: 1.25em 2em;
 		}
 	}
 }
