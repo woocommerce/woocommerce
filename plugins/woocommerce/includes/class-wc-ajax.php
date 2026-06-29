@@ -2104,9 +2104,10 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$term  = isset( $_GET['term'] ) ? (string) wc_clean( wp_unslash( $_GET['term'] ) ) : '';
 		$limit = 0;
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		if ( empty( $term ) ) {
 			wp_die();
@@ -2141,11 +2142,11 @@ class WC_AJAX {
 
 		$found_customers = array();
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( ! empty( $_GET['exclude'] ) ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$ids = array_diff( $ids, array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		foreach ( $ids as $id ) {
 			$customer = new WC_Customer( $id );
