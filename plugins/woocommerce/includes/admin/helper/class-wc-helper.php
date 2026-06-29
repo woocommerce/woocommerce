@@ -2523,7 +2523,7 @@ class WC_Helper {
 		return sprintf(
 			/* translators: %1$s: helper url, %2$d: number of extensions */
 			_n( 'Note: You currently have <a href="%1$s">%2$d paid extension</a> which should be updated first before updating WooCommerce.', 'Note: You currently have <a href="%1$s">%2$d paid extensions</a> which should be updated first before updating WooCommerce.', $available, 'woocommerce' ),
-			admin_url( 'admin.php?page=' . self::get_source_page() . ' &section=helper' ),
+			admin_url( 'admin.php?page=' . self::get_source_page() . '&section=helper' ),
 			$available
 		);
 	}
