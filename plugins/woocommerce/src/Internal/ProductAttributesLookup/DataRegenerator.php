@@ -335,7 +335,7 @@ class DataRegenerator {
 				'desc'             => __( 'This tool will abort the regenerate product attributes lookup table regeneration. After this is done the process can be either started over, or resumed to continue where it stopped.', 'woocommerce' ),
 				'requires_refresh' => true,
 				'callback'         => function () {
-					$this->abort_regeneration( true );
+					$this->abort_regeneration( false );
 					return __( 'Product attributes lookup table regeneration process has been aborted.', 'woocommerce' );
 				},
 				'button'           => __( 'Abort', 'woocommerce' ),
@@ -353,7 +353,7 @@ class DataRegenerator {
 					),
 				'requires_refresh' => true,
 				'callback'         => function () {
-					$this->resume_regeneration( true );
+					$this->resume_regeneration( false );
 					return __( 'Product attributes lookup table regeneration process has been resumed.', 'woocommerce' );
 				},
 				'button'           => __( 'Resume', 'woocommerce' ),
@@ -365,13 +365,16 @@ class DataRegenerator {
 	}
 
 	/**
-	 * Callback to initiate the regeneration process from the Status - Tools page.
+	 * Callback to initiate the regeneration process when the tool is run.
+	 *
+	 * This runs both from the Status - Tools admin page and from the REST API. Authorization is
+	 * enforced by the caller: the admin page verifies the 'debug_action' nonce before dispatching
+	 * the tool (see WC_Admin_Status::status_tools), and the REST controller performs a capability
+	 * check (see WC_REST_System_Status_Tools_V2_Controller::update_item_permissions_check).
 	 *
 	 * @throws \Exception The regeneration is already in progress.
 	 */
 	private function initiate_regeneration_from_tools_page() {
-		$this->verify_tool_execution_nonce();
-
 		//phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_REQUEST['regenerate_product_attribute_lookup_data_product_id'] ) ) {
 			$product_id = (int) $_REQUEST['regenerate_product_attribute_lookup_data_product_id'];
