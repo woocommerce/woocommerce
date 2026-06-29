@@ -1,6 +1,6 @@
 # Translations for lazy-loaded components
 
-The inner blocks of the Cart and Checkout blocks are lazy-loaded. To lazy-load them, the translation chunks need to be registered. This takes place in `/src/BlockTypes/AbstractBlock.php`:
+The inner blocks of the Cart and Checkout blocks are lazy-loaded. To lazy-load them, the translation chunks need to be registered. This takes place in `src/Blocks/BlockTypes/AbstractBlock.php`:
 
 ```php
 /**
@@ -26,7 +26,7 @@ protected function register_chunk_translations( $chunks ) {
 
 ## Lazy-loaded translations of the Cart block
 
-The translations of the inner blocks of the Cart block are loaded in this function in `src/BlockTypes/Cart.php`:
+The translations of the inner blocks of the Cart block are loaded in this function in `src/Blocks/BlockTypes/Cart.php`:
 
 ```php
 /**
@@ -45,7 +45,7 @@ protected function register_block_type_assets() {
 
 ## Lazy-loaded translations of the Checkout block
 
-The translations of the inner blocks of the Cart block are loaded in this function in `src/BlockTypes/Checkout.php`:
+The translations of the inner blocks of the Checkout block are loaded in this function in `src/Blocks/BlockTypes/Checkout.php`:
 
 ```php
 /**
