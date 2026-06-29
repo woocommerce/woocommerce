@@ -205,9 +205,10 @@ class FeaturePlugin {
 	}
 
 	/**
-	 * Overwrites the allowed features array using a local `feature-config.php` file.
+	 * Adds the allowed features from a local `feature-config.php` file.
 	 *
 	 * @param array $features Array of feature slugs.
+	 * @return array
 	 */
 	public function replace_supported_features( $features ) {
 		/**
@@ -216,8 +217,9 @@ class FeaturePlugin {
 		 * @since 6.5.0
 		 */
 		$feature_config = apply_filters( 'woocommerce_admin_get_feature_config', wc_admin_get_feature_config() );
-		$features       = array_keys( array_filter( $feature_config ) );
-		return $features;
+		$features       = array_merge( $features, array_keys( array_filter( $feature_config ) ) );
+
+		return array_values( array_unique( $features ) );
 	}
 
 	/**

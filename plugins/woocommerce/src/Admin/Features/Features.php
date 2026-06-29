@@ -129,12 +129,15 @@ class Features {
 	 * @return bool Returns true if the feature exists.
 	 */
 	public static function exists( $feature ) {
-		if ( self::is_legacy_compatibility_feature( $feature ) ) {
+		$is_legacy_compatibility_feature = self::is_legacy_compatibility_feature( $feature );
+
+		if ( $is_legacy_compatibility_feature ) {
 			self::warn_legacy_feature_compatibility_usage( __METHOD__, $feature );
-			return true;
 		}
 
-		$features = self::get_features();
+		$features = $is_legacy_compatibility_feature
+			? self::get_features_with_legacy_compatibility_defaults()
+			: self::get_features();
 		return in_array( $feature, $features, true );
 	}
 
@@ -226,7 +229,7 @@ class Features {
 	 * @return array Enabled Woocommerce Admin features/sections.
 	 */
 	public static function get_available_features() {
-		$features                     = self::get_features();
+		$features                     = self::get_features_with_legacy_compatibility_defaults();
 		$optional_feature_keys        = array( 'analytics', 'remote-inbox-notifications' );
 		$legacy_compatibility_values  = self::get_legacy_feature_compatibility_values();
 		$unavailable_features         = array();
@@ -269,7 +272,6 @@ class Features {
 	public static function is_enabled( $feature ) {
 		if ( self::is_legacy_compatibility_feature( $feature ) ) {
 			self::warn_legacy_feature_compatibility_usage( __METHOD__, $feature );
-			return self::get_legacy_feature_compatibility_value( $feature );
 		}
 
 		$available_features = self::get_available_features();
@@ -399,13 +401,49 @@ class Features {
 	 * @return array<string, bool>
 	 */
 	public static function get_legacy_feature_compatibility_values() {
-		return array_merge(
+		$compatibility_values = array_merge(
 			array_fill_keys( array_keys( self::$retired_feature_compatibility_removal_versions ), true ),
 			array(
 				'analytics'                  => FeaturesUtil::feature_is_enabled( 'analytics' ),
 				'remote-inbox-notifications' => 'yes' === get_option( RemoteInboxNotifications::TOGGLE_OPTION_NAME, 'yes' ),
 			)
 		);
+
+		return array_intersect_key(
+			$compatibility_values,
+			array_flip( self::get_features_with_legacy_compatibility_defaults() )
+		);
+	}
+
+	/**
+	 * Gets default legacy feature flag compatibility values before public filtering.
+	 *
+	 * @return array<string, bool>
+	 */
+	private static function get_legacy_feature_compatibility_defaults() {
+		return array_merge(
+			array_fill_keys( array_keys( self::$retired_feature_compatibility_removal_versions ), true ),
+			array(
+				'analytics'                  => true,
+				'remote-inbox-notifications' => true,
+			)
+		);
+	}
+
+	/**
+	 * Gets WooCommerce Admin features with legacy compatibility defaults before public filtering.
+	 *
+	 * @return array Enabled Woocommerce Admin features/sections.
+	 */
+	private static function get_features_with_legacy_compatibility_defaults() {
+		/**
+		 * Filter allowing WooCommerce Admin features to be changed after legacy compatibility defaults are seeded.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param array $features Array of feature slugs.
+		 */
+		return apply_filters( 'woocommerce_admin_features', array_keys( self::get_legacy_feature_compatibility_defaults() ) );
 	}
 
 	/**
@@ -415,18 +453,7 @@ class Features {
 	 * @return bool
 	 */
 	private static function is_legacy_compatibility_feature( $feature ) {
-		return array_key_exists( $feature, self::get_legacy_feature_compatibility_values() );
-	}
-
-	/**
-	 * Gets a single legacy feature flag compatibility value.
-	 *
-	 * @param string $feature Feature slug.
-	 * @return bool
-	 */
-	private static function get_legacy_feature_compatibility_value( $feature ) {
-		$values = self::get_legacy_feature_compatibility_values();
-		return $values[ $feature ] ?? false;
+		return array_key_exists( $feature, self::get_legacy_feature_compatibility_defaults() );
 	}
 
 	/**

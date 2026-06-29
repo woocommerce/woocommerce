@@ -55,7 +55,7 @@ export const warnRetiredFeatureFlag = ( featureId: string ): void => {
 	const removalVersion = getRetiredFeatureFlagRemovalVersion( featureId );
 
 	deprecated( `wcAdminFeatures.${ featureId }`, {
-		version: RETIRED_FEATURE_FLAG_DEPRECATION_VERSION,
+		since: RETIRED_FEATURE_FLAG_DEPRECATION_VERSION,
 		plugin: 'WooCommerce',
 		hint: `The ${ featureId } WC Admin feature flag shim will be removed in ${
 			removalVersion

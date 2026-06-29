@@ -19,6 +19,8 @@ class FeatureEnabledTest extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_analytics_enabled' );
 		delete_option( RemoteInboxNotifications::TOGGLE_OPTION_NAME );
 		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_analytics_feature' ) );
+		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_launch_your_store_feature' ) );
+		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_customize_store_feature' ) );
 
 		parent::tearDown();
 	}
@@ -78,6 +80,40 @@ class FeatureEnabledTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should respect filtered retired feature flags through the legacy is_enabled shim.
+	 */
+	public function test_should_respect_filtered_retired_feature_flags_through_legacy_is_enabled_shim(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'disable_launch_your_store_feature' ) );
+		$this->setExpectedDeprecated( "Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'launch-your-store' )" );
+
+		try {
+			$this->assertFalse(
+				Features::is_enabled( 'launch-your-store' ),
+				'Retired feature flags should respect the filtered feature list through the compatibility shim.'
+			);
+		} finally {
+			remove_filter( 'woocommerce_admin_features', array( $this, 'disable_launch_your_store_feature' ) );
+		}
+	}
+
+	/**
+	 * @testdox Should respect filtered retired feature flags through the legacy exists shim.
+	 */
+	public function test_should_respect_filtered_retired_feature_flags_through_legacy_exists_shim(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'disable_customize_store_feature' ) );
+		$this->setExpectedDeprecated( "Automattic\WooCommerce\Admin\Features\Features::exists( 'customize-store' )" );
+
+		try {
+			$this->assertFalse(
+				Features::exists( 'customize-store' ),
+				'Retired feature flags should respect the filtered feature list through the compatibility shim.'
+			);
+		} finally {
+			remove_filter( 'woocommerce_admin_features', array( $this, 'disable_customize_store_feature' ) );
+		}
+	}
+
+	/**
 	 * @testdox Should return false for unknown feature flags.
 	 */
 	public function test_should_return_false_for_unknown_feature_flags(): void {
@@ -115,5 +151,25 @@ class FeatureEnabledTest extends WC_Unit_Test_Case {
 		$features[] = 'analytics';
 
 		return array_unique( $features );
+	}
+
+	/**
+	 * Disable the launch your store feature in the legacy admin feature list.
+	 *
+	 * @param array $features Feature slugs.
+	 * @return array
+	 */
+	public function disable_launch_your_store_feature( array $features ): array {
+		return array_values( array_diff( $features, array( 'launch-your-store' ) ) );
+	}
+
+	/**
+	 * Disable the customize store feature in the legacy admin feature list.
+	 *
+	 * @param array $features Feature slugs.
+	 * @return array
+	 */
+	public function disable_customize_store_feature( array $features ): array {
+		return array_values( array_diff( $features, array( 'customize-store' ) ) );
 	}
 }
