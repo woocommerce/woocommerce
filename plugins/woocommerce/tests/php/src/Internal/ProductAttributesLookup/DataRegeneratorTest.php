@@ -331,6 +331,9 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		// Simulate a non-admin-page invocation (REST API / WP-CLI), where no 'debug_action' nonce is present.
 		unset( $_REQUEST['_wpnonce'] );
 
+		// Ensure the full-table path is exercised, not the admin product-selector branch.
+		unset( $_REQUEST['regenerate_product_attribute_lookup_data_product_id'] );
+
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		$wpdb->query( 'DROP TABLE IF EXISTS ' . $this->lookup_table_name );
 		$wpdb->query( 'CREATE TABLE ' . $this->lookup_table_name . ' ( foo int );' );
