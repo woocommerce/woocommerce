@@ -172,7 +172,7 @@ const focusableSelectors = `
 const getFocusableElements = ( container: HTMLElement | null ) =>
 	container
 		? Array.from(
-				container!.querySelectorAll< HTMLElement >( focusableSelectors )
+				container.querySelectorAll< HTMLElement >( focusableSelectors )
 		  ).filter( ( el ) => el.offsetParent !== null )
 		: [];
 
@@ -292,7 +292,7 @@ store< MiniCart >(
 						return state.productCountColor;
 					}
 					const { ref } = getElement();
-					return getClosestColor( ref!, 'color' ) || '#000';
+					return getClosestColor( ref, 'color' ) || '#000';
 				}
 			},
 

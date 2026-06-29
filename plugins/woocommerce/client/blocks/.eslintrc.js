@@ -289,6 +289,7 @@ module.exports = {
 			plugins: [ 'jest', '@typescript-eslint' ],
 			extends: [ 'plugin:jest/recommended' ],
 			rules: {
+				'@typescript-eslint/no-non-null-assertion': 'error',
 				'jest/no-mocks-import': 'off',
 				'jest/no-disabled-tests': 'warn',
 				'jest/expect-expect': 'error',
@@ -311,6 +312,7 @@ module.exports = {
 			],
 			rules: {
 				'@typescript-eslint/no-explicit-any': 'error',
+				'@typescript-eslint/no-non-null-assertion': 'error',
 				'react-hooks/exhaustive-deps': 'error',
 				'@wordpress/no-global-active-element': 'error',
 				'@wordpress/no-unsafe-wp-apis': 'error',
