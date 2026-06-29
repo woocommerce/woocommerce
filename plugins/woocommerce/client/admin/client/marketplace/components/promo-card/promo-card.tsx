@@ -39,8 +39,11 @@ const PromoCard = ( {
 			localStorage.getItem( 'wc-marketplaceDismissedPromos' ) || '[]'
 		);
 
+	// When a caller provides onDismiss it owns dismissal persistence (e.g. server-side, per user),
+	// so the localStorage fallback is bypassed for both the initial visibility check here and the
+	// write in handleDismiss. Without a callback, fall back to the localStorage-by-path behavior.
 	const [ isVisible, setIsVisible ] = useState(
-		! getDismissedURIs().includes( path )
+		onDismiss ? true : ! getDismissedURIs().includes( path )
 	);
 
 	useEffect( () => {
