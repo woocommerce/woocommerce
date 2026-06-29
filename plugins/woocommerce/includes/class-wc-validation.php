@@ -26,7 +26,7 @@ class WC_Validation {
 	/**
 	 * Validates a phone number using a regular expression.
 	 *
-	 * @param  string      $phone Phone number to validate.
+	 * @param  string      $phone   Phone number to validate.
 	 * @param  string|null $country The country code the phone is being validated for, or null if unknown.
 	 * @return bool
 	 */

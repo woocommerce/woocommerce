@@ -40,7 +40,7 @@ class WC_Validation_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_is_phone_filter_can_override_result(): void {
 		$callback = function ( $valid, $phone, $country ) {
-			if ( $country === 'IR' ) {
+			if ( 'IR' === $country ) {
 				$phone = str_replace(
 					array( '۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹' ),
 					range( 0, 9 ),
@@ -55,9 +55,9 @@ class WC_Validation_Test extends \WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_validate_phone', $callback, 10, 3 );
 		try {
-			$this->assertTrue( WC_Validation::is_phone( '+۹۸۹۱۵۱۱۱۲۲۳۳' ) );
-			$this->assertTrue( WC_Validation::is_phone( '۰۰۹۸۹۱۵۱۱۱۲۲۳۳' ) );
-			$this->assertTrue( WC_Validation::is_phone( '۰۹۱۵۱۱۱۲۲۳۳' ) );
+			$this->assertTrue( WC_Validation::is_phone( '+۹۸۹۱۵۱۱۱۲۲۳۳', 'IR' ) );
+			$this->assertTrue( WC_Validation::is_phone( '۰۰۹۸۹۱۵۱۱۱۲۲۳۳', 'IR' ) );
+			$this->assertTrue( WC_Validation::is_phone( '۰۹۱۵۱۱۱۲۲۳۳', 'IR' ) );
 		} finally {
 			remove_filter( 'woocommerce_validate_phone', $callback, 10 );
 		}
