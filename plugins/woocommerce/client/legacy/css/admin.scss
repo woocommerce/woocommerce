@@ -2136,10 +2136,14 @@ ul.wc_coupon_list_block {
 
 .order_actions {
 	margin: 0;
+	overflow: hidden;
+	zoom: 1;
 	padding: 0;
 	list-style: none;
 
 	li {
+		border-top: 1px solid #fff;
+		border-bottom: 1px solid #ddd;
 		padding: 6px 0;
 		margin: 0;
 		line-height: 1.6em;
@@ -2196,9 +2200,11 @@ body.woocommerce_page_wc-orders {
 	.order_actions {
 		display: flex;
 		flex-direction: column;
+		overflow: visible;
 
 		li {
 			border-top: 1px solid $gray-200;
+			border-bottom: 0;
 			padding: 16px 12px;
 			float: none;
 			width: auto;
