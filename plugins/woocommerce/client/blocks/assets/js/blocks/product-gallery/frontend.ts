@@ -829,7 +829,6 @@ const productGallery = {
 						32; // Arbitrary value for the header height.
 				}
 			}
-
 		},
 		initDialogVideoPlayback: () => {
 			const element = getElement()?.ref;
@@ -842,10 +841,7 @@ const productGallery = {
 				SELECTORS.dialogContent
 			);
 
-			if (
-				! scrollableContainer ||
-				! window.IntersectionObserver
-			) {
+			if ( ! scrollableContainer || ! window.IntersectionObserver ) {
 				return () => element.pause();
 			}
 
@@ -868,11 +864,7 @@ const productGallery = {
 				},
 				{
 					root: scrollableContainer,
-					threshold: [
-						0,
-						DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO,
-						1,
-					],
+					threshold: [ 0, DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO, 1 ],
 				}
 			);
 
