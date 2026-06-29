@@ -1568,6 +1568,71 @@ class AdditionalFields extends MockeryTestCase {
 	}
 
 	/**
+	 * Ensures backslashes survive field validation. The request body is JSON-decoded and never
+	 * magic-quoted, so Checkout::validate_callback() must not wp_unslash() the value before validating.
+	 */
+	public function test_placing_order_preserves_backslashes_in_validation() {
+		$id = 'plugin-namespace/backslash-validate';
+		\woocommerce_register_additional_checkout_field(
+			array(
+				'id'                => $id,
+				'label'             => 'Backslash Validate',
+				'location'          => 'order',
+				'type'              => 'text',
+				'validate_callback' => function ( $value ) {
+					// Passes only if the real backslash survived; wp_unslash() would have stripped it.
+					return false !== strpos( $value, '\\' );
+				},
+			)
+		);
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'   => (object) array(
+					'first_name'              => 'test',
+					'last_name'               => 'test',
+					'company'                 => '',
+					'address_1'               => 'test',
+					'address_2'               => '',
+					'city'                    => 'test',
+					'state'                   => '',
+					'postcode'                => 'cb241ab',
+					'country'                 => 'GB',
+					'phone'                   => '5555551234',
+					'email'                   => 'testaccount@test.com',
+					'plugin-namespace/gov-id' => 'my-gov-id',
+				),
+				'shipping_address'  => (object) array(
+					'first_name'              => 'test',
+					'last_name'               => 'test',
+					'company'                 => '',
+					'address_1'               => 'test',
+					'address_2'               => '',
+					'city'                    => 'test',
+					'state'                   => '',
+					'postcode'                => 'cb241ab',
+					'country'                 => 'GB',
+					'phone'                   => '5555551234',
+					'plugin-namespace/gov-id' => 'my-gov-id',
+				),
+				'payment_method'    => WC_Gateway_BACS::ID,
+				'additional_fields' => array(
+					'plugin-namespace/job-function' => 'engineering',
+					$id                             => 'C:\\Users',
+				),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+
+		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+	}
+
+	/**
 	 * Ensures that the provided validate callback works and prevents an order.
 	 */
 	public function test_placing_order_validate_text() {

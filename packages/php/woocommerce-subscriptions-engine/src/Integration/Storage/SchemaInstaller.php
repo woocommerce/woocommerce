@@ -33,13 +33,14 @@ final class SchemaInstaller {
 	 *         references, totals, stamps); immutable cycle records keyed on
 	 *         `(contract_id, kind)`; per-contract snapshots deduped by copy-forward.
 	 * 2.1.0 - rename `app_id` to `extension_slug` in plan_groups table.
+	 * 2.1.1 - add `status` and `sort_order` columns to plans table.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
 	 * on an earlier schema must drop and recreate the tables (and clear VERSION_OPTION)
 	 * to pick up such changes - in-place ALTERs and backfills arrive with the freeze.
 	 */
-	const VERSION = '2.1.0';
+	const VERSION = '2.1.1';
 
 	/**
 	 * Option key tracking the installed schema version.
@@ -202,12 +203,15 @@ final class SchemaInstaller {
   inventory_policy JSON NULL,
   pricing_policy JSON NULL,
   category VARCHAR(32) NOT NULL DEFAULT 'SUBSCRIPTION',
+  status VARCHAR(20) NOT NULL DEFAULT 'active',
+  sort_order INT NOT NULL DEFAULT 0,
   extension_slug VARCHAR(64) NULL,
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,
   PRIMARY KEY  (id),
   KEY group_id (group_id),
   KEY category (category),
+  KEY status_sort (status, sort_order, id),
   KEY extension_slug (extension_slug)
 ) {$collate};";
 

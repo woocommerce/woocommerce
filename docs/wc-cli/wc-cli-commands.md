@@ -39,6 +39,15 @@ wp wc [command] --help
 
 ### wc com
 
+#### wc com connect
+
+- `--password` - WooCommerce.com application password. If omitted, the command prompts for it.
+- `--force` - Disconnect the site first and force a new connection if the site is already connected.
+
+#### wc com disconnect
+
+- `--yes` - Do not prompt for confirmation.
+
 #### wc com extension list
 
 - `--format` - Render output in a particular format.
@@ -53,9 +62,9 @@ Default: all
 
 Options: product_slug, product_name, auto_renew, expires_on, expired, sites_max, sites_active, maxed
 
-#### wc com extension install [extension]
+#### wc com extension install `<extension>...`
 
-- `--extension` - Install one plugin from the available extensions.Accepts a plugin slug
+- `<extension>...` - One or more plugins to install from the available extensions. Accepts plugin slugs.
 - `--force` - If set, the command will overwrite any installed version of the extension without prompting for confirmation.
 - `--activate` - If set, after installation, the plugin will activate it.
 - `--activate-network` - If set, the plugin will be network activated immediately after installation
@@ -142,6 +151,84 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
+### wc hpos
+
+Commands for managing High-Performance Order Storage (HPOS). For detailed examples, see [HPOS CLI Tools](../features/high-performance-order-storage/cli-tools.md).
+
+The older `wc cot` namespace is deprecated. Use `wc hpos` instead of the remaining deprecated aliases: `wc cot count_unmigrated`, `wc cot sync`, `wc cot verify_cot_data`, `wc cot enable`, and `wc cot disable`. The `wc cot migrate` command is fully deprecated and no longer works.
+
+#### wc hpos status
+
+Displays a summary of HPOS settings and sync status for the site.
+
+#### wc hpos enable
+
+- `--for-new-shop` - Enable HPOS only if this is a new shop, regardless of whether tables are in sync.
+- `--with-sync` - Also enable compatibility mode, which keeps the HPOS and posts datastores in sync.
+- `--ignore-plugin-compatibility` - Enable HPOS even if active plugins are incompatible with HPOS.
+
+#### wc hpos disable
+
+- `--with-sync` - Also disable compatibility mode, which stops keeping the HPOS and posts datastores in sync.
+
+#### wc hpos compatibility-info
+
+- `--include-inactive` - Include inactive plugins in the compatibility lists.
+- `--display-filenames` - Display plugin file names instead of plugin names.
+
+#### wc hpos compatibility-mode enable
+
+Enables compatibility mode, which keeps the HPOS and posts datastores in sync.
+
+#### wc hpos compatibility-mode disable
+
+Disables compatibility mode, which stops keeping the HPOS and posts datastores in sync.
+
+#### wc hpos count_unmigrated
+
+Prints the number of orders pending sync.
+
+#### wc hpos sync
+
+- `--batch-size` - The number of orders to process in each batch.
+
+Default: 500
+
+#### wc hpos verify_data
+
+- `--batch-size` - The number of orders to verify in each batch.
+- `--start-from` - Order ID to start from.
+- `--end-at` - Order ID to end at.
+- `--verbose` - Output errors as they happen in each batch instead of aggregating them at the end.
+- `--order-types` - Comma-separated list of order types to verify. Defaults to `wc_get_order_types( 'cot-migration' )`.
+- `--re-migrate` - Attempt to re-migrate orders that fail verification. Use only after confirming the destination datastore should be overwritten.
+
+Default batch size: 500
+
+#### wc hpos diff `<order_id>`
+
+- `--format` - Render output in a particular format.
+
+Default: table
+
+Options: table, csv, json, yaml
+
+#### wc hpos backfill `<order_id>`
+
+- `--from` - Source datastore. (*Required*)
+- `--to` - Destination datastore. (*Required*)
+- `--meta_keys` - Comma-separated list of meta keys to backfill.
+- `--props` - Comma-separated list of order properties to backfill.
+
+Datastore options: hpos, posts
+
+#### wc hpos cleanup `<all|id|range>...`
+
+- `--batch-size` - Number of orders to process per batch. Applies only when cleaning up all orders.
+- `--force` - Clean up post meta even if the post appears to have been updated more recently than the order.
+
+Default batch size: 500
+
 ### wc order_note
 
 #### wc order_note list `<order_id>`
@@ -218,6 +305,51 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--enabled` - Payment gateway enabled status.
 - `--settings` - Payment gateway settings.
 - `--porcelain` - Output just the id when the operation is successful.
+
+### wc palt
+
+Commands for managing the product attributes lookup table. The table stores denormalized product attribute term data used to speed up catalog filtering.
+
+#### wc palt enable
+
+- `--force` - Skip confirmation when enabling table usage while regeneration is in progress, was aborted, or the lookup table is empty.
+
+#### wc palt disable
+
+Disables usage of the product attributes lookup table.
+
+#### wc palt info
+
+Displays information about the product attributes lookup table.
+
+#### wc palt regenerate_for_product `<product-id>`
+
+- `--disable-db-optimization` - Do not use optimized database access even if products are stored as custom post types.
+
+#### wc palt abort_regeneration
+
+- `--cleanup` - Also clean up temporary data, so regeneration cannot be resumed but can be restarted.
+
+#### wc palt resume_regeneration
+
+Resumes background regeneration of the product attributes lookup table after it has been aborted.
+
+#### wc palt cleanup_regeneration_progress
+
+Deletes temporary data used during product attributes lookup table regeneration.
+
+#### wc palt initiate_regeneration
+
+- `--force` - Do not prompt for confirmation if the product attributes lookup table is not empty.
+
+#### wc palt regenerate
+
+- `--force` - Do not prompt for confirmation if the product attributes lookup table is not empty.
+- `--from-scratch` - Start table regeneration from scratch even if regeneration is already in progress.
+- `--disable-db-optimization` - Do not use optimized database access even if products are stored as custom post types.
+- `--batch-size` - How many products to process in each iteration of the loop.
+
+Default batch size: 10
 
 ### wc product
 
@@ -1333,6 +1465,26 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--slug` - Unique slug for the resource.
 - `--force` - Required to be true, as resource does not support trashing.
 - `--porcelain` - Output just the id when the operation is successful.
+
+### wc tool
+
+#### wc tool list
+
+- `--fields` - Limit response to specific fields. Defaults to all fields.
+- `--field` - Get the value of an individual field.
+- `--format` - Render response in a particular format.
+
+Default: table
+
+Options: table, json, csv, ids, yaml, count, headers, body, envelope
+
+#### wc tool run [id]
+
+- `--id` - The id for the resource.
+
+### wc update
+
+Runs all pending WooCommerce database updates.
 
 ### wc webhook
 

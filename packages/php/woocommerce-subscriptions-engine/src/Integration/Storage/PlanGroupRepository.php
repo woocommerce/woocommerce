@@ -80,6 +80,37 @@ final class PlanGroupRepository {
 	}
 
 	/**
+	 * Persist changes to an existing plan group.
+	 *
+	 * @param PlanGroup $group Group to update. Must have an id.
+	 * @return bool True on success.
+	 * @throws \RuntimeException If the group has no id.
+	 */
+	public function update( PlanGroup $group ): bool {
+		global $wpdb;
+
+		$id = $group->get_id();
+		if ( null === $id ) {
+			throw new \RuntimeException( 'Cannot update a plan group that has no id.' );
+		}
+
+		$data = $group->to_storage();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$updated = $wpdb->update(
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_GROUPS ),
+			array(
+				'name'             => $data['name'],
+				'options_display'  => wp_json_encode( $data['options_display'] ),
+				'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ),
+			),
+			array( 'id' => $id )
+		);
+
+		return false !== $updated;
+	}
+
+	/**
 	 * Delete a plan group by id.
 	 *
 	 * @param int $id Group id.
