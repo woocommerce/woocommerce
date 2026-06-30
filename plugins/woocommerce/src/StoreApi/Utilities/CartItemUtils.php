@@ -10,10 +10,6 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 /**
  * Cart item utility functions for the Store API.
  *
- * Provides shared predicates used by the Store API cart-item schema and the
- * ProductButton block server-side rendering to determine the nature of a cart
- * line without duplicating the identity logic at each call site.
- *
  * @since 11.0.0
  */
 class CartItemUtils {
