@@ -70,12 +70,11 @@
 
 <!-- wp:paragraph {"className":"underline-link","style":{"typography":{"textAlign":"left"},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} -->
 <p class="has-text-align-left underline-link has-theme-4-color has-text-color has-link-color has-small-font-size">&copy; <?php echo esc_html( gmdate( 'Y' ) ); ?> <?php
-	/* Translators: WooCommerce link. */
-	$woocommerce_link = '<a href="' . esc_url( __( 'https://woocommerce.com/', 'purple' ) ) . '" rel="nofollow">WooCommerce</a>';
-	echo sprintf(
-		/* Translators: Designed with WooCommerce */
-		esc_html__( 'All rights reserved. Designed with %1$s.', 'purple' ),
-		$woocommerce_link
+	printf(
+		/* translators: %1$s: opening anchor tag. %2$s: closing anchor tag. */
+		esc_html__( 'All rights reserved. Designed with %1$sWooCommerce%2$s.', 'purple' ),
+		'<a href="' . esc_url( __( 'https://woocommerce.com/', 'purple' ) ) . '" rel="nofollow">',
+		'</a>'
 	);
 	?></p>
 <!-- /wp:paragraph --></div>

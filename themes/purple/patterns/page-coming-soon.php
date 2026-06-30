@@ -28,12 +28,11 @@
 <div class="wp-block-column" style="flex-basis:50%"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-placeholder.webp","alt":"<?php esc_attr_e( 'Placeholder image', 'purple' ); ?>","dimRatio":40,"isUserOverlayColor":true,"minHeight":100,"minHeightUnit":"vh","contentPosition":"bottom right","style":{"layout":{"selfStretch":"fit","flexSize":null},"spacing":{"padding":{"right":"var:preset|spacing|20","left":"var:preset|spacing|20","top":"var:preset|spacing|20","bottom":"var:preset|spacing|20"}},"color":[]},"layout":{"type":"default"}} -->
 <div class="wp-block-cover has-custom-content-position is-position-bottom-right" style="padding-top:var(--wp--preset--spacing--20);padding-right:var(--wp--preset--spacing--20);padding-bottom:var(--wp--preset--spacing--20);padding-left:var(--wp--preset--spacing--20);min-height:100vh"><img class="wp-block-cover__image-background" alt="<?php esc_attr_e( 'Placeholder image', 'purple' ); ?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-placeholder.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-40 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"className":"underline-link","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-1"}}},"typography":{"lineHeight":"1.71"}},"fontSize":"small"} -->
 <p class="underline-link has-link-color has-small-font-size" style="line-height:1.71"><?php
-	/* Translators: WooCommerce link. */
-	$woocommerce_link = '<a href="' . esc_url( __( 'https://woocommerce.com/', 'purple' ) ) . '" rel="nofollow">WooCommerce</a>';
-	echo sprintf(
-		/* Translators: Designed with WooCommerce */
-		esc_html__( 'All rights reserved. Designed with %1$s.', 'purple' ),
-		$woocommerce_link
+	printf(
+		/* translators: %1$s: opening anchor tag. %2$s: closing anchor tag. */
+		esc_html__( 'All rights reserved. Designed with %1$sWooCommerce%2$s.', 'purple' ),
+		'<a href="' . esc_url( __( 'https://woocommerce.com/', 'purple' ) ) . '" rel="nofollow">',
+		'</a>'
 	);
 	?></p>
 <!-- /wp:paragraph --></div></div>
