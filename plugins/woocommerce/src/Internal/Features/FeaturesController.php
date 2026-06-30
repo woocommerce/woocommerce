@@ -564,9 +564,9 @@ class FeaturesController {
 					'woocommerce'
 				),
 				'enabled_by_default'           => false,
-				// Stays visible in the Features UI during development; the whole flag is
-				// removed once this feature ships.
-				'disable_ui'                   => false,
+				// Hidden while incomplete so it can't ship merchant-toggleable; flip to
+				// false when it's ready for an experimental preview.
+				'disable_ui'                   => true,
 				'is_experimental'              => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
