@@ -28,6 +28,9 @@ if ( ! function_exists( __NAMESPACE__ . '\\apply_filters' ) ) {
 	 * @return mixed Configured override, or `$value` unchanged.
 	 */
 	function apply_filters( string $hook, $value, ...$args ) {
+		if ( ! isset( $GLOBALS['woocommerce_subscriptions_engine_test_apply_filters_calls'] ) || ! is_array( $GLOBALS['woocommerce_subscriptions_engine_test_apply_filters_calls'] ) ) {
+			$GLOBALS['woocommerce_subscriptions_engine_test_apply_filters_calls'] = array();
+		}
 		$GLOBALS['woocommerce_subscriptions_engine_test_apply_filters_calls'][] = array(
 			'hook'  => $hook,
 			'value' => $value,
