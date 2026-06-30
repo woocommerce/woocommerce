@@ -62,12 +62,26 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 	/**
 	 * Helper: invoke the v3 controller and return the response body as an array.
 	 *
-	 * @param string $period Period to request.
+	 * @param string|null $period   Period to request. Null to use a custom date range.
+	 * @param string|null $date_min Start date for custom date ranges.
+	 * @param string|null $date_max End date for custom date ranges.
 	 * @return array
 	 */
-	private function get_report( string $period = 'month' ): array {
+	private function get_report(
+		?string $period = 'month',
+		?string $date_min = null,
+		?string $date_max = null
+	): array {
 		$request = new WP_REST_Request( 'GET', '/wc/v3/reports/sales' );
-		$request->set_param( 'period', $period );
+		if ( null !== $period ) {
+			$request->set_param( 'period', $period );
+		}
+		if ( null !== $date_min ) {
+			$request->set_param( 'date_min', $date_min );
+		}
+		if ( null !== $date_max ) {
+			$request->set_param( 'date_max', $date_max );
+		}
 
 		$controller = new WC_REST_Report_Sales_Controller();
 		$response   = $controller->prepare_item_for_response( null, $request );
@@ -166,10 +180,12 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_refunds_bucketed_by_local_time_in_non_utc_site(): void {
 		$previous_php_tz = date_default_timezone_get();
 		$previous_wp_tz  = get_option( 'timezone_string' );
+		$previous_offset = get_option( 'gmt_offset' );
 
 		// Pacific/Auckland is UTC+12 (or +13 in DST) — large enough that a local-time-of-02:00
 		// is the previous calendar day in UTC, surfacing any date()/gmdate() mismatch.
 		update_option( 'timezone_string', 'Pacific/Auckland' );
+		update_option( 'gmt_offset', 12 );
 		// phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- Need to change the PHP timezone to exercise local-vs-UTC date bucketing.
 		date_default_timezone_set( 'Pacific/Auckland' );
 
@@ -195,7 +211,7 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 				)
 			);
 
-			$data = $this->get_report( 'month' );
+			$data = $this->get_report( null, $local_today, $local_today );
 
 			$this->assertArrayHasKey(
 				$local_today,
@@ -211,6 +227,7 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- Restore the original PHP timezone.
 			date_default_timezone_set( $previous_php_tz );
 			update_option( 'timezone_string', $previous_wp_tz );
+			update_option( 'gmt_offset', $previous_offset );
 		}
 	}
 
