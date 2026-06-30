@@ -24,7 +24,7 @@ use Exception;
  *
  * @since 10.5.0
  */
-class JsonFileFeed implements FeedInterface, ResumableFeedInterface {
+class JsonFileFeed implements ResumableFeedInterface {
 	public const UPLOAD_DIR = 'product-feeds';
 
 	/**
