@@ -4,7 +4,7 @@
 	"name": "woocommerce/saved-for-later",
 	"version": "1.0.0",
 	"title": "Saved for Later",
-	"description": "Display items the shopper has saved from their cart for later.",
+	"description": "Display items shoppers have saved from their cart for later.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce", "Saved for Later" ],
 	"textdomain": "woocommerce",
