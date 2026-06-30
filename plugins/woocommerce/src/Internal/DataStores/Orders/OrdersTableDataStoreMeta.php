@@ -132,7 +132,34 @@ class OrdersTableDataStoreMeta extends CustomMetaDataStore {
 		$cache_engine = wc_get_container()->get( WPCacheEngine::class );
 		$meta_data    = $cache_engine->get_cached_objects( $object_ids, $this->get_cache_group() );
 
-		return array_filter( $meta_data );
+		foreach ( $meta_data as $object_id => $object_meta ) {
+			if ( is_array( $object_meta ) ) {
+				continue;
+			}
+
+			/*
+			 * A non-array cache entry (e.g. a scalar or object where an array of meta rows is
+			 * expected) would fatal downstream consumers such as WC_Data_Store_WP::filter_raw_meta_data().
+			 * This can happen when a third-party persistent object cache returns a corrupt or
+			 * cross-contaminated value. Invalidate the entry so it is re-read from the database,
+			 * and surface it for diagnosis.
+			 */
+			if ( null !== $object_meta ) {
+				$cache_engine->delete_cached_object( $object_id, $this->get_cache_group() );
+				wc_get_logger()->warning(
+					sprintf(
+						'Discarded a corrupt HPOS meta cache entry for order %1$d: expected an array of meta rows but found %2$s. The entry was invalidated and will be re-read from the database.',
+						(int) $object_id,
+						get_debug_type( $object_meta )
+					),
+					array( 'source' => 'hpos-data-cache' )
+				);
+			}
+
+			unset( $meta_data[ $object_id ] );
+		}
+
+		return $meta_data;
 	}
 
 	/**
