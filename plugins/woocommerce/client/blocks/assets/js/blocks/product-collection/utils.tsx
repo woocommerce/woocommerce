@@ -473,7 +473,13 @@ export const useSetPreviewState = ( {
 			? location.sourceData?.termId
 			: null;
 	useEffect( () => {
-		if ( ! setPreviewState && ! isUsingReferencePreviewMode ) {
+		// Collections that declared a static `initialPreviewState` keep it — the
+		// generic-archive fallback must not overwrite it (#48936 regression).
+		if (
+			! setPreviewState &&
+			! isUsingReferencePreviewMode &&
+			! initialPreviewState
+		) {
 			const isGenericArchiveTemplate =
 				location.type === LocationType.Archive && termId === null;
 
@@ -493,6 +499,7 @@ export const useSetPreviewState = ( {
 		termId,
 		location.type,
 		setPreviewState,
+		initialPreviewState,
 		isUsingReferencePreviewMode,
 	] );
 
