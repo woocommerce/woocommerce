@@ -185,6 +185,7 @@ export const SearchListItem = < T extends object = object >( {
 							search
 						) }
 						onClick={ ( e ) => e.stopPropagation() }
+						onKeyDown={ ( e ) => e.stopPropagation() }
 						onChange={ () => {
 							const descendants = getItemDescendants( item );
 							const itemsToToggle = isSelectable
