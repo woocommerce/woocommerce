@@ -75,6 +75,34 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it uses RTL default alignment when alignment is absent.
+	 */
+	public function testItRendersContentWithRtlDefaultAlignment(): void {
+		$theme_controller = $this->di_container->get( Theme_Controller::class );
+		$rtl_context      = new Rendering_Context( $theme_controller->get_theme(), array( 'is_rtl' => true ) );
+
+		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $this->parsed_paragraph, $rtl_context );
+
+		$this->assertStringContainsString( 'text-align:right;', $rendered );
+		$this->assertStringContainsString( 'align="right"', $rendered );
+	}
+
+	/**
+	 * Test it preserves explicit left alignment in RTL.
+	 */
+	public function testItPreservesExplicitLeftAlignmentInRtl(): void {
+		$theme_controller                   = $this->di_container->get( Theme_Controller::class );
+		$rtl_context                        = new Rendering_Context( $theme_controller->get_theme(), array( 'is_rtl' => true ) );
+		$parsed_paragraph                   = $this->parsed_paragraph;
+		$parsed_paragraph['attrs']['align'] = 'left';
+
+		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $rtl_context );
+
+		$this->assertStringContainsString( 'text-align:left;', $rendered );
+		$this->assertStringContainsString( 'align="left"', $rendered );
+	}
+
+	/**
 	 * Test it renders content with padding
 	 */
 	public function testItRendersContentWithPadding(): void {

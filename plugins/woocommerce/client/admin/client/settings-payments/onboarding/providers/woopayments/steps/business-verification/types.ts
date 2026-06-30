@@ -63,6 +63,16 @@ export interface EmbeddedKycSessionCreateResult {
 	session: EmbeddedKycSession;
 }
 
+export type EmbeddedAccountInitializationFailureReason =
+	| 'bad_session'
+	| 'init_error';
+
+export interface EmbeddedAccountInitializationFailure {
+	reason: EmbeddedAccountInitializationFailureReason;
+	message: string;
+	receivedKeys?: string[];
+}
+
 /**
  * Finalize embedded KYC session response.
  */

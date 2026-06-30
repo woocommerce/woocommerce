@@ -21,12 +21,9 @@ describe( 'FormStep', () => {
 			</FormStep>
 		);
 
-		const element = container.querySelector( '#my-id' );
-
-		expect( element ).toBeDefined();
-		// Look eslint and typescript, we're checking it above
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		expect( element!.classList.contains( 'my-classname' ) ).toBeTruthy();
+		expect( container.querySelector( '#my-id' ) ).toHaveClass(
+			'my-classname'
+		);
 	} );
 
 	test( 'should render a fieldset if a legend is provided', () => {

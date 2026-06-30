@@ -1,5 +1,4 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
@@ -81,12 +80,23 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	}
 
 	/**
-	 * @testdox Test stock counts without filter.
+	 * @testdox Test stock counts without filter: via wc_product_meta_lookup table.
 	 */
-	public function test_get_stock_status_counts_with_default_query() {
-		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
+	public function test_get_stock_status_counts_with_default_query_using_lookup_table() {
+		$this->test_get_stock_status_counts_with( new \WP_Query( array( 'post_type' => 'product' ) ) );
+	}
 
-		$this->test_get_stock_status_counts_with( $wp_query );
+	/**
+	 * @testdox Test stock counts without filter: via postmeta table.
+	 */
+	public function test_get_stock_status_counts_with_default_query_using_postmeta_table() {
+		global $wpdb;
+		// Truncate the lookup table to confirm that the underlying query is targeting the correct postmeta table.
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->wc_product_meta_lookup}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		update_option( 'woocommerce_product_lookup_table_is_generating', '1' );
+		$this->test_get_stock_status_counts_with( new \WP_Query( array( 'post_type' => 'product' ) ) );
+		delete_option( 'woocommerce_product_lookup_table_is_generating' );
 	}
 
 	/**
@@ -467,7 +477,8 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	 * @param callable  $filter_callback Callback passed to filter test products.
 	 */
 	private function test_get_stock_status_counts_with( $wp_query, $filter_callback = null ) {
-		$query_vars = array_filter( $wp_query->query_vars );
+		$query_vars                        = array_filter( $wp_query->query_vars );
+		$query_vars['counts-cache-bypass'] = microtime( true );
 
 		$actual_stock_status_counts = $this->sut->get_stock_status_counts( $query_vars, array( 'instock', 'outofstock', 'onbackorder' ) );
 
@@ -500,7 +511,8 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	 * @param callable  $filter_callback Callback passed to filter test products.
 	 */
 	private function test_get_filtered_price_with( $wp_query, $filter_callback = null ) {
-		$query_vars = array_filter( $wp_query->query_vars );
+		$query_vars                        = array_filter( $wp_query->query_vars );
+		$query_vars['counts-cache-bypass'] = microtime( true );
 
 		$prices = array();
 

@@ -7,13 +7,17 @@ namespace Automattic\WooCommerce\Internal\PushNotifications;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\NotificationPreferencesRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewReviewNotificationTrigger;
+use Automattic\WooCommerce\Internal\PushNotifications\Triggers\StockNotificationRecoveryHandler;
+use Automattic\WooCommerce\Internal\PushNotifications\Triggers\StockNotificationTrigger;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WC_Logger;
@@ -78,10 +82,14 @@ class PushNotifications {
 
 		( new PushTokenRestController() )->register();
 		( new PushNotificationRestController() )->register();
+		( new NotificationPreferencesRestController() )->register();
 		( new NewOrderNotificationTrigger() )->register();
 		( new NewReviewNotificationTrigger() )->register();
+		( new StockNotificationTrigger() )->register();
+		( new StockNotificationRecoveryHandler() )->register();
 
 		wc_get_container()->get( NotificationProcessor::class )->register();
+		wc_get_container()->get( NotificationRetryHandler::class )->register();
 	}
 
 	/**

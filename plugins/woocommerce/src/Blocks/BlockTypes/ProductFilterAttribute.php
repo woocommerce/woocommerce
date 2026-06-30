@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
@@ -58,8 +59,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 			delete_transient( 'wc_block_product_filter_attribute_default_attribute' );
 		}
 	}
-
-
 
 	/**
 	 * Prepare the active filter items.
@@ -176,6 +175,10 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		$attribute_terms = get_terms( $args );
 
+		if ( is_wp_error( $attribute_terms ) ) {
+			$attribute_terms = array();
+		}
+
 		$filter_param_key = 'filter_' . str_replace( 'pa_', '', $product_attribute->slug );
 		$filter_params    = $block->context['filterParams'] ?? array();
 		$selected_terms   = array();
@@ -185,31 +188,52 @@ final class ProductFilterAttribute extends AbstractBlock {
 		}
 
 		$filter_context = array(
-			'showCounts' => $block_attributes['showCounts'] ?? false,
-			'items'      => array(),
-			'groupLabel' => $product_attribute->name,
+			'items'          => array(),
+			'selectionMode'  => $block_attributes['selectType'] ?? 'multiple',
+			'storeNamespace' => 'woocommerce/product-filters',
+			'groupLabel'     => $product_attribute->name,
 		);
 
 		if ( ! empty( $attribute_counts ) ) {
+			$show_counts         = $block_attributes['showCounts'] ?? false;
+			$is_visual_attribute = VisualAttributeTermMeta::is_visual_attribute_taxonomy( $product_attribute->slug );
+			$visual_values       = array();
+
+			if ( $is_visual_attribute ) {
+				$visual_values = VisualAttributeTermMeta::get_term_visuals( wp_list_pluck( $attribute_terms, 'term_id' ) );
+			}
+
 			$attribute_options = array_map(
-				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute ) {
+				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute, $show_counts, $is_visual_attribute, $visual_values ) {
 					$term          = (array) $term;
 					$term['count'] = $attribute_counts[ $term['term_id'] ] ?? 0;
 
-					return array(
+					$type = 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug );
+					$item = array(
+						'id'                 => $type . '-' . $term['slug'],
 						'label'              => $term['name'],
+						'ariaLabel'          => $term['name'],
 						'value'              => $term['slug'],
 						'selected'           => in_array( $term['slug'], $selected_terms, true ),
-						'count'              => $term['count'],
-						'type'               => 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug ),
+						'type'               => $type,
 						'attributeQueryType' => $block_attributes['queryType'],
 					);
+
+					if ( $show_counts ) {
+						$item['count'] = $term['count'];
+					}
+
+					if ( $is_visual_attribute ) {
+						$item['visual'] = $visual_values[ $term['term_id'] ] ?? VisualAttributeTermMeta::get_empty_visual();
+					}
+
+					return $item;
 				},
 				$attribute_terms
 			);
 
-			$filter_context['items'] = $attribute_options;
-		}
+			$filter_context['items'] = array_values( $attribute_options );
+		}//end if
 
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filters',
@@ -218,6 +242,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 				array(
 					'activeLabelTemplate' => "$product_attribute->name: {{label}}",
 					'filterType'          => 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug ),
+					'items'               => $filter_context['items'],
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
@@ -234,7 +259,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			array_reduce(
 				$block->parsed_block['innerBlocks'],
 				function ( $carry, $parsed_block ) use ( $filter_context ) {
-					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					$carry .= ( new \WP_Block( $parsed_block, array( 'woocommerce/selectableItems' => $filter_context ) ) )->render();
 					return $carry;
 				},
 				''

@@ -4,13 +4,57 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\Utilities;
 
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 
 /**
  * Tests for the internal ProductUtil class.
  */
 class ProductUtilTest extends \WC_Unit_Test_Case {
+	/**
+	 * @testdox `get_counts_for_type` returns per-status counts for the given post type.
+	 */
+	public function test_get_counts_for_type_returns_per_status_counts(): void {
+		$before = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
+
+		$published = \WC_Helper_Product::create_simple_product();
+		$draft     = \WC_Helper_Product::create_simple_product( true, array( 'status' => ProductStatus::DRAFT ) );
+		$pending   = \WC_Helper_Product::create_simple_product( true, array( 'status' => ProductStatus::PENDING ) );
+
+		$after = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
+
+		$this->assertSame( ( $before[ ProductStatus::PUBLISH ] ?? 0 ) + 1, $after[ ProductStatus::PUBLISH ] );
+		$this->assertSame( ( $before[ ProductStatus::DRAFT ] ?? 0 ) + 1, $after[ ProductStatus::DRAFT ] );
+		$this->assertSame( ( $before[ ProductStatus::PENDING ] ?? 0 ) + 1, $after[ ProductStatus::PENDING ] );
+
+		$published->delete( true );
+		$draft->delete( true );
+		$pending->delete( true );
+	}
+
+	/**
+	 * @testdox delete_product_transients_for_products deletes fixed-name transients once and fires hooks once per product.
+	 */
+	public function test_delete_product_transients_for_products_deletes_fixed_transients_and_fires_hooks() {
+		$product_ids = array( 0, 123, 123, 456 );
+		$deleted_ids = array();
+		$track_hook  = static function ( $product_id ) use ( &$deleted_ids ) {
+			$deleted_ids[] = (int) $product_id;
+		};
+
+		set_transient( 'wc_products_onsale', 'foobar' );
+		add_action( 'woocommerce_delete_product_transients', $track_hook );
+		try {
+			wc_get_container()->get( ProductUtil::class )->delete_product_transients_for_products( $product_ids );
+		} finally {
+			remove_action( 'woocommerce_delete_product_transients', $track_hook );
+		}
+
+		$this->assertFalse( get_transient( 'wc_products_onsale' ) );
+		$this->assertSame( array( 0, 123, 456 ), $deleted_ids );
+	}
+
 	/**
 	 * @testdox delete_product_specific_transients deletes the transients for a product that is not a variation.
 	 *
@@ -52,5 +96,26 @@ class ProductUtilTest extends \WC_Unit_Test_Case {
 
 		$this->assertFalse( get_transient( $parent_transient_name ) );
 		$this->assertFalse( get_transient( $child_transient_name ) );
+	}
+
+	/**
+	 * @testdox delete_product_specific_transients_for_products deletes parent variation transients once for multiple variations.
+	 */
+	public function test_delete_product_specific_transients_for_products_coalesces_parent_variation_transient_deletes() {
+		$parent_product  = ProductHelper::create_variation_product();
+		$child_ids       = array_slice( $parent_product->get_children(), 0, 2 );
+		$delete_attempts = 0;
+		$track_deletes   = static function () use ( &$delete_attempts ) {
+			++$delete_attempts;
+		};
+
+		add_action( 'delete_transient_wc_product_children_' . $parent_product->get_id(), $track_deletes );
+		try {
+			wc_get_container()->get( ProductUtil::class )->delete_product_specific_transients_for_products( $child_ids );
+		} finally {
+			remove_action( 'delete_transient_wc_product_children_' . $parent_product->get_id(), $track_deletes );
+		}
+
+		$this->assertSame( 1, $delete_attempts );
 	}
 }

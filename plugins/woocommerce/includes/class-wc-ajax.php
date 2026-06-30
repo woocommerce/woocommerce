@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
@@ -617,6 +618,10 @@ class WC_AJAX {
 			wp_die();
 		}
 
+		if ( ProductStatus::PUBLISH !== $variable_product->get_status() && ! current_user_can( 'edit_post', $variable_product->get_id() ) ) {
+			wp_die();
+		}
+
 		$data_store   = WC_Data_Store::load( 'product' );
 		$variation_id = $data_store->find_matching_product_variation( $variable_product, wp_unslash( $_POST ) );
 		$variation    = $variation_id ? $variable_product->get_available_variation( $variation_id ) : false;
@@ -763,17 +768,32 @@ class WC_AJAX {
 						)
 					);
 				} else {
+					VisualAttributeTermMeta::save_term_visual_from_request( (int) $result['term_id'], $taxonomy, $_POST ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
 					$term = get_term_by( 'id', $result['term_id'], $taxonomy );
-					wp_send_json(
-						array(
-							'term_id' => $term->term_id,
-							'name'    => $term->name,
-							'slug'    => $term->slug,
-						)
+
+					if ( ! $term ) {
+						wp_send_json(
+							array(
+								'error' => __( 'Term not found', 'woocommerce' ),
+							)
+						);
+					}
+
+					$response = array(
+						'term_id' => $term->term_id,
+						'name'    => $term->name,
+						'slug'    => $term->slug,
 					);
-				}
-			}
-		}
+
+					if ( VisualAttributeTermMeta::is_visual_attribute_taxonomy( $taxonomy ) ) {
+						$response['visual'] = VisualAttributeTermMeta::get_term_visual( (int) $term->term_id );
+					}
+
+					wp_send_json( $response );
+				}//end if
+			}//end if
+		}//end if
 		wp_die( -1 );
 	}
 
@@ -1705,31 +1725,48 @@ class WC_AJAX {
 			$comment_id = $order->add_order_note( $note, $is_customer_note, true );
 			$note       = wc_get_order_note( $comment_id );
 
+			if ( ! $note ) {
+				wp_die();
+			}
+
 			$note_classes   = array( 'note' );
 			$note_classes[] = $is_customer_note ? 'customer-note' : '';
 			$note_classes   = apply_filters( 'woocommerce_order_note_class', array_filter( $note_classes ), $note );
 			?>
 			<li rel="<?php echo absint( $note->id ); ?>" class="<?php echo esc_attr( implode( ' ', $note_classes ) ); ?>">
 				<div class="note_content">
-					<?php
-					$content = wc_wptexturize_order_note( $note->content );
-					echo wp_kses_post( wpautop( make_clickable( $content ) ) );
-					?>
+					<?php if ( $is_customer_note ) : ?>
+						<div class="note_header"><?php esc_html_e( 'Sent to customer', 'woocommerce' ); ?></div>
+					<?php endif; ?>
+					<div class="note_body">
+						<?php
+						$content = wc_wptexturize_order_note( $note->content );
+						echo wp_kses_post( wpautop( make_clickable( $content ) ) );
+						?>
+					</div>
 				</div>
 				<p class="meta">
-					<abbr class="exact-date" title="<?php echo esc_attr( $note->date_created->date( 'y-m-d h:i:s' ) ); ?>">
+					<abbr class="exact-date" title="<?php echo esc_attr( $note->date_created->date( 'Y-m-d H:i:s' ) ); ?>">
 						<?php
-						/* translators: $1: Date created, $2 Time created */
-						printf( esc_html__( 'added on %1$s at %2$s', 'woocommerce' ), esc_html( $note->date_created->date_i18n( wc_date_format() ) ), esc_html( $note->date_created->date_i18n( wc_time_format() ) ) );
+						/* translators: %1$s: order note date, %2$s: order note time */
+						printf( esc_html__( '%1$s at %2$s', 'woocommerce' ), esc_html( $note->date_created->date_i18n( wc_date_format() ) ), esc_html( $note->date_created->date_i18n( wc_time_format() ) ) );
 						?>
 					</abbr>
 					<?php
 					if ( 'system' !== $note->added_by ) :
-						/* translators: %s: note author */
+						/* translators: %s: order note author */
 						printf( ' ' . esc_html__( 'by %s', 'woocommerce' ), esc_html( $note->added_by ) );
 					endif;
 					?>
-					<a href="#" class="delete_note" role="button"><?php esc_html_e( 'Delete note', 'woocommerce' ); ?></a>
+					<?php
+					$note_date_label   = $note->date_created->date_i18n( wc_date_format() );
+					$delete_aria_label = 'system' === $note->added_by
+						/* translators: %s: order note date */
+						? sprintf( __( 'Delete system note from %s', 'woocommerce' ), $note_date_label )
+						/* translators: %1$s: order note author, %2$s: order note date */
+						: sprintf( __( 'Delete note from %1$s on %2$s', 'woocommerce' ), $note->added_by, $note_date_label );
+					?>
+					<a href="#" class="delete_note" role="button" aria-label="<?php echo esc_attr( $delete_aria_label ); ?>"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a>
 				</p>
 			</li>
 			<?php
@@ -1811,7 +1848,7 @@ class WC_AJAX {
 		foreach ( $ids as $id ) {
 			$product_object = wc_get_product( $id );
 
-			if ( ! wc_products_array_filter_readable( $product_object ) ) {
+			if ( ! $product_object || ! wc_products_array_filter_readable( $product_object ) ) {
 				continue;
 			}
 
@@ -1822,11 +1859,33 @@ class WC_AJAX {
 				continue;
 			}
 
-			if ( $managing_stock && ! empty( $_GET['display_stock'] ) ) {
-				$stock_amount = $product_object->get_stock_quantity();
-				/* Translators: %d stock amount */
-				$formatted_name .= ' &ndash; ' . sprintf( __( 'Stock: %d', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product_object ) );
-			}
+			if ( ! empty( $_GET['display_stock'] ) ) {
+				$stock_parts = array();
+
+				if ( $managing_stock ) {
+					$stock_amount = $product_object->get_stock_quantity();
+					/* Translators: %s stock amount */
+					$stock_parts[] = sprintf( __( 'Stock: %s', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product_object ) );
+				}
+
+				$stock_status = $product_object->get_stock_status();
+				if ( ProductStockStatus::OUT_OF_STOCK === $stock_status ) {
+					$stock_parts[] = __( 'Out of stock', 'woocommerce' );
+				} elseif ( ProductStockStatus::ON_BACKORDER === $stock_status ) {
+					$stock_parts[] = __( 'On backorder', 'woocommerce' );
+				}
+
+				if ( ! empty( $stock_parts ) ) {
+					$formatted_name .= ' (' . implode( ' &ndash; ', $stock_parts ) . ')';
+				}
+
+				$product_status = $product_object->get_status();
+				if ( ProductStatus::PRIVATE === $product_status ) {
+					$formatted_name .= ' (' . __( 'Disabled', 'woocommerce' ) . ')';
+				} elseif ( ProductStatus::DRAFT === $product_status ) {
+					$formatted_name .= ' (' . __( 'Draft', 'woocommerce' ) . ')';
+				}
+			}//end if
 
 			$products[ $product_object->get_id() ] = rawurldecode( wp_strip_all_tags( $formatted_name ) );
 		}
@@ -2012,9 +2071,13 @@ class WC_AJAX {
 	/**
 	 * Search for categories and return json.
 	 *
+	 * @deprecated 10.9.0 This callback was used by the removed async product editor category field.
+	 *
 	 * @return void
 	 */
 	public static function json_search_categories_tree() {
+		wc_deprecated_function( __METHOD__, '10.9.0' );
+
 		ob_start();
 
 		check_ajax_referer( 'search-categories', 'security' );
@@ -2544,7 +2607,7 @@ class WC_AJAX {
 				$response['consumer_key']    = $consumer_key;
 				$response['consumer_secret'] = $consumer_secret;
 				$response['message']         = __( 'API Key generated successfully. Make sure to copy your new keys now as the secret key will be hidden once you leave this page.', 'woocommerce' );
-				$response['revoke_url']      = '<a style="color: #a00; text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke key', 'woocommerce' ) . '</a>';
+				$response['revoke_url']      = '<a style="color: var(--wc-destructive, #cc1818); text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke key', 'woocommerce' ) . '</a>';
 			}
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
@@ -2947,16 +3010,19 @@ class WC_AJAX {
 			return;
 		}
 
+		$date_from = isset( $data['date_from'] ) ? wc_clean( $data['date_from'] ) : false;
+		$date_to   = isset( $data['date_to'] ) ? wc_clean( $data['date_to'] ) : false;
+
 		foreach ( $variations as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
 
-			if ( 'false' !== $data['date_from'] ) {
-				$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( wc_clean( $data['date_from'] ) ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			if ( false !== $date_from && 'false' !== $date_from ) {
+				$date_on_sale_from = '' === $date_from ? null : date( 'Y-m-d 00:00:00', strtotime( $date_from ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 				$variation->set_date_on_sale_from( $date_on_sale_from );
 			}
 
-			if ( 'false' !== $data['date_to'] ) {
-				$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( wc_clean( $data['date_to'] ) ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			if ( false !== $date_to && 'false' !== $date_to ) {
+				$date_on_sale_to = '' === $date_to ? null : date( 'Y-m-d 23:59:59', strtotime( $date_to ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 				$variation->set_date_on_sale_to( $date_on_sale_to );
 			}
 

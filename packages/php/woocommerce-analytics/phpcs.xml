@@ -1,6 +1,11 @@
 <?xml version="1.0"?>
 <ruleset name="WooCommerce Analytics Coding Standards">
-	<rule ref="WordPress"/>
+	<rule ref="WordPress">
+		<!-- Yoda conditions are not enforced in this package. -->
+		<exclude name="WordPress.PHP.YodaConditions"/>
+		<!-- Inline comments are not required to end with a full stop. -->
+		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar"/>
+	</rule>
 
 	<!-- Define files and folders to scan -->
 	<file>src</file>

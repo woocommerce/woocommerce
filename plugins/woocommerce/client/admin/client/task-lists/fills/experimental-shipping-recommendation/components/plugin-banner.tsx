@@ -17,6 +17,7 @@ type PluginBannerProps = {
 	logo?: {
 		image: string;
 		alt?: string;
+		label?: string;
 	};
 	description?: string;
 	layout?: 'single' | 'dual';
@@ -40,7 +41,12 @@ export const PluginBanner = ( {
 		>
 			{ logo && (
 				<div className="plugins-install__plugin-banner-image">
-					<img src={ logo.image } alt={ logo?.alt } />
+					<img
+						src={ logo.image }
+						alt={ logo.alt ?? logo.label ?? '' }
+						className={ clsx( { 'with-label': logo.label } ) }
+					/>
+					{ logo.label && <div>{ logo.label }</div> }
 				</div>
 			) }
 			{ description && <p>{ description }</p> }

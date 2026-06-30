@@ -158,6 +158,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		$p->set_attribute( 'tabindex', '-1' );
 		$p->set_attribute( 'draggable', 'false' );
+		$p->set_attribute( 'data-wp-watch', 'callbacks.toggleImageVisibility' );
 		$p->set_attribute( 'data-wp-on--click', 'actions.onViewerClick' );
 		$p->set_attribute( 'data-wp-on--touchstart', 'actions.onTouchStart' );
 		$p->set_attribute( 'data-wp-on--touchmove', 'actions.onTouchMove' );

@@ -2,13 +2,26 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { format } from '@wordpress/date';
 import PropTypes from 'prop-types';
 import { createElement } from '@wordpress/element';
 
-const TimelineItem = ( { item = {}, className = '', clockFormat } ) => {
+/**
+ * Internal dependencies
+ */
+import { formatTimelineDate } from './util';
+
+const TimelineItem = ( {
+	item = {},
+	className = '',
+	clockFormat,
+	timezone = 'browser',
+} ) => {
 	const itemClassName = clsx( 'woocommerce-timeline-item', className );
-	const itemTimeString = format( clockFormat, item.date );
+	const itemTimeString = formatTimelineDate(
+		clockFormat,
+		item.date,
+		timezone
+	);
 
 	return (
 		<li className={ itemClassName }>
@@ -65,11 +78,15 @@ TimelineItem.propTypes = {
 		 * Allows users to toggle the timestamp on or off.
 		 */
 		hideTimestamp: PropTypes.bool,
-		/**
-		 * The PHP clock format string used to format times, see php.net/date.
-		 */
-		clockFormat: PropTypes.string,
 	} ),
+	/**
+	 * The PHP clock format string used to format times, see php.net/date.
+	 */
+	clockFormat: PropTypes.string,
+	/**
+	 * Defines whether item dates should be displayed in the browser timezone or the WordPress site timezone.
+	 */
+	timezone: PropTypes.oneOf( [ 'browser', 'site' ] ),
 };
 
 export default TimelineItem;

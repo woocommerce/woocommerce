@@ -20,7 +20,7 @@ Furthermore, it is possible to disable the compatibility layer via the hook: [`w
 
 ## Archive Product Templates - [ArchiveProductTemplatesCompatibility](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/src/Templates/ArchiveProductTemplatesCompatibility.php)
 
-The compatibility is built around the Product Collection and Products (Beta) blocks because the loop is the main element of archive templates and hooks are placed inside and around the loop. The Compatibility Layer injects custom attributes for the Product Collection and Products (Beta) blocks that **inherit query from the template** and their inner blocks.
+The compatibility is built around the Product Collection block because the loop is the main element of archive templates and hooks are placed inside and around the loop. The Compatibility Layer injects custom attributes for the Product Collection block that **inherit query from the template** and their inner blocks.
 
 The following table shows where the hooks are injected into the page.
 
@@ -46,16 +46,16 @@ The compatibility is built around the entire page. The classic Single Product Pa
 The following table shows where the hooks are injected into the page.
 
 
-| Hook                                      | Block Name                                                                                                                                             | Position |
-|-------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
-| woocommerce_before_main_content           | First block related to the Single Product Template (Product Image Gallery, Product Details, Add to Cart Form, Product Meta, Product Price, Breadcrumbs) | before   |
-| woocommerce_after_main_content            | Last block related to the Single Product Template (Product Image Gallery, Product Details, Add to Cart Form, Product Meta, Product Price, Breadcrumbs)  | after    |
-| woocommerce_sidebar                       | Last block related to the Single Product Template (Product Image Gallery, Product Details, Add to Cart Form, Product Meta, Product Price, Breadcrumbs)  | after    |
-| woocommerce_before_single_product         | First block related to the Single Product Template (Product Image Gallery, Product Details, Add to Cart Form, Product Meta, Product Price, Breadcrumbs) | before   |
-| woocommerce_before_single_product_summary | First block related to the Single Product Template (Product Image Gallery, Product Details, Add to Cart Form, Product Meta, Product Price, Breadcrumbs) | before |
-| woocommerce_single_product_summary        | First `core/post-excerpt` or `woocommerce/product-summary` block                                                                                                                         | before   |
-| woocommerce_after_single_product          | Last block related to the Single Product Template (Product Image Gallery, Product Details, Add to Cart Form, Product Meta, Product Price, Breadcrumbs)  | after    |
-| woocommerce_product_meta_start            | Product Meta                                                                                                                                           | before   |
-| woocommerce_product_meta_end              | Product Meta                                                                                                                                           | after    |
-| woocommerce_share                         | Product Details                                                                                                                                        | before   |
-| woocommerce_after_single_product_summary  | Product Details                                                                                                                                        | before   |
+| Hook                                     | Block Name                                                                                                                                             | Position|
+|------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
+| woocommerce_before_main_content          | First block related to the Single Product Template (Product Image Gallery, Product Details, Add to Cart Form, Product Meta, Product Price, Breadcrumbs)| before  |
+| woocommerce_after_main_content           | Last block related to the Single Product Template (Product Image Gallery, Product Details, Add to Cart Form, Product Meta, Product Price, Breadcrumbs) | after   |
+| woocommerce_sidebar                      | Last block related to the Single Product Template (Product Image Gallery, Product Details, Add to Cart Form, Product Meta, Product Price, Breadcrumbs) | after   |
+| woocommerce_before_single_product        | First block related to the Single Product Template (Product Image Gallery, Product Details, Add to Cart Form, Product Meta, Product Price, Breadcrumbs)| before  |
+| woocommerce_before_single_product_summary| First block related to the Single Product Template (Product Image Gallery, Product Details, Add to Cart Form, Product Meta, Product Price, Breadcrumbs)| before  |
+| woocommerce_single_product_summary       | First `core/post-excerpt` or `woocommerce/product-summary` block                                                                                       | before  |
+| woocommerce_after_single_product         | Last block related to the Single Product Template (Product Image Gallery, Product Details, Add to Cart Form, Product Meta, Product Price, Breadcrumbs) | after   |
+| woocommerce_product_meta_start           | Product Meta                                                                                                                                           | before  |
+| woocommerce_product_meta_end             | Product Meta                                                                                                                                           | after   |
+| woocommerce_share                        | Product Details                                                                                                                                        | before  |
+| woocommerce_after_single_product_summary | Product Details                                                                                                                                        | before  |

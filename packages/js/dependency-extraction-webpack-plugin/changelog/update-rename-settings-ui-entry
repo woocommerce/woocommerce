@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Replace the @woocommerce/settings-ui-sdk dependency-extraction entry with @woocommerce/settings-ui, matching the renamed package. The previous entry was never consumable: the package is unpublished and no WooCommerce release registers its script handle.
