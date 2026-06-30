@@ -11,7 +11,7 @@ interface ExpandableSearchListItemProps extends RenderItemArgs {
 }
 
 const ExpandableSearchListItem = ( {
-	className = '',
+	className,
 	item,
 	isSelected,
 	isLoading,
