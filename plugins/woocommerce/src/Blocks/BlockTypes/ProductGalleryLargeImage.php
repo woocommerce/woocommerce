@@ -145,7 +145,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 			$p->set_attribute( 'tabindex', '-1' );
 		} else {
 			/**
-			 * If we can't find and <a> tag, we're at then end of the document.
+			 * If we can't find and <a> tag, we're at the end of the document.
 			 * We need to reinitialize the processor instance to search for <img> tag.
 			 */
 			$p = new \WP_HTML_Tag_Processor( $image_html );
@@ -158,6 +158,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		$p->set_attribute( 'tabindex', '-1' );
 		$p->set_attribute( 'draggable', 'false' );
+		$p->set_attribute( 'data-wp-watch', 'callbacks.toggleImageVisibility' );
 		$p->set_attribute( 'data-wp-on--click', 'actions.onViewerClick' );
 		$p->set_attribute( 'data-wp-on--touchstart', 'actions.onTouchStart' );
 		$p->set_attribute( 'data-wp-on--touchmove', 'actions.onTouchMove' );
@@ -165,6 +166,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		if ( 0 === $index ) {
 			$p->set_attribute( 'fetchpriority', 'high' );
+			$p->set_attribute( 'loading', 'eager' );
 		} else {
 			$p->set_attribute( 'fetchpriority', 'low' );
 			$p->set_attribute( 'loading', 'lazy' );

@@ -326,9 +326,14 @@ function wc_set_customer_auth_cookie( $customer_id ) {
  * @return int
  */
 function wc_update_new_customer_past_orders( $customer_id ) {
+	$customer = get_user_by( 'id', absint( $customer_id ) );
+
+	if ( ! $customer ) {
+		return 0;
+	}
+
 	$linked          = 0;
 	$complete        = 0;
-	$customer        = get_user_by( 'id', absint( $customer_id ) );
 	$customer_orders = wc_get_orders(
 		array(
 			'limit'    => -1,
@@ -439,106 +444,122 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		$cache_version = WC_Cache_Helper::get_transient_version( 'orders' );
 	}
 
-	$cache_group = 'orders';
-	$cache_key   = 'wc_customer_bought_product_' . md5( $customer_email . '-' . $user_id . '-' . $use_lookup_tables );
-	$cache_value = wp_cache_get( $cache_key, $cache_group );
+	// Update the version when modifying the aggregation implementation to ensure the cache is repopulated.
+	$aggregation_version = 'v3';
+	$cache_group         = 'orders';
+	$cache_key           = 'wc_customer_bought_product_' . md5( $customer_email . '-' . $user_id . '-' . $use_lookup_tables . '-' . $aggregation_version );
+	$cache_value         = wp_cache_get( $cache_key, $cache_group );
 
 	if ( isset( $cache_value['value'], $cache_value['version'] ) && $cache_value['version'] === $cache_version ) {
 		$result = $cache_value['value'];
 	} else {
-		$customer_data = array( $user_id );
-
-		if ( $user_id ) {
-			$user = get_user_by( 'id', $user_id );
-
-			if ( isset( $user->user_email ) ) {
-				$customer_data[] = $user->user_email;
-			}
+		// Identify the customer using the provided data. Use Customer ID to optimize performance in the following SQL
+		// queries. If an account has been deleted, use the supplied ID to ensure graceful handling.
+		$user = null;
+		if ( ! $user_id && $customer_email && is_email( $customer_email ) ) {
+			$user    = get_user_by( 'email', $customer_email );
+			$user_id = $user->ID ?? $user_id;
+		}
+		if ( $user_id && ! $user ) {
+			$user    = get_user_by( 'id', $user_id );
+			$user_id = $user->ID ?? $user_id;
 		}
 
-		if ( is_email( $customer_email ) ) {
-			$customer_data[] = $customer_email;
-		}
+		$emails = array( $customer_email );
+		$emails = array_unique( array_filter( $emails, static fn( $email ) => $email && is_email( $email ) ) );
 
-		$customer_data = array_map( 'esc_sql', array_filter( array_unique( $customer_data ) ) );
-		$statuses      = array_map( 'esc_sql', wc_get_is_paid_statuses() );
+		if ( empty( $emails ) && ! $user_id ) {
+			wp_cache_set(
+				$cache_key,
+				array(
+					'version' => $cache_version,
+					'value'   => array(),
+				),
+				$cache_group,
+				MONTH_IN_SECONDS
+			);
 
-		if ( count( $customer_data ) === 0 ) {
 			return false;
 		}
 
+		$emails   = array_map( 'esc_sql', $emails );
+		$statuses = array_map( 'esc_sql', wc_get_is_paid_statuses() );
+
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$statuses       = array_map(
-				function ( $status ) {
-					return "wc-$status";
-				},
-				$statuses
-			);
-			$order_table    = OrdersTableDataStore::get_orders_table_name();
-			$user_id_clause = '';
+			$statuses    = array_map( static fn( $status ) => "wc-$status", $statuses );
+			$order_table = OrdersTableDataStore::get_orders_table_name();
+
+			$identity_clause = array();
 			if ( $user_id ) {
-				$user_id_clause = 'OR o.customer_id = ' . absint( $user_id );
+				$identity_clause[] = 'orders.customer_id = ' . absint( $user_id );
 			}
+			if ( ! empty( $emails ) ) {
+				$identity_clause[] = "orders.billing_email IN ( '" . implode( "','", $emails ) . "' )";
+			}
+			$identity_clause = implode( ' OR ', $identity_clause );
+
 			if ( $use_lookup_tables ) {
 				// HPOS: yes, Lookup table: yes.
-				$sql = "
-SELECT DISTINCT product_or_variation_id FROM (
-SELECT CASE WHEN product_id != 0 THEN product_id ELSE variation_id END AS product_or_variation_id
-FROM {$wpdb->prefix}wc_order_product_lookup lookup
-INNER JOIN $order_table AS o ON lookup.order_id = o.ID
-WHERE o.status IN ('" . implode( "','", $statuses ) . "')
-AND ( o.billing_email IN ('" . implode( "','", $customer_data ) . "') $user_id_clause )
-) AS subquery
-WHERE product_or_variation_id != 0
-";
+				$sql = "SELECT DISTINCT product_or_variation_id
+				FROM (
+					SELECT CASE WHEN product_id != 0 THEN product_id ELSE variation_id END AS product_or_variation_id
+					FROM {$wpdb->prefix}wc_order_product_lookup lookup
+						INNER JOIN $order_table AS orders ON lookup.order_id = orders.ID
+					WHERE orders.status IN ( '" . implode( "','", $statuses ) . "' )
+						AND ( $identity_clause )
+				) AS subquery
+				WHERE product_or_variation_id != 0";
 			} else {
 				// HPOS: yes, Lookup table: no.
-				$sql = "
-SELECT DISTINCT im.meta_value FROM $order_table AS o
-INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON o.id = i.order_id
-INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
-WHERE o.status IN ('" . implode( "','", $statuses ) . "')
-AND im.meta_key IN ('_product_id', '_variation_id' )
-AND im.meta_value != 0
-AND ( o.billing_email IN ('" . implode( "','", $customer_data ) . "') $user_id_clause )
-";
+				$sql = "SELECT DISTINCT itemmeta.meta_value
+				FROM $order_table AS orders
+					INNER JOIN {$wpdb->prefix}woocommerce_order_items AS items ON orders.id = items.order_id
+					INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS itemmeta ON items.order_item_id = itemmeta.order_item_id
+				WHERE orders.status IN ( '" . implode( "','", $statuses ) . "' )
+					AND itemmeta.meta_key   IN ( '_product_id', '_variation_id' )
+					AND itemmeta.meta_value != '0'
+					AND ( $identity_clause )";
 			}
-			$result = $wpdb->get_col( $sql );
-		} elseif ( $use_lookup_tables ) {
-			// HPOS: no, Lookup table: yes.
-			$result = $wpdb->get_col(
-				"
-SELECT DISTINCT product_or_variation_id FROM (
-SELECT CASE WHEN lookup.product_id != 0 THEN lookup.product_id ELSE lookup.variation_id END AS product_or_variation_id
-FROM {$wpdb->prefix}wc_order_product_lookup AS lookup
-INNER JOIN {$wpdb->posts} AS p ON p.ID = lookup.order_id
-INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
-WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
-AND pm.meta_key IN ( '_billing_email', '_customer_user' )
-AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
-) AS subquery
-WHERE product_or_variation_id != 0
-		"
-			); // WPCS: unprepared SQL ok.
 		} else {
-			// HPOS: no, Lookup table: no.
-			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-			$result = $wpdb->get_col(
-				"
-SELECT DISTINCT im.meta_value FROM {$wpdb->posts} AS p
-INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
-INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
-INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
-WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' ) AND p.post_type = 'shop_order'
-AND pm.meta_key IN ( '_billing_email', '_customer_user' )
-AND im.meta_key IN ( '_product_id', '_variation_id' )
-AND im.meta_value != 0
-AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
-		"
-			);
-			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+			$identity_clause = array();
+			if ( $user_id ) {
+				$identity_clause[] = "( postmeta.meta_key = '_customer_user' AND postmeta.meta_value = '" . absint( $user_id ) . "' )";
+			}
+			if ( ! empty( $emails ) ) {
+				$identity_clause[] = "( postmeta.meta_key = '_billing_email' AND postmeta.meta_value IN ( '" . implode( "','", $emails ) . "' ) )";
+			}
+			$identity_clause = implode( ' OR ', $identity_clause );
+
+			if ( $use_lookup_tables ) {
+				// HPOS: no, Lookup table: yes.
+				$sql = "SELECT DISTINCT product_or_variation_id
+				FROM (
+					SELECT CASE WHEN lookup.product_id != 0 THEN lookup.product_id ELSE lookup.variation_id END AS product_or_variation_id
+					FROM {$wpdb->prefix}wc_order_product_lookup AS lookup
+						INNER JOIN {$wpdb->posts} AS posts ON posts.ID = lookup.order_id
+						INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
+					WHERE posts.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
+						AND ( $identity_clause )
+				) AS subquery
+				WHERE product_or_variation_id != 0";
+			} else {
+				// HPOS: no, Lookup table: no.
+				$sql = "SELECT DISTINCT itemmeta.meta_value
+				FROM {$wpdb->prefix}woocommerce_order_items AS items
+					INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS itemmeta ON items.order_item_id = itemmeta.order_item_id
+				WHERE items.order_id IN (
+						SELECT posts.ID as order_id
+						FROM {$wpdb->posts} AS posts
+							INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
+						WHERE posts.post_type   = 'shop_order'
+						  AND posts.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
+						  AND ( $identity_clause )
+				)
+				AND itemmeta.meta_key   IN ( '_product_id', '_variation_id' )
+				AND itemmeta.meta_value != '0'";
+			}
 		}
-		$result = array_map( 'absint', $result );
+		$result = array_map( 'absint', $wpdb->get_col( $sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 		wp_cache_set(
 			$cache_key,
@@ -722,9 +743,12 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 					$caps[] = 'do_not_allow';
 				} elseif ( wc_current_user_has_role( 'shop_manager' ) ) {
 					// Shop managers can only edit customer info.
-					$userdata                    = get_userdata( $args[0] );
+					$userdata = get_userdata( $args[0] );
+					if ( ! $userdata instanceof WP_User ) {
+						break;
+					}
 					$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-					if ( property_exists( $userdata, 'roles' ) && ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
+					if ( ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
 						$caps[] = 'do_not_allow';
 					}
 				}
@@ -1130,19 +1154,18 @@ function wc_update_user_last_active( $user_id ) {
  * @param string $translation  Translated text.
  * @param string $text         Text to translate.
  * @param string $context      Context information for the translators.
- * @param string $domain       Text domain. Unique identifier for retrieving translated strings.
  * @return string
  */
-function wc_translate_user_roles( $translation, $text, $context, $domain ) {
+function wc_translate_user_roles( $translation, $text, $context ) {
 	// translate_user_role() only accepts a second parameter starting in WP 5.2.
 	if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
 		return $translation;
 	}
 
-	if ( 'User role' === $context && 'default' === $domain && in_array( $text, array( 'Shop manager', 'Customer' ), true ) ) {
+	if ( 'User role' === $context && in_array( $text, array( 'Shop manager', 'Customer' ), true ) ) {
 		return translate_user_role( $text, 'woocommerce' );
 	}
 
 	return $translation;
 }
-add_filter( 'gettext_with_context', 'wc_translate_user_roles', 10, 4 );
+add_filter( 'gettext_with_context_default', 'wc_translate_user_roles', 10, 3 );

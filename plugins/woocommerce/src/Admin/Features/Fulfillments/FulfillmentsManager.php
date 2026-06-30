@@ -99,6 +99,8 @@ class FulfillmentsManager {
 	 * Initialize order deletion hooks.
 	 *
 	 * Registers hooks to clean up fulfillment records when an order is permanently deleted.
+	 * Hooks into both `woocommerce_before_delete_order` (HPOS) and `before_delete_post`
+	 * (legacy post storage) to ensure cleanup regardless of storage backend.
 	 */
 	private function init_order_deletion_hooks(): void {
 		add_action( 'woocommerce_before_delete_order', array( $this, 'delete_order_fulfillments' ), 10, 1 );
@@ -107,6 +109,9 @@ class FulfillmentsManager {
 
 	/**
 	 * Delete all fulfillment records for an order that is being permanently deleted.
+	 *
+	 * Does nothing if the given ID does not correspond to a valid order type.
+	 * Exceptions are caught and logged; this method never throws.
 	 *
 	 * @since 10.7.0
 	 *
@@ -507,33 +512,9 @@ class FulfillmentsManager {
 		$shipping_providers = FulfillmentUtils::get_shipping_providers();
 		$results            = array();
 		foreach ( $shipping_providers as $provider ) {
-			if ( class_exists( $provider ) && is_subclass_of( $provider, AbstractShippingProvider::class ) ) {
-				try {
-					/**
-					 * Instantiate the shipping provider class.
-					 *
-					 * @var AbstractShippingProvider $provider_instance
-					 */
-					$provider_instance = wc_get_container()->get( $provider );
-				} catch ( \Throwable $e ) {
-					$logger = wc_get_logger();
-					$logger->error(
-						sprintf(
-							'Error instantiating shipping provider class %s: %s',
-							$provider,
-							$e->getMessage()
-						),
-						array( 'source' => 'woocommerce-fulfillments' )
-					);
-					continue; // Skip if the provider class cannot be instantiated.
-				}
-			} else {
-				continue; // Skip if the provider class does not exist or is not a valid shipping provider.
-			}
-
-			$parsing_result = $provider_instance->try_parse_tracking_number( $tracking_number, $shipping_from, $shipping_to );
+			$parsing_result = $provider->try_parse_tracking_number( $tracking_number, $shipping_from, $shipping_to );
 			if ( ! is_null( $parsing_result ) ) {
-				$results[ $provider_instance->get_key() ] = $parsing_result;
+				$results[ $provider->get_key() ] = $parsing_result;
 			}
 		}
 

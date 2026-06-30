@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+const path = require( 'path' );
+
+/**
  * Internal dependencies
  */
 const { NODE_ENV, getAlias } = require( './bin/webpack-helpers.js' );
@@ -14,8 +19,35 @@ const {
 } = require( './bin/webpack-configs.js' );
 
 const interactivityBlocksConfig = require( './bin/webpack-config-interactive-blocks.js' );
-const interactivityAPIConfig = require( './bin/webpack-config-interactivity.js' );
 const dependencyDetectionConfig = require( './bin/webpack-config-dependency-detection.js' );
+const isWatch =
+	NODE_ENV === 'development' && process.argv.includes( '--watch' );
+
+const getCacheConfig = ( name, configPaths = [] ) =>
+	isWatch || process.env.CI
+		? { type: 'memory' }
+		: {
+				type: 'filesystem',
+				cacheDirectory: path.resolve(
+					__dirname,
+					`node_modules/.cache/webpack-${ name }`
+				),
+				buildDependencies: {
+					config: [
+						__filename,
+						path.resolve( __dirname, '../../../../pnpm-lock.yaml' ),
+						require.resolve(
+							'@woocommerce/dependency-extraction-webpack-plugin'
+						),
+						require.resolve(
+							'@woocommerce/internal-build/style-build'
+						),
+						...configPaths.map( ( configPath ) =>
+							path.resolve( __dirname, configPath )
+						),
+					],
+				},
+		  };
 
 // Only options shared between all configs should be defined here.
 const sharedConfig = {
@@ -40,26 +72,28 @@ const sharedConfig = {
 
 const CartAndCheckoutFrontendConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'cart-and-checkout-frontend', [] ),
 	...getCartAndCheckoutFrontendConfig( { alias: getAlias() } ),
 };
 
 // Core config for shared libraries.
 const CoreConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'core', [] ),
 	...getCoreConfig( { alias: getAlias() } ),
 };
 
 // Main Blocks config for registering Blocks and for the Editor.
 const MainConfig = {
 	...sharedConfig,
-	...getMainConfig( {
-		alias: getAlias(),
-	} ),
+	cache: getCacheConfig( 'main', [] ),
+	...getMainConfig( { alias: getAlias() } ),
 };
 
 // Frontend config for scripts used in the store itself.
 const FrontendConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'frontend', [] ),
 	...getFrontConfig( { alias: getAlias() } ),
 };
 
@@ -68,6 +102,7 @@ const FrontendConfig = {
  */
 const ExtensionsConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'extensions', [] ),
 	...getExtensionsConfig( { alias: getAlias() } ),
 };
 
@@ -76,6 +111,7 @@ const ExtensionsConfig = {
  */
 const PaymentsConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'payments', [] ),
 	...getPaymentsConfig( { alias: getAlias() } ),
 };
 
@@ -84,6 +120,7 @@ const PaymentsConfig = {
  */
 const StylingConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'styling', [] ),
 	...getStylingConfig( { alias: getAlias() } ),
 };
 
@@ -92,17 +129,16 @@ const StylingConfig = {
  */
 const SiteEditorConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'site-editor', [] ),
 	...getSiteEditorConfig( { alias: getAlias() } ),
 };
 
 const InteractivityBlocksConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'interactivity-blocks', [
+		'bin/webpack-config-interactive-blocks.js',
+	] ),
 	...interactivityBlocksConfig,
-};
-
-const InteractivityAPIConfig = {
-	...sharedConfig,
-	...interactivityAPIConfig,
 };
 
 /**
@@ -111,6 +147,9 @@ const InteractivityAPIConfig = {
  */
 const DependencyDetectionConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'dependency-detection', [
+		'bin/webpack-config-dependency-detection.js',
+	] ),
 	...dependencyDetectionConfig,
 };
 
@@ -124,6 +163,5 @@ module.exports = [
 	SiteEditorConfig,
 	StylingConfig,
 	InteractivityBlocksConfig,
-	InteractivityAPIConfig,
 	DependencyDetectionConfig,
 ];

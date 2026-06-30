@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -373,8 +374,11 @@ class WC_Query {
 			$q->is_comment_feed = false;
 		}
 
+		$shop_page    = null;
+		$shop_page_id = wc_get_page_id( 'shop' );
+
 		// Special check for shops with the PRODUCT POST TYPE ARCHIVE on front.
-		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
+		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === $shop_page_id ) {
 			// This is a front-page shop.
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page_id', '' );
@@ -390,7 +394,7 @@ class WC_Query {
 			// This is hacky but works. Awaiting https://core.trac.wordpress.org/ticket/21096.
 			global $wp_post_types;
 
-			$shop_page = get_post( wc_get_page_id( 'shop' ) );
+			$shop_page = get_post( $shop_page_id );
 
 			$wp_post_types['product']->ID         = $shop_page->ID;
 			$wp_post_types['product']->post_title = $shop_page->post_title;
@@ -412,9 +416,37 @@ class WC_Query {
 				add_filter( 'wpseo_metadesc', array( $this, 'wpseo_metadesc' ) );
 				add_filter( 'wpseo_metakey', array( $this, 'wpseo_metakey' ) );
 			}
+		} elseif ( $q->is_post_type_archive( 'product' ) && ! $q->is_tax() && $shop_page_id > 0 ) {
+			// This is a regular shop page (product archive).
+			$shop_page = get_post( $shop_page_id );
 		} elseif ( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) ) {
 			// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies.
+			if ( $q->is_search() ) {
+				// Exclude products flagged as hidden from search (catalog_visibility = hidden or catalog).
+				// Applied inline rather than via get_tax_query() to avoid pulling in layered nav filters
+				// and the woocommerce_product_query_tax_query hook, which are scoped to product archives.
+				$product_visibility_terms = wc_get_product_visibility_term_ids();
+				$exclude_term_id          = isset( $product_visibility_terms['exclude-from-search'] ) ? (int) $product_visibility_terms['exclude-from-search'] : 0;
+
+				if ( $exclude_term_id > 0 ) {
+					$existing_tax_query   = $q->get( 'tax_query' );
+					$existing_tax_query   = is_array( $existing_tax_query ) ? $existing_tax_query : array();
+					$existing_tax_query[] = array(
+						'taxonomy' => 'product_visibility',
+						'field'    => 'term_taxonomy_id',
+						'terms'    => array( $exclude_term_id ),
+						'operator' => 'NOT IN',
+					);
+					$q->set( 'tax_query', $existing_tax_query );
+				}
+			}
 			return;
+		}
+
+		// Set queried object for any shop page scenario.
+		if ( $shop_page ) {
+			$q->queried_object    = $shop_page;
+			$q->queried_object_id = $shop_page->ID;
 		}
 
 		$this->product_query( $q );
@@ -768,7 +800,7 @@ class WC_Query {
 		 * Adjust if the store taxes are not displayed how they are stored.
 		 * Kicks in when prices excluding tax are displayed including tax.
 		 */
-		if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
+		if ( wc_tax_enabled() && TaxDisplayMode::INCLUSIVE === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
 			$tax_class = apply_filters( 'woocommerce_price_filter_widget_tax_class', '' ); // Uses standard tax class.
 			$tax_rates = WC_Tax::get_rates( $tax_class );
 
@@ -962,6 +994,11 @@ class WC_Query {
 	 * @return array
 	 */
 	public static function get_main_meta_query() {
+		// PHPStan infers $product_query as non-nullable from other call sites. See https://github.com/woocommerce/woocommerce/pull/64360#issuecomment-4360066970.
+		// @phpstan-ignore-next-line isset.property See above.
+		if ( ! isset( self::$product_query ) ) {
+			return array();
+		}
 		$args       = self::$product_query->query_vars;
 		$meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
 
@@ -974,6 +1011,11 @@ class WC_Query {
 	public static function get_main_search_query_sql() {
 		global $wpdb;
 
+		// PHPStan infers $product_query as non-nullable from other call sites. See https://github.com/woocommerce/woocommerce/pull/64360#issuecomment-4360066970.
+		// @phpstan-ignore-next-line isset.property See above.
+		if ( ! isset( self::$product_query ) ) {
+			return '';
+		}
 		$args         = self::$product_query->query_vars;
 		$search_terms = isset( $args['search_terms'] ) ? $args['search_terms'] : array();
 		$sql          = array();

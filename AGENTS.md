@@ -24,10 +24,12 @@ The `.ai/skills/` directory contains procedural HOW-TO instructions:
 
 - **`woocommerce-backend-dev`** - Backend PHP conventions and unit tests. **Invoke before writing any PHP test files.**
 - **`woocommerce-dev-cycle`** - Testing and linting workflows (PHP, JS, markdown)
+- **`woocommerce-local-env`** - Local environment setup, wp-env commands, and WooCommerce build watchers
 - **`woocommerce-copy-guidelines`** - UI text standards (sentence case rules)
 - **`woocommerce-code-review`** - Code review standards and critical violations to flag
 - **`woocommerce-markdown`** - Markdown writing and editing guidelines
-- **`woocommerce-git`** - Guidelines for git and GitHub operations
+- **`woocommerce-git-commit`** - Commit changes with conventional messages and smart grouping
+- **`woocommerce-git-draft-pr`** - Create draft PRs with proper template, changelog, and milestone handling
 - **`woocommerce-email-editor`** - Email editor development setup and Mailpit configuration
 - **`woocommerce-performance`** - Performance guardrails. **Invoke when writing or reviewing PHP code.**
 
@@ -72,6 +74,10 @@ plugins/woocommerce/
 - Used for `@since` annotations (remove `-dev` suffix)
 - When changing template files (PHP files used to display UI on the front-end) the version in their header should be updated to the current version, without the `-dev` suffix.
 
+**JavaScript:**
+
+- Prefer vanilla JavaScript/TypeScript over jQuery for new or modified code. Keep existing jQuery when a rewrite is out of scope.
+
 ## Development Workflow
 
 1. Make code changes
@@ -94,7 +100,7 @@ pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes
 composer exec -- phpstan analyse path/to/modified/File.php --memory-limit=2G
 ```
 
-PHPStan failures often indicate the need to update the baseline file (`phpstan-baseline.neon`). If your fix resolves a previously baselined error, remove the corresponding entry from the baseline.
+**PHPStan Baseline Policy:** The baseline file (`phpstan-baseline.neon`) must never be added to. It should only shrink over time as existing errors are naturally resolved by code changes. If PHPStan reports a new error, fix it in the code rather than adding it to the baseline. If your fix resolves a previously baselined error, remove the corresponding entry from the baseline.
 
 ### Pre-push Checks
 
@@ -149,15 +155,41 @@ For detailed test commands, see `woocommerce-dev-cycle` skill.
 - Never create standalone functions (always use class methods)
 - Tests require Docker environment
 
+## Backward Compatibility
+
+Any change to a **public or externally exposed** class, interface, function, or method signature is **high-risk** and **must state its backward-compatibility impact in the PR description** — regardless of whether the symbol lives in the `Internal` namespace. The `Internal` namespace is not a guarantee that a symbol is safe to change: third-party code implements and consumes some of these contracts in practice (for example, the WooCommerce Stripe Gateway implements `Internal\ProductFeed\Feed\FeedInterface`).
+
+Treat a symbol as **externally exposed** when it is implemented or consumed outside `plugins/woocommerce/` — by extensions, other plugins, or themes — even if it lives under `Internal`. When in doubt, assume it is exposed and state the BC impact.
+
+**Adding a method to an interface that external code can implement must be flagged explicitly.** It is a backward-incompatible change: existing implementers fatal on load because they no longer satisfy the contract. Likewise, **removing a required method from an interface is breaking** for existing implementers (they carry a now-dead method, which static analysis such as PHPStan will flag). Prefer a non-breaking alternative — add the method to the concrete class rather than the interface, introduce a separate new interface, or supply a default implementation via an abstract base class.
+
+**Deprecate, don't rename.** For existing public symbols (classes, interfaces, methods, constants, hooks), never rename or remove them in place. Mark the old symbol `@deprecated`, introduce the replacement alongside it, and keep both working through a deprecation window so external consumers have time to migrate.
+
+> This rule exists because WooCommerce 10.9.0 was reverted on WP Cloud: PR #64394 added a required `get_entry_count(): int` method to `FeedInterface`, fataling older WooCommerce Stripe Gateway versions that implement it. Fixed in PR #65965.
+
+## Block Development
+
+### `block.json` Attribute Defaults
+
+Never include styling options such as `fontSize`, `borderColor`, `textColor`... as block attributes. They should only be listed under `supports`.
+
+Do not add `default` values to block attributes in `block.json`.
+
+- Default attribute values can be indistinguishable from missing attributes when parsed, especially when the default value is not serialized into saved block markup.
+- Defaults can create subtle conflicts with `theme.json`, block supports, editor controls, deprecations, and migrations.
+- During implementation or review, flag any newly inserted `default` in `block.json`.
+
 ## Interactivity API Stores
 
-All WooCommerce Interactivity API stores are **private by design**:
+Most WooCommerce Interactivity API stores are **private by design**. Exception: the `woocommerce/product-filters` store is public for Product Filters inner-block extensibility.
 
-- Stores use `lock: true` indicating they are not intended for extension
+For private stores:
+
+- Not intended for third-party extension
 - Removing or changing store state/selectors is **not a breaking change**
 - No backwards compatibility is required for store internals
-- If a store needs to be extensible in the future, it will be split into private (internal) and public (API) stores
-- General stores (namespace `woocommerce`) may become public eventually, but currently all are locked
+- If another store needs to be extensible in the future, it will be split into private (internal) and public (API) stores
+- General stores (namespace `woocommerce`) may become public eventually, but currently remain private
 
 Reference: [WordPress Interactivity API - Private Stores](https://developer.wordpress.org/block-editor/reference-guides/interactivity-api/api-reference#private-stores)
 

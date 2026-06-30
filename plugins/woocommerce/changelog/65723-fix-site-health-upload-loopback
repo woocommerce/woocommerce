@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid a critical Site Health warning when WooCommerce cannot verify uploads directory protection.

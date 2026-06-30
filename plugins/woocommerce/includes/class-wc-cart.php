@@ -12,10 +12,12 @@
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
-use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -387,7 +389,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool
 	 */
 	public function display_prices_including_tax() {
-		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, 'incl' === $this->get_tax_price_display_mode() );
+		/**
+		 * Filter whether or not the cart is displaying prices including tax.
+		 *
+		 * @since 3.3.0
+		 *
+		 * @param bool $display_prices_including_tax Whether or not the cart is displaying prices including tax.
+		 */
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, TaxDisplayMode::INCLUSIVE === $this->get_tax_price_display_mode() );
 	}
 
 	/*
@@ -755,8 +764,8 @@ class WC_Cart extends WC_Legacy_Cart {
 		$quantities = array();
 
 		foreach ( $this->get_cart() as $values ) {
-			$product = $values['data'];
-			$quantities[ $product->get_stock_managed_by_id() ] = isset( $quantities[ $product->get_stock_managed_by_id() ] ) ? $quantities[ $product->get_stock_managed_by_id() ] + $values['quantity'] : $values['quantity'];
+			$managed_by_id                = $values['data']->get_stock_managed_by_id();
+			$quantities[ $managed_by_id ] = $values['quantity'] + ( $quantities[ $managed_by_id ] ?? 0 );
 		}
 
 		return $quantities;
@@ -979,12 +988,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array
 	 */
 	public function get_tax_totals() {
-		$shipping_taxes = $this->get_shipping_taxes(); // Shipping taxes are rounded differently, so we will subtract from all taxes, then round and then add them back.
-		$taxes          = $this->get_taxes();
-		$tax_totals     = array();
+		$shipping_taxes   = $this->get_shipping_taxes();
+		$taxes            = $this->get_taxes();
+		$tax_rate_objects = wc_get_container()->get( TaxRateDataStore::class )->get_rate_objects_for_ids( array_keys( $taxes ) );
+		$tax_totals       = array();
 
 		foreach ( $taxes as $key => $tax ) {
-			$code = WC_Tax::get_rate_code( $key );
+			$tax_rate_object_or_id = $tax_rate_objects[ $key ] ?? $key;
+			$code                  = WC_Tax::get_rate_code( $tax_rate_object_or_id );
 
 			if ( $code || apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) === $key ) {
 				if ( ! isset( $tax_totals[ $code ] ) ) {
@@ -993,9 +1004,10 @@ class WC_Cart extends WC_Legacy_Cart {
 				}
 
 				$tax_totals[ $code ]->tax_rate_id = $key;
-				$tax_totals[ $code ]->is_compound = WC_Tax::is_compound( $key );
-				$tax_totals[ $code ]->label       = WC_Tax::get_rate_label( $key );
+				$tax_totals[ $code ]->is_compound = WC_Tax::is_compound( $tax_rate_object_or_id );
+				$tax_totals[ $code ]->label       = WC_Tax::get_rate_label( $tax_rate_object_or_id );
 
+				// Shipping taxes are rounded differently, so we will subtract from all taxes, then round and then add them back.
 				if ( isset( $shipping_taxes[ $key ] ) ) {
 					$tax -= $shipping_taxes[ $key ];
 					$tax  = wc_round_tax_total( $tax );
@@ -2392,7 +2404,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_tax_amount( $tax_rate_id ) {
 		$taxes = wc_array_merge_recursive_numeric( $this->get_cart_contents_taxes(), $this->get_fee_taxes() );
-		return isset( $taxes[ $tax_rate_id ] ) ? $taxes[ $tax_rate_id ] : 0;
+		return $taxes[ $tax_rate_id ] ?? 0;
 	}
 
 	/**
@@ -2403,7 +2415,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_shipping_tax_amount( $tax_rate_id ) {
 		$taxes = $this->get_shipping_taxes();
-		return isset( $taxes[ $tax_rate_id ] ) ? $taxes[ $tax_rate_id ] : 0;
+		return $taxes[ $tax_rate_id ] ?? 0;
 	}
 
 	/**
@@ -2414,17 +2426,21 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float price
 	 */
 	public function get_taxes_total( $compound = true, $display = true ) {
-		$total = 0;
 		$taxes = $this->get_taxes();
-		foreach ( $taxes as $key => $tax ) {
-			if ( ! $compound && WC_Tax::is_compound( $key ) ) {
-				continue;
+
+		// Skip compounding taxes if requested.
+		if ( ! $compound ) {
+			$tax_rate_objects = wc_get_container()->get( TaxRateDataStore::class )->get_rate_objects_for_ids( array_keys( $taxes ) );
+			foreach ( $taxes as $key => $tax ) {
+				if ( WC_Tax::is_compound( $tax_rate_objects[ $key ] ?? $key ) ) {
+					unset( $taxes[ $key ] );
+				}
 			}
-			$total += $tax;
 		}
-		if ( $display ) {
-			$total = wc_format_decimal( $total, wc_get_price_decimals() );
-		}
+
+		$total = array_sum( $taxes );
+		$total = $display ? wc_format_decimal( $total, wc_get_price_decimals() ) : $total;
+
 		return apply_filters( 'woocommerce_cart_taxes_total', $total, $compound, $display, $this );
 	}
 
@@ -2455,7 +2471,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_tax_price_display_mode() {
 		if ( $this->get_customer() && $this->get_customer()->get_is_vat_exempt() ) {
-			return 'excl';
+			return TaxDisplayMode::EXCLUSIVE;
 		}
 
 		return get_option( 'woocommerce_tax_display_cart' );

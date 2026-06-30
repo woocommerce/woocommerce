@@ -2,7 +2,7 @@
 
 ![WooCommerce](https://woocommerce.com/wp-content/themes/woo/images/logo-woo@2x.png)
 
-Welcome to the WooCommerce monorepo on GitHub. Here you can find all of the plugins, packages, and tools used in the development of the core WooCommerce plugin as well as WooCommerce extensions. You can browse the source, look at open issues, contribute code, and keep tracking of ongoing development.
+Welcome to the WooCommerce monorepo on GitHub. Here you can find all of the plugins, packages, and tools used in the development of the core WooCommerce plugin as well as WooCommerce extensions. You can browse the source, look at open issues, contribute code, and keep track of ongoing development.
 
 We recommend all developers follow the [WooCommerce development blog](https://developer.woocommerce.com/blog/) to stay up to date with everything happening in the project. You can also [follow @DevelopWoo](https://x.com/DevelopWoo) on X (formerly Twitter) for the latest development updates.
 
@@ -12,7 +12,7 @@ To get up and running within the WooCommerce Monorepo, you will need to make sur
 
 ### Prerequisites
 
--   [NVM](https://github.com/nvm-sh/nvm#installing-and-updating): While you can always install Node through other means, we recommend using NVM to ensure you're aligned with the version used by our development teams. Our repository contains [an `.nvmrc` file](.nvmrc) which helps ensure you are using the correct version of Node.
+-   [Node.js](https://nodejs.org/): Required to run PNPM and the monorepo's build and test scripts. You do not need to match a specific Node version by hand. PNPM reads the version pinned in [`pnpm-workspace.yaml`](pnpm-workspace.yaml) (`useNodeVersion`, mirrored in [`.nvmrc`](.nvmrc)) and automatically installs and uses it for every script it runs. A Node version manager such as [NVM](https://github.com/nvm-sh/nvm#installing-and-updating) is optional, but still handy for installing Node itself.
 -   [PNPM](https://pnpm.io/installation): Our repository utilizes PNPM to manage project dependencies and run various scripts involved in building and testing projects.
 -   [PHP 7.4+](https://www.php.net/manual/en/install.php): WooCommerce Core currently requires PHP version 7.4 or higher. It is also needed to run Composer and various project build scripts. See [troubleshooting](DEVELOPMENT.md#troubleshooting) for troubleshooting problems installing PHP.
 -   [Composer](https://getcomposer.org/doc/00-intro.md): We use Composer to manage all of the dependencies for PHP packages and plugins.
@@ -22,10 +22,9 @@ Note: A POSIX-compliant operating system (e.g., Linux, macOS) is assumed. If you
 Once you've installed all prerequisites, the following will prepare all of the build outputs necessary for development:
 
 ```bash
-# Ensure that the correct version of Node is installed and being used
-nvm install
-# Install the PHP and Composer dependencies for all of the plugins, packages, and tools
-pnpm install -frozen-lockfile
+# Install the PHP and Composer dependencies for all of the plugins, packages, and tools.
+# PNPM automatically uses the pinned Node version for every script it runs.
+pnpm install --frozen-lockfile
 # Build all of the plugins, packages, and tools in the monorepo
 pnpm build
 ```
@@ -63,4 +62,4 @@ For peer to peer support, real-time announcements, and office hours, please [joi
 
 ## Contributing to WooCommerce
 
-As an open source project, we rely on community contributions to continue to improve WooCommerce. To contribute, please follow the pre-requisites above and visit our [Contributing to Woo](https://developer.woocommerce.com/docs/contribution/contributing/) doc for more links and contribution guidelines.
+As an open-source project, we rely on community contributions to continue to improve WooCommerce. To get started, check out our [Contributing guide](CONTRIBUTING.md) for a quick reference of common development commands, or visit the [Contributing to Woo](https://developer.woocommerce.com/docs/contribution/contributing/) docs for broader contribution guidelines.

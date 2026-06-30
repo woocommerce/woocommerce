@@ -5,6 +5,12 @@ global.crypto = webcrypto;
 global.TextEncoder = require( 'util' ).TextEncoder;
 global.TextDecoder = require( 'util' ).TextDecoder;
 
+// The @woocommerce/email-editor package reads `__i18n_text_domain__` as its
+// text domain. It is normally replaced by `webpack.DefinePlugin` at bundle
+// time, but Jest does not run through webpack, so provide a default here so
+// test files that import from the package do not hit a ReferenceError.
+global.__i18n_text_domain__ = 'woocommerce';
+
 /**
  * Set up `wp.*` aliases.  Doing this because any tests importing wp stuff will
  * likely run into this.
@@ -358,6 +364,16 @@ Object.defineProperty( window, 'matchMedia', {
  */
 if ( ! window.DOMRect ) {
 	window.DOMRect = class DOMRect {};
+}
+
+/**
+ * `@wordpress/block-editor`@14.14.6 (wp-6.8) constructs `DOMRectReadOnly`
+ * instances in `getElementBounds`, which `jest-fixed-jsdom` doesn't polyfill.
+ * Stub it so tests that render `<BlockToolbarPopover>` and friends don't
+ * crash.
+ */
+if ( ! window.DOMRectReadOnly ) {
+	window.DOMRectReadOnly = class DOMRectReadOnly {};
 }
 
 /**

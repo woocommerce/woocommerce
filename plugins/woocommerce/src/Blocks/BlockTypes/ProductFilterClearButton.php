@@ -37,10 +37,12 @@ final class ProductFilterClearButton extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		// don't render if its admin, or ajax in progress.
+		$removable_context = $block->context['woocommerce/removableItems'] ?? null;
 		if (
 			is_admin() ||
 			wp_doing_ajax() ||
-			empty( $block->context['filterData'] )
+			empty( $removable_context ) ||
+			empty( $removable_context['items'] )
 		) {
 			return '';
 		}
@@ -48,7 +50,7 @@ final class ProductFilterClearButton extends AbstractBlock {
 		$p = new \WP_HTML_Tag_Processor( $content );
 
 		if ( $p->next_tag( array( 'class_name' => 'wp-block-button__link' ) ) ) {
-			$p->set_attribute( 'data-wp-on--click', 'actions.removeAllActiveFilters' );
+			$p->set_attribute( 'data-wp-on--click', 'actions.removeAll' );
 
 			$content = $p->get_updated_html();
 		}

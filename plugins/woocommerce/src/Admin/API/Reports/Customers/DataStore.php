@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\Overrides\Order as OverridesOrder;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
@@ -111,6 +112,45 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		add_action( 'woocommerce_privacy_remove_order_personal_data', array( __CLASS__, 'anonymize_customer' ) );
 
 		add_action( 'woocommerce_analytics_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 15, 2 );
+
+		add_action( 'woocommerce_created_customer', array( __CLASS__, 'merge_guest_customer_on_delayed_account_creation' ), 5, 2 );
+	}
+
+	/**
+	 * When a customer registers via delayed account creation (order confirmation page),
+	 * merge the existing guest lookup row instead of creating a duplicate.
+	 *
+	 * This runs on woocommerce_created_customer at priority 5, before the analytics
+	 * hooks (woocommerce_new_customer) that call update_registered_customer(). It updates
+	 * the guest row's user_id so that update_registered_customer() finds it via
+	 * get_customer_id_by_user_id() and updates in place rather than inserting a new row.
+	 *
+	 * @param int   $customer_id       New WP user ID.
+	 * @param array $new_customer_data Customer data including 'source'.
+	 */
+	public static function merge_guest_customer_on_delayed_account_creation( $customer_id, $new_customer_data ): void {
+		if ( empty( $new_customer_data['source'] ) || 'delayed-account-creation' !== $new_customer_data['source'] ) {
+			return;
+		}
+
+		$email = $new_customer_data['user_email'] ?? '';
+		if ( empty( $email ) ) {
+			return;
+		}
+
+		$guest_customer_id = self::get_guest_id_by_email( $email );
+		if ( ! $guest_customer_id ) {
+			return;
+		}
+
+		global $wpdb;
+		$wpdb->update(
+			self::get_db_table_name(),
+			array( 'user_id' => $customer_id ),
+			array( 'customer_id' => $guest_customer_id ),
+			array( '%d' ),
+			array( '%d' )
+		);
 	}
 
 	/**
@@ -152,7 +192,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		$order       = wc_get_order( $post_id );
+		$order = wc_get_order( $post_id );
+		if ( ! $order instanceof \WC_Order ) {
+			return -1;
+		}
 		$customer_id = self::get_existing_customer_id_from_order( $order );
 		if ( false === $customer_id ) {
 			return -1;
@@ -613,7 +656,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Get or create a customer from a given order.
 	 *
-	 * @param object $order WC Order.
+	 * A plain WC_Order will be converted to an Overrides\Order internally
+	 * to ensure consistent name resolution (user meta → billing → shipping fallback).
+	 *
+	 * @param \WC_Order $order WC Order.
 	 * @return int|bool
 	 */
 	public static function get_or_create_customer_from_order( $order ) {
@@ -625,6 +671,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		if ( ! is_a( $order, 'WC_Order' ) ) {
 			return false;
+		}
+
+		if ( ! $order instanceof OverridesOrder ) {
+			if ( ! $order->get_id() ) {
+				return false;
+			}
+			$order = new OverridesOrder( $order->get_id() );
 		}
 
 		$returning_customer_id = self::get_existing_customer_id_from_order( $order );
@@ -652,11 +705,29 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Returns a data object and format object of the customers data coming from the order.
 	 *
-	 * @param object      $order         WC_Order where we get customer info from.
-	 * @param object|null $customer_user WC_Customer registered customer WP user.
+	 * A plain WC_Order will be converted to an Overrides\Order internally
+	 * to ensure consistent name resolution (user meta → billing → shipping fallback).
+	 *
+	 * @param \WC_Order         $order         WC_Order where we get customer info from.
+	 * @param \WC_Customer|null $customer_user WC_Customer registered customer WP user.
 	 * @return array ($data, $format)
 	 */
 	public static function get_customer_order_data_and_format( $order, $customer_user = null ) {
+		if ( ! is_a( $order, 'WC_Order' ) ) {
+			return array( array(), array() );
+		}
+
+		if ( ! $order instanceof OverridesOrder ) {
+			if ( ! $order->get_id() ) {
+				return array( array(), array() );
+			}
+			$order = new OverridesOrder( $order->get_id() );
+		}
+
+		$date_created = $order->get_date_created( 'edit' )
+			?? $order->get_date_modified( 'edit' )
+			?? $order->get_date_paid( 'edit' );
+
 		$data   = array(
 			'first_name'       => $order->get_customer_first_name(),
 			'last_name'        => $order->get_customer_last_name(),
@@ -665,7 +736,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'state'            => $order->get_billing_state( 'edit' ),
 			'postcode'         => $order->get_billing_postcode( 'edit' ),
 			'country'          => $order->get_billing_country( 'edit' ),
-			'date_last_active' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+			'date_last_active' => $date_created ? gmdate( 'Y-m-d H:i:s', $date_created->getTimestamp() ) : null,
 		);
 		$format = array(
 			'%s',

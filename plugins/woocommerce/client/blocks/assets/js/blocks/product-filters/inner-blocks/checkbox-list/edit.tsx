@@ -26,6 +26,10 @@ import './style.scss';
 import './editor.scss';
 import { EditProps } from './types';
 import { getColorClasses, getColorVars } from './utils';
+import {
+	getVisualAttributeTermStyle,
+	isVisualAttributeTermEmpty,
+} from '../../../../base/utils/visual-attribute-terms';
 
 const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 	const {
@@ -49,8 +53,11 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 		customOptionElement,
 		customLabelElement,
 	} = attributes;
-	const { filterData } = context;
-	const { isLoading, items, showCounts } = filterData;
+	const selectableItems = context?.[ 'woocommerce/selectableItems' ] ?? {};
+	const isLoading = selectableItems.isLoading ?? false;
+	const items = Array.isArray( selectableItems.items )
+		? selectableItems.items
+		: [];
 
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 	const blockProps = useBlockProps( {
@@ -75,10 +82,6 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 			</div>
 		) );
 	}, [] );
-
-	if ( ! items ) {
-		return <></>;
-	}
 
 	const threshold = 15;
 	const isLongList = items.length > threshold;
@@ -123,6 +126,23 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 											/>
 										</span>
 										<span className="wc-block-product-filter-checkbox-list__text-wrapper">
+											{ item.visual !== undefined && (
+												<span
+													className={ clsx(
+														'wc-block-product-filter-checkbox-list__color-swatch',
+														{
+															'is-empty':
+																isVisualAttributeTermEmpty(
+																	item.visual
+																),
+														}
+													) }
+													style={ getVisualAttributeTermStyle(
+														item.visual
+													) }
+													aria-hidden="true"
+												/>
+											) }
 											<span className="wc-block-product-filter-checkbox-list__text">
 												{ typeof item.label === 'string'
 													? decodeHtmlEntities(
@@ -130,7 +150,7 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 													  )
 													: item.label }
 											</span>
-											{ showCounts && (
+											{ item.count !== undefined && (
 												<span className="wc-block-product-filter-checkbox-list__count">
 													{ ` (${ item.count })` }
 												</span>

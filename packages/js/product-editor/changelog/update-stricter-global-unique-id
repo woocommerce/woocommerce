@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix an issue in the text block where the validation was not being run due to missing dependencies in the parameters

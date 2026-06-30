@@ -7,7 +7,7 @@ import { useState } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 import { FormTokenField } from '@wordpress/components';
 import { decodeEntities } from '@wordpress/html-entities';
-import type { Taxonomy } from '@wordpress/core-data/src/entity-types';
+import type { Taxonomy } from '@wordpress/core-data';
 
 type Term = {
 	id: number;
@@ -73,7 +73,6 @@ const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
 				return { existingTerms: [], isLoadingExistingTerms: false };
 			}
 
-			// @ts-expect-error hasFinishedResolution is untyped.
 			const { getEntityRecords, hasFinishedResolution } =
 				select( 'core' );
 

@@ -248,7 +248,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$post_object = get_post( $product->get_id() );
 			$product->set_status( $post_object->post_status );
 
-			$this->update_post_meta( $product, true );
+			$this->update_post_meta_internal( $product, true, true );
 			$this->update_terms( $product, true );
 			$this->update_visibility( $product, true );
 			$this->update_attributes( $product, true );
@@ -697,12 +697,31 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
 	 *
+	 * Subclasses that override this method to write custom product-type meta should also override
+	 * update_post_meta_internal() so those writes run during object creation.
+	 *
 	 * @param WC_Product $product Product object.
 	 * @param bool       $force Force update. Used during create.
 	 * @since 3.0.0
 	 * @return void
 	 */
 	protected function update_post_meta( &$product, $force = false ) {
+		$this->update_post_meta_internal( $product, $force, false );
+	}
+
+	/**
+	 * Internal implementation of update_post_meta() that also knows whether the product is being created.
+	 *
+	 * Subclasses that override update_post_meta() to write custom product-type meta should also override
+	 * this method so those writes run during object creation.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @param bool       $force Force update. Used during create.
+	 * @param bool       $creating Whether the product is being created.
+	 * @param array      $existing_meta_keys Existing meta keys map, maintained across calls during creation. Passed by reference.
+	 * @return void
+	 */
+	protected function update_post_meta_internal( &$product, $force, $creating, &$existing_meta_keys = null ) {
 		$meta_key_to_props = array(
 			'_sku'                   => 'sku',
 			'_global_unique_id'      => 'global_unique_id',
@@ -788,7 +807,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					break;
 			}
 
-			$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value );
+			$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value, $creating, $existing_meta_keys );
 
 			if ( $updated ) {
 				$this->updated_props[] = $prop;
@@ -810,7 +829,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$cogs_value = apply_filters( 'woocommerce_save_product_cogs_value', $cogs_value, $product );
 
 			if ( false !== $cogs_value ) {
-				$updated = $this->update_or_delete_post_meta( $product, '_cogs_total_value', is_null( $cogs_value ) ? '' : $cogs_value );
+				$updated = $this->update_or_delete_post_meta( $product, '_cogs_total_value', is_null( $cogs_value ) ? '' : $cogs_value, $creating, $existing_meta_keys );
 				if ( $updated ) {
 					$this->updated_props[] = 'cogs_value';
 				}
@@ -828,7 +847,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				if ( is_callable( array( $product, $function ) ) ) {
 					$value   = $product->{$function}( 'edit' );
 					$value   = is_string( $value ) ? wp_slash( $value ) : $value;
-					$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value );
+					$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value, $creating, $existing_meta_keys );
 
 					if ( $updated ) {
 						$this->updated_props[] = $key;
@@ -940,6 +959,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// After handling, we can reset the props array.
 		$this->updated_props = array();
+	}
+
+	/**
+	 * Refresh the product meta lookup table row for a given product.
+	 *
+	 * @since 10.8.0
+	 * @param int $product_id Product ID.
+	 * @return void
+	 */
+	public function refresh_product_lookup_table( int $product_id ): void {
+		$this->update_lookup_table( $product_id, 'wc_product_meta_lookup' );
 	}
 
 	/**
@@ -1551,7 +1581,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return $count;
 		}
 
-		$attributes = wc_list_pluck( array_filter( $product->get_attributes(), 'wc_attributes_array_filter_variation' ), 'get_slugs' );
+		$variation_attributes = array_filter( $product->get_attributes(), 'wc_attributes_array_filter_variation' );
+		$attributes           = array();
+
+		foreach ( $variation_attributes as $attribute_key => $attribute ) {
+			if ( $attribute->is_taxonomy() && taxonomy_exists( $attribute->get_name() ) ) {
+				// Respect the attribute's configured term order (e.g. custom "menu_order") instead of
+				// the alphabetical order returned from the cached object terms. See get_slugs(), which
+				// preserves the order of the options read in read_attributes() via wc_get_object_terms().
+				$attributes[ $attribute_key ] = wc_get_product_terms( $product->get_id(), $attribute->get_name(), array( 'fields' => 'slugs' ) );
+			} else {
+				$attributes[ $attribute_key ] = $attribute->get_slugs();
+			}
+		}
 
 		if ( empty( $attributes ) ) {
 			return $count;
@@ -1610,18 +1652,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function sort_all_product_variations( $parent_id ) {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
+		$index = 1;
 		$ids   = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product_variation' AND post_parent = %d AND post_status in ( 'publish', 'private' ) ORDER BY menu_order ASC, ID ASC",
 				$parent_id
 			)
 		);
-		$index = 1;
 
 		foreach ( $ids as $id ) {
-			// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
-			$wpdb->update( $wpdb->posts, array( 'menu_order' => ( $index++ ) ), array( 'ID' => absint( $id ) ) );
+			$product_id = absint( $id );
+			$updated    = (bool) $wpdb->update( $wpdb->posts, array( 'menu_order' => ( $index++ ) ), array( 'ID' => $product_id ) );
+			if ( $updated ) {
+				clean_post_cache( $product_id );
+			}
 		}
 	}
 

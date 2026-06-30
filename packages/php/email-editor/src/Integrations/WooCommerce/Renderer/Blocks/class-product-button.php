@@ -88,11 +88,11 @@ class Product_Button extends Abstract_Product_Block_Renderer {
 			}
 		}
 
-		$block_attributes = array_replace_recursive(
+		$block_attributes              = array_replace_recursive(
 			array(
 				'textColor'       => '#ffffff',
 				'backgroundColor' => '#000000',
-				'textAlign'       => 'left',
+				'textAlign'       => $rendering_context->get_default_text_align(),
 				'width'           => '',
 				'style'           => array(
 					'typography' => array(
@@ -109,6 +109,7 @@ class Product_Button extends Abstract_Product_Block_Renderer {
 			),
 			$parsed_block['attrs'] ?? array()
 		);
+		$block_attributes['textAlign'] = $rendering_context->resolve_text_align( $block_attributes['textAlign'] ?? null );
 
 		$wrapper_styles = $this->get_wrapper_styles( $block_attributes, $rendering_context );
 		$button_styles  = $this->get_button_styles( $block_attributes, $rendering_context );

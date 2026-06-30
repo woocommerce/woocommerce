@@ -265,7 +265,14 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @var \string[][]
 	 */
-	protected $order_column_mapping = array(
+	/**
+	 * Full set of order columns for the base order data store. Used via self:: to ensure cached
+	 * order data objects always contain the complete column set, even when a subclass overrides
+	 * $order_column_mapping with a subset.
+	 *
+	 * @since 10.8.0
+	 */
+	private const BASE_ORDER_COLUMN_MAPPING = array(
 		'id'                   => array(
 			'type' => 'int',
 			'name' => 'id',
@@ -337,11 +344,20 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
-	 * Table column to WC_Order mapping for billing addresses in wc_address table.
+	 * Table column to WC_Order mapping for wc_orders table.
 	 *
 	 * @var \string[][]
 	 */
-	protected $billing_address_column_mapping = array(
+	protected $order_column_mapping = self::BASE_ORDER_COLUMN_MAPPING;
+
+	/**
+	 * Full set of billing address columns for the base order data store. Used via self:: to
+	 * ensure cached order data objects always contain the complete column set, even when a
+	 * subclass overrides $billing_address_column_mapping with a subset.
+	 *
+	 * @since 10.8.0
+	 */
+	private const BASE_BILLING_ADDRESS_COLUMN_MAPPING = array(
 		'id'           => array( 'type' => 'int' ),
 		'order_id'     => array( 'type' => 'int' ),
 		'address_type' => array( 'type' => 'string' ),
@@ -392,11 +408,20 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
-	 * Table column to WC_Order mapping for shipping addresses in wc_address table.
+	 * Table column to WC_Order mapping for billing addresses in wc_addresses table.
 	 *
 	 * @var \string[][]
 	 */
-	protected $shipping_address_column_mapping = array(
+	protected $billing_address_column_mapping = self::BASE_BILLING_ADDRESS_COLUMN_MAPPING;
+
+	/**
+	 * Full set of shipping address columns for the base order data store. Used via self:: to
+	 * ensure cached order data objects always contain the complete column set, even when a
+	 * subclass overrides $shipping_address_column_mapping with a subset.
+	 *
+	 * @since 10.8.0
+	 */
+	private const BASE_SHIPPING_ADDRESS_COLUMN_MAPPING = array(
 		'id'           => array( 'type' => 'int' ),
 		'order_id'     => array( 'type' => 'int' ),
 		'address_type' => array( 'type' => 'string' ),
@@ -444,11 +469,20 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
-	 * Table column to WC_Order mapping for wc_operational_data table.
+	 * Table column to WC_Order mapping for shipping addresses in wc_addresses table.
 	 *
 	 * @var \string[][]
 	 */
-	protected $operational_data_column_mapping = array(
+	protected $shipping_address_column_mapping = self::BASE_SHIPPING_ADDRESS_COLUMN_MAPPING;
+
+	/**
+	 * Full set of operational data columns for the base order data store. Used via self:: to ensure
+	 * cached order data objects always contain the complete column set, even when a subclass
+	 * overrides $operational_data_column_mapping with a subset.
+	 *
+	 * @since 10.8.0
+	 */
+	private const BASE_OPERATIONAL_DATA_COLUMN_MAPPING = array(
 		'id'                          => array( 'type' => 'int' ),
 		'order_id'                    => array( 'type' => 'int' ),
 		'created_via'                 => array(
@@ -518,11 +552,25 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
+	 * Table column to WC_Order mapping for wc_operational_data table.
+	 *
+	 * @var \string[][]
+	 */
+	protected $operational_data_column_mapping = self::BASE_OPERATIONAL_DATA_COLUMN_MAPPING;
+
+	/**
 	 * Cache variable to store combined mapping.
 	 *
 	 * @var array[][][]
 	 */
 	private $all_order_column_mapping;
+
+	/**
+	 * Cache variable to store combined mapping with full operational data columns.
+	 *
+	 * @var array<string, array<string, array<string, string>>>|null
+	 */
+	private $all_order_column_mapping_for_cache;
 
 	/**
 	 * Return combined mappings for all order tables.
@@ -540,6 +588,30 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		}
 
 		return $this->all_order_column_mapping;
+	}
+
+	/**
+	 * Return combined mappings for all order tables, always using the full set of operational
+	 * data columns defined in the base OrdersTableDataStore class. This ensures that cached
+	 * order data objects are complete regardless of which data store subclass populates the
+	 * cache, preventing cross-bleed when different data stores (orders, refunds, subscriptions)
+	 * share the same cache group.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @return array<string, array<string, array<string, string>>> Return combined mapping with full operational data columns.
+	 */
+	private function get_all_order_column_mappings_for_cache() {
+		if ( ! isset( $this->all_order_column_mapping_for_cache ) ) {
+			$this->all_order_column_mapping_for_cache = array(
+				'orders'           => self::BASE_ORDER_COLUMN_MAPPING,
+				'billing_address'  => self::BASE_BILLING_ADDRESS_COLUMN_MAPPING,
+				'shipping_address' => self::BASE_SHIPPING_ADDRESS_COLUMN_MAPPING,
+				'operational_data' => self::BASE_OPERATIONAL_DATA_COLUMN_MAPPING,
+			);
+		}
+
+		return $this->all_order_column_mapping_for_cache;
 	}
 
 	/**
@@ -1689,12 +1761,26 @@ WHERE
 	 * @param object             $order_data A row of order data from the database.
 	 */
 	protected function set_order_props_from_data( &$order, $order_data ) {
+		// Uses $this->get_all_order_column_mappings() (not the cache variant) intentionally:
+		// each data store subclass should only attempt to set properties it actually maps.
 		foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mapping ) {
 			foreach ( $column_mapping as $column_name => $prop_details ) {
 				if ( ! isset( $prop_details['name'] ) || ! is_string( $prop_details['name'] ) ) {
 					continue;
 				}
 				if ( ! property_exists( $order_data, $prop_details['name'] ) ) {
+					$this->error_logger->debug(
+						sprintf(
+							'Property \'%1$s\' (column \'%2$s\' from table group \'%3$s\') missing from data for order %4$d. Order will use default value for this property.',
+							$prop_details['name'],
+							$column_name,
+							$table_name,
+							$order->get_id()
+						),
+						array(
+							'source' => 'hpos-data-cache',
+						)
+					);
 					continue;
 				}
 				$prop_value = $order_data->{$prop_details['name']};
@@ -1826,7 +1912,7 @@ WHERE
 		foreach ( $table_data as $table_datum ) {
 			$id                = $table_datum->{"{$order_table_alias}_id"};
 			$order_data[ $id ] = new \stdClass();
-			foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mappings ) {
+			foreach ( $this->get_all_order_column_mappings_for_cache() as $table_name => $column_mappings ) {
 				$table_alias = $table_aliases[ $table_name ];
 				// This remapping is required to keep the query length small enough to be supported by implementations such as HyperDB (i.e. fetching some tables in join via alias.*, while others via full name). We can revert this commit if HyperDB starts supporting SRTM for query length more than 3076 characters.
 				foreach ( $column_mappings as $field => $map ) {
@@ -2685,8 +2771,19 @@ FROM $order_meta_table
 		 */
 		do_action( 'woocommerce_untrash_order', $order->get_id(), $previous_status );
 
-		$order->set_status( $previous_status );
-		$order->save();
+		// Customer order emails (and other transactional emails) are dispatched via WC_Emails
+		// listeners on the woocommerce_order_status_* actions. Suppress dispatch for this order
+		// while we restore it so customers aren't re-notified about an order they
+		// already received emails for. The status transition actions themselves still fire,
+		// so any 3rd-party code hooked into them keeps working.
+		$suspended_email_dispatch = $this->suspend_transactional_email_dispatch( $order->get_id() );
+
+		try {
+			$order->set_status( $previous_status );
+			$order->save();
+		} finally {
+			$this->restore_transactional_email_dispatch( $suspended_email_dispatch );
+		}
 
 		// Was the status successfully restored? Let's clean up the meta and indicate success...
 		if ( 'wc-' . $order->get_status() === $previous_status ) {
@@ -2709,7 +2806,6 @@ FROM $order_meta_table
 
 		return false;
 	}
-
 
 	/**
 	 * Deletes order data from custom order tables.
@@ -3257,6 +3353,7 @@ CREATE TABLE $orders_table_name (
 	KEY customer_id_billing_email (customer_id, billing_email({$composite_customer_id_email_length})),
 	KEY customer_id_status (customer_id, status),
 	KEY billing_email (billing_email($max_index_length)),
+	KEY transaction_id (transaction_id(20)),
 	KEY type_status_date (type, status, date_created_gmt),
 	KEY parent_order_id (parent_order_id),
 	KEY date_updated (date_updated_gmt)
@@ -3308,7 +3405,7 @@ CREATE TABLE $meta_table (
 	order_id bigint(20) unsigned null,
 	meta_key varchar(255),
 	meta_value text null,
-	KEY meta_key_value (meta_key(100), meta_value($composite_meta_value_index_length)),
+	KEY meta_key_value (meta_key(50), meta_value(20)),
 	KEY order_id_meta_key_meta_value (order_id, meta_key(100), meta_value($composite_meta_value_index_length))
 ) $collate;
 ";

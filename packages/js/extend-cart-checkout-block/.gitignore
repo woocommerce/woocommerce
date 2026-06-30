@@ -26,5 +26,3 @@ tests/e2e/config/local-*
 
 dist
 build
-
-{{slug}}.zip

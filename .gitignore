@@ -47,6 +47,7 @@ dist/
 oclif.manifest.json
 
 # Project files
+.pnpm-store/
 node_modules/
 vendor/
 
@@ -126,3 +127,5 @@ CLAUDE.local.md
 
 # Docusaurus
 .docusaurus
+
+.mcp.json

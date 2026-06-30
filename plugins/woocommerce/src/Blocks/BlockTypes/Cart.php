@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 /**
  * Cart class.
@@ -32,6 +33,26 @@ class Cart extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 		add_action( 'wp_loaded', array( $this, 'register_patterns' ) );
+		add_action( 'wp', array( $this, 'disable_wp_emoji' ) );
+	}
+
+	/**
+	 * Remove WordPress emoji detection script on pages containing this block.
+	 *
+	 * The wp-emoji MutationObserver converts emoji text nodes to <img> elements
+	 * when React hydrates or re-renders, corrupting the DOM tree and crashing the block.
+	 * The wp-exclude-emoji class on the wrapper only prevents the initial parse, not the
+	 * MutationObserver, so the script must be removed entirely.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @return void
+	 */
+	public function disable_wp_emoji() {
+		if ( has_block( $this->get_full_block_name() ) ) {
+			remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+			remove_action( 'wp_print_styles', 'print_emoji_styles' );
+		}
 	}
 
 	/**
@@ -235,7 +256,7 @@ class Cart extends AbstractBlock {
 
 		$this->asset_data_registry->add( 'countryData', CartCheckoutUtils::get_country_data() );
 		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ) );
-		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', 'incl' === get_option( 'woocommerce_tax_display_cart' ) );
+		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', TaxDisplayMode::INCLUSIVE === get_option( 'woocommerce_tax_display_cart' ) );
 		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled() );
 		$this->asset_data_registry->add( 'couponsEnabled', wc_coupons_enabled() );
 		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled() );

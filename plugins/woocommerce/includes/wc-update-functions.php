@@ -21,6 +21,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
@@ -29,6 +30,7 @@ use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -733,8 +735,8 @@ function wc_update_230_options() {
 	delete_metadata( 'user', 0, '_last_order', '', true );
 
 	// To prevent taxes being hidden when using a default 'no address' in a store with tax inc prices, set the woocommerce_default_customer_address to use the store base address by default.
-	if ( '' === get_option( 'woocommerce_default_customer_address', false ) && wc_prices_include_tax() ) {
-		update_option( 'woocommerce_default_customer_address', 'base' );
+	if ( DefaultCustomerAddress::NO_DEFAULT === get_option( 'woocommerce_default_customer_address', false ) && wc_prices_include_tax() ) {
+		update_option( 'woocommerce_default_customer_address', DefaultCustomerAddress::BASE );
 	}
 }
 
@@ -1069,8 +1071,6 @@ function wc_update_260_options() {
 	if ( 'no' === get_option( 'woocommerce_calc_shipping' ) ) {
 		update_option( 'woocommerce_ship_to_countries', 'disabled' );
 	}
-
-	WC_Admin_Notices::add_notice( 'legacy_shipping' );
 }
 
 /**
@@ -3400,23 +3400,18 @@ function wc_update_1060_add_woo_idx_comment_approved_type_index(): void {
 }
 
 /**
- * Add an admin notice about HPOS sync-on-read being disabled by default for sites
- * that have both HPOS and data synchronization enabled.
+ * Previously added an admin notice about HPOS sync-on-read being disabled by default.
+ *
+ * HPOS sync-on-read status is now shown in Site Health.
  *
  * @since 10.7.0
  *
  * @return void
  */
 function wc_update_1070_disable_hpos_sync_on_read(): void {
-	if ( 'yes' !== get_option( 'woocommerce_custom_orders_table_enabled' ) ) {
-		return;
-	}
-
-	if ( 'yes' !== get_option( 'woocommerce_custom_orders_table_data_sync_enabled' ) ) {
-		return;
-	}
-
-	WC_Admin_Notices::add_notice( 'hpos_sync_on_read_disabled' );
+	// Intentionally empty. The admin notice this update function used to queue has been
+	// replaced by a Site Health check, but the function must be kept so the 10.7.0 entry
+	// in WC_Install::$db_updates remains valid for stores upgrading from older versions.
 }
 
 /**
@@ -3458,4 +3453,109 @@ function wc_update_1080_migrate_analytics_import_option(): void {
 	if ( add_option( $new_option, $new_value ) ) {
 		delete_option( $legacy_option );
 	}
+}
+
+/**
+ * Reshape the `meta_key_value` index on `wc_orders_meta` to `(meta_key(50), meta_value(20))`.
+ *
+ * This is labeled as a 10.8.0-2 migration because originally there was a 10.8 migration that modified the
+ * meta_key_value index to include only the meta_key column (see https://github.com/woocommerce/woocommerce/pull/63897),
+ * but later it was discovered that this caused performance issues (as commented in the same pull request),
+ * so this new migration was added. However sites where 10.8 beta was installed will already have run
+ * the original migration (the one that removed meta_value from the index) and will have their db
+ * version updated to 10.8, so this new migration wouldn't run. Hence the 10.8.0-2 marker, which
+ * sorts between 10.8.0 and 10.8.1 via version_compare() and leaves the 10.8.1 slot free for any
+ * future patch-release migrations. WooCommerce 10.8.0 beta 2 had a migration labeled as 10.8.0-1 already,
+ * hence the need to go with 10.8.0-2 for this one.
+ *
+ * Handles two starting states transparently:
+ *  - Pre-10.8 sites: the index is the original `(meta_key(100), meta_value(82))`.
+ *  - 10.8 beta sites: the index has been changed to `(meta_key(100))` only.
+ *
+ * The new prefixes are sized from profiling a production-scale table: all meta_keys fit
+ * within 47 chars (so `meta_key(50)` covers every existing key) and a 20-byte `meta_value`
+ * prefix preserves full selectivity for the affected query patterns, keeping most of the
+ * storage benefit of the slim attempt.
+ *
+ * @since 10.8.0
+ *
+ * @return void
+ */
+function wc_update_10802_restore_orders_meta_key_value_index(): void {
+	global $wpdb;
+
+	$table_name = $wpdb->prefix . 'wc_orders_meta';
+	$index_name = 'meta_key_value';
+
+	// Table only exists on sites with HPOS enabled. Skip if absent.
+	if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		return;
+	}
+
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+	$columns = $wpdb->get_results(
+		$wpdb->prepare(
+			'SHOW INDEX FROM ' . $table_name . ' WHERE Key_name = %s',
+			$index_name
+		)
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+	$already_correct =
+		is_array( $columns ) && 2 === count( $columns ) &&
+		'meta_key' === $columns[0]->Column_name && 50 === (int) $columns[0]->Sub_part &&
+		'meta_value' === $columns[1]->Column_name && 20 === (int) $columns[1]->Sub_part;
+
+	if ( $already_correct ) {
+		return;
+	}
+
+	if ( empty( $columns ) ) {
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "ALTER TABLE {$table_name} ADD INDEX {$index_name} (meta_key(50), meta_value(20))" );
+	} else {
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "ALTER TABLE {$table_name} DROP INDEX {$index_name}, ADD INDEX {$index_name} (meta_key(50), meta_value(20))" );
+	}
+}
+
+/**
+ * Backfill sync meta onto pre-existing `woo_email` posts so the template
+ * divergence detector introduced in the same release (RSM-138) can classify
+ * legacy installs safely.
+ *
+ * @since 10.8.0
+ *
+ * @return bool Always false. Once-per-site is enforced by the
+ *              `woocommerce_db_version` fence in `$db_updates`.
+ */
+function wc_update_1080_backfill_email_template_sync_meta(): bool {
+	return WCEmailTemplateSyncBackfill::run();
+}
+
+/**
+ * Remove the option woocommerce_task_list_reminder_bar_hidden.
+ * The task list reminder bar was removed in 10.9.0; this option is no longer used.
+ *
+ * @since 10.9.0
+ *
+ * @return void
+ */
+function wc_update_1090_remove_task_list_reminder_bar_hidden_option() {
+	delete_option( 'woocommerce_task_list_reminder_bar_hidden' );
+}
+
+/**
+ * Set the stored value of the point_of_sale feature flag to enabled.
+ *
+ * The feature is deprecated as of 11.0.0 and always enabled in core, but the WooCommerce
+ * mobile apps read this option via the wc/v3 settings REST API to decide whether POS can
+ * be used, so the stored value must reflect the always-enabled state.
+ *
+ * @since 11.0.0
+ *
+ * @return void
+ */
+function wc_update_1100_enable_point_of_sale_feature() {
+	update_option( 'woocommerce_feature_point_of_sale_enabled', 'yes' );
 }

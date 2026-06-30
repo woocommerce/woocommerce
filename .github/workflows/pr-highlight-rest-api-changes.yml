@@ -52,5 +52,5 @@ jobs:
               issue_number: context.payload.pull_request.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '⚠️ **API Documentation Reminder**\n\nHi @${{ github.event.pull_request.user.login }}! Your PR contains REST API changes. Please consider updating the [REST API documentation](https://github.com/woocommerce/woocommerce-rest-api-docs) if your changes affect the public API.\n\nChanged API files:\n```\n${{ join(fromJson(steps.filter.outputs.rest_files || '[]'), '\n') }}\n```'
+              body: '⚠️ **API Documentation Reminder**\n\nHi @${{ github.event.pull_request.user.login }}! Your PR contains REST API changes. Please consider updating the [REST API documentation](https://github.com/woocommerce/woocommerce/tree/trunk/docs/apis/rest-api) if your changes affect the public API.\n\nChanged API files:\n```\n${{ join(fromJson(steps.filter.outputs.rest_files || '[]'), '\n') }}\n```'
             });

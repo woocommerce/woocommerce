@@ -17,8 +17,8 @@
 	}
 
 	svg {
-		width: 24px;
-		height: 24px;
+		width: 18px;
+		height: 18px;
 
 		&.woocommerce-layout__activity-panel-tab-icon {
 			fill: none;
@@ -69,10 +69,18 @@
 		border: none;
 		outline: none;
 		cursor: pointer;
-		background-color: $studio-white;
-		width: 100%;
+		background-color: transparent;
+		// Match wp-admin admin-bar item padding so all five icons in the bar
+		// (bell / list / megaphone / gear / ?) sit at the same tight spacing.
+		// $grid-unit-10 (8px from @wordpress/base-styles) instead of a
+		// literal so the value tracks the WP spacing scale automatically.
+		width: auto;
+		min-width: 0;
+		padding: 0 $grid-unit-10;
 		height: $header-height;
-		color: $gray-700;
+		// $gray-900 across all states (default, hover, active) — the blue
+		// underline alone signals active, matching Gutenberg's icon tab group.
+		color: $gray-900;
 		white-space: nowrap;
 
 		&::before {
@@ -91,54 +99,41 @@
 
 		&.is-active,
 		&.is-opened {
-			color: $gray-900;
 			box-shadow: none;
 
 			&::before {
-				height: 3px;
+				// 2px to match Gutenberg's TabPanel + Woo's own
+				// nav-tab-active indicator on Settings.
+				height: 2px;
 				opacity: 1;
 			}
 		}
 
-		&.has-unread::after,
-		&.woocommerce-layout__activity-panel-tab-wordpress-notices::after {
-			content: " ";
-			position: absolute;
-			padding: 1px;
-			background: $alert-red;
-			border: 2px solid $studio-white;
-			width: 4px;
-			height: 4px;
-			display: inline-block;
-			border-radius: 50%;
-			top: 8px;
-			left: 50%;
-
-			@include breakpoint( "782px-960px" ) {
-				right: 18px;
-				left: initial;
-				margin-left: 0;
-			}
-
-			@include breakpoint( ">960px" ) {
-				right: 28px;
-				left: initial;
-				margin-left: 0;
-			}
+		// The unread state ships as `bellUnread` from @wordpress/icons — a
+		// single SVG with the dot baked in. We just colour the dot red so the
+		// urgency signal reads, instead of inheriting currentColor like the
+		// rest of the icon.
+		&.has-unread svg circle {
+			fill: $alert-red;
 		}
 
 		&:hover,
 		&.components-button:not(:disabled):not([aria-disabled="true"]):hover {
 			box-shadow: none;
-
-			&.has-unread::after,
-			&.woocommerce-layout__activity-panel-tab-wordpress-notices::after {
-				border-color: $gray-200;
-			}
+			// Override Button's default theme-blue hover — Gutenberg's own
+			// icon tab groups keep the same dark-grey across all states.
+			color: $gray-900;
 		}
 
+		// Suppress the inset focus shadow on mouse-click focus (it conflicts
+		// with the blue underline). Keyboard-only focus still shows via
+		// :focus-visible.
 		&:focus,
 		&.components-button:not(:disabled):not([aria-disabled="true"]):focus {
+			box-shadow: none;
+		}
+		&:focus-visible,
+		&.components-button:not(:disabled):not([aria-disabled="true"]):focus-visible {
 			box-shadow: inset -1px -1px 0 $gray-700, inset 1px 1px 0 $gray-700;
 		}
 
@@ -159,28 +154,6 @@
 		}
 	}
 }
-
-.woocommerce-layout:has(.woocommerce-homescreen) {
-	.woocommerce-layout__activity-panel-tabs {
-		.woocommerce-layout__activity-panel-tab {
-			color: var(--wp-admin-theme-color) !important;
-			font-size: 13px;
-			font-style: normal;
-			font-weight: 400;
-			line-height: 20px; /* 153.846% */
-
-
-			&.has-icon {
-				padding: 6px 12px;
-			}
-
-			svg {
-				fill: #1e1e1e;
-			}
-		}
-	}
-}
-
 
 .woocommerce-layout__activity-panel-toggle-bubble.has-unread::after {
 	content: " ";
@@ -216,6 +189,13 @@
 }
 
 .woocommerce-layout__activity-panel-wrapper {
+	// Suppress the browser's default focus outline on click focus (the blue
+	// ring with slight rounded corners). Keyboard nav still gets it via
+	// :focus-visible so a11y is preserved.
+	&:focus {
+		outline: none;
+	}
+
 	height: calc(100vh - #{$header-height + $adminbar-height-mobile});
 	background: $gray-100;
 	width: 430px;
@@ -226,7 +206,10 @@
 	@include activity-panel-slide();
 	position: absolute;
 	right: 0;
-	top: 100%;
+	// Clear the floating header's bottom border so it stays visible when the
+	// slide-over panel is open (otherwise the panel covers it). Shares the
+	// border width with the header — if that ever changes, this stays aligned.
+	top: calc(100% + #{$header-border-width});
 	z-index: 1000;
 	overflow-x: hidden;
 	overflow-y: auto;

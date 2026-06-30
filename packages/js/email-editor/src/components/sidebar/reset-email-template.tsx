@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __, sprintf, TranslatableText } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import { store as coreStore, type WpTemplate } from '@wordpress/core-data';
 import { backup } from '@wordpress/icons';
@@ -45,7 +45,7 @@ const getResetEmailTemplateAction = () => {
 	 */
 	const resetEmailTemplate = {
 		id: 'reset-email-template',
-		label: __( 'Reset', 'woocommerce' ),
+		label: __( 'Reset', __i18n_text_domain__ ),
 		supportsBulk: false,
 		icon: backup,
 		isEligible( item: PostWithPermissions ) {
@@ -83,7 +83,7 @@ const getResetEmailTemplateAction = () => {
 				// translators: %s: The template's title
 				__(
 					'Are you sure you want to reset "%s" to default?',
-					'woocommerce'
+					__i18n_text_domain__
 				),
 				getItemTitle( item )
 			);
@@ -103,7 +103,7 @@ const getResetEmailTemplateAction = () => {
 							disabled={ isBusy }
 							__next40pxDefaultSize
 						>
-							{ __( 'Cancel', 'woocommerce' ) }
+							{ __( 'Cancel', __i18n_text_domain__ ) }
 						</Button>
 						<Button
 							variant="primary"
@@ -163,7 +163,7 @@ const getResetEmailTemplateAction = () => {
 										/* translators: The template's title. */
 										__(
 											'"%s" reset to default.',
-											'woocommerce'
+											__i18n_text_domain__
 										),
 										getItemTitle( item )
 									);
@@ -177,9 +177,9 @@ const getResetEmailTemplateAction = () => {
 									setIsBusy( false );
 									closeModal?.();
 								} catch ( error ) {
-									let errorMessage = __(
+									let errorMessage = __< string >(
 										'An error occurred while resetting the template.',
-										'woocommerce'
+										__i18n_text_domain__
 									);
 
 									if (
@@ -187,7 +187,8 @@ const getResetEmailTemplateAction = () => {
 										typeof error === 'object' &&
 										'message' in error
 									) {
-										errorMessage = String( error.message );
+										errorMessage =
+											error.message as TranslatableText< string >;
 									}
 
 									recordEvent( 'reset_modal_error', {
@@ -206,7 +207,7 @@ const getResetEmailTemplateAction = () => {
 							disabled={ isBusy }
 							__next40pxDefaultSize
 						>
-							{ __( 'Reset', 'woocommerce' ) }
+							{ __( 'Reset', __i18n_text_domain__ ) }
 						</Button>
 					</HStack>
 				</VStack>

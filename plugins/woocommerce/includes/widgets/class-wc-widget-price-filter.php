@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -97,7 +98,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		// Check to see if we should add taxes to the prices if store are excl tax but display incl.
 		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 
-		if ( wc_tax_enabled() && ! wc_prices_include_tax() && 'incl' === $tax_display_mode ) {
+		if ( wc_tax_enabled() && ! wc_prices_include_tax() && TaxDisplayMode::INCLUSIVE === $tax_display_mode ) {
 			$tax_class = apply_filters( 'woocommerce_price_filter_widget_tax_class', '' ); // Uses standard tax class.
 			$tax_rates = WC_Tax::get_rates( $tax_class );
 

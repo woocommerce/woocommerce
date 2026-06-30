@@ -249,7 +249,9 @@ const handleCoreProfilerCompletedSteps = assign( {
 } );
 
 const getCurrentUserEmail = fromPromise( async () => {
-	const currentUser = await resolveSelect( userStore ).getCurrentUser();
+	const currentUser = ( await resolveSelect(
+		userStore
+	).getCurrentUser() ) as WCUser | undefined;
 	return currentUser?.email;
 } );
 
@@ -1444,6 +1446,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								actions: [ 'assignCurrentUser' ],
 							},
 						},
+						{
+							src: 'getStoreCountryOption',
+							onDone: {
+								actions: [ 'handleStoreCountryOption' ],
+							},
+						},
 					],
 					meta: {
 						progress: 70,
@@ -1777,8 +1785,7 @@ export const CoreProfilerController = ( {
 	const augmentedStateMachine = useMemo( () => {
 		// When adding extensibility, this is the place to manipulate the state machine definition.
 		return coreProfilerStateMachineDefinition.provide( {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore -- there seems to be a flaky error here - it fails sometimes and then not on recompile, will need to investigate further.
+			// @ts-expect-error xstate's MachineImplementationsActions type does not accept the spread of action overrides here; the runtime is unchanged.
 			actions: {
 				...coreProfilerMachineActions,
 				...actionOverrides,
@@ -1817,7 +1824,6 @@ export const CoreProfilerController = ( {
 				},
 				userHasNoInstallPluginsPermission: ( { context } ) => {
 					return (
-						// @ts-expect-error TODO: react-18-upgrade: This comparison appears to be unintentional because the types 'string | undefined' and 'boolean' have no overlap.ts(2367). Need to check if this is a valid comparison.
 						context?.currentUser?.capabilities.install_plugins !==
 						true
 					);

@@ -53,7 +53,6 @@ export const getCanMakePaymentArg = (): CanMakePaymentArgument => {
 		const cart = store.getCartData();
 		const cartErrors = store.getCartErrors();
 		const cartTotals = store.getCartTotals();
-		// @ts-expect-error `hasFinishedResolution` is not typed in @wordpress/data yet.
 		const cartIsLoading = ! store.hasFinishedResolution( 'getCartData' );
 		const isLoadingRates = store.isAddressFieldsForShippingRatesUpdating();
 		const selectedShippingMethods = deriveSelectedShippingRates(
@@ -178,8 +177,14 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			| ExpressPaymentMethodConfigInstance
 	) => {
 		if ( express ) {
-			const { name, title, description, gatewayId, supports } =
-				paymentMethod as ExpressPaymentMethodConfigInstance;
+			const {
+				name,
+				title,
+				description,
+				gatewayId,
+				supports,
+				paymentMethodId,
+			} = paymentMethod as ExpressPaymentMethodConfigInstance;
 
 			availablePaymentMethods = {
 				...availablePaymentMethods,
@@ -188,6 +193,7 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 					title,
 					description,
 					gatewayId,
+					paymentMethodId: paymentMethodId ?? name,
 					supportsStyle: supports?.style,
 				},
 			};

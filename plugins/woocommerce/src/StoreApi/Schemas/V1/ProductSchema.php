@@ -7,6 +7,7 @@ use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
 use Automattic\WooCommerce\Blocks\Utils\ProductAvailabilityUtils;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 /**
  * ProductSchema class.
@@ -659,7 +660,11 @@ class ProductSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_images( \WC_Product $product ) {
-		$attachment_ids = array_merge( [ $product->get_image_id() ], $product->get_gallery_image_ids() );
+		$attachment_ids = array_filter( array_merge( [ $product->get_image_id() ], $product->get_gallery_image_ids() ) );
+		if ( ! empty( $attachment_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $attachment_ids );
+		}
 
 		return array_values( array_filter( array_map( [ $this->image_attachment_schema, 'get_item_response' ], $attachment_ids ) ) );
 	}
@@ -917,6 +922,7 @@ class ProductSchema extends AbstractSchema {
 		$prices           = [];
 		$tax_display_mode = $this->get_tax_display_mode( $tax_display_mode );
 		$price_function   = $this->get_price_function_from_tax_display_mode( $tax_display_mode );
+		$price_decimals   = wc_get_price_decimals();
 
 		// If we have a variable product, get the price from the variations (this will use the min value).
 		if ( $product->is_type( ProductType::VARIABLE ) ) {
@@ -927,9 +933,9 @@ class ProductSchema extends AbstractSchema {
 			$sale_price    = $product->get_sale_price();
 		}
 
-		$prices['price']         = $this->prepare_money_response( $price_function( $product ), wc_get_price_decimals() );
-		$prices['regular_price'] = $this->prepare_money_response( $price_function( $product, [ 'price' => $regular_price ] ), wc_get_price_decimals() );
-		$prices['sale_price']    = $this->prepare_money_response( $price_function( $product, [ 'price' => $sale_price ] ), wc_get_price_decimals() );
+		$prices['price']         = $this->prepare_money_response( $price_function( $product ), $price_decimals );
+		$prices['regular_price'] = $this->prepare_money_response( $price_function( $product, [ 'price' => $regular_price ] ), $price_decimals );
+		$prices['sale_price']    = $this->prepare_money_response( $price_function( $product, [ 'price' => $sale_price ] ), $price_decimals );
 		$prices['price_range']   = $this->get_price_range( $product, $tax_display_mode );
 
 		return $this->prepare_currency_response( $prices );
@@ -942,7 +948,7 @@ class ProductSchema extends AbstractSchema {
 	 * @return string Valid tax display mode.
 	 */
 	protected function get_tax_display_mode( $tax_display_mode = '' ) {
-		return in_array( $tax_display_mode, [ 'incl', 'excl' ], true ) ? $tax_display_mode : get_option( 'woocommerce_tax_display_shop' );
+		return in_array( $tax_display_mode, [ TaxDisplayMode::INCLUSIVE, TaxDisplayMode::EXCLUSIVE ], true ) ? $tax_display_mode : get_option( 'woocommerce_tax_display_shop' );
 	}
 
 	/**
@@ -952,7 +958,7 @@ class ProductSchema extends AbstractSchema {
 	 * @return string Function name.
 	 */
 	protected function get_price_function_from_tax_display_mode( $tax_display_mode ) {
-		return 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
+		return TaxDisplayMode::INCLUSIVE === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
 	}
 
 	/**
@@ -978,7 +984,7 @@ class ProductSchema extends AbstractSchema {
 
 		if ( $product->is_type( ProductType::GROUPED ) ) {
 			$children       = $product->get_visible_children();
-			$price_function = 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
+			$price_function = TaxDisplayMode::INCLUSIVE === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
 
 			foreach ( $children as $child ) {
 				if ( '' !== $child->get_price() ) {

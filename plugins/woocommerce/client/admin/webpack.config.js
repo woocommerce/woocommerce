@@ -6,9 +6,8 @@ const path = require( 'path' );
 const fs = require( 'fs' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
-const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
-const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
+const webpack = require( 'webpack' );
 
 /**
  * Internal dependencies
@@ -17,13 +16,14 @@ const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-
 const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 const {
 	webpackConfig: styleConfig,
-} = require( '@woocommerce/internal-style-build' );
+} = require( '@woocommerce/internal-build/style-build' );
 const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin/src/index' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
 const isHot = Boolean( process.env.HOT );
 const isProduction = NODE_ENV === 'production';
+const isWatch = ! isProduction && process.argv.includes( '--watch' );
 
 const getSubdirectoriesAt = ( searchPath ) => {
 	const dir = path.resolve( __dirname, searchPath );
@@ -36,6 +36,11 @@ const getSubdirectoriesAt = ( searchPath ) => {
 const WC_ADMIN_PACKAGES_DIR = '../../../../packages/js';
 const WP_ADMIN_SCRIPTS_DIR = './client/wp-admin-scripts';
 
+// Admin writes directly to the plugin's `assets/client/admin/` so PHP can
+// enqueue without an intermediate copy step. The JS config and every composed
+// package CSS config use this constant for `output.path`.
+const BUILD_DIR = path.resolve( __dirname, '../../assets/client/admin' );
+
 // wpAdminScripts are loaded on wp-admin pages outside the context of WooCommerce Admin
 // See ./client/wp-admin-scripts/README.md for more details
 const wpAdminScripts = getSubdirectoriesAt( WP_ADMIN_SCRIPTS_DIR ); // automatically include all subdirs
@@ -47,6 +52,7 @@ const wcAdminPackages = [
 	'currency',
 	'customer-effort-score',
 	'date',
+	'experimental-products-app',
 	'experimental',
 	'explat',
 	'navigation',
@@ -55,22 +61,58 @@ const wcAdminPackages = [
 	'data',
 	'tracks',
 	'onboarding',
-	'block-templates',
-	'product-editor',
 	'sanitize',
-	'settings-editor',
+	'settings-ui',
 	'remote-logging',
 	'email-editor',
 ];
+
+// Resolve each entry to the package's `wc-source` export as an absolute path.
+// Using the package name (`@woocommerce/<name>`) as the entry request would
+// match WooCommerceDependencyExtractionWebpackPlugin's externals list and
+// collapse the entry into a `window.wc.<name>` shim that re-exports itself.
+// Pointing entries at the filesystem dodges that match while still letting
+// transitive `@woocommerce/*` imports inside the bundle externalize normally.
+const resolvePackageSourceEntry = ( name ) => {
+	const pkgJsonPath = path.resolve(
+		__dirname,
+		`${ WC_ADMIN_PACKAGES_DIR }/${ name }/package.json`
+	);
+	const pkgJson = require( pkgJsonPath );
+	const source = pkgJson.exports?.[ '.' ]?.[ 'wc-source' ];
+	if ( ! source ) {
+		throw new Error(
+			`Package @woocommerce/${ name } has no exports["."]["wc-source"] entry in ${ pkgJsonPath }`
+		);
+	}
+	return path.resolve( path.dirname( pkgJsonPath ), source );
+};
+
+// Packages opt into having admin bundle their stylesheet by exporting a
+// `src/style.scss` next to `src/index.ts`. The file isn't imported from
+// `src/index.ts` (consumers historically relied on a separate `style.css`
+// asset), so we add it as a second entry tuple. Webpack bundles both into
+// the same chunk and MiniCssExtractPlugin emits `<pkg>/style.css`.
+const resolvePackageStyleEntry = ( name ) => {
+	const styleScss = path.resolve(
+		__dirname,
+		`${ WC_ADMIN_PACKAGES_DIR }/${ name }/src/style.scss`
+	);
+	return fs.existsSync( styleScss ) ? styleScss : null;
+};
 
 const getEntryPoints = () => {
 	const entryPoints = {
 		app: './client/index.tsx',
 		embed: './client/embed.tsx',
-		settings: './client/settings/index.js',
 	};
 	wcAdminPackages.forEach( ( name ) => {
-		entryPoints[ name ] = `${ WC_ADMIN_PACKAGES_DIR }/${ name }`;
+		const source = resolvePackageSourceEntry( name );
+		const style = resolvePackageStyleEntry( name );
+		// Order matters: webpack uses the last item in an array entry as the
+		// chunk's export source. Stylesheet first so `src/index.ts`'s exports
+		// land on the `window.wc.<name>` global.
+		entryPoints[ name ] = style ? [ style, source ] : source;
 	} );
 	wpAdminScripts.forEach( ( name ) => {
 		entryPoints[ name ] = `${ WP_ADMIN_SCRIPTS_DIR }/${ name }`;
@@ -81,15 +123,37 @@ const getEntryPoints = () => {
 // WordPress.org’s translation infrastructure ignores files named “.min.js” so we need to name our JS files without min when releasing the plugin.
 const outputSuffix = WC_ADMIN_PHASE === 'core' ? '' : '.min';
 
-// Here we are patching a dependency, see https://github.com/woocommerce/woocommerce/pull/45548 for more details.
-// Should be revisited: using the dependency patching, but seems we need some codebase tweaks as it uses xstate 4/5 mix.
-require( 'fs-extra' ).ensureSymlinkSync(
-	path.join( __dirname, './node_modules/xstate5' ),
-	path.join( __dirname, './node_modules/@xstate5/react/node_modules/xstate' )
-);
-
-const webpackConfig = {
+const jsConfig = {
+	name: 'admin-js',
 	mode: NODE_ENV,
+	performance: {
+		hints: false,
+	},
+	cache:
+		isWatch || process.env.CI || process.env.HOT || process.env.STORYBOOK
+			? { type: 'memory' }
+			: {
+					type: 'filesystem',
+					cacheDirectory: path.resolve(
+						__dirname,
+						`node_modules/.cache/webpack-${ WC_ADMIN_PHASE }-source`
+					),
+					buildDependencies: {
+						config: [
+							__filename,
+							path.resolve(
+								__dirname,
+								'../../../../pnpm-lock.yaml'
+							),
+							require.resolve(
+								'@woocommerce/dependency-extraction-webpack-plugin'
+							),
+							require.resolve(
+								'@woocommerce/internal-build/style-build'
+							),
+						],
+					},
+			  },
 	entry: getEntryPoints(),
 	output: {
 		filename: ( data ) => {
@@ -100,7 +164,7 @@ const webpackConfig = {
 				: `[name]/index${ outputSuffix }.js`;
 		},
 		chunkFilename: `chunks/[name]${ outputSuffix }.js?ver=[contenthash]`,
-		path: path.join( __dirname, '/build' ),
+		path: BUILD_DIR,
 		library: {
 			// Expose the exports of entry points so we can consume the libraries in window.wc.[modulename] with WooCommerceDependencyExtractionWebpackPlugin.
 			name: [ 'wc', '[modulename]' ],
@@ -126,19 +190,10 @@ const webpackConfig = {
 				use: {
 					loader: 'babel-loader',
 					options: {
-						presets: [
-							'@wordpress/babel-preset-default',
-							[
-								'@babel/preset-env',
-								{
-									// Add polyfills such as Array.flat based on their usage in the code
-									// See https://github.com/woocommerce/woocommerce-admin/pull/6411/
-									corejs: '3',
-									useBuiltIns: 'usage',
-								},
-							],
-							[ '@babel/preset-typescript' ],
-						],
+						// Prevent babel.config.js (Jest/Node context) from merging into this browser build and duplicating presets.
+						configFile: false,
+						sourceType: 'unambiguous',
+						presets: [ '@wordpress/babel-preset-default' ],
 						plugins: [
 							! isProduction &&
 								isHot &&
@@ -174,6 +229,14 @@ const webpackConfig = {
 			path: false,
 		},
 		extensions: [ '.json', '.js', '.jsx', '.ts', '.tsx' ],
+		// Activate the `"wc-source"` conditional export declared in each
+		// `packages/js/*` package.json. Webpack walks the package's exports map
+		// and picks `./src/index.ts` directly — no per-package alias is
+		// required, and transitive `@woocommerce/*` imports resolve to source
+		// through the same mechanism. The condition is namespaced (`wc-` prefix)
+		// so it never collides with third-party packages that publish their own
+		// `"source"` conditional export. `'...'` extends the default list.
+		conditionNames: [ 'wc-source', '...' ],
 		alias: {
 			'~': path.resolve( __dirname + '/client' ),
 			'react/jsx-dev-runtime': require.resolve( 'react/jsx-dev-runtime' ),
@@ -182,8 +245,12 @@ const webpackConfig = {
 	},
 	plugins: [
 		...styleConfig.plugins,
-		// Runs TypeScript type checker on a separate process.
-		! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),
+		// Substitute the `__i18n_text_domain__` identifier used by the
+		// @woocommerce/email-editor package with the WooCommerce text
+		// domain so strings extract and translate under `woocommerce`.
+		new webpack.DefinePlugin( {
+			__i18n_text_domain__: JSON.stringify( 'woocommerce' ),
+		} ),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {
 				const entryName = get( data, [ 'chunk', 'name' ] );
@@ -197,31 +264,6 @@ const webpackConfig = {
 				return outputPath;
 			},
 		} ),
-		// The package build process doesn't handle extracting CSS from JS files, so we copy them separately.
-		new CopyWebpackPlugin( {
-			patterns: wcAdminPackages.map( ( packageName ) => ( {
-				// Copy css and style.asset.php files.
-				from: `../../../../packages/js/${ packageName }/build-style/*.{css,php}`,
-				to: `./${ packageName }/[name][ext]`,
-				noErrorOnMissing: true,
-				// Overwrites files already in compilation.assets to ensure we use the assets from the build-style.
-				// This is required for @woocommerce/component to use @automattic/* packages because scss styles from @automattic/* packages will be automatically generated by mini-css-extract-plugin with the same output name.
-				force: true,
-			} ) ),
-		} ),
-
-		// Get all product editor blocks so they can be loaded via JSON.
-		new CopyWebpackPlugin( {
-			patterns: [
-				{
-					from: path.join(
-						__dirname,
-						'../../../../packages/js/product-editor/build/blocks'
-					),
-					to: './product-editor/blocks',
-				},
-			],
-		} ),
 
 		// React Fast Refresh.
 		! isProduction && isHot && new ReactRefreshWebpackPlugin(),
@@ -231,12 +273,25 @@ const webpackConfig = {
 			new WooCommerceDependencyExtractionWebpackPlugin( {
 				requestToExternal( request ) {
 					switch ( request ) {
+						case 'moment-timezone':
+							// Use WordPress core's window.moment (which includes moment-timezone)
+							// instead of bundling a stripped copy.
+							return 'moment';
 						case 'react/jsx-runtime':
 						case 'react/jsx-dev-runtime':
 							// @wordpress/dependency-extraction-webpack-plugin version bump related, which added 'react-jsx-runtime' dependency.
 							// See https://github.com/WordPress/gutenberg/pull/61692 for more details about the dependency in general.
 							// For backward compatibility reasons we need to skip requesting to external here.
 							return null;
+						case 'react-dom/client':
+							// React 18 split createRoot/hydrateRoot into
+							// react-dom/client. WordPress's wp-react-dom UMD
+							// aggregates both entrypoints onto the same
+							// window.ReactDOM global. DEWP's default mapper
+							// doesn't know about the subpath yet
+							// (https://github.com/WordPress/gutenberg/pull/77326),
+							// so map it here.
+							return 'ReactDOM';
 						case '@wordpress/global-styles-engine':
 							// @wordpress/global-styles-engine is not a standard WordPress package available globally,
 							// so we need to bundle it instead of treating it as an external.
@@ -244,6 +299,14 @@ const webpackConfig = {
 					}
 
 					if ( request.startsWith( '@wordpress/dataviews' ) ) {
+						return null;
+					}
+
+					if ( request.startsWith( '@wordpress/theme' ) ) {
+						return null;
+					}
+
+					if ( request.startsWith( '@wordpress/ui' ) ) {
 						return null;
 					}
 
@@ -263,12 +326,15 @@ const webpackConfig = {
 						return null;
 					}
 				},
+				requestToHandle( request ) {
+					if ( request === 'moment-timezone' ) {
+						return 'moment';
+					}
+					if ( request === 'react-dom/client' ) {
+						return 'react-dom';
+					}
+				},
 			} ),
-		// Reduces data for moment-timezone.
-		new MomentTimezoneDataPlugin( {
-			// This strips out timezone data before the year 2000 to make a smaller file.
-			startYear: 2000,
-		} ),
 		process.env.ANALYZE && new BundleAnalyzerPlugin(),
 		// We only want to generate unminified files in the development phase.
 		WC_ADMIN_PHASE === 'development' &&
@@ -289,12 +355,12 @@ const webpackConfig = {
 };
 if ( ! isProduction || WC_ADMIN_PHASE === 'development' ) {
 	// Set default sourcemap mode if it wasn't set by WP_DEVTOOL.
-	webpackConfig.devtool = webpackConfig.devtool || 'source-map';
+	jsConfig.devtool = jsConfig.devtool || 'source-map';
 
 	if ( isHot ) {
 		// Add dev server config
 		// Copied from https://github.com/WordPress/gutenberg/blob/05bea6dd5c6198b0287c41a401d36a06b48831eb/packages/scripts/config/webpack.config.js#L312-L326
-		webpackConfig.devServer = {
+		jsConfig.devServer = {
 			devMiddleware: {
 				writeToDisk: true,
 			},
@@ -302,9 +368,9 @@ if ( ! isProduction || WC_ADMIN_PHASE === 'development' ) {
 			host: 'localhost',
 			port: 8887,
 			proxy: {
-				'/build': {
+				'/assets/client/admin': {
 					pathRewrite: {
-						'^/build': '',
+						'^/assets/client/admin': '',
 					},
 				},
 			},
@@ -312,4 +378,4 @@ if ( ! isProduction || WC_ADMIN_PHASE === 'development' ) {
 	}
 }
 
-module.exports = webpackConfig;
+module.exports = jsConfig;

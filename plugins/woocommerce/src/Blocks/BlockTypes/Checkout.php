@@ -7,6 +7,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\Validation;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
@@ -41,6 +42,7 @@ class Checkout extends AbstractBlock {
 		parent::initialize();
 		add_action( 'rest_api_init', array( $this, 'register_settings' ) );
 		add_action( 'wp_loaded', array( $this, 'register_patterns' ) );
+		add_action( 'wp', array( $this, 'disable_wp_emoji' ) );
 		// This prevents the page redirecting when the cart is empty. This is so the editor still loads the page preview.
 		add_filter(
 			'woocommerce_checkout_redirect_empty_cart',
@@ -51,6 +53,25 @@ class Checkout extends AbstractBlock {
 		);
 
 		add_action( 'save_post', array( $this, 'update_local_pickup_title' ), 10, 2 );
+	}
+
+	/**
+	 * Remove WordPress emoji detection script on pages containing this block.
+	 *
+	 * The wp-emoji MutationObserver converts emoji text nodes to <img> elements
+	 * when React hydrates or re-renders, corrupting the DOM tree and crashing the block.
+	 * The wp-exclude-emoji class on the wrapper only prevents the initial parse, not the
+	 * MutationObserver, so the script must be removed entirely.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @return void
+	 */
+	public function disable_wp_emoji() {
+		if ( has_block( $this->get_full_block_name() ) ) {
+			remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+			remove_action( 'wp_print_styles', 'print_emoji_styles' );
+		}
 	}
 
 	/**
@@ -429,6 +450,21 @@ class Checkout extends AbstractBlock {
 		$this->asset_data_registry->add( 'addressAutocompleteProviders', $providers_payload );
 		$this->asset_data_registry->add( 'countryData', $country_data );
 		$this->asset_data_registry->add( 'defaultAddressFormat', $address_formats['default'] );
+
+		// Prime caches to reduce future queries.
+		wp_prime_option_caches(
+			array(
+				'woocommerce_enable_guest_checkout',
+				'woocommerce_enable_signup_and_login_from_checkout',
+				'woocommerce_enable_checkout_login_reminder',
+				'woocommerce_tax_display_cart', // This one is autoloaded, but we add it here for clarity.
+				'woocommerce_tax_total_display',
+				'woocommerce_ship_to_destination',
+				'woocommerce_registration_generate_password',
+				'pickup_location_pickup_locations',
+			)
+		);
+
 		$this->asset_data_registry->add(
 			'checkoutAllowsGuest',
 			false === filter_var(
@@ -443,18 +479,8 @@ class Checkout extends AbstractBlock {
 				FILTER_VALIDATE_BOOLEAN
 			)
 		);
-		// Prime caches to reduce future queries.
-		wp_prime_option_caches(
-			array(
-				'woocommerce_enable_checkout_login_reminder',
-				'woocommerce_tax_display_cart', // This one is autoloaded, but we add it here for clarity.
-				'woocommerce_tax_total_display',
-				'woocommerce_ship_to_destination',
-				'woocommerce_registration_generate_password',
-			)
-		);
 		$this->asset_data_registry->add( 'checkoutShowLoginReminder', filter_var( get_option( 'woocommerce_enable_checkout_login_reminder' ), FILTER_VALIDATE_BOOLEAN ) );
-		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', 'incl' === get_option( 'woocommerce_tax_display_cart' ) );
+		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', TaxDisplayMode::INCLUSIVE === get_option( 'woocommerce_tax_display_cart' ) );
 		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ) );
 		$this->asset_data_registry->add( 'forcedBillingAddress', 'billing_only' === get_option( 'woocommerce_ship_to_destination' ) );
 		$this->asset_data_registry->add( 'generatePassword', filter_var( get_option( 'woocommerce_registration_generate_password' ), FILTER_VALIDATE_BOOLEAN ) );
