@@ -1812,8 +1812,9 @@ test.describe( 'Settings API tests: CRUD', () => {
 					expect.arrayContaining( [
 						expect.objectContaining( {
 							id: 'woocommerce_analytics_enabled',
-							label: 'Analytics',
-							description: 'Enable WooCommerce Analytics',
+							label: 'WooCommerce Analytics',
+							description:
+								"Enable WooCommerce Analytics to track your store's key metrics and view them in a detailed dashboard. All data stays within your store.",
 							type: 'checkbox',
 							default: 'yes',
 							value: expect.any( String ),

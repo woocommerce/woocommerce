@@ -277,8 +277,8 @@ class Checkout extends AbstractCartRoute {
 					continue;
 				}
 
-				// Clean the field value to trim whitespace.
-				$field_value = wc_clean( wp_unslash( $field_values[ $field_key ] ?? '' ) );
+				// Clean the field value to trim whitespace. Request body is JSON-decoded and never magic-quoted, so no wp_unslash().
+				$field_value = wc_clean( $field_values[ $field_key ] ?? '' );
 
 				if ( empty( $field_value ) ) {
 					if ( true === $field['required'] ) {
