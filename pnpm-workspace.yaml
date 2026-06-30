@@ -10,7 +10,6 @@ catalogs:
         '@types/wordpress__viewport': 5.5.3
         '@wordpress/a11y': 4.33.1
         '@wordpress/api-fetch': 7.33.1
-        '@wordpress/base-styles': 6.9.1
         '@wordpress/blob': 4.33.1
         '@wordpress/block-editor': 15.6.9
         '@wordpress/block-library': 9.33.10
@@ -54,13 +53,19 @@ catalogs:
         '@wordpress/viewport': 6.33.1
         '@wordpress/warning': 3.33.1
         '@wordpress/wordcount': 4.33.1
-    # WordPress packages that are not externalized by the dependency extraction plugin.
-    # Consumers need to bundle these when they import them.
-	# We need to expand this list: https://github.com/WordPress/gutenberg/blob/e1d5efda04d8a8d868f220392f89f68cf37f1893/packages/dependency-extraction-webpack-plugin/lib/util.js#L2-L14
+
+    # `@wordpress/*` runtime packages that WooCommerce needs to bundle because
+    # they are not provided as WordPress script externals.
+	# https://github.com/WordPress/gutenberg/blob/e1d5efda04d8a8d868f220392f89f68cf37f1893/packages/dependency-extraction-webpack-plugin/lib/util.js#L2-L14
     wp-bundled:
-        '@wordpress/admin-ui': 1.12.0
+        '@wordpress/admin-ui': 1.1.5
+        '@wordpress/dataviews': 10.1.7
+        '@wordpress/fields': 0.25.11
         '@wordpress/icons': 11.0.1
         '@wordpress/interface': 9.18.5
+        '@wordpress/undo-manager': 1.33.1
+        '@wordpress/views': 1.0.8
+        '@wordpress/base-styles': 6.9.1
 
 packages:
     - 'packages/js/*'
