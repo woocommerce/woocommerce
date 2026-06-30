@@ -55418,49 +55418,7 @@ parameters:
 			path: src/Caches/OrderCacheController.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCache\:\:decrement\(\) should return int but returns int\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Caches/OrderCountCache.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCache\:\:increment\(\) should return int but returns int\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Caches/OrderCountCache.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCacheService\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Caches/OrderCountCacheService.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCacheService\:\:unschedule_background_actions\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Caches/OrderCountCacheService.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCacheService\:\:update_on_new_order\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Caches/OrderCountCacheService.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCacheService\:\:update_on_order_deleted\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Caches/OrderCountCacheService.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCacheService\:\:update_on_order_status_changed\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Caches/OrderCountCacheService.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCacheService\:\:update_on_order_trashed\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Caches/OrderCountCacheService.php
