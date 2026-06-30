@@ -434,7 +434,7 @@ test.describe(
 			) );
 		} );
 
-		test.beforeEach( async ( { restApi } ) => {
+		test.beforeEach( async ( { page, restApi } ) => {
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
 					name: productName,
@@ -492,6 +492,20 @@ test.describe(
 				.then( ( response: { data: { id: number } } ) => {
 					noProductOrderId = response.data.id;
 				} );
+
+			// The "Downloadable product permissions" meta box is hidden by default on the order
+			// edit screen. Reveal it via Screen Options (the preference persists for the admin
+			// user, so it carries to every order) so the tests below can interact with it.
+			// check() is a no-op when the box is already revealed from a previous test.
+			await page.goto(
+				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+			);
+			await page.locator( '#show-settings-link' ).click();
+			await page.locator( '#woocommerce-order-downloads-hide' ).check();
+			await page.locator( '#show-settings-link' ).click();
+			await expect(
+				page.locator( '#woocommerce-order-downloads' )
+			).toBeVisible();
 		} );
 
 		test.afterEach( async ( { restApi } ) => {
