@@ -96,6 +96,21 @@ describe( 'SearchListControl hierarchy interactions', () => {
 		expect( selectedIds ).toEqual( [ 1, 2, 3, 4 ] );
 	} );
 
+	test( 'does not collapse an expanded parent when its checkbox is clicked', () => {
+		const { container } = renderHierarchicalControl();
+
+		expandCategory( container, 'Apricots' );
+		expect(
+			screen.getByRole( 'checkbox', { name: 'Elderberry' } )
+		).toBeInTheDocument();
+
+		fireEvent.click( screen.getByRole( 'checkbox', { name: 'Apricots' } ) );
+
+		expect(
+			screen.getByRole( 'checkbox', { name: 'Elderberry' } )
+		).toBeInTheDocument();
+	} );
+
 	test( 'deselects a parent category and all descendants when its checkbox is unchecked', () => {
 		const onChange = jest.fn();
 		const selected = hierarchicalList.filter( ( { id } ) =>

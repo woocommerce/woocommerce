@@ -116,12 +116,6 @@ export const SearchListItem = < T extends object = object >( {
 		}
 	);
 
-	useEffect( () => {
-		if ( hasChildren && isSelected ) {
-			setExpandedPanelId( item.id as number );
-		}
-	}, [ item, hasChildren, isSelected, setExpandedPanelId ] );
-
 	const name = props.name || `search-list-item-${ controlId }`;
 	const id = `${ name }-${ item.id }`;
 
@@ -141,8 +135,8 @@ export const SearchListItem = < T extends object = object >( {
 	// all their descendants are selected, but look indeterminate when only some
 	// are selected.
 	const looksSelected =
-		isSelected ||
-		( ! isSelectable && areAllDescendantsSelected( item, selected ) );
+		( isSelected || ! isSelectable ) &&
+		areAllDescendantsSelected( item, selected );
 
 	return hasChildren ? (
 		<div
@@ -183,12 +177,14 @@ export const SearchListItem = < T extends object = object >( {
 						disabled={ disabled }
 						indeterminate={
 							! looksSelected &&
-							areSomeDescendantsSelected( item, selected )
+							( isSelected ||
+								areSomeDescendantsSelected( item, selected ) )
 						}
 						label={ getHighlightedName(
 							decodeEntities( item.name ),
 							search
 						) }
+						onClick={ ( e ) => e.stopPropagation() }
 						onChange={ () => {
 							const descendants = getItemDescendants( item );
 							const itemsToToggle = isSelectable
