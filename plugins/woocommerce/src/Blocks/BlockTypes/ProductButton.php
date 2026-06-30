@@ -132,7 +132,7 @@ class ProductButton extends AbstractBlock {
 			 * Filters the change the quantity to add to cart.
 			 *
 			 * @since 8.5.0
-			 * @since 10.8.0 Added the `$variation_id` parameter.
+			 * @since 11.0.0 Added the `$variation_id` parameter.
 			 * @param number $default_quantity The default quantity.
 			 * @param number $product_id The product id.
 			 * @param number $variation_id     The variation ID. Always 0 in this context.
