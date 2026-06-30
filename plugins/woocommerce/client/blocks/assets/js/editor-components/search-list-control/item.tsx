@@ -3,7 +3,7 @@
  */
 import clsx from 'clsx';
 import { CheckboxControl } from '@wordpress/components';
-import { useCallback, useEffect } from '@wordpress/element';
+import { useCallback } from '@wordpress/element';
 import { arrayDifferenceBy, arrayUnionBy } from '@woocommerce/utils';
 import { decodeEntities } from '@wordpress/html-entities';
 
