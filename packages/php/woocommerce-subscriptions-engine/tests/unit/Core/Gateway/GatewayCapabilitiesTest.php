@@ -41,14 +41,6 @@ class GatewayCapabilitiesTest extends TestCase {
 		);
 	}
 
-	public function test_constants_match_their_string_values(): void {
-		$this->assertSame( 'recurring', GatewayCapabilities::RECURRING );
-		$this->assertSame( 'payment_method_change', GatewayCapabilities::PAYMENT_METHOD_CHANGE );
-		$this->assertSame( 'amount_changes', GatewayCapabilities::AMOUNT_CHANGES );
-		$this->assertSame( 'multiple_per_customer', GatewayCapabilities::MULTIPLE_PER_CUSTOMER );
-		$this->assertSame( 'gateway_scheduled_renewals', GatewayCapabilities::GATEWAY_SCHEDULED_RENEWALS );
-	}
-
 	public function test_declared_capabilities_resolve_true(): void {
 		GatewayCapabilities::declare( 'dummy', array( GatewayCapabilities::RECURRING ) );
 

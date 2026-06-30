@@ -294,8 +294,8 @@ class FeaturesController {
 
 		$legacy_features = array(
 			'analytics'                          => array(
-				'name'                         => __( 'Analytics', 'woocommerce' ),
-				'description'                  => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
+				'name'                         => __( 'WooCommerce Analytics', 'woocommerce' ),
+				'description'                  => __( 'Enable WooCommerce Analytics to track your store\'s key metrics and view them in a detailed dashboard. All data stays within your store.', 'woocommerce' ),
 				'option_key'                   => Analytics::TOGGLE_OPTION_NAME,
 				'is_experimental'              => false,
 				'enabled_by_default'           => true,
@@ -564,8 +564,8 @@ class FeaturesController {
 					'woocommerce'
 				),
 				'enabled_by_default'           => false,
-				// Stays visible in the Features UI during development; the whole flag is
-				// removed once this feature ships.
+				// POC branch keeps the flag visible in the Features UI for testing;
+				// trunk ships it hidden (disable_ui => true) until the feature is ready.
 				'disable_ui'                   => false,
 				'is_experimental'              => true,
 				'skip_compatibility_checks'    => true,
