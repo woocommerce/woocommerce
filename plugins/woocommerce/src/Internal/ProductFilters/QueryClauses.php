@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\MainQueryClausesGenerator;
-use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
 use WC_Tax;
 use WC_Cache_Helper;
 
@@ -31,14 +30,23 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	private $params;
 
 	/**
+	 * Pre-computed taxonomy hierarchy data.
+	 *
+	 * @var TaxonomyHierarchyData
+	 */
+	private $taxonomy_hierarchy_data;
+
+	/**
 	 * Initialize the query clauses.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 * @param Params $params The filter params.
+	 * @param Params                $params                  The filter params.
+	 * @param TaxonomyHierarchyData $taxonomy_hierarchy_data Taxonomy hierarchy data.
 	 * @return void
 	 */
-	final public function init( Params $params ): void {
-		$this->params = $params;
+	final public function init( Params $params, TaxonomyHierarchyData $taxonomy_hierarchy_data ): void {
+		$this->params                  = $params;
+		$this->taxonomy_hierarchy_data = $taxonomy_hierarchy_data;
 	}
 
 	/**
@@ -359,30 +367,16 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			}
 
 			if ( is_taxonomy_hierarchical( $taxonomy ) ) {
+				// Expand chosen terms to include descendants using the per-taxonomy
+				// hierarchy map (one get_terms per taxonomy) instead of a child_of
+				// query per chosen term.
 				$expanded_term_ids = $term_ids;
 
 				foreach ( $term_ids as $term_id ) {
-					$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . 'child_terms_' . $taxonomy . '_' . $term_id;
-					$children  = wp_cache_get( $cache_key );
-
-					if ( false === $children ) {
-						$children = get_terms(
-							array(
-								'taxonomy'   => $taxonomy,
-								'child_of'   => $term_id,
-								'fields'     => 'ids',
-								'hide_empty' => false,
-							)
-						);
-
-						if ( ! is_wp_error( $children ) ) {
-							wp_cache_set( $cache_key, $children, '', HOUR_IN_SECONDS );
-						} else {
-							$children = array();
-						}
-					}
-
-					$expanded_term_ids = array_merge( $expanded_term_ids, $children );
+					$expanded_term_ids = array_merge(
+						$expanded_term_ids,
+						$this->taxonomy_hierarchy_data->get_descendants( (int) $term_id, $taxonomy )
+					);
 				}
 
 				$term_ids = array_unique( $expanded_term_ids );
