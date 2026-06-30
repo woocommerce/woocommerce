@@ -691,10 +691,12 @@ class ProductCollectionPage {
 			`.woocommerce-product-${ taxonomy }`
 		);
 		await taxonomyContainer.waitFor();
-		await taxonomyContainer
+		const checkbox = taxonomyContainer
 			.getByRole( 'checkbox', { name: term } )
-			.first()
-			.click();
+			.first();
+		if ( ! ( await checkbox.isChecked() ) ) {
+			await checkbox.click();
+		}
 		await this.refreshLocators( 'editor' );
 	}
 
@@ -711,10 +713,12 @@ class ProductCollectionPage {
 		);
 		await taxonomyContainer.waitFor();
 
-		await taxonomyContainer
+		const checkbox = taxonomyContainer
 			.getByRole( 'checkbox', { name: term } )
-			.first()
-			.click();
+			.first();
+		if ( await checkbox.isChecked() ) {
+			await checkbox.click();
+		}
 		await this.refreshLocators( 'editor' );
 	}
 
