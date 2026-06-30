@@ -256,6 +256,40 @@ class ImportRunSqlTest extends TestCase {
 	}
 
 	/**
+	 * Test that the table prefix placeholder is replaced with the local prefix
+	 * before the query runs, so the query targets an existing local table.
+	 */
+	public function test_process_replaces_table_prefix_placeholder(): void {
+		$schema = $this->create_sql_schema(
+			'INSERT INTO `' . RunSql::TABLE_PREFIX_PLACEHOLDER . "posts` (post_title) VALUES ('Placeholder Post')",
+			'test_placeholder_insert'
+		);
+
+		$result = $this->importer->process( $schema );
+
+		// Success proves the placeholder resolved to the real (existing) posts table.
+		$this->assertTrue( $result->is_success() );
+	}
+
+	/**
+	 * Test that security checks run against the resolved table name, not the
+	 * placeholder, so a placeholder that targets a protected table is rejected.
+	 */
+	public function test_process_placeholder_resolves_before_protected_table_check(): void {
+		$schema = $this->create_sql_schema(
+			'INSERT INTO `' . RunSql::TABLE_PREFIX_PLACEHOLDER . "users` (user_login) VALUES ('test_user')",
+			'test_placeholder_protected'
+		);
+
+		$result = $this->importer->process( $schema );
+
+		$this->assertFalse( $result->is_success() );
+		$error_messages = $result->get_messages( 'error' );
+		$this->assertNotEmpty( $error_messages );
+		$this->assertStringContainsString( 'Modifications to admin users or roles are not allowed', $error_messages[0]['message'] );
+	}
+
+	/**
 	 * Test that queries with multiple statements are rejected.
 	 */
 	public function test_process_multiple_statements_rejected(): void {
