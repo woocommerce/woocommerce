@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class FailingQuery {
 	public static function get_field_definition(): array {
 		return array(
-			'type'        => Type::nonNull(
+			'type'          => Type::nonNull(
 				new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(
 					array(
 						'name'   => 'FailingQueryResult',
@@ -24,19 +24,31 @@ class FailingQuery {
 					)
 				)
 			),
-			'description' => __( 'Always throws an exception', 'woocommerce' ),
-			'args'        => array(
+			'description'   => __( 'Always throws an exception', 'woocommerce' ),
+			'authorization' => array(
+				array(
+					'attribute' => 'PublicAccess',
+					'args'      => array(),
+				),
+			),
+			'args'          => array(
 				'kind' => array(
 					'type'         => Type::nonNull( Type::string() ),
 					'description'  => __( 'What kind of failure to raise', 'woocommerce' ),
 					'defaultValue' => 'invalid_argument',
 				),
 			),
-			'resolve'     => array( self::class, 'resolve' ),
+			'resolve'       => array( self::class, 'resolve' ),
 		);
 	}
 
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
+		// Publish the root query's metadata so downstream field-level
+		// authorization gates can read it via `$_metadata['query']`.
+		// $context is an ArrayObject (see GraphQLController::process_request())
+		// so the mutation propagates to nested resolvers.
+		$context['_query_metadata'] = array();
+
 		$command = \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Infrastructure\ClassResolver::resolve_class( FailingQueryCommand::class );
 
 		$execute_args = array();

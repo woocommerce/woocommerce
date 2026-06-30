@@ -71,6 +71,16 @@ class <?php echo $class_name; ?> {
 <?php endforeach; ?>
 					),
 <?php endif; ?>
+<?php if ( ! empty( $authorization ) ) : ?>
+					'authorization' => array(
+<?php foreach ( $authorization as $descriptor ) : ?>
+						array(
+							'attribute' => <?php echo var_export( $descriptor['attribute'], true ); ?>,
+							'args'      => <?php echo var_export( $descriptor['args'], true ); ?>,
+						),
+<?php endforeach; ?>
+					),
+<?php endif; ?>
 					'fields' => fn() => array(
 <?php foreach ( $fields as $field ) : ?>
 						'<?php echo $field['name']; ?>' => array(

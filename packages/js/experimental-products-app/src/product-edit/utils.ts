@@ -32,6 +32,7 @@ type ProductType = 'simple' | 'variation' | 'variable' | 'grouped' | 'external';
 type ProductVariationEntityRecord = ProductEntityRecord & {
 	parent_id: number;
 };
+type DimensionKey = keyof ProductEntityRecord[ 'dimensions' ];
 type Feature = {
 	is_enabled?: boolean;
 };
@@ -46,6 +47,7 @@ const PRODUCT_EDIT_FIELD_IDS = [
 	'images',
 	'images_count',
 	'product_status',
+	'variation_active',
 	'sku',
 	'price',
 	'regular_price',
@@ -81,8 +83,11 @@ const PRODUCT_EDIT_FIELD_IDS = [
 	'tax_status',
 	'upsell_ids',
 	'cross_sell_ids',
+	'grouped_products',
 	'linked_products_count',
 ] as const;
+
+const DIMENSION_KEYS: DimensionKey[] = [ 'length', 'width', 'height' ];
 
 const DIMENSIONS_FORM_FIELD: ProductEditFormField = {
 	id: 'dimensions',
@@ -119,11 +124,6 @@ const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 		'regular_price',
 		'sale_price',
 		'schedule_sale',
-		{
-			id: 'sale-schedule-dates',
-			layout: { type: 'row' as const },
-			children: [ 'date_on_sale_from', 'date_on_sale_to' ],
-		},
 		'cost_of_goods_sold',
 	] ),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
@@ -151,17 +151,12 @@ const VARIATION_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'general-fields',
 		__( 'General', 'woocommerce' ),
-		[ 'product_status' ]
+		[ 'variation_active' ]
 	),
 	createProductEditFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
 		'regular_price',
 		'sale_price',
 		'schedule_sale',
-		{
-			id: 'sale-schedule-dates',
-			layout: { type: 'row' as const },
-			children: [ 'date_on_sale_from', 'date_on_sale_to' ],
-		},
 		'cost_of_goods_sold',
 	] ),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
@@ -216,11 +211,6 @@ const EXTERNAL_PRODUCT_EDIT_FORM_FIELDS = [
 		'regular_price',
 		'sale_price',
 		'schedule_sale',
-		{
-			id: 'sale-schedule-dates',
-			layout: { type: 'row' as const },
-			children: [ 'date_on_sale_from', 'date_on_sale_to' ],
-		},
 	] ),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
@@ -246,7 +236,7 @@ const GROUPED_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'general-fields',
 		__( 'General', 'woocommerce' ),
-		[ 'name', 'product_status', 'catalog_visibility', 'upsell_ids' ]
+		[ 'name', 'product_status', 'catalog_visibility', 'grouped_products' ]
 	),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
@@ -283,6 +273,7 @@ const PARENT_OWNED_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
 	'featured',
 	'upsell_ids',
 	'cross_sell_ids',
+	'grouped_products',
 	'external_url',
 	'button_text',
 ] );
@@ -328,6 +319,48 @@ function getMixedValueFallback( sample: unknown ) {
 	}
 
 	return undefined;
+}
+
+function isRecord( value: unknown ): value is Record< string, unknown > {
+	return (
+		Boolean( value ) &&
+		typeof value === 'object' &&
+		! Array.isArray( value )
+	);
+}
+
+function buildMergedDimensions(
+	values: unknown[]
+): ProductEntityRecord[ 'dimensions' ] | undefined {
+	const hasDimensionValue = values.some( isRecord );
+
+	if ( ! hasDimensionValue ) {
+		return undefined;
+	}
+
+	const dimensions: Partial< ProductEntityRecord[ 'dimensions' ] > = {};
+
+	DIMENSION_KEYS.forEach( ( dimensionKey ) => {
+		const dimensionValues = values.map( ( value ) =>
+			isRecord( value ) ? value[ dimensionKey ] : undefined
+		);
+		const firstDefinedValue = dimensionValues.find(
+			( value ) => value !== undefined
+		);
+		const areValuesEqual = dimensionValues.every(
+			( value ) =>
+				normalizeValue( value ) ===
+				normalizeValue( dimensionValues[ 0 ] )
+		);
+
+		dimensions[ dimensionKey ] = (
+			areValuesEqual
+				? dimensionValues[ 0 ]
+				: getMixedValueFallback( firstDefinedValue )
+		) as string | undefined;
+	} );
+
+	return dimensions as ProductEntityRecord[ 'dimensions' ];
 }
 
 function isVariableProductParent( product: ProductEntityRecord ) {
@@ -533,6 +566,12 @@ export function buildMergedProductEditData(
 		const values = products.map(
 			( product ) => product[ key as keyof ProductEntityRecord ]
 		);
+
+		if ( key === 'dimensions' ) {
+			mergedData[ key ] = buildMergedDimensions( values );
+			return;
+		}
+
 		const firstDefinedValue = values.find(
 			( value ) => value !== undefined
 		);

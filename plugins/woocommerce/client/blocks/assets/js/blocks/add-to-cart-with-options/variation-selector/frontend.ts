@@ -8,7 +8,6 @@ import {
 	getElement,
 } from '@wordpress/interactivity';
 import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
-import type { ChangeEvent } from 'react';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import type { ProductResponseItem } from '@woocommerce/types';
@@ -16,35 +15,38 @@ import type { ProductResponseItem } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import type {
-	AddToCartWithOptionsStore,
-	Context as AddToCartWithOptionsStoreContext,
-} from '../frontend';
 import {
 	normalizeAttributeName,
 	attributeNamesMatch,
 	getVariationAttributeValue,
 } from '../../../base/utils/variations/attribute-matching';
-import setStyles from './set-styles';
+import type {
+	AddToCartWithOptionsStore,
+	Context as AddToCartWithOptionsStoreContext,
+} from '../frontend';
+import type { SelectableItem } from '../../../types/type-defs/selectable-items';
+import type { VisualAttributeTerm } from '../../../base/utils/visual-attribute-terms';
 
-type Option = {
-	value: string;
+type VariationOptionItem = {
+	id: string;
 	label: string;
-	isSelected: boolean;
+	value: string;
+	ariaLabel?: string;
+	visual?: VisualAttributeTerm;
 };
 
 type Context = AddToCartWithOptionsStoreContext & {
 	name: string;
 	selectedValue: string | null;
-	option: Option;
-	options: Option[];
+	variationAttributeOptions: VariationOptionItem[];
 	autoselect: boolean;
+	disabledAttributesAction?: 'disable' | 'hide';
 };
 
-// Set selected pill styles for proper contrast.
-setStyles();
+type ToggleContext = Context & {
+	item?: SelectableItem< { visual?: VisualAttributeTerm } >;
+};
 
-// Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
@@ -54,14 +56,6 @@ const { state: productsState } = store< ProductsStore >(
 	{ lock: universalLock }
 );
 
-/**
- * Check if the attribute value is valid given the other selected attributes and
- * the available variations.
- *
- * To know if an attribute value is valid given the other selected attributes,
- * we make sure there is at least one available variation matching the current
- * selected attributes and the attribute value being checked.
- */
 const isAttributeValueValid = ( {
 	attributeName,
 	attributeValue,
@@ -189,15 +183,15 @@ export type VariableProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		state: {
 			selectedAttributes: SelectedAttributes[];
-			isOptionSelected: boolean;
-			isOptionDisabled: boolean;
+			selectableItems: readonly SelectableItem< {
+				visual?: VisualAttributeTerm;
+			} >[];
 		};
 		actions: {
 			setAttribute: ( attribute: string, value: string ) => void;
 			removeAttribute: ( attribute: string ) => void;
-			handlePillClick: () => void;
-			handleDropdownChange: (
-				event: ChangeEvent< HTMLSelectElement >
+			toggle: (
+				item?: SelectableItem< { visual?: VisualAttributeTerm } >
 			) => void;
 			autoselectAttributes: ( args: {
 				includedAttributes?: string[];
@@ -221,31 +215,51 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				if ( ! context ) {
 					return [];
 				}
-				return context.selectedAttributes;
+				return context.selectedAttributes || [];
 			},
-			get isOptionSelected() {
-				const { selectedAttributes, option, name } =
-					getContext< Context >();
+			get selectableItems(): readonly SelectableItem< {
+				visual?: VisualAttributeTerm;
+			} >[] {
+				const context = getContext< Context >();
+				if ( ! context ) {
+					return [];
+				}
+				const {
+					name,
+					disabledAttributesAction,
+					variationAttributeOptions,
+				} = context;
+				const { selectedAttributes } = state;
+				const hideInvalid = disabledAttributesAction === 'hide';
 
-				return selectedAttributes.some( ( attrObject ) => {
-					return (
-						attributeNamesMatch( attrObject.attribute, name ) &&
-						attrObject.value === option.value
-					);
-				} );
-			},
-			get isOptionDisabled() {
-				const { name, option, selectedAttributes } =
-					getContext< Context >();
-
-				if ( option.value === '' ) {
-					return false;
+				if ( ! Array.isArray( variationAttributeOptions ) ) {
+					return [];
 				}
 
-				return ! isAttributeValueValid( {
-					attributeName: name,
-					attributeValue: option.value,
-					selectedAttributes,
+				return variationAttributeOptions.map( ( row, index ) => {
+					const disabled = ! isAttributeValueValid( {
+						attributeName: name,
+						attributeValue: row.value,
+						selectedAttributes,
+					} );
+					const selected = selectedAttributes.some(
+						( attrObject ) =>
+							attributeNamesMatch( attrObject.attribute, name ) &&
+							attrObject.value === row.value
+					);
+					return {
+						id: row.id,
+						label: row.label,
+						value: row.value,
+						ariaLabel: row.ariaLabel || row.label,
+						index,
+						selected,
+						disabled,
+						hidden: hideInvalid && disabled,
+						...( row.visual !== undefined && {
+							visual: row.visual,
+						} ),
+					};
 				} );
 			},
 		},
@@ -292,28 +306,36 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					selectedAttributes.splice( index, 1 );
 				}
 			},
-			handlePillClick() {
-				const context = getContext< Context >();
+			toggle(
+				itemArg?:
+					| SelectableItem< { visual?: VisualAttributeTerm } >
+					| Event
+			) {
+				const context = getContext< ToggleContext >();
+				const item =
+					itemArg && ! ( itemArg instanceof Event )
+						? itemArg
+						: context.item;
+				if ( ! item || item.hidden || item.disabled ) {
+					return;
+				}
 
-				if ( state.isOptionSelected ) {
+				const { name } = context;
+				const { selectedAttributes } = state;
+				const isCurrentlySelected = selectedAttributes.some(
+					( attrObject ) =>
+						attributeNamesMatch( attrObject.attribute, name ) &&
+						attrObject.value === item.value
+				);
+
+				if ( isCurrentlySelected ) {
 					context.selectedValue = '';
+					actions.setAttribute( name, '' );
 				} else {
-					context.selectedValue = context.option.value;
-				}
-				actions.setAttribute( context.name, context.selectedValue );
-				if ( context.selectedValue !== '' ) {
+					context.selectedValue = item.value;
+					actions.setAttribute( name, item.value );
 					actions.autoselectAttributes( {
-						excludedAttributes: [ context.name ],
-					} );
-				}
-			},
-			handleDropdownChange( event: ChangeEvent< HTMLSelectElement > ) {
-				const context = getContext< Context >();
-				context.selectedValue = event.currentTarget.value;
-				actions.setAttribute( context.name, context.selectedValue );
-				if ( context.selectedValue !== '' ) {
-					actions.autoselectAttributes( {
-						excludedAttributes: [ context.name ],
+						excludedAttributes: [ name ],
 					} );
 				}
 			},
@@ -324,12 +346,12 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				includedAttributes?: Array< string >;
 				excludedAttributes?: Array< string >;
 			} = {} ) {
-				const { autoselect, selectedAttributes } =
-					getContext< Context >();
-
-				if ( ! autoselect ) {
+				const context = getContext< Context >();
+				if ( ! context || ! context.autoselect ) {
 					return;
 				}
+
+				const { selectedAttributes } = state;
 
 				const { mainProductInContext: product } = productsState;
 				if ( ! product ) {
@@ -389,10 +411,14 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 		callbacks: {
 			setDefaultSelectedAttribute() {
 				const context = getContext< Context >();
+				if ( ! context.name ) {
+					return;
+				}
 
 				if ( context.selectedValue ) {
 					actions.setAttribute( context.name, context.selectedValue );
 				}
+
 				actions.autoselectAttributes( {
 					includedAttributes: [ context.name ],
 				} );

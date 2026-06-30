@@ -16,9 +16,17 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class CreateWidget {
 	public static function get_field_definition(): array {
 		return array(
-			'type'        => Type::nonNull( WidgetType::get() ),
-			'description' => __( 'Create a new widget', 'woocommerce' ),
-			'args'        => array(
+			'type'          => Type::nonNull( WidgetType::get() ),
+			'description'   => __( 'Create a new widget', 'woocommerce' ),
+			'authorization' => array(
+				array(
+					'attribute' => 'RequiredCapability',
+					'args'      => array(
+						0 => 'manage_options',
+					),
+				),
+			),
+			'args'          => array(
 				'input'          => array(
 					'type'        => Type::nonNull( CreateWidgetInput::get() ),
 					'description' => __( 'The data for the new widget', 'woocommerce' ),
@@ -29,7 +37,7 @@ class CreateWidget {
 					'defaultValue' => null,
 				),
 			),
-			'resolve'     => array( self::class, 'resolve' ),
+			'resolve'       => array( self::class, 'resolve' ),
 		);
 	}
 
@@ -40,6 +48,12 @@ class CreateWidget {
 			throw ResolverHelpers::build_authorization_error( $context['principal'] );
 		}
 
+		// Publish the root query's metadata so downstream field-level
+		// authorization gates can read it via `$_metadata['query']`.
+		// $context is an ArrayObject (see GraphQLController::process_request())
+		// so the mutation propagates to nested resolvers.
+		$context['_query_metadata'] = array();
+
 		$command = \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Infrastructure\ClassResolver::resolve_class( CreateWidgetCommand::class );
 
 		$execute_args = array();
@@ -48,6 +62,22 @@ class CreateWidget {
 		}
 		if ( array_key_exists( 'related_inputs', $args ) ) {
 			$execute_args['related_inputs'] = $args['related_inputs'];
+		}
+
+		if ( isset( $execute_args['input'] ) && $execute_args['input'] instanceof \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\InputTypes\CreateWidgetInput ) {
+			$_parent = $execute_args['input'];
+			if ( $_parent->was_provided( 'weight' ) ) {
+				$principal = $context['principal'];
+				$_metadata = array(
+					'query' => $context['_query_metadata'] ?? array(),
+					'type'  => array(),
+					'field' => array(),
+				);
+				$_args     = $args;
+				if ( ! ( ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability( 'manage_woocommerce' ) )->authorize( $principal ) ) ) {
+					throw ResolverHelpers::build_field_authorization_error( $principal, 'CreateWidgetInput', 'weight', 'RequiredCapability' );
+				}
+			}
 		}
 
 		$result = ResolverHelpers::execute_command( $command, $execute_args );

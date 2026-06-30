@@ -51,6 +51,28 @@ class Metadata {
 	}
 
 	/**
+	 * Whether the element carrying this attribute should appear in the
+	 * `_apiMetadata` discovery query.
+	 *
+	 * Returning `false` removes the element's row entirely from
+	 * `_apiMetadata` — neither this metadata entry nor any other
+	 * descriptor on the same target surfaces. The runtime gates and any
+	 * description transforms are unaffected. Useful for plugins that
+	 * attach internal routing or feature hints they prefer not to
+	 * broadcast through the discovery channel.
+	 *
+	 * Despite the colloquial naming around it, this has nothing to do
+	 * with native GraphQL introspection (`__schema` / `__type`); those
+	 * queries continue to expose the schema's shape as usual.
+	 *
+	 * Because this is an instance method, subclasses can decide
+	 * conditionally based on their own constructor arguments.
+	 */
+	public function shows_in_metadata_query(): bool {
+		return true;
+	}
+
+	/**
 	 * Transform the GraphQL `description` of the element this attribute is
 	 * applied to.
 	 *

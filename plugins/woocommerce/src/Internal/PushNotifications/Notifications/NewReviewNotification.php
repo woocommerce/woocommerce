@@ -27,6 +27,41 @@ class NewReviewNotification extends Notification {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 *
+	 * Extends the base enabled-toggle check with a maximum-rating threshold.
+	 * When `max_rating` is set in the user's preferences, reviews rated above
+	 * the threshold do not trigger a notification.
+	 *
+	 * @param mixed $pref_value The user's stored preference value, or null.
+	 * @return bool
+	 *
+	 * @since 10.9.0
+	 */
+	public function should_send_to_user( $pref_value ): bool {
+		if ( ! parent::should_send_to_user( $pref_value ) ) {
+			return false;
+		}
+
+		if ( ! is_array( $pref_value ) || ! isset( $pref_value['max_rating'] ) ) {
+			return true;
+		}
+
+		$comment = WC()->call_function( 'get_comment', $this->get_resource_id() );
+		if ( ! $comment instanceof WP_Comment ) {
+			return false;
+		}
+
+		$rating = WC()->call_function( 'get_comment_meta', $this->get_resource_id(), 'rating', true );
+
+		if ( '' === $rating ) {
+			return true;
+		}
+
+		return (int) $rating <= (int) $pref_value['max_rating'];
+	}
+
+	/**
 	 * Returns the WPCOM-ready payload for this notification.
 	 *
 	 * Returns null if the comment no longer exists.

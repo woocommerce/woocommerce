@@ -29,6 +29,7 @@ export type ProductListQuery = Omit<
 };
 
 const SUPPORTED_STATUS_FILTER_FIELDS = [ 'status', 'product_status' ];
+const DISABLED_SORT_FIELDS = [ 'name', 'price' ];
 
 function isStringArray( value: unknown ): value is string[] {
 	return (
@@ -232,15 +233,19 @@ function applyStockQuantityFilter( query: ProductListQuery, filter: Filter ) {
 }
 
 export function buildProductListQuery( view: View ): ProductListQuery {
+	const sort =
+		view.sort && ! DISABLED_SORT_FIELDS.includes( view.sort.field )
+			? view.sort
+			: undefined;
 	const query: ProductListQuery = {
 		_embed: 1,
 		per_page: view.perPage,
 		page: view.page,
-		order: view.sort?.direction,
+		order: sort?.direction,
 		orderby:
-			view.sort?.field === 'name'
+			sort?.field === 'name'
 				? 'title'
-				: ( view.sort?.field as ProductQuery[ 'orderby' ] ),
+				: ( sort?.field as ProductQuery[ 'orderby' ] ),
 		search_name_or_sku: view.search || undefined,
 	};
 

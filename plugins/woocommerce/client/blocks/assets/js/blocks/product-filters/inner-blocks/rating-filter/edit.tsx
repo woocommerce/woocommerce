@@ -187,7 +187,7 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 					>
 						<BlockContextProvider
 							value={ {
-								woocommerceSelectableItems: {
+								'woocommerce/selectableItems': {
 									items: displayedOptions,
 									selectionMode: 'multiple' as const,
 									storeNamespace:

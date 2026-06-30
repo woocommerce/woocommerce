@@ -16,15 +16,23 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class UpdateCoupon {
 	public static function get_field_definition(): array {
 		return array(
-			'type'        => Type::nonNull( CouponType::get() ),
-			'description' => __( 'Update an existing coupon.', 'woocommerce' ),
-			'args'        => array(
+			'type'          => Type::nonNull( CouponType::get() ),
+			'description'   => __( 'Update an existing coupon.', 'woocommerce' ),
+			'authorization' => array(
+				array(
+					'attribute' => 'RequiredCapability',
+					'args'      => array(
+						0 => 'manage_woocommerce',
+					),
+				),
+			),
+			'args'          => array(
 				'input' => array(
 					'type'        => Type::nonNull( UpdateCouponInput::get() ),
 					'description' => __( 'The fields to update.', 'woocommerce' ),
 				),
 			),
-			'resolve'     => array( self::class, 'resolve' ),
+			'resolve'       => array( self::class, 'resolve' ),
 		);
 	}
 
@@ -34,6 +42,12 @@ class UpdateCoupon {
 		if ( ! self::compute_preauthorized( $context['principal'] ) ) {
 			throw ResolverHelpers::build_authorization_error( $context['principal'] );
 		}
+
+		// Publish the root query's metadata so downstream field-level
+		// authorization gates can read it via `$_metadata['query']`.
+		// $context is an ArrayObject (see GraphQLController::process_request())
+		// so the mutation propagates to nested resolvers.
+		$context['_query_metadata'] = array();
 
 		$command = \Automattic\WooCommerce\Api\Infrastructure\ClassResolver::resolve_class( UpdateCouponCommand::class );
 

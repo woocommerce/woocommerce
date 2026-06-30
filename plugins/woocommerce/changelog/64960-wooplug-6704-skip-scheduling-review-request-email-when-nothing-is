@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Skip scheduling and sending the customer review-request email when the order has no reviewable items (every product has reviews disabled per-product or site-wide, or every reviewable item is already reviewed for that order).

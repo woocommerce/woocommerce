@@ -1,10 +1,13 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Tests\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\AttributesHelper;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -55,6 +58,8 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		global $wpdb;
 
+		remove_all_filters( 'woocommerce_layered_nav_count_cache_max_entries' );
+
 		parent::tearDown();
 
 		// Unregister all product attributes.
@@ -95,6 +100,47 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_product_attributes_lookup" );
 
 		\WC_Query::reset_chosen_attributes();
+	}
+
+	/**
+	 * @testdox Layered nav count cache entries are capped per taxonomy transient.
+	 */
+	public function test_layered_nav_count_cache_entries_are_capped() {
+		add_filter( 'woocommerce_layered_nav_count_cache_max_entries', fn() => 2 );
+
+		$cached_counts = array(
+			'first'  => array( 1 => 1 ),
+			'second' => array( 2 => 2 ),
+			'third'  => array( 3 => 3 ),
+		);
+
+		$limited_counts = Filterer::limit_layered_nav_count_cache_entries( $cached_counts, 'third' );
+
+		$this->assertSame(
+			array(
+				'second' => array( 2 => 2 ),
+				'third'  => array( 3 => 3 ),
+			),
+			$limited_counts
+		);
+	}
+
+	/**
+	 * @testdox The layered nav count cache cap can be disabled.
+	 */
+	public function test_layered_nav_count_cache_cap_can_be_disabled() {
+		add_filter( 'woocommerce_layered_nav_count_cache_max_entries', '__return_zero' );
+
+		$cached_counts = array(
+			'first'  => array( 1 => 1 ),
+			'second' => array( 2 => 2 ),
+			'third'  => array( 3 => 3 ),
+		);
+
+		$this->assertSame(
+			$cached_counts,
+			Filterer::limit_layered_nav_count_cache_entries( $cached_counts, 'third' )
+		);
 	}
 
 	/**

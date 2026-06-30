@@ -16,9 +16,17 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class ListCoupons {
 	public static function get_field_definition(): array {
 		return array(
-			'type'        => Type::nonNull( CouponConnectionType::get() ),
-			'description' => __( 'List coupons with cursor-based pagination.', 'woocommerce' ),
-			'args'        => array(
+			'type'          => Type::nonNull( CouponConnectionType::get() ),
+			'description'   => __( 'List coupons with cursor-based pagination.', 'woocommerce' ),
+			'authorization' => array(
+				array(
+					'attribute' => 'RequiredCapability',
+					'args'      => array(
+						0 => 'read_private_shop_coupons',
+					),
+				),
+			),
+			'args'          => array(
 				'first'  => array(
 					'type'         => Type::int(),
 					'description'  => __( 'Return the first N results. Must be between 0 and 100.', 'woocommerce' ),
@@ -45,8 +53,8 @@ class ListCoupons {
 					'defaultValue' => null,
 				),
 			),
-			'complexity'  => ResolverHelpers::complexity_from_pagination( ... ),
-			'resolve'     => array( self::class, 'resolve' ),
+			'complexity'    => ResolverHelpers::complexity_from_pagination( ... ),
+			'resolve'       => array( self::class, 'resolve' ),
 		);
 	}
 
@@ -56,6 +64,12 @@ class ListCoupons {
 		if ( ! self::compute_preauthorized( $context['principal'] ) ) {
 			throw ResolverHelpers::build_authorization_error( $context['principal'] );
 		}
+
+		// Publish the root query's metadata so downstream field-level
+		// authorization gates can read it via `$_metadata['query']`.
+		// $context is an ArrayObject (see GraphQLController::process_request())
+		// so the mutation propagates to nested resolvers.
+		$context['_query_metadata'] = array();
 
 		$command = \Automattic\WooCommerce\Api\Infrastructure\ClassResolver::resolve_class( ListCouponsCommand::class );
 

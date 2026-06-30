@@ -337,6 +337,9 @@ export function TaxonomyEdit< T extends Record< string, unknown > >( {
 			inputValue={ inputValue }
 			onInputValueChange={ setInputValue }
 			creatableItem={ isLoading ? undefined : creatableItem }
+			placeholderChip={
+				value.length === 0 ? field.placeholder : undefined
+			}
 			searchPlaceholder={
 				searchPlaceholder ?? __( 'Search', 'woocommerce' )
 			}

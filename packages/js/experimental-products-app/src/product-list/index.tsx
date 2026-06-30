@@ -28,10 +28,12 @@ import {
 import { productFields } from './fields';
 import {
 	getItemId,
+	getProductEditPostId,
 	getProductListNavigationPath,
 	getProductListTab,
 	getProductsWithEmbeddedVariations,
 	getSelectionFromPostId,
+	hasActiveProductListSearchOrFilters,
 	isProductEditorAccessible,
 } from './utils';
 import { useProductActions } from '../dataviews-actions';
@@ -97,7 +99,7 @@ export default function ProductList( {
 			if ( items.length > 0 ) {
 				nextParams.postId = items.join( ',' );
 			} else {
-				delete nextParams.postId;
+				nextParams.postId = undefined;
 			}
 
 			navigate(
@@ -125,9 +127,8 @@ export default function ProductList( {
 			const nextParams = {
 				...currentQuery,
 				activeView: nextTab,
+				postId: undefined,
 			};
-
-			delete nextParams.postId;
 
 			navigate(
 				getProductListNavigationPath( location.path, nextParams )
@@ -150,6 +151,18 @@ export default function ProductList( {
 		() => getProductsWithEmbeddedVariations( records || EMPTY_ARRAY ),
 		[ records ]
 	);
+	const hasActiveSearchOrFilters =
+		hasActiveProductListSearchOrFilters( view );
+
+	const onClearSearchOrFilters = useCallback( () => {
+		setView( {
+			...view,
+			filters: [],
+			page: 1,
+			search: '',
+		} );
+	}, [ setView, view ] );
+
 	const getItemParentId = useCallback(
 		( item: ProductEntityRecord ) =>
 			item.parent_id && item.parent_id > 0 ? item.parent_id : undefined,
@@ -294,13 +307,19 @@ export default function ProductList( {
 				selection={ selection }
 				defaultLayouts={ DEFAULT_LAYOUTS }
 				isItemClickable={ isProductEditorAccessible }
-				empty={ <ProductListEmptyState tab={ selectedTab } /> }
+				empty={
+					<ProductListEmptyState
+						isSearchOrFilterResult={ hasActiveSearchOrFilters }
+						onClearFilters={ onClearSearchOrFilters }
+						tab={ selectedTab }
+					/>
+				}
 				renderItemLink={ ( { item, ...props } ) => (
 					<a
 						{ ...props }
 						href={ getAdminLink(
 							addQueryArgs( 'post.php', {
-								post: item.id,
+								post: getProductEditPostId( item ),
 								action: 'edit',
 							} )
 						) }

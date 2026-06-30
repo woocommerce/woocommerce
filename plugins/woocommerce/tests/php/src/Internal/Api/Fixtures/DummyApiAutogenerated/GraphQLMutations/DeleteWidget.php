@@ -15,9 +15,17 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class DeleteWidget {
 	public static function get_field_definition(): array {
 		return array(
-			'type'        => Type::nonNull( OperationResultType::get() ),
-			'description' => __( 'Delete a widget', 'woocommerce' ),
-			'args'        => array(
+			'type'          => Type::nonNull( OperationResultType::get() ),
+			'description'   => __( 'Delete a widget', 'woocommerce' ),
+			'authorization' => array(
+				array(
+					'attribute' => 'RequiredCapability',
+					'args'      => array(
+						0 => 'manage_options',
+					),
+				),
+			),
+			'args'          => array(
 				'id'    => array(
 					'type'        => Type::nonNull( Type::int() ),
 					'description' => __( 'The widget id to delete', 'woocommerce' ),
@@ -28,7 +36,7 @@ class DeleteWidget {
 					'defaultValue' => false,
 				),
 			),
-			'resolve'     => array( self::class, 'resolve' ),
+			'resolve'       => array( self::class, 'resolve' ),
 		);
 	}
 
@@ -38,6 +46,12 @@ class DeleteWidget {
 		if ( ! self::compute_preauthorized( $context['principal'] ) ) {
 			throw ResolverHelpers::build_authorization_error( $context['principal'] );
 		}
+
+		// Publish the root query's metadata so downstream field-level
+		// authorization gates can read it via `$_metadata['query']`.
+		// $context is an ArrayObject (see GraphQLController::process_request())
+		// so the mutation propagates to nested resolvers.
+		$context['_query_metadata'] = array();
 
 		$command = \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Infrastructure\ClassResolver::resolve_class( DeleteWidgetCommand::class );
 

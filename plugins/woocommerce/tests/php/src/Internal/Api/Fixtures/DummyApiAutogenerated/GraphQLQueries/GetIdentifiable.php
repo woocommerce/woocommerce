@@ -15,19 +15,31 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class GetIdentifiable {
 	public static function get_field_definition(): array {
 		return array(
-			'type'        => Type::nonNull( NamedInterface::get() ),
-			'description' => __( 'Return either a Widget or a Gadget, both of which implement Named', 'woocommerce' ),
-			'args'        => array(
+			'type'          => Type::nonNull( NamedInterface::get() ),
+			'description'   => __( 'Return either a Widget or a Gadget, both of which implement Named', 'woocommerce' ),
+			'authorization' => array(
+				array(
+					'attribute' => 'PublicAccess',
+					'args'      => array(),
+				),
+			),
+			'args'          => array(
 				'kind' => array(
 					'type'        => Type::nonNull( Type::string() ),
 					'description' => __( 'Which kind of object to return', 'woocommerce' ),
 				),
 			),
-			'resolve'     => array( self::class, 'resolve' ),
+			'resolve'       => array( self::class, 'resolve' ),
 		);
 	}
 
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
+		// Publish the root query's metadata so downstream field-level
+		// authorization gates can read it via `$_metadata['query']`.
+		// $context is an ArrayObject (see GraphQLController::process_request())
+		// so the mutation propagates to nested resolvers.
+		$context['_query_metadata'] = array();
+
 		$command = \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Infrastructure\ClassResolver::resolve_class( GetIdentifiableCommand::class );
 
 		$execute_args = array();

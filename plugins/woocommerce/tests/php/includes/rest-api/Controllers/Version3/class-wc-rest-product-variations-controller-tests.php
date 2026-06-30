@@ -984,4 +984,60 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case
 
 		$this->assert_incomplete_meta_data_handled_correctly( wc_get_product( $variation->get_id() ) );
 	}
+
+	/**
+	 * @testdox Variation batch updates coalesce repeated product transient deletion.
+	 */
+	public function test_batch_update_coalesces_product_transient_deletion(): void {
+		$parent                                = WC_Helper_Product::create_variation_product();
+		$variation_ids                         = array_slice( $parent->get_children(), 0, 2 );
+		$deleted_ids                           = array();
+		$parent_product_children_deletes       = 0;
+		$track_deletes                         = static function ( $product_id ) use ( &$deleted_ids ) {
+			$deleted_ids[] = (int) $product_id;
+		};
+		$track_parent_product_children_deletes = static function () use ( &$parent_product_children_deletes ) {
+			++$parent_product_children_deletes;
+		};
+
+		add_action( 'woocommerce_delete_product_transients', $track_deletes );
+		add_action( 'delete_transient_wc_product_children_' . $parent->get_id(), $track_parent_product_children_deletes );
+		try {
+			$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $parent->get_id() . '/variations/batch' );
+			$request->set_body_params(
+				array(
+					'update' => array(
+						array(
+							'id'            => $variation_ids[0],
+							'regular_price' => '12.99',
+						),
+						array(
+							'id'            => $variation_ids[1],
+							'regular_price' => '13.99',
+						),
+					),
+				)
+			);
+
+			$response = $this->server->dispatch( $request );
+		} finally {
+			remove_action( 'woocommerce_delete_product_transients', $track_deletes );
+			remove_action( 'delete_transient_wc_product_children_' . $parent->get_id(), $track_parent_product_children_deletes );
+		}
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 2, $response->get_data()['update'] );
+
+		$expected_deleted_ids = array_merge( $variation_ids, array( $parent->get_id() ) );
+		$this->assertEqualsCanonicalizing( $expected_deleted_ids, array_unique( $deleted_ids ) );
+
+		foreach ( $expected_deleted_ids as $expected_deleted_id ) {
+			$this->assertSame(
+				1,
+				count( array_keys( $deleted_ids, $expected_deleted_id, true ) ),
+				'Each affected product should have product transients deleted once per batch.'
+			);
+		}
+		$this->assertSame( 1, $parent_product_children_deletes, 'Parent variation transients should be deleted once per batch.' );
+	}
 }

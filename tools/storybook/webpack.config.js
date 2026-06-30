@@ -3,7 +3,6 @@
  */
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-const webpack = require( 'webpack' );
 
 /**
  * External dependencies
@@ -56,7 +55,6 @@ module.exports = ( storybookConfig ) => {
 
 	storybookConfig.resolve.modules = [
 		path.join( __dirname, '../../plugins/woocommerce/client/admin/client' ),
-		path.join( __dirname, '../../packages/js/product-editor/src' ),
 		'node_modules',
 	];
 
@@ -87,13 +85,6 @@ module.exports = ( storybookConfig ) => {
 						`../../packages/js/onboarding/build-style/*.css`
 					),
 					to: `./onboarding-css/[name][ext]`,
-				},
-				{
-					from: path.resolve(
-						__dirname,
-						`../../packages/js/product-editor/build-style/*.css`
-					),
-					to: `./product-editor-css/[name][ext]`,
 				},
 				{
 					from: path.resolve(

@@ -8,14 +8,18 @@ use Automattic\WooCommerce\Api\Attributes\ArrayOf;
 use Automattic\WooCommerce\Api\Attributes\ConnectionOf;
 use Automattic\WooCommerce\Api\Attributes\Deprecated;
 use Automattic\WooCommerce\Api\Attributes\Description;
+use Automattic\WooCommerce\Api\Attributes\HiddenFromMetadataQuery;
 use Automattic\WooCommerce\Api\Attributes\Ignore;
 use Automattic\WooCommerce\Api\Attributes\Parameter;
 use Automattic\WooCommerce\Api\Attributes\ParameterDescription;
+use Automattic\WooCommerce\Api\Attributes\PublicAccess;
+use Automattic\WooCommerce\Api\Attributes\RequiredCapability;
 use Automattic\WooCommerce\Api\Attributes\ScalarType;
 use Automattic\WooCommerce\Api\Pagination\Connection;
 use Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Enums\Color;
 use Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Enums\Priority;
 use Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Interfaces\Named;
+use Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Metadata\VisibleSampleMetadata;
 use Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Scalars\DummyDateTime;
 
 /**
@@ -29,6 +33,8 @@ class Widget {
 	public string $slug;
 
 	#[Description( 'An optional caption' )]
+	#[VisibleSampleMetadata]
+	#[RequiredCapability( 'manage_woocommerce' )]
 	public ?string $caption;
 
 	#[Description( 'The widget color' )]
@@ -39,6 +45,7 @@ class Widget {
 
 	#[Description( 'Tag IDs assigned to this widget' )]
 	#[ArrayOf( 'int' )]
+	#[PublicAccess]
 	public array $tag_ids;
 
 	#[Description( 'Notable comments left on this widget' )]
@@ -66,6 +73,7 @@ class Widget {
 
 	#[Description( 'A field flagged for removal' )]
 	#[Deprecated( 'Use price instead.' )]
+	#[HiddenFromMetadataQuery]
 	public string $legacy_price;
 
 	#[Ignore]

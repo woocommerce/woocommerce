@@ -26,12 +26,26 @@ describe( 'buildProductListQuery', () => {
 			expect.objectContaining( {
 				per_page: 25,
 				page: 3,
-				order: 'asc',
-				orderby: 'title',
 				_embed: 1,
 				search_name_or_sku: 'hoodie',
 			} )
 		);
+	} );
+
+	it( 'does not map disabled sort fields to query params', () => {
+		const nameSortQuery = buildProductListQuery( baseView );
+		const priceSortQuery = buildProductListQuery( {
+			...baseView,
+			sort: {
+				field: 'price',
+				direction: 'desc',
+			},
+		} as View );
+
+		expect( nameSortQuery.order ).toBeUndefined();
+		expect( nameSortQuery.orderby ).toBeUndefined();
+		expect( priceSortQuery.order ).toBeUndefined();
+		expect( priceSortQuery.orderby ).toBeUndefined();
 	} );
 
 	it( 'maps supported filters to the v4 product query', () => {

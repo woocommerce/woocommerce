@@ -139,6 +139,11 @@ class ResolverHelpers {
 	 * that don't define it fall through to FORBIDDEN — generated resolvers
 	 * still emit a coded error, just without the 401/403 distinction.
 	 *
+	 * Used for class-level denials (operation-level "you cannot call this
+	 * query/mutation"). For field-level denials that should carry a
+	 * structured `subject` payload (type / field / attribute), see
+	 * {@see self::build_field_authorization_error()}.
+	 *
 	 * @param object $principal The resolved request principal.
 	 */
 	public static function build_authorization_error( object $principal ): Error {
@@ -146,6 +151,40 @@ class ResolverHelpers {
 		return new Error(
 			$is_anonymous ? 'Authentication required.' : 'You do not have permission to perform this action.',
 			extensions: array( 'code' => $is_anonymous ? 'UNAUTHORIZED' : 'FORBIDDEN' )
+		);
+	}
+
+	/**
+	 * Like {@see self::build_authorization_error()} but carries a structured
+	 * `subject` payload identifying *what* was denied — the enclosing type,
+	 * the field (when applicable), and the attribute class name driving the
+	 * decision. Clients can branch on `extensions.subject.field` to tell a
+	 * field-level deny apart from an operation-level one.
+	 *
+	 * The error code (UNAUTHORIZED / FORBIDDEN) is preserved verbatim so
+	 * existing client handlers continue to work; the subject payload is
+	 * additive.
+	 *
+	 * @param object  $principal       The resolved request principal.
+	 * @param string  $type            GraphQL type name carrying the gate.
+	 * @param ?string $field           Field name when the deny is field-level; null for type/operation-level denies.
+	 * @param string  $attribute_short Short class name of the deciding authorization attribute (no namespace).
+	 */
+	public static function build_field_authorization_error( object $principal, string $type, ?string $field, string $attribute_short ): Error {
+		$is_anonymous = method_exists( $principal, 'is_authenticated' ) && ! $principal->is_authenticated();
+		$subject      = array(
+			'type'      => $type,
+			'attribute' => $attribute_short,
+		);
+		if ( null !== $field ) {
+			$subject['field'] = $field;
+		}
+		return new Error(
+			$is_anonymous ? 'Authentication required.' : 'You do not have permission to perform this action.',
+			extensions: array(
+				'code'    => $is_anonymous ? 'UNAUTHORIZED' : 'FORBIDDEN',
+				'subject' => $subject,
+			)
 		);
 	}
 
@@ -167,6 +206,12 @@ class ResolverHelpers {
 	 * both attributes and an `authorize()` method composes the two via the
 	 * `_preauthorized` infrastructure parameter; this helper returns the value
 	 * that `_preauthorized` would carry, not the final `authorize()` outcome.
+	 *
+	 * Scope is class-level (queries / mutations). Field-level authorization
+	 * lives on output-type / input-type properties and is enforced inside
+	 * the generated resolvers. To inspect a field's declared authorization
+	 * from code, walk {@see \Automattic\WooCommerce\Api\Utils\SchemaHandle::find_metadata()}
+	 * and read the `authorization` slice on each row.
 	 *
 	 * @param string $command_fqcn Fully-qualified command class name.
 	 * @param object $principal    The resolved principal. Anonymous requests are represented by a sentinel principal (e.g. {@see \Automattic\WooCommerce\Api\Infrastructure\Principal} whose underlying WP_User has ID=0), not by null.
@@ -210,16 +255,84 @@ class ResolverHelpers {
 			}
 		}
 
+		$query_metadata = self::harvest_class_metadata( $ref );
+
 		foreach ( $usages as $instance ) {
 			$auth_method = new \ReflectionMethod( $instance, 'authorize' );
-			$result      = $auth_method->getNumberOfParameters() > 0
-				? $instance->authorize( $principal )
-				: $instance->authorize();
+			$call_args   = self::build_authorize_call_args(
+				$auth_method,
+				$principal,
+				array( 'query' => $query_metadata ),
+				array(),
+				null
+			);
+			$result      = $instance->authorize( ...$call_args );
 			if ( ! $result ) {
 				return false;
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Mirror of `ApiBuilder::harvest_metadata()` for the runtime path. Walks
+	 * {@see \Automattic\WooCommerce\Api\Attributes\Metadata}-subclass attributes
+	 * on a class reflector and returns `name => value`. Duplicate names are
+	 * resolved last-wins — the build-time validator already errors on
+	 * duplicates, so this is only relevant for in-process classes that
+	 * never went through a build.
+	 *
+	 * The per-target `_apiMetadata` opt-out (`shows_in_metadata_query()`)
+	 * is not applied here: the `$_metadata` slot threaded into a class-
+	 * level attribute's `authorize()` is for policy input, not discovery,
+	 * so attribute authors see every entry regardless of how it surfaces
+	 * through `_apiMetadata`.
+	 *
+	 * @param \ReflectionClass $ref The class to read metadata from.
+	 * @return array<string, bool|int|float|string|null>
+	 */
+	private static function harvest_class_metadata( \ReflectionClass $ref ): array {
+		$entries = array();
+		foreach ( $ref->getAttributes( \Automattic\WooCommerce\Api\Attributes\Metadata::class, \ReflectionAttribute::IS_INSTANCEOF ) as $attribute ) {
+			$instance                         = $attribute->newInstance();
+			$entries[ $instance->get_name() ] = $instance->get_value();
+		}
+		return $entries;
+	}
+
+	/**
+	 * Build the positional/named argument list for an attribute's `authorize()`
+	 * method based on which opt-in slots its signature declares.
+	 *
+	 * The principal is always passed first (positionally) when the method
+	 * declares a non-`_`-prefixed parameter; infrastructure parameters
+	 * (`$_metadata`, `$_args`, `$_parent`) are passed as named arguments so
+	 * the attribute can omit any subset without affecting the call shape.
+	 *
+	 * @param \ReflectionMethod $method    The attribute's `authorize()` method.
+	 * @param object            $principal The resolved principal to pass when the method takes one.
+	 * @param array             $metadata  Value for `$_metadata` (passed if the method declares it).
+	 * @param array             $args      Value for `$_args` (passed if the method declares it).
+	 * @param mixed             $parent    Value for `$_parent` (passed if the method declares it).
+	 *
+	 * @return array<int|string, mixed> Positional principal first (if any), then named infra slots. Use with `...` spread.
+	 */
+	private static function build_authorize_call_args( \ReflectionMethod $method, object $principal, array $metadata, array $args, mixed $parent ): array {
+		$call_args = array();
+		foreach ( $method->getParameters() as $param ) {
+			$name = $param->getName();
+			if ( '_metadata' === $name ) {
+				$call_args['_metadata'] = $metadata;
+			} elseif ( '_args' === $name ) {
+				$call_args['_args'] = $args;
+			} elseif ( '_parent' === $name ) {
+				$call_args['_parent'] = $parent;
+			} elseif ( '' === $name || '_' !== $name[0] ) {
+				// Principal — positional, must be the first entry in the spread.
+				array_unshift( $call_args, $principal );
+			}
+		}
+		return $call_args;
 	}
 
 	/**
@@ -252,9 +365,10 @@ class ResolverHelpers {
 
 	/**
 	 * Whether a method's shape matches the authorization-attribute contract:
-	 * public, non-static, returns bool, and takes either 0 parameters or
-	 * exactly 1 typed, non-nullable parameter (the principal — anonymous
-	 * requests use a sentinel non-null principal, so attributes never see null).
+	 * public, non-static, returns bool, and parameters drawn from the accepted
+	 * set — at most one principal (any non-`_`-prefixed name, non-nullable
+	 * typed) plus any subset of `$_metadata` (array), `$_args` (array), and
+	 * `$_parent` (any type).
 	 *
 	 * Mirrors the build-time `ApiBuilder::validate_attribute_authorize_shape()`
 	 * check so the runtime helper recognises the same set of attributes ApiBuilder
@@ -270,15 +384,34 @@ class ResolverHelpers {
 		if ( ! $return_type instanceof \ReflectionNamedType || 'bool' !== $return_type->getName() ) {
 			return false;
 		}
-		$params = $method->getParameters();
-		if ( count( $params ) > 1 ) {
-			return false;
+
+		$principal_seen = false;
+		foreach ( $method->getParameters() as $param ) {
+			$name = $param->getName();
+			if ( '_metadata' === $name || '_args' === $name ) {
+				$type = $param->getType();
+				if ( ! $type instanceof \ReflectionNamedType || 'array' !== $type->getName() ) {
+					return false;
+				}
+				continue;
+			}
+			if ( '_parent' === $name ) {
+				continue;
+			}
+			if ( '' !== $name && '_' === $name[0] ) {
+				// Unknown infra parameter — reject.
+				return false;
+			}
+			if ( $principal_seen ) {
+				return false;
+			}
+			$type = $param->getType();
+			if ( ! $type instanceof \ReflectionNamedType || $type->allowsNull() ) {
+				return false;
+			}
+			$principal_seen = true;
 		}
-		if ( 0 === count( $params ) ) {
-			return true;
-		}
-		$param_type = $params[0]->getType();
-		return $param_type instanceof \ReflectionNamedType && ! $param_type->allowsNull();
+		return true;
 	}
 
 	/**

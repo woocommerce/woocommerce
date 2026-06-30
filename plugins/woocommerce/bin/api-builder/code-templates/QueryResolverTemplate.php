@@ -11,7 +11,8 @@
  * @var string $return_type_expr
  * @var array  $use_statements
  * @var array  $args - each: ['name', 'type_expr', 'description', 'has_default', 'default', 'metadata' => array]
- * @var array  $metadata - root-field-level metadata, name => scalar value.
+ * @var array  $metadata - root-field-level metadata for discovery (`_apiMetadata`); blank when the operation opts out via shows_in_metadata_query().
+ * @var array  $metadata_runtime - full root-field-level metadata, published into $context['_query_metadata'] for downstream field gates regardless of discovery opt-out.
  * @var bool   $has_connection_of
  * @var string $connection_type_alias
  * @var bool   $standalone_attribute_check - true when authorize() is absent and the attribute_expr is the sole authorization gate
@@ -100,6 +101,16 @@ class <?php echo $class_name; ?> {
 <?php endforeach; ?>
 			),
 <?php endif; ?>
+<?php if ( ! empty( $authorization_descriptors ) ) : ?>
+			'authorization' => array(
+<?php foreach ( $authorization_descriptors as $descriptor ) : ?>
+				array(
+					'attribute' => <?php echo var_export( $descriptor['attribute'], true ); ?>,
+					'args'      => <?php echo var_export( $descriptor['args'], true ); ?>,
+				),
+<?php endforeach; ?>
+			),
+<?php endif; ?>
 			'args' => array(
 <?php foreach ( $args as $arg ) : ?>
 				'<?php echo $arg['name']; ?>' => array(
@@ -136,6 +147,13 @@ class <?php echo $class_name; ?> {
 		}
 
 <?php endif; ?>
+		// Publish the root query's metadata so downstream field-level
+		// authorization gates can read it via `$_metadata['query']`.
+		// $context is an ArrayObject (see GraphQLController::process_request())
+		// so the mutation propagates to nested resolvers.
+		$context['_query_metadata'] = <?php echo var_export( $metadata_runtime, true ); ?>;
+
+
 <?php if ( null !== $class_resolver_fqcn ) : ?>
 		$command = \<?php echo $class_resolver_fqcn; ?>::resolve_class( <?php echo $command_alias; ?>::class );
 <?php else : ?>
@@ -173,6 +191,26 @@ foreach ( $execute_params as $param ) :
 			$execute_args['<?php echo $param['name']; ?>'] = $args['<?php echo $param['name']; ?>'];
 		}
 <?php endif; ?>
+<?php endforeach; ?>
+
+<?php foreach ( $input_side_gates as $gate_set ) : ?>
+		if ( isset( $execute_args['<?php echo $gate_set['exec_arg_name']; ?>'] ) && $execute_args['<?php echo $gate_set['exec_arg_name']; ?>'] instanceof \<?php echo $gate_set['input_fqcn']; ?> ) {
+			$_parent = $execute_args['<?php echo $gate_set['exec_arg_name']; ?>'];
+	<?php foreach ( $gate_set['fields'] as $field_gate ) : ?>
+			if ( $_parent->was_provided( '<?php echo $field_gate['field_name']; ?>' ) ) {
+				$principal = $context['principal'];
+				$_metadata = array(
+					'query' => $context['_query_metadata'] ?? array(),
+					'type'  => <?php echo $field_gate['type_metadata_literal']; ?>,
+					'field' => <?php echo $field_gate['field_metadata_literal']; ?>,
+				);
+				$_args     = $args;
+				if ( ! ( <?php echo $field_gate['attribute_expr']; ?> ) ) {
+					throw ResolverHelpers::build_field_authorization_error( $principal, '<?php echo $gate_set['input_short_name']; ?>', '<?php echo $field_gate['field_name']; ?>', '<?php echo $field_gate['first_attribute_short']; ?>' );
+				}
+			}
+	<?php endforeach; ?>
+		}
 <?php endforeach; ?>
 
 <?php if ( $has_authorize ) : ?>

@@ -40,6 +40,7 @@ export const SearchableChipSelect = forwardRef<
 		emptyContent = __( 'No results found.', 'woocommerce' ),
 		items = DEFAULT_ITEMS,
 		chipsContent,
+		placeholderChip,
 		searchPlaceholder = __( 'Search', 'woocommerce' ),
 		showClearButton = true,
 		clearButtonLabel = __( 'Clear all', 'woocommerce' ),
@@ -78,11 +79,15 @@ export const SearchableChipSelect = forwardRef<
 				}
 			>
 				<BaseCombobox.Value>
-					{ ( value: Item[] ) =>
-						value.length > 0 ? (
+					{ ( value: Item[] ) => {
+						const hasValue = value.length > 0;
+						const showPlaceholderChip =
+							! hasValue && Boolean( placeholderChip );
+
+						return hasValue || showPlaceholderChip ? (
 							<div className="woocommerce-searchable-chip-select__chips-edit-area">
 								<div className="woocommerce-searchable-chip-select__chips-list">
-									{ chipsContent
+									{ hasValue && chipsContent
 										? chipsContent( value )
 										: value.map( ( item ) => (
 												<BaseCombobox.Chip
@@ -105,8 +110,15 @@ export const SearchableChipSelect = forwardRef<
 													</BaseCombobox.ChipRemove>
 												</BaseCombobox.Chip>
 										  ) ) }
+									{ showPlaceholderChip && (
+										<span className="woocommerce-searchable-chip-select__chip woocommerce-searchable-chip-select__chip--is-placeholder">
+											<span className="woocommerce-searchable-chip-select__chip-content">
+												{ placeholderChip }
+											</span>
+										</span>
+									) }
 								</div>
-								{ showClearButton && (
+								{ hasValue && showClearButton && (
 									<BaseCombobox.Clear
 										className="woocommerce-searchable-chip-select__clear"
 										aria-label={ clearButtonLabel }
@@ -115,8 +127,8 @@ export const SearchableChipSelect = forwardRef<
 									</BaseCombobox.Clear>
 								) }
 							</div>
-						) : null
-					}
+						) : null;
+					} }
 				</BaseCombobox.Value>
 
 				<BaseCombobox.Input

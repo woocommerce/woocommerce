@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class OverriddenCapQuery {
 	public static function get_field_definition(): array {
 		return array(
-			'type'        => Type::nonNull(
+			'type'          => Type::nonNull(
 				new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(
 					array(
 						'name'   => 'OverriddenCapQueryResult',
@@ -24,9 +24,17 @@ class OverriddenCapQuery {
 					)
 				)
 			),
-			'description' => __( 'Overrides the inherited manage_options with manage_categories', 'woocommerce' ),
-			'args'        => array(),
-			'resolve'     => array( self::class, 'resolve' ),
+			'description'   => __( 'Overrides the inherited manage_options with manage_categories', 'woocommerce' ),
+			'authorization' => array(
+				array(
+					'attribute' => 'RequiredCapability',
+					'args'      => array(
+						0 => 'manage_categories',
+					),
+				),
+			),
+			'args'          => array(),
+			'resolve'       => array( self::class, 'resolve' ),
 		);
 	}
 
@@ -36,6 +44,12 @@ class OverriddenCapQuery {
 		if ( ! self::compute_preauthorized( $context['principal'] ) ) {
 			throw ResolverHelpers::build_authorization_error( $context['principal'] );
 		}
+
+		// Publish the root query's metadata so downstream field-level
+		// authorization gates can read it via `$_metadata['query']`.
+		// $context is an ArrayObject (see GraphQLController::process_request())
+		// so the mutation propagates to nested resolvers.
+		$context['_query_metadata'] = array();
 
 		$command = \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Infrastructure\ClassResolver::resolve_class( OverriddenCapQueryCommand::class );
 

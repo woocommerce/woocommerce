@@ -43,14 +43,19 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	...fieldDefinition,
 	Edit: ( { data, onChange, field } ) => {
 		const options = field.elements ?? [];
-		const selectedOption = options.find(
-			( option ) =>
-				option.value === ( data.catalog_visibility ?? 'visible' )
-		);
+		const selectedOption =
+			field.placeholder && ! data.catalog_visibility
+				? undefined
+				: options.find(
+						( option ) =>
+							option.value ===
+							( data.catalog_visibility ?? 'visible' )
+				  );
 
 		return (
 			<SelectControl
 				label={ field.label }
+				placeholder={ field.placeholder }
 				value={ selectedOption }
 				items={ options }
 				onValueChange={ ( option ) => {

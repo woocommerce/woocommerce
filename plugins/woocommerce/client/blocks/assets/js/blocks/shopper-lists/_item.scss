@@ -1,0 +1,125 @@
+// Row styles shared by every block that renders a shopper-list item card
+// (Saved for Later, Wishlist, …). Consumers `@import` this partial and
+// keep their own layout (grid wrapper, empty-state, header) in their
+// block-local stylesheet.
+
+// Layout rules for `.wc-block-components-product-image`,
+// `.wc-block-components-product-price` and `.wc-block-components-product-button`
+// come from the atomic product-image / -price / -button blocks' stylesheets,
+// which the consuming blocks declare as style dependencies in `block.json`.
+// Don't duplicate those rules here.
+
+.wc-block-shopper-list-item {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25em;
+
+	// Tombstone rows render `<a>` without an href so iAPI can keep
+	// reconciling them against the live-row template (swapping the
+	// element type would force a re-hydration). The browser already
+	// drops link semantics for hrefless anchors, but make the
+	// non-clickability explicit so any inherited link styles don't
+	// mislead pointer or keyboard users.
+	a:not([href]) {
+		cursor: default;
+		pointer-events: none;
+	}
+
+	// The atomic product-button's `display: flex` outspecifies `[hidden]`,
+	// so the action wrapper (Move to cart / Add to cart) wouldn't honor
+	// `hidden` without this.
+	.wp-block-button.wc-block-components-product-button[hidden] {
+		display: none;
+	}
+
+	// Title spacing/line-height matches Product Collection's default
+	// product-title attributes (level: 2, margin: 0 0 0.75rem, line-height: 1.4).
+	// We target wp-block-post-title (core's post-title class) because the
+	// editor preview mirrors PC's editor render, which uses core/post-title.
+	.wp-block-post-title {
+		line-height: 1.4;
+		margin: 0 0 0.75rem;
+	}
+
+	// Quantity has no atomic equivalent in Product Collection, so we own
+	// its styling. Center-aligned and small to mirror the rest of the row
+	// (price + button use the WP `has-small-font-size` preset). Only the
+	// Saved for Later block renders this element — Wishlist omits it — but
+	// the rule lives here so the row's visual language stays consistent
+	// across consumers.
+	&__quantity {
+		color: rgba(0, 0, 0, 0.7);
+		display: block;
+		font-size: var(--wp--preset--font-size--small, 0.875em);
+		text-align: center;
+	}
+
+	// Variation overlay sits at the bottom of the image and shares the
+	// remove badge's border/background/radius so the two corner overlays
+	// read as a pair. Spans the full image width (with the same 4px inset
+	// the remove badge uses on top/right) and is only rendered for
+	// variation products, so when absent the image isn't pushed around.
+	&__variation {
+		background: #fff;
+		border: 1px solid #43454b;
+		border-radius: 4px;
+		bottom: 4px;
+		box-sizing: border-box;
+		color: #43454b;
+		font-size: var(--wp--preset--font-size--small, 0.875em);
+		left: 4px;
+		padding: 0.25em 0.75em;
+		position: absolute;
+		right: 4px;
+		text-align: center;
+		z-index: 10;
+	}
+
+	// Icon-only Remove button overlaying the image. Mirrors the
+	// `woocommerce-product-gallery__trigger` corner-overlay styles
+	// (white fill, circular, black icon, no border) so the affordance
+	// reads consistently with the gallery zoom trigger.
+	&__remove {
+		appearance: none;
+		background: #fff;
+		border: none;
+		border-radius: 100%;
+		box-sizing: border-box;
+		color: #000;
+		cursor: pointer;
+		display: block;
+		line-height: 0;
+		padding: 0.25em;
+		position: absolute;
+		right: 4px;
+		top: 4px;
+		transition: background-color 120ms ease, color 120ms ease;
+		z-index: 10;
+
+		svg {
+			display: block;
+			fill: currentColor;
+		}
+
+		&:hover:not([disabled]) {
+			background: #000;
+			color: #fff;
+		}
+
+		// Keyboard focus indicator. The default :focus-visible ring would
+		// land on a transparent border against the white badge body and
+		// be invisible, so paint our own — outline (so it sits outside the
+		// border without nudging layout) plus a soft offset to keep it
+		// readable over both the badge body and the product image behind
+		// it. Not applied to :hover-only — pointer users keep the invert.
+		&:focus-visible:not([disabled]) {
+			outline: 2px solid #000;
+			outline-offset: 1px;
+		}
+
+		&[disabled] {
+			cursor: not-allowed;
+			opacity: 0.7;
+		}
+	}
+}

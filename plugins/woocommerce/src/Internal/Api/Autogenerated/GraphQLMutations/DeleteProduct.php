@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class DeleteProduct {
 	public static function get_field_definition(): array {
 		return array(
-			'type'        => Type::nonNull(
+			'type'          => Type::nonNull(
 				new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(
 					array(
 						'name'   => 'DeleteProductResult',
@@ -24,8 +24,16 @@ class DeleteProduct {
 					)
 				)
 			),
-			'description' => __( 'Delete a product.', 'woocommerce' ),
-			'args'        => array(
+			'description'   => __( 'Delete a product.', 'woocommerce' ),
+			'authorization' => array(
+				array(
+					'attribute' => 'RequiredCapability',
+					'args'      => array(
+						0 => 'manage_woocommerce',
+					),
+				),
+			),
+			'args'          => array(
 				'id'    => array(
 					'type'        => Type::nonNull( Type::int() ),
 					'description' => __( 'The ID of the product to delete.', 'woocommerce' ),
@@ -36,7 +44,7 @@ class DeleteProduct {
 					'defaultValue' => false,
 				),
 			),
-			'resolve'     => array( self::class, 'resolve' ),
+			'resolve'       => array( self::class, 'resolve' ),
 		);
 	}
 
@@ -46,6 +54,12 @@ class DeleteProduct {
 		if ( ! self::compute_preauthorized( $context['principal'] ) ) {
 			throw ResolverHelpers::build_authorization_error( $context['principal'] );
 		}
+
+		// Publish the root query's metadata so downstream field-level
+		// authorization gates can read it via `$_metadata['query']`.
+		// $context is an ArrayObject (see GraphQLController::process_request())
+		// so the mutation propagates to nested resolvers.
+		$context['_query_metadata'] = array();
 
 		$command = \Automattic\WooCommerce\Api\Infrastructure\ClassResolver::resolve_class( DeleteProductCommand::class );
 

@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderCouponS
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderFeeSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderTaxSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderShippingSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
 
 /**
  * Orders Controller tests for V4 REST API.
@@ -89,8 +90,10 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order_tax_schema      = new OrderTaxSchema();
 		$order_shipping_schema = new OrderShippingSchema();
 
+		$data_utils = new DataUtils();
+
 		$this->order_schema = new OrderSchema();
-		$this->order_schema->init( $order_item_schema, $order_coupon_schema, $order_fee_schema, $order_tax_schema, $order_shipping_schema );
+		$this->order_schema->init( $order_item_schema, $order_coupon_schema, $order_fee_schema, $order_tax_schema, $order_shipping_schema, $data_utils );
 
 		// Create utils instances.
 		$collection_query  = new \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\CollectionQuery();

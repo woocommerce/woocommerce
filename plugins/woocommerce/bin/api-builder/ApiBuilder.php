@@ -210,17 +210,22 @@ class ApiBuilder {
 	private string $principal_type = Principal::class;
 
 	/**
-	 * Map of FQCN => `['takes_principal' => bool]` for every autodiscovered authorization attribute.
+	 * Map of FQCN => per-attribute slot flags for every autodiscovered authorization attribute.
 	 *
 	 * An attribute class qualifies when it lives in `Api/Attributes/` and declares an
-	 * `authorize()` method whose signature matches `(?<PrincipalType>): bool` or
-	 * `(): bool`. The flag captures whether the attribute's authorize() takes the
-	 * principal parameter (true) or opts out (false) — used by {@see self::resolve_authorization()}
-	 * to emit the runtime call with the right arity.
+	 * `authorize()` method whose signature matches the contract enforced by
+	 * {@see self::validate_attribute_authorize_shape()}. Each flag records whether the
+	 * `authorize()` method declared the corresponding opt-in slot, so call-site
+	 * emission can thread only the slots the attribute asked for:
+	 *
+	 *   - `takes_principal` — the principal positional parameter.
+	 *   - `takes_metadata`  — `array $_metadata` (the harvested metadata slices).
+	 *   - `takes_args`      — `array $_args` (the GraphQL field arguments at the call site).
+	 *   - `takes_parent`    — `mixed $_parent` (the parent value being resolved).
 	 *
 	 * Populated by {@see self::discover_authorization_attributes()}.
 	 *
-	 * @var array<class-string, array{takes_principal: bool}>
+	 * @var array<class-string, array{takes_principal: bool, takes_metadata: bool, takes_args: bool, takes_parent: bool}>
 	 */
 	private array $authorization_attribute_fqcns = array();
 
@@ -603,96 +608,164 @@ class ApiBuilder {
 		if ( ! $ref->hasMethod( 'authorize' ) ) {
 			return;
 		}
-		$method = $ref->getMethod( 'authorize' );
-		if ( ! $this->validate_attribute_authorize_shape( $fqcn, $method ) ) {
+		$method    = $ref->getMethod( 'authorize' );
+		$validated = $this->validate_attribute_authorize_shape( $fqcn, $method );
+		if ( null === $validated ) {
 			return;
 		}
-		if ( ! $this->attribute_principal_type_is_compatible( $method ) ) {
+		if ( null !== $validated['principal_param']
+			&& ! $this->is_principal_type_compatible( self::param_type_name( $validated['principal_param'] ) )
+		) {
 			if ( ! $is_core ) {
-				$this->record_attribute_principal_mismatch_error( $fqcn, $method );
+				$this->record_attribute_principal_mismatch_error( $fqcn, $validated['principal_param'] );
 			}
 			return;
 		}
 		$this->authorization_attribute_fqcns[ $fqcn ] = array(
-			'takes_principal' => count( $method->getParameters() ) > 0,
+			'takes_principal' => null !== $validated['principal_param'],
+			'takes_metadata'  => $validated['takes_metadata'],
+			'takes_args'      => $validated['takes_args'],
+			'takes_parent'    => $validated['takes_parent'],
 		);
 	}
 
 	/**
 	 * Validate the *shape* of an attribute's `authorize()` method — return type
-	 * and arity — independent of principal-type compatibility.
+	 * and per-parameter contract — independent of principal-type compatibility.
 	 *
-	 * The accepted shapes are:
-	 *   - 0 parameters, returns bool. The attribute opts out of using the principal.
-	 *   - 1 non-nullable parameter, returns bool. (Type compatibility with the registered
-	 *     principal type is checked separately by {@see self::attribute_principal_type_is_compatible()}
-	 *     so call sites can decide whether mismatch is a hard error or a silent skip.)
+	 * Accepted parameters (any order, any subset):
+	 *   - One positional principal parameter: any name that does not start with
+	 *     `_`. Must be non-nullable and typed. Type compatibility with the
+	 *     registered principal type is checked separately by the caller.
+	 *   - `array $_metadata`: opt-in metadata slices (`query`, `type`, `field`).
+	 *   - `array $_args`: opt-in GraphQL field arguments at the call site.
+	 *   - `mixed $_parent` (or untyped): opt-in parent value at the call site.
 	 *
-	 * Records build errors for genuinely malformed signatures and returns false.
+	 * Any other `_`-prefixed parameter name, more than one principal candidate,
+	 * a wrongly typed infra parameter, or a malformed return type produces a
+	 * build-time error.
+	 *
+	 * @return array{principal_param: ?\ReflectionParameter, takes_metadata: bool, takes_args: bool, takes_parent: bool}|null
+	 *         Structured per-parameter classification on success, or `null` on validation failure.
 	 */
-	private function validate_attribute_authorize_shape( string $fqcn, \ReflectionMethod $method ): bool {
+	private function validate_attribute_authorize_shape( string $fqcn, \ReflectionMethod $method ): ?array {
 		if ( $method->isStatic() || ! $method->isPublic() ) {
 			$this->errors[] = "Authorization attribute {$fqcn}::authorize() must be a public non-static method.";
-			return false;
+			return null;
 		}
 
 		$return_type = $method->getReturnType();
 		if ( ! $return_type instanceof \ReflectionNamedType || 'bool' !== $return_type->getName() ) {
 			$this->errors[] = "Authorization attribute {$fqcn}::authorize() must declare a `bool` return type.";
-			return false;
+			return null;
 		}
 
-		$params = $method->getParameters();
-		if ( count( $params ) > 1 ) {
-			$this->errors[] = "Authorization attribute {$fqcn}::authorize() must take 0 parameters or a single `<Principal>` parameter; got " . count( $params ) . '.';
-			return false;
-		}
-		if ( 0 === count( $params ) ) {
-			return true;
+		$principal_param = null;
+		$takes_metadata  = false;
+		$takes_args      = false;
+		$takes_parent    = false;
+
+		foreach ( $method->getParameters() as $param ) {
+			$name = $param->getName();
+
+			if ( '_metadata' === $name ) {
+				if ( ! self::param_type_is_named( $param, 'array' ) ) {
+					$this->errors[] = "Authorization attribute {$fqcn}::authorize() parameter \$_metadata must be typed `array`; got `" . self::param_type_name( $param ) . '`.';
+					return null;
+				}
+				$takes_metadata = true;
+				continue;
+			}
+
+			if ( '_args' === $name ) {
+				if ( ! self::param_type_is_named( $param, 'array' ) ) {
+					$this->errors[] = "Authorization attribute {$fqcn}::authorize() parameter \$_args must be typed `array`; got `" . self::param_type_name( $param ) . '`.';
+					return null;
+				}
+				$takes_args = true;
+				continue;
+			}
+
+			if ( '_parent' === $name ) {
+				$takes_parent = true;
+				continue;
+			}
+
+			if ( '' !== $name && '_' === $name[0] ) {
+				$this->errors[] = "Authorization attribute {$fqcn}::authorize() has unknown infrastructure parameter \${$name}; accepted: \$_metadata, \$_args, \$_parent.";
+				return null;
+			}
+
+			if ( null !== $principal_param ) {
+				$this->errors[] = "Authorization attribute {$fqcn}::authorize() may declare at most one principal parameter; got \${$principal_param->getName()} and \${$name}.";
+				return null;
+			}
+
+			$param_type = $param->getType();
+			$type_name  = self::param_type_name( $param );
+			if ( ! $param_type instanceof \ReflectionNamedType || $param_type->allowsNull() ) {
+				$this->errors[] = "Authorization attribute {$fqcn}::authorize() principal parameter must be non-nullable (anonymous requests are represented by a sentinel principal, not null); got `?{$type_name}`.";
+				return null;
+			}
+
+			$principal_param = $param;
 		}
 
-		$param      = $params[0];
-		$param_type = $param->getType();
-		$type_name  = $param_type instanceof \ReflectionNamedType ? $param_type->getName() : 'mixed';
-
-		if ( ! $param_type instanceof \ReflectionNamedType || $param_type->allowsNull() ) {
-			$this->errors[] = "Authorization attribute {$fqcn}::authorize() parameter must be non-nullable (anonymous requests are represented by a sentinel principal, not null); got `?{$type_name}`.";
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Whether an attribute's `authorize()` parameter type is compatible with the
-	 * registered principal type.
-	 *
-	 * Zero-arg methods are trivially compatible. Otherwise the parameter type
-	 * must satisfy {@see self::is_principal_type_compatible()}. Used by
-	 * {@see self::try_register_authorization_attribute()} to decide whether to
-	 * include the attribute in the autodiscovered set.
-	 */
-	private function attribute_principal_type_is_compatible( \ReflectionMethod $method ): bool {
-		$params = $method->getParameters();
-		if ( 0 === count( $params ) ) {
-			return true;
-		}
-		$param_type = $params[0]->getType();
-		$type_name  = $param_type instanceof \ReflectionNamedType ? $param_type->getName() : 'mixed';
-		return $this->is_principal_type_compatible( $type_name );
+		return array(
+			'principal_param' => $principal_param,
+			'takes_metadata'  => $takes_metadata,
+			'takes_args'      => $takes_args,
+			'takes_parent'    => $takes_parent,
+		);
 	}
 
 	/**
 	 * Record a build error for a plugin-shipped attribute whose `authorize()`
-	 * parameter type is incompatible with the registered principal type.
+	 * principal parameter type is incompatible with the registered principal type.
 	 */
-	private function record_attribute_principal_mismatch_error( string $fqcn, \ReflectionMethod $method ): void {
-		$param_type     = $method->getParameters()[0]->getType();
-		$type_name      = $param_type instanceof \ReflectionNamedType ? $param_type->getName() : 'mixed';
+	private function record_attribute_principal_mismatch_error( string $fqcn, \ReflectionParameter $principal_param ): void {
+		$type_name      = self::param_type_name( $principal_param );
 		$expected       = 'object' === $this->principal_type
 			? '`object` (or any object class)'
 			: "`{$this->principal_type}` (or `object`)";
-		$this->errors[] = "Authorization attribute {$fqcn}::authorize() parameter must be typed as {$expected}; got `{$type_name}`.";
+		$this->errors[] = "Authorization attribute {$fqcn}::authorize() principal parameter must be typed as {$expected}; got `{$type_name}`.";
+	}
+
+	/**
+	 * Whether a parameter declares the named type (and only the named type).
+	 *
+	 * Used by the authorize-method validator to enforce that opt-in
+	 * infrastructure parameters declare the type the contract expects
+	 * (`array` for `$_metadata` and `$_args`; `$_parent` has no required type).
+	 */
+	private static function param_type_is_named( \ReflectionParameter $param, string $expected ): bool {
+		$type = $param->getType();
+		return $type instanceof \ReflectionNamedType && $type->getName() === $expected;
+	}
+
+	/**
+	 * Return a printable name for a parameter's declared type.
+	 *
+	 * `mixed` is returned for untyped parameters and for union/intersection
+	 * types; the validator does not currently inspect those shapes.
+	 */
+	private static function param_type_name( \ReflectionParameter $param ): string {
+		$type = $param->getType();
+		return $type instanceof \ReflectionNamedType ? $type->getName() : 'mixed';
+	}
+
+	/**
+	 * Render a scalar/array value as a valid PHP expression that, when
+	 * evaluated, reproduces the value. Used by the resolver-template emission
+	 * to inline build-time-known data (e.g. metadata slices) into the
+	 * generated code.
+	 *
+	 * The output is `var_export()`-style and is later normalised by phpcbf
+	 * during the generated-file lint pass, so callers do not need to worry
+	 * about formatting.
+	 */
+	private static function render_php_literal( mixed $value ): string {
+		return var_export( $value, true );
 	}
 
 	// ========================================================================
@@ -1049,16 +1122,32 @@ class ApiBuilder {
 		} elseif ( $has_public_access ) {
 			$attribute_expr = 'true';
 		} else {
+			// Command-level metadata literal — `['query' => harvest_metadata($ref)]`.
+			// `$_args` and `$_parent` are field-level concepts; at the command
+			// level they carry neutral defaults (`[]` and `null`).
+			$query_metadata_literal = self::render_php_literal( array( 'query' => $this->harvest_metadata( $ref, $ref->getShortName() ) ) );
+
 			$expressions    = array_map(
-				function ( $u ) {
-					$arg = $this->authorization_attribute_fqcns[ $u['fqcn'] ]['takes_principal']
-						? ' $principal '
-						: '';
+				function ( $u ) use ( $query_metadata_literal ) {
+					$flags = $this->authorization_attribute_fqcns[ $u['fqcn'] ];
+					$args  = array();
+					if ( $flags['takes_principal'] ) {
+						$args[] = '$principal';
+					}
+					if ( $flags['takes_metadata'] ) {
+						$args[] = '_metadata: ' . $query_metadata_literal;
+					}
+					if ( $flags['takes_args'] ) {
+						$args[] = '_args: array()';
+					}
+					if ( $flags['takes_parent'] ) {
+						$args[] = '_parent: null';
+					}
 					return sprintf(
 						'( new \%s(%s) )->authorize(%s)',
 						$u['fqcn'],
 						$u['args_php'],
-						$arg
+						empty( $args ) ? '' : ' ' . implode( ', ', $args ) . ' '
 					);
 				},
 				$usages
@@ -1071,6 +1160,7 @@ class ApiBuilder {
 			'has_public_access' => $has_public_access,
 			'attribute_expr'    => $attribute_expr,
 			'error'             => $error,
+			'descriptors'       => $this->harvest_authorization_descriptors( $ref ),
 		);
 	}
 
@@ -1082,11 +1172,15 @@ class ApiBuilder {
 	 * supplied at each usage site, so the generated resolver can construct the
 	 * attribute with the same arguments.
 	 *
-	 * @param \ReflectionClass $source The class/trait/interface to read attributes from.
+	 * Accepts any reflector that supports `getAttributes()` (class, trait,
+	 * interface, or property) — class-level discovery, ancestor walks, and
+	 * field-level discovery share the same scanner.
+	 *
+	 * @param \ReflectionClass|\ReflectionProperty $source The reflector to read attributes from.
 	 *
 	 * @return array<int, array{fqcn: string, args_php: string, is_public_access: bool}>
 	 */
-	private function collect_authorization_usages( \ReflectionClass $source ): array {
+	private function collect_authorization_usages( $source ): array {
 		$usages = array();
 		foreach ( array_keys( $this->authorization_attribute_fqcns ) as $attr_fqcn ) {
 			foreach ( $source->getAttributes( $attr_fqcn ) as $attr ) {
@@ -1100,6 +1194,284 @@ class ApiBuilder {
 			}
 		}
 		return $usages;
+	}
+
+	/**
+	 * Whether the given reflector (class, property, parameter, …) should
+	 * appear in the `_apiMetadata` discovery query.
+	 *
+	 * The check is per-target and uniform across attribute kinds: walk
+	 * the reflector's direct attributes, and for each whose class
+	 * declares a `shows_in_metadata_query(): bool` method, call it. If
+	 * any returns `false`, the target is hidden — its `metadata` and
+	 * `authorization` keys are dropped from the emitted config, and
+	 * {@see \Automattic\WooCommerce\Api\Utils\SchemaHandle::get_all_metadata()}
+	 * does not emit a row for it.
+	 *
+	 * Despite the colloquial name, this is unrelated to native GraphQL
+	 * introspection (`__schema` / `__type`); those queries continue to
+	 * expose the schema's shape regardless of this flag. The marker
+	 * only affects the custom `_apiMetadata` channel.
+	 *
+	 * The runtime authorization gate is independent of this check: an
+	 * authorization attribute whose `shows_in_metadata_query()` returns
+	 * `false` still runs its `authorize()` method at request time. The
+	 * stock {@see \Automattic\WooCommerce\Api\Attributes\HiddenFromMetadataQuery}
+	 * marker is the recommended way to opt a target out without giving
+	 * the attribute any other behaviour.
+	 *
+	 * @param \Reflector $reflector Class, property, parameter, or enum case.
+	 */
+	private function is_target_metadata_visible( \Reflector $reflector ): bool {
+		foreach ( $reflector->getAttributes() as $attribute ) {
+			$name = $attribute->getName();
+			if ( ! class_exists( $name ) || ! method_exists( $name, 'shows_in_metadata_query' ) ) {
+				continue;
+			}
+			$instance = $attribute->newInstance();
+			if ( false === $instance->shows_in_metadata_query() ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Walk a class plus its parents / traits / interfaces (visit-set
+	 * guarded), invoking `$collect` on each reflector and accumulating the
+	 * returned descriptors. Shared between
+	 * {@see self::collect_class_authorization_usages()} and
+	 * {@see self::collect_class_authorization_descriptors()} so the gate
+	 * emission and the `_apiMetadata` discovery agree on what counts as
+	 * "from the type's hierarchy".
+	 *
+	 * Direct attributes shadow inherited ones — the same rule the existing
+	 * command-class resolution uses: if the class itself contributes a
+	 * non-empty list, ancestors are not walked.
+	 *
+	 * @param \ReflectionClass $ref     Class to walk.
+	 * @param callable         $collect Maps each reflector to a list.
+	 *
+	 * @return list<mixed>
+	 */
+	private function walk_class_hierarchy( \ReflectionClass $ref, callable $collect ): array {
+		$direct = $collect( $ref );
+		if ( ! empty( $direct ) ) {
+			return $direct;
+		}
+		$visited = array();
+		$stack   = array_merge(
+			$ref->getParentClass() ? array( $ref->getParentClass() ) : array(),
+			$ref->getTraits(),
+			$ref->getInterfaces(),
+		);
+		$out     = array();
+		while ( ! empty( $stack ) ) {
+			$source = array_shift( $stack );
+			$name   = $source->getName();
+			if ( in_array( $name, $visited, true ) ) {
+				continue;
+			}
+			$visited[] = $name;
+			$out       = array_merge( $out, $collect( $source ) );
+			if ( false !== $source->getParentClass() ) {
+				$stack[] = $source->getParentClass();
+			}
+			$stack = array_merge( $stack, $source->getTraits(), $source->getInterfaces() );
+		}
+		return $out;
+	}
+
+	/**
+	 * Collect class-level authorization usages from a type class, mirroring
+	 * {@see self::resolve_authorization()}'s inheritance walk (parent chain,
+	 * traits, interfaces — visit-set guarded). Direct attributes shadow
+	 * inherited ones; if the class declares any class-level usages directly,
+	 * ancestors are not walked.
+	 *
+	 * Used by {@see self::build_field_definition()} to AND a type's
+	 * class-level authorization into every one of its field gates, so an
+	 * attribute on `class Event` (or on a trait it uses, like an
+	 * `OrganizerOnlyTrait`) restricts read access to all of `Event`'s
+	 * fields without having to repeat the attribute on each property.
+	 *
+	 * @param \ReflectionClass $ref The type class to read class-level usages from.
+	 *
+	 * @return array<int, array{fqcn: string, args_php: string, is_public_access: bool}>
+	 */
+	private function collect_class_authorization_usages( \ReflectionClass $ref ): array {
+		return $this->walk_class_hierarchy(
+			$ref,
+			fn( \ReflectionClass $r ): array => $this->collect_authorization_usages( $r ),
+		);
+	}
+
+	/**
+	 * Inheritance-aware counterpart to
+	 * {@see self::harvest_authorization_descriptors()}: walks the class's
+	 * parents / traits / interfaces so trait-supplied class-level
+	 * authorization surfaces through `_apiMetadata`, not just through the
+	 * runtime gate. Direct descriptors shadow inherited ones (same rule
+	 * as the usages walk).
+	 *
+	 * @param \ReflectionClass $ref Class to walk.
+	 *
+	 * @return list<array{attribute: string, args: list<mixed>}>
+	 */
+	private function collect_class_authorization_descriptors( \ReflectionClass $ref ): array {
+		return $this->walk_class_hierarchy(
+			$ref,
+			fn( \ReflectionClass $r ): array => $this->harvest_authorization_descriptors( $r ),
+		);
+	}
+
+	/**
+	 * Harvest authorization-attribute descriptors for the `_apiMetadata`
+	 * discovery endpoint.
+	 *
+	 * Mirrors {@see self::collect_authorization_usages()} but emits
+	 * `{attribute, args}` records in the shape clients read through
+	 * `_apiMetadata { authorization { attribute args } }`. The per-target
+	 * `shows_in_metadata_query()` filter is applied by callers
+	 * ({@see self::build_field_definition()} and the `generate_*_type`
+	 * methods) — this method always returns every authorization attribute
+	 * found on the reflector, including those whose target opts out of
+	 * the metadata query. The caller decides whether to expose them.
+	 *
+	 * @param \ReflectionClass|\ReflectionProperty $reflector Source reflector.
+	 *
+	 * @return list<array{attribute: string, args: list<mixed>}>
+	 */
+	private function harvest_authorization_descriptors( $reflector ): array {
+		$descriptors = array();
+		foreach ( array_keys( $this->authorization_attribute_fqcns ) as $attr_fqcn ) {
+			foreach ( $reflector->getAttributes( $attr_fqcn ) as $attr ) {
+				$short_name    = ( false !== strrpos( $attr_fqcn, '\\' ) )
+					? substr( $attr_fqcn, strrpos( $attr_fqcn, '\\' ) + 1 )
+					: $attr_fqcn;
+				$descriptors[] = array(
+					'attribute' => $short_name,
+					'args'      => array_values( $attr->getArguments() ),
+				);
+			}
+		}
+		return $descriptors;
+	}
+
+	/**
+	 * Resolve authorization for a single property (output field, input field,
+	 * or trait property).
+	 *
+	 * Field-level gates differ from class-level gates in three ways:
+	 *
+	 *  - The attribute call expression references the runtime locals
+	 *    `$principal`, `$_metadata`, `$_args`, `$_parent` rather than baking
+	 *    `$_metadata` as a build-time literal. Step-5 emission creates these
+	 *    locals before invoking the expression.
+	 *  - `#[PublicAccess]` placed on a property is a build warning (not a
+	 *    hard error) and is treated as a no-op: it always grants, which is
+	 *    indistinguishable from the default allow-by-default semantics that
+	 *    apply to fields with no authorization attribute.
+	 *  - There is no inheritance walk: a field's gate is the attributes
+	 *    declared directly on the property reflector. Trait-declared
+	 *    properties carry their attributes onto every implementing class
+	 *    naturally through PHP's reflection.
+	 *
+	 * @return array{usages: list<array{fqcn: string, args_php: string, is_public_access: bool}>, attribute_expr: string}
+	 */
+	private function resolve_field_authorization( \ReflectionProperty $prop, array $type_level_usages = array(), array $type_level_descriptors = array() ): array {
+		$all_usages = $this->collect_authorization_usages( $prop );
+		$usages     = array();
+		foreach ( $all_usages as $usage ) {
+			if ( $usage['is_public_access'] ) {
+				$label            = $prop->getDeclaringClass()->getShortName() . '::$' . $prop->getName();
+				$this->warnings[] = "#[PublicAccess] on property {$label}: redundant with allow-by-default field semantics; the attribute is ignored at field level.";
+				continue;
+			}
+			$usages[] = $usage;
+		}
+
+		// AND in the type-class-level usages. PublicAccess at type level
+		// short-circuits to true, so it never contributes to a field gate; skip
+		// silently. Other type-level usages are concatenated with the field's
+		// own usages; the combined expression becomes the field's effective gate.
+		foreach ( $type_level_usages as $usage ) {
+			if ( $usage['is_public_access'] ) {
+				continue;
+			}
+			$usages[] = $usage;
+		}
+
+		// Descriptors advertised through `_apiMetadata` must mirror the
+		// *effective* gates: a no-op #[PublicAccess] on a field is dropped from
+		// $usages above, so drop it from the descriptors too — otherwise
+		// discovery would advertise a gate that never runs. $usages and the
+		// harvested descriptors are parallel (one per authorization attribute)
+		// and #[PublicAccess] is the only no-op, so keeping the descriptors whose
+		// attribute short name survives in $usages preserves every real gate and
+		// removes only the ignored ones.
+		$effective_shorts = array();
+		foreach ( $usages as $u ) {
+			$fqcn                       = $u['fqcn'];
+			$short                      = ( false !== strrpos( $fqcn, '\\' ) ) ? substr( $fqcn, strrpos( $fqcn, '\\' ) + 1 ) : $fqcn;
+			$effective_shorts[ $short ] = true;
+		}
+		$descriptors = array_values(
+			array_filter(
+				array_merge(
+					$this->harvest_authorization_descriptors( $prop ),
+					$type_level_descriptors,
+				),
+				static fn( array $d ): bool => isset( $effective_shorts[ $d['attribute'] ] ),
+			)
+		);
+
+		if ( empty( $usages ) ) {
+			return array(
+				'usages'                => array(),
+				'attribute_expr'        => 'true',
+				'first_attribute_short' => null,
+				'descriptors'           => $descriptors,
+			);
+		}
+
+		$expressions = array_map(
+			function ( $u ) {
+				$flags = $this->authorization_attribute_fqcns[ $u['fqcn'] ];
+				$args  = array();
+				if ( $flags['takes_principal'] ) {
+					$args[] = '$principal';
+				}
+				if ( $flags['takes_metadata'] ) {
+					$args[] = '_metadata: $_metadata';
+				}
+				if ( $flags['takes_args'] ) {
+					$args[] = '_args: $_args';
+				}
+				if ( $flags['takes_parent'] ) {
+					$args[] = '_parent: $_parent';
+				}
+				return sprintf(
+					'( new \%s(%s) )->authorize(%s)',
+					$u['fqcn'],
+					$u['args_php'],
+					empty( $args ) ? '' : ' ' . implode( ', ', $args ) . ' '
+				);
+			},
+			$usages
+		);
+
+		$first_fqcn  = $usages[0]['fqcn'];
+		$first_short = ( false !== strrpos( $first_fqcn, '\\' ) )
+			? substr( $first_fqcn, strrpos( $first_fqcn, '\\' ) + 1 )
+			: $first_fqcn;
+
+		return array(
+			'usages'                => $usages,
+			'attribute_expr'        => implode( ' && ', $expressions ),
+			'first_attribute_short' => $first_short,
+			'descriptors'           => $descriptors,
+		);
 	}
 
 	/**
@@ -1318,17 +1690,19 @@ class ApiBuilder {
 	// ------ Interface ------
 
 	private function generate_interface( string $fqcn, \ReflectionClass $ref ): void {
-		$graphql_name = $this->graphql_names[ $fqcn ];
-		$description  = $this->get_description( $ref );
-		$use_stmts    = array();
-		$fields       = array();
+		$graphql_name           = $this->graphql_names[ $fqcn ];
+		$description            = $this->get_description( $ref );
+		$use_stmts              = array();
+		$fields                 = array();
+		$type_level_usages      = $this->collect_class_authorization_usages( $ref );
+		$type_level_descriptors = $this->collect_class_authorization_descriptors( $ref );
 
 		foreach ( $ref->getProperties( \ReflectionProperty::IS_PUBLIC ) as $prop ) {
 			if ( ! empty( $prop->getAttributes( Ignore::class ) ) ) {
 				continue;
 			}
 
-			$field = $this->build_field_definition( $prop, 'output', $use_stmts );
+			$field = $this->build_field_definition( $prop, 'output', $use_stmts, $type_level_usages, $type_level_descriptors );
 			if ( $field !== null ) {
 				$fields[] = $field;
 			}
@@ -1346,7 +1720,8 @@ class ApiBuilder {
 			);
 		}
 
-		$code = $this->render_template(
+		$type_metadata_visible = $this->is_target_metadata_visible( $ref );
+		$code                  = $this->render_template(
 			'InterfaceTypeTemplate.php',
 			array(
 				'namespace'      => $this->autogenerated_namespace . '\\GraphQLTypes\\Interfaces',
@@ -1356,7 +1731,8 @@ class ApiBuilder {
 				'use_statements' => array_unique( $use_stmts ),
 				'fields'         => $fields,
 				'type_map'       => $type_map,
-				'metadata'       => $this->harvest_metadata( $ref, $ref->getShortName() ),
+				'metadata'       => $type_metadata_visible ? $this->harvest_metadata( $ref, $ref->getShortName() ) : array(),
+				'authorization'  => $type_metadata_visible ? $this->collect_class_authorization_descriptors( $ref ) : array(),
 			)
 		);
 
@@ -1368,18 +1744,20 @@ class ApiBuilder {
 	// ------ Output Type ------
 
 	private function generate_output_type( string $fqcn, \ReflectionClass $ref ): void {
-		$graphql_name = $this->graphql_names[ $fqcn ];
-		$description  = $this->get_description( $ref );
-		$use_stmts    = array();
-		$interfaces   = array();
-		$fields       = array();
+		$graphql_name           = $this->graphql_names[ $fqcn ];
+		$description            = $this->get_description( $ref );
+		$use_stmts              = array();
+		$interfaces             = array();
+		$fields                 = array();
+		$type_level_usages      = $this->collect_class_authorization_usages( $ref );
+		$type_level_descriptors = $this->collect_class_authorization_descriptors( $ref );
 
 		foreach ( $ref->getProperties( \ReflectionProperty::IS_PUBLIC ) as $prop ) {
 			if ( ! empty( $prop->getAttributes( Ignore::class ) ) ) {
 				continue;
 			}
 
-			$field = $this->build_field_definition( $prop, 'output', $use_stmts );
+			$field = $this->build_field_definition( $prop, 'output', $use_stmts, $type_level_usages, $type_level_descriptors );
 			if ( $field !== null ) {
 				$fields[] = $field;
 			}
@@ -1397,17 +1775,25 @@ class ApiBuilder {
 			}
 		}
 
-		$code = $this->render_template(
+		$type_metadata_visible = $this->is_target_metadata_visible( $ref );
+		$type_metadata_full    = $this->harvest_metadata( $ref, $ref->getShortName() );
+		$code                  = $this->render_template(
 			'ObjectTypeTemplate.php',
 			array(
-				'namespace'      => $this->autogenerated_namespace . '\\GraphQLTypes\\Output',
-				'class_name'     => $ref->getShortName(),
-				'graphql_name'   => $graphql_name,
-				'description'    => $description,
-				'use_statements' => array_unique( $use_stmts ),
-				'interfaces'     => $interfaces,
-				'fields'         => $fields,
-				'metadata'       => $this->harvest_metadata( $ref, $ref->getShortName() ),
+				'namespace'        => $this->autogenerated_namespace . '\\GraphQLTypes\\Output',
+				'class_name'       => $ref->getShortName(),
+				'graphql_name'     => $graphql_name,
+				'description'      => $description,
+				'use_statements'   => array_unique( $use_stmts ),
+				'interfaces'       => $interfaces,
+				'fields'           => $fields,
+				// `metadata` feeds the `_apiMetadata` discovery channel and so respects
+				// the per-target `shows_in_metadata_query()` opt-out; `metadata_runtime`
+				// always carries the full set because field gates thread it into the
+				// `$_metadata['type']` slice and that opt-out is discovery-only.
+				'metadata'         => $type_metadata_visible ? $type_metadata_full : array(),
+				'metadata_runtime' => $type_metadata_full,
+				'authorization'    => $type_metadata_visible ? $this->collect_class_authorization_descriptors( $ref ) : array(),
 			)
 		);
 
@@ -1427,22 +1813,25 @@ class ApiBuilder {
 			$gen_class_name = substr( $gen_class_name, 0, -5 );
 		}
 
-		$description = $this->get_description( $ref );
-		$use_stmts   = array();
-		$fields      = array();
+		$description            = $this->get_description( $ref );
+		$use_stmts              = array();
+		$fields                 = array();
+		$type_level_usages      = $this->collect_class_authorization_usages( $ref );
+		$type_level_descriptors = $this->collect_class_authorization_descriptors( $ref );
 
 		foreach ( $ref->getProperties( \ReflectionProperty::IS_PUBLIC ) as $prop ) {
 			if ( ! empty( $prop->getAttributes( Ignore::class ) ) ) {
 				continue;
 			}
 
-			$field = $this->build_field_definition( $prop, 'input', $use_stmts );
+			$field = $this->build_field_definition( $prop, 'input', $use_stmts, $type_level_usages, $type_level_descriptors );
 			if ( $field !== null ) {
 				$fields[] = $field;
 			}
 		}
 
-		$code = $this->render_template(
+		$type_metadata_visible = $this->is_target_metadata_visible( $ref );
+		$code                  = $this->render_template(
 			'InputObjectTypeTemplate.php',
 			array(
 				'namespace'      => $this->autogenerated_namespace . '\\GraphQLTypes\\Input',
@@ -1451,7 +1840,8 @@ class ApiBuilder {
 				'description'    => $description,
 				'use_statements' => array_unique( $use_stmts ),
 				'fields'         => $fields,
-				'metadata'       => $this->harvest_metadata( $ref, $ref->getShortName() ),
+				'metadata'       => $type_metadata_visible ? $this->harvest_metadata( $ref, $ref->getShortName() ) : array(),
+				'authorization'  => $type_metadata_visible ? $this->collect_class_authorization_descriptors( $ref ) : array(),
 			)
 		);
 
@@ -1537,6 +1927,7 @@ class ApiBuilder {
 					'conversion'        => null,
 					'is_infrastructure' => false,
 					'unroll'            => $unroll,
+					'input_fqcn'        => $unroll['fqcn'],
 				);
 				continue;
 			}
@@ -1577,6 +1968,7 @@ class ApiBuilder {
 				'name'              => $param_name,
 				'conversion'        => $conversion,
 				'is_infrastructure' => false,
+				'input_fqcn'        => ( null !== $conversion && null !== $input_info && 'input_type' === $input_info['kind'] ) ? $type_name : null,
 			);
 		}
 
@@ -1595,6 +1987,54 @@ class ApiBuilder {
 				$has_preauthorized        = $validated['has_preauthorized'];
 				$authorize_principal_arg  = $validated['principal_arg'];
 				$authorize_query_info_arg = $validated['query_info_arg'];
+			}
+		}
+
+		// Collect input-side authorization gate descriptors. For every
+		// execute() parameter whose runtime value is an input class instance
+		// (either unrolled, or built by an input-converter), walk that class's
+		// public properties for field-level authorization attributes. The
+		// emitted gate fires only for *provided* fields so an unset/optional
+		// property doesn't trigger a check, mirroring the
+		// {@see \Automattic\WooCommerce\Api\InputTypes\TracksProvidedFields}
+		// convention that input types already follow.
+		$input_side_gates = array();
+		foreach ( $execute_params as $param ) {
+			if ( empty( $param['input_fqcn'] ) || ! class_exists( $param['input_fqcn'] ) ) {
+				continue;
+			}
+			$input_ref              = new \ReflectionClass( $param['input_fqcn'] );
+			$input_short            = $input_ref->getShortName();
+			$type_metadata_lit      = self::render_php_literal( $this->harvest_metadata( $input_ref, $input_short ) );
+			$input_type_usages      = $this->collect_class_authorization_usages( $input_ref );
+			$input_type_descriptors = $this->collect_class_authorization_descriptors( $input_ref );
+			$field_descriptors      = array();
+			foreach ( $input_ref->getProperties( \ReflectionProperty::IS_PUBLIC ) as $prop ) {
+				if ( ! empty( $prop->getAttributes( Ignore::class ) ) ) {
+					continue;
+				}
+				$field_auth = $this->resolve_field_authorization( $prop, $input_type_usages, $input_type_descriptors );
+				if ( 'true' === $field_auth['attribute_expr'] ) {
+					continue;
+				}
+				$field_metadata_lit  = self::render_php_literal(
+					$this->harvest_metadata( $prop, $input_short . '::$' . $prop->getName() )
+				);
+				$field_descriptors[] = array(
+					'field_name'             => $prop->getName(),
+					'attribute_expr'         => $field_auth['attribute_expr'],
+					'first_attribute_short'  => $field_auth['first_attribute_short'],
+					'type_metadata_literal'  => $type_metadata_lit,
+					'field_metadata_literal' => $field_metadata_lit,
+				);
+			}
+			if ( ! empty( $field_descriptors ) ) {
+				$input_side_gates[] = array(
+					'exec_arg_name'    => $param['name'],
+					'input_fqcn'       => $param['input_fqcn'],
+					'input_short_name' => $input_short,
+					'fields'           => $field_descriptors,
+				);
 			}
 		}
 
@@ -1661,7 +2101,14 @@ class ApiBuilder {
 				'attribute_expr'                   => $attribute_expr,
 				'compute_preauthorized_param_type' => $compute_preauthorized_param_type,
 				'scalar_return'                    => $scalar_return,
-				'metadata'                         => $this->harvest_metadata( $ref, $ref->getShortName() ),
+				// `metadata` feeds the operation's `_apiMetadata` row (discovery, so it
+				// honours `shows_in_metadata_query()`); `metadata_runtime` is published
+				// into `$context['_query_metadata']` for downstream field gates and so
+				// always carries the full set (the opt-out is discovery-only).
+				'metadata'                         => $this->is_target_metadata_visible( $ref ) ? $this->harvest_metadata( $ref, $ref->getShortName() ) : array(),
+				'metadata_runtime'                 => $this->harvest_metadata( $ref, $ref->getShortName() ),
+				'input_side_gates'                 => $input_side_gates,
+				'authorization_descriptors'        => $this->is_target_metadata_visible( $ref ) ? $auth['descriptors'] : array(),
 			)
 		);
 
@@ -2482,7 +2929,7 @@ class ApiBuilder {
 	 * Root-operation arguments (declared as `execute()` parameters) do get
 	 * per-argument metadata — that path runs through {@see self::generate_resolver()}.
 	 */
-	private function build_field_definition( \ReflectionProperty $prop, string $context, array &$use_stmts ): ?array {
+	private function build_field_definition( \ReflectionProperty $prop, string $context, array &$use_stmts, array $type_level_usages = array(), array $type_level_descriptors = array() ): ?array {
 		$type        = $prop->getType();
 		$type_name   = $type instanceof \ReflectionNamedType ? $type->getName() : 'mixed';
 		$nullable    = $type?->allowsNull() ?? false;
@@ -2556,6 +3003,24 @@ class ApiBuilder {
 
 		$field_context_label = $prop->getDeclaringClass()->getShortName() . '::$' . $prop->getName();
 
+		$metadata_visible = $this->is_target_metadata_visible( $prop );
+		$authorization    = $this->resolve_field_authorization( $prop, $type_level_usages, $type_level_descriptors );
+		$metadata_full    = $this->harvest_metadata( $prop, $field_context_label );
+		$metadata         = $metadata_full;
+
+		// Per-target `_apiMetadata` opt-out: when any attribute on the
+		// property declares `shows_in_metadata_query(): false`, the
+		// field's row is omitted entirely. The runtime gate is
+		// unaffected — `attribute_expr` stays populated so the resolver
+		// template still emits the `'resolve'` callback; we only blank
+		// the descriptors and metadata that feed the discovery channel.
+		// `metadata_runtime` keeps the full set: the gate threads it into
+		// `$_metadata['field']`, and the opt-out is discovery-only.
+		if ( ! $metadata_visible ) {
+			$metadata                     = array();
+			$authorization['descriptors'] = array();
+		}
+
 		return array(
 			'name'                 => $prop->getName(),
 			'type_expr'            => $type_expr,
@@ -2563,7 +3028,9 @@ class ApiBuilder {
 			'args'                 => $args,
 			'deprecation_reason'   => ! empty( $deprecation ) ? $deprecation[0]->newInstance()->reason : null,
 			'paginated_connection' => $paginated_connection,
-			'metadata'             => $this->harvest_metadata( $prop, $field_context_label ),
+			'metadata'             => $metadata,
+			'metadata_runtime'     => $metadata_full,
+			'authorization'        => $authorization,
 		);
 	}
 
@@ -2738,6 +3205,20 @@ class ApiBuilder {
 			);
 
 			$expr = "{$conn_alias}::get()";
+			return $nullable ? $expr : "Type::nonNull({$expr})";
+		}
+
+		// Check for ArrayOf on the method (plain list return). Mirrors the
+		// property-/parameter-level ArrayOf handling: a method declared
+		// `: array` with `#[ArrayOf( X::class )]` becomes `[X!]!` (or `[X!]`
+		// when the return type is nullable). The element expression is
+		// resolved through the same helper the field path uses, so scalar
+		// and object element types are handled identically.
+		$array_of_attr = $method->getAttributes( ArrayOf::class );
+		if ( ! empty( $array_of_attr ) && 'array' === $type_name ) {
+			$item_type = $array_of_attr[0]->newInstance()->type;
+			$item_expr = $this->type_string_to_graphql_expr( $item_type, $use_stmts );
+			$expr      = "Type::listOf(Type::nonNull({$item_expr}))";
 			return $nullable ? $expr : "Type::nonNull({$expr})";
 		}
 

@@ -27,7 +27,6 @@
 /client/legacy/js/stupidtable/**
 /client/legacy/js/zoom/**
 /includes/gateways/**
-/tests/e2e/**
 /vendor/**
 
 /client/admin/**

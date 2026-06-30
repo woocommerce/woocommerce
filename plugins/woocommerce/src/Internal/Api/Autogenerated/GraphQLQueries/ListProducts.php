@@ -18,9 +18,23 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class ListProducts {
 	public static function get_field_definition(): array {
 		return array(
-			'type'        => Type::nonNull( ProductConnectionType::get() ),
-			'description' => __( 'List products with cursor-based pagination and optional filtering.', 'woocommerce' ),
-			'args'        => array(
+			'type'          => Type::nonNull( ProductConnectionType::get() ),
+			'description'   => __( 'List products with cursor-based pagination and optional filtering.', 'woocommerce' ),
+			'authorization' => array(
+				array(
+					'attribute' => 'RequiredCapability',
+					'args'      => array(
+						0 => 'manage_woocommerce',
+					),
+				),
+				array(
+					'attribute' => 'RequiredCapability',
+					'args'      => array(
+						0 => 'edit_products',
+					),
+				),
+			),
+			'args'          => array(
 				'first'        => array(
 					'type'         => Type::int(),
 					'description'  => __( 'Return the first N results. Must be between 0 and 100.', 'woocommerce' ),
@@ -62,8 +76,8 @@ class ListProducts {
 					'defaultValue' => null,
 				),
 			),
-			'complexity'  => ResolverHelpers::complexity_from_pagination( ... ),
-			'resolve'     => array( self::class, 'resolve' ),
+			'complexity'    => ResolverHelpers::complexity_from_pagination( ... ),
+			'resolve'       => array( self::class, 'resolve' ),
 		);
 	}
 
@@ -73,6 +87,12 @@ class ListProducts {
 		if ( ! self::compute_preauthorized( $context['principal'] ) ) {
 			throw ResolverHelpers::build_authorization_error( $context['principal'] );
 		}
+
+		// Publish the root query's metadata so downstream field-level
+		// authorization gates can read it via `$_metadata['query']`.
+		// $context is an ArrayObject (see GraphQLController::process_request())
+		// so the mutation propagates to nested resolvers.
+		$context['_query_metadata'] = array();
 
 		$command = \Automattic\WooCommerce\Api\Infrastructure\ClassResolver::resolve_class( ListProductsCommand::class );
 
