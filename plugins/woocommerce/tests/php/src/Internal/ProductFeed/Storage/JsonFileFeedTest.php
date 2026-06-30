@@ -98,7 +98,7 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 
 		// First chunk: start the feed and write some entries, then flush (do not end).
 		$feed       = new JsonFileFeed( 'test-feed' );
-		$identifier = $feed->start();
+		$identifier = $feed->open();
 		foreach ( $chunk_one as $entry ) {
 			$feed->add_entry( $entry );
 		}
@@ -108,7 +108,7 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 		// Second (final) chunk: a fresh instance resumes the same feed and ends it, mirroring how a
 		// subsequent Action Scheduler action would run in its own process.
 		$feed_two = new JsonFileFeed( 'test-feed' );
-		$feed_two->start( $identifier, $entries_written );
+		$feed_two->open( $identifier, $entries_written );
 		foreach ( $chunk_two as $entry ) {
 			$feed_two->add_entry( $entry );
 		}
@@ -127,11 +127,11 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_chunked_feed_handles_empty_first_chunk() {
 		$feed       = new JsonFileFeed( 'test-feed' );
-		$identifier = $feed->start();
+		$identifier = $feed->open();
 		$feed->flush();
 
 		$feed_two = new JsonFileFeed( 'test-feed' );
-		$feed_two->start( $identifier, 0 );
+		$feed_two->open( $identifier, 0 );
 		$feed_two->add_entry( array( 'name' => 'Only' ) );
 		$feed_two->end();
 
@@ -142,22 +142,22 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that start() resumes an existing partial feed by reusing its identifier, and throws when the
+	 * Test that open() resumes an existing partial feed by reusing its identifier, and throws when the
 	 * partial file is missing rather than appending to a non-existent file.
 	 */
-	public function test_start_resumes_existing_feed_and_throws_when_missing() {
+	public function test_open_resumes_existing_feed_and_throws_when_missing() {
 		// Resuming a just-created feed reuses the same identifier.
 		$feed       = new JsonFileFeed( 'test-feed' );
-		$identifier = $feed->start();
+		$identifier = $feed->open();
 		$feed->flush();
 
 		$feed_two = new JsonFileFeed( 'test-feed' );
-		$this->assertSame( $identifier, $feed_two->start( $identifier ) );
+		$this->assertSame( $identifier, $feed_two->open( $identifier ) );
 		$feed_two->flush();
 
 		// Resuming a feed that no longer exists throws.
 		$this->expectException( \Exception::class );
-		( new JsonFileFeed( 'test-feed' ) )->start( 'does-not-exist.json' );
+		( new JsonFileFeed( 'test-feed' ) )->open( 'does-not-exist.json' );
 	}
 
 	/**
@@ -203,7 +203,7 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_delete_removes_partial_feed_file() {
 		$feed       = new JsonFileFeed( 'test-feed' );
-		$identifier = $feed->start();
+		$identifier = $feed->open();
 		$feed->flush();
 
 		$path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier;
@@ -217,9 +217,9 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	 * Test that resuming with an identifier that is actually a path (traversal attempt) is rejected
 	 * rather than opening a file outside the feed directory.
 	 */
-	public function test_start_rejects_resume_identifier_with_path() {
+	public function test_open_rejects_resume_identifier_with_path() {
 		$this->expectException( \Exception::class );
-		( new JsonFileFeed( 'test-feed' ) )->start( '../escape.json' );
+		( new JsonFileFeed( 'test-feed' ) )->open( '../escape.json' );
 	}
 
 	/**
@@ -228,7 +228,7 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_delete_ignores_identifier_with_path() {
 		$feed       = new JsonFileFeed( 'test-feed' );
-		$identifier = $feed->start();
+		$identifier = $feed->open();
 		$feed->flush();
 
 		$path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier;
