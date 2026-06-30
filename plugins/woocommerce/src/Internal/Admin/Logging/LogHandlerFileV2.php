@@ -181,7 +181,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 			)
 		);
 
-		if ( is_wp_error( $files ) || count( $files ) < 1 ) {
+		if ( is_wp_error( $files ) || ! is_array( $files ) || count( $files ) < 1 ) {
 			return 0;
 		}
 
