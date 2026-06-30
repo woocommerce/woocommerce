@@ -1,4 +1,4 @@
-/* eslint-disable jest/expect-expect, array-callback-return, jest/no-identical-title */
+/* eslint-disable jest/expect-expect, jest/no-test-callback, array-callback-return, jest/no-identical-title */
 
 /**
  * WordPress dependencies
@@ -164,4 +164,4 @@ test.describe( 'Editor Performance', () => {
 	} );
 } );
 
-/* eslint-enable jest/expect-expect, array-callback-return, jest/no-identical-title */
+/* eslint-enable jest/expect-expect, jest/no-test-callback, array-callback-return, jest/no-identical-title */
