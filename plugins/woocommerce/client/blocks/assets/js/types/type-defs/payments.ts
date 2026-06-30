@@ -166,9 +166,15 @@ export type PlainPaymentMethods = Record<
 >;
 
 /**
- * Used to represent payment methods in a context where storing objects is not allowed, i.e. in data stores.
+ * Like `PlainPaymentMethods`, but express methods may also carry a `paymentMethodId`
+ * (the server-side gateway id, defaulting to `name`) for matching registered gateways.
  */
-export type PlainExpressPaymentMethods = PlainPaymentMethods;
+export type PlainExpressPaymentMethods = Record<
+	string,
+	PlainPaymentMethods[ string ] & {
+		paymentMethodId?: string;
+	}
+>;
 
 export type ExpressPaymentMethods =
 	| Record< string, ExpressPaymentMethodConfigInstance >

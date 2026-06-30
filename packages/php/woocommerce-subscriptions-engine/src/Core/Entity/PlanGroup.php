@@ -25,8 +25,6 @@ defined( 'ABSPATH' ) || exit;
  */
 final class PlanGroup {
 
-	use ScalarCoercion;
-
 	/**
 	 * Group id, or null before it is persisted.
 	 *
@@ -87,10 +85,10 @@ final class PlanGroup {
 	public static function create( array $args ): self {
 		return new self(
 			null,
-			self::coerce_string( $args['name'] ?? null ),
-			self::coerce_nullable_string( $args['merchant_code'] ?? null ),
+			ScalarCoercion::coerce_string( $args['name'] ?? null ),
+			ScalarCoercion::coerce_nullable_string( $args['merchant_code'] ?? null ),
 			is_array( $args['options_display'] ?? null ) ? $args['options_display'] : array(),
-			self::coerce_nullable_string( $args['extension_slug'] ?? null )
+			ScalarCoercion::coerce_nullable_string( $args['extension_slug'] ?? null )
 		);
 	}
 
@@ -101,11 +99,11 @@ final class PlanGroup {
 	 */
 	public static function from_storage( array $row ): self {
 		return new self(
-			isset( $row['id'] ) ? self::coerce_int( $row['id'] ) : null,
-			self::coerce_string( $row['name'] ?? null ),
-			self::coerce_nullable_string( $row['merchant_code'] ?? null ),
+			isset( $row['id'] ) ? ScalarCoercion::coerce_int( $row['id'] ) : null,
+			ScalarCoercion::coerce_string( $row['name'] ?? null ),
+			ScalarCoercion::coerce_nullable_string( $row['merchant_code'] ?? null ),
 			is_array( $row['options_display'] ?? null ) ? $row['options_display'] : array(),
-			self::coerce_nullable_string( $row['extension_slug'] ?? null )
+			ScalarCoercion::coerce_nullable_string( $row['extension_slug'] ?? null )
 		);
 	}
 
