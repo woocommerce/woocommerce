@@ -126,13 +126,6 @@ class PushNotifications {
 	 * Push notifications require Jetpack to be connected. Memoize the value so
 	 * we only check once per request.
 	 *
-	 * The feature is deprecated and always enabled by default, but an explicit
-	 * 'no' in the (now-removed) feature option is still honoured as a manual
-	 * kill switch, so a store can force a fallback if needed. The option is read
-	 * directly rather than through FeaturesUtil to avoid emitting a deprecation
-	 * notice on every request, and to avoid returning only the deprecated
-	 * value of `true`.
-	 *
 	 * @return bool
 	 *
 	 * @since 10.4.0
@@ -142,7 +135,22 @@ class PushNotifications {
 			return $this->enabled;
 		}
 
-		if ( 'no' === get_option( 'woocommerce_feature_push_notifications_enabled' ) ) {
+		/**
+		 * Filters whether enhanced push notifications should be disabled.
+		 *
+		 * The feature was previously controlled by a now-deprecated feature
+		 * flag. It is now enabled by default for all compatible users, but this
+		 * filter lets a store force it off (e.g. to fall back to Jetpack Sync
+		 * if something isn't working). The feature also requires a Jetpack
+		 * connection, which is checked separately below.
+		 *
+		 * @since 10.9.2
+		 *
+		 * @param bool $disabled Whether enhanced push notifications are disabled. Defaults to false.
+		 */
+		$feature_disabled = apply_filters( 'woocommerce_enhanced_push_notifications_disabled', false );
+
+		if ( $feature_disabled ) {
 			$this->enabled = false;
 			return $this->enabled;
 		}
