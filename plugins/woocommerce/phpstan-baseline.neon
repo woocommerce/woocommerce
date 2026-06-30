@@ -34432,12 +34432,6 @@ parameters:
 			path: includes/wc-formatting-functions.php
 
 		-
-			message: '#^Function wc_format_phone_number\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/wc-formatting-functions.php
-
-		-
 			message: '#^Function wc_get_filename_from_url\(\) should return string but return statement is missing\.$#'
 			identifier: return.missing
 			count: 1
