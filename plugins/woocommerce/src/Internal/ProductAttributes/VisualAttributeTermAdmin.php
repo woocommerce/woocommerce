@@ -475,7 +475,14 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 		$attribute = wc_get_attribute( $attribute_id );
 		$taxonomy  = wc_attribute_taxonomy_name( $data['attribute_name'] );
 
-		if ( ! $attribute || $taxonomy !== $attribute->slug ) {
+		// Verify the persisted record matches both the slug and the visual type before seeding;
+		// $data is the caller's intent and could be spoofed by a custom path.
+		if (
+			! $attribute ||
+			! isset( $attribute->slug, $attribute->type ) ||
+			$taxonomy !== $attribute->slug ||
+			'wc-visual' !== $attribute->type
+		) {
 			return;
 		}
 
