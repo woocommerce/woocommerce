@@ -54,14 +54,14 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 
 	public function test_version_option_is_set_after_install(): void {
 		$this->assertTrue( SchemaInstaller::is_current() );
-		$this->assertSame( SchemaInstaller::VERSION, get_option( SchemaInstaller::VERSION_OPTION ) );
+		$this->assertSame( SchemaInstaller::get_version(), SchemaInstaller::get_database_version() );
 	}
 
 	public function test_install_is_idempotent(): void {
 		// Running install again must not error or change the recorded version.
 		SchemaInstaller::install();
 
-		$this->assertSame( SchemaInstaller::VERSION, get_option( SchemaInstaller::VERSION_OPTION ) );
+		$this->assertSame( SchemaInstaller::get_version(), SchemaInstaller::get_database_version() );
 	}
 
 	public function test_unknown_table_identifier_throws(): void {
