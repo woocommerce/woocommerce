@@ -2369,12 +2369,11 @@ class Checkout extends MockeryTestCase {
 	}
 
 	/**
-	 * Ensure the checkout route does not resolve the available payment gateways
-	 * when the request carries no payment method.
+	 * @testdox Checkout route does not resolve the available payment gateways when the request carries no payment method.
 	 */
 	public function test_get_request_payment_method_skips_gateway_resolution_when_missing() {
 		$schema_controller = new SchemaController( $this->mock_extend );
-		$route             = new CheckoutRoute( $schema_controller, $schema_controller->get( 'checkout' ) );
+		$sut               = new CheckoutRoute( $schema_controller, $schema_controller->get( 'checkout' ) );
 
 		$gateway_resolution_count = 0;
 		$counter                  = function ( $gateways ) use ( &$gateway_resolution_count ) {
@@ -2389,7 +2388,7 @@ class Checkout extends MockeryTestCase {
 		$method->setAccessible( true );
 
 		try {
-			$result = $method->invoke( $route, $request );
+			$result = $method->invoke( $sut, $request );
 		} finally {
 			remove_filter( 'woocommerce_available_payment_gateways', $counter );
 		}
@@ -2399,12 +2398,11 @@ class Checkout extends MockeryTestCase {
 	}
 
 	/**
-	 * Ensure the checkout-order route does not resolve the available payment gateways
-	 * when the request carries no payment method and the order needs no payment.
+	 * @testdox Checkout-order route does not resolve the available payment gateways when the request carries no payment method and the order needs no payment.
 	 */
 	public function test_order_get_request_payment_method_skips_gateway_resolution_when_missing() {
 		$schema_controller = new SchemaController( $this->mock_extend );
-		$route             = new CheckoutOrderRoute( $schema_controller, $schema_controller->get( 'checkout-order' ) );
+		$sut               = new CheckoutOrderRoute( $schema_controller, $schema_controller->get( 'checkout-order' ) );
 
 		$order = new \WC_Order();
 		$order->save();
@@ -2414,7 +2412,7 @@ class Checkout extends MockeryTestCase {
 
 		$order_property = new \ReflectionProperty( CheckoutOrderRoute::class, 'order' );
 		$order_property->setAccessible( true );
-		$order_property->setValue( $route, $order );
+		$order_property->setValue( $sut, $order );
 
 		$gateway_resolution_count = 0;
 		$counter                  = function ( $gateways ) use ( &$gateway_resolution_count ) {
@@ -2429,7 +2427,7 @@ class Checkout extends MockeryTestCase {
 		$method->setAccessible( true );
 
 		try {
-			$result = $method->invoke( $route, $request );
+			$result = $method->invoke( $sut, $request );
 		} finally {
 			remove_filter( 'woocommerce_available_payment_gateways', $counter );
 			$order->delete( true );
