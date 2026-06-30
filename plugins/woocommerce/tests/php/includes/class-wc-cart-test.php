@@ -1463,9 +1463,9 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		// Ensure all 3 arguments were passed before accessing individual indexes.
 		$this->assertCount( 3, $this->add_to_cart_quantity_filter_args, 'Filter should receive exactly 3 arguments.' );
 
-		$this->assertEquals( 1, $this->add_to_cart_quantity_filter_args[0] );                           // $quantity
-		$this->assertEquals( $product->get_id(), $this->add_to_cart_quantity_filter_args[1] );          // $product_id.
-		$this->assertEquals( $variation['variation_id'], $this->add_to_cart_quantity_filter_args[2] );  // $variation_id
+		$this->assertEquals( 1, $this->add_to_cart_quantity_filter_args[0] );
+		$this->assertEquals( $product->get_id(), $this->add_to_cart_quantity_filter_args[1] );
+		$this->assertEquals( $variation['variation_id'], $this->add_to_cart_quantity_filter_args[2] );
 	}
 
 	/**
@@ -1480,9 +1480,9 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		$this->assertCount( 3, $this->add_to_cart_quantity_filter_args, 'Filter should receive exactly 3 arguments.' );
 
-		$this->assertEquals( 1, $this->add_to_cart_quantity_filter_args[0] );           // $quantity
-		$this->assertEquals( $product->get_id(), $this->add_to_cart_quantity_filter_args[1] ); // $product_id
-		$this->assertEquals( 0, $this->add_to_cart_quantity_filter_args[2] );           // $variation_id should be 0
+		$this->assertEquals( 1, $this->add_to_cart_quantity_filter_args[0] );
+		$this->assertEquals( $product->get_id(), $this->add_to_cart_quantity_filter_args[1] );
+		$this->assertEquals( 0, $this->add_to_cart_quantity_filter_args[2] );
 	}
 
 	/**

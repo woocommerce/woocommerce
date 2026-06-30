@@ -1156,7 +1156,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				$variation_id = $product_id;
 
 				// Guard against wp_get_post_parent_id returning false for invalid posts.
-				$product_id   = wp_get_post_parent_id( $variation_id );
+				$product_id = wp_get_post_parent_id( $variation_id );
 				if ( false === $product_id ) {
 					return false;
 				}
