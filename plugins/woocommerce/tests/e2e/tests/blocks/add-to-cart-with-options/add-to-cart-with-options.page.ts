@@ -80,11 +80,9 @@ class AddToCartWithOptionsPage {
 				state: 'hidden',
 			} );
 
-		await addToCartWithOptionsBlock
-			.locator( '.components-spinner' )
-			.waitFor( {
-				state: 'hidden',
-			} );
+		await expect(
+			addToCartWithOptionsBlock.locator( '.components-spinner' )
+		).toHaveCount( 0 );
 	}
 
 	async expectEditorInnerBlocks(
