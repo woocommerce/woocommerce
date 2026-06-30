@@ -58,12 +58,26 @@ async function addProductToOrder( page: Page, product, quantity: number ) {
 	await page.getByText( 'Search for a product…' ).click();
 	await page.locator( 'span > .select2-search__field' ).fill( product.name );
 	await page.getByRole( 'option', { name: product.name } ).first().click();
-	await page
+
+	const quantityField = page
 		.locator( 'tr' )
 		.filter( { hasText: product.name } )
-		.getByPlaceholder( '1' )
-		.fill( quantity.toString() );
+		.getByPlaceholder( '1' );
+	await quantityField.fill( quantity.toString() );
+	// Confirm the quantity stuck before committing, so the line item is never
+	// added with a stale/empty value.
+	await expect( quantityField ).toHaveValue( quantity.toString() );
+
 	await page.locator( '#btn-ok' ).click();
+
+	// Adding the product fires an AJAX request that inserts the line item and
+	// recalculates the order totals. Wait for the item row to render before
+	// returning; otherwise a subsequent "Create"/save can persist the order
+	// before the line item is fully applied, saving a 0-quantity / $0 line
+	// (observed intermittently under parallel load).
+	await expect(
+		page.locator( 'td.name > a' ).filter( { hasText: product.name } )
+	).toBeVisible();
 }
 
 const test = baseTest.extend( {

@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\CustomerEmailVerification;
 
+use Automattic\WooCommerce\Internal\CustomerEmailVerification\Admin\UserProfileField;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\Emails\CustomerVerifyEmail;
 
 /**
@@ -42,6 +43,10 @@ class CustomerEmailVerification {
 		$container = wc_get_container();
 		$container->get( VerificationController::class );
 		$container->get( VerificationEventListener::class );
+
+		if ( is_admin() ) {
+			$container->get( UserProfileField::class );
+		}
 	}
 
 	/**

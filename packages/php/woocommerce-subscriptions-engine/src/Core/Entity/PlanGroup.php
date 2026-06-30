@@ -4,7 +4,7 @@
  *
  * `merchant_code` is an optional stable external identifier; when present it is
  * unique at the storage layer and is the deduplication key consumers use to
- * make group creation idempotent. `app_id` scopes a group to a solution family.
+ * make group creation idempotent. `extension_slug` scopes a group to a specific extension.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity
  */
@@ -24,8 +24,6 @@ defined( 'ABSPATH' ) || exit;
  * {@see self::from_storage()} when hydrating a stored row.
  */
 final class PlanGroup {
-
-	use ScalarCoercion;
 
 	/**
 	 * Group id, or null before it is persisted.
@@ -56,11 +54,11 @@ final class PlanGroup {
 	private $options_display;
 
 	/**
-	 * Solution-family scope, e.g. a third-party app slug.
+	 * Extension slug, e.g. a third-party extension slug.
 	 *
 	 * @var string|null
 	 */
-	private $app_id;
+	private $extension_slug;
 
 	/**
 	 * Use {@see self::create()} or {@see self::from_storage()}.
@@ -69,14 +67,14 @@ final class PlanGroup {
 	 * @param string            $name            Display name.
 	 * @param string|null       $merchant_code   Optional stable external identifier.
 	 * @param array<int, mixed> $options_display Display ordering metadata.
-	 * @param string|null       $app_id          Solution-family scope.
+	 * @param string|null       $extension_slug  Extension slug.
 	 */
-	private function __construct( ?int $id, string $name, ?string $merchant_code, array $options_display, ?string $app_id ) {
+	private function __construct( ?int $id, string $name, ?string $merchant_code, array $options_display, ?string $extension_slug ) {
 		$this->id              = $id;
 		$this->name            = $name;
 		$this->merchant_code   = $merchant_code;
 		$this->options_display = $options_display;
-		$this->app_id          = $app_id;
+		$this->extension_slug  = $extension_slug;
 	}
 
 	/**
@@ -87,10 +85,10 @@ final class PlanGroup {
 	public static function create( array $args ): self {
 		return new self(
 			null,
-			self::coerce_string( $args['name'] ?? null ),
-			self::coerce_nullable_string( $args['merchant_code'] ?? null ),
+			ScalarCoercion::coerce_string( $args['name'] ?? null ),
+			ScalarCoercion::coerce_nullable_string( $args['merchant_code'] ?? null ),
 			is_array( $args['options_display'] ?? null ) ? $args['options_display'] : array(),
-			self::coerce_nullable_string( $args['app_id'] ?? null )
+			ScalarCoercion::coerce_nullable_string( $args['extension_slug'] ?? null )
 		);
 	}
 
@@ -101,11 +99,11 @@ final class PlanGroup {
 	 */
 	public static function from_storage( array $row ): self {
 		return new self(
-			isset( $row['id'] ) ? self::coerce_int( $row['id'] ) : null,
-			self::coerce_string( $row['name'] ?? null ),
-			self::coerce_nullable_string( $row['merchant_code'] ?? null ),
+			isset( $row['id'] ) ? ScalarCoercion::coerce_int( $row['id'] ) : null,
+			ScalarCoercion::coerce_string( $row['name'] ?? null ),
+			ScalarCoercion::coerce_nullable_string( $row['merchant_code'] ?? null ),
 			is_array( $row['options_display'] ?? null ) ? $row['options_display'] : array(),
-			self::coerce_nullable_string( $row['app_id'] ?? null )
+			ScalarCoercion::coerce_nullable_string( $row['extension_slug'] ?? null )
 		);
 	}
 
@@ -167,10 +165,10 @@ final class PlanGroup {
 	}
 
 	/**
-	 * Solution-family scope.
+	 * Extension slug.
 	 */
-	public function get_app_id(): ?string {
-		return $this->app_id;
+	public function get_extension_slug(): ?string {
+		return $this->extension_slug;
 	}
 
 	/**
@@ -183,7 +181,7 @@ final class PlanGroup {
 			'name'            => $this->name,
 			'merchant_code'   => $this->merchant_code,
 			'options_display' => $this->options_display,
-			'app_id'          => $this->app_id,
+			'extension_slug'  => $this->extension_slug,
 		);
 	}
 }

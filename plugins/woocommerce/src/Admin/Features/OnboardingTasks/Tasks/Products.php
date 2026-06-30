@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
@@ -34,7 +35,10 @@ class Products extends Task {
 		add_action( 'woocommerce_update_product', array( $this, 'maybe_set_has_product_transient' ), 10, 2 );
 		add_action( 'woocommerce_new_product', array( $this, 'maybe_set_has_product_transient' ), 10, 2 );
 		add_action( 'untrashed_post', array( $this, 'maybe_set_has_product_transient_on_untrashed_post' ) );
-		add_action( 'current_screen', array( $this, 'maybe_redirect_to_add_product_tasklist' ), 30, 0 );
+
+		if ( ! $this->is_complete() ) {
+			add_action( 'current_screen', array( $this, 'maybe_redirect_to_add_product_tasklist' ), 30, 0 );
+		}
 
 		add_action( 'trashed_post', array( $this, 'on_product_trashed' ) );
 		add_action( 'deleted_post_product', array( $this, 'on_product_deleted' ) );
@@ -345,6 +349,7 @@ class Products extends Task {
 			if ( $count > 0 ) {
 				return;
 			}
+
 			wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&task=products' ) );
 			exit;
 		}
