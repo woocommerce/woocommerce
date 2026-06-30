@@ -367,10 +367,8 @@ class DataRegenerator {
 	/**
 	 * Callback to initiate the regeneration process when the tool is run.
 	 *
-	 * This runs both from the Status - Tools admin page and from the REST API. Authorization is
-	 * enforced by the caller: the admin page verifies the 'debug_action' nonce before dispatching
-	 * the tool (see WC_Admin_Status::status_tools), and the REST controller performs a capability
-	 * check (see WC_REST_System_Status_Tools_V2_Controller::update_item_permissions_check).
+	 * Runs both from the Tools admin page and from the REST API. Authorization is
+	 * enforced by the caller (nonce for the admin page, capability check for the REST endpoint).
 	 *
 	 * @throws \Exception The regeneration is already in progress.
 	 */
