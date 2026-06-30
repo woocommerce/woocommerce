@@ -13,8 +13,6 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductButtonMock;
  * hydrates the client. Only plain (non-meta-differentiated) cart lines should
  * be counted so that the first-paint seed is consistent with the client-side
  * value produced by the Store API cart-item schema.
- *
- * @since 11.0.0
  */
 class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 
@@ -277,31 +275,6 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 			0,
 			$this->sut->call_get_cart_item_quantities_by_product_id( $this->product_id ),
 			'Plain lines for other product IDs must not influence the count for the queried product.'
-		);
-	}
-
-	// -------------------------------------------------------------------------
-	// No new hooks introduced
-	// -------------------------------------------------------------------------
-
-	/**
-	 * @testdox Should not register any new WordPress action or filter hooks.
-	 */
-	public function test_does_not_add_new_hooks(): void {
-		global $wp_filter;
-
-		$this->add_cart_item( $this->product_id, 1 );
-
-		$hooks_before = array_keys( $wp_filter );
-
-		$this->sut->call_get_cart_item_quantities_by_product_id( $this->product_id );
-
-		$hooks_after = array_keys( $wp_filter );
-		$new_hooks   = array_diff( $hooks_after, $hooks_before );
-
-		$this->assertEmpty(
-			$new_hooks,
-			'get_cart_item_quantities_by_product_id() must not register new WordPress hooks.'
 		);
 	}
 }

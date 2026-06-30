@@ -15,8 +15,6 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
  * Exposes the private `get_cart_item_quantities_by_product_id()` method as a
  * public `call_get_cart_item_quantities_by_product_id()` accessor for unit
  * testing without needing a full block rendering context.
- *
- * @since 11.0.0
  */
 class ProductButtonMock extends ProductButton {
 

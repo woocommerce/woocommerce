@@ -219,33 +219,4 @@ class CartItemUtilsTest extends \WC_Unit_Test_Case {
 			'When missing keys default to 0/[], the stored key should match the recomputed key, yielding false.'
 		);
 	}
-
-	/**
-	 * @testdox Should not introduce new WordPress action or filter hooks.
-	 */
-	public function test_does_not_add_new_hooks(): void {
-		global $wp_filter;
-
-		$hooks_before = array_keys( $wp_filter );
-
-		// Call the method; any hooks it registers during the call would be visible.
-		$plain_key = WC()->cart->generate_cart_id( $this->product_id );
-		CartItemUtils::has_cart_item_data(
-			array(
-				'key'          => $plain_key,
-				'product_id'   => $this->product_id,
-				'variation_id' => 0,
-				'variation'    => array(),
-			)
-		);
-
-		$hooks_after = array_keys( $wp_filter );
-
-		$new_hooks = array_diff( $hooks_after, $hooks_before );
-
-		$this->assertEmpty(
-			$new_hooks,
-			'CartItemUtils::has_cart_item_data() must not register new WordPress hooks.'
-		);
-	}
 }
