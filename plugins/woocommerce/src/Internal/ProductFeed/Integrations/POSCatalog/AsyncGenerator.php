@@ -252,7 +252,7 @@ class AsyncGenerator {
 				$this->get_chunk_batch_count( $option_key )
 			);
 
-			// The feed's entry count is already cumulative across chunks (start() seeds it with the running
+			// The feed's entry count is already cumulative across chunks (open() seeds it with the running
 			// total when resuming), so store it as-is rather than adding to the previous total.
 			$status                    = $this->update_progress( $status, $base_processed + $progress->processed_items, $progress->total_count );
 			$status['entries_written'] = $feed->get_entry_count();
