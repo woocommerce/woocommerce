@@ -125,6 +125,17 @@ $products = wc_get_products( array( 'orderby' => 'rand' ) );
 $products = wc_get_products( array( 'return' => 'ids' ) );
 ```
 
+## Catalog ordering on shop and product archives
+
+Product archives, including the shop page and product category pages, also support catalog ordering through the `orderby` URL query parameter. To list products with prices before products without prices, sort the catalog by price from high to low:
+
+```text
+https://example.com/shop/?orderby=price-desc
+https://example.com/product-category/clothing/?orderby=price-desc
+```
+
+The `price-desc` value maps to the "Price: high to low" catalog sort. Products with no price or a zero price are sorted after products with a higher price. Use `orderby=price` for the "Price: low to high" catalog sort.
+
 ### Pagination
 
 | Parameter | Description |
