@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
+use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
 use Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes\ControllerTestCase;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
@@ -732,6 +733,36 @@ class ProductCollectionData extends ControllerTestCase {
 			0,
 			$cached_entries,
 			'Attribute counts should be written to the shared filter-data cache (proves the cached path is used).'
+		);
+	}
+
+	/**
+	 * @testdox Price, stock, and rating counts are computed through the cached filter-data path.
+	 */
+	public function test_calculate_price_stock_and_rating_counts_use_filter_data_cache() {
+		global $wpdb;
+
+		delete_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT );
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_wc_filter_data_%' AND option_name <> '_transient_wc_filter_data_entry_count'" );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$request->set_param( 'calculate_price_range', true );
+		$request->set_param( 'calculate_stock_status_counts', true );
+		$request->set_param( 'calculate_rating_counts', true );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertNotNull( $data['price_range'], 'Price range should be returned.' );
+		$this->assertNotEmpty( $data['stock_status_counts'], 'Stock status counts should be returned.' );
+		$this->assertNotEmpty( $data['rating_counts'], 'Rating counts should be returned.' );
+
+		$cached_entries = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '_transient_wc_filter_data_%' AND option_name <> '_transient_wc_filter_data_entry_count'" );
+		$this->assertGreaterThanOrEqual(
+			3,
+			$cached_entries,
+			'Price, stock, and rating counts should be written to the shared filter-data cache.'
 		);
 	}
 
