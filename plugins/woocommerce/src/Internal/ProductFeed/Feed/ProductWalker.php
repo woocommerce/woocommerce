@@ -195,6 +195,26 @@ class ProductWalker {
 	}
 
 	/**
+	 * Walks through every remaining product in one go, managing the feed lifecycle.
+	 *
+	 * This is the simple, single-process entry point: it starts the feed, walks every batch, ends the
+	 * feed and returns the number of products processed. Callers that need to write a feed across
+	 * several processes should own the feed lifecycle themselves and use {@see walk_batches()} instead.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @param callable|null $callback The callback to call after each batch of products is processed.
+	 * @return int The number of products processed.
+	 */
+	public function walk( ?callable $callback = null ): int {
+		$this->feed->start();
+		$progress = $this->walk_batches( $callback );
+		$this->feed->end();
+
+		return $progress->processed_items;
+	}
+
+	/**
 	 * Walks through products, optionally limited to a bounded number of batches.
 	 *
 	 * The walker does not own the feed lifecycle: the caller is responsible for starting, flushing
@@ -204,7 +224,7 @@ class ProductWalker {
 	 * Called with the defaults it walks every remaining page in one go; pass `$start_page` and
 	 * `$max_batches` to process a bounded slice and resume later from `processed_batches`.
 	 *
-	 * @since 10.5.0
+	 * @since 11.0.0
 	 *
 	 * @param callable|null $callback    The callback to call after each batch of products is processed.
 	 * @param int           $start_page  The 1-based page (batch) to start at.
@@ -212,7 +232,7 @@ class ProductWalker {
 	 * @return WalkerProgress Items/batches processed here, plus the overall total_count and
 	 *                        total_batch_count so the caller knows whether the feed is complete.
 	 */
-	public function walk( ?callable $callback = null, int $start_page = 1, int $max_batches = PHP_INT_MAX ): WalkerProgress {
+	public function walk_batches( ?callable $callback = null, int $start_page = 1, int $max_batches = PHP_INT_MAX ): WalkerProgress {
 		if ( $start_page < 1 ) {
 			$start_page = 1;
 		}

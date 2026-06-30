@@ -11,8 +11,8 @@ namespace Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog;
 
 use ActionScheduler_AsyncRequest_QueueRunner;
 use ActionScheduler_Store;
-use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductWalker;
+use Automattic\WooCommerce\Internal\ProductFeed\Feed\ResumableFeedInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\WalkerProgress;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -224,13 +224,13 @@ class AsyncGenerator {
 			$feed = $this->integration->create_feed();
 
 			if ( $is_first_chunk ) {
-				$status['file_name']       = $feed->start();
+				$status['file_name']       = $feed->open();
 				$status['page']            = 1;
 				$status['processed']       = 0;
 				$status['entries_written'] = 0;
 				update_option( $option_key, $status );
 			} else {
-				$feed->start( (string) $status['file_name'], (int) ( $status['entries_written'] ?? 0 ) );
+				$feed->open( (string) $status['file_name'], (int) ( $status['entries_written'] ?? 0 ) );
 			}
 
 			$walker = ProductWalker::from_integration( $this->integration, $feed );
@@ -241,7 +241,7 @@ class AsyncGenerator {
 
 			$start_page     = max( 1, (int) ( $status['page'] ?? 1 ) );
 			$base_processed = (int) ( $status['processed'] ?? 0 );
-			$progress       = $walker->walk(
+			$progress       = $walker->walk_batches(
 				function ( WalkerProgress $progress ) use ( &$status, $option_key, $base_processed ) {
 					// Refresh progress and the heartbeat after every batch, so polling sees smooth progress
 					// within a chunk rather than a single jump at the chunk boundary.
@@ -293,7 +293,7 @@ class AsyncGenerator {
 			);
 
 			// Release the file handle, if any, so it is not left dangling.
-			if ( $feed instanceof FeedInterface ) {
+			if ( $feed instanceof ResumableFeedInterface ) {
 				$feed->flush();
 			}
 
@@ -510,8 +510,8 @@ class AsyncGenerator {
 	 */
 	private function discard_feed( array $status ): void {
 		// A completed feed exposes a full path; an in-progress chunked feed only tracks a file name.
-		// Reduce either to a plain identifier and let FeedInterface::delete() validate it and confine the
-		// deletion to the feed directory, so a tampered path read back from the option can never escape it.
+		// Reduce either to a plain identifier and let ResumableFeedInterface::delete() validate it and confine
+		// the deletion to the feed directory, so a tampered path read back from the option can never escape it.
 		$identifier = ! empty( $status['file_name'] )
 			? (string) $status['file_name']
 			: ( ! empty( $status['path'] ) ? wp_basename( (string) $status['path'] ) : '' );

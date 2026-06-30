@@ -108,6 +108,11 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 			->method( 'get_product_mapper' )
 			->willReturn( $mock_mapper );
 
+		// The integration produces a real (resumable) feed so generation runs end to end.
+		$this->mock_integration->method( 'create_feed' )->willReturnCallback(
+			fn() => new JsonFileFeed( 'pos-catalog-feed-test' )
+		);
+
 		// Trigger the action.
 		$this->sut->feed_generation_action( self::OPTION_KEY );
 
@@ -177,7 +182,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 
 		// A real partial feed file the failed status points at, so we can prove it is discarded.
 		$partial    = new JsonFileFeed( 'pos-catalog-feed-test' );
-		$identifier = $partial->start();
+		$identifier = $partial->open();
 		$partial->flush();
 		$partial_path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier;
 		$this->assertTrue( file_exists( $partial_path ) );
@@ -545,7 +550,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 
 		// A real partial feed left behind by the stuck (first, single-pass) attempt.
 		$partial    = new JsonFileFeed( 'pos-catalog-feed-test' );
-		$identifier = $partial->start();
+		$identifier = $partial->open();
 		$partial->flush();
 		$partial_path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier;
 		$this->assertTrue( file_exists( $partial_path ) );
@@ -614,7 +619,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 
 		// A real partial feed file that force should discard.
 		$partial    = new JsonFileFeed( 'pos-catalog-feed-test' );
-		$identifier = $partial->start();
+		$identifier = $partial->open();
 		$partial->flush();
 		$partial_path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier;
 		$this->assertTrue( file_exists( $partial_path ) );
@@ -715,6 +720,11 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$mock_mapper->method( 'map_product' )->willReturn( array() );
 		$this->mock_integration->method( 'get_product_mapper' )->willReturn( $mock_mapper );
 
+		// The integration produces a real (resumable) feed so generation runs end to end.
+		$this->mock_integration->method( 'create_feed' )->willReturnCallback(
+			fn() => new JsonFileFeed( 'pos-catalog-feed-test' )
+		);
+
 		$this->sut->feed_generation_action( self::OPTION_KEY );
 
 		$updated_status = get_option( self::OPTION_KEY );
@@ -754,7 +764,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		);
 
 		$partial    = new JsonFileFeed( 'pos-catalog-feed-test' );
-		$identifier = $partial->start();
+		$identifier = $partial->open();
 		$partial->flush();
 
 		$path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier;
