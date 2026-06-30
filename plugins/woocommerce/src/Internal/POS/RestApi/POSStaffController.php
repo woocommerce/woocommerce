@@ -125,6 +125,15 @@ class POSStaffController extends RestApiControllerBase {
 				continue;
 			}
 
+			// NOTE (known POC limitation): the `pin` field below ships each staff
+			// member's salt + PBKDF2 hash so the client can validate PINs offline —
+			// tills can't round-trip per keystroke. A 4-digit PIN is low-entropy, so
+			// the verifier is brute-forceable; the PIN is an operator-selection /
+			// attribution signal, not a security boundary (authz is device +
+			// manage_woocommerce admin). Residual risk: cross-staff attribution
+			// spoofing on a shared device, closed later by server-side authoritative-
+			// cashier stamping at payment/completion.
+			//
 			// PIN is the sole operator credential at the till; a row without one
 			// would be unauthenticatable on the device. The admin form enforces
 			// PIN at add/save time, but a manual edit could leave a POS-access
