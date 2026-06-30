@@ -1485,21 +1485,38 @@ WHERE
 	public function filter_raw_meta_data( &$object, $raw_meta_data ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
 
 		/*
-		 * Defensive last-resort guard: the meta data should always arrive as an array of meta
-		 * rows, but a corrupt persistent object cache entry can surface as a scalar or object and
-		 * would otherwise fatal in array_filter()/array_diff(). Treating an invalid shape as "no
-		 * meta" lets the order load instead of breaking the whole Orders screen.
+		 * Defensive last-resort guard. The meta data should always arrive as an array of meta-row
+		 * objects, but a corrupt persistent object cache entry can surface as a scalar, an object,
+		 * or a well-formed array whose elements are not meta rows. Any of these would otherwise
+		 * fatal downstream (array_filter()/array_diff() on a non-array, or $meta->meta_key on a
+		 * non-object element). Drop anything that is not a usable meta row so the order still
+		 * loads, and when corruption is detected invalidate the cached entry so the next read
+		 * self-heals from the database.
 		 */
-		if ( ! is_array( $raw_meta_data ) ) {
+		$is_corrupt = false;
+		if ( is_array( $raw_meta_data ) ) {
+			$valid_meta_data = array_filter(
+				$raw_meta_data,
+				static function ( $meta ) {
+					return is_object( $meta ) && property_exists( $meta, 'meta_key' );
+				}
+			);
+			$is_corrupt      = count( $valid_meta_data ) !== count( $raw_meta_data );
+			$raw_meta_data   = $valid_meta_data;
+		} else {
+			$is_corrupt    = true;
+			$raw_meta_data = array();
+		}
+
+		if ( $is_corrupt ) {
 			$this->error_logger->warning(
 				sprintf(
-					'Unexpected meta data shape for order %1$d: expected an array of meta rows but found %2$s. Treating it as empty.',
-					(int) $object->get_id(),
-					gettype( $raw_meta_data )
+					'Discarded malformed meta data for order %1$d while reading; invalidating the cached entry so it is re-read from the database.',
+					(int) $object->get_id()
 				),
 				array( 'source' => 'hpos-data-cache' )
 			);
-			$raw_meta_data = array();
+			$this->data_store_meta->clear_cached_data( array( $object->get_id() ) );
 		}
 
 		$filtered_meta_data = parent::filter_raw_meta_data( $object, $raw_meta_data );
@@ -1965,24 +1982,26 @@ WHERE
 		$order_data   = $cache_engine->get_cached_objects( $ids, $this->get_cache_group() );
 
 		foreach ( $order_data as $id => $datum ) {
-			if ( is_object( $datum ) ) {
+			/*
+			 * Cached order data is always a plain stdClass whose id matches the cache key (see
+			 * get_order_data_for_ids_from_db()). Accept only that shape. Anything else - a scalar,
+			 * an array, a foreign/incomplete object such as __PHP_Incomplete_Class, or a record
+			 * whose id is missing or belongs to a different order (cross-contamination) - would
+			 * fatal or silently hydrate the wrong order downstream (read_multiple() dereferences
+			 * $order_data->id and indexes $orders[$order_id]). This can happen when a third-party
+			 * persistent object cache returns a corrupt or cross-contaminated value. Invalidate the
+			 * entry so it is re-read from the database, and surface it for diagnosis.
+			 */
+			if ( $datum instanceof \stdClass && property_exists( $datum, 'id' ) && (int) $datum->id === (int) $id ) {
 				continue;
 			}
 
-			/*
-			 * A non-object cache entry (e.g. a scalar or array where a row of order data is
-			 * expected) would fatal downstream consumers that read properties off the record.
-			 * This can happen when a third-party persistent object cache returns a corrupt or
-			 * cross-contaminated value. Invalidate the entry so it is re-read from the database,
-			 * and surface it for diagnosis.
-			 */
 			if ( null !== $datum ) {
 				$cache_engine->delete_cached_object( $id, $this->get_cache_group() );
 				$this->error_logger->warning(
 					sprintf(
-						'Discarded a corrupt HPOS order cache entry for order %1$d: expected an order data object but found %2$s. The entry was invalidated and will be re-read from the database.',
-						(int) $id,
-						gettype( $datum )
+						'Discarded a corrupt HPOS order cache entry for order %1$d (unexpected shape or mismatched id); it will be re-read from the database.',
+						(int) $id
 					),
 					array( 'source' => 'hpos-data-cache' )
 				);
