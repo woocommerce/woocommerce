@@ -3,10 +3,9 @@
  * Admin View: Bulk Edit Products
  */
 
-use Automattic\WooCommerce\Enums\CatalogVisibility;
-use Automattic\WooCommerce\Enums\DimensionUnit;
-use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -203,7 +202,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</label>
 				<label class="change-input">
 					<?php
-					$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', DimensionUnit::CENTIMETER ) );
+					$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
 					?>
 					<input
 						type="text"

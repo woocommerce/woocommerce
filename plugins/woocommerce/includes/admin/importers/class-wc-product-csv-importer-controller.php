@@ -5,7 +5,6 @@
  * @package WooCommerce\Admin\Importers
  */
 
-use Automattic\WooCommerce\Enums\DimensionUnit;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\URL;
@@ -607,7 +606,7 @@ class WC_Product_CSV_Importer_Controller {
 	 */
 	protected function auto_map_columns( $raw_headers, $num_indexes = true ) {
 		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
-		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', DimensionUnit::CENTIMETER ) );
+		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
 
 		$default_columns = array(
 			__( 'ID', 'woocommerce' )                      => 'id',
@@ -786,7 +785,7 @@ class WC_Product_CSV_Importer_Controller {
 
 		// Available options.
 		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
-		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', DimensionUnit::CENTIMETER ) );
+		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
 		$options              = array(
 			'id'                 => __( 'ID', 'woocommerce' ),
 			'type'               => __( 'Type', 'woocommerce' ),

@@ -11,37 +11,54 @@ namespace Automattic\WooCommerce\Enums;
  */
 final class DimensionUnit {
 	/**
-	 * Meters.
+	 * Meter.
 	 *
 	 * @var string
 	 */
 	public const METER = 'm';
 
 	/**
-	 * Centimeters.
+	 * Centimeter.
 	 *
 	 * @var string
 	 */
 	public const CENTIMETER = 'cm';
 
 	/**
-	 * Millimeters.
+	 * Millimeter.
 	 *
 	 * @var string
 	 */
 	public const MILLIMETER = 'mm';
 
 	/**
-	 * Inches.
+	 * Inch.
 	 *
 	 * @var string
 	 */
 	public const INCH = 'in';
 
 	/**
-	 * Yards.
+	 * Yard.
 	 *
 	 * @var string
 	 */
 	public const YARD = 'yd';
+
+	/**
+	 * Returns all dimension unit values defined in this class.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return string[]
+	 */
+	public static function get_all(): array {
+		return array(
+			self::METER,
+			self::CENTIMETER,
+			self::MILLIMETER,
+			self::INCH,
+			self::YARD,
+		);
+	}
 }
