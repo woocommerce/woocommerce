@@ -349,9 +349,26 @@ class SettingsUIRequestContext {
 
 		if ( $registered_section ) {
 			if ( $registered_section instanceof SettingsSectionUIPageProviderInterface ) {
-				$settings_ui_page = $registered_section->get_settings_ui_page( $settings_page );
-				if ( $settings_ui_page instanceof SettingsUIPageInterface ) {
-					return $settings_ui_page;
+				try {
+					$settings_ui_page = $registered_section->get_settings_ui_page( $settings_page );
+					if ( $settings_ui_page instanceof SettingsUIPageInterface ) {
+						return $settings_ui_page;
+					}
+				} catch ( \Throwable $e ) {
+					wc_get_logger()->debug(
+						sprintf(
+							'Native Settings UI page could not be resolved for page "%1$s" section "%2$s": %3$s: %4$s',
+							$settings_page->get_id(),
+							'' === $section ? self::DEFAULT_SECTION_KEY : $section,
+							get_class( $e ),
+							$e->getMessage()
+						),
+						array( 'source' => 'settings-ui' )
+					);
+
+					if ( $e instanceof \Exception ) {
+						wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
+					}
 				}
 			}
 

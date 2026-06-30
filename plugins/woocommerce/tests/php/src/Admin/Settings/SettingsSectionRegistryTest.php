@@ -147,6 +147,22 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fall back to the default adapter when a registered section native Settings UI page provider fails.
+	 */
+	public function test_falls_back_to_default_adapter_when_registered_section_native_settings_ui_page_provider_fails(): void {
+		$page = $this->get_parent_page();
+		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section( 'acme_payments', true ) );
+
+		$settings_ui_page = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' )->get_settings_ui_page();
+
+		$this->assertInstanceOf( SettingsUIPageInterface::class, $settings_ui_page );
+		$this->assertSame( 'checkout', $settings_ui_page->get_page_id() );
+
+		$schema = $settings_ui_page->get_schema( 'acme_payments' );
+		$this->assertSame( 'registered_acme_payments_setting', $schema['groups']['default']['fields'][0]['id'] );
+	}
+
+	/**
 	 * @testdox Should keep direct SettingsSectionInterface implementations on the default adapter path.
 	 */
 	public function test_direct_settings_section_interface_implementation_uses_default_adapter(): void {
@@ -304,10 +320,11 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	 * Build a registered test section.
 	 *
 	 * @param string $section_id Section id.
+	 * @param bool   $fail_settings_ui_page_provider Whether the Settings UI page provider should fail.
 	 * @return SettingsSectionInterface
 	 */
-	private function get_registered_section( string $section_id = 'acme_payments' ): SettingsSectionInterface {
-		return new class( $section_id ) extends SettingsSection {
+	private function get_registered_section( string $section_id = 'acme_payments', bool $fail_settings_ui_page_provider = false ): SettingsSectionInterface {
+		return new class( $section_id, $fail_settings_ui_page_provider ) extends SettingsSection {
 			/**
 			 * Section id.
 			 *
@@ -316,12 +333,21 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 			private string $section_id;
 
 			/**
+			 * Whether the Settings UI page provider should fail.
+			 *
+			 * @var bool
+			 */
+			private bool $fail_settings_ui_page_provider;
+
+			/**
 			 * Constructor.
 			 *
 			 * @param string $section_id Section id.
+			 * @param bool   $fail_settings_ui_page_provider Whether the Settings UI page provider should fail.
 			 */
-			public function __construct( string $section_id ) {
-				$this->section_id = $section_id;
+			public function __construct( string $section_id, bool $fail_settings_ui_page_provider ) {
+				$this->section_id                     = $section_id;
+				$this->fail_settings_ui_page_provider = $fail_settings_ui_page_provider;
 			}
 
 			/**
@@ -375,6 +401,20 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 			 */
 			public function get_script_handles( \WC_Settings_Page $parent_page ): array {
 				return array( 'acme-payments-settings-ui' );
+			}
+
+			/**
+			 * Get the native Settings UI page.
+			 *
+			 * @param \WC_Settings_Page $parent_page Parent settings page.
+			 * @return SettingsUIPageInterface|null
+			 */
+			public function get_settings_ui_page( \WC_Settings_Page $parent_page ): ?SettingsUIPageInterface {
+				if ( $this->fail_settings_ui_page_provider ) {
+					throw new \Error( 'Unable to resolve native settings UI page.' );
+				}
+
+				return parent::get_settings_ui_page( $parent_page );
 			}
 
 		};
