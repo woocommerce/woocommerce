@@ -161,6 +161,11 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 			$order->payment_complete();
 		}
 
+		// Remove cart if it still matches the order being processed.
+		if ( WC()->cart && $order->has_cart_hash( WC()->cart->get_cart_hash() ) ) {
+			WC()->cart->empty_cart();
+		}
+
 		// Return thankyou redirect.
 		return array(
 			'result'   => 'success',
