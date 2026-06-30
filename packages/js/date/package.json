@@ -41,8 +41,8 @@
 		"@types/d3-time-format": "^2.3.4",
 		"@wordpress/date": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
+		"date-fns-tz": "^3.2.0",
 		"moment": "^2.29.4",
-		"moment-timezone": "^0.5.43",
 		"qs": "^6.11.2"
 	},
 	"devDependencies": {

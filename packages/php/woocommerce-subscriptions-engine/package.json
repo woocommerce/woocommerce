@@ -58,7 +58,6 @@
 					"name": "PHPStan: PHP 7.4",
 					"testType": "static:analysis",
 					"command": "phpstan:php7",
-					"optional": true,
 					"changes": [
 						"**/*.php",
 						"**/*.neon",
@@ -73,7 +72,6 @@
 					"name": "PHPStan: PHP 8.4",
 					"testType": "static:analysis",
 					"command": "phpstan:php8",
-					"optional": true,
 					"changes": [
 						"**/*.php",
 						"**/*.neon",
