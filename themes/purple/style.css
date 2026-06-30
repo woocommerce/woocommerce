@@ -5,7 +5,7 @@ Author: Automattic
 Author URI: https://automattic.com/
 Description: Purple is the new WooCommerce starter theme, fully built with blocks and ready for modern commerce. Designed with apparel stores in mind, it features clean styles and a simplistic color palette that adapts to any brand. Packed with commerce-ready templates and curated patterns, Purple offers a versatile foundation for launching your next online store with ease and precision.
 Requires at least: 6.8
-Tested up to: 6.8
+Tested up to: 7.0
 Requires PHP: 7.2
 Version: 1.0.0
 License: GNU General Public License v2 or later
@@ -14,10 +14,14 @@ Text Domain: purple
 Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blocks, block-patterns, custom-colors, custom-logo, custom-menu, block-styles, featured-images, full-site-editing, style-variations, template-editing, theme-options, rtl-language-support, sticky-post, threaded-comments, translation-ready
 */
 
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
 /* Utility class for underlined links. */
 .underline-link a {
 	text-decoration: underline;
-} 
+}
 
 /* Add a transition state for buttons. */
 .wp-element-button {
@@ -25,6 +29,10 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 	transition-duration: 0.15s;
 	transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
+
+/* ==========================================================================
+   WooCommerce — Checkout
+   ========================================================================== */
 
 /* Styles for WooCommerce blocks that can't be styled via the editor yet. */
 /* https://github.com/woocommerce/woocommerce/issues/59322 */
@@ -69,9 +77,9 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 	box-shadow: 0 0 0 0.5px var(--wp--preset--color--theme-6);
 }
 
-.wp-block-woocommerce-product-gallery-is-layout-flex {
-	gap: var(--wp--preset--spacing--50);
-}
+/* ==========================================================================
+   WooCommerce — My Account
+   ========================================================================== */
 
 /* My Account — classic shortcode UI; https://github.com/woocommerce/woocommerce/issues/59391 */
 .woocommerce-account {
@@ -168,19 +176,9 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 	font-style: normal;
 }
 
-.wp-block-product-specifications-item__value p {
-	margin: 0
-}
-
-/* Checkbox alignment for reviews form */
-.wp-block-woocommerce-product-review-form .comment-form-cookies-consent {
-	align-items: flex-start;
-}
-
-.wc-block-components-quantity-selector {
-	border-color: var(--wp--preset--color--theme-6);
-	border-radius: 0;
-}
+/* ==========================================================================
+   WooCommerce — Catalog
+   ========================================================================== */
 
 /* Catalog sort order select — CSS customizable select (base-select).
  * Continues PR #82 exploration: https://github.com/woocommerce/woo-themes/pull/82
@@ -327,6 +325,28 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 	}
 }
 
+/* ==========================================================================
+   WooCommerce — Single product
+   ========================================================================== */
+
+.wp-block-woocommerce-product-gallery-is-layout-flex {
+	gap: var(--wp--preset--spacing--50);
+}
+
+.wp-block-product-specifications-item__value p {
+	margin: 0
+}
+
+/* Checkbox alignment for reviews form */
+.wp-block-woocommerce-product-review-form .comment-form-cookies-consent {
+	align-items: flex-start;
+}
+
+.wc-block-components-quantity-selector {
+	border-color: var(--wp--preset--color--theme-6);
+	border-radius: 0;
+}
+
 :where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills) {
 	gap: var(--wp--preset--spacing--10);
 }
@@ -363,6 +383,10 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 	margin-bottom: 0;
 }
 
+/* ==========================================================================
+   WooCommerce — Cart
+   ========================================================================== */
+
 .wp-block-woocommerce-cart-order-summary-heading-block textarea {
 	padding-left: 0;
 }
@@ -370,9 +394,14 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 .wc-block-cart-item__quantity {
 	margin-top: var(--wp--preset--spacing--20);
 }
+
 .wc-block-components-quantity-selector {
 	min-height: 44px;
 }
+
+/* ==========================================================================
+   Navigation
+   ========================================================================== */
 
 /* Submenu text colour — beats core's default black on :not(.has-text-color). */
 :root .wp-block-navigation .wp-block-navigation__submenu-container,
@@ -518,7 +547,7 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 				padding-right: 1.25rem;
 			}
 
-			/* Submenu link inset by nesting depth (30px / 60px / 80px). */
+			/* Submenu link indent by nesting depth (30px / 60px / 80px). */
 			& .has-child .wp-block-navigation__submenu-container > .wp-block-navigation-item > .wp-block-navigation-item__content {
 				padding: 0.625rem 1.25rem 0.625rem 1.875rem;
 			}
