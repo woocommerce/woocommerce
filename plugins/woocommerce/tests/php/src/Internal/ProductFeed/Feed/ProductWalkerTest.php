@@ -206,10 +206,9 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 				}
 			);
 
-		// The walker does not own the feed lifecycle (the caller starts/ends the feed); it only adds
-		// entries.
-		$mock_feed->expects( $this->never() )->method( 'start' );
-		$mock_feed->expects( $this->never() )->method( 'end' );
+		// walk() owns the feed lifecycle: it starts the feed once, adds entries, and ends it once.
+		$mock_feed->expects( $this->once() )->method( 'start' );
+		$mock_feed->expects( $this->once() )->method( 'end' );
 		$mock_feed->expects( $this->exactly( $number_of_products - $validation_compensation ) )
 			->method( 'add_entry' )
 			->with( $this->isType( 'array' ) );
@@ -331,14 +330,14 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 		$walker->set_batch_size( $batch_size );
 
 		// First chunk: pages 1-2 (allotment of 2 batches reached).
-		$progress = $walker->walk( null, 1, 2 );
+		$progress = $walker->walk_batches( null, 1, 2 );
 		$this->assertSame( $total, $progress->total_count );
 		$this->assertSame( $total_pages, $progress->total_batch_count );
 		$this->assertSame( 2, $progress->processed_batches );
 		$this->assertSame( 4, $progress->processed_items );
 
 		// Final chunk: resumes at page 3 and stops at the last page even though 2 batches were allowed.
-		$progress = $walker->walk( null, 3, 2 );
+		$progress = $walker->walk_batches( null, 3, 2 );
 		$this->assertSame( 1, $progress->processed_batches );
 		$this->assertSame( 2, $progress->processed_items );
 	}

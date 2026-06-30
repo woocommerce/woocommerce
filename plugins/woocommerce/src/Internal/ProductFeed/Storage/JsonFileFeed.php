@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\Internal\ProductFeed\Storage;
 
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedInterface;
+use Automattic\WooCommerce\Internal\ProductFeed\Feed\ResumableFeedInterface;
 use Exception;
 
 // This file works directly with local files. That's fine.
@@ -23,7 +24,7 @@ use Exception;
  *
  * @since 10.5.0
  */
-class JsonFileFeed implements FeedInterface {
+class JsonFileFeed implements ResumableFeedInterface {
 	public const UPLOAD_DIR = 'product-feeds';
 
 	/**
@@ -96,6 +97,20 @@ class JsonFileFeed implements FeedInterface {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * Simple one-shot entry point for non-resumable generation. This is a thin adapter over the
+	 * resumable {@see open()}: it starts a fresh feed and discards the returned identifier. It exists
+	 * to honor the base {@see FeedInterface} contract; chunked callers use {@see open()} directly.
+	 *
+	 * @return void
+	 * @throws Exception If the feed directory or file cannot be created/opened.
+	 */
+	public function start(): void {
+		$this->open();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * A feed can be written across separate processes (and possibly servers), so it is created
 	 * directly in the shared upload directory rather than a per-request temp directory.
 	 *
@@ -104,7 +119,7 @@ class JsonFileFeed implements FeedInterface {
 	 * @return string The identifier of the feed that was started.
 	 * @throws Exception If the feed directory or file cannot be created/opened, or a resumed feed is missing.
 	 */
-	public function start( ?string $resume_identifier = null, int $entries_written = 0 ): string {
+	public function open( ?string $resume_identifier = null, int $entries_written = 0 ): string {
 		$upload_dir = $this->get_upload_dir();
 
 		$this->file_completed = false;
@@ -195,14 +210,7 @@ class JsonFileFeed implements FeedInterface {
 	}
 
 	/**
-	 * Get the number of entries that have been added to the feed.
-	 *
-	 * This reflects the rows actually written to the feed, which may be fewer
-	 * than the number of products iterated by `ProductWalker` because the
-	 * validator can silently drop entries before they reach `add_entry()`.
-	 *
-	 * @since 10.9.0
-	 * @return int Number of entries added to the feed.
+	 * {@inheritDoc}
 	 */
 	public function flush(): void {
 		if ( is_resource( $this->file_handle ) ) {
@@ -214,7 +222,7 @@ class JsonFileFeed implements FeedInterface {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @param string $identifier The identifier returned by start().
+	 * @param string $identifier The identifier returned by open().
 	 * @return void
 	 */
 	public function delete( string $identifier ): void {
