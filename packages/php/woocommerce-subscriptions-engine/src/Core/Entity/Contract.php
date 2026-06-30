@@ -39,9 +39,6 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Contract {
 
-	use ScalarCoercion;
-	use MoneyScale;
-
 	const SCHEDULE_SOURCE_PRIMITIVE = 'primitive';
 	const SCHEDULE_SOURCE_GATEWAY   = 'gateway';
 
@@ -239,29 +236,29 @@ final class Contract {
 	 * @param array<string, mixed> $data Raw attributes keyed by property name.
 	 */
 	private function __construct( array $data ) {
-		$this->id                   = self::coerce_nullable_int( $data['id'] ?? null );
-		$this->status               = self::coerce_string( $data['status'] ?? null, ContractStatus::ACTIVE );
-		$this->customer_id          = self::coerce_int( $data['customer_id'] ?? null );
-		$this->currency             = self::coerce_string( $data['currency'] ?? null );
-		$this->selling_plan_id      = self::coerce_int( $data['selling_plan_id'] ?? null );
-		$this->origin_order_id      = self::coerce_nullable_int( $data['origin_order_id'] ?? null );
-		$this->extension_slug       = self::coerce_nullable_string( $data['extension_slug'] ?? null );
-		$this->payment_method       = self::coerce_nullable_string( $data['payment_method'] ?? null );
-		$this->payment_method_title = self::coerce_nullable_string( $data['payment_method_title'] ?? null );
-		$this->payment_token_id     = self::coerce_nullable_int( $data['payment_token_id'] ?? null );
-		$this->start_gmt            = self::coerce_string( $data['start_gmt'] ?? null );
-		$this->next_payment_gmt     = self::coerce_nullable_string( $data['next_payment_gmt'] ?? null );
-		$this->plan_snapshot_id     = self::coerce_nullable_int( $data['plan_snapshot_id'] ?? null );
-		$this->items_snapshot_id    = self::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
-		$this->billing_total        = self::normalize_money( $data['billing_total'] ?? '0' );
-		$this->discount_total       = self::normalize_money( $data['discount_total'] ?? '0' );
-		$this->shipping_total       = self::normalize_money( $data['shipping_total'] ?? '0' );
-		$this->tax_total            = self::normalize_money( $data['tax_total'] ?? '0' );
-		$this->last_payment_gmt     = self::coerce_nullable_string( $data['last_payment_gmt'] ?? null );
-		$this->last_attempt_gmt     = self::coerce_nullable_string( $data['last_attempt_gmt'] ?? null );
-		$this->trial_end_gmt        = self::coerce_nullable_string( $data['trial_end_gmt'] ?? null );
-		$this->end_gmt              = self::coerce_nullable_string( $data['end_gmt'] ?? null );
-		$this->schedule_source      = self::coerce_string( $data['schedule_source'] ?? null, self::SCHEDULE_SOURCE_PRIMITIVE );
+		$this->id                   = ScalarCoercion::coerce_nullable_int( $data['id'] ?? null );
+		$this->status               = ScalarCoercion::coerce_string( $data['status'] ?? null, ContractStatus::ACTIVE );
+		$this->customer_id          = ScalarCoercion::coerce_int( $data['customer_id'] ?? null );
+		$this->currency             = ScalarCoercion::coerce_string( $data['currency'] ?? null );
+		$this->selling_plan_id      = ScalarCoercion::coerce_int( $data['selling_plan_id'] ?? null );
+		$this->origin_order_id      = ScalarCoercion::coerce_nullable_int( $data['origin_order_id'] ?? null );
+		$this->extension_slug       = ScalarCoercion::coerce_nullable_string( $data['extension_slug'] ?? null );
+		$this->payment_method       = ScalarCoercion::coerce_nullable_string( $data['payment_method'] ?? null );
+		$this->payment_method_title = ScalarCoercion::coerce_nullable_string( $data['payment_method_title'] ?? null );
+		$this->payment_token_id     = ScalarCoercion::coerce_nullable_int( $data['payment_token_id'] ?? null );
+		$this->start_gmt            = ScalarCoercion::coerce_string( $data['start_gmt'] ?? null );
+		$this->next_payment_gmt     = ScalarCoercion::coerce_nullable_string( $data['next_payment_gmt'] ?? null );
+		$this->plan_snapshot_id     = ScalarCoercion::coerce_nullable_int( $data['plan_snapshot_id'] ?? null );
+		$this->items_snapshot_id    = ScalarCoercion::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
+		$this->billing_total        = MoneyScale::normalize_money( $data['billing_total'] ?? '0' );
+		$this->discount_total       = MoneyScale::normalize_money( $data['discount_total'] ?? '0' );
+		$this->shipping_total       = MoneyScale::normalize_money( $data['shipping_total'] ?? '0' );
+		$this->tax_total            = MoneyScale::normalize_money( $data['tax_total'] ?? '0' );
+		$this->last_payment_gmt     = ScalarCoercion::coerce_nullable_string( $data['last_payment_gmt'] ?? null );
+		$this->last_attempt_gmt     = ScalarCoercion::coerce_nullable_string( $data['last_attempt_gmt'] ?? null );
+		$this->trial_end_gmt        = ScalarCoercion::coerce_nullable_string( $data['trial_end_gmt'] ?? null );
+		$this->end_gmt              = ScalarCoercion::coerce_nullable_string( $data['end_gmt'] ?? null );
+		$this->schedule_source      = ScalarCoercion::coerce_string( $data['schedule_source'] ?? null, self::SCHEDULE_SOURCE_PRIMITIVE );
 		$this->items                = self::coerce_item_rows( $data['items'] ?? null );
 		$this->addresses            = self::coerce_address_map( $data['addresses'] ?? null );
 		$this->meta                 = self::coerce_meta_map( $data['meta'] ?? null );
@@ -464,7 +461,7 @@ final class Contract {
 	 * @param string $billing_total Money value (decimal string or number).
 	 */
 	public function set_billing_total( string $billing_total ): void {
-		$this->billing_total = self::normalize_money( $billing_total );
+		$this->billing_total = MoneyScale::normalize_money( $billing_total );
 	}
 
 	/**
@@ -480,7 +477,7 @@ final class Contract {
 	 * @param string $discount_total Money value (decimal string or number).
 	 */
 	public function set_discount_total( string $discount_total ): void {
-		$this->discount_total = self::normalize_money( $discount_total );
+		$this->discount_total = MoneyScale::normalize_money( $discount_total );
 	}
 
 	/**
@@ -496,7 +493,7 @@ final class Contract {
 	 * @param string $shipping_total Money value (decimal string or number).
 	 */
 	public function set_shipping_total( string $shipping_total ): void {
-		$this->shipping_total = self::normalize_money( $shipping_total );
+		$this->shipping_total = MoneyScale::normalize_money( $shipping_total );
 	}
 
 	/**
@@ -512,7 +509,7 @@ final class Contract {
 	 * @param string $tax_total Money value (decimal string or number).
 	 */
 	public function set_tax_total( string $tax_total ): void {
-		$this->tax_total = self::normalize_money( $tax_total );
+		$this->tax_total = MoneyScale::normalize_money( $tax_total );
 	}
 
 	/**
@@ -710,7 +707,7 @@ final class Contract {
 
 		$map = array();
 		foreach ( $value as $key => $meta_value ) {
-			$map[ (string) $key ] = self::coerce_string( $meta_value );
+			$map[ (string) $key ] = ScalarCoercion::coerce_string( $meta_value );
 		}
 
 		return $map;
