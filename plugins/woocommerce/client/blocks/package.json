@@ -67,7 +67,7 @@
 		"lint:js-fix": "eslint assets/js --ext=js,jsx,ts,tsx --fix",
 		"lint:md:docs": "wp-scripts lint-md-docs",
 		"pre-commit": "lint-staged",
-		"reformat-files": "prettier --ignore-path .eslintignore --write \"**/*.{js,jsx,ts,tsx,css,scss}\"",
+		"reformat-files": "prettier --write \"**/*.{js,jsx,ts,tsx,css,scss}\"",
 		"rimraf": "./node_modules/rimraf/bin.js",
 		"start": "rimraf ../../assets/client/blocks/* && BABEL_ENV=default CHECK_CIRCULAR_DEPS=true webpack --watch",
 		"storybook": "pnpm watch:build:storybook",
@@ -135,7 +135,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/api-fetch": "catalog:wp-min",
 		"@wordpress/babel-preset-default": "next",
-		"@wordpress/base-styles": "catalog:wp-min",
+		"@wordpress/base-styles": "catalog:wp-bundled",
 		"@wordpress/block-editor": "catalog:wp-min",
 		"@wordpress/block-library": "catalog:wp-min",
 		"@wordpress/blocks": "catalog:wp-min",
@@ -285,7 +285,6 @@
 		"wordpress-components-slotfill": "npm:@wordpress/components@29.5.4"
 	},
 	"peerDependencies": {
-		"@wordpress/data": "^10.0.2",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"
 	},

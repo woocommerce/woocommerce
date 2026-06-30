@@ -16,7 +16,12 @@ async function addImageFromLibrary(
 	imageName: string,
 	actionButtonName: string
 ) {
-	await page.getByRole( 'tab', { name: 'Media Library' } ).click();
+	// The WordPress media modal can be slow to open under parallel load; wait
+	// for its "Media Library" tab with extra headroom beyond the default action
+	// timeout before clicking, so a slow-opening modal doesn't fail the test.
+	const mediaLibraryTab = page.getByRole( 'tab', { name: 'Media Library' } );
+	await mediaLibraryTab.waitFor( { state: 'visible', timeout: 30_000 } );
+	await mediaLibraryTab.click();
 	await page.getByRole( 'searchbox', { name: 'Search' } ).fill( imageName );
 	const imageLocator = page.getByLabel( imageName ).nth( 0 );
 	await imageLocator.click();

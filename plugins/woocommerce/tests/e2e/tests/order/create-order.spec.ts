@@ -10,6 +10,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { random } from '../../utils/helpers';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { assertTaxCalculationEnabled } from '../../utils/taxes';
 
 const taxClasses = [
 	{
@@ -57,12 +58,26 @@ async function addProductToOrder( page: Page, product, quantity: number ) {
 	await page.getByText( 'Search for a product…' ).click();
 	await page.locator( 'span > .select2-search__field' ).fill( product.name );
 	await page.getByRole( 'option', { name: product.name } ).first().click();
-	await page
+
+	const quantityField = page
 		.locator( 'tr' )
 		.filter( { hasText: product.name } )
-		.getByPlaceholder( '1' )
-		.fill( quantity.toString() );
+		.getByPlaceholder( '1' );
+	await quantityField.fill( quantity.toString() );
+	// Confirm the quantity stuck before committing, so the line item is never
+	// added with a stale/empty value.
+	await expect( quantityField ).toHaveValue( quantity.toString() );
+
 	await page.locator( '#btn-ok' ).click();
+
+	// Adding the product fires an AJAX request that inserts the line item and
+	// recalculates the order totals. Wait for the item row to render before
+	// returning; otherwise a subsequent "Create"/save can persist the order
+	// before the line item is fully applied, saving a 0-quantity / $0 line
+	// (observed intermittently under parallel load).
+	await expect(
+		page.locator( 'td.name > a' ).filter( { hasText: product.name } )
+	).toBeVisible();
 }
 
 const test = baseTest.extend( {
@@ -192,10 +207,10 @@ const test = baseTest.extend( {
 				product = response.data;
 			} );
 
-		for ( const key in variations ) {
-			restApi.post(
+		for ( const variation of variations ) {
+			await restApi.post(
 				`${ WC_API_PATH }/products/${ product.id }/variations`,
-				variations[ key ]
+				variation
 			);
 		}
 
@@ -277,13 +292,7 @@ test.describe(
 	{ tag: [ tags.SERVICES, tags.HPOS ] },
 	() => {
 		test.beforeAll( async ( { restApi } ) => {
-			// enable taxes on the account
-			await restApi.put(
-				`${ WC_API_PATH }/settings/general/woocommerce_calc_taxes`,
-				{
-					value: 'yes',
-				}
-			);
+			await assertTaxCalculationEnabled( restApi );
 			// add tax classes
 			for ( const taxClass of taxClasses ) {
 				await restApi.post(
@@ -318,13 +327,6 @@ test.describe(
 						}
 					);
 			}
-			// turn off taxes
-			await restApi.put(
-				`${ WC_API_PATH }/settings/general/woocommerce_calc_taxes`,
-				{
-					value: 'no',
-				}
-			);
 		} );
 
 		test( 'can create a simple guest order', async ( {

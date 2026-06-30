@@ -14,7 +14,8 @@ import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
 import { createClassicCartPage, CLASSIC_CART_PAGE } from '../../utils/pages';
 import { checkCartContent } from '../../utils/cart';
-import { updateIfNeeded, resetValue } from '../../utils/settings';
+import { setGatewayEnabled } from '../../utils/payment-gateways';
+import { withScopedTaxClass } from '../../utils/taxes';
 
 const cartPages = [ { name: 'blocks cart', slug: 'cart' }, CLASSIC_CART_PAGE ];
 
@@ -27,55 +28,20 @@ const test = baseTest.extend( {
 	page: async ( { page, restApi }, use ) => {
 		await createClassicCartPage();
 
-		const calcTaxesState = await updateIfNeeded(
-			`general/woocommerce_calc_taxes`,
-			'yes'
-		);
-
-		// Check id COD payment is enabled and enable it if it is not
-		const codResponse = await restApi.get(
-			`${ WC_API_PATH }/payment_gateways/cod`
-		);
-		const codEnabled = codResponse.enabled;
-
-		if ( ! codEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: true,
-			} );
-		}
-
-		// Check id BACS payment is enabled and enable it if it is not
-		const bacsResponse = await restApi.get(
-			`${ WC_API_PATH }/payment_gateways/bacs`
-		);
-		const bacsEnabled = bacsResponse.enabled;
-
-		if ( ! bacsEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
-				enabled: true,
-			} );
-		}
+		// COD and BACS are enabled globally in site setup; guard defensively in
+		// case they are somehow off, and restore their prior state afterwards.
+		const codWasEnabled = await setGatewayEnabled( restApi, 'cod', true );
+		const bacsWasEnabled = await setGatewayEnabled( restApi, 'bacs', true );
 
 		await page.context().clearCookies();
 		await use( page );
 
 		// revert the settings to initial state
 
-		await resetValue( `general/woocommerce_calc_taxes`, calcTaxesState );
-
-		if ( ! codEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: codEnabled,
-			} );
-		}
-
-		if ( ! bacsEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
-				enabled: bacsEnabled,
-			} );
-		}
+		await setGatewayEnabled( restApi, 'cod', codWasEnabled );
+		await setGatewayEnabled( restApi, 'bacs', bacsWasEnabled );
 	},
-	products: async ( { restApi }, use ) => {
+	products: async ( { restApi, tax }, use ) => {
 		const products = [];
 
 		// Using dec: 0 to avoid small rounding issues
@@ -85,6 +51,10 @@ const test = baseTest.extend( {
 					...getFakeProduct( { dec: 0 } ),
 					manage_stock: true,
 					stock_quantity: 3,
+					// Assign to this spec's own tax class so only these products
+					// are taxed; other workers' products use the standard class,
+					// which has no rate under the taxes-on baseline.
+					tax_class: tax.taxClassSlug,
 				} )
 				.then( ( response ) => {
 					products.push( response.data );
@@ -100,26 +70,9 @@ const test = baseTest.extend( {
 		}
 	},
 	tax: async ( { restApi }, use ) => {
-		let tax;
-		await restApi
-			.post( `${ WC_API_PATH }/taxes`, {
-				country: 'US',
-				state: '*',
-				cities: '*',
-				postcodes: '*',
-				rate: '25',
-				name: 'US Tax',
-				shipping: false,
-			} )
-			.then( ( r ) => {
-				tax = r.data;
-			} );
-
-		await use( tax );
-
-		await restApi.delete( `${ WC_API_PATH }/taxes/${ tax.id }`, {
-			force: true,
-		} );
+		// Products in the `products` fixture are assigned to this scoped class so
+		// only this spec's products are taxed; concurrent workers are unaffected.
+		await withScopedTaxClass( restApi, 'Cart Spec', use );
 	},
 } );
 /* endregion */
@@ -195,7 +148,7 @@ test(
 			// Verify undo link is no longer visible (cleanup occurred)
 			await expect(
 				page.getByRole( 'link', { name: 'Undo?' } )
-			).not.toBeVisible();
+			).toBeHidden();
 		} );
 	}
 );

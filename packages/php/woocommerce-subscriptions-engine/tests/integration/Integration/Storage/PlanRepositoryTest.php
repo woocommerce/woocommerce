@@ -34,6 +34,25 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		return ( new PlanGroupRepository() )->insert( $group );
 	}
 
+	private function make_plan( PlanRepository $repo, int $group_id, string $name, string $extension_slug, int $sort_order = 0 ): int {
+		return $repo->insert(
+			Plan::create(
+				$group_id,
+				array(
+					'name'           => $name,
+					'billing_policy' => BillingPolicy::from_array(
+						array(
+							'period'   => 'month',
+							'interval' => 1,
+						)
+					),
+					'extension_slug' => $extension_slug,
+					'sort_order'     => $sort_order,
+				)
+			)
+		);
+	}
+
 	public function test_plan_group_round_trips(): void {
 		$repo = new PlanGroupRepository();
 
@@ -43,7 +62,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 					'name'            => 'Boxes',
 					'merchant_code'   => 'boxes',
 					'options_display' => array( array( 'name' => 'Size' ) ),
-					'app_id'          => 'wc-subscriptions',
+					'extension_slug'  => 'wc-subscriptions',
 				)
 			)
 		);
@@ -54,7 +73,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( $id, $fetched->get_id() );
 		$this->assertSame( 'Boxes', $fetched->get_name() );
 		$this->assertSame( 'boxes', $fetched->get_merchant_code() );
-		$this->assertSame( 'wc-subscriptions', $fetched->get_app_id() );
+		$this->assertSame( 'wc-subscriptions', $fetched->get_extension_slug() );
 		$this->assertSame( array( array( 'name' => 'Size' ) ), $fetched->get_options_display() );
 	}
 
@@ -90,6 +109,8 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 						),
 					)
 				),
+				'status'         => Plan::STATUS_ARCHIVED,
+				'sort_order'     => 4,
 				'extension_slug' => 'lite',
 			)
 		);
@@ -105,6 +126,8 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'A monthly plan', $fetched->get_description() );
 		$this->assertSame( $group_id, $fetched->get_group_id() );
 		$this->assertSame( 'lite', $fetched->get_extension_slug() );
+		$this->assertSame( Plan::STATUS_ARCHIVED, $fetched->get_status() );
+		$this->assertSame( 4, $fetched->get_sort_order() );
 		$this->assertSame( 'month', $fetched->get_billing_policy()->get_period() );
 		$this->assertSame( 12, $fetched->get_billing_policy()->get_max_cycles() );
 		$this->assertNotNull( $fetched->get_pricing_policy() );
@@ -157,11 +180,207 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$id   = $repo->insert( $plan );
 
 		$plan->set_name( 'After' );
+		$plan->set_status( Plan::STATUS_ARCHIVED );
+		$plan->set_sort_order( 8 );
 		$this->assertTrue( $repo->update( $plan ) );
 
 		$updated = $repo->find( $id );
 		$this->assertInstanceOf( Plan::class, $updated );
 		$this->assertSame( 'After', $updated->get_name() );
+		$this->assertSame( Plan::STATUS_ARCHIVED, $updated->get_status() );
+		$this->assertSame( 8, $updated->get_sort_order() );
+	}
+
+	public function test_query_count_and_reorder_use_plan_lifecycle_fields(): void {
+		$group_id = $this->make_group();
+		$repo     = new PlanRepository();
+
+		$first    = Plan::create(
+			$group_id,
+			array(
+				'name'           => 'Alpha monthly',
+				'billing_policy' => BillingPolicy::from_array(
+					array(
+						'period'   => 'month',
+						'interval' => 1,
+					)
+				),
+				'status'         => Plan::STATUS_ACTIVE,
+				'sort_order'     => 1,
+				'extension_slug' => 'lite',
+			)
+		);
+		$second   = Plan::create(
+			$group_id,
+			array(
+				'name'           => 'Beta weekly',
+				'billing_policy' => BillingPolicy::from_array(
+					array(
+						'period'   => 'week',
+						'interval' => 1,
+					)
+				),
+				'status'         => Plan::STATUS_ACTIVE,
+				'sort_order'     => 2,
+				'extension_slug' => 'lite',
+			)
+		);
+		$archived = Plan::create(
+			$group_id,
+			array(
+				'name'           => 'Archived yearly',
+				'billing_policy' => BillingPolicy::from_array(
+					array(
+						'period'   => 'year',
+						'interval' => 1,
+					)
+				),
+				'status'         => Plan::STATUS_ARCHIVED,
+				'sort_order'     => 3,
+				'extension_slug' => 'lite',
+			)
+		);
+
+		$first_id    = $repo->insert( $first );
+		$second_id   = $repo->insert( $second );
+		$archived_id = $repo->insert( $archived );
+
+		$active = $repo->query(
+			array(
+				'status' => Plan::STATUS_ACTIVE,
+				'search' => 'weekly',
+			)
+		);
+
+		$this->assertCount( 1, $active );
+		$this->assertSame( $second_id, $active[0]->get_id() );
+		$this->assertSame( 1, $repo->count( array( 'status' => Plan::STATUS_ARCHIVED ) ) );
+
+		$this->assertTrue(
+			$repo->reorder(
+				'lite',
+				array(
+					$first_id    => 9,
+					$second_id   => 1,
+					$archived_id => 2,
+				)
+			)
+		);
+
+		$ordered = $repo->query(
+			array(
+				'orderby' => 'sort_order',
+				'order'   => 'asc',
+				'limit'   => 3,
+			)
+		);
+
+		$this->assertSame( array( $second_id, $archived_id, $first_id ), array_map( static fn ( Plan $plan ): ?int => $plan->get_id(), $ordered ) );
+	}
+
+	/**
+	 * Search terms that previously looked like placeholders after LIKE wildcards.
+	 *
+	 * @return array<string, array<int, string>>
+	 */
+	public function prepare_specifier_search_terms_provider(): array {
+		return array(
+			'starts with s' => array( 'status-specifier-regression' ),
+			'starts with d' => array( 'daily-specifier-regression' ),
+			'starts with f' => array( 'fixed-specifier-regression' ),
+			'starts with F' => array( 'Featured-specifier-regression' ),
+			'starts with i' => array( 'intro-specifier-regression' ),
+		);
+	}
+
+	/**
+	 * @dataProvider prepare_specifier_search_terms_provider
+	 *
+	 * @param string $search Search term.
+	 */
+	public function test_query_search_terms_starting_with_prepare_specifiers( string $search ): void {
+		$group_id = $this->make_group();
+		$repo     = new PlanRepository();
+
+		$this->make_plan( $repo, $group_id, 'Unrelated prepare regression plan', 'lite' );
+		$expected_id = $this->make_plan( $repo, $group_id, $search . ' plan', 'lite' );
+
+		$query_args = array(
+			'extension_slug' => 'lite',
+			'status'         => Plan::STATUS_ACTIVE,
+			'search'         => $search,
+			'orderby'        => 'id',
+			'order'          => 'asc',
+			'limit'          => 10,
+			'offset'         => 0,
+		);
+		$plans      = $repo->query( $query_args );
+
+		$this->assertCount( 1, $plans );
+		$this->assertSame( $expected_id, $plans[0]->get_id() );
+
+		$this->assertSame( 1, $repo->count( $query_args ) );
+	}
+
+	public function test_invalid_extension_scopes_do_not_return_unscoped_results(): void {
+		$group_id = $this->make_group();
+		$repo     = new PlanRepository();
+
+		$id = $this->make_plan( $repo, $group_id, 'Scoped', 'lite' );
+
+		$this->assertInstanceOf( Plan::class, $repo->find( $id, 'any' ) );
+		// Test with extension_slugs array.
+		$this->assertCount( 1, $repo->query( array( 'extension_slugs' => array( 'any' ) ) ) );
+		$this->assertSame( 1, $repo->count( array( 'extension_slugs' => array( 'any' ) ) ) );
+		// Test with null extension_slugs.
+		$this->assertCount( 1, $repo->query( array( 'extension_slugs' => null ) ) );
+		$this->assertSame( 1, $repo->count( array( 'extension_slugs' => null ) ) );
+
+		$this->assertNull( $repo->find( $id, '' ) );
+		$this->assertNull( $repo->find( $id, 'bad slug' ) );
+		$this->assertCount( 0, $repo->query( array( 'extension_slug' => '' ) ) );
+		$this->assertSame( 0, $repo->count( array( 'extension_slug' => '' ) ) );
+		$this->assertCount( 0, $repo->query( array( 'extension_slugs' => array( 'lite', '' ) ) ) );
+		$this->assertCount( 0, $repo->query( array( 'extension_slugs' => array( 'bad slug' ) ) ) );
+	}
+
+	public function test_reorder_fails_before_updates_when_an_id_is_missing_or_outside_extension(): void {
+		$group_id = $this->make_group();
+		$repo     = new PlanRepository();
+
+		$first_id = $this->make_plan( $repo, $group_id, 'First', 'lite', 1 );
+		$other_id = $this->make_plan( $repo, $group_id, 'Other', 'other-extension', 2 );
+
+		$this->assertFalse(
+			$repo->reorder(
+				'lite',
+				array(
+					$first_id => 9,
+					999999    => 1,
+				)
+			)
+		);
+
+		$first = $repo->find( $first_id, 'lite' );
+		$this->assertInstanceOf( Plan::class, $first );
+		$this->assertSame( 1, $first->get_sort_order() );
+
+		$this->assertFalse(
+			$repo->reorder(
+				'lite',
+				array(
+					$first_id => 9,
+					$other_id => 1,
+				)
+			)
+		);
+
+		$first = $repo->find( $first_id, 'lite' );
+		$other = $repo->find( $other_id, 'other-extension' );
+		$this->assertInstanceOf( Plan::class, $first );
+		$this->assertInstanceOf( Plan::class, $other );
+		$this->assertSame( 1, $first->get_sort_order() );
+		$this->assertSame( 2, $other->get_sort_order() );
 	}
 
 	public function test_delete_removes_the_row(): void {

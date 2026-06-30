@@ -57,16 +57,17 @@
 		"make:collection": "pnpm exec wc-api-tests make:collection",
 		"makepot": "XDEBUG_MODE=off composer run-script makepot",
 		"test": "pnpm test:unit",
-		"test:api": "pnpm test:e2e:default --project=api --workers 4",
-		"test:api:hpos-off": "pnpm test:e2e:with-env default-hpos-disabled --project=api-hpos-disabled --workers 4",
-		"test:api:object-cache": "pnpm test:e2e:with-env default-object-cache --project=api --workers 4",
-		"test:e2e": "pnpm test:e2e:default --project=e2e",
+		"test:api": "pnpm test:e2e:default --project=api",
+		"test:api:hpos-off": "pnpm test:e2e:with-env default-hpos-disabled --project=api-hpos-disabled",
+		"test:api:object-cache": "pnpm test:e2e:with-env default-object-cache --project=api",
+		"test:e2e:core-serial": "pnpm test:e2e:default --project=core-serial",
+		"test:e2e:core-parallel": "pnpm test:e2e:default --project=core-parallel",
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
 		"test:e2e:blocks": "pnpm playwright test --config=tests/e2e/playwright.config.ts --project=blocks-chromium",
 		"test:e2e:blocks:performance": "pnpm playwright test --config=tests/e2e/playwright.performance.config.ts --project=blocks-performance",
-		"test:e2e:email-update-propagation:pr": "pnpm test:e2e:default --project=e2e --grep @pr tests/email-editor/update-propagation",
-		"test:e2e:email-update-propagation:nightly": "pnpm test:e2e:default --project=e2e tests/email-editor/update-propagation",
+		"test:e2e:email-update-propagation:pr": "pnpm test:e2e:default --project=core-serial --project=core-parallel --grep @pr tests/email-editor/update-propagation",
+		"test:e2e:email-update-propagation:nightly": "pnpm test:e2e:default --project=core-serial --project=core-parallel tests/email-editor/update-propagation",
 		"test:e2e:with-env": "pnpm test:e2e:install && bash ./tests/e2e/run-tests-with-env.sh",
 		"test:e2e:pressable": "pnpm test:e2e:with-env default-pressable",
 		"test:e2e:wpcom": "pnpm test:e2e:with-env default-wpcom",
@@ -268,16 +269,49 @@
 					]
 				},
 				{
-					"name": "Core e2e tests",
+					"name": "Core e2e tests - parallel",
 					"testType": "e2e",
-					"command": "test:e2e",
+					"command": "test:e2e:core-parallel",
 					"shardingArguments": [
-						"--shard=1/6",
-						"--shard=2/6",
-						"--shard=3/6",
-						"--shard=4/6",
-						"--shard=5/6",
-						"--shard=6/6"
+						"--shard=1/2",
+						"--shard=2/2"
+					],
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.json",
+						"composer.lock",
+						"i18n/**/*.php",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/e2e/**",
+						".wp-env.json",
+						"woocommerce.php",
+						"uninstall.php"
+					],
+					"testEnv": {
+						"start": "env:test --debug"
+					},
+					"events": [
+						"pull_request",
+						"push",
+						"release-checks",
+						"core-e2e"
+					],
+					"report": {
+						"resultsBlobName": "core-e2e-report",
+						"resultsPath": "tests/e2e/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Core e2e tests - serial",
+					"testType": "e2e",
+					"command": "test:e2e:core-serial",
+					"shardingArguments": [
+						"--shard=1/2",
+						"--shard=2/2"
 					],
 					"changes": [
 						"client/admin/config/*.json",
@@ -344,10 +378,7 @@
 					"name": "Core e2e tests - Gutenberg stable",
 					"testType": "e2e",
 					"command": "test:e2e:gb-stable",
-					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
-					],
+					"shardingArguments": [],
 					"changes": [
 						"tests/e2e/**"
 					],
@@ -373,10 +404,7 @@
 					"name": "Core e2e tests - Gutenberg nightly",
 					"testType": "e2e",
 					"command": "test:e2e:gb-nightly",
-					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
-					],
+					"shardingArguments": [],
 					"changes": [
 						"tests/e2e/**"
 					],
@@ -424,15 +452,12 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - PHP 8.5",
+					"name": "Core e2e tests - PHP 8.5 - serial",
 					"testType": "e2e",
-					"command": "test:e2e",
+					"command": "test:e2e:core-serial",
 					"shardingArguments": [
-						"--shard=1/5",
-						"--shard=2/5",
-						"--shard=3/5",
-						"--shard=4/5",
-						"--shard=5/5"
+						"--shard=1/2",
+						"--shard=2/2"
 					],
 					"changes": [
 						"tests/e2e/**"
@@ -459,15 +484,44 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - WP latest-1",
+					"name": "Core e2e tests - PHP 8.5 - parallel",
 					"testType": "e2e",
-					"command": "test:e2e",
+					"command": "test:e2e:core-parallel",
 					"shardingArguments": [
-						"--shard=1/5",
-						"--shard=2/5",
-						"--shard=3/5",
-						"--shard=4/5",
-						"--shard=5/5"
+						"--shard=1/2",
+						"--shard=2/2"
+					],
+					"changes": [
+						"tests/e2e/**"
+					],
+					"onlyForDependencies": [
+						"@woocommerce/e2e-utils-playwright"
+					],
+					"testEnv": {
+						"start": "env:test --debug",
+						"config": {
+							"phpVersion": "8.5"
+						}
+					},
+					"events": [
+						"pull_request",
+						"nightly-checks",
+						"release-checks",
+						"core-e2e-php-8.5"
+					],
+					"report": {
+						"resultsBlobName": "core-e2e-report-php-8.5",
+						"resultsPath": "tests/e2e/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Core e2e tests - WP L-1 - serial",
+					"testType": "e2e",
+					"command": "test:e2e:core-serial",
+					"shardingArguments": [
+						"--shard=1/2",
+						"--shard=2/2"
 					],
 					"changes": [
 						"tests/e2e/**"
@@ -494,16 +548,78 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - WP pre-release",
+					"name": "Core e2e tests - WP L-1 - parallel",
+					"testType": "e2e",
+					"command": "test:e2e:core-parallel",
+					"shardingArguments": [
+						"--shard=1/2",
+						"--shard=2/2"
+					],
+					"changes": [
+						"tests/e2e/**"
+					],
+					"onlyForDependencies": [
+						"@woocommerce/e2e-utils-playwright"
+					],
+					"testEnv": {
+						"start": "env:test --debug",
+						"config": {
+							"wpVersion": "latest-1"
+						}
+					},
+					"events": [
+						"pull_request",
+						"nightly-checks",
+						"release-checks",
+						"core-e2e-wp-latest-1"
+					],
+					"report": {
+						"resultsBlobName": "core-e2e-report-wp-latest-1",
+						"resultsPath": "tests/e2e/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Core e2e tests - WP pre-release - serial",
 					"optional": true,
 					"testType": "e2e",
-					"command": "test:e2e",
+					"command": "test:e2e:core-serial",
 					"shardingArguments": [
-						"--shard=1/5",
-						"--shard=2/5",
-						"--shard=3/5",
-						"--shard=4/5",
-						"--shard=5/5"
+						"--shard=1/2",
+						"--shard=2/2"
+					],
+					"changes": [
+						"tests/e2e/**"
+					],
+					"onlyForDependencies": [
+						"@woocommerce/e2e-utils-playwright"
+					],
+					"testEnv": {
+						"start": "env:test --debug",
+						"config": {
+							"wpVersion": "prerelease"
+						}
+					},
+					"events": [
+						"pull_request",
+						"nightly-checks",
+						"release-checks",
+						"core-e2e-wp-pre-release"
+					],
+					"report": {
+						"resultsBlobName": "core-e2e-report-wp-pre-release",
+						"resultsPath": "tests/e2e/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Core e2e tests - WP pre-release - parallel",
+					"optional": true,
+					"testType": "e2e",
+					"command": "test:e2e:core-parallel",
+					"shardingArguments": [
+						"--shard=1/2",
+						"--shard=2/2"
 					],
 					"changes": [
 						"tests/e2e/**"

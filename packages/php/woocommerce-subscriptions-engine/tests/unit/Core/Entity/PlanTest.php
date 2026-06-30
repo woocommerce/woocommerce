@@ -41,6 +41,8 @@ class PlanTest extends TestCase {
 		$this->assertNull( $plan->get_id() );
 		$this->assertSame( 5, $plan->get_group_id() );
 		$this->assertSame( Plan::DEFAULT_CATEGORY, $plan->get_category() );
+		$this->assertSame( Plan::STATUS_ACTIVE, $plan->get_status() );
+		$this->assertSame( 0, $plan->get_sort_order() );
 		$this->assertNull( $plan->get_extension_slug() );
 	}
 
@@ -76,6 +78,36 @@ class PlanTest extends TestCase {
 		);
 
 		$this->assertSame( 42.0, $plan->calculate_price( 42.0 ) );
+	}
+
+	public function test_status_and_sort_order_are_mutable(): void {
+		$plan = Plan::create(
+			1,
+			array(
+				'name'           => 'Ordered',
+				'billing_policy' => $this->billing(),
+				'sort_order'     => 3,
+			)
+		);
+
+		$plan->set_status( Plan::STATUS_ARCHIVED );
+		$plan->set_sort_order( 7 );
+
+		$this->assertSame( Plan::STATUS_ARCHIVED, $plan->get_status() );
+		$this->assertSame( 7, $plan->get_sort_order() );
+	}
+
+	public function test_invalid_status_is_rejected(): void {
+		$this->expectException( InvalidArgumentException::class );
+
+		Plan::create(
+			1,
+			array(
+				'name'           => 'Bad status',
+				'billing_policy' => $this->billing(),
+				'status'         => 'deleted',
+			)
+		);
 	}
 
 	public function test_invalid_pricing_policy_type_is_rejected(): void {
@@ -128,6 +160,8 @@ class PlanTest extends TestCase {
 			array(
 				'name'           => 'Owned',
 				'billing_policy' => $this->billing(),
+				'status'         => Plan::STATUS_ARCHIVED,
+				'sort_order'     => 9,
 				'extension_slug' => 'lite',
 			)
 		);
@@ -135,6 +169,8 @@ class PlanTest extends TestCase {
 		$storage = $plan->to_storage();
 
 		$this->assertSame( 'lite', $storage['extension_slug'] );
+		$this->assertSame( Plan::STATUS_ARCHIVED, $storage['status'] );
+		$this->assertSame( 9, $storage['sort_order'] );
 		$this->assertSame( 3, $storage['group_id'] );
 		$this->assertIsArray( $storage['billing_policy'] );
 	}
