@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
-<input type="hidden" name="webhook_id" value="<?php echo esc_attr( (string) $webhook->get_id() ); ?>" />
+<input type="hidden" name="webhook_id" value="<?php echo esc_attr( $webhook->get_id() ); ?>" />
 
 <div id="webhook-options" class="settings-panel">
 	<h2><?php esc_html_e( 'Webhook data', 'woocommerce' ); ?></h2>
@@ -180,18 +180,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<h2><?php esc_html_e( 'Webhook actions', 'woocommerce' ); ?></h2>
 	<table class="form-table">
 		<tbody>
-			<?php
-			$date_created  = $webhook->get_date_created();
-			$date_modified = $webhook->get_date_modified();
-			if ( $date_created && '0000-00-00 00:00:00' !== $date_created->date( 'Y-m-d H:i:s' ) ) :
-				?>
-				<?php if ( is_null( $date_modified ) ) : ?>
+			<?php if ( $webhook->get_date_created() && '0000-00-00 00:00:00' !== $webhook->get_date_created()->date( 'Y-m-d H:i:s' ) ) : ?>
+				<?php if ( is_null( $webhook->get_date_modified() ) ) : ?>
 					<tr valign="top">
 						<th scope="row" class="titledesc">
 							<?php esc_html_e( 'Created at', 'woocommerce' ); ?>
 						</th>
 						<td class="forminp">
-							<?php echo esc_html( date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $date_created->date( 'Y-m-d H:i:s' ) ) ) ); ?>
+							<?php echo esc_html( date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $webhook->get_date_created()->date( 'Y-m-d H:i:s' ) ) ) ); ?>
 						</td>
 					</tr>
 				<?php else : ?>
@@ -200,7 +196,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<?php esc_html_e( 'Created at', 'woocommerce' ); ?>
 						</th>
 						<td class="forminp">
-							<?php echo esc_html( date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $date_created->date( 'Y-m-d H:i:s' ) ) ) ); ?>
+							<?php echo esc_html( date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $webhook->get_date_created()->date( 'Y-m-d H:i:s' ) ) ) ); ?>
 						</td>
 					</tr>
 				<tr valign="top">
@@ -208,7 +204,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<?php esc_html_e( 'Updated at', 'woocommerce' ); ?>
 						</th>
 						<td class="forminp">
-							<?php echo esc_html( date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $date_modified->date( 'Y-m-d H:i:s' ) ) ) ); ?>
+							<?php echo esc_html( date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $webhook->get_date_modified()->date( 'Y-m-d H:i:s' ) ) ) ); ?>
 						</td>
 					</tr>
 				<?php endif; ?>

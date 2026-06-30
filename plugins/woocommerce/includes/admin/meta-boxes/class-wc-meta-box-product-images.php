@@ -201,6 +201,25 @@ class WC_Meta_Box_Product_Images {
 	}
 
 	/**
+	 * Set product image IDs from a unified ordered list.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @param int[]      $image_ids Ordered image IDs.
+	 */
+	private static function set_product_image_ids( WC_Product $product, array $image_ids ): void {
+		$image_ids = wp_parse_id_list( $image_ids );
+
+		if ( empty( $image_ids ) ) {
+			$product->set_image_id( 0 );
+			$product->set_gallery_image_ids( array() );
+			return;
+		}
+
+		$product->set_image_id( array_shift( $image_ids ) );
+		$product->set_gallery_image_ids( $image_ids );
+	}
+
+	/**
 	 * Save meta box data.
 	 *
 	 * @param int     $post_id Post ID.
@@ -238,7 +257,7 @@ class WC_Meta_Box_Product_Images {
 		} else {
 			// Fallback for non-UI callers that submit the unified field only.
 			$image_ids = self::parse_posted_image_ids( $_POST['wc_product_image_ids'] );
-			$product->set_image_ids( $image_ids );
+			self::set_product_image_ids( $product, $image_ids );
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 

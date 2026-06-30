@@ -710,43 +710,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get all product image IDs in display order. The first ID is the featured image.
-	 *
-	 * @param string $context What the value is for. Valid values are view and edit.
-	 * @return int[]
-	 *
-	 * @since 10.9.0
-	 */
-	public function get_image_ids( $context = 'view' ) {
-		$image_ids = array();
-		$image_id  = $this->get_image_id( $context );
-
-		if ( $image_id ) {
-			$image_ids[] = (int) $image_id;
-		}
-
-		foreach ( $this->get_gallery_image_ids( $context ) as $gallery_id ) {
-			$gallery_id = (int) $gallery_id;
-			if ( $gallery_id && ! in_array( $gallery_id, $image_ids, true ) ) {
-				$image_ids[] = $gallery_id;
-			}
-		}
-
-		if ( 'view' === $context ) {
-			/**
-			 * Filters the combined product image IDs (featured + gallery) in display order.
-			 *
-			 * @since 10.9.0
-			 * @param int[]      $image_ids Product image IDs with featured image first.
-			 * @param WC_Product $product   Product object.
-			 */
-			$image_ids = apply_filters( 'woocommerce_product_get_image_ids', $image_ids, $this );
-		}
-
-		return $image_ids;
-	}
-
-	/**
 	 * Get rating count.
 	 *
 	 * @param  string $context What the value is for. Valid values are view and edit.
@@ -1507,27 +1470,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function set_image_id( $image_id = '' ) {
 		$this->set_prop( 'image_id', $image_id );
-	}
-
-	/**
-	 * Set all product image IDs. The first ID becomes the featured image, the rest become the gallery.
-	 * Duplicate IDs are removed before assigning the image properties.
-	 *
-	 * @param int[] $image_ids Ordered array of attachment IDs.
-	 * @return void
-	 *
-	 * @since 10.9.0
-	 */
-	public function set_image_ids( $image_ids ) {
-		$image_ids = wp_parse_id_list( $image_ids );
-
-		if ( ! empty( $image_ids ) ) {
-			$this->set_image_id( array_shift( $image_ids ) );
-			$this->set_gallery_image_ids( $image_ids );
-		} else {
-			$this->set_image_id( 0 );
-			$this->set_gallery_image_ids( array() );
-		}
 	}
 
 	/**

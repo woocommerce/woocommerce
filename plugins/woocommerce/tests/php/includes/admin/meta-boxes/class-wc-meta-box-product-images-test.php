@@ -51,7 +51,8 @@ class WC_Meta_Box_Product_Images_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array( 12, 34, 56 ), $saved_product->get_image_ids( 'edit' ), 'Posted image IDs should be saved in order.' );
+		$this->assertEquals( 12, $saved_product->get_image_id( 'edit' ), 'The first posted image ID should be saved as the featured image.' );
+		$this->assertSame( array( 34, 56 ), $saved_product->get_gallery_image_ids( 'edit' ), 'Remaining posted image IDs should be saved as gallery images.' );
 		$this->assertTrue( $saved_product->is_type( 'variable' ), 'Posted product type should be used while saving.' );
 	}
 
@@ -60,7 +61,8 @@ class WC_Meta_Box_Product_Images_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_save_clears_product_image_ids_when_posted_image_ids_are_empty(): void {
 		$product = WC_Helper_Product::create_simple_product();
-		$product->set_image_ids( array( 12, 34 ) );
+		$product->set_image_id( 12 );
+		$product->set_gallery_image_ids( array( 34 ) );
 		$product->save();
 
 		$saved_product = $this->save_product_images(
@@ -71,7 +73,8 @@ class WC_Meta_Box_Product_Images_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array(), $saved_product->get_image_ids( 'edit' ), 'Empty posted image IDs should clear product image IDs.' );
+		$this->assertEquals( 0, $saved_product->get_image_id( 'edit' ), 'Empty posted image IDs should clear the featured image.' );
+		$this->assertSame( array(), $saved_product->get_gallery_image_ids( 'edit' ), 'Empty posted image IDs should clear gallery images.' );
 	}
 
 	/**
@@ -88,7 +91,8 @@ class WC_Meta_Box_Product_Images_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array( 12, 34, 56 ), $saved_product->get_image_ids( 'edit' ), 'Sparse posted image IDs should be filtered before saving.' );
+		$this->assertEquals( 12, $saved_product->get_image_id( 'edit' ), 'The first sparse posted image ID should be saved as the featured image.' );
+		$this->assertSame( array( 34, 56 ), $saved_product->get_gallery_image_ids( 'edit' ), 'Sparse posted gallery image IDs should be filtered before saving.' );
 	}
 
 	/**
@@ -105,7 +109,8 @@ class WC_Meta_Box_Product_Images_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array( 12, 34, 56 ), $saved_product->get_image_ids( 'edit' ), 'Array-shaped image ID fields should be normalized before saving.' );
+		$this->assertEquals( 12, $saved_product->get_image_id( 'edit' ), 'The first normalized image ID should be saved as the featured image.' );
+		$this->assertSame( array( 34, 56 ), $saved_product->get_gallery_image_ids( 'edit' ), 'Array-shaped image ID fields should be normalized before saving.' );
 		$this->assertTrue( $saved_product->is_type( 'simple' ), 'Invalid product type input should fall back to the stored product type.' );
 	}
 
@@ -122,7 +127,8 @@ class WC_Meta_Box_Product_Images_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array( 12, 34 ), $saved_product->get_image_ids( 'edit' ), 'Image IDs should be saved when product type falls back to the stored value.' );
+		$this->assertEquals( 12, $saved_product->get_image_id( 'edit' ), 'The first image ID should be saved when product type falls back to the stored value.' );
+		$this->assertSame( array( 34 ), $saved_product->get_gallery_image_ids( 'edit' ), 'Gallery image IDs should be saved when product type falls back to the stored value.' );
 		$this->assertTrue( $saved_product->is_type( 'simple' ), 'Stored product type should be used when no product type is posted.' );
 	}
 

@@ -330,7 +330,6 @@
 
 	<!-- Temporary -->
 	<rule ref="Universal.Arrays.DisallowShortArraySyntax.Found">
-		<exclude-pattern>bin/api-builder/</exclude-pattern>
 		<exclude-pattern>src/Blocks/</exclude-pattern>
 		<exclude-pattern>src/StoreApi/</exclude-pattern>
 	</rule>

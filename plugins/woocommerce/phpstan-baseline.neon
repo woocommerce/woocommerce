@@ -5737,6 +5737,24 @@ parameters:
 			path: includes/admin/meta-boxes/class-wc-meta-box-product-data.php
 
 		-
+			message: '#^Call to an undefined method object\:\:save\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/admin/meta-boxes/class-wc-meta-box-product-images.php
+
+		-
+			message: '#^Call to an undefined method object\:\:set_gallery_image_ids\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/admin/meta-boxes/class-wc-meta-box-product-images.php
+
+		-
+			message: '#^Cannot call method get_gallery_image_ids\(\) on WC_Product\|false\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: includes/admin/meta-boxes/class-wc-meta-box-product-images.php
+
+		-
 			message: '#^Method WC_Meta_Box_Product_Images\:\:output\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -5745,6 +5763,12 @@ parameters:
 		-
 			message: '#^Method WC_Meta_Box_Product_Images\:\:save\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: includes/admin/meta-boxes/class-wc-meta-box-product-images.php
+
+		-
+			message: '#^Parameter \#2 \$str of function explode expects string, array\|string given\.$#'
+			identifier: argument.type
 			count: 1
 			path: includes/admin/meta-boxes/class-wc-meta-box-product-images.php
 
@@ -6328,6 +6352,12 @@ parameters:
 			message: '#^Variable \$base_cost might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
+			path: includes/admin/meta-boxes/views/html-variation-admin.php
+
+		-
+			message: '#^Variable \$loop might not be defined\.$#'
+			identifier: variable.undefined
+			count: 52
 			path: includes/admin/meta-boxes/views/html-variation-admin.php
 
 		-
@@ -7883,6 +7913,12 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/settings/views/html-settings-tax.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/admin/settings/views/html-webhooks-edit.php
 
 		-
 			message: '#^Parameter \#1 \$text of function esc_html expects string, \(float\|int\) given\.$#'
