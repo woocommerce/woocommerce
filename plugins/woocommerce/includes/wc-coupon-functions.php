@@ -10,7 +10,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Enums\CouponDiscountType;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
 
@@ -23,9 +22,9 @@ function wc_get_coupon_types() {
 	return (array) apply_filters(
 		'woocommerce_coupon_discount_types',
 		array(
-			CouponDiscountType::PERCENT       => __( 'Percentage discount', 'woocommerce' ),
-			CouponDiscountType::FIXED_CART    => __( 'Fixed cart discount', 'woocommerce' ),
-			CouponDiscountType::FIXED_PRODUCT => __( 'Fixed product discount', 'woocommerce' ),
+			'percent'       => __( 'Percentage discount', 'woocommerce' ),
+			'fixed_cart'    => __( 'Fixed cart discount', 'woocommerce' ),
+			'fixed_product' => __( 'Fixed product discount', 'woocommerce' ),
 		)
 	);
 }
@@ -48,14 +47,7 @@ function wc_get_coupon_type( $type = '' ) {
  * @return array
  */
 function wc_get_product_coupon_types() {
-	/**
-	 * Filters the coupon types that apply to individual products.
-	 *
-	 * @since 2.5.0
-	 *
-	 * @param array $types Array of coupon type keys.
-	 */
-	return (array) apply_filters( 'woocommerce_product_coupon_types', array( CouponDiscountType::FIXED_PRODUCT, CouponDiscountType::PERCENT ) );
+	return (array) apply_filters( 'woocommerce_product_coupon_types', array( 'fixed_product', 'percent' ) );
 }
 
 /**
@@ -65,14 +57,7 @@ function wc_get_product_coupon_types() {
  * @return array
  */
 function wc_get_cart_coupon_types() {
-	/**
-	 * Filters the coupon types that apply to the cart as a whole.
-	 *
-	 * @since 2.5.0
-	 *
-	 * @param array $types Array of coupon type keys.
-	 */
-	return (array) apply_filters( 'woocommerce_cart_coupon_types', array( CouponDiscountType::FIXED_CART ) );
+	return (array) apply_filters( 'woocommerce_cart_coupon_types', array( 'fixed_cart' ) );
 }
 
 /**

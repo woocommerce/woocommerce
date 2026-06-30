@@ -11,7 +11,6 @@
  */
 
 use Automattic\WooCommerce\Caches\OrderCache;
-use Automattic\WooCommerce\Enums\CouponDiscountType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -1590,7 +1589,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					} else {
 						$coupon_object->set_amount( $coupon_item->get_discount() );
 					}
-					$coupon_object->set_discount_type( CouponDiscountType::FIXED_CART );
+					$coupon_object->set_discount_type( 'fixed_cart' );
 				}
 			}
 

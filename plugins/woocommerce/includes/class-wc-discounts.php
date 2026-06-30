@@ -6,7 +6,6 @@
  * @since   3.2.0
  */
 
-use Automattic\WooCommerce\Enums\CouponDiscountType;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
@@ -267,13 +266,13 @@ class WC_Discounts {
 
 		// Core discounts are handled here as of 3.2.
 		switch ( $coupon->get_discount_type() ) {
-			case CouponDiscountType::PERCENT:
+			case 'percent':
 				$this->apply_coupon_percent( $coupon, $items_to_apply );
 				break;
-			case CouponDiscountType::FIXED_PRODUCT:
+			case 'fixed_product':
 				$this->apply_coupon_fixed_product( $coupon, $items_to_apply );
 				break;
-			case CouponDiscountType::FIXED_CART:
+			case 'fixed_cart':
 				$this->apply_coupon_fixed_cart( $coupon, $items_to_apply );
 				break;
 			default:

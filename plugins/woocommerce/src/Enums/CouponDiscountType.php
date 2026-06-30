@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Enums;
 /**
  * Enum class for the possible discount types of a coupon (as returned by wc_get_coupon_types()).
  *
- * @since 10.8.0
+ * @since 11.0.0
  */
 final class CouponDiscountType {
 	/**

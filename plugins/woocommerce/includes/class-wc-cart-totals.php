@@ -13,7 +13,6 @@
  * @version 3.2.0
  */
 
-use Automattic\WooCommerce\Enums\CouponDiscountType;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
@@ -365,13 +364,13 @@ final class WC_Cart_Totals {
 
 		foreach ( $this->coupons as $coupon ) {
 			switch ( $coupon->get_discount_type() ) {
-				case CouponDiscountType::FIXED_PRODUCT:
+				case 'fixed_product':
 					$coupon->sort = 1;
 					break;
-				case CouponDiscountType::PERCENT:
+				case 'percent':
 					$coupon->sort = 2;
 					break;
-				case CouponDiscountType::FIXED_CART:
+				case 'fixed_cart':
 					$coupon->sort = 3;
 					break;
 				default:

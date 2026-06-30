@@ -8,7 +8,6 @@
  * @version x.x.x
  */
 
-use Automattic\WooCommerce\Enums\CouponDiscountType;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
@@ -35,7 +34,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		'date_created'                => null,
 		'date_modified'               => null,
 		'date_expires'                => null,
-		'discount_type'               => CouponDiscountType::FIXED_CART,
+		'discount_type'               => 'fixed_cart',
 		'description'                 => '',
 		'usage_count'                 => 0,
 		'individual_use'              => false,
@@ -501,9 +500,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$discount      = 0;
 		$cart_item_qty = is_null( $cart_item ) ? 1 : $cart_item['quantity'];
 
-		if ( $this->is_type( array( CouponDiscountType::PERCENT ) ) ) {
+		if ( $this->is_type( array( 'percent' ) ) ) {
 			$discount = (float) $this->get_amount() * ( $discounting_amount / 100 );
-		} elseif ( $this->is_type( CouponDiscountType::FIXED_CART ) && ! is_null( $cart_item ) && WC()->cart->subtotal_ex_tax ) {
+		} elseif ( $this->is_type( 'fixed_cart' ) && ! is_null( $cart_item ) && WC()->cart->subtotal_ex_tax ) {
 			/**
 			 * This is the most complex discount - we need to divide the discount between rows based on their price in.
 			 * proportion to the subtotal. This is so rows with different tax rates get a fair discount, and so rows.
@@ -520,7 +519,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			}
 			$discount = ( (float) $this->get_amount() * $discount_percent ) / $cart_item_qty;
 
-		} elseif ( $this->is_type( CouponDiscountType::FIXED_PRODUCT ) ) {
+		} elseif ( $this->is_type( 'fixed_product' ) ) {
 			$discount = min( $this->get_amount(), $discounting_amount );
 			$discount = $single ? $discount : $discount * $cart_item_qty;
 		}
@@ -600,8 +599,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	private function set_discount_type_core( $discount_type, bool $verify_discount_type ) {
 		if ( 'percent_product' === $discount_type ) {
-			// Backwards compatibility.
-			$discount_type = CouponDiscountType::PERCENT;
+			$discount_type = 'percent'; // Backwards compatibility.
 		}
 		if ( $verify_discount_type && ! in_array( $discount_type, array_keys( wc_get_coupon_types() ), true ) ) {
 			$this->error( 'coupon_invalid_discount_type', __( 'Invalid discount type.', 'woocommerce' ) );
@@ -627,7 +625,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$this->error( 'coupon_invalid_amount', __( 'Invalid discount amount.', 'woocommerce' ) );
 		}
 
-		if ( CouponDiscountType::PERCENT === $this->get_discount_type() && (float) $amount > 100 ) {
+		if ( 'percent' === $this->get_discount_type() && (float) $amount > 100 ) {
 			$this->error( 'coupon_invalid_amount', __( 'Invalid discount amount.', 'woocommerce' ) );
 		}
 
@@ -1327,7 +1325,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$info = array(
 			$this->get_id(),
 			$this->get_code(),
-			CouponDiscountType::FIXED_CART === $type ? null : $type,
+			'fixed_cart' === $type ? null : $type,
 			(float) $this->get_prop( 'amount' ),
 		);
 
@@ -1362,7 +1360,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		return array(
 			'id'            => $data[0] ?? 0,
 			'code'          => $data[1] ?? '',
-			'discount_type' => $data[2] ?? CouponDiscountType::FIXED_CART,
+			'discount_type' => $data[2] ?? 'fixed_cart',
 			'amount'        => (float) ( $data[3] ?? 0 ),
 			'free_shipping' => (bool) ( $data[4] ?? false ),
 		);
@@ -1406,7 +1404,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				$data        = array(
 					'id'            => 0,
 					'code'          => '',
-					'discount_type' => $coupon_meta['discount_type'] ?? CouponDiscountType::FIXED_CART,
+					'discount_type' => $coupon_meta['discount_type'] ?? 'fixed_cart',
 					'amount'        => (float) ( $coupon_meta['amount'] ?? 0 ),
 					'free_shipping' => (bool) ( $coupon_meta['free_shipping'] ?? false ),
 				);

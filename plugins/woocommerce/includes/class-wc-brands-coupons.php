@@ -2,7 +2,6 @@
 
 declare( strict_types = 1);
 
-use Automattic\WooCommerce\Enums\CouponDiscountType;
 use Automattic\WooCommerce\Enums\ProductType;
 
 /**
@@ -81,7 +80,7 @@ class WC_Brands_Coupons {
 		}
 
 		// 3) For a cart discount, there is at least one product in cart that matches exclusion rule.
-		if ( $coupon->is_type( CouponDiscountType::FIXED_CART ) && $excluded_brands_matches > 0 ) {
+		if ( $coupon->is_type( 'fixed_cart' ) && $excluded_brands_matches > 0 ) {
 			throw new Exception( __( 'Sorry, this coupon is not applicable to the brands of selected products.', 'woocommerce' ), self::E_WC_COUPON_EXCLUDED_BRANDS ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
