@@ -19,6 +19,7 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->cleanup_helper_transients();
+		unset( $_GET['page'] );
 		parent::tearDown();
 	}
 
@@ -291,4 +292,38 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( $woocommerce_key, $woo_plugins );
 	}
 
+	/**
+	 * Invoke the private static WC_Helper::get_subscriptions_url().
+	 *
+	 * @return string
+	 */
+	private function get_subscriptions_url(): string {
+		$method = new ReflectionMethod( WC_Helper::class, 'get_subscriptions_url' );
+		$method->setAccessible( true );
+		return (string) $method->invoke( null );
+	}
+
+	/**
+	 * @testdox get_subscriptions_url query contains no stray whitespace (regression: GH #66075).
+	 */
+	public function test_subscriptions_url_query_has_no_whitespace(): void {
+		$_GET['page'] = 'wc-admin';
+
+		$query = wp_parse_url( $this->get_subscriptions_url(), PHP_URL_QUERY );
+
+		$this->assertIsString( $query );
+		$this->assertStringNotContainsString( ' ', $query );
+		$this->assertStringNotContainsString( '%20', $query );
+	}
+
+	/**
+	 * @testdox get_subscriptions_url targets the helper section for wc-admin and wc-addons.
+	 */
+	public function test_subscriptions_url_targets_helper_section(): void {
+		$_GET['page'] = 'wc-admin';
+		$this->assertStringEndsWith( 'admin.php?page=wc-admin&section=helper', $this->get_subscriptions_url() );
+
+		$_GET['page'] = 'wc-addons';
+		$this->assertStringEndsWith( 'admin.php?page=wc-addons&section=helper', $this->get_subscriptions_url() );
+	}
 }
