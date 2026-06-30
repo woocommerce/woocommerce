@@ -8,6 +8,9 @@
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce", "Saved for Later" ],
 	"textdomain": "woocommerce",
+	"blockHooks": {
+		"woocommerce/cart": "after"
+	},
 	"attributes": {
 		"columnCount": {
 			"type": "number",

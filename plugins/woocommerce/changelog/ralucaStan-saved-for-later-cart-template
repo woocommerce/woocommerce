@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Saved for Later now auto-injects on cart templates that hardcode the cart block, not only when the cart page uses core/post-content
+Saved for Later now declares its auto-injection after the Cart block via block.json blockHooks, so it appears reliably wherever the Cart block is used and is treated as a first-class hooked block in the editor

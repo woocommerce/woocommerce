@@ -49,120 +49,21 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @return array<string, array{string, string, bool, bool}>
+	 * Auto-injection after `woocommerce/cart` is declared in block.json via
+	 * `blockHooks`. Registering it on the block type (rather than through the
+	 * `hooked_block_types` filter alone) is what makes the editor treat it as a
+	 * first-class hooked block and materialize it, instead of recording it as
+	 * ignored on save. This guards that declaration.
 	 */
-	public function provider_register_hooked_block(): array {
-		$cart_only       = '<!-- wp:woocommerce/cart /-->';
-		$cart_with_block = '<!-- wp:woocommerce/cart /--><!-- wp:woocommerce/saved-for-later /-->';
+	public function test_block_json_declares_block_hooks_after_cart(): void {
+		$block_json = WC_ABSPATH . 'assets/client/blocks/saved-for-later/block.json';
+		$this->assertFileExists( $block_json, 'Built saved-for-later block.json should exist.' );
 
-		return array(
-			// label                                => array( cart_page_content, anchor, context_is_cart_page, expected_hooked ).
-			'hooked after cart on cart page'        => array( $cart_only, 'woocommerce/cart', true, true ),
-			'not hooked after non-cart anchor'      => array( $cart_only, 'core/paragraph', true, false ),
-			'not hooked when context is other page' => array( $cart_only, 'woocommerce/cart', false, false ),
-			'not hooked when already present'       => array( $cart_with_block, 'woocommerce/cart', true, false ),
-		);
-	}
-
-	/**
-	 * `register_hooked_block` only adds the block when the anchor is `woocommerce/cart`,
-	 * the context is the cart page, and the cart page doesn't already contain the block.
-	 *
-	 * @dataProvider provider_register_hooked_block
-	 *
-	 * @param string $cart_page_content    Initial content of the cart page.
-	 * @param string $anchor               Anchor block name passed to the filter.
-	 * @param bool   $context_is_cart_page Whether the filter context is the cart page or some other page.
-	 * @param bool   $expected_hooked      Whether the block should end up in the hooked list.
-	 */
-	public function test_register_hooked_block( string $cart_page_content, string $anchor, bool $context_is_cart_page, bool $expected_hooked ): void {
-		$cart_page_id = self::factory()->post->create(
-			array(
-				'post_type'    => 'page',
-				'post_status'  => 'publish',
-				'post_content' => $cart_page_content,
-			)
-		);
-		update_option( 'woocommerce_cart_page_id', $cart_page_id );
-
-		$context_id = $context_is_cart_page
-			? $cart_page_id
-			: self::factory()->post->create(
-				array(
-					'post_type'   => 'page',
-					'post_status' => 'publish',
-				)
-			);
-
-		$hooked = $this->sut->register_hooked_block( array(), 'after', $anchor, get_post( $context_id ) );
-
-		if ( $expected_hooked ) {
-			$this->assertContains( 'woocommerce/saved-for-later', $hooked );
-		} else {
-			$this->assertNotContains( 'woocommerce/saved-for-later', $hooked );
-		}
-	}
-
-	/**
-	 * When the cart page option is unset, `wc_get_page_id()` returns -1 — the filter
-	 * must treat that as "no cart page" rather than letting it match a real post ID.
-	 */
-	public function test_register_hooked_block_skips_when_cart_page_unset(): void {
-		delete_option( 'woocommerce_cart_page_id' );
-
-		$context_id = self::factory()->post->create(
-			array(
-				'post_type'    => 'page',
-				'post_status'  => 'publish',
-				'post_content' => '<!-- wp:woocommerce/cart /-->',
-			)
-		);
-
-		$hooked = $this->sut->register_hooked_block( array(), 'after', 'woocommerce/cart', get_post( $context_id ) );
-
-		$this->assertNotContains( 'woocommerce/saved-for-later', $hooked );
-	}
-
-	/**
-	 * @return array<string, array{string, string, bool}>
-	 */
-	public function provider_register_hooked_block_on_template(): array {
-		$cart_only       = '<!-- wp:woocommerce/cart /-->';
-		$cart_with_block = '<!-- wp:woocommerce/cart /--><!-- wp:woocommerce/saved-for-later /-->';
-
-		return array(
-			// label                                    => array( template_content, template_slug, expected_hooked ).
-			'hooked after cart on cart template'         => array( $cart_only, 'page-cart', true ),
-			'not hooked on a non-cart template'          => array( $cart_only, 'page-checkout', false ),
-			'not hooked when already in template markup' => array( $cart_with_block, 'page-cart', false ),
-		);
-	}
-
-	/**
-	 * `register_hooked_block` also injects on the cart block template — block
-	 * themes that hardcode `woocommerce/cart` in `page-cart.html` run the
-	 * block-hooks pass with a `WP_Block_Template` context, not a `WP_Post`, so
-	 * the cart-page-post path never matches. Injection must happen for the
-	 * `page-cart` template and must not happen for any other template.
-	 *
-	 * @dataProvider provider_register_hooked_block_on_template
-	 *
-	 * @param string $template_content Markup of the template being hooked.
-	 * @param string $template_slug    Slug of the template context.
-	 * @param bool   $expected_hooked  Whether the block should end up in the hooked list.
-	 */
-	public function test_register_hooked_block_on_template( string $template_content, string $template_slug, bool $expected_hooked ): void {
-		$template          = new \WP_Block_Template();
-		$template->slug    = $template_slug;
-		$template->content = $template_content;
-
-		$hooked = $this->sut->register_hooked_block( array(), 'after', 'woocommerce/cart', $template );
-
-		if ( $expected_hooked ) {
-			$this->assertContains( 'woocommerce/saved-for-later', $hooked );
-		} else {
-			$this->assertNotContains( 'woocommerce/saved-for-later', $hooked );
-		}
+		$metadata = json_decode( (string) file_get_contents( $block_json ), true );
+		$this->assertIsArray( $metadata );
+		$this->assertArrayHasKey( 'blockHooks', $metadata );
+		$this->assertArrayHasKey( 'woocommerce/cart', $metadata['blockHooks'] );
+		$this->assertSame( 'after', $metadata['blockHooks']['woocommerce/cart'] );
 	}
 
 	/**

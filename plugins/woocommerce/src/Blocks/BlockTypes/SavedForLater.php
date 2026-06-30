@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListRenderer;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -20,10 +19,10 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
  * The row markup (image, name, price, remove badge, variation overlay) is
  * shared with other shopper-list blocks via `ShopperListRenderer`. This
  * class composes those fragments and adds the bits that are unique to
- * Saved for Later: auto-injection via the Block Hooks API (on both the
- * cart page post and the cart block template), the
- * `hasShownItems` empty-state gating, the per-row quantity span, and the
- * Move-to-cart action button.
+ * Saved for Later: auto-injection after `woocommerce/cart` (declared via the
+ * `blockHooks` field in block.json so the editor treats it as a first-class
+ * hooked block), the `hasShownItems` empty-state gating, the per-row quantity
+ * span, and the Move-to-cart action button.
  */
 final class SavedForLater extends AbstractBlock {
 	/**
@@ -46,58 +45,10 @@ final class SavedForLater extends AbstractBlock {
 	protected function initialize(): void {
 		parent::initialize();
 
-		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
+		// Auto-injection after `woocommerce/cart` is declared in block.json
+		// (`blockHooks`). This filter only seeds the default heading on the
+		// injected block.
 		add_filter( 'hooked_block_woocommerce/saved-for-later', array( $this, 'set_hooked_block_attributes' ), 10, 4 );
-	}
-
-	/**
-	 * Auto-inject this block after `woocommerce/cart`, scoped to the cart.
-	 *
-	 * Two contexts are supported: the cart page post (`WP_Post` whose ID is the
-	 * configured cart page — the WordPress 6.8+ `core/post-content` path) and
-	 * the cart block template (`WP_Block_Template` whose slug is `page-cart` —
-	 * for block themes that hardcode the cart block in `page-cart.html` instead
-	 * of routing through `core/post-content`). The template-slug check mirrors
-	 * `WC_Brands::hook_product_brand_block()` and
-	 * `OrderConfirmation\CreateAccount`, the other page-scoped WooCommerce
-	 * hooked-block callbacks.
-	 *
-	 * Edge case: a theme that both hardcodes the cart in the template *and*
-	 * puts a cart block in the cart page content could double-inject, since the
-	 * two passes run with different contexts and the per-context `has_block()`
-	 * guard below only sees one of them at a time.
-	 *
-	 * @param array                                  $hooked_block_types Block names hooked at this position.
-	 * @param string                                 $relative_position  Position of the insertion point.
-	 * @param string                                 $anchor_block_type  Anchor block name.
-	 * @param array|\WP_Post|\WP_Block_Template|null $context            Where the block is being embedded.
-	 * @return array
-	 */
-	public function register_hooked_block( $hooked_block_types, $relative_position, $anchor_block_type, $context ) {
-		if ( 'after' !== $relative_position || 'woocommerce/cart' !== $anchor_block_type ) {
-			return $hooked_block_types;
-		}
-
-		// `wc_get_page_id()` returns -1 when the page option isn't set.
-		$cart_page_id     = (int) wc_get_page_id( 'cart' );
-		$is_cart_page     = $context instanceof \WP_Post && $cart_page_id > 0 && (int) $context->ID === $cart_page_id;
-		$is_cart_template = $context instanceof \WP_Block_Template && CartTemplate::SLUG === $context->slug;
-		if ( ! $is_cart_page && ! $is_cart_template ) {
-			return $hooked_block_types;
-		}
-
-		// Don't double-inject if the block is already present in this context.
-		// Pull the markup string out of whichever context shape applies (array,
-		// template, or post) so `has_block()` can scan it.
-		$content = is_array( $context ) && isset( $context['content'] ) ? $context['content'] : '';
-		$content = '' === $content && $context instanceof \WP_Block_Template ? $context->content : $content;
-		$content = '' === $content && $context instanceof \WP_Post ? $context->post_content : $content;
-		if ( has_block( $this->get_full_block_name(), $content ) ) {
-			return $hooked_block_types;
-		}
-
-		$hooked_block_types[] = $this->get_full_block_name();
-		return $hooked_block_types;
 	}
 
 	/**
