@@ -12,9 +12,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
  *
  * Defines the schema and serialisation for a single cart line item in the
  * Store API. Extends ItemSchema with cart-specific fields such as
- * quantity limits, totals, and the {@see CartItemSchema::has_cart_item_data}
- * predicate, which signals whether a line was originally added with
- * differentiating cart_item_data (e.g. bundle children, subscription switches).
+ * quantity limits, totals, etc.
  */
 class CartItemSchema extends ItemSchema {
 	use ProductItemTrait;
@@ -51,7 +49,7 @@ class CartItemSchema extends ItemSchema {
 			parent::get_properties(),
 			array(
 				'has_cart_item_data' => array(
-					'description' => __( 'True when this cart line carries differentiating item metadata (e.g. a bundle child, booking, or add-on configuration) and is therefore not the standalone line for the product.', 'woocommerce' ),
+					'description' => __( 'True when this cart line carries differentiating item metadata.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -64,10 +62,7 @@ class CartItemSchema extends ItemSchema {
 	 * Convert a WooCommerce cart item to an object suitable for the response.
 	 *
 	 * Returns an array whose keys match the properties declared in
-	 * {@see CartItemSchema::get_properties()}.  The has_cart_item_data entry
-	 * is computed via {@see CartItemUtils::has_cart_item_data()} and is true
-	 * when the line was originally added with non-empty cart_item_data (e.g.
-	 * a bundle component, booking extra, or subscription switch).
+	 * {@see CartItemSchema::get_properties()}.
 	 *
 	 * @since 11.0.0 Added has_cart_item_data field.
 	 *
