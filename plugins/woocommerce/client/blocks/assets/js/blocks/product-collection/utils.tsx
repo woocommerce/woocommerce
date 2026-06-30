@@ -3,7 +3,7 @@
  */
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
-import { select, useSelect, useDispatch } from '@wordpress/data';
+import { select, useSelect } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
 import { CORE_EDITOR_STORE } from '@woocommerce/utils';
@@ -394,31 +394,32 @@ export const useProductCollectionUIState = ( {
 
 export const useSetPreviewState = ( {
 	setPreviewState,
+	initialPreviewState,
 	location,
 	attributes,
-	setAttributes,
 	isUsingReferencePreviewMode,
 }: {
 	setPreviewState?: SetPreviewState | undefined;
+	initialPreviewState?: PreviewState | undefined;
 	location: WooCommerceBlockLocation;
 	attributes: ProductCollectionAttributes;
-	setAttributes: (
-		attributes: Partial< ProductCollectionAttributes >
-	) => void;
 	usesReference?: string[] | undefined;
 	isUsingReferencePreviewMode: boolean;
-} ) => {
-	const { __unstableMarkNextChangeAsNotPersistent } =
-		useDispatch( blockEditorStore );
+} ): PreviewState | undefined => {
+	// Preview state is editor-only UI — it drives the "Preview" badge and is
+	// passed down to inner blocks via block context. We keep it in local state
+	// rather than a block attribute: writing an attribute marks the entity dirty
+	// (and on navigation even a non-persistent write loses the race), flagging
+	// unsaved changes the merchant never made (#48936 / #51671).
+	const [ previewState, setLocalPreviewState ] = useState<
+		PreviewState | undefined
+	>( initialPreviewState );
 
 	const setState = ( newPreviewState: PreviewState ) => {
-		__unstableMarkNextChangeAsNotPersistent();
-		setAttributes( {
-			__privatePreviewState: {
-				...attributes.__privatePreviewState,
-				...newPreviewState,
-			},
-		} );
+		setLocalPreviewState( ( current ) => ( {
+			...current,
+			...newPreviewState,
+		} ) );
 	};
 
 	/**
@@ -431,19 +432,12 @@ export const useSetPreviewState = ( {
 	);
 	useEffect( () => {
 		if ( isUsingReferencePreviewMode ) {
-			__unstableMarkNextChangeAsNotPersistent();
-			setAttributes( {
-				__privatePreviewState: {
-					isPreview: usesReferencePreviewMessage.length > 0,
-					previewMessage: usesReferencePreviewMessage,
-				},
+			setLocalPreviewState( {
+				isPreview: usesReferencePreviewMessage.length > 0,
+				previewMessage: usesReferencePreviewMessage,
 			} );
 		}
-	}, [
-		setAttributes,
-		usesReferencePreviewMessage,
-		isUsingReferencePreviewMode,
-	] );
+	}, [ usesReferencePreviewMessage, isUsingReferencePreviewMode ] );
 
 	// Running setPreviewState function provided by Collection, if it exists.
 	useLayoutEffect( () => {
@@ -483,17 +477,14 @@ export const useSetPreviewState = ( {
 			const isGenericArchiveTemplate =
 				location.type === LocationType.Archive && termId === null;
 
-			__unstableMarkNextChangeAsNotPersistent();
-			setAttributes( {
-				__privatePreviewState: {
-					isPreview: isGenericArchiveTemplate
-						? !! attributes?.query?.inherit
-						: false,
-					previewMessage: __(
-						'Actual products will vary depending on the page being viewed.',
-						'woocommerce'
-					),
-				},
+			setLocalPreviewState( {
+				isPreview: isGenericArchiveTemplate
+					? !! attributes?.query?.inherit
+					: false,
+				previewMessage: __(
+					'Actual products will vary depending on the page being viewed.',
+					'woocommerce'
+				),
 			} );
 		}
 	}, [
@@ -501,10 +492,11 @@ export const useSetPreviewState = ( {
 		usesReferencePreviewMessage,
 		termId,
 		location.type,
-		setAttributes,
 		setPreviewState,
 		isUsingReferencePreviewMode,
 	] );
+
+	return previewState;
 };
 export const getDefaultQueryForSettingsSection = (
 	currentQuery: ProductCollectionQuery

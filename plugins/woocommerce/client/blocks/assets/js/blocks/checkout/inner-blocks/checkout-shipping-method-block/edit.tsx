@@ -19,7 +19,6 @@ import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { checkoutStore as checkoutStoreDescriptor } from '@woocommerce/block-data';
 import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
-import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -160,16 +159,6 @@ export const Edit = ( {
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element | null => {
-	useEffect( () => {
-		const localPickupTitle = getSetting< string >(
-			'localPickupText',
-			attributes.localPickupText
-		);
-		setAttributes( { localPickupText: localPickupTitle } );
-		// Disable the exhaustive deps rule because we only want to run this on first mount to set the attribute, not
-		// each time the attribute changes.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ setAttributes ] );
 	const { setPrefersCollection } = useDispatch( checkoutStoreDescriptor );
 	const { prefersCollection } = useSelect( ( select ) => {
 		const checkoutStore = select( checkoutStoreDescriptor );
@@ -177,8 +166,7 @@ export const Edit = ( {
 			prefersCollection: checkoutStore.prefersCollection(),
 		};
 	} );
-	const { showPrice, showIcon, className, localPickupText, shippingText } =
-		attributes;
+	const { showPrice, showIcon, className, shippingText } = attributes;
 	const {
 		shippingRates,
 		needsShipping,
@@ -195,6 +183,14 @@ export const Edit = ( {
 	) {
 		return null;
 	}
+
+	// Read the merchant-configured local pickup title at render (mirroring the
+	// frontend in block.tsx) instead of writing it to the attribute on mount,
+	// which flagged the page dirty on open (#48936).
+	const localPickupText = getSetting< string >(
+		'localPickupText',
+		attributes.localPickupText || defaultLocalPickupText
+	);
 
 	const changeView = ( method: string ) => {
 		if ( method === 'pickup' ) {

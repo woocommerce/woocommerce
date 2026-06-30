@@ -7,10 +7,13 @@ import {
 	BlockAttributes,
 } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
-import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
+import {
+	BlockContextProvider,
+	InnerBlocks,
+	useBlockProps,
+} from '@wordpress/block-editor';
 import { page } from '@wordpress/icons';
 import { CHECKOUT_PAGE_ID, CART_PAGE_ID } from '@woocommerce/block-settings';
-import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -18,13 +21,7 @@ import { useEffect } from '@wordpress/element';
 import metadata from './block.json';
 import './editor.scss';
 
-const Edit = ( {
-	attributes,
-	setAttributes,
-}: {
-	attributes: BlockAttributes;
-	setAttributes: ( attrs: BlockAttributes ) => void;
-} ) => {
+const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
 	const TEMPLATE: InnerBlockTemplate[] = [
 		[ 'core/post-title', { align: 'wide', level: 1 } ],
 		[ 'core/post-content', { align: 'wide' } ],
@@ -34,27 +31,29 @@ const Edit = ( {
 		className: 'wp-block-woocommerce-page-content-wrapper',
 	} );
 
-	useEffect( () => {
-		if ( ! attributes.postId && attributes.page ) {
-			let postId = 0;
+	// Resolve the page being previewed so the inner post-title/post-content
+	// render the right content in the editor canvas. We provide this as block
+	// context rather than writing it to attributes: mutating attributes on
+	// mount makes the Site Editor flag the template as dirty (#48936). On the
+	// frontend the queried post supplies this context, so it's editor-only.
+	let postId = 0;
+	if ( attributes.page === 'checkout' ) {
+		postId = CHECKOUT_PAGE_ID;
+	} else if ( attributes.page === 'cart' ) {
+		postId = CART_PAGE_ID;
+	}
 
-			if ( attributes.page === 'checkout' ) {
-				postId = CHECKOUT_PAGE_ID;
-			}
-
-			if ( attributes.page === 'cart' ) {
-				postId = CART_PAGE_ID;
-			}
-
-			if ( postId ) {
-				setAttributes( { postId, postType: 'page' } );
-			}
-		}
-	}, [ attributes, setAttributes ] );
+	const innerBlocks = <InnerBlocks template={ TEMPLATE } />;
 
 	return (
 		<div { ...blockProps }>
-			<InnerBlocks template={ TEMPLATE } />
+			{ postId ? (
+				<BlockContextProvider value={ { postId, postType: 'page' } }>
+					{ innerBlocks }
+				</BlockContextProvider>
+			) : (
+				innerBlocks
+			) }
 		</div>
 	);
 };

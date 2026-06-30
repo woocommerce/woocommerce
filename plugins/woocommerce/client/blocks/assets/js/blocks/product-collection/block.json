@@ -59,10 +59,6 @@
 		"forcePageReload": {
 			"type": "boolean",
 			"default": false
-		},
-		"__privatePreviewState": {
-			"type": "object",
-			"role": "local"
 		}
 	},
 	"providesContext": {
@@ -72,8 +68,7 @@
 		"dimensions": "dimensions",
 		"queryContextIncludes": "queryContextIncludes",
 		"collection": "collection",
-		"forcePageReload": "forcePageReload",
-		"__privateProductCollectionPreviewState": "__privatePreviewState"
+		"forcePageReload": "forcePageReload"
 	},
 	"usesContext": [ "templateSlug", "postId" ],
 	"supports": {

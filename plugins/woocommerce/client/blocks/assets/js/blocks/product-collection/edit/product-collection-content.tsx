@@ -5,6 +5,7 @@ import {
 	useBlockProps,
 	useInnerBlocksProps,
 	store as blockEditorStore,
+	BlockContextProvider,
 } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
 import { useEffect, useRef, useMemo } from '@wordpress/element';
@@ -43,14 +44,13 @@ const useQueryId = (
 	// @ts-ignore These selectors aren't getting their types loaded for some reason.
 	const { getBlockParentsByBlockName } = useSelect( blockEditorStore );
 
-	// In order to properly support pagination this block has a queryId attribute that
-	// is initialized to a unique value when the block is first added to the editor.
-	// We use the `instanceId` for this purpose. It is stable across saves as long
-	// as the order of instances of these blocks in the editor does not change.
-	// The block will be re-indexed in that case, however, this won't cause
-	// any problems since the queryid only has to be stable across client
-	// renders.
-	let queryId = instanceId as number;
+	// queryId must be unique per block instance (for pagination) but stable
+	// across re-mounts. Prefer the persisted value so re-mounting an existing
+	// block doesn't rewrite the attribute and flag the entity dirty on open
+	// (#48936); brand-new blocks have no queryId yet and fall back to instanceId.
+	let queryId = Number.isFinite( attributes.queryId )
+		? ( attributes.queryId as number )
+		: ( instanceId as number );
 
 	// We need to take special care when handling instances in a sync pattern
 	// to avoid an infinite loop. When two instances of a pattern are placed
@@ -82,13 +82,23 @@ const ProductCollectionContent = ( {
 
 	const isEmailEditor = useIsEmailEditor();
 
-	useSetPreviewState( {
+	const previewState = useSetPreviewState( {
 		setPreviewState,
-		setAttributes,
+		initialPreviewState,
 		location,
 		attributes,
 		isUsingReferencePreviewMode,
 	} );
+
+	// Provide the preview state to inner blocks (e.g. product-template) via block
+	// context instead of a persisted attribute, so deriving it never marks the
+	// post/template dirty.
+	const previewStateContext = useMemo(
+		() => ( {
+			__privateProductCollectionPreviewState: previewState,
+		} ),
+		[ previewState ]
+	);
 
 	const blockProps = useBlockProps();
 	const innerBlocksProps = useInnerBlocksProps(
@@ -113,11 +123,6 @@ const ProductCollectionContent = ( {
 		},
 		...( attributes as Partial< ProductCollectionAttributes > ),
 		queryId,
-		// If initialPreviewState is provided, set it as previewState.
-		...( !! attributes.collection &&
-			initialPreviewState && {
-				__privatePreviewState: initialPreviewState,
-			} ),
 	};
 
 	let style = {};
@@ -166,15 +171,13 @@ const ProductCollectionContent = ( {
 
 	return (
 		<div { ...blockProps }>
-			{ attributes.__privatePreviewState?.isPreview &&
+			{ previewState?.isPreview &&
 				( isEmailEditor || props.isSelected ) && (
 					<Button
 						variant="primary"
 						size="small"
 						showTooltip
-						label={
-							attributes.__privatePreviewState?.previewMessage
-						}
+						label={ previewState?.previewMessage }
 						className="wc-block-product-collection__preview-button"
 						data-testid="product-collection-preview-button"
 					>
@@ -185,7 +188,9 @@ const ProductCollectionContent = ( {
 			<InspectorControls { ...props } />
 			<InspectorAdvancedControls { ...props } />
 			<ToolbarControls { ...props } />
-			<div { ...innerBlocksProps } style={ style } />
+			<BlockContextProvider value={ previewStateContext }>
+				<div { ...innerBlocksProps } style={ style } />
+			</BlockContextProvider>
 		</div>
 	);
 };
