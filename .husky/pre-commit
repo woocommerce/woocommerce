@@ -6,5 +6,9 @@ fi
 
 printf '%s\n' 'Staged WooCommerce block metadata changes detected. Updating block reference documentation...'
 
-corepack pnpm --filter=@woocommerce/block-library build:docs:block-references
+if ! corepack pnpm --filter=@woocommerce/block-library build:docs:block-references; then
+	printf '%s\n' 'Failed to regenerate block reference documentation. Aborting commit.' >&2
+	exit 1
+fi
+
 git add docs/block-development/reference/block-references.md
