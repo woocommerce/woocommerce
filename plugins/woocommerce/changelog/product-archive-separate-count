@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Speed up the shop and product archive pages by replacing the SQL_CALC_FOUND_ROWS pagination total with a separate COUNT query, which avoids materializing the full result set on every request.

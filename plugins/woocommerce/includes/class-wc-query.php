@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
+use Automattic\WooCommerce\Internal\DataStores\Products\ProductQuerySeparateCountQuery;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
@@ -44,6 +45,14 @@ class WC_Query {
 	 * @var Filterer
 	 */
 	private $filterer;
+
+	/**
+	 * Computes the pagination total for the current product query with a separate COUNT instead of
+	 * SQL_CALC_FOUND_ROWS. Set for the duration of a single product loop, NULL otherwise.
+	 *
+	 * @var ProductQuerySeparateCountQuery|null
+	 */
+	private $separate_count_query = null;
 
 	/**
 	 * Constructor for the query class. Hooks in methods.
@@ -497,6 +506,10 @@ class WC_Query {
 	public function remove_product_query_filters( $posts ) {
 		$this->remove_ordering_args();
 		remove_filter( 'posts_clauses', array( $this, 'price_filter_post_clauses' ), 10, 2 );
+		if ( $this->separate_count_query instanceof ProductQuerySeparateCountQuery ) {
+			$this->separate_count_query->detach();
+			$this->separate_count_query = null;
+		}
 		return $posts;
 	}
 
@@ -588,6 +601,21 @@ class WC_Query {
 		add_filter( 'posts_clauses', array( $this, 'product_query_post_clauses' ), 10, 2 );
 		add_filter( 'the_posts', array( $this, 'handle_get_posts' ), 10, 2 );
 		add_filter( 'the_posts', array( $this, 'prime_thumbnail_caches' ), 10, 2 );
+
+		/**
+		 * Filters whether the main product query computes its total with a separate COUNT query instead
+		 * of MySQL's SQL_CALC_FOUND_ROWS, which fully materializes and sorts the matched set just to count
+		 * it (roughly doubling archive cost on large catalogs; deprecated since MySQL 8.0.17). Return
+		 * false to keep WordPress' default SQL_CALC_FOUND_ROWS behaviour.
+		 *
+		 * @since 11.0.0
+		 * @param bool     $use_separate_count Whether to use a separate COUNT query. Default true.
+		 * @param WP_Query $q                  The product query.
+		 */
+		if ( apply_filters( 'woocommerce_product_query_use_separate_count_query', true, $q ) ) {
+			$this->separate_count_query = new ProductQuerySeparateCountQuery( $q );
+			$this->separate_count_query->attach();
+		}
 
 		do_action( 'woocommerce_product_query', $q, $this );
 	}
