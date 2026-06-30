@@ -120,11 +120,18 @@ export const SearchListItem = < T extends object = object >( {
 	const id = `${ name }-${ item.id }`;
 
 	const togglePanel = useCallback( () => {
-		if ( ! isExpanded && typeof item.id === 'number' && item.id ) {
+		if (
+			! isExpanded &&
+			( typeof item.id === 'number' || typeof item.id === 'string' )
+		) {
 			setExpandedPanelId( item.id );
 			return;
 		}
-		if ( typeof item.parent === 'number' && item.parent ) {
+		if (
+			item.parent &&
+			( typeof item.parent === 'number' ||
+				typeof item.parent === 'string' )
+		) {
 			setExpandedPanelId( item.parent );
 			return;
 		}

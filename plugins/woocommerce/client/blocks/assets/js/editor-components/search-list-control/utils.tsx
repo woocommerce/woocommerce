@@ -31,7 +31,7 @@ export const defaultMessages = {
  */
 export const isExpandedOrDescendantIsExpanded = (
 	item: SearchListItem,
-	expandedPanelId: number | null
+	expandedPanelId: string | number | null
 ): boolean => {
 	if ( expandedPanelId === null ) {
 		return false;

@@ -21,8 +21,8 @@ interface ItemProps< T extends object = object > {
 	// Search string, used to highlight the substring in the item name.
 	search: string;
 	useExpandedPanelId: [
-		number | null,
-		React.Dispatch< React.SetStateAction< number | null > >
+		string | number | null,
+		React.Dispatch< React.SetStateAction< string | number | null > >
 	];
 }
 

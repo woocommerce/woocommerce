@@ -254,7 +254,7 @@ export const SearchListControl = < T extends object = object >(
 	} = props;
 
 	const [ search, setSearch ] = useState( '' );
-	const useExpandedPanelId = useState< number | null >( null );
+	const useExpandedPanelId = useState< string | number | null >( null );
 	const instanceId = useInstanceId( SearchListControl );
 	const messages = useMemo(
 		() => ( { ...defaultMessages, ...customMessages } ),
