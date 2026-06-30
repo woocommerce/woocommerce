@@ -20,6 +20,18 @@ class EditTest extends \WC_Unit_Test_Case {
 	private const TEST_SCREEN_ID = 'woocommerce_page_wc-orders';
 
 	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		// add_order_meta_boxes() runs the order-attribution path, which calls is_order_screen()
+		// and triggers a doing_it_wrong notice unless the current_screen action has fired. Real
+		// page loads register meta boxes after current_screen, so establish that precondition here.
+		set_current_screen( self::TEST_SCREEN_ID );
+	}
+
+	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
@@ -29,6 +41,9 @@ class EditTest extends \WC_Unit_Test_Case {
 
 		// Reset the meta boxes registered by add_order_meta_boxes() so global state stays clean.
 		unset( $GLOBALS['wp_meta_boxes'][ self::TEST_SCREEN_ID ] );
+
+		// Reset the current screen set in setUp() so it doesn't leak into other test classes.
+		set_current_screen( 'front' );
 
 		parent::tearDown();
 	}
