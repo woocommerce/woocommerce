@@ -215,7 +215,7 @@ class WC_Regenerate_Images {
 		}
 
 		// List of sizes we want to resize. Ignore others.
-		if ( ! $image || ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single' ) ), true ) ) {
+		if ( ! $image || ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single' ) ), true ) || ! apply_filters( 'woocommerce_should_resize_image', true, $image, $attachment_id ) ) {
 			return $image;
 		}
 
