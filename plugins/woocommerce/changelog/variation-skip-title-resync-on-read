@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Variable products: skip the per-read variation title resync when the stored title is already in sync with the parent, removing a per-variation attribute-term query on cold variation-price reads.

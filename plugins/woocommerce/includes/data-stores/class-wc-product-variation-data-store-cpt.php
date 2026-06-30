@@ -100,10 +100,28 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$product->set_attributes( wc_get_product_variation_attributes( $product->get_id() ) );
 
 		$updates = array();
+
+		// Resync the variation title with the parent if it has drifted (e.g. parent renamed, or saved
+		// pre-3.0). generate_product_title() costs one term query per variation, so skip it when the
+		// stored title is still in sync; otherwise regenerate (self-heals legacy / out-of-band edits).
+
 		/**
-		 * If a variation title is not in sync with the parent e.g. saved prior to 3.0, or if the parent title has changed, detect here and update.
+		 * Filters whether the per-read variation title resync may be skipped when the stored title is
+		 * already in sync with the parent. Skipping avoids one attribute-term query per variation on
+		 * read. Return false to always regenerate, restoring the pre-optimisation behaviour.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param bool       $skip_resync Whether the resync may be skipped. Default true.
+		 * @param WC_Product $product     The variation being read.
 		 */
-		$new_title = $this->generate_product_title( $product );
+		$skip_resync = apply_filters( 'woocommerce_variation_skip_title_resync_on_read', true, $product );
+
+		if ( $skip_resync && $this->is_variation_title_in_sync_with_parent( $product, $post_object->post_title ) ) {
+			$new_title = $post_object->post_title;
+		} else {
+			$new_title = $this->generate_product_title( $product );
+		}
 
 		if ( $post_object->post_title !== $new_title ) {
 			$product->set_name( $new_title );
@@ -296,6 +314,24 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	| Additional Methods
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Cheaply check whether a variation's stored title is still in sync with its parent, without
+	 * resolving attribute terms. A generated title is "Name" or "Name - Value, Value"; only the parent
+	 * portion drifts outside a save, so the parent title (alone, or followed by the default " - "
+	 * separator) being a prefix means in sync. Requiring the separator avoids a false match when the
+	 * parent is renamed to a leading word of its old name; custom separators fall back to regeneration.
+	 *
+	 * @since 11.0.0
+	 * @param WC_Product $product      Product variation object.
+	 * @param string     $stored_title The variation's stored post title.
+	 * @return bool True when the stored title is consistent with the parent title.
+	 */
+	protected function is_variation_title_in_sync_with_parent( $product, $stored_title ) {
+		$title_base = get_post_field( 'post_title', $product->get_parent_id() );
+		$in_sync    = $stored_title === $title_base || 0 === strpos( (string) $stored_title, ( (string) $title_base ) . ' - ' );
+		return $in_sync;
+	}
 
 	/**
 	 * Generates a title with attribute information for a variation.

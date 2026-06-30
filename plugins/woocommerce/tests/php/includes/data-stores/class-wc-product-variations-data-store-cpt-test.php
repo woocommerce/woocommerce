@@ -363,6 +363,99 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * When the stored title is in sync with the parent, reading the variation must skip the title
+	 * regeneration (generate_product_title resolves each attribute term - the per-variation query
+	 * this optimization removes). Detected by spying on the title filter that regeneration applies.
+	 */
+	public function test_in_sync_variation_read_skips_title_regeneration(): void {
+		$product  = WC_Helper_Product::create_variation_product();
+		$child_id = $product->get_children()[0];
+
+		$regenerated = false;
+		$spy         = function ( $title ) use ( &$regenerated ) {
+			$regenerated = true;
+			return $title;
+		};
+		add_filter( 'woocommerce_product_variation_title', $spy );
+
+		// Force a fresh read() of an in-sync variation; with the skip enabled (default), the title
+		// must not be regenerated.
+		wp_cache_flush();
+		wc_get_product( $child_id );
+
+		remove_filter( 'woocommerce_product_variation_title', $spy );
+
+		$this->assertFalse( $regenerated, 'An in-sync read must not regenerate the variation title.' );
+	}
+
+	/**
+	 * The optimization must not change the computed variation prices.
+	 */
+	public function test_variation_prices_are_unchanged_by_the_title_resync_skip(): void {
+		$product    = WC_Helper_Product::create_variation_product();
+		$product_id = $product->get_id();
+
+		wp_cache_flush();
+		$optimized = wc_get_product( $product_id )->get_variation_prices( false );
+
+		add_filter( 'woocommerce_variation_skip_title_resync_on_read', '__return_false' );
+		delete_transient( 'wc_var_prices_' . $product_id );
+		wp_cache_flush();
+		$legacy = wc_get_product( $product_id )->get_variation_prices( false );
+		remove_filter( 'woocommerce_variation_skip_title_resync_on_read', '__return_false' );
+
+		$this->assertSame( $legacy, $optimized, 'Variation prices must be identical with and without the title-resync skip.' );
+	}
+
+	/**
+	 * Returning false from the filter must restore the per-read title regeneration.
+	 */
+	public function test_disabling_filter_forces_title_regeneration(): void {
+		$product  = WC_Helper_Product::create_variation_product();
+		$child_id = $product->get_children()[0];
+
+		$regenerated = false;
+		$spy         = function ( $title ) use ( &$regenerated ) {
+			$regenerated = true;
+			return $title;
+		};
+		add_filter( 'woocommerce_product_variation_title', $spy );
+		add_filter( 'woocommerce_variation_skip_title_resync_on_read', '__return_false' );
+
+		wp_cache_flush();
+		wc_get_product( $child_id );
+
+		remove_filter( 'woocommerce_variation_skip_title_resync_on_read', '__return_false' );
+		remove_filter( 'woocommerce_product_variation_title', $spy );
+
+		$this->assertTrue( $regenerated, 'Disabling the skip filter must restore per-read title regeneration.' );
+	}
+
+	/**
+	 * An out-of-band parent rename (one that bypasses WC_Product::save and therefore
+	 * sync_variation_names) must still be healed when the variation is next read.
+	 */
+	public function test_out_of_band_parent_rename_is_healed_on_read(): void {
+		$product   = WC_Helper_Product::create_variation_product();
+		$parent_id = $product->get_id();
+		$child_id  = $product->get_children()[0];
+
+		// Rename the parent directly, bypassing the WC save path that resyncs child titles.
+		wp_update_post(
+			array(
+				'ID'         => $parent_id,
+				'post_title' => 'Renamed Variable Parent',
+			)
+		);
+		wp_cache_flush();
+
+		$variation = wc_get_product( $child_id );
+
+		$this->assertStringStartsWith( 'Renamed Variable Parent', $variation->get_name(), 'A stale variation title should be regenerated on read.' );
+		$this->assertSame( $variation->get_name(), get_post_field( 'post_title', $child_id, 'raw' ), 'The regenerated title should be persisted.' );
+	}
+
+	/**
 	 * Create a variable product and return one of its variations.
 	 *
 	 * @return WC_Product_Variation The variation created.
