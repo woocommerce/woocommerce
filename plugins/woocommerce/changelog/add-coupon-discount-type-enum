@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add CouponDiscountType enum class for coupon discount type values and implement it across the codebase.
