@@ -151,9 +151,7 @@ export interface CartItem {
 	/**
 	 * True when this cart line carries differentiating item metadata (e.g. a
 	 * bundle child, booking, or add-on configuration) and is therefore not the
-	 * standalone line for the product. Computed server-side from the Store API
-	 * `has_cart_item_data` field; absent on optimistic lines and treated as
-	 * falsy (plain) by the keyless matcher in the cart store.
+	 * standalone line for the product.
 	 */
 	has_cart_item_data: boolean;
 	permalink: string;
