@@ -10,8 +10,6 @@
  * @version     2.1.0
  */
 
-use Automattic\WooCommerce\Enums\ProductType;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -31,8 +29,8 @@ class WC_Meta_Box_Product_Images {
 
 		$thepostid      = $post->ID;
 		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product();
-		$featured_id    = $product_object ? (int) $product_object->get_image_id( 'edit' ) : 0;
-		$gallery_ids    = $product_object ? $product_object->get_gallery_image_ids( 'edit' ) : array();
+		$featured_id    = $product_object instanceof WC_Product ? (int) $product_object->get_image_id( 'edit' ) : 0;
+		$gallery_ids    = $product_object instanceof WC_Product ? $product_object->get_gallery_image_ids( 'edit' ) : array();
 		$rendered_ids   = array();
 		$gallery_ids    = array_filter( array_map( 'absint', $gallery_ids ) );
 
@@ -191,7 +189,7 @@ class WC_Meta_Box_Product_Images {
 			return array();
 		}
 
-		$raw_ids = sanitize_text_field( wp_unslash( (string) $posted_value ) );
+		$raw_ids = (string) sanitize_text_field( wp_unslash( (string) $posted_value ) );
 
 		if ( '' === $raw_ids ) {
 			return array();
@@ -233,22 +231,10 @@ class WC_Meta_Box_Product_Images {
 			return;
 		}
 
-		$product_type = WC_Product_Factory::get_product_type( $post_id );
-		if ( ! empty( $_POST['product-type'] ) && is_scalar( $_POST['product-type'] ) ) {
-			$product_type = sanitize_title( wp_unslash( (string) $_POST['product-type'] ) );
+		$product = wc_get_product( $post_id );
+		if ( ! $product instanceof WC_Product ) {
+			return;
 		}
-
-		if ( ! $product_type ) {
-			$product_type = ProductType::SIMPLE;
-		}
-
-		$classname = WC_Product_Factory::get_product_classname( $post_id, $product_type );
-		/**
-		 * Product instance.
-		 *
-		 * @var WC_Product $product
-		 */
-		$product = new $classname( $post_id );
 
 		if ( isset( $_POST['product_image_gallery'] ) ) {
 			// Legacy gallery field remains canonical. Core handles the featured image via _thumbnail_id.
