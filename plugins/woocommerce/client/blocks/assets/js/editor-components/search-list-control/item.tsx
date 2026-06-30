@@ -217,7 +217,6 @@ export const SearchListItem = < T extends object = object >( {
 								)();
 							}
 						} }
-						onClick={ ( e ) => e.stopPropagation() }
 						__nextHasNoMarginBottom={ true }
 					/>
 
