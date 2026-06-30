@@ -1,0 +1,10 @@
+changed_block_metadata=$(git diff --cached --name-only --diff-filter=ACMR -- 'plugins/woocommerce/client/blocks/assets/js/**/block.json')
+
+if [ -z "$changed_block_metadata" ]; then
+	exit 0
+fi
+
+printf '%s\n' 'Staged WooCommerce block metadata changes detected. Updating block reference documentation...'
+
+corepack pnpm --filter=@woocommerce/block-library build:docs:block-references
+git add docs/block-development/reference/block-references.md
