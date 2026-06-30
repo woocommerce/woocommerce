@@ -150,7 +150,7 @@ class OrdersTableDataStoreMeta extends CustomMetaDataStore {
 					sprintf(
 						'Discarded a corrupt HPOS meta cache entry for order %1$d: expected an array of meta rows but found %2$s. The entry was invalidated and will be re-read from the database.',
 						(int) $object_id,
-						get_debug_type( $object_meta )
+						gettype( $object_meta )
 					),
 					array( 'source' => 'hpos-data-cache' )
 				);

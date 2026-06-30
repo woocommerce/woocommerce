@@ -1483,6 +1483,7 @@ WHERE
 	 * @return array Filtered meta data.
 	 */
 	public function filter_raw_meta_data( &$object, $raw_meta_data ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
+
 		/*
 		 * Defensive last-resort guard: the meta data should always arrive as an array of meta
 		 * rows, but a corrupt persistent object cache entry can surface as a scalar or object and
@@ -1494,7 +1495,7 @@ WHERE
 				sprintf(
 					'Unexpected meta data shape for order %1$d: expected an array of meta rows but found %2$s. Treating it as empty.',
 					(int) $object->get_id(),
-					get_debug_type( $raw_meta_data )
+					gettype( $raw_meta_data )
 				),
 				array( 'source' => 'hpos-data-cache' )
 			);
@@ -1981,7 +1982,7 @@ WHERE
 					sprintf(
 						'Discarded a corrupt HPOS order cache entry for order %1$d: expected an order data object but found %2$s. The entry was invalidated and will be re-read from the database.',
 						(int) $id,
-						get_debug_type( $datum )
+						gettype( $datum )
 					),
 					array( 'source' => 'hpos-data-cache' )
 				);

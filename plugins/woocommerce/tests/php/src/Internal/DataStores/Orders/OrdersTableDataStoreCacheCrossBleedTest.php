@@ -333,7 +333,7 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 		$call_get_data = function ( $ids ) {
 			return $this->get_order_data_for_ids( $ids );
 		};
-		$order_data = $call_get_data->call( $sut, array( $order_id ) );
+		$order_data    = $call_get_data->call( $sut, array( $order_id ) );
 
 		$this->assertArrayHasKey( $order_id, $order_data, 'Order data should still be returned after the corrupt cache entry is discarded.' );
 		$this->assertIsObject( $order_data[ $order_id ], 'The corrupt cache entry should be replaced by a fresh object read from the database.' );
@@ -402,8 +402,8 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 		$order = new WC_Order();
 		$order->save();
 
-		$call_filter = function ( $object, $raw_meta_data ) {
-			return $this->filter_raw_meta_data( $object, $raw_meta_data );
+		$call_filter = function ( $order_object, $raw_meta_data ) {
+			return $this->filter_raw_meta_data( $order_object, $raw_meta_data );
 		};
 
 		$result = $call_filter->call( $sut, $order, 'not-an-array' );
