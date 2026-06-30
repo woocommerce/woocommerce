@@ -123,6 +123,9 @@ class OrderAttribution implements RegisterHooksInterface {
 		// Core does not durably record the creating user (HPOS has no author column), so record the
 		// staff actor — and the initiator, when present — on the object ourselves.
 		$order->update_meta_data( self::META_KEY_ACTOR_USER_ID, (string) $actor_id );
+		// Clear any prior initiator first so a write without an override doesn't keep
+		// a stale one — otherwise a plain staff write could look manager-approved.
+		$order->delete_meta_data( self::META_KEY_INITIATOR_USER_ID );
 		if ( $initiator instanceof WP_User ) {
 			$order->update_meta_data( self::META_KEY_INITIATOR_USER_ID, (string) $initiator->ID );
 		}

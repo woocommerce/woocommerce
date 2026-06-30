@@ -471,9 +471,11 @@ class WC_Admin_POS_Staff {
 			return;
 		}
 
-		$is_granting  = ! POSCapabilities::has_pos_access( $user_id );
-		$pin_optional = ! $is_granting;
-		$pin_service  = wc_get_container()->get( POSPinService::class );
+		$pin_service = wc_get_container()->get( POSPinService::class );
+		$is_granting = ! POSCapabilities::has_pos_access( $user_id );
+		// PIN is optional only when editing a user who already has one. A POS user
+		// with no stored PIN must set one — a blank PIN would leave them unusable.
+		$pin_optional = ! $is_granting && $pin_service->has_pin( $user_id );
 
 		$validation = POSAccessFields::validate( $pin_service, $pos_preset, $pin, $user_id, $pin_optional );
 		if ( $validation instanceof \WP_Error ) {

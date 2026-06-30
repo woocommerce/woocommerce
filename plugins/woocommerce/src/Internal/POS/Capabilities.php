@@ -166,7 +166,7 @@ class Capabilities {
 		}
 
 		foreach ( self::all_pos_capabilities() as $cap ) {
-			if ( ! empty( $user->allcaps[ $cap ] ) ) {
+			if ( self::user_holds_pos_capability( $user, $cap ) ) {
 				return true;
 			}
 		}
@@ -174,11 +174,14 @@ class Capabilities {
 	}
 
 	/**
-	 * Whether a user holds a specific POS capability.
+	 * Whether a user holds a specific known POS capability.
 	 *
-	 * Delegates to user_can() so the source of truth is the user's stored
-	 * capabilities — matching what /wp/v2/users and any other WP-native
-	 * introspection report.
+	 * Reads the user's stored grants (WP_User::$allcaps) directly — the same
+	 * primitive has_pos_access() uses — rather than user_can(). It therefore does
+	 * not honor the multisite super-admin runtime grant: a super admin needs an
+	 * explicit `woocommerce_pos_*` cap like anyone else. Capabilities outside
+	 * all_pos_capabilities() always return false, keeping this scoped to the POS
+	 * model.
 	 *
 	 * @param int    $user_id    Target user.
 	 * @param string $capability One of the self::CAP_* values.
@@ -187,7 +190,26 @@ class Capabilities {
 	 * @since 11.0.0
 	 */
 	public static function user_has_pos_capability( int $user_id, string $capability ): bool {
-		return user_can( $user_id, $capability );
+		if ( ! in_array( $capability, self::all_pos_capabilities(), true ) ) {
+			return false;
+		}
+
+		$user = get_userdata( $user_id );
+		return $user instanceof WP_User && self::user_holds_pos_capability( $user, $capability );
+	}
+
+	/**
+	 * Whether a resolved user holds a POS capability per their stored `$allcaps`.
+	 *
+	 * The single place the `$allcaps` lookup lives, shared by has_pos_access() and
+	 * user_has_pos_capability() so both resolve POS caps identically.
+	 *
+	 * @param WP_User $user       Resolved user.
+	 * @param string  $capability Capability identifier.
+	 * @return bool
+	 */
+	private static function user_holds_pos_capability( WP_User $user, string $capability ): bool {
+		return ! empty( $user->allcaps[ $capability ] );
 	}
 
 	/**

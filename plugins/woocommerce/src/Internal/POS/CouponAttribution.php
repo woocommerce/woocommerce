@@ -93,6 +93,9 @@ class CouponAttribution implements RegisterHooksInterface {
 		$initiator = $this->resolve_initiator( $coupon, $actor_id );
 
 		$coupon->update_meta_data( OrderAttribution::META_KEY_ACTOR_USER_ID, (string) $actor_id );
+		// Clear any prior initiator first so a write without an override doesn't keep
+		// a stale one — the stored attribution must reflect this write, not the last.
+		$coupon->delete_meta_data( OrderAttribution::META_KEY_INITIATOR_USER_ID );
 		if ( $initiator instanceof WP_User ) {
 			$coupon->update_meta_data( OrderAttribution::META_KEY_INITIATOR_USER_ID, (string) $initiator->ID );
 		}

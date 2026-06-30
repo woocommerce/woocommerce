@@ -40,8 +40,11 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 		if ( ! class_exists( 'WC_Admin_POS_Staff' ) || ! WC_Admin_POS_Staff::is_enabled() ) {
 			return;
 		}
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( isset( $_GET['section'] ) && 'staff' === $_GET['section'] ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$tab     = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+		$section = isset( $_GET['section'] ) ? sanitize_key( wp_unslash( $_GET['section'] ) ) : '';
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		if ( 'point-of-sale' === $tab && 'staff' === $section ) {
 			WC_Admin_POS_Staff::notices();
 		}
 	}

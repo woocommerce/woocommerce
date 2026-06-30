@@ -147,7 +147,7 @@ class POSController implements RegisterHooksInterface {
 		add_action(
 			'shutdown',
 			static function () {
-				flush_rewrite_rules( false );
+				WC()->call_function( 'flush_rewrite_rules', false );
 			}
 		);
 	}
