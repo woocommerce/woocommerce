@@ -90,10 +90,13 @@ class WC_Shortcode_My_Account {
 			wc_add_notice( sprintf( __( 'Are you sure you want to log out? <a href="%s">Confirm and log out</a>', 'woocommerce' ), wc_logout_url() ) );
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$password_link_just_sent = ! empty( $_GET['password-link-sent'] );
+		// Suppress the nag during the resend cooldown so it doesn't contradict the "we emailed you" confirmation.
+		// Driven off the same timestamp WC_Form_Handler::resend_set_password() writes, so the notice reappears
+		// once the cooldown lapses and the link can be requested again.
+		$last_resend_at  = (int) get_user_meta( get_current_user_id(), WC_Form_Handler::SET_PASSWORD_RESEND_META, true );
+		$within_cooldown = $last_resend_at > 0 && ( time() - $last_resend_at ) < WC_Form_Handler::SET_PASSWORD_RESEND_RATE_LIMIT_SECONDS;
 
-		if ( ! $password_link_just_sent && get_user_option( 'default_password_nag' ) && ( wc_is_current_account_menu_item( 'dashboard' ) || wc_is_current_account_menu_item( 'edit-account' ) || wc_is_current_account_menu_item( 'orders' ) ) ) {
+		if ( ! $within_cooldown && get_user_option( 'default_password_nag' ) && ( wc_is_current_account_menu_item( 'dashboard' ) || wc_is_current_account_menu_item( 'edit-account' ) ) ) {
 			$resend_url = wp_nonce_url( add_query_arg( 'wc-resend-set-password', '1', wc_get_page_permalink( 'myaccount' ) ), 'wc-resend-set-password' );
 			wc_add_notice(
 				sprintf(

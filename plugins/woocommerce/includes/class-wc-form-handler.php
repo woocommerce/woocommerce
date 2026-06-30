@@ -17,6 +17,16 @@ defined( 'ABSPATH' ) || exit;
 class WC_Form_Handler {
 
 	/**
+	 * User meta key tracking the last time the set-password link was resent. Used to rate-limit resends.
+	 */
+	const SET_PASSWORD_RESEND_META = '_wc_set_password_resend_at';
+
+	/**
+	 * Minimum seconds between back-to-back set-password resend requests.
+	 */
+	const SET_PASSWORD_RESEND_RATE_LIMIT_SECONDS = 60;
+
+	/**
 	 * Hook in methods.
 	 */
 	public static function init() {
@@ -100,19 +110,30 @@ class WC_Form_Handler {
 		}
 
 		$user     = wp_get_current_user();
-		$key      = get_password_reset_key( $user );
 		$redirect = wc_get_page_permalink( 'myaccount' );
+
+		// Rate-limit resends so the button can't be used to spam the customer's inbox.
+		$last_sent_at = (int) get_user_meta( $user->ID, self::SET_PASSWORD_RESEND_META, true );
+		if ( $last_sent_at > 0 && ( time() - $last_sent_at ) < self::SET_PASSWORD_RESEND_RATE_LIMIT_SECONDS ) {
+			wc_add_notice( __( 'Please wait a moment before requesting another link to change your password.', 'woocommerce' ), 'notice' );
+			wp_safe_redirect( $redirect );
+			exit;
+		}
+
+		$key = get_password_reset_key( $user );
 
 		if ( is_wp_error( $key ) ) {
 			wc_add_notice( __( 'Sorry, we were unable to resend the link. Please try again.', 'woocommerce' ), 'error' );
 		} else {
+			// Persist the rate-limit timestamp before dispatching so two near-simultaneous requests can't both pass.
+			// This timestamp also suppresses the temporary-password notice during the cooldown — see
+			// WC_Shortcode_My_Account::my_account_add_notices() — so the confirmation below isn't contradicted.
+			update_user_meta( $user->ID, self::SET_PASSWORD_RESEND_META, (string) time() );
 			// Load email classes so the reset-password notification has a listener.
 			WC()->mailer();
 			// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Re-fires woocommerce_reset_password_notification, documented in WC_Shortcode_My_Account::retrieve_password().
 			do_action( 'woocommerce_reset_password_notification', $user->user_login, $key );
 			wc_add_notice( __( 'We have emailed you a new link to change your password.', 'woocommerce' ) );
-			// Flag so the temporary-password notice is hidden on the redirect target — the confirmation above covers it.
-			$redirect = add_query_arg( 'password-link-sent', 'true', $redirect );
 		}
 
 		wp_safe_redirect( $redirect );
