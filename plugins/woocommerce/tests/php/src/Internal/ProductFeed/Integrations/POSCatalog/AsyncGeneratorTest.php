@@ -68,6 +68,9 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		delete_option( self::OPTION_KEY . '_chunk_size' );
 		remove_all_filters( 'woocommerce_product_feed_chunk_size' );
 		remove_all_filters( 'woocommerce_product_feed_batch_size' );
+		// Always clear the timeout filter here so a failed assertion in a test that registers it cannot
+		// leak it into later tests in the same process (tearDown runs even when a test fails).
+		remove_all_filters( 'woocommerce_product_feed_in_progress_timeout' );
 		$this->test_container->reset_all_replacements();
 	}
 

@@ -8,12 +8,19 @@ import type { ReactNode } from 'react';
 
 jest.mock( '@wordpress/admin-ui', () => ( {
 	Page: ( {
+		actions,
 		children,
 		className,
 	}: {
+		actions?: ReactNode;
 		children: ReactNode;
 		className?: string;
-	} ) => <div className={ className }>{ children }</div>,
+	} ) => (
+		<div className={ className }>
+			{ actions }
+			{ children }
+		</div>
+	),
 } ) );
 
 /**
@@ -38,6 +45,54 @@ const renderElement = ( element: JSX.Element ) => {
 	} );
 
 	return { container, root };
+};
+
+const renderElementInMainForm = ( element: JSX.Element ) => {
+	const form = document.createElement( 'form' );
+	form.id = 'mainform';
+	document.body.appendChild( form );
+
+	const container = document.createElement( 'div' );
+	form.appendChild( container );
+	const root = createRoot( container );
+
+	act( () => {
+		root.render( element );
+	} );
+
+	return { container, form, root };
+};
+
+const changeTextInput = ( input: HTMLInputElement, value: string ) => {
+	const valueSetter = Object.getOwnPropertyDescriptor(
+		HTMLInputElement.prototype,
+		'value'
+	)?.set;
+
+	if ( ! valueSetter ) {
+		throw new Error( 'Expected HTMLInputElement value setter.' );
+	}
+
+	valueSetter.call( input, value );
+	input.dispatchEvent(
+		new Event( 'input', { bubbles: true, cancelable: true } )
+	);
+};
+
+const getUnsavedChangesActionButton = ( label: string ): HTMLButtonElement => {
+	const button = Array.from(
+		document.body.querySelectorAll< HTMLButtonElement >(
+			'.wc-settings-ui__unsaved-changes-actions button'
+		)
+	).find( ( candidate ) => candidate.textContent?.trim() === label );
+
+	if ( ! ( button instanceof HTMLButtonElement ) ) {
+		throw new Error(
+			`Expected unsaved changes action button "${ label }".`
+		);
+	}
+
+	return button;
 };
 
 const expectUnsafeMarkupRemoved = ( container: HTMLElement ) => {
@@ -302,6 +357,98 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
+	it( 'submits form-post saves with the pending destination', () => {
+		const requestSubmit = jest
+			.spyOn( HTMLFormElement.prototype, 'requestSubmit' )
+			.mockImplementation( () => undefined );
+
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			shell: {
+				navigation: [
+					{
+						id: 'next-page',
+						label: 'Next page',
+						href: 'https://example.com/next',
+					},
+				],
+			},
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							value: 'Initial value',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, form, root } = renderElementInMainForm(
+			<SettingsUIPage schema={ schema } />
+		);
+
+		try {
+			const input = container.querySelector( 'input[type="text"]' );
+			const link = container.querySelector(
+				'a[href="https://example.com/next"]'
+			);
+
+			expect( input ).toBeInstanceOf( HTMLInputElement );
+			expect( link ).not.toBeNull();
+
+			act( () => {
+				changeTextInput( input as HTMLInputElement, 'Changed value' );
+			} );
+
+			act( () => {
+				link?.dispatchEvent(
+					new MouseEvent( 'click', {
+						bubbles: true,
+						cancelable: true,
+						button: 0,
+					} )
+				);
+			} );
+
+			const saveButton = getUnsavedChangesActionButton( 'Save' );
+
+			act( () => {
+				saveButton.dispatchEvent(
+					new MouseEvent( 'click', {
+						bubbles: true,
+						cancelable: true,
+						button: 0,
+					} )
+				);
+			} );
+
+			const redirectInput = form.querySelector(
+				'input[name="wc_settings_ui_redirect_to"]'
+			);
+
+			expect( redirectInput ).toBeInstanceOf( HTMLInputElement );
+			expect( redirectInput ).toHaveAttribute(
+				'value',
+				'https://example.com/next'
+			);
+			expect( requestSubmit ).toHaveBeenCalledWith(
+				container.querySelector( '.woocommerce-save-button' )
+			);
+		} finally {
+			act( () => root.unmount() );
+			form.remove();
+			requestSubmit.mockRestore();
+		}
+	} );
+
 	it( 'keeps unload protection when custom save before navigation fails', async () => {
 		const saveHandler = jest
 			.fn()
@@ -376,14 +523,10 @@ describe( 'settings HTML rendering', () => {
 			);
 		} );
 
-		const saveButton = Array.from(
-			document.body.querySelectorAll(
-				'.wc-settings-ui__unsaved-changes-actions button'
-			)
-		).find( ( button ) => button.textContent === 'Save' );
+		const saveButton = getUnsavedChangesActionButton( 'Save' );
 
 		await act( async () => {
-			saveButton?.dispatchEvent(
+			saveButton.dispatchEvent(
 				new MouseEvent( 'click', {
 					bubbles: true,
 					cancelable: true,
