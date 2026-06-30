@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsUtil;
+use Automattic\WooCommerce\Internal\DataStores\Reviews\ReviewVerificationQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -82,6 +83,9 @@ class WC_Comments {
 
 		// Review of verified purchase.
 		add_action( 'comment_post', array( __CLASS__, 'add_comment_purchase_verification' ) );
+
+		// Resolve "verified owner" status for all reviews on a product page in one query.
+		add_filter( 'comments_array', array( __CLASS__, 'prime_review_verification_meta' ), 10, 2 );
 
 		// Set comment type.
 		add_action( 'preprocess_comment', array( __CLASS__, 'update_comment_type' ), 1 );
@@ -509,6 +513,25 @@ class WC_Comments {
 			add_comment_meta( $comment_id, 'verified', (int) $verified, true );
 		}
 		return $verified;
+	}
+
+	/**
+	 * Batch-resolve "verified owner" status for a product page's reviews in a single query.
+	 *
+	 * Hooked on `comments_array`; delegates to ReviewVerificationQuery so the per-review badge
+	 * checks become O(1) reads. See that class for the rationale.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param mixed $comments The comments for the current post (WP_Comment[] when it is a list).
+	 * @param int   $post_id  The post (product) ID whose comments are displayed.
+	 * @return mixed The unchanged comments array.
+	 */
+	public static function prime_review_verification_meta( $comments, $post_id ) {
+		if ( empty( $comments ) || ! is_array( $comments ) ) {
+			return $comments;
+		}
+		return ( new ReviewVerificationQuery() )->prime( $comments, (int) $post_id );
 	}
 
 	/**

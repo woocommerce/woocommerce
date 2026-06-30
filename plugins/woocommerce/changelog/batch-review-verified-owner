@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Resolve the verified-owner status for all reviews on a product page in a single query instead of one purchase-history query per review.
