@@ -3010,16 +3010,19 @@ class WC_AJAX {
 			return;
 		}
 
+		$date_from = isset( $data['date_from'] ) ? wc_clean( $data['date_from'] ) : false;
+		$date_to   = isset( $data['date_to'] ) ? wc_clean( $data['date_to'] ) : false;
+
 		foreach ( $variations as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
 
-			if ( 'false' !== $data['date_from'] ) {
-				$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( wc_clean( $data['date_from'] ) ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			if ( false !== $date_from && 'false' !== $date_from ) {
+				$date_on_sale_from = '' === $date_from ? null : date( 'Y-m-d 00:00:00', strtotime( $date_from ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 				$variation->set_date_on_sale_from( $date_on_sale_from );
 			}
 
-			if ( 'false' !== $data['date_to'] ) {
-				$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( wc_clean( $data['date_to'] ) ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			if ( false !== $date_to && 'false' !== $date_to ) {
+				$date_on_sale_to = '' === $date_to ? null : date( 'Y-m-d 23:59:59', strtotime( $date_to ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 				$variation->set_date_on_sale_to( $date_on_sale_to );
 			}
 

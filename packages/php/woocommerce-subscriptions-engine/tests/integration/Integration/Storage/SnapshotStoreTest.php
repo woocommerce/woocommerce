@@ -19,8 +19,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SnapshotStore
  */
 class SnapshotStoreTest extends EngineIntegrationTestCase {
 
-	use ScalarCoercion;
-
 	/**
 	 * The System Under Test.
 	 *
@@ -80,10 +78,10 @@ class SnapshotStoreTest extends EngineIntegrationTestCase {
 
 		$row = $this->snapshot_row( $id );
 		$this->assertNotNull( $row );
-		$this->assertSame( '100', self::coerce_string( $row['contract_id'] ?? null ) );
+		$this->assertSame( '100', ScalarCoercion::coerce_string( $row['contract_id'] ?? null ) );
 		$this->assertSame( SnapshotStore::TYPE_PLAN, $row['snapshot_type'] );
-		$this->assertSame( '7', self::coerce_string( $row['parent_id'] ?? null ) );
-		$this->assertSame( '2', self::coerce_string( $row['schema_version'] ?? null ) );
+		$this->assertSame( '7', ScalarCoercion::coerce_string( $row['parent_id'] ?? null ) );
+		$this->assertSame( '2', ScalarCoercion::coerce_string( $row['schema_version'] ?? null ) );
 	}
 
 	/**
@@ -111,7 +109,7 @@ class SnapshotStoreTest extends EngineIntegrationTestCase {
 		$row = $this->snapshot_row( $id );
 
 		$this->assertNotNull( $row );
-		$this->assertSame( $payload, json_decode( self::coerce_string( $row['payload'] ?? null ), true ) );
+		$this->assertSame( $payload, json_decode( ScalarCoercion::coerce_string( $row['payload'] ?? null ), true ) );
 	}
 
 	/**

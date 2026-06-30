@@ -32,30 +32,32 @@ final class SchemaInstaller {
 	 * 2.0.0 - cycle-chain model: contract as live source of truth (schedule, snapshot
 	 *         references, totals, stamps); immutable cycle records keyed on
 	 *         `(contract_id, kind)`; per-contract snapshots deduped by copy-forward.
+	 * 2.1.0 - rename `app_id` to `extension_slug` in plan_groups table.
+	 * 2.1.1 - add `status` and `sort_order` columns to plans table.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
 	 * on an earlier schema must drop and recreate the tables (and clear VERSION_OPTION)
 	 * to pick up such changes - in-place ALTERs and backfills arrive with the freeze.
 	 */
-	const VERSION = '2.0.0';
+	private const VERSION = '2.1.1';
 
 	/**
 	 * Option key tracking the installed schema version.
 	 */
-	const VERSION_OPTION = 'wc_subscriptions_engine_db_version';
+	private const VERSION_OPTION = 'wc_subscriptions_engine_db_version';
 
 	/**
 	 * Logical table identifiers - keys map to unprefixed table names.
 	 */
-	const TABLE_PLAN_GROUPS        = 'plan_groups';
-	const TABLE_PLANS              = 'plans';
-	const TABLE_CONTRACTS          = 'contracts';
-	const TABLE_CONTRACT_ITEMS     = 'contract_items';
-	const TABLE_CONTRACT_ADDRESSES = 'contract_addresses';
-	const TABLE_CONTRACT_META      = 'contract_meta';
-	const TABLE_CYCLES             = 'cycles';
-	const TABLE_SNAPSHOTS          = 'snapshots';
+	public const TABLE_PLAN_GROUPS        = 'plan_groups';
+	public const TABLE_PLANS              = 'plans';
+	public const TABLE_CONTRACTS          = 'contracts';
+	public const TABLE_CONTRACT_ITEMS     = 'contract_items';
+	public const TABLE_CONTRACT_ADDRESSES = 'contract_addresses';
+	public const TABLE_CONTRACT_META      = 'contract_meta';
+	public const TABLE_CYCLES             = 'cycles';
+	public const TABLE_SNAPSHOTS          = 'snapshots';
 
 	/**
 	 * Resolve a logical identifier to its prefixed table name.
@@ -123,10 +125,28 @@ final class SchemaInstaller {
 	}
 
 	/**
-	 * Whether the installed schema version matches SchemaInstaller::VERSION.
+	 * Whether the installed schema version matches SchemaInstaller::get_version().
 	 */
 	public static function is_current(): bool {
-		return self::VERSION === get_option( self::VERSION_OPTION );
+		return self::get_version() === self::get_database_version();
+	}
+
+	/**
+	 * Get the schema version for this class.
+	 */
+	public static function get_version(): string {
+		return self::VERSION;
+	}
+
+	/**
+	 * Get the installed schema version from the database.
+	 */
+	public static function get_database_version(): ?string {
+		$database_version = get_option( self::VERSION_OPTION );
+		if ( ! is_string( $database_version ) ) {
+			return null;
+		}
+		return $database_version;
 	}
 
 	/**
@@ -179,12 +199,12 @@ final class SchemaInstaller {
   name VARCHAR(255) NOT NULL,
   merchant_code VARCHAR(64) NULL,
   options_display JSON NULL,
-  app_id VARCHAR(64) NULL,
+  extension_slug VARCHAR(64) NULL,
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,
   PRIMARY KEY  (id),
   UNIQUE KEY merchant_code (merchant_code),
-  KEY app_id (app_id)
+  KEY extension_slug (extension_slug)
 ) {$collate};";
 
 		// `extension_slug` records the creating extension's registered slug. Nullable
@@ -201,12 +221,15 @@ final class SchemaInstaller {
   inventory_policy JSON NULL,
   pricing_policy JSON NULL,
   category VARCHAR(32) NOT NULL DEFAULT 'SUBSCRIPTION',
+  status VARCHAR(20) NOT NULL DEFAULT 'active',
+  sort_order INT NOT NULL DEFAULT 0,
   extension_slug VARCHAR(64) NULL,
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,
   PRIMARY KEY  (id),
   KEY group_id (group_id),
   KEY category (category),
+  KEY status_sort (status, sort_order, id),
   KEY extension_slug (extension_slug)
 ) {$collate};";
 
