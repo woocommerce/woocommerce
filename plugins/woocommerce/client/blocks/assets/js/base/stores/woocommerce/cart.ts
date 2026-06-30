@@ -45,12 +45,15 @@ export type OptimisticCartItem = {
 	quantity: number;
 	variation?: CartVariationItem[];
 	/**
-	 * The cart line type (e.g. `"simple"`, `"variation"`). Present on
-	 * server-confirmed lines in `state.cart.items`; absent on optimistically
-	 * created lines before the server round-trip completes. The keyless
-	 * `findItemInCart` matcher reads this field off lines already in the cart
-	 * state — never off the action argument — so callers of `addCartItem` and
-	 * `batchAddCartItems` do not need to supply it.
+	 * Optional cart line type (e.g. `"simple"`, `"variation"`). The add actions
+	 * (`addCartItem`/`batchAddCartItems`) never read this off their argument, so
+	 * it is ignored if a caller passes it. It is declared here only because
+	 * `state.cart.items` is typed `(OptimisticCartItem | CartItem)[]` and the
+	 * matcher reads `cartItem.type === 'variation'` directly off that union (in
+	 * `findItemInCart` and `lineMatchesProduct`) without narrowing, so every
+	 * union member must declare `type`. Present on server-confirmed lines; absent
+	 * on optimistic lines before the server round-trip, where it correctly fails
+	 * the `=== 'variation'` check and falls through to the simple `id` match.
 	 */
 	type?: string;
 };
@@ -413,6 +416,17 @@ const { actions } = store< Store >(
 	'woocommerce',
 	{
 		state: {
+			/**
+			 * Finds the cart line for a product.
+			 *
+			 * With a `key`, returns the line for that exact key. Without a
+			 * key, returns the standalone per-product line matched by `id`
+			 * (and `variation` for variations), explicitly excluding
+			 * meta-differentiated lines (`has_cart_item_data: true`, e.g. a
+			 * bundle child, booking, or add-on configuration) so the keyless
+			 * match resolves only the plain line the product-button count
+			 * reflects.
+			 */
 			findItemInCart( {
 				id,
 				key,
@@ -426,16 +440,10 @@ const { actions } = store< Store >(
 					if ( key ) {
 						return key === cartItem.key;
 					}
-					// Exclude meta-differentiated lines from the per-product
-					// (keyless) match. A line carries `has_cart_item_data: true`
-					// when it was created with additional item metadata (e.g. a
-					// bundle child, booking, or add-on configuration) and is
-					// therefore not the standalone line that the product button
-					// count reflects. The guard is falsy-safe: `OptimisticCartItem`
-					// lacks the field entirely (`undefined` → falsy), so optimistic
-					// plain lines are still matched and rapid-click compounding is
-					// preserved. Keyed lookups are unaffected because they
-					// short-circuit on the `key` check above.
+					// Falsy-safe: `OptimisticCartItem` lacks the field
+					// (`undefined` → falsy), so optimistic plain lines are
+					// still matched (rapid-click compounding preserved);
+					// keyed lookups short-circuit on the `key` check above.
 					if (
 						! key &&
 						( cartItem as CartItem ).has_cart_item_data
