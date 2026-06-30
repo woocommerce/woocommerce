@@ -76,6 +76,23 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests the functionality can be manually disabled via the feature option,
+	 * short-circuiting the Jetpack connection check.
+	 */
+	public function test_it_can_tell_push_notifications_should_not_be_enabled_when_manually_disabled_via_option() {
+		update_option( 'woocommerce_feature_push_notifications_enabled', 'no' );
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+
+		$this->jetpack_connection_manager_mock
+			->expects( $this->never() )
+			->method( 'is_connected' );
+
+		$push_notifications = new PushNotifications();
+
+		$this->assertFalse( $push_notifications->should_be_enabled() );
+	}
+
+	/**
 	 * @testdox Tests that errors are logged when exception is thrown during
 	 * enablement check.
 	 */

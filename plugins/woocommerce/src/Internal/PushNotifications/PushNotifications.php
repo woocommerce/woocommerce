@@ -126,12 +126,24 @@ class PushNotifications {
 	 * Push notifications require Jetpack to be connected. Memoize the value so
 	 * we only check once per request.
 	 *
+	 * The feature is deprecated and always enabled by default, but an explicit
+	 * 'no' in the (now-removed) feature option is still honoured as a manual
+	 * kill switch, so a store can force a fallback if needed. The option is read
+	 * directly rather than through FeaturesUtil to avoid emitting a deprecation
+	 * notice on every request, and to avoid returning only the deprecated
+	 * value of `true`.
+	 *
 	 * @return bool
 	 *
 	 * @since 10.4.0
 	 */
 	public function should_be_enabled(): bool {
 		if ( null !== $this->enabled ) {
+			return $this->enabled;
+		}
+
+		if ( 'no' === get_option( 'woocommerce_feature_push_notifications_enabled' ) ) {
+			$this->enabled = false;
 			return $this->enabled;
 		}
 
