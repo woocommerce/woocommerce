@@ -52,17 +52,40 @@ class BatchProcessingController {
 	const FAILING_PROCESS_MAX_ATTEMPTS_DEFAULT = 5;
 
 	/**
-	 * Seconds to wait for the enqueued-processors lock before giving up and proceeding without it.
+	 * Option name used as a self-expiring mutex around mutations of the enqueued-processors option.
 	 *
-	 * Kept small deliberately: enqueue_processor() runs on the 'shutdown' hook of nearly every request under
-	 * continuous HPOS background sync, so a long wait could pile requests up. The guarded critical section is just
-	 * a couple of option queries, so one second is ample headroom for an uncontended writer while bounding the
-	 * worst-case stall when the lock is genuinely contended (in which case the mutation falls back to running
-	 * unguarded, which is no worse than the historical behavior).
+	 * The row holds the lock's release time (a microtime float); its mere existence is the lock. The lock lives in
+	 * the options table (rather than a MySQL named lock) so it is naturally scoped to this install's wp_options and
+	 * routes to the primary database like any other write, avoiding the replica-routing and server-global-namespace
+	 * pitfalls of GET_LOCK. Modeled on WC_Install::create_lock().
 	 *
 	 * @since 11.0.0
 	 */
-	const ENQUEUED_PROCESSORS_LOCK_TIMEOUT = 1;
+	const ENQUEUED_PROCESSORS_LOCK_OPTION = 'wc_pending_batch_processes_lock';
+
+	/**
+	 * How long (in seconds, fractional) a held enqueued-processors lock stays valid before it is considered stale
+	 * and can be taken over.
+	 *
+	 * Kept short deliberately: enqueue_processor() runs on the 'shutdown' hook of nearly every request under
+	 * continuous HPOS background sync, and the guarded critical section is just a couple of option queries. The
+	 * value must exceed the worst-case hold time (a normal holder releases in milliseconds), and also bounds how
+	 * long a contender waits before stealing a lock left behind by a crashed request.
+	 *
+	 * @since 11.0.0
+	 */
+	const ENQUEUED_PROCESSORS_LOCK_TTL = 1.0;
+
+	/**
+	 * Number of times to attempt to acquire the enqueued-processors lock before giving up and proceeding without it.
+	 *
+	 * The delay between attempts is ENQUEUED_PROCESSORS_LOCK_TTL / ENQUEUED_PROCESSORS_LOCK_ATTEMPTS, so the total
+	 * acquisition window is one TTL — long enough for a normal holder to finish and release, after which a stale
+	 * lock becomes stealable.
+	 *
+	 * @since 11.0.0
+	 */
+	const ENQUEUED_PROCESSORS_LOCK_ATTEMPTS = 20;
 
 	/**
 	 * Instance of WC_Logger class.
@@ -190,14 +213,14 @@ class BatchProcessingController {
 	 * The list is stored in a single option and mutated by several code paths (including the per-request
 	 * 'shutdown' enqueue from continuous HPOS background sync), so an unguarded read-modify-write can lose
 	 * updates under concurrency: two requests read the same list, each writes its own version, and the later
-	 * write silently drops the other's change. This serializes those mutations with a MySQL named lock and
-	 * re-reads the freshest persisted value inside the lock so the mutator always operates on current state.
+	 * write silently drops the other's change. This serializes those mutations with a self-expiring options-table
+	 * mutex and re-reads the freshest persisted value inside the lock so the mutator always operates on current
+	 * state.
 	 *
-	 * The lock is best-effort: if it cannot be acquired (timeout, an environment without GET_LOCK, or a multi-server
-	 * database layout — e.g. HyperDB/LudicrousDB — where the GET_LOCK SELECT is routed to a different connection
-	 * than the write) the mutation still proceeds, which is no worse than the previous lock-free behavior. The
-	 * fresh re-read inside the section narrows the race window even when the lock provides no real exclusion, and
-	 * the watchdog reconciles any residual divergence on its next run.
+	 * The lock is best-effort: if it cannot be acquired within ENQUEUED_PROCESSORS_LOCK_ATTEMPTS tries the mutation
+	 * still proceeds, which is no worse than the previous lock-free behavior. The fresh re-read inside the section
+	 * narrows the race window even when the lock provides no real exclusion, and the watchdog reconciles any
+	 * residual divergence on its next run.
 	 *
 	 * @since 11.0.0
 	 *
@@ -206,10 +229,7 @@ class BatchProcessingController {
 	 * @return array The list as persisted (the mutator's return value).
 	 */
 	private function mutate_enqueued_processors( callable $mutator ): array {
-		// Resolve the lock name once so acquire and release always target the exact same named lock, even if a
-		// hook fired during the write (e.g. by update_option()) were to mutate $wpdb->prefix mid-section.
-		$lock_name     = $this->get_enqueued_processors_lock_name();
-		$lock_acquired = $this->acquire_enqueued_processors_lock( $lock_name );
+		$lock_acquired = $this->acquire_enqueued_processors_lock();
 		try {
 			/*
 			 * Drop any request-cached copy so the read below reflects writes committed by concurrent requests
@@ -228,86 +248,107 @@ class BatchProcessingController {
 			return $updated;
 		} finally {
 			if ( $lock_acquired ) {
-				$this->release_enqueued_processors_lock( $lock_name );
+				$this->release_enqueued_processors_lock();
 			}
 		}
 	}
 
 	/**
-	 * Build the MySQL named-lock identifier for the enqueued-processors critical section.
+	 * Acquire the enqueued-processors lock by claiming a row in the options table.
 	 *
-	 * GET_LOCK names are scoped to the whole MySQL server (shared across databases), so the lock is namespaced
-	 * to this install to avoid unrelated sites on the same server contending. Lock names are capped at 64
-	 * characters, so the install-specific part is hashed.
-	 *
-	 * @since 11.0.0
-	 *
-	 * @return string Lock name.
-	 */
-	private function get_enqueued_processors_lock_name(): string {
-		global $wpdb;
-		$db_name = defined( 'DB_NAME' ) ? DB_NAME : '';
-		return 'wc_pending_batch_processes_' . md5( $wpdb->prefix . $db_name );
-	}
-
-	/**
-	 * Acquire the enqueued-processors named lock, waiting up to ENQUEUED_PROCESSORS_LOCK_TIMEOUT seconds.
-	 *
-	 * Failures (no $wpdb, GET_LOCK unavailable, or a database error) are swallowed and reported as "not acquired"
-	 * so the caller can fall back to its best-effort unguarded path rather than fataling — this runs on the
-	 * 'shutdown' hook of essentially every request under continuous background sync.
+	 * The claim is an atomic INSERT (which fails if the row already exists, making it a mutex); if the row exists
+	 * but its stored release time has already passed, a conditional UPDATE takes the stale lock over. Failure to
+	 * claim is retried up to ENQUEUED_PROCESSORS_LOCK_ATTEMPTS times with a short delay before the caller falls
+	 * back to its best-effort unguarded path. Modeled on WC_Install::create_lock().
 	 *
 	 * @since 11.0.0
 	 *
-	 * @param string $lock_name The named-lock identifier to acquire.
 	 * @return bool True if the lock was acquired (and must be released by the caller), false otherwise.
 	 */
-	private function acquire_enqueued_processors_lock( string $lock_name ): bool {
+	private function acquire_enqueued_processors_lock(): bool {
 		global $wpdb;
 		if ( ! $wpdb instanceof \wpdb ) {
 			return false;
 		}
 
-		try {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$acquired = $wpdb->get_var(
-				$wpdb->prepare( 'SELECT GET_LOCK(%s, %d)', $lock_name, self::ENQUEUED_PROCESSORS_LOCK_TIMEOUT )
-			);
-		} catch ( \Throwable $e ) {
-			return false;
-		}
+		$attempts    = max( 1, self::ENQUEUED_PROCESSORS_LOCK_ATTEMPTS );
+		$delay_micro = (int) ( ( self::ENQUEUED_PROCESSORS_LOCK_TTL / $attempts ) * 1000000 );
 
-		return '1' === (string) $acquired;
+		// A contended INSERT fails on the duplicate key by design, so silence wpdb error reporting to keep the
+		// expected-failure path from spamming the log in debug mode; restore the prior setting when done.
+		$suppress = $wpdb->suppress_errors( true );
+		try {
+			for ( $attempt = 0; $attempt < $attempts; $attempt++ ) {
+				$now    = microtime( true );
+				$expiry = $now + self::ENQUEUED_PROCESSORS_LOCK_TTL;
+
+				// The unique option_name key makes this INSERT a mutex: it fails when the lock row already exists.
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$acquired = $wpdb->insert(
+					$wpdb->options,
+					array(
+						'option_name'  => self::ENQUEUED_PROCESSORS_LOCK_OPTION,
+						'option_value' => $expiry,
+						'autoload'     => 'no',
+					),
+					array( '%s', '%f', '%s' )
+				);
+
+				if ( ! $acquired ) {
+					/*
+					 * The lock row exists; take it over only if its stored release time is already in the past.
+					 * $wpdb->update() cannot express the "<" comparison, so this conditional takeover uses raw SQL.
+					 * The table is a trusted internal identifier and every value is bound through a placeholder.
+					 */
+					$takeover = $wpdb->prepare(
+						// @phpstan-ignore-next-line argument.type -- $wpdb->options is a trusted identifier, not user input.
+						"UPDATE {$wpdb->options} SET option_value = %f WHERE option_name = %s AND option_value < %f", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+						$expiry,
+						self::ENQUEUED_PROCESSORS_LOCK_OPTION,
+						$now
+					);
+					if ( is_string( $takeover ) ) {
+						// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+						$acquired = $wpdb->query( $takeover );
+					}
+				}
+
+				if ( $acquired ) {
+					return true;
+				}
+
+				if ( $attempt < $attempts - 1 && $delay_micro > 0 ) {
+					usleep( $delay_micro );
+				}
+			}
+
+			return false;
+		} finally {
+			$wpdb->suppress_errors( $suppress );
+		}
 	}
 
 	/**
-	 * Release the enqueued-processors named lock previously acquired by acquire_enqueued_processors_lock().
+	 * Release the enqueued-processors lock by deleting its options-table row.
 	 *
 	 * @since 11.0.0
-	 *
-	 * @param string $lock_name The named-lock identifier to release (the same value passed to acquire).
 	 */
-	private function release_enqueued_processors_lock( string $lock_name ): void {
+	private function release_enqueued_processors_lock(): void {
 		global $wpdb;
 		if ( ! $wpdb instanceof \wpdb ) {
 			return;
 		}
 
-		$query = $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_name );
-		if ( ! is_string( $query ) ) {
-			return;
-		}
-
+		$suppress = $wpdb->suppress_errors( true );
 		try {
-			/*
-			 * $query is built by $wpdb->prepare() above; it is assigned to a variable only so it can be type-checked
-			 * before being passed to query() (prepare() returns string|null), hence the NotPrepared suppression.
-			 */
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
-			$wpdb->query( $query );
-		} catch ( \Throwable $e ) {
-			// Best-effort: the lock is released automatically when the database session ends regardless.
-			return;
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->delete(
+				$wpdb->options,
+				array( 'option_name' => self::ENQUEUED_PROCESSORS_LOCK_OPTION ),
+				array( '%s' )
+			);
+		} finally {
+			$wpdb->suppress_errors( $suppress );
 		}
 	}
 

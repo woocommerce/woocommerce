@@ -371,61 +371,42 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A mutating enqueue holds the named lock while persisting and releases it afterwards.
+	 * @testdox A mutating enqueue holds the options-table lock while persisting and releases it afterwards.
 	 */
 	public function test_enqueue_processor_holds_lock_during_write_and_releases_after(): void {
-		global $wpdb;
-
-		$lock_name = $this->get_lock_name();
-
-		$free_during_write = null;
+		$held_during_write = null;
 		add_filter(
 			'pre_update_option_' . BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME,
-			function ( $value ) use ( &$free_during_write, $wpdb, $lock_name ) {
-				// On this same DB session, IS_FREE_LOCK() returns '0' while the lock is held by this session.
-				$free_during_write = $wpdb->get_var( $wpdb->prepare( 'SELECT IS_FREE_LOCK(%s)', $lock_name ) );
+			function ( $value ) use ( &$held_during_write ) {
+				$held_during_write = $this->lock_row_value();
 				return $value;
 			}
 		);
 
 		$this->sut->enqueue_processor( 'Processor\\A' );
 
-		$this->assertSame( '0', (string) $free_during_write, 'The named lock must be held while the option is written.' );
-		$this->assertSame(
-			'1',
-			(string) $wpdb->get_var( $wpdb->prepare( 'SELECT IS_FREE_LOCK(%s)', $lock_name ) ),
-			'The named lock must be released once the mutation completes.'
-		);
+		$this->assertNotNull( $held_during_write, 'The lock row must exist while the option is written.' );
+		$this->assertNull( $this->lock_row_value(), 'The lock row must be deleted once the mutation completes.' );
 	}
 
 	/**
-	 * @testdox When the named lock is held by another connection, the mutation still proceeds (best-effort) after the timeout.
+	 * @testdox An unexpired lock claimed by another request forces the mutation onto its best-effort path and is left untouched.
 	 */
-	public function test_enqueue_processor_proceeds_when_lock_held_by_another_connection(): void {
+	public function test_enqueue_processor_proceeds_when_lock_held_by_an_unexpired_lock(): void {
 		global $wpdb;
-		$lock_name = $this->get_lock_name();
 
-		// Open a second, independent database connection and hold the lock there so the controller's own
-		// GET_LOCK on the request connection cannot acquire it within ENQUEUED_PROCESSORS_LOCK_TIMEOUT.
-		$other = new \wpdb( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
-		$other->query( $other->prepare( 'SELECT GET_LOCK(%s, %d)', $lock_name, 30 ) );
+		// Simulate another request holding the lock: insert the lock row with a release time far in the future,
+		// so the controller can neither claim it (row exists) nor take it over (not yet stale) and must fall back.
+		$foreign_expiry = microtime( true ) + 60;
+		$wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %f, 'no')", // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				BatchProcessingController::ENQUEUED_PROCESSORS_LOCK_OPTION,
+				$foreign_expiry
+			)
+		);
 
 		try {
-			/*
-			 * Fail fast if the second connection did not actually claim the lock: otherwise the controller would
-			 * acquire it normally and this test would silently pass without ever exercising the best-effort
-			 * fallback. IS_USED_LOCK() returns the connection id holding the lock (null if free), so assert it is
-			 * held by a different session than the request connection.
-			 */
-			$lock_holder    = $other->get_var( $other->prepare( 'SELECT IS_USED_LOCK(%s)', $lock_name ) );
-			$request_thread = (string) $wpdb->get_var( 'SELECT CONNECTION_ID()' );
-			$this->assertNotNull( $lock_holder, 'Precondition: the second connection must hold the lock.' );
-			$this->assertNotSame(
-				$request_thread,
-				(string) $lock_holder,
-				'Precondition: the lock must be held by the other connection, not the request connection, so the controller is forced onto its best-effort path.'
-			);
-
 			$this->sut->enqueue_processor( 'Processor\\A' );
 
 			$this->assertContains(
@@ -433,21 +414,57 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 				$this->sut->get_enqueued_processors(),
 				'The mutation must still persist when the lock cannot be acquired (best-effort fallback).'
 			);
+			$this->assertNotNull(
+				$this->lock_row_value(),
+				'The other request\'s unexpired lock must be left in place, not stolen or released.'
+			);
 		} finally {
-			$other->query( $other->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_name ) );
-			$other->close();
+			$wpdb->query(
+				$wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name = %s", BatchProcessingController::ENQUEUED_PROCESSORS_LOCK_OPTION ) // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			);
 		}
 	}
 
 	/**
-	 * Resolve the controller's named-lock identifier via reflection so the test never drifts from production.
-	 *
-	 * @return string Lock name.
+	 * @testdox A stale (expired) lock left by a crashed request is taken over, and released after the mutation.
 	 */
-	private function get_lock_name(): string {
-		$method = new \ReflectionMethod( $this->sut, 'get_enqueued_processors_lock_name' );
-		$method->setAccessible( true );
-		return $method->invoke( $this->sut );
+	public function test_enqueue_processor_takes_over_stale_lock(): void {
+		global $wpdb;
+
+		// A lock row whose release time is already in the past represents a crashed holder; it must be stealable.
+		$stale_expiry = microtime( true ) - 60;
+		$wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %f, 'no')", // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				BatchProcessingController::ENQUEUED_PROCESSORS_LOCK_OPTION,
+				$stale_expiry
+			)
+		);
+
+		$this->sut->enqueue_processor( 'Processor\\A' );
+
+		$this->assertContains(
+			'Processor\\A',
+			$this->sut->get_enqueued_processors(),
+			'The mutation must proceed after taking over the stale lock.'
+		);
+		$this->assertNull(
+			$this->lock_row_value(),
+			'After taking over and using the stale lock, the controller must release (delete) it.'
+		);
+	}
+
+	/**
+	 * Read the raw stored value of the enqueued-processors lock row, or null when no lock is held.
+	 *
+	 * @return string|null The lock row's option_value, or null if the row does not exist.
+	 */
+	private function lock_row_value(): ?string {
+		global $wpdb;
+		$value = $wpdb->get_var(
+			$wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", BatchProcessingController::ENQUEUED_PROCESSORS_LOCK_OPTION ) // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+		return null === $value ? null : (string) $value;
 	}
 
 	/**
