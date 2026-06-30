@@ -112,6 +112,7 @@ class AsyncGenerator {
 
 		$status = array(
 			'scheduled_at' => time(),
+			'updated_at'   => time(),
 			'completed_at' => null,
 			'state'        => self::STATE_SCHEDULED,
 			'progress'     => 0,
@@ -160,12 +161,44 @@ class AsyncGenerator {
 			return;
 		}
 
-		$status['state'] = self::STATE_IN_PROGRESS;
+		$status['state']      = self::STATE_IN_PROGRESS;
+		$status['updated_at'] = time();
 		update_option( $option_key, $status );
 
 		try {
+			// Large catalogs are memory heavy, so give the process as much headroom as the
+			// host allows before the heavy lifting begins. This only raises the limit for the
+			// current process and never lowers an already higher limit.
+			wp_raise_memory_limit( 'admin' );
+
+			/**
+			 * Filters the per-batch PHP execution time limit (in seconds) for product feed generation.
+			 *
+			 * The execution time limit is set to this value up front and reset to it after each processed
+			 * batch, so that a low `max_execution_time` does not abort generation part-way through a large
+			 * catalog. Return 0 to leave the time limit untouched.
+			 *
+			 * This only affects PHP's own execution timeout. It does not extend Action Scheduler's
+			 * failure period (`action_scheduler_failure_period`, 300 seconds by default) nor any hard
+			 * server/host request timeout, so it is a mitigation rather than a guarantee for very large
+			 * catalogs.
+			 *
+			 * @param int $batch_time_limit The per-batch time limit in seconds.
+			 *
+			 * @since 11.0.0
+			 */
+			$batch_time_limit = (int) apply_filters( 'woocommerce_product_feed_batch_time_limit', 5 * MINUTE_IN_SECONDS );
+
+			// Raise the time limit up front too: the walker only resets it after each batch, so the
+			// initial product query and the first batch would otherwise run under whatever (possibly
+			// very low) limit the Action Scheduler request started with.
+			if ( $batch_time_limit > 0 ) {
+				wc_set_time_limit( $batch_time_limit );
+			}
+
 			$feed   = $this->integration->create_feed();
 			$walker = ProductWalker::from_integration( $this->integration, $feed );
+			$walker->add_time_limit( $batch_time_limit );
 
 			// Add dynamic args to the mapper.
 			$args = $status['args'] ?? array();
@@ -250,6 +283,8 @@ class AsyncGenerator {
 				return $status;
 
 			case self::STATE_IN_PROGRESS:
+				// A genuinely running job (its heartbeat is still fresh, otherwise validate_status()
+				// above would have restarted it) cannot be interrupted mid-flight.
 				throw new \Exception( 'Feed generation is already in progress and cannot be stopped.' );
 
 			case self::STATE_COMPLETED:
@@ -314,11 +349,12 @@ class AsyncGenerator {
 	 * @return array                   Updated status of the feed generation.
 	 */
 	private function update_feed_progress( array $status, WalkerProgress $progress ): array {
-		$status['progress']  = $progress->total_count > 0
+		$status['progress']   = $progress->total_count > 0
 			? round( ( $progress->processed_items / $progress->total_count ) * 100, 2 )
 			: 0;
-		$status['processed'] = $progress->processed_items;
-		$status['total']     = $progress->total_count;
+		$status['processed']  = $progress->processed_items;
+		$status['total']      = $progress->total_count;
+		$status['updated_at'] = time();
 		return $status;
 	}
 
@@ -375,6 +411,32 @@ class AsyncGenerator {
 			)
 		) {
 			return false;
+		}
+
+		/**
+		 * If the job is in progress but has not updated its heartbeat within the timeout, the
+		 * process was most likely killed (server/host timeout or out of memory) before it could
+		 * mark itself as failed. Without this check, such a job would stay `in_progress` forever
+		 * and no new feed could ever be generated.
+		 *
+		 * The heartbeat (`updated_at`) is refreshed when the job starts and after every processed
+		 * batch, so an active job keeps it fresh while a killed one does not.
+		 */
+		if ( self::STATE_IN_PROGRESS === $status['state'] ) {
+			$last_activity = $status['updated_at'] ?? $status['scheduled_at'] ?? 0;
+
+			/**
+			 * Allows the timeout for a feed to remain in `in_progress` state without a heartbeat
+			 * update to be changed. Past this point the job is treated as stuck and regenerated.
+			 *
+			 * @param int $stuck_time The stuck time in seconds.
+			 * @return int The stuck time in seconds.
+			 * @since 11.0.0
+			 */
+			$in_progress_timeout = apply_filters( 'woocommerce_product_feed_in_progress_timeout', 5 * MINUTE_IN_SECONDS );
+			if ( time() - $last_activity > $in_progress_timeout ) {
+				return false;
+			}
 		}
 
 		// All good.

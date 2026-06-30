@@ -10,8 +10,51 @@
 
 declare( strict_types=1 );
 
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
+
 /**
  * Engine integration test case.
  */
 abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
+
+	/**
+	 * Gateway ids wired with an approving scheduled-payment handler, to unhook on teardown.
+	 *
+	 * @var array<int, string>
+	 */
+	private $approved_gateways = array();
+
+	public function tear_down(): void {
+		foreach ( $this->approved_gateways as $gateway ) {
+			remove_all_actions( 'woocommerce_subscriptions_engine_scheduled_payment_' . $gateway );
+		}
+		$this->approved_gateways = array();
+
+		parent::tear_down();
+	}
+
+	/**
+	 * Declare `recurring` for `$gateway` and wire an inline approving handler: it marks the
+	 * renewal order paid synchronously (the dummy-gateway shape), so the money-path reads a
+	 * paid order immediately after the charge is attempted. Unhooked automatically on teardown.
+	 *
+	 * @param string $gateway Gateway id to approve charges for.
+	 */
+	protected function approve_charges_for( string $gateway ): void {
+		GatewayCapabilities::declare( $gateway, array( GatewayCapabilities::RECURRING ) );
+
+		add_action(
+			'woocommerce_subscriptions_engine_scheduled_payment_' . $gateway,
+			static function ( $amount, $renewal_order ): void {
+				unset( $amount );
+				if ( $renewal_order instanceof WC_Order && $renewal_order->needs_payment() ) {
+					$renewal_order->payment_complete();
+				}
+			},
+			10,
+			2
+		);
+
+		$this->approved_gateways[] = $gateway;
+	}
 }

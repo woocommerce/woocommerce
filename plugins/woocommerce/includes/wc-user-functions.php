@@ -326,9 +326,14 @@ function wc_set_customer_auth_cookie( $customer_id ) {
  * @return int
  */
 function wc_update_new_customer_past_orders( $customer_id ) {
+	$customer = get_user_by( 'id', absint( $customer_id ) );
+
+	if ( ! $customer ) {
+		return 0;
+	}
+
 	$linked          = 0;
 	$complete        = 0;
-	$customer        = get_user_by( 'id', absint( $customer_id ) );
 	$customer_orders = wc_get_orders(
 		array(
 			'limit'    => -1,
