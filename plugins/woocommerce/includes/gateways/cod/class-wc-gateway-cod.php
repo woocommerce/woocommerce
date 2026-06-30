@@ -327,7 +327,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		}
 
 		// Remove cart if it still matches the order being processed.
-		if ( WC()->cart && $order->has_cart_hash( WC()->cart->get_cart_hash() ) ) {
+		if ( $order instanceof WC_Order && WC()->cart && $order->has_cart_hash( WC()->cart->get_cart_hash() ) ) {
 			WC()->cart->empty_cart();
 		}
 
