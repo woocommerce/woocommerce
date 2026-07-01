@@ -77,10 +77,9 @@ jobs:
             const sourceRef = process.env.SOURCE_REF;
             const builtAt = new Date().toISOString().replace('T', ' ').replace(/\..+/, ' UTC');
             const body = [
-              `Nightly build, regenerated every night from the latest \`${ sourceRef }\`.`,
+              `Nightly build, regenerated every night from \`${ sourceRef }\`.`,
               '',
-              `- Published: ${ builtAt }`,
-              `- Commit: ${ context.repo.owner }/${ context.repo.repo }@${ sha } (\`${ shortSha }\`)`,
+              `Last update: **${ builtAt }**`,
             ].join('\n');
 
             await github.rest.repos.updateRelease({
