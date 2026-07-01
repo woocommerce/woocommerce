@@ -54,7 +54,7 @@ class CustomerHistory {
 			$billing_email = $order->get_billing_email();
 			$result        = $this->query_hpos( $customer_id, $billing_email );
 		} else {
-			$customer_report_id = $this->get_cpt_customer_report_id( $order );
+			$customer_report_id = $this->get_cpt_report_customer_id( $order );
 			if ( $customer_report_id > 0 ) {
 				$result = $this->query_cpt( $customer_report_id );
 			} else {
@@ -233,7 +233,7 @@ class CustomerHistory {
 	 * @param WC_Order $order The order object.
 	 * @return int The reports customer ID.
 	 */
-	private function get_cpt_customer_report_id( WC_Order $order ): int {
+	private function get_cpt_report_customer_id( WC_Order $order ): int {
 		if ( ! $order->get_id() ) {
 			return 0;
 		}

@@ -569,6 +569,9 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_logging_class', $inject_logger );
 
+		$this->assertInstanceOf( \WC_Order::class, $order, 'Test should pass a base order to the metabox' );
+		$this->assertNotInstanceOf( AdminOrder::class, $order, 'Test should not pass the admin override order to the metabox' );
+
 		ob_start();
 		try {
 			$this->sut->output( $order );
@@ -577,8 +580,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 			remove_filter( 'woocommerce_logging_class', $inject_logger );
 		}
 
-		$this->assertInstanceOf( \WC_Order::class, $order, 'Test should pass a base order to the metabox' );
-		$this->assertNotInstanceOf( AdminOrder::class, $order, 'Test should not pass the admin override order to the metabox' );
 		$this->assertStringContainsString( 'order-attribution-total-orders', $output, 'Should render the metabox template' );
 		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should show 1 order from analytics data' );
 		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100\.00/', $output, 'Should show total spend of 100' );
