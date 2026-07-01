@@ -25,8 +25,8 @@ class WC_Meta_Box_Order_Actions_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$order       = WC_Helper_Order::create_order();
-		$menu_filter = function ( $menu_items ) {
+		$order             = WC_Helper_Order::create_order();
+		$menu_filter       = function ( $menu_items ) {
 			$menu_items['test_item'] = array(
 				'label' => 'Experimental menu item',
 				'url'   => 'https://example.com/',
