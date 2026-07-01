@@ -319,10 +319,16 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			'WC_Install::$db_update_callbacks must be sorted by version.',
 		);
 
-		// Greatest version can't be ahead of current stable (except, possibly, for its suffix).
+		// Unreleased builds (-dev/-rc) can't go past the version being developed. Clean versions also
+		// allow the next patch, since a release branch collects it before shipping.
+		$stable  = WC()->stable_version();
+		$ceiling = WC()->version === $stable
+			? preg_replace_callback( '/\d+$/', fn( $m ) => $m[0] + 1, $stable )
+			: $stable;
+
 		$this->assertTrue(
-			empty( $versions ) || version_compare( preg_replace( '/-.*$/', '', end( $versions ) ), WC()->stable_version(), '<=' ),
-			'WC_Install::$db_update_callbacks must not contain versions that are ahead of current stable (except, possibly, for suffix).',
+			empty( $versions ) || version_compare( preg_replace( '/-.*$/', '', end( $versions ) ), $ceiling, '<=' ),
+			'WC_Install::$db_update_callbacks must not contain versions ahead of this branch.',
 		);
 	}
 
