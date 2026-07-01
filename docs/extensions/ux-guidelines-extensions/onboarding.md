@@ -1,6 +1,7 @@
 ---
 post_title: Onboarding
 sidebar_label: Onboarding
+sidebar_position: 2
 ---
 
 # Onboarding
