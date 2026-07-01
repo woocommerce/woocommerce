@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add a woocommerce_format_phone_number filter for customizing the output of wc_format_phone_number(), plus a WC_Validation::is_phone_format() method for country-agnostic phone shape checks. wc_format_phone_number() now gates on is_phone_format() instead of is_phone(), so a woocommerce_validate_phone filter can no longer blank numbers during formatting.
+Add a woocommerce_format_phone_number filter and a WC_Validation::is_phone_format() method.

@@ -38,8 +38,8 @@ class WC_Validation {
 	 * @param  string $phone Phone number to check.
 	 * @return bool
 	 */
-	public static function is_phone_format( $phone ) {
-		return 0 === strlen( trim( preg_replace( '/[\s\#0-9_\-\+\/\(\)\.]/', '', (string) $phone ) ) );
+	public static function is_phone_format( $phone ): bool {
+		return '' === trim( preg_replace( '/[\s\#0-9_\-\+\/\(\)\.]/', '', (string) $phone ) );
 	}
 
 	/**
