@@ -387,19 +387,21 @@ class WC_Shortcode_My_Account {
 			remove_action( 'after_password_reset', 'wp_password_change_notification', $core_notification_priority );
 		}
 
-		/**
-		 * Fires after the user's password has been reset via WooCommerce.
-		 *
-		 * This provides parity with WordPress core's reset_password() function.
-		 *
-		 * @since 10.9.0
-		 * @param WP_User $user     The user.
-		 * @param string  $new_pass New user password in plaintext.
-		 */
-		do_action( 'after_password_reset', $user, $new_pass );
-
-		if ( false !== $core_notification_priority ) {
-			add_action( 'after_password_reset', 'wp_password_change_notification', $core_notification_priority );
+		try {
+			/**
+			 * Fires after the user's password has been reset via WooCommerce.
+			 *
+			 * This provides parity with WordPress core's reset_password() function.
+			 *
+			 * @since 10.9.0
+			 * @param WP_User $user     The user.
+			 * @param string  $new_pass New user password in plaintext.
+			 */
+			do_action( 'after_password_reset', $user, $new_pass );
+		} finally {
+			if ( false !== $core_notification_priority ) {
+				add_action( 'after_password_reset', 'wp_password_change_notification', $core_notification_priority );
+			}
 		}
 
 		self::set_reset_password_cookie();
