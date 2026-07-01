@@ -184,7 +184,21 @@ trait CheckoutTrait {
 			$order->set_payment_method_title( $payment_method->title );
 		} else {
 			$order_needs_payment = $order->needs_payment();
-			if ( $order_needs_payment && 'POST' === $request->get_method() ) {
+
+			/**
+			 * Filters whether a payment method is required for a POST /checkout request that creates an order needing payment.
+			 *
+			 * Defaults to true. Trusted-actor callers that defer payment selection past order creation can return false; the
+			 * order then stays pending until a later flow supplies the payment method.
+			 *
+			 * @since 11.0.0
+			 *
+			 * @param bool             $require Whether a payment method is required. Default true.
+			 * @param \WP_REST_Request $request The current REST request.
+			 * @param \WC_Order        $order   The order being checked out.
+			 */
+			$require_payment_method = (bool) apply_filters( 'woocommerce_store_api_checkout_require_payment_method', true, $request, $order );
+			if ( $require_payment_method && $order_needs_payment && 'POST' === $request->get_method() ) {
 				throw new RouteException(
 					'woocommerce_rest_checkout_missing_payment_method',
 					esc_html__( 'No payment method provided.', 'woocommerce' ),

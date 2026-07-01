@@ -87,7 +87,19 @@ class OrderController {
 		$order->set_customer_id( get_current_user_id() );
 		$order->set_customer_ip_address( \WC_Geolocation::get_ip_address() );
 		$order->set_customer_user_agent( wc_get_user_agent() );
-		$order->set_payment_method( PaymentUtils::get_default_payment_method() );
+		/**
+		 * Filters the default payment method stamped onto a draft order built from the cart.
+		 *
+		 * The default ({@see PaymentUtils::get_default_payment_method()}) returns the first enabled gateway, which fits web
+		 * checkout. Trusted-actor callers that defer payment selection past order creation can return an empty string.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param string    $payment_method The default payment method id. Defaults to the first enabled gateway.
+		 * @param \WC_Order $order          Order object being updated.
+		 */
+		$payment_method = (string) apply_filters( 'woocommerce_store_api_order_default_payment_method', PaymentUtils::get_default_payment_method(), $order );
+		$order->set_payment_method( $payment_method );
 		$order->update_meta_data( 'is_vat_exempt', wc_bool_to_string( wc()->cart->get_customer()->get_is_vat_exempt() ) );
 		$order->calculate_totals();
 	}
