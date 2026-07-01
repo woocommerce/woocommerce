@@ -379,6 +379,14 @@ class WC_Shortcode_My_Account {
 		wp_set_password( $new_pass, $user->ID );
 		update_user_meta( $user->ID, 'default_password_nag', false );
 
+		// WordPress core hooks wp_password_change_notification() onto after_password_reset. Detach it around
+		// the action so it doesn't duplicate the notification WooCommerce sends directly below (guarded by the
+		// woocommerce_disable_password_change_notification filter), then restore it to its original priority.
+		$core_notification_priority = has_action( 'after_password_reset', 'wp_password_change_notification' );
+		if ( false !== $core_notification_priority ) {
+			remove_action( 'after_password_reset', 'wp_password_change_notification', $core_notification_priority );
+		}
+
 		/**
 		 * Fires after the user's password has been reset via WooCommerce.
 		 *
@@ -389,6 +397,11 @@ class WC_Shortcode_My_Account {
 		 * @param string  $new_pass New user password in plaintext.
 		 */
 		do_action( 'after_password_reset', $user, $new_pass );
+
+		if ( false !== $core_notification_priority ) {
+			add_action( 'after_password_reset', 'wp_password_change_notification', $core_notification_priority );
+		}
+
 		self::set_reset_password_cookie();
 		wc_set_customer_auth_cookie( $user->ID );
 
