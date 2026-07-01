@@ -16,6 +16,84 @@ const BROWSER_IDLE_WAIT = 1000;
 
 const results = {};
 
+function recordResult( metric, value ) {
+	if ( ! results[ metric ] ) {
+		results[ metric ] = [];
+	}
+	results[ metric ].push( value );
+}
+
+async function getWooEditorMetrics( page ) {
+	return await page.evaluate( () => {
+		const isWooCommerceUrl = ( url ) =>
+			url.includes( '/wp-content/plugins/woocommerce/' );
+		const isWooBlockAssetUrl = ( url ) =>
+			url.includes(
+				'/wp-content/plugins/woocommerce/assets/client/blocks/'
+			);
+
+		const resources = performance
+			.getEntriesByType( 'resource' )
+			.map( ( entry ) => ( {
+				transferSize: entry.transferSize || 0,
+				encodedBodySize: entry.encodedBodySize || 0,
+				duration: entry.duration || 0,
+				isWooCommerce: isWooCommerceUrl( entry.name ),
+				isWooBlockAsset: isWooBlockAssetUrl( entry.name ),
+				isScript: entry.name.split( '?' )[ 0 ].endsWith( '.js' ),
+				isStyle: entry.name.split( '?' )[ 0 ].endsWith( '.css' ),
+			} ) );
+
+		const wooResources = resources.filter(
+			( resource ) => resource.isWooCommerce
+		);
+		const wooBlockAssetResources = resources.filter(
+			( resource ) => resource.isWooBlockAsset
+		);
+
+		const sum = ( entries, field ) =>
+			entries.reduce( ( total, entry ) => total + entry[ field ], 0 );
+
+		const registeredWooBlocks =
+			window.wp?.blocks
+				?.getBlockTypes()
+				.filter( ( blockType ) =>
+					blockType.name.startsWith( 'woocommerce/' )
+				).length || 0;
+
+		return {
+			wooResources: wooResources.length,
+			wooBlockAssetResources: wooBlockAssetResources.length,
+			wooScripts: wooResources.filter( ( resource ) => resource.isScript )
+				.length,
+			wooBlockAssetScripts: wooBlockAssetResources.filter(
+				( resource ) => resource.isScript
+			).length,
+			wooStyles: wooResources.filter( ( resource ) => resource.isStyle )
+				.length,
+			wooBlockAssetStyles: wooBlockAssetResources.filter(
+				( resource ) => resource.isStyle
+			).length,
+			wooTransferSize: sum( wooResources, 'transferSize' ),
+			wooEncodedBodySize: sum( wooResources, 'encodedBodySize' ),
+			wooBlockAssetTransferSize: sum(
+				wooBlockAssetResources,
+				'transferSize'
+			),
+			wooBlockAssetEncodedBodySize: sum(
+				wooBlockAssetResources,
+				'encodedBodySize'
+			),
+			wooResourceDuration: sum( wooResources, 'duration' ),
+			wooBlockAssetResourceDuration: sum(
+				wooBlockAssetResources,
+				'duration'
+			),
+			registeredWooBlocks,
+		};
+	} );
+}
+
 test.describe( 'Editor Performance', () => {
 	test.use( {
 		perfUtils: async ( { page }, use ) => {
@@ -79,10 +157,11 @@ test.describe( 'Editor Performance', () => {
 					page,
 					BROWSER_IDLE_WAIT
 				);
+				const wooEditorMetrics = await getWooEditorMetrics( page );
 
 				// Save the results.
 				if ( i > throwaway ) {
-					results.totalBlockingTime = results.tbt || [];
+					results.totalBlockingTime = results.totalBlockingTime || [];
 					results.totalBlockingTime.push( totalBlockingTime );
 					results.cumulativeLayoutShift =
 						results.cumulativeLayoutShift || [];
@@ -102,6 +181,11 @@ test.describe( 'Editor Performance', () => {
 								results[ metricKey ] = [];
 							}
 							results[ metricKey ].push( duration );
+						}
+					);
+					Object.entries( wooEditorMetrics ).forEach(
+						( [ metric, value ] ) => {
+							recordResult( metric, value );
 						}
 					);
 				}
