@@ -51,6 +51,8 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	public function tear_down(): void {
+		// Clear any recurring scan action a scheduling test enqueued so it cannot leak between tests.
+		as_unschedule_all_actions( RenewalDispatcher::HOOK, array(), RenewalDispatcher::GROUP );
 		ConsumerRegistry::reset();
 		GatewayCapabilities::reset();
 		parent::tear_down();
@@ -218,6 +220,56 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 		$processed_next = $dispatcher->run_batch( $this->scan_now(), 2 );
 		$this->assertSame( 1, $processed_next );
 		$this->assertSame( 2, $repo->max_count( (int) $third->get_id() ) );
+	}
+
+	/**
+	 * @testdox ensure_scheduled enqueues exactly one recurring scan action and is idempotent.
+	 */
+	public function test_ensure_scheduled_is_idempotent(): void {
+		// The engine schedules the recurring action (and sets its re-check option) once at
+		// bootstrap, committed before the per-test transaction. Reset both so this test starts
+		// from a clean, unscheduled slate; the rollback restores the bootstrap state afterwards.
+		as_unschedule_all_actions( RenewalDispatcher::HOOK, array(), RenewalDispatcher::GROUP );
+		delete_option( 'wc_subscriptions_engine_dispatch_scheduled_check' );
+		$this->assertFalse( RenewalDispatcher::is_scheduled(), 'No recurring action after the reset.' );
+
+		RenewalDispatcher::ensure_scheduled();
+		$this->assertTrue( RenewalDispatcher::is_scheduled() );
+
+		// A second call must not enqueue a duplicate.
+		RenewalDispatcher::ensure_scheduled();
+
+		$pending = as_get_scheduled_actions(
+			array(
+				'hook'   => RenewalDispatcher::HOOK,
+				'group'  => RenewalDispatcher::GROUP,
+				'status' => 'pending',
+			),
+			'ids'
+		);
+		$this->assertCount( 1, $pending, 'Exactly one recurring scan action is enqueued.' );
+	}
+
+	/**
+	 * @testdox handle_tick routes the Action Scheduler dispatch through run(), advancing a due renewal.
+	 */
+	public function test_handle_tick_routes_through_run(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+		ConsumerRegistry::register( self::CONSUMER );
+
+		// Due in the past relative to the real dispatch moment, so the tick picks it up.
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING, '2026-02-15 00:00:00' );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		// Drive the static Action Scheduler entry point (uses the real "now").
+		RenewalDispatcher::handle_tick();
+
+		// The dispatch reached the money-path: cycle 2 billed.
+		$cycle = ( new ContractRepository() )->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $cycle );
+		$this->assertSame( 2, $cycle->get_count() );
+		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
 	}
 
 	/**

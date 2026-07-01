@@ -252,10 +252,13 @@ final class RenewalEngine {
 		$previous = $this->contracts->find_current_cycle( $contract_id );
 		if ( null === $previous ) {
 			// No billing chain to advance: checkout always creates cycle 1, so a chainless
-			// contract is a manual/corrupt case the engine does not renew. Skip without throwing
-			// (never silently bill it as cycle 1) so a scheduled action does not retry forever.
+			// contract is a manual/corrupt case the engine does not renew. Park it (clear its
+			// schedule) so the due-scan does not revisit it every tick - a cluster of such rows
+			// would otherwise hold the front of the oldest-due-first scan and starve the healthy
+			// renewals behind them. Never silently bill it as cycle 1.
+			$this->park_contract( $contract );
 			wc_get_logger()->warning(
-				sprintf( 'RenewalEngine::process_due(): contract %d has no billing chain to advance - skipping.', $contract_id ),
+				sprintf( 'RenewalEngine::process_due(): contract %d has no billing chain to advance - parking (cleared its next payment).', $contract_id ),
 				array(
 					'source'      => self::LOG_SOURCE,
 					'contract_id' => $contract_id,
@@ -266,9 +269,17 @@ final class RenewalEngine {
 
 		$next_count = $this->target_count( $previous );
 
-		// Idempotency pre-check: a renewal order already tagged for this number means the
-		// action already ran (AS retry, double-fire). Bail before claiming a new cycle.
-		if ( $this->renewal_exists_for_cycle( $contract_id, $next_count ) ) {
+		// A renewal order already tagged for this number usually means the run already happened
+		// (an AS retry or a double-fire) - skip. The exception is a crashed attempt: the head
+		// cycle is still `pending` at this number with an expired lease, and the order was saved
+		// before its charge could settle. That is recoverable, not a duplicate - resume it rather
+		// than skipping forever, which would strand the contract on the same number every tick.
+		$existing_order = $this->find_renewal_order_for_cycle( $contract_id, $next_count );
+		if ( null !== $existing_order ) {
+			if ( $this->is_reclaimable_stall( $previous, $next_count ) ) {
+				return $this->recover_stalled_renewal( $contract, $previous, $existing_order );
+			}
+
 			wc_get_logger()->info(
 				sprintf( 'RenewalEngine::process_due(): renewal for contract %d cycle %d already exists - skipping (idempotent retry).', $contract_id, $next_count ),
 				array(
@@ -280,12 +291,14 @@ final class RenewalEngine {
 		}
 
 		// Resolve the billing cadence from the contract's plan snapshot. A deleted/unresolvable
-		// plan is a recoverable data condition, not a fatal: skip (logging only) like the guards
-		// above so a scheduled action does not retry a permanent failure forever.
+		// plan is a recoverable data condition, not a fatal. Park the contract (clear its
+		// schedule) so the due-scan stops revisiting it every tick and starving the healthy
+		// renewals behind it; restoring the plan and rescheduling re-arms it.
 		$policy = $this->resolve_billing_policy( $contract );
 		if ( null === $policy ) {
+			$this->park_contract( $contract );
 			wc_get_logger()->warning(
-				sprintf( 'RenewalEngine::process_due(): cannot resolve the billing plan for contract %d - skipping. The selling plan may have been deleted.', $contract_id ),
+				sprintf( 'RenewalEngine::process_due(): cannot resolve the billing plan for contract %d - parking (cleared its next payment). The selling plan may have been deleted.', $contract_id ),
 				array(
 					'source'      => self::LOG_SOURCE,
 					'contract_id' => $contract_id,
@@ -688,15 +701,33 @@ final class RenewalEngine {
 		$renewal_order->update_meta_data( self::renewal_cycle_meta_key(), (string) $count );
 		$renewal_order->save();
 
-		$token_id = $instrument->get_token_id();
-		if ( null !== $token_id ) {
-			$token = \WC_Payment_Tokens::get( $token_id );
-			if ( $token instanceof \WC_Payment_Token ) {
-				$renewal_order->add_payment_token( $token );
-			}
-		}
+		$this->ensure_payment_token( $renewal_order, $contract );
 
 		return $renewal_order;
+	}
+
+	/**
+	 * Attach the contract's stored payment token to `$order` when it carries none. Idempotent:
+	 * a no-op when the order already has a token, so it is safe both on a freshly-built order
+	 * and when resuming a renewal order a crash may have left un-tokenised before its charge.
+	 *
+	 * @param WC_Order $order    The renewal order to tokenise.
+	 * @param Contract $contract The contract whose payment instrument holds the token.
+	 */
+	private function ensure_payment_token( WC_Order $order, Contract $contract ): void {
+		if ( array() !== $order->get_payment_tokens() ) {
+			return;
+		}
+
+		$token_id = $contract->get_payment_instrument()->get_token_id();
+		if ( null === $token_id ) {
+			return;
+		}
+
+		$token = \WC_Payment_Tokens::get( $token_id );
+		if ( $token instanceof \WC_Payment_Token ) {
+			$order->add_payment_token( $token );
+		}
 	}
 
 	/**
@@ -779,8 +810,8 @@ final class RenewalEngine {
 	}
 
 	/**
-	 * Whether a renewal order tagged for `$contract_id` at `$cycle` already exists -
-	 * the idempotency check for AS retries.
+	 * The renewal order tagged for `$contract_id` at `$cycle`, or null when none exists -
+	 * the idempotency / crash-recovery lookup for AS retries.
 	 *
 	 * Queries on the contract id via the flat `meta_key` / `meta_value` shortcut, then
 	 * narrows by relation type and cycle in PHP. The flat shortcut is used rather than a
@@ -789,8 +820,9 @@ final class RenewalEngine {
 	 *
 	 * @param int $contract_id Contract id.
 	 * @param int $cycle       The cycle number the renewal would bill.
+	 * @return WC_Order|null The existing renewal order for the number, or null when none.
 	 */
-	private function renewal_exists_for_cycle( int $contract_id, int $cycle ): bool {
+	private function find_renewal_order_for_cycle( int $contract_id, int $cycle ): ?WC_Order {
 		$orders = wc_get_orders(
 			array(
 				'limit'      => -1,
@@ -804,7 +836,7 @@ final class RenewalEngine {
 		// Unpaginated, so wc_get_orders() returns a plain list. The guard narrows the
 		// declared return type and treats any non-array result as "no matching renewal".
 		if ( ! is_array( $orders ) ) {
-			return false;
+			return null;
 		}
 
 		foreach ( $orders as $order ) {
@@ -814,11 +846,101 @@ final class RenewalEngine {
 
 			if ( OrderLinkage::RELATION_RENEWAL === $order->get_meta( OrderLinkage::META_RELATION_TYPE )
 				&& (string) $cycle === $order->get_meta( self::renewal_cycle_meta_key() ) ) {
-				return true;
+				return $order;
 			}
 		}
 
-		return false;
+		return null;
+	}
+
+	/**
+	 * Whether the chain head is a crashed-in-flight renewal recoverable at `$count`: a `pending`
+	 * cycle at that number whose crash-recovery lease has expired. The same condition the
+	 * create-as-claim collision uses in {@see self::reclaim_or_skip()}, applied at the idempotency
+	 * pre-check so a renewal order a crash left before its charge settled is resumed, not skipped
+	 * forever. A live lease (a concurrent worker) or a settled/failed head is not reclaimable.
+	 *
+	 * @param Cycle $head  The chain's current head cycle.
+	 * @param int   $count The chargeable number being targeted.
+	 */
+	private function is_reclaimable_stall( Cycle $head, int $count ): bool {
+		return $count === $head->get_count()
+			&& $head->get_status()->equals( CycleStatus::pending() )
+			&& $this->lease_has_expired( $head );
+	}
+
+	/**
+	 * Resume a renewal whose order was saved but never settled because the run crashed mid-flight
+	 * (the head cycle is `pending` with an expired lease and its order already exists).
+	 *
+	 * Reclaims the stalled cycle through the same atomic compare-and-set as a create-as-claim
+	 * collision, so among concurrent workers only one resumes it. The existing order is reused
+	 * (never a second order for the same number): if the gateway had already been paid before the
+	 * crash the outcome is settled from that paid state with no re-charge; otherwise the token the
+	 * crash may have skipped is attached and the charge is (re)attempted - the normal retry
+	 * contract for an unpaid renewal.
+	 *
+	 * @param Contract $contract       The contract being renewed.
+	 * @param Cycle    $head           The stalled `pending` head cycle to resume.
+	 * @param WC_Order $existing_order The renewal order the crashed run left behind.
+	 * @return WC_Order|null The resumed order, or null when another worker reclaimed it first.
+	 */
+	private function recover_stalled_renewal( Contract $contract, Cycle $head, WC_Order $existing_order ): ?WC_Order {
+		$contract_id = (int) $contract->get_id();
+		$count       = (int) $head->get_count();
+
+		$won = $this->contracts->reclaim_expired_cycle( (int) $head->get_id(), gmdate( 'Y-m-d H:i:s' ), $this->lease_until() );
+		if ( ! $won ) {
+			// Another worker reclaimed the stall between our read and write: skip.
+			wc_get_logger()->info(
+				sprintf( 'RenewalEngine::process_due(): stalled renewal for contract %d cycle %d was reclaimed by another worker - skipping.', $contract_id, $count ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => $contract_id,
+				)
+			);
+			return null;
+		}
+
+		wc_get_logger()->info(
+			sprintf( 'RenewalEngine::process_due(): resuming renewal order %d for contract %d cycle %d - the previous attempt crashed before it settled.', $existing_order->get_id(), $contract_id, $count ),
+			array(
+				'source'      => self::LOG_SOURCE,
+				'contract_id' => $contract_id,
+				'order_id'    => $existing_order->get_id(),
+			)
+		);
+
+		// (Re)charge only when the crash landed before the gateway was paid. A crash AFTER the
+		// charge (order already paid, cycle not yet settled) needs no second charge - resolve_outcome
+		// settles it billed from that paid state. A crash BEFORE it (the save()/token-attach gap)
+		// left the order unpaid: attach the token it may be missing and charge it.
+		$fresh = wc_get_order( $existing_order->get_id() );
+		$paid  = $fresh instanceof WC_Order ? $fresh->is_paid() : $existing_order->is_paid();
+
+		if ( ! $paid ) {
+			$this->ensure_payment_token( $existing_order, $contract );
+			do_action( self::RENEWAL_ORDER_CREATED_ACTION, $existing_order, $contract );
+			$this->attempt_charge( $existing_order, $contract );
+		}
+
+		$this->resolve_outcome( $contract, $head, $existing_order );
+
+		return $existing_order;
+	}
+
+	/**
+	 * Park a contract that cannot be auto-renewed (a permanent skip: no billing chain, or an
+	 * unresolvable plan) by clearing its `next_payment_gmt`, so it leaves the due-index and the
+	 * scan stops revisiting it every tick - which would otherwise let a cluster of un-renewable
+	 * contracts hold the front of the oldest-due-first scan and starve healthy renewals. A repair
+	 * (fixing the underlying data and rescheduling) re-arms it.
+	 *
+	 * @param Contract $contract The contract to remove from the due set.
+	 */
+	private function park_contract( Contract $contract ): void {
+		$contract->set_next_payment_gmt( null );
+		$this->contracts->update( $contract );
 	}
 
 	/**

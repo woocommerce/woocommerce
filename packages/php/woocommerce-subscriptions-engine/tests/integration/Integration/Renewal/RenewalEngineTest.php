@@ -587,16 +587,17 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox process_due skips a contract that has no billing chain to advance.
+	 * @testdox process_due parks a contract that has no billing chain to advance.
 	 *
 	 * Checkout always creates cycle 1, so a chainless (lean / manual) contract is a case the
 	 * engine does not renew. process_due must skip (return null) rather than silently bill it as
-	 * cycle 1 or throw - a thrown error would make a scheduled action retry forever.
+	 * cycle 1 or throw, AND park it - clear its schedule so the oldest-due-first scan does not
+	 * revisit it every tick and starve the healthy renewals behind it.
 	 */
-	public function test_process_due_skips_a_contract_with_no_billing_chain(): void {
+	public function test_process_due_parks_a_contract_with_no_billing_chain(): void {
 		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
 
-		// A lean contract is persisted with no cycle chain.
+		// A lean contract is persisted with no cycle chain (but with a due date).
 		$plan_id     = $this->make_plan();
 		$order       = $this->make_origin_order();
 		$contract    = $this->make_contract( $plan_id, $order->get_id() );
@@ -610,6 +611,155 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$repo = new ContractRepository();
 		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 1 ) );
 		$this->assertNull( $repo->find_current_cycle( $contract_id ) );
+
+		// Parked: next_payment_gmt is cleared, so find_due no longer returns it.
+		$reloaded = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertNull( $reloaded->get_next_payment_gmt(), 'A chainless contract is parked out of the due set.' );
+	}
+
+	/**
+	 * @testdox process_due parks a contract whose plan resolves to nothing (no snapshot, deleted live plan).
+	 *
+	 * When neither the contract's plan snapshot nor the live selling plan resolves, the renewal
+	 * cannot bill. process_due skips AND parks (clears the schedule) so the un-renewable contract
+	 * leaves the due set instead of holding the front of the scan forever.
+	 */
+	public function test_process_due_parks_a_contract_whose_plan_is_unresolvable(): void {
+		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
+
+		$plan_id     = $this->make_plan();
+		$order       = $this->make_origin_order();
+		$contract    = $this->make_contract( $plan_id, $order->get_id() );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		// Give it a billing chain (so it passes the chainless guard) but no plan snapshot...
+		$repo = new ContractRepository();
+		$repo->append_cycle(
+			Cycle::create(
+				array(
+					'contract_id'    => $contract_id,
+					'sequence_no'    => 1,
+					'count'          => 1,
+					'status'         => CycleStatus::billed(),
+					'starts_at_gmt'  => '2026-01-15 00:00:00',
+					'ends_at_gmt'    => '2026-02-15 00:00:00',
+					'expected_total' => '19.99',
+					'currency'       => 'USD',
+				)
+			)
+		);
+
+		// ...then delete the live plan, so neither the snapshot nor the live plan resolves.
+		( new PlanRepository() )->delete( $plan_id );
+
+		$result = ( new RenewalEngine() )->process_due( $contract_id );
+		$this->assertNull( $result );
+
+		// No cycle 2 claimed, and the contract is parked out of the due set.
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+		$reloaded = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertNull( $reloaded->get_next_payment_gmt() );
+	}
+
+	/**
+	 * @testdox process_due resumes a stalled renewal whose order was saved but never charged.
+	 *
+	 * A run that claimed cycle 2 pending and saved its renewal order, then crashed before the
+	 * charge, leaves a stalled pending cycle (expired lease) plus an unpaid, un-tokenised order.
+	 * The idempotency pre-check would once have skipped forever on the existing order; instead the
+	 * run must resume that SAME order - charge it, settle the cycle billed, advance the schedule.
+	 */
+	public function test_process_due_resumes_a_stalled_renewal_with_an_unpaid_order(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$repo     = new ContractRepository();
+		$previous = $repo->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $previous );
+
+		// A crashed attempt: cycle 2 pending with an expired lease, plus its saved-but-uncharged order.
+		$stalled    = $this->make_pending_cycle_2( $contract_id, $previous, gmdate( 'Y-m-d H:i:s', time() - 60 ) );
+		$stalled_id = $stalled->get_id();
+		$this->assertNotNull( $stalled_id );
+		$ghost = $this->make_ghost_renewal_order( $contract_id, 2, false );
+
+		$resumed = ( new RenewalEngine() )->process_due( $contract_id );
+
+		// The SAME order is resumed and charged - no second order for the number.
+		$this->assertInstanceOf( WC_Order::class, $resumed );
+		$this->assertSame( $ghost->get_id(), $resumed->get_id() );
+		$paid_order = wc_get_order( $ghost->get_id() );
+		$this->assertInstanceOf( WC_Order::class, $paid_order );
+		$this->assertTrue( $paid_order->is_paid() );
+		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+
+		// The stalled cycle is reclaimed (same row) and settled billed, lease cleared.
+		$head = $repo->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertSame( $stalled_id, $head->get_id() );
+		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertNull( $head->get_claimed_until_gmt() );
+
+		// The schedule advances to the reclaimed cycle's own end - one cadence, not skipped.
+		$reloaded = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertSame( '2026-03-15 00:00:00', $reloaded->get_next_payment_gmt() );
+	}
+
+	/**
+	 * @testdox process_due settles a stalled renewal whose order was already paid, without re-charging.
+	 *
+	 * A crash AFTER the gateway was paid but before the cycle settled leaves a paid renewal order
+	 * on a stalled pending cycle. Recovery must settle it from that paid state and never fire a
+	 * second charge, which could double-charge the customer.
+	 */
+	public function test_process_due_settles_a_stalled_renewal_with_a_paid_order_without_recharging(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$repo     = new ContractRepository();
+		$previous = $repo->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $previous );
+
+		$this->make_pending_cycle_2( $contract_id, $previous, gmdate( 'Y-m-d H:i:s', time() - 60 ) );
+		$ghost = $this->make_ghost_renewal_order( $contract_id, 2, true );
+
+		// Spy on the charge hook (before the approving handler): an already-paid order must not be charged.
+		$charge_attempts = 0;
+		add_action(
+			'woocommerce_subscriptions_engine_scheduled_payment_' . self::GATEWAY_APPROVING,
+			static function ( $amount, $order ) use ( &$charge_attempts ): void {
+				unset( $amount, $order );
+				++$charge_attempts;
+			},
+			5,
+			2
+		);
+
+		$resumed = ( new RenewalEngine() )->process_due( $contract_id );
+
+		$this->assertInstanceOf( WC_Order::class, $resumed );
+		$this->assertSame( $ghost->get_id(), $resumed->get_id() );
+		$this->assertSame( 0, $charge_attempts, 'An already-paid order must not be charged again.' );
+
+		// The cycle is settled billed from the paid state and the schedule advances one cadence.
+		$head = $repo->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertSame( 2, $head->get_count() );
+		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+
+		$reloaded = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertSame( '2026-03-15 00:00:00', $reloaded->get_next_payment_gmt() );
 	}
 
 	/**
@@ -832,6 +982,35 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		( new ContractRepository() )->append_cycle( $cycle, $previous );
 
 		return $cycle;
+	}
+
+	/**
+	 * A renewal order left as a crash would leave it: saved with the renewal-relation meta for
+	 * `$count` but never charged (no payment token). Optionally pre-marked paid, to model a crash
+	 * AFTER the gateway was paid but before the cycle settled.
+	 *
+	 * @param int  $contract_id Contract id.
+	 * @param int  $count       Chargeable number the order bills.
+	 * @param bool $paid        Whether the gateway had already been paid before the crash.
+	 * @return WC_Order The ghost renewal order.
+	 */
+	private function make_ghost_renewal_order( int $contract_id, int $count, bool $paid ): WC_Order {
+		$order = new WC_Order();
+		$order->set_currency( 'USD' );
+		$order->set_total( '19.99' );
+		$order->update_meta_data( OrderLinkage::META_CONTRACT_ID, (string) $contract_id );
+		$order->update_meta_data( OrderLinkage::META_RELATION_TYPE, OrderLinkage::RELATION_RENEWAL );
+		$order->update_meta_data( '_subscription_renewal_cycle', (string) $count );
+
+		if ( $paid ) {
+			$order->set_status( 'processing' );
+			$order->set_date_paid( '2026-02-15 00:00:00' );
+		} else {
+			$order->set_status( 'pending' );
+		}
+		$order->save();
+
+		return $order;
 	}
 
 	/**

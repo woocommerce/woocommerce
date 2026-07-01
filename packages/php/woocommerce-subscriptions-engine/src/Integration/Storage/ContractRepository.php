@@ -252,24 +252,26 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Contract ids due for renewal at `$now`: active contracts whose `next_payment_gmt`
-	 * has arrived, oldest-due first. The batch dispatcher's scan - it returns ids only
-	 * (the money-path re-loads each), keyed on the `due_contract (status, next_payment_gmt)`
-	 * index. A null `next_payment_gmt` (no schedule) never matches the `<=` comparison.
+	 * Contract ids due for renewal at `$now`: active, primitive-scheduled contracts whose
+	 * `next_payment_gmt` has arrived, oldest-due first. The batch dispatcher's scan - it returns
+	 * ids only (the money-path re-loads each), keyed on the `due_contract (status,
+	 * next_payment_gmt)` index. A null `next_payment_gmt` (no schedule) never matches the `<=`
+	 * comparison. Gateway-scheduled contracts are excluded: the gateway owns their renewal, so
+	 * they must never enter the primitive scan - where a permanent skip would hold the front of
+	 * the oldest-due-first order and starve healthy renewals behind it.
 	 *
-	 * @param DateTimeImmutable $now    The cutoff moment; contracts due at or before it.
-	 * @param int               $limit  Maximum ids to return (the batch size).
-	 * @param int               $offset Rows to skip (for paging a backlog).
+	 * @param DateTimeImmutable $now   The cutoff moment; contracts due at or before it.
+	 * @param int               $limit Maximum ids to return (the batch size).
 	 * @return array<int, int> Due contract ids, oldest-due first.
 	 */
-	public function find_due( DateTimeImmutable $now, int $limit, int $offset = 0 ): array {
+	public function find_due( DateTimeImmutable $now, int $limit ): array {
 		global $wpdb;
 
 		$table  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$cutoff = $now->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$table} WHERE status = %s AND next_payment_gmt IS NOT NULL AND next_payment_gmt <= %s ORDER BY next_payment_gmt ASC, id ASC LIMIT %d OFFSET %d", ContractStatus::ACTIVE, $cutoff, $limit, $offset ) );
+		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$table} WHERE status = %s AND schedule_source <> %s AND next_payment_gmt IS NOT NULL AND next_payment_gmt <= %s ORDER BY next_payment_gmt ASC, id ASC LIMIT %d", ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_GATEWAY, $cutoff, $limit ) );
 
 		$result = array();
 		foreach ( is_array( $ids ) ? $ids : array() as $id ) {

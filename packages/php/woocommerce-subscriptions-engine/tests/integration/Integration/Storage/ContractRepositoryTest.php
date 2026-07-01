@@ -738,20 +738,32 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox find_due honours the batch limit and offset, paging the backlog oldest first.
+	 * @testdox find_due caps the batch at the limit from the oldest-due end.
 	 */
-	public function test_find_due_honours_limit_and_offset(): void {
+	public function test_find_due_honours_limit(): void {
 		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
 
 		$first  = $this->insert_contract_due_at( '2026-05-15 00:00:00', ContractStatus::ACTIVE );
 		$second = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-		$third  = $this->insert_contract_due_at( '2026-07-01 00:00:00', ContractStatus::ACTIVE );
+		$this->insert_contract_due_at( '2026-07-01 00:00:00', ContractStatus::ACTIVE );
 
-		// The limit caps the batch from the oldest-due end.
+		// The limit caps the batch from the oldest-due end; the newest-due row is left for a later tick.
 		$this->assertSame( array( $first, $second ), $this->sut->find_due( $now, 2 ) );
+	}
 
-		// The offset pages further into the backlog.
-		$this->assertSame( array( $third ), $this->sut->find_due( $now, 2, 2 ) );
+	/**
+	 * @testdox find_due excludes gateway-scheduled contracts (the gateway owns their renewal).
+	 */
+	public function test_find_due_excludes_gateway_scheduled_contracts(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+
+		$primitive = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		$gateway   = $this->insert_contract_due_at( '2026-06-01 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_GATEWAY );
+
+		$ids = $this->sut->find_due( $now, 50 );
+
+		$this->assertContains( $primitive, $ids );
+		$this->assertNotContains( $gateway, $ids, 'A gateway-scheduled contract must never enter the primitive scan.' );
 	}
 
 	/**
@@ -759,8 +771,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 *
 	 * @param string|null $next_payment_gmt The next-payment date, or null for no schedule.
 	 * @param string      $status           The contract status (a ContractStatus value).
+	 * @param string      $schedule_source  Who owns the schedule (primitive or gateway).
 	 */
-	private function insert_contract_due_at( ?string $next_payment_gmt, string $status ): int {
+	private function insert_contract_due_at( ?string $next_payment_gmt, string $status, string $schedule_source = Contract::SCHEDULE_SOURCE_PRIMITIVE ): int {
 		$contract = Contract::create(
 			array(
 				'customer_id'      => 1,
@@ -770,6 +783,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 				'start_gmt'        => '2026-01-15 00:00:00',
 				'next_payment_gmt' => $next_payment_gmt,
 				'status'           => $status,
+				'schedule_source'  => $schedule_source,
 			)
 		);
 

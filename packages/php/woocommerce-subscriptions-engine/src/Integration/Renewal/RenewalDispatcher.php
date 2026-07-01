@@ -68,6 +68,20 @@ final class RenewalDispatcher {
 	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
 
 	/**
+	 * Option holding the next moment the recurring action is re-verified against the Action
+	 * Scheduler store. Autoloaded (bulk-loaded, effectively free per request), so the common
+	 * path skips the AS store query {@see self::is_scheduled()} would otherwise run every load.
+	 */
+	private const SCHEDULE_CHECK_OPTION = 'wc_subscriptions_engine_dispatch_scheduled_check';
+
+	/**
+	 * How long a positive schedule check is trusted before re-verifying, in seconds. Bounds the
+	 * staleness if the recurring action is ever cleared externally: the next check past this
+	 * window re-creates it, so the dispatcher self-heals rather than stopping silently.
+	 */
+	private const SCHEDULE_RECHECK_SECONDS = 3600;
+
+	/**
 	 * Repository used to scan the contract due-index.
 	 *
 	 * @var ContractRepository
@@ -108,18 +122,29 @@ final class RenewalDispatcher {
 	 * Enqueue the recurring scan action when one is not already scheduled.
 	 *
 	 * Call once Action Scheduler is available (e.g. on `init`), since it uses the `as_*`
-	 * functions. Idempotent on two levels: the `is_scheduled()` fast-path skips the common
-	 * already-scheduled case, and the enqueue passes `$unique = true` so Action Scheduler
-	 * dedups at the store level even when two concurrent first-boots both pass the fast-path.
+	 * functions. To avoid an Action Scheduler store query on every request, a positive result is
+	 * cached in an autoloaded option and re-verified only once per re-check window - bounded
+	 * staleness that self-heals if the action is ever cleared. Within a re-verify it still guards
+	 * with the `is_scheduled()` fast-path plus a best-effort store-level dedup.
 	 */
 	public static function ensure_scheduled(): void {
-		if ( self::is_scheduled() ) {
+		// Skip the Action Scheduler store query while a recent positive check is still trusted.
+		$next_check = get_option( self::SCHEDULE_CHECK_OPTION, 0 );
+		if ( is_numeric( $next_check ) && time() < (int) $next_check ) {
 			return;
 		}
 
-		// $unique = true: Action Scheduler dedups at the store level, so two concurrent
-		// first-boots that both pass the is_scheduled() fast-path cannot create two
-		// perpetual recurring actions - only one is enqueued.
+		if ( self::is_scheduled() ) {
+			update_option( self::SCHEDULE_CHECK_OPTION, time() + self::SCHEDULE_RECHECK_SECONDS, true );
+			return;
+		}
+
+		// $unique = true is a best-effort store-level dedup: Action Scheduler checks for an
+		// existing pending/running action before inserting, but that is not an atomic unique
+		// constraint, so two concurrent first-boots could still create two rows. The downstream
+		// create-as-claim cycle UNIQUE prevents any double-charge regardless; at worst a duplicate
+		// recurring row means redundant scan work until it is cleared. With the is_scheduled()
+		// fast-path this keeps the common case to a single recurring action.
 		as_schedule_recurring_action(
 			time() + self::INTERVAL_SECONDS,
 			self::INTERVAL_SECONDS,
@@ -128,6 +153,8 @@ final class RenewalDispatcher {
 			self::GROUP,
 			true
 		);
+
+		update_option( self::SCHEDULE_CHECK_OPTION, time() + self::SCHEDULE_RECHECK_SECONDS, true );
 	}
 
 	/**
