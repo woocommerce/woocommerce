@@ -25,8 +25,8 @@ defined( 'ABSPATH' ) || exit;
  */
 final class SnapshotStore {
 
-	const TYPE_PLAN  = 'plan';
-	const TYPE_ITEMS = 'items';
+	public const TYPE_PLAN  = 'plan';
+	public const TYPE_ITEMS = 'items';
 
 	/**
 	 * Insert a typed snapshot row and return its id. The payload (the value object's
