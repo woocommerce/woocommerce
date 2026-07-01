@@ -12,6 +12,26 @@ use Automattic\WooCommerce\Internal\Caches\ProductTransientsDeferrer;
 class ProductTransientsDeferrerTest extends \WC_Unit_Test_Case {
 
 	/**
+	 * @testdox Shutdown fallback flushes product transients before deferred parent product sync.
+	 */
+	public function test_shutdown_fallback_runs_before_deferred_product_sync() {
+		$deferrer = wc_get_container()->get( ProductTransientsDeferrer::class );
+
+		try {
+			$deferrer->start_deferring();
+
+			$priority = has_action( 'shutdown', array( $deferrer, 'handle_shutdown' ) );
+			$this->assertSame( 0, $priority );
+			$this->assertLessThan( 10, $priority );
+
+			$deferrer->stop_deferring();
+			$this->assertFalse( has_action( 'shutdown', array( $deferrer, 'handle_shutdown' ) ) );
+		} finally {
+			$deferrer->stop_deferring();
+		}
+	}
+
+	/**
 	 * @testdox Product transient deferral coalesces repeated deletions until the outermost deferral ends.
 	 */
 	public function test_deferral_coalesces_repeated_deletions_until_outermost_stop() {
