@@ -4,8 +4,7 @@ This is a quick reference for common commands used during development. For broad
 
 ## Tooling
 
-- [NVM](https://github.com/nvm-sh/nvm#installing-and-updating) (recommended for Node version management)
-- [Node.js](https://nodejs.org/)
+- [Node.js](https://nodejs.org/) (PNPM installs and uses the pinned version automatically; a version manager such as [NVM](https://github.com/nvm-sh/nvm#installing-and-updating) is optional)
 - [PNPM](https://pnpm.io/installation)
 - [PHP](https://www.php.net/manual/en/install.php)
 - [Composer](https://getcomposer.org/doc/00-intro.md)
@@ -16,9 +15,8 @@ A POSIX-compliant OS (Linux, macOS) is assumed. On Windows, use [WSL](https://le
 ## Initial install
 
 ```sh
-# Use the pinned Node version from .nvmrc
-nvm install
-# Install JS and PHP dependencies
+# Install JS and PHP dependencies.
+# PNPM automatically uses the pinned Node version for the scripts it runs.
 pnpm install
 ```
 
@@ -97,7 +95,7 @@ pnpm --filter='@woocommerce/admin-library' test:js
 pnpm --filter='@woocommerce/block-library' test:js
 ```
 
-See the [unit tests README](plugins/woocommerce/tests/README.md), [E2E tests README](plugins/woocommerce/tests/e2e-pw/README.md), and [performance tests README](plugins/woocommerce/tests/performance/README.md) for full details.
+See the [unit tests README](plugins/woocommerce/tests/README.md), [E2E tests README](plugins/woocommerce/tests/e2e/README.md), and [performance tests README](plugins/woocommerce/tests/performance/README.md) for full details.
 
 ## Linting and static analysis
 
@@ -138,7 +136,7 @@ For the full PR workflow, changelog conventions, and coding guidelines, see [Con
 
 ## Repository structure
 
-```
+```text
 plugins/                   # WordPress plugins
   woocommerce/             # WooCommerce Core plugin
     src/                   #   Modern PHP (PSR-4, DI container)

@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Normalize heading formatting in Cart and Checkout product short descriptions so an H1-styled short description no longer renders oversized.
