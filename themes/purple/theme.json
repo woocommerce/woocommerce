@@ -435,7 +435,8 @@
 					"fontSize": "var(--wp--preset--font-size--large)",
 					"fontStyle": "normal",
 					"fontWeight": "700",
-					"letterSpacing":"0.125rem",
+					"letterSpacing":"0.09em",
+					"lineHeight": "1.2",
 					"textTransform": "uppercase"
 				}
 			},

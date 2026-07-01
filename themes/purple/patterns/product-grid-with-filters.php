@@ -12,19 +12,19 @@
 
 <!-- wp:group {"metadata":{"name":"Product grid with filters","categories":["woo-commerce","purple"],"patternName":"purple/product-grid-with-filters","description":"A product catalog grid with sidebar filters, sorting, and pagination."},"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|70","bottom":"0"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--70);margin-bottom:0"><!-- wp:columns {"align":"wide"} -->
-<div class="wp-block-columns alignwide"><!-- wp:column {"width":"22%"} -->
-<div class="wp-block-column" style="flex-basis:22%"><!-- wp:heading {"level":3,"style":{"margin":{"top":"0","bottom":"0"},"spacing":{"margin":{"top":"0","bottom":"0"}},"typography":{"lineHeight":1.6,"fontStyle":"normal","fontWeight":"400"}},"fontSize":"medium"} -->
+<div class="wp-block-columns alignwide"><!-- wp:column {"verticalAlignment":"center","width":"22%"} -->
+<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:22%"><!-- wp:heading {"level":3,"style":{"margin":{"top":"0","bottom":"0"},"spacing":{"margin":{"top":"0","bottom":"0"}},"typography":{"lineHeight":1.6,"fontStyle":"normal","fontWeight":"400"}},"fontSize":"medium"} -->
 <h3 class="wp-block-heading has-medium-font-size" style="margin-top:0;margin-bottom:0;font-style:normal;font-weight:400;line-height:1.6"><?php esc_html_e('Filter by:', 'purple');?></h3>
 <!-- /wp:heading --></div>
 <!-- /wp:column -->
 
-<!-- wp:column {"width":"88%"} -->
-<div class="wp-block-column" style="flex-basis:88%"><!-- wp:group {"className":"alignwide","layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
+<!-- wp:column {"verticalAlignment":"center","width":"88%"} -->
+<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:88%"><!-- wp:group {"className":"alignwide","layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
 <div class="wp-block-group alignwide"><!-- wp:woocommerce/product-results-count {"metadata":{"blockVisibility":{"viewport":{"mobile":false}}}} /-->
 
-<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
-<div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php esc_html_e('Sort by:', 'purple');?></p>
+<!-- wp:group {"style":{"spacing":{"blockGap":"4px"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+<div class="wp-block-group"><!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2"} -->
+<p class="has-theme-2-color has-text-color has-link-color"><?php esc_html_e('Sort by:', 'purple');?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:woocommerce/catalog-sorting {"fontSize":"medium","style":{"layout":{"selfStretch":"fit","flexSize":null}}} /--></div>

@@ -188,6 +188,10 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 	font-size: var(--wp--preset--font-size--medium) !important;
 }
 
+.woocommerce.wc-block-catalog-sorting form.woocommerce-ordering {
+	margin-bottom: 0;
+}
+
 .woocommerce.wc-block-catalog-sorting select.orderby {
 	-webkit-appearance: none;
 	appearance: none;
