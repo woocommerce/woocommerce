@@ -1723,18 +1723,6 @@ parameters:
 			path: includes/admin/class-wc-admin-brands.php
 
 		-
-			message: '#^Call to method get_id\(\) on an unknown class Task\.$#'
-			identifier: class.notFound
-			count: 1
-			path: includes/admin/class-wc-admin-dashboard-setup.php
-
-		-
-			message: '#^Call to method get_json\(\) on an unknown class Task\.$#'
-			identifier: class.notFound
-			count: 1
-			path: includes/admin/class-wc-admin-dashboard-setup.php
-
-		-
 			message: '#^Cannot call method get_viewable_tasks\(\) on array\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -1773,18 +1761,6 @@ parameters:
 		-
 			message: '#^Method WC_Admin_Dashboard_Setup\:\:set_task_list\(\) has parameter \$task_list with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/admin/class-wc-admin-dashboard-setup.php
-
-		-
-			message: '#^Parameter \#1 \$task of method WC_Admin_Dashboard_Setup\:\:get_button_link\(\) expects Task, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/class-wc-admin-dashboard-setup.php
-
-		-
-			message: '#^Parameter \$task of method WC_Admin_Dashboard_Setup\:\:get_button_link\(\) has invalid type Task\.$#'
-			identifier: class.notFound
 			count: 1
 			path: includes/admin/class-wc-admin-dashboard-setup.php
 
@@ -2858,12 +2834,6 @@ parameters:
 
 		-
 			message: '#^Method WC_Admin_Settings\:\:output_fields\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-wc-admin-settings.php
-
-		-
-			message: '#^Method WC_Admin_Settings\:\:reset_settings_pages_on_feature_change\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/admin/class-wc-admin-settings.php
@@ -6139,12 +6109,6 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-product-attribute-inner.php
 
 		-
-			message: '#^Variable \$attribute might not be defined\.$#'
-			identifier: variable.undefined
-			count: 5
-			path: includes/admin/meta-boxes/views/html-product-attribute.php
-
-		-
 			message: '#^Variable \$metabox_class might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -7927,12 +7891,6 @@ parameters:
 			path: includes/admin/settings/views/html-webhooks-edit.php
 
 		-
-			message: '#^Parameter \#1 \$text of function esc_html expects string, \(float\|int\) given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/views/html-admin-dashboard-setup.php
-
-		-
 			message: '#^Variable \$button_link might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -8171,12 +8129,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/views/html-notice-custom.php
-
-		-
-			message: '#^Variable \$msg might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/admin/views/html-notice-wp-php-minimum-requirements.php
 
 		-
 			message: '#^Parameter \#1 \$value of function wc_format_localized_decimal expects string, int given\.$#'
@@ -8539,31 +8491,13 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot access property \$name on WP_Term\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot access property \$parent on WP_Error\|WP_Term\|null\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot access property \$slug on WP_Term\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot access property \$term_id on WP_Error\|WP_Term\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot access property \$term_id on WP_Term\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: includes/class-wc-ajax.php
@@ -12079,18 +12013,6 @@ parameters:
 			path: includes/class-wc-form-handler.php
 
 		-
-			message: '#^Default value of the parameter \#5 \$in_footer \(array\<string, string\>\) of method WC_Frontend_Scripts\:\:enqueue_script\(\) is incompatible with type bool\.$#'
-			identifier: parameter.defaultValue
-			count: 1
-			path: includes/class-wc-frontend-scripts.php
-
-		-
-			message: '#^Default value of the parameter \#5 \$in_footer \(array\<string, string\>\) of method WC_Frontend_Scripts\:\:register_script\(\) is incompatible with type bool\.$#'
-			identifier: parameter.defaultValue
-			count: 1
-			path: includes/class-wc-frontend-scripts.php
-
-		-
 			message: '#^Method WC_Frontend_Scripts\:\:enqueue_block_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -14367,12 +14289,6 @@ parameters:
 		-
 			message: '#^Method WC_Regenerate_Images\:\:maybe_resize_image\(\) should return array but returns string\.$#'
 			identifier: return.type
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
-			message: '#^Method WC_Regenerate_Images\:\:regenerating_notice\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/class-wc-regenerate-images.php
 
@@ -20529,12 +20445,6 @@ parameters:
 		-
 			message: '#^Action callback returns bool but should not return anything\.$#'
 			identifier: return.void
-			count: 1
-			path: includes/integrations/maxmind-geolocation/class-wc-integration-maxmind-geolocation.php
-
-		-
-			message: '#^Method WC_Integration_MaxMind_Geolocation\:\:add_missing_license_key_notice\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/integrations/maxmind-geolocation/class-wc-integration-maxmind-geolocation.php
 
@@ -27005,12 +26915,6 @@ parameters:
 			identifier: variable.undefined
 			count: 3
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
-
-		-
-			message: '#^Access to an undefined property WC_REST_Products_V2_Controller\:\:\$request\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
 
 		-
 			message: '#^Call to an undefined method WC_Data\:\:get_children\(\)\.$#'
@@ -35614,12 +35518,6 @@ parameters:
 			path: includes/wc-stock-functions.php
 
 		-
-			message: '#^Cannot call method get_low_stock_amount\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-stock-functions.php
-
-		-
 			message: '#^Cannot call method get_stock_quantity\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -36402,18 +36300,6 @@ parameters:
 		-
 			message: '#^Cannot access offset ''name'' on array\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
-			message: '#^Cannot access property \$ID on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
-			message: '#^Cannot access property \$user_email on WP_User\|false\.$#'
-			identifier: property.nonObject
 			count: 1
 			path: includes/wc-user-functions.php
 
@@ -41583,59 +41469,7 @@ parameters:
 			count: 3
 			path: src/Admin/API/Reports/Customers/DataStore.php
 
-		-
-			message: '#^Call to an undefined method object\:\:get_billing_city\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
 
-		-
-			message: '#^Call to an undefined method object\:\:get_billing_country\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_billing_email\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_billing_postcode\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_billing_state\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_customer_first_name\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_customer_last_name\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_date_created\(\)\.$#'
-			identifier: method.notFound
-			count: 3
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_email\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
 
 		-
 			message: '#^Call to an undefined method object\:\:get_id\(\)\.$#'
@@ -41643,26 +41477,10 @@ parameters:
 			count: 1
 			path: src/Admin/API/Reports/Customers/DataStore.php
 
-		-
-			message: '#^Call to an undefined method object\:\:get_user_id\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Admin/API/Reports/Customers/DataStore.php
 
-		-
-			message: '#^Call to an undefined method object\:\:get_username\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
 
 		-
 			message: '#^Cannot call method get_id\(\) on Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\WC_Order\|WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Cannot call method get_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Admin/API/Reports/Customers/DataStore.php
@@ -41783,18 +41601,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$customer_id of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_last_order\(\) expects int, int\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Parameter \#1 \$order of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_customer_order_data_and_format\(\) expects object, WC_Order\|WC_Order_Refund\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Parameter \#1 \$order of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_existing_customer_id_from_order\(\) expects object, WC_Order\|WC_Order_Refund\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Admin/API/Reports/Customers/DataStore.php
@@ -45850,12 +45656,6 @@ parameters:
 			path: src/Admin/Features/Blueprint/Exporters/ExportWCSettingsIntegrations.php
 
 		-
-			message: '#^Parameter \#1 \$sql of class Automattic\\WooCommerce\\Blueprint\\Steps\\RunSql constructor expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 6
-			path: src/Admin/Features/Blueprint/Exporters/ExportWCSettingsShipping.php
-
-		-
 			message: '#^Return type \(array\) of method Automattic\\WooCommerce\\Admin\\Features\\Blueprint\\Exporters\\ExportWCSettingsShipping\:\:export\(\) should be compatible with return type \(Automattic\\WooCommerce\\Blueprint\\Steps\\SetSiteOptions\) of method Automattic\\WooCommerce\\Admin\\Features\\Blueprint\\Exporters\\ExportWCSettings\:\:export\(\)$#'
 			identifier: method.childReturnType
 			count: 1
@@ -45866,12 +45666,6 @@ parameters:
 			identifier: method.childReturnType
 			count: 1
 			path: src/Admin/Features/Blueprint/Exporters/ExportWCSettingsShipping.php
-
-		-
-			message: '#^Parameter \#1 \$sql of class Automattic\\WooCommerce\\Blueprint\\Steps\\RunSql constructor expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/Blueprint/Exporters/ExportWCSettingsTax.php
 
 		-
 			message: '#^Return type \(array\) of method Automattic\\WooCommerce\\Admin\\Features\\Blueprint\\Exporters\\ExportWCSettingsTax\:\:export\(\) should be compatible with return type \(Automattic\\WooCommerce\\Blueprint\\Steps\\SetSiteOptions\) of method Automattic\\WooCommerce\\Admin\\Features\\Blueprint\\Exporters\\ExportWCSettings\:\:export\(\)$#'
@@ -46948,12 +46742,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
 
 		-
-			message: '#^Parameter \#1 \$task_list of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Task\:\:__construct\(\) expects Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\TaskList\|null, Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\TaskList given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
 			message: '#^Parameter \#2 \$product of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:maybe_set_has_product_transient\(\) expects Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -46967,12 +46755,6 @@ parameters:
 
 		-
 			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:maybe_set_has_product_transient\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
-			message: '#^Parameter \$task_list of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:__construct\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\TaskList\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
@@ -47818,13 +47600,13 @@ parameters:
 			path: src/Admin/Notes/Notes.php
 
 		-
-			message: '#^Binary operation "/" between 0\|float and int\<min, \-1\>\|int\<1, max\>\|string results in an error\.$#'
+			message: '#^Binary operation "/" between 0\|float and int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: src/Admin/Overrides/Order.php
 
 		-
-			message: '#^Binary operation "/" between float and int\<min, \-1\>\|int\<1, max\>\|string results in an error\.$#'
+			message: '#^Binary operation "/" between float and int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: src/Admin/Overrides/Order.php
@@ -47914,13 +47696,13 @@ parameters:
 			path: src/Admin/Overrides/Order.php
 
 		-
-			message: '#^Binary operation "/" between 0\|float and int\<min, \-1\>\|int\<1, max\>\|string results in an error\.$#'
+			message: '#^Binary operation "/" between 0\|float and int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: src/Admin/Overrides/OrderRefund.php
 
 		-
-			message: '#^Binary operation "/" between float and int\<min, \-1\>\|int\<1, max\>\|string results in an error\.$#'
+			message: '#^Binary operation "/" between float and int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: src/Admin/Overrides/OrderRefund.php
@@ -47962,12 +47744,6 @@ parameters:
 			path: src/Admin/Overrides/OrderRefund.php
 
 		-
-			message: '#^Parameter \#1 \$order of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_or_create_customer_from_order\(\) expects object, WC_Order\|WC_Order_Refund\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Overrides/OrderRefund.php
-
-		-
 			message: '#^Parameter \$item of method Automattic\\WooCommerce\\Admin\\Overrides\\OrderRefund\:\:get_item_cart_tax_amount\(\) has invalid type Automattic\\WooCommerce\\Admin\\Overrides\\WC_Order_Item\.$#'
 			identifier: class.notFound
 			count: 1
@@ -47993,12 +47769,6 @@ parameters:
 
 		-
 			message: '#^Property Automattic\\WooCommerce\\Admin\\Overrides\\OrderRefund\:\:\$customer_id \(int\) does not accept bool\|int\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Admin/Overrides/OrderRefund.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Admin\\Overrides\\OrderRefund\:\:\$customer_id \(int\) does not accept false\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: src/Admin/Overrides/OrderRefund.php
@@ -49588,26 +49358,8 @@ parameters:
 			path: src/Admin/WCAdminHelper.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\WCAdminHelper\:\:get_normalized_url_path\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/WCAdminHelper.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\WCAdminHelper\:\:get_url_from_wp\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Admin/WCAdminHelper.php
-
-		-
-			message: '#^Parameter \#1 \$string of function strlen expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/WCAdminHelper.php
-
-		-
-			message: '#^Static method Automattic\\WooCommerce\\Admin\\WCAdminHelper\:\:get_normalized_url_path\(\) is unused\.$#'
-			identifier: method.unused
 			count: 1
 			path: src/Admin/WCAdminHelper.php
 
@@ -49846,22 +49598,10 @@ parameters:
 			path: src/Blocks/AssetsController.php
 
 		-
-			message: '#^Parameter \#1 \$src of method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:get_absolute_url\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/AssetsController.php
-
-		-
 			message: '#^Parameter \#1 \$text of function esc_js expects string, int\<1, max\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/AssetsController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockPatterns\:\:load_pattern_content\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockPatterns.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockPatterns\:\:set_pattern_cache\(\) has no return type specified\.$#'
@@ -50672,12 +50412,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/AttributeFilter.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Breadcrumbs\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/Breadcrumbs.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Cart\:\:enqueue_assets\(\) has no return type specified\.$#'
@@ -52332,12 +52066,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_product_id\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/HandlerRegistry.php
-
-		-
-			message: '#^Cannot call method get_upsell_ids\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Blocks/BlockTypes/ProductCollection/HandlerRegistry.php
 
@@ -54915,7 +54643,6 @@ parameters:
 			count: 1
 			path: src/Blocks/QueryFilters.php
 
-
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Registry\\Container\:\:register\(\) has no return type specified\.$#'
 			identifier: missingType.return
@@ -57396,12 +57123,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$fp of function fgets expects resource, resource\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Logging/PageController.php
-
-		-
-			message: '#^Parameter \#1 \$str of function stripslashes expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Logging/PageController.php
@@ -66896,18 +66617,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Refunds/Controller.php
 
 		-
-			message: '#^Call to method get_item_response\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\OrderSchema\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Controller.php
-
-		-
-			message: '#^Call to method get_item_schema\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\OrderSchema\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Controller.php
-
-		-
 			message: '#^Cannot call method delete\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -66992,12 +66701,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Refunds/Controller.php
 
 		-
-			message: '#^Parameter \#1 \$error_code of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\AbstractController\:\:get_route_error_response\(\) expects string, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Controller.php
-
-		-
 			message: '#^Parameter \#1 \$refund of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Controller\:\:is_valid_refund_for_request\(\) expects WC_Order_Refund, WC_Order\|WC_Order_Refund\|false given\.$#'
 			identifier: argument.type
 			count: 2
@@ -67010,105 +66713,9 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Refunds/Controller.php
 
 		-
-			message: '#^Parameter \#2 \$order of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\DataUtils\:\:convert_line_items_to_internal_format\(\) expects WC_Order, WC_Order\|WC_Order_Refund given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Controller.php
-
-		-
-			message: '#^Parameter \#2 \$order of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\DataUtils\:\:validate_line_items\(\) expects WC_Order, WC_Order\|WC_Order_Refund given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Controller.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Controller\:\:\$item_schema \(Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\OrderSchema\) does not accept Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\RefundSchema\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Controller.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Controller\:\:\$item_schema has unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\OrderSchema as its type\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Controller.php
-
-		-
-			message: '#^Binary operation "\+" between string and string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/DataUtils.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_label\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/DataUtils.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_rate_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/DataUtils.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_rate_percent\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/DataUtils.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_taxes\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/DataUtils.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:is_compound\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/DataUtils.php
-
-		-
-			message: '#^Call to method get_amount\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\WC_Order_Refund\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
-
-		-
-			message: '#^Call to method get_cogs_total_value\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\WC_Order_Refund\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
-
-		-
-			message: '#^Call to method get_currency\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\WC_Order_Refund\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
-
-		-
-			message: '#^Call to method get_date_created\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\WC_Order_Refund\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
-
-		-
 			message: '#^Call to method get_id\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\WC_Order_Item\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
-
-		-
-			message: '#^Call to method get_id\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\WC_Order_Refund\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
-
-		-
-			message: '#^Call to method get_items\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\WC_Order_Refund\.$#'
-			identifier: class.notFound
-			count: 3
 			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
 
 		-
@@ -67118,37 +66725,7 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
 
 		-
-			message: '#^Call to method get_meta_data\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\WC_Order_Refund\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
-
-		-
-			message: '#^Call to method get_parent_id\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\WC_Order_Refund\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
-
-		-
 			message: '#^Call to method get_quantity\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\WC_Order_Item\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
-
-		-
-			message: '#^Call to method get_reason\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\WC_Order_Refund\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
-
-		-
-			message: '#^Call to method get_refunded_by\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\WC_Order_Refund\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
-
-		-
-			message: '#^Call to method get_refunded_payment\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\WC_Order_Refund\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
@@ -67191,12 +66768,6 @@ parameters:
 
 		-
 			message: '#^Parameter \$line_item of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\RefundSchema\:\:prepare_line_item\(\) has invalid type Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\WC_Order_Item\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
-
-		-
-			message: '#^Parameter \$refund of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\RefundSchema\:\:get_item_response\(\) has invalid type Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\WC_Order_Refund\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
@@ -68296,24 +67867,6 @@ parameters:
 		-
 			message: '#^Call to static method get_order_item\(\) on an unknown class Automattic\\WooCommerce\\Internal\\WC_Order_Factory\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestockRefundedItemsAdjuster.php
-
-		-
-			message: '#^Cannot call method get_qty_refunded_for_item\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestockRefundedItemsAdjuster.php
-
-		-
-			message: '#^Cannot call method get_refunds\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestockRefundedItemsAdjuster.php
-
-		-
-			message: '#^Cannot call method get_version\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Internal/RestockRefundedItemsAdjuster.php
 
@@ -69432,18 +68985,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: src/Internal/Utilities/PluginInstaller.php
-
-		-
-			message: '#^Binary operation "\." between ''wc_child_has…''\|''wc_child_has_weight_''\|''wc_product_children_''\|''wc_related_''\|''wc_var_prices_'' and Automattic\\WooCommerce\\Internal\\Utilities\\WC_Product\|int results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: src/Internal/Utilities/ProductUtil.php
-
-		-
-			message: '#^Call to method get_id\(\) on an unknown class Automattic\\WooCommerce\\Internal\\Utilities\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Utilities/ProductUtil.php
 
 		-
 			message: '#^Parameter \$product_or_id of method Automattic\\WooCommerce\\Internal\\Utilities\\ProductUtil\:\:delete_product_specific_transients\(\) has invalid type Automattic\\WooCommerce\\Internal\\Utilities\\WC_Product\.$#'
@@ -70838,12 +70379,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
-			message: '#^@param WC_Order \$order does not accept actual type of parameter\: WC_Order\|WC_Order_Refund\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
 			count: 1
@@ -70859,18 +70394,6 @@ parameters:
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_billing_email\(\)\.$#'
 			identifier: method.notFound
 			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_customer_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:needs_payment\(\)\.$#'
-			identifier: method.notFound
-			count: 2
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
 		-
@@ -71048,12 +70571,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
 		-
-			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\StoreApi\\Utilities\\OrderController\:\:validate_existing_order_before_payment\(\) expects WC_Order, WC_Order\|WC_Order_Refund given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
 			message: '#^Parameter \#1 \$redirect_url of method Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:set_redirect_url\(\) expects array, string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -71073,12 +70590,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_billing_email\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/StoreApi/Routes/V1/Order.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_customer_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/StoreApi/Routes/V1/Order.php
@@ -71182,12 +70693,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property object\:\:\$min_price\.$#'
 			identifier: property.notFound
-			count: 1
-			path: src/StoreApi/Routes/V1/ProductCollectionData.php
-
-		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
 			count: 1
 			path: src/StoreApi/Routes/V1/ProductCollectionData.php
 

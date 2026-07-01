@@ -1071,8 +1071,6 @@ function wc_update_260_options() {
 	if ( 'no' === get_option( 'woocommerce_calc_shipping' ) ) {
 		update_option( 'woocommerce_ship_to_countries', 'disabled' );
 	}
-
-	WC_Admin_Notices::add_notice( 'legacy_shipping' );
 }
 
 /**
@@ -3402,23 +3400,18 @@ function wc_update_1060_add_woo_idx_comment_approved_type_index(): void {
 }
 
 /**
- * Add an admin notice about HPOS sync-on-read being disabled by default for sites
- * that have both HPOS and data synchronization enabled.
+ * Previously added an admin notice about HPOS sync-on-read being disabled by default.
+ *
+ * HPOS sync-on-read status is now shown in Site Health.
  *
  * @since 10.7.0
  *
  * @return void
  */
 function wc_update_1070_disable_hpos_sync_on_read(): void {
-	if ( 'yes' !== get_option( 'woocommerce_custom_orders_table_enabled' ) ) {
-		return;
-	}
-
-	if ( 'yes' !== get_option( 'woocommerce_custom_orders_table_data_sync_enabled' ) ) {
-		return;
-	}
-
-	WC_Admin_Notices::add_notice( 'hpos_sync_on_read_disabled' );
+	// Intentionally empty. The admin notice this update function used to queue has been
+	// replaced by a Site Health check, but the function must be kept so the 10.7.0 entry
+	// in WC_Install::$db_updates remains valid for stores upgrading from older versions.
 }
 
 /**
@@ -3550,4 +3543,19 @@ function wc_update_1080_backfill_email_template_sync_meta(): bool {
  */
 function wc_update_1090_remove_task_list_reminder_bar_hidden_option() {
 	delete_option( 'woocommerce_task_list_reminder_bar_hidden' );
+}
+
+/**
+ * Set the stored value of the point_of_sale feature flag to enabled.
+ *
+ * The feature is deprecated as of 11.0.0 and always enabled in core, but the WooCommerce
+ * mobile apps read this option via the wc/v3 settings REST API to decide whether POS can
+ * be used, so the stored value must reflect the always-enabled state.
+ *
+ * @since 11.0.0
+ *
+ * @return void
+ */
+function wc_update_1100_enable_point_of_sale_feature() {
+	update_option( 'woocommerce_feature_point_of_sale_enabled', 'yes' );
 }

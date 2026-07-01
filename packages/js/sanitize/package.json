@@ -57,12 +57,7 @@
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x"
 	},
-	"peerDependencies": {
-		"@types/react": "18.3.x",
-		"@types/react-dom": "18.3.x",
-		"react": "18.3.x",
-		"react-dom": "18.3.x"
-	},
+	"peerDependencies": {},
 	"publishConfig": {
 		"access": "public",
 		"exports": {

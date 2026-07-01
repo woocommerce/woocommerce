@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.14.0](https://github.com/woocommerce/email-editor/releases/tag/2.14.0) - 2026-06-15 
+
+-   Patch - Block email editor: render every child block of a quote, render the citation only once, and stop emitting a quote-within-a-quote. [#64746]
+-   Minor - Add support for Vimeo, TikTok, and Dailymotion embeds in the Email Editor package. [#65502]
+-   Patch - Email Editor: fix media-text RTL renderer test assertion. [#65215]
+
 ## [2.13.0](https://github.com/woocommerce/email-editor/releases/tag/2.13.0) - 2026-05-04 
 
 -   Minor - Add RTL direction support to the PHP email renderer. [#64500]

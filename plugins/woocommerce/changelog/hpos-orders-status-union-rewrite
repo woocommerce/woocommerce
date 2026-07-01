@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+HPOS: speed up the order admin list on large stores by rewriting multi-status order queries as per-status UNIONs.
