@@ -3546,3 +3546,38 @@ function wc_update_1080_backfill_email_template_sync_meta(): bool {
 function wc_update_1090_remove_task_list_reminder_bar_hidden_option() {
 	delete_option( 'woocommerce_task_list_reminder_bar_hidden' );
 }
+<<<<<<< HEAD
+=======
+
+/**
+ * Remove the deprecated push_notifications feature option from the database.
+ *
+ * The push_notifications feature flag was deprecated in 10.9.2 and is now always enabled.
+ * The option is no longer needed as FeaturesUtil::feature_is_enabled('push_notifications')
+ * returns the deprecated_value directly without reading from the database. Removing it also
+ * clears the stale "no" value that wc_update_1050_enable_autoload_options() persisted for
+ * stores upgrading across the 10.5.0 boundary.
+ *
+ * @since 10.9.2
+ *
+ * @return void
+ */
+function wc_update_10902_remove_deprecated_push_notifications_option(): void {
+	delete_option( 'woocommerce_feature_push_notifications_enabled' );
+}
+
+/**
+ * Set the stored value of the point_of_sale feature flag to enabled.
+ *
+ * The feature is deprecated as of 11.0.0 and always enabled in core, but the WooCommerce
+ * mobile apps read this option via the wc/v3 settings REST API to decide whether POS can
+ * be used, so the stored value must reflect the always-enabled state.
+ *
+ * @since 11.0.0
+ *
+ * @return void
+ */
+function wc_update_1100_enable_point_of_sale_feature() {
+	update_option( 'woocommerce_feature_point_of_sale_enabled', 'yes' );
+}
+>>>>>>> ab92f0b2c6 (Always enable push notifications by deprecating the feature flag (#66088))

@@ -619,11 +619,13 @@ class FeaturesController {
 					'Enable push notifications for the WooCommerce mobile apps to receive order notifications and store updates.',
 					'woocommerce'
 				),
+				'is_experimental'              => false,
 				'enabled_by_default'           => true,
-				'is_experimental'              => true,
 				'disable_ui'                   => true,
-				'skip_compatibility_checks'    => false,
+				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'deprecated_since'             => '10.9.2',
+				'deprecated_value'             => true,
 			),
 			'rest_api_caching'                   => array(
 				'name'                         => __( 'REST API Caching', 'woocommerce' ),
