@@ -349,6 +349,40 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 .wc-block-components-quantity-selector {
 	border-color: var(--wp--preset--color--theme-6);
 	border-radius: 0;
+	min-height: 44px;
+}
+
+/* Editor preview uses legacy .qty classes; frontend adds __input. */
+.woocommerce .wc-block-components-quantity-selector input.qty,
+.wc-block-components-quantity-selector input.qty,
+.wc-block-components-quantity-selector input.wc-block-components-quantity-selector__input {
+	-webkit-appearance: textfield;
+	appearance: textfield;
+	background: transparent;
+	border: 0;
+	box-shadow: none;
+	flex: 1 1 auto;
+	margin: 0;
+	min-width: 40px;
+	order: 2;
+	text-align: center;
+	width: auto;
+}
+
+.wc-block-components-quantity-selector input.qty::-webkit-inner-spin-button,
+.wc-block-components-quantity-selector input.qty::-webkit-outer-spin-button,
+.wc-block-components-quantity-selector input.wc-block-components-quantity-selector__input::-webkit-inner-spin-button,
+.wc-block-components-quantity-selector input.wc-block-components-quantity-selector__input::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+.wc-block-components-quantity-selector > .wc-block-components-quantity-selector__button--minus {
+	order: 1;
+}
+
+.wc-block-components-quantity-selector > .wc-block-components-quantity-selector__button--plus {
+	order: 3;
 }
 
 :where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills) {
@@ -397,10 +431,6 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 
 .wc-block-cart-item__quantity {
 	margin-top: var(--wp--preset--spacing--20);
-}
-
-.wc-block-components-quantity-selector {
-	min-height: 44px;
 }
 
 /* ==========================================================================
