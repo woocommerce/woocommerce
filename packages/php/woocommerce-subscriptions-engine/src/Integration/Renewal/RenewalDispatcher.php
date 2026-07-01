@@ -26,7 +26,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal;
 use DateTimeImmutable;
 use DateTimeZone;
 use Throwable;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Registry\ConsumerRegistry;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 
 defined( 'ABSPATH' ) || exit;

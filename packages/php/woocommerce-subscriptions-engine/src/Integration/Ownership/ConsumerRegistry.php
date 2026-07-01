@@ -1,12 +1,12 @@
 <?php
 /**
- * ConsumerRegistry - the processing-gate signal.
+ * ConsumerRegistry - the set of extensions consuming engine functionality.
  *
- * A consumer extension registers its slug here on load. The batch renewal
- * dispatcher reads the registry as a gate: with no registered consumer it
- * charges nothing. This keeps the engine inert when bundled but unused - the
- * engine never drives charges on its own behalf, only for a registered
- * consumer.
+ * A consumer extension registers its slug here on load, identifying itself as an
+ * active owner of the primitives it drives. The engine reads the registry to
+ * decide whether, and on whose behalf, to act - the batch renewal dispatcher, for
+ * one, treats an empty registry as "no consumer present, charge nothing," so the
+ * engine stays inert when bundled but unused.
  *
  * Static (not instance state) because registration is a load-time, by-class-name
  * call - every consumer reaches the registry by class name, mirroring
@@ -14,17 +14,17 @@
  *
  * Integration zone: WordPress-native (registered from a consumer's boot).
  *
- * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Registry
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership
  */
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Registry;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Registry of active consumer extensions (the processing gate).
+ * Registry of the extensions consuming engine functionality.
  */
 final class ConsumerRegistry {
 

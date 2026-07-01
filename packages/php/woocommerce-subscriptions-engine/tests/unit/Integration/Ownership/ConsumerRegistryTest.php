@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for the ConsumerRegistry processing-gate signal.
+ * Unit tests for the ConsumerRegistry (the set of engine-consuming extensions).
  *
  * The registry is WordPress-free (only the file-access guard), so it loads and
  * runs in the autoloader-only unit bootstrap.
@@ -10,13 +10,13 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Integration\Registry;
+namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Integration\Ownership;
 
 use PHPUnit\Framework\TestCase;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Registry\ConsumerRegistry;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
 
 /**
- * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Registry\ConsumerRegistry
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry
  */
 class ConsumerRegistryTest extends TestCase {
 
