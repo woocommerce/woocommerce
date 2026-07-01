@@ -215,10 +215,6 @@ class AsyncGenerator {
 			return;
 		}
 
-		$status['state']      = self::STATE_IN_PROGRESS;
-		$status['updated_at'] = time();
-		update_option( $option_key, $status );
-
 		$feed = null;
 		try {
 			$this->raise_resource_limits();
@@ -230,10 +226,17 @@ class AsyncGenerator {
 				$status['page']            = 1;
 				$status['processed']       = 0;
 				$status['entries_written'] = 0;
-				update_option( $option_key, $status );
 			} else {
 				$feed->open( (string) $status['file_name'], (int) ( $status['entries_written'] ?? 0 ) );
 			}
+
+			// Only now that the feed lock is held (acquired by open()) do we claim the job as in-progress
+			// and refresh the heartbeat. Doing it earlier would rewrite the status — and bump updated_at —
+			// even for a run that immediately steps aside on FeedLockException, contradicting that path's
+			// "leave the status untouched" intent and refreshing the heartbeat of a job it never wrote.
+			$status['state']      = self::STATE_IN_PROGRESS;
+			$status['updated_at'] = time();
+			update_option( $option_key, $status );
 
 			$walker = ProductWalker::from_integration( $this->integration, $feed );
 			$walker->set_batch_size( $this->get_batch_size() );
