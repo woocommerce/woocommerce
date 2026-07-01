@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Logging;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\{ LogHandlerFileV2, Settings };
-use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\File;
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ File, FileController };
 use WC_Unit_Test_Case;
 
 /**
@@ -376,6 +376,37 @@ MESSAGE;
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$actual_content  = file_get_contents( reset( $paths ) );
 		$expected_string = '4 expired log files were deleted.';
+		$this->assertStringContainsString( $expected_string, $actual_content );
+	}
+
+	/**
+	 * @testdox Check that delete_logs_before_timestamp deletes more than one page of expired files.
+	 */
+	public function test_delete_logs_before_timestamp_deletes_more_than_one_page(): void {
+		// Create more files than a single default page.
+		$past_time  = strtotime( '-5 days' );
+		$file_count = FileController::DEFAULTS_GET_FILES['per_page'] + 5;
+
+		for ( $i = 1; $i <= $file_count; $i++ ) {
+			$this->sut->handle( $past_time, 'debug', 'old.', array( 'source' => 'source' . $i ) );
+		}
+
+		$paths = glob( Settings::get_log_directory() . '*.log' );
+		$this->assertCount( $file_count, $paths );
+
+		$result = $this->sut->delete_logs_before_timestamp( strtotime( '-3 days' ) );
+		$this->assertEquals( $file_count, $result );
+
+		// Only the summary log created by the deletion should remain.
+		$paths = glob( Settings::get_log_directory() . '*.log' );
+		$this->assertCount( 1, $paths );
+
+		$paths = glob( Settings::get_log_directory() . 'wc_logger*.log' );
+		$this->assertCount( 1, $paths );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$actual_content  = file_get_contents( reset( $paths ) );
+		$expected_string = sprintf( '%d expired log files were deleted.', $file_count );
 		$this->assertStringContainsString( $expected_string, $actual_content );
 	}
 

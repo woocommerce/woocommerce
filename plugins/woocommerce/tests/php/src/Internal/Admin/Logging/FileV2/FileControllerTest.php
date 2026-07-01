@@ -243,6 +243,35 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The get_files method should return every file when per_page is -1, ignoring the default page size.
+	 */
+	public function test_get_files_per_page_unlimited(): void {
+		// Create more files than a single default page.
+		$default_per_page = FileController::DEFAULTS_GET_FILES['per_page'];
+		$file_count       = $default_per_page + 5;
+
+		for ( $i = 1; $i <= $file_count; $i++ ) {
+			$this->handler->handle( time(), 'debug', 'entry', array( 'source' => 'source' . $i ) );
+		}
+
+		$default_page = $this->sut->get_files();
+		$this->assertCount( $default_per_page, $default_page, 'The default per_page value should cap the result.' );
+
+		$all_files = $this->sut->get_files( array( 'per_page' => -1 ) );
+		$this->assertCount( $file_count, $all_files, 'A per_page of -1 should return every file.' );
+
+		// Offset must still apply when per_page is unlimited.
+		$offset     = 5;
+		$offset_all = $this->sut->get_files(
+			array(
+				'per_page' => -1,
+				'offset'   => $offset,
+			)
+		);
+		$this->assertCount( $file_count - $offset, $offset_all, 'A per_page of -1 should still honor the offset.' );
+	}
+
+	/**
 	 * @testdox The get_files_by_id method should return an array of File instances given an array of valid file IDs.
 	 */
 	public function test_get_files_by_id() {

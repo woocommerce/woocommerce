@@ -193,7 +193,7 @@ class FileController {
 	 *     @type int    $offset      Omit this number of files from the beginning of the list. Works with $per_page to do pagination.
 	 *     @type string $order       The sort direction. 'asc' or 'desc'. Defaults to 'desc'.
 	 *     @type string $orderby     The property to sort the list by. 'created', 'modified', 'source', 'size'. Defaults to 'modified'.
-	 *     @type int    $per_page    The number of files to include in the list. Works with $offset to do pagination.
+	 *     @type int    $per_page    The number of files to include in the list. Works with $offset to do pagination. Use -1 to include all files.
 	 *     @type string $source      Only include files from this source.
 	 * }
 	 * @param bool  $count_only Optional. True to return a total count of the files.
@@ -308,7 +308,11 @@ class FileController {
 
 		usort( $files, $sort_callback );
 
-		return array_slice( $files, $args['offset'], $args['per_page'] );
+		// A negative per_page value (e.g. -1) means "return all files" rather than being passed
+		// through to array_slice, where a negative length would drop files from the end of the list.
+		$length = $args['per_page'] < 0 ? null : $args['per_page'];
+
+		return array_slice( $files, $args['offset'], $length );
 	}
 
 	/**

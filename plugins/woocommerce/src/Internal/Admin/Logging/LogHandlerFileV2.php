@@ -240,6 +240,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 				'date_filter' => 'created',
 				'date_start'  => 1,
 				'date_end'    => $timestamp,
+				'per_page'    => -1,
 			)
 		);
 
