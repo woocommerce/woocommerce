@@ -1,0 +1,370 @@
+export const PRODUCT_CATEGORY_TREE = {
+  id: 'all-categories',
+  label: 'All categories',
+  children: [
+    {
+      id: 'clothing',
+      label: 'Clothing',
+      children: [
+        {
+          id: 'women',
+          label: 'Women',
+          children: [
+            {
+              id: 'women-tops',
+              label: 'Tops',
+              children: [
+                {
+                  id: 'women-shirts',
+                  label: 'Shirts',
+                  children: [
+                    {
+                      id: 'linen-shirts',
+                      label: 'Linen shirts',
+                      children: [
+                        {
+                          id: 'linen-shirts-long-sleeve',
+                          label: 'Long sleeve',
+                          children: [
+                            { id: 'petite-linen-long-sleeve', label: 'Petite' },
+                            { id: 'tall-linen-long-sleeve', label: 'Tall' },
+                          ],
+                        },
+                        { id: 'linen-shirts-short-sleeve', label: 'Short sleeve' },
+                      ],
+                    },
+                    { id: 'cotton-shirts', label: 'Cotton shirts' },
+                    { id: 'oversized-shirts', label: 'Oversized shirts' },
+                    { id: 'work-shirts', label: 'Work shirts' },
+                  ],
+                },
+                {
+                  id: 'women-knitwear',
+                  label: 'Knitwear',
+                  children: [
+                    { id: 'cardigans', label: 'Cardigans' },
+                    { id: 'fine-knit-sweaters', label: 'Fine-knit sweaters' },
+                    { id: 'cashmere-blends', label: 'Cashmere blends' },
+                  ],
+                },
+                { id: 'women-tees', label: 'T-shirts' },
+                { id: 'women-unisex-tops', label: 'Unisex' },
+                { id: 'women-tanks', label: 'Tanks' },
+              ],
+            },
+            {
+              id: 'women-bottoms',
+              label: 'Bottoms',
+              children: [
+                { id: 'wide-leg-pants', label: 'Wide-leg pants' },
+                { id: 'straight-jeans', label: 'Straight jeans' },
+                { id: 'midi-skirts', label: 'Midi skirts' },
+              ],
+            },
+            { id: 'women-dresses', label: 'Dresses' },
+            { id: 'women-outerwear', label: 'Outerwear' },
+          ],
+        },
+        {
+          id: 'men',
+          label: 'Men',
+          children: [
+            {
+              id: 'men-tops',
+              label: 'Tops',
+              children: [
+                { id: 'men-oxford-shirts', label: 'Oxford shirts' },
+                { id: 'men-tees', label: 'T-shirts' },
+                { id: 'men-polo-shirts', label: 'Polo shirts' },
+                { id: 'men-unisex-tops', label: 'Unisex' },
+                { id: 'men-hoodies', label: 'Hoodies' },
+              ],
+            },
+            { id: 'men-denim', label: 'Denim' },
+            { id: 'men-jackets', label: 'Jackets' },
+          ],
+        },
+        { id: 'kids', label: 'Kids' },
+        { id: 'sale-clothing', label: 'Sale clothing' },
+      ],
+    },
+    {
+      id: 'home-kitchen',
+      label: 'Home & Kitchen',
+      children: [
+        {
+          id: 'kitchen',
+          label: 'Kitchen',
+          children: [
+            {
+              id: 'drinkware',
+              label: 'Drinkware',
+              children: [
+                {
+                  id: 'mugs',
+                  label: 'Mugs',
+                  children: [
+                    {
+                      id: 'ceramic-mugs',
+                      label: 'Ceramic mugs',
+                      children: [
+                        {
+                          id: 'handmade-ceramic-mugs',
+                          label: 'Handmade',
+                          children: [
+                            { id: 'speckled-glaze-ceramic-mugs', label: 'Speckled glaze' },
+                            { id: 'matte-white-ceramic-mugs', label: 'Matte white' },
+                          ],
+                        },
+                        { id: 'stackable-ceramic-mugs', label: 'Stackable' },
+                      ],
+                    },
+                    { id: 'travel-mugs', label: 'Travel mugs' },
+                    { id: 'espresso-cups', label: 'Espresso cups' },
+                  ],
+                },
+                { id: 'tumblers', label: 'Tumblers' },
+                { id: 'water-bottles', label: 'Water bottles' },
+              ],
+            },
+            { id: 'cookware', label: 'Cookware' },
+            { id: 'storage-jars', label: 'Storage jars' },
+          ],
+        },
+        { id: 'bedding', label: 'Bedding' },
+        { id: 'bath', label: 'Bath' },
+      ],
+    },
+    {
+      id: 'electronics',
+      label: 'Electronics',
+      children: [
+        {
+          id: 'computers',
+          label: 'Computers',
+          children: [
+            {
+              id: 'computer-accessories',
+              label: 'Accessories',
+              children: [
+                {
+                  id: 'cables-adapters',
+                  label: 'Cables & adapters',
+                  children: [
+                    {
+                      id: 'usb-c-cables',
+                      label: 'USB-C cables',
+                      children: [
+                        {
+                          id: 'thunderbolt-4-cables',
+                          label: 'Thunderbolt 4',
+                          children: [
+                            { id: 'thunderbolt-4-1m-braided', label: '1m braided' },
+                            { id: 'thunderbolt-4-2m-braided', label: '2m braided' },
+                          ],
+                        },
+                        { id: 'usb-c-fast-charge', label: 'Fast charge' },
+                      ],
+                    },
+                    { id: 'hdmi-adapters', label: 'HDMI adapters' },
+                    { id: 'charging-docks', label: 'Charging docks' },
+                  ],
+                },
+                { id: 'keyboards', label: 'Keyboards' },
+                { id: 'laptop-stands', label: 'Laptop stands' },
+              ],
+            },
+            { id: 'laptops', label: 'Laptops' },
+            { id: 'monitors', label: 'Monitors' },
+          ],
+        },
+        { id: 'audio', label: 'Audio' },
+        { id: 'cameras', label: 'Cameras' },
+      ],
+    },
+    {
+      id: 'beauty',
+      label: 'Beauty',
+      children: [
+        {
+          id: 'skin-care',
+          label: 'Skin care',
+          children: [
+            {
+              id: 'face-care',
+              label: 'Face',
+              children: [
+                {
+                  id: 'moisturizers',
+                  label: 'Moisturizers',
+                  children: [
+                    { id: 'day-creams', label: 'Day creams' },
+                    { id: 'night-creams', label: 'Night creams' },
+                    { id: 'gel-moisturizers', label: 'Gel moisturizers' },
+                  ],
+                },
+                { id: 'cleansers', label: 'Cleansers' },
+                { id: 'serums', label: 'Serums' },
+              ],
+            },
+            { id: 'body-care', label: 'Body' },
+          ],
+        },
+        { id: 'hair-care', label: 'Hair care' },
+        { id: 'makeup', label: 'Makeup' },
+      ],
+    },
+    {
+      id: 'office',
+      label: 'Office',
+      children: [
+        {
+          id: 'printers',
+          label: 'Printers',
+          children: [
+            {
+              id: 'ink-toner',
+              label: 'Ink & toner',
+              children: [
+                {
+                  id: 'printer-refills',
+                  label: 'Printer refills',
+                  children: [
+                    { id: 'canon-refills', label: 'Canon refills' },
+                    { id: 'hp-refills', label: 'HP refills' },
+                    { id: 'epson-refills', label: 'Epson refills' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        { id: 'paper', label: 'Paper' },
+        { id: 'desk-accessories', label: 'Desk accessories' },
+      ],
+    },
+    {
+      id: 'sale',
+      label: 'Sale',
+      children: [
+        {
+          id: 'summer-sale',
+          label: 'Summer',
+          children: [
+            { id: 'summer-sale-t-shirts', label: 'T-shirts' },
+            { id: 'summer-sale-unisex', label: 'Unisex' },
+          ],
+        },
+        { id: 'last-chance', label: 'Last chance' },
+      ],
+    },
+  ],
+};
+
+export function findProductCategoryById(node, id) {
+  if (node.id === id) return node;
+  if (!node.children) return null;
+  for (const child of node.children) {
+    const found = findProductCategoryById(child, id);
+    if (found) return found;
+  }
+  return null;
+}
+
+export function getProductCategoryLeaves(node) {
+  if (!node.children || node.children.length === 0) return [node];
+  return node.children.flatMap(getProductCategoryLeaves);
+}
+
+export function getProductCategorySelectionState(node, selected) {
+  const leaves = getProductCategoryLeaves(node);
+  const selectedCount = leaves.filter((leaf) => selected.has(leaf.id)).length;
+  if (selectedCount === 0) return 'unchecked';
+  if (selectedCount === leaves.length) return 'checked';
+  return 'indeterminate';
+}
+
+export function getProductCategoryNodeAtPath(path) {
+  let node = PRODUCT_CATEGORY_TREE;
+  for (const id of path) {
+    node = (node.children || []).find((child) => child.id === id);
+    if (!node) return null;
+  }
+  return node;
+}
+
+export function findProductCategoryPath(root, nodeId, currentPath = []) {
+  if (!root.children) return null;
+  for (const child of root.children) {
+    if (child.id === nodeId) return [...currentPath, child.id];
+    const path = findProductCategoryPath(child, nodeId, [...currentPath, child.id]);
+    if (path) return path;
+  }
+  return null;
+}
+
+export function findProductCategoryMatches(node, query, pathLabels = []) {
+  const results = [];
+  const cleanQuery = query.trim().toLowerCase();
+  const pathText = [...pathLabels, node.label].join(' > ').toLowerCase();
+
+  if (
+    node.id !== PRODUCT_CATEGORY_TREE.id &&
+    (node.label.toLowerCase().includes(cleanQuery) || pathText.includes(cleanQuery))
+  ) {
+    results.push({ node, pathLabels });
+  }
+
+  if (node.children) {
+    const nextPath = node.id === PRODUCT_CATEGORY_TREE.id ? pathLabels : [...pathLabels, node.label];
+    node.children.forEach((child) => {
+      results.push(...findProductCategoryMatches(child, cleanQuery, nextPath));
+    });
+  }
+
+  return results;
+}
+
+export function formatProductCategoryPath(nodeId) {
+  const path = findProductCategoryPath(PRODUCT_CATEGORY_TREE, nodeId, []);
+  if (!path) return '';
+  return path
+    .map((id) => findProductCategoryById(PRODUCT_CATEGORY_TREE, id)?.label)
+    .filter(Boolean)
+    .join(' > ');
+}
+
+export function computeProductCategoryTags(selected) {
+  const tags = [];
+  const covered = new Set();
+
+  PRODUCT_CATEGORY_TREE.children.forEach((node) => {
+    const state = getProductCategorySelectionState(node, selected);
+    if (state === 'checked') {
+      const leaves = getProductCategoryLeaves(node);
+      leaves.forEach((leaf) => covered.add(leaf.id));
+      tags.push({
+        id: node.id,
+        label: node.label,
+        type: 'group',
+        count: leaves.length,
+      });
+    }
+  });
+
+  [...selected]
+    .filter((id) => !covered.has(id))
+    .map((id) => findProductCategoryById(PRODUCT_CATEGORY_TREE, id))
+    .filter(Boolean)
+    .sort((a, b) => formatProductCategoryPath(a.id).localeCompare(formatProductCategoryPath(b.id)))
+    .forEach((node) => {
+      tags.push({
+        id: node.id,
+        label: node.label,
+        type: 'leaf',
+        path: formatProductCategoryPath(node.id),
+      });
+    });
+
+  return tags;
+}
