@@ -163,15 +163,22 @@ class Capabilities {
 	}
 
 	/**
-	 * WP_User_Query args selecting every user with POS access.
+	 * WP_User_Query args selecting candidate POS staff — every user holding any
+	 * `woocommerce_pos_*` capability, via WP_User_Query's capability__in.
 	 *
-	 * Matches has_pos_access(): selects users holding any `woocommerce_pos_*` capability, via
-	 * WP_User_Query's capability__in. Use it to enumerate POS staff — e.g. the
-	 * GET /wc/pos/v1/staff endpoint and the wp-admin Staff list — which then refine
-	 * the candidates for their own needs (the staff endpoint also requires a PIN).
-	 * Keying on caps rather than the preset meta keeps this consistent with the
-	 * authorization signal: a user whose caps were stripped is excluded, and a cap
-	 * granted outside a preset is still included.
+	 * Use it to enumerate POS staff — e.g. the GET /wc/pos/v1/staff endpoint and the
+	 * wp-admin Staff list — which refine the candidates for their own needs (the staff
+	 * endpoint also requires a PIN). Keying on caps rather than the preset meta keeps
+	 * this aligned with the authorization signal: a user whose caps were stripped is
+	 * excluded, and a cap granted outside a preset is still included.
+	 *
+	 * This is a candidate query, not exact parity with has_pos_access(): capability__in
+	 * matches the capability *name* wherever it appears in the serialized capabilities
+	 * row, so a user with an explicit denial (add_cap( $cap, false )) is still selected
+	 * even though has_pos_access() — which reads the resolved capabilities — treats them
+	 * as no access. Capabilities only ever grants or strips caps, never denies, so this
+	 * diverges only when external code sets an explicit denial; callers needing exact
+	 * parity should refine results with has_pos_access().
 	 *
 	 * @return array<string, mixed>
 	 *
