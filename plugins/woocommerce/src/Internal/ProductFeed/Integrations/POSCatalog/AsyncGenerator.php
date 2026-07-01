@@ -11,7 +11,6 @@ namespace Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog;
 
 use ActionScheduler_AsyncRequest_QueueRunner;
 use ActionScheduler_Store;
-use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedLockException;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductWalker;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ResumableFeedInterface;
@@ -295,7 +294,7 @@ class AsyncGenerator {
 			// progress, so marking the job failed here would report a failure for a healthy generation
 			// and let the next poll discard the partial file the holder is still writing. Release only
 			// this run's own handle (which never acquired the lock, so closing it cannot free the holder's).
-			if ( $feed instanceof FeedInterface ) {
+			if ( $feed instanceof ResumableFeedInterface ) {
 				$feed->flush();
 			}
 			return;
