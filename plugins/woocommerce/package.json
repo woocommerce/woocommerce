@@ -87,6 +87,7 @@
 		"test:php:hpos-off": "sh ./client/blocks/bin/copy-blocks-json.sh && DISABLE_HPOS=1 ./vendor/bin/phpunit -c ./phpunit.xml",
 		"test:php:watch": "sh ./client/blocks/bin/copy-blocks-json.sh && ./vendor/bin/phpunit-watcher watch",
 		"test:metrics": "USE_WP_ENV=1 pnpm playwright test --config=tests/metrics/playwright.config.js",
+		"test:metrics:editor:woo-comparison": "node tests/metrics/bin/editor-woo-comparison.js",
 		"test:metrics:ci": "../../.github/workflows/scripts/run-metrics.sh",
 		"test:php:env": "sh ./client/blocks/bin/copy-blocks-json.sh && wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit -c phpunit.xml --verbose",
 		"test:php:env:hpos-off": "sh ./client/blocks/bin/copy-blocks-json.sh && wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli env DISABLE_HPOS=1 vendor/bin/phpunit -c phpunit.xml --verbose",
