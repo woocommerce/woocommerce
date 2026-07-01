@@ -41,7 +41,7 @@ env:
 jobs:
   bump-version:
     name: Bump WooCommerce Version
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     steps:
       - name: Normalize branch input
         id: normalize-branch

@@ -13,6 +13,7 @@ import {
 } from '@woocommerce/types';
 import {
 	camelCaseKeys,
+	hasCollectableRate,
 	triggerAddedToCartEvent,
 	triggerAddingToCartEvent,
 } from '@woocommerce/base-utils';
@@ -20,6 +21,7 @@ import {
 	type CurriedSelectorsOf,
 	type ConfigOf,
 	type ActionCreatorsOf,
+	type DispatchFunction,
 } from '@wordpress/data/build-types/types';
 import { __ } from '@wordpress/i18n';
 import { cartStore } from '@woocommerce/block-data';
@@ -40,9 +42,12 @@ import {
 	setTriggerStoreSyncEvent,
 } from './utils';
 import { isEditor } from '../utils';
+import { store as checkoutStore } from '../checkout';
+
 interface CartThunkArgs {
 	select: CurriedSelectorsOf< typeof cartStore >;
 	dispatch: ActionCreatorsOf< ConfigOf< typeof cartStore > >;
+	registry?: { dispatch: DispatchFunction };
 }
 
 /**
@@ -125,13 +130,40 @@ export const receiveError =
 	};
 
 /**
+ * Updates the checkout store with the shopper's collection preference based on
+ * the selected shipping rates in the cart.
+ *
+ * @param {CartResponse} response
+ * @param {CartThunkArgs['registry']} registry
+ */
+const syncPrefersCollectionFromSelectedShippingRates = (
+	response: CartResponse,
+	registry?: CartThunkArgs[ 'registry' ]
+) => {
+	if ( ! registry ) {
+		return;
+	}
+
+	const selectedMethodIds = response.shipping_rates
+		?.flatMap( ( shippingPackage ) => shippingPackage.shipping_rates )
+		.filter( ( rate ) => rate.selected )
+		.map( ( rate ) => rate.method_id );
+
+	if ( selectedMethodIds?.length ) {
+		registry
+			.dispatch( checkoutStore )
+			.setPrefersCollection( hasCollectableRate( selectedMethodIds ) );
+	}
+};
+
+/**
  * POSTs to the /cart/extensions endpoint with the data supplied by the extension.
  *
  * @param {Object} args The data to be posted to the endpoint
  */
 export const applyExtensionCartUpdate =
 	( args: ExtensionCartUpdateArgs ) =>
-	async ( { dispatch }: CartThunkArgs ) => {
+	async ( { dispatch, registry }: CartThunkArgs ) => {
 		try {
 			const { response } = await apiFetchWithHeaders< {
 				response: CartResponse;
@@ -178,9 +210,17 @@ export const applyExtensionCartUpdate =
 				}
 
 				dispatch.receiveCart( cartToReceive );
+				syncPrefersCollectionFromSelectedShippingRates(
+					response,
+					registry
+				);
 				return response;
 			}
 			dispatch.receiveCart( response );
+			syncPrefersCollectionFromSelectedShippingRates(
+				response,
+				registry
+			);
 			return response;
 		} catch ( error ) {
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );

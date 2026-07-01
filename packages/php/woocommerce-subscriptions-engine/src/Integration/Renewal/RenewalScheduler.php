@@ -38,13 +38,13 @@ final class RenewalScheduler {
 	 * Public so tooling and tests can inspect or cancel pending actions via
 	 * `as_has_scheduled_action()` and friends.
 	 */
-	const HOOK = 'woocommerce_subscriptions_engine_process_renewal';
+	public const HOOK = 'woocommerce_subscriptions_engine_process_renewal';
 
 	/**
 	 * Action Scheduler group - used for admin filterability (Tools ->
 	 * Scheduled Actions) and bulk teardown.
 	 */
-	const GROUP = 'woocommerce_subscriptions_engine';
+	public const GROUP = 'woocommerce_subscriptions_engine';
 
 	/**
 	 * Enqueue an AS action for `$contract_id` at `$when`.
