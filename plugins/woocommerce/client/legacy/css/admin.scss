@@ -8635,15 +8635,6 @@ table.bar_chart {
 		}
 	}
 
-	// Align the product description editor with the meta boxes below it.
-	// #normal-sortables adds 4px of padding around postboxes, which #post-body-content
-	// doesn't, so the description editor ends up 8px wider than neighbouring postboxes
-	// on WP 7.0 (where the radius makes the misalignment visible).
-	&.post-type-product #postdivrich.woocommerce-product-description {
-		margin-left: 4px;
-		margin-right: 4px;
-	}
-
 	// Shipping zone name input: ID selector in the base rule outranks the form-table override above.
 	.wc-shipping-zone-settings #zone_name {
 		padding: 0 12px;

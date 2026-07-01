@@ -557,6 +557,20 @@ class FeaturesController {
 				'deprecated_since'             => '11.0.0',
 				'deprecated_value'             => true,
 			),
+			'point_of_sale_staff'                => array(
+				'name'                         => __( 'POS staff', 'woocommerce' ),
+				'description'                  => __(
+					'Experimental: POS staff management, roles, and order attribution.',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				// Hidden while incomplete so it can't ship merchant-toggleable; flip to
+				// false when it's ready for an experimental preview.
+				'disable_ui'                   => true,
+				'is_experimental'              => true,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 			'fulfillments'                       => array(
 				'name'                         => __( 'Order Fulfillments', 'woocommerce' ),
 				'description'                  => __(

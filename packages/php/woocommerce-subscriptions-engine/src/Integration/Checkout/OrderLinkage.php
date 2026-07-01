@@ -29,32 +29,32 @@ final class OrderLinkage {
 	 *
 	 * Stored as a stringified integer (order meta is a flat string table).
 	 */
-	const META_CONTRACT_ID = '_subscription_contract_id';
+	public const META_CONTRACT_ID = '_subscription_contract_id';
 
 	/**
 	 * Order meta key holding the relation type - see the `RELATION_*` constants.
 	 */
-	const META_RELATION_TYPE = '_subscription_relation_type';
+	public const META_RELATION_TYPE = '_subscription_relation_type';
 
 	/**
 	 * The order whose checkout created the contract (the contract's `origin_order_id`).
 	 */
-	const RELATION_PARENT = 'parent';
+	public const RELATION_PARENT = 'parent';
 
 	/**
 	 * A renewal order - created by the renewal engine when a cycle bills.
 	 */
-	const RELATION_RENEWAL = 'renewal';
+	public const RELATION_RENEWAL = 'renewal';
 
 	/**
 	 * A switch order - customer moved between plans.
 	 */
-	const RELATION_SWITCH = 'switch';
+	public const RELATION_SWITCH = 'switch';
 
 	/**
 	 * A resubscribe order - customer restarted a previously-cancelled contract.
 	 */
-	const RELATION_RESUBSCRIBE = 'resubscribe';
+	public const RELATION_RESUBSCRIBE = 'resubscribe';
 
 	/**
 	 * All recognized relation types.

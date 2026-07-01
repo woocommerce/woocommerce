@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Update the admin to use persistent product status counters to improve performance with large product catalogs.
