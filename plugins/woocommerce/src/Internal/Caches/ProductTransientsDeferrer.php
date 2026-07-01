@@ -54,7 +54,7 @@ class ProductTransientsDeferrer {
 	public function start_deferring(): void {
 		++$this->deferral_level;
 		if ( 1 === $this->deferral_level ) {
-			add_action( 'shutdown', array( $this, 'handle_shutdown' ) );
+			add_action( 'shutdown', array( $this, 'handle_shutdown' ), 0 );
 		}
 	}
 
