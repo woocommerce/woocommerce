@@ -267,14 +267,23 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 		$deleted = 0;
 		$skipped = 0;
 
-		// Fetch and delete in batches so that sites with more than the default
-		// per-page of log files don't leave expired files behind.
+		/*
+		 * Fetch and delete in batches so that sites with more than the default
+		 * per-page of log files don't leave expired files behind.
+		 *
+		 * Order by 'created' so that paging past vetoed files stays reliable: the
+		 * offset only lands correctly if get_files() returns a strict, stable total
+		 * order across iterations, and (created, source, rotation) is unique per file
+		 * whereas the default 'modified' order can tie -- which PHP < 8.0's unstable
+		 * usort() could re-order between iterations, stranding an expired file.
+		 */
 		do {
 			$files = $this->file_controller->get_files(
 				array(
 					'date_filter' => 'created',
 					'date_start'  => 1,
 					'date_end'    => $timestamp,
+					'orderby'     => 'created',
 					'per_page'    => self::DELETE_BATCH_SIZE,
 					'offset'      => $skipped,
 				)

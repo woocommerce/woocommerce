@@ -265,7 +265,7 @@ class FileController {
 					$sort_sets  = array(
 						array( $a->get_created_timestamp(), $b->get_created_timestamp() ),
 						array( $a->get_source(), $b->get_source() ),
-						array( $a->get_rotation() || -1, $b->get_rotation() || -1 ),
+						array( $a->get_rotation() ?? -1, $b->get_rotation() ?? -1 ),
 					);
 					$order_sets = array( $args['order'], 'asc', 'asc' );
 					return $multi_sorter( $sort_sets, $order_sets );
@@ -276,7 +276,7 @@ class FileController {
 					$sort_sets  = array(
 						array( $a->get_modified_timestamp(), $b->get_modified_timestamp() ),
 						array( $a->get_source(), $b->get_source() ),
-						array( $a->get_rotation() || -1, $b->get_rotation() || -1 ),
+						array( $a->get_rotation() ?? -1, $b->get_rotation() ?? -1 ),
 					);
 					$order_sets = array( $args['order'], 'asc', 'asc' );
 					return $multi_sorter( $sort_sets, $order_sets );
@@ -287,7 +287,7 @@ class FileController {
 					$sort_sets  = array(
 						array( $a->get_source(), $b->get_source() ),
 						array( $a->get_created_timestamp(), $b->get_created_timestamp() ),
-						array( $a->get_rotation() || -1, $b->get_rotation() || -1 ),
+						array( $a->get_rotation() ?? -1, $b->get_rotation() ?? -1 ),
 					);
 					$order_sets = array( $args['order'], 'desc', 'asc' );
 					return $multi_sorter( $sort_sets, $order_sets );
@@ -298,7 +298,7 @@ class FileController {
 					$sort_sets  = array(
 						array( $a->get_file_size(), $b->get_file_size() ),
 						array( $a->get_source(), $b->get_source() ),
-						array( $a->get_rotation() || -1, $b->get_rotation() || -1 ),
+						array( $a->get_rotation() ?? -1, $b->get_rotation() ?? -1 ),
 					);
 					$order_sets = array( $args['order'], 'asc', 'asc' );
 					return $multi_sorter( $sort_sets, $order_sets );

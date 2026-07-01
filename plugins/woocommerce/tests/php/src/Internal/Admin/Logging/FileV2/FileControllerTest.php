@@ -232,6 +232,46 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The get_files method breaks ties between same-source rotations by rotation number.
+	 */
+	public function test_get_files_orders_same_source_rotations_by_rotation(): void {
+		// Create a source with a current file plus two rotations. They share a source
+		// and a created day, so only the rotation tie-break distinguishes their order.
+		$path = Settings::get_log_directory() . 'rotated-source.log';
+
+		$file = new File( $path );
+		$file->write( 'test' );
+		$file->rotate();
+		$file->rotate();
+
+		$file = new File( $path );
+		$file->write( 'test' );
+		$file->rotate();
+
+		$file = new File( $path );
+		$file->write( 'test' );
+
+		$files = $this->sut->get_files(
+			array(
+				'source'   => 'rotated-source',
+				'orderby'  => 'created',
+				'order'    => 'desc',
+				'per_page' => 10,
+			)
+		);
+
+		$rotations = array_map(
+			fn( $retrieved ) => $retrieved->get_rotation(),
+			$files
+		);
+		$this->assertSame(
+			array( null, 0, 1 ),
+			$rotations,
+			'Same-source rotations must sort by rotation ascending (current file first), not in arbitrary order.'
+		);
+	}
+
+	/**
 	 * @testdox The get_files method should return a count of files that meet the filtering criteria.
 	 */
 	public function test_get_files_count_only(): void {
