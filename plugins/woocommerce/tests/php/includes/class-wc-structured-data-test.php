@@ -189,4 +189,32 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 			unset( $_GET['attribute_pa_size'] );
 		}
 	}
+
+	/**
+	 * When a fully-specified selection matches more than one variation (a concrete variation and an
+	 * overlapping "Any" variation), the price is ambiguous, so the parent AggregateOffer is kept.
+	 *
+	 * @return void
+	 */
+	public function test_variable_product_with_ambiguous_selection_uses_aggregate_offer(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		// Matches both "huge / blue / 2" and "huge / blue / any number".
+		$_GET['attribute_pa_size']   = 'huge';
+		$_GET['attribute_pa_colour'] = 'blue';
+		$_GET['attribute_pa_number'] = '2';
+
+		try {
+			$this->structured_data->generate_product_data( $product );
+			$data  = $this->structured_data->get_data();
+			$offer = $data[0]['offers'][0];
+
+			$this->assertEquals( 'AggregateOffer', $offer['@type'] );
+			$this->assertArrayNotHasKey( 'inProductGroupWithID', $data[0] );
+		} finally {
+			unset( $_GET['attribute_pa_size'], $_GET['attribute_pa_colour'], $_GET['attribute_pa_number'] );
+		}
+	}
 }

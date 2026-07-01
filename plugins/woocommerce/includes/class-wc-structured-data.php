@@ -795,6 +795,14 @@ class WC_Structured_Data {
 			return null;
 		}
 
+		// `find_matching_product_variation()` returns the first match by menu order, so a fully-specified
+		// selection can still be ambiguous when an overlapping "Any" variation also matches it. Only treat
+		// the selection as a single Offer when exactly one variation matches; otherwise the price is
+		// ambiguous and we keep the parent's AggregateOffer.
+		if ( 1 !== $this->count_matching_variations( $product, $match_attributes ) ) {
+			return null;
+		}
+
 		$variation = wc_get_product( $variation_id );
 
 		if ( ! $variation instanceof WC_Product_Variation || '' === $variation->get_price() ) {
@@ -802,5 +810,47 @@ class WC_Structured_Data {
 		}
 
 		return $variation;
+	}
+
+	/**
+	 * Count how many of a variable product's variations match the given attribute selection.
+	 *
+	 * Mirrors the matching rules of `find_matching_product_variation()` (an empty stored attribute
+	 * value means the variation accepts any value), but counts every match so callers can detect an
+	 * ambiguous selection. Short-circuits once a second match is found.
+	 *
+	 * @param WC_Product $product          Variable product.
+	 * @param array      $match_attributes Requested attributes keyed by `attribute_*` name.
+	 * @return int Number of matching variations (0, 1, or 2 when more than one matches).
+	 */
+	private function count_matching_variations( $product, $match_attributes ) {
+		$match_count = 0;
+
+		foreach ( $product->get_children() as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+
+			if ( ! $variation instanceof WC_Product_Variation ) {
+				continue;
+			}
+
+			$matches = true;
+
+			foreach ( $variation->get_variation_attributes() as $attribute_key => $attribute_value ) {
+				// An empty stored value means the variation accepts any value for this attribute.
+				if ( '' === $attribute_value ) {
+					continue;
+				}
+				if ( ! isset( $match_attributes[ $attribute_key ] ) || $match_attributes[ $attribute_key ] !== $attribute_value ) {
+					$matches = false;
+					break;
+				}
+			}
+
+			if ( $matches && ++$match_count > 1 ) {
+				return $match_count;
+			}
+		}
+
+		return $match_count;
 	}
 }
