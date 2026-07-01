@@ -66,10 +66,15 @@ const BusinessDetails: React.FC = () => {
 			selectedBusinessStructures.length === 1 &&
 			selectedBusinessStructures[ 0 ].key === 'nil'
 		);
+	const selectedBusinessTypeKey = selectedBusinessType?.key;
+	const companyStructure = data[ 'company.structure' ];
+	const latestDataRef = React.useRef( data );
+	latestDataRef.current = data;
+
 	const selectedBusinessStructure =
 		! shouldDisplayBusinessStructure ||
 		selectedBusinessStructures.find(
-			( structure ) => structure.key === data[ 'company.structure' ]
+			( structure ) => structure.key === companyStructure
 		);
 
 	const updateBusinessVerificationData = React.useCallback(
@@ -98,18 +103,18 @@ const BusinessDetails: React.FC = () => {
 
 	React.useEffect( () => {
 		if (
-			selectedBusinessType &&
+			selectedBusinessTypeKey &&
 			! shouldDisplayBusinessStructure &&
-			data[ 'company.structure' ]
+			companyStructure !== undefined
 		) {
 			void updateBusinessVerificationData( {
-				...data,
+				...latestDataRef.current,
 				'company.structure': undefined,
 			} );
 		}
 	}, [
-		data,
-		selectedBusinessType,
+		companyStructure,
+		selectedBusinessTypeKey,
 		shouldDisplayBusinessStructure,
 		updateBusinessVerificationData,
 	] );

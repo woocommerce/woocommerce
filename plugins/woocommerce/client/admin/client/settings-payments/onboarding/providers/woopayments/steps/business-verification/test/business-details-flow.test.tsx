@@ -92,6 +92,7 @@ const mockNextStep = jest.fn();
 
 const fields = {
 	available_countries: {
+		CA: 'Canada',
 		GB: 'United Kingdom (UK)',
 		JP: 'Japan',
 		US: 'United States (US)',
@@ -115,6 +116,23 @@ const fields = {
 						{
 							key: 'llc',
 							name: 'Limited liability company',
+						},
+					],
+				},
+			],
+		},
+		{
+			key: 'CA',
+			name: 'Canada',
+			types: [
+				{
+					key: 'company',
+					name: 'Company',
+					description: '',
+					structures: [
+						{
+							key: 'nil',
+							name: 'None',
 						},
 					],
 				},
@@ -296,7 +314,7 @@ describe( 'Business details onboarding flow', () => {
 		renderBusinessDetailsForm( {
 			country: 'JP',
 			business_type: 'company',
-			'company.structure': 'sole_proprietorship',
+			'company.structure': '',
 			mcc: '5812',
 		} );
 
@@ -320,6 +338,42 @@ describe( 'Business details onboarding flow', () => {
 		expect( savePayload ).toEqual( {
 			self_assessment: {
 				country: 'JP',
+				business_type: 'company',
+				'company.structure': undefined,
+				mcc: '5812',
+			},
+			source: 'settings',
+		} );
+	} );
+
+	it( 'continues without showing business structure when nil is the only option', async () => {
+		renderBusinessDetailsForm( {
+			country: 'CA',
+			business_type: 'company',
+			'company.structure': 'nil',
+			mcc: '5812',
+		} );
+
+		expect(
+			screen.queryByRole( 'combobox', {
+				name: 'What category of legal entity identify your business?',
+			} )
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByRole( 'combobox', {
+				name: /What type of goods or services does your business sell?/,
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText( /By using WooPayments/ )
+		).toBeInTheDocument();
+
+		await waitFor( () => expect( mockApiFetch ).toHaveBeenCalled() );
+		const savePayload = mockApiFetch.mock.calls.at( -1 )?.[ 0 ].data;
+
+		expect( savePayload ).toEqual( {
+			self_assessment: {
+				country: 'CA',
 				business_type: 'company',
 				'company.structure': undefined,
 				mcc: '5812',
