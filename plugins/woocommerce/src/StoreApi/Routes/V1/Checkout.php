@@ -562,6 +562,15 @@ class Checkout extends AbstractCartRoute {
 		$this->cart_controller->validate_cart();
 
 		/**
+		 * Reject the order if the cart changed server-side since the customer last saw it
+		 * (e.g. a product price, quantity, coupon or shipping cost changed during checkout),
+		 * so they aren't charged unexpected totals.
+		 *
+		 * @see https://github.com/woocommerce/woocommerce/issues/52663
+		 */
+		$this->validate_cart_hash_matches_request( $request );
+
+		/**
 		 * Persist customer session data from the request first so that OrderController::update_addresses_from_cart
 		 * uses the up-to-date customer address.
 		 */
@@ -1043,6 +1052,37 @@ class Checkout extends AbstractCartRoute {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Reject the request if the cart hash the client last saw no longer matches the server's
+	 * current cart hash. This catches server-side changes (product price/quantity, coupons,
+	 * shipping costs, taxes — all folded into the cart total the hash is built from) that
+	 * happened while the customer was checking out, so the order isn't placed with totals the
+	 * customer never agreed to.
+	 *
+	 * The check is skipped when the client sends no hash (e.g. third-party Store API clients),
+	 * preserving backward compatibility.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @throws RouteException When the client's cart hash differs from the server's.
+	 */
+	private function validate_cart_hash_matches_request( \WP_REST_Request $request ): void {
+		$client_cart_hash = $request->get_header( 'Cart-Hash' );
+
+		if ( empty( $client_cart_hash ) ) {
+			return;
+		}
+
+		if ( ! hash_equals( WC()->cart->get_cart_hash(), $client_cart_hash ) ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_cart_changed',
+				esc_html__( 'The items or totals in your cart changed while placing your order. Please review your cart and try again.', 'woocommerce' ),
+				409
+			);
+		}
 	}
 
 	/**

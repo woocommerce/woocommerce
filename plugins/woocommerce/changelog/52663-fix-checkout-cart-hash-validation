@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Store API: reject the checkout POST with a 409 when the cart changed server-side (price, quantity, coupon, shipping or totals) since the customer last saw it, so orders aren't placed with unexpected totals.

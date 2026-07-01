@@ -426,6 +426,92 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * Ensure the order is placed when the client's cart hash still matches the server's.
+	 */
+	public function test_matching_cart_hash_post_data() {
+		WC()->cart->calculate_totals();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Cart-Hash', WC()->cart->get_cart_hash() );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+	}
+
+	/**
+	 * Ensure the order is rejected when the cart hash the client last saw no longer matches the
+	 * server's, e.g. a price, quantity or total changed server-side during checkout. See #52663.
+	 */
+	public function test_stale_cart_hash_post_data() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Cart-Hash', 'stale-hash-that-no-longer-matches' );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 409, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertEquals( 'woocommerce_rest_checkout_cart_changed', $response->get_data()['code'] );
+	}
+
+	/**
 	 * Ensure that orders can be placed with virtual products.
 	 */
 	public function test_virtual_product_post_data() {

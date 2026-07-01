@@ -3,6 +3,11 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 
+/**
+ * Internal dependencies
+ */
+import { isStoreApiRequest } from './store-api-nonce';
+
 // Stores the current hash for the middleware.
 let currentCartHash = window.localStorage.getItem( 'storeApiCartHash' );
 
@@ -36,4 +41,38 @@ const setCartHash = ( headers ) => {
 	}
 };
 
+/**
+ * Appends the last-seen cart hash to a request so the server can detect if the
+ * cart changed server-side (e.g. price, quantity, coupon or shipping) since the
+ * customer last saw it. The checkout POST rejects the order on a mismatch.
+ *
+ * @param {Object} request Fetch options.
+ * @return {Object} The request with the Cart-Hash header appended.
+ */
+const appendCartHashHeader = ( request ) => {
+	if ( ! currentCartHash ) {
+		return request;
+	}
+	request.headers = {
+		...( request.headers || {} ),
+		'Cart-Hash': currentCartHash,
+	};
+	return request;
+};
+
+/**
+ * Middleware which appends the current cart hash to store API requests.
+ *
+ * @param {Object}   options Fetch options.
+ * @param {Function} next    The next middleware or fetchHandler to call.
+ * @return {*} The evaluated result of the remaining middleware chain.
+ */
+const storeCartHashMiddleware = ( options, next ) => {
+	if ( isStoreApiRequest( options ) ) {
+		options = appendCartHashHeader( options );
+	}
+	return next( options, next );
+};
+
+apiFetch.use( storeCartHashMiddleware );
 apiFetch.setCartHash = setCartHash;
