@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Logging;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\{ LogHandlerFileV2, Settings };
-use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\File;
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ File, FileController };
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use WC_Unit_Test_Case;
 
@@ -383,6 +383,106 @@ MESSAGE;
 		$actual_content  = file_get_contents( reset( $paths ) );
 		$expected_string = '101 log files from source <code>duck</code> were deleted.';
 		$this->assertStringContainsString( $expected_string, $actual_content );
+	}
+
+	/**
+	 * @testdox Check that clear terminates and deletes everything when a source has exactly the batch-size number of files.
+	 */
+	public function test_clear_deletes_exactly_one_full_batch() {
+		// 100 files is exactly DELETE_BATCH_SIZE: the loop fetches a full page, then
+		// must make one more (empty) fetch and break rather than miscount or hang.
+		$total = 100;
+		foreach ( range( 1, $total ) as $days_ago ) {
+			$this->sut->handle( strtotime( "-{$days_ago} days" ), 'debug', 'quack.', array( 'source' => 'duck' ) );
+		}
+
+		$this->assertCount( $total, glob( Settings::get_log_directory() . 'duck*.log' ) );
+
+		$result = $this->sut->clear( 'duck' );
+
+		$this->assertEquals( $total, $result );
+		$this->assertCount( 0, glob( Settings::get_log_directory() . 'duck*.log' ) );
+	}
+
+	/**
+	 * @testdox Check that clear removes every deletable file for a source even when a full batch contains undeletable files.
+	 */
+	public function test_clear_removes_all_deletable_files_when_a_full_batch_contains_undeletable_files() {
+		$total = 150;
+		foreach ( range( 1, $total ) as $days_ago ) {
+			$this->sut->handle( strtotime( "-{$days_ago} days" ), 'debug', 'quack.', array( 'source' => 'duck' ) );
+		}
+
+		// Pin descending modified times so the default 'modified' sort in get_files()
+		// is deterministic (newest-dated file first) and the batch boundaries are predictable.
+		$filesystem = FilesystemUtil::get_wp_filesystem();
+		$paths      = glob( Settings::get_log_directory() . 'duck*.log' );
+		$this->assertCount( $total, $paths );
+		// glob() sorts oldest-date first; reverse to newest-first.
+		$newest_first = array_reverse( $paths );
+		$base_mtime   = time();
+		foreach ( $newest_first as $index => $path ) {
+			$filesystem->touch( $path, $base_mtime - $index );
+		}
+
+		/*
+		 * Lock files at adversarial positions: inside the first full batch (0, 50, 99),
+		 * on the batch boundary (100), and in the trailing partial batch (149). If clear()
+		 * advanced its offset past a deletable file while skipping an undeletable one, one of
+		 * the non-locked files would survive and the deleted count would fall short.
+		 */
+		$locked_indexes = array( 0, 50, 99, 100, 149 );
+		$locked_ids     = array();
+		foreach ( $locked_indexes as $index ) {
+			$locked_ids[] = ( new File( $newest_first[ $index ] ) )->get_file_id();
+		}
+
+		$controller = new class( $locked_ids ) extends FileController {
+			/**
+			 * File IDs that delete_files() must refuse to delete, simulating files that
+			 * cannot be removed from disk (e.g. a permission error).
+			 *
+			 * @var string[]
+			 */
+			private $locked_ids;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param string[] $locked_ids File IDs that must not be deleted.
+			 */
+			public function __construct( array $locked_ids ) {
+				$this->locked_ids = $locked_ids;
+			}
+
+			/**
+			 * Delete every requested file except the locked ones.
+			 *
+			 * @param string[] $file_ids The file IDs to delete.
+			 *
+			 * @return int The number of files that were deleted.
+			 */
+			public function delete_files( array $file_ids ): int {
+				return parent::delete_files( array_values( array_diff( $file_ids, $this->locked_ids ) ) );
+			}
+		};
+
+		$property = new \ReflectionProperty( LogHandlerFileV2::class, 'file_controller' );
+		$property->setAccessible( true );
+		$property->setValue( $this->sut, $controller );
+
+		$result = $this->sut->clear( 'duck' );
+
+		$this->assertEquals( $total - count( $locked_indexes ), $result, 'Every deletable file for the source should be removed.' );
+
+		$remaining = glob( Settings::get_log_directory() . 'duck*.log' );
+		sort( $remaining );
+		$expected_remaining = array();
+		foreach ( $locked_indexes as $index ) {
+			$expected_remaining[] = $newest_first[ $index ];
+		}
+		sort( $expected_remaining );
+		$this->assertSame( $expected_remaining, $remaining, 'Only the undeletable files should remain on disk.' );
 	}
 
 	/**

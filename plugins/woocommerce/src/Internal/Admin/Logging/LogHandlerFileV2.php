@@ -11,7 +11,7 @@ use WC_Log_Handler;
  */
 class LogHandlerFileV2 extends WC_Log_Handler {
 	/**
-	 * Maximum number of expired log files to delete in one loop iteration.
+	 * Maximum number of log files to delete in one loop iteration.
 	 *
 	 * @var int
 	 */
