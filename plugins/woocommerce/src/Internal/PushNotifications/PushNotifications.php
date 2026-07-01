@@ -135,20 +135,22 @@ class PushNotifications {
 			return $this->enabled;
 		}
 
-		/**
-		 * Filters whether enhanced push notifications should be disabled.
-		 *
-		 * The feature was previously controlled by a now-deprecated feature
-		 * flag. It is now enabled by default for all compatible users, but this
-		 * filter lets a store force it off (e.g. to fall back to Jetpack Sync
-		 * if something isn't working). The feature also requires a Jetpack
-		 * connection, which is checked separately below.
-		 *
-		 * @since 10.9.2
-		 *
-		 * @param bool $disabled Whether enhanced push notifications are disabled. Defaults to false.
-		 */
-		$feature_disabled = apply_filters( 'woocommerce_enhanced_push_notifications_disabled', false );
+		$feature_disabled = wc_string_to_bool(
+			/**
+			 * Filters whether enhanced push notifications should be disabled.
+			 *
+			 * The feature was previously controlled by a now-deprecated feature
+			 * flag. It is now enabled by default for all compatible users, but this
+			 * filter lets a store force it off (e.g. to fall back to Jetpack Sync
+			 * if something isn't working). The feature also requires a Jetpack
+			 * connection, which is checked separately below.
+			 *
+			 * @since 10.9.2
+			 *
+			 * @param bool $disabled Whether enhanced push notifications are disabled. Defaults to false.
+			 */
+			apply_filters( 'woocommerce_enhanced_push_notifications_disabled', false )
+		);
 
 		if ( $feature_disabled ) {
 			$this->enabled = false;
