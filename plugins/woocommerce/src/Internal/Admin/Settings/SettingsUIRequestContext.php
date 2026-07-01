@@ -370,6 +370,18 @@ class SettingsUIRequestContext {
 						array( 'source' => 'settings-ui' )
 					);
 
+					wc_doing_it_wrong(
+						__METHOD__,
+						sprintf(
+							/* translators: 1: settings page id, 2: settings section id, 3: failure reason. */
+							esc_html__( 'The native Settings UI page for page "%1$s" section "%2$s" could not be resolved. Falling back to the default settings adapter. Reason: %3$s', 'woocommerce' ),
+							esc_html( $settings_page->get_id() ),
+							esc_html( '' === $section ? self::DEFAULT_SECTION_KEY : $section ),
+							esc_html( get_class( $e ) . ': ' . $e->getMessage() )
+						),
+						'11.0.0'
+					);
+
 					if ( $e instanceof \Exception ) {
 						wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
 					}

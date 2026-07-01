@@ -150,8 +150,10 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	 * @testdox Should fall back to the default adapter when a registered section native Settings UI page provider fails.
 	 */
 	public function test_falls_back_to_default_adapter_when_registered_section_native_settings_ui_page_provider_fails(): void {
+		$this->setExpectedIncorrectUsage( SettingsUIRequestContext::class . '::resolve_settings_ui_page' );
+
 		$page = $this->get_parent_page();
-		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section( 'acme_payments', true ) );
+		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section( 'acme_payments', new \Error( 'Unable to resolve native settings UI page.' ) ) );
 
 		$settings_ui_page = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' )->get_settings_ui_page();
 
@@ -160,6 +162,33 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 
 		$schema = $settings_ui_page->get_schema( 'acme_payments' );
 		$this->assertSame( 'registered_acme_payments_setting', $schema['groups']['default']['fields'][0]['id'] );
+	}
+
+	/**
+	 * @testdox Should report exceptions from a registered section native Settings UI page provider and fall back to the default adapter.
+	 */
+	public function test_falls_back_to_default_adapter_when_registered_section_native_settings_ui_page_provider_throws_exception(): void {
+		$this->setExpectedIncorrectUsage( SettingsUIRequestContext::class . '::resolve_settings_ui_page' );
+
+		$caught   = array();
+		$listener = static function ( $exception ) use ( &$caught ): void {
+			$caught[] = $exception;
+		};
+		add_action( 'woocommerce_caught_exception', $listener );
+
+		$page      = $this->get_parent_page();
+		$exception = new \RuntimeException( 'Unable to resolve native settings UI page.' );
+		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section( 'acme_payments', $exception ) );
+
+		try {
+			$settings_ui_page = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' )->get_settings_ui_page();
+		} finally {
+			remove_action( 'woocommerce_caught_exception', $listener );
+		}
+
+		$this->assertInstanceOf( SettingsUIPageInterface::class, $settings_ui_page );
+		$this->assertSame( 'checkout', $settings_ui_page->get_page_id() );
+		$this->assertSame( array( $exception ), $caught, 'Provider exceptions should be reported through wc_caught_exception().' );
 	}
 
 	/**
@@ -319,12 +348,12 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	/**
 	 * Build a registered test section.
 	 *
-	 * @param string $section_id Section id.
-	 * @param bool   $fail_settings_ui_page_provider Whether the Settings UI page provider should fail.
+	 * @param string          $section_id Section id.
+	 * @param \Throwable|null $settings_ui_page_failure Throwable the Settings UI page provider should throw, if any.
 	 * @return SettingsSectionInterface
 	 */
-	private function get_registered_section( string $section_id = 'acme_payments', bool $fail_settings_ui_page_provider = false ): SettingsSectionInterface {
-		return new class( $section_id, $fail_settings_ui_page_provider ) extends SettingsSection {
+	private function get_registered_section( string $section_id = 'acme_payments', ?\Throwable $settings_ui_page_failure = null ): SettingsSectionInterface {
+		return new class( $section_id, $settings_ui_page_failure ) extends SettingsSection {
 			/**
 			 * Section id.
 			 *
@@ -333,21 +362,21 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 			private string $section_id;
 
 			/**
-			 * Whether the Settings UI page provider should fail.
+			 * Throwable the Settings UI page provider should throw, if any.
 			 *
-			 * @var bool
+			 * @var \Throwable|null
 			 */
-			private bool $fail_settings_ui_page_provider;
+			private ?\Throwable $settings_ui_page_failure;
 
 			/**
 			 * Constructor.
 			 *
-			 * @param string $section_id Section id.
-			 * @param bool   $fail_settings_ui_page_provider Whether the Settings UI page provider should fail.
+			 * @param string          $section_id Section id.
+			 * @param \Throwable|null $settings_ui_page_failure Throwable the Settings UI page provider should throw, if any.
 			 */
-			public function __construct( string $section_id, bool $fail_settings_ui_page_provider ) {
-				$this->section_id                     = $section_id;
-				$this->fail_settings_ui_page_provider = $fail_settings_ui_page_provider;
+			public function __construct( string $section_id, ?\Throwable $settings_ui_page_failure ) {
+				$this->section_id               = $section_id;
+				$this->settings_ui_page_failure = $settings_ui_page_failure;
 			}
 
 			/**
@@ -410,8 +439,8 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 			 * @return SettingsUIPageInterface|null
 			 */
 			public function get_settings_ui_page( \WC_Settings_Page $parent_page ): ?SettingsUIPageInterface {
-				if ( $this->fail_settings_ui_page_provider ) {
-					throw new \Error( 'Unable to resolve native settings UI page.' );
+				if ( $this->settings_ui_page_failure ) {
+					throw $this->settings_ui_page_failure;
 				}
 
 				return parent::get_settings_ui_page( $parent_page );
