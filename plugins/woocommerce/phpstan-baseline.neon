@@ -56966,12 +56966,6 @@ parameters:
 			path: src/Internal/Admin/Logging/FileV2/FileController.php
 
 		-
-			message: '#^Right side of \|\| is always true\.$#'
-			identifier: booleanOr.rightAlwaysTrue
-			count: 8
-			path: src/Internal/Admin/Logging/FileV2/FileController.php
-
-		-
 			message: '#^Variable \$sort_callback might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
