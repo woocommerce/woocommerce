@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show a free value for zero-cost shipping methods in order summary totals.
