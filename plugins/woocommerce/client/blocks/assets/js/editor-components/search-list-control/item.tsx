@@ -162,7 +162,12 @@ export const SearchListItem = < T extends object = object >( {
 						id={ id }
 						name={ name }
 						value={ item.value }
-						onChange={ onSelect( item ) }
+						onChange={ () => {
+							onSelect( item )();
+							if ( ! isExpanded ) {
+								setExpandedPanelId( item.id );
+							}
+						} }
 						onClick={ ( e ) => e.stopPropagation() }
 						checked={ isSelected }
 						disabled={ disabled }
@@ -219,6 +224,9 @@ export const SearchListItem = < T extends object = object >( {
 										'id'
 									)
 								)();
+								if ( ! isExpanded ) {
+									setExpandedPanelId( item.id );
+								}
 							}
 						} }
 						__nextHasNoMarginBottom={ true }
@@ -268,7 +276,12 @@ export const SearchListItem = < T extends object = object >( {
 						decodeEntities( item.name ),
 						search
 					) }
-					onChange={ onSelect( item ) }
+					onChange={ () => {
+						onSelect( item )();
+						if ( ! isExpanded ) {
+							setExpandedPanelId( item.id );
+						}
+					} }
 					checked={ isSelected }
 					disabled={ disabled }
 					__nextHasNoMarginBottom={ true }
