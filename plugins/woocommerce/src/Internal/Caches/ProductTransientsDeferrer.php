@@ -72,7 +72,7 @@ class ProductTransientsDeferrer {
 
 		--$this->deferral_level;
 		if ( 0 === $this->deferral_level ) {
-			remove_action( 'shutdown', array( $this, 'handle_shutdown' ) );
+			remove_action( 'shutdown', array( $this, 'handle_shutdown' ), 0 );
 			$this->flush();
 		}
 	}
