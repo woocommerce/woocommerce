@@ -2,16 +2,36 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { InnerBlocks } from '@wordpress/block-editor';
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import { registerBlockType, createBlock } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { Edit, Save } from './edit';
 import './style.scss';
 import { blockName, blockAttributes } from './attributes';
 import './inner-blocks';
 import { metadata } from './metadata';
+import { lazyEdit } from '../shared/lazy-edit';
+
+const Edit = lazyEdit( () =>
+	import( /* webpackChunkName: "cart-edit" */ './edit' ).then(
+		( { Edit: CartEdit } ) => ( {
+			default: CartEdit,
+		} )
+	)
+);
+
+const Save = () => {
+	return (
+		<div
+			{ ...useBlockProps.save( {
+				className: 'is-loading',
+			} ) }
+		>
+			<InnerBlocks.Content />
+		</div>
+	);
+};
 
 /**
  * Register and run the Cart block.

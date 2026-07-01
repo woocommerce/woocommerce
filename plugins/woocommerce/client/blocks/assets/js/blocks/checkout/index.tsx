@@ -6,14 +6,35 @@ import { fields } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
 import { registerBlockType, createBlock } from '@wordpress/blocks';
 import type { BlockInstance } from '@wordpress/blocks';
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
-import { Edit, Save } from './edit';
 import { blockAttributes, deprecatedAttributes } from './attributes';
 import './inner-blocks';
 import metadata from './block.json';
+import { lazyEdit } from '../shared/lazy-edit';
+
+const Edit = lazyEdit( () =>
+	import( /* webpackChunkName: "checkout-edit" */ './edit' ).then(
+		( { Edit: CheckoutEdit } ) => ( {
+			default: CheckoutEdit,
+		} )
+	)
+);
+
+const Save = (): JSX.Element => {
+	return (
+		<div
+			{ ...useBlockProps.save( {
+				className: 'wc-block-checkout is-loading',
+			} ) }
+		>
+			<InnerBlocks.Content />
+		</div>
+	);
+};
 
 const settings = {
 	icon: {

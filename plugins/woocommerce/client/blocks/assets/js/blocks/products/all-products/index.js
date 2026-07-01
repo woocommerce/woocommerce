@@ -10,12 +10,16 @@ import '@woocommerce/atomic-blocks';
  */
 import metadata from './block.json';
 import deprecated from './deprecated';
-import edit from './edit';
 import save from './save';
 import defaults from './defaults';
+import { lazyEdit } from '../../shared/lazy-edit';
 
 const { name } = metadata;
 export { metadata, name };
+
+const edit = lazyEdit( () =>
+	import( /* webpackChunkName: "all-products-edit" */ './edit' )
+);
 
 const settings = {
 	icon: {

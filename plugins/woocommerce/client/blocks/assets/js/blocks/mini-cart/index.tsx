@@ -9,8 +9,12 @@ import { addFilter } from '@wordpress/hooks';
  * Internal dependencies
  */
 import metadata from './block.json';
-import edit from './edit';
 import './style.scss';
+import { lazyEdit } from '../shared/lazy-edit';
+
+const edit = lazyEdit( () =>
+	import( /* webpackChunkName: "mini-cart-edit" */ './edit' )
+);
 
 const featurePluginSupport = {
 	...metadata.supports,
