@@ -53,10 +53,16 @@ const appendCartHashHeader = ( request ) => {
 	if ( ! currentCartHash ) {
 		return request;
 	}
-	request.headers = {
-		...( request.headers || {} ),
-		'Cart-Hash': currentCartHash,
-	};
+	// Preserve the original headers type so existing headers (e.g. the nonce) are
+	// not dropped when it is a Headers instance rather than a plain object.
+	if ( request.headers instanceof Headers ) {
+		request.headers.set( 'Cart-Hash', currentCartHash );
+	} else {
+		request.headers = {
+			...( request.headers || {} ),
+			'Cart-Hash': currentCartHash,
+		};
+	}
 	return request;
 };
 

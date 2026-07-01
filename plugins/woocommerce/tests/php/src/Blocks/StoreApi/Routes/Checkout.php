@@ -507,8 +507,11 @@ class Checkout extends \WP_Test_REST_TestCase {
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
-		$this->assertEquals( 409, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->assertEquals( 'woocommerce_rest_checkout_cart_changed', $response->get_data()['code'] );
+		$data     = $response->get_data();
+		$this->assertEquals( 409, $response->get_status(), print_r( $data, true ) );
+		$this->assertEquals( 'woocommerce_rest_checkout_cart_changed', $data['code'] );
+		// The 409 returns the fresh cart so the client can refresh the displayed totals.
+		$this->assertArrayHasKey( 'cart', $data['data'] );
 	}
 
 	/**
