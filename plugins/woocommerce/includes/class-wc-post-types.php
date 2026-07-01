@@ -208,6 +208,7 @@ class WC_Post_Types {
 						'add_new_item'      => __( 'Add new shipping class', 'woocommerce' ),
 						'new_item_name'     => __( 'New shipping class Name', 'woocommerce' ),
 					),
+					'public'                => false,
 					'show_ui'               => false,
 					'show_in_quick_edit'    => false,
 					'show_in_nav_menus'     => false,

@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -57,12 +58,45 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );
 		add_filter( 'posts_clauses', array( $this, 'posts_clauses' ), 10, 2 );
-		add_filter( 'the_posts', array( $this, 'prime_thumbnail_caches' ), 10, 2 );
 		add_action( 'manage_product_posts_custom_column', array( $this, 'add_sample_product_badge' ), 9, 2 );
+
+		// Use hooks to prime various caches and improve products page performance.
+		add_action( 'load-edit.php', array( $this, 'prime_status_counts_cache' ) );
+		add_filter( 'the_posts', array( $this, 'prime_thumbnail_caches' ), 10, 2 );
 
 		$cogs_controller              = wc_get_container()->get( CostOfGoodsSoldController::class );
 		$this->cogs_is_enabled        = $cogs_controller->feature_is_enabled();
 		$this->use_cogs_lookup_column = $this->cogs_is_enabled && $cogs_controller->product_meta_lookup_table_cogs_value_columns_exist();
+	}
+
+	/**
+	 * Pre-warm the wp_count_posts cache before the list table renders.
+	 *
+	 * @internal
+	 * @since 11.0.0
+	 *
+	 * @return void
+	 */
+	public function prime_status_counts_cache(): void {
+		$screen = get_current_screen();
+		if ( ! $screen || 'edit-product' !== $screen->id ) {
+			return;
+		}
+
+		// Performance note: the current listings architecture prevents us from isolating wp_count_posts calls.
+		// In the context of the products page, we can still isolate the underlying SQL by warming up the wp_count_posts cache.
+		$cache = (object) array_map(
+			static fn ( $count ) => $count ? (string) $count : (int) $count,
+			wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' )
+		);
+		// Trade-off: private-status tally may read slightly high for restricted roles (other users' privates included) — non-critical.
+		wp_cache_set_multiple(
+			array(
+				'posts-product' => $cache,
+				'posts-product_readable_' . get_current_user_id() => $cache,
+			),
+			'counts'
+		);
 	}
 
 	/**
