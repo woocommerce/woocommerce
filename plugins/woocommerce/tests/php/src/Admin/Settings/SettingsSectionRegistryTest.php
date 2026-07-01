@@ -147,6 +147,29 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should invoke the native Settings UI page provider once per cached request context.
+	 */
+	public function test_invokes_native_settings_ui_page_provider_once_per_request_context(): void {
+		$provider_calls = 0;
+		$page           = $this->get_parent_page();
+		SettingsSectionRegistry::get_instance()->register(
+			$this->get_registered_section_with_native_settings_ui_page(
+				static function () use ( &$provider_calls ): void {
+					++$provider_calls;
+				}
+			)
+		);
+
+		$context = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' );
+		$context->get_settings_ui_page();
+		$repeat_context = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' );
+		$repeat_context->get_settings_ui_page();
+
+		$this->assertSame( $context, $repeat_context, 'Request contexts should be cached per settings page and section.' );
+		$this->assertSame( 1, $provider_calls, 'The native Settings UI page provider should only be invoked once per request context.' );
+	}
+
+	/**
 	 * @testdox Should fall back to the default adapter when a registered section native Settings UI page provider fails.
 	 */
 	public function test_falls_back_to_default_adapter_when_registered_section_native_settings_ui_page_provider_fails(): void {
@@ -452,10 +475,27 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	/**
 	 * Build a registered section that provides a native Settings UI page.
 	 *
+	 * @param callable|null $on_settings_ui_page_call Callback invoked every time the Settings UI page provider runs.
 	 * @return SettingsSectionInterface
 	 */
-	private function get_registered_section_with_native_settings_ui_page(): SettingsSectionInterface {
-		return new class() extends SettingsSection {
+	private function get_registered_section_with_native_settings_ui_page( ?callable $on_settings_ui_page_call = null ): SettingsSectionInterface {
+		return new class( $on_settings_ui_page_call ) extends SettingsSection {
+			/**
+			 * Callback invoked every time the Settings UI page provider runs.
+			 *
+			 * @var callable|null
+			 */
+			private $on_settings_ui_page_call;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param callable|null $on_settings_ui_page_call Callback invoked every time the Settings UI page provider runs.
+			 */
+			public function __construct( ?callable $on_settings_ui_page_call ) {
+				$this->on_settings_ui_page_call = $on_settings_ui_page_call;
+			}
+
 			/**
 			 * Get the parent page id.
 			 *
@@ -506,6 +546,10 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 			 * @return SettingsUIPageInterface|null
 			 */
 			public function get_settings_ui_page( \WC_Settings_Page $parent_page ): ?SettingsUIPageInterface {
+				if ( $this->on_settings_ui_page_call ) {
+					( $this->on_settings_ui_page_call )();
+				}
+
 				return new class() implements SettingsUIPageInterface {
 					/**
 					 * Get the page id.
