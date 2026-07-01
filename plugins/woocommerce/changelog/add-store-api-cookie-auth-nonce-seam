@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Store API: add an `is_cookie_authenticated()` seam to AbstractCartRoute so routes authenticated by other means can opt out of the nonce requirement without re-implementing the nonce logic.

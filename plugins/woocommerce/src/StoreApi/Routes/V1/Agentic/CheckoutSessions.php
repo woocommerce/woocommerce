@@ -116,13 +116,15 @@ class CheckoutSessions extends AbstractCartRoute {
 	}
 
 	/**
-	 * Check if a nonce is required for the route.
+	 * Authenticated via Jetpack blog token (see is_authorized()), not the auth
+	 * cookie, so the route is not a CSRF target and opts out of the nonce.
 	 *
 	 * @param \WP_REST_Request $request Request object.
-	 * @return bool False, Jetpack blog token auth used instead.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 * @return bool
 	 */
-	protected function requires_nonce( \WP_REST_Request $request ) {
-		// Uses Jetpack blog token authentication via is_authorized().
+	protected function is_cookie_authenticated( \WP_REST_Request $request ) {
+		unset( $request );
 		return false;
 	}
 
