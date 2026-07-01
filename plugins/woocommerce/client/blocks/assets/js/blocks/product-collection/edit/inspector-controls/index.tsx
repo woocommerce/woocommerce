@@ -6,11 +6,10 @@ import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { useIsEmailEditor } from '@woocommerce/email-editor';
 import { recordEvent } from '@woocommerce/tracks';
-import { CesFeedbackButton } from '@woocommerce/editor-components/ces-feedback-button';
 import {
-	PanelBody,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
+	PanelBody,
 } from '@wordpress/components';
 
 /**
@@ -289,10 +288,6 @@ const ProductCollectionInspectorControls = (
 					) }
 				</ToolsPanel>
 			) : null }
-			<CesFeedbackButton
-				blockName={ `${ metadata.title } block` }
-				wrapper={ PanelBody }
-			/>
 		</InspectorControls>
 	);
 };
