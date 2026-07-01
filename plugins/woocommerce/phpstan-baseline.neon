@@ -10291,12 +10291,6 @@ parameters:
 			path: includes/class-wc-cart.php
 
 		-
-			message: '#^Parameter \#1 \$product_id of method WC_Cart\:\:generate_cart_id\(\) expects int, int\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-cart.php
-
-		-
 			message: '#^Parameter \#1 \$stock_quantity of function wc_format_stock_quantity_for_display expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 3
