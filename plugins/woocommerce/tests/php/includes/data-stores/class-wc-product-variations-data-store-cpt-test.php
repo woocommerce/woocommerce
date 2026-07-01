@@ -377,15 +377,42 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			return $title;
 		};
 		add_filter( 'woocommerce_product_variation_title', $spy );
+		// The spy hooks woocommerce_product_variation_title, which turns the skip off by default, so
+		// enable it explicitly here to exercise the in-sync skip path itself.
+		add_filter( 'woocommerce_variation_skip_title_resync_on_read', '__return_true' );
 
-		// Force a fresh read() of an in-sync variation; with the skip enabled (default), the title
-		// must not be regenerated.
+		// Force a fresh read() of an in-sync variation; with the skip enabled, the title must not be
+		// regenerated.
+		wp_cache_flush();
+		wc_get_product( $child_id );
+
+		remove_filter( 'woocommerce_variation_skip_title_resync_on_read', '__return_true' );
+		remove_filter( 'woocommerce_product_variation_title', $spy );
+
+		$this->assertFalse( $regenerated, 'An in-sync read must not regenerate the variation title.' );
+	}
+
+	/**
+	 * A registered woocommerce_product_variation_title filter may compute a dynamic title, so the skip
+	 * must default off (the title is regenerated on read) unless a store opts back in.
+	 */
+	public function test_title_filter_presence_disables_skip_by_default(): void {
+		$product  = WC_Helper_Product::create_variation_product();
+		$child_id = $product->get_children()[0];
+
+		$regenerated = false;
+		$spy         = function ( $title ) use ( &$regenerated ) {
+			$regenerated = true;
+			return $title;
+		};
+		add_filter( 'woocommerce_product_variation_title', $spy );
+
 		wp_cache_flush();
 		wc_get_product( $child_id );
 
 		remove_filter( 'woocommerce_product_variation_title', $spy );
 
-		$this->assertFalse( $regenerated, 'An in-sync read must not regenerate the variation title.' );
+		$this->assertTrue( $regenerated, 'A hooked title filter must default the skip off so the title is regenerated.' );
 	}
 
 	/**

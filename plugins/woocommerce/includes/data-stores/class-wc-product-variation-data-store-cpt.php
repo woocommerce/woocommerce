@@ -104,18 +104,21 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		// Resync the variation title with the parent if it has drifted (e.g. parent renamed, or saved
 		// pre-3.0). generate_product_title() costs one term query per variation, so skip it when the
 		// stored title is still in sync; otherwise regenerate (self-heals legacy / out-of-band edits).
+		// Default off when a woocommerce_product_variation_title filter is hooked, as it may compute a
+		// dynamic title that must keep running on read.
 
 		/**
 		 * Filters whether the per-read variation title resync may be skipped when the stored title is
 		 * already in sync with the parent. Skipping avoids one attribute-term query per variation on
-		 * read. Return false to always regenerate, restoring the pre-optimisation behaviour.
+		 * read. Defaults to true unless a woocommerce_product_variation_title filter is registered
+		 * (those may compute a dynamic title); return false to always regenerate.
 		 *
 		 * @since 11.0.0
 		 *
-		 * @param bool       $skip_resync Whether the resync may be skipped. Default true.
+		 * @param bool       $skip_resync Whether the resync may be skipped.
 		 * @param WC_Product $product     The variation being read.
 		 */
-		$skip_resync = apply_filters( 'woocommerce_variation_skip_title_resync_on_read', true, $product );
+		$skip_resync = apply_filters( 'woocommerce_variation_skip_title_resync_on_read', ! has_filter( 'woocommerce_product_variation_title' ), $product );
 
 		if ( $skip_resync && $this->is_variation_title_in_sync_with_parent( $product, $post_object->post_title ) ) {
 			$new_title = $post_object->post_title;
