@@ -1983,16 +1983,19 @@ WHERE
 
 		foreach ( $order_data as $id => $datum ) {
 			/*
-			 * Cached order data is always a plain stdClass whose id matches the cache key (see
-			 * get_order_data_for_ids_from_db()). Accept only that shape. Anything else - a scalar,
-			 * an array, a foreign/incomplete object such as __PHP_Incomplete_Class, or a record
-			 * whose id is missing or belongs to a different order (cross-contamination) - would
-			 * fatal or silently hydrate the wrong order downstream (read_multiple() dereferences
-			 * $order_data->id and indexes $orders[$order_id]). This can happen when a third-party
-			 * persistent object cache returns a corrupt or cross-contaminated value. Invalidate the
-			 * entry so it is re-read from the database, and surface it for diagnosis.
+			 * Cached order data is always a complete plain stdClass whose id matches the cache key
+			 * and which carries every mapped column property (see get_order_data_for_ids_from_db()).
+			 * Accept only that shape. Anything else - a scalar, an array, a foreign/incomplete
+			 * object such as __PHP_Incomplete_Class, a record whose id is missing or belongs to a
+			 * different order (cross-contamination), or a truncated record missing mapped columns -
+			 * would fatal or silently hydrate the wrong/default order state downstream
+			 * (read_multiple() dereferences $order_data->id and indexes $orders[$order_id];
+			 * set_order_props_from_data() defaults any missing property). This can happen when a
+			 * third-party persistent object cache returns a corrupt or cross-contaminated value, or
+			 * when a stale entry written by an older version predates the complete-column-set fix.
+			 * Invalidate the entry so it is re-read from the database, and surface it for diagnosis.
 			 */
-			if ( $datum instanceof \stdClass && property_exists( $datum, 'id' ) && (int) $datum->id === (int) $id ) {
+			if ( $this->is_valid_cached_order_data( $datum, (int) $id ) ) {
 				continue;
 			}
 
@@ -2000,7 +2003,7 @@ WHERE
 				$cache_engine->delete_cached_object( $id, $this->get_cache_group() );
 				$this->error_logger->warning(
 					sprintf(
-						'Discarded a corrupt HPOS order cache entry for order %1$d (unexpected shape or mismatched id); it will be re-read from the database.',
+						'Discarded a corrupt HPOS order cache entry for order %1$d (unexpected shape, mismatched id, or missing mapped columns); it will be re-read from the database.',
 						(int) $id
 					),
 					array( 'source' => 'hpos-data-cache' )
@@ -2011,6 +2014,36 @@ WHERE
 		}
 
 		return $order_data;
+	}
+
+	/**
+	 * Determine whether a cached order data record is complete and belongs to the requested order.
+	 *
+	 * A valid entry is a plain stdClass whose id matches the cache key and which carries every
+	 * column property that get_order_data_for_ids_from_db() populates from
+	 * get_all_order_column_mappings_for_cache(). Rejecting truncated records forces a fresh database
+	 * read instead of letting set_order_props_from_data() silently default the missing properties.
+	 *
+	 * @param mixed $datum The cached value to validate.
+	 * @param int   $id    The order id the entry is cached under.
+	 *
+	 * @return bool True when the record is a complete order data object for the given id.
+	 */
+	private function is_valid_cached_order_data( $datum, int $id ): bool {
+		if ( ! $datum instanceof \stdClass || ! property_exists( $datum, 'id' ) || (int) $datum->id !== $id ) {
+			return false;
+		}
+
+		foreach ( $this->get_all_order_column_mappings_for_cache() as $table_name => $column_mappings ) {
+			foreach ( $column_mappings as $field => $map ) {
+				$field_name = $map['name'] ?? "{$table_name}_$field";
+				if ( ! property_exists( $datum, $field_name ) ) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	/**

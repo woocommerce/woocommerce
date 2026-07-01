@@ -552,6 +552,57 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox A cached order data record with the correct id but a missing mapped column is rejected and re-read.
+	 */
+	public function test_truncated_order_data_cache_entry_is_rejected_and_reread(): void {
+		$fake_logger = $this->create_fake_logger();
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $fake_logger ) {
+				return $fake_logger;
+			}
+		);
+
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$sut = $container->get( OrdersTableDataStore::class );
+
+		$order = new WC_Order();
+		$order->set_status( 'completed' );
+		$order->set_total( '60.00' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$sut->clear_cached_data( array( $order_id ) );
+		wp_cache_flush();
+
+		$call_get_data = function ( $ids ) {
+			return $this->get_order_data_for_ids( $ids );
+		};
+
+		// Prime the cache with a complete record, then read it back.
+		$call_get_data->call( $sut, array( $order_id ) );
+		$cache_engine = $container->get( WPCacheEngine::class );
+		$cached       = $cache_engine->get_cached_objects( array( $order_id ), 'orders_data' );
+		$this->assertInstanceOf( \stdClass::class, $cached[ $order_id ] );
+		$this->assertTrue( property_exists( $cached[ $order_id ], 'status' ), 'Sanity: the primed cache record should carry the status column.' );
+
+		// Truncate the record: keep the correct id but drop a mapped column, then re-cache it.
+		$truncated = $cached[ $order_id ];
+		unset( $truncated->status );
+		$cache_engine->cache_objects( array( $order_id => $truncated ), 0, 'orders_data' );
+
+		$order_data = $call_get_data->call( $sut, array( $order_id ) );
+
+		$this->assertArrayHasKey( $order_id, $order_data, 'Order data should still be returned after the truncated entry is discarded.' );
+		$this->assertTrue( property_exists( $order_data[ $order_id ], 'status' ), 'The truncated entry should be replaced by a complete record read from the database.' );
+		$this->assertSame( $order_id, (int) $order_data[ $order_id ]->id );
+		$this->assert_hpos_cache_warning_logged( $fake_logger, 'corrupt HPOS order cache entry' );
+
+		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
 	 * @testdox filter_raw_meta_data() treats a non-array argument as empty meta instead of fataling.
 	 */
 	public function test_filter_raw_meta_data_tolerates_non_array_input(): void {
