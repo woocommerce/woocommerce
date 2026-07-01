@@ -342,6 +342,26 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox Order item totals display a free value for zero-cost shipping methods.
+	 */
+	public function test_get_order_item_totals_displays_free_value_for_zero_cost_shipping_methods() {
+		$shipping_method = 'Royal Mail 1st Class: Free';
+		$order           = new WC_Order();
+		$shipping_item   = new WC_Order_Item_Shipping();
+
+		$shipping_item->set_method_title( $shipping_method );
+		$shipping_item->set_method_id( 'free_shipping' );
+		$shipping_item->set_total( 0 );
+		$order->add_item( $shipping_item );
+
+		$totals = $order->get_order_item_totals();
+
+		$this->assertArrayHasKey( 'shipping', $totals );
+		$this->assertSame( $shipping_method, $totals['shipping']['meta'] );
+		$this->assertSame( __( 'Free', 'woocommerce' ), $totals['shipping']['value'] );
+	}
+
+	/**
 	 * @testDox Cache does not interfere if wc_get_order returns a different class than WC_Order.
 	 */
 	public function test_cache_does_not_interferes_with_order_object() {
