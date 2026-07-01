@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFeed\Storage;
 
+use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedLockException;
 use Automattic\WooCommerce\Internal\ProductFeed\Storage\JsonFileFeed;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 
@@ -173,7 +174,7 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 		$feed_two = new JsonFileFeed( 'test-feed' );
 
 		try {
-			$this->expectException( \Exception::class );
+			$this->expectException( FeedLockException::class );
 			$feed_two->start( $identifier );
 		} finally {
 			// Release the first process's lock so the test fixtures can be cleaned up.
