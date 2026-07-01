@@ -109,10 +109,7 @@ const handlers = [
 		return HttpResponse.json( mockProduct );
 	} ),
 
-	// @todo When updating the `@wordpress/data` package to 6.7 or later,
-	// this request will need to be updated to match the path in production:
-	// `/wp/v2/template-parts/woocommerce/woocommerce//<template-part-slug>`.
-	http.options( '/wp/v2/[object%20Object]', () => {
+	http.options( '/wp/v2/template-parts/woocommerce/woocommerce//*', () => {
 		return HttpResponse.json(
 			{},
 			{
@@ -232,10 +229,7 @@ describe( 'Add to Cart + Options block', () => {
 		/* eslint-enable no-console */
 	} );
 
-	// Skipped: wp-6.8's block-editor rendering pipeline no longer renders
-	// inner blocks in Jest's jsdom environment. Gutenberg tests block
-	// rendering via Playwright E2E; these should be migrated similarly.
-	it.skip( 'should render inner blocks for simple and external products', async () => {
+	it( 'should render inner blocks for simple and external products', async () => {
 		await setup();
 		await expectHasBlock( 'Add to Cart + Options (Beta)' );
 
@@ -259,10 +253,7 @@ describe( 'Add to Cart + Options block', () => {
 		expect( console ).toHaveWarned();
 	} );
 
-	// Skipped: wp-6.8's block-editor rendering pipeline no longer renders
-	// inner blocks in Jest's jsdom environment. Gutenberg tests block
-	// rendering via Playwright E2E; these should be migrated similarly.
-	it.skip( 'should render inner blocks for grouped products', async () => {
+	it( 'should render inner blocks for grouped products', async () => {
 		expect.hasAssertions();
 
 		await setup();
@@ -282,10 +273,7 @@ describe( 'Add to Cart + Options block', () => {
 		expect( console ).toHaveWarned();
 	} );
 
-	// Skipped: wp-6.8's block-editor rendering pipeline no longer renders
-	// inner blocks in Jest's jsdom environment. Gutenberg tests block
-	// rendering via Playwright E2E; these should be migrated similarly.
-	it.skip( 'should render inner blocks for grouped products with no store products', async () => {
+	it( 'should render inner blocks for grouped products with no store products', async () => {
 		expect.hasAssertions();
 
 		server.use(
@@ -311,10 +299,7 @@ describe( 'Add to Cart + Options block', () => {
 		expect( console ).toHaveWarned();
 	} );
 
-	// Skipped: wp-6.8's block-editor rendering pipeline no longer renders
-	// inner blocks in Jest's jsdom environment. Gutenberg tests block
-	// rendering via Playwright E2E; these should be migrated similarly.
-	it.skip( 'should render inner blocks for variable products', async () => {
+	it( 'should render inner blocks for variable products', async () => {
 		expect.hasAssertions();
 
 		await setup();
