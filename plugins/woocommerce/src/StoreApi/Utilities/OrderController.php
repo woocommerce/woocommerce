@@ -334,7 +334,25 @@ class OrderController {
 	protected function validate_email( \WC_Order $order ) {
 		$email = $order->get_billing_email();
 
+		/**
+		 * Filters whether a billing email is required on a Store API order.
+		 *
+		 * Defaults to true for web checkout. Trusted-actor callers that defer or omit customer identity (e.g. an
+		 * in-person point-of-sale flow) can return false to allow an order without a billing email. Relaxing the
+		 * requirement only skips the missing-email check; a billing email that IS provided is still validated for format.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param bool      $require Whether a billing email is required. Default true.
+		 * @param \WC_Order $order   Order object being validated.
+		 */
+		$require_email = (bool) apply_filters( 'woocommerce_store_api_require_billing_email', true, $order );
+
 		if ( empty( $email ) ) {
+			if ( ! $require_email ) {
+				return;
+			}
+
 			throw new RouteException(
 				'woocommerce_rest_missing_email_address',
 				__( 'A valid email address is required', 'woocommerce' ),
@@ -363,6 +381,27 @@ class OrderController {
 	 * @param bool      $needs_shipping Whether the order needs shipping.
 	 */
 	protected function validate_addresses( \WC_Order $order, bool $needs_shipping ) {
+		/**
+		 * Filters whether the Store API validates order addresses.
+		 *
+		 * Defaults to true for web checkout. Trusted-actor callers that accept incomplete or unverified addresses (e.g.
+		 * an in-person point-of-sale flow) can return false to skip address validation entirely — both the country
+		 * allow-list checks and the locale required-field checks. Address validation is store policy plus required-field
+		 * presence, so this is a single all-or-nothing gate; callers that only want to skip validation for empty
+		 * addresses can inspect $order in their callback and return true when address data is present.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param bool      $validate       Whether to validate order addresses. Default true.
+		 * @param \WC_Order $order          Order object being validated.
+		 * @param bool      $needs_shipping Whether the order needs shipping.
+		 */
+		$validate_addresses = (bool) apply_filters( 'woocommerce_store_api_validate_addresses', true, $order, $needs_shipping );
+
+		if ( ! $validate_addresses ) {
+			return;
+		}
+
 		$errors           = new \WP_Error();
 		$billing_country  = $order->get_billing_country();
 		$shipping_country = $order->get_shipping_country();
