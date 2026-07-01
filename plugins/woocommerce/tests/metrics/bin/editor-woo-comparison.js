@@ -14,81 +14,6 @@ const runId = new Date().toISOString().replace( /[:.]/g, '-' );
 const artifactsPath =
 	process.env.WP_ARTIFACTS_PATH ||
 	path.join( '/tmp/wc-editor-woo-comparison', runId );
-const blockFilterMuPlugin = 'wc-editor-heavy-block-filter.php';
-const filteredBlockTypes = [
-	'Cart',
-	'CartOrderSummaryTaxesBlock',
-	'CartOrderSummarySubtotalBlock',
-	'CartOrderSummaryTotalsBlock',
-	'FilledCartBlock',
-	'EmptyCartBlock',
-	'CartTotalsBlock',
-	'CartItemsBlock',
-	'CartLineItemsBlock',
-	'CartOrderSummaryBlock',
-	'CartExpressPaymentBlock',
-	'ProceedToCheckoutBlock',
-	'CartAcceptedPaymentMethodsBlock',
-	'CartOrderSummaryCouponFormBlock',
-	'CartOrderSummaryDiscountBlock',
-	'CartOrderSummaryFeeBlock',
-	'CartOrderSummaryHeadingBlock',
-	'CartOrderSummaryShippingBlock',
-	'CartCrossSellsBlock',
-	'CartCrossSellsProductsBlock',
-	'Checkout',
-	'CheckoutActionsBlock',
-	'CheckoutAdditionalInformationBlock',
-	'CheckoutBillingAddressBlock',
-	'CheckoutContactInformationBlock',
-	'CheckoutExpressPaymentBlock',
-	'CheckoutFieldsBlock',
-	'CheckoutOrderNoteBlock',
-	'CheckoutOrderSummaryBlock',
-	'CheckoutOrderSummaryCartItemsBlock',
-	'CheckoutOrderSummaryCouponFormBlock',
-	'CheckoutOrderSummaryDiscountBlock',
-	'CheckoutOrderSummaryFeeBlock',
-	'CheckoutOrderSummaryShippingBlock',
-	'CheckoutOrderSummarySubtotalBlock',
-	'CheckoutOrderSummaryTaxesBlock',
-	'CheckoutOrderSummaryTotalsBlock',
-	'CheckoutPaymentBlock',
-	'CheckoutShippingAddressBlock',
-	'CheckoutShippingMethodsBlock',
-	'CheckoutShippingMethodBlock',
-	'CheckoutPickupOptionsBlock',
-	'CheckoutTermsBlock',
-	'CheckoutTotalsBlock',
-	'MiniCart',
-	'MiniCartContents',
-	'EmptyMiniCartContentsBlock',
-	'FilledMiniCartContentsBlock',
-	'MiniCartFooterBlock',
-	'MiniCartItemsBlock',
-	'MiniCartProductsTableBlock',
-	'MiniCartShoppingButtonBlock',
-	'MiniCartCartButtonBlock',
-	'MiniCartCheckoutButtonBlock',
-	'MiniCartTitleBlock',
-	'MiniCartTitleItemsCounterBlock',
-	'MiniCartTitleLabelBlock',
-	'AllProducts',
-	'ProductCollection\\Controller',
-	'ProductCollection\\NoResults',
-	'ProductQuery',
-	'HandpickedProducts',
-	'ProductBestSellers',
-	'ProductCategory',
-	'ProductNew',
-	'ProductOnSale',
-	'ProductTag',
-	'ProductTopRated',
-	'ProductsByAttribute',
-];
-const encodedFilteredBlockTypes = Buffer.from(
-	JSON.stringify( filteredBlockTypes )
-).toString( 'base64' );
 
 function runCommand( command, args, options = {} ) {
 	if ( options.logCommand !== false ) {
@@ -121,44 +46,6 @@ function wpCli( args, options = {} ) {
 		'pnpm',
 		[ 'wp-env', 'run', 'tests-cli', 'wp', ...args ],
 		options
-	);
-}
-
-function wpEval( code, label ) {
-	wpCli( [ 'eval', code ], {
-		displayCommand: `pnpm wp-env run tests-cli wp eval "${ label }"`,
-		stdio: 'pipe',
-	} );
-}
-
-function installBlockFilterMuPlugin() {
-	const pluginSource = `<?php
-/**
- * Plugin Name: WooCommerce editor metrics heavy block filter
- */
-
-add_filter(
-	'woocommerce_get_block_types',
-	static function ( $block_types ) {
-		$filtered_block_types = json_decode( base64_decode( '${ encodedFilteredBlockTypes }' ), true );
-
-		return array_values( array_diff( $block_types, $filtered_block_types ) );
-	}
-);
-`;
-	const encodedPluginSource =
-		Buffer.from( pluginSource ).toString( 'base64' );
-
-	wpEval(
-		`if ( ! is_dir( WPMU_PLUGIN_DIR ) ) { mkdir( WPMU_PLUGIN_DIR, 0777, true ); } file_put_contents( WPMU_PLUGIN_DIR . '/${ blockFilterMuPlugin }', base64_decode( '${ encodedPluginSource }' ) );`,
-		'install temporary Woo block filter'
-	);
-}
-
-function removeBlockFilterMuPlugin() {
-	wpEval(
-		`if ( file_exists( WPMU_PLUGIN_DIR . '/${ blockFilterMuPlugin }' ) ) { unlink( WPMU_PLUGIN_DIR . '/${ blockFilterMuPlugin }' ); }`,
-		'remove temporary Woo block filter'
 	);
 }
 
@@ -241,17 +128,14 @@ function main() {
 
 	let inactiveResults;
 	let activeResults;
-	let filteredResults;
 
 	try {
-		removeBlockFilterMuPlugin();
 		wpCli( [ 'plugin', 'deactivate', 'woocommerce' ] );
 		inactiveResults = runEditorMetrics( 'woo-inactive' );
 
 		wpCli( [ 'plugin', 'activate', 'woocommerce' ] );
 		activeResults = runEditorMetrics( 'woo-active' );
 	} finally {
-		removeBlockFilterMuPlugin();
 		wpCli( [ 'plugin', 'activate', 'woocommerce' ] );
 	}
 
@@ -261,25 +145,9 @@ function main() {
 		'inactive',
 		'active'
 	);
-	const filteredComparison = buildComparison(
-		activeResults,
-		filteredResults,
-		'active',
-		'filtered'
-	);
-	const filteredVsInactiveComparison = buildComparison(
-		inactiveResults,
-		filteredResults,
-		'inactive',
-		'filtered'
-	);
 	const comparisonPath = path.join(
 		artifactsPath,
 		'editor-woo-comparison.json'
-	);
-	const filteredComparisonPath = path.join(
-		artifactsPath,
-		'editor-woo-filtered-comparison.json'
 	);
 	const resultsPath = path.join( artifactsPath, 'editor-woo-results.json' );
 
@@ -288,25 +156,11 @@ function main() {
 		JSON.stringify( activeComparison, null, 2 )
 	);
 	fs.writeFileSync(
-		filteredComparisonPath,
-		JSON.stringify(
-			{
-				filteredBlockTypes,
-				activeVsFiltered: filteredComparison,
-				inactiveVsFiltered: filteredVsInactiveComparison,
-			},
-			null,
-			2
-		)
-	);
-	fs.writeFileSync(
 		resultsPath,
 		JSON.stringify(
 			{
 				inactive: inactiveResults,
 				active: activeResults,
-				filtered: filteredResults,
-				filteredBlockTypes,
 			},
 			null,
 			2
@@ -318,14 +172,7 @@ function main() {
 		'inactive',
 		'active'
 	);
-	printComparison(
-		'Woo active with heavy block families filtered vs Woo active',
-		filteredComparison,
-		'active',
-		'filtered'
-	);
 	console.log( `\nSaved comparison to ${ comparisonPath }` );
-	console.log( `Saved filtered comparison to ${ filteredComparisonPath }` );
 	console.log( `Saved raw results to ${ resultsPath }` );
 }
 
