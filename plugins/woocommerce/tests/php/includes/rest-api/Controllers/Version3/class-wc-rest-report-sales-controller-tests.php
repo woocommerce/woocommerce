@@ -131,7 +131,7 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$data  = $this->get_report( 'month' );
+		$data  = $this->get_report( 'week' );
 		$today = current_datetime()->format( 'Y-m-d' );
 
 		$this->assertArrayHasKey( $yesterday, $data['totals'], 'Yesterday\'s bucket should exist in the response.' );
