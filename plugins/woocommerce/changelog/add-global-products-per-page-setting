@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a global setting `woocommerce_catalog_products_per_page` to control the number of products to display per page in the catalog block and globally.

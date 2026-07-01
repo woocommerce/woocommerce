@@ -567,7 +567,12 @@ class WC_Query {
 		$q->set( 'post__in', array_unique( (array) apply_filters( 'loop_shop_post_in', array() ) ) );
 
 		// Work out how many products to query.
-		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page() ) );
+		$per_page = get_option( 'woocommerce_catalog_products_per_page' );
+		if ( ! $per_page ) {
+			$per_page = wc_get_default_products_per_row() * wc_get_default_product_rows_per_page();
+		}
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', $per_page ) );
 
 		// Store reference to this query.
 		self::$product_query = $q;

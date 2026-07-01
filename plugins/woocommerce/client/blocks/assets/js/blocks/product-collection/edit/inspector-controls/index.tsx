@@ -53,6 +53,7 @@ import LinkedProductControl from './linked-product-control';
 import WidthOptionsControl from './width-options-control';
 import RelatedByControl from './related-by-control';
 import ProductsPerPageControl from './products-per-page-control';
+import GlobalProductsPerPageControl from './global-products-per-page-control';
 import OffsetControl from './offset-control';
 import MaxPagesToShowControl from './max-pages-to-show-control';
 
@@ -110,6 +111,8 @@ const ProductCollectionInspectorControls = (
 	const showProductsPerPageControl =
 		showCustomQueryControls &&
 		shouldShowFilter( CoreFilterNames.PRODUCTS_PER_PAGE );
+	const showGlobalProductsPerPageControl =
+		inherit && shouldShowFilter( CoreFilterNames.PRODUCTS_PER_PAGE );
 	const showOnSaleControl = shouldShowFilter( CoreFilterNames.ON_SALE );
 	const showStockStatusControl = shouldShowFilter(
 		CoreFilterNames.STOCK_STATUS
@@ -228,6 +231,9 @@ const ProductCollectionInspectorControls = (
 						{ ...queryControlProps }
 						carouselVariant={ isCarouselLayout }
 					/>
+				) }
+				{ showGlobalProductsPerPageControl && (
+					<GlobalProductsPerPageControl />
 				) }
 				{ showColumnsControl && (
 					<ColumnsControl
