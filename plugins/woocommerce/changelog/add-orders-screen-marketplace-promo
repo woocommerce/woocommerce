@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a contextual Marketplace recommendation card to the WooCommerce Orders screen, shown to eligible stores based on locally-evaluated promotion rules.
