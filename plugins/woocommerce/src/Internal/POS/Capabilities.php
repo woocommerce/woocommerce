@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\POS;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Utilities\Users;
 use WP_User;
 
 /**
@@ -81,7 +82,8 @@ class Capabilities {
 	 *
 	 * The value is one of the POSPreset constants. It drives the admin UI, but it
 	 * is not the authorization signal: has_pos_access() reads the `woocommerce_pos_*` caps, not
-	 * this meta.
+	 * this meta. Stored per-site via Users::*_site_user_meta() (which suffixes the blog prefix)
+	 * so it stays aligned with the blog-scoped capabilities on multisite.
 	 */
 	public const POS_PRESET_META_KEY = 'woocommerce_pos_preset';
 
@@ -218,13 +220,16 @@ class Capabilities {
 	 * Returns the `woocommerce_pos_preset` meta value only if it matches an
 	 * assignable preset, so a stale or hand-edited value reads as "no preset".
 	 *
+	 * The meta is stored per-site (see set_pos_preset()) so it stays aligned with the
+	 * blog-scoped POS capabilities on multisite.
+	 *
 	 * @param int $user_id Target user.
 	 * @return string|null One of the POSPreset constants, or null.
 	 *
 	 * @since 11.0.0
 	 */
 	public static function get_pos_preset( int $user_id ): ?string {
-		$meta = get_user_meta( $user_id, self::POS_PRESET_META_KEY, true );
+		$meta = Users::get_site_user_meta( $user_id, self::POS_PRESET_META_KEY, true );
 		if ( in_array( $meta, POSPreset::get_all(), true ) ) {
 			return (string) $meta;
 		}
@@ -232,15 +237,22 @@ class Capabilities {
 	}
 
 	/**
-	 * WP_User_Query args selecting every user with POS access.
+	 * WP_User_Query args selecting candidate POS staff — every user holding any
+	 * `woocommerce_pos_*` capability, via WP_User_Query's capability__in.
 	 *
-	 * Matches has_pos_access(): selects users holding any `woocommerce_pos_*` capability, via
-	 * WP_User_Query's capability__in. Use it to enumerate POS staff — e.g. the
-	 * GET /wc/pos/v1/staff endpoint and the wp-admin Staff list — which then refine
-	 * the candidates for their own needs (the staff endpoint also requires a PIN).
-	 * Keying on caps rather than the preset meta keeps this consistent with the
-	 * authorization signal: a user whose caps were stripped is excluded, and a cap
-	 * granted outside a preset is still included.
+	 * Use it to enumerate POS staff — e.g. the GET /wc/pos/v1/staff endpoint and the
+	 * wp-admin Staff list — which refine the candidates for their own needs (the staff
+	 * endpoint also requires a PIN). Keying on caps rather than the preset meta keeps
+	 * this aligned with the authorization signal: a user whose caps were stripped is
+	 * excluded, and a cap granted outside a preset is still included.
+	 *
+	 * This is a candidate query, not exact parity with has_pos_access(): capability__in
+	 * matches the capability *name* wherever it appears in the serialized capabilities
+	 * row, so a user with an explicit denial (add_cap( $cap, false )) is still selected
+	 * even though has_pos_access() — which reads the resolved capabilities — treats them
+	 * as no access. Capabilities only ever grants or strips caps, never denies, so this
+	 * diverges only when external code sets an explicit denial; callers needing exact
+	 * parity should refine results with has_pos_access().
 	 *
 	 * @return array<string, mixed>
 	 *
@@ -359,11 +371,14 @@ class Capabilities {
 		}
 
 		if ( null === $preset ) {
-			delete_user_meta( $user_id, self::POS_PRESET_META_KEY );
+			Users::delete_site_user_meta( $user_id, self::POS_PRESET_META_KEY );
 			return true;
 		}
 
-		update_user_meta( $user_id, self::POS_PRESET_META_KEY, $preset );
+		// Store the preset per-site so the bookkeeping stays aligned with the blog-scoped
+		// POS capabilities on multisite (Users::update_site_user_meta suffixes the blog prefix,
+		// so the key still matches the woocommerce_% uninstall sweep).
+		Users::update_site_user_meta( $user_id, self::POS_PRESET_META_KEY, $preset );
 
 		foreach ( array_keys( self::capabilities_for_preset( $preset ) ) as $cap ) {
 			$user->add_cap( $cap );

@@ -46,6 +46,8 @@ final class POSPreset {
 	 * All assignable presets, in ascending capability order.
 	 *
 	 * @return string[]
+	 *
+	 * @since 11.0.0
 	 */
 	public static function get_all(): array {
 		return array(

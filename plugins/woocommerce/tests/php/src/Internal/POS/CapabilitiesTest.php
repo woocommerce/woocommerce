@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\POS;
 
 use Automattic\WooCommerce\Internal\POS\Capabilities;
 use Automattic\WooCommerce\Internal\POS\POSPreset;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 use WC_Unit_Test_Case;
 
 /**
@@ -284,7 +285,7 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 
 		$this->assertNull( Capabilities::get_pos_preset( $user_id ) );
 
-		update_user_meta( $user_id, Capabilities::POS_PRESET_META_KEY, 'bogus' );
+		Users::update_site_user_meta( $user_id, Capabilities::POS_PRESET_META_KEY, 'bogus' );
 		$this->assertNull( Capabilities::get_pos_preset( $user_id ) );
 
 		wp_delete_user( $user_id );
@@ -420,7 +421,7 @@ class CapabilitiesTest extends WC_Unit_Test_Case {
 	public function test_has_pos_access_false_with_stale_preset_meta_only(): void {
 		$user_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
 
-		update_user_meta( $user_id, Capabilities::POS_PRESET_META_KEY, POSPreset::CASHIER );
+		Users::update_site_user_meta( $user_id, Capabilities::POS_PRESET_META_KEY, POSPreset::CASHIER );
 
 		$this->assertFalse( Capabilities::has_pos_access( $user_id ) );
 
