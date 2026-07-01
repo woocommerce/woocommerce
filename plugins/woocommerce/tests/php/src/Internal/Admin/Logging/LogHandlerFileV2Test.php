@@ -413,17 +413,22 @@ MESSAGE;
 			$this->sut->handle( strtotime( "-{$days_ago} days" ), 'debug', 'quack.', array( 'source' => 'duck' ) );
 		}
 
-		// Pin descending modified times so the default 'modified' sort in get_files()
-		// is deterministic (newest-dated file first) and the batch boundaries are predictable.
+		/*
+		 * Give every file the same modified time. This is the tie condition that
+		 * makes the default 'modified' sort non-deterministic on PHP < 8.0 (unstable
+		 * usort). clear() pages by 'created' instead, which is unique per file for a
+		 * single source, so the batch layout stays deterministic and offset paging
+		 * never strands a deletable file behind an undeletable one.
+		 */
 		$filesystem = FilesystemUtil::get_wp_filesystem();
 		$paths      = glob( Settings::get_log_directory() . 'duck*.log' );
 		$this->assertCount( $total, $paths );
-		// glob() sorts oldest-date first; reverse to newest-first.
-		$newest_first = array_reverse( $paths );
-		$base_mtime   = time();
-		foreach ( $newest_first as $index => $path ) {
-			$filesystem->touch( $path, $base_mtime - $index );
+		$shared_mtime = time();
+		foreach ( $paths as $path ) {
+			$filesystem->touch( $path, $shared_mtime );
 		}
+		// glob() sorts oldest-date first; reverse to created-descending, the order clear() pages in.
+		$newest_first = array_reverse( $paths );
 
 		/*
 		 * Lock files at adversarial positions: inside the first full batch (0, 50, 99),
@@ -452,6 +457,7 @@ MESSAGE;
 			 * @param string[] $locked_ids File IDs that must not be deleted.
 			 */
 			public function __construct( array $locked_ids ) {
+				// FileController declares no constructor, so there is intentionally no parent::__construct() call.
 				$this->locked_ids = $locked_ids;
 			}
 

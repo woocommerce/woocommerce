@@ -178,12 +178,22 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 		$deleted = 0;
 		$skipped = 0;
 
-		// Fetch and delete in batches so that sources with more than the default
-		// per-page of log files don't leave files behind.
+		/*
+		 * Fetch and delete in batches so that sources with more than the default
+		 * per-page of log files don't leave files behind.
+		 *
+		 * Order by 'created' rather than the default 'modified'. Because paging
+		 * advances $skipped past undeletable files, the offset is only reliable if
+		 * get_files() returns a stable, strict total order across iterations. For a
+		 * single source, created timestamps (plus rotation) are unique per file,
+		 * whereas modified times can tie -- and on PHP < 8.0 usort() is not stable,
+		 * so tied files could re-order between iterations and strand a deletable file.
+		 */
 		do {
 			$files = $this->file_controller->get_files(
 				array(
 					'source'   => $source,
+					'orderby'  => 'created',
 					'per_page' => self::DELETE_BATCH_SIZE,
 					'offset'   => $skipped,
 				)
