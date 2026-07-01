@@ -15,7 +15,6 @@ import {
 /**
  * Internal dependencies
  */
-import metadata from '../../block.json';
 import { useTracksLocation } from '../../tracks-utils';
 import {
 	ProductCollectionContentProps,
