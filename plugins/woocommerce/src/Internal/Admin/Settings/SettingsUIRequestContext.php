@@ -445,7 +445,7 @@ class SettingsUIRequestContext {
 		}
 
 		try {
-			$this->schema = $this->settings_ui_page->get_schema( $this->section );
+			$this->schema = $this->ensure_section_navigation( $this->settings_ui_page->get_schema( $this->section ) );
 		} catch ( \Throwable $e ) {
 			$this->schema_failed = true;
 
@@ -464,6 +464,29 @@ class SettingsUIRequestContext {
 				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
 			}
 		}
+	}
+
+	/**
+	 * Ensure a resolved settings UI schema carries section navigation for the shell.
+	 *
+	 * Schemas that omit `shell.sectionNavigation` get the default sibling-section
+	 * navigation for the settings page, matching the legacy settings adapter.
+	 * Setting the key — including to an empty array — keeps the provided value,
+	 * so pages with custom or no navigation stay untouched.
+	 *
+	 * @param array $schema Resolved settings UI schema.
+	 * @return array
+	 */
+	private function ensure_section_navigation( array $schema ): array {
+		if ( ! isset( $schema['shell'] ) ) {
+			$schema['shell'] = array();
+		}
+
+		if ( is_array( $schema['shell'] ) && ! isset( $schema['shell']['sectionNavigation'] ) ) {
+			$schema['shell']['sectionNavigation'] = LegacySettingsPageAdapter::build_default_section_navigation( $this->settings_page, $this->section );
+		}
+
+		return $schema;
 	}
 
 	/**

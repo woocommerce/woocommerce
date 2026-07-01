@@ -61,19 +61,25 @@ class LegacySettingsPageAdapter implements PublicSettingsUIPageInterface {
 			$this->get_save_adapter( $section )
 		);
 
-		$schema['shell']['sectionNavigation'] = $this->get_section_navigation( $section );
+		$schema['shell']['sectionNavigation'] = self::build_default_section_navigation( $this->settings_page, $section );
 
 		return $schema;
 	}
 
 	/**
-	 * Get secondary settings section navigation for the settings UI shell.
+	 * Build the default settings section navigation for the settings UI shell.
 	 *
-	 * @param string $current_section Current section id.
+	 * Lists every section of the settings page, linking back through the classic
+	 * settings URLs. Returns an empty array for pages with fewer than two sections.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param \WC_Settings_Page $settings_page Settings page to build the navigation for.
+	 * @param string            $current_section Current section id. Empty string means the default section.
 	 * @return array<int, array{id: string, label: string, href: string, active: bool}>
 	 */
-	private function get_section_navigation( string $current_section ): array {
-		$sections = $this->settings_page->get_sections();
+	public static function build_default_section_navigation( \WC_Settings_Page $settings_page, string $current_section ): array {
+		$sections = $settings_page->get_sections();
 		if ( empty( $sections ) || 1 === count( $sections ) ) {
 			return array();
 		}
@@ -87,7 +93,7 @@ class LegacySettingsPageAdapter implements PublicSettingsUIPageInterface {
 				'href'   => add_query_arg(
 					array(
 						'page'    => 'wc-settings',
-						'tab'     => sanitize_title( $this->settings_page->get_id() ),
+						'tab'     => sanitize_title( $settings_page->get_id() ),
 						'section' => sanitize_title( $section_id ),
 					),
 					admin_url( 'admin.php' )

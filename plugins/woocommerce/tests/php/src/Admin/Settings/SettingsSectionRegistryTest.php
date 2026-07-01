@@ -170,6 +170,51 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should inject default section navigation when a native Settings UI schema omits it.
+	 */
+	public function test_injects_default_section_navigation_when_native_settings_ui_schema_omits_it(): void {
+		$page = $this->get_parent_page();
+		SettingsSectionRegistry::get_instance()->register(
+			$this->get_registered_section_with_native_settings_ui_page( null, array( 'title' => 'Acme native settings' ) )
+		);
+
+		$schema = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' )->get_schema();
+
+		$navigation = $schema['shell']['sectionNavigation'];
+		$this->assertSame( array( 'default', 'acme_payments' ), array_column( $navigation, 'id' ) );
+		$this->assertSame( array( false, true ), array_column( $navigation, 'active' ) );
+		$this->assertStringContainsString( 'tab=checkout', $navigation[1]['href'] );
+		$this->assertStringContainsString( 'section=acme_payments', $navigation[1]['href'] );
+	}
+
+	/**
+	 * @testdox Should keep custom section navigation provided by a native Settings UI schema.
+	 */
+	public function test_keeps_custom_section_navigation_from_native_settings_ui_schema(): void {
+		$page = $this->get_parent_page();
+		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section_with_native_settings_ui_page() );
+
+		$schema = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' )->get_schema();
+
+		$navigation = $schema['shell']['sectionNavigation'];
+		$this->assertSame( array( 'native_tab' ), array_column( $navigation, 'id' ) );
+	}
+
+	/**
+	 * @testdox Should keep an explicitly empty section navigation in a native Settings UI schema.
+	 */
+	public function test_keeps_explicitly_empty_section_navigation_in_native_settings_ui_schema(): void {
+		$page = $this->get_parent_page();
+		SettingsSectionRegistry::get_instance()->register(
+			$this->get_registered_section_with_native_settings_ui_page( null, array( 'sectionNavigation' => array() ) )
+		);
+
+		$schema = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' )->get_schema();
+
+		$this->assertSame( array(), $schema['shell']['sectionNavigation'] );
+	}
+
+	/**
 	 * @testdox Should fall back to the default adapter when a registered section native Settings UI page provider fails.
 	 */
 	public function test_falls_back_to_default_adapter_when_registered_section_native_settings_ui_page_provider_fails(): void {
@@ -476,10 +521,11 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	 * Build a registered section that provides a native Settings UI page.
 	 *
 	 * @param callable|null $on_settings_ui_page_call Callback invoked every time the Settings UI page provider runs.
+	 * @param array|null    $shell Schema shell for the native page. Null uses the fixture default with custom section navigation.
 	 * @return SettingsSectionInterface
 	 */
-	private function get_registered_section_with_native_settings_ui_page( ?callable $on_settings_ui_page_call = null ): SettingsSectionInterface {
-		return new class( $on_settings_ui_page_call ) extends SettingsSection {
+	private function get_registered_section_with_native_settings_ui_page( ?callable $on_settings_ui_page_call = null, ?array $shell = null ): SettingsSectionInterface {
+		return new class( $on_settings_ui_page_call, $shell ) extends SettingsSection {
 			/**
 			 * Callback invoked every time the Settings UI page provider runs.
 			 *
@@ -488,12 +534,21 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 			private $on_settings_ui_page_call;
 
 			/**
+			 * Schema shell for the native page, or null for the fixture default.
+			 *
+			 * @var array|null
+			 */
+			private ?array $shell;
+
+			/**
 			 * Constructor.
 			 *
 			 * @param callable|null $on_settings_ui_page_call Callback invoked every time the Settings UI page provider runs.
+			 * @param array|null    $shell Schema shell for the native page, or null for the fixture default.
 			 */
-			public function __construct( ?callable $on_settings_ui_page_call ) {
+			public function __construct( ?callable $on_settings_ui_page_call, ?array $shell ) {
 				$this->on_settings_ui_page_call = $on_settings_ui_page_call;
+				$this->shell                    = $shell;
 			}
 
 			/**
@@ -550,7 +605,23 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 					( $this->on_settings_ui_page_call )();
 				}
 
-				return new class() implements SettingsUIPageInterface {
+				return new class( $this->shell ) implements SettingsUIPageInterface {
+					/**
+					 * Schema shell, or null for the fixture default.
+					 *
+					 * @var array|null
+					 */
+					private ?array $shell;
+
+					/**
+					 * Constructor.
+					 *
+					 * @param array|null $shell Schema shell, or null for the fixture default.
+					 */
+					public function __construct( ?array $shell ) {
+						$this->shell = $shell;
+					}
+
 					/**
 					 * Get the page id.
 					 *
@@ -571,7 +642,7 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 							'id'      => 'acme_native',
 							'title'   => 'Acme native settings',
 							'section' => 'native_tab',
-							'shell'   => array(
+							'shell'   => $this->shell ?? array(
 								'title'             => 'Acme native settings',
 								'sectionNavigation' => array(
 									array(
