@@ -469,13 +469,18 @@ class WC_Discounts {
 
 	/**
 	 * Apply a fixed cart-level discount across eligible items.
+	 * 
+	 * @since 3.2.0
+	 * @since 10.9.0 Added eligibility filtering by product ID/category restriction (OR logic).
 	 *
 	 * Distributes the flat discount amount only across items that satisfy the
 	 * coupon's product ID or product category restrictions (OR logic). Items
 	 * that match neither restriction are excluded from the discount entirely.
 	 *
 	 * @param  WC_Coupon $coupon          Coupon object.
-	 * @param  array     $items_to_apply  Cart items to consider for discount.
+	 * @param  array     $items_to_apply  Items to consider for discount. Usually cart items, but
+	 *                                    $items_to_apply may also come from a WC_Order (order line
+	 *                                    items) when discounts are recalculated on an existing order.
 	 * @param  int|null  $amount          Discount amount with precision, or null to use coupon amount.
 	 * @return int Total discount applied (with precision).
 	 */
@@ -495,13 +500,12 @@ class WC_Discounts {
 			$items_to_apply = array_filter(
 				$items_to_apply,
 				function ( $item ) use ( $coupon, $has_product_restriction, $has_category_restriction ) {
-					if ( ! $item->object ) {
+					if ( ! $item->product ) {
 						return false;
 					}
 
-					$product    = $item->object;
-					$product_id = $product['product_id'];
-					$parent_id  = $product['data']->parent_id;
+					$product_id = $item->product->get_id();
+					$parent_id  = $item->product->get_parent_id();
 
 					// Allow if product ID or parent ID matches an allowed product ID.
 					if ( $has_product_restriction ) {
@@ -514,7 +518,7 @@ class WC_Discounts {
 
 					// Allow if the product belongs to an allowed category.
 					if ( $has_category_restriction ) {
-						$lookup_id    = isset( $product['variation'] ) ? $parent_id : $product_id;
+						$lookup_id    = $item->product->is_type( 'variation' ) ? $parent_id : $product_id;
 						$product_cats = wc_get_product_cat_ids( $lookup_id );
 
 						if ( array_intersect( $product_cats, $coupon->get_product_categories() ) ) {
