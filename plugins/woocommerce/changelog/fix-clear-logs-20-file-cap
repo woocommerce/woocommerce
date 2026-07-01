@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix clearing a log source so it deletes all of the source's log files, not just the first 20.

@@ -349,6 +349,43 @@ MESSAGE;
 	}
 
 	/**
+	 * @testdox Check that clear deletes more than the default per-page of log files from a source in one run.
+	 */
+	public function test_clear_deletes_more_than_default_per_page() {
+		// Create more files for a single source than a single delete batch can
+		// remove (batch size is 100), using a distinct date per file.
+		$expired_count = 101;
+		foreach ( range( 1, $expired_count ) as $days_ago ) {
+			$this->sut->handle( strtotime( "-{$days_ago} days" ), 'debug', 'quack.', array( 'source' => 'duck' ) );
+		}
+
+		// Add a couple of files from a different source that must be left alone.
+		$this->sut->handle( time(), 'debug', 'honk.', array( 'source' => 'goose' ) );
+		$this->sut->handle( strtotime( '-1 day' ), 'debug', 'honk.', array( 'source' => 'goose' ) );
+
+		$paths = glob( Settings::get_log_directory() . 'duck*.log' );
+		$this->assertCount( $expired_count, $paths );
+
+		$result = $this->sut->clear( 'duck' );
+		$this->assertEquals( $expired_count, $result );
+
+		$paths = glob( Settings::get_log_directory() . 'duck*.log' );
+		$this->assertCount( 0, $paths );
+
+		// The two goose files remain untouched.
+		$paths = glob( Settings::get_log_directory() . 'goose*.log' );
+		$this->assertCount( 2, $paths );
+
+		$paths = glob( Settings::get_log_directory() . 'wc_logger*.log' );
+		$this->assertCount( 1, $paths );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$actual_content  = file_get_contents( reset( $paths ) );
+		$expected_string = '101 log files from source <code>duck</code> were deleted.';
+		$this->assertStringContainsString( $expected_string, $actual_content );
+	}
+
+	/**
 	 * @testdox Check that the delete_logs_before_timestamp method deletes files based on their created date.
 	 */
 	public function test_delete_logs_before_timestamp() {

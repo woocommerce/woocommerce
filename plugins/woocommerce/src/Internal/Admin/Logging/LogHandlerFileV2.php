@@ -175,22 +175,42 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 	public function clear( string $source, bool $quiet = false ): int {
 		$source = File::sanitize_source( $source );
 
-		$files = $this->file_controller->get_files(
-			array(
-				'source' => $source,
-			)
-		);
+		$deleted = 0;
+		$skipped = 0;
 
-		if ( is_wp_error( $files ) || ! is_array( $files ) || count( $files ) < 1 ) {
-			return 0;
-		}
+		// Fetch and delete in batches so that sources with more than the default
+		// per-page of log files don't leave files behind.
+		do {
+			$files = $this->file_controller->get_files(
+				array(
+					'source'   => $source,
+					'per_page' => self::DELETE_BATCH_SIZE,
+					'offset'   => $skipped,
+				)
+			);
 
-		$file_ids = array_map(
-			fn( $file ) => $file->get_file_id(),
-			$files
-		);
+			if ( is_wp_error( $files ) || ! is_array( $files ) ) {
+				break;
+			}
 
-		$deleted = $this->file_controller->delete_files( $file_ids );
+			$fetched_count = count( $files );
+			if ( $fetched_count < 1 ) {
+				break;
+			}
+
+			$file_ids = array_map(
+				fn( $file ) => $file->get_file_id(),
+				$files
+			);
+
+			$deleted_in_batch = $this->file_controller->delete_files( $file_ids );
+			$deleted         += $deleted_in_batch;
+
+			// Deleted files disappear from the directory, so only files that could
+			// not be deleted need to be skipped. This avoids retrying a permanently
+			// undeletable batch forever.
+			$skipped += $fetched_count - $deleted_in_batch;
+		} while ( self::DELETE_BATCH_SIZE === $fetched_count );
 
 		if ( $deleted > 0 && ! $quiet ) {
 			$this->handle(
