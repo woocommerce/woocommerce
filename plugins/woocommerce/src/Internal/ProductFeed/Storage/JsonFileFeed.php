@@ -215,7 +215,10 @@ class JsonFileFeed implements ResumableFeedInterface {
 		}
 
 		fwrite( $this->file_handle, ']' );
-		flock( $this->file_handle, LOCK_UN );
+		// Do not unlock explicitly before closing: fclose() flushes PHP's userspace stream buffer to the
+		// OS and only then releases the lock. Unlocking first would open a window in which another process
+		// could acquire the lock and start writing while this process's buffered bytes are still pending,
+		// interleaving output — the exact corruption the lock prevents.
 		fclose( $this->file_handle );
 		$this->file_handle    = null;
 		$this->file_completed = true;
@@ -226,7 +229,9 @@ class JsonFileFeed implements ResumableFeedInterface {
 	 */
 	public function flush(): void {
 		if ( is_resource( $this->file_handle ) ) {
-			flock( $this->file_handle, LOCK_UN );
+			// Rely on fclose() to release the lock: it flushes the userspace buffer first and only then
+			// unlocks, so the lock stays held until the buffered bytes are durable. An explicit LOCK_UN
+			// here would release it while pending bytes are still buffered (see end()).
 			fclose( $this->file_handle );
 			$this->file_handle = null;
 		}
