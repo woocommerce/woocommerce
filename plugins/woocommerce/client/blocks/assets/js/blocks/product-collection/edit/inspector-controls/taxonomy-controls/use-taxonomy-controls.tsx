@@ -67,7 +67,6 @@ function useTaxonomyControls( {
 	const createHandleChange = ( slug: string ) => ( newTermIds: number[] ) => {
 		setQueryAttribute( {
 			taxQuery: {
-				...taxQuery,
 				[ slug ]: newTermIds,
 			},
 		} );
