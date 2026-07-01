@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Admin\Features;
 
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Internal\Admin\WCAdminUser;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 
 /**
@@ -125,7 +124,7 @@ class LaunchYourStore {
 				'woocommerce_store_pages_only' => get_option( 'woocommerce_store_pages_only' ),
 				'woocommerce_private_link'     => get_option( 'woocommerce_private_link' ),
 				'woocommerce_share_key'        => get_option( 'woocommerce_share_key' ),
-				'woocommerce_feature_site_visibility_badge_enabled' => FeaturesUtil::feature_is_enabled( 'site_visibility_badge' ) ? 'yes' : 'no',
+				'woocommerce_feature_site_visibility_badge_enabled' => get_option( 'woocommerce_feature_site_visibility_badge_enabled', 'yes' ),
 			);
 		}
 
