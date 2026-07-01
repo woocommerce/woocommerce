@@ -249,7 +249,7 @@ const ProductCollectionInspectorControls = (
 			{ showCustomQueryControls ? (
 				<ToolsPanel
 					label={ __( 'Filters', 'woocommerce' ) }
-					resetAll={ ( resetAllFilters: ( () => void )[] ) => {
+					resetAll={ ( resetAllFilters = [] ) => {
 						resetAllFilters.forEach( ( resetFilter ) => {
 							resetFilter();
 						} );
