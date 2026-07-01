@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Remove an unused block metadata import from Product Collection inspector controls.
