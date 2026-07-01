@@ -4,7 +4,9 @@ namespace Automattic\WooCommerce\Tests\Blocks\Assets;
 
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Utilities\UpdateDetection;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
+use Automattic\WooCommerce\Tests\Internal\Utilities\UpdateDetectionStub;
 use Automattic\WooCommerce\Blocks\Package;
 use InvalidArgumentException;
 
@@ -22,6 +24,105 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 		$this->registry = new AssetDataRegistryMock(
 			Package::container()->get( API::class )
 		);
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	protected function tearDown(): void {
+		wc_get_container()->reset_replacement( UpdateDetection::class );
+		wp_dequeue_script( 'wc-settings' );
+		parent::tearDown();
+	}
+
+	/**
+	 * Create an UpdateDetection stub with a controllable update-window state that records log calls.
+	 *
+	 * @param bool $in_progress The value 'is_update_in_progress' should report.
+	 * @return UpdateDetectionStub The stub, already registered as a container replacement.
+	 */
+	private function replace_update_detection_with_stub( bool $in_progress ): UpdateDetectionStub {
+		$stub = new UpdateDetectionStub( $in_progress );
+		wc_get_container()->replace( UpdateDetection::class, $stub );
+
+		return $stub;
+	}
+
+	/**
+	 * @testdox A lazy data callback that throws is dropped and logged without breaking sibling keys.
+	 */
+	public function test_lazy_data_callback_failure_does_not_break_sibling_keys() {
+		$stub = $this->replace_update_detection_with_stub( false );
+
+		$this->registry->add( 'healthy', fn () => 'healthy-value' );
+		$this->registry->add(
+			'broken',
+			function () {
+				throw new \Error( 'Class "Automattic\WooCommerce\Some\NewClass" not found' );
+			}
+		);
+		$this->registry->add( 'alsoHealthy', fn () => 'also-healthy-value' );
+
+		$this->registry->execute_lazy_data();
+		$data = $this->registry->get();
+
+		$this->assertSame( 'healthy-value', $data['healthy'], 'Keys before the failing one should be populated' );
+		$this->assertSame( 'also-healthy-value', $data['alsoHealthy'], 'Keys after the failing one should be populated' );
+		$this->assertArrayNotHasKey( 'broken', $data, 'The failing key should be dropped' );
+		$this->assertCount( 1, $stub->logged, 'The failure should be logged' );
+		$this->assertSame( 'asset_data_registry:broken', $stub->logged[0]['context'] );
+	}
+
+	/**
+	 * @testdox Lazy data callbacks are skipped and logged when an update window is active.
+	 */
+	public function test_enqueue_asset_data_skips_lazy_data_during_update_window() {
+		$stub = $this->replace_update_detection_with_stub( true );
+
+		$executed = false;
+		$this->registry->add(
+			'lazyKey',
+			function () use ( &$executed ) {
+				$executed = true;
+				return 'lazy-value';
+			}
+		);
+
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter,WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_register_script( 'wc-settings', '' );
+		wp_enqueue_script( 'wc-settings' );
+
+		$this->registry->enqueue_asset_data();
+
+		$this->assertFalse( $executed, 'Lazy callbacks should not execute during an update window' );
+		$this->assertArrayNotHasKey( 'lazyKey', $this->registry->get(), 'Lazy data should not be present during an update window' );
+		$this->assertCount( 1, $stub->logged, 'The skip should be logged' );
+		$this->assertSame( 'asset_data_registry_lazy_data', $stub->logged[0]['context'] );
+	}
+
+	/**
+	 * @testdox Lazy data callbacks execute normally when no update window is active.
+	 */
+	public function test_enqueue_asset_data_executes_lazy_data_without_update_window() {
+		$this->replace_update_detection_with_stub( false );
+
+		$executed = false;
+		$this->registry->add(
+			'lazyKey',
+			function () use ( &$executed ) {
+				$executed = true;
+				return 'lazy-value';
+			}
+		);
+
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter,WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_register_script( 'wc-settings', '' );
+		wp_enqueue_script( 'wc-settings' );
+
+		$this->registry->enqueue_asset_data();
+
+		$this->assertTrue( $executed, 'Lazy callbacks should execute when no update window is active' );
+		$this->assertSame( 'lazy-value', $this->registry->get()['lazyKey'] );
 	}
 
 	public function test_initial_data() {

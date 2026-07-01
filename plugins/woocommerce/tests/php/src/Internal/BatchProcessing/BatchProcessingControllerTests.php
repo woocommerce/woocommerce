@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\BatchProcessing;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Tests\Internal\Utilities\UpdateDetectionStub;
 
 /**
  * Class BatchProcessingControllerTests.
@@ -331,5 +332,34 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 		$this->assertFalse( $this->sut->is_enqueued( get_class( $second_processor ) ) );
 		$this->assertFalse( $this->sut->is_scheduled( get_class( $second_processor ) ) );
 		$this->assertFalse( as_has_scheduled_action( $this->sut::WATCHDOG_ACTION_NAME ) );
+	}
+
+	/**
+	 * @testdox The shutdown cleanup routine is skipped and logged while a WooCommerce update window is active.
+	 */
+	public function test_shutdown_cleanup_is_skipped_during_update_window() {
+		$stub = new UpdateDetectionStub( true );
+		$this->sut->init( $stub );
+
+		$method = new \ReflectionMethod( $this->sut, 'remove_or_retry_failed_processors' );
+		$method->setAccessible( true );
+		$method->invoke( $this->sut );
+
+		$this->assertCount( 1, $stub->logged, 'The skipped cleanup should be logged' );
+		$this->assertSame( 'batch_processing_shutdown_cleanup', $stub->logged[0]['context'] );
+	}
+
+	/**
+	 * @testdox The shutdown cleanup routine runs normally when no update window is active.
+	 */
+	public function test_shutdown_cleanup_runs_without_update_window() {
+		$stub = new UpdateDetectionStub( false );
+		$this->sut->init( $stub );
+
+		$method = new \ReflectionMethod( $this->sut, 'remove_or_retry_failed_processors' );
+		$method->setAccessible( true );
+		$method->invoke( $this->sut );
+
+		$this->assertCount( 0, $stub->logged, 'No skip should be logged when no update window is active' );
 	}
 }

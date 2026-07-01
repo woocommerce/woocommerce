@@ -37638,7 +37638,7 @@ parameters:
 		-
 			message: '#^Call to an undefined method object\:\:register_routes\(\)\.$#'
 			identifier: method.notFound
-			count: 2
+			count: 1
 			path: src/Admin/API/Init.php
 
 		-

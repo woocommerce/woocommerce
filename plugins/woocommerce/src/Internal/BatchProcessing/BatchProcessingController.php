@@ -21,6 +21,8 @@
 
 namespace Automattic\WooCommerce\Internal\BatchProcessing;
 
+use Automattic\WooCommerce\Internal\Utilities\UpdateDetection;
+
 /**
  * Class BatchProcessingController
  *
@@ -57,6 +59,24 @@ class BatchProcessingController {
 	 * @var \WC_Logger_Interface
 	 */
 	private $logger;
+
+	/**
+	 * The UpdateDetection instance to use.
+	 *
+	 * @var UpdateDetection|null
+	 */
+	private ?UpdateDetection $update_detection = null;
+
+	/**
+	 * Initialize the class instance.
+	 *
+	 * @internal
+	 *
+	 * @param UpdateDetection $update_detection The UpdateDetection instance to use.
+	 */
+	final public function init( UpdateDetection $update_detection ): void {
+		$this->update_detection = $update_detection;
+	}
 
 	/**
 	 * BatchProcessingController constructor.
@@ -556,6 +576,13 @@ class BatchProcessingController {
 	 */
 	private function remove_or_retry_failed_processors(): void {
 		if ( ! did_action( 'wp_loaded' ) ) {
+			return;
+		}
+
+		// Processor class names stored in the database can't be reliably autoloaded while an update
+		// is swapping the plugin files; skip the cleanup, it will run again on the next request.
+		if ( ! is_null( $this->update_detection ) && $this->update_detection->is_update_in_progress() ) {
+			$this->update_detection->log_suppressed_work( 'batch_processing_shutdown_cleanup' );
 			return;
 		}
 

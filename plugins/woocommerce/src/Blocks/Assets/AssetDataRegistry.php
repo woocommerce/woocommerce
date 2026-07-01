@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
+use Automattic\WooCommerce\Internal\Utilities\UpdateDetection;
 use Exception;
 use InvalidArgumentException;
 
@@ -271,7 +272,31 @@ class AssetDataRegistry {
 	 */
 	protected function execute_lazy_data() {
 		foreach ( $this->lazy_data as $key => $callback ) {
-			$this->data[ $key ] = $callback();
+			try {
+				$this->data[ $key ] = $callback();
+			} catch ( \Throwable $throwable ) {
+				// A failing callback degrades to a missing data key instead of fataling the whole page.
+				// This cannot catch a stale-classmap require of a deleted file; that case is prevented
+				// by the update-window skip in enqueue_asset_data().
+				$update_detection = $this->get_update_detection();
+				if ( $update_detection ) {
+					$update_detection->log_suppressed_work( 'asset_data_registry:' . $key, $throwable );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Get the UpdateDetection instance, or null if it cannot be resolved.
+	 * Failures resolving the guard must never break asset data output.
+	 *
+	 * @return UpdateDetection|null The UpdateDetection instance or null.
+	 */
+	private function get_update_detection() {
+		try {
+			return wc_get_container()->get( UpdateDetection::class );
+		} catch ( \Throwable $throwable ) {
+			return null;
 		}
 	}
 
@@ -396,7 +421,15 @@ class AssetDataRegistry {
 	public function enqueue_asset_data() {
 		if ( wp_script_is( $this->handle, 'enqueued' ) ) {
 			$this->initialize_core_data();
-			$this->execute_lazy_data();
+
+			$update_detection = $this->get_update_detection();
+			if ( $update_detection && $update_detection->is_update_in_progress() ) {
+				// Executing the lazy callbacks mid-update can autoload classes from a half-swapped
+				// file state and fatal; skip them for this request, the next one will hydrate fully.
+				$update_detection->log_suppressed_work( 'asset_data_registry_lazy_data' );
+			} else {
+				$this->execute_lazy_data();
+			}
 
 			$data                          = rawurlencode( wp_json_encode( $this->data ) );
 			$wc_settings_script            = "var wcSettings = JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
