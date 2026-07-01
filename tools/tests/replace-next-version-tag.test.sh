@@ -114,10 +114,11 @@ PHP
 git add -A
 
 unsupported_exit=0
-CI='' bash "$SCRIPT" "$VERSION" . 2>/tmp/nv_stderr.$$ || unsupported_exit=$?
+stderr_file="$(mktemp)"
+CI='' bash "$SCRIPT" "$VERSION" . 2>"$stderr_file" || unsupported_exit=$?
 if [[ "$unsupported_exit" -ne 0 ]]; then pass "exits non-zero when a token cannot be placed"; else fail "should exit non-zero for an unsupported token"; fi
-if grep -Fq 'Unexpected `$$next-version$$` token' /tmp/nv_stderr.$$; then pass "reports the offending file/line"; else fail "should report the unexpected token"; fi
-rm -f /tmp/nv_stderr.$$
+if grep -Fq 'Unexpected `$$next-version$$` token' "$stderr_file"; then pass "reports the offending file/line"; else fail "should report the unexpected token"; fi
+rm -f "$stderr_file"
 
 # --- Result --------------------------------------------------------------------------
 

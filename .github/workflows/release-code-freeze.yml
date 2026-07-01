@@ -135,24 +135,27 @@ jobs:
         with:
           ref: trunk
       - name: Push frozen branch to the repo
+        env:
+          NEXT_RELEASE_BRANCH: ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}
+          NEXT_RELEASE_VERSION: ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}
         run: |
           # Last opportunity to bail if branch already exists.
-          if [[ -n $(git ls-remote --heads origin ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}) ]]; then
-            echo "::error::Release branch '${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}' already exists."
+          if [[ -n $(git ls-remote --heads origin "$NEXT_RELEASE_BRANCH") ]]; then
+            echo "::error::Release branch '$NEXT_RELEASE_BRANCH' already exists."
             exit 1
           fi
 
           git checkout trunk
-          git checkout -b ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}
+          git checkout -b "$NEXT_RELEASE_BRANCH"
 
           # Resolve $$next-version$$ placeholder tokens to the version being frozen.
-          bash ./tools/replace-next-version-tag.sh "${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}"
+          bash ./tools/replace-next-version-tag.sh "$NEXT_RELEASE_VERSION"
           if ! git diff --quiet; then
             git add -A
-            git commit -m 'Replace $$next-version$$ tokens with ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}.'
+            git commit -m "Replace \$\$next-version\$\$ tokens with ${NEXT_RELEASE_VERSION}."
           fi
 
-          git push origin ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}
+          git push origin "$NEXT_RELEASE_BRANCH"
       - name: Create milestone for next dev cycle
         uses: actions/github-script@v7
         with:

@@ -75,7 +75,8 @@ function debug {
 cd "$(git rev-parse --show-toplevel)"
 
 EXIT=0
-for FILE in $(git ls-files "$PATH_ARG"); do
+# NUL-delimited so pathnames containing whitespace are handled correctly.
+while IFS= read -r -d '' FILE; do
 	grep -F -q '$$next-version$$' "$FILE" 2>/dev/null || continue
 	debug "Processing $FILE"
 
@@ -109,6 +110,6 @@ for FILE in $(git ls-files "$PATH_ARG"); do
 			fi
 		done < <( grep --line-number -F '$$next-version$$' "$FILE" || true )
 	fi
-done
+done < <( git ls-files -z "$PATH_ARG" )
 
 exit $EXIT

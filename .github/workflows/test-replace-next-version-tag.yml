@@ -29,6 +29,8 @@ jobs:
         steps:
             - uses: 'actions/checkout@v4'
               name: 'Checkout'
+              with:
+                  persist-credentials: false
 
             - name: 'Run test'
               run: bash tools/tests/replace-next-version-tag.test.sh
