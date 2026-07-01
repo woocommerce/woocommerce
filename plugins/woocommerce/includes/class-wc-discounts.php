@@ -500,33 +500,7 @@ class WC_Discounts {
 			$items_to_apply = array_filter(
 				$items_to_apply,
 				function ( $item ) use ( $coupon, $has_product_restriction, $has_category_restriction ) {
-					if ( ! $item->product ) {
-						return false;
-					}
-
-					$product_id = $item->product->get_id();
-					$parent_id  = $item->product->get_parent_id();
-
-					// Allow if product ID or parent ID matches an allowed product ID.
-					if ( $has_product_restriction ) {
-						$allowed_ids = $coupon->get_product_ids();
-
-						if ( in_array( $product_id, $allowed_ids, true ) || in_array( $parent_id, $allowed_ids, true ) ) {
-							return true;
-						}
-					}
-
-					// Allow if the product belongs to an allowed category.
-					if ( $has_category_restriction ) {
-						$lookup_id    = $item->product->is_type( 'variation' ) ? $parent_id : $product_id;
-						$product_cats = wc_get_product_cat_ids( $lookup_id );
-
-						if ( array_intersect( $product_cats, $coupon->get_product_categories() ) ) {
-							return true;
-						}
-					}
-
-					return false;
+					return $this->item_matches_product_or_category_restriction( $item, $coupon, $has_product_restriction, $has_category_restriction );
 				}
 			);
 		}
@@ -558,6 +532,51 @@ class WC_Discounts {
 		}
 
 		return $total_discount;
+	}
+
+	/**
+	 * Determine whether an item satisfies the coupon's product ID or product
+	 * category restriction, using OR logic (matching either is sufficient).
+	 *
+	 * Works for both cart items and order items, since it reads from
+	 * $item->product (a WC_Product instance) rather than a cart-array shape.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param object    $item                      Cart or order item exposing a ->product property.
+	 * @param WC_Coupon $coupon                    Coupon object.
+	 * @param bool      $has_product_restriction   Whether the coupon restricts by product ID.
+	 * @param bool      $has_category_restriction  Whether the coupon restricts by product category.
+	 * @return bool True if the item is eligible under the restriction(s).
+	 */
+	protected function item_matches_product_or_category_restriction( $item, $coupon, $has_product_restriction, $has_category_restriction ) {
+		if ( ! $item->product ) {
+			return false;
+		}
+
+		$product_id = $item->product->get_id();
+		$parent_id  = $item->product->get_parent_id();
+
+		// Allow if product ID or parent ID matches an allowed product ID.
+		if ( $has_product_restriction ) {
+			$allowed_ids = $coupon->get_product_ids();
+
+			if ( in_array( $product_id, $allowed_ids, true ) || in_array( $parent_id, $allowed_ids, true ) ) {
+				return true;
+			}
+		}
+
+		// Allow if the product belongs to an allowed category.
+		if ( $has_category_restriction ) {
+			$lookup_id    = $item->product->is_type( 'variation' ) ? $parent_id : $product_id;
+			$product_cats = wc_get_product_cat_ids( $lookup_id );
+
+			if ( array_intersect( $product_cats, $coupon->get_product_categories() ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -863,31 +882,9 @@ class WC_Discounts {
 		$valid = false;
 
 		foreach ( $this->get_items_to_validate() as $item ) {
-			if ( ! $item->product ) {
-				continue;
-			}
-
-			// Check product ID match.
-			if ( $has_product_restriction && (
-				in_array( $item->product->get_id(), $coupon->get_product_ids(), true ) ||
-				in_array( $item->product->get_parent_id(), $coupon->get_product_ids(), true )
-			) ) {
+			if ( $this->item_matches_product_or_category_restriction( $item, $coupon, $has_product_restriction, $has_category_restriction ) ) {
 				$valid = true;
 				break;
-			}
-
-			// Check category match.
-			if ( $has_category_restriction ) {
-				$product_cats = wc_get_product_cat_ids(
-					$item->product->is_type( 'variation' )
-						? $item->product->get_parent_id()
-						: $item->product->get_id()
-				);
-
-				if ( count( array_intersect( $product_cats, $coupon->get_product_categories() ) ) > 0 ) {
-					$valid = true;
-					break;
-				}
 			}
 		}
 
