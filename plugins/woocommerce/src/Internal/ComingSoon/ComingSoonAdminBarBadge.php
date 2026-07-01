@@ -18,14 +18,6 @@ class ComingSoonAdminBarBadge {
 	 * @return bool
 	 */
 	private function is_badge_enabled(): bool {
-		$option_value = get_option( 'woocommerce_site_visibility_badge', null );
-
-		// If the new option is set, use it.
-		if ( null !== $option_value ) {
-			return 'yes' === $option_value;
-		}
-
-		// Fallback to the legacy feature flag for sites that haven't migrated yet.
 		return FeaturesUtil::feature_is_enabled( 'site_visibility_badge' );
 	}
 

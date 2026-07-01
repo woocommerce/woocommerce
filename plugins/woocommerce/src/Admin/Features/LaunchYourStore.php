@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Admin\Features;
 
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Internal\Admin\WCAdminUser;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 
 /**
@@ -40,7 +41,7 @@ class LaunchYourStore {
 			'woocommerce_coming_soon'      => array( 'yes', 'no' ),
 			'woocommerce_store_pages_only' => array( 'yes', 'no' ),
 			'woocommerce_private_link'     => array( 'yes', 'no' ),
-			'woocommerce_site_visibility_badge' => array( 'yes', 'no' ),
+			'woocommerce_feature_site_visibility_badge_enabled' => array( 'yes', 'no' ),
 		);
 
 		$event_data = array();
@@ -123,8 +124,8 @@ class LaunchYourStore {
 				'woocommerce_coming_soon'      => get_option( 'woocommerce_coming_soon' ),
 				'woocommerce_store_pages_only' => get_option( 'woocommerce_store_pages_only' ),
 				'woocommerce_private_link'     => get_option( 'woocommerce_private_link' ),
-				'woocommerce_share_key'              => get_option( 'woocommerce_share_key' ),
-				'woocommerce_site_visibility_badge'   => get_option( 'woocommerce_site_visibility_badge', 'yes' ),
+				'woocommerce_share_key'        => get_option( 'woocommerce_share_key' ),
+				'woocommerce_feature_site_visibility_badge_enabled' => FeaturesUtil::feature_is_enabled( 'site_visibility_badge' ) ? 'yes' : 'no',
 			);
 		}
 

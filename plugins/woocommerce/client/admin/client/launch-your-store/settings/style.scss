@@ -106,23 +106,6 @@
 			margin-top: 16px;
 		}
 
-		// Toggle alignment rules apply to every toggle in a section, including
-		// top-level toggles that are not nested in the `-content` wrapper.
-		.components-toggle-control {
-			margin: 0;
-
-			.components-h-stack {
-				align-items: baseline;
-			}
-		}
-
-		.components-base-control__field {
-			p {
-				margin-top: 6px;
-				margin-bottom: 0;
-			}
-		}
-
 		.site-visibility-settings-slotfill-section-content {
 			gap: 16px;
 			display: flex;
@@ -132,6 +115,27 @@
 			&.is-hidden {
 				display: none;
 			}
+
+			.components-toggle-control {
+				margin: 0;
+
+				.components-h-stack {
+					align-items: baseline;
+				}
+			}
+
+			.components-base-control__field {
+				p {
+					margin-top: 6px;
+					margin-bottom: 0;
+				}
+			}
+		}
+
+		// The badge toggle is its own top-level section, so drop the left indent
+		// that nested sub-option toggles use.
+		.site-visibility-settings-slotfill-section-visibility-badge {
+			margin-left: 0;
 		}
 	}
 }

@@ -48,7 +48,7 @@ const SiteVisibility = () => {
 		setting?.woocommerce_private_link || 'no'
 	);
 	const [ siteVisibilityBadge, setSiteVisibilityBadge ] = useState(
-		setting?.woocommerce_site_visibility_badge || 'yes'
+		setting?.woocommerce_feature_site_visibility_badge_enabled || 'yes'
 	);
 	const formRef = useRef( null );
 	const saveButtonRef = useRef( null );
@@ -78,7 +78,8 @@ const SiteVisibility = () => {
 			storePagesOnly: setting.woocommerce_store_pages_only,
 			privateLink: setting.woocommerce_private_link || 'no',
 			siteVisibilityBadge:
-				setting.woocommerce_site_visibility_badge || 'yes',
+				setting.woocommerce_feature_site_visibility_badge_enabled ||
+				'yes',
 		};
 
 		const currentValues = {
@@ -151,7 +152,7 @@ const SiteVisibility = () => {
 			<input
 				type="hidden"
 				value={ siteVisibilityBadge }
-				name="woocommerce_site_visibility_badge"
+				name="woocommerce_feature_site_visibility_badge_enabled"
 			/>
 			<h2>{ __( 'Site visibility', 'woocommerce' ) }</h2>
 			<p className="site-visibility-settings-slotfill-description">
@@ -316,35 +317,32 @@ const SiteVisibility = () => {
 				</p>
 			</div>
 			<div className="site-visibility-settings-slotfill-section">
-				<ToggleControl
-					__nextHasNoMarginBottom
-					label={
-						<>
-							{ __(
-								'Display site visibility badge in admin bar',
-								'woocommerce'
-							) }
-							<p>
+				<div className="site-visibility-settings-slotfill-section-content site-visibility-settings-slotfill-section-visibility-badge">
+					<ToggleControl
+						__nextHasNoMarginBottom
+						label={
+							<>
 								{ __(
-									'Show the site visibility status badge in the WordPress admin bar.',
+									'Display site visibility badge in admin bar',
 									'woocommerce'
 								) }
-							</p>
-						</>
-					}
-					checked={ siteVisibilityBadge === 'yes' }
-					onChange={ ( enabled ) => {
-						setSiteVisibilityBadge(
-							siteVisibilityBadge === 'yes' ? 'no' : 'yes'
-						);
-						recordEvent(
-							'site_visibility_badge_toggle',
-							{
+								<p>
+									{ __(
+										'Show the site visibility status badge in the WordPress admin bar.',
+										'woocommerce'
+									) }
+								</p>
+							</>
+						}
+						checked={ siteVisibilityBadge === 'yes' }
+						onChange={ ( enabled ) => {
+							setSiteVisibilityBadge( enabled ? 'yes' : 'no' );
+							recordEvent( 'site_visibility_badge_toggle', {
 								enabled,
-							}
-						);
-					} }
-				/>
+							} );
+						} }
+					/>
+				</div>
 			</div>
 			{ formRef.current && saveButtonRef.current ? (
 				<ConfirmationModal
