@@ -50,23 +50,23 @@ final class RenewalEngine {
 	 * Action fired after a contract is scheduled, with `( $contract, $when )`.
 	 * Listeners observe a scheduled state, not an in-flight one.
 	 */
-	const RENEWAL_SCHEDULED_ACTION = 'woocommerce_subscriptions_engine_renewal_scheduled';
+	public const RENEWAL_SCHEDULED_ACTION = 'woocommerce_subscriptions_engine_renewal_scheduled';
 
 	/**
 	 * Action fired after a renewal order is created, with `( $renewal_order, $contract )`.
 	 */
-	const RENEWAL_ORDER_CREATED_ACTION = 'woocommerce_subscriptions_engine_renewal_order_created';
+	public const RENEWAL_ORDER_CREATED_ACTION = 'woocommerce_subscriptions_engine_renewal_order_created';
 
 	/**
 	 * Action fired after a renewal cycle is billed and the schedule advanced, with
 	 * `( $contract, $cycle, $renewal_order )`.
 	 */
-	const RENEWAL_BILLED_ACTION = 'woocommerce_subscriptions_engine_renewal_billed';
+	public const RENEWAL_BILLED_ACTION = 'woocommerce_subscriptions_engine_renewal_billed';
 
 	/**
 	 * Logger source tag.
 	 */
-	const LOG_SOURCE = 'woocommerce-subscriptions-engine';
+	protected const LOG_SOURCE = 'woocommerce-subscriptions-engine';
 
 	/**
 	 * Repository for loading and persisting contracts, and targeted cycle access.

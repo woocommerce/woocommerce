@@ -31,7 +31,7 @@ final class Cancellation {
 	/**
 	 * Action fired after a contract is cancelled, with `( $contract )`.
 	 */
-	const CONTRACT_CANCELLED_ACTION = 'woocommerce_subscriptions_engine_contract_cancelled';
+	public const CONTRACT_CANCELLED_ACTION = 'woocommerce_subscriptions_engine_contract_cancelled';
 
 	/**
 	 * Contract repository.
