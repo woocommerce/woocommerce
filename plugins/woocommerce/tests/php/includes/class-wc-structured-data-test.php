@@ -217,4 +217,47 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 			unset( $_GET['attribute_pa_size'], $_GET['attribute_pa_colour'], $_GET['attribute_pa_number'] );
 		}
 	}
+
+	/**
+	 * A private variation matching the same selection must not block the single Offer for the
+	 * published variation, because `find_matching_product_variation()` only resolves published ones.
+	 *
+	 * @return void
+	 */
+	public function test_variable_product_ignores_private_variation_when_counting_matches(): void {
+		$product = WC_Helper_Product::create_variation_product();
+
+		// Private sibling with the same attributes as the published "huge / red / 0" variation.
+		$private_variation = new WC_Product_Variation();
+		$private_variation->set_parent_id( $product->get_id() );
+		$private_variation->set_attributes(
+			array(
+				'pa_size'   => 'huge',
+				'pa_colour' => 'red',
+				'pa_number' => '0',
+			)
+		);
+		$private_variation->set_regular_price( 99 );
+		$private_variation->set_status( 'private' );
+		$private_variation->save();
+
+		WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		$_GET['attribute_pa_size']   = 'huge';
+		$_GET['attribute_pa_colour'] = 'red';
+		$_GET['attribute_pa_number'] = '0';
+
+		try {
+			$this->structured_data->generate_product_data( $product );
+			$data  = $this->structured_data->get_data();
+			$offer = $data[0]['offers'][0];
+
+			// Still a single Offer at the published variation's price, not the private one's.
+			$this->assertEquals( 'Offer', $offer['@type'] );
+			$this->assertEquals( '16.00', $offer['price'] );
+		} finally {
+			unset( $_GET['attribute_pa_size'], $_GET['attribute_pa_colour'], $_GET['attribute_pa_number'] );
+		}
+	}
 }

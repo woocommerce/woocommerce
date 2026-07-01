@@ -13,6 +13,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
@@ -830,6 +831,12 @@ class WC_Structured_Data {
 			$variation = wc_get_product( $variation_id );
 
 			if ( ! $variation instanceof WC_Product_Variation ) {
+				continue;
+			}
+
+			// `find_matching_product_variation()` only queries published variations, so private
+			// siblings must be ignored here to keep the count consistent with the resolved variation.
+			if ( ProductStatus::PUBLISH !== $variation->get_status() ) {
 				continue;
 			}
 
