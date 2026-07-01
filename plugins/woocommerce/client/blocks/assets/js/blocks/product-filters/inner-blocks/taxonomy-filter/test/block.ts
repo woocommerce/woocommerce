@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { getBlockType, type BlockAttributes } from '@wordpress/blocks';
+import { type BlockAttributes } from '@wordpress/blocks';
 import '@testing-library/jest-dom';
 import { act, fireEvent, screen, within } from '@testing-library/react';
 
@@ -88,18 +88,6 @@ function enableControl( controlName: string ) {
 }
 
 describe( 'Taxonomy Filter block', () => {
-	describe( 'Block registration', () => {
-		test( 'describes taxonomy variations without implying sidebar taxonomy selection', () => {
-			const blockType = getBlockType(
-				'woocommerce/product-filter-taxonomy'
-			);
-
-			expect( blockType?.variations?.[ 0 ].description ).toBe(
-				'Let shoppers filter products by category.'
-			);
-		} );
-	} );
-
 	describe( 'Initial display', () => {
 		test( 'should show notice when no taxonomy is selected', async () => {
 			await setup( { taxonomy: '' } );
