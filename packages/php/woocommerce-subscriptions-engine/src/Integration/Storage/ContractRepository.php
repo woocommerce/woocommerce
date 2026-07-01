@@ -252,30 +252,76 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Contract ids due for renewal at `$now`: active, primitive-scheduled contracts whose
-	 * `next_payment_gmt` has arrived, oldest-due first. The batch dispatcher's scan - it returns
-	 * ids only (the money-path re-loads each), keyed on the `due_contract (status,
-	 * next_payment_gmt)` index. A null `next_payment_gmt` (no schedule) never matches the `<=`
-	 * comparison. Gateway-scheduled contracts are excluded: the gateway owns their renewal, so
-	 * they must never enter the primitive scan - where a permanent skip would hold the front of
-	 * the oldest-due-first order and starve healthy renewals behind it.
+	 * Contracts actionable for renewal at `$now`, oldest-due first - the batch dispatcher's scan.
+	 * Active, primitive-scheduled contracts whose `next_payment_gmt` has arrived, joined to their
+	 * head cycle so the scan can filter to the ones actually chargeable now:
+	 *
+	 * - head `billed`/`cancelled` and its period has ended (`ends_at_gmt <= now`) -> advance-ready;
+	 * - head `pending` with an expired crash-recovery lease (`claimed_until <= now`) -> reclaim-ready.
+	 *
+	 * A head that is `failed` (awaits dunning), `processing` (awaits its gateway), or `pending`
+	 * with a live lease is deliberately excluded. Because that filter is in SQL, `LIMIT` counts
+	 * only actionable rows, so a cluster of non-actionable heads (a stuck gateway, a backlog of
+	 * declines) cannot occupy the batch and starve healthy renewals behind them. Gateway-scheduled
+	 * contracts are excluded (the gateway owns their renewal); a null `next_payment_gmt` never
+	 * matches the `<=` comparison. Driven by the `due_contract (status, next_payment_gmt)` index;
+	 * the head cycle is joined per candidate via the `chain_seq` UNIQUE index. Returns the head
+	 * fields selection needs, so the dispatcher does not re-load the head to decide what to bill.
 	 *
 	 * @param DateTimeImmutable $now   The cutoff moment; contracts due at or before it.
-	 * @param int               $limit Maximum ids to return (the batch size).
-	 * @return array<int, int> Due contract ids, oldest-due first.
+	 * @param int               $limit Maximum rows to return (the batch size).
+	 * @return array<int, DueRenewal> Actionable due renewals, oldest-due first.
 	 */
 	public function find_due( DateTimeImmutable $now, int $limit ): array {
 		global $wpdb;
 
-		$table  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-		$cutoff = $now->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$cycles    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$cutoff    = $now->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$table} WHERE status = %s AND schedule_source <> %s AND next_payment_gmt IS NOT NULL AND next_payment_gmt <= %s ORDER BY next_payment_gmt ASC, id ASC LIMIT %d", ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_GATEWAY, $cutoff, $limit ) );
+		// Table names cannot be bound, so they are interpolated; every value is a placeholder.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT c.id AS contract_id, cy.count AS head_count, cy.status AS head_status, cy.ends_at_gmt AS head_ends_at_gmt
+				FROM {$contracts} c
+				JOIN {$cycles} cy
+				  ON cy.contract_id = c.id AND cy.kind = %s
+				 AND cy.sequence_no = ( SELECT MAX(s.sequence_no) FROM {$cycles} s WHERE s.contract_id = c.id AND s.kind = %s )
+				WHERE c.status = %s AND c.schedule_source <> %s AND c.next_payment_gmt IS NOT NULL AND c.next_payment_gmt <= %s
+				  AND (
+				        ( cy.status = %s AND cy.ends_at_gmt <= %s )
+				     OR ( cy.status = %s AND cy.claimed_until IS NOT NULL AND cy.claimed_until <= %s )
+				      )
+				ORDER BY c.next_payment_gmt ASC, c.id ASC
+				LIMIT %d",
+				Cycle::KIND_BILLING,
+				Cycle::KIND_BILLING,
+				ContractStatus::ACTIVE,
+				Contract::SCHEDULE_SOURCE_GATEWAY,
+				$cutoff,
+				CycleStatus::BILLED,
+				$cutoff,
+				CycleStatus::PENDING,
+				$cutoff,
+				$limit
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		$result = array();
-		foreach ( is_array( $ids ) ? $ids : array() as $id ) {
-			$result[] = ScalarCoercion::coerce_int( $id );
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+			$head_count = $row['head_count'] ?? null;
+			$result[]   = new DueRenewal(
+				ScalarCoercion::coerce_int( $row['contract_id'] ?? 0 ),
+				null === $head_count ? null : ScalarCoercion::coerce_int( $head_count ),
+				ScalarCoercion::coerce_string( $row['head_status'] ?? '' ),
+				ScalarCoercion::coerce_string( $row['head_ends_at_gmt'] ?? '' )
+			);
 		}
 
 		return $result;

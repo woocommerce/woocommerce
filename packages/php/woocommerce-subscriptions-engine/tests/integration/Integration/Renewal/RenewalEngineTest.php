@@ -43,10 +43,17 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	private const GATEWAY_APPROVING = 'engine_test_gateway_approve';
 
 	/**
-	 * A gateway that declares `recurring` but never completes the charge, so the
-	 * renewal order stays unpaid (the failed-charge path).
+	 * A gateway that declares `recurring` and reports a hard decline synchronously,
+	 * moving the renewal order to `failed` (the failed-charge path).
 	 */
 	private const GATEWAY_DECLINING = 'engine_test_gateway_decline';
+
+	/**
+	 * A gateway that declares `recurring` but registers no handler, so the renewal order
+	 * stays `pending` (uncharged) - the async-pending shape: neither paid nor failed, which
+	 * the money-path parks in `processing` awaiting a later confirmation.
+	 */
+	private const GATEWAY_PENDING = 'engine_test_gateway_pending';
 
 	public function set_up(): void {
 		parent::set_up();
@@ -213,13 +220,13 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox process_due skips when a renewal order is already tagged for the cycle.
+	 * @testdox process_due does not re-select a failed cycle (no second order).
 	 *
-	 * Covers the order-meta pre-check: the first run tags a renewal order for the cycle, so
-	 * the retried due action is suppressed before a second cycle/order is created.
+	 * A declined charge settles cycle 2 `failed`. A `failed` head is not selectable (dunning is
+	 * deferred), so a retried run is a no-op - no second cycle, no second order for the number.
 	 */
-	public function test_process_due_skips_when_a_renewal_order_is_already_tagged(): void {
-		GatewayCapabilities::declare( self::GATEWAY_DECLINING, array( GatewayCapabilities::RECURRING ) );
+	public function test_process_due_does_not_reselect_a_failed_cycle(): void {
+		$this->fail_charges_for( self::GATEWAY_DECLINING );
 
 		$contract    = $this->sign_up_contract( self::GATEWAY_DECLINING );
 		$contract_id = $contract->get_id();
@@ -229,8 +236,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$first = $engine->process_due( $contract_id );
 		$this->assertInstanceOf( WC_Order::class, $first );
 
-		// The charge did not settle, so the head stays at the same chargeable number; a retried
-		// due action is suppressed by the order-meta pre-check rather than creating a second order.
+		// Cycle 2 settled failed; a retried run does not re-select it (no duplicate order).
 		$retry = $engine->process_due( $contract_id );
 		$this->assertNull( $retry );
 
@@ -238,12 +244,12 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox process_due skips when the cycle is already claimed (create-as-claim UNIQUE).
+	 * @testdox process_due skips when the head cycle is a live pending claim.
 	 *
-	 * Covers the claim_next_cycle catch path: a pending cycle for the target count exists with
-	 * NO tagged renewal order, so the order-meta pre-check finds nothing and process_due reaches
-	 * the append_cycle insert, which loses the UNIQUE(contract_id, kind, count) race. It returns
-	 * null and creates no duplicate cycle or order.
+	 * A pending cycle for the target count already exists with no lease recorded (a live claim,
+	 * not a crashed one). Selection targets that same count, and the money-path's reclaim step
+	 * finds a non-reclaimable pending head, so it returns null and creates no duplicate cycle or
+	 * order.
 	 */
 	public function test_process_due_skips_when_the_cycle_is_already_claimed(): void {
 		$this->approve_charges_for( self::GATEWAY_APPROVING );
@@ -301,15 +307,16 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
-		// Seed a stalled pending cycle 2 with an already-expired lease (no tagged order).
+		// Seed a stalled pending cycle 2 whose lease expired a minute before the run (no tagged order).
+		$now      = new \DateTimeImmutable( '2026-02-15 00:05:00', new \DateTimeZone( 'UTC' ) );
 		$repo     = new ContractRepository();
 		$previous = $repo->find_current_cycle( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $previous );
-		$stalled    = $this->make_pending_cycle_2( $contract_id, $previous, gmdate( 'Y-m-d H:i:s', time() - 60 ) );
+		$stalled    = $this->make_pending_cycle_2( $contract_id, $previous, $now->modify( '-60 seconds' )->format( 'Y-m-d H:i:s' ) );
 		$stalled_id = $stalled->get_id();
 		$this->assertNotNull( $stalled_id );
 
-		$renewal_order = ( new RenewalEngine() )->process_due( $contract_id );
+		$renewal_order = ( new RenewalEngine() )->process_due( $contract_id, $now );
 
 		// The reclaimed cycle is billed and resolved through a renewal order.
 		$this->assertInstanceOf( WC_Order::class, $renewal_order );
@@ -355,14 +362,15 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
-		// Seed a pending cycle 2 whose lease is still in the future (a live claim).
+		// Seed a pending cycle 2 whose lease is still an hour in the future (a live claim).
+		$now      = new \DateTimeImmutable( '2026-02-15 00:05:00', new \DateTimeZone( 'UTC' ) );
 		$repo     = new ContractRepository();
 		$previous = $repo->find_current_cycle( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $previous );
-		$live_until = gmdate( 'Y-m-d H:i:s', time() + 3600 );
+		$live_until = $now->modify( '+1 hour' )->format( 'Y-m-d H:i:s' );
 		$claimed    = $this->make_pending_cycle_2( $contract_id, $previous, $live_until );
 
-		$result = ( new RenewalEngine() )->process_due( $contract_id );
+		$result = ( new RenewalEngine() )->process_due( $contract_id, $now );
 		$this->assertNull( $result );
 
 		// No renewal order for count 2, and the seeded cycle is untouched (still pending, lease intact).
@@ -478,11 +486,11 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox process_due on a failed charge marks the cycle failed and leaves the schedule.
+	 * @testdox process_due on a declined charge marks the cycle failed and leaves the schedule.
 	 */
-	public function test_process_due_marks_the_cycle_failed_when_the_charge_does_not_settle(): void {
-		// Declared recurring, but no handler completes the charge: the order stays unpaid.
-		GatewayCapabilities::declare( self::GATEWAY_DECLINING, array( GatewayCapabilities::RECURRING ) );
+	public function test_process_due_marks_the_cycle_failed_when_the_gateway_declines(): void {
+		// The gateway reports a hard decline synchronously: the renewal order moves to failed.
+		$this->fail_charges_for( self::GATEWAY_DECLINING );
 
 		$contract    = $this->sign_up_contract( self::GATEWAY_DECLINING );
 		$contract_id = $contract->get_id();
@@ -515,15 +523,15 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox process_due retry of an unsettled cycle adds no duplicate cycle/order.
+	 * @testdox process_due retry of a failed cycle adds no duplicate cycle/order.
 	 *
-	 * A failed charge leaves cycle 2 `failed` with its order (and the schedule unchanged).
-	 * Re-firing targets the same count, so the order-meta pre-check makes it an idempotent
-	 * no-op: no second order, no second cycle for count 2. (Forward advancement after a
-	 * SUCCESSFUL bill is a distinct renewal, not a retry.)
+	 * A declined charge leaves cycle 2 `failed` with its order (and the schedule unchanged).
+	 * A `failed` head is not selectable, so re-firing is an idempotent no-op: no second order,
+	 * no second cycle for count 2. (Forward advancement after a SUCCESSFUL bill is a distinct
+	 * renewal, not a retry.)
 	 */
-	public function test_process_due_retry_of_an_unsettled_cycle_is_idempotent(): void {
-		GatewayCapabilities::declare( self::GATEWAY_DECLINING, array( GatewayCapabilities::RECURRING ) );
+	public function test_process_due_retry_of_a_failed_cycle_is_idempotent(): void {
+		$this->fail_charges_for( self::GATEWAY_DECLINING );
 
 		$contract    = $this->sign_up_contract( self::GATEWAY_DECLINING );
 		$contract_id = $contract->get_id();
@@ -534,7 +542,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( WC_Order::class, $first );
 		$this->assertFalse( $first->is_paid() );
 
-		// A retry while cycle 2 is unsettled (failed) creates no duplicate.
+		// A retry while cycle 2 is failed creates no duplicate.
 		$second = $engine->process_due( $contract_id );
 		$this->assertNull( $second );
 
@@ -954,6 +962,126 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 
 		$this->assertFalse( ( new RenewalEngine() )->schedule( $contract ) );
 		$this->assertFalse( RenewalScheduler::is_scheduled( $contract_id ) );
+	}
+
+	/**
+	 * @testdox process_due leaves the cycle processing when the charge is neither paid nor failed.
+	 *
+	 * A gateway that accepts the charge but confirms later (async) leaves the renewal order
+	 * neither paid nor failed. The money-path settles the cycle `processing` - awaiting the
+	 * gateway - without advancing the schedule or treating it as a failure. A `processing` head
+	 * is not re-selected, so a later run is a no-op until the order settles.
+	 */
+	public function test_process_due_leaves_the_cycle_processing_when_the_charge_is_pending(): void {
+		// Declared recurring, but no handler settles the order: it stays pending (async-accepted shape).
+		GatewayCapabilities::declare( self::GATEWAY_PENDING, array( GatewayCapabilities::RECURRING ) );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_PENDING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$engine        = new RenewalEngine();
+		$renewal_order = $engine->process_due( $contract_id );
+
+		$this->assertInstanceOf( WC_Order::class, $renewal_order );
+		$this->assertFalse( $renewal_order->is_paid() );
+
+		$repo  = new ContractRepository();
+		$cycle = $repo->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $cycle );
+		$this->assertSame( 2, $cycle->get_count() );
+		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::processing() ) );
+		// A processing cycle carries no crash-recovery lease.
+		$this->assertNull( $cycle->get_claimed_until_gmt() );
+
+		// The schedule is not advanced (the charge has not confirmed).
+		$reloaded = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertSame( '2026-02-15 00:00:00', $reloaded->get_next_payment_gmt() );
+
+		// A processing head is not re-selected: a later run is a no-op, no duplicate order.
+		$this->assertNull( $engine->process_due( $contract_id ) );
+		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+	}
+
+	/**
+	 * @testdox complete_from_order bills a processing cycle once its order is paid, and is idempotent.
+	 *
+	 * The async confirmation path: a cycle left `processing` is settled `billed` (and the schedule
+	 * advanced) when its order becomes paid and completion is driven from that order - the same
+	 * routine the order-status listener runs. Re-driving it is a no-op.
+	 */
+	public function test_complete_from_order_bills_a_processing_cycle_when_paid(): void {
+		GatewayCapabilities::declare( self::GATEWAY_PENDING, array( GatewayCapabilities::RECURRING ) );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_PENDING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$engine = new RenewalEngine();
+		$order  = $engine->process_due( $contract_id );
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		$repo            = new ContractRepository();
+		$processing_head = $repo->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $processing_head );
+		$this->assertTrue( $processing_head->get_status()->equals( CycleStatus::processing() ) );
+
+		// The async confirmation arrives: the order is paid. Drive completion as the listener would.
+		$order->payment_complete();
+		$paid_order = wc_get_order( $order->get_id() );
+		$this->assertInstanceOf( WC_Order::class, $paid_order );
+		$engine->complete_from_order( $paid_order );
+
+		$head = $repo->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+
+		$reloaded = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertSame( '2026-03-15 00:00:00', $reloaded->get_next_payment_gmt() );
+
+		// Idempotent: re-driving completion on the already-billed cycle changes nothing.
+		$engine->complete_from_order( $paid_order );
+		$billed_head = $repo->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $billed_head );
+		$this->assertTrue( $billed_head->get_status()->equals( CycleStatus::billed() ) );
+	}
+
+	/**
+	 * @testdox process does not charge the next cycle ahead of its period (the due-guard).
+	 *
+	 * After cycle 2 is billed its period runs to 2026-03-15. Advancing to cycle 3 at a moment
+	 * before that end must be a no-op - no cycle 3, no order - even called directly. This is the
+	 * charge-ahead guard, anchored on the head cycle's immutable end.
+	 */
+	public function test_process_does_not_charge_ahead_of_the_period(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$engine = new RenewalEngine();
+
+		// Bill cycle 2 (its period ends 2026-03-15).
+		$order2 = $engine->process_due( $contract_id, new \DateTimeImmutable( '2026-02-15 00:00:00', new \DateTimeZone( 'UTC' ) ) );
+		$this->assertInstanceOf( WC_Order::class, $order2 );
+
+		$repo = new ContractRepository();
+		$head = $repo->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertSame( 2, $head->get_count() );
+		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+
+		// Advance to cycle 3 before cycle 2's period has ended: a no-op.
+		$ahead = $engine->process( $contract_id, 3, new \DateTimeImmutable( '2026-03-01 00:00:00', new \DateTimeZone( 'UTC' ) ) );
+		$this->assertNull( $ahead );
+
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 3 ) );
+		$still = $repo->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $still );
+		$this->assertSame( 2, $still->get_count() );
 	}
 
 	/**

@@ -3,9 +3,9 @@
  * RenewalDispatcher - the autonomous batch renewal scanner.
  *
  * One recurring Action Scheduler job replaces the superseded one-job-per-contract
- * model: on each tick it scans the contract due-index and drives every due renewal
- * through the single synchronous money-path ({@see RenewalEngine::process_due()}).
- * Before charging anything it consults the processing gate
+ * model: on each tick it scans the cycle-aware due-index for actionable contracts, runs
+ * read-only selection ({@see RenewalSelector}) to choose the cycle, and bills it through
+ * {@see RenewalEngine::process()}. Before charging anything it consults the processing gate
  * ({@see ConsumerRegistry::is_empty()}) - with no registered consumer the engine is
  * inert and the whole run is skipped.
  *
@@ -96,14 +96,23 @@ final class RenewalDispatcher {
 	private $engine;
 
 	/**
+	 * The read-only selector that turns a due scan row into the cycle to bill.
+	 *
+	 * @var RenewalSelector
+	 */
+	private $selector;
+
+	/**
 	 * Build a dispatcher over the given collaborators.
 	 *
 	 * @param ContractRepository|null $contracts Contract repository; default instance when omitted.
 	 * @param RenewalEngine|null      $engine    Renewal engine; default instance when omitted.
+	 * @param RenewalSelector|null    $selector  Cycle selector; default instance when omitted.
 	 */
-	public function __construct( ?ContractRepository $contracts = null, ?RenewalEngine $engine = null ) {
+	public function __construct( ?ContractRepository $contracts = null, ?RenewalEngine $engine = null, ?RenewalSelector $selector = null ) {
 		$this->contracts = $contracts ?? new ContractRepository();
 		$this->engine    = $engine ?? new RenewalEngine();
+		$this->selector  = $selector ?? new RenewalSelector();
 	}
 
 	/**
@@ -188,14 +197,15 @@ final class RenewalDispatcher {
 	 * Run one scan tick over up to `$limit` due contracts: gate, then drive every due renewal.
 	 *
 	 * The processing gate comes first - with no registered consumer the engine charges
-	 * nothing and the run returns immediately. Otherwise the contract due-index is scanned
-	 * for up to `$limit` contracts due at `$now` and each is advanced through the money-path.
-	 * A throw from one contract is logged and the scan continues, so one bad contract cannot
-	 * stall the whole batch. A backlog larger than `$limit` drains over successive ticks.
+	 * nothing and the run returns immediately. Otherwise the cycle-aware scan returns the
+	 * actionable contracts due at `$now`; each is run through read-only selection and, when a
+	 * cycle is due, billed via {@see RenewalEngine::process()}. A pre-flight impossibility
+	 * ({@see RenewalNotProcessable}) parks the contract; any other throw is logged - so one bad
+	 * contract cannot stall the batch. A backlog larger than `$limit` drains over successive ticks.
 	 *
 	 * @param DateTimeImmutable|null $now   The scan moment; defaults to now (UTC).
 	 * @param int                    $limit Maximum due contracts to process this tick.
-	 * @return int The number of due contracts processed this tick (0 when gated).
+	 * @return int The number of actionable due contracts scanned this tick (0 when gated).
 	 */
 	public function run_batch( ?DateTimeImmutable $now, int $limit ): int {
 		if ( ConsumerRegistry::is_empty() ) {
@@ -206,25 +216,40 @@ final class RenewalDispatcher {
 			return 0;
 		}
 
-		$now     = $now ?? new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
-		$due_ids = $this->contracts->find_due( $now, $limit );
+		$now = $now ?? new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
+		$due = $this->contracts->find_due( $now, $limit );
 
-		foreach ( $due_ids as $contract_id ) {
+		foreach ( $due as $row ) {
 			try {
-				$this->engine->process_due( $contract_id );
+				$intent = $this->selector->select( $row, $now );
+				if ( null === $intent ) {
+					continue;
+				}
+				$this->engine->process( $intent->get_contract_id(), $intent->get_cycle_count(), $now );
+			} catch ( RenewalNotProcessable $e ) {
+				// Pre-flight impossibility (e.g. an unresolvable plan): park so the contract
+				// leaves the due window and cannot re-poison the scan; a repair re-arms it.
+				$this->engine->park( $row->get_contract_id() );
+				wc_get_logger()->warning(
+					sprintf( 'RenewalDispatcher::run(): parking contract %d - %s', $row->get_contract_id(), $e->getMessage() ),
+					array(
+						'source'      => self::LOG_SOURCE,
+						'contract_id' => $row->get_contract_id(),
+					)
+				);
 			} catch ( Throwable $e ) {
 				// One contract's failure must not stall the batch (or make AS retry the
 				// whole tick forever). Log and continue to the next due contract.
 				wc_get_logger()->error(
-					sprintf( 'RenewalDispatcher::run(): processing contract %d threw: %s', $contract_id, $e->getMessage() ),
+					sprintf( 'RenewalDispatcher::run(): processing contract %d threw: %s', $row->get_contract_id(), $e->getMessage() ),
 					array(
 						'source'      => self::LOG_SOURCE,
-						'contract_id' => $contract_id,
+						'contract_id' => $row->get_contract_id(),
 					)
 				);
 			}
 		}
 
-		return count( $due_ids );
+		return count( $due );
 	}
 }

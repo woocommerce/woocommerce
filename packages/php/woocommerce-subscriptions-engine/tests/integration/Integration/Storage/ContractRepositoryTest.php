@@ -17,6 +17,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DueRenewal;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
@@ -714,7 +715,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$not_yet    = $this->insert_contract_due_at( '2026-08-15 00:00:00', ContractStatus::ACTIVE );
 		$on_hold    = $this->insert_contract_due_at( '2026-06-01 00:00:00', ContractStatus::ON_HOLD );
 
-		$ids = $this->sut->find_due( $now, 50 );
+		$ids = $this->due_ids( $now, 50 );
 
 		// Only the two due+active contracts, oldest-due first; the future and the non-active excluded.
 		$this->assertSame( array( $due_old, $due_recent ), $ids );
@@ -731,7 +732,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$exactly_due = $this->insert_contract_due_at( '2026-07-15 00:00:00', ContractStatus::ACTIVE );
 		$no_schedule = $this->insert_contract_due_at( null, ContractStatus::ACTIVE );
 
-		$ids = $this->sut->find_due( $now, 50 );
+		$ids = $this->due_ids( $now, 50 );
 
 		$this->assertContains( $exactly_due, $ids, 'A contract due exactly at the cutoff is included.' );
 		$this->assertNotContains( $no_schedule, $ids, 'A contract with no next_payment_gmt is never due.' );
@@ -748,7 +749,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->insert_contract_due_at( '2026-07-01 00:00:00', ContractStatus::ACTIVE );
 
 		// The limit caps the batch from the oldest-due end; the newest-due row is left for a later tick.
-		$this->assertSame( array( $first, $second ), $this->sut->find_due( $now, 2 ) );
+		$this->assertSame( array( $first, $second ), $this->due_ids( $now, 2 ) );
 	}
 
 	/**
@@ -760,20 +761,111 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$primitive = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
 		$gateway   = $this->insert_contract_due_at( '2026-06-01 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_GATEWAY );
 
-		$ids = $this->sut->find_due( $now, 50 );
+		$ids = $this->due_ids( $now, 50 );
 
 		$this->assertContains( $primitive, $ids );
 		$this->assertNotContains( $gateway, $ids, 'A gateway-scheduled contract must never enter the primitive scan.' );
 	}
 
 	/**
-	 * Insert a contract with the given schedule date and status, returning its id.
+	 * @testdox find_due returns the head fields the selector needs.
+	 */
+	public function test_find_due_returns_the_head_fields(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+
+		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		$due = $this->sut->find_due( $now, 50 );
+
+		$this->assertCount( 1, $due );
+		$row = $due[0];
+		$this->assertInstanceOf( DueRenewal::class, $row );
+		$this->assertSame( $id, $row->get_contract_id() );
+		$this->assertSame( 1, $row->get_head_count() );
+		$this->assertSame( CycleStatus::BILLED, $row->get_head_status() );
+		$this->assertSame( '2026-06-15 00:00:00', $row->get_head_ends_at_gmt() );
+	}
+
+	/**
+	 * @testdox find_due excludes a contract whose head is not actionable (failed / processing).
+	 */
+	public function test_find_due_excludes_non_actionable_heads(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+
+		$billed     = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::BILLED );
+		$failed     = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::FAILED );
+		$processing = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::PROCESSING );
+
+		$ids = $this->due_ids( $now, 50 );
+
+		$this->assertContains( $billed, $ids );
+		$this->assertNotContains( $failed, $ids, 'A failed head awaits dunning, not the scan.' );
+		$this->assertNotContains( $processing, $ids, 'A processing head awaits its gateway, not the scan.' );
+	}
+
+	/**
+	 * @testdox find_due excludes a billed head whose period has not ended (the advance due-guard).
+	 */
+	public function test_find_due_excludes_a_billed_head_not_yet_ended(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+
+		// next_payment has arrived (the coarse index would pick it), but the head's own period
+		// runs into the future - so the successor is not yet due and the scan must exclude it.
+		$not_ended = $this->insert_contract_due_at( '2026-07-01 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::BILLED, null, '2026-08-15 00:00:00' );
+
+		$this->assertNotContains( $not_ended, $this->due_ids( $now, 50 ) );
+	}
+
+	/**
+	 * @testdox find_due includes a reclaim-ready pending head but not a live-lease one.
+	 */
+	public function test_find_due_includes_reclaim_ready_pending_but_not_live_lease(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+
+		$reclaimable = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::PENDING, '2026-07-14 00:00:00' );
+		$live_lease  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::PENDING, '2026-08-15 00:00:00' );
+
+		$ids = $this->due_ids( $now, 50 );
+
+		$this->assertContains( $reclaimable, $ids, 'A pending head whose lease has expired is reclaim-ready.' );
+		$this->assertNotContains( $live_lease, $ids, 'A pending head with a live lease is a concurrent claim, not for the scan.' );
+	}
+
+	/**
+	 * The contract ids of the due scan at `$now`, in scan order.
 	 *
-	 * @param string|null $next_payment_gmt The next-payment date, or null for no schedule.
+	 * @param \DateTimeImmutable $now   The cutoff moment.
+	 * @param int                $limit The batch size.
+	 * @return array<int, int>
+	 */
+	private function due_ids( \DateTimeImmutable $now, int $limit ): array {
+		return array_map(
+			static function ( DueRenewal $due ): int {
+				return $due->get_contract_id();
+			},
+			$this->sut->find_due( $now, $limit )
+		);
+	}
+
+	/**
+	 * Insert a contract with the given schedule date and status, plus a head cycle so the
+	 * cycle-aware scan can join it. The head is billed and ends when the next payment is due
+	 * (advance-ready) unless overridden. Returns the contract id.
+	 *
+	 * @param string|null $next_payment_gmt The next-payment date, or null for no schedule/head.
 	 * @param string      $status           The contract status (a ContractStatus value).
 	 * @param string      $schedule_source  Who owns the schedule (primitive or gateway).
+	 * @param string      $head_status      The head cycle status (a CycleStatus value).
+	 * @param string|null $claimed_until    The head cycle lease expiry, or null for none.
+	 * @param string|null $head_ends_at     The head period end; defaults to `$next_payment_gmt`.
 	 */
-	private function insert_contract_due_at( ?string $next_payment_gmt, string $status, string $schedule_source = Contract::SCHEDULE_SOURCE_PRIMITIVE ): int {
+	private function insert_contract_due_at(
+		?string $next_payment_gmt,
+		string $status,
+		string $schedule_source = Contract::SCHEDULE_SOURCE_PRIMITIVE,
+		string $head_status = CycleStatus::BILLED,
+		?string $claimed_until = null,
+		?string $head_ends_at = null
+	): int {
 		$contract = Contract::create(
 			array(
 				'customer_id'      => 1,
@@ -786,8 +878,27 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 				'schedule_source'  => $schedule_source,
 			)
 		);
+		$id       = $this->sut->insert( $contract );
 
-		return $this->sut->insert( $contract );
+		if ( null !== $next_payment_gmt ) {
+			$this->sut->append_cycle(
+				Cycle::create(
+					array(
+						'contract_id'    => $id,
+						'sequence_no'    => 1,
+						'count'          => 1,
+						'status'         => CycleStatus::from( $head_status ),
+						'starts_at_gmt'  => '2026-01-15 00:00:00',
+						'ends_at_gmt'    => $head_ends_at ?? $next_payment_gmt,
+						'expected_total' => '19.99',
+						'currency'       => 'USD',
+						'claimed_until'  => $claimed_until,
+					)
+				)
+			);
+		}
+
+		return $id;
 	}
 
 	/**
