@@ -34,12 +34,21 @@ class WC_Meta_Box_Order_Actions_Test extends WC_Unit_Test_Case {
 
 			return $menu_items;
 		};
+		$delete_cap_filter = function ( $caps, $cap, $user_id, $args ) use ( $order ) {
+			if ( 'delete_post' === $cap && isset( $args[0] ) && $order->get_id() === (int) $args[0] ) {
+				return array( 'exist' );
+			}
+
+			return $caps;
+		};
 
 		add_filter( 'woocommerce_order_actions_menu_items', $menu_filter );
+		add_filter( 'map_meta_cap', $delete_cap_filter, 10, 4 );
 		try {
 			$output = $this->render_order_actions_meta_box( $order );
 		} finally {
 			remove_filter( 'woocommerce_order_actions_menu_items', $menu_filter );
+			remove_filter( 'map_meta_cap', $delete_cap_filter, 10 );
 		}
 
 		$expected_delete_text = EMPTY_TRASH_DAYS ? 'Move to trash' : 'Delete permanently';
