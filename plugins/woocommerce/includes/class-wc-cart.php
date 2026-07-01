@@ -12,6 +12,7 @@
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
@@ -388,7 +389,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool
 	 */
 	public function display_prices_including_tax() {
-		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, 'incl' === $this->get_tax_price_display_mode() );
+		/**
+		 * Filter whether or not the cart is displaying prices including tax.
+		 *
+		 * @since 3.3.0
+		 *
+		 * @param bool $display_prices_including_tax Whether or not the cart is displaying prices including tax.
+		 */
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, TaxDisplayMode::INCLUSIVE === $this->get_tax_price_display_mode() );
 	}
 
 	/*
@@ -2448,7 +2456,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_tax_price_display_mode() {
 		if ( $this->get_customer() && $this->get_customer()->get_is_vat_exempt() ) {
-			return 'excl';
+			return TaxDisplayMode::EXCLUSIVE;
 		}
 
 		return get_option( 'woocommerce_tax_display_cart' );

@@ -37,10 +37,13 @@ permissions:
   contents: read
   issues: read
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   create-tracking-issue:
     name: Create Release Tracking Issue
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     steps:
       - name: Parse version and determine template
         id: parse-version

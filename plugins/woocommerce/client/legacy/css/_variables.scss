@@ -25,8 +25,14 @@ $contentbg:         #fff !default;                                     // Conten
 $subtext:           #767676 !default;                                  // small, breadcrumbs etc
 
 // Mirrors @wordpress/base-styles/colors.scss (WP 7.0 admin gray scale).
-$gray-900:          #1e1e1e !default;                                  // Primary admin text
-$gray-700:          #757575 !default;                                  // Placeholder / secondary admin text
+$gray-900:            #1e1e1e !default;                                // Primary admin text
+$gray-700:            #757575 !default;                                // Placeholder / secondary admin text
+$wp-admin-hover-gray: #f0f0f0 !default;                                // WordPress dashboard hover background.
+$wp-admin-text-gray:  #50575e !default;                                // WordPress dashboard text color.
+$wp-admin-icon-gray:  #646970 !default;                                // WordPress dashboard icon color.
+
+// Mirrors @wordpress/base-styles/colors.scss alert colors.
+$wp-alert-red:      #cc1818 !default;
 
 // Border radius tokens — mirrors WP Design System naming.
 $radius-s:          2px !default;                                      // Small radius: inputs, buttons, selects.
@@ -59,7 +65,7 @@ $grid-unit-60:      48px !default;                                     // Matche
 	--wc-form-border-radius: 4px;
 	--wc-form-border-width: 1px;
 	// Matches WP 7.0 $alert-red token for destructive actions.
-	--wc-destructive: #cc1818;
+	--wc-destructive: #{$wp-alert-red};
 	// Matches WP 7.0 $radius-l token (used on dashboard widgets).
 	--wc-card-border-radius: 8px;
 }

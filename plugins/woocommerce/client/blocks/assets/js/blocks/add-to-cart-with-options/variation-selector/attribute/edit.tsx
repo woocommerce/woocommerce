@@ -35,6 +35,7 @@ import {
 	__experimentalToolsPanel as ToolsPanel,
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -102,6 +103,10 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			__experimental_visual: true,
 		},
 	} );
+	const visualAttributesEnabled = getSetting(
+		'experimentalVisualAttributes',
+		false
+	);
 	const visualByTermId = useMemo( () => {
 		return attributeTerms.reduce< Record< number, VisualAttributeTerm > >(
 			( accumulator, term ) => {
@@ -128,7 +133,10 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 		) {
 			items = attribute.terms.map( ( term ) => {
 				const visual =
-					visualByTermId[ term.id ] || EMPTY_TERM_VISUALS[ term.id ];
+					visualByTermId[ term.id ] ||
+					( visualAttributesEnabled
+						? EMPTY_TERM_VISUALS[ term.id ]
+						: undefined );
 
 				return {
 					id: `${ attribute.taxonomy }-${ term.slug }`,
@@ -150,7 +158,7 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			ariaLabel: string;
 			visual?: VisualAttributeTerm;
 		} >;
-	}, [ attribute, visualByTermId ] );
+	}, [ attribute, visualAttributesEnabled, visualByTermId ] );
 
 	const blockPreviewProps = useBlockPreview( {
 		blocks,

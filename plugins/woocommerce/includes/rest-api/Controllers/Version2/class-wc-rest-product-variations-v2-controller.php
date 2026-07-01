@@ -296,6 +296,9 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
+		// @phpstan-ignore-next-line property.notFound (Deliberately dynamic to avoid adding inherited state that can fatal subclasses.)
+		$this->request = $request;
+
 		$data = array(
 			'id'                    => $object->get_id(),
 			'date_created'          => wc_rest_prepare_date_response( $object->get_date_created(), false ),
@@ -336,7 +339,7 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 			),
 			'shipping_class'        => $object->get_shipping_class(),
 			'shipping_class_id'     => $object->get_shipping_class_id(),
-			'image'                 => current( $this->get_images( $object, $request['image_size'] ?? 'full' ) ),
+			'image'                 => current( $this->get_images( $object ) ),
 			'attributes'            => $this->get_attributes( $object ),
 			'menu_order'            => $object->get_menu_order(),
 			'meta_data'             => $object->get_meta_data(),

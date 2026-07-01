@@ -22,6 +22,17 @@ class WC_Checkout {
 	use CogsAwareTrait;
 
 	/**
+	 * Checkout/order-level shipping fields that should not be persisted as generic meta.
+	 *
+	 * @var string[]
+	 */
+	private const SHIPPING_FIELDS_EXCLUDED_FROM_META = array(
+		'shipping_method',
+		'shipping_total',
+		'shipping_tax',
+	);
+
+	/**
 	 * The single instance of the class.
 	 *
 	 * @var WC_Checkout|null
@@ -421,19 +432,15 @@ class WC_Checkout {
 				'billing'  => true,
 			);
 
-			$shipping_fields = array(
-				'shipping_method' => true,
-				'shipping_total'  => true,
-				'shipping_tax'    => true,
-			);
 			foreach ( $data as $key => $value ) {
 				if ( is_callable( array( $order, "set_{$key}" ) ) ) {
 					$order->{"set_{$key}"}( $value );
 					// Store custom fields prefixed with either shipping_ or billing_. This is for backwards compatibility with 2.6.x.
-				} elseif ( isset( $fields_prefix[ current( explode( '_', $key ) ) ] ) ) {
-					if ( ! isset( $shipping_fields[ $key ] ) ) {
-						$order->update_meta_data( '_' . $key, $value );
-					}
+				} elseif (
+					isset( $fields_prefix[ current( explode( '_', $key ) ) ] )
+					&& ! in_array( $key, self::SHIPPING_FIELDS_EXCLUDED_FROM_META, true )
+				) {
+					$order->update_meta_data( '_' . $key, $value );
 				}
 			}
 
@@ -910,10 +917,11 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'phone', $format, true ) ) {
+					$country = $data[ $fieldset_key . '_country' ] ?? WC()->customer->{"get_{$fieldset_key}_country"}();
 					// This is a safe sanitize to prevent copy-paste issues with invisible chars. Won't ensure validation.
 					$data[ $key ] = wc_remove_non_displayable_chars( $data[ $key ] );
 
-					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
+					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ], $country ) ) {
 						/* translators: %s: phone number */
 						$errors->add( $key . '_validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), array( 'id' => $key ) );
 					}
@@ -1257,7 +1265,10 @@ class WC_Checkout {
 					$customer->{"set_{$key}"}( $value );
 
 					// Store custom fields prefixed with either shipping_ or billing_.
-				} elseif ( 0 === stripos( $key, 'billing_' ) || 0 === stripos( $key, 'shipping_' ) ) {
+				} elseif (
+					( 0 === stripos( $key, 'billing_' ) || 0 === stripos( $key, 'shipping_' ) )
+					&& ! in_array( $key, self::SHIPPING_FIELDS_EXCLUDED_FROM_META, true )
+				) {
 					$customer->update_meta_data( $key, $value );
 				}
 			}
