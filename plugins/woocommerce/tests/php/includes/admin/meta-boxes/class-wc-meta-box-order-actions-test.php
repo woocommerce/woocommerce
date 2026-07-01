@@ -42,9 +42,11 @@ class WC_Meta_Box_Order_Actions_Test extends WC_Unit_Test_Case {
 			remove_filter( 'woocommerce_order_actions_menu_items', $menu_filter );
 		}
 
+		$expected_delete_text = EMPTY_TRASH_DAYS ? 'Move to trash' : 'Delete permanently';
+
 		$this->assertStringContainsString( 'id="delete-action"', $output );
 		$this->assertStringContainsString( 'class="submitdelete deletion"', $output );
-		$this->assertStringContainsString( 'Move to trash', $output );
+		$this->assertStringContainsString( $expected_delete_text, $output );
 		$this->assertStringNotContainsString( 'Move to Trash', $output );
 		$this->assertStringNotContainsString( 'wc-order-actions-menu', $output );
 		$this->assertStringNotContainsString( 'role="menu"', $output );
