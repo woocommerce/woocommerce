@@ -47,10 +47,10 @@ final class Bootstrap {
 
 		CapabilityRegistry::init();
 
-		// Register the Action Scheduler callbacks that dispatch renewals back into the
-		// engine. Plain add_action calls, safe before Action Scheduler has loaded; must
-		// run on every boot (not just activation) so AS can fire the actions.
-		RenewalEngine::register_hooks();
+		// Register the callbacks that dispatch renewals back into the engine. Plain
+		// add_action calls, safe before Action Scheduler has loaded; must run on every
+		// boot (not just activation) so the hooks can fire.
+		( new RenewalEngine() )->register_hooks();
 		PlansController::register_hooks();
 		RenewalDispatcher::register_hooks();
 

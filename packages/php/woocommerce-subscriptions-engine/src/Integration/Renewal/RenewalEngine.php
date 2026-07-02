@@ -125,27 +125,28 @@ final class RenewalEngine {
 	}
 
 	/**
-	 * Register the order-driven completion listeners. Must run on every page load so a
-	 * renewal order reaching a terminal state completes its cycle through
-	 * {@see self::handle_order_settled()}.
+	 * Register the order-driven completion listeners on THIS instance. Must run on every page
+	 * load so a renewal order reaching a terminal state completes its cycle through
+	 * {@see self::handle_order_settled()}. Instance-based (not static) so the boot-built
+	 * engine - with whatever collaborators it was constructed over - is the one the listeners
+	 * run.
 	 */
-	public static function register_hooks(): void {
-		add_action( 'woocommerce_payment_complete', array( __CLASS__, 'handle_order_settled' ), 10, 1 );
-		add_action( 'woocommerce_order_status_failed', array( __CLASS__, 'handle_order_settled' ), 10, 1 );
+	public function register_hooks(): void {
+		add_action( 'woocommerce_payment_complete', array( $this, 'handle_order_settled' ), 10, 1 );
+		add_action( 'woocommerce_order_status_failed', array( $this, 'handle_order_settled' ), 10, 1 );
 	}
 
 	/**
 	 * Completion listener - fires when a renewal order reaches a paid or failed state, and
-	 * settles the matching cycle from that state. Static so it can be a plain callback; the
-	 * mapping and idempotency live in {@see self::complete_from_order()}. A non-renewal order
-	 * is ignored there.
+	 * settles the matching cycle from that state. The mapping and idempotency live in
+	 * {@see self::complete_from_order()}. A non-renewal order is ignored there.
 	 *
 	 * @param int $order_id The order whose state changed.
 	 */
-	public static function handle_order_settled( int $order_id ): void {
+	public function handle_order_settled( int $order_id ): void {
 		$order = wc_get_order( $order_id );
 		if ( $order instanceof WC_Order ) {
-			( new self() )->complete_from_order( $order );
+			$this->complete_from_order( $order );
 		}
 	}
 
