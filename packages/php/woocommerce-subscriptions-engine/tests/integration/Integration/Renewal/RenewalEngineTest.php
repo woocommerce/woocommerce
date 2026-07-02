@@ -1441,6 +1441,42 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox a manual paid-status change settles a processing cycle (cash-on-delivery shape).
+	 *
+	 * A gateway-less settlement never calls payment_complete(): an admin marks the renewal
+	 * order processing/completed by hand. The paid-status transition listeners must complete
+	 * the cycle from that, or manual methods stay locked in `processing` forever.
+	 */
+	public function test_manual_paid_status_change_settles_the_cycle(): void {
+		GatewayCapabilities::declare( self::GATEWAY_PENDING, array( GatewayCapabilities::RECURRING ) );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_PENDING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		// No charge handler: the charge stays unconfirmed and the cycle parks `processing`.
+		$renewal_order = $this->run_scheduled_renewal( $contract_id );
+		$this->assertInstanceOf( WC_Order::class, $renewal_order );
+
+		$repo = new ContractRepository();
+		$head = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertTrue( $head->get_status()->equals( CycleStatus::processing() ) );
+
+		// An admin marks the order paid by hand; the status-transition listener settles.
+		$renewal_order->update_status( 'processing' );
+
+		$settled = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $settled );
+		$this->assertTrue( $settled->get_status()->equals( CycleStatus::billed() ), 'The manual paid transition bills the cycle.' );
+
+		// The schedule advanced to the billed cycle's own period end.
+		$reloaded = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertSame( '2026-03-15 00:00:00', $reloaded->get_next_payment_gmt() );
+	}
+
+	/**
 	 * Append a pending cycle 2 (no tagged renewal order) with the given crash-recovery
 	 * lease, so the create-as-claim collides on it and the reclaim-vs-skip path is exercised.
 	 *
@@ -1481,6 +1517,15 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	 * @return WC_Order The ghost renewal order.
 	 */
 	private function make_ghost_renewal_order( int $contract_id, int $count, bool $paid, ?string $status = null ): WC_Order {
+		// A ghost models a crash where settlement never ran: silence the order-settled
+		// listeners while seeding it (a paid status transition would settle the cycle
+		// mid-setup), then restore them on a fresh engine.
+		remove_all_actions( 'woocommerce_payment_complete' );
+		remove_all_actions( 'woocommerce_order_status_failed' );
+		foreach ( wc_get_is_paid_statuses() as $paid_status ) {
+			remove_all_actions( 'woocommerce_order_status_' . $paid_status );
+		}
+
 		$order = new WC_Order();
 		$order->set_currency( 'USD' );
 		$order->set_total( '19.99' );
@@ -1498,6 +1543,8 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 			$order->set_status( $status );
 		}
 		$order->save();
+
+		( new RenewalEngine() )->register_hooks();
 
 		return $order;
 	}
