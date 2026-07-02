@@ -1,6 +1,7 @@
 ---
 post_title: A large store's guide to enable HPOS on WooCommerce
 sidebar_label: Enable HPOS for large stores
+sidebar_position: 2
 ---
 
 # A large store's guide to enable HPOS on WooCommerce
@@ -9,8 +10,8 @@ Do you run a high-volume WooCommerce store? Are you about to embark on the task 
 
 ## Before you begin
 
-1. [Intro to High-Performance Order Storage](/docs/features/high-performance-order-storage/)
-2. [High-Performance Order Storage Upgrade Recipe Book](/docs/features/high-performance-order-storage/recipe-book/)
+1. [Intro to High-Performance Order Storage](/docs/features/orders/high-performance-order-storage/)
+2. [High-Performance Order Storage Upgrade Recipe Book](/docs/features/orders/high-performance-order-storage/recipe-book/)
 3. [High-Performance Order Storage: Backward Compatibility and Synchronization](https://developer.woocommerce.com/2022/09/29/high-performance-order-storage-backward-compatibility-and-synchronization/)
 4. [Intro to High-Performance Order Storage for non-devs](https://woocommerce.com/document/high-performance-order-storage/)
 
@@ -138,4 +139,3 @@ Now with synchronization fully disabled, test out various critical flows, check 
 2. [ ] Document any issues encountered during testing and migration.
 3. [ ] Regularly communicate with stakeholders regarding testing progress and outcomes.
 4. [ ] Plan for potential fallback scenarios, ensuring the ability to revert to posts if issues arise.
-

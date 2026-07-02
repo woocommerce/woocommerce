@@ -1,7 +1,7 @@
 ---
 post_title: How to enable High Performance Order Storage
 sidebar_label: Enable HPOS
-
+sidebar_position: 1
 ---
 
 # How to enable High Performance Order Storage
@@ -28,4 +28,3 @@ To activate High-Performance Order Storage, existing stores will first need to g
 4. After both tables are successfully synchronized, you'll be able to select the option to switch to High-Performance Order Storage (HPOS).
   
     - It is advisable to maintain compatibility mode for some time to ensure a seamless transition. In case of any issues, reverting to the post table can be done instantly.
-

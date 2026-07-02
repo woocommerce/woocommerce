@@ -1,6 +1,7 @@
 ---
 post_title: Payment button layout
 sidebar_label: Payment button layout
+sidebar_position: 4
 ---
 
 # Payment Button Layout

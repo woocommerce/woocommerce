@@ -1,6 +1,7 @@
 ---
 post_title: wc_get_products and product queries
 sidebar_label: Product Querying
+sidebar_position: 1
 ---
 
 # `wc_get_products` and product queries

@@ -1,6 +1,7 @@
 ---
 post_title: Payment button size
 sidebar_label: Payment button size
+sidebar_position: 2
 ---
 
 # Payment Button Size and Anatomy

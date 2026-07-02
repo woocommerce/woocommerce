@@ -1,6 +1,7 @@
 ---
 post_title: Payments onboarding and setup
 sidebar_label: Payments onboarding and setup
+sidebar_position: 1
 ---
 
 # Payments Onboarding and Setup

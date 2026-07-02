@@ -1,6 +1,8 @@
 ---
 sidebar_label: Order Querying
+sidebar_position: 1
 ---
+
 # `wc_get_orders()` and order queries
 
 `wc_get_orders()` and `WC_Order_Query` provide a standard way of retrieving orders from the database, similar to WordPress' [`get_posts()` and `WP_Query`](https://codex.wordpress.org/Class_Reference/WP_Query) but specifically for orders.
@@ -328,7 +330,7 @@ $orders = wc_get_orders( $args );
 | --- | --- |
 | **meta_query** | One or more arrays with keys `key` (meta key), `value` (optional, string or array) and optionally `type` and `compare`.<br />This parameter is analogous to [WP_Query's `meta_query`](https://developer.wordpress.org/reference/classes/wp_query/#custom-field-post-meta-parameters), supporting various comparison operators and levels of queries joined by AND/OR relations. |
 
-For more details and examples, refer to the [HPOS order querying](/docs/features/high-performance-order-storage/wc-order-query-improvements#metadata-queries-meta_query) guide.
+For more details and examples, refer to the [HPOS order querying](/docs/features/orders/high-performance-order-storage/wc-order-query-improvements#metadata-queries-meta_query) guide.
 
 :::warning
 
@@ -367,7 +369,7 @@ $orders = wc_get_orders(
 |-|-|
 |**field_query**|One or more arrays with keys `field` (any order property), `value` and optionally `type` and `compare`.<br />This parameter is analogous to those of `meta_query` described in the previous section, supporting various comparison operators and levels of queries joined by AND/OR relations.|
 
-For more details and examples, refer to the [HPOS order querying](/docs/features/high-performance-order-storage/wc-order-query-improvements#order-field-queries-field_query) guide.
+For more details and examples, refer to the [HPOS order querying](/docs/features/orders/high-performance-order-storage/wc-order-query-improvements#order-field-queries-field_query) guide.
 
 :::warning
 
@@ -405,7 +407,7 @@ $orders = wc_get_orders(
 | --- | --- |
 | **date_query** | One or more arrays with keys `column` (an order date: `date_completed`, `date_created`, `date_updated` or `date_paid`, optionally followed by `_gmt` for UTC dates), `value` and optionally `type` and `compare`.<br />This parameter is analogous to [WP_Query's `date_query`](https://developer.wordpress.org/reference/classes/wp_query/#date-parameters), supporting various comparison operators and levels of queries joined by AND/OR relations. |
 
-For more details and examples, refer to the [HPOS order querying](/docs/features/high-performance-order-storage/wc-order-query-improvements#date-queries-date_query) guide.
+For more details and examples, refer to the [HPOS order querying](/docs/features/orders/high-performance-order-storage/wc-order-query-improvements#date-queries-date_query) guide.
 
 :::warning
 

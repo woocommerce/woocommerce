@@ -1,6 +1,7 @@
 ---
 post_title: HPOS extension recipe book
-
+sidebar_label: Extension recipe book
+sidebar_position: 3
 ---
 
 # HPOS extension recipe book

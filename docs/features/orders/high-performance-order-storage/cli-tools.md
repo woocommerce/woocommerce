@@ -1,6 +1,7 @@
 ---
 post_title: HPOS CLI Tools
-
+sidebar_label: CLI tools
+sidebar_position: 5
 ---
 
 # HPOS CLI Tools
@@ -358,4 +359,3 @@ Starting cleanup for 999 orders...
 HPOS cleanup  100% [=====================================================================================================================] 0:01 / 0:05
 Success: Cleanup completed for 999 orders.
 ```
-

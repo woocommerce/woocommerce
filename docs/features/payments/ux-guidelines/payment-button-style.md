@@ -1,6 +1,7 @@
 ---
 post_title: Payment button style
 sidebar_label: Payment button style
+sidebar_position: 3
 ---
 
 # Payment Button Style

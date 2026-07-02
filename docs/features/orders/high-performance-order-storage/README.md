@@ -163,6 +163,6 @@ To do this, navigate to  **WooCommerce ▸ Settings ▸ Advanced ▸ Features** 
 
 ![WooCommerce ▸ Settings ▸ Advanced ▸ Features Screen](https://woocommerce.com/wp-content/uploads/2023/10/hpos-feature-settings.png?w=650)
 
-Once synchronization has completed, you can select  **WordPress posts storage (legacy)**  as your preferred option. You can also disable compatibility mode at this point. Once you are ready to re-enable HPOS, simply follow the instructions posted at the  [start of this doc](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-3). Finally, remember to save this page between changes!
+Once synchronization has completed, you can select  **WordPress posts storage (legacy)**  as your preferred option. You can also disable compatibility mode at this point. Once you are ready to re-enable HPOS, simply follow the instructions posted at the  [start of this doc](/docs/features/orders/high-performance-order-storage/#enabling-the-feature). Finally, remember to save this page between changes!
 
 As noted earlier, we also strongly recommend reaching out to the support teams of any plugins that are incompatible, so they can take corrective action.
