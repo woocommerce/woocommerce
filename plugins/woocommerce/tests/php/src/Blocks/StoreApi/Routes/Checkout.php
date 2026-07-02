@@ -1615,6 +1615,162 @@ class Checkout extends MockeryTestCase {
 	}
 
 	/**
+	 * A shipping address that resolves to a different shipping zone than the order was priced against must be
+	 * rejected on the pay-for-order endpoint, so the order cannot keep the cheaper region's shipping cost.
+	 */
+	public function test_checkout_order_rejects_shipping_address_in_different_zone() {
+		// Zone with free shipping for Nepal; the default zone (Rest of the world) keeps the flat rate from setUp().
+		$nepal_zone = $this->add_country_free_shipping_zone( 'NP' );
+
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_shipping_country( 'NP' );
+		$order->set_shipping_state( '' );
+		$order->set_shipping_postcode( '' );
+		$order->save();
+
+		$original_shipping_country = $order->get_shipping_country();
+		$original_total            = $order->get_total();
+
+		// India falls into the default zone, i.e. a different zone than the order (Nepal) was priced against.
+		$india_address = array(
+			'first_name' => 'Bug',
+			'last_name'  => 'Bounty',
+			'company'    => '',
+			'address_1'  => 'Connaught Place',
+			'address_2'  => '',
+			'city'       => 'New Delhi',
+			'state'      => 'DL',
+			'postcode'   => '110001',
+			'country'    => 'IN',
+			'phone'      => '9999999999',
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_query_params(
+			array(
+				'key'           => $order->get_order_key(),
+				'billing_email' => $order->get_billing_email(),
+			)
+		);
+		$request->set_body_params(
+			array(
+				'billing_address'  => array_merge( $india_address, array( 'email' => $order->get_billing_email() ) ),
+				'shipping_address' => $india_address,
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_checkout_order_shipping_zone_changed', $response->get_data()['code'] );
+
+		// The rejected request must not mutate the order.
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( $original_shipping_country, $stored_order->get_shipping_country() );
+		$this->assertEquals( $original_total, $stored_order->get_total() );
+
+		$nepal_zone->delete();
+	}
+
+	/**
+	 * A shipping address that stays within the same shipping zone must be accepted, so legitimate edits (typo
+	 * fixes, etc.) are not blocked. Exercises the guard directly so it does not depend on payment processing.
+	 */
+	public function test_checkout_order_allows_shipping_address_in_same_zone() {
+		$nepal_zone = $this->add_country_free_shipping_zone( 'NP' );
+
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_shipping_country( 'NP' );
+		$order->set_shipping_state( 'BAG' );
+		$order->save();
+
+		$route  = $this->get_checkout_order_route_with_order( $order );
+		$method = new \ReflectionMethod( CheckoutOrderRoute::class, 'validate_shipping_address_zone' );
+		$method->setAccessible( true );
+
+		// A different Nepal address still resolves to the same (Nepal) zone, so the guard must not throw.
+		$method->invoke(
+			$route,
+			array(
+				'country'  => 'NP',
+				'state'    => 'GAN',
+				'postcode' => '',
+			)
+		);
+
+		$this->assertTrue( true, 'A same-zone shipping address must not be rejected.' );
+
+		$nepal_zone->delete();
+	}
+
+	/**
+	 * A shipping address that resolves to a different shipping zone must be rejected by the guard.
+	 */
+	public function test_checkout_order_guard_blocks_shipping_address_in_different_zone() {
+		$nepal_zone = $this->add_country_free_shipping_zone( 'NP' );
+
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_shipping_country( 'NP' );
+		$order->set_shipping_state( 'BAG' );
+		$order->save();
+
+		$route  = $this->get_checkout_order_route_with_order( $order );
+		$method = new \ReflectionMethod( CheckoutOrderRoute::class, 'validate_shipping_address_zone' );
+		$method->setAccessible( true );
+
+		$this->expectException( \Automattic\WooCommerce\StoreApi\Exceptions\RouteException::class );
+
+		try {
+			// India falls into the default zone, i.e. a different zone than the order (Nepal) was priced against.
+			$method->invoke(
+				$route,
+				array(
+					'country'  => 'IN',
+					'state'    => 'DL',
+					'postcode' => '110001',
+				)
+			);
+		} finally {
+			$nepal_zone->delete();
+		}
+	}
+
+	/**
+	 * Build a CheckoutOrder route instance with its order property set to the given order.
+	 *
+	 * @param \WC_Order $order The order to attach to the route.
+	 * @return CheckoutOrderRoute The route instance.
+	 */
+	private function get_checkout_order_route_with_order( \WC_Order $order ) {
+		$schema_controller = new SchemaController( $this->mock_extend );
+		$route             = new CheckoutOrderRoute( $schema_controller, $schema_controller->get( 'checkout-order' ) );
+
+		$order_property = new \ReflectionProperty( CheckoutOrderRoute::class, 'order' );
+		$order_property->setAccessible( true );
+		$order_property->setValue( $route, $order );
+
+		return $route;
+	}
+
+	/**
+	 * Create a shipping zone matching a single country and offering free shipping.
+	 *
+	 * @param string $country Two-letter country code the zone should match.
+	 * @return \WC_Shipping_Zone The created zone.
+	 */
+	private function add_country_free_shipping_zone( $country ) {
+		$zone = new \WC_Shipping_Zone();
+		$zone->set_zone_name( $country . ' zone' );
+		$zone->add_location( $country, 'country' );
+		$zone->add_shipping_method( 'free_shipping' );
+		$zone->save();
+
+		return $zone;
+	}
+
+	/**
 	 * Helper method to register custom order status.
 	 *
 	 * @param string $status_name             Custom status name to register.

@@ -205,6 +205,10 @@ class CheckoutOrder extends AbstractCartRoute {
 		// If shipping address (optional field) was not provided, set it to the given billing address (required field).
 		$shipping = $request['shipping_address'] ?? $billing;
 
+		// This endpoint reuses the order's existing shipping lines rather than repricing from the cart, so a new
+		// address that falls into a different shipping zone would keep the original (now incorrect) shipping cost.
+		$this->validate_shipping_address_zone( $shipping );
+
 		$this->order->set_billing_address( $billing );
 		$this->order->set_shipping_address( $shipping );
 		$this->order_controller->validate_existing_order_before_update( $this->order );
@@ -235,6 +239,55 @@ class CheckoutOrder extends AbstractCartRoute {
 		$customer->save();
 		$this->order->save();
 		$this->order->calculate_totals();
+	}
+
+	/**
+	 * Ensure a new shipping address does not move the order into a different shipping zone.
+	 *
+	 * Unlike the cart-based checkout route, this endpoint does not recalculate shipping rates; it relies on the
+	 * order already holding the correct shipping lines. If a new shipping address resolves to a different shipping
+	 * zone than the one the order was priced against, those lines no longer apply, so the request is rejected and
+	 * the shopper is asked to return to the checkout to choose a valid shipping option.
+	 *
+	 * Runs before any address is set on the order, so a rejected request cannot mutate the order or the customer.
+	 *
+	 * @throws RouteException When the new shipping address resolves to a different shipping zone.
+	 *
+	 * @param array $shipping The shipping address being applied to the order.
+	 */
+	private function validate_shipping_address_zone( array $shipping ) {
+		if ( ! $this->order->needs_shipping() ) {
+			return;
+		}
+
+		$current_zone_id = \WC_Shipping_Zones::get_zone_matching_package(
+			array(
+				'destination' => array(
+					'country'  => $this->order->get_shipping_country(),
+					'state'    => $this->order->get_shipping_state(),
+					'postcode' => $this->order->get_shipping_postcode(),
+				),
+			)
+		)->get_id();
+
+		$new_zone_id = \WC_Shipping_Zones::get_zone_matching_package(
+			array(
+				'destination' => array(
+					'country'  => $shipping['country'] ?? '',
+					'state'    => $shipping['state'] ?? '',
+					'postcode' => $shipping['postcode'] ?? '',
+				),
+			)
+		)->get_id();
+
+		if ( $current_zone_id !== $new_zone_id ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_order_shipping_zone_changed',
+				esc_html__( 'Sorry, this order cannot be shipped to the address provided. Please return to the checkout to update your shipping options.', 'woocommerce' ),
+				400,
+				array( 'context' => 'wc/checkout' )
+			);
+		}
 	}
 
 	/**

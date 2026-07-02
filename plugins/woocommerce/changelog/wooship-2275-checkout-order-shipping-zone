@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API: reject a shipping address on the pay-for-order checkout endpoint when it resolves to a different shipping zone than the order was priced against, so the order's shipping cost stays consistent with its destination.
