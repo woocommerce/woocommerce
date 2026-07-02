@@ -618,7 +618,7 @@ class WC_AJAX {
 			wp_die();
 		}
 
-		if ( ProductStatus::PUBLISH !== $variable_product->get_status() && ! current_user_can( 'edit_post', $variable_product->get_id() ) ) {
+		if ( ! $variable_product->is_viewable() ) {
 			wp_die();
 		}
 
