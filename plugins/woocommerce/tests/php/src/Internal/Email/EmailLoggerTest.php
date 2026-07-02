@@ -29,6 +29,8 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email.php';
 		$this->sut = new EmailLogger();
 	}
 
