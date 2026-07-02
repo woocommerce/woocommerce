@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+CSV importer: clear removed gallery images when reducing the number of images for an existing product.
