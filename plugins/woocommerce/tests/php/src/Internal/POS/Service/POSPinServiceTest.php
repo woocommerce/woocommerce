@@ -234,6 +234,27 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep verifying the exact record format shipped in v1 (frozen golden record).
+	 */
+	public function test_verify_pin_accepts_frozen_v1_record(): void {
+		// A golden record frozen in the exact wire format this service first shipped:
+		// PBKDF2-SHA256, 10k iterations, 16-byte salt, 32-byte hash, base64 envelope —
+		// deliberately built from literals, NOT the class constants. Records like this
+		// live in merchant databases; if a change to the constants or validation stops
+		// this one from verifying, it breaks every stored PIN the same way. Such a change
+		// must handle historical records explicitly (and update this test deliberately).
+		$record = array(
+			'algo'       => 'pbkdf2-sha256',
+			'iterations' => 10000,
+			'salt'       => 'AAAAAAAAAAAAAAAAAAAAAA==',
+			'hash'       => '4LKid0czxzbVTCqt3HuQw9Fe3FdcasIOAR5YlAhmuhU=',
+		);
+
+		$this->assertTrue( $this->sut->verify_pin( '1234', $record ), 'The shipped v1 record format must keep verifying.' );
+		$this->assertFalse( $this->sut->verify_pin( '9999', $record ), 'A wrong PIN must still fail against the golden record.' );
+	}
+
+	/**
 	 * @testdox Should return null from get_public_pin_record when no PIN is set.
 	 */
 	public function test_get_public_pin_record_returns_null_when_unset(): void {
