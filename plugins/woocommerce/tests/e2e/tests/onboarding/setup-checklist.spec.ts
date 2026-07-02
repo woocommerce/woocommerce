@@ -75,7 +75,7 @@ test(
 
 		await test.step( 'Hide the task list', async () => {
 			await page
-				.getByRole( 'button', { name: 'Task List Options' } )
+				.getByRole( 'button', { name: 'Task list options' } )
 				.first()
 				.click();
 			await page
