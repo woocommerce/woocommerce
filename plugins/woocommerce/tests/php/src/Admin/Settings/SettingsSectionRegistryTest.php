@@ -29,6 +29,13 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	private array $original_get = array();
 
 	/**
+	 * Original combined request globals.
+	 *
+	 * @var array
+	 */
+	private array $original_request = array();
+
+	/**
 	 * Original current settings section.
 	 *
 	 * @var mixed
@@ -53,6 +60,7 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 
 		global $current_section, $current_tab;
 		$this->original_get             = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$this->original_request         = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->original_current_section = $current_section ?? null;
 		$this->original_current_tab     = $current_tab ?? null;
 
@@ -66,6 +74,7 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		global $current_section, $current_tab;
 		$_GET            = $this->original_get;
+		$_REQUEST        = $this->original_request;
 		$current_section = $this->original_current_section;
 		$current_tab     = $this->original_current_tab;
 
@@ -328,6 +337,8 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 		$_GET['page']    = 'wc-settings';
 		$_GET['tab']     = 'checkout';
 		$_GET['section'] = 'acme_payments';
+		// PHP builds $_REQUEST once at request start, so runtime $_GET changes need mirroring.
+		$_REQUEST['section'] = 'acme_payments';
 
 		$page                   = $this->get_parent_page();
 		$original_settings      = $this->replace_wc_admin_settings_pages( array( $page ) );

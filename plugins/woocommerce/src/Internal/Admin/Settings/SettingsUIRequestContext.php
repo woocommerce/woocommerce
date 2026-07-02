@@ -192,15 +192,18 @@ class SettingsUIRequestContext {
 	/**
 	 * Get the current WooCommerce settings section.
 	 *
+	 * Reads $_REQUEST to match how the legacy $current_section global is derived,
+	 * so context resolution and legacy settings rendering agree on the section.
+	 *
 	 * @return string
 	 */
 	private static function get_current_settings_section(): string {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( ! isset( $_GET['section'] ) ) {
+		if ( ! isset( $_REQUEST['section'] ) ) {
 			return '';
 		}
 
-		$section = wp_unslash( $_GET['section'] );
+		$section = wp_unslash( $_REQUEST['section'] );
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		return is_string( $section ) ? sanitize_title( $section ) : '';
