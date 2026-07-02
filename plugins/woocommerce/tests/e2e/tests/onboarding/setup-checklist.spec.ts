@@ -81,9 +81,7 @@ test(
 			await setupTaskProgressHeader
 				.getByRole( 'button', { name: 'Task list options' } )
 				.click();
-			await page
-				.getByRole( 'button', { name: 'Hide setup list' } )
-				.click();
+			await page.getByText( 'Hide setup list', { exact: true } ).click();
 			await expect(
 				page.getByRole( 'heading', {
 					name: 'Customize your store',
