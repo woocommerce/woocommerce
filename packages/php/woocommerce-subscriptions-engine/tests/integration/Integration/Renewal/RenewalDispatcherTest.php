@@ -271,6 +271,31 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox ensure_scheduled removes the recurring scan once every consumer is gone.
+	 */
+	public function test_ensure_scheduled_removes_the_job_when_consumers_are_gone(): void {
+		as_unschedule_all_actions( RenewalDispatcher::HOOK, array(), RenewalDispatcher::GROUP );
+		delete_option( 'woocommerce_subscriptions_engine_dispatch_scheduled_check' );
+
+		ConsumerRegistry::register( self::CONSUMER );
+		RenewalDispatcher::ensure_scheduled();
+		$this->assertNotFalse( as_next_scheduled_action( RenewalDispatcher::HOOK, array(), RenewalDispatcher::GROUP ) );
+
+		// Every consumer deactivates: the next gated boot removes the recurring scan.
+		ConsumerRegistry::reset();
+		RenewalDispatcher::ensure_scheduled();
+		$this->assertFalse(
+			as_next_scheduled_action( RenewalDispatcher::HOOK, array(), RenewalDispatcher::GROUP ),
+			'The recurring scan does not keep ticking after the last consumer deactivates.'
+		);
+
+		// A returning consumer schedules promptly again.
+		ConsumerRegistry::register( self::CONSUMER );
+		RenewalDispatcher::ensure_scheduled();
+		$this->assertNotFalse( as_next_scheduled_action( RenewalDispatcher::HOOK, array(), RenewalDispatcher::GROUP ) );
+	}
+
+	/**
 	 * @testdox run_batch is a no-op for a non-positive limit.
 	 */
 	public function test_run_batch_returns_zero_for_a_non_positive_limit(): void {

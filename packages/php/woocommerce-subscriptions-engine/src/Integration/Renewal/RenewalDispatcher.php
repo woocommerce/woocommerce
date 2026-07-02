@@ -128,16 +128,24 @@ final class RenewalDispatcher {
 	 *
 	 * Call once Action Scheduler is available (e.g. on `init`), since it uses the `as_*`
 	 * functions. Gated on the consumer registry: a store with no consumer extension runs no
-	 * renewals, so it carries no recurring scan action either. To avoid an Action Scheduler
+	 * renewals, so it carries no recurring scan action either - one already scheduled is
+	 * removed on the first gated boot after the last consumer deactivates. To avoid an Action Scheduler
 	 * store query on every request, a positive result is cached in an autoloaded option and
 	 * re-verified only once per re-check window - bounded staleness that self-heals if the
 	 * action is ever cleared. Within a re-verify it still guards with the `is_scheduled()`
 	 * fast-path plus a best-effort store-level dedup.
 	 */
 	public static function ensure_scheduled(): void {
-		// No consumer, no scan. Nothing is cached on this path, so a consumer registering
-		// later (this boot or the next) schedules promptly.
+		// No consumer, no scan - and a store that previously scheduled the recurring action
+		// removes it here, so the job does not keep ticking against the gate after every
+		// consumer deactivates. The check option doubles as the "scheduled before" marker,
+		// keeping the common no-consumer path to a single autoloaded option read; nothing is
+		// re-cached, so a consumer registering later schedules promptly.
 		if ( ConsumerRegistry::is_empty() ) {
+			if ( false !== get_option( self::SCHEDULE_CHECK_OPTION, false ) ) {
+				as_unschedule_all_actions( self::HOOK, array(), self::GROUP );
+				delete_option( self::SCHEDULE_CHECK_OPTION );
+			}
 			return;
 		}
 
