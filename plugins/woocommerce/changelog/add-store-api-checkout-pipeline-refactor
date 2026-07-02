@@ -1,4 +1,4 @@
 Significance: patch
 Type: update
 
-Store API: extract the checkout route's place-order pipeline into a reusable internal trait (`ProcessCheckoutTrait`). Internal refactor with no change to checkout behaviour.
+Store API: extract the checkout route's place-order pipeline into a reusable internal trait (`ProcessCheckoutTrait`), and fix the shipping-address fallback so additional-field persistence falls back to the billing address when no shipping address is submitted.
