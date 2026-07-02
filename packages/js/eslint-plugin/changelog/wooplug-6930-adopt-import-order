@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Replace the `@woocommerce/dependency-group` rule with `import/order`. The custom rule is removed (rule, test, docs, and export); the recommended config now enforces import grouping via `import/order` and no longer requires the `/* External/Internal dependencies */` comment blocks.

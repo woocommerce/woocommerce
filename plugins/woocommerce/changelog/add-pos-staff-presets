@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the POS preset layer to the capability model: capability bundles for the Cashier, Manager, and Admin presets, assigned or cleared per user via `woocommerce_pos_*` capabilities (never WP roles), with the assigned preset recorded in user meta and cleaned up on uninstall. Behind the off-by-default `point_of_sale_staff` feature flag.

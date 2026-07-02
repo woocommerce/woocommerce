@@ -29,6 +29,8 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email.php';
 		$this->sut = new EmailLogger();
 	}
 
@@ -39,6 +41,7 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'woocommerce_email_log_enabled' );
 		remove_all_filters( 'woocommerce_email_log_context' );
 		remove_all_filters( 'woocommerce_email_log_add_order_note' );
+		remove_all_filters( 'woocommerce_mail_callback' );
 		remove_all_actions( 'woocommerce_email_disabled' );
 		remove_all_actions( 'woocommerce_email_skipped' );
 		remove_action( 'woocommerce_email_sent', array( $this->sut, 'handle_woocommerce_email_sent' ) );
@@ -769,15 +772,16 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	 *
 	 * Exposes both protected helpers as public `run_*` wrappers and records whether send() was called.
 	 *
-	 * @param string $email_id    Email type ID.
-	 * @param string $recipient   Recipient email address (empty string = no recipient).
-	 * @param bool   $is_enabled  Return value for is_enabled().
-	 * @param bool   $send_return Return value for the stubbed send().
+	 * @param string $email_id       Email type ID.
+	 * @param string $recipient      Recipient email address (empty string = no recipient).
+	 * @param bool   $is_enabled     Return value for is_enabled().
+	 * @param bool   $send_return    Return value for the stubbed send() (ignored if $use_real_send is true).
+	 * @param bool   $use_real_send  If true, keep the real WC_Email::send() instead of stubbing it.
 	 * @return object Anonymous class instance with `run_send_notification()`, `run_send_if_recipient()`,
 	 *                `send_called`, and `send_args` properties.
 	 */
-	private function create_testable_email( string $email_id, string $recipient, bool $is_enabled, bool $send_return = false ): object {
-		return new class( $email_id, $recipient, $is_enabled, $send_return ) extends \WC_Email {
+	private function create_testable_email( string $email_id, string $recipient, bool $is_enabled, bool $send_return = false, bool $use_real_send = false ): object {
+		return new class( $email_id, $recipient, $is_enabled, $send_return, $use_real_send ) extends \WC_Email {
 			/** @var bool Whether send() has been invoked. */
 			public bool $send_called = false;
 			/** @var array Arguments captured from the most recent send() call. */
@@ -789,6 +793,8 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 			private bool $test_is_enabled;
 			/** @var bool Value returned by send(). */
 			private bool $test_send_return;
+			/** @var bool Whether to delegate to the real WC_Email::send() instead of returning $test_send_return. */
+			private bool $use_real_send;
 
 			/**
 			 * Construct the test double.
@@ -797,13 +803,15 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 			 * @param string $recipient   Recipient string for get_recipient().
 			 * @param bool   $is_enabled  Value to return from is_enabled().
 			 * @param bool   $send_return Value to return from send().
+			 * @param bool   $use_real_send Whether to delegate to the real send() instead of the stub.
 			 */
-			public function __construct( string $email_id, string $recipient, bool $is_enabled, bool $send_return ) {
+			public function __construct( string $email_id, string $recipient, bool $is_enabled, bool $send_return, bool $use_real_send ) {
 				// Deliberately skip parent::__construct() to avoid side-effects in tests.
 				$this->id               = $email_id;
 				$this->test_recipient   = $recipient;
 				$this->test_is_enabled  = $is_enabled;
 				$this->test_send_return = $send_return;
+				$this->use_real_send    = $use_real_send;
 			}
 
 			/**
@@ -861,6 +869,11 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 			public function send( $to, $subject, $message, $headers, $attachments ): bool {
 				$this->send_called = true;
 				$this->send_args   = array( $to, $subject, $message, $headers, $attachments );
+
+				if ( $this->use_real_send ) {
+					return parent::send( $to, $subject, $message, $headers, $attachments );
+				}
+
 				return $this->test_send_return;
 			}
 
@@ -894,5 +907,78 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 		$email->expects( $this->any() )->method( 'get_title' )->willReturn( $email_id );
 
 		return $email;
+	}
+
+	/**
+	 * @testdox send() coerces a non-bool return from the mail callback into a bool.
+	 */
+	public function test_send_coerces_non_bool_mail_callback_return_to_bool(): void {
+		add_filter(
+			'woocommerce_mail_callback',
+			function () {
+					return static function () {
+							return null;
+					};
+			}
+		);
+
+		$email  = new \WC_Email();
+		$result = $email->send( 'test@example.com', 'Subject', 'Message', '', array() );
+
+		$this->assertIsBool( $result, 'send() should always return a bool, even if the mail callback does not' );
+		$this->assertFalse( $result, 'A non-bool (null) callback return should coerce to false' );
+	}
+
+	/**
+	 * @testdox send_notification() does not throw a TypeError when the mail callback returns a non-bool.
+	 */
+	public function test_send_notification_does_not_fatal_when_mail_callback_returns_non_bool(): void {
+		add_filter(
+			'woocommerce_mail_callback',
+			function () {
+					return static function () {
+							return null;
+					};
+			}
+		);
+
+		$email = $this->create_testable_email( 'my_email', 'admin@example.com', true, false, true );
+
+		$result = $email->run_send_notification();
+
+		$this->assertIsBool( $result, 'send_notification() should return a bool instead of fataling' );
+		$this->assertFalse( $result, 'Should resolve to false when the underlying mail callback returns null' );
+	}
+
+	/**
+	 * @testdox send() casts the mail callback return to bool before firing woocommerce_email_sent.
+	 */
+	public function test_send_fires_email_sent_action_with_bool_when_callback_returns_non_bool(): void {
+		add_filter(
+			'woocommerce_mail_callback',
+			function () {
+					return static function () {
+							return null;
+					};
+			}
+		);
+
+		$received_return = null;
+		add_action(
+			'woocommerce_email_sent',
+			function ( $result ) use ( &$received_return ) {
+				$received_return = $result;
+			},
+			10,
+			1
+		);
+
+		$email = new \WC_Email();
+		$email->send( 'test@example.com', 'Subject', 'Message', '', array() );
+
+		$this->assertIsBool( $received_return, 'woocommerce_email_sent should receive a bool even when the mail callback returns null' );
+		$this->assertFalse( $received_return );
+
+		remove_all_actions( 'woocommerce_email_sent' );
 	}
 }
