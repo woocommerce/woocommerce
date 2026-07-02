@@ -949,4 +949,36 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 		$this->assertIsBool( $result, 'send_notification() should return a bool instead of fataling' );
 		$this->assertFalse( $result, 'Should resolve to false when the underlying mail callback returns null' );
 	}
+
+	/**
+	 * @testdox send() casts the mail callback return to bool before firing woocommerce_email_sent.
+	 */
+	public function test_send_fires_email_sent_action_with_bool_when_callback_returns_non_bool(): void {
+		add_filter(
+			'woocommerce_mail_callback',
+			function () {
+					return static function () {
+							return null;
+					};
+			}
+		);
+
+		$received_return = null;
+		add_action(
+			'woocommerce_email_sent',
+			function ( $result ) use ( &$received_return ) {
+				$received_return = $result;
+			},
+			10,
+			1
+		);
+
+		$email = new \WC_Email();
+		$email->send( 'test@example.com', 'Subject', 'Message', '', array() );
+
+		$this->assertIsBool( $received_return, 'woocommerce_email_sent should receive a bool even when the mail callback returns null' );
+		$this->assertFalse( $received_return );
+
+		remove_all_actions( 'woocommerce_email_sent' );
+	}
 }
