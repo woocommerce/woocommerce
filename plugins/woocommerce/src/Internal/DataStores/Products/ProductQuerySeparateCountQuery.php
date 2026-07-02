@@ -24,11 +24,36 @@ defined( 'ABSPATH' ) || exit;
 class ProductQuerySeparateCountQuery {
 
 	/**
+	 * Feature flag id registered in FeaturesController; the master on/off switch for this optimization.
+	 */
+	public const FEATURE_NAME = 'product_query_separate_count';
+
+	/**
 	 * The product query whose pagination total this instance computes.
 	 *
 	 * @var WP_Query
 	 */
 	private WP_Query $query;
+
+	/**
+	 * Whether the separate-COUNT rewrite is worth using on the live database.
+	 *
+	 * It only wins on MySQL 8.0+. MariaDB (all versions) and MySQL < 8.0 regress: the plain SELECT trades
+	 * the single full scan for a non-covering index range scan (a heap fetch per matched row). Gate on the
+	 * running server so those engines keep SQL_CALC_FOUND_ROWS.
+	 *
+	 * @param \wpdb $wpdb The WordPress database handle to inspect.
+	 * @return bool True when the server is MySQL 8.0 or newer.
+	 */
+	public static function is_supported( \wpdb $wpdb ): bool {
+		$server = (string) $wpdb->db_server_info();
+		if ( false !== stripos( $server, 'mariadb' ) ) {
+			return false;
+		}
+		// Strip the legacy "5.5.5-" replication-version prefix some servers report before the real version.
+		$version = (string) preg_replace( '/^5\.5\.5-/', '', $server );
+		return version_compare( $version, '8.0', '>=' );
+	}
 
 	/**
 	 * Captured JOIN and WHERE clauses of the product query, used to build the separate COUNT that

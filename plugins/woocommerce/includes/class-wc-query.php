@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
 use Automattic\WooCommerce\Internal\DataStores\Products\ProductQuerySeparateCountQuery;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
@@ -602,6 +603,11 @@ class WC_Query {
 		add_filter( 'the_posts', array( $this, 'handle_get_posts' ), 10, 2 );
 		add_filter( 'the_posts', array( $this, 'prime_thumbnail_caches' ), 10, 2 );
 
+		// On for MySQL 8.0+ with the feature enabled; MariaDB / MySQL < 8.0 regress, so keep SQL_CALC_FOUND_ROWS.
+		global $wpdb;
+		$use_separate_count = FeaturesUtil::feature_is_enabled( ProductQuerySeparateCountQuery::FEATURE_NAME )
+			&& ProductQuerySeparateCountQuery::is_supported( $wpdb );
+
 		/**
 		 * Filters whether the main product query computes its total with a separate COUNT query instead
 		 * of MySQL's SQL_CALC_FOUND_ROWS, which fully materializes and sorts the matched set just to count
@@ -609,10 +615,12 @@ class WC_Query {
 		 * false to keep WordPress' default SQL_CALC_FOUND_ROWS behaviour.
 		 *
 		 * @since 11.0.0
-		 * @param bool     $use_separate_count Whether to use a separate COUNT query. Default true.
+		 * @param bool     $use_separate_count Whether to use a separate COUNT query. Defaults to the
+		 *                                     'product_query_separate_count' feature being enabled on a
+		 *                                     supported server (MySQL 8.0+); false on MariaDB / MySQL < 8.0.
 		 * @param WP_Query $q                  The product query.
 		 */
-		if ( apply_filters( 'woocommerce_product_query_use_separate_count_query', true, $q ) ) {
+		if ( apply_filters( 'woocommerce_product_query_use_separate_count_query', $use_separate_count, $q ) ) {
 			$this->separate_count_query = new ProductQuerySeparateCountQuery( $q );
 			$this->separate_count_query->attach();
 		}

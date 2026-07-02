@@ -392,18 +392,31 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox WC_Query wires the separate-count optimization into the main product query and honors its gate filter.
+	 * @testdox WC_Query wires the separate-count optimization by default on MySQL 8.0+ (gated feature) and honors its gate filter.
 	 */
 	public function test_product_query_wires_separate_count_optimization() {
+		global $wpdb;
 		WC_Helper_Product::create_simple_product();
 
-		// Wired by default: the main product query drops SQL_CALC_FOUND_ROWS.
-		$this->assertFalse(
+		// Enabled by default, but only attaches on MySQL 8.0+; MariaDB / MySQL < 8.0 keep SQL_CALC_FOUND_ROWS.
+		$supported = \Automattic\WooCommerce\Internal\DataStores\Products\ProductQuerySeparateCountQuery::is_supported( $wpdb );
+		$this->assertSame(
+			! $supported,
 			$this->product_query_used_sql_calc_found_rows(),
-			'By default WC_Query attaches the separate-count optimization, so the product query drops SQL_CALC_FOUND_ROWS.'
+			'By default the optimization attaches on MySQL 8.0+ (dropping SQL_CALC_FOUND_ROWS) and is skipped on other engines.'
 		);
 
-		// Gate filter respected: returning false leaves SQL_CALC_FOUND_ROWS in place.
+		// Gate filter forces it on regardless of feature/engine: SQL_CALC_FOUND_ROWS is dropped.
+		add_filter( 'woocommerce_product_query_use_separate_count_query', '__return_true' );
+		$used_with_filter_on = $this->product_query_used_sql_calc_found_rows();
+		remove_filter( 'woocommerce_product_query_use_separate_count_query', '__return_true' );
+
+		$this->assertFalse(
+			$used_with_filter_on,
+			'Returning true from woocommerce_product_query_use_separate_count_query attaches the optimization and drops SQL_CALC_FOUND_ROWS.'
+		);
+
+		// Gate filter forces it off: SQL_CALC_FOUND_ROWS stays.
 		add_filter( 'woocommerce_product_query_use_separate_count_query', '__return_false' );
 		$used_with_filter_off = $this->product_query_used_sql_calc_found_rows();
 		remove_filter( 'woocommerce_product_query_use_separate_count_query', '__return_false' );

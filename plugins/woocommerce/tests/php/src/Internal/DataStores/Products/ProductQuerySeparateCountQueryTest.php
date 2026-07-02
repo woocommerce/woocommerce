@@ -4,8 +4,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\DataStores\Products;
 
+use Automattic\WooCommerce\Internal\DataStores\Products\ProductQuerySeparateCountQuery;
 use WC_Helper_Product;
 use WP_Query;
+use wpdb;
 
 /**
  * Tests for ProductQuerySeparateCountQuery, exercised through the main product archive query that
@@ -81,8 +83,11 @@ class ProductQuerySeparateCountQueryTest extends \WC_Unit_Test_Case {
 		$baseline = $this->run_main_product_query( $per_page );
 		remove_filter( 'woocommerce_product_query_use_separate_count_query', '__return_false' );
 
-		// Optimized: a dedicated COUNT query over the same clauses.
+		// Optimized: force the gate on (independent of the feature flag and DB engine) so the dedicated
+		// COUNT path runs over the same clauses.
+		add_filter( 'woocommerce_product_query_use_separate_count_query', '__return_true' );
 		$optimized = $this->run_main_product_query( $per_page );
+		remove_filter( 'woocommerce_product_query_use_separate_count_query', '__return_true' );
 
 		$this->assertNotNull( $optimized['used_sql_calc_found_rows'], 'The main product query should have run.' );
 		$this->assertTrue( $baseline['used_sql_calc_found_rows'], 'The baseline query should use SQL_CALC_FOUND_ROWS.' );
@@ -102,14 +107,45 @@ class ProductQuerySeparateCountQueryTest extends \WC_Unit_Test_Case {
 
 		$per_page = 2;
 
+		add_filter( 'woocommerce_product_query_use_separate_count_query', '__return_true' );
 		$optimized = $this->run_main_product_query( $per_page );
+		remove_filter( 'woocommerce_product_query_use_separate_count_query', '__return_true' );
 
 		add_filter( 'woocommerce_product_query_use_separate_count_query', '__return_false' );
 		$disabled = $this->run_main_product_query( $per_page );
 		remove_filter( 'woocommerce_product_query_use_separate_count_query', '__return_false' );
 
-		$this->assertFalse( $optimized['used_sql_calc_found_rows'], 'By default the optimization removes SQL_CALC_FOUND_ROWS.' );
+		$this->assertFalse( $optimized['used_sql_calc_found_rows'], 'Returning true from the filter removes SQL_CALC_FOUND_ROWS.' );
 		$this->assertTrue( $disabled['used_sql_calc_found_rows'], 'Returning false from the filter restores SQL_CALC_FOUND_ROWS.' );
 		$this->assertSame( $optimized['found_posts'], $disabled['found_posts'], 'The reported total is unchanged whether or not the optimization is enabled.' );
+	}
+
+	/**
+	 * @testdox is_supported() only accepts MySQL 8.0+, rejecting MariaDB and older MySQL.
+	 * @dataProvider data_provider_is_supported
+	 *
+	 * @param string $server_info The db_server_info() string the server reports.
+	 * @param bool   $expected    Whether the separate-COUNT rewrite should be used on that server.
+	 */
+	public function test_is_supported_gates_on_mysql_8( string $server_info, bool $expected ): void {
+		$wpdb = $this->createMock( wpdb::class );
+		$wpdb->method( 'db_server_info' )->willReturn( $server_info );
+
+		$this->assertSame( $expected, ProductQuerySeparateCountQuery::is_supported( $wpdb ) );
+	}
+
+	/**
+	 * Server strings and whether the separate-COUNT rewrite wins on them.
+	 *
+	 * @return array<string, array{0:string, 1:bool}>
+	 */
+	public function data_provider_is_supported(): array {
+		return array(
+			'MariaDB 10.11'         => array( '10.11.18-MariaDB-ubu2204', false ),
+			'MariaDB legacy prefix' => array( '5.5.5-10.6.2-MariaDB', false ),
+			'MySQL 5.7'             => array( '5.7.44', false ),
+			'MySQL 8.0'             => array( '8.0.46', true ),
+			'MySQL 8.4'             => array( '8.4.0', true ),
+		);
 	}
 }
