@@ -363,8 +363,7 @@ const entries = {
 		wcBlocksMiddleware: './assets/js/middleware/index.js',
 		wcBlocksSharedContext:
 			'./assets/js/blocks/packages/shared-context/index.js',
-		wcBlocksSharedHocs:
-			'./assets/js/blocks/packages/shared-hocs/index.js',
+		wcBlocksSharedHocs: './assets/js/blocks/packages/shared-hocs/index.js',
 		wcSchemaParser: './assets/js/utils/schema-parser/index.ts',
 		priceFormat: './packages/prices/index.js',
 		wcTypes: './assets/js/blocks/packages/types/index.ts',
