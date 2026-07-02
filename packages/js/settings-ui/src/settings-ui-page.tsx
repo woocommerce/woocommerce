@@ -80,6 +80,40 @@ const areValuesEqual = ( a: SettingsValue, b: SettingsValue ) => {
 	return a === b;
 };
 
+// Restore the schema's value representation when a control's emitted value is
+// just a re-encoding of the initial value (e.g. '5' for 5, '' for null, [] for
+// ''). Field controls emit fixed types — strings, arrays, booleans — so
+// without this, an edit that reverts to the initial value leaves the form
+// dirty on a type difference alone, and save handlers receive values in a
+// vocabulary the schema never declared.
+const preserveInitialRepresentation = (
+	value: SettingsValue,
+	initialValue: SettingsValue
+): SettingsValue => {
+	if ( typeof initialValue === 'undefined' || value === initialValue ) {
+		return value;
+	}
+
+	if (
+		typeof value === 'string' &&
+		typeof initialValue !== 'string' &&
+		! Array.isArray( initialValue ) &&
+		( initialValue === null ? '' : String( initialValue ) ) === value
+	) {
+		return initialValue;
+	}
+
+	if (
+		Array.isArray( value ) &&
+		value.length === 0 &&
+		( initialValue === '' || initialValue === null )
+	) {
+		return initialValue;
+	}
+
+	return value;
+};
+
 const getChangedValues = (
 	values: SettingsValues,
 	initialValues: SettingsValues
@@ -568,10 +602,13 @@ export const SettingsUIPage = ( {
 		( fieldId: string, nextValue: SettingsValue ) => {
 			setValuesState( ( currentValues ) => ( {
 				...currentValues,
-				[ fieldId ]: nextValue,
+				[ fieldId ]: preserveInitialRepresentation(
+					nextValue,
+					initialValues[ fieldId ]
+				),
 			} ) );
 		},
-		[]
+		[ initialValues ]
 	);
 
 	const allowNavigation = useCallback( () => {
@@ -613,7 +650,11 @@ export const SettingsUIPage = ( {
 				Object.entries( nextValues ).forEach(
 					( [ fieldId, value ] ) => {
 						if ( typeof value !== 'undefined' ) {
-							mergedValues[ fieldId ] = value;
+							mergedValues[ fieldId ] =
+								preserveInitialRepresentation(
+									value,
+									initialValues[ fieldId ]
+								);
 						}
 					}
 				);
@@ -621,7 +662,7 @@ export const SettingsUIPage = ( {
 				return mergedValues;
 			} );
 		},
-		[]
+		[ initialValues ]
 	);
 
 	const handleCustomSave = useCallback( async () => {

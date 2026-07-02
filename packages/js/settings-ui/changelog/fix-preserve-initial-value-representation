@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve the schema's value representation for all fields when an edit reverts to the initial value, so string-emitting controls and custom components no longer leave the form dirty on a type difference alone.

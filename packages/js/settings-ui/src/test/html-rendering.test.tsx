@@ -317,6 +317,157 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
+	it( 'restores non-string schema values when an edit reverts to the initial value', () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'threshold',
+							label: 'Threshold',
+							type: 'number',
+							value: 5,
+							customAttributes: { step: 1 },
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } page="test-page" />
+		);
+
+		const getSaveButton = () => {
+			const saveButton = container.querySelector< HTMLButtonElement >(
+				'.woocommerce-save-button'
+			);
+
+			if ( ! saveButton ) {
+				throw new Error( 'Expected a save button.' );
+			}
+
+			return saveButton;
+		};
+
+		const clickSpinButton = ( ariaLabel: string ) => {
+			const button = container.querySelector< HTMLButtonElement >(
+				`button[aria-label="${ ariaLabel }"]`
+			);
+
+			act( () => {
+				button?.dispatchEvent(
+					new MouseEvent( 'click', { bubbles: true } )
+				);
+			} );
+		};
+
+		expect( getSaveButton().disabled ).toBe( true );
+
+		// The spin control emits strings; the schema supplied the number 5.
+		clickSpinButton( 'Increment Threshold' );
+		expect( getSaveButton().disabled ).toBe( false );
+
+		// Stepping back to "5" restores the schema's numeric 5, so the form
+		// is clean again instead of dirty on '5' !== 5.
+		clickSpinButton( 'Decrement Threshold' );
+		expect( getSaveButton().disabled ).toBe( true );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'preserves the initial representation for custom component setValue writes', () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'tags_field',
+							label: 'Tags',
+							type: 'array',
+							value: '',
+						},
+					],
+				},
+			},
+		};
+
+		registerSettingsExtension( {
+			scope: { page: 'test-page' },
+			fieldOverrides: {
+				tags_field: ( { setValue } ) => (
+					<div>
+						<button
+							type="button"
+							onClick={ () => setValue( 'tags_field', [] ) }
+						>
+							Clear tags
+						</button>
+						<button
+							type="button"
+							onClick={ () =>
+								setValue( 'tags_field', [ 'featured' ] )
+							}
+						>
+							Add tag
+						</button>
+					</div>
+				),
+			},
+		} );
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } page="test-page" />
+		);
+
+		const getSaveButton = () => {
+			const saveButton = container.querySelector< HTMLButtonElement >(
+				'.woocommerce-save-button'
+			);
+
+			if ( ! saveButton ) {
+				throw new Error( 'Expected a save button.' );
+			}
+
+			return saveButton;
+		};
+
+		const clickButton = ( text: string ) => {
+			const button = [
+				...container.querySelectorAll< HTMLButtonElement >( 'button' ),
+			].find( ( el ) => el.textContent === text );
+
+			act( () => {
+				button?.dispatchEvent(
+					new MouseEvent( 'click', { bubbles: true } )
+				);
+			} );
+		};
+
+		// An empty array is a re-encoding of the initial '' value, so a
+		// custom component writing [] through setValue keeps the form clean.
+		clickButton( 'Clear tags' );
+		expect( getSaveButton().disabled ).toBe( true );
+
+		// A real change still dirties the form.
+		clickButton( 'Add tag' );
+		expect( getSaveButton().disabled ).toBe( false );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
 	it( 'hides fields with unmet native visibility rules', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
