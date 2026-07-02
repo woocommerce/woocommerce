@@ -77,7 +77,7 @@ class SystemStatusReport {
 		$enabled_features  = array_filter( $features );
 		$disabled_features = array_filter(
 			$features,
-			function( $feature ) {
+			function ( $feature ) {
 				return empty( $feature );
 			}
 		);
@@ -114,7 +114,15 @@ class SystemStatusReport {
 	 * Render daily cron row.
 	 */
 	public function render_daily_cron() {
-		$next_daily_cron = wp_next_scheduled( 'wc_admin_daily' );
+		$next_daily_cron = null;
+
+		if ( function_exists( 'as_next_scheduled_action' ) ) {
+			$next_daily_cron = as_next_scheduled_action( 'wc_admin_daily_wrapper', array(), 'woocommerce' );
+		}
+
+		if ( empty( $next_daily_cron ) ) {
+			$next_daily_cron = wp_next_scheduled( 'wc_admin_daily' );
+		}
 		?>
 			<tr>
 				<td data-export-label="Daily Cron">
@@ -213,5 +221,4 @@ class SystemStatusReport {
 			</tr>
 		<?php
 	}
-
 }
