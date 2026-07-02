@@ -195,32 +195,70 @@ class ProductWalker {
 	}
 
 	/**
-	 * Walks through all products.
+	 * Walks through every remaining product in one go, managing the feed lifecycle.
+	 *
+	 * This is the simple, single-process entry point: it starts the feed, walks every batch, ends the
+	 * feed and returns the number of products processed. Callers that need to write a feed across
+	 * several processes should own the feed lifecycle themselves and use {@see walk_batches()} instead.
 	 *
 	 * @since 10.5.0
 	 *
-	 * @param callable $callback The callback to call after each batch of products is processed.
-	 * @return int The total number of products processed.
+	 * @param callable|null $callback The callback to call after each batch of products is processed.
+	 * @return int The number of products processed.
 	 */
 	public function walk( ?callable $callback = null ): int {
-		$progress = null;
-
-		// Instruct the feed to start.
 		$this->feed->start();
+		$progress = $this->walk_batches( $callback );
+		$this->feed->end();
+
+		return $progress->processed_items;
+	}
+
+	/**
+	 * Walks through products, optionally limited to a bounded number of batches.
+	 *
+	 * The walker does not own the feed lifecycle: the caller is responsible for starting, flushing
+	 * and ending the feed. This lets a feed be written across several processes by resuming the same
+	 * feed between calls.
+	 *
+	 * Called with the defaults it walks every remaining page in one go; pass `$start_page` and
+	 * `$max_batches` to process a bounded slice and resume later from `processed_batches`.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param callable|null $callback    The callback to call after each batch of products is processed.
+	 * @param int           $start_page  The 1-based page (batch) to start at.
+	 * @param int           $max_batches The maximum number of batches to process in this call.
+	 * @return WalkerProgress Items/batches processed here, plus the overall total_count and
+	 *                        total_batch_count so the caller knows whether the feed is complete.
+	 */
+	public function walk_batches( ?callable $callback = null, int $start_page = 1, int $max_batches = PHP_INT_MAX ): WalkerProgress {
+		if ( $start_page < 1 ) {
+			$start_page = 1;
+		}
+		if ( $max_batches < 1 ) {
+			$max_batches = 1;
+		}
+
+		$progress = null;
+		$page     = $start_page;
 
 		// Check how much memory is available at first.
 		$initial_available_memory = $this->memory_manager->get_available_memory();
 
+		$batches_processed = 0;
 		do {
-			$result   = $this->iterate( $this->query_args, $progress ? $progress->processed_batches + 1 : 1, $this->per_page );
+			$result   = $this->iterate( $this->query_args, $page, $this->per_page );
 			$iterated = count( $result->products );
 
-			// Only done when the progress is not set. Will be modified otherwise.
+			// Only build the progress object once; the total/total batch count is stable across pages.
 			if ( is_null( $progress ) ) {
 				$progress = WalkerProgress::from_wc_get_products_result( $result );
 			}
 			$progress->processed_items += $iterated;
 			++$progress->processed_batches;
+			++$batches_processed;
+			++$page;
 
 			if ( is_callable( $callback ) && $iterated > 0 ) {
 				$callback( $progress );
@@ -239,14 +277,15 @@ class ProductWalker {
 			// If `wc_get_products()` returns less than the batch size, it was the last page.
 			$iterated === $this->per_page
 
-			// For the cases where the above is true, make sure that we do not exceed the total number of pages.
-			&& $progress->processed_batches < $progress->total_batch_count
+			// Stop once this call has processed its requested number of batches.
+			&& $batches_processed < $max_batches
+
+			// For the cases where the above are true, make sure that we do not exceed the total number of pages.
+			&& ( $progress->total_batch_count <= 0 || ( $page - 1 ) < $progress->total_batch_count )
 		);
 
-		// Instruct the feed to end.
-		$this->feed->end();
-
-		return $progress->processed_items;
+		// The do-while body always executes at least once and assigns $progress on the first iteration.
+		return $progress;
 	}
 
 	/**
