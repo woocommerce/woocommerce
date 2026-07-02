@@ -239,23 +239,25 @@ class Checkout extends MockeryTestCase {
 		add_filter( 'woocommerce_store_api_checkout_require_payment_method', '__return_false' );
 		add_filter( 'woocommerce_store_api_order_default_payment_method', '__return_empty_string' );
 
-		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
-		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
-		$request->set_body_params(
-			array(
-				'billing_address'  => (object) $this->get_test_address( true ),
-				'shipping_address' => (object) $this->get_test_address(),
-			)
-		);
+		try {
+			$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+			$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+			$request->set_body_params(
+				array(
+					'billing_address'  => (object) $this->get_test_address( true ),
+					'shipping_address' => (object) $this->get_test_address(),
+				)
+			);
 
-		$response = rest_get_server()->dispatch( $request );
+			$response = rest_get_server()->dispatch( $request );
 
-		remove_filter( 'woocommerce_store_api_checkout_require_payment_method', '__return_false' );
-		remove_filter( 'woocommerce_store_api_order_default_payment_method', '__return_empty_string' );
-
-		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
-		$order = wc_get_order( $response->get_data()['order_id'] );
-		$this->assertSame( '', $order->get_payment_method(), 'Order should be created without a payment method.' );
+			$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+			$order = wc_get_order( $response->get_data()['order_id'] );
+			$this->assertSame( '', $order->get_payment_method(), 'Order should be created without a payment method.' );
+		} finally {
+			remove_filter( 'woocommerce_store_api_checkout_require_payment_method', '__return_false' );
+			remove_filter( 'woocommerce_store_api_order_default_payment_method', '__return_empty_string' );
+		}
 	}
 
 	/**

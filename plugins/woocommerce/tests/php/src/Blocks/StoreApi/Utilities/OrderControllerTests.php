@@ -355,10 +355,12 @@ class OrderControllerTests extends TestCase {
 
 		add_filter( 'woocommerce_store_api_order_default_payment_method', '__return_empty_string' );
 
-		$order = $this->sut->create_order_from_cart();
-
-		remove_filter( 'woocommerce_store_api_order_default_payment_method', '__return_empty_string' );
-		WC()->cart->empty_cart();
+		try {
+			$order = $this->sut->create_order_from_cart();
+		} finally {
+			remove_filter( 'woocommerce_store_api_order_default_payment_method', '__return_empty_string' );
+			WC()->cart->empty_cart();
+		}
 
 		$this->assertSame(
 			'',
