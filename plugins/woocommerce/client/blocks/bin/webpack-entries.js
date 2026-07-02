@@ -371,7 +371,7 @@ const entries = {
 		wcEntities: './packages/entities/index.ts',
 	},
 	main: {
-		'wc-blocks-editor': [ './assets/js/index.js', ...editorScriptEntries ],
+		'wc-block-library': [ './assets/js/index.js', ...editorScriptEntries ],
 	},
 	frontend: {
 		reviews: './assets/js/blocks/reviews/frontend.ts',

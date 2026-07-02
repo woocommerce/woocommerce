@@ -63,7 +63,7 @@ class Api {
 			! in_array(
 				$handle,
 				array(
-					'wc-blocks-editor',
+					'wc-block-library',
 					'wc-checkout-block',
 					'wc-checkout-block-frontend',
 					'wc-cart-block',
@@ -180,7 +180,7 @@ class Api {
 					);
 
 					$cart_checkout_scripts = array(
-						'wc-blocks-editor',
+						'wc-block-library',
 						'wc-cart-block',
 						'wc-cart-block-frontend',
 						'wc-checkout-block',

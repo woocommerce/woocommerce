@@ -80,8 +80,8 @@ final class AssetsController {
 		wp_register_script( 'wc-blocks-vendors', false, array(), $this->api->wc_version, true );
 		$this->api->register_script( 'wc-blocks-registry', 'assets/client/blocks/wc-blocks-registry.js', array(), false );
 		$this->api->register_script(
-			'wc-blocks-editor',
-			$this->api->get_block_asset_build_path( 'wc-blocks-editor' ),
+			'wc-block-library',
+			$this->api->get_block_asset_build_path( 'wc-block-library' ),
 			array(),
 			true
 		);

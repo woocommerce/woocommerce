@@ -347,8 +347,8 @@ abstract class AbstractBlock {
 	 */
 	protected function get_block_type_editor_script( $key = null ) {
 		$script = [
-			'handle'       => 'wc-blocks-editor',
-			'path'         => $this->asset_api->get_block_asset_build_path( 'wc-blocks-editor' ),
+			'handle'       => 'wc-block-library',
+			'path'         => $this->asset_api->get_block_asset_build_path( 'wc-block-library' ),
 			'dependencies' => [],
 		];
 		return $key ? $script[ $key ] : $script;
