@@ -6,7 +6,7 @@
  * The contract is the live source of truth. A chain is NOT a stored entity: it is
  * the pair `(contract_id, kind)`, with its head and counters derived from the cycle
  * rows. The entity never carries a cycle graph in memory, so cycles are reached
- * through purpose-built reads ({@see self::find_current_cycle()}, {@see self::max_count()},
+ * through purpose-built reads ({@see self::find_chain_head()}, {@see self::max_count()},
  * etc.) and written one at a time ({@see self::append_cycle()}, {@see self::update_cycle()}).
  * There is no whole-graph `save()`. Snapshots are deduped by copy-forward (reuse the
  * previous cycle's snapshot id when plan / items are unchanged), via {@see SnapshotStore}.
@@ -468,15 +468,17 @@ final class ContractRepository {
 	}
 
 	/**
-	 * The chain's most-recent cycle (highest `sequence_no` in `(contract_id, kind)`),
-	 * or null when the chain is empty. Snapshots are decoded into typed value objects
-	 * only for an in-flight cycle (see {@see self::hydrate_cycle()}).
+	 * The chain's head - its most-recent cycle (highest `sequence_no` in `(contract_id,
+	 * kind)`) - or null when the chain is empty. The head is the chain's growth point, not
+	 * necessarily the cycle current by date (a forced early renewal bills a head whose
+	 * period lies ahead). Snapshots are decoded into typed value objects only for an
+	 * in-flight cycle (see {@see self::hydrate_cycle()}).
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $kind        Chain kind. Defaults to billing.
-	 * @return Cycle|null The most-recent cycle, or null if the chain has none.
+	 * @return Cycle|null The head cycle, or null if the chain has none.
 	 */
-	public function find_current_cycle( int $contract_id, string $kind = Cycle::KIND_BILLING ): ?Cycle {
+	public function find_chain_head( int $contract_id, string $kind = Cycle::KIND_BILLING ): ?Cycle {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );

@@ -268,7 +268,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( $cycle->get_items_snapshot_id(), $reloaded->get_items_snapshot_id() );
 
 		// Cycle 1 is the billed signup, reachable as the chain's most-recent cycle.
-		$current = $this->sut->find_current_cycle( $id );
+		$current = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $current );
 		$this->assertSame( 1, $current->get_count() );
 		$this->assertTrue( $current->get_status()->equals( CycleStatus::billed() ) );
@@ -413,7 +413,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	/**
 	 * @testdox append_cycle inserts a cycle reachable as the chain's current cycle.
 	 */
-	public function test_append_cycle_and_find_current_cycle(): void {
+	public function test_append_cycle_and_find_chain_head(): void {
 		$id = $this->sut->insert( $this->make_contract() );
 
 		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', $this->sample_plan_snapshot(), $this->sample_items_snapshot() );
@@ -421,7 +421,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$this->assertNotNull( $cycle->get_id() );
 
-		$current = $this->sut->find_current_cycle( $id );
+		$current = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $current );
 		$this->assertSame( $cycle->get_id(), $current->get_id() );
 		$this->assertSame( 1, $current->get_sequence_no() );
@@ -465,15 +465,15 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		);
 		$this->sut->append_cycle( $cycle );
 
-		$reloaded = $this->sut->find_current_cycle( $id );
+		$reloaded = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $reloaded );
 		$this->assertSame( '9.12345678', $reloaded->get_expected_total() );
 	}
 
 	/**
-	 * @testdox find_current_cycle returns the highest-sequence cycle in the chain.
+	 * @testdox find_chain_head returns the highest-sequence cycle in the chain.
 	 */
-	public function test_find_current_cycle_returns_the_head(): void {
+	public function test_find_chain_head_returns_the_head(): void {
 		$id = $this->sut->insert( $this->make_contract() );
 
 		$first = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' );
@@ -482,18 +482,18 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$second = $this->make_cycle( $id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00' );
 		$this->sut->append_cycle( $second, $first );
 
-		$current = $this->sut->find_current_cycle( $id );
+		$current = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $current );
 		$this->assertSame( 2, $current->get_sequence_no() );
 	}
 
 	/**
-	 * @testdox find_current_cycle returns null for a chain with no cycles.
+	 * @testdox find_chain_head returns null for a chain with no cycles.
 	 */
-	public function test_find_current_cycle_is_null_when_empty(): void {
+	public function test_find_chain_head_is_null_when_empty(): void {
 		$id = $this->sut->insert( $this->make_contract() );
 
-		$this->assertNull( $this->sut->find_current_cycle( $id ) );
+		$this->assertNull( $this->sut->find_chain_head( $id ) );
 	}
 
 	/**
@@ -578,7 +578,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$cycle->set_status( CycleStatus::billed() );
 		$this->sut->update_cycle( $cycle );
 
-		$reloaded = $this->sut->find_current_cycle( $id );
+		$reloaded = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $reloaded );
 		$this->assertTrue( $reloaded->get_status()->equals( CycleStatus::billed() ) );
 	}
@@ -605,7 +605,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		);
 		$this->sut->append_cycle( $cycle );
 
-		$reloaded = $this->sut->find_current_cycle( $id );
+		$reloaded = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $reloaded );
 		$this->assertSame( '2026-07-15 00:15:00', $reloaded->get_claimed_until_gmt() );
 
@@ -614,7 +614,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$reloaded->set_claimed_until_gmt( null );
 		$this->sut->update_cycle( $reloaded );
 
-		$settled = $this->sut->find_current_cycle( $id );
+		$settled = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $settled );
 		$this->assertNull( $settled->get_claimed_until_gmt() );
 	}
@@ -630,7 +630,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$won = $this->sut->reclaim_expired_cycle( (int) $cycle->get_id(), '2026-07-15 00:10:00', '2026-07-15 00:25:00' );
 		$this->assertTrue( $won, 'The first worker reclaims an expired-lease pending cycle.' );
 
-		$reloaded = $this->sut->find_current_cycle( $id );
+		$reloaded = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $reloaded );
 		$this->assertSame( '2026-07-15 00:25:00', $reloaded->get_claimed_until_gmt(), 'The lease is extended to the new moment.' );
 	}
@@ -658,7 +658,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertFalse( $second, 'The second worker loses the race: no double reclaim.' );
 
 		// The lease reflects only the winner's extension, never the loser's.
-		$reloaded = $this->sut->find_current_cycle( $id );
+		$reloaded = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $reloaded );
 		$this->assertSame( '2026-07-15 00:25:00', $reloaded->get_claimed_until_gmt() );
 	}

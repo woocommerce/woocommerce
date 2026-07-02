@@ -73,7 +73,7 @@ final class Cancellation {
 
 		// Close a charge caught mid-flight: a still-pending head cycle is cancelled so no stale
 		// claim is left open. A settled (billed/failed/cancelled) cycle is left as is.
-		$current = $this->contracts->find_current_cycle( $id );
+		$current = $this->contracts->find_chain_head( $id );
 		if ( null !== $current && $current->get_status()->equals( CycleStatus::pending() ) ) {
 			$current->set_status( CycleStatus::cancelled() );
 			$this->contracts->update_cycle( $current );

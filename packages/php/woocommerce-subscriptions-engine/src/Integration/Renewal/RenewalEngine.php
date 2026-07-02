@@ -247,7 +247,7 @@ final class RenewalEngine {
 	public function process_due( int $contract_id, ?DateTimeImmutable $now = null ): ?WC_Order {
 		$now = $now ?? new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
 
-		$head = $this->contracts->find_current_cycle( $contract_id );
+		$head = $this->contracts->find_chain_head( $contract_id );
 		if ( null === $head ) {
 			// No billing chain to advance: checkout always creates cycle 1, so a chainless
 			// contract is a manual/corrupt case the engine does not renew. Park it so the
@@ -299,7 +299,7 @@ final class RenewalEngine {
 	public function renew_now( int $contract_id, ?DateTimeImmutable $now = null ): ?WC_Order {
 		$now = $now ?? new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
 
-		$head = $this->contracts->find_current_cycle( $contract_id );
+		$head = $this->contracts->find_chain_head( $contract_id );
 		if ( null === $head ) {
 			wc_get_logger()->warning(
 				sprintf( 'RenewalEngine::renew_now(): contract %d has no billing chain to renew.', $contract_id ),
@@ -394,7 +394,7 @@ final class RenewalEngine {
 			return null;
 		}
 
-		$head = $this->contracts->find_current_cycle( $contract_id );
+		$head = $this->contracts->find_chain_head( $contract_id );
 		if ( null === $head ) {
 			throw new RenewalNotProcessable( 'no billing chain to advance' );
 		}
@@ -561,7 +561,7 @@ final class RenewalEngine {
 	 * @return Cycle|null The reclaimed cycle (this caller won the CAS), or null to skip.
 	 */
 	private function reclaim_head( int $contract_id, int $count, DateTimeImmutable $now ): ?Cycle {
-		$head = $this->contracts->find_current_cycle( $contract_id );
+		$head = $this->contracts->find_chain_head( $contract_id );
 
 		$is_pending_at_count = null !== $head
 			&& $count === $head->get_count()
@@ -691,7 +691,7 @@ final class RenewalEngine {
 			return;
 		}
 
-		$cycle = $this->contracts->find_current_cycle( $contract_id );
+		$cycle = $this->contracts->find_chain_head( $contract_id );
 		if ( null === $cycle || $count !== $cycle->get_count() ) {
 			// The chain advanced past this order's cycle (or has none): nothing to settle.
 			return;

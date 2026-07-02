@@ -153,7 +153,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 		$this->assertSame( 1, $processed );
 
 		$repo  = new ContractRepository();
-		$cycle = $repo->find_current_cycle( $contract_id );
+		$cycle = $repo->find_chain_head( $contract_id );
 
 		// Cycle 2 was billed via the dummy gateway and the schedule advanced one cadence.
 		$this->assertInstanceOf( Cycle::class, $cycle );
@@ -266,7 +266,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 		RenewalDispatcher::handle_tick();
 
 		// The dispatch reached the money-path: cycle 2 billed.
-		$cycle = ( new ContractRepository() )->find_current_cycle( $contract_id );
+		$cycle = ( new ContractRepository() )->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( 2, $cycle->get_count() );
 		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
