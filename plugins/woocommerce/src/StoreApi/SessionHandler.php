@@ -113,14 +113,18 @@ final class SessionHandler extends WC_Session {
 			return;
 		}
 
-		// Consume the guest session so a repeated, stale token cannot merge again.
-		$this->delete_session( $guest_id );
-
 		// Fold the saved cart and the active guest cart into the user's session. Later entries
 		// win on key collision, so the active guest cart takes precedence over saved items.
 		$saved_cart = $this->get_persistent_cart_contents( (int) $user_id );
 		$user_cart  = (array) $this->get( 'cart', array() );
 		$this->set( 'cart', array_merge( $saved_cart, $user_cart, $guest_cart ) );
+
+		// Persist the merged user cart before consuming the guest session. delete_session()
+		// writes immediately but set() only flushes on shutdown, so saving first ensures a
+		// fatal between the two can't leave the guest session gone and the merge unsaved. A
+		// stale guest token still can't re-merge: it loads an empty cart next time.
+		$this->save_data();
+		$this->delete_session( $guest_id );
 	}
 
 	/**
