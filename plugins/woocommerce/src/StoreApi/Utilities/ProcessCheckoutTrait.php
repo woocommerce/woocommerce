@@ -596,7 +596,7 @@ trait ProcessCheckoutTrait {
 			array(
 				'order_object'           => $this->order,
 				'processed_with_payment' => $this->order->needs_payment() ? 'yes' : 'no',
-				'payment_status'         => $payment_result->status,
+				'payment_status'         => $payment_result->get_status(),
 			),
 			true
 		);
@@ -654,7 +654,7 @@ trait ProcessCheckoutTrait {
 	 * @param array     $data The data to add to the error object.
 	 * @param int       $http_status_code The HTTP status code this error should return.
 	 * @param bool      $include_cart Whether the cart should be included in the error data.
-	 * @returns \WP_Error The \WP_Error with the cart added.
+	 * @return \WP_Error The \WP_Error with the cart added.
 	 */
 	private function add_data_to_error_object( $error, $data, $http_status_code, bool $include_cart = false ) {
 		$data = array_merge( $data, [ 'status' => $http_status_code ] );

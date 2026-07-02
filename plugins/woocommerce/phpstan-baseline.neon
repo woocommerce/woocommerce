@@ -70346,12 +70346,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:add_data_to_error_object\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:create_or_update_draft_order\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
