@@ -74,9 +74,12 @@ test(
 		} );
 
 		await test.step( 'Hide the task list', async () => {
-			await page
+			const setupTaskProgressHeader = page.locator(
+				'.woocommerce-task-progress-header'
+			);
+
+			await setupTaskProgressHeader
 				.getByRole( 'button', { name: 'Task list options' } )
-				.first()
 				.click();
 			await page
 				.getByRole( 'button', { name: 'Hide setup list' } )
