@@ -139,9 +139,9 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			}
 
 			$section = is_string( $current_section ) ? $current_section : '';
-			$context = SettingsUIRequestContext::for_settings_page( $this, $section );
+			$context = $this->get_settings_ui_request_context( $section );
 
-			if ( ! $context->is_rendering_enabled() ) {
+			if ( ! $context || ! $context->is_rendering_enabled() ) {
 				return $classes;
 			}
 
@@ -254,6 +254,44 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		}
 
 		/**
+		 * Settings section registry instance, or null when the modern settings SDK is unavailable.
+		 *
+		 * The class can be missing mid-update: a 10.9 copy of this file may load before the autoloader
+		 * class map can safely resolve the new registry, so a direct call would fatal.
+		 *
+		 * @return SettingsSectionRegistry|null
+		 */
+		protected function get_settings_section_registry() {
+			try {
+				if ( ! class_exists( SettingsSectionRegistry::class ) ) {
+					return null;
+				}
+
+				return SettingsSectionRegistry::get_instance();
+			} catch ( \Throwable $e ) {
+				return null;
+			}
+		}
+
+		/**
+		 * Settings UI request context, or null when the modern settings SDK is unavailable.
+		 *
+		 * @param string $section Section id.
+		 * @return SettingsUIRequestContext|null
+		 */
+		protected function get_settings_ui_request_context( $section ) {
+			try {
+				if ( ! class_exists( SettingsUIRequestContext::class ) ) {
+					return null;
+				}
+
+				return SettingsUIRequestContext::for_settings_page( $this, $section );
+			} catch ( \Throwable $e ) {
+				return null;
+			}
+		}
+
+		/**
 		 * Get the settings for a given section.
 		 * This method is invoked from 'get_settings_for_section' when no 'get_settings_for_{current_section}_section'
 		 * method exists in the class.
@@ -266,7 +304,8 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 * @return array Settings array, each item being an associative array representing a setting.
 		 */
 		protected function get_settings_for_section_core( $section_id ) {
-			$registered_section = SettingsSectionRegistry::get_instance()->get_registered( $this->id, (string) $section_id );
+			$registry           = $this->get_settings_section_registry();
+			$registered_section = $registry ? $registry->get_registered( $this->id, (string) $section_id ) : null;
 
 			return $registered_section ? $registered_section->get_settings( $this ) : array();
 		}
@@ -278,7 +317,8 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 */
 		public function get_sections() {
 			$sections            = $this->get_own_sections();
-			$registered_sections = SettingsSectionRegistry::get_instance()->get_sections_for_page( $this->id );
+			$registry            = $this->get_settings_section_registry();
+			$registered_sections = $registry ? $registry->get_sections_for_page( $this->id ) : array();
 
 			foreach ( $registered_sections as $section_id => $section_label ) {
 				// Preserve sections declared by the settings page when a registered section uses the same id.
@@ -349,9 +389,9 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			global $current_section;
 
 			$section = is_string( $current_section ) ? $current_section : '';
-			$context = SettingsUIRequestContext::for_settings_page( $this, $section );
+			$context = $this->get_settings_ui_request_context( $section );
 
-			if ( $context->is_rendering_enabled() ) {
+			if ( $context && $context->is_rendering_enabled() ) {
 				$settings_ui_page = $context->get_settings_ui_page();
 				assert( $settings_ui_page instanceof SettingsUIPageInterface );
 

@@ -387,16 +387,31 @@ class WC_Shortcode_My_Account {
 		// The temporary-password notice is gone for good now, so drop its resend rate-limit timestamp.
 		delete_user_meta( $user->ID, WC_Form_Handler::SET_PASSWORD_RESEND_META );
 
-		/**
-		 * Fires after the user's password has been reset via WooCommerce.
-		 *
-		 * This provides parity with WordPress core's reset_password() function.
-		 *
-		 * @since 10.9.0
-		 * @param WP_User $user     The user.
-		 * @param string  $new_pass New user password in plaintext.
-		 */
-		do_action( 'after_password_reset', $user, $new_pass );
+		// WordPress core hooks wp_password_change_notification() onto after_password_reset. Detach it around
+		// the action so it doesn't duplicate the notification WooCommerce sends directly below (guarded by the
+		// woocommerce_disable_password_change_notification filter), then restore it to its original priority.
+		$core_notification_priority = has_action( 'after_password_reset', 'wp_password_change_notification' );
+		if ( false !== $core_notification_priority ) {
+			remove_action( 'after_password_reset', 'wp_password_change_notification', $core_notification_priority );
+		}
+
+		try {
+			/**
+			 * Fires after the user's password has been reset via WooCommerce.
+			 *
+			 * This provides parity with WordPress core's reset_password() function.
+			 *
+			 * @since 10.9.0
+			 * @param WP_User $user     The user.
+			 * @param string  $new_pass New user password in plaintext.
+			 */
+			do_action( 'after_password_reset', $user, $new_pass );
+		} finally {
+			if ( false !== $core_notification_priority ) {
+				add_action( 'after_password_reset', 'wp_password_change_notification', $core_notification_priority );
+			}
+		}
+
 		self::set_reset_password_cookie();
 		wc_set_customer_auth_cookie( $user->ID );
 
