@@ -8,7 +8,6 @@ import { expect, RequestUtils } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import {
-	FREE_SHIPPING_NAME,
 	FREE_SHIPPING_PRICE,
 	SIMPLE_PHYSICAL_PRODUCT_NAME,
 	SIMPLE_VIRTUAL_PRODUCT_NAME,
