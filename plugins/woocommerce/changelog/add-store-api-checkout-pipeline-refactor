@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Store API: extract the checkout route's place-order pipeline into a reusable internal trait (`ProcessCheckoutTrait`). Internal refactor with no change to checkout behaviour.

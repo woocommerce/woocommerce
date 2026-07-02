@@ -384,7 +384,7 @@ trait ProcessCheckoutTrait {
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response
 	 */
-	private function build_draft_route_response( \WP_REST_Request $request ) {
+	private function build_draft_route_response( \WP_REST_Request $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Signature kept for call-site symmetry with the other route responders; response is built from cart + customer.
 		/**
 		 * Narrow the parent-declared schema property to the checkout subclass for phpstan.
 		 *
@@ -673,7 +673,7 @@ trait ProcessCheckoutTrait {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @throws RouteException On error.
 	 */
-	private function create_or_update_draft_order( \WP_REST_Request $request ) {
+	private function create_or_update_draft_order( \WP_REST_Request $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Signature kept for call-site symmetry; the draft order is built from the cart, not the request.
 		// Reuse the failed/pending order from the customer's session if one exists; otherwise the POST flow would orphan it by creating a fresh order on every retry.
 		$this->order = $this->order ?? $this->get_draft_order();
 
