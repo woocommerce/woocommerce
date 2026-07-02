@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Disabled counters in the category filter on the admin products page to address performance issues with large product catalogs.
