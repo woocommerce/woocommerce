@@ -221,7 +221,7 @@ final class RenewalDispatcher {
 
 		foreach ( $candidates as $candidate ) {
 			try {
-				$cycle_count = $this->selector->select_billing_cycle( $candidate, $now );
+				$cycle_count = $this->selector->select_scheduled_cycle( $candidate, $now );
 				if ( null === $cycle_count ) {
 					continue;
 				}

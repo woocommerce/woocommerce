@@ -8,7 +8,7 @@
  * It encodes two selection policies over the same `process()` primitive (which bills whatever
  * cycle it is handed and owns no due policy):
  *
- * - scheduled ({@see self::select_billing_cycle()}): advance to the next cycle once the current
+ * - scheduled ({@see self::select_scheduled_cycle()}): advance to the next cycle once the current
  *   period has ended (the due-guard), or retry a still-in-flight head. The guard anchors on the
  *   head's `ends_at_gmt` - immutable once settled - so it is race-free: an overlapping run that
  *   reads a just-billed head sees its end still in the future and does not charge ahead.
@@ -36,13 +36,13 @@ defined( 'ABSPATH' ) || exit;
 final class RenewalSelector {
 
 	/**
-	 * Resolve the cycle number to bill for a due contract, or null to skip.
+	 * Resolve the cycle a scheduled renewal should bill for this candidate, or null to skip.
 	 *
 	 * @param RenewalCandidate  $candidate The candidate (contract + head fields).
 	 * @param DateTimeImmutable $now       The scan moment.
 	 * @return int|null The cycle count to bill, or null when nothing is due.
 	 */
-	public function select_billing_cycle( RenewalCandidate $candidate, DateTimeImmutable $now ): ?int {
+	public function select_scheduled_cycle( RenewalCandidate $candidate, DateTimeImmutable $now ): ?int {
 		$count = $candidate->get_head_count();
 		if ( null === $count ) {
 			// A countless head is a corrupt chain the scan should not surface; refuse to guess.
@@ -73,11 +73,11 @@ final class RenewalSelector {
 	}
 
 	/**
-	 * Resolve the cycle number for an admin-triggered renewal, or null to skip. Unlike the
-	 * scheduled path this applies no due-guard - the admin is forcing the renewal - so a settled
-	 * head advances to the next cycle even before its period ends, while a failed or still-pending
-	 * head is re-attempted at its own count. A `processing` head (awaiting its gateway) or a
-	 * countless head is not manually renewable.
+	 * Resolve the cycle a manual (admin-triggered) renewal should bill for this candidate, or
+	 * null to skip. Unlike the scheduled path this applies no due-guard - the admin is forcing
+	 * the renewal - so a settled head advances to the next cycle even before its period ends,
+	 * while a failed or still-pending head is re-attempted at its own count. A `processing` head
+	 * (awaiting its gateway) or a countless head is not manually renewable.
 	 *
 	 * @param RenewalCandidate $candidate The candidate (contract + head fields).
 	 * @return int|null The cycle count to bill, or null when nothing is renewable.

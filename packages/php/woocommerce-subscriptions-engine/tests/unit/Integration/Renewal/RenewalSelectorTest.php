@@ -51,40 +51,40 @@ class RenewalSelectorTest extends TestCase {
 	}
 
 	public function test_advances_to_the_next_cycle_when_a_billed_head_period_has_ended(): void {
-		$this->assertSame( 2, $this->selector->select_billing_cycle( $this->candidate( 1, CycleStatus::BILLED, '2026-02-01 00:00:00' ), $this->now ) );
+		$this->assertSame( 2, $this->selector->select_scheduled_cycle( $this->candidate( 1, CycleStatus::BILLED, '2026-02-01 00:00:00' ), $this->now ) );
 	}
 
 	public function test_does_not_advance_when_the_billed_head_period_has_not_ended(): void {
 		// The charge-ahead guard: a just-billed head whose period runs into the future is not
 		// yet due for its successor.
-		$this->assertNull( $this->selector->select_billing_cycle( $this->candidate( 1, CycleStatus::BILLED, '2026-04-01 00:00:00' ), $this->now ) );
+		$this->assertNull( $this->selector->select_scheduled_cycle( $this->candidate( 1, CycleStatus::BILLED, '2026-04-01 00:00:00' ), $this->now ) );
 	}
 
 	public function test_advances_on_the_exact_period_boundary(): void {
 		// ends_at == now: the period has ended, so the successor is due.
-		$this->assertSame( 4, $this->selector->select_billing_cycle( $this->candidate( 3, CycleStatus::BILLED, '2026-03-01 00:00:00' ), $this->now ) );
+		$this->assertSame( 4, $this->selector->select_scheduled_cycle( $this->candidate( 3, CycleStatus::BILLED, '2026-03-01 00:00:00' ), $this->now ) );
 	}
 
 	public function test_advances_past_a_cancelled_head_that_has_ended(): void {
-		$this->assertSame( 6, $this->selector->select_billing_cycle( $this->candidate( 5, CycleStatus::CANCELLED, '2026-02-01 00:00:00' ), $this->now ) );
+		$this->assertSame( 6, $this->selector->select_scheduled_cycle( $this->candidate( 5, CycleStatus::CANCELLED, '2026-02-01 00:00:00' ), $this->now ) );
 	}
 
 	public function test_retries_the_same_cycle_when_the_head_is_still_pending(): void {
 		// A pending head only reaches the selector via the scan once its lease has expired; the
 		// money-path reclaims it. Selection targets the same count, not the next.
-		$this->assertSame( 7, $this->selector->select_billing_cycle( $this->candidate( 7, CycleStatus::PENDING, '2026-02-01 00:00:00' ), $this->now ) );
+		$this->assertSame( 7, $this->selector->select_scheduled_cycle( $this->candidate( 7, CycleStatus::PENDING, '2026-02-01 00:00:00' ), $this->now ) );
 	}
 
 	public function test_skips_a_failed_head(): void {
-		$this->assertNull( $this->selector->select_billing_cycle( $this->candidate( 2, CycleStatus::FAILED, '2026-02-01 00:00:00' ), $this->now ) );
+		$this->assertNull( $this->selector->select_scheduled_cycle( $this->candidate( 2, CycleStatus::FAILED, '2026-02-01 00:00:00' ), $this->now ) );
 	}
 
 	public function test_skips_a_processing_head(): void {
-		$this->assertNull( $this->selector->select_billing_cycle( $this->candidate( 2, CycleStatus::PROCESSING, '2026-02-01 00:00:00' ), $this->now ) );
+		$this->assertNull( $this->selector->select_scheduled_cycle( $this->candidate( 2, CycleStatus::PROCESSING, '2026-02-01 00:00:00' ), $this->now ) );
 	}
 
 	public function test_skips_a_countless_head(): void {
-		$this->assertNull( $this->selector->select_billing_cycle( new RenewalCandidate( 42, null, CycleStatus::BILLED, '2026-02-01 00:00:00' ), $this->now ) );
+		$this->assertNull( $this->selector->select_scheduled_cycle( new RenewalCandidate( 42, null, CycleStatus::BILLED, '2026-02-01 00:00:00' ), $this->now ) );
 	}
 
 	public function test_manual_forces_the_next_cycle_regardless_of_the_due_date(): void {

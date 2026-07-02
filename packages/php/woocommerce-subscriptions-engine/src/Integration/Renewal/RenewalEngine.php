@@ -264,7 +264,7 @@ final class RenewalEngine {
 			return null;
 		}
 
-		$cycle_count = $this->selector->select_billing_cycle( RenewalCandidate::from_cycle( $head ), $now );
+		$cycle_count = $this->selector->select_scheduled_cycle( RenewalCandidate::from_cycle( $head ), $now );
 		if ( null === $cycle_count ) {
 			return null;
 		}
