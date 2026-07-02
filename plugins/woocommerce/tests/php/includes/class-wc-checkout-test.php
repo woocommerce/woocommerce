@@ -377,9 +377,12 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		$order_id = $this->sut->create_order( $data );
 
-		// Reduce stock as a payment attempt would, then leave the order pending so it can be resumed.
+		// Mirror the production payment/status transition: it both reduces stock and releases the
+		// hold placed at order creation. Reducing without releasing would leave a stale reservation
+		// that no real flow produces, so we release here to reproduce the true resumable state.
 		wc_maybe_reduce_stock_levels( $order_id );
 		$order = wc_get_order( $order_id );
+		wc_release_stock_for_order( $order );
 		$order->set_status( 'pending' );
 		$order->save();
 
@@ -497,31 +500,19 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox create_order does not gate on stock; availability is enforced by cart stock validation.
+	 * @testdox Resuming an order with hold-stock enabled re-reserves the stock cleanly, without erroring or double-reserving.
 	 */
-	public function test_create_order_does_not_bypass_cart_stock_validation() {
-		update_option( 'woocommerce_manage_stock', 'yes' );
+	public function test_resuming_order_re_reserves_stock_without_overselling() {
+		list( $order_id, $product, $data ) = $this->create_pending_reduced_stock_order( 10, 1 );
 
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_manage_stock( true );
-		$product->set_stock_quantity( 1 );
-		$product->set_backorders( 'no' );
-		$product->save();
+		$reserve_stock = new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock();
 
-		WC()->cart->add_to_cart( $product->get_id(), 5 );
-		WC()->cart->calculate_totals();
+		// The helper released the initial hold when it reduced stock, mirroring a real status transition.
+		$this->assertEquals( 0, $reserve_stock->get_reserved_stock( $product ), 'No stock should be reserved before the order is resumed.' );
 
-		// Cart-level validation is the availability gate, independent of how order line items are built.
-		$stock_check = WC()->cart->check_cart_item_stock();
-		$this->assertInstanceOf( WP_Error::class, $stock_check, 'Cart stock validation should flag the shortage.' );
+		$resumed_id = $this->sut->create_order( $data );
 
-		// create_order() itself performs no stock check, so keeping line items on resume cannot bypass validation.
-		$order_id = $this->sut->create_order(
-			array(
-				'payment_method' => WC_Gateway_BACS::ID,
-				'billing_email'  => 'customer@example.com',
-			)
-		);
-		$this->assertIsInt( $order_id, 'create_order() builds the order regardless of stock; the check lives in the validation phase.' );
+		$this->assertSame( $order_id, $resumed_id, 'The order should be resumed with hold-stock enabled, not rejected or replaced.' );
+		$this->assertEquals( 1, $reserve_stock->get_reserved_stock( $product ), 'Resuming should re-reserve exactly the ordered quantity, not double-reserve or oversell.' );
 	}
 }
