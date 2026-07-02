@@ -23,6 +23,73 @@ export function readFile( filePath ) {
 	return readFileSync( filePath, 'utf8' ).trim();
 }
 
+export function getMetricUnit( metric ) {
+	if ( metric.endsWith( 'Size' ) ) {
+		return 'KB';
+	}
+
+	if ( metric.endsWith( 'Count' ) ) {
+		return 'count';
+	}
+
+	return 'ms';
+}
+
+export function formatMetricValue( metric, value ) {
+	return `${ value } ${ getMetricUnit( metric ) }`;
+}
+
+export async function getWooEditorAssetMetrics( page ) {
+	return await page.evaluate( () => {
+		const WOO_BLOCKS_ASSETS_PATH =
+			'/wp-content/plugins/woocommerce/assets/client/blocks/';
+		const KB = 1024;
+		const assetUrls = new Set();
+		const metrics = {
+			wooEditorAssetSize: 0,
+			wooEditorScriptSize: 0,
+			wooEditorStyleSize: 0,
+			wooEditorAssetCount: 0,
+		};
+
+		const roundSize = ( value ) => Math.round( value * 100 ) / 100;
+
+		performance.getEntriesByType( 'resource' ).forEach( ( entry ) => {
+			const url = new URL( entry.name, window.location.href );
+			const normalizedUrl = url.origin + url.pathname;
+
+			if (
+				! url.pathname.includes( WOO_BLOCKS_ASSETS_PATH ) ||
+				! /\.(js|css)$/.test( url.pathname ) ||
+				assetUrls.has( normalizedUrl )
+			) {
+				return;
+			}
+
+			assetUrls.add( normalizedUrl );
+
+			const size = entry.decodedBodySize || 0;
+			metrics.wooEditorAssetSize += size;
+			metrics.wooEditorAssetCount += 1;
+
+			if ( url.pathname.endsWith( '.js' ) ) {
+				metrics.wooEditorScriptSize += size;
+			}
+
+			if ( url.pathname.endsWith( '.css' ) ) {
+				metrics.wooEditorStyleSize += size;
+			}
+		} );
+
+		return {
+			wooEditorAssetSize: roundSize( metrics.wooEditorAssetSize / KB ),
+			wooEditorScriptSize: roundSize( metrics.wooEditorScriptSize / KB ),
+			wooEditorStyleSize: roundSize( metrics.wooEditorStyleSize / KB ),
+			wooEditorAssetCount: metrics.wooEditorAssetCount,
+		};
+	} );
+}
+
 export async function getTotalBlockingTime( page, idleWait ) {
 	const totalBlockingTime = await page.evaluate( async ( waitTime ) => {
 		return new Promise( ( resolve ) => {

@@ -9,7 +9,11 @@ import { test, Metrics } from '@wordpress/e2e-test-utils-playwright';
  * Internal dependencies
  */
 import { PerfUtils } from '../fixtures';
-import { getTotalBlockingTime, median } from '../utils';
+import {
+	getTotalBlockingTime,
+	getWooEditorAssetMetrics,
+	median,
+} from '../utils';
 
 // See https://github.com/WordPress/gutenberg/issues/51383#issuecomment-1613460429
 const BROWSER_IDLE_WAIT = 1000;
@@ -80,6 +84,11 @@ test.describe( 'Editor Performance', () => {
 					BROWSER_IDLE_WAIT
 				);
 
+				// Measure WooCommerce editor asset sizes.
+				const wooEditorAssetMetrics = await getWooEditorAssetMetrics(
+					page
+				);
+
 				// Save the results.
 				if ( i > throwaway ) {
 					results.totalBlockingTime = results.tbt || [];
@@ -102,6 +111,14 @@ test.describe( 'Editor Performance', () => {
 								results[ metricKey ] = [];
 							}
 							results[ metricKey ].push( duration );
+						}
+					);
+					Object.entries( wooEditorAssetMetrics ).forEach(
+						( [ metric, value ] ) => {
+							if ( ! results[ metric ] ) {
+								results[ metric ] = [];
+							}
+							results[ metric ].push( value );
 						}
 					);
 				}

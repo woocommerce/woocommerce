@@ -143,6 +143,22 @@ function median( array ) {
 	return numbers[ middleIndex ];
 }
 
+function getMetricUnit( metric ) {
+	if ( metric.endsWith( 'Size' ) ) {
+		return 'KB';
+	}
+
+	if ( metric.endsWith( 'Count' ) ) {
+		return 'count';
+	}
+
+	return 'ms';
+}
+
+function formatMetricValue( metric, value ) {
+	return `${ value } ${ getMetricUnit( metric ) }`;
+}
+
 module.exports = {
 	askForConfirmation,
 	readJSONFile,
@@ -150,5 +166,6 @@ module.exports = {
 	getFilesFromDir,
 	logAtIndent,
 	sanitizeBranchName,
-	median
+	median,
+	formatMetricValue,
 };
