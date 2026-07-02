@@ -15,7 +15,7 @@
  * - admin-triggered ({@see self::select_manual_cycle()}): force the next cycle regardless of the
  *   due-guard, or retry a failed/stalled head - the admin is deciding, not the schedule.
  *
- * Integration zone, but WordPress-free by construction: `$now` is passed in.
+ * WordPress-free by construction: `$now` is passed in.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal
  */

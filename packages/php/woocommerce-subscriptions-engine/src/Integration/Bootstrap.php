@@ -73,12 +73,4 @@ final class Bootstrap {
 		RenewalDispatcher::ensure_scheduled();
 	}
 
-	/**
-	 * Install or upgrade the engine schema when it is missing or behind.
-	 *
-	 * @deprecated Folded into {@see self::on_init()}; retained for any external caller.
-	 */
-	public static function maybe_install_schema(): void {
-		SchemaInstaller::maybe_install();
-	}
 }

@@ -4,8 +4,8 @@
  * checkout order, and links order <-> contract in both directions. Does not schedule
  * the first renewal - the caller arms that separately via {@see RenewalEngine::schedule()}.
  *
- * Integration zone: WordPress-native. Reads a live `WC_Order`; the order never
- * crosses into Core - only the snapshot values pulled off it do.
+ * Reads a live `WC_Order`; the order never crosses into Core - only the snapshot
+ * values pulled off it do.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout
  */

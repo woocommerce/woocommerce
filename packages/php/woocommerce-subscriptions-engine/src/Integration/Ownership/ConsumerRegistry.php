@@ -3,16 +3,14 @@
  * ConsumerRegistry - the set of extensions consuming engine functionality.
  *
  * A consumer extension registers its slug here on load, identifying itself as an
- * active owner of the primitives it drives. The engine reads the registry to
- * decide whether, and on whose behalf, to act - the batch renewal dispatcher, for
- * one, treats an empty registry as "no consumer present, charge nothing," so the
- * engine stays inert when bundled but unused.
+ * active owner of the primitives it drives. Engine components read the registry to
+ * decide whether, and on whose behalf, to act: an empty registry means "no consumer
+ * present," so the engine stays inert when bundled but unused - the renewal
+ * dispatcher charges nothing, and future components gate the same way.
  *
  * Static (not instance state) because registration is a load-time, by-class-name
  * call - every consumer reaches the registry by class name, mirroring
  * {@see \Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities}.
- *
- * Integration zone: WordPress-native (registered from a consumer's boot).
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership
  */
