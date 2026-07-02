@@ -13,15 +13,13 @@ use WP_User_Query;
 /**
  * Stores and verifies POS PINs.
  *
- * PINs are stored as a self-describing record in per-site user meta (via
- * Users::*_site_user_meta(), aligning with the blog-scoped POS capabilities on multisite)
- * and shipped to the mobile client (via the staff list endpoint) so the client can
- * validate PIN entry locally.
+ * PINs are stored as a self-describing record in per-site user meta (aligning with the
+ * blog-scoped POS capabilities on multisite) and shipped to the mobile client via the
+ * staff list endpoint for local PIN-entry validation.
  *
- * Hash format: PBKDF2-HMAC-SHA-256, 10k iterations, 16-byte random salt, 32-byte hash.
- * This is native on iOS (CommonCrypto / CryptoKit) and Android (SecretKeyFactory with
- * PBKDF2WithHmacSHA256, API 26+). Brute-forcing the 4-digit PIN space against a stolen
- * hash takes ~100 seconds with the chosen cost factor.
+ * Hash format: PBKDF2-HMAC-SHA-256, 10k iterations, 16-byte salt, 32-byte hash — native
+ * on both iOS and Android. Brute-forcing the 4-digit space against a stolen hash takes
+ * ~100 seconds; the PIN identifies the operator at the till and is not a credential.
  *
  * @since 11.0.0
  * @internal
@@ -38,25 +36,17 @@ class POSPinService {
 	/**
 	 * Set or replace a user's POS PIN.
 	 *
-	 * PINs are the sole operator identifier on the POS device (the merchant taps a
-	 * 4-digit code to identify themselves at the till), so a collision between two
-	 * staff members is unresolvable — the device would have no way to tell who is
-	 * keying in 1234. To prevent that, this method PBKDF2-verifies the candidate
-	 * against every other stored PIN record and rejects on first match.
+	 * The PIN is the sole operator identifier at the till, so a collision between two staff
+	 * members is unresolvable on the device; the candidate is PBKDF2-verified against every
+	 * other stored record and rejected on first match. The target must already hold POS
+	 * access: the uniqueness scan only covers POS staff, so a PIN on a non-POS user would
+	 * become a latent collision the moment they later gain access.
 	 *
-	 * The target must already have POS access (hold a `woocommerce_pos_*` capability).
-	 * The uniqueness scan only covers POS staff, so a PIN stored on a non-POS user would
-	 * be invisible to it and become a latent collision the moment that user is later
-	 * granted POS caps — this method rejects that case rather than create the record.
-	 *
-	 * The uniqueness check is best-effort: it is a read-then-write, so two near-simultaneous
-	 * calls for different users could both pass before either writes and end up sharing a PIN.
-	 * A PIN is stored as a per-record salted hash, so it cannot be guarded by a unique DB index
-	 * the way core enforces SKUs ({@see WC_Product_Data_Store_CPT::obtain_lock_on_sku_for_concurrent_requests()}),
-	 * and WordPress offers no portable atomic "reserve value" primitive — mirroring the same
-	 * documented trade-off in {@see \Automattic\WooCommerce\Api\Mutations\Products\CreateProduct}.
-	 * If strict uniqueness is ever required, the caller should enforce it at a higher layer
-	 * (e.g. a mutex around the REST handler) rather than assume this service guarantees it.
+	 * The uniqueness check is best-effort read-then-write: near-simultaneous calls can end
+	 * up sharing a PIN. A per-record salted hash cannot be guarded by a unique DB index, and
+	 * WordPress has no portable atomic "reserve value" primitive — the same documented
+	 * trade-off as {@see \Automattic\WooCommerce\Api\Mutations\Products\CreateProduct}.
+	 * Callers needing strict uniqueness must serialize at a higher layer.
 	 *
 	 * @param int    $user_id The target user ID.
 	 * @param string $pin     The plaintext 4-digit PIN. Must match the PIN_LENGTH constant.
@@ -103,15 +93,10 @@ class POSPinService {
 			'hash'       => base64_encode( $hash ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 		);
 
-		// Store the PIN per-site so it stays aligned with the blog-scoped POS capabilities on
-		// multisite (Users::update_site_user_meta suffixes the blog prefix, so the key still
-		// matches the woocommerce_% uninstall sweep). A user's PIN is only meaningful on sites
-		// where they hold POS access, and the uniqueness scan below is itself blog-scoped, so
-		// PIN storage must share that scope.
-		//
-		// update_user_meta() also returns false for a same-value write, but the fresh random
-		// salt above means the record always differs from what is stored — false here is
-		// unambiguously a failed write, and returning success would leave the old PIN live.
+		// Stored per-site to stay aligned with the blog-scoped POS capabilities on multisite
+		// (the suffixed key still matches the woocommerce_% uninstall sweep). The fresh random
+		// salt means the record always differs from what is stored, so false from
+		// update_user_meta() is unambiguously a failed write, never a same-value no-op.
 		if ( false === Users::update_site_user_meta( $user_id, self::PIN_META_KEY, $record ) ) {
 			return new WP_Error(
 				'woocommerce_pos_pin_save_failed',
@@ -126,17 +111,14 @@ class POSPinService {
 	/**
 	 * Whether the given plaintext PIN collides with one already stored on another POS-access user.
 	 *
-	 * The PIN is the sole operator identifier at the till, so two staff sharing one would be
-	 * unresolvable on the device. set_pin() calls this internally; it is also public for the
-	 * wp-admin add-staff flow, which must check uniqueness *before* the user exists (so it can't go
-	 * through set_pin) — that caller passes 0 to scan every existing record.
+	 * set_pin() calls this internally; it is also public for the wp-admin add-staff flow, which
+	 * checks uniqueness before the user exists — that caller passes 0 to scan every record.
 	 *
-	 * Scoping the scan to POS-access users keeps stale PIN meta on non-POS users from causing
-	 * phantom collisions. `Capabilities::pos_staff_user_query_args()` selects *candidates* (it
-	 * also matches explicitly denied caps), so each row is refined with the resolved-capability
-	 * check `Capabilities::has_pos_access()` before its PIN is compared. Cost is bounded by the
-	 * number of active staff (a handful), one PBKDF2 evaluation per row. The candidate user is
-	 * excluded so an idempotent re-set ("save the same PIN again") is allowed.
+	 * The query selects *candidates* (capability__in also matches explicitly denied caps), so
+	 * each row is refined with the resolved-capability check Capabilities::has_pos_access()
+	 * before its PIN is compared — stale PIN meta on users without actual POS access cannot
+	 * cause phantom collisions. Cost is bounded by the number of active staff, one PBKDF2
+	 * evaluation per row. The candidate user is excluded so an idempotent re-set is allowed.
 	 *
 	 * @param string $pin             Plaintext PIN candidate; a malformed PIN is never "in use".
 	 * @param int    $exclude_user_id User being assigned the PIN; excluded from the scan. Pass 0 at
@@ -163,9 +145,7 @@ class POSPinService {
 		);
 
 		foreach ( $user_query->get_results() as $other_id ) {
-			// The query matches capability *names*, so it also selects users whose POS caps are
-			// explicitly denied (stored as false). Skip anyone without resolved POS access before
-			// spending PBKDF2 cycles, so their stale PIN cannot phantom-block the candidate PIN.
+			// Candidates can include explicitly denied caps (see docblock); skip before hashing.
 			if ( ! Capabilities::has_pos_access( (int) $other_id ) ) {
 				continue;
 			}
@@ -191,11 +171,8 @@ class POSPinService {
 	}
 
 	/**
-	 * Check whether a user has a PIN set.
-	 *
-	 * A record that verify_pin() would reject (wrong algo, out-of-range iterations,
-	 * malformed salt/hash) reads as no PIN, so "has a PIN" always means "has a PIN
-	 * that can actually verify".
+	 * Check whether a user has a PIN set. A record that verify_pin() would reject reads
+	 * as no PIN, so "has a PIN" always means "has a PIN that can actually verify".
 	 *
 	 * @param int $user_id The target user ID.
 	 * @return bool
@@ -208,17 +185,11 @@ class POSPinService {
 	}
 
 	/**
-	 * Return the public PIN record for a user, suitable for embedding in the staff
-	 * list payload sent to mobile clients. Returns null if no PIN is set.
-	 *
-	 * The record contains the algorithm, iteration count, salt, and hash — everything
-	 * needed for the client to validate an entered PIN locally. The plaintext PIN
-	 * never leaves the device that set it.
-	 *
-	 * Only well-formed records are exposed: a record that verify_pin() would reject
-	 * returns null instead of shipping to clients, so a corrupted or hostile meta value
-	 * (e.g. a huge iteration count that would make the client's PBKDF2 hang) never
-	 * reaches a device.
+	 * Return the public PIN record for a user — algorithm, iterations, salt, hash:
+	 * everything a mobile client needs to validate an entered PIN locally (the plaintext
+	 * PIN never leaves the device that set it). Returns null when no PIN is set or the
+	 * stored record is malformed, so a corrupted or hostile meta value (e.g. a huge
+	 * iteration count that would hang the client's PBKDF2) never ships to a device.
 	 *
 	 * @param int $user_id The target user ID.
 	 * @return array{algo:string,iterations:int,salt:string,hash:string}|null
@@ -280,16 +251,12 @@ class POSPinService {
 	/**
 	 * Validate and decode a stored PIN record, or null if it is malformed.
 	 *
-	 * Single source of truth for what a well-formed record is, shared by has_pin(),
-	 * get_public_pin_record(), and verify_pin() so a record is only ever reported,
-	 * exposed to clients, or verified if it matches the format set_pin() writes.
-	 *
-	 * The iteration count drives PBKDF2's cost, and set_pin() only ever writes ITERATIONS —
-	 * anything else was not written by this service and reads as malformed. The exact match
-	 * rejects both a hostile inflation (a huge count would make the uniqueness scan — or a
-	 * mobile client validating locally — hang) and a downgrade below the intended cost.
-	 * If the cost is ever raised, this check must learn to accept the previously shipped
-	 * values so historical records keep verifying.
+	 * Single source of truth for what a well-formed record is — shared by has_pin(),
+	 * get_public_pin_record(), and verify_pin(), so a record is only ever reported,
+	 * exposed, or verified if it matches the format set_pin() writes. That includes the
+	 * exact ITERATIONS count, rejecting both hostile inflation (a huge count would hang
+	 * the uniqueness scan or a client) and a cost downgrade. If the cost is ever raised,
+	 * this check must accept previously shipped values so historical records keep verifying.
 	 *
 	 * @param mixed $record The raw meta value (array with algo, iterations, salt, hash).
 	 * @return array{iterations:int,salt:string,hash:string}|null Decoded binary salt/hash and
@@ -316,9 +283,7 @@ class POSPinService {
 			return null;
 		}
 
-		// A well-formed record always carries a SALT_BYTES salt and a HASH_BYTES hash (the fixed
-		// PBKDF2-SHA256 format set_pin writes). Reject any other size as malformed before anything
-		// spends PBKDF2 cycles on it.
+		// Reject any size other than the fixed SALT_BYTES/HASH_BYTES format before hashing.
 		if ( self::SALT_BYTES !== strlen( $salt ) || self::HASH_BYTES !== strlen( $hash ) ) {
 			return null;
 		}

@@ -110,9 +110,6 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should reject set_pin for a user without POS access.
-	 *
-	 * Uniqueness is scoped to POS-access users, so a PIN stored on a non-POS user would be a
-	 * latent collision once they gain POS caps. set_pin must refuse to create that record.
 	 */
 	public function test_set_pin_rejects_user_without_pos_access(): void {
 		$non_pos_user           = self::factory()->user->create( array( 'role' => 'subscriber' ) );
@@ -203,9 +200,7 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 		$this->sut->set_pin( $this->user_id, '4321' );
 		$record = $this->sut->get_public_pin_record( $this->user_id );
 
-		// set_pin() only ever writes ITERATIONS. A corrupted or hostile count could inflate the
-		// PBKDF2 cost (hanging the scan or a client) or downgrade it below the intended cost —
-		// both must be treated as malformed and rejected before any hashing work is done.
+		// Any count other than ITERATIONS — inflated (DoS) or downgraded — reads as malformed.
 		$record['iterations'] = POSPinService::ITERATIONS + 1;
 		$this->assertFalse( $this->sut->verify_pin( '4321', $record ), 'Inflated iterations must be rejected.' );
 
@@ -237,12 +232,10 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	 * @testdox Should keep verifying the exact record format shipped in v1 (frozen golden record).
 	 */
 	public function test_verify_pin_accepts_frozen_v1_record(): void {
-		// A golden record frozen in the exact wire format this service first shipped:
-		// PBKDF2-SHA256, 10k iterations, 16-byte salt, 32-byte hash, base64 envelope —
-		// deliberately built from literals, NOT the class constants. Records like this
-		// live in merchant databases; if a change to the constants or validation stops
-		// this one from verifying, it breaks every stored PIN the same way. Such a change
-		// must handle historical records explicitly (and update this test deliberately).
+		// A golden record frozen in the exact wire format first shipped, deliberately built
+		// from literals, NOT the class constants. Records like this live in merchant
+		// databases: a change that stops this one verifying breaks every stored PIN the
+		// same way, and must handle historical records explicitly.
 		$record = array(
 			'algo'       => 'pbkdf2-sha256',
 			'iterations' => 10000,
@@ -264,9 +257,6 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should treat a malformed stored record as no PIN: has_pin false, public record null.
 	 * @dataProvider provider_malformed_pin_records
-	 *
-	 * A record verify_pin() would reject must never be reported as a set PIN nor shipped
-	 * to mobile clients (e.g. a hostile iteration count would hang the client's PBKDF2).
 	 *
 	 * @param mixed $record The malformed meta value to plant.
 	 */
@@ -302,9 +292,6 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should return WP_Error from set_pin when the meta write fails.
-	 *
-	 * A silently failed write would leave the previous PIN live while the caller
-	 * believes it changed, so the failure must be propagated.
 	 */
 	public function test_set_pin_returns_error_when_meta_write_fails(): void {
 		add_filter( 'update_user_metadata', '__return_false' );
@@ -340,19 +327,13 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should ignore PINs on users who do not have POS access.
-	 *
-	 * A non-POS user with a stale `woocommerce_pos_pin` meta entry (e.g. left over
-	 * from v1 or a manual edit) must not block a real POS staff member from using
-	 * the same plaintext PIN. Uniqueness is scoped to users with POS access — holders
-	 * of any `woocommerce_pos_*` capability — so non-POS users are invisible to the scan.
 	 */
 	public function test_set_pin_ignores_non_pos_staff_users_with_stale_pin_meta(): void {
 		$non_pos_user           = self::factory()->user->create( array( 'role' => 'subscriber' ) );
 		$this->extra_user_ids[] = $non_pos_user;
 
-		// Plant a *verifiable* stale PIN record (consistent salt/hash) directly, bypassing set_pin's
-		// POS-access check. The record genuinely matches '1234', so this test only passes because the
-		// uniqueness scan is scoped to POS-access users — a non-POS user is invisible to it.
+		// A *verifiable* stale record genuinely matching '1234', planted bypassing set_pin's
+		// POS-access check: it must stay invisible to the POS-scoped uniqueness scan.
 		$this->plant_pin_meta( $non_pos_user, '1234' );
 
 		$this->assertTrue( $this->sut->set_pin( $this->user_id, '1234' ) );
@@ -364,9 +345,7 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	public function test_set_pin_allows_same_user_to_resave_same_pin(): void {
 		$this->assertTrue( $this->sut->set_pin( $this->user_id, '1234' ) );
 
-		// Re-saving the same PIN for the same user must succeed — the user is excluded
-		// from the uniqueness scan so their own existing hash does not falsely collide.
-		$this->assertTrue( $this->sut->set_pin( $this->user_id, '1234' ) );
+		$this->assertTrue( $this->sut->set_pin( $this->user_id, '1234' ), 'The own existing hash must not falsely collide.' );
 	}
 
 	/**
@@ -418,10 +397,8 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox is_pin_used_by_other_user ignores PINs on users whose POS caps are explicitly denied.
 	 *
-	 * WP_User_Query's capability__in matches the capability *name* in the stored map, so a user
-	 * whose caps were explicitly denied (add_cap with false) is still selected as a candidate
-	 * even though has_pos_access() resolves to no access. Their stale PIN must not block the
-	 * candidate PIN as "in use".
+	 * capability__in still selects a user whose caps are denied (add_cap with false), but
+	 * has_pos_access() resolves to no access — their stale PIN must not block the candidate.
 	 */
 	public function test_is_pin_used_by_other_user_ignores_users_with_denied_pos_caps(): void {
 		$denied_id = $this->make_pos_user_with_pin( '1234' );
