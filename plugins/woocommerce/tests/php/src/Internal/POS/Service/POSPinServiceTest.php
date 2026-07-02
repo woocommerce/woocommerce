@@ -197,16 +197,20 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject a record whose iteration count is out of the safe range (DoS guard).
+	 * @testdox Should reject a record whose iteration count is not the canonical PBKDF2 cost.
 	 */
-	public function test_verify_pin_rejects_out_of_range_iterations(): void {
+	public function test_verify_pin_rejects_non_canonical_iterations(): void {
 		$this->sut->set_pin( $this->user_id, '4321' );
 		$record = $this->sut->get_public_pin_record( $this->user_id );
 
-		// A corrupted or hostile record could carry a huge iteration count to make PBKDF2 hang.
-		// It must be treated as malformed and rejected before any hashing work is done.
-		$record['iterations'] = POSPinService::MAX_ITERATIONS + 1;
-		$this->assertFalse( $this->sut->verify_pin( '4321', $record ), 'Over-the-cap iterations must be rejected.' );
+		// set_pin() only ever writes ITERATIONS. A corrupted or hostile count could inflate the
+		// PBKDF2 cost (hanging the scan or a client) or downgrade it below the intended cost —
+		// both must be treated as malformed and rejected before any hashing work is done.
+		$record['iterations'] = POSPinService::ITERATIONS + 1;
+		$this->assertFalse( $this->sut->verify_pin( '4321', $record ), 'Inflated iterations must be rejected.' );
+
+		$record['iterations'] = 1;
+		$this->assertFalse( $this->sut->verify_pin( '4321', $record ), 'Downgraded iterations must be rejected.' );
 
 		$record['iterations'] = 0;
 		$this->assertFalse( $this->sut->verify_pin( '4321', $record ), 'Non-positive iterations must be rejected.' );
@@ -266,12 +270,12 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 		);
 
 		return array(
-			'not an array'        => array( 'garbage' ),
-			'missing salt'        => array( array_diff_key( $valid, array( 'salt' => true ) ) ),
-			'unknown algo'        => array( array_merge( $valid, array( 'algo' => 'md5' ) ) ),
-			'over-cap iterations' => array( array_merge( $valid, array( 'iterations' => POSPinService::MAX_ITERATIONS + 1 ) ) ),
-			'invalid base64 salt' => array( array_merge( $valid, array( 'salt' => '!!!not-base64!!!' ) ) ),
-			'wrong hash length'   => array( array_merge( $valid, array( 'hash' => base64_encode( random_bytes( POSPinService::HASH_BYTES - 1 ) ) ) ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+			'not an array'          => array( 'garbage' ),
+			'missing salt'          => array( array_diff_key( $valid, array( 'salt' => true ) ) ),
+			'unknown algo'          => array( array_merge( $valid, array( 'algo' => 'md5' ) ) ),
+			'downgraded iterations' => array( array_merge( $valid, array( 'iterations' => 1 ) ) ),
+			'invalid base64 salt'   => array( array_merge( $valid, array( 'salt' => '!!!not-base64!!!' ) ) ),
+			'wrong hash length'     => array( array_merge( $valid, array( 'hash' => base64_encode( random_bytes( POSPinService::HASH_BYTES - 1 ) ) ) ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 		);
 	}
 

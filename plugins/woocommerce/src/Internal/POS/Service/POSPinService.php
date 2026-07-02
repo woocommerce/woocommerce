@@ -28,13 +28,12 @@ use WP_User_Query;
  */
 class POSPinService {
 
-	public const PIN_META_KEY   = 'woocommerce_pos_pin';
-	public const ALGO           = 'pbkdf2-sha256';
-	public const ITERATIONS     = 10000;
-	public const MAX_ITERATIONS = 100000;
-	public const SALT_BYTES     = 16;
-	public const HASH_BYTES     = 32;
-	public const PIN_LENGTH     = 4;
+	public const PIN_META_KEY = 'woocommerce_pos_pin';
+	public const ALGO         = 'pbkdf2-sha256';
+	public const ITERATIONS   = 10000;
+	public const SALT_BYTES   = 16;
+	public const HASH_BYTES   = 32;
+	public const PIN_LENGTH   = 4;
 
 	/**
 	 * Set or replace a user's POS PIN.
@@ -273,11 +272,12 @@ class POSPinService {
 	 * get_public_pin_record(), and verify_pin() so a record is only ever reported,
 	 * exposed to clients, or verified if it matches the format set_pin() writes.
 	 *
-	 * The iteration count drives PBKDF2's cost. The record comes from user meta, so a corrupted
-	 * or hostile value (e.g. a billion iterations) would make every uniqueness scan — or a mobile
-	 * client validating locally — hang; bound it and treat anything out of range as malformed.
-	 * MAX_ITERATIONS leaves headroom to raise the cost over time while still verifying
-	 * historical records.
+	 * The iteration count drives PBKDF2's cost, and set_pin() only ever writes ITERATIONS —
+	 * anything else was not written by this service and reads as malformed. The exact match
+	 * rejects both a hostile inflation (a huge count would make the uniqueness scan — or a
+	 * mobile client validating locally — hang) and a downgrade below the intended cost.
+	 * If the cost is ever raised, this check must learn to accept the previously shipped
+	 * values so historical records keep verifying.
 	 *
 	 * @param mixed $record The raw meta value (array with algo, iterations, salt, hash).
 	 * @return array{iterations:int,salt:string,hash:string}|null Decoded binary salt/hash and
@@ -293,7 +293,7 @@ class POSPinService {
 		$salt_b64   = (string) ( $record['salt'] ?? '' );
 		$hash_b64   = (string) ( $record['hash'] ?? '' );
 
-		if ( self::ALGO !== $algo || $iterations <= 0 || $iterations > self::MAX_ITERATIONS || '' === $salt_b64 || '' === $hash_b64 ) {
+		if ( self::ALGO !== $algo || self::ITERATIONS !== $iterations || '' === $salt_b64 || '' === $hash_b64 ) {
 			return null;
 		}
 
