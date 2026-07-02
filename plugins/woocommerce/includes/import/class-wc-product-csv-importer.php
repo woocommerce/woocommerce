@@ -373,7 +373,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		// Remove the ' prepended to fields that start with - if needed.
 		$value = $this->unescape_data( $value );
 
-		return floatval( $value );
+		// Use wc_format_decimal() rather than floatval() so the store's decimal separator
+		// setting is respected (e.g. a comma-separated weight like "1,5"). This mirrors how
+		// price fields are parsed above and how the product setters normalize these values.
+		return (float) wc_format_decimal( $value );
 	}
 
 	/**
