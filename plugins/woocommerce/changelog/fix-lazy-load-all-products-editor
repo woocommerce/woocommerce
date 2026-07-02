@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Lazy-load the All Products block editor UI after merchants choose to edit the legacy block.
