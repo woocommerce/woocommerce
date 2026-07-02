@@ -111,7 +111,7 @@ class POSPinService {
 	/**
 	 * Whether the given plaintext PIN collides with one already stored on another POS-access user.
 	 *
-	 * set_pin() calls this internally; it is also public for the wp-admin add-staff flow, which
+	 * Called internally by set_pin(); also public for the wp-admin add-staff flow, which
 	 * checks uniqueness before the user exists — that caller passes 0 to scan every record.
 	 *
 	 * The query selects *candidates* (capability__in also matches explicitly denied caps), so
