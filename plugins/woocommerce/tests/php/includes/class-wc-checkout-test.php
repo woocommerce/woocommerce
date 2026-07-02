@@ -21,6 +21,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
+		parent::setUp();
 		// phpcs:disable Generic.CodeAnalysis, Squiz.Commenting
 		$this->sut = new class() extends WC_Checkout {
 			public function validate_posted_data( &$data, &$errors ) {
@@ -47,6 +48,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_manage_stock', 'no' );
 		WC()->session->set( 'order_awaiting_payment', null );
 		WC()->cart->empty_cart();
+		parent::tearDown();
 	}
 
 	/**
