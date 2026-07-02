@@ -2,19 +2,13 @@
 /**
  * RenewalDispatcher - the autonomous batch renewal scanner.
  *
- * One recurring Action Scheduler job replaces the superseded one-job-per-contract
- * model: on each tick it scans the cycle-aware due-index for actionable contracts, runs
- * read-only selection ({@see RenewalSelector}) to choose the cycle, and bills it through
- * {@see RenewalEngine::process()}. Before charging anything it consults the processing gate
- * ({@see ConsumerRegistry::is_empty()}) - with no registered consumer the engine is
- * inert and the whole run is skipped.
+ * One recurring Action Scheduler job drives every scheduled renewal: each tick runs
+ * {@see self::run_batch()} over the cycle-aware due-index. The class owns the recurring
+ * action's registration, scheduling, and hook callback.
  *
  * The create-as-claim ({@see RenewalEngine}) plus the cycle crash-recovery lease keep
  * overlap correct, so the scan needs no claim of its own: a contract picked up twice
  * (a slow tick overlapping the next) bills at most once.
- *
- * Integration zone: WordPress-native. Owns the recurring-action registration and the
- * AS hook callback, mirroring {@see RenewalScheduler}'s Action Scheduler conventions.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal
  */

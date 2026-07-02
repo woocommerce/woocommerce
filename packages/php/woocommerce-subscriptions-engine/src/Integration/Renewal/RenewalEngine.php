@@ -19,11 +19,8 @@
  * confirmation) settles the cycle `processing`, which the lease never reclaims and the scan
  * never re-selects.
  *
- * `schedule()` keeps the schedule-time capability gate; the batch dispatcher drives renewals
- * off the due-index, so it no longer enqueues a per-contract Action Scheduler row (the
- * superseded per-contract {@see RenewalScheduler} is drained only).
- *
- * Integration zone: WordPress-native. Action Scheduler, WC orders, gateways.
+ * `schedule()` is the schedule-time capability gate; the batch dispatcher drives renewals
+ * off the due-index, so no per-contract Action Scheduler rows exist.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal
  */
@@ -129,26 +126,13 @@ final class RenewalEngine {
 	}
 
 	/**
-	 * Register the Action Scheduler drain callback and the order-driven completion listeners.
-	 * Must run on every page load so AS can dispatch a stale per-contract row back into
-	 * {@see self::handle_due_action()}, and so a renewal order reaching a terminal state
-	 * completes its cycle through {@see self::handle_order_settled()}.
+	 * Register the order-driven completion listeners. Must run on every page load so a
+	 * renewal order reaching a terminal state completes its cycle through
+	 * {@see self::handle_order_settled()}.
 	 */
 	public static function register_hooks(): void {
-		add_action( RenewalScheduler::HOOK, array( __CLASS__, 'handle_due_action' ), 10, 1 );
 		add_action( 'woocommerce_payment_complete', array( __CLASS__, 'handle_order_settled' ), 10, 1 );
 		add_action( 'woocommerce_order_status_failed', array( __CLASS__, 'handle_order_settled' ), 10, 1 );
-	}
-
-	/**
-	 * Action Scheduler dispatch entry point - fires when a stale per-contract renewal row
-	 * left by the superseded {@see RenewalScheduler} is drained. Routes through the instance
-	 * `process_due()` so dispatch and any synchronous test driver share one code path.
-	 *
-	 * @param int $contract_id Contract whose renewal is firing.
-	 */
-	public static function handle_due_action( int $contract_id ): void {
-		( new self() )->process_due( $contract_id );
 	}
 
 	/**
@@ -170,13 +154,12 @@ final class RenewalEngine {
 	 * Acknowledge `$contract` as eligible for autonomous renewal at its `next_payment_gmt`.
 	 *
 	 * The batch dispatcher ({@see RenewalDispatcher}) scans the contract due-index and
-	 * drives every due renewal, so this no longer enqueues a per-contract Action Scheduler
-	 * row - it keeps only the schedule-time capability gate and clears any stale per-contract
-	 * row left by the superseded {@see RenewalScheduler}. Skips (clearing any stale row) when
-	 * the contract is gateway-scheduled (the gateway runs its own schedule) or has no
-	 * `next_payment_gmt`. The gate refuses a primitive-scheduled contract whose gateway does
-	 * not declare the `recurring` capability via {@see CapabilityRegistry::supports()}, so a
-	 * renewal nothing can charge is rejected at the boundary rather than failing later.
+	 * drives every due renewal, so this enqueues nothing - it is the schedule-time
+	 * capability gate. Skips when the contract is gateway-scheduled (the gateway runs its
+	 * own schedule) or has no `next_payment_gmt`. The gate refuses a primitive-scheduled
+	 * contract whose gateway does not declare the `recurring` capability via
+	 * {@see CapabilityRegistry::supports()}, so a renewal nothing can charge is rejected at
+	 * the boundary rather than failing later.
 	 *
 	 * @param Contract $contract Contract to acknowledge. Must have an id.
 	 * @return bool True when the contract is eligible for dispatcher-driven renewal; false
@@ -188,22 +171,19 @@ final class RenewalEngine {
 			return false;
 		}
 
-		// Gateway-scheduled: the gateway owns the schedule. Clear any stale row and bail.
+		// Gateway-scheduled: the gateway owns the schedule.
 		if ( Contract::SCHEDULE_SOURCE_GATEWAY === $contract->get_schedule_source() ) {
-			RenewalScheduler::unschedule( $id );
 			return false;
 		}
 
 		$next_payment_gmt = $contract->get_next_payment_gmt();
 		if ( null === $next_payment_gmt ) {
-			RenewalScheduler::unschedule( $id );
 			return false;
 		}
 
 		// Schedule-time capability gate.
 		$gateway_id = $contract->get_payment_instrument()->get_gateway();
 		if ( null === $gateway_id || '' === $gateway_id || ! CapabilityRegistry::supports( (string) $gateway_id, GatewayCapabilities::RECURRING ) ) {
-			RenewalScheduler::unschedule( $id );
 			wc_get_logger()->warning(
 				sprintf(
 					'RenewalEngine::schedule(): not scheduling contract %d - gateway "%s" does not declare the "recurring" capability. Declare it via CapabilityRegistry, or set the contract to gateway-scheduled if the gateway runs its own renewals.',
@@ -219,11 +199,6 @@ final class RenewalEngine {
 			return false;
 		}
 
-		// The dispatcher drives renewals off the due-index, not a per-contract AS row.
-		// Clear any stale row from the superseded per-contract scheduler so a leftover
-		// does not double-fire alongside the dispatcher.
-		RenewalScheduler::unschedule( $id );
-
 		$when = new DateTimeImmutable( $next_payment_gmt, new DateTimeZone( 'UTC' ) );
 
 		do_action( self::RENEWAL_SCHEDULED_ACTION, $contract, $when );
@@ -233,8 +208,8 @@ final class RenewalEngine {
 
 	/**
 	 * Select and process the renewal due for a single contract at `$now` - the convenience
-	 * entry the AS drain path, the {@see \Automattic\WooCommerce\SubscriptionsEngine\Api\Subscriptions}
-	 * facade, and direct test drivers use. The batch dispatcher does not call this: it selects
+	 * entry the {@see \Automattic\WooCommerce\SubscriptionsEngine\Api\Subscriptions} facade
+	 * and direct test drivers use. The batch dispatcher does not call this: it selects
 	 * from the cycle-aware scan and calls {@see self::process()} directly, so it never re-loads
 	 * a head the scan already carried.
 	 *

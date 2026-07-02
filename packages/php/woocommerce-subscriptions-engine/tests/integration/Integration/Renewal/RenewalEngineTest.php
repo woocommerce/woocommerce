@@ -1,6 +1,6 @@
 <?php
 /**
- * Integration tests for RenewalEngine (and RenewalScheduler).
+ * Integration tests for RenewalEngine.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine
  */
@@ -24,14 +24,12 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalIntent;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalScheduler;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanGroupRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine
- * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalScheduler
  */
 class RenewalEngineTest extends EngineIntegrationTestCase {
 
@@ -165,10 +163,10 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox schedule no longer enqueues a per-contract AS row (the dispatcher drives renewals).
+	 * @testdox schedule enqueues no per-contract AS row (the dispatcher drives renewals).
 	 *
 	 * The batch dispatcher scans the contract due-index, so schedule() acknowledges
-	 * eligibility (and keeps the capability gate) without enqueuing a per-contract Action
+	 * eligibility (the capability gate) without enqueuing a per-contract Action
 	 * Scheduler row. Repeated calls still enqueue nothing.
 	 */
 	public function test_schedule_does_not_enqueue_a_per_contract_row(): void {
@@ -184,12 +182,9 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$this->assertTrue( $engine->schedule( $contract ) );
 		$this->assertTrue( $engine->schedule( $contract ) );
 
-		// No per-contract row is enqueued by the superseded scheduler.
-		$this->assertFalse( RenewalScheduler::is_scheduled( $contract_id ) );
-
+		// No pending Action Scheduler action carries this contract as its argument.
 		$pending = as_get_scheduled_actions(
 			array(
-				'hook'   => RenewalScheduler::HOOK,
 				'args'   => array( $contract_id ),
 				'status' => \ActionScheduler_Store::STATUS_PENDING,
 			),
@@ -858,13 +853,12 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox cancel transitions the contract to cancelled and clears any stale pending row.
+	 * @testdox cancel transitions the contract to cancelled.
 	 *
-	 * schedule() no longer enqueues a per-contract row, but a stale row may linger from
-	 * before the dispatcher superseded the per-contract scheduler. cancel() must still clear
-	 * it, so seed one directly and assert it is gone afterwards.
+	 * The due scan only selects active contracts, so cancellation needs no schedule
+	 * cleanup - the status transition alone removes the contract from renewal.
 	 */
-	public function test_cancel_transitions_and_unschedules(): void {
+	public function test_cancel_transitions_the_contract(): void {
 		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
 
 		$plan_id     = $this->make_plan();
@@ -873,16 +867,11 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
-		// Seed a stale per-contract row (as the superseded scheduler would have left).
-		RenewalScheduler::schedule( $contract_id, new \DateTimeImmutable( '2026-02-15 00:00:00', new \DateTimeZone( 'UTC' ) ) );
-		$this->assertTrue( RenewalScheduler::is_scheduled( $contract_id ) );
-
 		$this->assertTrue( ( new Cancellation() )->cancel( $contract ) );
 
 		$reloaded = ( new ContractRepository() )->find( $contract_id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertSame( ContractStatus::CANCELLED, $reloaded->get_status() );
-		$this->assertFalse( RenewalScheduler::is_scheduled( $contract_id ) );
 	}
 
 	/**
@@ -959,10 +948,9 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 				'schedule_source'  => Contract::SCHEDULE_SOURCE_GATEWAY,
 			)
 		);
-		$contract_id = ( new ContractRepository() )->insert( $contract );
+		( new ContractRepository() )->insert( $contract );
 
 		$this->assertFalse( ( new RenewalEngine() )->schedule( $contract ) );
-		$this->assertFalse( RenewalScheduler::is_scheduled( $contract_id ) );
 	}
 
 	/**
