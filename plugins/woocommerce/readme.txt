@@ -170,6 +170,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.9.2 2026-XX-XX =
+= 10.9.2 2026-07-02 =
+
+**WooCommerce**
+
+* Fix - Prevent update-time fatal errors by guarding new settings SDK classes and preserving the removed legacy settings API controller as a no-op compatibility stub. [#66081](https://github.com/woocommerce/woocommerce/pull/66081)
+* Update - Enable push notifications by default and deprecate feature flag. [#66088](https://github.com/woocommerce/woocommerce/pull/66088)
+
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
