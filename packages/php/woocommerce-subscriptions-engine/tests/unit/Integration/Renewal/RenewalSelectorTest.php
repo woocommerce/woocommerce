@@ -86,4 +86,32 @@ class RenewalSelectorTest extends TestCase {
 	public function test_skips_a_countless_head(): void {
 		$this->assertNull( $this->selector->select_billing_cycle( new DueRenewal( 42, null, CycleStatus::BILLED, '2026-02-01 00:00:00' ), $this->now ) );
 	}
+
+	public function test_manual_forces_the_next_cycle_regardless_of_the_due_date(): void {
+		// A billed head whose period runs into the future would be skipped by the scheduled path,
+		// but the admin path forces the next cycle anyway (no due-guard).
+		$this->assertSame( 2, $this->selector->select_manual_cycle( $this->due( 1, CycleStatus::BILLED, '2026-04-01 00:00:00' ) ) );
+	}
+
+	public function test_manual_forces_the_next_cycle_past_a_cancelled_head(): void {
+		$this->assertSame( 6, $this->selector->select_manual_cycle( $this->due( 5, CycleStatus::CANCELLED, '2026-04-01 00:00:00' ) ) );
+	}
+
+	public function test_manual_retries_a_failed_head(): void {
+		// The scheduled path skips a failed head (awaits dunning); the admin path retries it.
+		$this->assertSame( 2, $this->selector->select_manual_cycle( $this->due( 2, CycleStatus::FAILED, '2026-02-01 00:00:00' ) ) );
+	}
+
+	public function test_manual_retries_a_pending_head(): void {
+		$this->assertSame( 7, $this->selector->select_manual_cycle( $this->due( 7, CycleStatus::PENDING, '2026-02-01 00:00:00' ) ) );
+	}
+
+	public function test_manual_skips_a_processing_head(): void {
+		// A manual trigger cannot preempt an in-flight async charge.
+		$this->assertNull( $this->selector->select_manual_cycle( $this->due( 2, CycleStatus::PROCESSING, '2026-02-01 00:00:00' ) ) );
+	}
+
+	public function test_manual_skips_a_countless_head(): void {
+		$this->assertNull( $this->selector->select_manual_cycle( new DueRenewal( 42, null, CycleStatus::BILLED, '2026-02-01 00:00:00' ) ) );
+	}
 }

@@ -55,10 +55,11 @@ class CycleStatusTest extends TestCase {
 		$this->assertFalse( CycleStatus::is_terminal( CycleStatus::PROCESSING ) );
 	}
 
-	public function test_failed_can_only_be_cancelled(): void {
-		// Retry support (failed -> pending re-queue) is deferred; for now a failed cycle can only be cancelled.
+	public function test_failed_can_be_retried_to_pending_or_cancelled(): void {
+		// A failed cycle can be retried (re-queued to pending by an admin trigger) or cancelled,
+		// but not settled directly to billed without re-attempting the charge.
+		$this->assertTrue( CycleStatus::is_transition_allowed( CycleStatus::FAILED, CycleStatus::PENDING ) );
 		$this->assertTrue( CycleStatus::is_transition_allowed( CycleStatus::FAILED, CycleStatus::CANCELLED ) );
-		$this->assertFalse( CycleStatus::is_transition_allowed( CycleStatus::FAILED, CycleStatus::PENDING ) );
 		$this->assertFalse( CycleStatus::is_transition_allowed( CycleStatus::FAILED, CycleStatus::BILLED ) );
 	}
 

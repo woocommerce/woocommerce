@@ -1116,6 +1116,117 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox renew_now forces the next cycle before its scheduled due date, keeping the schedule.
+	 *
+	 * The scheduled path would defer (the head's period has not ended), but an admin renewal
+	 * bypasses the due-guard. The forced cycle continues from the previous period's end, so the
+	 * schedule is preserved (a prepay), not reset to the moment of the manual renewal.
+	 */
+	public function test_renew_now_forces_the_next_cycle_before_its_due_date(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		// A moment well before cycle 1's period end (2026-02-15): not yet due on the schedule.
+		$now = new \DateTimeImmutable( '2026-02-01 00:00:00', new \DateTimeZone( 'UTC' ) );
+
+		$renewal_order = ( new RenewalEngine() )->renew_now( $contract_id, $now );
+
+		$this->assertInstanceOf( WC_Order::class, $renewal_order );
+		$this->assertTrue( $renewal_order->is_paid() );
+
+		$repo  = new ContractRepository();
+		$cycle = $repo->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $cycle );
+		$this->assertSame( 2, $cycle->get_count() );
+		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
+
+		// Schedule preserved: cycle 2 runs from cycle 1's end (2026-02-15), so next payment is one
+		// cadence on from that (2026-03-15) - not one cadence from the manual-renewal moment.
+		$reloaded = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertSame( '2026-03-15 00:00:00', $reloaded->get_next_payment_gmt() );
+	}
+
+	/**
+	 * @testdox renew_now retries a failed head in place and bills it on success.
+	 *
+	 * A failed renewal (the gateway declined) is not re-selected by the scheduled path, but an
+	 * admin retry re-attempts the SAME cycle: it flips failed -> pending, reuses the failed order,
+	 * and settles billed once the charge succeeds - without advancing to a new cycle.
+	 */
+	public function test_renew_now_retries_a_failed_head_in_place(): void {
+		$this->fail_charges_for( self::GATEWAY_DECLINING );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_DECLINING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$engine = new RenewalEngine();
+
+		// Scheduled run advances to cycle 2, which the gateway declines: a failed head.
+		$engine->process_due( $contract_id );
+
+		$repo   = new ContractRepository();
+		$failed = $repo->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $failed );
+		$this->assertSame( 2, $failed->get_count() );
+		$this->assertTrue( $failed->get_status()->equals( CycleStatus::failed() ) );
+
+		// The customer fixes their payment method; the same gateway now approves the retry.
+		remove_all_actions( 'woocommerce_subscriptions_engine_scheduled_payment_' . self::GATEWAY_DECLINING );
+		add_action(
+			'woocommerce_subscriptions_engine_scheduled_payment_' . self::GATEWAY_DECLINING,
+			static function ( $amount, $renewal_order ): void {
+				unset( $amount );
+				if ( $renewal_order instanceof WC_Order && $renewal_order->needs_payment() ) {
+					$renewal_order->payment_complete();
+				}
+			},
+			10,
+			2
+		);
+
+		$retry = $engine->renew_now( $contract_id );
+
+		$this->assertInstanceOf( WC_Order::class, $retry );
+		$this->assertTrue( $retry->is_paid() );
+
+		// The SAME cycle 2 is now billed - retried in place, not advanced to a cycle 3.
+		$head = $repo->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertSame( 2, $head->get_count() );
+		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+
+		// The failed order was reused, not duplicated.
+		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+	}
+
+	/**
+	 * @testdox renew_now returns null for a contract with no billing chain, and does not park it.
+	 *
+	 * Unlike the scheduled path, a manual renewal never clears the schedule when it cannot proceed.
+	 */
+	public function test_renew_now_returns_null_for_a_chainless_contract_without_parking(): void {
+		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
+
+		$plan_id     = $this->make_plan();
+		$order       = $this->make_origin_order();
+		$contract    = $this->make_contract( $plan_id, $order->get_id() );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$this->assertNull( ( new RenewalEngine() )->renew_now( $contract_id ) );
+
+		// The schedule is untouched (not parked): next_payment remains as set.
+		$reloaded = ( new ContractRepository() )->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertSame( '2026-02-15 00:00:00', $reloaded->get_next_payment_gmt() );
+	}
+
+	/**
 	 * Append a pending cycle 2 (no tagged renewal order) with the given crash-recovery
 	 * lease, so the create-as-claim collides on it and the reclaim-vs-skip path is exercised.
 	 *

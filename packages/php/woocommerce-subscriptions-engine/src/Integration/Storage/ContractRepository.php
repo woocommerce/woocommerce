@@ -448,6 +448,26 @@ final class ContractRepository {
 	}
 
 	/**
+	 * Re-claim a failed cycle for an admin-triggered retry, as an atomic compare-and-set:
+	 * flip it back to `pending` and stamp a fresh lease only while it is still `failed`.
+	 * Returns true when this caller won (exactly one row matched), false when it was already
+	 * re-claimed or has since moved on.
+	 *
+	 * @param int    $cycle_id            The cycle to re-claim.
+	 * @param string $new_lease_until_gmt The crash-recovery lease to stamp (GMT string).
+	 */
+	public function reclaim_failed_cycle( int $cycle_id, string $new_lease_until_gmt ): bool {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s, claimed_until = %s, date_updated_gmt = %s WHERE id = %d AND status = %s", CycleStatus::PENDING, $new_lease_until_gmt, gmdate( 'Y-m-d H:i:s' ), $cycle_id, CycleStatus::FAILED ) );
+
+		return false !== $result && 1 === $wpdb->rows_affected;
+	}
+
+	/**
 	 * The chain's most-recent cycle (highest `sequence_no` in `(contract_id, kind)`),
 	 * or null when the chain is empty. Snapshots are decoded into typed value objects
 	 * only for an in-flight cycle (see {@see self::hydrate_cycle()}).

@@ -284,6 +284,52 @@ final class RenewalEngine {
 	}
 
 	/**
+	 * Renew a contract now at an admin's request, regardless of the schedule. Selection is by head
+	 * state without the scheduled due-guard ({@see RenewalSelector::select_manual_cycle()}): a
+	 * settled head is force-advanced to the next cycle (whose period continues from the previous
+	 * end, so the schedule is preserved, not reset), while a failed or stalled head is re-attempted
+	 * at its own count. Unlike `process_due()` it never parks the contract - a manual action should
+	 * not clear the schedule when it cannot proceed.
+	 *
+	 * @param int                    $contract_id The contract to renew.
+	 * @param DateTimeImmutable|null $now         The processing moment; defaults to now (UTC).
+	 * @return WC_Order|null The renewal order, or null when the contract is not currently renewable.
+	 */
+	public function renew_now( int $contract_id, ?DateTimeImmutable $now = null ): ?WC_Order {
+		$now = $now ?? new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
+
+		$head = $this->contracts->find_current_cycle( $contract_id );
+		if ( null === $head ) {
+			wc_get_logger()->warning(
+				sprintf( 'RenewalEngine::renew_now(): contract %d has no billing chain to renew.', $contract_id ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => $contract_id,
+				)
+			);
+			return null;
+		}
+
+		$cycle_count = $this->selector->select_manual_cycle( DueRenewal::from_head( $contract_id, $head ) );
+		if ( null === $cycle_count ) {
+			return null;
+		}
+
+		try {
+			return $this->process( new RenewalIntent( $contract_id, $cycle_count ), $now );
+		} catch ( RenewalNotProcessable $e ) {
+			wc_get_logger()->warning(
+				sprintf( 'RenewalEngine::renew_now(): cannot renew contract %d. %s', $contract_id, $e->getMessage() ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => $contract_id,
+				)
+			);
+			return null;
+		}
+	}
+
+	/**
 	 * Bill the cycle named by `$intent` - the trigger-agnostic processing primitive.
 	 *
 	 * It owns no "which cycle" or "is it due" policy: selection (scheduled, admin, or early
@@ -494,21 +540,24 @@ final class RenewalEngine {
 	}
 
 	/**
-	 * Reclaim the chain head at `$count` when it is a crashed in-flight charge, or skip.
+	 * Reclaim the chain head at `$count` for a re-attempt, or skip. Re-reads the head; two heads
+	 * are reclaimable, each via an atomic compare-and-set so that among concurrent workers only
+	 * the one whose UPDATE matches the row wins (the rest match zero rows and skip, so the cycle
+	 * is charged at most once):
 	 *
-	 * Re-reads the head. When it is a `pending` cycle at `$count` whose `claimed_until` lease
-	 * has expired - a charge that claimed but never settled - it is reclaimed through
-	 * {@see ContractRepository::reclaim_expired_cycle()}, an atomic compare-and-set on
-	 * `claimed_until <= now`. That CAS is the concurrency guard: among workers that all read the
-	 * same expired cycle, only the one whose UPDATE matches the row wins (extending the lease);
-	 * the rest match zero rows and skip, so the cycle is charged exactly once. A still-leased
-	 * pending cycle (a live claim) or a settled cycle is a no-op (null). A `processing` head is
-	 * never pending, so it is never reclaimed here - its async outcome resolves it instead.
+	 * - a `pending` cycle whose `claimed_until` lease has expired - a charge that claimed but
+	 *   never settled (crash recovery), via {@see ContractRepository::reclaim_expired_cycle()};
+	 * - a `failed` cycle - an admin-triggered retry that flips it back to `pending`, via
+	 *   {@see ContractRepository::reclaim_failed_cycle()}. Scheduled selection never routes a
+	 *   failed head here; only a manual trigger does.
+	 *
+	 * A still-leased pending cycle (a live claim), a settled cycle, or a `processing` head
+	 * (awaiting its gateway) is a no-op (null).
 	 *
 	 * @param int               $contract_id The contract being renewed.
 	 * @param int               $count       The chargeable number to reclaim.
 	 * @param DateTimeImmutable $now         The processing moment (the lease clock).
-	 * @return Cycle|null The reclaimed pending cycle (this caller won the CAS), or null to skip.
+	 * @return Cycle|null The reclaimed cycle (this caller won the CAS), or null to skip.
 	 */
 	private function reclaim_head( int $contract_id, int $count, DateTimeImmutable $now ): ?Cycle {
 		$head = $this->contracts->find_current_cycle( $contract_id );
@@ -543,6 +592,25 @@ final class RenewalEngine {
 					'contract_id' => $contract_id,
 				)
 			);
+
+			return null;
+		}
+
+		// Admin retry: flip a failed head back to pending and re-attempt its charge. Scheduled
+		// selection never routes a failed head here; only a manual trigger does.
+		if ( null !== $head && $count === $head->get_count() && $head->get_status()->equals( CycleStatus::failed() ) ) {
+			// Race-safe: only the caller whose CAS UPDATE matches the still-failed row wins.
+			if ( $this->contracts->reclaim_failed_cycle( (int) $head->get_id(), $this->lease_until( $now ) ) ) {
+				wc_get_logger()->info(
+					sprintf( 'RenewalEngine::process(): retrying failed cycle %d for contract %d - re-attempting.', $count, $contract_id ),
+					array(
+						'source'      => self::LOG_SOURCE,
+						'contract_id' => $contract_id,
+					)
+				);
+
+				return $head;
+			}
 
 			return null;
 		}

@@ -5,13 +5,15 @@
  * gateway; it turns a {@see DueRenewal} scan row into the cycle number to bill, or null to
  * skip. The caller builds the {@see RenewalIntent} the money-path executes.
  *
- * This encodes the scheduled-renewal policy: advance to the next cycle once the current
- * period has ended (the due-guard), or retry a still-in-flight head. The guard anchors on
- * the head cycle's `ends_at_gmt` - immutable once the cycle is settled - so it is race-free:
- * an overlapping run that reads a just-billed head sees its end still in the future and does
- * not charge the next cycle ahead of time. It is the scheduled path's due policy: `process()`
- * bills whatever cycle it is handed, so a future trigger (admin retry, customer early renewal)
- * chooses its own cycle over the same processing path without inheriting this guard.
+ * It encodes two selection policies over the same `process()` primitive (which bills whatever
+ * cycle it is handed and owns no due policy):
+ *
+ * - scheduled ({@see self::select_billing_cycle()}): advance to the next cycle once the current
+ *   period has ended (the due-guard), or retry a still-in-flight head. The guard anchors on the
+ *   head's `ends_at_gmt` - immutable once settled - so it is race-free: an overlapping run that
+ *   reads a just-billed head sees its end still in the future and does not charge ahead.
+ * - admin-triggered ({@see self::select_manual_cycle()}): force the next cycle regardless of the
+ *   due-guard, or retry a failed/stalled head - the admin is deciding, not the schedule.
  *
  * Integration zone, but WordPress-free by construction: `$now` is passed in.
  *
@@ -29,7 +31,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DueRenewal;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The scheduled-renewal cycle selector.
+ * The renewal cycle selector - scheduled and admin-triggered policies.
  */
 final class RenewalSelector {
 
@@ -67,6 +69,39 @@ final class RenewalSelector {
 
 		// failed (awaits dunning) / processing (awaits its gateway): not selectable here. The
 		// scan already excludes them; this is a defensive skip.
+		return null;
+	}
+
+	/**
+	 * Resolve the cycle number for an admin-triggered renewal, or null to skip. Unlike the
+	 * scheduled path this applies no due-guard - the admin is forcing the renewal - so a settled
+	 * head advances to the next cycle even before its period ends, while a failed or still-pending
+	 * head is re-attempted at its own count. A `processing` head (awaiting its gateway) or a
+	 * countless head is not manually renewable.
+	 *
+	 * @param DueRenewal $due The contract + head fields.
+	 * @return int|null The cycle count to bill, or null when nothing is renewable.
+	 */
+	public function select_manual_cycle( DueRenewal $due ): ?int {
+		$count = $due->get_head_count();
+		if ( null === $count ) {
+			return null;
+		}
+
+		$status = $due->get_head_status();
+
+		// Settled forward: force the next cycle. Its period continues from the previous end, so
+		// the schedule is preserved (a prepay), not reset to now.
+		if ( CycleStatus::BILLED === $status || CycleStatus::CANCELLED === $status ) {
+			return $count + 1;
+		}
+
+		// Failed (retry) or still in flight (reclaim a stalled one): re-attempt the same cycle.
+		if ( CycleStatus::FAILED === $status || CycleStatus::PENDING === $status ) {
+			return $count;
+		}
+
+		// processing: awaiting its gateway - a manual trigger cannot preempt an in-flight charge.
 		return null;
 	}
 
