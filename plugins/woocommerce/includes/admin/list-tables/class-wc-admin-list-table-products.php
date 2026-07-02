@@ -435,6 +435,9 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				array(
 					'option_select_text' => __( 'Filter by category', 'woocommerce' ),
 					'hide_empty'         => 0,
+					// Performance note: pad_counts=0 and show_count=0 disables counters, which cause performance issues with large product catalogs.
+					'pad_counts'         => 0,
+					'show_count'         => 0,
 				)
 			);
 		} else {
