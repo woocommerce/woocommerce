@@ -290,6 +290,15 @@ This event emitter will execute through each registered observer (passing in not
 
 When a payment method returns a non-truthy value, if it returns a valid response type the event emitter will update various internal statuses according to the response. Here's the possible response types that will get handled by the emitter:
 
+##### Choosing between `fail` and `error`
+
+Both `fail` and `error` responses stop the checkout flow, display any provided notices, and set the internal payment status so that checkout `hasError` becomes true. The difference is in intent and in the extra data each one can carry:
+
+-   Return **`error`** when the problem is with the shopper's input on the checkout form (for example an invalid card number, a failed CVV check, or a missing billing field). An `error` response can attach `validationErrors` to point the shopper at the specific fields to fix.
+-   Return **`fail`** when the problem is on the payment processing side and not something the shopper can correct by editing a field (for example a declined charge, a processor outage, or a network error). A `fail` response can attach `billingAddress` and `paymentMethodData`, so it's suited to failures reported back from the payment processor.
+
+If in doubt, prefer `error` for anything the shopper can resolve by changing what they entered.
+
 #### Success
 
 A successful response should be given when the user's entered data is correct and the payment checks are successful. A response is considered successful if, at a minimum, it is an object with this shape:
