@@ -55,6 +55,11 @@ final class ContractRepository {
 	);
 
 	/**
+	 * Logger source tag.
+	 */
+	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
+
+	/**
 	 * The per-contract typed snapshot store.
 	 *
 	 * @var SnapshotStore
@@ -314,6 +319,15 @@ final class ContractRepository {
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
+		// A failed scan otherwise reads exactly like "nothing due" and renewals stall
+		// store-wide with no signal; the return stays empty either way.
+		if ( '' !== $wpdb->last_error ) {
+			wc_get_logger()->error(
+				sprintf( 'ContractRepository::find_due(): due-index scan failed - renewals may stall until this is fixed. %s', $wpdb->last_error ),
+				array( 'source' => self::LOG_SOURCE )
+			);
+		}
+
 		$result = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( ! is_array( $row ) ) {
@@ -385,8 +399,10 @@ final class ContractRepository {
 	 * @param Cycle      $cycle    Cycle to append. Carries its contract id and kind.
 	 * @param Cycle|null $previous The chain's previous cycle, when copy-forward of its
 	 *                             snapshot ids should be considered; null for the first cycle.
-	 * @throws \RuntimeException If a snapshot or cycle write fails (e.g. a duplicate
-	 *                          (contract_id, kind, sequence_no) the UNIQUE index rejects).
+	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row (the
+	 *                                 position is already claimed - the create-as-claim race).
+	 * @throws \RuntimeException If a snapshot write or the cycle insert fails for any
+	 *                          other reason (the database error is in the message).
 	 */
 	public function append_cycle( Cycle $cycle, ?Cycle $previous = null ): void {
 		$this->resolve_cycle_snapshots( $cycle, $previous );
@@ -704,7 +720,8 @@ final class ContractRepository {
 	 * Insert a cycle row and stamp the generated id back onto the entity.
 	 *
 	 * @param Cycle $cycle Cycle to insert. Carries its contract id and kind.
-	 * @throws \RuntimeException If the cycle insert fails.
+	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row.
+	 * @throws \RuntimeException If the insert fails for any other reason.
 	 */
 	private function insert_cycle( Cycle $cycle ): void {
 		global $wpdb;
@@ -724,7 +741,12 @@ final class ContractRepository {
 		);
 
 		if ( false === $inserted ) {
-			throw new \RuntimeException( 'Failed to insert cycle.' );
+			$db_error = $wpdb->last_error;
+			if ( false !== stripos( $db_error, 'Duplicate entry' ) ) {
+				// A chain UNIQUE index rejected the row: the position is already claimed.
+				throw new DuplicateCycleException( esc_html( 'Cycle position already exists: ' . $db_error ) );
+			}
+			throw new \RuntimeException( esc_html( 'Failed to insert cycle. ' . $db_error ) );
 		}
 
 		$cycle->set_id( (int) $wpdb->insert_id );

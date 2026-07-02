@@ -48,6 +48,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway\CapabilityRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DuplicateCycleException;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\RenewalCandidate;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
@@ -128,6 +129,14 @@ final class RenewalEngine {
 	public function register_hooks(): void {
 		add_action( 'woocommerce_payment_complete', array( $this, 'handle_order_settled' ), 10, 1 );
 		add_action( 'woocommerce_order_status_failed', array( $this, 'handle_order_settled' ), 10, 1 );
+
+		// payment_complete() never fires for a renewal settled by hand - an admin marking a
+		// cash-on-delivery-style order processing/completed. Listen to the paid-status
+		// transitions too; the CAS settle keeps the double-fire (payment_complete plus its
+		// own status transition) idempotent.
+		foreach ( wc_get_is_paid_statuses() as $paid_status ) {
+			add_action( 'woocommerce_order_status_' . $paid_status, array( $this, 'handle_order_settled' ), 10, 1 );
+		}
 	}
 
 	/**
@@ -395,8 +404,10 @@ final class RenewalEngine {
 	 * new `pending` cycle one period past the head, stamp a crash-recovery lease, and insert it.
 	 * Returns ONLY a freshly appended cycle - on a UNIQUE(contract_id, kind, count) collision
 	 * (another worker already appended this number) it returns null and the caller routes
-	 * through {@see self::reclaim_head()}. Keeping the fresh/reclaimed distinction at the caller
-	 * lets it skip order lookups a brand-new cycle cannot need.
+	 * through {@see self::reclaim_head()}. Any other write failure is logged as an error (never
+	 * mistaken for the benign collision) and also returns null, so the contract is retried on a
+	 * later tick. Keeping the fresh/reclaimed distinction at the caller lets it skip order
+	 * lookups a brand-new cycle cannot need.
 	 *
 	 * @param Contract          $contract    The contract being renewed.
 	 * @param Cycle             $head        The chain's head cycle (the new cycle's predecessor).
@@ -429,9 +440,20 @@ final class RenewalEngine {
 
 		try {
 			$this->contracts->append_cycle( $new_cycle, $head );
+		} catch ( DuplicateCycleException $e ) {
+			// The UNIQUE(contract_id, kind, count) index rejected the row: another worker
+			// already appended this number. Null routes the caller to the reclaim path.
+			return null;
 		} catch ( Throwable $e ) {
-			// A duplicate (contract_id, kind, count) is rejected by the UNIQUE index: another
-			// worker already appended this number. Null routes the caller to the reclaim path.
+			// A real write failure, not the benign collision - surface it instead of
+			// mistaking it for a claim race. The contract is retried on a later scan tick.
+			wc_get_logger()->error(
+				sprintf( 'RenewalEngine::claim_advance(): cannot claim cycle %d for contract %d - will retry on a later scan. %s', $cycle_count, (int) $contract->get_id(), $e->getMessage() ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => (int) $contract->get_id(),
+				)
+			);
 			return null;
 		}
 

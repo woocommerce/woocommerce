@@ -17,6 +17,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DuplicateCycleException;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\RenewalCandidate;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
@@ -1062,6 +1063,20 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		);
 
 		$this->assertFalse( $inserted, 'A duplicate (contract_id, kind, count) must be rejected by the UNIQUE index.' );
+	}
+
+	/**
+	 * @testdox append_cycle surfaces a UNIQUE collision as DuplicateCycleException.
+	 *
+	 * The create-as-claim race signal must be distinguishable from any other write failure,
+	 * so the money-path can treat the collision as benign without masking real errors.
+	 */
+	public function test_append_cycle_throws_duplicate_cycle_exception_on_collision(): void {
+		$id = $this->sut->insert( $this->make_contract() );
+		$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
+
+		$this->expectException( DuplicateCycleException::class );
+		$this->sut->append_cycle( $this->make_cycle( $id, 2, 1, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ) );
 	}
 
 	/**
