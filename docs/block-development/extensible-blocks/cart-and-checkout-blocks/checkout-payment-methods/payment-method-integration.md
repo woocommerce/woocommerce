@@ -12,7 +12,7 @@ The client side integration consists of an API for registering both _regular_ an
 
 In both cases, the client side integration is done using registration methods exposed on the `blocks-registry` API. You can access this via the `wc` global in a WooCommerce environment (`wc.wcBlocksRegistry`).
 
-> Note: In your build process, you could do something similar to what is done in the blocks repository which [aliases this API as an external on `@woocommerce/blocks-registry`](https://github.com/woocommerce/woocommerce/blob/e024b720ddeb617fe889b9772959db6eca9e8c70/plugins/woocommerce/client/blocks/bin/webpack-helpers.js#L14-L33).
+> Note: The `@woocommerce/blocks-registry` import examples in this document require a build process that maps WooCommerce packages to their registered script handles. Do not install `@woocommerce/blocks-registry` from npm. Use the [`@woocommerce/dependency-extraction-webpack-plugin`](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin) in your webpack configuration to externalize bundled WooCommerce packages such as `@woocommerce/blocks-registry` to the `wc-blocks-registry` script.
 
 ## Express Payment Methods
 

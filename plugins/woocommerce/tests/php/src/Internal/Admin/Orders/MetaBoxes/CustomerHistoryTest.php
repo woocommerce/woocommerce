@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders\MetaBoxes;
 
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Admin\Overrides\Order as AdminOrder;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use WC_Helper_Order;
@@ -537,6 +538,47 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$output = ob_get_clean();
 
 		remove_filter( 'woocommerce_order_class', array( \Automattic\WooCommerce\Admin\Overrides\Order::class, 'order_class_name' ) );
+
+		$this->assertStringContainsString( 'order-attribution-total-orders', $output, 'Should render the metabox template' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should show 1 order from analytics data' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100\.00/', $output, 'Should show total spend of 100' );
+	}
+
+	/**
+	 * @testdox CPT fallback should render customer history from a base WC_Order without logging warnings.
+	 */
+	public function test_cpt_fallback_renders_with_base_order(): void {
+		$this->toggle_cot_feature_and_usage( false );
+
+		\WC_Helper_Reports::reset_stats_dbs();
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->set_total( 100 );
+		$order->save();
+
+		OrdersStatsDataStore::update( new AdminOrder( $order->get_id() ) );
+
+		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->expects( $this->never() )->method( 'warning' );
+
+		$inject_logger = function () use ( $logger ) {
+			return $logger;
+		};
+		add_filter( 'woocommerce_logging_class', $inject_logger );
+
+		$this->assertInstanceOf( \WC_Order::class, $order, 'Test should pass a base order to the metabox' );
+		$this->assertNotInstanceOf( AdminOrder::class, $order, 'Test should not pass the admin override order to the metabox' );
+
+		ob_start();
+		try {
+			$this->sut->output( $order );
+			$output = ob_get_clean();
+		} finally {
+			remove_filter( 'woocommerce_logging_class', $inject_logger );
+		}
 
 		$this->assertStringContainsString( 'order-attribution-total-orders', $output, 'Should render the metabox template' );
 		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should show 1 order from analytics data' );

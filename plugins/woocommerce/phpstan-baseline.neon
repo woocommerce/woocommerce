@@ -57055,17 +57055,6 @@ parameters:
 			count: 1
 			path: src/Internal/Admin/Logging/LogHandlerFileV2.php
 
-		-
-			message: '#^Parameter \#1 \$input of function array_filter expects array, array\<Automattic\\WooCommerce\\Internal\\Admin\\Logging\\FileV2\\File\>\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Logging/LogHandlerFileV2.php
-
-		-
-			message: '#^Parameter \#1 \$var of function count expects array\|Countable, array\<Automattic\\WooCommerce\\Internal\\Admin\\Logging\\FileV2\\File\>\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Logging/LogHandlerFileV2.php
 
 		-
 			message: '#^Call to protected method prepare_column_headers\(\) of class WC_Admin_Log_Table_List\.$#'
