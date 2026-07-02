@@ -52,7 +52,7 @@ final class Bootstrap {
 		// boot (not just activation) so the hooks can fire.
 		( new RenewalEngine() )->register_hooks();
 		PlansController::register_hooks();
-		RenewalDispatcher::register_hooks();
+		( new RenewalDispatcher() )->register_hooks();
 
 		// The schema install and the recurring-action enqueue both need a later moment
 		// (the install reads options/runs dbDelta; the enqueue needs Action Scheduler's

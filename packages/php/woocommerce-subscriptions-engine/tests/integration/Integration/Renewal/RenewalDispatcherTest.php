@@ -299,8 +299,8 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
-		// Drive the static Action Scheduler entry point (uses the real "now").
-		RenewalDispatcher::handle_tick();
+		// Drive the Action Scheduler entry point (uses the real "now").
+		( new RenewalDispatcher() )->handle_tick();
 
 		// The dispatch reached the money-path: cycle 2 billed.
 		$cycle = ( new ContractRepository() )->find_chain_head( $contract_id );

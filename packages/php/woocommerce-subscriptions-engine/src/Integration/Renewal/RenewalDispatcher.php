@@ -110,15 +110,17 @@ final class RenewalDispatcher {
 	}
 
 	/**
-	 * Register the scan-tick handler.
+	 * Register the scan-tick handler on THIS instance.
 	 *
 	 * Must run on every boot (not just activation) so Action Scheduler can dispatch a tick
 	 * back into {@see self::handle_tick()}. A plain `add_action`, safe to call before Action
 	 * Scheduler has loaded; the recurring action itself is enqueued later via
-	 * {@see self::ensure_scheduled()}.
+	 * {@see self::ensure_scheduled()}. Instance-based (not static) so the boot-built
+	 * dispatcher - with whatever collaborators it was constructed over - is the one the
+	 * tick runs.
 	 */
-	public static function register_hooks(): void {
-		add_action( self::HOOK, array( __CLASS__, 'handle_tick' ) );
+	public function register_hooks(): void {
+		add_action( self::HOOK, array( $this, 'handle_tick' ) );
 	}
 
 	/**
@@ -178,13 +180,11 @@ final class RenewalDispatcher {
 	}
 
 	/**
-	 * Action Scheduler dispatch entry point - fires once per scan tick.
-	 *
-	 * Static so it can be registered as a plain callback; routes through an instance
+	 * Action Scheduler dispatch entry point - fires once per scan tick. Routes through
 	 * `run()` so dispatch and any synchronous test driver share one code path.
 	 */
-	public static function handle_tick(): void {
-		( new self() )->run();
+	public function handle_tick(): void {
+		$this->run();
 	}
 
 	/**
