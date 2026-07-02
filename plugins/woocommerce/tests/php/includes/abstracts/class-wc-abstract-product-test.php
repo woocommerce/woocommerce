@@ -476,13 +476,14 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 */
 	public function global_unique_id_provider(): array {
 		return array(
-			'plain digits untouched'          => array( '4006381333931', '4006381333931' ),
-			'letters stripped'                => array( 'ABC-4006381333931', '-4006381333931' ),
-			'final ISBN-10 X preserved'       => array( '097522980X', '097522980X' ),
-			'hyphenated ISBN-10 X preserved'  => array( '0-9752298-0-X', '0-9752298-0-X' ),
-			'lowercase final x preserved'     => array( '097522980x', '097522980x' ),
-			'mid-string X stripped'           => array( '12X4567890123', '124567890123' ),
-			'all X stripped when shape is invalid' => array( '12X45X', '1245' ),
+			'plain digits untouched'                => array( '4006381333931', '4006381333931' ),
+			'letters stripped'                      => array( 'ABC-4006381333931', '-4006381333931' ),
+			'final ISBN-10 X preserved'             => array( '097522980X', '097522980X' ),
+			'hyphenated ISBN-10 X preserved'        => array( '0-9752298-0-X', '0-9752298-0-X' ),
+			'lowercase final x preserved'           => array( '097522980x', '097522980x' ),
+			'mid-string X stripped'                 => array( '12X4567890123', '124567890123' ),
+			'all X stripped when shape is invalid'  => array( '12X45X', '1245' ),
+			'all invalid stripped to empty'         => array( 'ABC', '' ),
 		);
 	}
 }
