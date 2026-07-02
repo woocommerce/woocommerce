@@ -8738,6 +8738,121 @@ table.bar_chart {
 		}
 	}
 
+	// Align the product description editor with the meta boxes below it.
+	// #normal-sortables adds 4px of padding around postboxes, which #post-body-content
+	// doesn't, so the description editor ends up 8px wider than neighbouring postboxes
+	// on WP 7.0 (where the radius makes the misalignment visible).
+	&.post-type-product #postdivrich.woocommerce-product-description {
+		margin-left: 4px;
+		margin-right: 4px;
+	}
+
+	&.post-type-product #submitdiv {
+		--wc-product-publish-spacing-1: var(--wp-admin-grid-unit-05, 4px);
+		--wc-product-publish-spacing-2: var(--wp-admin-grid-unit-10, 8px);
+		--wc-product-publish-icon-size: 20px;
+		--wc-product-publish-row-horizontal-padding: 10px;
+		--wc-product-publish-summary-row-offset: calc(
+			var(--wc-product-publish-icon-size) +
+				6px
+		);
+		--wc-product-publish-panel-offset: calc(
+			var(--wc-product-publish-icon-size) +
+				5px
+		);
+
+		.misc-pub-catalog-visibility {
+			padding-left: calc(
+				var(--wc-product-publish-row-horizontal-padding) +
+					var(--wc-product-publish-summary-row-offset)
+			);
+			position: relative;
+		}
+
+		.misc-pub-catalog-visibility::before {
+			color: currentColor;
+			content: "\f180";
+			content: "\f180" / "";
+			display: inline-block;
+			font: normal 20px/1 dashicons;
+			left: calc(var(--wc-product-publish-row-horizontal-padding) - 1px);
+			position: absolute;
+			speak: never;
+			top: calc(var(--wc-product-publish-spacing-2) - 2px);
+			vertical-align: top;
+			width: var(--wc-product-publish-icon-size);
+		}
+
+		#catalog-visibility-select {
+			margin-left: calc(-1 * var(--wc-product-publish-panel-offset));
+			width: calc(100% + var(--wc-product-publish-panel-offset));
+		}
+
+		#catalog-visibility-select > p:first-of-type {
+			color: $wp-admin-icon-gray;
+			margin: var(--wc-product-publish-spacing-1) 0
+				var(--wc-product-publish-spacing-2);
+		}
+
+		#catalog-visibility-select input[type="radio"],
+		#catalog-visibility-select input[type="checkbox"] {
+			margin: 0 var(--wc-product-publish-spacing-1)
+				var(--wc-product-publish-spacing-1) 0;
+			vertical-align: text-top;
+		}
+
+		#catalog-visibility-select #_featured,
+		#catalog-visibility-select label[for="_featured"] {
+			position: relative;
+			top: calc(
+				var(--wc-product-publish-spacing-2) -
+					5px
+			);
+		}
+
+		#catalog-visibility-select label.selectit,
+		#catalog-visibility-select label[for="_featured"] {
+			display: inline-block;
+			line-height: 1.5;
+			max-width: calc(100% - 28px);
+		}
+
+		#catalog-visibility-select > p:last-child {
+			align-items: center;
+			display: flex;
+			gap: var(--wc-product-publish-spacing-2);
+			margin: var(--wc-product-publish-spacing-2) 0 0;
+		}
+
+		@media screen and (max-width: 782px) {
+			.misc-pub-catalog-visibility::before {
+				top: calc(var(--wc-product-publish-spacing-2) + 3px);
+			}
+
+			#catalog-visibility-select input[type="radio"],
+			#catalog-visibility-select input[type="checkbox"] {
+				margin: calc(-1 * var(--wc-product-publish-spacing-1))
+					var(--wc-product-publish-spacing-1) 0 0;
+				vertical-align: middle;
+			}
+
+			#catalog-visibility-select label.selectit,
+			#catalog-visibility-select label[for="_featured"] {
+				display: inline;
+				line-height: 280%;
+			}
+
+			#catalog-visibility-select > p:last-child {
+				display: block;
+			}
+
+			#catalog-visibility-select #_featured,
+			#catalog-visibility-select label[for="_featured"] {
+				top: 0;
+			}
+		}
+	}
+
 	// Shipping zone name input: ID selector in the base rule outranks the form-table override above.
 	.wc-shipping-zone-settings #zone_name {
 		padding: 0 12px;
