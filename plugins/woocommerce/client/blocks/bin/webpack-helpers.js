@@ -44,6 +44,11 @@ const wcHandleMap = {
 	'@woocommerce/sanitize': 'wc-sanitize',
 };
 
+const bundledEditorPackages = new Set( [
+	'@woocommerce/blocks-checkout',
+	'@woocommerce/blocks-components',
+] );
+
 const getAlias = ( options = {} ) => {
 	let { pathPart } = options;
 	pathPart = pathPart ? `${ pathPart }/` : '';
@@ -91,6 +96,14 @@ const getAlias = ( options = {} ) => {
 		'@woocommerce/block-settings': path.resolve(
 			__dirname,
 			'../assets/js/settings/blocks'
+		),
+		'@woocommerce/blocks-checkout': path.resolve(
+			__dirname,
+			'../packages/checkout'
+		),
+		'@woocommerce/blocks-components': path.resolve(
+			__dirname,
+			'../packages/components'
 		),
 		'@woocommerce/icons': path.resolve( __dirname, `../assets/js/icons` ),
 		'@woocommerce/resource-previews': path.resolve(
@@ -143,6 +156,20 @@ const requestToHandle = ( request ) => {
 	if ( request === 'react-dom/client' ) {
 		return 'react-dom';
 	}
+};
+
+const requestToEditorExternal = ( request ) => {
+	if ( bundledEditorPackages.has( request ) ) {
+		return;
+	}
+	return requestToExternal( request );
+};
+
+const requestToEditorHandle = ( request ) => {
+	if ( bundledEditorPackages.has( request ) ) {
+		return;
+	}
+	return requestToHandle( request );
 };
 
 const getProgressBarPluginConfig = ( name ) => {
@@ -226,6 +253,8 @@ module.exports = {
 	getResolve,
 	requestToHandle,
 	requestToExternal,
+	requestToEditorHandle,
+	requestToEditorExternal,
 	getProgressBarPluginConfig,
 	getCacheGroups,
 };

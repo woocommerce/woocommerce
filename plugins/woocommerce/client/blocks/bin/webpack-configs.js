@@ -26,6 +26,8 @@ const {
 	NODE_ENV,
 	CHECK_CIRCULAR_DEPS,
 	requestToExternal,
+	requestToEditorExternal,
+	requestToEditorHandle,
 	requestToHandle,
 	getProgressBarPluginConfig,
 	getCacheGroups,
@@ -44,6 +46,10 @@ const BABEL_CACHE_DIR = path.join(
 	'node_modules/.cache/babel-loader'
 );
 const isProduction = NODE_ENV === 'production';
+const editorBundledPackages = [
+	'@woocommerce/blocks-checkout',
+	'@woocommerce/blocks-components',
+];
 
 /**
  * Shared config for all script builds.
@@ -51,7 +57,10 @@ const isProduction = NODE_ENV === 'production';
 let initialBundleAnalyzerPort = 8888;
 const getSharedPlugins = ( {
 	bundleAnalyzerReportTitle,
+	bundledPackages = [],
 	checkCircularDeps = true,
+	scriptRequestToExternal = requestToExternal,
+	scriptRequestToHandle = requestToHandle,
 } ) =>
 	[
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
@@ -69,11 +78,12 @@ const getSharedPlugins = ( {
 				reportTitle: bundleAnalyzerReportTitle,
 			} ),
 		new DependencyExtractionWebpackPlugin( {
+			bundledPackages,
 			injectPolyfill: true,
 			combineAssets: ASSET_CHECK,
 			outputFormat: ASSET_CHECK ? 'json' : 'php',
-			requestToExternal,
-			requestToHandle,
+			requestToExternal: scriptRequestToExternal,
+			requestToHandle: scriptRequestToHandle,
 		} ),
 		// Substitute the `__i18n_text_domain__` identifier used by the
 		// @woocommerce/email-editor package with the WooCommerce text
@@ -225,7 +235,10 @@ const getMainConfig = ( options = {} ) => {
 		},
 		plugins: [
 			...getSharedPlugins( {
+				bundledPackages: editorBundledPackages,
 				bundleAnalyzerReportTitle: 'Main',
+				scriptRequestToExternal: requestToEditorExternal,
+				scriptRequestToHandle: requestToEditorHandle,
 			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Main' ) ),
 			/**
