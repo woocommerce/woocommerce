@@ -149,10 +149,7 @@ class POSPinService {
 
 		foreach ( $user_query->get_results() as $other_id ) {
 			$record = Users::get_site_user_meta( (int) $other_id, self::PIN_META_KEY, true );
-			if ( ! is_array( $record ) || empty( $record['hash'] ) ) {
-				continue;
-			}
-			if ( $this->verify_pin( $pin, $record ) ) {
+			if ( is_array( $record ) && $this->verify_pin( $pin, $record ) ) {
 				return true;
 			}
 		}
@@ -174,6 +171,10 @@ class POSPinService {
 	/**
 	 * Check whether a user has a PIN set.
 	 *
+	 * A record that verify_pin() would reject (wrong algo, out-of-range iterations,
+	 * malformed salt/hash) reads as no PIN, so "has a PIN" always means "has a PIN
+	 * that can actually verify".
+	 *
 	 * @param int $user_id The target user ID.
 	 * @return bool
 	 *
@@ -181,7 +182,7 @@ class POSPinService {
 	 */
 	public function has_pin( int $user_id ): bool {
 		$record = Users::get_site_user_meta( $user_id, self::PIN_META_KEY, true );
-		return is_array( $record ) && ! empty( $record['hash'] );
+		return null !== $this->decode_pin_record( $record );
 	}
 
 	/**
@@ -192,22 +193,28 @@ class POSPinService {
 	 * needed for the client to validate an entered PIN locally. The plaintext PIN
 	 * never leaves the device that set it.
 	 *
+	 * Only well-formed records are exposed: a record that verify_pin() would reject
+	 * returns null instead of shipping to clients, so a corrupted or hostile meta value
+	 * (e.g. a huge iteration count that would make the client's PBKDF2 hang) never
+	 * reaches a device.
+	 *
 	 * @param int $user_id The target user ID.
 	 * @return array{algo:string,iterations:int,salt:string,hash:string}|null
 	 *
 	 * @since 11.0.0
 	 */
 	public function get_public_pin_record( int $user_id ): ?array {
-		$record = Users::get_site_user_meta( $user_id, self::PIN_META_KEY, true );
-		if ( ! is_array( $record ) || empty( $record['hash'] ) ) {
+		$record  = Users::get_site_user_meta( $user_id, self::PIN_META_KEY, true );
+		$decoded = $this->decode_pin_record( $record );
+		if ( null === $decoded ) {
 			return null;
 		}
 
 		return array(
-			'algo'       => (string) ( $record['algo'] ?? self::ALGO ),
-			'iterations' => (int) ( $record['iterations'] ?? self::ITERATIONS ),
-			'salt'       => (string) ( $record['salt'] ?? '' ),
-			'hash'       => (string) ( $record['hash'] ?? '' ),
+			'algo'       => self::ALGO,
+			'iterations' => $decoded['iterations'],
+			'salt'       => base64_encode( $decoded['salt'] ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+			'hash'       => base64_encode( $decoded['hash'] ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 		);
 	}
 
@@ -226,36 +233,14 @@ class POSPinService {
 			return false;
 		}
 
-		$algo       = (string) ( $record['algo'] ?? '' );
-		$iterations = (int) ( $record['iterations'] ?? 0 );
-		$salt_b64   = (string) ( $record['salt'] ?? '' );
-		$hash_b64   = (string) ( $record['hash'] ?? '' );
-
-		// The iteration count drives PBKDF2's cost. The record comes from user meta, so a corrupted
-		// or hostile value (e.g. a billion iterations) would make every uniqueness scan hang — bound
-		// it and treat anything out of range as malformed. MAX_ITERATIONS leaves headroom to raise
-		// the cost over time while still verifying historical records.
-		if ( self::ALGO !== $algo || $iterations <= 0 || $iterations > self::MAX_ITERATIONS || '' === $salt_b64 || '' === $hash_b64 ) {
+		$decoded = $this->decode_pin_record( $record );
+		if ( null === $decoded ) {
 			return false;
 		}
 
-		// Decode the stored binary salt/hash back from their base64 envelope (see set_pin).
-		$salt          = base64_decode( $salt_b64, true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
-		$expected_hash = base64_decode( $hash_b64, true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
-		if ( false === $salt || false === $expected_hash ) {
-			return false;
-		}
+		$actual_hash = hash_pbkdf2( 'sha256', $pin, $decoded['salt'], $decoded['iterations'], self::HASH_BYTES, true );
 
-		// A well-formed record always carries a SALT_BYTES salt and a HASH_BYTES hash (the fixed
-		// PBKDF2-SHA256 format set_pin writes). Reject any other size as malformed before spending
-		// PBKDF2 cycles, and keep the method consistent with the format it declares.
-		if ( self::SALT_BYTES !== strlen( $salt ) || self::HASH_BYTES !== strlen( $expected_hash ) ) {
-			return false;
-		}
-
-		$actual_hash = hash_pbkdf2( 'sha256', $pin, $salt, $iterations, self::HASH_BYTES, true );
-
-		return hash_equals( $expected_hash, $actual_hash );
+		return hash_equals( $decoded['hash'], $actual_hash );
 	}
 
 	/**
@@ -268,5 +253,57 @@ class POSPinService {
 	 */
 	public function validate_pin_format( string $pin ): bool {
 		return 1 === preg_match( '/^\d{' . self::PIN_LENGTH . '}$/', $pin );
+	}
+
+	/**
+	 * Validate and decode a stored PIN record, or null if it is malformed.
+	 *
+	 * Single source of truth for what a well-formed record is, shared by has_pin(),
+	 * get_public_pin_record(), and verify_pin() so a record is only ever reported,
+	 * exposed to clients, or verified if it matches the format set_pin() writes.
+	 *
+	 * The iteration count drives PBKDF2's cost. The record comes from user meta, so a corrupted
+	 * or hostile value (e.g. a billion iterations) would make every uniqueness scan — or a mobile
+	 * client validating locally — hang; bound it and treat anything out of range as malformed.
+	 * MAX_ITERATIONS leaves headroom to raise the cost over time while still verifying
+	 * historical records.
+	 *
+	 * @param mixed $record The raw meta value (array with algo, iterations, salt, hash).
+	 * @return array{iterations:int,salt:string,hash:string}|null Decoded binary salt/hash and
+	 *                                                            iterations, or null when malformed.
+	 */
+	private function decode_pin_record( $record ): ?array {
+		if ( ! is_array( $record ) ) {
+			return null;
+		}
+
+		$algo       = (string) ( $record['algo'] ?? '' );
+		$iterations = (int) ( $record['iterations'] ?? 0 );
+		$salt_b64   = (string) ( $record['salt'] ?? '' );
+		$hash_b64   = (string) ( $record['hash'] ?? '' );
+
+		if ( self::ALGO !== $algo || $iterations <= 0 || $iterations > self::MAX_ITERATIONS || '' === $salt_b64 || '' === $hash_b64 ) {
+			return null;
+		}
+
+		// Decode the stored binary salt/hash back from their base64 envelope (see set_pin).
+		$salt = base64_decode( $salt_b64, true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+		$hash = base64_decode( $hash_b64, true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+		if ( false === $salt || false === $hash ) {
+			return null;
+		}
+
+		// A well-formed record always carries a SALT_BYTES salt and a HASH_BYTES hash (the fixed
+		// PBKDF2-SHA256 format set_pin writes). Reject any other size as malformed before anything
+		// spends PBKDF2 cycles on it.
+		if ( self::SALT_BYTES !== strlen( $salt ) || self::HASH_BYTES !== strlen( $hash ) ) {
+			return null;
+		}
+
+		return array(
+			'iterations' => $iterations,
+			'salt'       => $salt,
+			'hash'       => $hash,
+		);
 	}
 }

@@ -237,6 +237,45 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should treat a malformed stored record as no PIN: has_pin false, public record null.
+	 * @dataProvider provider_malformed_pin_records
+	 *
+	 * A record verify_pin() would reject must never be reported as a set PIN nor shipped
+	 * to mobile clients (e.g. a hostile iteration count would hang the client's PBKDF2).
+	 *
+	 * @param mixed $record The malformed meta value to plant.
+	 */
+	public function test_malformed_record_reads_as_no_pin( $record ): void {
+		Users::update_site_user_meta( $this->user_id, POSPinService::PIN_META_KEY, $record );
+
+		$this->assertFalse( $this->sut->has_pin( $this->user_id ), 'Malformed record must read as no PIN.' );
+		$this->assertNull( $this->sut->get_public_pin_record( $this->user_id ), 'Malformed record must not be exposed to clients.' );
+	}
+
+	/**
+	 * Malformed stored PIN records that must read as "no PIN".
+	 *
+	 * @return array<string, array{mixed}>
+	 */
+	public function provider_malformed_pin_records(): array {
+		$valid = array(
+			'algo'       => POSPinService::ALGO,
+			'iterations' => POSPinService::ITERATIONS,
+			'salt'       => base64_encode( random_bytes( POSPinService::SALT_BYTES ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+			'hash'       => base64_encode( random_bytes( POSPinService::HASH_BYTES ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+		);
+
+		return array(
+			'not an array'        => array( 'garbage' ),
+			'missing salt'        => array( array_diff_key( $valid, array( 'salt' => true ) ) ),
+			'unknown algo'        => array( array_merge( $valid, array( 'algo' => 'md5' ) ) ),
+			'over-cap iterations' => array( array_merge( $valid, array( 'iterations' => POSPinService::MAX_ITERATIONS + 1 ) ) ),
+			'invalid base64 salt' => array( array_merge( $valid, array( 'salt' => '!!!not-base64!!!' ) ) ),
+			'wrong hash length'   => array( array_merge( $valid, array( 'hash' => base64_encode( random_bytes( POSPinService::HASH_BYTES - 1 ) ) ) ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+		);
+	}
+
+	/**
 	 * @testdox Should reject set_pin when the PIN is already used by another staff member.
 	 */
 	public function test_set_pin_rejects_pin_in_use_by_another_user(): void {
