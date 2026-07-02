@@ -226,15 +226,17 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 	 * @testdox ensure_scheduled enqueues exactly one recurring scan action and is idempotent.
 	 */
 	public function test_ensure_scheduled_is_idempotent(): void {
+		ConsumerRegistry::register( self::CONSUMER );
+
 		// The engine schedules the recurring action (and sets its re-check option) once at
 		// bootstrap, committed before the per-test transaction. Reset both so this test starts
 		// from a clean, unscheduled slate; the rollback restores the bootstrap state afterwards.
 		as_unschedule_all_actions( RenewalDispatcher::HOOK, array(), RenewalDispatcher::GROUP );
-		delete_option( 'wc_subscriptions_engine_dispatch_scheduled_check' );
-		$this->assertFalse( RenewalDispatcher::is_scheduled(), 'No recurring action after the reset.' );
+		delete_option( 'woocommerce_subscriptions_engine_dispatch_scheduled_check' );
+		$this->assertFalse( as_next_scheduled_action( RenewalDispatcher::HOOK, array(), RenewalDispatcher::GROUP ), 'No recurring action after the reset.' );
 
 		RenewalDispatcher::ensure_scheduled();
-		$this->assertTrue( RenewalDispatcher::is_scheduled() );
+		$this->assertNotFalse( as_next_scheduled_action( RenewalDispatcher::HOOK, array(), RenewalDispatcher::GROUP ) );
 
 		// A second call must not enqueue a duplicate.
 		RenewalDispatcher::ensure_scheduled();
@@ -248,6 +250,41 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 			'ids'
 		);
 		$this->assertCount( 1, $pending, 'Exactly one recurring scan action is enqueued.' );
+	}
+
+	/**
+	 * @testdox ensure_scheduled enqueues nothing while no consumer is registered.
+	 *
+	 * A store without a consumer extension runs no renewals, so it carries no recurring
+	 * scan action either - the scheduling is gated exactly like the run.
+	 */
+	public function test_ensure_scheduled_skips_without_a_consumer(): void {
+		as_unschedule_all_actions( RenewalDispatcher::HOOK, array(), RenewalDispatcher::GROUP );
+		delete_option( 'woocommerce_subscriptions_engine_dispatch_scheduled_check' );
+
+		RenewalDispatcher::ensure_scheduled();
+
+		$this->assertFalse(
+			as_next_scheduled_action( RenewalDispatcher::HOOK, array(), RenewalDispatcher::GROUP ),
+			'No recurring action is enqueued while the consumer registry is empty.'
+		);
+	}
+
+	/**
+	 * @testdox run_batch is a no-op for a non-positive limit.
+	 */
+	public function test_run_batch_returns_zero_for_a_non_positive_limit(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+		ConsumerRegistry::register( self::CONSUMER );
+
+		$contract = $this->sign_up_contract( self::GATEWAY_APPROVING, '2026-01-20 00:00:00' );
+
+		$dispatcher = new RenewalDispatcher();
+		$this->assertSame( 0, $dispatcher->run_batch( $this->scan_now(), 0 ) );
+		$this->assertSame( 0, $dispatcher->run_batch( $this->scan_now(), -5 ) );
+
+		// Nothing was renewed by the no-op ticks.
+		$this->assertSame( 1, ( new ContractRepository() )->max_count( (int) $contract->get_id() ) );
 	}
 
 	/**

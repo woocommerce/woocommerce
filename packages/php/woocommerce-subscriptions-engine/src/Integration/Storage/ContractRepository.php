@@ -273,6 +273,10 @@ final class ContractRepository {
 	 * @return array<int, RenewalCandidate> Actionable renewal candidates, oldest-due first.
 	 */
 	public function find_due( DateTimeImmutable $now, int $limit ): array {
+		if ( $limit < 1 ) {
+			return array();
+		}
+
 		global $wpdb;
 
 		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );

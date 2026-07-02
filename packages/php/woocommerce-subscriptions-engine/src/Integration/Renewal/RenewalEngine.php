@@ -563,11 +563,21 @@ final class RenewalEngine {
 	private function reclaim_head( int $contract_id, int $count, DateTimeImmutable $now ): ?Cycle {
 		$head = $this->contracts->find_chain_head( $contract_id );
 
-		$is_pending_at_count = null !== $head
-			&& $count === $head->get_count()
-			&& $head->get_status()->equals( CycleStatus::pending() );
+		if ( null === $head || $count !== $head->get_count() ) {
+			// The chain moved on (or vanished) between selection and the claim: nothing at
+			// this number to reclaim.
+			wc_get_logger()->info(
+				sprintf( 'RenewalEngine::process(): cycle %d for contract %d is no longer the chain head - skipping.', $count, $contract_id ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => $contract_id,
+				)
+			);
 
-		if ( $is_pending_at_count && $this->lease_has_expired( $head, $now ) ) {
+			return null;
+		}
+
+		if ( $head->get_status()->equals( CycleStatus::pending() ) && $this->lease_has_expired( $head, $now ) ) {
 			// Crash recovery, race-safe: only the caller whose CAS UPDATE matches the
 			// still-expired row reclaims it; a concurrent worker that already extended the
 			// lease leaves this caller matching zero rows, so it skips.
@@ -599,7 +609,7 @@ final class RenewalEngine {
 
 		// Admin retry: flip a failed head back to pending and re-attempt its charge. Scheduled
 		// selection never routes a failed head here; only a manual trigger does.
-		if ( null !== $head && $count === $head->get_count() && $head->get_status()->equals( CycleStatus::failed() ) ) {
+		if ( $head->get_status()->equals( CycleStatus::failed() ) ) {
 			// Race-safe: only the caller whose CAS UPDATE matches the still-failed row wins.
 			if ( $this->contracts->reclaim_failed_cycle( (int) $head->get_id(), $this->lease_until( $now ) ) ) {
 				wc_get_logger()->info(
@@ -658,7 +668,10 @@ final class RenewalEngine {
 			return false;
 		}
 
-		return strtotime( $claimed_until . ' UTC' ) <= $now->getTimestamp();
+		$expires_at = strtotime( $claimed_until . ' UTC' );
+
+		// An unparsable lease is treated as live (not reclaimable): never re-charge on bad data.
+		return false !== $expires_at && $expires_at <= $now->getTimestamp();
 	}
 
 	/**

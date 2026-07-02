@@ -38,13 +38,14 @@ final class ConsumerRegistry {
 	/**
 	 * Register a consumer extension by its slug.
 	 *
-	 * Idempotent: registering the same slug twice is a no-op. An empty slug is
-	 * ignored so a misconfigured caller cannot flip the gate open with a blank
-	 * registration.
+	 * Idempotent: registering the same slug twice is a no-op. The slug is trimmed, and
+	 * an empty or whitespace-only slug is ignored so a misconfigured caller cannot flip
+	 * the gate open with a blank registration.
 	 *
 	 * @param string $slug The consumer extension's registered slug.
 	 */
 	public static function register( string $slug ): void {
+		$slug = trim( $slug );
 		if ( '' === $slug ) {
 			return;
 		}

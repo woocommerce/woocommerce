@@ -67,6 +67,14 @@ class ConsumerRegistryTest extends TestCase {
 		$this->assertSame( array(), ConsumerRegistry::all() );
 	}
 
+	public function test_register_ignores_a_whitespace_only_slug_and_trims(): void {
+		ConsumerRegistry::register( "  \t\n" );
+		$this->assertTrue( ConsumerRegistry::is_empty(), 'A whitespace-only slug must not open the gate.' );
+
+		ConsumerRegistry::register( '  woocommerce-subscriptions-lite  ' );
+		$this->assertSame( array( 'woocommerce-subscriptions-lite' ), ConsumerRegistry::all(), 'The slug is stored trimmed.' );
+	}
+
 	public function test_reset_clears_every_registration(): void {
 		ConsumerRegistry::register( 'lite' );
 		ConsumerRegistry::reset();

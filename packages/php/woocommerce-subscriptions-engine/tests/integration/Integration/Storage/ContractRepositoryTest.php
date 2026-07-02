@@ -831,6 +831,17 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox find_due returns no rows for a non-positive limit.
+	 */
+	public function test_find_due_returns_no_rows_for_a_non_positive_limit(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+
+		$this->assertSame( array(), $this->sut->find_due( $now, 0 ) );
+		$this->assertSame( array(), $this->sut->find_due( $now, -1 ) );
+	}
+
+	/**
 	 * @testdox transition_cycle_status settles atomically: one caller wins, repeats lose.
 	 */
 	public function test_transition_cycle_status_is_an_atomic_compare_and_set(): void {

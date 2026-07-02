@@ -66,7 +66,7 @@ final class RenewalDispatcher {
 	 * Scheduler store. Autoloaded (bulk-loaded, effectively free per request), so the common
 	 * path skips the AS store query {@see self::is_scheduled()} would otherwise run every load.
 	 */
-	private const SCHEDULE_CHECK_OPTION = 'wc_subscriptions_engine_dispatch_scheduled_check';
+	private const SCHEDULE_CHECK_OPTION = 'woocommerce_subscriptions_engine_dispatch_scheduled_check';
 
 	/**
 	 * How long a positive schedule check is trusted before re-verifying, in seconds. Bounds the
@@ -125,12 +125,20 @@ final class RenewalDispatcher {
 	 * Enqueue the recurring scan action when one is not already scheduled.
 	 *
 	 * Call once Action Scheduler is available (e.g. on `init`), since it uses the `as_*`
-	 * functions. To avoid an Action Scheduler store query on every request, a positive result is
-	 * cached in an autoloaded option and re-verified only once per re-check window - bounded
-	 * staleness that self-heals if the action is ever cleared. Within a re-verify it still guards
-	 * with the `is_scheduled()` fast-path plus a best-effort store-level dedup.
+	 * functions. Gated on the consumer registry: a store with no consumer extension runs no
+	 * renewals, so it carries no recurring scan action either. To avoid an Action Scheduler
+	 * store query on every request, a positive result is cached in an autoloaded option and
+	 * re-verified only once per re-check window - bounded staleness that self-heals if the
+	 * action is ever cleared. Within a re-verify it still guards with the `is_scheduled()`
+	 * fast-path plus a best-effort store-level dedup.
 	 */
 	public static function ensure_scheduled(): void {
+		// No consumer, no scan. Nothing is cached on this path, so a consumer registering
+		// later (this boot or the next) schedules promptly.
+		if ( ConsumerRegistry::is_empty() ) {
+			return;
+		}
+
 		// Skip the Action Scheduler store query while a recent positive check is still trusted.
 		$next_check = get_option( self::SCHEDULE_CHECK_OPTION, 0 );
 		if ( is_numeric( $next_check ) && time() < (int) $next_check ) {
@@ -161,9 +169,11 @@ final class RenewalDispatcher {
 	}
 
 	/**
-	 * Whether the recurring scan action is currently scheduled.
+	 * Whether the recurring scan action is currently scheduled. Private - it queries the
+	 * Action Scheduler store, so per-request callers must go through the option-cached
+	 * {@see self::ensure_scheduled()} instead.
 	 */
-	public static function is_scheduled(): bool {
+	private static function is_scheduled(): bool {
 		return false !== as_next_scheduled_action( self::HOOK, array(), self::GROUP );
 	}
 
@@ -198,10 +208,16 @@ final class RenewalDispatcher {
 	 * contract cannot stall the batch. A backlog larger than `$limit` drains over successive ticks.
 	 *
 	 * @param DateTimeImmutable|null $now   The scan moment; defaults to now (UTC).
-	 * @param int                    $limit Maximum due contracts to process this tick.
+	 * @param int                    $limit Maximum due contracts to process this tick; a
+	 *                                      non-positive limit is a no-op returning 0.
 	 * @return int The number of actionable due contracts scanned this tick (0 when gated).
+	 *             A billed/skipped/failed breakdown is logged at debug level.
 	 */
 	public function run_batch( ?DateTimeImmutable $now, int $limit ): int {
+		if ( $limit < 1 ) {
+			return 0;
+		}
+
 		if ( ConsumerRegistry::is_empty() ) {
 			wc_get_logger()->info(
 				'RenewalDispatcher::run(): no consumer extension is registered - skipping the renewal scan (charging nothing).',
@@ -213,15 +229,26 @@ final class RenewalDispatcher {
 		$now        = $now ?? new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
 		$candidates = $this->contracts->find_due( $now, $limit );
 
+		$billed  = 0;
+		$skipped = 0;
+		$failed  = 0;
+
 		foreach ( $candidates as $candidate ) {
 			try {
 				$cycle_count = $this->selector->select_scheduled_cycle( $candidate, $now );
 				if ( null === $cycle_count ) {
+					++$skipped;
 					continue;
 				}
 				$renewal_intent = new RenewalIntent( $candidate->get_contract_id(), $cycle_count );
-				$this->engine->process( $renewal_intent, $now );
+				if ( null === $this->engine->process( $renewal_intent, $now ) ) {
+					// A skip or idempotent no-op (a live claim, an already-settled cycle).
+					++$skipped;
+				} else {
+					++$billed;
+				}
 			} catch ( RenewalNotProcessable $e ) {
+				++$failed;
 				// Pre-flight impossibility (e.g. an unresolvable plan): park so the contract
 				// leaves the due window and cannot re-poison the scan; a repair re-arms it.
 				$this->engine->park( $candidate->get_contract_id() );
@@ -235,6 +262,7 @@ final class RenewalDispatcher {
 			} catch ( Throwable $e ) {
 				// One contract's failure must not stall the batch (or make AS retry the
 				// whole tick forever). Log and continue to the next due contract.
+				++$failed;
 				wc_get_logger()->error(
 					sprintf( 'RenewalDispatcher::run(): processing contract %d threw: %s', $candidate->get_contract_id(), $e->getMessage() ),
 					array(
@@ -243,6 +271,13 @@ final class RenewalDispatcher {
 					)
 				);
 			}
+		}
+
+		if ( array() !== $candidates ) {
+			wc_get_logger()->debug(
+				sprintf( 'RenewalDispatcher::run(): scanned %d candidate(s) - %d billed, %d skipped, %d failed.', count( $candidates ), $billed, $skipped, $failed ),
+				array( 'source' => self::LOG_SOURCE )
+			);
 		}
 
 		return count( $candidates );
