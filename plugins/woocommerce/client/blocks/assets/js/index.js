@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import '@woocommerce/atomic-blocks';
+
+/**
  * Internal dependencies
  */
 import '../css/editor.scss';

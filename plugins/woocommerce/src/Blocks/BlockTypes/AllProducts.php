@@ -41,6 +41,6 @@ class AllProducts extends AbstractBlock {
 	 */
 	protected function register_block_type_assets() {
 		parent::register_block_type_assets();
-		$this->register_chunk_translations( [ $this->block_name ] );
+		$this->register_chunk_translations( [ $this->block_name, 'all-products-edit' ] );
 	}
 }
