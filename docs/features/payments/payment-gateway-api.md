@@ -1,7 +1,7 @@
 ---
 post_title: WooCommerce Payment Gateway API
 sidebar_label: Payment Gateway API
-
+sidebar_position: 1
 ---
 
 # WooCommerce Payment Gateway API

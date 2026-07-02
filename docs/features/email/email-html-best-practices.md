@@ -1,6 +1,7 @@
 ---
 post_title: HTML best practices
 sidebar_label: HTML best practices
+sidebar_position: 1
 ---
 
 # Email HTML - Best Practices

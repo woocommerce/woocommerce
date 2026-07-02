@@ -1,6 +1,7 @@
 ---
 post_title: Email preview integration
 sidebar_label: Email preview integration
+sidebar_position: 2
 ---
 
 # Email Preview Integration
