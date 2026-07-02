@@ -3,7 +3,10 @@
  */
 const { omit } = require( 'lodash' );
 const glob = require( 'glob' );
-const { scriptModuleEntries } = require( './webpack-interactivity-entries' );
+const {
+	scriptModuleEntries,
+	editorStyleEntries,
+} = require( './webpack-interactivity-entries' );
 
 // List of blocks that should be used as webpack entry points. They are expected
 // to be in `/assets/js/blocks/[BLOCK_NAME]`. If they are not, their relative
@@ -326,6 +329,14 @@ const blockStylingEntries = getBlockEntries(
 	}
 );
 
+const editorScriptEntries = Object.values(
+	getBlockEntries( 'index.{t,j}s{,x}', {
+		...blocks,
+		...genericBlocks,
+		...cartAndCheckoutBlocks,
+	} )
+).flat();
+
 const entries = {
 	styling: {
 		// Packages styles
@@ -335,6 +346,8 @@ const entries = {
 
 		// Shared blocks code
 		'wc-blocks': './assets/js/index.js',
+		'interactivity-editor-styles':
+			Object.values( editorStyleEntries ).flat(),
 
 		// Blocks
 		'product-image-gallery':
@@ -356,15 +369,7 @@ const entries = {
 		wcEntities: './assets/js/entities/index.ts',
 	},
 	main: {
-		// Shared blocks code
-		'wc-blocks': './assets/js/index.js',
-
-		// Blocks
-		...getBlockEntries( 'index.{t,j}s{,x}', {
-			...blocks,
-			...genericBlocks,
-			...cartAndCheckoutBlocks,
-		} ),
+		'wc-blocks-editor': [ './assets/js/index.js', ...editorScriptEntries ],
 	},
 	frontend: {
 		reviews: './assets/js/blocks/reviews/frontend.ts',

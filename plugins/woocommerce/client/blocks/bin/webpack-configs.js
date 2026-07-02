@@ -45,6 +45,16 @@ const BABEL_CACHE_DIR = path.join(
 );
 const isProduction = NODE_ENV === 'production';
 
+const getBlockJsonWithSharedEditorStyle = ( content ) => {
+	const metadata = JSON.parse( content.toString() );
+
+	if ( metadata.editorStyle ) {
+		metadata.editorStyle = 'wc-blocks-editor-style';
+	}
+
+	return `${ JSON.stringify( metadata, null, '\t' ) }\n`;
+};
+
 /**
  * Shared config for all script builds.
  */
@@ -209,19 +219,7 @@ const getMainConfig = ( options = {} ) => {
 		},
 		optimization: {
 			...sharedOptimizationConfig,
-			splitChunks: {
-				minSize: 200000,
-				automaticNameDelimiter: '--',
-				cacheGroups: {
-					commons: {
-						test: /[\/\\]node_modules[\/\\]/,
-						name: 'wc-blocks-vendors',
-						chunks: 'all',
-						enforce: true,
-					},
-					...getCacheGroups(),
-				},
-			},
+			splitChunks: false,
 		},
 		plugins: [
 			...getSharedPlugins( {
@@ -236,6 +234,7 @@ const getMainConfig = ( options = {} ) => {
 				patterns: [
 					{
 						from: './assets/js/**/block.json',
+						transform: getBlockJsonWithSharedEditorStyle,
 						to( { absoluteFilename } ) {
 							/**
 							 * Getting the block name from the JSON metadata is less error prone
@@ -646,7 +645,9 @@ const getStylingConfig = ( options = {} ) => {
 							const moduleIssuer =
 								moduleGraph.getIssuer( module );
 							if ( ! moduleIssuer ) {
-								return false;
+								return module.resource?.endsWith(
+									'editor.scss'
+								);
 							}
 
 							return (
@@ -660,6 +661,7 @@ const getStylingConfig = ( options = {} ) => {
 						},
 						name: 'wc-blocks-editor-style',
 						chunks: 'all',
+						enforce: true,
 						priority: 10,
 					},
 					...getCacheGroups(),

@@ -146,19 +146,67 @@ abstract class AbstractBlock {
 	 * This registers the scripts; it does not enqueue them.
 	 */
 	protected function register_block_type_assets() {
-		if ( null !== $this->get_block_type_editor_script() ) {
-			$data     = $this->asset_api->get_script_data( $this->get_block_type_editor_script( 'path' ) );
-			$has_i18n = in_array( 'wp-i18n', $data['dependencies'], true );
-
-			$this->asset_api->register_script(
-				$this->get_block_type_editor_script( 'handle' ),
-				$this->get_block_type_editor_script( 'path' ),
-				array_merge(
-					$this->get_block_type_editor_script( 'dependencies' ),
-					$this->integration_registry->get_all_registered_editor_script_handles()
-				),
-				$has_i18n
+		$editor_script = $this->get_block_type_editor_script();
+		if ( is_array( $editor_script ) ) {
+			$handle        = (string) $editor_script['handle'];
+			$path          = (string) $editor_script['path'];
+			$dependencies  = array_merge(
+				(array) $editor_script['dependencies'],
+				$this->integration_registry->get_all_registered_editor_script_handles()
 			);
+			$legacy_handle = 'wc-' . $this->block_name . '-block';
+
+			/**
+			 * Filters the legacy per-block editor script dependencies before adding them to the shared editor bundle.
+			 *
+			 * @since 3.0.0
+			 *
+			 * @param array  $dependencies  The list of script dependencies.
+			 * @param string $legacy_handle The legacy per-block script handle.
+			 */
+			$legacy_dependencies = apply_filters( 'woocommerce_blocks_register_script_dependencies', $dependencies, $legacy_handle );
+
+			$dependencies = array_values(
+				array_unique(
+					array_merge(
+						$dependencies,
+						$legacy_dependencies
+					)
+				)
+			);
+			$data         = $this->asset_api->get_script_data( $path );
+			$has_i18n     = in_array( 'wp-i18n', $data['dependencies'], true );
+
+			if ( wp_script_is( $handle, 'registered' ) ) {
+				$wp_scripts = wp_scripts();
+				if ( isset( $wp_scripts->registered[ $handle ] ) ) {
+					$wp_scripts->registered[ $handle ]->deps = array_values(
+						array_unique(
+							array_merge(
+								$wp_scripts->registered[ $handle ]->deps,
+								$dependencies
+							)
+						)
+					);
+				}
+			} else {
+				$this->asset_api->register_script(
+					$handle,
+					$path,
+					$dependencies,
+					$has_i18n
+				);
+			}
+
+			if ( $legacy_handle !== $handle && ! wp_script_is( $legacy_handle, 'registered' ) ) {
+				wp_register_script(
+					$legacy_handle,
+					false,
+					array( $handle ),
+					$this->asset_api->wc_version,
+					true
+				);
+			}
 		}
 		if ( null !== $this->get_block_type_script() ) {
 			$data     = $this->asset_api->get_script_data( $this->get_block_type_script( 'path' ) );
@@ -299,9 +347,9 @@ abstract class AbstractBlock {
 	 */
 	protected function get_block_type_editor_script( $key = null ) {
 		$script = [
-			'handle'       => 'wc-' . $this->block_name . '-block',
-			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name ),
-			'dependencies' => [ 'wc-blocks' ],
+			'handle'       => 'wc-blocks-editor',
+			'path'         => $this->asset_api->get_block_asset_build_path( 'wc-blocks-editor' ),
+			'dependencies' => [],
 		];
 		return $key ? $script[ $key ] : $script;
 	}

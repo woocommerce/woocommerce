@@ -59,10 +59,29 @@ class Api {
 	 * @return array
 	 */
 	public function add_payment_method_script_dependencies( $dependencies, $handle ) {
-		if ( ! in_array( $handle, [ 'wc-checkout-block', 'wc-checkout-block-frontend', 'wc-cart-block', 'wc-cart-block-frontend' ], true ) ) {
+		if (
+			! in_array(
+				$handle,
+				array(
+					'wc-blocks-editor',
+					'wc-checkout-block',
+					'wc-checkout-block-frontend',
+					'wc-cart-block',
+					'wc-cart-block-frontend',
+				),
+				true
+			)
+		) {
 			return $dependencies;
 		}
-		return array_merge( $dependencies, $this->payment_method_registry->get_all_active_payment_method_script_dependencies() );
+		return array_values(
+			array_unique(
+				array_merge(
+					$dependencies,
+					$this->payment_method_registry->get_all_active_payment_method_script_dependencies()
+				)
+			)
+		);
 	}
 
 	/**
@@ -160,7 +179,13 @@ class Api {
 						sprintf( 'console.error( "%s" );', $error_message )
 					);
 
-					$cart_checkout_scripts = [ 'wc-cart-block', 'wc-cart-block-frontend', 'wc-checkout-block', 'wc-checkout-block-frontend' ];
+					$cart_checkout_scripts = array(
+						'wc-blocks-editor',
+						'wc-cart-block',
+						'wc-cart-block-frontend',
+						'wc-checkout-block',
+						'wc-checkout-block-frontend',
+					);
 					foreach ( $cart_checkout_scripts as $script_handle ) {
 						if (
 							! array_key_exists( $script_handle, $wp_scripts->registered ) ||

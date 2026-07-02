@@ -23,6 +23,23 @@ mkdir -p "$TARGET_DIR"
 # Define generic blocks as a space-separated string (keep in sync with webpack-entries.js)
 generic_blocks="accordion-group accordion-header accordion-item accordion-panel"
 
+copy_block_json() {
+    local source_path="$1"
+    local destination_path="$2"
+
+    node -e '
+const fs = require( "fs" );
+const [ sourcePath, destinationPath ] = process.argv.slice( 1 );
+const metadata = JSON.parse( fs.readFileSync( sourcePath, "utf8" ) );
+
+if ( metadata.editorStyle ) {
+    metadata.editorStyle = "wc-blocks-editor-style";
+}
+
+fs.writeFileSync( destinationPath, `${ JSON.stringify( metadata, null, "\t" ) }\n` );
+' "$source_path" "$destination_path"
+}
+
 # Find all block.json files
 find plugins/woocommerce/client/blocks/assets/js -name "block.json" | while read file; do
     # Read the block name from the JSON file
@@ -38,19 +55,15 @@ find plugins/woocommerce/client/blocks/assets/js -name "block.json" | while read
     done
 
     # Check if it's a parent block by looking for "parent" field, but treat as regular if generic
-    if grep -q '"parent":' "$file" && [ "$is_generic_block" = false ]; then
-        # It's an inner block
-        target_path="$TARGET_DIR/inner-blocks/$block_name/block.json"
-        mkdir -p "$TARGET_DIR/inner-blocks/$block_name"
-        if [ ! -f "$target_path" ]; then
-            cp "$file" "$target_path"
-        fi
-    else
-        # It's a regular block
-        target_path="$TARGET_DIR/$block_name/block.json"
-        mkdir -p "$TARGET_DIR/$block_name"
-        if [ ! -f "$target_path" ]; then
-            cp "$file" "$target_path"
-        fi
-    fi
+	if grep -q '"parent":' "$file" && [ "$is_generic_block" = false ]; then
+		# It's an inner block
+		target_path="$TARGET_DIR/inner-blocks/$block_name/block.json"
+		mkdir -p "$TARGET_DIR/inner-blocks/$block_name"
+		copy_block_json "$file" "$target_path"
+	else
+		# It's a regular block
+		target_path="$TARGET_DIR/$block_name/block.json"
+		mkdir -p "$TARGET_DIR/$block_name"
+		copy_block_json "$file" "$target_path"
+	fi
 done

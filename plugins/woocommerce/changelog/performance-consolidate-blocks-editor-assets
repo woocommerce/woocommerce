@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Consolidate Woo blocks editor scripts and editor styles into shared editor assets.

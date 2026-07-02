@@ -3,10 +3,10 @@
  */
 const path = require( 'path' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
-const [
-	,
-	moduleConfig,
-] = require( '@wordpress/scripts/config/webpack.config' );
+const wpScriptsConfig = require( '@wordpress/scripts/config/webpack.config' );
+const moduleConfig = Array.isArray( wpScriptsConfig )
+	? wpScriptsConfig[ 1 ]
+	: wpScriptsConfig;
 const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 
 /**
@@ -31,14 +31,12 @@ const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 const {
 	scriptModuleEntries,
 	styleEntries,
-	editorStyleEntries,
 } = require( './webpack-interactivity-entries' );
 
 const entries = {
 	// Blocks
 	...scriptModuleEntries,
 	...styleEntries,
-	...editorStyleEntries,
 
 	// Experimental mini cart frontend modules, only enqueued when experimental-iapi-mini-cart feature flag is enabled.
 	'woocommerce/mini-cart': './assets/js/blocks/mini-cart/iapi-frontend.ts',
