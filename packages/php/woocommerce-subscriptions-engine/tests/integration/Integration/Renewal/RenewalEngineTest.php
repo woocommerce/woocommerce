@@ -1227,6 +1227,181 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox process_due resumes a draft order already linked on the cycle: promotes, charges, settles.
+	 *
+	 * A crash between linking the draft onto the cycle and promoting it to pending leaves a
+	 * linked `checkout-draft`. The resume path must resolve it directly through the cycle's
+	 * order reference, promote it, charge it, and settle - one order, no duplicate.
+	 */
+	public function test_process_due_resumes_a_linked_draft_order(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$repo     = new ContractRepository();
+		$previous = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $previous );
+
+		$cycle = $this->make_pending_cycle_2( $contract_id, $previous, gmdate( 'Y-m-d H:i:s', time() - 60 ) );
+		$draft = $this->make_ghost_renewal_order( $contract_id, 2, false, 'checkout-draft' );
+		$cycle->set_order_id( $draft->get_id() );
+		$repo->update_cycle( $cycle );
+
+		$resumed = ( new RenewalEngine() )->process_due( $contract_id );
+
+		$this->assertInstanceOf( WC_Order::class, $resumed );
+		$this->assertSame( $draft->get_id(), $resumed->get_id(), 'The linked draft is reused, not duplicated.' );
+		$this->assertTrue( $resumed->is_paid() );
+		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+
+		$head = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+	}
+
+	/**
+	 * @testdox process_due finds an unlinked draft via the meta fallback and heals the cycle link.
+	 *
+	 * A crash between saving the draft and linking it onto the cycle leaves an unlinked
+	 * `checkout-draft` carrying only the renewal meta. The fallback search must still surface
+	 * it (drafts are excluded from a plain 'any'-status query), heal the link, and resume.
+	 */
+	public function test_process_due_reuses_an_unlinked_draft_order(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$repo     = new ContractRepository();
+		$previous = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $previous );
+
+		$this->make_pending_cycle_2( $contract_id, $previous, gmdate( 'Y-m-d H:i:s', time() - 60 ) );
+		$draft = $this->make_ghost_renewal_order( $contract_id, 2, false, 'checkout-draft' );
+
+		$resumed = ( new RenewalEngine() )->process_due( $contract_id );
+
+		$this->assertInstanceOf( WC_Order::class, $resumed );
+		$this->assertSame( $draft->get_id(), $resumed->get_id(), 'The abandoned draft is reused, not duplicated.' );
+		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+
+		$head = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertSame( $draft->get_id(), $head->get_order_id(), 'The cycle link is healed from the meta match.' );
+	}
+
+	/**
+	 * @testdox complete_from_order settles once: repeats move no dates and re-fire no actions.
+	 */
+	public function test_complete_from_order_settles_the_schedule_once_when_invoked_repeatedly(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$billed_fired = 0;
+		add_action(
+			RenewalEngine::RENEWAL_BILLED_ACTION,
+			static function () use ( &$billed_fired ): void {
+				++$billed_fired;
+			},
+			10,
+			0
+		);
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$engine        = new RenewalEngine();
+		$renewal_order = $engine->process_due( $contract_id );
+		$this->assertInstanceOf( WC_Order::class, $renewal_order );
+		$fired_after_process = $billed_fired;
+
+		$repo  = new ContractRepository();
+		$after = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $after );
+		$next_payment = $after->get_next_payment_gmt();
+		$last_payment = $after->get_last_payment_gmt();
+
+		// A late duplicate completion (a repeated webhook, a concurrent worker's retry): no-op.
+		$fresh = wc_get_order( $renewal_order->get_id() );
+		$this->assertInstanceOf( WC_Order::class, $fresh );
+		$engine->complete_from_order( $fresh );
+		$fired_after_repeat = $billed_fired;
+
+		$reloaded = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertSame( $next_payment, $reloaded->get_next_payment_gmt(), 'The schedule does not move again.' );
+		$this->assertSame( $last_payment, $reloaded->get_last_payment_gmt(), 'The payment record does not move again.' );
+		$this->assertSame( 1, $fired_after_process, 'The billed action fires exactly once for the renewal.' );
+		$this->assertSame( 1, $fired_after_repeat, 'The billed action does not re-fire.' );
+	}
+
+	/**
+	 * @testdox complete_from_order ignores an order the head is not linked to.
+	 *
+	 * The cycle's own order reference is the settlement authority: a rogue paid order carrying
+	 * matching renewal meta must not settle a head that is linked to a different order.
+	 */
+	public function test_complete_from_order_ignores_an_order_the_head_is_not_linked_to(): void {
+		GatewayCapabilities::declare( self::GATEWAY_APPROVING, array( GatewayCapabilities::RECURRING ) );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$repo     = new ContractRepository();
+		$previous = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $previous );
+
+		// The head is claimed with a live lease and linked to (unpaid) order A.
+		$cycle   = $this->make_pending_cycle_2( $contract_id, $previous, gmdate( 'Y-m-d H:i:s', time() + 3600 ) );
+		$order_a = $this->make_ghost_renewal_order( $contract_id, 2, false );
+		$cycle->set_order_id( $order_a->get_id() );
+		$repo->update_cycle( $cycle );
+
+		// A rogue paid order B carries the same renewal meta but is not the head's order.
+		$order_b = $this->make_ghost_renewal_order( $contract_id, 2, true );
+		( new RenewalEngine() )->complete_from_order( $order_b );
+
+		$head = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertTrue( $head->get_status()->equals( CycleStatus::pending() ), 'The linked head is not settled by a rogue order.' );
+		$this->assertSame( $order_a->get_id(), $head->get_order_id() );
+	}
+
+	/**
+	 * @testdox complete_from_order leaves the cycle in flight when the order cannot be re-read.
+	 *
+	 * Settlement never trusts the stale in-memory order: when the fresh read fails (the order
+	 * was deleted mid-flight) the cycle stays as it was, for a later run to resolve.
+	 */
+	public function test_complete_from_order_leaves_the_cycle_in_flight_when_the_order_is_gone(): void {
+		GatewayCapabilities::declare( self::GATEWAY_APPROVING, array( GatewayCapabilities::RECURRING ) );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$repo     = new ContractRepository();
+		$previous = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $previous );
+
+		$this->make_pending_cycle_2( $contract_id, $previous, gmdate( 'Y-m-d H:i:s', time() + 3600 ) );
+		$ghost = $this->make_ghost_renewal_order( $contract_id, 2, true );
+		$ghost->delete( true );
+
+		// The in-memory instance still carries the meta, but the stored order is gone.
+		( new RenewalEngine() )->complete_from_order( $ghost );
+
+		$head = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertTrue( $head->get_status()->equals( CycleStatus::pending() ), 'No settlement happens from a stale order copy.' );
+	}
+
+	/**
 	 * Append a pending cycle 2 (no tagged renewal order) with the given crash-recovery
 	 * lease, so the create-as-claim collides on it and the reclaim-vs-skip path is exercised.
 	 *
@@ -1257,14 +1432,16 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	/**
 	 * A renewal order left as a crash would leave it: saved with the renewal-relation meta for
 	 * `$count` but never charged (no payment token). Optionally pre-marked paid, to model a crash
-	 * AFTER the gateway was paid but before the cycle settled.
+	 * AFTER the gateway was paid but before the cycle settled, or given an explicit status - a
+	 * `checkout-draft` models a crash during the draft-first creation window.
 	 *
-	 * @param int  $contract_id Contract id.
-	 * @param int  $count       Chargeable number the order bills.
-	 * @param bool $paid        Whether the gateway had already been paid before the crash.
+	 * @param int         $contract_id Contract id.
+	 * @param int         $count       Chargeable number the order bills.
+	 * @param bool        $paid        Whether the gateway had already been paid before the crash.
+	 * @param string|null $status      Explicit order status, overriding the paid/pending default.
 	 * @return WC_Order The ghost renewal order.
 	 */
-	private function make_ghost_renewal_order( int $contract_id, int $count, bool $paid ): WC_Order {
+	private function make_ghost_renewal_order( int $contract_id, int $count, bool $paid, ?string $status = null ): WC_Order {
 		$order = new WC_Order();
 		$order->set_currency( 'USD' );
 		$order->set_total( '19.99' );
@@ -1277,6 +1454,9 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 			$order->set_date_paid( '2026-02-15 00:00:00' );
 		} else {
 			$order->set_status( 'pending' );
+		}
+		if ( null !== $status ) {
+			$order->set_status( $status );
 		}
 		$order->save();
 

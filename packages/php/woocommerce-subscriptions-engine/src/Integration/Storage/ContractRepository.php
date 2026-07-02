@@ -468,6 +468,36 @@ final class ContractRepository {
 	}
 
 	/**
+	 * Settle a cycle's outcome as an atomic compare-and-set on its status: move it from
+	 * `$from_status` to `$to_status`, stamp the settling order and reason, and clear the
+	 * crash-recovery lease - all in one UPDATE gated on the row still being in `$from_status`.
+	 * Among concurrent settlers (the post-charge reconciliation and the order-status listener
+	 * can race across workers), exactly one caller matches the row and wins; the rest match
+	 * zero rows, so status transitions - and the actions fired on them - happen exactly once.
+	 *
+	 * @param int         $cycle_id    The cycle to settle.
+	 * @param string      $from_status The status the caller read; the CAS predicate.
+	 * @param string      $to_status   The settled status to write.
+	 * @param int         $order_id    The renewal order carrying the outcome.
+	 * @param string|null $reason      Failure reason to record, or null to clear.
+	 */
+	public function transition_cycle_status( int $cycle_id, string $from_status, string $to_status, int $order_id, ?string $reason = null ): bool {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		if ( null === $reason ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s, order_id = %d, reason = NULL, claimed_until = NULL, date_updated_gmt = %s WHERE id = %d AND status = %s", $to_status, $order_id, gmdate( 'Y-m-d H:i:s' ), $cycle_id, $from_status ) );
+		} else {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s, order_id = %d, reason = %s, claimed_until = NULL, date_updated_gmt = %s WHERE id = %d AND status = %s", $to_status, $order_id, $reason, gmdate( 'Y-m-d H:i:s' ), $cycle_id, $from_status ) );
+		}
+
+		return false !== $result && 1 === $wpdb->rows_affected;
+	}
+
+	/**
 	 * The chain's head - its most-recent cycle (highest `sequence_no` in `(contract_id,
 	 * kind)`) - or null when the chain is empty. The head is the chain's growth point, not
 	 * necessarily the cycle current by date (a forced early renewal bills a head whose

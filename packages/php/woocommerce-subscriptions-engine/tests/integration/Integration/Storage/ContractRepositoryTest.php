@@ -831,6 +831,35 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox transition_cycle_status settles atomically: one caller wins, repeats lose.
+	 */
+	public function test_transition_cycle_status_is_an_atomic_compare_and_set(): void {
+		$contract_id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::PENDING, '2026-07-14 00:00:00' );
+
+		$head = $this->sut->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$cycle_id = (int) $head->get_id();
+
+		// The winning settle: status flips, order stamped, lease cleared, reason NULL - one write.
+		$this->assertTrue( $this->sut->transition_cycle_status( $cycle_id, CycleStatus::PENDING, CycleStatus::BILLED, 4242 ) );
+
+		$settled = $this->sut->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $settled );
+		$this->assertSame( CycleStatus::BILLED, $settled->get_status()->get_value() );
+		$this->assertSame( 4242, $settled->get_order_id() );
+		$this->assertNull( $settled->get_claimed_until_gmt() );
+		$this->assertNull( $settled->get_reason() );
+
+		// A racing settler that read the old status matches zero rows and loses.
+		$this->assertFalse( $this->sut->transition_cycle_status( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, 9999, 'gateway-charge-failed' ) );
+
+		$after = $this->sut->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $after );
+		$this->assertSame( CycleStatus::BILLED, $after->get_status()->get_value(), 'The losing transition writes nothing.' );
+		$this->assertSame( 4242, $after->get_order_id() );
+	}
+
+	/**
 	 * The contract ids of the due scan at `$now`, in scan order.
 	 *
 	 * @param \DateTimeImmutable $now   The cutoff moment.

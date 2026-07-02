@@ -7,13 +7,15 @@
  *   cycle-aware due scan; `process_due()` runs it for a single contract.
  * - Processing ({@see self::process()}) bills exactly the cycle it is handed: it claims that
  *   cycle `pending` (create-as-claim, stamping a crash-recovery lease, or reclaiming a
- *   stalled one), reconciles the renewal order AFTER the claim (reuse-or-build - so the cycle
- *   chain, not the mutable order, is the idempotency gate), charges, and completes.
+ *   stalled one), reconciles the renewal order AFTER the claim (reuse-or-build, draft-first
+ *   and linked onto the cycle before the order goes live - so the cycle chain, not the
+ *   mutable order, is the idempotency gate), charges, and completes.
  *
  * Completion is driven by the renewal order's paid state, not the charge call's return, so
  * synchronous and asynchronous gateways share one path: {@see self::complete_from_order()}
  * runs both as a post-charge reconciliation and from `woocommerce_payment_complete` / the
- * failed transition. A charge with no terminal outcome yet (an async method awaiting
+ * failed transition, and every settlement lands through an atomic status compare-and-set so
+ * it happens exactly once. A charge with no terminal outcome yet (an async method awaiting
  * confirmation) settles the cycle `processing`, which the lease never reclaims and the scan
  * never re-selects.
  *
@@ -35,6 +37,7 @@ use DateTimeZone;
 use Throwable;
 use WC_Order;
 use WC_Order_Item_Product;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
@@ -419,27 +422,37 @@ final class RenewalEngine {
 			return null;
 		}
 
-		// Reconcile the order AFTER the claim: reuse the one tagged for this count, or build one.
-		// The cycle being settled is the price + period authority; a reclaimed cycle carries its
-		// OWN stored total, so the order bills that, never a freshly-computed next period.
-		$renewal_order = $this->find_renewal_order_for_cycle( $contract_id, $cycle_count );
+		// Reconcile the order AFTER the claim: reuse the one linked or tagged for this cycle, or
+		// build one. The cycle being settled is the price + period authority; a reclaimed cycle
+		// carries its OWN stored total, so the order bills that, never a freshly-computed next period.
+		$renewal_order = $this->find_renewal_order_for_cycle( $cycle );
 		$order_created = false;
 		if ( null === $renewal_order ) {
-			$renewal_order = $this->build_renewal_order( $contract, $cycle_count, $cycle->get_expected_total() );
+			$renewal_order = $this->build_renewal_order( $contract, $cycle );
 			if ( null === $renewal_order ) {
 				// build_renewal_order logged the reason. The claimed cycle stays pending for a
 				// later run to resolve; no schedule change is made here.
 				return null;
 			}
 			$order_created = true;
+		} elseif ( $cycle->get_order_id() !== $renewal_order->get_id() ) {
+			// Found via the meta fallback: heal the missing cycle link before the order acts.
+			$cycle->set_order_id( $renewal_order->get_id() );
+			$this->contracts->update_cycle( $cycle );
+		}
+
+		// A reused order abandoned mid-creation may still be a draft: promote it before the
+		// charge (a draft is not payable).
+		if ( $renewal_order->has_status( OrderStatus::CHECKOUT_DRAFT ) ) {
+			$renewal_order->set_status( OrderStatus::PENDING );
+			$renewal_order->save();
 		}
 
 		// Charge only when the order is not already paid - a crash after the charge, or a prior
 		// async attempt that has since settled, needs no second charge; completion handles it.
-		$fresh = wc_get_order( $renewal_order->get_id() );
-		$paid  = $fresh instanceof WC_Order ? $fresh->is_paid() : $renewal_order->is_paid();
-
-		if ( ! $paid ) {
+		// The order was built or loaded moments ago with no gateway in between, so its own paid
+		// state is current.
+		if ( ! $renewal_order->is_paid() ) {
 			$this->ensure_payment_token( $renewal_order, $contract );
 			// The created action fires once, for a genuinely new order only. A reused order - a
 			// reclaimed stall resuming an earlier attempt - already announced its creation, so
@@ -667,10 +680,12 @@ final class RenewalEngine {
 	 * listener {@see self::handle_order_settled()}. Keying completion on the order (not the
 	 * charge call's return) lets synchronous and asynchronous gateways share one path.
 	 *
-	 * Maps the order back to its cycle via the renewal relation meta and re-reads the head
-	 * fresh, so it is idempotent: it acts only while the head is the still-in-flight cycle this
-	 * order bills (`pending`/`processing` at the order's count) and no-ops once it is terminal
-	 * or the chain has advanced. A non-renewal order is ignored.
+	 * The order's renewal meta locates the contract; whether this order settles the head is
+	 * then decided by the CYCLE's own data: a head linked to an order settles only from that
+	 * order, and the order meta count is consulted only for an unlinked head (a pre-link
+	 * crash). Re-reading the head fresh keeps it idempotent: it acts only while the head is the
+	 * still-in-flight cycle this order bills (`pending`/`processing`) and no-ops once it is
+	 * terminal or the chain has advanced. A non-renewal order is ignored.
 	 *
 	 * @param WC_Order $order The order whose state may settle a cycle.
 	 */
@@ -680,11 +695,9 @@ final class RenewalEngine {
 		}
 
 		$contract_id = ScalarCoercion::coerce_int( $order->get_meta( OrderLinkage::META_CONTRACT_ID ) );
-		$count_meta  = $order->get_meta( self::renewal_cycle_meta_key() );
-		if ( $contract_id <= 0 || ! is_numeric( $count_meta ) ) {
+		if ( $contract_id <= 0 ) {
 			return;
 		}
-		$count = (int) $count_meta;
 
 		$contract = $this->contracts->find( $contract_id );
 		if ( null === $contract ) {
@@ -692,9 +705,23 @@ final class RenewalEngine {
 		}
 
 		$cycle = $this->contracts->find_chain_head( $contract_id );
-		if ( null === $cycle || $count !== $cycle->get_count() ) {
-			// The chain advanced past this order's cycle (or has none): nothing to settle.
+		if ( null === $cycle ) {
 			return;
+		}
+
+		$linked_id = $cycle->get_order_id();
+		if ( null !== $linked_id ) {
+			// The head knows its order: settle only from that order, whatever the meta says.
+			if ( $linked_id !== $order->get_id() ) {
+				return;
+			}
+		} else {
+			// Unlinked head (a crash before the link was stamped): fall back to the order's
+			// chargeable-number meta to decide whether it bills this head.
+			$count_meta = $order->get_meta( self::renewal_cycle_meta_key() );
+			if ( ! is_numeric( $count_meta ) || (int) $count_meta !== $cycle->get_count() ) {
+				return;
+			}
 		}
 
 		$status = $cycle->get_status()->get_value();
@@ -709,9 +736,15 @@ final class RenewalEngine {
 	/**
 	 * Settle an in-flight cycle from `$order`'s paid state, and advance the contract on success.
 	 *
-	 * Paid -> cycle `billed`, order linked, `next_payment_gmt` advanced to the cycle's OWN
-	 * `ends_at_gmt` (the period actually charged, so a reclaimed cycle advances exactly one
-	 * cadence, never skipping one). Failed -> cycle `failed` (recording a reason), schedule
+	 * Every outcome lands through {@see ContractRepository::transition_cycle_status()} - an
+	 * atomic compare-and-set on the status the caller read - so among racing settlers (the
+	 * post-charge reconciliation and the order-status listener can overlap across workers)
+	 * exactly one wins each transition, and the billed action fires exactly once per cycle.
+	 *
+	 * Paid -> cycle `billed`, `next_payment_gmt` advanced to the cycle's OWN `ends_at_gmt` (the
+	 * period actually charged, so a reclaimed cycle advances exactly one cadence, never
+	 * skipping one) and `last_payment_gmt` taken from the order's paid date - inputs that do
+	 * not move between invocations. Failed -> cycle `failed` (recording a reason), schedule
 	 * left for a later dunning pass. Neither yet -> cycle `processing`: the gateway accepted an
 	 * async charge whose outcome will arrive later; the crash-recovery lease is cleared (a
 	 * submitted charge is no longer a mid-submit window to reclaim) and the schedule is left
@@ -726,21 +759,40 @@ final class RenewalEngine {
 
 		// Re-fetch the order: a gateway handler that called payment_complete() on its own
 		// freshly-loaded instance leaves the passed object stale, which would misread a
-		// successful charge. Read the outcome from the fresh instance.
+		// successful charge. Never settle from the stale copy: when the fresh read fails (the
+		// order vanished mid-flight) the cycle stays in flight for a later run to resolve.
 		$fresh = wc_get_order( $order->get_id() );
-		$order = $fresh instanceof WC_Order ? $fresh : $order;
+		if ( ! $fresh instanceof WC_Order ) {
+			wc_get_logger()->warning(
+				sprintf( 'RenewalEngine::settle_cycle(): renewal order %d could not be re-read - leaving cycle %d unsettled.', $order->get_id(), (int) $cycle->get_id() ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => (int) $contract->get_id(),
+					'order_id'    => $order->get_id(),
+				)
+			);
+			return;
+		}
+		$order = $fresh;
 
-		// The renewal order exists regardless of outcome, so record it on the cycle either way.
-		$cycle->set_order_id( $order->get_id() );
+		$cycle_id    = (int) $cycle->get_id();
+		$read_status = $cycle->get_status()->get_value();
 
 		if ( $order->is_paid() ) {
+			if ( ! $this->contracts->transition_cycle_status( $cycle_id, $read_status, CycleStatus::BILLED, $order->get_id() ) ) {
+				// Another settler won the CAS; its transition carried the side effects.
+				return;
+			}
+			// Sync the entity with the row the CAS just wrote, for the action payload.
+			$cycle->set_order_id( $order->get_id() );
 			$cycle->set_status( CycleStatus::billed() );
 			$cycle->set_claimed_until_gmt( null );
-			$this->contracts->update_cycle( $cycle );
 
-			// Advance to the period actually billed (this cycle's end), not a recomputed one.
+			// Advance to the period actually billed (this cycle's end), not a recomputed one;
+			// the payment moment comes from the order itself.
+			$paid_at = $order->get_date_paid();
 			$contract->set_next_payment_gmt( $cycle->get_ends_at_gmt() );
-			$contract->set_last_payment_gmt( $now );
+			$contract->set_last_payment_gmt( null !== $paid_at ? gmdate( 'Y-m-d H:i:s', $paid_at->getTimestamp() ) : $now );
 			$contract->set_last_attempt_gmt( $now );
 			$this->contracts->update( $contract );
 
@@ -756,11 +808,14 @@ final class RenewalEngine {
 			return;
 		}
 
-		if ( $order->has_status( 'failed' ) ) {
+		if ( $order->has_status( OrderStatus::FAILED ) ) {
+			if ( ! $this->contracts->transition_cycle_status( $cycle_id, $read_status, CycleStatus::FAILED, $order->get_id(), 'gateway-charge-failed' ) ) {
+				return;
+			}
+			$cycle->set_order_id( $order->get_id() );
 			$cycle->set_status( CycleStatus::failed() );
 			$cycle->set_reason( 'gateway-charge-failed' );
 			$cycle->set_claimed_until_gmt( null );
-			$this->contracts->update_cycle( $cycle );
 
 			$contract->set_last_attempt_gmt( $now );
 			$this->contracts->update( $contract );
@@ -770,11 +825,10 @@ final class RenewalEngine {
 
 		// Neither paid nor failed: the gateway accepted the charge but has not confirmed it
 		// (an async method). Park the cycle in `processing` until its outcome arrives; the
-		// listener completes it then. Guard the transition so re-entry is a no-op.
-		if ( CycleStatus::PROCESSING !== $cycle->get_status()->get_value() ) {
-			$cycle->set_status( CycleStatus::processing() );
-			$cycle->set_claimed_until_gmt( null );
-			$this->contracts->update_cycle( $cycle );
+		// listener completes it then. Only a pending cycle needs the write - a processing one
+		// re-entering here is already parked.
+		if ( CycleStatus::PENDING === $read_status ) {
+			$this->contracts->transition_cycle_status( $cycle_id, CycleStatus::PENDING, CycleStatus::PROCESSING, $order->get_id() );
 		}
 
 		$contract->set_last_attempt_gmt( $now );
@@ -782,23 +836,31 @@ final class RenewalEngine {
 	}
 
 	/**
-	 * Build the renewal order from the contract's own stored state: its billing / shipping
-	 * addresses and its (recurring) line items - never the origin order, whose cart may have
-	 * carried one-time items that must not ride along onto a renewal. Applies the new cycle's
+	 * Build the renewal order for `$cycle` from the contract's own stored state: its billing /
+	 * shipping addresses and its (recurring) line items - never the origin order, whose cart may
+	 * have carried one-time items that must not ride along onto a renewal. Applies the cycle's
 	 * expected total as ground truth, attaches the contract's payment token, and tags the
 	 * renewal relation meta (contract id + chargeable number) so charge observers and the
-	 * order-to-cycle mapping can find it. Returns null (logged) when `wc_create_order()` fails.
+	 * order-to-cycle mapping can find it.
 	 *
-	 * @param Contract $contract       Contract being renewed.
-	 * @param int      $count          The chargeable number this order bills.
-	 * @param string   $expected_total The new cycle's expected total (the price authority).
+	 * Created draft-first: the order starts as `checkout-draft`, is linked onto the claimed
+	 * cycle (`order_id`), and only then becomes `pending`. A crash mid-way therefore leaves
+	 * either a linked draft the resume path promotes, or an unlinked draft that fires no emails
+	 * and is swept by core's stale-draft cleanup - never a live pending order the cycle does not
+	 * know about. Returns null (logged) when `wc_create_order()` fails.
+	 *
+	 * @param Contract $contract Contract being renewed.
+	 * @param Cycle    $cycle    The claimed cycle this order bills (count + expected total).
 	 * @return WC_Order|null The saved pending renewal order, or null on failure.
 	 */
-	private function build_renewal_order( Contract $contract, int $count, string $expected_total ): ?WC_Order {
+	private function build_renewal_order( Contract $contract, Cycle $cycle ): ?WC_Order {
+		$count          = (int) $cycle->get_count();
+		$expected_total = $cycle->get_expected_total();
+
 		$renewal_order = wc_create_order(
 			array(
 				'customer_id' => $contract->get_customer_id(),
-				'status'      => 'pending',
+				'status'      => OrderStatus::CHECKOUT_DRAFT,
 				'created_via' => 'woocommerce_subscriptions_engine_renewal',
 			)
 		);
@@ -868,11 +930,20 @@ final class RenewalEngine {
 		$renewal_order->set_total( $expected_total );
 
 		// Tag the renewal relation + chargeable number so completion can map the order back to
-		// its cycle, and save before attaching the token so a crash between the two leaves the
-		// order findable (no duplicate charge on the retry).
+		// its cycle, and save (still a draft) before any linking so a crash between the two
+		// leaves the order findable (no duplicate charge on the retry).
 		$renewal_order->update_meta_data( OrderLinkage::META_CONTRACT_ID, (string) $contract->get_id() );
 		$renewal_order->update_meta_data( OrderLinkage::META_RELATION_TYPE, OrderLinkage::RELATION_RENEWAL );
 		$renewal_order->update_meta_data( self::renewal_cycle_meta_key(), (string) $count );
+		$renewal_order->save();
+
+		// Link the order onto the claimed cycle BEFORE the order goes live: the cycle row is the
+		// idempotency authority, so the link must exist by the time the order can act (emails,
+		// charges). Only then does the draft become a real pending order.
+		$cycle->set_order_id( $renewal_order->get_id() );
+		$this->contracts->update_cycle( $cycle );
+
+		$renewal_order->set_status( OrderStatus::PENDING );
 		$renewal_order->save();
 
 		$this->ensure_payment_token( $renewal_order, $contract );
@@ -963,7 +1034,11 @@ final class RenewalEngine {
 			/**
 			 * Fires to request a recurring charge for a renewal order. The gateway (or its
 			 * adapter) captures against the stored token, then transitions the order via its
-			 * own `payment_complete()` / failure handling.
+			 * own `payment_complete()` / failure handling. The gateway is expected to reach a
+			 * terminal order state for errors it can detect - mark the order failed on a
+			 * decline or an unrecoverable processing error. An order left neither paid nor
+			 * failed is treated as an async charge awaiting confirmation: its cycle parks in
+			 * `processing` until the order settles (or is resolved manually).
 			 *
 			 * @param float    $amount        The amount to charge.
 			 * @param WC_Order $renewal_order The renewal order being charged.
@@ -984,26 +1059,39 @@ final class RenewalEngine {
 	}
 
 	/**
-	 * The renewal order tagged for `$contract_id` at `$cycle`, or null when none exists -
-	 * the reuse lookup the post-claim order reconciliation runs.
+	 * The renewal order for `$cycle`, or null when none exists - the reuse lookup the
+	 * post-claim order reconciliation runs.
 	 *
-	 * Queries on the contract id via the flat `meta_key` / `meta_value` shortcut, then
-	 * narrows by relation type and cycle in PHP. The flat shortcut is used rather than a
+	 * The cycle's own `order_id` reference resolves directly (we already hold the row, and the
+	 * link is stamped at order creation). The meta search is the fallback for a cycle that was
+	 * claimed but never linked - a crash between creating the order and linking it: it queries
+	 * on the contract id via the flat `meta_key` / `meta_value` shortcut, then narrows by
+	 * relation type and chargeable number in PHP. The flat shortcut is used rather than a
 	 * `meta_query` because the legacy CPT order store rejects `meta_query` with
-	 * `wc_doing_it_wrong`; the shortcut round-trips through both stores.
+	 * `wc_doing_it_wrong`; the shortcut round-trips through both stores. Statuses are passed
+	 * explicitly (not `'any'`) because a crash-abandoned order may still be a `checkout-draft`,
+	 * which `'any'` excludes.
 	 *
-	 * @param int $contract_id Contract id.
-	 * @param int $cycle       The cycle number the renewal would bill.
-	 * @return WC_Order|null The existing renewal order for the number, or null when none.
+	 * @param Cycle $cycle The claimed cycle whose renewal order to resolve.
+	 * @return WC_Order|null The existing renewal order for the cycle, or null when none.
 	 */
-	private function find_renewal_order_for_cycle( int $contract_id, int $cycle ): ?WC_Order {
+	private function find_renewal_order_for_cycle( Cycle $cycle ): ?WC_Order {
+		$linked_id = $cycle->get_order_id();
+		if ( null !== $linked_id ) {
+			$linked = wc_get_order( $linked_id );
+			if ( $linked instanceof WC_Order ) {
+				return $linked;
+			}
+			// The linked order is gone (deleted): fall through to the meta search.
+		}
+
 		$orders = wc_get_orders(
 			array(
 				'limit'      => -1,
-				'status'     => 'any',
+				'status'     => array_keys( wc_get_order_statuses() ),
 				'type'       => 'shop_order',
-				'meta_key'   => OrderLinkage::META_CONTRACT_ID, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_value' => (string) $contract_id,          // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'meta_key'   => OrderLinkage::META_CONTRACT_ID,        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value' => (string) $cycle->get_contract_id(),    // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			)
 		);
 
@@ -1019,7 +1107,7 @@ final class RenewalEngine {
 			}
 
 			if ( OrderLinkage::RELATION_RENEWAL === $order->get_meta( OrderLinkage::META_RELATION_TYPE )
-				&& (string) $cycle === $order->get_meta( self::renewal_cycle_meta_key() ) ) {
+				&& (string) $cycle->get_count() === $order->get_meta( self::renewal_cycle_meta_key() ) ) {
 				return $order;
 			}
 		}
