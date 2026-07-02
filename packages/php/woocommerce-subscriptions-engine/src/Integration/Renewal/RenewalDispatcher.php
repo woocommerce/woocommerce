@@ -216,41 +216,41 @@ final class RenewalDispatcher {
 			return 0;
 		}
 
-		$now = $now ?? new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
-		$due = $this->contracts->find_due( $now, $limit );
+		$now        = $now ?? new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
+		$candidates = $this->contracts->find_due( $now, $limit );
 
-		foreach ( $due as $row ) {
+		foreach ( $candidates as $candidate ) {
 			try {
-				$cycle_count = $this->selector->select_billing_cycle( $row, $now );
+				$cycle_count = $this->selector->select_billing_cycle( $candidate, $now );
 				if ( null === $cycle_count ) {
 					continue;
 				}
-				$renewal_intent = new RenewalIntent( $row->get_contract_id(), $cycle_count );
+				$renewal_intent = new RenewalIntent( $candidate->get_contract_id(), $cycle_count );
 				$this->engine->process( $renewal_intent, $now );
 			} catch ( RenewalNotProcessable $e ) {
 				// Pre-flight impossibility (e.g. an unresolvable plan): park so the contract
 				// leaves the due window and cannot re-poison the scan; a repair re-arms it.
-				$this->engine->park( $row->get_contract_id() );
+				$this->engine->park( $candidate->get_contract_id() );
 				wc_get_logger()->warning(
-					sprintf( 'RenewalDispatcher::run(): parking contract %d - %s', $row->get_contract_id(), $e->getMessage() ),
+					sprintf( 'RenewalDispatcher::run(): parking contract %d - %s', $candidate->get_contract_id(), $e->getMessage() ),
 					array(
 						'source'      => self::LOG_SOURCE,
-						'contract_id' => $row->get_contract_id(),
+						'contract_id' => $candidate->get_contract_id(),
 					)
 				);
 			} catch ( Throwable $e ) {
 				// One contract's failure must not stall the batch (or make AS retry the
 				// whole tick forever). Log and continue to the next due contract.
 				wc_get_logger()->error(
-					sprintf( 'RenewalDispatcher::run(): processing contract %d threw: %s', $row->get_contract_id(), $e->getMessage() ),
+					sprintf( 'RenewalDispatcher::run(): processing contract %d threw: %s', $candidate->get_contract_id(), $e->getMessage() ),
 					array(
 						'source'      => self::LOG_SOURCE,
-						'contract_id' => $row->get_contract_id(),
+						'contract_id' => $candidate->get_contract_id(),
 					)
 				);
 			}
 		}
 
-		return count( $due );
+		return count( $candidates );
 	}
 }

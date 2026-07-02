@@ -1,9 +1,9 @@
 <?php
 /**
- * RenewalSelector - read-only selection: given a due contract's head cycle and the scan
- * moment, decide which cycle to bill, or nothing. It performs no writes and touches no
- * gateway; it turns a {@see DueRenewal} scan row into the cycle number to bill, or null to
- * skip. The caller builds the {@see RenewalIntent} the money-path executes.
+ * RenewalSelector - read-only selection: given a contract's head-cycle fields, decide
+ * which cycle to bill, or nothing. It performs no writes and touches no gateway; it turns
+ * a {@see RenewalCandidate} into the cycle number to bill, or null to skip. The caller
+ * builds the {@see RenewalIntent} the money-path executes.
  *
  * It encodes two selection policies over the same `process()` primitive (which bills whatever
  * cycle it is handed and owns no due policy):
@@ -26,7 +26,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal;
 
 use DateTimeImmutable;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DueRenewal;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\RenewalCandidate;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -38,24 +38,24 @@ final class RenewalSelector {
 	/**
 	 * Resolve the cycle number to bill for a due contract, or null to skip.
 	 *
-	 * @param DueRenewal        $due The due scan row (contract + head fields).
-	 * @param DateTimeImmutable $now The scan moment.
+	 * @param RenewalCandidate  $candidate The candidate (contract + head fields).
+	 * @param DateTimeImmutable $now       The scan moment.
 	 * @return int|null The cycle count to bill, or null when nothing is due.
 	 */
-	public function select_billing_cycle( DueRenewal $due, DateTimeImmutable $now ): ?int {
-		$count = $due->get_head_count();
+	public function select_billing_cycle( RenewalCandidate $candidate, DateTimeImmutable $now ): ?int {
+		$count = $candidate->get_head_count();
 		if ( null === $count ) {
 			// A countless head is a corrupt chain the scan should not surface; refuse to guess.
 			return null;
 		}
 
-		$status = $due->get_head_status();
+		$status = $candidate->get_head_status();
 
 		// Head settled forward: advance to the next cycle, but only once its period has begun.
 		// The guard is the charge-ahead defence - a just-billed head whose period runs into the
 		// future is not yet due for its successor.
 		if ( CycleStatus::BILLED === $status || CycleStatus::CANCELLED === $status ) {
-			if ( ! self::has_period_ended( $due->get_head_ends_at_gmt(), $now ) ) {
+			if ( ! self::has_period_ended( $candidate->get_head_ends_at_gmt(), $now ) ) {
 				return null;
 			}
 			return $count + 1;
@@ -79,16 +79,16 @@ final class RenewalSelector {
 	 * head is re-attempted at its own count. A `processing` head (awaiting its gateway) or a
 	 * countless head is not manually renewable.
 	 *
-	 * @param DueRenewal $due The contract + head fields.
+	 * @param RenewalCandidate $candidate The candidate (contract + head fields).
 	 * @return int|null The cycle count to bill, or null when nothing is renewable.
 	 */
-	public function select_manual_cycle( DueRenewal $due ): ?int {
-		$count = $due->get_head_count();
+	public function select_manual_cycle( RenewalCandidate $candidate ): ?int {
+		$count = $candidate->get_head_count();
 		if ( null === $count ) {
 			return null;
 		}
 
-		$status = $due->get_head_status();
+		$status = $candidate->get_head_status();
 
 		// Settled forward: force the next cycle. Its period continues from the previous end, so
 		// the schedule is preserved (a prepay), not reset to now.

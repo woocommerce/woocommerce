@@ -270,7 +270,7 @@ final class ContractRepository {
 	 *
 	 * @param DateTimeImmutable $now   The cutoff moment; contracts due at or before it.
 	 * @param int               $limit Maximum rows to return (the batch size).
-	 * @return array<int, DueRenewal> Actionable due renewals, oldest-due first.
+	 * @return array<int, RenewalCandidate> Actionable renewal candidates, oldest-due first.
 	 */
 	public function find_due( DateTimeImmutable $now, int $limit ): array {
 		global $wpdb;
@@ -316,7 +316,7 @@ final class ContractRepository {
 				continue;
 			}
 			$head_count = $row['head_count'] ?? null;
-			$result[]   = new DueRenewal(
+			$result[]   = new RenewalCandidate(
 				ScalarCoercion::coerce_int( $row['contract_id'] ?? 0 ),
 				null === $head_count ? null : ScalarCoercion::coerce_int( $head_count ),
 				ScalarCoercion::coerce_string( $row['head_status'] ?? '' ),

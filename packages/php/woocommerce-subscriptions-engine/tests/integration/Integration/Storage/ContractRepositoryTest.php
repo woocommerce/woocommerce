@@ -17,7 +17,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DueRenewal;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\RenewalCandidate;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
@@ -773,12 +773,12 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_find_due_returns_the_head_fields(): void {
 		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
 
-		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-		$due = $this->sut->find_due( $now, 50 );
+		$id         = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		$candidates = $this->sut->find_due( $now, 50 );
 
-		$this->assertCount( 1, $due );
-		$row = $due[0];
-		$this->assertInstanceOf( DueRenewal::class, $row );
+		$this->assertCount( 1, $candidates );
+		$row = $candidates[0];
+		$this->assertInstanceOf( RenewalCandidate::class, $row );
 		$this->assertSame( $id, $row->get_contract_id() );
 		$this->assertSame( 1, $row->get_head_count() );
 		$this->assertSame( CycleStatus::BILLED, $row->get_head_status() );
@@ -839,8 +839,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	private function due_ids( \DateTimeImmutable $now, int $limit ): array {
 		return array_map(
-			static function ( DueRenewal $due ): int {
-				return $due->get_contract_id();
+			static function ( RenewalCandidate $candidate ): int {
+				return $candidate->get_contract_id();
 			},
 			$this->sut->find_due( $now, $limit )
 		);

@@ -48,7 +48,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway\CapabilityRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DueRenewal;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\RenewalCandidate;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
 defined( 'ABSPATH' ) || exit;
@@ -105,7 +105,8 @@ final class RenewalEngine {
 	private $plans;
 
 	/**
-	 * The read-only cycle selector `process_due()` runs for a single contract.
+	 * The read-only cycle selector the single-contract paths (`process_due()`,
+	 * `renew_now()`) run.
 	 *
 	 * @var RenewalSelector
 	 */
@@ -263,7 +264,7 @@ final class RenewalEngine {
 			return null;
 		}
 
-		$cycle_count = $this->selector->select_billing_cycle( DueRenewal::from_cycle( $head ), $now );
+		$cycle_count = $this->selector->select_billing_cycle( RenewalCandidate::from_cycle( $head ), $now );
 		if ( null === $cycle_count ) {
 			return null;
 		}
@@ -310,7 +311,7 @@ final class RenewalEngine {
 			return null;
 		}
 
-		$cycle_count = $this->selector->select_manual_cycle( DueRenewal::from_cycle( $head ) );
+		$cycle_count = $this->selector->select_manual_cycle( RenewalCandidate::from_cycle( $head ) );
 		if ( null === $cycle_count ) {
 			return null;
 		}

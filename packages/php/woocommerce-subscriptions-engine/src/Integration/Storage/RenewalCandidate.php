@@ -1,10 +1,12 @@
 <?php
 /**
- * DueRenewal - one row of the cycle-aware due scan: a contract and the head fields the
- * renewal selector needs to decide what to charge. Produced by
- * {@see ContractRepository::find_due()}, which joins each due contract to its head cycle
+ * RenewalCandidate - a contract as a candidate for renewal: its id plus the head-cycle
+ * fields the renewal selector reads to decide what (if anything) to bill. Produced by
+ * {@see ContractRepository::find_due()} - which joins each due contract to its head cycle
  * so the scan can filter to actionable contracts (head billed and due, or head pending
- * with an expired lease) in SQL - keeping non-actionable rows out of the batch budget.
+ * with an expired lease) in SQL, keeping non-actionable rows out of the batch budget -
+ * and by {@see self::from_cycle()} on the single-contract paths (scheduled or manual),
+ * where the caller has already loaded the head.
  *
  * A lean read-model, not the full {@see \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle}:
  * it carries only the head fields selection reads, so the scan does not hydrate snapshots
@@ -22,9 +24,9 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * A due contract plus its head-cycle fields.
+ * A renewal candidate: a contract plus its head-cycle fields.
  */
-final class DueRenewal {
+final class RenewalCandidate {
 
 	/**
 	 * Contract id.
@@ -55,7 +57,7 @@ final class DueRenewal {
 	private $head_ends_at_gmt;
 
 	/**
-	 * Build a due-scan row from a contract and its head-cycle fields.
+	 * Build a candidate from a contract and its head-cycle fields.
 	 *
 	 * @param int      $contract_id      Contract id.
 	 * @param int|null $head_count       Head chargeable count (null when the head has none).
