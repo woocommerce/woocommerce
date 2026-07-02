@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Logging;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\{ LogHandlerFileV2, Settings };
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\File;
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use WC_Unit_Test_Case;
 
 /**
@@ -376,6 +377,93 @@ MESSAGE;
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$actual_content  = file_get_contents( reset( $paths ) );
 		$expected_string = '4 expired log files were deleted.';
+		$this->assertStringContainsString( $expected_string, $actual_content );
+	}
+
+	/**
+	 * @testdox Check that delete_logs_before_timestamp deletes more than 20 expired log files in one run.
+	 */
+	public function test_delete_logs_before_timestamp_deletes_more_than_default_per_page() {
+		$current_time = time();
+		$past_time    = strtotime( '-5 days' );
+
+		// Create more expired files than a single delete batch can remove (batch size is 100).
+		$expired_count = 101;
+		foreach ( range( 1, $expired_count ) as $suffix ) {
+			$this->sut->handle( $past_time, 'debug', 'old.', array( 'source' => "source-{$suffix}" ) );
+		}
+
+		// Add a couple of non-expired files as well.
+		$this->sut->handle( $current_time, 'debug', 'new!', array( 'source' => 'fresh1' ) );
+		$this->sut->handle( $current_time, 'debug', 'new!', array( 'source' => 'fresh2' ) );
+
+		$paths = glob( Settings::get_log_directory() . '*.log' );
+		$this->assertCount( $expired_count + 2, $paths );
+
+		$result = $this->sut->delete_logs_before_timestamp( strtotime( '-3 days' ) );
+		$this->assertEquals( $expired_count, $result );
+
+		$paths = glob( Settings::get_log_directory() . '*.log' );
+		// wc_logger plus two fresh files.
+		$this->assertCount( 3, $paths );
+
+		$paths = glob( Settings::get_log_directory() . 'wc_logger*.log' );
+		$this->assertCount( 1, $paths );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$actual_content  = file_get_contents( reset( $paths ) );
+		$expected_string = '101 expired log files were deleted.';
+		$this->assertStringContainsString( $expected_string, $actual_content );
+	}
+
+	/**
+	 * @testdox Check that delete_logs_before_timestamp advances past a fully vetoed batch.
+	 */
+	public function test_delete_logs_before_timestamp_advances_past_vetoed_batch() {
+		$current_time = time();
+		$past_time    = strtotime( '-5 days' );
+
+		// Create 100 vetoed files, then the single allowed file. Files are sorted
+		// by modified time descending, so the 100 vetoed files normally land on the
+		// first 100-file page. Touch the allowed file to an older mtime so it is
+		// guaranteed to fall on the next page and forces pagination to advance past
+		// a fully vetoed batch.
+		$expired_count = 100;
+		foreach ( range( 1, $expired_count ) as $suffix ) {
+			$this->sut->handle( $past_time, 'debug', 'old.', array( 'source' => "source-{$suffix}" ) );
+		}
+		$this->sut->handle( $past_time, 'debug', 'old.', array( 'source' => 'source-101' ) );
+
+		$allowed_paths = glob( Settings::get_log_directory() . '*source-101*.log' );
+		$this->assertCount( 1, $allowed_paths );
+		FilesystemUtil::get_wp_filesystem()->touch( reset( $allowed_paths ), $past_time - 1 );
+
+		// Allow only the older file to be deleted.
+		$filter = function ( $delete, $file ) {
+			unset( $delete );
+			$basename = basename( $file->get_path() );
+			return false !== strpos( $basename, 'source-101' );
+		};
+		add_filter( 'woocommerce_logger_delete_expired_file', $filter, 10, 2 );
+
+		try {
+			$result = $this->sut->delete_logs_before_timestamp( strtotime( '-3 days' ) );
+		} finally {
+			remove_filter( 'woocommerce_logger_delete_expired_file', $filter, 10 );
+		}
+
+		$this->assertEquals( 1, $result );
+
+		$paths = glob( Settings::get_log_directory() . '*.log' );
+		// 100 vetoed files, 1 wc_logger summary file.
+		$this->assertCount( 101, $paths );
+
+		$paths = glob( Settings::get_log_directory() . 'wc_logger*.log' );
+		$this->assertCount( 1, $paths );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$actual_content  = file_get_contents( reset( $paths ) );
+		$expected_string = '1 expired log file was deleted.';
 		$this->assertStringContainsString( $expected_string, $actual_content );
 	}
 
