@@ -9720,7 +9720,11 @@ body.woocommerce_page_wc-settings {
 			color: #505050;
 			padding: 0 0 10px 0;
 			text-decoration: none;
-			&:focus, &:hover, &:active {
+			&:focus {
+				outline: 2px solid var(--wp-admin-theme-color, #3858e9);
+				outline-offset: -2px;
+			}
+			&:hover, &:active {
 				outline: none;
 				box-shadow: none;
 			}
