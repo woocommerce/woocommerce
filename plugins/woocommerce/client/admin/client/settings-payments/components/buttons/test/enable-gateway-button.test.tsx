@@ -21,6 +21,7 @@ jest.mock( '@woocommerce/data', () => ( {
 } ) );
 
 jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
 	dispatch: jest.fn( () => ( {
 		createErrorNotice: mockCreateErrorNotice,
 	} ) ),

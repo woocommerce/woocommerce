@@ -21,17 +21,29 @@ class ClassicVariationGalleryAdminTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Set up test dependencies.
+	 * @var LegacyVariationGalleryCompatibility
+	 */
+	private $legacy_compat;
+
+	/**
+	 * Set up.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = new ClassicVariationGalleryAdmin();
+		$this->sut           = new ClassicVariationGalleryAdmin();
+		$this->legacy_compat = new LegacyVariationGalleryCompatibility();
+		$this->legacy_compat->register();
 	}
 
 	/**
-	 * Reset globals after each test.
+	 * Tear down.
 	 */
 	public function tearDown(): void {
+		remove_filter(
+			'woocommerce_product_variation_get_gallery_image_ids',
+			array( $this->legacy_compat, 'maybe_read_legacy_gallery_image_ids' ),
+			10
+		);
 		unset( $_POST['variable_gallery_image_ids'] );
 		parent::tearDown();
 	}
@@ -198,18 +210,20 @@ class ClassicVariationGalleryAdminTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a test attachment.
-	 *
 	 * @param string $title Attachment title.
 	 * @return int
 	 */
 	private function create_attachment( string $title ): int {
-		return wp_insert_attachment(
+		$attachment_id = wp_insert_attachment(
 			array(
 				'post_title'     => $title,
 				'post_type'      => 'attachment',
 				'post_mime_type' => 'image/jpeg',
 			)
 		);
+
+		update_post_meta( $attachment_id, '_wp_attached_file', sanitize_title( $title ) . '.jpg' );
+
+		return $attachment_id;
 	}
 }

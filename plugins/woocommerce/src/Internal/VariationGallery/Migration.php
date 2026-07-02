@@ -67,7 +67,9 @@ class Migration {
 		$variation_ids = $select_variation_ids( self::BATCH_SIZE );
 
 		foreach ( $variation_ids as $variation_id ) {
-			$legacy_gallery_image_ids = wp_parse_id_list( get_post_meta( $variation_id, $legacy_meta_key, true ) );
+			$legacy_gallery_image_ids = array_values(
+				array_filter( wp_parse_id_list( get_post_meta( $variation_id, $legacy_meta_key, true ) ) )
+			);
 			$core_gallery_image_ids   = wp_parse_id_list( get_post_meta( $variation_id, $core_gallery_meta, true ) );
 
 			if ( empty( $core_gallery_image_ids ) && ! empty( $legacy_gallery_image_ids ) ) {

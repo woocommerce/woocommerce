@@ -6,11 +6,14 @@ module.exports = function ( grunt ) {
 		// Setting folder templates.
 		dirs: {
 			css: 'css',
-			cssDest: 'build/css',
+			// Write directly to the plugin's `assets/css` so PHP enqueues
+			// from the final location with no intermediate rsync step.
+			cssDest: '../../assets/css',
 			fonts: 'assets/fonts',
 			images: 'assets/images',
 			js: 'js',
-			jsDest: 'build/js',
+			// See `cssDest`. The plugin enqueues from `assets/js`.
+			jsDest: '../../assets/js',
 			php: 'includes',
 		},
 
@@ -142,30 +145,6 @@ module.exports = function ( grunt ) {
 			},
 		},
 
-		// Watch changes for assets.
-		watch: {
-			css: {
-				files: [ '<%= dirs.css %>/*.scss' ],
-				tasks: [
-					'sass',
-					'rtlcss',
-					'postcss',
-					'cssmin',
-					'concat:css',
-					'move:css',
-					'copy:css',
-				],
-			},
-			js: {
-				files: [
-					'GruntFile.js',
-					'<%= dirs.js %>/**/*.js',
-					'!<%= dirs.js %>/**/*.min.js',
-				],
-				tasks: [ 'eslint', 'copy:js', 'concat:js', 'newer:uglify' ],
-			},
-		},
-
 		// PHP Code Sniffer.
 		phpcs: {
 			options: {
@@ -263,11 +242,11 @@ module.exports = function ( grunt ) {
 	grunt.loadNpmTasks( 'grunt-rtlcss' );
 	grunt.loadNpmTasks( 'grunt-postcss' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
+	grunt.loadNpmTasks( 'gruntify-eslint' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify-es' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-concat' );
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
-	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 	grunt.loadNpmTasks( 'grunt-newer' );
 	grunt.loadNpmTasks( 'grunt-move' );
@@ -293,4 +272,68 @@ module.exports = function ( grunt ) {
 
 	// Only an alias to 'default' task.
 	grunt.registerTask( 'dev', [ 'default' ] );
+
+	grunt.registerTask(
+		'watch',
+		'Rebuild js/css assets when their sources change.',
+		function () {
+			const chokidar = require( 'chokidar' );
+			this.async(); // Keep this task alive until SIGINT.
+
+			let running = false;
+			const pending = new Set();
+			const runQueued = ( tasks ) => {
+				tasks.forEach( ( task ) => pending.add( task ) );
+				if ( running ) {
+					return;
+				}
+				running = true;
+				const next = [ ...pending ];
+				pending.clear();
+				grunt.util.spawn(
+					{
+						grunt: true,
+						args: next,
+						opts: { stdio: 'inherit' },
+					},
+					() => {
+						running = false;
+						if ( pending.size > 0 ) {
+							// Drain the queue.
+							runQueued( [] );
+						}
+					}
+				);
+			};
+
+			chokidar
+				.watch( [ 'css/*.scss' ], { ignoreInitial: true } )
+				.on( 'all', () =>
+					runQueued( [
+						'sass',
+						'rtlcss',
+						'postcss',
+						'cssmin',
+						'concat:css',
+						'move:css',
+						'copy:css',
+					] )
+				);
+
+			chokidar
+				.watch( [ 'js/**/*.js', 'Gruntfile.js' ], {
+					ignoreInitial: true,
+					ignored: '**/*.min.js',
+				} )
+				.on( 'all', () =>
+					runQueued( [
+						'copy:js',
+						'concat:js',
+						'newer:uglify',
+					] )
+				);
+
+			grunt.log.writeln( 'Watching css/ and js/ for changes...' );
+		}
+	);
 };

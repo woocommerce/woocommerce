@@ -179,6 +179,25 @@ class PatternRegistryTest extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test HTML entities are decoded in pattern titles.
+	 */
+	public function test_html_entities_are_decoded_in_pattern_title() {
+		$pattern = [
+			'title'   => 'Featured Products: Fresh &amp; Tasty',
+			'slug'    => 'my-pattern',
+			'content' => '<!-- wp:group {"metadata":{"name":"Sweet Organic Lemons"}} -->
+<div class="wp-block-group"></div>
+<!-- /wp:group -->',
+		];
+
+		$this->pattern_registry->register_block_pattern( 'source', $pattern, [] );
+
+		$registered_pattern = \WP_Block_Patterns_Registry::get_instance()->get_registered( $pattern['slug'] );
+
+		$this->assertSame( 'Featured Products: Fresh & Tasty', $registered_pattern['title'] );
+	}
+
+	/**
 	 * Enable the feature flag.
 	 *
 	 * @param array $features The features.

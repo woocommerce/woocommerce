@@ -218,6 +218,47 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preserve zero variation attributes when adding a variation directly by ID.
+	 */
+	public function test_add_variation_to_the_cart_directly_by_id_preserves_zero_attributes(): void {
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Variable product with zero attribute' );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( 0 );
+		$attribute->set_name( 'length' );
+		$attribute->set_options( array( '0', '1' ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'length' => '0' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		$cart_item_key = WC()->cart->add_to_cart( $variation->get_id(), 1 );
+
+		$this->assertNotFalse( $cart_item_key, 'The variation should be added to the cart.' );
+
+		$cart_item = WC()->cart->get_cart_item( (string) $cart_item_key );
+
+		$this->assertSame( $product->get_id(), $cart_item['product_id'], 'The cart item should use the parent product ID.' );
+		$this->assertSame( $variation->get_id(), $cart_item['variation_id'], 'The cart item should use the variation ID.' );
+		$this->assertSame(
+			array( 'attribute_length' => '0' ),
+			$cart_item['variation'],
+			'The zero variation attribute should be preserved in cart item data.'
+		);
+
+		$variation->delete( true );
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox should throw a notice to the cart if using variation_id
 	 * that doesn't belong to specified variable product.
 	 */
@@ -1415,5 +1456,39 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		unset( $_REQUEST['add-to-cart'], $_REQUEST['variation_id'], $_REQUEST['quantity'], $_POST['quantity'], $_REQUEST['attribute_pa_color'] );
 		$variation->delete( true );
 		$product->delete( true );
+	}
+
+	/**
+	 * Applying the same coupon a second time returns false and leaves the discount total unchanged.
+	 */
+	public function test_apply_same_coupon_twice_returns_false() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 20 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'dup-coupon',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '5',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$first = WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+		$discount_after_first = WC()->cart->get_discount_total();
+
+		$second = WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( $first, 'first application should succeed' );
+		$this->assertFalse( $second, 'second application of same coupon should be rejected' );
+		$this->assertEqualsWithDelta( $discount_after_first, WC()->cart->get_discount_total(), 0.001, 'discount total should be unchanged after rejected re-application' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$coupon->delete( true );
 	}
 }

@@ -4,6 +4,11 @@
 import type { TemplateArray } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
+
 export const ATTRIBUTE_ITEM_TEMPLATE: TemplateArray = [
 	[
 		'woocommerce/add-to-cart-with-options-variation-selector-attribute',
@@ -34,9 +39,7 @@ export const ATTRIBUTE_ITEM_TEMPLATE: TemplateArray = [
 							fontSize: 'medium',
 						},
 					],
-					[
-						'woocommerce/add-to-cart-with-options-variation-selector-attribute-options',
-					],
+					[ 'woocommerce/product-filter-chips' ],
 				],
 			],
 		],
@@ -50,9 +53,9 @@ export const DEFAULT_ATTRIBUTES = [
 		name: __( 'Color', 'woocommerce' ),
 		has_variations: true,
 		terms: [
-			{ id: 1, slug: 'blue', name: __( 'Blue', 'woocommerce' ) },
-			{ id: 2, slug: 'red', name: __( 'Red', 'woocommerce' ) },
-			{ id: 3, slug: 'green', name: __( 'Green', 'woocommerce' ) },
+			{ id: -1, slug: 'blue', name: __( 'Blue', 'woocommerce' ) },
+			{ id: -2, slug: 'red', name: __( 'Red', 'woocommerce' ) },
+			{ id: -3, slug: 'green', name: __( 'Green', 'woocommerce' ) },
 		],
 	},
 	{
@@ -67,3 +70,9 @@ export const DEFAULT_ATTRIBUTES = [
 		],
 	},
 ] as const;
+
+export const EMPTY_TERM_VISUALS: Record< string, VisualAttributeTerm > = {
+	'-1': { type: 'color', value: '#0000ff' },
+	'-2': { type: 'color', value: '#e10000' },
+	'-3': { type: 'color', value: '#009b00' },
+};

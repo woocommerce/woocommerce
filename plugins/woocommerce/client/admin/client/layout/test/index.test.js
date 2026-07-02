@@ -38,6 +38,7 @@ jest.mock( '@woocommerce/data', () => {
 	return {
 		...originalModule,
 		useUser: jest.fn().mockReturnValue( { currentUserCan: () => true } ),
+		useUserPreferences: jest.fn().mockReturnValue( {} ),
 	};
 } );
 

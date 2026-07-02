@@ -10,6 +10,7 @@ export const DEFAULT_VARIATION_TABLE_MEDIA_FIELD = 'images';
 
 export const DEFAULT_VARIATION_TABLE_FIELDS = [
 	'variation_options',
+	'variation_active',
 	'price',
 	'stock',
 ] as const;

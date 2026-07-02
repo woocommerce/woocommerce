@@ -76,6 +76,21 @@ describe( 'SearchableChipSelect', () => {
 		).toBeVisible();
 	} );
 
+	it( 'renders a placeholder chip when there are no selected values', () => {
+		render(
+			<SearchableChipSelectControl
+				label="Fruits"
+				items={ mockItems }
+				placeholderChip="Mixed (2)"
+			/>
+		);
+
+		expect( screen.getByText( 'Mixed (2)' ) ).toBeVisible();
+		expect(
+			screen.queryByLabelText( 'Clear all' )
+		).not.toBeInTheDocument();
+	} );
+
 	it( 'renders custom empty content', async () => {
 		render(
 			<SearchableChipSelectControl

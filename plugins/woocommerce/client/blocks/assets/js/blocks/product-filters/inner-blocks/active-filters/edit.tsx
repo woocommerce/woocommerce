@@ -33,7 +33,7 @@ const Edit = () => {
 			<InitialDisabled>
 				<BlockContextProvider
 					value={ {
-						woocommerceRemovableItems: {
+						'woocommerce/removableItems': {
 							items: filtersPreview,
 							storeNamespace: 'woocommerce/product-filters',
 						} satisfies RemovableItemsContext,

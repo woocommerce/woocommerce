@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Remove async product editor category field from live branch feature flags.

@@ -2,7 +2,7 @@
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
 	"homepage": "https://woocommerce.com/",
-	"version": "10.9.0",
+	"version": "11.0.0",
 	"type": "wordpress-plugin",
 	"license": "GPL-2.0-or-later",
 	"prefer-stable": true,
@@ -53,7 +53,7 @@
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"opis/json-schema": "*",
-		"woocommerce/action-scheduler": "3.9.3",
+		"woocommerce/action-scheduler": "4.0.0",
 		"woocommerce/blueprint": "*",
 		"woocommerce/email-editor": "*",
 		"wordpress/abilities-api": "^0.4.0",
@@ -110,13 +110,14 @@
 			"src/StoreApi/functions.php",
 			"src/Blocks/Domain/Services/functions.php",
 			"src/Deprecated.php",
-			"src/Internal/Api/Schema/aliases.php"
+			"src/Api/Infrastructure/Schema/aliases.php"
 		]
 	},
 	"autoload-dev": {
 		"psr-4": {
 			"Automattic\\WooCommerce\\Tests\\": "tests/php/src/",
-			"Automattic\\WooCommerce\\Testing\\Tools\\": "tests/Tools/"
+			"Automattic\\WooCommerce\\Testing\\Tools\\": "tests/Tools/",
+			"Automattic\\WooCommerce\\Api\\Infrastructure\\DesignTime\\": "bin/api-builder/"
 		},
 		"classmap": [
 			"tests/legacy/unit-tests/rest-api/Helpers"

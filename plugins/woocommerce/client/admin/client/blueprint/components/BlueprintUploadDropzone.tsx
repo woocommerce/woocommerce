@@ -9,7 +9,7 @@ import {
 	Button,
 	Icon,
 } from '@wordpress/components';
-import { closeSmall, upload, check, warning } from '@wordpress/icons';
+import { closeSmall, upload, check, cautionFilled } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
 import { useMachine } from '@xstate5/react';
 import {
@@ -109,18 +109,22 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 									'Step exceeds maximum size limit of %1$.2fMB (Current: %2$.2fMB)',
 									'woocommerce'
 								),
-								(
-									MAX_STEP_SIZE_BYTES /
-									( 1024 * 1024 )
-								).toFixed( 2 ),
-								( stepSize / ( 1024 * 1024 ) ).toFixed( 2 )
+								Number(
+									(
+										MAX_STEP_SIZE_BYTES /
+										( 1024 * 1024 )
+									).toFixed( 2 )
+								),
+								Number(
+									( stepSize / ( 1024 * 1024 ) ).toFixed( 2 )
+								)
 							),
 						},
 					],
 				} );
 				continue; // Skip this step
 			}
-			const response = await apiFetch< Response >( {
+			const response = await apiFetch< Response, false >( {
 				path: 'wc-admin/blueprint/import-step',
 				method: 'POST',
 				headers: {
@@ -153,7 +157,13 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 					'woocommerce'
 				) }`,
 				{
-					icon: <Icon icon={ warning } size={ 24 } fill="#d63638" />,
+					icon: (
+						<Icon
+							icon={ cautionFilled }
+							size={ 24 }
+							fill="#d63638"
+						/>
+					),
 					explicitDismiss: true,
 				}
 			);

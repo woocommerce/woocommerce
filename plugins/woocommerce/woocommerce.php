@@ -3,12 +3,12 @@
  * Plugin Name: WooCommerce
  * Plugin URI: https://woocommerce.com/
  * Description: An ecommerce toolkit that helps you sell anything. Beautifully.
- * Version: 10.9.0-dev
+ * Version: 11.0.0-dev
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Text Domain: woocommerce
  * Domain Path: /i18n/languages/
- * Requires at least: 6.8
+ * Requires at least: 6.9
  * Requires PHP: 7.4
  *
  * @package WooCommerce
@@ -28,6 +28,14 @@ if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
 	return;
 }
 \Automattic\WooCommerce\Packages::init();
+
+// Register a WooCommerce-scoped Composer PSR-4 autoloader on the SPL stack as a
+// low-priority (appended) fallback, consulted only after every other autoloader
+// — including the primary Jetpack autoloader — has missed. When a WordPress
+// in-place upgrade swaps WooCommerce's files mid-request, the Jetpack classmap
+// snapshot (captured at request start, never refreshed) cannot resolve a class
+// that is new in the upgraded version; this fallback resolves it from disk.
+\Automattic\WooCommerce\Autoloader::register_woocommerce_psr4_fallback();
 
 // Include the main WooCommerce class.
 if ( ! class_exists( 'WooCommerce', false ) ) {

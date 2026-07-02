@@ -2771,8 +2771,19 @@ FROM $order_meta_table
 		 */
 		do_action( 'woocommerce_untrash_order', $order->get_id(), $previous_status );
 
-		$order->set_status( $previous_status );
-		$order->save();
+		// Customer order emails (and other transactional emails) are dispatched via WC_Emails
+		// listeners on the woocommerce_order_status_* actions. Suppress dispatch for this order
+		// while we restore it so customers aren't re-notified about an order they
+		// already received emails for. The status transition actions themselves still fire,
+		// so any 3rd-party code hooked into them keeps working.
+		$suspended_email_dispatch = $this->suspend_transactional_email_dispatch( $order->get_id() );
+
+		try {
+			$order->set_status( $previous_status );
+			$order->save();
+		} finally {
+			$this->restore_transactional_email_dispatch( $suspended_email_dispatch );
+		}
 
 		// Was the status successfully restored? Let's clean up the meta and indicate success...
 		if ( 'wc-' . $order->get_status() === $previous_status ) {
@@ -2795,7 +2806,6 @@ FROM $order_meta_table
 
 		return false;
 	}
-
 
 	/**
 	 * Deletes order data from custom order tables.

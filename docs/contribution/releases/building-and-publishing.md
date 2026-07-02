@@ -61,7 +61,7 @@ This step only applies to `rc` or stable (`x.y.0`  onwards) releases.
 ##### If a critical issue was detected while monitoring
 
 - [ ] Request a revert in the staging environment.
-- [ ] Pause the release process and **do not continue with any steps on this issue**. Follow the procedure in the [troubleshooting guide](https://developer.woocommerce.com/docs/contribution/releases/troubleshooting/#deploy-serious-bug) instead.
+- [ ] Pause the release process and **do not continue with any steps on this issue**. Follow the procedure in the [troubleshooting guide](https://developer.woocommerce.com/docs/contribution/releases/troubleshooting/#a-serious-bug-was-detected-during-internal-checks--monitoring) instead.
 
 #### 5. Publish the release
 

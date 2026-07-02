@@ -57,7 +57,7 @@ const CurrencySuffixSlot = () => {
 
 const fieldDefinition = {
 	label: __( 'Price', 'woocommerce' ),
-	enableSorting: true,
+	enableSorting: false,
 	filterBy: {
 		operators: [ 'is', 'between', 'greaterThanOrEqual', 'lessThanOrEqual' ],
 	},
@@ -175,7 +175,8 @@ export const fieldExtensions: Partial< Field< PriceFilterData > > = {
 
 		return (
 			<InputControl
-				label={ hideLabelFromVision ? '' : field.label }
+				label={ field.label }
+				hideLabelFromVision={ hideLabelFromVision }
 				type="number"
 				step={ step }
 				value={ singleValue }

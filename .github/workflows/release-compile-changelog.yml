@@ -23,6 +23,7 @@ concurrency:
   group: release-compile-changelog-${{ inputs.version }}
 
 env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
   GIT_COMMITTER_NAME: 'woocommercebot'
   GIT_COMMITTER_EMAIL: 'woocommercebot@users.noreply.github.com'
   GIT_AUTHOR_NAME: 'woocommercebot'
@@ -31,7 +32,7 @@ env:
 jobs:
   build-prep:
     name: Create changelog PR
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     permissions:
       contents: write
       pull-requests: write

@@ -8,8 +8,14 @@ import type {
 	ProductType,
 } from '@woocommerce/data';
 
-export type ProductListQuery = Omit< ProductQuery, 'status' > & {
+type ProductStockStatus = 'instock' | 'outofstock' | 'onbackorder';
+
+export type ProductListQuery = Omit<
+	ProductQuery,
+	'status' | 'stock_status'
+> & {
 	status?: ProductStatus | ProductStatus[];
+	stock_status?: ProductStockStatus | ProductStockStatus[];
 	_embed?: number;
 	search_name_or_sku?: string;
 	exclude_status?: ProductStatus[];
@@ -23,6 +29,7 @@ export type ProductListQuery = Omit< ProductQuery, 'status' > & {
 };
 
 const SUPPORTED_STATUS_FILTER_FIELDS = [ 'status', 'product_status' ];
+const DISABLED_SORT_FIELDS = [ 'name', 'price' ];
 
 function isStringArray( value: unknown ): value is string[] {
 	return (
@@ -141,10 +148,13 @@ function applyBrandFilter( query: ProductListQuery, filter: Filter ) {
 }
 
 function applyStockFilter( query: ProductListQuery, filter: Filter ) {
-	const [ stockStatus ] = getStringValues( filter.value );
+	const stockStatuses = getStringValues(
+		filter.value
+	) as ProductStockStatus[];
 
-	if ( stockStatus ) {
-		query.stock_status = stockStatus as ProductListQuery[ 'stock_status' ];
+	if ( stockStatuses.length > 0 ) {
+		query.stock_status =
+			stockStatuses.length === 1 ? stockStatuses[ 0 ] : stockStatuses;
 	}
 }
 
@@ -223,15 +233,19 @@ function applyStockQuantityFilter( query: ProductListQuery, filter: Filter ) {
 }
 
 export function buildProductListQuery( view: View ): ProductListQuery {
+	const sort =
+		view.sort && ! DISABLED_SORT_FIELDS.includes( view.sort.field )
+			? view.sort
+			: undefined;
 	const query: ProductListQuery = {
 		_embed: 1,
 		per_page: view.perPage,
 		page: view.page,
-		order: view.sort?.direction,
+		order: sort?.direction,
 		orderby:
-			view.sort?.field === 'name'
+			sort?.field === 'name'
 				? 'title'
-				: ( view.sort?.field as ProductQuery[ 'orderby' ] ),
+				: ( sort?.field as ProductQuery[ 'orderby' ] ),
 		search_name_or_sku: view.search || undefined,
 	};
 

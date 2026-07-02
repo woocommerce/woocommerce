@@ -2,6 +2,8 @@
 
 echo "Initializing WooCommerce E2E"
 
+wp-env run tests-cli wp config set WP_HTTP_BLOCK_EXTERNAL false --raw --type=constant
+
 wp-env run tests-cli wp plugin activate woocommerce
 
 wp-env run tests-cli wp user create customer customer@woocommercecoree2etestsuite.com --user_pass=password --role=subscriber --path=/var/www/html

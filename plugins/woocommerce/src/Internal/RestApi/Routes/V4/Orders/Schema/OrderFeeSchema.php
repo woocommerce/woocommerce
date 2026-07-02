@@ -36,41 +36,47 @@ class OrderFeeSchema extends AbstractLineItemSchema {
 	 */
 	public function get_item_schema_properties(): array {
 		$schema = array(
-			'id'         => array(
+			'id'              => array(
 				'description' => __( 'Item ID.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
-			'name'       => array(
+			'name'            => array(
 				'description' => __( 'Fee name.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
-			'tax_class'  => array(
+			'tax_class'       => array(
 				'description' => __( 'Tax class of fee.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
-			'tax_status' => array(
+			'tax_status'      => array(
 				'description' => __( 'Tax status of fee.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'enum'        => array( 'taxable', 'none' ),
 			),
-			'total'      => array(
+			'total'           => array(
 				'description' => __( 'Line total (after discounts).', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
-			'total_tax'  => array(
+			'total_tax'       => array(
 				'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
-			'taxes'      => $this->get_taxes_schema(),
-			'meta_data'  => $this->get_meta_data_schema(),
+			'taxes'           => $this->get_taxes_schema(),
+			'meta_data'       => $this->get_meta_data_schema(),
+			'can_be_refunded' => array(
+				'description' => __( 'Whether the fee can be refunded, based on remaining refundable amount.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
 		);
 
 		return $schema;

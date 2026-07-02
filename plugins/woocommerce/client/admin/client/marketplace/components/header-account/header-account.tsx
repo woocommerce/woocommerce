@@ -40,7 +40,7 @@ interface HeaderAccountProps {
 
 export default function HeaderAccount( {
 	page = 'wc-admin',
-}: HeaderAccountProps ): JSX.Element {
+}: HeaderAccountProps ): React.JSX.Element {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 	const [ useDefaultAvatar, setUseDefaultAvatar ] = useState( false );
 
