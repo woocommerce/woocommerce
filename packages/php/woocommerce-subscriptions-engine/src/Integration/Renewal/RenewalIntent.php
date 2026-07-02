@@ -1,12 +1,13 @@
 <?php
 /**
  * RenewalIntent - the seam between selection and processing: a resolved decision to bill a
- * specific cycle of a specific contract. {@see RenewalSelector} produces one from a due
- * scan row; {@see RenewalEngine::process()} consumes its `contract_id` + `cycle_count`.
+ * specific cycle of a specific contract. A trigger (the batch {@see RenewalDispatcher},
+ * `process_due()`, or a future admin/early-renewal path) builds one from the cycle
+ * {@see RenewalSelector} chose (or its own target); {@see RenewalEngine::process()} consumes it.
  *
  * Carrying the target as an explicit value keeps `process()` free of any "which cycle"
  * logic - it bills exactly the count it is handed, so a future trigger (an admin retry, a
- * customer early renewal) is just a different selector producing a different intent over
+ * customer early renewal) is just a different trigger building a different intent over
  * the same processing path.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal

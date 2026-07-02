@@ -221,11 +221,12 @@ final class RenewalDispatcher {
 
 		foreach ( $due as $row ) {
 			try {
-				$intent = $this->selector->select( $row, $now );
-				if ( null === $intent ) {
+				$cycle_count = $this->selector->select_billing_cycle( $row, $now );
+				if ( null === $cycle_count ) {
 					continue;
 				}
-				$this->engine->process( $intent->get_contract_id(), $intent->get_cycle_count(), $now );
+				$renewal_intent = new RenewalIntent( $row->get_contract_id(), $cycle_count );
+				$this->engine->process( $renewal_intent, $now );
 			} catch ( RenewalNotProcessable $e ) {
 				// Pre-flight impossibility (e.g. an unresolvable plan): park so the contract
 				// leaves the due window and cannot re-poison the scan; a repair re-arms it.

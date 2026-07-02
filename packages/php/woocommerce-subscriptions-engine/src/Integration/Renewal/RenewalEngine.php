@@ -263,13 +263,13 @@ final class RenewalEngine {
 			return null;
 		}
 
-		$intent = $this->selector->select( DueRenewal::from_head( $contract_id, $head ), $now );
-		if ( null === $intent ) {
+		$cycle_count = $this->selector->select_billing_cycle( DueRenewal::from_head( $contract_id, $head ), $now );
+		if ( null === $cycle_count ) {
 			return null;
 		}
 
 		try {
-			return $this->process( $contract_id, $intent->get_cycle_count(), $now );
+			return $this->process( new RenewalIntent( $contract_id, $cycle_count ), $now );
 		} catch ( RenewalNotProcessable $e ) {
 			$this->park( $contract_id );
 			wc_get_logger()->warning(
@@ -284,29 +284,34 @@ final class RenewalEngine {
 	}
 
 	/**
-	 * Bill exactly `$cycle_count` for `$contract_id` - the trigger-agnostic processing
-	 * primitive. It runs no "which cycle" logic: selection already chose the count.
+	 * Bill the cycle named by `$intent` - the trigger-agnostic processing primitive.
 	 *
-	 * Skips (logging only, never throwing on a permanent condition a scheduled action would
-	 * retry forever) when the contract is gone, gateway-scheduled, or not active. Otherwise it
-	 * claims the target cycle - appending a new one (create-as-claim, stamping a lease) when
-	 * `$cycle_count` is the head's successor, or reclaiming/skipping the existing one when it
-	 * is the head - so the `UNIQUE(contract_id, kind, count)` cycle chain, not the order, is
-	 * the idempotency gate. It then reconciles the renewal order for that count (reuse a
-	 * present one, build one when absent), charges unless the order is already paid, and
-	 * completes from the order's paid state ({@see self::complete_from_order()}).
+	 * It owns no "which cycle" or "is it due" policy: selection (scheduled, admin, or early
+	 * renewal) decides the target elsewhere and hands it in, so one primitive serves every
+	 * trigger and a caller can force a renewal the scheduled guard would otherwise defer.
+	 *
+	 * The structural invariants it does enforce keep the money-path safe whatever the caller:
+	 * it skips (logging, never throwing - a scheduled action would retry a permanent condition
+	 * forever) when the contract is gone, gateway-scheduled, or inactive, and refuses a cycle
+	 * that is neither the head nor its immediate successor (no billing a gap). The claim is the
+	 * concurrency gate: appending the successor collides on `UNIQUE(contract_id, kind, count)`
+	 * and the head is reclaimed only through the lease compare-and-set, so a cycle is charged at
+	 * most once even under overlapping runs. Order reconciliation follows the claim, so the
+	 * cycle chain - not the mutable order - is the idempotency authority.
 	 *
 	 * Throws {@see RenewalNotProcessable} for a pre-flight impossibility (no chain, an
 	 * unresolvable plan, a non-adjacent count) so the caller can park; returns null for an
 	 * idempotent no-op (a live claim, an already-settled cycle, an unbuildable order).
 	 *
-	 * @param int               $contract_id Contract to bill.
-	 * @param int               $cycle_count The chargeable cycle count to bill.
-	 * @param DateTimeImmutable $now         The processing moment; the due-guard cutoff for an advance.
+	 * @param RenewalIntent     $intent The contract and cycle count to bill.
+	 * @param DateTimeImmutable $now    The processing moment (the lease clock for a claim).
 	 * @return WC_Order|null The renewal order, or null when skipped/idempotent.
 	 * @throws RenewalNotProcessable When the renewal cannot start at all.
 	 */
-	public function process( int $contract_id, int $cycle_count, DateTimeImmutable $now ): ?WC_Order {
+	public function process( RenewalIntent $intent, DateTimeImmutable $now ): ?WC_Order {
+		$contract_id = $intent->get_contract_id();
+		$cycle_count = $intent->get_cycle_count();
+
 		$contract = $this->contracts->find( $contract_id );
 		if ( null === $contract ) {
 			wc_get_logger()->warning(
@@ -354,19 +359,6 @@ final class RenewalEngine {
 
 		// Claim the target cycle - the authoritative idempotency gate, ahead of any order lookup.
 		if ( $cycle_count === $head_count + 1 ) {
-			// Due-guard, race-safe: advance only once the head's period has ended. Anchored on
-			// the head's immutable ends_at (re-read here), so an overlapping run that reads a
-			// just-billed head sees its period still open and does not charge the next cycle ahead.
-			if ( ! RenewalSelector::has_period_ended( $head->get_ends_at_gmt(), $now ) ) {
-				wc_get_logger()->info(
-					sprintf( 'RenewalEngine::process(): cycle %d for contract %d is not due yet (its period has not ended) - skipping.', $cycle_count, $contract_id ),
-					array(
-						'source'      => self::LOG_SOURCE,
-						'contract_id' => $contract_id,
-					)
-				);
-				return null;
-			}
 			$cycle = $this->claim_advance( $contract, $head, $cycle_count, $now );
 		} elseif ( $cycle_count === $head_count ) {
 			$cycle = $this->reclaim_head( $contract_id, $cycle_count, $now );

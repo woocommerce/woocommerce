@@ -23,6 +23,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFact
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalIntent;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalScheduler;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanGroupRepository;
@@ -1049,13 +1050,14 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox process does not charge the next cycle ahead of its period (the due-guard).
+	 * @testdox process_due does not charge the next cycle ahead of its period (the selection due-guard).
 	 *
-	 * After cycle 2 is billed its period runs to 2026-03-15. Advancing to cycle 3 at a moment
-	 * before that end must be a no-op - no cycle 3, no order - even called directly. This is the
-	 * charge-ahead guard, anchored on the head cycle's immutable end.
+	 * After cycle 2 is billed its period runs to 2026-03-15. The scheduled path (process_due) at
+	 * a moment before that end must be a no-op - no cycle 3, no order - because selection owns the
+	 * due-guard, anchored on the head cycle's immutable end. process() itself bills whatever cycle
+	 * it is handed, so the "is it due" decision lives in the selector, not the money-path.
 	 */
-	public function test_process_does_not_charge_ahead_of_the_period(): void {
+	public function test_process_due_does_not_charge_ahead_of_the_period(): void {
 		$this->approve_charges_for( self::GATEWAY_APPROVING );
 
 		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
@@ -1074,14 +1076,43 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$this->assertSame( 2, $head->get_count() );
 		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
 
-		// Advance to cycle 3 before cycle 2's period has ended: a no-op.
-		$ahead = $engine->process( $contract_id, 3, new \DateTimeImmutable( '2026-03-01 00:00:00', new \DateTimeZone( 'UTC' ) ) );
+		// The scheduled path before cycle 2's period ends: selection skips, so nothing advances.
+		$ahead = $engine->process_due( $contract_id, new \DateTimeImmutable( '2026-03-01 00:00:00', new \DateTimeZone( 'UTC' ) ) );
 		$this->assertNull( $ahead );
 
 		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 3 ) );
 		$still = $repo->find_current_cycle( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $still );
 		$this->assertSame( 2, $still->get_count() );
+	}
+
+	/**
+	 * @testdox process bills the cycle it is handed, even before that cycle's scheduled due date.
+	 *
+	 * process() owns no due policy: handed the next cycle directly (as a future admin or early
+	 * renewal trigger would), it bills it regardless of the scheduled due-guard - which lives only
+	 * in selection. A scheduled run at this same moment would skip; forcing the intent does not.
+	 */
+	public function test_process_bills_the_handed_cycle_before_its_scheduled_due_date(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		// Cycle 1's period ends 2026-02-15; force cycle 2 well before then.
+		$order = ( new RenewalEngine() )->process(
+			new RenewalIntent( $contract_id, 2 ),
+			new \DateTimeImmutable( '2026-01-20 00:00:00', new \DateTimeZone( 'UTC' ) )
+		);
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertTrue( $order->is_paid() );
+
+		$head = ( new ContractRepository() )->find_current_cycle( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertSame( 2, $head->get_count() );
+		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
 	}
 
 	/**
