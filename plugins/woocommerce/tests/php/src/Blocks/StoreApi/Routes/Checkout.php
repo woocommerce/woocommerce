@@ -2367,4 +2367,73 @@ class Checkout extends MockeryTestCase {
 		);
 		return $request;
 	}
+
+	/**
+	 * @testdox Checkout route does not resolve the available payment gateways when the request carries no payment method.
+	 */
+	public function test_get_request_payment_method_skips_gateway_resolution_when_missing() {
+		$schema_controller = new SchemaController( $this->mock_extend );
+		$sut               = new CheckoutRoute( $schema_controller, $schema_controller->get( 'checkout' ) );
+
+		$gateway_resolution_count = 0;
+		$counter                  = function ( $gateways ) use ( &$gateway_resolution_count ) {
+			++$gateway_resolution_count;
+			return $gateways;
+		};
+		add_filter( 'woocommerce_available_payment_gateways', $counter );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+
+		$method = new \ReflectionMethod( CheckoutRoute::class, 'get_request_payment_method' );
+		$method->setAccessible( true );
+
+		try {
+			$result = $method->invoke( $sut, $request );
+		} finally {
+			remove_filter( 'woocommerce_available_payment_gateways', $counter );
+		}
+
+		$this->assertNull( $result, 'No payment method should resolve to a null gateway.' );
+		$this->assertSame( 0, $gateway_resolution_count, 'Available payment gateways must not be resolved when no payment method is supplied.' );
+	}
+
+	/**
+	 * @testdox Checkout-order route does not resolve the available payment gateways when the request carries no payment method and the order needs no payment.
+	 */
+	public function test_order_get_request_payment_method_skips_gateway_resolution_when_missing() {
+		$schema_controller = new SchemaController( $this->mock_extend );
+		$sut               = new CheckoutOrderRoute( $schema_controller, $schema_controller->get( 'checkout-order' ) );
+
+		$order = new \WC_Order();
+		$order->save();
+
+		// This scenario depends on the order not needing payment, so the empty-method branch returns null instead of throwing.
+		$this->assertFalse( $order->needs_payment(), 'A zero-total order should not need payment in this scenario.' );
+
+		$order_property = new \ReflectionProperty( CheckoutOrderRoute::class, 'order' );
+		$order_property->setAccessible( true );
+		$order_property->setValue( $sut, $order );
+
+		$gateway_resolution_count = 0;
+		$counter                  = function ( $gateways ) use ( &$gateway_resolution_count ) {
+			++$gateway_resolution_count;
+			return $gateways;
+		};
+		add_filter( 'woocommerce_available_payment_gateways', $counter );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
+
+		$method = new \ReflectionMethod( CheckoutOrderRoute::class, 'get_request_payment_method' );
+		$method->setAccessible( true );
+
+		try {
+			$result = $method->invoke( $sut, $request );
+		} finally {
+			remove_filter( 'woocommerce_available_payment_gateways', $counter );
+			$order->delete( true );
+		}
+
+		$this->assertNull( $result, 'No payment method on a zero-total order should resolve to a null gateway.' );
+		$this->assertSame( 0, $gateway_resolution_count, 'Available payment gateways must not be resolved when no payment method is supplied.' );
+	}
 }

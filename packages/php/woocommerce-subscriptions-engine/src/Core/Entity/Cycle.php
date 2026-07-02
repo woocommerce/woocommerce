@@ -32,7 +32,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Cycle {
 
-	const KIND_BILLING = 'billing';
+	public const KIND_BILLING = 'billing';
 
 	/**
 	 * Cycle id, or null before it is persisted.
