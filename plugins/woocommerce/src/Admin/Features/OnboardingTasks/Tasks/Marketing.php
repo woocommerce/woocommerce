@@ -96,6 +96,15 @@ class Marketing extends Task {
 	}
 
 	/**
+	 * Check if a task is dismissable.
+	 *
+	 * @return bool
+	 */
+	public function is_dismissable() {
+		return true;
+	}
+
+	/**
 	 * Get the marketing plugins.
 	 *
 	 * @deprecated 9.3.0 Removed to improve performance.

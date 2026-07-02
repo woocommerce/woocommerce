@@ -28,6 +28,9 @@ jest.mock( '@woocommerce/components', () => ( {
 	Badge: jest
 		.fn()
 		.mockImplementation( ( { count } ) => <div>Count:{ count }</div> ),
+	H: jest
+		.fn()
+		.mockImplementation( ( { children } ) => <h2>{ children }</h2> ),
 } ) );
 jest.mock( '@woocommerce/admin-layout', () => {
 	const mockContext = {
@@ -255,5 +258,55 @@ describe( 'TaskList', () => {
 		expect(
 			queryByText( dismissedTask[ 0 ].title )
 		).not.toBeInTheDocument();
+	} );
+
+	it( 'should render an empty state for extended task list when all tasks are dismissed', () => {
+		const dismissedTask = [
+			{ ...tasks.extension[ 0 ], isDismissed: true },
+		];
+		const { queryByText } = render(
+			<TaskList
+				id="extended"
+				eventPrefix="extended_tasklist_"
+				tasks={ dismissedTask }
+				title="Things to do next"
+				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ false }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+			/>
+		);
+
+		expect( queryByText( "You're all caught up" ) ).toBeInTheDocument();
+		expect(
+			queryByText(
+				"You've completed all the things to do next. Watch this space for more recommendations."
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'should render an empty state for extended task list when all tasks are completed', () => {
+		const completedTask = [ { ...tasks.extension[ 0 ], isComplete: true } ];
+		const { queryByText } = render(
+			<TaskList
+				id="extended"
+				eventPrefix="extended_tasklist_"
+				tasks={ completedTask }
+				title="Things to do next"
+				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ true }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+			/>
+		);
+
+		expect(
+			queryByText( completedTask[ 0 ].title )
+		).not.toBeInTheDocument();
+		expect( queryByText( "You're all caught up" ) ).toBeInTheDocument();
 	} );
 } );

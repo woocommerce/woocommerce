@@ -12,6 +12,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { TaskItem, useSlot } from '@woocommerce/experimental';
 import { useCallback, useEffect } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
+import { Button } from '@wordpress/components';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 import { useLayoutContext } from '@woocommerce/admin-layout';
 
@@ -27,6 +28,8 @@ export type TaskListItemProps = {
 	task: TaskType & {
 		onClick?: () => void;
 	};
+	onTaskDismissed?: ( task: TaskType ) => void;
+	showSkipAction?: boolean;
 };
 
 export const TaskListItem = ( {
@@ -34,6 +37,8 @@ export const TaskListItem = ( {
 	isExpanded = false,
 	setExpandedTask,
 	task,
+	onTaskDismissed,
+	showSkipAction = false,
 }: TaskListItemProps ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { layoutString } = useLayoutContext();
@@ -90,6 +95,20 @@ export const TaskListItem = ( {
 			],
 		} );
 	}, [ id ] );
+
+	const onSkip = useCallback(
+		( event: React.MouseEvent | React.KeyboardEvent ) => {
+			event.preventDefault();
+			event.stopPropagation();
+
+			if ( onTaskDismissed ) {
+				onTaskDismissed( task );
+			}
+
+			dismissTask( id );
+		},
+		[ id, onTaskDismissed, task ]
+	);
 
 	const onSnooze = useCallback( () => {
 		snoozeTask( id );
@@ -158,7 +177,7 @@ export const TaskListItem = ( {
 		expanded: isExpandable && isExpanded,
 		completed: isComplete,
 		onSnooze: isSnoozeable ? onSnooze : undefined,
-		onDismiss: isDismissable ? onDismiss : undefined,
+		onDismiss: isDismissable && ! showSkipAction ? onDismiss : undefined,
 	};
 
 	const DefaultTaskItem = useCallback(
@@ -192,6 +211,17 @@ export const TaskListItem = ( {
 					content={ content }
 					additionalInfo={ additionalInfo }
 					time={ time }
+					secondaryAction={
+						showSkipAction && isDismissable && ! isComplete ? (
+							<Button
+								className="woocommerce-task-list__item-skip"
+								variant="link"
+								onClick={ onSkip }
+							>
+								{ __( 'Skip', 'woocommerce' ) }
+							</Button>
+						) : undefined
+					}
 					action={ onClickActions }
 					level={ level }
 					actionLabel={ actionLabel }

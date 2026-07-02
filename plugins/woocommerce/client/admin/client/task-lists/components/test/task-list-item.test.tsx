@@ -68,9 +68,16 @@ jest.mock( '@woocommerce/experimental', () => {
 		TaskItem: jest
 			.fn()
 			.mockImplementation(
-				( { title, onSnooze, onDismiss, onClick } ) => (
+				( {
+					title,
+					onSnooze,
+					onDismiss,
+					onClick,
+					secondaryAction,
+				} ) => (
 					<div>
 						<button onClick={ onClick }>{ title }</button>
+						{ secondaryAction }
 						{ onSnooze && (
 							<button onClick={ onSnooze } name="Snooze">
 								Snooze
@@ -220,6 +227,28 @@ describe( 'TaskListItem', () => {
 		expect(
 			queryByRole( 'button', { name: 'Dismiss' } )
 		).not.toBeInTheDocument();
+	} );
+
+	it( 'should call dismissTask and onTaskDismissed when skipping a task', () => {
+		const onTaskDismissed = jest.fn();
+		const { getByRole } = render(
+			<TaskListItem
+				task={ { ...task } }
+				isExpandable={ false }
+				isExpanded={ false }
+				setExpandedTask={ () => {} }
+				showSkipAction={ true }
+				onTaskDismissed={ onTaskDismissed }
+			/>
+		);
+
+		act( () => {
+			userEvent.click( getByRole( 'button', { name: 'Skip' } ) );
+		} );
+
+		expect( mockDispatch.dismissTask ).toHaveBeenCalledWith( task.id );
+		expect( onTaskDismissed ).toHaveBeenCalledWith( task );
+		expect( mockDispatch.createNotice ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should call snoozeTask and trigger a notice when snoozing a task', () => {

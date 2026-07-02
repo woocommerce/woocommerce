@@ -21,3 +21,57 @@
 		transition: opacity 500ms, max-height 500ms;
 	}
 }
+
+.woocommerce-task-list__extended {
+	.woocommerce-task-list__item-skip {
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.woocommerce-task-list__item:hover,
+	.woocommerce-task-list__item:focus-within {
+		.woocommerce-task-list__item-skip {
+			opacity: 1;
+			pointer-events: auto;
+		}
+	}
+
+	.woocommerce-task-list__item-removed-message {
+		color: $gray-700;
+		font-weight: 400;
+	}
+
+	.woocommerce-task-list__empty-state {
+		align-items: center;
+		border-top: 1px solid $gray-100;
+		display: flex;
+		flex-direction: column;
+		padding: $gap-large;
+		text-align: center;
+
+		.woocommerce-task-list__empty-state-image {
+			display: block;
+			height: $grid-unit-60;
+			margin: 0 0 $gap-smaller;
+			width: $grid-unit-60;
+		}
+
+		h2 {
+			color: $gray-900;
+			@include font-size(16);
+			font-style: normal;
+			font-weight: normal;
+			line-height: 1.5;
+			margin: $gap-smaller 0 0;
+		}
+
+		p {
+			color: $gray-700;
+			@include font-size(14);
+			font-style: normal;
+			font-weight: normal;
+			line-height: 20px;
+			margin: $gap-smaller 0;
+		}
+	}
+}
