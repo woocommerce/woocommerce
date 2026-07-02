@@ -49,6 +49,12 @@ export async function getWooEditorAssetMetrics( page ) {
 			wooEditorAssetSize: 0,
 			wooEditorScriptSize: 0,
 			wooEditorStyleSize: 0,
+			wooEditorEncodedAssetSize: 0,
+			wooEditorEncodedScriptSize: 0,
+			wooEditorEncodedStyleSize: 0,
+			wooEditorTransferAssetSize: 0,
+			wooEditorTransferScriptSize: 0,
+			wooEditorTransferStyleSize: 0,
 			wooEditorAssetCount: 0,
 		};
 
@@ -68,16 +74,25 @@ export async function getWooEditorAssetMetrics( page ) {
 
 			assetUrls.add( normalizedUrl );
 
-			const size = entry.decodedBodySize || 0;
-			metrics.wooEditorAssetSize += size;
+			const decodedSize = entry.decodedBodySize || 0;
+			const encodedSize = entry.encodedBodySize || 0;
+			const transferSize = entry.transferSize || 0;
+
+			metrics.wooEditorAssetSize += decodedSize;
+			metrics.wooEditorEncodedAssetSize += encodedSize;
+			metrics.wooEditorTransferAssetSize += transferSize;
 			metrics.wooEditorAssetCount += 1;
 
 			if ( url.pathname.endsWith( '.js' ) ) {
-				metrics.wooEditorScriptSize += size;
+				metrics.wooEditorScriptSize += decodedSize;
+				metrics.wooEditorEncodedScriptSize += encodedSize;
+				metrics.wooEditorTransferScriptSize += transferSize;
 			}
 
 			if ( url.pathname.endsWith( '.css' ) ) {
-				metrics.wooEditorStyleSize += size;
+				metrics.wooEditorStyleSize += decodedSize;
+				metrics.wooEditorEncodedStyleSize += encodedSize;
+				metrics.wooEditorTransferStyleSize += transferSize;
 			}
 		} );
 
@@ -85,6 +100,24 @@ export async function getWooEditorAssetMetrics( page ) {
 			wooEditorAssetSize: roundSize( metrics.wooEditorAssetSize / KB ),
 			wooEditorScriptSize: roundSize( metrics.wooEditorScriptSize / KB ),
 			wooEditorStyleSize: roundSize( metrics.wooEditorStyleSize / KB ),
+			wooEditorEncodedAssetSize: roundSize(
+				metrics.wooEditorEncodedAssetSize / KB
+			),
+			wooEditorEncodedScriptSize: roundSize(
+				metrics.wooEditorEncodedScriptSize / KB
+			),
+			wooEditorEncodedStyleSize: roundSize(
+				metrics.wooEditorEncodedStyleSize / KB
+			),
+			wooEditorTransferAssetSize: roundSize(
+				metrics.wooEditorTransferAssetSize / KB
+			),
+			wooEditorTransferScriptSize: roundSize(
+				metrics.wooEditorTransferScriptSize / KB
+			),
+			wooEditorTransferStyleSize: roundSize(
+				metrics.wooEditorTransferStyleSize / KB
+			),
 			wooEditorAssetCount: metrics.wooEditorAssetCount,
 		};
 	} );
