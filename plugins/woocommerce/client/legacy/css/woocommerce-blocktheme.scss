@@ -456,16 +456,49 @@ a.added_to_cart {
 	}
 }
 
-.woocommerce-form-login h2,
-.woocommerce-form-register h2 {
-	// Heading now sits as the first child of the form (see templates/myaccount/form-login.php).
-	// Remove the top margin so it sits flush with the top of the form.
+// My Account login/register: make each heading appear to belong to its box
+// using CSS only, without changing the template markup. The <h2> stays a
+// sibling before the <form> in the DOM (templates/myaccount/form-login.php).
+
+// Move the card border from the form up to the column wrapper, so the
+// heading and the form sit inside the same box.
+#customer_login .u-column1,
+#customer_login .u-column2 {
+	box-sizing: border-box;
+	padding: 20px;
+	border: 1px solid darken($secondary, 10%); // Matches form.login in woocommerce.scss.
+	border-radius: 5px;
+}
+
+// Remove the inner form box to avoid a double border.
+#customer_login form.login,
+#customer_login form.register {
+	border: 0;
+	padding: 0;
+	margin: 0;
+}
+
+// Heading flush at the top of the card.
+#customer_login .u-column1 > h2,
+#customer_login .u-column2 > h2 {
 	margin-top: 0;
 	font-size: var(--wp--preset--font-size--large);
 }
 
-.woocommerce form.woocommerce-form-login .form-row,
-.woocommerce form.woocommerce-form-register .form-row {
+// Remember me on its own row above the submit button.
+#customer_login .woocommerce-form-login__rememberme {
+	display: block;
+	margin-bottom: 1em;
+}
+
+#customer_login .woocommerce-form-login__submit {
+	float: none;
+	margin-right: 0;
+}
+
+// Remove padding-left on form rows inside login/register.
+#customer_login form.login .form-row,
+#customer_login form.register .form-row {
 	padding-left: 0;
 }
 

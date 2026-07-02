@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 11.0.0
+ * @version 9.9.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,9 +29,9 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
 
 <?php endif; ?>
 
-		<form class="woocommerce-form woocommerce-form-login login" method="post" novalidate>
+		<h2><?php esc_html_e( 'Login', 'woocommerce' ); ?></h2>
 
-			<h2><?php esc_html_e( 'Login', 'woocommerce' ); ?></h2>
+		<form class="woocommerce-form woocommerce-form-login login" method="post" novalidate>
 
 			<?php do_action( 'woocommerce_login_form_start' ); ?>
 
@@ -50,8 +50,6 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
 				<label class="woocommerce-form__label woocommerce-form__label-for-checkbox woocommerce-form-login__rememberme">
 					<input class="woocommerce-form__input woocommerce-form__input-checkbox" name="rememberme" type="checkbox" id="rememberme" value="forever" /> <span><?php esc_html_e( 'Remember me', 'woocommerce' ); ?></span>
 				</label>
-			</p>
-			<p class="form-row">
 				<?php wp_nonce_field( 'woocommerce-login', 'woocommerce-login-nonce' ); ?>
 				<button type="submit" class="woocommerce-button button woocommerce-form-login__submit<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" name="login" value="<?php esc_attr_e( 'Log in', 'woocommerce' ); ?>"><?php esc_html_e( 'Log in', 'woocommerce' ); ?></button>
 			</p>
@@ -69,9 +67,9 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
 
 	<div class="u-column2 col-2">
 
-		<form method="post" class="woocommerce-form woocommerce-form-register register" <?php do_action( 'woocommerce_register_form_tag' ); ?> >
+		<h2><?php esc_html_e( 'Register', 'woocommerce' ); ?></h2>
 
-			<h2><?php esc_html_e( 'Register', 'woocommerce' ); ?></h2>
+		<form method="post" class="woocommerce-form woocommerce-form-register register" <?php do_action( 'woocommerce_register_form_tag' ); ?> >
 
 			<?php do_action( 'woocommerce_register_form_start' ); ?>
 

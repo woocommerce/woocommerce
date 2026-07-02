@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Improve the My Account login form layout by moving the Login and Register headings inside their form elements, styling them like an H3, placing the Remember me checkbox in its own row before the submit button, and trimming the leading padding on form rows.
+Improve the My Account login form layout for block themes with CSS only (no template changes): the Login and Register headings now sit inside their boxes, the Remember me checkbox gets its own row above the submit button, and the leading padding on form rows is trimmed. No markup changes, so there is no backwards-compatibility risk for stores overriding the template.
