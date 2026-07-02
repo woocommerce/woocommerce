@@ -7,7 +7,6 @@ import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Icon, grid } from '@wordpress/icons';
 import { useBlockProps } from '@wordpress/block-editor';
-import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -101,8 +100,8 @@ const settings = {
 	save,
 	deprecated,
 	defaults: {
-		columns: getSetting( 'defaultColumns', 3 ),
-		rows: getSetting( 'defaultRows', 3 ),
+		columns: 3,
+		rows: 3,
 		alignButtons: false,
 		contentVisibility: {
 			orderBy: true,
