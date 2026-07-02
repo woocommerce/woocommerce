@@ -113,27 +113,26 @@ const TotalsFooterItem = ( {
 
 	const parsedTaxValue = parseInt( totalTax, 10 );
 
-	const description =
-		taxLines && taxLines.length > 0
-			? sprintf(
-					/* translators: %s is a list of tax rates */
-					__( 'Including %s', 'woocommerce' ),
-					taxLines
-						.map( ( { name, price } ) => {
-							return `${ formatPrice(
-								price,
-								currency
-							) } ${ name }`;
-						} )
-						.join( ', ' )
-			  )
-			: taxLabel
-			? sprintf(
-					/* translators: %s is the tax label (VAT/Tax/etc). */
-					__( 'Including <TaxAmount/> in %s', 'woocommerce' ),
-					taxLabel
-			  )
-			: __( 'Including <TaxAmount/> in taxes', 'woocommerce' );
+	let description;
+	if ( taxLines && taxLines.length > 0 ) {
+		description = sprintf(
+			/* translators: %s is a list of tax rates */
+			__( 'Including %s', 'woocommerce' ),
+			taxLines
+				.map( ( { name, price } ) => {
+					return `${ formatPrice( price, currency ) } ${ name }`;
+				} )
+				.join( ', ' )
+		);
+	} else if ( taxLabel ) {
+		description = sprintf(
+			/* translators: %s is the configured tax label (e.g. VAT). */
+			__( 'Including <TaxAmount/> %s', 'woocommerce' ),
+			taxLabel
+		);
+	} else {
+		description = __( 'Including <TaxAmount/> taxes', 'woocommerce' );
+	}
 
 	const hasSelectedRates = hasSelectedShippingRate( cart.shippingRates );
 	const cartNeedsShipping = cart.cartNeedsShipping;

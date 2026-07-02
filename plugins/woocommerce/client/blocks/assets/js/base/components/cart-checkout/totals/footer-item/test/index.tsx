@@ -288,6 +288,8 @@ describe( 'TotalsFooterItem', () => {
 
 		const taxInfo = screen.getByText( /including.*VAT/i );
 		expect( taxInfo ).toBeInTheDocument();
+		// Verify the awkward "in" preposition has been dropped (see PR review T0).
+		expect( taxInfo.textContent ).not.toMatch( /\bin\b/i );
 		expect( taxInfo ).toHaveClass(
 			'wc-block-components-totals-footer-item-tax'
 		);

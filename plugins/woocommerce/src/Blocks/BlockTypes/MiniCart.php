@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Utils\Utils;
 use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
@@ -58,7 +59,7 @@ class MiniCart extends AbstractBlock {
 	/**
 	 *  Visibility of price including tax.
 	 *
-	 * @var string
+	 * @var bool
 	 */
 	protected $display_cart_prices_including_tax = false;
 
@@ -875,42 +876,12 @@ class MiniCart extends AbstractBlock {
 	}
 
 	/**
-	 * Get array with data for handle the tax label.
-	 * the entire logic of this function is was taken from:
-	 * https://github.com/woocommerce/woocommerce/blob/e730f7463c25b50258e97bf56e31e9d7d3bc7ae7/includes/class-wc-cart.php#L1582
+	 * Get the configured tax label (e.g. "VAT") and display-mode flag.
 	 *
-	 * @return array;
+	 * @return array{ tax_label: string, display_cart_prices_including_tax: bool }
 	 */
 	protected function get_tax_label() {
-		$cart = $this->get_cart_instance();
-
-		if ( $cart && $cart->display_prices_including_tax() ) {
-			if ( ! wc_prices_include_tax() ) {
-				$tax_label                         = WC()->countries->inc_tax_or_vat();
-				$display_cart_prices_including_tax = true;
-				return array(
-					'tax_label'                         => $tax_label,
-					'display_cart_prices_including_tax' => $display_cart_prices_including_tax,
-				);
-			}
-			return array(
-				'tax_label'                         => '',
-				'display_cart_prices_including_tax' => true,
-			);
-		}
-
-		if ( wc_prices_include_tax() ) {
-			$tax_label = WC()->countries->ex_tax_or_vat();
-			return array(
-				'tax_label'                         => $tax_label,
-				'display_cart_prices_including_tax' => false,
-			);
-		}
-
-		return array(
-			'tax_label'                         => '',
-			'display_cart_prices_including_tax' => false,
-		);
+		return CartCheckoutUtils::get_tax_label();
 	}
 
 	/**

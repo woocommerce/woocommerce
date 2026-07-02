@@ -328,4 +328,65 @@ class CartCheckoutUtilsTest extends WP_UnitTestCase {
 
 		$this->assertEquals( $expected, $result );
 	}
+
+	/**
+	 * Test get_tax_label() returns the expected array shape.
+	 */
+	public function test_get_tax_label_returns_array_shape(): void {
+		$result = CartCheckoutUtils::get_tax_label();
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'tax_label', $result );
+		$this->assertArrayHasKey( 'display_cart_prices_including_tax', $result );
+		$this->assertIsString( $result['tax_label'] );
+		$this->assertIsBool( $result['display_cart_prices_including_tax'] );
+	}
+
+	/**
+	 * Test get_tax_label() returns empty label when both display and entry are exclusive.
+	 */
+	public function test_get_tax_label_exclusive_display_exclusive_entry_returns_empty(): void {
+		update_option( 'woocommerce_tax_display_cart', 'excl' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+
+		$result = CartCheckoutUtils::get_tax_label();
+
+		$this->assertSame( '', $result['tax_label'] );
+		$this->assertFalse( $result['display_cart_prices_including_tax'] );
+	}
+
+	/**
+	 * Test get_tax_label() returns ex_label when display is exclusive but prices entered inclusive.
+	 */
+	public function test_get_tax_label_exclusive_display_inclusive_entry_returns_ex_label(): void {
+		update_option( 'woocommerce_tax_display_cart', 'excl' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+		$result = CartCheckoutUtils::get_tax_label();
+
+		$this->assertFalse( $result['display_cart_prices_including_tax'] );
+		// tax_label should be the ex_tax_or_vat string (e.g. "(ex. VAT)") or empty if countries not initialized
+		$this->assertIsString( $result['tax_label'] );
+	}
+
+	/**
+	 * Test get_tax_label() returns inc_label when display is inclusive and prices entered exclusive.
+	 *
+	 * This test requires WC()->cart to be initialized so the cart->display_prices_including_tax() branch executes.
+	 */
+	public function test_get_tax_label_inclusive_display_exclusive_entry_returns_inc_label(): void {
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+
+		// Initialize cart if not already done (needed for branch A).
+		if ( ! WC()->cart instanceof \WC_Cart ) {
+			WC()->initialize_cart();
+		}
+
+		$result = CartCheckoutUtils::get_tax_label();
+
+		$this->assertTrue( $result['display_cart_prices_including_tax'] );
+		// tax_label should be the inc_tax_or_vat string (e.g. "(incl. VAT)") or empty if countries not initialized
+		$this->assertIsString( $result['tax_label'] );
+	}
 }

@@ -564,4 +564,53 @@ class CartCheckoutUtils {
 			)
 		);
 	}
+
+	/**
+	 * Get the configured tax label (e.g. "VAT", "GST") and whether
+	 * cart/checkout prices display inclusively.
+	 *
+	 * Mirrors the parity logic in WC_Countries::inc_tax_or_vat() /
+	 * WC_Countries::ex_tax_or_vat() that the classic cart/checkout
+	 * templates use, so callers in Cart/Checkout/MiniCart blocks
+	 * expose the same string via the asset_data_registry.
+	 *
+	 * @since 10.4.0
+	 * @internal
+	 *
+	 * @return array{ tax_label: string, display_cart_prices_including_tax: bool }
+	 */
+	public static function get_tax_label(): array {
+		$cart = WC()->cart;
+
+		// If taxes are disabled store-wide, return empty label.
+		if ( ! wc_tax_enabled() ) {
+			return array(
+				'tax_label'                         => '',
+				'display_cart_prices_including_tax' => $cart instanceof \WC_Cart ? $cart->display_prices_including_tax() : false,
+			);
+		}
+
+		if ( $cart instanceof \WC_Cart && $cart->display_prices_including_tax() ) {
+			if ( ! wc_prices_include_tax() ) {
+				return array(
+					'tax_label'                         => WC()->countries->inc_tax_or_vat(),
+					'display_cart_prices_including_tax' => true,
+				);
+			}
+			return array(
+				'tax_label'                         => '',
+				'display_cart_prices_including_tax' => true,
+			);
+		}
+		if ( wc_prices_include_tax() ) {
+			return array(
+				'tax_label'                         => WC()->countries->ex_tax_or_vat(),
+				'display_cart_prices_including_tax' => false,
+			);
+		}
+		return array(
+			'tax_label'                         => '',
+			'display_cart_prices_including_tax' => false,
+		);
+	}
 }
