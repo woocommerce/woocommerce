@@ -19,7 +19,7 @@ use WP_User_Query;
  *
  * Hash format: PBKDF2-HMAC-SHA-256, 10k iterations, 16-byte salt, 32-byte hash — native
  * on both iOS and Android. Brute-forcing the 4-digit space against a stolen hash takes
- * ~100 seconds; the PIN identifies the operator at the till and is not a credential.
+ * ~100 seconds; the PIN identifies the operator on the POS device and is not a credential.
  *
  * @since 11.0.0
  * @internal
@@ -36,9 +36,9 @@ class POSPinService {
 	/**
 	 * Set or replace a user's POS PIN.
 	 *
-	 * The PIN is the sole operator identifier at the till, so a collision between two staff
-	 * members is unresolvable on the device; the candidate is PBKDF2-verified against every
-	 * other stored record and rejected on first match. The target must already hold POS
+	 * The PIN is the sole operator identifier on the POS device, so a collision between two
+	 * staff members is unresolvable; the candidate is PBKDF2-verified against every other
+	 * stored record and rejected on first match. The target must already hold POS
 	 * access: the uniqueness scan only covers POS staff, so a PIN on a non-POS user would
 	 * become a latent collision the moment they later gain access.
 	 *
