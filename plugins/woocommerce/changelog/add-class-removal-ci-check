@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a class-removal CI check that fails when a PR removes a PHP class declared on its base branch, unless the author explicitly acknowledges the removal in the PR description, enforcing a deprecation-stub window for shipped classes.
