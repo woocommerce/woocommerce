@@ -85,17 +85,17 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_product_export_product_query_args', array( $this, 'set_export_product_query_args' ) );
 
-		// Required for brands to be registered because wc-admin-brands.php adds a filter that depends on it.
-		WC_Brands::init_taxonomy();
+		try {
+			$exporter = new WC_Product_CSV_Exporter();
+			$exporter->prepare_data_to_export();
+			$data = $get_data_to_export->invoke( $exporter );
 
-		$exporter = new WC_Product_CSV_Exporter();
-		$exporter->prepare_data_to_export();
-		$data = $get_data_to_export->invoke( $exporter );
-
-		$this->assertNotEmpty( $data, 'Pending review product should be included in the export.' );
-		foreach ( $data as $row ) {
-			$this->assertEquals( 2, $row['published'], 'Pending review products should not export as draft (-1).' );
+			$this->assertNotEmpty( $data, 'Pending review product should be included in the export.' );
+			foreach ( $data as $row ) {
+				$this->assertEquals( 2, $row['published'], 'Pending review products should not export as draft (-1).' );
+			}
+		} finally {
+			remove_filter( 'woocommerce_product_export_product_query_args', array( $this, 'set_export_product_query_args' ) );
 		}
-		remove_filter( 'woocommerce_product_export_product_query_args', array( $this, 'set_export_product_query_args' ) );
 	}
 }

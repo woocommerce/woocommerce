@@ -730,7 +730,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 *
 	 * @param string $value Field value.
 	 *
-	 * @return float|string
+	 * @return int|float|string
 	 */
 	public function parse_published_field( $value ) {
 		if ( '' === $value ) {
