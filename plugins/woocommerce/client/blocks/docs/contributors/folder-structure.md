@@ -99,7 +99,7 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 │ Filters Block.
 │
 ├── assets/js/blocks/packages
-│ Package-like code used by block/editor bundles, such as shared context,
+│ Package-like code used by @woocommerce/block-library block and editor builds,
 │ shared HOCs, and shared block types.
 │
 ├── assets/js/data

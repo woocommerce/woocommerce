@@ -9,9 +9,9 @@ The main sources of truth are:
 - `plugins/woocommerce/src/Blocks/AssetsController.php` for script registration.
 - `plugins/woocommerce/src/Blocks/DependencyDetection.php` for runtime warnings when scripts use `window.wc.*` globals without declaring the matching handle.
 
-## Editor bundling
+## Block library bundling
 
-`wc-blocks-editor` intentionally bundles most WooCommerce package imports for the editor build. That keeps the editor from enqueueing a long list of package scripts.
+The `@woocommerce/block-library` editor build intentionally bundles most WooCommerce package imports. That keeps the editor from enqueueing a long list of package scripts.
 
 `@woocommerce/entities` is the exception: it remains external in the editor build and is loaded through the `wc-entities` handle.
 
@@ -22,7 +22,7 @@ The standalone handles below must still be registered and emitted. They are publ
 Package source location communicates the intended surface:
 
 - `packages/*` contains public or standalone package surfaces with dedicated bundles, such as `blocks-registry`, `entities`, `checkout`, `components`, and `prices`.
-- `assets/js/blocks/packages/*` contains package-like code used by block/editor bundles, such as `shared-context`, `shared-hocs`, and `types`.
+- `assets/js/blocks/packages/*` contains package-like code used by `@woocommerce/block-library` block and editor builds, such as `shared-context`, `shared-hocs`, and `types`.
 - `assets/js/blocks/*` contains concrete block implementation code.
 
 ## Package handles
@@ -70,4 +70,4 @@ When adding, removing, or renaming one of these packages, update the full chain:
 4. Update dependency detection if the package exposes a `window.wc.*` global that third-party scripts can consume.
 5. Update this README.
 
-Changing the public API of these packages can affect third-party extensions that declare the matching script handle, even when `wc-blocks-editor` bundles the same package internally.
+Changing the public API of these packages can affect third-party extensions that declare the matching script handle, even when `@woocommerce/block-library` bundles the same package internally.
