@@ -6,14 +6,17 @@ namespace Automattic\WooCommerce\Internal\POS\Service;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\POS\Capabilities;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 use WP_Error;
 use WP_User_Query;
 
 /**
  * Stores and verifies POS PINs.
  *
- * PINs are stored as a self-describing record in user meta and shipped to the mobile
- * client (via the staff list endpoint) so the client can validate PIN entry locally.
+ * PINs are stored as a self-describing record in per-site user meta (via
+ * Users::*_site_user_meta(), aligning with the blog-scoped POS capabilities on multisite)
+ * and shipped to the mobile client (via the staff list endpoint) so the client can
+ * validate PIN entry locally.
  *
  * Hash format: PBKDF2-HMAC-SHA-256, 10k iterations, 16-byte random salt, 32-byte hash.
  * This is native on iOS (CommonCrypto / CryptoKit) and Android (SecretKeyFactory with
@@ -100,7 +103,12 @@ class POSPinService {
 			'hash'       => base64_encode( $hash ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 		);
 
-		update_user_meta( $user_id, self::PIN_META_KEY, $record );
+		// Store the PIN per-site so it stays aligned with the blog-scoped POS capabilities on
+		// multisite (Users::update_site_user_meta suffixes the blog prefix, so the key still
+		// matches the woocommerce_% uninstall sweep). A user's PIN is only meaningful on sites
+		// where they hold POS access, and the uniqueness scan below is itself blog-scoped, so
+		// PIN storage must share that scope.
+		Users::update_site_user_meta( $user_id, self::PIN_META_KEY, $record );
 
 		return true;
 	}
@@ -140,7 +148,7 @@ class POSPinService {
 		);
 
 		foreach ( $user_query->get_results() as $other_id ) {
-			$record = get_user_meta( (int) $other_id, self::PIN_META_KEY, true );
+			$record = Users::get_site_user_meta( (int) $other_id, self::PIN_META_KEY, true );
 			if ( ! is_array( $record ) || empty( $record['hash'] ) ) {
 				continue;
 			}
@@ -160,7 +168,7 @@ class POSPinService {
 	 * @since 11.0.0
 	 */
 	public function delete_pin( int $user_id ): void {
-		delete_user_meta( $user_id, self::PIN_META_KEY );
+		Users::delete_site_user_meta( $user_id, self::PIN_META_KEY );
 	}
 
 	/**
@@ -172,7 +180,7 @@ class POSPinService {
 	 * @since 11.0.0
 	 */
 	public function has_pin( int $user_id ): bool {
-		$record = get_user_meta( $user_id, self::PIN_META_KEY, true );
+		$record = Users::get_site_user_meta( $user_id, self::PIN_META_KEY, true );
 		return is_array( $record ) && ! empty( $record['hash'] );
 	}
 
@@ -190,7 +198,7 @@ class POSPinService {
 	 * @since 11.0.0
 	 */
 	public function get_public_pin_record( int $user_id ): ?array {
-		$record = get_user_meta( $user_id, self::PIN_META_KEY, true );
+		$record = Users::get_site_user_meta( $user_id, self::PIN_META_KEY, true );
 		if ( ! is_array( $record ) || empty( $record['hash'] ) ) {
 			return null;
 		}

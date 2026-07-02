@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\POS\Service;
 use Automattic\WooCommerce\Internal\POS\Capabilities;
 use Automattic\WooCommerce\Internal\POS\POSPreset;
 use Automattic\WooCommerce\Internal\POS\Service\POSPinService;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 use WC_Unit_Test_Case;
 
 /**
@@ -346,14 +347,15 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Plant a well-formed PIN record directly in user meta (bypassing set_pin's POS-access check).
+	 * Plant a well-formed PIN record directly in per-site user meta (bypassing set_pin's
+	 * POS-access check), matching how POSPinService stores it via Users::*_site_user_meta().
 	 *
 	 * @param int    $user_id Target user.
 	 * @param string $pin     Plaintext PIN to store.
 	 */
 	private function plant_pin_meta( int $user_id, string $pin ): void {
 		$salt = random_bytes( POSPinService::SALT_BYTES );
-		update_user_meta(
+		Users::update_site_user_meta(
 			$user_id,
 			POSPinService::PIN_META_KEY,
 			array(
