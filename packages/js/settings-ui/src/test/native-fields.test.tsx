@@ -419,6 +419,95 @@ describe( 'NativeSettingsField', () => {
 		} );
 	} );
 
+	describe( 'checkbox fields', () => {
+		const checkboxField: SettingsUIField = {
+			id: 'wc_test_checkbox',
+			label: 'Enable feature',
+			type: 'checkbox',
+		};
+
+		const getCheckbox = ( container: HTMLElement ) => {
+			const checkbox = container.querySelector(
+				'input[type="checkbox"]'
+			);
+
+			if ( ! ( checkbox instanceof HTMLInputElement ) ) {
+				throw new Error( 'Expected a checkbox input.' );
+			}
+
+			return checkbox;
+		};
+
+		const renderCheckbox = (
+			value: SettingsValue,
+			initialValue: SettingsValue,
+			onChange: ( next: SettingsValue ) => void
+		) =>
+			render(
+				<NativeSettingsField
+					{ ...makeProps( checkboxField, value, onChange ) }
+					initialValues={ { [ checkboxField.id ]: initialValue } }
+				/>
+			);
+
+		const clickCheckbox = ( container: HTMLElement ) => {
+			act( () => {
+				getCheckbox( container ).click();
+			} );
+		};
+
+		it( "keeps the 'yes'/'no' value vocabulary when toggling", () => {
+			const onChange = jest.fn();
+			const container = renderCheckbox( 'no', 'no', onChange );
+
+			expect( getCheckbox( container ).checked ).toBe( false );
+
+			clickCheckbox( container );
+
+			expect( onChange ).toHaveBeenCalledWith( 'yes' );
+		} );
+
+		it( 'restores the exact initial value when toggled back', () => {
+			const onChange = jest.fn();
+			const container = renderCheckbox( 'yes', 'no', onChange );
+
+			expect( getCheckbox( container ).checked ).toBe( true );
+
+			clickCheckbox( container );
+
+			expect( onChange ).toHaveBeenCalledWith( 'no' );
+		} );
+
+		it( "keeps the '1'/'0' value vocabulary when toggling", () => {
+			const onChange = jest.fn();
+			const container = renderCheckbox( '1', '1', onChange );
+
+			expect( getCheckbox( container ).checked ).toBe( true );
+
+			clickCheckbox( container );
+
+			expect( onChange ).toHaveBeenCalledWith( '0' );
+		} );
+
+		it( 'keeps boolean values boolean when toggling', () => {
+			const onChange = jest.fn();
+			const container = renderCheckbox( false, false, onChange );
+
+			clickCheckbox( container );
+
+			expect( onChange ).toHaveBeenCalledWith( true );
+		} );
+
+		it( 'restores an empty-string initial value when toggled back', () => {
+			const onChange = jest.fn();
+			const container = renderCheckbox( 'yes', '', onChange );
+
+			clickCheckbox( container );
+
+			expect( onChange ).toHaveBeenCalledWith( '' );
+		} );
+	} );
+
 	describe( 'text fields', () => {
 		it( 'renders text fields without spin buttons', () => {
 			const container = render(

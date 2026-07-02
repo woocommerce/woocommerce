@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep checkbox field values in the schema's value vocabulary ('yes'/'no', '1'/'0', or boolean) instead of emitting raw booleans, fixing dirty tracking, fieldVisibility predicates, and the values passed to save handlers.

@@ -237,6 +237,86 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
+	it( 'keeps checkbox values in the schema vocabulary for visibility predicates and dirty tracking', () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'env',
+							label: 'Enable environment',
+							type: 'checkbox',
+							value: 'no',
+						},
+						{
+							id: 'dependent_field',
+							label: 'Dependent field',
+							type: 'text',
+							value: 'abc',
+						},
+					],
+				},
+			},
+		};
+
+		registerSettingsExtension( {
+			scope: { page: 'test-page' },
+			fieldVisibility: {
+				dependent_field: ( { values } ) => values.env === 'yes',
+			},
+		} );
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } page="test-page" />
+		);
+
+		const getSaveButton = () => {
+			const saveButton = container.querySelector< HTMLButtonElement >(
+				'.woocommerce-save-button'
+			);
+
+			if ( ! saveButton ) {
+				throw new Error( 'Expected a save button.' );
+			}
+
+			return saveButton;
+		};
+
+		const clickCheckbox = () => {
+			const checkbox = container.querySelector< HTMLInputElement >(
+				'input[type="checkbox"]'
+			);
+
+			act( () => {
+				checkbox?.click();
+			} );
+		};
+
+		// Initially: predicate unmet, nothing dirty.
+		expect( container.textContent ).not.toContain( 'Dependent field' );
+		expect( getSaveButton().disabled ).toBe( true );
+
+		// Toggle on: the predicate sees 'yes' (not a raw boolean) and the
+		// change is a real edit, so Save enables.
+		clickCheckbox();
+		expect( container.textContent ).toContain( 'Dependent field' );
+		expect( getSaveButton().disabled ).toBe( false );
+
+		// Toggle back off: the value returns to the initial 'no', so the
+		// form is clean again and Save disables.
+		clickCheckbox();
+		expect( container.textContent ).not.toContain( 'Dependent field' );
+		expect( getSaveButton().disabled ).toBe( true );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
 	it( 'hides fields with unmet native visibility rules', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',

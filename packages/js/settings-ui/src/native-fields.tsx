@@ -42,6 +42,34 @@ const textInputTypes: TextInputType[] = [
 const toStringValue = ( value: SettingsValue ) =>
 	value === null || typeof value === 'undefined' ? '' : String( value );
 
+const isCheckboxChecked = ( value: SettingsValue ) =>
+	value === true || value === 'yes' || value === '1';
+
+// Preserve the schema's value vocabulary: legacy settings store checkboxes as
+// 'yes'/'no' (or '1'/'0') strings, and dirty tracking, visibility predicates,
+// and save handlers all compare against that vocabulary. Emitting
+// CheckboxControl's raw boolean would permanently change the value's type on
+// first interaction, so map the checked state back onto the initial value's
+// representation — returning the initial value itself when the state reverts.
+const toCheckboxValue = (
+	checked: boolean,
+	initialValue: SettingsValue
+): SettingsValue => {
+	if ( checked === isCheckboxChecked( initialValue ) ) {
+		return initialValue;
+	}
+
+	if ( typeof initialValue === 'boolean' ) {
+		return checked;
+	}
+
+	if ( initialValue === '1' || initialValue === '0' ) {
+		return checked ? '1' : '0';
+	}
+
+	return checked ? 'yes' : 'no';
+};
+
 const isTextInputType = ( type: string ): type is TextInputType =>
 	textInputTypes.includes( type as TextInputType );
 
@@ -93,6 +121,7 @@ const getHelp = ( description?: string ) =>
 export const NativeSettingsField = ( {
 	field,
 	value,
+	initialValues,
 	onChange,
 }: SettingsFieldComponentProps ) => {
 	if ( field.type === 'info' ) {
@@ -114,9 +143,13 @@ export const NativeSettingsField = ( {
 				className="wc-settings-ui__control"
 				label={ field.label }
 				help={ getHelp( field.description ) }
-				checked={ value === true || value === 'yes' || value === '1' }
+				checked={ isCheckboxChecked( value ) }
 				disabled={ field.disabled }
-				onChange={ onChange }
+				onChange={ ( checked: boolean ) =>
+					onChange(
+						toCheckboxValue( checked, initialValues?.[ field.id ] )
+					)
+				}
 				__nextHasNoMarginBottom
 			/>
 		);
