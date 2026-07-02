@@ -320,6 +320,8 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
 		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section_with_native_settings_ui_page() );
 
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
 		global $current_section, $current_tab;
 		$current_tab     = 'checkout';
 		$current_section = 'acme_payments';

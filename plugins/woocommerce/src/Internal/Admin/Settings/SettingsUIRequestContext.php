@@ -235,6 +235,17 @@ class SettingsUIRequestContext {
 	}
 
 	/**
+	 * Get the legacy settings page this context was resolved for.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return \WC_Settings_Page
+	 */
+	public function get_settings_page(): \WC_Settings_Page {
+		return $this->settings_page;
+	}
+
+	/**
 	 * Get the Settings UI page id.
 	 *
 	 * @return string
@@ -245,6 +256,11 @@ class SettingsUIRequestContext {
 
 	/**
 	 * Whether this context can render through the Settings UI.
+	 *
+	 * True when the settings UI feature is enabled and a Settings UI page resolved
+	 * for the page and section — provided natively by a registered section, adapted
+	 * from a registered section's legacy settings, or provided by the settings page
+	 * itself. Callers replacing legacy rendering should treat all three the same.
 	 *
 	 * @return bool
 	 */
@@ -348,6 +364,7 @@ class SettingsUIRequestContext {
 		try {
 			$registered_section = SettingsSectionRegistry::get_instance()->get_registered( $settings_page->get_id(), $section );
 		} catch ( \Throwable $e ) {
+			self::log_resolution_failure( 'Registered settings section', $settings_page->get_id(), $section, $e, __METHOD__ );
 			$registered_section = null;
 		}
 
@@ -359,16 +376,7 @@ class SettingsUIRequestContext {
 						return $settings_ui_page;
 					}
 				} catch ( \Throwable $e ) {
-					wc_get_logger()->debug(
-						sprintf(
-							'Native Settings UI page could not be resolved for page "%1$s" section "%2$s": %3$s: %4$s',
-							$settings_page->get_id(),
-							'' === $section ? self::DEFAULT_SECTION_KEY : $section,
-							get_class( $e ),
-							$e->getMessage()
-						),
-						array( 'source' => 'settings-ui' )
-					);
+					self::log_resolution_failure( 'Native Settings UI page', $settings_page->get_id(), $section, $e, __METHOD__ );
 
 					wc_doing_it_wrong(
 						__METHOD__,
@@ -376,15 +384,11 @@ class SettingsUIRequestContext {
 							/* translators: 1: settings page id, 2: settings section id, 3: failure reason. */
 							esc_html__( 'The native Settings UI page for page "%1$s" section "%2$s" could not be resolved. Falling back to the default settings adapter. Reason: %3$s', 'woocommerce' ),
 							esc_html( $settings_page->get_id() ),
-							esc_html( '' === $section ? self::DEFAULT_SECTION_KEY : $section ),
+							esc_html( self::get_section_key( $section ) ),
 							esc_html( get_class( $e ) . ': ' . $e->getMessage() )
 						),
 						'11.0.0'
 					);
-
-					if ( $e instanceof \Exception ) {
-						wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
-					}
 				}
 			}
 
@@ -411,16 +415,7 @@ class SettingsUIRequestContext {
 		} catch ( \Throwable $e ) {
 			$this->script_handles_failed = true;
 
-			wc_get_logger()->debug(
-				sprintf(
-					'Settings UI script handles could not be resolved for page "%1$s" section "%2$s": %3$s: %4$s',
-					$this->get_page_id(),
-					'' === $this->section ? self::DEFAULT_SECTION_KEY : $this->section,
-					get_class( $e ),
-					$e->getMessage()
-				),
-				array( 'source' => 'settings-ui' )
-			);
+			self::log_resolution_failure( 'Settings UI script handles', $this->get_page_id(), $this->section, $e, __METHOD__ );
 
 			if ( $e instanceof \Exception ) {
 				$this->script_handles_failure_reason = sprintf(
@@ -428,7 +423,6 @@ class SettingsUIRequestContext {
 					__( 'Settings UI script handles could not be resolved: %s', 'woocommerce' ),
 					$e->getMessage()
 				);
-				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
 			}
 		}
 	}
@@ -449,20 +443,34 @@ class SettingsUIRequestContext {
 		} catch ( \Throwable $e ) {
 			$this->schema_failed = true;
 
-			wc_get_logger()->debug(
-				sprintf(
-					'Settings UI schema could not be resolved for page "%1$s" section "%2$s": %3$s: %4$s',
-					$this->get_page_id(),
-					'' === $this->section ? self::DEFAULT_SECTION_KEY : $this->section,
-					get_class( $e ),
-					$e->getMessage()
-				),
-				array( 'source' => 'settings-ui' )
-			);
+			self::log_resolution_failure( 'Settings UI schema', $this->get_page_id(), $this->section, $e, __METHOD__ );
+		}
+	}
 
-			if ( $e instanceof \Exception ) {
-				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
-			}
+	/**
+	 * Log a Settings UI resolution failure for developers.
+	 *
+	 * @param string     $subject What failed to resolve, e.g. 'Settings UI schema'.
+	 * @param string     $page_id Settings page id.
+	 * @param string     $section Section id. Empty string means the default section.
+	 * @param \Throwable $e The resolution failure.
+	 * @param string     $caller Calling method, for exception tracking.
+	 */
+	private static function log_resolution_failure( string $subject, string $page_id, string $section, \Throwable $e, string $caller ): void {
+		wc_get_logger()->debug(
+			sprintf(
+				'%1$s could not be resolved for page "%2$s" section "%3$s": %4$s: %5$s',
+				$subject,
+				$page_id,
+				self::get_section_key( $section ),
+				get_class( $e ),
+				$e->getMessage()
+			),
+			array( 'source' => 'settings-ui' )
+		);
+
+		if ( $e instanceof \Exception ) {
+			wc_caught_exception( $e, $caller );
 		}
 	}
 
@@ -483,7 +491,7 @@ class SettingsUIRequestContext {
 		}
 
 		if ( is_array( $schema['shell'] ) && ! isset( $schema['shell']['sectionNavigation'] ) ) {
-			$schema['shell']['sectionNavigation'] = LegacySettingsPageAdapter::build_default_section_navigation( $this->settings_page, $this->section );
+			$schema['shell']['sectionNavigation'] = SettingsSectionNavigation::build_default( $this->settings_page, $this->section );
 		}
 
 		return $schema;
