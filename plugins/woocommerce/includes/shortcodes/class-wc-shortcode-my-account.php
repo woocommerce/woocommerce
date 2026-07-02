@@ -384,6 +384,8 @@ class WC_Shortcode_My_Account {
 
 		wp_set_password( $new_pass, $user->ID );
 		update_user_meta( $user->ID, 'default_password_nag', false );
+		// The temporary-password notice is gone for good now, so drop its resend rate-limit timestamp.
+		delete_user_meta( $user->ID, WC_Form_Handler::SET_PASSWORD_RESEND_META );
 
 		/**
 		 * Fires after the user's password has been reset via WooCommerce.
