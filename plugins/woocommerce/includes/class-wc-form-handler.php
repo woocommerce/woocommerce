@@ -157,7 +157,9 @@ class WC_Form_Handler {
 								}
 								break;
 							case 'phone':
-								if ( '' !== $value && ! WC_Validation::is_phone( $value ) ) {
+								$country = wc_clean( wp_unslash( $_POST[ $address_type . '_country' ] ) );
+								$country = is_string( $country ) ? $country : '';
+								if ( '' !== $value && ! WC_Validation::is_phone( $value, $country ) ) {
 									/* translators: %s: Phone number. */
 									wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
 								}

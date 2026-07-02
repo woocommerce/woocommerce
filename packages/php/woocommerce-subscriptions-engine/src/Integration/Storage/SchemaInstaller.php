@@ -40,24 +40,24 @@ final class SchemaInstaller {
 	 * on an earlier schema must drop and recreate the tables (and clear VERSION_OPTION)
 	 * to pick up such changes - in-place ALTERs and backfills arrive with the freeze.
 	 */
-	const VERSION = '2.1.1';
+	private const VERSION = '2.1.1';
 
 	/**
 	 * Option key tracking the installed schema version.
 	 */
-	const VERSION_OPTION = 'wc_subscriptions_engine_db_version';
+	private const VERSION_OPTION = 'wc_subscriptions_engine_db_version';
 
 	/**
 	 * Logical table identifiers - keys map to unprefixed table names.
 	 */
-	const TABLE_PLAN_GROUPS        = 'plan_groups';
-	const TABLE_PLANS              = 'plans';
-	const TABLE_CONTRACTS          = 'contracts';
-	const TABLE_CONTRACT_ITEMS     = 'contract_items';
-	const TABLE_CONTRACT_ADDRESSES = 'contract_addresses';
-	const TABLE_CONTRACT_META      = 'contract_meta';
-	const TABLE_CYCLES             = 'cycles';
-	const TABLE_SNAPSHOTS          = 'snapshots';
+	public const TABLE_PLAN_GROUPS        = 'plan_groups';
+	public const TABLE_PLANS              = 'plans';
+	public const TABLE_CONTRACTS          = 'contracts';
+	public const TABLE_CONTRACT_ITEMS     = 'contract_items';
+	public const TABLE_CONTRACT_ADDRESSES = 'contract_addresses';
+	public const TABLE_CONTRACT_META      = 'contract_meta';
+	public const TABLE_CYCLES             = 'cycles';
+	public const TABLE_SNAPSHOTS          = 'snapshots';
 
 	/**
 	 * Resolve a logical identifier to its prefixed table name.
@@ -125,10 +125,28 @@ final class SchemaInstaller {
 	}
 
 	/**
-	 * Whether the installed schema version matches SchemaInstaller::VERSION.
+	 * Whether the installed schema version matches SchemaInstaller::get_version().
 	 */
 	public static function is_current(): bool {
-		return self::VERSION === get_option( self::VERSION_OPTION );
+		return self::get_version() === self::get_database_version();
+	}
+
+	/**
+	 * Get the schema version for this class.
+	 */
+	public static function get_version(): string {
+		return self::VERSION;
+	}
+
+	/**
+	 * Get the installed schema version from the database.
+	 */
+	public static function get_database_version(): ?string {
+		$database_version = get_option( self::VERSION_OPTION );
+		if ( ! is_string( $database_version ) ) {
+			return null;
+		}
+		return $database_version;
 	}
 
 	/**

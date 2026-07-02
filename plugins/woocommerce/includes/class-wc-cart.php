@@ -1176,7 +1176,7 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				$variation_attributes = $product_data->get_variation_attributes();
 				// Filter out 'any' variations, which are empty, as they need to be explicitly specified while adding to cart.
-				$variation_attributes = array_filter( $variation_attributes );
+				$variation_attributes = array_filter( $variation_attributes, 'wc_array_filter_default_attributes' );
 
 				// Gather posted attributes.
 				$posted_attributes = array();

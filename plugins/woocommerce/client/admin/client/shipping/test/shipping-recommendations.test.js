@@ -22,6 +22,9 @@ jest.mock( '../../settings-recommendations/dismissable-list', () => ( {
 jest.mock( '../../lib/notices', () => ( {
 	createNoticesFromResponse: () => null,
 } ) );
+jest.mock( '~/hooks/use-option-dismiss', () => ( {
+	useOptionDismiss: () => ( { isDismissed: false, onDismiss: jest.fn() } ),
+} ) );
 
 describe( 'ShippingRecommendations', () => {
 	beforeEach( () => {
