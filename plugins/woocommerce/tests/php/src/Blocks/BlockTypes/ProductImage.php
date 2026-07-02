@@ -215,9 +215,8 @@ class ProductImage extends \WP_UnitTestCase {
 		$markup_single    = $this->render_product_image_block( $data['product'], '{"imageSizing":"single"}' );
 		$markup_thumbnail = $this->render_product_image_block( $data['product'], '{"imageSizing":"thumbnail"}' );
 
-		$this->assertStringContainsString( 'aspect-ratio:1/1', $markup_single );
+		$this->assertStringNotContainsString( 'aspect-ratio:1/1', $markup_single );
 		$this->assertStringContainsString( 'aspect-ratio:1/1', $markup_thumbnail );
-		$this->assertSame( $markup_single, $markup_thumbnail );
 
 		// Clean up.
 		$data['product']->delete( true );
@@ -231,19 +230,19 @@ class ProductImage extends \WP_UnitTestCase {
 		$data = $this->create_product_with_image();
 
 		update_option( 'woocommerce_thumbnail_cropping', '1:1' );
-		$markup = $this->render_product_image_block( $data['product'] );
+		$markup = $this->render_product_image_block( $data['product'], '{"imageSizing":"thumbnail"}' );
 		$this->assertStringContainsString( 'aspect-ratio:1/1', $markup );
 		$this->assertStringContainsString( 'wc-block-components-product-image--aspect-ratio-1-1', $markup );
 
 		update_option( 'woocommerce_thumbnail_cropping', 'custom' );
 		update_option( 'woocommerce_thumbnail_cropping_custom_width', '4' );
 		update_option( 'woocommerce_thumbnail_cropping_custom_height', '3' );
-		$markup = $this->render_product_image_block( $data['product'] );
+		$markup = $this->render_product_image_block( $data['product'], '{"imageSizing":"thumbnail"}' );
 		$this->assertStringContainsString( 'aspect-ratio:4/3', $markup );
 		$this->assertStringContainsString( 'wc-block-components-product-image--aspect-ratio-4-3', $markup );
 
 		update_option( 'woocommerce_thumbnail_cropping', 'uncropped' );
-		$markup = $this->render_product_image_block( $data['product'] );
+		$markup = $this->render_product_image_block( $data['product'], '{"imageSizing":"thumbnail"}' );
 		$this->assertStringNotContainsString( 'aspect-ratio:', $markup );
 		$this->assertStringContainsString( 'wc-block-components-product-image--aspect-ratio-auto', $markup );
 

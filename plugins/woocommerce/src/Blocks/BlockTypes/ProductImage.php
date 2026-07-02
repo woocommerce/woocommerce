@@ -162,7 +162,13 @@ class ProductImage extends AbstractBlock {
 			return $attributes['aspectRatio'];
 		}
 
-		return $this->get_store_thumbnail_aspect_ratio();
+		// For backwards compatibility, we interpret "thumbnail" as following
+		// the store thumbnail cropping settings.
+		if ( 'thumbnail' === $attributes['imageSizing'] ) {
+			return $this->get_store_thumbnail_aspect_ratio();
+		}
+
+		return null;
 	}
 
 	/**
