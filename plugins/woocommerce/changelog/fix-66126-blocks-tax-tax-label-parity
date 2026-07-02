@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Cart/Checkout blocks single-total tax label now shows configured tax name (VAT/Tax) matching classic parity

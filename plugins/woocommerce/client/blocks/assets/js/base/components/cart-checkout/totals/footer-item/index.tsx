@@ -68,6 +68,8 @@ const TotalsFooterItem = ( {
 		getSetting< boolean >( 'taxesEnabled', true ) &&
 		getSetting< boolean >( 'displayCartPricesIncludingTax', false );
 
+	const taxLabel = getSetting< string >( 'taxLabel', '' );
+
 	const {
 		total_price: totalPrice,
 		total_tax: totalTax,
@@ -124,6 +126,12 @@ const TotalsFooterItem = ( {
 							) } ${ name }`;
 						} )
 						.join( ', ' )
+			  )
+			: taxLabel
+			? sprintf(
+					/* translators: %s is the tax label (VAT/Tax/etc). */
+					__( 'Including <TaxAmount/> in %s', 'woocommerce' ),
+					taxLabel
 			  )
 			: __( 'Including <TaxAmount/> in taxes', 'woocommerce' );
 

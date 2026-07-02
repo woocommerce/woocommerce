@@ -485,6 +485,19 @@ class Checkout extends AbstractBlock {
 		$this->asset_data_registry->add( 'forcedBillingAddress', 'billing_only' === get_option( 'woocommerce_ship_to_destination' ) );
 		$this->asset_data_registry->add( 'generatePassword', filter_var( get_option( 'woocommerce_registration_generate_password' ), FILTER_VALIDATE_BOOLEAN ) );
 		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled() );
+
+		// Bridge the tax label setting for parity with classic cart/checkout.
+		$tax_label = '';
+		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
+			$display_including_tax = 'inclusive' === get_option( 'woocommerce_tax_display_cart' );
+			if ( $display_including_tax && ! wc_prices_include_tax() ) {
+				$tax_label = WC()->countries->inc_tax_or_vat();
+			} elseif ( ! $display_including_tax && wc_prices_include_tax() ) {
+				$tax_label = WC()->countries->ex_tax_or_vat();
+			}
+		}
+		$this->asset_data_registry->add( 'taxLabel', $tax_label );
+
 		$this->asset_data_registry->add( 'couponsEnabled', wc_coupons_enabled() );
 		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled() );
 		$this->asset_data_registry->add( 'hasDarkEditorStyleSupport', current_theme_supports( 'dark-editor-style' ) );

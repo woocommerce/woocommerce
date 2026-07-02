@@ -46,6 +46,8 @@ const TotalsTaxes = ( {
 		false
 	) as boolean;
 
+	const taxLabel = getSetting< string >( 'taxLabel', '' );
+
 	const itemisedTaxItems: ReactElement | null =
 		showItemisedTaxes && taxLines.length > 0 ? (
 			<>
@@ -80,7 +82,7 @@ const TotalsTaxes = ( {
 					className
 				) }
 				currency={ currency }
-				label={ __( 'Taxes', 'woocommerce' ) }
+				label={ taxLabel || __( 'Taxes', 'woocommerce' ) }
 				value={ parseInt( totalTax, 10 ) }
 				description={ null }
 			/>

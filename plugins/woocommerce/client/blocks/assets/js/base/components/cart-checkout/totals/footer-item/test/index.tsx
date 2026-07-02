@@ -137,6 +137,7 @@ describe( 'TotalsFooterItem', () => {
 	beforeEach( () => {
 		allSettings.taxesEnabled = true;
 		allSettings.displayCartPricesIncludingTax = true;
+		allSettings.taxLabel = '';
 	} );
 
 	const currency = {
@@ -265,6 +266,48 @@ describe( 'TotalsFooterItem', () => {
 
 		// Check that tax information with multiple labels is displayed
 		const taxInfo = screen.getByText( /including.*10% VAT.*5% VAT/i );
+		expect( taxInfo ).toBeInTheDocument();
+		expect( taxInfo ).toHaveClass(
+			'wc-block-components-totals-footer-item-tax'
+		);
+	} );
+
+	it( 'Uses the taxLabel setting when showing single-total line', async () => {
+		allSettings.taxLabel = 'VAT';
+		const valuesWithTax = {
+			...values,
+			total_tax: '100',
+			total_items_tax: '100',
+			tax_lines: [],
+		};
+		render(
+			<TotalsFooterItem currency={ currency } values={ valuesWithTax } />
+		);
+
+		expect( screen.getByText( /£85\.00/ ) ).toBeInTheDocument();
+
+		const taxInfo = screen.getByText( /including.*VAT/i );
+		expect( taxInfo ).toBeInTheDocument();
+		expect( taxInfo ).toHaveClass(
+			'wc-block-components-totals-footer-item-tax'
+		);
+	} );
+
+	it( 'Falls back to generic "taxes" wording when taxLabel is empty', async () => {
+		allSettings.taxLabel = '';
+		const valuesWithTax = {
+			...values,
+			total_tax: '100',
+			total_items_tax: '100',
+			tax_lines: [],
+		};
+		render(
+			<TotalsFooterItem currency={ currency } values={ valuesWithTax } />
+		);
+
+		expect( screen.getByText( /£85\.00/ ) ).toBeInTheDocument();
+
+		const taxInfo = screen.getByText( /including.*tax/i );
 		expect( taxInfo ).toBeInTheDocument();
 		expect( taxInfo ).toHaveClass(
 			'wc-block-components-totals-footer-item-tax'
