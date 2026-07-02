@@ -221,7 +221,7 @@ class WC_Meta_Box_Order_Data {
 
 							printf(
 								/* translators: 1: order type 2: order number */
-								esc_html__( '%1$s #%2$s details', 'woocommerce' ),
+								esc_html__( '%1$s #%2$s', 'woocommerce' ),
 								esc_html( $order_type_object->labels->singular_name ),
 								esc_html( $order->get_order_number() )
 							);
@@ -261,7 +261,7 @@ class WC_Meta_Box_Order_Data {
 							if ( $order->get_date_paid() ) {
 								$meta_list[] = sprintf(
 									/* translators: 1: date 2: time */
-									__( 'Paid on %1$s @ %2$s', 'woocommerce' ),
+									__( 'Paid on %1$s at %2$s', 'woocommerce' ),
 									wc_format_datetime( $order->get_date_paid() ),
 									wc_format_datetime( $order->get_date_paid(), get_option( 'time_format' ) )
 								);
@@ -317,8 +317,8 @@ class WC_Meta_Box_Order_Data {
 							<?php
 							$order_date_created_localised = ! is_null( $order->get_date_created() ) ? $order->get_date_created()->getOffsetTimestamp() : '';
 							?>
-							<label for="order_date"><?php esc_html_e( 'Date created:', 'woocommerce' ); ?></label>
-							<input type="text" class="date-picker" name="order_date" maxlength="10" value="<?php echo esc_attr( date_i18n( 'Y-m-d', $order_date_created_localised ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>" />@
+							<label for="order_date"><?php esc_html_e( 'Date created', 'woocommerce' ); ?></label>
+							<input type="text" class="date-picker" name="order_date" maxlength="10" value="<?php echo esc_attr( date_i18n( 'Y-m-d', $order_date_created_localised ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>" />
 							&lrm;
 							<input type="number" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ); ?>" name="order_date_hour" min="0" max="23" step="1" value="<?php echo esc_attr( date_i18n( 'H', $order_date_created_localised ) ); ?>" pattern="([01]?[0-9]{1}|2[0-3]{1})" />:
 							<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ); ?>" name="order_date_minute" min="0" max="59" step="1" value="<?php echo esc_attr( date_i18n( 'i', $order_date_created_localised ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />
@@ -328,7 +328,7 @@ class WC_Meta_Box_Order_Data {
 						<p class="form-field form-field-wide wc-order-status">
 							<label for="order_status">
 								<?php
-								esc_html_e( 'Status:', 'woocommerce' );
+								esc_html_e( 'Status', 'woocommerce' );
 								if ( $order->needs_payment() ) {
 									printf(
 										'<a href="%s">%s</a>',
@@ -352,7 +352,7 @@ class WC_Meta_Box_Order_Data {
 							<!--email_off--> <!-- Disable CloudFlare email obfuscation -->
 							<label for="customer_user">
 								<?php
-								esc_html_e( 'Customer:', 'woocommerce' );
+								esc_html_e( 'Customer', 'woocommerce' );
 								if ( $order->get_user_id( 'edit' ) ) {
 									$args = array(
 										'post_status'    => 'all',
@@ -435,7 +435,7 @@ class WC_Meta_Box_Order_Data {
 								if ( $order->get_formatted_billing_address() ) {
 									echo '<p>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
 								} else {
-									echo '<p class="none_set"><strong>' . esc_html__( 'Address:', 'woocommerce' ) . '</strong> ' . esc_html__( 'No billing address set.', 'woocommerce' ) . '</p>';
+									echo '<p class="none_set">' . esc_html__( 'No billing address set.', 'woocommerce' ) . '</p>';
 								}
 
 								$billing_fields = self::get_billing_fields( $order, 'view' );
@@ -458,7 +458,10 @@ class WC_Meta_Box_Order_Data {
 									if ( 'billing_phone' === $field_name ) {
 										$field_value = wc_make_phone_clickable( $field_value );
 									} elseif ( 'billing_email' === $field_name ) {
-										$field_value = '<a href="' . esc_url( 'mailto:' . $field_value ) . '">' . $field_value . '</a>';
+										$normalized_email = is_string( $field_value ) ? trim( $field_value ) : '';
+										$field_value      = '' === $normalized_email
+											? '<span class="none_set">' . esc_html__( 'No email address set.', 'woocommerce' ) . '</span>'
+											: '<a href="' . esc_url( 'mailto:' . $normalized_email ) . '">' . esc_html( $normalized_email ) . '</a>';
 									} else {
 										$field_value = make_clickable( esc_html( $field_value ) );
 									}
@@ -571,7 +574,7 @@ class WC_Meta_Box_Order_Data {
 								if ( $order->get_formatted_shipping_address() ) {
 									echo '<p>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
 								} else {
-									echo '<p class="none_set"><strong>' . esc_html__( 'Address:', 'woocommerce' ) . '</strong> ' . esc_html__( 'No shipping address set.', 'woocommerce' ) . '</p>';
+									echo '<p class="none_set">' . esc_html__( 'No shipping address set.', 'woocommerce' ) . '</p>';
 								}
 
 								$shipping_fields = self::get_shipping_fields( $order, 'view' );
