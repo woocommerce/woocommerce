@@ -62,7 +62,8 @@ class POSPinService {
 	 * @param int    $user_id The target user ID.
 	 * @param string $pin     The plaintext 4-digit PIN. Must match the PIN_LENGTH constant.
 	 * @return true|WP_Error  True on success, WP_Error when the user lacks POS access, the
-	 *                        PIN format is invalid, or the PIN is already in use by another user.
+	 *                        PIN format is invalid, the PIN is already in use by another user,
+	 *                        or the record could not be written.
 	 *
 	 * @since 11.0.0
 	 */
@@ -108,7 +109,17 @@ class POSPinService {
 		// matches the woocommerce_% uninstall sweep). A user's PIN is only meaningful on sites
 		// where they hold POS access, and the uniqueness scan below is itself blog-scoped, so
 		// PIN storage must share that scope.
-		Users::update_site_user_meta( $user_id, self::PIN_META_KEY, $record );
+		//
+		// update_user_meta() also returns false for a same-value write, but the fresh random
+		// salt above means the record always differs from what is stored — false here is
+		// unambiguously a failed write, and returning success would leave the old PIN live.
+		if ( false === Users::update_site_user_meta( $user_id, self::PIN_META_KEY, $record ) ) {
+			return new WP_Error(
+				'woocommerce_pos_pin_save_failed',
+				__( 'The PIN could not be saved. Please try again.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
 
 		return true;
 	}

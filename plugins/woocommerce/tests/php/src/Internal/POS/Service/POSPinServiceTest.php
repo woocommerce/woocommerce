@@ -276,6 +276,24 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return WP_Error from set_pin when the meta write fails.
+	 *
+	 * A silently failed write would leave the previous PIN live while the caller
+	 * believes it changed, so the failure must be propagated.
+	 */
+	public function test_set_pin_returns_error_when_meta_write_fails(): void {
+		add_filter( 'update_user_metadata', '__return_false' );
+
+		$result = $this->sut->set_pin( $this->user_id, '4242' );
+
+		remove_filter( 'update_user_metadata', '__return_false' );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_pos_pin_save_failed', $result->get_error_code() );
+		$this->assertFalse( $this->sut->has_pin( $this->user_id ), 'No PIN should be reported after a failed write.' );
+	}
+
+	/**
 	 * @testdox Should reject set_pin when the PIN is already used by another staff member.
 	 */
 	public function test_set_pin_rejects_pin_in_use_by_another_user(): void {
