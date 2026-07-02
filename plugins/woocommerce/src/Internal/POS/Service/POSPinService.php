@@ -263,7 +263,7 @@ class POSPinService {
 	 * @since 11.0.0
 	 */
 	public function validate_pin_format( string $pin ): bool {
-		return 1 === preg_match( '/^\d{' . self::PIN_LENGTH . '}$/', $pin );
+		return self::PIN_LENGTH === strlen( $pin ) && ctype_digit( $pin );
 	}
 
 	/**
