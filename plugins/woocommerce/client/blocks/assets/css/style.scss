@@ -1,3 +1,8 @@
+:root {
+	--wc-separator-color: color-mix(in srgb, currentColor 20%, transparent);
+	--wc-border-radius: 0;
+}
+
 body.wc-modal--open {
 	overflow: hidden;
 }
