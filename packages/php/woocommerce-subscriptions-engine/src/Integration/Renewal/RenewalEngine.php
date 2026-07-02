@@ -2,9 +2,9 @@
 /**
  * The renewal money-path, in two separated concerns joined by a {@see RenewalIntent}:
  *
- * - Selection ({@see RenewalSelector}, read-only) decides which cycle a due contract should
+ * - Selection ({@see RenewalSelector}, read-only) decides which cycle a contract should
  *   bill, and whether it is due at all. The batch {@see RenewalDispatcher} runs it over the
- *   cycle-aware due scan; `process_due()` runs it for a single contract.
+ *   cycle-aware due scan; `renew_now()` runs its manual variant for a single contract.
  * - Processing ({@see self::process()}) bills exactly the cycle it is handed: it claims that
  *   cycle `pending` (create-as-claim, stamping a crash-recovery lease, or reclaiming a
  *   stalled one), reconciles the renewal order AFTER the claim (reuse-or-build, draft-first
@@ -105,8 +105,7 @@ final class RenewalEngine {
 	private $plans;
 
 	/**
-	 * The read-only cycle selector the single-contract paths (`process_due()`,
-	 * `renew_now()`) run.
+	 * The read-only cycle selector `renew_now()` runs for a single contract.
 	 *
 	 * @var RenewalSelector
 	 */
@@ -207,68 +206,12 @@ final class RenewalEngine {
 	}
 
 	/**
-	 * Select and process the renewal due for a single contract at `$now` - the convenience
-	 * entry the {@see \Automattic\WooCommerce\SubscriptionsEngine\Api\Subscriptions} facade
-	 * and direct test drivers use. The batch dispatcher does not call this: it selects
-	 * from the cycle-aware scan and calls {@see self::process()} directly, so it never re-loads
-	 * a head the scan already carried.
-	 *
-	 * Loads the head cycle, runs read-only selection ({@see RenewalSelector}), and processes
-	 * the chosen cycle. A chainless contract (no head to advance) is parked; a pre-flight
-	 * impossibility ({@see RenewalNotProcessable}, e.g. an unresolvable plan) parks too, so the
-	 * contract leaves the due window rather than being retried every tick.
-	 *
-	 * @param int                    $contract_id Contract whose renewal is firing.
-	 * @param DateTimeImmutable|null $now         The moment to select against; defaults to now (UTC).
-	 * @return WC_Order|null The renewal order, or null when skipped/idempotent/parked.
-	 */
-	public function process_due( int $contract_id, ?DateTimeImmutable $now = null ): ?WC_Order {
-		$now = $now ?? new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
-
-		$head = $this->contracts->find_chain_head( $contract_id );
-		if ( null === $head ) {
-			// No billing chain to advance: checkout always creates cycle 1, so a chainless
-			// contract is a manual/corrupt case the engine does not renew. Park it so the
-			// due-scan stops revisiting it - the cycle-aware scan already omits it (no head to
-			// join), and this covers the single-contract path.
-			$this->park( $contract_id );
-			wc_get_logger()->warning(
-				sprintf( 'RenewalEngine::process_due(): contract %d has no billing chain to advance - parking (cleared its next payment).', $contract_id ),
-				array(
-					'source'      => self::LOG_SOURCE,
-					'contract_id' => $contract_id,
-				)
-			);
-			return null;
-		}
-
-		$cycle_count = $this->selector->select_scheduled_cycle( RenewalCandidate::from_cycle( $head ), $now );
-		if ( null === $cycle_count ) {
-			return null;
-		}
-
-		try {
-			return $this->process( new RenewalIntent( $contract_id, $cycle_count ), $now );
-		} catch ( RenewalNotProcessable $e ) {
-			$this->park( $contract_id );
-			wc_get_logger()->warning(
-				sprintf( 'RenewalEngine::process_due(): cannot process contract %d - parking (cleared its next payment). %s', $contract_id, $e->getMessage() ),
-				array(
-					'source'      => self::LOG_SOURCE,
-					'contract_id' => $contract_id,
-				)
-			);
-			return null;
-		}
-	}
-
-	/**
 	 * Renew a contract now at an admin's request, regardless of the schedule. Selection is by head
 	 * state without the scheduled due-guard ({@see RenewalSelector::select_manual_cycle()}): a
 	 * settled head is force-advanced to the next cycle (whose period continues from the previous
 	 * end, so the schedule is preserved, not reset), while a failed or stalled head is re-attempted
-	 * at its own count. Unlike `process_due()` it never parks the contract - a manual action should
-	 * not clear the schedule when it cannot proceed.
+	 * at its own count. Unlike the scheduled path it never parks the contract - a manual action
+	 * should not clear the schedule when it cannot proceed.
 	 *
 	 * @param int                    $contract_id The contract to renew.
 	 * @param DateTimeImmutable|null $now         The processing moment; defaults to now (UTC).

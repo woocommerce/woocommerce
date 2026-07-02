@@ -1,9 +1,9 @@
 <?php
 /**
  * RenewalIntent - the seam between selection and processing: a resolved decision to bill a
- * specific cycle of a specific contract. A trigger (the batch {@see RenewalDispatcher},
- * `process_due()`, or a future admin/early-renewal path) builds one from the cycle
- * {@see RenewalSelector} chose (or its own target); {@see RenewalEngine::process()} consumes it.
+ * specific cycle of a specific contract. A trigger (the batch {@see RenewalDispatcher} or the
+ * admin `renew_now()` path) builds one from the cycle {@see RenewalSelector} chose;
+ * {@see RenewalEngine::process()} consumes it.
  *
  * Carrying the target as an explicit value keeps `process()` free of any "which cycle"
  * logic - it bills exactly the count it is handed, so a future trigger (an admin retry, a
