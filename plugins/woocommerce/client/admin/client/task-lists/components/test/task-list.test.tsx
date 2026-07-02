@@ -258,7 +258,7 @@ describe( 'TaskList', () => {
 	} );
 
 	it( 'should fire extended tasklist task clicked event when a task is clicked', () => {
-		const { getByText } = render(
+		const { getByRole } = render(
 			<TaskList
 				id="extended"
 				eventPrefix="extended_tasklist_"
@@ -275,7 +275,9 @@ describe( 'TaskList', () => {
 
 		( recordEvent as jest.Mock ).mockClear();
 
-		fireEvent.click( getByText( tasks.extension[ 0 ].title ) );
+		fireEvent.click(
+			getByRole( 'button', { name: tasks.extension[ 0 ].title } )
+		);
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'extended_tasklist_task_clicked',
@@ -289,7 +291,7 @@ describe( 'TaskList', () => {
 	} );
 
 	it( 'should include task_complete when a completed task is clicked', () => {
-		const { getByText } = render(
+		const { getByRole } = render(
 			<TaskList
 				id="extended"
 				eventPrefix="extended_tasklist_"
@@ -306,7 +308,9 @@ describe( 'TaskList', () => {
 
 		( recordEvent as jest.Mock ).mockClear();
 
-		fireEvent.click( getByText( tasks.setup[ 2 ].title ) );
+		fireEvent.click(
+			getByRole( 'button', { name: tasks.setup[ 2 ].title } )
+		);
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'extended_tasklist_task_clicked',
