@@ -892,11 +892,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		// Strip characters that are never valid (digits, hyphens, and X/x for the ISBN-10 check digit).
 		$global_unique_id = (string) preg_replace( '/[^0-9Xx\-]/', '', (string) $global_unique_id );
 
-		// X is only valid as the final ISBN-10 check digit character (ISO 2108). Strip it from any
-		// other position instead of rejecting the value: releases before 10.9 silently cleaned
-		// invalid characters, and REST API clients rely on that behavior.
+		// X is only valid as the final ISBN-10 check digit character (ISO 2108). If the value is not
+		// shaped like that, clean it exactly as releases before 10.9 did (strip all X) instead of
+		// rejecting it: REST API clients rely on that behavior. Valid ISBN-10s keep their X.
 		if ( ! preg_match( '/^[0-9\-]*[0-9Xx]?$/', $global_unique_id ) ) {
-			$global_unique_id = (string) preg_replace( '/[Xx](?!$)/', '', $global_unique_id );
+			$global_unique_id = str_replace( array( 'X', 'x' ), '', $global_unique_id );
 		}
 
 		if ( $this->get_object_read() && ! empty( $global_unique_id ) && ! wc_product_has_global_unique_id( $this->get_id(), $global_unique_id ) ) {

@@ -482,7 +482,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 			'hyphenated ISBN-10 X preserved'  => array( '0-9752298-0-X', '0-9752298-0-X' ),
 			'lowercase final x preserved'     => array( '097522980x', '097522980x' ),
 			'mid-string X stripped'           => array( '12X4567890123', '124567890123' ),
-			'only final X kept when multiple' => array( '12X45X', '1245X' ),
+			'all X stripped when shape is invalid' => array( '12X45X', '1245' ),
 		);
 	}
 }
