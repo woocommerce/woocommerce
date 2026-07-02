@@ -86,13 +86,13 @@ export interface RenderItemArgs< T extends object = object >
 			>
 		> {
 	// Additional CSS classes.
-	className?: string | undefined;
+	className?: string;
 	// Unique id of the parent control.
 	controlId: string | number;
 	// Label to display in the count bubble. Takes preference over `item.count`.
 	countLabel?: ReactNode;
 	// Whether the item is disabled.
-	disabled?: boolean | undefined;
+	disabled?: boolean;
 	// Current item to display.
 	item: SearchListItem< T >;
 	// Whether this item is selected.
