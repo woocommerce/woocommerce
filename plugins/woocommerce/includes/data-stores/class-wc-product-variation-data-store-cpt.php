@@ -331,9 +331,46 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @return bool True when the stored title is consistent with the parent title.
 	 */
 	protected function is_variation_title_in_sync_with_parent( $product, $stored_title ) {
-		$title_base = get_post_field( 'post_title', $product->get_parent_id() );
-		$in_sync    = $stored_title === $title_base || 0 === strpos( (string) $stored_title, ( (string) $title_base ) . ' - ' );
-		return $in_sync;
+		$title_base = (string) get_post_field( 'post_title', $product->get_parent_id() );
+		// When attributes are omitted (e.g. 3+ attributes) the title is just the parent name, so it must
+		// match exactly. A stored attribute suffix in that case is stale and must be regenerated away.
+		if ( ! $this->should_include_attributes_in_title( $product ) ) {
+			return $stored_title === $title_base;
+		}
+		return $stored_title === $title_base || 0 === strpos( (string) $stored_title, $title_base . ' - ' );
+	}
+
+	/**
+	 * Whether a variation's attribute suffix should be part of its generated title. Cheap (no term
+	 * queries): attributes are omitted for variations with 3+ attributes, or with multiple attributes
+	 * when any attribute name contains a hyphen.
+	 *
+	 * @since 11.0.0
+	 * @param WC_Product $product Product variation object.
+	 * @return bool
+	 */
+	protected function should_include_attributes_in_title( $product ) {
+		$attributes = (array) $product->get_attributes();
+		$include    = count( $attributes ) < 3;
+
+		if ( $include && 1 < count( $attributes ) ) {
+			foreach ( $attributes as $name => $value ) {
+				if ( false !== strpos( $name, '-' ) ) {
+					$include = false;
+					break;
+				}
+			}
+		}
+
+		/**
+		 * Filters whether the attribute suffix should be included in a variation's generated title.
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param bool       $include Whether to include the attribute suffix.
+		 * @param WC_Product $product The variation being titled.
+		 */
+		return (bool) apply_filters( 'woocommerce_product_variation_title_include_attributes', $include, $product );
 	}
 
 	/**
@@ -345,23 +382,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @return string
 	 */
 	protected function generate_product_title( $product ) {
-		$attributes = (array) $product->get_attributes();
-
-		// Do not include attributes if the product has 3+ attributes.
-		$should_include_attributes = count( $attributes ) < 3;
-
-		// Do not include attributes if an attribute name has 2+ words and the
-		// product has multiple attributes.
-		if ( $should_include_attributes && 1 < count( $attributes ) ) {
-			foreach ( $attributes as $name => $value ) {
-				if ( false !== strpos( $name, '-' ) ) {
-					$should_include_attributes = false;
-					break;
-				}
-			}
-		}
-
-		$should_include_attributes = apply_filters( 'woocommerce_product_variation_title_include_attributes', $should_include_attributes, $product );
+		$should_include_attributes = $this->should_include_attributes_in_title( $product );
 		$separator                 = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', $product );
 		$title_base                = get_post_field( 'post_title', $product->get_parent_id() );
 		$title_suffix              = $should_include_attributes ? wc_get_formatted_variation( $product, true, false ) : '';

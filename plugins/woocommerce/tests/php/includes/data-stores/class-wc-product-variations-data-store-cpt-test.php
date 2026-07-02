@@ -483,6 +483,35 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A stored attribute suffix is stale for a variation that omits attributes from its title (3+
+	 * attributes). The in-sync check must treat it as out of sync so the suffix is regenerated away,
+	 * matching the unconditional regeneration behaviour. Regression for the product-duplication path.
+	 */
+	public function test_stale_attribute_suffix_is_regenerated_when_attributes_are_omitted(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$parent  = get_post_field( 'post_title', $product->get_id() );
+
+		// The third variation has 3 attributes, so its title omits them.
+		$child_id = $product->get_children()[2];
+
+		// Store a title that carries a stale attribute suffix, then read with the skip enabled.
+		wp_update_post(
+			array(
+				'ID'         => $child_id,
+				'post_title' => $parent . ' - huge, red, 0',
+			)
+		);
+		add_filter( 'woocommerce_variation_skip_title_resync_on_read', '__return_true' );
+		wp_cache_flush();
+
+		$variation = wc_get_product( $child_id );
+		remove_filter( 'woocommerce_variation_skip_title_resync_on_read', '__return_true' );
+
+		$this->assertSame( $parent, $variation->get_name(), 'A stale attribute suffix must be regenerated away when the title omits attributes.' );
+		$this->assertSame( $parent, get_post_field( 'post_title', $child_id, 'raw' ), 'The corrected title must be persisted.' );
+	}
+
+	/**
 	 * Create a variable product and return one of its variations.
 	 *
 	 * @return WC_Product_Variation The variation created.
