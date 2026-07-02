@@ -117,7 +117,8 @@ class SystemStatusReport {
 		$next_daily_cron = null;
 
 		if ( function_exists( 'as_next_scheduled_action' ) ) {
-			$next_daily_cron = as_next_scheduled_action( 'wc_admin_daily_wrapper', array(), 'woocommerce' );
+			$next_action_time = as_next_scheduled_action( 'wc_admin_daily_wrapper', array(), 'woocommerce' );
+			$next_daily_cron  = is_numeric( $next_action_time ) ? $next_action_time : null;
 		}
 
 		if ( empty( $next_daily_cron ) ) {
