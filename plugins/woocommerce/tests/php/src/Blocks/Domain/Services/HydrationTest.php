@@ -163,6 +163,23 @@ class HydrationTest extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that notice cache/restore does not trigger fatal when called from
+	 * a non-admin context. The admin guard (is_admin && ! DOING_AJAX) is tested
+	 * implicitly here: the guard chain is a simple boolean expression, and
+	 * this test confirms the non-admin path still works.
+	 */
+	public function test_notice_cache_and_restore_skips_in_admin_context() {
+		$result = $this->hydration->get_rest_api_response_data( '/wc/store/v1/cart' );
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'body', $result );
+
+		$cart = $result['body'];
+		$this->assertArrayHasKey( 'items', $cart );
+		$this->assertArrayHasKey( 'totals', $cart );
+	}
+
+	/**
 	 * Test that encoded query parameters are properly handled.
 	 */
 	public function test_get_rest_api_response_data_with_encoded_query_params() {

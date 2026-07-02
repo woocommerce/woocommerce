@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add is_admin() guard to Hydration notice cache/restore to prevent fatal when wc_set_notices() is undefined during block editor REST preload in wp-admin.

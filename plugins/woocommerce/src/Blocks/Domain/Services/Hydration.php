@@ -252,9 +252,13 @@ class Hydration {
 
 	/**
 	 * Cache notices before hydrating the API if the customer has a session.
+	 *
+	 * @since 11.0.0 Admin non-AJAX contexts skip notice caching to avoid
+	 *               calling undefined WC notice functions during block editor
+	 *               REST preload in wp-admin.
 	 */
 	protected function cache_store_notices() {
-		if ( ! did_action( 'woocommerce_init' ) || null === WC()->session ) {
+		if ( ! did_action( 'woocommerce_init' ) || null === WC()->session || ( is_admin() && ! defined( 'DOING_AJAX' ) ) ) {
 			return;
 		}
 		$this->cached_store_notices = wc_get_notices();
@@ -263,9 +267,13 @@ class Hydration {
 
 	/**
 	 * Restore notices into current session from cache.
+	 *
+	 * @since 11.0.0 Admin non-AJAX contexts skip notice restoration to avoid
+	 *               calling undefined WC notice functions during block editor
+	 *               REST preload in wp-admin.
 	 */
 	protected function restore_cached_store_notices() {
-		if ( ! did_action( 'woocommerce_init' ) || null === WC()->session ) {
+		if ( ! did_action( 'woocommerce_init' ) || null === WC()->session || ( is_admin() && ! defined( 'DOING_AJAX' ) ) ) {
 			return;
 		}
 
