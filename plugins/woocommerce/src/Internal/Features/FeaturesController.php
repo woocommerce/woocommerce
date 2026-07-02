@@ -358,7 +358,7 @@ class FeaturesController {
 					'woocommerce'
 				),
 				'enabled_by_default'           => true,
-				'disable_ui'                   => false,
+				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
@@ -557,6 +557,20 @@ class FeaturesController {
 				'deprecated_since'             => '11.0.0',
 				'deprecated_value'             => true,
 			),
+			'point_of_sale_staff'                => array(
+				'name'                         => __( 'POS staff', 'woocommerce' ),
+				'description'                  => __(
+					'Experimental: POS staff management, roles, and order attribution.',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				// Hidden while incomplete so it can't ship merchant-toggleable; flip to
+				// false when it's ready for an experimental preview.
+				'disable_ui'                   => true,
+				'is_experimental'              => true,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 			'fulfillments'                       => array(
 				'name'                         => __( 'Order Fulfillments', 'woocommerce' ),
 				'description'                  => __(
@@ -618,11 +632,13 @@ class FeaturesController {
 					'Enable push notifications for the WooCommerce mobile apps to receive order notifications and store updates.',
 					'woocommerce'
 				),
+				'is_experimental'              => false,
 				'enabled_by_default'           => true,
-				'is_experimental'              => true,
 				'disable_ui'                   => true,
-				'skip_compatibility_checks'    => false,
+				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'deprecated_since'             => '10.9.2',
+				'deprecated_value'             => true,
 			),
 			'rest_api_caching'                   => array(
 				'name'                         => __( 'REST API Caching', 'woocommerce' ),

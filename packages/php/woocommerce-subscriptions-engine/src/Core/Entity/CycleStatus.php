@@ -28,10 +28,10 @@ defined( 'ABSPATH' ) || exit;
  */
 final class CycleStatus {
 
-	const PENDING   = 'pending';
-	const BILLED    = 'billed';
-	const FAILED    = 'failed';
-	const CANCELLED = 'cancelled';
+	public const PENDING   = 'pending';
+	public const BILLED    = 'billed';
+	public const FAILED    = 'failed';
+	public const CANCELLED = 'cancelled';
 
 	/**
 	 * The status string this value wraps.

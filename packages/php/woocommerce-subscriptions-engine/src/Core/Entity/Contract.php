@@ -39,11 +39,11 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Contract {
 
-	const SCHEDULE_SOURCE_PRIMITIVE = 'primitive';
-	const SCHEDULE_SOURCE_GATEWAY   = 'gateway';
+	public const SCHEDULE_SOURCE_PRIMITIVE = 'primitive';
+	public const SCHEDULE_SOURCE_GATEWAY   = 'gateway';
 
-	const ADDRESS_BILLING  = 'billing';
-	const ADDRESS_SHIPPING = 'shipping';
+	public const ADDRESS_BILLING  = 'billing';
+	public const ADDRESS_SHIPPING = 'shipping';
 
 	/**
 	 * Contract id, or null before it is persisted.
