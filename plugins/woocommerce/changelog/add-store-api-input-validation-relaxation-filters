@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Store API: add `woocommerce_store_api_require_billing_email` and `woocommerce_store_api_validate_addresses` filters so trusted-actor checkout clients can relax billing-email and address validation. Both default to current web behaviour.

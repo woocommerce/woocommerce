@@ -41,6 +41,25 @@ class OrderControllerTests extends TestCase {
 			public function validate_address_fields( \WC_Order $order, $address_type, \WP_Error $errors ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
 				parent::validate_address_fields( $order, $address_type, $errors );
 			}
+
+			/**
+			 * Validate the customer email. Parent is protected.
+			 *
+			 * @param \WC_Order $order Order object.
+			 */
+			public function validate_email( \WC_Order $order ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
+				parent::validate_email( $order );
+			}
+
+			/**
+			 * Validate the order addresses. Parent is protected.
+			 *
+			 * @param \WC_Order $order Order object.
+			 * @param bool      $needs_shipping Whether the order needs shipping.
+			 */
+			public function validate_addresses( \WC_Order $order, bool $needs_shipping ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
+				parent::validate_addresses( $order, $needs_shipping );
+			}
 		};
 	}
 
@@ -325,6 +344,140 @@ class OrderControllerTests extends TestCase {
 		$this->sut->validate_address_fields( $order, 'shipping', $errors );
 		$this->assertEmpty( $errors->get_error_messages() );
 		remove_filter( 'woocommerce_get_country_locale', $hide_postcode );
+	}
+
+	/**
+	 * @testdox validate_email() requires a billing email by default.
+	 */
+	public function test_validate_email_requires_email_by_default(): void {
+		$this->expectException( RouteException::class );
+		$this->expectExceptionCode( 400 );
+		$this->expectExceptionMessage( 'A valid email address is required' );
+
+		$order = new \WC_Order();
+		$order->set_billing_email( '' );
+
+		$this->sut->validate_email( $order );
+	}
+
+	/**
+	 * Build an unsaved order whose billing email bypasses WC_Order::set_billing_email() format
+	 * validation, so validate_email() can be exercised against a malformed value (as can happen for
+	 * orders whose stored data predates validation or was set outside the setter).
+	 *
+	 * @param string $email Billing email to return from get_billing_email().
+	 * @return \WC_Order
+	 */
+	private function order_with_billing_email( string $email ): \WC_Order {
+		return new class( $email ) extends \WC_Order {
+			/**
+			 * Forced billing email.
+			 *
+			 * @var string
+			 */
+			private $forced_email;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param string $email Billing email.
+			 */
+			public function __construct( string $email ) {
+				$this->forced_email = $email;
+				parent::__construct();
+			}
+
+			/**
+			 * Return the forced billing email, bypassing stored data.
+			 *
+			 * @param string $context Context.
+			 * @return string
+			 */
+			public function get_billing_email( $context = 'view' ) {
+				return $this->forced_email;
+			}
+		};
+	}
+
+	/**
+	 * @testdox validate_email() rejects a malformed billing email by default.
+	 */
+	public function test_validate_email_rejects_malformed_email_by_default(): void {
+		$this->expectException( RouteException::class );
+		$this->expectExceptionCode( 400 );
+		$this->expectExceptionMessage( 'is not valid' );
+
+		$this->sut->validate_email( $this->order_with_billing_email( 'not-an-email' ) );
+	}
+
+	/**
+	 * @testdox validate_email() allows a missing billing email when the requirement is filtered off.
+	 */
+	public function test_validate_email_missing_email_allowed_when_relaxed(): void {
+		$order = new \WC_Order();
+		$order->set_billing_email( '' );
+
+		add_filter( 'woocommerce_store_api_require_billing_email', '__return_false' );
+		try {
+			$this->assertNull(
+				$this->sut->validate_email( $order ),
+				'A relaxed caller should be allowed to omit the billing email.'
+			);
+		} finally {
+			remove_filter( 'woocommerce_store_api_require_billing_email', '__return_false' );
+		}
+	}
+
+	/**
+	 * @testdox validate_email() still rejects a malformed billing email even when the requirement is filtered off.
+	 */
+	public function test_validate_email_still_validates_format_when_relaxed(): void {
+		$order = $this->order_with_billing_email( 'not-an-email' );
+
+		add_filter( 'woocommerce_store_api_require_billing_email', '__return_false' );
+		try {
+			$this->expectException( RouteException::class );
+			$this->expectExceptionCode( 400 );
+			$this->expectExceptionMessage( 'is not valid' );
+
+			$this->sut->validate_email( $order );
+		} finally {
+			remove_filter( 'woocommerce_store_api_require_billing_email', '__return_false' );
+		}
+	}
+
+	/**
+	 * @testdox validate_addresses() validates the country allow-list by default.
+	 */
+	public function test_validate_addresses_validates_by_default(): void {
+		$this->expectException( RouteException::class );
+		$this->expectExceptionCode( 400 );
+		$this->expectExceptionMessage( 'Sorry, we do not allow orders from the provided country (Invalid)' );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_billing_country( 'Invalid' );
+		$order->save();
+
+		$this->sut->validate_addresses( $order, false );
+	}
+
+	/**
+	 * @testdox validate_addresses() skips validation entirely when filtered off.
+	 */
+	public function test_validate_addresses_skipped_when_relaxed(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_billing_country( 'Invalid' );
+		$order->save();
+
+		add_filter( 'woocommerce_store_api_validate_addresses', '__return_false' );
+		try {
+			$this->assertNull(
+				$this->sut->validate_addresses( $order, false ),
+				'A relaxed caller should be able to skip validation for an otherwise-invalid address.'
+			);
+		} finally {
+			remove_filter( 'woocommerce_store_api_validate_addresses', '__return_false' );
+		}
 	}
 
 	/**
