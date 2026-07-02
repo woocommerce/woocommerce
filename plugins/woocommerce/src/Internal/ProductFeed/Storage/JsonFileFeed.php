@@ -344,6 +344,8 @@ class JsonFileFeed implements ResumableFeedInterface {
 	 */
 	private function acquire_lock( $handle ): void {
 		if ( ! flock( $handle, LOCK_EX | LOCK_NB ) ) {
+			fclose( $handle );
+			$this->file_handle = null;
 			throw new FeedLockException(
 				esc_html(
 					sprintf(
