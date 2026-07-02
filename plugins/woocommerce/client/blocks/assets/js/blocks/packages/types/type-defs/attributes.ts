@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import type { VisualAttributeTerm } from '../../base/utils/visual-attribute-terms';
+import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 
 export interface AttributeSetting {
 	attribute_id: string;

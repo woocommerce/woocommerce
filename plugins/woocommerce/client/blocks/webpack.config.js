@@ -13,7 +13,6 @@ const {
 	getFrontConfig,
 	getPaymentsConfig,
 	getExtensionsConfig,
-	getSiteEditorConfig,
 	getStylingConfig,
 	getCartAndCheckoutFrontendConfig,
 } = require( './bin/webpack-configs.js' );
@@ -124,15 +123,6 @@ const StylingConfig = {
 	...getStylingConfig( { alias: getAlias() } ),
 };
 
-/**
- * Config to generate the site editor scripts.
- */
-const SiteEditorConfig = {
-	...sharedConfig,
-	cache: getCacheConfig( 'site-editor', [] ),
-	...getSiteEditorConfig( { alias: getAlias() } ),
-};
-
 const InteractivityBlocksConfig = {
 	...sharedConfig,
 	cache: getCacheConfig( 'interactivity-blocks', [
@@ -160,7 +150,6 @@ module.exports = [
 	FrontendConfig,
 	ExtensionsConfig,
 	PaymentsConfig,
-	SiteEditorConfig,
 	StylingConfig,
 	InteractivityBlocksConfig,
 	DependencyDetectionConfig,

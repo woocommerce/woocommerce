@@ -1,7 +1,11 @@
 /**
+ * External dependencies
+ */
+import { isExperimentalWcRestApiV4Enabled } from '@woocommerce/block-settings';
+
+/**
  * Internal dependencies
  */
-import { isExperimentalWcRestApiV4Enabled } from '../settings/blocks/feature-flags';
 import {
 	registerProductEntity,
 	registerSettingsEntity,

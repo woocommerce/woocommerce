@@ -28,6 +28,7 @@ export interface WcGlobalExportsMap {
 	blocksComponents: 'wc-blocks-components';
 	wcTypes: 'wc-types';
 	sanitize: 'wc-sanitize';
+	wcEntities: 'wc-entities';
 }
 
 /**

@@ -6,7 +6,7 @@ import { store, getContext } from '@wordpress/interactivity';
 /**
  * Internal dependencies
  */
-import type { SelectableItem } from '../../types/type-defs/selectable-items';
+import type { SelectableItem } from '../packages/types/type-defs/selectable-items';
 
 type DropdownContext = {
 	storeNamespace: string;

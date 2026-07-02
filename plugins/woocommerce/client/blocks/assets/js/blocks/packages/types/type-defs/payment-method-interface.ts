@@ -18,7 +18,7 @@ import type {
 	emitterCallback,
 	responseTypes,
 	noticeContexts,
-} from '../../base/context/event-emit';
+} from '../../../../base/context/event-emit';
 import type {
 	CartResponseShippingAddress,
 	CartResponseCouponItem,

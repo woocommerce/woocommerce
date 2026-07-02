@@ -11,7 +11,7 @@ import type { BlockEditProps } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import type { SelectableItemsBlockContext } from '../../types/type-defs/selectable-items';
+import type { SelectableItemsBlockContext } from '../packages/types/type-defs/selectable-items';
 import './editor.scss';
 import './style.scss';
 

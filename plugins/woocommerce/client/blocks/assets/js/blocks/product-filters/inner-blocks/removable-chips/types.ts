@@ -6,7 +6,7 @@ import { BlockEditProps } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import type { RemovableItemsBlockContext } from '../../../../types/type-defs/removable-items';
+import type { RemovableItemsBlockContext } from '../../../packages/types/type-defs/removable-items';
 
 export type Color = {
 	slug?: string;

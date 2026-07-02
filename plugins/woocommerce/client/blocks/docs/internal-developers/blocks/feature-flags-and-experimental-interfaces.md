@@ -97,8 +97,8 @@ We also have individual features or code blocks behind a feature flag, this is a
 
 ### JS methods
 
--   `__experimentalDeRegisterPaymentMethod` function used to deregister a payment method, only used in tests ([experimental function](https://github.com/woocommerce/woocommerce-blocks/blob/f27456dd00fa0b21b29a935943defb18351edf48/assets/js/blocks-registry/payment-methods/registry.ts#L110-L114)).
--   `__experimentalDeRegisterExpressPaymentMethod` function used to deregister an express payment method, only used in tests ([experimental function](https://github.com/woocommerce/woocommerce-blocks/blob/f27456dd00fa0b21b29a935943defb18351edf48/assets/js/blocks-registry/payment-methods/registry.ts#L116-L120)).
+-   `__experimentalDeRegisterPaymentMethod` function used to deregister a payment method, only used in tests ([experimental function](https://github.com/woocommerce/woocommerce-blocks/blob/f27456dd00fa0b21b29a935943defb18351edf48/packages/blocks-registry/payment-methods/registry.ts#L110-L114)).
+-   `__experimentalDeRegisterExpressPaymentMethod` function used to deregister an express payment method, only used in tests ([experimental function](https://github.com/woocommerce/woocommerce-blocks/blob/f27456dd00fa0b21b29a935943defb18351edf48/packages/blocks-registry/payment-methods/registry.ts#L116-L120)).
 
 ### Slots
 

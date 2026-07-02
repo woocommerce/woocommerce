@@ -35,9 +35,9 @@ import { store as cartStore } from '../cart';
 import {
 	isBillingAddress,
 	isShippingAddress,
-} from '../../types/type-guards/address';
-import { isObserverResponse } from '../../types/type-guards/observers';
-import { isValidValidationErrorsObject } from '../../types/type-guards/validation';
+} from '../../blocks/packages/types/type-guards/address';
+import { isObserverResponse } from '../../blocks/packages/types/type-guards/observers';
+import { isValidValidationErrorsObject } from '../../blocks/packages/types/type-guards/validation';
 
 interface PaymentThunkArgs {
 	select?: CurriedSelectorsOf< typeof paymentStore >;

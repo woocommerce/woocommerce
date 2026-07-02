@@ -44,7 +44,7 @@ import { DEFAULT_ATTRIBUTES, EMPTY_TERM_VISUALS } from './constants';
 import type {
 	SelectableItem,
 	SelectableItemsContext,
-} from '../../../../types/type-defs/selectable-items';
+} from '../../../packages/types/type-defs/selectable-items';
 import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 
 const INNER_CHIPS = 'woocommerce/product-filter-chips';

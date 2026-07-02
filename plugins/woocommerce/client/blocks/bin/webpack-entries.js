@@ -356,17 +356,19 @@ const entries = {
 		...blockStylingEntries,
 	},
 	core: {
-		wcBlocksRegistry: './assets/js/blocks-registry/index.js',
+		wcBlocksRegistry: './packages/blocks-registry/index.js',
 		blocksCheckoutEvents: './assets/js/events/index.ts',
 		wcSettings: './assets/js/settings/shared/index.ts',
 		wcBlocksData: './assets/js/data/index.ts',
 		wcBlocksMiddleware: './assets/js/middleware/index.js',
-		wcBlocksSharedContext: './assets/js/shared/context/index.js',
-		wcBlocksSharedHocs: './assets/js/shared/hocs/index.js',
+		wcBlocksSharedContext:
+			'./assets/js/blocks/packages/shared-context/index.js',
+		wcBlocksSharedHocs:
+			'./assets/js/blocks/packages/shared-hocs/index.js',
 		wcSchemaParser: './assets/js/utils/schema-parser/index.ts',
 		priceFormat: './packages/prices/index.js',
-		wcTypes: './assets/js/types/index.ts',
-		wcEntities: './assets/js/entities/index.ts',
+		wcTypes: './assets/js/blocks/packages/types/index.ts',
+		wcEntities: './packages/entities/index.ts',
 	},
 	main: {
 		'wc-blocks-editor': [ './assets/js/index.js', ...editorScriptEntries ],

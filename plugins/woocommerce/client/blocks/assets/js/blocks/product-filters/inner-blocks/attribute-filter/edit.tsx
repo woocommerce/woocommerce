@@ -31,7 +31,7 @@ import { getAttributeFromId } from './utils';
 import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { EXCLUDED_BLOCKS } from '../../constants';
 import { FilterOptionItem, FilterItemFields } from '../../types';
-import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
+import type { SelectableItemsContext } from '../../../packages/types/type-defs/selectable-items';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Notice } from '../../components/notice';
 import { sortFilterOptions } from '../../utils/sort-filter-options';

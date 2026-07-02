@@ -35,7 +35,7 @@ import {
 } from './notify-quantity-changes';
 import { updateCartErrorNotices } from './notify-errors';
 import { apiFetchWithHeaders } from '../shared-controls';
-import { isObject } from '../../types/type-guards/object';
+import { isObject } from '../../blocks/packages/types/type-guards/object';
 import {
 	getIsCustomerDataDirty,
 	setIsCustomerDataDirty,
@@ -133,7 +133,7 @@ export const receiveError =
  * Updates the checkout store with the shopper's collection preference based on
  * the selected shipping rates in the cart.
  *
- * @param {CartResponse} response
+ * @param {CartResponse}              response
  * @param {CartThunkArgs['registry']} registry
  */
 const syncPrefersCollectionFromSelectedShippingRates = (

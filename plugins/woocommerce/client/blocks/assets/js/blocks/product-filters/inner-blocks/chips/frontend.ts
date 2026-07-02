@@ -9,7 +9,7 @@ import { store, getContext, getElement } from '@wordpress/interactivity';
 import type {
 	SelectableItem,
 	SelectableItemsParentStore,
-} from '../../../../types/type-defs/selectable-items';
+} from '../../../packages/types/type-defs/selectable-items';
 import {
 	getVisualAttributeTermStyleString,
 	isVisualAttributeTermEmpty,

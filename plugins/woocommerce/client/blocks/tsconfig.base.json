@@ -89,7 +89,7 @@
 				"assets/js/hocs"
 			],
 			"@woocommerce/blocks-registry": [
-				"assets/js/blocks-registry"
+				"packages/blocks-registry"
 			],
 			"@woocommerce/blocks-checkout": [
 				"packages/checkout"
@@ -116,10 +116,10 @@
 				"assets/js/settings/shared"
 			],
 			"@woocommerce/shared-context": [
-				"assets/js/shared/context"
+				"assets/js/blocks/packages/shared-context"
 			],
 			"@woocommerce/shared-hocs": [
-				"assets/js/shared/hocs"
+				"assets/js/blocks/packages/shared-hocs"
 			],
 			"@woocommerce/stores/store-notices": [
 				"assets/js/base/stores/store-notices"
@@ -134,10 +134,10 @@
 				"assets/js/base/stores/woocommerce/shopper-lists"
 			],
 			"@woocommerce/type-defs/*": [
-				"assets/js/types/type-defs/*"
+				"assets/js/blocks/packages/types/type-defs/*"
 			],
 			"@woocommerce/types": [
-				"assets/js/types"
+				"assets/js/blocks/packages/types"
 			],
 			"@woocommerce/storybook-controls": [
 				"storybook/custom-controls"
@@ -152,7 +152,7 @@
 				"tests/js/config/msw-setup"
 			],
 			"@woocommerce/entities": [
-				"assets/js/entities"
+				"packages/entities"
 			],
 			"@woocommerce/sanitize": [
 				"node_modules/@woocommerce/sanitize/src/index.ts"

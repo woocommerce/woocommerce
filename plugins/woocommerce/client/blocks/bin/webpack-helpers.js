@@ -25,6 +25,7 @@ const wcDepMap = {
 	'@woocommerce/blocks-components': [ 'wc', 'blocksComponents' ],
 	'@woocommerce/types': [ 'wc', 'wcTypes' ],
 	'@woocommerce/sanitize': [ 'wc', 'sanitize' ],
+	'@woocommerce/entities': [ 'wc', 'wcEntities' ],
 };
 const wcHandleMap = {
 	'@woocommerce/tracks': false, // Bundle; no PHP handle needed
@@ -40,7 +41,58 @@ const wcHandleMap = {
 	'@woocommerce/blocks-components': 'wc-blocks-components',
 	'@woocommerce/types': 'wc-types',
 	'@woocommerce/sanitize': 'wc-sanitize',
+	'@woocommerce/entities': 'wc-entities',
 };
+
+const isWooPackageRequest = ( request ) =>
+	request.startsWith( '@woocommerce/' );
+
+const shouldBundleWooPackageInEditor = ( request ) =>
+	isWooPackageRequest( request ) && request !== '@woocommerce/entities';
+
+const getEditorPackageAliases = () => ( {
+	'@woocommerce/block-data': path.resolve( __dirname, `../assets/js/data` ),
+	'@woocommerce/blocks-checkout': path.resolve(
+		__dirname,
+		`../packages/checkout`
+	),
+	'@woocommerce/blocks-checkout-events': path.resolve(
+		__dirname,
+		`../assets/js/events`
+	),
+	'@woocommerce/blocks-components': path.resolve(
+		__dirname,
+		`../packages/components`
+	),
+	'@woocommerce/blocks-registry': path.resolve(
+		__dirname,
+		`../packages/blocks-registry`
+	),
+	'@woocommerce/data': path.resolve(
+		__dirname,
+		`../../../../../packages/js/data/src/index.ts`
+	),
+	'@woocommerce/price-format': path.resolve(
+		__dirname,
+		`../packages/prices`
+	),
+	'@woocommerce/sanitize': path.resolve(
+		__dirname,
+		`../../../../../packages/js/sanitize/src/index.ts`
+	),
+	'@woocommerce/settings': path.resolve(
+		__dirname,
+		`../assets/js/settings/shared`
+	),
+	'@woocommerce/shared-context': path.resolve(
+		__dirname,
+		`../assets/js/blocks/packages/shared-context/`
+	),
+	'@woocommerce/shared-hocs': path.resolve(
+		__dirname,
+		`../assets/js/blocks/packages/shared-hocs/`
+	),
+} );
 
 const getAlias = ( options = {} ) => {
 	let { pathPart } = options;
@@ -95,11 +147,14 @@ const getAlias = ( options = {} ) => {
 			__dirname,
 			`../assets/js/${ pathPart }previews/`
 		),
-		'@woocommerce/types': path.resolve( __dirname, `../assets/js/types/` ),
+		'@woocommerce/types': path.resolve(
+			__dirname,
+			`../assets/js/blocks/packages/types/`
+		),
 		'@woocommerce/utils': path.resolve( __dirname, `../assets/js/utils/` ),
 		'@woocommerce/entities': path.resolve(
 			__dirname,
-			`../assets/js/entities/`
+			`../packages/entities/`
 		),
 		'react/jsx-dev-runtime': require.resolve( 'react/jsx-dev-runtime' ),
 		'react/jsx-runtime': require.resolve( 'react/jsx-runtime' ),
@@ -141,6 +196,22 @@ const requestToHandle = ( request ) => {
 	if ( request === 'react-dom/client' ) {
 		return 'react-dom';
 	}
+};
+
+const requestToEditorExternal = ( request ) => {
+	if ( shouldBundleWooPackageInEditor( request ) ) {
+		return false;
+	}
+
+	return requestToExternal( request );
+};
+
+const requestToEditorHandle = ( request ) => {
+	if ( shouldBundleWooPackageInEditor( request ) ) {
+		return false;
+	}
+
+	return requestToHandle( request );
 };
 
 const getProgressBarPluginConfig = ( name ) => {
@@ -221,9 +292,12 @@ module.exports = {
 	CHECK_CIRCULAR_DEPS,
 	ASSET_CHECK,
 	getAlias,
+	getEditorPackageAliases,
 	getResolve,
 	requestToHandle,
 	requestToExternal,
+	requestToEditorHandle,
+	requestToEditorExternal,
 	getProgressBarPluginConfig,
 	getCacheGroups,
 };

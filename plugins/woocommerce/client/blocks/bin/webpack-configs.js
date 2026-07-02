@@ -26,9 +26,12 @@ const {
 	NODE_ENV,
 	CHECK_CIRCULAR_DEPS,
 	requestToExternal,
+	requestToEditorExternal,
 	requestToHandle,
+	requestToEditorHandle,
 	getProgressBarPluginConfig,
 	getCacheGroups,
+	getEditorPackageAliases,
 	getResolve,
 } = require( './webpack-helpers' );
 const AddSplitChunkDependencies = require( './add-split-chunk-dependencies' );
@@ -62,6 +65,8 @@ let initialBundleAnalyzerPort = 8888;
 const getSharedPlugins = ( {
 	bundleAnalyzerReportTitle,
 	checkCircularDeps = true,
+	dependencyRequestToExternal = requestToExternal,
+	dependencyRequestToHandle = requestToHandle,
 } ) =>
 	[
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
@@ -82,8 +87,8 @@ const getSharedPlugins = ( {
 			injectPolyfill: true,
 			combineAssets: ASSET_CHECK,
 			outputFormat: ASSET_CHECK ? 'json' : 'php',
-			requestToExternal,
-			requestToHandle,
+			requestToExternal: dependencyRequestToExternal,
+			requestToHandle: dependencyRequestToHandle,
 		} ),
 		// Substitute the `__i18n_text_domain__` identifier used by the
 		// @woocommerce/email-editor package with the WooCommerce text
@@ -169,7 +174,13 @@ const getCoreConfig = ( options = {} ) => {
 const getMainConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
 
-	const resolve = getResolve( { alias, resolvePlugins } );
+	const resolve = getResolve( {
+		alias: {
+			...getEditorPackageAliases(),
+			...alias,
+		},
+		resolvePlugins,
+	} );
 	return {
 		entry: getEntryConfig( 'main', options.exclude || [] ),
 		output: {
@@ -224,6 +235,8 @@ const getMainConfig = ( options = {} ) => {
 		plugins: [
 			...getSharedPlugins( {
 				bundleAnalyzerReportTitle: 'Main',
+				dependencyRequestToExternal: requestToEditorExternal,
+				dependencyRequestToHandle: requestToEditorHandle,
 			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Main' ) ),
 			/**
@@ -532,87 +545,6 @@ const getExtensionsConfig = ( options = {} ) => {
 };
 
 /**
- * Build config for scripts to be used exclusively within the Site Editor context.
- *
- * @param {Object} options Build options.
- */
-const getSiteEditorConfig = ( options = {} ) => {
-	const { alias, resolvePlugins = [] } = options;
-	const resolve = getResolve( { alias, resolvePlugins } );
-	return {
-		entry: getEntryConfig( 'editor', options.exclude || [] ),
-		output: {
-			devtoolNamespace: 'wc',
-			path: BUILD_DIR,
-			filename: `[name].js`,
-			chunkLoadingGlobal: 'webpackWcBlocksExtensionsMethodExtensionJsonp',
-		},
-		module: {
-			rules: [
-				{
-					test: /\.(j|t)sx?$/,
-					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
-					use: {
-						loader: 'babel-loader',
-						options: {
-							presets: [
-								[
-									'@wordpress/babel-preset-default',
-									{
-										modules: false,
-										targets: {
-											browsers: [
-												'extends @wordpress/browserslist-config',
-											],
-										},
-									},
-								],
-							],
-							plugins: [
-								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
-									: false,
-							].filter( Boolean ),
-							cacheDirectory: BABEL_CACHE_DIR,
-							cacheCompression: false,
-						},
-					},
-				},
-				{
-					test: /\.s[c|a]ss$/,
-					use: {
-						loader: 'ignore-loader',
-					},
-				},
-			],
-		},
-		optimization: {
-			...sharedOptimizationConfig,
-			splitChunks: {
-				automaticNameDelimiter: '--',
-				cacheGroups: {
-					...getCacheGroups(),
-				},
-			},
-		},
-		plugins: [
-			...getSharedPlugins( {
-				bundleAnalyzerReportTitle: 'Site Editor',
-			} ),
-			new ProgressBarPlugin(
-				getProgressBarPluginConfig( 'Site Editor' )
-			),
-		],
-		resolve: {
-			...resolve,
-			extensions: [ '.js', '.ts', '.tsx' ],
-		},
-	};
-};
-
-/**
  * Build config for CSS Styles.
  *
  * @param {Object} options Build options.
@@ -891,7 +823,6 @@ module.exports = {
 	getMainConfig,
 	getPaymentsConfig,
 	getExtensionsConfig,
-	getSiteEditorConfig,
 	getStylingConfig,
 	getCartAndCheckoutFrontendConfig,
 };
