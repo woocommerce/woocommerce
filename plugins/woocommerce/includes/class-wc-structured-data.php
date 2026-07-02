@@ -253,9 +253,13 @@ class WC_Structured_Data {
 				if ( $selected_variation->get_sku() ) {
 					$markup['sku'] = $selected_variation->get_sku();
 				}
+				// A GTIN uniquely identifies a single trade item, so the parent's GTIN must not leak onto a
+				// specific variation. Use the variation's own GTIN, or drop it entirely when it has none.
 				$variation_gtin = $this->prepare_gtin( $selected_variation->get_global_unique_id() );
 				if ( $this->is_valid_gtin( $variation_gtin ) ) {
 					$markup['gtin'] = $variation_gtin;
+				} else {
+					unset( $markup['gtin'] );
 				}
 			}
 

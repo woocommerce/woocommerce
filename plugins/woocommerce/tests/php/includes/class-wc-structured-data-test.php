@@ -163,6 +163,35 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A GTIN uniquely identifies a single trade item, so a selected variation without its own GTIN
+	 * must not inherit the parent product's GTIN.
+	 *
+	 * @return void
+	 */
+	public function test_variable_product_selected_variation_does_not_inherit_parent_gtin(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_global_unique_id( '12345678' );
+		$product->save();
+		WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		// Uniquely identifies the "huge / red / 0" variation, which has no GTIN of its own.
+		$_GET['attribute_pa_size']   = 'huge';
+		$_GET['attribute_pa_colour'] = 'red';
+		$_GET['attribute_pa_number'] = '0';
+
+		try {
+			$this->structured_data->generate_product_data( $product );
+			$data = $this->structured_data->get_data();
+
+			$this->assertEquals( 'Offer', $data[0]['offers'][0]['@type'] );
+			$this->assertArrayNotHasKey( 'gtin', $data[0] );
+		} finally {
+			unset( $_GET['attribute_pa_size'], $_GET['attribute_pa_colour'], $_GET['attribute_pa_number'] );
+		}
+	}
+
+	/**
 	 * Without a fully-specified variation selection, the variable product keeps the AggregateOffer
 	 * price range (no behavior change).
 	 *
