@@ -40,11 +40,13 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Renewal\RenewalCalculator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway\CapabilityRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\RenewalCandidate;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
@@ -205,8 +207,9 @@ final class RenewalEngine {
 	 * cycle chain - not the mutable order - is the idempotency authority.
 	 *
 	 * Throws {@see RenewalNotProcessable} for a pre-flight impossibility (no chain, an
-	 * unresolvable plan, a non-adjacent count) so the caller can park; returns null for an
-	 * idempotent no-op (a live claim, an already-settled cycle, an unbuildable order).
+	 * unresolvable plan, a non-adjacent count, a gateway that cannot charge renewals) so the
+	 * caller can park; returns null for an idempotent no-op (a live claim, an already-settled
+	 * cycle, an unbuildable order).
 	 *
 	 * @param RenewalIntent     $intent The contract and cycle count to bill.
 	 * @param DateTimeImmutable $now    The processing moment (the lease clock for a claim).
@@ -250,6 +253,21 @@ final class RenewalEngine {
 				)
 			);
 			return null;
+		}
+
+		// Pre-flight capability gate, ahead of the claim so an unchargeable renewal never
+		// claims a cycle or creates an order. Without it the charge hook would fire into
+		// nothing and the cycle would park `processing` - a stall that misreads as an
+		// in-flight charge. Every attempt is futile until the payment method is updated, so
+		// the throw lets the scheduled caller park the contract out of the due set.
+		$gateway_id = $contract->get_payment_instrument()->get_gateway();
+		if ( null === $gateway_id || '' === $gateway_id ) {
+			throw new RenewalNotProcessable( 'the contract has no payment gateway to charge renewals with' );
+		}
+		if ( ! CapabilityRegistry::supports( (string) $gateway_id, GatewayCapabilities::RECURRING ) ) {
+			throw new RenewalNotProcessable(
+				esc_html( sprintf( 'gateway "%s" does not declare the "recurring" capability - unchargeable until the payment method is updated.', $gateway_id ) )
+			);
 		}
 
 		$head = $this->contracts->find_chain_head( $contract_id );
@@ -903,10 +921,9 @@ final class RenewalEngine {
 	 * @param Contract $contract      The contract being renewed.
 	 */
 	private function attempt_charge( WC_Order $renewal_order, Contract $contract ): void {
-		$gateway_id = $contract->get_payment_instrument()->get_gateway();
-		if ( null === $gateway_id || '' === $gateway_id ) {
-			return;
-		}
+		// process() pre-flights the gateway (present + declares `recurring`) before any claim,
+		// so the instrument is chargeable by the time the money-path reaches the charge.
+		$gateway_id = (string) $contract->get_payment_instrument()->get_gateway();
 
 		$amount = (float) $renewal_order->get_total();
 

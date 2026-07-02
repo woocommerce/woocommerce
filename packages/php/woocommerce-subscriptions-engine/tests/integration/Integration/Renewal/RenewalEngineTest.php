@@ -1389,6 +1389,58 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox the scheduled scan parks a contract whose gateway cannot charge renewals.
+	 *
+	 * A gateway that does not declare the `recurring` capability makes every attempt futile
+	 * until the payment method is updated: the charge hook would fire into nothing and the
+	 * cycle would stall `processing`. The pre-flight refuses before any claim, and the
+	 * dispatcher parks the contract out of the due set; fixing the payment method plus a
+	 * manual renewal (or a repair) re-arms it.
+	 */
+	public function test_scheduled_renewal_parks_a_contract_whose_gateway_cannot_charge(): void {
+		// Signed up against a gateway that never declares the `recurring` capability.
+		$contract    = $this->sign_up_contract( self::GATEWAY );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$this->assertNull( $this->run_scheduled_renewal( $contract_id ) );
+
+		// Nothing was claimed: the head is still cycle 1 and no renewal order exists.
+		$repo = new ContractRepository();
+		$head = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertSame( 1, $head->get_count() );
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+
+		// Parked: the contract left the due set until the payment method is repaired.
+		$reloaded = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertNull( $reloaded->get_next_payment_gmt(), 'An unchargeable contract is parked out of the due set.' );
+	}
+
+	/**
+	 * @testdox renew_now refuses a contract whose gateway cannot charge, without parking it.
+	 */
+	public function test_renew_now_refuses_an_unchargeable_gateway_without_parking(): void {
+		$contract    = $this->sign_up_contract( self::GATEWAY );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$this->assertNull( ( new RenewalEngine() )->renew_now( $contract_id ) );
+
+		// No claim, no order, and the schedule is untouched (a manual action never parks).
+		$repo = new ContractRepository();
+		$head = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertSame( 1, $head->get_count() );
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+
+		$reloaded = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertSame( '2026-02-15 00:00:00', $reloaded->get_next_payment_gmt() );
+	}
+
+	/**
 	 * Append a pending cycle 2 (no tagged renewal order) with the given crash-recovery
 	 * lease, so the create-as-claim collides on it and the reclaim-vs-skip path is exercised.
 	 *
