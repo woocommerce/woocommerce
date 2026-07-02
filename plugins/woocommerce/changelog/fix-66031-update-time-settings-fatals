@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent update-time fatal errors by guarding new settings SDK classes and preserving the removed legacy settings API controller as a no-op compatibility stub.
