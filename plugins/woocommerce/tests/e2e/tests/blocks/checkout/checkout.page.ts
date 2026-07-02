@@ -9,6 +9,7 @@ import { expect, RequestUtils } from '@woocommerce/e2e-utils';
  */
 import {
 	FREE_SHIPPING_NAME,
+	FREE_SHIPPING_PRICE,
 	SIMPLE_PHYSICAL_PRODUCT_NAME,
 	SIMPLE_VIRTUAL_PRODUCT_NAME,
 } from './constants';
@@ -566,7 +567,7 @@ export class CheckoutPage {
 			).toBeVisible();
 			await expect( summarySection.getByText( email ) ).toBeVisible();
 			await expect(
-				this.page.getByText( FREE_SHIPPING_NAME )
+				totalsSection.getByText( FREE_SHIPPING_PRICE )
 			).toBeVisible();
 			await expect(
 				this.page.getByText( SIMPLE_PHYSICAL_PRODUCT_NAME )

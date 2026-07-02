@@ -413,7 +413,13 @@ test.describe( 'Shopper → Shipping (customer user)', () => {
 		await checkoutPageObject.placeOrder();
 		await checkoutPageObject.verifyAddressDetails( 'billing' );
 		await checkoutPageObject.verifyAddressDetails( 'shipping' );
-		await expect( page.getByText( FREE_SHIPPING_NAME ) ).toBeVisible();
+		await expect(
+			page
+				.locator(
+					'[data-block-name="woocommerce/order-confirmation-totals"]'
+				)
+				.getByText( FREE_SHIPPING_PRICE )
+		).toBeVisible();
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( 'Beanie' );
