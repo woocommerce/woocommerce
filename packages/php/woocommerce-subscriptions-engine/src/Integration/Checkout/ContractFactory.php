@@ -1,8 +1,9 @@
 <?php
 /**
  * Builds and persists a {@see Contract} (plus its origin {@see Cycle}) from a paid
- * checkout order, and links order <-> contract in both directions. Does not schedule
- * the first renewal - the caller arms that separately via {@see RenewalEngine::schedule()}.
+ * checkout order, and links order <-> contract in both directions. Renewals need no
+ * arming beyond this: the contract's `next_payment_gmt` places it on the due index the
+ * batch dispatcher scans.
  *
  * Reads a live `WC_Order`; the order never crosses into Core - only the snapshot
  * values pulled off it do.

@@ -19,8 +19,8 @@
  * confirmation) settles the cycle `processing`, which the lease never reclaims and the scan
  * never re-selects.
  *
- * `schedule()` is the schedule-time capability gate; the batch dispatcher drives renewals
- * off the due-index, so no per-contract Action Scheduler rows exist.
+ * The batch dispatcher drives renewals off the due-index; no per-contract Action
+ * Scheduler rows exist.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal
  */
@@ -40,13 +40,11 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Renewal\RenewalCalculator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway\CapabilityRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\RenewalCandidate;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
@@ -54,15 +52,9 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepositor
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Renewal engine - schedule, select, process, complete.
+ * Renewal engine - select, process, complete.
  */
 final class RenewalEngine {
-
-	/**
-	 * Action fired after a contract is scheduled, with `( $contract, $when )`.
-	 * Listeners observe a scheduled state, not an in-flight one.
-	 */
-	public const RENEWAL_SCHEDULED_ACTION = 'woocommerce_subscriptions_engine_renewal_scheduled';
 
 	/**
 	 * Action fired after a renewal order is created, with `( $renewal_order, $contract )`.
@@ -148,62 +140,6 @@ final class RenewalEngine {
 		if ( $order instanceof WC_Order ) {
 			$this->complete_from_order( $order );
 		}
-	}
-
-	/**
-	 * Acknowledge `$contract` as eligible for autonomous renewal at its `next_payment_gmt`.
-	 *
-	 * The batch dispatcher ({@see RenewalDispatcher}) scans the contract due-index and
-	 * drives every due renewal, so this enqueues nothing - it is the schedule-time
-	 * capability gate. Skips when the contract is gateway-scheduled (the gateway runs its
-	 * own schedule) or has no `next_payment_gmt`. The gate refuses a primitive-scheduled
-	 * contract whose gateway does not declare the `recurring` capability via
-	 * {@see CapabilityRegistry::supports()}, so a renewal nothing can charge is rejected at
-	 * the boundary rather than failing later.
-	 *
-	 * @param Contract $contract Contract to acknowledge. Must have an id.
-	 * @return bool True when the contract is eligible for dispatcher-driven renewal; false
-	 *              when refused (gateway-scheduled, incapable gateway, no date, no id).
-	 */
-	public function schedule( Contract $contract ): bool {
-		$id = $contract->get_id();
-		if ( null === $id ) {
-			return false;
-		}
-
-		// Gateway-scheduled: the gateway owns the schedule.
-		if ( Contract::SCHEDULE_SOURCE_GATEWAY === $contract->get_schedule_source() ) {
-			return false;
-		}
-
-		$next_payment_gmt = $contract->get_next_payment_gmt();
-		if ( null === $next_payment_gmt ) {
-			return false;
-		}
-
-		// Schedule-time capability gate.
-		$gateway_id = $contract->get_payment_instrument()->get_gateway();
-		if ( null === $gateway_id || '' === $gateway_id || ! CapabilityRegistry::supports( (string) $gateway_id, GatewayCapabilities::RECURRING ) ) {
-			wc_get_logger()->warning(
-				sprintf(
-					'RenewalEngine::schedule(): not scheduling contract %d - gateway "%s" does not declare the "recurring" capability. Declare it via CapabilityRegistry, or set the contract to gateway-scheduled if the gateway runs its own renewals.',
-					$id,
-					(string) $gateway_id
-				),
-				array(
-					'source'      => self::LOG_SOURCE,
-					'contract_id' => $id,
-					'gateway_id'  => (string) $gateway_id,
-				)
-			);
-			return false;
-		}
-
-		$when = new DateTimeImmutable( $next_payment_gmt, new DateTimeZone( 'UTC' ) );
-
-		do_action( self::RENEWAL_SCHEDULED_ACTION, $contract, $when );
-
-		return true;
 	}
 
 	/**

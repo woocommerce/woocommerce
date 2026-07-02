@@ -185,57 +185,6 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox schedule is gated on the gateway's recurring capability.
-	 */
-	public function test_schedule_is_gated_on_recurring_capability(): void {
-		$plan_id     = $this->make_plan();
-		$order       = $this->make_origin_order();
-		$contract    = $this->make_contract( $plan_id, $order->get_id() );
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
-
-		$engine = new RenewalEngine();
-
-		// No capability declared: scheduling is refused.
-		$this->assertFalse( $engine->schedule( $contract ) );
-
-		// Declared: the contract is acknowledged as eligible (the capability gate passes).
-		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
-		$this->assertTrue( $engine->schedule( $contract ) );
-	}
-
-	/**
-	 * @testdox schedule enqueues no per-contract AS row (the dispatcher drives renewals).
-	 *
-	 * The batch dispatcher scans the contract due-index, so schedule() acknowledges
-	 * eligibility (the capability gate) without enqueuing a per-contract Action
-	 * Scheduler row. Repeated calls still enqueue nothing.
-	 */
-	public function test_schedule_does_not_enqueue_a_per_contract_row(): void {
-		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
-
-		$plan_id     = $this->make_plan();
-		$order       = $this->make_origin_order();
-		$contract    = $this->make_contract( $plan_id, $order->get_id() );
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
-
-		$engine = new RenewalEngine();
-		$this->assertTrue( $engine->schedule( $contract ) );
-		$this->assertTrue( $engine->schedule( $contract ) );
-
-		// No pending Action Scheduler action carries this contract as its argument.
-		$pending = as_get_scheduled_actions(
-			array(
-				'args'   => array( $contract_id ),
-				'status' => \ActionScheduler_Store::STATUS_PENDING,
-			),
-			'ids'
-		);
-		$this->assertCount( 0, $pending );
-	}
-
-	/**
 	 * @testdox the scheduled scan creates a renewal order tagged for the next chargeable number.
 	 */
 	public function test_scheduled_renewal_creates_renewal_order(): void {
@@ -968,30 +917,6 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
 	}
 
-	/**
-	 * @testdox A gateway-scheduled contract is not scheduled by the engine.
-	 */
-	public function test_gateway_scheduled_contract_is_not_scheduled(): void {
-		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
-
-		$plan_id  = $this->make_plan();
-		$order    = $this->make_origin_order();
-		$contract = Contract::create(
-			array(
-				'customer_id'      => 1,
-				'currency'         => 'USD',
-				'selling_plan_id'  => $plan_id,
-				'origin_order_id'  => $order->get_id(),
-				'payment_method'   => self::GATEWAY,
-				'start_gmt'        => '2026-01-15 00:00:00',
-				'next_payment_gmt' => '2026-02-15 00:00:00',
-				'schedule_source'  => Contract::SCHEDULE_SOURCE_GATEWAY,
-			)
-		);
-		( new ContractRepository() )->insert( $contract );
-
-		$this->assertFalse( ( new RenewalEngine() )->schedule( $contract ) );
-	}
 
 	/**
 	 * @testdox the scheduled scan leaves the cycle processing when the charge is neither paid nor failed.
