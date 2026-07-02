@@ -415,6 +415,26 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox is_pin_used_by_other_user ignores PINs on users whose POS caps are explicitly denied.
+	 *
+	 * WP_User_Query's capability__in matches the capability *name* in the stored map, so a user
+	 * whose caps were explicitly denied (add_cap with false) is still selected as a candidate
+	 * even though has_pos_access() resolves to no access. Their stale PIN must not block the
+	 * candidate PIN as "in use".
+	 */
+	public function test_is_pin_used_by_other_user_ignores_users_with_denied_pos_caps(): void {
+		$denied_id = $this->make_pos_user_with_pin( '1234' );
+
+		$denied_user = get_userdata( $denied_id );
+		foreach ( Capabilities::all_pos_capabilities() as $cap ) {
+			$denied_user->add_cap( $cap, false );
+		}
+		$this->assertFalse( Capabilities::has_pos_access( $denied_id ), 'Fixture: denied caps must resolve to no POS access.' );
+
+		$this->assertFalse( $this->sut->is_pin_used_by_other_user( '1234' ) );
+	}
+
+	/**
 	 * Create a POS-access user (Cashier preset) with the given PIN, tracked for cleanup.
 	 *
 	 * @param string $pin Plaintext PIN to assign.

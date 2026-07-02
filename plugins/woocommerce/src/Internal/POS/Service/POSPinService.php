@@ -131,11 +131,12 @@ class POSPinService {
 	 * wp-admin add-staff flow, which must check uniqueness *before* the user exists (so it can't go
 	 * through set_pin) — that caller passes 0 to scan every existing record.
 	 *
-	 * Scoping the scan to POS-access users — `Capabilities::pos_staff_user_query_args()` selects
-	 * holders of any `woocommerce_pos_*` capability — keeps stale PIN meta on non-POS users from
-	 * causing phantom collisions. Cost is bounded by the number of active staff (a handful), one
-	 * PBKDF2 evaluation per row. The candidate user is excluded so an idempotent re-set ("save the
-	 * same PIN again") is allowed.
+	 * Scoping the scan to POS-access users keeps stale PIN meta on non-POS users from causing
+	 * phantom collisions. `Capabilities::pos_staff_user_query_args()` selects *candidates* (it
+	 * also matches explicitly denied caps), so each row is refined with the resolved-capability
+	 * check `Capabilities::has_pos_access()` before its PIN is compared. Cost is bounded by the
+	 * number of active staff (a handful), one PBKDF2 evaluation per row. The candidate user is
+	 * excluded so an idempotent re-set ("save the same PIN again") is allowed.
 	 *
 	 * @param string $pin             Plaintext PIN candidate. Assumed format-validated.
 	 * @param int    $exclude_user_id User being assigned the PIN; excluded from the scan. Pass 0 at
@@ -158,6 +159,13 @@ class POSPinService {
 		);
 
 		foreach ( $user_query->get_results() as $other_id ) {
+			// The query matches capability *names*, so it also selects users whose POS caps are
+			// explicitly denied (stored as false). Skip anyone without resolved POS access before
+			// spending PBKDF2 cycles, so their stale PIN cannot phantom-block the candidate PIN.
+			if ( ! Capabilities::has_pos_access( (int) $other_id ) ) {
+				continue;
+			}
+
 			$record = Users::get_site_user_meta( (int) $other_id, self::PIN_META_KEY, true );
 			if ( is_array( $record ) && $this->verify_pin( $pin, $record ) ) {
 				return true;
