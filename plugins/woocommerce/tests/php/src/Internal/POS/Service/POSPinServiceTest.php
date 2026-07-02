@@ -403,7 +403,10 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 		$user_id                = self::factory()->user->create( array( 'role' => 'subscriber' ) );
 		$this->extra_user_ids[] = $user_id;
 		Capabilities::set_pos_preset( $user_id, POSPreset::CASHIER );
-		$this->sut->set_pin( $user_id, $pin );
+		$this->assertTrue(
+			$this->sut->set_pin( $user_id, $pin ),
+			'Fixture: set_pin() must succeed for the collision scenarios to be meaningful.'
+		);
 		return $user_id;
 	}
 
