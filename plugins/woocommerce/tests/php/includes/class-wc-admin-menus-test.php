@@ -46,8 +46,7 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 				(array) $this->brand_taxonomy_backup
 			);
 		}
-		global $wp_meta_boxes;
-		$wp_meta_boxes = $this->wp_meta_boxes_backup;
+		$GLOBALS['wp_meta_boxes'] = $this->wp_meta_boxes_backup;  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		parent::tearDown();
 	}
 
@@ -69,23 +68,23 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 							'id'    => 'add-post-type-post',
 							'title' => 'Posts',
 						),
-						'add-custom-links' => array(
+						'add-custom-links'   => array(
 							'id'    => 'add-custom-links',
 							'title' => 'Custom Links',
 						),
-						'add-category' => array(
+						'add-category'       => array(
 							'id'    => 'add-category',
 							'title' => 'Categories',
 						),
-						'add-product_cat' => array(
+						'add-product_cat'    => array(
 							'id'    => 'add-product_cat',
 							'title' => 'Product Categories',
 						),
-						'add-product_tag' => array(
+						'add-product_tag'    => array(
 							'id'    => 'add-product_tag',
 							'title' => 'Product Tags',
 						),
-						'add-product_brand' => array(
+						'add-product_brand'  => array(
 							'id'    => 'add-product_brand',
 							'title' => 'Brands',
 						),
@@ -104,10 +103,8 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 	 * while third-party boxes remain hidden by default.
 	 */
 	public function test_filter_returns_wc_taxonomy_boxes_visible_for_first_time_user() {
-		global $wp_meta_boxes;
-
-		$wp_meta_boxes = $this->get_nav_meta_boxes();
-		$user_id       = $this->factory->user->create();
+		$GLOBALS['wp_meta_boxes'] = $this->get_nav_meta_boxes();  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$user_id                  = $this->factory->user->create();
 
 		$menus = new WC_Admin_Menus();
 		$menus->register_default_nav_menu_meta_boxes_filter();
@@ -170,13 +167,11 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 	 * When the Brands taxonomy is not registered, the brand box should not be treated as visible by default.
 	 */
 	public function test_filter_keeps_brand_box_hidden_when_brand_taxonomy_unregistered() {
-		global $wp_meta_boxes;
-
 		$this->brand_taxonomy_backup = get_taxonomy( 'product_brand' );
 		unregister_taxonomy( 'product_brand' );
 
-		$wp_meta_boxes = $this->get_nav_meta_boxes();
-		$user_id       = $this->factory->user->create();
+		$GLOBALS['wp_meta_boxes'] = $this->get_nav_meta_boxes();  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$user_id                  = $this->factory->user->create();
 
 		$menus = new WC_Admin_Menus();
 		$menus->register_default_nav_menu_meta_boxes_filter();
