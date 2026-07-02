@@ -94,14 +94,7 @@ class VisualAttributeTermAdminTest extends WC_Unit_Test_Case {
 			register_taxonomy( $taxonomy, array( 'product' ) );
 
 			VisualAttributeTermAdmin::seed_visual_attribute_terms(
-				$attribute_id,
-				array(
-					'attribute_name'    => $attribute_data['slug'],
-					'attribute_type'    => $attribute_data['type'],
-					'attribute_label'   => $attribute_data['name'],
-					'attribute_orderby' => 'menu_order',
-					'attribute_public'  => 0,
-				)
+				$attribute_id
 			);
 
 			$terms = get_terms(
@@ -178,14 +171,7 @@ class VisualAttributeTermAdminTest extends WC_Unit_Test_Case {
 
 		try {
 			VisualAttributeTermAdmin::seed_visual_attribute_terms(
-				$attribute_id,
-				array(
-					'attribute_name'    => $attribute_data['slug'],
-					'attribute_type'    => $attribute_data['type'],
-					'attribute_label'   => $attribute_data['name'],
-					'attribute_orderby' => 'menu_order',
-					'attribute_public'  => 0,
-				)
+				$attribute_id
 			);
 
 			$this->assertTrue( taxonomy_exists( $taxonomy ), 'Seeder should register the taxonomy when missing.' );
@@ -242,14 +228,7 @@ class VisualAttributeTermAdminTest extends WC_Unit_Test_Case {
 			$term_ids[] = $term_id;
 
 			VisualAttributeTermAdmin::seed_visual_attribute_terms(
-				$attribute_id,
-				array(
-					'attribute_name'    => $attribute_data['slug'],
-					'attribute_type'    => $attribute_data['type'],
-					'attribute_label'   => $attribute_data['name'],
-					'attribute_orderby' => 'menu_order',
-					'attribute_public'  => 0,
-				)
+				$attribute_id
 			);
 
 			$terms = get_terms(
@@ -296,14 +275,7 @@ class VisualAttributeTermAdminTest extends WC_Unit_Test_Case {
 			register_taxonomy( $taxonomy, array( 'product' ) );
 
 			VisualAttributeTermAdmin::seed_visual_attribute_terms(
-				$attribute_id,
-				array(
-					'attribute_name'    => $attribute_data['slug'],
-					'attribute_type'    => $attribute_data['type'],
-					'attribute_label'   => $attribute_data['name'],
-					'attribute_orderby' => 'menu_order',
-					'attribute_public'  => 0,
-				)
+				$attribute_id
 			);
 
 			$terms = get_terms(

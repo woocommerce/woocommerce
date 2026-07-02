@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\Internal\ProductAttributes;
 
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * Admin UI for wc-visual attribute term metadata.
@@ -28,6 +29,10 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 	 */
 	public function register(): void {
 		if ( ! is_admin() ) {
+			return;
+		}
+
+		if ( ! FeaturesUtil::feature_is_enabled( 'wc-visual-attribute' ) ) {
 			return;
 		}
 		add_action( 'created_term', array( $this, 'save_product_attribute_term_fields' ), 10, 3 );
@@ -405,8 +410,6 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 	 * Get the default color terms to create for a new wc-visual attribute.
 	 *
 	 * @return array<string, array{label: string, color: string}>
-	 *
-	 * @since 11.0.0
 	 */
 	private static function get_default_color_terms(): array {
 		return array(
@@ -454,42 +457,55 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param int   $attribute_id Attribute ID.
-	 * @param array $data         Attribute data containing attribute_type and attribute_name.
+	 * @param int $attribute_id Attribute ID.
 	 * @return void
-	 *
-	 * @since 11.0.0
 	 */
-	public static function seed_visual_attribute_terms( int $attribute_id, array $data ): void {
-		if (
-			0 >= $attribute_id ||
-			! isset( $data['attribute_type'], $data['attribute_name'] ) ||
-			! is_string( $data['attribute_type'] ) ||
-			'wc-visual' !== $data['attribute_type'] ||
-			! is_string( $data['attribute_name'] ) ||
-			'' === trim( $data['attribute_name'] )
-		) {
+	public static function seed_visual_attribute_terms( int $attribute_id ): void {
+		if ( 0 >= $attribute_id ) {
 			return;
 		}
 
 		$attribute = wc_get_attribute( $attribute_id );
-		$taxonomy  = wc_attribute_taxonomy_name( $data['attribute_name'] );
 
-		// Verify the persisted record matches both the slug and the visual type before seeding;
-		// $data is the caller's intent and could be spoofed by a custom path.
 		if (
 			! $attribute ||
 			! isset( $attribute->slug, $attribute->type ) ||
-			$taxonomy !== $attribute->slug ||
 			'wc-visual' !== $attribute->type
 		) {
 			return;
 		}
 
+		$taxonomy = $attribute->slug;
+
 		// Taxonomy is registered on init from the cached list but not yet available
 		// at process_add_attribute time (cache invalidated after wc_create_attribute).
+		// Use the same WC filter seams as WC_Post_Types::register_taxonomies().
 		if ( ! taxonomy_exists( $taxonomy ) ) {
-			register_taxonomy( $taxonomy, array( 'product' ) );
+			/**
+			 * Filters the object types for a WooCommerce taxonomy.
+			 *
+			 * @param array $objects Object types.
+			 *
+			 * @since 11.0.0
+			 */
+			$objects = apply_filters( "woocommerce_taxonomy_objects_{$taxonomy}", array( 'product' ) );
+			/**
+			 * Filters the arguments for a WooCommerce taxonomy.
+			 *
+			 * @param array $args Taxonomy arguments.
+			 *
+			 * @since 11.0.0
+			 */
+			$args    = apply_filters(
+				"woocommerce_taxonomy_args_{$taxonomy}",
+				array(
+					'hierarchical' => false,
+					'public'       => false,
+					'show_ui'      => false,
+					'show_in_menu' => false,
+				)
+			);
+			register_taxonomy( $taxonomy, $objects, $args );
 		}
 
 		foreach ( self::get_default_color_terms() as $slug => $term ) {
