@@ -9,3 +9,35 @@ export const isTryingToDisplayLegacySaleBadge = ( showSaleBadge?: boolean ) => {
 	// that we should respect.
 	return showSaleBadge;
 };
+
+type AspectRatioStyle = {
+	dimensions?: {
+		aspectRatio?: string;
+	};
+};
+
+/**
+ * Resolve the aspect ratio for a product image.
+ *
+ * Block-level overrides take priority over store thumbnail cropping settings.
+ */
+export const resolveAspectRatio = (
+	aspectRatio: string | undefined,
+	style: AspectRatioStyle | undefined,
+	storeAspectRatio: string | null | undefined
+): string | undefined => {
+	if (
+		style &&
+		style.dimensions &&
+		style.dimensions.aspectRatio &&
+		typeof style.dimensions.aspectRatio === 'string'
+	) {
+		return style.dimensions.aspectRatio;
+	}
+
+	if ( aspectRatio ) {
+		return aspectRatio;
+	}
+
+	return storeAspectRatio ?? undefined;
+};

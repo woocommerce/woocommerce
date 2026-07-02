@@ -100,6 +100,23 @@ class ProductImage extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Helper to render a product image block for a product.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @param string      $block_attributes Optional JSON attributes for the block.
+	 * @return string Rendered block markup.
+	 */
+	private function render_product_image_block( $product, $block_attributes = '' ) {
+		$attrs = '' !== $block_attributes ? ' ' . $block_attributes : '';
+
+		return do_blocks(
+			'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} -->' .
+			'<!-- wp:woocommerce/product-image' . $attrs . ' /-->' .
+			'<!-- /wp:woocommerce/single-product -->'
+		);
+	}
+
+	/**
 	 * Test that the ProductImage block renders correctly for a simple product.
 	 */
 	public function test_product_image_render_simple_product() {
@@ -193,13 +210,59 @@ class ProductImage extends \WP_UnitTestCase {
 	public function test_product_image_render_with_different_sizing() {
 		$data = $this->create_product_with_image();
 
-		// Test with 'single' image sizing.
-		$markup_single = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} --><!-- wp:woocommerce/product-image {"imageSizing":"single"} /--><!-- /wp:woocommerce/single-product -->' );
-		$this->assertStringContainsString( 'wc-block-components-product-image', $markup_single );
+		update_option( 'woocommerce_thumbnail_cropping', '1:1' );
 
-		// Test with 'thumbnail' image sizing.
-		$markup_thumbnail = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} --><!-- wp:woocommerce/product-image {"imageSizing":"thumbnail"} /--><!-- /wp:woocommerce/single-product -->' );
-		$this->assertStringContainsString( 'wc-block-components-product-image', $markup_thumbnail );
+		$markup_single    = $this->render_product_image_block( $data['product'], '{"imageSizing":"single"}' );
+		$markup_thumbnail = $this->render_product_image_block( $data['product'], '{"imageSizing":"thumbnail"}' );
+
+		$this->assertStringContainsString( 'aspect-ratio:1/1', $markup_single );
+		$this->assertStringContainsString( 'aspect-ratio:1/1', $markup_thumbnail );
+		$this->assertSame( $markup_single, $markup_thumbnail );
+
+		// Clean up.
+		$data['product']->delete( true );
+		wp_delete_attachment( $data['image_id'], true );
+	}
+
+	/**
+	 * Test that the ProductImage block uses store thumbnail cropping aspect ratio.
+	 */
+	public function test_product_image_render_with_store_aspect_ratio() {
+		$data = $this->create_product_with_image();
+
+		update_option( 'woocommerce_thumbnail_cropping', '1:1' );
+		$markup = $this->render_product_image_block( $data['product'] );
+		$this->assertStringContainsString( 'aspect-ratio:1/1', $markup );
+		$this->assertStringContainsString( 'wc-block-components-product-image--aspect-ratio-1-1', $markup );
+
+		update_option( 'woocommerce_thumbnail_cropping', 'custom' );
+		update_option( 'woocommerce_thumbnail_cropping_custom_width', '4' );
+		update_option( 'woocommerce_thumbnail_cropping_custom_height', '3' );
+		$markup = $this->render_product_image_block( $data['product'] );
+		$this->assertStringContainsString( 'aspect-ratio:4/3', $markup );
+		$this->assertStringContainsString( 'wc-block-components-product-image--aspect-ratio-4-3', $markup );
+
+		update_option( 'woocommerce_thumbnail_cropping', 'uncropped' );
+		$markup = $this->render_product_image_block( $data['product'] );
+		$this->assertStringNotContainsString( 'aspect-ratio:', $markup );
+		$this->assertStringContainsString( 'wc-block-components-product-image--aspect-ratio-auto', $markup );
+
+		// Clean up.
+		$data['product']->delete( true );
+		wp_delete_attachment( $data['image_id'], true );
+	}
+
+	/**
+	 * Test that block aspect ratio overrides store thumbnail cropping.
+	 */
+	public function test_product_image_render_with_block_aspect_ratio_override() {
+		$data = $this->create_product_with_image();
+
+		update_option( 'woocommerce_thumbnail_cropping', '1:1' );
+		$markup = $this->render_product_image_block( $data['product'], '{"aspectRatio":"3/5"}' );
+		$this->assertStringContainsString( 'aspect-ratio:3/5', $markup );
+		$this->assertStringContainsString( 'wc-block-components-product-image--aspect-ratio-3-5', $markup );
+		$this->assertStringNotContainsString( 'aspect-ratio:1/1', $markup );
 
 		// Clean up.
 		$data['product']->delete( true );
