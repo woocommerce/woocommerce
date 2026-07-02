@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Preserve existing line items when resuming a pending or failed order at checkout instead of rebuilding them, so per-item reduced-stock accounting is kept and stock is restored correctly on cancellation and not reduced twice on re-payment.

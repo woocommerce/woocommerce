@@ -410,6 +410,8 @@ class WC_Checkout {
 			 * different items or cost, create a new order. We use a hash to
 			 * detect changes which is based on cart items + order total.
 			 */
+			$resuming_order = false;
+
 			if ( $order && $order->has_cart_hash( $cart_hash ) && $order->has_status( array( OrderStatus::PENDING, OrderStatus::FAILED ) ) ) {
 				/**
 				 * Indicates that we are resuming checkout for an existing order (which is pending payment, and which
@@ -421,8 +423,19 @@ class WC_Checkout {
 				 */
 				do_action( 'woocommerce_resume_order', $order_id );
 
-				// Remove all items - we will re-add them later.
-				$order->remove_order_items();
+				$resuming_order = true;
+
+				// Preserve the existing line items on resume instead of wiping and rebuilding them.
+				// The resume gate (has_cart_hash) guarantees the cart is unchanged, so the line items
+				// are already correct; rebuilding them would delete their per-item `_reduced_stock`
+				// accounting and break stock handling on cancel or re-payment (see #36702). The other
+				// item types are refreshed below because they can still differ at an unchanged cart
+				// total (e.g. a different shipping method of equal cost, or an address change that
+				// shifts the tax or fee breakdown).
+				$order->remove_order_items( 'fee' );
+				$order->remove_order_items( 'shipping' );
+				$order->remove_order_items( 'tax' );
+				$order->remove_order_items( 'coupon' );
 			} else {
 				$order = new WC_Order();
 			}
@@ -462,7 +475,7 @@ class WC_Checkout {
 			$order->set_customer_user_agent( wc_get_user_agent() );
 			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
 			$order->set_payment_method( isset( $available_gateways[ $data['payment_method'] ] ) ? $available_gateways[ $data['payment_method'] ] : $data['payment_method'] );
-			$this->set_data_from_cart( $order );
+			$this->set_data_from_cart( $order, $resuming_order );
 
 			if ( $order->has_cogs() && $this->cogs_is_enabled() ) {
 				$order->calculate_cogs_total_value();
@@ -527,11 +540,15 @@ class WC_Checkout {
 	/**
 	 * Copy line items, tax, totals data from cart to order.
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param WC_Order $order            Order object.
+	 * @param bool     $skip_line_items  Skip (re)creating line items from the cart. Used when resuming an
+	 *                                   unchanged order, where the existing line items are already correct and
+	 *                                   rebuilding them would discard their per-item `_reduced_stock` accounting.
+	 *                                   Default false. @since 11.0.0.
 	 *
 	 * @throws Exception When unable to create order.
 	 */
-	public function set_data_from_cart( &$order ) {
+	public function set_data_from_cart( &$order, $skip_line_items = false ) {
 		$order_vat_exempt = WC()->cart->get_customer()->get_is_vat_exempt() ? 'yes' : 'no';
 		$order->add_meta_data( 'is_vat_exempt', $order_vat_exempt, true );
 		$order->set_shipping_total( WC()->cart->get_shipping_total() );
@@ -540,7 +557,9 @@ class WC_Checkout {
 		$order->set_cart_tax( WC()->cart->get_cart_contents_tax() + WC()->cart->get_fee_tax() );
 		$order->set_shipping_tax( WC()->cart->get_shipping_tax() );
 		$order->set_total( WC()->cart->get_total( 'edit' ) );
-		$this->create_order_line_items( $order, WC()->cart );
+		if ( ! $skip_line_items ) {
+			$this->create_order_line_items( $order, WC()->cart );
+		}
 		$this->create_order_fee_lines( $order, WC()->cart );
 		$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
 		$this->create_order_tax_lines( $order, WC()->cart );

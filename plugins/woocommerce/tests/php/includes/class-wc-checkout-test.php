@@ -44,6 +44,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 		delete_option( 'woocommerce_calc_taxes' );
+		update_option( 'woocommerce_manage_stock', 'no' );
+		WC()->session->set( 'order_awaiting_payment', null );
+		WC()->cart->empty_cart();
 	}
 
 	/**
@@ -344,5 +347,179 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( WP_Error::class, $result, 'create_order() should return a WP_Error when line items were not persisted.' );
 		$this->assertSame( 'checkout-error', $result->get_error_code(), 'Error code should come from the checkout try/catch path.' );
 		$this->assertStringContainsString( 'Order items could not be saved', $result->get_error_message(), 'Error message should surface the defense-in-depth guard message.' );
+	}
+
+	/**
+	 * Create a pending, stock-reduced order and mark it as awaiting payment so a subsequent
+	 * create_order() call resumes it.
+	 *
+	 * @param int $stock Initial product stock quantity.
+	 * @param int $qty   Quantity to order.
+	 * @return array Order ID (int), product (WC_Product) and the checkout data used to resume (array).
+	 */
+	private function create_pending_reduced_stock_order( $stock = 10, $qty = 1 ) {
+		update_option( 'woocommerce_manage_stock', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( $stock );
+		$product->save();
+
+		WC()->cart->add_to_cart( $product->get_id(), $qty );
+		WC()->cart->calculate_totals();
+
+		$data = array(
+			'payment_method' => WC_Gateway_BACS::ID,
+			'billing_email'  => 'customer@example.com',
+		);
+
+		$order_id = $this->sut->create_order( $data );
+
+		// Reduce stock as a payment attempt would, then leave the order pending so it can be resumed.
+		wc_maybe_reduce_stock_levels( $order_id );
+		$order = wc_get_order( $order_id );
+		$order->set_status( 'pending' );
+		$order->save();
+
+		WC()->session->set( 'order_awaiting_payment', $order_id );
+
+		return array( $order_id, wc_get_product( $product->get_id() ), $data );
+	}
+
+	/**
+	 * @testdox Resuming an unchanged order keeps its line items and their reduced-stock accounting.
+	 */
+	public function test_resuming_order_preserves_line_items_and_reduced_stock() {
+		list( $order_id, $product, $data ) = $this->create_pending_reduced_stock_order( 10, 1 );
+
+		$order_before   = wc_get_order( $order_id );
+		$items_before   = $order_before->get_items();
+		$item_before    = reset( $items_before );
+		$item_id_before = $item_before->get_id();
+
+		$this->assertEquals( 1, $item_before->get_meta( '_reduced_stock' ), 'First pass should record the reduced stock on the line item.' );
+		$this->assertEquals( 9, wc_get_product( $product->get_id() )->get_stock_quantity(), 'First pass should reduce stock by the ordered quantity.' );
+
+		$resumed_id = $this->sut->create_order( $data );
+
+		$this->assertSame( $order_id, $resumed_id, 'The unchanged order should be resumed, not replaced by a new one.' );
+
+		$resumed     = wc_get_order( $resumed_id );
+		$items_after = $resumed->get_items();
+
+		$this->assertCount( 1, $items_after, 'The resumed order should still have exactly one line item.' );
+
+		$item_after = reset( $items_after );
+		$this->assertSame( $item_id_before, $item_after->get_id(), 'The line item should be preserved (same row), not deleted and recreated.' );
+		$this->assertEquals( 1, $item_after->get_meta( '_reduced_stock' ), 'The per-item reduced-stock meta should survive the resume.' );
+		$this->assertTrue( (bool) $resumed->get_data_store()->get_stock_reduced( $resumed ), 'The order-level stock-reduced flag should stay set.' );
+
+		// A subsequent payment-time reduction must not reduce stock a second time.
+		wc_maybe_reduce_stock_levels( $resumed_id );
+		$this->assertEquals( 9, wc_get_product( $product->get_id() )->get_stock_quantity(), 'Stock must not be reduced twice for a resumed order.' );
+	}
+
+	/**
+	 * @testdox Resuming an order does not re-run the create_order_line_item hook and does not duplicate its meta.
+	 */
+	public function test_resuming_order_does_not_refire_create_order_line_item_hook() {
+		$fire_count = 0;
+		$callback   = function ( $item ) use ( &$fire_count ) {
+			++$fire_count;
+			$item->add_meta_data( '_test_addon', 'engraving' );
+		};
+		add_action( 'woocommerce_checkout_create_order_line_item', $callback, 10, 1 );
+
+		list( $order_id, , $data ) = $this->create_pending_reduced_stock_order();
+
+		$this->assertSame( 1, $fire_count, 'The line-item hook should fire once when the order is first created.' );
+
+		$resumed_id = $this->sut->create_order( $data );
+
+		remove_action( 'woocommerce_checkout_create_order_line_item', $callback, 10 );
+
+		$this->assertSame( 1, $fire_count, 'The line-item hook must not fire again on resume, since line items are preserved.' );
+
+		$resumed = wc_get_order( $resumed_id );
+		$items   = $resumed->get_items();
+		$item    = reset( $items );
+
+		$this->assertSame( 'engraving', $item->get_meta( '_test_addon' ), 'Meta added through the hook should survive the resume.' );
+		$this->assertCount( 1, $item->get_meta( '_test_addon', false ), 'The hook meta should not be duplicated on the preserved line item.' );
+	}
+
+	/**
+	 * @testdox Resuming an order does not re-run the create_order_line_item_object filter.
+	 */
+	public function test_resuming_order_does_not_refire_create_order_line_item_object_filter() {
+		$fire_count = 0;
+		$callback   = function ( $item ) use ( &$fire_count ) {
+			++$fire_count;
+			return $item;
+		};
+		add_filter( 'woocommerce_checkout_create_order_line_item_object', $callback, 10, 1 );
+
+		list( $order_id, , $data ) = $this->create_pending_reduced_stock_order();
+
+		$this->assertSame( 1, $fire_count, 'The line-item object filter should fire once when the order is first created.' );
+
+		$this->sut->create_order( $data );
+
+		remove_filter( 'woocommerce_checkout_create_order_line_item_object', $callback, 10 );
+
+		$this->assertSame( 1, $fire_count, 'The line-item object filter must not fire again on resume, since line items are preserved.' );
+	}
+
+	/**
+	 * @testdox Resuming an order still refreshes the non-line-item types such as fees.
+	 */
+	public function test_resuming_order_still_refreshes_fee_lines() {
+		$add_fee = function ( $cart ) {
+			$cart->add_fee( 'Handling', 5 );
+		};
+		add_action( 'woocommerce_cart_calculate_fees', $add_fee );
+
+		list( $order_id, , $data ) = $this->create_pending_reduced_stock_order();
+
+		$this->assertCount( 1, wc_get_order( $order_id )->get_items( 'fee' ), 'First pass should add the fee line.' );
+
+		$resumed_id = $this->sut->create_order( $data );
+
+		remove_action( 'woocommerce_cart_calculate_fees', $add_fee );
+
+		$fees = wc_get_order( $resumed_id )->get_items( 'fee' );
+		$this->assertCount( 1, $fees, 'The resumed order should still have exactly one fee line (refreshed, not dropped or duplicated).' );
+
+		$fee = reset( $fees );
+		$this->assertEquals( 5, $fee->get_total(), 'The refreshed fee amount should match the cart.' );
+	}
+
+	/**
+	 * @testdox create_order does not gate on stock; availability is enforced by cart stock validation.
+	 */
+	public function test_create_order_does_not_bypass_cart_stock_validation() {
+		update_option( 'woocommerce_manage_stock', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 1 );
+		$product->set_backorders( 'no' );
+		$product->save();
+
+		WC()->cart->add_to_cart( $product->get_id(), 5 );
+		WC()->cart->calculate_totals();
+
+		// Cart-level validation is the availability gate, independent of how order line items are built.
+		$stock_check = WC()->cart->check_cart_item_stock();
+		$this->assertInstanceOf( WP_Error::class, $stock_check, 'Cart stock validation should flag the shortage.' );
+
+		// create_order() itself performs no stock check, so keeping line items on resume cannot bypass validation.
+		$order_id = $this->sut->create_order(
+			array(
+				'payment_method' => WC_Gateway_BACS::ID,
+				'billing_email'  => 'customer@example.com',
+			)
+		);
+		$this->assertIsInt( $order_id, 'create_order() builds the order regardless of stock; the check lives in the validation phase.' );
 	}
 }
