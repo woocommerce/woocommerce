@@ -1901,12 +1901,9 @@ ul.wc_coupon_list_block {
 
 	h2 {
 		margin: 0;
-		font-family: "HelveticaNeue-Light", "Helvetica Neue Light",
-			"Helvetica Neue", sans-serif;
-		font-size: 21px;
-		font-weight: normal;
-		line-height: 1.2;
-		text-shadow: 1px 1px 1px white;
+		font-size: 20px;
+		font-weight: 600;
+		line-height: 1.3;
 		padding: 0;
 	}
 
@@ -1916,21 +1913,19 @@ ul.wc_coupon_list_block {
 
 	h3,
 	h4 {
-		color: #333;
-		margin: 1.33em 0 0;
+		color: $gray-900;
+		margin: 12px 0 0;
 	}
 
 	p {
-		color: $gray-900;
+		color: $subtext;
 	}
 
 	p.order_number {
 		margin: 0;
-		font-family: "HelveticaNeue-Light", "Helvetica Neue Light",
-			"Helvetica Neue", sans-serif;
 		font-weight: normal;
-		line-height: 1.6em;
-		font-size: 16px;
+		line-height: 1.5;
+		font-size: 13px;
 	}
 
 	.order_data_header {
@@ -1956,8 +1951,8 @@ ul.wc_coupon_list_block {
 	}
 
 	.order_data_column {
-		width: 32%;
-		padding: 0 2% 0 0;
+		width: 31%;
+		padding: 0 3% 0 0;
 		float: left;
 
 		> h3 span {
@@ -1968,12 +1963,31 @@ ul.wc_coupon_list_block {
 			padding-right: 0;
 		}
 
+		// Breathing room when columns stack at narrow widths.
+		// (No-op on float layouts that fit side-by-side.)
+		&:not(:last-child) {
+			margin-bottom: 24px;
+		}
+
 		p {
 			padding: 0 !important;
 		}
 
-		.address strong {
-			display: block;
+		.address {
+			margin-top: 8px;
+
+			p {
+				margin: 0 0 8px;
+				line-height: 1.6;
+				overflow-wrap: anywhere;
+			}
+
+			strong {
+				display: block;
+				margin-bottom: 4px;
+				font-weight: 600;
+				color: $gray-900; // Field labels use the primary admin text color.
+			}
 		}
 
 		.form-field {
@@ -1985,7 +1999,8 @@ ul.wc_coupon_list_block {
 
 			label {
 				display: block;
-				padding: 0 0 3px;
+				margin-bottom: 4px;
+				color: $gray-900;
 			}
 
 			input:not(.checkbox),
@@ -2040,6 +2055,7 @@ ul.wc_coupon_list_block {
 			}
 			input.date-picker {
 				width: 40%;
+				margin-right: 8px;
 			}
 			input.hour,
 			input.minute {
@@ -2047,8 +2063,8 @@ ul.wc_coupon_list_block {
 			}
 		}
 
-		p.none_set {
-			color: $gray-900;
+		.none_set {
+			color: $subtext;
 		}
 
 		div.edit_address {
@@ -2082,13 +2098,13 @@ ul.wc_coupon_list_block {
 			margin: 0 0 0 6px;
 			overflow: hidden;
 			position: relative;
-			color: #999;
+			color: $subtext;
 			border: 0;
 			float: right;
 
 			&:hover,
 			&:focus {
-				color: #000;
+				color: var(--wp-admin-theme-color, #007cba);
 			}
 
 			&::after {
@@ -2127,6 +2143,8 @@ ul.wc_coupon_list_block {
 	margin: 0;
 	overflow: hidden;
 	zoom: 1;
+	padding: 0;
+	list-style: none;
 
 	li {
 		border-top: 1px solid #fff;
@@ -2177,6 +2195,84 @@ ul.wc_coupon_list_block {
 				width: 225px;
 				box-sizing: border-box;
 				float: left;
+			}
+		}
+	}
+}
+
+body.post-type-shop_order,
+body.woocommerce_page_wc-orders {
+	.order_actions {
+		display: flex;
+		flex-direction: column;
+		overflow: visible;
+
+		li {
+			border-top: 1px solid $gray-200;
+			border-bottom: 0;
+			padding: 16px 12px;
+			float: none;
+			width: auto;
+			text-align: left;
+
+			&:first-child {
+				border-top: 0;
+			}
+
+			&.wide {
+				padding: 16px 12px;
+			}
+
+			// Save row: keep the legacy trash link in its usual position while
+			// clearing old button margins that overflow under WP 7.0 sizing.
+			&.wide:has(.save_order) {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 8px;
+
+				#delete-action {
+					line-height: 40px;
+					text-align: left;
+					float: none;
+
+					&:not(:has(*)) {
+						display: none;
+					}
+				}
+
+				.save_order {
+					flex-shrink: 0;
+					margin: 0 0 0 auto;
+					float: none;
+				}
+			}
+
+			// Action row (top): select + Apply button. Replaces the legacy
+			// float layout where the Apply button was forced to width: 24px
+			// (a squished pill) and the select to a hardcoded 225px (overflowed
+			// on narrow sidebars).
+			&#actions {
+				display: flex;
+				gap: 8px;
+				align-items: stretch;
+
+				select {
+					flex: 1;
+					min-width: 0; // prevent flex blow-out on long option labels.
+					width: auto;
+					box-sizing: border-box;
+					float: none;
+				}
+
+				.button {
+					flex-shrink: 0;
+					width: auto;
+					box-sizing: border-box;
+					// Reset the legacy 1px button margin so the row doesn't overflow.
+					margin: 0;
+					float: none;
+				}
 			}
 		}
 	}
@@ -2901,7 +2997,6 @@ ul.wc_coupon_list_block {
 	padding: 0;
 
 	ul.order_actions li {
-		padding: 6px 10px;
 		box-sizing: border-box;
 
 		&:last-child {
@@ -7652,6 +7747,9 @@ table.bar_chart {
 
 			&:first-child {
 				width: 100%;
+				// Reset the base 3% gutter so the full-width first column
+				// doesn't render at 103% and overflow at narrow viewports.
+				padding-right: 0;
 			}
 		}
 	}
@@ -8398,6 +8496,22 @@ table.bar_chart {
 		}
 	}
 
+	// General column Select2s (Status + Customer): same WP 7.0 sizing as above.
+	// The direct-child `>` scopes this to General — address fields are nested
+	// inside .edit_address and covered by the rule above.
+	#order_data .order_data_column > .form-field-wide .select2-container .select2-selection--single {
+		height: 40px;
+
+		.select2-selection__rendered {
+			line-height: 38px;
+			padding: 0 12px;
+		}
+
+		.select2-selection__arrow {
+			height: 38px;
+		}
+	}
+
 	// Table action icon buttons: prevent WP 7.0 min-height from stretching them.
 	.widefat {
 		.column-wc_actions {
@@ -8437,17 +8551,6 @@ table.bar_chart {
 	}
 
 
-	// Order actions: select + button overflow container due to WP 7.0 select margins.
-	.order_actions {
-		#actions select {
-			width: calc(100% - 32px);
-		}
-
-		// Move to trash: make sure it aligns better vertically with 7.0's increased button height.
-		#delete-action {
-			line-height: 35px;
-		}
-	}
 
 	// Order actions reload button: icon line-height must match WP 7.0 button height.
 	.button.wc-reload {
