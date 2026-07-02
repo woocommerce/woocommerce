@@ -385,6 +385,7 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 		$this->make_pos_user_with_pin( '1234' );
 
 		$this->assertFalse( $this->sut->is_pin_used_by_other_user( '5678' ) );
+		$this->assertFalse( $this->sut->is_pin_used_by_other_user( 'abcd' ), 'A malformed PIN is never "in use".' );
 	}
 
 	/**

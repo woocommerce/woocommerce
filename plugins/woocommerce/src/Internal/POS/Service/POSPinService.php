@@ -138,12 +138,16 @@ class POSPinService {
 	 * number of active staff (a handful), one PBKDF2 evaluation per row. The candidate user is
 	 * excluded so an idempotent re-set ("save the same PIN again") is allowed.
 	 *
-	 * @param string $pin             Plaintext PIN candidate. Assumed format-validated.
+	 * @param string $pin             Plaintext PIN candidate; a malformed PIN is never "in use".
 	 * @param int    $exclude_user_id User being assigned the PIN; excluded from the scan. Pass 0 at
 	 *                                create time, when the user does not exist yet.
 	 * @return bool
 	 */
 	public function is_pin_used_by_other_user( string $pin, int $exclude_user_id = 0 ): bool {
+		if ( ! $this->validate_pin_format( $pin ) ) {
+			return false;
+		}
+
 		// Select every POS-access user except the candidate, so the new PIN can be PBKDF2-compared
 		// against each stored hash and rejected on the first match.
 		$user_query = new WP_User_Query(
