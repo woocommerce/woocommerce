@@ -8,11 +8,6 @@
 	"keywords": [ "WooCommerce" ],
 	"usesContext": [ "iapi/provider" ],
 	"textdomain": "woocommerce",
-	"attributes": {
-		"style": {
-			"type": "object"
-		}
-	},
 	"supports": {
 		"interactivity": true,
 		"color": {
