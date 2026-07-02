@@ -41469,15 +41469,11 @@ parameters:
 			count: 3
 			path: src/Admin/API/Reports/Customers/DataStore.php
 
-
-
 		-
 			message: '#^Call to an undefined method object\:\:get_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Admin/API/Reports/Customers/DataStore.php
-
-
 
 		-
 			message: '#^Cannot call method get_id\(\) on Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\WC_Order\|WC_Order\|WC_Order_Refund\|false\.$#'
@@ -49551,12 +49547,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/AssetsController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:register_and_enqueue_site_editor_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Blocks/AssetsController.php
