@@ -326,7 +326,8 @@ class OrderController {
 	}
 
 	/**
-	 * Validates the customer email. This is a required field.
+	 * Validates the customer email. Required by default, but the requirement can be relaxed via the
+	 * `woocommerce_store_api_require_billing_email` filter; a provided email is always validated for format.
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
 	 * @param \WC_Order $order Order object.
