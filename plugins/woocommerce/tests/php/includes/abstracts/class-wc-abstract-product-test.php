@@ -454,4 +454,35 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'outofstock', $product->get_stock_status() );
 	}
+	/**
+	 * @testdox Setting a GTIN cleans invalid characters instead of rejecting the value, preserving a final ISBN-10 X check digit.
+	 * @dataProvider global_unique_id_provider
+	 *
+	 * @param string $input    Raw value passed to the setter.
+	 * @param string $expected Expected stored value.
+	 */
+	public function test_set_global_unique_id_cleans_invalid_characters( string $input, string $expected ): void {
+		$product = new WC_Product_Simple();
+
+		$product->set_global_unique_id( $input );
+
+		$this->assertSame( $expected, $product->get_global_unique_id(), "Input '{$input}' should be stored as '{$expected}'" );
+	}
+
+	/**
+	 * Data provider for GTIN cleaning tests.
+	 *
+	 * @return array[]
+	 */
+	public function global_unique_id_provider(): array {
+		return array(
+			'plain digits untouched'          => array( '4006381333931', '4006381333931' ),
+			'letters stripped'                => array( 'ABC-4006381333931', '-4006381333931' ),
+			'final ISBN-10 X preserved'       => array( '097522980X', '097522980X' ),
+			'hyphenated ISBN-10 X preserved'  => array( '0-9752298-0-X', '0-9752298-0-X' ),
+			'lowercase final x preserved'     => array( '097522980x', '097522980x' ),
+			'mid-string X stripped'           => array( '12X4567890123', '124567890123' ),
+			'only final X kept when multiple' => array( '12X45X', '1245X' ),
+		);
+	}
 }

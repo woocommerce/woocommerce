@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore lenient GTIN handling: strip a misplaced ISBN-10 X check digit instead of rejecting the value, fixing REST API product creates/updates that succeeded before 10.9.
