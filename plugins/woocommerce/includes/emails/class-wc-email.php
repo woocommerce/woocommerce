@@ -1252,7 +1252,7 @@ class WC_Email extends WC_Settings_API {
 		 */
 		do_action( 'woocommerce_email_sent', $return, (string) $this->id, $this );
 
-		return $return;
+		return (bool) $return;
 	}
 
 	/**
