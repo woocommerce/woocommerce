@@ -11,6 +11,13 @@ use WC_Log_Handler;
  */
 class LogHandlerFileV2 extends WC_Log_Handler {
 	/**
+	 * Maximum number of expired log files to delete in one loop iteration.
+	 *
+	 * @var int
+	 */
+	private const DELETE_BATCH_SIZE = 100;
+
+	/**
 	 * Instance of the FileController class.
 	 *
 	 * @var FileController
@@ -18,18 +25,10 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 	private $file_controller;
 
 	/**
-	 * Instance of the Settings class.
-	 *
-	 * @var Settings
-	 */
-	private $settings;
-
-	/**
 	 * LogHandlerFileV2 class.
 	 */
 	public function __construct() {
 		$this->file_controller = wc_get_container()->get( FileController::class );
-		$this->settings        = wc_get_container()->get( Settings::class );
 	}
 
 	/**
@@ -182,7 +181,7 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 			)
 		);
 
-		if ( is_wp_error( $files ) || count( $files ) < 1 ) {
+		if ( is_wp_error( $files ) || ! is_array( $files ) || count( $files ) < 1 ) {
 			return 0;
 		}
 
@@ -235,47 +234,63 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 			return 0;
 		}
 
-		$files = $this->file_controller->get_files(
-			array(
-				'date_filter' => 'created',
-				'date_start'  => 1,
-				'date_end'    => $timestamp,
-			)
-		);
+		$deleted = 0;
+		$skipped = 0;
 
-		if ( is_wp_error( $files ) ) {
-			return 0;
-		}
+		// Fetch and delete in batches so that sites with more than the default
+		// per-page of log files don't leave expired files behind.
+		do {
+			$files = $this->file_controller->get_files(
+				array(
+					'date_filter' => 'created',
+					'date_start'  => 1,
+					'date_end'    => $timestamp,
+					'per_page'    => self::DELETE_BATCH_SIZE,
+					'offset'      => $skipped,
+				)
+			);
 
-		$files = array_filter(
-			$files,
-			function ( $file ) use ( $timestamp ) {
-				/**
-				 * Allows preventing an expired log file from being deleted.
-				 *
-				 * @param bool $delete    True to delete the file.
-				 * @param File $file      The log file object.
-				 * @param int  $timestamp The expiration threshold.
-				 *
-				 * @since 8.7.0
-				 */
-				$delete = apply_filters( 'woocommerce_logger_delete_expired_file', true, $file, $timestamp );
-
-				return boolval( $delete );
+			if ( is_wp_error( $files ) || ! is_array( $files ) ) {
+				break;
 			}
-		);
 
-		if ( count( $files ) < 1 ) {
-			return 0;
-		}
+			$fetched_count = count( $files );
+			$files         = array_filter(
+				$files,
+				function ( $file ) use ( $timestamp ) {
+					/**
+					 * Allows preventing an expired log file from being deleted.
+					 *
+					 * @param bool $delete    True to delete the file.
+					 * @param File $file      The log file object.
+					 * @param int  $timestamp The expiration threshold.
+					 *
+					 * @since 8.7.0
+					 */
+					$delete = apply_filters( 'woocommerce_logger_delete_expired_file', true, $file, $timestamp );
 
-		$file_ids = array_map(
-			fn( $file ) => $file->get_file_id(),
-			$files
-		);
+					return boolval( $delete );
+				}
+			);
 
-		$deleted        = $this->file_controller->delete_files( $file_ids );
-		$retention_days = $this->settings->get_retention_period();
+			$file_count       = count( $files );
+			$vetoed_count     = $fetched_count - $file_count;
+			$deleted_in_batch = 0;
+			if ( $file_count > 0 ) {
+				$file_ids = array_map(
+					fn( $file ) => $file->get_file_id(),
+					$files
+				);
+
+				$deleted_in_batch = $this->file_controller->delete_files( $file_ids );
+				$deleted         += $deleted_in_batch;
+			}
+
+			// Deleted files disappear from the directory, so only vetoed files
+			// need to be skipped. If no progress was made, skip the full page to
+			// avoid retrying a permanently vetoed or undeletable batch forever.
+			$skipped += $deleted_in_batch > 0 ? $vetoed_count : $fetched_count;
+		} while ( self::DELETE_BATCH_SIZE === $fetched_count );
 
 		if ( $deleted > 0 ) {
 			$this->handle(
