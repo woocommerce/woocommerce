@@ -175,8 +175,21 @@ class JsonFileFeed implements ResumableFeedInterface {
 		// safe to clear stale content and write the array from the top.
 		$handle = $this->open_handle( $this->file_path, 'c' );
 		$this->acquire_lock( $handle );
-		ftruncate( $handle, 0 );
-		rewind( $handle );
+
+		if ( ! ftruncate( $handle, 0 ) || ! rewind( $handle ) ) {
+			fclose( $handle );
+			$this->file_handle = null;
+			throw new Exception(
+				esc_html(
+					sprintf(
+						/* translators: %s: file path */
+						__( 'Unable to reset feed file for writing: %s', 'woocommerce' ),
+						$this->file_path
+					)
+				)
+			);
+		}
+
 		fwrite( $handle, '[' );
 
 		return $this->file_name;
