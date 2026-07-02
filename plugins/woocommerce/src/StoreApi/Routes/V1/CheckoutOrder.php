@@ -260,6 +260,12 @@ class CheckoutOrder extends AbstractCartRoute {
 			return;
 		}
 
+		// If the order never recorded a shipping destination (e.g. a manually created "pay for order" draft),
+		// there is no prior shipping cost to protect, so allow the shopper to set their address for the first time.
+		if ( ! $this->order->get_shipping_country() ) {
+			return;
+		}
+
 		$current_zone_id = \WC_Shipping_Zones::get_zone_matching_package(
 			array(
 				'destination' => array(

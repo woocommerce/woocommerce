@@ -1738,6 +1738,40 @@ class Checkout extends MockeryTestCase {
 	}
 
 	/**
+	 * An order that never recorded a shipping destination (e.g. a manually created "pay for order" draft) has no
+	 * prior shipping cost to protect, so the guard must accept a first-time address in any zone.
+	 */
+	public function test_checkout_order_allows_first_time_shipping_address_when_order_has_no_destination() {
+		$nepal_zone = $this->add_country_free_shipping_zone( 'NP' );
+
+		$order = \WC_Helper_Order::create_order( 0 );
+		// Clear any shipping destination so the order has no zone it was priced against.
+		$order->set_shipping_country( '' );
+		$order->set_shipping_state( '' );
+		$order->set_shipping_postcode( '' );
+		$order->set_shipping_city( '' );
+		$order->save();
+
+		$route  = $this->get_checkout_order_route_with_order( $order );
+		$method = new \ReflectionMethod( CheckoutOrderRoute::class, 'validate_shipping_address_zone' );
+		$method->setAccessible( true );
+
+		// A first-time address that resolves to a specific zone must not be rejected.
+		$method->invoke(
+			$route,
+			array(
+				'country'  => 'NP',
+				'state'    => 'GAN',
+				'postcode' => '',
+			)
+		);
+
+		$this->assertTrue( true, 'A first-time shipping address on an order with no destination must not be rejected.' );
+
+		$nepal_zone->delete();
+	}
+
+	/**
 	 * Build a CheckoutOrder route instance with its order property set to the given order.
 	 *
 	 * @param \WC_Order $order The order to attach to the route.
