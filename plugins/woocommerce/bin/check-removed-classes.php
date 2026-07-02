@@ -293,8 +293,9 @@ if ( 'cli' === PHP_SAPI && isset( $argv[0] ) && realpath( $argv[0] ) === __FILE_
 		echo "\nRemoving a shipped class causes fatal errors during in-place updates: code from the\n";
 		echo "previous version can still reference it while the files are being swapped on disk.\n";
 		echo "Deprecate the class and keep it as a stub for at least one release instead. If the\n";
-		echo "removal is intentional and update-safe, acknowledge it in the PR description with:\n";
-		echo "- [x] This Pull Request intentionally removes PHP classes. (Comment required below)\n";
+		echo "removal is intentional and update-safe, acknowledge it by checking this box in the\n";
+		echo "PR description (part of the PR template) and explaining why:\n";
+		echo "- [x] This Pull Request intentionally removes PHP classes. (Comment required in the description)\n";
 		exit( 1 );
 	}
 

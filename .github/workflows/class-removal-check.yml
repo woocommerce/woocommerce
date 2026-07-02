@@ -57,7 +57,7 @@ jobs:
           echo "Removing a shipped class causes fatal errors during in-place updates. Deprecate it and"
           echo "keep it as a stub for at least one release instead. If the removal is intentional and"
           echo "update-safe (e.g. the class was never shipped, or its deprecation window has passed),"
-          echo "acknowledge it by adding this line to the PR description, with an explanation:"
+          echo "acknowledge it by checking the box in the PR description, with an explanation:"
           echo ""
-          echo "- [x] This Pull Request intentionally removes PHP classes. (Comment required below)"
+          echo "- [x] This Pull Request intentionally removes PHP classes. (Comment required in the description)"
           exit 1
