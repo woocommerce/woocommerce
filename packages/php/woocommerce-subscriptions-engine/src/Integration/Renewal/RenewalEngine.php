@@ -263,7 +263,7 @@ final class RenewalEngine {
 			return null;
 		}
 
-		$cycle_count = $this->selector->select_billing_cycle( DueRenewal::from_head( $contract_id, $head ), $now );
+		$cycle_count = $this->selector->select_billing_cycle( DueRenewal::from_cycle( $head ), $now );
 		if ( null === $cycle_count ) {
 			return null;
 		}
@@ -310,7 +310,7 @@ final class RenewalEngine {
 			return null;
 		}
 
-		$cycle_count = $this->selector->select_manual_cycle( DueRenewal::from_head( $contract_id, $head ) );
+		$cycle_count = $this->selector->select_manual_cycle( DueRenewal::from_cycle( $head ) );
 		if ( null === $cycle_count ) {
 			return null;
 		}

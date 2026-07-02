@@ -70,18 +70,18 @@ final class DueRenewal {
 	}
 
 	/**
-	 * Build from a hydrated head cycle - the single-contract path where the head is loaded
-	 * directly rather than joined in the scan.
+	 * Build from a hydrated cycle - the single-contract path, where the caller has already loaded
+	 * the contract's head cycle (rather than joining it in the scan) and maps its fields in. The
+	 * head semantics are the caller's to uphold; this only reads the cycle it is handed.
 	 *
-	 * @param int   $contract_id Contract id.
-	 * @param Cycle $head        The contract's head cycle.
+	 * @param Cycle $cycle The cycle to read (the contract's head, in the single-contract path).
 	 */
-	public static function from_head( int $contract_id, Cycle $head ): self {
+	public static function from_cycle( Cycle $cycle ): self {
 		return new self(
-			$contract_id,
-			$head->get_count(),
-			$head->get_status()->get_value(),
-			$head->get_ends_at_gmt()
+			$cycle->get_contract_id(),
+			$cycle->get_count(),
+			$cycle->get_status()->get_value(),
+			$cycle->get_ends_at_gmt()
 		);
 	}
 
