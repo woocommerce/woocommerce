@@ -72,5 +72,4 @@ final class Bootstrap {
 		SchemaInstaller::maybe_install();
 		RenewalDispatcher::ensure_scheduled();
 	}
-
 }
