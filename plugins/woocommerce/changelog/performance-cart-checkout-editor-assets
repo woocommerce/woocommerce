@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Bundle Cart and Checkout editor dependencies directly to avoid loading frontend Cart and Checkout chunks in the editor.
