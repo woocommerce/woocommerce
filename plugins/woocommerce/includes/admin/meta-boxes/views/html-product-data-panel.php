@@ -39,7 +39,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php endforeach; ?>
 	</span>
 
-	<ul class="product_data_tabs wc-tabs">
+	<ul
+		class="product_data_tabs wc-tabs"
+		aria-orientation="vertical"
+		aria-label="<?php esc_attr_e( 'Product data', 'woocommerce' ); ?>"
+	>
 		<?php foreach ( self::get_product_data_tabs() as $key => $tab ) : ?>
 			<li class="<?php echo esc_attr( $key ); ?>_options <?php echo esc_attr( $key ); ?>_tab <?php echo esc_attr( isset( $tab['class'] ) ? implode( ' ', (array) $tab['class'] ) : '' ); ?>">
 				<a href="#<?php echo esc_attr( $tab['target'] ); ?>"><span><?php echo esc_html( $tab['label'] ); ?></span></a>

@@ -3,11 +3,11 @@ jQuery( function ( $ ) {
 	 * Function to check if the attribute and variation fields are empty.
 	 */
 	jQuery.is_attribute_or_variation_empty = function (
-		attributes_and_variations_data
+		$attributes_and_variations_data
 	) {
-		var has_empty_fields = false;
-		attributes_and_variations_data.each( function () {
-			var $this = $( this );
+		let has_empty_fields = false;
+		$attributes_and_variations_data.each( function () {
+			const $this = $( this );
 			// Check if the field is optional, a checkbox or a search field.
 			if (
 				$this.hasClass( 'optional_attribute_or_variation_data' ) ||
@@ -17,7 +17,7 @@ jQuery( function ( $ ) {
 				return;
 			}
 
-			var is_empty = $this.is( 'select' )
+			const is_empty = $this.is( 'select' )
 				? $this.find( ':selected' ).length === 0
 				: ! $this.val();
 			if ( is_empty ) {
@@ -31,24 +31,24 @@ jQuery( function ( $ ) {
 	 * Function to maybe disable the save button.
 	 */
 	jQuery.maybe_disable_save_button = function () {
-		var $tab;
-		var $save_button;
+		let $tab;
+		let $save_button;
 		if (
 			$( '.woocommerce_variation_new_attribute_data' ).is( ':visible' )
 		) {
 			$tab = $( '.woocommerce_variation_new_attribute_data' );
 			$save_button = $( 'button.create-variations' );
 		} else {
-			var $tab = $( '.product_attributes' );
-			var $save_button = $( 'button.save_attributes' );
+			$tab = $( '.product_attributes' );
+			$save_button = $( 'button.save_attributes' );
 		}
 
-		var attributes_and_variations_data = $tab.find(
+		const $attributes_and_variations_data = $tab.find(
 			'input, select, textarea'
 		);
 		if (
 			jQuery.is_attribute_or_variation_empty(
-				attributes_and_variations_data
+				$attributes_and_variations_data
 			)
 		) {
 			if ( ! $save_button.hasClass( 'disabled' ) ) {
@@ -102,18 +102,18 @@ jQuery( function ( $ ) {
 	} );
 
 	$( '.wc-metaboxes-wrapper' ).on( 'click', '.wc-metabox > h3', function () {
-		var metabox = $( this ).parent( '.wc-metabox' );
+		const $metabox = $( this ).parent( '.wc-metabox' );
 
-		if ( metabox.hasClass( 'closed' ) ) {
-			metabox.removeClass( 'closed' );
+		if ( $metabox.hasClass( 'closed' ) ) {
+			$metabox.removeClass( 'closed' );
 		} else {
-			metabox.addClass( 'closed' );
+			$metabox.addClass( 'closed' );
 		}
 
-		if ( metabox.hasClass( 'open' ) ) {
-			metabox.removeClass( 'open' );
+		if ( $metabox.hasClass( 'open' ) ) {
+			$metabox.removeClass( 'open' );
 		} else {
-			metabox.addClass( 'open' );
+			$metabox.addClass( 'open' );
 		}
 	} );
 
@@ -121,22 +121,195 @@ jQuery( function ( $ ) {
 	$( document.body )
 		.on( 'wc-init-tabbed-panels', function () {
 			$( 'ul.wc-tabs' ).show();
-			$( 'ul.wc-tabs a' ).on( 'click', function ( e ) {
-				e.preventDefault();
-				var panel_wrap = $( this ).closest( 'div.panel-wrap' );
-				$( 'ul.wc-tabs li', panel_wrap ).removeClass( 'active' );
-				$( this ).parent().addClass( 'active' );
-				$( 'div.panel', panel_wrap ).hide();
-				$( $( this ).attr( 'href' ) ).show( 0, function () {
+
+			const focusable_elements = [
+				'a[href]',
+				'area[href]',
+				'button:not([disabled])',
+				'input:not([disabled]):not([type="hidden"])',
+				'select:not([disabled])',
+				'textarea:not([disabled])',
+				'iframe',
+				'object',
+				'embed',
+				'[tabindex]:not([tabindex="-1"])',
+				'[contenteditable="true"]',
+			].join( ', ' );
+
+			const get_tab_target_id = function ( $tab ) {
+				return ( $tab.attr( 'href' ) || '' ).replace( /^#/, '' );
+			};
+
+			const get_tab_panel = function ( $tab, $panel_wrap ) {
+				const target_id = get_tab_target_id( $tab );
+				if ( ! target_id ) {
+					return $();
+				}
+
+				const $panel = $( document.getElementById( target_id ) );
+				if (
+					$panel.length &&
+					$.contains( $panel_wrap.get( 0 ), $panel.get( 0 ) )
+				) {
+					return $panel;
+				}
+
+				return $();
+			};
+
+			const maybe_update_panel_tabindex = function ( $panel ) {
+				if ( $panel.find( focusable_elements ).length ) {
+					if ( $panel.data( 'wcTabpanelTabindex' ) ) {
+						$panel
+							.removeAttr( 'tabindex' )
+							.removeData( 'wcTabpanelTabindex' );
+					}
+					return;
+				}
+
+				$panel.attr( 'tabindex', '0' );
+				$panel.data( 'wcTabpanelTabindex', true );
+			};
+
+			// Wire each tab and panel up so extension tabs get the same semantics.
+			$( 'div.panel-wrap' ).each( function () {
+				const $panel_wrap = $( this );
+				$panel_wrap
+					.find( 'ul.wc-tabs' )
+					.attr( 'role', 'tablist' );
+				$panel_wrap
+					.find( 'ul.wc-tabs > li > a[href^="#"]' )
+					.each( function () {
+						const $tab = $( this );
+						const target_id = get_tab_target_id( $tab );
+						if ( ! target_id ) {
+							return;
+						}
+
+						if ( ! $tab.attr( 'id' ) ) {
+							$tab.attr( 'id', 'wc-tab-' + target_id );
+						}
+
+						$tab.parent().attr( 'role', 'presentation' );
+						$tab
+							.attr( 'role', 'tab' )
+							.attr( 'aria-controls', target_id )
+							.attr( 'aria-selected', 'false' )
+							.attr( 'tabindex', '-1' );
+
+						const $panel = get_tab_panel( $tab, $panel_wrap );
+						if ( $panel.length ) {
+							$panel
+								.attr( 'role', 'tabpanel' )
+								.attr( 'aria-labelledby', $tab.attr( 'id' ) );
+							maybe_update_panel_tabindex( $panel );
+						}
+					} );
+			} );
+
+			const activate_tab = function ( $tab ) {
+				if ( ! $tab || ! $tab.length ) {
+					return;
+				}
+				const $panel_wrap = $tab.closest( 'div.panel-wrap' );
+				const $panel = get_tab_panel( $tab, $panel_wrap );
+				if ( ! $panel.length ) {
+					return;
+				}
+
+				$panel_wrap.find( 'ul.wc-tabs li' ).removeClass( 'active' );
+				$panel_wrap.find( 'ul.wc-tabs a[role="tab"]' )
+					.attr( 'aria-selected', 'false' )
+					.attr( 'tabindex', '-1' );
+
+				$tab.parent().addClass( 'active' );
+				$tab.attr( 'aria-selected', 'true' ).attr( 'tabindex', '0' );
+
+				$panel_wrap.find( 'div.panel' ).hide();
+				$panel.show( 0, function () {
 					$( this ).trigger( 'woocommerce_tab_shown' );
 				} );
-			} );
+			};
+
+			$( 'ul.wc-tabs' )
+				.off( 'click.wc-tabbed-panels', 'a[href^="#"]' )
+				.on(
+					'click.wc-tabbed-panels',
+					'a[href^="#"]',
+					function ( e ) {
+						e.preventDefault();
+						const $tab = $( this );
+						activate_tab( $tab );
+					}
+				);
+
+			// Arrow-key navigation per WAI-ARIA APG tabs pattern. WC tabs are stacked
+			// vertically, so Up/Down move focus and activate; Home/End jump to ends.
+			$( 'ul.wc-tabs' )
+				.off( 'keydown.wc-tabbed-panels', 'a[role="tab"]' )
+				.on(
+					'keydown.wc-tabbed-panels',
+					'a[role="tab"]',
+					function ( e ) {
+						const $visible_tabs = $( this )
+							.closest( 'ul.wc-tabs' )
+							.find( 'li:visible > a[role="tab"]' );
+						if ( ! $visible_tabs.length ) {
+							return;
+						}
+						const current_index = $visible_tabs.index( this );
+						let target_index = null;
+
+						switch ( e.key ) {
+							case 'ArrowDown':
+							case 'Down':
+								target_index =
+									( current_index + 1 ) %
+									$visible_tabs.length;
+								break;
+							case 'ArrowUp':
+							case 'Up':
+								target_index =
+									( current_index -
+										1 +
+										$visible_tabs.length ) %
+									$visible_tabs.length;
+								break;
+							case 'Home':
+								target_index = 0;
+								break;
+							case 'End':
+								target_index = $visible_tabs.length - 1;
+								break;
+							default:
+								return;
+						}
+
+						e.preventDefault();
+						const $target = $visible_tabs.eq( target_index );
+						activate_tab( $target );
+						$target.trigger( 'focus' );
+					}
+				);
+
 			$( 'div.panel-wrap' ).each( function () {
-				$( this )
-					.find( 'ul.wc-tabs li' )
+				let $first_tab = $( this )
+					.find( 'ul.wc-tabs li:visible' )
 					.eq( 0 )
-					.find( 'a' )
-					.trigger( 'click' );
+					.find( 'a' );
+
+				if ( ! $first_tab.length ) {
+					$first_tab = $( this )
+						.find( 'ul.wc-tabs li' )
+						.eq( 0 )
+						.find( 'a' );
+				}
+
+				if ( ! $first_tab.length ) {
+					return;
+				}
+
+				$first_tab.trigger( 'click' );
 			} );
 		} )
 		.trigger( 'wc-init-tabbed-panels' );

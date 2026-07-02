@@ -59,8 +59,8 @@ test.describe( `${ blockData.slug } Block`, () => {
 		await test.step( `Disable reviews for ${ blockData.productSlug }`, async () => {
 			await page.goto( `/products/${ blockData.productSlug }` );
 			await page.click( 'text=Edit product' );
-			await page.getByRole( 'link', { name: 'Inventory' } ).click();
-			await page.getByRole( 'link', { name: 'Advanced' } ).click();
+			await page.getByRole( 'tab', { name: 'Inventory' } ).click();
+			await page.getByRole( 'tab', { name: 'Advanced' } ).click();
 			await page.waitForSelector( 'text=Enable reviews' );
 			await admin.page
 				.getByRole( 'checkbox', {
