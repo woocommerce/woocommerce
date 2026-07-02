@@ -28,7 +28,6 @@
 		},
 		"shadow": true,
 		"spacing": {
-			"blockGap": true,
 			"margin": true,
 			"__experimentalSkipSerialization": true
 		},
