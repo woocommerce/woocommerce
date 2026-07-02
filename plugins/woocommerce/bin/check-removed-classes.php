@@ -2,32 +2,23 @@
 /**
  * WooCommerce Removed Classes Checker
  *
- * Detects PHP classes, interfaces, traits and enums that exist in a previous
- * WooCommerce release but are missing from the current source tree.
- *
- * Removing a shipped class without a deprecation stub causes update-time fatal
- * errors: during an in-place update, code from the previous version that is
- * still loaded in memory (or a stale autoloader classmap) can reference the
- * class, and the autoloader then tries to require a file that no longer exists,
- * which is an uncatchable fatal. Shipped classes must be deprecated and kept as
- * stubs for at least one release before being removed.
+ * Detects PHP classes, interfaces, traits and enums that exist in a baseline tree
+ * but are missing from the current one. Removing a shipped class causes update-time
+ * fatal errors (stale code/classmaps from the previous version can still reference
+ * it during an in-place update), so shipped classes should be deprecated and kept
+ * as stubs for at least one release before removal.
  *
  * Usage:
  *   php check-removed-classes.php scan <plugin_root> <output.json>
  *   php check-removed-classes.php compare <old.json> <new.json> [<allowlist_file>]
  *
- * The 'scan' command writes a JSON map of fully qualified type name => file to
- * <output.json>. The 'compare' command exits with code 1 if any type present in
- * <old.json> is missing from <new.json> and not listed in the optional
- * <allowlist_file> (one fully qualified name per line, '#' comments allowed).
+ * 'scan' writes a JSON map of fully qualified type name => file. 'compare' exits 1
+ * if any type in <old.json> is missing from <new.json> and not in the optional
+ * <allowlist_file> (one name per line, '#' comments allowed).
  *
- * In CI (class-removal-check.yml) this compares a PR against its base branch, and
- * the author acknowledges intentional removals in the PR description. The script
- * also works against arbitrary baselines, e.g. to audit a release against the
- * previous one before shipping:
- *   php check-removed-classes.php scan /path/to/previous-release-checkout old.json
- *   php check-removed-classes.php scan plugins/woocommerce new.json
- *   php check-removed-classes.php compare old.json new.json
+ * CI (class-removal-check.yml) compares a PR against its base branch. The script
+ * also works against arbitrary baselines, e.g. auditing a release against the
+ * previous shipped version: scan both checkouts, then compare.
  *
  * @package WooCommerce
  */

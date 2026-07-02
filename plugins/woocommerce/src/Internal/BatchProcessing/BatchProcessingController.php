@@ -579,8 +579,7 @@ class BatchProcessingController {
 			return;
 		}
 
-		// Processor class names stored in the database can't be reliably autoloaded while an update
-		// is swapping the plugin files; skip the cleanup, it will run again on the next request.
+		// Stored processor class names can't be reliably autoloaded mid-update; the cleanup reruns next request.
 		if ( ! is_null( $this->update_detection ) && $this->update_detection->is_update_in_progress() ) {
 			$this->update_detection->log_suppressed_work( 'batch_processing_shutdown_cleanup' );
 			return;

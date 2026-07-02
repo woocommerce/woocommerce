@@ -275,9 +275,8 @@ class AssetDataRegistry {
 			try {
 				$this->data[ $key ] = $callback();
 			} catch ( \Throwable $throwable ) {
-				// A failing callback degrades to a missing data key instead of fataling the whole page.
-				// This cannot catch a stale-classmap require of a deleted file; that case is prevented
-				// by the update-window skip in enqueue_asset_data().
+				// A stale-classmap require of a deleted file is not catchable; that case is
+				// handled by the update-window skip in enqueue_asset_data().
 				$update_detection = $this->get_update_detection();
 				if ( $update_detection ) {
 					$update_detection->log_suppressed_work( 'asset_data_registry:' . $key, $throwable );
@@ -287,8 +286,7 @@ class AssetDataRegistry {
 	}
 
 	/**
-	 * Get the UpdateDetection instance, or null if it cannot be resolved.
-	 * Failures resolving the guard must never break asset data output.
+	 * Get the UpdateDetection instance, or null if it cannot be resolved (the guard must never break asset output).
 	 *
 	 * @return UpdateDetection|null The UpdateDetection instance or null.
 	 */
@@ -424,8 +422,7 @@ class AssetDataRegistry {
 
 			$update_detection = $this->get_update_detection();
 			if ( $update_detection && $update_detection->is_update_in_progress() ) {
-				// Executing the lazy callbacks mid-update can autoload classes from a half-swapped
-				// file state and fatal; skip them for this request, the next one will hydrate fully.
+				// Lazy callbacks can fatal on autoload mid-update; the next request hydrates fully.
 				$update_detection->log_suppressed_work( 'asset_data_registry_lazy_data' );
 			} else {
 				$this->execute_lazy_data();

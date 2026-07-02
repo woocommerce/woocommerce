@@ -182,8 +182,7 @@ class Api {
 		if ( ! $this->script_data_modified ) {
 			return;
 		}
-		// Script data computed while an update is swapping the plugin files may mix old and new
-		// asset state; don't persist it, the next request will rebuild it consistently.
+		// Don't persist script data computed mid-update; it may mix old and new asset state.
 		if ( $this->is_woocommerce_update_in_progress() ) {
 			return;
 		}

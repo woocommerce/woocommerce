@@ -1,10 +1,8 @@
 name: Class Removal Check
 
-# Fails when a PHP class/interface/trait/enum declared on the base branch is missing from
-# the PR result, unless the author explicitly acknowledges the removal in the PR description.
-# Removing shipped classes without a deprecation-stub window causes fatal errors during
-# in-place updates, because code from the previous version can still reference them while
-# the plugin files are being swapped on disk.
+# Fails when a type declared on the base branch is missing from the PR result, unless the
+# author acknowledges the removal in the PR description. Removing shipped classes causes
+# fatal errors during in-place updates (stale code/classmaps can still reference them).
 on:
   pull_request:
     paths:

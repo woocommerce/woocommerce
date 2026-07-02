@@ -62,9 +62,7 @@ class Init {
 	public function rest_api_init() {
 		$update_detection = $this->get_update_detection();
 		if ( $update_detection && $update_detection->is_update_in_progress() ) {
-			// Registering controllers mid-update can load classes from a half-swapped file state,
-			// including requires of files that no longer exist, which fatal uncatchably.
-			// Skip registration for this request; the next request will register normally.
+			// Registration can fatal uncatchably on autoload mid-update; the next request registers normally.
 			$update_detection->log_suppressed_work( 'wc_admin_rest_controllers' );
 			return;
 		}
@@ -222,10 +220,7 @@ class Init {
 
 	/**
 	 * Instantiate the given controller class names and register their routes.
-	 *
-	 * Controllers whose classes cannot be loaded (e.g. added via the
-	 * 'woocommerce_admin_rest_controllers' filter by an extension that is mid-update)
-	 * are skipped and logged instead of fataling the whole REST registration.
+	 * Controllers whose classes cannot be loaded are skipped and logged instead of fataling.
 	 *
 	 * @param array $controllers List of fully qualified controller class names.
 	 */
@@ -248,8 +243,7 @@ class Init {
 	}
 
 	/**
-	 * Get the UpdateDetection instance, or null if it cannot be resolved.
-	 * Failures resolving the guard must never break REST registration.
+	 * Get the UpdateDetection instance, or null if it cannot be resolved (the guard must never break REST registration).
 	 *
 	 * @return UpdateDetection|null The UpdateDetection instance or null.
 	 */

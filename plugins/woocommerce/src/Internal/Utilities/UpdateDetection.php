@@ -7,25 +7,15 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
- * Detects requests that are running with a mixed old-code/new-files state.
+ * Detects requests running with a mixed old-code/new-files state: an in-place update
+ * has swapped the plugin files on disk while the loaded code and autoloader classmap
+ * still belong to the previous version. Autoloading is unreliable in that state, so
+ * deferrable late work (footer hooks, 'shutdown', REST registration) should consult
+ * 'is_update_in_progress' and skip for the remainder of the request.
  *
- * When WooCommerce is updated in place, WordPress swaps the plugin files on disk
- * mid-request while the code already loaded in memory (and any per-request autoloader
- * classmap snapshot) still belongs to the previous version. Code that runs late in
- * such a request — footer hooks, 'shutdown', REST controller registration — can then
- * reference classes that the stale classmap cannot resolve (new classes) or whose
- * files no longer exist (removed classes), producing fatal errors.
- *
- * This class provides a signal ('is_update_in_progress') that deferrable late work
- * can consult in order to skip execution for the remainder of the request. Two
- * detection mechanisms are used:
- *
- * - The 'upgrader_pre_install' and 'upgrader_process_complete' hooks, which cover the
- *   request that performs the update itself.
- * - A comparison of the plugin version on disk against the loaded code version, which
- *   covers requests served by still-warm PHP workers (e.g. with a stale opcache) after
- *   the update happened in another process. This check is admin-only, since all known
- *   failure paths are admin-side and it involves a file read.
+ * Detection uses the upgrader hooks (covers the request performing the update) and an
+ * admin-only disk-vs-loaded version comparison (covers still-warm workers after an
+ * update in another process).
  *
  * @since 11.0.0
  */
@@ -79,8 +69,7 @@ class UpdateDetection implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Handler for the 'upgrader_pre_install' filter. Flags the start of a WooCommerce update
-	 * so that late-request work can be suppressed before the files are swapped on disk.
+	 * Handler for the 'upgrader_pre_install' filter: flags the start of a WooCommerce update.
 	 *
 	 * @param bool|\WP_Error $response The installation response before the installation has started.
 	 * @param array          $hook_extra Extra arguments passed to hooked filters.
@@ -96,9 +85,8 @@ class UpdateDetection implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Handler for the 'upgrader_process_complete' action. Flags the completion of a WooCommerce
-	 * update: from this point until the end of the request the files on disk belong to the new
-	 * version while the loaded code is still the old one.
+	 * Handler for the 'upgrader_process_complete' action: flags that a WooCommerce update
+	 * just swapped the files in this request.
 	 *
 	 * @param \WP_Upgrader $upgrader The upgrader instance that performed the update.
 	 * @param array        $hook_extra Extra information about the update process.
@@ -112,12 +100,8 @@ class UpdateDetection implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Whether the current request may be running with plugin files that don't match the loaded code.
-	 *
-	 * True when a WooCommerce update has started or completed within this request, or (in admin
-	 * requests) when the plugin version on disk differs from the version of the loaded code.
-	 * Deferrable work hooked late in the request should skip execution when this returns true:
-	 * class autoloading is unreliable in this state and can produce fatal errors.
+	 * Whether the current request may be running with plugin files that don't match the
+	 * loaded code. Deferrable late work should skip execution when this returns true.
 	 *
 	 * @return bool True if an update window is active for this request.
 	 */
@@ -126,8 +110,8 @@ class UpdateDetection implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Log that deferrable work was skipped or failed during an update window, throttled to one
-	 * entry per context per hour to avoid flooding logs while a stale cache window persists.
+	 * Log that deferrable work was skipped or failed during an update window,
+	 * throttled to one entry per context per hour.
 	 *
 	 * @param string          $context Identifier of the work that was skipped, e.g. 'asset_data_registry:someDataKey'.
 	 * @param \Throwable|null $throwable The error that was caught, if the work failed rather than being skipped.
@@ -160,9 +144,7 @@ class UpdateDetection implements RegisterHooksInterface {
 
 	/**
 	 * Whether the WooCommerce version on disk differs from the loaded code version.
-	 *
-	 * Only computed for admin requests, and only once per request: the result is memoized,
-	 * so consulting the guard from multiple late hooks costs a single file read at most.
+	 * Admin-only and memoized, so it costs at most one file read per request.
 	 *
 	 * @return bool True if the on-disk version differs (or could not be read).
 	 */
