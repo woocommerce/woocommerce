@@ -408,10 +408,18 @@ final class RenewalEngine {
 		}
 
 		// Claim the target cycle - the authoritative idempotency gate, ahead of any order lookup.
+		$reclaimed = false;
 		if ( $cycle_count === $head_count + 1 ) {
 			$cycle = $this->claim_advance( $contract, $head, $cycle_count, $now );
+			if ( null === $cycle ) {
+				// The append collided: this number was already claimed by an earlier or
+				// concurrent run. Take over a stalled claim, or skip a live one.
+				$cycle     = $this->reclaim_head( $contract_id, $cycle_count, $now );
+				$reclaimed = null !== $cycle;
+			}
 		} elseif ( $cycle_count === $head_count ) {
-			$cycle = $this->reclaim_head( $contract_id, $cycle_count, $now );
+			$cycle     = $this->reclaim_head( $contract_id, $cycle_count, $now );
+			$reclaimed = null !== $cycle;
 		} else {
 			throw new RenewalNotProcessable(
 				esc_html( sprintf( 'cycle %d is not adjacent to head cycle %d - refusing to bill a gap.', $cycle_count, $head_count ) )
@@ -424,8 +432,11 @@ final class RenewalEngine {
 
 		// Reconcile the order AFTER the claim: reuse the one linked or tagged for this cycle, or
 		// build one. The cycle being settled is the price + period authority; a reclaimed cycle
-		// carries its OWN stored total, so the order bills that, never a freshly-computed next period.
-		$renewal_order = $this->find_renewal_order_for_cycle( $cycle );
+		// carries its OWN stored total, so the order bills that, never a freshly-computed next
+		// period. A cycle appended by THIS run cannot have an order yet - order work strictly
+		// follows the claim - so the lookup (and its meta scan) runs only for a reclaimed cycle,
+		// where an earlier attempt may have left one.
+		$renewal_order = $reclaimed ? $this->find_renewal_order_for_cycle( $cycle ) : null;
 		$order_created = false;
 		if ( null === $renewal_order ) {
 			$renewal_order = $this->build_renewal_order( $contract, $cycle );
@@ -509,15 +520,16 @@ final class RenewalEngine {
 	/**
 	 * Claim the head's successor cycle as the create-as-claim: resolve the cadence, compute the
 	 * new `pending` cycle one period past the head, stamp a crash-recovery lease, and insert it.
-	 * On a UNIQUE(contract_id, kind, count) collision a concurrent worker already appended this
-	 * number - {@see self::reclaim_head()} reclaims it when its lease has expired or skips a live
-	 * claim.
+	 * Returns ONLY a freshly appended cycle - on a UNIQUE(contract_id, kind, count) collision
+	 * (another worker already appended this number) it returns null and the caller routes
+	 * through {@see self::reclaim_head()}. Keeping the fresh/reclaimed distinction at the caller
+	 * lets it skip order lookups a brand-new cycle cannot need.
 	 *
 	 * @param Contract          $contract    The contract being renewed.
 	 * @param Cycle             $head        The chain's head cycle (the new cycle's predecessor).
 	 * @param int               $cycle_count The chargeable number to append (the head's successor).
 	 * @param DateTimeImmutable $now         The processing moment (the lease clock).
-	 * @return Cycle|null The claimed (or reclaimed) pending cycle, or null when the claim is held.
+	 * @return Cycle|null The freshly appended pending cycle, or null on an append collision.
 	 * @throws RenewalNotProcessable When the billing plan cannot be resolved (a deleted plan).
 	 */
 	private function claim_advance( Contract $contract, Cycle $head, int $cycle_count, DateTimeImmutable $now ): ?Cycle {
@@ -545,9 +557,9 @@ final class RenewalEngine {
 		try {
 			$this->contracts->append_cycle( $new_cycle, $head );
 		} catch ( Throwable $e ) {
-			// A duplicate (contract_id, kind, count) is rejected by the UNIQUE index: a
-			// concurrent worker already appended this number. Reclaim a stalled one or skip.
-			return $this->reclaim_head( (int) $contract->get_id(), $cycle_count, $now );
+			// A duplicate (contract_id, kind, count) is rejected by the UNIQUE index: another
+			// worker already appended this number. Null routes the caller to the reclaim path.
+			return null;
 		}
 
 		return $new_cycle;
@@ -1060,7 +1072,9 @@ final class RenewalEngine {
 
 	/**
 	 * The renewal order for `$cycle`, or null when none exists - the reuse lookup the
-	 * post-claim order reconciliation runs.
+	 * post-claim order reconciliation runs for a RECLAIMED cycle only. A freshly appended
+	 * cycle skips it entirely (no order can exist before its claim), which keeps the meta
+	 * scan below off the every-renewal path.
 	 *
 	 * The cycle's own `order_id` reference resolves directly (we already hold the row, and the
 	 * link is stamped at order creation). The meta search is the fallback for a cycle that was

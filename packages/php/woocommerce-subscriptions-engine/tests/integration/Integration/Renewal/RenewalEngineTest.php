@@ -1295,6 +1295,42 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox a fresh claim builds its own order and never adopts a pre-tagged stray.
+	 *
+	 * The order lookup runs only for a reclaimed cycle: a cycle appended by this run cannot
+	 * have an order yet, so the every-renewal path skips the meta scan - and an anomalous
+	 * stray order carrying matching renewal meta (no cycle was ever claimed for it) is not
+	 * adopted or charged.
+	 */
+	public function test_a_fresh_claim_builds_its_own_order_and_ignores_a_pre_tagged_stray(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		// A stray order tagged for the not-yet-claimed cycle 2 (a data anomaly: order work
+		// always follows the claim, so nothing legitimate produces this).
+		$stray = $this->make_ghost_renewal_order( $contract_id, 2, false );
+
+		$renewal_order = ( new RenewalEngine() )->process_due( $contract_id );
+
+		$this->assertInstanceOf( WC_Order::class, $renewal_order );
+		$this->assertNotSame( $stray->get_id(), $renewal_order->get_id(), 'The fresh claim does not adopt the stray.' );
+		$this->assertTrue( $renewal_order->is_paid() );
+
+		$head = ( new ContractRepository() )->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertSame( 2, $head->get_count() );
+		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertSame( $renewal_order->get_id(), $head->get_order_id(), 'The cycle is linked to its own order, not the stray.' );
+
+		$stray_after = wc_get_order( $stray->get_id() );
+		$this->assertInstanceOf( WC_Order::class, $stray_after );
+		$this->assertFalse( $stray_after->is_paid(), 'The stray order is never charged.' );
+	}
+
+	/**
 	 * @testdox complete_from_order settles once: repeats move no dates and re-fire no actions.
 	 */
 	public function test_complete_from_order_settles_the_schedule_once_when_invoked_repeatedly(): void {
