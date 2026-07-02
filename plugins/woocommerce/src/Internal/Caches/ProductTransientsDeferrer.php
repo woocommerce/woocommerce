@@ -14,6 +14,13 @@ use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 class ProductTransientsDeferrer {
 
 	/**
+	 * Shutdown priority used to flush deferred product transients before product sync callbacks.
+	 *
+	 * @var int
+	 */
+	public const SHUTDOWN_PRIORITY = 9;
+
+	/**
 	 * The product utility instance.
 	 *
 	 * @var ProductUtil
@@ -54,7 +61,7 @@ class ProductTransientsDeferrer {
 	public function start_deferring(): void {
 		++$this->deferral_level;
 		if ( 1 === $this->deferral_level ) {
-			add_action( 'shutdown', array( $this, 'handle_shutdown' ) );
+			add_action( 'shutdown', array( $this, 'handle_shutdown' ), self::SHUTDOWN_PRIORITY );
 		}
 	}
 
@@ -72,7 +79,7 @@ class ProductTransientsDeferrer {
 
 		--$this->deferral_level;
 		if ( 0 === $this->deferral_level ) {
-			remove_action( 'shutdown', array( $this, 'handle_shutdown' ) );
+			remove_action( 'shutdown', array( $this, 'handle_shutdown' ), self::SHUTDOWN_PRIORITY );
 			$this->flush();
 		}
 	}
