@@ -1043,16 +1043,31 @@ final class RenewalEngine {
 	 * starve healthy renewals. A no-op when the contract is gone. A repair (fixing the
 	 * underlying data and rescheduling) re-arms it.
 	 *
+	 * Best-effort, never throws: parking protects the scan, it is not a correctness requirement,
+	 * and it runs inside the dispatcher's per-contract error handling - a failure here (the row
+	 * vanished mid-park, a write error) must not stall the rest of the batch. On failure the
+	 * contract simply stays due and the park is re-attempted next tick.
+	 *
 	 * @param int $contract_id The contract to remove from the due set.
 	 */
 	public function park( int $contract_id ): void {
-		$contract = $this->contracts->find( $contract_id );
-		if ( null === $contract ) {
-			return;
-		}
+		try {
+			$contract = $this->contracts->find( $contract_id );
+			if ( null === $contract ) {
+				return;
+			}
 
-		$contract->set_next_payment_gmt( null );
-		$this->contracts->update( $contract );
+			$contract->set_next_payment_gmt( null );
+			$this->contracts->update( $contract );
+		} catch ( Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'RenewalEngine::park(): failed to park contract %d - %s', $contract_id, $e->getMessage() ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => $contract_id,
+				)
+			);
+		}
 	}
 
 	/**
