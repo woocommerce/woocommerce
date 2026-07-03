@@ -96,6 +96,18 @@ final class Subscriptions {
 	}
 
 	/**
+	 * Count a single customer's subscription contracts - the collection-total companion
+	 * to {@see self::list_for_customer()}, so a paging consumer (the REST collection
+	 * headers) can report totals for the same owner-scoped result set.
+	 *
+	 * @param int $customer_id Owning customer id.
+	 * @return int Number of contracts the customer owns.
+	 */
+	public static function count_for_customer( int $customer_id ): int {
+		return ( new ContractRepository() )->count_by_customer_id( $customer_id );
+	}
+
+	/**
 	 * Fetch a contract a customer owns - the customer portal's ownership-checked read.
 	 *
 	 * Returns null for BOTH an unknown id AND a contract owned by another customer (the

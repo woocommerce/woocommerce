@@ -155,6 +155,39 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( $mine, $rows[0]['id'] );
 	}
 
+	public function test_list_serves_the_embed_row_representation_with_totals_headers(): void {
+		wp_set_current_user( $this->owner_id );
+		$this->seed( $this->owner_id );
+		$this->seed( $this->owner_id );
+
+		$response = rest_get_server()->dispatch( new WP_REST_Request( 'GET', self::BASE ) );
+
+		$this->assertSame( 200, $response->get_status() );
+
+		$headers = $response->get_headers();
+		$this->assertSame( '2', (string) ( $headers['X-WP-Total'] ?? '' ) );
+		$this->assertSame( '1', (string) ( $headers['X-WP-TotalPages'] ?? '' ) );
+
+		$rows = $this->data_array( $response );
+		$this->assertIsArray( $rows[0] );
+		// The embed (list-row) representation: row fields present, detail-only absent.
+		foreach ( array( 'id', 'status', 'status_label', 'next_payment', 'payment_method_title', 'total' ) as $key ) {
+			$this->assertArrayHasKey( $key, $rows[0], "list row is missing '{$key}'" );
+		}
+		$this->assertArrayNotHasKey( 'related_orders', $rows[0] );
+	}
+
+	public function test_options_exposes_the_item_schema(): void {
+		wp_set_current_user( $this->owner_id );
+
+		$response = rest_get_server()->dispatch( new WP_REST_Request( 'OPTIONS', self::BASE ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $this->data_array( $response );
+		$this->assertIsArray( $data['schema'] );
+		$this->assertSame( 'subscription_engine_contract', $data['schema']['title'] );
+	}
+
 	public function test_hold_action_on_a_foreign_contract_is_not_found(): void {
 		wp_set_current_user( $this->other_id );
 		$id = $this->seed( $this->owner_id );

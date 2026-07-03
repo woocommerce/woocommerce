@@ -53,16 +53,8 @@ final class Bootstrap {
 		// boot (not just activation) so the hooks can fire.
 		( new RenewalEngine() )->register_hooks();
 		PlansController::register_hooks();
+		ContractsController::register_hooks();
 		( new RenewalDispatcher() )->register_hooks();
-
-		// Register the customer-portal REST routes. Routes must be registered on
-		// `rest_api_init`, where core gathers them for the live server.
-		add_action(
-			'rest_api_init',
-			static function (): void {
-				( new ContractsController() )->register_routes();
-			}
-		);
 
 		// Deferred boot work, each on the most specific moment it needs: the schema install
 		// reads options and runs dbDelta, so it waits for `init`; the recurring-action
