@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
  * Replace a page title with the endpoint title.
  *
  * @param  string $title   Post title.
- * @param  int    $post_id Optional. The post ID the title belongs to. Passed by the `the_title` filter.
+ * @param  int    $post_id Optional. The post ID the title belongs to. Passed by the `the_title` filter. Defaults to 0 for backwards compatibility with callers that pass only the title, in which case the queried-object check is skipped (matching the original single-argument behaviour).
  * @return string
  */
 function wc_page_endpoint_title( $title, $post_id = 0 ) {
