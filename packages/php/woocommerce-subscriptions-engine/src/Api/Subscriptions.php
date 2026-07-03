@@ -89,12 +89,15 @@ final class Subscriptions {
 	}
 
 	/**
-	 * Run the contract's renewal now (advance the billing chain a cycle).
+	 * Renew the contract now on an admin's request, regardless of the schedule. A settled cycle
+	 * is billed ahead of its due date (the period continues from the previous end, so the schedule
+	 * is preserved); a failed cycle is retried. Returns null when the contract is not renewable
+	 * (no chain, awaiting a gateway, or inactive).
 	 *
 	 * @param int $contract_id Contract id.
 	 * @return WC_Order|null The renewal order, or null when the renewal was skipped.
 	 */
 	public static function renew_now( int $contract_id ): ?WC_Order {
-		return ( new RenewalEngine() )->process_due( $contract_id );
+		return ( new RenewalEngine() )->renew_now( $contract_id );
 	}
 }

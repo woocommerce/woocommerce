@@ -119,7 +119,7 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 		$this->assertNotNull( $contract_id );
 
 		$repo  = new ContractRepository();
-		$cycle = $repo->find_current_cycle( $contract_id );
+		$cycle = $repo->find_chain_head( $contract_id );
 
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( Cycle::KIND_BILLING, $cycle->get_kind() );
@@ -202,7 +202,7 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 		$this->assertNotNull( $contract_id );
 
 		// Cycle 1's period end matches that first renewal date.
-		$cycle = ( new ContractRepository() )->find_current_cycle( $contract_id );
+		$cycle = ( new ContractRepository() )->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( '2026-01-29 00:00:00', $cycle->get_ends_at_gmt() );
 	}
@@ -229,7 +229,7 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
-		$cycle = ( new ContractRepository() )->find_current_cycle( $contract_id );
+		$cycle = ( new ContractRepository() )->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( '49.00000000', $cycle->get_expected_total() );
 		$this->assertSame( '2026-12-01 00:00:00', $cycle->get_ends_at_gmt() );

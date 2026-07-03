@@ -47,10 +47,10 @@ class WC_Geolocation {
 	 * @var array
 	 */
 	private static $ip_lookup_apis = array(
-		'ipify'  => 'http://api.ipify.org/',
-		'ipecho' => 'http://ipecho.net/plain',
-		'ident'  => 'http://ident.me',
-		'tnedi'  => 'http://tnedi.me',
+		'ipify'  => 'https://api.ipify.org/',
+		'ipecho' => 'https://ipecho.net/plain',
+		'ident'  => 'https://ident.me',
+		'tnedi'  => 'https://tnedi.me',
 	);
 
 	/**
@@ -60,7 +60,7 @@ class WC_Geolocation {
 	 */
 	private static $geoip_apis = array(
 		'ipinfo.io'  => 'https://ipinfo.io/%s/json',
-		'ip-api.com' => 'http://ip-api.com/json/%s',
+		'country.is' => 'https://api.country.is/%s',
 	);
 
 	/**
@@ -310,10 +310,12 @@ class WC_Geolocation {
 				if ( ! is_wp_error( $response ) && $response['body'] ) {
 					switch ( $service_name ) {
 						case 'ipinfo.io':
+						case 'country.is':
 							$data         = json_decode( $response['body'] );
 							$country_code = isset( $data->country ) ? $data->country : '';
 							break;
 						case 'ip-api.com':
+							// Not a default provider (HTTP-only), but retained so extensions that re-add it via the woocommerce_geolocation_geoip_apis filter keep working.
 							$data         = json_decode( $response['body'] );
 							$country_code = isset( $data->countryCode ) ? $data->countryCode : ''; // @codingStandardsIgnoreLine
 							break;

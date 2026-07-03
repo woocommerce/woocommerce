@@ -7,7 +7,7 @@ import { settingsStore } from '@woocommerce/data';
 import { useState, useCallback, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 // @ts-expect-error - We need to use this /wp see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/#dataviews
-import { View } from '@wordpress/dataviews/wp'; // eslint-disable-line @woocommerce/dependency-group
+import { View } from '@wordpress/dataviews/wp';
 
 /**
  * Internal dependencies
