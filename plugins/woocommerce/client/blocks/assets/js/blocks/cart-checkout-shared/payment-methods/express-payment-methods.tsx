@@ -21,11 +21,11 @@ import {
 	ConfigOf,
 	CurriedSelectorsOf,
 } from '@wordpress/data/build-types/types';
+import { paymentStore } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
  */
-import { STORE_KEY as PAYMENT_STORE_KEY } from '@woocommerce/block-data/payment/constants';
 import type { PaymentStoreDescriptor } from '@woocommerce/block-data/payment';
 import PaymentMethodErrorBoundary from './payment-method-error-boundary';
 import { useExpressPaymentContext } from '../../cart-checkout-shared/payment-methods/express-payment/express-payment-context';
@@ -48,7 +48,7 @@ const ExpressPaymentMethods = () => {
 	const { activePaymentMethod, paymentMethodData } = useSelect(
 		( select ) => {
 			const store = select(
-				PAYMENT_STORE_KEY
+				paymentStore
 			) as CurriedSelectorsOf< PaymentStoreDescriptor >;
 			return {
 				activePaymentMethod: store.getActivePaymentMethod(),
@@ -63,7 +63,7 @@ const ExpressPaymentMethods = () => {
 		__internalSetPaymentError,
 		__internalSetPaymentMethodData,
 		__internalSetExpressPaymentError,
-	} = useDispatch( PAYMENT_STORE_KEY ) as ActionCreatorsOf<
+	} = useDispatch( paymentStore ) as ActionCreatorsOf<
 		ConfigOf< PaymentStoreDescriptor >
 	>;
 	const { paymentMethods } = useExpressPaymentMethods();

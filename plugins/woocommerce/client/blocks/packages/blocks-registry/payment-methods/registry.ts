@@ -16,11 +16,11 @@ import {
 	ConfigOf,
 	DispatchReturn,
 } from '@wordpress/data/build-types/types';
+import { paymentStore } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
  */
-import { STORE_KEY as PAYMENT_STORE_KEY } from '@woocommerce/block-data/payment/constants';
 import type { PaymentStoreDescriptor } from '@woocommerce/block-data/payment';
 import { default as PaymentMethodConfig } from './payment-method-config';
 import { default as ExpressPaymentMethodConfig } from './express-payment-method-config';
@@ -123,7 +123,7 @@ export const __experimentalDeRegisterPaymentMethod = (
 	const {
 		__internalRemoveAvailablePaymentMethod,
 	}: DispatchReturn< PaymentStoreDescriptor > = dispatch(
-		PAYMENT_STORE_KEY
+		paymentStore
 	) as ActionCreatorsOf< ConfigOf< PaymentStoreDescriptor > >;
 	__internalRemoveAvailablePaymentMethod( paymentMethodName );
 };
@@ -133,7 +133,7 @@ export const __experimentalDeRegisterExpressPaymentMethod = (
 ): void => {
 	delete expressPaymentMethods[ paymentMethodName ];
 	const { __internalRemoveAvailableExpressPaymentMethod } = dispatch(
-		PAYMENT_STORE_KEY
+		paymentStore
 	) as ActionCreatorsOf< ConfigOf< PaymentStoreDescriptor > >;
 	__internalRemoveAvailableExpressPaymentMethod( paymentMethodName );
 };
