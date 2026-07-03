@@ -21,6 +21,13 @@ import WoocommerceShippingItem from './woocommerce-shipping-item';
 import './shipping-recommendations.scss';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
 
+type ShippingRecommendationsMarketplaceLinkProps = {
+	textProps?: {
+		as?: string;
+		className?: string;
+	};
+};
+
 export const useInstallPlugin = () => {
 	const [ pluginsBeingSetup, setPluginsBeingSetup ] = useState<
 		Array< string >
@@ -94,6 +101,24 @@ export const useInstallPlugin = () => {
 	] as const;
 };
 
+export const ShippingRecommendationsMarketplaceLink = ( {
+	textProps,
+}: ShippingRecommendationsMarketplaceLinkProps ) => (
+	<TrackedLink
+		textProps={ textProps }
+		message={ __(
+			// translators: {{Link}} is a placeholder for a html element.
+			'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
+			'woocommerce'
+		) }
+		targetUrl={ getAdminLink(
+			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
+		) }
+		linkType="wc-admin"
+		eventName="settings_shipping_recommendation_visit_marketplace_click"
+	/>
+);
+
 export const ShippingRecommendationsList = ( {
 	children,
 }: {
@@ -126,18 +151,7 @@ export const ShippingRecommendationsList = ( {
 			) ) }
 		</ul>
 		<CardFooter>
-			<TrackedLink
-				message={ __(
-					// translators: {{Link}} is a placeholder for a html element.
-					'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
-					'woocommerce'
-				) }
-				targetUrl={ getAdminLink(
-					'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
-				) }
-				linkType="wc-admin"
-				eventName="settings_shipping_recommendation_visit_marketplace_click"
-			/>
+			<ShippingRecommendationsMarketplaceLink />
 		</CardFooter>
 	</DismissableList>
 );

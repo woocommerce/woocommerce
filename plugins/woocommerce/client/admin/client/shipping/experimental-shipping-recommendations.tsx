@@ -7,6 +7,7 @@ import {
 	pluginsStore,
 	settingsStore,
 	onboardingStore,
+	optionsStore,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -18,6 +19,7 @@ import WooCommerceShippingItem from './experimental-woocommerce-shipping-item';
 import ShipStationItem from './shipstation-item';
 import PacklinkItem from './packlink-item';
 import {
+	ShippingRecommendationsMarketplaceLink,
 	ShippingRecommendationsList,
 	useInstallPlugin,
 } from './shipping-recommendations';
@@ -25,6 +27,9 @@ import './shipping-recommendations.scss';
 import { ShippingTour } from '../guided-tours/shipping-tour';
 
 type ExtensionId = 'woocommerce-shipping' | 'shipstation' | 'packlink';
+
+const SHIPPING_RECOMMENDATIONS_DISMISS_OPTION =
+	'woocommerce_settings_shipping_recommendations_hidden';
 
 const COUNTRY_EXTENSIONS_MAP: Record< string, ExtensionId[] > = {
 	US: [ 'woocommerce-shipping', 'shipstation' ],
@@ -58,6 +63,7 @@ const ShippingRecommendations = () => {
 		activePlugins,
 		countryCode,
 		isSellingDigitalProductsOnly,
+		isRecommendationsHidden,
 	} = useSelect( ( select ) => {
 		const settings = select( settingsStore ).getSettings( 'general' );
 
@@ -67,6 +73,8 @@ const ShippingRecommendations = () => {
 		const profileItems =
 			select( onboardingStore ).getProfileItems()?.product_types;
 
+		const { getOption } = select( optionsStore );
+
 		return {
 			installedPlugins: getInstalledPlugins(),
 			activePlugins: getActivePlugins(),
@@ -75,6 +83,8 @@ const ShippingRecommendations = () => {
 			),
 			isSellingDigitalProductsOnly:
 				profileItems?.length === 1 && profileItems[ 0 ] === 'downloads',
+			isRecommendationsHidden:
+				getOption( SHIPPING_RECOMMENDATIONS_DISMISS_OPTION ) === 'yes',
 		};
 	}, [] );
 
@@ -92,13 +102,16 @@ const ShippingRecommendations = () => {
 		? []
 		: extensionsForCountry;
 
+	const shouldShowRecommendations =
+		! isRecommendationsHidden && visibleExtensions.length > 0;
+
 	const visiblePluginSlugs = visibleExtensions
 		.map( ( ext ) => EXTENSION_PLUGIN_SLUGS[ ext ] )
 		.join( ',' );
 
 	const impressionFired = useRef( false );
 	useEffect( () => {
-		if ( visibleExtensions.length > 0 && ! impressionFired.current ) {
+		if ( shouldShowRecommendations && ! impressionFired.current ) {
 			recordEvent( 'shipping_partner_impression', {
 				context: 'settings',
 				country: normalizedCountry,
@@ -106,14 +119,21 @@ const ShippingRecommendations = () => {
 			} );
 			impressionFired.current = true;
 		}
-	}, [ visibleExtensions.length, normalizedCountry, visiblePluginSlugs ] );
+	}, [ shouldShowRecommendations, normalizedCountry, visiblePluginSlugs ] );
 
-	if ( isSellingDigitalProductsOnly ) {
-		return <ShippingTour showShippingRecommendationsStep={ false } />;
-	}
-
-	if ( visibleExtensions.length === 0 ) {
-		return <ShippingTour showShippingRecommendationsStep={ false } />;
+	if ( ! shouldShowRecommendations ) {
+		return (
+			<>
+				<ShippingTour showShippingRecommendationsStep={ false } />
+				<ShippingRecommendationsMarketplaceLink
+					textProps={ {
+						as: 'p',
+						className:
+							'woocommerce-recommended-shipping__fallback-link',
+					} }
+				/>
+			</>
+		);
 	}
 
 	return (

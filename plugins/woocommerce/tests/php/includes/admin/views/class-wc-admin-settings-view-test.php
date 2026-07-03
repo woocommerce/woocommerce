@@ -61,169 +61,20 @@ class WC_Admin_Settings_View_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not render the generic shipping marketplace link when shipping recommendations can be shown.
+	 * @testdox Should not render the generic shipping marketplace link on Shipping settings.
 	 */
-	public function test_shipping_marketplace_link_is_hidden_when_shipping_recommendations_can_be_shown(): void {
-		$this->enabled_admin_features_mock = array( 'shipping-smart-defaults' );
-
+	public function test_shipping_marketplace_link_is_not_rendered_on_shipping_settings(): void {
 		$output = $this->render_settings_view( 'shipping' );
 
 		$this->assertStringNotContainsString(
-			'data-settings-tab="shipping"',
+			'wc-settings-marketplace-link',
 			$output,
-			'The generic Shipping settings marketplace link should not duplicate the richer shipping recommendations card.'
+			'Shipping settings marketplace fallback links are rendered by the shipping recommendations component.'
 		);
 		$this->assertStringNotContainsString(
 			'shipping-delivery-and-fulfillment',
 			$output,
-			'The generic Shipping settings marketplace URL should not be rendered when shipping recommendations are shown.'
-		);
-	}
-
-	/**
-	 * @testdox Should render the generic shipping marketplace link when marketplace suggestions are disabled.
-	 */
-	public function test_shipping_marketplace_link_is_rendered_when_marketplace_suggestions_are_disabled(): void {
-		$this->enabled_admin_features_mock = array( 'shipping-smart-defaults' );
-		update_option( 'woocommerce_show_marketplace_suggestions', 'no' );
-
-		$output = $this->render_settings_view( 'shipping' );
-
-		$this->assertStringContainsString(
-			'data-settings-tab="shipping"',
-			$output,
-			'The generic Shipping settings marketplace link should remain when the shipping recommendations card is not rendered.'
-		);
-		$this->assertStringContainsString(
-			'shipping-delivery-and-fulfillment',
-			$output,
-			'The generic Shipping settings marketplace URL should remain when marketplace suggestions are disabled.'
-		);
-	}
-
-	/**
-	 * @testdox Should render the generic shipping marketplace link when the user cannot install plugins.
-	 */
-	public function test_shipping_marketplace_link_is_rendered_when_user_cannot_install_plugins(): void {
-		$this->enabled_admin_features_mock = array( 'shipping-smart-defaults' );
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
-
-		$output = $this->render_settings_view( 'shipping' );
-
-		$this->assertStringContainsString(
-			'data-settings-tab="shipping"',
-			$output,
-			'The generic Shipping settings marketplace link should remain when the shipping recommendations card is not rendered.'
-		);
-		$this->assertStringContainsString(
-			'shipping-delivery-and-fulfillment',
-			$output,
-			'The generic Shipping settings marketplace URL should remain when the user cannot install plugins.'
-		);
-	}
-
-	/**
-	 * @testdox Should render the generic shipping marketplace link when the store country has no shipping recommendations.
-	 */
-	public function test_shipping_marketplace_link_is_rendered_for_unsupported_shipping_recommendations_country(): void {
-		$this->enabled_admin_features_mock = array( 'shipping-smart-defaults' );
-		update_option( 'woocommerce_default_country', 'ZA' );
-
-		$output = $this->render_settings_view( 'shipping' );
-
-		$this->assertStringContainsString(
-			'data-settings-tab="shipping"',
-			$output,
-			'The generic Shipping settings marketplace link should remain when the shipping recommendations card is not rendered.'
-		);
-		$this->assertStringContainsString(
-			'shipping-delivery-and-fulfillment',
-			$output,
-			'The generic Shipping settings marketplace URL should remain when the store country has no shipping recommendations.'
-		);
-	}
-
-	/**
-	 * @testdox Should render the generic shipping marketplace link when the store only sells digital products.
-	 */
-	public function test_shipping_marketplace_link_is_rendered_for_digital_products_only_store(): void {
-		$this->enabled_admin_features_mock = array( 'shipping-smart-defaults' );
-		update_option( 'woocommerce_onboarding_profile', array( 'product_types' => array( 'downloads' ) ) );
-
-		$output = $this->render_settings_view( 'shipping' );
-
-		$this->assertStringContainsString(
-			'data-settings-tab="shipping"',
-			$output,
-			'The generic Shipping settings marketplace link should remain when the shipping recommendations card is not rendered.'
-		);
-		$this->assertStringContainsString(
-			'shipping-delivery-and-fulfillment',
-			$output,
-			'The generic Shipping settings marketplace URL should remain for digital-only stores.'
-		);
-	}
-
-	/**
-	 * @testdox Should render the generic shipping marketplace link when shipping smart defaults are disabled.
-	 */
-	public function test_shipping_marketplace_link_is_rendered_when_shipping_smart_defaults_are_disabled(): void {
-		$this->enabled_admin_features_mock = array();
-
-		$output = $this->render_settings_view( 'shipping' );
-
-		$this->assertStringContainsString(
-			'data-settings-tab="shipping"',
-			$output,
-			'The generic Shipping settings marketplace link should remain for the legacy settings experience.'
-		);
-		$this->assertStringContainsString(
-			'shipping-delivery-and-fulfillment',
-			$output,
-			'The generic Shipping settings marketplace URL should remain for the legacy settings experience.'
-		);
-	}
-
-	/**
-	 * @testdox Should render the generic shipping marketplace link for shipping sections when shipping smart defaults are enabled.
-	 */
-	public function test_shipping_marketplace_link_is_rendered_for_sections_when_shipping_smart_defaults_are_enabled(): void {
-		$this->enabled_admin_features_mock = array( 'shipping-smart-defaults' );
-
-		$output = $this->render_settings_view( 'shipping', 'classes' );
-
-		$this->assertStringContainsString(
-			'data-settings-tab="shipping"',
-			$output,
-			'The generic Shipping settings marketplace link should remain when the shipping recommendations card is not rendered.'
-		);
-		$this->assertStringContainsString(
-			'shipping-delivery-and-fulfillment',
-			$output,
-			'The generic Shipping settings marketplace URL should remain when the shipping recommendations card is not rendered.'
-		);
-	}
-
-	/**
-	 * @testdox Should render the generic shipping marketplace link for shipping zone views when shipping smart defaults are enabled.
-	 */
-	public function test_shipping_marketplace_link_is_rendered_for_zone_views_when_shipping_smart_defaults_are_enabled(): void {
-		$this->enabled_admin_features_mock = array( 'shipping-smart-defaults' );
-		$_GET['zone_id']                   = '1';
-
-		$output = $this->render_settings_view( 'shipping' );
-
-		unset( $_GET['zone_id'] );
-
-		$this->assertStringContainsString(
-			'data-settings-tab="shipping"',
-			$output,
-			'The generic Shipping settings marketplace link should remain when the shipping recommendations card is not rendered.'
-		);
-		$this->assertStringContainsString(
-			'shipping-delivery-and-fulfillment',
-			$output,
-			'The generic Shipping settings marketplace URL should remain when the shipping recommendations card is not rendered.'
+			'The generic Shipping settings marketplace URL should not be rendered by the PHP settings template.'
 		);
 	}
 

@@ -11,6 +11,9 @@ import userEvent from '@testing-library/user-event';
  */
 import ShippingRecommendations from '../experimental-shipping-recommendations';
 
+const SHIPPING_RECOMMENDATIONS_DISMISS_OPTION =
+	'woocommerce_settings_shipping_recommendations_hidden';
+
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
 	useSelect: jest.fn(),
@@ -193,6 +196,9 @@ describe( 'ShippingRecommendations', () => {
 			expect(
 				screen.queryByText( 'Packlink PRO' )
 			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText( 'the WooCommerce Marketplace' )
+			).toBeInTheDocument();
 		} );
 	} );
 
@@ -282,7 +288,7 @@ describe( 'ShippingRecommendations', () => {
 	} );
 
 	describe( 'digital products only', () => {
-		it( 'should not render when store sells digital products only', () => {
+		it( 'should render the marketplace fallback when store sells digital products only', () => {
 			( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
 				fn( () => ( {
 					...defaultSelectReturn,
@@ -296,6 +302,29 @@ describe( 'ShippingRecommendations', () => {
 			expect(
 				screen.queryByText( 'WooCommerce Shipping' )
 			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText( 'the WooCommerce Marketplace' )
+			).toBeInTheDocument();
+		} );
+	} );
+
+	describe( 'dismissed recommendations', () => {
+		it( 'should render the marketplace fallback when recommendations are hidden', () => {
+			mockSelectForCountry( 'US', [], {
+				getOption: ( option: string ) =>
+					option === SHIPPING_RECOMMENDATIONS_DISMISS_OPTION
+						? 'yes'
+						: undefined,
+			} );
+			render( <ShippingRecommendations /> );
+
+			expect(
+				screen.queryByText( 'WooCommerce Shipping' )
+			).not.toBeInTheDocument();
+			expect( screen.queryByText( 'ShipStation' ) ).not.toBeInTheDocument();
+			expect(
+				screen.queryByText( 'the WooCommerce Marketplace' )
+			).toBeInTheDocument();
 		} );
 	} );
 
@@ -351,6 +380,22 @@ describe( 'ShippingRecommendations', () => {
 					} ),
 				} ) )
 			);
+			render( <ShippingRecommendations /> );
+
+			expect( recordEvent ).not.toHaveBeenCalledWith(
+				'shipping_partner_impression',
+				expect.anything()
+			);
+		} );
+
+		it( 'should not fire shipping_partner_impression when recommendations are hidden', () => {
+			( recordEvent as jest.Mock ).mockClear();
+			mockSelectForCountry( 'US', [], {
+				getOption: ( option: string ) =>
+					option === SHIPPING_RECOMMENDATIONS_DISMISS_OPTION
+						? 'yes'
+						: undefined,
+			} );
 			render( <ShippingRecommendations /> );
 
 			expect( recordEvent ).not.toHaveBeenCalledWith(

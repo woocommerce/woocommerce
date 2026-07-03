@@ -82,12 +82,6 @@ $marketplace_links = array(
 		/* translators: %1$s: opening link tag, %2$s: closing link tag */
 		'message'     => __( '%1$sExplore solutions%2$s that help with tax calculations, compliance, and regional requirements.', 'woocommerce' ),
 	),
-	'shipping' => array(
-		'url'         => $marketplace_base_url . 'shipping-delivery-and-fulfillment/',
-		'is_external' => true,
-		/* translators: %1$s: opening link tag, %2$s: closing link tag */
-		'message'     => __( '%1$sExplore solutions%2$s that enhance shipping, delivery, and fulfillment workflows.', 'woocommerce' ),
-	),
 	'account'  => array(
 		'url'         => $marketplace_base_url . 'store-content-and-customizations/cart-and-checkout-features/',
 		'is_external' => true,
@@ -107,27 +101,6 @@ $marketplace_links = array(
 		'message'     => __( '%1$sDiscover additional solutions%2$s to boost your business and expand what your store can do.', 'woocommerce' ),
 	),
 );
-
-// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only check to match the embedded settings page visibility.
-$is_shipping_zone_view = isset( $_GET['zone_id'] );
-// phpcs:enable WordPress.Security.NonceVerification.Recommended
-
-$is_top_level_shipping_settings    = 'shipping' === $current_tab && '' === $current_section && ! $is_shipping_zone_view;
-$can_show_shipping_recommendations = false;
-
-if ( $is_top_level_shipping_settings && Features::is_enabled( 'shipping-smart-defaults' ) && current_user_can( 'install_plugins' ) && 'no' !== get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
-	// Mirrors COUNTRY_EXTENSIONS_MAP in the experimental shipping recommendations card.
-	$shipping_recommendations_countries = array( 'US', 'CA', 'FR', 'ES', 'IT', 'DE', 'GB', 'NL', 'AT', 'BE', 'AU', 'NZ', 'IE', 'PT' );
-	$store_country                      = wc_format_country_state_string( get_option( 'woocommerce_default_country', '' ) )['country'];
-	$onboarding_profile                 = get_option( 'woocommerce_onboarding_profile', array() );
-	$product_types                      = is_array( $onboarding_profile ) && isset( $onboarding_profile['product_types'] ) ? $onboarding_profile['product_types'] : array();
-	$is_selling_digital_products_only   = array( 'downloads' ) === $product_types;
-	$can_show_shipping_recommendations  = in_array( $store_country, $shipping_recommendations_countries, true ) && ! $is_selling_digital_products_only;
-}
-
-if ( $can_show_shipping_recommendations ) {
-	unset( $marketplace_links['shipping'] );
-}
 
 ?>
 
