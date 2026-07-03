@@ -37,17 +37,12 @@
 <h4 class="wp-block-heading has-text-align-left"><?php esc_html_e( 'Shop', 'purple' ); ?></h4>
 <!-- /wp:heading -->
 
-<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","orientation":"vertical"}} -->
-<div class="wp-block-group"><!-- wp:navigation {"overlayMenu":"never","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","orientation":"vertical"}} -->
+<!-- wp:navigation {"overlayMenu":"never","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","orientation":"vertical"}} -->
 <!-- wp:navigation-link {"label":"<?php esc_html_e( 'Ceramics', 'purple' ); ?>","url":"#"} /-->
-
 <!-- wp:navigation-link {"label":"<?php esc_html_e( 'Furniture', 'purple' ); ?>","url":"#"} /-->
-
 <!-- wp:navigation-link {"label":"<?php esc_html_e( 'Accessories', 'purple' ); ?>","url":"#"} /-->
-
 <!-- wp:navigation-link {"label":"<?php esc_html_e( 'Clothing', 'purple' ); ?>","url":"#"} /-->
 <!-- /wp:navigation --></div>
-<!-- /wp:group --></div>
 <!-- /wp:column -->
 
 <!-- wp:column {"width":"15%","layout":{"type":"default"}} -->
@@ -55,17 +50,12 @@
 <h4 class="wp-block-heading has-text-align-left"><?php esc_html_e( 'Info', 'purple' ); ?></h4>
 <!-- /wp:heading -->
 
-<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","orientation":"vertical"}} -->
-<div class="wp-block-group"><!-- wp:navigation {"overlayMenu":"never","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","orientation":"vertical"}} -->
+<!-- wp:navigation {"overlayMenu":"never","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","orientation":"vertical"}} -->
 <!-- wp:navigation-link {"label":"<?php esc_html_e( 'About', 'purple' ); ?>","url":"#"} /-->
-
 <!-- wp:navigation-link {"label":"<?php esc_html_e( 'Contact us', 'purple' ); ?>","url":"#"} /-->
-
 <!-- wp:navigation-link {"label":"<?php esc_html_e( 'FAQs', 'purple' ); ?>","url":"#"} /-->
-
 <!-- wp:navigation-link {"label":"<?php esc_html_e( 'Blog', 'purple' ); ?>","url":"#"} /-->
 <!-- /wp:navigation --></div>
-<!-- /wp:group --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
 
@@ -89,18 +79,10 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|30"},"typography":{"lineHeight":"1.71"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
-<div class="wp-block-group" style="line-height:1.71"><!-- wp:paragraph {"fontSize":"small"} -->
-<p class="has-small-font-size"><a href="#"><?php esc_html_e( 'Shipping & returns', 'purple' ); ?></a></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph {"fontSize":"small"} -->
-<p class="has-small-font-size"><a href="#"><?php esc_html_e( 'Privacy Policy', 'purple' ); ?></a></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph {"fontSize":"small"} -->
-<p class="has-small-font-size"><a href="#"><?php esc_html_e( 'Terms & Conditions', 'purple' ); ?></a></p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group --></div>
+<!-- wp:navigation {"overlayMenu":"never","style":{"spacing":{"blockGap":"var:preset|spacing|30"},"typography":{"lineHeight":"1.71"}},"fontSize":"small","layout":{"type":"flex","flexWrap":"nowrap"}} -->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Shipping & returns', 'purple' ); ?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Privacy Policy', 'purple' ); ?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Terms & Conditions', 'purple' ); ?>","url":"#"} /-->
+<!-- /wp:navigation --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->

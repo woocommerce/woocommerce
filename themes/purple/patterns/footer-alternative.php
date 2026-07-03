@@ -54,19 +54,13 @@
 <!-- /wp:columns -->
 
 <!-- wp:group {"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|20"},"blockGap":"0.63rem"}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
-<div class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--20)"><!-- wp:group {"fontSize":"small","layout":{"type":"flex","flexWrap":"wrap"}} -->
-<div class="wp-block-group has-small-font-size"><!-- wp:paragraph -->
-<p><a href="#"><?php esc_html_e( 'Shipping & returns', 'purple' ); ?></a></p>
-<!-- /wp:paragraph -->
+<div class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--20)">
 
-<!-- wp:paragraph -->
-<p><a href="/privacy-policy"><?php esc_html_e( 'Privacy policy', 'purple' ); ?></a></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph -->
-<p><a href="#"><?php esc_html_e( 'Terms & conditions', 'purple' ); ?></a></p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
+<!-- wp:navigation {"overlayMenu":"never","style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"fontSize":"small","layout":{"type":"flex","orientation":"horizontal"}} -->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Shipping & returns', 'purple' ); ?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Privacy Policy', 'purple' ); ?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Terms & Conditions', 'purple' ); ?>","url":"#"} /-->
+<!-- /wp:navigation -->
 
 <!-- wp:paragraph {"className":"underline-link","style":{"typography":{"textAlign":"left"},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} -->
 <p class="has-text-align-left underline-link has-theme-4-color has-text-color has-link-color has-small-font-size">&copy; <?php echo esc_html( gmdate( 'Y' ) ); ?> <?php
