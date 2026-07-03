@@ -12,6 +12,45 @@ use WC_Helper_Product;
 class ProductImage extends \WP_UnitTestCase {
 
 	/**
+	 * Previous thumbnail cropping option values to restore after tests.
+	 *
+	 * @var array<string, mixed>
+	 */
+	private $prev_thumbnail_cropping_options = array();
+
+	/**
+	 * Set up.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$option_names = array(
+			'woocommerce_thumbnail_cropping',
+			'woocommerce_thumbnail_cropping_custom_width',
+			'woocommerce_thumbnail_cropping_custom_height',
+		);
+
+		foreach ( $option_names as $option_name ) {
+			$this->prev_thumbnail_cropping_options[ $option_name ] = get_option( $option_name, null );
+		}
+	}
+
+	/**
+	 * Tear down.
+	 */
+	public function tearDown(): void {
+		foreach ( $this->prev_thumbnail_cropping_options as $option_name => $value ) {
+			if ( null === $value ) {
+				delete_option( $option_name );
+			} else {
+				update_option( $option_name, $value );
+			}
+		}
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Helper method to create a simple product with an image.
 	 *
 	 * @param string $image_title Optional title for the image.
