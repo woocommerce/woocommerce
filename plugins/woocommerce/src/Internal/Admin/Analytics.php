@@ -77,7 +77,7 @@ class Analytics {
 		// flag is cleared (clearing happens before the first batch is queued).
 		add_action( 'woocommerce_analytics_refund_fix_batch', array( $this, 'process_refund_fix_batch' ) );
 
-		if ( $this->should_show_refund_fix_tool() ) {
+		if ( self::should_show_refund_fix_tool() ) {
 			add_filter( 'woocommerce_debug_tools', array( $this, 'register_full_refund_fix_data_tool' ) );
 			add_action( 'admin_footer', array( $this, 'output_refund_fix_tool_js' ) );
 			add_action( 'wp_ajax_woocommerce_check_refund_fix_needed', array( $this, 'ajax_check_refund_fix_needed' ) );
@@ -209,7 +209,7 @@ class Analytics {
 	 *
 	 * @return bool
 	 */
-	private function should_show_refund_fix_tool(): bool {
+	public static function should_show_refund_fix_tool(): bool {
 		return ! OrderUtil::uses_new_full_refund_data()
 			|| 'yes' === get_option( 'woocommerce_analytics_show_old_refund_data_tool' );
 	}

@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\Admin\Notes\EditProductsOnTheMove;
 use Automattic\WooCommerce\Internal\Admin\Notes\EmailImprovements;
 use Automattic\WooCommerce\Internal\Admin\Notes\EUVATNumber;
 use Automattic\WooCommerce\Internal\Admin\Notes\FirstProduct;
+use Automattic\WooCommerce\Internal\Admin\Notes\FullRefundFixDataToolNotice;
 use Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
 use Automattic\WooCommerce\Internal\Admin\Notes\LaunchChecklist;
 use Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
@@ -73,6 +74,7 @@ class Events {
 		EmailImprovements::class,
 		EUVATNumber::class,
 		FirstProduct::class,
+		FullRefundFixDataToolNotice::class,
 		LaunchChecklist::class,
 		MagentoMigration::class,
 		ManageOrdersOnTheGo::class,
@@ -202,6 +204,7 @@ class Events {
 	protected function possibly_delete_notes() {
 		PaymentsRemindMeLater::delete_if_not_applicable();
 		PaymentsMoreInfoNeeded::delete_if_not_applicable();
+		FullRefundFixDataToolNotice::delete_if_not_applicable();
 	}
 
 	/**
