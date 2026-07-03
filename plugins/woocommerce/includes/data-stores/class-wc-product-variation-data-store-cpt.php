@@ -104,8 +104,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		// Resync the variation title with the parent if it has drifted (e.g. parent renamed, or saved
 		// pre-3.0). generate_product_title() costs one term query per variation, so skip it when the
 		// stored title is still in sync; otherwise regenerate (self-heals legacy / out-of-band edits).
-		// Default off when a woocommerce_product_variation_title filter is hooked, as it may compute a
-		// dynamic title that must keep running on read.
 
 		/**
 		 * Filters whether the per-read variation title resync may be skipped when the stored title is
