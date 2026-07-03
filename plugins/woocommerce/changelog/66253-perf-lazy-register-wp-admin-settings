@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Defer loading of settings pages and email classes on REST requests until a request targets the wc/v2 or wc/v3 settings endpoints.
