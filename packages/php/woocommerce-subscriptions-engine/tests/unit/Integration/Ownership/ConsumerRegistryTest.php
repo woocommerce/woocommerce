@@ -75,6 +75,20 @@ class ConsumerRegistryTest extends TestCase {
 		$this->assertSame( array( 'woocommerce-subscriptions-lite' ), ConsumerRegistry::all(), 'The slug is stored trimmed.' );
 	}
 
+	public function test_unregister_removes_only_the_named_consumer(): void {
+		ConsumerRegistry::register( 'lite' );
+		ConsumerRegistry::register( 'premium' );
+
+		ConsumerRegistry::unregister( 'lite' );
+		$this->assertSame( array( 'premium' ), ConsumerRegistry::all(), 'Only the named consumer is removed.' );
+
+		ConsumerRegistry::unregister( ' premium ' );
+		$this->assertTrue( ConsumerRegistry::is_empty(), 'The slug is trimmed, matching register().' );
+
+		ConsumerRegistry::unregister( 'unknown' );
+		$this->assertTrue( ConsumerRegistry::is_empty(), 'An unknown slug is a no-op.' );
+	}
+
 	public function test_reset_clears_every_registration(): void {
 		ConsumerRegistry::register( 'lite' );
 		ConsumerRegistry::reset();

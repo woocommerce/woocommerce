@@ -52,6 +52,19 @@ final class ConsumerRegistry {
 	}
 
 	/**
+	 * Remove a consumer registration. A deactivating consumer deregisters itself so the
+	 * engine's gates re-evaluate while its code is still loaded - the engine only loads
+	 * through its consumers, so the deactivation request is the last chance for components
+	 * to clean up (e.g. the renewal dispatcher removes its recurring scan when the last
+	 * consumer leaves). An unknown slug is a no-op.
+	 *
+	 * @param string $slug The consumer extension's registered slug.
+	 */
+	public static function unregister( string $slug ): void {
+		unset( self::$slugs[ trim( $slug ) ] );
+	}
+
+	/**
 	 * Whether no consumer is registered. The dispatcher gate: true means charge
 	 * nothing this run.
 	 */
