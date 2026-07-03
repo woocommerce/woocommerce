@@ -74,7 +74,8 @@ module.exports = {
 		'@woocommerce/base-hocs(.*)$': 'assets/js/base/hocs/$1',
 		'@woocommerce/base-hooks(.*)$': 'assets/js/base/hooks/$1',
 		'@woocommerce/base-utils(.*)$': 'assets/js/base/utils',
-		'@woocommerce/block-data': 'assets/js/data',
+		'@woocommerce/block-data/(.*)$': 'packages/wc-blocks-data/$1',
+		'@woocommerce/block-data': 'packages/wc-blocks-data',
 		'@woocommerce/resource-previews': 'assets/js/previews',
 		'@woocommerce/shared-context':
 			'assets/js/blocks/packages/shared-context',

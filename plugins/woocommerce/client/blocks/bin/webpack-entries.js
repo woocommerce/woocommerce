@@ -375,8 +375,8 @@ const entries = {
 		wcBlocksRegistry: './packages/blocks-registry/index.js',
 		blocksCheckoutEvents: './assets/js/events/index.ts',
 		wcSettings: './assets/js/settings/shared/index.ts',
-		wcBlocksData: './assets/js/data/index.ts',
-		wcBlocksMiddleware: './assets/js/middleware/index.js',
+		wcBlocksData: './packages/wc-blocks-data/index.ts',
+		wcBlocksMiddleware: './packages/wc-blocks-middleware/index.js',
 		wcBlocksSharedContext:
 			'./assets/js/blocks/packages/shared-context/index.js',
 		wcBlocksSharedHocs: './assets/js/blocks/packages/shared-hocs/index.js',

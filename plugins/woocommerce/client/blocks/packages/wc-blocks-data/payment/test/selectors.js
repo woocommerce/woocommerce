@@ -24,7 +24,7 @@ import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
 import {
 	CheckoutExpressPayment,
 	SavedPaymentMethodOptions,
-} from '../../../blocks/cart-checkout-shared/payment-methods';
+} from '../../../../assets/js/blocks/cart-checkout-shared/payment-methods';
 import { defaultCartState } from '../../cart/default-state';
 import {
 	getRegisteredExpressPaymentMethods,

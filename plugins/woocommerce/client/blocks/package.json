@@ -21,7 +21,7 @@
 		"*.scss",
 		"./assets/js/atomic/blocks/**",
 		"./assets/js/filters/**",
-		"./assets/js/middleware/**",
+		"./packages/wc-blocks-middleware/**",
 		"./assets/js/types/**",
 		"./assets/js/blocks/checkout/inner-blocks/**/index.tsx",
 		"./assets/js/blocks/checkout/inner-blocks/register-components.ts",

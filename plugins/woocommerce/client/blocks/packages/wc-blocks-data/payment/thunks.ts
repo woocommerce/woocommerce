@@ -28,16 +28,16 @@ import { paymentStore } from '@woocommerce/block-data';
 import {
 	emitEventWithAbort,
 	noticeContexts,
-} from '../../base/context/event-emit';
-import { EMIT_TYPES } from '../../base/context/providers/cart-checkout/payment-events/event-emit';
+} from '../../../assets/js/base/context/event-emit';
+import { EMIT_TYPES } from '../../../assets/js/base/context/providers/cart-checkout/payment-events/event-emit';
 import type { emitProcessingEventType } from './types';
 import { store as cartStore } from '../cart';
 import {
 	isBillingAddress,
 	isShippingAddress,
-} from '../../blocks/packages/types/type-guards/address';
-import { isObserverResponse } from '../../blocks/packages/types/type-guards/observers';
-import { isValidValidationErrorsObject } from '../../blocks/packages/types/type-guards/validation';
+} from '../../../assets/js/blocks/packages/types/type-guards/address';
+import { isObserverResponse } from '../../../assets/js/blocks/packages/types/type-guards/observers';
+import { isValidValidationErrorsObject } from '../../../assets/js/blocks/packages/types/type-guards/validation';
 
 interface PaymentThunkArgs {
 	select?: CurriedSelectorsOf< typeof paymentStore >;

@@ -10,9 +10,9 @@ import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
 import { useStoreCartCoupons } from '../use-store-cart-coupons';
 
 // Mock the resolvers to avoid actual API calls on cart data store setup.
-jest.mock( '../../../../../data/cart/resolvers', () => {
+jest.mock( '@woocommerce/block-data/cart/resolvers', () => {
 	return {
-		...jest.requireActual( '../../../../../data/cart/resolvers' ),
+		...jest.requireActual( '@woocommerce/block-data/cart/resolvers' ),
 		getCartData: jest
 			.fn()
 			.mockResolvedValue(

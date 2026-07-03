@@ -19,8 +19,8 @@ import userEvent from '@testing-library/user-event';
 /**
  * Internal dependencies
  */
+import { defaultCartState } from '@woocommerce/block-data/cart/default-state';
 import Block from '../block';
-import { defaultCartState } from '../../../data/cart/default-state';
 
 const MiniCartBlock = ( props ) => (
 	<SlotFillProvider>

@@ -14,7 +14,7 @@ import { __unstableStripHTML as stripHTML } from '@wordpress/dom';
  * Internal dependencies
  */
 import { STORE_KEY as CART_STORE_KEY } from './constants';
-import type { CartStoreDescriptor } from '../../data/cart';
+import type { CartStoreDescriptor } from './index';
 
 export type QuantityChanges = {
 	cartItemsPendingQuantity?: string[] | undefined;

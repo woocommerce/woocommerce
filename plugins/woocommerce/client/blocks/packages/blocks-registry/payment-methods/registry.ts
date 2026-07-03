@@ -20,11 +20,11 @@ import {
 /**
  * Internal dependencies
  */
+import { STORE_KEY as PAYMENT_STORE_KEY } from '@woocommerce/block-data/payment/constants';
+import type { PaymentStoreDescriptor } from '@woocommerce/block-data/payment';
 import { default as PaymentMethodConfig } from './payment-method-config';
 import { default as ExpressPaymentMethodConfig } from './express-payment-method-config';
 import { canMakePaymentExtensionsCallbacks } from './extensions-config';
-import { STORE_KEY as PAYMENT_STORE_KEY } from '../../../assets/js/data/payment/constants';
-import type { PaymentStoreDescriptor } from '../../../assets/js/data/payment';
 
 type LegacyRegisterPaymentMethodFunction = ( config: unknown ) => unknown;
 type LegacyRegisterExpressPaymentMethodFunction = (

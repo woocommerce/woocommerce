@@ -13,12 +13,12 @@ import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 /**
  * Internal dependencies
  */
+import * as actionCreators from '@woocommerce/block-data/validation/actions';
 import FrontendBlock from '../frontend';
-import * as actionCreators from '../../../../../data/validation/actions';
 
-jest.mock( '../../../../../data/validation/actions', () => {
+jest.mock( '@woocommerce/block-data/validation/actions', () => {
 	const actions = jest.requireActual(
-		'../../../../../data/validation/actions'
+		'@woocommerce/block-data/validation/actions'
 	);
 	return {
 		...actions,

@@ -21,7 +21,7 @@ The standalone handles below must still be registered and emitted. They are publ
 
 Package source location communicates the intended surface:
 
-- `packages/*` contains public or standalone package surfaces with dedicated bundles, such as `blocks-registry`, `entities`, `checkout`, `components`, and `prices`.
+- `packages/*` contains public or standalone package surfaces with dedicated bundles, such as `blocks-registry`, `entities`, `wc-blocks-data`, `wc-blocks-middleware`, `checkout`, `components`, and `prices`.
 - `assets/js/blocks/packages/*` contains package-like code used by `@woocommerce/block-library` block and editor builds, such as `shared-context`, `shared-hocs`, and `types`.
 - `assets/js/blocks/*` contains concrete block implementation code.
 

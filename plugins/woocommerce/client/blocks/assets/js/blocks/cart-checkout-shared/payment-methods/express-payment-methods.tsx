@@ -25,10 +25,10 @@ import {
 /**
  * Internal dependencies
  */
+import { STORE_KEY as PAYMENT_STORE_KEY } from '@woocommerce/block-data/payment/constants';
+import type { PaymentStoreDescriptor } from '@woocommerce/block-data/payment';
 import PaymentMethodErrorBoundary from './payment-method-error-boundary';
-import { STORE_KEY as PAYMENT_STORE_KEY } from '../../../data/payment/constants';
 import { useExpressPaymentContext } from '../../cart-checkout-shared/payment-methods/express-payment/express-payment-context';
-import type { PaymentStoreDescriptor } from '../../../data/payment';
 import { useExpressPaymentFocus } from './use-express-payment-focus';
 
 const ExpressPaymentMethods = () => {

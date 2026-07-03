@@ -102,9 +102,6 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 │ Package-like code used by @woocommerce/block-library block and editor builds,
 │ shared HOCs, and shared block types.
 │
-├── assets/js/data
-│ Functionality to store data using Redux and wp.data.
-│
 ├── assets/js/editor-components
 │ Editor components such as the block-title component.
 │
@@ -120,9 +117,6 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 │
 ├── assets/js/icons
 │ The WooCommerce Blocks Icon library.
-│
-├── assets/js/middleware
-│ The middleware code to handle Store API calls.
 │
 ├── assets/js/payment-method-extensions
 │ Functionality for the payment options such as PayPal.
@@ -156,6 +150,12 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 │
 ├── packages/entities
 │ WooCommerce entity registration and hooks.
+│
+├── packages/wc-blocks-data
+│ Functionality to store data using Redux and wp.data.
+│
+├── packages/wc-blocks-middleware
+│ Middleware code to handle Store API calls.
 │
 ├── patches
 │ Patches for 3rd party scripts applied when installing dependencies.

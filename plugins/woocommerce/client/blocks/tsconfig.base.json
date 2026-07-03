@@ -83,7 +83,10 @@
 				"assets/js/editor-components/*"
 			],
 			"@woocommerce/block-data": [
-				"assets/js/data"
+				"packages/wc-blocks-data"
+			],
+			"@woocommerce/block-data/*": [
+				"packages/wc-blocks-data/*"
 			],
 			"@woocommerce/block-hocs": [
 				"assets/js/hocs"

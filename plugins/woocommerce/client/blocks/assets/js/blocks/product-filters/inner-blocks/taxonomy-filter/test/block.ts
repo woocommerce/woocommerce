@@ -50,7 +50,7 @@ jest.mock( '@woocommerce/settings', () => {
 } );
 
 // Mock WooCommerce schema selectors to prevent namespace errors
-jest.mock( '../../../../../data/schema/selectors', () => ( {
+jest.mock( '@woocommerce/block-data/schema/selectors', () => ( {
 	getRoute: jest.fn( () => null ),
 	getRoutes: jest.fn( () => ( {
 		'/wc/store/v1': {},

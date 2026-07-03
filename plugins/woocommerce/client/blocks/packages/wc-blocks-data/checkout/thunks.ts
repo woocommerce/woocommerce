@@ -25,7 +25,7 @@ import {
  */
 import { store as paymentStore } from '../payment';
 import type { CheckoutStoreDescriptor } from './index';
-import { removeNoticesByStatus } from '../../utils/notices';
+import { removeNoticesByStatus } from '../../../assets/js/utils/notices';
 import {
 	getPaymentResultFromCheckoutResponse,
 	runCheckoutFailObservers,
