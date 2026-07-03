@@ -225,28 +225,30 @@ class WC_Tests_Orders extends WC_Unit_Test_Case {
 		$original_value      = $features_controller->feature_is_enabled( 'email_improvements' );
 		$features_controller->change_feature_enable( 'email_improvements', true );
 
-		$shipping_rate = new WC_Shipping_Rate( 'free_shipping', 'Royal Mail 1st Class: Free', '0', array(), 'free_shipping' );
-		$shipping_item = new WC_Order_Item_Shipping();
-		$shipping_item->set_props(
-			array(
-				'method_title' => $shipping_rate->label,
-				'method_id'    => $shipping_rate->id,
-				'total'        => wc_format_decimal( $shipping_rate->cost ),
-				'taxes'        => $shipping_rate->taxes,
-			)
-		);
+		try {
+			$shipping_rate = new WC_Shipping_Rate( 'free_shipping', 'Royal Mail 1st Class: Free', '0', array(), 'free_shipping' );
+			$shipping_item = new WC_Order_Item_Shipping();
+			$shipping_item->set_props(
+				array(
+					'method_title' => $shipping_rate->label,
+					'method_id'    => $shipping_rate->id,
+					'total'        => wc_format_decimal( $shipping_rate->cost ),
+					'taxes'        => $shipping_rate->taxes,
+				)
+			);
 
-		$order = new WC_Order();
-		$order->add_item( $shipping_item );
-		$order->calculate_totals( true );
+			$order = new WC_Order();
+			$order->add_item( $shipping_item );
+			$order->calculate_totals( true );
 
-		$totals = $order->get_order_item_totals();
+			$totals = $order->get_order_item_totals();
 
-		$this->assertArrayHasKey( 'shipping', $totals );
-		$this->assertEquals( 'Free', $totals['shipping']['value'] );
-		$this->assertNotEquals( $order->get_shipping_method(), $totals['shipping']['value'] );
-
-		$features_controller->change_feature_enable( 'email_improvements', $original_value );
+			$this->assertArrayHasKey( 'shipping', $totals );
+			$this->assertEquals( 'Free', $totals['shipping']['value'] );
+			$this->assertNotEquals( $order->get_shipping_method(), $totals['shipping']['value'] );
+		} finally {
+			$features_controller->change_feature_enable( 'email_improvements', $original_value );
+		}
 	}
 
 	/**
@@ -260,26 +262,29 @@ class WC_Tests_Orders extends WC_Unit_Test_Case {
 		$original_value      = $features_controller->feature_is_enabled( 'email_improvements' );
 		$features_controller->change_feature_enable( 'email_improvements', false );
 
-		$shipping_rate = new WC_Shipping_Rate( 'free_shipping', 'Royal Mail 1st Class: Free', '0', array(), 'free_shipping' );
-		$shipping_item = new WC_Order_Item_Shipping();
-		$shipping_item->set_props(
-			array(
-				'method_title' => $shipping_rate->label,
-				'method_id'    => $shipping_rate->id,
-				'total'        => wc_format_decimal( $shipping_rate->cost ),
-				'taxes'        => $shipping_rate->taxes,
-			)
-		);
+		try {
+			$shipping_rate = new WC_Shipping_Rate( 'free_shipping', 'Royal Mail 1st Class: Free', '0', array(), 'free_shipping' );
+			$shipping_item = new WC_Order_Item_Shipping();
+			$shipping_item->set_props(
+				array(
+					'method_title' => $shipping_rate->label,
+					'method_id'    => $shipping_rate->id,
+					'total'        => wc_format_decimal( $shipping_rate->cost ),
+					'taxes'        => $shipping_rate->taxes,
+				)
+			);
 
-		$order = new WC_Order();
-		$order->add_item( $shipping_item );
-		$order->calculate_totals( true );
+			$order = new WC_Order();
+			$order->add_item( $shipping_item );
+			$order->calculate_totals( true );
 
-		$totals = $order->get_order_item_totals();
+			$totals = $order->get_order_item_totals();
 
-		$this->assertArrayHasKey( 'shipping', $totals );
-		$this->assertEquals( 'Royal Mail 1st Class: Free', $totals['shipping']['value'] );
+			$this->assertArrayHasKey( 'shipping', $totals );
+			$this->assertEquals( 'Royal Mail 1st Class: Free', $totals['shipping']['value'] );
 
-		$features_controller->change_feature_enable( 'email_improvements', $original_value );
+		} finally {
+			$features_controller->change_feature_enable( 'email_improvements', $original_value );
+		}
 	}
 }
