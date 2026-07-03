@@ -35,7 +35,7 @@ import {
 } from './notify-quantity-changes';
 import { updateCartErrorNotices } from './notify-errors';
 import { apiFetchWithHeaders } from '../shared-controls';
-import { isObject } from '../../../assets/js/blocks/packages/types/type-guards/object';
+import { isObject } from '../../types/type-guards/object';
 import {
 	getIsCustomerDataDirty,
 	setIsCustomerDataDirty,

@@ -10,9 +10,9 @@ With this approach, third-party developers can also start using entities outside
 
 ## Source location
 
-This package lives in `plugins/woocommerce/client/blocks/packages/entities` because it is a public standalone package surface. It is emitted as the `wc-entities` script handle and exposed through the `@woocommerce/entities` import name for explicit consumers.
+This package lives in `plugins/woocommerce/client/blocks/assets/js/entities` because it follows the trunk Blocks source layout while still being emitted as the `wc-entities` script handle and exposed through the `@woocommerce/entities` import name for explicit consumers.
 
-Package-like code that is only used by `@woocommerce/block-library` block and editor builds should live under `assets/js/blocks/packages` instead.
+Package-like code that uses public import names can still live in the matching `assets/js` source area and be bundled into `@woocommerce/block-library` when appropriate.
 
 ## Available Entities
 

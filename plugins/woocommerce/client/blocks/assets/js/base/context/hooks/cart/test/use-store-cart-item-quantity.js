@@ -16,10 +16,20 @@ jest.mock( '../use-store-cart', () => ( {
 	useStoreCart: jest.fn(),
 } ) );
 
-jest.mock( '@woocommerce/block-data', () => ( {
-	__esModule: true,
-	...jest.requireActual( '@woocommerce/block-data' ),
-} ) );
+jest.mock( '@woocommerce/block-data', () => {
+	const cart = jest.requireActual( '@woocommerce/block-data/cart' );
+	const checkout = jest.requireActual( '@woocommerce/block-data/checkout' );
+	const utils = jest.requireActual( '@woocommerce/block-data/utils' );
+
+	return {
+		__esModule: true,
+		CART_STORE_KEY: cart.CART_STORE_KEY,
+		CHECKOUT_STORE_KEY: checkout.CHECKOUT_STORE_KEY,
+		cartStore: cart.store,
+		checkoutStore: checkout.store,
+		processErrorResponse: utils.processErrorResponse,
+	};
+} );
 
 // Make debounce instantaneous.
 jest.mock( 'use-debounce', () => ( {

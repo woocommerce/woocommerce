@@ -98,12 +98,17 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 │ The main blocks of the WooCommerce Blocks plugin such as the Active
 │ Filters Block.
 │
-├── assets/js/blocks/packages
-│ Package-like code used by @woocommerce/block-library block and editor builds,
-│ shared HOCs, and shared block types.
+├── assets/js/blocks-registry
+│ Files that allows developers to connect their extensions to this plugin.
+│
+├── assets/js/data
+│ Functionality to store data using Redux and wp.data.
 │
 ├── assets/js/editor-components
 │ Editor components such as the block-title component.
+│
+├── assets/js/entities
+│ WooCommerce entity registration and hooks.
 │
 ├── assets/js/extensions
 │ TypeScript files to allow Google Analytics tracking of specific events
@@ -118,6 +123,9 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 ├── assets/js/icons
 │ The WooCommerce Blocks Icon library.
 │
+├── assets/js/middleware
+│ The middleware code to handle Store API calls.
+│
 ├── assets/js/payment-method-extensions
 │ Functionality for the payment options such as PayPal.
 │
@@ -129,6 +137,9 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 │
 ├── assets/js/shared
 │ Shared components of the WooCommerce Blocks plugin.
+│
+├── assets/js/types
+│ TypeScript definitions of the WooCommerce Blocks plugin.
 │
 ├── assets/js/utils
 │ Shared utilities of the WooCommerce Blocks plugin.
@@ -143,19 +154,10 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 │ Images for the payment options and the previews.
 │
 ├── packages
-│ Public or standalone package surfaces with dedicated bundles.
-│
-├── packages/blocks-registry
-│ Registries that allow extensions to connect to WooCommerce Blocks.
-│
-├── packages/entities
-│ WooCommerce entity registration and hooks.
-│
-├── packages/wc-blocks-data
-│ Functionality to store data using Redux and wp.data.
-│
-├── packages/wc-blocks-middleware
-│ Middleware code to handle Store API calls.
+│ Things that are likely to be published as npm packages in the future. Packages can be:
+│ - Production JavaScript scripts and styles loaded on WordPress
+│ and the WooCommerce Blocks plugin or distributed as npm packages.
+│ - Development tools available on npm.
 │
 ├── patches
 │ Patches for 3rd party scripts applied when installing dependencies.

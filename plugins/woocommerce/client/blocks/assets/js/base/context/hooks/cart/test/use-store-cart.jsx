@@ -15,10 +15,17 @@ jest.mock( '../../../providers/editor-context', () => ( {
 	useEditorContext: jest.fn(),
 } ) );
 
-jest.mock( '@woocommerce/block-data', () => ( {
-	...jest.requireActual( '@woocommerce/block-data' ),
-	__esModule: true,
-} ) );
+jest.mock( '@woocommerce/block-data', () => {
+	const constants = jest.requireActual( '@woocommerce/block-data/constants' );
+	const cart = jest.requireActual( '@woocommerce/block-data/cart' );
+
+	return {
+		__esModule: true,
+		...constants,
+		CART_STORE_KEY: cart.CART_STORE_KEY,
+		cartStore: cart.store,
+	};
+} );
 
 describe( 'useStoreCart', () => {
 	let registry, renderer;

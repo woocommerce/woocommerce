@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { isObject } from '../blocks/packages/types/type-guards';
+import { isObject } from '../types/type-guards';
 
 export const isWidgetEditorPage = ( store: unknown ): boolean => {
 	if ( isObject( store ) ) {

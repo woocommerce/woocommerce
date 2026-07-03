@@ -33,7 +33,7 @@ import { removeNoticesForField } from '@woocommerce/base-utils';
 /**
  * Internal dependencies
  */
-import { shouldRetry } from '../../../assets/js/base/context/event-emit';
+import { shouldRetry } from '../../base/context/event-emit';
 import { store as validationStore } from '../validation';
 import {
 	CheckoutAndPaymentNotices,
@@ -43,7 +43,7 @@ import {
 import {
 	CONTACT_FORM_KEYS,
 	ORDER_FORM_KEYS,
-} from '../../../assets/js/settings/blocks/constants';
+} from '../../settings/blocks/constants';
 
 /**
  * Based on the given observers, create Error Notices where necessary

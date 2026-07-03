@@ -1,6 +1,6 @@
 /**
  * Purpose of this file:
- * This file defines constants for use in `plugins/woocommerce/client/blocks/packages/blocks-registry/product-collection/register-product-collection.tsx`.
+ * This file defines constants for use in `plugins/woocommerce/client/blocks/assets/js/blocks-registry/product-collection/register-product-collection.tsx`.
  * By isolating constants here, we avoid loading unnecessary JS file on the frontend (e.g., the /shop page), enhancing site performance.
  *
  * Context: https://github.com/woocommerce/woocommerce/pull/48141#issuecomment-2208770592.

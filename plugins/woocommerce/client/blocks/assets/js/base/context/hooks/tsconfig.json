@@ -11,7 +11,7 @@
 		"../providers/cart-checkout/shipping/index.js",
 		"../../components/cart-checkout/totals/shipping",
 		"../../../editor-components/utils/*",
-		"../../../../../packages/wc-blocks-data/**/*"
+		"../../../data/**/*"
 	],
 	"exclude": [ "**/test/**" ]
 }

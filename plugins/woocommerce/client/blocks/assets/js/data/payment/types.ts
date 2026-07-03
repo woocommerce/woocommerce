@@ -15,7 +15,7 @@ import { DataRegistry } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import type { EventObserversType } from '../../../assets/js/base/context/event-emit';
+import type { EventObserversType } from '../../base/context/event-emit';
 import type { DispatchFromMap } from '../mapped-types';
 import * as actions from './actions';
 

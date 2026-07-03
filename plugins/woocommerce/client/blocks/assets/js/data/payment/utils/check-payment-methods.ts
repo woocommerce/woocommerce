@@ -31,7 +31,7 @@ import { STORE_KEY as CART_STORE_KEY } from '../../cart/constants';
 import { STORE_KEY as PAYMENT_STORE_KEY } from '../constants';
 import type { PaymentStoreDescriptor } from '../index';
 import type { CartStoreDescriptor } from '../../cart';
-import { noticeContexts } from '../../../../assets/js/base/context/event-emit';
+import { noticeContexts } from '../../../base/context/event-emit';
 import {
 	EMPTY_CART_ERRORS,
 	EMPTY_CART_ITEM_ERRORS,

@@ -53,7 +53,7 @@ const shouldBundleWooPackageInEditor = ( request ) =>
 const getEditorPackageAliases = () => ( {
 	'@woocommerce/block-data': path.resolve(
 		__dirname,
-		`../packages/wc-blocks-data`
+		`../assets/js/data`
 	),
 	'@woocommerce/blocks-checkout': path.resolve(
 		__dirname,
@@ -69,7 +69,7 @@ const getEditorPackageAliases = () => ( {
 	),
 	'@woocommerce/blocks-registry': path.resolve(
 		__dirname,
-		`../packages/blocks-registry`
+		`../assets/js/blocks-registry`
 	),
 	'@woocommerce/data': path.resolve(
 		__dirname,
@@ -89,11 +89,11 @@ const getEditorPackageAliases = () => ( {
 	),
 	'@woocommerce/shared-context': path.resolve(
 		__dirname,
-		`../assets/js/blocks/packages/shared-context/`
+		`../assets/js/shared/context/`
 	),
 	'@woocommerce/shared-hocs': path.resolve(
 		__dirname,
-		`../assets/js/blocks/packages/shared-hocs/`
+		`../assets/js/shared/hocs/`
 	),
 } );
 
@@ -131,7 +131,7 @@ const getAlias = ( options = {} ) => {
 		),
 		'@woocommerce/block-data': path.resolve(
 			__dirname,
-			`../packages/wc-blocks-data`
+			`../assets/js/data`
 		),
 		'@woocommerce/blocks': path.resolve(
 			__dirname,
@@ -156,12 +156,12 @@ const getAlias = ( options = {} ) => {
 		),
 		'@woocommerce/types': path.resolve(
 			__dirname,
-			`../assets/js/blocks/packages/types/`
+			`../assets/js/types/`
 		),
 		'@woocommerce/utils': path.resolve( __dirname, `../assets/js/utils/` ),
 		'@woocommerce/entities': path.resolve(
 			__dirname,
-			`../packages/entities/`
+			`../assets/js/entities/`
 		),
 		'react/jsx-dev-runtime': require.resolve( 'react/jsx-dev-runtime' ),
 		'react/jsx-runtime': require.resolve( 'react/jsx-runtime' ),

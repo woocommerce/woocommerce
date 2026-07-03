@@ -321,7 +321,7 @@ const { state, actions } = store< Store >(
 // has a TODO about.
 //
 // Keeps the discriminator + payload contract in sync with
-// `packages/wc-blocks-data/cart/thunks.ts::saveForLater`.
+// `assets/js/data/cart/thunks.ts::saveForLater`.
 window.addEventListener( 'wc-blocks_store_sync_required', ( event: Event ) => {
 	const detail = ( event as CustomEvent ).detail as
 		| { type?: string; slug?: string; item?: RawShopperListItem }
