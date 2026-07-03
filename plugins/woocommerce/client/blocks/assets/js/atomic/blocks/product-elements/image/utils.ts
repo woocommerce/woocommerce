@@ -1,3 +1,8 @@
+/**
+ * Internal dependencies
+ */
+import { ImageSizing } from './types';
+
 export const isTryingToDisplayLegacySaleBadge = ( showSaleBadge?: boolean ) => {
 	// If the block is pristine, it doesn't have a showSaleBadge attribute
 	// but it is supposed to be `true` by default.
@@ -22,9 +27,10 @@ type AspectRatioStyle = {
  * Block-level overrides take priority over store thumbnail cropping settings.
  */
 export const resolveAspectRatio = (
-	aspectRatio: string | undefined,
 	style: AspectRatioStyle | undefined,
-	storeAspectRatio: string | null | undefined
+	aspectRatio: string | undefined,
+	storeAspectRatio: string | null | undefined,
+	imageSizing: ImageSizing
 ): string | undefined => {
 	if (
 		style &&
@@ -39,5 +45,9 @@ export const resolveAspectRatio = (
 		return aspectRatio;
 	}
 
-	return storeAspectRatio ?? undefined;
+	if ( imageSizing === ImageSizing.THUMBNAIL ) {
+		return storeAspectRatio ?? undefined;
+	}
+
+	return undefined;
 };

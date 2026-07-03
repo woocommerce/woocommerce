@@ -158,6 +158,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		className,
 		height,
 		imageId,
+		imageSizing,
 		scale,
 		showProductLink = true,
 		style,
@@ -182,9 +183,10 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		null
 	);
 	const finalAspectRatio = resolveAspectRatio(
-		aspectRatio,
 		style,
-		storeAspectRatio
+		aspectRatio,
+		storeAspectRatio,
+		imageSizing
 	);
 	const aspectRatioClass = `wc-block-components-product-image--aspect-ratio-${
 		finalAspectRatio ? finalAspectRatio.replace( '/', '-' ) : 'auto'
