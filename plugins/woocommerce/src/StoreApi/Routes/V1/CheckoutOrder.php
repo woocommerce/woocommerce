@@ -255,7 +255,7 @@ class CheckoutOrder extends AbstractCartRoute {
 	 *
 	 * @param array $shipping The shipping address being applied to the order.
 	 */
-	private function validate_shipping_address_zone( array $shipping ) {
+	private function validate_shipping_address_zone( array $shipping ): void {
 		if ( ! $this->order->needs_shipping() ) {
 			return;
 		}
