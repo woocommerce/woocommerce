@@ -11,7 +11,6 @@ namespace Automattic\WooCommerce\Internal\ProductAttributes;
 
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * Admin UI for wc-visual attribute term metadata.
@@ -32,9 +31,6 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 			return;
 		}
 
-		if ( ! FeaturesUtil::feature_is_enabled( 'wc-visual-attribute' ) ) {
-			return;
-		}
 		add_action( 'created_term', array( $this, 'save_product_attribute_term_fields' ), 10, 3 );
 		add_action( 'edit_term', array( $this, 'save_product_attribute_term_fields' ), 10, 3 );
 

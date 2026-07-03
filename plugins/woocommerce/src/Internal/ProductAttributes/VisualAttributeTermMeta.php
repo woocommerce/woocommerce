@@ -9,8 +9,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\ProductAttributes;
 
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
-
 /**
  * Utilities for wc-visual attribute term metadata.
  *
@@ -158,10 +156,6 @@ class VisualAttributeTermMeta {
 	 * @since 10.9.0
 	 */
 	public static function is_visual_attribute_taxonomy( string $taxonomy ): bool {
-		if ( ! FeaturesUtil::feature_is_enabled( 'wc-visual-attribute' ) ) {
-			return false;
-		}
-
 		static $visual_attribute_taxonomies = array();
 		static $cache_prefix                = '';
 

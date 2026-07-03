@@ -117,7 +117,7 @@ class WC_Admin_Attributes {
 			return $id;
 		}
 
-		VisualAttributeTermAdmin::seed_visual_attribute_terms( $id, $attribute );
+		VisualAttributeTermAdmin::seed_visual_attribute_terms( $id );
 
 		return true;
 	}
