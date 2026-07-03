@@ -345,7 +345,7 @@ describe( 'Product Image Block', () => {
 						productId={ productWithImages.id }
 						showSaleBadge={ false }
 						saleBadgeAlign={ 'left' }
-						imageSizing={ ImageSizing.SINGLE }
+						imageSizing={ ImageSizing.THUMBNAIL }
 						isDescendentOfQueryLoop={ false }
 					/>
 				</ProductDataContextProvider>
