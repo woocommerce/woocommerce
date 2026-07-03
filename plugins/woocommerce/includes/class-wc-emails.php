@@ -1196,7 +1196,7 @@ class WC_Emails {
 		$order = wc_get_order( $args['order_id'] );
 		if (
 		! $args['product'] ||
-		! is_object( $args['product'] ) ||
+		! $args['product'] instanceof WC_Product ||
 		! $args['quantity'] ||
 		! $order
 		) {
