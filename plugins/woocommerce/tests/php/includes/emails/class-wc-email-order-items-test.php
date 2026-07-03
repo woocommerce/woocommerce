@@ -41,7 +41,7 @@ class WC_Email_Order_Items_Test extends \WC_Unit_Test_Case {
 		$content = wc_get_email_order_items( $order );
 
 		$this->assertStringContainsString(
-			'<table class="order-item-data" role="presentation" style="width: 100%;">',
+			'<table class="order-item-data" role="presentation">',
 			$content,
 			'Order item data table should fill the product column so rows share the same layout.'
 		);

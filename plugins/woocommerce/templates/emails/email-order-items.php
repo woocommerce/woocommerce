@@ -61,7 +61,7 @@ foreach ( $items as $item_id => $item ) :
 	<tr class="<?php echo esc_attr( $order_item_class ); ?>">
 		<td class="td font-family text-align-left" style="vertical-align: <?php echo $block_email_editor_enabled ? 'top' : 'middle'; ?>; word-wrap:break-word;">
 			<?php if ( $email_improvements_enabled ) { ?>
-				<table class="order-item-data" role="presentation" style="width: 100%;">
+				<table class="order-item-data" role="presentation">
 					<tr>
 						<?php
 						// Show title/image etc.

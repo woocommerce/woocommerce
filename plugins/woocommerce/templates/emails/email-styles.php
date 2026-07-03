@@ -388,6 +388,10 @@ body {
 	font-family: <?php echo $safe_font_family; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>;
 }
 
+.order-item-data {
+	width: 100%;
+}
+
 .link {
 	color: <?php echo esc_attr( $link_color ); ?>;
 }
