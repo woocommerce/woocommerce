@@ -100,7 +100,7 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 			return array();
 		}
 
-		$loaded_scripts = array_intersect( $wp_scripts->queue, $wp_scripts->done );
+		$loaded_scripts = $wp_scripts->done;
 
 		$handles    = array();
 		$dependents = array();
@@ -120,9 +120,17 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 			return array();
 		}
 
+		$location = '';
+
+		if ( self::CONTEXT_ADMIN === $context ) {
+			$location = $this->get_current_screen_id();
+		} elseif ( self::CONTEXT_FRONTEND === $context ) {
+			$location = $this->get_current_request_path();
+		}
+
 		return array(
 			'context'    => $context,
-			'screen_id'  => self::CONTEXT_ADMIN === $context ? $this->get_current_screen_id() : '',
+			'location'   => $location,
 			'handles'    => implode( ',', array_keys( $handles ) ),
 			'dependents' => implode( ',', array_keys( $dependents ) ),
 		);
@@ -174,10 +182,17 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 	 * @return array<string, string>
 	 */
 	private function get_request_scope( string $context ): array {
+		$location = '';
+
+		if ( self::CONTEXT_ADMIN === $context ) {
+			$location = $this->get_current_screen_id();
+		} elseif ( self::CONTEXT_FRONTEND === $context ) {
+			$location = $this->get_current_request_path();
+		}
+
 		return array(
-			'context'   => $context,
-			'screen_id' => self::CONTEXT_ADMIN === $context ? $this->get_current_screen_id() : '',
-			'path'      => self::CONTEXT_FRONTEND === $context ? $this->get_current_request_path() : '',
+			'context'  => $context,
+			'location' => $location,
 		);
 	}
 

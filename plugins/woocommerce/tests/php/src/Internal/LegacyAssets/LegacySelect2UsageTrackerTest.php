@@ -70,7 +70,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'context'    => 'admin',
-				'screen_id'  => 'woocommerce_page_wc-settings',
+				'location'   => 'woocommerce_page_wc-settings',
 				'handles'    => 'select2',
 				'dependents' => 'my-extension-admin',
 			),
@@ -97,7 +97,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'context'    => 'frontend',
-				'screen_id'  => '',
+				'location'   => '',
 				'handles'    => 'wc-select2',
 				'dependents' => 'my-extension-footer',
 			),
@@ -142,7 +142,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'context'    => 'frontend',
-				'screen_id'  => '',
+				'location'   => '',
 				'handles'    => 'select2',
 				'dependents' => 'select2',
 			),
@@ -208,7 +208,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'context'    => 'frontend',
-				'screen_id'  => '',
+				'location'   => '',
 				'handles'    => 'wc-select2',
 				'dependents' => 'my-extension-footer',
 			),
@@ -239,13 +239,12 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$original_request_uri     = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
 		$_SERVER['REQUEST_URI']   = '/shop/?filter=featured';
 		$frontend_shop_page_scope = array(
-			'context'   => 'frontend',
-			'screen_id' => '',
-			'path'      => '/shop/',
+			'context'  => 'frontend',
+			'location' => '/shop/',
 		);
 		$event                    = array(
 			'context'    => 'frontend',
-			'screen_id'  => '',
+			'location'   => '/shop/',
 			'handles'    => 'wc-select2',
 			'dependents' => 'my-extension-footer',
 		);
