@@ -389,6 +389,13 @@ class Features {
 			return true;
 		}
 
+		// Feature classes contribute the woocommerce_meta fields that wc-admin persists user
+		// preferences through (via woocommerce_admin_get_user_data_fields), so users endpoints
+		// need features loaded for their responses to be complete.
+		if ( str_starts_with( $route, '/wp/v2/users' ) ) {
+			return true;
+		}
+
 		// Matches wc/v1..v4, wc/store, wc-admin, wc-analytics, wc-telemetry, etc.
 		return (bool) preg_match( '#^/wc(?:[-/]|$)#', $route );
 	}
