@@ -156,6 +156,23 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `lazy_load_namespace` should execute callback immediately for batch requests, because batch subrequests bypass `rest_pre_dispatch`.
+	 */
+	public function test_lazy_load_namespace_executes_callback_for_batch_requests() {
+		$callback_executed = false;
+		$callback          = function () use ( &$callback_executed ) {
+			$callback_executed = true;
+		};
+
+		// Set up a batch REST route.
+		$GLOBALS['wp']->query_vars['rest_route'] = '/batch/v1';
+
+		$this->rest_api_util->lazy_load_namespace( 'wc/v3', $callback );
+
+		$this->assertTrue( $callback_executed );
+	}
+
+	/**
 	 * @testdox `lazy_load_namespace` should handle missing rest_route gracefully.
 	 */
 	public function test_lazy_load_namespace_handles_missing_rest_route() {
