@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
  * Class WC_Tests_Order.
@@ -214,15 +215,15 @@ class WC_Tests_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that get_shipping_to_display() shows a "Free" indicator instead of
-	 * duplicating the shipping method title when the shipping cost is zero.
+	 * Test that when email improvements are enabled, the shipping row value shows
+	 * "Free" instead of duplicating the method name for zero-cost shipping methods.
 	 *
-	 * @link https://github.com/woocommerce/woocommerce/issues/65904
+	 * @link https://github.com/woocommerce/woocommerce/issues/66002
 	 */
-	public function test_get_shipping_to_display_free_shipping_does_not_duplicate_method_name() {
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( 23.85 );
-		$product->save();
+	public function test_shipping_row_value_shows_free_with_email_improvements_enabled() {
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		$original_value      = $features_controller->feature_is_enabled( 'email_improvements' );
+		$features_controller->change_feature_enable( 'email_improvements', true );
 
 		$shipping_rate = new WC_Shipping_Rate( 'free_shipping', 'Royal Mail 1st Class: Free', '0', array(), 'free_shipping' );
 		$shipping_item = new WC_Order_Item_Shipping();
@@ -236,12 +237,49 @@ class WC_Tests_Orders extends WC_Unit_Test_Case {
 		);
 
 		$order = new WC_Order();
-		$order->add_product( $product, 1 );
 		$order->add_item( $shipping_item );
 		$order->calculate_totals( true );
 
-		$this->assertEquals( 'Royal Mail 1st Class: Free', $order->get_shipping_method() );
-		$this->assertEquals( 'Free', $order->get_shipping_to_display() );
-		$this->assertNotEquals( $order->get_shipping_method(), $order->get_shipping_to_display() );
+		$totals = $order->get_order_item_totals();
+
+		$this->assertArrayHasKey( 'shipping', $totals );
+		$this->assertEquals( 'Free', $totals['shipping']['value'] );
+		$this->assertNotEquals( $order->get_shipping_method(), $totals['shipping']['value'] );
+
+		$features_controller->change_feature_enable( 'email_improvements', $original_value );
+	}
+
+	/**
+	 * Test that when email improvements are disabled, the shipping row value
+	 * still shows the method name (no regression on existing behaviour).
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/66002
+	 */
+	public function test_shipping_row_value_shows_method_name_with_email_improvements_disabled() {
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		$original_value      = $features_controller->feature_is_enabled( 'email_improvements' );
+		$features_controller->change_feature_enable( 'email_improvements', false );
+
+		$shipping_rate = new WC_Shipping_Rate( 'free_shipping', 'Royal Mail 1st Class: Free', '0', array(), 'free_shipping' );
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_props(
+			array(
+				'method_title' => $shipping_rate->label,
+				'method_id'    => $shipping_rate->id,
+				'total'        => wc_format_decimal( $shipping_rate->cost ),
+				'taxes'        => $shipping_rate->taxes,
+			)
+		);
+
+		$order = new WC_Order();
+		$order->add_item( $shipping_item );
+		$order->calculate_totals( true );
+
+		$totals = $order->get_order_item_totals();
+
+		$this->assertArrayHasKey( 'shipping', $totals );
+		$this->assertEquals( 'Royal Mail 1st Class: Free', $totals['shipping']['value'] );
+
+		$features_controller->change_feature_enable( 'email_improvements', $original_value );
 	}
 }
