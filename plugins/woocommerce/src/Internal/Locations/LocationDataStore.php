@@ -33,27 +33,27 @@ class LocationDataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Sto
 	public function create( &$location ): void {
 		global $wpdb;
 
-		$created = $location->get_date_created();
-		if ( empty( $created ) ) {
-			$created = gmdate( 'Y-m-d H:i:s' );
-			$location->set_date_created( $created );
+		if ( ! $location->get_date_created() ) {
+			$location->set_date_created( time() );
 		}
+		$location->set_date_modified( time() );
 
 		$inserted = $wpdb->insert(
 			$this->get_table_name(),
 			array(
-				'name'           => $location->get_name(),
-				'type'           => $location->get_type(),
-				'address_1'      => $location->get_address_1(),
-				'address_2'      => $location->get_address_2(),
-				'city'           => $location->get_city(),
-				'state'          => $location->get_state(),
-				'postcode'       => $location->get_postcode(),
-				'country'        => $location->get_country(),
-				'created_at_gmt' => $created,
-				'deleted_at_gmt' => $location->get_date_deleted() ? $location->get_date_deleted() : null,
+				'name'              => $location->get_name(),
+				'type'              => $location->get_type(),
+				'address_1'         => $location->get_address_1(),
+				'address_2'         => $location->get_address_2(),
+				'city'              => $location->get_city(),
+				'state'             => $location->get_state(),
+				'postcode'          => $location->get_postcode(),
+				'country'           => $location->get_country(),
+				'date_created_gmt'  => $this->to_gmt_string( $location->get_date_created() ),
+				'date_modified_gmt' => $this->to_gmt_string( $location->get_date_modified() ),
+				'date_deleted_gmt'  => $this->to_gmt_string( $location->get_date_deleted() ),
 			),
-			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
+			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
 		);
 
 		if ( false === $inserted ) {
@@ -90,16 +90,17 @@ class LocationDataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Sto
 
 		$location->set_props(
 			array(
-				'name'         => $row['name'],
-				'type'         => $row['type'],
-				'address_1'    => $row['address_1'],
-				'address_2'    => $row['address_2'],
-				'city'         => $row['city'],
-				'state'        => $row['state'],
-				'postcode'     => $row['postcode'],
-				'country'      => $row['country'],
-				'date_created' => $row['created_at_gmt'],
-				'date_deleted' => $row['deleted_at_gmt'],
+				'name'          => $row['name'],
+				'type'          => $row['type'],
+				'address_1'     => $row['address_1'],
+				'address_2'     => $row['address_2'],
+				'city'          => $row['city'],
+				'state'         => $row['state'],
+				'postcode'      => $row['postcode'],
+				'country'       => $row['country'],
+				'date_created'  => $this->to_utc_timestamp( $row['date_created_gmt'] ),
+				'date_modified' => $this->to_utc_timestamp( $row['date_modified_gmt'] ),
+				'date_deleted'  => $this->to_utc_timestamp( $row['date_deleted_gmt'] ),
 			)
 		);
 		$location->set_object_read( true );
@@ -113,21 +114,24 @@ class LocationDataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Sto
 	public function update( &$location ): void {
 		global $wpdb;
 
+		$location->set_date_modified( time() );
+
 		$wpdb->update(
 			$this->get_table_name(),
 			array(
-				'name'           => $location->get_name(),
-				'type'           => $location->get_type(),
-				'address_1'      => $location->get_address_1(),
-				'address_2'      => $location->get_address_2(),
-				'city'           => $location->get_city(),
-				'state'          => $location->get_state(),
-				'postcode'       => $location->get_postcode(),
-				'country'        => $location->get_country(),
-				'deleted_at_gmt' => $location->get_date_deleted() ? $location->get_date_deleted() : null,
+				'name'              => $location->get_name(),
+				'type'              => $location->get_type(),
+				'address_1'         => $location->get_address_1(),
+				'address_2'         => $location->get_address_2(),
+				'city'              => $location->get_city(),
+				'state'             => $location->get_state(),
+				'postcode'          => $location->get_postcode(),
+				'country'           => $location->get_country(),
+				'date_modified_gmt' => $this->to_gmt_string( $location->get_date_modified() ),
+				'date_deleted_gmt'  => $this->to_gmt_string( $location->get_date_deleted() ),
 			),
 			array( 'id' => $location->get_id() ),
-			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' ),
+			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' ),
 			array( '%d' )
 		);
 
@@ -135,34 +139,30 @@ class LocationDataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Sto
 	}
 
 	/**
-	 * Soft delete a location.
-	 *
-	 * Declares a `bool` return (unlike the brief's `void`) because
-	 * `WC_Object_Data_Store_Interface::delete()` documents a `bool` return;
-	 * a `void` (or undeclared) return trips PHPStan's childReturnType check
-	 * at level 8, and the baseline must not grow to accommodate it.
-	 *
-	 * force_delete is intentionally NOT honored — locations are soft-delete only
-	 * (matching FulfillmentsDataStore).
+	 * Soft-delete a location. force_delete is intentionally ignored; locations are soft-delete only.
 	 *
 	 * @param Location $location Location object.
-	 * @param array    $args     Unused. Present to satisfy WC_Object_Data_Store_Interface.
-	 * @return bool True on success, false on failure.
+	 * @param array    $args     Unused; present for interface compatibility.
+	 * @return bool True on success.
 	 */
 	public function delete( &$location, $args = array() ): bool {
 		global $wpdb;
 
-		$deleted_at = gmdate( 'Y-m-d H:i:s' );
-		$result     = $wpdb->update(
+		$now = time();
+		$location->set_date_deleted( $now );
+		$location->set_date_modified( $now );
+
+		$result = $wpdb->update(
 			$this->get_table_name(),
 			array(
-				'deleted_at_gmt' => $deleted_at,
+				'date_modified_gmt' => $this->to_gmt_string( $location->get_date_modified() ),
+				'date_deleted_gmt'  => $this->to_gmt_string( $location->get_date_deleted() ),
 			),
 			array( 'id' => $location->get_id() ),
-			array( '%s' ),
+			array( '%s', '%s' ),
 			array( '%d' )
 		);
-		$location->set_date_deleted( $deleted_at );
+
 		$location->apply_changes();
 		return false !== $result;
 	}
@@ -176,7 +176,7 @@ class LocationDataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Sto
 		global $wpdb;
 		return (bool) $wpdb->get_var(
 			$wpdb->prepare(
-				'SELECT 1 FROM %i WHERE id = %d AND deleted_at_gmt IS NULL LIMIT 1',
+				'SELECT 1 FROM %i WHERE id = %d AND date_deleted_gmt IS NULL LIMIT 1',
 				$this->get_table_name(),
 				$id
 			)
@@ -192,7 +192,7 @@ class LocationDataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Sto
 		global $wpdb;
 		$ids = $wpdb->get_col(
 			$wpdb->prepare(
-				'SELECT id FROM %i WHERE deleted_at_gmt IS NULL ORDER BY id ASC',
+				'SELECT id FROM %i WHERE date_deleted_gmt IS NULL ORDER BY id ASC',
 				$this->get_table_name()
 			)
 		);
@@ -200,10 +200,30 @@ class LocationDataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Sto
 	}
 
 	/**
-	 * Locations do not support metadata (there is no wc_location_meta table). These override the
-	 * inherited WC_Data_Store_WP meta methods so Location meta can never route to the shared postmeta
-	 * table. If location meta is needed later, add a wc_location_meta table + proper $meta_type/get_db_info
-	 * and remove these no-ops.
+	 * Convert a stored GMT datetime string to a UTC timestamp.
+	 *
+	 * @param string|null $value GMT 'Y-m-d H:i:s' string.
+	 */
+	private function to_utc_timestamp( $value ): ?int {
+		if ( empty( $value ) ) {
+			return null;
+		}
+		$timestamp = wc_string_to_timestamp( (string) $value );
+		return $timestamp ? $timestamp : null;
+	}
+
+	/**
+	 * Format a date prop as a GMT datetime string for storage.
+	 *
+	 * @param \WC_DateTime|null $date Date prop value.
+	 */
+	private function to_gmt_string( $date ): ?string {
+		return $date instanceof \WC_DateTime ? gmdate( 'Y-m-d H:i:s', $date->getTimestamp() ) : null;
+	}
+
+	/*
+	 * Locations have no meta table. These no-ops override WC_Data_Store_WP so Location meta can
+	 * never route to the shared postmeta table. Add a wc_location_meta table here if meta is needed.
 	 */
 
 	/**

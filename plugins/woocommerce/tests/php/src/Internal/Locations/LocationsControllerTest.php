@@ -40,25 +40,18 @@ class LocationsControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox create_tables() creates wc_locations as InnoDB (without is_default) with a key on type.
+	 * @testdox create_tables() creates wc_locations (without is_default) with a key on type.
 	 */
-	public function test_create_tables_creates_innodb_table_with_type_key(): void {
+	public function test_create_tables_creates_table_with_type_key(): void {
 		global $wpdb;
 
 		$this->assertTrue( $this->sut->tables_exist(), 'wc_locations should exist after creation.' );
 
-		$engine = $wpdb->get_var(
-			$wpdb->prepare(
-				'SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s',
-				$this->sut->get_table_name()
-			)
-		);
-		$this->assertEquals( 'InnoDB', $engine, 'Table engine must be InnoDB.' );
-
 		$create_sql = $wpdb->get_var( $wpdb->prepare( 'SHOW CREATE TABLE %i', $this->sut->get_table_name() ), 1 );
 		$this->assertStringNotContainsString( '`is_default`', $create_sql, 'is_default column must not exist.' );
 		$this->assertStringContainsString( 'KEY `type`', $create_sql, 'There must be a key on type.' );
-		$this->assertStringContainsString( '`deleted_at_gmt`', $create_sql, 'Soft-delete column must exist.' );
+		$this->assertStringContainsString( '`date_deleted_gmt`', $create_sql, 'Soft-delete column must exist.' );
+		$this->assertStringContainsString( '`date_modified_gmt`', $create_sql, 'Modified column must exist.' );
 	}
 
 	/**

@@ -75,6 +75,21 @@ class LocationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Dates round-trip as WC_DateTime objects and date_modified is populated on save.
+	 */
+	public function test_dates_round_trip_as_wc_datetime(): void {
+		$location = new Location();
+		$location->set_name( 'Dated' );
+		$location->set_type( 'pos' );
+		$location->save();
+
+		$read = new Location( $location->get_id() );
+		$this->assertInstanceOf( \WC_DateTime::class, $read->get_date_created() );
+		$this->assertInstanceOf( \WC_DateTime::class, $read->get_date_modified() );
+		$this->assertNull( $read->get_date_deleted() );
+	}
+
+	/**
 	 * @testdox get_location_ids() returns active ids and excludes soft-deleted ones.
 	 */
 	public function test_get_location_ids_excludes_soft_deleted(): void {

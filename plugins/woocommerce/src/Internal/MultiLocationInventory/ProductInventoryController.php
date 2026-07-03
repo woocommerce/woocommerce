@@ -47,7 +47,7 @@ class ProductInventoryController extends \Automattic\WooCommerce\Internal\Abstra
 	PRIMARY KEY  (id),
 	UNIQUE KEY product_variation_location (product_id, variation_id, location_id),
 	KEY location (location_id, product_id, variation_id)
-) ENGINE=InnoDB $collate;";
+) $collate;";
 	}
 
 	/**

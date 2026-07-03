@@ -36,21 +36,22 @@ class Location extends \WC_Data {
 	protected $cache_group = 'locations';
 
 	/**
-	 * Default data. GMT datetimes are stored as 'Y-m-d H:i:s' strings.
+	 * Core data for this object.
 	 *
 	 * @var array
 	 */
 	protected $data = array(
-		'name'         => '',
-		'type'         => '',
-		'address_1'    => '',
-		'address_2'    => '',
-		'city'         => '',
-		'state'        => '',
-		'postcode'     => '',
-		'country'      => '',
-		'date_created' => null,
-		'date_deleted' => null,
+		'name'          => '',
+		'type'          => '',
+		'address_1'     => '',
+		'address_2'     => '',
+		'city'          => '',
+		'state'         => '',
+		'postcode'      => '',
+		'country'       => '',
+		'date_created'  => null,
+		'date_modified' => null,
+		'date_deleted'  => null,
 	);
 
 	/**
@@ -148,20 +149,30 @@ class Location extends \WC_Data {
 	}
 
 	/**
-	 * Get created date (GMT 'Y-m-d H:i:s' string or null).
+	 * Get created date.
 	 *
 	 * @param string $context View or edit context.
-	 * @return string|null
+	 * @return \WC_DateTime|null
 	 */
 	public function get_date_created( string $context = 'view' ) {
 		return $this->get_prop( 'date_created', $context );
 	}
 
 	/**
-	 * Get deleted date (GMT 'Y-m-d H:i:s' string or null).
+	 * Get last-modified date.
 	 *
 	 * @param string $context View or edit context.
-	 * @return string|null
+	 * @return \WC_DateTime|null
+	 */
+	public function get_date_modified( string $context = 'view' ) {
+		return $this->get_prop( 'date_modified', $context );
+	}
+
+	/**
+	 * Get deleted date.
+	 *
+	 * @param string $context View or edit context.
+	 * @return \WC_DateTime|null
 	 */
 	public function get_date_deleted( string $context = 'view' ) {
 		return $this->get_prop( 'date_deleted', $context );
@@ -253,18 +264,41 @@ class Location extends \WC_Data {
 	/**
 	 * Set created date.
 	 *
-	 * @param string|null $date GMT 'Y-m-d H:i:s' string or null.
+	 * @param string|integer|null $date UTC timestamp or date string; site timezone assumed if none given.
 	 */
 	public function set_date_created( $date ): void {
-		$this->set_prop( 'date_created', $date );
+		$this->set_date( 'date_created', $date );
+	}
+
+	/**
+	 * Set last-modified date.
+	 *
+	 * @param string|integer|null $date UTC timestamp or date string; site timezone assumed if none given.
+	 */
+	public function set_date_modified( $date ): void {
+		$this->set_date( 'date_modified', $date );
 	}
 
 	/**
 	 * Set deleted date.
 	 *
-	 * @param string|null $date GMT 'Y-m-d H:i:s' string or null.
+	 * @param string|integer|null $date UTC timestamp or date string; site timezone assumed if none given.
 	 */
 	public function set_date_deleted( $date ): void {
-		$this->set_prop( 'date_deleted', $date );
+		$this->set_date( 'date_deleted', $date );
+	}
+
+	/**
+	 * Set a date prop, storing null for an empty value.
+	 *
+	 * @param string              $prop Prop name.
+	 * @param string|integer|null $date UTC timestamp or date string.
+	 */
+	private function set_date( string $prop, $date ): void {
+		if ( null === $date || '' === $date ) {
+			$this->set_prop( $prop, null );
+			return;
+		}
+		$this->set_date_prop( $prop, $date );
 	}
 }

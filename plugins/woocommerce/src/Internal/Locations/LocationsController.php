@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
 class LocationsController extends \Automattic\WooCommerce\Internal\AbstractFeatureTablesInstaller {
 
 	public const TABLES_CREATED_OPTION    = 'woocommerce_locations_db_tables_created';
-	public const DEFAULT_LOCATION_TYPE    = 'pos';
+	public const POS_LOCATION_TYPE        = 'pos';
 	public const CONSUMER_FILTER          = 'woocommerce_location_feature_consumers';
 	public const DEFAULT_LOCATIONS_OPTION = 'woocommerce_default_locations';
 
@@ -50,16 +50,16 @@ class LocationsController extends \Automattic\WooCommerce\Internal\AbstractFeatu
 	state varchar(100) NOT NULL DEFAULT '',
 	postcode varchar(20) NOT NULL DEFAULT '',
 	country char(2) NOT NULL DEFAULT '',
-	created_at_gmt datetime NOT NULL,
-	deleted_at_gmt datetime NULL DEFAULT NULL,
+	date_created_gmt datetime NOT NULL,
+	date_modified_gmt datetime NOT NULL,
+	date_deleted_gmt datetime NULL DEFAULT NULL,
 	PRIMARY KEY  (id),
 	KEY type (type)
-) ENGINE=InnoDB $collate;";
+) $collate;";
 	}
 
 	/**
-	 * Register the location data store. Unconditional: the store is harmless dormant
-	 * infrastructure, and the table's existence is the real gate.
+	 * Register the location data store.
 	 *
 	 * @param array $data_stores Registered data stores.
 	 * @return array
@@ -128,14 +128,12 @@ class LocationsController extends \Automattic\WooCommerce\Internal\AbstractFeatu
 	}
 
 	/**
-	 * Seed the default pos location if it does not already exist. Idempotent.
+	 * Seed the default pos location from store settings if none exists. Idempotent.
 	 *
-	 * Address is an owned one-time default from the structured main-store options
-	 * (the pos location is an independent physical address, not a live mirror of
-	 * store settings, so this snapshot is a starting value, not a synced reference).
+	 * The address is a one-time snapshot, not a live mirror of store settings.
 	 */
 	public function maybe_seed_default_location(): void {
-		if ( $this->get_default_location_id( self::DEFAULT_LOCATION_TYPE ) > 0 ) {
+		if ( $this->get_default_location_id( self::POS_LOCATION_TYPE ) > 0 ) {
 			return;
 		}
 
@@ -147,7 +145,7 @@ class LocationsController extends \Automattic\WooCommerce\Internal\AbstractFeatu
 		$base = wc_get_base_location();
 
 		$location = new Location();
-		$location->set_type( self::DEFAULT_LOCATION_TYPE );
+		$location->set_type( self::POS_LOCATION_TYPE );
 		$location->set_name( $name );
 		$location->set_address_1( (string) get_option( 'woocommerce_store_address', '' ) );
 		$location->set_address_2( (string) get_option( 'woocommerce_store_address_2', '' ) );
@@ -157,7 +155,7 @@ class LocationsController extends \Automattic\WooCommerce\Internal\AbstractFeatu
 		$location->set_state( (string) ( $base['state'] ?? '' ) );
 		$location->save();
 
-		$this->set_default_location( self::DEFAULT_LOCATION_TYPE, $location->get_id() );
+		$this->set_default_location( self::POS_LOCATION_TYPE, $location->get_id() );
 	}
 
 	/**

@@ -34,23 +34,15 @@ class ProductInventoryControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox create_tables() creates wc_product_inventory as InnoDB with the unique triple key.
+	 * @testdox create_tables() creates wc_product_inventory with the unique triple key.
 	 */
-	public function test_create_tables_creates_innodb_table_with_unique_triple(): void {
+	public function test_create_tables_creates_table_with_unique_triple(): void {
 		global $wpdb;
 
 		$controller = wc_get_container()->get( ProductInventoryController::class );
 		$controller->create_tables();
 
 		$this->assertTrue( $controller->tables_exist() );
-
-		$engine = $wpdb->get_var(
-			$wpdb->prepare(
-				'SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s',
-				$controller->get_table_name()
-			)
-		);
-		$this->assertEquals( 'InnoDB', $engine );
 
 		$create_sql = $wpdb->get_var( $wpdb->prepare( 'SHOW CREATE TABLE %i', $controller->get_table_name() ), 1 );
 		$this->assertStringContainsString( 'UNIQUE KEY', $create_sql );
