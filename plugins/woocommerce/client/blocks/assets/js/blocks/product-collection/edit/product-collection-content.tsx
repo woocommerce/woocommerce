@@ -45,12 +45,10 @@ const useQueryId = (
 	const { getBlockParentsByBlockName } = useSelect( blockEditorStore );
 
 	// queryId must be unique per block instance (for pagination) but stable
-	// across re-mounts. Prefer the persisted value so re-mounting an existing
-	// block doesn't rewrite the attribute and flag the entity dirty on open
-	// (#48936); brand-new blocks have no queryId yet and fall back to instanceId.
-	let queryId = Number.isFinite( attributes.queryId )
-		? ( attributes.queryId as number )
-		: ( instanceId as number );
+	// across re-mounts. Prefer the persisted value so re-mounting doesn't
+	// rewrite the attribute and flag the entity dirty on open (#48936);
+	// brand-new blocks fall back to instanceId.
+	let queryId = attributes.queryId ?? ( instanceId as number );
 
 	// We need to take special care when handling instances in a sync pattern
 	// to avoid an infinite loop. When two instances of a pattern are placed
@@ -90,9 +88,8 @@ const ProductCollectionContent = ( {
 		isUsingReferencePreviewMode,
 	} );
 
-	// Provide the preview state to inner blocks (e.g. product-template) via block
-	// context instead of a persisted attribute, so deriving it never marks the
-	// post/template dirty.
+	// Provided to inner blocks via context instead of a persisted attribute,
+	// so deriving it never marks the entity dirty.
 	const previewStateContext = useMemo(
 		() => ( {
 			__privateProductCollectionPreviewState: previewState,

@@ -406,21 +406,11 @@ export const useSetPreviewState = ( {
 	usesReference?: string[] | undefined;
 	isUsingReferencePreviewMode: boolean;
 } ): PreviewState | undefined => {
-	// Preview state is editor-only UI — it drives the "Preview" badge and is
-	// passed down to inner blocks via block context. We keep it in local state
-	// rather than a block attribute: writing an attribute marks the entity dirty
-	// (and on navigation even a non-persistent write loses the race), flagging
-	// unsaved changes the merchant never made (#48936 / #51671).
-	const [ previewState, setLocalPreviewState ] = useState<
-		PreviewState | undefined
-	>( initialPreviewState );
-
-	const setState = ( newPreviewState: PreviewState ) => {
-		setLocalPreviewState( ( current ) => ( {
-			...current,
-			...newPreviewState,
-		} ) );
-	};
+	// Preview state is editor-only UI, so keep it in local state rather than a
+	// block attribute — attribute writes mark the entity dirty (#48936).
+	const [ previewState, setState ] = useState< PreviewState | undefined >(
+		initialPreviewState
+	);
 
 	/**
 	 * When usesReference is available on Frontend but not on Editor side,
@@ -432,7 +422,7 @@ export const useSetPreviewState = ( {
 	);
 	useEffect( () => {
 		if ( isUsingReferencePreviewMode ) {
-			setLocalPreviewState( {
+			setState( {
 				isPreview: usesReferencePreviewMessage.length > 0,
 				previewMessage: usesReferencePreviewMessage,
 			} );
@@ -473,8 +463,8 @@ export const useSetPreviewState = ( {
 			? location.sourceData?.termId
 			: null;
 	useEffect( () => {
-		// Collections that declared a static `initialPreviewState` keep it — the
-		// generic-archive fallback must not overwrite it (#48936 regression).
+		// Don't overwrite a collection's static `initialPreviewState` with the
+		// generic archive fallback.
 		if (
 			! setPreviewState &&
 			! isUsingReferencePreviewMode &&
@@ -483,7 +473,7 @@ export const useSetPreviewState = ( {
 			const isGenericArchiveTemplate =
 				location.type === LocationType.Archive && termId === null;
 
-			setLocalPreviewState( {
+			setState( {
 				isPreview: isGenericArchiveTemplate
 					? !! attributes?.query?.inherit
 					: false,

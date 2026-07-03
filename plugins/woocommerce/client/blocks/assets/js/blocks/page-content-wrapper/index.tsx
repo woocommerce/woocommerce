@@ -14,6 +14,7 @@ import {
 } from '@wordpress/block-editor';
 import { page } from '@wordpress/icons';
 import { CHECKOUT_PAGE_ID, CART_PAGE_ID } from '@woocommerce/block-settings';
+import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -31,11 +32,9 @@ const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
 		className: 'wp-block-woocommerce-page-content-wrapper',
 	} );
 
-	// Resolve the page being previewed so the inner post-title/post-content
-	// render the right content in the editor canvas. We provide this as block
-	// context rather than writing it to attributes: mutating attributes on
-	// mount makes the Site Editor flag the template as dirty (#48936). On the
-	// frontend the queried post supplies this context, so it's editor-only.
+	// Provide the previewed page as block context rather than writing it to
+	// attributes on mount, which flagged the template dirty on open (#48936).
+	// On the frontend the queried post supplies this context.
 	let postId = 0;
 	if ( attributes.page === 'checkout' ) {
 		postId = CHECKOUT_PAGE_ID;
@@ -43,17 +42,16 @@ const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
 		postId = CART_PAGE_ID;
 	}
 
-	const innerBlocks = <InnerBlocks template={ TEMPLATE } />;
+	const context = useMemo(
+		() => ( postId ? { postId, postType: 'page' } : {} ),
+		[ postId ]
+	);
 
 	return (
 		<div { ...blockProps }>
-			{ postId ? (
-				<BlockContextProvider value={ { postId, postType: 'page' } }>
-					{ innerBlocks }
-				</BlockContextProvider>
-			) : (
-				innerBlocks
-			) }
+			<BlockContextProvider value={ context }>
+				<InnerBlocks template={ TEMPLATE } />
+			</BlockContextProvider>
 		</div>
 	);
 };

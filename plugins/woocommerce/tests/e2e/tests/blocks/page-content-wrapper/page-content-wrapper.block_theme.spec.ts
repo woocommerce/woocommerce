@@ -75,11 +75,9 @@ for ( const template of templates ) {
 			await expect( page.getByText( userText ).first() ).toBeVisible();
 		} );
 
-		// Regression test for #48936: opening a template that uses this block in
-		// the Site Editor must not flag it as dirty. Previously the block wrote
-		// postId/postType to its attributes on mount, enabling the Save button
-		// with no user edits — which could overwrite the template with empty
-		// content.
+		// Regression test for #48936: opening a template that uses this block
+		// must not flag it as dirty (the block previously wrote postId/postType
+		// to attributes on mount, enabling the Save button with no edits).
 		test( `opening the ${ template.title } template in the Site Editor does not enable the Save button`, async ( {
 			page,
 			admin,

@@ -25,8 +25,6 @@ export const selectView = (
 		selectBlock,
 		__unstableMarkNextChangeAsNotPersistent,
 	} = dispatch( 'core/block-editor' );
-	// `currentView` is an editor-only view toggle. Mark the change as
-	// non-persistent so switching views doesn't create an undo step.
 	__unstableMarkNextChangeAsNotPersistent();
 	updateBlockAttributes( clientId, {
 		currentView: viewName,

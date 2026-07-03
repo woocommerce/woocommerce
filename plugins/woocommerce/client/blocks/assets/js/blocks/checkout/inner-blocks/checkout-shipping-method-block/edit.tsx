@@ -184,9 +184,8 @@ export const Edit = ( {
 		return null;
 	}
 
-	// Read the merchant-configured local pickup title at render (mirroring the
-	// frontend in block.tsx) instead of writing it to the attribute on mount,
-	// which flagged the page dirty on open (#48936).
+	// Read the local pickup title at render (mirroring the frontend) instead of
+	// writing it to the attribute on mount, which flagged the page dirty (#48936).
 	const localPickupText = getSetting< string >(
 		'localPickupText',
 		attributes.localPickupText || defaultLocalPickupText
