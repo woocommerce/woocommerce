@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Lazy load Store API route registration so wc/store routes are only registered for requests that target them.
