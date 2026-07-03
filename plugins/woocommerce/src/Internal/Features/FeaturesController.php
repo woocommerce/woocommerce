@@ -582,6 +582,14 @@ class FeaturesController {
 				'is_experimental'              => false,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
+			'multi_location_inventory'           => array(
+				'name'                         => __( 'Multiple inventory locations', 'woocommerce' ),
+				'description'                  => __( 'Track product stock across multiple inventory locations. Used by WooCommerce Point of Sale.', 'woocommerce' ),
+				'is_experimental'              => false,
+				'enabled_by_default'           => false,
+				'disable_ui'                   => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 			'mcp_integration'                    => array(
 				'name'                         => __( 'WooCommerce MCP', 'woocommerce' ),
 				'description'                  => $this->get_mcp_integration_description(),
