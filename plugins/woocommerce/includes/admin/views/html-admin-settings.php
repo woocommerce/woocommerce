@@ -38,7 +38,19 @@ if ( ! $tab_exists ) {
 
 $hide_nav = 'checkout' === $current_tab && in_array( $current_section, array( 'offline', 'bacs', 'cheque', 'cod' ), true );
 
-$settings_ui_context       = SettingsUIRequestContext::get_current();
+// Resolve the Settings UI context for this request, falling back to legacy
+// rendering when the settings SDK classes are unavailable. The class can be
+// missing mid-update, when this file has been replaced on disk but the cached
+// autoloader has not refreshed yet.
+$settings_ui_context = null;
+try {
+	if ( class_exists( SettingsUIRequestContext::class ) ) {
+		$settings_ui_context = SettingsUIRequestContext::get_current();
+	}
+} catch ( \Throwable $e ) {
+	$settings_ui_context = null;
+}
+
 $settings_ui_settings_page = $settings_ui_context ? $settings_ui_context->get_settings_page() : null;
 $is_settings_ui_page       = null !== $settings_ui_settings_page;
 
