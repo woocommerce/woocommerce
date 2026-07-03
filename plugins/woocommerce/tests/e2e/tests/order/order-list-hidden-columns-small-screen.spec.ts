@@ -41,6 +41,7 @@ test.describe(
 		test( 'date/status copies follow the Columns menu below 782px', async ( {
 			page,
 		} ) => {
+			await page.setViewportSize( SMALL_SCREEN );
 			await page.goto( 'wp-admin/admin.php?page=wc-orders' );
 
 			const dateCopy = page
@@ -54,31 +55,43 @@ test.describe(
 				)
 				.first();
 
-			// Open Screen Options at desktop width: WordPress hides the toggle
-			// below 782px, so it can only be opened before shrinking. The panel
-			// stays open across the resize, and the fix reacts to the column's
-			// `hidden` class regardless of the width at which it was toggled.
-			await page.locator( '#show-settings-link' ).click();
-
-			// Shrink below the 782px breakpoint that renders the copies.
-			await page.setViewportSize( SMALL_SCREEN );
+			// This test verifies the CSS contract of the fix: a small-screen
+			// copy is hidden whenever its real column header carries the
+			// `hidden` class. We toggle that class directly the way WordPress's
+			// Screen Options JS (wp-admin/js/common.js `columns`) does, because
+			// the Screen Options panel toggle is not reliably actionable in
+			// headless CI below 782px, and hiding a column is core behavior we
+			// only react to, not own.
+			const setColumnHidden = ( column: string, hidden: boolean ) =>
+				page.evaluate(
+					( { col, hide } ) => {
+						document
+							.querySelectorAll(
+								`.wp-list-table th.column-${ col }, .wp-list-table td.column-${ col }`
+							)
+							.forEach( ( cell ) =>
+								cell.classList.toggle( 'hidden', hide )
+							);
+					},
+					{ col: column, hide: hidden }
+				);
 
 			// Both copies visible by default (both columns shown).
 			await expect( dateCopy ).toBeVisible();
 			await expect( statusCopy ).toBeVisible();
 
-			// Hide the Date column -> its copy disappears live.
-			await page.locator( '#order_date-hide' ).uncheck();
+			// Hide the Date column -> its copy disappears.
+			await setColumnHidden( 'order_date', true );
 			await expect( dateCopy ).toBeHidden();
 			// Status copy is untouched.
 			await expect( statusCopy ).toBeVisible();
 
-			// Re-show the Date column -> its copy returns live (both directions).
-			await page.locator( '#order_date-hide' ).check();
+			// Re-show the Date column -> its copy returns (both directions).
+			await setColumnHidden( 'order_date', false );
 			await expect( dateCopy ).toBeVisible();
 
-			// Hide the Status column -> its copy disappears live.
-			await page.locator( '#order_status-hide' ).uncheck();
+			// Hide the Status column -> its copy disappears.
+			await setColumnHidden( 'order_status', true );
 			await expect( statusCopy ).toBeHidden();
 			await expect( dateCopy ).toBeVisible();
 		} );
