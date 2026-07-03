@@ -72,10 +72,19 @@ type BreakoutInfo = {
  * has no padding there's nothing to break out of.
  *
  * Returns false when the block sits in a column, since columns keep their width.
+ *
+ * Skips the ancestor lookup when `enabled` is false (block isn't full width) so
+ * we don't traverse the tree for every block in the editor.
  */
-function useBreakoutPadding( clientId: string ): BreakoutInfo | false {
+function useBreakoutPadding(
+	clientId: string,
+	enabled: boolean
+): BreakoutInfo | false {
 	return useSelect(
 		( select ) => {
+			if ( ! enabled ) {
+				return { left: null, right: null };
+			}
 			const { getBlockParents, getBlockName, getBlockAttributes } =
 				select( blockEditorStore );
 			// getBlockParents lists ancestors root-first, so the last entry is
@@ -114,15 +123,16 @@ function useBreakoutPadding( clientId: string ): BreakoutInfo | false {
 
 			return { left: null, right: null };
 		},
-		[ clientId ]
+		[ clientId, enabled ]
 	);
 }
 
 function BlockWithFullWidth( { block: BlockListBlock, props } ) {
-	const breakout = useBreakoutPadding( props.clientId );
+	const isFullWidth = props.attributes?.align === 'full';
+	const breakout = useBreakoutPadding( props.clientId, isFullWidth );
 
-	// Inside a column: leave it alone.
-	if ( breakout === false ) {
+	// Not full width, or inside a column: render the block untouched.
+	if ( ! isFullWidth || breakout === false ) {
 		return <BlockListBlock { ...props } />;
 	}
 
@@ -147,15 +157,12 @@ function BlockWithFullWidth( { block: BlockListBlock, props } ) {
 
 /**
  * Marks full-width aligned blocks so they go edge-to-edge in the editor canvas,
- * the same way they show up in the sent email.
+ * the same way they show up in the sent email. Always renders the same component
+ * so toggling alignment doesn't remount the block.
  */
 const withFullWidthClassName = createHigherOrderComponent(
 	( BlockListBlock ) =>
 		function maybeAddFullWidthClassName( props ) {
-			if ( props.attributes?.align !== 'full' ) {
-				return <BlockListBlock { ...props } />;
-			}
-
 			return (
 				<BlockWithFullWidth block={ BlockListBlock } props={ props } />
 			);
