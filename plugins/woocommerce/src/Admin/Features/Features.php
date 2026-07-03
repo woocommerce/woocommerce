@@ -336,11 +336,20 @@ class Features {
 			is_admin() ||
 			wp_doing_ajax() ||
 			wp_doing_cron() ||
-			( defined( 'WP_CLI' ) && WP_CLI ) ||
-			( WC()->is_rest_api_request() && ! WC()->is_store_api_request() ) ||
-			// Allow features to be loaded in frontend for admin users. This is needed for the use case such as the coming soon footer banner.
-			current_user_can( 'manage_woocommerce' )
+			( defined( 'WP_CLI' ) && WP_CLI )
 		);
+
+		if ( ! $should_load ) {
+			if ( WC()->is_rest_api_request() && ! WC()->is_store_api_request() ) {
+				// Only load features when the REST request targets a WooCommerce-owned
+				// namespace (or the API index, for route discovery). Foreign namespaces
+				// such as wp/v2 do not need wc-admin features.
+				$should_load = self::rest_request_targets_woocommerce();
+			} else {
+				// Allow features to be loaded in frontend for admin users. This is needed for the use case such as the coming soon footer banner.
+				$should_load = current_user_can( 'manage_woocommerce' );
+			}
+		}
 
 		/**
 		 * Filter to determine if admin features should be loaded.
@@ -349,5 +358,38 @@ class Features {
 		 * @param boolean $should_load Whether admin features should be loaded. It defaults to true when the current request is in an admin context.
 		 */
 		return apply_filters( 'woocommerce_admin_should_load_features', $should_load );
+	}
+
+	/**
+	 * Whether the current REST request targets a WooCommerce-owned namespace.
+	 *
+	 * Runs before the main query is parsed, so the route is derived from the
+	 * request URI (or the rest_route query argument on plain-permalink sites).
+	 *
+	 * @return boolean
+	 */
+	private static function rest_request_targets_woocommerce() {
+		$route = '';
+		if ( ! empty( $_GET['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$route = sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		} elseif ( ! empty( $_SERVER['REQUEST_URI'] ) ) {
+			$path   = (string) wp_parse_url( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH );
+			$prefix = '/' . rest_get_url_prefix();
+			$pos    = strpos( $path, $prefix );
+			if ( false !== $pos ) {
+				$route = substr( $path, $pos + strlen( $prefix ) );
+			}
+		}
+
+		$route = '/' . ltrim( $route, '/' );
+
+		// API index (route discovery) and batch requests keep existing behavior: batch
+		// subrequests may target WooCommerce namespaces and cannot be inspected here.
+		if ( '/' === untrailingslashit( $route ) || '/' === $route || str_starts_with( $route, '/batch/v1' ) ) {
+			return true;
+		}
+
+		// Matches wc/v1..v4, wc/store, wc-admin, wc-analytics, wc-telemetry, etc.
+		return (bool) preg_match( '#^/wc(?:[-/]|$)#', $route );
 	}
 }
