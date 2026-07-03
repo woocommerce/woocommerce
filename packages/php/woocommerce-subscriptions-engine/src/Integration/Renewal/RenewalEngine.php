@@ -501,7 +501,7 @@ final class RenewalEngine {
 			// Crash recovery, race-safe: only the caller whose CAS UPDATE matches the
 			// still-expired row reclaims it; a concurrent worker that already extended the
 			// lease leaves this caller matching zero rows, so it skips.
-			$won = $this->contracts->reclaim_expired_cycle( (int) $head->get_id(), $now->format( 'Y-m-d H:i:s' ), $this->lease_until( $now ) );
+			$won = $this->contracts->reclaim_expired_cycle( (int) $head->get_id(), self::LEASE_TTL_SECONDS );
 
 			if ( $won ) {
 				wc_get_logger()->info(
@@ -531,7 +531,7 @@ final class RenewalEngine {
 		// selection never routes a failed head here; only a manual trigger does.
 		if ( $head->get_status()->equals( CycleStatus::failed() ) ) {
 			// Race-safe: only the caller whose CAS UPDATE matches the still-failed row wins.
-			if ( $this->contracts->reclaim_failed_cycle( (int) $head->get_id(), $this->lease_until( $now ) ) ) {
+			if ( $this->contracts->reclaim_failed_cycle( (int) $head->get_id(), self::LEASE_TTL_SECONDS ) ) {
 				wc_get_logger()->info(
 					sprintf( 'RenewalEngine::process(): retrying failed cycle %d for contract %d - re-attempting.', $count, $contract_id ),
 					array(
@@ -578,6 +578,10 @@ final class RenewalEngine {
 	 * engine cannot prove it is stale, so it is left as a live claim rather than risk
 	 * re-charging a cycle some other path created. Only an explicit lease whose moment has
 	 * passed is reclaimable.
+	 *
+	 * A cheap local pre-check only: the reclaim compare-and-set runs its own expiry predicate
+	 * on the DATABASE clock, so a skewed PHP clock here cannot win a takeover early - at worst
+	 * it wastes (fast clock) or defers (slow clock) a reclaim attempt by the skew.
 	 *
 	 * @param Cycle             $cycle The cycle whose lease to test.
 	 * @param DateTimeImmutable $now   The processing moment (the lease clock).

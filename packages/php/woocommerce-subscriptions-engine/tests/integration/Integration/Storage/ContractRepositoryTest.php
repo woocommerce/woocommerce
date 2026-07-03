@@ -622,18 +622,22 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 	/**
 	 * @testdox reclaim_expired_cycle wins the CAS for an expired-lease pending cycle and extends the lease.
+	 *
+	 * The expiry predicate and the fresh lease both anchor on the database clock, so the
+	 * test seeds the lease relative to real time.
 	 */
 	public function test_reclaim_expired_cycle_succeeds_for_an_expired_lease(): void {
 		$id    = $this->sut->insert( $this->make_contract() );
-		$cycle = $this->append_pending_cycle_with_lease( $id, '2026-07-15 00:00:00' );
+		$cycle = $this->append_pending_cycle_with_lease( $id, gmdate( 'Y-m-d H:i:s', time() - 60 ) );
 
-		// Now is after the lease: the CAS predicate (claimed_until <= now) matches.
-		$won = $this->sut->reclaim_expired_cycle( (int) $cycle->get_id(), '2026-07-15 00:10:00', '2026-07-15 00:25:00' );
+		// The lease expired a minute ago per the DB clock: the CAS matches.
+		$won = $this->sut->reclaim_expired_cycle( (int) $cycle->get_id(), 900 );
 		$this->assertTrue( $won, 'The first worker reclaims an expired-lease pending cycle.' );
 
 		$reloaded = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $reloaded );
-		$this->assertSame( '2026-07-15 00:25:00', $reloaded->get_claimed_until_gmt(), 'The lease is extended to the new moment.' );
+		$this->assertNotNull( $reloaded->get_claimed_until_gmt() );
+		$this->assertGreaterThan( time() + 800, strtotime( $reloaded->get_claimed_until_gmt() . ' UTC' ), 'The lease is extended a TTL into the future.' );
 	}
 
 	/**
@@ -646,22 +650,23 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_reclaim_expired_cycle_arbitrates_the_race(): void {
 		$id    = $this->sut->insert( $this->make_contract() );
-		$cycle = $this->append_pending_cycle_with_lease( $id, '2026-07-15 00:00:00' );
+		$cycle = $this->append_pending_cycle_with_lease( $id, gmdate( 'Y-m-d H:i:s', time() - 60 ) );
 
 		$cycle_id = (int) $cycle->get_id();
 
-		// Worker A: lease has expired (00:00 <= 00:10), so the CAS wins and extends to 00:25.
-		$first = $this->sut->reclaim_expired_cycle( $cycle_id, '2026-07-15 00:10:00', '2026-07-15 00:25:00' );
+		// Worker A: the lease has expired per the DB clock, so the CAS wins and extends it.
+		$first = $this->sut->reclaim_expired_cycle( $cycle_id, 900 );
 		$this->assertTrue( $first, 'The first worker wins the reclaim.' );
 
-		// Worker B: same read, but the lease is now 00:25 (> 00:10), so the CAS matches zero rows.
-		$second = $this->sut->reclaim_expired_cycle( $cycle_id, '2026-07-15 00:10:00', '2026-07-15 00:40:00' );
+		// Worker B: same read, but the lease now sits a TTL in the future - zero rows match.
+		$second = $this->sut->reclaim_expired_cycle( $cycle_id, 900 );
 		$this->assertFalse( $second, 'The second worker loses the race: no double reclaim.' );
 
-		// The lease reflects only the winner's extension, never the loser's.
+		// The lease reflects the winner's extension.
 		$reloaded = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $reloaded );
-		$this->assertSame( '2026-07-15 00:25:00', $reloaded->get_claimed_until_gmt() );
+		$this->assertNotNull( $reloaded->get_claimed_until_gmt() );
+		$this->assertGreaterThan( time() + 800, strtotime( $reloaded->get_claimed_until_gmt() . ' UTC' ) );
 	}
 
 	/**
@@ -669,14 +674,14 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_reclaim_expired_cycle_skips_a_settled_cycle(): void {
 		$id    = $this->sut->insert( $this->make_contract() );
-		$cycle = $this->append_pending_cycle_with_lease( $id, '2026-07-15 00:00:00' );
+		$cycle = $this->append_pending_cycle_with_lease( $id, gmdate( 'Y-m-d H:i:s', time() - 60 ) );
 
 		// Settle it billed (clearing the lease, as the money-path does).
 		$cycle->set_status( CycleStatus::billed() );
 		$cycle->set_claimed_until_gmt( null );
 		$this->sut->update_cycle( $cycle );
 
-		$won = $this->sut->reclaim_expired_cycle( (int) $cycle->get_id(), '2026-07-15 00:10:00', '2026-07-15 00:25:00' );
+		$won = $this->sut->reclaim_expired_cycle( (int) $cycle->get_id(), 900 );
 		$this->assertFalse( $won, 'A billed cycle is never reclaimable: the status predicate excludes it.' );
 	}
 

@@ -443,24 +443,28 @@ final class ContractRepository {
 
 	/**
 	 * Atomically reclaim a stalled `pending` cycle whose crash-recovery lease has expired,
-	 * extending the lease to `$new_lease_until_gmt`. The compare-and-set that makes reclaim
-	 * race-safe: the predicate keys on `claimed_until <= $now_gmt`, so among concurrent
-	 * workers only the first to run the UPDATE matches a row - it writes the future lease,
-	 * after which every other worker's `<=` predicate matches zero rows.
+	 * extending the lease by `$lease_ttl_seconds`. The compare-and-set that makes reclaim
+	 * race-safe: the predicate keys on `claimed_until <= now`, so among concurrent workers
+	 * only the first to run the UPDATE matches a row - it writes the future lease, after
+	 * which every other worker's `<=` predicate matches zero rows.
 	 *
-	 * @param int    $cycle_id             The stalled cycle's id.
-	 * @param string $now_gmt              The current moment (GMT string); the lease-expiry cutoff.
-	 * @param string $new_lease_until_gmt  The extended lease expiry to stamp (GMT string).
+	 * Both the expiry predicate and the fresh lease anchor on the DATABASE clock
+	 * (`UTC_TIMESTAMP()`) - the one clock every worker shares - so a worker whose PHP clock
+	 * runs fast cannot take over a lease that is still live in real terms, and the lease it
+	 * stamps means the same thing to every other worker.
+	 *
+	 * @param int $cycle_id          The stalled cycle's id.
+	 * @param int $lease_ttl_seconds The lease window to stamp, measured from the DB's now.
 	 * @return bool True when this caller won the reclaim (exactly one row updated); false
 	 *              when another worker already reclaimed it (zero rows matched).
 	 */
-	public function reclaim_expired_cycle( int $cycle_id, string $now_gmt, string $new_lease_until_gmt ): bool {
+	public function reclaim_expired_cycle( int $cycle_id, int $lease_ttl_seconds ): bool {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET claimed_until = %s, date_updated_gmt = %s WHERE id = %d AND status = %s AND claimed_until IS NOT NULL AND claimed_until <= %s", $new_lease_until_gmt, gmdate( 'Y-m-d H:i:s' ), $cycle_id, CycleStatus::PENDING, $now_gmt ) );
+		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), date_updated_gmt = UTC_TIMESTAMP() WHERE id = %d AND status = %s AND claimed_until IS NOT NULL AND claimed_until <= UTC_TIMESTAMP()", $lease_ttl_seconds, $cycle_id, CycleStatus::PENDING ) );
 
 		// Exactly one row matched means this caller won the CAS; 0 means another worker
 		// already extended the lease (or the cycle settled) between read and write.
@@ -473,16 +477,19 @@ final class ContractRepository {
 	 * Returns true when this caller won (exactly one row matched), false when it was already
 	 * re-claimed or has since moved on.
 	 *
-	 * @param int    $cycle_id            The cycle to re-claim.
-	 * @param string $new_lease_until_gmt The crash-recovery lease to stamp (GMT string).
+	 * The fresh lease anchors on the DATABASE clock (`UTC_TIMESTAMP()`), the shared reference
+	 * clock for all lease arbitration.
+	 *
+	 * @param int $cycle_id          The cycle to re-claim.
+	 * @param int $lease_ttl_seconds The lease window to stamp, measured from the DB's now.
 	 */
-	public function reclaim_failed_cycle( int $cycle_id, string $new_lease_until_gmt ): bool {
+	public function reclaim_failed_cycle( int $cycle_id, int $lease_ttl_seconds ): bool {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s, claimed_until = %s, date_updated_gmt = %s WHERE id = %d AND status = %s", CycleStatus::PENDING, $new_lease_until_gmt, gmdate( 'Y-m-d H:i:s' ), $cycle_id, CycleStatus::FAILED ) );
+		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s, claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), date_updated_gmt = UTC_TIMESTAMP() WHERE id = %d AND status = %s", CycleStatus::PENDING, $lease_ttl_seconds, $cycle_id, CycleStatus::FAILED ) );
 
 		return false !== $result && 1 === $wpdb->rows_affected;
 	}
