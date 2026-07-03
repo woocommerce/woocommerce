@@ -132,7 +132,7 @@
 				{
 					"name": "Inter",
 					"slug": "inter",
-					"fontFamily": "Inter",
+					"fontFamily": "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
 					"fontFace": [
 						{
 							"src": [
@@ -722,7 +722,7 @@
 			}
 		},
 		"typography": {
-			"fontFamily": "var(--wp--preset--font-family--inter), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+			"fontFamily": "var(--wp--preset--font-family--inter)",
 			"fontSize":  "var(--wp--preset--font-size--medium)",
 			"fontStyle": "normal",
 			"fontWeight": "300",
