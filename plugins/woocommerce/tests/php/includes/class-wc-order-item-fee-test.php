@@ -275,6 +275,56 @@ class WC_Order_Item_Fee_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox calculate_taxes treats a blank fee total as 0 instead of throwing a TypeError.
+	 *
+	 * Regression test for the fatal reported when an order has a fee stored with an empty-string
+	 * total and calculate_totals() is called with taxes enabled:
+	 * "TypeError: Unsupported operand types: float * string".
+	 *
+	 * Repro steps from the issue: enable taxes with a standard rate, create an order with a fee,
+	 * blank out the fee value (empty string, not 0), then run calculate_totals().
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/44859
+	 */
+	public function test_calculate_taxes_with_blank_fee_total_is_treated_as_zero() {
+		// Enable taxes and add a standard rate.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$order = WC_Helper_Order::create_order();
+
+		// Add a fee with a blank (empty string) total, mirroring the errant DB state.
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_name( 'Blank fee' );
+		$fee->set_total( '' );
+		$fee->set_tax_status( \Automattic\WooCommerce\Enums\ProductTaxStatus::TAXABLE );
+		$order->add_item( $fee );
+		$order->save();
+
+		// Before the fix this threw "Unsupported operand types: float * string".
+		$order->calculate_totals();
+
+		// A blank fee contributes nothing to tax.
+		$this->assertEquals( 0.0, (float) $fee->get_total_tax() );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$order->delete( true );
+	}
+
+	/**
 	 * @testdox set_taxes handles empty/null values gracefully.
 	 */
 	public function test_set_taxes_with_empty_values() {
