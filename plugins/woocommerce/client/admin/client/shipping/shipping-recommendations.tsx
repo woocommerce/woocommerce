@@ -20,7 +20,13 @@ import {
 import WoocommerceShippingItem from './woocommerce-shipping-item';
 import './shipping-recommendations.scss';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
-import { useOptionDismiss } from '~/hooks/use-option-dismiss';
+import {
+	type DismissState,
+	useOptionDismiss,
+} from '~/hooks/use-option-dismiss';
+
+export const SHIPPING_RECOMMENDATIONS_DISMISS_OPTION =
+	'woocommerce_settings_shipping_recommendations_hidden';
 
 type ShippingRecommendationsMarketplaceLinkProps = {
 	textProps?: {
@@ -122,12 +128,15 @@ export const ShippingRecommendationsMarketplaceLink = ( {
 
 export const ShippingRecommendationsList = ( {
 	children,
+	dismissState,
 }: {
 	children: React.ReactNode;
+	dismissState?: DismissState;
 } ) => {
-	const { isDismissed, onDismiss } = useOptionDismiss(
-		'woocommerce_settings_shipping_recommendations_hidden'
+	const defaultDismissState = useOptionDismiss(
+		SHIPPING_RECOMMENDATIONS_DISMISS_OPTION
 	);
+	const { isDismissed, onDismiss } = dismissState ?? defaultDismissState;
 
 	return (
 		<DismissableList

@@ -20,7 +20,13 @@ jest.mock( '@wordpress/data', () => ( {
 	useDispatch: jest.fn(),
 } ) );
 jest.mock( '../../settings-recommendations/dismissable-list', () => ( {
-	DismissableList: ( ( { children } ) => children ) as React.FC,
+	DismissableList: ( {
+		children,
+		isDismissed,
+	}: {
+		children: React.ReactNode;
+		isDismissed?: boolean;
+	} ) => ( isDismissed ? null : children ),
 	DismissableListHeading: ( ( { children } ) => children ) as React.FC,
 } ) );
 jest.mock( '../../lib/notices', () => ( {
@@ -55,8 +61,8 @@ const defaultSelectReturn = {
 		},
 	} ),
 	getProfileItems: () => ( {} ),
-	hasFinishedResolution: jest.fn(),
-	getOption: jest.fn(),
+	hasFinishedResolution: jest.fn().mockReturnValue( true ),
+	getOption: jest.fn().mockReturnValue( 'no' ),
 };
 
 const mockSelectForCountry = (
@@ -321,7 +327,9 @@ describe( 'ShippingRecommendations', () => {
 			expect(
 				screen.queryByText( 'WooCommerce Shipping' )
 			).not.toBeInTheDocument();
-			expect( screen.queryByText( 'ShipStation' ) ).not.toBeInTheDocument();
+			expect(
+				screen.queryByText( 'ShipStation' )
+			).not.toBeInTheDocument();
 			expect(
 				screen.queryByText( 'the WooCommerce Marketplace' )
 			).toBeInTheDocument();
@@ -395,6 +403,24 @@ describe( 'ShippingRecommendations', () => {
 					option === SHIPPING_RECOMMENDATIONS_DISMISS_OPTION
 						? 'yes'
 						: undefined,
+			} );
+			render( <ShippingRecommendations /> );
+
+			expect( recordEvent ).not.toHaveBeenCalledWith(
+				'shipping_partner_impression',
+				expect.anything()
+			);
+		} );
+
+		it( 'should not fire shipping_partner_impression while dismissal option is resolving', () => {
+			( recordEvent as jest.Mock ).mockClear();
+			mockSelectForCountry( 'US', [], {
+				getOption: () => undefined,
+				hasFinishedResolution: ( selector: string, args?: string[] ) =>
+					! (
+						selector === 'getOption' &&
+						args?.[ 0 ] === SHIPPING_RECOMMENDATIONS_DISMISS_OPTION
+					),
 			} );
 			render( <ShippingRecommendations /> );
 

@@ -7,7 +7,6 @@ import {
 	pluginsStore,
 	settingsStore,
 	onboardingStore,
-	optionsStore,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -15,10 +14,12 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { getCountryCode } from '~/dashboard/utils';
+import { useOptionDismiss } from '~/hooks/use-option-dismiss';
 import WooCommerceShippingItem from './experimental-woocommerce-shipping-item';
 import ShipStationItem from './shipstation-item';
 import PacklinkItem from './packlink-item';
 import {
+	SHIPPING_RECOMMENDATIONS_DISMISS_OPTION,
 	ShippingRecommendationsMarketplaceLink,
 	ShippingRecommendationsList,
 	useInstallPlugin,
@@ -27,9 +28,6 @@ import './shipping-recommendations.scss';
 import { ShippingTour } from '../guided-tours/shipping-tour';
 
 type ExtensionId = 'woocommerce-shipping' | 'shipstation' | 'packlink';
-
-const SHIPPING_RECOMMENDATIONS_DISMISS_OPTION =
-	'woocommerce_settings_shipping_recommendations_hidden';
 
 const COUNTRY_EXTENSIONS_MAP: Record< string, ExtensionId[] > = {
 	US: [ 'woocommerce-shipping', 'shipstation' ],
@@ -57,13 +55,17 @@ const EXTENSION_PLUGIN_SLUGS: Record< ExtensionId, string > = {
 const ShippingRecommendations = () => {
 	const [ pluginsBeingSetup, , handleInstall, handleActivate ] =
 		useInstallPlugin();
+	const recommendationsDismissState = useOptionDismiss(
+		SHIPPING_RECOMMENDATIONS_DISMISS_OPTION
+	);
+	const { isDismissed: isRecommendationsHidden } =
+		recommendationsDismissState;
 
 	const {
 		installedPlugins,
 		activePlugins,
 		countryCode,
 		isSellingDigitalProductsOnly,
-		isRecommendationsHidden,
 	} = useSelect( ( select ) => {
 		const settings = select( settingsStore ).getSettings( 'general' );
 
@@ -73,8 +75,6 @@ const ShippingRecommendations = () => {
 		const profileItems =
 			select( onboardingStore ).getProfileItems()?.product_types;
 
-		const { getOption } = select( optionsStore );
-
 		return {
 			installedPlugins: getInstalledPlugins(),
 			activePlugins: getActivePlugins(),
@@ -83,8 +83,6 @@ const ShippingRecommendations = () => {
 			),
 			isSellingDigitalProductsOnly:
 				profileItems?.length === 1 && profileItems[ 0 ] === 'downloads',
-			isRecommendationsHidden:
-				getOption( SHIPPING_RECOMMENDATIONS_DISMISS_OPTION ) === 'yes',
 		};
 	}, [] );
 
@@ -102,8 +100,9 @@ const ShippingRecommendations = () => {
 		? []
 		: extensionsForCountry;
 
+	const hasVisibleExtensions = visibleExtensions.length > 0;
 	const shouldShowRecommendations =
-		! isRecommendationsHidden && visibleExtensions.length > 0;
+		! isRecommendationsHidden && hasVisibleExtensions;
 
 	const visiblePluginSlugs = visibleExtensions
 		.map( ( ext ) => EXTENSION_PLUGIN_SLUGS[ ext ] )
@@ -121,7 +120,7 @@ const ShippingRecommendations = () => {
 		}
 	}, [ shouldShowRecommendations, normalizedCountry, visiblePluginSlugs ] );
 
-	if ( ! shouldShowRecommendations ) {
+	if ( ! hasVisibleExtensions ) {
 		return (
 			<>
 				<ShippingTour showShippingRecommendationsStep={ false } />
@@ -137,9 +136,17 @@ const ShippingRecommendations = () => {
 	}
 
 	return (
-		<div style={ { paddingBottom: 60 } }>
-			<ShippingTour showShippingRecommendationsStep={ true } />
-			<ShippingRecommendationsList>
+		<div
+			style={
+				shouldShowRecommendations ? { paddingBottom: 60 } : undefined
+			}
+		>
+			<ShippingTour
+				showShippingRecommendationsStep={ shouldShowRecommendations }
+			/>
+			<ShippingRecommendationsList
+				dismissState={ recommendationsDismissState }
+			>
 				{ visibleExtensions.map( ( ext ) => {
 					const isPluginInstalled = installedPlugins.includes(
 						EXTENSION_PLUGIN_SLUGS[ ext ]
@@ -194,6 +201,15 @@ const ShippingRecommendations = () => {
 					}
 				} ) }
 			</ShippingRecommendationsList>
+			{ isRecommendationsHidden && (
+				<ShippingRecommendationsMarketplaceLink
+					textProps={ {
+						as: 'p',
+						className:
+							'woocommerce-recommended-shipping__fallback-link',
+					} }
+				/>
+			) }
 		</div>
 	);
 };
