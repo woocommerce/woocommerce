@@ -51,7 +51,7 @@ final class Subscriptions {
 	 * @return Contract|null The contract, or null when none exists.
 	 */
 	public static function get( int $contract_id ): ?Contract {
-		return ( new ContractRepository() )->find_with_snapshot( $contract_id );
+		return ( new ContractRepository() )->find( $contract_id );
 	}
 
 	/**
@@ -115,7 +115,7 @@ final class Subscriptions {
 			return null;
 		}
 
-		return $contracts->find_with_snapshot( $contract_id );
+		return $contracts->find( $contract_id );
 	}
 
 	/**

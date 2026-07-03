@@ -182,9 +182,11 @@ final class ContractRepository {
 
 	/**
 	 * Fetch a contract by id, hydrating the live entity with its items / addresses /
-	 * meta. Cycles are NOT hydrated - they are reached on demand through the targeted
-	 * cycle reads. For list / guard paths that do not need the children, use
-	 * {@see self::find_summary()}.
+	 * meta, plus its frozen plan terms ({@see Contract::get_plan_snapshot()}) from
+	 * `plan_snapshot_id` - so every full read carries the billing cadence off the
+	 * snapshot, with no live {@see PlanRepository} join. Cycles are NOT hydrated - they
+	 * are reached on demand through the targeted cycle reads. For list / guard paths
+	 * that do not need the children, use {@see self::find_summary()}.
 	 *
 	 * @param int $id Contract id.
 	 * @return Contract|null Hydrated contract, or null if not found.
@@ -195,30 +197,12 @@ final class ContractRepository {
 			return null;
 		}
 
-		return Contract::from_storage(
+		$contract = Contract::from_storage(
 			$row,
 			$this->find_items( $id ),
 			$this->find_addresses( $id ),
 			$this->find_meta( $id )
 		);
-	}
-
-	/**
-	 * Fetch a contract by id like {@see self::find()}, additionally hydrating its frozen
-	 * plan terms ({@see Contract::get_plan_snapshot()}) from `plan_snapshot_id` - the read
-	 * path the customer-portal facade uses so a consumer reads the billing cadence straight
-	 * off the snapshot, with no live {@see PlanRepository} join. The bare {@see self::find()}
-	 * stays lean for the action paths that do not need the cadence.
-	 *
-	 * @param int $id Contract id.
-	 * @return Contract|null Hydrated contract (with its plan snapshot when present), or null if not found.
-	 */
-	public function find_with_snapshot( int $id ): ?Contract {
-		$contract = $this->find( $id );
-		if ( null === $contract ) {
-			return null;
-		}
-
 		$this->hydrate_plan_snapshot( $contract );
 
 		return $contract;
