@@ -242,7 +242,12 @@ jobs:
         env:
           PLUGIN_PATH: ${{ github.workspace }}/woocommerce-plugin-artifact/woocommerce
           WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.projectPath }}
-        run: node .github/workflows/scripts/override-wp-env-plugins.js
+        # WC_SHARED_PLUGIN_BUILD_PATH lets test setup scripts that modify the plugin
+        # (feature flags, generated translations) target the served artifact instead
+        # of the source checkout, which is no longer bind-mounted into wp-env.
+        run: |
+          node .github/workflows/scripts/override-wp-env-plugins.js
+          echo "WC_SHARED_PLUGIN_BUILD_PATH=$PLUGIN_PATH" >> "$GITHUB_ENV"
 
       - name: 'Update wp-env config'
         if: ${{ inputs.artifactName != '' }}
