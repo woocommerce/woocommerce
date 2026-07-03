@@ -125,10 +125,14 @@ const TotalsFooterItem = ( {
 				.join( ', ' )
 		);
 	} else if ( taxLabel ) {
+		// Escape angle brackets so taxLabel is not parsed as HTML by createInterpolateElement.
+		const safeTaxLabel = String( taxLabel )
+			.replace( /</g, '&lt;' )
+			.replace( />/g, '&gt;' );
 		description = sprintf(
 			/* translators: %s is the configured tax label (e.g. VAT). */
 			__( 'Including <TaxAmount/> %s', 'woocommerce' ),
-			taxLabel
+			safeTaxLabel
 		);
 	} else {
 		description = __( 'Including <TaxAmount/> taxes', 'woocommerce' );

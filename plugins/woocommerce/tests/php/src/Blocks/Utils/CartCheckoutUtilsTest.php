@@ -378,15 +378,20 @@ class CartCheckoutUtilsTest extends WP_UnitTestCase {
 		update_option( 'woocommerce_tax_display_cart', 'incl' );
 		update_option( 'woocommerce_prices_include_tax', 'no' );
 
-		// Initialize cart if not already done (needed for branch A).
-		if ( ! WC()->cart instanceof \WC_Cart ) {
-			WC()->initialize_cart();
+		$previous_cart = WC()->cart;
+		try {
+			// Initialize cart if not already done (needed for branch A).
+			if ( ! WC()->cart instanceof \WC_Cart ) {
+				WC()->initialize_cart();
+			}
+
+			$result = CartCheckoutUtils::get_tax_label();
+
+			$this->assertTrue( $result['display_cart_prices_including_tax'] );
+			// tax_label should be the inc_tax_or_vat string (e.g. "(incl. VAT)") or empty if countries not initialized.
+			$this->assertIsString( $result['tax_label'] );
+		} finally {
+			WC()->cart = $previous_cart;
 		}
-
-		$result = CartCheckoutUtils::get_tax_label();
-
-		$this->assertTrue( $result['display_cart_prices_including_tax'] );
-		// tax_label should be the inc_tax_or_vat string (e.g. "(incl. VAT)") or empty if countries not initialized
-		$this->assertIsString( $result['tax_label'] );
 	}
 }

@@ -480,18 +480,22 @@ class Checkout extends AbstractBlock {
 			)
 		);
 		$this->asset_data_registry->add( 'checkoutShowLoginReminder', filter_var( get_option( 'woocommerce_enable_checkout_login_reminder' ), FILTER_VALIDATE_BOOLEAN ) );
-		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', TaxDisplayMode::INCLUSIVE === get_option( 'woocommerce_tax_display_cart' ) );
 		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ) );
 		$this->asset_data_registry->add( 'forcedBillingAddress', 'billing_only' === get_option( 'woocommerce_ship_to_destination' ) );
 		$this->asset_data_registry->add( 'generatePassword', filter_var( get_option( 'woocommerce_registration_generate_password' ), FILTER_VALIDATE_BOOLEAN ) );
 		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled() );
 
-		// Bridge the configured tax label (e.g. "VAT") for parity with classic cart.
-		$tax_label = '';
+		// Bridge the configured tax label (e.g. "VAT") and display flag for parity with classic cart.
+		// Source the display flag from the cart-aware helper so VAT-exempt customers
+		// (get_tax_price_display_mode() forces EXCLUSIVE) stay consistent with MiniCart.
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
-			$tax_label = CartCheckoutUtils::get_tax_label()['tax_label'];
+			$tax_label_info = CartCheckoutUtils::get_tax_label();
+			$this->asset_data_registry->add( 'taxLabel', $tax_label_info['tax_label'] );
+			$this->asset_data_registry->add( 'displayCartPricesIncludingTax', $tax_label_info['display_cart_prices_including_tax'] );
+		} else {
+			$this->asset_data_registry->add( 'displayCartPricesIncludingTax', TaxDisplayMode::INCLUSIVE === get_option( 'woocommerce_tax_display_cart' ) );
+			$this->asset_data_registry->add( 'taxLabel', '' );
 		}
-		$this->asset_data_registry->add( 'taxLabel', $tax_label );
 
 		$this->asset_data_registry->add( 'couponsEnabled', wc_coupons_enabled() );
 		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled() );

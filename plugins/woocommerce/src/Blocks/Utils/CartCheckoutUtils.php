@@ -574,7 +574,7 @@ class CartCheckoutUtils {
 	 * templates use, so callers in Cart/Checkout/MiniCart blocks
 	 * expose the same string via the asset_data_registry.
 	 *
-	 * @since 10.4.0
+	 * @since 11.0.0
 	 * @internal
 	 *
 	 * @return array{ tax_label: string, display_cart_prices_including_tax: bool }
