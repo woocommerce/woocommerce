@@ -598,8 +598,6 @@ class WC_Brands_Admin {
 		if ( $brands_count <= apply_filters( 'woocommerce_product_brand_filter_threshold', 100 ) ) {
 			wc_product_dropdown_categories(
 				array(
-					'pad_counts'        => true,
-					'show_count'        => true,
 					'orderby'           => 'name',
 					'selected'          => $current_brand_slug,
 					'show_option_none'  => __( 'Filter by brand', 'woocommerce' ),
@@ -608,6 +606,10 @@ class WC_Brands_Admin {
 					'taxonomy'          => 'product_brand',
 					'name'              => 'product_brand',
 					'class'             => 'dropdown_product_brand',
+					// Performance note: pad_counts=0 skips the hierarchical count SQL — O(all published products), degrades linearly
+					// with catalog size. show_count=0 suppresses the raw wp_term_taxonomy.count that would otherwise render in its place.
+					'pad_counts'        => 0,
+					'show_count'        => 0,
 				)
 			);
 		} else {

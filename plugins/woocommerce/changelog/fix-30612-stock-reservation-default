@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use the checkout hold stock setting only for core checkout stock reservations.

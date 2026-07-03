@@ -332,6 +332,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			ProductStatus::DRAFT   => -1,
 			ProductStatus::PRIVATE => 0,
 			ProductStatus::PUBLISH => 1,
+			ProductStatus::PENDING => 2,
 		);
 
 		// Fix display for variations when parent product is a draft.
