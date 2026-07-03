@@ -152,13 +152,12 @@ $marketplace_links = array(
 				$link_config = $marketplace_links[ $current_tab ];
 
 				if ( $link_config['is_external'] ) {
-					$utm_source    = 'settings_' . $current_tab . ( $current_section ? '_' . $current_section : '' );
-					$link_url      = add_query_arg( 'utm_source', $utm_source, $link_config['url'] );
-					$icon_url      = WC()->plugin_url() . '/assets/images/icons/external-link.svg';
-					$external_icon = '<img src="' . esc_url( $icon_url ) . '" alt="" />';
-					$screen_reader = '<span class="screen-reader-text">' . esc_html__( '(opens in a new tab)', 'woocommerce' ) . '</span>';
-					$link_open     = '<a href="' . esc_url( $link_url ) . '" target="_blank" rel="noopener noreferrer">' . $external_icon;
-					$link_close    = $screen_reader . '</a>';
+					$utm_source          = 'settings_' . $current_tab . ( $current_section ? '_' . $current_section : '' );
+					$link_url            = add_query_arg( 'utm_source', $utm_source, $link_config['url'] );
+					$external_icon_arrow = is_rtl() ? '&#8598;' : '&#8599;';
+					$external_icon       = '<span class="components-external-link__icon wp-exclude-emoji" aria-label="' . esc_attr__( '(opens in a new tab)', 'woocommerce' ) . '">' . $external_icon_arrow . '</span>';
+					$link_open           = '<a class="components-external-link" href="' . esc_url( $link_url ) . '" target="_blank" rel="external noreferrer noopener"><span class="components-external-link__contents">';
+					$link_close          = '</span>' . $external_icon . '</a>';
 				} else {
 					$link_open  = '<a href="' . esc_url( $link_config['url'] ) . '">';
 					$link_close = '</a>';
@@ -170,16 +169,14 @@ $marketplace_links = array(
 					sprintf( $link_config['message'], $link_open, $link_close ),
 					array(
 						'a'    => array(
+							'class'  => array(),
 							'href'   => array(),
 							'target' => array(),
 							'rel'    => array(),
 						),
-						'img'  => array(
-							'src' => array(),
-							'alt' => array(),
-						),
 						'span' => array(
-							'class' => array(),
+							'class'      => array(),
+							'aria-label' => array(),
 						),
 					)
 				);

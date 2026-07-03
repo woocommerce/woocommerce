@@ -9612,9 +9612,8 @@ body.woocommerce_page_wc-settings {
 		border-top: 1px solid #c3c4c7;
 		color: #50575e;
 
-		a img {
-			margin-right: 4px;
-			vertical-align: text-bottom;
+		.components-external-link__icon {
+			margin-left: 0.5ch;
 		}
 	}
 
