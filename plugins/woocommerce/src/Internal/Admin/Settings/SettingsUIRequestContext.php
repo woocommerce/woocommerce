@@ -261,9 +261,9 @@ class SettingsUIRequestContext {
 	 * Whether this context can render through the Settings UI.
 	 *
 	 * True when the settings UI feature is enabled and a Settings UI page resolved
-	 * for the page and section — provided natively by a registered section, adapted
-	 * from a registered section's legacy settings, or provided by the settings page
-	 * itself. Callers replacing legacy rendering should treat all three the same.
+	 * for the page and section. The page can come from a registered section (native
+	 * or adapted from its legacy settings) or from the settings page itself, and
+	 * callers replacing legacy rendering should treat all three the same.
 	 *
 	 * @return bool
 	 */
