@@ -814,7 +814,6 @@
 				{
 					"name": "Metrics",
 					"testType": "performance",
-					"usesSharedPluginBuild": true,
 					"command": "test:metrics:ci",
 					"optional": true,
 					"changes": [
