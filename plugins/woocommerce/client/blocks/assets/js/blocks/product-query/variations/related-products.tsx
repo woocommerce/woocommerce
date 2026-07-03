@@ -73,7 +73,7 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 				'woocommerce/product-image',
 				{
 					productId: 0,
-					imageSizing: 'cropped',
+					imageSizing: 'thumbnail',
 				},
 			],
 			[
