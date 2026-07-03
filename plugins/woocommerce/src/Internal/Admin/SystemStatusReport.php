@@ -114,16 +114,9 @@ class SystemStatusReport {
 	 * Render daily cron row.
 	 */
 	public function render_daily_cron() {
-		$next_daily_cron = null;
-
-		if ( function_exists( 'as_next_scheduled_action' ) ) {
-			$next_action_time = as_next_scheduled_action( 'wc_admin_daily_wrapper', array(), 'woocommerce' );
-			$next_daily_cron  = is_numeric( $next_action_time ) ? $next_action_time : null;
-		}
-
-		if ( empty( $next_daily_cron ) ) {
-			$next_daily_cron = wp_next_scheduled( 'wc_admin_daily' );
-		}
+		$next_action_time = function_exists( 'as_next_scheduled_action' )
+			? as_next_scheduled_action( 'wc_admin_daily_wrapper', null, 'woocommerce' )
+			: false;
 		?>
 			<tr>
 				<td data-export-label="Daily Cron">
@@ -132,10 +125,12 @@ class SystemStatusReport {
 				<td class="help"><?php echo wc_help_tip( esc_html__( 'Is the daily cron job active, when does it next run?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 				<td>
 					<?php
-					if ( empty( $next_daily_cron ) ) {
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Not scheduled', 'woocommerce' ) . '</mark>';
+					if ( true === $next_action_time ) {
+						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html__( 'Currently running', 'woocommerce' ) . '</mark>';
+					} elseif ( is_numeric( $next_action_time ) ) {
+						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> Next scheduled: ' . esc_html( date_i18n( 'Y-m-d H:i:s P', (int) $next_action_time ) ) . '</mark>';
 					} else {
-						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> Next scheduled: ' . esc_html( date_i18n( 'Y-m-d H:i:s P', $next_daily_cron ) ) . '</mark>';
+						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Not scheduled', 'woocommerce' ) . '</mark>';
 					}
 					?>
 				</td>

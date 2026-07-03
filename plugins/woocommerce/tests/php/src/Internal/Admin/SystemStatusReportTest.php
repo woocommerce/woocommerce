@@ -24,82 +24,60 @@ class SystemStatusReportTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = SystemStatusReport::get_instance();
+		as_unschedule_all_actions( 'wc_admin_daily_wrapper' );
 	}
 
 	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		// Clean up scheduled actions and cron events.
-		if ( function_exists( 'as_unschedule_all_actions' ) ) {
-			as_unschedule_all_actions( 'wc_admin_daily_wrapper' );
-		}
-		wp_clear_scheduled_hook( 'wc_admin_daily' );
+		as_unschedule_all_actions( 'wc_admin_daily_wrapper' );
 		parent::tearDown();
 	}
 
 	/**
-	 * Test render_daily_cron when scheduled via Action Scheduler.
+	 * Data provider for test_render_daily_cron.
+	 *
+	 * @return array<string, array<string>>
 	 */
-	public function test_render_daily_cron_scheduled_via_action_scheduler(): void {
-		$next_run = time() + DAY_IN_SECONDS;
-
-		// Schedule the wrapper action.
-		if ( function_exists( 'as_schedule_recurring_action' ) ) {
-			as_schedule_recurring_action( $next_run, DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
-		}
-
-		ob_start();
-		$this->sut->render_daily_cron();
-		$output = ob_get_clean();
-
-		$this->assertStringContainsString( 'Next scheduled:', $output );
-		$this->assertStringContainsString( '<mark class="yes">', $output );
-		$this->assertStringNotContainsString( 'Not scheduled', $output );
+	public function provider_render_daily_cron(): array {
+		return array(
+			'scheduled'     => array( 'scheduled' ),
+			'not-scheduled' => array( 'not-scheduled' ),
+		);
 	}
 
 	/**
-	 * Test render_daily_cron when not scheduled.
+	 * Test render_daily_cron across scheduled and not-scheduled Action Scheduler states.
+	 *
+	 * @dataProvider provider_render_daily_cron
+	 *
+	 * @param string $scenario Either 'scheduled' or 'not-scheduled'.
 	 */
-	public function test_render_daily_cron_not_scheduled(): void {
-		// Ensure no actions are scheduled.
-		if ( function_exists( 'as_unschedule_all_actions' ) ) {
-			as_unschedule_all_actions( 'wc_admin_daily_wrapper' );
+	public function test_render_daily_cron( string $scenario ): void {
+		$expected_label = '';
+		$expected_date  = '';
+
+		if ( 'scheduled' === $scenario ) {
+			$timestamp     = time() + DAY_IN_SECONDS;
+			$expected_date = esc_html( date_i18n( 'Y-m-d H:i:s P', $timestamp ) );
+
+			as_schedule_recurring_action( $timestamp, DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
+		} else {
+			$expected_label = 'Not scheduled';
 		}
-		wp_clear_scheduled_hook( 'wc_admin_daily' );
 
 		ob_start();
 		$this->sut->render_daily_cron();
 		$output = ob_get_clean();
 
-		$this->assertStringContainsString( 'Not scheduled', $output );
-		$this->assertStringContainsString( '<mark class="error">', $output );
-		$this->assertStringNotContainsString( 'Next scheduled:', $output );
-	}
-
-	/**
-	 * Test render_daily_cron fallback to legacy WP-Cron.
-	 */
-	public function test_render_daily_cron_legacy_fallback(): void {
-		$next_run = time() + DAY_IN_SECONDS;
-
-		// Ensure no AS action scheduled.
-		if ( function_exists( 'as_unschedule_all_actions' ) ) {
-			as_unschedule_all_actions( 'wc_admin_daily_wrapper' );
+		if ( 'scheduled' === $scenario ) {
+			$this->assertStringContainsString( 'Next scheduled:', $output );
+			$this->assertStringContainsString( $expected_date, $output );
+			$this->assertStringNotContainsString( 'Not scheduled', $output );
+		} else {
+			$this->assertStringContainsString( 'Not scheduled', $output );
+			$this->assertStringNotContainsString( 'Next scheduled:', $output );
 		}
-
-		// Schedule legacy WP-Cron event.
-		wp_schedule_event( $next_run, 'daily', 'wc_admin_daily' );
-
-		ob_start();
-		$this->sut->render_daily_cron();
-		$output = ob_get_clean();
-
-		$this->assertStringContainsString( 'Next scheduled:', $output );
-		$this->assertStringContainsString( '<mark class="yes">', $output );
-		$this->assertStringNotContainsString( 'Not scheduled', $output );
-
-		// Cleanup.
-		wp_clear_scheduled_hook( 'wc_admin_daily' );
 	}
 }
