@@ -2652,7 +2652,7 @@ class WC_Order extends WC_Abstract_Order {
 			FeaturesUtil::feature_is_enabled( 'email_improvements' ) &&
 			isset( $total_rows['shipping'] ) &&
 			$this->get_shipping_method() &&
-			! ( 0 < abs( (float) $this->get_shipping_total() ) )
+			0.0 === abs( (float) $this->get_shipping_total() )
 		) {
 			$total_rows['shipping']['value'] = __( 'Free', 'woocommerce' );
 		}
