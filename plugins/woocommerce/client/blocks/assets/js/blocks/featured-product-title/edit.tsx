@@ -6,7 +6,6 @@ import { store as coreStore, useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { createElement, forwardRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { WP_REST_API_Category } from 'wp-types';
 import {
 	AlignmentControl,
 	BlockControls,
@@ -15,8 +14,6 @@ import {
 	PlainText,
 	HeadingLevelDropdown,
 } from '@wordpress/block-editor';
-import { usePreviewMode } from '@woocommerce/base-hooks';
-import { previewCategories } from '@woocommerce/resource-previews';
 import {
 	ToggleControl,
 	TextControl,
@@ -37,8 +34,8 @@ interface Props {
 	};
 	setAttributes: ( attrs: Partial< Props[ 'attributes' ] > ) => void;
 	context: {
-		termId?: number;
-		termTaxonomy?: string;
+		postId?: number;
+		postType?: string;
 		decoupledEdit?: boolean;
 	};
 }
@@ -49,7 +46,7 @@ const DEFAULT_ATTRIBUTES = {
 	rel: '',
 };
 
-// Helper component to handle dynamic tag names without TypeScript union type issues
+// Helper component to handle dynamic tag names without TypeScript union type issues.
 const ContainerElement = forwardRef<
 	HTMLElement,
 	React.HTMLAttributes< HTMLElement > & {
@@ -66,33 +63,30 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		level === 0 ? 'p' : `h${ level }`
 	) as keyof JSX.IntrinsicElements;
 
-	const { termId, termTaxonomy, decoupledEdit } = context;
+	const { postId, postType, decoupledEdit } = context;
+	const postTypeSlug = postType || 'product';
 
 	const userCanEdit = useSelect(
 		( select ) => {
-			if ( ! termId ) return false;
-			// This use actually reflects the use seen in `core/post-title` block.
+			if ( ! postId ) return false;
 			return select( coreStore ).canUser( 'update', {
-				kind: 'taxonomy',
-				name: termTaxonomy || 'product_cat',
-				id: termId,
+				kind: 'postType',
+				name: postTypeSlug,
+				id: postId,
 			} );
 		},
-		[ termId, termTaxonomy ]
+		[ postId, postTypeSlug ]
 	);
 
-	const isPreviewMode = usePreviewMode();
 	const [ rawTitle = '', setTitle, fullTitle ] = useEntityProp(
-		'taxonomy',
-		termTaxonomy || 'product_cat',
-		'name',
-		termId ? String( termId ) : undefined
+		'postType',
+		postTypeSlug,
+		'title',
+		postId ? String( postId ) : undefined
 	);
 
 	let displayRawTitle = '';
-	if ( isPreviewMode ) {
-		displayRawTitle = previewCategories[ 0 ].description;
-	} else if ( decoupledEdit ) {
+	if ( decoupledEdit ) {
 		displayRawTitle =
 			typeof attributes.content === 'string' && attributes.content.length
 				? attributes.content
@@ -102,9 +96,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	}
 
 	let displayFullTitle = '';
-	if ( isPreviewMode ) {
-		displayFullTitle = previewCategories[ 0 ].description;
-	} else if ( decoupledEdit ) {
+	if ( decoupledEdit ) {
 		displayFullTitle =
 			typeof attributes.content === 'string' && attributes.content.length
 				? attributes.content
@@ -118,6 +110,20 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		displayFullTitle = fullTitle.rendered;
 	}
 
+	const link = useSelect(
+		( select ) => {
+			if ( ! postId ) return undefined;
+			const record = select( coreStore ).getEntityRecord(
+				'postType',
+				postTypeSlug,
+				postId
+			);
+
+			return record?.link;
+		},
+		[ postId, postTypeSlug ]
+	);
+
 	const onChangeTitle = ( v: string ) => {
 		if ( decoupledEdit ) {
 			setAttributes( { content: v } );
@@ -126,22 +132,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		}
 	};
 
-	const link = useSelect(
-		( select ) => {
-			if ( ! termId ) return undefined;
-			const record = select(
-				coreStore
-			).getEntityRecord< WP_REST_API_Category >(
-				'taxonomy',
-				termTaxonomy || 'product_cat',
-				termId
-			);
-
-			return record?.link;
-		},
-		[ termId, termTaxonomy ]
-	);
-
 	const blockProps = useBlockProps( {
 		className: clsx( { [ `has-text-align-${ textAlign }` ]: textAlign } ),
 	} );
@@ -149,10 +139,10 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	let titleElement: JSX.Element = createElement(
 		TagName,
 		blockProps,
-		__( 'Category title', 'woocommerce' )
+		__( 'Product title', 'woocommerce' )
 	) as JSX.Element;
 
-	if ( termId ) {
+	if ( postId ) {
 		titleElement = userCanEdit ? (
 			<PlainText
 				tagName={ TagName }
@@ -173,7 +163,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		);
 	}
 
-	if ( isLink && termId ) {
+	if ( isLink && postId ) {
 		titleElement = userCanEdit ? (
 			<ContainerElement tagName={ TagName } { ...blockProps }>
 				<PlainText

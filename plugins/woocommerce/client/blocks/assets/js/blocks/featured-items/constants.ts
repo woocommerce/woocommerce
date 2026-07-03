@@ -6,11 +6,6 @@ import { ProductResponseItem } from '@woocommerce/types';
 import { InnerBlockTemplate } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 
-/**
- * Internal dependencies
- */
-import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '../product-collection/variations/elements/product-title';
-
 export const DEFAULT_EDITOR_SIZE = {
 	height: 500,
 	width: 500,
@@ -50,12 +45,11 @@ export const FEATURED_PRODUCT_DEFAULT_TEMPLATE = (
 	product: ProductResponseItem
 ): InnerBlockTemplate[] => [
 	[
-		'core/post-title',
+		'woocommerce/featured-product-title',
 		{
 			isLink: true,
 			level: 2,
 			textAlign: 'center',
-			__woocommerceNamespace: PRODUCT_TITLE_VARIATION_NAME,
 		},
 	],
 	[

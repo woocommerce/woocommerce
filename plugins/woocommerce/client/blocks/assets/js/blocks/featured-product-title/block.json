@@ -1,7 +1,7 @@
 {
-	"name": "woocommerce/category-title",
-	"title": "Product Category Title",
-	"description": "Displays the current category title and lets permitted users edit it.",
+	"name": "woocommerce/featured-product-title",
+	"title": "Product Title",
+	"description": "Displays the current product title.",
 	"category": "woocommerce",
 	"apiVersion": 3,
 	"textdomain": "woocommerce",
@@ -42,5 +42,6 @@
 		},
 		"typography": true
 	},
-	"usesContext": [ "termId", "termTaxonomy", "decoupledEdit" ]
+	"usesContext": [ "postId", "postType", "decoupledEdit" ],
+	"ancestor": [ "woocommerce/featured-product" ]
 }

@@ -37,7 +37,12 @@ class CategoryDescription extends AbstractBlock {
 			return '';
 		}
 
-		$description = $term->description;
+		// Use the locally edited content when decoupled editing is enabled (e.g. inside a
+		// Featured Category block), falling back to the term description otherwise.
+		$decoupled   = ! empty( $block->context['decoupledEdit'] );
+		$description = $decoupled && isset( $attributes['content'] ) && '' !== trim( (string) $attributes['content'] )
+			? $attributes['content']
+			: $term->description;
 		if ( empty( trim( $description ) ) ) {
 			return '';
 		}
@@ -66,7 +71,7 @@ class CategoryDescription extends AbstractBlock {
 	 * @return array
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'termId', 'termTaxonomy' ];
+		return [ 'termId', 'termTaxonomy', 'decoupledEdit' ];
 	}
 
 	/**

@@ -153,6 +153,10 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 					$this->extract_featured_item_inner_block_names( $parsed_block )
 				);
 			}
+
+			// Signal to inner blocks that text edits should be stored locally
+			// rather than written back to the underlying product or category.
+			$context['decoupledEdit'] = true;
 		}
 
 		// Replace post context for featured item inner blocks.

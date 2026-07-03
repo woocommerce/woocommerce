@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Decouple Featured Product and Featured Category inner block text edits from underlying product/category data.

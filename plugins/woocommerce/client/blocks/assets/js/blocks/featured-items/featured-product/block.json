@@ -99,6 +99,10 @@
 		"previewProduct": {
 			"type": "object",
 			"default": null
+		},
+		"decoupledEdit": {
+			"type": "boolean",
+			"default": true
 		}
 	},
 	"selectors": {
@@ -108,5 +112,8 @@
 	},
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
-	"$schema": "https://schemas.wp.org/trunk/block.json"
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"providesContext": {
+		"decoupledEdit": "decoupledEdit"
+	}
 }

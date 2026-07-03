@@ -455,6 +455,7 @@ final class BlockTypesController {
 			'EmailContent',
 			'FeaturedCategory',
 			'FeaturedProduct',
+			'FeaturedProductTitle',
 			'FilterWrapper',
 			'HandpickedProducts',
 			'MiniCart',

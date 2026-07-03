@@ -98,6 +98,10 @@
 		"previewCategory": {
 			"type": "object",
 			"default": null
+		},
+		"decoupledEdit": {
+			"type": "boolean",
+			"default": true
 		}
 	},
 	"selectors": {
@@ -111,6 +115,7 @@
 	"usesContext": [ "termId", "termTaxonomy" ],
 	"providesContext": {
 		"termId": "categoryId",
-		"termTaxonomy": "termTaxonomy"
+		"termTaxonomy": "termTaxonomy",
+		"decoupledEdit": "decoupledEdit"
 	}
 }

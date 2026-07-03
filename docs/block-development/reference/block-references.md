@@ -541,7 +541,7 @@ Displays the current category description.
 - **Name:** woocommerce/category-description
 - **Category:** woocommerce
 - **Supports:** color (background, text), spacing (margin, padding), typography, ~~align~~, ~~html~~
-- **Attributes:** textAlign
+- **Attributes:** content, textAlign
 
 ## Product Category Title - woocommerce/category-title
 
@@ -550,7 +550,7 @@ Displays the current category title and lets permitted users edit it.
 - **Name:** woocommerce/category-title
 - **Category:** woocommerce
 - **Supports:** color (background, text), spacing (margin, padding), typography, ~~align~~, ~~html~~
-- **Attributes:** isLink, level, linkTarget, rel, textAlign
+- **Attributes:** content, isLink, level, linkTarget, rel, textAlign
 
 ## Checkout - woocommerce/checkout
 
@@ -852,7 +852,7 @@ Visually highlight a product category and encourage prompt action.
 - **Name:** woocommerce/featured-category
 - **Category:** woocommerce
 - **Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), spacing (padding), ~~html~~
-- **Attributes:** alt, categoryId, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewCategory
+- **Attributes:** alt, categoryId, contentAlign, decoupledEdit, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewCategory
 
 ## Featured Product - woocommerce/featured-product
 
@@ -861,7 +861,17 @@ Highlight a product or variation.
 - **Name:** woocommerce/featured-product
 - **Category:** woocommerce
 - **Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), multiple, spacing (padding), ~~html~~
-- **Attributes:** alt, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewProduct, productId
+- **Attributes:** alt, contentAlign, decoupledEdit, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewProduct, productId
+
+## Product Title - woocommerce/featured-product-title
+
+Displays the current product title.
+
+- **Name:** woocommerce/featured-product-title
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/featured-product
+- **Supports:** color (background, text), spacing (margin, padding), typography, ~~align~~, ~~html~~
+- **Attributes:** content, isLink, level, linkTarget, rel, textAlign
 
 ## Filter Block - woocommerce/filter-wrapper
 
@@ -1235,7 +1245,7 @@ Display a product's description, attributes, and reviews
 
 ## Product Filters - woocommerce/product-filters
 
-Let shoppers filter products displayed on the page.
+Add a set of filters shoppers can use.
 
 - **Name:** woocommerce/product-filters
 - **Category:** woocommerce
@@ -1244,7 +1254,7 @@ Let shoppers filter products displayed on the page.
 
 ## Active Filters - woocommerce/product-filter-active
 
-Display the currently active filters.
+Display all active filters.
 
 - **Name:** woocommerce/product-filter-active
 - **Category:** woocommerce
@@ -1253,7 +1263,7 @@ Display the currently active filters.
 
 ## Attribute Filter - woocommerce/product-filter-attribute
 
-Enable customers to filter the product grid by selecting one or more attributes, such as color.
+Let shoppers filter products by attribute.
 
 - **Name:** woocommerce/product-filter-attribute
 - **Category:** woocommerce
@@ -1263,7 +1273,7 @@ Enable customers to filter the product grid by selecting one or more attributes,
 
 ## List - woocommerce/product-filter-checkbox-list
 
-Display a list of filter options.
+Display filter options as a list.
 
 - **Name:** woocommerce/product-filter-checkbox-list
 - **Category:** woocommerce
@@ -1283,7 +1293,7 @@ Display filter options as chips.
 
 ## Clear filters - woocommerce/product-filter-clear-button
 
-Allows shoppers to clear active filters.
+Let shoppers clear any active filters.
 
 - **Name:** woocommerce/product-filter-clear-button
 - **Category:** woocommerce
@@ -1292,7 +1302,7 @@ Allows shoppers to clear active filters.
 
 ## Price Filter - woocommerce/product-filter-price
 
-Let shoppers filter products by choosing a price range.
+Let shoppers filter products by price.
 
 - **Name:** woocommerce/product-filter-price
 - **Category:** woocommerce
@@ -1301,7 +1311,7 @@ Let shoppers filter products by choosing a price range.
 
 ## Price Slider - woocommerce/product-filter-price-slider
 
-A slider helps shopper choose a price range.
+Let shoppers choose a price range with a slider.
 
 - **Name:** woocommerce/product-filter-price-slider
 - **Category:** woocommerce
@@ -1311,7 +1321,7 @@ A slider helps shopper choose a price range.
 
 ## Rating Filter - woocommerce/product-filter-rating
 
-Enable customers to filter the product collection by rating.
+Let shoppers filter products by rating.
 
 - **Name:** woocommerce/product-filter-rating
 - **Category:** woocommerce
@@ -1321,7 +1331,7 @@ Enable customers to filter the product collection by rating.
 
 ## Chips - woocommerce/product-filter-removable-chips
 
-Display removable active filters as chips.
+Display active filters as removable chips.
 
 - **Name:** woocommerce/product-filter-removable-chips
 - **Category:** woocommerce
@@ -1329,7 +1339,7 @@ Display removable active filters as chips.
 - **Supports:** interactivity, layout (default, ~~allowInheriting~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~)
 - **Attributes:** chipBackground, chipBorder, chipText, customChipBackground, customChipBorder, customChipText
 
-## Availability filter - woocommerce/product-filter-status
+## Availability Filter - woocommerce/product-filter-status
 
 Let shoppers filter products by availability.
 
@@ -1341,7 +1351,7 @@ Let shoppers filter products by availability.
 
 ## Taxonomy Filter - woocommerce/product-filter-taxonomy
 
-Enable customers to filter the product collection by selecting one or more taxonomy terms, such as categories, brands, or tags.
+Let shoppers filter products by category, brand, or tag.
 
 - **Name:** woocommerce/product-filter-taxonomy
 - **Category:** woocommerce

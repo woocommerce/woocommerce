@@ -8,6 +8,9 @@
 	"attributes": {
 		"textAlign": {
 			"type": "string"
+		},
+		"content": {
+			"type": "string"
 		}
 	},
 	"supports": {
@@ -23,5 +26,5 @@
 		},
 		"typography": true
 	},
-	"usesContext": [ "termId", "termTaxonomy" ]
+	"usesContext": [ "termId", "termTaxonomy", "decoupledEdit" ]
 }

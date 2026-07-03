@@ -3,28 +3,31 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
- * CategoryTitle block: renders the current term title using context.
+ * Featured Product Title block: renders the current product title using context.
+ *
+ * Used inside the Featured Product block. The `content` attribute holds a
+ * locally edited title that overrides the underlying product name, so editing
+ * the title in the block does not change the product data itself.
  */
-class CategoryTitle extends AbstractBlock {
+class FeaturedProductTitle extends AbstractBlock {
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'category-title';
+	protected $block_name = 'featured-product-title';
 
 	/**
 	 * Render the block.
 	 *
 	 * @param array     $attributes Block attributes.
 	 * @param string    $content    Block content.
-	 * @param \WP_Block $block     Block instance.
+	 * @param \WP_Block $block      Block instance.
 	 *
 	 * @return string Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$term_id       = $block->context['termId'] ?? 0;
-		$term_taxonomy = $block->context['termTaxonomy'] ?? 'product_cat';
+		$post_id = $block->context['postId'] ?? 0;
 
 		$level      = isset( $attributes['level'] ) ? max( 0, min( 6, intval( $attributes['level'] ) ) ) : 2;
 		$text_align = isset( $attributes['textAlign'] ) ? sanitize_key( $attributes['textAlign'] ) : '';
@@ -32,31 +35,29 @@ class CategoryTitle extends AbstractBlock {
 		$rel        = isset( $attributes['rel'] ) ? esc_attr( $attributes['rel'] ) : '';
 		$target     = isset( $attributes['linkTarget'] ) ? esc_attr( $attributes['linkTarget'] ) : '_self';
 
-		if ( ! $term_id ) {
-			return '';
-		}
-
-		$term = get_term( $term_id, $term_taxonomy );
-		if ( ! $term || is_wp_error( $term ) ) {
+		if ( ! $post_id ) {
 			return '';
 		}
 
 		// Use the locally edited content when decoupled editing is enabled (e.g. inside a
-		// Featured Category block), falling back to the term name otherwise.
+		// Featured Product block), falling back to the product title otherwise.
 		$decoupled = ! empty( $block->context['decoupledEdit'] );
 		$title     = $decoupled && isset( $attributes['content'] ) && '' !== trim( (string) $attributes['content'] )
 			? $attributes['content']
-			: $term->name;
+			: get_the_title( $post_id );
+
+		if ( '' === trim( (string) $title ) ) {
+			return '';
+		}
 
 		$tag_name           = 0 === $level ? 'p' : 'h' . $level;
-
 		$classes            = $text_align ? 'has-text-align-' . $text_align : '';
 		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => $classes ) );
 
 		$title_html = '';
 		if ( $is_link ) {
-			$link = get_term_link( $term );
-			if ( ! is_wp_error( $link ) ) {
+			$link = get_permalink( $post_id );
+			if ( $link ) {
 				$title_html = sprintf(
 					'<%1$s %2$s><a href="%3$s" target="%4$s" rel="%5$s">%6$s</a></%1$s>',
 					esc_attr( $tag_name ),
@@ -87,7 +88,7 @@ class CategoryTitle extends AbstractBlock {
 	 * @return array
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'termId', 'termTaxonomy', 'decoupledEdit' ];
+		return [ 'postId', 'postType', 'decoupledEdit' ];
 	}
 
 	/**

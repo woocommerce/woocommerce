@@ -66,6 +66,7 @@ const blocks = {
 	'featured-product': {
 		customDir: 'featured-items/featured-product',
 	},
+	'featured-product-title': {},
 	'filter-wrapper': {
 		// Frontend-only lazy component registration; exclude from styling build.
 		skipStyling: true,

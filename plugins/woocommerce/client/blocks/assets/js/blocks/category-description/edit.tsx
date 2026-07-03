@@ -17,17 +17,19 @@ import { previewCategories } from '@woocommerce/resource-previews';
 interface Props {
 	attributes: {
 		textAlign?: string;
+		content?: string;
 	};
 	setAttributes: ( attrs: Partial< Props[ 'attributes' ] > ) => void;
 	context: {
 		termId?: number;
 		termTaxonomy?: string;
+		decoupledEdit?: boolean;
 	};
 }
 
 export default function Edit( { attributes, setAttributes, context }: Props ) {
 	const { textAlign } = attributes;
-	const { termId, termTaxonomy } = context;
+	const { termId, termTaxonomy, decoupledEdit } = context;
 
 	const userCanEdit = useSelect(
 		( select ) => {
@@ -55,6 +57,11 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	let displayRawDescription = '';
 	if ( isPreviewMode ) {
 		displayRawDescription = previewCategories[ 0 ].description;
+	} else if ( decoupledEdit ) {
+		displayRawDescription =
+			typeof attributes.content === 'string' && attributes.content.length
+				? attributes.content
+				: '';
 	} else if ( typeof rawDescription === 'string' ) {
 		displayRawDescription = rawDescription;
 	}
@@ -62,6 +69,11 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	let displayFullDescription = '';
 	if ( isPreviewMode ) {
 		displayFullDescription = previewCategories[ 0 ].description;
+	} else if ( decoupledEdit ) {
+		displayFullDescription =
+			typeof attributes.content === 'string' && attributes.content.length
+				? attributes.content
+				: '';
 	} else if (
 		typeof fullDescription === 'object' &&
 		fullDescription !== null &&
@@ -70,6 +82,14 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	) {
 		displayFullDescription = fullDescription.rendered;
 	}
+
+	const onChangeDescription = ( v: string ) => {
+		if ( decoupledEdit ) {
+			setAttributes( { content: v } );
+		} else {
+			( setDescription as ( v: string ) => void )( v );
+		}
+	};
 
 	const blockProps = useBlockProps( {
 		className: clsx( { [ `has-text-align-${ textAlign }` ]: textAlign } ),
@@ -85,9 +105,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 				tagName="p"
 				placeholder={ __( 'No description', 'woocommerce' ) as string }
 				value={ displayRawDescription }
-				onChange={ ( v: string ) =>
-					( setDescription as ( v: string ) => void )( v )
-				}
+				onChange={ onChangeDescription }
 				__experimentalVersion={ 2 }
 				{ ...blockProps }
 			/>
