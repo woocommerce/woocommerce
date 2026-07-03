@@ -2539,7 +2539,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_shipped_via', '&nbsp;<small class="shipped_via">' . sprintf( __( 'via %s', 'woocommerce' ), $this->get_shipping_method() ) . '</small>', $this );
 
 		} elseif ( $this->get_shipping_method() ) {
-			$shipping = __( 'Free', 'woocommerce' );
+			$shipping = $this->get_shipping_method();
 		} else {
 			$shipping = __( 'Free!', 'woocommerce' );
 		}
