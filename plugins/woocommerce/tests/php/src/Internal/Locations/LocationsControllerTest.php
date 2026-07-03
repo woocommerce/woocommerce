@@ -55,44 +55,6 @@ class LocationsControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox maybe_seed_default_location() creates a single pos location from store settings.
-	 */
-	public function test_seed_creates_single_pos_location_from_store_settings(): void {
-		update_option( 'woocommerce_store_address', '123 Test St' );
-		update_option( 'woocommerce_store_city', 'Testville' );
-		update_option( 'woocommerce_store_postcode', 'TS1 1AA' );
-		update_option( 'woocommerce_default_country', 'GB' );
-		update_option( 'woocommerce_pos_store_name', 'My POS' );
-
-		$this->sut->maybe_seed_default_location();
-
-		$id = $this->sut->get_default_location_id( 'pos' );
-		$this->assertGreaterThan( 0, $id );
-
-		$location = new Location( $id );
-		$this->assertEquals( 'pos', $location->get_type() );
-		$this->assertEquals( 'My POS', $location->get_name() );
-		$this->assertEquals( '123 Test St', $location->get_address_1() );
-		$this->assertEquals( 'Testville', $location->get_city() );
-		$this->assertEquals( 'GB', $location->get_country() );
-	}
-
-	/**
-	 * @testdox maybe_seed_default_location() is idempotent.
-	 */
-	public function test_seed_is_idempotent(): void {
-		global $wpdb;
-
-		$this->sut->maybe_seed_default_location();
-		$this->sut->maybe_seed_default_location();
-
-		$count = (int) $wpdb->get_var(
-			$wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE type = %s', $this->sut->get_table_name(), 'pos' )
-		);
-		$this->assertEquals( 1, $count );
-	}
-
-	/**
 	 * @testdox set_default_location() then get_default_location_id() returns the location that was set.
 	 */
 	public function test_set_default_location_then_get_returns_it(): void {
@@ -141,9 +103,9 @@ class LocationsControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Enabling a consumer feature installs and seeds the default location.
+	 * @testdox Enabling a consumer feature installs the table and announces locations are ready.
 	 */
-	public function test_on_feature_enabled_changed_installs_when_enabled(): void {
+	public function test_on_feature_enabled_changed_installs_and_announces(): void {
 		add_filter(
 			'woocommerce_location_feature_consumers',
 			static function ( $ids ) {
@@ -152,14 +114,20 @@ class LocationsControllerTest extends WC_Unit_Test_Case {
 			}
 		);
 		delete_option( LocationsController::TABLES_CREATED_OPTION );
-		update_option( 'woocommerce_feature_multi_location_inventory_enabled', 'yes' );
 
-		// Idempotent explicit call: once the bootstrap wires the listener, the option
-		// write above also auto-fires this handler via FeaturesController.
+		$fired = false;
+		add_action(
+			LocationsController::LOCATIONS_READY_ACTION,
+			static function () use ( &$fired ) {
+				$fired = true;
+			}
+		);
+
+		update_option( 'woocommerce_feature_multi_location_inventory_enabled', 'yes' );
 		$this->sut->on_feature_enabled_changed( 'multi_location_inventory', true );
 
 		$this->assertEquals( 'yes', get_option( LocationsController::TABLES_CREATED_OPTION ) );
-		$this->assertGreaterThan( 0, $this->sut->get_default_location_id( 'pos' ) );
+		$this->assertTrue( $fired, 'Enabling a consumer must announce that locations are ready.' );
 	}
 
 	/**

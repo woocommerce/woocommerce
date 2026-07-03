@@ -19,9 +19,9 @@ defined( 'ABSPATH' ) || exit;
 class LocationsController extends \Automattic\WooCommerce\Internal\AbstractFeatureTablesInstaller {
 
 	public const TABLES_CREATED_OPTION    = 'woocommerce_locations_db_tables_created';
-	public const POS_LOCATION_TYPE        = 'pos';
 	public const CONSUMER_FILTER          = 'woocommerce_location_feature_consumers';
 	public const DEFAULT_LOCATIONS_OPTION = 'woocommerce_default_locations';
+	public const LOCATIONS_READY_ACTION   = 'woocommerce_locations_ready';
 
 	/**
 	 * Get the wc_locations table name.
@@ -128,37 +128,6 @@ class LocationsController extends \Automattic\WooCommerce\Internal\AbstractFeatu
 	}
 
 	/**
-	 * Seed the default pos location from store settings if none exists. Idempotent.
-	 *
-	 * The address is a one-time snapshot, not a live mirror of store settings.
-	 */
-	public function maybe_seed_default_location(): void {
-		if ( $this->get_default_location_id( self::POS_LOCATION_TYPE ) > 0 ) {
-			return;
-		}
-
-		$name = (string) get_option( 'woocommerce_pos_store_name', '' );
-		if ( '' === $name ) {
-			$name = (string) get_bloginfo( 'name' );
-		}
-
-		$base = wc_get_base_location();
-
-		$location = new Location();
-		$location->set_type( self::POS_LOCATION_TYPE );
-		$location->set_name( $name );
-		$location->set_address_1( (string) get_option( 'woocommerce_store_address', '' ) );
-		$location->set_address_2( (string) get_option( 'woocommerce_store_address_2', '' ) );
-		$location->set_city( (string) get_option( 'woocommerce_store_city', '' ) );
-		$location->set_postcode( (string) get_option( 'woocommerce_store_postcode', '' ) );
-		$location->set_country( (string) ( $base['country'] ?? '' ) );
-		$location->set_state( (string) ( $base['state'] ?? '' ) );
-		$location->save();
-
-		$this->set_default_location( self::POS_LOCATION_TYPE, $location->get_id() );
-	}
-
-	/**
 	 * The option name latching that the table has been created.
 	 */
 	protected function get_tables_created_option(): string {
@@ -175,10 +144,16 @@ class LocationsController extends \Automattic\WooCommerce\Internal\AbstractFeatu
 	}
 
 	/**
-	 * Seed the default location once the table has been created.
+	 * Announce that the locations table is ready so consumers can seed their defaults.
 	 */
 	protected function after_tables_created(): void {
-		$this->maybe_seed_default_location();
+		/**
+		 * Fires once the wc_locations table exists, so location consumers can seed
+		 * their default location(s).
+		 *
+		 * @since 11.0.0
+		 */
+		do_action( self::LOCATIONS_READY_ACTION );
 	}
 
 	/**

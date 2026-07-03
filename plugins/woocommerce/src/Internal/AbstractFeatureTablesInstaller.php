@@ -95,9 +95,7 @@ abstract class AbstractFeatureTablesInstaller {
 
 	/**
 	 * Create the table (and run any post-create step) if the feature is enabled. Idempotent.
-	 *
-	 * Wrapped in try/catch so a transient failure does not white-screen the request that
-	 * toggled the feature; on failure the latch is left unset so a later call retries.
+	 * On failure the latch is left unset so a later call retries.
 	 */
 	public function maybe_install(): void {
 		if ( ! $this->is_enabled() ) {
