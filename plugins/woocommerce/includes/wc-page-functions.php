@@ -13,13 +13,18 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Replace a page title with the endpoint title.
  *
- * @param  string $title Post title.
+ * @param  string $title   Post title.
+ * @param  int    $post_id Optional. The post ID the title belongs to. Passed by the `the_title` filter. Defaults to 0 for backwards compatibility with callers that pass only the title, in which case the queried-object check is skipped (matching the original single-argument behaviour).
  * @return string
  */
-function wc_page_endpoint_title( $title ) {
+function wc_page_endpoint_title( $title, $post_id = 0 ) {
 	global $wp_query;
 
-	if ( ! is_null( $wp_query ) && ! is_admin() && is_main_query() && in_the_loop() && is_page() && is_wc_endpoint_url() ) {
+	// In block themes the whole template (header, footer, content) renders inside the main
+	// loop, so `the_title` fires for any post title rendered on the page (e.g. a product in a
+	// server-rendered mini-cart) - not just the page's own heading. Only replace the title of
+	// the queried page so an earlier title doesn't consume this one-shot filter.
+	if ( ! is_null( $wp_query ) && ! is_admin() && is_main_query() && in_the_loop() && is_page() && is_wc_endpoint_url() && ( ! $post_id || get_queried_object_id() === $post_id ) ) {
 		$endpoint       = WC()->query->get_current_endpoint();
 		$action         = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
 		$endpoint_title = WC()->query->get_endpoint_title( $endpoint, $action );
@@ -31,7 +36,7 @@ function wc_page_endpoint_title( $title ) {
 	return $title;
 }
 
-add_filter( 'the_title', 'wc_page_endpoint_title' );
+add_filter( 'the_title', 'wc_page_endpoint_title', 10, 2 );
 
 /**
  * Replace the title part of the document title.
