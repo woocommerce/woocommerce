@@ -669,6 +669,84 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Should not complete when a concurrent session claims a limited-use coupon after validation, and should release reserved stock.
+	 */
+	public function test_complete_checkout_session_holds_limited_use_coupon() {
+		// The agentic fulfillment address carries no phone; keep it optional.
+		update_option( 'woocommerce_checkout_phone_field', 'optional' );
+
+		$coupon = \WC_Helper_Coupon::create_coupon(
+			'race_once',
+			array( 'usage_limit' => 1 )
+		);
+
+		$this->products[0]->set_manage_stock( true );
+		$this->products[0]->set_stock_quantity( 5 );
+		$this->products[0]->save();
+
+		$create_response = $this->create_session(
+			$this->create_checkout_request(
+				array(
+					'fulfillment_address' => $this->get_test_address(),
+					'buyer'               => $this->get_test_buyer(),
+				)
+			)
+		);
+
+		$create_data        = $create_response->get_data();
+		$session_id         = $create_data['id'];
+		$shipping_method_id = $create_data['fulfillment_options'][0]['id'];
+		$this->update_session(
+			$session_id,
+			array(
+				'fulfillment_option_id' => $shipping_method_id,
+			)
+		);
+
+		// Stock reservation runs after coupon validation but before the coupon
+		// hold: use that window to simulate a concurrent session claiming the coupon.
+		$injected = false;
+		$inject   = function ( $enabled ) use ( $coupon, &$injected ) {
+			if ( ! $injected ) {
+				$injected = true;
+				WC()->cart->apply_coupon( $coupon->get_code() );
+				$coupon->get_data_store()->check_and_hold_coupon( $coupon );
+			}
+			return $enabled;
+		};
+		add_filter( 'woocommerce_hold_stock_for_checkout', $inject );
+
+		$complete_response = $this->complete_session(
+			$session_id,
+			array(
+				'payment_data' => $this->get_payment_data(),
+			)
+		);
+		$complete_data     = $complete_response->get_data();
+
+		remove_filter( 'woocommerce_hold_stock_for_checkout', $inject );
+
+		$this->assertTrue( $injected, 'The concurrent-session hold should have been injected during stock reservation.' );
+
+		$this->assertEquals( 400, $complete_response->get_status(), 'Completion must fail when the coupon usage limit is claimed by a concurrent session.' );
+		$this->assertArrayHasKey( 'code', $complete_data );
+		$this->assertEquals( 'invalid', $complete_data['code'] );
+		$this->assertArrayHasKey( 'message', $complete_data );
+		$this->assertStringContainsString( 'usage limit', strtolower( $complete_data['message'] ), 'Error should indicate the coupon usage limit was reached.' );
+
+		$this->assertNull(
+			WC()->session->get( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID ),
+			'No order should be completed when the coupon hold fails.'
+		);
+
+		$this->assertEquals(
+			0,
+			wc_get_held_stock_quantity( $this->products[0] ),
+			'Reserved stock should be released when the coupon hold fails.'
+		);
+	}
+
+	/**
 	 * Test error response format matches ACP spec.
 	 */
 	public function test_complete_error_response_format() {

@@ -300,6 +300,15 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 			return Error::invalid_request( ErrorCode::INVALID, $message )->to_rest_response();
 		}
 
+		// Hold applied coupons before payment, mirroring the classic checkout path.
+		try {
+			$this->order->hold_applied_coupons( $this->order->get_billing_email() );
+		} catch ( \Exception $e ) {
+			wc_release_stock_for_order( $this->order );
+			$message = wp_specialchars_decode( $e->getMessage(), ENT_QUOTES );
+			return Error::invalid_request( ErrorCode::INVALID, $message )->to_rest_response();
+		}
+
 		// Set the order status to 'pending' as an initial step.
 		$this->order->update_status( 'pending' );
 
