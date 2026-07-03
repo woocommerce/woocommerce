@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Skip loading wc-admin feature classes on REST API requests to non-WooCommerce namespaces, reducing response time for editor and core REST requests.
