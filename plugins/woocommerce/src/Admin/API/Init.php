@@ -59,11 +59,8 @@ class Init {
 	 * @return void
 	 */
 	public function rest_api_init() {
-		if ( wc_rest_should_load_namespace( 'wc-admin' ) ) {
-			$this->rest_api_init_wc_admin();
-		}
-
 		$rest_api_util = wc_get_container()->get( RestApiUtil::class );
+		$rest_api_util->lazy_load_namespace( 'wc-admin', array( $this, 'rest_api_init_wc_admin' ) );
 		$rest_api_util->lazy_load_namespace( 'wc-analytics', array( $this, 'rest_api_init_wc_analytics' ) );
 
 		if ( Features::is_enabled( 'launch-your-store' ) ) {
