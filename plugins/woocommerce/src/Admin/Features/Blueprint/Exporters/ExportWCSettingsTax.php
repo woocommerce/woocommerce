@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 use Automattic\WooCommerce\Blueprint\Steps\RunSql;
 use Automattic\WooCommerce\Admin\Features\Blueprint\SettingOptions;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 /**
  * Class ExportWCSettingsTax
@@ -89,10 +90,11 @@ class ExportWCSettingsTax extends ExportWCSettings {
 	 */
 	private function generateTaxRateSteps( string $table ): array {
 		global $wpdb;
-		$prefixed_table = $wpdb->prefix . $table;
+		$prefixed_table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $wpdb->prefix . $table );
 		return array_map(
 			fn( $record ) => RunSql::from_table_row( $record, $table ),
-			$wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i', $prefixed_table ), ARRAY_A ),
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
+			$wpdb->get_results( "SELECT * FROM {$prefixed_table_sql}", ARRAY_A ),
 		);
 	}
 }

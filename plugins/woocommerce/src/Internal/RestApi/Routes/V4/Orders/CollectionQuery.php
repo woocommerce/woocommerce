@@ -21,6 +21,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order_Query;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 /**
  * CollectionQuery class.
@@ -243,11 +244,12 @@ class CollectionQuery extends AbstractCollectionQuery {
 		if ( ! empty( $request['product'] ) ) {
 			global $wpdb;
 
-			$order_ids = $wpdb->get_col(
+			$order_items_sql    = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $wpdb->prefix . 'woocommerce_order_items' );
+			$order_itemmeta_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $wpdb->prefix . 'woocommerce_order_itemmeta' );
+			$order_ids          = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT order_id FROM %i WHERE order_item_id IN ( SELECT order_item_id FROM %i WHERE meta_key = '_product_id' AND meta_value = %d ) AND order_item_type = %s",
-					$wpdb->prefix . 'woocommerce_order_items',
-					$wpdb->prefix . 'woocommerce_order_itemmeta',
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names are quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
+					"SELECT order_id FROM {$order_items_sql} WHERE order_item_id IN ( SELECT order_item_id FROM {$order_itemmeta_sql} WHERE meta_key = '_product_id' AND meta_value = %d ) AND order_item_type = %s",
 					$request['product'],
 					OrderItemType::LINE_ITEM
 				)

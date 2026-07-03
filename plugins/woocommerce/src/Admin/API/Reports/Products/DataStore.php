@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 /**
  * API\Reports\Products\DataStore.
@@ -498,6 +499,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$order_items     = $parent_order->get_items();
 
 			// Get the partially refunded product and variation IDs along with their sum of product_net_revenue from the parent order.
+			$table_name_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $table_name );
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
 			$partial_refund_products = $wpdb->get_results(
 				$wpdb->prepare(
 					"
@@ -505,7 +508,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 							product_lookup.product_id,
 							product_lookup.variation_id,
 							SUM( product_lookup.product_net_revenue ) AS product_net_revenue
-						FROM %i AS product_lookup
+						FROM {$table_name_sql} AS product_lookup
 						INNER JOIN {$wpdb->prefix}wc_order_stats AS order_stats
 							ON order_stats.order_id = product_lookup.order_id
 						WHERE 1 = 1
@@ -513,10 +516,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 							AND product_lookup.product_net_revenue < 0
 						GROUP BY product_lookup.product_id, product_lookup.variation_id
 					",
-					$table_name,
 					$parent_order_id
 				)
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 			/**
 			 * Create a lookup table for partially refunded products.

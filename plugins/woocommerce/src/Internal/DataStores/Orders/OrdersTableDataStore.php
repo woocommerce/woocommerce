@@ -1121,7 +1121,9 @@ WHERE
 	 */
 	protected function get_refund_orders_join_clause( int $order_id ): string {
 		global $wpdb;
-		return $wpdb->prepare( '%i AS refunds ON ( refunds.type = %s AND refunds.parent_order_id = %d )', self::get_orders_table_name(), 'shop_order_refund', $order_id );
+		$orders_table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( self::get_orders_table_name() );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
+		return $wpdb->prepare( "{$orders_table_sql} AS refunds ON ( refunds.type = %s AND refunds.parent_order_id = %d )", 'shop_order_refund', $order_id );
 	}
 
 	/**
@@ -3259,9 +3261,10 @@ FROM $order_meta_table
 	 */
 	protected function get_refund_orders_batch_join_clause( array $order_ids ): string {
 		global $wpdb;
-		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
-		return $wpdb->prepare( "%i AS refunds ON ( refunds.type = %s AND refunds.parent_order_id IN ( $id_list ) )", self::get_orders_table_name(), 'shop_order_refund' );
+		$id_list          = implode( ', ', array_map( 'absint', $order_ids ) );
+		$orders_table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( self::get_orders_table_name() );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above; table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
+		return $wpdb->prepare( "{$orders_table_sql} AS refunds ON ( refunds.type = %s AND refunds.parent_order_id IN ( $id_list ) )", 'shop_order_refund' );
 	}
 
 	/**
@@ -3287,17 +3290,15 @@ FROM $order_meta_table
 	protected function get_batch_refund_totals( array $order_ids ): array {
 		global $wpdb;
 
-		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
+		$id_list          = implode( ', ', array_map( 'absint', $order_ids ) );
+		$orders_table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( self::get_orders_table_name() );
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above; table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
 		$refund_totals = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT parent_order_id AS order_id, SUM( total_amount ) AS total
-				FROM %i
+			"SELECT parent_order_id AS order_id, SUM( total_amount ) AS total
+				FROM {$orders_table_sql}
 				WHERE type = 'shop_order_refund' AND parent_order_id IN ( $id_list )
-				GROUP BY parent_order_id",
-				self::get_orders_table_name()
-			)
+				GROUP BY parent_order_id"
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 

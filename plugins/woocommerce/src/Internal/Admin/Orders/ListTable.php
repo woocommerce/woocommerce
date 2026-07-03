@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 use WP_List_Table;
 use WP_Screen;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 /**
  * Admin list table for orders as managed by the OrdersTableDataStore.
@@ -876,21 +877,21 @@ class ListTable extends WP_List_Table {
 	protected function get_months_filter_options(): array {
 		global $wpdb;
 
-		$table_name     = OrdersTableDataStore::get_orders_table_name();
+		$table_name_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( OrdersTableDataStore::get_orders_table_name() );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
 		$min_max_months = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT MIN(date_created_gmt) as min_date_gmt, MAX(date_created_gmt) as max_date_gmt
 				 FROM (
-					( SELECT date_created_gmt FROM %i WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt DESC LIMIT 1 )
+					( SELECT date_created_gmt FROM {$table_name_sql} WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt DESC LIMIT 1 )
 					UNION ALL
-					( SELECT date_created_gmt FROM %i WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt ASC LIMIT 1 )
+					( SELECT date_created_gmt FROM {$table_name_sql} WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt ASC LIMIT 1 )
 				 ) d",
-				$table_name,
 				$this->order_type,
-				$table_name,
 				$this->order_type
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		/**
 		 * Normalize "this month" to be the first day of the month in the current timezone of the site.

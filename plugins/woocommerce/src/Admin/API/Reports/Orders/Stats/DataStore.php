@@ -24,6 +24,7 @@ use WC_Order;
 use WC_Order_Refund;
 use Automattic\WooCommerce\Admin\Overrides\Order;
 use Automattic\WooCommerce\Admin\Overrides\OrderRefund;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 /**
  * API\Reports\Orders\Stats\DataStore.
@@ -836,12 +837,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected static function set_customer_first_order( $customer_id, $order_id ) {
 		global $wpdb;
-		$orders_stats_table = self::get_db_table_name();
+		$orders_stats_table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( self::get_db_table_name() );
 
 		$wpdb->query(
 			$wpdb->prepare(
-				'UPDATE %i SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d',
-				$orders_stats_table,
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
+				"UPDATE {$orders_stats_table_sql} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d",
 				$order_id,
 				$customer_id
 			)

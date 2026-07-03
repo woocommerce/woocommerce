@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Guard the `%i` SQL identifier placeholder behind `wpdb::has_cap( 'identifier_placeholders' )` so WooCommerce produces valid queries on database layers that run on a supported WordPress version but don't implement `%i`.

@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Traits\OrderAttributionMeta;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 
 /**
@@ -627,8 +628,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$statuses = wp_cache_get( self::ORDERS_STATUSES_ALL_CACHE_KEY, 'woocommerce_analytics' );
 		if ( false === $statuses ) {
-			$table_name = self::get_db_table_name();
-			$statuses   = $wpdb->get_col( $wpdb->prepare( 'SELECT DISTINCT status FROM %i', $table_name ) );
+			$table_name_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( self::get_db_table_name() );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
+			$statuses = $wpdb->get_col( "SELECT DISTINCT status FROM {$table_name_sql}" );
 			wp_cache_set( self::ORDERS_STATUSES_ALL_CACHE_KEY, $statuses, 'woocommerce_analytics', YEAR_IN_SECONDS );
 		}
 

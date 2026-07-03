@@ -155,4 +155,53 @@ class DatabaseUtilTest extends \WC_Unit_Test_Case {
 			$this->assertEquals( $expected, $this->sut->sanitise_boolean_fts_search_term( $term ) );
 		}
 	}
+
+	/**
+	 * @testdox get_sql_identifier() returns a backtick-quoted identifier via %i when the database layer supports it.
+	 */
+	public function test_get_sql_identifier_uses_placeholder_when_cap_supported(): void {
+		global $wpdb;
+
+		// Stock WordPress (>= 6.2) reports support for the %i identifier placeholder.
+		$this->assertTrue(
+			$wpdb->has_cap( 'identifier_placeholders' ),
+			'The test environment is expected to support the %i identifier placeholder.'
+		);
+
+		$this->assertSame( '`wp_posts`', $this->sut->get_sql_identifier( 'wp_posts' ) );
+	}
+
+	/**
+	 * @testdox get_sql_identifier() falls back to manual backtick quoting when the database layer lacks %i support.
+	 */
+	public function test_get_sql_identifier_falls_back_when_cap_unsupported(): void {
+		$real_wpdb = $GLOBALS['wpdb'];
+
+		// Simulate a $wpdb drop-in that runs on a supported WordPress version but does not implement %i.
+		// Its has_cap() honestly returns false, so get_sql_identifier() must take the manual-quoting path
+		// and never call prepare() (the stub deliberately omits it).
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- intentionally swapping $wpdb for a stub; restored below.
+		$GLOBALS['wpdb'] = new class() {
+			/**
+			 * Report no support for any capability, including identifier placeholders.
+			 *
+			 * @param string $capability Capability name.
+			 * @return bool
+			 */
+			public function has_cap( $capability ) {
+				unset( $capability );
+				return false;
+			}
+		};
+
+		try {
+			$this->assertSame( '`wp_posts`', $this->sut->get_sql_identifier( 'wp_posts' ) );
+
+			// Backticks within the identifier are escaped by doubling.
+			$this->assertSame( '`odd``name`', $this->sut->get_sql_identifier( 'odd`name' ) );
+		} finally {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restoring the real $wpdb swapped above.
+			$GLOBALS['wpdb'] = $real_wpdb;
+		}
+	}
 }

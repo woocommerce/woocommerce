@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\Customers;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 /**
  * Internal API for searching users/customers: no backward compatibility obligation.
@@ -25,12 +26,12 @@ final class SearchService {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			global $wpdb;
 
-			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 			$placeholders     = implode( ', ', array_fill( 0, count( $emails ), '%s' ) );
+			$orders_table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( OrdersTableDataStore::get_orders_table_name() );
 			$include_user_ids = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT DISTINCT customer_id FROM %i WHERE billing_email IN ($placeholders)",
-					OrdersTableDataStore::get_orders_table_name(),
+					"SELECT DISTINCT customer_id FROM {$orders_table_sql} WHERE billing_email IN ($placeholders)",
 					...$emails
 				)
 			);

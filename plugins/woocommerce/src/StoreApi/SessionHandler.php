@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\StoreApi;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use WC_Session;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -125,10 +126,11 @@ final class SessionHandler extends WC_Session {
 			return $default_value;
 		}
 
-		$value = $wpdb->get_var(
+		$table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $this->table );
+		$value     = $wpdb->get_var(
 			$wpdb->prepare(
-				'SELECT session_value FROM %i WHERE session_key = %s',
-				$this->table,
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
+				"SELECT session_value FROM {$table_sql} WHERE session_key = %s",
 				$customer_id
 			)
 		);
@@ -184,10 +186,11 @@ final class SessionHandler extends WC_Session {
 		if ( $this->_dirty ) {
 			global $wpdb;
 
+			$table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $this->table );
 			$wpdb->query(
 				$wpdb->prepare(
-					'INSERT INTO %i (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d) ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)',
-					$this->table,
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
+					"INSERT INTO {$table_sql} (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d) ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)",
 					$this->get_customer_id(),
 					maybe_serialize( $this->_data ),
 					$this->session_expiration

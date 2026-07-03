@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores;
 
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+
 /**
  * Implements functions similar to WP's add_metadata(), get_metadata(), and friends using a custom table.
  *
@@ -249,10 +251,11 @@ abstract class CustomMetaDataStore {
 	public function get_meta_keys( int $limit = 100 ): array {
 		global $wpdb;
 
+		$table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $this->get_db_info()['table'] );
 		return $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT DISTINCT meta_key FROM %i WHERE meta_key != '' AND meta_key NOT BETWEEN '_' AND '_z' AND meta_key NOT LIKE %s ORDER BY meta_key ASC LIMIT %d",
-				$this->get_db_info()['table'],
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
+				"SELECT DISTINCT meta_key FROM {$table_sql} WHERE meta_key != '' AND meta_key NOT BETWEEN '_' AND '_z' AND meta_key NOT LIKE %s ORDER BY meta_key ASC LIMIT %d",
 				$wpdb->esc_like( '_' ) . '%',
 				$limit
 			)

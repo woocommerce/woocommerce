@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Internal\Utilities\COTMigrationUtil;
 use WC_Order;
 use WP_Post;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 /**
  * A class of utilities for dealing with orders.
@@ -231,10 +232,11 @@ final class OrderUtil {
 
 		if ( null === $count_per_status ) {
 			if ( self::custom_orders_table_usage_is_enabled() ) {
+				$orders_table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( self::get_table_for_orders() );
 				$results          = $wpdb->get_results(
 					$wpdb->prepare(
-						'SELECT status, COUNT(*) AS count FROM %i WHERE type = %s GROUP BY status',
-						self::get_table_for_orders(),
+						// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
+						"SELECT status, COUNT(*) AS count FROM {$orders_table_sql} WHERE type = %s GROUP BY status",
 						$order_type
 					),
 					ARRAY_A

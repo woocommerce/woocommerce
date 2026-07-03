@@ -437,4 +437,32 @@ $on_duplicate_clause
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_item_table is hardcoded.
 		return ! empty( $wpdb->get_results( "SHOW INDEX FROM $order_item_table WHERE Key_name = 'order_item_fts'" ) );
 	}
+
+	/**
+	 * Return a query-safe, backtick-quoted SQL identifier (a table or column name) that is safe to
+	 * interpolate directly into a query string.
+	 *
+	 * When the active `$wpdb` supports identifier placeholders (WordPress 6.2+ with a compatible
+	 * database layer) the `%i` placeholder is used; otherwise the identifier is quoted manually.
+	 * This guards against `$wpdb` drop-ins that run on a supported WordPress version but do not
+	 * implement `%i`, per the `wpdb::prepare()` documentation's recommendation to check
+	 * `wpdb::has_cap( 'identifier_placeholders' )` before relying on the placeholder.
+	 *
+	 * The identifier MUST be a trusted, developer-provided value (a table or column name), never
+	 * raw user input. This method quotes a trusted identifier; it is not an input sanitizer.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param string $identifier Unquoted SQL identifier, e.g. a table or column name.
+	 * @return string The identifier, backtick-quoted and safe to interpolate into a query.
+	 */
+	public function get_sql_identifier( string $identifier ): string {
+		global $wpdb;
+
+		if ( $wpdb->has_cap( 'identifier_placeholders' ) ) {
+			return $wpdb->prepare( '%i', $identifier );
+		}
+
+		return '`' . str_replace( '`', '``', $identifier ) . '`';
+	}
 }

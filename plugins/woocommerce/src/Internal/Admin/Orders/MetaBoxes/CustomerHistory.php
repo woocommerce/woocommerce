@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Admin\Overrides\Order as AdminOrder;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 /**
  * Class CustomerHistory
@@ -121,6 +122,7 @@ class CustomerHistory {
 
 		$excluded_statuses_sql = $this->get_excluded_statuses_sql();
 		$orders_table          = OrdersTableDataStore::get_orders_table_name();
+		$orders_table_sql      = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $orders_table );
 
 		$sql = null;
 
@@ -134,52 +136,45 @@ class CustomerHistory {
 					COALESCE( SUM( filtered.total_amount ), 0 ) + COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
 				FROM (
 					SELECT id, total_amount
-					FROM %i
+					FROM {$orders_table_sql}
 					WHERE customer_id = %d AND type = 'shop_order' $status_filter
 				) AS filtered
 				LEFT JOIN (
 					SELECT rp.parent_order_id, SUM( rp.total_amount ) AS refund_total
-					FROM %i AS rp
-					INNER JOIN %i AS co ON rp.parent_order_id = co.id
+					FROM {$orders_table_sql} AS rp
+					INNER JOIN {$orders_table_sql} AS co ON rp.parent_order_id = co.id
 					WHERE rp.type = 'shop_order_refund'
 						AND co.customer_id = %d AND co.type = 'shop_order' $co_status_filter
 					GROUP BY rp.parent_order_id
 				) AS r ON filtered.id = r.parent_order_id",
-				$orders_table,
 				$customer_id,
-				$orders_table,
-				$orders_table,
 				$customer_id
 			);
 		} elseif ( '' !== $billing_email ) {
-			$addresses_table  = OrdersTableDataStore::get_addresses_table_name();
-			$o_status_filter  = $excluded_statuses_sql ? "AND o.status NOT IN $excluded_statuses_sql" : '';
-			$co_status_filter = $excluded_statuses_sql ? "AND co.status NOT IN $excluded_statuses_sql" : '';
+			$addresses_table     = OrdersTableDataStore::get_addresses_table_name();
+			$addresses_table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $addresses_table );
+			$o_status_filter     = $excluded_statuses_sql ? "AND o.status NOT IN $excluded_statuses_sql" : '';
+			$co_status_filter    = $excluded_statuses_sql ? "AND co.status NOT IN $excluded_statuses_sql" : '';
 
 			$sql = $wpdb->prepare(
 				"SELECT COUNT(*) AS orders_count,
 					COALESCE( SUM( filtered.total_amount ), 0 ) + COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
 				FROM (
 					SELECT o.id, o.total_amount
-					FROM %i AS o
-					INNER JOIN %i AS a ON o.id = a.order_id AND a.address_type = 'billing'
+					FROM {$orders_table_sql} AS o
+					INNER JOIN {$addresses_table_sql} AS a ON o.id = a.order_id AND a.address_type = 'billing'
 					WHERE o.customer_id = 0 AND a.email = %s AND o.type = 'shop_order' $o_status_filter
 				) AS filtered
 				LEFT JOIN (
 					SELECT rp.parent_order_id, SUM( rp.total_amount ) AS refund_total
-					FROM %i AS rp
-					INNER JOIN %i AS co ON rp.parent_order_id = co.id
-					INNER JOIN %i AS ca ON co.id = ca.order_id AND ca.address_type = 'billing'
+					FROM {$orders_table_sql} AS rp
+					INNER JOIN {$orders_table_sql} AS co ON rp.parent_order_id = co.id
+					INNER JOIN {$addresses_table_sql} AS ca ON co.id = ca.order_id AND ca.address_type = 'billing'
 					WHERE rp.type = 'shop_order_refund'
 						AND co.customer_id = 0 AND ca.email = %s AND co.type = 'shop_order' $co_status_filter
 					GROUP BY rp.parent_order_id
 				) AS r ON filtered.id = r.parent_order_id",
-				$orders_table,
-				$addresses_table,
 				$billing_email,
-				$orders_table,
-				$orders_table,
-				$addresses_table,
 				$billing_email
 			);
 		}

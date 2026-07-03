@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -265,10 +266,11 @@ class LookupDataStore {
 
 		$in_stock = $product->is_in_stock();
 
+		$lookup_table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $this->lookup_table_name );
 		$wpdb->query(
 			$wpdb->prepare(
-				'UPDATE %i SET in_stock = %d WHERE product_id = %d',
-				$this->lookup_table_name,
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
+				"UPDATE {$lookup_table_sql} SET in_stock = %d WHERE product_id = %d",
 				$in_stock ? 1 : 0,
 				$product->get_id()
 			)
@@ -359,20 +361,21 @@ class LookupDataStore {
 		global $wpdb;
 
 		// Single query handled with `index_merge` strategy, while separate with `range` (better performing) on available indexes.
+		$lookup_table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $this->lookup_table_name );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
 		$wpdb->query(
 			$wpdb->prepare(
-				'DELETE FROM %i WHERE product_or_parent_id = %d',
-				$this->lookup_table_name,
+				"DELETE FROM {$lookup_table_sql} WHERE product_or_parent_id = %d",
 				$product_id
 			)
 		);
 		$wpdb->query(
 			$wpdb->prepare(
-				'DELETE FROM %i WHERE product_id = %d',
-				$this->lookup_table_name,
+				"DELETE FROM {$lookup_table_sql} WHERE product_id = %d",
 				$product_id
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -616,9 +619,11 @@ class LookupDataStore {
 	private function insert_lookup_table_data( int $product_id, int $product_or_parent_id, string $taxonomy, int $term_id, bool $is_variation_attribute, bool $has_stock ) {
 		global $wpdb;
 
+		$lookup_table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $this->lookup_table_name );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
 		$wpdb->query(
 			$wpdb->prepare(
-				'INSERT INTO %i (
+				"INSERT INTO {$lookup_table_sql} (
 					  product_id,
 					  product_or_parent_id,
 					  taxonomy,
@@ -626,8 +631,7 @@ class LookupDataStore {
 					  is_variation_attribute,
 					  in_stock)
 					VALUES
-					  ( %d, %d, %s, %d, %d, %d )',
-				$this->lookup_table_name,
+					  ( %d, %d, %s, %d, %d, %d )",
 				$product_id,
 				$product_or_parent_id,
 				$taxonomy,
@@ -636,6 +640,7 @@ class LookupDataStore {
 				$has_stock ? 1 : 0
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -847,10 +852,11 @@ class LookupDataStore {
 	private function create_data_for_product_cpt_core( int $product_id ) {
 		global $wpdb;
 
+		$lookup_table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $this->lookup_table_name );
 		$wpdb->query(
 			$wpdb->prepare(
-				'DELETE FROM %i WHERE product_or_parent_id = %d',
-				$this->lookup_table_name,
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
+				"DELETE FROM {$lookup_table_sql} WHERE product_or_parent_id = %d",
 				$product_id
 			)
 		);
