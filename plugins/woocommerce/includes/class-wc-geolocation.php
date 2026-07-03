@@ -47,10 +47,10 @@ class WC_Geolocation {
 	 * @var array
 	 */
 	private static $ip_lookup_apis = array(
-		'ipify'  => 'http://api.ipify.org/',
-		'ipecho' => 'http://ipecho.net/plain',
-		'ident'  => 'http://ident.me',
-		'tnedi'  => 'http://tnedi.me',
+		'ipify'  => 'https://api.ipify.org/',
+		'ipecho' => 'https://ipecho.net/plain',
+		'ident'  => 'https://ident.me',
+		'tnedi'  => 'https://tnedi.me',
 	);
 
 	/**
@@ -60,7 +60,7 @@ class WC_Geolocation {
 	 */
 	private static $geoip_apis = array(
 		'ipinfo.io'  => 'https://ipinfo.io/%s/json',
-		'ip-api.com' => 'http://ip-api.com/json/%s',
+		'country.is' => 'https://api.country.is/%s',
 	);
 
 	/**
@@ -313,9 +313,9 @@ class WC_Geolocation {
 							$data         = json_decode( $response['body'] );
 							$country_code = isset( $data->country ) ? $data->country : '';
 							break;
-						case 'ip-api.com':
+						case 'country.is':
 							$data         = json_decode( $response['body'] );
-							$country_code = isset( $data->countryCode ) ? $data->countryCode : ''; // @codingStandardsIgnoreLine
+							$country_code = isset( $data->country ) ? $data->country : '';
 							break;
 						default:
 							$country_code = apply_filters( 'woocommerce_geolocation_geoip_response_' . $service_name, '', $response['body'] );
