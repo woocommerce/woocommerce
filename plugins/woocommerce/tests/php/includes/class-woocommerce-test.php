@@ -108,5 +108,9 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 			$query_after_action,
 			'New post editor load action should invoke WooCommerce includes.'
 		);
+		$this->assertTrue(
+			function_exists( 'wc_set_notices' ),
+			'New post editor load action should load frontend includes such as wc-notice-functions.php.'
+		);
 	}
 }
