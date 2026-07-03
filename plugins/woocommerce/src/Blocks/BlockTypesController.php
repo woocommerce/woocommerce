@@ -62,6 +62,7 @@ final class BlockTypesController {
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
+		add_filter( 'register_block_type_args', array( $this, 'use_single_block_editor_style' ), 10, 2 );
 		add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
 		add_filter( 'block_core_breadcrumbs_post_type_settings', array( $this, 'set_product_breadcrumbs_preferred_taxonomy' ), 10, 3 );
 		add_filter( 'block_core_breadcrumbs_items', array( $this, 'apply_woocommerce_breadcrumb_filters' ), 10, 1 );
@@ -680,6 +681,33 @@ final class BlockTypesController {
 
 		$args['style_handles'] = array();
 		$args['style']         = array();
+
+		return $args;
+	}
+
+	/**
+	 * Use one shared editor stylesheet for WooCommerce blocks.
+	 *
+	 * WordPress loads `style` handles in both the frontend and editor. WooCommerce
+	 * keeps those per-block handles for frontend performance, but removes them in
+	 * admin so the block editor loads the combined stylesheet only.
+	 *
+	 * @internal
+	 *
+	 * @param array  $args       Block metadata.
+	 * @param string $block_name Block name.
+	 *
+	 * @return array Block metadata.
+	 */
+	public function use_single_block_editor_style( $args, $block_name ) {
+		if ( ! is_admin() || false === strpos( $block_name, 'woocommerce/' ) ) {
+			return $args;
+		}
+
+		$args['style_handles']        = array();
+		$args['style']                = array();
+		$args['editor_style_handles'] = array( 'wc-block-library-style' );
+		$args['editor_style']         = array( 'wc-block-library-style' );
 
 		return $args;
 	}

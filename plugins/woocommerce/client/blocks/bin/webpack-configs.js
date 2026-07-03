@@ -52,7 +52,7 @@ const getBlockJsonWithSharedEditorStyle = ( content ) => {
 	const metadata = JSON.parse( content.toString() );
 
 	if ( metadata.editorStyle ) {
-		metadata.editorStyle = 'wc-blocks-editor-style';
+		metadata.editorStyle = 'wc-block-library-style';
 	}
 
 	return `${ JSON.stringify( metadata, null, '\t' ) }\n`;
@@ -568,10 +568,20 @@ const getStylingConfig = ( options = {} ) => {
 				automaticNameDelimiter: '--',
 				cacheGroups: {
 					editorStyle: {
-						// Capture all `editor` stylesheets and editor-components stylesheets.
+						// Capture all editor stylesheets and editor-bundle stylesheets.
 						test: ( module = {}, { moduleGraph } ) => {
 							if ( ! module.type.includes( 'css' ) ) {
 								return false;
+							}
+
+							const moduleIdentifier =
+								typeof module.identifier === 'function'
+									? module.identifier()
+									: '';
+							if (
+								moduleIdentifier.includes( '?editor-bundle' )
+							) {
+								return true;
 							}
 
 							const moduleIssuer =
@@ -591,7 +601,7 @@ const getStylingConfig = ( options = {} ) => {
 								)
 							);
 						},
-						name: 'wc-blocks-editor-style',
+						name: 'wc-block-library-style',
 						chunks: 'all',
 						enforce: true,
 						priority: 10,

@@ -33,7 +33,7 @@ const [ sourcePath, destinationPath ] = process.argv.slice( 1 );
 const metadata = JSON.parse( fs.readFileSync( sourcePath, "utf8" ) );
 
 if ( metadata.editorStyle ) {
-    metadata.editorStyle = "wc-blocks-editor-style";
+    metadata.editorStyle = "wc-block-library-style";
 }
 
 fs.writeFileSync( destinationPath, `${ JSON.stringify( metadata, null, "\t" ) }\n` );

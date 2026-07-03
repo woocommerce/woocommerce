@@ -329,6 +329,21 @@ const blockStylingEntries = getBlockEntries(
 	}
 );
 
+const addEditorBundleResourceQuery = ( filePath ) =>
+	`${ filePath }?editor-bundle`;
+
+const editorBlockStyleEntries = [
+	'./assets/css/style.scss',
+	'./assets/css/editor.scss',
+	...glob.sync( './assets/js/**/{style,editor}.scss', {
+		dotRelative: true,
+	} ),
+	...glob.sync( './packages/**/style.scss', {
+		dotRelative: true,
+		ignore: './packages/**/stories/**',
+	} ),
+].map( addEditorBundleResourceQuery );
+
 const editorScriptEntries = Object.values(
 	getBlockEntries( 'index.{t,j}s{,x}', {
 		...blocks,
@@ -346,6 +361,7 @@ const entries = {
 
 		// Shared blocks code
 		'wc-blocks': './assets/js/index.js',
+		'wc-block-library-style-source': editorBlockStyleEntries,
 		'interactivity-editor-styles':
 			Object.values( editorStyleEntries ).flat(),
 
