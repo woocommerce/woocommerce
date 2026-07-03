@@ -246,4 +246,50 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		wc_delete_attribute( $color_attr_id );
 		wc_delete_attribute( $size_attr_id );
 	}
+
+	/**
+	 * @testdox Variations imported from a CSV that includes IDs do not inherit the default product category (issue #31815).
+	 */
+	public function test_imported_variations_do_not_inherit_default_product_category_31815() {
+		// Term creation during import requires the manage_product_terms capability.
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		// A default product category must be configured so that the simple-product
+		// placeholders created for the ID-bearing rows would otherwise be assigned it.
+		$default_cat = wp_insert_term( 'Uncategorized', 'product_cat' );
+		$default_cat = is_wp_error( $default_cat ) ? get_term_by( 'name', 'Uncategorized', 'product_cat' )->term_id : $default_cat['term_id'];
+		update_option( 'default_product_cat', $default_cat );
+
+		// Build the header-to-field mapping the way the admin import UI does.
+		$csv_file   = __DIR__ . '/variation-category-31815.csv';
+		$headers    = ( new WC_Product_CSV_Importer( $csv_file, array( 'parse' => false ) ) )->get_raw_keys();
+		$controller = new WC_Product_CSV_Importer_Controller();
+		$auto_map   = new ReflectionMethod( $controller, 'auto_map_columns' );
+		$auto_map->setAccessible( true );
+		$mapping = array_combine( $headers, $auto_map->invoke( $controller, $headers ) );
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'   => true,
+				'mapping' => $mapping,
+			)
+		);
+		$data     = $importer->import();
+
+		$this->assertCount( 2, $data['imported_variations'], 'Expected 2 variations to be imported.' );
+
+		foreach ( $data['imported_variations'] as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+			$this->assertInstanceOf( WC_Product_Variation::class, $variation );
+			$this->assertEmpty(
+				wp_get_object_terms( $variation_id, 'product_cat', array( 'fields' => 'ids' ) ),
+				'Imported variations must not be assigned any product category.'
+			);
+		}
+
+		foreach ( array_merge( $data['imported'], $data['imported_variations'] ) as $id ) {
+			WC_Helper_Product::delete_product( $id );
+		}
+	}
 }
