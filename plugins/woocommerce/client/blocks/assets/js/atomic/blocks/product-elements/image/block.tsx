@@ -127,7 +127,7 @@ const Image = ( {
 
 type Props = BlockAttributes &
 	Pick< ProductImageContext, 'imageId' > &
-	HTMLAttributes< HTMLDivElement > & {
+	Omit< HTMLAttributes< HTMLDivElement >, 'style' > & {
 		isAdmin?: boolean;
 		product?: ProductResponseItem | ProductEntityResponse;
 		isResolving?: boolean;

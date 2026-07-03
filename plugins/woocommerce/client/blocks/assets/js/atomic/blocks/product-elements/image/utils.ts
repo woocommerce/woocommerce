@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { ImageSizing } from './types';
+import { AspectRatioStyle, ImageSizing } from './types';
 
 export const isTryingToDisplayLegacySaleBadge = ( showSaleBadge?: boolean ) => {
 	// If the block is pristine, it doesn't have a showSaleBadge attribute
@@ -13,12 +13,6 @@ export const isTryingToDisplayLegacySaleBadge = ( showSaleBadge?: boolean ) => {
 	// If the block was edited, it will have a showSaleBadge attribute
 	// that we should respect.
 	return showSaleBadge;
-};
-
-type AspectRatioStyle = {
-	dimensions?: {
-		aspectRatio?: string;
-	};
 };
 
 /**
