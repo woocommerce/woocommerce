@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.8.0
+ * @version 11.0.0
  */
 
 use Automattic\WooCommerce\Internal\Email\EmailFont;
@@ -274,7 +274,7 @@ body {
 #body_content .order-item-data td {
 	border: 0 !important;
 	padding: 0 !important;
-	vertical-align: top;
+	vertical-align: middle;
 }
 
 #body_content .email-order-details .order-totals td,
@@ -390,6 +390,10 @@ body {
 
 .order-item-data {
 	width: 100%;
+}
+
+.order-item-data h3 {
+	margin: 0;
 }
 
 .link {

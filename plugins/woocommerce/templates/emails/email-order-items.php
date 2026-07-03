@@ -76,7 +76,7 @@ foreach ( $items as $item_id => $item ) :
 							 * @param WC_Order_Item_Product $item  The item being displayed.
 							 * @since 2.1.0
 							 */
-							echo '<td class="email-order-item-thumbnail" style="vertical-align: top; width: ' . esc_attr( $thumbnail_width ) . 'px;">' . wp_kses_post( apply_filters( 'woocommerce_order_item_thumbnail', $image, $item ) ) . '</td>';
+							echo '<td class="email-order-item-thumbnail" style="width: ' . esc_attr( $thumbnail_width ) . 'px;">' . wp_kses_post( apply_filters( 'woocommerce_order_item_thumbnail', $image, $item ) ) . '</td>';
 						}
 						?>
 						<td>

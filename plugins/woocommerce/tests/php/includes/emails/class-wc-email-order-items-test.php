@@ -46,7 +46,7 @@ class WC_Email_Order_Items_Test extends \WC_Unit_Test_Case {
 			'Order item data table should fill the product column so rows share the same layout.'
 		);
 		$this->assertStringContainsString(
-			'<td class="email-order-item-thumbnail" style="vertical-align: top; width: 72px;">',
+			'<td class="email-order-item-thumbnail" style="width: 72px;">',
 			$content,
 			'Thumbnail column should reserve the image width plus the email improvements image gap.'
 		);
