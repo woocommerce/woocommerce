@@ -59,10 +59,9 @@ test.describe(
 			await expect( dateCopy ).toBeVisible();
 			await expect( statusCopy ).toBeVisible();
 
-			// Open Screen Options.
-			await page
-				.getByRole( 'button', { name: 'Screen Options' } )
-				.click();
+			// Open Screen Options. Target the toggle by its stable ID: the
+			// accessible name "Screen Options" matches more than one element.
+			await page.locator( '#show-settings-link' ).click();
 
 			// Hide the Date column -> its copy disappears live.
 			await page.locator( '#order_date-hide' ).uncheck();
