@@ -33,6 +33,16 @@ wp-env run tests-cli wp import wp-content/plugins/woocommerce/sample-data/sample
 # install Storefront
 wp-env run tests-cli wp theme install storefront --activate
 
+# Pin order storage to the legacy posts table (HPOS off) for deterministic runs.
+# These performance requests assert the classic post.php order-edit screens,
+# which are not authoritative under HPOS. New installs can auto-enable HPOS via
+# the `woocommerce_newly_installed` hook (fired on admin_init - e.g. a Site
+# Health loopback to admin-ajax.php) while no orders exist yet, flipping order
+# storage mid-run and breaking those assertions. Force HPOS off and consume the
+# newly-installed flag so it cannot be re-enabled during the test run.
+wp-env run tests-cli wp option update woocommerce_custom_orders_table_enabled no
+wp-env run tests-cli wp option update woocommerce_newly_installed no
+
 # reduce the impact of background activities on the testing setup
 wp-env run tests-cli wp config set DISABLE_WP_CRON true --raw --type=constant
 wp-env run tests-cli wp config set WP_HTTP_BLOCK_EXTERNAL true --raw --type=constant
