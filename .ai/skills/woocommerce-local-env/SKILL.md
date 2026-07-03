@@ -53,8 +53,8 @@ Fallback commands from the WooCommerce package:
 
 ```bash
 pnpm --filter='@woocommerce/plugin-woocommerce' env:dev
-pnpm --filter='@woocommerce/plugin-woocommerce' env:stop
-pnpm --filter='@woocommerce/plugin-woocommerce' env:restart
+pnpm --filter='@woocommerce/plugin-woocommerce' env:dev:stop
+pnpm --filter='@woocommerce/plugin-woocommerce' env:dev:restart
 pnpm --filter='@woocommerce/plugin-woocommerce' build
 pnpm --filter='@woocommerce/plugin-woocommerce' watch:build
 pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:admin

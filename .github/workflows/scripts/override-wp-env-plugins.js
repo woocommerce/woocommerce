@@ -20,7 +20,7 @@ if ( ! WP_ENV_CONFIG_PATH ) {
 
 const artifactUrl = `https://github.com/woocommerce/woocommerce/releases/download/${ RELEASE_TAG }/${ ARTIFACT_NAME }`;
 
-const configPath = `${ WP_ENV_CONFIG_PATH }/.wp-env.json`;
+const configPath = `${ WP_ENV_CONFIG_PATH }/.wp-env.test.json`;
 console.log( `Reading ${ configPath }` );
 const wpEnvConfig = JSON.parse( fs.readFileSync( configPath, 'utf8' ) );
 
@@ -51,27 +51,12 @@ const wooCommerceMapping = {
 	'wp-content/plugins/woocommerce': artifactUrl,
 };
 
-const overrideConfig = {};
-
-if ( wpEnvConfig.plugins ) {
-	overrideConfig.plugins = withoutWooCommerce( wpEnvConfig.plugins );
-}
-
-if ( wpEnvConfig.env?.tests?.plugins ) {
-	// Scope the mapping to env.tests: `wp-env start` provisions both the
-	// development and tests instances, but the Blocks e2e suite only runs
-	// against tests. Mapping here avoids extracting the artifact into the dev
-	// instance that is never exercised. Move this to a root-level `mappings` if
-	// WooCommerce is ever needed in the dev environment too.
-	overrideConfig.env = {
-		tests: {
-			plugins: withoutWooCommerce( wpEnvConfig.env.tests.plugins ),
-			mappings: wooCommerceMapping,
-		},
-	};
-} else {
-	overrideConfig.mappings = wooCommerceMapping;
-}
+// `.wp-env.test.json` is a single-container-set config (testsEnvironment:
+// false), so plugins and mappings live at the top level - no env.tests nesting.
+const overrideConfig = {
+	plugins: withoutWooCommerce( wpEnvConfig.plugins ),
+	mappings: wooCommerceMapping,
+};
 
 if ( removed === 0 ) {
 	console.error(
@@ -89,7 +74,7 @@ console.log(
 	}; mapping ${ artifactUrl } -> wp-content/plugins/woocommerce`
 );
 
-const overrideConfigPath = `${ WP_ENV_CONFIG_PATH }/.wp-env.override.json`;
+const overrideConfigPath = `${ WP_ENV_CONFIG_PATH }/.wp-env.test.override.json`;
 console.log( `Saving ${ overrideConfigPath }` );
 fs.writeFileSync(
 	overrideConfigPath,
