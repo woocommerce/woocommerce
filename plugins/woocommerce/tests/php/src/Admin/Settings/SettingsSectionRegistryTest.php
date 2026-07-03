@@ -269,6 +269,35 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fall back to the page provider when the registry lookup itself fails.
+	 */
+	public function test_falls_back_to_page_provider_when_registry_lookup_fails(): void {
+		$page = $this->get_parent_page();
+		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section() );
+
+		// Make the lookup itself throw: get_registered() normalises ids
+		// through sanitize_title(), which runs this filter. Scoped to the
+		// section id so logging inside the guard is unaffected.
+		$break_lookup = static function ( $title, $raw_title = '' ) {
+			if ( 'acme_payments' === $raw_title ) {
+				throw new \RuntimeException( 'Broken registry lookup.' );
+			}
+			return $title;
+		};
+		add_filter( 'sanitize_title', $break_lookup, 10, 2 );
+
+		try {
+			$settings_ui_page = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' )->get_settings_ui_page();
+		} finally {
+			remove_filter( 'sanitize_title', $break_lookup );
+		}
+
+		// The registered section is unreachable, so resolution falls through
+		// to the page's own provider (null on the base class) without fataling.
+		$this->assertNull( $settings_ui_page );
+	}
+
+	/**
 	 * @testdox Should keep direct SettingsSectionInterface implementations on the default adapter path.
 	 */
 	public function test_direct_settings_section_interface_implementation_uses_default_adapter(): void {
