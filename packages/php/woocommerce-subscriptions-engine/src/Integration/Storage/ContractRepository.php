@@ -288,11 +288,38 @@ final class ContractRepository {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} ORDER BY id DESC LIMIT %d OFFSET %d", $limit, $offset ), ARRAY_A );
 
-		$contracts = array();
-		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
+	}
+
+	/**
+	 * Construct a page of list contracts from fetched rows: row-only children, with the
+	 * frozen plan terms batch-loaded in ONE `IN()` read for the whole page - the one
+	 * list construction path, so every list read carries the snapshot the same way.
+	 *
+	 * @param array<int, mixed> $rows Fetched rows (non-arrays are skipped).
+	 * @return array<int, Contract> Contracts in row order.
+	 */
+	private function contracts_from_rows( array $rows ): array {
+		$clean_rows = array();
+		foreach ( $rows as $row ) {
 			if ( is_array( $row ) ) {
-				$contracts[] = Contract::from_storage( self::as_string_keyed( $row ) );
+				$clean_rows[] = self::as_string_keyed( $row );
 			}
+		}
+
+		$snapshot_ids = array();
+		foreach ( $clean_rows as $row ) {
+			$snapshot_id = ScalarCoercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
+			if ( null !== $snapshot_id ) {
+				$snapshot_ids[ $snapshot_id ] = $snapshot_id;
+			}
+		}
+		$snapshots = $this->find_plan_snapshots( array_values( $snapshot_ids ) );
+
+		$contracts = array();
+		foreach ( $clean_rows as $row ) {
+			$snapshot_id = ScalarCoercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
+			$contracts[] = Contract::from_storage( $row, null !== $snapshot_id ? ( $snapshots[ $snapshot_id ] ?? null ) : null );
 		}
 
 		return $contracts;
@@ -452,31 +479,7 @@ final class ContractRepository {
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
-		$clean_rows = array();
-		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
-			if ( is_array( $row ) ) {
-				$clean_rows[] = self::as_string_keyed( $row );
-			}
-		}
-
-		// Batch-load the page's frozen plan terms in one read, then construct each
-		// contract with its snapshot on the same footing as a full read.
-		$snapshot_ids = array();
-		foreach ( $clean_rows as $row ) {
-			$snapshot_id = ScalarCoercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
-			if ( null !== $snapshot_id ) {
-				$snapshot_ids[ $snapshot_id ] = $snapshot_id;
-			}
-		}
-		$snapshots = $this->find_plan_snapshots( array_values( $snapshot_ids ) );
-
-		$contracts = array();
-		foreach ( $clean_rows as $row ) {
-			$snapshot_id = ScalarCoercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
-			$contracts[] = Contract::from_storage( $row, null !== $snapshot_id ? ( $snapshots[ $snapshot_id ] ?? null ) : null );
-		}
-
-		return $contracts;
+		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
 	}
 
 	/**

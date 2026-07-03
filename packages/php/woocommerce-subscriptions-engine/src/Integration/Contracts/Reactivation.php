@@ -172,11 +172,22 @@ final class Reactivation {
 	}
 
 	/**
-	 * The contract's plan billing policy, or null when the plan row is gone.
+	 * The billing policy the forward roll steps by: the contract's own frozen plan
+	 * terms first (the snapshot is what the contract actually bills under - the same
+	 * source the renewal money-path resolves), falling back to the live selling plan
+	 * for a contract with no snapshot, and null when neither resolves.
 	 *
 	 * @param Contract $contract The contract.
 	 */
 	private function billing_policy( Contract $contract ): ?BillingPolicy {
+		$snapshot = $contract->get_plan_snapshot();
+		if ( null !== $snapshot ) {
+			$policy = $snapshot->get_billing_policy();
+			if ( $policy instanceof BillingPolicy ) {
+				return $policy;
+			}
+		}
+
 		$plan = $this->plans->find( $contract->get_selling_plan_id() );
 
 		return $plan instanceof Plan ? $plan->get_billing_policy() : null;

@@ -218,6 +218,19 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox list hydrates each row's frozen plan terms, like the customer list.
+	 */
+	public function test_list_hydrates_the_plan_snapshot(): void {
+		$this->sign_up_contract();
+
+		$contracts = Subscriptions::list( 1 );
+		$this->assertCount( 1, $contracts );
+
+		$snapshot = $contracts[0]->get_plan_snapshot();
+		$this->assertInstanceOf( PlanSnapshot::class, $snapshot, 'list must hydrate each row\'s plan snapshot.' );
+	}
+
+	/**
 	 * @testdox list returns recent contracts newest first.
 	 */
 	public function test_list_returns_recent_contracts(): void {

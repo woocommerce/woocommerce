@@ -375,7 +375,9 @@ final class RenewalEngine {
 	 * @return BillingPolicy|null The billing policy, or null when unresolvable.
 	 */
 	private function resolve_billing_policy( Contract $contract ): ?BillingPolicy {
-		$snapshot = $this->contracts->find_plan_snapshot( $contract->get_plan_snapshot_id() );
+		// The full contract reads already carry the snapshot; the store fetch is the
+		// fallback for a contract built on a lean path (row-only reads).
+		$snapshot = $contract->get_plan_snapshot() ?? $this->contracts->find_plan_snapshot( $contract->get_plan_snapshot_id() );
 		if ( $snapshot instanceof PlanSnapshot ) {
 			$payload = $snapshot->to_array();
 			if ( isset( $payload['billing_policy'] ) && is_array( $payload['billing_policy'] ) ) {

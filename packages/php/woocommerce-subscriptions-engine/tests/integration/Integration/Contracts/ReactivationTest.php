@@ -20,6 +20,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanGroup;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Reactivation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanGroupRepository;
@@ -129,6 +130,30 @@ class ReactivationTest extends EngineIntegrationTestCase {
 		$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-04-15 00:00:00' ) );
 
 		$this->assertSame( '2026-05-01 00:00:00', $this->reload( $id )->get_next_payment_gmt() );
+	}
+
+	public function test_reactivate_rolls_by_the_frozen_snapshot_cadence_over_the_live_plan(): void {
+		// The live selling plan is monthly, but the contract's frozen terms are
+		// yearly: the snapshot is what the contract bills under, so the forward
+		// roll steps by years - 2026-01-15 -> 2027-01-15 (first > now).
+		$id = $this->seed_on_hold( '2026-01-15 00:00:00', $this->make_monthly_plan() );
+
+		$contract = $this->reload( $id );
+		$contract->set_plan_snapshot(
+			PlanSnapshot::from_array(
+				array(
+					'selling_plan_id' => $contract->get_selling_plan_id(),
+					'billing_policy'  => array(
+						'period'   => 'year',
+						'interval' => 1,
+					),
+				)
+			)
+		);
+
+		$this->sut->reactivate( $contract, $this->utc( '2026-03-01 00:00:00' ) );
+
+		$this->assertSame( '2027-01-15 00:00:00', $this->reload( $id )->get_next_payment_gmt() );
 	}
 
 	public function test_reactivate_floors_past_due_at_now_without_a_policy(): void {
