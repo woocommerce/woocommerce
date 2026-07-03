@@ -180,8 +180,7 @@ class ProductImage extends AbstractBlock {
 	 * @return string
 	 */
 	private function render_image( $product, $attributes, $image_id = null ) {
-		$image_size = 'large';
-
+		$image_size  = 'large';
 		$image_style = '';
 
 		if ( ! empty( $attributes['height'] ) ) {
@@ -271,7 +270,6 @@ class ProductImage extends AbstractBlock {
 	 *                           not in the post content on editor load.
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
-		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
 		$this->asset_data_registry->add( 'placeholderImgSrcFullSize', wc_placeholder_img_src( 'woocommerce_single' ) );
 		$this->asset_data_registry->add( 'thumbnailAspectRatio', $this->get_store_thumbnail_aspect_ratio() );
 	}

@@ -35,7 +35,7 @@ export const resolveAspectRatio = (
 		return style.dimensions.aspectRatio;
 	}
 
-	if ( aspectRatio ) {
+	if ( aspectRatio && typeof aspectRatio === 'string' ) {
 		return aspectRatio;
 	}
 

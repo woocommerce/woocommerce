@@ -244,34 +244,20 @@ class ProductImage extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the ProductImage block renders correctly with different image sizing options.
-	 */
-	public function test_product_image_render_with_different_sizing() {
-		$data = $this->create_product_with_image();
-
-		update_option( 'woocommerce_thumbnail_cropping', '1:1' );
-
-		$markup_single    = $this->render_product_image_block( $data['product'], '{"imageSizing":"single"}' );
-		$markup_thumbnail = $this->render_product_image_block( $data['product'], '{"imageSizing":"thumbnail"}' );
-
-		$this->assertStringNotContainsString( 'aspect-ratio:1/1', $markup_single );
-		$this->assertStringContainsString( 'aspect-ratio:1/1', $markup_thumbnail );
-
-		// Clean up.
-		$data['product']->delete( true );
-		wp_delete_attachment( $data['image_id'], true );
-	}
-
-	/**
 	 * Test that the ProductImage block uses store thumbnail cropping aspect ratio.
+	 *
+	 * @testdox Should honor the store thumbnail cropping aspect ratio when imageSizing is thumbnail.
 	 */
 	public function test_product_image_render_with_store_aspect_ratio() {
 		$data = $this->create_product_with_image();
 
 		update_option( 'woocommerce_thumbnail_cropping', '1:1' );
-		$markup = $this->render_product_image_block( $data['product'], '{"imageSizing":"thumbnail"}' );
-		$this->assertStringContainsString( 'aspect-ratio:1/1', $markup );
-		$this->assertStringContainsString( 'wc-block-components-product-image--aspect-ratio-1-1', $markup );
+		$markup_single    = $this->render_product_image_block( $data['product'], '{"imageSizing":"single"}' );
+		$markup_thumbnail = $this->render_product_image_block( $data['product'], '{"imageSizing":"thumbnail"}' );
+		$this->assertStringNotContainsString( 'aspect-ratio:1/1', $markup_single );
+		$this->assertStringNotContainsString( 'wc-block-components-product-image--aspect-ratio-1-1', $markup_single );
+		$this->assertStringContainsString( 'aspect-ratio:1/1', $markup_thumbnail );
+		$this->assertStringContainsString( 'wc-block-components-product-image--aspect-ratio-1-1', $markup_thumbnail );
 
 		update_option( 'woocommerce_thumbnail_cropping', 'custom' );
 		update_option( 'woocommerce_thumbnail_cropping_custom_width', '4' );
@@ -291,13 +277,45 @@ class ProductImage extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that malformed aspect ratio values are ignored.
+	 *
+	 * @testdox Should ignore malformed aspect ratio values to prevent CSS and class injection.
+	 */
+	public function test_product_image_ignores_malformed_aspect_ratio_values() {
+		$data = $this->create_product_with_image();
+
+		update_option( 'woocommerce_thumbnail_cropping', '1:1' );
+		$markup = $this->render_product_image_block(
+			$data['product'],
+			'{"aspectRatio":"3/5; background: red","imageSizing":"thumbnail"}'
+		);
+		$this->assertStringNotContainsString( 'background: red', $markup );
+		$this->assertStringContainsString( 'aspect-ratio:1/1', $markup );
+		$this->assertStringContainsString( 'wc-block-components-product-image--aspect-ratio-1-1', $markup );
+
+		$markup = $this->render_product_image_block(
+			$data['product'],
+			'{"aspectRatio":"3/5 evil-class","imageSizing":"single"}'
+		);
+		$this->assertStringNotContainsString( 'evil-class', $markup );
+		$this->assertStringNotContainsString( 'aspect-ratio:', $markup );
+		$this->assertStringContainsString( 'wc-block-components-product-image--aspect-ratio-auto', $markup );
+
+		// Clean up.
+		$data['product']->delete( true );
+		wp_delete_attachment( $data['image_id'], true );
+	}
+
+	/**
 	 * Test that block aspect ratio overrides store thumbnail cropping.
+	 *
+	 * @testdox Should prioritize the block aspect ratio over the store thumbnail cropping aspect ratio.
 	 */
 	public function test_product_image_render_with_block_aspect_ratio_override() {
 		$data = $this->create_product_with_image();
 
 		update_option( 'woocommerce_thumbnail_cropping', '1:1' );
-		$markup = $this->render_product_image_block( $data['product'], '{"aspectRatio":"3/5"}' );
+		$markup = $this->render_product_image_block( $data['product'], '{"aspectRatio":"3/5","imageSizing":"thumbnail"}' );
 		$this->assertStringContainsString( 'aspect-ratio:3/5', $markup );
 		$this->assertStringContainsString( 'wc-block-components-product-image--aspect-ratio-3-5', $markup );
 		$this->assertStringNotContainsString( 'aspect-ratio:1/1', $markup );
