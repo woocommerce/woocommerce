@@ -144,22 +144,10 @@ export async function getWooEditorAssetMetrics( page ) {
 	return await page.evaluate( () => {
 		const wooBlocksAssetsPath =
 			'/wp-content/plugins/woocommerce/assets/client/blocks/';
-		const kb = 1024;
 		const assetUrls = new Set();
 		const metrics = {
-			wooEditorAssetSize: 0,
-			wooEditorScriptSize: 0,
-			wooEditorStyleSize: 0,
-			wooEditorEncodedAssetSize: 0,
-			wooEditorEncodedScriptSize: 0,
-			wooEditorEncodedStyleSize: 0,
-			wooEditorTransferAssetSize: 0,
-			wooEditorTransferScriptSize: 0,
-			wooEditorTransferStyleSize: 0,
 			wooEditorAssetCount: 0,
 		};
-
-		const roundMetricSize = ( value ) => Math.round( value * 100 ) / 100;
 
 		performance.getEntriesByType( 'resource' ).forEach( ( entry ) => {
 			const url = new URL( entry.name, window.location.href );
@@ -174,57 +162,10 @@ export async function getWooEditorAssetMetrics( page ) {
 			}
 
 			assetUrls.add( normalizedUrl );
-
-			const decodedSize = entry.decodedBodySize || 0;
-			const encodedSize = entry.encodedBodySize || 0;
-			const transferSize = entry.transferSize || 0;
-
-			metrics.wooEditorAssetSize += decodedSize;
-			metrics.wooEditorEncodedAssetSize += encodedSize;
-			metrics.wooEditorTransferAssetSize += transferSize;
 			metrics.wooEditorAssetCount += 1;
-
-			if ( url.pathname.endsWith( '.js' ) ) {
-				metrics.wooEditorScriptSize += decodedSize;
-				metrics.wooEditorEncodedScriptSize += encodedSize;
-				metrics.wooEditorTransferScriptSize += transferSize;
-			}
-
-			if ( url.pathname.endsWith( '.css' ) ) {
-				metrics.wooEditorStyleSize += decodedSize;
-				metrics.wooEditorEncodedStyleSize += encodedSize;
-				metrics.wooEditorTransferStyleSize += transferSize;
-			}
 		} );
 
 		return {
-			wooEditorAssetSize: roundMetricSize(
-				metrics.wooEditorAssetSize / kb
-			),
-			wooEditorScriptSize: roundMetricSize(
-				metrics.wooEditorScriptSize / kb
-			),
-			wooEditorStyleSize: roundMetricSize(
-				metrics.wooEditorStyleSize / kb
-			),
-			wooEditorEncodedAssetSize: roundMetricSize(
-				metrics.wooEditorEncodedAssetSize / kb
-			),
-			wooEditorEncodedScriptSize: roundMetricSize(
-				metrics.wooEditorEncodedScriptSize / kb
-			),
-			wooEditorEncodedStyleSize: roundMetricSize(
-				metrics.wooEditorEncodedStyleSize / kb
-			),
-			wooEditorTransferAssetSize: roundMetricSize(
-				metrics.wooEditorTransferAssetSize / kb
-			),
-			wooEditorTransferScriptSize: roundMetricSize(
-				metrics.wooEditorTransferScriptSize / kb
-			),
-			wooEditorTransferStyleSize: roundMetricSize(
-				metrics.wooEditorTransferStyleSize / kb
-			),
 			wooEditorAssetCount: metrics.wooEditorAssetCount,
 		};
 	} );
