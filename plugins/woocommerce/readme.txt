@@ -170,6 +170,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.9.3 2026-XX-XX =
+= 10.9.3 2026-07-03 =
+
+**WooCommerce**
+
+* Fix - Fix a fatal error in WC_Email::send_notification() when a filtered mail callback returns a non-bool value. [#66219](https://github.com/woocommerce/woocommerce/pull/66219)
+
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
