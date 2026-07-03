@@ -19,6 +19,10 @@ const getFieldName = ( field: SettingsUIField ) => field.save?.name || field.id;
 const getArrayFieldName = ( name: string ) =>
 	name.endsWith( '[]' ) ? name : `${ name }[]`;
 
+/**
+ * Build the hidden inputs that mirror a field's value into the legacy
+ * settings form, so form_post saves go through the existing PHP save path.
+ */
 export const getHiddenInputs = (
 	field: SettingsUIField,
 	value: SettingsValue
@@ -66,6 +70,9 @@ export const getHiddenInputs = (
 	];
 };
 
+/**
+ * Render the hidden inputs for a field. See getHiddenInputs.
+ */
 export const HiddenInputs = ( {
 	field,
 	value,

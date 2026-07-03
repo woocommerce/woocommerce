@@ -360,6 +360,10 @@ type ErrorBoundaryState = {
 	hasError: boolean;
 };
 
+/**
+ * Render an error notice instead of a broken page when a settings UI render
+ * throws.
+ */
 export class SettingsUIErrorBoundary extends Component<
 	ErrorBoundaryProps,
 	ErrorBoundaryState
@@ -549,6 +553,11 @@ const ShellHeader = ( {
 	);
 };
 
+/**
+ * Render a settings UI schema as a full settings page: shell header with
+ * save button, section navigation, grouped field cards, dirty tracking,
+ * unsaved-changes guards and save handling.
+ */
 export const SettingsUIPage = ( {
 	schema,
 	page,

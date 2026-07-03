@@ -116,6 +116,10 @@ const getHelp = ( description?: string ) =>
 		/>
 	) : undefined;
 
+/**
+ * Render a schema field with the core control matching its type. Unsupported
+ * types warn and fall back to a text control.
+ */
 export const NativeSettingsField = ( {
 	field,
 	value,

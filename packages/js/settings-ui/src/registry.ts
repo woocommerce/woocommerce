@@ -140,6 +140,12 @@ const hasDuplicateScopeAndKeys = (
 	return false;
 };
 
+/**
+ * Register scoped extension points for a settings page or section: custom
+ * field components, field overrides, type renderers, visibility predicates,
+ * save handlers and region components. Registering the same keys for the
+ * same scope again replaces the previous registration.
+ */
 export const registerSettingsExtension = (
 	registration: SettingsExtensionRegistration
 ) => {
@@ -174,10 +180,18 @@ export const registerSettingsExtension = (
 	registrations.push( registration );
 };
 
+/**
+ * Clear all registrations. Only intended for tests.
+ */
 export const __resetRegistry = () => {
 	registrations.splice( 0 );
 };
 
+/**
+ * Resolve the component that renders a field: a named `field.component`
+ * registration first, then a field override by id, then a type renderer.
+ * The most recent matching registration wins.
+ */
 export const resolveFieldComponent = (
 	field: SettingsUIField,
 	context: SettingsFieldContext
@@ -215,6 +229,10 @@ export const resolveFieldComponent = (
 	return undefined;
 };
 
+/**
+ * Resolve the visibility predicate registered for a field id in the given
+ * context, if any.
+ */
 export const resolveFieldVisibilityPredicate = (
 	fieldId: string,
 	context: SettingsFieldContext
@@ -224,6 +242,10 @@ export const resolveFieldVisibilityPredicate = (
 		( registration ) => registration.fieldVisibility?.[ fieldId ]
 	);
 
+/**
+ * Resolve the visibility predicate registered for a group id in the given
+ * context, if any.
+ */
 export const resolveGroupVisibilityPredicate = (
 	groupId: string,
 	context: SettingsFieldContext
@@ -233,6 +255,10 @@ export const resolveGroupVisibilityPredicate = (
 		( registration ) => registration.groupVisibility?.[ groupId ]
 	);
 
+/**
+ * Resolve a named save handler for the given context. Warns and returns
+ * undefined when the handler is not registered.
+ */
 export const resolveSaveHandler = (
 	handler: string,
 	context: SettingsFieldContext
@@ -250,6 +276,10 @@ export const resolveSaveHandler = (
 	return undefined;
 };
 
+/**
+ * Resolve a named region component for the given context. Warns and returns
+ * undefined when the component is not registered.
+ */
 export const resolveRegionComponent = (
 	component: string,
 	context: SettingsFieldContext
