@@ -6,7 +6,7 @@
  * The contract is the live source of truth. A chain is NOT a stored entity: it is
  * the pair `(contract_id, kind)`, with its head and counters derived from the cycle
  * rows. The entity never carries a cycle graph in memory, so cycles are reached
- * through purpose-built reads ({@see self::find_current_cycle()}, {@see self::max_count()},
+ * through purpose-built reads ({@see self::find_chain_head()}, {@see self::max_count()},
  * etc.) and written one at a time ({@see self::append_cycle()}, {@see self::update_cycle()}).
  * There is no whole-graph `save()`. Snapshots are deduped by copy-forward (reuse the
  * previous cycle's snapshot id when plan / items are unchanged), via {@see SnapshotStore}.
@@ -18,7 +18,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage;
 
+use DateTimeImmutable;
+use DateTimeZone;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
@@ -50,6 +53,11 @@ final class ContractRepository {
 		'email',
 		'phone',
 	);
+
+	/**
+	 * Logger source tag.
+	 */
+	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
 
 	/**
 	 * The per-contract typed snapshot store.
@@ -249,6 +257,95 @@ final class ContractRepository {
 	}
 
 	/**
+	 * Contracts actionable for renewal at `$now`, oldest-due first - the batch dispatcher's scan.
+	 * Active, primitive-scheduled contracts whose `next_payment_gmt` has arrived, joined to their
+	 * head cycle so the scan can filter to the ones actually chargeable now:
+	 *
+	 * - head `billed`/`cancelled` and its period has ended (`ends_at_gmt <= now`) -> advance-ready;
+	 * - head `pending` with an expired crash-recovery lease (`claimed_until <= now`) -> reclaim-ready.
+	 *
+	 * A head that is `failed` (awaits dunning), `processing` (awaits its gateway), or `pending`
+	 * with a live lease is deliberately excluded. Because that filter is in SQL, `LIMIT` counts
+	 * only actionable rows, so a cluster of non-actionable heads (a stuck gateway, a backlog of
+	 * declines) cannot occupy the batch and starve healthy renewals behind them. Gateway-scheduled
+	 * contracts are excluded (the gateway owns their renewal); a null `next_payment_gmt` never
+	 * matches the `<=` comparison. Driven by the `due_contract (status, next_payment_gmt)` index;
+	 * the head cycle is joined per candidate via the `chain_seq` UNIQUE index. Returns the head
+	 * fields selection needs, so the dispatcher does not re-load the head to decide what to bill.
+	 *
+	 * @param DateTimeImmutable $now   The cutoff moment; contracts due at or before it.
+	 * @param int               $limit Maximum rows to return (the batch size).
+	 * @return array<int, RenewalCandidate> Actionable renewal candidates, oldest-due first.
+	 */
+	public function find_due( DateTimeImmutable $now, int $limit ): array {
+		if ( $limit < 1 ) {
+			return array();
+		}
+
+		global $wpdb;
+
+		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$cycles    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$cutoff    = $now->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+
+		// Table names cannot be bound, so they are interpolated; every value is a placeholder.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT c.id AS contract_id, cy.count AS head_count, cy.status AS head_status, cy.ends_at_gmt AS head_ends_at_gmt
+				FROM {$contracts} c
+				JOIN {$cycles} cy
+				  ON cy.contract_id = c.id AND cy.kind = %s
+				 AND cy.sequence_no = ( SELECT MAX(s.sequence_no) FROM {$cycles} s WHERE s.contract_id = c.id AND s.kind = %s )
+				WHERE c.status = %s AND c.schedule_source <> %s AND c.next_payment_gmt IS NOT NULL AND c.next_payment_gmt <= %s
+				  AND (
+				        ( cy.status = %s AND cy.ends_at_gmt <= %s )
+				     OR ( cy.status = %s AND cy.claimed_until IS NOT NULL AND cy.claimed_until <= %s )
+				      )
+				ORDER BY c.next_payment_gmt ASC, c.id ASC
+				LIMIT %d",
+				Cycle::KIND_BILLING,
+				Cycle::KIND_BILLING,
+				ContractStatus::ACTIVE,
+				Contract::SCHEDULE_SOURCE_GATEWAY,
+				$cutoff,
+				CycleStatus::BILLED,
+				$cutoff,
+				CycleStatus::PENDING,
+				$cutoff,
+				$limit
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// A failed scan otherwise reads exactly like "nothing due" and renewals stall
+		// store-wide with no signal; the return stays empty either way.
+		if ( '' !== $wpdb->last_error ) {
+			wc_get_logger()->error(
+				sprintf( 'ContractRepository::find_due(): due-index scan failed - renewals may stall until this is fixed. %s', $wpdb->last_error ),
+				array( 'source' => self::LOG_SOURCE )
+			);
+		}
+
+		$result = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+			$head_count = $row['head_count'] ?? null;
+			$result[]   = new RenewalCandidate(
+				ScalarCoercion::coerce_int( $row['contract_id'] ?? 0 ),
+				null === $head_count ? null : ScalarCoercion::coerce_int( $head_count ),
+				ScalarCoercion::coerce_string( $row['head_status'] ?? '' ),
+				ScalarCoercion::coerce_string( $row['head_ends_at_gmt'] ?? '' )
+			);
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Whether a contract row exists for `$id`.
 	 *
 	 * @param int $id Contract id.
@@ -302,8 +399,10 @@ final class ContractRepository {
 	 * @param Cycle      $cycle    Cycle to append. Carries its contract id and kind.
 	 * @param Cycle|null $previous The chain's previous cycle, when copy-forward of its
 	 *                             snapshot ids should be considered; null for the first cycle.
-	 * @throws \RuntimeException If a snapshot or cycle write fails (e.g. a duplicate
-	 *                          (contract_id, kind, sequence_no) the UNIQUE index rejects).
+	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row (the
+	 *                                 position is already claimed - the create-as-claim race).
+	 * @throws \RuntimeException If a snapshot write or the cycle insert fails for any
+	 *                          other reason (the database error is in the message).
 	 */
 	public function append_cycle( Cycle $cycle, ?Cycle $previous = null ): void {
 		$this->resolve_cycle_snapshots( $cycle, $previous );
@@ -343,15 +442,100 @@ final class ContractRepository {
 	}
 
 	/**
-	 * The chain's most-recent cycle (highest `sequence_no` in `(contract_id, kind)`),
-	 * or null when the chain is empty. Snapshots are decoded into typed value objects
-	 * only for an in-flight cycle (see {@see self::hydrate_cycle()}).
+	 * Atomically reclaim a stalled `pending` cycle whose crash-recovery lease has expired,
+	 * extending the lease by `$lease_ttl_seconds`. The compare-and-set that makes reclaim
+	 * race-safe: the predicate keys on `claimed_until <= now`, so among concurrent workers
+	 * only the first to run the UPDATE matches a row - it writes the future lease, after
+	 * which every other worker's `<=` predicate matches zero rows.
+	 *
+	 * Both the expiry predicate and the fresh lease anchor on the DATABASE clock
+	 * (`UTC_TIMESTAMP()`) - the one clock every worker shares - so a worker whose PHP clock
+	 * runs fast cannot take over a lease that is still live in real terms, and the lease it
+	 * stamps means the same thing to every other worker.
+	 *
+	 * @param int $cycle_id          The stalled cycle's id.
+	 * @param int $lease_ttl_seconds The lease window to stamp, measured from the DB's now.
+	 * @return bool True when this caller won the reclaim (exactly one row updated); false
+	 *              when another worker already reclaimed it (zero rows matched).
+	 */
+	public function reclaim_expired_cycle( int $cycle_id, int $lease_ttl_seconds ): bool {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), date_updated_gmt = UTC_TIMESTAMP() WHERE id = %d AND status = %s AND claimed_until IS NOT NULL AND claimed_until <= UTC_TIMESTAMP()", $lease_ttl_seconds, $cycle_id, CycleStatus::PENDING ) );
+
+		// Exactly one row matched means this caller won the CAS; 0 means another worker
+		// already extended the lease (or the cycle settled) between read and write.
+		return false !== $result && 1 === $wpdb->rows_affected;
+	}
+
+	/**
+	 * Re-claim a failed cycle for an admin-triggered retry, as an atomic compare-and-set:
+	 * flip it back to `pending` and stamp a fresh lease only while it is still `failed`.
+	 * Returns true when this caller won (exactly one row matched), false when it was already
+	 * re-claimed or has since moved on.
+	 *
+	 * The fresh lease anchors on the DATABASE clock (`UTC_TIMESTAMP()`), the shared reference
+	 * clock for all lease arbitration.
+	 *
+	 * @param int $cycle_id          The cycle to re-claim.
+	 * @param int $lease_ttl_seconds The lease window to stamp, measured from the DB's now.
+	 */
+	public function reclaim_failed_cycle( int $cycle_id, int $lease_ttl_seconds ): bool {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s, claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), date_updated_gmt = UTC_TIMESTAMP() WHERE id = %d AND status = %s", CycleStatus::PENDING, $lease_ttl_seconds, $cycle_id, CycleStatus::FAILED ) );
+
+		return false !== $result && 1 === $wpdb->rows_affected;
+	}
+
+	/**
+	 * Settle a cycle's outcome as an atomic compare-and-set on its status: move it from
+	 * `$from_status` to `$to_status`, stamp the settling order and reason, and clear the
+	 * crash-recovery lease - all in one UPDATE gated on the row still being in `$from_status`.
+	 * Among concurrent settlers (the post-charge reconciliation and the order-status listener
+	 * can race across workers), exactly one caller matches the row and wins; the rest match
+	 * zero rows, so status transitions - and the actions fired on them - happen exactly once.
+	 *
+	 * @param int         $cycle_id    The cycle to settle.
+	 * @param string      $from_status The status the caller read; the CAS predicate.
+	 * @param string      $to_status   The settled status to write.
+	 * @param int         $order_id    The renewal order carrying the outcome.
+	 * @param string|null $reason      Failure reason to record, or null to clear.
+	 */
+	public function transition_cycle_status( int $cycle_id, string $from_status, string $to_status, int $order_id, ?string $reason = null ): bool {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		if ( null === $reason ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s, order_id = %d, reason = NULL, claimed_until = NULL, date_updated_gmt = %s WHERE id = %d AND status = %s", $to_status, $order_id, gmdate( 'Y-m-d H:i:s' ), $cycle_id, $from_status ) );
+		} else {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s, order_id = %d, reason = %s, claimed_until = NULL, date_updated_gmt = %s WHERE id = %d AND status = %s", $to_status, $order_id, $reason, gmdate( 'Y-m-d H:i:s' ), $cycle_id, $from_status ) );
+		}
+
+		return false !== $result && 1 === $wpdb->rows_affected;
+	}
+
+	/**
+	 * The chain's head - its most-recent cycle (highest `sequence_no` in `(contract_id,
+	 * kind)`) - or null when the chain is empty. The head is the chain's growth point, not
+	 * necessarily the cycle current by date (a forced early renewal bills a head whose
+	 * period lies ahead). Snapshots are decoded into typed value objects only for an
+	 * in-flight cycle (see {@see self::hydrate_cycle()}).
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $kind        Chain kind. Defaults to billing.
-	 * @return Cycle|null The most-recent cycle, or null if the chain has none.
+	 * @return Cycle|null The head cycle, or null if the chain has none.
 	 */
-	public function find_current_cycle( int $contract_id, string $kind = Cycle::KIND_BILLING ): ?Cycle {
+	public function find_chain_head( int $contract_id, string $kind = Cycle::KIND_BILLING ): ?Cycle {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
@@ -543,7 +727,8 @@ final class ContractRepository {
 	 * Insert a cycle row and stamp the generated id back onto the entity.
 	 *
 	 * @param Cycle $cycle Cycle to insert. Carries its contract id and kind.
-	 * @throws \RuntimeException If the cycle insert fails.
+	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row.
+	 * @throws \RuntimeException If the insert fails for any other reason.
 	 */
 	private function insert_cycle( Cycle $cycle ): void {
 		global $wpdb;
@@ -563,7 +748,12 @@ final class ContractRepository {
 		);
 
 		if ( false === $inserted ) {
-			throw new \RuntimeException( 'Failed to insert cycle.' );
+			$db_error = $wpdb->last_error;
+			if ( false !== stripos( $db_error, 'Duplicate entry' ) ) {
+				// A chain UNIQUE index rejected the row: the position is already claimed.
+				throw new DuplicateCycleException( esc_html( 'Cycle position already exists: ' . $db_error ) );
+			}
+			throw new \RuntimeException( esc_html( 'Failed to insert cycle. ' . $db_error ) );
 		}
 
 		$cycle->set_id( (int) $wpdb->insert_id );
