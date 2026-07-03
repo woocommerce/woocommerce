@@ -509,7 +509,12 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	public function render_products_stock_status_filter() {
 		$current_stock_status = isset( $_REQUEST['stock_status'] ) ? wc_clean( wp_unslash( $_REQUEST['stock_status'] ) ) : false; // WPCS: input var ok, sanitization ok.
 		$stock_statuses       = wc_get_product_stock_status_options();
-		$output               = '<select name="stock_status"><option value="">' . esc_html__( 'Filter by stock status', 'woocommerce' ) . '</option>';
+
+		// Low stock is a derived quantity condition, not a stored stock status, so it's appended here
+		// rather than in wc_get_product_stock_status_options() which is used in other contexts too.
+		$stock_statuses['lowstock'] = __( 'Low stock', 'woocommerce' );
+
+		$output = '<select name="stock_status"><option value="">' . esc_html__( 'Filter by stock status', 'woocommerce' ) . '</option>';
 
 		foreach ( $stock_statuses as $status => $label ) {
 			$output .= '<option ' . selected( $status, $current_stock_status, false ) . ' value="' . esc_attr( $status ) . '">' . esc_html( $label ) . '</option>';
@@ -618,7 +623,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		// Stock status filter.
 		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			add_filter( 'posts_clauses', array( $this, 'filter_stock_status_post_clauses' ) );
+			if ( 'lowstock' === wc_clean( wp_unslash( $_GET['stock_status'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				add_filter( 'posts_clauses', array( $this, 'filter_low_stock_post_clauses' ) );
+			} else {
+				add_filter( 'posts_clauses', array( $this, 'filter_stock_status_post_clauses' ) );
+			}
 		}
 
 		// Shipping class taxonomy.
@@ -671,6 +680,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		remove_filter( 'posts_clauses', array( $this, 'filter_downloadable_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'filter_virtual_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'filter_stock_status_post_clauses' ) );
+		remove_filter( 'posts_clauses', array( $this, 'filter_low_stock_post_clauses' ) );
 		if ( $this->use_cogs_lookup_column ) {
 			remove_filter( 'posts_clauses', array( $this, 'order_by_cogs_value_asc_post_clauses' ) );
 			remove_filter( 'posts_clauses', array( $this, 'order_by_cogs_value_desc_post_clauses' ) );
@@ -842,6 +852,33 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', $stock_status );
 			}
 		}
+		return $args;
+	}
+
+	/**
+	 * Filter by low stock: quantity at or below the product's own low stock amount,
+	 * falling back to the sitewide "woocommerce_notify_low_stock_amount" option.
+	 * Mirrors the threshold logic used by the Analytics low-in-stock report.
+	 *
+	 * @param array $args Query args.
+	 * @return array
+	 */
+	public function filter_low_stock_post_clauses( $args ) {
+		global $wpdb;
+
+		$args['join']  = $this->append_product_sorting_table_join( $args['join'] );
+		$args['join'] .= " LEFT JOIN {$wpdb->postmeta} AS wc_low_stock_amount ON {$wpdb->posts}.ID = wc_low_stock_amount.post_id AND wc_low_stock_amount.meta_key = '_low_stock_amount' ";
+
+		$args['where'] .= $wpdb->prepare(
+			" AND wc_product_meta_lookup.stock_status = 'instock'
+			AND wc_product_meta_lookup.stock_quantity IS NOT NULL
+			AND (
+				( wc_low_stock_amount.meta_value > '' AND wc_product_meta_lookup.stock_quantity <= CAST( wc_low_stock_amount.meta_value AS SIGNED ) )
+				OR ( ( wc_low_stock_amount.meta_value IS NULL OR wc_low_stock_amount.meta_value <= '' ) AND wc_product_meta_lookup.stock_quantity <= %d )
+			) ",
+			get_option( 'woocommerce_notify_low_stock_amount', 2 )
+		);
+
 		return $args;
 	}
 

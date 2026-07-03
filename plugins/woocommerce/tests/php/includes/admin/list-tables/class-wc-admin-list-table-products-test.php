@@ -26,11 +26,19 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	private $original_manage_stock;
 
 	/**
+	 * Previous value of the sitewide low stock amount option, restored in tearDown.
+	 *
+	 * @var string
+	 */
+	private $previous_low_stock_amount_option;
+
+	/**
 	 * Set up.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->original_manage_stock = get_option( 'woocommerce_manage_stock' );
+		$this->original_manage_stock             = get_option( 'woocommerce_manage_stock' );
+		$this->previous_low_stock_amount_option = get_option( 'woocommerce_notify_low_stock_amount', 2 );
 	}
 
 	/**
@@ -42,6 +50,9 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 		} else {
 			update_option( 'woocommerce_manage_stock', $this->original_manage_stock );
 		}
+
+		update_option( 'woocommerce_notify_low_stock_amount', $this->previous_low_stock_amount_option );
+		unset( $_GET['stock_status'] );
 
 		parent::tearDown();
 	}
@@ -116,6 +127,123 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 			array( $simple_out_of_stock->get_id() ),
 			array_values( array_intersect( $this->query_product_ids_for_stock_status( ProductStockStatus::OUT_OF_STOCK, 'filter_virtual_post_clauses' ), $fixture_ids ) )
 		);
+	}
+
+	/**
+	 * @testdox Should include a "Low stock" option in the stock status filter dropdown.
+	 */
+	public function test_render_products_stock_status_filter_includes_low_stock_option() {
+		$list_table = new WC_Admin_List_Table_Products();
+
+		ob_start();
+		$list_table->render_products_stock_status_filter();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'value="lowstock"', $output );
+	}
+
+	/**
+	 * @testdox Should hook the low stock clause, not the exact-match stock status clause, when stock_status=lowstock.
+	 */
+	public function test_query_filters_hooks_low_stock_clause_for_lowstock_status() {
+		$_GET['stock_status'] = 'lowstock'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		$list_table = new WC_Admin_List_Table_Products();
+		$this->call_query_filters( $list_table, array() );
+
+		$this->assertNotFalse( has_filter( 'posts_clauses', array( $list_table, 'filter_low_stock_post_clauses' ) ) );
+		$this->assertFalse( has_filter( 'posts_clauses', array( $list_table, 'filter_stock_status_post_clauses' ) ) );
+
+		$list_table->remove_ordering_args();
+	}
+
+	/**
+	 * @testdox Should return only in-stock products at or below their low stock threshold.
+	 */
+	public function test_filter_low_stock_post_clauses_returns_expected_products() {
+		update_option( 'woocommerce_notify_low_stock_amount', 5 );
+
+		$low_stock_custom_threshold = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'     => true,
+				'stock_quantity'   => 3,
+				'low_stock_amount' => 4,
+				'stock_status'     => ProductStockStatus::IN_STOCK,
+			)
+		);
+
+		$above_custom_threshold = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'     => true,
+				'stock_quantity'   => 10,
+				'low_stock_amount' => 4,
+				'stock_status'     => ProductStockStatus::IN_STOCK,
+			)
+		);
+
+		$low_stock_sitewide_threshold = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 5,
+				'stock_status'   => ProductStockStatus::IN_STOCK,
+			)
+		);
+
+		$well_stocked = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 50,
+				'stock_status'   => ProductStockStatus::IN_STOCK,
+			)
+		);
+
+		// Stock status is recalculated from quantity on save (see WC_Product::validate_props()),
+		// so a quantity of 0 with default backorders is what actually produces "out of stock".
+		$out_of_stock = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'     => true,
+				'stock_quantity'   => 0,
+				'low_stock_amount' => 4,
+			)
+		);
+
+		$list_table = new WC_Admin_List_Table_Products();
+		add_filter( 'posts_clauses', array( $list_table, 'filter_low_stock_post_clauses' ) );
+
+		$query     = new WP_Query(
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'publish',
+				'fields'      => 'ids',
+			)
+		);
+		$found_ids = $query->posts;
+
+		remove_filter( 'posts_clauses', array( $list_table, 'filter_low_stock_post_clauses' ) );
+
+		$this->assertContains( $low_stock_custom_threshold->get_id(), $found_ids, 'Product under its custom low stock amount should be included' );
+		$this->assertContains( $low_stock_sitewide_threshold->get_id(), $found_ids, 'Product under the sitewide threshold should be included' );
+		$this->assertNotContains( $above_custom_threshold->get_id(), $found_ids, 'Product above its custom low stock amount should be excluded' );
+		$this->assertNotContains( $well_stocked->get_id(), $found_ids, 'Well stocked product should be excluded' );
+		$this->assertNotContains( $out_of_stock->get_id(), $found_ids, 'Out of stock product should be excluded even if under threshold' );
+	}
+
+	/**
+	 * Call the protected query_filters() method.
+	 *
+	 * @param WC_Admin_List_Table_Products $list_table List table instance.
+	 * @param array                        $query_vars Query vars.
+	 * @return array
+	 */
+	private function call_query_filters( $list_table, $query_vars ) {
+		$method = new ReflectionMethod( $list_table, 'query_filters' );
+		$method->setAccessible( true );
+		return $method->invoke( $list_table, $query_vars );
 	}
 
 	/**
