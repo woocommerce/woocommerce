@@ -344,7 +344,11 @@ class SettingsUIRequestContext {
 	 * @return SettingsUIPageInterface|null
 	 */
 	private static function resolve_settings_ui_page( \WC_Settings_Page $settings_page, string $section ): ?SettingsUIPageInterface {
-		$registered_section = SettingsSectionRegistry::get_instance()->get_registered( $settings_page->get_id(), $section );
+		try {
+			$registered_section = SettingsSectionRegistry::get_instance()->get_registered( $settings_page->get_id(), $section );
+		} catch ( \Throwable $e ) {
+			$registered_section = null;
+		}
 
 		if ( $registered_section ) {
 			return new RegisteredSettingsSectionAdapter( $settings_page, $registered_section );

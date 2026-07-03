@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use HTTPS for all geolocation IP-lookup and geo-IP requests. Switch the IP-lookup services (ipify, ipecho, ident, tnedi) to HTTPS and replace the HTTP-only ip-api.com geo-IP provider with the HTTPS-based country.is, so visitor IP addresses are never sent over unencrypted connections.

@@ -24,7 +24,6 @@
 	},
 	"files": [
 		"configs",
-		"rules",
 		"index.js"
 	],
 	"main": "index.js",
@@ -44,8 +43,8 @@
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:fix:lang:js": "eslint ./rules ./configs --fix",
-		"lint:lang:js": "eslint ./rules ./configs"
+		"lint:fix:lang:js": "eslint ./configs ./index.js --fix",
+		"lint:lang:js": "eslint ./configs ./index.js"
 	},
 	"devDependencies": {
 		"@babel/core": "7.25.7",
@@ -66,8 +65,8 @@
 			"lint": {
 				"command": "lint",
 				"changes": [
-					"rules/**/*.js",
-					"configs/**/*.js"
+					"configs/**/*.js",
+					"index.js"
 				]
 			}
 		}

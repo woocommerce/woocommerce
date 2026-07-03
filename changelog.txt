@@ -1,5 +1,13 @@
 == Changelog ==
 
+= 10.9.2 2026-07-02 =
+
+**WooCommerce**
+
+* Fix - Prevent update-time fatal errors by guarding new settings SDK classes and preserving the removed legacy settings API controller as a no-op compatibility stub. [#66081](https://github.com/woocommerce/woocommerce/pull/66081)
+* Update - Enable push notifications by default and deprecate feature flag. [#66088](https://github.com/woocommerce/woocommerce/pull/66088)
+
+
 = 10.9.1 2026-06-24 =
 
 **WooCommerce**
