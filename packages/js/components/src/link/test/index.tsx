@@ -10,21 +10,26 @@ import { createElement } from '@wordpress/element';
 import { Link } from '..';
 
 describe( 'Link', () => {
-	it( 'should render `external` links', () => {
-		const { container } = render(
+	it( 'should render `external` links using WordPress ExternalLink', () => {
+		render(
 			<Link href="https://woocommerce.com" type="external">
 				WooCommerce.com
 			</Link>
 		);
 
-		expect( container.firstChild ).toMatchInlineSnapshot( `
-			<a
-			  data-link-type="external"
-			  href="https://woocommerce.com"
-			>
-			  WooCommerce.com
-			</a>
-		` );
+		const testLink = screen.getByRole( 'link', {
+			name: 'WooCommerce.com (opens in a new tab)',
+		} );
+
+		expect( testLink.className ).toContain( 'components-external-link' );
+		expect( testLink.getAttribute( 'data-link-type' ) ).toBe( 'external' );
+		expect( testLink.getAttribute( 'href' ) ).toBe(
+			'https://woocommerce.com'
+		);
+		expect( testLink.getAttribute( 'target' ) ).toBe( '_blank' );
+		expect( testLink.getAttribute( 'rel' ) ).toContain( 'noopener' );
+		expect( testLink.getAttribute( 'rel' ) ).toContain( 'noreferrer' );
+		expect( testLink.querySelector( 'svg' ) ).not.toBeNull();
 	} );
 
 	it( 'should render `wp-admin` links', () => {
@@ -82,27 +87,25 @@ describe( 'Link', () => {
 	} );
 
 	it( 'should allow custom props to be passed through', () => {
-		const { container } = render(
+		render(
 			<Link
 				href="https://woocommerce.com"
 				type="external"
 				className="foo"
-				target="bar"
+				title="bar"
 			>
 				WooCommerce.com
 			</Link>
 		);
 
-		expect( container.firstChild ).toMatchInlineSnapshot( `
-			<a
-			  class="foo"
-			  data-link-type="external"
-			  href="https://woocommerce.com"
-			  target="bar"
-			>
-			  WooCommerce.com
-			</a>
-		` );
+		const testLink = screen.getByRole( 'link', {
+			name: 'WooCommerce.com (opens in a new tab)',
+		} );
+
+		expect( testLink.className ).toContain( 'components-external-link' );
+		expect( testLink.className ).toContain( 'foo' );
+		expect( testLink.getAttribute( 'data-link-type' ) ).toBe( 'external' );
+		expect( testLink.getAttribute( 'title' ) ).toBe( 'bar' );
 	} );
 
 	it( 'should support `onClick`', () => {
