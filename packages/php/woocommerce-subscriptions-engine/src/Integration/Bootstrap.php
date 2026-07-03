@@ -54,22 +54,21 @@ final class Bootstrap {
 		PlansController::register_hooks();
 		( new RenewalDispatcher() )->register_hooks();
 
-		// The schema install and the recurring-action enqueue both need a later moment
-		// (the install reads options/runs dbDelta; the enqueue needs Action Scheduler's
-		// as_* functions). Run them on init, or immediately when init already fired.
+		// Deferred boot work, each on the most specific moment it needs: the schema install
+		// reads options and runs dbDelta, so it waits for `init`; the recurring-action
+		// enqueue needs the `as_*` functions, so it waits for `action_scheduler_init` - the
+		// hook Action Scheduler fires once it is ready. Run immediately when a consumer
+		// boots the engine after a hook already fired.
 		if ( did_action( 'init' ) ) {
-			self::on_init();
+			SchemaInstaller::maybe_install();
 		} else {
-			add_action( 'init', array( __CLASS__, 'on_init' ) );
+			add_action( 'init', array( SchemaInstaller::class, 'maybe_install' ) );
 		}
-	}
 
-	/**
-	 * Deferred boot work that needs the `init` moment: install/upgrade the schema and
-	 * ensure the recurring renewal dispatcher is scheduled.
-	 */
-	public static function on_init(): void {
-		SchemaInstaller::maybe_install();
-		RenewalDispatcher::ensure_scheduled();
+		if ( did_action( 'action_scheduler_init' ) ) {
+			RenewalDispatcher::ensure_scheduled();
+		} else {
+			add_action( 'action_scheduler_init', array( RenewalDispatcher::class, 'ensure_scheduled' ) );
+		}
 	}
 }
