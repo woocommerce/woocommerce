@@ -19,6 +19,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanGroup;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
@@ -156,6 +157,44 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 	 */
 	public function test_get_related_orders_is_empty_when_none_are_linked(): void {
 		$this->assertSame( array(), Subscriptions::get_related_orders( 987654 ) );
+	}
+
+	/**
+	 * @testdox get_related_orders windows with limit/offset, newest first.
+	 */
+	public function test_get_related_orders_windows_with_limit_and_offset(): void {
+		$contract    = $this->sign_up_contract();
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		// Link three renewal orders backdated 1-3 days before the origin (created
+		// "now"), so the full set is 4 orders newest-first: origin, renewal1,
+		// renewal2, renewal3.
+		$renewal_ids = array();
+		foreach ( array( 3, 2, 1 ) as $days_ago ) {
+			$order = wc_create_order();
+			$order->set_date_created( gmdate( 'Y-m-d H:i:s', time() - ( $days_ago * DAY_IN_SECONDS ) ) );
+			$order->update_meta_data( OrderLinkage::META_CONTRACT_ID, (string) $contract_id );
+			$order->update_meta_data( OrderLinkage::META_RELATION_TYPE, OrderLinkage::RELATION_RENEWAL );
+			$order->save();
+			$renewal_ids[ $days_ago ] = $order->get_id();
+		}
+
+		$all = Subscriptions::get_related_orders( $contract_id );
+		$this->assertCount( 4, $all, 'The default window stays "all".' );
+
+		$first_page = Subscriptions::get_related_orders( $contract_id, 2, 0 );
+		$this->assertCount( 2, $first_page );
+		$this->assertSame( $contract->get_origin_order_id(), $first_page[0]->get_id(), 'Newest linked order first.' );
+		$this->assertSame( $renewal_ids[1], $first_page[1]->get_id() );
+
+		$second_page = Subscriptions::get_related_orders( $contract_id, 2, 2 );
+		$this->assertCount( 2, $second_page );
+		$this->assertSame( $renewal_ids[2], $second_page[0]->get_id() );
+		$this->assertSame( $renewal_ids[3], $second_page[1]->get_id() );
+
+		$past_the_end = Subscriptions::get_related_orders( $contract_id, 2, 4 );
+		$this->assertSame( array(), $past_the_end );
 	}
 
 	/**

@@ -31,13 +31,20 @@ final class RelatedOrders {
 	 * {@see OrderLinkage::META_CONTRACT_ID} meta; the contract row carries the reverse
 	 * `origin_order_id`. Returns an empty array when none are linked.
 	 *
+	 * The window args exist because a long-running contract accumulates one renewal
+	 * order per period - unbounded reads grow with contract age, so paging consumers
+	 * pass a window. The default stays "all", newest first.
+	 *
 	 * @param int $contract_id Contract id.
+	 * @param int $limit       Maximum orders to return; -1 (default) for all.
+	 * @param int $offset      Orders to skip (for paging). Default 0.
 	 * @return array<int, WC_Order> Linked orders, newest first.
 	 */
-	public function for_contract( int $contract_id ): array {
+	public function for_contract( int $contract_id, int $limit = -1, int $offset = 0 ): array {
 		$orders = wc_get_orders(
 			array(
-				'limit'      => -1,
+				'limit'      => $limit,
+				'offset'     => max( 0, $offset ),
 				'status'     => 'any',
 				'type'       => 'shop_order',
 				'orderby'    => 'date',

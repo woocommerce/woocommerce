@@ -135,12 +135,16 @@ final class Subscriptions {
 	 * facade-only so a consumer never reaches into the order-linkage internals.
 	 *
 	 * Returns live `WC_Order` objects; presentation shaping is the caller's job.
+	 * A long-running contract accumulates one renewal order per period, so paging
+	 * consumers pass a window; the default stays "all".
 	 *
 	 * @param int $contract_id Contract id.
+	 * @param int $limit       Maximum orders to return; -1 (default) for all.
+	 * @param int $offset      Orders to skip (for paging). Default 0.
 	 * @return array<int, WC_Order> Related orders, newest first.
 	 */
-	public static function get_related_orders( int $contract_id ): array {
-		return ( new RelatedOrders() )->for_contract( $contract_id );
+	public static function get_related_orders( int $contract_id, int $limit = -1, int $offset = 0 ): array {
+		return ( new RelatedOrders() )->for_contract( $contract_id, $limit, $offset );
 	}
 
 	/**
