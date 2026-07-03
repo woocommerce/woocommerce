@@ -45,10 +45,10 @@ const toStringValue = ( value: SettingsValue ) =>
 const isCheckboxChecked = ( value: SettingsValue ) =>
 	value === true || value === 'yes' || value === '1';
 
-// CheckboxControl emits raw booleans, but schemas usually supply 'yes'/'no'
-// (or '1'/'0') strings and dirty tracking, visibility predicates and save
-// handlers all compare against that format. Keep the initial value's format,
-// and return the initial value itself when the state reverts.
+// Convert a checked state to the initial value's format ('yes'/'no', '1'/'0'
+// or boolean), returning the initial value itself when the state reverts.
+// This keeps checkbox values in the format the schema declared, since
+// CheckboxControl only emits raw booleans.
 const toCheckboxValue = (
 	checked: boolean,
 	initialValue: SettingsValue

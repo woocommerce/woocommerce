@@ -80,11 +80,11 @@ const areValuesEqual = ( a: SettingsValue, b: SettingsValue ) => {
 	return a === b;
 };
 
-// Field controls emit fixed types (strings, arrays, booleans), so an edit
-// that reverts can leave the form dirty on a type difference alone ('5' !== 5)
-// and save handlers can receive values in a format the schema never declared.
-// Restore the initial value when the emitted value is just a re-encoding of
-// it ('5' for 5, '' for null, [] for '').
+// Preserve the initial representation of a value, returning the initial
+// value when the emitted value is just a re-encoding of it ('5' for 5,
+// '' for null, [] for ''). This prevents reverted changes leaving the form
+// dirty on a type difference alone (e.g. '5' !== 5), and keeps values in
+// the format the schema declared.
 const preserveInitialRepresentation = (
 	value: SettingsValue,
 	initialValue: SettingsValue
