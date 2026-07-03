@@ -39,11 +39,112 @@ export function formatMetricValue( metric, value ) {
 	return `${ value } ${ getMetricUnit( metric ) }`;
 }
 
+const WOO_BLOCKS_ASSETS_PATH =
+	'/wp-content/plugins/woocommerce/assets/client/blocks/';
+const KB = 1024;
+
+function roundSize( value ) {
+	return Math.round( value * 100 ) / 100;
+}
+
+function getWooEditorAssetUrl( rawUrl, baseUrl ) {
+	const url = new URL( rawUrl, baseUrl );
+
+	if (
+		! url.pathname.includes( WOO_BLOCKS_ASSETS_PATH ) ||
+		! /\.(js|css)$/.test( url.pathname )
+	) {
+		return null;
+	}
+
+	return {
+		normalizedUrl: url.origin + url.pathname,
+		isScript: url.pathname.endsWith( '.js' ),
+		isStyle: url.pathname.endsWith( '.css' ),
+	};
+}
+
+function getEmptyWooEditorNetworkTransferMetrics() {
+	return {
+		wooEditorNetworkTransferAssetSize: 0,
+		wooEditorNetworkTransferScriptSize: 0,
+		wooEditorNetworkTransferStyleSize: 0,
+	};
+}
+
+function formatWooEditorNetworkTransferMetrics( metrics ) {
+	return {
+		wooEditorNetworkTransferAssetSize: roundSize(
+			metrics.wooEditorNetworkTransferAssetSize / KB
+		),
+		wooEditorNetworkTransferScriptSize: roundSize(
+			metrics.wooEditorNetworkTransferScriptSize / KB
+		),
+		wooEditorNetworkTransferStyleSize: roundSize(
+			metrics.wooEditorNetworkTransferStyleSize / KB
+		),
+	};
+}
+
+export async function startWooEditorNetworkTransferMetrics( page ) {
+	const client = await page.context().newCDPSession( page );
+	const requests = new Map();
+	const assetUrls = new Set();
+	const metrics = getEmptyWooEditorNetworkTransferMetrics();
+	let isCollecting = true;
+
+	const onRequestWillBeSent = ( event ) => {
+		const assetUrl = getWooEditorAssetUrl( event.request.url, page.url() );
+
+		if ( assetUrl ) {
+			requests.set( event.requestId, assetUrl );
+		}
+	};
+
+	const onLoadingFinished = ( event ) => {
+		const assetUrl = requests.get( event.requestId );
+
+		if ( ! assetUrl || assetUrls.has( assetUrl.normalizedUrl ) ) {
+			return;
+		}
+
+		assetUrls.add( assetUrl.normalizedUrl );
+
+		const size = event.encodedDataLength || 0;
+		metrics.wooEditorNetworkTransferAssetSize += size;
+
+		if ( assetUrl.isScript ) {
+			metrics.wooEditorNetworkTransferScriptSize += size;
+		}
+
+		if ( assetUrl.isStyle ) {
+			metrics.wooEditorNetworkTransferStyleSize += size;
+		}
+	};
+
+	client.on( 'Network.requestWillBeSent', onRequestWillBeSent );
+	client.on( 'Network.loadingFinished', onLoadingFinished );
+	await client.send( 'Network.enable' );
+
+	return async () => {
+		if ( ! isCollecting ) {
+			return formatWooEditorNetworkTransferMetrics( metrics );
+		}
+
+		isCollecting = false;
+		client.off( 'Network.requestWillBeSent', onRequestWillBeSent );
+		client.off( 'Network.loadingFinished', onLoadingFinished );
+		await client.detach();
+
+		return formatWooEditorNetworkTransferMetrics( metrics );
+	};
+}
+
 export async function getWooEditorAssetMetrics( page ) {
 	return await page.evaluate( () => {
-		const WOO_BLOCKS_ASSETS_PATH =
+		const wooBlocksAssetsPath =
 			'/wp-content/plugins/woocommerce/assets/client/blocks/';
-		const KB = 1024;
+		const kb = 1024;
 		const assetUrls = new Set();
 		const metrics = {
 			wooEditorAssetSize: 0,
@@ -58,14 +159,14 @@ export async function getWooEditorAssetMetrics( page ) {
 			wooEditorAssetCount: 0,
 		};
 
-		const roundSize = ( value ) => Math.round( value * 100 ) / 100;
+		const roundMetricSize = ( value ) => Math.round( value * 100 ) / 100;
 
 		performance.getEntriesByType( 'resource' ).forEach( ( entry ) => {
 			const url = new URL( entry.name, window.location.href );
 			const normalizedUrl = url.origin + url.pathname;
 
 			if (
-				! url.pathname.includes( WOO_BLOCKS_ASSETS_PATH ) ||
+				! url.pathname.includes( wooBlocksAssetsPath ) ||
 				! /\.(js|css)$/.test( url.pathname ) ||
 				assetUrls.has( normalizedUrl )
 			) {
@@ -97,26 +198,32 @@ export async function getWooEditorAssetMetrics( page ) {
 		} );
 
 		return {
-			wooEditorAssetSize: roundSize( metrics.wooEditorAssetSize / KB ),
-			wooEditorScriptSize: roundSize( metrics.wooEditorScriptSize / KB ),
-			wooEditorStyleSize: roundSize( metrics.wooEditorStyleSize / KB ),
-			wooEditorEncodedAssetSize: roundSize(
-				metrics.wooEditorEncodedAssetSize / KB
+			wooEditorAssetSize: roundMetricSize(
+				metrics.wooEditorAssetSize / kb
 			),
-			wooEditorEncodedScriptSize: roundSize(
-				metrics.wooEditorEncodedScriptSize / KB
+			wooEditorScriptSize: roundMetricSize(
+				metrics.wooEditorScriptSize / kb
 			),
-			wooEditorEncodedStyleSize: roundSize(
-				metrics.wooEditorEncodedStyleSize / KB
+			wooEditorStyleSize: roundMetricSize(
+				metrics.wooEditorStyleSize / kb
 			),
-			wooEditorTransferAssetSize: roundSize(
-				metrics.wooEditorTransferAssetSize / KB
+			wooEditorEncodedAssetSize: roundMetricSize(
+				metrics.wooEditorEncodedAssetSize / kb
 			),
-			wooEditorTransferScriptSize: roundSize(
-				metrics.wooEditorTransferScriptSize / KB
+			wooEditorEncodedScriptSize: roundMetricSize(
+				metrics.wooEditorEncodedScriptSize / kb
 			),
-			wooEditorTransferStyleSize: roundSize(
-				metrics.wooEditorTransferStyleSize / KB
+			wooEditorEncodedStyleSize: roundMetricSize(
+				metrics.wooEditorEncodedStyleSize / kb
+			),
+			wooEditorTransferAssetSize: roundMetricSize(
+				metrics.wooEditorTransferAssetSize / kb
+			),
+			wooEditorTransferScriptSize: roundMetricSize(
+				metrics.wooEditorTransferScriptSize / kb
+			),
+			wooEditorTransferStyleSize: roundMetricSize(
+				metrics.wooEditorTransferStyleSize / kb
 			),
 			wooEditorAssetCount: metrics.wooEditorAssetCount,
 		};

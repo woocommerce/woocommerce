@@ -13,6 +13,7 @@ import {
 	getTotalBlockingTime,
 	getWooEditorAssetMetrics,
 	median,
+	startWooEditorNetworkTransferMetrics,
 } from '../utils';
 
 // See https://github.com/WordPress/gutenberg/issues/51383#issuecomment-1613460429
@@ -60,67 +61,87 @@ test.describe( 'Editor Performance', () => {
 				perfUtils,
 				metrics,
 			} ) => {
-				// Open the test draft.
-				await admin.editPost( draftId );
-				const canvas = await perfUtils.getCanvas();
+				const stopWooEditorNetworkTransferMetrics =
+					await startWooEditorNetworkTransferMetrics( page );
 
-				// Wait for the first block.
-				await canvas.locator( '.wp-block' ).first().waitFor();
+				try {
+					// Open the test draft.
+					await admin.editPost( draftId );
+					const canvas = await perfUtils.getCanvas();
 
-				// Get the durations.
-				const loadingDurations = await metrics.getLoadingDurations();
+					// Wait for the first block.
+					await canvas.locator( '.wp-block' ).first().waitFor();
 
-				// Measure CLS
-				const cumulativeLayoutShift =
-					await metrics.getCumulativeLayoutShift();
+					// Get the durations.
+					const loadingDurations =
+						await metrics.getLoadingDurations();
 
-				// Measure LCP
-				const largestContentfulPaint =
-					await metrics.getLargestContentfulPaint();
+					// Measure CLS
+					const cumulativeLayoutShift =
+						await metrics.getCumulativeLayoutShift();
 
-				// Measure TBT
-				const totalBlockingTime = await getTotalBlockingTime(
-					page,
-					BROWSER_IDLE_WAIT
-				);
+					// Measure LCP
+					const largestContentfulPaint =
+						await metrics.getLargestContentfulPaint();
 
-				// Measure WooCommerce editor asset sizes.
-				const wooEditorAssetMetrics = await getWooEditorAssetMetrics(
-					page
-				);
-
-				// Save the results.
-				if ( i > throwaway ) {
-					results.totalBlockingTime = results.tbt || [];
-					results.totalBlockingTime.push( totalBlockingTime );
-					results.cumulativeLayoutShift =
-						results.cumulativeLayoutShift || [];
-					results.cumulativeLayoutShift.push( cumulativeLayoutShift );
-					results.largestContentfulPaint =
-						results.largestContentfulPaint || [];
-					results.largestContentfulPaint.push(
-						largestContentfulPaint
+					// Measure TBT
+					const totalBlockingTime = await getTotalBlockingTime(
+						page,
+						BROWSER_IDLE_WAIT
 					);
-					Object.entries( loadingDurations ).forEach(
-						( [ metric, duration ] ) => {
-							const metricKey =
-								metric === 'timeSinceResponseEnd'
-									? 'firstBlock'
-									: metric;
-							if ( ! results[ metricKey ] ) {
-								results[ metricKey ] = [];
+
+					// Measure WooCommerce editor asset sizes.
+					const wooEditorAssetMetrics =
+						await getWooEditorAssetMetrics( page );
+					const wooEditorNetworkTransferMetrics =
+						await stopWooEditorNetworkTransferMetrics();
+
+					// Save the results.
+					if ( i > throwaway ) {
+						results.totalBlockingTime =
+							results.totalBlockingTime || [];
+						results.totalBlockingTime.push( totalBlockingTime );
+						results.cumulativeLayoutShift =
+							results.cumulativeLayoutShift || [];
+						results.cumulativeLayoutShift.push(
+							cumulativeLayoutShift
+						);
+						results.largestContentfulPaint =
+							results.largestContentfulPaint || [];
+						results.largestContentfulPaint.push(
+							largestContentfulPaint
+						);
+						Object.entries( loadingDurations ).forEach(
+							( [ metric, duration ] ) => {
+								const metricKey =
+									metric === 'timeSinceResponseEnd'
+										? 'firstBlock'
+										: metric;
+								if ( ! results[ metricKey ] ) {
+									results[ metricKey ] = [];
+								}
+								results[ metricKey ].push( duration );
 							}
-							results[ metricKey ].push( duration );
-						}
-					);
-					Object.entries( wooEditorAssetMetrics ).forEach(
-						( [ metric, value ] ) => {
+						);
+						Object.entries( wooEditorAssetMetrics ).forEach(
+							( [ metric, value ] ) => {
+								if ( ! results[ metric ] ) {
+									results[ metric ] = [];
+								}
+								results[ metric ].push( value );
+							}
+						);
+						Object.entries(
+							wooEditorNetworkTransferMetrics
+						).forEach( ( [ metric, value ] ) => {
 							if ( ! results[ metric ] ) {
 								results[ metric ] = [];
 							}
 							results[ metric ].push( value );
-						}
-					);
+						} );
+					}
+				} finally {
+					await stopWooEditorNetworkTransferMetrics();
 				}
 			} );
 		}
