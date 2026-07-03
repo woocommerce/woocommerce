@@ -97,33 +97,26 @@ class WC_Tests_Geolocation extends WC_Unit_Test_Case {
 		delete_transient( 'geoip_' . $ip_address );
 
 		// Force the database lookup to return nothing so the API fallback runs.
-		add_filter(
-			'woocommerce_get_geolocation',
-			function ( $data ) {
-				$data['country'] = '';
-				return $data;
-			},
-			999
-		);
+		$force_empty_geolocation = function ( $data ) {
+			$data['country'] = '';
+			return $data;
+		};
+		add_filter( 'woocommerce_get_geolocation', $force_empty_geolocation, 999 );
 
 		// Intercept the outgoing request; the body is valid for both configured providers.
-		add_filter(
-			'pre_http_request',
-			function ( $pre, $args, $url ) use ( &$requested_url ) {
-				$requested_url = $url;
-				return array(
-					'body'     => wp_json_encode( array( 'country' => 'US' ) ),
-					'response' => array( 'code' => 200 ),
-				);
-			},
-			10,
-			3
-		);
+		$intercept_request = function ( $pre, $args, $url ) use ( &$requested_url ) {
+			$requested_url = $url;
+			return array(
+				'body'     => wp_json_encode( array( 'country' => 'US' ) ),
+				'response' => array( 'code' => 200 ),
+			);
+		};
+		add_filter( 'pre_http_request', $intercept_request, 10, 3 );
 
 		$geolocation = WC_Geolocation::geolocate_ip( $ip_address, false, true );
 
-		remove_all_filters( 'pre_http_request' );
-		remove_all_filters( 'woocommerce_get_geolocation' );
+		remove_filter( 'pre_http_request', $intercept_request, 10 );
+		remove_filter( 'woocommerce_get_geolocation', $force_empty_geolocation, 999 );
 		delete_transient( 'geoip_' . $ip_address );
 
 		$this->assertEquals( 'US', $geolocation['country'], 'The country code from the API response should be returned' );

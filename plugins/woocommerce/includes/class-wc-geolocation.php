@@ -310,12 +310,14 @@ class WC_Geolocation {
 				if ( ! is_wp_error( $response ) && $response['body'] ) {
 					switch ( $service_name ) {
 						case 'ipinfo.io':
-							$data         = json_decode( $response['body'] );
-							$country_code = isset( $data->country ) ? $data->country : '';
-							break;
 						case 'country.is':
 							$data         = json_decode( $response['body'] );
 							$country_code = isset( $data->country ) ? $data->country : '';
+							break;
+						case 'ip-api.com':
+							// Not a default provider (HTTP-only), but retained so extensions that re-add it via the woocommerce_geolocation_geoip_apis filter keep working.
+							$data         = json_decode( $response['body'] );
+							$country_code = isset( $data->countryCode ) ? $data->countryCode : ''; // @codingStandardsIgnoreLine
 							break;
 						default:
 							$country_code = apply_filters( 'woocommerce_geolocation_geoip_response_' . $service_name, '', $response['body'] );
