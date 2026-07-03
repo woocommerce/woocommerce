@@ -381,6 +381,11 @@ class SettingsUIRequestContext {
 				} catch ( \Throwable $e ) {
 					self::log_resolution_failure( 'Native Settings UI page', $settings_page->get_id(), $section, $e, __METHOD__ );
 
+					// Raise a developer notice here only: this failure still
+					// renders through the registered-section adapter, so
+					// nothing downstream reports it. Registry lookup failures
+					// are environmental, and schema/script-handle failures
+					// surface through log_settings_ui_fallback() at render time.
 					wc_doing_it_wrong(
 						__METHOD__,
 						sprintf(
