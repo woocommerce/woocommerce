@@ -173,6 +173,7 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$renewal_ids = array();
 		foreach ( array( 3, 2, 1 ) as $days_ago ) {
 			$order = wc_create_order();
+			$this->assertInstanceOf( WC_Order::class, $order );
 			$order->set_date_created( gmdate( 'Y-m-d H:i:s', time() - ( $days_ago * DAY_IN_SECONDS ) ) );
 			$order->update_meta_data( OrderLinkage::META_CONTRACT_ID, (string) $contract_id );
 			$order->update_meta_data( OrderLinkage::META_RELATION_TYPE, OrderLinkage::RELATION_RENEWAL );

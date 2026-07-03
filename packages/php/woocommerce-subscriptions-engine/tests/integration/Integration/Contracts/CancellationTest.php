@@ -1,8 +1,9 @@
 <?php
 /**
- * Integration tests for the PeriodEndCancellation contract operation: ACTIVE ->
+ * Integration tests for the Cancellation contract operation's period-end mode: ACTIVE ->
  * PENDING_CANCELLATION, the end date stamped, and the next-payment date left in place so
- * the contract lapses at period end.
+ * the contract lapses at period end. (The immediate-cancel mode is covered through the
+ * facade suite.)
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine
  */
@@ -15,13 +16,13 @@ use DomainException;
 use EngineIntegrationTestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\PeriodEndCancellation;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 
 /**
- * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\PeriodEndCancellation
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation
  */
-class PeriodEndCancellationTest extends EngineIntegrationTestCase {
+class CancellationTest extends EngineIntegrationTestCase {
 
 	/**
 	 * @var ContractRepository
@@ -29,14 +30,14 @@ class PeriodEndCancellationTest extends EngineIntegrationTestCase {
 	private $contracts;
 
 	/**
-	 * @var PeriodEndCancellation
+	 * @var Cancellation
 	 */
 	private $sut;
 
 	public function set_up(): void {
 		parent::set_up();
 		$this->contracts = new ContractRepository();
-		$this->sut       = new PeriodEndCancellation( $this->contracts );
+		$this->sut       = new Cancellation( $this->contracts );
 	}
 
 	/**
@@ -95,7 +96,7 @@ class PeriodEndCancellationTest extends EngineIntegrationTestCase {
 		$id    = $this->seed_active();
 		$fired = 0;
 		add_action(
-			PeriodEndCancellation::CONTRACT_PENDING_CANCELLATION_ACTION,
+			Cancellation::CONTRACT_PENDING_CANCELLATION_ACTION,
 			static function () use ( &$fired ): void {
 				++$fired;
 			}

@@ -26,7 +26,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\RelatedOrders;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Hold;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\PeriodEndCancellation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Reactivation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
@@ -108,14 +107,10 @@ final class Subscriptions {
 	 * @param int $contract_id Contract id.
 	 * @param int $customer_id Customer that must own the contract.
 	 * @return Contract|null The contract when owned by `$customer_id`, else null.
+	 * @phpstan-impure
 	 */
 	public static function get_for_customer( int $contract_id, int $customer_id ): ?Contract {
-		$contracts = new ContractRepository();
-		if ( ! $contracts->is_owned_by( $contract_id, $customer_id ) ) {
-			return null;
-		}
-
-		return $contracts->find( $contract_id );
+		return ( new ContractRepository() )->find_for_customer( $contract_id, $customer_id );
 	}
 
 	/**
@@ -207,7 +202,7 @@ final class Subscriptions {
 			return false;
 		}
 
-		return ( new PeriodEndCancellation() )->cancel_at_period_end( $contract );
+		return ( new Cancellation() )->cancel_at_period_end( $contract );
 	}
 
 	/**

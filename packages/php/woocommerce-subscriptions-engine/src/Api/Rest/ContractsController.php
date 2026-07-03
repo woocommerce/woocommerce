@@ -286,17 +286,18 @@ final class ContractsController extends WP_REST_Controller {
 		$contract_id = ScalarCoercion::coerce_int( $request->get_param( 'id' ) );
 		$customer_id = get_current_user_id();
 
-		// Guard ownership before acting: unknown and foreign are both 404.
-		$contract = $this->owned_contract( $contract_id );
-		if ( $contract instanceof WP_Error ) {
-			return $contract;
+		// Guard ownership before acting: the facade's ownership-checked read returns
+		// null for an unknown id and a foreign-owned contract alike, so both map to
+		// the same 404 (anti-IDOR).
+		if ( null === Subscriptions::get_for_customer( $contract_id, $customer_id ) ) {
+			return $this->not_found_error();
 		}
 
 		try {
 			$action( $contract_id );
 		} catch ( DomainException $e ) {
 			return new WP_Error(
-				'woocommerce_subscriptions_engine_illegal_transition',
+				'woocommerce_subscriptions_engine_illegal_action',
 				__( 'That action is not available for this subscription right now.', 'woocommerce-subscriptions-engine' ),
 				array( 'status' => 409 )
 			);
@@ -308,32 +309,18 @@ final class ContractsController extends WP_REST_Controller {
 			);
 		}
 
+		// Re-read for the resulting status. The action already succeeded, so a row
+		// vanishing here is a server-side inconsistency - a 500, not a not-found.
 		$refreshed = Subscriptions::get_for_customer( $contract_id, $customer_id );
 		if ( null === $refreshed ) {
-			// Raced away between the action and the re-read - treat as not found.
-			return $this->not_found_error();
+			return new WP_Error(
+				'woocommerce_subscriptions_engine_refresh_failed',
+				__( 'The subscription was updated, but its refreshed state could not be loaded.', 'woocommerce-subscriptions-engine' ),
+				array( 'status' => 500 )
+			);
 		}
 
 		return $this->prepare_item_for_response( $refreshed, $request );
-	}
-
-	/**
-	 * Load the contract `$contract_id` when the current user owns it, else a 404.
-	 *
-	 * Returns the asymmetric not-found (unknown id and foreign-owned are indistinguishable)
-	 * via the facade's {@see Subscriptions::get_for_customer()}, so a logged-in user cannot
-	 * probe for the existence of contracts they do not own.
-	 *
-	 * @param int $contract_id Contract id.
-	 * @return Contract|WP_Error The owned contract, or a 404.
-	 */
-	private function owned_contract( int $contract_id ) {
-		$contract = Subscriptions::get_for_customer( $contract_id, get_current_user_id() );
-		if ( null === $contract ) {
-			return $this->not_found_error();
-		}
-
-		return $contract;
 	}
 
 	/**
