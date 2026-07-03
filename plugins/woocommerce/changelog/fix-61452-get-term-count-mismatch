@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix get_term() returning a different product count than get_terms() for product categories, tags and brands on the frontend.

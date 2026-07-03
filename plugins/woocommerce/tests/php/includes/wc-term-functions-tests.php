@@ -76,6 +76,29 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Asserts that get_term() returns the same count as get_terms() for every term given.
+	 *
+	 * @param array $expected_counts Counts keyed by term_id, as returned by get_terms().
+	 * @return void
+	 */
+	private function assert_get_term_counts_match( array $expected_counts ): void {
+		$taxonomies_by_key = array(
+			'parent' => 'product_cat',
+			'child1' => 'product_cat',
+			'child2' => 'product_cat',
+			'tag1'   => 'product_tag',
+			'tag2'   => 'product_tag',
+		);
+
+		foreach ( $taxonomies_by_key as $key => $taxonomy ) {
+			$term_id = $this->terms[ $key ]['term_id'];
+			$fetched = get_term( $term_id, $taxonomy );
+
+			$this->assertEquals( $expected_counts[ $term_id ], $fetched->count, "get_term() count mismatch for term {$term_id}" );
+		}
+	}
+
+	/**
 	 * @testdox Term product counts with default settings.
 	 */
 	public function test_term_count_baseline(): void {
@@ -92,6 +115,8 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $term_counts[ $this->terms['child2']['term_id'] ] );
 		$this->assertEquals( 2, $term_counts[ $this->terms['tag1']['term_id'] ] );
 		$this->assertEquals( 2, $term_counts[ $this->terms['tag2']['term_id'] ] );
+
+		$this->assert_get_term_counts_match( $term_counts );
 	}
 
 	/**
@@ -117,6 +142,8 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $term_counts[ $this->terms['child2']['term_id'] ] );
 		$this->assertEquals( 1, $term_counts[ $this->terms['tag1']['term_id'] ] );
 		$this->assertEquals( 2, $term_counts[ $this->terms['tag2']['term_id'] ] );
+
+		$this->assert_get_term_counts_match( $term_counts );
 	}
 
 	/**
@@ -141,6 +168,8 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertEquals( 0, $term_counts[ $this->terms['child2']['term_id'] ] );
 		$this->assertEquals( 2, $term_counts[ $this->terms['tag1']['term_id'] ] );
 		$this->assertEquals( 1, $term_counts[ $this->terms['tag2']['term_id'] ] );
+
+		$this->assert_get_term_counts_match( $term_counts );
 
 		delete_option( 'woocommerce_hide_out_of_stock_items' );
 	}
