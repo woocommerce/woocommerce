@@ -381,7 +381,7 @@ jobs:
   alert-on-failure:
     name: 'Report results on Slack'
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
-    needs: ['project-jobs', 'project-lint-jobs', 'project-test-jobs', 'evaluate-project-jobs']
+    needs: ['project-jobs', 'woocommerce-plugin-build-artifact', 'project-lint-jobs', 'project-test-jobs', 'evaluate-project-jobs']
     if: ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce' }}
     env:
       NON_SUCCESSFUL_JOBS: ${{ needs.evaluate-project-jobs.outputs.non_successful_jobs }}
@@ -422,6 +422,8 @@ jobs:
           fi
 
           pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "$CHECKS_TYPE build jobs matrix" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
+          # A shared plugin build failure skips the test jobs instead of failing them, so report it explicitly.
+          pnpm utils slack-test-report -c "${{ needs.woocommerce-plugin-build-artifact.result }}" -r "$CHECKS_TYPE WooCommerce plugin build" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
           pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "$CHECKS_TYPE linting" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
           pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE tests" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json" --jobs-list "Failed:###$FAILED_JOBS"
 
