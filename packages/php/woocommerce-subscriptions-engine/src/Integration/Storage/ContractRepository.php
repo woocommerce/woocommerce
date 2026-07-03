@@ -197,15 +197,52 @@ final class ContractRepository {
 			return null;
 		}
 
-		$contract = Contract::from_storage(
+		return $this->hydrate_row( $row );
+	}
+
+	/**
+	 * Fetch a contract by id when `$customer_id` owns it - the ownership-checked full
+	 * read behind the customer portal.
+	 *
+	 * The ownership filter lives in the row query itself, so an unknown id and a
+	 * contract owned by someone else are the SAME null - one read, nothing for a
+	 * caller to distinguish (the anti-IDOR rule at the storage layer). The returned
+	 * contract is hydrated exactly like {@see self::find()}.
+	 *
+	 * @param int $contract_id Contract id.
+	 * @param int $customer_id Customer that must own the contract.
+	 * @return Contract|null Hydrated contract when owned by `$customer_id`, else null.
+	 */
+	public function find_for_customer( int $contract_id, int $customer_id ): ?Contract {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d AND customer_id = %d", $contract_id, $customer_id ), ARRAY_A );
+		if ( ! is_array( $row ) ) {
+			return null;
+		}
+
+		return $this->hydrate_row( self::as_string_keyed( $row ) );
+	}
+
+	/**
+	 * Hydrate a fetched contract row into the full live entity: frozen plan terms,
+	 * items, addresses, and meta - the one full-read construction path.
+	 *
+	 * @param array<string, mixed> $row Contract row.
+	 */
+	private function hydrate_row( array $row ): Contract {
+		$id = ScalarCoercion::coerce_int( $row['id'] ?? 0 );
+
+		return Contract::from_storage(
 			$row,
+			$this->find_plan_snapshot( ScalarCoercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null ) ),
 			$this->find_items( $id ),
 			$this->find_addresses( $id ),
 			$this->find_meta( $id )
 		);
-		$this->hydrate_plan_snapshot( $contract );
-
-		return $contract;
 	}
 
 	/**
@@ -365,8 +402,8 @@ final class ContractRepository {
 	 *
 	 * Each row is row-only (no items / addresses / meta), but its frozen plan terms are
 	 * hydrated ({@see Contract::get_plan_snapshot()}) so the list rows carry the billing
-	 * cadence off the snapshot - one extra snapshot read per contract (an accepted N+1
-	 * pre-freeze; the list page sizes are bounded by the REST controller).
+	 * cadence off the snapshot - batch-loaded in ONE `IN()` read for the whole page, not
+	 * one read per row.
 	 *
 	 * @param int                       $customer_id Owning customer id.
 	 * @param array<string, mixed>|null $args        {
@@ -388,69 +425,58 @@ final class ContractRepository {
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
-		if ( null === $status ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE customer_id = %d ORDER BY id DESC LIMIT %d OFFSET %d", $customer_id, $limit, $offset ), ARRAY_A );
-		} else {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE customer_id = %d AND status = %s ORDER BY id DESC LIMIT %d OFFSET %d", $customer_id, $status, $limit, $offset ), ARRAY_A );
+		// One query for both shapes: the optional status filter joins the WHERE, and
+		// every value is a placeholder (table names cannot be bound, so the table is
+		// interpolated).
+		$where  = 'customer_id = %d';
+		$params = array( $customer_id );
+		if ( null !== $status ) {
+			$where   .= ' AND status = %s';
+			$params[] = $status;
 		}
+		$params[] = $limit;
+		$params[] = $offset;
 
-		$contracts = array();
+		// The WHERE placeholders join dynamically, so the sniff cannot count them.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT *
+				FROM {$table}
+				WHERE {$where}
+				ORDER BY id DESC
+				LIMIT %d OFFSET %d",
+				$params
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		$clean_rows = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$contract = Contract::from_storage( self::as_string_keyed( $row ) );
-				$this->hydrate_plan_snapshot( $contract );
-				$contracts[] = $contract;
+				$clean_rows[] = self::as_string_keyed( $row );
 			}
 		}
 
+		// Batch-load the page's frozen plan terms in one read, then construct each
+		// contract with its snapshot on the same footing as a full read.
+		$snapshot_ids = array();
+		foreach ( $clean_rows as $row ) {
+			$snapshot_id = ScalarCoercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
+			if ( null !== $snapshot_id ) {
+				$snapshot_ids[ $snapshot_id ] = $snapshot_id;
+			}
+		}
+		$snapshots = $this->find_plan_snapshots( array_values( $snapshot_ids ) );
+
+		$contracts = array();
+		foreach ( $clean_rows as $row ) {
+			$snapshot_id = ScalarCoercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
+			$contracts[] = Contract::from_storage( $row, null !== $snapshot_id ? ( $snapshots[ $snapshot_id ] ?? null ) : null );
+		}
+
 		return $contracts;
-	}
-
-	/**
-	 * Whether `$contract_id` is owned by `$customer_id` - the portal's ownership guard.
-	 *
-	 * A single indexed read returning false for BOTH an unknown contract and a contract
-	 * owned by someone else, so the caller cannot distinguish "not yours" from "does not
-	 * exist". The asymmetric not-found / anti-IDOR rule lives at the REST boundary; this
-	 * just answers the ownership question without leaking which case it is.
-	 *
-	 * @param int $contract_id Contract id.
-	 * @param int $customer_id Customer to check ownership against.
-	 */
-	public function is_owned_by( int $contract_id, int $customer_id ): bool {
-		global $wpdb;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$found = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d AND customer_id = %d", $contract_id, $customer_id ) );
-
-		return null !== $found;
-	}
-
-	/**
-	 * The contract's last-updated timestamp (the storage-managed `date_updated_gmt`
-	 * column), or null when the row is gone.
-	 *
-	 * The {@see Contract} entity intentionally does not carry the storage-managed
-	 * `date_*_gmt` columns (they are not part of its `to_storage()` shape), but the portal
-	 * detail read surfaces "last updated" as a first-class date - so it is read directly
-	 * here rather than smuggled onto the entity.
-	 *
-	 * @param int $id Contract id.
-	 * @return string|null GMT string, or null if the row no longer exists.
-	 */
-	public function find_last_updated_gmt( int $id ): ?string {
-		global $wpdb;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$value = $wpdb->get_var( $wpdb->prepare( "SELECT date_updated_gmt FROM {$table} WHERE id = %d", $id ) );
-
-		return null === $value ? null : (string) $value;
 	}
 
 	/**
@@ -868,21 +894,6 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Hydrate a contract's frozen plan terms from its `plan_snapshot_id`, when present.
-	 *
-	 * A no-op for a contract with no plan snapshot (a manually-seeded contract), so the
-	 * cadence accessor on it returns null and the consumer degrades to "no cadence".
-	 *
-	 * @param Contract $contract Contract to hydrate in place.
-	 */
-	private function hydrate_plan_snapshot( Contract $contract ): void {
-		$snapshot = $this->find_plan_snapshot( $contract->get_plan_snapshot_id() );
-		if ( $snapshot instanceof PlanSnapshot ) {
-			$contract->set_plan_snapshot( $snapshot );
-		}
-	}
-
-	/**
 	 * Decode a stored plan snapshot row into a typed value object.
 	 *
 	 * Public so the renewal money-path can resolve a contract's own frozen plan terms
@@ -898,6 +909,54 @@ final class ContractRepository {
 		}
 
 		return PlanSnapshot::from_payload( self::as_string_keyed( $decoded['payload'] ), $decoded['schema_version'] );
+	}
+
+	/**
+	 * Decode a batch of stored plan snapshot rows in one read - the list pages'
+	 * hydration path, so a page of contracts costs one snapshot query, not one
+	 * per row.
+	 *
+	 * @param array<int, int> $snapshot_ids Snapshot row ids (deduplicated by the caller or not - the IN() dedupes).
+	 * @return array<int, PlanSnapshot> Decoded value objects keyed by snapshot row id.
+	 */
+	private function find_plan_snapshots( array $snapshot_ids ): array {
+		global $wpdb;
+
+		$ids = array_values( array_unique( array_map( 'intval', $snapshot_ids ) ) );
+		if ( array() === $ids ) {
+			return array();
+		}
+
+		$table        = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_SNAPSHOTS );
+		$placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
+
+		// The IN() placeholders are built per id, so the sniff sees none in the literal.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, payload, schema_version
+				FROM {$table}
+				WHERE id IN ( {$placeholders} )",
+				$ids
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+
+		$snapshots = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+			$payload = json_decode( ScalarCoercion::coerce_string( $row['payload'] ?? null ), true );
+
+			$snapshots[ ScalarCoercion::coerce_int( $row['id'] ?? 0 ) ] = PlanSnapshot::from_payload(
+				self::as_string_keyed( is_array( $payload ) ? $payload : array() ),
+				ScalarCoercion::coerce_int( $row['schema_version'] ?? 0 )
+			);
+		}
+
+		return $snapshots;
 	}
 
 	/**

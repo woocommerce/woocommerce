@@ -302,13 +302,18 @@ final class Contract {
 	/**
 	 * Hydrate from stored rows.
 	 *
-	 * @param array<string, mixed>                $row       Contract row.
-	 * @param array<int, array<string, mixed>>    $items     Item rows.
-	 * @param array<string, array<string, mixed>> $addresses Address rows keyed by type.
-	 * @param array<string, string>               $meta      Meta as key => value.
+	 * The frozen plan terms ride second, ahead of the child rows: a contract without
+	 * its plan is pretty pointless, so the snapshot is hydrated on the same footing as
+	 * items / addresses / meta rather than through a separate mutation step.
+	 *
+	 * @param array<string, mixed>                $row           Contract row.
+	 * @param PlanSnapshot|null                   $plan_snapshot Frozen plan terms for the row's `plan_snapshot_id`, or null.
+	 * @param array<int, array<string, mixed>>    $items         Item rows.
+	 * @param array<string, array<string, mixed>> $addresses     Address rows keyed by type.
+	 * @param array<string, string>               $meta          Meta as key => value.
 	 */
-	public static function from_storage( array $row, array $items = array(), array $addresses = array(), array $meta = array() ): self {
-		return new self(
+	public static function from_storage( array $row, ?PlanSnapshot $plan_snapshot = null, array $items = array(), array $addresses = array(), array $meta = array() ): self {
+		$contract = new self(
 			array_merge(
 				$row,
 				array(
@@ -318,6 +323,12 @@ final class Contract {
 				)
 			)
 		);
+
+		if ( null !== $plan_snapshot ) {
+			$contract->set_plan_snapshot( $plan_snapshot );
+		}
+
+		return $contract;
 	}
 
 	/**

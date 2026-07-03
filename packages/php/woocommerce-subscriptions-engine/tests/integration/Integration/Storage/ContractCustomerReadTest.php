@@ -1,8 +1,9 @@
 <?php
 /**
  * Integration tests for the customer-scoped contract reads on ContractRepository:
- * find_by_customer_id (owner scoping, ordering, status filter, paging), is_owned_by
- * (the asymmetric ownership question), and find_last_updated_gmt.
+ * find_by_customer_id (owner scoping, ordering, status filter, paging) and
+ * find_for_customer (the ownership-filtered full read behind the asymmetric
+ * not-found rule).
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine
  */
@@ -134,28 +135,24 @@ class ContractCustomerReadTest extends EngineIntegrationTestCase {
 		$this->assertSame( array(), $this->sut->find_by_customer_id( 999 ) );
 	}
 
-	public function test_is_owned_by_is_true_only_for_the_owner(): void {
+	public function test_find_for_customer_returns_the_owned_contract_hydrated(): void {
 		$id = $this->seed( 14, ContractStatus::ACTIVE );
 
-		$this->assertTrue( $this->sut->is_owned_by( $id, 14 ) );
-		$this->assertFalse( $this->sut->is_owned_by( $id, 15 ) );
+		$contract = $this->sut->find_for_customer( $id, 14 );
+
+		$this->assertInstanceOf( Contract::class, $contract );
+		$this->assertSame( $id, $contract->get_id() );
+		$this->assertSame( 14, $contract->get_customer_id() );
 	}
 
-	public function test_is_owned_by_is_false_for_an_unknown_contract(): void {
+	public function test_find_for_customer_is_null_for_a_foreign_owned_contract(): void {
+		$id = $this->seed( 14, ContractStatus::ACTIVE );
+
+		$this->assertNull( $this->sut->find_for_customer( $id, 15 ) );
+	}
+
+	public function test_find_for_customer_is_null_for_an_unknown_contract(): void {
 		// Indistinguishable from "owned by someone else" - the asymmetric not-found rule.
-		$this->assertFalse( $this->sut->is_owned_by( 123456, 14 ) );
-	}
-
-	public function test_find_last_updated_gmt_returns_the_stamp(): void {
-		$id = $this->seed( 16, ContractStatus::ACTIVE );
-
-		$updated = $this->sut->find_last_updated_gmt( $id );
-
-		$this->assertNotNull( $updated );
-		$this->assertSame( 1, preg_match( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', (string) $updated ) );
-	}
-
-	public function test_find_last_updated_gmt_is_null_for_an_unknown_contract(): void {
-		$this->assertNull( $this->sut->find_last_updated_gmt( 123456 ) );
+		$this->assertNull( $this->sut->find_for_customer( 123456, 14 ) );
 	}
 }
