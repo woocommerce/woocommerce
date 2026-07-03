@@ -24,7 +24,7 @@ export const resolveAspectRatio = (
 	style: AspectRatioStyle | undefined,
 	aspectRatio: string | undefined,
 	storeAspectRatio: string | null | undefined,
-	imageSizing: ImageSizing
+	imageSizing: ImageSizing | undefined
 ): string | undefined => {
 	if (
 		style &&
@@ -39,7 +39,7 @@ export const resolveAspectRatio = (
 		return aspectRatio;
 	}
 
-	if ( imageSizing === ImageSizing.THUMBNAIL ) {
+	if ( imageSizing && imageSizing === ImageSizing.THUMBNAIL ) {
 		return storeAspectRatio ?? undefined;
 	}
 
