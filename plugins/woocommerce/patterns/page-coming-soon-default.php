@@ -22,7 +22,11 @@
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
-<!-- wp:loginout {"className":"woocommerce-coming-soon-header-login"} /--></div>
+<!-- wp:buttons {"className":"woocommerce-coming-soon-header-login"} -->
+<div class="wp-block-buttons woocommerce-coming-soon-header-login"><!-- wp:button {"className":"is-style-outline"} -->
+<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( wp_login_url() ); ?>"><?php esc_html_e( 'Log in', 'woocommerce' ); ?></a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
