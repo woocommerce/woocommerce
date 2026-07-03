@@ -163,7 +163,9 @@ jobs:
     permissions:
       contents: read
     env:
-      WOOCOMMERCE_PLUGIN_ARTIFACT_NAME: woocommerce-plugin-${{ github.run_id }}-${{ github.run_attempt }}
+      # The name must stay stable across run attempts: "Re-run failed jobs" does not
+      # re-run this job when it succeeded, so consumers must find the previous attempt's artifact.
+      WOOCOMMERCE_PLUGIN_ARTIFACT_NAME: woocommerce-plugin-${{ github.run_id }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -190,7 +192,8 @@ jobs:
           name: ${{ env.WOOCOMMERCE_PLUGIN_ARTIFACT_NAME }}
           path: plugins/woocommerce/woocommerce.zip
           if-no-files-found: error
-          retention-days: 1
+          # Long enough to allow re-runs on the following days; these zips are transient CI plumbing.
+          retention-days: 3
           overwrite: true
           compression-level: 0
 
@@ -225,7 +228,7 @@ jobs:
         if: ${{ matrix.usesSharedPluginBuild == true && inputs.artifactName == '' }}
         uses: actions/download-artifact@v4
         with:
-          name: woocommerce-plugin-${{ github.run_id }}-${{ github.run_attempt }}
+          name: woocommerce-plugin-${{ github.run_id }}
           path: ${{ github.workspace }}/woocommerce-plugin-artifact
 
       - name: 'Prepare WooCommerce plugin artifact'
