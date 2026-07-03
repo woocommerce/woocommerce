@@ -40,11 +40,13 @@ fi
 pnpm --filter='@woocommerce/plugin-woocommerce' build || exit "$?"
 echo "Cleaning up PHP dependencies..."
 composer install --no-dev --quiet || exit "$?"
-if [ "$BUILD_ZIP_WITH_MAKEPOT" = "1" ]; then
+# Makepot runs by default so every distributed zip ships translation templates;
+# only transient builds (e.g. CI test artifacts) should opt out.
+if [ "$BUILD_ZIP_WITH_MAKEPOT" = "0" ]; then
+	echo "Skipping makepot. Unset BUILD_ZIP_WITH_MAKEPOT to include translation templates."
+else
 	echo "Run makepot..."
 	pnpm --filter=@woocommerce/plugin-woocommerce makepot || exit "$?"
-else
-	echo "Skipping makepot. Set BUILD_ZIP_WITH_MAKEPOT=1 to include translation templates."
 fi
 echo "Syncing files..."
 rsync -rc --exclude-from="$PROJECT_PATH/.distignore" "$PROJECT_PATH/" "$DEST_PATH/" --delete --delete-excluded

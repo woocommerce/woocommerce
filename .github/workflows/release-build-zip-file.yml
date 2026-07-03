@@ -230,8 +230,6 @@ jobs:
 
       - name: Build zip
         working-directory: plugins/woocommerce
-        env:
-          BUILD_ZIP_WITH_MAKEPOT: '1'
         run: bash bin/build-zip.sh
 
       - name: Unzip the file (prevents double zip problem)
