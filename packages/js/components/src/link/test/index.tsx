@@ -29,7 +29,9 @@ describe( 'Link', () => {
 		expect( testLink.getAttribute( 'target' ) ).toBe( '_blank' );
 		expect( testLink.getAttribute( 'rel' ) ).toContain( 'noopener' );
 		expect( testLink.getAttribute( 'rel' ) ).toContain( 'noreferrer' );
-		expect( testLink.querySelector( 'svg' ) ).not.toBeNull();
+		expect(
+			testLink.querySelector( '.components-external-link__icon' )
+		).not.toBeNull();
 	} );
 
 	it( 'should render `wp-admin` links', () => {
