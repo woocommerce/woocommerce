@@ -10,14 +10,26 @@ const {
 } = require( '../../utils/blocks/get-test-translation.js' );
 
 const ROOT_DIR = path.resolve( __dirname, '../../../../' );
-const BUILD_DIR = path.resolve( ROOT_DIR, 'assets/client/blocks/' );
+// When CI serves the shared plugin build artifact instead of the bind-mounted
+// source checkout, the built JS lives in (and the translation JSONs must land
+// in) the artifact - the source checkout was never built and is not served.
+const PLUGIN_DIR = process.env.WC_SHARED_PLUGIN_BUILD_PATH || ROOT_DIR;
+const BUILD_DIR = path.resolve( PLUGIN_DIR, 'assets/client/blocks/' );
 const TESTS_DIR = path.resolve( __dirname, '../../tests/blocks' );
-const LANGUAGES_DIR = path.join( ROOT_DIR, 'i18n/languages/' );
+const LANGUAGES_DIR = path.join( PLUGIN_DIR, 'i18n/languages/' );
 
 ensureDirSync( LANGUAGES_DIR );
 
 const builtJsFiles = glob.sync( path.join( BUILD_DIR, '**/*.js' ) );
 const testFiles = glob.sync( path.join( TESTS_DIR, '**/*.{js,ts}' ) );
+
+if ( builtJsFiles.length === 0 ) {
+	// Without built JS no translation JSONs are generated and the translation
+	// specs fail much later with a confusing "untranslated string" error.
+	throw new Error(
+		`No built JS found under ${ BUILD_DIR }. Build the plugin or point WC_SHARED_PLUGIN_BUILD_PATH at a built plugin root.`
+	);
+}
 
 // Scan the test files to collect translations used in the tests. We'll use this
 // to generate the test translations json files.
