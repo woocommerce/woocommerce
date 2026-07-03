@@ -10,7 +10,7 @@ import {
 import { useStyleProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import type { HTMLAttributes } from 'react';
-import { ProductResponseItem } from '@woocommerce/types';
+import { type ProductResponseItem } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
 
 /**

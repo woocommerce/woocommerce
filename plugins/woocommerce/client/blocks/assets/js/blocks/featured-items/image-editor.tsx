@@ -5,7 +5,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
-import { ProductResponseItem } from '@woocommerce/types';
+import { type ProductResponseItem } from '@woocommerce/types';
 import {
 	__experimentalImageEditingProvider as ImageEditingProvider,
 	__experimentalImageEditor as GutenbergImageEditor,

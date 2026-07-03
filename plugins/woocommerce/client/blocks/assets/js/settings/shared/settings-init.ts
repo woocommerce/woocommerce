@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { SymbolPosition, CurrencyCode } from '@woocommerce/types';
+import { type SymbolPosition, type CurrencyCode } from '@woocommerce/types';
 
 declare global {
 	interface Window {

@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
-import { ProductResponseItem } from '@woocommerce/types';
+import { type ProductResponseItem } from '@woocommerce/types';
 
 export const previewProductResponseItems: ProductResponseItem[] = [
 	{

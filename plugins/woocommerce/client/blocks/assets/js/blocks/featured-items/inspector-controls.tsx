@@ -23,7 +23,10 @@ import {
 	ExternalLink,
 	Notice,
 } from '@wordpress/components';
-import { LooselyMustHave, ProductResponseItem } from '@woocommerce/types';
+import {
+	type LooselyMustHave,
+	type ProductResponseItem,
+} from '@woocommerce/types';
 import type { ComponentType } from 'react';
 
 /**

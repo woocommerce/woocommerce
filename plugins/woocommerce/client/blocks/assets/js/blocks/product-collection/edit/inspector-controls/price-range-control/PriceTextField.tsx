@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { getCurrency } from '@woocommerce/price-format';
-import { Currency } from '@woocommerce/types';
+import { type Currency } from '@woocommerce/types';
 import { useState } from '@wordpress/element';
 import {
 	// @ts-expect-error Using experimental features

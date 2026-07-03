@@ -3,7 +3,7 @@
  */
 import { getBlockMap } from '@woocommerce/atomic-utils';
 import { Suspense } from '@wordpress/element';
-import { ProductResponseItem } from '@woocommerce/types';
+import { type ProductResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { AddressAutocompleteResult } from '@woocommerce/types';
+import { type AddressAutocompleteResult } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
 import { sanitizeHTML } from '@woocommerce/sanitize';
 

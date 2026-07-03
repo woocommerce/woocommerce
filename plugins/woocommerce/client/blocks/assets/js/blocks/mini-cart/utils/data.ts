@@ -6,7 +6,7 @@ import {
 	getCurrencyFromPriceResponse,
 	formatPrice,
 } from '@woocommerce/price-format';
-import { CartResponseTotals, isBoolean } from '@woocommerce/types';
+import { type CartResponseTotals, isBoolean } from '@woocommerce/types';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import type { ColorPaletteOption } from '@woocommerce/editor-components/color-panel/types';
 import type { Cart } from '@woocommerce/types';

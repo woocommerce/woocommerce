@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { ProductEntityResponse } from '@woocommerce/entities';
-import { ProductResponseItem } from '@woocommerce/types';
+import { type ProductResponseItem } from '@woocommerce/types';
 import { createContext, useContext } from '@wordpress/element';
 
 /**

@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
 import { BlockInstance } from '@wordpress/blocks';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { ProductResponseItem } from '@woocommerce/types';
+import { type ProductResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies

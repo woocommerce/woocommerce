@@ -4,7 +4,7 @@
 import { debounce } from '@woocommerce/base-utils';
 import { select, dispatch } from '@wordpress/data';
 import type { OrderFormValues } from '@woocommerce/settings';
-import { ApiErrorResponse } from '@woocommerce/types';
+import { type ApiErrorResponse } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
 
 /**

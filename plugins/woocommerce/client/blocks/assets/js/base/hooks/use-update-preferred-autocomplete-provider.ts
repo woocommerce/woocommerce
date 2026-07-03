@@ -14,8 +14,8 @@ import type {
 /**
  * Internal dependencies
  */
-import { type CheckoutStoreDescriptor } from '@woocommerce/block-data/checkout';
-import { type CartStoreDescriptor } from '@woocommerce/block-data/cart';
+import { type CheckoutStoreDescriptor } from '../../data/checkout';
+import { type CartStoreDescriptor } from '../../data/cart';
 
 // Get server providers configuration
 const serverProviders = getSettingWithCoercion<

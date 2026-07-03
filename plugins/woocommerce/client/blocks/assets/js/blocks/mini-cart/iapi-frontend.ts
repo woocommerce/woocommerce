@@ -24,7 +24,7 @@ import {
 	formatPriceWithCurrency,
 	normalizeCurrencyResponse,
 } from '../../../../packages/prices/utils/currency';
-import { CartItem, Currency } from '../packages/types';
+import { CartItem, Currency } from '../../types';
 import { translateJQueryEventToNative } from '../../base/stores/woocommerce/legacy-events';
 
 const universalLock =

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { getProducts } from '@woocommerce/editor-components/utils';
-import { ProductResponseItem } from '@woocommerce/types';
+import { type ProductResponseItem } from '@woocommerce/types';
 import { objectOmit } from '@woocommerce/utils';
 import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';

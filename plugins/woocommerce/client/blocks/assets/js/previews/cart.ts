@@ -6,7 +6,7 @@ import {
 	SHIPPING_ENABLED,
 	WC_BLOCKS_IMAGE_URL,
 } from '@woocommerce/block-settings';
-import { CartResponse } from '@woocommerce/types';
+import { type CartResponse } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
 
 /**

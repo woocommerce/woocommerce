@@ -2,9 +2,9 @@
  * External dependencies
  */
 import {
-	CanMakePaymentArgument,
-	ExpressPaymentMethodConfigInstance,
-	PaymentMethodConfigInstance,
+	type CanMakePaymentArgument,
+	type ExpressPaymentMethodConfigInstance,
+	type PaymentMethodConfigInstance,
 } from '@woocommerce/types';
 import { CURRENT_USER_IS_ADMIN, getSetting } from '@woocommerce/settings';
 import { dispatch, select } from '@wordpress/data';
@@ -36,8 +36,8 @@ import {
 	EMPTY_CART_ERRORS,
 	EMPTY_CART_ITEM_ERRORS,
 	EMPTY_EXTENSIONS,
-} from '../../constants';
-import { defaultCartState } from '../../cart/default-state';
+} from '../../../data/constants';
+import { defaultCartState } from '../../../data/cart/default-state';
 
 /**
  * Get the argument that will be passed to a payment method's `canMakePayment` method.

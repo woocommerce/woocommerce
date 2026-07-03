@@ -8,7 +8,7 @@ import {
 	isObject,
 	isString,
 	objectHasProp,
-	ObserverResponse,
+	type ObserverResponse,
 	isErrorResponse,
 	isFailResponse,
 	isSuccessResponse,

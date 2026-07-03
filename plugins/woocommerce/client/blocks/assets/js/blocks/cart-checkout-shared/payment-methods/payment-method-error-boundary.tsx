@@ -6,7 +6,7 @@ import { Component } from '@wordpress/element';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { noticeContexts } from '@woocommerce/base-context';
-import { NoticeType } from '@woocommerce/types';
+import { type NoticeType } from '@woocommerce/types';
 import {
 	DerivedStateReturn,
 	ReactError,

@@ -2,10 +2,10 @@
  * External dependencies
  */
 import {
-	AttributeObject,
-	AttributeObjectForDisplay,
-	AttributeQuery,
-	AttributeTerm,
+	type AttributeObject,
+	type AttributeObjectForDisplay,
+	type AttributeQuery,
+	type AttributeTerm,
 } from '@woocommerce/types';
 import { sort } from 'fast-sort';
 

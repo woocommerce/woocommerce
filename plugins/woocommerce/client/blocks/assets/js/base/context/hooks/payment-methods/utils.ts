@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
-	CartResponseTotals,
+	type CartResponseTotals,
 	objectHasProp,
 	isString,
 } from '@woocommerce/types';

@@ -3,12 +3,12 @@
  * External dependencies
  */
 import { select, dispatch } from '@wordpress/data';
-import { PlainPaymentMethods } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import { setDefaultPaymentMethod } from '../utils/set-default-payment-method';
+import { PlainPaymentMethods } from '../../../types';
 import '../../checkout';
 import { store as paymentStore } from '..';
 

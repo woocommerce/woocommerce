@@ -2,14 +2,14 @@
  * External dependencies
  */
 import {
-	Cart,
-	CartResponse,
-	ApiErrorResponse,
+	type Cart,
+	type CartResponse,
+	type ApiErrorResponse,
 	isApiErrorResponse,
-	ExtensionCartUpdateArgs,
-	CartShippingPackageShippingRate,
-	CartShippingRate,
-	BillingAddressShippingAddress,
+	type ExtensionCartUpdateArgs,
+	type CartShippingPackageShippingRate,
+	type CartShippingRate,
+	type BillingAddressShippingAddress,
 } from '@woocommerce/types';
 import {
 	camelCaseKeys,

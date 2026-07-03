@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { dispatch } from '@wordpress/data';
-import { CartResponse, ExtensionCartUpdateArgs } from '@woocommerce/types';
+import {
+	type CartResponse,
+	type ExtensionCartUpdateArgs,
+} from '@woocommerce/types';
 import { processErrorResponse } from '@woocommerce/block-data';
 
 /**

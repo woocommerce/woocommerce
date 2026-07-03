@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { type ElementType, useEffect, useState } from '@wordpress/element';
-import { EditorBlock } from '@woocommerce/types';
+import { type EditorBlock } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
 import {

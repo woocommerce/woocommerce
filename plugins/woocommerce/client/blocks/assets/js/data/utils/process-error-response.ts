@@ -5,9 +5,9 @@ import { createNotice, DEFAULT_ERROR_MESSAGE } from '@woocommerce/base-utils';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
 	objectHasProp,
-	ApiErrorResponse,
+	type ApiErrorResponse,
 	isApiErrorResponse,
-	ApiErrorResponseData,
+	type ApiErrorResponseData,
 	isObject,
 	isString,
 } from '@woocommerce/types';

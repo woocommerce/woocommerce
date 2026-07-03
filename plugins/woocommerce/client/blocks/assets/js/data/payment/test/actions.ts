@@ -1,10 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	PlainExpressPaymentMethods,
-	PlainPaymentMethods,
-} from '@woocommerce/types';
+import { PlainExpressPaymentMethods } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -12,6 +9,7 @@ import {
 import { setDefaultPaymentMethod as setDefaultPaymentMethodOriginal } from '../utils/set-default-payment-method';
 import '../../checkout';
 import { store as paymentStore } from '..';
+import { PlainPaymentMethods } from '../../../types';
 import { __internalSetRegisteredExpressPaymentMethods } from '../actions';
 
 const originalDispatch = jest.requireActual( '@wordpress/data' ).dispatch;

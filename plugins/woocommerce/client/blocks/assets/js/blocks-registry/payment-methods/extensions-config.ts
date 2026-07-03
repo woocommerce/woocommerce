@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { CanMakePaymentExtensionCallback } from '@woocommerce/types';
+import { type CanMakePaymentExtensionCallback } from '@woocommerce/types';
 
 type CanMakePaymentExtensionCallbacks = Record<
 	string,

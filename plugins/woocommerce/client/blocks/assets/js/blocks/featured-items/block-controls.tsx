@@ -10,7 +10,7 @@ import {
 import { ToolbarButton, ToolbarGroup } from '@wordpress/components';
 import { crop } from '@wordpress/icons';
 import { WP_REST_API_Category } from 'wp-types';
-import { ProductResponseItem } from '@woocommerce/types';
+import { type ProductResponseItem } from '@woocommerce/types';
 import type { ComponentType, Dispatch, SetStateAction } from 'react';
 import type { BlockAlignment } from '@wordpress/blocks';
 

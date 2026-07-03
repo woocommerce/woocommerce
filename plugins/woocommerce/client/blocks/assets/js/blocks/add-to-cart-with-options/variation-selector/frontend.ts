@@ -24,7 +24,7 @@ import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
-import type { SelectableItem } from '../../packages/types/type-defs/selectable-items';
+import type { SelectableItem } from '../../../types/type-defs/selectable-items';
 import type { VisualAttributeTerm } from '../../../base/utils/visual-attribute-terms';
 
 type VariationOptionItem = {

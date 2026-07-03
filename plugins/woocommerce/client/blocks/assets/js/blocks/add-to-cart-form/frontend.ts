@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { store } from '@wordpress/interactivity';
-import { HTMLElementEvent } from '@woocommerce/types';
+import { type HTMLElementEvent } from '@woocommerce/types';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =

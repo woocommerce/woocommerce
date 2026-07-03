@@ -14,7 +14,7 @@ import { InitialDisabled } from '../../components/initial-disabled';
 import { EXCLUDED_BLOCKS } from '../../constants';
 import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { filtersPreview } from './constants';
-import type { RemovableItemsContext } from '../../../packages/types/type-defs/removable-items';
+import type { RemovableItemsContext } from '../../../../types/type-defs/removable-items';
 
 const Edit = () => {
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(

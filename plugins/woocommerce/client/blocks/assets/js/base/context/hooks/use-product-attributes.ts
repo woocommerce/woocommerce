@@ -4,9 +4,9 @@
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { getAttributes, getTerms } from '@woocommerce/editor-components/utils';
 import {
-	AttributeObject,
-	AttributeTerm,
-	AttributeWithTerms,
+	type AttributeObject,
+	type AttributeTerm,
+	type AttributeWithTerms,
 } from '@woocommerce/types';
 import { formatError } from '@woocommerce/base-utils';
 

@@ -12,7 +12,7 @@ import {
 } from '@wordpress/element';
 import clsx from 'clsx';
 import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
-import { Currency, isObject } from '@woocommerce/types';
+import { type Currency, isObject } from '@woocommerce/types';
 import { useDebouncedCallback } from 'use-debounce';
 
 /**

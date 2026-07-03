@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Cart, CartItem } from '@woocommerce/types';
+import { type Cart, type CartItem } from '@woocommerce/types';
 import { dispatch, select } from '@wordpress/data';
 import { decodeEntities } from '@wordpress/html-entities';
 import { __, sprintf } from '@wordpress/i18n';
@@ -14,7 +14,7 @@ import { __unstableStripHTML as stripHTML } from '@wordpress/dom';
  * Internal dependencies
  */
 import { STORE_KEY as CART_STORE_KEY } from './constants';
-import type { CartStoreDescriptor } from './index';
+import type { CartStoreDescriptor } from '../../data/cart';
 
 export type QuantityChanges = {
 	cartItemsPendingQuantity?: string[] | undefined;

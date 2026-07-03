@@ -10,8 +10,8 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import {
-	AttributeObject,
-	AttributeTerm,
+	type AttributeObject,
+	type AttributeTerm,
 	isAttributeQueryCollection,
 	isAttributeTermCollection,
 	isBoolean,

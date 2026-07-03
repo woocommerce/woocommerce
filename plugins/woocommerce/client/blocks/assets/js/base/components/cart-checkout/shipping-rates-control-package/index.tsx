@@ -7,7 +7,7 @@ import { Panel } from '@woocommerce/blocks-components';
 import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { useShippingData, useStoreCart } from '@woocommerce/base-context/hooks';
 import { sanitizeHTML } from '@woocommerce/sanitize';
-import { CartShippingPackageShippingRate } from '@woocommerce/types';
+import { type CartShippingPackageShippingRate } from '@woocommerce/types';
 import {
 	PackageItems,
 	ShippingPackageItemIcon,

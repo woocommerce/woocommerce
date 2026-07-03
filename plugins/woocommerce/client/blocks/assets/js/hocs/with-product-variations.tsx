@@ -7,8 +7,8 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
 import { getProductVariationsWithTotal } from '@woocommerce/editor-components/utils';
 import { ErrorObject } from '@woocommerce/editor-components/error-placeholder';
 import {
-	ProductResponseItem,
-	ProductResponseVariationsItem,
+	type ProductResponseItem,
+	type ProductResponseVariationsItem,
 } from '@woocommerce/types';
 
 /**

@@ -4,7 +4,7 @@
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
 	objectHasProp,
-	Currency,
+	type Currency,
 	isString,
 	type CurrencyResponse,
 	type WCStoreV1ProductsCollectionProps,
