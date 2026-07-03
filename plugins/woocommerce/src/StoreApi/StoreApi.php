@@ -35,8 +35,22 @@ final class StoreApi {
 				if ( ! wc_rest_should_load_namespace( 'wc/store' ) && ! wc_rest_should_load_namespace( 'wc/private' ) ) {
 					return;
 				}
-				self::container()->get( Legacy::class )->init();
-				self::container()->get( RoutesController::class )->register_all_routes();
+				// Both namespaces share one callback; guard against double registration per
+				// server instance (not a static flag, which would break when tests reset the server).
+				$registered_server = null;
+				$register_routes   = function () use ( &$registered_server ) {
+					$server = rest_get_server();
+					if ( $registered_server === $server ) {
+						return;
+					}
+					$registered_server = $server;
+					self::container()->get( Legacy::class )->init();
+					self::container()->get( RoutesController::class )->register_all_routes();
+				};
+
+				$rest_api_util = wc_get_container()->get( \Automattic\WooCommerce\Utilities\RestApiUtil::class );
+				$rest_api_util->lazy_load_namespace( 'wc/store', $register_routes );
+				$rest_api_util->lazy_load_namespace( 'wc/private', $register_routes );
 			}
 		);
 		// Runs on priority 11 after rest_api_default_filters() which is hooked at 10.

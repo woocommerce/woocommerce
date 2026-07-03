@@ -31,6 +31,9 @@ abstract class ControllerTestCase extends \WP_Test_REST_TestCase {
 		/** @var \WP_REST_Server $wp_rest_server */
 		global $wp_rest_server;
 		$wp_rest_server = new \Spy_REST_Server();
+		// Register namespaces eagerly so route tests can assert against the route table directly.
+		// The lazy-loading machinery itself is covered by RestApiUtilTest.
+		add_filter( 'woocommerce_rest_should_lazy_load_namespace', '__return_false' );
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'rest_api_init', $wp_rest_server );
 

@@ -42,6 +42,9 @@ class Checkout extends MockeryTestCase {
 
 		global $wp_rest_server;
 		$wp_rest_server = new \Spy_REST_Server();
+		// Register namespaces eagerly so the mock checkout route below reliably overrides the
+		// container-registered one; lazy loading would re-register it at dispatch time.
+		add_filter( 'woocommerce_rest_should_lazy_load_namespace', '__return_false' );
 		do_action( 'rest_api_init', $wp_rest_server );
 
 		wp_set_current_user( 0 );
