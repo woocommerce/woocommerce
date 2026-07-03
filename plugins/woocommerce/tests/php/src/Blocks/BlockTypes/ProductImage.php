@@ -161,7 +161,7 @@ class ProductImage extends \WP_UnitTestCase {
 	public function test_product_image_render_simple_product() {
 		$data = $this->create_product_with_image();
 
-		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} --><!-- wp:woocommerce/product-image /--><!-- /wp:woocommerce/single-product -->' );
+		$markup = $this->render_product_image_block( $data['product'] );
 
 		$this->assertStringContainsString( 'wc-block-components-product-image', $markup );
 		$this->assertStringContainsString( 'data-testid="product-image"', $markup );
@@ -178,7 +178,7 @@ class ProductImage extends \WP_UnitTestCase {
 	public function test_product_image_render_includes_product_link_by_default() {
 		$data = $this->create_product_with_image();
 
-		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} --><!-- wp:woocommerce/product-image /--><!-- /wp:woocommerce/single-product -->' );
+		$markup = $this->render_product_image_block( $data['product'] );
 
 		$this->assertStringContainsString( '<a href="' . $data['product']->get_permalink() . '"', $markup );
 		$this->assertStringContainsString( 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"', $markup );
@@ -194,7 +194,7 @@ class ProductImage extends \WP_UnitTestCase {
 	public function test_product_image_render_omits_anchor_when_product_link_is_hidden() {
 		$data = $this->create_product_with_image();
 
-		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} --><!-- wp:woocommerce/product-image {"showProductLink":false} /--><!-- /wp:woocommerce/single-product -->' );
+		$markup = $this->render_product_image_block( $data['product'], '{"showProductLink":false}' );
 
 		$this->assertStringContainsString( 'data-testid="product-image"', $markup );
 		$this->assertStringNotContainsString( '<a ', $markup );
@@ -218,19 +218,19 @@ class ProductImage extends \WP_UnitTestCase {
 		$variation_image_id = $data['variation_image_ids'][0];
 
 		// Test that the ProductImage block recognizes the variation image when provided via context.
-		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} --><!-- wp:woocommerce/product-image {"imageId":' . $variation_image_id . '} /--><!-- /wp:woocommerce/single-product -->' );
+		$markup = $this->render_product_image_block( $data['product'], '{"imageId":' . $variation_image_id . '}' );
 
 		// The block should recognize the variation image as valid and use it.
 		$this->assertStringContainsString( 'data-image-id="' . $variation_image_id . '"', $markup );
 		$this->assertStringContainsString( 'wc-block-components-product-image', $markup );
 
 		// Test that the block falls back to the main product image when no imageId is provided.
-		$markup_no_image_id = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} --><!-- wp:woocommerce/product-image /--><!-- /wp:woocommerce/single-product -->' );
+		$markup_no_image_id = $this->render_product_image_block( $data['product'] );
 		$this->assertStringContainsString( 'data-image-id="' . $data['main_image_id'] . '"', $markup_no_image_id );
 
 		// Test that the block rejects invalid image IDs.
 		$invalid_image_id = 99999;
-		$markup_invalid   = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} --><!-- wp:woocommerce/product-image {"imageId":' . $invalid_image_id . '} /--><!-- /wp:woocommerce/single-product -->' );
+		$markup_invalid   = $this->render_product_image_block( $data['product'], '{"imageId":' . $invalid_image_id . '}' );
 		// Should fall back to main product image when invalid image ID is provided.
 		$this->assertStringContainsString( 'data-image-id="' . $data['main_image_id'] . '"', $markup_invalid );
 
@@ -316,7 +316,7 @@ class ProductImage extends \WP_UnitTestCase {
 		$data['product']->set_sale_price( 5 );
 		$data['product']->save();
 
-		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} --><!-- wp:woocommerce/product-image {"showSaleBadge":true} /--><!-- /wp:woocommerce/single-product -->' );
+		$markup = $this->render_product_image_block( $data['product'], '{"showSaleBadge":true}' );
 
 		$this->assertStringContainsString( 'wc-block-components-product-image', $markup );
 		$this->assertStringContainsString( 'wp-block-woocommerce-product-sale-badge', $markup );
@@ -351,7 +351,7 @@ class ProductImage extends \WP_UnitTestCase {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->save();
 
-		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-image /--><!-- /wp:woocommerce/single-product -->' );
+		$markup = $this->render_product_image_block( $product );
 
 		$this->assertStringContainsString( 'wc-block-components-product-image', $markup );
 		// Should contain placeholder image.
