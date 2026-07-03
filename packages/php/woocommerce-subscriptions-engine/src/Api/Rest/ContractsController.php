@@ -1,35 +1,32 @@
 <?php
 /**
- * ContractsController - the authenticated `wc/v3` REST surface for the customer
- * portal's contract reads and lifecycle actions.
+ * ContractsController - the authenticated `wc/v3` REST surface for the generic
+ * contract lifecycle actions.
  *
  * Routes (namespace `wc/v3`, base `subscriptions-engine/contracts`):
  *
- *   GET  /                       Customer-scoped list of the requester's contracts.
- *                                Query: `page`, `per_page`, `context`. Returns items in
- *                                the `embed` (list-row) representation by default, with
- *                                `X-WP-Total` / `X-WP-TotalPages` collection headers.
- *   GET  /{id}                   One contract in the `view` (detail) representation,
- *                                with related orders.
  *   POST /{id}/hold              Put an active contract on hold.
  *   POST /{id}/reactivate        Resume a held contract (next date recomputed forward).
  *   POST /{id}/cancel            Cancel. Body `{ at_period_end: bool }` - true winds the
  *                                contract down at the current period end, false cancels now.
  *
+ * Actions only, deliberately: the engine exposes ONE implementation of the lifecycle
+ * transitions (guards, ownership, conflict semantics) that every consumer calls rather
+ * than re-implements - while READS for UI stay server-side, where each consumer shapes
+ * its own view from the {@see Subscriptions} facade. There are no read routes here and
+ * no view-model in the responses: an action responds with a minimal domain summary
+ * (`id` + resulting `status` slug, e.g. cancel lands on `pending-cancellation` or
+ * `cancelled` depending on the mode), so no consumer-specific presentation leaks into
+ * the engine. The summary is ADDITIVE: fields may appear; consumers tolerate unknown
+ * fields and must not assume the set is closed. A generic resource read API is a
+ * planned follow-up alongside the read-model views, when a consumer needs it.
+ *
  * Every route requires a logged-in user, enforced through the shared
  * {@see RESTPermissions} floor (core's cookie auth has already verified the REST nonce
- * `wp_rest` by then). Per-route, the `{id}` routes additionally enforce per-contract
- * OWNERSHIP with the asymmetric not-found rule: a contract owned by another user returns
- * 404 - IDENTICAL to an unknown id - so the portal never confirms the existence of a
- * contract the requester does not own (anti-IDOR). The list route is inherently
- * owner-scoped (it only ever reads the requester's own customer id).
- *
- * The controller is a thin transport shell: it delegates every read and action to the
- * public {@see Subscriptions} facade (never the repository or services directly) and maps
- * the returned {@see Contract} entities to the response shape through {@see ContractPresenter},
- * behind the standard {@see WP_REST_Controller} machinery (item schema, context filtering,
- * schema-driven arg validation). The view-model is ADDITIVE: new fields may appear;
- * consumers tolerate unknown fields and must not assume the set is closed.
+ * `wp_rest` by then). Per-route, ownership is enforced with the asymmetric not-found
+ * rule: a contract owned by another user returns 404 - IDENTICAL to an unknown id - so
+ * a caller never confirms the existence of a contract the requester does not own
+ * (anti-IDOR).
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api\Rest
  */
@@ -53,24 +50,13 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\RESTPermissio
 defined( 'ABSPATH' ) || exit;
 
 /**
- * REST controller for customer-portal contract reads + lifecycle actions.
+ * REST controller for the generic contract lifecycle actions.
  */
 final class ContractsController extends WP_REST_Controller {
 
 	private const REST_NAMESPACE = 'wc/v3';
 
 	private const REST_BASE = 'subscriptions-engine/contracts';
-
-	private const DEFAULT_PER_PAGE = 50;
-
-	private const MAX_PER_PAGE = 200;
-
-	/**
-	 * Presenter mapping contracts to the response view-model.
-	 *
-	 * @var ContractPresenter
-	 */
-	private $presenter;
 
 	/**
 	 * REST permissions.
@@ -82,13 +68,11 @@ final class ContractsController extends WP_REST_Controller {
 	/**
 	 * Build the controller.
 	 *
-	 * @param ContractPresenter|null $presenter        Presenter; default instance when omitted.
-	 * @param RESTPermissions|null   $rest_permissions REST permissions; default instance when omitted.
+	 * @param RESTPermissions|null $rest_permissions REST permissions; default instance when omitted.
 	 */
-	public function __construct( ?ContractPresenter $presenter = null, ?RESTPermissions $rest_permissions = null ) {
+	public function __construct( ?RESTPermissions $rest_permissions = null ) {
 		$this->namespace        = self::REST_NAMESPACE;
 		$this->rest_base        = self::REST_BASE;
-		$this->presenter        = $presenter ?? new ContractPresenter();
 		$this->rest_permissions = $rest_permissions ?? new RESTPermissions();
 	}
 
@@ -108,37 +92,6 @@ final class ContractsController extends WP_REST_Controller {
 	 * Register the routes.
 	 */
 	public function register_routes(): void {
-		register_rest_route(
-			self::REST_NAMESPACE,
-			'/' . self::REST_BASE,
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items' ),
-					'permission_callback' => array( $this, 'permissions_check' ),
-					'args'                => $this->get_collection_params(),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
-
-		register_rest_route(
-			self::REST_NAMESPACE,
-			'/' . self::REST_BASE . '/(?P<id>[\d]+)',
-			array(
-				'args'   => $this->id_arg(),
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_item' ),
-					'permission_callback' => array( $this, 'permissions_check' ),
-					'args'                => array(
-						'context' => $this->get_context_param( array( 'default' => 'view' ) ),
-					),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
-
 		register_rest_route(
 			self::REST_NAMESPACE,
 			'/' . self::REST_BASE . '/(?P<id>[\d]+)/hold',
@@ -196,7 +149,7 @@ final class ContractsController extends WP_REST_Controller {
 	 * Permission callback for all routes: the shared logged-in floor.
 	 *
 	 * Any logged-in user passes; per-contract ownership is enforced by the route
-	 * handlers (the asymmetric 404), and the list is owner-scoped by construction.
+	 * handlers (the asymmetric 404).
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return true|WP_Error True when logged in, else a 401 error.
@@ -206,57 +159,10 @@ final class ContractsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * GET / - the requester's contracts, in the `embed` (list-row) representation by
-	 * default, with collection totals headers.
-	 *
-	 * Owner-scoped by construction: the customer id is the current user's, never a
-	 * request parameter, so there is nothing to IDOR.
-	 *
-	 * @param WP_REST_Request $request The request.
-	 * @return WP_REST_Response
-	 */
-	public function get_items( $request ): WP_REST_Response {
-		$customer_id = get_current_user_id();
-
-		$page     = max( 1, ScalarCoercion::coerce_int( $request->get_param( 'page' ), 1 ) );
-		$per_page = ScalarCoercion::coerce_int( $request->get_param( 'per_page' ), self::DEFAULT_PER_PAGE );
-		$per_page = min( max( 1, $per_page ), self::MAX_PER_PAGE );
-		$offset   = ( $page - 1 ) * $per_page;
-
-		$rows = array();
-		foreach ( Subscriptions::list_for_customer( $customer_id, $per_page, $offset ) as $contract ) {
-			$rows[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( $contract, $request ) );
-		}
-
-		$total = Subscriptions::count_for_customer( $customer_id );
-
-		$response = new WP_REST_Response( $rows );
-		$response->header( 'X-WP-Total', (string) $total );
-		$response->header( 'X-WP-TotalPages', (string) (int) ceil( $total / $per_page ) );
-
-		return $response;
-	}
-
-	/**
-	 * GET /{id} - one contract in the `view` (detail) representation, ownership-checked.
-	 *
-	 * @param WP_REST_Request $request The request.
-	 * @return WP_REST_Response|WP_Error The detail view-model, or a 404 (asymmetric).
-	 */
-	public function get_item( $request ) {
-		$contract = $this->owned_contract( ScalarCoercion::coerce_int( $request->get_param( 'id' ) ) );
-		if ( $contract instanceof WP_Error ) {
-			return $contract;
-		}
-
-		return $this->prepare_item_for_response( $contract, $request );
-	}
-
-	/**
 	 * POST /{id}/hold.
 	 *
 	 * @param WP_REST_Request $request The request.
-	 * @return WP_REST_Response|WP_Error The refreshed detail view-model, or an error.
+	 * @return WP_REST_Response|WP_Error The domain summary, or an error.
 	 */
 	public function hold_item( $request ) {
 		return $this->run_action(
@@ -271,7 +177,7 @@ final class ContractsController extends WP_REST_Controller {
 	 * POST /{id}/reactivate.
 	 *
 	 * @param WP_REST_Request $request The request.
-	 * @return WP_REST_Response|WP_Error The refreshed detail view-model, or an error.
+	 * @return WP_REST_Response|WP_Error The domain summary, or an error.
 	 */
 	public function reactivate_item( $request ) {
 		return $this->run_action(
@@ -289,7 +195,7 @@ final class ContractsController extends WP_REST_Controller {
 	 * false cancels immediately, reusing the shared {@see Subscriptions::cancel()}.
 	 *
 	 * @param WP_REST_Request $request The request.
-	 * @return WP_REST_Response|WP_Error The refreshed detail view-model, or an error.
+	 * @return WP_REST_Response|WP_Error The domain summary, or an error.
 	 */
 	public function cancel_item( $request ) {
 		// Boolean-typed, defaulted, and `rest_sanitize_boolean`-sanitized by the route
@@ -311,70 +217,28 @@ final class ContractsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Serialize a contract through the presenter, honouring the requested context.
+	 * Serialize a contract as the action-response domain summary.
 	 *
-	 * `embed` (the list default) maps to the lightweight list-row view-model; `view`
-	 * (the detail default) maps to the full detail view-model, whose related-orders
-	 * read is deliberately kept off the list path. The result then flows through the
-	 * standard additional-fields + context filter, so registered REST fields and the
-	 * schema's per-property contexts apply.
+	 * Domain values only - the id and the resulting status slug - never labels,
+	 * formatted values, or other presentation: consumers own their view shaping.
 	 *
 	 * @param Contract        $item    Contract.
 	 * @param WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
-		$context = ScalarCoercion::coerce_string( $request->get_param( 'context' ), 'view' );
-		$context = '' !== $context ? $context : 'view';
-
-		$data = 'embed' === $context
-			? $this->presenter->build_row( $item )
-			: $this->presenter->build_detail( $item );
+		$data = array(
+			'id'     => (int) $item->get_id(),
+			'status' => $item->get_status(),
+		);
 
 		$data = $this->add_additional_fields_to_object( $data, $request );
-		$data = $this->filter_response_by_context( $data, $context );
 
 		return rest_ensure_response( $data );
 	}
 
 	/**
-	 * Get collection params.
-	 *
-	 * The `context` default is `embed`: the list intentionally serves the lightweight
-	 * row representation, keeping the detail-only reads (related orders) off the
-	 * collection path.
-	 *
-	 * @return array<string, mixed>
-	 */
-	public function get_collection_params(): array {
-		return array(
-			'page'     => array(
-				'description'       => __( 'Current page of the collection.', 'woocommerce-subscriptions-engine' ),
-				'type'              => 'integer',
-				'default'           => 1,
-				'minimum'           => 1,
-				'sanitize_callback' => 'absint',
-				'validate_callback' => 'rest_validate_request_arg',
-			),
-			'per_page' => array(
-				'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-subscriptions-engine' ),
-				'type'              => 'integer',
-				'default'           => self::DEFAULT_PER_PAGE,
-				'minimum'           => 1,
-				'maximum'           => self::MAX_PER_PAGE,
-				'sanitize_callback' => 'absint',
-				'validate_callback' => 'rest_validate_request_arg',
-			),
-			'context'  => $this->get_context_param( array( 'default' => 'embed' ) ),
-		);
-	}
-
-	/**
-	 * Get item schema.
-	 *
-	 * One resource, two representations: `embed` is the list row, `view` is the detail.
-	 * Properties carry their contexts accordingly, so the context filter documents (and
-	 * enforces) which fields each representation serves.
+	 * Get item schema: the action-response domain summary.
 	 *
 	 * @return array<string, mixed>
 	 */
@@ -385,120 +249,18 @@ final class ContractsController extends WP_REST_Controller {
 
 		$this->schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'subscription_engine_contract',
+			'title'      => 'subscription_engine_contract_action',
 			'type'       => 'object',
 			'properties' => array(
-				'id'                     => array(
+				'id'     => array(
 					'description' => __( 'Unique identifier for the subscription contract.', 'woocommerce-subscriptions-engine' ),
 					'type'        => 'integer',
-					'context'     => array( 'view', 'embed' ),
+					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'status'                 => array(
-					'description' => __( 'Contract status.', 'woocommerce-subscriptions-engine' ),
+				'status' => array(
+					'description' => __( 'Contract status after the action.', 'woocommerce-subscriptions-engine' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'embed' ),
-					'readonly'    => true,
-				),
-				'status_label'           => array(
-					'description' => __( 'Localized status label.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'embed' ),
-					'readonly'    => true,
-				),
-				'payment_method_title'   => array(
-					'description' => __( 'Payment method display title.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'embed' ),
-					'readonly'    => true,
-				),
-				'next_payment'           => array(
-					'description' => __( 'Formatted next payment date for the list row.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'string',
-					'context'     => array( 'embed' ),
-					'readonly'    => true,
-				),
-				'total'                  => array(
-					'description' => __( 'Formatted recurring total for the list row.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'string',
-					'context'     => array( 'embed' ),
-					'readonly'    => true,
-				),
-				'recurring_summary'      => array(
-					'description' => __( 'Formatted recurring price and cadence summary.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'string',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'start_date'             => array(
-					'description' => __( 'Formatted contract start date.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'string',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'last_order_date'        => array(
-					'description' => __( 'Formatted date of the most recent related order.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'string',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'date_row_label'         => array(
-					'description' => __( 'Label for the status-dependent date row.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'string',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'date_row_value'         => array(
-					'description' => __( 'Value for the status-dependent date row.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'string',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'payment_method_expires' => array(
-					'description' => __( 'Payment method expiry note, when known.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'string',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'cancel_visible'         => array(
-					'description' => __( 'Whether the cancel action is available.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'boolean',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'hold_visible'           => array(
-					'description' => __( 'Whether the hold action is available.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'boolean',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'reactivate_visible'     => array(
-					'description' => __( 'Whether the reactivate action is available.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'boolean',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'needs_payment_notice'   => array(
-					'description' => __( 'Whether the payment method needs updating before the contract can resume.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'boolean',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'at_period_end'          => array(
-					'description' => __( 'Whether a cancel request defaults to winding down at the period end.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'boolean',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'cancel_modal_copy'      => array(
-					'description' => __( 'Status-dependent copy for the cancel confirmation.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'object',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'related_orders'         => array(
-					'description' => __( 'Orders related to the contract, newest first.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'array',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
@@ -509,14 +271,14 @@ final class ContractsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Run a lifecycle action behind the ownership guard, then return the refreshed detail
-	 * view-model so the client can re-render from one response.
+	 * Run a lifecycle action behind the ownership guard, then return the domain
+	 * summary with the resulting status.
 	 *
 	 * A `DomainException` (an illegal transition for the contract's current state) maps to
 	 * a 409 Conflict; any other failure maps to a 500. The ownership guard keeps the
 	 * asymmetric 404 for not-owned / unknown.
 	 *
-	 * @param WP_REST_Request $request The request (carries the id; context resolves to `view`).
+	 * @param WP_REST_Request $request The request (carries the id).
 	 * @param callable        $action  Runs the lifecycle action; receives the contract id.
 	 * @return WP_REST_Response|WP_Error
 	 */

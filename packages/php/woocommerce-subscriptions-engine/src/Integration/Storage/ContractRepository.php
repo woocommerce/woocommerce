@@ -409,40 +409,6 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Count a customer's contracts - the collection-total companion to
-	 * {@see self::find_by_customer_id()}, for the REST pagination headers.
-	 *
-	 * Honours the same optional status filter so the total always describes the same
-	 * result set the list read pages over. Hits the `(customer_id, status)` index.
-	 *
-	 * @param int                       $customer_id Owning customer id.
-	 * @param array<string, mixed>|null $args        {
-	 *     Optional. Query args.
-	 *
-	 *     @type string $status Optional status filter (one of {@see \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus}).
-	 * }
-	 * @return int Number of contracts the customer owns (matching the filter).
-	 */
-	public function count_by_customer_id( int $customer_id, ?array $args = null ): int {
-		global $wpdb;
-
-		$args   = $args ?? array();
-		$status = isset( $args['status'] ) && is_string( $args['status'] ) && '' !== $args['status'] ? $args['status'] : null;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-
-		if ( null === $status ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE customer_id = %d", $customer_id ) );
-		} else {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE customer_id = %d AND status = %s", $customer_id, $status ) );
-		}
-
-		return (int) $count;
-	}
-
-	/**
 	 * Whether `$contract_id` is owned by `$customer_id` - the portal's ownership guard.
 	 *
 	 * A single indexed read returning false for BOTH an unknown contract and a contract

@@ -1,8 +1,9 @@
 <?php
 /**
- * Integration tests for the customer-portal REST controller: the auth + ownership
+ * Integration tests for the lifecycle-actions REST controller: the auth + ownership
  * matrix (anonymous 401, valid owner 200, foreign owner 404, unknown id 404), the
- * lifecycle action round-trips, and the illegal-transition 409.
+ * action round-trips with their domain-summary responses, and the
+ * illegal-transition 409.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine
  */
@@ -103,89 +104,31 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 		wp_set_current_user( 0 );
 		$id = $this->seed( $this->owner_id );
 
-		$response = rest_get_server()->dispatch( new WP_REST_Request( 'GET', self::BASE . '/' . $id ) );
+		$response = rest_get_server()->dispatch( new WP_REST_Request( 'POST', self::BASE . '/' . $id . '/hold' ) );
 
 		$this->assertSame( 401, $response->get_status() );
+		// The contract is untouched.
+		$this->assertSame( ContractStatus::ACTIVE, $this->reload( $id )->get_status() );
 	}
 
-	public function test_owner_can_read_their_contract_detail(): void {
-		wp_set_current_user( $this->owner_id );
-		$id = $this->seed( $this->owner_id );
-
-		$response = rest_get_server()->dispatch( new WP_REST_Request( 'GET', self::BASE . '/' . $id ) );
-
-		$this->assertSame( 200, $response->get_status() );
-		$data = $this->data_array( $response );
-		$this->assertSame( $id, $data['id'] );
-		$this->assertSame( ContractStatus::ACTIVE, $data['status'] );
-		// The detail view-model shape the consumer portal expects.
-		foreach ( array( 'status_label', 'recurring_summary', 'start_date', 'date_row_label', 'date_row_value', 'cancel_visible', 'hold_visible', 'reactivate_visible', 'needs_payment_notice', 'at_period_end', 'cancel_modal_copy', 'related_orders' ) as $key ) {
-			$this->assertArrayHasKey( $key, $data, "detail view-model is missing '{$key}'" );
-		}
-	}
-
-	public function test_foreign_owned_contract_is_not_found(): void {
+	public function test_unknown_contract_is_not_found_indistinguishably_from_foreign(): void {
 		wp_set_current_user( $this->other_id );
-		$id = $this->seed( $this->owner_id );
 
-		$response = rest_get_server()->dispatch( new WP_REST_Request( 'GET', self::BASE . '/' . $id ) );
+		$response = rest_get_server()->dispatch( new WP_REST_Request( 'POST', self::BASE . '/4242424/hold' ) );
 
 		$this->assertSame( 404, $response->get_status() );
 	}
 
-	public function test_unknown_contract_is_not_found_indistinguishably(): void {
-		wp_set_current_user( $this->other_id );
-
-		$response = rest_get_server()->dispatch( new WP_REST_Request( 'GET', self::BASE . '/4242424' ) );
-
-		$this->assertSame( 404, $response->get_status() );
-	}
-
-	public function test_list_is_scoped_to_the_current_customer(): void {
+	public function test_options_exposes_the_action_schema(): void {
 		wp_set_current_user( $this->owner_id );
-		$mine = $this->seed( $this->owner_id );
-		$this->seed( $this->other_id );
+		$id = $this->seed( $this->owner_id );
 
-		$response = rest_get_server()->dispatch( new WP_REST_Request( 'GET', self::BASE ) );
-
-		$this->assertSame( 200, $response->get_status() );
-		$rows = $this->data_array( $response );
-		$this->assertCount( 1, $rows );
-		$this->assertIsArray( $rows[0] );
-		$this->assertSame( $mine, $rows[0]['id'] );
-	}
-
-	public function test_list_serves_the_embed_row_representation_with_totals_headers(): void {
-		wp_set_current_user( $this->owner_id );
-		$this->seed( $this->owner_id );
-		$this->seed( $this->owner_id );
-
-		$response = rest_get_server()->dispatch( new WP_REST_Request( 'GET', self::BASE ) );
-
-		$this->assertSame( 200, $response->get_status() );
-
-		$headers = $response->get_headers();
-		$this->assertSame( '2', (string) ( $headers['X-WP-Total'] ?? '' ) );
-		$this->assertSame( '1', (string) ( $headers['X-WP-TotalPages'] ?? '' ) );
-
-		$rows = $this->data_array( $response );
-		$this->assertIsArray( $rows[0] );
-		// The embed (list-row) representation: row fields present, detail-only absent.
-		foreach ( array( 'id', 'status', 'status_label', 'next_payment', 'payment_method_title', 'total' ) as $key ) {
-			$this->assertArrayHasKey( $key, $rows[0], "list row is missing '{$key}'" );
-		}
-		$this->assertArrayNotHasKey( 'related_orders', $rows[0] );
-	}
-
-	public function test_options_exposes_the_item_schema(): void {
-		wp_set_current_user( $this->owner_id );
-
-		$response = rest_get_server()->dispatch( new WP_REST_Request( 'OPTIONS', self::BASE ) );
+		$response = rest_get_server()->dispatch( new WP_REST_Request( 'OPTIONS', self::BASE . '/' . $id . '/hold' ) );
 
 		$this->assertSame( 200, $response->get_status() );
 		$data = $this->data_array( $response );
 		$this->assertIsArray( $data['schema'] );
-		$this->assertSame( 'subscription_engine_contract', $data['schema']['title'] );
+		$this->assertSame( 'subscription_engine_contract_action', $data['schema']['title'] );
 	}
 
 	public function test_hold_action_on_a_foreign_contract_is_not_found(): void {
@@ -199,14 +142,20 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( ContractStatus::ACTIVE, $this->reload( $id )->get_status() );
 	}
 
-	public function test_owner_hold_transitions_and_returns_the_refreshed_detail(): void {
+	public function test_owner_hold_transitions_and_returns_the_domain_summary(): void {
 		wp_set_current_user( $this->owner_id );
 		$id = $this->seed( $this->owner_id );
 
 		$response = rest_get_server()->dispatch( new WP_REST_Request( 'POST', self::BASE . '/' . $id . '/hold' ) );
 
 		$this->assertSame( 200, $response->get_status() );
-		$this->assertSame( ContractStatus::ON_HOLD, $this->data_array( $response )['status'] );
+		$data = $this->data_array( $response );
+		// The action response is a domain summary: id + resulting status slug,
+		// no view-model fields (labels, formatted values, visibility flags).
+		$this->assertSame( $id, $data['id'] );
+		$this->assertSame( ContractStatus::ON_HOLD, $data['status'] );
+		$this->assertArrayNotHasKey( 'status_label', $data );
+		$this->assertArrayNotHasKey( 'related_orders', $data );
 		$this->assertSame( ContractStatus::ON_HOLD, $this->reload( $id )->get_status() );
 	}
 
@@ -219,6 +168,8 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 		$response = rest_get_server()->dispatch( $request );
 
 		$this->assertSame( 200, $response->get_status() );
+		// The summary status tells the caller which cancel mode landed.
+		$this->assertSame( ContractStatus::PENDING_CANCELLATION, $this->data_array( $response )['status'] );
 		$this->assertSame( ContractStatus::PENDING_CANCELLATION, $this->reload( $id )->get_status() );
 	}
 
@@ -231,6 +182,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 		$response = rest_get_server()->dispatch( $request );
 
 		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( ContractStatus::CANCELLED, $this->data_array( $response )['status'] );
 		$this->assertSame( ContractStatus::CANCELLED, $this->reload( $id )->get_status() );
 	}
 
