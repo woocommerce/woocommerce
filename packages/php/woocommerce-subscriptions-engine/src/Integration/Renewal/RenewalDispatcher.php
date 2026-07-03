@@ -126,8 +126,8 @@ final class RenewalDispatcher {
 	/**
 	 * Enqueue the recurring scan action when one is not already scheduled.
 	 *
-	 * Call once Action Scheduler is available (e.g. on `init`), since it uses the `as_*`
-	 * functions. Gated on the consumer registry: a store with no consumer extension runs no
+	 * Call once Action Scheduler is available (Bootstrap runs it on `action_scheduler_init`,
+	 * the moment AS declares its `as_*` functions ready). Gated on the consumer registry: a store with no consumer extension runs no
 	 * renewals, so it carries no recurring scan action either - one already scheduled is
 	 * removed on the first gated boot after the last consumer deactivates. To avoid an Action Scheduler
 	 * store query on every request, a positive result is cached in an autoloaded option and
@@ -188,21 +188,15 @@ final class RenewalDispatcher {
 	}
 
 	/**
-	 * Action Scheduler dispatch entry point - fires once per scan tick. Routes through
-	 * `run()` so dispatch and any synchronous test driver share one code path.
+	 * Triggers a batch run - the Action Scheduler dispatch entry point, fired once per tick.
+	 *
+	 * A thin wrapper around {@see self::run_batch()}, needed (vs registering that method
+	 * directly) because a stray `do_action( self::HOOK, ... )` carrying arguments would
+	 * reach run_batch's typed parameters and fatal; the argument-less wrapper absorbs
+	 * whatever the hook carries.
 	 */
 	public function handle_tick(): void {
-		$this->run();
-	}
-
-	/**
-	 * Run one scan tick at the default batch size.
-	 *
-	 * @param DateTimeImmutable|null $now The scan moment; defaults to now (UTC). Injectable for tests.
-	 * @return int The number of due contracts processed this tick (0 when gated).
-	 */
-	public function run( ?DateTimeImmutable $now = null ): int {
-		return $this->run_batch( $now, self::BATCH_SIZE );
+		$this->run_batch();
 	}
 
 	/**
@@ -215,13 +209,13 @@ final class RenewalDispatcher {
 	 * ({@see RenewalNotProcessable}) parks the contract; any other throw is logged - so one bad
 	 * contract cannot stall the batch. A backlog larger than `$limit` drains over successive ticks.
 	 *
-	 * @param DateTimeImmutable|null $now   The scan moment; defaults to now (UTC).
-	 * @param int                    $limit Maximum due contracts to process this tick; a
-	 *                                      non-positive limit is a no-op returning 0.
+	 * @param DateTimeImmutable|null $now   The scan moment; defaults to now (UTC). Injectable for tests.
+	 * @param int                    $limit Maximum due contracts to process this tick; defaults to
+	 *                                      the batch size. A non-positive limit is a no-op returning 0.
 	 * @return int The number of actionable due contracts scanned this tick (0 when gated).
 	 *             A billed/skipped/failed breakdown is logged at debug level.
 	 */
-	public function run_batch( ?DateTimeImmutable $now, int $limit ): int {
+	public function run_batch( ?DateTimeImmutable $now = null, int $limit = self::BATCH_SIZE ): int {
 		if ( $limit < 1 ) {
 			return 0;
 		}

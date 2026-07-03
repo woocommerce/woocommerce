@@ -126,7 +126,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 		// No consumer registered: the gate is closed.
 		$this->assertTrue( ConsumerRegistry::is_empty() );
 
-		$processed = ( new RenewalDispatcher() )->run( $this->scan_now() );
+		$processed = ( new RenewalDispatcher() )->run_batch( $this->scan_now() );
 
 		$this->assertSame( 0, $processed, 'A gated run processes no contracts.' );
 
@@ -149,7 +149,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
-		$processed = ( new RenewalDispatcher() )->run( $this->scan_now() );
+		$processed = ( new RenewalDispatcher() )->run_batch( $this->scan_now() );
 		$this->assertSame( 1, $processed );
 
 		$repo  = new ContractRepository();
@@ -181,7 +181,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
-		$processed = ( new RenewalDispatcher() )->run( $this->scan_now() );
+		$processed = ( new RenewalDispatcher() )->run_batch( $this->scan_now() );
 		$this->assertSame( 0, $processed );
 
 		// Untouched: still cycle 1, schedule unmoved, no renewal order.
