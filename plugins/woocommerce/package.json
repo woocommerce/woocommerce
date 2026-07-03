@@ -74,7 +74,7 @@
 		"test:e2e:hpos-off": "pnpm test:e2e:with-env default-hpos-disabled --project=e2e-hpos-disabled",
 		"test:e2e:gb-stable": "pnpm test:e2e:with-env gutenberg-stable",
 		"test:e2e:gb-nightly": "pnpm test:e2e:with-env gutenberg-nightly",
-		"ci:legacy-minicart-flag-off": "node ./bin/set-legacy-minicart-flag.js && php bin/generate-feature-config.php",
+		"ci:legacy-minicart-flag-off": "node ./bin/set-legacy-minicart-flag.js && php bin/generate-feature-config.php && node ./bin/sync-feature-config.js",
 		"test:e2e:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm test:e2e:default --project=legacy-mini-cart",
 		"test:e2e:blocks:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm playwright test --config=tests/e2e/playwright.config.ts --project=blocks-legacy-mini-cart",
 		"test:e2e:paypal-standard": "pnpm test:e2e:default --project=paypal-standard",
