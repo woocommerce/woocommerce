@@ -124,4 +124,169 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( '70.00', $offer['priceSpecification'][0]['price'] );
 		$this->assertEquals( get_woocommerce_currency(), $offer['priceCurrency'] );
 	}
+
+	/**
+	 * When a variable product page is requested for a single, fully-specified variation, the offer
+	 * should describe that variation with a single Offer and exact price (no AggregateOffer range),
+	 * and reference the parent product group.
+	 *
+	 * @return void
+	 */
+	public function test_variable_product_with_selected_variation_uses_single_offer(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		// Uniquely identifies the "huge / red / 0" variation priced at 16.
+		$_GET['attribute_pa_size']   = 'huge';
+		$_GET['attribute_pa_colour'] = 'red';
+		$_GET['attribute_pa_number'] = '0';
+
+		try {
+			$this->structured_data->generate_product_data( $product );
+			$data  = $this->structured_data->get_data();
+			$offer = $data[0]['offers'][0];
+
+			$this->assertEquals( 'Offer', $offer['@type'] );
+			$this->assertEquals( '16.00', $offer['price'] );
+			$this->assertArrayNotHasKey( 'lowPrice', $offer );
+			$this->assertArrayNotHasKey( 'highPrice', $offer );
+			$this->assertEquals( get_woocommerce_currency(), $offer['priceCurrency'] );
+
+			// The variation is grouped under the parent product (Google `item_group_id`).
+			$this->assertEquals( $product->get_sku(), $data[0]['inProductGroupWithID'] );
+			// The variation's own SKU is used.
+			$this->assertEquals( 'DUMMY SKU VARIABLE HUGE RED 0', $data[0]['sku'] );
+		} finally {
+			unset( $_GET['attribute_pa_size'], $_GET['attribute_pa_colour'], $_GET['attribute_pa_number'] );
+		}
+	}
+
+	/**
+	 * A GTIN uniquely identifies a single trade item, so a selected variation without its own GTIN
+	 * must not inherit the parent product's GTIN.
+	 *
+	 * @return void
+	 */
+	public function test_variable_product_selected_variation_does_not_inherit_parent_gtin(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_global_unique_id( '12345678' );
+		$product->save();
+		WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		// Uniquely identifies the "huge / red / 0" variation, which has no GTIN of its own.
+		$_GET['attribute_pa_size']   = 'huge';
+		$_GET['attribute_pa_colour'] = 'red';
+		$_GET['attribute_pa_number'] = '0';
+
+		try {
+			$this->structured_data->generate_product_data( $product );
+			$data = $this->structured_data->get_data();
+
+			$this->assertEquals( 'Offer', $data[0]['offers'][0]['@type'] );
+			$this->assertArrayNotHasKey( 'gtin', $data[0] );
+		} finally {
+			unset( $_GET['attribute_pa_size'], $_GET['attribute_pa_colour'], $_GET['attribute_pa_number'] );
+		}
+	}
+
+	/**
+	 * Without a fully-specified variation selection, the variable product keeps the AggregateOffer
+	 * price range (no behavior change).
+	 *
+	 * @return void
+	 */
+	public function test_variable_product_without_full_selection_uses_aggregate_offer(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		// Only one of the three variation attributes is provided: ambiguous, so fall back to aggregate.
+		$_GET['attribute_pa_size'] = 'huge';
+
+		try {
+			$this->structured_data->generate_product_data( $product );
+			$data  = $this->structured_data->get_data();
+			$offer = $data[0]['offers'][0];
+
+			$this->assertEquals( 'AggregateOffer', $offer['@type'] );
+			$this->assertArrayHasKey( 'lowPrice', $offer );
+			$this->assertArrayHasKey( 'highPrice', $offer );
+			$this->assertArrayNotHasKey( 'inProductGroupWithID', $data[0] );
+		} finally {
+			unset( $_GET['attribute_pa_size'] );
+		}
+	}
+
+	/**
+	 * When a fully-specified selection matches more than one variation (a concrete variation and an
+	 * overlapping "Any" variation), the price is ambiguous, so the parent AggregateOffer is kept.
+	 *
+	 * @return void
+	 */
+	public function test_variable_product_with_ambiguous_selection_uses_aggregate_offer(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		// Matches both "huge / blue / 2" and "huge / blue / any number".
+		$_GET['attribute_pa_size']   = 'huge';
+		$_GET['attribute_pa_colour'] = 'blue';
+		$_GET['attribute_pa_number'] = '2';
+
+		try {
+			$this->structured_data->generate_product_data( $product );
+			$data  = $this->structured_data->get_data();
+			$offer = $data[0]['offers'][0];
+
+			$this->assertEquals( 'AggregateOffer', $offer['@type'] );
+			$this->assertArrayNotHasKey( 'inProductGroupWithID', $data[0] );
+		} finally {
+			unset( $_GET['attribute_pa_size'], $_GET['attribute_pa_colour'], $_GET['attribute_pa_number'] );
+		}
+	}
+
+	/**
+	 * A private variation matching the same selection must not block the single Offer for the
+	 * published variation, because `find_matching_product_variation()` only resolves published ones.
+	 *
+	 * @return void
+	 */
+	public function test_variable_product_ignores_private_variation_when_counting_matches(): void {
+		$product = WC_Helper_Product::create_variation_product();
+
+		// Private sibling with the same attributes as the published "huge / red / 0" variation.
+		$private_variation = new WC_Product_Variation();
+		$private_variation->set_parent_id( $product->get_id() );
+		$private_variation->set_attributes(
+			array(
+				'pa_size'   => 'huge',
+				'pa_colour' => 'red',
+				'pa_number' => '0',
+			)
+		);
+		$private_variation->set_regular_price( 99 );
+		$private_variation->set_status( 'private' );
+		$private_variation->save();
+
+		WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		$_GET['attribute_pa_size']   = 'huge';
+		$_GET['attribute_pa_colour'] = 'red';
+		$_GET['attribute_pa_number'] = '0';
+
+		try {
+			$this->structured_data->generate_product_data( $product );
+			$data  = $this->structured_data->get_data();
+			$offer = $data[0]['offers'][0];
+
+			// Still a single Offer at the published variation's price, not the private one's.
+			$this->assertEquals( 'Offer', $offer['@type'] );
+			$this->assertEquals( '16.00', $offer['price'] );
+		} finally {
+			unset( $_GET['attribute_pa_size'], $_GET['attribute_pa_colour'], $_GET['attribute_pa_number'] );
+		}
+	}
 }
