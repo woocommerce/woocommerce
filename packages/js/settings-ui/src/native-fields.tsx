@@ -45,12 +45,10 @@ const toStringValue = ( value: SettingsValue ) =>
 const isCheckboxChecked = ( value: SettingsValue ) =>
 	value === true || value === 'yes' || value === '1';
 
-// Preserve the schema's value vocabulary: legacy settings store checkboxes as
-// 'yes'/'no' (or '1'/'0') strings, and dirty tracking, visibility predicates,
-// and save handlers all compare against that vocabulary. Emitting
-// CheckboxControl's raw boolean would permanently change the value's type on
-// first interaction, so map the checked state back onto the initial value's
-// representation — returning the initial value itself when the state reverts.
+// CheckboxControl emits raw booleans, but schemas usually supply 'yes'/'no'
+// (or '1'/'0') strings and dirty tracking, visibility predicates and save
+// handlers all compare against that format. Keep the initial value's format,
+// and return the initial value itself when the state reverts.
 const toCheckboxValue = (
 	checked: boolean,
 	initialValue: SettingsValue
