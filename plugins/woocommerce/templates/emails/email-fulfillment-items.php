@@ -62,8 +62,9 @@ foreach ( $items as $item_id => $item ) :
 					<?php
 					// Show title/image etc.
 					if ( $show_image ) {
-						$image_width     = is_array( $image_size ) && isset( $image_size[0] ) ? absint( $image_size[0] ) : absint( $image_size );
-						$thumbnail_width = $image_width + 24;
+						$image_dimensions = wc_get_image_size( $image_size );
+						$image_width      = is_array( $image_dimensions ) && isset( $image_dimensions['width'] ) ? absint( $image_dimensions['width'] ) : 48;
+						$thumbnail_width  = $image_width + 24;
 
 						/**
 						 * Email Order Item Thumbnail hook.
