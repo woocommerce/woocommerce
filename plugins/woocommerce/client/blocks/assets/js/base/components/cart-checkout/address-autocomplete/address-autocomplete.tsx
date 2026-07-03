@@ -22,6 +22,7 @@ import { ValidatedTextInputProps } from '../../../../../../packages/components/t
 import './style.scss';
 import { Suggestions } from './suggestions';
 import { useUpdatePreferredAutocompleteProvider } from '../../../hooks/use-update-preferred-autocomplete-provider';
+import { getAutocompleteCountry } from './utils';
 
 // Maximum gap (ms) between a keydown event and the resulting React onChange.
 // After this window, userIsTypingRef resets to false so that programmatic
@@ -167,10 +168,15 @@ export const AddressAutocomplete = ( {
 				addressType as 'shipping' | 'billing'
 			];
 
-		if ( provider ) {
+		const autocompleteCountry = getAutocompleteCountry(
+			country,
+			addressType
+		);
+
+		if ( provider && autocompleteCountry ) {
 			const generation = ++searchGenerationRef.current;
 			provider
-				.search( searchValue, country )
+				.search( searchValue, autocompleteCountry )
 				.then( ( results ) => {
 					// Discard stale results from a superseded search.
 					if ( generation !== searchGenerationRef.current ) {
@@ -371,14 +377,18 @@ export const AddressAutocomplete = ( {
 					window?.wc?.addressAutocomplete?.activeProvider?.[
 						addressType
 					];
-				if ( provider ) {
+				const autocompleteCountry = getAutocompleteCountry(
+					country,
+					addressType
+				);
+				if ( provider && autocompleteCountry ) {
 					setIsSettingAddress( true );
 					// Immediately suppress search to prevent any change events from triggering search
 					suppressSearchTimeoutRef.current = setTimeout( () => {
 						suppressSearchTimeoutRef.current = null;
 					}, 1000 );
 					provider
-						.select( selected.id, country )
+						.select( selected.id, autocompleteCountry )
 						.then( ( address ) => {
 							if ( addressType === 'shipping' ) {
 								setShippingAddress( address );
@@ -409,14 +419,21 @@ export const AddressAutocomplete = ( {
 	const handleSuggestionClick = async ( suggestionId: string ) => {
 		const provider =
 			window?.wc?.addressAutocomplete?.activeProvider?.[ addressType ];
-		if ( provider ) {
+		const autocompleteCountry = getAutocompleteCountry(
+			country,
+			addressType
+		);
+		if ( provider && autocompleteCountry ) {
 			setIsSettingAddress( true );
 			// Immediately suppress search to prevent any change events from triggering search
 			suppressSearchTimeoutRef.current = setTimeout( () => {
 				suppressSearchTimeoutRef.current = null;
 			}, 1000 );
 			try {
-				const address = await provider.select( suggestionId, country );
+				const address = await provider.select(
+					suggestionId,
+					autocompleteCountry
+				);
 				if ( addressType === 'shipping' ) {
 					setShippingAddress( address );
 					if ( useShippingAsBilling ) {

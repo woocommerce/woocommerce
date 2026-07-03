@@ -40,8 +40,10 @@ wpData.useSelect.mockImplementation(
 				return {
 					getCartData() {
 						return {
-							shippingAddress: { country: 'DE' },
-							billingAddress: { country: 'DE' },
+							// CA is allowed for billing/shipping in the global test
+							// settings mock, so autocomplete is eligible to search for it.
+							shippingAddress: { country: 'CA' },
+							billingAddress: { country: 'CA' },
 						};
 					},
 				};

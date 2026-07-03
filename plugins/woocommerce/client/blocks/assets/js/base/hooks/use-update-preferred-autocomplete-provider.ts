@@ -16,6 +16,7 @@ import type {
  */
 import { type CheckoutStoreDescriptor } from '../../data/checkout';
 import { type CartStoreDescriptor } from '../../data/cart';
+import { getAutocompleteCountry } from '../components/cart-checkout/address-autocomplete/utils';
 
 // Get server providers configuration
 const serverProviders = getSettingWithCoercion<
@@ -76,13 +77,30 @@ export function useUpdatePreferredAutocompleteProvider(
 	) as ActionCreatorsOf< ConfigOf< CheckoutStoreDescriptor > >;
 
 	useEffect( () => {
-		// Check if window.wc.addressAutocomplete.providers exists
-		if ( ! window?.wc?.addressAutocomplete?.providers ) {
+		const clearActiveProvider = () => {
 			setActiveAddressAutocompleteProvider( '', addressType );
 			if ( window?.wc?.addressAutocomplete?.activeProvider ) {
 				window.wc.addressAutocomplete.activeProvider[ addressType ] =
 					null;
 			}
+		};
+
+		// Check if window.wc.addressAutocomplete.providers exists
+		if ( ! window?.wc?.addressAutocomplete?.providers ) {
+			clearActiveProvider();
+			return;
+		}
+
+		// Constrain the country to what the store actually allows for this
+		// address type. An empty result means there's no country the
+		// shopper can eligibly search/select yet.
+		const autocompleteCountry = getAutocompleteCountry(
+			country || '',
+			addressType
+		);
+
+		if ( ! autocompleteCountry ) {
+			clearActiveProvider();
 			return;
 		}
 
@@ -93,7 +111,7 @@ export function useUpdatePreferredAutocompleteProvider(
 					serverProvider.id
 				];
 
-			if ( provider && provider.canSearch( country ) ) {
+			if ( provider && provider.canSearch( autocompleteCountry ) ) {
 				setActiveAddressAutocompleteProvider(
 					provider.id,
 					addressType
@@ -107,11 +125,7 @@ export function useUpdatePreferredAutocompleteProvider(
 		}
 
 		// No provider supports this country, clear the active provider
-		setActiveAddressAutocompleteProvider( '', addressType );
-		// Set globally as this is going to be the source of truth where the actual provider objects are stored.
-		if ( window?.wc?.addressAutocomplete?.activeProvider ) {
-			window.wc.addressAutocomplete.activeProvider[ addressType ] = null;
-		}
+		clearActiveProvider();
 	}, [
 		addressType,
 		country,

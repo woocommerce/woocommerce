@@ -18,6 +18,16 @@ jest.mock( '@wordpress/data', () => ( {
  */
 import { useUpdatePreferredAutocompleteProvider } from '../use-update-preferred-autocomplete-provider';
 
+// This test exercises canSearch()-driven provider switching between DE and
+// US, independent of the ship-to/sell-to country restriction feature, so
+// give it its own allow-list rather than relying on the global test fixture.
+jest.mock( '@woocommerce/block-settings', () => ( {
+	__esModule: true,
+	...jest.requireActual( '@woocommerce/block-settings' ),
+	ALLOWED_COUNTRIES: { DE: 'Germany', US: 'United States' },
+	SHIPPING_COUNTRIES: { DE: 'Germany', US: 'United States' },
+} ) );
+
 // Mock settings
 jest.mock( '@woocommerce/settings', () => ( {
 	...jest.requireActual( '@woocommerce/settings' ),

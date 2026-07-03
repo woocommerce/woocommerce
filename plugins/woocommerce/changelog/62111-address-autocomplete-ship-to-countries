@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Address autocomplete now only searches/selects countries the store actually sells or ships to
