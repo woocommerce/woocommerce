@@ -334,7 +334,7 @@ describe( 'Product Image Block', () => {
 			);
 		} );
 
-		test( 'applies store thumbnail aspect ratio by default', () => {
+		test( 'applies store thumbnail aspect ratio when imageSizing is thumbnail', () => {
 			const component = render(
 				<ProductDataContextProvider
 					product={ productWithImages }
