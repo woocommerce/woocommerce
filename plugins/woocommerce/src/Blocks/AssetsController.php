@@ -82,7 +82,7 @@ final class AssetsController {
 		$this->api->register_script(
 			'wc-block-library',
 			$this->api->get_block_asset_build_path( 'wc-block-library' ),
-			array( 'wc-blocks-middleware' ),
+			array( 'wc-blocks-middleware', 'wc-entities', 'wc-blocks-data-store' ),
 			true
 		);
 		wp_register_script( 'wc-blocks', false, array(), $this->api->wc_version, true );
