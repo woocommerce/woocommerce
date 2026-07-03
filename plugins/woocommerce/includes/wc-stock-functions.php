@@ -453,7 +453,7 @@ function wc_reserve_stock_for_order( $order ) {
 
 	if ( $order ) {
 		$reserve_stock = new ReserveStock();
-		$reserve_stock->reserve_stock_for_order( $order );
+		$reserve_stock->reserve_stock_for_order( $order, (int) get_option( 'woocommerce_hold_stock_minutes', 60 ) );
 	}
 }
 add_action( 'woocommerce_checkout_order_created', 'wc_reserve_stock_for_order' );
