@@ -181,6 +181,69 @@ final class ContractRepository {
 	}
 
 	/**
+	 * Update the contract row (and children) ONLY while its stored status still matches
+	 * `$expected_status` - the optimistic compare-and-set for status-sensitive writes,
+	 * mirroring {@see self::transition_cycle_status()} on the cycle side.
+	 *
+	 * The lifecycle transitions (hold / reactivate / cancel) and the renewal engine's
+	 * schedule advances all read-validate-write the contract row; unconditioned, the
+	 * slower writer silently clobbers the faster one - a customer cancel lost to a
+	 * concurrent settle would resurrect the contract into future billing. Keying the
+	 * write on the status the caller read makes the race lose LOUDLY: no row matches,
+	 * false comes back, and the caller reports a conflict or re-reads instead of
+	 * overwriting.
+	 *
+	 * A zero-row result is disambiguated with a follow-up status read (an update whose
+	 * values happen to be byte-identical also reports zero rows), so false always means
+	 * "the stored status is no longer `$expected_status`, or the row is gone" - never a
+	 * false conflict.
+	 *
+	 * @param Contract $contract        Contract to write. Must have an id.
+	 * @param string   $expected_status The status the caller read; the write lands only while the row still carries it.
+	 * @return bool True when the row was written (children synced); false when the condition missed.
+	 * @throws \RuntimeException If the contract has no id, or the write itself errors.
+	 */
+	public function update_if_status( Contract $contract, string $expected_status ): bool {
+		global $wpdb;
+
+		$id = $contract->get_id();
+		if ( null === $id ) {
+			throw new \RuntimeException( 'Cannot update a contract that has no id. Use ContractRepository::insert() for a new contract.' );
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$updated = $wpdb->update(
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ),
+			array_merge(
+				$contract->to_storage(),
+				array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) )
+			),
+			array(
+				'id'     => (int) $id,
+				'status' => $expected_status,
+			)
+		);
+
+		if ( false === $updated ) {
+			throw new \RuntimeException( 'Failed to update contract.' );
+		}
+
+		if ( 0 === $updated ) {
+			$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$current = $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$table} WHERE id = %d", $id ) );
+			if ( $expected_status !== $current ) {
+				return false;
+			}
+		}
+
+		$this->sync_children( $contract );
+
+		return true;
+	}
+
+	/**
 	 * Fetch a contract by id, hydrating the live entity with its items / addresses /
 	 * meta, plus its frozen plan terms ({@see Contract::get_plan_snapshot()}) from
 	 * `plan_snapshot_id` - so every full read carries the billing cadence off the

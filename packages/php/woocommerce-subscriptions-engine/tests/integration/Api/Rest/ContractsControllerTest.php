@@ -159,6 +159,30 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( ContractStatus::ON_HOLD, $this->reload( $id )->get_status() );
 	}
 
+	public function test_owner_reactivate_transitions_and_returns_the_domain_summary(): void {
+		wp_set_current_user( $this->owner_id );
+		$id = $this->seed( $this->owner_id, ContractStatus::ON_HOLD );
+
+		$response = rest_get_server()->dispatch( new WP_REST_Request( 'POST', self::BASE . '/' . $id . '/reactivate' ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( ContractStatus::ACTIVE, $this->data_array( $response )['status'] );
+		$this->assertSame( ContractStatus::ACTIVE, $this->reload( $id )->get_status() );
+	}
+
+	public function test_reactivate_on_an_already_active_contract_is_a_conflict(): void {
+		// An active contract must never reach the date recompute (a past-due date
+		// rolled forward would skip a charge); the guard maps to a 409.
+		wp_set_current_user( $this->owner_id );
+		$id     = $this->seed( $this->owner_id, ContractStatus::ACTIVE );
+		$before = $this->reload( $id )->get_next_payment_gmt();
+
+		$response = rest_get_server()->dispatch( new WP_REST_Request( 'POST', self::BASE . '/' . $id . '/reactivate' ) );
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( $before, $this->reload( $id )->get_next_payment_gmt(), 'The schedule is untouched.' );
+	}
+
 	public function test_cancel_at_period_end_winds_down_the_contract(): void {
 		wp_set_current_user( $this->owner_id );
 		$id = $this->seed( $this->owner_id );

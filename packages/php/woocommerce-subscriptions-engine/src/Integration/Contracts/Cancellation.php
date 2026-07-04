@@ -69,6 +69,7 @@ final class Cancellation {
 	 * @param Contract $contract Contract to cancel. Must have an id.
 	 * @return bool True when the contract was cancelled and persisted.
 	 * @throws RuntimeException If the contract has no id.
+	 * @throws \DomainException If the contract cannot be cancelled from its current state, or its state changed concurrently.
 	 */
 	public function cancel( Contract $contract ): bool {
 		$id = $contract->get_id();
@@ -76,8 +77,15 @@ final class Cancellation {
 			throw new RuntimeException( 'Cancellation::cancel(): cannot cancel a contract that has no id.' );
 		}
 
+		$previous = $contract->get_status();
 		$contract->set_status( ContractStatus::CANCELLED );
-		$this->contracts->update( $contract );
+
+		// Compare-and-set on the status read above: a concurrent transition (another
+		// request, the renewal engine's settle) makes this write miss loudly rather
+		// than be clobbered.
+		if ( ! $this->contracts->update_if_status( $contract, $previous ) ) {
+			throw new \DomainException( 'Cancellation::cancel(): the contract state changed concurrently; nothing was written.' );
+		}
 
 		// Close a charge caught mid-flight: a still-pending head cycle is cancelled so no stale
 		// claim is left open. A settled (billed/failed/cancelled) cycle is left as is.
@@ -120,6 +128,7 @@ final class Cancellation {
 	 * @param Contract $contract Contract to wind down. Must have an id, and be ACTIVE.
 	 * @return bool True when the contract was wound down and persisted.
 	 * @throws RuntimeException If the contract has no id.
+	 * @throws \DomainException If the contract cannot be wound down from its current state, or its state changed concurrently.
 	 */
 	public function cancel_at_period_end( Contract $contract ): bool {
 		$id = $contract->get_id();
@@ -127,6 +136,7 @@ final class Cancellation {
 			throw new RuntimeException( 'Cancellation::cancel_at_period_end(): cannot cancel a contract that has no id.' );
 		}
 
+		$previous = $contract->get_status();
 		$contract->set_status( ContractStatus::PENDING_CANCELLATION );
 
 		// The end of the current period is the next-payment moment: the contract is
@@ -136,7 +146,11 @@ final class Cancellation {
 			$contract->set_end_gmt( $contract->get_next_payment_gmt() );
 		}
 
-		$this->contracts->update( $contract );
+		// Compare-and-set on the status read above: a concurrent transition makes this
+		// write miss loudly rather than be clobbered.
+		if ( ! $this->contracts->update_if_status( $contract, $previous ) ) {
+			throw new \DomainException( 'Cancellation::cancel_at_period_end(): the contract state changed concurrently; nothing was written.' );
+		}
 
 		// Intentionally leave the next-payment date in place: the contract lapses at the date (see the TODO above).
 

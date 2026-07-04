@@ -92,6 +92,24 @@ class HoldTest extends EngineIntegrationTestCase {
 		$this->assertSame( 1, $fired );
 	}
 
+	public function test_hold_loses_the_race_to_a_concurrent_transition(): void {
+		$id       = $this->seed( ContractStatus::ACTIVE );
+		$contract = $this->reload( $id );
+
+		// A concurrent request cancels the contract after our read: the compare-and-set
+		// write must miss loudly instead of resurrecting the contract to on-hold.
+		$concurrent = $this->reload( $id );
+		$concurrent->set_status( ContractStatus::CANCELLED );
+		$this->contracts->update( $concurrent );
+
+		try {
+			$this->sut->hold( $contract );
+			$this->fail( 'Expected a DomainException when the conditional write misses.' );
+		} catch ( DomainException $e ) {
+			$this->assertSame( ContractStatus::CANCELLED, $this->reload( $id )->get_status(), 'The concurrent cancel is not clobbered.' );
+		}
+	}
+
 	public function test_hold_rejects_a_cancelled_contract(): void {
 		$id = $this->seed( ContractStatus::CANCELLED );
 

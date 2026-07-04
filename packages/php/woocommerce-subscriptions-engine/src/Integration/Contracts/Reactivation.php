@@ -22,6 +22,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts;
 
 use DateTimeImmutable;
 use DateTimeZone;
+use DomainException;
 use RuntimeException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
@@ -90,6 +91,7 @@ final class Reactivation {
 	 * @param DateTimeImmutable|null $now      The current moment; read from the wall clock (UTC) when omitted.
 	 * @return bool True when the contract was reactivated and persisted.
 	 * @throws RuntimeException If the contract has no id.
+	 * @throws DomainException If the contract is not on hold, or its state changed concurrently.
 	 */
 	public function reactivate( Contract $contract, ?DateTimeImmutable $now = null ): bool {
 		$id = $contract->get_id();
@@ -97,12 +99,27 @@ final class Reactivation {
 			throw new RuntimeException( 'Reactivation::reactivate(): cannot reactivate a contract that has no id.' );
 		}
 
+		// Only a held contract reactivates. The state machine rejects terminal states on
+		// its own, but an already-ACTIVE contract would silently no-op through it and
+		// still reach the recompute below - and rolling a past-due active contract's
+		// next-payment date forward would skip the charge the due scan owes it. Reject
+		// it explicitly before any date math.
+		if ( ContractStatus::ON_HOLD !== $contract->get_status() ) {
+			throw new DomainException( 'Reactivation::reactivate(): only an on-hold contract can be reactivated.' );
+		}
+
 		// Read the clock at the integration boundary so the Core cadence math stays clock-free.
 		$now = ( $now ?? new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) ) )->setTimezone( new DateTimeZone( 'UTC' ) );
 
 		$contract->set_status( ContractStatus::ACTIVE );
 		$contract->set_next_payment_gmt( $this->recompute_next_payment( $contract, $now, $this->billing_policy( $contract ) ) );
-		$this->contracts->update( $contract );
+
+		// Compare-and-set on the ON_HOLD status read above: a concurrent transition
+		// (another request, the renewal engine) makes this write miss loudly rather
+		// than be clobbered.
+		if ( ! $this->contracts->update_if_status( $contract, ContractStatus::ON_HOLD ) ) {
+			throw new DomainException( 'Reactivation::reactivate(): the contract state changed concurrently; nothing was written.' );
+		}
 
 		/**
 		 * Fires after a held contract is reactivated and its renewal re-armed.

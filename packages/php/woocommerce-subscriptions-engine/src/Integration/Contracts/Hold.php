@@ -64,6 +64,7 @@ final class Hold {
 	 * @param Contract $contract Contract to hold. Must have an id, and be ACTIVE.
 	 * @return bool True when the contract was held and persisted.
 	 * @throws RuntimeException If the contract has no id.
+	 * @throws \DomainException If the contract cannot be held from its current state, or its state changed concurrently.
 	 */
 	public function hold( Contract $contract ): bool {
 		$id = $contract->get_id();
@@ -71,8 +72,15 @@ final class Hold {
 			throw new RuntimeException( 'Hold::hold(): cannot hold a contract that has no id.' );
 		}
 
+		$previous = $contract->get_status();
 		$contract->set_status( ContractStatus::ON_HOLD );
-		$this->contracts->update( $contract );
+
+		// Compare-and-set on the status read above: a concurrent transition (another
+		// request, the renewal engine) makes this write miss loudly rather than be
+		// clobbered.
+		if ( ! $this->contracts->update_if_status( $contract, $previous ) ) {
+			throw new \DomainException( 'Hold::hold(): the contract state changed concurrently; nothing was written.' );
+		}
 
 		/**
 		 * Fires after a contract is put on hold.

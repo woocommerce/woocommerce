@@ -75,16 +75,17 @@ class ReactivationTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Seed an ON_HOLD contract with a next-payment date and the given selling plan.
+	 * Seed a contract with a next-payment date and the given selling plan.
 	 *
 	 * @param string|null $next_payment_gmt Next-payment GMT string, or null.
 	 * @param int         $selling_plan_id  Selling plan id.
+	 * @param string      $status           Contract status. Default ON_HOLD.
 	 */
-	private function seed_on_hold( ?string $next_payment_gmt, int $selling_plan_id ): int {
+	private function seed_on_hold( ?string $next_payment_gmt, int $selling_plan_id, string $status = ContractStatus::ON_HOLD ): int {
 		$contract = Contract::create(
 			array(
 				'customer_id'      => 1,
-				'status'           => ContractStatus::ON_HOLD,
+				'status'           => $status,
 				'currency'         => 'USD',
 				'selling_plan_id'  => $selling_plan_id,
 				'payment_method'   => self::GATEWAY,
@@ -189,6 +190,40 @@ class ReactivationTest extends EngineIntegrationTestCase {
 		$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-06-01 00:00:00' ) );
 
 		$this->assertSame( 1, $fired );
+	}
+
+	public function test_reactivate_rejects_an_already_active_contract(): void {
+		// An active contract past its due date must NOT reach the recompute: rolling its
+		// date forward would skip the charge the due scan owes it.
+		$id       = $this->seed_on_hold( '2026-02-01 00:00:00', $this->make_monthly_plan(), ContractStatus::ACTIVE );
+		$contract = $this->reload( $id );
+
+		try {
+			$this->sut->reactivate( $contract, $this->utc( '2026-04-15 00:00:00' ) );
+			$this->fail( 'Expected a DomainException for an already-active contract.' );
+		} catch ( DomainException $e ) {
+			$row = $this->reload( $id );
+			$this->assertSame( ContractStatus::ACTIVE, $row->get_status() );
+			$this->assertSame( '2026-02-01 00:00:00', $row->get_next_payment_gmt(), 'The past-due date is untouched, so the due scan still bills it.' );
+		}
+	}
+
+	public function test_reactivate_loses_the_race_to_a_concurrent_transition(): void {
+		$id       = $this->seed_on_hold( '2099-01-01 00:00:00', self::MISSING_PLAN_ID );
+		$contract = $this->reload( $id );
+
+		// A concurrent request cancels the contract after our read: the compare-and-set
+		// write must miss loudly instead of resurrecting the contract to active.
+		$concurrent = $this->reload( $id );
+		$concurrent->set_status( ContractStatus::CANCELLED );
+		$this->contracts->update( $concurrent );
+
+		try {
+			$this->sut->reactivate( $contract, $this->utc( '2026-01-01 00:00:00' ) );
+			$this->fail( 'Expected a DomainException when the conditional write misses.' );
+		} catch ( DomainException $e ) {
+			$this->assertSame( ContractStatus::CANCELLED, $this->reload( $id )->get_status(), 'The concurrent cancel is not clobbered.' );
+		}
 	}
 
 	public function test_reactivate_rejects_a_terminal_contract(): void {
