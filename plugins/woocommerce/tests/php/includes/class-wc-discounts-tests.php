@@ -239,4 +239,94 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		$this->assertWPError( $result, 'email-restricted coupon should be invalid for a non-matching customer' );
 		$this->assertEquals( $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED ), $result->get_error_message() );
 	}
+
+	/**
+	 * @testdox Coupon with product AND category restrictions validates on
+	 *          category match alone, confirming OR logic (not AND logic).
+	 * 
+	 * Coupons restricted to specific products OR categories should validate
+	 * against a cart item matching either restriction, not require both.
+	 */
+	public function test_coupon_validates_with_or_logic_for_products_and_categories() {
+		// Arrange: product in a category, and a second unrelated product.
+		$category            = wp_insert_term( 'Test Category', 'product_cat' );
+		$product_in_category = WC_Helper_Product::create_simple_product();
+		wp_set_object_terms( $product_in_category->get_id(), array( $category['term_id'] ), 'product_cat' );
+
+		$unrelated_product = WC_Helper_Product::create_simple_product();
+
+		// Coupon restricted to a *different* product ID AND this category.
+		$coupon = WC_Helper_Coupon::create_coupon();
+		$coupon->set_product_ids( array( $unrelated_product->get_id() + 999 ) ); // Not in cart.
+		$coupon->set_product_categories( array( $category['term_id'] ) );
+		$coupon->save();
+
+		$cart = WC()->cart;
+		$cart->empty_cart();
+		$cart->add_to_cart( $product_in_category->get_id(), 1 );
+
+		$discounts = new WC_Discounts( $cart );
+
+		// Act / Assert: should validate true because category matches (OR logic).
+		$this->assertTrue( $discounts->is_coupon_valid( $coupon ) );
+
+		// Cleanup.
+		WC_Helper_Product::delete_product( $product_in_category->get_id() );
+		WC_Helper_Product::delete_product( $unrelated_product->get_id() );
+		$coupon->delete( true );
+	}
+
+	/**
+	 * @testdox Fixed-cart coupon restricted to one product applies its full
+	 *           discount to that product only, leaving ineligible items untouched.
+	 * Flat cart discounts should only be spread across eligible items,
+	 * not the entire cart.
+	 */
+	public function test_fixed_cart_discount_applies_only_to_eligible_items() {
+		$eligible_product   = WC_Helper_Product::create_simple_product(); // price 10.
+		$ineligible_product = WC_Helper_Product::create_simple_product(); // price 10.
+
+		$coupon = WC_Helper_Coupon::create_coupon();
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 10 );
+		$coupon->set_product_ids( array( $eligible_product->get_id() ) );
+		$coupon->save();
+
+		$cart = WC()->cart;
+		$cart->empty_cart();
+		$cart->add_to_cart( $eligible_product->get_id(), 1 );
+		$cart->add_to_cart( $ineligible_product->get_id(), 1 );
+		$cart->calculate_totals();
+
+		$cart->apply_coupon( $coupon->get_code() );
+
+		$ineligible_item_key = $this->get_cart_item_key_for_product( $cart, $ineligible_product->get_id() );
+		$eligible_discount   = $cart->get_coupon_discount_amount( $coupon->get_code() );
+		$ineligible_item     = $cart->cart_contents[ $ineligible_item_key ];
+
+		// The discount total per line should confirm the full $10 landed on the eligible item.
+		$this->assertEquals( 10, $eligible_discount );
+		$this->assertEquals( 0, $ineligible_item['line_subtotal'] - $ineligible_item['line_total'] );
+
+		// Cleanup.
+		WC_Helper_Product::delete_product( $eligible_product->get_id() );
+		WC_Helper_Product::delete_product( $ineligible_product->get_id() );
+		$coupon->delete( true );
+	}
+
+	/**
+	 * Helper to find a cart item key by product ID.
+	 *
+	 * @param WC_Cart $cart       Cart object to search.
+	 * @param int     $product_id Product ID to match against.
+	 * @return string|null Cart item key if found, null otherwise.
+	 */
+	private function get_cart_item_key_for_product( $cart, $product_id ) {
+		foreach ( $cart->cart_contents as $key => $item ) {
+			if ( $item['product_id'] === $product_id ) {
+				return $key;
+			}
+		}
+		return null;
+	}
 }
