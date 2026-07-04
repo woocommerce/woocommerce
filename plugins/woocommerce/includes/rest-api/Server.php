@@ -96,19 +96,19 @@ class Server {
 	/**
 	 * Instantiate the given controllers and register their routes.
 	 *
-	 * @param string $namespace   The namespace the controllers are grouped under.
-	 * @param array  $controllers Map of controller name => controller class.
+	 * @param string $rest_namespace The namespace the controllers are grouped under.
+	 * @param array  $controllers    Map of controller name => controller class.
 	 *
 	 * @return void
 	 */
-	private function register_namespace_controllers( $namespace, $controllers ): void {
+	private function register_namespace_controllers( $rest_namespace, $controllers ): void {
 		$container    = wc_get_container();
 		$legacy_proxy = $container->get( LegacyProxy::class );
 		foreach ( $controllers as $controller_name => $controller_class ) {
-			$this->controllers[ $namespace ][ $controller_name ] = $container->has( $controller_class ) ?
+			$this->controllers[ $rest_namespace ][ $controller_name ] = $container->has( $controller_class ) ?
 				$container->get( $controller_class ) :
 				$legacy_proxy->get_instance_of( $controller_class );
-			$this->controllers[ $namespace ][ $controller_name ]->register_routes();
+			$this->controllers[ $rest_namespace ][ $controller_name ]->register_routes();
 		}
 	}
 
