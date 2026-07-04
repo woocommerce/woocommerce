@@ -41,7 +41,7 @@ class CategoryDescription extends AbstractBlock {
 		// Featured Category block), falling back to the term description otherwise.
 		$decoupled   = ! empty( $block->context['decoupledEdit'] );
 		$description = $decoupled && isset( $attributes['content'] ) && '' !== trim( (string) $attributes['content'] )
-			? $attributes['content']
+			? (string) $attributes['content']
 			: $term->description;
 		if ( empty( trim( $description ) ) ) {
 			return '';

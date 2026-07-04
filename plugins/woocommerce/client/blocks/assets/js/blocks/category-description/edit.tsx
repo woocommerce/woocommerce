@@ -54,14 +54,21 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	const isPreviewMode = usePreviewMode();
 
+	// Only use the locally edited content when it's non-empty; otherwise fall
+	// back to the entity value, matching the PHP renderer's fallback to
+	// `$term->description`. This also marks when `displayFullDescription`
+	// holds raw, unsanitized `PlainText` input (needs to render as text, not
+	// HTML).
+	const hasDecoupledContent =
+		decoupledEdit &&
+		typeof attributes.content === 'string' &&
+		attributes.content.length > 0;
+
 	let displayRawDescription = '';
 	if ( isPreviewMode ) {
 		displayRawDescription = previewCategories[ 0 ].description;
-	} else if ( decoupledEdit ) {
-		displayRawDescription =
-			typeof attributes.content === 'string' && attributes.content.length
-				? attributes.content
-				: '';
+	} else if ( hasDecoupledContent ) {
+		displayRawDescription = attributes.content as string;
 	} else if ( typeof rawDescription === 'string' ) {
 		displayRawDescription = rawDescription;
 	}
@@ -69,11 +76,8 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	let displayFullDescription = '';
 	if ( isPreviewMode ) {
 		displayFullDescription = previewCategories[ 0 ].description;
-	} else if ( decoupledEdit ) {
-		displayFullDescription =
-			typeof attributes.content === 'string' && attributes.content.length
-				? attributes.content
-				: '';
+	} else if ( hasDecoupledContent ) {
+		displayFullDescription = attributes.content as string;
 	} else if (
 		typeof fullDescription === 'object' &&
 		fullDescription !== null &&
@@ -100,6 +104,17 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	);
 
 	if ( termId ) {
+		const readOnlyDescription = hasDecoupledContent ? (
+			<p { ...blockProps }>{ displayFullDescription }</p>
+		) : (
+			<p
+				{ ...blockProps }
+				dangerouslySetInnerHTML={ {
+					__html: displayFullDescription,
+				} }
+			/>
+		);
+
 		descriptionElement = userCanEdit ? (
 			<PlainText
 				tagName="p"
@@ -110,12 +125,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 				{ ...blockProps }
 			/>
 		) : (
-			<p
-				{ ...blockProps }
-				dangerouslySetInnerHTML={ {
-					__html: displayFullDescription,
-				} }
-			/>
+			readOnlyDescription
 		);
 	}
 

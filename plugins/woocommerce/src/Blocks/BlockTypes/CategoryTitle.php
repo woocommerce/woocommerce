@@ -45,10 +45,10 @@ class CategoryTitle extends AbstractBlock {
 		// Featured Category block), falling back to the term name otherwise.
 		$decoupled = ! empty( $block->context['decoupledEdit'] );
 		$title     = $decoupled && isset( $attributes['content'] ) && '' !== trim( (string) $attributes['content'] )
-			? $attributes['content']
+			? (string) $attributes['content']
 			: $term->name;
 
-		$tag_name           = 0 === $level ? 'p' : 'h' . $level;
+		$tag_name = 0 === $level ? 'p' : 'h' . $level;
 
 		$classes            = $text_align ? 'has-text-align-' . $text_align : '';
 		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => $classes ) );

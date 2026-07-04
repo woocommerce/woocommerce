@@ -863,7 +863,7 @@ Highlight a product or variation.
 - **Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), multiple, spacing (padding), ~~html~~
 - **Attributes:** alt, contentAlign, decoupledEdit, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewProduct, productId
 
-## Product Title - woocommerce/featured-product-title
+## Featured Product Title - woocommerce/featured-product-title
 
 Displays the current product title.
 

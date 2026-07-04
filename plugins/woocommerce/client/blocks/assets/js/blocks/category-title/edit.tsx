@@ -89,14 +89,20 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		termId ? String( termId ) : undefined
 	);
 
+	// Only use the locally edited content when it's non-empty; otherwise fall
+	// back to the entity value, matching the PHP renderer's fallback to
+	// `$term->name`. This also marks when `displayFullTitle` holds raw,
+	// unsanitized `PlainText` input (needs to render as text, not HTML).
+	const hasDecoupledContent =
+		decoupledEdit &&
+		typeof attributes.content === 'string' &&
+		attributes.content.length > 0;
+
 	let displayRawTitle = '';
 	if ( isPreviewMode ) {
 		displayRawTitle = previewCategories[ 0 ].description;
-	} else if ( decoupledEdit ) {
-		displayRawTitle =
-			typeof attributes.content === 'string' && attributes.content.length
-				? attributes.content
-				: '';
+	} else if ( hasDecoupledContent ) {
+		displayRawTitle = attributes.content as string;
 	} else if ( typeof rawTitle === 'string' ) {
 		displayRawTitle = rawTitle;
 	}
@@ -104,11 +110,8 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	let displayFullTitle = '';
 	if ( isPreviewMode ) {
 		displayFullTitle = previewCategories[ 0 ].description;
-	} else if ( decoupledEdit ) {
-		displayFullTitle =
-			typeof attributes.content === 'string' && attributes.content.length
-				? attributes.content
-				: '';
+	} else if ( hasDecoupledContent ) {
+		displayFullTitle = attributes.content as string;
 	} else if (
 		typeof fullTitle === 'object' &&
 		fullTitle !== null &&
@@ -153,6 +156,20 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	) as JSX.Element;
 
 	if ( termId ) {
+		const readOnlyTitle = hasDecoupledContent ? (
+			<ContainerElement tagName={ TagName } { ...blockProps }>
+				{ displayFullTitle }
+			</ContainerElement>
+		) : (
+			<ContainerElement
+				tagName={ TagName }
+				{ ...blockProps }
+				dangerouslySetInnerHTML={ {
+					__html: displayFullTitle,
+				} }
+			/>
+		);
+
 		titleElement = userCanEdit ? (
 			<PlainText
 				tagName={ TagName }
@@ -163,17 +180,36 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 				{ ...blockProps }
 			/>
 		) : (
-			<ContainerElement
-				tagName={ TagName }
-				{ ...blockProps }
-				dangerouslySetInnerHTML={ {
-					__html: displayFullTitle,
-				} }
-			/>
+			readOnlyTitle
 		);
 	}
 
 	if ( isLink && termId ) {
+		const readOnlyLinkedTitle = hasDecoupledContent ? (
+			<ContainerElement tagName={ TagName } { ...blockProps }>
+				<a
+					href={ link }
+					target={ linkTarget }
+					rel={ rel }
+					onClick={ ( event ) => event.preventDefault() }
+				>
+					{ displayFullTitle }
+				</a>
+			</ContainerElement>
+		) : (
+			<ContainerElement tagName={ TagName } { ...blockProps }>
+				<a
+					href={ link }
+					target={ linkTarget }
+					rel={ rel }
+					onClick={ ( event ) => event.preventDefault() }
+					dangerouslySetInnerHTML={ {
+						__html: displayFullTitle,
+					} }
+				/>
+			</ContainerElement>
+		);
+
 		titleElement = userCanEdit ? (
 			<ContainerElement tagName={ TagName } { ...blockProps }>
 				<PlainText
@@ -192,17 +228,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 				/>
 			</ContainerElement>
 		) : (
-			<ContainerElement tagName={ TagName } { ...blockProps }>
-				<a
-					href={ link }
-					target={ linkTarget }
-					rel={ rel }
-					onClick={ ( event ) => event.preventDefault() }
-					dangerouslySetInnerHTML={ {
-						__html: displayFullTitle,
-					} }
-				/>
-			</ContainerElement>
+			readOnlyLinkedTitle
 		);
 	}
 

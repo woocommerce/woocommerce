@@ -43,7 +43,7 @@ class FeaturedProductTitle extends AbstractBlock {
 		// Featured Product block), falling back to the product title otherwise.
 		$decoupled = ! empty( $block->context['decoupledEdit'] );
 		$title     = $decoupled && isset( $attributes['content'] ) && '' !== trim( (string) $attributes['content'] )
-			? $attributes['content']
+			? (string) $attributes['content']
 			: get_the_title( $post_id );
 
 		if ( '' === trim( (string) $title ) ) {
