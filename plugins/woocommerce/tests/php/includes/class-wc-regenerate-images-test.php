@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 /**
  * Class WC_Regenerate_Images_Test file.
  *
