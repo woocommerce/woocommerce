@@ -1498,9 +1498,9 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function register_wp_admin_settings() {
-		// The registered settings groups are only consumed by the wc/v2 and wc/v3 settings
-		// endpoints, so defer the (expensive) settings pages and emails loading until a
-		// request actually targets one of those namespaces.
+		// The registered settings groups are consumed by the settings endpoints in the wc/v2,
+		// wc/v3, wc-admin and wc-analytics namespaces, so defer the (expensive) settings pages
+		// and emails loading until a request actually targets one of those namespaces.
 		$register = function () {
 			static $registered = false;
 			if ( $registered ) {
@@ -1522,6 +1522,8 @@ final class WooCommerce {
 		$rest_api_util = wc_get_container()->get( \Automattic\WooCommerce\Utilities\RestApiUtil::class );
 		$rest_api_util->lazy_load_namespace( 'wc/v2', $register );
 		$rest_api_util->lazy_load_namespace( 'wc/v3', $register );
+		$rest_api_util->lazy_load_namespace( 'wc-admin', $register );
+		$rest_api_util->lazy_load_namespace( 'wc-analytics', $register );
 	}
 
 	/**
