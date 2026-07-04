@@ -324,6 +324,22 @@ class WC_Regenerate_Images {
 	}
 
 	/**
+	 * Only regenerate images for the requested size. `intermediate_image_sizes_advanced` is the
+	 * filter core's image subsize generation actually reads (unlike `intermediate_image_sizes`
+	 * above), so without this every registered size gets regenerated instead of just the one
+	 * we need, which can be slow enough on large images to leave the DB with partial metadata.
+	 *
+	 * @param array $sizes Registered subsizes, keyed by size name.
+	 * @return array
+	 */
+	public static function adjust_intermediate_image_sizes_advanced( $sizes ) {
+		if ( ! isset( $sizes[ self::$regenerate_size ] ) ) {
+			return array();
+		}
+		return array( self::$regenerate_size => $sizes[ self::$regenerate_size ] );
+	}
+
+	/**
 	 * Generate the thumbnail filename and dimensions for a given file.
 	 *
 	 * @param string $fullsizepath Path to full size image.
@@ -412,14 +428,18 @@ class WC_Regenerate_Images {
 			$metadata = array();
 		}
 
-		// We only want to regen a specific image size.
+		// We only want to regen a specific image size. `intermediate_image_sizes_advanced` is what
+		// core's wp_create_image_subsizes()/_wp_make_subsizes() actually reads since WP 5.3, so both
+		// filters are needed to stop it from regenerating every registered size.
 		add_filter( 'intermediate_image_sizes', array( __CLASS__, 'adjust_intermediate_image_sizes' ) );
+		add_filter( 'intermediate_image_sizes_advanced', array( __CLASS__, 'adjust_intermediate_image_sizes_advanced' ) );
 
 		// This function will generate the new image sizes.
 		$new_metadata = wp_generate_attachment_metadata( $attachment_id, $fullsizepath );
 
-		// Remove custom filter.
+		// Remove custom filters.
 		remove_filter( 'intermediate_image_sizes', array( __CLASS__, 'adjust_intermediate_image_sizes' ) );
+		remove_filter( 'intermediate_image_sizes_advanced', array( __CLASS__, 'adjust_intermediate_image_sizes_advanced' ) );
 
 		// If something went wrong lets just return the original image.
 		if ( is_wp_error( $new_metadata ) || empty( $new_metadata ) ) {
