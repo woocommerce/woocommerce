@@ -16,7 +16,10 @@
 		.components-external-link__contents {
 			display: flex;
 			align-items: center;
-			flex: 1;
+		}
+
+		.components-external-link__icon {
+			margin-left: 0.5ch;
 		}
 
 		.woocommerce-quick-links__item-link__icon {
@@ -25,7 +28,6 @@
 
 		.woocommerce-quick-links__item-link__text {
 			margin-left: 16px;
-			flex: 1;
 			line-height: 16px;
 			font-size: 13px;
 		}
