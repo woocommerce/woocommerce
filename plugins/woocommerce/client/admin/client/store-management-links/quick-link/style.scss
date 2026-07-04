@@ -13,6 +13,12 @@
 		text-decoration: none;
 		padding: 16px 27px 16px 24px;
 
+		.components-external-link__contents {
+			display: flex;
+			align-items: center;
+			flex: 1;
+		}
+
 		.woocommerce-quick-links__item-link__icon {
 			fill: var(--wp-admin-theme-color);
 		}
