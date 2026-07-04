@@ -876,7 +876,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				( wc_low_stock_amount.meta_value > '' AND wc_product_meta_lookup.stock_quantity <= CAST( wc_low_stock_amount.meta_value AS SIGNED ) )
 				OR ( ( wc_low_stock_amount.meta_value IS NULL OR wc_low_stock_amount.meta_value <= '' ) AND wc_product_meta_lookup.stock_quantity <= %d )
 			) ",
-			get_option( 'woocommerce_notify_low_stock_amount', 2 )
+			absint( max( get_option( 'woocommerce_notify_low_stock_amount', 2 ), 1 ) )
 		);
 
 		return $args;

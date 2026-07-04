@@ -247,6 +247,38 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should treat an empty sitewide low stock amount option as a threshold of 1, matching the Analytics low-in-stock report, rather than 0.
+	 */
+	public function test_filter_low_stock_post_clauses_normalizes_empty_sitewide_threshold() {
+		update_option( 'woocommerce_notify_low_stock_amount', '' );
+
+		$low_stock_no_amount = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 1,
+				'stock_status'   => ProductStockStatus::IN_STOCK,
+			)
+		);
+
+		$list_table = new WC_Admin_List_Table_Products();
+		add_filter( 'posts_clauses', array( $list_table, 'filter_low_stock_post_clauses' ) );
+
+		$query     = new WP_Query(
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'publish',
+				'fields'      => 'ids',
+			)
+		);
+		$found_ids = $query->posts;
+
+		remove_filter( 'posts_clauses', array( $list_table, 'filter_low_stock_post_clauses' ) );
+
+		$this->assertContains( $low_stock_no_amount->get_id(), $found_ids, 'Quantity of 1 with an empty sitewide option should still be treated as low stock (threshold normalized to 1, not 0)' );
+	}
+
+	/**
 	 * Create a variable product with children that use the supplied stock statuses.
 	 *
 	 * @param array $stock_statuses Child variation stock statuses.
