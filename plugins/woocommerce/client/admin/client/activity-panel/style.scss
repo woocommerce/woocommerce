@@ -256,3 +256,17 @@
 .woocommerce-layout__notice-list-hide {
 	display: none;
 }
+
+.woocommerce-quick-links__list {
+	.woocommerce-list__item-inner {
+		align-items: center;
+	}
+
+	.woocommerce-list__item-text,
+	.woocommerce-list__item-title,
+	.woocommerce-list__item-title > div,
+	.components-external-link__contents {
+		display: inline-flex;
+		align-items: center;
+	}
+}
