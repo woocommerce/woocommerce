@@ -10,11 +10,23 @@ exports[`PluginsTermsOfService should render TOS message when Jetpack is selecte
   </span>
    plugin for free you agree to our 
   <a
+    class="components-external-link"
     data-link-type="external"
     href="https://wordpress.com/tos/"
+    rel="external noreferrer noopener"
     target="_blank"
   >
-    Terms of Service
+    <span
+      class="components-external-link__contents"
+    >
+      Terms of Service
+    </span>
+    <span
+      aria-label="(opens in a new tab)"
+      class="components-external-link__icon"
+    >
+      ↗
+    </span>
   </a>
   .
 </p>
@@ -38,11 +50,23 @@ exports[`PluginsTermsOfService should render TOS message with multiple plugins w
   </span>
    plugins for free you agree to our 
   <a
+    class="components-external-link"
     data-link-type="external"
     href="https://wordpress.com/tos/"
+    rel="external noreferrer noopener"
     target="_blank"
   >
-    Terms of Service
+    <span
+      class="components-external-link__contents"
+    >
+      Terms of Service
+    </span>
+    <span
+      aria-label="(opens in a new tab)"
+      class="components-external-link__icon"
+    >
+      ↗
+    </span>
   </a>
   .
 </p>
@@ -66,11 +90,23 @@ exports[`PluginsTermsOfService should render TOS message with multiple plugins w
   </span>
    plugins for free you agree to our 
   <a
+    class="components-external-link"
     data-link-type="external"
     href="https://wordpress.com/tos/"
+    rel="external noreferrer noopener"
     target="_blank"
   >
-    Terms of Service
+    <span
+      class="components-external-link__contents"
+    >
+      Terms of Service
+    </span>
+    <span
+      aria-label="(opens in a new tab)"
+      class="components-external-link__icon"
+    >
+      ↗
+    </span>
   </a>
   .
 </p>
