@@ -91,7 +91,9 @@ class WC_Admin {
 		}
 
 		// Helper.
-		include_once __DIR__ . '/helper/class-wc-helper.php';
+		if ( ! class_exists( 'WC_Helper', false ) ) {
+			include_once __DIR__ . '/helper/class-wc-helper.php';
+		}
 
 		// Marketplace suggestions & related REST API.
 		include_once __DIR__ . '/marketplace-suggestions/class-wc-marketplace-suggestions.php';

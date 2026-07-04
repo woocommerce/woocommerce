@@ -520,7 +520,9 @@ class Plugins extends \WC_REST_Data_Controller {
 	 * @return \WP_Error|array Contains success status.
 	 */
 	public function finish_wccom_connect( $rest_request ) {
-		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php';
+		if ( ! class_exists( 'WC_Helper', false ) ) {
+			include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php';
+		}
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-api.php';
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-updater.php';
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-options.php';

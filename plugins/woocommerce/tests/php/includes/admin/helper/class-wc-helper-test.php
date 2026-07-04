@@ -291,4 +291,20 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( $woocommerce_key, $woo_plugins );
 	}
 
+	/**
+	 * @testdox WC_Admin::includes should be safe to run more than once (e.g. when a symlinked
+	 *          plugin directory causes the 'init' hook path and another bootstrap path to both
+	 *          attempt to load class-wc-helper.php).
+	 */
+	public function test_wc_admin_includes_can_run_more_than_once(): void {
+		$this->assertTrue( class_exists( 'WC_Helper' ) );
+
+		// WC_Admin::includes() is normally only reached once (via the 'init' hook), but under
+		// a symlinked plugin install it can be reached via more than one literal path. Running
+		// it again must not attempt to redeclare WC_Helper.
+		( new WC_Admin() )->includes();
+
+		$this->assertTrue( class_exists( 'WC_Helper' ) );
+	}
+
 }
