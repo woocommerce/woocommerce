@@ -74,9 +74,7 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 		return renderEmptyCard();
 	}
 
-	const getCustomerString = ( customer ) => {
-		const { name } = customer || {};
-
+	const getCustomerString = ( name ) => {
 		if ( ! name ) {
 			return '';
 		}
@@ -89,6 +87,7 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 			id: orderId,
 			number: orderNumber,
 			customer_id: customerId,
+			billing,
 		} = order;
 		const customer =
 			customers.find( ( c ) => c.user_id === customerId ) || {};
@@ -102,11 +101,22 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 				: getAdminLink( 'user-edit.php?user_id=' + customer.id );
 		}
 
+		// Guest orders (customer_id 0) have no customer record to look up,
+		// fall back to the billing name stored on the order itself. Strip
+		// angle brackets so a billing name can't be mistaken for markup by
+		// createInterpolateElement below.
+		const guestName = billing
+			? `${ billing.first_name || '' } ${ billing.last_name || '' }`
+					.trim()
+					.replace( /[<>]/g, '' )
+			: '';
+		const customerName = customer.name || guestName;
+
 		const formattedString = sprintf(
 			/* translators: 1: order number, 2: customer name */
 			__( '<orderLink>Order #%1$s</orderLink> %2$s', 'woocommerce' ),
 			orderNumber,
-			getCustomerString( customer )
+			getCustomerString( customerName )
 		);
 
 		return (
@@ -218,6 +228,7 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 				'status',
 				'total',
 				'customer',
+				'billing',
 				'line_items',
 				'customer_id',
 				'date_created_gmt',
