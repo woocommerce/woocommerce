@@ -27,6 +27,18 @@ if ( Features::exists( ProductVariationsClassicRedesign::FEATURE_ID ) ) {
 $add_attributes_img_url = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/info.svg';
 $background_img_url     = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variation-background-image.svg';
 $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variation-arrow.svg';
+$external_link_icon     = is_rtl() ? '&#8598;' : '&#8599;';
+$attributes_link_open   = '<a class="variations-add-attributes-link" href="'
+	. esc_url( '#product_attributes' )
+	. '">';
+$learn_more_link_open   = '<a class="variations-learn-more-link components-external-link" href="'
+	. esc_url( 'https://woocommerce.com/document/variable-product/' )
+	. '" target="_blank" rel="external noreferrer noopener"><span class="components-external-link__contents">';
+$learn_more_link_close  = '</span><span class="components-external-link__icon wp-exclude-emoji" aria-label="'
+	. esc_attr__( '(opens in a new tab)', 'woocommerce' )
+	. '">'
+	. $external_link_icon
+	. '</span></a>';
 ?>
 <div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden">
 	<div id="variable_product_options_inner">
@@ -37,12 +49,27 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 				<img src="<?php echo esc_url( $add_attributes_img_url ); ?>" />
 				<p>
 					<?php
-						echo wp_kses_post(
+						echo wp_kses(
 							sprintf(
-								/* translators: %1$s: url for attributes tab, %2$s: url for variable product documentation */
-								__( 'Add some attributes in the <a class="variations-add-attributes-link" href="%1$s">Attributes</a> tab to generate variations. Make sure to check the <b>Used for variations</b> box. <a class="variations-learn-more-link" href="%2$s" target="_blank" rel="noreferrer">Learn more</a>', 'woocommerce' ),
-								esc_url( '#product_attributes' ),
-								esc_url( 'https://woocommerce.com/document/variable-product/' )
+								/* translators: %1$s: opening attributes tab link, %2$s: closing attributes tab link, %3$s: opening learn more link, %4$s: closing learn more link */
+								__( 'Add some attributes in the %1$sAttributes%2$s tab to generate variations. Make sure to check the <b>Used for variations</b> box. %3$sLearn more%4$s', 'woocommerce' ),
+								$attributes_link_open,
+								'</a>',
+								$learn_more_link_open,
+								$learn_more_link_close
+							),
+							array(
+								'a'    => array(
+									'class'  => true,
+									'href'   => true,
+									'target' => true,
+									'rel'    => true,
+								),
+								'b'    => array(),
+								'span' => array(
+									'class'      => true,
+									'aria-label' => true,
+								),
 							)
 						);
 					?>

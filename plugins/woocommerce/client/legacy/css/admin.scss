@@ -1065,12 +1065,11 @@ $default-line-height: 18px;
 
 		a {
 			text-decoration: none;
+		}
 
-			&[target="_blank"]::after {
-				content: url("../images/icons/external-link.svg");
-				margin-left: 2px;
-				vertical-align: sub;
-			}
+		.components-external-link__icon {
+			margin-left: 0.5ch;
+			vertical-align: text-bottom;
 		}
 
 		.add-attributes-message {
