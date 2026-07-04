@@ -100,7 +100,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	let displayRawTitle = '';
 	if ( isPreviewMode ) {
-		displayRawTitle = previewCategories[ 0 ].description;
+		displayRawTitle = previewCategories[ 0 ].name;
 	} else if ( hasDecoupledContent ) {
 		displayRawTitle = attributes.content as string;
 	} else if ( typeof rawTitle === 'string' ) {
@@ -109,7 +109,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	let displayFullTitle = '';
 	if ( isPreviewMode ) {
-		displayFullTitle = previewCategories[ 0 ].description;
+		displayFullTitle = previewCategories[ 0 ].name;
 	} else if ( hasDecoupledContent ) {
 		displayFullTitle = attributes.content as string;
 	} else if (
