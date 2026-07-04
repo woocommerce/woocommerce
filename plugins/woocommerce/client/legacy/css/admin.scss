@@ -1067,6 +1067,11 @@ $default-line-height: 18px;
 			text-decoration: none;
 		}
 
+		.variations-learn-more-link::after {
+			content: none;
+			display: none;
+		}
+
 		.components-external-link__icon {
 			margin-left: 0.5ch;
 			vertical-align: text-bottom;
