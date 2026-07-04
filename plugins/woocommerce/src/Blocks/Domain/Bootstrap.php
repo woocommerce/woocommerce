@@ -196,6 +196,10 @@ class Bootstrap {
 		 * Filters the REST route prefixes for which the blocks infrastructure (block types,
 		 * patterns, templates) is not loaded because those routes never render block content.
 		 *
+		 * Note that wp/v2/settings is deliberately NOT in this list: block classes register
+		 * settings with show_in_rest (for example woocommerce_default_catalog_orderby in
+		 * ProductCollection), so that endpoint needs the blocks infrastructure loaded.
+		 *
 		 * Return an empty array to always load the blocks infrastructure on REST requests.
 		 *
 		 * @param string[] $block_free_route_prefixes REST route prefixes, each starting with '/'.
@@ -207,7 +211,6 @@ class Bootstrap {
 				'/wp/v2/types',
 				'/wp/v2/taxonomies',
 				'/wp/v2/users',
-				'/wp/v2/settings',
 				'/wp/v2/statuses',
 			)
 		);
