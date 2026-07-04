@@ -731,6 +731,11 @@ final class RenewalEngine {
 						'contract_id' => (int) $contract->get_id(),
 					)
 				);
+
+				// The action below announces "billed AND schedule advanced"; the advance
+				// did not persist, so do not hand listeners the unpersisted in-memory
+				// entity. The order + billed cycle rows carry the charge for audit.
+				return;
 			}
 
 			/**
