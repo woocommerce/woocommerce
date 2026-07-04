@@ -214,6 +214,49 @@ module.exports = {
 				paths: restrictedImports,
 			},
 		],
+		'@typescript-eslint/no-restricted-imports': [
+			'error',
+			{
+				paths: [
+					{
+						name: 'react',
+						importNames: [
+							// Hooks
+							'useState',
+							'useEffect',
+							'useContext',
+							'useReducer',
+							'useCallback',
+							'useMemo',
+							'useRef',
+							'useImperativeHandle',
+							'useLayoutEffect',
+							'useDebugValue',
+							'useDeferredValue',
+							'useTransition',
+							'useId',
+							'useSyncExternalStore',
+							'startTransition',
+							// Components & Utilities
+							'Fragment',
+							'createElement',
+							'cloneElement',
+							'isValidElement',
+							'Children',
+							'Component',
+							'PureComponent',
+							'memo',
+							'forwardRef',
+							'lazy',
+							'Suspense',
+						],
+						message:
+							'Please import named React APIs through `@wordpress/element` instead of `react`. Only the default `React` import is allowed directly from `react`.',
+						allowTypeImports: true,
+					},
+				],
+			},
+		],
 		camelcase: [
 			'error',
 			{
