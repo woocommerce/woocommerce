@@ -10,7 +10,7 @@ import { WPDataRegistry } from '@wordpress/data/build-types/registry';
 /**
  * Internal dependencies
  */
-import { useSchemaParser } from '../use-schema-parser';
+import { useSchemaParser, type DocumentObject } from '../use-schema-parser';
 import { CheckoutState } from '../../../data/checkout/default-state';
 import { PaymentState } from '../../../data/payment/default-state';
 import { CartState } from '../../../data/cart/default-state';
@@ -35,6 +35,16 @@ type DeepPartial< T > = T extends object
 			[ P in keyof T ]?: DeepPartial< T[ P ] >;
 	  }
 	: T;
+
+const getCurrentData = < T extends FormType | 'global' >( result: {
+	current: { data: DocumentObject< T > | null };
+} ): DocumentObject< T > => {
+	const { data } = result.current;
+	if ( data === null ) {
+		throw new Error( 'Expected schema parser data to be available.' );
+	}
+	return data;
+};
 
 describe( 'useSchemaParser', () => {
 	let registry: WPDataRegistry;
@@ -242,7 +252,7 @@ describe( 'useSchemaParser', () => {
 				}
 			);
 
-			const { cart } = result.current.data!;
+			const { cart } = getCurrentData( result );
 			expect( cart ).toHaveProperty( 'coupons' );
 			expect( cart.coupons ).toEqual( [ 'SAVE10', 'FREESHIP' ] );
 
@@ -291,7 +301,7 @@ describe( 'useSchemaParser', () => {
 				}
 			);
 
-			const { checkout } = result.current.data!;
+			const { checkout } = getCurrentData( result );
 
 			expect( checkout ).toHaveProperty( 'create_account' );
 			expect( checkout.create_account ).toBe( true );
@@ -319,7 +329,7 @@ describe( 'useSchemaParser', () => {
 				}
 			);
 
-			const { customer } = result.current.data!;
+			const { customer } = getCurrentData( result );
 
 			expect( customer ).toHaveProperty( 'id' );
 			expect( customer.id ).toBe( 123 );
@@ -355,7 +365,7 @@ describe( 'useSchemaParser', () => {
 				}
 			);
 
-			const { customer } = result.current.data!;
+			const { customer } = getCurrentData( result );
 			expect( customer.address ).toEqual( mockCartData.billingAddress );
 		} );
 
@@ -368,7 +378,7 @@ describe( 'useSchemaParser', () => {
 				}
 			);
 
-			const { customer } = result.current.data!;
+			const { customer } = getCurrentData( result );
 			expect( customer.address ).toEqual( mockCartData.shippingAddress );
 		} );
 
@@ -381,7 +391,7 @@ describe( 'useSchemaParser', () => {
 				}
 			);
 
-			const { customer } = result.current.data!;
+			const { customer } = getCurrentData( result );
 			expect( customer.address ).toBeUndefined();
 		} );
 
@@ -394,7 +404,7 @@ describe( 'useSchemaParser', () => {
 				}
 			);
 
-			const { customer } = result.current.data!;
+			const { customer } = getCurrentData( result );
 			expect( customer.address ).toBeUndefined();
 		} );
 
@@ -407,7 +417,7 @@ describe( 'useSchemaParser', () => {
 				}
 			);
 
-			const { customer } = result.current.data!;
+			const { customer } = getCurrentData( result );
 			expect( customer.address ).toBeUndefined();
 		} );
 	} );
@@ -422,7 +432,7 @@ describe( 'useSchemaParser', () => {
 				}
 			);
 
-			const { customer } = result.current.data!;
+			const { customer } = getCurrentData( result );
 			expect( customer.additional_fields ).toEqual( {
 				'namespace/contact_field': 'value1',
 			} );
@@ -437,7 +447,7 @@ describe( 'useSchemaParser', () => {
 				}
 			);
 
-			const { checkout } = result.current.data!;
+			const { checkout } = getCurrentData( result );
 			expect( checkout.additional_fields ).toEqual( {
 				'namespace/order_field': 'value2',
 			} );

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
+use Automattic\WooCommerce\Blocks\Utils\Utils;
 
 /**
  * AssetsController class.
@@ -37,7 +38,6 @@ final class AssetsController {
 	protected function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
 		add_action( 'init', array( $this, 'register_assets' ) );
 		add_action( 'init', array( $this, 'register_script_modules' ) );
-		add_action( 'enqueue_block_editor_assets', array( $this, 'register_and_enqueue_site_editor_assets' ) );
 		add_filter( 'wp_resource_hints', array( $this, 'add_resource_hints' ), 10, 2 );
 		add_action( 'body_class', array( $this, 'add_theme_body_class' ), 1 );
 		add_action( 'admin_body_class', array( $this, 'add_theme_body_class' ), 1 );
@@ -104,17 +104,6 @@ final class AssetsController {
 			array()
 		);
 
-		// Customer Effort Score.
-		$this->api->register_script(
-			'wc-customer-effort-score',
-			'assets/client/admin/customer-effort-score/index.js',
-			array( 'wp-data', 'wp-data-controls', 'wc-store-data' )
-		);
-		$this->api->register_style(
-			'wc-customer-effort-score',
-			'assets/client/admin/customer-effort-score/style.css',
-		);
-
 		wp_add_inline_script(
 			'wc-blocks-middleware',
 			"
@@ -125,15 +114,6 @@ final class AssetsController {
 			",
 			'before'
 		);
-	}
-
-	/**
-	 * Register and enqueue assets for exclusive usage within the Site Editor.
-	 */
-	public function register_and_enqueue_site_editor_assets() {
-		// Customer Effort Score.
-		wp_enqueue_script( 'wc-customer-effort-score' );
-		wp_enqueue_style( 'wc-customer-effort-score' );
 	}
 
 	/**
@@ -328,7 +308,12 @@ final class AssetsController {
 
 		$src = array();
 		foreach ( $found_dependencies as $handle => $unused ) {
-			$src[] = esc_url( add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, $this->get_absolute_url( $wp_scripts->registered[ $handle ]->src ) ) );
+			$script_src = $wp_scripts->registered[ $handle ]->src;
+			if ( ! is_string( $script_src ) ) {
+				// Skip srcless dependencies (e.g. meta-packages), which have no URL to hint.
+				continue;
+			}
+			$src[] = esc_url( add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, Utils::get_absolute_script_url( $script_src ) ) );
 		}
 		return $src;
 	}
@@ -355,20 +340,6 @@ final class AssetsController {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Returns an absolute url to relative links for WordPress core scripts.
-	 *
-	 * @param string $src Original src that can be relative.
-	 * @return string Correct full path string.
-	 */
-	private function get_absolute_url( $src ) {
-		$wp_scripts = wp_scripts();
-		if ( ! preg_match( '|^(https?:)?//|', $src ) && ! ( $wp_scripts->content_url && 0 === strpos( $src, $wp_scripts->content_url ) ) ) {
-			$src = $wp_scripts->base_url . $src;
-		}
-		return $src;
 	}
 
 	/**

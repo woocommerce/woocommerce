@@ -10,6 +10,7 @@ on:
       - 'release/*'
 
 env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
   GIT_COMMITTER_NAME: 'woocommercebot'
   GIT_COMMITTER_EMAIL: 'woocommercebot@users.noreply.github.com'
   GIT_AUTHOR_NAME: 'woocommercebot'

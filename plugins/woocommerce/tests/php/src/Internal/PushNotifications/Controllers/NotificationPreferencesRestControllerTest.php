@@ -43,7 +43,6 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->set_up_features_controller_mock();
 		$this->reset_push_notifications_cache();
 
 		$this->user_id       = $this->factory->user->create( array( 'role' => 'shop_manager' ) );

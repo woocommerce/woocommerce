@@ -129,6 +129,117 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox ignored package fields do not invalidate cached shipping rates
+	 *
+	 * @dataProvider provide_ignored_package_hash_fields
+	 *
+	 * @param string $field Package field to mutate.
+	 * @param mixed  $value Mutated field value.
+	 */
+	public function test_calculate_shipping_for_package_ignores_non_rate_fields_in_package_hash( string $field, $value ) {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+		WC()->session->__unset( 'shipping_for_package_0' );
+
+		$filter_calls = 0;
+		$filter       = $this->get_package_rates_counter( $filter_calls );
+		$package      = $this->get_package_hash_test_package();
+
+		add_filter( 'woocommerce_package_rates', $filter, 10 );
+
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$package[ $field ] = $value;
+
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$this->assertSame( 1, $filter_calls );
+
+		remove_filter( 'woocommerce_package_rates', $filter, 10 );
+	}
+
+	/**
+	 * @testdox material package fields invalidate cached shipping rates
+	 *
+	 * @dataProvider provide_material_package_hash_fields
+	 *
+	 * @param callable $mutate_package Package mutation callback.
+	 */
+	public function test_calculate_shipping_for_package_invalidates_cache_for_material_package_changes( callable $mutate_package ) {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+		WC()->session->__unset( 'shipping_for_package_0' );
+
+		$filter_calls = 0;
+		$filter       = $this->get_package_rates_counter( $filter_calls );
+		$package      = $this->get_package_hash_test_package();
+
+		add_filter( 'woocommerce_package_rates', $filter, 10 );
+
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$mutate_package( $package );
+
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$this->assertSame( 2, $filter_calls );
+
+		remove_filter( 'woocommerce_package_rates', $filter, 10 );
+	}
+
+	/**
+	 * @testdox unknown package fields invalidate cached shipping rates by default
+	 */
+	public function test_calculate_shipping_for_package_invalidates_cache_for_unknown_package_fields_by_default() {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+		WC()->session->__unset( 'shipping_for_package_0' );
+
+		$filter_calls = 0;
+		$filter       = $this->get_package_rates_counter( $filter_calls );
+		$package      = $this->get_package_hash_test_package();
+
+		add_filter( 'woocommerce_package_rates', $filter, 10 );
+
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$package['custom_extension_key'] = 'changed';
+
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$this->assertSame( 2, $filter_calls );
+
+		remove_filter( 'woocommerce_package_rates', $filter, 10 );
+	}
+
+	/**
+	 * @testdox extensions can ignore package fields for the shipping-rate cache hash
+	 */
+	public function test_calculate_shipping_for_package_allows_extensions_to_ignore_package_hash_fields() {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+		WC()->session->__unset( 'shipping_for_package_0' );
+
+		$filter_calls          = 0;
+		$filter                = $this->get_package_rates_counter( $filter_calls );
+		$ignored_fields_filter = function ( array $ignored_fields ): array {
+			$ignored_fields[] = 'custom_extension_key';
+			return $ignored_fields;
+		};
+		$package               = $this->get_package_hash_test_package();
+
+		add_filter( 'woocommerce_package_rates', $filter, 10 );
+		add_filter( 'woocommerce_shipping_package_hash_ignored_fields', $ignored_fields_filter );
+
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$package['custom_extension_key'] = 'changed';
+
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$this->assertSame( 1, $filter_calls );
+
+		remove_filter( 'woocommerce_shipping_package_hash_ignored_fields', $ignored_fields_filter );
+		remove_filter( 'woocommerce_package_rates', $filter, 10 );
+	}
+
+	/**
 	 * Data provider for test_package_rates_filter_error_handling.
 	 *
 	 * @return array[]
@@ -167,6 +278,92 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 				},
 				'Filter handles arithmetic operations on rate costs safely',
 			),
+		);
+	}
+
+	/**
+	 * Data provider for ignored package hash fields.
+	 *
+	 * @return array[]
+	 */
+	public function provide_ignored_package_hash_fields(): array {
+		return array(
+			'subtotal'      => array( 'subtotal', 20 ),
+			'total'         => array( 'total', 20 ),
+			'package_id'    => array( 'package_id', 'package-1-changed' ),
+			'package_name'  => array( 'package_name', 'Package 1 Changed' ),
+			'rates'         => array( 'rates', array( 'prefilled_rate' => new WC_Shipping_Rate( 'prefilled_rate', 'Prefilled Rate', '7.00' ) ) ),
+			'package_index' => array( 'package_index', 2 ),
+		);
+	}
+
+	/**
+	 * Data provider for material package hash fields.
+	 *
+	 * @return array[]
+	 */
+	public function provide_material_package_hash_fields(): array {
+		return array(
+			'destination postcode' => array(
+				function ( array &$package ): void {
+					$package['destination']['postcode'] = '11111';
+				},
+			),
+			'contents cost'        => array(
+				function ( array &$package ): void {
+					$package['contents_cost'] = 20;
+				},
+			),
+			'cart contents'        => array(
+				function ( array &$package ): void {
+					$package['contents']['test_item']['quantity'] = 2;
+				},
+			),
+		);
+	}
+
+	/**
+	 * Get a package rates filter that counts recalculations.
+	 *
+	 * @param int $filter_calls Filter call count.
+	 * @return callable
+	 */
+	private function get_package_rates_counter( int &$filter_calls ): callable {
+		return function ( $rates ) use ( &$filter_calls ) {
+			++$filter_calls;
+			return $rates;
+		};
+	}
+
+	/**
+	 * Get a package for shipping hash tests.
+	 *
+	 * @return array
+	 */
+	private function get_package_hash_test_package(): array {
+		return array(
+			'contents'      => array(
+				'test_item' => array(
+					'quantity'          => 1,
+					'line_subtotal'     => 10,
+					'line_subtotal_tax' => 0,
+					'line_total'        => 10,
+					'line_tax'          => 0,
+					'data'              => new WC_Product_Simple(),
+				),
+			),
+			'contents_cost' => 10,
+			'destination'   => array(
+				'country'  => 'US',
+				'state'    => 'CA',
+				'postcode' => '00000',
+			),
+			'package_id'    => 'package-1',
+			'package_name'  => 'Package 1',
+			'package_index' => 1,
+			'subtotal'      => 10,
+			'total'         => 10,
+			'rates'         => array(),
 		);
 	}
 

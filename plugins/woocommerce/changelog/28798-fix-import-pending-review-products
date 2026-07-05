@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve the "Pending review" product status when exporting and re-importing products via CSV, instead of importing them as drafts.

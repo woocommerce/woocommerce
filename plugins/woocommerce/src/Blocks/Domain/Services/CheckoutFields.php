@@ -189,6 +189,11 @@ class CheckoutFields {
 	 * @return WP_Error|void True if the field was registered, a WP_Error otherwise.
 	 */
 	public function register_checkout_field( $options ) {
+		// Warn when fields are registered before `after_setup_theme`. Registering that early can cause problems, such as loading translations before they're ready.
+		if ( ! did_action( 'after_setup_theme' ) && ! doing_action( 'after_setup_theme' ) ) {
+			_doing_it_wrong( 'woocommerce_register_additional_checkout_field', 'Additional checkout fields should be registered on the woocommerce_init action or later.', '11.0.0' );
+		}
+
 		// Check the options and show warnings if they're not supplied. Return early if an error that would prevent registration is encountered.
 		if ( false === $this->validate_options( $options ) ) {
 			return;
