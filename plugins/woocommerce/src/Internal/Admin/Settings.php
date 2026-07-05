@@ -92,7 +92,8 @@ class Settings {
 		if ( ! is_array( $statuses ) ) {
 			return $fallback;
 		}
-		return array_values( array_intersect( $statuses, array_keys( $all_statuses ) ) );
+		$sanitized = array_values( array_intersect( $statuses, array_keys( $all_statuses ) ) );
+		return empty( $sanitized ) ? $fallback : $sanitized;
 	}
 
 	/**
@@ -341,6 +342,7 @@ class Settings {
 		 * Filters the default set of order statuses excluded from Analytics report totals.
 		 *
 		 * @since 11.0.0
+		 * @param array $default_statuses Default excluded order statuses.
 		 */
 		$default_excluded_statuses = apply_filters( 'woocommerce_analytics_settings_default_excluded_order_statuses', array( 'pending', 'cancelled', 'failed' ) );
 		$default_excluded_statuses = $this->sanitize_default_order_statuses( $default_excluded_statuses, $all_statuses, array( 'pending', 'cancelled', 'failed' ) );
@@ -349,6 +351,7 @@ class Settings {
 		 * Filters the default set of order statuses considered actionable in Analytics.
 		 *
 		 * @since 11.0.0
+		 * @param array $default_statuses Default actionable order statuses.
 		 */
 		$default_actionable_statuses = apply_filters( 'woocommerce_analytics_settings_default_actionable_order_statuses', array( 'processing', 'on-hold' ) );
 		$default_actionable_statuses = $this->sanitize_default_order_statuses( $default_actionable_statuses, $all_statuses, array( 'processing', 'on-hold' ) );

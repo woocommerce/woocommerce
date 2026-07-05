@@ -117,6 +117,30 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A default order statuses filter returning only unknown slugs falls back to the built-in default.
+	 */
+	public function test_default_order_statuses_filter_all_unknown_falls_back(): void {
+		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', array( $this, 'return_only_unknown_statuses' ) );
+		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_excluded_order_statuses', array( $this, 'return_only_unknown_statuses' ) );
+
+		$settings = $this->sut->add_settings( array() );
+		$setting  = $this->find_setting( $settings, 'woocommerce_excluded_report_order_statuses' );
+
+		$this->assertSame( array( 'pending', 'cancelled', 'failed' ), $setting['default'] );
+	}
+
+	/**
+	 * Filter callback that returns only unregistered status slugs.
+	 *
+	 * @param array $statuses Default statuses.
+	 * @return array
+	 */
+	public function return_only_unknown_statuses( $statuses ) {
+		unset( $statuses );
+		return array( 'not-a-real-status', 'also-fake' );
+	}
+
+	/**
 	 * @testdox A default order statuses filter returning a non-array falls back to the built-in default.
 	 */
 	public function test_default_order_statuses_filter_invalid_type_falls_back(): void {
