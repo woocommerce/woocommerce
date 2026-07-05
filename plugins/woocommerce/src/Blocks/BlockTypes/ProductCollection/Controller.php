@@ -220,10 +220,7 @@ class Controller extends AbstractBlock {
 	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
 
-		$per_page = get_option( 'woocommerce_catalog_products_per_page' );
-		if ( ! $per_page ) {
-			$per_page = wc_get_default_products_per_row() * wc_get_default_product_rows_per_page();
-		}
+		$per_page = WC()->query->get_catalog_products_per_page();
 		// The `loop_shop_per_page` filter can be found in WC_Query::product_query().
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		$this->asset_data_registry->add( 'loopShopPerPage', apply_filters( 'loop_shop_per_page', $per_page ) );
@@ -256,10 +253,21 @@ class Controller extends AbstractBlock {
 			'options',
 			'woocommerce_catalog_products_per_page',
 			array(
-				'type'         => 'integer',
-				'description'  => __( 'Number of products to display per page in the catalog.', 'woocommerce' ),
-				'show_in_rest' => true,
-				'default'      => 0,
+				'type'              => 'integer',
+				'description'       => __( 'Number of products to display per page in the catalog.', 'woocommerce' ),
+				'show_in_rest'      => array(
+					'name'   => 'woocommerce_catalog_products_per_page',
+					'schema' => array(
+						'type'    => 'integer',
+						'minimum' => 0,
+						'maximum' => 100,
+					),
+				),
+				'sanitize_callback' => function ( $value ) {
+					$value = (int) $value;
+					return max( 0, min( 100, $value ) );
+				},
+				'default'           => 0,
 			)
 		);
 	}

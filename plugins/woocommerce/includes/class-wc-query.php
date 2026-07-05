@@ -544,6 +544,19 @@ class WC_Query {
 	}
 
 	/**
+	 * Get the number of products to display per page in the catalog.
+	 *
+	 * @return int Number of products to display.
+	 */
+	public function get_catalog_products_per_page() {
+		$per_page = get_option( 'woocommerce_catalog_products_per_page' );
+		if ( ! $per_page ) {
+			$per_page = wc_get_default_products_per_row() * wc_get_default_product_rows_per_page();
+		}
+		return (int) $per_page;
+	}
+
+	/**
 	 * Query the products, applying sorting/ordering etc.
 	 * This applies to the main WordPress loop.
 	 *
@@ -567,10 +580,7 @@ class WC_Query {
 		$q->set( 'post__in', array_unique( (array) apply_filters( 'loop_shop_post_in', array() ) ) );
 
 		// Work out how many products to query.
-		$per_page = get_option( 'woocommerce_catalog_products_per_page' );
-		if ( ! $per_page ) {
-			$per_page = wc_get_default_products_per_row() * wc_get_default_product_rows_per_page();
-		}
+		$per_page = $this->get_catalog_products_per_page();
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', $per_page ) );
 
