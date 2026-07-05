@@ -230,15 +230,15 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 			$data['sku']              = $product ? $product->get_sku() : null;
 			$data['global_unique_id'] = $product ? $product->get_global_unique_id() : null;
-			$data['price']       = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
+			$data['price']            = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
 
-				if ( $item instanceof WC_Order_Item_Product ) {
-					$regular         = $item->get_regular_price();
-					$sale            = $item->get_sale_price();
-					$data['on_sale'] = ( '' !== $sale && $sale !== $regular );
-				}
+			if ( $item instanceof WC_Order_Item_Product ) {
+				$regular         = isset( $data['regular_price'] ) ? $data['regular_price'] : '';
+				$sale            = isset( $data['sale_price'] ) ? $data['sale_price'] : '';
+				$data['on_sale'] = ( '' !== $sale && $sale !== $regular );
+			}
 
-				$image_id = $product ? $product->get_image_id() : 0;
+			$image_id = $product ? $product->get_image_id() : 0;
 
 			$data['image'] = array(
 				'id'  => $image_id,
@@ -328,13 +328,11 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	private function merge_meta_item_with_formatted_meta_display_attributes( $meta_item, $formatted_meta_data ) {
 		$result = array(
-			'id'                            => $meta_item->id,
-			'key'                           => $meta_item->key,
-			'value'                         => $meta_item->value,
-			'display_key'                   => $meta_item->key,
-			// Default to original key, in case a formatted key is not available.
-							'display_value' => $meta_item->value,
-		// Default to original value, in case a formatted value is not available.
+			'id'            => $meta_item->id,
+			'key'           => $meta_item->key,
+			'value'         => $meta_item->value,
+			'display_key'   => $meta_item->key,   // Default to original key, in case a formatted key is not available.
+			'display_value' => $meta_item->value, // Default to original value, in case a formatted value is not available.
 		);
 
 		if ( $meta_item->id && array_key_exists( $meta_item->id, $formatted_meta_data ) ) {
@@ -961,7 +959,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			}
 		}
 
-			$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );
+		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );
 		$this->maybe_set_item_meta_data( $item, $posted );
 
 		return $item;

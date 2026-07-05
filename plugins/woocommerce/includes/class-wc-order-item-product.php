@@ -170,6 +170,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set regular price (snapshot at order time).
 	 *
+	 * @since 11.0.0
 	 * @param string $value Regular price.
 	 */
 	public function set_regular_price( $value ) {
@@ -179,6 +180,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set sale price (snapshot at order time).
 	 *
+	 * @since 11.0.0
 	 * @param string $value Sale price.
 	 */
 	public function set_sale_price( $value ) {
@@ -287,6 +289,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Snapshot the product's regular and sale price at order time.
 	 *
+	 * @since 11.0.0
 	 * @param WC_Product $product Product instance.
 	 * @return void
 	 */
@@ -408,6 +411,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get regular price (snapshot at order time).
 	 *
+	 * @since 11.0.0
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
@@ -418,6 +422,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get sale price (snapshot at order time).
 	 *
+	 * @since 11.0.0
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
