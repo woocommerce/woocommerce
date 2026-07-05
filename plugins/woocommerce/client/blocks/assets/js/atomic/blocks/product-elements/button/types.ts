@@ -22,6 +22,7 @@ export interface BlockAttributes {
 	isAdmin?: boolean | undefined;
 	collection?: string | undefined;
 	isDescendentOfQueryLoop?: boolean | undefined;
+	isDescendentOfSingleProductBlock?: boolean | undefined;
 }
 
 export interface AddToCartProductDetails {
