@@ -790,7 +790,7 @@ class WC_Brands {
 			'widgets/brand-thumbnails-description.php',
 			array(
 				'brands'  => $brands,
-				'columns' => $args['columns'],
+				'columns' => max( 1, absint( $args['columns'] ) ),
 			),
 			'woocommerce',
 			WC()->plugin_path() . '/templates/brands/'
