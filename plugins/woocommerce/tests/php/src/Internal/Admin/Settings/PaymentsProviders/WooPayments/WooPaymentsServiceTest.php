@@ -7230,6 +7230,157 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test onboarding_test_account_init completes the step when the error is non-recoverable.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_test_account_init_completes_step_on_non_recoverable_error() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the NOX profile.
+		$step_id                 = WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT;
+		$stored_profile          = array();
+		$updated_stored_profiles = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( &$updated_stored_profiles, $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return ! empty( $updated_stored_profiles ) ? end( $updated_stored_profiles ) : $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( &$updated_stored_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profiles[] = $value;
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Arrange the REST API request to fail with a non-recoverable Stripe error type.
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) {
+						// Avoid parameter not used PHPCS errors.
+						unset( $params );
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							return new WP_Error(
+								'bad_request',
+								"The statement descriptor matches a common term or website URL, and can't be used.",
+								array( 'type' => 'invalid_request_error' )
+							);
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Act.
+		$result = $this->sut->onboarding_test_account_init( $location );
+
+		// Assert - the step is completed instead of throwing, so onboarding can proceed.
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'success', $result );
+		$this->assertTrue( $result['success'] );
+
+		$this->assertNotEmpty( $updated_stored_profiles );
+		$final_profile = end( $updated_stored_profiles );
+		$this->assertArrayHasKey(
+			WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+			$final_profile['onboarding'][ $location ]['steps'][ $step_id ]['statuses']
+		);
+	}
+
+	/**
+	 * Test onboarding_test_account_init still throws for a recoverable (non-matching) error type.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_test_account_init_throws_on_recoverable_error_type() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the NOX profile.
+		$stored_profile = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) {
+					// Avoid parameter not used PHPCS errors.
+					unset( $option_name, $value );
+					return true;
+				},
+			)
+		);
+
+		// Arrange the REST API request to fail with an error type that is not non-recoverable.
+		$expected_error = array(
+			'code'    => 'bad_request',
+			'message' => 'Your card was declined.',
+		);
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( $expected_error ) {
+						// Avoid parameter not used PHPCS errors.
+						unset( $params );
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							return new WP_Error(
+								$expected_error['code'],
+								$expected_error['message'],
+								array( 'type' => 'card_error' )
+							);
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Assert.
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( $expected_error['message'] );
+
+		// Act.
+		$this->sut->onboarding_test_account_init( $location );
+	}
+
+	/**
 	 * Test that error sanitization moves extra keys to context when storing a step error.
 	 *
 	 * When an error has keys beyond 'code', 'message', and 'context', those extra keys

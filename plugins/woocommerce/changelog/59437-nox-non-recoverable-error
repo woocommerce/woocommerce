@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Automatically advance the NOX test-account onboarding step when Stripe returns a non-recoverable error

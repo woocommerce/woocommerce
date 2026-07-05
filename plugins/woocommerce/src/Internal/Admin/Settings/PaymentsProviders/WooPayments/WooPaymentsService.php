@@ -67,6 +67,15 @@ class WooPaymentsService {
 	 */
 	const ONBOARDING_STEP_STATUS_BLOCKED = 'blocked';
 
+	/**
+	 * Stripe error types that are non-recoverable for the test account step.
+	 *
+	 * These are errors the merchant has no way to fix on their end (e.g. a validation error
+	 * caused by data we generate automatically), so we shouldn't trap them in a retry loop.
+	 * Instead, we complete the step and let onboarding proceed.
+	 */
+	const NON_RECOVERABLE_TEST_ACCOUNT_ERROR_TYPES = array( 'invalid_request_error' );
+
 	const ACTION_TYPE_REST     = 'REST';
 	const ACTION_TYPE_REDIRECT = 'REDIRECT';
 
@@ -1036,6 +1045,23 @@ class WooPaymentsService {
 		$this->clear_onboarding_lock();
 
 		if ( is_wp_error( $response ) ) {
+			// If the merchant can't do anything to fix this on their end, don't trap them
+			// in a retry loop. Complete the step and let onboarding proceed instead.
+			// Use the internal record path (not mark_onboarding_step_completed()) because the
+			// onboarding lock was already released above; re-checking it here could spuriously
+			// fail if a concurrent request has since acquired it. See record_onboarding_step_completed().
+			if ( $this->is_test_account_error_non_recoverable( $response->get_error_data() ) ) {
+				$this->record_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location, false, $source );
+
+				$this->record_event(
+					self::EVENT_PREFIX . 'onboarding_test_account_init_non_recoverable_error',
+					$location,
+					array( 'source' => $source )
+				);
+
+				return array( 'success' => true );
+			}
+
 			// Mark the onboarding step as failed.
 			$this->mark_onboarding_step_failed(
 				self::ONBOARDING_STEP_TEST_ACCOUNT,
@@ -1107,6 +1133,30 @@ class WooPaymentsService {
 		);
 
 		return $response;
+	}
+
+	/**
+	 * Determine if a test account initialization error is non-recoverable for the merchant.
+	 *
+	 * We look for a Stripe error `type` in a few plausible locations of the error data, since
+	 * the shape depends on how the WooPayments extension forwards it to us.
+	 *
+	 * @param mixed $error_data The error data returned alongside the WP_Error.
+	 *
+	 * @return bool
+	 */
+	private function is_test_account_error_non_recoverable( $error_data ): bool {
+		if ( ! is_array( $error_data ) ) {
+			return false;
+		}
+
+		$error_type = $error_data['type']
+			?? $error_data['error']['type']
+			?? $error_data['data']['type']
+			?? $error_data['data']['error']['type']
+			?? null;
+
+		return is_string( $error_type ) && in_array( $error_type, self::NON_RECOVERABLE_TEST_ACCOUNT_ERROR_TYPES, true );
 	}
 
 	/**
