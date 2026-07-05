@@ -92,7 +92,7 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 	 *
 	 * @param string $route  REST route to call, e.g. '/wc-analytics/orders'.
 	 * @param array  $params Query params for the sub-request.
-	 * @return int
+	 * @return int|null Null when the sub-request failed, so callers can tell "unknown" apart from a real zero count.
 	 */
 	private function get_count_via( $route, $params ) {
 		$sub_request = new \WP_REST_Request( 'GET', $route );
@@ -107,7 +107,7 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 				sprintf( 'Activity Panel counts sub-request to %s failed.', $route ),
 				array( 'source' => 'activity-panel-counts' )
 			);
-			return 0;
+			return null;
 		}
 
 		$headers = $response->get_headers();
@@ -176,22 +176,25 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'orders_to_fulfill_count'     => array(
-					'description' => __( 'Number of orders to fulfill.', 'woocommerce' ),
+					'description' => __( 'Number of orders to fulfill. Null if the underlying sub-request failed.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
+					'nullable'    => true,
 				),
 				'reviews_to_moderate_count'   => array(
-					'description' => __( 'Number of reviews awaiting moderation.', 'woocommerce' ),
+					'description' => __( 'Number of reviews awaiting moderation. Null if the underlying sub-request failed.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
+					'nullable'    => true,
 				),
 				'products_low_in_stock_count' => array(
-					'description' => __( 'Number of products low in stock.', 'woocommerce' ),
+					'description' => __( 'Number of products low in stock. Null if the underlying sub-request failed.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
+					'nullable'    => true,
 				),
 			),
 		);
