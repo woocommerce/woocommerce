@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Introduce two new PHP filters, woocommerce_analytics_settings_default_excluded_order_statuses and woocommerce_analytics_settings_default_actionable_order_statuses, that allow plugins to extend the default order statuses pre-selected in the Analytics Settings screen.
