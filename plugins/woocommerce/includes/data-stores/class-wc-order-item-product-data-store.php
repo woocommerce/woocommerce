@@ -22,7 +22,7 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_
 	 * @since 3.0.0
 	 * @var array
 	 */
-	protected $internal_meta_keys = array( '_product_id', '_variation_id', '_qty', '_tax_class', '_line_subtotal', '_line_subtotal_tax', '_line_total', '_line_tax', '_line_tax_data' );
+	protected $internal_meta_keys = array( '_product_id', '_variation_id', '_qty', '_tax_class', '_line_subtotal', '_line_subtotal_tax', '_line_total', '_line_tax', '_line_tax_data', '_line_regular_price', '_line_sale_price' );
 
 	/**
 	 * Read/populate data properties specific to this order item.
@@ -35,13 +35,15 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_
 		$id = $item->get_id();
 		$item->set_props(
 			array(
-				'product_id'   => get_metadata( 'order_item', $id, '_product_id', true ),
-				'variation_id' => get_metadata( 'order_item', $id, '_variation_id', true ),
-				'quantity'     => get_metadata( 'order_item', $id, '_qty', true ),
-				'tax_class'    => get_metadata( 'order_item', $id, '_tax_class', true ),
-				'subtotal'     => get_metadata( 'order_item', $id, '_line_subtotal', true ),
-				'total'        => get_metadata( 'order_item', $id, '_line_total', true ),
-				'taxes'        => get_metadata( 'order_item', $id, '_line_tax_data', true ),
+				'product_id'    => get_metadata( 'order_item', $id, '_product_id', true ),
+				'variation_id'  => get_metadata( 'order_item', $id, '_variation_id', true ),
+				'quantity'      => get_metadata( 'order_item', $id, '_qty', true ),
+				'tax_class'     => get_metadata( 'order_item', $id, '_tax_class', true ),
+				'subtotal'      => get_metadata( 'order_item', $id, '_line_subtotal', true ),
+				'total'         => get_metadata( 'order_item', $id, '_line_total', true ),
+				'taxes'         => get_metadata( 'order_item', $id, '_line_tax_data', true ),
+				'regular_price' => get_metadata( 'order_item', $id, '_line_regular_price', true ),
+				'sale_price'    => get_metadata( 'order_item', $id, '_line_sale_price', true ),
 			)
 		);
 		$item->set_object_read( true );
@@ -58,15 +60,17 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_
 		$id                = $item->get_id();
 		$changes           = $item->get_changes();
 		$meta_key_to_props = array(
-			'_product_id'        => 'product_id',
-			'_variation_id'      => 'variation_id',
-			'_qty'               => 'quantity',
-			'_tax_class'         => 'tax_class',
-			'_line_subtotal'     => 'subtotal',
-			'_line_subtotal_tax' => 'subtotal_tax',
-			'_line_total'        => 'total',
-			'_line_tax'          => 'total_tax',
-			'_line_tax_data'     => 'taxes',
+			'_product_id'         => 'product_id',
+			'_variation_id'       => 'variation_id',
+			'_qty'                => 'quantity',
+			'_tax_class'          => 'tax_class',
+			'_line_subtotal'      => 'subtotal',
+			'_line_subtotal_tax'  => 'subtotal_tax',
+			'_line_total'         => 'total',
+			'_line_tax'           => 'total_tax',
+			'_line_tax_data'      => 'taxes',
+			'_line_regular_price' => 'regular_price',
+			'_line_sale_price'    => 'sale_price',
 		);
 		$props_to_update   = $this->get_props_to_update( $item, $meta_key_to_props, 'order_item' );
 

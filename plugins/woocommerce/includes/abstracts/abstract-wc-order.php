@@ -1800,6 +1800,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$item = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Order_Item_Product::class );
 		$item->set_props( $args );
+		if ( $product ) {
+			$item->set_product_price_snapshot( $product );
+		}
 		$item->set_backorder_meta();
 		$item->set_order_id( $this->get_id() );
 		$item->save();

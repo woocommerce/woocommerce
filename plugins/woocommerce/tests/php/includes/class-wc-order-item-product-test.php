@@ -622,4 +622,50 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		// Clean up order.
 		$order->delete( true );
 	}
+
+	/**
+	 * Test regular and sale price snapshot at order item creation time.
+	 */
+	public function test_product_price_snapshot_is_persisted_and_not_affected_by_later_product_changes() {
+		// Arrange: set regular and sale prices on the product.
+		$this->product->set_regular_price( '20.00' );
+		$this->product->set_sale_price( '15.00' );
+		$this->product->save();
+
+		// Act: create a fresh order item using the snapshot helper.
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->product );
+		$item->set_quantity( 1 );
+		$item->set_order_id( $this->order->get_id() );
+		$item->set_product_price_snapshot( $this->product );
+		$item->save();
+
+		// Assert snapshot captured at set time.
+		$this->assertEquals( '20.00', $item->get_regular_price() );
+		$this->assertEquals( '15.00', $item->get_sale_price() );
+
+		// Change live product prices (simulates price change after order).
+		$this->product->set_regular_price( '25.00' );
+		$this->product->set_sale_price( '12.00' );
+		$this->product->save();
+
+		// Reload the item from DB to ensure persistence.
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+
+		// Snapshot must remain the original captured values, not the new live ones.
+		$this->assertEquals( '20.00', $reloaded->get_regular_price() );
+		$this->assertEquals( '15.00', $reloaded->get_sale_price() );
+	}
+
+	/**
+	 * Test direct getter/setter for regular and sale price.
+	 */
+	public function test_regular_and_sale_price_getters_setters() {
+		$item = new WC_Order_Item_Product();
+		$item->set_regular_price( '99.99' );
+		$item->set_sale_price( '79.99' );
+
+		$this->assertEquals( '99.99', $item->get_regular_price() );
+		$this->assertEquals( '79.99', $item->get_sale_price() );
+	}
 }

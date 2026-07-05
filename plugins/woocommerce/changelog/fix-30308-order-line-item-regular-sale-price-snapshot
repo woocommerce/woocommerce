@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add regular_price, sale_price and on_sale (snapshot at order time) to order line items in the REST API.

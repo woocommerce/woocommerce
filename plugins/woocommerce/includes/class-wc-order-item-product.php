@@ -42,18 +42,20 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @var array
 	 */
 	protected $extra_data = array(
-		'product_id'   => 0,
-		'variation_id' => 0,
-		'quantity'     => 1,
-		'tax_class'    => '',
-		'subtotal'     => 0,
-		'subtotal_tax' => 0,
-		'total'        => 0,
-		'total_tax'    => 0,
-		'taxes'        => array(
+		'product_id'    => 0,
+		'variation_id'  => 0,
+		'quantity'      => 1,
+		'tax_class'     => '',
+		'subtotal'      => 0,
+		'subtotal_tax'  => 0,
+		'total'         => 0,
+		'total_tax'     => 0,
+		'taxes'         => array(
 			'subtotal' => array(),
 			'total'    => array(),
 		),
+		'regular_price' => '',
+		'sale_price'    => '',
 	);
 
 	/*
@@ -166,6 +168,24 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
+	 * Set regular price (snapshot at order time).
+	 *
+	 * @param string $value Regular price.
+	 */
+	public function set_regular_price( $value ) {
+		$this->set_prop( 'regular_price', wc_format_decimal( $value ) );
+	}
+
+	/**
+	 * Set sale price (snapshot at order time).
+	 *
+	 * @param string $value Sale price.
+	 */
+	public function set_sale_price( $value ) {
+		$this->set_prop( 'sale_price', wc_format_decimal( $value ) );
+	}
+
+	/**
 	 * Set line taxes and totals for passed in taxes.
 	 *
 	 * @since 10.5.0 Handles legacy scalar tax values by converting to arrays.
@@ -262,6 +282,20 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		}
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
+	}
+
+	/**
+	 * Snapshot the product's regular and sale price at order time.
+	 *
+	 * @param WC_Product $product Product instance.
+	 * @return void
+	 */
+	public function set_product_price_snapshot( $product ) {
+		if ( ! ( $product instanceof \WC_Product ) ) {
+			$this->error( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
+		}
+		$this->set_regular_price( $product->get_regular_price() );
+		$this->set_sale_price( $product->get_sale_price() );
 	}
 
 	/**
@@ -369,6 +403,26 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function get_total_tax( $context = 'view' ) {
 		return $this->get_prop( 'total_tax', $context );
+	}
+
+	/**
+	 * Get regular price (snapshot at order time).
+	 *
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @return string
+	 */
+	public function get_regular_price( $context = 'view' ) {
+		return $this->get_prop( 'regular_price', $context );
+	}
+
+	/**
+	 * Get sale price (snapshot at order time).
+	 *
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @return string
+	 */
+	public function get_sale_price( $context = 'view' ) {
+		return $this->get_prop( 'sale_price', $context );
 	}
 
 	/**

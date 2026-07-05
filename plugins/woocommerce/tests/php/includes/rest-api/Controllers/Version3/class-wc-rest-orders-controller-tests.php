@@ -1023,4 +1023,65 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assert_incomplete_meta_data_handled_correctly( wc_get_order( $order->get_id() ) );
 	}
+
+	/**
+	 * @testdox Order line items expose regular_price, sale_price and on_sale as a snapshot at creation time.
+	 */
+	public function test_order_line_item_includes_regular_and_sale_price_snapshot(): void {
+		// Create a product with regular and sale price.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '20.00' );
+		$product->set_sale_price( '15.00' );
+		$product->save();
+
+		// Create order via REST with the sale-priced product.
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'     => 'pending',
+					'line_items' => array(
+						array(
+							'product_id' => $product->get_id(),
+							'quantity'   => 2,
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertNotEmpty( $data['line_items'] );
+		$line = $data['line_items'][0];
+
+		$this->assertEquals( '20.00', $line['regular_price'] );
+		$this->assertEquals( '15.00', $line['sale_price'] );
+		$this->assertTrue( $line['on_sale'] );
+
+		$order_id = $data['id'];
+
+		// Mutate the product's current prices (should not affect the persisted snapshot).
+		$product->set_sale_price( '10.00' );
+		$product->save();
+
+		// Re-fetch the order and verify snapshot is unchanged.
+		$get_req  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id );
+		$get_resp = $this->server->dispatch( $get_req );
+		$this->assertEquals( 200, $get_resp->get_status() );
+
+		$get_data = $get_resp->get_data();
+		$line2    = $get_data['line_items'][0];
+
+		$this->assertEquals( '20.00', $line2['regular_price'] );
+		$this->assertEquals( '15.00', $line2['sale_price'] );
+		$this->assertTrue( $line2['on_sale'] );
+
+		// Cleanup.
+		$product->delete( true );
+		wc_get_order( $order_id )->delete( true );
+	}
 }

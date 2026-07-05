@@ -588,6 +588,10 @@ class WC_Checkout {
 				);
 			}
 
+			if ( $product ) {
+				$item->set_product_price_snapshot( $product );
+			}
+
 			$item->set_backorder_meta();
 
 			/**
@@ -833,7 +837,8 @@ class WC_Checkout {
 							break;
 						case 'password':
 							if ( $data['createaccount'] && 'account_password' === $key ) {
-								$value = wp_slash( $value ); // Passwords are encrypted with slashes on account creation, so we need to slash here too.
+								$value = wp_slash( $value );
+								// Passwords are encrypted with slashes on account creation, so we need to slash here too.
 							}
 							break;
 						default:
