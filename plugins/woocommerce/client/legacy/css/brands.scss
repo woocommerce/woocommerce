@@ -117,8 +117,43 @@ ul.brand-thumbnails.columns-6 li {
 }
 
 /* Brand thumbnails description */
+ul.brand-thumbnails-description {
+	margin-left: 0;
+	margin-bottom: 0;
+	clear: both;
+	list-style: none;
+}
+
+ul.brand-thumbnails-description:before {
+	clear: both;
+	content: "";
+	display: table;
+}
+
+ul.brand-thumbnails-description:after {
+	clear: both;
+	content: "";
+	display: table;
+}
+
 .brand-thumbnails-description li {
+	float: left;
+	margin: 0 2% 1em 0;
+	padding: 0;
+	position: relative;
 	text-align: center;
+}
+
+.brand-thumbnails-description li.first {
+	clear: both;
+}
+
+.brand-thumbnails-description li.last {
+	margin-right: 0;
+}
+
+ul.brand-thumbnails-description.columns-1 li {
+	margin-right: 0;
 }
 
 .brand-thumbnails-description li .term-thumbnail img {
