@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use WC_Helper_Order;
 use WC_Helper_Product;
 use WC_REST_Unit_Test_Case;
+use WP_Error;
 use WP_REST_Request;
 
 /**
@@ -145,5 +146,37 @@ class ActivityPanelCountsTest extends WC_REST_Unit_Test_Case {
 			$dedicated_data['total'],
 			$counts_data['products_low_in_stock_count']
 		);
+	}
+
+	/**
+	 * Test that a failed sub-request yields null for that count, not 0, so a merchant can't
+	 * mistake "sub-request failed" for a genuine zero count.
+	 */
+	public function test_failed_sub_request_returns_null_not_zero() {
+		wp_set_current_user( $this->user );
+
+		WC_Helper_Order::create_order( 1, null, array( 'status' => OrderStatus::PROCESSING ) );
+
+		$failing_route = '/wc-analytics/products/count-low-in-stock';
+		$force_error   = function ( $result, $server, $request ) use ( $failing_route ) {
+			if ( $request->get_route() === $failing_route ) {
+				return new WP_Error( 'test_forced_failure', 'Forced failure for test.', array( 'status' => 500 ) );
+			}
+			return $result;
+		};
+
+		add_filter( 'rest_pre_dispatch', $force_error, 10, 3 );
+
+		try {
+			$request  = new WP_REST_Request( 'GET', self::ENDPOINT );
+			$response = $this->server->dispatch( $request );
+			$data     = $response->get_data();
+		} finally {
+			remove_filter( 'rest_pre_dispatch', $force_error, 10 );
+		}
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertNull( $data['products_low_in_stock_count'] );
+		$this->assertEquals( 1, $data['orders_to_fulfill_count'] );
 	}
 }

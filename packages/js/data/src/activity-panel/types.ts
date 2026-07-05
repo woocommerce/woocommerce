@@ -8,9 +8,10 @@ import {
 } from './selectors';
 
 export type ActivityPanelCounts = {
-	orders_to_fulfill_count: number;
-	reviews_to_moderate_count: number;
-	products_low_in_stock_count: number;
+	// Null when the endpoint's underlying sub-request for this count failed.
+	orders_to_fulfill_count: number | null;
+	reviews_to_moderate_count: number | null;
+	products_low_in_stock_count: number | null;
 };
 
 export type ActivityPanelState = {
