@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Increase the URL column length in wc_product_download_directories from 256 to 1000 characters to accommodate valid URLs.
