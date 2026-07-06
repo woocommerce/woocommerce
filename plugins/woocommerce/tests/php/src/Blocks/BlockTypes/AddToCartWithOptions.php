@@ -597,7 +597,8 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 	/**
 	 * Tests that a simple product seeds a cart draft (birth) with its minimum
-	 * purchase quantity, and that the form renders the shared woocommerce context.
+	 * purchase quantity, and that the surface carries the products context that
+	 * resolves the draft's product id (T12).
 	 */
 	public function test_simple_product_seeds_cart_draft() {
 		$product = new \WC_Product_Simple();
@@ -610,16 +611,18 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$this->assertNotNull( $draft, 'A draft is seeded for the simple product.' );
 		$this->assertSame( $product->get_min_purchase_quantity(), $draft['quantity'], 'The simple product draft seeds the min purchase quantity.' );
 
-		// The shared `woocommerce::{ productId }` context is rendered around the
-		// form. Build the expected attribute with the same function production
-		// uses: `wp_interactivity_data_wp_context` emits a single-quoted
-		// attribute whose JSON keeps plain structural double quotes
-		// (JSON_HEX_QUOT only escapes quotes inside string data, not the JSON
-		// delimiters).
-		$this->assertStringContainsString(
-			wp_interactivity_data_wp_context( array( 'productId' => $product_id ), 'woocommerce' ),
+		// T12: the form no longer renders a shared bare `woocommerce` context —
+		// the product identity is resolved through the `woocommerce/products`
+		// context (here rendered by the Single Product block) / global state.
+		$this->assertStringNotContainsString(
+			"data-wp-context='woocommerce::",
 			$markup,
-			'The form renders the shared woocommerce productId context.'
+			'The form no longer renders the retired bare woocommerce context (T12).'
+		);
+		$this->assertStringContainsString(
+			'woocommerce/products::',
+			$markup,
+			'The surface renders a woocommerce/products context resolving the product identity.'
 		);
 	}
 

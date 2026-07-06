@@ -2,10 +2,12 @@
 /**
  * Server render for the Gift Note Badge (Demo) block — the cartItemFilter demo.
  *
- * This block renders its own shared `woocommerce` context carrying BOTH a
- * `productId` (so the envelope has a product to scope to) AND a `cartItemFilter`
- * serialized action reference. The reference points at a PUBLIC iAPI store
- * (`wc-gift-note-demo/filter`) whose `matchByMarker` action is a pure predicate.
+ * This block renders TWO domain-scoped contexts (T12): a `woocommerce/products`
+ * context carrying the `productId` (so the envelope has a product to scope to),
+ * and a nested `woocommerce/cart` context carrying the `cartItemFilter`
+ * serialized action reference plus the marker the predicate reads. The reference
+ * points at a PUBLIC iAPI store (`wc-gift-note-demo/filter`) whose `matchByMarker`
+ * action is a pure predicate.
  *
  * When core derives `itemInContext` inside this context, the predicate REPLACES
  * the generic narrowing: it selects the note-split cart line whose note starts
@@ -36,27 +38,34 @@ if ( ! $product_id ) {
 	return '';
 }
 
-// The shared `woocommerce` context for this surface: the product to scope to
-// PLUS the serialized cartItemFilter reference. `marker` travels in the context
-// so the predicate (which receives `context`) can read it — the predicate stays
-// pure and configuration-free.
-$shared_context = wp_interactivity_data_wp_context(
+// Domain-scoped contexts (T12). The product to scope to lives in the
+// `woocommerce/products` context (the cart store resolves it via derived state —
+// `mainProductInContext`). The `cartItemFilter` reference and the marker live in
+// the `woocommerce/cart` context — the cart store's own namespace. `marker`
+// travels in the cart context so the predicate (which receives `context`) can
+// read it, staying pure and configuration-free.
+$products_context = wp_interactivity_data_wp_context(
+	array( 'productId' => $product_id ),
+	'woocommerce/products'
+);
+$cart_context     = wp_interactivity_data_wp_context(
 	array(
-		'productId'      => $product_id,
 		'cartItemFilter' => array(
 			'namespace' => 'wc-gift-note-demo/filter',
 			'action'    => 'matchByMarker',
 		),
 		'giftNoteMarker' => $note_marker,
 	),
-	'woocommerce'
+	'woocommerce/cart'
 );
 
-// IMPORTANT: `data-wp-interactive` and the shared `woocommerce::` context must
-// be on the SAME element (the interactive island root). iAPI only processes a
-// `data-wp-context` that sits on, or inside, an interactive region; a context on
-// a bare ancestor of the island is ignored, so `getContext('woocommerce')` would
-// return nothing. (T8 finding.)
+// IMPORTANT: `data-wp-interactive` and the contexts must sit on, or inside, the
+// interactive island root. iAPI ignores a `data-wp-context` on a bare ancestor of
+// the island (T8 finding). The two domain contexts go on SEPARATE elements — the
+// products context on the island root, the cart context on a nested wrapper —
+// because WordPress 6.8 does not support two `data-wp-context` namespaces on the
+// same element (WP 6.9 does). The `hasMarkedLine` getter runs in the inner span's
+// scope, which inherits BOTH contexts.
 $wrapper_attributes = get_block_wrapper_attributes(
 	array(
 		'data-wp-interactive' => 'wc-gift-note-demo/badge',
@@ -65,19 +74,21 @@ $wrapper_attributes = get_block_wrapper_attributes(
 ?>
 <div
 	<?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-	<?php echo $shared_context; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+	<?php echo $products_context; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 >
-	<span
-		class="wc-gift-note-demo__badge"
-		data-wp-bind--hidden="!state.hasMarkedLine"
-		data-testid="gift-note-badge"
-	>
-		<?php
-		printf(
-			/* translators: %s: the note marker, e.g. "VIP". */
-			esc_html__( 'This %s gift note is in your cart', 'wc-gift-note-demo' ),
-			esc_html( $note_marker )
-		);
-		?>
-	</span>
+	<div <?php echo $cart_context; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+		<span
+			class="wc-gift-note-demo__badge"
+			data-wp-bind--hidden="!state.hasMarkedLine"
+			data-testid="gift-note-badge"
+		>
+			<?php
+			printf(
+				/* translators: %s: the note marker, e.g. "VIP". */
+				esc_html__( 'This %s gift note is in your cart', 'wc-gift-note-demo' ),
+				esc_html( $note_marker )
+			);
+			?>
+		</span>
+	</div>
 </div>

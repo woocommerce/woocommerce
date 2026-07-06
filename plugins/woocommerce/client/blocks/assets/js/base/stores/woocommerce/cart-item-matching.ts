@@ -51,11 +51,11 @@ export type DraftItem = {
 
 /**
  * A serialized reference to a `cartItemFilter` predicate, as it travels in the
- * shared `woocommerce` context: `data-wp-context='woocommerce::{"cartItemFilter":
- * {"namespace":"my-plugin/x","action":"matchLine"}}'`. It is NEVER a live
- * function — context is serialized. Core resolves it against the iAPI store
- * registry at envelope-derivation time (see `resolveCartItemFilter` in
- * `cart.ts`).
+ * cart store's own context (`woocommerce/cart` — T12):
+ * `data-wp-context='woocommerce/cart::{"cartItemFilter":{"namespace":"my-plugin/x","action":"matchLine"}}'`.
+ * It is NEVER a live function — context is serialized. Core resolves it against
+ * the iAPI store registry at envelope-derivation time (see `resolveCartItemFilter`
+ * in `cart.ts`).
  *
  * `action` accepts either a plain action name (resolved against the store's
  * `actions[ name ]`, then the store root `[ name ]`) or a dotted path walked
@@ -71,7 +71,7 @@ export type CartItemFilterReference = {
 /**
  * The resolved `cartItemFilter` predicate contract. Pure and synchronous — it
  * receives a candidate cart line and the derivation context (the active draft
- * and the shared `woocommerce` context) and returns whether the line is a match.
+ * and the `woocommerce/cart` context) and returns whether the line is a match.
  * It MUST NOT mutate its arguments or perform side effects; it runs during
  * derived-state evaluation, potentially many times per render.
  *

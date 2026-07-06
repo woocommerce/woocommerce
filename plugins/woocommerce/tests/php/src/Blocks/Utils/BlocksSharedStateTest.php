@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\Utils;
 
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
+use Automattic\WooCommerce\Blocks\SharedStores\ProductsStore;
 
 /**
  * Tests for the BlocksSharedState class.
@@ -53,6 +54,24 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 		$cart_getters->setAccessible( true );
 		$cart_getters->setValue( null, false );
 
+		// Reset the products store static state so seed_context_product() can
+		// re-register its getters and re-seed cleanly (T12: the cart closure
+		// resolves the context product id through the products store).
+		$products_ref      = new \ReflectionClass( ProductsStore::class );
+		$products_defaults = array(
+			'products'                 => array(),
+			'product_variations'       => array(),
+			'loaded_variation_parents' => array(),
+			'getters_registered'       => false,
+		);
+		foreach ( $products_defaults as $name => $default ) {
+			if ( $products_ref->hasProperty( $name ) ) {
+				$prop = $products_ref->getProperty( $name );
+				$prop->setAccessible( true );
+				$prop->setValue( null, $default );
+			}
+		}
+
 		$interactivity     = wp_interactivity();
 		$interactivity_ref = new \ReflectionClass( $interactivity );
 		$config_data       = $interactivity_ref->getProperty( 'config_data' );
@@ -94,20 +113,44 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Push a shared `woocommerce` context onto the Interactivity API context
-	 * stack, so a directly-invoked derived-state closure can read it via
+	 * Push per-namespace contexts onto the Interactivity API context stack, so a
+	 * directly-invoked derived-state closure can read them via
 	 * wp_interactivity_get_context() as if it ran during directive processing.
 	 * Cleared by reset_shared_state() in setUp/tearDown.
 	 *
-	 * @param array $woocommerce_context The `woocommerce`-namespaced context.
+	 * @param array $namespaced_context Map of namespace => context array (e.g.
+	 *                                  `[ 'woocommerce/cart' => [...] ]`).
 	 * @return void
 	 */
-	private function set_interactivity_context( array $woocommerce_context ): void {
+	private function set_interactivity_context( array $namespaced_context ): void {
 		$interactivity = wp_interactivity();
 		$reflection    = new \ReflectionClass( $interactivity );
 		$stack         = $reflection->getProperty( 'context_stack' );
 		$stack->setAccessible( true );
-		$stack->setValue( $interactivity, array( array( 'woocommerce' => $woocommerce_context ) ) );
+		$stack->setValue( $interactivity, array( $namespaced_context ) );
+	}
+
+	/**
+	 * Seed the products store so its `mainProductInContext` derived state resolves
+	 * to a given product id — the cross-domain source the cart closure uses to
+	 * resolve the context product id (T12). Seeds a minimal product record and the
+	 * global `productId`, and registers the products getters.
+	 *
+	 * @param int $product_id The product id to make resolvable in context.
+	 * @return void
+	 */
+	private function seed_context_product( int $product_id ): void {
+		$reflection = new \ReflectionMethod( ProductsStore::class, 'register_getters' );
+		$reflection->setAccessible( true );
+		$reflection->invoke( null );
+
+		wp_interactivity_state(
+			'woocommerce/products',
+			array(
+				'products'  => array( $product_id => array( 'id' => $product_id ) ),
+				'productId' => $product_id,
+			)
+		);
 	}
 
 	/**
@@ -221,12 +264,16 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 			)
 		);
 
+		// Product identity is resolved through the products store's
+		// mainProductInContext derived state (T12), not a foreign context read.
+		$this->seed_context_product( 100 );
 		$this->set_interactivity_context(
 			array(
-				'productId'      => 100,
-				'cartItemFilter' => array(
-					'namespace' => 'my-plugin/x',
-					'action'    => 'matchLine',
+				'woocommerce/cart' => array(
+					'cartItemFilter' => array(
+						'namespace' => 'my-plugin/x',
+						'action'    => 'matchLine',
+					),
 				),
 			)
 		);
@@ -263,10 +310,12 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 
 		$this->set_interactivity_context(
 			array(
-				'cartItemKey'    => 'exact',
-				'cartItemFilter' => array(
-					'namespace' => 'my-plugin/x',
-					'action'    => 'matchLine',
+				'woocommerce/cart' => array(
+					'cartItemKey'    => 'exact',
+					'cartItemFilter' => array(
+						'namespace' => 'my-plugin/x',
+						'action'    => 'matchLine',
+					),
 				),
 			)
 		);
@@ -275,6 +324,55 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 
 		$this->assertIsArray( $envelope['cart'], 'A keyed surface is always exact; the filter never runs.' );
 		$this->assertSame( 'exact', $envelope['cart']['key'] );
+		$this->assertTrue( $envelope['isInCart'] );
+	}
+
+	/**
+	 * @testdox itemInContext resolves a cart row's line server-side from the data-wp-each item context (cartItem.key), giving rows SSR envelope parity without a client key bridge.
+	 *
+	 * Domain-scoped contexts (T12): a `data-wp-each--cart-item` directive keys the
+	 * per-row item context under the `woocommerce/cart` namespace as `cartItem`.
+	 * Envelope step 1 accepts `cartItem.key` directly, so any block inside a cart
+	 * row resolves its exact line at first paint — the SSR parity that replaced the
+	 * deleted `syncCartItemKeyContext` bridge.
+	 */
+	public function test_item_in_context_resolves_row_line_from_each_item_context(): void {
+		BlocksSharedState::load_cart_state( $this->consent );
+
+		$state = wp_interactivity_state(
+			'woocommerce/cart',
+			array(
+				'cart'       => array(
+					'items' => array(
+						array(
+							'key'      => 'row-1',
+							'id'       => 1,
+							'quantity' => 2,
+						),
+						array(
+							'key'      => 'row-2',
+							'id'       => 2,
+							'quantity' => 1,
+						),
+					),
+				),
+				'draftItems' => array(),
+			)
+		);
+
+		// No explicit `cartItemKey`; the row's each-item context carries the line.
+		$this->set_interactivity_context(
+			array(
+				'woocommerce/cart' => array(
+					'cartItem' => array( 'key' => 'row-2' ),
+				),
+			)
+		);
+
+		$envelope = $state['itemInContext']();
+
+		$this->assertIsArray( $envelope['cart'], 'The each-item context key resolves the row line server-side.' );
+		$this->assertSame( 'row-2', $envelope['cart']['key'] );
 		$this->assertTrue( $envelope['isInCart'] );
 	}
 

@@ -186,8 +186,13 @@ const getProductAttributesAndOptions = (
 
 /**
  * Mirror the shopper's attribute selection into the shared-store draft's
- * `variation` — the single source of selection truth the cart submission and
- * `woocommerce/products`' `productVariationInContext` read (T6).
+ * `variation` — the submission/pairing truth the cart POST reads. This is the
+ * FIRST half of the "double write" the selection performs (schema: "Selection UI
+ * layering"): the SECOND half is `setSelectedVariationId`, which resolves the
+ * selection to a variation and writes `variationId` into the `woocommerce/products`
+ * context — the DERIVATION truth `productVariationInContext` reads. The two
+ * planes are deliberately separate: the products store derives from its own
+ * `variationId` and reads NOTHING from the cart draft (T12).
  *
  * The block's `context.selectedAttributes` stays authoritative for the block
  * family's own UI (valid-option computation) and for out-of-scope consumers
@@ -453,6 +458,15 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 					includedAttributes: [ context.name ],
 				} );
 			},
+			// The DERIVATION-TRUTH half of the selection's double write (schema:
+			// "Selection UI layering"). A `data-wp-watch` callback: it re-runs on
+			// every selection change, resolves the shopper's attribute selection
+			// to a variation via `findProduct` (deterministic, mirrors the server
+			// — identity rule 6), and writes the resolved `variationId` into the
+			// `woocommerce/products` context (or global state out of context).
+			// That id is the ONLY thing `productVariationInContext` derives from —
+			// the products store never reads the cart draft (T12). The submission/
+			// pairing half is `mirrorSelectionToDraft` (draft `variation`).
 			setSelectedVariationId: () => {
 				const { mainProductInContext: product } = productsState;
 

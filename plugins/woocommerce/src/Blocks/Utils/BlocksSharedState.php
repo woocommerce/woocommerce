@@ -178,15 +178,23 @@ class BlocksSharedState {
 	 * wp_interactivity_get_context() at call time, they only need to be
 	 * registered once.
 	 *
+	 * Domain-scoped contexts (T12): the line key and filter come from the cart
+	 * store's OWN context (`woocommerce/cart`) — an explicit `cartItemKey`, or the
+	 * each-item `cartItem.key` a `data-wp-each--cart-item` directive keys under
+	 * this namespace (step 1 accepts either, so cart rows resolve their line
+	 * server-side). The context product id is resolved through derived state (the
+	 * products store's `mainProductInContext`), never by reading the products
+	 * context namespace directly.
+	 *
 	 * Boundary notes — where PHP cannot fully mirror the JS ladder:
 	 *
 	 * - **Drafts**: server-side `draftItems` is empty in general (surfaces seed
 	 *   their own drafts during render; that is T6). With no draft, `draft` is
 	 *   null and generic narrowing has nothing to compare, so the envelope
-	 *   resolves conservatively: an explicit `cartItemKey` still yields an exact
-	 *   line (step 1), but without a draft the id+variation path cannot pair a
-	 *   line and `cart` stays null. This matches the JS behavior for the same
-	 *   (draft-less) inputs.
+	 *   resolves conservatively: a line key (explicit or each-item) still yields
+	 *   an exact line (step 1), but without a draft the id+variation path cannot
+	 *   pair a line and `cart` stays null. This matches the JS behavior for the
+	 *   same (draft-less) inputs.
 	 * - **Purchasable-id resolution**: the JS ladder resolves a draft's parent
 	 *   id + variation to the purchasable id via the products store's
 	 *   `findProduct`. Server-side we only have a draft to resolve when one was
@@ -218,15 +226,22 @@ class BlocksSharedState {
 			$cart_namespace,
 			array(
 				'itemInContext' => function () use ( $cart_namespace ) {
-					$context = wp_interactivity_get_context( self::$settings_namespace );
+					// The cart store reads its OWN context for the line key and
+					// filter (T12). The context product id is resolved through the
+					// products store's `mainProductInContext` derived state.
+					$context = wp_interactivity_get_context( $cart_namespace );
 					$state   = wp_interactivity_state( $cart_namespace );
 					$items   = $state['cart']['items'] ?? array();
 
-					$draft = self::find_context_draft( $state, $context );
+					$draft = self::find_context_draft( $state );
 
-					// Ladder step 1: an explicit cartItemKey yields that exact
-					// line. Filters never run; cart surfaces are always exact.
-					$key = $context['cartItemKey'] ?? null;
+					// Ladder step 1: a line key — an explicit `cartItemKey`, or the
+					// each-item context's `cartItem.key` a `data-wp-each--cart-item`
+					// directive keys under the `woocommerce/cart` namespace — yields
+					// that exact line. Filters never run; cart surfaces are always
+					// exact. Resolving the each-item key here is what gives cart rows
+					// SSR envelope parity (no client-side key bridge).
+					$key = $context['cartItemKey'] ?? ( $context['cartItem']['key'] ?? null );
 					if ( $key ) {
 						$line = self::find_line_by_key( $items, $key );
 						return array(
@@ -295,20 +310,45 @@ class BlocksSharedState {
 	 * Find the draft for the current context product id (identity rule 3: one
 	 * draft per product context, keyed by the main/context product id).
 	 *
-	 * @param array $state   The cart store state.
-	 * @param array $context The shared `woocommerce` context.
+	 * Cross-domain resolution (T12): the context product id comes from the
+	 * products store's `mainProductInContext` derived state — the cart store never
+	 * reads the products context namespace. On the server that closure reads the
+	 * `woocommerce/products` context (per-element) or the store's global
+	 * `state.productId`, exactly as its JS counterpart does.
+	 *
+	 * @param array $state The cart store state.
 	 * @return array|null The matching draft, or null.
 	 */
-	private static function find_context_draft( array $state, array $context ): ?array {
-		if ( ! isset( $context['productId'] ) ) {
+	private static function find_context_draft( array $state ): ?array {
+		$product_id = self::get_context_product_id();
+		if ( null === $product_id ) {
 			return null;
 		}
 
-		$product_id = $context['productId'];
 		foreach ( $state['draftItems'] ?? array() as $draft ) {
 			if ( isset( $draft['id'] ) && $draft['id'] === $product_id ) {
 				return $draft;
 			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Resolve the current context product id through the products store's
+	 * `mainProductInContext` derived state (T12 — cross-domain via derived state,
+	 * never a foreign context read). Returns null out of product scope or when the
+	 * products store is not populated on this surface.
+	 *
+	 * @return int|null The context product id, or null.
+	 */
+	private static function get_context_product_id(): ?int {
+		$products_state = wp_interactivity_state( 'woocommerce/products' );
+		$main           = $products_state['mainProductInContext'] ?? null;
+
+		$product = $main instanceof \Closure ? $main() : $main;
+		if ( is_array( $product ) && isset( $product['id'] ) ) {
+			return (int) $product['id'];
 		}
 
 		return null;

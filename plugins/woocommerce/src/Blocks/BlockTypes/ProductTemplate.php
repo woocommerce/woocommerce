@@ -89,11 +89,12 @@ class ProductTemplate extends AbstractBlock {
 
 		// T9 DEMO (boundary-breaking use case E14/E48, PR #65570): does any
 		// card carry a Product Quantity (stepper) block? When it does, each card
-		// needs the shared `woocommerce::{ productId }` context and a seeded cart
-		// draft so the stepper edits that card's draft and the Add to Cart button
-		// posts it — the same mechanics the Add to Cart + Options form uses, but
-		// outside the form. Detected once for the whole template (all cards share
-		// the same inner-block structure).
+		// needs a seeded cart draft so the stepper edits that card's draft and the
+		// Add to Cart button posts it — the same mechanics the Add to Cart +
+		// Options form uses, but outside the form. The card's product identity
+		// comes from the `<li>`'s `woocommerce/products` context (T12). Detected
+		// once for the whole template (all cards share the same inner-block
+		// structure).
 		$has_quantity_stepper = $this->inner_blocks_contain_quantity_stepper( $block->inner_blocks );
 
 		if ( $has_quantity_stepper ) {
@@ -154,30 +155,20 @@ class ProductTemplate extends AbstractBlock {
 				data-wp-key="product-item-' . $product_id . '"
 			';
 
-			// T9 DEMO: when a stepper is present, give each card the shared
-			// `woocommerce::{ productId }` context and seed its draft (min
-			// quantity). The stepper edits this draft (keyed by the shared-context
-			// product id — identity rule 3, landmine #2) and the Add to Cart
-			// button posts it via `woocommerce/cart::actions.addItem()`.
+			// T9 DEMO: when a stepper is present, seed each card's draft (min
+			// quantity). The stepper edits this draft (keyed by the card's product
+			// id — identity rule 3, landmine #2) and the Add to Cart button posts
+			// it via `woocommerce/cart::actions.addItem()`.
+			//
+			// No shared-context wrapper is needed (T12): the `<li>` already carries
+			// the `woocommerce/products::{ productId }` context, which is now THE
+			// product-identity source. The stepper resolves the card's product id
+			// via `mainProductInContext` (`getContextProductId()`), and the cart
+			// store keys the draft off that derived id. This also removes the WP
+			// ≤ 6.8 two-contexts-on-one-element hazard the earlier nested
+			// `woocommerce` wrapper worked around.
 			if ( $has_quantity_stepper ) {
 				$this->seed_card_draft( $product_id );
-
-				// The `<li>` already carries a `woocommerce/products` context, and
-				// WordPress 6.8 does not support two `data-wp-context` directives on
-				// the same element (same limitation the grouped-product stepper hit
-				// — see AddToCartWithOptions\Utils::make_quantity_input_interactive).
-				// So the shared `woocommerce` context goes on a nested wrapper div,
-				// which must be an ANCESTOR of the stepper and the button for
-				// `getContext('woocommerce')` to resolve in their scope.
-				$shared_context_directive = wp_interactivity_data_wp_context(
-					array( 'productId' => $product_id ),
-					'woocommerce'
-				);
-				$block_content            = sprintf(
-					'<div class="wc-block-product-template__shared-context" %1$s>%2$s</div>',
-					$shared_context_directive,
-					$block_content
-				);
 			}
 
 			// Wrap the render inner blocks in a `li` element with the appropriate post classes.
@@ -240,9 +231,10 @@ class ProductTemplate extends AbstractBlock {
 	 * T9 DEMO: whether the card's inner blocks include the Product Quantity
 	 * (stepper) block. Recurses so the stepper can sit anywhere in the card.
 	 *
-	 * When true, each card gets the shared `woocommerce::{ productId }` context
-	 * and a seeded draft (see render()). Detected once per template render — all
-	 * cards share the same inner-block structure.
+	 * When true, each card gets a seeded draft (see render()); the card's product
+	 * identity comes from the `<li>`'s `woocommerce/products` context (T12).
+	 * Detected once per template render — all cards share the same inner-block
+	 * structure.
 	 *
 	 * @param \WP_Block_List|array $inner_blocks Inner block instances.
 	 * @return bool True if a quantity-selector block is present.

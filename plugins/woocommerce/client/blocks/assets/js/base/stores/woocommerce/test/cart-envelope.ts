@@ -17,12 +17,20 @@ const mockState = {} as Store[ 'state' ];
 // "unknown namespace on a locked read" so the resolver's catch path is exercised.
 const mockExtensionStores: Record< string, Record< string, unknown > > = {};
 
-// Shared `woocommerce` context returned by getContext( 'woocommerce' ).
-let mockContext: {
-	productId?: number;
+// The cart store's OWN context (`woocommerce/cart`), returned by
+// getContext( 'woocommerce/cart' ). Carries the line key, the each-item
+// `cartItem`, and the `cartItemFilter` reference — NOT the product id (that is
+// derived state, T12).
+let mockCartContext: {
 	cartItemKey?: string;
+	cartItem?: { key?: string };
 	cartItemFilter?: { namespace: string; action: string };
 } | null = null;
+
+// The context product id the products store's `mainProductInContext` resolves to
+// (derived state — the cart store reads it instead of a foreign context, T12).
+// Tests set this in place of the old `mockContext.productId`.
+let mockContextProductId: number | undefined;
 
 // products store `findProduct` — deterministic variation resolution stand-in.
 // Tests set this to control purchasable-id resolution.
@@ -40,16 +48,28 @@ jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
 		getConfig: jest.fn( () => mockConfig ),
-		getContext: jest.fn( () => mockContext ),
+		// Namespace-aware: the cart store reads its OWN context
+		// (`woocommerce/cart`) for the line key/filter. There is no product-context
+		// read anymore (T12), so any other namespace resolves to null.
+		getContext: jest.fn( ( namespace?: string ) =>
+			namespace === 'woocommerce/cart' ? mockCartContext : null
+		),
 		store: jest.fn( ( name: string, definition?: { state?: object } ) => {
-			// Stub the products store so the cart's lazy cross-store read
-			// resolves purchasable ids via the injectable mockFindProduct.
+			// Stub the products store so the cart's lazy cross-store reads
+			// resolve: purchasable ids via the injectable mockFindProduct, and the
+			// context product id via `mainProductInContext` (derived state — the
+			// cart store's ONLY cross-domain product read, T12).
 			if ( name === 'woocommerce/products' ) {
 				return {
 					state: {
 						findProduct: (
 							...args: Parameters< typeof mockFindProduct >
 						) => mockFindProduct( ...args ),
+						get mainProductInContext() {
+							return mockContextProductId === undefined
+								? null
+								: { id: mockContextProductId };
+						},
 					},
 				};
 			}
@@ -212,7 +232,8 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
-		mockContext = null;
+		mockCartContext = null;
+		mockContextProductId = undefined;
 		mockFindProduct = ( { id } ) => ( { id } );
 		// Reset shared mock state so drafts don't leak between tests.
 		( mockState as { draftItems?: DraftItem[] } ).draftItems = [];
@@ -229,7 +250,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 				{ key: 'abc', id: 1, quantity: 1, name: 'A', type: 'simple' },
 				{ key: 'def', id: 2, quantity: 1, name: 'B', type: 'simple' },
 			] );
-			mockContext = { cartItemKey: 'def' };
+			mockCartContext = { cartItemKey: 'def' };
 
 			const env = cart.state.itemInContext;
 			expect( env.cart?.key ).toBe( 'def' );
@@ -249,7 +270,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 					item_data: [],
 				},
 			] );
-			mockContext = { productId: 100 };
+			mockContextProductId = 100;
 			cart.state.draftItems = [ { id: 100, quantity: 1 } ];
 
 			const env = cart.state.itemInContext;
@@ -274,7 +295,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			] );
 			// findProduct resolves parent 100 + green → variation 456.
 			mockFindProduct = ( { id } ) => ( id === 100 ? { id: 456 } : null );
-			mockContext = { productId: 100 };
+			mockContextProductId = 100;
 			cart.state.draftItems = [
 				{
 					id: 100,
@@ -311,7 +332,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 					item_data: [ { key: 'Gift note', value: 'B' } ],
 				},
 			] );
-			mockContext = { productId: 100 };
+			mockContextProductId = 100;
 			cart.state.draftItems = [
 				{ id: 100, quantity: 1, 'my-plugin': { note: 'B' } },
 			];
@@ -343,7 +364,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 					item_data: [ { key: 'Gift note', value: 'B' } ],
 				},
 			] );
-			mockContext = { productId: 100 };
+			mockContextProductId = 100;
 			// Draft accounts for none of the note metadata.
 			cart.state.draftItems = [ { id: 100, quantity: 1 } ];
 
@@ -373,7 +394,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 					item_data: [ { key: 'Part of', value: 'Mega Bundle' } ],
 				},
 			] );
-			mockContext = { productId: 5 };
+			mockContextProductId = 5;
 			cart.state.draftItems = [ { id: 5, quantity: 1 } ];
 
 			const env = cart.state.itemInContext;
@@ -406,7 +427,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 					item_data: [],
 				},
 			] );
-			mockContext = { productId: 100 };
+			mockContextProductId = 100;
 			cart.state.draftItems = [ { id: 100, quantity: 1 } ];
 
 			const env = cart.state.itemInContext;
@@ -437,7 +458,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 					item_data: [],
 				},
 			] );
-			mockContext = { productId: 100 };
+			mockContextProductId = 100;
 			cart.state.draftItems = [
 				{ id: 100, quantity: 1, 'my-plugin': 'A' },
 			];
@@ -462,7 +483,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 					item_data: [],
 				},
 			] );
-			mockContext = { productId: 100 };
+			mockContextProductId = 100;
 			cart.state.draftItems = [ { id: 100, quantity: 1 } ];
 
 			const env = cart.state.itemInContext;
@@ -525,7 +546,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 	describe( 'drafts', () => {
 		it( 'upsertDraftItem creates a draft when missing', async () => {
 			const cart = await loadCartAndReady();
-			mockContext = { productId: 100 };
+			mockContextProductId = 100;
 			const draft = cart.actions.upsertDraftItem( { quantity: 3 } );
 			expect( draft ).toEqual( { id: 100, quantity: 3 } );
 			expect( cart.state.draftItems ).toHaveLength( 1 );
@@ -533,7 +554,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 
 		it( 'upsertDraftItem merges into an existing draft by product id', async () => {
 			const cart = await loadCartAndReady();
-			mockContext = { productId: 100 };
+			mockContextProductId = 100;
 			cart.actions.upsertDraftItem( { quantity: 1 } );
 			cart.actions.upsertDraftItem( { 'my-plugin/gift-note': 'A' } );
 			expect( cart.state.draftItems ).toHaveLength( 1 );
@@ -544,11 +565,11 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			} );
 		} );
 
-		it( 'direct mutation of a draft object works', async () => {
+		it( 'upsertDraftItem is the write path for updating a field (write policy)', async () => {
 			const cart = await loadCartAndReady();
-			mockContext = { productId: 100 };
-			const draft = cart.actions.upsertDraftItem( { quantity: 1 } );
-			draft.quantity = 5;
+			mockContextProductId = 100;
+			cart.actions.upsertDraftItem( { quantity: 1 } );
+			cart.actions.upsertDraftItem( { quantity: 5 } );
 			expect( cart.state.draftItems[ 0 ].quantity ).toBe( 5 );
 		} );
 
@@ -558,7 +579,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 				{ id: 100, quantity: 1 },
 				{ id: 200, quantity: 1 },
 			];
-			mockContext = { productId: 100 };
+			mockContextProductId = 100;
 			cart.actions.removeDraftItem();
 			expect( cart.state.draftItems.map( ( d ) => d.id ) ).toEqual( [
 				200,
@@ -571,7 +592,8 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 				{ id: 100, quantity: 1 },
 				{ id: 200, quantity: 1 },
 			];
-			mockContext = null;
+			// No context product (mainProductInContext resolves nothing).
+			mockContextProductId = undefined;
 			cart.actions.clearDraftItems();
 			expect( cart.state.draftItems ).toHaveLength( 0 );
 		} );
@@ -580,7 +602,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 	describe( 'addItem', () => {
 		it( 'with no draft uses the { id, quantity: 1 } fallback from context', async () => {
 			const cart = await loadCartAndReady();
-			mockContext = { productId: 42 };
+			mockContextProductId = 42;
 			const { batchCalls } = installFetchMock( {
 				onBatch: ( requests ) =>
 					requests.map( () => ( {
@@ -757,7 +779,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 
 		it( 'does not clear drafts implicitly', async () => {
 			const cart = await loadCartAndReady();
-			mockContext = { productId: 100 };
+			mockContextProductId = 100;
 			cart.state.draftItems = [ { id: 100, quantity: 1 } ];
 			installFetchMock( {
 				onBatch: ( requests ) =>
@@ -812,8 +834,8 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 						item.key === 'decorated',
 				},
 			};
-			mockContext = {
-				productId: 100,
+			mockContextProductId = 100;
+			mockCartContext = {
 				cartItemFilter: {
 					namespace: 'bundle/editor',
 					action: 'matchLine',
@@ -835,7 +857,8 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			const seen: Array< {
 				key: string | undefined;
 				draftToken: unknown;
-				ctxProductId: number | undefined;
+				draftId: number | undefined;
+				ctxFilterNamespace: string | undefined;
 			} > = [];
 			mockExtensionStores[ 'my-plugin/x' ] = {
 				actions: {
@@ -843,20 +866,27 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 						item: { key?: string },
 						extra: {
 							draft?: Record< string, unknown >;
-							context?: { productId?: number } | null;
+							// The predicate receives the `woocommerce/cart`
+							// context (T12) — it carries the filter reference, not
+							// a product id (product identity is derived state).
+							context?: {
+								cartItemFilter?: { namespace?: string };
+							} | null;
 						}
 					) => {
 						seen.push( {
 							key: item.key,
 							draftToken: extra.draft?.[ 'my-plugin/token' ],
-							ctxProductId: extra.context?.productId,
+							draftId: extra.draft?.id as number | undefined,
+							ctxFilterNamespace:
+								extra.context?.cartItemFilter?.namespace,
 						} );
 						return true;
 					},
 				},
 			};
-			mockContext = {
-				productId: 100,
+			mockContextProductId = 100;
+			mockCartContext = {
 				cartItemFilter: {
 					namespace: 'my-plugin/x',
 					action: 'matchLine',
@@ -865,7 +895,12 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 
 			cart.state.itemInContext;
 			expect( seen ).toEqual( [
-				{ key: 'plain', draftToken: 'seed', ctxProductId: 100 },
+				{
+					key: 'plain',
+					draftToken: 'seed',
+					draftId: 100,
+					ctxFilterNamespace: 'my-plugin/x',
+				},
 			] );
 		} );
 
@@ -883,8 +918,8 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 					} ) => item.extensions?.p?.n === 'B',
 				},
 			};
-			mockContext = {
-				productId: 100,
+			mockContextProductId = 100;
+			mockCartContext = {
 				cartItemFilter: {
 					namespace: 'my-plugin/x',
 					action: 'matchLine',
@@ -903,8 +938,8 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			mockExtensionStores[ 'my-plugin/x' ] = {
 				actions: { matchLine: () => false },
 			};
-			mockContext = {
-				productId: 100,
+			mockContextProductId = 100;
+			mockCartContext = {
 				cartItemFilter: {
 					namespace: 'my-plugin/x',
 					action: 'matchLine',
@@ -926,8 +961,8 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			mockExtensionStores[ 'my-plugin/x' ] = {
 				actions: { matchLine: () => true },
 			};
-			mockContext = {
-				productId: 100,
+			mockContextProductId = 100;
+			mockCartContext = {
 				cartItemFilter: {
 					namespace: 'my-plugin/x',
 					action: 'matchLine',
@@ -948,7 +983,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			mockExtensionStores[ 'my-plugin/x' ] = {
 				actions: { matchLine: () => false },
 			};
-			mockContext = {
+			mockCartContext = {
 				cartItemKey: 'exact',
 				cartItemFilter: {
 					namespace: 'my-plugin/x',
@@ -972,8 +1007,8 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 					},
 				},
 			};
-			mockContext = {
-				productId: 100,
+			mockContextProductId = 100;
+			mockCartContext = {
 				cartItemFilter: {
 					namespace: 'my-plugin/x',
 					action: 'actions.filters.byNote',
@@ -996,8 +1031,8 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 				// One plain line that generic narrowing WOULD pair.
 				setCartItems( cart, [ plainLine ] );
 				cart.state.draftItems = [ { id: 100, quantity: 1 } ];
-				mockContext = {
-					productId: 100,
+				mockContextProductId = 100;
+				mockCartContext = {
 					cartItemFilter: {
 						namespace: 'does-not/exist',
 						action: 'matchLine',
@@ -1027,8 +1062,8 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 				mockExtensionStores[ 'my-plugin/x' ] = {
 					actions: { somethingElse: () => true },
 				};
-				mockContext = {
-					productId: 100,
+				mockContextProductId = 100;
+				mockCartContext = {
 					cartItemFilter: {
 						namespace: 'my-plugin/x',
 						action: 'noSuchAction',
@@ -1057,8 +1092,8 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 				mockExtensionStores[ 'my-plugin/x' ] = {
 					actions: { matchLine: 'not a function' },
 				};
-				mockContext = {
-					productId: 100,
+				mockContextProductId = 100;
+				mockCartContext = {
 					cartItemFilter: {
 						namespace: 'my-plugin/x',
 						action: 'matchLine',
@@ -1083,8 +1118,8 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 
 				setCartItems( cart, [ plainLine ] );
 				cart.state.draftItems = [ { id: 100, quantity: 1 } ];
-				mockContext = {
-					productId: 100,
+				mockContextProductId = 100;
+				mockCartContext = {
 					cartItemFilter: {
 						namespace: 'does-not/exist',
 						action: 'matchLine',
@@ -1125,15 +1160,15 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			};
 
 			// Outer context would pick 'outerPick'…
-			mockContext = {
-				productId: 100,
+			mockContextProductId = 100;
+			mockCartContext = {
 				cartItemFilter: { namespace: 'outer/region', action: 'pick' },
 			};
 			expect( cart.state.itemInContext.cart?.key ).toBe( 'outerPick' );
 
 			// …but an inner region shadowing it picks 'innerPick' (innermost wins).
-			mockContext = {
-				productId: 100,
+			mockContextProductId = 100;
+			mockCartContext = {
 				cartItemFilter: { namespace: 'inner/region', action: 'pick' },
 			};
 			expect( cart.state.itemInContext.cart?.key ).toBe( 'innerPick' );
@@ -1161,8 +1196,8 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 						pick: ( item: { key?: string } ) => item.key === 'A',
 					},
 				};
-				mockContext = {
-					productId: 100,
+				mockContextProductId = 100;
+				mockCartContext = {
 					cartItemFilter: { namespace: 'ctx/x', action: 'pick' },
 				};
 
@@ -1184,8 +1219,8 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 				mockExtensionStores[ 'ctx/x' ] = {
 					actions: { pick: () => false },
 				};
-				mockContext = {
-					productId: 100,
+				mockContextProductId = 100;
+				mockCartContext = {
 					cartItemFilter: { namespace: 'ctx/x', action: 'pick' },
 				};
 
@@ -1203,8 +1238,8 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 						pick: ( item: { key?: string } ) => item.key === 'B',
 					},
 				};
-				mockContext = {
-					productId: 100,
+				mockContextProductId = 100;
+				mockCartContext = {
 					cartItemFilter: { namespace: 'ctx/x', action: 'pick' },
 				};
 

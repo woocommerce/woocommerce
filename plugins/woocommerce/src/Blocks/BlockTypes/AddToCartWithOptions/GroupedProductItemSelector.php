@@ -186,21 +186,18 @@ class GroupedProductItemSelector extends AbstractBlock {
 			}
 
 			if ( $markup ) {
-				// Interactive child rows carry the shared `woocommerce::{ childId }`
-				// context so this child's own draft (`woocommerce/cart::state.draftItems`,
-				// keyed by the child product id — identity rule 3) is resolvable
-				// by descendants that read `getContext('woocommerce')`. The child's
-				// draft is seeded server-side by the parent form (draft birth).
-				$shared_context_attribute = $is_interactive
-					? wp_interactivity_data_wp_context(
-						array( 'productId' => $product->get_id() ),
-						'woocommerce'
-					)
-					: '';
-
+				// No shared-context wrapper here (T12): the child's own
+				// `woocommerce/products::{ productId: childId }` context — already
+				// set on the interactive stepper/checkbox by
+				// `make_quantity_input_interactive( …, $set_product_context = true )`
+				// / `get_checkbox_markup()` — is now THE product-identity source.
+				// Descendants resolve the child id via that products context
+				// (`getContextProductId()`), and the cart store keys this child's
+				// draft (`woocommerce/cart::state.draftItems`, identity rule 3) off
+				// it through derived state. Dropping the wrapper also removes the
+				// WP ≤ 6.8 two-contexts-on-one-element hazard.
 				$markup = sprintf(
-					'<div class="wp-block-add-to-cart-with-options-grouped-product-item-selector wc-block-add-to-cart-with-options-grouped-product-item-selector" %1$s>%2$s</div>',
-					$shared_context_attribute,
+					'<div class="wp-block-add-to-cart-with-options-grouped-product-item-selector wc-block-add-to-cart-with-options-grouped-product-item-selector">%1$s</div>',
 					$markup
 				);
 			}

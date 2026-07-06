@@ -97,17 +97,27 @@ export type ClientCartItem = Omit<
 type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
 
 /**
- * The shared `woocommerce` context namespace read by both shared stores. It
- * carries the surface's product/cart identity (`productId`, `cartItemKey`) and
- * the optional `cartItemFilter` escape hatch — a SERIALIZED ACTION REFERENCE
+ * The cart store's OWN context namespace, `woocommerce/cart` (domain-scoped —
+ * T12). It carries a cart surface's line identity (`cartItemKey`) and the
+ * optional `cartItemFilter` escape hatch — a SERIALIZED ACTION REFERENCE
  * (`{ namespace, action }`), never a live function (context is serialized).
  * Core resolves it to a predicate at envelope-derivation time (see
  * `resolveCartItemFilter`).
+ *
+ * `cartItem` is the IMPLICIT per-row context that a `data-wp-each--cart-item`
+ * directive (iterating `woocommerce/cart::state.cart.items`) keys under this
+ * same namespace. Its `key` is a first-class envelope step-1 source, so cart
+ * rows resolve their exact line with no client-side key bridge (and with SSR
+ * parity, since the each-item context also exists server-side).
+ *
+ * The context carries NO `productId`: cross-domain product identity is resolved
+ * through derived state (`woocommerce/products` store's `mainProductInContext`),
+ * never by reading the products context namespace (T12).
  */
-export type SharedWooCommerceContext = {
-	productId?: number;
+export type CartScopeContext = {
 	cartItemKey?: string;
 	cartItemFilter?: CartItemFilterReference;
+	cartItem?: { key?: string };
 };
 
 /**
@@ -148,13 +158,16 @@ export type Store = {
 		/**
 		 * Editable array of pure `cart/add-item` payloads. One draft per product
 		 * context (identity rule 3); `id` is the main/context product id and
-		 * doubles as the draft's identity. Direct mutation of draft objects is
-		 * legal (write policy).
+		 * doubles as the draft's identity. Shopper input is written through the
+		 * draft actions — `upsertDraftItem`, `removeDraftItem`, `clearDraftItems`
+		 * (write policy CONTRACT). `state.cart` is read-only for consumers.
 		 */
 		draftItems: DraftItem[];
 		/**
-		 * The envelope for the current shared context (`woocommerce`):
-		 * `{ cart, draft, isInCart }`. Read-only derived getter.
+		 * The envelope for the current context: `{ cart, draft, isInCart }`.
+		 * Read-only derived getter. The draft is keyed by the products store's
+		 * `mainProductInContext` id; the exact line key comes from the
+		 * `woocommerce/cart` context (T12).
 		 */
 		itemInContext: ItemEnvelope;
 		/**
@@ -604,15 +617,46 @@ function resolvePurchasableId( draft: DraftItem ): number {
 }
 
 /**
- * Read the shared `woocommerce` context, or `null` when called outside a
- * directive scope (e.g. from a plain module call). Out-of-scope reads degrade
- * silently to "no context draft" rather than throwing.
+ * Read the cart store's OWN context (`woocommerce/cart`), or `null` when called
+ * outside a directive scope (e.g. from a plain module call). Out-of-scope reads
+ * degrade silently to "no cart context" rather than throwing.
+ *
+ * This never reads the products context namespace — the context product id is
+ * resolved through derived state (`getContextProductId`), per the T12
+ * cross-domain rule.
  */
-function getSharedContext(): SharedWooCommerceContext | null {
+function getCartContext(): CartScopeContext | null {
 	try {
-		return getContext< SharedWooCommerceContext >( 'woocommerce' ) ?? null;
+		return getContext< CartScopeContext >( 'woocommerce/cart' ) ?? null;
 	} catch {
 		return null;
+	}
+}
+
+/**
+ * Resolve the context product id via derived state on the products store —
+ * `mainProductInContext` (the top-level product for this surface, keyed off the
+ * `woocommerce/products` context or that store's global state). Its id is the
+ * key the cart store's drafts live under (identity rule 3).
+ *
+ * Cross-domain resolution goes through this derived getter ONLY: the cart store
+ * never reads the `woocommerce/products` context namespace itself (T12). Degrades
+ * to `undefined` out of product scope (or when the products store isn't
+ * registered) — the envelope then resolves conservatively (no draft).
+ *
+ * @return The context product id, or `undefined` when unavailable.
+ */
+function getContextProductId(): number | undefined {
+	const productsState = getProductsState();
+	if ( ! productsState ) {
+		return undefined;
+	}
+	try {
+		return productsState.mainProductInContext?.id;
+	} catch {
+		// mainProductInContext reads the products context; out of scope it
+		// throws — degrade to "no context product".
+		return undefined;
 	}
 }
 
@@ -744,9 +788,11 @@ function resolveCartItemFilter(
  *
  * Ladder:
  *
- * 1. `cartItemKey` present → that exact line. Filters NEVER run; cart surfaces
- *    are always exact. `isInCart` reflects whether the line exists. (This step
- *    is unchanged by the `cartItemFilter` escape hatch.)
+ * 1. A cart-context line key (`context.cartItemKey`, or a `data-wp-each` item
+ *    context's `cartItem.key` — both in the `woocommerce/cart` namespace) →
+ *    that exact line. Filters NEVER run; cart surfaces are always exact.
+ *    `isInCart` reflects whether the line exists. (This step is unchanged by
+ *    the `cartItemFilter` escape hatch.)
  * 2. Candidates = lines whose purchasable id matches the draft's resolved id
  *    (variation-id resolution only — no attribute matching at cart level,
  *    Raluca's rule). Then EITHER:
@@ -773,14 +819,14 @@ function resolveCartItemFilter(
  * @param opts.key     An explicit cart item key (bypasses everything).
  * @param opts.filter  A resolved `cartItemFilter` predicate. When present it is
  *                     the sole narrowing authority (replaces generic narrowing).
- * @param opts.context The shared `woocommerce` context, passed to the predicate.
+ * @param opts.context The `woocommerce/cart` context, passed to the predicate.
  * @return The resolved envelope.
  */
 function resolveEnvelope( opts: {
 	draft?: DraftItem | undefined;
 	key?: string | undefined;
 	filter?: CartItemFilterPredicate | null | undefined;
-	context?: SharedWooCommerceContext | null | undefined;
+	context?: CartScopeContext | null | undefined;
 } ): ItemEnvelope {
 	const { draft, key, filter, context } = opts;
 
@@ -861,25 +907,34 @@ const { actions } = store< Store >(
 			// maintainer sign-off.)
 
 			/**
-			 * The `{ cart, draft, isInCart }` envelope for the current shared
-			 * `woocommerce` context. Derived read-only getter.
+			 * The `{ cart, draft, isInCart }` envelope for the current context.
+			 * Derived read-only getter.
 			 *
-			 * `draft` is the `draftItems` entry whose `id` === context.productId
-			 * (the returned object IS editable — mutating it mutates the draft).
-			 * `cart` and `isInCart` come from the resolution ladder.
+			 * `draft` is the `draftItems` entry whose `id` === the context product
+			 * id — resolved via derived state (`getContextProductId`, which reads
+			 * the products store's `mainProductInContext`), NOT by reading the
+			 * products context namespace (T12 cross-domain rule). Shopper input is
+			 * written back through the draft actions (`upsertDraftItem`) per the
+			 * write-policy contract. `cart` and `isInCart` come from the resolution
+			 * ladder.
+			 *
+			 * The exact line key comes from the cart store's own context
+			 * (`woocommerce/cart`): an explicit `cartItemKey`, or the each-item
+			 * `cartItem.key` a `data-wp-each--cart-item` directive keys under this
+			 * namespace (envelope step 1 accepts either).
 			 *
 			 * When `context.cartItemFilter` is set, its resolved predicate is the
 			 * sole narrowing authority (it replaces generic narrowing). A broken
 			 * reference resolves to `null` → generic narrowing runs (graceful
 			 * degradation, dev-mode warning). Innermost-context shadowing falls
-			 * out of iAPI context inheritance for free: `getSharedContext()`
-			 * reads the nearest `woocommerce` context, so an inner region's
+			 * out of iAPI context inheritance for free: `getCartContext()` reads
+			 * the nearest `woocommerce/cart` context, so an inner region's
 			 * `cartItemFilter` naturally overrides an outer one.
 			 */
 			get itemInContext(): ItemEnvelope {
-				const context = getSharedContext();
-				const draft = findDraftByProductId( context?.productId );
-				const key = context?.cartItemKey;
+				const context = getCartContext();
+				const draft = findDraftByProductId( getContextProductId() );
+				const key = context?.cartItemKey ?? context?.cartItem?.key;
 				const filter = resolveCartItemFilter( context?.cartItemFilter );
 				return resolveEnvelope( { draft, key, filter, context } );
 			},
@@ -899,13 +954,13 @@ const { actions } = store< Store >(
 			 *   - absent → inherit `context.cartItemFilter`.
 			 *
 			 * Scope caveat: inheriting the context filter requires an iAPI scope,
-			 * because it reads `getContext('woocommerce')`. In scope means the
-			 * call happens synchronously inside a directive callback or an
-			 * action/derived-state getter (see `getSharedContext`). Out of scope
+			 * because it reads `getContext('woocommerce/cart')`. In scope means
+			 * the call happens synchronously inside a directive callback or an
+			 * action/derived-state getter (see `getCartContext`). Out of scope
 			 * — a plain module call, a `setTimeout`/`Promise.then` callback not
 			 * wrapped in `withScope`, or an async continuation after a `yield` in
 			 * a generator (the scope is only guaranteed for the synchronous part)
-			 * — `getContext` throws, `getSharedContext()` returns `null`, and the
+			 * — `getContext` throws, `getCartContext()` returns `null`, and the
 			 * lookup degrades silently to generic rules. Pass an explicit
 			 * `filter` (or `filter: false`) to make the behavior deterministic
 			 * regardless of scope.
@@ -927,7 +982,7 @@ const { actions } = store< Store >(
 					return resolveEnvelope( { draft, key } );
 				}
 
-				const context = getSharedContext();
+				const context = getCartContext();
 				const draft =
 					findDraftByProductId( id ) ??
 					( id !== undefined ? { id } : undefined );
@@ -1295,16 +1350,17 @@ const { actions } = store< Store >(
 				payload?: DraftItem
 			): AsyncAction< CartItem | undefined > {
 				// Resolve the payload: explicit → context draft → fallback.
+				// The context product id is derived state (products store's
+				// `mainProductInContext`), never a foreign context read (T12).
 				let itemPayload = payload;
 				if ( ! itemPayload ) {
-					const context = getSharedContext();
-					const contextDraft = findDraftByProductId(
-						context?.productId
-					);
+					const contextProductId = getContextProductId();
+					const contextDraft =
+						findDraftByProductId( contextProductId );
 					if ( contextDraft ) {
 						itemPayload = contextDraft;
-					} else if ( context?.productId !== undefined ) {
-						itemPayload = { id: context.productId, quantity: 1 };
+					} else if ( contextProductId !== undefined ) {
+						itemPayload = { id: contextProductId, quantity: 1 };
 					}
 				}
 
@@ -1463,13 +1519,13 @@ const { actions } = store< Store >(
 
 			/**
 			 * Merge a partial payload into the current context draft (matched by
-			 * the payload's `id`, else the context `productId`), creating the
-			 * draft if missing. Returns the (editable) draft. A convenience, not
-			 * a gatekeeper — direct draft mutation is equally valid.
+			 * the payload's `id`, else the context product id — derived state, not
+			 * a foreign context read, T12), creating the draft if missing. Returns
+			 * the (editable) draft. This is the canonical write path for shopper
+			 * input (write policy CONTRACT).
 			 */
 			upsertDraftItem( partialPayload: Partial< DraftItem > ): DraftItem {
-				const context = getSharedContext();
-				const targetId = partialPayload.id ?? context?.productId;
+				const targetId = partialPayload.id ?? getContextProductId();
 
 				if ( targetId === undefined ) {
 					throw new Error(
@@ -1492,13 +1548,13 @@ const { actions } = store< Store >(
 			},
 
 			/**
-			 * Remove the draft for a product id (defaults to context.productId).
+			 * Remove the draft for a product id (defaults to the context product
+			 * id — derived state, not a foreign context read, T12).
 			 */
 			removeDraftItem( {
 				productId,
 			}: { productId?: number } = {} ): void {
-				const context = getSharedContext();
-				const targetId = productId ?? context?.productId;
+				const targetId = productId ?? getContextProductId();
 				if ( targetId === undefined ) {
 					return;
 				}
@@ -1508,15 +1564,14 @@ const { actions } = store< Store >(
 			},
 
 			/**
-			 * Clear drafts. With a `productId` (or the context product id), clears
-			 * only that draft; called with an explicit `{}`/no context it clears
-			 * all drafts.
+			 * Clear drafts. With a `productId` (or the context product id — derived
+			 * state, T12), clears only that draft; called with an explicit `{}`/no
+			 * context it clears all drafts.
 			 */
 			clearDraftItems( {
 				productId,
 			}: { productId?: number } = {} ): void {
-				const context = getSharedContext();
-				const targetId = productId ?? context?.productId;
+				const targetId = productId ?? getContextProductId();
 				if ( targetId === undefined ) {
 					state.draftItems = [];
 					return;
@@ -1567,9 +1622,11 @@ if ( ! state.draftItems ) {
  *   access, so consumers reading through the alias stay in sync with mutations
  *   applied to `woocommerce/cart`.
  * - `itemInContext` / `findItem` are copied by descriptor (getter / function),
- *   same as `findItemInCart`, and close over the module-level `state`. Note
- *   that when read *through the alias*, `getContext('woocommerce')` still reads
- *   the same shared context namespace, so the envelope resolves identically.
+ *   same as `findItemInCart`, and close over the module-level `state`. They
+ *   resolve context from the DOMAIN-SCOPED namespaces (`woocommerce/cart` for
+ *   the line key/filter, the products store's `mainProductInContext` for the
+ *   draft product id — T12), so the envelope resolves identically whether the
+ *   getter is reached directly or through this legacy state/actions alias.
  * - Both stores are created with the same `universalLock`, so the alias
  *   registration passes the lock check and no store is unlocked/published.
  */

@@ -115,8 +115,9 @@ add_action(
  * suppressed by hooked-block bookkeeping. We prepend the field's rendered markup
  * when the quantity-selector anchor renders — the exact placement a `blockHooks`
  * "before" would produce, done deterministically. The field lands inside the
- * form's shared `woocommerce::{ productId }` context wrapper, so its iAPI module
- * resolves the right draft with no extra wiring.
+ * form, which resolves its product identity through the `woocommerce/products`
+ * context / global state (T12), so its iAPI module resolves the right draft with
+ * no extra wiring.
  *
  * The proper core fix is to run the Add to Cart + Options template-part content
  * through `apply_block_hooks_to_content()` (once, at assembly time) so that

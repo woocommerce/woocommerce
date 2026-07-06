@@ -1,12 +1,13 @@
 /**
  * External dependencies
  */
-import { store, getContext } from '@wordpress/interactivity';
+import { store } from '@wordpress/interactivity';
 import type {
 	Store as WooCommerce,
 	DraftItem,
 	SelectedAttributes,
 } from '@woocommerce/stores/woocommerce/cart';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Cart-draft helpers for the Add to Cart + Options block family (T6).
@@ -14,13 +15,14 @@ import type {
  * Shopper input for this form — quantity and the selected variation attributes —
  * lives in the shared `woocommerce/cart` store as a "draft" (a pure
  * `cart/add-item` payload), one per product context, keyed by the main/context
- * product id (identity rule 3). The draft is the single source of truth the
- * submission (`addItem()`) and `woocommerce/products`' `productVariationInContext`
- * read from.
+ * product id (identity rule 3). The draft is the submission/pairing truth the
+ * cart POST (`addItem()`) reads. Shopper input is written through the cart
+ * store's draft actions (`upsertDraftItem`) — the write-policy contract.
  *
- * The draft is addressed via the shared `woocommerce::{ productId }` context the
- * form (and each grouped child row) renders. These helpers centralize the lazy
- * cross-store access so the family's frontend modules don't each re-implement it.
+ * The draft's product id is the `woocommerce/products` context `productId` the
+ * form (and each grouped child row) renders (T12 — domain-scoped contexts). These
+ * helpers centralize the lazy cross-store access so the family's frontend modules
+ * don't each re-implement it.
  *
  * The `woocommerce/add-to-cart-with-options` context keeps its own
  * `selectedAttributes` / `quantity` fields as the compatibility surface that
@@ -34,14 +36,6 @@ const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 /**
- * The shared `woocommerce` context namespace. Carries the surface's product
- * identity (`productId`) — the key drafts are stored under.
- */
-export type SharedWooCommerceContext = {
-	productId?: number;
-};
-
-/**
  * Lazily access the `woocommerce/cart` store. Read lazily (not at module load)
  * so the cart store's registration order doesn't matter.
  */
@@ -49,25 +43,36 @@ const getCartStore = (): WooCommerce =>
 	store< WooCommerce >( 'woocommerce/cart', {}, { lock: universalLock } );
 
 /**
- * Read the shared `woocommerce` context, or `null` when called outside a
- * directive scope. Out-of-scope reads degrade silently rather than throwing.
- */
-export function getSharedContext(): SharedWooCommerceContext | null {
-	try {
-		return getContext< SharedWooCommerceContext >( 'woocommerce' ) ?? null;
-	} catch {
-		return null;
-	}
-}
-
-/**
- * The product id identifying the current context draft: the shared
- * `woocommerce` context `productId`.
+ * The product id identifying the current context draft: the top-level product
+ * for this surface, resolved through the products store's `mainProductInContext`
+ * derived state (T12 — domain-scoped contexts). That getter reads the products
+ * store's OWN context/state:
+ *
+ * - a per-element `woocommerce/products::{ productId }` context (grouped child
+ *   rows, SingleProduct-in-loop cards), else
+ * - the products store's global `state.productId` (the single product page seeds
+ *   it via `SingleProductTemplate`).
+ *
+ * Reading `mainProductInContext.id` (rather than a raw products-context read)
+ * lets the id come from EITHER source, matching the cart store's own resolution
+ * and preserving the single-product-page flow where no per-form products context
+ * exists (so the variation selector's `variationId` write stays global for the
+ * Product Gallery). Degrades to `undefined` when the products store isn't
+ * registered or resolves no product.
  *
  * @return The context product id, or `undefined` when out of scope.
  */
 export function getContextProductId(): number | undefined {
-	return getSharedContext()?.productId;
+	try {
+		const { state } = store< ProductsStore >(
+			'woocommerce/products',
+			{},
+			{ lock: universalLock }
+		);
+		return state.mainProductInContext?.id;
+	} catch {
+		return undefined;
+	}
 }
 
 /**
@@ -98,9 +103,8 @@ export function getDraftQuantity( productId?: number ): number {
 }
 
 /**
- * Set a draft's quantity: `upsertDraftItem` on first touch (creates the draft if
- * missing), direct mutation thereafter. Both go through the cart store, keeping
- * a single write path.
+ * Set a draft's quantity through the cart store's `upsertDraftItem` action — the
+ * write-policy write path (creates the draft on first touch, merges thereafter).
  *
  * When the target equals the draft's current quantity, we write `NaN` first and
  * then the real value. Assigning an unchanged value to a reactive signal fires no

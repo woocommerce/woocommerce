@@ -6,13 +6,15 @@
  * `@woocommerce/stores/woocommerce/cart` (declared server-side when the module
  * is registered) so the shared cart store is registered before this runs.
  *
- * The field is a DOM descendant of the Add to Cart + Options form, which is
- * wrapped in `data-wp-context='woocommerce::{"productId":N}'`. That means:
+ * The field is a DOM descendant of the Add to Cart + Options form, which resolves
+ * its product identity through the `woocommerce/products` context / global state
+ * (T12 — domain-scoped contexts). That means:
  *
  * - `store('woocommerce/cart').state.itemInContext` resolves the draft for THIS
- *   product automatically (no need to read/track the product id ourselves), and
+ *   product automatically (the cart store derives the product id via the products
+ *   store's `mainProductInContext`; the field needn't read or track it), and
  * - `upsertDraftItem({ ... })` writes into that same context draft, keyed by the
- *   shared-context product id (landmine #2: never key by `productInContext.id`).
+ *   context product id (landmine #2: never key by `productInContext.id`).
  *
  * This module contains ZERO submission code — the core Add to Cart button POSTs
  * the draft, and our namespaced `wc-gift-note-demo/gift-note` prop (a payload-
@@ -59,9 +61,10 @@ store( NAMESPACE, {
 	actions: {
 		/**
 		 * Write the input's value into the context draft under the namespaced
-		 * payload-root key. `upsertDraftItem` targets the draft for the shared
-		 * `woocommerce::productId` context (creating it if missing), so the note
-		 * is stored against the right product with no id bookkeeping here.
+		 * payload-root key. `upsertDraftItem` targets the draft for the context
+		 * product (resolved via the products store's `mainProductInContext` — T12;
+		 * creating it if missing), so the note is stored against the right product
+		 * with no id bookkeeping here.
 		 *
 		 * iAPI passes the DOM event as the first argument to `data-wp-on--*`
 		 * handlers (same pattern as the Product Filter price inputs).

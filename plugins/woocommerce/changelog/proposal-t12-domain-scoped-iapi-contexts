@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Domain-scope the shared iAPI store contexts: product surfaces use `woocommerce/products` and cart surfaces use `woocommerce/cart`; retire the bare `woocommerce` shared context. Cross-domain resolution now goes through derived state only (the cart store resolves its context product via the products store's `mainProductInContext`), the cart row envelope resolves from the `data-wp-each` item key server-side, and shopper input is documented as written through the draft upsert actions.

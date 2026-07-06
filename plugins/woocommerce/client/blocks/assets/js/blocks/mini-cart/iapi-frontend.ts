@@ -15,7 +15,6 @@ import '@woocommerce/stores/store-notices';
 import type {
 	Store as WooCommerce,
 	WooCommerceConfig,
-	SharedWooCommerceContext,
 } from '@woocommerce/stores/woocommerce/cart';
 
 /**
@@ -966,27 +965,14 @@ const { state: cartItemState } = store(
 		},
 
 		callbacks: {
-			// Publish the per-row line key into the shared `woocommerce` context
-			// as `cartItemKey`, so any block placed inside a cart row resolves its
-			// exact line through the envelope ladder (step 1: an explicit
-			// `cartItemKey` yields that line, no filters). The `woocommerce`
-			// context cannot carry a per-row dynamic value through a static
-			// `data-wp-context` literal (the context directive does not evaluate
-			// references), so the row seeds an empty `cartItemKey` slot and this
-			// `data-wp-init` callback fills it from the row's `woocommerce/cart`
-			// each-item context. `data-wp-init` re-runs when the key changes, so
-			// rows recycled by `data-wp-each` stay in sync.
-			syncCartItemKeyContext() {
-				const context =
-					getContext< SharedWooCommerceContext >( 'woocommerce' );
-				const { cartItem } =
-					getContext< CartItemContext >( 'woocommerce/cart' );
-				const key = cartItem?.key ?? '';
-				if ( context.cartItemKey !== key ) {
-					context.cartItemKey = key;
-				}
-			},
-
+			// No client-side key bridge (T12): a cart row's each-item context —
+			// `woocommerce/cart::{ cartItem }`, keyed by the
+			// `data-wp-each--cart-item` directive that iterates
+			// `woocommerce/cart::state.cart.items` — carries the line, and the
+			// envelope ladder's step 1 accepts `cartItem.key` directly. So any
+			// block placed inside a row resolves its exact line (SSR-resolvable
+			// too, since the each-item context exists server-side) with no
+			// `data-wp-context` slot to seed and no `data-wp-init` to fill it.
 			itemShortDescription() {
 				const { ref } = getElement();
 

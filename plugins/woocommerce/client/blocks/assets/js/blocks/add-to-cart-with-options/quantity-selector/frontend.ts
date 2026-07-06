@@ -17,10 +17,10 @@ import {
 } from '../cart-drafts';
 
 /**
- * The id the current draft is keyed by: the shared `woocommerce` context
+ * The id the current draft is keyed by: the `woocommerce/products` context
  * product id (identity rule 3 — the MAIN/parent product id; on grouped child
- * rows, the row's own `woocommerce::{ childId }` context). Falls back to the
- * resolved product's id when called out of a shared-context scope.
+ * rows, the row's own `woocommerce/products::{ childId }` context). Falls back to
+ * the resolved product's id when called out of a products-context scope.
  *
  * This is deliberately NOT `productInContext.id`: for variable products that
  * resolves to the selected VARIATION's id, while the draft (and its quantity)
@@ -49,7 +49,7 @@ const getDraftKey = ( productId: number ): number =>
  *   `context.quantity` and runs form-only validation — cannot run.
  *
  * Both surfaces share the SAME underlying truth: the shared `woocommerce/cart`
- * draft, keyed by the shared `woocommerce::{ productId }` context (identity rule
+ * draft, keyed by the `woocommerce/products::{ productId }` context (identity rule
  * 3). So this helper always writes the draft directly via `setDraftQuantity`
  * (the single write path both the form and the card go through), and ONLY when a
  * form store context is present does it additionally delegate to the form's

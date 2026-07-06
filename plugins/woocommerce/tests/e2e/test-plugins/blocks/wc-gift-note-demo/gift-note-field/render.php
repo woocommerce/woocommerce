@@ -3,9 +3,10 @@
  * Server render for the Gift Note Field (Demo) block.
  *
  * A minimal text input hooked into the Add to Cart + Options form (via Block
- * Hooks, before the quantity selector). It is a DOM descendant of the form's
- * shared `woocommerce::{ productId }` context wrapper, so the field's iAPI
- * module resolves the correct context draft with no extra wiring.
+ * Hooks, before the quantity selector). It is a DOM descendant of the form, which
+ * resolves its product identity through the `woocommerce/products` context /
+ * global state (T12), so the field's iAPI module resolves the correct context
+ * draft with no extra wiring.
  *
  * The field owns NO submission code: it only writes its value into the context
  * draft (`upsertDraftItem`). The core Add to Cart button POSTs the draft, and

@@ -113,7 +113,12 @@ class ProductsStore {
 			self::$store_namespace,
 			array(
 				'mainProductInContext'      => function () {
-					$context    = wp_interactivity_get_context();
+					// Read this store's OWN context explicitly (namespace-scoped),
+					// mirroring the JS getter's `getContext('woocommerce/products')`.
+					// The explicit namespace keeps the read correct even when
+					// another store's derived-state closure calls this one during
+					// its own directive processing (cross-domain resolution — T12).
+					$context    = wp_interactivity_get_context( self::$store_namespace );
 					$state      = wp_interactivity_state( self::$store_namespace );
 					$product_id = array_key_exists( 'productId', $context )
 						? $context['productId']
@@ -125,24 +130,21 @@ class ProductsStore {
 
 					return $state['products'][ $product_id ] ?? null;
 				},
-				// The JS `productVariationInContext` (T6) resolves the selected
-				// variation from an explicit `variationId` OVERRIDE first, and
-				// otherwise DERIVES it from the shared-context cart draft's
-				// `variation` selection. Server-side we intentionally mirror only
-				// the override branch: `variationId` is seeded `null` everywhere
-				// on first paint (SingleProduct / SingleProductTemplate /
-				// grouped rows), the seeded variable draft carries an empty
-				// `variation` (defaults are applied client-side after hydration),
-				// and there is no PHP counterpart to `findProduct`'s deterministic
-				// resolution here. So the draft-derived branch would resolve to
-				// `null` at first paint anyway — exactly what returning based on
-				// the (null) `variationId` already yields. Keeping this closure
-				// override-only preserves first-paint parity and avoids an
-				// SSR/hydration mismatch; the draft-driven variation is resolved
-				// client-side once the store hydrates. See cart draft "birth" in
-				// the shared-stores schema.
+				// `productVariationInContext` derives the selected variation
+				// PURELY from this store's own `variationId` — the context value
+				// first, else global state (T12). The products store reads NOTHING
+				// from the cart store (coupling is one-directional: cart →
+				// products only). A purchase surface writes the resolved
+				// `variationId` into the products context when the shopper picks
+				// attributes (the "double write" — draft in `woocommerce/cart`,
+				// `variationId` here). On first paint `variationId` is seeded
+				// `null` everywhere (SingleProduct / SingleProductTemplate /
+				// grouped rows), so the getter yields `null` server-side; the
+				// selected variation resolves client-side once the surface writes
+				// `variationId` after hydration, matching this JS getter exactly.
 				'productVariationInContext' => function () {
-					$context      = wp_interactivity_get_context();
+					// Own-namespace context read (T12), mirroring the JS getter.
+					$context      = wp_interactivity_get_context( self::$store_namespace );
 					$state        = wp_interactivity_state( self::$store_namespace );
 					$variation_id = array_key_exists( 'variationId', $context )
 						? $context['variationId']

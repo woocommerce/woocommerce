@@ -265,18 +265,18 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 				}
 
 				// Resolve the context draft SYNCHRONOUSLY, before any `yield`.
-				// The draft read relies on the shared `woocommerce` context, which
-				// is only guaranteed in scope for the synchronous portion of the
-				// action (iAPI restores scope around directive-invoked actions,
+				// The draft read relies on the `woocommerce/products` context,
+				// which is only guaranteed in scope for the synchronous portion of
+				// the action (iAPI restores scope around directive-invoked actions,
 				// but resolving up front and passing the draft explicitly to
 				// `addItem` removes any dependency on scope surviving the async
 				// import below).
 				//
-				// IMPORTANT: the draft is keyed by the shared-context product id
-				// (`woocommerce::productId` — the MAIN/parent product, identity
-				// rule 3), NOT by `productInContext.id`, which for variable
+				// IMPORTANT: the draft is keyed by the products context product id
+				// (`woocommerce/products::productId` — the MAIN/parent product,
+				// identity rule 3), NOT by `productInContext.id`, which for variable
 				// products resolves to the selected VARIATION's id. `getDraft()`
-				// with no argument reads the shared context. The draft already
+				// with no argument reads the products context. The draft already
 				// carries `id`, `quantity` and the shopper's `variation` (the
 				// variation selector mirrors the selection into it); `addItem`
 				// posts parent id + variation and the server resolves the

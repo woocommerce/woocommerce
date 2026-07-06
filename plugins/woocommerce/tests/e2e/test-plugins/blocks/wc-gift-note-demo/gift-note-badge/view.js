@@ -11,9 +11,9 @@
  *
  * 2. `wc-gift-note-demo/badge` — a private UI store whose `hasMarkedLine` getter
  *    reads `itemInContext.cart`. Because the badge's markup sits inside a
- *    `woocommerce::{ cartItemFilter }` context, that envelope is derived with the
- *    predicate as the SOLE narrowing authority — so `cart` is the line the
- *    filter selected, not what the generic rules would pick.
+ *    `woocommerce/cart::{ cartItemFilter }` context (T12), that envelope is
+ *    derived with the predicate as the SOLE narrowing authority — so `cart` is
+ *    the line the filter selected, not what the generic rules would pick.
  *
  * The predicate contract (schema): `( cartItem, { draft, context } ) => boolean`,
  * pure and synchronous, no mutations.
@@ -44,7 +44,7 @@ store( 'wc-gift-note-demo/filter', {
 		 *
 		 * @param {Object} cartItem The candidate cart line.
 		 * @param {Object} extra    Derivation extras.
-		 * @param {Object} extra.context The shared `woocommerce` context.
+		 * @param {Object} extra.context The `woocommerce/cart` context.
 		 * @return {boolean} Whether the line matches the marker.
 		 */
 		matchByMarker( cartItem, { context } ) {
@@ -80,20 +80,19 @@ store( 'wc-gift-note-demo/badge', {
 		 * surface's context.
 		 *
 		 * This is the PURE context-reference path: the badge renders a
-		 * `woocommerce::{ ..., cartItemFilter: { namespace, action } }` context
-		 * (see render.php), and core resolves that serialized reference to our
-		 * public `wc-gift-note-demo/filter` store's `matchByMarker` predicate at
-		 * envelope-derivation time. So `cartState.itemInContext.cart` is the line
-		 * the FILTER selected — a line the generic rules would exclude (this
+		 * `woocommerce/cart::{ ..., cartItemFilter: { namespace, action } }`
+		 * context (see render.php), and core resolves that serialized reference to
+		 * our public `wc-gift-note-demo/filter` store's `matchByMarker` predicate
+		 * at envelope-derivation time. So `cartState.itemInContext.cart` is the
+		 * line the FILTER selected — a line the generic rules would exclude (this
 		 * surface's draft carries no note, so the presence heuristic drops every
 		 * note-carrying line). `cart` is populated only when the filter pairs
 		 * exactly one line (the exactly-one rule still applies).
 		 *
-		 * DX FINDING (landmine): `itemInContext` only resolves the context when
-		 * `data-wp-interactive` and the `woocommerce::` context sit on the SAME
-		 * element (the interactive-island root). With the context on a bare
-		 * ancestor of the island, `getContext('woocommerce')` — and therefore the
-		 * whole envelope, filter included — silently returns nothing. See
+		 * DX FINDING (landmine): `itemInContext` only resolves when the contexts
+		 * sit on, or inside, the interactive-island root. With a context on a bare
+		 * ancestor of the island, `getContext('woocommerce/cart')` — and therefore
+		 * the whole envelope, filter included — silently returns nothing. See
 		 * render.php and the T8 report.
 		 *
 		 * @return {boolean} Whether a marked line is paired.

@@ -175,8 +175,9 @@ class AddToCartWithOptions extends AbstractBlock {
 	 * given product wins, which is harmless), and re-set the full array.
 	 *
 	 * Each draft is a pure `cart/add-item` payload keyed by its `id` (the
-	 * main/context product id — identity rule 3), matching the shared
-	 * `woocommerce::{ productId }` context the form renders around it.
+	 * main/context product id — identity rule 3), matching the product identity
+	 * the form resolves through the `woocommerce/products` context / global state
+	 * (T12).
 	 *
 	 * @param array $drafts The draft(s) this block contributes. Empty is a no-op.
 	 * @return void
@@ -438,9 +439,10 @@ class AddToCartWithOptions extends AbstractBlock {
 					}
 
 					// One draft per child, keyed by the child product id. Each
-					// grouped row renders its own `woocommerce::{ childId }`
-					// context, so the child's quantity selector and the submit
-					// loop resolve this draft.
+					// grouped row's interactive stepper/checkbox renders its own
+					// `woocommerce/products::{ productId: childId }` context (T12),
+					// so the child's quantity selector resolves this draft (the
+					// submit loop addresses each child draft by explicit id).
 					$drafts[] = array(
 						'id'       => (int) $child_product_id,
 						'quantity' => $context['quantity'][ $child_product_id ],
@@ -751,24 +753,18 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			$form_html = $form_html . ob_get_clean();
 
-			// Wrap the whole form in the shared `woocommerce::{ productId }`
-			// context so everything inside — the form's submit handler
-			// (`actions.addToCart` → `addItem()`), the variation selector
-			// (mirrors the selection into the draft), the quantity selector, and
-			// `woocommerce/products`' draft-derived `productVariationInContext` —
-			// resolves the draft for this product. The draft lives in
-			// `woocommerce/cart::state.draftItems`, keyed by this `productId`
-			// (identity rule 3). This must be an ANCESTOR of the `<form>` so
-			// `getContext('woocommerce')` resolves in the submit handler's scope.
-			$shared_context_directive = wp_interactivity_data_wp_context(
-				array( 'productId' => $product_id ),
-				'woocommerce'
-			);
-			$form_html                = sprintf(
-				'<div %1$s>%2$s</div>',
-				$shared_context_directive,
-				$form_html
-			);
+			// No shared-context wrapper here (T12): the form's product identity is
+			// resolved through the products store's `mainProductInContext` derived
+			// state, which reads the `woocommerce/products` context (a per-element
+			// context in query loops / SingleProduct cards) or the products store's
+			// global `state.productId` (seeded by `SingleProductTemplate` on the
+			// single product page). Everything inside the form — the submit handler
+			// (`actions.addToCart` → `addItem()`), the variation selector, the
+			// quantity selector — keys the draft (`woocommerce/cart::state.draftItems`,
+			// identity rule 3) off that derived product id. Deliberately NOT wrapping
+			// the form in its own `woocommerce/products` context keeps the variation
+			// selector's `variationId` write GLOBAL on the single product page, which
+			// the Product Gallery reads for variation-image switching.
 
 			if ( ! $legacy_mode ) {
 				$form_html = $this->render_interactivity_notices_region( $form_html );
