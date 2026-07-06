@@ -222,10 +222,10 @@ CREATE TABLE $meta_table_name (
 			throw new \Exception( 'Invalid notification ID.' );
 		}
 
-		$table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $this->get_table_name() );
+		$table_sql = $this->database_util->get_sql_identifier( $this->get_table_name() );
 		$data      = $wpdb->get_row(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by $this->database_util->get_sql_identifier().
 				"SELECT * FROM {$table_sql} WHERE id = %d",
 				$notification->get_id()
 			)
@@ -546,7 +546,7 @@ CREATE TABLE $meta_table_name (
 			return false;
 		}
 
-		$table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $this->get_table_name() );
+		$table_sql = $this->database_util->get_sql_identifier( $this->get_table_name() );
 		$format    = array_fill( 0, count( $product_ids ), '%d' );
 		$query_in  = '(' . implode( ',', $format ) . ')';
 		$sql       = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
@@ -571,7 +571,7 @@ CREATE TABLE $meta_table_name (
 
 		global $wpdb;
 
-		$table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $this->get_table_name() );
+		$table_sql = $this->database_util->get_sql_identifier( $this->get_table_name() );
 		$sql       = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 			"SELECT 1 FROM {$table_sql} WHERE product_id = %d AND user_email = %s AND status IN (%s, %s) LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			array( $product_id, $email, NotificationStatus::ACTIVE, NotificationStatus::PENDING )
@@ -594,7 +594,7 @@ CREATE TABLE $meta_table_name (
 
 		global $wpdb;
 
-		$table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $this->get_table_name() );
+		$table_sql = $this->database_util->get_sql_identifier( $this->get_table_name() );
 		$sql       = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 			"SELECT 1 FROM {$table_sql} WHERE product_id = %d AND user_id = %d AND status IN (%s, %s) LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			array( $product_id, $user_id, NotificationStatus::ACTIVE, NotificationStatus::PENDING )
@@ -611,8 +611,8 @@ CREATE TABLE $meta_table_name (
 
 		global $wpdb;
 
-		$table_sql = wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier( $this->get_table_name() );
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by wc_get_container()->get( DatabaseUtil::class )->get_sql_identifier().
+		$table_sql = $this->database_util->get_sql_identifier( $this->get_table_name() );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is quoted by $this->database_util->get_sql_identifier().
 		$results = $wpdb->get_results(
 			"SELECT DISTINCT
 					YEAR(date_created_gmt) AS year,
