@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed incorrect order counts when custom query_args are added via the order list table prepare_items query args filter.

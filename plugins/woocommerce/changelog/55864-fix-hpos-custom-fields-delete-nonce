@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix deleting a newly added custom field on the order edit screen with HPOS enabled.

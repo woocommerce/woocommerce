@@ -92,6 +92,16 @@ test.describe( 'Add to Cart + Options Block', () => {
 	} ) => {
 		await pageObject.updateSingleProductTemplate();
 
+		await test.step( 'renders inner blocks for simple products', async () => {
+			await pageObject.expectEditorInnerBlocks( 'simple' );
+		} );
+
+		await test.step( 'renders inner blocks for external products', async () => {
+			await pageObject.switchProductType( 'External/Affiliate product' );
+			await pageObject.expectEditorInnerBlocks( 'external' );
+			await pageObject.switchProductType( 'Simple product' );
+		} );
+
 		await editor.saveSiteEditorEntities( {
 			isOnlyCurrentEntityDirty: true,
 		} );
@@ -199,6 +209,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		);
 
 		await pageObject.updateSingleProductTemplate();
+
+		await test.step( 'renders inner blocks for variable products', async () => {
+			await pageObject.switchProductType( 'Variable product' );
+			await pageObject.expectEditorInnerBlocks( 'variable' );
+		} );
 
 		// We update to the Product Gallery block to test that it scrolls to the
 		// correct variation image.
@@ -547,6 +562,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		);
 
 		await pageObject.updateSingleProductTemplate();
+
+		await test.step( 'renders inner blocks for grouped products', async () => {
+			await pageObject.switchProductType( 'Grouped product' );
+			await pageObject.expectEditorInnerBlocks( 'grouped' );
+		} );
 
 		await editor.saveSiteEditorEntities( {
 			isOnlyCurrentEntityDirty: true,
