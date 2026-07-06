@@ -74,6 +74,17 @@ class CustomerSwap implements RegisterHooksInterface {
 			WC()->initialize_session();
 		}
 
+		// On eagerly-initialized requests (?rest_route= style) WooCommerce
+		// already built an operator-derived customer AND bound its save() to
+		// shutdown. Left in place, that stale hook would write the operator's
+		// name/email/addresses into the guest transaction session row at
+		// shutdown. Unbind it — and don't rebind for the blank customer:
+		// a POS request persists identity data nowhere; what checkout needs
+		// lands on the order.
+		if ( WC()->customer instanceof WC_Customer ) {
+			remove_action( 'shutdown', array( WC()->customer, 'save' ), 10 );
+		}
+
 		$customer = new WC_Customer( 0, true );
 		$customer->set_billing_country( '' );
 		$customer->set_billing_state( '' );

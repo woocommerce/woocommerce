@@ -67,6 +67,26 @@ class CustomerSwapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * On eagerly-initialized requests the operator-derived customer has its
+	 * save() bound to shutdown; left bound, it writes operator PII into the
+	 * guest transaction session row.
+	 *
+	 * @testdox The swap unbinds the previous customer's shutdown save and binds none for the blank one.
+	 */
+	public function test_swap_unbinds_operator_shutdown_save(): void {
+		Context::set_test_override( true );
+
+		$operator_customer = new \WC_Customer( 0, true );
+		WC()->customer     = $operator_customer;
+		add_action( 'shutdown', array( $operator_customer, 'save' ), 10 );
+
+		$this->sut->maybe_swap_customer( null );
+
+		$this->assertFalse( has_action( 'shutdown', array( $operator_customer, 'save' ) ), 'The operator customer must not persist at shutdown.' );
+		$this->assertFalse( has_action( 'shutdown', array( WC()->customer, 'save' ) ), 'The blank customer must not persist at shutdown either.' );
+	}
+
+	/**
 	 * On /wp-json requests dispatch fires before WooCommerce initializes the
 	 * session. Without one, WC_Customer(0, true) binds to the DB-backed data
 	 * store and checkout's save() tries to create a WP user — a 500 on every
