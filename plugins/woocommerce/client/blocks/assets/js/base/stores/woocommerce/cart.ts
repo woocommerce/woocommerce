@@ -412,7 +412,7 @@ const { actions } = store< Store >(
 			 * (and `variation` for variations), explicitly excluding
 			 * meta-differentiated lines (`has_cart_item_data: true`, e.g. a
 			 * bundle child, booking, or add-on configuration) so the keyless
-			 * match resolves only the plain line the product-button count
+			 * match resolves only the standalone line the product-button count
 			 * reflects.
 			 */
 			findItemInCart( {

@@ -149,9 +149,15 @@ export interface CartItem {
 	show_backorder_badge: boolean;
 	sold_individually: boolean;
 	/**
-	 * True when this cart line carries differentiating item metadata (e.g. a
-	 * bundle child, booking, or add-on configuration) and is therefore not the
-	 * standalone line for the product.
+	 * True when this cart line's identity was differentiated by extra cart-item
+	 * data — re-deriving the key from product + variation alone does not reproduce
+	 * the stored key. Supplied at add-to-cart time via the
+	 * `woocommerce_add_cart_item_data` filter or the `$cart_item_data` argument to
+	 * `WC_Cart::add_to_cart()` (e.g. bundle children, bookings, add-on/custom-text
+	 * configurations). False for a standalone line — including a plain variation,
+	 * since variation attributes are first-class identity, not `cart_item_data`.
+	 * This is a boolean reflection only — the `CartItem` does not carry the raw
+	 * `cart_item_data` payload, nor does it mirror a schema `cart_item` object.
 	 */
 	has_cart_item_data: boolean;
 	permalink: string;
