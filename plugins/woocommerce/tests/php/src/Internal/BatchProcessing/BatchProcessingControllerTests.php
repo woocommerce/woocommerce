@@ -397,10 +397,10 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 
 		// Simulate another request holding the lock: insert the lock row with a release time far in the future,
 		// so the controller can neither claim it (row exists) nor take it over (not yet stale) and must fall back.
-		$foreign_expiry = microtime( true ) + 60;
+		$foreign_expiry = number_format( microtime( true ) + 60, 6, '.', '' );
 		$wpdb->query(
 			$wpdb->prepare(
-				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %f, 'no')", // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'no')", // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				BatchProcessingController::ENQUEUED_PROCESSORS_LOCK_OPTION,
 				$foreign_expiry
 			)
@@ -432,10 +432,10 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 		global $wpdb;
 
 		// A lock row whose release time is already in the past represents a crashed holder; it must be stealable.
-		$stale_expiry = microtime( true ) - 60;
+		$stale_expiry = number_format( microtime( true ) - 60, 6, '.', '' );
 		$wpdb->query(
 			$wpdb->prepare(
-				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %f, 'no')", // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'no')", // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				BatchProcessingController::ENQUEUED_PROCESSORS_LOCK_OPTION,
 				$stale_expiry
 			)
@@ -451,6 +451,46 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 		$this->assertNull(
 			$this->lock_row_value(),
 			'After taking over and using the stale lock, the controller must release (delete) it.'
+		);
+	}
+
+	/**
+	 * @testdox Releasing does not delete a lock whose stored release time no longer matches ours (taken over by another request).
+	 */
+	public function test_release_leaves_a_lock_taken_over_by_another_request(): void {
+		global $wpdb;
+
+		$foreign_value = null;
+		add_filter(
+			'pre_update_option_' . BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME,
+			function ( $value ) use ( &$foreign_value, $wpdb ) {
+				// While this request holds the lock, simulate another request expiring and taking it over by
+				// overwriting the lock row's release time. Release must then leave that row alone.
+				$foreign_value = number_format( microtime( true ) + 999, 6, '.', '' );
+				$wpdb->update(
+					$wpdb->options,
+					array( 'option_value' => $foreign_value ),
+					array( 'option_name' => BatchProcessingController::ENQUEUED_PROCESSORS_LOCK_OPTION ),
+					array( '%s' ),
+					array( '%s' )
+				);
+				return $value;
+			}
+		);
+
+		$this->sut->enqueue_processor( 'Processor\\A' );
+
+		$this->assertSame(
+			$foreign_value,
+			$this->lock_row_value(),
+			'Release must be scoped to our own release time, so a lock another request now owns is not deleted.'
+		);
+
+		// Clean up the simulated foreign lock so it does not leak into other assertions.
+		$wpdb->delete(
+			$wpdb->options,
+			array( 'option_name' => BatchProcessingController::ENQUEUED_PROCESSORS_LOCK_OPTION ),
+			array( '%s' )
 		);
 	}
 

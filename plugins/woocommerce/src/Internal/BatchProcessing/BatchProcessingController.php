@@ -229,7 +229,7 @@ class BatchProcessingController {
 	 * @return array The list as persisted (the mutator's return value).
 	 */
 	private function mutate_enqueued_processors( callable $mutator ): array {
-		$lock_acquired = $this->acquire_enqueued_processors_lock();
+		$lock_token = $this->acquire_enqueued_processors_lock();
 		try {
 			/*
 			 * Drop any request-cached copy so the read below reflects writes committed by concurrent requests
@@ -247,8 +247,8 @@ class BatchProcessingController {
 			}
 			return $updated;
 		} finally {
-			if ( $lock_acquired ) {
-				$this->release_enqueued_processors_lock();
+			if ( null !== $lock_token ) {
+				$this->release_enqueued_processors_lock( $lock_token );
 			}
 		}
 	}
@@ -261,26 +261,29 @@ class BatchProcessingController {
 	 * claim is retried up to ENQUEUED_PROCESSORS_LOCK_ATTEMPTS times with a short delay before the caller falls
 	 * back to its best-effort unguarded path. Modeled on WC_Install::create_lock().
 	 *
+	 * Release times are stored as fixed-width, zero-padded-fraction strings (`number_format( ..., 6 )`) so the
+	 * database compares and matches them as plain strings without a numeric cast; for the current epoch the
+	 * integer part is a stable ten digits, so lexical order matches chronological order.
+	 *
 	 * @since 11.0.0
 	 *
-	 * @return bool True if the lock was acquired (and must be released by the caller), false otherwise.
+	 * @return string|null The stored release time when the lock was acquired (which must be passed to
+	 *                     release_enqueued_processors_lock()), or null when it could not be acquired.
 	 */
-	private function acquire_enqueued_processors_lock(): bool {
+	private function acquire_enqueued_processors_lock(): ?string {
 		global $wpdb;
-		if ( ! $wpdb instanceof \wpdb ) {
-			return false;
-		}
 
 		$attempts    = max( 1, self::ENQUEUED_PROCESSORS_LOCK_ATTEMPTS );
-		$delay_micro = (int) ( ( self::ENQUEUED_PROCESSORS_LOCK_TTL / $attempts ) * 1000000 );
+		$delay_micro = (int) ( ( self::ENQUEUED_PROCESSORS_LOCK_TTL / $attempts ) * 1_000_000 );
 
 		// A contended INSERT fails on the duplicate key by design, so silence wpdb error reporting to keep the
 		// expected-failure path from spamming the log in debug mode; restore the prior setting when done.
 		$suppress = $wpdb->suppress_errors( true );
 		try {
 			for ( $attempt = 0; $attempt < $attempts; $attempt++ ) {
-				$now    = microtime( true );
-				$expiry = $now + self::ENQUEUED_PROCESSORS_LOCK_TTL;
+				$time   = microtime( true );
+				$now    = number_format( $time, 6, '.', '' );
+				$expiry = number_format( $time + self::ENQUEUED_PROCESSORS_LOCK_TTL, 6, '.', '' );
 
 				// The unique option_name key makes this INSERT a mutex: it fails when the lock row already exists.
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -291,7 +294,7 @@ class BatchProcessingController {
 						'option_value' => $expiry,
 						'autoload'     => 'no',
 					),
-					array( '%s', '%f', '%s' )
+					array( '%s', '%s', '%s' )
 				);
 
 				if ( ! $acquired ) {
@@ -301,8 +304,7 @@ class BatchProcessingController {
 					 * The table is a trusted internal identifier and every value is bound through a placeholder.
 					 */
 					$takeover = $wpdb->prepare(
-						// @phpstan-ignore-next-line argument.type -- $wpdb->options is a trusted identifier, not user input.
-						"UPDATE {$wpdb->options} SET option_value = %f WHERE option_name = %s AND option_value < %f", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+						"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 						$expiry,
 						self::ENQUEUED_PROCESSORS_LOCK_OPTION,
 						$now
@@ -314,7 +316,7 @@ class BatchProcessingController {
 				}
 
 				if ( $acquired ) {
-					return true;
+					return $expiry;
 				}
 
 				if ( $attempt < $attempts - 1 && $delay_micro > 0 ) {
@@ -322,30 +324,35 @@ class BatchProcessingController {
 				}
 			}
 
-			return false;
+			return null;
 		} finally {
 			$wpdb->suppress_errors( $suppress );
 		}
 	}
 
 	/**
-	 * Release the enqueued-processors lock by deleting its options-table row.
+	 * Release the enqueued-processors lock by deleting the options-table row we own.
+	 *
+	 * The delete is conditional on the stored release time still matching the one written when the lock was
+	 * acquired, so a lock that expired and was taken over by another request is never released out from under it.
 	 *
 	 * @since 11.0.0
+	 *
+	 * @param string $expiry The release time returned by acquire_enqueued_processors_lock().
 	 */
-	private function release_enqueued_processors_lock(): void {
+	private function release_enqueued_processors_lock( string $expiry ): void {
 		global $wpdb;
-		if ( ! $wpdb instanceof \wpdb ) {
-			return;
-		}
 
 		$suppress = $wpdb->suppress_errors( true );
 		try {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->delete(
 				$wpdb->options,
-				array( 'option_name' => self::ENQUEUED_PROCESSORS_LOCK_OPTION ),
-				array( '%s' )
+				array(
+					'option_name'  => self::ENQUEUED_PROCESSORS_LOCK_OPTION,
+					'option_value' => $expiry,
+				),
+				array( '%s', '%s' )
 			);
 		} finally {
 			$wpdb->suppress_errors( $suppress );
