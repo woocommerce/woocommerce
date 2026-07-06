@@ -2,8 +2,8 @@
  * External dependencies
  */
 import {
-	type PlainPaymentMethods,
-	type PlainExpressPaymentMethods,
+	PlainPaymentMethods,
+	PlainExpressPaymentMethods,
 } from '@woocommerce/types';
 import type { PaymentResult } from '@woocommerce/types';
 

@@ -18,8 +18,8 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { getQueryArgs, removeQueryArgs } from '@wordpress/url';
 import {
-	type AttributeQuery,
-	type AttributeTerm,
+	AttributeQuery,
+	AttributeTerm,
 	isAttributeQueryCollection,
 	isBoolean,
 	isString,

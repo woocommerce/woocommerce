@@ -23,8 +23,8 @@ import { store as noticesStore } from '@wordpress/notices';
 import type { WPNotice } from '@wordpress/notices/build-types/store/selectors';
 import { checkoutEvents } from '@woocommerce/blocks-checkout-events';
 import {
-	type ExpressPaymentMethods,
-	type PlainExpressPaymentMethods,
+	ExpressPaymentMethods,
+	PlainExpressPaymentMethods,
 } from '@woocommerce/types';
 import {
 	getExpressPaymentMethods,

@@ -6,8 +6,8 @@ import {
 	useCollectionData,
 } from '@woocommerce/base-context/hooks';
 import {
-	type AttributeSetting,
-	type AttributeTerm,
+	AttributeSetting,
+	AttributeTerm,
 	objectHasProp,
 } from '@woocommerce/types';
 import {

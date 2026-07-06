@@ -8,7 +8,7 @@ import {
 	OrderFormValues,
 } from '@woocommerce/settings';
 
-import { type CheckoutResponseSuccess } from '@woocommerce/types';
+import { CheckoutResponseSuccess } from '@woocommerce/types';
 
 export const STORE_KEY = 'wc/store/checkout';
 

@@ -5,7 +5,7 @@ import {
 	InnerBlockLayoutContextProvider,
 	ProductDataContextProvider,
 } from '@woocommerce/shared-context';
-import { type ProductResponseItem } from '@woocommerce/types';
+import { ProductResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies

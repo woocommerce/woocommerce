@@ -5,10 +5,10 @@ import { select } from '@wordpress/data';
 import { camelCaseKeys, debounce } from '@woocommerce/base-utils';
 import { isEmail } from '@wordpress/url';
 import {
-	type CartBillingAddress,
-	type CartShippingAddress,
-	type Cart,
-	type CartResponse,
+	CartBillingAddress,
+	CartShippingAddress,
+	Cart,
+	CartResponse,
 } from '@woocommerce/types';
 import { CurriedSelectorsOf } from '@wordpress/data/build-types/types';
 

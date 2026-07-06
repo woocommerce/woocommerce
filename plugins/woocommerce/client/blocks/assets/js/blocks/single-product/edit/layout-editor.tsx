@@ -10,7 +10,7 @@ import {
 } from '@woocommerce/shared-context';
 import { PanelBody, Button } from '@wordpress/components';
 import { backup } from '@wordpress/icons';
-import { type ProductResponseItem } from '@woocommerce/types';
+import { ProductResponseItem } from '@woocommerce/types';
 import {
 	InnerBlocks,
 	InspectorControls,

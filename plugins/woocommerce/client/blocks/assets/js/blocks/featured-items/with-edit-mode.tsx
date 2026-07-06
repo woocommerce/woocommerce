@@ -9,8 +9,8 @@ import { info } from '@wordpress/icons';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import ProductControl from '@woocommerce/editor-components/product-control';
 import {
-	type ProductResponseItem,
-	type ProductCategoryResponseItem,
+	ProductResponseItem,
+	ProductCategoryResponseItem,
 } from '@woocommerce/types';
 import {
 	Placeholder,

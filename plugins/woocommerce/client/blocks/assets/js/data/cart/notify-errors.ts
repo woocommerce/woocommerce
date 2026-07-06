@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { type ApiErrorResponse, isApiErrorResponse } from '@woocommerce/types';
+import { ApiErrorResponse, isApiErrorResponse } from '@woocommerce/types';
 import { createNotice } from '@woocommerce/base-utils';
 import { decodeEntities } from '@wordpress/html-entities';
 import { dispatch } from '@wordpress/data';

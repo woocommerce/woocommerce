@@ -4,11 +4,11 @@
 import { SearchListItem } from '@woocommerce/editor-components/search-list-control/types';
 import { getSetting } from '@woocommerce/settings';
 import {
-	type AttributeObject,
-	type AttributeObjectForDisplay,
-	type AttributeSetting,
-	type AttributeTerm,
-	type AttributeWithTerms,
+	AttributeObject,
+	AttributeObjectForDisplay,
+	AttributeSetting,
+	AttributeTerm,
+	AttributeWithTerms,
 	isAttributeTerm,
 } from '@woocommerce/types';
 import { dispatch, select } from '@wordpress/data';

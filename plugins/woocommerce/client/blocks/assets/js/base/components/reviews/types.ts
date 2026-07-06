@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { type EmptyObjectType } from '@woocommerce/types';
+import { EmptyObjectType } from '@woocommerce/types';
 
 export type Review =
 	| {

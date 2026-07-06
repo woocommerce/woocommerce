@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { type Cart, type CartItem } from '@woocommerce/types';
+import { Cart, CartItem } from '@woocommerce/types';
 import { dispatch, select } from '@wordpress/data';
 import { decodeEntities } from '@wordpress/html-entities';
 import { __, sprintf } from '@wordpress/i18n';

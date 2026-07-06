@@ -4,10 +4,10 @@
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
 	objectHasProp,
-	type Currency,
+	Currency,
 	isString,
-	type CurrencyResponse,
-	type WCStoreV1ProductsCollectionProps,
+	CurrencyResponse,
+	WCStoreV1ProductsCollectionProps,
 } from '@woocommerce/types';
 
 function formatPriceInt( price: string | number, currency: Currency ) {

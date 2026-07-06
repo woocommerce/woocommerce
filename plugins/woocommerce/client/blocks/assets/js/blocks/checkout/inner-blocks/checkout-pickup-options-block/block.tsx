@@ -18,7 +18,7 @@ import {
 import { decodeEntities } from '@wordpress/html-entities';
 import { getSetting } from '@woocommerce/settings';
 import { Icon, mapMarker } from '@wordpress/icons';
-import { type CartShippingPackageShippingRate } from '@woocommerce/types';
+import { CartShippingPackageShippingRate } from '@woocommerce/types';
 import {
 	isPackageRateCollectable,
 	getShippingRatesPackageCount,

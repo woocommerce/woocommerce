@@ -16,7 +16,7 @@ import {
 } from '@woocommerce/blocks-checkout';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import type { ReactRootWithContainer } from '@woocommerce/base-utils';
-import { type RegisteredBlockComponent } from '@woocommerce/types';
+import { RegisteredBlockComponent } from '@woocommerce/types';
 
 /**
  * This file contains logic used on the frontend to convert DOM elements (saved by the block editor) to React

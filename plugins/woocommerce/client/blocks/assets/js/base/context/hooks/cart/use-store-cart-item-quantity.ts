@@ -11,8 +11,8 @@ import {
 import { useDebounce } from 'use-debounce';
 import { usePrevious } from '@woocommerce/base-hooks';
 import {
-	type CartItem,
-	type StoreCartItemQuantity,
+	CartItem,
+	StoreCartItemQuantity,
 	isNumber,
 	isObject,
 	isString,

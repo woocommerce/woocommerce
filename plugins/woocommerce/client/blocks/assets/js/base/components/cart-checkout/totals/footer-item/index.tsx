@@ -18,9 +18,9 @@ import {
 } from '@woocommerce/base-context/hooks';
 import { getSetting } from '@woocommerce/settings';
 import {
-	type CartResponseTotals,
-	type Currency,
-	type LooselyMustHave,
+	CartResponseTotals,
+	Currency,
+	LooselyMustHave,
 } from '@woocommerce/types';
 import { formatPrice } from '@woocommerce/price-format';
 import { hasSelectedShippingRate } from '@woocommerce/base-utils';

@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { getSetting } from '@woocommerce/settings';
-import {
-	type AttributeObject,
-	type AttributeSetting,
-} from '@woocommerce/types';
+import { AttributeObject, AttributeSetting } from '@woocommerce/types';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 

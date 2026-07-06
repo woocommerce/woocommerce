@@ -5,10 +5,7 @@ import {
 	debounce,
 	addressFieldsForShippingRates,
 } from '@woocommerce/base-utils';
-import {
-	type CartBillingAddress,
-	type CartShippingAddress,
-} from '@woocommerce/types';
+import { CartBillingAddress, CartShippingAddress } from '@woocommerce/types';
 import { select, dispatch } from '@wordpress/data';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 

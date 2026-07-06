@@ -2,7 +2,7 @@
  * External dependencies
  */
 import deprecated from '@wordpress/deprecated';
-import { type FieldValidationStatus } from '@woocommerce/types';
+import { FieldValidationStatus } from '@woocommerce/types';
 
 /**
  * Internal dependencies

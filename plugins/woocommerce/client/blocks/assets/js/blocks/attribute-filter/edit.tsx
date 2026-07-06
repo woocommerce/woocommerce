@@ -15,7 +15,7 @@ import { getAdminLink, getSetting } from '@woocommerce/settings';
 import BlockTitle from '@woocommerce/editor-components/block-title';
 import clsx from 'clsx';
 import { SearchListItem } from '@woocommerce/editor-components/search-list-control/types';
-import { type AttributeSetting } from '@woocommerce/types';
+import { AttributeSetting } from '@woocommerce/types';
 import {
 	Placeholder,
 	Disabled,

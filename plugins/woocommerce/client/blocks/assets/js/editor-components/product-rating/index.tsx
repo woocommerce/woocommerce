@@ -4,7 +4,7 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import type { CSSProperties } from 'react';
-import { isNumber, type ProductResponseItem } from '@woocommerce/types';
+import { isNumber, ProductResponseItem } from '@woocommerce/types';
 import { ProductEntityResponse } from '@woocommerce/entities';
 
 type RatingProps = {

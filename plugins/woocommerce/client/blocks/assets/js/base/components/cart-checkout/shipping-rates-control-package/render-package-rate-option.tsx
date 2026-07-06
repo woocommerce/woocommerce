@@ -6,7 +6,7 @@ import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
 import type { PackageRateOption } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
-import { type CartShippingPackageShippingRate } from '@woocommerce/types';
+import { CartShippingPackageShippingRate } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
 
 /**

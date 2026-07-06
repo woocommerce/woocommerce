@@ -51,10 +51,7 @@ const shouldBundleWooPackageInEditor = ( request ) =>
 	isWooPackageRequest( request ) && request !== '@woocommerce/entities';
 
 const getEditorPackageAliases = () => ( {
-	'@woocommerce/block-data': path.resolve(
-		__dirname,
-		`../assets/js/data`
-	),
+	'@woocommerce/block-data': path.resolve( __dirname, `../assets/js/data` ),
 	'@woocommerce/blocks-checkout': path.resolve(
 		__dirname,
 		`../packages/checkout`
@@ -154,10 +151,7 @@ const getAlias = ( options = {} ) => {
 			__dirname,
 			`../assets/js/${ pathPart }previews/`
 		),
-		'@woocommerce/types': path.resolve(
-			__dirname,
-			`../assets/js/types/`
-		),
+		'@woocommerce/types': path.resolve( __dirname, `../assets/js/types/` ),
 		'@woocommerce/utils': path.resolve( __dirname, `../assets/js/utils/` ),
 		'@woocommerce/entities': path.resolve(
 			__dirname,

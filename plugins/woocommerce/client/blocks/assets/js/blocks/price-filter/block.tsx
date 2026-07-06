@@ -16,7 +16,7 @@ import { getSettingWithCoercion } from '@woocommerce/settings';
 import { addQueryArgs, removeQueryArgs } from '@wordpress/url';
 import { changeUrl, getUrlParameter } from '@woocommerce/utils';
 import {
-	type CurrencyResponse,
+	CurrencyResponse,
 	isBoolean,
 	isObject,
 	isString,

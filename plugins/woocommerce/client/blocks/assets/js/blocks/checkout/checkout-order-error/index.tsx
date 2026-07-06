@@ -7,7 +7,7 @@ import { removeCart } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
 import { getSetting } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
-import { type CheckoutResponse } from '@woocommerce/types';
+import { CheckoutResponse } from '@woocommerce/types';
 import { reloadPage } from '@woocommerce/blocks/checkout/utils';
 
 /**

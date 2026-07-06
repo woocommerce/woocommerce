@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import Summary from '@woocommerce/base-components/summary';
 import { blocksConfig } from '@woocommerce/block-settings';
-import { isEmpty, type ProductResponseItem } from '@woocommerce/types';
+import { isEmpty, ProductResponseItem } from '@woocommerce/types';
 
 import {
 	useInnerBlockLayoutContext,

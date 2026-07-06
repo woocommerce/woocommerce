@@ -18,7 +18,7 @@ import {
 	isString,
 	objectHasProp,
 	isEmpty,
-	type ProductResponseItem,
+	ProductResponseItem,
 } from '@woocommerce/types';
 import { ProductEntityResponse } from '@woocommerce/entities';
 

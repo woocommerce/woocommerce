@@ -77,8 +77,7 @@ module.exports = {
 		'@woocommerce/block-data/(.*)$': 'assets/js/data/$1',
 		'@woocommerce/block-data': 'assets/js/data',
 		'@woocommerce/resource-previews': 'assets/js/previews',
-		'@woocommerce/shared-context':
-			'assets/js/shared/context',
+		'@woocommerce/shared-context': 'assets/js/shared/context',
 		'@woocommerce/shared-hocs': 'assets/js/shared/hocs',
 		'@woocommerce/blocks-test-utils/(.*)$': 'tests/utils/$1',
 		'@woocommerce/blocks-test-utils': 'tests/utils',

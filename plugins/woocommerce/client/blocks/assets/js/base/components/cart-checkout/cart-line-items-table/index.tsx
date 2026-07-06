@@ -3,7 +3,7 @@
  */
 import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
-import { type CartResponseItem } from '@woocommerce/types';
+import { CartResponseItem } from '@woocommerce/types';
 import { createRef, useEffect, useRef } from '@wordpress/element';
 import type { RefObject } from 'react';
 import { CartLineItemsCartSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
-import { type CartResponse } from '@woocommerce/types';
+import { CartResponse } from '@woocommerce/types';
 import { previewCart } from '@woocommerce/resource-previews';
 
 /**

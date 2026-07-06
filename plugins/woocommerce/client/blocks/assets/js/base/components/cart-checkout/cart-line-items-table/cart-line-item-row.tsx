@@ -21,11 +21,11 @@ import {
 } from '@woocommerce/blocks-checkout';
 import { forwardRef, useMemo } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/types';
-import { isBoolean, type Currency } from '@woocommerce/types';
+import { isBoolean, Currency } from '@woocommerce/types';
 import { getSetting, getSettingWithCoercion } from '@woocommerce/settings';
 import { Icon, trash } from '@wordpress/icons';
 import { calculateSaleAmount } from '@woocommerce/base-utils';
-import { dinero, transformScale, toSnapshot, type Dinero } from 'dinero.js';
+import { dinero, transformScale, toSnapshot, Dinero } from 'dinero.js';
 import { USD } from 'dinero.js/currencies'; // USD is used as a placeholder currency for arithmetic; actual formatting is handled elsewhere.
 
 /**

@@ -8,8 +8,8 @@ import type {
 } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
 import {
-	type PlainPaymentMethods,
-	type PlainExpressPaymentMethods,
+	PlainPaymentMethods,
+	PlainExpressPaymentMethods,
 } from '@woocommerce/types';
 
 /**

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { getSetting, STORE_PAGES } from '@woocommerce/settings';
-import { type CountryData } from '@woocommerce/types';
+import { CountryData } from '@woocommerce/types';
 import type {
 	OrderForm,
 	AddressForm,

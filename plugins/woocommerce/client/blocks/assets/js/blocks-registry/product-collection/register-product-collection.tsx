@@ -4,7 +4,7 @@
  */
 import { BlockVariation } from '@wordpress/blocks';
 import { addFilter } from '@wordpress/hooks';
-import { type EditorBlock } from '@woocommerce/types';
+import { EditorBlock } from '@woocommerce/types';
 import type { ElementType } from '@wordpress/element';
 import type { BlockEditProps, BlockAttributes } from '@wordpress/blocks';
 import {

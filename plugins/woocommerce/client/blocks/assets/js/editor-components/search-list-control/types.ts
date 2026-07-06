@@ -2,7 +2,7 @@
  * External dependencies
  */
 import type { InputHTMLAttributes, ReactNode } from 'react';
-import { type Require } from '@woocommerce/types';
+import { Require } from '@woocommerce/types';
 
 interface ItemProps< T extends object = object > {
 	// Depth, non-zero if the list is hierarchical.

@@ -9,8 +9,8 @@ import {
 import {
 	isObject,
 	objectHasProp,
-	type CartShippingRate,
-	type CartResponseTotals,
+	CartShippingRate,
+	CartResponseTotals,
 } from '@woocommerce/types';
 
 export const renderShippingTotalValue = ( values: CartResponseTotals ) => {

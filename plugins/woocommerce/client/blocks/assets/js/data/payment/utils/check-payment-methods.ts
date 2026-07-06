@@ -2,9 +2,9 @@
  * External dependencies
  */
 import {
-	type CanMakePaymentArgument,
-	type ExpressPaymentMethodConfigInstance,
-	type PaymentMethodConfigInstance,
+	CanMakePaymentArgument,
+	ExpressPaymentMethodConfigInstance,
+	PaymentMethodConfigInstance,
 } from '@woocommerce/types';
 import { CURRENT_USER_IS_ADMIN, getSetting } from '@woocommerce/settings';
 import { dispatch, select } from '@wordpress/data';

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { type CartResponseTotals } from '@woocommerce/types';
+import { CartResponseTotals } from '@woocommerce/types';
 
 export type IconType = 'cart' | 'bag' | 'bag-alt' | undefined;
 export type productCountVisibilityType =

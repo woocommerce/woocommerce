@@ -5,7 +5,7 @@ import {
 	RadioControl,
 	RadioControlOptionType,
 } from '@woocommerce/blocks-components';
-import { type CartShippingPackageShippingRate } from '@woocommerce/types';
+import { CartShippingPackageShippingRate } from '@woocommerce/types';
 import { useShippingData } from '@woocommerce/base-context';
 import clsx from 'clsx';
 import { sanitizeHTML } from '@woocommerce/sanitize';

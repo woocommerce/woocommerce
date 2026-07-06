@@ -5,7 +5,7 @@
  */
 import type { BlockAlignment } from '@wordpress/blocks';
 import type { ComponentType, Dispatch, SetStateAction } from 'react';
-import { type ProductResponseItem } from '@woocommerce/types';
+import { ProductResponseItem } from '@woocommerce/types';
 import { Icon, Placeholder, Spinner } from '@wordpress/components';
 import { ProductDataContextProvider } from '@woocommerce/shared-context';
 import clsx from 'clsx';

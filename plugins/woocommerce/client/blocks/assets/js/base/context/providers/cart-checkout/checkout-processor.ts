@@ -24,9 +24,9 @@ import {
 	getExpressPaymentMethods,
 } from '@woocommerce/blocks-registry';
 import {
-	type ApiResponse,
-	type CheckoutResponseSuccess,
-	type CheckoutResponseError,
+	ApiResponse,
+	CheckoutResponseSuccess,
+	CheckoutResponseError,
 	assertResponseIsValid,
 	responseTypes,
 } from '@woocommerce/types';

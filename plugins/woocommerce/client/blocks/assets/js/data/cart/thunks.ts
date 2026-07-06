@@ -2,14 +2,14 @@
  * External dependencies
  */
 import {
-	type Cart,
-	type CartResponse,
-	type ApiErrorResponse,
+	Cart,
+	CartResponse,
+	ApiErrorResponse,
 	isApiErrorResponse,
-	type ExtensionCartUpdateArgs,
-	type CartShippingPackageShippingRate,
-	type CartShippingRate,
-	type BillingAddressShippingAddress,
+	ExtensionCartUpdateArgs,
+	CartShippingPackageShippingRate,
+	CartShippingRate,
+	BillingAddressShippingAddress,
 } from '@woocommerce/types';
 import {
 	camelCaseKeys,
@@ -18,10 +18,10 @@ import {
 	triggerAddingToCartEvent,
 } from '@woocommerce/base-utils';
 import {
-	type CurriedSelectorsOf,
-	type ConfigOf,
-	type ActionCreatorsOf,
-	type DispatchFunction,
+	CurriedSelectorsOf,
+	ConfigOf,
+	ActionCreatorsOf,
+	DispatchFunction,
 } from '@wordpress/data/build-types/types';
 import { __ } from '@wordpress/i18n';
 import { cartStore } from '@woocommerce/block-data';

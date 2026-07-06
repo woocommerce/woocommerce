@@ -7,10 +7,10 @@ import { RemovableChip, TotalsItem } from '@woocommerce/blocks-components';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { getSetting } from '@woocommerce/settings';
 import {
-	type CartResponseCouponItemWithLabel,
-	type CartTotalsItem,
-	type Currency,
-	type LooselyMustHave,
+	CartResponseCouponItemWithLabel,
+	CartTotalsItem,
+	Currency,
+	LooselyMustHave,
 } from '@woocommerce/types';
 
 /**

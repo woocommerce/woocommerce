@@ -3,7 +3,7 @@
  */
 import { productFilterAttribute } from '@woocommerce/icons';
 import { getSetting } from '@woocommerce/settings';
-import { type AttributeSetting } from '@woocommerce/types';
+import { AttributeSetting } from '@woocommerce/types';
 import { registerBlockType } from '@wordpress/blocks';
 import { __, sprintf } from '@wordpress/i18n';
 

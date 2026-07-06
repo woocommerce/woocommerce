@@ -2,7 +2,7 @@
  * External dependencies
  */
 import type { ReactNode } from 'react';
-import { type ApiErrorResponse } from '@woocommerce/types';
+import { ApiErrorResponse } from '@woocommerce/types';
 
 /**
  * Internal dependencies
