@@ -1,6 +1,6 @@
 ---
 sidebar_label: Address autocomplete
-sidebar_position: 1
+sidebar_position: 7
 ---
 
 # Address Autocomplete Provider Implementation
