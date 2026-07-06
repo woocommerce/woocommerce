@@ -101,7 +101,7 @@ const ShippingRecommendations = () => {
 		: extensionsForCountry;
 
 	const hasVisibleExtensions = visibleExtensions.length > 0;
-	const shouldShowRecommendations =
+	const shouldTrackRecommendationsImpression =
 		! isRecommendationsHidden && hasVisibleExtensions;
 
 	const visiblePluginSlugs = visibleExtensions
@@ -110,7 +110,10 @@ const ShippingRecommendations = () => {
 
 	const impressionFired = useRef( false );
 	useEffect( () => {
-		if ( shouldShowRecommendations && ! impressionFired.current ) {
+		if (
+			shouldTrackRecommendationsImpression &&
+			! impressionFired.current
+		) {
 			recordEvent( 'shipping_partner_impression', {
 				context: 'settings',
 				country: normalizedCountry,
@@ -118,7 +121,11 @@ const ShippingRecommendations = () => {
 			} );
 			impressionFired.current = true;
 		}
-	}, [ shouldShowRecommendations, normalizedCountry, visiblePluginSlugs ] );
+	}, [
+		shouldTrackRecommendationsImpression,
+		normalizedCountry,
+		visiblePluginSlugs,
+	] );
 
 	if ( ! hasVisibleExtensions ) {
 		return (
@@ -136,14 +143,8 @@ const ShippingRecommendations = () => {
 	}
 
 	return (
-		<div
-			style={
-				shouldShowRecommendations ? { paddingBottom: 60 } : undefined
-			}
-		>
-			<ShippingTour
-				showShippingRecommendationsStep={ shouldShowRecommendations }
-			/>
+		<div style={ { paddingBottom: 60 } }>
+			<ShippingTour showShippingRecommendationsStep={ true } />
 			<ShippingRecommendationsList
 				dismissState={ recommendationsDismissState }
 			>
