@@ -71,16 +71,19 @@ class POSSessionHandler extends WC_Session_Handler {
 	}
 
 	/**
-	 * Always generate a guest-style customer ID.
+	 * Always generate a POS-prefixed guest customer ID.
 	 *
 	 * The parent returns the logged-in user's ID, which would make the
 	 * operator the customer and collide concurrent transactions processed
-	 * under the same account.
+	 * under the same account. The `pos_` prefix (instead of the web guest
+	 * `t_`) makes transaction sessions distinguishable from web guest
+	 * sessions, so tokens can never cross surfaces in either direction.
+	 * Length: the sessions table key is char(32), so 4 + 28 fills it exactly.
 	 *
 	 * @return string
 	 */
 	public function generate_customer_id() {
-		return wc_rand_hash( 't_', 30 );
+		return wc_rand_hash( 'pos_', 28 );
 	}
 
 	/**
@@ -114,11 +117,13 @@ class POSSessionHandler extends WC_Session_Handler {
 	/**
 	 * Resolve the transaction's customer ID from the Cart-Token header, if any.
 	 *
-	 * Only guest (`t_`) session IDs are accepted — a token minted for a
-	 * user-keyed web session must not be resumable through POS, mirroring the
-	 * restraint of core's session-restore paths.
+	 * Only `pos_`-prefixed transaction sessions are resumable here. Web
+	 * sessions — user-keyed (numeric) or guest (`t_`, the same prefix web
+	 * guests get) — must never resume as a POS transaction: a web shopper's
+	 * token replayed at the register would otherwise hand their live cart to
+	 * the POS surface.
 	 *
-	 * @return string Customer ID, or '' when there is no valid token.
+	 * @return string Customer ID, or '' when there is no valid POS token.
 	 */
 	private function get_customer_id_from_cart_token(): string {
 		$cart_token = wc_clean( wp_unslash( $_SERVER['HTTP_CART_TOKEN'] ?? '' ) );
@@ -129,6 +134,6 @@ class POSSessionHandler extends WC_Session_Handler {
 
 		$customer_id = (string) ( CartTokenUtils::get_cart_token_payload( $cart_token )['user_id'] ?? '' );
 
-		return 0 === strpos( $customer_id, 't_' ) ? $customer_id : '';
+		return 0 === strpos( $customer_id, 'pos_' ) ? $customer_id : '';
 	}
 }

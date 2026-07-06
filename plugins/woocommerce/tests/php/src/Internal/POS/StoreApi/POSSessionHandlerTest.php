@@ -68,7 +68,7 @@ class POSSessionHandlerTest extends WC_Unit_Test_Case {
 		$handler = new POSSessionHandler();
 		$id      = $handler->generate_customer_id();
 
-		$this->assertSame( 't_', substr( $id, 0, 2 ) );
+		$this->assertSame( 'pos_', substr( $id, 0, 4 ) );
 		$this->assertNotSame( (string) $operator_id, $id );
 		// Calling again must yield a fresh id — every transaction gets its own.
 		$this->assertNotSame( $id, $handler->generate_customer_id() );
@@ -84,7 +84,7 @@ class POSSessionHandlerTest extends WC_Unit_Test_Case {
 		$handler = new POSSessionHandler();
 		$handler->init();
 
-		$this->assertSame( 't_', substr( $handler->get_customer_id(), 0, 2 ) );
+		$this->assertSame( 'pos_', substr( $handler->get_customer_id(), 0, 4 ) );
 		$this->assertNotSame( (string) $operator_id, $handler->get_customer_id() );
 	}
 
@@ -110,20 +110,23 @@ class POSSessionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A token minted for a user-keyed (non-guest) session must not be
-	 * resumable through POS — it would hand the web account's cart to the
-	 * register.
+	 * Tokens minted for web sessions — user-keyed (numeric) or guest (`t_`,
+	 * the prefix web guests share) — must not resume as POS transactions: a
+	 * web shopper's token replayed at the register would hand their live cart
+	 * to the POS surface.
 	 *
-	 * @testdox init with a token for a non-guest session starts a fresh guest session instead.
+	 * @testdox init with a token for a web session (user or t_ guest) starts a fresh POS session instead.
 	 */
-	public function test_init_rejects_non_guest_token(): void {
-		$_SERVER['HTTP_CART_TOKEN'] = CartTokenUtils::get_cart_token( '123' );
+	public function test_init_rejects_web_session_tokens(): void {
+		foreach ( array( '123', 't_' . wc_rand_hash( '', 30 ) ) as $web_session_id ) {
+			$_SERVER['HTTP_CART_TOKEN'] = CartTokenUtils::get_cart_token( $web_session_id );
 
-		$handler = new POSSessionHandler();
-		$handler->init();
+			$handler = new POSSessionHandler();
+			$handler->init();
 
-		$this->assertNotSame( '123', $handler->get_customer_id() );
-		$this->assertSame( 't_', substr( $handler->get_customer_id(), 0, 2 ) );
+			$this->assertNotSame( $web_session_id, $handler->get_customer_id() );
+			$this->assertSame( 'pos_', substr( $handler->get_customer_id(), 0, 4 ) );
+		}
 	}
 
 	/**
@@ -135,7 +138,7 @@ class POSSessionHandlerTest extends WC_Unit_Test_Case {
 		$handler = new POSSessionHandler();
 		$handler->init();
 
-		$this->assertSame( 't_', substr( $handler->get_customer_id(), 0, 2 ) );
+		$this->assertSame( 'pos_', substr( $handler->get_customer_id(), 0, 4 ) );
 	}
 
 	/**
