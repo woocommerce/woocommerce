@@ -28,6 +28,12 @@ interface SettingsUIPageInterface {
 	/**
 	 * Build the canonical settings schema for a section.
 	 *
+	 * The `shell.sectionNavigation` key controls the sibling-section navigation
+	 * rendered by the Settings UI shell. Omit the key to let WooCommerce inject
+	 * the default navigation listing every section of the settings page, set a
+	 * custom array of `id`/`label`/`href`/`active` entries to own the navigation,
+	 * or set an empty array to render no shell navigation at all.
+	 *
 	 * @since 10.9.0
 	 *
 	 * @param string $section Section id. Empty string means the default section.
