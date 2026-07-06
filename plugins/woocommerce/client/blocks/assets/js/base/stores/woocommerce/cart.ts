@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { getConfig, store } from '@wordpress/interactivity';
+import { getConfig, getContext, store } from '@wordpress/interactivity';
 import type { AsyncAction, TypeYield } from '@wordpress/interactivity';
 import type {
 	Cart,
@@ -10,11 +10,13 @@ import type {
 	ApiErrorResponse,
 	CartResponseTotals,
 	Currency,
+	ProductResponseItem,
 } from '@woocommerce/types';
 import type {
 	Store as StoreNotices,
 	Notice,
 } from '@woocommerce/stores/store-notices';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
@@ -28,6 +30,15 @@ import {
 	type CycleSettleResult,
 } from './mutation-batcher';
 import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
+import {
+	type DraftItem,
+	getDraftExtensionProps,
+	isGenericExactPair,
+	narrowCandidates,
+	resolveExactlyOne,
+} from './cart-item-matching';
+
+export type { DraftItem } from './cart-item-matching';
 
 export type WooCommerceConfig = {
 	messages?: {
@@ -79,6 +90,41 @@ export type ClientCartItem = Omit<
 
 type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
 
+/**
+ * The shared `woocommerce` context namespace read by both shared stores. It
+ * carries the surface's product/cart identity (`productId`, `cartItemKey`).
+ * `cartItemFilter` is reserved for the T5 escape hatch and is not consumed here.
+ */
+export type SharedWooCommerceContext = {
+	productId?: number;
+	cartItemKey?: string;
+	cartItemFilter?: unknown;
+};
+
+/**
+ * The `itemInContext` / `findItem` envelope: the cart line (only when exactly
+ * one candidate survives the ladder), the editable context draft, and whether
+ * this configuration is in the cart.
+ *
+ * `cart` is the raw Store API cart line (`CartItem`) — never an optimistic
+ * in-flight item. Optimistic items lack a `key` and carry no `extensions` /
+ * `item_data`, so they can never be an exact pairing target; excluding them
+ * keeps the "cart" side of the envelope strictly server-truth, which is what
+ * consumers feeding `updateItem({ key })` require.
+ *
+ * `isInCart` is configuration-level: survivors AFTER narrowing > 0 — "THIS
+ * configuration is in the cart". It is `false` when the product is present
+ * only as lines the draft cannot account for (e.g. a decorated bundle child,
+ * or note-split lines with no matching draft props) — such surfaces fall back
+ * to plain add-button UI. "In the cart in any form" (banners) is a raw
+ * `state.cart.items` scan, not this flag.
+ */
+export type ItemEnvelope = {
+	cart?: CartItem;
+	draft?: DraftItem;
+	isInCart: boolean;
+};
+
 export type Store = {
 	state: {
 		findItemInCart: ( args: {
@@ -90,6 +136,24 @@ export type Store = {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
 		};
+		/**
+		 * Editable array of pure `cart/add-item` payloads. One draft per product
+		 * context (identity rule 3); `id` is the main/context product id and
+		 * doubles as the draft's identity. Direct mutation of draft objects is
+		 * legal (write policy).
+		 */
+		draftItems: DraftItem[];
+		/**
+		 * The envelope for the current shared context (`woocommerce`):
+		 * `{ cart, draft, isInCart }`. Read-only derived getter.
+		 */
+		itemInContext: ItemEnvelope;
+		/**
+		 * Resolve an envelope explicitly by `key` or `id` (no `filter` param —
+		 * that is T5). `key` bypasses the ladder (exact); `id` runs the ladder
+		 * against the context draft.
+		 */
+		findItem: ( args: { key?: string; id?: number } ) => ItemEnvelope;
 	};
 	actions: {
 		removeCartItem: ( key: string ) => Promise< void >;
@@ -105,6 +169,27 @@ export type Store = {
 			notices: Notice[],
 			removeOthers?: boolean
 		) => Promise< void >;
+		/**
+		 * ALWAYS posts `add-item` (never converts to update-item by client
+		 * matching — identity rule 5). Defaults to `itemInContext.draft`; falls
+		 * back to `{ id: productInContext id, quantity: 1 }`. Resolves with the
+		 * affected cart line from the batch response (provenance is a return
+		 * value, never stored on drafts).
+		 */
+		addItem: ( payload?: DraftItem ) => Promise< CartItem | undefined >;
+		updateItem: ( args: {
+			key: string;
+			quantity: number;
+		} ) => Promise< void >;
+		removeItem: ( key: string ) => Promise< void >;
+		refresh: () => Promise< void >;
+		/**
+		 * Merge a partial payload into the context draft (matched by product id),
+		 * creating it if missing. Returns the draft.
+		 */
+		upsertDraftItem: ( partialPayload: Partial< DraftItem > ) => DraftItem;
+		removeDraftItem: ( args?: { productId?: number } ) => void;
+		clearDraftItems: ( args?: { productId?: number } ) => void;
 	};
 };
 
@@ -437,6 +522,179 @@ async function sendCartRequest(
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
+/**
+ * Lazy cross-store read into `woocommerce/products`.
+ *
+ * The cart store needs the products store only for deterministic variation
+ * resolution (identity rule 6) — turning a draft's main product id + variation
+ * selection into the purchasable id that a cart line carries. This is a
+ * core-internal, documented lazy read (schema: "a lazy cross-store
+ * `store('woocommerce/products', …)` read"). We read it lazily rather than at
+ * module load so the products store's own registration order doesn't matter.
+ */
+function getProductsState(): ProductsStore[ 'state' ] | null {
+	try {
+		const { state: productsState } = store< ProductsStore >(
+			'woocommerce/products',
+			{},
+			{ lock: universalLock }
+		);
+		return productsState;
+	} catch {
+		// Products store not registered on this surface (e.g. cart/checkout
+		// pages that never load product data). Callers fall back to the draft's
+		// own id — correct for simple products, and there is no variation to
+		// resolve without product data anyway.
+		return null;
+	}
+}
+
+/**
+ * Resolve a draft's main/context product id + variation selection to the
+ * purchasable id that a matching cart line carries (identity rule 6).
+ *
+ * Cart lines expose the purchasable id in their `id` field — the variation id
+ * for a variation, the product id otherwise (Store API `CartItemSchema`). To
+ * pair a draft against lines we must resolve the same purchasable id the server
+ * would, which `findProduct` does deterministically (mirrors the server's
+ * `find_matching_product_variation`, T1). If the products store or the product
+ * is unavailable, or the selection is ambiguous, we degrade to the draft's own
+ * `id` — this is safe: for a simple product the id is already purchasable, and
+ * an unresolved variable selection simply won't match any variation line.
+ *
+ * @param draft The draft whose purchasable id we want.
+ * @return The resolved purchasable id (variation id or product id).
+ */
+function resolvePurchasableId( draft: DraftItem ): number {
+	const productsState = getProductsState();
+	if ( ! productsState ) {
+		return draft.id;
+	}
+
+	const resolved: ProductResponseItem | null = productsState.findProduct( {
+		id: draft.id,
+		selectedAttributes: ( draft.variation ?? null ) as
+			| SelectedAttributes[]
+			| null,
+	} );
+
+	return resolved?.id ?? draft.id;
+}
+
+/**
+ * Read the shared `woocommerce` context, or `null` when called outside a
+ * directive scope (e.g. from a plain module call). Out-of-scope reads degrade
+ * silently to "no context draft" rather than throwing.
+ */
+function getSharedContext(): SharedWooCommerceContext | null {
+	try {
+		return getContext< SharedWooCommerceContext >( 'woocommerce' ) ?? null;
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * Find the draft whose `id` matches a product id (identity rule 3: one draft
+ * per product context, keyed by the main/context product id).
+ *
+ * @param productId The main/context product id.
+ * @return The matching draft, or undefined.
+ */
+function findDraftByProductId(
+	productId: number | undefined
+): DraftItem | undefined {
+	if ( productId === undefined ) {
+		return undefined;
+	}
+	return state.draftItems.find( ( draft ) => draft.id === productId );
+}
+
+/**
+ * Type guard: only server-confirmed cart lines (which carry a `key`) can be an
+ * exact pairing target. Optimistic in-flight items lack a key and carry no
+ * `extensions` / `item_data`.
+ */
+function isServerCartItem(
+	item: OptimisticCartItem | CartItem
+): item is CartItem {
+	return typeof ( item as CartItem ).key === 'string' && 'name' in item;
+}
+
+/**
+ * Resolve the `{ cart, draft, isInCart }` envelope via the resolution ladder.
+ *
+ * Ladder (generic-narrowing path only — the `cartItemFilter` escape hatch is
+ * T5, deliberately not implemented here):
+ *
+ * 1. `cartItemKey` present → that exact line. Filters never run; cart surfaces
+ *    are always exact. `isInCart` reflects whether the line exists.
+ * 2. Candidates = lines whose purchasable id matches the draft's resolved id
+ *    (variation-id resolution only — no attribute matching at cart level,
+ *    Raluca's rule). Then generic narrowing: per-namespace deep-compare of the
+ *    draft's namespaced props vs the line's `extensions[ns]`, plus the presence
+ *    heuristic (a line with visible `item_data`/`extensions` the draft doesn't
+ *    account for is excluded).
+ * 3. Exactly one survivor → `cart`; zero or several → undefined. NEVER
+ *    first-match fallback. `isInCart` = survivors AFTER narrowing > 0 ("THIS
+ *    configuration is in the cart") — pre-narrowing candidates do NOT count:
+ *    a product present only as lines the draft cannot account for (e.g. a
+ *    decorated bundle child) yields `isInCart: false`, so the surface renders
+ *    plain add-button UI instead of in-cart UI without a safe mutation target.
+ *    Invisible bare twins both survive → `isInCart: true` with `cart`
+ *    undefined (genuinely ambiguous presence).
+ *
+ * @param opts.draft The draft to pair (usually the context draft).
+ * @param opts.key   An explicit cart item key (bypasses everything).
+ * @return The resolved envelope.
+ */
+function resolveEnvelope( opts: {
+	draft?: DraftItem | undefined;
+	key?: string | undefined;
+} ): ItemEnvelope {
+	const { draft, key } = opts;
+
+	// Step 1: explicit key wins — exact, no filters, no narrowing.
+	if ( key ) {
+		const line = state.cart.items.find( ( item ) => item.key === key ) as
+			| CartItem
+			| undefined;
+		return {
+			...( line && { cart: line } ),
+			...( draft && { draft } ),
+			isInCart: Boolean( line ),
+		};
+	}
+
+	// Without a draft (and without a key) there is nothing to pair against.
+	if ( ! draft ) {
+		return { isInCart: false };
+	}
+
+	// Step 2: id + variation candidates (purchasable-id resolution only).
+	const purchasableId = resolvePurchasableId( draft );
+	const candidates = state.cart.items.filter(
+		( item ): item is CartItem =>
+			isServerCartItem( item ) && item.id === purchasableId
+	);
+
+	// Generic narrowing (step 2), then both envelope values derive from the
+	// SAME survivor set (step 3): `cart` needs exactly one survivor;
+	// `isInCart` needs at least one. Lines the draft cannot account for are
+	// not survivors and therefore never count as "this configuration".
+	const draftProps = getDraftExtensionProps( draft );
+	const survivors = narrowCandidates( candidates, ( line ) =>
+		isGenericExactPair( draftProps, line )
+	);
+	const cart = resolveExactlyOne( survivors );
+
+	return {
+		...( cart && { cart } ),
+		draft,
+		isInCart: survivors.length > 0,
+	};
+}
+
 // The cart store now lives under the `woocommerce/cart` namespace. The bare
 // `woocommerce` namespace holds only the shared context and
 // `wp_interactivity_config` (see the alias at the bottom of this file).
@@ -451,6 +709,53 @@ const { actions } = store< Store >(
 	'woocommerce/cart',
 	{
 		state: {
+			// Editable array of pure add-item payloads. Plain writable slot (like
+			// `cart`): surfaces seed and mutate it directly (write policy). One
+			// draft per product context, keyed by `id` (identity rule 3).
+			draftItems: [],
+
+			/**
+			 * The `{ cart, draft, isInCart }` envelope for the current shared
+			 * `woocommerce` context. Derived read-only getter.
+			 *
+			 * `draft` is the `draftItems` entry whose `id` === context.productId
+			 * (the returned object IS editable — mutating it mutates the draft).
+			 * `cart` and `isInCart` come from the resolution ladder.
+			 */
+			get itemInContext(): ItemEnvelope {
+				const context = getSharedContext();
+				const draft = findDraftByProductId( context?.productId );
+				const key = context?.cartItemKey;
+				return resolveEnvelope( { draft, key } );
+			},
+
+			/**
+			 * Explicit envelope lookup by `key` or `id` (no `filter` param —
+			 * that is T5). `key` bypasses the ladder; `id` runs the ladder
+			 * against the context draft for that product id (or a bare draft
+			 * built from the id when no context draft exists).
+			 */
+			findItem( {
+				key,
+				id,
+			}: {
+				key?: string;
+				id?: number;
+			} ): ItemEnvelope {
+				if ( key ) {
+					const draft =
+						id !== undefined
+							? findDraftByProductId( id )
+							: undefined;
+					return resolveEnvelope( { draft, key } );
+				}
+
+				const draft =
+					findDraftByProductId( id ) ??
+					( id !== undefined ? { id } : undefined );
+				return resolveEnvelope( { draft } );
+			},
+
 			findItemInCart( {
 				id,
 				key,
@@ -483,6 +788,11 @@ const { actions } = store< Store >(
 			},
 		},
 		actions: {
+			/**
+			 * @deprecated (T4) Use `removeItem( key )`. Thin delegating wrapper
+			 * kept so untouched consumers and the `woocommerce` alias keep
+			 * working until T6/T7 migrate them. Dies in T10.
+			 */
 			*removeCartItem( key: string ): AsyncAction< void > {
 				// Contribute this request's changes to the cycle. Sync events
 				// and notices are fired once per settle cycle by the batcher's
@@ -514,6 +824,14 @@ const { actions } = store< Store >(
 				}
 			},
 
+			/**
+			 * @deprecated (T4) Use `addItem( payload )` / `updateItem({ key,
+			 * quantity })`. Thin delegating wrapper retaining the legacy
+			 * add-or-update-by-client-matching behavior so untouched consumers
+			 * and the `woocommerce` alias keep working until T6/T7 migrate them.
+			 * Dies in T10. New code MUST NOT rely on the implicit
+			 * update-item-on-match path here — identity rule 5 ("adds are adds").
+			 */
 			*addCartItem(
 				{ id, key, quantity, quantityToAdd, variation }: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
@@ -622,6 +940,12 @@ const { actions } = store< Store >(
 				}
 			},
 
+			/**
+			 * @deprecated (T4) Use `refresh()`. Thin delegating wrapper kept for
+			 * the `woocommerce` alias and untouched consumers until T6/T7
+			 * migrate them. Dies in T10. (Still the real implementation the
+			 * module bootstrap and the sync-event listener call.)
+			 */
 			*refreshCartItems(): AsyncAction< void > {
 				// Skip if queue is processing - it will apply server state when done
 				if ( cartQueue?.getStatus().isProcessing ) {
@@ -742,6 +1066,251 @@ const { actions } = store< Store >(
 						.forEach( ( id ) => noticeActions.removeNotice( id ) );
 				}
 			},
+
+			// ---- New T4 API ----
+
+			/**
+			 * Add an item to the cart. ALWAYS posts `add-item` — never converts
+			 * to `update-item` by client matching (identity rule 5, "adds are
+			 * adds"; PR #65869). The server owns line identity: two adds that
+			 * differ only in identity-affecting `cart_item_data` become two
+			 * lines; two that don't get merged server-side.
+			 *
+			 * Payload resolution:
+			 * 1. explicit `payload` argument, else
+			 * 2. `itemInContext.draft`, else
+			 * 3. `{ id: productInContext id, quantity: 1 }` fallback (a bare
+			 *    Product Button with no seeded draft).
+			 *
+			 * The draft is POSTed as-is: the `add-item` endpoint accepts a
+			 * variable parent id + full `variation` array and resolves the
+			 * variation id server-side via `find_matching_product_variation`
+			 * (verified in `CartController::parse_variation_data`), so no
+			 * client-side purchasable-id swap is needed at send time.
+			 *
+			 * Resolves with the affected cart line from the batch response so
+			 * callers can keep their own draft↔line link (provenance is a return
+			 * value, never stored on drafts). Does NOT clear drafts — draft death
+			 * is surface-owned (T6).
+			 */
+			*addItem(
+				payload?: DraftItem
+			): AsyncAction< CartItem | undefined > {
+				// Resolve the payload: explicit → context draft → fallback.
+				let itemPayload = payload;
+				if ( ! itemPayload ) {
+					const context = getSharedContext();
+					const contextDraft = findDraftByProductId(
+						context?.productId
+					);
+					if ( contextDraft ) {
+						itemPayload = contextDraft;
+					} else if ( context?.productId !== undefined ) {
+						itemPayload = { id: context.productId, quantity: 1 };
+					}
+				}
+
+				if ( ! itemPayload || itemPayload.id === undefined ) {
+					// Nothing to add — no payload, no context draft, no product
+					// in context. Surface a doubt via console rather than throw.
+					// eslint-disable-next-line no-console
+					console.error(
+						'addItem: no payload, context draft, or product in context to add.'
+					);
+					return undefined;
+				}
+
+				const { id, quantity, variation } = itemPayload;
+				const targetQuantity =
+					typeof quantity === 'number' ? quantity : 1;
+
+				// Build the add-item body. The draft is the payload; strip the
+				// bookkeeping-free reserved keys plus carry every namespaced
+				// extension prop through to the server untouched (they may drive
+				// `cart_item_data` via `woocommerce_store_api_add_to_cart_data`).
+				const extensionProps = getDraftExtensionProps(
+					itemPayload as Record< string, unknown >
+				);
+				const body = {
+					id,
+					quantity: targetQuantity,
+					...( variation && { variation } ),
+					...extensionProps,
+				};
+
+				// Contribute to the settle cycle (add semantics). Matches the
+				// deprecated addCartItem's contribution for a fresh add.
+				accumulateCartCycle( {
+					quantityChanges: { productsPendingAdd: [ id ] },
+					didAdd: true,
+					showNotices: true,
+				} );
+
+				// Optimistic item: a keyless line the reconcile will replace.
+				// `type` is a best-effort placeholder (there is no purchasable
+				// type on the draft) until the server response commits the real
+				// line; a variation selection implies a variation line.
+				const optimisticItem: OptimisticCartItem = {
+					id,
+					quantity: targetQuantity,
+					type: variation ? 'variation' : 'simple',
+					...( variation && {
+						variation: variation as CartVariationItem[],
+					} ),
+				};
+
+				try {
+					const result = ( yield sendCartRequest( state, {
+						path: '/wc/store/v1/cart/add-item',
+						method: 'POST',
+						body,
+						applyOptimistic: () => {
+							state.cart.items.push( optimisticItem );
+							cartCycle.optimisticSnapshot = JSON.parse(
+								JSON.stringify( state.cart )
+							);
+						},
+					} ) ) as MutationResult< Cart >;
+
+					if ( ! result.success ) {
+						return undefined;
+					}
+
+					// Resolve the affected line from the committed cart via the
+					// ladder (identity resolution is the server's, we just read
+					// it back). `state.cart` is the committed response here.
+					return resolveEnvelope( { draft: itemPayload } ).cart;
+				} catch ( error ) {
+					actions.showNoticeError( error as Error );
+					return undefined;
+				}
+			},
+
+			/**
+			 * Update a server-confirmed line's quantity by key. Mutations use an
+			 * explicit key (identity rule 5) — never an inferred pairing.
+			 */
+			*updateItem( {
+				key,
+				quantity,
+			}: {
+				key: string;
+				quantity: number;
+			} ): AsyncAction< void > {
+				const existingItem = state.cart.items.find(
+					( item ) => item.key === key
+				);
+
+				accumulateCartCycle( {
+					quantityChanges: { cartItemsPendingQuantity: [ key ] },
+					didAdd: true,
+					showNotices: true,
+				} );
+
+				try {
+					yield sendCartRequest( state, {
+						path: '/wc/store/v1/cart/update-item',
+						method: 'POST',
+						body: { key, quantity },
+						applyOptimistic: () => {
+							if ( existingItem ) {
+								const isSoldIndividually =
+									isCartItem( existingItem ) &&
+									existingItem.sold_individually;
+								if ( ! isSoldIndividually ) {
+									existingItem.quantity = quantity;
+								}
+							}
+							cartCycle.optimisticSnapshot = JSON.parse(
+								JSON.stringify( state.cart )
+							);
+						},
+					} );
+				} catch ( error ) {
+					actions.showNoticeError( error as Error );
+				}
+			},
+
+			/**
+			 * Remove a line by key. Delegates to the deprecated `removeCartItem`
+			 * wrapper (identical behavior); the new name is the T4 public API.
+			 */
+			*removeItem( key: string ): AsyncAction< void > {
+				yield actions.removeCartItem( key );
+			},
+
+			/**
+			 * Refresh the cart from the server. Delegates to the deprecated
+			 * `refreshCartItems` wrapper.
+			 */
+			*refresh(): AsyncAction< void > {
+				yield actions.refreshCartItems();
+			},
+
+			/**
+			 * Merge a partial payload into the current context draft (matched by
+			 * the payload's `id`, else the context `productId`), creating the
+			 * draft if missing. Returns the (editable) draft. A convenience, not
+			 * a gatekeeper — direct draft mutation is equally valid.
+			 */
+			upsertDraftItem( partialPayload: Partial< DraftItem > ): DraftItem {
+				const context = getSharedContext();
+				const targetId = partialPayload.id ?? context?.productId;
+
+				if ( targetId === undefined ) {
+					throw new Error(
+						'upsertDraftItem: no product id in the payload or context.'
+					);
+				}
+
+				const existing = findDraftByProductId( targetId );
+				if ( existing ) {
+					Object.assign( existing, partialPayload, { id: targetId } );
+					return existing;
+				}
+
+				const draft = {
+					...partialPayload,
+					id: targetId,
+				} as DraftItem;
+				state.draftItems.push( draft );
+				return draft;
+			},
+
+			/**
+			 * Remove the draft for a product id (defaults to context.productId).
+			 */
+			removeDraftItem( {
+				productId,
+			}: { productId?: number } = {} ): void {
+				const context = getSharedContext();
+				const targetId = productId ?? context?.productId;
+				if ( targetId === undefined ) {
+					return;
+				}
+				state.draftItems = state.draftItems.filter(
+					( draft ) => draft.id !== targetId
+				);
+			},
+
+			/**
+			 * Clear drafts. With a `productId` (or the context product id), clears
+			 * only that draft; called with an explicit `{}`/no context it clears
+			 * all drafts.
+			 */
+			clearDraftItems( {
+				productId,
+			}: { productId?: number } = {} ): void {
+				const context = getSharedContext();
+				const targetId = productId ?? context?.productId;
+				if ( targetId === undefined ) {
+					state.draftItems = [];
+					return;
+				}
+				state.draftItems = state.draftItems.filter(
+					( draft ) => draft.id !== targetId
+				);
+			},
 		},
 	},
 	{ lock: universalLock }
@@ -765,12 +1334,16 @@ const { actions } = store< Store >(
  *   implementation, no divergent copies. Those functions close over the
  *   module-level `state` (the `woocommerce/cart` proxy), so they operate on the
  *   real cart state regardless of which namespace invoked them.
- * - `cart` is exposed as a **getter** that reads `state.cart` live. iAPI would
- *   otherwise deep-*copy* a plain-object `cart` into a separate `woocommerce`
- *   proxy (breaking cross-namespace reactivity); a getter is copied by
- *   descriptor and re-reads the single reactive source on every access, so
- *   consumers reading `wooState.cart` stay in sync with mutations applied to
- *   `woocommerce/cart`.
+ * - `cart` (and `draftItems`) are exposed as **getters** that read the live
+ *   `state.*` slot. iAPI would otherwise deep-*copy* a plain-object/array into a
+ *   separate `woocommerce` proxy (breaking cross-namespace reactivity); a getter
+ *   is copied by descriptor and re-reads the single reactive source on every
+ *   access, so consumers reading through the alias stay in sync with mutations
+ *   applied to `woocommerce/cart`.
+ * - `itemInContext` / `findItem` are copied by descriptor (getter / function),
+ *   same as `findItemInCart`, and close over the module-level `state`. Note
+ *   that when read *through the alias*, `getContext('woocommerce')` still reads
+ *   the same shared context namespace, so the envelope resolves identically.
  * - Both stores are created with the same `universalLock`, so the alias
  *   registration passes the lock check and no store is unlocked/published.
  */
@@ -781,7 +1354,14 @@ store< Store >(
 			get cart() {
 				return state.cart;
 			},
+			get draftItems() {
+				return state.draftItems;
+			},
 			findItemInCart: state.findItemInCart,
+			findItem: state.findItem,
+			get itemInContext() {
+				return state.itemInContext;
+			},
 		},
 		actions,
 	},

@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add draft items, the itemInContext envelope, findItem, and the add/update/remove/refresh + draft actions to the woocommerce/cart iAPI store, with a generic-narrowing resolution ladder (per-namespace extensions compare + presence heuristic, exactly-one rule, no first-match fallback) and matching first-paint PHP closures. Existing addCartItem/removeCartItem/refreshCartItems remain as deprecated delegating wrappers so untouched consumers and the woocommerce alias keep working.

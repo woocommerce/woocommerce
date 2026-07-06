@@ -52,6 +52,13 @@ class BlocksSharedState {
 	private static ?array $blocks_shared_cart_state = null;
 
 	/**
+	 * Whether the cart derived-state getters have been registered.
+	 *
+	 * @var bool
+	 */
+	private static bool $cart_getters_registered = false;
+
+	/**
 	 * Prevent caching on certain pages.
 	 *
 	 * @return void
@@ -136,13 +143,27 @@ class BlocksSharedState {
 			// Cart state now lives under the `woocommerce/cart` namespace. The
 			// bare `woocommerce` namespace holds only the shared context and
 			// interactivity config.
+			//
+			// `draftItems` seeds an empty array: server-side there are no drafts
+			// yet in general (surfaces seed their own drafts during render — see
+			// the draft "birth" section of the shared-stores schema; that lands
+			// with the Add to Cart + Options refactor in T6). Seeding the empty
+			// array here guarantees the reactive slot exists at first paint so
+			// directives reading `state.draftItems` / `state.itemInContext` don't
+			// resolve against `undefined` before hydration.
 			wp_interactivity_state(
 				self::$cart_namespace,
 				array(
-					'cart'     => self::$blocks_shared_cart_state,
-					'noticeId' => '',
+					'cart'       => self::$blocks_shared_cart_state,
+					'draftItems' => array(),
+					'noticeId'   => '',
 				)
 			);
+
+			// Derived-state closures for the `itemInContext` envelope, so
+			// server-rendered directives that read the envelope resolve at first
+			// paint (parity with the JS getters in cart.ts).
+			self::register_cart_getters();
 
 			// TRANSITIONAL: also seed the same cart array under the legacy
 			// `woocommerce` namespace. Server-side directive processing has no
@@ -162,6 +183,309 @@ class BlocksSharedState {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Register the cart derived-state getters once.
+	 *
+	 * These closures mirror the JS `itemInContext` envelope getter and its
+	 * resolution ladder in
+	 * client/blocks/assets/js/base/stores/woocommerce/cart.ts, so that
+	 * server-rendered directives that read the envelope resolve at first paint
+	 * (matching hydration). Because they read from wp_interactivity_state() and
+	 * wp_interactivity_get_context() at call time, they only need to be
+	 * registered once.
+	 *
+	 * Boundary notes — where PHP cannot fully mirror the JS ladder:
+	 *
+	 * - **Drafts**: server-side `draftItems` is empty in general (surfaces seed
+	 *   their own drafts during render; that is T6). With no draft, `draft` is
+	 *   null and generic narrowing has nothing to compare, so the envelope
+	 *   resolves conservatively: an explicit `cartItemKey` still yields an exact
+	 *   line (step 1), but without a draft the id+variation path cannot pair a
+	 *   line and `cart` stays null. This matches the JS behavior for the same
+	 *   (draft-less) inputs.
+	 * - **Purchasable-id resolution**: the JS ladder resolves a draft's parent
+	 *   id + variation to the purchasable id via the products store's
+	 *   `findProduct`. Server-side we only have a draft to resolve when one was
+	 *   seeded; when a draft exists we match on its `id` directly (already the
+	 *   purchasable id for simple products). Deterministic variation resolution
+	 *   server-side is deferred to the surface that seeds the draft (T6).
+	 * - **`cartItemFilter`**: a JS predicate cannot run during PHP seeding.
+	 *   Filtered surfaces render conservatively server-side (open item; the
+	 *   filter itself is T5).
+	 *
+	 * @return void
+	 */
+	private static function register_cart_getters(): void {
+		if ( self::$cart_getters_registered ) {
+			return;
+		}
+
+		self::$cart_getters_registered = true;
+
+		$cart_namespace = self::$cart_namespace;
+
+		wp_interactivity_state(
+			$cart_namespace,
+			array(
+				'itemInContext' => function () use ( $cart_namespace ) {
+					$context = wp_interactivity_get_context( self::$settings_namespace );
+					$state   = wp_interactivity_state( $cart_namespace );
+					$items   = $state['cart']['items'] ?? array();
+
+					$draft = self::find_context_draft( $state, $context );
+
+					// Ladder step 1: an explicit cartItemKey yields that exact
+					// line. Filters never run; cart surfaces are always exact.
+					$key = $context['cartItemKey'] ?? null;
+					if ( $key ) {
+						$line = self::find_line_by_key( $items, $key );
+						return array(
+							'cart'     => $line,
+							'draft'    => $draft,
+							'isInCart' => null !== $line,
+						);
+					}
+
+					// Without a draft there is nothing to pair against (see the
+					// boundary notes on register_cart_getters). Resolve
+					// conservatively.
+					if ( null === $draft ) {
+						return array(
+							'cart'     => null,
+							'draft'    => null,
+							'isInCart' => false,
+						);
+					}
+
+					// Ladder step 2/3: id-matched candidates, generic narrowing.
+					// Both envelope values derive from the SAME survivor set:
+					// `cart` needs exactly one survivor (never first-match);
+					// `isInCart` needs at least one — pre-narrowing candidates
+					// do NOT count, so a product present only as lines the
+					// draft cannot account for (e.g. a decorated bundle child)
+					// yields isInCart false.
+					$candidates = self::find_id_candidates( $items, $draft );
+					$survivors  = self::narrow_candidates( $candidates, $draft );
+					$cart       = 1 === count( $survivors ) ? $survivors[0] : null;
+
+					return array(
+						'cart'     => $cart,
+						'draft'    => $draft,
+						'isInCart' => count( $survivors ) > 0,
+					);
+				},
+			)
+		);
+	}
+
+	/**
+	 * Find the draft for the current context product id (identity rule 3: one
+	 * draft per product context, keyed by the main/context product id).
+	 *
+	 * @param array $state   The cart store state.
+	 * @param array $context The shared `woocommerce` context.
+	 * @return array|null The matching draft, or null.
+	 */
+	private static function find_context_draft( array $state, array $context ): ?array {
+		if ( ! isset( $context['productId'] ) ) {
+			return null;
+		}
+
+		$product_id = $context['productId'];
+		foreach ( $state['draftItems'] ?? array() as $draft ) {
+			if ( isset( $draft['id'] ) && $draft['id'] === $product_id ) {
+				return $draft;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Find a cart line by its server key (ladder step 1).
+	 *
+	 * @param array  $items Cart line items.
+	 * @param string $key   The cart item key.
+	 * @return array|null The matching line, or null.
+	 */
+	private static function find_line_by_key( array $items, string $key ): ?array {
+		foreach ( $items as $item ) {
+			if ( ( $item['key'] ?? null ) === $key ) {
+				return $item;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Candidate lines whose purchasable id matches the draft's id (ladder step
+	 * 2). Server-side we match on the draft's own id — the purchasable id for
+	 * simple products; deterministic variation resolution for a seeded draft is
+	 * the seeding surface's responsibility (T6).
+	 *
+	 * @param array $items Cart line items.
+	 * @param array $draft The context draft.
+	 * @return array Candidate lines.
+	 */
+	private static function find_id_candidates( array $items, array $draft ): array {
+		$draft_id = $draft['id'] ?? null;
+		if ( null === $draft_id ) {
+			return array();
+		}
+
+		return array_values(
+			array_filter(
+				$items,
+				static function ( $item ) use ( $draft_id ) {
+					return isset( $item['key'] ) && ( $item['id'] ?? null ) === $draft_id;
+				}
+			)
+		);
+	}
+
+	/**
+	 * Narrow id-matched candidates to the generic-exact-pair survivors —
+	 * mirrors `narrowCandidates` + `isGenericExactPair` in
+	 * cart-item-matching.ts. The envelope derives BOTH cart-side values from
+	 * this survivor set: `cart` (exactly one survivor, never first-match) and
+	 * `isInCart` (survivors > 0 — "THIS configuration is in the cart"; lines
+	 * the draft cannot account for are not survivors and never count).
+	 *
+	 * @param array $candidates Id-matched candidate lines.
+	 * @param array $draft      The context draft.
+	 * @return array The surviving lines (re-indexed).
+	 */
+	private static function narrow_candidates( array $candidates, array $draft ): array {
+		$draft_props = self::get_draft_extension_props( $draft );
+
+		return array_values(
+			array_filter(
+				$candidates,
+				static function ( $line ) use ( $draft_props ) {
+					return self::is_generic_exact_pair( $draft_props, $line );
+				}
+			)
+		);
+	}
+
+	/**
+	 * Extract the namespaced extension request params from a draft — every key
+	 * that is not a reserved add-item envelope key. Mirrors
+	 * `getDraftExtensionProps` in cart-item-matching.ts.
+	 *
+	 * @param array $draft The draft.
+	 * @return array Namespace => value map.
+	 */
+	private static function get_draft_extension_props( array $draft ): array {
+		$reserved = array( 'id', 'quantity', 'variation', 'key', 'type' );
+		$props    = array();
+
+		foreach ( $draft as $draft_key => $value ) {
+			if ( ! in_array( $draft_key, $reserved, true ) ) {
+				$props[ $draft_key ] = $value;
+			}
+		}
+
+		return $props;
+	}
+
+	/**
+	 * Whether a draft is a generic-exact-pair with a line: every non-empty
+	 * draft prop deep-matches the line's `extensions[ns]` AND the line carries
+	 * no unaccounted visible content. Mirrors `isGenericExactPair` in
+	 * cart-item-matching.ts.
+	 *
+	 * @param array $draft_props Draft extension props.
+	 * @param array $line        Candidate line.
+	 * @return bool True on an exact pair.
+	 */
+	private static function is_generic_exact_pair( array $draft_props, array $line ): bool {
+		return self::draft_props_match_line_extensions( $draft_props, $line )
+			&& ! self::line_has_unaccounted_content( $draft_props, $line );
+	}
+
+	/**
+	 * Per-namespace deep-compare of draft props vs line `extensions[ns]`, with
+	 * absent/empty normalization. Mirrors `draftPropsMatchLineExtensions`.
+	 *
+	 * @param array $draft_props Draft extension props.
+	 * @param array $line        Candidate line.
+	 * @return bool True when every non-empty draft prop matches.
+	 */
+	private static function draft_props_match_line_extensions( array $draft_props, array $line ): bool {
+		$extensions = $line['extensions'] ?? array();
+
+		foreach ( $draft_props as $ns => $draft_value ) {
+			$line_value = $extensions[ $ns ] ?? null;
+
+			if ( self::is_empty_value( $draft_value ) && self::is_empty_value( $line_value ) ) {
+				continue;
+			}
+
+			if ( $draft_value !== $line_value ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Presence heuristic — mirrors `lineHasUnaccountedContent`. A line with a
+	 * non-empty extension the draft has no prop for is always unaccounted;
+	 * visible `item_data` counts as unaccounted only when the line exposes no
+	 * extension content the draft positively matched.
+	 *
+	 * @param array $draft_props Draft extension props.
+	 * @param array $line        Candidate line.
+	 * @return bool True when the line has unaccounted visible content.
+	 */
+	private static function line_has_unaccounted_content( array $draft_props, array $line ): bool {
+		$extensions = $line['extensions'] ?? array();
+
+		$line_namespaces_with_content = array();
+		foreach ( $extensions as $ns => $value ) {
+			if ( ! self::is_empty_value( $value ) ) {
+				$line_namespaces_with_content[] = $ns;
+			}
+		}
+
+		foreach ( $line_namespaces_with_content as $ns ) {
+			if ( self::is_empty_value( $draft_props[ $ns ] ?? null ) ) {
+				return true;
+			}
+		}
+
+		if ( count( $line_namespaces_with_content ) > 0 ) {
+			return false;
+		}
+
+		foreach ( $line['item_data'] ?? array() as $entry ) {
+			if ( empty( $entry['hidden'] ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Whether a value counts as "empty" for absent/empty normalization: null,
+	 * '', or an empty array. Mirrors `isEmptyValue` (the JS `{}`/`[]` cases both
+	 * map to PHP empty arrays).
+	 *
+	 * @param mixed $value The value to test.
+	 * @return bool True when empty.
+	 */
+	private static function is_empty_value( $value ): bool {
+		if ( null === $value || '' === $value ) {
+			return true;
+		}
+
+		return is_array( $value ) && 0 === count( $value );
 	}
 
 	/**
