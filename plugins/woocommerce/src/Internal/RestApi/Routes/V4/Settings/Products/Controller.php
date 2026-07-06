@@ -12,6 +12,8 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Products;
 
 use WP_Error;
+use Automattic\WooCommerce\Enums\DimensionUnit;
+use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Products\Schema\ProductSettingsSchema;
 use WP_REST_Server;
@@ -243,7 +245,7 @@ class Controller extends AbstractController {
 				 *
 				 * @param array $weight_units Array of weight unit strings.
 				 */
-				$valid_units = apply_filters( 'woocommerce_weight_units', array( 'kg', 'g', 'lbs', 'oz' ) );
+				$valid_units = apply_filters( 'woocommerce_weight_units', WeightUnit::get_all() );
 				if ( ! in_array( $value, $valid_units, true ) ) {
 					return new WP_Error(
 						'rest_invalid_param',
@@ -261,7 +263,7 @@ class Controller extends AbstractController {
 				 *
 				 * @param array $dimension_units Array of dimension unit strings.
 				 */
-				$valid_units = apply_filters( 'woocommerce_dimension_units', array( 'm', 'cm', 'mm', 'in', 'yd' ) );
+				$valid_units = apply_filters( 'woocommerce_dimension_units', DimensionUnit::get_all() );
 				if ( ! in_array( $value, $valid_units, true ) ) {
 					return new WP_Error(
 						'rest_invalid_param',

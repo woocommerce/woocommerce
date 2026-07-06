@@ -158,7 +158,7 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test getting email settings when block email editor is disabled.
-	 * Reply-to fields should not be present, but design fields should be present.
+	 * Reply-to and design fields should be present.
 	 */
 	public function test_get_item_without_block_email_editor() {
 		// Disable block email editor feature.
@@ -180,10 +180,10 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'woocommerce_email_from_name', $data['values'] );
 		$this->assertArrayHasKey( 'woocommerce_email_from_address', $data['values'] );
 
-		// Reply-to fields should NOT be present when block email editor is disabled.
-		$this->assertArrayNotHasKey( 'woocommerce_email_reply_to_enabled', $data['values'] );
-		$this->assertArrayNotHasKey( 'woocommerce_email_reply_to_name', $data['values'] );
-		$this->assertArrayNotHasKey( 'woocommerce_email_reply_to_address', $data['values'] );
+		// Reply-to fields should be present when block email editor is disabled.
+		$this->assertArrayHasKey( 'woocommerce_email_reply_to_enabled', $data['values'] );
+		$this->assertArrayHasKey( 'woocommerce_email_reply_to_name', $data['values'] );
+		$this->assertArrayHasKey( 'woocommerce_email_reply_to_address', $data['values'] );
 
 		// Design fields SHOULD be present when block email editor is disabled.
 		$this->assertArrayHasKey( 'woocommerce_email_header_image', $data['values'] );
@@ -197,15 +197,15 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'woocommerce_email_text_color', $data['values'] );
 		$this->assertArrayHasKey( 'woocommerce_email_footer_text_color', $data['values'] );
 
-		// Verify the email_options group exists and does not contain reply-to fields.
-		if ( isset( $data['groups']['email_options'] ) && isset( $data['groups']['email_options']['fields'] ) ) {
-			$field_ids = array_column( $data['groups']['email_options']['fields'], 'id' );
-			$this->assertContains( 'woocommerce_email_from_name', $field_ids );
-			$this->assertContains( 'woocommerce_email_from_address', $field_ids );
-			$this->assertNotContains( 'woocommerce_email_reply_to_enabled', $field_ids );
-			$this->assertNotContains( 'woocommerce_email_reply_to_name', $field_ids );
-			$this->assertNotContains( 'woocommerce_email_reply_to_address', $field_ids );
-		}
+		// Verify the email_options group exists and contains reply-to fields.
+		$this->assertArrayHasKey( 'email_options', $data['groups'] );
+		$this->assertArrayHasKey( 'fields', $data['groups']['email_options'] );
+		$field_ids = array_column( $data['groups']['email_options']['fields'], 'id' );
+		$this->assertContains( 'woocommerce_email_from_name', $field_ids );
+		$this->assertContains( 'woocommerce_email_from_address', $field_ids );
+		$this->assertContains( 'woocommerce_email_reply_to_enabled', $field_ids );
+		$this->assertContains( 'woocommerce_email_reply_to_name', $field_ids );
+		$this->assertContains( 'woocommerce_email_reply_to_address', $field_ids );
 
 		// Verify email template options group exists with design fields.
 		$this->assertArrayHasKey( 'email_template_options', $data['groups'] );

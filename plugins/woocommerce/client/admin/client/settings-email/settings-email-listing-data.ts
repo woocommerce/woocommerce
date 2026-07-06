@@ -7,7 +7,7 @@ import { settingsStore } from '@woocommerce/data';
 import { useState, useCallback, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 // @ts-expect-error - We need to use this /wp see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/#dataviews
-import { View } from '@wordpress/dataviews/wp'; // eslint-disable-line @woocommerce/dependency-group
+import { View } from '@wordpress/dataviews/wp';
 
 /**
  * Internal dependencies
@@ -17,6 +17,7 @@ import {
 	EmailStatus,
 	TemplateStatus,
 } from './settings-email-listing-slotfill';
+import { shouldShowReviewUpdate } from './settings-email-listing-update-state';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 /**
@@ -105,12 +106,32 @@ export const useTransactionalEmails = (
 						? rawVersion
 						: null;
 
+				const rawBackfilled = meta?._wc_email_backfilled;
+				const wasBackfilled =
+					rawBackfilled === true ||
+					rawBackfilled === '1' ||
+					rawBackfilled === 1;
+
+				// PHP serializes the registry's current version under
+				// `current_version` (snake) on the slotfill payload; project to
+				// `currentVersion` (camel) for the row's TS contract.
+				const rawCurrentVersion = (
+					emailType as unknown as { current_version?: string | null }
+				 ).current_version;
+				const currentVersion: string | null =
+					typeof rawCurrentVersion === 'string' &&
+					rawCurrentVersion.length > 0
+						? rawCurrentVersion
+						: null;
+
 				return {
 					...emailType,
 					link: post?.link || '',
 					status: status as EmailStatus,
 					templateStatus,
 					templateVersion,
+					currentVersion,
+					wasBackfilled,
 				};
 			} ),
 		[ emailTypesData, emailPosts, postIdsMap ]
@@ -212,10 +233,9 @@ export const useTransactionalEmails = (
 		const selected = Array.isArray( updatesFilter.value )
 			? ( updatesFilter.value as string[] )
 			: [ updatesFilter.value as string ];
-		const emailValue =
-			email.templateStatus === 'core_updated_customized'
-				? 'available'
-				: 'none';
+		const emailValue = shouldShowReviewUpdate( email )
+			? 'available'
+			: 'none';
 		return selected.includes( emailValue );
 	} );
 

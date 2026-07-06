@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Security hardening: pass allowed_classes => false to unserialize() in LookupDataStore to prevent PHP Object Injection via crafted cached data.

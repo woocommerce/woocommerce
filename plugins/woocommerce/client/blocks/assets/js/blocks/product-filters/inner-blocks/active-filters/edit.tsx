@@ -14,6 +14,7 @@ import { InitialDisabled } from '../../components/initial-disabled';
 import { EXCLUDED_BLOCKS } from '../../constants';
 import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { filtersPreview } from './constants';
+import type { RemovableItemsContext } from '../../../../types/type-defs/removable-items';
 
 const Edit = () => {
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
@@ -32,9 +33,10 @@ const Edit = () => {
 			<InitialDisabled>
 				<BlockContextProvider
 					value={ {
-						filterData: {
+						'woocommerce/removableItems': {
 							items: filtersPreview,
-						},
+							storeNamespace: 'woocommerce/product-filters',
+						} satisfies RemovableItemsContext,
 					} }
 				>
 					{ children }

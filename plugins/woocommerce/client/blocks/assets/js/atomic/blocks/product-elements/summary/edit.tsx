@@ -132,7 +132,7 @@ const LinkToDescription = ( {
 	return (
 		<p>
 			<RichText
-				identifier="linkToDescrption"
+				identifier="linkToDescription"
 				className="wc-block-components-product-summary__more-link"
 				tagName="a"
 				aria-label={ __( '“Read more” link text', 'woocommerce' ) }

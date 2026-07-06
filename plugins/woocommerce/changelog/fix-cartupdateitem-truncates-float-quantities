@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix/normalize the Store API cart/update-item route truncating decimal quantities when dispatching the cart item updated hook.

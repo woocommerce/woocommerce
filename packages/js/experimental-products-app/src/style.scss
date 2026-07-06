@@ -6,15 +6,49 @@
 
 .product_page_woocommerce-products-dashboard {
 	background-color: unset;
+}
+
+.product_page_woocommerce-products-dashboard #wpcontent {
+	padding: 0;
+}
+
+.product_page_woocommerce-products-dashboard #wpbody-content {
+	padding-bottom: 0;
+}
+
+.product_page_woocommerce-products-dashboard #wpfooter {
+	display: none;
+}
+
+.product_page_woocommerce-products-dashboard,
+#woocommerce-variations-classic-root,
+.woocommerce-product-edit__drawer-portal {
+	@import "./fields/grouped_products/style.scss";
 	@import "./fields/components/list-item/style.scss";
+	@import "./fields/components/searchable-chip-select/style.scss";
+	@import "./fields/components/taxonomy-edit/style.scss";
 	@import "./fields/downloadable/style.scss";
 	@import "./fields/images/style.scss";
+	@import "./fields/schedule_sale/style.scss";
 	@import "./fields/stock/style.scss";
 	@import "./fields/visibility_summary/style.scss";
+	--wp-ui-drawer-z-index: 100000;
+	--wp-ui-select-z-index: 100001;
 }
 
 .product_page_woocommerce-products-dashboard-snackbar {
 	@include snackbar-container;
+	z-index: 100002;
+}
+
+.woocommerce-experimental-products-app-error {
+	box-sizing: border-box;
+	min-height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
+	padding: var(--wpds-dimension-padding-2xl, 24px);
+}
+
+.woocommerce-experimental-products-app-error__description {
+	max-width: 520px;
 }
 
 .product_page_woocommerce-products-dashboard .edit-site-layout__content {
@@ -29,10 +63,12 @@
 }
 
 .woocommerce-product-list {
-	height: 85vh;
+	height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
 }
 
 .woocommerce-product-list__toolbar {
+	margin: var(--wpds-dimension-padding-xs, 4px)
+		calc(var(--wpds-dimension-padding-2xl, 24px) * -1) 0;
 	padding: 0 var(--wpds-dimension-padding-2xl, 24px);
 }
 
@@ -40,25 +76,67 @@
 	height: 100%;
 }
 
-.woocommerce-product-edit-layout__region {
-	flex: 0 0 380px;
-	height: 85vh;
-	min-width: 380px;
-	max-width: 380px !important;
+.woocommerce-product-list-page__header {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	padding: var(--wpds-dimension-padding-lg, 16px)
+		var(--wpds-dimension-padding-2xl, 24px)
+		0;
+	border-bottom: var(--wpds-border-width-xs, 1px) solid
+		var(--wpds-color-stroke-surface-neutral-weak, #ddd);
 }
 
-.woocommerce-product-edit-layout__panel {
-	height: 100%;
-	background: #fcfcfc;
-	border-left: 1px solid var(--wp-components-color-gray-300, #ddd);
-	box-shadow: -1px 0 0 rgba(0, 0, 0, 0.02);
+.woocommerce-product-list-page__header-title {
+	margin: 0;
+	overflow: hidden;
+	color: var(--wpds-color-fg-content-neutral, #1e1e1e);
+	font-family: var(--wpds-typography-font-family-heading);
+	font-size: var(--wpds-typography-font-size-lg, 15px);
+	font-weight: var(--wpds-typography-font-weight-medium, 500);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.woocommerce-product-list-page__header-actions {
+	width: auto;
+	flex-shrink: 0;
+}
+
+// Wrap the Beta feedback Badge in a link without inheriting the default
+// underlined anchor styling — the Badge already provides its own affordance.
+.woocommerce-product-list-page__feedback-link {
+	display: inline-flex;
+	text-decoration: none;
+	color: inherit;
+
+	&:hover,
+	&:focus-visible {
+		text-decoration: none;
+	}
+}
+
+.woocommerce-product-list-page__header-subtitle {
+	margin: 0;
+	color: var(--wpds-color-fg-content-neutral-weak, #707070);
+	font-size: var(--wpds-typography-font-size-md, 13px);
+	line-height: var(--wpds-typography-line-height-md, 24px);
+}
+
+// Temporary override until DataViews supports title links without default underlines.
+#woocommerce-products-dashboard a.dataviews-title-field {
+	text-decoration: none;
+
+	&:hover {
+		text-decoration: underline;
+	}
 }
 
 .woocommerce-product-edit {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
-	background: #fcfcfc;
+	padding-top: var(--wpds-dimension-padding-2xl, 24px);
 }
 
 .woocommerce-product-edit__header {
@@ -66,15 +144,17 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 12px;
-	padding: 12px 16px;
+	padding: 12px var(--wpds-dimension-padding-2xl, 24px);
 	border-bottom: 1px solid var(--wp-components-color-gray-300, #ddd);
 }
 
-.woocommerce-product-edit__title {
+// Qualified to beat `@wordpress/ui`'s unlayered `:is(h1-h6).heading` defense rule.
+// Matches the design-system Drawer header treatment (heading-xl, 20px).
+.woocommerce-product-edit__drawer .woocommerce-product-edit__title {
 	margin: 0;
-	font-size: 15px;
+	font-size: 20px;
 	font-weight: 500;
-	line-height: 20px;
+	line-height: 28px;
 	color: var(--wp-components-color-foreground, #1e1e1e);
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -84,7 +164,7 @@
 .woocommerce-product-edit__loading,
 .woocommerce-product-edit__empty-state {
 	display: flex;
-	flex: 1;
+	min-height: 100%;
 	align-items: center;
 	justify-content: center;
 	padding: var(--wpds-dimension-padding-xl, 20px);
@@ -92,6 +172,47 @@
 
 .woocommerce-product-edit__form {
 	flex: 1;
-	overflow: auto;
-	padding: 16px;
+
+	// TODO: Improve grouped DataForm section spacing at the DataViews library level.
+	> .dataforms-layouts__wrapper {
+		gap: 0 !important;
+	}
+
+	.dataforms-layouts-regular__header :is(h1, h2, h3, h4, h5, h6) {
+		margin: 0 !important;
+		font-size: 15px !important;
+	}
+
+	.dataforms-layouts-row__header {
+		gap: 0 !important;
+		margin-bottom: 8px;
+
+		:is(h1, h2, h3, h4, h5, h6) {
+			margin: 0 !important;
+			color: var(--wpds-color-fg-content-neutral, #1e1e1e);
+			font-family: var(--wpds-typography-font-family-body);
+			font-size: 11px !important;
+			font-weight: 500;
+			line-height: 1.4;
+			text-transform: uppercase;
+		}
+	}
+
+	.dataforms-layouts-regular__header + .dataforms-layouts__wrapper {
+		gap: 16px !important;
+		margin-top: 16px;
+	}
+
+	.dataforms-layouts__wrapper + .dataforms-layouts-regular__header {
+		margin-top: 32px;
+	}
 }
+
+.woocommerce-product-edit__footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+@import "./product-list/empty-state/style.scss";
+@import "./variation-view/style.scss";

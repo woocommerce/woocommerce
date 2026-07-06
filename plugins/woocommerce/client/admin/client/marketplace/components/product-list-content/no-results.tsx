@@ -18,7 +18,7 @@ export default function NoResults( props: {
 	type: SearchResultType;
 	showHeading?: boolean;
 	heading?: string;
-} ): JSX.Element {
+} ): React.JSX.Element {
 	const [ productGroups, setProductGroups ] = useState< ProductGroup[] >();
 	const [ isLoading, setIsLoading ] = useState( false );
 	const productGroupsForSearchType = {

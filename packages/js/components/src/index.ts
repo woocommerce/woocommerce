@@ -24,7 +24,10 @@ export { ImageGallery, ImageGalleryItem } from './image-gallery';
 export { default as ImageUpload } from './image-upload';
 export { Link } from './link';
 export { default as List } from './list';
-export { MediaUploader, MediaUploaderErrorCallback } from './media-uploader';
+export {
+	MediaUploader,
+	type MediaUploaderErrorCallback,
+} from './media-uploader';
 export { default as MenuItem } from './ellipsis-menu/menu-item';
 export { default as MenuTitle } from './ellipsis-menu/menu-title';
 export { default as OrderStatus } from './order-status';
@@ -49,7 +52,7 @@ export {
 } from './experimental-select-control';
 export {
 	MenuItem as __experimentalSelectControlMenuItem,
-	MenuItemProps as __experimentalSelectControlMenuItemProps,
+	type MenuItemProps as __experimentalSelectControlMenuItemProps,
 } from './experimental-select-control/menu-item';
 export {
 	Menu as __experimentalSelectControlMenu,
@@ -59,7 +62,7 @@ export { default as ScrollTo } from './scroll-to';
 export { Sortable } from './sortable';
 export { ListItem } from './list-item';
 export { default as Spinner } from './spinner';
-export { default as Stepper, StepperProps } from './stepper';
+export { default as Stepper, type StepperProps } from './stepper';
 export { default as SummaryList } from './summary';
 export { default as SummaryListPlaceholder } from './summary/placeholder';
 export { SummaryNumberPlaceholder } from './summary/placeholder';
@@ -89,12 +92,12 @@ export * from './product-fields';
 export {
 	SlotContextProvider,
 	useSlotContext,
-	SlotContextType,
-	SlotContextHelpersType,
+	type SlotContextType,
+	type SlotContextHelpersType,
 } from './slot-context';
 export {
 	TreeControl as __experimentalTreeControl,
-	Item as TreeItemType,
+	type Item as TreeItemType,
 } from './experimental-tree-control';
 export { SelectTree as __experimentalSelectTreeControl } from './experimental-select-tree-control';
 export { default as TreeSelectControl } from './tree-select-control';

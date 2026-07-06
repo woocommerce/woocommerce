@@ -166,8 +166,6 @@ class Filterer {
 	public function get_filtered_term_product_counts( $term_ids, $taxonomy, $query_type ) {
 		global $wpdb;
 
-		$use_lookup_table = $this->filtering_via_lookup_table_is_active();
-
 		$tax_query  = \WC_Query::get_main_tax_query();
 		$meta_query = \WC_Query::get_main_meta_query();
 		if ( 'or' === $query_type ) {
@@ -179,14 +177,22 @@ class Filterer {
 		}
 
 		$meta_query = new \WP_Meta_Query( $meta_query );
-		$tax_query  = new \WP_Tax_Query( $tax_query );
+		$tax_query  = new TaxQuery( $tax_query );
 
-		if ( $use_lookup_table ) {
+		if ( $this->filtering_via_lookup_table_is_active() ) {
 			$query = $this->get_product_counts_query_using_lookup_table( $tax_query, $meta_query, $taxonomy, $term_ids );
 		} else {
 			$query = $this->get_product_counts_query_not_using_lookup_table( $tax_query, $meta_query, $term_ids );
 		}
 
+		/**
+		 * Customizes the SQL query that populates product counts in layered navigation.
+		 *
+		 * @since 10.9.0 the query was optimized to remove the join on term_relationships in favor of a nested select from term_relationships.
+		 * @since 2.6.1
+		 *
+		 * @param array $query Query fragments (the available fragments are: select, from, join, where, group_by).
+		 */
 		$query     = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query );
 		$query_sql = implode( ' ', $query );
 
@@ -205,10 +211,50 @@ class Filterer {
 			$counts                       = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
 			$cached_counts[ $query_hash ] = $counts;
 			if ( true === $cache ) {
+				$cached_counts = self::limit_layered_nav_count_cache_entries( $cached_counts, $query_hash );
 				set_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ), $cached_counts, DAY_IN_SECONDS );
 			}
 		}
 		return array_map( 'absint', (array) $cached_counts[ $query_hash ] );
+	}
+
+	/**
+	 * Limit the number of query result entries stored in a layered nav count transient.
+	 *
+	 * The layered nav count cache stores many query hashes inside a single transient per taxonomy.
+	 * Without a cap, bot or faceted-search enumeration can grow that single option without bound.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param array  $cached_counts Cached count entries keyed by query hash.
+	 * @param string $current_hash  Hash for the query that was just added or read.
+	 * @return array Bounded cached count entries.
+	 */
+	public static function limit_layered_nav_count_cache_entries( array $cached_counts, string $current_hash ): array {
+		/**
+		 * Maximum number of query result entries to store in each layered nav count transient.
+		 *
+		 * Set to 0 to disable the cap.
+		 *
+		 * @hook woocommerce_layered_nav_count_cache_max_entries
+		 * @since 10.9.0
+		 *
+		 * @param int $max_entries Maximum number of cached query result entries. Default 1000.
+		 * @return int
+		 */
+		$max_entries = (int) apply_filters( 'woocommerce_layered_nav_count_cache_max_entries', 1000 );
+
+		if ( $max_entries < 1 || count( $cached_counts ) <= $max_entries ) {
+			return $cached_counts;
+		}
+
+		if ( isset( $cached_counts[ $current_hash ] ) ) {
+			$current_counts = $cached_counts[ $current_hash ];
+			unset( $cached_counts[ $current_hash ] );
+			$cached_counts[ $current_hash ] = $current_counts;
+		}
+
+		return array_slice( $cached_counts, -$max_entries, null, true );
 	}
 
 	/**
@@ -306,7 +352,6 @@ class Filterer {
 			$query['where'] .= ' AND ' . $search_query_sql;
 		}
 
-		$query['group_by'] = 'GROUP BY terms.term_id';
 		$query['group_by'] = "GROUP BY {$this->lookup_table_name}.term_id";
 
 		return $query;

@@ -23,12 +23,6 @@ function Features() {
 
 	const sortedFeatureNames = Object.keys( features ).sort();
 
-	const afterToggleCallback = {
-		'product-block-editor': () => {
-			window.location.reload();
-		},
-	};
-
 	return (
 		<div id="wc-admin-test-helper-features">
 			<h2>
@@ -51,7 +45,6 @@ function Features() {
 								checked={ features[ feature_name ] }
 								onChange={ async () => {
 									await toggleFeature( feature_name );
-									afterToggleCallback[ feature_name ]?.();
 								} }
 							/>
 						</li>

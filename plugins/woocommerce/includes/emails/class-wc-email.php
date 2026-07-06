@@ -33,6 +33,13 @@ if ( class_exists( 'WC_Email', false ) ) {
 class WC_Email extends WC_Settings_API {
 
 	/**
+	 * Skip-reason identifier used when the email has no recipient address.
+	 *
+	 * @since 10.9.0
+	 */
+	public const SKIP_REASON_NO_RECIPIENT = 'no_recipient';
+
+	/**
 	 * Email method ID.
 	 *
 	 * @var string
@@ -1116,6 +1123,99 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
+	 * Send the email notification when enabled and a recipient is available.
+	 *
+	 * This is the standard helper used by trigger() methods. It checks whether the email
+	 * is enabled and whether a recipient address exists, fires appropriate action hooks for
+	 * the disabled or skipped outcome, and otherwise delegates to send() with the
+	 * standard content parameters.
+	 *
+	 * Subclasses that intentionally bypass the enabled check (e.g. manually-triggered invoice
+	 * emails, POS receipts) should NOT call this method and should continue to call send()
+	 * directly.
+	 *
+	 * @since 10.9.0
+	 * @return bool Whether the email was sent successfully.
+	 */
+	protected function send_notification(): bool {
+		if ( ! $this->is_enabled() ) {
+			/**
+			 * Fires when a transactional email is not sent because the email type is disabled.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @param string   $email_id The email type ID (e.g. `customer_processing_order`).
+			 * @param WC_Email $email    The WC_Email instance.
+			 */
+			do_action( 'woocommerce_email_disabled', $this->id, $this );
+			return false;
+		}
+
+		$recipient = $this->get_recipient();
+
+		if ( ! $recipient ) {
+			/**
+			 * Fires when a transactional email is not sent for a reason other than being disabled.
+			 *
+			 * The $reason parameter identifies why the email was not sent:
+			 * - WC_Email::SKIP_REASON_NO_RECIPIENT: No recipient address was available at send time.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @param string   $reason   Short identifier for why the email was skipped.
+			 * @param string   $email_id The email type ID.
+			 * @param WC_Email $email    The WC_Email instance.
+			 */
+			do_action( 'woocommerce_email_skipped', self::SKIP_REASON_NO_RECIPIENT, $this->id, $this );
+			return false;
+		}
+
+		return $this->send(
+			$recipient,
+			$this->get_subject(),
+			$this->get_content(),
+			$this->get_headers(),
+			$this->get_attachments()
+		);
+	}
+
+	/**
+	 * Send the email when a recipient is available, regardless of the enabled setting.
+	 *
+	 * This helper is intended for manually-triggered emails (e.g. invoice resend, POS receipts)
+	 * that intentionally bypass the enabled/disabled check. It fires
+	 * `woocommerce_email_skipped` with reason {@see WC_Email::SKIP_REASON_NO_RECIPIENT} when
+	 * no recipient is available so the outcome is still observable via the EmailLogger, and
+	 * otherwise delegates to send().
+	 *
+	 * @since 10.9.0
+	 * @return bool Whether the email was sent successfully.
+	 */
+	protected function send_if_recipient(): bool {
+		$recipient = $this->get_recipient();
+
+		if ( ! $recipient ) {
+			/**
+			 * Fires when a transactional email is not sent for a reason other than being disabled.
+			 *
+			 * This action is documented in includes/emails/class-wc-email.php
+			 *
+			 * @since 10.9.0
+			 */
+			do_action( 'woocommerce_email_skipped', self::SKIP_REASON_NO_RECIPIENT, $this->id, $this );
+			return false;
+		}
+
+		return $this->send(
+			$recipient,
+			$this->get_subject(),
+			$this->get_content(),
+			$this->get_headers(),
+			$this->get_attachments()
+		);
+	}
+
+	/**
 	 * Send an email.
 	 *
 	 * @param string $to Email to.
@@ -1133,7 +1233,7 @@ class WC_Email extends WC_Settings_API {
 		$message              = apply_filters( 'woocommerce_mail_content', $this->style_inline( $message ) );
 		$mail_callback        = apply_filters( 'woocommerce_mail_callback', 'wp_mail', $this );
 		$mail_callback_params = apply_filters( 'woocommerce_mail_callback_params', array( $to, wp_specialchars_decode( $subject ), $message, $headers, $attachments ), $this );
-		$return               = $mail_callback( ...$mail_callback_params );
+		$return               = (bool) $mail_callback( ...$mail_callback_params );
 
 		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );

@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 
@@ -72,10 +73,13 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 				return;
 			}
 
-			$button_link           = $this->get_button_link( $task );
-			$completed_tasks_count = $this->get_completed_tasks_count();
-			$step_number           = $this->get_completed_tasks_count() + 1;
-			$tasks_count           = count( $this->get_tasks() );
+			$button_link            = $this->get_button_link( $task );
+			$task_header            = $this->get_task_header( $task );
+			$task_is_in_progress    = $task->is_in_progress();
+			$task_in_progress_label = $task_is_in_progress ? $task->in_progress_label() : '';
+			$completed_tasks_count  = $this->get_completed_tasks_count();
+			$step_number            = $completed_tasks_count + 1;
+			$tasks_count            = count( $this->get_tasks() );
 
 			// Given 'r' (circle element's r attr), dashoffset = ((100-$desired_percentage)/100) * PI * (r*2).
 			$progress_percentage = ( $completed_tasks_count / $tasks_count ) * 100;
@@ -83,6 +87,68 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 			$circle_dashoffset   = ( ( 100 - $progress_percentage ) / 100 ) * ( pi() * ( $circle_r * 2 ) );
 
 			include __DIR__ . '/views/html-admin-dashboard-setup.php';
+		}
+
+		/**
+		 * Get dashboard widget header data for a task.
+		 *
+		 * @param Task $task Task.
+		 * @return array
+		 */
+		private function get_task_header( $task ) {
+			$asset_url           = WC()->plugin_url() . '/assets/';
+			$task_json           = $task->get_json();
+			$default_task_header = array(
+				'title'        => $task->get_title(),
+				'content'      => $task_json['content'] ?? '',
+				'button_label' => $task_json['actionLabel'] ?? $task->get_title(),
+				'image_url'    => $asset_url . 'images/dashboard-widget-setup.png',
+				'image_alt'    => __( 'WooCommerce setup illustration', 'woocommerce' ),
+			);
+			$task_images         = array(
+				'store_details'        => array(
+					'image_url' => $asset_url . 'images/task_list/store-details-illustration.png',
+					'image_alt' => __( 'Store location illustration', 'woocommerce' ),
+				),
+				'customize-store'      => array(
+					'image_url' => $asset_url . 'images/task_list/customize-store-illustration.svg',
+					'image_alt' => __( 'Customize your store illustration', 'woocommerce' ),
+				),
+				'tax'                  => array(
+					'image_url' => $asset_url . 'images/task_list/tax-illustration.svg',
+					'image_alt' => __( 'Tax illustration', 'woocommerce' ),
+				),
+				'shipping'             => array(
+					'image_url' => $asset_url . 'images/task_list/shipping-illustration.svg',
+					'image_alt' => __( 'Shipping illustration', 'woocommerce' ),
+				),
+				'marketing'            => array(
+					'image_url' => $asset_url . 'images/task_list/sales-illustration.svg',
+					'image_alt' => __( 'Marketing illustration', 'woocommerce' ),
+				),
+				'payments'             => array(
+					'image_url' => $asset_url . 'images/task_list/payment-illustration.svg',
+					'image_alt' => __( 'Payment illustration', 'woocommerce' ),
+				),
+				'woocommerce-payments' => array(
+					'image_url' => $asset_url . 'images/task_list/payment-illustration.svg',
+					'image_alt' => __( 'Payment illustration', 'woocommerce' ),
+				),
+				'products'             => array(
+					'image_url' => $asset_url . 'images/task_list/sales-section-illustration.svg',
+					'image_alt' => __( 'Products illustration', 'woocommerce' ),
+				),
+				'purchase'             => array(
+					'image_url' => $asset_url . 'images/task_list/purchase-illustration.png',
+					'image_alt' => __( 'Purchase illustration', 'woocommerce' ),
+				),
+				'launch-your-store'    => array(
+					'image_url' => $asset_url . 'images/task_list/launch-your-store-illustration.svg',
+					'image_alt' => __( 'Launch your store illustration', 'woocommerce' ),
+				),
+			);
+
+			return array_merge( $default_task_header, $task_images[ $task->get_id() ] ?? array() );
 		}
 
 		/**
@@ -165,7 +231,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		/**
 		 * Get the next task.
 		 *
-		 * @return array|null
+		 * @return Task|null
 		 */
 		private function get_next_task() {
 			foreach ( $this->get_tasks() as $task ) {

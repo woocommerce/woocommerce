@@ -47,6 +47,7 @@ dist/
 oclif.manifest.json
 
 # Project files
+.pnpm-store/
 node_modules/
 vendor/
 
@@ -58,6 +59,7 @@ package-lock.json
 
 # wp-env config
 .wp-env.override.json
+.wp-env.test.override.json
 
 # Unit tests
 tmp/
@@ -126,3 +128,5 @@ CLAUDE.local.md
 
 # Docusaurus
 .docusaurus
+
+.mcp.json

@@ -2,51 +2,59 @@
  * External dependencies
  */
 import type { BlockEditProps } from '@wordpress/blocks';
-import type { ReactNode } from 'react';
 
-export type BlockAttributes = {
-	productId?: string;
-	isPreview: boolean;
-};
+/**
+ * Internal dependencies
+ */
+import type { SelectableItem } from '../../types/type-defs/selectable-items';
+import type { VisualAttributeTerm } from '../../base/utils/visual-attribute-terms';
 
-export type EditProps = BlockEditProps< BlockAttributes >;
-
-export type FilterOptionItem = (
-	| {
-			label: string;
-			ariaLabel?: string;
-	  }
-	| {
-			label: ReactNode;
-			ariaLabel: string;
-	  }
- ) & {
-	value: string;
-	selected?: boolean;
-	count: number;
-	id?: number;
+// ----------------------------------------
+// Filter-specific item fields
+// ----------------------------------------
+export type FilterItemFields = {
+	count?: number;
+	termId?: number;
 	parent?: number;
 	depth?: number;
 	menuOrder?: number;
+	attributeQueryType?: 'and' | 'or';
+	visual?: VisualAttributeTerm;
 };
 
-export type FilterBlockContext = {
-	filterData: {
-		isLoading: boolean;
-		items?: FilterOptionItem[];
-		price?: {
-			minPrice: number;
-			minRange: number;
-			maxPrice: number;
-			maxRange: number;
-		};
-		showCounts?: boolean;
-	};
+export type FilterOptionItem = SelectableItem< FilterItemFields >;
+
+// ----------------------------------------
+// Parent store context + active-filter shape
+// ----------------------------------------
+export type ActiveFilterItem = {
+	type: string;
+	value: string;
+	attributeQueryType?: 'and' | 'or';
+	activeLabel: string;
 };
 
-export type Color = {
-	slug?: string;
-	class?: string;
-	name?: string;
-	color: string;
+export type ProductFiltersContext = {
+	isOverlayOpened: boolean;
+	params: Record< string, string >;
+	activeFilters: ActiveFilterItem[];
+	items?: FilterOptionItem[];
+	item: FilterOptionItem;
+	activeLabelTemplate: string;
+	filterType: string;
+	// Set when Product Filters is a descendant of Product Collection. Null
+	// signals the frontend to fall back to the global interactivity config
+	// (sibling-block layout).
+	forcePageReload?: boolean | null;
 };
+
+// ----------------------------------------
+// Block props
+// ----------------------------------------
+export type BlockAttributes = {
+	productId?: string;
+	isPreview: boolean;
+	showFilterDrawer?: boolean;
+};
+
+export type EditProps = BlockEditProps< BlockAttributes >;

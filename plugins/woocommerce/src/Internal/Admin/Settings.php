@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Marketplace_Suggestions;
@@ -143,7 +144,7 @@ class Settings {
 
 		//phpcs:ignore
 		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );
-		$preload_data_endpoints['jetpackStatus'] = '/jetpack/v4/connection';
+
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$preload_data = array_reduce(
 				array_values( $preload_data_endpoints ),
@@ -221,10 +222,18 @@ class Settings {
 		//phpcs:ignore
 		$settings['variationTitleAttributesSeparator'] = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', new \WC_Product() );
 
+		$settings = $this->add_settings_ui_schema( $settings );
+
+		// Performance note: refer back to https://github.com/woocommerce/woocommerce/pull/41092: unconditionally loading /jetpack/v4/connection.
+		// As automattic/jetpack-connection package is a direct dependency, we can return the Jetpack connection status via its public API.
+		$settings['dataEndpoints'] = $settings['dataEndpoints'] ?? array();
+		try {
+			$settings['dataEndpoints']['jetpackStatus'] = \Automattic\Jetpack\Connection\REST_Connector::connection_status( false );
+		} catch ( \Throwable $e ) {
+			$settings['dataEndpoints']['jetpackStatus'] = array();
+		}
+
 		if ( ! empty( $preload_data_endpoints ) ) {
-			$settings['dataEndpoints'] = isset( $settings['dataEndpoints'] )
-				? $settings['dataEndpoints']
-				: array();
 			foreach ( $preload_data_endpoints as $key => $endpoint ) {
 				// Handle error case: rest_do_request() doesn't guarantee success.
 				if ( empty( $preload_data[ $endpoint ] ) ) {
@@ -397,6 +406,47 @@ class Settings {
 				$settings['wcAdminSettings'][ $setting['id'] ] = $setting['value'];
 			}
 		}
+		return $settings;
+	}
+
+	/**
+	 * Add the settings UI schema for the current classic settings page.
+	 *
+	 * @param array $settings Array of component settings.
+	 * @return array
+	 */
+	private function add_settings_ui_schema( array $settings ): array {
+		try {
+			if ( ! class_exists( SettingsUIRequestContext::class ) ) {
+				return $settings;
+			}
+
+			$context = SettingsUIRequestContext::get_current();
+		} catch ( \Throwable $e ) {
+			return $settings;
+		}
+
+		if ( ! $context ) {
+			return $settings;
+		}
+
+		$schema = $context->get_schema();
+		if ( ! is_array( $schema ) ) {
+			return $settings;
+		}
+
+		$page_id     = $context->get_page_id();
+		$section_key = $context->get_current_section_key();
+
+		if ( ! isset( $settings['settingsUI'] ) || ! is_array( $settings['settingsUI'] ) ) {
+			$settings['settingsUI'] = array();
+		}
+		if ( ! isset( $settings['settingsUI'][ $page_id ] ) || ! is_array( $settings['settingsUI'][ $page_id ] ) ) {
+			$settings['settingsUI'][ $page_id ] = array();
+		}
+
+		$settings['settingsUI'][ $page_id ][ $section_key ] = $schema;
+
 		return $settings;
 	}
 }

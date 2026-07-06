@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Remove redundant variations table checkbox border-color override; inherit Gutenberg's WP 7.0 CheckboxControl default ($gray-900).

@@ -24,9 +24,6 @@ const fieldDefinition = {
 
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	...fieldDefinition,
-	isVisible: ( item ) => {
-		return !! item.on_sale || !! item.sale_price;
-	},
 	isValid: {
 		custom: ( item ) => validateSalePrice( item ),
 	},

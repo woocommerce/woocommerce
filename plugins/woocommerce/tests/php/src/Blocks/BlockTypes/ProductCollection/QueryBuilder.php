@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
+use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
 use Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection\Utils;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -642,14 +643,76 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test the random sorting functionality.
+	 * @testdox Should use a deterministic random seed for frontend random sorting.
 	 */
-	public function test_random_sorting() {
+	public function test_random_sorting_uses_deterministic_seed(): void {
 		$parsed_block                              = Utils::get_base_parsed_block();
+		$parsed_block['attrs']['queryId']          = 53919;
 		$parsed_block['attrs']['query']['orderBy'] = 'random';
-		$merged_query                              = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
-		$this->assertEquals( 'rand', $merged_query['orderby'] );
+		$first_merged_query  = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
+		$second_merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
+
+		$this->assertMatchesRegularExpression(
+			'/^RAND\([1-9][0-9]*\)$/',
+			$first_merged_query['orderby'],
+			'Random sorting should use a seeded random order.'
+		);
+		$this->assertSame(
+			$first_merged_query['orderby'],
+			$second_merged_query['orderby'],
+			'Random sorting should use the same seed for the same Product Collection query.'
+		);
+	}
+
+	/**
+	 * @testdox Should include the Product Collection query ID in the random seed.
+	 */
+	public function test_random_sorting_seed_uses_query_id(): void {
+		$first_parsed_block                              = Utils::get_base_parsed_block();
+		$first_parsed_block['attrs']['queryId']          = 53919;
+		$first_parsed_block['attrs']['query']['orderBy'] = 'random';
+
+		$second_parsed_block                     = $first_parsed_block;
+		$second_parsed_block['attrs']['queryId'] = 53920;
+
+		$first_merged_query  = Utils::initialize_merged_query( $this->block_instance, $first_parsed_block );
+		$second_merged_query = Utils::initialize_merged_query( $this->block_instance, $second_parsed_block );
+
+		$this->assertNotSame(
+			$first_merged_query['orderby'],
+			$second_merged_query['orderby'],
+			'Random sorting should use a different seed for different Product Collection query IDs.'
+		);
+	}
+
+	/**
+	 * @testdox Should include the daily rotation key in the random seed.
+	 */
+	public function test_random_sorting_seed_uses_rotation_key(): void {
+		$query_context = array(
+			'orderby' => 'random',
+		);
+		$rotation_key  = '2026-06-03';
+		$wp_date_mock  = static function ( $date, $format ) use ( &$rotation_key ) {
+			return 'Y-m-d' === $format ? $rotation_key : $date;
+		};
+
+		add_filter( 'wp_date', $wp_date_mock, 10, 2 );
+
+		try {
+			$first_seed   = ProductCollectionUtils::get_random_order_seed( 53919, $query_context );
+			$rotation_key = '2026-06-04';
+			$second_seed  = ProductCollectionUtils::get_random_order_seed( 53919, $query_context );
+
+			$this->assertNotSame(
+				$first_seed,
+				$second_seed,
+				'Random sorting should use a different seed when the daily rotation key changes.'
+			);
+		} finally {
+			remove_filter( 'wp_date', $wp_date_mock, 10 );
+		}
 	}
 
 	/**
