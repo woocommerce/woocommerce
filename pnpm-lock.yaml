@@ -38380,29 +38380,6 @@ snapshots:
       - date-fns
       - stylelint
 
-  '@wordpress/ui@0.15.1(@date-fns/tz@1.4.1)(date-fns@3.6.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@14.16.1)':
-    dependencies:
-      '@base-ui/react': 1.5.0(@date-fns/tz@1.4.1)(@types/react@18.3.28)(date-fns@3.6.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@types/react': 18.3.28
-      '@wordpress/a11y': 4.48.1
-      '@wordpress/compose': 8.1.1(react@18.3.1)
-      '@wordpress/element': 8.0.1
-      '@wordpress/i18n': 6.21.1
-      '@wordpress/icons': 14.0.1(react@18.3.1)
-      '@wordpress/keycodes': 4.48.1
-      '@wordpress/primitives': 4.48.1(react@18.3.1)
-      '@wordpress/private-apis': 1.48.1
-      '@wordpress/style-runtime': 0.4.1
-      '@wordpress/theme': 0.15.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@14.16.1)
-      clsx: 2.1.1
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-      tabbable: 6.4.0
-    transitivePeerDependencies:
-      - '@date-fns/tz'
-      - date-fns
-      - stylelint
-
   '@wordpress/ui@0.15.1(@date-fns/tz@1.4.1)(date-fns@4.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))':
     dependencies:
       '@base-ui/react': 1.5.0(@date-fns/tz@1.4.1)(@types/react@18.3.28)(date-fns@4.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
