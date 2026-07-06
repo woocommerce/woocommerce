@@ -6,8 +6,15 @@ import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 /**
  * Internal dependencies
  */
-import type { AddToCartWithOptionsStore } from '../frontend';
-import { getContextProductId, getDraftQuantity } from '../cart-drafts';
+import type {
+	AddToCartWithOptionsStore,
+	Context as AddToCartWithOptionsContext,
+} from '../frontend';
+import {
+	getContextProductId,
+	getDraftQuantity,
+	setDraftQuantity,
+} from '../cart-drafts';
 
 /**
  * The id the current draft is keyed by: the shared `woocommerce` context
@@ -25,6 +32,55 @@ import { getContextProductId, getDraftQuantity } from '../cart-drafts';
  */
 const getDraftKey = ( productId: number ): number =>
 	getContextProductId() ?? productId;
+
+/**
+ * Commit a new quantity for the context draft.
+ *
+ * The quantity stepper lives in TWO surfaces now:
+ *
+ * - Inside the Add to Cart + Options FORM (its original home), where the
+ *   `woocommerce/add-to-cart-with-options` store's `setQuantity` owns the extra
+ *   form bookkeeping (compat `context.quantity`, form validation, the manual
+ *   change event that keeps extensions listening on the input working).
+ * - Inside a Product Collection CARD (T9 demo — the boundary-breaking use case
+ *   from PR #65570 / E14/E48), where there is NO form store context: the card is
+ *   not wrapped by the form, so `getContext('woocommerce/add-to-cart-with-options')`
+ *   resolves to `undefined` and the form `setQuantity` — which dereferences
+ *   `context.quantity` and runs form-only validation — cannot run.
+ *
+ * Both surfaces share the SAME underlying truth: the shared `woocommerce/cart`
+ * draft, keyed by the shared `woocommerce::{ productId }` context (identity rule
+ * 3). So this helper always writes the draft directly via `setDraftQuantity`
+ * (the single write path both the form and the card go through), and ONLY when a
+ * form store context is present does it additionally delegate to the form's
+ * `setQuantity` for the form-specific side effects. Detecting the form context
+ * (rather than the shared context) keeps in-form behavior byte-identical while
+ * letting the stepper function standalone in a collection card.
+ *
+ * @param productId The draft's product id (the shared-context/key product id).
+ * @param value     The absolute target quantity.
+ */
+const commitQuantity = ( productId: number, value: number ): void => {
+	// Is the stepper rendered inside the Add to Cart + Options form? The form
+	// wrapper provides the `woocommerce/add-to-cart-with-options` context; a
+	// collection card does not. `getContext` returns `undefined` (not throws)
+	// for a namespace with no provider in the current scope.
+	const formContext = getContext< AddToCartWithOptionsContext >(
+		'woocommerce/add-to-cart-with-options'
+	);
+
+	if ( formContext ) {
+		// In-form path: unchanged. The form's `setQuantity` writes the draft
+		// (via the same `setDraftQuantity`) plus its own bookkeeping.
+		addToCartWithOptionsStore.actions.setQuantity( productId, value );
+		return;
+	}
+
+	// T9 demo path (collection card, no form): write the draft directly. The
+	// bound `state.inputQuantity` re-renders from the draft; the add button
+	// posts this draft via `woocommerce/cart::actions.addItem()`.
+	setDraftQuantity( productId, value );
+};
 
 export type Context = {
 	allowZero?: boolean;
@@ -145,10 +201,7 @@ store< QuantitySelectorStore >(
 					Math.min( maximum, currentValue + multipleOf )
 				);
 
-				addToCartWithOptionsStore.actions.setQuantity(
-					getDraftKey( productId ),
-					newValue
-				);
+				commitQuantity( getDraftKey( productId ), newValue );
 			},
 			decreaseQuantity: () => {
 				const { allowZero, inputElement } = getContext< Context >();
@@ -182,10 +235,7 @@ store< QuantitySelectorStore >(
 				}
 
 				if ( newValue !== currentValue ) {
-					addToCartWithOptionsStore.actions.setQuantity(
-						getDraftKey( productId ),
-						newValue
-					);
+					commitQuantity( getDraftKey( productId ), newValue );
 				}
 			},
 			// We need to listen to blur events instead of change events because
@@ -207,10 +257,7 @@ store< QuantitySelectorStore >(
 					allowZero &&
 					( isValueNaN || inputElement?.valueAsNumber === 0 )
 				) {
-					addToCartWithOptionsStore.actions.setQuantity(
-						getDraftKey( productId ),
-						0
-					);
+					commitQuantity( getDraftKey( productId ), 0 );
 					return;
 				}
 
@@ -220,10 +267,7 @@ store< QuantitySelectorStore >(
 				const newValue =
 					! isNaN( value ) && value > 0 ? value : addToCart.minimum;
 
-				addToCartWithOptionsStore.actions.setQuantity(
-					getDraftKey( productId ),
-					newValue
-				);
+				commitQuantity( getDraftKey( productId ), newValue );
 			},
 			handleQuantityCheckboxChange: () => {
 				const element = getElement();
@@ -238,7 +282,7 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				addToCartWithOptionsStore.actions.setQuantity(
+				commitQuantity(
 					getDraftKey( product.id ),
 					element.ref.checked ? 1 : 0
 				);

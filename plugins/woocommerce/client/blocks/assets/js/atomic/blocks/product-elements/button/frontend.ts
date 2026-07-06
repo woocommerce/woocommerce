@@ -70,6 +70,17 @@ const productButtonStore = {
 				return 0;
 			}
 
+			// T9 DEMO — grocery pattern (E48): when the card carries a shared
+			// `woocommerce::{ productId }` context with a seeded draft (stepper
+			// present), read the in-cart line through the `itemInContext`
+			// envelope instead of a raw scan. With the item unambiguously in the
+			// cart, `itemInContext.cart` is the exact line, so "X in cart" reads
+			// from the envelope — the read-side half of the boundary-break.
+			const envelope = wooState.itemInContext;
+			if ( envelope?.draft ) {
+				return envelope.cart?.quantity ?? 0;
+			}
+
 			const formContext = getContext< AddToCartWithOptionsContext >(
 				'woocommerce/add-to-cart-with-options'
 			);
@@ -146,6 +157,41 @@ const productButtonStore = {
 				return;
 			}
 
+			// T9 DEMO PATH (boundary-breaking use case E14/E48, PR #65570).
+			// When this button sits in a Product Collection card that also
+			// renders a Product Quantity (stepper) block, the card carries the
+			// shared `woocommerce::{ productId }` context and the server seeds a
+			// draft for it (ProductTemplate::seed_card_draft). The stepper edits
+			// that draft; the button must POST it (with the shopper-chosen
+			// quantity) via `addItem()` instead of the legacy fixed-quantity
+			// `addCartItem`. We detect the case by the presence of a context
+			// draft — resolved SYNCHRONOUSLY, before any `yield`, because the
+			// shared context is only guaranteed in scope for the synchronous
+			// portion of a generator action (same rule the ATCWO submit handler
+			// follows). NOTE: this is a deliberately narrow demo branch; the
+			// button's full migration onto drafts/envelope is T7a.
+			const contextDraft = wooState.itemInContext?.draft;
+			const context = getContext< Context >();
+
+			if ( contextDraft ) {
+				// Todo: Use the module exports instead of `store()` once the
+				// woocommerce store is public.
+				yield import( '@woocommerce/stores/woocommerce/cart' );
+
+				const { actions: wooActions } = store< WooCommerce >(
+					'woocommerce',
+					{},
+					{ lock: universalLock }
+				);
+
+				// Post the draft (identity rule 5: adds are adds). The draft
+				// carries the stepper's chosen quantity.
+				yield wooActions.addItem( contextDraft );
+
+				context.displayViewCart = true;
+				return;
+			}
+
 			// Todo: Use the module exports instead of `store()` once the
 			// woocommerce store is public.
 			yield import( '@woocommerce/stores/woocommerce/cart' );
@@ -155,8 +201,6 @@ const productButtonStore = {
 				{},
 				{ lock: universalLock }
 			);
-
-			const context = getContext< Context >();
 
 			// Pass quantityToAdd as a delta. The cart store will add this
 			// to the current quantity, ensuring rapid clicks compound correctly.

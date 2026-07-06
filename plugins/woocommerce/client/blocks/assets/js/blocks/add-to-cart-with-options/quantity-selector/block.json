@@ -5,7 +5,10 @@
 	"category": "woocommerce-product-elements",
 	"keywords": [ "WooCommerce" ],
 	"usesContext": [ "postId" ],
-	"ancestor": [ "woocommerce/add-to-cart-with-options" ],
+	"ancestor": [
+		"woocommerce/add-to-cart-with-options",
+		"woocommerce/product-template"
+	],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"supports": {

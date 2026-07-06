@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Demonstrate the Product Quantity (stepper) block usable inside Product Collection cards, editing each card's shared cart draft and posting it via the Add to Cart button (T9 shared iAPI stores demo).
