@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove Sample badge when updating sample products generated during the CYS flow
