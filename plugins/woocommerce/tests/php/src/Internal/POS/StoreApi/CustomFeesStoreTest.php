@@ -75,6 +75,21 @@ class CustomFeesStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The client generates one id per fee line: retried requests upsert
+	 * their own line, while two intentionally identical fees coexist.
+	 *
+	 * @testdox Client-supplied ids disambiguate identical fees and keep retries idempotent.
+	 */
+	public function test_client_ids_disambiguate_identical_fees(): void {
+		$this->sut->add( 'Misc', 5.0, false, '', 'line-a' );
+		$this->sut->add( 'Misc', 5.0, false, '', 'line-b' );
+		$this->assertCount( 2, $this->sut->get_all(), 'Identical fees with distinct client ids are two separate charges.' );
+
+		$this->sut->add( 'Misc', 5.0, false, '', 'line-a' );
+		$this->assertCount( 2, $this->sut->get_all(), 'A retried request with the same client id must not add a third.' );
+	}
+
+	/**
 	 * @testdox apply_to_cart() registers every stored fee with the cart's fees API.
 	 */
 	public function test_apply_to_cart_registers_stored_fees(): void {

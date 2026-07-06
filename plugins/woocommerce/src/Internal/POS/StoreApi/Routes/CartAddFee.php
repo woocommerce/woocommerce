@@ -79,6 +79,12 @@ class CartAddFee extends AbstractCartRoute {
 				'callback'            => array( $this, 'get_response' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 				'args'                => array(
+					'id'        => array(
+						'description'       => __( 'Client-generated identifier for this fee line. Lets a retried request stay idempotent while two identical fees (same name and amount) coexist under different ids.', 'woocommerce' ),
+						'type'              => 'string',
+						'context'           => array( 'view', 'edit' ),
+						'sanitize_callback' => 'sanitize_key',
+					),
 					'name'      => array(
 						'description'       => __( 'Fee label shown on the cart and order.', 'woocommerce' ),
 						'type'              => 'string',
@@ -136,7 +142,7 @@ class CartAddFee extends AbstractCartRoute {
 			throw new RouteException( 'woocommerce_pos_rest_no_session', esc_html__( 'No transaction session is available.', 'woocommerce' ), 500 );
 		}
 
-		( new CustomFeesStore( WC()->session ) )->add( $name, $amount, (bool) $request['taxable'], (string) $request['tax_class'] );
+		( new CustomFeesStore( WC()->session ) )->add( $name, $amount, (bool) $request['taxable'], (string) $request['tax_class'], (string) ( $request['id'] ?? '' ) );
 
 		// Recalculate so the response cart includes the fee (CustomFeesPolicy
 		// applies stored fees inside the calculation).

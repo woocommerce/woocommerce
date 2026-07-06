@@ -62,15 +62,22 @@ class CustomFeesStore {
 	}
 
 	/**
-	 * Add a fee spec (idempotent by content).
+	 * Add a fee spec (idempotent per fee identity).
+	 *
+	 * Identity comes from the client-supplied id when given — the client
+	 * generates one per fee line, so a retried request upserts its own line
+	 * while two intentionally identical fees (same name and amount) coexist
+	 * under different ids. Without a client id, identity falls back to the
+	 * fee's content, which keeps retries safe but collapses identical fees.
 	 *
 	 * @param string $name      Fee label shown on the order.
 	 * @param float  $amount    Fee amount, excluding tax.
 	 * @param bool   $taxable   Whether tax applies to the fee.
 	 * @param string $tax_class Tax class when taxable.
+	 * @param string $client_id Optional client-generated fee identifier.
 	 * @return array{id: string, name: string, amount: float, taxable: bool, tax_class: string} The stored spec.
 	 */
-	public function add( string $name, float $amount, bool $taxable = false, string $tax_class = '' ): array {
+	public function add( string $name, float $amount, bool $taxable = false, string $tax_class = '', string $client_id = '' ): array {
 		$spec = array(
 			'id'        => '',
 			'name'      => $name,
@@ -79,7 +86,9 @@ class CustomFeesStore {
 			'tax_class' => $tax_class,
 		);
 
-		$spec['id'] = 'pos-fee-' . md5( (string) wp_json_encode( array( $name, $amount, $taxable, $tax_class ) ) );
+		$spec['id'] = '' !== $client_id
+			? 'pos-fee-' . sanitize_key( $client_id )
+			: 'pos-fee-' . md5( (string) wp_json_encode( array( $name, $amount, $taxable, $tax_class ) ) );
 
 		$fees                = $this->get_all();
 		$fees[ $spec['id'] ] = $spec;
