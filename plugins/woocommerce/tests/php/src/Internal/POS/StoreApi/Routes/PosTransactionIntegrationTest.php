@@ -318,6 +318,33 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
+	 * POS sales are account-independent: web account settings must not block
+	 * the register or create accounts for walk-in customers.
+	 *
+	 * @testdox Checkout succeeds as guest even when web guest checkout is disabled, and never creates an account.
+	 */
+	public function test_checkout_ignores_web_account_settings(): void {
+		update_option( 'woocommerce_enable_guest_checkout', 'no' );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
+		$user_count_before = count_users()['total_users'];
+
+		try {
+			wp_set_current_user( $this->operator_id );
+			$this->add_items( array( array( 'id' => $this->product->get_id(), 'quantity' => 1 ) ) );
+
+			wp_set_current_user( $this->operator_id );
+			$checkout = $this->dispatch_post( '/checkout', array() );
+
+			$this->assertSame( 200, $checkout->get_status(), 'Guest-checkout-disabled must not block POS: ' . wp_json_encode( $checkout->get_data() ) );
+			$this->assertSame( 0, wc_get_order( $checkout->get_data()['order_id'] )->get_customer_id() );
+			$this->assertSame( $user_count_before, count_users()['total_users'], 'No account may be created for a walk-in customer.' );
+		} finally {
+			delete_option( 'woocommerce_enable_guest_checkout' );
+			delete_option( 'woocommerce_enable_signup_and_login_from_checkout' );
+		}
+	}
+
+	/**
 	 * @testdox Checkout attaches an identified customer account via customer_id — still never the operator.
 	 */
 	public function test_checkout_attaches_identified_customer(): void {

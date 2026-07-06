@@ -42,6 +42,16 @@ class CheckoutPolicy implements RegisterHooksInterface {
 		add_filter( 'woocommerce_store_api_validate_addresses', array( $this, 'maybe_relax_requirement' ) );
 		add_filter( 'woocommerce_store_api_require_billing_email', array( $this, 'maybe_relax_requirement' ) );
 		add_filter( 'woocommerce_store_api_order_default_payment_method', array( $this, 'maybe_clear_default_payment_method' ) );
+
+		// A POS sale is account-independent: the purchaser is a guest at the
+		// register regardless of how the web checkout is configured.
+		// registration_required=no keeps guest-checkout-disabled stores from
+		// rejecting every POS sale ("You must be logged in to checkout");
+		// registration_enabled=no keeps registration-required stores from
+		// force-creating a WP account (and auth cookie, and welcome email)
+		// for a walk-in customer.
+		add_filter( 'woocommerce_checkout_registration_required', array( $this, 'maybe_relax_requirement' ) );
+		add_filter( 'woocommerce_checkout_registration_enabled', array( $this, 'maybe_relax_requirement' ) );
 	}
 
 	/**
