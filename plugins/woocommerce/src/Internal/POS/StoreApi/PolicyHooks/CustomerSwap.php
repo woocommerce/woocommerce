@@ -61,6 +61,19 @@ class CustomerSwap implements RegisterHooksInterface {
 			return $dispatch_result;
 		}
 
+		// /wp-json requests reach dispatch before WooCommerce has initialized
+		// the session (that normally happens later, in the route's
+		// load_cart_session). Initialize it now — under POS context that
+		// installs POSSessionHandler — so the blank customer binds to the
+		// session-backed data store. Without a session, WC_Customer(0, true)
+		// silently falls back to the DB-backed store, and checkout's
+		// $customer->save() would try to create a real WP user: a 500 on
+		// every guest checkout, or a stray account (and welcome email) when a
+		// receipt email was provided.
+		if ( null === WC()->session ) {
+			WC()->initialize_session();
+		}
+
 		$customer = new WC_Customer( 0, true );
 		$customer->set_billing_country( '' );
 		$customer->set_billing_state( '' );
