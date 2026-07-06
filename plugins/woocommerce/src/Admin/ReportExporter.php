@@ -148,7 +148,10 @@ class ReportExporter {
 		$exports_status = get_option( self::EXPORT_STATUS_OPTION, array() );
 		$status_key     = self::get_status_key( $report_type, $export_id );
 
-		$exports_status[ $status_key ] = $percentage;
+		// Use max() to ensure progress never moves backwards when export batch
+		// actions complete out of order via Action Scheduler.
+		$current                 = isset( $exports_status[ $status_key ] ) ? (int) $exports_status[ $status_key ] : 0;
+		$exports_status[ $status_key ] = max( $current, (int) $percentage );
 
 		update_option( self::EXPORT_STATUS_OPTION, $exports_status );
 	}

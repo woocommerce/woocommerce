@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent analytics report export progress from moving backwards when Action Scheduler batches complete out of order.
