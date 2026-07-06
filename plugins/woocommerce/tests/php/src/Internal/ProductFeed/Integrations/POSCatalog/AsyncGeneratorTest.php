@@ -708,6 +708,56 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should leave the job in progress (not failed) and keep the partial feed when the feed file is locked by another process.
+	 */
+	public function test_feed_generation_steps_aside_when_feed_file_is_locked() {
+		$this->mock_integration->method( 'create_feed' )->willReturnCallback(
+			fn() => new JsonFileFeed( 'pos-catalog-feed-test' )
+		);
+
+		// Simulate the original process: start a feed and keep its exclusive lock held (no flush/end).
+		$holder       = new JsonFileFeed( 'pos-catalog-feed-test' );
+		$identifier   = $holder->start();
+		$partial_path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier;
+		$this->assertTrue( file_exists( $partial_path ) );
+
+		// A continuation for the same feed, as a duplicate run would see it.
+		update_option(
+			self::OPTION_KEY,
+			array(
+				'state'           => AsyncGenerator::STATE_IN_PROGRESS,
+				'file_name'       => $identifier,
+				'page'            => 2,
+				'processed'       => 1,
+				'entries_written' => 1,
+				'total'           => 5,
+				'updated_at'      => time(),
+			)
+		);
+
+		try {
+			$this->sut->feed_generation_action( self::OPTION_KEY );
+		} finally {
+			// Release the holder's lock so fixtures can be cleaned up.
+			$holder->flush();
+		}
+
+		$status = get_option( self::OPTION_KEY );
+		$this->assertSame(
+			AsyncGenerator::STATE_IN_PROGRESS,
+			$status['state'],
+			'A locked feed file means another process is generating; the job must not be marked failed.'
+		);
+		$this->assertArrayNotHasKey( 'error', $status );
+		$this->assertTrue(
+			file_exists( $partial_path ),
+			'The partial feed the lock holder is still writing must not be discarded.'
+		);
+
+		wp_delete_file( $partial_path );
+	}
+
+	/**
 	 * Test that feed generation records a heartbeat in the resulting status.
 	 */
 	public function test_feed_generation_action_records_heartbeat() {

@@ -45,9 +45,9 @@ test.describe( 'Mutation Batcher', () => {
 			const { actions } = store( 'woocommerce', {}, { lock: unlockKey } );
 
 			// Three calls with no await between them — same microtick.
-			const p1 = actions.addCartItem( { id: 15, quantity: 1 } );
-			const p2 = actions.addCartItem( { id: 16, quantity: 1 } );
-			const p3 = actions.addCartItem( { id: 17, quantity: 1 } );
+			const p1 = actions.addCartItem( { id: 15, quantityToAdd: 1 } );
+			const p2 = actions.addCartItem( { id: 16, quantityToAdd: 1 } );
+			const p3 = actions.addCartItem( { id: 17, quantityToAdd: 1 } );
 
 			await Promise.all( [ p1, p2, p3 ] );
 		} );
@@ -77,9 +77,9 @@ test.describe( 'Mutation Batcher', () => {
 			const { actions } = store( 'woocommerce', {}, { lock: unlockKey } );
 
 			// Each await breaks the microtick — each call becomes its own batch.
-			await actions.addCartItem( { id: 18, quantity: 1 } );
-			await actions.addCartItem( { id: 19, quantity: 1 } );
-			await actions.addCartItem( { id: 20, quantity: 1 } );
+			await actions.addCartItem( { id: 18, quantityToAdd: 1 } );
+			await actions.addCartItem( { id: 19, quantityToAdd: 1 } );
+			await actions.addCartItem( { id: 20, quantityToAdd: 1 } );
 		} );
 
 		// Each call should have produced its own batch request.
@@ -109,17 +109,17 @@ test.describe( 'Mutation Batcher', () => {
 			const { actions } = store( 'woocommerce', {}, { lock: unlockKey } );
 
 			// Batch 1: two sync calls
-			const p1 = actions.addCartItem( { id: 21, quantity: 1 } );
-			const p2 = actions.addCartItem( { id: 22, quantity: 1 } );
+			const p1 = actions.addCartItem( { id: 21, quantityToAdd: 1 } );
+			const p2 = actions.addCartItem( { id: 22, quantityToAdd: 1 } );
 			await Promise.all( [ p1, p2 ] );
 
 			// Batch 2: one call after await
-			await actions.addCartItem( { id: 23, quantity: 1 } );
+			await actions.addCartItem( { id: 23, quantityToAdd: 1 } );
 
 			// Batch 3: three sync calls
-			const p3 = actions.addCartItem( { id: 24, quantity: 1 } );
-			const p4 = actions.addCartItem( { id: 25, quantity: 1 } );
-			const p5 = actions.addCartItem( { id: 26, quantity: 1 } );
+			const p3 = actions.addCartItem( { id: 24, quantityToAdd: 1 } );
+			const p4 = actions.addCartItem( { id: 25, quantityToAdd: 1 } );
+			const p5 = actions.addCartItem( { id: 26, quantityToAdd: 1 } );
 			await Promise.all( [ p3, p4, p5 ] );
 		} );
 
@@ -157,9 +157,9 @@ test.describe( 'Mutation Batcher', () => {
 			}
 
 			// Now add 3 products synchronously (one batch).
-			const p1 = actions.addCartItem( { id: 15, quantity: 1 } );
-			const p2 = actions.addCartItem( { id: 16, quantity: 1 } );
-			const p3 = actions.addCartItem( { id: 17, quantity: 1 } );
+			const p1 = actions.addCartItem( { id: 15, quantityToAdd: 1 } );
+			const p2 = actions.addCartItem( { id: 16, quantityToAdd: 1 } );
+			const p3 = actions.addCartItem( { id: 17, quantityToAdd: 1 } );
 			await Promise.all( [ p1, p2, p3 ] );
 
 			// Return the product IDs now in the cart.
@@ -249,9 +249,9 @@ test.describe( 'Mutation Batcher', () => {
 			await actions.refreshCartItems();
 
 			// Mix valid and invalid product IDs — all in one microtick.
-			const p1 = actions.addCartItem( { id: 15, quantity: 1 } );
-			const p2 = actions.addCartItem( { id: 999999, quantity: 1 } ); // Invalid
-			const p3 = actions.addCartItem( { id: 16, quantity: 1 } );
+			const p1 = actions.addCartItem( { id: 15, quantityToAdd: 1 } );
+			const p2 = actions.addCartItem( { id: 999999, quantityToAdd: 1 } ); // Invalid
+			const p3 = actions.addCartItem( { id: 16, quantityToAdd: 1 } );
 
 			// addCartItem catches errors internally so all promises resolve.
 			await Promise.allSettled( [ p1, p2, p3 ] );
