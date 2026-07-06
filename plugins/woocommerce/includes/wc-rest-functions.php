@@ -432,6 +432,7 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
 		'wc-analytics',
 		'wc/store',
 		'wc/private',
+		'wc/internal/pos',
 	);
 
 	$known_namespace_request = false;
