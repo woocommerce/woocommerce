@@ -4,7 +4,7 @@
  * Slug: purple/contact-form-with-address-and-image
  * Categories: about, contact, purple
  * Keywords: contact, form, contact-form, address
- * Description: A contact section with heading, address, contact form, and image placeholder.
+ * Description: A contact section with heading, address, contact form, and storefront image.
  * Viewport width: 1440
  */
 ?>
@@ -48,8 +48,8 @@
 <!-- /wp:column -->
 
 <!-- wp:column -->
-<div class="wp-block-column"><!-- wp:image {"lightbox":{"enabled":false},"aspectRatio":"3/4","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-placeholder.webp" alt="<?php esc_attr_e( 'Placeholder image', 'purple' ); ?>" style="aspect-ratio:3/4;object-fit:cover"/></figure>
+<div class="wp-block-column"><!-- wp:image {"lightbox":{"enabled":false},"aspectRatio":"3/4","scale":"cover","focalPoint":{"x":0.19,"y":0.5},"sizeSlug":"full","linkDestination":"none"} -->
+<figure class="wp-block-image size-full"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/storytelling-store-2.webp" alt="<?php esc_attr_e( 'Minimalist clothing store exterior with a colourful sweatshirt display.', 'purple' ); ?>" style="aspect-ratio:3/4;object-fit:cover;object-position:19% 50%"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns --></div>
