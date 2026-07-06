@@ -100,12 +100,14 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 			return array();
 		}
 
-		$loaded_scripts = $wp_scripts->done;
+		// `done` includes dependencies that WordPress printed while resolving the queue.
+		// Keep only queued handles so dependents identify scripts explicitly enqueued for the page.
+		$printed_queued_scripts = array_intersect( $wp_scripts->queue, $wp_scripts->done );
 
 		$handles    = array();
 		$dependents = array();
 
-		foreach ( $loaded_scripts as $handle ) {
+		foreach ( $printed_queued_scripts as $handle ) {
 			$legacy_handles = $this->get_legacy_handles( $wp_scripts, $handle );
 
 			if ( empty( $legacy_handles ) ) {
