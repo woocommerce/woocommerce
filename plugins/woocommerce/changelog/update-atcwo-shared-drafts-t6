@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add to Cart + Options: move the form's shopper input (quantity and selected variation attributes) into the shared woocommerce/cart drafts, and derive woocommerce/products' productVariationInContext from the context draft. No shopper-facing behavior change.

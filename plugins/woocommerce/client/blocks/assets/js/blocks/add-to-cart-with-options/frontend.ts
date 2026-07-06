@@ -21,6 +21,7 @@ import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
 import type { Context as QuantitySelectorContext } from './quantity-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
+import { getContextProductId, getDraft, setDraftQuantity } from './cart-drafts';
 
 export type Context = {
 	selectedAttributes: SelectedAttributes[];
@@ -69,8 +70,6 @@ export type AddToCartWithOptionsStore = {
 		validationErrors: AddToCartError[];
 		isFormValid: boolean;
 		allowsAddingToCart: boolean;
-		quantity: Record< number, number >;
-		selectedAttributes: SelectedAttributes[];
 	};
 	actions: {
 		validateQuantity: ( productId: number, value?: number ) => void;
@@ -123,14 +122,6 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 
 				return product.is_purchasable && product.is_in_stock;
 			},
-			get quantity(): Record< number, number > {
-				const context = getContext< Context >();
-				return context.quantity;
-			},
-			get selectedAttributes(): SelectedAttributes[] {
-				const context = getContext< Context >();
-				return context.selectedAttributes || [];
-			},
 		},
 		actions: {
 			validateQuantity( productId: number, value?: number ) {
@@ -165,42 +156,24 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 						'woocommerce/add-to-cart-with-options-quantity-selector'
 					);
 				const inputElement = quantitySelectorContext?.inputElement;
-				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
 
-				const { mainProductInContext: productFromStore } =
-					productsState;
-				const variationIds =
-					productFromStore?.variations?.map( ( v ) => v.id ) ?? [];
+				// Shopper quantity is now owned by the shared-store draft (T6):
+				// one draft per product context, keyed by the main/context
+				// product id. `upsertDraftItem` creates it on first touch and
+				// mutates it thereafter. The draft's quantity is
+				// variation-independent, so the old per-variation-id fan-out
+				// (which existed only to keep a `context.quantity` map in sync
+				// across variation switches) is no longer needed.
+				setDraftQuantity( productId, value );
 
-				if ( variationIds.length > 0 ) {
-					// Set the quantity for all variations, so when switching
-					// variations the quantity persists.
-					const idsToUpdate = [ productId, ...variationIds ];
-
-					idsToUpdate.forEach( ( id ) => {
-						if ( isValueNaN ) {
-							// Modify the value first before setting the real
-							// value to ensure that a signal update happens.
-							context.quantity[ Number( id ) ] = NaN;
-						}
-
-						context.quantity[ Number( id ) ] = value;
-					} );
-				} else {
-					if ( isValueNaN ) {
-						// Modify the value first before setting the real value
-						// to ensure that a signal update happens.
-						context.quantity = {
-							...context.quantity,
-							[ productId ]: NaN,
-						};
-					}
-
-					context.quantity = {
-						...context.quantity,
-						[ productId ]: value,
-					};
-				}
+				// Keep `context.quantity` populated as the compatibility surface
+				// (server-seeded; still part of the block's public context shape).
+				// `setDraftQuantity` owns the reactive-signal handling (including
+				// the same-value NaN pre-write that forces the input to re-render).
+				context.quantity = {
+					...context.quantity,
+					[ productId ]: value,
+				};
 
 				const parentProduct = productsState.findProduct( {
 					id: productsState.productId,
@@ -280,10 +253,6 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 					return;
 				}
 
-				// Todo: Use the module exports instead of `store()` once the
-				// woocommerce store is public.
-				yield import( '@woocommerce/stores/woocommerce/cart' );
-
 				const product = productsState.productInContext;
 
 				if ( ! product ) {
@@ -295,23 +264,50 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 					return;
 				}
 
-				const { quantity, selectedAttributes } =
-					getContext< Context >();
+				// Resolve the context draft SYNCHRONOUSLY, before any `yield`.
+				// The draft read relies on the shared `woocommerce` context, which
+				// is only guaranteed in scope for the synchronous portion of the
+				// action (iAPI restores scope around directive-invoked actions,
+				// but resolving up front and passing the draft explicitly to
+				// `addItem` removes any dependency on scope surviving the async
+				// import below).
+				//
+				// IMPORTANT: the draft is keyed by the shared-context product id
+				// (`woocommerce::productId` — the MAIN/parent product, identity
+				// rule 3), NOT by `productInContext.id`, which for variable
+				// products resolves to the selected VARIATION's id. `getDraft()`
+				// with no argument reads the shared context. The draft already
+				// carries `id`, `quantity` and the shopper's `variation` (the
+				// variation selector mirrors the selection into it); `addItem`
+				// posts parent id + variation and the server resolves the
+				// purchasable variation.
+				const contextProductId = getContextProductId();
+				const draft = getDraft();
+
+				// Todo: Use the module exports instead of `store()` once the
+				// woocommerce store is public.
+				yield import( '@woocommerce/stores/woocommerce/cart' );
 
 				const { actions: wooActions } = store< WooCommerce >(
-					'woocommerce',
+					'woocommerce/cart',
 					{},
 					{ lock: universalLock }
 				);
-				yield wooActions.addCartItem(
-					{
-						id: product.id,
-						quantityToAdd: quantity[ product.id ],
-						variation: selectedAttributes,
-						type: product.type,
-					},
-					{
-						showCartUpdatesNotices: false,
+
+				// Submit the draft (identity rule 5: adds are adds). Passing it
+				// explicitly (rather than relying on `addItem()`'s context
+				// default) keeps submission deterministic across the async
+				// boundary. When no draft exists (defensive — the form seeds one
+				// server-side), fall back to the context product id so a variable
+				// selection still travels as parent id semantics. The draft is
+				// NOT reset after a successful add — matching current UX
+				// (attribute selection persists, and a repeat submit compounds
+				// server-side); draft death is deliberately a no-op here (see the
+				// T6 report / draft-lifecycle note in the schema).
+				yield wooActions.addItem(
+					draft ?? {
+						id: contextProductId ?? product.id,
+						quantity: 1,
 					}
 				);
 			} ),

@@ -163,6 +163,56 @@ class AddToCartWithOptions extends AbstractBlock {
 	}
 
 	/**
+	 * Seed this block's initial cart draft(s) into the shared `woocommerce/cart`
+	 * interactivity state (draft "birth").
+	 *
+	 * Read-modify-write is required: `wp_interactivity_state()` merges with
+	 * `array_replace_recursive`, which replaces `draftItems` entry-by-numeric-index
+	 * rather than appending. Blind-seeding a fresh array would therefore clobber
+	 * drafts seeded by other Add to Cart + Options forms on the same page (grouped
+	 * children, or several product cards in a collection). We read the current
+	 * accumulated `draftItems`, append/replace by product id (last render of a
+	 * given product wins, which is harmless), and re-set the full array.
+	 *
+	 * Each draft is a pure `cart/add-item` payload keyed by its `id` (the
+	 * main/context product id — identity rule 3), matching the shared
+	 * `woocommerce::{ productId }` context the form renders around it.
+	 *
+	 * @param array $drafts The draft(s) this block contributes. Empty is a no-op.
+	 * @return void
+	 */
+	private function seed_cart_drafts( array $drafts ): void {
+		if ( empty( $drafts ) ) {
+			return;
+		}
+
+		$cart_state      = wp_interactivity_state( 'woocommerce/cart' );
+		$existing_drafts = isset( $cart_state['draftItems'] ) && is_array( $cart_state['draftItems'] )
+			? $cart_state['draftItems']
+			: array();
+
+		// Index existing drafts by product id so we replace-by-id (idempotent)
+		// rather than duplicate when the same product renders more than once.
+		$drafts_by_id = array();
+		foreach ( $existing_drafts as $existing_draft ) {
+			if ( isset( $existing_draft['id'] ) ) {
+				$drafts_by_id[ (int) $existing_draft['id'] ] = $existing_draft;
+			}
+		}
+
+		foreach ( $drafts as $draft ) {
+			if ( isset( $draft['id'] ) ) {
+				$drafts_by_id[ (int) $draft['id'] ] = $draft;
+			}
+		}
+
+		wp_interactivity_state(
+			'woocommerce/cart',
+			array( 'draftItems' => array_values( $drafts_by_id ) )
+		);
+	}
+
+	/**
 	 * Check if HTML content has form elements.
 	 *
 	 * @param string $html_content The HTML content.
@@ -299,6 +349,18 @@ class AddToCartWithOptions extends AbstractBlock {
 				'validationErrors' => array(),
 			);
 
+			// Shopper input for this form (quantity + selected variation) is
+			// owned by the shared `woocommerce/cart` store as drafts (T6): one
+			// draft per product context, keyed by the main/context product id
+			// (identity rule 3). We seed the initial draft(s) here so the
+			// server-rendered form matches hydration; the initial shape mirrors
+			// exactly what the form renders (see the shared-stores schema, "Draft
+			// lifecycle → Birth"). $drafts accumulates the draft(s) this block
+			// seeds; they are merged into the cart state via a read-modify-write
+			// below (seed_cart_drafts) so multiple forms on a page don't clobber
+			// each other.
+			$drafts = array();
+
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
 				$context['selectedAttributes'] = array();
 
@@ -315,6 +377,18 @@ class AddToCartWithOptions extends AbstractBlock {
 				foreach ( array_keys( $variations ) as $variation_id ) {
 					$context['quantity'][ $variation_id ] = $default_quantity;
 				}
+
+				// Draft for the parent product. `variation` is seeded empty to
+				// mirror the current first paint: the server sets
+				// `selectedAttributes = array()` and the default attributes are
+				// applied client-side by `callbacks.setDefaultSelectedAttribute`,
+				// which then mirrors them into the draft. Keeping the seed empty
+				// keeps server render and hydration in sync.
+				$drafts[] = array(
+					'id'        => $product->get_id(),
+					'quantity'  => $default_quantity,
+					'variation' => array(),
+				);
 			} elseif ( $product->is_type( ProductType::VARIATION ) ) {
 				$variation_attributes = $product->get_variation_attributes();
 				$formatted_attributes = array_map(
@@ -329,6 +403,14 @@ class AddToCartWithOptions extends AbstractBlock {
 				);
 
 				$context['selectedAttributes'] = $formatted_attributes;
+
+				// A standalone variation renders via the simple template; its
+				// draft carries the variation's fixed attributes.
+				$drafts[] = array(
+					'id'        => $product->get_id(),
+					'quantity'  => $default_quantity,
+					'variation' => $formatted_attributes,
+				);
 			} elseif ( $product->is_type( ProductType::GROUPED ) ) {
 				// Load purchasable child products into the shared store with full REST API data.
 				$child_products = wc_interactivity_api_load_purchasable_child_products(
@@ -354,8 +436,28 @@ class AddToCartWithOptions extends AbstractBlock {
 					if ( $child_product_data['sold_individually'] ) {
 						$context['quantity'][ $child_product_id ] = 0;
 					}
+
+					// One draft per child, keyed by the child product id. Each
+					// grouped row renders its own `woocommerce::{ childId }`
+					// context, so the child's quantity selector and the submit
+					// loop resolve this draft.
+					$drafts[] = array(
+						'id'       => (int) $child_product_id,
+						'quantity' => $context['quantity'][ $child_product_id ],
+					);
 				}
+			} elseif ( ProductType::SIMPLE === $product_type ) {
+				// External products are excluded: they are not purchasable via
+				// the cart (they use their own product URL button), so they need
+				// no draft. Simple products seed a single draft.
+				$drafts[] = array(
+					'id'       => $product->get_id(),
+					'quantity' => $default_quantity,
+				);
 			}
+
+			// Merge this block's drafts into the shared cart state (birth).
+			$this->seed_cart_drafts( $drafts );
 
 			$hooks_before = '';
 			$hooks_after  = '';
@@ -648,6 +750,25 @@ class AddToCartWithOptions extends AbstractBlock {
 			}
 
 			$form_html = $form_html . ob_get_clean();
+
+			// Wrap the whole form in the shared `woocommerce::{ productId }`
+			// context so everything inside — the form's submit handler
+			// (`actions.addToCart` → `addItem()`), the variation selector
+			// (mirrors the selection into the draft), the quantity selector, and
+			// `woocommerce/products`' draft-derived `productVariationInContext` —
+			// resolves the draft for this product. The draft lives in
+			// `woocommerce/cart::state.draftItems`, keyed by this `productId`
+			// (identity rule 3). This must be an ANCESTOR of the `<form>` so
+			// `getContext('woocommerce')` resolves in the submit handler's scope.
+			$shared_context_directive = wp_interactivity_data_wp_context(
+				array( 'productId' => $product_id ),
+				'woocommerce'
+			);
+			$form_html                = sprintf(
+				'<div %1$s>%2$s</div>',
+				$shared_context_directive,
+				$form_html
+			);
 
 			if ( ! $legacy_mode ) {
 				$form_html = $this->render_interactivity_notices_region( $form_html );

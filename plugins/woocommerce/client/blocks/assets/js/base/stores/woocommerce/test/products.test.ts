@@ -17,6 +17,19 @@ let mockStoreState: ProductsStore[ 'state' ];
 let mockContext: { productId?: number; variationId?: number | null } | null =
 	null;
 
+// A shared `woocommerce` context, returned for `getContext('woocommerce')`.
+// The draft-derivation path of `productVariationInContext` reads its
+// `productId` to find the context draft in the (mocked) cart store.
+let mockSharedContext: { productId?: number } | null = null;
+
+// Draft items exposed by the mocked `woocommerce/cart` store. When left null,
+// the `store('woocommerce/cart')` read returns an object without `draftItems`,
+// exercising the defensive fallback (no draft → override path only).
+let mockCartDraftItems: Array< {
+	id: number;
+	variation?: Array< { attribute: string; value: string } >;
+} > | null = null;
+
 const getMockStoreState = (): ProductsStore[ 'state' ] => {
 	if ( mockRegisteredStore === null ) {
 		throw new Error(
@@ -64,9 +77,27 @@ jest.mock(
 				};
 				return mockRegisteredStore;
 			}
+			if ( namespace === 'woocommerce/cart' ) {
+				// The lazy cross-store read the draft-derivation path uses.
+				// Return a store whose `state.draftItems` reflects the test's
+				// `mockCartDraftItems`; when null, omit `draftItems` so the
+				// getter's defensive read (draftItems.find on undefined) throws
+				// and degrades to the override/null path — mirroring a surface
+				// where the cart store isn't populated.
+				return {
+					state:
+						mockCartDraftItems === null
+							? {}
+							: { draftItems: mockCartDraftItems },
+				};
+			}
 			return {};
 		} ),
-		getContext: jest.fn( () => mockContext ),
+		// Namespace-aware: the shared `woocommerce` context and the per-element
+		// `woocommerce/products` context are distinct.
+		getContext: jest.fn( ( namespace?: string ) =>
+			namespace === 'woocommerce' ? mockSharedContext : mockContext
+		),
 	} ),
 	{ virtual: true }
 );
@@ -75,6 +106,8 @@ describe( 'woocommerce/products store – product context derived state', () => 
 	beforeEach( () => {
 		mockRegisteredStore = null;
 		mockContext = null;
+		mockSharedContext = null;
+		mockCartDraftItems = null;
 
 		jest.isolateModules( () => require( '../products' ) );
 		mockStoreState = getMockStoreState();
@@ -158,6 +191,90 @@ describe( 'woocommerce/products store – product context derived state', () => 
 		it( 'returns null when variation is not in the store', () => {
 			mockStoreState.productId = 42;
 			mockStoreState.variationId = 999;
+
+			expect( mockStoreState.productVariationInContext ).toBeNull();
+		} );
+	} );
+
+	// T6: with no explicit `variationId` override, `productVariationInContext`
+	// derives the selected variation from the shared-context draft's `variation`
+	// array (a lazy cross-store read into `woocommerce/cart`), resolved the same
+	// deterministic way `findProduct` mirrors the server.
+	describe( 'productVariationInContext – draft derivation (T6)', () => {
+		const variableProduct = {
+			id: 10,
+			type: 'variable',
+			variations: [
+				{ id: 77, attributes: [ { name: 'Color', value: 'red' } ] },
+			],
+		} as unknown as ProductResponseItem;
+		const redVariation = {
+			id: 77,
+			name: 'Red',
+		} as ProductResponseItem;
+
+		beforeEach( () => {
+			mockStoreState.products[ 10 ] = variableProduct;
+			mockStoreState.productVariations[ 77 ] = redVariation;
+			// No explicit override anywhere.
+			mockStoreState.productId = 10;
+			mockStoreState.variationId = null;
+			mockContext = { productId: 10, variationId: null };
+		} );
+
+		it( 'derives the variation from the context draft when no variationId override is set', () => {
+			mockSharedContext = { productId: 10 };
+			mockCartDraftItems = [
+				{ id: 10, variation: [ { attribute: 'Color', value: 'red' } ] },
+			];
+
+			expect( mockStoreState.productVariationInContext ).toBe(
+				redVariation
+			);
+		} );
+
+		it( 'an explicit variationId override wins over the draft', () => {
+			// Draft selects the red variation, but an explicit override pins 99.
+			mockSharedContext = { productId: 10 };
+			mockCartDraftItems = [
+				{ id: 10, variation: [ { attribute: 'Color', value: 'red' } ] },
+			];
+			mockContext = { productId: 10, variationId: 99 };
+
+			expect( mockStoreState.productVariationInContext ).toBe(
+				mockVariation
+			);
+		} );
+
+		it( 'returns null when the draft carries no variation selection', () => {
+			mockSharedContext = { productId: 10 };
+			mockCartDraftItems = [ { id: 10, variation: [] } ];
+
+			expect( mockStoreState.productVariationInContext ).toBeNull();
+		} );
+
+		it( 'returns null when there is no draft for the context product', () => {
+			mockSharedContext = { productId: 10 };
+			mockCartDraftItems = [];
+
+			expect( mockStoreState.productVariationInContext ).toBeNull();
+		} );
+
+		it( 'returns null when the cart store is unavailable (defensive)', () => {
+			mockSharedContext = { productId: 10 };
+			mockCartDraftItems = null; // cart store has no draftItems slot.
+
+			expect( mockStoreState.productVariationInContext ).toBeNull();
+		} );
+
+		it( 'returns null when the selection does not resolve to a variation', () => {
+			mockSharedContext = { productId: 10 };
+			mockCartDraftItems = [
+				{
+					id: 10,
+					variation: [ { attribute: 'Color', value: 'purple' } ],
+				},
+			];
 
 			expect( mockStoreState.productVariationInContext ).toBeNull();
 		} );

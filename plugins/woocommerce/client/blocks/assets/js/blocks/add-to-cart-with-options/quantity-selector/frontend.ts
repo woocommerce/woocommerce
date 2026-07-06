@@ -7,6 +7,24 @@ import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
  * Internal dependencies
  */
 import type { AddToCartWithOptionsStore } from '../frontend';
+import { getContextProductId, getDraftQuantity } from '../cart-drafts';
+
+/**
+ * The id the current draft is keyed by: the shared `woocommerce` context
+ * product id (identity rule 3 — the MAIN/parent product id; on grouped child
+ * rows, the row's own `woocommerce::{ childId }` context). Falls back to the
+ * resolved product's id when called out of a shared-context scope.
+ *
+ * This is deliberately NOT `productInContext.id`: for variable products that
+ * resolves to the selected VARIATION's id, while the draft (and its quantity)
+ * lives under the parent id. The product's `add_to_cart` constraints, on the
+ * other hand, DO come from `productInContext` (variation-specific min/max).
+ *
+ * @param productId The resolved product's id (fallback).
+ * @return The draft key.
+ */
+const getDraftKey = ( productId: number ): number =>
+	getContextProductId() ?? productId;
 
 export type Context = {
 	allowZero?: boolean;
@@ -61,8 +79,6 @@ store< QuantitySelectorStore >(
 				return product.is_in_stock && ! product.sold_individually;
 			},
 			get allowsDecrease() {
-				const { quantity } = addToCartWithOptionsStore.state;
-
 				const product = productsState.productInContext;
 
 				if ( ! product ) {
@@ -71,7 +87,9 @@ store< QuantitySelectorStore >(
 
 				const { id, add_to_cart: addToCart } = product;
 
-				const currentQuantity = quantity[ id ] || 0;
+				// Quantity lives on the shared-store draft, keyed by the shared
+				// context product id (see getDraftKey).
+				const currentQuantity = getDraftQuantity( getDraftKey( id ) );
 
 				const { allowZero } = getContext< Context >();
 				return (
@@ -80,8 +98,6 @@ store< QuantitySelectorStore >(
 				);
 			},
 			get allowsIncrease() {
-				const { quantity } = addToCartWithOptionsStore.state;
-
 				const product = productsState.productInContext;
 
 				if ( ! product ) {
@@ -90,7 +106,7 @@ store< QuantitySelectorStore >(
 
 				const { id, add_to_cart: addToCart } = product;
 
-				const currentQuantity = quantity[ id ] || 0;
+				const currentQuantity = getDraftQuantity( getDraftKey( id ) );
 
 				return (
 					currentQuantity + addToCart.multiple_of <= addToCart.maximum
@@ -103,10 +119,7 @@ store< QuantitySelectorStore >(
 					return 0;
 				}
 
-				const quantity =
-					addToCartWithOptionsStore.state.quantity?.[ product.id ];
-
-				return quantity === undefined ? 0 : quantity;
+				return getDraftQuantity( getDraftKey( product.id ) );
 			},
 		},
 		actions: {
@@ -133,7 +146,7 @@ store< QuantitySelectorStore >(
 				);
 
 				addToCartWithOptionsStore.actions.setQuantity(
-					productId,
+					getDraftKey( productId ),
 					newValue
 				);
 			},
@@ -170,7 +183,7 @@ store< QuantitySelectorStore >(
 
 				if ( newValue !== currentValue ) {
 					addToCartWithOptionsStore.actions.setQuantity(
-						productId,
+						getDraftKey( productId ),
 						newValue
 					);
 				}
@@ -195,7 +208,7 @@ store< QuantitySelectorStore >(
 					( isValueNaN || inputElement?.valueAsNumber === 0 )
 				) {
 					addToCartWithOptionsStore.actions.setQuantity(
-						productId,
+						getDraftKey( productId ),
 						0
 					);
 					return;
@@ -208,7 +221,7 @@ store< QuantitySelectorStore >(
 					! isNaN( value ) && value > 0 ? value : addToCart.minimum;
 
 				addToCartWithOptionsStore.actions.setQuantity(
-					productId,
+					getDraftKey( productId ),
 					newValue
 				);
 			},
@@ -226,7 +239,7 @@ store< QuantitySelectorStore >(
 				}
 
 				addToCartWithOptionsStore.actions.setQuantity(
-					product.id,
+					getDraftKey( product.id ),
 					element.ref.checked ? 1 : 0
 				);
 			},

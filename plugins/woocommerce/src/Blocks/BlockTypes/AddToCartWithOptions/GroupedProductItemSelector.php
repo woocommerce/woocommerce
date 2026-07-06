@@ -186,7 +186,23 @@ class GroupedProductItemSelector extends AbstractBlock {
 			}
 
 			if ( $markup ) {
-				$markup = '<div class="wp-block-add-to-cart-with-options-grouped-product-item-selector wc-block-add-to-cart-with-options-grouped-product-item-selector">' . $markup . '</div>';
+				// Interactive child rows carry the shared `woocommerce::{ childId }`
+				// context so this child's own draft (`woocommerce/cart::state.draftItems`,
+				// keyed by the child product id — identity rule 3) is resolvable
+				// by descendants that read `getContext('woocommerce')`. The child's
+				// draft is seeded server-side by the parent form (draft birth).
+				$shared_context_attribute = $is_interactive
+					? wp_interactivity_data_wp_context(
+						array( 'productId' => $product->get_id() ),
+						'woocommerce'
+					)
+					: '';
+
+				$markup = sprintf(
+					'<div class="wp-block-add-to-cart-with-options-grouped-product-item-selector wc-block-add-to-cart-with-options-grouped-product-item-selector" %1$s>%2$s</div>',
+					$shared_context_attribute,
+					$markup
+				);
 			}
 		}
 

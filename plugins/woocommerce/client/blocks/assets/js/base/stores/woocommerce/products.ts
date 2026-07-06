@@ -3,7 +3,11 @@
  */
 import { store, getContext } from '@wordpress/interactivity';
 import type { ProductResponseItem } from '@woocommerce/types';
-import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+import type {
+	SelectedAttributes,
+	Store as CartStore,
+	DraftItem,
+} from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Per-element selection for the current product/variation.
@@ -21,6 +25,19 @@ import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 type ProductContext = {
 	productId: number;
 	variationId?: number | null;
+};
+
+/**
+ * The shared `woocommerce` context namespace read by both shared stores. It
+ * carries the surface's product identity (`productId`) — the key under which the
+ * cart store's drafts live (identity rule 3: one draft per product context,
+ * keyed by the main/context product id). The variation selector writes the
+ * shopper's attribute selection into that draft's `variation`, which is the
+ * single source of selection truth (schema: "`productVariationInContext` derives
+ * from the context draft's `variation` array").
+ */
+type SharedWooCommerceContext = {
+	productId?: number;
 };
 
 /**
@@ -92,6 +109,58 @@ export type ProductsStore = {
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+/**
+ * Read the shared `woocommerce` context, or `null` when called outside a
+ * directive scope. The context carries the surface's `productId` — the key the
+ * cart store's drafts are stored under. Out-of-scope reads degrade silently.
+ */
+function getSharedContext(): SharedWooCommerceContext | null {
+	try {
+		return getContext< SharedWooCommerceContext >( 'woocommerce' ) ?? null;
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * Lazy cross-store read into `woocommerce/cart` to find the draft for a product
+ * id (identity rule 3: one draft per product context, keyed by the main/context
+ * product id).
+ *
+ * The products store needs the cart store only to resolve the variation the
+ * shopper selected — the draft's `variation` is the single source of selection
+ * truth (schema: "`productVariationInContext` derives from the context draft's
+ * `variation` array … a lazy cross-store `store('woocommerce/cart', …)` read,
+ * core-internal, allowed, documented"). Read lazily rather than at module load
+ * so the cart store's own registration order doesn't matter, and degrade to
+ * `null` when the cart store isn't registered on this surface (e.g. a product
+ * grid card with no purchase form) — there is then no draft-driven selection and
+ * the getter falls back to the explicit `variationId` override.
+ *
+ * @param productId The main/context product id.
+ * @return The matching draft, or `null` when unavailable.
+ */
+function getContextDraft( productId: number | undefined ): DraftItem | null {
+	if ( productId === undefined ) {
+		return null;
+	}
+
+	try {
+		const { state: cartState } = store< CartStore >(
+			'woocommerce/cart',
+			{},
+			{ lock: universalLock }
+		);
+		const draft = cartState.draftItems.find(
+			( item ) => item.id === productId
+		);
+		return draft ?? null;
+	} catch {
+		// Cart store not registered on this surface.
+		return null;
+	}
+}
 
 const normalizeAttributeName = ( name: string ): string =>
 	name
@@ -251,14 +320,52 @@ const { state: productsState } = store< ProductsStore >(
 				const context = getContext< ProductContext >(
 					'woocommerce/products'
 				);
-				const variationId =
+
+				// Precedence (documented open point in the schema): an explicit
+				// `variationId` — set in the `woocommerce/products` context or
+				// global state — is an OVERRIDE and wins. It is how a surface can
+				// pin a specific variation directly (e.g. a Single Product block
+				// bound to one variation) without going through a draft. This
+				// preserves the pre-T6 behavior for every consumer that set
+				// `variationId` explicitly.
+				const explicitVariationId =
 					context && 'variationId' in context
 						? context.variationId
 						: productsState.variationId;
-				if ( ! variationId ) {
+				if ( explicitVariationId ) {
+					return (
+						productsState.productVariations[
+							explicitVariationId
+						] ?? null
+					);
+				}
+
+				// Otherwise derive from the context draft's `variation` — the
+				// single source of the shopper's selection truth (T6). The draft
+				// lives in `woocommerce/cart`, keyed by the shared `woocommerce`
+				// context `productId`. Resolve that selection to a variation the
+				// same deterministic way the server would (identity rule 6, via
+				// `findProduct`).
+				const sharedProductId = getSharedContext()?.productId;
+				const draft = getContextDraft( sharedProductId );
+				if ( ! draft?.variation?.length ) {
 					return null;
 				}
-				return productsState.productVariations[ variationId ] ?? null;
+
+				const resolved = productsState.findProduct( {
+					id: draft.id,
+					selectedAttributes: draft.variation as SelectedAttributes[],
+				} );
+
+				// `findProduct` returns the parent when no variation matches (or
+				// for a partial/ambiguous selection) — only an actual variation
+				// counts here. A resolved product whose id equals the draft's
+				// main product id is the parent, not a variation.
+				if ( ! resolved || resolved.id === draft.id ) {
+					return null;
+				}
+
+				return resolved;
 			},
 
 			get productInContext(): ProductResponseItem | null {

@@ -30,10 +30,15 @@ jest.mock(
 		// Merge each registration's `state` into the single shared `mockState`
 		// (mirroring iAPI's deepMerge, which is how `findItemInCart` ends up on
 		// the proxy the actions close over) and record the actions from every
-		// registration that supplies them. We skip the `cart` key: the module
-		// keeps `state.cart` as a plain writable slot (set by refreshCartItems
-		// and the batcher commit), while the alias registers `cart` as a getter
-		// that we do not want copied onto the shared state.
+		// registration that supplies them. We skip the `cart` and `draftItems`
+		// keys: the module keeps both as plain writable slots (`cart` set by
+		// refreshCartItems / the batcher commit; `draftItems` server-seeded and
+		// initialized post-registration), while the alias registers each as a
+		// getter delegating to the real store's state. In this mock every
+		// registration shares ONE `mockState`, so copying those alias getters
+		// would make them self-referential (`get draftItems(){ return
+		// state.draftItems; }` reading itself — infinite recursion when the
+		// module is re-required against the persistent mockState).
 		store: jest.fn( ( name, definition ) => {
 			// The notices store is a separate registration; return a stub with
 			// the notice bookkeeping the cart actions call into.
@@ -48,7 +53,7 @@ jest.mock(
 			}
 			if ( definition?.state ) {
 				for ( const key of Object.keys( definition.state ) ) {
-					if ( key === 'cart' ) {
+					if ( key === 'cart' || key === 'draftItems' ) {
 						continue;
 					}
 					const descriptor = Object.getOwnPropertyDescriptor(

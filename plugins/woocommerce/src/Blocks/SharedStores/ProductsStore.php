@@ -125,6 +125,22 @@ class ProductsStore {
 
 					return $state['products'][ $product_id ] ?? null;
 				},
+				// The JS `productVariationInContext` (T6) resolves the selected
+				// variation from an explicit `variationId` OVERRIDE first, and
+				// otherwise DERIVES it from the shared-context cart draft's
+				// `variation` selection. Server-side we intentionally mirror only
+				// the override branch: `variationId` is seeded `null` everywhere
+				// on first paint (SingleProduct / SingleProductTemplate /
+				// grouped rows), the seeded variable draft carries an empty
+				// `variation` (defaults are applied client-side after hydration),
+				// and there is no PHP counterpart to `findProduct`'s deterministic
+				// resolution here. So the draft-derived branch would resolve to
+				// `null` at first paint anyway — exactly what returning based on
+				// the (null) `variationId` already yields. Keeping this closure
+				// override-only preserves first-paint parity and avoids an
+				// SSR/hydration mismatch; the draft-driven variation is resolved
+				// client-side once the store hydrates. See cart draft "birth" in
+				// the shared-stores schema.
 				'productVariationInContext' => function () {
 					$context      = wp_interactivity_get_context();
 					$state        = wp_interactivity_state( self::$store_namespace );

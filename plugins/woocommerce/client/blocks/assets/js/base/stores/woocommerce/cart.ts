@@ -844,10 +844,21 @@ const { actions } = store< Store >(
 	'woocommerce/cart',
 	{
 		state: {
-			// Editable array of pure add-item payloads. Plain writable slot (like
-			// `cart`): surfaces seed and mutate it directly (write policy). One
-			// draft per product context, keyed by `id` (identity rule 3).
-			draftItems: [],
+			// NOTE: `draftItems` is deliberately NOT declared here. It is a plain
+			// writable slot (like `cart`) that surfaces seed SERVER-SIDE via
+			// `wp_interactivity_state` (draft "birth" — see the shared-stores
+			// schema) and mutate directly (write policy). Declaring it in this
+			// client definition would WIPE the server-seeded drafts: the iAPI
+			// runtime merges server data first (`populateInitialData`,
+			// override=false) and then merges this definition at module
+			// registration with override=true — and arrays are not deep-merged,
+			// so a `draftItems: []` here replaces the seeded array wholesale
+			// (verified against @wordpress/interactivity deepMergeRecursive: the
+			// non-plain-object branch runs `Object.defineProperty` whenever
+			// `override` is set). The slot is instead initialized after
+			// registration, only when no server seed exists — see below the
+			// store definition. (T6 finding; shared-store change pending
+			// maintainer sign-off.)
 
 			/**
 			 * The `{ cart, draft, isInCart }` envelope for the current shared
@@ -1311,6 +1322,22 @@ const { actions } = store< Store >(
 				const targetQuantity =
 					typeof quantity === 'number' ? quantity : 1;
 
+				// SEND-TIME PURCHASABLE-ID SWAP (identity rule 6, schema: "addItem()
+				// resolves the purchasable id (selected variation) at send time via
+				// findProduct"). Posting the parent id + `variation` array and
+				// letting the server resolve it is NOT universally safe: the
+				// draft's `variation` holds the shopper-facing attribute labels,
+				// and for attributes with custom slugs (label ≠ slug) the server's
+				// resolution fails with "No matching variation found" (verified in
+				// the T6 e2e run against a custom-slug variable product). The
+				// client's `findProduct` matches labels tolerantly AND mirrors the
+				// server's tie-breaking (T1), so we swap in the resolved variation
+				// id here; the server then validates the attributes against that
+				// concrete variation, which accepts labels. Falls back to the
+				// payload's own id when resolution is unavailable/ambiguous
+				// (simple products, missing product data — same as before).
+				const purchasableId = resolvePurchasableId( itemPayload );
+
 				// Build the add-item body. The draft is the payload; strip the
 				// bookkeeping-free reserved keys plus carry every namespaced
 				// extension prop through to the server untouched (they may drive
@@ -1319,7 +1346,7 @@ const { actions } = store< Store >(
 					itemPayload as Record< string, unknown >
 				);
 				const body = {
-					id,
+					id: purchasableId,
 					quantity: targetQuantity,
 					...( variation && { variation } ),
 					...extensionProps,
@@ -1502,6 +1529,18 @@ const { actions } = store< Store >(
 	},
 	{ lock: universalLock }
 );
+
+// Guarantee the `draftItems` slot exists WITHOUT clobbering server-seeded
+// drafts. `wp_interactivity_state` seeds (draft "birth") land in the store
+// before this module registers; a conditional assignment preserves them, while
+// pages with no PHP seed at all (no purchase surface rendered any draft, and
+// `BlocksSharedState::load_cart_state` never ran) still get a usable empty
+// array so `state.draftItems.find(...)` never explodes. This replaces the old
+// `draftItems: []` in the store definition above, which wiped the seeds (see
+// the NOTE in the definition).
+if ( ! state.draftItems ) {
+	state.draftItems = [];
+}
 
 /**
  * Backwards-compatibility alias on the bare `woocommerce` namespace.

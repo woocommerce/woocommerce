@@ -26,6 +26,11 @@ import type {
 } from '../frontend';
 import type { SelectableItem } from '../../../types/type-defs/selectable-items';
 import type { VisualAttributeTerm } from '../../../base/utils/visual-attribute-terms';
+import {
+	getContextProductId,
+	getDraftQuantity,
+	setDraftVariation,
+} from '../cart-drafts';
 
 type VariationOptionItem = {
 	id: string;
@@ -179,10 +184,33 @@ const getProductAttributesAndOptions = (
 	return productAttributesAndOptions;
 };
 
+/**
+ * Mirror the shopper's attribute selection into the shared-store draft's
+ * `variation` — the single source of selection truth the cart submission and
+ * `woocommerce/products`' `productVariationInContext` read (T6).
+ *
+ * The block's `context.selectedAttributes` stays authoritative for the block
+ * family's own UI (valid-option computation) and for out-of-scope consumers
+ * (Product Button, Add to Wishlist Button) that still read it; this one-way
+ * mirror keeps the draft in step on every selection change. A shallow copy is
+ * written so the draft holds its own array rather than aliasing the reactive
+ * context array.
+ *
+ * @param selectedAttributes The current selection from the block context.
+ */
+const mirrorSelectionToDraft = (
+	selectedAttributes: SelectedAttributes[]
+): void => {
+	const productId = getContextProductId();
+	if ( productId === undefined ) {
+		return;
+	}
+	setDraftVariation( productId, [ ...selectedAttributes ] );
+};
+
 export type VariableProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		state: {
-			selectedAttributes: SelectedAttributes[];
 			selectableItems: readonly SelectableItem< {
 				visual?: VisualAttributeTerm;
 			} >[];
@@ -206,17 +234,10 @@ export type VariableProductAddToCartWithOptionsStore =
 		};
 	};
 
-const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
+const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
-			get selectedAttributes(): SelectedAttributes[] {
-				const context = getContext< Context >();
-				if ( ! context ) {
-					return [];
-				}
-				return context.selectedAttributes || [];
-			},
 			get selectableItems(): readonly SelectableItem< {
 				visual?: VisualAttributeTerm;
 			} >[] {
@@ -229,7 +250,11 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					disabledAttributesAction,
 					variationAttributeOptions,
 				} = context;
-				const { selectedAttributes } = state;
+				// The shopper's selection is read from the block's iAPI context
+				// (the compatibility surface out-of-scope consumers still read);
+				// the source of truth for the cart mirrors into the draft (see
+				// `setAttribute` / `removeAttribute`).
+				const selectedAttributes = context.selectedAttributes || [];
 				const hideInvalid = disabledAttributesAction === 'hide';
 
 				if ( ! Array.isArray( variationAttributeOptions ) ) {
@@ -278,6 +303,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					if ( index >= 0 ) {
 						selectedAttributes.splice( index, 1 );
 					}
+					mirrorSelectionToDraft( selectedAttributes );
 					return;
 				}
 
@@ -292,6 +318,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						value,
 					} );
 				}
+
+				mirrorSelectionToDraft( selectedAttributes );
 			},
 			removeAttribute( attribute: string ) {
 				const { selectedAttributes } = getContext< Context >();
@@ -305,6 +333,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				if ( index >= 0 ) {
 					selectedAttributes.splice( index, 1 );
 				}
+
+				mirrorSelectionToDraft( selectedAttributes );
 			},
 			toggle(
 				itemArg?:
@@ -321,7 +351,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				const { name } = context;
-				const { selectedAttributes } = state;
+				const selectedAttributes = context.selectedAttributes || [];
 				const isCurrentlySelected = selectedAttributes.some(
 					( attrObject ) =>
 						attributeNamesMatch( attrObject.attribute, name ) &&
@@ -351,7 +381,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { selectedAttributes } = state;
+				const selectedAttributes = context.selectedAttributes || [];
 
 				const { mainProductInContext: product } = productsState;
 				if ( ! product ) {
@@ -522,8 +552,15 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				const { minimum, maximum } = variation.add_to_cart;
 
-				const { quantity } = getContext< Context >();
-				const currentValue = quantity[ variation.id ];
+				// Quantity now lives on the shared-store draft, keyed by the
+				// main/context product id and variation-independent (one draft
+				// per product). Read and write it under that id rather than the
+				// per-variation key the old `context.quantity` map used.
+				const productId = getContextProductId();
+				if ( productId === undefined ) {
+					return;
+				}
+				const currentValue = getDraftQuantity( productId );
 
 				let newValue = currentValue;
 				if ( currentValue < minimum ) {
@@ -536,7 +573,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					newValue !== ref.valueAsNumber ||
 					newValue !== currentValue
 				) {
-					actions.setQuantity( variation.id, newValue );
+					actions.setQuantity( productId, newValue );
 				}
 			},
 		},

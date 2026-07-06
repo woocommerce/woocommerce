@@ -658,10 +658,17 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			expect( batchCalls[ 0 ][ 0 ].path ).not.toContain( 'update-item' );
 		} );
 
-		it( 'POSTs the draft as-is (parent id + variation array), no client-side id swap', async () => {
+		it( 'swaps in the purchasable id at send time (identity rule 6), keeping the variation array', async () => {
 			const cart = await loadCartAndReady();
-			// Even though findProduct could resolve 100 → 456, addItem must POST
-			// the parent id and let the server resolve the variation.
+			// findProduct resolves the draft's parent id + selection to the
+			// variation (100 → 456). addItem must POST the RESOLVED purchasable
+			// id: posting the parent id and relying on server-side resolution is
+			// not universally safe — the draft's `variation` carries the
+			// shopper-facing attribute LABELS, and for attributes with custom
+			// slugs (label ≠ slug) the server fails with "No matching variation
+			// found" (T6 e2e finding). The variation array is still sent so the
+			// server can validate the attributes against the concrete variation
+			// (including "any" slots).
 			mockFindProduct = ( { id } ) => ( id === 100 ? { id: 456 } : null );
 			const { batchCalls } = installFetchMock( {
 				onBatch: ( requests ) =>
@@ -682,7 +689,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			);
 
 			expect( batchCalls[ 0 ][ 0 ].body ).toMatchObject( {
-				id: 100,
+				id: 456,
 				quantity: 2,
 				variation: [
 					{ attribute: 'attribute_pa_color', value: 'green' },
