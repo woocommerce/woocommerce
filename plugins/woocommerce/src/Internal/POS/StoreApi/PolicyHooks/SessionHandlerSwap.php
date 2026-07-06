@@ -28,10 +28,35 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 class SessionHandlerSwap implements RegisterHooksInterface {
 
 	/**
+	 * POS transaction/token lifetime.
+	 *
+	 * The web default (48h) is shaped for browser carts; a register
+	 * transaction lives minutes to hours, and a token that outlives its sale
+	 * is only attack surface. Applies to both the session row and the
+	 * Cart-Token `exp` (both derive from the same filter).
+	 */
+	private const SESSION_LIFETIME_SECONDS = 6 * HOUR_IN_SECONDS;
+
+	/**
 	 * Register hooks.
 	 */
 	public function register(): void {
 		add_filter( 'woocommerce_session_handler', array( $this, 'swap_session_handler' ) );
+		add_filter( 'wc_session_expiration', array( $this, 'maybe_shorten_session_lifetime' ) );
+	}
+
+	/**
+	 * Shorten the session/token lifetime for POS requests.
+	 *
+	 * Untyped parameter on purpose — see swap_session_handler().
+	 *
+	 * @param mixed $expiration Session lifetime in seconds.
+	 * @return mixed
+	 *
+	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+	 */
+	public function maybe_shorten_session_lifetime( $expiration ) {
+		return Context::is_pos_request() ? self::SESSION_LIFETIME_SECONDS : $expiration;
 	}
 
 	/**

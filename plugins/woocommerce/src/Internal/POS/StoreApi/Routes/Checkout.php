@@ -39,6 +39,21 @@ class Checkout extends AbstractCartRoute {
 	use CheckoutTrait;
 	use ProcessCheckoutTrait, PosRouteTrait {
 		PosRouteTrait::requires_nonce insteadof ProcessCheckoutTrait;
+		PosRouteTrait::get_response insteadof ProcessCheckoutTrait;
+		ProcessCheckoutTrait::get_response as process_checkout_get_response;
+	}
+
+	/**
+	 * Route the token pre-check into the checkout's own dispatch wrapper
+	 * (which carries checkout-specific error handling — stock release,
+	 * InvalidCartException mapping) instead of the cart route base one.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	protected function dispatch_pos_response( \WP_REST_Request $request ) {
+		return $this->process_checkout_get_response( $request );
 	}
 
 	/**

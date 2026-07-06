@@ -64,6 +64,12 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 		// detection can't apply; force POS context the way a real POS URI would.
 		Context::set_test_override( true );
 
+		// Re-initialize the session under POS context so the whole class runs
+		// on POSSessionHandler (pos_-keyed transaction session), as production
+		// requests do.
+		WC()->session = null;
+		WC()->initialize_session();
+
 		// The bootstrap registered the policy hooks via Controller::register();
 		// the swap is inert outside POS context and engages now via the override.
 		$this->original_user_id = get_current_user_id();
@@ -196,6 +202,53 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox A valid Cart-Token threads the transaction across requests.
+	 */
+	public function test_cart_token_threads_transaction(): void {
+		wp_set_current_user( $this->operator_id );
+
+		$first = $this->add_items( array( array( 'id' => $this->product->get_id(), 'quantity' => 1 ) ) );
+		$this->assertSame( 201, $first->get_status() );
+		$token = \Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils::get_cart_token( WC()->session->get_customer_id() );
+
+		wp_set_current_user( $this->operator_id );
+		$second = $this->add_items( array( array( 'id' => $this->product->get_id(), 'quantity' => 1 ) ), $token );
+
+		$this->assertSame( 201, $second->get_status() );
+		$this->assertSame( 2, $second->get_data()['cart']['items'][0]['quantity'] );
+	}
+
+	/**
+	 * A presented-but-unusable token must fail loud — silently starting a
+	 * fresh cart would drop every scanned item and undercharge at checkout.
+	 *
+	 * @testdox Invalid and expired Cart-Tokens are rejected with 401, not silently discarded.
+	 */
+	public function test_unusable_cart_token_fails_loud(): void {
+		wp_set_current_user( $this->operator_id );
+
+		$garbage = $this->add_items( array( array( 'id' => $this->product->get_id(), 'quantity' => 1 ) ), 'not-a-token' );
+		$this->assertSame( 401, $garbage->get_status() );
+		$this->assertSame( 'woocommerce_pos_rest_invalid_cart_token', $garbage->get_data()['code'] );
+
+		// Mint an already-expired token by forcing a negative lifetime.
+		$expire_now = function () {
+			return -100;
+		};
+		add_filter( 'wc_session_expiration', $expire_now, 100 );
+		try {
+			$expired_token = \Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils::get_cart_token( 'pos_' . wc_rand_hash( '', 28 ) );
+		} finally {
+			remove_filter( 'wc_session_expiration', $expire_now, 100 );
+		}
+
+		wp_set_current_user( $this->operator_id );
+		$expired = $this->add_items( array( array( 'id' => $this->product->get_id(), 'quantity' => 1 ) ), $expired_token );
+		$this->assertSame( 401, $expired->get_status() );
+		$this->assertSame( 'woocommerce_pos_rest_invalid_cart_token', $expired->get_data()['code'] );
+	}
+
+	/**
 	 * @testdox add-fee rejects non-positive amounts.
 	 */
 	public function test_add_fee_rejects_non_positive_amount(): void {
@@ -315,23 +368,28 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 	/**
 	 * Dispatch POST /cart/add-items.
 	 *
-	 * @param array $items Items payload.
+	 * @param array       $items      Items payload.
+	 * @param string|null $cart_token Optional Cart-Token header value.
 	 * @return \WP_REST_Response
 	 */
-	private function add_items( array $items ): \WP_REST_Response {
-		return $this->dispatch_post( '/cart/add-items', array( 'items' => $items ) );
+	private function add_items( array $items, ?string $cart_token = null ): \WP_REST_Response {
+		return $this->dispatch_post( '/cart/add-items', array( 'items' => $items ), $cart_token );
 	}
 
 	/**
 	 * Dispatch a POST request to a POS route.
 	 *
-	 * @param string $path Route path below the POS namespace.
-	 * @param array  $body Body params.
+	 * @param string      $path       Route path below the POS namespace.
+	 * @param array       $body       Body params.
+	 * @param string|null $cart_token Optional Cart-Token header value.
 	 * @return \WP_REST_Response
 	 */
-	private function dispatch_post( string $path, array $body ): \WP_REST_Response {
+	private function dispatch_post( string $path, array $body, ?string $cart_token = null ): \WP_REST_Response {
 		$request = new \WP_REST_Request( 'POST', '/' . Controller::REST_NAMESPACE . $path );
 		$request->set_body_params( $body );
+		if ( null !== $cart_token ) {
+			$request->set_header( 'Cart-Token', $cart_token );
+		}
 
 		return rest_get_server()->dispatch( $request );
 	}

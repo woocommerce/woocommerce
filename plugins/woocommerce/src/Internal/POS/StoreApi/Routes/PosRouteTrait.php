@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\POS\StoreApi\Routes;
 
+use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use WP_Error;
 use WP_REST_Request;
 
@@ -23,6 +24,67 @@ use WP_REST_Request;
  * @since 11.0.0
  */
 trait PosRouteTrait {
+
+	/**
+	 * Fail loud when the client presents a Cart-Token that cannot resume a
+	 * POS transaction.
+	 *
+	 * The session handler itself degrades silently to a fresh session (the
+	 * safe default at that layer), but from the client's perspective that
+	 * would mean: token expired overnight → next scan returns 201 with a cart
+	 * missing every previously scanned item → checkout silently undercharges.
+	 * A presented-but-unusable token is a client-visible error, not a fresh
+	 * start.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function get_response( WP_REST_Request $request ) {
+		$cart_token = (string) ( $request->get_header( 'Cart-Token' ) ?? '' );
+
+		if ( '' !== $cart_token && ! $this->is_resumable_pos_cart_token( $cart_token ) ) {
+			return $this->error_to_response(
+				$this->get_route_error_response(
+					'woocommerce_pos_rest_invalid_cart_token',
+					__( 'The cart token is invalid or expired. Start a new transaction.', 'woocommerce' ),
+					401
+				)
+			);
+		}
+
+		return $this->dispatch_pos_response( $request );
+	}
+
+	/**
+	 * The underlying response dispatch the token pre-check wraps.
+	 *
+	 * Defaults to the cart route base implementation; routes composing another
+	 * trait's get_response (the checkout) alias theirs in here instead.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	protected function dispatch_pos_response( WP_REST_Request $request ) {
+		return parent::get_response( $request );
+	}
+
+	/**
+	 * Whether a presented Cart-Token identifies a resumable POS transaction.
+	 *
+	 * @param string $cart_token The presented token.
+	 * @return bool
+	 */
+	private function is_resumable_pos_cart_token( string $cart_token ): bool {
+		if ( ! CartTokenUtils::validate_cart_token( $cart_token ) ) {
+			return false;
+		}
+
+		$customer_id = (string) ( CartTokenUtils::get_cart_token_payload( $cart_token )['user_id'] ?? '' );
+
+		return 0 === strpos( $customer_id, 'pos_' );
+	}
 
 	/**
 	 * Capability-based permission check replacing the Store API's `__return_true`
