@@ -382,4 +382,17 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$store->update_product_sales( $product_id, 30.5, 'set' );
 		$this->assertSame( '30.500000', get_post_meta( $product_id, 'total_sales', true ) );
 	}
+
+	/**
+	 * @testdox Removes the sample product meta when a product is updated.
+	 */
+	public function test_removes_headstart_post_meta_on_product_update(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		update_post_meta( $product->get_id(), '_headstart_post', true );
+
+		$product->set_name( 'Updated sample product' );
+		$product->save();
+
+		$this->assertFalse( metadata_exists( 'post', $product->get_id(), '_headstart_post' ) );
+	}
 }
