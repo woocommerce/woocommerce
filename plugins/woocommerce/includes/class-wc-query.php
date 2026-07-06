@@ -7,8 +7,7 @@
  */
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
-use Automattic\WooCommerce\Internal\DataStores\Products\ProductQuerySeparateCountQuery;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Internal\DataStores\Products\ProductQueryFoundRowsOptimizer;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
@@ -51,9 +50,9 @@ class WC_Query {
 	 * Computes the pagination total for the current product query with a separate COUNT instead of
 	 * SQL_CALC_FOUND_ROWS. Set for the duration of a single product loop, NULL otherwise.
 	 *
-	 * @var ProductQuerySeparateCountQuery|null
+	 * @var ProductQueryFoundRowsOptimizer|null
 	 */
-	private $separate_count_query = null;
+	private ?ProductQueryFoundRowsOptimizer $found_rows_optimizer = null;
 
 	/**
 	 * Constructor for the query class. Hooks in methods.
@@ -507,9 +506,9 @@ class WC_Query {
 	public function remove_product_query_filters( $posts ) {
 		$this->remove_ordering_args();
 		remove_filter( 'posts_clauses', array( $this, 'price_filter_post_clauses' ), 10, 2 );
-		if ( $this->separate_count_query instanceof ProductQuerySeparateCountQuery ) {
-			$this->separate_count_query->detach();
-			$this->separate_count_query = null;
+		if ( null !== $this->found_rows_optimizer ) {
+			$this->found_rows_optimizer->detach();
+			$this->found_rows_optimizer = null;
 		}
 		return $posts;
 	}
@@ -603,26 +602,11 @@ class WC_Query {
 		add_filter( 'the_posts', array( $this, 'handle_get_posts' ), 10, 2 );
 		add_filter( 'the_posts', array( $this, 'prime_thumbnail_caches' ), 10, 2 );
 
-		// On for MySQL 8.0+ with the feature enabled; MariaDB / MySQL < 8.0 regress, so keep SQL_CALC_FOUND_ROWS.
-		global $wpdb;
-		$use_separate_count = FeaturesUtil::feature_is_enabled( ProductQuerySeparateCountQuery::FEATURE_NAME )
-			&& ProductQuerySeparateCountQuery::is_supported( $wpdb );
-
-		/**
-		 * Filters whether the main product query computes its total with a separate COUNT query instead
-		 * of MySQL's SQL_CALC_FOUND_ROWS, which fully materializes and sorts the matched set just to count
-		 * it (roughly doubling archive cost on large catalogs; deprecated since MySQL 8.0.17). Return
-		 * false to keep WordPress' default SQL_CALC_FOUND_ROWS behaviour.
-		 *
-		 * @since 11.0.0
-		 * @param bool     $use_separate_count Whether to use a separate COUNT query. Defaults to the
-		 *                                     'product_query_separate_count' feature being enabled on a
-		 *                                     supported server (MySQL 8.0+); false on MariaDB / MySQL < 8.0.
-		 * @param WP_Query $q                  The product query.
-		 */
-		if ( apply_filters( 'woocommerce_product_query_use_separate_count_query', $use_separate_count, $q ) ) {
-			$this->separate_count_query = new ProductQuerySeparateCountQuery( $q );
-			$this->separate_count_query->attach();
+		// Compute the pagination total with a separate COUNT instead of SQL_CALC_FOUND_ROWS where that wins.
+		$optimizer = new ProductQueryFoundRowsOptimizer( $q );
+		if ( $optimizer->is_enabled() ) {
+			$this->found_rows_optimizer = $optimizer;
+			$this->found_rows_optimizer->attach();
 		}
 
 		do_action( 'woocommerce_product_query', $q, $this );

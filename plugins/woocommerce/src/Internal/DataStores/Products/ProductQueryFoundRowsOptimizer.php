@@ -1,12 +1,13 @@
 <?php
 /**
- * ProductQuerySeparateCountQuery class file.
+ * ProductQueryFoundRowsOptimizer class file.
  */
 
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\DataStores\Products;
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WP_Query;
 
 defined( 'ABSPATH' ) || exit;
@@ -21,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
  * same clauses (so price and layered-nav filters are reflected). WC_Query wires one instance per product
  * query and attaches/detaches it around the loop; identity against the captured query scopes the filters.
  */
-class ProductQuerySeparateCountQuery {
+final class ProductQueryFoundRowsOptimizer {
 
 	/**
 	 * Feature flag id registered in FeaturesController; the master on/off switch for this optimization.
@@ -36,32 +37,20 @@ class ProductQuerySeparateCountQuery {
 	private WP_Query $query;
 
 	/**
-	 * Whether the separate-COUNT rewrite is worth using on the live database.
-	 *
-	 * It only wins on MySQL 8.0+. MariaDB (all versions) and MySQL < 8.0 regress: the plain SELECT trades
-	 * the single full scan for a non-covering index range scan (a heap fetch per matched row). Gate on the
-	 * running server so those engines keep SQL_CALC_FOUND_ROWS.
-	 *
-	 * @param \wpdb $wpdb The WordPress database handle to inspect.
-	 * @return bool True when the server is MySQL 8.0 or newer.
-	 */
-	public static function is_supported( \wpdb $wpdb ): bool {
-		$server = (string) $wpdb->db_server_info();
-		if ( false !== stripos( $server, 'mariadb' ) ) {
-			return false;
-		}
-		// Strip the legacy "5.5.5-" replication-version prefix some servers report before the real version.
-		$version = (string) preg_replace( '/^5\.5\.5-/', '', $server );
-		return version_compare( $version, '8.0', '>=' );
-	}
-
-	/**
 	 * Captured JOIN and WHERE clauses of the product query, used to build the separate COUNT that
 	 * replaces SQL_CALC_FOUND_ROWS. NULL until the clauses have been captured.
 	 *
 	 * @var array|null
 	 */
 	private ?array $found_posts_clauses = null;
+
+	/**
+	 * Hook closures registered by attach(), as hook name => array( priority, closure ), so detach()
+	 * can remove exactly what was added.
+	 *
+	 * @var array
+	 */
+	private array $hooks = array();
 
 	/**
 	 * Constructor.
@@ -73,47 +62,84 @@ class ProductQuerySeparateCountQuery {
 	}
 
 	/**
+	 * Whether the optimization should run for this query: the feature flag must be on and the
+	 * database server supported, with a filter as the final override.
+	 *
+	 * @return bool True when the separate COUNT should replace SQL_CALC_FOUND_ROWS.
+	 */
+	public function is_enabled(): bool {
+		$enabled = FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) && self::is_supported();
+
+		/**
+		 * Filters whether the main product query computes its total with a separate COUNT query instead
+		 * of MySQL's SQL_CALC_FOUND_ROWS. Return false to keep WordPress' default behaviour.
+		 *
+		 * @since 11.0.0
+		 * @param bool     $enabled Whether to use a separate COUNT query. Defaults to the
+		 *                          'product_query_separate_count' feature being enabled on a supported
+		 *                          server (MySQL 8.0+); false on MariaDB / MySQL < 8.0.
+		 * @param WP_Query $query   The product query.
+		 */
+		return (bool) apply_filters( 'woocommerce_product_query_use_separate_count_query', $enabled, $this->query );
+	}
+
+	/**
+	 * Whether the separate-COUNT rewrite is worth using on the live database.
+	 *
+	 * It only wins on MySQL 8.0+. MariaDB (all versions) and MySQL < 8.0 regress: the plain SELECT trades
+	 * the single full scan for a non-covering index range scan (a heap fetch per matched row). Gate on the
+	 * running server so those engines keep SQL_CALC_FOUND_ROWS.
+	 *
+	 * Uses wc_get_server_database_version() (a SELECT VERSION() probe) rather than db_server_info():
+	 * behind a proxy such as ProxySQL or MaxScale the latter reports the proxy's handshake version, not
+	 * the actual backend server.
+	 *
+	 * @return bool True when the server is MySQL 8.0 or newer.
+	 */
+	public static function is_supported(): bool {
+		$db_version = wc_get_server_database_version();
+		if ( false !== stripos( (string) $db_version['string'], 'mariadb' ) ) {
+			return false;
+		}
+		return version_compare( (string) $db_version['number'], '8.0', '>=' );
+	}
+
+	/**
 	 * Attach the filters that swap SQL_CALC_FOUND_ROWS for a separate COUNT on the product query.
+	 * The clause capture runs at priority 999 so it sees the clauses after every other filter
+	 * (price, layered nav, ordering) and the COUNT matches the main query exactly.
 	 */
 	public function attach(): void {
 		$this->found_posts_clauses = null;
-		add_filter( 'posts_clauses', array( $this, 'capture_product_query_clauses' ), 999, 2 );
-		add_filter( 'posts_request', array( $this, 'remove_product_query_found_rows' ), 10, 2 );
-		add_filter( 'found_posts_query', array( $this, 'product_query_found_posts_query' ), 10, 2 );
+		$this->hooks               = array(
+			'posts_clauses'     => array( 999, fn( $clauses, $wp_query ) => $this->capture_product_query_clauses( $clauses, $wp_query ) ),
+			'posts_request'     => array( 10, fn( $request, $wp_query ) => $this->remove_product_query_found_rows( $request, $wp_query ) ),
+			'found_posts_query' => array( 10, fn( $found_posts_query, $wp_query ) => $this->product_query_found_posts_query( $found_posts_query, $wp_query ) ),
+		);
+		foreach ( $this->hooks as $hook => list( $priority, $closure ) ) {
+			add_filter( $hook, $closure, $priority, 2 );
+		}
 	}
 
 	/**
 	 * Detach the filters attached by attach(). Called once the product loop is done.
 	 */
 	public function detach(): void {
-		remove_filter( 'posts_clauses', array( $this, 'capture_product_query_clauses' ), 999 );
-		remove_filter( 'posts_request', array( $this, 'remove_product_query_found_rows' ), 10 );
-		remove_filter( 'found_posts_query', array( $this, 'product_query_found_posts_query' ), 10 );
+		foreach ( $this->hooks as $hook => list( $priority, $closure ) ) {
+			remove_filter( $hook, $closure, $priority );
+		}
+		$this->hooks = array();
 	}
 
 	/**
-	 * Whether the query being filtered is the exact product query this instance was built for.
-	 *
-	 * @param mixed $wp_query The query passed by the current filter.
-	 * @return bool
-	 */
-	private function is_target_query( $wp_query ): bool {
-		return $wp_query instanceof WP_Query && $wp_query === $this->query;
-	}
-
-	/**
-	 * Capture the product query's final JOIN/WHERE clauses for the separate COUNT. Runs at a late
-	 * priority so it sees the clauses after every other filter (price, layered-nav, ordering), ensuring
-	 * the COUNT matches exactly the rows the main query returns.
+	 * Capture the product query's final JOIN/WHERE clauses for the separate COUNT.
 	 *
 	 * @param array    $clauses  The product query clauses.
 	 * @param WP_Query $wp_query The current product query.
 	 * @return array The clauses, unchanged.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	public function capture_product_query_clauses( $clauses, $wp_query ) {
-		if ( $this->is_target_query( $wp_query ) ) {
+	private function capture_product_query_clauses( $clauses, $wp_query ) {
+		if ( $wp_query === $this->query ) {
 			$this->found_posts_clauses = array(
 				'join'  => $clauses['join'],
 				'where' => $clauses['where'],
@@ -130,11 +156,9 @@ class ProductQuerySeparateCountQuery {
 	 * @param string   $request  The complete SQL query.
 	 * @param WP_Query $wp_query The current product query.
 	 * @return string The query without SQL_CALC_FOUND_ROWS.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	public function remove_product_query_found_rows( $request, $wp_query ) {
-		if ( is_array( $this->found_posts_clauses ) && $this->is_target_query( $wp_query ) ) {
+	private function remove_product_query_found_rows( $request, $wp_query ) {
+		if ( null !== $this->found_posts_clauses && $wp_query === $this->query ) {
 			$stripped = preg_replace( '/^(\s*SELECT\s+)SQL_CALC_FOUND_ROWS\s+/i', '$1', $request, 1 );
 
 			// Guard against a preg_replace error (null); keep the original request if so.
@@ -154,13 +178,11 @@ class ProductQuerySeparateCountQuery {
 	 * @param string   $found_posts_query The query used to retrieve the found post count.
 	 * @param WP_Query $wp_query          The current product query.
 	 * @return string The replacement COUNT query, or the original when not applicable.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	public function product_query_found_posts_query( $found_posts_query, $wp_query ) {
+	private function product_query_found_posts_query( $found_posts_query, $wp_query ) {
 		global $wpdb;
 
-		if ( is_array( $this->found_posts_clauses ) && $this->is_target_query( $wp_query ) ) {
+		if ( null !== $this->found_posts_clauses && $wp_query === $this->query ) {
 			$join  = $this->found_posts_clauses['join'];
 			$where = $this->found_posts_clauses['where'];
 

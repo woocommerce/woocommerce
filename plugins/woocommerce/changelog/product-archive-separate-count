@@ -1,4 +1,4 @@
 Significance: minor
 Type: performance
 
-Speed up shop and product archive pagination on MySQL 8.0+ by replacing the SQL_CALC_FOUND_ROWS total with a separate COUNT query, avoiding a full result-set materialization on every request. Enabled by default on MySQL 8.0+; MariaDB and MySQL < 8.0 keep the existing behaviour.
+Speed up shop and product archive pagination on MySQL 8.0+ by replacing SQL_CALC_FOUND_ROWS with a separate COUNT query (MariaDB and MySQL < 8.0 keep the existing behaviour).

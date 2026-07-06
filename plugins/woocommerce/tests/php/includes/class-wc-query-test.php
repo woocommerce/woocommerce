@@ -2,10 +2,15 @@
 
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Internal\DataStores\Products\ProductQueryFoundRowsOptimizer;
+use Automattic\WooCommerce\Tests\Internal\DataStores\Products\RunsMainProductQueryTrait;
+
 /**
  * Tests for WC_Query.
  */
 class WC_Query_Test extends \WC_Unit_Test_Case {
+
+	use RunsMainProductQueryTrait;
 
 	/**
 	 * @testdox 'price_filter_post_clauses' generates the proper 'where' clause when there are 'max_price' and 'min_price' arguments in the query.
@@ -345,61 +350,24 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Run the main product archive query and report whether its SQL request still used
-	 * SQL_CALC_FOUND_ROWS. The separate-COUNT correctness invariants are covered by
-	 * ProductQuerySeparateCountQueryTest; this only checks that WC_Query wires the optimization in.
+	 * Run the main product archive query (via RunsMainProductQueryTrait) and report whether its SQL
+	 * request still used SQL_CALC_FOUND_ROWS. The separate-COUNT correctness invariants are covered by
+	 * ProductQueryFoundRowsOptimizerTest; this only checks that WC_Query wires the optimization in.
 	 *
 	 * @return bool Whether the main product query carried SQL_CALC_FOUND_ROWS.
 	 */
 	private function product_query_used_sql_calc_found_rows(): bool {
-		$used_sql_calc_found_rows = null;
-		$capture                  = function ( $request, $query ) use ( &$used_sql_calc_found_rows ) {
-			if ( $query->is_main_query() && 'product_query' === $query->get( 'wc_query' ) ) {
-				$used_sql_calc_found_rows = false !== stripos( $request, 'SQL_CALC_FOUND_ROWS' );
-			}
-			return $request;
-		};
-
-		// Make the synthetic main query resolve as the product archive (a raw WP_Query is not flagged
-		// as one), so WC_Query::pre_get_posts() runs product_query() instead of returning early. Runs
-		// at priority 5, before WC_Query::pre_get_posts() at the default priority 10.
-		$as_product_archive = function ( $query ) {
-			if ( $query->is_main_query() ) {
-				$query->is_archive           = true;
-				$query->is_post_type_archive = true;
-				$query->set( 'posts_per_page', 2 );
-			}
-		};
-		add_action( 'pre_get_posts', $as_product_archive, 5 );
-		add_filter( 'posts_request', $capture, 99999, 2 );
-
-		global $wp_the_query, $wp_query;
-		$previous_wp_the_query = $wp_the_query;
-		$previous_wp_query     = $wp_query;
-
-		$query        = new WP_Query();
-		$wp_the_query = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$wp_query     = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
-		$query->query( array( 'post_type' => 'product' ) );
-
-		remove_filter( 'posts_request', $capture, 99999 );
-		remove_action( 'pre_get_posts', $as_product_archive, 5 );
-		$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$wp_query     = $previous_wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
-		return (bool) $used_sql_calc_found_rows;
+		return (bool) $this->run_main_product_query( 2 )['used_sql_calc_found_rows'];
 	}
 
 	/**
 	 * @testdox WC_Query wires the separate-count optimization by default on MySQL 8.0+ (gated feature) and honors its gate filter.
 	 */
-	public function test_product_query_wires_separate_count_optimization() {
-		global $wpdb;
+	public function test_product_query_wires_separate_count_optimization(): void {
 		WC_Helper_Product::create_simple_product();
 
 		// Enabled by default, but only attaches on MySQL 8.0+; MariaDB / MySQL < 8.0 keep SQL_CALC_FOUND_ROWS.
-		$supported = \Automattic\WooCommerce\Internal\DataStores\Products\ProductQuerySeparateCountQuery::is_supported( $wpdb );
+		$supported = ProductQueryFoundRowsOptimizer::is_supported();
 		$this->assertSame(
 			! $supported,
 			$this->product_query_used_sql_calc_found_rows(),

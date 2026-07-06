@@ -4,74 +4,22 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\DataStores\Products;
 
-use Automattic\WooCommerce\Internal\DataStores\Products\ProductQuerySeparateCountQuery;
+use Automattic\WooCommerce\Internal\DataStores\Products\ProductQueryFoundRowsOptimizer;
 use WC_Helper_Product;
-use WP_Query;
 use wpdb;
 
 /**
- * Tests for ProductQuerySeparateCountQuery, exercised through the main product archive query that
+ * Tests for ProductQueryFoundRowsOptimizer, exercised through the main product archive query that
  * WC_Query wires it into.
  */
-class ProductQuerySeparateCountQueryTest extends \WC_Unit_Test_Case {
+class ProductQueryFoundRowsOptimizerTest extends \WC_Unit_Test_Case {
 
-	/**
-	 * Run the main product archive query and return its found_posts, max_num_pages and whether the SQL
-	 * request still used SQL_CALC_FOUND_ROWS.
-	 *
-	 * @param int $posts_per_page Posts per page for the query (forces a LIMIT so the found-rows path runs).
-	 * @return array{found_posts:int, max_num_pages:int, used_sql_calc_found_rows:bool}
-	 */
-	private function run_main_product_query( int $posts_per_page ): array {
-		$used_sql_calc_found_rows = null;
-		$capture                  = function ( $request, $query ) use ( &$used_sql_calc_found_rows ) {
-			if ( $query->is_main_query() && 'product_query' === $query->get( 'wc_query' ) ) {
-				$used_sql_calc_found_rows = false !== stripos( $request, 'SQL_CALC_FOUND_ROWS' );
-			}
-			return $request;
-		};
-
-		// Make the synthetic main query resolve as the product archive (a raw WP_Query is not flagged
-		// as one), so WC_Query::pre_get_posts() runs product_query() instead of returning early. Runs
-		// at priority 5, before WC_Query::pre_get_posts() at the default priority 10.
-		$as_product_archive = function ( $query ) use ( $posts_per_page ) {
-			if ( $query->is_main_query() ) {
-				$query->is_archive           = true;
-				$query->is_post_type_archive = true;
-				$query->set( 'posts_per_page', $posts_per_page );
-			}
-		};
-		add_action( 'pre_get_posts', $as_product_archive, 5 );
-		add_filter( 'posts_request', $capture, 99999, 2 );
-
-		global $wp_the_query, $wp_query;
-		$previous_wp_the_query = $wp_the_query;
-		$previous_wp_query     = $wp_query;
-
-		$query        = new WP_Query();
-		$wp_the_query = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$wp_query     = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
-		$query->query( array( 'post_type' => 'product' ) );
-
-		$result = array(
-			'found_posts'              => (int) $query->found_posts,
-			'max_num_pages'            => (int) $query->max_num_pages,
-			'used_sql_calc_found_rows' => $used_sql_calc_found_rows,
-		);
-
-		remove_filter( 'posts_request', $capture, 99999 );
-		remove_action( 'pre_get_posts', $as_product_archive, 5 );
-		$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$wp_query     = $previous_wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
-		return $result;
-	}
+	use RunsMainProductQueryTrait;
 
 	/**
 	 * @testdox The product archive drops SQL_CALC_FOUND_ROWS but still reports the correct pagination total.
 	 */
-	public function test_product_query_uses_separate_count_for_pagination() {
+	public function test_product_query_uses_separate_count_for_pagination(): void {
 		for ( $i = 0; $i < 3; $i++ ) {
 			WC_Helper_Product::create_simple_product();
 		}
@@ -100,7 +48,7 @@ class ProductQuerySeparateCountQueryTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox The woocommerce_product_query_use_separate_count_query filter can restore SQL_CALC_FOUND_ROWS.
 	 */
-	public function test_product_query_separate_count_can_be_disabled() {
+	public function test_product_query_separate_count_can_be_disabled(): void {
 		for ( $i = 0; $i < 3; $i++ ) {
 			WC_Helper_Product::create_simple_product();
 		}
@@ -124,18 +72,31 @@ class ProductQuerySeparateCountQueryTest extends \WC_Unit_Test_Case {
 	 * @testdox is_supported() only accepts MySQL 8.0+, rejecting MariaDB and older MySQL.
 	 * @dataProvider data_provider_is_supported
 	 *
-	 * @param string $server_info The db_server_info() string the server reports.
-	 * @param bool   $expected    Whether the separate-COUNT rewrite should be used on that server.
+	 * @param string $server_version The version string SELECT VERSION() reports.
+	 * @param bool   $expected       Whether the separate-COUNT rewrite should be used on that server.
 	 */
-	public function test_is_supported_gates_on_mysql_8( string $server_info, bool $expected ): void {
-		$wpdb = $this->createMock( wpdb::class );
-		$wpdb->method( 'db_server_info' )->willReturn( $server_info );
+	public function test_is_supported_gates_on_mysql_8( string $server_version, bool $expected ): void {
+		global $wpdb;
+		$real_wpdb = $wpdb;
 
-		$this->assertSame( $expected, ProductQuerySeparateCountQuery::is_supported( $wpdb ) );
+		// Stub the pieces wc_get_server_database_version() reads: is_mysql, use_mysqli (via the
+		// magic accessors, __isset included since empty() checks it first) and the SELECT VERSION() result.
+		$mock           = $this->createMock( wpdb::class );
+		$mock->is_mysql = true;
+		$mock->method( '__isset' )->willReturnCallback( fn( $name ) => 'use_mysqli' === $name );
+		$mock->method( '__get' )->willReturnCallback( fn( $name ) => 'use_mysqli' === $name ? true : null );
+		$mock->method( 'get_var' )->willReturn( $server_version );
+
+		$wpdb = $mock; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		try {
+			$this->assertSame( $expected, ProductQueryFoundRowsOptimizer::is_supported() );
+		} finally {
+			$wpdb = $real_wpdb; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
 	}
 
 	/**
-	 * Server strings and whether the separate-COUNT rewrite wins on them.
+	 * Server version strings and whether the separate-COUNT rewrite wins on them.
 	 *
 	 * @return array<string, array{0:string, 1:bool}>
 	 */
