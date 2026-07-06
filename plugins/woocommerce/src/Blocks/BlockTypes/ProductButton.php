@@ -320,10 +320,10 @@ class ProductButton extends AbstractBlock {
 	}
 
 	/**
-	 * Get the total quantity of plain (non-meta-differentiated) cart lines for a given parent product ID.
+	 * Get the total quantity of standalone (non-meta-differentiated) cart lines for a given parent product ID.
 	 *
 	 * Iterates {@see WC_Cart::get_cart_contents()} and sums the `quantity` of every
-	 * line that (a) belongs to the given parent product ID and (b) is a plain,
+	 * line that (a) belongs to the given parent product ID and (b) is a
 	 * standalone line as determined by the shared
 	 * {@see CartItemUtils::has_cart_item_data()} predicate.
 	 *
@@ -333,15 +333,26 @@ class ProductButton extends AbstractBlock {
 	 * with the client-side "Add to cart" / "%d in cart" logic in the Interactivity
 	 * API store.
 	 *
-	 * The seed is parent-scoped: it sums plain lines of the parent product ID
+	 * The seed is parent-scoped: it sums standalone lines of the parent product ID
 	 * regardless of variation. The hydrated client value (variation-aware, from the
 	 * Store API) is the reactive source of truth that corrects any parent-vs-variation
 	 * difference after hydration.
 	 *
+	 * Variation lines are counted, not skipped: a variation line in `WC()->cart` stores
+	 * `product_id` = the parent product id and `variation_id` = the variation id (core
+	 * normalises the variation's post id to the parent at add-to-cart time). Because
+	 * this method is always invoked with the parent id, the `product_id` filter matches
+	 * every in-cart variation line of that parent — variation-level stock management is
+	 * orthogonal to line identity and does not cause a miss. The seed count may therefore
+	 * be parent-wide (all standalone variation lines of the same parent summed together)
+	 * before the hydrated client narrows to the selected variation's id; that
+	 * parent-vs-variation reconciliation is a deliberate, accepted granularity bound
+	 * documented above.
+	 *
 	 * @since 11.0.0
 	 *
-	 * @param int $product_id The parent product ID whose plain cart lines are summed.
-	 * @return int The total quantity across plain cart lines for this product,
+	 * @param int $product_id The parent product ID whose standalone cart lines are summed.
+	 * @return int The total quantity across standalone cart lines for this product,
 	 *             or 0 when the cart is unavailable or contains no matching lines.
 	 */
 	private function get_cart_item_quantities_by_product_id( $product_id ) {

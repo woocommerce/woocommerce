@@ -261,6 +261,31 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 	}
 
 	// -------------------------------------------------------------------------
+	// Variation lines (standalone) → counted under the parent product ID
+	// -------------------------------------------------------------------------
+
+	/**
+	 * @testdox Should count a plain variation line (no cart_item_data).
+	 */
+	public function test_counts_plain_variation_line(): void {
+		$this->add_cart_item(
+			$this->product_id,
+			2,
+			// No extra cart_item_data, so the line takes the standalone key.
+			array(),
+			// Variation ID.
+			99,
+			array( 'attribute_color' => 'red' )
+		);
+
+		$this->assertSame(
+			2,
+			$this->sut->call_get_cart_item_quantities_by_product_id( $this->product_id ),
+			'A plain variation line must be counted in the server seed (variation_id is identity, not cart_item_data).'
+		);
+	}
+
+	// -------------------------------------------------------------------------
 	// Scoping: only lines whose product_id matches are considered
 	// -------------------------------------------------------------------------
 
