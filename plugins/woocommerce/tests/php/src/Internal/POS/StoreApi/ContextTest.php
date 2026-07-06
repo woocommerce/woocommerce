@@ -128,6 +128,29 @@ class ContextTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A rest_route parameter on an admin request (admin-ajax.php never
+	 * dispatches REST) is spoofing and must not flip POS policies onto a
+	 * shopper's request.
+	 *
+	 * @testdox is_pos_request ignores rest_route in admin context.
+	 */
+	public function test_returns_false_for_rest_route_in_admin_context(): void {
+		$_SERVER['REQUEST_URI'] = '/wp-admin/admin-ajax.php?action=x&rest_route=/wc/internal/pos/v1/cart';
+		$_GET['rest_route']     = '/wc/internal/pos/v1/cart';
+
+		set_current_screen( 'index.php' );
+		try {
+			$this->assertTrue( is_admin(), 'Precondition: admin context.' );
+			$this->assertFalse( Context::is_pos_request() );
+		} finally {
+			set_current_screen( 'front' );
+		}
+
+		// Same request state outside admin is legitimate (proxied REST).
+		$this->assertTrue( Context::is_pos_request() );
+	}
+
+	/**
 	 * @testdox is_pos_request returns false for a non-POS rest_route GET parameter.
 	 */
 	public function test_returns_false_for_store_rest_route_get_parameter(): void {

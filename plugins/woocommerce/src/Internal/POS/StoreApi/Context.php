@@ -57,6 +57,15 @@ class Context {
 			return self::$test_override;
 		}
 
+		return self::detect_pos_request();
+	}
+
+	/**
+	 * Uncached detection.
+	 *
+	 * @return bool
+	 */
+	private static function detect_pos_request(): bool {
 		// Direct request: the route is in the URI path (/wp-json/wc/internal/pos/...).
 		// Only the path component is inspected; a query string containing the
 		// prefix must not count.
@@ -69,10 +78,14 @@ class Context {
 		}
 
 		// Proxied request (e.g. Jetpack tunnel): the route arrives as a `rest_route` GET parameter.
+		// Only honoured outside admin contexts: admin-ajax.php and friends never
+		// dispatch REST routes, so a rest_route parameter there is spoofing —
+		// honouring it would let a crafted link run a shopper's admin-ajax
+		// request under the POS session handler.
 		// Sanitized with sanitize_text_field, not esc_url_raw — the latter treats a
 		// schemaless route like `wc/internal/pos/...` as a hostname and mangles it.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context check, not a state change.
-		if ( isset( $_GET['rest_route'] ) && is_string( $_GET['rest_route'] ) ) {
+		if ( ! is_admin() && isset( $_GET['rest_route'] ) && is_string( $_GET['rest_route'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context check, not a state change.
 			$rest_route = rawurldecode( sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ) );
 			if ( 0 === strpos( ltrim( $rest_route, '/' ), self::URI_PREFIX ) ) {
