@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix PHP 8.0+ undefined array key warning in PayPal gateway add_paypal_sdk_attributes.

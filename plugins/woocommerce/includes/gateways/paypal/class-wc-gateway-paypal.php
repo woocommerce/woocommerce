@@ -853,7 +853,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function add_paypal_sdk_attributes( $attrs ) {
-		if ( 'paypal-standard-sdk-js' === $attrs['id'] ) {
+		if ( isset( $attrs['id'] ) && 'paypal-standard-sdk-js' === $attrs['id'] ) {
 			$buttons   = new PayPalButtons( $this );
 			$page_type = $buttons->get_page_type();
 
