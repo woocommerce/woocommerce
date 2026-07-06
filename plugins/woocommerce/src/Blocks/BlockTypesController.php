@@ -374,7 +374,7 @@ final class BlockTypesController {
 			return false;
 		}
 
-		$editor_name = isset( $block_editor_context->name ) ? $block_editor_context->name : '';
+		$editor_name = $block_editor_context->name;
 
 		if ( 'core/edit-site' === $editor_name ) {
 			return $allowed_block_types;
@@ -406,6 +406,7 @@ final class BlockTypesController {
 	 */
 	private function remove_allowed_block_types( $allowed_block_types, array $block_types_to_remove ) {
 		$allowed_block_types = true === $allowed_block_types ? $this->get_registered_block_types() : (array) $allowed_block_types;
+		$allowed_block_types = array_filter( $allowed_block_types, 'is_string' );
 
 		return array_values(
 			array_diff(
@@ -424,15 +425,12 @@ final class BlockTypesController {
 	 */
 	private function filter_allowed_woocommerce_block_types( $allowed_block_types, array $allowed_woocommerce_block_types ) {
 		$allowed_block_types = true === $allowed_block_types ? $this->get_registered_block_types() : (array) $allowed_block_types;
+		$allowed_block_types = array_filter( $allowed_block_types, 'is_string' );
 
 		return array_values(
 			array_filter(
 				$allowed_block_types,
 				function ( $block_type ) use ( $allowed_woocommerce_block_types ) {
-					if ( ! is_string( $block_type ) ) {
-						return false;
-					}
-
 					if ( 0 !== strpos( $block_type, 'woocommerce/' ) ) {
 						return true;
 					}
