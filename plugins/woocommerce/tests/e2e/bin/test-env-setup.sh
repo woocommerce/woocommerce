@@ -5,7 +5,8 @@
 # The CI fast-path below re-runs this script inside the container with the prefix
 # blanked out (WP_CLI_PREFIX=), so each command runs as a bare `wp …` in a single
 # container exec instead of one `wp-env run` round-trip per command.
-WP_CLI_PREFIX="${WP_CLI_PREFIX-wp-env --config .wp-env.test.json run cli}"
+WP_ENV_TEST_CMD="wp-env --config .wp-env.test.json"
+WP_CLI_PREFIX="${WP_CLI_PREFIX-$WP_ENV_TEST_CMD run cli}"
 
 if [ ! -z ${CI+y} ]; then
     # In CI we execute the setup in a single container call, while in dev
@@ -14,8 +15,8 @@ if [ ! -z ${CI+y} ]; then
     echo -e '--> Dispatching script execution into cli\n'
     # Source from the e2e-test-helpers directory mount; a single-file mount of this
     # script can surface as an empty file under Docker gRPC FUSE.
-    wp-env --config .wp-env.test.json run --debug cli cp wp-content/plugins/e2e-test-helpers/test-env-setup.sh test-env-setup-ci.sh
-    wp-env --config .wp-env.test.json run --debug cli env -u CI WP_CLI_PREFIX= bash test-env-setup-ci.sh
+    $WP_ENV_TEST_CMD run --debug cli cp wp-content/plugins/e2e-test-helpers/test-env-setup.sh test-env-setup-ci.sh
+    $WP_ENV_TEST_CMD run --debug cli env -u CI WP_CLI_PREFIX= bash test-env-setup-ci.sh
     exit $?
 fi
 
