@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Migrator: stop the Webflow product mapper from clearing an existing product's weight on a re-run that excludes the weight field.

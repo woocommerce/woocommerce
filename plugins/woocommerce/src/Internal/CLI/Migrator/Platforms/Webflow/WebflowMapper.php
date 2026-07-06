@@ -375,7 +375,6 @@ class WebflowMapper implements PlatformMapperInterface {
 			'manage_stock'   => false,
 			'stock_quantity' => null,
 			'stock_status'   => 'instock',
-			'weight'         => null,
 			'tax_status'     => 'taxable',
 		);
 
@@ -488,7 +487,6 @@ class WebflowMapper implements PlatformMapperInterface {
 				'manage_stock'      => false,
 				'stock_quantity'    => null,
 				'stock_status'      => 'instock',
-				'weight'            => null,
 				'tax_status'        => 'taxable',
 				'attributes'        => array(),
 				'image_original_id' => null,
