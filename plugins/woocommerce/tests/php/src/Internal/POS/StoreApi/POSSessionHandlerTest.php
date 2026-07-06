@@ -239,6 +239,36 @@ class POSSessionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The parent's cookie/rekey surface (direct init_session_cookie,
+	 * forget_session, destroy_session calls from third-party code) must stay
+	 * cookie-free and operator-free.
+	 *
+	 * @testdox Direct session lifecycle calls never adopt the operator or read cookies.
+	 */
+	public function test_lifecycle_methods_stay_pos_scoped(): void {
+		$operator_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
+		wp_set_current_user( $operator_id );
+
+		$handler = new POSSessionHandler();
+		$handler->init();
+		$handler->set( 'cart', array( 'line' => array( 'product_id' => 3 ) ) );
+		$handler->save_data();
+		$original_id = $handler->get_customer_id();
+
+		// destroy_session must delete the row and re-key to a fresh pos_ id.
+		$handler->destroy_session();
+		$this->assertSame( 'pos_', substr( $handler->get_customer_id(), 0, 4 ) );
+		$this->assertNotSame( $original_id, $handler->get_customer_id() );
+		$this->assertFalse( $handler->get_session( $original_id, false ), 'The destroyed session row must be gone.' );
+
+		// Direct init_session_cookie (e.g. via wc_set_customer_auth_cookie
+		// paths) must yield a fresh pos_ session, never the operator id.
+		$handler->init_session_cookie();
+		$this->assertSame( 'pos_', substr( $handler->get_customer_id(), 0, 4 ) );
+		$this->assertNotSame( (string) $operator_id, $handler->get_customer_id() );
+	}
+
+	/**
 	 * @testdox has_session is always true, so session data persists regardless of who is authenticated.
 	 */
 	public function test_has_session_is_always_true(): void {

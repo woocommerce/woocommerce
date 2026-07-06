@@ -115,6 +115,49 @@ class POSSessionHandler extends WC_Session_Handler {
 	}
 
 	/**
+	 * Never read the browser cookie or adopt the logged-in user.
+	 *
+	 * The parent implementation resolves the browser session cookie and
+	 * migrates guest sessions onto the logged-in user — both would key the
+	 * transaction to the operator. Third-party code can reach this directly
+	 * (e.g. through wc_set_customer_auth_cookie), so it must be safe: it
+	 * simply starts a fresh transaction session.
+	 *
+	 * @return void
+	 */
+	public function init_session_cookie() {
+		$this->_customer_id = $this->generate_customer_id();
+		$this->_data        = $this->get_session_data();
+	}
+
+	/**
+	 * Forget the transaction session without touching browser cookies.
+	 *
+	 * The parent writes an expired session cookie into the response — on a
+	 * cookie-authenticated client that clobbers the operator's own storefront
+	 * session.
+	 *
+	 * @return void
+	 */
+	public function forget_session() {
+		wc_empty_cart();
+
+		$this->_customer_id = $this->generate_customer_id();
+		$this->_data        = array();
+		$this->_dirty       = false;
+	}
+
+	/**
+	 * Destroy the transaction session without touching browser cookies.
+	 *
+	 * @return void
+	 */
+	public function destroy_session() {
+		$this->delete_session( $this->_customer_id );
+		$this->forget_session();
+	}
+
+	/**
 	 * Resolve the transaction's customer ID from the Cart-Token header, if any.
 	 *
 	 * Only `pos_`-prefixed transaction sessions are resumable here. Web
