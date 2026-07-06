@@ -20,6 +20,8 @@ We also recommend you review the [WordPress core guidelines](https://developer.w
 
 ## Best practices
 
+![Use existing components example](/img/doc_images/Use-existing-components.png)
+
 ### Do: Use existing UI
 
 Use existing WordPress and WooCommerce UI, built-in components (text fields, checkboxes, etc), and existing menu structures.
