@@ -789,7 +789,7 @@ Returns a cart item from the state.
     -   _backorders_allowed_ `boolean` indicating if backorders are allowed.
     -   _show_backorder_badge_ `boolean` indicating if the backorder badge should be shown.
     -   _sold_individually_ `boolean` indicating if the item is sold individually.
-    -   _has_cart_item_data_ `boolean` indicating whether this cart line carries differentiating item metadata.
+    -   _is_standalone_line_ `boolean` indicating whether this cart line is the standalone (non-differentiated) line for its product; true for a plain standalone line, false when differentiated by extra cart-item data.
     -   _permalink_ `string`: The cart item permalink.
     -   _images_ `array`: The cart item images.
     -   _variation_ `array`: The cart item variation.

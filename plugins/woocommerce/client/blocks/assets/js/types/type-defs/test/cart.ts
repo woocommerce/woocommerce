@@ -9,7 +9,7 @@ import type { CartItem } from '@woocommerce/types';
 import type { OptimisticCartItem } from '../../../base/stores/woocommerce/cart';
 
 /**
- * Verifies that `CartItem` declares `has_cart_item_data` as a required boolean
+ * Verifies that `CartItem` declares `is_standalone_line` as a required boolean
  * property, and that `OptimisticCartItem` does not declare the field.
  *
  * These tests act as a type-level regression net: because the file is compiled
@@ -41,7 +41,7 @@ const minimalCartItem: CartItem = {
 	backorders_allowed: false,
 	show_backorder_badge: false,
 	sold_individually: false,
-	has_cart_item_data: false,
+	is_standalone_line: true,
 	permalink: 'https://example.com/test',
 	images: [],
 	variation: [],
@@ -83,9 +83,9 @@ const minimalCartItem: CartItem = {
 
 /**
  * Minimum valid skeleton for `OptimisticCartItem`. This type must NOT include
- * `has_cart_item_data`; the field is deliberately absent so that optimistic
- * standalone lines evaluate as falsy/absent and are treated as standalone
- * lines by the `isCartItem`-guarded keyless matcher in the cart store.
+ * `is_standalone_line`; the field is deliberately absent so that optimistic
+ * lines are excluded from the `isCartItem()` guard check in the cart store's
+ * keyless matcher — `isCartItem` short-circuits before the field is read.
  */
 const minimalOptimisticCartItem: OptimisticCartItem = {
 	id: 1,
@@ -93,50 +93,50 @@ const minimalOptimisticCartItem: OptimisticCartItem = {
 };
 
 describe( 'CartItem TypeScript interface', () => {
-	describe( 'has_cart_item_data field on CartItem', () => {
-		it( 'accepts has_cart_item_data: false for a plain standalone line', () => {
+	describe( 'is_standalone_line field on CartItem', () => {
+		it( 'accepts is_standalone_line: true for a plain standalone line', () => {
 			const item: CartItem = {
 				...minimalCartItem,
-				has_cart_item_data: false,
+				is_standalone_line: true,
 			};
-			expect( item.has_cart_item_data ).toBe( false );
+			expect( item.is_standalone_line ).toBe( true );
 		} );
 
-		it( 'accepts has_cart_item_data: true for a meta-differentiated line', () => {
+		it( 'accepts is_standalone_line: false for a meta-differentiated line', () => {
 			const item: CartItem = {
 				...minimalCartItem,
-				has_cart_item_data: true,
+				is_standalone_line: false,
 			};
-			expect( item.has_cart_item_data ).toBe( true );
+			expect( item.is_standalone_line ).toBe( false );
 		} );
 
-		it( 'exposes has_cart_item_data as a boolean property on CartItem', () => {
-			expect( typeof minimalCartItem.has_cart_item_data ).toBe(
+		it( 'exposes is_standalone_line as a boolean property on CartItem', () => {
+			expect( typeof minimalCartItem.is_standalone_line ).toBe(
 				'boolean'
 			);
 		} );
 	} );
 
-	describe( 'OptimisticCartItem does not declare has_cart_item_data', () => {
-		it( 'does not carry has_cart_item_data (field is absent)', () => {
+	describe( 'OptimisticCartItem does not declare is_standalone_line', () => {
+		it( 'does not carry is_standalone_line (field is absent)', () => {
 			// Verify the property is not present on the OptimisticCartItem object.
 			// This is both a runtime check and a compile-time guard: if the field
 			// were added to the type declaration, this test would remain green —
 			// but the TypeScript interface check enforces it is not required.
-			expect( 'has_cart_item_data' in minimalOptimisticCartItem ).toBe(
+			expect( 'is_standalone_line' in minimalOptimisticCartItem ).toBe(
 				false
 			);
 		} );
 
-		it( 'accessing a missing has_cart_item_data yields undefined (falsy-safe)', () => {
-			// Simulates the falsy-safe guard in the keyless matcher: casting the
-			// optimistic item through the union type and reading has_cart_item_data
-			// must yield undefined (falsy), not throw.
+		it( 'accessing a missing is_standalone_line yields undefined (falsy-safe)', () => {
+			// Simulates the isCartItem() guard short-circuit in the keyless matcher:
+			// casting the optimistic item through the union type and reading
+			// is_standalone_line must yield undefined (falsy), not throw.
 			const asUnion = minimalOptimisticCartItem as
 				| OptimisticCartItem
 				| CartItem;
-			const value = ( asUnion as CartItem ).has_cart_item_data;
-			// `undefined` is falsy, which is how the guard treats a missing field.
+			const value = ( asUnion as CartItem ).is_standalone_line;
+			// `undefined` is falsy — the guard is applied before the field is read.
 			expect( value ).toBeFalsy();
 		} );
 	} );

@@ -83,14 +83,14 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 	 * Build and inject a cart item array into WC()->cart->cart_contents for testing.
 	 *
 	 * Populates the minimum fields expected by
-	 * {@see \Automattic\WooCommerce\StoreApi\Utilities\CartItemUtils::has_cart_item_data()}
+	 * {@see \Automattic\WooCommerce\StoreApi\Utilities\CartItemUtils::is_standalone_line()}
 	 * and the method under test. The stored key is generated via
 	 * {@see \WC_Cart::generate_cart_id()} so the plain-vs-meta distinction works correctly.
 	 *
 	 * @param int   $product_id   The parent product ID for the cart line.
 	 * @param int   $quantity     The line quantity.
 	 * @param array $extra_data   Optional. Non-empty array means the key will be
-	 *                            meta-differentiated (has_cart_item_data returns true).
+	 *                            meta-differentiated (is_standalone_line returns false).
 	 * @param int   $variation_id Optional. Variation ID; 0 for simple products.
 	 * @param array $variation    Optional. Variation attributes array.
 	 * @return string The cart item key that was inserted.

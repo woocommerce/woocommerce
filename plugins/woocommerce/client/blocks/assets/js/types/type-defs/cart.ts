@@ -149,17 +149,23 @@ export interface CartItem {
 	show_backorder_badge: boolean;
 	sold_individually: boolean;
 	/**
-	 * True when this cart line's identity was differentiated by extra cart-item
-	 * data — re-deriving the key from product + variation alone does not reproduce
-	 * the stored key. Supplied at add-to-cart time via the
-	 * `woocommerce_add_cart_item_data` filter or the `$cart_item_data` argument to
-	 * `WC_Cart::add_to_cart()` (e.g. bundle children, bookings, add-on/custom-text
-	 * configurations). False for a standalone line — including a plain variation,
-	 * since variation attributes are first-class identity, not `cart_item_data`.
-	 * This is a boolean reflection only — the `CartItem` does not carry the raw
-	 * `cart_item_data` payload, nor does it mirror a schema `cart_item` object.
+	 * True when this cart line is the standalone (non-differentiated) line for
+	 * its product. The key can be re-derived from product + variation alone;
+	 * no extra cart-item data was required to produce it.
+	 *
+	 * False when the line's identity was differentiated by extra cart-item
+	 * data supplied via the `woocommerce_add_cart_item_data` filter or the
+	 * `$cart_item_data` argument to `WC_Cart::add_to_cart()` (e.g. bundle
+	 * children, bookings, add-on/custom-text configurations).
+	 *
+	 * A plain variation reads as standalone (`true`) because variation
+	 * attributes are first-class identity, not `cart_item_data`.
+	 *
+	 * This is a boolean reflection only — the `CartItem` does not carry the
+	 * raw `cart_item_data` payload, nor does it mirror a schema `cart_item`
+	 * object.
 	 */
-	has_cart_item_data: boolean;
+	is_standalone_line: boolean;
 	permalink: string;
 	images: Array< CartImageItem >;
 	variation: Array< CartVariationItem >;

@@ -410,7 +410,7 @@ const { actions } = store< Store >(
 			 * With a `key`, returns the line for that exact key. Without a
 			 * key, returns the standalone per-product line matched by `id`
 			 * (and `variation` for variations), explicitly excluding
-			 * meta-differentiated lines (`has_cart_item_data: true`, e.g. a
+			 * meta-differentiated lines (`is_standalone_line: false`, e.g. a
 			 * bundle child, booking, or add-on configuration) so the keyless
 			 * match resolves only the standalone line the product-button count
 			 * reflects.
@@ -428,14 +428,14 @@ const { actions } = store< Store >(
 					if ( key ) {
 						return key === cartItem.key;
 					}
-					// `isCartItem` narrows to server-confirmed lines; optimistic
-					// lines (which lack `has_cart_item_data`) fall through as
-					// falsy, so rapid-click compounding on standalone lines is
+					// `isCartItem` narrows to server-confirmed lines; for optimistic
+					// lines the guard short-circuits the `&&` before `is_standalone_line`
+					// is read, so rapid-click compounding on standalone lines is
 					// preserved. Keyed lookups short-circuit on the `key` check
 					// above and never reach this guard.
 					if (
 						isCartItem( cartItem ) &&
-						cartItem.has_cart_item_data
+						! cartItem.is_standalone_line
 					) {
 						return false;
 					}

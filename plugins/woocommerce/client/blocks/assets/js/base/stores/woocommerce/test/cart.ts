@@ -326,11 +326,11 @@ function mockBatchFetchFailing( {
 /**
  * Builds a minimal server-confirmed cart line carrying a key.
  *
- * Defaults `has_cart_item_data` to `false` so a plain call produces a
+ * Defaults `is_standalone_line` to `true` so a plain call produces a
  * standalone line — the kind the product-button count reflects and that
  * `findItemInCart` matches on a keyless lookup. Callers that need a
  * meta-differentiated line (a bundle child, booking, or add-on) must pass
- * `has_cart_item_data: true` explicitly as an override.
+ * `is_standalone_line: false` explicitly as an override.
  *
  * @param overrides Partial cart-line fields to override the defaults.
  * @return A cart line suitable for seeding `state.cart.items`.
@@ -345,7 +345,7 @@ function makeKeyedLine( overrides: Partial< CartItem > = {} ): CartItem {
 		sold_individually: false,
 		variation: [],
 		item_data: [],
-		has_cart_item_data: false,
+		is_standalone_line: true,
 		...overrides,
 	} as CartItem;
 }
@@ -798,7 +798,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 		it( 'emits no quantity-changed notice for a keyless add resolved server-side as a new standalone line', async () => {
 			// The product is present only as a single keyed meta line (qty 3,
-			// has_cart_item_data: true). findItemInCart excludes meta lines on a
+			// is_standalone_line: false). findItemInCart excludes meta lines on a
 			// keyless lookup, so it returns undefined — the optimistic update pushes
 			// a brand-new plain line instead of bumping the meta line. The server
 			// keeps the meta line at qty 3 and adds a separate standalone line
@@ -811,7 +811,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						key: 'server-key-abc',
 						id: 42,
 						quantity: 3,
-						has_cart_item_data: true,
+						is_standalone_line: false,
 					} ),
 					makeKeyedLine( {
 						key: 'server-key-new',
@@ -826,7 +826,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					key: 'server-key-abc',
 					id: 42,
 					quantity: 3,
-					has_cart_item_data: true,
+					is_standalone_line: false,
 				} ),
 			] );
 			const notices = spyOnUpdateNotices();
@@ -845,7 +845,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 		it( 'emits no quantity-changed notice when only the first of two meta lines for the same product is bumped optimistically', async () => {
 			// The product is present as two distinct keyed meta lines (qty 3 and
-			// qty 2, both has_cart_item_data: true). findItemInCart excludes both
+			// qty 2, both is_standalone_line: false). findItemInCart excludes both
 			// meta lines on a keyless lookup, so it returns undefined — the
 			// optimistic update pushes a brand-new plain line instead of bumping
 			// either meta line. The server keeps both meta lines at their pre-add
@@ -860,13 +860,13 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						key: 'server-key-1',
 						id: 42,
 						quantity: 3,
-						has_cart_item_data: true,
+						is_standalone_line: false,
 					} ),
 					makeKeyedLine( {
 						key: 'server-key-2',
 						id: 42,
 						quantity: 2,
-						has_cart_item_data: true,
+						is_standalone_line: false,
 					} ),
 					makeKeyedLine( {
 						key: 'server-key-new',
@@ -881,13 +881,13 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					key: 'server-key-1',
 					id: 42,
 					quantity: 3,
-					has_cart_item_data: true,
+					is_standalone_line: false,
 				} ),
 				makeKeyedLine( {
 					key: 'server-key-2',
 					id: 42,
 					quantity: 2,
-					has_cart_item_data: true,
+					is_standalone_line: false,
 				} ),
 			] );
 			const notices = spyOnUpdateNotices();
@@ -974,7 +974,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 		it( 'suppresses the notice for a keyless batch add resolved server-side as a new standalone line', async () => {
 			// Same meta-only scenario through the batch path: the cart has only a
-			// single meta line (qty 3, has_cart_item_data: true). findItemInCart
+			// single meta line (qty 3, is_standalone_line: false). findItemInCart
 			// excludes it, so the optimistic update pushes a brand-new plain line.
 			// The server keeps the meta line at 3 and adds a standalone line (qty 1).
 			// lineMatchesProduct is meta-inclusive → preAddTotal = 3, deltaTotal = 1,
@@ -986,7 +986,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						key: 'server-key-abc',
 						id: 42,
 						quantity: 3,
-						has_cart_item_data: true,
+						is_standalone_line: false,
 					} ),
 					makeKeyedLine( {
 						key: 'server-key-new',
@@ -1001,7 +1001,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					key: 'server-key-abc',
 					id: 42,
 					quantity: 3,
-					has_cart_item_data: true,
+					is_standalone_line: false,
 				} ),
 			] );
 			const notices = spyOnUpdateNotices();
@@ -1133,7 +1133,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 		it( 'suppresses the notice for a keyless add when the client bumps a meta line but the server grows the standalone line', async () => {
 			// Product 42 occupies two lines: a meta-differentiated line (server-key-
-			// meta, qty 1, has_cart_item_data: true) and a plain standalone line
+			// meta, qty 1, is_standalone_line: false) and a plain standalone line
 			// (server-key-standalone, qty 1). findItemInCart excludes the meta line
 			// on a keyless lookup and returns the standalone line directly, so the
 			// optimistic update bumps the standalone line from 1 to 2. The server
@@ -1149,7 +1149,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						id: 42,
 						quantity: 1,
 						name: 'Test Product',
-						has_cart_item_data: true,
+						is_standalone_line: false,
 					} ),
 					makeKeyedLine( {
 						key: 'server-key-standalone',
@@ -1165,7 +1165,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					key: 'server-key-meta',
 					id: 42,
 					quantity: 1,
-					has_cart_item_data: true,
+					is_standalone_line: false,
 				} ),
 				makeKeyedLine( {
 					key: 'server-key-standalone',
@@ -1190,8 +1190,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 		it( 'suppresses the notice for a keyless batch add when the client bumps a meta line but the server grows the standalone line, through the batch path', async () => {
 			// Same meta-line/standalone-line scenario through the batch path.
-			// Product 42 occupies two lines: meta first (qty 1, has_cart_item_data:
-			// true) then standalone (qty 1). findItemInCart excludes the meta line
+			// Product 42 occupies two lines: meta first (qty 1, is_standalone_line:
+			// false) then standalone (qty 1). findItemInCart excludes the meta line
 			// and returns the standalone line, so the batch item bumps the standalone
 			// line optimistically. The server also grows the standalone line to 2 and
 			// keeps the meta line at 1. lineMatchesProduct is meta-inclusive →
@@ -1204,7 +1204,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						id: 42,
 						quantity: 1,
 						name: 'Test Product',
-						has_cart_item_data: true,
+						is_standalone_line: false,
 					} ),
 					makeKeyedLine( {
 						key: 'server-key-standalone',
@@ -1220,7 +1220,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					key: 'server-key-meta',
 					id: 42,
 					quantity: 1,
-					has_cart_item_data: true,
+					is_standalone_line: false,
 				} ),
 				makeKeyedLine( {
 					key: 'server-key-standalone',
@@ -1334,7 +1334,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 	describe( 'findItemInCart meta-exclusion guard', () => {
 		it( 'returns undefined (no match) for a keyless lookup when the cart contains only a meta line for that product', async () => {
-			// A line with has_cart_item_data: true is a meta-differentiated line
+			// A line with is_standalone_line: false is a meta-differentiated line
 			// (e.g. a bundle child or add-on). The keyless matcher must not return
 			// it as the standalone line for the product. The derived count should
 			// be 0 (undefined match).
@@ -1344,7 +1344,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					key: 'meta-key-1',
 					id: 42,
 					quantity: 2,
-					has_cart_item_data: true,
+					is_standalone_line: false,
 				} ),
 			] );
 
@@ -1354,14 +1354,14 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 
 		it( 'returns only the standalone line when the cart has both a standalone and a meta line for the same product', async () => {
-			// When a product has two lines — one standalone (has_cart_item_data
-			// falsy) and one meta (has_cart_item_data: true) — the keyless matcher
+			// When a product has two lines — one standalone (is_standalone_line:
+			// true) and one meta (is_standalone_line: false) — the keyless matcher
 			// must return only the standalone line.
 			const standaloneLine = makeKeyedLine( {
 				key: 'standalone-key',
 				id: 42,
 				quantity: 1,
-				has_cart_item_data: false,
+				is_standalone_line: true,
 			} );
 			await loadCartStore();
 			seedCart( [
@@ -1370,7 +1370,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					key: 'meta-key',
 					id: 42,
 					quantity: 3,
-					has_cart_item_data: true,
+					is_standalone_line: false,
 				} ),
 			] );
 
@@ -1387,7 +1387,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				key: 'standalone-key',
 				id: 42,
 				quantity: 1,
-				has_cart_item_data: false,
+				is_standalone_line: true,
 			} );
 			await loadCartStore();
 			seedCart( [
@@ -1395,7 +1395,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					key: 'meta-key',
 					id: 42,
 					quantity: 3,
-					has_cart_item_data: true,
+					is_standalone_line: false,
 				} ),
 				standaloneLine,
 			] );
@@ -1409,7 +1409,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		it( 'continues to match the correct variation standalone line and excludes a same-product meta line', async () => {
 			// For variation products, the meta-exclusion guard must AND with the
 			// attribute check: only the variation line that matches both attributes
-			// and has_cart_item_data falsy should be returned. A meta line with
+			// and is_standalone_line: true should be returned. A meta line with
 			// matching attributes must be excluded.
 			const colorRedVariation = [
 				{ attribute: 'Color', value: 'Red' },
@@ -1419,7 +1419,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					key: 'var-standalone',
 					id: 42,
 					quantity: 2,
-					has_cart_item_data: false,
+					is_standalone_line: true,
 				} ),
 				type: 'variation',
 				variation: colorRedVariation,
@@ -1431,7 +1431,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						key: 'var-meta',
 						id: 42,
 						quantity: 5,
-						has_cart_item_data: true,
+						is_standalone_line: false,
 					} ),
 					type: 'variation',
 					variation: colorRedVariation,
@@ -1465,7 +1465,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						key: 'var-blue',
 						id: 42,
 						quantity: 1,
-						has_cart_item_data: false,
+						is_standalone_line: true,
 					} ),
 					type: 'variation',
 					variation: colorBlueVariation,
@@ -1481,7 +1481,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( result ).toBeUndefined();
 		} );
 
-		it( 'returns the line for a keyed lookup regardless of has_cart_item_data (keyed lookups unaffected)', async () => {
+		it( 'returns the line for a keyed lookup regardless of is_standalone_line (keyed lookups unaffected)', async () => {
 			// The key short-circuit runs before the meta-exclusion guard, so
 			// keyed lookups — e.g. the mini-cart stepper — always return the
 			// exact line with that key, whether it is a meta line or not.
@@ -1489,7 +1489,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				key: 'meta-key',
 				id: 42,
 				quantity: 2,
-				has_cart_item_data: true,
+				is_standalone_line: false,
 			} );
 			await loadCartStore();
 			seedCart( [ metaLine ] );
@@ -1502,10 +1502,10 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( result ).toBe( metaLine );
 		} );
 
-		it( 'treats an optimistic line without has_cart_item_data as plain and returns it from a keyless lookup', async () => {
-			// OptimisticCartItem does not carry has_cart_item_data (the field is
-			// absent — undefined). The guard must be falsy-safe: undefined is
-			// treated as falsy (plain), so the optimistic line IS matched. This
+		it( 'treats an optimistic line without is_standalone_line as plain and returns it from a keyless lookup', async () => {
+			// OptimisticCartItem does not carry is_standalone_line (the field is
+			// absent — undefined). The isCartItem() guard short-circuits the &&
+			// before the field is read, so the optimistic line IS matched. This
 			// preserves rapid-click compounding and the common re-add count.
 			const optimisticLine: OptimisticCartItem = {
 				id: 42,
@@ -1550,7 +1550,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						key: 'meta-key',
 						id: 42,
 						quantity: 2,
-						has_cart_item_data: true,
+						is_standalone_line: false,
 					} ),
 				] )
 			);
@@ -1560,13 +1560,13 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					key: 'standalone-key',
 					id: 42,
 					quantity: 1,
-					has_cart_item_data: false,
+					is_standalone_line: true,
 				} ),
 				makeKeyedLine( {
 					key: 'meta-key',
 					id: 42,
 					quantity: 2,
-					has_cart_item_data: true,
+					is_standalone_line: false,
 				} ),
 			] );
 			const notices = spyOnUpdateNotices();

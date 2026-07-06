@@ -28,13 +28,13 @@ class CartItemUtilsTest extends \WC_Unit_Test_Case {
 	}
 
 	// -------------------------------------------------------------------------
-	// Plain (standalone) line — has_cart_item_data must return false
+	// Plain (standalone) line — is_standalone_line must return true
 	// -------------------------------------------------------------------------
 
 	/**
-	 * @testdox Should return false for a plain simple-product line whose stored key matches the empty-data recompute.
+	 * @testdox Should return true for a plain simple-product line whose stored key matches the empty-data recompute.
 	 */
-	public function test_returns_false_for_plain_simple_product_line(): void {
+	public function test_returns_true_for_plain_simple_product_line(): void {
 		$plain_key = WC()->cart->generate_cart_id( $this->product_id );
 
 		$cart_item = array(
@@ -44,16 +44,16 @@ class CartItemUtilsTest extends \WC_Unit_Test_Case {
 			'variation'    => array(),
 		);
 
-		$this->assertFalse(
-			CartItemUtils::has_cart_item_data( $cart_item ),
-			'A plain simple-product line should not be reported as carrying cart item data.'
+		$this->assertTrue(
+			CartItemUtils::is_standalone_line( $cart_item ),
+			'A plain simple-product line should be reported as a standalone line.'
 		);
 	}
 
 	/**
-	 * @testdox Should return false for a plain variation line whose stored key matches the empty-data recompute.
+	 * @testdox Should return true for a plain variation line whose stored key matches the empty-data recompute.
 	 */
-	public function test_returns_false_for_plain_variation_line(): void {
+	public function test_returns_true_for_plain_variation_line(): void {
 		$variation_id = 7;
 		$variation    = array( 'attribute_color' => 'red' );
 		$plain_key    = WC()->cart->generate_cart_id( $this->product_id, $variation_id, $variation );
@@ -65,20 +65,20 @@ class CartItemUtilsTest extends \WC_Unit_Test_Case {
 			'variation'    => $variation,
 		);
 
-		$this->assertFalse(
-			CartItemUtils::has_cart_item_data( $cart_item ),
-			'A plain variation line (no extra cart item data) should not be reported as carrying cart item data.'
+		$this->assertTrue(
+			CartItemUtils::is_standalone_line( $cart_item ),
+			'A plain variation line (no extra cart item data) should be reported as a standalone line.'
 		);
 	}
 
 	// -------------------------------------------------------------------------
-	// Meta-differentiated line — has_cart_item_data must return true
+	// Meta-differentiated line — is_standalone_line must return false
 	// -------------------------------------------------------------------------
 
 	/**
-	 * @testdox Should return true for a simple-product line whose stored key was generated with non-empty cart_item_data.
+	 * @testdox Should return false for a simple-product line whose stored key was generated with non-empty cart_item_data.
 	 */
-	public function test_returns_true_for_simple_product_line_with_cart_item_data(): void {
+	public function test_returns_false_for_simple_product_line_with_cart_item_data(): void {
 		$cart_item_data = array( '_bundle' => 'bundle-parent-123' );
 		$meta_key       = WC()->cart->generate_cart_id( $this->product_id, 0, array(), $cart_item_data );
 
@@ -89,16 +89,16 @@ class CartItemUtilsTest extends \WC_Unit_Test_Case {
 			'variation'    => array(),
 		);
 
-		$this->assertTrue(
-			CartItemUtils::has_cart_item_data( $cart_item ),
-			'A line whose key was generated with non-empty cart_item_data should be reported as carrying cart item data.'
+		$this->assertFalse(
+			CartItemUtils::is_standalone_line( $cart_item ),
+			'A line whose key was generated with non-empty cart_item_data should not be reported as a standalone line.'
 		);
 	}
 
 	/**
-	 * @testdox Should return true for a variation line whose stored key was generated with non-empty cart_item_data.
+	 * @testdox Should return false for a variation line whose stored key was generated with non-empty cart_item_data.
 	 */
-	public function test_returns_true_for_variation_line_with_cart_item_data(): void {
+	public function test_returns_false_for_variation_line_with_cart_item_data(): void {
 		$variation_id   = 7;
 		$variation      = array( 'attribute_color' => 'blue' );
 		$cart_item_data = array( '_cart_line_identity' => 'composite-child-456' );
@@ -111,16 +111,16 @@ class CartItemUtilsTest extends \WC_Unit_Test_Case {
 			'variation'    => $variation,
 		);
 
-		$this->assertTrue(
-			CartItemUtils::has_cart_item_data( $cart_item ),
-			'A variation line whose key was generated with non-empty cart_item_data should be reported as carrying cart item data.'
+		$this->assertFalse(
+			CartItemUtils::is_standalone_line( $cart_item ),
+			'A variation line whose key was generated with non-empty cart_item_data should not be reported as a standalone line.'
 		);
 	}
 
 	/**
-	 * @testdox Should return true for a variation line with cart_item_data even when variation attributes are the same.
+	 * @testdox Should return false for a variation line with cart_item_data even when variation attributes are the same.
 	 */
-	public function test_returns_true_for_variation_line_differentiates_from_plain_variation(): void {
+	public function test_returns_false_for_variation_line_differentiates_from_plain_variation(): void {
 		$variation_id = 7;
 		$variation    = array( 'attribute_size' => 'large' );
 
@@ -152,14 +152,14 @@ class CartItemUtilsTest extends \WC_Unit_Test_Case {
 			'variation'    => $variation,
 		);
 
-		$this->assertFalse(
-			CartItemUtils::has_cart_item_data( $plain_cart_item ),
-			'The plain variation line must be reported as plain.'
+		$this->assertTrue(
+			CartItemUtils::is_standalone_line( $plain_cart_item ),
+			'The plain variation line must be reported as standalone.'
 		);
 
-		$this->assertTrue(
-			CartItemUtils::has_cart_item_data( $meta_cart_item ),
-			'The meta-differentiated variation line must be reported as carrying cart item data.'
+		$this->assertFalse(
+			CartItemUtils::is_standalone_line( $meta_cart_item ),
+			'The meta-differentiated variation line must not be reported as a standalone line.'
 		);
 	}
 
@@ -182,14 +182,14 @@ class CartItemUtilsTest extends \WC_Unit_Test_Case {
 			'variation'    => array(),
 		);
 
-		$result = CartItemUtils::has_cart_item_data( $cart_item );
+		$result = CartItemUtils::is_standalone_line( $cart_item );
 
 		// Restore cart immediately.
 		WC()->cart = $original_cart; // phpcs:ignore
 
 		$this->assertFalse(
 			$result,
-			'When WC()->cart is unavailable the helper must degrade gracefully and treat the line as plain.'
+			'When WC()->cart is unavailable the helper must degrade gracefully and return false.'
 		);
 	}
 
@@ -207,16 +207,16 @@ class CartItemUtilsTest extends \WC_Unit_Test_Case {
 			// product_id, variation_id, variation intentionally absent.
 		);
 
-		$result = CartItemUtils::has_cart_item_data( $cart_item );
+		$result = CartItemUtils::is_standalone_line( $cart_item );
 
 		$this->assertIsBool(
 			$result,
 			'The helper must return a bool and not fatal when product_id/variation_id/variation keys are absent.'
 		);
 
-		$this->assertFalse(
+		$this->assertTrue(
 			$result,
-			'When missing keys default to 0/[], the stored key should match the recomputed key, yielding false.'
+			'When missing keys default to 0/[], the stored key matches the recomputed key, so the line is treated as standalone.'
 		);
 	}
 }

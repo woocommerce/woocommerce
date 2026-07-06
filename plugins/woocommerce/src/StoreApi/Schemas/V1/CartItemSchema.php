@@ -33,9 +33,9 @@ class CartItemSchema extends ItemSchema {
 
 	/**
 	 * Returns the cart-item schema properties, merging the parent item
-	 * properties with the cart-only has_cart_item_data boolean.
+	 * properties with the cart-only is_standalone_line boolean.
 	 *
-	 * The has_cart_item_data field is intentionally placed here (not in the
+	 * The is_standalone_line field is intentionally placed here (not in the
 	 * shared ItemSchema base) because it depends on the live cart's
 	 * generate_cart_id() method, which is not available on order line items
 	 * served by OrderItemSchema.
@@ -48,8 +48,8 @@ class CartItemSchema extends ItemSchema {
 		return array_merge(
 			parent::get_properties(),
 			array(
-				'has_cart_item_data' => array(
-					'description' => __( 'True when this cart line carries differentiating item metadata.', 'woocommerce' ),
+				'is_standalone_line' => array(
+					'description' => __( 'True when this cart line is the standalone (non-differentiated) line for its product; false when the line\'s identity was differentiated by extra cart-item data.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -64,7 +64,7 @@ class CartItemSchema extends ItemSchema {
 	 * Returns an array whose keys match the properties declared in
 	 * {@see CartItemSchema::get_properties()}.
 	 *
-	 * @since 11.0.0 Added has_cart_item_data field.
+	 * @since 11.0.0 Added is_standalone_line field.
 	 *
 	 * @param array $cart_item Cart item array from WC()->cart->cart_contents.
 	 *                         Required keys: 'key', 'data' (WC_Product), 'product_id',
@@ -122,7 +122,7 @@ class CartItemSchema extends ItemSchema {
 				]
 			),
 			'catalog_visibility'   => $product->get_catalog_visibility(),
-			'has_cart_item_data'   => CartItemUtils::has_cart_item_data( $cart_item ),
+			'is_standalone_line'   => CartItemUtils::is_standalone_line( $cart_item ),
 			self::EXTENDING_KEY    => $this->get_extended_data( self::IDENTIFIER, $cart_item ),
 		];
 	}

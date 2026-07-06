@@ -15,7 +15,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 class CartItemUtils {
 
 	/**
-	 * Determines whether a cart line was created with non-empty cart_item_data.
+	 * Determines whether a cart line is the standalone (non-meta-differentiated) line for its product.
 	 *
 	 * A standalone cart line is one whose stored cart key equals the key that
 	 * WooCommerce's {@see WC_Cart::generate_cart_id()} would produce when called
@@ -33,7 +33,7 @@ class CartItemUtils {
 	 * ```php
 	 * use Automattic\WooCommerce\StoreApi\Utilities\CartItemUtils;
 	 *
-	 * if ( ! CartItemUtils::has_cart_item_data( $cart_item ) ) {
+	 * if ( CartItemUtils::is_standalone_line( $cart_item ) ) {
 	 *     // This is the standalone line — show an "Add to cart" button.
 	 * }
 	 * ```
@@ -45,12 +45,11 @@ class CartItemUtils {
 	 *                         'variation_id' (int), 'variation' (array).
 	 *                         Missing keys default to 0 / empty array so that a
 	 *                         malformed entry degrades gracefully without a fatal.
-	 * @return bool True when the line's stored key was generated with non-empty
-	 *              cart_item_data (i.e. the line is meta-differentiated).
-	 *              False when the line is standalone, when WC()->cart is unavailable,
-	 *              or when the $cart_item array is malformed.
+	 * @return bool True when the stored key equals the standalone key — the line IS the
+	 *              standalone per-product line; false when meta-differentiated, cart
+	 *              unavailable, or array malformed.
 	 */
-	public static function has_cart_item_data( array $cart_item ): bool {
+	public static function is_standalone_line( array $cart_item ): bool {
 		// @phpstan-ignore isset.property (WC()->cart is declared non-null but can be null before WC fully initialises; the guard is load-bearing for early-bootstrap callers)
 		if ( ! isset( WC()->cart ) ) {
 			return false;
@@ -62,6 +61,6 @@ class CartItemUtils {
 
 		$standalone_key = WC()->cart->generate_cart_id( $product_id, $variation_id, $variation );
 
-		return ( $cart_item['key'] ?? '' ) !== $standalone_key;
+		return ( $cart_item['key'] ?? '' ) === $standalone_key;
 	}
 }

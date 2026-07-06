@@ -13,14 +13,14 @@ use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for the has_cart_item_data boolean added to CartItemSchema.
+ * Tests for the is_standalone_line boolean added to CartItemSchema.
  *
- * Covers: get_item_response() returning has_cart_item_data=false for plain lines,
- * has_cart_item_data=true for meta-differentiated lines, and get_properties()
- * returning a correctly-shaped has_cart_item_data definition while still
+ * Covers: get_item_response() returning is_standalone_line=true for plain standalone lines,
+ * is_standalone_line=false for meta-differentiated lines, and get_properties()
+ * returning a correctly-shaped is_standalone_line definition while still
  * inheriting all parent properties.
  */
-class CartItemSchemaHasCartItemDataTest extends WC_Unit_Test_Case {
+class CartItemSchemaIsStandaloneLineTest extends WC_Unit_Test_Case {
 
 	/**
 	 * The System Under Test.
@@ -69,7 +69,7 @@ class CartItemSchemaHasCartItemDataTest extends WC_Unit_Test_Case {
 	}
 
 	// -------------------------------------------------------------------------
-	// get_item_response() — has_cart_item_data field presence and value
+	// get_item_response() — is_standalone_line field presence and value
 	// -------------------------------------------------------------------------
 
 	/**
@@ -97,9 +97,9 @@ class CartItemSchemaHasCartItemDataTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should include has_cart_item_data=false in the response for a plain standalone line.
+	 * @testdox Should include is_standalone_line=true in the response for a plain standalone line.
 	 */
-	public function test_get_item_response_returns_false_for_plain_line(): void {
+	public function test_get_item_response_returns_true_for_plain_line(): void {
 		$product_id = $this->product->get_id();
 		$plain_key  = WC()->cart->generate_cart_id( $product_id );
 		$cart_item  = $this->build_cart_item( $plain_key, $product_id );
@@ -107,20 +107,20 @@ class CartItemSchemaHasCartItemDataTest extends WC_Unit_Test_Case {
 		$response = $this->sut->get_item_response( $cart_item );
 
 		$this->assertArrayHasKey(
-			'has_cart_item_data',
+			'is_standalone_line',
 			$response,
-			'get_item_response() must include has_cart_item_data for plain lines.'
+			'get_item_response() must include is_standalone_line for plain lines.'
 		);
-		$this->assertFalse(
-			$response['has_cart_item_data'],
-			'A plain standalone line must have has_cart_item_data=false.'
+		$this->assertTrue(
+			$response['is_standalone_line'],
+			'A plain standalone line must have is_standalone_line=true.'
 		);
 	}
 
 	/**
-	 * @testdox Should include has_cart_item_data=true in the response for a meta-differentiated line.
+	 * @testdox Should include is_standalone_line=false in the response for a meta-differentiated line.
 	 */
-	public function test_get_item_response_returns_true_for_meta_differentiated_line(): void {
+	public function test_get_item_response_returns_false_for_meta_differentiated_line(): void {
 		$product_id     = $this->product->get_id();
 		$cart_item_data = array( '_bundle' => 'bundle-parent-123' );
 		$meta_key       = WC()->cart->generate_cart_id( $product_id, 0, array(), $cart_item_data );
@@ -129,47 +129,47 @@ class CartItemSchemaHasCartItemDataTest extends WC_Unit_Test_Case {
 		$response = $this->sut->get_item_response( $cart_item );
 
 		$this->assertArrayHasKey(
-			'has_cart_item_data',
+			'is_standalone_line',
 			$response,
-			'get_item_response() must include has_cart_item_data for meta-differentiated lines.'
+			'get_item_response() must include is_standalone_line for meta-differentiated lines.'
 		);
-		$this->assertTrue(
-			$response['has_cart_item_data'],
-			'A meta-differentiated line must have has_cart_item_data=true.'
+		$this->assertFalse(
+			$response['is_standalone_line'],
+			'A meta-differentiated line must have is_standalone_line=false.'
 		);
 	}
 
 	// -------------------------------------------------------------------------
-	// get_properties() — schema definition for has_cart_item_data
+	// get_properties() — schema definition for is_standalone_line
 	// -------------------------------------------------------------------------
 
 	/**
-	 * @testdox Should define has_cart_item_data as a readonly boolean with view and edit context in get_properties().
+	 * @testdox Should define is_standalone_line as a readonly boolean with view and edit context in get_properties().
 	 */
-	public function test_get_properties_defines_has_cart_item_data_as_readonly_boolean(): void {
+	public function test_get_properties_defines_is_standalone_line_as_readonly_boolean(): void {
 		$properties = $this->sut->get_properties();
 
 		$this->assertArrayHasKey(
-			'has_cart_item_data',
+			'is_standalone_line',
 			$properties,
-			'get_properties() must include has_cart_item_data.'
+			'get_properties() must include is_standalone_line.'
 		);
 
-		$definition = $properties['has_cart_item_data'];
+		$definition = $properties['is_standalone_line'];
 
 		$this->assertSame(
 			'boolean',
 			$definition['type'],
-			'has_cart_item_data must be declared as type boolean.'
+			'is_standalone_line must be declared as type boolean.'
 		);
 		$this->assertSame(
 			array( 'view', 'edit' ),
 			$definition['context'],
-			'has_cart_item_data must have context [view, edit].'
+			'is_standalone_line must have context [view, edit].'
 		);
 		$this->assertTrue(
 			$definition['readonly'],
-			'has_cart_item_data must be readonly.'
+			'is_standalone_line must be readonly.'
 		);
 	}
 

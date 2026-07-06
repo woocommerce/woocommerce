@@ -28,8 +28,8 @@ import {
  * instead of "Add to cart".
  *
  * The fix is realised in four coordinated places:
- *  - A shared PHP "plain line" predicate helper (`CartItemUtils::has_cart_item_data`)
- *  - An additive readonly `has_cart_item_data` boolean on the Store API cart-item
+ *  - A shared PHP "plain line" predicate helper (`CartItemUtils::is_standalone_line`)
+ *  - An additive readonly `is_standalone_line` boolean on the Store API cart-item
  *  - A meta-exclusion guard in the iAPI cart store's keyless `findItemInCart` branch
  *  - `ProductButton.php`'s server seed, rewritten to sum only plain lines
  *

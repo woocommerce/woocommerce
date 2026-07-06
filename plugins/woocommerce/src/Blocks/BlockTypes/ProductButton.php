@@ -325,7 +325,7 @@ class ProductButton extends AbstractBlock {
 	 * Iterates {@see WC_Cart::get_cart_contents()} and sums the `quantity` of every
 	 * line that (a) belongs to the given parent product ID and (b) is a
 	 * standalone line as determined by the shared
-	 * {@see CartItemUtils::has_cart_item_data()} predicate.
+	 * {@see CartItemUtils::is_standalone_line()} predicate.
 	 *
 	 * Meta-differentiated lines — those whose cart key was generated with non-empty
 	 * `cart_item_data` (e.g. bundle components, subscription switches) — are
@@ -367,7 +367,7 @@ class ProductButton extends AbstractBlock {
 			if ( (int) ( $cart_item['product_id'] ?? 0 ) !== (int) $product_id ) {
 				continue;
 			}
-			if ( CartItemUtils::has_cart_item_data( $cart_item ) ) {
+			if ( ! CartItemUtils::is_standalone_line( $cart_item ) ) {
 				continue;
 			}
 			$quantity += (int) ( $cart_item['quantity'] ?? 0 );
