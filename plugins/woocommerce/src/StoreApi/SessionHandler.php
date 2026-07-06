@@ -62,6 +62,20 @@ final class SessionHandler extends WC_Session {
 	protected function init_session_from_token() {
 		$payload = CartTokenUtils::get_cart_token_payload( $this->token );
 
+		$customer_id = (string) $payload['user_id'];
+
+		// Only web session identities — numeric user IDs and `t_` guest hashes —
+		// are resumable on the Store API. Tokens minted for other surfaces
+		// (e.g. the internal POS transaction sessions, prefixed `pos_`) must
+		// not open their sessions here: this surface has no capability gate,
+		// so honouring a foreign token would let anyone holding it read and
+		// mutate that cart.
+		if ( ! ctype_digit( $customer_id ) && 0 !== strpos( $customer_id, 't_' ) ) {
+			$this->_customer_id = $this->generate_customer_id();
+			$this->_data        = array();
+			return;
+		}
+
 		$this->_customer_id       = $payload['user_id'];
 		$this->session_expiration = $payload['exp'];
 		$this->_data              = (array) $this->get_session( $this->get_customer_id(), array() );

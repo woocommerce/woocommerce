@@ -130,6 +130,28 @@ class POSSessionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The reverse direction of the cross-surface guard: a POS transaction
+	 * token presented to the public Store API session handler must not open
+	 * the transaction session there (wc/store has no capability gate).
+	 *
+	 * @testdox The web Store API session handler does not resume pos_ sessions.
+	 */
+	public function test_web_store_api_handler_rejects_pos_tokens(): void {
+		$pos = new POSSessionHandler();
+		$pos->init();
+		$pos->set( 'cart', array( 'pos_line' => array( 'product_id' => 11 ) ) );
+		$pos->save_data();
+
+		$_SERVER['HTTP_CART_TOKEN'] = CartTokenUtils::get_cart_token( $pos->get_customer_id() );
+
+		$web = new \Automattic\WooCommerce\StoreApi\SessionHandler();
+		$web->init();
+
+		$this->assertNotSame( $pos->get_customer_id(), $web->get_customer_id() );
+		$this->assertNull( $web->get( 'cart' ), 'The POS transaction cart must not be readable through the web Store API handler.' );
+	}
+
+	/**
 	 * @testdox init with an invalid Cart-Token starts a fresh guest session.
 	 */
 	public function test_init_with_invalid_token_starts_fresh_guest_session(): void {
