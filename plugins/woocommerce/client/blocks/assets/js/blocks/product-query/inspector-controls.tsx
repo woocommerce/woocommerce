@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
 import { useSelect } from '@wordpress/data';
 import { addFilter } from '@wordpress/hooks';
-import { ElementType } from '@wordpress/element';
+import { type ElementType } from '@wordpress/element';
 import { EditorBlock, isNumber } from '@woocommerce/types';
 import { usePrevious } from '@woocommerce/base-hooks';
 import { manualUpdate } from '@woocommerce/blocks/migration-products-to-product-collection';
