@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove invalid label for= attribute from radio button settings fields where no matching input id exists.
