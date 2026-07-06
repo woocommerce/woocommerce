@@ -151,6 +151,21 @@ class ContextTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Detection is memoized per request state; a changed request state must
+	 * recompute rather than serve a stale answer.
+	 *
+	 * @testdox Memoization does not stick across request-state changes.
+	 */
+	public function test_memoization_follows_request_state(): void {
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/internal/pos/v1/cart/add-items';
+		$this->assertTrue( Context::is_pos_request() );
+		$this->assertTrue( Context::is_pos_request() );
+
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/store/v1/cart';
+		$this->assertFalse( Context::is_pos_request() );
+	}
+
+	/**
 	 * @testdox is_pos_request returns false for a non-POS rest_route GET parameter.
 	 */
 	public function test_returns_false_for_store_rest_route_get_parameter(): void {

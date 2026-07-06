@@ -48,6 +48,17 @@ class Context {
 	private static $test_override = null;
 
 	/**
+	 * Per-request memoized detection results, keyed by the request state.
+	 *
+	 * The consumers include site-wide hot-path filters (stock checks fire per
+	 * product per page), and the answer is immutable for a given request
+	 * state, so re-parsing the URI on every call would be pure waste.
+	 *
+	 * @var array<string, bool>
+	 */
+	private static $memo = array();
+
+	/**
 	 * Whether the current request is a POS Store API request.
 	 *
 	 * @return bool
@@ -57,7 +68,14 @@ class Context {
 			return self::$test_override;
 		}
 
-		return self::detect_pos_request();
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
+		$memo_key = ( $_SERVER['REQUEST_URI'] ?? '' ) . '|' . ( is_string( $_GET['rest_route'] ?? null ) ? $_GET['rest_route'] : '' ) . '|' . ( is_admin() ? 'a' : 'f' );
+
+		if ( ! isset( self::$memo[ $memo_key ] ) ) {
+			self::$memo = array( $memo_key => self::detect_pos_request() );
+		}
+
+		return self::$memo[ $memo_key ];
 	}
 
 	/**
