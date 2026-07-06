@@ -18,41 +18,39 @@ use WC_Unit_Test_Case;
 class VisualAttributeTermAdminTest extends WC_Unit_Test_Case {
 
 	/**
-	 * Ensure `wc-visual` is always in the allowed attribute types so
-	 * `wc_create_attribute()` persists the correct type in the DB.
+	 * Original theme stylesheet to restore after tests.
 	 *
-	 * @var bool
+	 * @var string|null
 	 */
-	private $add_visual_type_filter = false;
+	private $original_theme;
 
 	/**
-	 * Set up the wc-visual type filter for all tests.
+	 * Set up block theme + enable wc-visual feature so 'wc-visual' type
+	 * is available via the real wc_get_attribute_types() logic.
+	 * Matches the approach used in other visual attribute tests.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		// wc-visual is only available when the feature flag is on and a block
-		// theme is active. Tests create attributes directly, so we must add it
-		// to the allowed list to ensure the DB stores the visual type rather
-		// than being silently coerced to 'select'.
-		add_filter(
-			'product_attributes_type_selector',
-			function ( $types ) {
-				$types['wc-visual'] = 'Color / image';
-				return $types;
-			}
-		);
-		$this->add_visual_type_filter = true;
+		$this->original_theme = wp_get_theme()->get_stylesheet();
+
+		// wc-visual requires block theme + feature. Enable for the duration
+		// of the test so wc_create_attribute accepts/stores type 'wc-visual'.
+		switch_theme( 'twentytwentyfour' );
+		delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
+		wc_get_container()
+			->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class )
+			->change_feature_enable( 'wc-visual-attribute', true );
 	}
 
 	/**
-	 * Clean up the wc-visual type filter.
+	 * Restore original theme and clean feature option.
 	 */
 	public function tearDown(): void {
-		if ( $this->add_visual_type_filter ) {
-			remove_all_filters( 'product_attributes_type_selector' );
-			$this->add_visual_type_filter = false;
+		if ( $this->original_theme ) {
+			switch_theme( $this->original_theme );
 		}
+		delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
 		parent::tearDown();
 	}
 
