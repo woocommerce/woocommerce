@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix revenue report double-counting refund amounts when an order has both partial and full refunds.

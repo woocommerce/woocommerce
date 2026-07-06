@@ -606,10 +606,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					|| self::should_split_full_refund_using_parent_order( $order, $parent_order )
 				);
 				if ( $use_parent_refund_amounts ) {
+					// Subtract amounts already stored by prior partial refund rows for the same parent.
+					$prior = $wpdb->get_row(
+						$wpdb->prepare(
+							"SELECT COALESCE(SUM(net_total), 0) AS net, COALESCE(SUM(tax_total), 0) AS tax, COALESCE(SUM(shipping_total), 0) AS shipping FROM {$table_name} WHERE parent_id = %d AND order_id != %d",
+							$parent_order->get_id(),
+							$order->get_id()
+						)
+					);
+
 					$data['num_items_sold'] = -1 * self::get_num_items_sold( $parent_order );
-					$data['tax_total']      = -1 * $parent_order->get_total_tax();
-					$data['net_total']      = -1 * self::get_net_total( $parent_order );
-					$data['shipping_total'] = -1 * $parent_order->get_shipping_total();
+					$data['tax_total']      = -1 * $parent_order->get_total_tax() - (float) ( $prior->tax ?? 0 );
+					$data['net_total']      = -1 * self::get_net_total( $parent_order ) - (float) ( $prior->net ?? 0 );
+					$data['shipping_total'] = -1 * $parent_order->get_shipping_total() - (float) ( $prior->shipping ?? 0 );
 				}
 			}
 			/**
