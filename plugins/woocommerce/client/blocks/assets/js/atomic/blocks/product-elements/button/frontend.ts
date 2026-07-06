@@ -9,10 +9,7 @@ import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 /**
  * Internal dependencies
  */
-import type {
-	Context as AddToCartWithOptionsContext,
-	AddToCartWithOptionsStore,
-} from '../../../../blocks/add-to-cart-with-options/frontend';
+import type { AddToCartWithOptionsStore } from '../../../../blocks/add-to-cart-with-options/frontend';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -64,34 +61,25 @@ const { state: productsState } = store< ProductsStore >(
 const productButtonStore = {
 	state: {
 		get quantity(): number {
-			const product = productsState.productInContext;
+			// T7a: one behavior everywhere. The "X in cart" quantity resolves
+			// through the shared-store envelope, keyed by the MAIN/context
+			// product id (`mainProductInContext` — the parent, never a variation;
+			// identity rule 3, landmine #2). `findItem({ id })` runs the
+			// resolution ladder against the context draft when one exists (a
+			// stepper-bearing collection card, or the Add to Cart + Options form's
+			// seeded draft — the draft carries the shopper's `variation`, so no
+			// ATCWO `selectedAttributes` mirror read is needed), and against a bare
+			// `{ id }` draft otherwise (a plain Product Button with no seeded
+			// draft — the common shop/grid case). Both collapse to the same call.
+			const mainProduct = productsState.mainProductInContext;
 
-			if ( ! product ) {
+			if ( ! mainProduct ) {
 				return 0;
 			}
 
-			// T9 DEMO — grocery pattern (E48): when the card has a seeded draft
-			// (stepper present, product identity from the `<li>`'s
-			// `woocommerce/products` context — T12), read the in-cart line through
-			// the `itemInContext` envelope instead of a raw scan. With the item
-			// unambiguously in the cart, `itemInContext.cart` is the exact line, so
-			// "X in cart" reads from the envelope — the read-side half of the
-			// boundary-break.
-			const envelope = wooState.itemInContext;
-			if ( envelope?.draft ) {
-				return envelope.cart?.quantity ?? 0;
-			}
-
-			const formContext = getContext< AddToCartWithOptionsContext >(
-				'woocommerce/add-to-cart-with-options'
+			return (
+				wooState.findItem( { id: mainProduct.id } ).cart?.quantity ?? 0
 			);
-
-			const item = wooState.findItemInCart( {
-				id: product.id,
-				variation: formContext?.selectedAttributes,
-			} );
-
-			return item?.quantity ?? 0;
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();
@@ -121,13 +109,17 @@ const productButtonStore = {
 				: state.quantity;
 
 			if ( productsState.productInContext?.type === 'grouped' ) {
+				// Grouped products seed one draft per CHILD (keyed by child id),
+				// not by the grouped parent, so the parent has no envelope line of
+				// its own. The button's own server-seeded `groupedProductIds`
+				// context (not an ATCWO mirror) is the only handle to the child
+				// ids; each child's in-cart quantity is read through the shared
+				// envelope (`findItem({ id: childId })`), same surface as the
+				// simple/variable path above.
 				const groupedProductIdsInCart = groupedProductIds?.map(
-					( productId ) => {
-						const product = wooState.findItemInCart( {
-							id: productId,
-						} );
-						return product?.quantity || 0;
-					}
+					( productId ) =>
+						wooState.findItem( { id: productId } ).cart?.quantity ||
+						0
 				);
 				if (
 					groupedProductIdsInCart?.some( ( qty ) => qty > 0 ) &&
@@ -152,47 +144,14 @@ const productButtonStore = {
 	},
 	actions: {
 		*addCartItem(): Generator< unknown, void > {
-			const product = productsState.productInContext;
-
-			if ( ! product ) {
-				return;
-			}
-
-			// T9 DEMO PATH (boundary-breaking use case E14/E48, PR #65570).
-			// When this button sits in a Product Collection card that also
-			// renders a Product Quantity (stepper) block, the server seeds a draft
-			// for the card's product (ProductTemplate::seed_card_draft) and the
-			// card's product identity comes from the `<li>`'s
-			// `woocommerce/products` context (T12). The stepper edits that draft;
-			// the button must POST it (with the shopper-chosen quantity) via
-			// `addItem()` instead of the legacy fixed-quantity `addCartItem`. We
-			// detect the case by the presence of a context draft — resolved
-			// SYNCHRONOUSLY, before any `yield`, because the context is only
-			// guaranteed in scope for the synchronous portion of a generator
-			// action (same rule the ATCWO submit handler follows). NOTE: this is a
-			// deliberately narrow demo branch; the button's full migration onto
-			// drafts/envelope is T7a.
-			const contextDraft = wooState.itemInContext?.draft;
+			// T7a: fully agnostic — ONE path. `addItem()` (no argument) resolves
+			// the payload itself: the context draft when one exists (a
+			// stepper-bearing collection card, or the Add to Cart + Options form's
+			// seeded draft), else its `{ id: productInContext id, quantity: 1 }`
+			// fallback for a bare Product Button with no seeded draft. Identity
+			// rule 5: adds are adds — `addItem` always POSTs `add-item`, so rapid
+			// clicks compound server-side. There is nothing left to branch on.
 			const context = getContext< Context >();
-
-			if ( contextDraft ) {
-				// Todo: Use the module exports instead of `store()` once the
-				// woocommerce store is public.
-				yield import( '@woocommerce/stores/woocommerce/cart' );
-
-				const { actions: wooActions } = store< WooCommerce >(
-					'woocommerce',
-					{},
-					{ lock: universalLock }
-				);
-
-				// Post the draft (identity rule 5: adds are adds). The draft
-				// carries the stepper's chosen quantity.
-				yield wooActions.addItem( contextDraft );
-
-				context.displayViewCart = true;
-				return;
-			}
 
 			// Todo: Use the module exports instead of `store()` once the
 			// woocommerce store is public.
@@ -204,18 +163,7 @@ const productButtonStore = {
 				{ lock: universalLock }
 			);
 
-			// Pass quantityToAdd as a delta. The cart store will add this
-			// to the current quantity, ensuring rapid clicks compound correctly.
-			yield actions.addCartItem(
-				{
-					id: product.id,
-					quantityToAdd: context.quantityToAdd,
-					type: product.type,
-				},
-				{
-					showCartUpdatesNotices: false,
-				}
-			);
+			yield actions.addItem();
 
 			context.displayViewCart = true;
 		},

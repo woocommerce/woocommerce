@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Make the Product Button fully agnostic on the shared iAPI cart/products stores: resolve add-to-cart through `addItem()` and read in-cart quantity through the shared envelope (`findItem`), removing the Add to Cart + Options selection context mirror read.
