@@ -4,6 +4,8 @@ category_slug: user-experience-extensions
 post_title: User experience guidelines
 ---
 
+import DoDontGrid from '@site/src/components/DoDontGrid';
+
 # User experience guidelines
 
 This section covers general guidelines, and best practices to follow in order to ensure your product experience aligns with WooCommerce for ease of use, seamless integration, and strong adoption.
@@ -22,45 +24,56 @@ We also recommend you review the [WordPress core guidelines](https://developer.w
 
 ![Use existing components example](/img/doc_images/Use-existing-components.png)
 
-:::tip[Do]
+<DoDontGrid>
+<DoDontGrid.Do>
 
-Use existing UI. Use existing WordPress and WooCommerce UI, built-in components (text fields, checkboxes, etc), and existing menu structures.
+### Do: Use existing UI
 
-:::
+Use existing WordPress and WooCommerce UI, built-in components (text fields, checkboxes, etc), and existing menu structures.
 
-:::danger[Don't]
+</DoDontGrid.Do>
+<DoDontGrid.Dont>
+
+### Don't: Create new components
 
 Create new components. If you need to make an exception for your product, be prepared to provide a valid use case.
 
-:::
+</DoDontGrid.Dont>
+</DoDontGrid>
 
----
+<DoDontGrid>
+<DoDontGrid.Do>
 
-:::tip[Do]
+### Do: Present a review request at the right time
 
-Present a review request at the right time. Presenting users with a request for review is a great way to get feedback on your extension. Think about best placement and timing to show these prompts. Try to present the review request at a time that's least disruptive, such as after successful completion of a task or event.
+Presenting users with a request for review is a great way to get feedback on your extension. Think about best placement and timing to show these prompts. Try to present the review request at a time that's least disruptive, such as after successful completion of a task or event.
 
-:::
+</DoDontGrid.Do>
+<DoDontGrid.Dont>
 
-:::danger[Don't]
+### Don't: Present a review request first thing
 
-Present a review request first thing. Avoid showing the user a review request upon first launching the extension. Once the user has had a chance to set up, connect, and use the plugin, they'll have a better idea of how to rate it.
+Avoid showing the user a review request upon first launching the extension. Once the user has had a chance to set up, connect, and use the plugin, they'll have a better idea of how to rate it.
 
-:::
+</DoDontGrid.Dont>
+</DoDontGrid>
 
----
+<DoDontGrid>
+<DoDontGrid.Do>
 
-:::tip[Do]
+### Do: Focus on the experience
 
-Focus on the experience. After the customer installs your product, the experience should be the primary focus. Keep things simple and guide the user to successful setup.
+After the customer installs your product, the experience should be the primary focus. Keep things simple and guide the user to successful setup.
 
-:::
+</DoDontGrid.Do>
+<DoDontGrid.Dont>
 
-:::danger[Don't]
+### Don't: Alter the core interface
 
-Alter the core interface. Don't express your brand by changing the shape of containers in Woo admin. Content that's unrelated to the experience, such as branding, self-promotion, or large banners, will distract the merchant from the tasks they purchased your product for.
+Don't express your brand by changing the shape of containers in Woo admin. Content that's unrelated to the experience, such as branding, self-promotion, or large banners, will distract the merchant from the tasks they purchased your product for.
 
-:::
+</DoDontGrid.Dont>
+</DoDontGrid>
 
 ## Voice and tone
 
