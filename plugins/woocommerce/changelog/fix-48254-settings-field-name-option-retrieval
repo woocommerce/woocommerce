@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use field_name instead of id when retrieving option values to correctly support array options.
