@@ -11,10 +11,7 @@ import { apiFetch } from '@wordpress/data-controls';
  * Internal dependencies
  */
 import { getActivityPanelCounts } from '../resolvers';
-import {
-	getActivityPanelCountsSuccess,
-	getActivityPanelCountsError,
-} from '../actions';
+import { getActivityPanelCountsSuccess } from '../actions';
 import { NAMESPACE } from '../../constants';
 
 describe( 'getActivityPanelCounts resolver', () => {
@@ -33,18 +30,6 @@ describe( 'getActivityPanelCounts resolver', () => {
 
 		expect( generator.next( counts ).value ).toEqual(
 			getActivityPanelCountsSuccess( counts )
-		);
-		expect( generator.next().done ).toBe( true );
-	} );
-
-	it( 'dispatches an error when the fetch fails', () => {
-		const generator = getActivityPanelCounts();
-		generator.next();
-
-		const error = new Error( 'Request failed' );
-
-		expect( generator.throw( error ).value ).toEqual(
-			getActivityPanelCountsError( error )
 		);
 		expect( generator.next().done ).toBe( true );
 	} );

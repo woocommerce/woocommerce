@@ -7,10 +7,7 @@ import { apiFetch } from '@wordpress/data-controls';
  * Internal dependencies
  */
 import { NAMESPACE } from '../constants';
-import {
-	getActivityPanelCountsSuccess,
-	getActivityPanelCountsError,
-} from './actions';
+import { getActivityPanelCountsSuccess } from './actions';
 import { ActivityPanelCounts } from './types';
 
 /**
@@ -18,12 +15,8 @@ import { ActivityPanelCounts } from './types';
  * low stock products) in a single request instead of one per count.
  */
 export function* getActivityPanelCounts() {
-	try {
-		const counts: ActivityPanelCounts = yield apiFetch( {
-			path: `${ NAMESPACE }/activity-panel/counts`,
-		} );
-		yield getActivityPanelCountsSuccess( counts );
-	} catch ( error ) {
-		yield getActivityPanelCountsError( error );
-	}
+	const counts: ActivityPanelCounts = yield apiFetch( {
+		path: `${ NAMESPACE }/activity-panel/counts`,
+	} );
+	yield getActivityPanelCountsSuccess( counts );
 }

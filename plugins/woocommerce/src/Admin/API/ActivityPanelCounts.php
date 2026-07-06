@@ -74,7 +74,6 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 						'page'     => 1,
 						'per_page' => 1,
 						'status'   => $request->get_param( 'review_status' ),
-						'_embed'   => 1,
 						'_fields'  => array( 'id' ),
 					)
 				),
@@ -102,7 +101,7 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 
 		$response = rest_do_request( $sub_request );
 
-		if ( is_wp_error( $response ) || $response->is_error() ) {
+		if ( $response->is_error() ) {
 			wc_get_logger()->warning(
 				sprintf( 'Activity Panel counts sub-request to %s failed.', $route ),
 				array( 'source' => 'activity-panel-counts' )
@@ -116,7 +115,7 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 		}
 
 		$data = $response->get_data();
-		return isset( $data['total'] ) ? (int) $data['total'] : 0;
+		return isset( $data['total'] ) ? (int) $data['total'] : null;
 	}
 
 	/**
@@ -177,24 +176,15 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 			'properties' => array(
 				'orders_to_fulfill_count'     => array(
 					'description' => __( 'Number of orders to fulfill. Null if the underlying sub-request failed.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-					'nullable'    => true,
+					'type'        => array( 'integer', 'null' ),
 				),
 				'reviews_to_moderate_count'   => array(
 					'description' => __( 'Number of reviews awaiting moderation. Null if the underlying sub-request failed.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-					'nullable'    => true,
+					'type'        => array( 'integer', 'null' ),
 				),
 				'products_low_in_stock_count' => array(
 					'description' => __( 'Number of products low in stock. Null if the underlying sub-request failed.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-					'nullable'    => true,
+					'type'        => array( 'integer', 'null' ),
 				),
 			),
 		);
