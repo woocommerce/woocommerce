@@ -193,6 +193,50 @@ class OrderControllerTests extends TestCase {
 	}
 
 	/**
+	 * @testdox Existing-order validation keeps the coupon when the order already recorded its usage.
+	 */
+	public function test_validate_existing_order_before_payment_keeps_coupon_when_usage_recorded() {
+		$coupon = CouponHelper::create_coupon( 'recorded-coupon', 'publish', array( 'usage_limit' => 1 ) );
+		$coupon->increase_usage_count();
+
+		$order = WC_Helper_Order::create_order();
+		$this->set_shipping_address( $order );
+		$item = new \WC_Order_Item_Coupon();
+		$item->set_code( $coupon->get_code() );
+		$order->add_item( $item );
+		$order->set_recorded_coupon_usage_counts( true );
+		$order->save();
+
+		$this->assertNull( $this->sut->validate_existing_order_before_payment( $order ) );
+		$this->assertEquals( array( 'recorded-coupon' ), $order->get_coupon_codes() );
+	}
+
+	/**
+	 * @testdox Stripping an exhausted coupon from a draft does not change its usage count.
+	 */
+	public function test_validate_existing_order_before_payment_does_not_decrement_usage_count() {
+		$coupon = CouponHelper::create_coupon( 'draft-global', 'publish', array( 'usage_limit' => 1 ) );
+		$coupon->increase_usage_count();
+		$this->assertEquals( 1, ( new \WC_Coupon( 'draft-global' ) )->get_usage_count() );
+
+		$order = WC_Helper_Order::create_order();
+		$item  = new \WC_Order_Item_Coupon();
+		$item->set_code( $coupon->get_code() );
+		$order->add_item( $item );
+		$order->save();
+
+		try {
+			$this->sut->validate_existing_order_before_payment( $order );
+			$this->fail( 'Expected a RouteException for the exhausted coupon.' );
+		} catch ( RouteException $e ) {
+			$this->assertEquals( 409, $e->getCode() );
+		}
+
+		$this->assertEmpty( $order->get_coupon_codes() );
+		$this->assertEquals( 1, ( new \WC_Coupon( 'draft-global' ) )->get_usage_count(), 'usage_count must not be decremented for a draft that never recorded it' );
+	}
+
+	/**
 	 * test_validate_order_before_payment_invalid_email.
 	 */
 	public function test_validate_order_before_payment_invalid_email() {
@@ -434,6 +478,7 @@ class OrderControllerTests extends TestCase {
 		$order->set_shipping_city( 'Test City' );
 		$order->set_shipping_state( 'CA' );
 		$order->set_shipping_postcode( '12345' );
+		$order->set_shipping_phone( '555-32123' );
 
 		foreach ( $override_data as $key => $value ) {
 			$order->{"set_shipping_$key"}( $value );
