@@ -148,80 +148,104 @@ abstract class AbstractBlock {
 	protected function register_block_type_assets() {
 		$editor_script = $this->get_block_type_editor_script();
 		if ( is_array( $editor_script ) ) {
-			$handle        = (string) $editor_script['handle'];
-			$path          = (string) $editor_script['path'];
-			$dependencies  = array_merge(
-				(array) $editor_script['dependencies'],
-				$this->integration_registry->get_all_registered_editor_script_handles()
-			);
-			$legacy_handle = 'wc-' . $this->block_name . '-block';
-
-			/**
-			 * Filters the legacy per-block editor script dependencies before adding them to the shared editor bundle.
-			 *
-			 * @since 3.0.0
-			 *
-			 * @param array  $dependencies  The list of script dependencies.
-			 * @param string $legacy_handle The legacy per-block script handle.
-			 */
-			$legacy_dependencies = apply_filters( 'woocommerce_blocks_register_script_dependencies', $dependencies, $legacy_handle );
-
-			$dependencies = array_values(
-				array_unique(
-					array_merge(
-						$dependencies,
-						$legacy_dependencies
-					)
-				)
-			);
-			$data         = $this->asset_api->get_script_data( $path );
-			$has_i18n     = in_array( 'wp-i18n', $data['dependencies'], true );
-
-			if ( wp_script_is( $handle, 'registered' ) ) {
-				$wp_scripts = wp_scripts();
-				if ( isset( $wp_scripts->registered[ $handle ] ) ) {
-					$wp_scripts->registered[ $handle ]->deps = array_values(
-						array_unique(
-							array_merge(
-								$wp_scripts->registered[ $handle ]->deps,
-								$dependencies
-							)
-						)
-					);
-				}
-			} else {
-				$this->asset_api->register_script(
-					$handle,
-					$path,
-					$dependencies,
-					$has_i18n
-				);
-			}
-
-			if ( $legacy_handle !== $handle && ! wp_script_is( $legacy_handle, 'registered' ) ) {
-				wp_register_script(
-					$legacy_handle,
-					false,
-					array( $handle ),
-					$this->asset_api->wc_version,
-					true
-				);
-			}
+			$this->register_editor_script_asset( $editor_script );
 		}
-		if ( null !== $this->get_block_type_script() ) {
-			$data     = $this->asset_api->get_script_data( $this->get_block_type_script( 'path' ) );
-			$has_i18n = in_array( 'wp-i18n', $data['dependencies'], true );
 
-			$this->asset_api->register_script(
-				$this->get_block_type_script( 'handle' ),
-				$this->get_block_type_script( 'path' ),
+		$frontend_script = $this->get_block_type_script();
+		if ( is_array( $frontend_script ) ) {
+			$this->register_frontend_script_asset( $frontend_script );
+		}
+	}
+
+	/**
+	 * Register the editor script asset.
+	 *
+	 * @param array $editor_script The editor script data.
+	 * @return void
+	 */
+	private function register_editor_script_asset( $editor_script ) {
+		$handle        = (string) $editor_script['handle'];
+		$path          = (string) $editor_script['path'];
+		$dependencies  = array_values(
+			array_unique(
 				array_merge(
-					$this->get_block_type_script( 'dependencies' ),
-					$this->integration_registry->get_all_registered_script_handles()
-				),
+					(array) $editor_script['dependencies'],
+					$this->integration_registry->get_all_registered_editor_script_handles()
+				)
+			)
+		);
+		$legacy_handle = 'wc-' . $this->block_name . '-block';
+		$data          = $this->asset_api->get_script_data( $path );
+		$has_i18n      = in_array( 'wp-i18n', $data['dependencies'], true );
+
+		if ( wp_script_is( $handle, 'registered' ) ) {
+			$this->add_script_dependencies( $handle, $dependencies );
+		} else {
+			$this->asset_api->register_script(
+				$handle,
+				$path,
+				$dependencies,
 				$has_i18n
 			);
 		}
+
+		if ( $legacy_handle !== $handle && ! wp_script_is( $legacy_handle, 'registered' ) ) {
+			wp_register_script(
+				$legacy_handle,
+				false,
+				array( $handle ),
+				$this->asset_api->wc_version,
+				true
+			);
+		}
+	}
+
+	/**
+	 * Register the frontend script asset.
+	 *
+	 * @param array $frontend_script The frontend script data.
+	 * @return void
+	 */
+	private function register_frontend_script_asset( $frontend_script ) {
+		$handle       = (string) $frontend_script['handle'];
+		$path         = (string) $frontend_script['path'];
+		$dependencies = array_merge(
+			(array) $frontend_script['dependencies'],
+			$this->integration_registry->get_all_registered_script_handles()
+		);
+		$data         = $this->asset_api->get_script_data( $path );
+		$has_i18n     = in_array( 'wp-i18n', $data['dependencies'], true );
+
+		$this->asset_api->register_script(
+			$handle,
+			$path,
+			$dependencies,
+			$has_i18n
+		);
+	}
+
+	/**
+	 * Add dependencies to a registered script.
+	 *
+	 * @param string $handle       The script handle.
+	 * @param array  $dependencies The dependencies to add.
+	 * @return void
+	 */
+	private function add_script_dependencies( $handle, $dependencies ) {
+		$wp_scripts = wp_scripts();
+
+		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
+			return;
+		}
+
+		$wp_scripts->registered[ $handle ]->deps = array_values(
+			array_unique(
+				array_merge(
+					$wp_scripts->registered[ $handle ]->deps,
+					$dependencies
+				)
+			)
+		);
 	}
 
 	/**

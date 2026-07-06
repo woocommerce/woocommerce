@@ -25,6 +25,8 @@ const {
 	ASSET_CHECK,
 	NODE_ENV,
 	CHECK_CIRCULAR_DEPS,
+	SHARED_EDITOR_STYLE_HANDLE,
+	getBlockJsonWithSharedEditorStyle,
 	requestToExternal,
 	requestToEditorExternal,
 	requestToHandle,
@@ -47,16 +49,6 @@ const BABEL_CACHE_DIR = path.join(
 	'node_modules/.cache/babel-loader'
 );
 const isProduction = NODE_ENV === 'production';
-
-const getBlockJsonWithSharedEditorStyle = ( content ) => {
-	const metadata = JSON.parse( content.toString() );
-
-	if ( metadata.editorStyle ) {
-		metadata.editorStyle = 'wc-block-library-style';
-	}
-
-	return `${ JSON.stringify( metadata, null, '\t' ) }\n`;
-};
 
 /**
  * Shared config for all script builds.
@@ -601,7 +593,7 @@ const getStylingConfig = ( options = {} ) => {
 								)
 							);
 						},
-						name: 'wc-block-library-style',
+						name: SHARED_EDITOR_STYLE_HANDLE,
 						chunks: 'all',
 						enforce: true,
 						priority: 10,

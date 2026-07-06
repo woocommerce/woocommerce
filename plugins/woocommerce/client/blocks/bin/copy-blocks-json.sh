@@ -27,17 +27,7 @@ copy_block_json() {
     local source_path="$1"
     local destination_path="$2"
 
-    node -e '
-const fs = require( "fs" );
-const [ sourcePath, destinationPath ] = process.argv.slice( 1 );
-const metadata = JSON.parse( fs.readFileSync( sourcePath, "utf8" ) );
-
-if ( metadata.editorStyle ) {
-    metadata.editorStyle = "wc-block-library-style";
-}
-
-fs.writeFileSync( destinationPath, `${ JSON.stringify( metadata, null, "\t" ) }\n` );
-' "$source_path" "$destination_path"
+    node plugins/woocommerce/client/blocks/bin/copy-block-json.js "$source_path" "$destination_path"
 }
 
 # Find all block.json files

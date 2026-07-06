@@ -8,12 +8,6 @@ Entities have a dedicated module that loads consistently on every admin screen, 
 
 With this approach, third-party developers can also start using entities outside of the Gutenberg editor whenever needed.
 
-## Source location
-
-This package lives in `plugins/woocommerce/client/blocks/assets/js/entities` because it follows the trunk Blocks source layout while still being emitted as the `wc-entities` script handle and exposed through the `@woocommerce/entities` import name for explicit consumers.
-
-Package-like code that uses public import names can still live in the matching `assets/js` source area and be bundled into `@woocommerce/block-library` when appropriate.
-
 ## Available Entities
 
 ### Product Entity
@@ -36,7 +30,7 @@ Entities are automatically registered when the module is loaded. This happens on
 If you need to register entities manually (e.g., in tests), you can use the registration functions:
 
 ```typescript
-import { registerProductEntity } from '@woocommerce/entities/register-entities';
+import { registerProductEntity } from './entities/register-entities';
 
 // Register the product entity
 registerProductEntity();
@@ -45,7 +39,7 @@ registerProductEntity();
 ### Using Entity Hooks
 
 ```typescript
-import { useProduct } from '@woocommerce/entities/product';
+import { useProduct } from './entities/product';
 
 function MyComponent() {
 	const { product, isLoading, error } = useProduct( 123 );
