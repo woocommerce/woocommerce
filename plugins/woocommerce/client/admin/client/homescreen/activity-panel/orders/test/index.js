@@ -220,7 +220,7 @@ describe( 'OrdersPanel', () => {
 		} );
 
 		render( <OrdersPanel orderStatuses={ [] } unreadOrdersCount={ 1 } /> );
-		expect( screen.getByText( 'bscriptb Doe' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'bscript/b Doe' ) ).toBeInTheDocument();
 		expect( screen.queryByText( /</ ) ).not.toBeInTheDocument();
 	} );
 } );
