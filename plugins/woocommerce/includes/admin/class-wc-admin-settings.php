@@ -161,7 +161,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				foreach ( self::$errors as $error ) {
 					echo '<div id="message" class="error inline"><p><strong>' . esc_html( $error ) . '</strong></p></div>';
 				}
-			} elseif ( count( self::$messages ) > 0 ) {
+			}
+
+			if ( count( self::$messages ) > 0 ) {
 				foreach ( self::$messages as $message ) {
 					echo '<div id="message" class="updated inline"><p><strong>' . esc_html( $message ) . '</strong></p></div>';
 				}
