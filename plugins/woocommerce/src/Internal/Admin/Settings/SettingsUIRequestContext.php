@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\Settings\SettingsSectionRegistry;
+use Automattic\WooCommerce\Admin\Settings\SettingsSectionUIPageProviderInterface;
 use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 
 /**
@@ -191,15 +192,18 @@ class SettingsUIRequestContext {
 	/**
 	 * Get the current WooCommerce settings section.
 	 *
+	 * Reads $_REQUEST to match how the legacy $current_section global is derived,
+	 * so context resolution and legacy settings rendering agree on the section.
+	 *
 	 * @return string
 	 */
 	private static function get_current_settings_section(): string {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( ! isset( $_GET['section'] ) ) {
+		if ( ! isset( $_REQUEST['section'] ) ) {
 			return '';
 		}
 
-		$section = wp_unslash( $_GET['section'] );
+		$section = wp_unslash( $_REQUEST['section'] );
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		return is_string( $section ) ? sanitize_title( $section ) : '';
@@ -234,6 +238,17 @@ class SettingsUIRequestContext {
 	}
 
 	/**
+	 * Get the legacy settings page this context was resolved for.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return \WC_Settings_Page
+	 */
+	public function get_settings_page(): \WC_Settings_Page {
+		return $this->settings_page;
+	}
+
+	/**
 	 * Get the Settings UI page id.
 	 *
 	 * @return string
@@ -244,6 +259,11 @@ class SettingsUIRequestContext {
 
 	/**
 	 * Whether this context can render through the Settings UI.
+	 *
+	 * True when the settings UI feature is enabled and a Settings UI page resolved
+	 * for the page and section. The page can come from a registered section (native
+	 * or adapted from its legacy settings) or from the settings page itself, and
+	 * callers replacing legacy rendering should treat all three the same.
 	 *
 	 * @return bool
 	 */
@@ -347,10 +367,39 @@ class SettingsUIRequestContext {
 		try {
 			$registered_section = SettingsSectionRegistry::get_instance()->get_registered( $settings_page->get_id(), $section );
 		} catch ( \Throwable $e ) {
+			self::log_resolution_failure( 'Registered settings section', $settings_page->get_id(), $section, $e, __METHOD__ );
 			$registered_section = null;
 		}
 
 		if ( $registered_section ) {
+			if ( $registered_section instanceof SettingsSectionUIPageProviderInterface ) {
+				try {
+					$settings_ui_page = $registered_section->get_settings_ui_page( $settings_page );
+					if ( $settings_ui_page instanceof SettingsUIPageInterface ) {
+						return $settings_ui_page;
+					}
+				} catch ( \Throwable $e ) {
+					self::log_resolution_failure( 'Native Settings UI page', $settings_page->get_id(), $section, $e, __METHOD__ );
+
+					// Raise a developer notice here only: this failure still
+					// renders through the registered-section adapter, so
+					// nothing downstream reports it. Registry lookup failures
+					// are environmental, and schema/script-handle failures
+					// surface through log_settings_ui_fallback() at render time.
+					wc_doing_it_wrong(
+						__METHOD__,
+						sprintf(
+							/* translators: 1: settings page id, 2: settings section id, 3: failure reason. */
+							esc_html__( 'The native Settings UI page for page "%1$s" section "%2$s" could not be resolved. Falling back to the default settings adapter. Reason: %3$s', 'woocommerce' ),
+							esc_html( $settings_page->get_id() ),
+							esc_html( self::get_section_key( $section ) ),
+							esc_html( get_class( $e ) . ': ' . $e->getMessage() )
+						),
+						'11.0.0'
+					);
+				}
+			}
+
 			return new RegisteredSettingsSectionAdapter( $settings_page, $registered_section );
 		}
 
@@ -374,16 +423,7 @@ class SettingsUIRequestContext {
 		} catch ( \Throwable $e ) {
 			$this->script_handles_failed = true;
 
-			wc_get_logger()->debug(
-				sprintf(
-					'Settings UI script handles could not be resolved for page "%1$s" section "%2$s": %3$s: %4$s',
-					$this->get_page_id(),
-					'' === $this->section ? self::DEFAULT_SECTION_KEY : $this->section,
-					get_class( $e ),
-					$e->getMessage()
-				),
-				array( 'source' => 'settings-ui' )
-			);
+			self::log_resolution_failure( 'Settings UI script handles', $this->get_page_id(), $this->section, $e, __METHOD__ );
 
 			if ( $e instanceof \Exception ) {
 				$this->script_handles_failure_reason = sprintf(
@@ -391,7 +431,6 @@ class SettingsUIRequestContext {
 					__( 'Settings UI script handles could not be resolved: %s', 'woocommerce' ),
 					$e->getMessage()
 				);
-				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
 			}
 		}
 	}
@@ -408,25 +447,62 @@ class SettingsUIRequestContext {
 		}
 
 		try {
-			$this->schema = $this->settings_ui_page->get_schema( $this->section );
+			$this->schema = $this->ensure_section_navigation( $this->settings_ui_page->get_schema( $this->section ) );
 		} catch ( \Throwable $e ) {
 			$this->schema_failed = true;
 
-			wc_get_logger()->debug(
-				sprintf(
-					'Settings UI schema could not be resolved for page "%1$s" section "%2$s": %3$s: %4$s',
-					$this->get_page_id(),
-					'' === $this->section ? self::DEFAULT_SECTION_KEY : $this->section,
-					get_class( $e ),
-					$e->getMessage()
-				),
-				array( 'source' => 'settings-ui' )
-			);
-
-			if ( $e instanceof \Exception ) {
-				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
-			}
+			self::log_resolution_failure( 'Settings UI schema', $this->get_page_id(), $this->section, $e, __METHOD__ );
 		}
+	}
+
+	/**
+	 * Log a Settings UI resolution failure for developers.
+	 *
+	 * @param string     $subject What failed to resolve, e.g. 'Settings UI schema'.
+	 * @param string     $page_id Settings page id.
+	 * @param string     $section Section id. Empty string means the default section.
+	 * @param \Throwable $e The resolution failure.
+	 * @param string     $caller Calling method, for exception tracking.
+	 */
+	private static function log_resolution_failure( string $subject, string $page_id, string $section, \Throwable $e, string $caller ): void {
+		wc_get_logger()->debug(
+			sprintf(
+				'%1$s could not be resolved for page "%2$s" section "%3$s": %4$s: %5$s',
+				$subject,
+				$page_id,
+				self::get_section_key( $section ),
+				get_class( $e ),
+				$e->getMessage()
+			),
+			array( 'source' => 'settings-ui' )
+		);
+
+		if ( $e instanceof \Exception ) {
+			wc_caught_exception( $e, $caller );
+		}
+	}
+
+	/**
+	 * Ensure a resolved settings UI schema carries section navigation for the shell.
+	 *
+	 * Schemas that omit `shell.sectionNavigation` get the default sibling-section
+	 * navigation for the settings page, matching the legacy settings adapter.
+	 * Setting the key — including to an empty array — keeps the provided value,
+	 * so pages with custom or no navigation stay untouched.
+	 *
+	 * @param array $schema Resolved settings UI schema.
+	 * @return array
+	 */
+	private function ensure_section_navigation( array $schema ): array {
+		if ( ! isset( $schema['shell'] ) ) {
+			$schema['shell'] = array();
+		}
+
+		if ( is_array( $schema['shell'] ) && ! isset( $schema['shell']['sectionNavigation'] ) ) {
+			$schema['shell']['sectionNavigation'] = SettingsSectionNavigation::build_default( $this->settings_page, $this->section );
+		}
+
+		return $schema;
 	}
 
 	/**
