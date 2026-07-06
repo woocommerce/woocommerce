@@ -1,6 +1,6 @@
 <?php
 /**
- * Integration tests for PlanRepository (and PlanGroupRepository).
+ * Integration tests for PlanRepository.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine
  */
@@ -11,33 +11,18 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integrati
 
 use EngineIntegrationTestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanGroup;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanGroupRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository
- * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanGroupRepository
  */
 class PlanRepositoryTest extends EngineIntegrationTestCase {
 
-	private function make_group(): int {
-		$group = PlanGroup::create(
-			array(
-				'name'          => 'Coffee club',
-				'merchant_code' => 'coffee-club',
-			)
-		);
-
-		return ( new PlanGroupRepository() )->insert( $group );
-	}
-
-	private function make_plan( PlanRepository $repo, int $group_id, string $name, string $extension_slug, int $sort_order = 0 ): int {
+	private function make_plan( PlanRepository $repo, string $name, string $extension_slug, int $sort_order = 0 ): int {
 		return $repo->insert(
 			Plan::create(
-				$group_id,
 				array(
 					'name'           => $name,
 					'billing_policy' => BillingPolicy::from_array(
@@ -53,45 +38,13 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		);
 	}
 
-	public function test_plan_group_round_trips(): void {
-		$repo = new PlanGroupRepository();
-
-		$id = $repo->insert(
-			PlanGroup::create(
-				array(
-					'name'            => 'Boxes',
-					'merchant_code'   => 'boxes',
-					'options_display' => array( array( 'name' => 'Size' ) ),
-					'extension_slug'  => 'wc-subscriptions',
-				)
-			)
-		);
-
-		$fetched = $repo->find( $id );
-
-		$this->assertInstanceOf( PlanGroup::class, $fetched );
-		$this->assertSame( $id, $fetched->get_id() );
-		$this->assertSame( 'Boxes', $fetched->get_name() );
-		$this->assertSame( 'boxes', $fetched->get_merchant_code() );
-		$this->assertSame( 'wc-subscriptions', $fetched->get_extension_slug() );
-		$this->assertSame( array( array( 'name' => 'Size' ) ), $fetched->get_options_display() );
-	}
-
 	public function test_plan_round_trips_with_policies_and_extension_slug(): void {
-		$group_id = $this->make_group();
-		$repo     = new PlanRepository();
+		$repo = new PlanRepository();
 
 		$plan = Plan::create(
-			$group_id,
 			array(
 				'name'           => 'Monthly',
 				'description'    => 'A monthly plan',
-				'options'        => array(
-					array(
-						'name'  => 'Monthly',
-						'value' => 'monthly',
-					),
-				),
 				'billing_policy' => BillingPolicy::from_array(
 					array(
 						'period'     => 'month',
@@ -124,7 +77,6 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( Plan::class, $fetched );
 		$this->assertSame( 'Monthly', $fetched->get_name() );
 		$this->assertSame( 'A monthly plan', $fetched->get_description() );
-		$this->assertSame( $group_id, $fetched->get_group_id() );
 		$this->assertSame( 'lite', $fetched->get_extension_slug() );
 		$this->assertSame( Plan::STATUS_ARCHIVED, $fetched->get_status() );
 		$this->assertSame( 4, $fetched->get_sort_order() );
@@ -135,12 +87,10 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_plan_without_optional_policies_round_trips(): void {
-		$group_id = $this->make_group();
-		$repo     = new PlanRepository();
+		$repo = new PlanRepository();
 
 		$id = $repo->insert(
 			Plan::create(
-				$group_id,
 				array(
 					'name'           => 'Bare',
 					'billing_policy' => BillingPolicy::from_array(
@@ -161,12 +111,72 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertNull( $fetched->get_extension_slug() );
 	}
 
+	public function test_merchant_code_round_trips_through_insert_and_find(): void {
+		$repo = new PlanRepository();
+
+		$id = $repo->insert(
+			Plan::create(
+				array(
+					'name'           => 'Coded',
+					'billing_policy' => BillingPolicy::from_array(
+						array(
+							'period'   => 'month',
+							'interval' => 1,
+						)
+					),
+					'merchant_code'  => 'coffee-club',
+				)
+			)
+		);
+
+		$fetched = $repo->find( $id );
+
+		$this->assertInstanceOf( Plan::class, $fetched );
+		$this->assertSame( 'coffee-club', $fetched->get_merchant_code() );
+	}
+
+	public function test_duplicate_merchant_code_insert_throws(): void {
+		$repo = new PlanRepository();
+
+		$make = static function (): Plan {
+			return Plan::create(
+				array(
+					'name'           => 'Duplicate code',
+					'billing_policy' => BillingPolicy::from_array(
+						array(
+							'period'   => 'month',
+							'interval' => 1,
+						)
+					),
+					'merchant_code'  => 'dupe-code',
+				)
+			);
+		};
+
+		$repo->insert( $make() );
+
+		$this->expectException( \RuntimeException::class );
+		$repo->insert( $make() );
+	}
+
+	public function test_plans_without_merchant_code_coexist(): void {
+		$repo = new PlanRepository();
+
+		$first_id  = $this->make_plan( $repo, 'First uncoded', 'lite' );
+		$second_id = $this->make_plan( $repo, 'Second uncoded', 'lite' );
+
+		$this->assertGreaterThan( 0, $first_id );
+		$this->assertGreaterThan( $first_id, $second_id );
+
+		$first = $repo->find( $first_id );
+		$this->assertInstanceOf( Plan::class, $first );
+		$this->assertNull( $first->get_merchant_code() );
+	}
+
 	public function test_update_persists_changes(): void {
-		$group_id = $this->make_group();
-		$repo     = new PlanRepository();
+		$repo = new PlanRepository();
 
 		$plan = Plan::create(
-			$group_id,
 			array(
 				'name'           => 'Before',
 				'billing_policy' => BillingPolicy::from_array(
@@ -192,11 +202,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_query_count_and_reorder_use_plan_lifecycle_fields(): void {
-		$group_id = $this->make_group();
-		$repo     = new PlanRepository();
+		$repo = new PlanRepository();
 
 		$first    = Plan::create(
-			$group_id,
 			array(
 				'name'           => 'Alpha monthly',
 				'billing_policy' => BillingPolicy::from_array(
@@ -211,7 +219,6 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 			)
 		);
 		$second   = Plan::create(
-			$group_id,
 			array(
 				'name'           => 'Beta weekly',
 				'billing_policy' => BillingPolicy::from_array(
@@ -226,7 +233,6 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 			)
 		);
 		$archived = Plan::create(
-			$group_id,
 			array(
 				'name'           => 'Archived yearly',
 				'billing_policy' => BillingPolicy::from_array(
@@ -299,11 +305,10 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	 * @param string $search Search term.
 	 */
 	public function test_query_search_terms_starting_with_prepare_specifiers( string $search ): void {
-		$group_id = $this->make_group();
-		$repo     = new PlanRepository();
+		$repo = new PlanRepository();
 
-		$this->make_plan( $repo, $group_id, 'Unrelated prepare regression plan', 'lite' );
-		$expected_id = $this->make_plan( $repo, $group_id, $search . ' plan', 'lite' );
+		$this->make_plan( $repo, 'Unrelated prepare regression plan', 'lite' );
+		$expected_id = $this->make_plan( $repo, $search . ' plan', 'lite' );
 
 		$query_args = array(
 			'extension_slugs' => array( 'lite' ),
@@ -323,10 +328,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_invalid_extension_scopes_do_not_return_unscoped_results(): void {
-		$group_id = $this->make_group();
-		$repo     = new PlanRepository();
+		$repo = new PlanRepository();
 
-		$id = $this->make_plan( $repo, $group_id, 'Scoped', 'lite' );
+		$id = $this->make_plan( $repo, 'Scoped', 'lite' );
 
 		$this->assertInstanceOf( Plan::class, $repo->find( $id, 'any' ) );
 		// Test with extension_slugs array.
@@ -347,11 +351,10 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_query_extension_slugs_filters_by_single_and_multiple_slugs(): void {
-		$group_id = $this->make_group();
-		$repo     = new PlanRepository();
+		$repo = new PlanRepository();
 
-		$lite_id  = $this->make_plan( $repo, $group_id, 'Lite plan', 'lite', 1 );
-		$other_id = $this->make_plan( $repo, $group_id, 'Other plan', 'other-extension', 2 );
+		$lite_id  = $this->make_plan( $repo, 'Lite plan', 'lite', 1 );
+		$other_id = $this->make_plan( $repo, 'Other plan', 'other-extension', 2 );
 
 		$single = $repo->query( array( 'extension_slugs' => array( 'lite' ) ) );
 		$this->assertSame( array( $lite_id ), array_map( static fn ( Plan $plan ): ?int => $plan->get_id(), $single ) );
@@ -362,10 +365,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_query_singular_extension_slug_arg_is_unknown_and_ignored(): void {
-		$group_id = $this->make_group();
-		$repo     = new PlanRepository();
+		$repo = new PlanRepository();
 
-		$plan_id = $this->make_plan( $repo, $group_id, 'Scoped', 'lite' );
+		$plan_id = $this->make_plan( $repo, 'Scoped', 'lite' );
 
 		$plans = $repo->query( array( 'extension_slug' => 'other-extension' ) );
 		$this->assertSame( array( $plan_id ), array_map( static fn ( Plan $plan ): ?int => $plan->get_id(), $plans ) );
@@ -373,11 +375,10 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_reorder_fails_before_updates_when_an_id_is_missing_or_outside_extension(): void {
-		$group_id = $this->make_group();
-		$repo     = new PlanRepository();
+		$repo = new PlanRepository();
 
-		$first_id = $this->make_plan( $repo, $group_id, 'First', 'lite', 1 );
-		$other_id = $this->make_plan( $repo, $group_id, 'Other', 'other-extension', 2 );
+		$first_id = $this->make_plan( $repo, 'First', 'lite', 1 );
+		$other_id = $this->make_plan( $repo, 'Other', 'other-extension', 2 );
 
 		$this->assertFalse(
 			$repo->reorder(
@@ -412,12 +413,11 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_query_ids_returns_only_those_plans(): void {
-		$repo     = new PlanRepository();
-		$group_id = $this->make_group();
+		$repo = new PlanRepository();
 
-		$first_plan_id  = $this->make_plan( $repo, $group_id, 'First', 'lite', 1 );
-		$second_plan_id = $this->make_plan( $repo, $group_id, 'Second', 'lite', 2 );
-		$this->make_plan( $repo, $group_id, 'Third', 'lite', 3 );
+		$first_plan_id  = $this->make_plan( $repo, 'First', 'lite', 1 );
+		$second_plan_id = $this->make_plan( $repo, 'Second', 'lite', 2 );
+		$this->make_plan( $repo, 'Third', 'lite', 3 );
 
 		$plans = $repo->query( array( 'ids' => array( $first_plan_id, $second_plan_id ) ) );
 
@@ -426,13 +426,12 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_query_ids_composes_with_status_and_extension_slugs(): void {
-		$repo     = new PlanRepository();
-		$group_id = $this->make_group();
+		$repo = new PlanRepository();
 
-		$active_id  = $this->make_plan( $repo, $group_id, 'Active lite', 'lite', 1 );
-		$foreign_id = $this->make_plan( $repo, $group_id, 'Other extension', 'other-extension', 2 );
+		$active_id  = $this->make_plan( $repo, 'Active lite', 'lite', 1 );
+		$foreign_id = $this->make_plan( $repo, 'Other extension', 'other-extension', 2 );
 
-		$archived = $repo->find( $this->make_plan( $repo, $group_id, 'Archived lite', 'lite', 3 ) );
+		$archived = $repo->find( $this->make_plan( $repo, 'Archived lite', 'lite', 3 ) );
 		$this->assertInstanceOf( Plan::class, $archived );
 		$archived->set_status( Plan::STATUS_ARCHIVED );
 		$this->assertTrue( $repo->update( $archived ) );
@@ -450,9 +449,8 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_query_empty_or_invalid_ids_match_nothing(): void {
-		$repo     = new PlanRepository();
-		$group_id = $this->make_group();
-		$plan_id  = $this->make_plan( $repo, $group_id, 'Plan', 'lite' );
+		$repo    = new PlanRepository();
+		$plan_id = $this->make_plan( $repo, 'Plan', 'lite' );
 
 		$this->assertCount( 0, $repo->query( array( 'ids' => array() ) ) );
 		$this->assertSame( 0, $repo->count( array( 'ids' => array() ) ) );
@@ -462,11 +460,10 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_query_null_ids_behaves_as_arg_absent(): void {
-		$repo     = new PlanRepository();
-		$group_id = $this->make_group();
+		$repo = new PlanRepository();
 
-		$first_plan_id  = $this->make_plan( $repo, $group_id, 'First', 'lite', 1 );
-		$second_plan_id = $this->make_plan( $repo, $group_id, 'Second', 'lite', 2 );
+		$first_plan_id  = $this->make_plan( $repo, 'First', 'lite', 1 );
+		$second_plan_id = $this->make_plan( $repo, 'Second', 'lite', 2 );
 
 		$plans = $repo->query( array( 'ids' => null ) );
 
@@ -475,12 +472,10 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_delete_removes_the_row(): void {
-		$group_id = $this->make_group();
-		$repo     = new PlanRepository();
+		$repo = new PlanRepository();
 
 		$id = $repo->insert(
 			Plan::create(
-				$group_id,
 				array(
 					'name'           => 'Doomed',
 					'billing_policy' => BillingPolicy::from_array(

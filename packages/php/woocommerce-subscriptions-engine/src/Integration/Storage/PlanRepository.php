@@ -24,7 +24,7 @@ final class PlanRepository {
 	 *
 	 * @var array<int, string>
 	 */
-	private const JSON_COLUMNS = array( 'options', 'billing_policy', 'delivery_policy', 'pricing_policy' );
+	private const JSON_COLUMNS = array( 'billing_policy', 'delivery_policy', 'pricing_policy' );
 
 	/**
 	 * Always-false WHERE clause: a filter arg that is present but empty or
@@ -53,9 +53,12 @@ final class PlanRepository {
 	/**
 	 * Insert a new plan and stamp its id back onto the entity.
 	 *
+	 * `merchant_code` uniqueness is DB-enforced (UNIQUE key, NULLs distinct): a
+	 * duplicate code fails the insert and surfaces as the RuntimeException.
+	 *
 	 * @param Plan $plan Plan to insert.
 	 * @return int The new plan id.
-	 * @throws \RuntimeException If the insert fails.
+	 * @throws \RuntimeException If the insert fails, including on a duplicate merchant_code.
 	 */
 	public function insert( Plan $plan ): int {
 		global $wpdb;
@@ -67,10 +70,8 @@ final class PlanRepository {
 		$inserted = $wpdb->insert(
 			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
 			array(
-				'group_id'         => $data['group_id'],
 				'name'             => $data['name'],
 				'description'      => $data['description'],
-				'options'          => wp_json_encode( $data['options'] ),
 				'billing_policy'   => wp_json_encode( $data['billing_policy'] ),
 				'delivery_policy'  => null !== $data['delivery_policy'] ? wp_json_encode( $data['delivery_policy'] ) : null,
 				'inventory_policy' => null,
@@ -78,6 +79,7 @@ final class PlanRepository {
 				'category'         => $data['category'],
 				'status'           => $data['status'],
 				'sort_order'       => $data['sort_order'],
+				'merchant_code'    => $data['merchant_code'],
 				'extension_slug'   => $data['extension_slug'],
 				'date_created_gmt' => $now,
 				'date_updated_gmt' => $now,
@@ -208,6 +210,9 @@ final class PlanRepository {
 	/**
 	 * Persist changes to an existing plan.
 	 *
+	 * `merchant_code` is immutable post-create and intentionally not written here,
+	 * same as `id`.
+	 *
 	 * @param Plan $plan Plan to update. Must have an id.
 	 * @return bool True on success.
 	 * @throws \RuntimeException If the plan has no id.
@@ -228,7 +233,6 @@ final class PlanRepository {
 			array(
 				'name'             => $data['name'],
 				'description'      => $data['description'],
-				'options'          => wp_json_encode( $data['options'] ),
 				'billing_policy'   => wp_json_encode( $data['billing_policy'] ),
 				'delivery_policy'  => null !== $data['delivery_policy'] ? wp_json_encode( $data['delivery_policy'] ) : null,
 				'pricing_policy'   => null !== $data['pricing_policy'] ? wp_json_encode( $data['pricing_policy'] ) : null,

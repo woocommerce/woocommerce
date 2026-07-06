@@ -96,6 +96,8 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'global', $created_data['scope'] );
 		$this->assertSame( Plan::STATUS_ACTIVE, $created_data['status'] );
 		$this->assertSame( self::EXTENSION_SLUG, $created_data['extension_slug'] );
+		$this->assertArrayNotHasKey( 'group', $created_data );
+		$this->assertArrayNotHasKey( 'merchant_code', $created_data );
 
 		$id = $this->int_value( $created_data, 'id' );
 
