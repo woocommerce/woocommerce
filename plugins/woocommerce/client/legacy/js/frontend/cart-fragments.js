@@ -68,6 +68,15 @@ jQuery( function( $ ) {
 
 	/* Named callback for refreshing cart fragment */
 	function refresh_cart_fragment() {
+		// Visitors without a cart session can use the pre-rendered empty-cart
+		// fragments instead of requesting them over AJAX.
+		if ( wc_cart_fragments_params.empty_cart_fragments && ! Cookies.get( 'woocommerce_cart_hash' ) ) {
+			$fragment_refresh.success( {
+				fragments: wc_cart_fragments_params.empty_cart_fragments,
+				cart_hash: ''
+			} );
+			return;
+		}
 		$.ajax( $fragment_refresh );
 	}
 
