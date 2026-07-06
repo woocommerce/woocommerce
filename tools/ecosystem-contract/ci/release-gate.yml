@@ -1,0 +1,76 @@
+# Ecosystem contract gate — runs when a release tag / RC is cut.
+#
+# Deliberately NOT a merge gate: it gates the release tag only. PRs merge freely;
+# the release lead sees the full ecosystem impact of the accumulated diff once,
+# at tag time, with install counts attached.
+#
+# Draft — not wired into the release process yet. To adopt: move to
+# .github/workflows/, point RELEASE_REF/BASE_REF at the release tooling's refs,
+# and publish the usage index as a fetchable artifact (see README "Refreshing").
+name: Ecosystem contract gate
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+-rc*'
+      - '[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+    inputs:
+      base:
+        description: 'Previous stable version (e.g. 10.8.0)'
+        required: true
+      candidate:
+        description: 'RC ref or version to check'
+        required: true
+
+jobs:
+  contract-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download usage index (rebuilt daily by the ecosystem-usage-index repo)
+        run: |
+          # Built daily by github.com/jamesckemp/ecosystem-usage-index (pending
+          # transfer to the woocommerce org) and published on its rolling
+          # usage-index-latest release. Requires that repo to be public (or a
+          # token) — not wired up while it is private.
+          curl -sfL -o usage-index.sqlite "$USAGE_INDEX_URL"
+        env:
+          USAGE_INDEX_URL: ${{ vars.ECOSYSTEM_USAGE_INDEX_URL }}
+
+      - name: Fetch base release
+        run: |
+          BASE="${{ inputs.base || 'PREVIOUS_STABLE' }}"
+          curl -sL -o base.zip "https://downloads.wordpress.org/plugin/woocommerce.${BASE}.zip"
+          unzip -q base.zip -d base
+
+      - name: Build candidate zip
+        run: |
+          # For tag builds, use the built release artifact from the release pipeline.
+          # For workflow_dispatch, build from the checked-out ref.
+          echo "candidate tree in ./candidate"
+
+      - name: Extract surfaces and diff
+        run: |
+          python3 tools/ecosystem-contract/extract_surface.py base --out base-surface.json
+          python3 tools/ecosystem-contract/extract_surface.py candidate --out rc-surface.json
+          python3 tools/ecosystem-contract/diff_surface.py base-surface.json rc-surface.json --out diff.json
+
+      - name: Gate
+        run: |
+          python3 tools/ecosystem-contract/gate.py \
+            --diff diff.json \
+            --index usage-index.sqlite \
+            --ack tools/ecosystem-contract/acks.json \
+            --report gate-report.md \
+            --json-out gate-findings.json
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ecosystem-contract-report
+          path: |
+            gate-report.md
+            gate-findings.json
