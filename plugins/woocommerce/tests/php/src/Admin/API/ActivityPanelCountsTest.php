@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin\Tests\Admin\API
  */
 
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Tests\Admin\API;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
@@ -137,7 +139,7 @@ class ActivityPanelCountsTest extends WC_REST_Unit_Test_Case {
 		$counts_response = $this->server->dispatch( $counts_request );
 		$counts_data     = $counts_response->get_data();
 
-		$dedicated_request  = new WP_REST_Request( 'GET', '/wc-analytics/products/count-low-in-stock' );
+		$dedicated_request = new WP_REST_Request( 'GET', '/wc-analytics/products/count-low-in-stock' );
 		$dedicated_request->set_param( 'status', ProductStatus::PUBLISH );
 		$dedicated_response = $this->server->dispatch( $dedicated_request );
 		$dedicated_data     = $dedicated_response->get_data();
