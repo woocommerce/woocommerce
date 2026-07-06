@@ -52,22 +52,26 @@ class WC_Admin_Brands_Test extends WC_Unit_Test_Case {
 
 		// Brand column starts after "name" so the reorder actually moves it.
 		$columns = array(
-			'cb'                      => '<input type="checkbox" />',
-			'name'                    => __( 'Name', 'woocommerce' ),
-			'taxonomy-product_brand'  => __( 'Brands', 'woocommerce' ),
-			'sku'                     => __( 'SKU', 'woocommerce' ),
-			'product_cat'             => __( 'Categories', 'woocommerce' ),
-			'featured'                => __( 'Featured', 'woocommerce' ),
-			'date'                    => __( 'Date', 'woocommerce' ),
+			'cb'                     => '<input type="checkbox" />',
+			'name'                   => __( 'Name', 'woocommerce' ),
+			'taxonomy-product_brand' => __( 'Brands', 'woocommerce' ),
+			'sku'                    => __( 'SKU', 'woocommerce' ),
+			'product_cat'            => __( 'Categories', 'woocommerce' ),
+			'featured'               => __( 'Featured', 'woocommerce' ),
+			'date'                   => __( 'Date', 'woocommerce' ),
 		);
 
 		$brands_admin = new WC_Brands_Admin();
 		$result       = $brands_admin->product_columns( $columns );
 		$result_keys  = array_keys( $result );
 
-		// After reorder: cb, name, sku, product_cat, taxonomy-product_brand, featured, date.
-		// Brand column is inserted before the last 2 columns (featured, date).
-		$this->assertNotEquals( $columns, $result, 'Columns should have been reordered.' );
+		/*
+		 * After reorder: cb, name, sku, product_cat, taxonomy-product_brand, featured, date.
+		 * Brand column is inserted before the last 2 columns (featured, date).
+		 * Use assertNotSame because the reorder only changes column order, and
+		 * assertEquals/assertNotEquals compare arrays order-insensitively.
+		 */
+		$this->assertNotSame( $columns, $result, 'Columns should have been reordered.' );
 
 		// The brand column should be at the third-to-last position.
 		$last_index = count( $result_keys ) - 1;
