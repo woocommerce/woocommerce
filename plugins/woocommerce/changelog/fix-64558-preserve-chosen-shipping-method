@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve customer's chosen shipping method when rates are recalculated, not just local pickup methods.

@@ -534,17 +534,16 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 	}
 
 	/**
-	 * If the customer has selected local pickup, keep it selected if it's still in the package. We don't want to auto
-	 * toggle between shipping and pickup even if available shipping methods are changed.
+	 * If the customer has selected a shipping method, keep it selected if it's still in the package. We don't want to
+	 * silently change the customer's selection when unrelated rates change.
 	 *
-	 * This is important for block-based checkout where there is an explicit toggle between shipping and pickup.
+	 * Previously this was limited to local pickup methods (for block-based checkout toggle), but the same logic applies
+	 * to any chosen method — if it's still available, it should stay selected.
 	 */
-	$chosen_method_id       = current( explode( ':', $chosen_method ) );
 	$chosen_method_exists   = in_array( $chosen_method, $rate_keys, true );
-	$is_local_pickup_chosen = in_array( $chosen_method_id, $local_pickup_method_ids, true );
 
-	// Default to local pickup if its chosen already.
-	if ( $chosen_method_exists && $is_local_pickup_chosen ) {
+	// Preserve the customer's chosen method if it's still available.
+	if ( $chosen_method_exists ) {
 		$default = $chosen_method;
 
 	} else {
