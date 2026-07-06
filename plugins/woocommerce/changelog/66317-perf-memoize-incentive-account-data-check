@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Memoize the WooPayments account data check used by incentive visibility so it reads the account cache once per request instead of once per incentive.

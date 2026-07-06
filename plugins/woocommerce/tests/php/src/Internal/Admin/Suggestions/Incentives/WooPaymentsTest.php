@@ -271,4 +271,42 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		// Clean up.
 		delete_option( 'wcpay_account_data' );
 	}
+
+	/**
+	 * Test that the account data check is memoized across visibility checks.
+	 */
+	public function test_is_visible_memoizes_account_data_check() {
+		// Arrange.
+		$this->sut
+			->expects( $this->exactly( 3 ) )
+			->method( 'is_extension_active' )
+			->willReturn( true );
+
+		add_filter( 'pre_http_request', $this->response_mock_ref, 10, 3 );
+
+		update_option( 'wcpay_account_data', array( 'data' => array( 'account_id' => '123' ) ) );
+
+		$reads   = 0;
+		$counter = function ( $value ) use ( &$reads ) {
+			++$reads;
+			return $value;
+		};
+		add_filter( 'option_wcpay_account_data', $counter );
+
+		// Act.
+		$this->sut->is_visible( 'incentive1', 'US' );
+		$this->sut->is_visible( 'incentive2', 'US' );
+		$reads_before_reset = $reads;
+
+		$this->sut->reset_memo();
+		$this->sut->is_visible( 'incentive1', 'US' );
+
+		// Assert.
+		$this->assertSame( 1, $reads_before_reset, 'Repeated visibility checks should read the account data option once' );
+		$this->assertSame( 2, $reads, 'Resetting the memo should cause the account data option to be read again' );
+
+		// Clean up.
+		remove_filter( 'option_wcpay_account_data', $counter );
+		delete_option( 'wcpay_account_data' );
+	}
 }
