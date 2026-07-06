@@ -97,7 +97,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'context'    => 'frontend',
-				'location'   => '',
+				'location'   => '/',
 				'handles'    => 'wc-select2',
 				'dependents' => 'my-extension-footer',
 			),
@@ -142,7 +142,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'context'    => 'frontend',
-				'location'   => '',
+				'location'   => '/',
 				'handles'    => 'select2',
 				'dependents' => 'select2',
 			),
@@ -208,7 +208,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'context'    => 'frontend',
-				'location'   => '',
+				'location'   => '/',
 				'handles'    => 'wc-select2',
 				'dependents' => 'my-extension-footer',
 			),
@@ -235,7 +235,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should record each detected usage event only once per week.
 	 */
-	public function test_records_each_detected_usage_event_only_once_per_day(): void {
+	public function test_records_each_detected_usage_event_only_once_per_week(): void {
 		$original_request_uri     = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
 		$_SERVER['REQUEST_URI']   = '/shop/?filter=featured';
 		$frontend_shop_page_scope = array(
