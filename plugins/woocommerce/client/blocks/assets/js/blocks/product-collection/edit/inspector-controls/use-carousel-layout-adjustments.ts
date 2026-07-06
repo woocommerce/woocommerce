@@ -103,7 +103,6 @@ const handleTransitionToCarouselLayout = (
 	// 2. Create and insert the next/previous buttons block
 	const nextPrevArrowsBlock = createBlock( nextPreviousButtonsBlockName, {
 		layout: { type: 'flex', flexWrap: 'nowrap' },
-		style: { spacing: { blockGap: '0' } },
 	} );
 
 	if ( headingBlock ) {
