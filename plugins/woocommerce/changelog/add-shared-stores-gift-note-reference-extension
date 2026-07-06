@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Add the gift-note reference extension (test plugin) and its e2e spec proving the shared iAPI stores extension contract (T8). Test-only; no merchant-facing change.
+
+

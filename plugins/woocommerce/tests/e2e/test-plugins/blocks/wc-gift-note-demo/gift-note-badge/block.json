@@ -1,0 +1,23 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "wc-gift-note-demo/badge",
+	"title": "Gift Note Badge (Demo)",
+	"category": "woocommerce-product-elements",
+	"description": "Reference extension cartItemFilter demo: pairs a note-split cart line via a filter predicate the generic rules would not.",
+	"keywords": [ "WooCommerce", "gift note" ],
+	"textdomain": "wc-gift-note-demo",
+	"usesContext": [ "postId" ],
+	"attributes": {
+		"noteMarker": {
+			"type": "string",
+			"role": "content"
+		}
+	},
+	"supports": {
+		"interactivity": true,
+		"html": false
+	},
+	"render": "file:./render.php",
+	"viewScriptModule": "file:./view.js"
+}
