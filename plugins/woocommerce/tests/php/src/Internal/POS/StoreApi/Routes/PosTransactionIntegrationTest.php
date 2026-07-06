@@ -202,6 +202,56 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
+	 * Plugins on the add-to-cart hooks can throw anything; one item's failure
+	 * must stay that item's failure.
+	 *
+	 * @testdox A plugin exception on one item does not abort the batch.
+	 */
+	public function test_plugin_exception_is_contained_per_item(): void {
+		wp_set_current_user( $this->operator_id );
+
+		$second_product = ( new FixtureData() )->get_simple_product(
+			array(
+				'name'          => 'Cursed Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 3,
+			)
+		);
+
+		$throw_for_cursed = function ( $cart_item_key, $product_id ) use ( $second_product ) {
+			unset( $cart_item_key );
+			if ( $product_id === $second_product->get_id() ) {
+				throw new \Exception( 'Plugin exploded.' );
+			}
+		};
+		add_action( 'woocommerce_add_to_cart', $throw_for_cursed, 10, 2 );
+
+		try {
+			$response = $this->add_items(
+				array(
+					array(
+						'id'       => $this->product->get_id(),
+						'quantity' => 1,
+					),
+					array(
+						'id'       => $second_product->get_id(),
+						'quantity' => 1,
+					),
+				)
+			);
+		} finally {
+			remove_action( 'woocommerce_add_to_cart', $throw_for_cursed, 10 );
+		}
+
+		$this->assertSame( 201, $response->get_status(), 'Body: ' . wp_json_encode( $response->get_data() ) );
+		$data = $response->get_data();
+		$this->assertTrue( $data['items'][0]['added'] );
+		$this->assertFalse( $data['items'][1]['added'] );
+		$this->assertSame( 'woocommerce_pos_rest_add_item_failed', $data['items'][1]['error']['code'] );
+		$this->assertCount( 1, $data['cart']['items'] );
+	}
+
+	/**
 	 * @testdox A valid Cart-Token threads the transaction across requests.
 	 */
 	public function test_cart_token_threads_transaction(): void {

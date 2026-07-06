@@ -175,6 +175,8 @@ class CartAddItems extends AbstractCartRoute {
 				$request
 			);
 
+			$keys_before_attempt = array_keys( $this->cart_controller->get_cart_instance()->get_cart_contents() );
+
 			try {
 				$result['key']   = $this->cart_controller->add_to_cart( $add_to_cart_data );
 				$result['added'] = true;
@@ -198,6 +200,34 @@ class CartAddItems extends AbstractCartRoute {
 				$result['error'] = array(
 					'code'    => $error->getErrorCode(),
 					'message' => wp_specialchars_decode( $error->getMessage(), ENT_QUOTES ),
+				);
+			} catch ( \Throwable $unexpected ) {
+				// Third-party code on the add-to-cart hooks can throw anything.
+				// Items are processed independently by contract: one plugin
+				// blowing up on one item must not abort the batch as a 500 —
+				// earlier items are already in the cart, and the operator's
+				// natural reaction (rescan the basket) would double-add them.
+				//
+				// An exception can interrupt core's add mid-write, leaving a
+				// half-populated cart line (no totals) that would blow up
+				// response serialization — drop any line this attempt created.
+				// set_cart_contents (not remove_cart_item) on purpose: the
+				// line never validly existed, so no removal hooks and no
+				// restorable removed_contents entry, which would carry the
+				// same corrupt data into the response.
+				$cart          = $this->cart_controller->get_cart_instance();
+				$orphaned_keys = array_diff( array_keys( $cart->get_cart_contents() ), $keys_before_attempt );
+				if ( $orphaned_keys ) {
+					$contents = $cart->get_cart_contents();
+					foreach ( $orphaned_keys as $orphaned_key ) {
+						unset( $contents[ $orphaned_key ] );
+					}
+					$cart->set_cart_contents( $contents );
+				}
+
+				$result['error'] = array(
+					'code'    => 'woocommerce_pos_rest_add_item_failed',
+					'message' => wp_specialchars_decode( $unexpected->getMessage(), ENT_QUOTES ),
 				);
 			}
 
