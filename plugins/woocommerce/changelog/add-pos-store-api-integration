@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the internal POS Store API (wc/internal/pos/v1): transaction sessions, cart/add-items, cart/add-fee, in-person cart policies, customer identity handling, and checkout.
