@@ -763,7 +763,12 @@ class WC_Frontend_Scripts {
 				 * @param bool $skip Whether to skip the AJAX request for visitors without a cart session. Default true.
 				 */
 				if ( apply_filters( 'woocommerce_cart_fragments_skip_ajax_for_empty_carts', true ) && WC()->cart instanceof WC_Cart && WC()->cart->is_empty() ) {
-					$params['empty_cart_fragments'] = self::get_empty_cart_fragments();
+					$empty_cart_fragments = self::get_empty_cart_fragments();
+
+					// Omitted entirely on failure: an empty value would suppress the AJAX fallback in the frontend script.
+					if ( ! empty( $empty_cart_fragments ) ) {
+						$params['empty_cart_fragments'] = $empty_cart_fragments;
+					}
 				}
 				break;
 			case 'wc-add-to-cart':
@@ -829,24 +834,42 @@ class WC_Frontend_Scripts {
 	/**
 	 * Get the cart fragments for an empty cart, matching what WC_AJAX::get_refreshed_fragments() returns.
 	 *
-	 * @return array Fragments keyed by replacement selector.
+	 * Third-party fragment callbacks and mini cart templates run during regular page rendering here,
+	 * unlike the AJAX endpoint, so failures are contained: an empty array is returned and the
+	 * frontend falls back to requesting fragments over AJAX.
+	 *
+	 * @return array Fragments keyed by replacement selector, or an empty array on failure.
 	 */
 	private static function get_empty_cart_fragments() {
-		ob_start();
+		$ob_level = ob_get_level();
 
-		woocommerce_mini_cart();
+		try {
+			ob_start();
 
-		$mini_cart = ob_get_clean();
+			woocommerce_mini_cart();
 
-		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
-		/** This filter is documented in includes/class-wc-ajax.php */
-		return apply_filters(
-			'woocommerce_add_to_cart_fragments',
-			array(
-				'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>',
-			)
-		);
-		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			$mini_cart = ob_get_clean();
+
+			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			/** This filter is documented in includes/class-wc-ajax.php */
+			$fragments = apply_filters(
+				'woocommerce_add_to_cart_fragments',
+				array(
+					'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>',
+				)
+			);
+			// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+
+			return is_array( $fragments ) ? $fragments : array();
+		} catch ( Throwable $e ) {
+			while ( ob_get_level() > $ob_level ) {
+				ob_end_clean();
+			}
+
+			wc_get_logger()->error( 'Could not pre-render empty cart fragments: ' . $e->getMessage(), array( 'source' => 'cart-fragments' ) );
+
+			return array();
+		}
 	}
 
 	/**
