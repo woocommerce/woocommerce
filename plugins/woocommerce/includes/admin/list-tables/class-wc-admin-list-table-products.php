@@ -157,7 +157,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			$show_columns['cogs_value'] = __( 'Cost', 'woocommerce' );
 		}
 		$show_columns['product_cat'] = __( 'Categories', 'woocommerce' );
-		if ( taxonomy_exists( 'product_tag' ) ) {
+		if ( is_object_in_taxonomy( 'product', 'product_tag' ) ) {
 			$show_columns['product_tag'] = __( 'Tags', 'woocommerce' );
 		}
 		$show_columns['featured']    = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';

@@ -525,7 +525,7 @@ class WC_Brands_Admin {
 
 		$column_index = 'taxonomy-product_brand';
 
-		if ( ! isset( $columns[ $column_index ] ) || ! taxonomy_exists( 'product_brand' ) ) {
+		if ( ! isset( $columns[ $column_index ] ) ) {
 			return $columns;
 		}
 
