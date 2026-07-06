@@ -23,8 +23,8 @@ import { triggerAddedToCartEvent } from './legacy-events';
 import {
 	createMutationQueue,
 	MutationRequest,
-	MutationQueue,
-	MutationResult,
+	type MutationQueue,
+	type MutationResult,
 } from './mutation-batcher';
 import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
 

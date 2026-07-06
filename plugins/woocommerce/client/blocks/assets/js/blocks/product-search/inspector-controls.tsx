@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ElementType, useEffect, useState } from '@wordpress/element';
+import { type ElementType, useEffect, useState } from '@wordpress/element';
 import { EditorBlock } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
@@ -10,11 +10,11 @@ import {
 	RadioControl,
 	ToggleControl,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore - Ignoring because `__experimentalToggleGroupControl` is not yet in the definitions.
+	// @ts-ignore - Ignoring because `__experimentalToggleGroupControl` is not yet in the type definitions.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore - Ignoring because `__experimentalToggleGroupControlOption` is not yet in the definitions.
+	// @ts-ignore - Ignoring because `__experimentalToggleGroupControlOption` is not yet in the type definitions.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';

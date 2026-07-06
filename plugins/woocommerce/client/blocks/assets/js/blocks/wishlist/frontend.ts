@@ -6,7 +6,7 @@ import {
 	getContext,
 	getElement,
 	store,
-	AsyncAction,
+	type AsyncAction,
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/shopper-lists';
 import '@woocommerce/stores/woocommerce/cart';

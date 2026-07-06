@@ -6,8 +6,8 @@ import {
 	objectHasProp,
 	Currency,
 	isString,
-	CurrencyResponse,
-	WCStoreV1ProductsCollectionProps,
+	type CurrencyResponse,
+	type WCStoreV1ProductsCollectionProps,
 } from '@woocommerce/types';
 
 function formatPriceInt( price: string | number, currency: Currency ) {

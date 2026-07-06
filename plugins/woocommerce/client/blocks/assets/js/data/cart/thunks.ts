@@ -18,10 +18,10 @@ import {
 	triggerAddingToCartEvent,
 } from '@woocommerce/base-utils';
 import {
-	CurriedSelectorsOf,
-	ConfigOf,
-	ActionCreatorsOf,
-	DispatchFunction,
+	type CurriedSelectorsOf,
+	type ConfigOf,
+	type ActionCreatorsOf,
+	type DispatchFunction,
 } from '@wordpress/data/build-types/types';
 import { __ } from '@wordpress/i18n';
 import { cartStore } from '@woocommerce/block-data';
@@ -133,7 +133,7 @@ export const receiveError =
  * Updates the checkout store with the shopper's collection preference based on
  * the selected shipping rates in the cart.
  *
- * @param {CartResponse}              response
+ * @param {CartResponse} response
  * @param {CartThunkArgs['registry']} registry
  */
 const syncPrefersCollectionFromSelectedShippingRates = (
