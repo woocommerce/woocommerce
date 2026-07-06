@@ -50,12 +50,13 @@ class WC_Admin_Brands_Test extends WC_Unit_Test_Case {
 	public function test_product_columns_reorders_brand_column() {
 		WC_Brands::init_taxonomy();
 
+		// Brand column starts after "name" so the reorder actually moves it.
 		$columns = array(
 			'cb'                      => '<input type="checkbox" />',
 			'name'                    => __( 'Name', 'woocommerce' ),
+			'taxonomy-product_brand'  => __( 'Brands', 'woocommerce' ),
 			'sku'                     => __( 'SKU', 'woocommerce' ),
 			'product_cat'             => __( 'Categories', 'woocommerce' ),
-			'taxonomy-product_brand'  => __( 'Brands', 'woocommerce' ),
 			'featured'                => __( 'Featured', 'woocommerce' ),
 			'date'                    => __( 'Date', 'woocommerce' ),
 		);
