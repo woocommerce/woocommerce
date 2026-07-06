@@ -164,9 +164,9 @@ abstract class AbstractBlock {
 	 * @return void
 	 */
 	private function register_editor_script_asset( $editor_script ) {
-		$handle        = (string) $editor_script['handle'];
-		$path          = (string) $editor_script['path'];
-		$dependencies  = array_values(
+		$handle       = (string) $editor_script['handle'];
+		$path         = (string) $editor_script['path'];
+		$dependencies = array_values(
 			array_unique(
 				array_merge(
 					(array) $editor_script['dependencies'],
@@ -174,9 +174,8 @@ abstract class AbstractBlock {
 				)
 			)
 		);
-		$legacy_handle = 'wc-' . $this->block_name . '-block';
-		$data          = $this->asset_api->get_script_data( $path );
-		$has_i18n      = in_array( 'wp-i18n', $data['dependencies'], true );
+		$data         = $this->asset_api->get_script_data( $path );
+		$has_i18n     = in_array( 'wp-i18n', $data['dependencies'], true );
 
 		if ( wp_script_is( $handle, 'registered' ) ) {
 			$this->add_script_dependencies( $handle, $dependencies );
@@ -186,16 +185,6 @@ abstract class AbstractBlock {
 				$path,
 				$dependencies,
 				$has_i18n
-			);
-		}
-
-		if ( $legacy_handle !== $handle && ! wp_script_is( $legacy_handle, 'registered' ) ) {
-			wp_register_script(
-				$legacy_handle,
-				false,
-				array( $handle ),
-				$this->asset_api->wc_version,
-				true
 			);
 		}
 	}

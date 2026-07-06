@@ -54,6 +54,7 @@ const editorExternalPackages = [
 	'@woocommerce/blocks-checkout-events',
 	'@woocommerce/blocks-registry',
 	'@woocommerce/entities',
+	'@woocommerce/price-format',
 ];
 
 const shouldBundleWooPackageInEditor = ( request ) =>

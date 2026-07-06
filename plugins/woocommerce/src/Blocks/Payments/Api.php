@@ -64,9 +64,7 @@ class Api {
 				$handle,
 				array(
 					'wc-block-library',
-					'wc-checkout-block',
 					'wc-checkout-block-frontend',
-					'wc-cart-block',
 					'wc-cart-block-frontend',
 				),
 				true
@@ -181,9 +179,7 @@ class Api {
 
 					$cart_checkout_scripts = array(
 						'wc-block-library',
-						'wc-cart-block',
 						'wc-cart-block-frontend',
-						'wc-checkout-block',
 						'wc-checkout-block-frontend',
 					);
 					foreach ( $cart_checkout_scripts as $script_handle ) {

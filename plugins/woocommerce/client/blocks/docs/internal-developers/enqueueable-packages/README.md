@@ -20,6 +20,7 @@ The exceptions are package instances that must be shared with editor extensions 
 - `@woocommerce/blocks-checkout-events` remains external through the `wc-blocks-checkout-events` handle so checkout lifecycle event subscribers and emitters use the same event emitter.
 - `@woocommerce/blocks-registry` remains external through the `wc-blocks-registry` handle so block, payment method, and extension registrations are stored in the same registries.
 - `@woocommerce/entities` remains external through the `wc-entities` handle so WooCommerce entity registration is shared in the editor.
+- `@woocommerce/price-format` remains external through the `wc-price-format` handle so editor, frontend, and extension code share one small price formatting package instead of duplicating it across bundles.
 
 The standalone handles below must still be registered and emitted. They are public dependency targets for non-editor scripts and third-party consumers that explicitly enqueue or declare them.
 
