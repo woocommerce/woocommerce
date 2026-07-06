@@ -48,8 +48,16 @@ const wcHandleMap = {
 const isWooPackageRequest = ( request ) =>
 	request.startsWith( '@woocommerce/' );
 
+const editorExternalPackages = [
+	'@woocommerce/blocks-checkout',
+	'@woocommerce/blocks-checkout-events',
+	'@woocommerce/blocks-registry',
+	'@woocommerce/entities',
+];
+
 const shouldBundleWooPackageInEditor = ( request ) =>
-	isWooPackageRequest( request ) && request !== '@woocommerce/entities';
+	isWooPackageRequest( request ) &&
+	! editorExternalPackages.includes( request );
 
 const getBlockJsonWithSharedEditorStyle = ( content ) => {
 	const metadata = JSON.parse( content.toString() );
