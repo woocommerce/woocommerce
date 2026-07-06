@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Move the shared cart Interactivity API store from the `woocommerce` namespace to `woocommerce/cart`, with a temporary delegating alias on the old namespace for existing consumers, and relocate `restUrl`/`nonce`/`errorMessages` from reactive state into `wp_interactivity_config( 'woocommerce' )`.

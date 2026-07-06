@@ -24,11 +24,18 @@ class BlocksSharedState {
 	private static string $consent_statement = 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
 
 	/**
-	 * The namespace for interactivity config and state.
+	 * The namespace for interactivity config and shared (non-cart) state.
 	 *
 	 * @var string
 	 */
 	private static string $settings_namespace = 'woocommerce';
+
+	/**
+	 * The namespace for the shared cart interactivity state.
+	 *
+	 * @var string
+	 */
+	private static string $cart_namespace = 'woocommerce/cart';
 
 	/**
 	 * Whether the core config has been registered.
@@ -113,17 +120,45 @@ class BlocksSharedState {
 				self::prevent_cache();
 			}
 
+			// `nonOptimisticProperties` and `restUrl` are infra config, not
+			// commerce state, so they live under `wp_interactivity_config`.
+			// `restUrl` moved out of reactive state (previously seeded under
+			// `state.restUrl`) as part of moving the cart store to the
+			// `woocommerce/cart` namespace.
 			wp_interactivity_config(
 				self::$settings_namespace,
-				array( 'nonOptimisticProperties' => self::get_non_optimistic_properties() )
+				array(
+					'nonOptimisticProperties' => self::get_non_optimistic_properties(),
+					'restUrl'                 => get_rest_url(),
+				)
 			);
 
+			// Cart state now lives under the `woocommerce/cart` namespace. The
+			// bare `woocommerce` namespace holds only the shared context and
+			// interactivity config.
 			wp_interactivity_state(
-				self::$settings_namespace,
+				self::$cart_namespace,
 				array(
 					'cart'     => self::$blocks_shared_cart_state,
 					'noticeId' => '',
-					'restUrl'  => get_rest_url(),
+				)
+			);
+
+			// TRANSITIONAL: also seed the same cart array under the legacy
+			// `woocommerce` namespace. Server-side directive processing has no
+			// equivalent of the JS store alias, and PHP-rendered markup still
+			// references the old namespace (the Mini-Cart products table renders
+			// `data-wp-each--cart-item="woocommerce::state.cart.items"`), so
+			// without this bridge those rows would not server-render. Remove
+			// when the mini-cart migrates to `woocommerce/cart` (T7b) and the
+			// JS alias is removed (T10). Accepted temporary cost: the cart JSON
+			// is printed under both namespaces. Client-side this is harmless —
+			// the JS alias getter replaces the copied object during store
+			// registration.
+			wp_interactivity_state(
+				self::$settings_namespace,
+				array(
+					'cart' => self::$blocks_shared_cart_state,
 				)
 			);
 		}

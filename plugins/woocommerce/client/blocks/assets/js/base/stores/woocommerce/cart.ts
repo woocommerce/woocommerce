@@ -35,6 +35,24 @@ export type WooCommerceConfig = {
 	placeholderImgSrc?: string;
 	currency?: Currency;
 	nonOptimisticProperties?: string[];
+	/**
+	 * REST API base URL. Seeded server-side via
+	 * `wp_interactivity_config( 'woocommerce' )`. Infra, not commerce state.
+	 */
+	restUrl?: string;
+	/**
+	 * Bootstrap Store API nonce. Seeded server-side (optional). The live nonce
+	 * is refreshed from the `Nonce` response header on every request — see the
+	 * `currentNonce` module variable below.
+	 */
+	nonce?: string;
+	/**
+	 * Map of Store API error codes to user-friendly messages. Infra config,
+	 * not commerce state.
+	 */
+	errorMessages?: {
+		[ key: string ]: string;
+	};
 };
 
 export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
@@ -62,11 +80,6 @@ type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
 
 export type Store = {
 	state: {
-		errorMessages?: {
-			[ key: string ]: string;
-		};
-		restUrl: string;
-		nonce: string;
 		findItemInCart: ( args: {
 			id: ClientCartItem[ 'id' ];
 			key?: ClientCartItem[ 'key' ];
@@ -185,6 +198,38 @@ const isNonceReady = new Promise< void >( ( resolve ) => {
 	resolveNonceReady = resolve;
 } );
 
+/**
+ * Infra config (restUrl, nonce, errorMessages) lives in
+ * `wp_interactivity_config( 'woocommerce' )`, not in reactive store state.
+ */
+const wooConfig = getConfig( 'woocommerce' ) as WooCommerceConfig;
+
+/**
+ * REST API base URL. Read once from config — it never changes at runtime.
+ */
+const restUrl = wooConfig.restUrl ?? '';
+
+/**
+ * Live Store API nonce.
+ *
+ * Config is read-only/static, but the nonce is refreshed per request from the
+ * `Nonce` response header (rotating nonces). We therefore bootstrap it from
+ * config and keep the current value in this module-level variable, updating it
+ * whenever a response carries a fresh `Nonce` header (see `refreshNonce`). This
+ * preserves the previous behavior where the refreshed nonce was written back
+ * into `state.nonce`, without keeping it in reactive state.
+ */
+let currentNonce = wooConfig.nonce ?? '';
+
+/**
+ * Update the in-memory nonce from a response's `Nonce` header, if present.
+ *
+ * @param response Fetch response whose headers may carry a fresh nonce.
+ */
+function refreshNonce( response: Response ): void {
+	currentNonce = response.headers.get( 'Nonce' ) || currentNonce;
+}
+
 function emitSyncEvent( {
 	quantityChanges,
 }: {
@@ -221,9 +266,9 @@ async function sendCartRequest(
 	// Lazily initialize queue on first use.
 	if ( ! cartQueue ) {
 		cartQueue = createMutationQueue< Cart >( {
-			endpoint: `${ stateRef.restUrl }wc/store/v1/batch`,
+			endpoint: `${ restUrl }wc/store/v1/batch`,
 			getHeaders: () => ( {
-				Nonce: stateRef.nonce,
+				Nonce: currentNonce,
 			} ),
 			takeSnapshot: () => JSON.parse( JSON.stringify( stateRef.cart ) ),
 			rollback: ( snapshot ) => {
@@ -234,8 +279,7 @@ async function sendCartRequest(
 			},
 			fetchHandler: async ( ...args ) => {
 				const response = await fetch( ...args );
-				stateRef.nonce =
-					response.headers.get( 'Nonce' ) || stateRef.nonce;
+				refreshNonce( response );
 				return response;
 			},
 		} );
@@ -247,10 +291,18 @@ async function sendCartRequest(
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
+// The cart store now lives under the `woocommerce/cart` namespace. The bare
+// `woocommerce` namespace holds only the shared context and
+// `wp_interactivity_config` (see the alias at the bottom of this file).
+//
 // Todo: export this store once the store is public.
-const { state } = store< Store >( 'woocommerce', {}, { lock: universalLock } );
+const { state } = store< Store >(
+	'woocommerce/cart',
+	{},
+	{ lock: universalLock }
+);
 const { actions } = store< Store >(
-	'woocommerce',
+	'woocommerce/cart',
 	{
 		state: {
 			findItemInCart( {
@@ -652,17 +704,14 @@ const { actions } = store< Store >(
 				pendingRefresh = true;
 
 				try {
-					const res = ( yield fetch(
-						`${ state.restUrl }wc/store/v1/cart`,
-						{
-							method: 'GET',
-							cache: 'no-store',
-							headers: { 'Content-Type': 'application/json' },
-						}
-					) ) as TypeYield< typeof fetch >;
+					const res = ( yield fetch( `${ restUrl }wc/store/v1/cart`, {
+						method: 'GET',
+						cache: 'no-store',
+						headers: { 'Content-Type': 'application/json' },
+					} ) ) as TypeYield< typeof fetch >;
 
 					// Extract fresh nonce from response headers.
-					state.nonce = res.headers.get( 'Nonce' ) || state.nonce;
+					refreshNonce( res );
 
 					if ( resolveNonceReady ) {
 						resolveNonceReady();
@@ -720,7 +769,7 @@ const { actions } = store< Store >(
 				const { code, message } = error as ApiErrorResponse;
 
 				const userFriendlyMessage =
-					state.errorMessages?.[ code ] || message;
+					wooConfig.errorMessages?.[ code ] || message;
 
 				// Todo: Check what should happen if the notice is already displayed.
 				noticeActions.addNotice( {
@@ -764,6 +813,47 @@ const { actions } = store< Store >(
 				}
 			},
 		},
+	},
+	{ lock: universalLock }
+);
+
+/**
+ * Backwards-compatibility alias on the bare `woocommerce` namespace.
+ *
+ * The cart store moved to `woocommerce/cart` (T2 of the shared-stores plan).
+ * Existing consumers (mini-cart, product button, add-to-cart-with-options,
+ * the wishlist family) still call `store( 'woocommerce' )` and read
+ * `state.cart`, `state.findItemInCart` and the cart `actions`. This alias keeps
+ * them working unchanged until each consumer migrates in its own task; it is
+ * removed in T10.
+ *
+ * Why this is safe with the iAPI `store()` merge/lock semantics:
+ *
+ * - We expose the *same underlying* `actions` and `findItemInCart` **function
+ *   references**. iAPI's `deepMerge` copies function/primitive properties by
+ *   descriptor, so the alias shares the identical functions — a single
+ *   implementation, no divergent copies. Those functions close over the
+ *   module-level `state` (the `woocommerce/cart` proxy), so they operate on the
+ *   real cart state regardless of which namespace invoked them.
+ * - `cart` is exposed as a **getter** that reads `state.cart` live. iAPI would
+ *   otherwise deep-*copy* a plain-object `cart` into a separate `woocommerce`
+ *   proxy (breaking cross-namespace reactivity); a getter is copied by
+ *   descriptor and re-reads the single reactive source on every access, so
+ *   consumers reading `wooState.cart` stay in sync with mutations applied to
+ *   `woocommerce/cart`.
+ * - Both stores are created with the same `universalLock`, so the alias
+ *   registration passes the lock check and no store is unlocked/published.
+ */
+store< Store >(
+	'woocommerce',
+	{
+		state: {
+			get cart() {
+				return state.cart;
+			},
+			findItemInCart: state.findItemInCart,
+		},
+		actions,
 	},
 	{ lock: universalLock }
 );

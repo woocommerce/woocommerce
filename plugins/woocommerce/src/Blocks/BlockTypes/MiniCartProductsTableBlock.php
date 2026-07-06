@@ -32,8 +32,10 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 			$this->get_full_block_name(),
 			array(
 				'cartItem' => function () {
+					// The shared context stays on the bare `woocommerce`
+					// namespace; the cart state moved to `woocommerce/cart`.
 					$context = wp_interactivity_get_context( 'woocommerce' );
-					$cart_state = wp_interactivity_state( 'woocommerce' );
+					$cart_state = wp_interactivity_state( 'woocommerce/cart' );
 					$item_key = $context['cartItem']['key'];
 
 					foreach ( $cart_state['cart']['items'] as $item ) {
