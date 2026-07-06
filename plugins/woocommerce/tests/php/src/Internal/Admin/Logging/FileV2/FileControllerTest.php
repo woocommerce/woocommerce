@@ -235,21 +235,20 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	 * @testdox The get_files method breaks ties between same-source rotations by rotation number.
 	 */
 	public function test_get_files_orders_same_source_rotations_by_rotation(): void {
-		// Create a source with a current file plus two rotations. They share a source
-		// and a created day, so only the rotation tie-break distinguishes their order.
-		$path = Settings::get_log_directory() . 'rotated-source.log';
-
-		$file = new File( $path );
-		$file->write( 'test' );
-		$file->rotate();
-		$file->rotate();
-
-		$file = new File( $path );
-		$file->write( 'test' );
-		$file->rotate();
-
-		$file = new File( $path );
-		$file->write( 'test' );
+		/*
+		 * Create a current file plus two rotations for one source, all sharing a
+		 * created day. Standard filenames embed the created date, so
+		 * get_created_timestamp() is parsed from the filename rather than falling
+		 * back to the live filectime(); this keeps the created values tied -- and
+		 * therefore the rotation tie-break under test -- deterministic.
+		 */
+		$created = strtotime( '-1 day' );
+		foreach ( array( null, 0, 1 ) as $rotation ) {
+			$file_id = File::generate_file_id( 'rotated-source', $rotation, $created );
+			$path    = Settings::get_log_directory() . $file_id . '-' . File::generate_hash( $file_id ) . '.log';
+			$file    = new File( $path );
+			$file->write( 'test' );
+		}
 
 		$files = $this->sut->get_files(
 			array(
