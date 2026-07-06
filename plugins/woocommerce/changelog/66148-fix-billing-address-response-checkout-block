@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Sanitize instead of texturize the email address in the StoreAPI response
