@@ -21,10 +21,7 @@
 			"margin": true,
 			"padding": true
 		},
-		"typography": {
-			"fontSize": true,
-			"lineHeight": true
-		}
+		"typography": true
 	},
 	"usesContext": [ "termId", "termTaxonomy" ]
 }
