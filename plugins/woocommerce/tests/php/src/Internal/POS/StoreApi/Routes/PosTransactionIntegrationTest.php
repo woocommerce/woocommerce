@@ -294,12 +294,27 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 	public function test_cart_token_threads_transaction(): void {
 		wp_set_current_user( $this->operator_id );
 
-		$first = $this->add_items( array( array( 'id' => $this->product->get_id(), 'quantity' => 1 ) ) );
+		$first = $this->add_items(
+			array(
+				array(
+					'id'       => $this->product->get_id(),
+					'quantity' => 1,
+				),
+			)
+		);
 		$this->assertSame( 201, $first->get_status() );
 		$token = \Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils::get_cart_token( WC()->session->get_customer_id() );
 
 		wp_set_current_user( $this->operator_id );
-		$second = $this->add_items( array( array( 'id' => $this->product->get_id(), 'quantity' => 1 ) ), $token );
+		$second = $this->add_items(
+			array(
+				array(
+					'id'       => $this->product->get_id(),
+					'quantity' => 1,
+				),
+			),
+			$token
+		);
 
 		$this->assertSame( 201, $second->get_status() );
 		$this->assertSame( 2, $second->get_data()['cart']['items'][0]['quantity'] );
@@ -314,7 +329,15 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 	public function test_unusable_cart_token_fails_loud(): void {
 		wp_set_current_user( $this->operator_id );
 
-		$garbage = $this->add_items( array( array( 'id' => $this->product->get_id(), 'quantity' => 1 ) ), 'not-a-token' );
+		$garbage = $this->add_items(
+			array(
+				array(
+					'id'       => $this->product->get_id(),
+					'quantity' => 1,
+				),
+			),
+			'not-a-token'
+		);
 		$this->assertSame( 401, $garbage->get_status() );
 		$this->assertSame( 'woocommerce_pos_rest_invalid_cart_token', $garbage->get_data()['code'] );
 
@@ -330,7 +353,15 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 		}
 
 		wp_set_current_user( $this->operator_id );
-		$expired = $this->add_items( array( array( 'id' => $this->product->get_id(), 'quantity' => 1 ) ), $expired_token );
+		$expired = $this->add_items(
+			array(
+				array(
+					'id'       => $this->product->get_id(),
+					'quantity' => 1,
+				),
+			),
+			$expired_token
+		);
 		$this->assertSame( 401, $expired->get_status() );
 		$this->assertSame( 'woocommerce_pos_rest_invalid_cart_token', $expired->get_data()['code'] );
 	}
@@ -435,7 +466,14 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 
 		try {
 			wp_set_current_user( $this->operator_id );
-			$this->add_items( array( array( 'id' => $this->product->get_id(), 'quantity' => 1 ) ) );
+			$this->add_items(
+				array(
+					array(
+						'id'       => $this->product->get_id(),
+						'quantity' => 1,
+					),
+				)
+			);
 
 			wp_set_current_user( $this->operator_id );
 			$checkout = $this->dispatch_post( '/checkout', array() );

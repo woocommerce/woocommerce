@@ -153,7 +153,7 @@ class POSSessionHandler extends WC_Session_Handler {
 	 * @return void
 	 */
 	public function destroy_session() {
-		$this->delete_session( $this->_customer_id );
+		$this->delete_session( (string) $this->_customer_id );
 		$this->forget_session();
 	}
 
