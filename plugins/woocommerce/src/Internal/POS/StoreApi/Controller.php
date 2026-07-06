@@ -19,6 +19,7 @@ use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\StockPolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\PolicyHooks\TaxLocationPolicy;
 use Automattic\WooCommerce\Internal\POS\StoreApi\Routes\CartAddFee;
 use Automattic\WooCommerce\Internal\POS\StoreApi\Routes\CartAddItems;
+use Automattic\WooCommerce\Internal\POS\StoreApi\Routes\CartApplyCoupon;
 use Automattic\WooCommerce\Internal\POS\StoreApi\Routes\Checkout;
 use Automattic\WooCommerce\Internal\POS\StoreApi\Schemas\AddItemsSchema;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
@@ -70,6 +71,7 @@ class Controller implements RegisterHooksInterface {
 	private const ROUTE_CLASSES = array(
 		CartAddItems::class,
 		CartAddFee::class,
+		CartApplyCoupon::class,
 		Checkout::class,
 	);
 
