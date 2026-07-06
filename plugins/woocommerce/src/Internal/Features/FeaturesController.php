@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\Inventory\InventoryController;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -570,6 +571,16 @@ class FeaturesController {
 				'is_experimental'              => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
+			InventoryController::FEATURE_ID         => array(
+				'name'                         => __( 'POS location stock', 'woocommerce' ),
+				'description'                  => __( 'Track and adjust a separate stock quantity for point of sale orders.', 'woocommerce' ),
+				'option_key'                   => InventoryController::FEATURE_OPTION,
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'is_experimental'              => true,
 			),
 			'fulfillments'                       => array(
 				'name'                         => __( 'Order Fulfillments', 'woocommerce' ),

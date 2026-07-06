@@ -144,10 +144,11 @@ class ProductMapper implements ProductShapeMapperInterface {
 		 * Filter mapped catalog product data.
 		 *
 		 * @since 10.5.0
-		 * @param array      $row     Mapped product data.
-		 * @param WC_Product $product Product object.
+		 * @param array           $row     Mapped product data.
+		 * @param WC_Product      $product Product object.
+		 * @param WP_REST_Request $request REST request used to prepare the mapped data.
 		 */
-		return apply_filters( 'woocommerce_pos_catalog_map_product', $row, $product );
+		return apply_filters( 'woocommerce_pos_catalog_map_product', $row, $product, $request );
 	}
 
 	/**
