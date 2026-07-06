@@ -46,9 +46,9 @@ cd plugins/woocommerce
 # Start the environment (creates it if needed, pulls latest config)
 pnpm env:dev
 # Stop the environment
-pnpm env:dev:stop
+pnpm env:stop
 # Remove all environment files
-pnpm env:dev:destroy
+pnpm env:destroy
 ```
 
 ## Build
