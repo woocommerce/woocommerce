@@ -212,6 +212,43 @@ class WebflowMapperTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Simple product omits the weight key entirely when weight is excluded from the fields to process.
+	 */
+	public function test_simple_product_omits_weight_key_when_field_excluded(): void {
+		$mapper = new WebflowMapper( array( 'fields' => array( 'price', 'sku' ) ) );
+
+		$result = $mapper->map_product_data( MockWebflowData::simple_product_item() );
+
+		// The importer only touches weight when the key is present (array_key_exists), so an
+		// excluded field must leave the key absent rather than null — a null would clear the
+		// existing product's weight on a field-filtered re-run.
+		$this->assertArrayNotHasKey( 'weight', $result, 'Excluded weight field must not leave a null weight key.' );
+	}
+
+	/**
+	 * @testdox Simple product includes the weight key when weight is among the fields to process.
+	 */
+	public function test_simple_product_includes_weight_key_by_default(): void {
+		$result = $this->mapper->map_product_data( MockWebflowData::simple_product_item() );
+
+		$this->assertArrayHasKey( 'weight', $result, 'Weight key must be present when the field is processed.' );
+	}
+
+	/**
+	 * @testdox Variations omit the weight key entirely when weight is excluded from the fields to process.
+	 */
+	public function test_variation_omits_weight_key_when_field_excluded(): void {
+		$mapper = new WebflowMapper( array( 'fields' => array( 'price', 'sku' ) ) );
+
+		$result = $mapper->map_product_data( MockWebflowData::variable_product_item() );
+
+		$this->assertNotEmpty( $result['variations'], 'Fixture should produce variations.' );
+		foreach ( $result['variations'] as $variation ) {
+			$this->assertArrayNotHasKey( 'weight', $variation, 'Excluded weight field must not leave a null weight key on variations.' );
+		}
+	}
+
+	/**
 	 * Test SEO fields land in metafields.
 	 */
 	public function test_simple_product_seo_metafields(): void {
