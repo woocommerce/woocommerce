@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
@@ -616,7 +617,8 @@ class WC_Checkout {
 			$item->set_props(
 				array(
 					'name'      => $fee->name,
-					'tax_class' => $fee->taxable ? $fee->tax_class : 0,
+					'tax_class' => $fee->taxable ? $fee->tax_class : '',
+					'tax_status' => $fee->taxable ? ProductTaxStatus::TAXABLE : ProductTaxStatus::NONE,
 					'amount'    => $fee->amount,
 					'total'     => $fee->total,
 					'total_tax' => $fee->tax,
