@@ -84,13 +84,12 @@ const minimalCartItem: CartItem = {
 /**
  * Minimum valid skeleton for `OptimisticCartItem`. This type must NOT include
  * `has_cart_item_data`; the field is deliberately absent so that optimistic
- * plain lines evaluate as falsy/absent and are treated as plain lines by the
- * keyless matcher guard in the cart store.
+ * standalone lines evaluate as falsy/absent and are treated as standalone
+ * lines by the `isCartItem`-guarded keyless matcher in the cart store.
  */
 const minimalOptimisticCartItem: OptimisticCartItem = {
 	id: 1,
 	quantity: 1,
-	type: 'simple',
 };
 
 describe( 'CartItem TypeScript interface', () => {

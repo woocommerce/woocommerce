@@ -392,7 +392,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -410,7 +409,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -431,14 +429,12 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					actions.addCartItem( {
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					} )
 				),
 				runAction(
 					actions.addCartItem( {
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					} )
 				),
 			] );
@@ -462,7 +458,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -481,7 +476,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					id: 42,
 					key: 'server-key-abc',
 					quantity: 5,
-					type: 'simple',
 				} )
 			);
 
@@ -501,7 +495,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -518,7 +511,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 99,
 					quantityToAdd: 2,
-					type: 'simple',
 				} )
 			);
 
@@ -548,7 +540,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				withEmptyItemData.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -564,7 +555,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				withRichItemData.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -586,7 +576,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					actions.addCartItem( {
 						id: 42,
 						quantity: 5,
-						type: 'simple',
 					} )
 				)
 			).rejects.toThrow();
@@ -602,7 +591,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					actions.addCartItem( {
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					} )
 				)
 			).resolves.toBeUndefined();
@@ -624,7 +612,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						id: 42,
 						key: 'server-key-abc',
 						quantity: 5,
-						type: 'simple',
 					} )
 				)
 			).resolves.toBeUndefined();
@@ -641,7 +628,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						id: 42,
 						quantity: 5,
 						quantityToAdd: 1,
-						type: 'simple',
 					} )
 				)
 			).rejects.toThrow();
@@ -659,7 +645,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					{
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					},
 				] )
 			);
@@ -679,7 +664,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					{
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					},
 				] )
 			);
@@ -700,7 +684,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					{
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					},
 				] )
 			);
@@ -721,7 +704,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						id: 42,
 						key: 'server-key-abc',
 						quantity: 5,
-						type: 'simple',
 					},
 				] )
 			);
@@ -743,7 +725,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				singleActions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -755,7 +736,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					{
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					},
 				] )
 			);
@@ -781,7 +761,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					{
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					},
 				] )
 			);
@@ -800,7 +779,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					{
 						id: 99,
 						quantityToAdd: 2,
-						type: 'simple',
 					},
 				] )
 			);
@@ -857,7 +835,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -919,7 +896,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -953,7 +929,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					id: 42,
 					key: 'server-key-abc',
 					quantity: 5,
-					type: 'simple',
 				} )
 			);
 
@@ -985,7 +960,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -1037,7 +1011,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					{
 						id: 42,
 						quantityToAdd: 1,
-						type: 'simple',
 					},
 				] )
 			);
@@ -1076,7 +1049,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -1111,8 +1083,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			await runAction(
 				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
+					{ id: 42, quantityToAdd: 1 },
+					{ id: 42, quantityToAdd: 1 },
 				] )
 			);
 
@@ -1145,8 +1117,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			await runAction(
 				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
+					{ id: 42, quantityToAdd: 1 },
+					{ id: 42, quantityToAdd: 1 },
 				] )
 			);
 
@@ -1207,7 +1179,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -1260,9 +1231,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const notices = spyOnUpdateNotices();
 
 			await runAction(
-				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-				] )
+				actions.batchAddCartItems( [ { id: 42, quantityToAdd: 1 } ] )
 			);
 
 			// Server total (1+2=3) === expected total (1+1+1=3) → suppress.
@@ -1310,7 +1279,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'variation',
 					variation: colorRedVariation,
 				} )
 			);
@@ -1542,7 +1510,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const optimisticLine: OptimisticCartItem = {
 				id: 42,
 				quantity: 1,
-				type: 'simple',
 			};
 			await loadCartStore();
 			seedCart( [ optimisticLine ] );
@@ -1608,7 +1575,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -1645,7 +1611,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 
@@ -1684,7 +1649,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.addCartItem( {
 					id: 42,
 					quantityToAdd: 1,
-					type: 'simple',
 				} )
 			);
 

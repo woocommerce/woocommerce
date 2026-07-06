@@ -174,7 +174,11 @@ const sumMatchingCartQuantity = (
 ): number =>
 	items.reduce( ( total, cartItem ) => {
 		let matches: boolean;
-		if ( cartItem.type === 'variation' ) {
+		// `'name'` is present on server-confirmed lines (which carry `type`) but
+		// absent on optimistic lines, mirroring the module-private `isCartItem`
+		// guard in the cart store. Optimistic lines fall through to the
+		// `id === cartItem.id` branch.
+		if ( 'name' in cartItem && cartItem.type === 'variation' ) {
 			matches =
 				id === cartItem.id &&
 				Array.isArray( cartItem.variation ) &&
@@ -342,7 +346,6 @@ store< BlockStore >(
 					yield cartActions.addCartItem( {
 						id: listItem.id,
 						quantityToAdd: listItem.quantity,
-						type: isVariation ? 'variation' : 'simple',
 						...( isVariation && { variation } ),
 					} );
 

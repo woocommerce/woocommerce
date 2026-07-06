@@ -44,18 +44,6 @@ export type OptimisticCartItem = {
 	id: number;
 	quantity: number;
 	variation?: CartVariationItem[];
-	/**
-	 * Optional cart line type (e.g. `"simple"`, `"variation"`). The add actions
-	 * (`addCartItem`/`batchAddCartItems`) never read this off their argument, so
-	 * it is ignored if a caller passes it. It is declared here only because
-	 * `state.cart.items` is typed `(OptimisticCartItem | CartItem)[]` and the
-	 * matcher reads `cartItem.type === 'variation'` directly off that union (in
-	 * `findItemInCart` and `lineMatchesProduct`) without narrowing, so every
-	 * union member must declare `type`. Present on server-confirmed lines; absent
-	 * on optimistic lines before the server round-trip, where it correctly fails
-	 * the `=== 'variation'` check and falls through to the simple `id` match.
-	 */
-	type?: string;
 };
 
 export type ClientCartItem = Omit<
@@ -188,7 +176,7 @@ function lineMatchesProduct(
 	id: number,
 	variation?: CartVariationItem[] | SelectedAttributes[]
 ): boolean {
-	if ( item.type === 'variation' ) {
+	if ( isCartItem( item ) && item.type === 'variation' ) {
 		if (
 			id !== item.id ||
 			! item.variation ||
@@ -440,17 +428,21 @@ const { actions } = store< Store >(
 					if ( key ) {
 						return key === cartItem.key;
 					}
-					// Falsy-safe: `OptimisticCartItem` lacks the field
-					// (`undefined` → falsy), so optimistic plain lines are
-					// still matched (rapid-click compounding preserved);
-					// keyed lookups short-circuit on the `key` check above.
+					// `isCartItem` narrows to server-confirmed lines; optimistic
+					// lines (which lack `has_cart_item_data`) fall through as
+					// falsy, so rapid-click compounding on standalone lines is
+					// preserved. Keyed lookups short-circuit on the `key` check
+					// above and never reach this guard.
 					if (
-						! key &&
-						( cartItem as CartItem ).has_cart_item_data
+						isCartItem( cartItem ) &&
+						cartItem.has_cart_item_data
 					) {
 						return false;
 					}
-					if ( cartItem.type === 'variation' ) {
+					if (
+						isCartItem( cartItem ) &&
+						cartItem.type === 'variation'
+					) {
 						if (
 							id !== cartItem.id ||
 							! cartItem.variation ||
@@ -911,8 +903,10 @@ const { actions } = store< Store >(
 							} else {
 								// Same product seen again in this batch — add delta.
 								const capture =
-									batchProductCaptures.get( token )!;
-								capture.deltaTotal += quantityToSend;
+									batchProductCaptures.get( token );
+								if ( capture ) {
+									capture.deltaTotal += quantityToSend;
+								}
 							}
 						}
 
