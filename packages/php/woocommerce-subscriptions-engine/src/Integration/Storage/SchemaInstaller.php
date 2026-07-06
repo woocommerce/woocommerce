@@ -34,13 +34,16 @@ final class SchemaInstaller {
 	 *         `(contract_id, kind)`; per-contract snapshots deduped by copy-forward.
 	 * 2.1.0 - rename `app_id` to `extension_slug` in plan_groups table.
 	 * 2.1.1 - add `status` and `sort_order` columns to plans table.
+	 * 2.2.0 - dispatcher columns: cycle `claimed_until` (crash-recovery lease) and
+	 *         reserved `retry_at`; a `due_contract (status, next_payment_gmt)` index on
+	 *         contracts for the batch renewal scan.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
 	 * on an earlier schema must drop and recreate the tables (and clear VERSION_OPTION)
 	 * to pick up such changes - in-place ALTERs and backfills arrive with the freeze.
 	 */
-	private const VERSION = '2.1.1';
+	private const VERSION = '2.2.0';
 
 	/**
 	 * Option key tracking the installed schema version.
@@ -234,12 +237,14 @@ final class SchemaInstaller {
 ) {$collate};";
 
 		// The contract row is the live source of truth: the totals and stamps are live
-		// values, not caches of cycles. The `due` index keys the renewal scan off
-		// `next_payment_gmt`. `origin_order_id` is NULLABLE (a manual/admin contract has
-		// no origin order). There is no generic `cycle_count` - counters are per-chain,
-		// derived as `MAX(count)` over `(contract_id, kind)`. `currency` is first-class
-		// (forward-compat for multi-currency recurring; today the store base currency).
-		// `schedule_source` distinguishes engine-owned renewals from gateway-owned schedules.
+		// values, not caches of cycles. The `due_contract (status, next_payment_gmt)` index
+		// keys the batch dispatcher's scan (status equality, then a range on the due date);
+		// `due` is retained for next-bill-cache lookups keyed the other way. `origin_order_id`
+		// is NULLABLE (a manual/admin contract has no origin order). There is no generic
+		// `cycle_count` - counters are per-chain, derived as `MAX(count)` over
+		// `(contract_id, kind)`. `currency` is first-class (forward-compat for multi-currency
+		// recurring; today the store base currency). `schedule_source` distinguishes
+		// engine-owned renewals from gateway-owned schedules.
 		$contracts_sql = "CREATE TABLE {$contracts} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   status VARCHAR(20) NOT NULL,
@@ -269,6 +274,7 @@ final class SchemaInstaller {
   PRIMARY KEY  (id),
   KEY customer_status (customer_id, status),
   KEY due (next_payment_gmt, status),
+  KEY due_contract (status, next_payment_gmt),
   KEY origin_order (origin_order_id),
   KEY extension_slug (extension_slug)
 ) {$collate};";
@@ -324,7 +330,10 @@ final class SchemaInstaller {
 		// The `due` index keys the dispatcher's due-scan in (kind, status, starts_at_gmt)
 		// order, since billing-in-advance fires at `starts_at_gmt`. `order_id` is non-1:1
 		// (an aggregate order may serve many cycles); `contract_kind` serves targeted
-		// per-chain reads (MAX(count), head).
+		// per-chain reads (MAX(count), head). `claimed_until` is the crash-recovery lease:
+		// it is stamped when a `pending` cycle is claimed and a stuck pending cycle past it
+		// is reclaimable; the create-as-claim UNIQUE remains the primary concurrency guard.
+		// `retry_at` is reserved (additive) for a later retry/dunning pass - not wired yet.
 		$cycles_sql = "CREATE TABLE {$cycles} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   contract_id BIGINT UNSIGNED NOT NULL,
@@ -341,6 +350,8 @@ final class SchemaInstaller {
   items_snapshot_id BIGINT UNSIGNED NULL,
   order_id BIGINT UNSIGNED NULL,
   extension_slug VARCHAR(64) NULL,
+  claimed_until DATETIME NULL,
+  retry_at DATETIME NULL,
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,
   PRIMARY KEY  (id),
