@@ -23,6 +23,8 @@ The exceptions are package instances that must be shared with editor extensions 
 
 The standalone handles below must still be registered and emitted. They are public dependency targets for non-editor scripts and third-party consumers that explicitly enqueue or declare them.
 
+Package handles used as editor externals should be emitted by the core package build rather than the cart and checkout frontend build. That keeps editor dependencies from loading cart/checkout-only split chunks.
+
 ## Source locations
 
 Package source location communicates the intended surface:

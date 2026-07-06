@@ -724,18 +724,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 			// translations which we must avoid.
 			// @see https://github.com/Automattic/jetpack/pull/20926
 			chunkFilename: '[name]-frontend.js?ver=[contenthash]',
-			filename: ( pathData ) => {
-				// blocksCheckout and blocksComponents were moved from core bundle,
-				// retain their filenames to avoid breaking translations.
-				if (
-					pathData.chunk.name === 'blocksCheckout' ||
-					pathData.chunk.name === 'blocksComponents'
-				) {
-					return `${ paramCase( pathData.chunk.name ) }.js`;
-				}
-
-				return `[name]-frontend.js`;
-			},
+			filename: '[name]-frontend.js',
 			uniqueName: 'webpackWcBlocksCartCheckoutFrontendJsonp',
 			library: [ 'wc', '[name]' ],
 		},
