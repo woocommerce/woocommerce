@@ -492,7 +492,7 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 			 *
 			 * @since 11.0.0
 			 */
-			$args    = apply_filters(
+			$args = apply_filters(
 				"woocommerce_taxonomy_args_{$taxonomy}",
 				array(
 					'hierarchical' => false,
