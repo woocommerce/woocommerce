@@ -59,12 +59,21 @@ class ReactivationTest extends EngineIntegrationTestCase {
 	 * Create a monthly plan and return its id.
 	 */
 	private function make_monthly_plan(): int {
+		return $this->make_plan( 'month' );
+	}
+
+	/**
+	 * Create a plan on the given cadence period and return its id.
+	 *
+	 * @param string $period Billing period slug: day/week/month/year.
+	 */
+	private function make_plan( string $period ): int {
 		$group_id = ( new PlanGroupRepository() )->insert( PlanGroup::create( array( 'name' => 'Club' ) ) );
 		$plan     = Plan::create(
 			$group_id,
 			array(
-				'name'           => 'Monthly',
-				'billing_policy' => new BillingPolicy( 'month', 1, null, null, null ),
+				'name'           => ucfirst( $period ) . 'ly',
+				'billing_policy' => new BillingPolicy( $period, 1, null, null, null ),
 				'category'       => Plan::DEFAULT_CATEGORY,
 				'extension_slug' => 'engine-tests',
 			)
@@ -155,6 +164,16 @@ class ReactivationTest extends EngineIntegrationTestCase {
 		$this->sut->reactivate( $contract, $this->utc( '2026-03-01 00:00:00' ) );
 
 		$this->assertSame( '2027-01-15 00:00:00', $this->reload( $id )->get_next_payment_gmt() );
+	}
+
+	public function test_reactivate_floors_past_due_at_now_when_the_roll_cap_exhausts(): void {
+		// Daily cadence, held ~6.5 years past due: more rolls than the cap allows, so
+		// the date is floored at `$now` - never returned still in the past.
+		$id = $this->seed_on_hold( '2020-01-01 00:00:00', $this->make_plan( 'day' ) );
+
+		$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-07-06 00:00:00' ) );
+
+		$this->assertSame( '2026-07-06 00:00:00', $this->reload( $id )->get_next_payment_gmt() );
 	}
 
 	public function test_reactivate_floors_past_due_at_now_without_a_policy(): void {

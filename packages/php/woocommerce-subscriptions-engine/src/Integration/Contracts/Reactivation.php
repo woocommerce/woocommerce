@@ -51,6 +51,11 @@ final class Reactivation {
 	private const MAX_FORWARD_ROLLS = 1000;
 
 	/**
+	 * Log source, matching the package's shared logging channel.
+	 */
+	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
+
+	/**
 	 * Contract repository.
 	 *
 	 * @var ContractRepository
@@ -183,6 +188,22 @@ final class Reactivation {
 		$rolls = self::MAX_FORWARD_ROLLS;
 		while ( $next <= $now && $rolls-- > 0 ) {
 			$next = RenewalCalculator::next_bill_date( $policy, $next );
+		}
+
+		if ( $next <= $now ) {
+			// The cap ran out before the date cleared `$now` (a very long hold on a
+			// fine-grained cadence): floor at `$now` like the no-policy branch above, so
+			// the resume never lands a back-dated renewal. Logged because a capped roll
+			// means the schedule anchor left the plan's cadence grid.
+			wc_get_logger()->warning(
+				sprintf( 'Reactivation: contract %d exhausted the forward-roll cap; next payment floored at now.', (int) $contract->get_id() ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => (int) $contract->get_id(),
+				)
+			);
+
+			return $now->format( 'Y-m-d H:i:s' );
 		}
 
 		return $next->format( 'Y-m-d H:i:s' );

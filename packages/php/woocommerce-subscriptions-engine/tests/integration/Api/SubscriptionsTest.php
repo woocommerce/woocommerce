@@ -196,6 +196,9 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 
 		$past_the_end = Subscriptions::get_related_orders( $contract_id, 2, 4 );
 		$this->assertSame( array(), $past_the_end );
+
+		// A zero limit means none - never WP_Query's posts-per-page default.
+		$this->assertSame( array(), Subscriptions::get_related_orders( $contract_id, 0 ) );
 	}
 
 	/**

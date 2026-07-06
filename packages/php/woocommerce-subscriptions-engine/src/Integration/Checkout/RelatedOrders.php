@@ -36,11 +36,19 @@ final class RelatedOrders {
 	 * pass a window. The default stays "all", newest first.
 	 *
 	 * @param int $contract_id Contract id.
-	 * @param int $limit       Maximum orders to return; -1 (default) for all.
+	 * @param int $limit       Maximum orders to return; any negative (default -1) for all, 0 for none.
 	 * @param int $offset      Orders to skip (for paging). Default 0.
 	 * @return array<int, WC_Order> Linked orders, newest first.
 	 */
 	public function for_contract( int $contract_id, int $limit = -1, int $offset = 0 ): array {
+		if ( 0 === $limit ) {
+			return array();
+		}
+
+		// Any other non-positive limit means "all": -1 is the wc_get_orders sentinel,
+		// and an unguarded 0 would fall back to the site's posts-per-page default.
+		$limit = $limit < 0 ? -1 : $limit;
+
 		$orders = wc_get_orders(
 			array(
 				'limit'      => $limit,

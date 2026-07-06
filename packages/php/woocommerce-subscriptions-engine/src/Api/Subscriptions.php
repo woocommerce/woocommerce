@@ -134,7 +134,7 @@ final class Subscriptions {
 	 * consumers pass a window; the default stays "all".
 	 *
 	 * @param int $contract_id Contract id.
-	 * @param int $limit       Maximum orders to return; -1 (default) for all.
+	 * @param int $limit       Maximum orders to return; any negative (default -1) for all, 0 for none.
 	 * @param int $offset      Orders to skip (for paging). Default 0.
 	 * @return array<int, WC_Order> Related orders, newest first.
 	 */
