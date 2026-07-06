@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Make the woocommerce/products iAPI store's findProduct resolve variable-product "Any"-attribute ambiguity and partial selections identically to the server's find_matching_product_variation, so client and server always pick the same variation.

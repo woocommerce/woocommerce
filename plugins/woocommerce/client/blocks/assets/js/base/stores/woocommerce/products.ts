@@ -103,6 +103,66 @@ const attributeNamesMatch = ( a: string, b: string ): boolean =>
 	normalizeAttributeName( a ) === normalizeAttributeName( b );
 
 /**
+ * A single variation attribute as it appears on a parent product's
+ * `variations[].attributes` array (Store API format). `value` is `null`
+ * when the attribute is set to "Any" for that variation.
+ */
+type VariationAttribute = { name: string; value: string | null };
+
+/**
+ * Decide whether a variation matches a shopper's attribute selection,
+ * mirroring the server's `find_matching_product_variation`
+ * (WC_Product_Data_Store_CPT) exactly.
+ *
+ * The server iterates each of the variation's stored attributes and applies
+ * two rules (an "Any" attribute is stored as an empty string server-side and
+ * surfaces as `value === null` in the Store API):
+ *
+ * 1. If the attribute is NOT "Any" and the selection does not include it, the
+ *    variation does not match (it requires a value none was given for).
+ * 2. If the selection includes the attribute and it is NOT "Any", the selected
+ *    value must equal the variation's value, otherwise no match.
+ *
+ * An "Any" variation attribute is therefore unconditionally permissive: it can
+ * never cause a mismatch, regardless of whether the selection omits it, sets it
+ * to null, or sets it to any concrete value. This is what lets a partial
+ * selection resolve to an all-"Any"/partially-"Any" variation on the server,
+ * and the client must agree.
+ *
+ * Extra selected attributes that the variation does not define are ignored, as
+ * on the server (which only loops over the variation's own attributes).
+ *
+ * @param variationAttributes The variation's `attributes` array (Store API).
+ * @param selectedAttributes  The shopper's attribute selection.
+ * @return `true` when the variation matches the selection.
+ */
+const variationMatchesSelection = (
+	variationAttributes: VariationAttribute[],
+	selectedAttributes: SelectedAttributes[]
+): boolean =>
+	variationAttributes.every( ( attr ) => {
+		// An "Any" attribute (null value) never causes a mismatch, exactly
+		// like the server's `'' === $attribute_value` short-circuit.
+		if ( attr.value === null ) {
+			return true;
+		}
+
+		const selectedAttr = selectedAttributes.find( ( selected ) =>
+			attributeNamesMatch( attr.name, selected.attribute )
+		);
+
+		// Rule 1: the variation requires a specific value but the selection
+		// does not include this attribute at all.
+		if ( selectedAttr === undefined ) {
+			return false;
+		}
+
+		// Rule 2: the selection provides a value; it must equal the
+		// variation's required value.
+		return selectedAttr.value === attr.value;
+	} );
+
+/**
  * The woocommerce/products store.
  *
  * Server-hydrated cache of product and variation data in Store API format
@@ -145,25 +205,21 @@ const { state: productsState } = store< ProductsStore >(
 					return product;
 				}
 
+				// Deterministic variation resolution: mirror the server's
+				// `find_matching_product_variation` tie-breaking. The server
+				// iterates variations ordered by `menu_order ASC, ID ASC` and
+				// returns the FIRST that matches. The Store API already
+				// delivers `product.variations` in that exact order (it is
+				// built from `get_visible_children()`, which orders by
+				// `menu_order ASC, ID ASC`), so iterating this array in order
+				// with `find` reproduces the server's first-match choice. See
+				// ./README.md — "Variation resolution is deterministic and
+				// mirrors the server".
 				const matchedVariation = product.variations?.find( ( v ) =>
-					v.attributes.every( ( attr ) => {
-						const selectedAttr = selectedAttributes.find(
-							( selected ) =>
-								attributeNamesMatch(
-									attr.name,
-									selected.attribute
-								)
-						);
-
-						if ( attr.value === null ) {
-							return (
-								selectedAttr !== undefined &&
-								selectedAttr.value !== null
-							);
-						}
-
-						return selectedAttr?.value === attr.value;
-					} )
+					variationMatchesSelection(
+						v.attributes as VariationAttribute[],
+						selectedAttributes
+					)
 				);
 
 				if ( ! matchedVariation ) {

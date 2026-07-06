@@ -465,7 +465,13 @@ describe( 'woocommerce/products store – product context derived state', () => 
 					expect( result ).toBe( populatedVariation );
 				} );
 
-				it( 'does not match "Any" attribute when selected value is null', () => {
+				// Server parity: an "Any" variation attribute never causes a
+				// mismatch, even when the corresponding selected value is
+				// null. `find_matching_product_variation` short-circuits on
+				// `'' === $attribute_value` before ever consulting the
+				// selection, so the variation still matches on its non-"Any"
+				// attributes alone.
+				it( 'matches "Any" attribute even when the selected value is null', () => {
 					const variableProduct = {
 						id: 2,
 						type: 'variable',
@@ -479,7 +485,13 @@ describe( 'woocommerce/products store – product context derived state', () => 
 							},
 						],
 					} as unknown as ProductResponseItem;
+					const populatedVariation = {
+						id: 201,
+						name: 'Any Color Small',
+					} as ProductResponseItem;
 					mockStoreState.products[ 2 ] = variableProduct;
+					mockStoreState.productVariations[ 201 ] =
+						populatedVariation;
 
 					const result = mockStoreState.findProduct( {
 						id: 2,
@@ -492,10 +504,13 @@ describe( 'woocommerce/products store – product context derived state', () => 
 						],
 					} );
 
-					expect( result ).toBeNull();
+					expect( result ).toBe( populatedVariation );
 				} );
 
-				it( 'does not match "Any" attribute when attribute is not selected', () => {
+				// Server parity: partial selections resolve. When the shopper
+				// omits an "Any" attribute entirely, the server still matches
+				// the variation on its remaining (non-"Any") attributes.
+				it( 'matches "Any" attribute even when it is not selected (partial selection)', () => {
 					const variableProduct = {
 						id: 2,
 						type: 'variable',
@@ -509,7 +524,13 @@ describe( 'woocommerce/products store – product context derived state', () => 
 							},
 						],
 					} as unknown as ProductResponseItem;
+					const populatedVariation = {
+						id: 201,
+						name: 'Any Color Small',
+					} as ProductResponseItem;
 					mockStoreState.products[ 2 ] = variableProduct;
+					mockStoreState.productVariations[ 201 ] =
+						populatedVariation;
 
 					const result = mockStoreState.findProduct( {
 						id: 2,
@@ -518,8 +539,263 @@ describe( 'woocommerce/products store – product context derived state', () => 
 						],
 					} );
 
-					expect( result ).toBeNull();
+					expect( result ).toBe( populatedVariation );
 				} );
+			} );
+
+			// Adversarial parity table: each case asserts that `findProduct`
+			// resolves the SAME variation the server's
+			// `find_matching_product_variation` would (WC_Product_Data_Store_CPT).
+			// Variations are always listed in `menu_order ASC, ID ASC` order,
+			// exactly as the Store API delivers them via `get_visible_children()`,
+			// so the first matching variation in array order is the server winner.
+			describe( 'deterministic resolution mirrors the server', () => {
+				type Attr = { name: string; value: string | null };
+				type Case = {
+					title: string;
+					// Variations in server order (menu_order ASC, ID ASC).
+					variations: Array< { id: number; attributes: Attr[] } >;
+					selection: Array< { attribute: string; value: string } >;
+					// Expected resolved variation ID, or null for no match.
+					expected: number | null;
+				};
+
+				const cases: Case[] = [
+					{
+						title: 'overlapping "any": first variation in order wins the tie (A = size S / color any, B = size any / color red; select S + red → A)',
+						variations: [
+							{
+								id: 201,
+								attributes: [
+									{ name: 'Size', value: 'S' },
+									{ name: 'Color', value: null },
+								],
+							},
+							{
+								id: 202,
+								attributes: [
+									{ name: 'Size', value: null },
+									{ name: 'Color', value: 'red' },
+								],
+							},
+						],
+						selection: [
+							{ attribute: 'Size', value: 'S' },
+							{ attribute: 'Color', value: 'red' },
+						],
+						expected: 201,
+					},
+					{
+						title: 'order dependence: same two variations but B is listed first (menu_order) → B wins',
+						variations: [
+							{
+								id: 202,
+								attributes: [
+									{ name: 'Size', value: null },
+									{ name: 'Color', value: 'red' },
+								],
+							},
+							{
+								id: 201,
+								attributes: [
+									{ name: 'Size', value: 'S' },
+									{ name: 'Color', value: null },
+								],
+							},
+						],
+						selection: [
+							{ attribute: 'Size', value: 'S' },
+							{ attribute: 'Color', value: 'red' },
+						],
+						expected: 202,
+					},
+					{
+						title: 'catch-all "any/any" listed first shadows an exact match listed later',
+						variations: [
+							{
+								id: 300,
+								attributes: [
+									{ name: 'Size', value: null },
+									{ name: 'Color', value: null },
+								],
+							},
+							{
+								id: 301,
+								attributes: [
+									{ name: 'Size', value: 'S' },
+									{ name: 'Color', value: 'red' },
+								],
+							},
+						],
+						selection: [
+							{ attribute: 'Size', value: 'S' },
+							{ attribute: 'Color', value: 'red' },
+						],
+						expected: 300,
+					},
+					{
+						title: 'exact match: fully-specified variation among specific siblings',
+						variations: [
+							{
+								id: 400,
+								attributes: [
+									{ name: 'Size', value: 'S' },
+									{ name: 'Color', value: 'blue' },
+								],
+							},
+							{
+								id: 401,
+								attributes: [
+									{ name: 'Size', value: 'M' },
+									{ name: 'Color', value: 'red' },
+								],
+							},
+						],
+						selection: [
+							{ attribute: 'Size', value: 'M' },
+							{ attribute: 'Color', value: 'red' },
+						],
+						expected: 401,
+					},
+					{
+						title: 'partial selection: omitted attribute is "any" on the variation → matches',
+						variations: [
+							{
+								id: 500,
+								attributes: [
+									{ name: 'Size', value: 'S' },
+									{ name: 'Color', value: null },
+								],
+							},
+						],
+						selection: [ { attribute: 'Size', value: 'S' } ],
+						expected: 500,
+					},
+					{
+						title: 'partial selection: omitted attribute is concrete on every variation → no match',
+						variations: [
+							{
+								id: 600,
+								attributes: [
+									{ name: 'Size', value: 'S' },
+									{ name: 'Color', value: 'red' },
+								],
+							},
+							{
+								id: 601,
+								attributes: [
+									{ name: 'Size', value: 'S' },
+									{ name: 'Color', value: 'blue' },
+								],
+							},
+						],
+						selection: [ { attribute: 'Size', value: 'S' } ],
+						expected: null,
+					},
+					{
+						title: 'no match: selected value does not exist on any variation',
+						variations: [
+							{
+								id: 700,
+								attributes: [
+									{ name: 'Size', value: 'S' },
+									{ name: 'Color', value: 'red' },
+								],
+							},
+							{
+								id: 701,
+								attributes: [
+									{ name: 'Size', value: 'M' },
+									{ name: 'Color', value: 'red' },
+								],
+							},
+						],
+						selection: [
+							{ attribute: 'Size', value: 'XL' },
+							{ attribute: 'Color', value: 'red' },
+						],
+						expected: null,
+					},
+					{
+						title: 'extra selected attribute the variation does not define is ignored (server loops variation attrs only)',
+						variations: [
+							{
+								id: 800,
+								attributes: [ { name: 'Size', value: 'S' } ],
+							},
+						],
+						selection: [
+							{ attribute: 'Size', value: 'S' },
+							{ attribute: 'Material', value: 'cotton' },
+						],
+						expected: 800,
+					},
+					{
+						title: 'all-"any" variation matches any concrete selection',
+						variations: [
+							{
+								id: 900,
+								attributes: [
+									{ name: 'Size', value: null },
+									{ name: 'Color', value: null },
+								],
+							},
+						],
+						selection: [
+							{ attribute: 'Size', value: 'S' },
+							{ attribute: 'Color', value: 'green' },
+						],
+						expected: 900,
+					},
+					{
+						title: 'first exact match wins over a later, equally-exact duplicate',
+						variations: [
+							{
+								id: 1000,
+								attributes: [ { name: 'Size', value: 'S' } ],
+							},
+							{
+								id: 1001,
+								attributes: [ { name: 'Size', value: 'S' } ],
+							},
+						],
+						selection: [ { attribute: 'Size', value: 'S' } ],
+						expected: 1000,
+					},
+				];
+
+				it.each( cases )(
+					'$title',
+					( { variations, selection, expected } ) => {
+						const productId = 7;
+						mockStoreState.products[ productId ] = {
+							id: productId,
+							type: 'variable',
+							variations,
+						} as unknown as ProductResponseItem;
+
+						// Populate every referenced variation so a successful
+						// match returns the variation record (not null due to a
+						// missing record).
+						variations.forEach( ( v ) => {
+							mockStoreState.productVariations[ v.id ] = {
+								id: v.id,
+							} as ProductResponseItem;
+						} );
+
+						const result = mockStoreState.findProduct( {
+							id: productId,
+							selectedAttributes: selection,
+						} );
+
+						if ( expected === null ) {
+							expect( result ).toBeNull();
+						} else {
+							expect( result ).not.toBeNull();
+							expect( result?.id ).toBe( expected );
+						}
+					}
+				);
 			} );
 		} );
 	} );

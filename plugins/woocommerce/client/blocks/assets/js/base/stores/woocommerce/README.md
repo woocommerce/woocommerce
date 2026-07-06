@@ -224,6 +224,19 @@ const productAttributes =
 
 For variable products, `findProduct` returns `null` when no variation matches the given attributes. For simple, grouped, external, or any other non-variable product type, it returns the product itself.
 
+#### Variation resolution is deterministic and mirrors the server
+
+When a variable product uses "Any" attributes, more than one variation can match a single attribute selection. `findProduct` resolves that ambiguity **exactly** the way the server does, so the client and server never disagree about which variation a selection means. The authority is `WC_Product_Data_Store_CPT::find_matching_product_variation()` (`includes/data-stores/class-wc-product-data-store-cpt.php`); the client replicates it against the variation data already in `state.products[ id ].variations`.
+
+The rules:
+
+-   **"Any" is unconditionally permissive.** A variation attribute set to "Any" surfaces as `value: null` in the Store API (an empty string server-side). It can never cause a mismatch — it matches whether the selection omits that attribute, sets it to `null`, or sets it to any concrete value. This is what lets a **partial selection** resolve: selecting only `Size = S` matches a `Size = S / Color = Any` variation.
+-   **Non-"Any" attributes must be satisfied.** If a variation requires a concrete value for an attribute, the selection must include that attribute with the matching value. A missing attribute or a different value is a mismatch.
+-   **Extra selected attributes are ignored.** Only the variation's own attributes are compared (the server loops over the variation's stored meta), so selecting attributes a variation does not define never blocks a match.
+-   **First match wins, in `menu_order ASC, ID ASC` order.** The server iterates variations by `menu_order` then variation ID and returns the first match. The Store API delivers `product.variations` in that same order (it is built from `get_visible_children()`, which orders by `menu_order ASC, ID ASC`), so `findProduct` iterates the array in order and takes the first match. A catch-all "Any/Any" variation listed before a more specific one therefore wins — matching the server. **Do not re-sort `product.variations`; the incoming array order is the tie-breaker.**
+
+Because the tie-breaker is `menu_order`, which is not exposed on the Store API `ProductResponseItem`, this parity depends on the array-order guarantee above rather than on a client-side sort. See `test/products.test.ts` → "deterministic resolution mirrors the server" for the adversarial parity table.
+
 ### Patterns and pitfalls
 
 -   **Always load before you bind.** If `wc_interactivity_api_load_product` was never called for the current `productId`, `state.mainProductInContext` resolves to `null` and directive bindings silently render empty.
