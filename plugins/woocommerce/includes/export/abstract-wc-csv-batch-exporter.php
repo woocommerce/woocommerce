@@ -147,14 +147,23 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 		 * @see   https://www.php.net/manual/en/function.fopen.php
 		 * @since 6.8.0
 		 *
-		 * @param string $fopen_mode, either (r, r+, w, w+, a, a+, x, x+, c, c+, e)
+		 * @param string $fopen_mode, either (r, r+, w, w+, a, a+, x, x+, c, c+, e). Defaults to "a" (append, write-only) for broad stream-wrapper compatibility.
 		 */
-		$fopen_mode = apply_filters( 'woocommerce_csv_exporter_fopen_mode', 'a+' );
+		$fopen_mode = apply_filters( 'woocommerce_csv_exporter_fopen_mode', 'a' );
 		$fp         = fopen( $this->get_file_path(), $fopen_mode );
 
 		if ( $fp ) {
 			fwrite( $fp, $data );
 			fclose( $fp );
+		} else {
+			wc_get_logger()->error(
+				sprintf(
+					/* translators: %s: file path */
+					__( 'Unable to open file for writing: %s', 'woocommerce' ),
+					$this->get_file_path()
+				),
+				array( 'source' => 'wc_csv_exporter' )
+			);
 		}
 
 		// Add all columns when finished.
