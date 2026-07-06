@@ -200,4 +200,27 @@ describe( 'OrdersPanel', () => {
 		expect( screen.getByText( 'Registered Customer' ) ).toBeInTheDocument();
 		expect( screen.queryByText( 'Jane Doe' ) ).not.toBeInTheDocument();
 	} );
+
+	it( 'should strip angle brackets from a guest billing name', () => {
+		useSelect.mockReturnValue( {
+			orders: [
+				{
+					total: 123,
+					id: 1,
+					number: 1,
+					customer_id: 0,
+					billing: {
+						first_name: '<b>script</b>',
+						last_name: 'Doe',
+					},
+				},
+			],
+			isError: false,
+			isRequesting: false,
+		} );
+
+		render( <OrdersPanel orderStatuses={ [] } unreadOrdersCount={ 1 } /> );
+		expect( screen.getByText( 'bscriptb Doe' ) ).toBeInTheDocument();
+		expect( screen.queryByText( /</ ) ).not.toBeInTheDocument();
+	} );
 } );

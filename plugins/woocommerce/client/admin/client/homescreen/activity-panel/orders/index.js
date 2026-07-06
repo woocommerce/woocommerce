@@ -101,16 +101,15 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 				: getAdminLink( 'user-edit.php?user_id=' + customer.id );
 		}
 
-		// Guest orders (customer_id 0) have no customer record to look up,
-		// fall back to the billing name stored on the order itself. Strip
-		// angle brackets so a billing name can't be mistaken for markup by
-		// createInterpolateElement below.
+		// Guest orders have no customer record; fall back to the billing name.
+		// createInterpolateElement parses <word> as a token, so strip angle
+		// brackets from the name to keep it from being read as markup.
+		const sanitizeName = ( name ) =>
+			( name || '' ).replace( /[<>]/g, '' ).trim();
 		const guestName = billing
 			? `${ billing.first_name || '' } ${ billing.last_name || '' }`
-					.trim()
-					.replace( /[<>]/g, '' )
 			: '';
-		const customerName = customer.name || guestName;
+		const customerName = sanitizeName( customer?.name || guestName );
 
 		const formattedString = sprintf(
 			/* translators: 1: order number, 2: customer name */
