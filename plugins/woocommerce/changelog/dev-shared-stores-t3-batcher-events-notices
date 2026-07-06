@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Move sync/legacy cart events and store-notice extraction into the cart mutation batcher so they fire once per settle cycle via a new `onCycleSettle` config callback, and remove the now-redundant `batchAddCartItems` action (same-frame `addCartItem` calls coalesce into one batch request with a single event/notice pass).

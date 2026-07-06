@@ -25,6 +25,7 @@ import {
 	MutationRequest,
 	type MutationQueue,
 	type MutationResult,
+	type CycleSettleResult,
 } from './mutation-batcher';
 import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
 
@@ -94,10 +95,6 @@ export type Store = {
 		removeCartItem: ( key: string ) => Promise< void >;
 		addCartItem: (
 			args: ClientCartItem,
-			options?: CartUpdateOptions
-		) => Promise< void >;
-		batchAddCartItems: (
-			items: ClientCartItem[],
 			options?: CartUpdateOptions
 		) => Promise< void >;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
@@ -246,6 +243,151 @@ function emitSyncEvent( {
 }
 
 /**
+ * Cycle accumulator.
+ *
+ * The mutation batcher fires `onCycleSettle` ONCE when the queue returns to
+ * idle, regardless of how many requests the cycle contained. Sync/legacy events
+ * and store notices are cycle-level concerns (issues #63333 and #63560), so the
+ * cart actions no longer fire them per request; instead each request contributes
+ * to this per-cycle accumulator, and `handleCartCycleSettle` consumes it once.
+ *
+ * This is reset at the end of every settle cycle (see `handleCartCycleSettle`).
+ */
+type CartCycleAccumulator = {
+	/** Aggregated quantity changes across every request in the cycle. */
+	quantityChanges: QuantityChanges;
+	/**
+	 * True when the cycle contained at least one add/update request. Controls
+	 * the legacy `wc-blocks_added_to_cart` event and the a11y announcement,
+	 * which a pure removal cycle must not fire (preserves prior behavior where
+	 * `removeCartItem` never triggered them).
+	 */
+	didAdd: boolean;
+	/**
+	 * Whether the cycle's info/error notice pass should run. Per-request
+	 * opt-outs aggregate with logical AND: if ANY request in the cycle passes
+	 * `showCartUpdatesNotices: false`, the whole cycle's notice pass is
+	 * suppressed. A caller opting out is asserting "don't surface generic cart
+	 * notices for my operation"; honoring that matches the old
+	 * `batchAddCartItems`, where a single flag governed the entire batch.
+	 * `removeCartItem` has no opt-out, so it always leaves this `true`.
+	 */
+	showNotices: boolean;
+	/**
+	 * Cart state captured after the last optimistic update in the cycle, used
+	 * as the "old cart" for notice extraction. We deliberately compare the
+	 * post-optimistic cart (not the batcher's pre-optimistic snapshot) against
+	 * the final server state so that user-initiated removals/quantity changes
+	 * are already reflected and do not generate spurious auto-change notices —
+	 * see `getInfoNoticesFromCartUpdates`.
+	 */
+	optimisticSnapshot: Store[ 'state' ][ 'cart' ] | null;
+};
+
+function createCartCycleAccumulator(): CartCycleAccumulator {
+	return {
+		quantityChanges: {},
+		didAdd: false,
+		showNotices: true,
+		optimisticSnapshot: null,
+	};
+}
+
+let cartCycle: CartCycleAccumulator = createCartCycleAccumulator();
+
+/**
+ * Merge a single request's contribution into the current cycle accumulator.
+ *
+ * Called from each action at submit time (synchronously, before the batch is
+ * sent), so that by settle time the accumulator reflects every request.
+ */
+function accumulateCartCycle( contribution: {
+	quantityChanges?: QuantityChanges;
+	didAdd?: boolean;
+	showNotices?: boolean;
+} ): void {
+	const { quantityChanges, didAdd, showNotices } = contribution;
+
+	if ( quantityChanges?.cartItemsPendingQuantity ) {
+		cartCycle.quantityChanges.cartItemsPendingQuantity = [
+			...( cartCycle.quantityChanges.cartItemsPendingQuantity ?? [] ),
+			...quantityChanges.cartItemsPendingQuantity,
+		];
+	}
+	if ( quantityChanges?.cartItemsPendingDelete ) {
+		cartCycle.quantityChanges.cartItemsPendingDelete = [
+			...( cartCycle.quantityChanges.cartItemsPendingDelete ?? [] ),
+			...quantityChanges.cartItemsPendingDelete,
+		];
+	}
+	if ( quantityChanges?.productsPendingAdd ) {
+		cartCycle.quantityChanges.productsPendingAdd = [
+			...( cartCycle.quantityChanges.productsPendingAdd ?? [] ),
+			...quantityChanges.productsPendingAdd,
+		];
+	}
+	if ( didAdd ) {
+		cartCycle.didAdd = true;
+	}
+	// AND semantics: a single opt-out suppresses the whole cycle's pass.
+	if ( showNotices === false ) {
+		cartCycle.showNotices = false;
+	}
+}
+
+/**
+ * Announce the "added to cart" text to screen readers, if configured.
+ */
+async function announceAddedToCart(): Promise< void > {
+	const { messages } = getConfig( 'woocommerce' ) as WooCommerceConfig;
+	if ( messages?.addedToCartText ) {
+		const { speak } = await import( '@wordpress/a11y' );
+		speak( messages.addedToCartText, 'polite' );
+	}
+}
+
+/**
+ * Cycle-level settle handler wired into the batcher via `onCycleSettle`.
+ *
+ * Fires exactly once per settle cycle, synchronously during `reconcile()` while
+ * the batcher is still `isProcessing` — so events and notices complete before
+ * `refreshCartItems` (which bails while processing) can run, preserving the
+ * no-race-with-refreshes guarantee that the old per-request `onSettled`
+ * callbacks provided.
+ */
+function handleCartCycleSettle( result: CycleSettleResult< Cart > ): void {
+	const cycle = cartCycle;
+	// Reset immediately so a nested cycle (should not happen synchronously, but
+	// defensively) starts clean and this handler is idempotent per cycle.
+	cartCycle = createCartCycleAccumulator();
+
+	if ( result.hasSuccess ) {
+		// Legacy event + screen-reader announcement only for add/update cycles.
+		if ( cycle.didAdd ) {
+			triggerAddedToCartEvent( { preserveCartData: true } );
+			announceAddedToCart();
+		}
+
+		// Sync event carries the whole cycle's aggregated quantity changes.
+		emitSyncEvent( { quantityChanges: cycle.quantityChanges } );
+
+		// Info + server-error notices: compare the post-optimistic cart against
+		// the final server state, once for the whole cycle.
+		const cart = result.data;
+		if ( cycle.showNotices && cart && cycle.optimisticSnapshot ) {
+			const infoNotices = getInfoNoticesFromCartUpdates(
+				cycle.optimisticSnapshot,
+				cart
+			);
+			const errorNotices = ( cart.errors ?? [] ).map(
+				generateErrorNotice
+			);
+			actions.updateNotices( [ ...infoNotices, ...errorNotices ], true );
+		}
+	}
+}
+
+/**
  * Cart request queue singleton
  *
  * Lazily initialized on first use since state isn't available at module load.
@@ -277,6 +419,10 @@ async function sendCartRequest(
 			commit: ( serverState ) => {
 				stateRef.cart = serverState;
 			},
+			// Batcher owns firing sync/legacy events and running the notice
+			// pass once per settle cycle (issues #63333 and #63560). Runs while
+			// the queue is still processing, so refreshes stay guarded.
+			onCycleSettle: handleCartCycleSettle,
 			fetchHandler: async ( ...args ) => {
 				const response = await fetch( ...args );
 				refreshNonce( response );
@@ -338,16 +484,17 @@ const { actions } = store< Store >(
 		},
 		actions: {
 			*removeCartItem( key: string ): AsyncAction< void > {
-				// Track what changes we're making for the sync event.
-				const quantityChanges: QuantityChanges = {
-					cartItemsPendingDelete: [ key ],
-				};
-
-				// Capture cart state after optimistic updates for notice comparison.
-				let cartAfterOptimistic: typeof state.cart | null = null;
+				// Contribute this request's changes to the cycle. Sync events
+				// and notices are fired once per settle cycle by the batcher's
+				// onCycleSettle handler (handleCartCycleSettle) — a removal is
+				// not an "add", so it must not trigger the legacy event / a11y.
+				accumulateCartCycle( {
+					quantityChanges: { cartItemsPendingDelete: [ key ] },
+					didAdd: false,
+				} );
 
 				try {
-					const result = ( yield sendCartRequest( state, {
+					yield sendCartRequest( state, {
 						path: '/wc/store/v1/cart/remove-item',
 						method: 'POST',
 						body: { key },
@@ -355,35 +502,13 @@ const { actions } = store< Store >(
 							state.cart.items = state.cart.items.filter(
 								( item ) => item.key !== key
 							);
-							// Capture state after optimistic update.
-							cartAfterOptimistic = JSON.parse(
+							// Capture post-optimistic cart for the cycle's
+							// notice comparison (last writer in the cycle wins).
+							cartCycle.optimisticSnapshot = JSON.parse(
 								JSON.stringify( state.cart )
 							);
 						},
-						// Side effects run synchronously during reconciliation,
-						// before isProcessing clears. This prevents
-						// refreshCartItems from running during these events.
-						onSettled: ( { success } ) => {
-							if ( success ) {
-								emitSyncEvent( { quantityChanges } );
-							}
-						},
-					} ) ) as TypeYield< typeof sendCartRequest >;
-
-					// Show notices from server response.
-					const cart = result.data as Cart;
-					if ( cart && cartAfterOptimistic ) {
-						const infoNotices = getInfoNoticesFromCartUpdates(
-							cartAfterOptimistic,
-							cart
-						);
-						const errorNotices =
-							cart.errors.map( generateErrorNotice );
-						yield actions.updateNotices(
-							[ ...infoNotices, ...errorNotices ],
-							true
-						);
-					}
+					} );
 				} catch ( error ) {
 					actions.showNoticeError( error as Error );
 				}
@@ -398,8 +523,6 @@ const { actions } = store< Store >(
 						'addCartItem: pass either quantity or quantityToAdd, not both.'
 					);
 				}
-
-				const a11yModulePromise = import( '@wordpress/a11y' );
 
 				// Find existing item
 				const existingItem = state.findItemInCart( {
@@ -428,7 +551,7 @@ const { actions } = store< Store >(
 				const isUpdate = !! existingItem?.key;
 				const endpoint = isUpdate ? 'update-item' : 'add-item';
 
-				// Track what changes we're making for notice comparison.
+				// Track what changes we're making for the aggregated sync event.
 				const quantityChanges: QuantityChanges = isUpdate
 					? {
 							cartItemsPendingQuantity: existingItem?.key
@@ -436,6 +559,17 @@ const { actions } = store< Store >(
 								: [],
 					  }
 					: { productsPendingAdd: [ id ] };
+
+				// Contribute to the cycle. The batcher fires the legacy event,
+				// a11y announcement, sync event and notice pass once when the
+				// queue settles (handleCartCycleSettle). This is an add/update,
+				// so it flips the cycle's didAdd flag; `showCartUpdatesNotices`
+				// aggregates with AND across the cycle.
+				accumulateCartCycle( {
+					quantityChanges,
+					didAdd: true,
+					showNotices: showCartUpdatesNotices,
+				} );
 
 				// Prepare the item to send.
 				let itemToSend: OptimisticCartItem;
@@ -457,11 +591,8 @@ const { actions } = store< Store >(
 					} as OptimisticCartItem;
 				}
 
-				// Capture cart state after optimistic updates for notice comparison.
-				let cartAfterOptimistic: typeof state.cart | null = null;
-
 				try {
-					const result = ( yield sendCartRequest( state, {
+					yield sendCartRequest( state, {
 						path: `/wc/store/v1/cart/${ endpoint }`,
 						method: 'POST',
 						body: itemToSend,
@@ -478,216 +609,15 @@ const { actions } = store< Store >(
 								// No existing item: push new optimistic item.
 								state.cart.items.push( itemToSend );
 							}
-							// Capture state after optimistic update.
-							cartAfterOptimistic = JSON.parse(
+							// Capture post-optimistic cart for the cycle's
+							// notice comparison (last writer in the cycle wins).
+							cartCycle.optimisticSnapshot = JSON.parse(
 								JSON.stringify( state.cart )
 							);
 						},
-						// Side effects run synchronously during reconciliation,
-						// before isProcessing clears. This prevents
-						// refreshCartItems from running during these events.
-						onSettled: ( { success } ) => {
-							if ( success ) {
-								// Dispatch legacy event
-								triggerAddedToCartEvent( {
-									preserveCartData: true,
-								} );
-
-								// Dispatch sync event
-								emitSyncEvent( { quantityChanges } );
-							}
-						},
-					} ) ) as TypeYield< typeof sendCartRequest >;
-
-					// Success - handle side effects that don't trigger refreshCartItems
-					const cart = result.data as Cart;
-
-					// Show notices if enabled
-					if (
-						showCartUpdatesNotices &&
-						cart &&
-						cartAfterOptimistic
-					) {
-						const infoNotices = getInfoNoticesFromCartUpdates(
-							cartAfterOptimistic,
-							cart
-						);
-						const errorNotices =
-							cart.errors.map( generateErrorNotice );
-						yield actions.updateNotices(
-							[ ...infoNotices, ...errorNotices ],
-							true
-						);
-					}
-
-					// Announce to screen readers
-					const { messages } = getConfig(
-						'woocommerce'
-					) as WooCommerceConfig;
-					if ( messages?.addedToCartText ) {
-						const { speak } =
-							( yield a11yModulePromise ) as Awaited<
-								typeof a11yModulePromise
-							>;
-						speak( messages.addedToCartText, 'polite' );
-					}
+					} );
 				} catch ( error ) {
 					// Show error notice
-					actions.showNoticeError( error as Error );
-				}
-			},
-
-			*batchAddCartItems(
-				items: ClientCartItem[],
-				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
-			): AsyncAction< void > {
-				const a11yModulePromise = import( '@wordpress/a11y' );
-				const quantityChanges: QuantityChanges = {};
-
-				try {
-					// Submit each item through the batcher. They'll be
-					// collected into a single batch request automatically.
-					const promises = items.map( ( item, index ) => {
-						const existingItem = state.findItemInCart( {
-							id: item.id,
-							key: item.key,
-							variation: item.variation,
-						} );
-
-						let quantity: number;
-						if ( typeof item.quantityToAdd === 'number' ) {
-							const currentQuantity = existingItem?.quantity ?? 0;
-							quantity = currentQuantity + item.quantityToAdd;
-						} else {
-							quantity = item.quantity ?? 1;
-						}
-						const isUpdate = !! existingItem?.key;
-						const endpoint = isUpdate ? 'update-item' : 'add-item';
-
-						let itemToSend: OptimisticCartItem;
-						if ( isUpdate && existingItem ) {
-							itemToSend = {
-								key: existingItem.key,
-								id: existingItem.id,
-								quantity,
-							} as OptimisticCartItem;
-							quantityChanges.cartItemsPendingQuantity = [
-								...( quantityChanges.cartItemsPendingQuantity ??
-									[] ),
-								existingItem.key as string,
-							];
-						} else {
-							const quantityToSend = existingItem
-								? quantity - existingItem.quantity
-								: quantity;
-							itemToSend = {
-								id: item.id,
-								quantity: quantityToSend,
-								...( item.variation && {
-									variation: item.variation,
-								} ),
-							} as OptimisticCartItem;
-							quantityChanges.productsPendingAdd = [
-								...( quantityChanges.productsPendingAdd ?? [] ),
-								item.id,
-							];
-						}
-
-						const isLastItem = index === items.length - 1;
-
-						return sendCartRequest( state, {
-							path: `/wc/store/v1/cart/${ endpoint }`,
-							method: 'POST',
-							body: itemToSend,
-							applyOptimistic: () => {
-								if ( existingItem ) {
-									existingItem.quantity = quantity;
-								} else {
-									state.cart.items.push( itemToSend );
-								}
-							},
-							// Only fire events on the last item to avoid
-							// duplicate notifications mid-batch.
-							// Fire events when ANY item in the batch
-							// succeeded (data is set from the last
-							// successful server state). Only the last
-							// item's callback fires to avoid duplicates.
-							...( isLastItem && {
-								onSettled: ( { data } ) => {
-									if ( data ) {
-										triggerAddedToCartEvent( {
-											preserveCartData: true,
-										} );
-										emitSyncEvent( {
-											quantityChanges,
-										} );
-									}
-								},
-							} ),
-						} );
-					} );
-
-					// Capture cart state after optimistic updates for notices.
-					const cartAfterOptimistic = JSON.parse(
-						JSON.stringify( state.cart )
-					);
-
-					const results = ( yield Promise.allSettled(
-						promises
-					) ) as PromiseSettledResult< MutationResult< Cart > >[];
-
-					// Find the last successful result for notices/a11y.
-					const lastSuccess = [ ...results ]
-						.reverse()
-						.find(
-							(
-								r
-							): r is PromiseFulfilledResult<
-								MutationResult< Cart >
-							> => r.status === 'fulfilled' && r.value.success
-						);
-
-					if ( lastSuccess ) {
-						const cart = lastSuccess.value.data as Cart;
-
-						if ( showCartUpdatesNotices ) {
-							const infoNotices = getInfoNoticesFromCartUpdates(
-								cartAfterOptimistic,
-								cart
-							);
-							const errorNotices =
-								cart.errors.map( generateErrorNotice );
-							yield actions.updateNotices(
-								[ ...infoNotices, ...errorNotices ],
-								true
-							);
-						}
-
-						const { messages } = getConfig(
-							'woocommerce'
-						) as WooCommerceConfig;
-						if ( messages?.addedToCartText ) {
-							const { speak } =
-								( yield a11yModulePromise ) as Awaited<
-									typeof a11yModulePromise
-								>;
-							speak( messages.addedToCartText, 'polite' );
-						}
-					}
-
-					// Show error notices for failed items.
-					const errorNotices = results
-						.filter(
-							( r ): r is PromiseRejectedResult =>
-								r.status === 'rejected'
-						)
-						.map( ( r ) =>
-							generateErrorNotice( r.reason as ApiErrorResponse )
-						);
-					if ( errorNotices.length > 0 ) {
-						yield actions.updateNotices( errorNotices );
-					}
-				} catch ( error ) {
 					actions.showNoticeError( error as Error );
 				}
 			},

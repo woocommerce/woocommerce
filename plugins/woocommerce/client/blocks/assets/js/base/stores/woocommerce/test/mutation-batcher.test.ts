@@ -277,6 +277,243 @@ describe( 'createMutationQueue', () => {
 		} );
 	} );
 
+	describe( 'onCycleSettle callback', () => {
+		it( 'fires exactly once per settle cycle regardless of request count', async () => {
+			const mockFetch = createMockFetch( [
+				{ status: 200, body: { value: 10 } },
+				{ status: 200, body: { value: 20 } },
+				{ status: 200, body: { value: 30 } },
+			] );
+			global.fetch = mockFetch;
+
+			const onCycleSettle = jest.fn();
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				onCycleSettle,
+				...stateHandler,
+			} );
+
+			await Promise.all( [
+				queue.submit( { path: '/a', method: 'POST' } ),
+				queue.submit( { path: '/b', method: 'POST' } ),
+				queue.submit( { path: '/c', method: 'POST' } ),
+			] );
+
+			// Three same-tick submits → one batch → one settle callback.
+			expect( mockFetch ).toHaveBeenCalledTimes( 1 );
+			expect( onCycleSettle ).toHaveBeenCalledTimes( 1 );
+			expect( onCycleSettle ).toHaveBeenCalledWith(
+				expect.objectContaining( {
+					hasSuccess: true,
+					data: { value: 30 },
+				} )
+			);
+		} );
+
+		it( 'fires once per cycle across multiple in-flight batches', async () => {
+			// A request arriving while the first batch is in-flight is sent in
+			// a second batch, but both belong to the SAME settle cycle, so the
+			// callback must fire only once when the queue finally goes idle.
+			const fetchPromises: Array< {
+				resolve: ( value: Response ) => void;
+			} > = [];
+			global.fetch = jest.fn(
+				() =>
+					new Promise< Response >( ( resolve ) => {
+						fetchPromises.push( { resolve } );
+					} )
+			) as jest.Mock;
+
+			const onCycleSettle = jest.fn();
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				onCycleSettle,
+				...stateHandler,
+			} );
+
+			const p1 = queue.submit( { path: '/a', method: 'POST' } );
+			await flushMicrotasks();
+
+			// Second request arrives while the first batch is in flight.
+			const p2 = queue.submit( { path: '/b', method: 'POST' } );
+
+			// Resolve first batch — triggers the second batch, NOT a settle.
+			resolvePendingFetch( fetchPromises[ 0 ], {
+				ok: true,
+				json: () =>
+					Promise.resolve( {
+						responses: [ { status: 200, body: { value: 1 } } ],
+					} ),
+			} as Response );
+			await flushMicrotasks();
+
+			expect( onCycleSettle ).not.toHaveBeenCalled();
+
+			// Resolve second batch — now the cycle settles.
+			resolvePendingFetch( fetchPromises[ 1 ], {
+				ok: true,
+				json: () =>
+					Promise.resolve( {
+						responses: [ { status: 200, body: { value: 2 } } ],
+					} ),
+			} as Response );
+
+			await Promise.all( [ p1, p2 ] );
+
+			expect( onCycleSettle ).toHaveBeenCalledTimes( 1 );
+			expect( onCycleSettle ).toHaveBeenCalledWith(
+				expect.objectContaining( {
+					hasSuccess: true,
+					data: { value: 2 },
+				} )
+			);
+		} );
+
+		it( 'reports hasSuccess true when at least one request succeeds in a mixed cycle', async () => {
+			const mockFetch = createMockFetch( [
+				{
+					status: 400,
+					body: { message: 'Bad request', code: 'bad_request' },
+				},
+				{ status: 200, body: { value: 42 } },
+			] );
+			global.fetch = mockFetch;
+
+			const onCycleSettle = jest.fn();
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				onCycleSettle,
+				...stateHandler,
+			} );
+
+			const p1 = queue.submit( { path: '/a', method: 'POST' } );
+			const p2 = queue.submit( { path: '/b', method: 'POST' } );
+
+			await expect( p1 ).rejects.toThrow();
+			await expect( p2 ).resolves.toMatchObject( { success: true } );
+
+			expect( onCycleSettle ).toHaveBeenCalledTimes( 1 );
+			expect( onCycleSettle ).toHaveBeenCalledWith(
+				expect.objectContaining( {
+					hasSuccess: true,
+					data: { value: 42 },
+				} )
+			);
+		} );
+
+		it( 'reports hasSuccess false when all requests fail', async () => {
+			const mockFetch = createMockFetch( [
+				{ status: 400, body: { message: 'Error 1' } },
+				{ status: 500, body: { message: 'Error 2' } },
+			] );
+			global.fetch = mockFetch;
+
+			const onCycleSettle = jest.fn();
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				onCycleSettle,
+				...stateHandler,
+			} );
+
+			const p1 = queue.submit( { path: '/a', method: 'POST' } );
+			const p2 = queue.submit( { path: '/b', method: 'POST' } );
+
+			await expect( p1 ).rejects.toThrow();
+			await expect( p2 ).rejects.toThrow();
+
+			expect( onCycleSettle ).toHaveBeenCalledTimes( 1 );
+			const arg = onCycleSettle.mock.calls[ 0 ][ 0 ];
+			expect( arg.hasSuccess ).toBe( false );
+			expect( arg.data ).toBeUndefined();
+		} );
+
+		it( 'reports hasSuccess false on a total network failure', async () => {
+			global.fetch = createFailingFetch( new Error( 'Network error' ) );
+
+			const onCycleSettle = jest.fn();
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				onCycleSettle,
+				...stateHandler,
+			} );
+
+			const p1 = queue.submit( { path: '/a', method: 'POST' } );
+
+			await expect( p1 ).rejects.toThrow( 'Network error' );
+
+			expect( onCycleSettle ).toHaveBeenCalledTimes( 1 );
+			expect( onCycleSettle.mock.calls[ 0 ][ 0 ].hasSuccess ).toBe(
+				false
+			);
+		} );
+
+		it( 'runs onCycleSettle before isProcessing clears (refresh guard)', async () => {
+			const mockFetch = createMockFetch( [
+				{ status: 200, body: { value: 1 } },
+			] );
+			global.fetch = mockFetch;
+
+			let processingDuringSettle: boolean | undefined;
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				onCycleSettle: () => {
+					processingDuringSettle = queue.getStatus().isProcessing;
+				},
+				...stateHandler,
+			} );
+
+			await queue.submit( { path: '/a', method: 'POST' } );
+
+			// Same guarantee as onSettled: still processing when it runs, so a
+			// refresh triggered from the callback would bail.
+			expect( processingDuringSettle ).toBe( true );
+			expect( queue.getStatus().isProcessing ).toBe( false );
+		} );
+
+		it( 'provides the pre-optimistic snapshot to onCycleSettle', async () => {
+			const mockFetch = createMockFetch( [
+				{ status: 200, body: { value: 99 } },
+			] );
+			global.fetch = mockFetch;
+
+			mockState.value = 7;
+
+			let settleSnapshot: TestState | undefined;
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				onCycleSettle: ( result ) => {
+					settleSnapshot = result.snapshot;
+				},
+				...stateHandler,
+			} );
+
+			await queue.submit( {
+				path: '/a',
+				method: 'POST',
+				applyOptimistic: () => {
+					mockState.value = 999;
+				},
+			} );
+
+			// Snapshot reflects the state before any optimistic update.
+			expect( settleSnapshot ).toEqual( { value: 7 } );
+		} );
+	} );
+
 	describe( 'onSettled callback timing', () => {
 		it( 'runs onSettled before isProcessing clears', async () => {
 			const mockFetch = createMockFetch( [

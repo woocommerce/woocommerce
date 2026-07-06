@@ -32,6 +32,24 @@ export type MutationResult< TState = unknown > = {
 	error?: Error;
 };
 
+/**
+ * Cycle-level information passed to the `onCycleSettle` callback.
+ *
+ * A "cycle" is one settle period: every request submitted between the queue
+ * going from idle → processing and returning to idle (this can span several
+ * in-flight batches when new requests arrive while one is in flight). This is
+ * fired exactly ONCE per cycle, unlike `MutationRequest.onSettled` which fires
+ * once per request.
+ */
+export type CycleSettleResult< TState = unknown > = {
+	/** True when at least one request in the cycle succeeded. */
+	hasSuccess: boolean;
+	/** The committed server state (last successful response), if any. */
+	data?: TState;
+	/** The snapshot taken before any optimistic update in the cycle, if any. */
+	snapshot?: TState;
+};
+
 type BatchItemResponse = {
 	status: number;
 	body: unknown;
@@ -45,6 +63,21 @@ export type MutationQueueConfig< TState = unknown > = {
 	takeSnapshot: () => TState;
 	rollback: ( snapshot: TState ) => void;
 	commit: ( serverState: TState ) => void;
+	/**
+	 * Called synchronously ONCE per settle cycle, when the queue returns to
+	 * idle, after commit/rollback but before `isProcessing` clears. This is the
+	 * place for cycle-level side effects that must run exactly once regardless
+	 * of how many requests the cycle contained (e.g. firing sync/legacy events
+	 * and extracting store notices) and that must complete before external code
+	 * (like a cart refresh) is allowed to run.
+	 *
+	 * Keeping this in the queue config — rather than in per-request `onSettled`
+	 * callbacks — means the batcher owns "fire once when idle", so callers can't
+	 * accidentally fire cycle events per request. The batcher itself stays
+	 * domain-agnostic: it only knows there is a settle moment; what happens then
+	 * is injected by the consumer.
+	 */
+	onCycleSettle?: ( result: CycleSettleResult< TState > ) => void;
 };
 
 type TrackedRequest< TState = unknown > = {
@@ -63,6 +96,7 @@ export function createMutationQueue< TState >(
 		takeSnapshot,
 		rollback,
 		commit,
+		onCycleSettle,
 		fetchHandler = fetch,
 	} = config;
 
@@ -106,6 +140,16 @@ export function createMutationQueue< TState >(
 				...( lastServerState !== null && { data: lastServerState } ),
 				...( error && { error } ),
 			} );
+		} );
+
+		// Fire the cycle-level settle callback exactly once, while
+		// isProcessing is still true so any refresh stays guarded (same
+		// guarantee as onSettled above). A cycle "had a success" iff at least
+		// one request committed server state (lastServerState !== null).
+		onCycleSettle?.( {
+			hasSuccess: lastServerState !== null,
+			...( lastServerState !== null && { data: lastServerState } ),
+			...( snapshot !== null && { snapshot } ),
 		} );
 
 		isProcessing = false;

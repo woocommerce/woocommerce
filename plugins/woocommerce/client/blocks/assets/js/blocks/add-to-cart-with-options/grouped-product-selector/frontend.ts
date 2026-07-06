@@ -127,9 +127,20 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 					{ lock: universalLock }
 				);
 
-				yield wooActions.batchAddCartItems( addedItems, {
-					showCartUpdatesNotices: false,
-				} );
+				// Loop addCartItem instead of the removed batchAddCartItems.
+				// Same-frame calls coalesce into a single Store API batch
+				// request via the mutation batcher, and the batcher fires the
+				// sync/legacy events, notice pass and a11y announcement once
+				// when the cycle settles — behaviorally identical to the old
+				// single batch action. Dispatch all in the same tick (do not
+				// await between them) so they land in one batch.
+				const promises = addedItems.map( ( item ) =>
+					wooActions.addCartItem( item, {
+						showCartUpdatesNotices: false,
+					} )
+				);
+
+				yield Promise.all( promises );
 			},
 		},
 		callbacks: {
