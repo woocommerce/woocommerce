@@ -2,14 +2,14 @@
 /**
  * Title: Collection of categories with images
  * Slug: purple/about-category-collection
- * Categories: purple
+ * Categories: about, purple
  * Keywords: about, text, image, media
  * Description: A section with a collection of categories with images.
  * Viewport width: 1440
  */
 ?>
 
-<!-- wp:group {"metadata":{"name":"Collection of categories with images","patternName":"purple/about-category-collection","description":"A section with a collection of categories with images.","categories":["purple"]},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|90","bottom":"var:preset|spacing|90"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":"Collection of categories with images","patternName":"purple/about-category-collection","description":"A section with a collection of categories with images.","categories":["about","purple"]},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|90","bottom":"var:preset|spacing|90"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--90);padding-bottom:var(--wp--preset--spacing--90)"><!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide"><!-- wp:paragraph {"style":{"typography":{"textTransform":"uppercase","textAlign":"center","letterSpacing":"0.08em","lineHeight":"1.28"},"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2","fontSize":"small"} -->
 <p class="has-text-align-center has-theme-2-color has-text-color has-link-color has-small-font-size" style="letter-spacing:0.08em;line-height:1.28;text-transform:uppercase"><?php esc_html_e( 'Our Selection', 'purple' ); ?></p>

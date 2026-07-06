@@ -2,14 +2,14 @@
 /**
  * Title: Heading, image and list of features
  * Slug: purple/about-features-2-columns
- * Categories: purple
+ * Categories: about, purple
  * Keywords: about, text, image, media
  * Description: A section with a heading, paragraph, a list of features with icons and an image.
  * Viewport width: 1440
  */
 ?>
 
-<!-- wp:group {"metadata":{"categories":["purple"],"name":"Heading, image and list of features","patternName":"purple/about-features-2-columns","description":"A section with a heading, paragraph, a list of features with icons and an image."},"align":"full","className":"alignfull is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
+<!-- wp:group {"metadata":{"categories":["about","purple"],"name":"Heading, image and list of features","patternName":"purple/about-features-2-columns","description":"A section with a heading, paragraph, a list of features with icons and an image."},"align":"full","className":"alignfull is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
 <div class="wp-block-group alignfull is-style-default" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0"><!-- wp:columns {"verticalAlignment":"center","align":"wide","style":{"spacing":{"blockGap":{"left":"var:preset|spacing|90"}}}} -->
 <div class="wp-block-columns alignwide are-vertically-aligned-center"><!-- wp:column {"verticalAlignment":"center","width":"40%","style":{"spacing":{"padding":{"bottom":"var:preset|spacing|30"}}},"layout":{"type":"default"}} -->
 <div class="wp-block-column is-vertically-aligned-center" style="padding-bottom:var(--wp--preset--spacing--30);flex-basis:40%"><!-- wp:paragraph {"style":{"typography":{"textTransform":"uppercase","letterSpacing":"1.12px"}},"fontSize":"small"} -->

@@ -2,14 +2,14 @@
 /**
  * Title: Left-aligned image, text on the right
  * Slug: purple/about-left-aligned-image-right-text
- * Categories: purple
+ * Categories: about, purple
  * Keywords: about, text, intro
  * Description: An intro section with a heading, paragraph, button and image.
  * Viewport width: 1440
  */
 ?>
 
-<!-- wp:group {"metadata":{"categories":["purple"],"name":"Left-aligned image, text on the right","patternName":"purple/about-left-aligned-image-right-text","description":"An intro section with a heading, paragraph, button and image."},"align":"full","className":"alignfull","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|140","bottom":"var:preset|spacing|140"}}},"backgroundColor":"theme-5","layout":{"type":"constrained","justifyContent":"center"}} -->
+<!-- wp:group {"metadata":{"categories":["about","purple"],"name":"Left-aligned image, text on the right","patternName":"purple/about-left-aligned-image-right-text","description":"An intro section with a heading, paragraph, button and image."},"align":"full","className":"alignfull","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|140","bottom":"var:preset|spacing|140"}}},"backgroundColor":"theme-5","layout":{"type":"constrained","justifyContent":"center"}} -->
 <div class="wp-block-group alignfull has-theme-5-background-color has-background" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--140);padding-bottom:var(--wp--preset--spacing--140)"><!-- wp:columns {"verticalAlignment":"center","align":"wide","style":{"spacing":{"blockGap":{"top":"0","left":"var:preset|spacing|50"}}}} -->
 <div class="wp-block-columns alignwide are-vertically-aligned-center"><!-- wp:column {"verticalAlignment":"center","width":"50%"} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:50%"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-placeholder.webp","alt":"<?php esc_attr_e('Placeholder image', 'purple');?>","dimRatio":0,"overlayColor":"theme-2","isUserOverlayColor":true,"minHeight":25,"minHeightUnit":"rem"} -->
