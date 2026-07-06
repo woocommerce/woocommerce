@@ -152,6 +152,16 @@ class CartAddItems extends AbstractCartRoute {
 				'error'    => null,
 			);
 
+			// Extensions on the add-to-cart filter read the request's
+			// top-level id/quantity/variation (that is the filter's whole
+			// point). This batch request nests them in items[], so hand the
+			// filter a per-item view that looks like the web add-item request
+			// it was written against.
+			$item_request = clone $request;
+			$item_request->set_param( 'id', $result['id'] );
+			$item_request->set_param( 'quantity', $result['quantity'] );
+			$item_request->set_param( 'variation', $item['variation'] ?? array() );
+
 			/**
 			 * Filters cart item data sent via the API before it is passed to the cart controller.
 			 *
@@ -172,7 +182,7 @@ class CartAddItems extends AbstractCartRoute {
 					'variation'      => $item['variation'] ?? array(),
 					'cart_item_data' => array(),
 				),
-				$request
+				$item_request
 			);
 
 			$keys_before_attempt = array_keys( $this->cart_controller->get_cart_instance()->get_cart_contents() );

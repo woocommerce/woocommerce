@@ -202,6 +202,43 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
+	 * Extensions on woocommerce_store_api_add_to_cart_data read the request's
+	 * top-level params; each batch item must present itself like a web
+	 * add-item request.
+	 *
+	 * @testdox The add-to-cart data filter sees per-item request params.
+	 */
+	public function test_add_to_cart_filter_sees_per_item_params(): void {
+		wp_set_current_user( $this->operator_id );
+
+		$seen_ids  = array();
+		$extension = function ( $data, $request ) use ( &$seen_ids ) {
+			$seen_ids[] = $request['id'];
+			return $data;
+		};
+		add_filter( 'woocommerce_store_api_add_to_cart_data', $extension, 10, 2 );
+
+		try {
+			$this->add_items(
+				array(
+					array(
+						'id'       => $this->product->get_id(),
+						'quantity' => 1,
+					),
+					array(
+						'id'       => $this->out_of_stock_product->get_id(),
+						'quantity' => 1,
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_store_api_add_to_cart_data', $extension, 10 );
+		}
+
+		$this->assertSame( array( $this->product->get_id(), $this->out_of_stock_product->get_id() ), $seen_ids );
+	}
+
+	/**
 	 * Plugins on the add-to-cart hooks can throw anything; one item's failure
 	 * must stay that item's failure.
 	 *
