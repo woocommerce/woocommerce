@@ -22,33 +22,45 @@ We also recommend you review the [WordPress core guidelines](https://developer.w
 
 ![Use existing components example](/img/doc_images/Use-existing-components.png)
 
-### Do: Use existing UI
+:::tip[Do]
 
-Use existing WordPress and WooCommerce UI, built-in components (text fields, checkboxes, etc), and existing menu structures.
+Use existing UI. Use existing WordPress and WooCommerce UI, built-in components (text fields, checkboxes, etc), and existing menu structures.
 
-### Don't create new components
+:::
 
-If you need to make an exception for your product, be prepared to provide a valid use case.
+:::danger[Don't]
 
----
+Create new components. If you need to make an exception for your product, be prepared to provide a valid use case.
 
-### Do: Present a review request at the right time
-
-Presenting users with a request for review is a great way to get feedback on your extension. Think about best placement and timing to show these prompts. Try to present the review request at a time that's least disruptive, such as after successful completion of a task or event.
-
-### Don't present a review request first thing
-
-Avoid showing the user a review request upon first launching the extension. Once the user has had a chance to set up, connect, and use the plugin, they'll have a better idea of how to rate it.
+:::
 
 ---
 
-### Do: Focus on the experience
+:::tip[Do]
 
-After the customer installs your product, the experience should be the primary focus. Keep things simple and guide the user to successful setup.
+Present a review request at the right time. Presenting users with a request for review is a great way to get feedback on your extension. Think about best placement and timing to show these prompts. Try to present the review request at a time that's least disruptive, such as after successful completion of a task or event.
 
-### Don't alter the core interface
+:::
 
-Don't express your brand by changing the shape of containers in Woo admin. Content that's unrelated to the experience, such as branding, self-promotion, or large banners, will distract the merchant from the tasks they purchased your product for.
+:::danger[Don't]
+
+Present a review request first thing. Avoid showing the user a review request upon first launching the extension. Once the user has had a chance to set up, connect, and use the plugin, they'll have a better idea of how to rate it.
+
+:::
+
+---
+
+:::tip[Do]
+
+Focus on the experience. After the customer installs your product, the experience should be the primary focus. Keep things simple and guide the user to successful setup.
+
+:::
+
+:::danger[Don't]
+
+Alter the core interface. Don't express your brand by changing the shape of containers in Woo admin. Content that's unrelated to the experience, such as branding, self-promotion, or large banners, will distract the merchant from the tasks they purchased your product for.
+
+:::
 
 ## Voice and tone
 
