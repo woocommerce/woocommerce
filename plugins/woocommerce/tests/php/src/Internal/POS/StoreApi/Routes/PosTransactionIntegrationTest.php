@@ -351,6 +351,12 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 		wp_set_current_user( $this->operator_id );
 		$customer_id = $this->factory()->user->create( array( 'role' => 'customer' ) );
 
+		// Give the account saved address data; a POS sale must never touch it.
+		$customer = new \WC_Customer( $customer_id );
+		$customer->set_billing_city( 'Brno' );
+		$customer->set_billing_email( 'saved@example.com' );
+		$customer->save();
+
 		$this->add_items(
 			array(
 				array(
@@ -368,6 +374,10 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 
 		$order = wc_get_order( $checkout->get_data()['order_id'] );
 		$this->assertSame( $customer_id, $order->get_customer_id() );
+
+		$customer = new \WC_Customer( $customer_id );
+		$this->assertSame( 'Brno', $customer->get_billing_city(), 'A POS sale must not overwrite the account saved addresses.' );
+		$this->assertSame( 'saved@example.com', $customer->get_billing_email() );
 	}
 
 	/**
