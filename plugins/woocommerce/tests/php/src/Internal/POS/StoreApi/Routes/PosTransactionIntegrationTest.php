@@ -107,14 +107,78 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox All three POS routes are registered through the production wiring.
+	 * @testdox All POS routes are registered through the production wiring.
 	 */
 	public function test_routes_are_registered(): void {
 		$routes = rest_get_server()->get_routes();
 
-		foreach ( array( '/cart/add-items', '/cart/add-fee', '/checkout' ) as $path ) {
+		foreach ( array( '/cart/add-items', '/cart/add-fee', '/cart/apply-coupon', '/checkout' ) as $path ) {
 			$this->assertArrayHasKey( '/' . Controller::REST_NAMESPACE . $path, $routes );
 		}
+	}
+
+	/**
+	 * @testdox apply-coupon is a passthrough of core coupon validation: valid codes apply, unknown codes 400.
+	 */
+	public function test_apply_coupon_passthrough(): void {
+		wp_set_current_user( $this->operator_id );
+
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'pos-five-off' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 5.0 );
+		$coupon->save();
+
+		$this->add_items(
+			array(
+				array(
+					'id'       => $this->product->get_id(),
+					'quantity' => 2,
+				),
+			)
+		);
+
+		wp_set_current_user( $this->operator_id );
+		$applied = $this->dispatch_post( '/cart/apply-coupon', array( 'code' => 'pos-five-off' ) );
+		$this->assertSame( 201, $applied->get_status(), 'Body: ' . wp_json_encode( $applied->get_data() ) );
+		$this->assertSame( '500', $applied->get_data()['totals']->total_discount, 'The 5.00 coupon should discount the cart.' );
+
+		wp_set_current_user( $this->operator_id );
+		$unknown = $this->dispatch_post( '/cart/apply-coupon', array( 'code' => 'no-such-coupon' ) );
+		$this->assertSame( 400, $unknown->get_status() );
+	}
+
+	/**
+	 * @testdox A coupon survives into the checkout totals.
+	 */
+	public function test_coupon_lands_on_the_order(): void {
+		wp_set_current_user( $this->operator_id );
+
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'pos-ten-off' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 10.0 );
+		$coupon->save();
+
+		$this->add_items(
+			array(
+				array(
+					'id'       => $this->product->get_id(),
+					'quantity' => 2,
+				),
+			)
+		);
+
+		wp_set_current_user( $this->operator_id );
+		$this->dispatch_post( '/cart/apply-coupon', array( 'code' => 'pos-ten-off' ) );
+
+		wp_set_current_user( $this->operator_id );
+		$checkout = $this->dispatch_post( '/checkout', array() );
+		$this->assertSame( 200, $checkout->get_status(), 'Body: ' . wp_json_encode( $checkout->get_data() ) );
+
+		$order = wc_get_order( $checkout->get_data()['order_id'] );
+		$this->assertSame( 10.0, (float) $order->get_total(), 'Total should be 2×10.00 − 10.00 coupon.' );
+		$this->assertSame( array( 'pos-ten-off' ), $order->get_coupon_codes() );
 	}
 
 	/**
