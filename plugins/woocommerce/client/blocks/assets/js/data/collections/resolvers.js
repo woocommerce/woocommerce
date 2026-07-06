@@ -8,9 +8,8 @@ import { addQueryArgs } from '@wordpress/url';
  * Internal dependencies
  */
 import { receiveCollection, receiveCollectionError } from './actions';
-// Ensure the schema store is registered before collection resolvers request routes.
-import '../schema';
-import { STORE_KEY as SCHEMA_STORE_KEY } from '../schema/constants';
+// Import from the schema entry point so the schema store is registered before collection resolvers request routes.
+import { SCHEMA_STORE_KEY } from '../schema';
 import { STORE_KEY, DEFAULT_EMPTY_ARRAY } from './constants';
 import { apiFetchWithHeadersControl } from '../shared-controls';
 
