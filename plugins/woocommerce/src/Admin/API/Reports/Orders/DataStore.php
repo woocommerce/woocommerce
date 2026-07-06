@@ -406,9 +406,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$mapped_data[ $product['order_id'] ]['products'][] = $product_data;
 
-			// If this product's order has another related order, it will be added to our mapped_data.
+			// If this product's order has related refund orders, add product data to each refund.
 			if ( isset( $related_orders [ $product['order_id'] ] ) ) {
-				$mapped_data[ $related_orders[ $product['order_id'] ]['order_id'] ] ['products'] [] = $product_data;
+				foreach ( $related_orders[ $product['order_id'] ] as $refund_order ) {
+					$mapped_data[ $refund_order['order_id'] ]['products'][] = $product_data;
+				}
 			}
 		}
 
@@ -453,7 +455,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$related_orders = array();
 		foreach ( $orders as $order ) {
 			if ( '0' !== $order['parent_id'] ) {
-				$related_orders[ $order['parent_id'] ] = $order;
+				$related_orders[ $order['parent_id'] ][] = $order;
 			}
 		}
 		return $related_orders;
