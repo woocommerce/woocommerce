@@ -11,7 +11,7 @@ import { processErrorResponse } from '@woocommerce/block-data';
 /**
  * Internal dependencies
  */
-import { STORE_KEY } from '@woocommerce/block-data/cart/constants';
+import { STORE_KEY } from '../../../assets/js/data/cart/constants';
 
 /**
  * When executed, this will call the cart/extensions endpoint.

@@ -15,10 +15,10 @@ import { Button } from '@ariakit/react';
 /**
  * Internal dependencies
  */
-import { shippingAddressHasValidationErrors } from '@woocommerce/block-data/cart/utils';
 import { RatePrice, getLocalPickupPrices, getShippingPrices } from './shared';
 import type { minMaxPrices } from './shared';
 import { defaultLocalPickupText, defaultShippingText } from './constants';
+import { shippingAddressHasValidationErrors } from '../../../../data/cart/utils';
 
 const SHIPPING_RATE_ERROR = {
 	hidden: true,
