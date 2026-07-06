@@ -27,26 +27,34 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 	private $brand_taxonomy_backup = null;
 
 	/**
+	 * Holds the original current user ID when a test changes it.
+	 *
+	 * @var int|null
+	 */
+	private $current_user_backup = null;
+
+	/**
 	 * Set up test data.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		global $wp_meta_boxes;
 		$this->wp_meta_boxes_backup = isset( $wp_meta_boxes ) ? $wp_meta_boxes : array();
+		$this->current_user_backup  = get_current_user_id();
 	}
 
 	/**
 	 * Tear down test data.
 	 */
 	public function tearDown(): void {
-		if ( null !== $this->brand_taxonomy_backup && $this->brand_taxonomy_backup instanceof WP_Taxonomy ) {
-			register_taxonomy(
-				$this->brand_taxonomy_backup->name,
-				$this->brand_taxonomy_backup->object_type,
-				(array) $this->brand_taxonomy_backup
-			);
+		if ( $this->brand_taxonomy_backup instanceof WP_Taxonomy ) {
+			// Restore the original registration directly; register_taxonomy() takes a 'capabilities'
+			// array arg but WP_Taxonomy only exposes a 'cap' object, so casting the object back
+			// would silently drop the real capabilities.
+			$GLOBALS['wp_taxonomies']['product_brand'] = $this->brand_taxonomy_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 		$GLOBALS['wp_meta_boxes'] = $this->wp_meta_boxes_backup;  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		wp_set_current_user( $this->current_user_backup );
 		parent::tearDown();
 	}
 
