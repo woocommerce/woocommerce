@@ -57,4 +57,31 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 
 		$this->approved_gateways[] = $gateway;
 	}
+
+	/**
+	 * Declare `recurring` for `$gateway` and wire an inline declining handler: it moves the
+	 * renewal order to `failed` (a hard decline the gateway reports synchronously), so the
+	 * money-path settles the cycle `failed` - as opposed to a gateway that leaves the order
+	 * un-paid-and-not-failed, which is treated as an async charge still awaiting confirmation.
+	 * Unhooked automatically on teardown.
+	 *
+	 * @param string $gateway Gateway id to fail charges for.
+	 */
+	protected function fail_charges_for( string $gateway ): void {
+		GatewayCapabilities::declare( $gateway, array( GatewayCapabilities::RECURRING ) );
+
+		add_action(
+			'woocommerce_subscriptions_engine_scheduled_payment_' . $gateway,
+			static function ( $amount, $renewal_order ): void {
+				unset( $amount );
+				if ( $renewal_order instanceof WC_Order ) {
+					$renewal_order->update_status( 'failed', 'Gateway declined the recurring charge.' );
+				}
+			},
+			10,
+			2
+		);
+
+		$this->approved_gateways[] = $gateway;
+	}
 }
