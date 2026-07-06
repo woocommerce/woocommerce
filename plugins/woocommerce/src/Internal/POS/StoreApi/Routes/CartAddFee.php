@@ -126,8 +126,10 @@ class CartAddFee extends AbstractCartRoute {
 			throw new RouteException( 'woocommerce_pos_rest_invalid_fee_name', esc_html__( 'The fee name cannot be empty.', 'woocommerce' ), 400 );
 		}
 
-		if ( $amount <= 0 ) {
-			throw new RouteException( 'woocommerce_pos_rest_invalid_fee_amount', esc_html__( 'The fee amount must be greater than zero.', 'woocommerce' ), 400 );
+		// is_finite: REST 'number' validation accepts values like 1e400, which
+		// cast to INF, pass an `<= 0` check, and corrupt every total downstream.
+		if ( ! is_finite( $amount ) || $amount <= 0 ) {
+			throw new RouteException( 'woocommerce_pos_rest_invalid_fee_amount', esc_html__( 'The fee amount must be a finite number greater than zero.', 'woocommerce' ), 400 );
 		}
 
 		if ( ! WC()->session ) {

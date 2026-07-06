@@ -336,6 +336,24 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox add-fee rejects non-finite amounts (1e400 casts to INF and passes numeric checks).
+	 */
+	public function test_add_fee_rejects_non_finite_amount(): void {
+		wp_set_current_user( $this->operator_id );
+
+		$response = $this->dispatch_post(
+			'/cart/add-fee',
+			array(
+				'name'   => 'Overflow',
+				'amount' => '1e400',
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_pos_rest_invalid_fee_amount', $response->get_data()['code'] );
+	}
+
+	/**
 	 * @testdox add-fee rejects non-positive amounts.
 	 */
 	public function test_add_fee_rejects_non_positive_amount(): void {
