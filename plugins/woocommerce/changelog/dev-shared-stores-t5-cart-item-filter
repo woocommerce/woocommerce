@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add the context.cartItemFilter escape hatch to the woocommerce/cart iAPI store: a serialized { namespace, action } predicate reference resolved via the store registry at envelope-derivation time. When set it becomes the sole narrowing authority over the id+variation candidates, replacing the generic narrowing (per-namespace compare + presence heuristic); key-in-context still bypasses it and the exactly-one/isInCart rules apply to the filter's survivors. findItem gains a filter param (explicit predicate overrides, false opts out, absent inherits the context filter in scope, out-of-scope degrades to generic rules). Broken references degrade gracefully to generic narrowing with a dev-mode warning. Server-side first-paint resolves conservatively when a cartItemFilter is present (no exact line, not in cart, draft still resolved) since a JS predicate cannot run during PHP directive processing.

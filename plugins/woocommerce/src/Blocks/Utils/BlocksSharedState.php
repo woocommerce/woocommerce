@@ -211,9 +211,15 @@ class BlocksSharedState {
 	 *   seeded; when a draft exists we match on its `id` directly (already the
 	 *   purchasable id for simple products). Deterministic variation resolution
 	 *   server-side is deferred to the surface that seeds the draft (T6).
-	 * - **`cartItemFilter`**: a JS predicate cannot run during PHP seeding.
-	 *   Filtered surfaces render conservatively server-side (open item; the
-	 *   filter itself is T5).
+	 * - **`cartItemFilter`**: a JS predicate cannot run during PHP seeding, and
+	 *   in JS the filter REPLACES generic narrowing (it is the sole narrowing
+	 *   authority). Applying generic narrowing server-side when a filter is set
+	 *   could render a pairing the filter would reject, so when the context
+	 *   carries a `cartItemFilter` the closure resolves conservatively: `cart`
+	 *   null, `isInCart` false, draft still resolved. The exact filtered pairing
+	 *   is deferred to hydration. See the CONSERVATIVE FILTER FALLBACK comment in
+	 *   the closure. There is intentionally no PHP callback mechanism for the
+	 *   predicate (out of scope).
 	 *
 	 * @return void
 	 */
@@ -245,6 +251,29 @@ class BlocksSharedState {
 							'cart'     => $line,
 							'draft'    => $draft,
 							'isInCart' => null !== $line,
+						);
+					}
+
+					// CONSERVATIVE FILTER FALLBACK (first-paint, T5):
+					// `context.cartItemFilter` is a JS predicate reference that
+					// CANNOT run during PHP directive processing. In JS the filter
+					// REPLACES generic narrowing and is the sole narrowing
+					// authority, so applying generic narrowing here (as if no
+					// filter existed) could server-render a pairing the filter
+					// would reject (e.g. pair a plain line a bundle-editor filter
+					// excludes) — a hydration mismatch and a wrong mutation
+					// target. We therefore resolve conservatively when a filter is
+					// present: no exact cart line, not in cart. The draft is still
+					// resolved (so the surface has its editable draft), and step 1
+					// above is unaffected (a keyed surface is always exact). The
+					// exact filtered pairing is left to hydration, when the JS
+					// predicate can finally run. There is deliberately no PHP
+					// callback mechanism for the predicate (out of scope).
+					if ( isset( $context['cartItemFilter'] ) ) {
+						return array(
+							'cart'     => null,
+							'draft'    => $draft,
+							'isInCart' => false,
 						);
 					}
 

@@ -31,6 +31,8 @@ import {
 } from './mutation-batcher';
 import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
 import {
+	type CartItemFilterPredicate,
+	type CartItemFilterReference,
 	type DraftItem,
 	getDraftExtensionProps,
 	isGenericExactPair,
@@ -38,7 +40,11 @@ import {
 	resolveExactlyOne,
 } from './cart-item-matching';
 
-export type { DraftItem } from './cart-item-matching';
+export type {
+	DraftItem,
+	CartItemFilterPredicate,
+	CartItemFilterReference,
+} from './cart-item-matching';
 
 export type WooCommerceConfig = {
 	messages?: {
@@ -92,13 +98,16 @@ type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
 
 /**
  * The shared `woocommerce` context namespace read by both shared stores. It
- * carries the surface's product/cart identity (`productId`, `cartItemKey`).
- * `cartItemFilter` is reserved for the T5 escape hatch and is not consumed here.
+ * carries the surface's product/cart identity (`productId`, `cartItemKey`) and
+ * the optional `cartItemFilter` escape hatch — a SERIALIZED ACTION REFERENCE
+ * (`{ namespace, action }`), never a live function (context is serialized).
+ * Core resolves it to a predicate at envelope-derivation time (see
+ * `resolveCartItemFilter`).
  */
 export type SharedWooCommerceContext = {
 	productId?: number;
 	cartItemKey?: string;
-	cartItemFilter?: unknown;
+	cartItemFilter?: CartItemFilterReference;
 };
 
 /**
@@ -149,11 +158,24 @@ export type Store = {
 		 */
 		itemInContext: ItemEnvelope;
 		/**
-		 * Resolve an envelope explicitly by `key` or `id` (no `filter` param —
-		 * that is T5). `key` bypasses the ladder (exact); `id` runs the ladder
-		 * against the context draft.
+		 * Resolve an envelope explicitly.
+		 *
+		 * - `key` bypasses the ladder entirely (exact line; ignores any filter).
+		 * - `id` runs the ladder against the context draft (or a bare draft built
+		 *   from the id).
+		 * - `filter` controls narrowing:
+		 *   - a predicate FUNCTION → that predicate is the sole narrowing
+		 *     authority (overrides any `context.cartItemFilter`);
+		 *   - `false` → explicitly opt out of context filtering (generic rules
+		 *     only, ignore `context.cartItemFilter`);
+		 *   - absent → inherit `context.cartItemFilter` when called in an iAPI
+		 *     scope; out-of-scope calls degrade silently to generic rules.
 		 */
-		findItem: ( args: { key?: string; id?: number } ) => ItemEnvelope;
+		findItem: ( args: {
+			key?: string;
+			id?: number;
+			filter?: CartItemFilterPredicate | false;
+		} ) => ItemEnvelope;
 	};
 	actions: {
 		removeCartItem: ( key: string ) => Promise< void >;
@@ -622,19 +644,121 @@ function isServerCartItem(
 }
 
 /**
+ * Emit a dev-mode warning about a broken `cartItemFilter` reference.
+ *
+ * Gated behind `globalThis.SCRIPT_DEBUG` (the iAPI dev-mode flag): a broken
+ * reference degrades gracefully to generic narrowing in production (no
+ * warning), but surfaces loudly during development so the extension author sees
+ * the mistake. Never throws — a bad reference must not break derivation.
+ *
+ * @param message The warning message.
+ */
+function warnFilter( message: string ): void {
+	if ( ( globalThis as { SCRIPT_DEBUG?: boolean } ).SCRIPT_DEBUG ) {
+		// eslint-disable-next-line no-console
+		console.warn( `[woocommerce/cart] cartItemFilter: ${ message }` );
+	}
+}
+
+/**
+ * Resolve a serialized `cartItemFilter` reference (`{ namespace, action }`) to a
+ * live predicate function, via the iAPI store registry.
+ *
+ * Resolution mechanics:
+ *
+ * - The `namespace` is looked up with the public `store( namespace )` accessor.
+ *   We do NOT pass a lock: an extension exposing a filter action registers a
+ *   *public* store, and a plain `store( namespace )` read of a public store is a
+ *   no-op that returns its proxy. If the extension locked its store, the lookup
+ *   throws — we catch it and treat it as an unresolvable reference (degrade).
+ * - The `action` is either a plain name or a dotted path:
+ *   - **dotted** (`"actions.matchLine"`, `"actions.filters.byNote"`) → walked
+ *     from the store root, property by property.
+ *   - **plain** (`"matchLine"`) → tried first at `store.actions[ action ]`, then
+ *     at the store root `store[ action ]` (tolerates authors who expose the
+ *     predicate off `state`/root rather than `actions`).
+ * - The final target must be a function; anything else (unknown namespace,
+ *   unknown action, non-function value) resolves to `null`.
+ *
+ * Failure behavior: unknown namespace/action or a non-function target returns
+ * `null` — the caller behaves as if no filter is set (generic narrowing runs) —
+ * with a dev-mode `console.warn` (see `warnFilter`). Never throws.
+ *
+ * @param reference The serialized filter reference from context.
+ * @return The resolved predicate, or `null` when it cannot be resolved.
+ */
+function resolveCartItemFilter(
+	reference: CartItemFilterReference | undefined
+): CartItemFilterPredicate | null {
+	if (
+		! reference ||
+		typeof reference.namespace !== 'string' ||
+		typeof reference.action !== 'string'
+	) {
+		return null;
+	}
+
+	const { namespace, action } = reference;
+
+	let storeProxy: Record< string, unknown >;
+	try {
+		// Public read: no lock passed. Locked extension stores throw here and
+		// fall through to the catch → treated as unresolvable.
+		storeProxy = store( namespace ) as Record< string, unknown >;
+	} catch {
+		warnFilter(
+			`store "${ namespace }" could not be read (is it locked?); ignoring filter.`
+		);
+		return null;
+	}
+
+	// Resolve the target: dotted path walked from the store root; a plain name
+	// tried on `actions` first, then the root.
+	let target: unknown;
+	if ( action.includes( '.' ) ) {
+		target = action.split( '.' ).reduce< unknown >( ( node, segment ) => {
+			if ( node && typeof node === 'object' ) {
+				return ( node as Record< string, unknown > )[ segment ];
+			}
+			return undefined;
+		}, storeProxy );
+	} else {
+		const actions = storeProxy.actions as
+			| Record< string, unknown >
+			| undefined;
+		target = actions?.[ action ] ?? storeProxy[ action ];
+	}
+
+	if ( typeof target !== 'function' ) {
+		warnFilter(
+			`action "${ action }" on store "${ namespace }" is not a function; ignoring filter.`
+		);
+		return null;
+	}
+
+	return target as CartItemFilterPredicate;
+}
+
+/**
  * Resolve the `{ cart, draft, isInCart }` envelope via the resolution ladder.
  *
- * Ladder (generic-narrowing path only — the `cartItemFilter` escape hatch is
- * T5, deliberately not implemented here):
+ * Ladder:
  *
- * 1. `cartItemKey` present → that exact line. Filters never run; cart surfaces
- *    are always exact. `isInCart` reflects whether the line exists.
+ * 1. `cartItemKey` present → that exact line. Filters NEVER run; cart surfaces
+ *    are always exact. `isInCart` reflects whether the line exists. (This step
+ *    is unchanged by the `cartItemFilter` escape hatch.)
  * 2. Candidates = lines whose purchasable id matches the draft's resolved id
  *    (variation-id resolution only — no attribute matching at cart level,
- *    Raluca's rule). Then generic narrowing: per-namespace deep-compare of the
- *    draft's namespaced props vs the line's `extensions[ns]`, plus the presence
- *    heuristic (a line with visible `item_data`/`extensions` the draft doesn't
- *    account for is excluded).
+ *    Raluca's rule). Then EITHER:
+ *    - `filter` (a resolved `cartItemFilter` predicate) is set → the predicate
+ *      is the **sole** narrowing authority: it REPLACES the generic narrowing
+ *      (per-namespace compare + presence heuristic), it does not compose with
+ *      it. This is what lets a surface (e.g. a bundle editor) pair with a line
+ *      the presence heuristic would otherwise exclude.
+ *    - otherwise → generic narrowing: per-namespace deep-compare of the draft's
+ *      namespaced props vs the line's `extensions[ns]`, plus the presence
+ *      heuristic (a line with visible `item_data`/`extensions` the draft doesn't
+ *      account for is excluded).
  * 3. Exactly one survivor → `cart`; zero or several → undefined. NEVER
  *    first-match fallback. `isInCart` = survivors AFTER narrowing > 0 ("THIS
  *    configuration is in the cart") — pre-narrowing candidates do NOT count:
@@ -642,17 +766,23 @@ function isServerCartItem(
  *    decorated bundle child) yields `isInCart: false`, so the surface renders
  *    plain add-button UI instead of in-cart UI without a safe mutation target.
  *    Invisible bare twins both survive → `isInCart: true` with `cart`
- *    undefined (genuinely ambiguous presence).
+ *    undefined (genuinely ambiguous presence). This exactly-one rule and the
+ *    survivors-based `isInCart` apply to the filter's survivor set identically.
  *
- * @param opts.draft The draft to pair (usually the context draft).
- * @param opts.key   An explicit cart item key (bypasses everything).
+ * @param opts.draft   The draft to pair (usually the context draft).
+ * @param opts.key     An explicit cart item key (bypasses everything).
+ * @param opts.filter  A resolved `cartItemFilter` predicate. When present it is
+ *                     the sole narrowing authority (replaces generic narrowing).
+ * @param opts.context The shared `woocommerce` context, passed to the predicate.
  * @return The resolved envelope.
  */
 function resolveEnvelope( opts: {
 	draft?: DraftItem | undefined;
 	key?: string | undefined;
+	filter?: CartItemFilterPredicate | null | undefined;
+	context?: SharedWooCommerceContext | null | undefined;
 } ): ItemEnvelope {
-	const { draft, key } = opts;
+	const { draft, key, filter, context } = opts;
 
 	// Step 1: explicit key wins — exact, no filters, no narrowing.
 	if ( key ) {
@@ -678,14 +808,19 @@ function resolveEnvelope( opts: {
 			isServerCartItem( item ) && item.id === purchasableId
 	);
 
-	// Generic narrowing (step 2), then both envelope values derive from the
-	// SAME survivor set (step 3): `cart` needs exactly one survivor;
-	// `isInCart` needs at least one. Lines the draft cannot account for are
-	// not survivors and therefore never count as "this configuration".
-	const draftProps = getDraftExtensionProps( draft );
-	const survivors = narrowCandidates( candidates, ( line ) =>
-		isGenericExactPair( draftProps, line )
-	);
+	// Step 2 narrowing. When a filter is set it is the SOLE narrowing authority
+	// (replace, not compose — the generic narrowing does NOT also run). Step 3
+	// (exactly-one + survivors-based isInCart) then applies identically to the
+	// survivor set, whichever narrowing produced it.
+	let narrow: ( line: CartItem ) => boolean;
+	if ( filter ) {
+		narrow = ( line ) =>
+			filter( line, { draft, context: context ?? null } );
+	} else {
+		const draftProps = getDraftExtensionProps( draft );
+		narrow = ( line ) => isGenericExactPair( draftProps, line );
+	}
+	const survivors = narrowCandidates( candidates, narrow );
 	const cart = resolveExactlyOne( survivors );
 
 	return {
@@ -721,26 +856,57 @@ const { actions } = store< Store >(
 			 * `draft` is the `draftItems` entry whose `id` === context.productId
 			 * (the returned object IS editable — mutating it mutates the draft).
 			 * `cart` and `isInCart` come from the resolution ladder.
+			 *
+			 * When `context.cartItemFilter` is set, its resolved predicate is the
+			 * sole narrowing authority (it replaces generic narrowing). A broken
+			 * reference resolves to `null` → generic narrowing runs (graceful
+			 * degradation, dev-mode warning). Innermost-context shadowing falls
+			 * out of iAPI context inheritance for free: `getSharedContext()`
+			 * reads the nearest `woocommerce` context, so an inner region's
+			 * `cartItemFilter` naturally overrides an outer one.
 			 */
 			get itemInContext(): ItemEnvelope {
 				const context = getSharedContext();
 				const draft = findDraftByProductId( context?.productId );
 				const key = context?.cartItemKey;
-				return resolveEnvelope( { draft, key } );
+				const filter = resolveCartItemFilter( context?.cartItemFilter );
+				return resolveEnvelope( { draft, key, filter, context } );
 			},
 
 			/**
-			 * Explicit envelope lookup by `key` or `id` (no `filter` param —
-			 * that is T5). `key` bypasses the ladder; `id` runs the ladder
-			 * against the context draft for that product id (or a bare draft
-			 * built from the id when no context draft exists).
+			 * Explicit envelope lookup.
+			 *
+			 * - `key` bypasses the ladder (exact line, no filter).
+			 * - `id` runs the ladder against the context draft for that product
+			 *   id (or a bare draft built from the id when no context draft
+			 *   exists).
+			 * - `filter` (add-on to the ladder):
+			 *   - a predicate FUNCTION → overrides any `context.cartItemFilter`
+			 *     (callers in JS can pass real functions);
+			 *   - `false` → explicitly opt out of context filtering (generic
+			 *     rules run, `context.cartItemFilter` ignored);
+			 *   - absent → inherit `context.cartItemFilter`.
+			 *
+			 * Scope caveat: inheriting the context filter requires an iAPI scope,
+			 * because it reads `getContext('woocommerce')`. In scope means the
+			 * call happens synchronously inside a directive callback or an
+			 * action/derived-state getter (see `getSharedContext`). Out of scope
+			 * — a plain module call, a `setTimeout`/`Promise.then` callback not
+			 * wrapped in `withScope`, or an async continuation after a `yield` in
+			 * a generator (the scope is only guaranteed for the synchronous part)
+			 * — `getContext` throws, `getSharedContext()` returns `null`, and the
+			 * lookup degrades silently to generic rules. Pass an explicit
+			 * `filter` (or `filter: false`) to make the behavior deterministic
+			 * regardless of scope.
 			 */
 			findItem( {
 				key,
 				id,
+				filter,
 			}: {
 				key?: string;
 				id?: number;
+				filter?: CartItemFilterPredicate | false;
 			} ): ItemEnvelope {
 				if ( key ) {
 					const draft =
@@ -750,10 +916,31 @@ const { actions } = store< Store >(
 					return resolveEnvelope( { draft, key } );
 				}
 
+				const context = getSharedContext();
 				const draft =
 					findDraftByProductId( id ) ??
 					( id !== undefined ? { id } : undefined );
-				return resolveEnvelope( { draft } );
+
+				// Filter precedence:
+				// - explicit predicate → use it verbatim (overrides context).
+				// - `false` → opt out: generic rules, ignore context filter.
+				// - absent → inherit the (possibly resolved) context filter.
+				let resolvedFilter: CartItemFilterPredicate | null;
+				if ( typeof filter === 'function' ) {
+					resolvedFilter = filter;
+				} else if ( filter === false ) {
+					resolvedFilter = null;
+				} else {
+					resolvedFilter = resolveCartItemFilter(
+						context?.cartItemFilter
+					);
+				}
+
+				return resolveEnvelope( {
+					draft,
+					filter: resolvedFilter,
+					context,
+				} );
 			},
 
 			findItemInCart( {

@@ -70,6 +70,14 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 			$property->setAccessible( true );
 			$property->setValue( $interactivity, array() );
 		}
+
+		// Reset the context stack to its "not processing directives" default so
+		// a test that injected a context does not leak into the next one.
+		if ( $interactivity_ref->hasProperty( 'context_stack' ) ) {
+			$context_stack = $interactivity_ref->getProperty( 'context_stack' );
+			$context_stack->setAccessible( true );
+			$context_stack->setValue( $interactivity, null );
+		}
 	}
 
 	/**
@@ -83,6 +91,23 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 		$reflection = new \ReflectionMethod( BlocksSharedState::class, $method );
 		$reflection->setAccessible( true );
 		return $reflection->invokeArgs( null, $args );
+	}
+
+	/**
+	 * Push a shared `woocommerce` context onto the Interactivity API context
+	 * stack, so a directly-invoked derived-state closure can read it via
+	 * wp_interactivity_get_context() as if it ran during directive processing.
+	 * Cleared by reset_shared_state() in setUp/tearDown.
+	 *
+	 * @param array $woocommerce_context The `woocommerce`-namespaced context.
+	 * @return void
+	 */
+	private function set_interactivity_context( array $woocommerce_context ): void {
+		$interactivity = wp_interactivity();
+		$reflection    = new \ReflectionClass( $interactivity );
+		$stack         = $reflection->getProperty( 'context_stack' );
+		$stack->setAccessible( true );
+		$stack->setValue( $interactivity, array( array( 'woocommerce' => $woocommerce_context ) ) );
 	}
 
 	/**
@@ -156,6 +181,101 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 		$this->assertNull( $envelope['cart'], 'No context draft → no exact cart line.' );
 		$this->assertNull( $envelope['draft'] );
 		$this->assertFalse( $envelope['isInCart'] );
+	}
+
+	/**
+	 * @testdox itemInContext resolves conservatively (no cart, not in cart) when the context carries a cartItemFilter, even for a draft generic narrowing would otherwise pair.
+	 *
+	 * First-paint boundary (T5): a JS cartItemFilter predicate cannot run in PHP
+	 * and, in JS, REPLACES generic narrowing. Applying generic narrowing here
+	 * could server-render a pairing the filter would reject, so the closure must
+	 * resolve conservatively — cart null, isInCart false, draft still resolved —
+	 * and leave the exact pairing to hydration.
+	 */
+	public function test_item_in_context_is_conservative_when_filter_present(): void {
+		BlocksSharedState::load_cart_state( $this->consent );
+
+		// A single plain line + a plain draft: WITHOUT a filter, generic
+		// narrowing would pair this line exactly (isInCart true, cart set). The
+		// presence of a cartItemFilter must suppress that pairing.
+		$state = wp_interactivity_state(
+			'woocommerce/cart',
+			array(
+				'cart'       => array(
+					'items' => array(
+						array(
+							'key'        => 'plain',
+							'id'         => 100,
+							'quantity'   => 1,
+							'extensions' => array(),
+							'item_data'  => array(),
+						),
+					),
+				),
+				'draftItems' => array(
+					array(
+						'id'       => 100,
+						'quantity' => 1,
+					),
+				),
+			)
+		);
+
+		$this->set_interactivity_context(
+			array(
+				'productId'      => 100,
+				'cartItemFilter' => array(
+					'namespace' => 'my-plugin/x',
+					'action'    => 'matchLine',
+				),
+			)
+		);
+
+		$envelope = $state['itemInContext']();
+
+		$this->assertNull( $envelope['cart'], 'A filter suppresses server-side pairing (no exact line at first paint).' );
+		$this->assertFalse( $envelope['isInCart'], 'A filtered surface is not "in cart" server-side; hydration decides.' );
+		$this->assertIsArray( $envelope['draft'], 'The draft is still resolved so the surface has its editable draft.' );
+		$this->assertSame( 100, $envelope['draft']['id'] );
+	}
+
+	/**
+	 * @testdox itemInContext with a cartItemKey stays exact even when a cartItemFilter is present (step 1 is unaffected by filters).
+	 */
+	public function test_item_in_context_key_ignores_filter(): void {
+		BlocksSharedState::load_cart_state( $this->consent );
+
+		$state = wp_interactivity_state(
+			'woocommerce/cart',
+			array(
+				'cart'       => array(
+					'items' => array(
+						array(
+							'key'      => 'exact',
+							'id'       => 1,
+							'quantity' => 1,
+						),
+					),
+				),
+				'draftItems' => array(),
+			)
+		);
+
+		$this->set_interactivity_context(
+			array(
+				'cartItemKey'    => 'exact',
+				'cartItemFilter' => array(
+					'namespace' => 'my-plugin/x',
+					'action'    => 'matchLine',
+				),
+			)
+		);
+
+		$envelope = $state['itemInContext']();
+
+		$this->assertIsArray( $envelope['cart'], 'A keyed surface is always exact; the filter never runs.' );
+		$this->assertSame( 'exact', $envelope['cart']['key'] );
+		$this->assertTrue( $envelope['isInCart'] );
 	}
 
 	/**

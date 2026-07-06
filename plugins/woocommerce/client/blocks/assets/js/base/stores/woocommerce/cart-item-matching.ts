@@ -50,6 +50,46 @@ export type DraftItem = {
 };
 
 /**
+ * A serialized reference to a `cartItemFilter` predicate, as it travels in the
+ * shared `woocommerce` context: `data-wp-context='woocommerce::{"cartItemFilter":
+ * {"namespace":"my-plugin/x","action":"matchLine"}}'`. It is NEVER a live
+ * function — context is serialized. Core resolves it against the iAPI store
+ * registry at envelope-derivation time (see `resolveCartItemFilter` in
+ * `cart.ts`).
+ *
+ * `action` accepts either a plain action name (resolved against the store's
+ * `actions[ name ]`, then the store root `[ name ]`) or a dotted path walked
+ * from the store root (e.g. `"actions.matchLine"`, `"actions.filters.byNote"`).
+ */
+export type CartItemFilterReference = {
+	/** The iAPI store namespace that owns the predicate action. */
+	namespace: string;
+	/** Plain action name or dotted path from the store root. */
+	action: string;
+};
+
+/**
+ * The resolved `cartItemFilter` predicate contract. Pure and synchronous — it
+ * receives a candidate cart line and the derivation context (the active draft
+ * and the shared `woocommerce` context) and returns whether the line is a match.
+ * It MUST NOT mutate its arguments or perform side effects; it runs during
+ * derived-state evaluation, potentially many times per render.
+ *
+ * When set (via `context.cartItemFilter` or an explicit `findItem({ filter })`),
+ * it becomes the SOLE narrowing authority over the id+variation candidates — it
+ * REPLACES the generic narrowing (per-namespace compare + presence heuristic),
+ * it does not compose with it. This is what lets a surface (e.g. a bundle
+ * editor) pair with a line the presence heuristic would otherwise exclude.
+ */
+export type CartItemFilterPredicate = (
+	cartItem: CartItem,
+	extra: {
+		draft?: DraftItem;
+		context?: Record< string, unknown > | null;
+	}
+) => boolean;
+
+/**
  * Payload-root keys that are part of the add-item envelope itself, NOT
  * namespaced extension request params. Everything on a draft that is not one of
  * these is treated as an extension prop and matched against `extensions[ns]`.
