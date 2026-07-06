@@ -15,6 +15,7 @@ import '@woocommerce/stores/store-notices';
 import type {
 	Store as WooCommerce,
 	WooCommerceConfig,
+	SharedWooCommerceContext,
 } from '@woocommerce/stores/woocommerce/cart';
 
 /**
@@ -176,8 +177,8 @@ const getFocusableElements = ( container: HTMLElement | null ) =>
 		  ).filter( ( el ) => el.offsetParent !== null )
 		: [];
 
-const { state: woocommerceState, actions } = store< WooCommerce >(
-	'woocommerce',
+const { state: cartState, actions } = store< WooCommerce >(
+	'woocommerce/cart',
 	{},
 	{ lock: universalLock }
 );
@@ -203,9 +204,9 @@ store< MiniCart >(
 			isHydrated: false,
 			get totalItemsInCart() {
 				if ( nonOptimisticProperties.includes( 'cart.items_count' ) ) {
-					return woocommerceState.cart.items_count as number;
+					return cartState.cart.items_count as number;
 				}
-				return woocommerceState.cart.items.reduce< number >(
+				return cartState.cart.items.reduce< number >(
 					( total, { quantity } ) => total + quantity,
 					0
 				);
@@ -217,15 +218,12 @@ store< MiniCart >(
 				}
 
 				const subtotal = displayCartPriceIncludingTax
-					? parseInt( woocommerceState.cart.totals.total_items, 10 ) +
-					  parseInt(
-							woocommerceState.cart.totals.total_items_tax,
-							10
-					  )
-					: parseInt( woocommerceState.cart.totals.total_items, 10 );
+					? parseInt( cartState.cart.totals.total_items, 10 ) +
+					  parseInt( cartState.cart.totals.total_items_tax, 10 )
+					: parseInt( cartState.cart.totals.total_items, 10 );
 
 				const normalizedCurrency = normalizeCurrencyResponse(
-					woocommerceState.cart.totals,
+					cartState.cart.totals,
 					currency
 				);
 
@@ -273,10 +271,7 @@ store< MiniCart >(
 
 			get shouldShowTaxLabel(): boolean {
 				return (
-					parseInt(
-						woocommerceState.cart.totals.total_items_tax,
-						10
-					) > 0
+					parseInt( cartState.cart.totals.total_items_tax, 10 ) > 0
 				);
 			},
 
@@ -455,15 +450,18 @@ const { state: cartItemState } = store(
 	'woocommerce/mini-cart-products-table-block',
 	{
 		state: {
-			// As a workaround for a bug in context of wp-each we use state to
-			// find the cart item. Where we need reactivity for the wp-each, use
-			// state.cartItem to get the cart item.
+			// The `data-wp-each--cart-item` directive iterates
+			// `woocommerce/cart::state.cart.items`, so the per-row item context
+			// lives under the `woocommerce/cart` namespace. As a workaround for a
+			// bug in the context of wp-each we re-read the line from cart state by
+			// its key; where we need reactivity for the wp-each, use
+			// `state.cartItem` to get the cart item.
 			get cartItem() {
 				const {
 					cartItem: { id, key, variation },
-				} = getContext< CartItemContext >( 'woocommerce' );
+				} = getContext< CartItemContext >( 'woocommerce/cart' );
 
-				const cartItem = ( woocommerceState.findItemInCart( {
+				const cartItem = ( cartState.findItemInCart( {
 					id,
 					key,
 					variation,
@@ -477,7 +475,7 @@ const { state: cartItemState } = store(
 
 			get currency(): Currency {
 				return normalizeCurrencyResponse(
-					woocommerceState.cart.totals,
+					cartState.cart.totals,
 					currency as Currency
 				);
 			},
@@ -511,7 +509,7 @@ const { state: cartItemState } = store(
 								arg: {
 									context: 'cart',
 									cartItem: cartItemState.cartItem,
-									cart: woocommerceState.cart,
+									cart: cartState.cart,
 								},
 							}
 						);
@@ -592,7 +590,7 @@ const { state: cartItemState } = store(
 								arg: {
 									context: 'cart',
 									cartItem: cartItemState.cartItem,
-									cart: woocommerceState.cart,
+									cart: cartState.cart,
 								},
 							}
 						);
@@ -672,7 +670,7 @@ const { state: cartItemState } = store(
 								arg: {
 									context: 'cart',
 									cartItem: cartItemState.cartItem,
-									cart: woocommerceState.cart,
+									cart: cartState.cart,
 								},
 							}
 						);
@@ -698,7 +696,7 @@ const { state: cartItemState } = store(
 								arg: {
 									context: 'cart',
 									cartItem: cartItemState.cartItem,
-									cart: woocommerceState.cart,
+									cart: cartState.cart,
 								},
 							}
 						);
@@ -751,7 +749,7 @@ const { state: cartItemState } = store(
 								arg: {
 									context: 'cart',
 									cartItem: cartItemState.cartItem,
-									cart: woocommerceState.cart,
+									cart: cartState.cart,
 								},
 							}
 						);
@@ -784,7 +782,7 @@ const { state: cartItemState } = store(
 							arg: {
 								context: 'cart',
 								cartItem: cartItemState.cartItem,
-								cart: woocommerceState.cart,
+								cart: cartState.cart,
 							},
 					  } )
 					: true;
@@ -930,58 +928,34 @@ const { state: cartItemState } = store(
 			},
 
 			*changeQuantity(): Generator< unknown, void > {
-				const variation = cartItemState.cartItem.variation.map(
-					( { raw_attribute: rawAttribute, ...rest } ) => ( {
-						...rest,
-						attribute: rawAttribute,
-					} )
-				);
-				yield actions.addCartItem( {
-					id: cartItemState.cartItem.id,
+				// Mini-cart rows always operate on server-confirmed lines (they
+				// carry a `key`), so quantity changes are `updateItem`s by key —
+				// no client-side add/update inference (identity rule 5).
+				yield actions.updateItem( {
 					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity,
-					variation,
-					type: cartItemState.cartItem.type,
 				} );
 			},
 
 			*removeItemFromCart(): Generator< unknown, void > {
-				yield actions.removeCartItem( cartItemState.cartItem.key );
+				yield actions.removeItem( cartItemState.cartItem.key );
 			},
 
 			*incrementQuantity(): Generator< unknown, void > {
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
-				const variation = cartItemState.cartItem.variation.map(
-					( { raw_attribute: rawAttribute, ...rest } ) => ( {
-						...rest,
-						attribute: rawAttribute,
-					} )
-				);
-				yield actions.addCartItem( {
-					id: cartItemState.cartItem.id,
+				yield actions.updateItem( {
 					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity + multipleOf,
-					variation,
-					type: cartItemState.cartItem.type,
 				} );
 			},
 
 			*decrementQuantity(): Generator< unknown, void > {
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
-				const variation = cartItemState.cartItem.variation.map(
-					( { raw_attribute: rawAttribute, ...rest } ) => ( {
-						...rest,
-						attribute: rawAttribute,
-					} )
-				);
-				yield actions.addCartItem( {
-					id: cartItemState.cartItem.id,
+				yield actions.updateItem( {
 					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
-					variation,
-					type: cartItemState.cartItem.type,
 				} );
 			},
 
@@ -992,6 +966,27 @@ const { state: cartItemState } = store(
 		},
 
 		callbacks: {
+			// Publish the per-row line key into the shared `woocommerce` context
+			// as `cartItemKey`, so any block placed inside a cart row resolves its
+			// exact line through the envelope ladder (step 1: an explicit
+			// `cartItemKey` yields that line, no filters). The `woocommerce`
+			// context cannot carry a per-row dynamic value through a static
+			// `data-wp-context` literal (the context directive does not evaluate
+			// references), so the row seeds an empty `cartItemKey` slot and this
+			// `data-wp-init` callback fills it from the row's `woocommerce/cart`
+			// each-item context. `data-wp-init` re-runs when the key changes, so
+			// rows recycled by `data-wp-each` stay in sync.
+			syncCartItemKeyContext() {
+				const context =
+					getContext< SharedWooCommerceContext >( 'woocommerce' );
+				const { cartItem } =
+					getContext< CartItemContext >( 'woocommerce/cart' );
+				const key = cartItem?.key ?? '';
+				if ( context.cartItemKey !== key ) {
+					context.cartItemKey = key;
+				}
+			},
+
 			itemShortDescription() {
 				const { ref } = getElement();
 
@@ -1055,7 +1050,7 @@ const { state: cartItemState } = store(
 							arg: {
 								context: 'cart',
 								cartItem: cartItemState.cartItem,
-								cart: woocommerceState.cart,
+								cart: cartState.cart,
 							},
 						} );
 

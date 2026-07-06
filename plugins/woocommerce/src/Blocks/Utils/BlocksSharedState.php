@@ -164,24 +164,6 @@ class BlocksSharedState {
 			// server-rendered directives that read the envelope resolve at first
 			// paint (parity with the JS getters in cart.ts).
 			self::register_cart_getters();
-
-			// TRANSITIONAL: also seed the same cart array under the legacy
-			// `woocommerce` namespace. Server-side directive processing has no
-			// equivalent of the JS store alias, and PHP-rendered markup still
-			// references the old namespace (the Mini-Cart products table renders
-			// `data-wp-each--cart-item="woocommerce::state.cart.items"`), so
-			// without this bridge those rows would not server-render. Remove
-			// when the mini-cart migrates to `woocommerce/cart` (T7b) and the
-			// JS alias is removed (T10). Accepted temporary cost: the cart JSON
-			// is printed under both namespaces. Client-side this is harmless —
-			// the JS alias getter replaces the copied object during store
-			// registration.
-			wp_interactivity_state(
-				self::$settings_namespace,
-				array(
-					'cart' => self::$blocks_shared_cart_state,
-				)
-			);
 		}
 	}
 

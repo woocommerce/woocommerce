@@ -32,11 +32,14 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 			$this->get_full_block_name(),
 			array(
 				'cartItem' => function () {
-					// The shared context stays on the bare `woocommerce`
-					// namespace; the cart state moved to `woocommerce/cart`.
-					$context = wp_interactivity_get_context( 'woocommerce' );
+					// The `data-wp-each--cart-item` directive iterates
+					// `woocommerce/cart::state.cart.items`, so the per-row item
+					// context lands under the `woocommerce/cart` namespace (the
+					// `data-wp-each` directive keys the item context by its own
+					// namespace — see WP_Interactivity_API::data_wp_each_processor).
+					$context    = wp_interactivity_get_context( 'woocommerce/cart' );
 					$cart_state = wp_interactivity_state( 'woocommerce/cart' );
-					$item_key = $context['cartItem']['key'];
+					$item_key   = $context['cartItem']['key'] ?? null;
 
 					foreach ( $cart_state['cart']['items'] as $item ) {
 						if ( $item['key'] === $item_key ) {
@@ -109,13 +112,15 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 				</thead>
 				<tbody>
 					<template
-						data-wp-each--cart-item="woocommerce::state.cart.items"
+						data-wp-each--cart-item="woocommerce/cart::state.cart.items"
 						data-wp-each-key="state.cartItem.key"
 					>
 						<tr
 							class="wc-block-cart-items__row"
 							data-wp-bind--hidden="!state.cartItem.key"
 							data-wp-run="callbacks.filterCartItemClass"
+							data-wp-context='woocommerce::{ "cartItemKey": "" }'
+							data-wp-init="callbacks.syncCartItemKeyContext"
 							tabindex="-1"
 						>
 							<td data-wp-context='{ "isImageHidden": false }' class="wc-block-cart-item__image" aria-hidden="true">

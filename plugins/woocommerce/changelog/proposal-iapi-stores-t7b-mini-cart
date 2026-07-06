@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Migrate the experimental iAPI Mini-Cart family onto the shared woocommerce/cart store namespace and retire the transitional dual-seed of cart state.
