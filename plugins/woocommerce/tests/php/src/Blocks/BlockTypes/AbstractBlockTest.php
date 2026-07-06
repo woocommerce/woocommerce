@@ -34,25 +34,28 @@ class AbstractBlockTest extends WC_Unit_Test_Case {
 		$asset_api           = Package::container()->get( Api::class );
 		$asset_data_registry = Package::container()->get( AssetDataRegistry::class );
 
-		if ( $with_script_handle ) {
-			return new class( $asset_api, $asset_data_registry, new IntegrationRegistry(), 'test-block' ) extends AbstractBlock {
-				/**
-				 * Skip block registration in tests.
-				 */
-				protected function register_block_type() {}
+		return new class( $asset_api, $asset_data_registry, new IntegrationRegistry(), 'test-block', $with_script_handle ) extends AbstractBlock {
+			/**
+			 * Whether the block has a front-end script handle.
+			 *
+			 * @var bool
+			 */
+			private $with_script_handle;
 
-				/**
-				 * Public wrapper for register_chunk_translations.
-				 *
-				 * @param string[] $chunks Array of chunk names.
-				 */
-				public function call_register_chunk_translations( $chunks ) {
-					$this->register_chunk_translations( $chunks );
-				}
-			};
-		}
+			/**
+			 * Constructor.
+			 *
+			 * @param Api                 $asset_api Instance of the asset API.
+			 * @param AssetDataRegistry   $asset_data_registry Instance of the asset data registry.
+			 * @param IntegrationRegistry $integration_registry Instance of the integration registry.
+			 * @param string              $block_name Block name.
+			 * @param bool                $with_script_handle Whether the block has a front-end script handle.
+			 */
+			public function __construct( $asset_api, $asset_data_registry, $integration_registry, $block_name, bool $with_script_handle ) {
+				$this->with_script_handle = $with_script_handle;
+				parent::__construct( $asset_api, $asset_data_registry, $integration_registry, $block_name );
+			}
 
-		return new class( $asset_api, $asset_data_registry, new IntegrationRegistry(), 'test-block' ) extends AbstractBlock {
 			/**
 			 * Skip block registration in tests.
 			 */
@@ -65,7 +68,7 @@ class AbstractBlockTest extends WC_Unit_Test_Case {
 			 * @return array|string|null
 			 */
 			protected function get_block_type_script( $key = null ) {
-				return null;
+				return $this->with_script_handle ? parent::get_block_type_script( $key ) : null;
 			}
 
 			/**
