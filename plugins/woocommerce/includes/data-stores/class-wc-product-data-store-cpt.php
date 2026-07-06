@@ -248,7 +248,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$post_object = get_post( $product->get_id() );
 			$product->set_status( $post_object->post_status );
 
-			$this->update_post_meta_internal( $product, true, true );
+			$this->update_post_meta( $product, true );
 			$this->update_terms( $product, true );
 			$this->update_visibility( $product, true );
 			$this->update_attributes( $product, true );
@@ -697,31 +697,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
 	 *
-	 * Subclasses that override this method to write custom product-type meta should also override
-	 * update_post_meta_internal() so those writes run during object creation.
-	 *
 	 * @param WC_Product $product Product object.
 	 * @param bool       $force Force update. Used during create.
 	 * @since 3.0.0
 	 * @return void
 	 */
 	protected function update_post_meta( &$product, $force = false ) {
-		$this->update_post_meta_internal( $product, $force, false );
-	}
-
-	/**
-	 * Internal implementation of update_post_meta() that also knows whether the product is being created.
-	 *
-	 * Subclasses that override update_post_meta() to write custom product-type meta should also override
-	 * this method so those writes run during object creation.
-	 *
-	 * @param WC_Product $product Product object.
-	 * @param bool       $force Force update. Used during create.
-	 * @param bool       $creating Whether the product is being created.
-	 * @param array      $existing_meta_keys Existing meta keys map, maintained across calls during creation. Passed by reference.
-	 * @return void
-	 */
-	protected function update_post_meta_internal( &$product, $force, $creating, &$existing_meta_keys = null ) {
 		$meta_key_to_props = array(
 			'_sku'                   => 'sku',
 			'_global_unique_id'      => 'global_unique_id',
@@ -807,7 +788,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					break;
 			}
 
-			$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value, $creating, $existing_meta_keys );
+			$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value );
 
 			if ( $updated ) {
 				$this->updated_props[] = $prop;
@@ -829,7 +810,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$cogs_value = apply_filters( 'woocommerce_save_product_cogs_value', $cogs_value, $product );
 
 			if ( false !== $cogs_value ) {
-				$updated = $this->update_or_delete_post_meta( $product, '_cogs_total_value', is_null( $cogs_value ) ? '' : $cogs_value, $creating, $existing_meta_keys );
+				$updated = $this->update_or_delete_post_meta( $product, '_cogs_total_value', is_null( $cogs_value ) ? '' : $cogs_value );
 				if ( $updated ) {
 					$this->updated_props[] = 'cogs_value';
 				}
@@ -847,7 +828,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				if ( is_callable( array( $product, $function ) ) ) {
 					$value   = $product->{$function}( 'edit' );
 					$value   = is_string( $value ) ? wp_slash( $value ) : $value;
-					$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value, $creating, $existing_meta_keys );
+					$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value );
 
 					if ( $updated ) {
 						$this->updated_props[] = $key;
