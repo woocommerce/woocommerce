@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Release reserved stock when an order transitions to failed status.
