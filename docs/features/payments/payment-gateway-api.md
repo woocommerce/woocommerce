@@ -94,8 +94,8 @@ The Payments settings page uses the gateway's admin-facing details to build the 
 | Provider detail | Source | Notes |
 | ----------------- | -------- | ------- |
 | Icon | `$this->icon` | Must be a valid image URL. Use a square image for the best fit. If the value is empty, invalid, or contains an `<img>` tag instead of a URL, WooCommerce shows the default payments icon. |
-| Title | `$this->get_method_title()` | This returns `$this->method_title` by default. WooCommerce falls back to `$this->get_title()` when the method title is empty, strips HTML, and truncates the display value to 75 characters. |
-| Description | `$this->get_method_description()` | This returns `$this->method_description` by default. WooCommerce falls back to `$this->get_description()` when the method description is empty, strips HTML, and truncates the display value to 130 characters. |
+| Title | `PaymentsProviders\PaymentGateway::get_title()` | Uses `WC_Payment_Gateway::get_method_title()` as a `$this->method_title` accessor. If it is empty, the provider falls back to the gateway's customer-facing `WC_Payment_Gateway::get_title()`, strips HTML, and truncates the display value to 75 characters. |
+| Description | `PaymentsProviders\PaymentGateway::get_description()` | Uses `WC_Payment_Gateway::get_method_description()` as a `$this->method_description` accessor. If it is empty, the provider falls back to the gateway's customer-facing `WC_Payment_Gateway::get_description()`, strips HTML, and truncates the display value to 130 characters. |
 
 Use `$this->method_title` and `$this->method_description` for concise admin copy. Use `$this->title` and `$this->description` for the customer-facing checkout label and payment instructions, often loaded from merchant settings with `$this->get_option()`.
 
