@@ -965,6 +965,63 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that get_payment_gateway_details memoizes the derived details during a request,
+	 * except for the call-specific order.
+	 */
+	public function test_get_payment_gateway_details_is_memoized() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway(
+			'fake-gateway-id',
+			array(
+				'plugin_slug' => 'fake-plugin-slug',
+				'plugin_file' => 'fake-plugin-slug/fake-plugin-file',
+			),
+		);
+
+		// Deriving the details searches for a matching suggestion. A memoized result skips this.
+		$this->mock_extension_suggestions
+			->expects( $this->once() )
+			->method( 'get_by_plugin_slug' )
+			->willReturn( null );
+
+		// Act.
+		$first  = $this->sut->get_payment_gateway_details( $fake_gateway, 1, 'US' );
+		$second = $this->sut->get_payment_gateway_details( $fake_gateway, 5, 'US' );
+
+		// Assert.
+		$this->assertSame( 1, $first['_order'], 'The first call should use the given order' );
+		$this->assertSame( 5, $second['_order'], 'The order should not be memoized' );
+		unset( $first['_order'], $second['_order'] );
+		$this->assertSame( $first, $second, 'Memoized details should match the originally derived ones' );
+	}
+
+	/**
+	 * Test that the payment gateway details memoization discriminates between countries
+	 * and is cleared by reset_memo.
+	 */
+	public function test_get_payment_gateway_details_memo_per_country_and_reset() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway(
+			'fake-gateway-id',
+			array(
+				'plugin_slug' => 'fake-plugin-slug',
+				'plugin_file' => 'fake-plugin-slug/fake-plugin-file',
+			),
+		);
+
+		$this->mock_extension_suggestions
+			->expects( $this->exactly( 3 ) )
+			->method( 'get_by_plugin_slug' )
+			->willReturn( null );
+
+		// Act.
+		$this->sut->get_payment_gateway_details( $fake_gateway, 0, 'US' );
+		$this->sut->get_payment_gateway_details( $fake_gateway, 0, 'DE' );
+		$this->sut->reset_memo();
+		$this->sut->get_payment_gateway_details( $fake_gateway, 0, 'US' );
+	}
+
+	/**
 	 * Test that get_payment_gateway_details does not override gateway details with those from the suggestion
 	 * when they exist.
 	 */

@@ -44,6 +44,17 @@ class Payments {
 	private ExtensionSuggestions $extension_suggestions;
 
 	/**
+	 * The memoized payment providers details lists to avoid computing them multiple times during a request.
+	 *
+	 * Multiple consumers (the Payments settings page, the onboarding Payments task, the menu badge logic)
+	 * request the same list during a single request, and computing it is expensive.
+	 * Keyed by the location and flags the list was computed for.
+	 *
+	 * @var array
+	 */
+	private array $payment_providers_memo = array();
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @param PaymentsProviders    $payment_providers             The payment providers service.
@@ -76,6 +87,11 @@ class Payments {
 	 * @throws Exception If there are malformed or invalid suggestions.
 	 */
 	public function get_payment_providers( string $location, bool $for_display = true, bool $remove_shells = false ): array {
+		$memo_key = strtoupper( $location ) . '__' . ( $for_display ? '1' : '0' ) . ( $remove_shells ? '1' : '0' );
+		if ( isset( $this->payment_providers_memo[ $memo_key ] ) ) {
+			return $this->payment_providers_memo[ $memo_key ];
+		}
+
 		$payment_gateways = $this->providers->get_payment_gateways( $for_display );
 		if ( ! $for_display && $remove_shells ) {
 			$payment_gateways = $this->providers->remove_shell_payment_gateways( $payment_gateways, $location );
@@ -204,6 +220,8 @@ class Payments {
 			$this->process_payment_provider_states( $payment_providers );
 		}
 
+		$this->payment_providers_memo[ $memo_key ] = $payment_providers;
+
 		return $payment_providers;
 	}
 
@@ -287,6 +305,9 @@ class Payments {
 		$result = $this->providers->update_payment_providers_order_map( $order_map );
 
 		if ( $result ) {
+			// The order map influences the providers list, so we reset the memoized data.
+			$this->reset_memo();
+
 			// Record an event that the payment providers order map was updated.
 			$this->record_event(
 				'payment_providers_order_map_updated',
@@ -313,6 +334,9 @@ class Payments {
 		$result = $this->providers->attach_extension_suggestion( $id );
 
 		if ( $result ) {
+			// The attachment influences the providers list, so we reset the memoized data.
+			$this->reset_memo();
+
 			// Record an event that the suggestion was attached.
 			$this->record_event(
 				'extension_suggestion_attached',
@@ -337,6 +361,9 @@ class Payments {
 		$result = $this->providers->hide_extension_suggestion( $id );
 
 		if ( $result ) {
+			// Hidden suggestions are excluded from the providers list, so we reset the memoized data.
+			$this->reset_memo();
+
 			// Record an event that the suggestion was hidden.
 			$this->record_event(
 				'extension_suggestion_hidden',
@@ -365,6 +392,11 @@ class Payments {
 	public function dismiss_extension_suggestion_incentive( string $suggestion_id, string $incentive_id, string $context = 'all', bool $do_not_track = false ): bool {
 		$result = $this->extension_suggestions->dismiss_incentive( $incentive_id, $suggestion_id, $context );
 
+		if ( $result ) {
+			// Incentives are embedded in the providers list details, so we reset the memoized data.
+			$this->reset_memo();
+		}
+
 		if ( ! $do_not_track && $result ) {
 			// Record an event that the incentive was dismissed.
 			$this->record_event(
@@ -378,6 +410,20 @@ class Payments {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Reset the memoized data.
+	 *
+	 * Used to invalidate the request-level caches when the underlying data changes mid-request.
+	 * Also useful for testing purposes.
+	 *
+	 * @internal
+	 * @return void
+	 */
+	public function reset_memo(): void {
+		$this->payment_providers_memo = array();
+		$this->providers->reset_memo();
 	}
 
 	/**

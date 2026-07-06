@@ -200,6 +200,16 @@ class PaymentsProviders {
 	private array $payment_gateways_for_display_memo = array();
 
 	/**
+	 * The memoized payment gateway details to avoid re-deriving them multiple times during a request.
+	 *
+	 * Deriving a gateway's details can be expensive since gateways may run account and state checks.
+	 * Keyed by gateway ID and country code.
+	 *
+	 * @var array
+	 */
+	private array $payment_gateway_details_memo = array();
+
+	/**
 	 * The payment extension suggestions service.
 	 *
 	 * @var ExtensionSuggestions
@@ -479,11 +489,24 @@ class PaymentsProviders {
 		// Normalize the country code to uppercase.
 		$country_code = strtoupper( $country_code );
 
-		return $this->enhance_payment_gateway_details(
+		$memo_key = $payment_gateway->id . '__' . $country_code;
+		if ( isset( $this->payment_gateway_details_memo[ $memo_key ] ) ) {
+			$details = $this->payment_gateway_details_memo[ $memo_key ];
+			// The order is call-specific, so we don't memoize it.
+			$details['_order'] = $payment_gateway_order;
+
+			return $details;
+		}
+
+		$details = $this->enhance_payment_gateway_details(
 			$this->get_payment_gateway_base_details( $payment_gateway, $payment_gateway_order, $country_code ),
 			$payment_gateway,
 			$country_code
 		);
+
+		$this->payment_gateway_details_memo[ $memo_key ] = $details;
+
+		return $details;
 	}
 
 	/**
@@ -1225,7 +1248,10 @@ class PaymentsProviders {
 	}
 
 	/**
-	 * Reset the memoized data. Useful for testing purposes.
+	 * Reset the memoized data.
+	 *
+	 * Used to invalidate the request-level caches when the underlying data changes mid-request.
+	 * Also useful for testing purposes.
 	 *
 	 * @internal
 	 * @return void
@@ -1233,6 +1259,7 @@ class PaymentsProviders {
 	public function reset_memo(): void {
 		$this->payment_gateways_memo             = array();
 		$this->payment_gateways_for_display_memo = array();
+		$this->payment_gateway_details_memo      = array();
 	}
 
 	/**

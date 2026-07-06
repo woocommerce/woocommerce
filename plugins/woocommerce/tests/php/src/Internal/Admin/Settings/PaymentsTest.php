@@ -61,6 +61,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 											'get_payment_gateways',
 											'get_extension_suggestions',
 											'get_extension_suggestion_categories',
+											'attach_extension_suggestion',
 											'hide_extension_suggestion',
 											'get_order_map',
 											'save_order_map',
@@ -594,6 +595,171 @@ class PaymentsTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertTrue( $result );
+	}
+
+	/**
+	 * Test that getting the payment providers memoizes the result during a request.
+	 */
+	public function test_get_payment_providers_is_memoized() {
+		// Arrange.
+		$location = 'US';
+
+		$this->mock_providers
+			->expects( $this->once() )
+			->method( 'get_payment_gateways' )
+			->willReturn( array() );
+
+		$this->mock_providers
+			->expects( $this->once() )
+			->method( 'get_extension_suggestions' )
+			->willReturn( array() );
+
+		// Act.
+		$first  = $this->sut->get_payment_providers( $location );
+		$second = $this->sut->get_payment_providers( $location );
+
+		// Assert.
+		$this->assertSame( $first, $second );
+	}
+
+	/**
+	 * Test that the payment providers memoization discriminates between arguments.
+	 */
+	public function test_get_payment_providers_is_memoized_per_arguments() {
+		// Arrange.
+		$this->mock_providers
+			->expects( $this->exactly( 3 ) )
+			->method( 'get_payment_gateways' )
+			->willReturn( array() );
+
+		$this->mock_providers
+			->method( 'get_extension_suggestions' )
+			->willReturn( array() );
+
+		// Act.
+		$this->sut->get_payment_providers( 'US' );
+		$this->sut->get_payment_providers( 'DE' );
+		$this->sut->get_payment_providers( 'US', false );
+		// Repeated calls should be served from the memo.
+		$this->sut->get_payment_providers( 'US' );
+		$this->sut->get_payment_providers( 'DE' );
+		$this->sut->get_payment_providers( 'US', false );
+	}
+
+	/**
+	 * Test that resetting the memo forces the payment providers to be recomputed.
+	 */
+	public function test_reset_memo_clears_memoized_payment_providers() {
+		// Arrange.
+		$this->mock_providers
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_payment_gateways' )
+			->willReturn( array() );
+
+		$this->mock_providers
+			->method( 'get_extension_suggestions' )
+			->willReturn( array() );
+
+		// Act.
+		$this->sut->get_payment_providers( 'US' );
+		$this->sut->reset_memo();
+		$this->sut->get_payment_providers( 'US' );
+	}
+
+	/**
+	 * Test that updating the payment providers order map resets the memoized payment providers.
+	 */
+	public function test_update_payment_providers_order_map_resets_memo() {
+		// Arrange.
+		$this->mock_providers
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_payment_gateways' )
+			->willReturn( array() );
+
+		$this->mock_providers
+			->method( 'get_extension_suggestions' )
+			->willReturn( array() );
+
+		$this->mock_providers
+			->method( 'update_payment_providers_order_map' )
+			->willReturn( true );
+
+		// Act.
+		$this->sut->get_payment_providers( 'US' );
+		$this->sut->update_payment_providers_order_map( array( 'gateway1' => 1 ) );
+		$this->sut->get_payment_providers( 'US' );
+	}
+
+	/**
+	 * Test that attaching a payment extension suggestion resets the memoized payment providers.
+	 */
+	public function test_attach_payment_extension_suggestion_resets_memo() {
+		// Arrange.
+		$this->mock_providers
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_payment_gateways' )
+			->willReturn( array() );
+
+		$this->mock_providers
+			->method( 'get_extension_suggestions' )
+			->willReturn( array() );
+
+		$this->mock_providers
+			->method( 'attach_extension_suggestion' )
+			->willReturn( true );
+
+		// Act.
+		$this->sut->get_payment_providers( 'US' );
+		$this->sut->attach_payment_extension_suggestion( 'suggestion1' );
+		$this->sut->get_payment_providers( 'US' );
+	}
+
+	/**
+	 * Test that hiding a payment extension suggestion resets the memoized payment providers.
+	 */
+	public function test_hide_payment_extension_suggestion_resets_memo() {
+		// Arrange.
+		$this->mock_providers
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_payment_gateways' )
+			->willReturn( array() );
+
+		$this->mock_providers
+			->method( 'get_extension_suggestions' )
+			->willReturn( array() );
+
+		$this->mock_providers
+			->method( 'hide_extension_suggestion' )
+			->willReturn( true );
+
+		// Act.
+		$this->sut->get_payment_providers( 'US' );
+		$this->sut->hide_payment_extension_suggestion( 'suggestion1' );
+		$this->sut->get_payment_providers( 'US' );
+	}
+
+	/**
+	 * Test that dismissing an extension suggestion incentive resets the memoized payment providers.
+	 */
+	public function test_dismiss_extension_suggestion_incentive_resets_memo() {
+		// Arrange.
+		$this->mock_providers
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_payment_gateways' )
+			->willReturn( array() );
+
+		$this->mock_providers
+			->method( 'get_extension_suggestions' )
+			->willReturn( array() );
+
+		$this->mock_extension_suggestions
+			->method( 'dismiss_incentive' )
+			->willReturn( true );
+
+		// Act.
+		$this->sut->get_payment_providers( 'US' );
+		$this->sut->dismiss_extension_suggestion_incentive( 'suggestion1', 'incentive1' );
+		$this->sut->get_payment_providers( 'US' );
 	}
 
 	/**

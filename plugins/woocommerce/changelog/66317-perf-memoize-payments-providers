@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Memoize payment provider details derivation within a request so the wp-admin dashboard setup widget, onboarding task list and Payments settings no longer re-derive gateway details multiple times per page load.

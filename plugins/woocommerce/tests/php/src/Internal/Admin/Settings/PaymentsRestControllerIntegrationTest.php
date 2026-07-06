@@ -1335,6 +1335,8 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		// Delete the user meta.
 		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
+		// We changed the underlying data directly, so reset the memoized data to simulate a fresh request.
+		$this->service->reset_memo();
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
@@ -1393,6 +1395,8 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		// Delete the user meta.
 		delete_user_meta( get_current_user_id(), Incentive::PREFIX . 'dismissed' );
+		// We changed the underlying data directly, so reset the memoized data to simulate a fresh request.
+		$this->service->reset_memo();
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
