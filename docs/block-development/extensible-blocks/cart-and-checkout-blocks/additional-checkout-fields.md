@@ -199,7 +199,11 @@ There are plans to expand this list, but for now these are the types available.
 
 To register additional checkout fields you must use the `woocommerce_register_additional_checkout_field` function.
 
-It is recommended to run this function after the `woocommerce_init` action.
+:::note
+
+Register fields on the `woocommerce_init` action (or later). Registering earlier can cause initialization and translation issues.
+
+:::
 
 The registration function takes an array of options describing your field. Some field types take additional options.
 

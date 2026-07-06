@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Lock the POS catalog feed file exclusively while writing so two overlapping generation processes can no longer interleave output into a corrupt feed.

@@ -7,7 +7,7 @@ import { Icon } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
 // @ts-expect-error - We need to use this /wp see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/#dataviews
-import { DataViews, View } from '@wordpress/dataviews/wp'; // eslint-disable-line @woocommerce/dependency-group
+import { DataViews, View } from '@wordpress/dataviews/wp';
 
 /**
  * Internal dependencies
