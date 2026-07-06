@@ -4,7 +4,7 @@
  * Slug: purple/about-three-columns-of-images-with-heading-and-paragraph
  * Categories: about, purple
  * Keywords: about, intro, columns, heading
- * Description: A section with a heading and short paragraph above a row of three image placeholders.
+ * Description: A section with a heading and short paragraph above a row of three images.
  * Viewport width: 1440
  */
 ?>
@@ -20,15 +20,15 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:image {"aspectRatio":"3/4","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-placeholder.webp" alt="<?php esc_attr_e( 'Placeholder image', 'purple' ); ?>" style="aspect-ratio:3/4;object-fit:cover"/></figure>
+<figure class="wp-block-image size-full"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/storytelling-wool.webp" alt="<?php esc_attr_e( 'Macro photo of fluffy white wool fibers.', 'purple' ); ?>" style="aspect-ratio:3/4;object-fit:cover"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:image {"aspectRatio":"3/4","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-placeholder.webp" alt="<?php esc_attr_e( 'Placeholder image', 'purple' ); ?>" style="aspect-ratio:3/4;object-fit:cover"/></figure>
+<figure class="wp-block-image size-full"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/green-sweater-hands.webp" alt="<?php esc_attr_e( 'Hands touching a soft green knit sweater sleeve.', 'purple' ); ?>" style="aspect-ratio:3/4;object-fit:cover"/></figure>
 <!-- /wp:image -->
 
-<!-- wp:image {"aspectRatio":"3/4","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-placeholder.webp" alt="<?php esc_attr_e( 'Placeholder image', 'purple' ); ?>" style="aspect-ratio:3/4;object-fit:cover"/></figure>
+<!-- wp:image {"aspectRatio":"3/4","scale":"cover","focalPoint":{"x":0.74,"y":0.54},"sizeSlug":"full","linkDestination":"none"} -->
+<figure class="wp-block-image size-full"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/orange-sweater.webp" alt="<?php esc_attr_e( 'Model wearing a colourful knit sweater', 'purple' ); ?>" style="aspect-ratio:3/4;object-fit:cover;object-position:74% 54%"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
