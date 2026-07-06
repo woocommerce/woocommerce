@@ -49,6 +49,7 @@ const isWooPackageRequest = ( request ) =>
 	request.startsWith( '@woocommerce/' );
 
 const editorExternalPackages = [
+	'@woocommerce/block-data',
 	'@woocommerce/blocks-checkout',
 	'@woocommerce/blocks-checkout-events',
 	'@woocommerce/blocks-registry',

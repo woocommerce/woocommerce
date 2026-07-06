@@ -15,6 +15,7 @@ The `@woocommerce/block-library` editor build intentionally bundles most WooComm
 
 The exceptions are package instances that must be shared with editor extensions or initialized exactly once:
 
+- `@woocommerce/block-data` remains external through the `wc-blocks-data-store` handle so WooCommerce Blocks data stores are registered once and shared with external checkout APIs.
 - `@woocommerce/blocks-checkout` remains external through the `wc-blocks-checkout` handle so checkout filters, slot/fill APIs, and checkout block registry helpers use the same package instance.
 - `@woocommerce/blocks-checkout-events` remains external through the `wc-blocks-checkout-events` handle so checkout lifecycle event subscribers and emitters use the same event emitter.
 - `@woocommerce/blocks-registry` remains external through the `wc-blocks-registry` handle so block, payment method, and extension registrations are stored in the same registries.
