@@ -31,6 +31,6 @@
 <!-- /wp:columns -->
 
 <!-- wp:image {"sizeSlug":"full","linkDestination":"none","align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|70"}}}} -->
-<figure class="wp-block-image alignwide size-full" style="margin-top:var(--wp--preset--spacing--70)"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-placeholder.webp" alt="<?php esc_attr_e( 'Placeholder image', 'purple' ); ?>"/></figure>
+<figure class="wp-block-image alignwide size-full" style="margin-top:var(--wp--preset--spacing--70)"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/storytelling-store.webp" alt="<?php esc_attr_e( 'Clothing store window display featuring purple, coral, and orange sweaters on hangers above folded knitwear.', 'purple' ); ?>"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group -->
