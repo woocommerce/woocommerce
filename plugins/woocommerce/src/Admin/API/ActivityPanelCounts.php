@@ -5,6 +5,8 @@
  * Handles requests to /activity-panel/counts.
  */
 
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Admin\API;
 
 defined( 'ABSPATH' ) || exit;
