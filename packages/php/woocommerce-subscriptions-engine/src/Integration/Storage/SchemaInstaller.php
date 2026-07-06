@@ -193,9 +193,10 @@ final class SchemaInstaller {
 		$cycles             = $names[ self::TABLE_CYCLES ];
 		$snapshots          = $names[ self::TABLE_SNAPSHOTS ];
 
-		// `merchant_code` is UNIQUE (not KEY) for DB-enforced idempotency on
-		// consumer-supplied codes; NULLs are treated as distinct, so consumers that do
-		// not use merchant codes are unaffected. `extension_slug` records the creating
+		// `merchant_code` is DB-enforced-unique per extension (composite with
+		// `extension_slug`) for idempotency on consumer-supplied codes - each consumer
+		// owns its own code namespace; NULLs are treated as distinct, so consumers that
+		// do not use merchant codes are unaffected. `extension_slug` records the creating
 		// extension's registered slug. Nullable while owner identifier/registration
 		// semantics are still open; tightened additively once decided.
 		$plans_sql = "CREATE TABLE {$plans} (
@@ -214,7 +215,7 @@ final class SchemaInstaller {
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,
   PRIMARY KEY  (id),
-  UNIQUE KEY merchant_code (merchant_code),
+  UNIQUE KEY extension_merchant_code (extension_slug, merchant_code),
   KEY category (category),
   KEY status_sort (status, sort_order, id),
   KEY extension_slug (extension_slug)

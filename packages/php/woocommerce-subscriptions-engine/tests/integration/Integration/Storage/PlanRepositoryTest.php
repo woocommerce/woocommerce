@@ -135,10 +135,10 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'coffee-club', $fetched->get_merchant_code() );
 	}
 
-	public function test_duplicate_merchant_code_insert_throws(): void {
+	public function test_duplicate_merchant_code_insert_throws_within_one_extension(): void {
 		$repo = new PlanRepository();
 
-		$make = static function (): Plan {
+		$make = static function ( string $extension_slug ): Plan {
 			return Plan::create(
 				array(
 					'name'           => 'Duplicate code',
@@ -149,14 +149,41 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 						)
 					),
 					'merchant_code'  => 'dupe-code',
+					'extension_slug' => $extension_slug,
 				)
 			);
 		};
 
-		$repo->insert( $make() );
+		$repo->insert( $make( 'lite' ) );
 
 		$this->expectException( \RuntimeException::class );
-		$repo->insert( $make() );
+		$repo->insert( $make( 'lite' ) );
+	}
+
+	public function test_same_merchant_code_coexists_across_extensions(): void {
+		$repo = new PlanRepository();
+
+		$make = static function ( string $extension_slug ): Plan {
+			return Plan::create(
+				array(
+					'name'           => 'Shared code',
+					'billing_policy' => BillingPolicy::from_array(
+						array(
+							'period'   => 'month',
+							'interval' => 1,
+						)
+					),
+					'merchant_code'  => 'monthly-box',
+					'extension_slug' => $extension_slug,
+				)
+			);
+		};
+
+		$first_id  = $repo->insert( $make( 'lite' ) );
+		$second_id = $repo->insert( $make( 'other-extension' ) );
+
+		$this->assertGreaterThan( 0, $first_id );
+		$this->assertGreaterThan( $first_id, $second_id );
 	}
 
 	public function test_plans_without_merchant_code_coexist(): void {

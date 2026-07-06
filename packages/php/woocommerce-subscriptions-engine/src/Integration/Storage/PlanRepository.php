@@ -53,8 +53,9 @@ final class PlanRepository {
 	/**
 	 * Insert a new plan and stamp its id back onto the entity.
 	 *
-	 * `merchant_code` uniqueness is DB-enforced (UNIQUE key, NULLs distinct): a
-	 * duplicate code fails the insert and surfaces as the RuntimeException.
+	 * `merchant_code` uniqueness is DB-enforced per extension (composite UNIQUE
+	 * with `extension_slug`, NULLs distinct): a duplicate code within one
+	 * extension fails the insert and surfaces as the RuntimeException.
 	 *
 	 * @param Plan $plan Plan to insert.
 	 * @return int The new plan id.
