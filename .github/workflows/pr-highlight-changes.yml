@@ -21,6 +21,8 @@ jobs:
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
+        with:
+          fetch-depth: 2
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup WooCommerce Monorepo'
         with:

@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
  * Helper REST endpoints exposed under /wc-email-test-helper/v1/ for Playwright E2E tests.
  *
  * Health endpoint is open; every other route requires manage_options. The plugin's location
- * under tests/e2e/test-plugins/ — only mounted via .wp-env.json for the test environment —
+ * under tests/e2e/test-plugins/ — only mounted via .wp-env.test.json for the test environment —
  * provides the second layer of defense.
  */
 class REST_Controller {
@@ -636,7 +636,7 @@ class REST_Controller {
 
 	/**
 	 * Permission callback used by every non-health endpoint. Requires the manage_options
-	 * capability. The plugin is only mounted in test environments via .wp-env.json — it
+	 * capability. The plugin is only mounted in test environments via .wp-env.test.json — it
 	 * does not ship in any production WooCommerce build — which provides the second
 	 * layer of defense.
 	 *

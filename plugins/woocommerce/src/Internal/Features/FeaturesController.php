@@ -369,7 +369,7 @@ class FeaturesController {
 					'woocommerce'
 				),
 				'enabled_by_default'           => true,
-				'disable_ui'                   => false,
+				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
@@ -537,7 +537,7 @@ class FeaturesController {
 				),
 				'option_key'                   => \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME,
 				'is_experimental'              => true,
-				'enabled_by_default'           => false,
+				'enabled_by_default'           => \Automattic\WooCommerce\Internal\VariationGallery\Package::is_in_canary_cohort(),
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
@@ -643,11 +643,13 @@ class FeaturesController {
 					'Enable push notifications for the WooCommerce mobile apps to receive order notifications and store updates.',
 					'woocommerce'
 				),
+				'is_experimental'              => false,
 				'enabled_by_default'           => true,
-				'is_experimental'              => true,
 				'disable_ui'                   => true,
-				'skip_compatibility_checks'    => false,
+				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'deprecated_since'             => '10.9.2',
+				'deprecated_value'             => true,
 			),
 			'rest_api_caching'                   => array(
 				'name'                         => __( 'REST API Caching', 'woocommerce' ),

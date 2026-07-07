@@ -18,9 +18,22 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
+	 * Post statuses registered during a test, to clean up on tear down.
+	 *
+	 * @var string[]
+	 */
+	private $registered_order_statuses = array();
+
+	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
+		// register_post_status() mutates the global registry, which WP_UnitTestCase does not restore.
+		foreach ( $this->registered_order_statuses as $status ) {
+			unset( $GLOBALS['wp_post_statuses'][ $status ] );
+		}
+		$this->registered_order_statuses = array();
+
 		parent::tearDown();
 		$this->disable_cogs_feature();
 	}
@@ -994,5 +1007,57 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		} finally {
 			remove_filter( 'woocommerce_order_type_to_group', $adjust );
 		}
+	}
+
+	/**
+	 * Register a custom order status so it survives set_status() and is prefixed on save.
+	 *
+	 * Registers it in the valid order statuses (so set_status keeps it) and as a post status
+	 * (so get_post_status adds the wc- prefix, which is what pushes it over the column limit).
+	 *
+	 * @param string $status Unprefixed order status key.
+	 */
+	private function register_custom_order_status( string $status ): void {
+		$prefixed = 'wc-' . $status;
+
+		add_filter(
+			'wc_order_statuses',
+			function ( $statuses ) use ( $prefixed ) {
+				$statuses[ $prefixed ] = 'Custom status for testing';
+				return $statuses;
+			}
+		);
+		register_post_status( $prefixed );
+		$this->registered_order_statuses[] = $prefixed;
+	}
+
+	/**
+	 * @testdox Should warn when an order is saved with a status that exceeds the storage limit.
+	 */
+	public function test_saving_an_order_with_a_too_long_status_warns() {
+		$this->setExpectedIncorrectUsage( 'Abstract_WC_Order_Data_Store_CPT::get_post_status' );
+
+		// 'wc-' + 18 characters = 21, one over the 20-character storage limit.
+		$status = str_repeat( 'a', 18 );
+		$this->register_custom_order_status( $status );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( $status );
+		$order->save();
+	}
+
+	/**
+	 * @testdox Should not warn when an order is saved with a status at the storage limit.
+	 */
+	public function test_saving_an_order_with_a_status_at_the_limit_does_not_warn() {
+		// 'wc-' + 17 characters = 20, exactly the storage limit.
+		$status = str_repeat( 'a', 17 );
+		$this->register_custom_order_status( $status );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( $status );
+		$order->save();
+
+		$this->assertSame( $status, wc_get_order( $order->get_id() )->get_status() );
 	}
 }

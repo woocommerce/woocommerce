@@ -23,7 +23,11 @@ import { useInstanceId } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { getFilteredList, defaultMessages } from './utils';
+import {
+	getFilteredList,
+	defaultMessages,
+	isExpandedOrDescendantIsExpanded,
+} from './utils';
 import SearchListItem from './item';
 import Tag from '../tag';
 import type {
@@ -65,15 +69,13 @@ const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
 		<>
 			{ list.map( ( item ) => {
 				const childrenCount = item.children?.length ?? 0;
-				const isSelected =
-					childrenCount && ! isSingle
-						? item.children?.every( ( { id } ) =>
-								selected.find(
-									( selectedItem ) => selectedItem.id === id
-								)
-						  )
-						: !! selected.find( ( { id } ) => id === item.id );
-				const isExpanded = childrenCount && expandedPanelId === item.id;
+				const isSelected = !! selected.find(
+					( { id } ) => id === item.id
+				);
+				const isExpanded = isExpandedOrDescendantIsExpanded(
+					item,
+					expandedPanelId
+				);
 				const totalChildrenForItem = totalChildren?.[ item.id ];
 				const hasMoreChildren =
 					typeof totalChildrenForItem === 'number' &&
@@ -252,7 +254,7 @@ export const SearchListControl = < T extends object = object >(
 	} = props;
 
 	const [ search, setSearch ] = useState( '' );
-	const useExpandedPanelId = useState< number >( -1 );
+	const useExpandedPanelId = useState< string | number | null >( null );
 	const instanceId = useInstanceId( SearchListControl );
 	const messages = useMemo(
 		() => ( { ...defaultMessages, ...customMessages } ),

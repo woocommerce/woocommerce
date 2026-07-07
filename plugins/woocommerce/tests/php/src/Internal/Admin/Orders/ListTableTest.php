@@ -283,4 +283,44 @@ class ListTableTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'order_id', $query_args['search_filter'] ?? null, 'The selected search filter should be applied' );
 		$this->assertArrayNotHasKey( 'no_found_rows', $query_args, 'Searches should count their actual results' );
 	}
+
+	/**
+	 * @testdox When a filter modifies the query args via woocommerce_order_list_table_prepare_items_query_args, the cache fast path is not used.
+	 */
+	public function test_filter_modifying_query_args_disables_no_found_rows(): void {
+		\WC_Helper_Order::create_order();
+
+		$called = false;
+
+		$callback = function ( $args ) use ( &$called ) {
+			$called               = true;
+			$args['meta_query'][] = array(
+				'key'     => 'my_custom_meta_key',
+				'value'   => 'any_value',
+				'compare' => '=',
+			);
+			return $args;
+		};
+		add_filter( 'woocommerce_order_list_table_prepare_items_query_args', $callback );
+
+		$this->sut->prepare_items();
+		$query_args = $this->get_order_query_args();
+
+		remove_filter( 'woocommerce_order_list_table_prepare_items_query_args', $callback );
+
+		$this->assertTrue( $called, 'The filter should have been invoked' );
+		$this->assertArrayNotHasKey( 'no_found_rows', $query_args, 'When a filter modifies the query args, the cache fast path should not be used' );
+	}
+
+	/**
+	 * @testdox Without any filter modifying the query args, the cache fast path is still used.
+	 */
+	public function test_basic_query_still_uses_no_found_rows(): void {
+		\WC_Helper_Order::create_order();
+
+		$this->sut->prepare_items();
+		$query_args = $this->get_order_query_args();
+
+		$this->assertTrue( $query_args['no_found_rows'] ?? false, 'A basic query should use the cache fast path' );
+	}
 }
