@@ -149,14 +149,30 @@
 			var button = e.keyCode || e.which;
 
 			// Enter key
-			if (
-				13 === button &&
-				! ( e.target.tagName && ( e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'textarea' ) )
-			) {
-				if ( $( '#btn-ok' ).length ) {
-					this.addButton( e );
-				}	else if ( $( '#btn-next' ).length ) {
-					this.nextButton( e );
+			if ( 13 === button ) {
+				var isFormField = e.target.tagName &&
+					( e.target.tagName.toLowerCase() === 'input' ||
+						e.target.tagName.toLowerCase() === 'textarea' );
+
+				// Don't hijack Enter when the user is on an enhanced-select
+				// (selectWoo/select2) control. Focus on a *closed* control sits
+				// on the combobox element (not an <input>), so without this the
+				// Enter would "click OK", submitting and closing the modal and
+				// stranding the dropdown. Two checks cover both moments: focus
+				// on the control (first Enter, dropdown still closed) and an
+				// already-open dropdown inside this modal. Let selectWoo handle
+				// Enter natively (open the list / choose the highlighted item).
+				var inEnhancedSelect = $( e.target ).closest(
+					'.select2-container, .select2-selection, .select2-search__field, [role="combobox"]'
+				).length > 0 ||
+					this.$el.find( '.select2-container--open' ).length > 0;
+
+				if ( ! isFormField && ! inEnhancedSelect ) {
+					if ( $( '#btn-ok' ).length ) {
+						this.addButton( e );
+					}	else if ( $( '#btn-next' ).length ) {
+						this.nextButton( e );
+					}
 				}
 			}
 
