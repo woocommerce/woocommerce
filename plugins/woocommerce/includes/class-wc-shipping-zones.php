@@ -203,11 +203,11 @@ class WC_Shipping_Zones {
 		}
 
 		if ( 'continent' === $broader_type ) {
-			return $broader_code === self::get_continent_code_for_location( $location );
+			return self::get_continent_code_for_location( $location ) === $broader_code;
 		}
 
 		if ( 'country' === $broader_type ) {
-			return 'state' === $type && $broader_code === self::get_country_code_from_state_code( $code );
+			return 'state' === $type && self::get_country_code_from_state_code( $code ) === $broader_code;
 		}
 
 		return false;
