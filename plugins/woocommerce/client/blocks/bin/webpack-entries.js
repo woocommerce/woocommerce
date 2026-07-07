@@ -361,7 +361,7 @@ const entries = {
 
 		// Shared blocks code
 		'wc-blocks': './assets/js/index.js',
-		'wc-block-library-style-source': editorBlockStyleEntries,
+		'wc-blocks-editor-style-source': editorBlockStyleEntries,
 		'interactivity-editor-styles':
 			Object.values( editorStyleEntries ).flat(),
 

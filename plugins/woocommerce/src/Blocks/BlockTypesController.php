@@ -706,8 +706,8 @@ final class BlockTypesController {
 
 		$args['style_handles']        = array();
 		$args['style']                = array();
-		$args['editor_style_handles'] = array( 'wc-block-library-style' );
-		$args['editor_style']         = array( 'wc-block-library-style' );
+		$args['editor_style_handles'] = array( 'wc-blocks-editor-style' );
+		$args['editor_style']         = array( 'wc-blocks-editor-style' );
 
 		return $args;
 	}

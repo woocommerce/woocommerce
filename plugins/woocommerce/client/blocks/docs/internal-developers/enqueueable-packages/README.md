@@ -11,7 +11,7 @@ WooCommerce block types use these shared handles in the block editor:
 | Handle | Type | What it contains |
 | --- | --- | --- |
 | `wc-block-library` | Script | The shared editor bundle for WooCommerce blocks. It is built from `entries.main.wc-block-library`, which includes `assets/js/index.js` and the block editor entrypoints. |
-| `wc-block-library-style` | Stylesheet | The shared editor stylesheet for WooCommerce blocks. Block metadata and PHP block registration point editor styles to this handle. |
+| `wc-blocks-editor-style` | Stylesheet | The shared editor stylesheet for WooCommerce blocks. Block metadata and PHP block registration point editor styles to this handle. |
 
 When `wc-block-library` is loaded, its generated asset file declares the package handles that still need to be shared as separate scripts:
 

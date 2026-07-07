@@ -374,7 +374,7 @@ abstract class AbstractBlock {
 	 * @return string|null
 	 */
 	protected function get_block_type_editor_style() {
-		return 'wc-block-library-style';
+		return 'wc-blocks-editor-style';
 	}
 
 	/**

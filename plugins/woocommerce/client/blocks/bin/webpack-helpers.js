@@ -7,7 +7,7 @@ const chalk = require( 'chalk' );
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const CHECK_CIRCULAR_DEPS = process.env.CHECK_CIRCULAR_DEPS || false;
 const ASSET_CHECK = process.env.ASSET_CHECK === 'true';
-const SHARED_EDITOR_STYLE_HANDLE = 'wc-block-library-style';
+const SHARED_EDITOR_STYLE_HANDLE = 'wc-blocks-editor-style';
 
 // See also @woocommerce/dependency-extraction-webpack-plugin/assets/packages. It will backfill any missing
 // mapping here and any duplicates are because of switched between Woo and WordPress versions of the plugin.
