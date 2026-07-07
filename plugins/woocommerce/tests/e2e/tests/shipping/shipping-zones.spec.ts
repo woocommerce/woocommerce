@@ -126,8 +126,9 @@ test( 'keeps save changes enabled after adding a method to an unsaved shipping z
 			.getByRole( 'combobox', { name: 'Start typing to filter zones' } )
 			.fill( 'United States' );
 		await page
-			.locator( 'li.select2-results__option', {
-				hasText: /^United States \(US\)$/,
+			.getByRole( 'checkbox', {
+				name: 'United States (US)',
+				exact: true,
 			} )
 			.click();
 
