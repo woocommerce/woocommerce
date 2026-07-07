@@ -118,4 +118,13 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 
 		$this->assertFalse( WC()->is_store_api_request(), 'A non-Store API ?rest_route= request should not be detected as Store API.' );
 	}
+
+	/**
+	 * @testdox Should not detect a Store-API-like value in a query argument as a Store API request.
+	 */
+	public function test_is_store_api_request_returns_false_for_rest_like_query_arg(): void {
+		$_SERVER['REQUEST_URI'] = '/some-page/?arg=/wp-json/wc/store/v1/cart';
+
+		$this->assertFalse( WC()->is_store_api_request(), 'A REST-like value in a query argument should not be detected as Store API.' );
+	}
 }

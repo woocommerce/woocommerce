@@ -121,6 +121,9 @@ class BlockRegistrationContextTest extends WC_Unit_Test_Case {
 			'wc/vendor not a version'      => array( '/wp-json/wc/vendor/x', null, null, true ),
 			'wc/voucher plain not version' => array( '/index.php?rest_route=/wc/voucher/x', '/wc/voucher/x', null, true ),
 
+			// A REST-like namespace in a query argument must not be mistaken for a REST request; only the path counts.
+			'rest-like arg in query'       => array( '/some-page/?arg=/wp-json/wc/v3', null, null, true ),
+
 			// wp/v2 is WordPress core's namespace, which the block and site editors rely on, so the whole
 			// namespace keeps registering (true) — even endpoints like users/me that render no blocks.
 			'wp/v2 editor rest'            => array( '/wp-json/wp/v2/types', null, null, true ),

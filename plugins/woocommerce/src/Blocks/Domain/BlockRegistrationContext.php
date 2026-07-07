@@ -13,7 +13,7 @@ namespace Automattic\WooCommerce\Blocks\Domain;
  * Runs during bootstrap on `plugins_loaded`, before the main query is parsed, so it inspects only $_SERVER,
  * $_GET and constants set before wp-load — not query-dependent helpers such as is_favicon()/is_robots().
  *
- * @since 11.0.0
+ * @since 11.1.0
  */
 class BlockRegistrationContext {
 
@@ -171,14 +171,18 @@ class BlockRegistrationContext {
 			'wc-telemetry/',
 		);
 
-		$rest_prefix = trailingslashit( rest_get_url_prefix() );
+		// Match against the path only (a leading slash anchors the prefix) so a REST-like query argument such as
+		// /some-page/?arg=/wp-json/wc/v3 is not mistaken for a REST request.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$path        = wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH );
+		$rest_prefix = '/' . trailingslashit( rest_get_url_prefix() );
 
 		// Pretty permalinks: /wp-json/<namespace>...
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] );
-		foreach ( $namespaces as $namespace ) {
-			if ( false !== strpos( $request_uri, $rest_prefix . $namespace ) ) {
-				return true;
+		if ( is_string( $path ) ) {
+			foreach ( $namespaces as $namespace ) {
+				if ( false !== strpos( $path, $rest_prefix . $namespace ) ) {
+					return true;
+				}
 			}
 		}
 
