@@ -639,6 +639,31 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Adding a custom field renders a Delete button with a valid delete nonce.
+	 */
+	public function test_order_add_meta_delete_button_uses_name_value_nonce(): void {
+		$this->_setRole( 'administrator' );
+		$order = WC_Helper_Order::create_order();
+
+		$_POST['_ajax_nonce-add-meta'] = wp_create_nonce( 'add-meta' );
+		$_POST['order_id']             = $order->get_id();
+		$_POST['metakeyinput']         = 'my_test_key';
+		$_POST['metavalue']            = 'my_test_value';
+
+		try {
+			$this->_handleAjax( 'woocommerce_order_add_meta' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			ob_end_clean();
+		}
+
+		$this->assertStringContainsString(
+			'::_ajax_nonce=',
+			(string) $this->_last_response,
+			'Delete button should use the _ajax_nonce= token.'
+		);
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.

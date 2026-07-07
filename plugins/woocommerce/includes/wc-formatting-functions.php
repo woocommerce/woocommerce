@@ -1082,12 +1082,23 @@ function wc_normalize_postcode( $postcode ) {
  * @return string
  */
 function wc_format_phone_number( $phone ) {
-	$phone = $phone ?? '';
+	$original = $phone ?? '';
 
-	if ( ! WC_Validation::is_phone( $phone ) ) {
-		return '';
-	}
-	return preg_replace( '/[^0-9\+\-\(\)\s]/', '-', preg_replace( '/[\x00-\x1F\x7F-\xFF]/', '', $phone ) );
+	$is_valid  = WC_Validation::is_phone_format( $original );
+	$formatted = $is_valid
+		? (string) preg_replace( '/[^0-9\+\-\(\)\s]/', '-', preg_replace( '/[\x00-\x1F\x7F-\xFF]/', '', $original ) )
+		: '';
+
+	/**
+	 * Filters the formatted phone number.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param string $formatted The formatted phone number, or an empty string if $original isn't a valid phone number.
+	 * @param string $original  The phone number passed to the function.
+	 * @param bool   $is_valid  Whether $original passed the default phone number validation.
+	 */
+	return apply_filters( 'woocommerce_format_phone_number', $formatted, $original, $is_valid );
 }
 
 /**

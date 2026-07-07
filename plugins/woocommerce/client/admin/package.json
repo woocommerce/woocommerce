@@ -100,6 +100,7 @@
 		"@wordpress/plugins": "catalog:wp-min",
 		"@wordpress/primitives": "catalog:wp-min",
 		"@wordpress/router": "0.7.0",
+		"@wordpress/ui": "catalog:wp-bundled",
 		"@wordpress/url": "catalog:wp-min",
 		"@wordpress/viewport": "catalog:wp-min",
 		"@wordpress/warning": "catalog:wp-min",

@@ -209,9 +209,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			$show_columns['cogs_value'] = __( 'Cost', 'woocommerce' );
 		}
 		$show_columns['product_cat'] = __( 'Categories', 'woocommerce' );
-		$show_columns['product_tag'] = __( 'Tags', 'woocommerce' );
-		$show_columns['featured']    = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
-		$show_columns['date']        = __( 'Date', 'woocommerce' );
+		if ( is_object_in_taxonomy( 'product', 'product_tag' ) ) {
+			$show_columns['product_tag'] = __( 'Tags', 'woocommerce' );
+		}
+		$show_columns['featured'] = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
+		$show_columns['date']     = __( 'Date', 'woocommerce' );
 
 		return array_merge( $show_columns, $columns );
 	}
@@ -435,6 +437,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				array(
 					'option_select_text' => __( 'Filter by category', 'woocommerce' ),
 					'hide_empty'         => 0,
+					// Performance note: pad_counts=0 skips the hierarchical count SQL — O(all published products), degrades linearly
+					// with catalog size. show_count=0 suppresses the raw wp_term_taxonomy.count that would otherwise render in its place.
+					'pad_counts'         => 0,
+					'show_count'         => 0,
 				)
 			);
 		} else {

@@ -4,6 +4,7 @@
 import { render } from '@testing-library/react';
 import { date as formatSiteDate, dateI18n, format } from '@wordpress/date';
 import { createElement } from '@wordpress/element';
+import Timeline from '..';
 
 /**
  * Internal dependencies

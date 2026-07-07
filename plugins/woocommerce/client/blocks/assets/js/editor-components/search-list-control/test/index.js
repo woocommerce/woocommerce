@@ -34,10 +34,7 @@ describe( 'SearchListControl', () => {
 				onChange={ noop }
 			/>
 		);
-
-		// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
-		// opt out of without changing the visual output.
-		expect( console ).toHaveWarned();
+		expect( component ).toMatchSnapshot();
 	} );
 
 	test( 'should render a search box with a search term, and only matching options, regardless of case sensitivity', () => {

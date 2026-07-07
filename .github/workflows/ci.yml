@@ -189,7 +189,17 @@ jobs:
           WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.projectPath }}
         run: node .github/workflows/scripts/override-wp-env-plugins.js
 
-      - name: 'Start Test Environment'
+      - name: 'Start Test Environment: increase max-download-attempts'
+        if: ${{ matrix.testEnv.shouldCreate }}
+        uses: docker/setup-docker-action@6d7cfa65f60a9dda7b46e5513fa982536f3c9877 # v5.3.0
+        with:
+          daemon-config: |
+            {
+              "max-download-attempts": 10,
+              "max-concurrent-downloads": 3
+            }
+
+      - name: 'Start Test Environment: start'
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
         run: pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
@@ -213,7 +223,7 @@ jobs:
           pattern: 'last-run__${{ strategy.job-index }}'
 
       - name: 'Run tests (${{ matrix.testType }})'
-        timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && 20 ) || ( matrix.testType == 'unit:php' && 15 ) ) ) || 360 }}
+        timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && 20 ) || ( matrix.testType == 'unit:php' && 20 ) ) ) || 360 }}
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests

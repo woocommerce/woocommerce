@@ -1315,4 +1315,160 @@ class Cart extends ControllerTestCase {
 
 		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
 	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_updated_from_user_request with untruncated quantities on stores with decimal quantities.
+	 */
+	public function test_update_item_fires_update_action_with_float_quantity(): void {
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+		$multiple_of_callback = function () {
+			return 0.5;
+		};
+		add_filter( 'woocommerce_store_api_product_quantity_multiple_of', $multiple_of_callback );
+
+		wc()->cart->set_quantity( $this->keys[0], 1.5 );
+
+		$captured_args = array();
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$callback = function ( $cart_item_key, $quantity, $old_quantity, $cart ) use ( &$captured_args ) {
+			$captured_args = compact( 'cart_item_key', 'quantity', 'old_quantity', 'cart' );
+		};
+
+		add_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'key'      => $this->keys[0],
+				'quantity' => 2.5,
+			)
+		);
+
+		$this->assertAPIResponse( $request, 200 );
+
+		$this->assertNotEmpty( $captured_args, 'The update action should have been fired' );
+		$this->assertSame( 2.5, $captured_args['quantity'], 'The new quantity should not be truncated' );
+		$this->assertSame( 1.5, $captured_args['old_quantity'], 'The old quantity should not be truncated' );
+		$this->assertSame( 2.5, wc()->cart->get_cart_item( $this->keys[0] )['quantity'], 'The cart item quantity should be the untruncated value' );
+
+		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
+		remove_filter( 'woocommerce_store_api_product_quantity_multiple_of', $multiple_of_callback );
+		remove_filter( 'woocommerce_stock_amount', 'floatval' );
+		add_filter( 'woocommerce_stock_amount', 'intval' );
+	}
+
+	/**
+	 * @testdox Should not fire internal_woocommerce_cart_item_updated_from_user_request when a decimal quantity is unchanged.
+	 */
+	public function test_update_item_with_same_float_quantity_does_not_fire_update_action(): void {
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+		$multiple_of_callback = function () {
+			return 0.5;
+		};
+		add_filter( 'woocommerce_store_api_product_quantity_multiple_of', $multiple_of_callback );
+
+		wc()->cart->set_quantity( $this->keys[0], 1.5 );
+
+		$action_fired = false;
+		$callback     = function () use ( &$action_fired ) {
+			$action_fired = true;
+		};
+
+		add_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'key'      => $this->keys[0],
+				'quantity' => 1.5,
+			)
+		);
+
+		$this->assertAPIResponse( $request, 200 );
+
+		$this->assertFalse( $action_fired, 'The update action should not fire when a decimal quantity is unchanged' );
+
+		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
+		remove_filter( 'woocommerce_store_api_product_quantity_multiple_of', $multiple_of_callback );
+		remove_filter( 'woocommerce_stock_amount', 'floatval' );
+		add_filter( 'woocommerce_stock_amount', 'intval' );
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_updated_from_user_request with numeric quantities when the cart contains a string quantity.
+	 */
+	public function test_update_item_fires_update_action_with_numeric_quantities_for_string_cart_quantity(): void {
+		$cart_contents                               = wc()->cart->get_cart_contents();
+		$cart_contents[ $this->keys[0] ]['quantity'] = '2';
+		wc()->cart->set_cart_contents( $cart_contents );
+
+		$captured_args = array();
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$callback = function ( $cart_item_key, $quantity, $old_quantity, $cart ) use ( &$captured_args ) {
+			$captured_args = compact( 'cart_item_key', 'quantity', 'old_quantity', 'cart' );
+		};
+
+		add_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'key'      => $this->keys[0],
+				'quantity' => 3,
+			)
+		);
+
+		$this->assertAPIResponse( $request, 200 );
+
+		$this->assertNotEmpty( $captured_args, 'The update action should have been fired' );
+		$this->assertSame( 3, $captured_args['quantity'], 'The new quantity should be a numeric value' );
+		$this->assertSame( 2, $captured_args['old_quantity'], 'The old quantity should be normalized to a numeric value' );
+
+		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_added_from_user_request with a numeric quantity when a filter sets a string quantity.
+	 */
+	public function test_add_item_fires_add_action_with_numeric_quantity_for_string_quantity(): void {
+		wc_empty_cart();
+
+		$add_to_cart_data_callback = function ( $add_to_cart_data ) {
+			$add_to_cart_data['quantity'] = '2';
+			return $add_to_cart_data;
+		};
+		add_filter( 'woocommerce_store_api_add_to_cart_data', $add_to_cart_data_callback );
+
+		$captured_args = array();
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
+		};
+
+		add_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => 1,
+			)
+		);
+
+		$this->assertAPIResponse( $request, 201 );
+
+		$this->assertNotEmpty( $captured_args, 'The add action should have been fired' );
+		$this->assertSame( 2, $captured_args['quantity'], 'The quantity should be normalized to a numeric value' );
+
+		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
+		remove_filter( 'woocommerce_store_api_add_to_cart_data', $add_to_cart_data_callback );
+	}
 }

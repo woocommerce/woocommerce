@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix is_vat_exempt being not correctly applied during block checkout for logged-in users.
