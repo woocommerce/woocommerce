@@ -33,8 +33,17 @@ trait ApplyCouponTrait {
 
 		$coupon_code = wc_format_coupon_code( wp_unslash( $request['code'] ) );
 
-		// The web route's WC_REST_Exception catch is not carried over: static
-		// analysis proves it dead — apply_coupon() throws RouteException.
-		$this->cart_controller->apply_coupon( $coupon_code );
+		// Core only throws RouteException, but the coupon hooks apply_coupon()
+		// fires (e.g. woocommerce_applied_coupon) are extension surface that can
+		// throw WC_REST_Exception; PHPStan can't see through the action, so the
+		// catch reads as dead to it.
+		try {
+			$this->cart_controller->apply_coupon( $coupon_code );
+			// @phpstan-ignore-next-line catch.neverThrown
+		} catch ( \WC_REST_Exception $e ) {
+			// Preserve the extension's own error code and HTTP status instead of
+			// letting it fall through to the route's generic 500 handler.
+			throw new RouteException( $e->getErrorCode(), $e->getMessage(), $e->getCode() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
 	}
 }

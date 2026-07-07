@@ -299,6 +299,33 @@ class CartApplyCoupon extends ControllerTestCase {
 	}
 
 	/**
+	 * A WC_REST_Exception thrown from a coupon hook (extension surface) must
+	 * surface with its own error code and HTTP status, not a generic 500.
+	 */
+	public function test_wc_rest_exception_from_coupon_hook_preserves_code_and_status() {
+		wc()->cart->remove_coupons();
+
+		$throw = function () {
+			throw new \WC_REST_Exception( 'my_plugin_limit', 'Custom coupon limit reached.', 409 );
+		};
+		add_action( 'woocommerce_applied_coupon', $throw );
+
+		try {
+			$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/apply-coupon' );
+			$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+			$request->set_body_params( array( 'code' => $this->coupon->get_code() ) );
+
+			$response = rest_get_server()->dispatch( $request );
+			$data     = $response->get_data();
+
+			$this->assertEquals( 409, $response->get_status() );
+			$this->assertEquals( 'my_plugin_limit', $data['code'] );
+		} finally {
+			remove_action( 'woocommerce_applied_coupon', $throw );
+		}
+	}
+
+	/**
 	 * Test schema retrieval.
 	 */
 	public function test_get_item_schema() {
