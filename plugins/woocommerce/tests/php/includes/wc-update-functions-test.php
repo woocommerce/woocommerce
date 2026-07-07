@@ -338,4 +338,26 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		wc_update_1100_enable_point_of_sale_feature();
 		$this->assertSame( 'yes', get_option( 'woocommerce_feature_point_of_sale_enabled' ) );
 	}
+
+	/**
+	 * @testdox wc_update_1110_remove_headstart_post_product_meta removes _headstart_post from products only.
+	 */
+	public function test_wc_update_1110_remove_headstart_post_product_meta(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$product = WC_Helper_Product::create_simple_product();
+		update_post_meta( $product->get_id(), '_headstart_post', '1' );
+
+		$page_id = self::factory()->post->create(
+			array(
+				'post_type' => 'page',
+			)
+		);
+		update_post_meta( $page_id, '_headstart_post', '1' );
+
+		wc_update_1110_remove_headstart_post_product_meta();
+
+		$this->assertSame( '', get_post_meta( $product->get_id(), '_headstart_post', true ) );
+		$this->assertSame( '1', get_post_meta( $page_id, '_headstart_post', true ) );
+	}
 }

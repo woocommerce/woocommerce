@@ -3581,3 +3581,56 @@ function wc_update_10902_remove_deprecated_push_notifications_option(): void {
 function wc_update_1100_enable_point_of_sale_feature() {
 	update_option( 'woocommerce_feature_point_of_sale_enabled', 'yes' );
 }
+
+/**
+ * Remove product meta associated with the key '_headstart_post'.
+ *
+ * This meta was used to mark AI-generated sample products created during store
+ * onboarding. It is no longer needed and removing it prevents stale sample
+ * product markers from lingering in the database.
+ *
+ * @since 11.1.0
+ *
+ * @return void
+ */
+function wc_update_1110_remove_headstart_post_product_meta() {
+	global $wpdb;
+
+	$deletions = $wpdb->query(
+		$wpdb->prepare(
+			"DELETE pm FROM {$wpdb->postmeta} pm
+			INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+			WHERE p.post_type = %s
+			AND pm.meta_key = %s",
+			'product',
+			'_headstart_post'
+		)
+	);
+
+	$logger = wc_get_logger();
+
+	if ( null === $logger ) {
+		return;
+	}
+
+	if ( false === $deletions ) {
+		$logger->notice(
+			'During the update to 11.1.0, WooCommerce attempted to remove product meta with the key "_headstart_post" but was unable to do so.',
+			array(
+				'source' => 'wc-updater',
+			)
+		);
+	} else {
+		$logger->info(
+			sprintf(
+				1 === $deletions
+					? 'During the update to 11.1.0, WooCommerce removed %d product meta row associated with the meta key "_headstart_post".'
+					: 'During the update to 11.1.0, WooCommerce removed %d product meta rows associated with the meta key "_headstart_post".',
+				number_format_i18n( $deletions )
+			),
+			array(
+				'source' => 'wc-updater',
+			)
+		);
+	}
+}
