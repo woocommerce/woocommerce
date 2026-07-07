@@ -130,11 +130,11 @@ class ShopperListItem {
 	 * @param int   $product_or_variation_id Product or variation ID.
 	 * @param array $variation               Variation attributes keyed by attribute name.
 	 * @param int   $quantity                Saved quantity. Coerced to a minimum of 1.
-	 * @return self|null Null if the underlying product can't be resolved.
+	 * @return self|null Null if the underlying product can't be resolved or isn't published.
 	 */
 	public static function from_product( int $product_or_variation_id, array $variation = array(), int $quantity = 1 ): ?self {
 		$product = wc_get_product( absint( $product_or_variation_id ) );
-		if ( ! $product ) {
+		if ( ! $product || ! self::product_is_live( $product ) ) {
 			return null;
 		}
 
@@ -313,7 +313,16 @@ class ShopperListItem {
 	 */
 	public function is_live(): bool {
 		$product = $this->get_product();
-		if ( ! $product instanceof \WC_Product || ProductStatus::PUBLISH !== $product->get_status() ) {
+		return $product instanceof \WC_Product && self::product_is_live( $product );
+	}
+
+	/**
+	 * Whether a resolved product (and its parent, for variations) is `publish`.
+	 *
+	 * @param \WC_Product $product Resolved product or variation.
+	 */
+	private static function product_is_live( \WC_Product $product ): bool {
+		if ( ProductStatus::PUBLISH !== $product->get_status() ) {
 			return false;
 		}
 

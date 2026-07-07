@@ -49,6 +49,11 @@ type PendingNavigation = {
 	href: string;
 };
 
+const FORM_POST_REDIRECT_INPUT_NAME = 'wc_settings_ui_redirect_to';
+
+const normalizeSection = ( section?: string ) =>
+	section === 'default' ? '' : section;
+
 const getInitialValues = ( schema: SettingsUISchema ): SettingsValues => {
 	const values: SettingsValues = {};
 
@@ -98,11 +103,35 @@ const getActionVariant = ( variant?: string ) =>
 		? variant
 		: 'secondary' ) as 'primary' | 'secondary' | 'tertiary' | 'link';
 
+// TS unions erase at runtime, so guard the className interpolation against unexpected
+// strings from PHP-supplied schemas.
+const getBadgeIntent = ( intent?: string ) =>
+	[ 'default', 'info', 'success', 'warning', 'error' ].includes(
+		intent || ''
+	)
+		? intent
+		: 'default';
+
 const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>
 	schema.save || { adapter: 'form_post' };
 
 const clearLegacyFormPrompt = () => {
 	window.onbeforeunload = null;
+};
+
+const setFormPostRedirectInput = ( form: HTMLFormElement, href: string ) => {
+	let redirectInput = form.querySelector< HTMLInputElement >(
+		`input[name="${ FORM_POST_REDIRECT_INPUT_NAME }"]`
+	);
+
+	if ( ! redirectInput ) {
+		redirectInput = document.createElement( 'input' );
+		redirectInput.type = 'hidden';
+		redirectInput.name = FORM_POST_REDIRECT_INPUT_NAME;
+		form.appendChild( redirectInput );
+	}
+
+	redirectInput.value = href;
 };
 
 const shouldPromptForNavigation = ( event: MouseEvent ) => {
@@ -387,6 +416,19 @@ const ShellHeader = ( {
 			</nav>
 		) : undefined;
 
+	const badges = shell.badges?.length
+		? shell.badges.map( ( badge, index ) => (
+				<span
+					className={ `wc-settings-ui-shell__badge wc-settings-ui-shell__badge--${ getBadgeIntent(
+						badge.intent
+					) }` }
+					key={ `${ badge.label }-${ index }` }
+				>
+					{ badge.label }
+				</span>
+		  ) )
+		: undefined;
+
 	const saveButtonLabel = __( 'Save', 'woocommerce' );
 
 	const actions = showSaveButton ? (
@@ -407,11 +449,11 @@ const ShellHeader = ( {
 	return (
 		<Page
 			className="wc-settings-ui-shell"
-			headingLevel={ 1 }
 			title={ title }
+			subTitle={ shell.subtitle }
 			breadcrumbs={ breadcrumbs }
+			badges={ badges }
 			actions={ actions }
-			showSidebarToggle={ false }
 		>
 			{ hasNavigation ? (
 				<div className="wc-settings-ui-shell__navigation">
@@ -497,7 +539,9 @@ export const SettingsUIPage = ( {
 	const context: SettingsFieldContext = useMemo(
 		() => ( {
 			page: page || schema.id,
-			section: section || schema.section,
+			section: normalizeSection(
+				typeof section === 'undefined' ? schema.section : section
+			),
 		} ),
 		[ page, schema.id, schema.section, section ]
 	);
@@ -535,27 +579,31 @@ export const SettingsUIPage = ( {
 		clearLegacyFormPrompt();
 	}, [] );
 
-	const submitSettingsForm = useCallback( () => {
-		allowNavigation();
+	const submitSettingsForm = useCallback(
+		( redirectTo?: string ) => {
+			const form = document.getElementById( 'mainform' );
 
-		const form = document.getElementById( 'mainform' );
+			if ( ! ( form instanceof HTMLFormElement ) ) {
+				return;
+			}
 
-		if ( ! ( form instanceof HTMLFormElement ) ) {
-			return;
-		}
+			if ( typeof redirectTo === 'string' && redirectTo ) {
+				setFormPostRedirectInput( form, redirectTo );
+			}
 
-		const saveButton = document.querySelector( '.woocommerce-save-button' );
+			allowNavigation();
 
-		if (
-			saveButton instanceof HTMLButtonElement &&
-			saveButton.form === form
-		) {
-			form.requestSubmit( saveButton );
-			return;
-		}
+			const saveButton = form.querySelector( '.woocommerce-save-button' );
 
-		form.requestSubmit();
-	}, [ allowNavigation ] );
+			if ( saveButton instanceof HTMLButtonElement ) {
+				form.requestSubmit( saveButton );
+				return;
+			}
+
+			form.requestSubmit();
+		},
+		[ allowNavigation ]
+	);
 
 	const setValues = useCallback(
 		( nextValues: Partial< SettingsValues > ) => {
@@ -709,7 +757,7 @@ export const SettingsUIPage = ( {
 		}
 
 		if ( saveStrategy.adapter === 'form_post' ) {
-			submitSettingsForm();
+			submitSettingsForm( pendingNavigation.href );
 			return;
 		}
 

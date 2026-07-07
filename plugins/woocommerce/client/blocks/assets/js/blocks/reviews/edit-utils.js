@@ -15,6 +15,8 @@ import {
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
 
 export const getBlockControls = ( editMode, setAttributes, buttonTitle ) => (
@@ -37,103 +39,31 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 	const reviewRatingsEnabled = getSetting( 'reviewRatingsEnabled', true );
 	return (
 		<>
-			<ToggleControl
+			<ToolsPanelItem
+				hasValue={ () => ! attributes.showReviewRating }
 				label={ __( 'Product rating', 'woocommerce' ) }
-				checked={ attributes.showReviewRating }
-				onChange={ () =>
-					setAttributes( {
-						showReviewRating: ! attributes.showReviewRating,
-					} )
-				}
-			/>
-			{ attributes.showReviewRating && ! reviewRatingsEnabled && (
-				<Notice
-					className="wc-block-base-control-notice"
-					isDismissible={ false }
-				>
-					{ createInterpolateElement(
-						__(
-							'Product rating is disabled in your <a>store settings</a>.',
-							'woocommerce'
-						),
-						{
-							a: (
-								// eslint-disable-next-line jsx-a11y/anchor-has-content
-								<a
-									href={ getAdminLink(
-										'admin.php?page=wc-settings&tab=products'
-									) }
-									target="_blank"
-									rel="noopener noreferrer"
-								/>
-							),
+				onDeselect={ () => setAttributes( { showReviewRating: true } ) }
+				isShownByDefault
+			>
+				<div className="wc-block-reviews__tools-panel-item-container">
+					<ToggleControl
+						__nextHasNoMarginBottom
+						label={ __( 'Product rating', 'woocommerce' ) }
+						checked={ attributes.showReviewRating }
+						onChange={ () =>
+							setAttributes( {
+								showReviewRating: ! attributes.showReviewRating,
+							} )
 						}
-					) }
-				</Notice>
-			) }
-			<ToggleControl
-				label={ __( 'Reviewer name', 'woocommerce' ) }
-				checked={ attributes.showReviewerName }
-				onChange={ () =>
-					setAttributes( {
-						showReviewerName: ! attributes.showReviewerName,
-					} )
-				}
-			/>
-			<ToggleControl
-				label={ __( 'Image', 'woocommerce' ) }
-				checked={ attributes.showReviewImage }
-				onChange={ () =>
-					setAttributes( {
-						showReviewImage: ! attributes.showReviewImage,
-					} )
-				}
-			/>
-			<ToggleControl
-				label={ __( 'Review date', 'woocommerce' ) }
-				checked={ attributes.showReviewDate }
-				onChange={ () =>
-					setAttributes( {
-						showReviewDate: ! attributes.showReviewDate,
-					} )
-				}
-			/>
-			<ToggleControl
-				label={ __( 'Review content', 'woocommerce' ) }
-				checked={ attributes.showReviewContent }
-				onChange={ () =>
-					setAttributes( {
-						showReviewContent: ! attributes.showReviewContent,
-					} )
-				}
-			/>
-			{ attributes.showReviewImage && (
-				<>
-					<ToggleGroupControl
-						label={ __( 'Review image', 'woocommerce' ) }
-						isBlock
-						value={ attributes.imageType }
-						onChange={ ( value ) =>
-							setAttributes( { imageType: value } )
-						}
-					>
-						<ToggleGroupControlOption
-							value="reviewer"
-							label={ __( 'Reviewer photo', 'woocommerce' ) }
-						/>
-						<ToggleGroupControlOption
-							value="product"
-							label={ __( 'Product', 'woocommerce' ) }
-						/>
-					</ToggleGroupControl>
-					{ attributes.imageType === 'reviewer' && ! showAvatars && (
+					/>
+					{ attributes.showReviewRating && ! reviewRatingsEnabled && (
 						<Notice
 							className="wc-block-base-control-notice"
 							isDismissible={ false }
 						>
 							{ createInterpolateElement(
 								__(
-									'Reviewer photo is disabled in your <a>site settings</a>.',
+									'Product rating is disabled in your <a>store settings</a>.',
 									'woocommerce'
 								),
 								{
@@ -141,7 +71,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 										// eslint-disable-next-line jsx-a11y/anchor-has-content
 										<a
 											href={ getAdminLink(
-												'options-discussion.php'
+												'admin.php?page=wc-settings&tab=products'
 											) }
 											target="_blank"
 											rel="noopener noreferrer"
@@ -151,8 +81,138 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 							) }
 						</Notice>
 					) }
-				</>
-			) }
+				</div>
+			</ToolsPanelItem>
+			<ToolsPanelItem
+				hasValue={ () => ! attributes.showReviewerName }
+				label={ __( 'Reviewer name', 'woocommerce' ) }
+				onDeselect={ () => setAttributes( { showReviewerName: true } ) }
+				isShownByDefault
+			>
+				<ToggleControl
+					__nextHasNoMarginBottom
+					label={ __( 'Reviewer name', 'woocommerce' ) }
+					checked={ attributes.showReviewerName }
+					onChange={ () =>
+						setAttributes( {
+							showReviewerName: ! attributes.showReviewerName,
+						} )
+					}
+				/>
+			</ToolsPanelItem>
+			<ToolsPanelItem
+				hasValue={ () =>
+					! attributes.showReviewImage ||
+					attributes.imageType !== 'reviewer'
+				}
+				label={ __( 'Image', 'woocommerce' ) }
+				onDeselect={ () =>
+					setAttributes( {
+						showReviewImage: true,
+						imageType: 'reviewer',
+					} )
+				}
+				isShownByDefault
+			>
+				<div className="wc-block-reviews__tools-panel-item-container">
+					<ToggleControl
+						__nextHasNoMarginBottom
+						label={ __( 'Image', 'woocommerce' ) }
+						checked={ attributes.showReviewImage }
+						onChange={ () =>
+							setAttributes( {
+								showReviewImage: ! attributes.showReviewImage,
+							} )
+						}
+					/>
+					{ attributes.showReviewImage && (
+						<>
+							<ToggleGroupControl
+								label={ __( 'Review image', 'woocommerce' ) }
+								isBlock
+								value={ attributes.imageType }
+								onChange={ ( value ) =>
+									setAttributes( { imageType: value } )
+								}
+							>
+								<ToggleGroupControlOption
+									value="reviewer"
+									label={ __(
+										'Reviewer photo',
+										'woocommerce'
+									) }
+								/>
+								<ToggleGroupControlOption
+									value="product"
+									label={ __( 'Product', 'woocommerce' ) }
+								/>
+							</ToggleGroupControl>
+							{ attributes.imageType === 'reviewer' &&
+								! showAvatars && (
+									<Notice
+										className="wc-block-base-control-notice"
+										isDismissible={ false }
+									>
+										{ createInterpolateElement(
+											__(
+												'Reviewer photo is disabled in your <a>site settings</a>.',
+												'woocommerce'
+											),
+											{
+												a: (
+													// eslint-disable-next-line jsx-a11y/anchor-has-content
+													<a
+														href={ getAdminLink(
+															'options-discussion.php'
+														) }
+														target="_blank"
+														rel="noopener noreferrer"
+													/>
+												),
+											}
+										) }
+									</Notice>
+								) }
+						</>
+					) }
+				</div>
+			</ToolsPanelItem>
+			<ToolsPanelItem
+				hasValue={ () => ! attributes.showReviewDate }
+				label={ __( 'Review date', 'woocommerce' ) }
+				onDeselect={ () => setAttributes( { showReviewDate: true } ) }
+				isShownByDefault
+			>
+				<ToggleControl
+					__nextHasNoMarginBottom
+					label={ __( 'Review date', 'woocommerce' ) }
+					checked={ attributes.showReviewDate }
+					onChange={ () =>
+						setAttributes( {
+							showReviewDate: ! attributes.showReviewDate,
+						} )
+					}
+				/>
+			</ToolsPanelItem>
+			<ToolsPanelItem
+				hasValue={ () => ! attributes.showReviewContent }
+				label={ __( 'Review content', 'woocommerce' ) }
+				onDeselect={ () =>
+					setAttributes( { showReviewContent: true } )
+				}
+				isShownByDefault
+			>
+				<ToggleControl
+					__nextHasNoMarginBottom
+					label={ __( 'Review content', 'woocommerce' ) }
+					checked={ attributes.showReviewContent }
+					onChange={ () =>
+						setAttributes( {
+							showReviewContent: ! attributes.showReviewContent,
+						} )
+					}
+				/>
+			</ToolsPanelItem>
 		</>
 	);
 };
@@ -163,50 +223,103 @@ export const getSharedReviewListControls = ( attributes, setAttributes ) => {
 
 	return (
 		<>
-			<ToggleControl
+			<ToolsPanelItem
+				hasValue={ () => ! attributes.showOrderby }
 				label={ __( 'Order by', 'woocommerce' ) }
-				checked={ attributes.showOrderby }
-				onChange={ () =>
-					setAttributes( { showOrderby: ! attributes.showOrderby } )
-				}
-			/>
-			<SelectControl
+				onDeselect={ () => setAttributes( { showOrderby: true } ) }
+				isShownByDefault
+			>
+				<ToggleControl
+					__nextHasNoMarginBottom
+					label={ __( 'Order by', 'woocommerce' ) }
+					checked={ attributes.showOrderby }
+					onChange={ () =>
+						setAttributes( {
+							showOrderby: ! attributes.showOrderby,
+						} )
+					}
+				/>
+			</ToolsPanelItem>
+			<ToolsPanelItem
+				hasValue={ () => attributes.orderby !== 'most-recent' }
 				label={ __( 'Order Product Reviews by', 'woocommerce' ) }
-				value={ attributes.orderby }
-				options={ [
-					{ label: 'Most recent', value: 'most-recent' },
-					{ label: 'Highest Rating', value: 'highest-rating' },
-					{ label: 'Lowest Rating', value: 'lowest-rating' },
-				] }
-				onChange={ ( orderby ) => setAttributes( { orderby } ) }
-			/>
-			<RangeControl
+				onDeselect={ () => setAttributes( { orderby: 'most-recent' } ) }
+				isShownByDefault
+			>
+				<SelectControl
+					label={ __( 'Order Product Reviews by', 'woocommerce' ) }
+					value={ attributes.orderby }
+					options={ [
+						{
+							label: __( 'Most recent', 'woocommerce' ),
+							value: 'most-recent',
+						},
+						{
+							label: __( 'Highest rating', 'woocommerce' ),
+							value: 'highest-rating',
+						},
+						{
+							label: __( 'Lowest rating', 'woocommerce' ),
+							value: 'lowest-rating',
+						},
+					] }
+					onChange={ ( orderby ) => setAttributes( { orderby } ) }
+				/>
+			</ToolsPanelItem>
+			<ToolsPanelItem
+				hasValue={ () => attributes.reviewsOnPageLoad !== 10 }
 				label={ __( 'Starting Number of Reviews', 'woocommerce' ) }
-				value={ attributes.reviewsOnPageLoad }
-				onChange={ ( reviewsOnPageLoad ) =>
-					setAttributes( { reviewsOnPageLoad } )
-				}
-				max={ maxPerPage }
-				min={ minPerPage }
-			/>
-			<ToggleControl
-				label={ __( 'Load more', 'woocommerce' ) }
-				checked={ attributes.showLoadMore }
-				onChange={ () =>
-					setAttributes( { showLoadMore: ! attributes.showLoadMore } )
-				}
-			/>
-			{ attributes.showLoadMore && (
+				onDeselect={ () => setAttributes( { reviewsOnPageLoad: 10 } ) }
+				isShownByDefault
+			>
 				<RangeControl
-					label={ __( 'Load More Reviews', 'woocommerce' ) }
-					value={ attributes.reviewsOnLoadMore }
-					onChange={ ( reviewsOnLoadMore ) =>
-						setAttributes( { reviewsOnLoadMore } )
+					label={ __( 'Starting Number of Reviews', 'woocommerce' ) }
+					value={ attributes.reviewsOnPageLoad }
+					onChange={ ( reviewsOnPageLoad ) =>
+						setAttributes( { reviewsOnPageLoad } )
 					}
 					max={ maxPerPage }
 					min={ minPerPage }
 				/>
-			) }
+			</ToolsPanelItem>
+			<ToolsPanelItem
+				hasValue={ () =>
+					! attributes.showLoadMore ||
+					attributes.reviewsOnLoadMore !== 10
+				}
+				label={ __( 'Load more', 'woocommerce' ) }
+				onDeselect={ () =>
+					setAttributes( {
+						showLoadMore: true,
+						reviewsOnLoadMore: 10,
+					} )
+				}
+				isShownByDefault
+			>
+				<div className="wc-block-reviews__tools-panel-item-container">
+					<ToggleControl
+						__nextHasNoMarginBottom
+						label={ __( 'Load more', 'woocommerce' ) }
+						checked={ attributes.showLoadMore }
+						onChange={ () =>
+							setAttributes( {
+								showLoadMore: ! attributes.showLoadMore,
+							} )
+						}
+					/>
+					{ attributes.showLoadMore && (
+						<RangeControl
+							label={ __( 'Load More Reviews', 'woocommerce' ) }
+							value={ attributes.reviewsOnLoadMore }
+							onChange={ ( reviewsOnLoadMore ) =>
+								setAttributes( { reviewsOnLoadMore } )
+							}
+							max={ maxPerPage }
+							min={ minPerPage }
+						/>
+					) }
+				</div>
+			</ToolsPanelItem>
 		</>
 	);
 };

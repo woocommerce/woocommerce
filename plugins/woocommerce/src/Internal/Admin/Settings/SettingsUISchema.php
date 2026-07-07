@@ -115,6 +115,11 @@ class SettingsUISchema {
 			}
 		);
 
+		foreach ( $groups as $group_id => $group ) {
+			unset( $group['order'] );
+			$groups[ $group_id ] = $group;
+		}
+
 		$decoded_title = html_entity_decode( $title, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 );
 
 		return array(
