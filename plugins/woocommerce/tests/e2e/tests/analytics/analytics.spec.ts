@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Page } from '@playwright/test';
+import { request as apiRequest, type Page } from '@playwright/test';
 import {
 	WC_ADMIN_API_PATH,
 	WC_API_PATH,
@@ -12,6 +12,7 @@ import {
  */
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { setOption } from '../../utils/options';
 
 /**
  * Escape a string for literal use inside a RegExp.
@@ -630,5 +631,87 @@ test(
 				.getByText( 'Your settings have been successfully saved.' )
 				.first()
 		).toBeVisible();
+	}
+);
+
+// Overview manual-import trigger. Folded in here so its `scheduled_import`
+// toggle serialises with the data suite's within one core-parallel worker.
+test.describe(
+	'manual import trigger',
+	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
+	() => {
+		test.beforeEach( async ( { page } ) => {
+			await page.goto(
+				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
+			);
+		} );
+
+		test( 'shows the manual update trigger in scheduled mode', async ( {
+			page,
+			baseURL,
+		} ) => {
+			// Switch to scheduled mode, where the manual "Update now" trigger is
+			// offered.
+			await setOption(
+				apiRequest,
+				baseURL,
+				'woocommerce_analytics_scheduled_import',
+				'yes'
+			);
+
+			// Enabling scheduled mode schedules a recurring batch import whose
+			// first run is "now" (OrdersScheduler::schedule_recurring_batch_processor
+			// → as_schedule_recurring_action( time(), … )). Until that batch runs,
+			// the status bar renders its busy "in progress" state instead of the
+			// "Update now" trigger, and wp-env has no cron to run it. So drain the
+			// Action Scheduler queue via ?process-waiting-actions — exactly as this
+			// spec's data setup does — until the batch clears and the button
+			// settles to idle. Poll because the reload races the drain.
+			const updateButton = page.getByRole( 'button', {
+				name: 'Manually trigger analytics data import',
+			} );
+			await expect( async () => {
+				await page.request.get( '?process-waiting-actions' );
+				await page.reload();
+				await expect( page.getByText( 'Data status' ) ).toBeVisible();
+				await expect( updateButton ).toBeVisible( { timeout: 2_000 } );
+			} ).toPass( {
+				timeout: 30_000,
+				intervals: [ 1_000, 2_000, 3_000 ],
+			} );
+
+			// Clicking it fires the import and flips the button to a busy state.
+			const responsePromise = page.waitForResponse(
+				( response ) =>
+					response
+						.url()
+						.includes( '/wc-analytics/imports/trigger' ) &&
+					response.ok()
+			);
+			await updateButton.click();
+
+			const busyButton = page.getByRole( 'button', {
+				name: 'Analytics data import in progress',
+			} );
+			await expect( busyButton ).toBeDisabled();
+			await responsePromise;
+		} );
+
+		test( 'hides the manual update trigger in immediate mode', async ( {
+			page,
+			baseURL,
+		} ) => {
+			// In immediate mode there is no batch import to trigger, so the
+			// status bar (and its button) are not rendered.
+			await setOption(
+				apiRequest,
+				baseURL,
+				'woocommerce_analytics_scheduled_import',
+				'no'
+			);
+			await page.reload();
+
+			await expect( page.getByText( 'Data status' ) ).toBeHidden();
+		} );
 	}
 );
