@@ -421,6 +421,10 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 	margin-bottom: 0;
 }
 
+.wp-block-woocommerce-product-gallery-large-image-next-previous-is-layout-flex {
+	gap: 0;
+}
+
 /* ==========================================================================
    WooCommerce — Cart
    ========================================================================== */
