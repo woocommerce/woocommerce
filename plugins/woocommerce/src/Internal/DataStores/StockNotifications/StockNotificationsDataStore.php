@@ -222,10 +222,11 @@ CREATE TABLE $meta_table_name (
 			throw new \Exception( 'Invalid notification ID.' );
 		}
 
-		$data = $wpdb->get_row(
+		$table = $this->get_table_name();
+		$data  = $wpdb->get_row(
 			$wpdb->prepare(
-				'SELECT * FROM %i WHERE id = %d',
-				$this->get_table_name(),
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+				"SELECT * FROM {$table} WHERE id = %d",
 				$notification->get_id()
 			)
 		);
@@ -549,8 +550,8 @@ CREATE TABLE $meta_table_name (
 		$format   = array_fill( 0, count( $product_ids ), '%d' );
 		$query_in = '(' . implode( ',', $format ) . ')';
 		$sql      = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-			"SELECT 1 FROM %i WHERE product_id IN $query_in AND status = %s LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			array( $table, ...$product_ids, NotificationStatus::ACTIVE )
+			"SELECT 1 FROM {$table} WHERE product_id IN $query_in AND status = %s LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array( ...$product_ids, NotificationStatus::ACTIVE )
 		);
 		return (int) $wpdb->get_var( $sql ) > 0; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
@@ -572,8 +573,8 @@ CREATE TABLE $meta_table_name (
 
 		$table = $this->get_table_name();
 		$sql   = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-			'SELECT 1 FROM %i WHERE product_id = %d AND user_email = %s AND status IN (%s, %s) LIMIT 1', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			array( $table, $product_id, $email, NotificationStatus::ACTIVE, NotificationStatus::PENDING )
+			"SELECT 1 FROM {$table} WHERE product_id = %d AND user_email = %s AND status IN (%s, %s) LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array( $product_id, $email, NotificationStatus::ACTIVE, NotificationStatus::PENDING )
 		);
 		return (int) $wpdb->get_var( $sql ) > 0; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
@@ -595,8 +596,8 @@ CREATE TABLE $meta_table_name (
 
 		$table = $this->get_table_name();
 		$sql   = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-			'SELECT 1 FROM %i WHERE product_id = %d AND user_id = %d AND status IN (%s, %s) LIMIT 1', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			array( $table, $product_id, $user_id, NotificationStatus::ACTIVE, NotificationStatus::PENDING )
+			"SELECT 1 FROM {$table} WHERE product_id = %d AND user_id = %d AND status IN (%s, %s) LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array( $product_id, $user_id, NotificationStatus::ACTIVE, NotificationStatus::PENDING )
 		);
 		return (int) $wpdb->get_var( $sql ) > 0; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
@@ -610,16 +611,16 @@ CREATE TABLE $meta_table_name (
 
 		global $wpdb;
 
+		$table = $this->get_table_name();
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
 		$results = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT DISTINCT
+			"SELECT DISTINCT
 					YEAR(date_created_gmt) AS year,
 					MONTH(date_created_gmt) AS month
-				FROM %i
-				ORDER BY year DESC, month DESC',
-				$this->get_table_name()
-			)
+				FROM {$table}
+				ORDER BY year DESC, month DESC"
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return $results;
 	}
