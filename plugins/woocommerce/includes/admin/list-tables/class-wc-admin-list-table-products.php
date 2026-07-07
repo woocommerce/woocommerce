@@ -843,7 +843,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @deprecated 11.1.0
 	 */
 	public function add_sample_product_badge( $column_name, $post_id ) {
-		_deprecated_function( __METHOD__, '11.1.0' );
+		wc_deprecated_function( __METHOD__, '11.1.0' );
 	}
 
 	/**
