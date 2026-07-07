@@ -71,13 +71,6 @@ const { state: cartState } = store< WooCommerce >(
 	{ lock: universalLock }
 );
 
-// The shopper's picked attributes, read from the shared cart draft's
-// `variation` (the selection truth). This block is an inner block of ATCWO, so
-// the cart store's `itemInContext` resolves the draft via the inherited
-// products context.
-const getSelectedAttributes = (): SelectedAttributes[] =>
-	( cartState.itemInContext.draft?.variation ?? [] ) as SelectedAttributes[];
-
 const { state } = store< BlockStore >(
 	'woocommerce/add-to-wishlist-button',
 	{
@@ -106,7 +99,8 @@ const { state } = store< BlockStore >(
 				return shopperListsState.findListItem( {
 					slug: LIST_SLUG,
 					id,
-					variation: getSelectedAttributes(),
+					variation: ( cartState.itemInContext.draft?.variation ??
+						[] ) as SelectedAttributes[],
 				} );
 			},
 
@@ -176,13 +170,13 @@ const { state } = store< BlockStore >(
 								}
 							}
 						);
-						const variation = getSelectedAttributes().map(
-							( { attribute, value } ) => ( {
-								attribute:
-									attrMap.get( attribute ) ?? attribute,
-								value,
-							} )
-						);
+						const variation = (
+							( cartState.itemInContext.draft?.variation ??
+								[] ) as SelectedAttributes[]
+						 ).map( ( { attribute, value } ) => ( {
+							attribute: attrMap.get( attribute ) ?? attribute,
+							value,
+						} ) );
 						yield shopperListsActions.addItem( LIST_SLUG, {
 							product_id: id,
 							...( variation.length && { variation } ),

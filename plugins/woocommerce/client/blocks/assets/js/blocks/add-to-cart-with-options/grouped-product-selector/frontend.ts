@@ -40,6 +40,9 @@ export type GroupedProductAddToCartWithOptionsStore =
 			validateGroupedProductQuantity: () => void;
 			batchAddToCart: () => void;
 		};
+		callbacks: {
+			validateGroupedProductQuantity: () => void;
+		};
 	};
 
 const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
@@ -139,6 +142,16 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				);
 
 				yield Promise.all( promises );
+			},
+		},
+		callbacks: {
+			// Bound via `data-wp-init` on the grouped selector so the initial
+			// validation runs on hydration. `data-wp-init` expects a callback,
+			// not an action, so this slot delegates to the action, which holds
+			// the single implementation (the composer's quantity watch also
+			// invokes that action imperatively).
+			validateGroupedProductQuantity() {
+				actions.validateGroupedProductQuantity();
 			},
 		},
 	},

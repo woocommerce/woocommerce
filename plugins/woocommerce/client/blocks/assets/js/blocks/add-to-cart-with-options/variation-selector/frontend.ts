@@ -58,17 +58,6 @@ const { state: cartState, actions: cartActions } = store< WooCommerce >(
 	{ lock: universalLock }
 );
 
-/**
- * The shopper's current attribute selection — read from the context draft's
- * `variation`, the single source of selection truth. Returns a fresh array so
- * callers can mutate it before writing it back through `setAttribute`.
- */
-const getSelectedAttributes = (): SelectedAttributes[] =>
-	(
-		( cartState.itemInContext.draft?.variation ??
-			[] ) as SelectedAttributes[]
-	 ).map( ( attr ) => ( { ...attr } ) );
-
 const isAttributeValueValid = ( {
 	attributeName,
 	attributeValue,
@@ -192,39 +181,6 @@ const getProductAttributesAndOptions = (
 	return productAttributesAndOptions;
 };
 
-/**
- * Resolve a shopper's attribute selection to a variation and write the resolved
- * `variationId` into the `woocommerce/products` context (or global state when no
- * context — the single-product-page flow, which keeps the write global for the
- * Product Gallery). This is the derivation-truth half of the selection's "double
- * write"; the submission/pairing half is the draft `variation` upserted in
- * `setAttribute`. The products store derives `productVariationInContext` from this
- * `variationId` alone — it never reads the cart draft.
- *
- * @param selectedAttributes The current selection.
- */
-const writeVariationId = ( selectedAttributes: SelectedAttributes[] ): void => {
-	const { mainProductInContext: product } = productsState;
-	if ( ! product?.variations?.length ) {
-		return;
-	}
-
-	const result = productsState.findProduct( {
-		id: product.id,
-		selectedAttributes,
-	} );
-	// findProduct returns the parent when no variation matches — only accept an
-	// actual variation.
-	const matchedVariation = result && result.id !== product.id ? result : null;
-	const variationId = matchedVariation?.id ?? null;
-
-	const productContext = getContext< {
-		variationId?: number | null;
-	} >( 'woocommerce/products' );
-
-	( productContext ?? productsState ).variationId = variationId;
-};
-
 export type VariableProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		state: {
@@ -269,7 +225,8 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 					return [];
 				}
 
-				const selectedAttributes = getSelectedAttributes();
+				const selectedAttributes = ( cartState.itemInContext.draft
+					?.variation ?? [] ) as SelectedAttributes[];
 				const hideInvalid = disabledAttributesAction === 'hide';
 
 				return variationAttributeOptions.map( ( row, index ) => {
@@ -306,7 +263,8 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 			// into the products context (derivation truth). An empty value removes
 			// the attribute (absorbing the former `removeAttribute`).
 			setAttribute( attribute: string, value: string ) {
-				const selectedAttributes = getSelectedAttributes();
+				const selectedAttributes = ( cartState.itemInContext.draft
+					?.variation ?? [] ) as SelectedAttributes[];
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
 						attributeNamesMatch(
@@ -328,7 +286,34 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 				cartActions.upsertDraftItem( {
 					variation: selectedAttributes,
 				} );
-				writeVariationId( selectedAttributes );
+
+				// Derivation-truth half of the selection's "double write":
+				// resolve the selection to a variation and write the resolved
+				// `variationId` into the `woocommerce/products` context (or
+				// global state when there is no context — the single-product-page
+				// flow keeps the write global for the Product Gallery). The
+				// products store derives `productVariationInContext` from this
+				// `variationId` alone — it never reads the cart draft.
+				const { mainProductInContext: product } = productsState;
+				if ( ! product?.variations?.length ) {
+					return;
+				}
+
+				const result = productsState.findProduct( {
+					id: product.id,
+					selectedAttributes,
+				} );
+				// findProduct returns the parent when no variation matches —
+				// only accept an actual variation.
+				const matchedVariation =
+					result && result.id !== product.id ? result : null;
+
+				const productContext = getContext< {
+					variationId?: number | null;
+				} >( 'woocommerce/products' );
+
+				( productContext ?? productsState ).variationId =
+					matchedVariation?.id ?? null;
 			},
 			toggle(
 				itemArg?:
@@ -345,7 +330,8 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				const { name } = context;
-				const selectedAttributes = getSelectedAttributes();
+				const selectedAttributes = ( cartState.itemInContext.draft
+					?.variation ?? [] ) as SelectedAttributes[];
 				const isCurrentlySelected = selectedAttributes.some(
 					( attrObject ) =>
 						attributeNamesMatch( attrObject.attribute, name ) &&
@@ -380,7 +366,8 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const selectedAttributes = getSelectedAttributes();
+				const selectedAttributes = ( cartState.itemInContext.draft
+					?.variation ?? [] ) as SelectedAttributes[];
 
 				// Normalize included/excluded attributes to lowercase for comparison
 				// with Store API labels (e.g., "Color" vs "attribute_pa_color" → "color").
@@ -461,7 +448,8 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const selectedAttributes = getSelectedAttributes();
+				const selectedAttributes = ( cartState.itemInContext.draft
+					?.variation ?? [] ) as SelectedAttributes[];
 				const result = productsState.findProduct( {
 					id: product.id,
 					selectedAttributes,

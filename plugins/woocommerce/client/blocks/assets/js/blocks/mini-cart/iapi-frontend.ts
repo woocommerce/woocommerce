@@ -130,10 +130,6 @@ type MiniCartContext = {
 	productCountVisibility: 'never' | 'always' | 'greater_than_zero';
 };
 
-type CartItemContext = {
-	cartItem: CartItem;
-};
-
 type ItemData = {
 	raw_attribute?: string | undefined;
 	value?: string | undefined;
@@ -456,13 +452,12 @@ const { state: cartItemState } = store(
 			// its key; where we need reactivity for the wp-each, use
 			// `state.cartItem` to get the cart item.
 			get cartItem(): CartItem {
-				const {
-					cartItem: { key },
-				} = getContext< CartItemContext >( 'woocommerce/cart' );
-
-				// Cart rows always operate on a server-confirmed line, so resolve
-				// it by key through the shared envelope (step 1 — exact line).
-				const cartItem = ( cartState.findItem( { key } ).cart ||
+				// The each-item row context (`woocommerce/cart::{ cartItem }`)
+				// already carries this row's line, so `itemInContext` is the
+				// default read: envelope step 1 resolves the row's
+				// `cartItem.key` directly, with no explicit lookup. Fall back to
+				// an empty object while the line is unresolved.
+				const cartItem = ( cartState.itemInContext.cart ||
 					{} ) as CartItem;
 
 				cartItem.variation = cartItem.variation || [];
@@ -950,8 +945,10 @@ const { state: cartItemState } = store(
 				} );
 			},
 
+			// Pure event shield: the row's each-item context carries the line
+			// key, so `removeItem()` defaults to it (context.cartItem.key).
 			*removeItemFromCart(): Generator< unknown, void > {
-				yield actions.removeItem( cartItemState.cartItem.key );
+				yield actions.removeItem();
 			},
 
 			*incrementQuantity(): Generator< unknown, void > {

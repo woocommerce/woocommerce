@@ -9,6 +9,11 @@ let mockRegisteredStore: MockStore | null = null;
 const mockState = {} as Store[ 'state' ];
 const mockAddNotice = jest.fn( () => 'notice-id' );
 
+// The current `woocommerce/cart` scope context. Tests set this to exercise the
+// context-defaulting actions (e.g. `removeItem()` with no key). Defaults to
+// `null` (no context), matching an out-of-scope call.
+let mockCartContext: Record< string, unknown > | null = null;
+
 // `restUrl` (and the other infra values) now live in
 // `wp_interactivity_config( 'woocommerce' )`, so the cart store reads them via
 // `getConfig` instead of from reactive state.
@@ -25,7 +30,10 @@ jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
 		getConfig: jest.fn( () => mockConfig ),
-		getContext: jest.fn( () => null ),
+		// Returns the cart scope context tests configure via `mockCartContext`
+		// (the cart store only ever reads its own `woocommerce/cart` namespace).
+		// Defaults to `null` — an out-of-scope call.
+		getContext: jest.fn( () => mockCartContext ),
 		// The cart store registers under `woocommerce/cart`. Merge each
 		// registration's `state` into the single shared `mockState` and record
 		// the actions. We skip the `cart` and `draftItems` keys: the module keeps
@@ -219,6 +227,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 	beforeEach( () => {
 		jest.clearAllMocks();
+		// Reset the cart scope context between tests (default: out of scope).
+		mockCartContext = null;
 		// showNoticeError logs to console.error for troubleshooting; silence it.
 		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
 		mockConfig.messages = { addedToCartText: 'Product added to cart.' };
@@ -507,5 +517,116 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			'/wc/store/v1/cart/add-item'
 		);
 		expect( batchCalls[ 0 ][ 0 ].body ).toEqual( { id: 7, quantity: 2 } );
+	} );
+
+	describe( 'removeItem context-defaulting', () => {
+		const singleLineCart = {
+			items: [
+				{ key: 'z', id: 5, quantity: 1, name: 'Z', type: 'simple' },
+			],
+			totals: {},
+			errors: [],
+		};
+		const emptyServerCart = { items: [], totals: {}, errors: [] };
+
+		it( 'removes the explicitly passed key even when a context key is present', async () => {
+			// An explicit argument always wins over the context.
+			mockCartContext = { cartItemKey: 'context-key' };
+			const { batchCalls } = installFetchMock( {
+				initialCart: singleLineCart,
+				onBatch: ( requests ) =>
+					requests.map( () => ( {
+						status: 200,
+						body: emptyServerCart,
+					} ) ),
+			} );
+
+			const cart = await loadCartAndReady();
+
+			await runAction(
+				cart.actions.removeItem(
+					'explicit-key'
+				) as unknown as Iterator< unknown >
+			);
+
+			expect( batchCalls[ 0 ][ 0 ].body ).toEqual( {
+				key: 'explicit-key',
+			} );
+		} );
+
+		it( 'defaults to context.cartItemKey when no key is passed', async () => {
+			mockCartContext = { cartItemKey: 'z' };
+			const { batchCalls } = installFetchMock( {
+				initialCart: singleLineCart,
+				onBatch: ( requests ) =>
+					requests.map( () => ( {
+						status: 200,
+						body: emptyServerCart,
+					} ) ),
+			} );
+
+			const cart = await loadCartAndReady();
+
+			await runAction(
+				cart.actions.removeItem() as unknown as Iterator< unknown >
+			);
+
+			expect( batchCalls ).toHaveLength( 1 );
+			expect( batchCalls[ 0 ][ 0 ].path ).toBe(
+				'/wc/store/v1/cart/remove-item'
+			);
+			expect( batchCalls[ 0 ][ 0 ].body ).toEqual( { key: 'z' } );
+		} );
+
+		it( 'defaults to the each-item context cartItem.key when no key is passed', async () => {
+			// A cart row's each-item context carries the line under `cartItem`.
+			mockCartContext = { cartItem: { key: 'z' } };
+			const { batchCalls } = installFetchMock( {
+				initialCart: singleLineCart,
+				onBatch: ( requests ) =>
+					requests.map( () => ( {
+						status: 200,
+						body: emptyServerCart,
+					} ) ),
+			} );
+
+			const cart = await loadCartAndReady();
+
+			await runAction(
+				cart.actions.removeItem() as unknown as Iterator< unknown >
+			);
+
+			expect( batchCalls ).toHaveLength( 1 );
+			expect( batchCalls[ 0 ][ 0 ].body ).toEqual( { key: 'z' } );
+		} );
+
+		it( 'is a NO-OP with a dev-mode warning when nothing resolves', async () => {
+			mockCartContext = null; // no key, no context.
+			const warnSpy = jest
+				.spyOn( console, 'warn' )
+				.mockImplementation( () => undefined );
+			const { batchCalls } = installFetchMock( {
+				initialCart: singleLineCart,
+				onBatch: ( requests ) =>
+					requests.map( () => ( {
+						status: 200,
+						body: emptyServerCart,
+					} ) ),
+			} );
+
+			const cart = await loadCartAndReady();
+
+			await runAction(
+				cart.actions.removeItem() as unknown as Iterator< unknown >
+			);
+
+			// No remove-item request was posted…
+			expect( batchCalls ).toHaveLength( 0 );
+			// …and a dev-mode warning was emitted.
+			expect( warnSpy ).toHaveBeenCalledTimes( 1 );
+			expect( warnSpy.mock.calls[ 0 ][ 0 ] ).toContain( 'removeItem' );
+
+			warnSpy.mockRestore();
+		} );
 	} );
 } );

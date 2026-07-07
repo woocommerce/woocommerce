@@ -74,14 +74,6 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 };
 
 /**
- * The current draft quantity for the context product, or `undefined` when no
- * draft exists yet (nothing has been touched). Read straight from the shared
- * store envelope, so the same value backs the form and formless surfaces.
- */
-const getDraftQuantity = (): number | undefined =>
-	cartState.itemInContext.draft?.quantity;
-
-/**
  * Commit a quantity to the context draft, then run the shared side effects: fire
  * the legacy `change` event so extensions listening on the input keep working,
  * and — when the target equals what the input already displays — write the value
@@ -93,7 +85,7 @@ const getDraftQuantity = (): number | undefined =>
  */
 const commitQuantity = ( quantity: number ): void => {
 	const { inputElement } = getContext< Context >();
-	const unchanged = getDraftQuantity() === quantity;
+	const unchanged = cartState.itemInContext.draft?.quantity === quantity;
 
 	cartActions.upsertDraftItem( { quantity } );
 
@@ -153,7 +145,7 @@ store< QuantitySelectorStore >(
 			// product's minimum purchase quantity — fixing the first-paint 0 the
 			// removed SSR seed used to show.
 			get inputQuantity(): number {
-				const draftQuantity = getDraftQuantity();
+				const draftQuantity = cartState.itemInContext.draft?.quantity;
 				if ( typeof draftQuantity === 'number' ) {
 					return draftQuantity;
 				}

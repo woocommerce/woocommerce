@@ -530,7 +530,6 @@ describe( 'createMutationQueue', () => {
 			let isProcessingDuringOnSettled: boolean | undefined;
 
 			await queue.submit( {
-				id: '1',
 				path: '/a',
 				method: 'POST',
 				onSettled: () => {
@@ -564,7 +563,6 @@ describe( 'createMutationQueue', () => {
 				| undefined;
 
 			await queue.submit( {
-				id: '1',
 				path: '/a',
 				method: 'POST',
 				onSettled: ( result ) => {
@@ -601,7 +599,6 @@ describe( 'createMutationQueue', () => {
 			// We need to catch the rejection
 			try {
 				await queue.submit( {
-					id: '1',
 					path: '/a',
 					method: 'POST',
 					onSettled: ( result ) => {
@@ -703,7 +700,6 @@ describe( 'createMutationQueue', () => {
 
 			// First request - starts the cycle
 			const p1 = queue.submit( {
-				id: '1',
 				path: '/first',
 				method: 'POST',
 			} );
@@ -712,7 +708,6 @@ describe( 'createMutationQueue', () => {
 
 			// New request while first is in-flight
 			const p2 = queue.submit( {
-				id: '2',
 				path: '/second',
 				method: 'POST',
 			} );
@@ -782,7 +777,7 @@ describe( 'createMutationQueue', () => {
 			expect( queue.getStatus().isProcessing ).toBe( true );
 
 			// Resolve
-			fetchPromise.resolve( {
+			resolvePendingFetch( fetchPromise, {
 				ok: true,
 				json: () =>
 					Promise.resolve( {

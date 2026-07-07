@@ -199,7 +199,12 @@ export type Store = {
 			key: string;
 			quantity: number;
 		} ) => Promise< void >;
-		removeItem: ( key: string ) => Promise< void >;
+		/**
+		 * Remove a line by key. When `key` is omitted it defaults to the cart
+		 * scope context's line key (`context.cartItemKey ?? context.cartItem?.key`).
+		 * NO-OP (dev-mode warning) when nothing resolves — never throws.
+		 */
+		removeItem: ( key?: string ) => Promise< void >;
 		refresh: () => Promise< void >;
 		/**
 		 * Merge a partial payload into the context draft, creating it if missing.
@@ -639,6 +644,18 @@ function getContextProductId(): number | undefined {
 }
 
 /**
+ * Resolve the cart line key from the current `woocommerce/cart` context — the
+ * exact source envelope step 1 uses: an explicit `cartItemKey`, or the each-item
+ * `cartItem.key` a `data-wp-each--cart-item` directive keys under this namespace.
+ *
+ * @return The context cart item key, or `undefined` when neither is present.
+ */
+function getContextCartItemKey(): string | undefined {
+	const context = getCartContext();
+	return context?.cartItemKey ?? context?.cartItem?.key;
+}
+
+/**
  * Resolve the draft key for the current context. Surfaces of the same product
  * share one draft by default (`String(context product id)`); a surface opts into
  * isolation by declaring `draftKey` in its `woocommerce/cart` scope context.
@@ -819,9 +836,8 @@ const { actions } = store< Store >(
 			 * namespace (envelope step 1 accepts either).
 			 */
 			get itemInContext(): ItemEnvelope {
-				const context = getCartContext();
 				const draft = findDraftByKey( getContextDraftKey() );
-				const key = context?.cartItemKey ?? context?.cartItem?.key;
+				const key = getContextCartItemKey();
 				return resolveEnvelope( { draft, key } );
 			},
 
@@ -1163,14 +1179,32 @@ const { actions } = store< Store >(
 			/**
 			 * Remove a line by key. Mutations use an explicit key — never an
 			 * inferred pairing.
+			 *
+			 * The `key` is optional: when omitted it defaults to the current cart
+			 * scope's line key (`context.cartItemKey ?? context.cartItem?.key` —
+			 * the same source envelope step 1 uses), so a cart row can call
+			 * `removeItem()` with no argument and remove its own line. NO-OP with
+			 * a dev-mode warning when nothing resolves — it never throws, because
+			 * it is bound near user events.
 			 */
-			*removeItem( key: string ): AsyncAction< void > {
+			*removeItem( key?: string ): AsyncAction< void > {
+				const targetKey = key ?? getContextCartItemKey();
+				if ( ! targetKey ) {
+					if ( process.env.NODE_ENV !== 'production' ) {
+						// eslint-disable-next-line no-console
+						console.warn(
+							'removeItem: no key passed and no cart line key in context — nothing to remove.'
+						);
+					}
+					return;
+				}
+
 				// Contribute this request's changes to the cycle. Sync events
 				// and notices are fired once per settle cycle by the batcher's
 				// onCycleSettle handler (handleCartCycleSettle) — a removal is
 				// not an "add", so it must not trigger the legacy event / a11y.
 				accumulateCartCycle( {
-					quantityChanges: { cartItemsPendingDelete: [ key ] },
+					quantityChanges: { cartItemsPendingDelete: [ targetKey ] },
 					didAdd: false,
 				} );
 
@@ -1178,10 +1212,10 @@ const { actions } = store< Store >(
 					yield sendCartRequest( state, {
 						path: '/wc/store/v1/cart/remove-item',
 						method: 'POST',
-						body: { key },
+						body: { key: targetKey },
 						applyOptimistic: () => {
 							state.cart.items = state.cart.items.filter(
-								( item ) => item.key !== key
+								( item ) => item.key !== targetKey
 							);
 							// Capture post-optimistic cart for the cycle's
 							// notice comparison (last writer in the cycle wins).

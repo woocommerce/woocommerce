@@ -11,11 +11,12 @@ use Automattic\WooCommerce\Internal\ShopperLists\ShopperListRenderer;
  * Add to Wishlist Button block.
  *
  * Single-product trigger UI for the wishlist. Shipped as an inner block of
- * `woocommerce/add-to-cart-with-options` (ATCWO) via the per-product-type
- * template parts, so it always renders inside the form's iAPI scope and can
- * read its `selectedAttributes` context directly. The `ancestor` restriction
- * in `block.json` prevents merchants from inserting the block outside ATCWO
- * (where it'd lose iAPI scope and the variation-attribute read would break).
+ * `woocommerce/add-to-cart-with-options` (Add to Cart + Options) via the
+ * per-product-type template parts, so it always renders inside the form's iAPI
+ * scope and can read its `selectedAttributes` context directly. The `ancestor`
+ * restriction in `block.json` prevents merchants from inserting the block
+ * outside the Add to Cart + Options form (where it'd lose iAPI scope and the
+ * variation-attribute read would break).
  *
  * Hidden for guests and gated by the `product_wishlist` feature flag. On
  * click, toggles the currently configured product (parent or selected
