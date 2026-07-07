@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Re-enable WP_DEBUG in the wp-env test config so PHP notices and deprecations are captured in debug.log again (with WP_DEBUG_DISPLAY kept off); test-only tooling change, no merchant-facing impact.
