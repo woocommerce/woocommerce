@@ -47,9 +47,9 @@ final class SellingPlans {
 	public static function list_plans( string $extension_slug ): array {
 		return ( new PlanRepository() )->query(
 			array(
-				'status'         => Plan::STATUS_ACTIVE,
-				'extension_slug' => $extension_slug,
-				'limit'          => self::PLAN_QUERY_LIMIT,
+				'status'          => Plan::STATUS_ACTIVE,
+				'extension_slugs' => array( $extension_slug ),
+				'limit'           => self::PLAN_QUERY_LIMIT,
 			)
 		);
 	}
@@ -69,10 +69,10 @@ final class SellingPlans {
 	public static function get_plans( array $plan_ids, string $extension_slug ): array {
 		return ( new PlanRepository() )->query(
 			array(
-				'status'         => Plan::STATUS_ACTIVE,
-				'extension_slug' => $extension_slug,
-				'ids'            => $plan_ids,
-				'limit'          => self::PLAN_QUERY_LIMIT,
+				'status'          => Plan::STATUS_ACTIVE,
+				'extension_slugs' => array( $extension_slug ),
+				'ids'             => $plan_ids,
+				'limit'           => self::PLAN_QUERY_LIMIT,
 			)
 		);
 	}

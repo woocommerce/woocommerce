@@ -306,13 +306,13 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$expected_id = $this->make_plan( $repo, $group_id, $search . ' plan', 'lite' );
 
 		$query_args = array(
-			'extension_slug' => 'lite',
-			'status'         => Plan::STATUS_ACTIVE,
-			'search'         => $search,
-			'orderby'        => 'id',
-			'order'          => 'asc',
-			'limit'          => 10,
-			'offset'         => 0,
+			'extension_slugs' => array( 'lite' ),
+			'status'          => Plan::STATUS_ACTIVE,
+			'search'          => $search,
+			'orderby'         => 'id',
+			'order'           => 'asc',
+			'limit'           => 10,
+			'offset'          => 0,
 		);
 		$plans      = $repo->query( $query_args );
 
@@ -338,10 +338,38 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 
 		$this->assertNull( $repo->find( $id, '' ) );
 		$this->assertNull( $repo->find( $id, 'bad slug' ) );
-		$this->assertCount( 0, $repo->query( array( 'extension_slug' => '' ) ) );
-		$this->assertSame( 0, $repo->count( array( 'extension_slug' => '' ) ) );
+		$this->assertCount( 0, $repo->query( array( 'extension_slugs' => array() ) ) );
+		$this->assertSame( 0, $repo->count( array( 'extension_slugs' => array() ) ) );
+		$this->assertCount( 0, $repo->query( array( 'extension_slugs' => array( '' ) ) ) );
+		$this->assertCount( 0, $repo->query( array( 'extension_slugs' => 'not-an-array' ) ) );
 		$this->assertCount( 0, $repo->query( array( 'extension_slugs' => array( 'lite', '' ) ) ) );
 		$this->assertCount( 0, $repo->query( array( 'extension_slugs' => array( 'bad slug' ) ) ) );
+	}
+
+	public function test_query_extension_slugs_filters_by_single_and_multiple_slugs(): void {
+		$group_id = $this->make_group();
+		$repo     = new PlanRepository();
+
+		$lite_id  = $this->make_plan( $repo, $group_id, 'Lite plan', 'lite', 1 );
+		$other_id = $this->make_plan( $repo, $group_id, 'Other plan', 'other-extension', 2 );
+
+		$single = $repo->query( array( 'extension_slugs' => array( 'lite' ) ) );
+		$this->assertSame( array( $lite_id ), array_map( static fn ( Plan $plan ): ?int => $plan->get_id(), $single ) );
+		$this->assertSame( 1, $repo->count( array( 'extension_slugs' => array( 'lite' ) ) ) );
+
+		$both = $repo->query( array( 'extension_slugs' => array( 'lite', 'other-extension' ) ) );
+		$this->assertSame( array( $lite_id, $other_id ), array_map( static fn ( Plan $plan ): ?int => $plan->get_id(), $both ) );
+	}
+
+	public function test_query_singular_extension_slug_arg_is_unknown_and_ignored(): void {
+		$group_id = $this->make_group();
+		$repo     = new PlanRepository();
+
+		$plan_id = $this->make_plan( $repo, $group_id, 'Scoped', 'lite' );
+
+		$plans = $repo->query( array( 'extension_slug' => 'other-extension' ) );
+		$this->assertSame( array( $plan_id ), array_map( static fn ( Plan $plan ): ?int => $plan->get_id(), $plans ) );
+		$this->assertSame( 1, $repo->count( array( 'extension_slug' => '' ) ) );
 	}
 
 	public function test_reorder_fails_before_updates_when_an_id_is_missing_or_outside_extension(): void {
@@ -397,7 +425,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( 2, $repo->count( array( 'ids' => array( $first_plan_id, $second_plan_id ) ) ) );
 	}
 
-	public function test_query_ids_composes_with_status_and_extension_slug(): void {
+	public function test_query_ids_composes_with_status_and_extension_slugs(): void {
 		$repo     = new PlanRepository();
 		$group_id = $this->make_group();
 
@@ -411,9 +439,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 
 		$plans = $repo->query(
 			array(
-				'status'         => Plan::STATUS_ACTIVE,
-				'extension_slug' => 'lite',
-				'ids'            => array( $active_id, $foreign_id, (int) $archived->get_id() ),
+				'status'          => Plan::STATUS_ACTIVE,
+				'extension_slugs' => array( 'lite' ),
+				'ids'             => array( $active_id, $foreign_id, (int) $archived->get_id() ),
 			)
 		);
 
