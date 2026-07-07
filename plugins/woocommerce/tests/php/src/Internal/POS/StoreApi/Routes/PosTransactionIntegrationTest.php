@@ -372,7 +372,18 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 			)
 		);
 		$this->assertSame( 201, $first->get_status() );
-		$token = \Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils::get_cart_token( WC()->session->get_customer_id() );
+		$transaction_id = WC()->session->get_customer_id();
+		$token          = \Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils::get_cart_token( $transaction_id );
+
+		// Simulate the second HTTP request for real: persist the session,
+		// throw the in-process one away, and re-initialize from the token in
+		// $_SERVER — the exact production resumption path. Without this the
+		// in-process session would carry the cart regardless of the token.
+		WC()->session->save_data();
+		$_SERVER['HTTP_CART_TOKEN'] = $token;
+		WC()->session               = null;
+		WC()->initialize_session();
+		$this->assertSame( $transaction_id, WC()->session->get_customer_id(), 'The fresh session must resume the transaction from the token.' );
 
 		wp_set_current_user( $this->operator_id );
 		$second = $this->add_items(
