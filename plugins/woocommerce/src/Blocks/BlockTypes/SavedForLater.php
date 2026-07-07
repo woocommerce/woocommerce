@@ -49,10 +49,11 @@ final class SavedForLater extends AbstractBlock {
 		// The block type is registered unconditionally (see BlockTypesController)
 		// so content saved while the feature was on doesn't show an "unsupported
 		// block" notice once it's off. When the feature is disabled we strip the
-		// `blockHooks` declaration and hide the block from the inserter, so it
-		// neither auto-injects nor can be added manually. This must be filtered
+		// hook declaration and hide the block from the inserter, so it neither
+		// auto-injects nor can be added manually. `block_type_metadata_settings`
+		// edits the normalized `WP_Block_Type` settings and must be filtered
 		// before `parent::initialize()` registers the block.
-		add_filter( 'block_type_metadata', array( $this, 'disable_when_feature_off' ) );
+		add_filter( 'block_type_metadata_settings', array( $this, 'disable_when_feature_off' ), 10, 2 );
 
 		parent::initialize();
 
@@ -62,23 +63,28 @@ final class SavedForLater extends AbstractBlock {
 	}
 
 	/**
-	 * When the `saved-for-later` feature is disabled, drop the block's
-	 * `blockHooks` declaration and hide it from the inserter. The block type
-	 * itself stays registered, so content saved while the feature was enabled
-	 * keeps rendering as a known block rather than an "unsupported block" notice.
+	 * When the `saved-for-later` feature is disabled, drop the block's hook
+	 * declaration and hide it from the inserter. The block type itself stays
+	 * registered, so content saved while the feature was enabled keeps rendering
+	 * as a known block rather than an "unsupported block" notice.
 	 *
-	 * @param array $metadata Parsed block.json metadata.
+	 * Runs on `block_type_metadata_settings`, so it edits the normalized settings
+	 * used to build the `WP_Block_Type` (`block_hooks`, `supports`) rather than
+	 * the raw block.json metadata.
+	 *
+	 * @param array $settings Normalized block type settings.
+	 * @param array $metadata Parsed block.json metadata (carries the block `name`).
 	 * @return array
 	 */
-	public function disable_when_feature_off( $metadata ) {
+	public function disable_when_feature_off( $settings, $metadata ) {
 		if ( ! isset( $metadata['name'] ) || $this->get_full_block_name() !== $metadata['name'] || $this->is_feature_enabled() ) {
-			return $metadata;
+			return $settings;
 		}
 
-		unset( $metadata['blockHooks'] );
-		$metadata['supports']             = isset( $metadata['supports'] ) && is_array( $metadata['supports'] ) ? $metadata['supports'] : array();
-		$metadata['supports']['inserter'] = false;
-		return $metadata;
+		unset( $settings['block_hooks'] );
+		$settings['supports']             = isset( $settings['supports'] ) && is_array( $settings['supports'] ) ? $settings['supports'] : array();
+		$settings['supports']['inserter'] = false;
+		return $settings;
 	}
 
 	/**

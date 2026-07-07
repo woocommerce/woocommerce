@@ -97,58 +97,56 @@ class SavedForLaterTests extends WP_UnitTestCase {
 
 	/**
 	 * The block type is registered unconditionally, but when the feature is off
-	 * `disable_when_feature_off` strips the `blockHooks` declaration and hides
-	 * the block from the inserter, so it neither auto-injects nor can be added
+	 * `disable_when_feature_off` strips the `block_hooks` setting and hides the
+	 * block from the inserter, so it neither auto-injects nor can be added
 	 * manually while off.
 	 */
 	public function test_disable_when_feature_off_strips_hooks_and_hides_inserter(): void {
 		$this->features_controller->change_feature_enable( 'cart_save_for_later', false );
 
-		$metadata = array(
-			'name'       => 'woocommerce/saved-for-later',
-			'blockHooks' => array( 'woocommerce/cart' => 'after' ),
-			'supports'   => array( 'interactivity' => true ),
+		$settings = array(
+			'block_hooks' => array( 'woocommerce/cart' => 'after' ),
+			'supports'    => array( 'interactivity' => true ),
 		);
+		$metadata = array( 'name' => 'woocommerce/saved-for-later' );
 
-		$result = $this->sut->disable_when_feature_off( $metadata );
+		$result = $this->sut->disable_when_feature_off( $settings, $metadata );
 
-		$this->assertArrayNotHasKey( 'blockHooks', $result );
+		$this->assertArrayNotHasKey( 'block_hooks', $result );
 		$this->assertFalse( $result['supports']['inserter'] );
 	}
 
 	/**
-	 * When the feature is enabled the metadata is left untouched, so the block
-	 * keeps its `blockHooks` declaration and stays inserter-visible.
+	 * When the feature is enabled the settings are left untouched, so the block
+	 * keeps its `block_hooks` setting and stays inserter-visible.
 	 */
-	public function test_disable_when_feature_off_keeps_metadata_when_enabled(): void {
+	public function test_disable_when_feature_off_keeps_settings_when_enabled(): void {
 		$this->features_controller->change_feature_enable( 'cart_save_for_later', true );
 
-		$metadata = array(
-			'name'       => 'woocommerce/saved-for-later',
-			'blockHooks' => array( 'woocommerce/cart' => 'after' ),
-			'supports'   => array( 'interactivity' => true ),
+		$settings = array(
+			'block_hooks' => array( 'woocommerce/cart' => 'after' ),
+			'supports'    => array( 'interactivity' => true ),
 		);
+		$metadata = array( 'name' => 'woocommerce/saved-for-later' );
 
-		$result = $this->sut->disable_when_feature_off( $metadata );
+		$result = $this->sut->disable_when_feature_off( $settings, $metadata );
 
-		$this->assertArrayHasKey( 'blockHooks', $result );
-		$this->assertSame( 'after', $result['blockHooks']['woocommerce/cart'] );
+		$this->assertArrayHasKey( 'block_hooks', $result );
+		$this->assertSame( 'after', $result['block_hooks']['woocommerce/cart'] );
 		$this->assertArrayNotHasKey( 'inserter', $result['supports'] );
 	}
 
 	/**
 	 * `disable_when_feature_off` only touches the Saved for Later block; other
-	 * blocks' metadata passes through untouched even when the feature is off.
+	 * blocks' settings pass through untouched even when the feature is off.
 	 */
 	public function test_disable_when_feature_off_ignores_other_blocks(): void {
 		$this->features_controller->change_feature_enable( 'cart_save_for_later', false );
 
-		$metadata = array(
-			'name'       => 'core/paragraph',
-			'blockHooks' => array( 'woocommerce/cart' => 'after' ),
-		);
+		$settings = array( 'block_hooks' => array( 'woocommerce/cart' => 'after' ) );
+		$metadata = array( 'name' => 'core/paragraph' );
 
-		$this->assertSame( $metadata, $this->sut->disable_when_feature_off( $metadata ) );
+		$this->assertSame( $settings, $this->sut->disable_when_feature_off( $settings, $metadata ) );
 	}
 
 	/**
