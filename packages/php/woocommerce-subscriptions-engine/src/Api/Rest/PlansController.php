@@ -363,7 +363,13 @@ final class PlansController extends WP_REST_Controller {
 				$plan->set_sort_order( ScalarCoercion::coerce_int( $request->get_param( 'sort_order' ) ) );
 			}
 
-			$this->plan_repository->update( $plan );
+			if ( ! $this->plan_repository->update( $plan ) ) {
+				return new WP_Error(
+					'woocommerce_subscriptions_engine_plan_update_failed',
+					__( 'The plan could not be saved.', 'woocommerce-subscriptions-engine' ),
+					array( 'status' => 500 )
+				);
+			}
 		} catch ( Throwable $e ) {
 			return $this->invalid_error( $e->getMessage() );
 		}

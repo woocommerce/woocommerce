@@ -319,6 +319,40 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		}
 	}
 
+	public function test_update_surfaces_a_failed_write_as_an_error(): void {
+		global $wpdb;
+
+		wp_set_current_user( $this->admin_id );
+		$id = $this->create_plan( 'Doomed to fail' );
+
+		// Break UPDATEs against the plans table for this request so the write
+		// errors at the database and the repository reports failure.
+		$break_plan_updates = static function ( $query ) {
+			if ( is_string( $query ) && 0 === stripos( ltrim( $query ), 'UPDATE' ) && false !== strpos( $query, 'wc_selling_plans' ) ) {
+				return 'UPDATE nonexistent_table_for_this_test SET id = id';
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $break_plan_updates );
+		$suppressed = $wpdb->suppress_errors( true );
+
+		$response = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'New name',
+			)
+		);
+
+		$wpdb->suppress_errors( $suppressed );
+		remove_filter( 'query', $break_plan_updates );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_plan_update_failed', $this->response_data( $response )['code'] );
+	}
+
 	public function test_archive_restore_and_reorder(): void {
 		wp_set_current_user( $this->admin_id );
 
