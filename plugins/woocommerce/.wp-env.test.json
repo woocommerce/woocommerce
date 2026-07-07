@@ -14,7 +14,7 @@
 	"themes": [],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
-		"WP_DEBUG": false,
+		"WP_DEBUG": true,
 		"SCRIPT_DEBUG": false,
 		"WP_DEBUG_LOG": true,
 		"WP_DEBUG_DISPLAY": false,
