@@ -30,9 +30,38 @@ const test = baseTest.extend( {
 	},
 } );
 
-let categoryIds: number[], productIds: number[], orderIds: number[], setupPage;
+let categoryIds: number[], productIds: number[], orderIds: number[];
 
-test.beforeAll( async ( { browser, restApi } ) => {
+test.beforeAll( async ( { request, restApi } ) => {
+	// Force immediate analytics import mode before creating any orders.
+	//
+	// New installs default to scheduled import mode
+	// (`woocommerce_analytics_scheduled_import = 'yes'`), where orders are
+	// imported into the analytics lookup tables by a recurring 12-hour batch
+	// rather than per order. In that mode the `?process-waiting-actions` helper
+	// below has no due action to run for the orders created here, so the reports
+	// stay empty and the data assertions fail. Immediate mode schedules a
+	// per-order import that the helper processes deterministically.
+	await restApi
+		.post(
+			'wc-analytics/settings/wc_admin/woocommerce_analytics_scheduled_import',
+			{
+				value: 'no',
+			}
+		)
+		.then( ( response ) => {
+			expect( response.data.value ).toEqual( 'no' );
+		} )
+		.catch( ( error ) => {
+			throw new Error(
+				`Error occurred while forcing immediate analytics import mode.\n${ JSON.stringify(
+					error,
+					null,
+					2
+				) }`
+			);
+		} );
+
 	// create a couple of product categories
 	await restApi
 		.post( `${ WC_API_PATH }/products/categories/batch`, {
@@ -240,12 +269,19 @@ test.beforeAll( async ( { browser, restApi } ) => {
 			);
 		} );
 
-	// process the Action Scheduler tasks
-	setupPage = await browser.newPage();
-	// eslint-disable-next-line playwright/no-wait-for-timeout
-	await setupPage.waitForTimeout( 5000 );
-	await setupPage.goto( '?process-waiting-actions' );
-	await setupPage.close();
+	// Process the Action Scheduler tasks that import the orders created above.
+	//
+	// In immediate mode each order schedules its import action for `time() + 5`
+	// (see SchedulerTraits::schedule_action), so wait for those actions to become
+	// due before draining the queue. Draining earlier skips them and the orders
+	// never import.
+	await new Promise( ( resolve ) => setTimeout( resolve, 5000 ) );
+
+	// Drain the Action Scheduler queue via the `process-waiting-actions`
+	// mu-plugin. It runs the queue runner on `init` and exits before rendering,
+	// so a plain HTTP request is enough — no browser page needed.
+	const response = await request.get( '?process-waiting-actions' );
+	expect( response.ok() ).toBeTruthy();
 } );
 
 test.afterAll( async ( { restApi } ) => {
@@ -259,6 +295,13 @@ test.afterAll( async ( { restApi } ) => {
 	} );
 	// delete the orders
 	await restApi.post( `${ WC_API_PATH }/orders/batch`, { delete: orderIds } );
+
+	// Restore the store-wide analytics import mode to the new-install default
+	// (scheduled), since beforeAll forced it to immediate for this spec.
+	await restApi.post(
+		'wc-analytics/settings/wc_admin/woocommerce_analytics_scheduled_import',
+		{ value: 'yes' }
+	);
 } );
 
 test(

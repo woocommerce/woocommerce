@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add a native Settings UI page provider path for registered settings sections.

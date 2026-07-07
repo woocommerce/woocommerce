@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Inject default sibling-section navigation into native Settings UI page schemas that omit shell.sectionNavigation.
