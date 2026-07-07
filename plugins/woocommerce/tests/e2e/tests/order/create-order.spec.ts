@@ -421,6 +421,64 @@ test.describe(
 			).toBeVisible();
 		} );
 
+		test( 'can add a product using the keyboard without a rogue search box', async ( {
+			page,
+			simpleProduct,
+		} ) => {
+			await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
+
+			// Open the Add products modal.
+			await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
+			await page
+				.getByRole( 'button', { name: 'Add product(s)' } )
+				.click();
+
+			const modal = page.locator( '.wc-backbone-modal-content' );
+			await expect( modal ).toBeVisible();
+
+			// Focus the (closed) product-search control and press Enter.
+			// Before the fix this submitted the modal, closing it and
+			// stranding a detached selectWoo dropdown at the top-left of the
+			// page.
+			await modal.locator( '.select2-selection' ).first().focus();
+			await page.keyboard.press( 'Enter' );
+
+			// The modal must still be open...
+			await expect( modal ).toBeVisible();
+			// ...and no dropdown may be stranded as a direct child of <body>.
+			await expect(
+				page.locator( 'body > .select2-container--open' )
+			).toHaveCount( 0 );
+
+			// Complete the add with the keyboard: type, then Enter to pick the
+			// option. Use real keystrokes (pressSequentially, not fill):
+			// selectWoo's AJAX search fires on keyup, so a programmatic fill()
+			// may not request results.
+			await modal
+				.locator( '.select2-search__field' )
+				.pressSequentially( simpleProduct.name );
+			await page
+				.getByRole( 'option', { name: simpleProduct.name } )
+				.first()
+				.waitFor();
+			await page.keyboard.press( 'Enter' );
+
+			// The product row is added inside the modal, then commit.
+			await expect( modal.getByText( simpleProduct.name ) ).toBeVisible();
+			await page.locator( '#btn-ok' ).click();
+
+			// Line item lands on the order, and nothing is left stranded on
+			// <body>.
+			await expect(
+				page
+					.locator( 'td.name > a' )
+					.filter( { hasText: simpleProduct.name } )
+			).toBeVisible();
+			await expect(
+				page.locator( 'body > .select2-container--open' )
+			).toHaveCount( 0 );
+		} );
+
 		test( 'can create an order for an existing customer', async ( {
 			page,
 			simpleProduct,
