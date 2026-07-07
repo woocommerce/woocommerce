@@ -59,17 +59,27 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 	 * @return \WP_REST_Response
 	 */
 	public function get_counts( $request ) {
+		$order_statuses = (array) $request->get_param( 'order_statuses' );
+
+		// When a merchant has cleared every actionable order status there is nothing
+		// "to fulfill". Short-circuit to 0 rather than querying: an empty status list
+		// would otherwise count every order, and the previous client-side
+		// getUnreadOrders() returned 0 in this case.
+		$orders_to_fulfill_count = empty( $order_statuses )
+			? 0
+			: $this->get_count_via(
+				'/wc-analytics/orders',
+				array(
+					'page'     => 1,
+					'per_page' => 1,
+					'status'   => $order_statuses,
+					'_fields'  => array( 'id' ),
+				)
+			);
+
 		return rest_ensure_response(
 			array(
-				'orders_to_fulfill_count'     => $this->get_count_via(
-					'/wc-analytics/orders',
-					array(
-						'page'     => 1,
-						'per_page' => 1,
-						'status'   => $request->get_param( 'order_statuses' ),
-						'_fields'  => array( 'id' ),
-					)
-				),
+				'orders_to_fulfill_count'     => $orders_to_fulfill_count,
 				'reviews_to_moderate_count'   => $this->get_count_via(
 					'/wc-analytics/products/reviews',
 					array(
@@ -161,8 +171,17 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 	 * @return array
 	 */
 	private function get_default_order_statuses() {
-		$actionable = get_option( 'woocommerce_actionable_order_statuses', array() );
-		return is_array( $actionable ) && ! empty( $actionable ) ? $actionable : array( 'processing', 'on-hold' );
+		$actionable = get_option( 'woocommerce_actionable_order_statuses', false );
+
+		// A missing option means actionable statuses were never configured, so fall
+		// back to the store's built-in defaults. An explicitly empty array means the
+		// merchant intentionally cleared all statuses, which we respect (nothing to
+		// fulfill) to match the previous client-side behaviour.
+		if ( false === $actionable ) {
+			return array( 'processing', 'on-hold' );
+		}
+
+		return is_array( $actionable ) ? $actionable : array( 'processing', 'on-hold' );
 	}
 
 	/**

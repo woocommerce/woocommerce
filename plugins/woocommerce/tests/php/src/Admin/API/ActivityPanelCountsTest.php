@@ -16,6 +16,7 @@ use WC_Helper_Product;
 use WC_REST_Unit_Test_Case;
 use WP_Error;
 use WP_REST_Request;
+use WP_REST_Server;
 
 /**
  * ActivityPanelCounts API controller test.
@@ -180,5 +181,36 @@ class ActivityPanelCountsTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertNull( $data['products_low_in_stock_count'] );
 		$this->assertEquals( 1, $data['orders_to_fulfill_count'] );
+	}
+
+	/**
+	 * Test that clearing all actionable order statuses yields a 0 orders-to-fulfill count,
+	 * matching the previous client-side getUnreadOrders() behaviour, rather than falling back
+	 * to the default statuses. Mirrors the client, which calls the endpoint without passing
+	 * order_statuses and relies on the endpoint default.
+	 */
+	public function test_cleared_actionable_statuses_yield_zero_orders_to_fulfill() {
+		wp_set_current_user( $this->user );
+
+		WC_Helper_Order::create_order( 1, null, array( 'status' => OrderStatus::PROCESSING ) );
+
+		// Merchant cleared every actionable status. Re-register routes so the endpoint's
+		// default order_statuses reflects the updated option, as it would on a real request.
+		update_option( 'woocommerce_actionable_order_statuses', array() );
+		$this->server              = new WP_REST_Server();
+		$GLOBALS['wp_rest_server'] = $this->server;
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Re-firing a core hook to re-register routes in the test, not defining one.
+		do_action( 'rest_api_init' );
+
+		try {
+			$request  = new WP_REST_Request( 'GET', self::ENDPOINT );
+			$response = $this->server->dispatch( $request );
+			$data     = $response->get_data();
+		} finally {
+			delete_option( 'woocommerce_actionable_order_statuses' );
+		}
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( 0, $data['orders_to_fulfill_count'] );
 	}
 }
