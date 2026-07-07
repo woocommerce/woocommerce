@@ -29,7 +29,9 @@ Both problems live in the **legacy** admin order modal (`wc-modal-add-products` 
 
 Fix both root causes of Problem 1 (not a band-aid), scope the CSS fix to the modal, and lock the behavior with a keyboard regression test.
 
-### Change 1 — Keep the search dropdown inside the popup
+### Change 1 — ~~Keep the search dropdown inside the popup (dropdownParent)~~ — ABANDONED
+
+> **Superseded during QA (2026-07-07).** `dropdownParent` pointed at the `position: fixed` modal mispositions the results panel to the bottom of the page: selectWoo's `_positionDropdown` (selectWoo.js:4406-4408) subtracts the parent's `left` offset but never its `top`, so a positioned parent throws the vertical position off. It is also unnecessary — the default `<body>` attachment positions correctly under the field, like every other `.wc-product-search` in admin. **The ticket's keyboard bug is fixed by Change 2 (the Enter guard) alone; no `dropdownParent` is used.** Original text kept below for history.
 
 File: `plugins/woocommerce/client/legacy/js/admin/wc-enhanced-select.js` (the `.wc-product-search` init block).
 

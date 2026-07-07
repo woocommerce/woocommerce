@@ -102,7 +102,9 @@ Note on selectors: `.select2-selection` is the focusable combobox; `.select2-sea
 
 ---
 
-### Task 2: Keep the product-search dropdown inside the modal (`dropdownParent`)
+### Task 2: ~~Keep the product-search dropdown inside the modal (`dropdownParent`)~~ — ABANDONED
+
+> **Superseded during QA (2026-07-07).** `dropdownParent` at the `position: fixed` modal mispositions the results panel to the bottom of the page (selectWoo `_positionDropdown` adjusts `left` but not `top` for a positioned parent) and is unnecessary — the default `<body>` attachment positions correctly under the field. This task was reverted; the Enter guard (Task 3) is the actual fix. Do not implement this task.
 
 **Files:**
 - Modify: `plugins/woocommerce/client/legacy/js/admin/wc-enhanced-select.js`
