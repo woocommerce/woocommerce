@@ -11,12 +11,13 @@ const {
 
 const ROOT_DIR = path.resolve( __dirname, '../../../../' );
 // When CI serves the shared plugin build artifact instead of the bind-mounted
-// source checkout, the built JS lives in (and the translation JSONs must land
-// in) the artifact - the source checkout was never built and is not served.
-const PLUGIN_DIR = process.env.WC_SHARED_PLUGIN_BUILD_PATH || ROOT_DIR;
-const BUILD_DIR = path.resolve( PLUGIN_DIR, 'assets/client/blocks/' );
+// source checkout, the built JS lives in the artifact - the source checkout is
+// never built. The JSONs still go to the source checkout's i18n/languages:
+// .wp-env.json maps that directory into the container over the served plugin.
+const BUILD_ROOT = process.env.WC_SHARED_PLUGIN_BUILD_PATH || ROOT_DIR;
+const BUILD_DIR = path.resolve( BUILD_ROOT, 'assets/client/blocks/' );
 const TESTS_DIR = path.resolve( __dirname, '../../tests/blocks' );
-const LANGUAGES_DIR = path.join( PLUGIN_DIR, 'i18n/languages/' );
+const LANGUAGES_DIR = path.join( ROOT_DIR, 'i18n/languages/' );
 
 ensureDirSync( LANGUAGES_DIR );
 
