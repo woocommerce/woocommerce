@@ -96,22 +96,16 @@ class Checkout extends AbstractCartRoute {
 	/**
 	 * Get method arguments for this REST route.
 	 *
-	 * Mirrors the web checkout endpoints (the trait provides the handlers)
-	 * with POS deltas: the POS permission callback, no batch support, relaxed
-	 * address requiredness, and the optional `customer_id`.
+	 * POST only, deliberately: the POS client places the order in a single
+	 * call; the web checkout's GET (draft state) and PUT (draft update)
+	 * endpoints have no POS flow behind them, and unused capability-gated
+	 * endpoints running under the POS policy relaxations would be pure
+	 * unreviewed surface.
 	 *
 	 * @return array An array of endpoints.
 	 */
 	public function get_args() {
 		return array(
-			array(
-				'methods'             => \WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_response' ),
-				'permission_callback' => array( $this, 'check_permission' ),
-				'args'                => array(
-					'context' => $this->get_context_param( array( 'default' => 'view' ) ),
-				),
-			),
 			array(
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'get_response' ),
@@ -141,28 +135,6 @@ class Checkout extends AbstractCartRoute {
 						),
 					),
 					$this->relax_address_required( $this->schema->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ) )
-				),
-			),
-			array(
-				'methods'             => \WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'get_response' ),
-				'permission_callback' => array( $this, 'check_permission' ),
-				'args'                => array_merge(
-					array(
-						'additional_fields' => array(
-							'description' => __( 'Additional fields related to the order.', 'woocommerce' ),
-							'type'        => 'object',
-						),
-						'payment_method'    => array(
-							'description' => __( 'Selected payment method for the order.', 'woocommerce' ),
-							'type'        => 'string',
-						),
-						'order_notes'       => array(
-							'description' => __( 'Order notes.', 'woocommerce' ),
-							'type'        => 'string',
-						),
-					),
-					$this->relax_address_required( $this->schema->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ) )
 				),
 			),
 			'schema' => array( $this->schema, 'get_public_item_schema' ),
