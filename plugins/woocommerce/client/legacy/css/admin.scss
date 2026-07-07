@@ -8050,6 +8050,30 @@ table.bar_chart {
 	.select2-container {
 		width: 100% !important;
 	}
+
+	// Establish a positioning context so a dropdown parented to the modal
+	// content (see dropdownParent in wc-enhanced-select.js) positions relative
+	// to the modal rather than an unexpected ancestor. Low-risk safeguard; if
+	// the results list still clips, switch the dropdownParent target to a
+	// non-clipping ancestor.
+	.wc-backbone-modal-content {
+		position: relative;
+	}
+
+	// Keep the clear (x) icon from overlapping the dropdown chevron on single
+	// selects inside the modal (e.g. the product-search rows). Reserve room
+	// for both icons and sit the clear icon to the left of the chevron. Scoped
+	// to the modal so no other select in admin shifts; rtlcss flips the
+	// right/margin values for RTL at build time.
+	.select2-selection--single {
+		.select2-selection__rendered {
+			padding-right: 40px;
+		}
+
+		.select2-selection__clear {
+			margin-right: 18px;
+		}
+	}
 }
 
 .wc-backbone-modal-backdrop {
