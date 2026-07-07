@@ -910,23 +910,43 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox send() coerces a non-bool return from the mail callback into a bool.
+	 * @testdox send() returns false and warns when the mail callback returns a non-bool.
 	 */
-	public function test_send_coerces_non_bool_mail_callback_return_to_bool(): void {
+	public function test_send_returns_false_and_warns_when_mail_callback_returns_non_bool(): void {
 		add_filter(
 			'woocommerce_mail_callback',
 			function () {
-					return static function () {
-							return null;
-					};
+				return static function () {
+					return 1;
+				};
 			}
 		);
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		$this->setExpectedIncorrectUsage( 'WC_Email::send' );
 
-		$email  = new \WC_Email();
-		$result = $email->send( 'test@example.com', 'Subject', 'Message', '', array() );
+		$notices = array();
+		$action  = function ( $function_name, $message, $version ) use ( &$notices ) {
+			$notices[] = array(
+				'function_name' => $function_name,
+				'message'       => $message,
+				'version'       => $version,
+			);
+		};
+		add_action( 'doing_it_wrong_run', $action, 10, 3 );
 
-		$this->assertIsBool( $result, 'send() should always return a bool, even if the mail callback does not' );
-		$this->assertFalse( $result, 'A non-bool (null) callback return should coerce to false' );
+		try {
+			$email  = new \WC_Email();
+			$result = $email->send( 'test@example.com', 'Subject', 'Message', '', array() );
+		} finally {
+			remove_action( 'doing_it_wrong_run', $action, 10 );
+			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		}
+
+		$this->assertFalse( $result, 'A non-bool callback return should resolve to false' );
+		$this->assertNotEmpty( $notices );
+		$this->assertSame( 'WC_Email::send', $notices[0]['function_name'] );
+		$this->assertStringContainsString( 'woocommerce_mail_callback filter should return a boolean; integer returned.', $notices[0]['message'] );
+		$this->assertSame( '11.1.0', $notices[0]['version'] );
 	}
 
 	/**
@@ -936,32 +956,40 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 		add_filter(
 			'woocommerce_mail_callback',
 			function () {
-					return static function () {
-							return null;
-					};
+				return static function () {
+					return 1;
+				};
 			}
 		);
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		$this->setExpectedIncorrectUsage( 'WC_Email::send' );
 
 		$email = $this->create_testable_email( 'my_email', 'admin@example.com', true, false, true );
 
-		$result = $email->run_send_notification();
+		try {
+			$result = $email->run_send_notification();
+		} finally {
+			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		}
 
 		$this->assertIsBool( $result, 'send_notification() should return a bool instead of fataling' );
-		$this->assertFalse( $result, 'Should resolve to false when the underlying mail callback returns null' );
+		$this->assertFalse( $result, 'Should resolve to false when the underlying mail callback returns a non-bool' );
 	}
 
 	/**
-	 * @testdox send() casts the mail callback return to bool before firing woocommerce_email_sent.
+	 * @testdox send() passes false to woocommerce_email_sent when the mail callback returns a non-bool.
 	 */
 	public function test_send_fires_email_sent_action_with_bool_when_callback_returns_non_bool(): void {
 		add_filter(
 			'woocommerce_mail_callback',
 			function () {
-					return static function () {
-							return null;
-					};
+				return static function () {
+					return 1;
+				};
 			}
 		);
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		$this->setExpectedIncorrectUsage( 'WC_Email::send' );
 
 		$received_return = null;
 		add_action(
@@ -974,9 +1002,13 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 		);
 
 		$email = new \WC_Email();
-		$email->send( 'test@example.com', 'Subject', 'Message', '', array() );
+		try {
+			$email->send( 'test@example.com', 'Subject', 'Message', '', array() );
+		} finally {
+			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		}
 
-		$this->assertIsBool( $received_return, 'woocommerce_email_sent should receive a bool even when the mail callback returns null' );
+		$this->assertIsBool( $received_return, 'woocommerce_email_sent should receive a bool even when the mail callback returns a non-bool' );
 		$this->assertFalse( $received_return );
 
 		remove_all_actions( 'woocommerce_email_sent' );
