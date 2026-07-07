@@ -863,7 +863,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			expect( batchCalls[ 0 ][ 0 ].path ).not.toContain( 'update-item' );
 		} );
 
-		it( 'swaps in the purchasable id at send time (identity rule 6), keeping the variation array', async () => {
+		it( 'swaps in the purchasable id at send time, keeping the variation array', async () => {
 			const cart = await loadCartAndReady();
 			// findProduct resolves the draft's parent id + selection to the
 			// variation (100 → 456). addItem must POST the RESOLVED purchasable

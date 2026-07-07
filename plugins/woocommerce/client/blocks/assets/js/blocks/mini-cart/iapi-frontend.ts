@@ -455,16 +455,15 @@ const { state: cartItemState } = store(
 			// bug in the context of wp-each we re-read the line from cart state by
 			// its key; where we need reactivity for the wp-each, use
 			// `state.cartItem` to get the cart item.
-			get cartItem() {
+			get cartItem(): CartItem {
 				const {
-					cartItem: { id, key, variation },
+					cartItem: { key },
 				} = getContext< CartItemContext >( 'woocommerce/cart' );
 
-				const cartItem = ( cartState.findItemInCart( {
-					id,
-					key,
-					variation,
-				} ) || {} ) as CartItem;
+				// Cart rows always operate on a server-confirmed line, so resolve
+				// it by key through the shared envelope (step 1 — exact line).
+				const cartItem = ( cartState.findItem( { key } ).cart ||
+					{} ) as CartItem;
 
 				cartItem.variation = cartItem.variation || [];
 				cartItem.item_data = cartItem.item_data || [];
@@ -901,17 +900,21 @@ const { state: cartItemState } = store(
 		},
 
 		actions: {
-			overrideInvalidQuantity( e: InputEvent ) {
+			*overrideInvalidQuantity(
+				e: InputEvent
+			): Generator< unknown, void > {
 				const input = e.target as HTMLInputElement;
-				const qty = input.value;
-
+				const { key, quantity: currentQuantity } =
+					cartItemState.cartItem;
 				const { minimum, maximum } =
 					cartItemState.cartItem.quantity_limits;
 
-				const quantity = parseInt( qty, 10 );
+				const quantity = parseInt( input.value, 10 );
 
+				// Invalid input: reset the field to the line's current quantity
+				// (direct DOM write — `state.cart` is read-only for consumers).
 				if ( Number.isNaN( quantity ) ) {
-					input.value = cartItemState.cartItem.quantity.toString();
+					input.value = currentQuantity.toString();
 					return;
 				}
 
@@ -923,13 +926,24 @@ const { state: cartItemState } = store(
 					finalQuantity = maximum;
 				}
 
-				cartItemState.cartItem.quantity = finalQuantity;
+				// Reflect the clamped value visually right away…
+				input.value = finalQuantity.toString();
+
+				// …and persist it by key when it actually changed. Never mutate
+				// `state.cart` directly — go through `updateItem` (mutations
+				// use an explicit key).
+				if ( finalQuantity !== currentQuantity ) {
+					yield actions.updateItem( {
+						key,
+						quantity: finalQuantity,
+					} );
+				}
 			},
 
 			*changeQuantity(): Generator< unknown, void > {
 				// Mini-cart rows always operate on server-confirmed lines (they
 				// carry a `key`), so quantity changes are `updateItem`s by key —
-				// no client-side add/update inference (identity rule 5).
+				// no client-side add/update inference).
 				yield actions.updateItem( {
 					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity,
@@ -965,7 +979,7 @@ const { state: cartItemState } = store(
 		},
 
 		callbacks: {
-			// No client-side key bridge (T12): a cart row's each-item context —
+			// No client-side key bridge: a cart row's each-item context —
 			// `woocommerce/cart::{ cartItem }`, keyed by the
 			// `data-wp-each--cart-item` directive that iterates
 			// `woocommerce/cart::state.cart.items` — carries the line, and the

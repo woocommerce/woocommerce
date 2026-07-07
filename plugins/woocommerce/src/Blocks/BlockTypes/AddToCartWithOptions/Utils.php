@@ -150,16 +150,13 @@ class Utils {
 			$processor->get_attribute( 'type' ) === 'number' &&
 			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
 		) {
-			$default_quantity = $product instanceof \WC_Product ? $product->get_min_purchase_quantity() : 1;
-			$input_quantity   = isset( $context['allowZero'] ) && true === $context['allowZero'] ? 0 : $default_quantity;
-
-			wp_interactivity_state(
-				'woocommerce/add-to-cart-with-options-quantity-selector',
-				array(
-					'inputQuantity' => $input_quantity,
-				)
-			);
-
+			// No namespace-global `inputQuantity` SSR seed: a single state slot
+			// would let the last-rendered input's value win for every quantity
+			// input on the page (grouped children, collection cards). The input's
+			// own `value` attribute — set per-instance by `woocommerce_quantity_input`
+			// — is the SSR source; on hydration the client `state.inputQuantity`
+			// getter (reading the context draft, min-aware) drives the value
+			// reactively.
 			$processor->set_attribute( 'data-wp-on--blur', 'actions.handleQuantityBlur' );
 			$processor->set_attribute( 'data-wp-bind--value', 'state.inputQuantity' );
 			foreach ( $input_attributes as $attribute => $value ) {

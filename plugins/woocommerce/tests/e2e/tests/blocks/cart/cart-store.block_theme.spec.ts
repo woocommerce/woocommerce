@@ -25,7 +25,7 @@ test.describe( 'Cart Store', () => {
 		let requestNonce: string | null = null;
 		let responseNonce: string | null = null;
 
-		// Intercept GET /cart (refreshCartItems) to capture the nonce.
+		// Intercept GET /cart (the cart refresh) to capture the nonce.
 		await page.route( '**/wc/store/v1/cart**', async ( route ) => {
 			if ( route.request().method() === 'GET' ) {
 				const response = await route.fetch();
@@ -47,13 +47,13 @@ test.describe( 'Cart Store', () => {
 
 		await frontendUtils.goToShop();
 
-		// Wait for the GET /cart request (refreshCartItems) to complete.
+		// Wait for the GET /cart request (the cart refresh) to complete.
 		await page.waitForResponse( '**/wc/store/v1/cart**' );
 
-		// refreshCartItems should return a nonce.
+		// the cart refresh should return a nonce.
 		expect( refreshNonce ).toBeTruthy();
 
-		// Adding a product should use the nonce from refreshCartItems.
+		// Adding a product should use the nonce from the cart refresh.
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		expect( requestNonce ).toBe( refreshNonce );
 

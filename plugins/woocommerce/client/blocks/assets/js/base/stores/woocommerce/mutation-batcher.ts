@@ -21,7 +21,7 @@ export type MutationRequest< TState = unknown > = {
 	/**
 	 * Called synchronously after reconciliation, before isProcessing clears.
 	 * Use for side effects that must complete before external code
-	 * (like refreshCartItems) is allowed to run.
+	 * (like the cart `refresh` action) is allowed to run.
 	 */
 	onSettled?: ( result: MutationResult< TState > ) => void;
 };
@@ -132,7 +132,7 @@ export function createMutationQueue< TState >(
 		}
 
 		// Run onSettled callbacks while isProcessing is still true.
-		// This prevents refreshCartItems from running during these callbacks.
+		// This prevents the cart refresh from running during these callbacks.
 		trackedRequests.forEach( ( tracked ) => {
 			const error = errors.get( tracked.id );
 			tracked.request.onSettled?.( {

@@ -1,14 +1,13 @@
 /**
  * External dependencies
  */
-import {
-	store,
-	getContext,
-	getConfig,
-	getElement,
-} from '@wordpress/interactivity';
-import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+import { store, getContext, getConfig } from '@wordpress/interactivity';
+import type {
+	SelectedAttributes,
+	Store as WooCommerce,
+} from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce/cart';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import type { ProductResponseItem } from '@woocommerce/types';
 
@@ -20,17 +19,9 @@ import {
 	attributeNamesMatch,
 	getVariationAttributeValue,
 } from '../../../base/utils/variations/attribute-matching';
-import type {
-	AddToCartWithOptionsStore,
-	Context as AddToCartWithOptionsStoreContext,
-} from '../frontend';
+import type { AddToCartWithOptionsStore } from '../frontend';
 import type { SelectableItem } from '../../../types/type-defs/selectable-items';
 import type { VisualAttributeTerm } from '../../../base/utils/visual-attribute-terms';
-import {
-	getContextProductId,
-	getDraftQuantity,
-	setDraftVariation,
-} from '../cart-drafts';
 
 type VariationOptionItem = {
 	id: string;
@@ -40,7 +31,7 @@ type VariationOptionItem = {
 	visual?: VisualAttributeTerm;
 };
 
-type Context = AddToCartWithOptionsStoreContext & {
+type Context = {
 	name: string;
 	selectedValue: string | null;
 	variationAttributeOptions: VariationOptionItem[];
@@ -60,6 +51,23 @@ const { state: productsState } = store< ProductsStore >(
 	{},
 	{ lock: universalLock }
 );
+
+const { state: cartState, actions: cartActions } = store< WooCommerce >(
+	'woocommerce/cart',
+	{},
+	{ lock: universalLock }
+);
+
+/**
+ * The shopper's current attribute selection — read from the context draft's
+ * `variation`, the single source of selection truth. Returns a fresh array so
+ * callers can mutate it before writing it back through `setAttribute`.
+ */
+const getSelectedAttributes = (): SelectedAttributes[] =>
+	(
+		( cartState.itemInContext.draft?.variation ??
+			[] ) as SelectedAttributes[]
+	 ).map( ( attr ) => ( { ...attr } ) );
 
 const isAttributeValueValid = ( {
 	attributeName,
@@ -185,32 +193,36 @@ const getProductAttributesAndOptions = (
 };
 
 /**
- * Mirror the shopper's attribute selection into the shared-store draft's
- * `variation` — the submission/pairing truth the cart POST reads. This is the
- * FIRST half of the "double write" the selection performs (schema: "Selection UI
- * layering"): the SECOND half is `setSelectedVariationId`, which resolves the
- * selection to a variation and writes `variationId` into the `woocommerce/products`
- * context — the DERIVATION truth `productVariationInContext` reads. The two
- * planes are deliberately separate: the products store derives from its own
- * `variationId` and reads NOTHING from the cart draft (T12).
+ * Resolve a shopper's attribute selection to a variation and write the resolved
+ * `variationId` into the `woocommerce/products` context (or global state when no
+ * context — the single-product-page flow, which keeps the write global for the
+ * Product Gallery). This is the derivation-truth half of the selection's "double
+ * write"; the submission/pairing half is the draft `variation` upserted in
+ * `setAttribute`. The products store derives `productVariationInContext` from this
+ * `variationId` alone — it never reads the cart draft.
  *
- * The block's `context.selectedAttributes` stays authoritative for the block
- * family's own UI (valid-option computation) and for out-of-scope consumers
- * (Product Button, Add to Wishlist Button) that still read it; this one-way
- * mirror keeps the draft in step on every selection change. A shallow copy is
- * written so the draft holds its own array rather than aliasing the reactive
- * context array.
- *
- * @param selectedAttributes The current selection from the block context.
+ * @param selectedAttributes The current selection.
  */
-const mirrorSelectionToDraft = (
-	selectedAttributes: SelectedAttributes[]
-): void => {
-	const productId = getContextProductId();
-	if ( productId === undefined ) {
+const writeVariationId = ( selectedAttributes: SelectedAttributes[] ): void => {
+	const { mainProductInContext: product } = productsState;
+	if ( ! product?.variations?.length ) {
 		return;
 	}
-	setDraftVariation( productId, [ ...selectedAttributes ] );
+
+	const result = productsState.findProduct( {
+		id: product.id,
+		selectedAttributes,
+	} );
+	// findProduct returns the parent when no variation matches — only accept an
+	// actual variation.
+	const matchedVariation = result && result.id !== product.id ? result : null;
+	const variationId = matchedVariation?.id ?? null;
+
+	const productContext = getContext< {
+		variationId?: number | null;
+	} >( 'woocommerce/products' );
+
+	( productContext ?? productsState ).variationId = variationId;
 };
 
 export type VariableProductAddToCartWithOptionsStore =
@@ -222,7 +234,6 @@ export type VariableProductAddToCartWithOptionsStore =
 		};
 		actions: {
 			setAttribute: ( attribute: string, value: string ) => void;
-			removeAttribute: ( attribute: string ) => void;
 			toggle: (
 				item?: SelectableItem< { visual?: VisualAttributeTerm } >
 			) => void;
@@ -233,9 +244,7 @@ export type VariableProductAddToCartWithOptionsStore =
 		};
 		callbacks: {
 			setDefaultSelectedAttribute: () => void;
-			setSelectedVariationId: () => void;
 			validateVariation: () => void;
-			watchQuantityConstraints: () => void;
 		};
 	};
 
@@ -255,16 +264,13 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 					disabledAttributesAction,
 					variationAttributeOptions,
 				} = context;
-				// The shopper's selection is read from the block's iAPI context
-				// (the compatibility surface out-of-scope consumers still read);
-				// the source of truth for the cart mirrors into the draft (see
-				// `setAttribute` / `removeAttribute`).
-				const selectedAttributes = context.selectedAttributes || [];
-				const hideInvalid = disabledAttributesAction === 'hide';
 
 				if ( ! Array.isArray( variationAttributeOptions ) ) {
 					return [];
 				}
+
+				const selectedAttributes = getSelectedAttributes();
+				const hideInvalid = disabledAttributesAction === 'hide';
 
 				return variationAttributeOptions.map( ( row, index ) => {
 					const disabled = ! isAttributeValueValid( {
@@ -294,8 +300,13 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 		},
 		actions: {
+			// The single choke point for every attribute change. It computes the
+			// next selection, upserts it into the context draft's `variation`
+			// (submission/pairing truth), then resolves and writes `variationId`
+			// into the products context (derivation truth). An empty value removes
+			// the attribute (absorbing the former `removeAttribute`).
 			setAttribute( attribute: string, value: string ) {
-				const { selectedAttributes } = getContext< Context >();
+				const selectedAttributes = getSelectedAttributes();
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
 						attributeNamesMatch(
@@ -308,38 +319,16 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 					if ( index >= 0 ) {
 						selectedAttributes.splice( index, 1 );
 					}
-					mirrorSelectionToDraft( selectedAttributes );
-					return;
-				}
-
-				if ( index >= 0 ) {
-					selectedAttributes[ index ] = {
-						attribute,
-						value,
-					};
+				} else if ( index >= 0 ) {
+					selectedAttributes[ index ] = { attribute, value };
 				} else {
-					selectedAttributes.push( {
-						attribute,
-						value,
-					} );
+					selectedAttributes.push( { attribute, value } );
 				}
 
-				mirrorSelectionToDraft( selectedAttributes );
-			},
-			removeAttribute( attribute: string ) {
-				const { selectedAttributes } = getContext< Context >();
-				const index = selectedAttributes.findIndex(
-					( selectedAttribute ) =>
-						attributeNamesMatch(
-							selectedAttribute.attribute,
-							attribute
-						)
-				);
-				if ( index >= 0 ) {
-					selectedAttributes.splice( index, 1 );
-				}
-
-				mirrorSelectionToDraft( selectedAttributes );
+				cartActions.upsertDraftItem( {
+					variation: selectedAttributes,
+				} );
+				writeVariationId( selectedAttributes );
 			},
 			toggle(
 				itemArg?:
@@ -356,7 +345,7 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				const { name } = context;
-				const selectedAttributes = context.selectedAttributes || [];
+				const selectedAttributes = getSelectedAttributes();
 				const isCurrentlySelected = selectedAttributes.some(
 					( attrObject ) =>
 						attributeNamesMatch( attrObject.attribute, name ) &&
@@ -386,12 +375,12 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const selectedAttributes = context.selectedAttributes || [];
-
 				const { mainProductInContext: product } = productsState;
 				if ( ! product ) {
 					return;
 				}
+
+				const selectedAttributes = getSelectedAttributes();
 
 				// Normalize included/excluded attributes to lowercase for comparison
 				// with Store API labels (e.g., "Color" vs "attribute_pa_color" → "color").
@@ -444,6 +433,11 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 		},
 		callbacks: {
+			// Client-side default-selection mechanism, run on each attribute
+			// block's init. It seeds the initial selection into the context draft
+			// (drafts are client-only — this is where a variable product's draft
+			// is born) through the same `setAttribute` choke point, so the initial
+			// `variationId` resolution happens for free.
 			setDefaultSelectedAttribute() {
 				const context = getContext< Context >();
 				if ( ! context.name ) {
@@ -458,43 +452,6 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 					includedAttributes: [ context.name ],
 				} );
 			},
-			// The DERIVATION-TRUTH half of the selection's double write (schema:
-			// "Selection UI layering"). A `data-wp-watch` callback: it re-runs on
-			// every selection change, resolves the shopper's attribute selection
-			// to a variation via `findProduct` (deterministic, mirrors the server
-			// — identity rule 6), and writes the resolved `variationId` into the
-			// `woocommerce/products` context (or global state out of context).
-			// That id is the ONLY thing `productVariationInContext` derives from —
-			// the products store never reads the cart draft (T12). The submission/
-			// pairing half is `mirrorSelectionToDraft` (draft `variation`).
-			setSelectedVariationId: () => {
-				const { mainProductInContext: product } = productsState;
-
-				if ( ! product?.variations?.length ) {
-					return;
-				}
-
-				const { selectedAttributes } = getContext< Context >();
-				const result = productsState.findProduct( {
-					id: product.id,
-					selectedAttributes,
-				} );
-				// findProduct returns the parent when no variation
-				// matches — only accept an actual variation.
-				const matchedVariation =
-					result && result.id !== product.id ? result : null;
-
-				const variationId = matchedVariation?.id ?? null;
-				const productContext = getContext< {
-					variationId?: number | null;
-				} >( 'woocommerce/products' );
-
-				// If there is context, update the context. Otherwise, update the state directly.
-				( productContext
-					? productContext
-					: productsState
-				).variationId = variationId;
-			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
 
@@ -504,7 +461,7 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { selectedAttributes } = getContext< Context >();
+				const selectedAttributes = getSelectedAttributes();
 				const result = productsState.findProduct( {
 					id: product.id,
 					selectedAttributes,
@@ -542,52 +499,6 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 						message: errorMessages?.variableProductOutOfStock || '',
 						group: 'variable-product',
 					} );
-				}
-			},
-			// Quantity constraints might change dynamically when switching
-			// variations. Based on this, we might need to update the quantity.
-			watchQuantityConstraints() {
-				const { ref } = getElement();
-
-				if ( ! ( ref instanceof HTMLInputElement ) ) {
-					return;
-				}
-
-				// Let's not do anything if the user is typing in the input.
-				if ( ref === document.activeElement ) {
-					return;
-				}
-
-				const { productVariationInContext: variation } = productsState;
-
-				if ( ! variation ) {
-					return;
-				}
-
-				const { minimum, maximum } = variation.add_to_cart;
-
-				// Quantity now lives on the shared-store draft, keyed by the
-				// main/context product id and variation-independent (one draft
-				// per product). Read and write it under that id rather than the
-				// per-variation key the old `context.quantity` map used.
-				const productId = getContextProductId();
-				if ( productId === undefined ) {
-					return;
-				}
-				const currentValue = getDraftQuantity( productId );
-
-				let newValue = currentValue;
-				if ( currentValue < minimum ) {
-					newValue = minimum;
-				} else if ( currentValue > maximum ) {
-					newValue = maximum;
-				}
-
-				if (
-					newValue !== ref.valueAsNumber ||
-					newValue !== currentValue
-				) {
-					actions.setQuantity( productId, newValue );
 				}
 			},
 		},

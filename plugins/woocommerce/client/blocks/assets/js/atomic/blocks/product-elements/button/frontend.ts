@@ -3,6 +3,7 @@
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce/cart';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
@@ -19,7 +20,6 @@ interface Context {
 	addToCartText: string;
 	groupedProductIds?: number[];
 	displayViewCart: boolean;
-	quantityToAdd: number;
 	tempQuantity: number;
 	animationStatus: AnimationStatus;
 	hasPressedButton: boolean;
@@ -40,8 +40,8 @@ type ServerState = {
 	};
 };
 
-const { state: wooState } = store< WooCommerce >(
-	'woocommerce',
+const { state: cartState, actions: cartActions } = store< WooCommerce >(
+	'woocommerce/cart',
 	{},
 	{ lock: universalLock }
 );
@@ -60,17 +60,14 @@ const { state: productsState } = store< ProductsStore >(
 
 const productButtonStore = {
 	state: {
-		get quantity(): number {
-			// T7a: one behavior everywhere. The "X in cart" quantity resolves
-			// through the shared-store envelope, keyed by the MAIN/context
-			// product id (`mainProductInContext` — the parent, never a variation;
-			// identity rule 3, landmine #2). `findItem({ id })` runs the
-			// resolution ladder against the context draft when one exists (a
-			// stepper-bearing collection card, or the Add to Cart + Options form's
-			// seeded draft — the draft carries the shopper's `variation`, so no
-			// ATCWO `selectedAttributes` mirror read is needed), and against a bare
-			// `{ id }` draft otherwise (a plain Product Button with no seeded
-			// draft — the common shop/grid case). Both collapse to the same call.
+		// The "X in cart" quantity, resolved through the shared-store envelope
+		// keyed by the main/context product id (`mainProductInContext` — the
+		// parent, never a variation). `findItem({ id })` runs the resolution
+		// ladder against the context draft when one exists (a stepper-bearing
+		// collection card, or the form's draft, which carries the variation),
+		// else against a bare `{ id }` draft (a plain Product Button on a
+		// shop/grid). Both collapse to the same call.
+		get inCartQuantity(): number {
 			const mainProduct = productsState.mainProductInContext;
 
 			if ( ! mainProduct ) {
@@ -78,7 +75,7 @@ const productButtonStore = {
 			}
 
 			return (
-				wooState.findItem( { id: mainProduct.id } ).cart?.quantity ?? 0
+				cartState.findItem( { id: mainProduct.id } ).cart?.quantity ?? 0
 			);
 		},
 		get slideInAnimation() {
@@ -106,20 +103,19 @@ const productButtonStore = {
 				animationStatus === AnimationStatus.SLIDE_OUT;
 			const quantity = showTemporaryNumber
 				? tempQuantity || 0
-				: state.quantity;
+				: state.inCartQuantity;
 
 			if ( productsState.productInContext?.type === 'grouped' ) {
-				// Grouped products seed one draft per CHILD (keyed by child id),
+				// Grouped products keep one draft per CHILD (keyed by child id),
 				// not by the grouped parent, so the parent has no envelope line of
 				// its own. The button's own server-seeded `groupedProductIds`
-				// context (not an ATCWO mirror) is the only handle to the child
-				// ids; each child's in-cart quantity is read through the shared
-				// envelope (`findItem({ id: childId })`), same surface as the
-				// simple/variable path above.
+				// context is the only handle to the child ids; each child's
+				// in-cart quantity is read through the shared envelope
+				// (`findItem({ id: childId })`), same surface as above.
 				const groupedProductIdsInCart = groupedProductIds?.map(
 					( productId ) =>
-						wooState.findItem( { id: productId } ).cart?.quantity ||
-						0
+						cartState.findItem( { id: productId } ).cart
+							?.quantity || 0
 				);
 				if (
 					groupedProductIdsInCart?.some( ( qty ) => qty > 0 ) &&
@@ -139,44 +135,22 @@ const productButtonStore = {
 		get displayViewCart(): boolean {
 			const { displayViewCart } = getContext< Context >();
 			if ( ! displayViewCart ) return false;
-			return state.quantity > 0;
+			return state.inCartQuantity > 0;
 		},
 	},
 	actions: {
 		*addCartItem(): Generator< unknown, void > {
-			// T7a: fully agnostic — ONE path. `addItem()` (no argument) resolves
-			// the payload itself: the context draft when one exists (a
-			// stepper-bearing collection card, or the Add to Cart + Options form's
-			// seeded draft), else its `{ id: productInContext id, quantity: 1 }`
-			// fallback for a bare Product Button with no seeded draft. Identity
-			// rule 5: adds are adds — `addItem` always POSTs `add-item`, so rapid
-			// clicks compound server-side. There is nothing left to branch on.
+			// Fully agnostic — ONE path. `addItem()` (no argument) resolves the
+			// payload itself: the context draft when one exists (a stepper-bearing
+			// collection card, or the Add to Cart + Options form's draft), else
+			// its `{ id: productInContext id, quantity: min }` fallback for a bare
+			// Product Button. Adds are adds — `addItem` always POSTs add-item, so
+			// rapid clicks compound server-side.
 			const context = getContext< Context >();
 
-			// Todo: Use the module exports instead of `store()` once the
-			// woocommerce store is public.
-			yield import( '@woocommerce/stores/woocommerce/cart' );
-
-			const { actions } = store< WooCommerce >(
-				'woocommerce',
-				{},
-				{ lock: universalLock }
-			);
-
-			yield actions.addItem();
+			yield cartActions.addItem();
 
 			context.displayViewCart = true;
-		},
-		*refreshCartItems() {
-			// Todo: Use the module exports instead of `store()` once the
-			// woocommerce store is public.
-			yield import( '@woocommerce/stores/woocommerce/cart' );
-			const { actions } = store< WooCommerce >(
-				'woocommerce',
-				{},
-				{ lock: universalLock }
-			);
-			actions.refreshCartItems();
 		},
 		handleAnimationEnd( event: AnimationEvent ) {
 			const context = getContext< Context >();
@@ -188,7 +162,7 @@ const productButtonStore = {
 				// When the second part of the animation ends, we update the
 				// temporary quantity to sync it with the cart and reset the
 				// animation status so it can be triggered again.
-				context.tempQuantity = state.quantity;
+				context.tempQuantity = state.inCartQuantity;
 				context.animationStatus = AnimationStatus.IDLE;
 			}
 		},
@@ -205,7 +179,7 @@ const productButtonStore = {
 				// Only animate if the quantity number changes and there is no
 				// animation in progress.
 				if (
-					context.tempQuantity !== state.quantity &&
+					context.tempQuantity !== state.inCartQuantity &&
 					context.animationStatus === AnimationStatus.IDLE
 				) {
 					context.animationStatus = AnimationStatus.SLIDE_OUT;
@@ -222,7 +196,7 @@ const productButtonStore = {
 			// useLayoutEffect to avoid the useEffect flickering.
 			// eslint-disable-next-line react-hooks/rules-of-hooks
 			useLayoutEffect( () => {
-				context.tempQuantity = state.quantity;
+				context.tempQuantity = state.inCartQuantity;
 				// eslint-disable-next-line react-hooks/exhaustive-deps
 			}, [] );
 		},
@@ -232,7 +206,7 @@ const productButtonStore = {
 			// sync with the quantity in the cart and the animation hasn't
 			// started yet.
 			if (
-				context.tempQuantity !== state.quantity &&
+				context.tempQuantity !== state.inCartQuantity &&
 				context.animationStatus === AnimationStatus.IDLE
 			) {
 				context.animationStatus = AnimationStatus.SLIDE_OUT;

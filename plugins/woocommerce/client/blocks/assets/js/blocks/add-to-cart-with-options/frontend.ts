@@ -7,27 +7,24 @@ import {
 	getConfig,
 	withSyncEvent,
 } from '@wordpress/interactivity';
-import type {
-	Store as WooCommerce,
-	SelectedAttributes,
-} from '@woocommerce/stores/woocommerce/cart';
+import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+// The cart store is a hard dependency: quantity writers and `addToCart` call its
+// actions directly, and the form's validation watch reads `itemInContext.draft`.
+// Static import guarantees the module (and its store registration) is loaded on
+// every page carrying this form.
+import '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
  */
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
-import type { Context as QuantitySelectorContext } from './quantity-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
-import { getContextProductId, getDraft, setDraftQuantity } from './cart-drafts';
 
 export type Context = {
-	selectedAttributes: SelectedAttributes[];
-	quantity: Record< number, number >;
 	validationErrors: AddToCartError[];
-	tempQuantity: number;
 	groupedProductIds: number[];
 };
 
@@ -35,23 +32,6 @@ export type AddToCartError = {
 	code: string;
 	group: string;
 	message: string;
-};
-
-/**
- * Manually dispatches a 'change' event on the quantity input element.
- *
- * When users click the plus/minus stepper buttons, no 'change' event is fired
- * since there is no direct interaction with the input. However, some extensions
- * rely on the change event to detect quantity changes. This function ensures
- * those extensions continue working by programmatically dispatching the event.
- *
- * @see https://github.com/woocommerce/woocommerce/issues/53031
- *
- * @param inputElement - The quantity input element to dispatch the event on.
- */
-const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
-	const event = new Event( 'change', { bubbles: true } );
-	inputElement.dispatchEvent( event );
 };
 
 // Stores are locked to prevent 3PD usage until the API is stable.
@@ -64,6 +44,12 @@ const { state: productsState } = store< ProductsStore >(
 	{ lock: universalLock }
 );
 
+const { state: cartState, actions: cartActions } = store< WooCommerce >(
+	'woocommerce/cart',
+	{},
+	{ lock: universalLock }
+);
+
 export type AddToCartWithOptionsStore = {
 	state: {
 		noticeIds: string[];
@@ -72,11 +58,13 @@ export type AddToCartWithOptionsStore = {
 		allowsAddingToCart: boolean;
 	};
 	actions: {
-		validateQuantity: ( productId: number, value?: number ) => void;
-		setQuantity: ( productId: number, value: number ) => void;
+		validateQuantity: ( value?: number ) => void;
 		addError: ( error: AddToCartError ) => string;
 		clearErrors: ( group?: string ) => void;
 		addToCart: ( event: SubmitEvent ) => void;
+	};
+	callbacks: {
+		validateQuantityConstraints: () => void;
 	};
 };
 
@@ -124,7 +112,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 			},
 		},
 		actions: {
-			validateQuantity( productId: number, value?: number ) {
+			validateQuantity( value?: number ) {
 				actions.clearErrors( 'invalid-quantities' );
 
 				if ( typeof value !== 'number' ) {
@@ -147,46 +135,6 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 						message: errorMessages?.invalidQuantities || '',
 						group: 'invalid-quantities',
 					} );
-				}
-			},
-			setQuantity( productId: number, value: number ) {
-				const context = getContext< Context >();
-				const quantitySelectorContext =
-					getContext< QuantitySelectorContext >(
-						'woocommerce/add-to-cart-with-options-quantity-selector'
-					);
-				const inputElement = quantitySelectorContext?.inputElement;
-
-				// Shopper quantity is now owned by the shared-store draft (T6):
-				// one draft per product context, keyed by the main/context
-				// product id. `upsertDraftItem` creates it on first touch and
-				// mutates it thereafter. The draft's quantity is
-				// variation-independent, so the old per-variation-id fan-out
-				// (which existed only to keep a `context.quantity` map in sync
-				// across variation switches) is no longer needed.
-				setDraftQuantity( productId, value );
-
-				// Keep `context.quantity` populated as the compatibility surface
-				// (server-seeded; still part of the block's public context shape).
-				// `setDraftQuantity` owns the reactive-signal handling (including
-				// the same-value NaN pre-write that forces the input to re-render).
-				context.quantity = {
-					...context.quantity,
-					[ productId ]: value,
-				};
-
-				const parentProduct = productsState.findProduct( {
-					id: productsState.productId,
-					selectedAttributes: context.selectedAttributes,
-				} );
-				if ( parentProduct?.type === 'grouped' ) {
-					actions.validateGroupedProductQuantity();
-				} else {
-					actions.validateQuantity( productId, value );
-				}
-
-				if ( inputElement ) {
-					dispatchChangeEvent( inputElement );
 				}
 			},
 			addError: ( error: AddToCartError ): string => {
@@ -264,53 +212,39 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 					return;
 				}
 
-				// Resolve the context draft SYNCHRONOUSLY, before any `yield`.
-				// The draft read relies on the `woocommerce/products` context,
-				// which is only guaranteed in scope for the synchronous portion of
-				// the action (iAPI restores scope around directive-invoked actions,
-				// but resolving up front and passing the draft explicitly to
-				// `addItem` removes any dependency on scope surviving the async
-				// import below).
-				//
-				// IMPORTANT: the draft is keyed by the products context product id
-				// (`woocommerce/products::productId` — the MAIN/parent product,
-				// identity rule 3), NOT by `productInContext.id`, which for variable
-				// products resolves to the selected VARIATION's id. `getDraft()`
-				// with no argument reads the products context. The draft already
-				// carries `id`, `quantity` and the shopper's `variation` (the
-				// variation selector mirrors the selection into it); `addItem`
-				// posts parent id + variation and the server resolves the
-				// purchasable variation.
-				const contextProductId = getContextProductId();
-				const draft = getDraft();
-
-				// Todo: Use the module exports instead of `store()` once the
-				// woocommerce store is public.
-				yield import( '@woocommerce/stores/woocommerce/cart' );
-
-				const { actions: wooActions } = store< WooCommerce >(
-					'woocommerce/cart',
-					{},
-					{ lock: universalLock }
-				);
-
-				// Submit the draft (identity rule 5: adds are adds). Passing it
-				// explicitly (rather than relying on `addItem()`'s context
-				// default) keeps submission deterministic across the async
-				// boundary. When no draft exists (defensive — the form seeds one
-				// server-side), fall back to the context product id so a variable
-				// selection still travels as parent id semantics. The draft is
-				// NOT reset after a successful add — matching current UX
-				// (attribute selection persists, and a repeat submit compounds
-				// server-side); draft death is deliberately a no-op here (see the
-				// T6 report / draft-lifecycle note in the schema).
-				yield wooActions.addItem(
-					draft ?? {
-						id: contextProductId ?? product.id,
-						quantity: 1,
-					}
-				);
+				// Submit the context draft. Adds are always adds — never converted
+				// to an update of an existing line by client-side matching. The
+				// draft — keyed by the shared context product id — already carries
+				// the shopper's quantity and variation; `addItem()` resolves it,
+				// swaps in the purchasable variation id, and POSTs add-item.
+				// Falls back to the min-purchase product id when no draft exists
+				// (a form the shopper never touched). The draft is NOT reset after
+				// a successful add: attribute selection and quantity persist, and a
+				// repeat submit compounds server-side.
+				yield cartActions.addItem();
 			} ),
+		},
+		callbacks: {
+			// Quantity validation watch: re-runs whenever the context draft's
+			// quantity changes. Simple/variable products validate the quantity
+			// against the product's min/max; grouped products validate their
+			// child quantities. Replaces the old `setQuantity` write-path side
+			// effect now that quantity writers upsert the draft directly.
+			validateQuantityConstraints() {
+				const product = productsState.productInContext;
+				if ( ! product ) {
+					return;
+				}
+
+				if ( product.type === 'grouped' ) {
+					actions.validateGroupedProductQuantity();
+					return;
+				}
+
+				actions.validateQuantity(
+					cartState.itemInContext.draft?.quantity
+				);
+			},
 		},
 	},
 	{ lock: universalLock }

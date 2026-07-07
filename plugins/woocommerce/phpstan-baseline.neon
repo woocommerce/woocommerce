@@ -50158,12 +50158,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
 
 		-
-			message: '#^Offset ''class'' on array\{class\: string, style\: mixed, data\-wp\-interactive\: ''woocommerce/add\-to…'', data\-wp\-class\-\-is\-invalid\: ''\!state\.isFormValid''\} in isset\(\) always exists and is not nullable\.$#'
-			identifier: isset.offset
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
-
-		-
 			message: '#^Parameter \#1 \$amount of function wc_stock_amount expects float\|int, array\|string given\.$#'
 			identifier: argument.type
 			count: 1

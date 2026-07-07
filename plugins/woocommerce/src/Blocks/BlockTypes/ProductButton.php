@@ -125,21 +125,6 @@ class ProductButton extends AbstractBlock {
 			)
 		);
 
-		$default_quantity = 1;
-
-		if ( ! $is_descendant_of_add_to_cart_form ) {
-			/**
-			 * Filters the change the quantity to add to cart.
-			 *
-			 * @since 8.5.0
-			 * @since 11.0.0 Added the `$variation_id` parameter.
-			 * @param number $default_quantity The default quantity.
-			 * @param number $product_id The product id.
-			 * @param number $variation_id     The variation ID. Always 0 in this context.
-			 */
-			$default_quantity = apply_filters( 'woocommerce_add_to_cart_quantity', $default_quantity, $product->get_id(), 0 );
-		}
-
 		$add_to_cart_text = null !== $product->add_to_cart_text() ? $product->add_to_cart_text() : __( 'Add to cart', 'woocommerce' );
 
 		if ( $is_descendant_of_add_to_cart_form && null !== $product->single_add_to_cart_text() ) {
@@ -147,7 +132,6 @@ class ProductButton extends AbstractBlock {
 		}
 
 		$context = array(
-			'quantityToAdd'    => $default_quantity,
 			'addToCartText'    => $add_to_cart_text,
 			'tempQuantity'     => $number_of_items_in_cart,
 			'animationStatus'  => 'IDLE',

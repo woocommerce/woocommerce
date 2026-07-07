@@ -25,20 +25,12 @@ jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
 		getConfig: jest.fn( () => mockConfig ),
-		// The cart store registers under `woocommerce/cart` and re-registers a
-		// delegating alias under `woocommerce`; both carry the same `actions`.
-		// Merge each registration's `state` into the single shared `mockState`
-		// (mirroring iAPI's deepMerge, which is how `findItemInCart` ends up on
-		// the proxy the actions close over) and record the actions from every
-		// registration that supplies them. We skip the `cart` and `draftItems`
-		// keys: the module keeps both as plain writable slots (`cart` set by
-		// refresh / the batcher commit; `draftItems` mutated by the draft
-		// actions), while the alias registers each as a getter delegating to the
-		// real store's state. In this mock every registration shares ONE
-		// `mockState`, so copying those alias getters would make them
-		// self-referential (`get draftItems(){ return state.draftItems; }`
-		// reading itself — infinite recursion when the module is re-required
-		// against the persistent mockState).
+		getContext: jest.fn( () => null ),
+		// The cart store registers under `woocommerce/cart`. Merge each
+		// registration's `state` into the single shared `mockState` and record
+		// the actions. We skip the `cart` and `draftItems` keys: the module keeps
+		// both as plain writable slots (`cart` set by refresh / the batcher
+		// commit; `draftItems` mutated by the draft actions).
 		store: jest.fn( ( name, definition ) => {
 			// The notices store is a separate registration; return a stub with
 			// the notice bookkeeping the cart actions call into.
@@ -48,6 +40,18 @@ jest.mock(
 					actions: {
 						addNotice: mockAddNotice,
 						removeNotice: jest.fn(),
+					},
+				};
+			}
+			// The cart store reads the products store for purchasable-id
+			// resolution and the context product id. Stub it: `findProduct`
+			// echoes the id (no variation swap), and there is no context product.
+			if ( name === 'woocommerce/products' ) {
+				return {
+					state: {
+						findProduct: ( { id }: { id: number } ) => ( { id } ),
+						mainProductInContext: undefined,
+						productInContext: undefined,
 					},
 				};
 			}
@@ -137,7 +141,7 @@ async function runAction(
 
 /**
  * Build a mocked global.fetch that:
- * - answers the initial GET /cart (refreshCartItems) with an empty cart, and
+ * - answers the initial GET /cart (the cart refresh) with an empty cart, and
  * - answers POST /batch with one response item per request.
  *
  * `onBatch` receives the parsed request bodies for assertions/customization and
@@ -270,7 +274,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		);
 	} );
 
-	it( 'N same-frame addCartItem calls → one batch request, one sync event, one legacy event, one a11y announcement, one notice pass', async () => {
+	it( 'N same-frame addItem calls → one batch request, one sync event, one legacy event, one a11y announcement, one notice pass', async () => {
 		const serverCart = {
 			items: [
 				{ key: 'a', id: 1, quantity: 1, name: 'A', type: 'simple' },
@@ -291,24 +295,21 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		// Three adds dispatched in the same frame (no await between them).
 		await Promise.all( [
 			runAction(
-				cart.actions.addCartItem( {
+				cart.actions.addItem( {
 					id: 1,
 					quantity: 1,
-					type: 'simple',
 				} ) as unknown as Iterator< unknown >
 			),
 			runAction(
-				cart.actions.addCartItem( {
+				cart.actions.addItem( {
 					id: 2,
 					quantity: 1,
-					type: 'simple',
 				} ) as unknown as Iterator< unknown >
 			),
 			runAction(
-				cart.actions.addCartItem( {
+				cart.actions.addItem( {
 					id: 3,
 					quantity: 1,
-					type: 'simple',
 				} ) as unknown as Iterator< unknown >
 			),
 		] );
@@ -358,17 +359,15 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 		await Promise.all( [
 			runAction(
-				cart.actions.addCartItem( {
+				cart.actions.addItem( {
 					id: 99,
 					quantity: 1,
-					type: 'simple',
 				} ) as unknown as Iterator< unknown >
 			),
 			runAction(
-				cart.actions.addCartItem( {
+				cart.actions.addItem( {
 					id: 1,
 					quantity: 1,
-					type: 'simple',
 				} ) as unknown as Iterator< unknown >
 			),
 		] );
@@ -396,17 +395,15 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 		await Promise.all( [
 			runAction(
-				cart.actions.addCartItem( {
+				cart.actions.addItem( {
 					id: 1,
 					quantity: 1,
-					type: 'simple',
 				} ) as unknown as Iterator< unknown >
 			),
 			runAction(
-				cart.actions.addCartItem( {
+				cart.actions.addItem( {
 					id: 2,
 					quantity: 1,
-					type: 'simple',
 				} ) as unknown as Iterator< unknown >
 			),
 		] );
@@ -453,57 +450,62 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		expect( mockSpeak ).not.toHaveBeenCalled();
 	} );
 
-	it( 'removeCartItem delegates to removeItem (deprecated alias)', async () => {
-		const cart = await loadCartAndReady();
-		const removeItemSpy = jest.spyOn( cart.actions, 'removeItem' );
-
-		// Drive the alias; it yields the delegate generator, which runAction
-		// then drives to completion.
-		await runAction(
-			cart.actions.removeCartItem( 'y' ) as unknown as Iterator< unknown >
-		);
-
-		expect( removeItemSpy ).toHaveBeenCalledWith( 'y' );
-		removeItemSpy.mockRestore();
-	} );
-
-	it( 'suppresses the cycle notice pass if any request opts out via showCartUpdatesNotices: false', async () => {
-		const serverCart = {
-			items: [
-				{ key: 'a', id: 1, quantity: 1, name: 'A', type: 'simple' },
-				{ key: 'b', id: 2, quantity: 1, name: 'B', type: 'simple' },
-			],
-			totals: {},
-			errors: [],
-		};
-		installFetchMock( {
+	it( 'removeItem posts a remove-item request by key and fires the sync event', async () => {
+		const serverCart = { items: [], totals: {}, errors: [] };
+		const { batchCalls } = installFetchMock( {
+			initialCart: {
+				items: [
+					{ key: 'y', id: 5, quantity: 1, name: 'Y', type: 'simple' },
+				],
+				totals: {},
+				errors: [],
+			},
 			onBatch: ( requests ) =>
 				requests.map( () => ( { status: 200, body: serverCart } ) ),
 		} );
 
 		const cart = await loadCartAndReady();
-		updateNoticesSpy = jest.spyOn( cart.actions, 'updateNotices' );
 
-		// One request opts in (default), the other opts out. AND semantics ⇒
-		// the whole cycle's notice pass is suppressed.
-		await Promise.all( [
-			runAction(
-				cart.actions.addCartItem( {
-					id: 1,
-					quantity: 1,
-					type: 'simple',
-				} ) as unknown as Iterator< unknown >
-			),
-			runAction(
-				cart.actions.addCartItem(
-					{ id: 2, quantity: 1, type: 'simple' },
-					{ showCartUpdatesNotices: false }
-				) as unknown as Iterator< unknown >
-			),
-		] );
+		await runAction(
+			cart.actions.removeItem( 'y' ) as unknown as Iterator< unknown >
+		);
 
-		// Events still fire once; the notice pass is skipped.
-		expect( iapiSyncEvents() ).toHaveLength( 1 );
-		expect( updateNoticesSpy ).not.toHaveBeenCalled();
+		expect( batchCalls ).toHaveLength( 1 );
+		expect( batchCalls[ 0 ][ 0 ].path ).toBe(
+			'/wc/store/v1/cart/remove-item'
+		);
+		expect( batchCalls[ 0 ][ 0 ].body ).toEqual( { key: 'y' } );
+		expect(
+			iapiSyncEvents()[ 0 ].detail.quantityChanges.cartItemsPendingDelete
+		).toEqual( [ 'y' ] );
+	} );
+
+	it( 'addItem posts an add-item request carrying the payload id and quantity', async () => {
+		const serverCart = {
+			items: [
+				{ key: 'a', id: 7, quantity: 2, name: 'A', type: 'simple' },
+			],
+			totals: {},
+			errors: [],
+		};
+		const { batchCalls } = installFetchMock( {
+			onBatch: ( requests ) =>
+				requests.map( () => ( { status: 200, body: serverCart } ) ),
+		} );
+
+		const cart = await loadCartAndReady();
+
+		await runAction(
+			cart.actions.addItem( {
+				id: 7,
+				quantity: 2,
+			} ) as unknown as Iterator< unknown >
+		);
+
+		expect( batchCalls ).toHaveLength( 1 );
+		expect( batchCalls[ 0 ][ 0 ].path ).toBe(
+			'/wc/store/v1/cart/add-item'
+		);
+		expect( batchCalls[ 0 ][ 0 ].body ).toEqual( { id: 7, quantity: 2 } );
 	} );
 } );

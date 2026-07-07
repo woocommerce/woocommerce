@@ -29,7 +29,6 @@ import {
 	type MutationResult,
 	type CycleSettleResult,
 } from './mutation-batcher';
-import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
 import {
 	type CartItemFilterPredicate,
 	type DraftItem,
@@ -75,19 +74,6 @@ export type OptimisticCartItem = {
 	variation?: CartVariationItem[];
 	type: string;
 };
-
-export type ClientCartItem = Omit<
-	OptimisticCartItem,
-	'variation' | 'quantity'
-> & {
-	variation?: SelectedAttributes[];
-	/** The target quantity (absolute). Either this or quantityToAdd must be provided. */
-	quantity?: number;
-	/** Optional: add this delta to current quantity instead of setting absolute quantity */
-	quantityToAdd?: number;
-};
-
-type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
 
 /**
  * The cart store's OWN context namespace, `woocommerce/cart`. It carries a cart
@@ -139,11 +125,6 @@ export type ItemEnvelope = {
 
 export type Store = {
 	state: {
-		findItemInCart: ( args: {
-			id: ClientCartItem[ 'id' ];
-			key?: ClientCartItem[ 'key' ];
-			variation?: ClientCartItem[ 'variation' ];
-		} ) => CartItem | OptimisticCartItem | undefined;
 		cart: Omit< Cart, 'items' > & {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
@@ -182,13 +163,6 @@ export type Store = {
 		} ) => ItemEnvelope;
 	};
 	actions: {
-		removeCartItem: ( key: string ) => Promise< void >;
-		addCartItem: (
-			args: ClientCartItem,
-			options?: CartUpdateOptions
-		) => Promise< void >;
-		// Todo: Check why if I switch to an async function here the types of the store stop working.
-		refreshCartItems: () => Promise< void >;
 		waitForIdle: () => Promise< void >;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => Promise< void >;
 		updateNotices: (
@@ -870,170 +844,8 @@ const { actions } = store< Store >(
 
 				return resolveEnvelope( { draft, filter } );
 			},
-
-			findItemInCart( {
-				id,
-				key,
-				variation,
-			}: {
-				id: ClientCartItem[ 'id' ];
-				key?: ClientCartItem[ 'key' ];
-				variation?: ClientCartItem[ 'variation' ];
-			} ) {
-				return state.cart.items.find( ( cartItem ) => {
-					if ( key ) {
-						return key === cartItem.key;
-					}
-					if ( cartItem.type === 'variation' ) {
-						if (
-							id !== cartItem.id ||
-							! cartItem.variation ||
-							! variation ||
-							cartItem.variation.length !== variation.length
-						) {
-							return false;
-						}
-						return doesCartItemMatchAttributes(
-							cartItem,
-							variation
-						);
-					}
-					return id === cartItem.id;
-				} );
-			},
 		},
 		actions: {
-			/**
-			 * @deprecated Use `removeItem( key )`. Thin delegating alias kept so
-			 * untouched consumers and the `woocommerce` alias keep working.
-			 */
-			*removeCartItem( key: string ): AsyncAction< void > {
-				yield actions.removeItem( key );
-			},
-
-			/**
-			 * @deprecated Use `addItem( payload )` / `updateItem({ key, quantity })`.
-			 * Thin delegating wrapper retaining the legacy add-or-update-by-client-
-			 * matching behavior so untouched consumers and the `woocommerce` alias
-			 * keep working. New code MUST NOT rely on the implicit
-			 * update-item-on-match path here — adds are adds.
-			 */
-			*addCartItem(
-				{ id, key, quantity, quantityToAdd, variation }: ClientCartItem,
-				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
-			): AsyncAction< void > {
-				if ( quantity !== undefined && quantityToAdd !== undefined ) {
-					throw new Error(
-						'addCartItem: pass either quantity or quantityToAdd, not both.'
-					);
-				}
-
-				// Find existing item
-				const existingItem = state.findItemInCart( {
-					id,
-					key,
-					variation,
-				} );
-
-				// Determine the target quantity.
-				// If quantityToAdd is provided, calculate target based on current
-				// cart state (which includes optimistic updates from previous clicks).
-				// This ensures rapid clicks compound correctly.
-				let targetQuantity: number;
-				if ( typeof quantityToAdd === 'number' ) {
-					const currentQuantity = existingItem?.quantity ?? 0;
-					targetQuantity = currentQuantity + quantityToAdd;
-				} else if ( typeof quantity === 'number' ) {
-					targetQuantity = quantity;
-				} else {
-					// Neither provided - default to 1
-					targetQuantity = 1;
-				}
-
-				// Only treat as update if the item has a key (server-confirmed item).
-				// Optimistic items don't have keys, so we should add them instead.
-				const isUpdate = !! existingItem?.key;
-				const endpoint = isUpdate ? 'update-item' : 'add-item';
-
-				// Track what changes we're making for the aggregated sync event.
-				const quantityChanges: QuantityChanges = isUpdate
-					? {
-							cartItemsPendingQuantity: existingItem?.key
-								? [ existingItem.key ]
-								: [],
-					  }
-					: { productsPendingAdd: [ id ] };
-
-				// Contribute to the cycle. The batcher fires the legacy event,
-				// a11y announcement, sync event and notice pass once when the
-				// queue settles (handleCartCycleSettle). This is an add/update,
-				// so it flips the cycle's didAdd flag; `showCartUpdatesNotices`
-				// aggregates with AND across the cycle.
-				accumulateCartCycle( {
-					quantityChanges,
-					didAdd: true,
-					showNotices: showCartUpdatesNotices,
-				} );
-
-				// Prepare the item to send.
-				let itemToSend: OptimisticCartItem;
-				if ( isUpdate && existingItem ) {
-					// Server-confirmed item: include the key for update-item endpoint.
-					itemToSend = { ...existingItem, quantity: targetQuantity };
-				} else {
-					// New item or optimistic item: build fresh for add-item endpoint.
-					// For optimistic items (existingItem without key), calculate delta
-					// since add-item adds to existing quantity, not sets it.
-					const quantityToSend = existingItem
-						? targetQuantity - existingItem.quantity
-						: targetQuantity;
-
-					itemToSend = {
-						id,
-						quantity: quantityToSend,
-						...( variation && { variation } ),
-					} as OptimisticCartItem;
-				}
-
-				try {
-					yield sendCartRequest( state, {
-						path: `/wc/store/v1/cart/${ endpoint }`,
-						method: 'POST',
-						body: itemToSend,
-						applyOptimistic: () => {
-							if ( existingItem ) {
-								// Update existing item's quantity (whether server-confirmed or optimistic).
-								const isSoldIndividually =
-									isCartItem( existingItem ) &&
-									existingItem.sold_individually;
-								if ( ! isSoldIndividually ) {
-									existingItem.quantity = targetQuantity;
-								}
-							} else {
-								// No existing item: push new optimistic item.
-								state.cart.items.push( itemToSend );
-							}
-							// Capture post-optimistic cart for the cycle's
-							// notice comparison (last writer in the cycle wins).
-							cartCycle.optimisticSnapshot = JSON.parse(
-								JSON.stringify( state.cart )
-							);
-						},
-					} );
-				} catch ( error ) {
-					// Show error notice
-					actions.showNoticeError( error as Error );
-				}
-			},
-
-			/**
-			 * @deprecated Use `refresh()`. Thin delegating alias kept for the
-			 * `woocommerce` alias and untouched consumers.
-			 */
-			*refreshCartItems(): AsyncAction< void > {
-				yield actions.refresh();
-			},
-
 			*waitForIdle(): AsyncAction< void > {
 				if ( cartQueue ) {
 					yield cartQueue.waitForIdle();
@@ -1432,59 +1244,6 @@ const { actions } = store< Store >(
 				delete state.draftItems[ targetKey ];
 			},
 		},
-	},
-	{ lock: universalLock }
-);
-
-/**
- * Backwards-compatibility alias on the bare `woocommerce` namespace.
- *
- * The cart store lives under `woocommerce/cart`. Existing consumers (mini-cart,
- * product button, add-to-cart-with-options, the wishlist family) still call
- * `store( 'woocommerce' )` and read `state.cart`, `state.findItemInCart` and the
- * cart `actions`. This alias keeps them working unchanged until each consumer
- * migrates.
- *
- * Why this is safe with the iAPI `store()` merge/lock semantics:
- *
- * - We expose the *same underlying* `actions` and `findItemInCart` **function
- *   references**. iAPI's `deepMerge` copies function/primitive properties by
- *   descriptor, so the alias shares the identical functions — a single
- *   implementation, no divergent copies. Those functions close over the
- *   module-level `state` (the `woocommerce/cart` proxy), so they operate on the
- *   real cart state regardless of which namespace invoked them.
- * - `cart` (and `draftItems`) are exposed as **getters** that read the live
- *   `state.*` slot. iAPI would otherwise deep-*copy* a plain-object into a
- *   separate `woocommerce` proxy (breaking cross-namespace reactivity); a getter
- *   is copied by descriptor and re-reads the single reactive source on every
- *   access, so consumers reading through the alias stay in sync with mutations
- *   applied to `woocommerce/cart`.
- * - `itemInContext` / `findItem` are copied by descriptor (getter / function),
- *   same as `findItemInCart`, and close over the module-level `state`. They
- *   resolve context from the domain-scoped namespaces (`woocommerce/cart` for
- *   the line key, the products store's `mainProductInContext` for the draft
- *   product id), so the envelope resolves identically whether the getter is
- *   reached directly or through this legacy state/actions alias.
- * - Both stores are created with the same `universalLock`, so the alias
- *   registration passes the lock check and no store is unlocked/published.
- */
-store< Store >(
-	'woocommerce',
-	{
-		state: {
-			get cart() {
-				return state.cart;
-			},
-			get draftItems() {
-				return state.draftItems;
-			},
-			findItemInCart: state.findItemInCart,
-			findItem: state.findItem,
-			get itemInContext() {
-				return state.itemInContext;
-			},
-		},
-		actions,
 	},
 	{ lock: universalLock }
 );

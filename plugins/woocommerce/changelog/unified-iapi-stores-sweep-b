@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Slim the block-layer surfaces of the shared iAPI cart store: block stores now read draft/line state directly through the shared store's `itemInContext`/`findItem`/`upsertDraftItem`, holding only presentational and validation state.

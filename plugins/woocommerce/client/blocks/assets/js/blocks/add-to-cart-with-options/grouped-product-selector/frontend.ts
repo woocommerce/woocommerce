@@ -7,6 +7,7 @@ import type {
 	Store as WooCommerce,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce/cart';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
@@ -16,7 +17,6 @@ import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
-import { getDraft, getDraftQuantity } from '../cart-drafts';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -28,14 +28,17 @@ const { state: productsState } = store< ProductsStore >(
 	{ lock: universalLock }
 );
 
+const { state: cartState, actions: cartActions } = store< WooCommerce >(
+	'woocommerce/cart',
+	{},
+	{ lock: universalLock }
+);
+
 export type GroupedProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		actions: {
 			validateGroupedProductQuantity: () => void;
 			batchAddToCart: () => void;
-		};
-		callbacks: {
-			validateQuantities: () => void;
 		};
 	};
 
@@ -50,13 +53,16 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				const { groupedProductIds } =
 					getContext< AddToCartWithOptionsStoreContext >();
 
-				// Grouped children each own a draft (keyed by the child product
-				// id). Validation reads the child draft quantities — the new
-				// source of truth — rather than the `context.quantity` map.
+				// Each grouped child owns a draft keyed by its own product id. An
+				// untouched child has no draft (lazy birth) → quantity 0 → excluded
+				// (the default IS the absence). Read each child's quantity through
+				// the shared envelope by explicit id.
 				const childQuantities = groupedProductIds.map(
 					( childProductId ) => ( {
 						id: childProductId,
-						quantity: getDraftQuantity( childProductId ),
+						quantity:
+							cartState.findItem( { id: childProductId } ).draft
+								?.quantity ?? 0,
 					} )
 				);
 
@@ -103,52 +109,36 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				}
 			},
 			*batchAddToCart() {
-				// Resolve the child ids and their drafts SYNCHRONOUSLY, before
-				// any `yield`, so the reads happen while the block's iAPI context
-				// is guaranteed in scope. `getDraft` addresses each child draft by
-				// explicit id (no shared-context dependency), but `groupedProductIds`
-				// comes from context, so it must be read up front.
+				// Resolve the child ids SYNCHRONOUSLY, before any `yield`, so the
+				// context read happens while the block's iAPI context is in scope.
 				const { groupedProductIds } =
 					getContext< AddToCartWithOptionsStoreContext >();
 
-				// Collect the non-zero child drafts (one draft per child product
-				// context, keyed by the child product id). Each is a pure
-				// add-item payload already carrying id + quantity.
+				// Collect the non-zero child drafts (one draft per child, keyed by
+				// the child product id). Each is a pure add-item payload carrying
+				// id + quantity. An untouched child has no draft → skipped.
 				const childDrafts = groupedProductIds
-					.map( ( childProductId ) => getDraft( childProductId ) )
+					.map(
+						( childProductId ) =>
+							cartState.draftItems[ String( childProductId ) ]
+					)
 					.filter(
 						( draft ): draft is DraftItem =>
 							!! draft && ( draft.quantity ?? 0 ) > 0
 					);
 
-				// Todo: Use the module exports instead of `store()` once the
-				// woocommerce store is public.
-				yield import( '@woocommerce/stores/woocommerce/cart' );
-
-				const { actions: wooActions } = store< WooCommerce >(
-					'woocommerce/cart',
-					{},
-					{ lock: universalLock }
-				);
-
 				// Loop addItem() per non-zero child draft. Same-frame calls
 				// coalesce into a single Store API batch request via the mutation
-				// batcher, and the batcher fires the sync/legacy events, notice
-				// pass and a11y announcement once when the cycle settles —
-				// behaviorally identical to the old single batch action. Dispatch
-				// all in the same tick (do not await between them) so they land in
-				// one batch. Drafts are NOT reset after add (parity: quantities
-				// persist, a repeat submit compounds server-side).
+				// batcher, which fires the sync/legacy events, notice pass and a11y
+				// announcement once when the cycle settles. Dispatch all in the same
+				// tick (do not await between them) so they land in one batch. Drafts
+				// are NOT reset after add (quantities persist, a repeat submit
+				// compounds server-side).
 				const promises = childDrafts.map( ( draft ) =>
-					wooActions.addItem( draft )
+					cartActions.addItem( draft )
 				);
 
 				yield Promise.all( promises );
-			},
-		},
-		callbacks: {
-			validateQuantities() {
-				actions.validateGroupedProductQuantity();
 			},
 		},
 	},

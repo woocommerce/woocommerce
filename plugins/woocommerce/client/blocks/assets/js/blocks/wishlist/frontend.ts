@@ -98,8 +98,8 @@ const { state: shopperListsState, actions: shopperListsActions } =
 		{ lock: universalLock }
 	);
 
-const { state: cartState, actions: cartActions } = store< WooCommerce >(
-	'woocommerce',
+const { actions: cartActions } = store< WooCommerce >(
+	'woocommerce/cart',
 	{},
 	{ lock: universalLock }
 );
@@ -238,33 +238,20 @@ store< BlockStore >(
 				const isVariation = listItem.variation_id > 0;
 
 				// Wishlist always adds quantity 1 (no quantity column).
-				// `cartActions.addCartItem` catches its own errors and
-				// surfaces them as store notices, so the yield resolves
-				// the same way on success and failure. Snapshot the
-				// matching line's quantity, run the add, then only remove
-				// from the wishlist if the cart line actually grew — that
-				// guards against partial-stock and silent-failure paths
-				// where we shouldn't drop the wishlist entry.
-				const lookup = {
-					id: listItem.id,
-					...( isVariation && { variation } ),
-				};
-				const beforeItem = cartState.findItemInCart( lookup );
-				const beforeQuantity = beforeItem?.quantity ?? 0;
-
+				// `addItem` POSTs add-item and resolves with the affected cart
+				// line, or `undefined` when the add failed (it catches its own
+				// errors and surfaces them as store notices). Only remove from
+				// the wishlist when the add succeeded — guarding against
+				// partial-stock and silent-failure paths.
 				pendingKeys[ listItem.key ] = true;
 				try {
-					yield cartActions.addCartItem( {
+					const addedLine = yield cartActions.addItem( {
 						id: listItem.id,
-						quantityToAdd: 1,
-						type: isVariation ? 'variation' : 'simple',
+						quantity: 1,
 						...( isVariation && { variation } ),
 					} );
 
-					const afterItem = cartState.findItemInCart( lookup );
-					const afterQuantity = afterItem?.quantity ?? 0;
-
-					if ( afterQuantity <= beforeQuantity ) {
+					if ( ! addedLine ) {
 						return;
 					}
 

@@ -242,15 +242,32 @@ class AddToCartWithOptions extends AbstractBlock {
 				$template_part_contents = file_get_contents( $template_part_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			}
 
-			$default_quantity = $product->get_min_purchase_quantity();
-
 			$product_id = $product->get_id();
 
+			// SSR fallback for `state.isFormValid` before hydration. It must
+			// resolve per-element, not per-page: `isFormValid` is a
+			// namespace-global state slot, so a closure capturing a single
+			// product id would let the last-rendered form's value win for every
+			// form on the page. Deriving the product from the ambient
+			// `woocommerce/products` context (the same source the client getter
+			// uses) keeps each form's SSR value correct on multi-product pages.
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options',
 				array(
-					'isFormValid' => function () use ( $product_id ) {
-						$product = wc_get_product( $product_id );
+					'isFormValid' => function () {
+						$product_context    = wp_interactivity_get_context( 'woocommerce/products' );
+						$context_product_id = $product_context['productId'] ?? null;
+
+						if ( null === $context_product_id ) {
+							$products_state     = wp_interactivity_state( 'woocommerce/products' );
+							$context_product_id = $products_state['productId'] ?? null;
+						}
+
+						if ( null === $context_product_id ) {
+							return true;
+						}
+
+						$product = wc_get_product( $context_product_id );
 
 						if ( $product instanceof \WC_Product && ( $product->is_type( ProductType::GROUPED ) || $product->has_options() ) ) {
 							return false;
@@ -294,44 +311,21 @@ class AddToCartWithOptions extends AbstractBlock {
 				$product->get_id()
 			);
 
-			$context = array(
-				'quantity'         => array( $product->get_id() => $default_quantity ),
-				'validationErrors' => array(),
-			);
-
 			// Shopper input for this form (quantity + selected variation) lives in
 			// the shared `woocommerce/cart` store as a draft, born client-side on
 			// first interaction via `upsertDraftItem` — never seeded server-side.
-			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$context['selectedAttributes'] = array();
+			// The form context therefore carries only its own validation state and,
+			// for grouped products, the child ids the validation/batch-add loop over.
+			$context = array(
+				'validationErrors' => array(),
+			);
 
+			if ( $product->is_type( ProductType::VARIABLE ) ) {
 				// Load all variations into the shared store with full REST API data.
-				$variations = wc_interactivity_api_load_variations(
+				wc_interactivity_api_load_variations(
 					'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
 					$product->get_id()
 				);
-
-				// Set up quantity context for each variation.
-				// We intentionally set the default quantity to the product's min purchase quantity
-				// instead of the variation's min purchase quantity. That's because we use the same
-				// input for all variations, so we want quantities to be in sync.
-				foreach ( array_keys( $variations ) as $variation_id ) {
-					$context['quantity'][ $variation_id ] = $default_quantity;
-				}
-			} elseif ( $product->is_type( ProductType::VARIATION ) ) {
-				$variation_attributes = $product->get_variation_attributes();
-				$formatted_attributes = array_map(
-					function ( $key, $value ) {
-						return [
-							'attribute' => $key,
-							'value'     => $value,
-						];
-					},
-					array_keys( $variation_attributes ),
-					$variation_attributes
-				);
-
-				$context['selectedAttributes'] = $formatted_attributes;
 			} elseif ( $product->is_type( ProductType::GROUPED ) ) {
 				// Load purchasable child products into the shared store with full REST API data.
 				$child_products = wc_interactivity_api_load_purchasable_child_products(
@@ -340,24 +334,6 @@ class AddToCartWithOptions extends AbstractBlock {
 				);
 
 				$context['groupedProductIds'] = array_keys( $child_products );
-
-				// Add quantity context for purchasable child products.
-				$context['quantity'] = array_fill_keys(
-					$context['groupedProductIds'],
-					0
-				);
-
-				// Set default quantity for each child product.
-				foreach ( $child_products as $child_product_id => $child_product_data ) {
-					$default_child_quantity = isset( $_POST['quantity'][ $child_product_id ] ) ? wc_stock_amount( wc_clean( wp_unslash( $_POST['quantity'][ $child_product_id ] ) ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-
-					$context['quantity'][ $child_product_id ] = $default_child_quantity;
-
-					// Check for any "sold individually" products and set their default quantity to 0.
-					if ( $child_product_data['sold_individually'] ) {
-						$context['quantity'][ $child_product_id ] = 0;
-					}
-				}
 			}
 
 			$hooks_before = '';
@@ -545,10 +521,14 @@ class AddToCartWithOptions extends AbstractBlock {
 			remove_filter( 'render_block_context', array( $this, 'set_is_descendant_of_add_to_cart_with_options_context' ) );
 
 			$wrapper_attributes = array(
-				'class'                     => $classes,
-				'style'                     => esc_attr( $classes_and_styles['styles'] ),
-				'data-wp-interactive'       => 'woocommerce/add-to-cart-with-options',
-				'data-wp-class--is-invalid' => '!state.isFormValid',
+				'class'                            => $classes,
+				'style'                            => esc_attr( $classes_and_styles['styles'] ),
+				'data-wp-interactive'              => 'woocommerce/add-to-cart-with-options',
+				'data-wp-class--is-invalid'        => '!state.isFormValid',
+				// Re-run quantity validation whenever the context draft's quantity
+				// changes. This replaces the side effect the removed `setQuantity`
+				// write path used to perform inline.
+				'data-wp-watch--validate-quantity' => 'callbacks.validateQuantityConstraints',
 			);
 			$context_directive  = wp_interactivity_data_wp_context( $context );
 
@@ -610,7 +590,7 @@ class AddToCartWithOptions extends AbstractBlock {
 								' ',
 								array_filter(
 									array(
-										isset( $wrapper_attributes['class'] ) ? $wrapper_attributes['class'] : '',
+										$wrapper_attributes['class'],
 										isset( $form_attributes['class'] ) ? $form_attributes['class'] : '',
 										// Add the `is-layout-flow` class so inner elements automatically get the
 										// default vertical margin from the theme. That's especially useful for

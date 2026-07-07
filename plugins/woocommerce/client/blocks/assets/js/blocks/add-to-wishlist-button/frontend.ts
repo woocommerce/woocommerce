@@ -9,8 +9,12 @@ import {
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/products';
 import '@woocommerce/stores/woocommerce/shopper-lists';
+import '@woocommerce/stores/woocommerce/cart';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
-import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+import type {
+	SelectedAttributes,
+	Store as WooCommerce,
+} from '@woocommerce/stores/woocommerce/cart';
 import type {
 	RawShopperListItem,
 	Store as ShopperListsStore,
@@ -41,14 +45,6 @@ type BlockContext = {
 	isPending: boolean;
 };
 
-// The narrow slice of ATCWO's iAPI context this block consumes. Reuses
-// `SelectedAttributes` from the cart store — the same type ATCWO uses for
-// its own `selectedAttributes` context field — so any shape change there
-// (e.g. adding a `taxonomy` field) flows through here automatically.
-type ATCWOContext = {
-	selectedAttributes: SelectedAttributes[];
-};
-
 type BlockStore = {
 	state: {
 		effectiveProductId: number;
@@ -74,6 +70,19 @@ const { state: shopperListsState, actions: shopperListsActions } =
 		{},
 		{ lock: universalLock }
 	);
+
+const { state: cartState } = store< WooCommerce >(
+	'woocommerce/cart',
+	{},
+	{ lock: universalLock }
+);
+
+// The shopper's picked attributes, read from the shared cart draft's
+// `variation` (the selection truth). This block is an inner block of ATCWO, so
+// the cart store's `itemInContext` resolves the draft via the inherited
+// products context.
+const getSelectedAttributes = (): SelectedAttributes[] =>
+	( cartState.itemInContext.draft?.variation ?? [] ) as SelectedAttributes[];
 
 const { state } = store< BlockStore >(
 	'woocommerce/add-to-wishlist-button',
@@ -119,10 +128,7 @@ const { state } = store< BlockStore >(
 						list.items.find( ( item ) => item.id === id ) ?? null
 					);
 				}
-				const addToCartContext = getContext< ATCWOContext >(
-					'woocommerce/add-to-cart-with-options'
-				);
-				const selected = addToCartContext?.selectedAttributes ?? [];
+				const selected = getSelectedAttributes();
 				return (
 					list.items.find( ( item ) =>
 						matchVariationItem( item, id, selected )
@@ -174,24 +180,16 @@ const { state } = store< BlockStore >(
 							existing.key
 						);
 					} else {
-						// We inherit ATCWO's iAPI context because this block
-						// is an inner block of ATCWO (enforced by
-						// `ancestor` in `block.json`). That lets us read
-						// the shopper-picked attributes — needed for
-						// variations with "any" slots, where the server
-						// can't resolve the line item without them.
+						// The shopper-picked attributes come from the shared
+						// cart draft's `variation` — needed for variations
+						// with "any" slots, where the server can't resolve
+						// the line item without them.
 						//
-						// ATCWO stores them by display label ("Color"), but
-						// the shopper-lists route expects taxonomy slugs
+						// The draft stores them by display label ("Color"),
+						// but the shopper-lists route expects taxonomy slugs
 						// ("pa_color"). Map via the parent product's
 						// `attributes` table; fall back to the raw name for
 						// non-taxonomy custom attributes.
-						//
-						// TODO: drop this mapping once ATCWO exposes the
-						// taxonomy on `selectedAttributes` directly.
-						const addToCartContext = getContext< ATCWOContext >(
-							'woocommerce/add-to-cart-with-options'
-						);
 						const parent = productsState.mainProductInContext;
 						const attrMap = new Map< string, string >();
 						parent?.attributes?.forEach(
@@ -204,14 +202,13 @@ const { state } = store< BlockStore >(
 								}
 							}
 						);
-						const variation =
-							addToCartContext?.selectedAttributes?.map(
-								( { attribute, value } ) => ( {
-									attribute:
-										attrMap.get( attribute ) ?? attribute,
-									value,
-								} )
-							) ?? [];
+						const variation = getSelectedAttributes().map(
+							( { attribute, value } ) => ( {
+								attribute:
+									attrMap.get( attribute ) ?? attribute,
+								value,
+							} )
+						);
 						yield shopperListsActions.addItem( LIST_SLUG, {
 							product_id: id,
 							...( variation.length && { variation } ),
