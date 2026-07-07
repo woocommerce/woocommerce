@@ -31,11 +31,20 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	);
 
 	/**
+	 * Original request URI.
+	 *
+	 * @var string|null
+	 */
+	private ?string $original_request_uri = null;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
+		$this->original_request_uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : null;
+		$_SERVER['REQUEST_URI']     = '/';
 		$this->reset_scripts();
 		$this->register_legacy_select2_scripts();
 		$this->sut = new LegacySelect2UsageTracker();
@@ -47,6 +56,12 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->reset_scripts();
 		set_current_screen( 'front' );
+
+		if ( null === $this->original_request_uri ) {
+			unset( $_SERVER['REQUEST_URI'] );
+		} else {
+			$_SERVER['REQUEST_URI'] = $this->original_request_uri;
+		}
 
 		parent::tearDown();
 	}
@@ -73,6 +88,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 				'location'   => 'woocommerce_page_wc-settings',
 				'handles'    => 'select2',
 				'dependents' => 'my-extension-admin',
+				'sources'    => 'http://localhost:8086/wp-content/plugins/my-extension/assets/admin.js',
 			),
 			$this->sut->get_usage_event( 'admin' ),
 			'Admin usage should include only the expected event properties.'
@@ -100,6 +116,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 				'location'   => '/',
 				'handles'    => 'wc-select2',
 				'dependents' => 'my-extension-footer',
+				'sources'    => 'http://localhost:8086/wp-content/plugins/my-extension/assets/footer.js',
 			),
 			$this->sut->get_usage_event( 'frontend' ),
 			'Frontend usage should report the direct wc-select2 handle.'
@@ -145,6 +162,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 				'location'   => '/',
 				'handles'    => 'select2',
 				'dependents' => 'select2',
+				'sources'    => '',
 			),
 			$this->sut->get_usage_event( 'frontend' ),
 			'Direct Select2 enqueue should report the requested handle.'
@@ -211,6 +229,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 				'location'   => '/',
 				'handles'    => 'wc-select2',
 				'dependents' => 'my-extension-footer',
+				'sources'    => 'http://localhost:8086/wp-content/plugins/my-extension/assets/footer.js',
 			),
 			$this->sut->get_usage_event( 'frontend' ),
 			'Footer dependencies should be reported after footer scripts are printed.'
@@ -247,6 +266,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 			'location'   => '/shop/',
 			'handles'    => 'wc-select2',
 			'dependents' => 'my-extension-footer',
+			'sources'    => 'http://localhost:8086/wp-content/plugins/my-extension/assets/footer.js',
 		);
 
 		$this->delete_request_scope_transient( $frontend_shop_page_scope );

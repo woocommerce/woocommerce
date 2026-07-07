@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\LegacyAssets;
 
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use WP_Scripts;
+use WC_Site_Tracking;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -37,8 +38,10 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 	 * @since 11.0.0
 	 */
 	public function register() {
-		add_action( 'admin_print_footer_scripts', array( $this, 'handle_admin_print_footer_scripts' ), PHP_INT_MAX );
-		add_action( 'wp_print_footer_scripts', array( $this, 'handle_wp_print_footer_scripts' ), PHP_INT_MAX );
+		if ( WC_Site_Tracking::is_tracking_enabled() ) {
+			add_action( 'admin_print_footer_scripts', array( $this, 'handle_admin_print_footer_scripts' ), PHP_INT_MAX );
+			add_action( 'wp_print_footer_scripts', array( $this, 'handle_wp_print_footer_scripts' ), PHP_INT_MAX );
+		}
 	}
 
 	/**
@@ -106,6 +109,7 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 
 		$handles    = array();
 		$dependents = array();
+		$sources    = array();
 
 		foreach ( $printed_queued_scripts as $handle ) {
 			$legacy_handles = $this->get_legacy_handles( $wp_scripts, $handle );
@@ -116,6 +120,10 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 
 			$handles              += array_fill_keys( $legacy_handles, true );
 			$dependents[ $handle ] = true;
+			$source               = $wp_scripts->registered[ $handle ]->src ?? '';
+			if ( is_string( $source ) && '' !== $source ) {
+				$sources[] = $source;
+			}
 		}
 
 		if ( empty( $handles ) ) {
@@ -135,6 +143,7 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 			'location'   => $location,
 			'handles'    => implode( ',', array_keys( $handles ) ),
 			'dependents' => implode( ',', array_keys( $dependents ) ),
+			'sources'    => implode( ',', array_unique( $sources ) ),
 		);
 	}
 
