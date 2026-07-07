@@ -337,17 +337,19 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		add_filter( 'query', $break_plan_updates );
 		$suppressed = $wpdb->suppress_errors( true );
 
-		$response = $this->request(
-			'PATCH',
-			self::BASE . '/' . $id,
-			array(
-				'extension_slug' => self::EXTENSION_SLUG,
-				'name'           => 'New name',
-			)
-		);
-
-		$wpdb->suppress_errors( $suppressed );
-		remove_filter( 'query', $break_plan_updates );
+		try {
+			$response = $this->request(
+				'PATCH',
+				self::BASE . '/' . $id,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'name'           => 'New name',
+				)
+			);
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+			remove_filter( 'query', $break_plan_updates );
+		}
 
 		$this->assertSame( 500, $response->get_status() );
 		$this->assertSame( 'woocommerce_subscriptions_engine_plan_update_failed', $this->response_data( $response )['code'] );
