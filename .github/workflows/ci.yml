@@ -222,7 +222,7 @@ jobs:
           pattern: 'last-run__${{ strategy.job-index }}'
 
       - name: 'Run tests (${{ matrix.testType }})'
-        timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && 20 ) || ( matrix.testType == 'unit:php' && 15 ) ) ) || 360 }}
+        timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && 20 ) || ( matrix.testType == 'unit:php' && 20 ) ) ) || 360 }}
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
