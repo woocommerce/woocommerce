@@ -16,22 +16,13 @@ use WC_Unit_Test_Case;
 class AbstractBlockTest extends WC_Unit_Test_Case {
 
 	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		wp_deregister_script( 'wc-blocks-test-chunk-chunk' );
-		wp_deregister_script( 'wc-test-block-block-frontend' );
-		parent::tearDown();
-	}
-
-	/**
-	 * Create a testable AbstractBlock instance.
+	 * Create a testable AbstractBlock instance with a mocked asset API.
 	 *
+	 * @param Api  $asset_api Mocked asset API.
 	 * @param bool $with_script_handle Whether the block has a front-end script handle.
 	 * @return AbstractBlock
 	 */
-	private function create_block( bool $with_script_handle ): AbstractBlock {
-		$asset_api           = Package::container()->get( Api::class );
+	private function create_block( Api $asset_api, bool $with_script_handle ): AbstractBlock {
 		$asset_data_registry = Package::container()->get( AssetDataRegistry::class );
 
 		return new class( $asset_api, $asset_data_registry, new IntegrationRegistry(), 'test-block', $with_script_handle ) extends AbstractBlock {
@@ -86,32 +77,30 @@ class AbstractBlockTest extends WC_Unit_Test_Case {
 	 * @testdox Should not register chunk scripts when the block has no front-end script handle.
 	 */
 	public function test_register_chunk_translations_skips_blocks_without_script_handle(): void {
-		$block = $this->create_block( false );
+		$asset_api = $this->createMock( Api::class );
+		$asset_api->expects( $this->never() )->method( 'register_script' );
+
+		$block = $this->create_block( $asset_api, false );
 
 		$block->call_register_chunk_translations( array( 'test-chunk' ) );
-
-		$this->assertFalse(
-			wp_script_is( 'wc-blocks-test-chunk-chunk', 'registered' ),
-			'Chunk script should not be registered when the block has no front-end script handle'
-		);
 	}
 
 	/**
-	 * @testdox Should register chunk scripts and attach translations when the block has a front-end script handle.
+	 * @testdox Should register chunk scripts when the block has a front-end script handle.
 	 */
 	public function test_register_chunk_translations_registers_chunks_for_blocks_with_script_handle(): void {
-		$block = $this->create_block( true );
-		wp_register_script( 'wc-test-block-block-frontend', 'https://example.com/test-block-frontend.js', array(), '1.0', true );
+		$asset_api = $this->createMock( Api::class );
+		$asset_api->method( 'get_block_asset_build_path' )->willReturnCallback(
+			function ( $filename ) {
+				return "assets/client/blocks/{$filename}.js";
+			}
+		);
+		$asset_api->expects( $this->once() )
+			->method( 'register_script' )
+			->with( 'wc-blocks-test-chunk-chunk', 'assets/client/blocks/test-chunk.js', array(), true );
+
+		$block = $this->create_block( $asset_api, true );
 
 		$block->call_register_chunk_translations( array( 'test-chunk' ) );
-
-		$this->assertTrue(
-			wp_script_is( 'wc-blocks-test-chunk-chunk', 'registered' ),
-			'Chunk script should be registered when the block has a front-end script handle'
-		);
-		$this->assertNotEmpty(
-			wp_scripts()->get_data( 'wc-test-block-block-frontend', 'before' ),
-			'Translations should be attached as an inline script on the block front-end script handle'
-		);
 	}
 }

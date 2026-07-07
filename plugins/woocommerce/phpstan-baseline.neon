@@ -50056,12 +50056,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AbstractBlock.php
 
 		-
-			message: '#^Parameter \#1 \$handle of function wp_add_inline_script expects string, array\|string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractBlock.php
-
-		-
 			message: '#^Parameter \#1 \$handle of function wp_enqueue_script expects string, array\|string\|null given\.$#'
 			identifier: argument.type
 			count: 1
