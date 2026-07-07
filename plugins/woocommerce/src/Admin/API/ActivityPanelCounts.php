@@ -81,7 +81,7 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 				),
 				'products_low_in_stock_count' => $this->get_count_via(
 					'/wc-analytics/products/count-low-in-stock',
-					array( 'status' => $request->get_param( 'stock_status' ) )
+					array( 'status' => $request->get_param( 'product_status' ) )
 				),
 			)
 		);
@@ -143,8 +143,8 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['stock_status']   = array(
-			'description'       => __( 'Product status used for the low stock count.', 'woocommerce' ),
+		$params['product_status'] = array(
+			'description'       => __( 'Product post status used for the low stock count.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'publish',
 			'sanitize_callback' => 'sanitize_key',
