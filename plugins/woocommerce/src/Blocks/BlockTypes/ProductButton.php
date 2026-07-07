@@ -135,7 +135,7 @@ class ProductButton extends AbstractBlock {
 			'addToCartText'    => $add_to_cart_text,
 			'tempQuantity'     => $number_of_items_in_cart,
 			'animationStatus'  => 'IDLE',
-			'inTheCartText'    => $this->get_in_the_cart_text(),
+			'inTheCartText'    => $this->get_in_the_cart_text( $product ),
 			'noticeId'         => '',
 			'hasPressedButton' => false,
 		);
@@ -346,20 +346,44 @@ class ProductButton extends AbstractBlock {
 	/**
 	 * Get the inTheCartText text for a given product.
 	 *
-	 * ONE string for every product type: the `###` placeholder is replaced
-	 * client-side with the in-cart total (which the cart store's type-invariant
-	 * `inCartQuantity` read resolves for any purchasable form, including a
-	 * grouped parent's summed children). Grouped products therefore show the
-	 * same "### in cart" count as every other type, not a bespoke label.
+	 * For most product types the `###` placeholder is replaced client-side with
+	 * the in-cart total (which the cart store's type-invariant `inCartQuantity`
+	 * read resolves for any purchasable form). Grouped products keep their
+	 * bespoke "Added to cart" label instead of a summed count: a grouped parent
+	 * has no line of its own and its children are added as separate lines, so a
+	 * single aggregate count is not the shopper-facing UX we ship for it.
 	 *
+	 * The grouped branch keys on the product exposing grouped children (the
+	 * server-side source of the client's `grouped_products` schema field the
+	 * aggregate itself branches on) — the type name is incidental, this is a
+	 * schema-field read.
+	 *
+	 * @param \WC_Product $product The product.
 	 * @return string The inTheCartText string.
 	 */
-	private function get_in_the_cart_text() {
+	private function get_in_the_cart_text( $product ) {
+		if ( ! empty( $this->get_grouped_children( $product ) ) ) {
+			return __( 'Added to cart', 'woocommerce' );
+		}
+
 		return sprintf(
 			/* translators: %s: product number. */
 			__( '%s in cart', 'woocommerce' ),
 			'###'
 		);
+	}
+
+	/**
+	 * Get the grouped children of a product — the server-side source of the
+	 * `grouped_products` schema field. Empty for every non-grouped type
+	 * (variations are NOT grouped children), so callers can branch on the
+	 * schema field rather than sniffing `is_type( GROUPED )`.
+	 *
+	 * @param \WC_Product $product The product.
+	 * @return int[] The grouped child product ids, or an empty array.
+	 */
+	private function get_grouped_children( $product ) {
+		return $product instanceof \WC_Product_Grouped ? $product->get_children() : array();
 	}
 
 	/**

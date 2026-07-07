@@ -1104,13 +1104,67 @@ const { actions } = store< Store >(
 					} ),
 				};
 
+				// MERGE-ONTO-CONFIRMED. When the posted identity matches EXACTLY
+				// ONE already-confirmed line, we increment that line's quantity
+				// optimistically instead of pushing a keyless synthetic line beside
+				// it. This is what keeps the in-cart count ticking mid-flight (the
+				// envelope and `inCartQuantity` exclude keyless lines, so a
+				// synthetic twin would leave "3 in cart" reading the stale confirmed
+				// quantity while the add is in flight — and would give the
+				// exactly-one envelope rule two candidates, blanking the pairing).
+				// The merge preserves the line's `key`, so a stepper acting on it
+				// stays legal and rollback restores the pre-mutation quantity from
+				// the queue snapshot exactly as before.
+				//
+				// Matching mirrors the envelope's generic narrowing: the purchasable
+				// id must match AND the draft's namespaced props must deep-match the
+				// line's `extensions[ns]` with no unaccounted content
+				// (`isGenericExactPair`). Zero or several matches → keyless synthetic
+				// push (genuinely ambiguous — let the server resolve identity).
+				//
+				// `sold_individually` lines are NEVER merged: the server rejects
+				// add-to-existing for them (forcing quantity 1), so projecting an
+				// incremented quantity would show a doomed value; we push the
+				// synthetic instead and let the failure surface at settle as today.
+				const draftProps = getDraftExtensionProps(
+					itemPayload as Record< string, unknown >
+				);
+				const mergeCandidates = state.cart.items.filter(
+					( item ): item is CartItem =>
+						isCartItem( item ) &&
+						item.id === purchasableId &&
+						! item.sold_individually &&
+						isGenericExactPair( draftProps, item )
+				);
+				const mergeTarget =
+					mergeCandidates.length === 1
+						? mergeCandidates[ 0 ]
+						: undefined;
+
 				try {
 					const result = ( yield sendCartRequest( state, {
 						path: '/wc/store/v1/cart/add-item',
 						method: 'POST',
 						body,
 						applyOptimistic: () => {
-							state.cart.items.push( optimisticItem );
+							if ( mergeTarget ) {
+								// Re-resolve the target inside applyOptimistic so we
+								// mutate the live reactive line (the queue takes its
+								// rollback snapshot before this runs, so the pre-merge
+								// quantity is preserved for total-failure rollback).
+								const liveTarget = state.cart.items.find(
+									( item ): item is CartItem =>
+										isCartItem( item ) &&
+										item.key === mergeTarget.key
+								);
+								if ( liveTarget ) {
+									liveTarget.quantity += targetQuantity;
+								} else {
+									state.cart.items.push( optimisticItem );
+								}
+							} else {
+								state.cart.items.push( optimisticItem );
+							}
 							cartCycle.optimisticSnapshot = JSON.parse(
 								JSON.stringify( state.cart )
 							);

@@ -980,6 +980,246 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 		} );
 	} );
 
+	describe( 'addItem — merge-onto-confirmed optimism', () => {
+		it( 'merges onto the single matching confirmed line instead of pushing a keyless twin (count ticks mid-flight)', async () => {
+			const cart = await loadCartAndReady( {
+				items: [
+					{
+						key: 'line-100',
+						id: 100,
+						quantity: 3,
+						name: 'A',
+						type: 'simple',
+						extensions: {},
+						item_data: [],
+					},
+				],
+				totals: {},
+				errors: [],
+			} );
+			// `onBatch` runs during the fetch, AFTER `applyOptimistic` mutated the
+			// reactive state, so it observes exactly what the shopper sees while
+			// the add is in flight.
+			const midFlight: { items?: unknown[] } = {};
+			installFetchMock( {
+				onBatch: ( requests ) => {
+					midFlight.items = JSON.parse(
+						JSON.stringify( cart.state.cart.items )
+					);
+					return requests.map( () => ( {
+						status: 200,
+						body: { items: [], totals: {}, errors: [] },
+					} ) );
+				},
+			} );
+
+			await runAction(
+				cart.actions.addItem( {
+					id: 100,
+					quantity: 1,
+				} ) as unknown as Iterator< unknown >
+			);
+
+			// Mid-flight: the confirmed line was bumped 3 → 4 in place (key
+			// preserved), NOT a keyless synthetic line pushed beside it.
+			expect( midFlight.items ).toHaveLength( 1 );
+			expect( midFlight.items?.[ 0 ] ).toMatchObject( {
+				key: 'line-100',
+				quantity: 4,
+			} );
+		} );
+
+		it( 'envelope inCartQuantity sees the merged quantity mid-flight', async () => {
+			const cart = await loadCartAndReady( {
+				items: [
+					{
+						key: 'line-100',
+						id: 100,
+						quantity: 3,
+						name: 'A',
+						type: 'simple',
+						extensions: {},
+						item_data: [],
+					},
+				],
+				totals: {},
+				errors: [],
+			} );
+			mockContextProductId = 100;
+			// Read the in-cart total DURING flight (inside onBatch, after
+			// applyOptimistic). A keyless twin would leave two candidates and
+			// blank the envelope; the merge keeps exactly one at quantity 4.
+			let midFlightInCart: number | undefined;
+			installFetchMock( {
+				onBatch: ( requests ) => {
+					midFlightInCart = cart.state.inCartQuantity( 100 );
+					return requests.map( () => ( {
+						status: 200,
+						body: { items: [], totals: {}, errors: [] },
+					} ) );
+				},
+			} );
+
+			await runAction(
+				cart.actions.addItem( {
+					id: 100,
+					quantity: 1,
+				} ) as unknown as Iterator< unknown >
+			);
+
+			expect( midFlightInCart ).toBe( 4 );
+		} );
+
+		it( 'never merges onto a sold_individually line — pushes a keyless synthetic instead', async () => {
+			const cart = await loadCartAndReady( {
+				items: [
+					{
+						key: 'line-100',
+						id: 100,
+						quantity: 1,
+						name: 'A',
+						type: 'simple',
+						sold_individually: true,
+						extensions: {},
+						item_data: [],
+					},
+				],
+				totals: {},
+				errors: [],
+			} );
+			const midFlight: { items?: unknown[] } = {};
+			installFetchMock( {
+				onBatch: ( requests ) => {
+					midFlight.items = JSON.parse(
+						JSON.stringify( cart.state.cart.items )
+					);
+					return requests.map( () => ( {
+						status: 200,
+						body: { items: [], totals: {}, errors: [] },
+					} ) );
+				},
+			} );
+
+			await runAction(
+				cart.actions.addItem( {
+					id: 100,
+					quantity: 1,
+				} ) as unknown as Iterator< unknown >
+			);
+
+			// The confirmed sold-individually line is untouched (still 1) and a
+			// keyless synthetic add was pushed beside it — the doomed add surfaces
+			// as the server op's error at settle, not a projected 2.
+			expect( midFlight.items ).toHaveLength( 2 );
+			const items = midFlight.items as Array< {
+				key?: string;
+				quantity: number;
+			} >;
+			expect(
+				items.find( ( i ) => i.key === 'line-100' )?.quantity
+			).toBe( 1 );
+			expect( items.find( ( i ) => i.key === undefined )?.quantity ).toBe(
+				1
+			);
+		} );
+
+		it( 'ambiguous (two matching confirmed lines) → keyless synthetic push, no merge', async () => {
+			const cart = await loadCartAndReady( {
+				items: [
+					{
+						key: 'line-a',
+						id: 100,
+						quantity: 1,
+						name: 'A',
+						type: 'simple',
+						extensions: {},
+						item_data: [],
+					},
+					{
+						key: 'line-b',
+						id: 100,
+						quantity: 1,
+						name: 'A',
+						type: 'simple',
+						extensions: {},
+						item_data: [],
+					},
+				],
+				totals: {},
+				errors: [],
+			} );
+			const midFlight: { items?: unknown[] } = {};
+			installFetchMock( {
+				onBatch: ( requests ) => {
+					midFlight.items = JSON.parse(
+						JSON.stringify( cart.state.cart.items )
+					);
+					return requests.map( () => ( {
+						status: 200,
+						body: { items: [], totals: {}, errors: [] },
+					} ) );
+				},
+			} );
+
+			await runAction(
+				cart.actions.addItem( {
+					id: 100,
+					quantity: 1,
+				} ) as unknown as Iterator< unknown >
+			);
+
+			// Two matches → not exactly one → no merge. Both confirmed lines stay
+			// at 1 and a keyless synthetic is pushed (3 items total).
+			expect( midFlight.items ).toHaveLength( 3 );
+			const bumped = (
+				midFlight.items as Array< { quantity: number } >
+			 ).filter( ( i ) => i.quantity !== 1 );
+			expect( bumped ).toHaveLength( 0 );
+		} );
+
+		it( 'total failure rolls the merged quantity back to the confirmed value', async () => {
+			const cart = await loadCartAndReady( {
+				items: [
+					{
+						key: 'line-100',
+						id: 100,
+						quantity: 3,
+						name: 'A',
+						type: 'simple',
+						extensions: {},
+						item_data: [],
+					},
+				],
+				totals: {},
+				errors: [],
+			} );
+			// Batch fails for every request → total failure → rollback to the
+			// pre-optimistic snapshot (quantity 3).
+			installFetchMock( {
+				onBatch: ( requests ) =>
+					requests.map( () => ( {
+						status: 500,
+						body: {
+							message: 'Simulated server error',
+							code: 'internal_error',
+						},
+					} ) ),
+			} );
+
+			await runAction(
+				cart.actions.addItem( {
+					id: 100,
+					quantity: 1,
+				} ) as unknown as Iterator< unknown >
+			);
+
+			expect( cart.state.cart.items ).toHaveLength( 1 );
+			expect(
+				( cart.state.cart.items[ 0 ] as { quantity: number } ).quantity
+			).toBe( 3 );
+		} );
+	} );
+
 	describe( 'findItem({ filter }) — the explicit predicate escape hatch', () => {
 		// A decorated line the presence heuristic would exclude, plus a plain
 		// line. Shared by several tests.

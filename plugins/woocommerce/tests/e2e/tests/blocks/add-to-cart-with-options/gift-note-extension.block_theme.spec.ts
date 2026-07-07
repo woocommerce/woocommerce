@@ -148,7 +148,9 @@ test.describe( 'Add to Cart + Options — Gift Note extension (T8)', () => {
 				const { store } = await import( '@wordpress/interactivity' );
 				await import( '@woocommerce/stores/woocommerce/cart' );
 				const { state } = store( 'woocommerce/cart', {}, { lock } );
-				const drafts = state.draftItems || [];
+				// `draftItems` is a `Record< string, DraftItem >` keyed by draft
+				// key — read its values to scan the drafts.
+				const drafts = Object.values( state.draftItems || {} );
 				const withNote = drafts.find(
 					( d: Record< string, unknown > ) => {
 						// Bare-namespace extension prop: the note lives under
@@ -228,15 +230,25 @@ test.describe( 'Add to Cart + Options — Gift Note extension (T8)', () => {
 			const env = await page.evaluate( async ( lock ) => {
 				const { store } = await import( '@wordpress/interactivity' );
 				await import( '@woocommerce/stores/woocommerce/cart' );
-				const { state } = store( 'woocommerce/cart', {}, { lock } );
-				const productId = ( state.draftItems || [] )[ 0 ]?.id as
-					| number
-					| undefined;
+				const { state, actions } = store(
+					'woocommerce/cart',
+					{},
+					{ lock }
+				);
+				// `draftItems` is a `Record< string, DraftItem >` keyed by draft
+				// key — take the first draft's id from its values.
+				const productId = Object.values( state.draftItems || {} )[ 0 ]
+					?.id as number | undefined;
 				if ( ! productId ) {
 					return { error: 'no-draft' };
 				}
-				// findItem with an id but no note props builds a bare draft and
-				// runs generic narrowing (no filter → presence heuristic applies).
+				// Drafts are now client-only and persist per draft key: earlier
+				// steps upserted a note into the draft keyed by `String(productId)`,
+				// and `findItem({ id })` resolves that STORED draft (not a fresh
+				// bare one). Remove it first so `findItem` builds a genuinely bare
+				// draft with no note props, then runs generic narrowing (no filter →
+				// presence heuristic applies).
+				actions.removeDraftItem( { draftKey: String( productId ) } );
 				const envelope = state.findItem( { id: productId } );
 				return {
 					hasCart: Boolean( envelope?.cart ),

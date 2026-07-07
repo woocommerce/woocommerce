@@ -88,6 +88,7 @@ const productButtonStore = {
 				tempQuantity,
 				addToCartText,
 				inTheCartText,
+				hasPressedButton,
 			} = getContext< Context >();
 
 			// We use the temporary quantity when there's no animation, or
@@ -99,10 +100,29 @@ const productButtonStore = {
 				? tempQuantity || 0
 				: state.inCartQuantity;
 
-			// One path for every product type: `state.inCartQuantity` already
-			// resolves the in-cart total for any purchasable form (including a
-			// grouped parent's summed children), so the button shows the same
-			// "### in cart" string for all types with no type branch here.
+			// Grouped products keep their bespoke "Added to cart" label instead
+			// of a summed count: a grouped parent has no line of its own and its
+			// children are added as separate lines. The copy fork keys on the
+			// schema field `grouped_products` being non-empty — the same signal
+			// the `inCartQuantity` aggregate branches on — never on
+			// `product.type`. The in-cart quantity read stays type-invariant; only
+			// the string differs. Gated on `hasPressedButton` so the label only
+			// appears after the shopper adds, matching the pre-existing UX.
+			const groupedProducts =
+				productsState.mainProductInContext?.grouped_products;
+			const isGrouped =
+				Array.isArray( groupedProducts ) && groupedProducts.length > 0;
+
+			if ( isGrouped ) {
+				if ( state.inCartQuantity > 0 && hasPressedButton ) {
+					// `inTheCartText` is the bespoke grouped label (no `###`).
+					return inTheCartText;
+				}
+				return addToCartText;
+			}
+
+			// Every other product type shows the "### in cart" count, with the
+			// placeholder replaced by the type-invariant in-cart total.
 			if ( quantity > 0 ) {
 				return inTheCartText.replace( '###', quantity.toString() );
 			}

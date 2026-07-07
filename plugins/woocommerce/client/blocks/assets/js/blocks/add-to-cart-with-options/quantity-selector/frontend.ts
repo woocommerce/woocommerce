@@ -84,7 +84,19 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
  * @param quantity The absolute target quantity.
  */
 const commitQuantity = ( quantity: number ): void => {
-	const { inputElement } = getContext< Context >();
+	// The quantity-selector context carries `inputElement` for stepper inputs.
+	// A grouped "sold individually" CHILD renders as a bare checkbox that carries
+	// `data-wp-interactive` for this namespace but NO `data-wp-context` for it, so
+	// `getContext()` THROWS there. Read it defensively: a checkbox legitimately
+	// has no `inputElement` and must still write its draft. Without this guard the
+	// throw aborts the whole handler before `upsertDraftItem`, so the child
+	// quantity never becomes a draft and the grouped add finds nothing to post.
+	let inputElement: HTMLInputElement | null | undefined;
+	try {
+		( { inputElement } = getContext< Context >() );
+	} catch {
+		inputElement = undefined;
+	}
 	const unchanged = cartState.itemInContext.draft?.quantity === quantity;
 
 	cartActions.upsertDraftItem( { quantity } );
@@ -280,15 +292,20 @@ store< QuantitySelectorStore >(
 					context.inputElement = inputElement;
 				}
 			},
-			// Quantity constraints can change when switching variations. This
-			// watch re-clamps the draft quantity into the CURRENT product's
-			// min/max. It reads `productInContext` (variation if one is
-			// selected, else the main product) and runs for every product type:
-			// for a non-variable product the constraints never change, so the
-			// clamp is a no-op — behaviorally identical, but with no
-			// type/variation branch. Bound on the quantity input, it moved here
-			// from the variation selector: it is quantity logic and belongs with
-			// the quantity input it observes.
+			// Quantity constraints can change when the shopper switches to a
+			// different VARIATION (each variation carries its own min/max). This
+			// watch re-clamps the effective quantity into the newly selected
+			// variation's range and commits the result to the draft, so the
+			// value persists across further variation switches.
+			//
+			// It reads `productVariationInContext` — the SELECTED variation only,
+			// never the main product — deliberately: constraint-driven clamping
+			// applies exclusively when a concrete variation is in play. For simple
+			// products (and variable products with no variation selected yet)
+			// `productVariationInContext` is null, so this returns early and does
+			// NOT clamp — a below-minimum quantity the shopper typed persists in
+			// the input (the form's `validateQuantity` watch flags it and disables
+			// the add button, without silently rewriting the shopper's value).
 			watchQuantityConstraints: () => {
 				const { ref } = getElement();
 
@@ -301,23 +318,25 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const { productInContext: product } = productsState;
+				// Only a concrete selected variation drives constraint clamping.
+				// Null for simple products and unresolved variable selections —
+				// leaving typed below-min values untouched (persistence rule).
+				const { productVariationInContext: variation } = productsState;
 
-				if ( ! product ) {
+				if ( ! variation ) {
 					return;
 				}
 
-				const { minimum, maximum } = product.add_to_cart;
+				const { minimum, maximum } = variation.add_to_cart;
 
-				// Read the draft directly (not the min-defaulted getter): only an
-				// out-of-range EXISTING quantity needs re-clamping. An untouched
-				// draft has no quantity to correct.
-				const draft: DraftItem | undefined =
-					cartState.itemInContext.draft;
-				const currentValue = draft?.quantity;
-				if ( typeof currentValue !== 'number' ) {
-					return;
-				}
+				// Use the EFFECTIVE displayed quantity (the min-defaulted
+				// `inputQuantity` getter), not the raw draft quantity: a variation
+				// whose minimum exceeds the current (possibly absent) draft
+				// quantity must raise it AND commit it, so switching to another
+				// variation later keeps the raised value instead of falling back
+				// to the new variation's min. This mirrors the pre-refactor watch,
+				// which defaulted an absent quantity to 0 and clamped up to min.
+				const currentValue = state.inputQuantity;
 
 				let newValue = currentValue;
 				if ( currentValue < minimum ) {
@@ -326,9 +345,15 @@ store< QuantitySelectorStore >(
 					newValue = maximum;
 				}
 
+				// Commit whenever the clamped value differs from what the input
+				// shows OR from what the draft actually stores (an absent draft
+				// quantity that already displays the min still needs committing so
+				// it survives the next variation switch).
+				const draft: DraftItem | undefined =
+					cartState.itemInContext.draft;
 				if (
 					newValue !== ref.valueAsNumber ||
-					newValue !== currentValue
+					newValue !== draft?.quantity
 				) {
 					commitQuantity( newValue );
 				}
