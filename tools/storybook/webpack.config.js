@@ -71,8 +71,21 @@ module.exports = ( storybookConfig ) => {
 					to: 'wordpress/css/[name][ext]',
 				},
 				{
-					from: require.resolve(
-						'@wordpress/components/build-style/style.css'
+					/*
+					 * Resolve the package root via its exported `package.json`
+					 * and join the CSS path manually. `@wordpress/components`
+					 * still maps `build-style` as a deprecated trailing-slash
+					 * folder export, which Node 24 no longer honors, so a direct
+					 * `require.resolve` of the stylesheet throws
+					 * ERR_PACKAGE_PATH_NOT_EXPORTED.
+					 */
+					from: path.join(
+						path.dirname(
+							require.resolve(
+								'@wordpress/components/package.json'
+							)
+						),
+						'build-style/style.css'
 					),
 					to: 'wordpress/css/components.css',
 				},
