@@ -433,6 +433,52 @@ describe( 'woocommerce/products store – product context derived state', () => 
 				expect( result ).toBe( populatedVariation301 );
 			} );
 
+			it( 'value comparison stays EXACT on the products-store path (no case folding)', () => {
+				// The structural matcher (`variationMatchesSelection`) compares
+				// VALUES exactly: on this path both sides are slugs, mirroring
+				// the server's `find_matching_product_variation`. Case-only
+				// normalization exists ONLY at the shopper-lists boundary
+				// (`findListItem`), where rows carry display names — it must
+				// never leak into variation resolution, or client and server
+				// would disagree on which variation a selection resolves to.
+				const variableProduct = {
+					id: 3,
+					type: 'variable',
+					variations: [
+						{
+							id: 301,
+							attributes: [ { name: 'Color', value: 'blue' } ],
+						},
+					],
+				} as unknown as ProductResponseItem;
+				const populatedVariation301 = {
+					id: 301,
+					name: 'Blue',
+				} as ProductResponseItem;
+				mockStoreState.products[ 3 ] = variableProduct;
+				mockStoreState.productVariations[ 301 ] = populatedVariation301;
+
+				// Case-only difference ("Blue" vs stored "blue") → NO match.
+				expect(
+					mockStoreState.findProduct( {
+						id: 3,
+						selectedAttributes: [
+							{ attribute: 'Color', value: 'Blue' },
+						],
+					} )
+				).toBeNull();
+
+				// Exact value → match.
+				expect(
+					mockStoreState.findProduct( {
+						id: 3,
+						selectedAttributes: [
+							{ attribute: 'Color', value: 'blue' },
+						],
+					} )
+				).toBe( populatedVariation301 );
+			} );
+
 			describe( 'multi-word attribute names', () => {
 				it( 'matches when selected attributes use hyphenated slugs', () => {
 					const variableProduct = {
@@ -892,6 +938,74 @@ describe( 'woocommerce/products store – product context derived state', () => 
 			mockContext = { productId: 42, variationId: 99 };
 
 			expect( mockStoreState.productInContext ).toBe( mockVariation );
+		} );
+	} );
+
+	// `resolvedProductInContext` is `productInContext` restricted to a
+	// selection RESOLVED to one concrete product — a selected variation, or a
+	// main product that needs no options (`has_options === false`). It is the
+	// type-invariant read the wishlist button binds to: no `type === 'variable'`
+	// sniff, the polymorphism resolves once here from the server-computed
+	// `has_options` field.
+	describe( 'resolvedProductInContext', () => {
+		it( 'returns the variation when one is selected', () => {
+			mockStoreState.productId = 42;
+			mockStoreState.variationId = 99;
+
+			expect( mockStoreState.resolvedProductInContext ).toBe(
+				mockVariation
+			);
+		} );
+
+		it( 'returns the main product when it has no options (has_options false)', () => {
+			// A no-options product (simple/grouped/external): resolved
+			// immediately, no variation to pick.
+			mockStoreState.products[ 50 ] = {
+				id: 50,
+				type: 'simple',
+				has_options: false,
+			} as ProductResponseItem;
+			mockStoreState.productId = 50;
+			mockStoreState.variationId = null;
+
+			expect( mockStoreState.resolvedProductInContext?.id ).toBe( 50 );
+		} );
+
+		it( 'returns null for a product with options and no variation selected', () => {
+			// A variable product before the shopper picks a variation: NOT yet
+			// resolved → null. Detected from `has_options`, never `type`.
+			mockStoreState.products[ 60 ] = {
+				id: 60,
+				type: 'variable',
+				has_options: true,
+			} as ProductResponseItem;
+			mockStoreState.productId = 60;
+			mockStoreState.variationId = null;
+
+			expect( mockStoreState.resolvedProductInContext ).toBeNull();
+		} );
+
+		it( 'returns the variation for a product WITH options once one is selected', () => {
+			// Same has_options=true product, but now a variation is picked — the
+			// selected variation resolves it regardless of has_options.
+			mockStoreState.products[ 60 ] = {
+				id: 60,
+				type: 'variable',
+				has_options: true,
+			} as ProductResponseItem;
+			mockStoreState.productId = 60;
+			mockStoreState.variationId = 99;
+
+			expect( mockStoreState.resolvedProductInContext ).toBe(
+				mockVariation
+			);
+		} );
+
+		it( 'returns null when neither product nor variation resolves', () => {
+			mockStoreState.productId = 0;
+			mockStoreState.variationId = null;
+
+			expect( mockStoreState.resolvedProductInContext ).toBeNull();
 		} );
 	} );
 

@@ -13,7 +13,7 @@ import type {
  * so the products store imports NOTHING from `woocommerce/cart` — coupling is
  * one-directional (cart → products only).
  */
-type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
+export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
 
 /**
  * The products store's OWN context namespace, `woocommerce/products`. Per-element
@@ -99,6 +99,30 @@ export type ProductsStoreState = {
 	 *   state.productInContext.sku
 	 */
 	productInContext: ProductResponseItem | null;
+	/**
+	 * `productInContext` ONLY when the current selection is RESOLVED to one
+	 * specific, concrete product a shopper can act on, else `null`.
+	 *
+	 * A selection is resolved when EITHER:
+	 * - a variation is selected (`productVariationInContext` is non-null), OR
+	 * - the product exposes no options to pick (`has_options === false`,
+	 *   which covers simple, grouped, external — everything that needs no
+	 *   attribute selection before it can be acted on).
+	 *
+	 * It is `null` while a variable product still has unresolved options
+	 * (the shopper hasn't picked a variation yet). This is the type-invariant
+	 * read that lets surfaces like the wishlist button express "the selection
+	 * is actionable" without branching on `type === 'variable'`: they read
+	 * `resolvedProductInContext?.id` and treat `null` as "not yet
+	 * selectable". `has_options` is a server-computed capability field, so the
+	 * decision is made from data, not a client-side type sniff.
+	 *
+	 * Deliberately named "resolved", NOT "purchasable": resolution says
+	 * nothing about stock or purchasability (an external-with-URL product
+	 * resolves here but is not add-to-cart purchasable). A server-computed
+	 * purchasability capability field is a separate, named follow-up gap.
+	 */
+	resolvedProductInContext: ProductResponseItem | null;
 };
 
 /**
@@ -126,7 +150,7 @@ const attributeNamesMatch = ( a: string, b: string ): boolean =>
  * `variations[].attributes` array (Store API format). `value` is `null`
  * when the attribute is set to "Any" for that variation.
  */
-type VariationAttribute = { name: string; value: string | null };
+export type VariationAttribute = { name: string; value: string | null };
 
 /**
  * Decide whether a variation matches a shopper's attribute selection,
@@ -155,7 +179,7 @@ type VariationAttribute = { name: string; value: string | null };
  * @param selectedAttributes  The shopper's attribute selection.
  * @return `true` when the variation matches the selection.
  */
-const variationMatchesSelection = (
+export const variationMatchesSelection = (
 	variationAttributes: VariationAttribute[],
 	selectedAttributes: SelectedAttributes[]
 ): boolean =>
@@ -187,9 +211,12 @@ const variationMatchesSelection = (
  * Server-hydrated cache of product and variation data in Store API format
  * (`ProductResponseItem`). PHP loaders populate `products` / `productVariations`;
  * derived getters below resolve the "current" product from either global state
- * or per-element context. These getters are mirrored in PHP
+ * or per-element context. The context getters are mirrored in PHP
  * (see ProductsStore::register_getters) so directive bindings like
  * `state.productInContext.sku` resolve during SSR as well as on the client.
+ * PHP mirrors are added on demand only: `resolvedProductInContext` is
+ * client-only today (no server-side directive binds to it — the wishlist
+ * button's SSR computes its initial state directly in PHP).
  *
  * See ./README.md for the complete model, loaders, and consumer patterns.
  */
@@ -301,6 +328,26 @@ const { state: productsState } = store< ProductsStore >(
 					productsState.productVariationInContext ||
 					productsState.mainProductInContext
 				);
+			},
+
+			get resolvedProductInContext(): ProductResponseItem | null {
+				// A selected variation is always a resolved, concrete product.
+				const variation = productsState.productVariationInContext;
+				if ( variation ) {
+					return variation;
+				}
+
+				// Otherwise the main product is resolved only when it needs
+				// no options picked (`has_options === false` — simple, grouped,
+				// external, ...). A variable product with options still to pick
+				// resolves to `null`. Reading the server-computed `has_options`
+				// keeps this type-invariant: no `type === 'variable'` sniff.
+				const main = productsState.mainProductInContext;
+				if ( main && ! main.has_options ) {
+					return main;
+				}
+
+				return null;
 			},
 		},
 	},

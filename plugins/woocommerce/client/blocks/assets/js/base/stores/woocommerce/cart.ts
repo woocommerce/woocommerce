@@ -161,6 +161,24 @@ export type Store = {
 			id?: number;
 			filter?: CartItemFilterPredicate;
 		} ) => ItemEnvelope;
+		/**
+		 * Type-invariant in-cart total for a product, in ANY purchasable form.
+		 * This is the polymorphic read that lets non-specialized surfaces (e.g.
+		 * the Product Button) show "X in cart" without ever branching on product
+		 * type — the getter resolves the total once, for every type:
+		 *
+		 * - simple:   the product's own line quantity.
+		 * - variable: the resolved-variation line's quantity (the envelope's
+		 *             purchasable-id resolution already handles this via
+		 *             `findItem`).
+		 * - grouped:  the sum over the lines of the product's
+		 *             `grouped_products` child ids (a grouped parent has no line
+		 *             of its own; its "in cart" is the aggregate of its children).
+		 *
+		 * `id` defaults to the context product (`mainProductInContext`). Returns
+		 * `0` when nothing is resolvable or the product is not in the cart.
+		 */
+		inCartQuantity: ( id?: number ) => number;
 	};
 	actions: {
 		waitForIdle: () => Promise< void >;
@@ -843,6 +861,51 @@ const { actions } = store< Store >(
 					( id !== undefined ? { id } : undefined );
 
 				return resolveEnvelope( { draft, filter } );
+			},
+
+			/**
+			 * Type-invariant in-cart total for a product, in any purchasable
+			 * form. See the type declaration on `Store['state'].inCartQuantity`
+			 * for the polymorphism contract.
+			 *
+			 * Resolution is a single, type-agnostic rule expressed over data,
+			 * never a type switch:
+			 *
+			 * 1. Resolve the product for `id` (default: `mainProductInContext`).
+			 * 2. If it declares `grouped_products`, the "in cart" is the SUM of
+			 *    each child's own in-cart quantity (a grouped parent carries no
+			 *    line of its own). Simple/variable products have an empty
+			 *    `grouped_products`, so they fall through to step 3 — the branch
+			 *    is on a schema field, not on `type`.
+			 * 3. Otherwise it is the product's own resolved line quantity, via
+			 *    `findItem` (which resolves the purchasable/variation id).
+			 *
+			 * @param id Product id (defaults to the context product).
+			 * @return The in-cart total, or `0` when unresolvable / absent.
+			 */
+			inCartQuantity( id?: number ): number {
+				const productId = id ?? getContextProductId();
+				if ( productId === undefined ) {
+					return 0;
+				}
+
+				// Grouped parents have no line of their own — sum over children.
+				// The branch is on a schema field (`grouped_products`), not on
+				// product type, so it stays type-invariant (schema-field branches
+				// are not type branches).
+				const product = getProductsState().findProduct( {
+					id: productId,
+				} );
+				const childIds = product?.grouped_products;
+				if ( childIds && childIds.length > 0 ) {
+					return childIds.reduce(
+						( sum, childId ) =>
+							sum + state.inCartQuantity( childId ),
+						0
+					);
+				}
+
+				return state.findItem( { id: productId } ).cart?.quantity ?? 0;
 			},
 		},
 		actions: {

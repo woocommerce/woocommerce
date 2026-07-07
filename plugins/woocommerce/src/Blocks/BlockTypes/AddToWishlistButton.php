@@ -102,10 +102,17 @@ final class AddToWishlistButton extends AbstractBlock {
 			)
 		);
 
-		$is_variable            = $product->is_type( 'variable' );
+		// Mirror the JS `resolvedProductInContext` getter's logic server-side
+		// (computed directly here — the getter itself has no PHP mirror): the
+		// selection is resolved on first paint only when the product needs no
+		// options picked (`has_options() === false`). No `is_type( 'variable' )`
+		// branch — the capability is read from the same data the getter uses, so
+		// SSR and hydration agree. On first paint no variation is selected, so a
+		// product with options is disabled and prompts "Select options first".
+		$has_options            = $product->has_options();
 		$initial_is_in_wishlist = $this->is_initial_in_wishlist( $items, $product );
-		$initial_disabled       = $is_variable;
-		$initial_label          = $is_variable
+		$initial_disabled       = $has_options;
+		$initial_label          = $has_options
 			? $this->get_select_options_label()
 			: ( $initial_is_in_wishlist ? $this->get_saved_label() : $this->get_add_label() );
 
@@ -114,9 +121,8 @@ final class AddToWishlistButton extends AbstractBlock {
 			'data-wp-interactive' => 'woocommerce/add-to-wishlist-button',
 			'data-wp-context'     => (string) wp_json_encode(
 				array(
-					'productId'      => $product->get_id(),
-					'isVariableType' => $is_variable,
-					'isPending'      => false,
+					'productId' => $product->get_id(),
+					'isPending' => false,
 				)
 			),
 		);
@@ -201,16 +207,17 @@ final class AddToWishlistButton extends AbstractBlock {
 	}
 
 	/**
-	 * Whether the current product (or its parent, for a variable parent
-	 * with no selection yet) is already in the prefetched wishlist. For
-	 * variable products the SSR star is always empty — we can't know which
-	 * variation the shopper will pick before JS hydrates.
+	 * Whether the current product is already in the prefetched wishlist. For a
+	 * product that still has options to pick (`has_options()`), the SSR star is
+	 * always empty — we can't know which variation the shopper will pick before
+	 * JS hydrates. Reads the same capability field as the JS getter, not the
+	 * product type.
 	 *
 	 * @param array<int, array<string, mixed>> $items   Schema-shape items.
 	 * @param \WC_Product                      $product The product being viewed.
 	 */
 	private function is_initial_in_wishlist( array $items, \WC_Product $product ): bool {
-		if ( $product->is_type( 'variable' ) ) {
+		if ( $product->has_options() ) {
 			return false;
 		}
 		$product_id = $product->get_id();

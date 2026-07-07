@@ -146,8 +146,8 @@ class AddToWishlistButtonTests extends WP_UnitTestCase {
 	/**
 	 * For a logged-in shopper on a simple product not in the wishlist, the
 	 * rendered markup carries the iAPI wrapper, the per-block context (with
-	 * `isVariableType` false and `isPending` false), and the empty-star
-	 * initial state with `aria-pressed="false"`.
+	 * `isPending` false), and the empty-star initial state with
+	 * `aria-pressed="false"`.
 	 */
 	public function test_render_simple_product_not_in_wishlist(): void {
 		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
@@ -166,8 +166,10 @@ class AddToWishlistButtonTests extends WP_UnitTestCase {
 
 		// `data-wp-context` is HTML-encoded; the embedded quotes appear as `&quot;`.
 		$this->assertStringContainsString( '&quot;productId&quot;:' . $product_id, $markup );
-		$this->assertStringContainsString( '&quot;isVariableType&quot;:false', $markup );
 		$this->assertStringContainsString( '&quot;isPending&quot;:false', $markup );
+		// The `isVariableType` type flag was removed — the button resolves
+		// actionability from `has_options()`/variation data, not product type.
+		$this->assertStringNotContainsString( 'isVariableType', $markup );
 
 		$this->assertStringContainsString(
 			'aria-pressed="false"',
@@ -195,7 +197,10 @@ class AddToWishlistButtonTests extends WP_UnitTestCase {
 
 		$markup = $this->invoke_render( $this->build_block_stub( $product_id ) );
 
-		$this->assertStringContainsString( '&quot;isVariableType&quot;:true', $markup );
+		// The button resolves "not yet actionable" from `has_options()`, not a
+		// product-type flag; the observable first-paint state is disabled +
+		// "Select options first".
+		$this->assertStringNotContainsString( 'isVariableType', $markup );
 
 		$this->assertMatchesRegularExpression(
 			'/<button[^>]*\bdisabled\b/',

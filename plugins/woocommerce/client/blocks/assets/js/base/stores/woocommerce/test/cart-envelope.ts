@@ -1131,4 +1131,121 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			expect( env.cart?.key ).toBe( 'plain' );
 		} );
 	} );
+
+	// The type-invariant in-cart aggregate. One read resolves the in-cart total
+	// for ANY purchasable form — simple line, resolved variation line, or the
+	// sum over a grouped parent's children — with no product-type branch.
+	describe( 'inCartQuantity (type-invariant aggregate)', () => {
+		it( 'simple: returns the product line quantity', async () => {
+			const cart = await loadCartAndReady();
+			setCartItems( cart, [
+				{
+					key: 'abc',
+					id: 100,
+					quantity: 4,
+					name: 'A',
+					type: 'simple',
+					extensions: {},
+					item_data: [],
+				},
+			] );
+			// findProduct( 100 ) → a simple product (no grouped_products), so the
+			// aggregate falls through to the line quantity.
+			mockFindProduct = ( { id } ) => ( { id } );
+			expect( cart.state.inCartQuantity( 100 ) ).toBe( 4 );
+		} );
+
+		it( 'variable: returns the RESOLVED-variation line quantity', async () => {
+			const cart = await loadCartAndReady();
+			// The cart line carries the variation id (456), not the parent (100).
+			setCartItems( cart, [
+				{
+					key: 'v',
+					id: 456,
+					quantity: 3,
+					name: 'Hoodie - Green',
+					type: 'variation',
+					extensions: {},
+					item_data: [],
+				},
+			] );
+			// A draft carrying the variation selection is what the context surface
+			// holds; findProduct resolves 100 → 456 (the purchasable id), which is
+			// the line the aggregate must read.
+			cart.state.draftItems = {
+				'100': {
+					id: 100,
+					quantity: 1,
+					variation: [ { attribute: 'color', value: 'green' } ],
+				},
+			};
+			mockFindProduct = ( { id } ) =>
+				id === 100 ? { id: 456 } : { id };
+			expect( cart.state.inCartQuantity( 100 ) ).toBe( 3 );
+		} );
+
+		it( 'grouped: sums each child line quantity (parent has no line)', async () => {
+			const cart = await loadCartAndReady();
+			setCartItems( cart, [
+				{
+					key: 'c1',
+					id: 11,
+					quantity: 2,
+					name: 'Child 1',
+					type: 'simple',
+					extensions: {},
+					item_data: [],
+				},
+				{
+					key: 'c2',
+					id: 12,
+					quantity: 5,
+					name: 'Child 2',
+					type: 'simple',
+					extensions: {},
+					item_data: [],
+				},
+				// A third child that is NOT in the cart contributes 0.
+			] );
+			// findProduct( 9 ) → a grouped parent declaring its children;
+			// findProduct( child ) → a plain product (no grouped_products) so each
+			// child resolves to its own line quantity.
+			mockFindProduct = ( { id } ) =>
+				id === 9 ? { id: 9, grouped_products: [ 11, 12, 13 ] } : { id };
+			// 2 (child 11) + 5 (child 12) + 0 (child 13 absent) = 7.
+			expect( cart.state.inCartQuantity( 9 ) ).toBe( 7 );
+		} );
+
+		it( 'returns 0 when the product is not in the cart', async () => {
+			const cart = await loadCartAndReady();
+			setCartItems( cart, [] );
+			mockFindProduct = ( { id } ) => ( { id } );
+			expect( cart.state.inCartQuantity( 100 ) ).toBe( 0 );
+		} );
+
+		it( 'defaults to the context product id when called with no argument', async () => {
+			const cart = await loadCartAndReady();
+			setCartItems( cart, [
+				{
+					key: 'abc',
+					id: 100,
+					quantity: 6,
+					name: 'A',
+					type: 'simple',
+					extensions: {},
+					item_data: [],
+				},
+			] );
+			mockContextProductId = 100;
+			mockFindProduct = ( { id } ) => ( { id } );
+			expect( cart.state.inCartQuantity() ).toBe( 6 );
+		} );
+
+		it( 'returns 0 when no id and no context product resolves', async () => {
+			const cart = await loadCartAndReady();
+			setCartItems( cart, [] );
+			mockContextProductId = undefined;
+			expect( cart.state.inCartQuantity() ).toBe( 0 );
+		} );
+	} );
 } );

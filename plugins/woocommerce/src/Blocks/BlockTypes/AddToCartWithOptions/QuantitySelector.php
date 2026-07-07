@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * Block type for quantity selector in add to cart with options.
@@ -115,15 +114,20 @@ class QuantitySelector extends AbstractBlock {
 
 		$product_quantity_constraints = AddToCartWithOptionsUtils::get_product_quantity_constraints( $product );
 
-		if ( $product->is_type( ProductType::VARIABLE ) ) {
-			wp_enqueue_script_module( 'woocommerce/product-elements' );
+		// The reactive quantity constraints (min/max/step bindings + the
+		// re-clamp watcher) are emitted for EVERY product type, not just
+		// variable. For a non-variable product the bound values simply never
+		// change, so the behavior is identical — but the block no longer
+		// branches on `is_type( VARIABLE )` to decide whether to wire them. The
+		// polymorphism (a variation swap changing the constraints) is handled
+		// once, reactively, by binding to `productInContext.add_to_cart`.
+		wp_enqueue_script_module( 'woocommerce/product-elements' );
 
-			$wrapper_attributes['data-wp-bind--hidden'] = 'woocommerce/add-to-cart-with-options-quantity-selector::!state.allowsQuantityChange';
-			$input_attributes['data-wp-bind--min']      = 'woocommerce/products::state.productInContext.add_to_cart.minimum';
-			$input_attributes['data-wp-bind--max']      = 'woocommerce/products::state.productInContext.add_to_cart.maximum';
-			$input_attributes['data-wp-bind--step']     = 'woocommerce/products::state.productInContext.add_to_cart.multiple_of';
-			$input_attributes['data-wp-watch']          = 'woocommerce/add-to-cart-with-options-quantity-selector::callbacks.watchQuantityConstraints';
-		}
+		$wrapper_attributes['data-wp-bind--hidden'] = 'woocommerce/add-to-cart-with-options-quantity-selector::!state.allowsQuantityChange';
+		$input_attributes['data-wp-bind--min']      = 'woocommerce/products::state.productInContext.add_to_cart.minimum';
+		$input_attributes['data-wp-bind--max']      = 'woocommerce/products::state.productInContext.add_to_cart.maximum';
+		$input_attributes['data-wp-bind--step']     = 'woocommerce/products::state.productInContext.add_to_cart.multiple_of';
+		$input_attributes['data-wp-watch']          = 'woocommerce/add-to-cart-with-options-quantity-selector::callbacks.watchQuantityConstraints';
 
 		$form = AddToCartWithOptionsUtils::make_quantity_input_interactive( $product_html, $wrapper_attributes, $input_attributes );
 

@@ -18,7 +18,6 @@ const universalLock =
 
 interface Context {
 	addToCartText: string;
-	groupedProductIds?: number[];
 	displayViewCart: boolean;
 	tempQuantity: number;
 	animationStatus: AnimationStatus;
@@ -60,13 +59,12 @@ const { state: productsState } = store< ProductsStore >(
 
 const productButtonStore = {
 	state: {
-		// The "X in cart" quantity, resolved through the shared-store envelope
-		// keyed by the main/context product id (`mainProductInContext` — the
-		// parent, never a variation). `findItem({ id })` runs the resolution
-		// ladder against the context draft when one exists (a stepper-bearing
-		// collection card, or the form's draft, which carries the variation),
-		// else against a bare `{ id }` draft (a plain Product Button on a
-		// shop/grid). Both collapse to the same call.
+		// The "X in cart" quantity, resolved through the cart store's
+		// type-invariant `inCartQuantity` read keyed by the main/context product
+		// id (`mainProductInContext` — the parent, never a variation). The cart
+		// store resolves the total for ANY purchasable form (simple line,
+		// resolved variation line, or the sum over a grouped parent's children),
+		// so the button never branches on product type here.
 		get inCartQuantity(): number {
 			const mainProduct = productsState.mainProductInContext;
 
@@ -74,9 +72,7 @@ const productButtonStore = {
 				return 0;
 			}
 
-			return (
-				cartState.findItem( { id: mainProduct.id } ).cart?.quantity ?? 0
-			);
+			return cartState.inCartQuantity( mainProduct.id );
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();
@@ -91,8 +87,6 @@ const productButtonStore = {
 				animationStatus,
 				tempQuantity,
 				addToCartText,
-				groupedProductIds,
-				hasPressedButton,
 				inTheCartText,
 			} = getContext< Context >();
 
@@ -105,27 +99,10 @@ const productButtonStore = {
 				? tempQuantity || 0
 				: state.inCartQuantity;
 
-			if ( productsState.productInContext?.type === 'grouped' ) {
-				// Grouped products keep one draft per CHILD (keyed by child id),
-				// not by the grouped parent, so the parent has no envelope line of
-				// its own. The button's own server-seeded `groupedProductIds`
-				// context is the only handle to the child ids; each child's
-				// in-cart quantity is read through the shared envelope
-				// (`findItem({ id: childId })`), same surface as above.
-				const groupedProductIdsInCart = groupedProductIds?.map(
-					( productId ) =>
-						cartState.findItem( { id: productId } ).cart
-							?.quantity || 0
-				);
-				if (
-					groupedProductIdsInCart?.some( ( qty ) => qty > 0 ) &&
-					hasPressedButton
-				) {
-					return inTheCartText;
-				}
-				return addToCartText;
-			}
-
+			// One path for every product type: `state.inCartQuantity` already
+			// resolves the in-cart total for any purchasable form (including a
+			// grouped parent's summed children), so the button shows the same
+			// "### in cart" string for all types with no type branch here.
 			if ( quantity > 0 ) {
 				return inTheCartText.replace( '###', quantity.toString() );
 			}

@@ -135,14 +135,10 @@ class ProductButton extends AbstractBlock {
 			'addToCartText'    => $add_to_cart_text,
 			'tempQuantity'     => $number_of_items_in_cart,
 			'animationStatus'  => 'IDLE',
-			'inTheCartText'    => $this->get_in_the_cart_text( $product ),
+			'inTheCartText'    => $this->get_in_the_cart_text(),
 			'noticeId'         => '',
 			'hasPressedButton' => false,
 		);
-
-		if ( $product->is_type( ProductType::GROUPED ) ) {
-			$context['groupedProductIds'] = $product->get_children();
-		}
 
 		$attributes = array(
 			'type' => $is_descendant_of_add_to_cart_form ? 'submit' : 'button',
@@ -350,14 +346,15 @@ class ProductButton extends AbstractBlock {
 	/**
 	 * Get the inTheCartText text for a given product.
 	 *
-	 * @param \WC_Product $product The product.
+	 * ONE string for every product type: the `###` placeholder is replaced
+	 * client-side with the in-cart total (which the cart store's type-invariant
+	 * `inCartQuantity` read resolves for any purchasable form, including a
+	 * grouped parent's summed children). Grouped products therefore show the
+	 * same "### in cart" count as every other type, not a bespoke label.
+	 *
 	 * @return string The inTheCartText string.
 	 */
-	private function get_in_the_cart_text( $product ) {
-		if ( $product->is_type( ProductType::GROUPED ) ) {
-			return __( 'Added to cart', 'woocommerce' );
-		}
-
+	private function get_in_the_cart_text() {
 		return sprintf(
 			/* translators: %s: product number. */
 			__( '%s in cart', 'woocommerce' ),

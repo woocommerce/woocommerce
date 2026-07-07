@@ -18,7 +18,9 @@ use InvalidArgumentException;
  *   `wp_interactivity_state` (global) or `data-wp-context` (per-element) —
  *   plus the derived getters (`mainProductInContext`,
  *   `productVariationInContext`, `productInContext`) registered by
- *   `register_getters()`.
+ *   `register_getters()`. Mirrors are registered on demand only: the JS
+ *   store's `resolvedProductInContext` has no PHP mirror because no
+ *   server-side directive binds to it.
  *
  * The derived getters are mirrored in the JS store
  * (client/blocks/assets/js/base/stores/woocommerce/products.ts) so that

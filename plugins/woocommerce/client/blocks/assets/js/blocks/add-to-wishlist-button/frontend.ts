@@ -20,11 +20,6 @@ import type {
 	Store as ShopperListsStore,
 } from '@woocommerce/stores/woocommerce/shopper-lists';
 
-/**
- * Internal dependencies
- */
-import { matchVariationItem } from './match-variation-item';
-
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
@@ -38,7 +33,6 @@ type ButtonConfig = {
 
 type BlockContext = {
 	productId: number;
-	isVariableType: boolean;
 	// Mid-click flag, gated per-block so the button can be disabled while
 	// the request is in flight. Single-instance block, no `pendingKeys`
 	// map needed (Wishlist/SFL use one because they're per-row).
@@ -88,23 +82,15 @@ const { state } = store< BlockStore >(
 	'woocommerce/add-to-wishlist-button',
 	{
 		state: {
-			// For variable products, the effective product is the selected
-			// variation — resolved through the products store's
-			// `productInContext` derived getter, which already encapsulates
-			// "variation if one is selected, otherwise the parent." Returns
-			// 0 when the current resolution is still the variable parent
-			// (i.e. the shopper hasn't picked attributes yet), which
-			// `isDisabled` reads as "not yet selectable."
+			// The effective product is whatever the selection resolves to as
+			// one concrete product — a selected variation, or a product that
+			// needs no options picked — via the products store's
+			// `resolvedProductInContext` derived getter. It is `null` (→ 0
+			// here) while a variable product still has options to pick, which
+			// `isDisabled` reads as "not yet selectable." No `type === 'variable'`
+			// branch: the polymorphism is resolved once, in the store getter.
 			get effectiveProductId(): number {
-				const product = productsState.productInContext;
-				if ( ! product ) {
-					return 0;
-				}
-				const context = getContext< BlockContext >();
-				if ( context.isVariableType && product.type === 'variable' ) {
-					return 0;
-				}
-				return product.id;
+				return productsState.resolvedProductInContext?.id ?? 0;
 			},
 
 			get currentItem(): RawShopperListItem | null {
@@ -112,28 +98,16 @@ const { state } = store< BlockStore >(
 				if ( ! id ) {
 					return null;
 				}
-				const list = shopperListsState.lists[ LIST_SLUG ];
-				if ( ! list ) {
-					return null;
-				}
-				const context = getContext< BlockContext >();
-				// For non-variable products, id alone uniquely identifies
-				// the wishlist row. For variable products with "any"
-				// attribute slots, several attribute combinations can map
-				// to the same variation product, so we additionally
-				// disambiguate by the shopper's picked attributes — see
-				// `matchVariationItem` for details.
-				if ( ! context.isVariableType ) {
-					return (
-						list.items.find( ( item ) => item.id === id ) ?? null
-					);
-				}
-				const selected = getSelectedAttributes();
-				return (
-					list.items.find( ( item ) =>
-						matchVariationItem( item, id, selected )
-					) ?? null
-				);
+				// The shopper's picked attributes disambiguate "any"-slot
+				// variations that share a single variation product id; for a
+				// product with no options the selection is empty and the store
+				// matches on id alone. Either way `findListItem` applies the
+				// unified matching semantics — no type branch here.
+				return shopperListsState.findListItem( {
+					slug: LIST_SLUG,
+					id,
+					variation: getSelectedAttributes(),
+				} );
 			},
 
 			get isInWishlist(): boolean {

@@ -289,10 +289,14 @@ store< QuantitySelectorStore >(
 				}
 			},
 			// Quantity constraints can change when switching variations. This
-			// watch re-clamps the draft quantity into the current variation's
-			// min/max. Bound on the quantity input, it moved here from the
-			// variation selector: it is quantity logic and belongs with the
-			// quantity input it observes.
+			// watch re-clamps the draft quantity into the CURRENT product's
+			// min/max. It reads `productInContext` (variation if one is
+			// selected, else the main product) and runs for every product type:
+			// for a non-variable product the constraints never change, so the
+			// clamp is a no-op — behaviorally identical, but with no
+			// type/variation branch. Bound on the quantity input, it moved here
+			// from the variation selector: it is quantity logic and belongs with
+			// the quantity input it observes.
 			watchQuantityConstraints: () => {
 				const { ref } = getElement();
 
@@ -305,13 +309,13 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const { productVariationInContext: variation } = productsState;
+				const { productInContext: product } = productsState;
 
-				if ( ! variation ) {
+				if ( ! product ) {
 					return;
 				}
 
-				const { minimum, maximum } = variation.add_to_cart;
+				const { minimum, maximum } = product.add_to_cart;
 
 				// Read the draft directly (not the min-defaulted getter): only an
 				// out-of-range EXISTING quantity needs re-clamping. An untouched

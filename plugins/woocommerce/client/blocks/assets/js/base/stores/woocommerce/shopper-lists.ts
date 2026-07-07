@@ -5,6 +5,11 @@ import { store } from '@wordpress/interactivity';
 import type { AsyncAction, TypeYield } from '@wordpress/interactivity';
 import type { CurrencyResponse } from '@woocommerce/types';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
+import {
+	variationMatchesSelection,
+	type SelectedAttributes,
+	type VariationAttribute,
+} from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Mirror of `Automattic\WooCommerce\StoreApi\Schemas\V1\ShopperListItemSchema::get_properties()`.
@@ -80,6 +85,36 @@ export type Store = {
 		// caching-friendlier transport.
 		nonce: string;
 		lists: Record< string, ShopperListState >;
+		/**
+		 * Find the list row a selection resolves to, applying the SAME
+		 * STRUCTURAL variation-matching semantics as the products store's
+		 * `findProduct` (`variationMatchesSelection`): an "any"/absent
+		 * variation attribute never constrains, extra selected attributes are
+		 * ignored, attribute names compare normalized. This is the single,
+		 * unified matcher — it replaces the wishlist block's old bespoke
+		 * `matchVariationItem` (which additionally required exact-length
+		 * attribute sets), so a row and a selection pair by one structural
+		 * rule everywhere.
+		 *
+		 * VALUE normalization happens at THIS boundary (and only here): both
+		 * sides' values are trimmed and lower-cased before the structural
+		 * compare. The two datasets genuinely differ — list rows store term
+		 * DISPLAY NAMES ("Red", via `get_term_by( 'slug' )->name`) while
+		 * selections carry slugs ("red") — so an exact compare is right on
+		 * the products-store path (slug-to-slug) and wrong here.
+		 * `variationMatchesSelection` itself stays exact; see
+		 * `normalizeListMatchValue` for the normalization contract and why it
+		 * is safe for non-latin values.
+		 *
+		 * A product with no options passes an empty `variation`; every row of
+		 * the matching id then satisfies the (vacuously true) match, so id
+		 * alone identifies the row. Returns the first matching row, or `null`.
+		 */
+		findListItem: ( args: {
+			slug: string;
+			id: number;
+			variation?: SelectedAttributes[];
+		} ) => RawShopperListItem | null;
 	};
 	actions: {
 		loadList: ( slug: string ) => Promise< void >;
@@ -166,6 +201,36 @@ async function restRequest< T >(
 	return json as T | null;
 }
 
+/**
+ * Value normalization for LIST-boundary matching (see `findListItem`).
+ *
+ * List rows store attribute values as term DISPLAY NAMES (the Store API's
+ * `format_variation_data` maps the stored slug through
+ * `get_term_by( 'slug' )->name`), while selections carry the slug the shopper
+ * picked. The structural matcher (`variationMatchesSelection`) compares values
+ * exactly — correct on the products-store path, where both sides are slugs —
+ * so the display-name-vs-slug drift is bridged HERE, by normalizing both sides
+ * before the structural compare.
+ *
+ * Normalization = `trim()` + `toLowerCase()`:
+ * - `toLowerCase()` uses the locale-independent Unicode default case mapping,
+ *   so the result is deterministic across environments (no Turkish-i surprises
+ *   from locale rules). Caseless scripts (CJK, Arabic, Hebrew, …) map to
+ *   themselves, so for non-latin values normalization is a no-op and can never
+ *   merge distinct values — it only bridges case-only differences, which is
+ *   exactly the display-name-vs-slug drift ("Red" vs "red").
+ * - No dash/space folding on VALUES (unlike attribute-NAME normalization):
+ *   conflating "t-shirt" with "t shirt" could merge genuinely distinct terms.
+ *   Slug shapes that differ from the display name beyond case (e.g.
+ *   "bright-red" vs "Bright Red") remain out of scope, as with the previous
+ *   matcher — bridging those needs a slug→name lookup via the parent product.
+ *
+ * @param value The raw attribute value (display name or slug).
+ * @return The normalized value for list-boundary comparison.
+ */
+const normalizeListMatchValue = ( value: string ): string =>
+	value.trim().toLowerCase();
+
 // Do NOT supply `nonce` / `restUrl` defaults here. iAPI's deep-merge has the
 // JS-supplied state win over the existing (PHP-seeded) state for primitives,
 // so an empty-string default would clobber the values seeded server-side via
@@ -174,6 +239,65 @@ async function restRequest< T >(
 const { state, actions } = store< Store >(
 	'woocommerce/shopper-lists',
 	{
+		state: {
+			// Do NOT declare `nonce` / `restUrl` / `lists` here — those are
+			// PHP-seeded primitives/objects and iAPI's deep-merge would let a
+			// JS default clobber the server value (see the note below the store
+			// definition). A method is safe to declare: it adds behavior without
+			// shadowing seeded data.
+			findListItem( {
+				slug,
+				id,
+				variation = [],
+			}: {
+				slug: string;
+				id: number;
+				variation?: SelectedAttributes[];
+			} ): RawShopperListItem | null {
+				const list = state.lists?.[ slug ];
+				if ( ! list ) {
+					return null;
+				}
+				// LIST-BOUNDARY VALUE NORMALIZATION: rows carry term display
+				// names, selections carry slugs; both sides are trimmed +
+				// lower-cased here so the structural matcher (which stays
+				// exact) can pair them. See `normalizeListMatchValue`.
+				const normalizedSelection = variation.map(
+					( { attribute, value } ) => ( {
+						attribute,
+						value: normalizeListMatchValue( value ),
+					} )
+				);
+				return (
+					list.items.find( ( item ) => {
+						if ( item.id !== id ) {
+							return false;
+						}
+						// Match the row's stored attributes against the
+						// selection with the unified structural rules. A row's
+						// stored `variation` is the display projection
+						// ({ attribute, value }); map it to the { name, value }
+						// shape `variationMatchesSelection` expects, normalizing
+						// values on this side too. With an empty selection every
+						// row of the id matches (vacuously), so no-options
+						// products resolve by id alone.
+						const variationAttributes: VariationAttribute[] = (
+							item.variation ?? []
+						).map( ( entry ) => ( {
+							name: entry.attribute,
+							value:
+								typeof entry.value === 'string'
+									? normalizeListMatchValue( entry.value )
+									: entry.value,
+						} ) );
+						return variationMatchesSelection(
+							variationAttributes,
+							normalizedSelection
+						);
+					} ) ?? null
+				);
+			},
+		},
 		actions: {
 			*loadList( slug: string ): AsyncAction< void > {
 				const list = ensureListState( state, slug );
