@@ -11,10 +11,6 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expect, test as baseTest } from '../../fixtures/fixtures';
 import { getInstalledWordPressVersion } from '../../utils/wordpress';
 
-// need to figure out whether tests are being run on a mac
-const macOS = process.platform === 'darwin';
-const cmdKeyCombo = macOS ? 'Meta+k' : 'Control+k';
-
 const clickOnCommandPaletteOption = async ( {
 	page,
 	optionName,
@@ -22,15 +18,40 @@ const clickOnCommandPaletteOption = async ( {
 	page: Page;
 	optionName: string;
 } ) => {
-	// Press `Ctrl` + `K` to open the command palette.
+	// Using a regex here because Gutenberg changes the text of the placeholder
+	const searchBox = page.getByPlaceholder(
+		/Search (?:commands(?: and settings)?|for commands)/
+	);
+
+	// WordPress registers the command-palette shortcut via @wordpress/keycodes'
+	// `isAppleOS()`, which inspects `navigator.platform` only. In Playwright's
+	// Chromium on macOS these two disagree: `navigator.platform` is "MacIntel"
+	// (Apple → Cmd+K) while `navigator.userAgentData.platform` is "Windows".
+	// Deriving the modifier from `userAgentData` therefore sends Ctrl+K and the
+	// palette never opens. Reuse `isAppleOS()` so the test always matches whatever
+	// modifier WordPress actually registered (falling back to its logic if the
+	// keycodes package is unavailable).
+	const isApplePlatform = await page.evaluate( () => {
+		const isAppleOS = (
+			window as Window & {
+				wp?: { keycodes?: { isAppleOS?: () => boolean } };
+			}
+		 ).wp?.keycodes?.isAppleOS;
+		if ( typeof isAppleOS === 'function' ) {
+			return isAppleOS();
+		}
+		const { platform } = navigator;
+		return (
+			platform.indexOf( 'Mac' ) !== -1 ||
+			[ 'iPad', 'iPhone' ].includes( platform )
+		);
+	} );
+	const cmdKeyCombo = isApplePlatform ? 'Meta+k' : 'Control+k';
+
+	// Press `Ctrl`/`Cmd` + `K` to open the command palette.
 	await page.keyboard.press( cmdKeyCombo );
 
-	// Using a regex here because Gutenberg changes the text of the placeholder
-	await page
-		.getByPlaceholder(
-			/Search (?:commands(?: and settings)?|for commands)/
-		)
-		.fill( optionName );
+	await searchBox.fill( optionName );
 
 	// TODO: WP 7.0 compat - WP 7.0 appends "Action" to command palette option
 	// accessible names. Simplify when WP 7.0 is the minimum supported version.

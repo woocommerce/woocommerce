@@ -20,6 +20,7 @@ import {
 import WoocommerceShippingItem from './woocommerce-shipping-item';
 import './shipping-recommendations.scss';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
+import { useOptionDismiss } from '~/hooks/use-option-dismiss';
 
 export const useInstallPlugin = () => {
 	const [ pluginsBeingSetup, setPluginsBeingSetup ] = useState<
@@ -98,49 +99,55 @@ export const ShippingRecommendationsList = ( {
 	children,
 }: {
 	children: React.ReactNode;
-} ) => (
-	<DismissableList
-		className="woocommerce-recommended-shipping-extensions"
-		dismissOptionName="woocommerce_settings_shipping_recommendations_hidden"
-	>
-		<DismissableListHeading>
-			<Text variant="title.small" as="p" size="20" lineHeight="28px">
-				{ __( 'Recommended shipping solutions', 'woocommerce' ) }
-			</Text>
-			<Text
-				className="woocommerce-recommended-shipping__header-heading"
-				variant="caption"
-				as="p"
-				size="12"
-				lineHeight="16px"
-			>
-				{ __(
-					'We recommend adding one of the following shipping extensions to your store.',
-					'woocommerce'
-				) }
-			</Text>
-		</DismissableListHeading>
-		<ul className="woocommerce-list">
-			{ Children.map( children, ( item ) => (
-				<li className="woocommerce-list__item">{ item }</li>
-			) ) }
-		</ul>
-		<CardFooter>
-			<TrackedLink
-				message={ __(
-					// translators: {{Link}} is a placeholder for a html element.
-					'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
-					'woocommerce'
-				) }
-				targetUrl={ getAdminLink(
-					'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
-				) }
-				linkType="wc-admin"
-				eventName="settings_shipping_recommendation_visit_marketplace_click"
-			/>
-		</CardFooter>
-	</DismissableList>
-);
+} ) => {
+	const { isDismissed, onDismiss } = useOptionDismiss(
+		'woocommerce_settings_shipping_recommendations_hidden'
+	);
+
+	return (
+		<DismissableList
+			className="woocommerce-recommended-shipping-extensions"
+			isDismissed={ isDismissed }
+		>
+			<DismissableListHeading onDismiss={ onDismiss }>
+				<Text variant="title.small" as="p" size="20" lineHeight="28px">
+					{ __( 'Recommended shipping solutions', 'woocommerce' ) }
+				</Text>
+				<Text
+					className="woocommerce-recommended-shipping__header-heading"
+					variant="caption"
+					as="p"
+					size="12"
+					lineHeight="16px"
+				>
+					{ __(
+						'We recommend adding one of the following shipping extensions to your store.',
+						'woocommerce'
+					) }
+				</Text>
+			</DismissableListHeading>
+			<ul className="woocommerce-list">
+				{ Children.map( children, ( item ) => (
+					<li className="woocommerce-list__item">{ item }</li>
+				) ) }
+			</ul>
+			<CardFooter>
+				<TrackedLink
+					message={ __(
+						// translators: {{Link}} is a placeholder for a html element.
+						'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
+						'woocommerce'
+					) }
+					targetUrl={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
+					) }
+					linkType="wc-admin"
+					eventName="settings_shipping_recommendation_visit_marketplace_click"
+				/>
+			</CardFooter>
+		</DismissableList>
+	);
+};
 
 const ShippingRecommendations = () => {
 	const [ pluginsBeingSetup, setupPlugin ] = useInstallPlugin();

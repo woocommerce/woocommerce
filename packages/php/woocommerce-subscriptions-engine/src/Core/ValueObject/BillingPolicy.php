@@ -36,8 +36,6 @@ defined( 'ABSPATH' ) || exit;
  */
 final class BillingPolicy {
 
-	use ScalarCoercion;
-
 	/**
 	 * Period unit: 'day' | 'week' | 'month' | 'year'.
 	 *
@@ -126,8 +124,8 @@ final class BillingPolicy {
 		return new self(
 			(string) $data['period'],
 			(int) $data['interval'],
-			self::coerce_nullable_int( $data['min_cycles'] ?? null ),
-			self::coerce_nullable_int( $data['max_cycles'] ?? null ),
+			ScalarCoercion::coerce_nullable_int( $data['min_cycles'] ?? null ),
+			ScalarCoercion::coerce_nullable_int( $data['max_cycles'] ?? null ),
 			$trial
 		);
 	}

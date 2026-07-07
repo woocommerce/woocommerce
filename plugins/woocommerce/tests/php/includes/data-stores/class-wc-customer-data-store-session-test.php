@@ -199,4 +199,34 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( '', $customer->get_shipping_address_2() );
 	}
+
+	/**
+	 * Ensure backslashes in customer fields survive a session save/read round-trip.
+	 *
+	 * Reproduces the Agentic Checkout flow where one request stores the address in the session and a
+	 * follow-up request reads it back: the session store must not wp_unslash() the data on read, or
+	 * real backslashes the buyer typed get stripped (session data is stored raw, never magic-quoted).
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/pull/65900
+	 */
+	public function test_backslashes_survive_session_round_trip() {
+		WC()->session->init();
+
+		$customer = new WC_Customer();
+		$customer->set_email( 'backslash@example.com' );
+		$customer->set_shipping_address_1( 'Apt 4\\B' );
+		$customer->set_shipping_city( 'C:\\Users' );
+		$customer->save();
+
+		$data_store = new WC_Customer_Data_Store_Session();
+		$data_store->save_to_session( $customer );
+
+		// Overwrite in memory, then read back from the session as the next request would.
+		$customer->set_shipping_address_1( 'overwritten' );
+		$customer->set_shipping_city( 'overwritten' );
+		$data_store->read( $customer );
+
+		$this->assertSame( 'Apt 4\\B', $customer->get_shipping_address_1(), 'Backslashes in the shipping address should survive the session round-trip.' );
+		$this->assertSame( 'C:\\Users', $customer->get_shipping_city(), 'Backslashes in the shipping city should survive the session round-trip.' );
+	}
 }

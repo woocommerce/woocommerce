@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent Product Collection filter resets from clearing lifted collection controls.

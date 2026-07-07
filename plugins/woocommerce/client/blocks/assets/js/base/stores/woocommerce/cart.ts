@@ -44,6 +44,7 @@ export type OptimisticCartItem = {
 	id: number;
 	quantity: number;
 	variation?: CartVariationItem[];
+	type: string;
 };
 
 export type ClientCartItem = Omit<
@@ -176,7 +177,7 @@ function lineMatchesProduct(
 	id: number,
 	variation?: CartVariationItem[] | SelectedAttributes[]
 ): boolean {
-	if ( isCartItem( item ) && item.type === 'variation' ) {
+	if ( item.type === 'variation' ) {
 		if (
 			id !== item.id ||
 			! item.variation ||
@@ -288,7 +289,7 @@ const getInfoNoticesFromCartUpdates = (
 	// We pass the optimistic snapshot as oldCart, so user-initiated removals
 	// are already absent and do not generate spurious notices here.
 	const autoDeletedToNotify = oldItems.filter(
-		( old ): old is CartItem =>
+		( old ) =>
 			isCartItem( old ) &&
 			! newItems.some( ( item ) => old.key === item.key )
 	);
@@ -301,7 +302,7 @@ const getInfoNoticesFromCartUpdates = (
 	// quantity difference on those lines is an intentional add result, not a
 	// server-initiated change. Keyed update-item lines and removeCartItem lines
 	// are never in suppressKeys, so their notice behavior is unchanged.
-	const autoUpdatedToNotify = newItems.filter( ( item ): item is CartItem => {
+	const autoUpdatedToNotify = newItems.filter( ( item ) => {
 		if ( ! isCartItem( item ) ) {
 			return false;
 		}
@@ -309,7 +310,7 @@ const getInfoNoticesFromCartUpdates = (
 			return false; // The action proved this product's add was exact.
 		}
 		const old = oldItems.find( ( o ) => o.key === item.key );
-		return !! ( old && item.quantity !== old.quantity );
+		return old && item.quantity !== old.quantity;
 	} );
 	return [
 		...autoDeletedToNotify.map( ( item ) =>
@@ -439,10 +440,7 @@ const { actions } = store< Store >(
 					) {
 						return false;
 					}
-					if (
-						isCartItem( cartItem ) &&
-						cartItem.type === 'variation'
-					) {
+					if ( cartItem.type === 'variation' ) {
 						if (
 							id !== cartItem.id ||
 							! cartItem.variation ||
@@ -601,8 +599,8 @@ const { actions } = store< Store >(
 					// how much delta is already accounted for in the running
 					// optimistic total; with no match we post the full target
 					// quantity. The matched line is never sent as an absolute
-					// quantity: per the iron rule the posted amount is a function
-					// of the delta, not of the match.
+					// quantity: the posted amount is a function of the delta,
+					// not of the match.
 					const quantityToSend = existingItem
 						? targetQuantity - existingItem.quantity
 						: targetQuantity;
@@ -674,7 +672,7 @@ const { actions } = store< Store >(
 						body: itemToSend,
 						applyOptimistic: () => {
 							if ( existingItem ) {
-								// Iron rule: this in-place bump is render-only. It
+								// This in-place bump is render-only. It
 								// makes the common re-add flicker-free, but it must
 								// never feed back into endpoint selection or the
 								// posted amount — those are already fixed above as a
@@ -846,8 +844,8 @@ const { actions } = store< Store >(
 							// setting it — so a match (by id/variation, possibly
 							// carrying a server key) only tells us how much delta is
 							// already accounted for; with no match we post the full
-							// target quantity. Per the iron rule the matched line is
-							// never sent as an absolute quantity.
+							// target quantity. The matched line is never sent as an
+							// absolute quantity.
 							const quantityToSend = existingItem
 								? quantity - existingItem.quantity
 								: quantity;
@@ -918,7 +916,7 @@ const { actions } = store< Store >(
 							body: itemToSend,
 							applyOptimistic: () => {
 								if ( existingItem ) {
-									// Iron rule (same as addCartItem): this in-place
+									// As in addCartItem, this in-place
 									// bump is render-only and must never feed back into
 									// endpoint selection or the posted amount, which are
 									// already fixed above as a pure function of

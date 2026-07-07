@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import type { CartItem } from '@woocommerce/types';
 import type {
 	OptimisticCartItem,
 	Store as WooCommerce,
@@ -155,6 +154,7 @@ function makeCartLine(
 ): OptimisticCartItem {
 	return {
 		id: 42,
+		type: 'simple',
 		quantity: 1,
 		...overrides,
 	} as OptimisticCartItem;
@@ -362,46 +362,39 @@ describe( 'Wishlist onClickAddToCart success detection', () => {
 				value: 'x',
 			},
 		];
-		// Variation-typed fixtures are server-confirmed lines and must carry
-		// `name` so that the `'name' in cartItem` guard in `sumMatchingCartQuantity`
-		// activates the variation branch (attribute-based matching).
-		const matchingLine = {
+		const matchingLine = makeCartLine( {
 			id: 7,
 			type: 'variation',
 			quantity: 1,
 			key: 'match',
-			name: 'Wishlisted Product',
 			variation: variationAttr,
-		} as CartItem;
-		const otherVariationLine = {
+		} );
+		const otherVariationLine = makeCartLine( {
 			id: 7,
 			type: 'variation',
 			quantity: 4,
 			key: 'other-variation',
-			name: 'Wishlisted Product',
 			variation: variationAttr,
-		} as CartItem;
+		} );
 		mockCartItems = [ matchingLine, otherVariationLine ];
 		// Only the matching variation line satisfies the attribute matcher.
 		mockAttributeMatcher = ( cartItem ) => cartItem.key === 'match';
 		mockAddCartItem = jest.fn( () => {
 			mockCartItems = [
-				{
+				makeCartLine( {
 					id: 7,
 					type: 'variation',
 					quantity: 2,
 					key: 'match',
-					name: 'Wishlisted Product',
 					variation: variationAttr,
-				} as CartItem,
-				{
+				} ),
+				makeCartLine( {
 					id: 7,
 					type: 'variation',
 					quantity: 4,
 					key: 'other-variation',
-					name: 'Wishlisted Product',
 					variation: variationAttr,
-				} as CartItem,
+				} ),
 			];
 			return Promise.resolve();
 		} );

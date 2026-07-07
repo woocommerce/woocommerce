@@ -160,6 +160,70 @@ class WC_Admin_Attributes {
 	}
 
 	/**
+	 * Output an inline script that shows a live UTF-8 byte count next to the
+	 * slug input and visually warns when the value approaches or exceeds the
+	 * server-side byte limit.
+	 *
+	 * The HTML `maxlength` attribute counts characters, not bytes, so a
+	 * multibyte slug (e.g. Cyrillic, Chinese) can pass the browser's guard
+	 * and still be rejected by `register_taxonomy()`'s 32-byte name limit.
+	 * This counter closes that feedback gap before submission.
+	 */
+	private static function slug_byte_counter_script(): void {
+		$max_bytes = wc_get_attribute_slug_max_byte_length();
+		/* translators: 1: current byte count, 2: maximum allowed bytes. */
+		$template = wp_json_encode( __( '%1$d / %2$d bytes', 'woocommerce' ), JSON_HEX_TAG | JSON_HEX_AMP );
+		if ( false === $template ) {
+			// Encoding the counter template failed (e.g. invalid UTF-8 in the translated
+			// string); skip the counter rather than emit broken inline JavaScript.
+			return;
+		}
+		?>
+		<script type="text/javascript">
+			( function() {
+				var input = document.getElementById( 'attribute_name' );
+				if ( ! input || ! ( 'TextEncoder' in window ) ) {
+					return;
+				}
+				var wrapper = input.closest( 'td, .form-field' );
+				var description = wrapper ? wrapper.querySelector( 'p.description' ) : null;
+				if ( ! description ) {
+					return;
+				}
+				var maxBytes = <?php echo (int) $max_bytes; ?>;
+				var template = <?php echo $template; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode with JSON_HEX_TAG produces JS-safe output. ?>;
+				var encoder = new TextEncoder();
+				var counter = document.createElement( 'span' );
+				counter.style.display = 'block';
+				counter.style.marginTop = '4px';
+				description.appendChild( counter );
+				function update() {
+					var bytes = encoder.encode( input.value ).length;
+					if ( 0 === bytes ) {
+						counter.textContent = '';
+						counter.style.color = '';
+						return;
+					}
+					counter.textContent = template
+						.replace( '%1$d', bytes )
+						.replace( '%2$d', maxBytes );
+					if ( bytes > maxBytes ) {
+						counter.style.color = '#d63638';
+					} else if ( bytes >= maxBytes - 3 ) {
+						// Within one multibyte character (up to 3 bytes) of the limit.
+						counter.style.color = '#996800';
+					} else {
+						counter.style.color = '';
+					}
+				}
+				input.addEventListener( 'input', update );
+				update();
+			} )();
+		</script>
+		<?php
+	}
+
+	/**
 	 * Edit Attribute admin panel.
 	 *
 	 * Shows the interface for changing an attributes type between select and text.
@@ -215,8 +279,8 @@ class WC_Admin_Attributes {
 									<label for="attribute_name"><?php esc_html_e( 'Slug', 'woocommerce' ); ?></label>
 								</th>
 								<td>
-									<input name="attribute_name" id="attribute_name" type="text" value="<?php echo esc_attr( $att_name ); ?>" maxlength="28" />
-									<p class="description"><?php esc_html_e( 'Unique slug/reference for the attribute; must be no more than 28 characters.', 'woocommerce' ); ?></p>
+									<input name="attribute_name" id="attribute_name" type="text" value="<?php echo esc_attr( $att_name ); ?>" maxlength="29" />
+									<p class="description"><?php esc_html_e( 'Unique slug/reference for the attribute. May be up to 29 bytes; non-ASCII characters each count as 2–4 bytes.', 'woocommerce' ); ?></p>
 								</td>
 							</tr>
 							<tr class="form-field form-required">
@@ -283,6 +347,7 @@ class WC_Admin_Attributes {
 					<p class="submit"><button type="submit" name="save_attribute" id="submit" class="button-primary" value="<?php esc_attr_e( 'Update', 'woocommerce' ); ?>"><?php esc_html_e( 'Update', 'woocommerce' ); ?></button></p>
 					<?php wp_nonce_field( 'woocommerce-save-attribute_' . $edit ); ?>
 				</form>
+				<?php self::slug_byte_counter_script(); ?>
 				<?php
 			}//end if
 			?>
@@ -433,8 +498,8 @@ class WC_Admin_Attributes {
 
 								<div class="form-field">
 									<label for="attribute_name"><?php esc_html_e( 'Slug', 'woocommerce' ); ?></label>
-									<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="28" />
-									<p class="description"><?php esc_html_e( 'Unique slug/reference for the attribute; must be no more than 28 characters.', 'woocommerce' ); ?></p>
+									<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="29" />
+									<p class="description"><?php esc_html_e( 'Unique slug/reference for the attribute. May be up to 29 bytes; non-ASCII characters each count as 2–4 bytes.', 'woocommerce' ); ?></p>
 								</div>
 
 								<div class="form-field">
@@ -507,6 +572,7 @@ class WC_Admin_Attributes {
 
 			/* ]]> */
 			</script>
+			<?php self::slug_byte_counter_script(); ?>
 		</div>
 		<?php
 	}
