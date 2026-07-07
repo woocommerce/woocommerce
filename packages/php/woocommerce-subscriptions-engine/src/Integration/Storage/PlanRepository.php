@@ -122,8 +122,10 @@ final class PlanRepository {
 	/**
 	 * Query plans.
 	 *
-	 * Supported args: limit, offset, search, status, extension_slug, orderby,
-	 * order. Results default to manual order, oldest id as a stable tiebreaker.
+	 * Supported args: limit, offset, search, status, extension_slug, ids,
+	 * orderby, order. `ids` filters to plans whose id is in the given int
+	 * list; it composes with the other filters and is honored by count().
+	 * Results default to manual order, oldest id as a stable tiebreaker.
 	 *
 	 * @param array<string, mixed> $args Query args.
 	 * @return array<int, Plan>
@@ -375,6 +377,36 @@ final class PlanRepository {
 			}
 
 			if ( ! $are_extension_slugs_valid ) {
+				$clauses[] = '0 = 1';
+			}
+		}
+
+		if ( array_key_exists( 'ids', $args ) && null !== $args['ids'] ) {
+			$are_ids_valid = false;
+
+			if ( is_array( $args['ids'] ) && array() !== $args['ids'] ) {
+				$ids       = array();
+				$all_valid = true;
+				foreach ( array_values( $args['ids'] ) as $possible_id ) {
+					$plan_id = ScalarCoercion::coerce_int( $possible_id );
+					if ( $plan_id <= 0 ) {
+						$all_valid = false;
+						break;
+					}
+					$ids[ $plan_id ] = $plan_id;
+				}
+
+				// Require all ids to be positive ints before running the query.
+				if ( $all_valid ) {
+					$are_ids_valid = true;
+
+					$ids       = array_values( $ids );
+					$clauses[] = 'id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')';
+					$params    = array_merge( $params, $ids );
+				}
+			}
+
+			if ( ! $are_ids_valid ) {
 				$clauses[] = '0 = 1';
 			}
 		}
