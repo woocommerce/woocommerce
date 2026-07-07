@@ -37,10 +37,13 @@ class StockPolicy implements RegisterHooksInterface {
 
 	/**
 	 * Register hooks.
+	 *
+	 * Variations are covered by `woocommerce_product_is_in_stock` too —
+	 * WC_Product_Variation resolves is_in_stock() through the shared filter
+	 * in the product base class; no variation-specific filter exists.
 	 */
 	public function register(): void {
 		add_filter( 'woocommerce_product_is_in_stock', array( $this, 'maybe_force_in_stock' ) );
-		add_filter( 'woocommerce_variation_is_in_stock', array( $this, 'maybe_force_in_stock' ) );
 		add_filter( 'woocommerce_product_backorders_allowed', array( $this, 'maybe_force_in_stock' ) );
 	}
 

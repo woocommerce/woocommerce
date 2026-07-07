@@ -37,7 +37,6 @@ class StockPolicyTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_filter( 'woocommerce_product_is_in_stock', array( $this->sut, 'maybe_force_in_stock' ) );
-		remove_filter( 'woocommerce_variation_is_in_stock', array( $this->sut, 'maybe_force_in_stock' ) );
 		remove_filter( 'woocommerce_product_backorders_allowed', array( $this->sut, 'maybe_force_in_stock' ) );
 		Context::set_test_override( null );
 		parent::tearDown();
@@ -56,6 +55,26 @@ class StockPolicyTest extends WC_Unit_Test_Case {
 
 		Context::set_test_override( true );
 		$this->assertTrue( $product->is_in_stock() );
+	}
+
+	/**
+	 * Variations resolve is_in_stock() through the shared product filter; an
+	 * out-of-stock variation must be sellable too.
+	 *
+	 * @testdox An out-of-stock variation is sellable in POS context.
+	 */
+	public function test_out_of_stock_variation_sellable_in_pos_context(): void {
+		$variable  = \WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $variable->get_children()[0] );
+		$variation->set_stock_status( \Automattic\WooCommerce\Enums\ProductStockStatus::OUT_OF_STOCK );
+		$variation->save();
+		$variation = wc_get_product( $variation->get_id() );
+
+		Context::set_test_override( false );
+		$this->assertFalse( $variation->is_in_stock() );
+
+		Context::set_test_override( true );
+		$this->assertTrue( $variation->is_in_stock() );
 	}
 
 	/**
