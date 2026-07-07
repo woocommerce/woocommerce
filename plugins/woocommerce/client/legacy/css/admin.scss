@@ -8051,15 +8051,6 @@ table.bar_chart {
 		width: 100% !important;
 	}
 
-	// Establish a positioning context so a dropdown parented to the modal
-	// content (see dropdownParent in wc-enhanced-select.js) positions relative
-	// to the modal rather than an unexpected ancestor. Low-risk safeguard; if
-	// the results list still clips, switch the dropdownParent target to a
-	// non-clipping ancestor.
-	.wc-backbone-modal-content {
-		position: relative;
-	}
-
 	// Keep the clear (x) icon from overlapping the dropdown chevron on single
 	// selects inside the modal (e.g. the product-search rows). Reserve room
 	// for both icons and sit the clear icon to the left of the chevron. Scoped
