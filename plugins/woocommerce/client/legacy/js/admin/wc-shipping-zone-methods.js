@@ -33,9 +33,11 @@
 					this.changes = changes;
 					this.trigger( 'change:methods' );
 				},
-				save: function() {
+				save: function( options ) {
 					// Special handling for an empty 'zone_locations' array, which jQuery filters out during $.post().
 					var changes = _.clone( this.changes );
+					this.saveOptions = options || {};
+
 					if ( _.has( changes, 'zone_locations' ) && _.isEmpty( changes.zone_locations ) ) {
 						changes.zone_locations = [''];
 					}
@@ -67,7 +69,8 @@
 							shippingMethod.set( 'methods', response.data.methods );
 							shippingMethod.trigger( 'change:methods' );
 							shippingMethod.changes = {};
-							shippingMethod.trigger( 'saved:methods' );
+							shippingMethod.trigger( 'saved:methods', shippingMethod.saveOptions || {} );
+							shippingMethod.saveOptions = {};
 
 							// Overrides the onbeforeunload callback added by settings.js.
 							window.onbeforeunload = null;
@@ -266,9 +269,14 @@
 					$save_button.prop( 'disabled', false );
 					$save_button.removeClass( 'is-busy' );
 				},
-				clearUnloadConfirmation: function() {
+				clearUnloadConfirmation: function( options ) {
 					this.needsUnloadConfirm = false;
-					$save_button.attr( 'disabled', 'disabled' );
+					if ( options && options.keepSaveButtonEnabled ) {
+						$save_button.prop( 'disabled', false );
+						$save_button.removeClass( 'is-busy' );
+					} else {
+						$save_button.attr( 'disabled', 'disabled' );
+					}
 				},
 				unloadConfirmation: function( event ) {
 					if ( event.data.view.needsUnloadConfirm ) {
@@ -386,6 +394,8 @@
 				},
 				onConfigureShippingMethodSubmitted: function( event, target, posted_data ) {
 					if ( 'wc-modal-shipping-method-settings' === target ) {
+						var isNewMethod = $( '#btn-ok' ).data( 'status' ) === 'new';
+
 						shippingMethodView.block();
 
 						// Save method settings via ajax call
@@ -407,7 +417,9 @@
 
 									// Method was saved. Re-render.
 									if ( _.size( shippingMethodView.model.changes ) ) {
-										shippingMethodView.model.save();
+										shippingMethodView.model.save({
+											keepSaveButtonEnabled: isNewMethod
+										});
 									} else {
 										shippingMethodView.model.onSaveResponse( response, textStatus );
 									}
@@ -649,8 +661,14 @@
 
 								shippingMethodView.highlightOnFocus( '.wc-shipping-modal-price' );
 							} else {
-								shippingMethodView.model.trigger( 'change:methods' );
-								shippingMethodView.model.trigger( 'saved:methods' );
+								if ( _.size( shippingMethodView.model.changes ) ) {
+									shippingMethodView.model.save({
+										keepSaveButtonEnabled: true
+									});
+								} else {
+									shippingMethodView.model.trigger( 'change:methods' );
+									shippingMethodView.model.trigger( 'saved:methods' );
+								}
 							}
 
 							$( document.body ).trigger( 'init_tooltips' );

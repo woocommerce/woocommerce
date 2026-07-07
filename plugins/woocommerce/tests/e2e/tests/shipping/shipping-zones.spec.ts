@@ -110,3 +110,53 @@ test( 'can delete the shipping zone method', async ( { page, zone } ) => {
 		/You can add multiple shipping methods within this zone. Only customers within the zone will see them.*/
 	);
 } );
+
+test( 'keeps save changes enabled after adding a method to an unsaved shipping zone', async ( {
+	page,
+	restApi,
+} ) => {
+	const zoneName = `Unsaved zone ${ rand() }`;
+
+	try {
+		await page.goto(
+			'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
+		);
+		await page.getByLabel( 'Zone name' ).fill( zoneName );
+		await page
+			.getByRole( 'combobox', { name: 'Start typing to filter zones' } )
+			.fill( 'United States' );
+		await page
+			.getByRole( 'checkbox', { name: 'United States (US)' } )
+			.click();
+
+		await expect( page.locator( '#submit' ) ).toBeEnabled();
+
+		await page
+			.getByRole( 'button', { name: 'Add shipping method' } )
+			.click();
+		await page.getByText( 'Flat rate' ).click();
+		await page.getByRole( 'button', { name: 'Continue' } ).click();
+		await page.getByRole( 'button', { name: 'Create and save' } ).click();
+
+		await expect(
+			page.locator( '.wc-shipping-zone-method-title', {
+				hasText: 'Flat rate',
+			} )
+		).toBeVisible();
+		await expect( page.locator( '#submit' ) ).toBeEnabled();
+	} finally {
+		const response = await restApi.get( `${ WC_API_PATH }/shipping/zones` );
+		const zones = response.data.filter( ( zoneData ) => {
+			return zoneData.name === zoneName;
+		} );
+
+		for ( const createdZone of zones ) {
+			await restApi.delete(
+				`${ WC_API_PATH }/shipping/zones/${ createdZone.id }`,
+				{
+					force: true,
+				}
+			);
+		}
+	}
+} );
