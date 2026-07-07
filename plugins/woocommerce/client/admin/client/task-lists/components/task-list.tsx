@@ -69,6 +69,15 @@ export const TaskList = ( {
 		} );
 	};
 
+	const trackClick = ( task: TaskListProps[ 'tasks' ][ number ] ) => {
+		recordEvent( eventPrefix + 'task_click', {
+			task_name: task.id,
+			task_complete: task.isComplete,
+			task_dismissed: task.isDismissed,
+			context: layoutString,
+		} );
+	};
+
 	useEffect( () => {
 		recordTaskListView();
 	}, [] );
@@ -106,6 +115,7 @@ export const TaskList = ( {
 			isExpandable={ isExpandable }
 			task={ task }
 			setExpandedTask={ setExpandedTask }
+			trackClick={ () => trackClick( task ) }
 		/>
 	) );
 

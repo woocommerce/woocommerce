@@ -10273,12 +10273,6 @@ parameters:
 			path: includes/class-wc-cart.php
 
 		-
-			message: '#^Parameter \#1 \$product_id of method WC_Cart\:\:generate_cart_id\(\) expects int, int\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-cart.php
-
-		-
 			message: '#^Parameter \#1 \$stock_quantity of function wc_format_stock_quantity_for_display expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 3
@@ -11540,18 +11534,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_order_number\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-emails.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_formatted_name\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-emails.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_stock_quantity\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: includes/class-wc-emails.php
@@ -31648,12 +31630,6 @@ parameters:
 			path: includes/shortcodes/class-wc-shortcode-my-account.php
 
 		-
-			message: '#^Function wc_add_notice invoked with 4 parameters, 1\-3 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-my-account.php
-
-		-
 			message: '#^Method WC_Shortcode_My_Account\:\:add_payment_method\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -33046,12 +33022,6 @@ parameters:
 			path: includes/wc-account-functions.php
 
 		-
-			message: '#^@param string \$old_slug does not accept actual type of parameter\: string\|null\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: includes/wc-attribute-functions.php
-
-		-
 			message: '#^Argument of an invalid type array\<int, WP_Term\>\|WP_Error supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
@@ -33103,30 +33073,6 @@ parameters:
 			message: '#^Parameter \#1 \$args of function get_terms expects array\{taxonomy\?\: array\<string\>\|string, object_ids\?\: array\<int\>\|int, orderby\?\: string, order\?\: string, hide_empty\?\: bool\|int, include\?\: array\<int\>\|string, exclude\?\: array\<int\>\|string, exclude_tree\?\: array\<int\>\|string, \.\.\.\}, non\-falsy\-string given\.$#'
 			identifier: argument.type
 			count: 1
-			path: includes/wc-attribute-functions.php
-
-		-
-			message: '#^Parameter \#1 \$attribute_name of function wc_attribute_taxonomy_name expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 3
-			path: includes/wc-attribute-functions.php
-
-		-
-			message: '#^Parameter \#1 \$attribute_name of function wc_check_if_attribute_name_is_reserved expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-attribute-functions.php
-
-		-
-			message: '#^Parameter \#1 \$string of function strlen expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-attribute-functions.php
-
-		-
-			message: '#^Parameter \#1 \$title of function sanitize_title expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 3
 			path: includes/wc-attribute-functions.php
 
 		-
@@ -34409,12 +34355,6 @@ parameters:
 
 		-
 			message: '#^Function wc_format_option_price_num_decimals\(\) should return string but returns int\<0, max\>\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/wc-formatting-functions.php
-
-		-
-			message: '#^Function wc_format_phone_number\(\) should return string but returns string\|null\.$#'
 			identifier: return.type
 			count: 1
 			path: includes/wc-formatting-functions.php
@@ -41451,15 +41391,11 @@ parameters:
 			count: 3
 			path: src/Admin/API/Reports/Customers/DataStore.php
 
-
-
 		-
 			message: '#^Call to an undefined method object\:\:get_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Admin/API/Reports/Customers/DataStore.php
-
-
 
 		-
 			message: '#^Cannot call method get_id\(\) on Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\WC_Order\|WC_Order\|WC_Order_Refund\|false\.$#'
@@ -49538,12 +49474,6 @@ parameters:
 			path: src/Blocks/AssetsController.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:register_and_enqueue_site_editor_assets\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/AssetsController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:register_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -57037,17 +56967,6 @@ parameters:
 			count: 1
 			path: src/Internal/Admin/Logging/LogHandlerFileV2.php
 
-		-
-			message: '#^Parameter \#1 \$input of function array_filter expects array, array\<Automattic\\WooCommerce\\Internal\\Admin\\Logging\\FileV2\\File\>\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Logging/LogHandlerFileV2.php
-
-		-
-			message: '#^Parameter \#1 \$var of function count expects array\|Countable, array\<Automattic\\WooCommerce\\Internal\\Admin\\Logging\\FileV2\\File\>\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Logging/LogHandlerFileV2.php
 
 		-
 			message: '#^Call to protected method prepare_column_headers\(\) of class WC_Admin_Log_Table_List\.$#'

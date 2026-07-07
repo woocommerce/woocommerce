@@ -133,6 +133,41 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 			OR meta_key IN ( 'wc_last_active', 'wc_marketplace_suggestions_dismissed_suggestions' );"
 	);
 
+	/*
+	 * Remove direct POS capabilities (woocommerce_pos_*) granted per user via WP_User::add_cap().
+	 *
+	 * Unlike the woocommerce_pos_preset meta removed above, these caps live inside the serialized
+	 * {prefix}capabilities meta row rather than a woocommerce_ meta key, so the sweep above can't reach
+	 * them. Left behind, a reinstall would silently restore POS access because has_pos_access() keys off
+	 * these caps. The row also stores the user's role, so strip only the woocommerce_pos_ caps per user
+	 * via remove_cap() rather than deleting the row.
+	 *
+	 * Users are matched by the woocommerce_pos_ cap prefix — the same {prefix}capabilities LIKE that
+	 * WP_User_Query's capability__in (used by Capabilities::pos_staff_user_query_args()) is built on —
+	 * so no fixed cap list is duplicated here; the PSR-4 Capabilities class is not autoloadable during
+	 * uninstall. The per-user strip is prefix-based for the same reason.
+	 */
+	$pos_staff_ids = get_users(
+		array(
+			'fields'     => 'ID',
+			'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- one-off uninstall cleanup, not a runtime query.
+				array(
+					'key'     => $wpdb->prefix . 'capabilities',
+					'value'   => 'woocommerce_pos_',
+					'compare' => 'LIKE',
+				),
+			),
+		)
+	);
+	foreach ( $pos_staff_ids as $pos_staff_id ) {
+		$pos_staff_user = new WP_User( (int) $pos_staff_id );
+		foreach ( array_keys( $pos_staff_user->caps ) as $pos_capability ) {
+			if ( 0 === strpos( (string) $pos_capability, 'woocommerce_pos_' ) ) {
+				$pos_staff_user->remove_cap( (string) $pos_capability );
+			}
+		}
+	}
+
 	// Delete our data from the post and post meta tables, and remove any additional tables we created.
 	$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation', 'shop_coupon', 'shop_order', 'shop_order_refund' );" );
 	$wpdb->query( "DELETE meta FROM {$wpdb->postmeta} meta LEFT JOIN {$wpdb->posts} posts ON posts.ID = meta.post_id WHERE posts.ID IS NULL;" );
