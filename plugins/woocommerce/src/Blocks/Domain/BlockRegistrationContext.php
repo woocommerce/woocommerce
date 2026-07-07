@@ -20,13 +20,33 @@ class BlockRegistrationContext {
 	/**
 	 * Whether block types and patterns should be registered for the current request.
 	 *
+	 * @return bool True unless the request is a known non-rendering context.
+	 */
+	public function should_register(): bool {
+		/**
+		 * Filters whether WooCommerce should register its block types and patterns for the current request.
+		 *
+		 * Registration is skipped on known non-rendering contexts (the Store API and other WooCommerce REST
+		 * namespaces, cron, AJAX, XML-RPC, favicon, robots.txt and XML sitemaps) as a performance optimisation.
+		 * An extension that renders WooCommerce blocks in one of those contexts can return true here to opt back in.
+		 *
+		 * @since 11.1.0
+		 *
+		 * @param bool $should_register Whether block types and patterns should be registered for this request.
+		 */
+		return (bool) apply_filters( 'woocommerce_should_register_blocks', $this->is_rendering_request() );
+	}
+
+	/**
+	 * Whether the current request may render or edit blocks.
+	 *
 	 * Blacklist of known non-rendering contexts: an unrecognised request keeps registering (the previous
 	 * behaviour), so a missed case costs a little performance but never a rendering regression. Front-end,
 	 * admin and wp/v2 (block/site editor) requests therefore keep registering.
 	 *
 	 * @return bool True unless the request is a known non-rendering context.
 	 */
-	public function should_register(): bool {
+	private function is_rendering_request(): bool {
 		// Store API renders no blocks.
 		if ( wc()->is_store_api_request() ) {
 			return false;
