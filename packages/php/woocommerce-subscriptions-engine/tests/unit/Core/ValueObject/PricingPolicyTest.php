@@ -157,7 +157,15 @@ class PricingPolicyTest extends TestCase {
 
 		// A value-less bogo entry normalizes to value 0.0 and round-trips that shape.
 		$this->assertSame( 0.0, $policy->get_policies()[0]['value'] );
-		$this->assertSame( 0.0, $policy->to_array()['policies'][0]['value'] );
+		$this->assertSame(
+			array(
+				array(
+					'type'  => 'bogo',
+					'value' => 0.0,
+				),
+			),
+			$policy->to_array()['policies']
+		);
 
 		// Money-neutral: neither the unit price nor the line total moves.
 		$this->assertSame( 100.0, $policy->calculate_price( 100.0 ) );

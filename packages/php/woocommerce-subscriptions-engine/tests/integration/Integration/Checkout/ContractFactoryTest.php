@@ -283,7 +283,7 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 		$this->assertCount( 2, $policies );
 		$this->assertSame( 'bogo', $policies[0]['type'] );
 		$this->assertSame( 0.0, $policies[0]['value'] );
-		$this->assertSame( 1, $policies[0]['duration_cycles'] );
+		$this->assertSame( 1, $policies[0]['duration_cycles'] ?? null );
 		$this->assertSame( 'percentage', $policies[1]['type'] );
 		$this->assertSame( 10.0, $policies[1]['value'] );
 	}
