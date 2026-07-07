@@ -131,6 +131,8 @@ test( 'keeps save changes enabled after adding a method to an unsaved shipping z
 				exact: true,
 			} )
 			.click();
+		await page.keyboard.press( 'Escape' );
+		await expect( page.locator( '.select2-container--open' ) ).toBeHidden();
 
 		await expect( page.locator( '#submit' ) ).toBeEnabled();
 
