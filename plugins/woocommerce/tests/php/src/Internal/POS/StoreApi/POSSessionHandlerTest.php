@@ -152,6 +152,31 @@ class POSSessionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The web handler's foreign-token replacement session must be a fresh
+	 * guest — keyed to the logged-in user it would clobber their real session
+	 * row with empty data — and must carry a real expiration, or the cleanup
+	 * cron purges it mid-session.
+	 *
+	 * @testdox The web handler's foreign-token fallback never adopts the logged-in user and gets a real expiration.
+	 */
+	public function test_web_handler_foreign_token_fallback_is_safe(): void {
+		$operator_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
+		wp_set_current_user( $operator_id );
+
+		$_SERVER['HTTP_CART_TOKEN'] = CartTokenUtils::get_cart_token( 'pos_' . wc_rand_hash( '', 28 ) );
+
+		$web = new \Automattic\WooCommerce\StoreApi\SessionHandler();
+		$web->init();
+
+		$this->assertNotSame( (string) $operator_id, $web->get_customer_id(), 'The fallback session must never be keyed to the logged-in user.' );
+		$this->assertSame( 't_', substr( $web->get_customer_id(), 0, 2 ) );
+
+		$expiration = new \ReflectionProperty( $web, 'session_expiration' );
+		$expiration->setAccessible( true );
+		$this->assertGreaterThan( time(), $expiration->getValue( $web ), 'The fallback session must not be born expired.' );
+	}
+
+	/**
 	 * @testdox init with an invalid Cart-Token starts a fresh guest session.
 	 */
 	public function test_init_with_invalid_token_starts_fresh_guest_session(): void {

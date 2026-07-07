@@ -69,10 +69,17 @@ final class SessionHandler extends WC_Session {
 		// (e.g. the internal POS transaction sessions, prefixed `pos_`) must
 		// not open their sessions here: this surface has no capability gate,
 		// so honouring a foreign token would let anyone holding it read and
-		// mutate that cart.
+		// mutate that cart. The replacement session is a FRESH guest: never
+		// generate_customer_id(), which returns the logged-in user's ID and
+		// would key an empty session onto their real session row; and with a
+		// real expiration, or the cleanup cron would purge the row while the
+		// client's token is still valid.
 		if ( ! ctype_digit( $customer_id ) && 0 !== strpos( $customer_id, 't_' ) ) {
-			$this->_customer_id = $this->generate_customer_id();
-			$this->_data        = array();
+			$this->_customer_id = wc_rand_hash( 't_', 30 );
+
+			/** This filter is documented in includes/class-wc-session-handler.php. */
+			$this->session_expiration = time() + intval( apply_filters( 'wc_session_expiration', 60 * 60 * 48 ) );
+			$this->_data              = array();
 			return;
 		}
 
