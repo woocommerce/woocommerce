@@ -1717,7 +1717,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Whether the current user can view this product: it is published, or they can edit it.
 	 * A variation additionally requires its parent to be viewable.
 	 *
-	 * @since 11.0.0
+	 * @since 11.1.0
 	 * @return bool
 	 */
 	public function is_viewable() {
@@ -1730,7 +1730,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Whether this product is publicly viewable: the product and its parent (if it has one) are published.
 	 *
-	 * @since 11.0.0
+	 * @since 11.1.0
 	 * @return bool
 	 */
 	public function is_publicly_viewable() {
