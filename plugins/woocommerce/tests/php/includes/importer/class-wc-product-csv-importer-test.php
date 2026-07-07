@@ -265,6 +265,8 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$previous_default_cat = get_option( 'default_product_cat' );
 		update_option( 'default_product_cat', $default_cat );
 
+		$imported_ids = array();
+
 		try {
 			// Build the header-to-field mapping the way the admin import UI does.
 			$csv_file   = __DIR__ . '/variation-category-31815.csv';
@@ -274,14 +276,15 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			$auto_map->setAccessible( true );
 			$mapping = array_combine( $headers, $auto_map->invoke( $controller, $headers ) );
 
-			$importer = new WC_Product_CSV_Importer(
+			$importer     = new WC_Product_CSV_Importer(
 				$csv_file,
 				array(
 					'parse'   => true,
 					'mapping' => $mapping,
 				)
 			);
-			$data     = $importer->import();
+			$data         = $importer->import();
+			$imported_ids = array_merge( $data['imported'], $data['imported_variations'] );
 
 			$this->assertCount( 2, $data['imported_variations'], 'Expected 2 variations to be imported.' );
 
@@ -292,12 +295,15 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 					wp_get_object_terms( $variation_id, 'product_cat', array( 'fields' => 'ids' ) ),
 					'Imported variations must not be assigned any product category.'
 				);
-			}
-
-			foreach ( array_merge( $data['imported'], $data['imported_variations'] ) as $id ) {
-				WC_Helper_Product::delete_product( $id );
+				$this->assertEmpty(
+					wp_get_object_terms( $variation_id, 'product_tag', array( 'fields' => 'ids' ) ),
+					'Imported variations must not be assigned any product tag.'
+				);
 			}
 		} finally {
+			foreach ( $imported_ids as $id ) {
+				WC_Helper_Product::delete_product( $id );
+			}
 			update_option( 'default_product_cat', $previous_default_cat );
 		}
 	}
