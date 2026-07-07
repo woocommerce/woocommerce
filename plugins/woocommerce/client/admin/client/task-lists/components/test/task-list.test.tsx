@@ -280,7 +280,7 @@ describe( 'TaskList', () => {
 		);
 
 		expect( recordEvent ).toHaveBeenCalledWith(
-			'extended_tasklist_task_clicked',
+			'extended_tasklist_task_click',
 			{
 				task_name: 'extension',
 				task_complete: false,
@@ -313,7 +313,7 @@ describe( 'TaskList', () => {
 		);
 
 		expect( recordEvent ).toHaveBeenCalledWith(
-			'extended_tasklist_task_clicked',
+			'extended_tasklist_task_click',
 			expect.objectContaining( {
 				task_name: 'completed',
 				task_complete: true,
