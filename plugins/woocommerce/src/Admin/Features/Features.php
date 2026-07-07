@@ -17,11 +17,6 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
  */
 class Features {
 	/**
-	 * WooCommerce version where WC Admin feature flag compatibility shims were deprecated.
-	 */
-	private const RETIRED_FEATURE_COMPATIBILITY_DEPRECATION_VERSION = '11.0.0';
-
-	/**
 	 * Class instance.
 	 *
 	 * @var Loader instance
@@ -29,45 +24,138 @@ class Features {
 	protected static $instance = null;
 
 	/**
-	 * Removal versions for WC Admin feature flags kept for backward compatibility.
+	 * Version metadata for WC Admin feature flags kept for backward compatibility.
 	 *
 	 * Keep this dictionary in sync with RETIRED_FEATURE_FLAGS in
 	 * plugins/woocommerce/client/admin/client/utils/features/retired-feature-flags.ts.
 	 *
-	 * @var array<string, ?string>
+	 * @var array<string, array{deprecated_since: string, removed_in: ?string}>
 	 */
-	private static $retired_feature_compatibility_removal_versions = array(
-		'activity-panels'                      => null,
-		'analytics'                            => null,
-		'analytics-scheduled-import'           => null,
-		'experimental-iapi-mini-cart'          => null,
-		'coupons'                              => null,
-		'core-profiler'                        => null,
-		'customize-store'                      => null,
-		'customer-effort-score-tracks'         => null,
-		'import-products-task'                 => null,
-		'experimental-fashion-sample-products' => null,
-		'shipping-smart-defaults'              => null,
-		'shipping-setting-tour'                => null,
-		'homescreen'                           => null,
-		'marketing'                            => null,
-		'mobile-app-banner'                    => null,
-		'onboarding'                           => null,
-		'onboarding-tasks'                     => null,
-		'pattern-toolkit-full-composability'   => null,
-		'payment-gateway-suggestions'          => null,
-		'product-custom-fields'                => null,
-		'printful'                             => null,
-		'remote-inbox-notifications'           => null,
-		'remote-free-extensions'               => null,
-		'shipping-label-banner'                => null,
-		'subscriptions'                        => null,
-		'store-alerts'                         => null,
-		'transient-notices'                    => null,
-		'wc-pay-promotion'                     => null,
-		'wc-pay-welcome-page'                  => null,
-		'woo-mobile-welcome'                   => null,
-		'launch-your-store'                    => null,
+	private static $retired_feature_compatibility_versions = array(
+		'activity-panels'                      => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'analytics'                            => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'analytics-scheduled-import'           => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'experimental-iapi-mini-cart'          => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'coupons'                              => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'core-profiler'                        => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'customize-store'                      => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'customer-effort-score-tracks'         => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'import-products-task'                 => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'experimental-fashion-sample-products' => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'shipping-smart-defaults'              => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'shipping-setting-tour'                => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'homescreen'                           => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'marketing'                            => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'mobile-app-banner'                    => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'onboarding'                           => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'onboarding-tasks'                     => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'pattern-toolkit-full-composability'   => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'payment-gateway-suggestions'          => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'product-custom-fields'                => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'printful'                             => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'remote-inbox-notifications'           => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'remote-free-extensions'               => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'shipping-label-banner'                => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'subscriptions'                        => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'store-alerts'                         => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'transient-notices'                    => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'wc-pay-promotion'                     => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'wc-pay-welcome-page'                  => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'woo-mobile-welcome'                   => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
+		'launch-your-store'                    => array(
+			'deprecated_since' => '11.1.0',
+			'removed_in'       => null,
+		),
 	);
 
 	/**
@@ -109,12 +197,12 @@ class Features {
 	/**
 	 * Gets the optional feature options as an associative array that can be toggled on or off.
 	 *
-	 * @deprecated 11.0.0 Use FeaturesUtil::feature_is_enabled() to check if a feature is enabled.
+	 * @deprecated 11.1.0 Use FeaturesUtil::feature_is_enabled() to check if a feature is enabled.
 	 *
 	 * @return array
 	 */
 	public static function get_optional_feature_options() {
-		wc_deprecated_function( __METHOD__, '11.0.0', 'FeaturesUtil::feature_is_enabled()' );
+		wc_deprecated_function( __METHOD__, '11.1.0', 'FeaturesUtil::feature_is_enabled()' );
 
 		return array(
 			'analytics'                  => Analytics::TOGGLE_OPTION_NAME,
@@ -281,13 +369,13 @@ class Features {
 	/**
 	 * Enable a toggleable optional feature.
 	 *
-	 * @deprecated 11.0.0 Use FeaturesUtil::feature_is_enabled() to check if a feature is enabled.
+	 * @deprecated 11.1.0 Use FeaturesUtil::feature_is_enabled() to check if a feature is enabled.
 	 *
 	 * @param string $feature Feature name.
 	 * @return bool
 	 */
 	public static function enable( $feature ) {
-		wc_deprecated_function( __METHOD__, '11.0.0', 'FeaturesUtil::feature_is_enabled()' );
+		wc_deprecated_function( __METHOD__, '11.1.0', 'FeaturesUtil::feature_is_enabled()' );
 
 		if ( 'analytics' === $feature ) {
 			update_option( Analytics::TOGGLE_OPTION_NAME, 'yes' );
@@ -305,13 +393,13 @@ class Features {
 	/**
 	 * Disable a toggleable optional feature.
 	 *
-	 * @deprecated 11.0.0 Use FeaturesUtil::feature_is_enabled() to check if a feature is enabled.
+	 * @deprecated 11.1.0 Use FeaturesUtil::feature_is_enabled() to check if a feature is enabled.
 	 *
 	 * @param string $feature Feature name.
 	 * @return bool
 	 */
 	public static function disable( $feature ) {
-		wc_deprecated_function( __METHOD__, '11.0.0', 'FeaturesUtil::feature_is_enabled()' );
+		wc_deprecated_function( __METHOD__, '11.1.0', 'FeaturesUtil::feature_is_enabled()' );
 
 		if ( 'analytics' === $feature ) {
 			update_option( Analytics::TOGGLE_OPTION_NAME, 'no' );
@@ -402,7 +490,7 @@ class Features {
 	 */
 	public static function get_legacy_feature_compatibility_values() {
 		$compatibility_values = array_merge(
-			array_fill_keys( array_keys( self::$retired_feature_compatibility_removal_versions ), true ),
+			array_fill_keys( array_keys( self::$retired_feature_compatibility_versions ), true ),
 			array(
 				'analytics'                  => FeaturesUtil::feature_is_enabled( 'analytics' ),
 				'remote-inbox-notifications' => 'yes' === get_option( RemoteInboxNotifications::TOGGLE_OPTION_NAME, 'yes' ),
@@ -422,7 +510,7 @@ class Features {
 	 */
 	private static function get_legacy_feature_compatibility_defaults() {
 		return array_merge(
-			array_fill_keys( array_keys( self::$retired_feature_compatibility_removal_versions ), true ),
+			array_fill_keys( array_keys( self::$retired_feature_compatibility_versions ), true ),
 			array(
 				'analytics'                  => true,
 				'remote-inbox-notifications' => true,
@@ -439,7 +527,7 @@ class Features {
 		/**
 		 * Filter allowing WooCommerce Admin features to be changed after legacy compatibility defaults are seeded.
 		 *
-		 * @since 11.0.0
+		 * @since 11.1.0
 		 *
 		 * @param array $features Array of feature slugs.
 		 */
@@ -457,13 +545,35 @@ class Features {
 	}
 
 	/**
+	 * Gets version metadata for a legacy feature flag shim.
+	 *
+	 * @param string $feature Feature slug.
+	 * @return array{deprecated_since: string, removed_in: ?string}|null
+	 */
+	private static function get_legacy_feature_compatibility_versions( $feature ) {
+		return self::$retired_feature_compatibility_versions[ $feature ] ?? null;
+	}
+
+	/**
+	 * Gets the WooCommerce version where a legacy feature flag shim was deprecated.
+	 *
+	 * @param string $feature Feature slug.
+	 * @return string|null
+	 */
+	private static function get_legacy_feature_compatibility_deprecation_version( $feature ) {
+		$versions = self::get_legacy_feature_compatibility_versions( $feature );
+		return $versions['deprecated_since'] ?? null;
+	}
+
+	/**
 	 * Gets the WooCommerce version where a legacy feature flag shim will be removed.
 	 *
 	 * @param string $feature Feature slug.
 	 * @return string|null
 	 */
 	private static function get_legacy_feature_compatibility_removal_version( $feature ) {
-		return self::$retired_feature_compatibility_removal_versions[ $feature ] ?? null;
+		$versions = self::get_legacy_feature_compatibility_versions( $feature );
+		return $versions['removed_in'] ?? null;
 	}
 
 	/**
@@ -473,11 +583,16 @@ class Features {
 	 * @param string $feature Feature slug.
 	 */
 	private static function warn_legacy_feature_compatibility_usage( $method, $feature ): void {
-		$removal_version = self::get_legacy_feature_compatibility_removal_version( $feature );
+		$deprecation_version = self::get_legacy_feature_compatibility_deprecation_version( $feature );
+		$removal_version     = self::get_legacy_feature_compatibility_removal_version( $feature );
+
+		if ( ! $deprecation_version ) {
+			return;
+		}
 
 		wc_deprecated_function(
 			sprintf( "%s( '%s' )", $method, $feature ),
-			self::RETIRED_FEATURE_COMPATIBILITY_DEPRECATION_VERSION,
+			$deprecation_version,
 			sprintf(
 				'direct feature behavior checks. The %1$s WC Admin feature flag shim will be removed in %2$s.',
 				$feature,
