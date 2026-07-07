@@ -348,8 +348,13 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 		$data = $response->get_data();
 		$this->assertTrue( $data['items'][0]['added'] );
 		$this->assertFalse( $data['items'][1]['added'] );
-		$this->assertSame( 'woocommerce_pos_rest_add_item_failed', $data['items'][1]['error']['code'] );
-		$this->assertCount( 1, $data['cart']['items'] );
+		// Web parity: the crash reports the same generic code web's dispatcher
+		// 500s with, and the cart keeps whatever state core left behind (the
+		// throwing listener fired AFTER the line was inserted, so it is in the
+		// cart). The envelope's cart is the source of truth, like a web
+		// client's re-fetch after a 500.
+		$this->assertSame( 'woocommerce_rest_unknown_server_error', $data['items'][1]['error']['code'] );
+		$this->assertCount( 2, $data['cart']['items'] );
 	}
 
 	/**

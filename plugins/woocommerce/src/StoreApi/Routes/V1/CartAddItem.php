@@ -2,11 +2,14 @@
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\StoreApi\Utilities\AddItemToCartTrait;
 
 /**
  * CartAddItem class.
  */
 class CartAddItem extends AbstractCartRoute {
+	use AddItemToCartTrait;
+
 	/**
 	 * The route identifier.
 	 *
@@ -93,55 +96,7 @@ class CartAddItem extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		// Do not allow key to be specified during creation.
-		if ( ! empty( $request['key'] ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_item_exists', esc_html__( 'Cannot create an existing cart item.', 'woocommerce' ), 400 );
-		}
-
-		/**
-		 * Filters cart item data sent via the API before it is passed to the cart controller.
-		 *
-		 * This hook filters cart items. It allows the request data to be changed, for example, quantity, or
-		 * supplemental cart item data, before it is passed into CartController::add_to_cart and stored to session.
-		 *
-		 * CartController::add_to_cart only expects the keys id, quantity, variation, and cart_item_data, so other values
-		 * may be ignored. CartController::add_to_cart (and core) do already have a filter hook called
-		 * woocommerce_add_cart_item, but this does not have access to the original Store API request like this hook does.
-		 *
-		 * @since 8.8.0
-		 *
-		 * @param array $add_to_cart_data An array of cart item data.
-		 * @return array
-		 */
-		$add_to_cart_data = apply_filters(
-			'woocommerce_store_api_add_to_cart_data',
-			array(
-				'id'             => $request['id'],
-				'quantity'       => $request['quantity'],
-				'variation'      => $request['variation'],
-				'cart_item_data' => [],
-			),
-			$request
-		);
-
-		$item_id   = $this->cart_controller->add_to_cart( $add_to_cart_data );
-		$cart      = $this->cart_controller->get_cart_instance();
-		$cart_item = $cart->get_cart_item( $item_id );
-
-		if ( ! empty( $cart_item ) ) {
-			$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
-			$quantity   = $add_to_cart_data['quantity'] ?? $cart_item['quantity'];
-
-			/**
-			 * Fires when an item is added to the cart from a user request.
-			 *
-			 * @param int       $product_id Product ID (variation ID for variable products).
-			 * @param int|float $quantity   Quantity added to the cart.
-			 *
-			 * @since 10.6.0
-			 */
-			do_action( 'internal_woocommerce_cart_item_added_from_user_request', $product_id, $quantity );
-		}
+		$this->add_item_to_cart_from_request( $request );
 
 		$response = rest_ensure_response( $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() ) );
 		$response->set_status( 201 );

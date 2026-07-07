@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\POS\StoreApi\Routes;
 use Automattic\WooCommerce\Internal\POS\StoreApi\Schemas\AddItemsSchema;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
+use Automattic\WooCommerce\StoreApi\Utilities\AddItemToCartTrait;
 
 /**
  * POS cart/add-items route.
@@ -31,6 +32,7 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
  */
 class CartAddItems extends AbstractCartRoute {
 
+	use AddItemToCartTrait;
 	use PosRouteTrait;
 
 	/**
@@ -152,93 +154,36 @@ class CartAddItems extends AbstractCartRoute {
 				'error'    => null,
 			);
 
-			// Extensions on the add-to-cart filter read the request's
-			// top-level id/quantity/variation (that is the filter's whole
-			// point). This batch request nests them in items[], so hand the
-			// filter a per-item view that looks like the web add-item request
-			// it was written against.
+			// Each batch item runs the web add-item pipeline verbatim (shared
+			// AddItemToCartTrait) against a per-item view of the request, so
+			// extensions written for the web route behave identically here.
 			$item_request = clone $request;
 			$item_request->set_param( 'id', $result['id'] );
 			$item_request->set_param( 'quantity', $result['quantity'] );
 			$item_request->set_param( 'variation', $item['variation'] ?? array() );
 
-			/**
-			 * Filters cart item data sent via the API before it is passed to the cart controller.
-			 *
-			 * Applied per item, mirroring the web cart/add-item route, so extensions
-			 * hooked there behave identically for POS adds.
-			 *
-			 * @since 8.8.0
-			 *
-			 * @param array            $add_to_cart_data An array of cart item data.
-			 * @param \WP_REST_Request $request          Full details about the request.
-			 * @return array
-			 */
-			$add_to_cart_data = apply_filters(
-				'woocommerce_store_api_add_to_cart_data',
-				array(
-					'id'             => $result['id'],
-					'quantity'       => $result['quantity'],
-					'variation'      => $item['variation'] ?? array(),
-					'cart_item_data' => array(),
-				),
-				$item_request
-			);
-
-			$keys_before_attempt = array_keys( $this->cart_controller->get_cart_instance()->get_cart_contents() );
-
 			try {
-				$result['key']   = $this->cart_controller->add_to_cart( $add_to_cart_data );
+				$result['key']   = $this->add_item_to_cart_from_request( $item_request );
 				$result['added'] = true;
 				++$added_count;
-
-				$cart_item = $this->cart_controller->get_cart_instance()->get_cart_item( $result['key'] );
-				if ( ! empty( $cart_item ) ) {
-					$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
-
-					/**
-					 * Fires when an item is added to the cart from a user request.
-					 *
-					 * @param int       $product_id Product ID (variation ID for variable products).
-					 * @param int|float $quantity   Quantity added to the cart.
-					 *
-					 * @since 10.6.0
-					 */
-					do_action( 'internal_woocommerce_cart_item_added_from_user_request', $product_id, $add_to_cart_data['quantity'] ?? $cart_item['quantity'] );
-				}
 			} catch ( RouteException $error ) {
+				// What the web route would have answered with a 4xx.
 				$result['error'] = array(
 					'code'    => $error->getErrorCode(),
 					'message' => wp_specialchars_decode( $error->getMessage(), ENT_QUOTES ),
 				);
 			} catch ( \Throwable $unexpected ) {
-				// Third-party code on the add-to-cart hooks can throw anything.
-				// Items are processed independently by contract: one plugin
-				// blowing up on one item must not abort the batch as a 500 —
-				// earlier items are already in the cart, and the operator's
-				// natural reaction (rescan the basket) would double-add them.
-				//
-				// An exception can interrupt core's add mid-write, leaving a
-				// half-populated cart line (no totals) that would blow up
-				// response serialization — drop any line this attempt created.
-				// set_cart_contents (not remove_cart_item) on purpose: the
-				// line never validly existed, so no removal hooks and no
-				// restorable removed_contents entry, which would carry the
-				// same corrupt data into the response.
-				$cart          = $this->cart_controller->get_cart_instance();
-				$orphaned_keys = array_diff( array_keys( $cart->get_cart_contents() ), $keys_before_attempt );
-				if ( $orphaned_keys ) {
-					$contents = $cart->get_cart_contents();
-					foreach ( $orphaned_keys as $orphaned_key ) {
-						unset( $contents[ $orphaned_key ] );
-					}
-					$cart->set_cart_contents( $contents );
-				}
-
+				// What the web route would have answered with a generic 500
+				// (same code, see AbstractRoute's dispatch catch). Web parity
+				// means no cleanup: the cart keeps whatever state core left,
+				// and the envelope's cart — like a web client's re-fetch — is
+				// the source of truth. Totals are recalculated below before
+				// anything serializes the cart again.
 				$result['error'] = array(
-					'code'    => 'woocommerce_pos_rest_add_item_failed',
+					'code'    => 'woocommerce_rest_unknown_server_error',
 					'message' => wp_specialchars_decode( $unexpected->getMessage(), ENT_QUOTES ),
 				);
+				$this->cart_controller->get_cart_instance()->calculate_totals();
 			}
 
 			$results[] = $result;
