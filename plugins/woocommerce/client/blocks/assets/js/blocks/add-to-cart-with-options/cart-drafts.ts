@@ -79,6 +79,9 @@ export function getContextProductId(): number | undefined {
  * Find the draft for a product id (defaults to the shared context product id).
  * Returns the live, editable draft object or `undefined` when none exists yet.
  *
+ * This family uses the default draft keying (`String(productId)`) — it never
+ * declares a `draftKey` — so the draft lives under the product id's string key.
+ *
  * @param productId Optional explicit product id; defaults to the context id.
  * @return The matching draft, or `undefined`.
  */
@@ -88,7 +91,7 @@ export function getDraft( productId?: number ): DraftItem | undefined {
 		return undefined;
 	}
 	const { state } = getCartStore();
-	return state.draftItems.find( ( draft ) => draft.id === id );
+	return state.draftItems[ String( id ) ];
 }
 
 /**

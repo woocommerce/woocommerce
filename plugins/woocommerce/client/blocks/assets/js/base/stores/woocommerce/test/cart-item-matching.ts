@@ -13,8 +13,6 @@ import {
 	draftPropsMatchLineExtensions,
 	lineHasUnaccountedContent,
 	isGenericExactPair,
-	narrowCandidates,
-	resolveExactlyOne,
 	type DraftItem,
 } from '../cart-item-matching';
 
@@ -194,34 +192,6 @@ describe( 'cart-item-matching — pure ladder helpers', () => {
 			expect( isGenericExactPair( { 'my-plugin': 'A' }, line ) ).toBe(
 				false
 			);
-		} );
-	} );
-
-	describe( 'narrowCandidates (survivor set — feeds cart)', () => {
-		it( 'returns the survivors of the predicate', () => {
-			expect( narrowCandidates( [ 1, 2, 3 ], ( n ) => n > 1 ) ).toEqual( [
-				2, 3,
-			] );
-		} );
-
-		it( 'returns an empty set when nothing survives (no cart line case)', () => {
-			expect( narrowCandidates( [ 1, 2, 3 ], () => false ) ).toEqual(
-				[]
-			);
-		} );
-	} );
-
-	describe( 'resolveExactlyOne (exactly-one rule, never first-match)', () => {
-		it( 'returns the sole survivor', () => {
-			expect( resolveExactlyOne( [ 2 ] ) ).toBe( 2 );
-		} );
-
-		it( 'returns undefined for zero survivors', () => {
-			expect( resolveExactlyOne( [] ) ).toBeUndefined();
-		} );
-
-		it( 'returns undefined for several survivors (no first-match fallback)', () => {
-			expect( resolveExactlyOne( [ 2, 3 ] ) ).toBeUndefined();
 		} );
 	} );
 } );

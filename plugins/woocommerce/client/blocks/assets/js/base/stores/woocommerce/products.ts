@@ -11,14 +11,13 @@ import type {
  * A shopper's single attribute selection (Store API `add-item`/variation shape),
  * minus the display-only `raw_attribute`. Defined locally from `@woocommerce/types`
  * so the products store imports NOTHING from `woocommerce/cart` — coupling is
- * one-directional (cart → products only, T12).
+ * one-directional (cart → products only).
  */
 type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
 
 /**
- * The products store's OWN context namespace, `woocommerce/products`
- * (domain-scoped — T12). Per-element selection for the current
- * product/variation.
+ * The products store's OWN context namespace, `woocommerce/products`. Per-element
+ * selection for the current product/variation.
  *
  * The "current" product can be set in two ways:
  * - Globally, via `wp_interactivity_state( 'woocommerce/products', [ ... ] )`
@@ -33,10 +32,10 @@ type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
  * `variationId` is THE derivation source for the selected variation: a purchase
  * surface (e.g. the Add to Cart + Options form) resolves the shopper's attribute
  * selection to a variation via `findProduct` and writes the id here, alongside
- * the draft it upserts into `woocommerce/cart` (the "double write" — see the
- * schema's "Selection UI layering"). The products store reads ONLY its own
- * context/state — it never reads the cart store (neither its context nor its
- * state), so coupling is one-directional: cart → products only (T12).
+ * the draft it upserts into `woocommerce/cart` (the "double write"). The products
+ * store reads ONLY its own context/state — it never reads the cart store (neither
+ * its context nor its state), so coupling is one-directional: cart → products
+ * only.
  */
 type ProductContext = {
 	productId: number;
@@ -274,11 +273,10 @@ const { state: productsState } = store< ProductsStore >(
 
 				// `variationId` — set in the `woocommerce/products` context or
 				// this store's global state — is THE derivation source for the
-				// selected variation (T12). A purchase surface resolves the
-				// shopper's attribute selection to a variation via `findProduct`
-				// and writes the id here (the "double write": draft in
-				// `woocommerce/cart` for submission/pairing, `variationId` here for
-				// derivation — see the schema's "Selection UI layering"). It is
+				// selected variation. A purchase surface resolves the shopper's
+				// attribute selection to a variation via `findProduct` and writes
+				// the id here (the "double write": draft in `woocommerce/cart` for
+				// submission/pairing, `variationId` here for derivation). It is
 				// also how a surface pins a specific variation directly (e.g. a
 				// Single Product block bound to one variation). The products store
 				// reads ONLY its own context/state — never the cart store — so

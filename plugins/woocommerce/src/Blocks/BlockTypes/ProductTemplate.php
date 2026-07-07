@@ -3,7 +3,6 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
-use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use WP_Block;
 
 /**
@@ -87,24 +86,6 @@ class ProductTemplate extends AbstractBlock {
 			)
 		);
 
-		// T9 DEMO (boundary-breaking use case E14/E48, PR #65570): does any
-		// card carry a Product Quantity (stepper) block? When it does, each card
-		// needs a seeded cart draft so the stepper edits that card's draft and the
-		// Add to Cart button posts it — the same mechanics the Add to Cart +
-		// Options form uses, but outside the form. The card's product identity
-		// comes from the `<li>`'s `woocommerce/products` context (T12). Detected
-		// once for the whole template (all cards share the same inner-block
-		// structure).
-		$has_quantity_stepper = $this->inner_blocks_contain_quantity_stepper( $block->inner_blocks );
-
-		if ( $has_quantity_stepper ) {
-			// Ensure the shared `woocommerce/cart` state (including the
-			// `draftItems` slot) exists so per-card draft seeding has somewhere
-			// to land (draft "birth"). Mirrors what the Add to Cart + Options
-			// block relies on.
-			BlocksSharedState::load_cart_state( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
-		}
-
 		$content = '';
 		while ( $query->have_posts() ) {
 			$query->the_post();
@@ -154,22 +135,6 @@ class ProductTemplate extends AbstractBlock {
 				' . $product_context_directive . '
 				data-wp-key="product-item-' . $product_id . '"
 			';
-
-			// T9 DEMO: when a stepper is present, seed each card's draft (min
-			// quantity). The stepper edits this draft (keyed by the card's product
-			// id — identity rule 3, landmine #2) and the Add to Cart button posts
-			// it via `woocommerce/cart::actions.addItem()`.
-			//
-			// No shared-context wrapper is needed (T12): the `<li>` already carries
-			// the `woocommerce/products::{ productId }` context, which is now THE
-			// product-identity source. The stepper resolves the card's product id
-			// via `mainProductInContext` (`getContextProductId()`), and the cart
-			// store keys the draft off that derived id. This also removes the WP
-			// ≤ 6.8 two-contexts-on-one-element hazard the earlier nested
-			// `woocommerce` wrapper worked around.
-			if ( $has_quantity_stepper ) {
-				$this->seed_card_draft( $product_id );
-			}
 
 			// Wrap the render inner blocks in a `li` element with the appropriate post classes.
 			$post_classes = implode( ' ', get_post_class( 'wc-block-product' ) );
@@ -225,79 +190,6 @@ class ProductTemplate extends AbstractBlock {
 		}
 
 		return false;
-	}
-
-	/**
-	 * T9 DEMO: whether the card's inner blocks include the Product Quantity
-	 * (stepper) block. Recurses so the stepper can sit anywhere in the card.
-	 *
-	 * When true, each card gets a seeded draft (see render()); the card's product
-	 * identity comes from the `<li>`'s `woocommerce/products` context (T12).
-	 * Detected once per template render — all cards share the same inner-block
-	 * structure.
-	 *
-	 * @param \WP_Block_List|array $inner_blocks Inner block instances.
-	 * @return bool True if a quantity-selector block is present.
-	 */
-	protected function inner_blocks_contain_quantity_stepper( $inner_blocks ): bool {
-		foreach ( $inner_blocks as $inner_block ) {
-			if ( 'woocommerce/add-to-cart-with-options-quantity-selector' === $inner_block->name ) {
-				return true;
-			}
-			if ( $inner_block->inner_blocks && $this->inner_blocks_contain_quantity_stepper( $inner_block->inner_blocks ) ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * T9 DEMO: seed a card's cart draft into the shared `woocommerce/cart`
-	 * interactivity state (draft "birth"), keyed by the product id (identity
-	 * rule 3). Read-modify-write, mirroring
-	 * AddToCartWithOptions::seed_cart_drafts: `wp_interactivity_state()` merges
-	 * with `array_replace_recursive`, which would clobber sibling cards' drafts
-	 * if we blind-seeded a fresh array. Index-by-id keeps it idempotent.
-	 *
-	 * Only simple, purchasable, in-stock products get a draft here — the demo
-	 * targets the grocery/quick-add pattern. Products with options (variable,
-	 * grouped) are out of scope for this stretch demo (they need the full form).
-	 *
-	 * @param int $product_id The card's product id.
-	 * @return void
-	 */
-	protected function seed_card_draft( int $product_id ): void {
-		$product = wc_get_product( $product_id );
-
-		if ( ! $product instanceof \WC_Product || $product->has_options() || ! $product->is_purchasable() || ! $product->is_in_stock() ) {
-			return;
-		}
-
-		$draft = array(
-			'id'       => $product_id,
-			'quantity' => $product->get_min_purchase_quantity(),
-		);
-
-		$cart_state      = wp_interactivity_state( 'woocommerce/cart' );
-		$existing_drafts = isset( $cart_state['draftItems'] ) && is_array( $cart_state['draftItems'] )
-			? $cart_state['draftItems']
-			: array();
-
-		// Index existing drafts by product id so we replace-by-id (idempotent)
-		// rather than duplicate when the same product renders more than once.
-		$drafts_by_id = array();
-		foreach ( $existing_drafts as $existing_draft ) {
-			if ( isset( $existing_draft['id'] ) ) {
-				$drafts_by_id[ (int) $existing_draft['id'] ] = $existing_draft;
-			}
-		}
-		$drafts_by_id[ $product_id ] = $draft;
-
-		wp_interactivity_state(
-			'woocommerce/cart',
-			array( 'draftItems' => array_values( $drafts_by_id ) )
-		);
 	}
 
 	/**

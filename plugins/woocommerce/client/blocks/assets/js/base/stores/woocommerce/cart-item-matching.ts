@@ -7,35 +7,25 @@ import type { CartItem, CartVariationItem } from '@woocommerce/types';
  * Cart-item matching helpers — the pure core of the envelope resolution ladder.
  *
  * These functions know nothing about the store, the network, or the
- * Interactivity API. They implement the identity/matching law from
- * `docs/internal-developers/blocks/shared-stores-schema.md`
- * ("Line identity rules" + "Envelope resolution ladder"), so they can be unit
- * tested in isolation and reused by the `woocommerce/cart` store.
+ * Interactivity API, so they can be unit tested in isolation and reused by the
+ * `woocommerce/cart` store.
  *
- * The four data shapes the glossary warns never to confuse:
- *
- * - **Extension request params** — what a draft holds at its payload root
- *   (namespaced, machine-comparable). The client → server direction.
- * - **`cart_item_data`** — server-internal, never leaves the server.
- * - **`item_data`** — server → client, display-only, NEVER machine-compared.
- * - **`extensions[ns]`** — server → client, the machine-readable projection an
- *   extension exposes for matching (identity convention).
- *
- * Matching therefore compares a draft's namespaced payload-root props against a
- * line's `extensions[ns]` — and only uses `item_data` for the presence
- * heuristic (rule 4: "`item_data` is never machine-compared").
+ * Matching compares a draft's namespaced payload-root props against a line's
+ * `extensions[ns]` (the machine-readable projection an extension exposes for
+ * matching). Display-only `item_data` is NEVER machine-compared; it only feeds
+ * the presence heuristic.
  */
 
 /**
  * A draft is literally a `cart/add-item` payload — no bookkeeping fields. `id`
- * is always the main/context product id and doubles as the draft's identity
- * (identity rule 3). The shopper's variation choice lives in `variation`;
- * extension request params live at the payload root under their namespace.
+ * is the product id and doubles as the draft's identity. The shopper's variation
+ * choice lives in `variation`; extension request params live at the payload root
+ * under their namespace.
  */
 export type DraftItem = {
-	/** Main/context product id — also the draft's identity. */
+	/** Product id — also the draft's identity. */
 	id: number;
-	/** Target quantity (absolute). Optional; `addItem` falls back to 1. */
+	/** Target quantity (absolute). Optional; `addItem` falls back to a min. */
 	quantity?: number;
 	/** The shopper's attribute selection (Store API `add-item` shape). */
 	variation?:
@@ -44,25 +34,24 @@ export type DraftItem = {
 	/**
 	 * Extension request params at the payload root, keyed by namespace (e.g.
 	 * `"my-plugin/gift-note"`). Legacy non-namespaced names are tolerated. Every
-	 * such prop is assumed identity-affecting (rule 2).
+	 * such prop is assumed identity-affecting: over-splitting is free (the server
+	 * merges on POST); under-splitting destroys shopper input.
 	 */
 	[ key: string ]: unknown;
 };
 
 /**
  * The optional `findItem({ filter })` predicate contract. Pure and synchronous —
- * it receives a candidate cart line and the derivation extras (the active draft)
- * and returns whether the line is a match. It MUST NOT mutate its arguments or
- * perform side effects; it runs during derived-state evaluation, potentially many
- * times per render.
+ * it receives a candidate cart line and the active draft and returns whether the
+ * line is a match. It MUST NOT mutate its arguments or perform side effects; it
+ * runs during derived-state evaluation, potentially many times per render.
  *
  * When passed to `findItem`, it becomes the SOLE narrowing authority over the
  * id+variation candidates — it REPLACES the generic narrowing (per-namespace
  * compare + presence heuristic), it does not compose with it. This is what lets a
- * caller (e.g. a bundle editor, or the gift-note badge demo) pair with a line the
- * presence heuristic would otherwise exclude. It is a caller-supplied function
- * only — there is no serialized context-reference machinery (a `cartItemFilter`
- * context escape hatch was deferred; see the shared-stores schema).
+ * caller (e.g. a bundle editor) pair with a line the presence heuristic would
+ * otherwise exclude. It is a caller-supplied function only — there is no
+ * serialized context-reference machinery.
  */
 export type CartItemFilterPredicate = (
 	cartItem: CartItem,
@@ -76,16 +65,11 @@ export type CartItemFilterPredicate = (
  * namespaced extension request params. Everything on a draft that is not one of
  * these is treated as an extension prop and matched against `extensions[ns]`.
  *
- * `key` and `type` are tolerated here because callers occasionally reuse a cart
- * line as a payload seed; they never participate in extension matching.
+ * A draft is a payload, not a cart line: line-only fields like `key`/`type` are
+ * deliberately NOT reserved, so seeding a draft from a cart line surfaces them as
+ * (bogus) extension props and fails loudly rather than silently.
  */
-const RESERVED_DRAFT_KEYS = new Set( [
-	'id',
-	'quantity',
-	'variation',
-	'key',
-	'type',
-] );
+const RESERVED_DRAFT_KEYS = new Set( [ 'id', 'quantity', 'variation' ] );
 
 /**
  * Extract the namespaced extension request params from a draft — every own,
@@ -111,12 +95,11 @@ export function getDraftExtensionProps(
  * projection: primitives, arrays, plain objects). Key order is irrelevant;
  * arrays are order-sensitive.
  *
- * Chosen semantics (documented per the task's freedom area): two values are
- * equal when they serialize to the same normalized structure — recursively
- * equal primitives, same-length arrays with equal elements in order, and plain
- * objects with the same set of keys and equal values. This deliberately does
- * NOT treat `[]` and `{}` as equal to each other; emptiness normalization for
- * the "absent/empty" case is handled separately by `isEmptyValue`.
+ * Two values are equal when they serialize to the same normalized structure —
+ * recursively equal primitives, same-length arrays with equal elements in order,
+ * and plain objects with the same set of keys and equal values. This deliberately
+ * does NOT treat `[]` and `{}` as equal to each other; emptiness normalization
+ * for the "absent/empty" case is handled separately by `isEmptyValue`.
  *
  * @param a First value.
  * @param b Second value.
@@ -166,8 +149,7 @@ export function deepEqual( a: unknown, b: unknown ): boolean {
 /**
  * Whether a value counts as "empty" for absent/empty normalization: `undefined`,
  * `null`, `''`, `[]`, or `{}`. A draft prop the extension set to an empty value
- * and a line that carries nothing under that namespace must compare equal
- * (schema: "absent/empty normalized").
+ * and a line that carries nothing under that namespace must compare equal.
  *
  * @param value The value to test.
  * @return True when the value is considered empty.
@@ -187,8 +169,7 @@ export function isEmptyValue( value: unknown ): boolean {
 
 /**
  * Per-namespace deep-compare of a draft's namespaced props against a line's
- * `extensions[ns]`, with absent/empty normalization (ladder step 2, generic
- * narrowing — the non-`cartItemFilter` path).
+ * `extensions[ns]`, with absent/empty normalization (generic narrowing).
  *
  * For every extension prop the draft carries, the line's matching
  * `extensions[ns]` must be deeply equal (both sides normalized so absent/empty
@@ -222,12 +203,9 @@ export function draftPropsMatchLineExtensions(
 }
 
 /**
- * Presence heuristic (identity rule 4: "unaccounted line data = no exact
- * pairing").
- *
- * A line carrying visible machine-readable content the draft does not account
- * for must be excluded from exact pairing. There are two ways a line can carry
- * unaccounted content:
+ * Presence heuristic: a line carrying visible machine-readable content the draft
+ * does not account for must be excluded from exact pairing. There are two ways a
+ * line can carry unaccounted content:
  *
  * 1. **Unaccounted extension namespace** — the line exposes a non-empty
  *    `extensions[ns]` under a namespace the draft has NO (non-empty) prop for.
@@ -235,8 +213,8 @@ export function draftPropsMatchLineExtensions(
  *    excludes.
  *
  * 2. **Unaccounted display data** — the line has visible (non-hidden)
- *    `item_data`. `item_data` is display-only and NEVER machine-compared (rule
- *    4), so we cannot map it to a namespace. It signals unaccounted content
+ *    `item_data`. `item_data` is display-only and NEVER machine-compared, so we
+ *    cannot map it to a namespace. It signals unaccounted content
  *    ONLY when the draft does not already positively account for the line's
  *    identity via `extensions`. When the draft's props deep-match every
  *    non-empty `extensions[ns]` on the line, that `item_data` is just the
@@ -247,9 +225,8 @@ export function draftPropsMatchLineExtensions(
  * This split is what lets:
  * - two note-lines + a draft with the matching note → pair the right line, but
  * - the same two note-lines + a draft with no note props → both excluded →
- *   zero survivors → `cart` undefined: THIS (plain) configuration is not paired
- *   with a line, only decorated lines the draft cannot account for are (the
- *   #65869-safe outcome — the surface falls back to a plain add button).
+ *   zero survivors → `cart` undefined: the plain surface is not paired with a
+ *   decorated line it cannot account for, and falls back to a plain add button.
  *
  * Hidden `item_data` entries (`hidden: true`, from the
  * `__experimental_woocommerce_blocks_hidden` convention) are internal and never
@@ -313,42 +290,4 @@ export function isGenericExactPair(
 		draftPropsMatchLineExtensions( draftProps, line ) &&
 		! lineHasUnaccountedContent( draftProps, line )
 	);
-}
-
-/**
- * Narrow candidate lines to the survivors of a narrowing predicate (ladder
- * step 2's output). The envelope's `cart` derives from this survivor set via
- * `resolveExactlyOne( survivors )`.
- *
- * Pre-narrowing candidates deliberately do NOT survive on their own: a product
- * present only as lines the draft cannot account for (e.g. a decorated bundle
- * child, or note-split lines with no matching draft props) is NOT paired, so
- * `cart` is `undefined` and the surface falls back to plain add-button UI (the
- * #65869-aligned behavior).
- *
- * @param candidates Lines already matched by purchasable id + variation.
- * @param predicate  The narrowing predicate (generic pair, or an explicit
- *                   `findItem` filter).
- * @return The surviving lines.
- */
-export function narrowCandidates< T >(
-	candidates: T[],
-	predicate: ( line: T ) => boolean
-): T[] {
-	return candidates.filter( predicate );
-}
-
-/**
- * Reduce narrowed survivors to exactly one line, or `undefined`.
- *
- * Implements the exactly-one rule (ladder step 3): zero or several survivors →
- * `undefined`. NEVER falls back to "first match" — an inferred pairing would
- * feed `updateItem({ key })` and become a wrong-line mutation (the #65869 bug
- * class).
- *
- * @param survivors Lines that survived narrowing (see `narrowCandidates`).
- * @return The sole surviving line, or `undefined` when zero or many survive.
- */
-export function resolveExactlyOne< T >( survivors: T[] ): T | undefined {
-	return survivors.length === 1 ? survivors[ 0 ] : undefined;
 }

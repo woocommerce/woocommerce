@@ -32,13 +32,13 @@ jest.mock(
 		// the proxy the actions close over) and record the actions from every
 		// registration that supplies them. We skip the `cart` and `draftItems`
 		// keys: the module keeps both as plain writable slots (`cart` set by
-		// refreshCartItems / the batcher commit; `draftItems` server-seeded and
-		// initialized post-registration), while the alias registers each as a
-		// getter delegating to the real store's state. In this mock every
-		// registration shares ONE `mockState`, so copying those alias getters
-		// would make them self-referential (`get draftItems(){ return
-		// state.draftItems; }` reading itself — infinite recursion when the
-		// module is re-required against the persistent mockState).
+		// refresh / the batcher commit; `draftItems` mutated by the draft
+		// actions), while the alias registers each as a getter delegating to the
+		// real store's state. In this mock every registration shares ONE
+		// `mockState`, so copying those alias getters would make them
+		// self-referential (`get draftItems(){ return state.draftItems; }`
+		// reading itself — infinite recursion when the module is re-required
+		// against the persistent mockState).
 		store: jest.fn( ( name, definition ) => {
 			// The notices store is a separate registration; return a stub with
 			// the notice bookkeeping the cart actions call into.
@@ -196,11 +196,11 @@ async function loadCartAndReady() {
 		mod = mockRegisteredStore;
 	} );
 
-	// The module kicks off refreshCartItems() on load, which is what resolves
+	// The module kicks off refresh() on load, which is what resolves
 	// `isNonceReady`. Drive it to completion so subsequent add/remove requests
 	// can flow through the batcher.
 	await runAction(
-		mockRegisteredStore?.actions.refreshCartItems() as unknown as Iterator< unknown >
+		mockRegisteredStore?.actions.refresh() as unknown as Iterator< unknown >
 	);
 	// Let the refresh's promise chain settle.
 	await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
@@ -244,7 +244,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 	const iapiSyncEvents = () =>
 		syncEvents.filter( ( e ) => e.detail?.type === 'from_iAPI' );
 
-	it( 'refreshCartItems passes cache: no-store to fetch to prevent browser caching', () => {
+	it( 'refresh passes cache: no-store to fetch to prevent browser caching', () => {
 		const mockFetch = jest
 			.fn()
 			.mockResolvedValue(
@@ -256,7 +256,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 		jest.isolateModules( () => require( '../cart' ) );
 
-		const iterator = mockRegisteredStore?.actions.refreshCartItems();
+		const iterator = mockRegisteredStore?.actions.refresh();
 
 		// Async actions are typed as void for consumers, but are actually generators internally.
 		( iterator as unknown as Iterator< void > ).next();
@@ -440,7 +440,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		const cart = await loadCartAndReady();
 
 		await runAction(
-			cart.actions.removeCartItem( 'x' ) as unknown as Iterator< unknown >
+			cart.actions.removeItem( 'x' ) as unknown as Iterator< unknown >
 		);
 
 		// Sync event fires (removal changed the cart)…
@@ -451,6 +451,20 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		// …but this is not an add, so no legacy add event / no announcement.
 		expect( mockTriggerAddedToCartEvent ).not.toHaveBeenCalled();
 		expect( mockSpeak ).not.toHaveBeenCalled();
+	} );
+
+	it( 'removeCartItem delegates to removeItem (deprecated alias)', async () => {
+		const cart = await loadCartAndReady();
+		const removeItemSpy = jest.spyOn( cart.actions, 'removeItem' );
+
+		// Drive the alias; it yields the delegate generator, which runAction
+		// then drives to completion.
+		await runAction(
+			cart.actions.removeCartItem( 'y' ) as unknown as Iterator< unknown >
+		);
+
+		expect( removeItemSpy ).toHaveBeenCalledWith( 'y' );
+		removeItemSpy.mockRestore();
 	} );
 
 	it( 'suppresses the cycle notice pass if any request opts out via showCartUpdatesNotices: false', async () => {

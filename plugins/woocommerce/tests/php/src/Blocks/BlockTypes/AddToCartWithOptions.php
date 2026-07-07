@@ -579,118 +579,33 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Find the seeded draft for a product id in the `woocommerce/cart` state.
-	 *
-	 * @param int $product_id The product id (draft identity).
-	 * @return array|null The draft, or null when not seeded.
+	 * Tests that the form resolves product identity through the
+	 * `woocommerce/products` context and does not render a bare `woocommerce`
+	 * context. (Drafts are client-only and never seeded server-side.)
 	 */
-	private function get_seeded_draft( int $product_id ): ?array {
-		$state  = wp_interactivity_state( 'woocommerce/cart' );
-		$drafts = $state['draftItems'] ?? array();
-		foreach ( $drafts as $draft ) {
-			if ( isset( $draft['id'] ) && (int) $draft['id'] === $product_id ) {
-				return $draft;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Tests that a simple product seeds a cart draft (birth) with its minimum
-	 * purchase quantity, and that the surface carries the products context that
-	 * resolves the draft's product id (T12).
-	 */
-	public function test_simple_product_seeds_cart_draft() {
+	public function test_form_renders_products_context_not_bare_woocommerce() {
 		$product = new \WC_Product_Simple();
 		$product->set_regular_price( 10 );
 		$product_id = $product->save();
 
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
-		$draft = $this->get_seeded_draft( $product_id );
-		$this->assertNotNull( $draft, 'A draft is seeded for the simple product.' );
-		$this->assertSame( $product->get_min_purchase_quantity(), $draft['quantity'], 'The simple product draft seeds the min purchase quantity.' );
-
-		// T12: the form no longer renders a shared bare `woocommerce` context —
-		// the product identity is resolved through the `woocommerce/products`
-		// context (here rendered by the Single Product block) / global state.
+		// The form does not render a shared bare `woocommerce` context — the
+		// product identity is resolved through the `woocommerce/products` context
+		// (here rendered by the Single Product block) / global state.
 		$this->assertStringNotContainsString(
 			"data-wp-context='woocommerce::",
 			$markup,
-			'The form no longer renders the retired bare woocommerce context (T12).'
+			'The form does not render the retired bare woocommerce context.'
 		);
 		$this->assertStringContainsString(
 			'woocommerce/products::',
 			$markup,
 			'The surface renders a woocommerce/products context resolving the product identity.'
 		);
-	}
 
-	/**
-	 * Tests that a variable product seeds a single parent draft with an empty
-	 * variation (defaults are applied client-side after hydration).
-	 */
-	public function test_variable_product_seeds_cart_draft_with_empty_variation() {
-		global $product;
-
-		$fixtures = new FixtureData();
-
-		$product = $fixtures->get_variable_product(
-			array(),
-			array(
-				$fixtures->get_product_attribute( 'color', array( 'red', 'green' ) ),
-			)
-		);
-
-		$product_id = $product->get_id();
-
-		$fixtures->get_variation_product(
-			$product_id,
-			array( 'pa_color' => 'red-slug' ),
-			array(
-				'regular_price' => 10,
-				'stock_status'  => ProductStockStatus::IN_STOCK,
-			)
-		);
-
-		$product = wc_get_product( $product_id );
-
-		do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
-
-		$draft = $this->get_seeded_draft( $product_id );
-		$this->assertNotNull( $draft, 'A draft is seeded for the variable product parent.' );
-		$this->assertArrayHasKey( 'variation', $draft, 'The variable product draft has a variation key.' );
-		$this->assertSame( array(), $draft['variation'], 'The variable product draft seeds an empty variation (defaults applied client-side).' );
-	}
-
-	/**
-	 * Tests that a grouped product seeds one draft per child product, each keyed
-	 * by the child product id with an initial quantity of 0.
-	 */
-	public function test_grouped_product_seeds_one_draft_per_child() {
-		$child_one = new \WC_Product_Simple();
-		$child_one->set_regular_price( 10 );
-		$child_one_id = $child_one->save();
-
-		$child_two = new \WC_Product_Simple();
-		$child_two->set_regular_price( 15 );
-		$child_two_id = $child_two->save();
-
-		$grouped = new \WC_Product_Grouped();
-		$grouped->set_children( array( $child_one_id, $child_two_id ) );
-		$grouped_id = $grouped->save();
-
-		do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $grouped_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
-
-		$draft_one = $this->get_seeded_draft( $child_one_id );
-		$draft_two = $this->get_seeded_draft( $child_two_id );
-
-		$this->assertNotNull( $draft_one, 'A draft is seeded for the first grouped child.' );
-		$this->assertNotNull( $draft_two, 'A draft is seeded for the second grouped child.' );
-		$this->assertSame( 0, $draft_one['quantity'], 'Grouped child drafts seed an initial quantity of 0.' );
-		$this->assertSame( 0, $draft_two['quantity'], 'Grouped child drafts seed an initial quantity of 0.' );
-
-		// The grouped parent itself is not a purchasable draft.
-		$this->assertNull( $this->get_seeded_draft( $grouped_id ), 'The grouped parent is not seeded as a draft.' );
+		// No draft is seeded server-side.
+		$state = wp_interactivity_state( 'woocommerce/cart' );
+		$this->assertArrayNotHasKey( 'draftItems', $state, 'Drafts are client-only — never seeded server-side.' );
 	}
 }

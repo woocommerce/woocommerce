@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Simplify the shared iAPI cart/products stores: drafts are now client-only (no server-side seeding or PHP envelope mirror), draftItems is keyed by draft key, and addItem's no-draft fallback is minimum-purchase-quantity aware.
