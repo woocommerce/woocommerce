@@ -261,14 +261,11 @@ Replace the block above with:
 		width: 100% !important;
 	}
 
-	// Establish a positioning context so a dropdown parented to the modal
-	// content (see dropdownParent in wc-enhanced-select.js) positions relative
-	// to the modal rather than an unexpected ancestor. Low-risk safeguard; if
-	// QA still shows the results list clipped, switch the dropdownParent target
-	// to a non-clipping ancestor (Task 2, Step 3).
-	.wc-backbone-modal-content {
-		position: relative;
-	}
+	// NOTE: do NOT add `position: relative` to .wc-backbone-modal-content — it
+	// overrides the modal's own `position: fixed` centering, dropping the modal
+	// into normal flow (renders low/off-centre) and mispositioning the dropdown.
+	// `position: fixed` already provides the containing block dropdownParent
+	// needs. (Removed after it regressed modal centering in QA.)
 
 	// Keep the clear (x) icon from overlapping the dropdown chevron on single
 	// selects inside the modal (e.g. the product-search rows). Reserve room
