@@ -10,14 +10,20 @@ namespace Automattic\WooCommerce\Internal\POS\StoreApi;
 /**
  * Request-scoped detection of POS Store API requests.
  *
- * Detection matches the URI *path* (never the query string, so a crafted
- * storefront URL cannot force POS behaviour onto a shopper's request), plus
- * the `rest_route` GET-parameter fallback used by proxied requests (e.g. the
- * Jetpack tunnel and plain-permalink sites), where the route is not in the
- * URI path. Consulted lazily by the POS policy hooks on every check — never
- * cached at registration time — so filters like `rest_url_prefix` are
- * respected regardless of load order. A test override lets PHPUnit simulate
- * POS context without a full REST request.
+ * Detection resolves the route WordPress will actually dispatch, so it can
+ * never diverge from dispatch. An explicit `rest_route` request parameter
+ * ($_POST then $_GET — the precedence WP::parse_request() applies to public
+ * query vars) is the authority when present: this both catches proxied
+ * requests (the Jetpack tunnel, plain-permalink sites) whose route is not in
+ * the URI path, and rejects a crafted POS-looking path carrying a `rest_route`
+ * that points at a public web route. Absent that parameter, the pretty-
+ * permalink URI path is matched, anchored to the site's REST base (so the
+ * prefix cannot appear mid-path and force POS behaviour onto a shopper) and
+ * case-insensitively (WP_REST_Server matches routes case-insensitively).
+ * Consulted lazily by the POS policy hooks on every check — never cached at
+ * registration time — so filters like `rest_url_prefix` are respected
+ * regardless of load order. A test override lets PHPUnit simulate POS context
+ * without a full REST request.
  *
  * Deliberately not tied to any feature flag: the `point_of_sale` feature is
  * deprecated (always-enabled) as of 11.0.0 and must not be consulted — its
@@ -68,8 +74,13 @@ class Context {
 			return self::$test_override;
 		}
 
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
-		$memo_key = ( $_SERVER['REQUEST_URI'] ?? '' ) . '|' . ( is_string( $_GET['rest_route'] ?? null ) ? $_GET['rest_route'] : '' ) . '|' . ( is_admin() ? 'a' : 'f' );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing
+		$memo_key = ( $_SERVER['REQUEST_URI'] ?? '' )
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing
+			. '|' . ( is_string( $_POST['rest_route'] ?? null ) ? $_POST['rest_route'] : '' )
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
+			. '|' . ( is_string( $_GET['rest_route'] ?? null ) ? $_GET['rest_route'] : '' )
+			. '|' . ( is_admin() ? 'a' : 'f' );
 
 		if ( ! isset( self::$memo[ $memo_key ] ) ) {
 			self::$memo = array( $memo_key => self::detect_pos_request() );
@@ -90,13 +101,33 @@ class Context {
 			return false;
 		}
 
-		// Direct request: the URI path starts with the site's actual REST base
-		// for the POS namespace (rest_url() accounts for subdirectory installs
-		// and prefix filters). Anchored on purpose: a substring match would
-		// let the prefix appear mid-path (PATH_INFO on a storefront URL) and
-		// force POS behaviour onto a shopper's request. On plain-permalink
-		// sites rest_url() is query-string based, so this branch never
-		// matches there — those requests carry rest_route instead.
+		// The route WordPress dispatches is the resolved `rest_route` query var,
+		// for which an explicit request parameter — $_POST then $_GET — overrides
+		// the value the permalink rewrite derives from the URL path (the
+		// precedence WP::parse_request() applies to public query vars). Detection
+		// must key on that same route, or a crafted POS-looking path carrying
+		// e.g. `?rest_route=/wc/store/v1/checkout` would run the guest-accessible
+		// web route while the POS policy hooks (which drop the payment-method
+		// requirement, force stock, swap the session handler) engage without the
+		// POS routes' capability check. So when an explicit parameter is present
+		// it is the sole authority — positive for a POS route, negative for a
+		// non-POS one. Reproducing the precedence from the superglobals (rather
+		// than reading $GLOBALS['wp']->query_vars) keeps the answer stable
+		// whether detection runs before or after WP::parse_request(), e.g. during
+		// eager session initialization.
+		$explicit_route = self::explicit_rest_route_param();
+		if ( null !== $explicit_route ) {
+			return self::route_is_pos( $explicit_route );
+		}
+
+		// No explicit parameter: a pretty-permalink request whose route lives in
+		// the URI path, which starts with the site's actual REST base for the POS
+		// namespace (rest_url() accounts for subdirectory installs and prefix
+		// filters). Anchored on purpose — a substring match would let the prefix
+		// appear mid-path (PATH_INFO on a storefront URL) and force POS behaviour
+		// onto a shopper — and case-insensitive, because WP_REST_Server matches
+		// routes case-insensitively so the dispatched route can differ in case
+		// from the constant.
 		if ( ! empty( $_SERVER['REQUEST_URI'] ) ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$request_path  = wp_parse_url( (string) $_SERVER['REQUEST_URI'], PHP_URL_PATH );
@@ -104,26 +135,50 @@ class Context {
 
 			if (
 				is_string( $request_path ) && is_string( $pos_rest_path )
-				&& false !== strpos( $pos_rest_path, self::URI_PREFIX )
-				&& 0 === strpos( $request_path, $pos_rest_path )
+				&& false !== stripos( $pos_rest_path, self::URI_PREFIX )
+				&& 0 === stripos( $request_path, $pos_rest_path )
 			) {
 				return true;
 			}
 		}
 
-		// Proxied request (e.g. Jetpack tunnel): the route arrives as a `rest_route` GET parameter.
-		// Sanitized with sanitize_text_field, not esc_url_raw — the latter treats a
-		// schemaless route like `wc/internal/pos/...` as a hostname and mangles it.
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context check, not a state change.
-		if ( isset( $_GET['rest_route'] ) && is_string( $_GET['rest_route'] ) ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context check, not a state change.
-			$rest_route = rawurldecode( sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ) );
-			if ( 0 === strpos( ltrim( $rest_route, '/' ), self::URI_PREFIX ) ) {
-				return true;
+		return false;
+	}
+
+	/**
+	 * The explicit `rest_route` request parameter — $_POST then $_GET, the
+	 * precedence WP::parse_request() applies to public query vars — or null when
+	 * neither carries a non-empty value.
+	 *
+	 * Sanitized with sanitize_text_field, not esc_url_raw — the latter treats a
+	 * schemaless route like `wc/internal/pos/...` as a hostname and mangles it.
+	 *
+	 * @return string|null
+	 */
+	private static function explicit_rest_route_param(): ?string {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing -- Context check, not a state change.
+		foreach ( array( $_POST, $_GET ) as $source ) {
+			if ( ! isset( $source['rest_route'] ) || ! is_string( $source['rest_route'] ) ) {
+				continue;
+			}
+			$route = rawurldecode( sanitize_text_field( wp_unslash( $source['rest_route'] ) ) );
+			if ( '' !== $route ) {
+				return $route;
 			}
 		}
 
-		return false;
+		return null;
+	}
+
+	/**
+	 * Whether a resolved REST route falls under the POS namespace, matched
+	 * case-insensitively (WP_REST_Server matches routes case-insensitively).
+	 *
+	 * @param string $route The resolved route, with or without a leading slash.
+	 * @return bool
+	 */
+	private static function route_is_pos( string $route ): bool {
+		return 0 === stripos( ltrim( $route, '/' ), self::URI_PREFIX );
 	}
 
 	/**

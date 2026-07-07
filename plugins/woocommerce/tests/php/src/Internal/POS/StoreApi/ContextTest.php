@@ -28,6 +28,13 @@ class ContextTest extends WC_Unit_Test_Case {
 	private $original_rest_route;
 
 	/**
+	 * Backup of $_POST['rest_route'] to restore in tearDown.
+	 *
+	 * @var string|null
+	 */
+	private $original_post_rest_route;
+
+	/**
 	 * Set up — back up superglobals we may mutate.
 	 */
 	public function setUp(): void {
@@ -40,8 +47,10 @@ class ContextTest extends WC_Unit_Test_Case {
 		$this->original_request_uri = $_SERVER['REQUEST_URI'] ?? null;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 		$this->original_rest_route = $_GET['rest_route'] ?? null;
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		$this->original_post_rest_route = $_POST['rest_route'] ?? null;
 		// Start each test from a clean slate so ambient request state can't leak in.
-		unset( $_GET['rest_route'] );
+		unset( $_GET['rest_route'], $_POST['rest_route'] );
 	}
 
 	/**
@@ -58,6 +67,11 @@ class ContextTest extends WC_Unit_Test_Case {
 			unset( $_GET['rest_route'] );
 		} else {
 			$_GET['rest_route'] = $this->original_rest_route;
+		}
+		if ( null === $this->original_post_rest_route ) {
+			unset( $_POST['rest_route'] );
+		} else {
+			$_POST['rest_route'] = $this->original_post_rest_route;
 		}
 		parent::tearDown();
 	}
@@ -183,6 +197,56 @@ class ContextTest extends WC_Unit_Test_Case {
 		$_SERVER['REQUEST_URI'] = '/?rest_route=/wc/store/v1/cart';
 		$_GET['rest_route']     = '/wc/store/v1/cart';
 		$this->assertFalse( Context::is_pos_request() );
+	}
+
+	/**
+	 * The route WordPress dispatches comes from the `rest_route` query var, for
+	 * which $_GET overrides the permalink-derived path. A POS-looking path
+	 * carrying `?rest_route=/wc/store/...` therefore runs the guest-accessible
+	 * web route; classifying it as POS would engage the policy relaxations
+	 * (payment method dropped, stock forced) on a request that never passed the
+	 * POS capability check.
+	 *
+	 * @testdox is_pos_request returns false when a rest_route GET parameter points a POS-looking path at a web route.
+	 */
+	public function test_rest_route_get_parameter_overrides_pos_path(): void {
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/internal/pos/v1/cart/add-items?rest_route=/wc/store/v1/checkout';
+		$_GET['rest_route']     = '/wc/store/v1/checkout';
+		$this->assertFalse( Context::is_pos_request() );
+	}
+
+	/**
+	 * $_POST overrides $_GET and the path when WP resolves the `rest_route`
+	 * query var, so a POST-body override must be honoured the same way.
+	 *
+	 * @testdox is_pos_request returns false when a rest_route POST parameter points a POS-looking path at a web route.
+	 */
+	public function test_rest_route_post_parameter_overrides_pos_path(): void {
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/internal/pos/v1/cart/add-items';
+		$_POST['rest_route']    = '/wc/store/v1/checkout';
+		$this->assertFalse( Context::is_pos_request() );
+	}
+
+	/**
+	 * @testdox is_pos_request returns true when the route arrives via the rest_route POST parameter.
+	 */
+	public function test_returns_true_for_pos_rest_route_post_parameter(): void {
+		$_SERVER['REQUEST_URI'] = '/index.php';
+		$_POST['rest_route']    = '/wc/internal/pos/v1/cart/add-items';
+		$this->assertTrue( Context::is_pos_request() );
+	}
+
+	/**
+	 * WP_REST_Server matches routes case-insensitively, so a differently-cased
+	 * POS path still dispatches the POS route and must be detected as POS —
+	 * otherwise every policy hook silently disengages and the request mutates
+	 * the operator's real web cart.
+	 *
+	 * @testdox is_pos_request matches the POS path case-insensitively.
+	 */
+	public function test_matches_pos_path_case_insensitively(): void {
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/INTERNAL/pos/v1/cart/add-items';
+		$this->assertTrue( Context::is_pos_request() );
 	}
 
 	/**
