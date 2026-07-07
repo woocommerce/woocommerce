@@ -25,7 +25,11 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Public selling-plans catalog read facade.
  *
- * Final and static-only: a stateless entry point, not an extension seam.
+ * Each extension constructs one instance scoped to its own slugs and reuses
+ * it for every read - the slug scope is fixed at construction so call sites
+ * never carry it around. Instances are cheap and hold no state beyond the
+ * scope, so constructing more is harmless. Final: a facade over the engine
+ * internals, not an extension seam.
  */
 final class SellingPlans {
 
@@ -38,39 +42,54 @@ final class SellingPlans {
 	private const PLAN_QUERY_LIMIT = 200;
 
 	/**
-	 * List an extension's active plans in display order - the read behind a
-	 * plan-selection UI.
+	 * Extension slugs this instance reads plans for.
 	 *
-	 * @param string $extension_slug Extension slug scope.
+	 * @var array<int, string>
+	 */
+	private $extension_slugs;
+
+	/**
+	 * Scope the facade to the calling extension's slugs.
+	 *
+	 * @param array<int, string> $extension_slugs Extension slugs to read plans for.
+	 */
+	public function __construct( array $extension_slugs ) {
+		$this->extension_slugs = $extension_slugs;
+	}
+
+	/**
+	 * List the scoped extensions' active plans in display order - the read
+	 * behind a plan-selection UI.
+	 *
 	 * @return array<int, Plan> Plans in display order.
 	 */
-	public static function list_plans( string $extension_slug ): array {
+	public function list_plans(): array {
 		return ( new PlanRepository() )->query(
 			array(
 				'status'          => Plan::STATUS_ACTIVE,
-				'extension_slugs' => array( $extension_slug ),
+				'extension_slugs' => $this->extension_slugs,
 				'limit'           => self::PLAN_QUERY_LIMIT,
 			)
 		);
 	}
 
 	/**
-	 * Fetch the active plans among the given ids owned by one extension, in
-	 * display order - the read behind rendering a stored plan selection.
+	 * Fetch the active plans among the given ids owned by the scoped
+	 * extensions, in display order - the read behind rendering a stored plan
+	 * selection.
 	 *
-	 * Ids that are unknown, archived, or owned by another extension are
-	 * simply absent from the result. An empty or invalid id list yields an
-	 * empty array.
+	 * Ids that are unknown, archived, or owned by an out-of-scope extension
+	 * are simply absent from the result. An empty or invalid id list yields
+	 * an empty array.
 	 *
-	 * @param array<int, int> $plan_ids       Plan ids to fetch.
-	 * @param string          $extension_slug Extension slug scope.
+	 * @param array<int, int> $plan_ids Plan ids to fetch.
 	 * @return array<int, Plan> Plans in display order.
 	 */
-	public static function get_plans( array $plan_ids, string $extension_slug ): array {
+	public function get_plans( array $plan_ids ): array {
 		return ( new PlanRepository() )->query(
 			array(
 				'status'          => Plan::STATUS_ACTIVE,
-				'extension_slugs' => array( $extension_slug ),
+				'extension_slugs' => $this->extension_slugs,
 				'ids'             => $plan_ids,
 				'limit'           => self::PLAN_QUERY_LIMIT,
 			)

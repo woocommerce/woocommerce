@@ -24,13 +24,19 @@ class SellingPlansTest extends EngineIntegrationTestCase {
 
 	private const SLUG = 'lite';
 
-	private function make_group( string $merchant_code ): int {
+	/**
+	 * Insert a plan group.
+	 *
+	 * @param string $merchant_code  Merchant code.
+	 * @param string $extension_slug Owning extension slug.
+	 */
+	private function make_group( string $merchant_code, string $extension_slug = self::SLUG ): int {
 		return ( new PlanGroupRepository() )->insert(
 			PlanGroup::create(
 				array(
 					'name'           => 'Group ' . $merchant_code,
 					'merchant_code'  => $merchant_code,
-					'extension_slug' => self::SLUG,
+					'extension_slug' => $extension_slug,
 				)
 			)
 		);
@@ -87,7 +93,7 @@ class SellingPlansTest extends EngineIntegrationTestCase {
 		$this->make_plan( $group_id, 'Archived', array( 'status' => Plan::STATUS_ARCHIVED ) );
 		$this->make_plan( $group_id, 'Foreign', array( 'extension_slug' => 'other-extension' ) );
 
-		$plans = SellingPlans::list_plans( self::SLUG );
+		$plans = ( new SellingPlans( array( self::SLUG ) ) )->list_plans();
 
 		$this->assertSame( array( $first_id, $second_id ), self::plan_ids( $plans ) );
 	}
@@ -101,7 +107,9 @@ class SellingPlansTest extends EngineIntegrationTestCase {
 		$archived_id = $this->make_plan( $group_id, 'Archived', array( 'status' => Plan::STATUS_ARCHIVED ) );
 		$foreign_id  = $this->make_plan( $group_id, 'Foreign', array( 'extension_slug' => 'other-extension' ) );
 
-		$plans = SellingPlans::get_plans( array( $second_id, $first_id, $archived_id, $foreign_id, 999999 ), self::SLUG );
+		$catalog = new SellingPlans( array( self::SLUG ) );
+
+		$plans = $catalog->get_plans( array( $second_id, $first_id, $archived_id, $foreign_id, 999999 ) );
 
 		// Display order regardless of request order; archived, foreign, and unknown ids are absent.
 		$this->assertSame( array( $first_id, $second_id ), self::plan_ids( $plans ) );
@@ -112,8 +120,38 @@ class SellingPlansTest extends EngineIntegrationTestCase {
 		$group_id = $this->make_group( 'empty-ids' );
 		$plan_id  = $this->make_plan( $group_id, 'Plan' );
 
+		$catalog = new SellingPlans( array( self::SLUG ) );
+
 		// Non-int junk coverage lives in PlanRepositoryTest; the facade takes int ids.
-		$this->assertSame( array(), SellingPlans::get_plans( array(), self::SLUG ) );
-		$this->assertSame( array(), SellingPlans::get_plans( array( $plan_id, 0 ), self::SLUG ) );
+		$this->assertSame( array(), $catalog->get_plans( array() ) );
+		$this->assertSame( array(), $catalog->get_plans( array( $plan_id, 0 ) ) );
+	}
+
+	public function test_two_slug_instance_reads_across_both_slugs(): void {
+		$lite_group_id  = $this->make_group( 'two-slug-lite' );
+		$other_group_id = $this->make_group( 'two-slug-other', 'other-extension' );
+
+		$lite_id    = $this->make_plan( $lite_group_id, 'Lite plan', array( 'sort_order' => 1 ) );
+		$other_id   = $this->make_plan(
+			$other_group_id,
+			'Other plan',
+			array(
+				'sort_order'     => 2,
+				'extension_slug' => 'other-extension',
+			)
+		);
+		$foreign_id = $this->make_plan(
+			$lite_group_id,
+			'Foreign',
+			array(
+				'sort_order'     => 3,
+				'extension_slug' => 'third-extension',
+			)
+		);
+
+		$catalog = new SellingPlans( array( self::SLUG, 'other-extension' ) );
+
+		$this->assertSame( array( $lite_id, $other_id ), self::plan_ids( $catalog->list_plans() ) );
+		$this->assertSame( array( $lite_id, $other_id ), self::plan_ids( $catalog->get_plans( array( $other_id, $lite_id, $foreign_id ) ) ) );
 	}
 }
