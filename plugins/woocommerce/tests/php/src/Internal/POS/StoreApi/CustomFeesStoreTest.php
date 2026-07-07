@@ -90,6 +90,19 @@ class CustomFeesStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Client ids must not be canonicalized into collisions: distinct ids are
+	 * distinct fees, whatever characters they use.
+	 *
+	 * @testdox Client ids differing only in case or special characters stay distinct.
+	 */
+	public function test_client_ids_are_not_lossily_canonicalized(): void {
+		$this->sut->add( 'Fee', 5.0, false, '', 'FEE.1' );
+		$this->sut->add( 'Fee', 5.0, false, '', 'fee~1' );
+
+		$this->assertCount( 2, $this->sut->get_all() );
+	}
+
+	/**
 	 * @testdox apply_to_cart() registers every stored fee with the cart's fees API.
 	 */
 	public function test_apply_to_cart_registers_stored_fees(): void {

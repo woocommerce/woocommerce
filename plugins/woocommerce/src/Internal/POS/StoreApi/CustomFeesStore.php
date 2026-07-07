@@ -86,8 +86,11 @@ class CustomFeesStore {
 			'tax_class' => $tax_class,
 		);
 
+		// The raw client id is hashed, not sanitized: a lossy canonicalization
+		// (sanitize_key et al.) can collapse distinct client ids ('FEE.1',
+		// 'fee~1') into one key, silently replacing one charge with another.
 		$spec['id'] = '' !== $client_id
-			? 'pos-fee-' . sanitize_key( $client_id )
+			? 'pos-fee-c-' . md5( $client_id )
 			: 'pos-fee-' . md5( (string) wp_json_encode( array( $name, $amount, $taxable, $tax_class ) ) );
 
 		$fees                = $this->get_all();

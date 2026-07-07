@@ -83,7 +83,7 @@ class CartAddFee extends AbstractCartRoute {
 						'description'       => __( 'Client-generated identifier for this fee line. Lets a retried request stay idempotent while two identical fees (same name and amount) coexist under different ids.', 'woocommerce' ),
 						'type'              => 'string',
 						'context'           => array( 'view', 'edit' ),
-						'sanitize_callback' => 'sanitize_key',
+						'sanitize_callback' => 'sanitize_text_field',
 					),
 					'name'      => array(
 						'description'       => __( 'Fee label shown on the cart and order.', 'woocommerce' ),
