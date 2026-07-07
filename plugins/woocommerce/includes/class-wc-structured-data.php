@@ -13,6 +13,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
@@ -234,7 +235,35 @@ class WC_Structured_Data {
 			// Assume prices will be valid until the end of next year, unless on sale and there is an end date.
 			$price_valid_until = gmdate( 'Y-12-31', time() + YEAR_IN_SECONDS );
 
-			if ( $product->is_type( ProductType::VARIABLE ) ) {
+			// If the request targets a single, fully-specified variation (e.g. a variation-specific URL
+			// submitted to a product feed), describe that variation with a single Offer and its exact
+			// price instead of the parent's AggregateOffer price range. This keeps the landing page's
+			// structured data consistent with the variation price and avoids Google Merchant Center
+			// "price mismatch" disapprovals. See https://github.com/woocommerce/woocommerce/issues/30799.
+			$selected_variation = $product->is_type( ProductType::VARIABLE )
+				? $this->get_selected_variation( $product )
+				: null;
+			$offer_source       = $selected_variation ? $selected_variation : $product;
+
+			if ( $selected_variation ) {
+				// Reference the parent product group so variations stay grouped (Google `item_group_id`).
+				$markup['inProductGroupWithID'] = $product->get_sku() ? $product->get_sku() : (string) $product->get_id();
+
+				// Prefer the selected variation's own identifiers when set.
+				if ( $selected_variation->get_sku() ) {
+					$markup['sku'] = $selected_variation->get_sku();
+				}
+				// A GTIN uniquely identifies a single trade item, so the parent's GTIN must not leak onto a
+				// specific variation. Use the variation's own GTIN, or drop it entirely when it has none.
+				$variation_gtin = $this->prepare_gtin( $selected_variation->get_global_unique_id() );
+				if ( $this->is_valid_gtin( $variation_gtin ) ) {
+					$markup['gtin'] = $variation_gtin;
+				} else {
+					unset( $markup['gtin'] );
+				}
+			}
+
+			if ( $product->is_type( ProductType::VARIABLE ) && ! $selected_variation ) {
 				$lowest  = $product->get_variation_price( 'min', true );
 				$highest = $product->get_variation_price( 'max', true );
 
@@ -355,10 +384,11 @@ class WC_Structured_Data {
 					array_unshift( $markup_offer['priceSpecification'], $grouped_sale_spec );
 				}
 			} else {
+				// Simple product, or a single selected variation treated as a simple product.
 				$tax_display_mode         = get_option( 'woocommerce_tax_display_shop' );
 				$regular_price            = TaxDisplayMode::INCLUSIVE === $tax_display_mode
-					? wc_get_price_including_tax( $product, array( 'price' => $product->get_regular_price() ) )
-					: wc_get_price_excluding_tax( $product, array( 'price' => $product->get_regular_price() ) );
+					? wc_get_price_including_tax( $offer_source, array( 'price' => $offer_source->get_regular_price() ) )
+					: wc_get_price_excluding_tax( $offer_source, array( 'price' => $offer_source->get_regular_price() ) );
 				$unit_price_specification = array(
 					'@type'         => 'UnitPriceSpecification',
 					'price'         => wc_format_decimal( $regular_price, wc_get_price_decimals() ),
@@ -368,7 +398,7 @@ class WC_Structured_Data {
 				if ( wc_tax_enabled() ) {
 					$unit_price_specification['valueAddedTaxIncluded'] = TaxDisplayMode::INCLUSIVE === $tax_display_mode;
 				}
-				if ( $product->is_on_sale() ) {
+				if ( $offer_source->is_on_sale() ) {
 					// `priceType` should only be specified in prices which are not the current offer.
 					// https://developers.google.com/search/docs/appearance/structured-data/merchant-listing#sale-pricing-example
 					$unit_price_specification['priceType'] = 'https://schema.org/ListPrice';
@@ -380,12 +410,12 @@ class WC_Structured_Data {
 					),
 				);
 
-				if ( $product->is_on_sale() ) {
+				if ( $offer_source->is_on_sale() ) {
 					$sale_price = TaxDisplayMode::INCLUSIVE === $tax_display_mode
-						? wc_get_price_including_tax( $product, array( 'price' => $product->get_sale_price() ) )
-						: wc_get_price_excluding_tax( $product, array( 'price' => $product->get_sale_price() ) );
-					if ( $product->get_date_on_sale_to() ) {
-						$sale_price_valid_until = gmdate( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );
+						? wc_get_price_including_tax( $offer_source, array( 'price' => $offer_source->get_sale_price() ) )
+						: wc_get_price_excluding_tax( $offer_source, array( 'price' => $offer_source->get_sale_price() ) );
+					if ( $offer_source->get_date_on_sale_to() ) {
+						$sale_price_valid_until = gmdate( 'Y-m-d', $offer_source->get_date_on_sale_to()->getTimestamp() );
 					}
 
 					// We add the sale price to the top of the array so it's the first offer.
@@ -403,8 +433,8 @@ class WC_Structured_Data {
 				}
 			}
 
-			if ( $product->is_in_stock() ) {
-				$stock_status_schema = ( ProductStockStatus::ON_BACKORDER === $product->get_stock_status() ) ? 'BackOrder' : 'InStock';
+			if ( $offer_source->is_in_stock() ) {
+				$stock_status_schema = ( ProductStockStatus::ON_BACKORDER === $offer_source->get_stock_status() ) ? 'BackOrder' : 'InStock';
 			} else {
 				$stock_status_schema = 'OutOfStock';
 			}
@@ -412,7 +442,7 @@ class WC_Structured_Data {
 			$markup_offer += array(
 				'priceValidUntil' => $sale_price_valid_until ?? $price_valid_until,
 				'availability'    => 'https://schema.org/' . $stock_status_schema,
-				'url'             => $permalink,
+				'url'             => $offer_source->get_permalink(),
 				'seller'          => array(
 					'@type' => 'Organization',
 					'name'  => $shop_name,
@@ -725,5 +755,113 @@ class WC_Structured_Data {
 		}
 
 		return preg_replace( '/[^0-9]/', '', $gtin );
+	}
+
+	/**
+	 * Resolve the variation targeted by the current request, if any.
+	 *
+	 * A variation is only returned when every variation attribute of the product is present in the
+	 * request (e.g. `?attribute_pa_size=large&attribute_color=red`) and they unambiguously identify a
+	 * single, purchasable variation. Partial or missing selections return null so the parent product's
+	 * AggregateOffer is used instead.
+	 *
+	 * @param WC_Product $product Variable product.
+	 * @return WC_Product_Variation|null The selected variation, or null when not uniquely identified.
+	 */
+	private function get_selected_variation( $product ) {
+		if ( ! $product instanceof WC_Product_Variable ) {
+			return null;
+		}
+
+		$variation_attributes = $product->get_variation_attributes();
+
+		if ( empty( $variation_attributes ) ) {
+			return null;
+		}
+
+		$match_attributes = array();
+
+		foreach ( $variation_attributes as $attribute_name => $options ) {
+			$key = wc_variation_attribute_name( $attribute_name );
+
+			// Require every variation attribute to be specified so a single variation is identified.
+			if ( ! isset( $_GET[ $key ] ) || '' === $_GET[ $key ] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				return null;
+			}
+
+			$match_attributes[ $key ] = wc_clean( wp_unslash( $_GET[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+
+		$data_store = WC_Data_Store::load( 'product' );
+		// @phpstan-ignore-next-line method.notFound (Called via __call() on the underlying product data store instance.)
+		$variation_id = $data_store->find_matching_product_variation( $product, $match_attributes );
+
+		if ( ! $variation_id ) {
+			return null;
+		}
+
+		// `find_matching_product_variation()` returns the first match by menu order, so a fully-specified
+		// selection can still be ambiguous when an overlapping "Any" variation also matches it. Only treat
+		// the selection as a single Offer when exactly one variation matches; otherwise the price is
+		// ambiguous and we keep the parent's AggregateOffer.
+		if ( 1 !== $this->count_matching_variations( $product, $match_attributes ) ) {
+			return null;
+		}
+
+		$variation = wc_get_product( $variation_id );
+
+		if ( ! $variation instanceof WC_Product_Variation || '' === $variation->get_price() ) {
+			return null;
+		}
+
+		return $variation;
+	}
+
+	/**
+	 * Count how many of a variable product's variations match the given attribute selection.
+	 *
+	 * Mirrors the matching rules of `find_matching_product_variation()` (an empty stored attribute
+	 * value means the variation accepts any value), but counts every match so callers can detect an
+	 * ambiguous selection. Short-circuits once a second match is found.
+	 *
+	 * @param WC_Product $product          Variable product.
+	 * @param array      $match_attributes Requested attributes keyed by `attribute_*` name.
+	 * @return int Number of matching variations (0, 1, or 2 when more than one matches).
+	 */
+	private function count_matching_variations( $product, $match_attributes ) {
+		$match_count = 0;
+
+		foreach ( $product->get_children() as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+
+			if ( ! $variation instanceof WC_Product_Variation ) {
+				continue;
+			}
+
+			// `find_matching_product_variation()` only queries published variations, so private
+			// siblings must be ignored here to keep the count consistent with the resolved variation.
+			if ( ProductStatus::PUBLISH !== $variation->get_status() ) {
+				continue;
+			}
+
+			$matches = true;
+
+			foreach ( $variation->get_variation_attributes() as $attribute_key => $attribute_value ) {
+				// An empty stored value means the variation accepts any value for this attribute.
+				if ( '' === $attribute_value ) {
+					continue;
+				}
+				if ( ! isset( $match_attributes[ $attribute_key ] ) || $match_attributes[ $attribute_key ] !== $attribute_value ) {
+					$matches = false;
+					break;
+				}
+			}
+
+			if ( $matches && ++$match_count > 1 ) {
+				return $match_count;
+			}
+		}
+
+		return $match_count;
 	}
 }
