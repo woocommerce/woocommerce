@@ -391,23 +391,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			->get( DownloadPermissionsAdjuster::class )
 			->maybe_schedule_adjust_download_permissions( $product );
 
-		$this->maybe_remove_headstart_post_meta( $product->get_id() );
-
 		$product->apply_changes();
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_update_product', $product->get_id(), $product );
-	}
-
-	/**
-	 * Remove the sample product meta when a product is updated.
-	 *
-	 * @param int $product_id Product ID.
-	 */
-	private function maybe_remove_headstart_post_meta( int $product_id ): void {
-		if ( metadata_exists( 'post', $product_id, '_headstart_post' ) ) {
-			delete_post_meta( $product_id, '_headstart_post' );
-		}
 	}
 
 	/**
