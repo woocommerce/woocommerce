@@ -190,11 +190,22 @@ class CartAddItems extends AbstractCartRoute {
 		}
 
 		if ( 0 === $added_count ) {
+			// A listener that throws on woocommerce_add_to_cart aborts *after*
+			// CartController committed the line, so the item is in the cart even
+			// though it is reported added=false. Attach the authoritative cart —
+			// the same source of truth the 201 envelope and the 409 conflict
+			// response give the client — so the client reconciles instead of
+			// re-scanning and doubling.
+			$error_data = array(
+				'items' => $results,
+				'cart'  => $this->cart_schema->get_item_response( $this->cart_controller->get_cart_for_response() ),
+			);
+
 			throw new RouteException(
 				'woocommerce_pos_rest_no_items_added',
 				esc_html__( 'None of the requested items could be added to the cart.', 'woocommerce' ),
 				400,
-				array( 'items' => $results ) // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Structured data, encoded by the REST server.
+				$error_data // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Structured data, encoded by the REST server.
 			);
 		}
 

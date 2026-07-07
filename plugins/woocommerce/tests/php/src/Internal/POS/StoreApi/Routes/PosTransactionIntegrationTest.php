@@ -266,6 +266,44 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
+	 * A listener that throws on woocommerce_add_to_cart aborts after the line
+	 * was committed, so the sole item is in the cart even though the batch
+	 * reports "none added". The 400 must carry that cart so the client can
+	 * reconcile instead of re-scanning and doubling the quantity.
+	 *
+	 * @testdox add-items 400 carries the authoritative cart when the only item landed before a hook threw.
+	 */
+	public function test_add_items_all_failed_still_returns_the_cart(): void {
+		wp_set_current_user( $this->operator_id );
+
+		$throw = function () {
+			throw new \Exception( 'Plugin exploded.' );
+		};
+		add_action( 'woocommerce_add_to_cart', $throw );
+
+		try {
+			$response = $this->add_items(
+				array(
+					array(
+						'id'       => $this->product->get_id(),
+						'quantity' => 1,
+					),
+				)
+			);
+		} finally {
+			remove_action( 'woocommerce_add_to_cart', $throw );
+		}
+
+		$this->assertSame( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( 'woocommerce_pos_rest_no_items_added', $data['code'] );
+		// Per-item report says the item was not added...
+		$this->assertFalse( $data['data']['items'][0]['added'] );
+		// ...but the attached cart — the source of truth — shows it landed.
+		$this->assertCount( 1, $data['data']['cart']['items'] );
+	}
+
+	/**
 	 * Extensions on woocommerce_store_api_add_to_cart_data read the request's
 	 * top-level params; each batch item must present itself like a web
 	 * add-item request.
