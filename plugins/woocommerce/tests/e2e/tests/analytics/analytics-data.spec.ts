@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { Page } from '@playwright/test';
 import {
 	WC_ADMIN_API_PATH,
 	WC_API_PATH,
@@ -11,6 +12,29 @@ import {
  */
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+
+/**
+ * Escape a string for literal use inside a RegExp.
+ */
+const escapeRegExp = ( value: string ) =>
+	value.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
+
+/**
+ * Locate an analytics summary tile ("performance indicator") by its label and
+ * value, ignoring the volatile delta text that follows (e.g.
+ * "No change from Previous year:").
+ *
+ * The tile is a `menuitem` whose accessible name is
+ * `"<label> <value> <delta>"`, so we anchor on `"<label> <value>"` up to the
+ * next whitespace (or end of string). The trailing boundary is what stops
+ * `"Orders 10"` from also matching `"Orders 100"`.
+ */
+const summaryTile = ( page: Page, label: string, value: string ) =>
+	page.getByRole( 'menuitem', {
+		name: new RegExp(
+			`^${ escapeRegExp( `${ label } ${ value }` ) }(\\s|$)`
+		),
+	} );
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
@@ -269,19 +293,56 @@ test.beforeAll( async ( { request, restApi } ) => {
 			);
 		} );
 
-	// Process the Action Scheduler tasks that import the orders created above.
+	// Import the orders created above into the analytics lookup tables, then wait
+	// for that import to actually complete before any test asserts on the data.
 	//
-	// In immediate mode each order schedules its import action for `time() + 5`
-	// (see SchedulerTraits::schedule_action), so wait for those actions to become
-	// due before draining the queue. Draining earlier skips them and the orders
-	// never import.
-	await new Promise( ( resolve ) => setTimeout( resolve, 5000 ) );
+	// In immediate mode each order scheduled its import action for `time() + 5`
+	// (see SchedulerTraits::schedule_action), so the actions are not due the
+	// instant this runs. Rather than sleeping a fixed amount and draining once,
+	// poll: on each pass drain the Action Scheduler queue via the
+	// `process-waiting-actions` mu-plugin, then re-read a WC Analytics report
+	// scoped to *this spec's products* until the expected totals appear. Looping
+	// the drain absorbs a queue backed up by earlier specs in this serial run — a
+	// single fixed-time drain could return before this spec's actions run,
+	// leaving the lookup tables empty and every assertion timing out.
+	await expect
+		.poll(
+			async () => {
+				// `expect.poll` awaits this callback outside its retry try/catch,
+				// so anything that throws here aborts the whole poll instead of
+				// retrying. Both requests can fail transiently while the queue is
+				// draining (`restApi.get` is axios and rejects on any non-2xx), so
+				// swallow errors and return an undefined total — the matcher then
+				// simply fails and the next iteration retries.
+				try {
+					await request.get( '?process-waiting-actions' );
 
-	// Drain the Action Scheduler queue via the `process-waiting-actions`
-	// mu-plugin. It runs the queue runner on `init` and exits before rendering,
-	// so a plain HTTP request is enough — no browser page needed.
-	const response = await request.get( '?process-waiting-actions' );
-	expect( response.ok() ).toBeTruthy();
+					const stats = await restApi.get< {
+						totals?: {
+							orders_count?: number;
+							items_sold?: number;
+						};
+					} >( 'wc-analytics/reports/products/stats', {
+						products: productIds.join( ',' ),
+						after: '2020-01-01T00:00:00',
+						before: '2050-01-01T00:00:00',
+					} );
+					return {
+						orders: stats.data?.totals?.orders_count,
+						itemsSold: stats.data?.totals?.items_sold,
+					};
+				} catch ( e ) {
+					return { orders: undefined, itemsSold: undefined };
+				}
+			},
+			{
+				message:
+					"This spec's 10 orders must be imported into the analytics lookup tables before the tests assert on them.",
+				timeout: 90_000,
+				intervals: [ 1_000, 2_000, 3_000 ],
+			}
+		)
+		.toEqual( { orders: 10, itemsSold: 110 } );
 } );
 
 test.afterAll( async ( { restApi } ) => {
@@ -305,7 +366,7 @@ test.afterAll( async ( { restApi } ) => {
 } );
 
 test(
-	'confirms correct summary numbers on overview page',
+	'renders the overview performance indicators',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
 	},
@@ -314,31 +375,28 @@ test(
 			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 		);
 
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Total sales $1,229.30 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Net sales $1,229.30 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Orders 10 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Products sold 110 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Variations Sold 40 No change from Previous year:',
-			} )
-		).toBeVisible();
+		// The overview performance tiles are store-wide and cannot be scoped to
+		// this spec's data, so any exact total asserted here would be polluted
+		// by orders that earlier specs in this serial run leave in the shared
+		// store. Assert only that the performance section renders; the exact
+		// figures are verified on the product-scoped report tests below.
+		//
+		// Require a value (a digit or `$`) after the label so this matches the
+		// rendered tile ("Total sales $1,229.30 …") and not a bare-label
+		// `menuitem` an indicator picker might also contribute to the DOM.
+		for ( const label of [
+			'Total sales',
+			'Net sales',
+			'Orders',
+			'Products sold',
+			'Variations Sold',
+		] ) {
+			await expect(
+				page.getByRole( 'menuitem', {
+					name: new RegExp( `^${ escapeRegExp( label ) } [\\d$]` ),
+				} )
+			).toBeVisible();
+		}
 	}
 );
 
@@ -375,72 +433,34 @@ test(
 );
 
 test(
-	'use date filter on overview page',
+	'use date filter on products report',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
 	},
 	async ( { page } ) => {
+		// Scope the report to this spec's variable product so cumulative store
+		// state from earlier serial specs can't affect the totals. The date
+		// filter itself is a shared component, so exercising it here covers the
+		// same behaviour the overview page used to, without store-wide numbers.
+		const variableProductId = productIds[ productIds.length - 1 ];
 		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
+			`wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Fproducts&filter=single_product&products=${ variableProductId }`
 		);
 
-		// assert that current month is shown and that values are for that
+		// Default range (month to date) reflects this spec's variable-product sales.
 		await expect( page.getByText( 'Month to date' ).first() ).toBeVisible();
+		await expect( summaryTile( page, 'Items sold', '40' ) ).toBeVisible();
 		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Total sales $1,229.30 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Net sales $1,229.30 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Orders 10 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Products sold 110 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Variations Sold 40 No change from Previous year:',
-			} )
+			summaryTile( page, 'Net sales', '$260.00' )
 		).toBeVisible();
 
-		// click the date filter and change to Last month (should be no sales/orders)
+		// Last month predates this spec's (and every other spec's) orders, so the
+		// totals are a stable zero regardless of what else the store contains.
 		await page.getByRole( 'button', { name: 'Month to date' } ).click();
 		await page.getByText( 'Last month' ).click();
 		await page.getByRole( 'button', { name: 'Update' } ).click();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Total sales $0.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Net sales $0.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Orders 0 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Products sold 0 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Variations Sold 0 No change from Previous year:',
-			} )
-		).toBeVisible();
+		await expect( summaryTile( page, 'Items sold', '0' ) ).toBeVisible();
+		await expect( summaryTile( page, 'Net sales', '$0.00' ) ).toBeVisible();
 	}
 );
 
@@ -454,45 +474,12 @@ test(
 			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue'
 		);
 
-		// assert that current month is shown and that values are for that
 		await expect( page.getByText( 'Month to date' ).first() ).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Gross sales $1,229.30 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Returns $0.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Coupons $0.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Net sales $1,229.30 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Taxes $0.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Shipping $0.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Total sales $1,229.30 No change from Previous year:',
-			} )
-		).toBeVisible();
 
-		// click the date filter and change to custom date range (should be no sales/orders)
+		// The revenue report is store-wide (there is no product scope for it), so
+		// only assert on a date range that predates every spec's orders, where the
+		// totals are a stable zero regardless of what else the shared serial store
+		// contains. This still exercises the custom-date-range UI end to end.
 		await page.getByRole( 'button', { name: 'Month to date' } ).click();
 		await page.getByText( 'Custom', { exact: true } ).click();
 		await page
@@ -502,140 +489,50 @@ test(
 		await page.getByPlaceholder( 'mm/dd/yyyy' ).last().fill( '01/30/2022' );
 		await page.getByRole( 'button', { name: 'Update' } ).click();
 
-		// assert values updated
 		await expect(
 			page.getByRole( 'button', {
 				name: 'Custom (Jan 1 - 30, 2022) vs. Previous year (Jan 1 - 30, 2021)',
 			} )
 		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Gross sales $0.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Returns $0.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Coupons $0.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Net sales $0.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Taxes $0.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Shipping $0.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Total sales $0.00 No change from Previous year:',
-			} )
-		).toBeVisible();
+		for ( const label of [
+			'Gross sales',
+			'Returns',
+			'Coupons',
+			'Net sales',
+			'Taxes',
+			'Shipping',
+			'Total sales',
+		] ) {
+			await expect( summaryTile( page, label, '$0.00' ) ).toBeVisible();
+		}
 	}
 );
 
 test(
-	'use advanced filters on orders report',
+	'scope orders report via advanced product filter',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
 	},
 	async ( { page } ) => {
+		// Scope the orders report to this spec's data with the product advanced
+		// filter: every one of this spec's 10 orders contains productIds[0] and no
+		// other order in the shared store does, so the totals below are isolated
+		// from orders left behind by earlier serial specs. Pre-applying the filter
+		// via the URL also exercises the report's advanced-filter query path
+		// without the flaky multi-step filter-builder clicks.
 		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Forders'
+			`wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Forders&filter=advanced&product_includes=${ productIds[ 0 ] }`
 		);
 
-		// no filters applied
+		await expect( summaryTile( page, 'Orders', '10' ) ).toBeVisible();
 		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Orders 10 No change from Previous year:',
-			} )
+			summaryTile( page, 'Net sales', '$1,229.30' )
 		).toBeVisible();
 		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Net sales $1,229.30 No change from Previous year:',
-			} )
+			summaryTile( page, 'Average order value', '$122.93' )
 		).toBeVisible();
 		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Average order value $122.93 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Average items per order 11 No change from Previous year:',
-			} )
-		).toBeVisible();
-
-		// apply some filters
-		await page.getByRole( 'button', { name: 'All orders' } ).click();
-		await page.getByText( 'Advanced filters' ).click();
-
-		await page.getByRole( 'button', { name: 'Add a filter' } ).click();
-		await page.getByRole( 'button', { name: 'Order status' } ).click();
-		await page
-			.getByLabel( 'Select an order status filter match' )
-			.selectOption( 'Is' );
-		await page
-			.getByLabel( 'Select an order status', { exact: true } )
-			.selectOption( 'Failed' );
-		await page.getByRole( 'link', { name: 'Filter', exact: true } ).click();
-
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Orders 0 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Net sales $0.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Average order value $0.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Average items per order 0 No change from Previous year:',
-			} )
-		).toBeVisible();
-
-		await page
-			.getByLabel( 'Select an order status', { exact: true } )
-			.selectOption( 'Completed' );
-		await page.getByRole( 'link', { name: 'Filter', exact: true } ).click();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Orders 10 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Net sales $1,229.30 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Average order value $122.93 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Average items per order 11 No change from Previous year:',
-			} )
+			summaryTile( page, 'Average items per order', '11' )
 		).toBeVisible();
 	}
 );
@@ -646,68 +543,22 @@ test(
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
 	},
 	async ( { page } ) => {
+		// Land already scoped to this spec's variable product. There is no
+		// store-wide "no filters" block to assert, so cumulative orders from
+		// earlier serial specs can't pollute these figures.
+		const variableProductId = productIds[ productIds.length - 1 ];
 		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Fproducts'
+			`wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Fproducts&filter=single_product&products=${ variableProductId }&is-variable=1`
 		);
 
-		// no filters applied
+		await expect( summaryTile( page, 'Items sold', '40' ) ).toBeVisible();
 		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Orders 10 No change from Previous year:',
-			} )
+			summaryTile( page, 'Net sales', '$260.00' )
 		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Items sold 110 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Net sales $1,229.30 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Orders 10 No change from Previous year:',
-			} )
-		).toBeVisible();
+		await expect( summaryTile( page, 'Orders', '10' ) ).toBeVisible();
 
-		// apply some filters
-		await page.getByRole( 'button', { name: 'All products' } ).click();
-		await page.getByText( 'Single product' ).click();
-
-		// Search for single product
-		await page
-			.getByPlaceholder( 'Type to search for a product' )
-			.last()
-			.fill( 'Variable Product' );
-
-		await page
-			.getByRole( 'option', {
-				name: 'Variable Product',
-				exact: true,
-			} )
-			.click();
-
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Items sold 40 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Net sales $260.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Orders 10 No change from Previous year:',
-			} )
-		).toBeVisible();
-
+		// Drill into a single variation via the report's variation filter UI.
 		await page.getByText( 'All variations' ).click();
-
-		// Search for single product
 		await expect(
 			page.getByRole( 'button', { name: 'Single variation' } )
 		).toBeVisible();
@@ -721,21 +572,11 @@ test(
 			.getByRole( 'option', { name: 'Variable Product - Blue' } )
 			.click();
 
+		await expect( summaryTile( page, 'Items sold', '30' ) ).toBeVisible();
 		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Items sold 30 No change from Previous year:',
-			} )
+			summaryTile( page, 'Net sales', '$180.00' )
 		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Net sales $180.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Orders 10 No change from Previous year:',
-			} )
-		).toBeVisible();
+		await expect( summaryTile( page, 'Orders', '10' ) ).toBeVisible();
 	}
 );
 

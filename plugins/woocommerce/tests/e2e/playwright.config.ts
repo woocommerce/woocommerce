@@ -120,9 +120,13 @@ export const setupProjects = [
  * `core-parallel` by default, except the other-project folders in `nonCoreSpecs`.
  */
 const serialRunSpecs = [
-	// Drains the whole store's Action Scheduler queue via `?process-waiting-actions`
-	// (other workers' order/product churn floods it past the 10s timeout) and asserts
-	// exact store-wide totals, polluted by concurrent orders.
+	// Forces immediate analytics-import mode by flipping the global
+	// `woocommerce_analytics_scheduled_import` option, and needs it to stay
+	// immediate while it creates orders and drains their imports. In
+	// `core-parallel` that would race `analytics-settings.spec.ts` — which runs in
+	// that pool and toggles the same option — over the shared store and Action
+	// Scheduler queue. Its numeric assertions are scoped to its own products, so
+	// they no longer depend on store-wide totals.
 	'**/tests/analytics/analytics-data.spec.ts',
 	// Asserts store-wide `$0.00 / Orders 0`, polluted by concurrent orders.
 	'**/tests/analytics/analytics-access.spec.ts',
