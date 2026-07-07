@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\BlockTypes\SavedForLater;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 use ReflectionClass;
@@ -31,6 +32,20 @@ class SavedForLaterTests extends WP_UnitTestCase {
 	private SavedForLater $sut;
 
 	/**
+	 * Features controller, used to toggle the `cart_save_for_later` feature.
+	 *
+	 * @var FeaturesController
+	 */
+	private FeaturesController $features_controller;
+
+	/**
+	 * The `cart_save_for_later` feature state before the test, restored on teardown.
+	 *
+	 * @var bool
+	 */
+	private bool $original_feature_enabled;
+
+	/**
 	 * Instantiate the block without invoking its constructor and inject a
 	 * registry mock so render() can call `->add()` without NPEing.
 	 */
@@ -46,6 +61,20 @@ class SavedForLaterTests extends WP_UnitTestCase {
 			$this->sut,
 			new AssetDataRegistryMock( Package::container()->get( Api::class ) )
 		);
+
+		// The block gates its rendering and auto-injection on the feature, so
+		// enable it by default; the feature-off tests toggle it off explicitly.
+		$this->features_controller      = wc_get_container()->get( FeaturesController::class );
+		$this->original_feature_enabled = $this->features_controller->feature_is_enabled( 'cart_save_for_later' );
+		$this->features_controller->change_feature_enable( 'cart_save_for_later', true );
+	}
+
+	/**
+	 * Restore the feature flag to its pre-test state.
+	 */
+	public function tearDown(): void {
+		$this->features_controller->change_feature_enable( 'cart_save_for_later', $this->original_feature_enabled );
+		parent::tearDown();
 	}
 
 	/**
@@ -64,6 +93,76 @@ class SavedForLaterTests extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'blockHooks', $metadata );
 		$this->assertArrayHasKey( 'woocommerce/cart', $metadata['blockHooks'] );
 		$this->assertSame( 'after', $metadata['blockHooks']['woocommerce/cart'] );
+	}
+
+	/**
+	 * The block type is registered unconditionally, but when the feature is off
+	 * `disable_when_feature_off` strips the `blockHooks` declaration and hides
+	 * the block from the inserter, so it neither auto-injects nor can be added
+	 * manually while off.
+	 */
+	public function test_disable_when_feature_off_strips_hooks_and_hides_inserter(): void {
+		$this->features_controller->change_feature_enable( 'cart_save_for_later', false );
+
+		$metadata = array(
+			'name'       => 'woocommerce/saved-for-later',
+			'blockHooks' => array( 'woocommerce/cart' => 'after' ),
+			'supports'   => array( 'interactivity' => true ),
+		);
+
+		$result = $this->sut->disable_when_feature_off( $metadata );
+
+		$this->assertArrayNotHasKey( 'blockHooks', $result );
+		$this->assertFalse( $result['supports']['inserter'] );
+	}
+
+	/**
+	 * When the feature is enabled the metadata is left untouched, so the block
+	 * keeps its `blockHooks` declaration and stays inserter-visible.
+	 */
+	public function test_disable_when_feature_off_keeps_metadata_when_enabled(): void {
+		$this->features_controller->change_feature_enable( 'cart_save_for_later', true );
+
+		$metadata = array(
+			'name'       => 'woocommerce/saved-for-later',
+			'blockHooks' => array( 'woocommerce/cart' => 'after' ),
+			'supports'   => array( 'interactivity' => true ),
+		);
+
+		$result = $this->sut->disable_when_feature_off( $metadata );
+
+		$this->assertArrayHasKey( 'blockHooks', $result );
+		$this->assertSame( 'after', $result['blockHooks']['woocommerce/cart'] );
+		$this->assertArrayNotHasKey( 'inserter', $result['supports'] );
+	}
+
+	/**
+	 * `disable_when_feature_off` only touches the Saved for Later block; other
+	 * blocks' metadata passes through untouched even when the feature is off.
+	 */
+	public function test_disable_when_feature_off_ignores_other_blocks(): void {
+		$this->features_controller->change_feature_enable( 'cart_save_for_later', false );
+
+		$metadata = array(
+			'name'       => 'core/paragraph',
+			'blockHooks' => array( 'woocommerce/cart' => 'after' ),
+		);
+
+		$this->assertSame( $metadata, $this->sut->disable_when_feature_off( $metadata ) );
+	}
+
+	/**
+	 * `render()` outputs nothing when the feature is disabled, so a block
+	 * persisted while the feature was on renders empty instead of as content.
+	 */
+	public function test_render_returns_empty_when_feature_disabled(): void {
+		$this->features_controller->change_feature_enable( 'cart_save_for_later', false );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+
+		$render = new ReflectionMethod( SavedForLater::class, 'render' );
+		$render->setAccessible( true );
+
+		$this->assertSame( '', (string) $render->invoke( $this->sut, array(), '', null ) );
 	}
 
 	/**

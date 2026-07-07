@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListRenderer;
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -21,8 +22,10 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
  * class composes those fragments and adds the bits that are unique to
  * Saved for Later: auto-injection after `woocommerce/cart` (declared via the
  * `blockHooks` field in block.json so the editor treats it as a first-class
- * hooked block), the `hasShownItems` empty-state gating, the per-row quantity
- * span, and the Move-to-cart action button.
+ * hooked block; the hook, rendering, and inserter visibility are gated on the
+ * `saved-for-later` feature while the block type itself stays registered), the
+ * `hasShownItems` empty-state gating, the per-row quantity span, and the
+ * Move-to-cart action button.
  */
 final class SavedForLater extends AbstractBlock {
 	/**
@@ -43,12 +46,48 @@ final class SavedForLater extends AbstractBlock {
 	 * Initialize this block type.
 	 */
 	protected function initialize(): void {
+		// The block type is registered unconditionally (see BlockTypesController)
+		// so content saved while the feature was on doesn't show an "unsupported
+		// block" notice once it's off. When the feature is disabled we strip the
+		// `blockHooks` declaration and hide the block from the inserter, so it
+		// neither auto-injects nor can be added manually. This must be filtered
+		// before `parent::initialize()` registers the block.
+		add_filter( 'block_type_metadata', array( $this, 'disable_when_feature_off' ) );
+
 		parent::initialize();
 
-		// Auto-injection after `woocommerce/cart` is declared in block.json
-		// (`blockHooks`). This filter only seeds the default heading on the
-		// injected block.
+		// Seeds the default heading on the auto-injected block (only fires while
+		// the feature is on and the block is being hooked).
 		add_filter( 'hooked_block_woocommerce/saved-for-later', array( $this, 'set_hooked_block_attributes' ), 10, 4 );
+	}
+
+	/**
+	 * When the `saved-for-later` feature is disabled, drop the block's
+	 * `blockHooks` declaration and hide it from the inserter. The block type
+	 * itself stays registered, so content saved while the feature was enabled
+	 * keeps rendering as a known block rather than an "unsupported block" notice.
+	 *
+	 * @param array $metadata Parsed block.json metadata.
+	 * @return array
+	 */
+	public function disable_when_feature_off( $metadata ) {
+		if ( ! isset( $metadata['name'] ) || $this->get_full_block_name() !== $metadata['name'] || $this->is_feature_enabled() ) {
+			return $metadata;
+		}
+
+		unset( $metadata['blockHooks'] );
+		$metadata['supports']             = isset( $metadata['supports'] ) && is_array( $metadata['supports'] ) ? $metadata['supports'] : array();
+		$metadata['supports']['inserter'] = false;
+		return $metadata;
+	}
+
+	/**
+	 * Whether the Saved for Later feature is enabled.
+	 *
+	 * @return bool
+	 */
+	private function is_feature_enabled(): bool {
+		return wc_get_container()->get( ShopperListsController::class )->is_enabled( 'saved-for-later' );
 	}
 
 	/**
@@ -118,6 +157,13 @@ final class SavedForLater extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		// The block type is always registered, so a block persisted while the
+		// feature was on can still reach render() after it's turned off. Render
+		// nothing in that case.
+		if ( ! $this->is_feature_enabled() ) {
+			return '';
+		}
+
 		// Guests have no personal list — bail before enqueuing assets or seeding state.
 		if ( ! is_user_logged_in() ) {
 			return '';

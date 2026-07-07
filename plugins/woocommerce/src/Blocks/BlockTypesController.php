@@ -556,9 +556,11 @@ final class BlockTypesController {
 			MiniCartContents::get_mini_cart_block_types()
 		);
 
-		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled( 'saved-for-later' ) ) {
-			$block_types[] = 'SavedForLater';
-		}
+		// Registered unconditionally so content saved while the feature was on
+		// doesn't surface an "unsupported block" notice once it's disabled. The
+		// block gates its own auto-injection, rendering, and inserter visibility
+		// on the `saved-for-later` feature (see SavedForLater).
+		$block_types[] = 'SavedForLater';
 
 		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled( 'wishlist' ) ) {
 			$block_types[] = 'Wishlist';
