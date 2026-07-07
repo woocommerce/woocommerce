@@ -84,19 +84,13 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
  * @param quantity The absolute target quantity.
  */
 const commitQuantity = ( quantity: number ): void => {
-	// The quantity-selector context carries `inputElement` for stepper inputs.
-	// A grouped "sold individually" CHILD renders as a bare checkbox that carries
-	// `data-wp-interactive` for this namespace but NO `data-wp-context` for it, so
-	// `getContext()` THROWS there. Read it defensively: a checkbox legitimately
-	// has no `inputElement` and must still write its draft. Without this guard the
-	// throw aborts the whole handler before `upsertDraftItem`, so the child
-	// quantity never becomes a draft and the grouped add finds nothing to post.
-	let inputElement: HTMLInputElement | null | undefined;
-	try {
-		( { inputElement } = getContext< Context >() );
-	} catch {
-		inputElement = undefined;
-	}
+	// The quantity-selector context carries `inputElement` for stepper inputs. A
+	// grouped "sold individually" CHILD renders as a bare checkbox, but its wrapper
+	// now emits an EMPTY own-namespace context (see
+	// `GroupedProductItemSelector::get_checkbox_markup`), so `getContext()` resolves
+	// to `{}` there instead of throwing — a checkbox legitimately has no
+	// `inputElement` and must still write its draft.
+	const { inputElement } = getContext< Context >();
 	const unchanged = cartState.itemInContext.draft?.quantity === quantity;
 
 	cartActions.upsertDraftItem( { quantity } );

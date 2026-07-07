@@ -584,7 +584,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			).toBeUndefined();
 		} );
 
-		it( 'findItem({ id }) runs the ladder against the context draft', async () => {
+		it( 'findItem({ id }) returns the STORED draft keyed by String(id) and resolves the line', async () => {
 			const cart = await loadCartAndReady();
 			setCartItems( cart, [
 				{
@@ -603,7 +603,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			expect( env.draft?.id ).toBe( 100 );
 		} );
 
-		it( 'findItem({ id }) with no draft builds a bare draft from the id', async () => {
+		it( 'findItem({ id }) with no stored draft resolves the line but never fabricates a draft (draft undefined)', async () => {
 			const cart = await loadCartAndReady();
 			setCartItems( cart, [
 				{
@@ -617,7 +617,11 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 				},
 			] );
 			const env = cart.state.findItem( { id: 100 } );
+			// The bare `{ id }` query object narrows candidates internally, so
+			// the line still resolves…
 			expect( env.cart?.key ).toBe( 'abc' );
+			// …but the envelope's `draft` is undefined — no synthetic draft.
+			expect( env.draft ).toBeUndefined();
 		} );
 	} );
 
@@ -804,9 +808,10 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			} );
 		} );
 
-		it( 'throws when there is no payload, no draft, and no product in context', async () => {
+		it( 'is a NO-OP returning undefined with a dev-mode warning when there is no payload, no draft, and no product in context', async () => {
 			const cart = await loadCartAndReady();
 			mockContextProductId = undefined;
+			const batchCalls: Array< [ string, RequestInit ] > = [];
 			installFetchMock( {
 				onBatch: ( requests ) =>
 					requests.map( () => ( {
@@ -814,12 +819,45 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 						body: { items: [], totals: {}, errors: [] },
 					} ) ),
 			} );
+			// Record any batch POSTs to prove none is sent.
+			const fetchSpy = jest.spyOn(
+				globalThis,
+				'fetch'
+			) as unknown as jest.SpyInstance;
+			fetchSpy.mockImplementation( ( url: string, init: RequestInit ) => {
+				if ( String( url ).includes( '/batch' ) ) {
+					batchCalls.push( [ String( url ), init ] );
+				}
+				return Promise.resolve( {
+					ok: true,
+					status: 200,
+					headers: new Headers(),
+					json: async () => ( {
+						responses: [],
+						items: [],
+						totals: {},
+						errors: [],
+					} ),
+				} as unknown as Response );
+			} );
 
-			await expect(
-				runAction(
-					cart.actions.addItem() as unknown as Iterator< unknown >
-				)
-			).rejects.toThrow( 'addItem: no payload' );
+			const warnSpy = jest
+				.spyOn( console, 'warn' )
+				.mockImplementation( () => undefined );
+
+			const result = await runAction(
+				cart.actions.addItem() as unknown as Iterator< unknown >
+			);
+
+			// No throw, resolves undefined, no add-item batch, dev-mode warning.
+			expect( result ).toBeUndefined();
+			expect( batchCalls ).toHaveLength( 0 );
+			expect( warnSpy ).toHaveBeenCalledWith(
+				expect.stringContaining( 'addItem: no payload' )
+			);
+
+			warnSpy.mockRestore();
+			fetchSpy.mockRestore();
 		} );
 
 		it( 'never emits update-item even when an id-matching line already exists', async () => {

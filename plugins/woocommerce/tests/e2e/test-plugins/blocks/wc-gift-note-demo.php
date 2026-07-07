@@ -213,9 +213,18 @@ add_action(
 						$note = (string) $cart_item[ WC_GIFT_NOTE_DEMO_NS ][ WC_GIFT_NOTE_DEMO_ITEM_KEY ];
 					}
 
+					// When the line carries no note, echo an EMPTY OBJECT — not
+					// `{ 'gift-note': '' }`. The machine-readable projection must be
+					// truly ABSENT for a note-less line so it reads as "no content under
+					// this namespace": core's matcher normalizes absent/empty, so an
+					// empty `extensions[ns]` pairs with a draft that has no (or an empty)
+					// gift-note prop. Echoing a present-but-empty `gift-note` key would
+					// instead advertise a real field the matcher must reconcile.
+					if ( '' === $note ) {
+						return array();
+					}
+
 					// Same shape as the request/draft prop: a `gift-note` string.
-					// Empty string when the line carries no note (absent/empty is
-					// normalized by core's matcher).
 					return array(
 						WC_GIFT_NOTE_DEMO_ITEM_KEY => $note,
 					);

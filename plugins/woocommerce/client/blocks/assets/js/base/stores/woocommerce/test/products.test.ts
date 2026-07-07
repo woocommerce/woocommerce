@@ -218,6 +218,25 @@ describe( 'woocommerce/products store – product context derived state', () => 
 
 			expect( mockStoreState.productVariationInContext ).toBeNull();
 		} );
+
+		it( 'context presence shadows global: a productId-only context does NOT inherit the global variationId', () => {
+			// The context scopes out of the page product but declares no
+			// variationId; the page-global variationId is set. The scoped
+			// surface must resolve to NO variation (null), not inherit global.
+			mockContext = { productId: 10 };
+			mockStoreState.variationId = 77;
+
+			expect( mockStoreState.productVariationInContext ).toBeNull();
+		} );
+
+		it( 'an explicit context variationId still resolves even when global differs', () => {
+			mockContext = { productId: 10, variationId: 77 };
+			mockStoreState.variationId = 999;
+
+			expect( mockStoreState.productVariationInContext ).toBe(
+				redVariation
+			);
+		} );
 	} );
 
 	describe( 'findProduct', () => {
@@ -1026,13 +1045,14 @@ describe( 'woocommerce/products store – product context derived state', () => 
 			);
 		} );
 
-		it( 'productVariationInContext falls back to state when context exists but does not define variationId', () => {
+		it( 'productVariationInContext does NOT fall back to state when the context exists but omits variationId (context presence shadows global)', () => {
+			// A products context that declares `productId` has scoped out of the
+			// page product; with no `variationId` in it, there is no selected
+			// variation — it must NOT inherit the page-global `variationId`.
 			mockContext = { productId: 42 };
 			mockStoreState.variationId = 99;
 
-			expect( mockStoreState.productVariationInContext ).toBe(
-				mockVariation
-			);
+			expect( mockStoreState.productVariationInContext ).toBeNull();
 		} );
 
 		it( 'productVariationInContext does not fall back to state when context explicitly sets variationId to null', () => {

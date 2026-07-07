@@ -38,6 +38,11 @@ import {
 
 export type { DraftItem, CartItemFilterPredicate } from './cart-item-matching';
 
+// `SelectedAttributes` has a single definition — the products store owns it
+// (the cart-store types already import from products). Re-exported here so the
+// cart store's existing consumers keep importing it from `woocommerce/cart`.
+export type { SelectedAttributes } from '@woocommerce/stores/woocommerce/products';
+
 export type WooCommerceConfig = {
 	messages?: {
 		addedToCartText?: string;
@@ -64,8 +69,6 @@ export type WooCommerceConfig = {
 		[ key: string ]: string;
 	};
 };
-
-export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
 
 export type OptimisticCartItem = {
 	key?: string | undefined;
@@ -149,8 +152,11 @@ export type Store = {
 		 * Resolve an envelope explicitly.
 		 *
 		 * - `key` bypasses the ladder entirely (exact line; ignores any filter).
-		 * - `id` runs the ladder against the context draft (or a bare draft built
-		 *   from the id).
+		 * - `id` runs the ladder against the draft STORED under `String(id)` (never
+		 *   the context draft — `findItem` does not consult context). When no such
+		 *   draft exists, a bare `{ id }` query object narrows candidates internally,
+		 *   but the returned envelope's `draft` is the stored draft or `undefined` —
+		 *   it never fabricates a draft.
 		 * - `filter` — an optional predicate that REPLACES the generic narrowing
 		 *   (per-namespace compare + presence heuristic) as the sole narrowing
 		 *   authority. Absent → generic narrowing runs. Never inherits any context
@@ -162,18 +168,22 @@ export type Store = {
 			filter?: CartItemFilterPredicate;
 		} ) => ItemEnvelope;
 		/**
-		 * Type-invariant in-cart total for a product, in ANY purchasable form.
-		 * This is the polymorphic read that lets non-specialized surfaces (e.g.
-		 * the Product Button) show "X in cart" without ever branching on product
-		 * type — the getter resolves the total once, for every type:
+		 * Type-invariant in-cart quantity for a product. This is the polymorphic
+		 * read that lets non-specialized surfaces (e.g. the Product Button) show
+		 * "X in cart" without ever branching on product type — the getter resolves
+		 * the number once, for every type. It is NOT "the total across every
+		 * purchasable form": for a variable product it is specifically the
+		 * RESOLVED-SELECTION line's quantity, not a sum over sibling variations.
 		 *
 		 * - simple:   the product's own line quantity.
-		 * - variable: the resolved-variation line's quantity (the envelope's
-		 *             purchasable-id resolution already handles this via
-		 *             `findItem`).
-		 * - grouped:  the sum over the lines of the product's
-		 *             `grouped_products` child ids (a grouped parent has no line
-		 *             of its own; its "in cart" is the aggregate of its children).
+		 * - variable: the currently RESOLVED variation's line quantity — the one
+		 *             the draft's selection resolves to (via `findItem`'s
+		 *             purchasable-id resolution). `0` while the selection is
+		 *             unresolved (no variation picked yet); it does NOT aggregate
+		 *             over other variation lines of the same parent.
+		 * - grouped:  the SUM over the lines of the product's `grouped_products`
+		 *             child ids (a grouped parent has no line of its own; its "in
+		 *             cart" is the aggregate of its children).
 		 *
 		 * `id` defaults to the context product (`mainProductInContext`). Returns
 		 * `0` when nothing is resolvable or the product is not in the cart.
@@ -181,8 +191,20 @@ export type Store = {
 		inCartQuantity: ( id?: number ) => number;
 	};
 	actions: {
+		/**
+		 * @internal Not contract surface. Test/internal plumbing — resolves once
+		 * the mutation queue is idle. Not part of the shared-store API.
+		 */
 		waitForIdle: () => Promise< void >;
+		/**
+		 * @internal Not contract surface. Internal error → store-notice bridge,
+		 * used by the store's own actions. Not part of the shared-store API.
+		 */
 		showNoticeError: ( error: Error | ApiErrorResponse ) => Promise< void >;
+		/**
+		 * @internal Not contract surface. Internal notice-reconciliation used by
+		 * the cycle settle handler. Not part of the shared-store API.
+		 */
 		updateNotices: (
 			notices: Notice[],
 			removeOthers?: boolean
@@ -597,9 +619,7 @@ function resolvePurchasableId( draft: DraftItem ): number {
 	const resolved: ProductResponseItem | null = getProductsState().findProduct(
 		{
 			id: draft.id,
-			selectedAttributes: ( draft.variation ?? null ) as
-				| SelectedAttributes[]
-				| null,
+			selectedAttributes: draft.variation ?? null,
 		}
 	);
 
@@ -864,19 +884,33 @@ const { actions } = store< Store >(
 				filter?: CartItemFilterPredicate;
 			} ): ItemEnvelope {
 				const draftKey = id !== undefined ? String( id ) : undefined;
+				const storedDraft = findDraftByKey( draftKey );
 
 				if ( key ) {
 					return resolveEnvelope( {
-						draft: findDraftByKey( draftKey ),
+						draft: storedDraft,
 						key,
 					} );
 				}
 
-				const draft =
-					findDraftByKey( draftKey ) ??
-					( id !== undefined ? { id } : undefined );
+				// Run the ladder against the stored draft when one exists, else a
+				// bare `{ id }` QUERY object so id-only lookups still resolve their
+				// line. That query object is internal to the ladder only — it must
+				// NOT leak into the returned envelope's `draft`, which reports the
+				// STORED draft (or `undefined`). Consumers that need the line read
+				// `.cart`; nobody should mistake the query stand-in for a real draft.
+				const queryDraft =
+					storedDraft ?? ( id !== undefined ? { id } : undefined );
 
-				return resolveEnvelope( { draft, filter } );
+				const { cart } = resolveEnvelope( {
+					draft: queryDraft,
+					filter,
+				} );
+
+				return {
+					...( cart && { cart } ),
+					...( storedDraft && { draft: storedDraft } ),
+				};
 			},
 
 			/**
@@ -1007,8 +1041,10 @@ const { actions } = store< Store >(
 			 *    the product's `add_to_cart.minimum`, so a min-purchase product adds
 			 *    a valid quantity.
 			 *
-			 * THROWS when nothing is resolvable: no payload, no draft, and no
-			 * product in context — there is nothing to add.
+			 * NO-OP with a dev-mode warning (returning `undefined`) when nothing
+			 * is resolvable: no payload, no draft, and no product in context —
+			 * there is nothing to add. Never throws (same policy as `removeItem`),
+			 * because it is bound near user events.
 			 *
 			 * The purchasable id is resolved client-side at send time: posting the
 			 * parent id and relying on server-side variation resolution is not
@@ -1046,10 +1082,18 @@ const { actions } = store< Store >(
 
 				if ( ! itemPayload || itemPayload.id === undefined ) {
 					// Nothing to add — no payload, no context draft, no product
-					// in context.
-					throw new Error(
-						'addItem: no payload, context draft, or product in context to add.'
-					);
+					// in context. NO-OP with a dev-mode warning, returning
+					// `undefined` (the same failure policy as `removeItem`): these
+					// actions are bound near user events, so a hard throw would
+					// surface an uncaught error for a benign "nothing to act on"
+					// state.
+					if ( process.env.NODE_ENV !== 'production' ) {
+						// eslint-disable-next-line no-console
+						console.warn(
+							'addItem: no payload, context draft, or product in context to add — nothing to add.'
+						);
+					}
+					return undefined;
 				}
 
 				const { id, quantity, variation } = itemPayload;

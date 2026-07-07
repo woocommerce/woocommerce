@@ -225,8 +225,8 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 					return [];
 				}
 
-				const selectedAttributes = ( cartState.itemInContext.draft
-					?.variation ?? [] ) as SelectedAttributes[];
+				const selectedAttributes =
+					cartState.itemInContext.draft?.variation ?? [];
 				const hideInvalid = disabledAttributesAction === 'hide';
 
 				return variationAttributeOptions.map( ( row, index ) => {
@@ -263,8 +263,8 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 			// into the products context (derivation truth). An empty value removes
 			// the attribute (absorbing the former `removeAttribute`).
 			setAttribute( attribute: string, value: string ) {
-				const selectedAttributes = ( cartState.itemInContext.draft
-					?.variation ?? [] ) as SelectedAttributes[];
+				const selectedAttributes =
+					cartState.itemInContext.draft?.variation ?? [];
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
 						attributeNamesMatch(
@@ -330,8 +330,8 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				const { name } = context;
-				const selectedAttributes = ( cartState.itemInContext.draft
-					?.variation ?? [] ) as SelectedAttributes[];
+				const selectedAttributes =
+					cartState.itemInContext.draft?.variation ?? [];
 				const isCurrentlySelected = selectedAttributes.some(
 					( attrObject ) =>
 						attributeNamesMatch( attrObject.attribute, name ) &&
@@ -366,8 +366,8 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const selectedAttributes = ( cartState.itemInContext.draft
-					?.variation ?? [] ) as SelectedAttributes[];
+				const selectedAttributes =
+					cartState.itemInContext.draft?.variation ?? [];
 
 				// Normalize included/excluded attributes to lowercase for comparison
 				// with Store API labels (e.g., "Color" vs "attribute_pa_color" → "color").
@@ -448,20 +448,17 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const selectedAttributes = ( cartState.itemInContext.draft
-					?.variation ?? [] ) as SelectedAttributes[];
-				const result = productsState.findProduct( {
-					id: product.id,
-					selectedAttributes,
-				} );
-				// findProduct returns the parent when no variation
-				// matches — only accept an actual variation.
-				const matchedVariation =
-					result && result.id !== product.id ? result : null;
+				// Read the resolved variation straight off the products store's
+				// `productVariationInContext` — written by `setAttribute` (the same
+				// choke point that writes the draft's `variation`), so it already
+				// reflects the current selection with no re-derivation here. Null
+				// means the selection has not resolved to a concrete variation →
+				// missing attributes.
+				const { productVariationInContext: variation } = productsState;
 
 				const { errorMessages } = getConfig();
 
-				if ( ! matchedVariation?.id ) {
+				if ( ! variation ) {
 					actions.addError( {
 						code: 'variableProductMissingAttributes',
 						message:
@@ -472,16 +469,7 @@ const { actions } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				// Check stock status from productVariations store.
-				const variationData =
-					productsState.productVariations[ matchedVariation.id ];
-
-				if ( ! variationData ) {
-					// Variation data not loaded - this is a data consistency issue.
-					return;
-				}
-
-				if ( ! variationData.is_in_stock ) {
+				if ( ! variation.is_in_stock ) {
 					actions.addError( {
 						code: 'variableProductOutOfStock',
 						message: errorMessages?.variableProductOutOfStock || '',

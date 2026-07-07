@@ -4,7 +4,6 @@
 import {
 	getConfig,
 	getContext,
-	getElement,
 	store,
 	type AsyncAction,
 } from '@wordpress/interactivity';
@@ -15,7 +14,19 @@ import type {
 	Store as ShopperListsStore,
 } from '@woocommerce/stores/woocommerce/shopper-lists';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
-import { sanitizeHTML } from '@woocommerce/sanitize';
+
+/**
+ * Internal dependencies
+ */
+import {
+	type SharedListBlockContext,
+	createOnClickRemove,
+	decodeEntities,
+	formatVariationLabel,
+	getList,
+	mapListItemVariation,
+	updateInnerHtml,
+} from '../shopper-lists-shared/frontend-utils';
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
@@ -26,12 +37,7 @@ type WishlistConfig = {
 	removeLabelTemplate: string;
 };
 
-type BlockContext = {
-	listItem?: RawShopperListItem;
-	htmlField?: 'price_html' | 'image_html';
-	// Item keys currently mid-mutation, used to disable per-row buttons.
-	pendingKeys: Record< string, true >;
-};
+type BlockContext = SharedListBlockContext;
 
 type BlockStore = {
 	state: {
@@ -53,44 +59,6 @@ type BlockStore = {
 	};
 };
 
-// Allow-list for sanitizing the schema's preformatted strings on innerHTML
-// swap. Covers what `wc_price` (sale/discount markup, currency symbol) and
-// `wp_get_attachment_image` / `wc_placeholder_img` emit (responsive image
-// + dimensions + lazy loading).
-const ALLOWED_TAGS = [
-	'a',
-	'b',
-	'em',
-	'i',
-	'strong',
-	'p',
-	'br',
-	'span',
-	'bdi',
-	'del',
-	'ins',
-	'img',
-	'picture',
-	'source',
-];
-const ALLOWED_ATTR = [
-	'class',
-	'target',
-	'href',
-	'rel',
-	'name',
-	'download',
-	'aria-hidden',
-	'src',
-	'srcset',
-	'sizes',
-	'alt',
-	'width',
-	'height',
-	'loading',
-	'decoding',
-];
-
 const { state: shopperListsState, actions: shopperListsActions } =
 	store< ShopperListsStore >(
 		'woocommerce/shopper-lists',
@@ -104,34 +72,12 @@ const { actions: cartActions } = store< WooCommerce >(
 	{ lock: universalLock }
 );
 
-const decodeEntities = ( encoded: string ): string => {
-	const txt = document.createElement( 'textarea' );
-	txt.innerHTML = encoded;
-	return txt.value;
-};
-
-const formatVariationLabel = ( item: RawShopperListItem ): string => {
-	if ( ! item.variation || item.variation.length === 0 ) {
-		return '';
-	}
-	return item.variation
-		.map(
-			( v ) =>
-				`${ decodeEntities( v.attribute ) }: ${ decodeEntities(
-					v.value
-				) }`
-		)
-		.join( ', ' );
-};
-
-const getList = ( slug: string ) => shopperListsState.lists[ slug ] ?? null;
-
 store< BlockStore >(
 	'woocommerce/wishlist',
 	{
 		state: {
 			get currentItems(): RawShopperListItem[] {
-				return getList( LIST_SLUG )?.items ?? [];
+				return getList( shopperListsState, LIST_SLUG )?.items ?? [];
 			},
 
 			get isCurrentItemPending(): boolean {
@@ -144,7 +90,7 @@ store< BlockStore >(
 			// showing the empty message immediately when the list is
 			// empty is the right signal.
 			get isEmpty(): boolean {
-				const list = getList( LIST_SLUG );
+				const list = getList( shopperListsState, LIST_SLUG );
 				if ( ! list ) {
 					return false;
 				}
@@ -196,21 +142,10 @@ store< BlockStore >(
 		},
 
 		actions: {
-			*onClickRemove(): AsyncAction< void > {
-				const { listItem, pendingKeys } = getContext< BlockContext >();
-				if ( ! listItem || pendingKeys[ listItem.key ] ) {
-					return;
-				}
-				pendingKeys[ listItem.key ] = true;
-				try {
-					yield shopperListsActions.removeItem(
-						LIST_SLUG,
-						listItem.key
-					);
-				} finally {
-					delete pendingKeys[ listItem.key ];
-				}
-			},
+			onClickRemove: createOnClickRemove(
+				shopperListsActions,
+				LIST_SLUG
+			),
 
 			*onClickAddToCart(): AsyncAction< void > {
 				const { listItem, pendingKeys } = getContext< BlockContext >();
@@ -222,19 +157,7 @@ store< BlockStore >(
 					return;
 				}
 
-				// Map the schema's `variation` shape to the cart's
-				// SelectedAttributes shape. The schema returns the
-				// slug-form attribute under `raw_attribute` (e.g.
-				// `attribute_pa_color`) plus a display label under
-				// `attribute` (e.g. "Color"); the cart matches by the
-				// slug-form, so override `attribute` with `raw_attribute`.
-				// Empty for simple products.
-				const variation = listItem.variation.map(
-					( { raw_attribute: rawAttribute, value, attribute } ) => ( {
-						attribute: rawAttribute || attribute,
-						value,
-					} )
-				);
+				const variation = mapListItemVariation( listItem );
 				const isVariation = listItem.variation_id > 0;
 
 				// Wishlist always adds quantity 1 (no quantity column).
@@ -266,30 +189,7 @@ store< BlockStore >(
 		},
 
 		callbacks: {
-			// Single shared innerHTML-swap callback for any slot whose
-			// content is one of the schema's preformatted HTML fields.
-			// Mirrors the atomic product-elements `updateValue` callback:
-			// the watched element carries `data-wp-context='{"htmlField":"price_html"}'`
-			// (or `"image_html"`), and this callback reads that field
-			// off the row's `listItem` and pastes its sanitized HTML into
-			// `element.ref`. PHP renders the same HTML server-side, so
-			// hydration is a no-op when the row's listItem hasn't changed,
-			// and a clean swap when it has (e.g. after Remove shifts the
-			// next item into this slot).
-			updateInnerHtml: () => {
-				const { ref } = getElement();
-				const { listItem, htmlField } = getContext< BlockContext >();
-				if ( ! ref || ! listItem || ! htmlField ) {
-					return;
-				}
-				const html = listItem[ htmlField ];
-				if ( typeof html === 'string' ) {
-					ref.innerHTML = sanitizeHTML( html, {
-						tags: ALLOWED_TAGS,
-						attr: ALLOWED_ATTR,
-					} );
-				}
-			},
+			updateInnerHtml,
 		},
 	},
 	{ lock: universalLock }

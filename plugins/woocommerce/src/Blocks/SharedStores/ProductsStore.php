@@ -133,23 +133,30 @@ class ProductsStore {
 					return $state['products'][ $product_id ] ?? null;
 				},
 				// `productVariationInContext` derives the selected variation
-				// PURELY from this store's own `variationId` — the context value
-				// first, else global state (T12). The products store reads NOTHING
-				// from the cart store (coupling is one-directional: cart →
-				// products only). A purchase surface writes the resolved
-				// `variationId` into the products context when the shopper picks
-				// attributes (the "double write" — draft in `woocommerce/cart`,
-				// `variationId` here). On first paint `variationId` is seeded
-				// `null` everywhere (SingleProduct / SingleProductTemplate /
-				// grouped rows), so the getter yields `null` server-side; the
-				// selected variation resolves client-side once the surface writes
-				// `variationId` after hydration, matching this JS getter exactly.
+				// PURELY from this store's own `variationId` (T12). The products
+				// store reads NOTHING from the cart store (coupling is
+				// one-directional: cart → products only). A purchase surface writes
+				// the resolved `variationId` into the products context when the
+				// shopper picks attributes (the "double write" — draft in
+				// `woocommerce/cart`, `variationId` here).
+				//
+				// CONTEXT PRESENCE SHADOWS GLOBAL (mirrors the JS getter): when a
+				// products context is present (a surface that declared its own
+				// `woocommerce/products` scope always carries `productId`), the
+				// `variationId` is whatever THAT context holds — and only that; we
+				// do NOT fall back to global. A scoped card/grouped-child row must
+				// not inherit the page's global variation selection. Fallback to
+				// global `variationId` happens only when there is NO products
+				// context at all. On first paint no surface has written a
+				// `variationId`, so the getter yields `null` server-side; the
+				// selected variation resolves client-side after hydration.
 				'productVariationInContext' => function () {
 					// Own-namespace context read (T12), mirroring the JS getter.
 					$context      = wp_interactivity_get_context( self::$store_namespace );
 					$state        = wp_interactivity_state( self::$store_namespace );
-					$variation_id = array_key_exists( 'variationId', $context )
-						? $context['variationId']
+					$has_context  = array_key_exists( 'productId', $context );
+					$variation_id = $has_context
+						? ( $context['variationId'] ?? null )
 						: ( $state['variationId'] ?? null );
 
 					if ( ! $variation_id ) {

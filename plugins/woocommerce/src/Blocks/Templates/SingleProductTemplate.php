@@ -69,8 +69,7 @@ class SingleProductTemplate extends AbstractTemplate {
 				wp_interactivity_state(
 					'woocommerce/products',
 					array(
-						'productId'   => $product->get_id(),
-						'variationId' => null,
+						'productId' => $product->get_id(),
 					)
 				);
 			}

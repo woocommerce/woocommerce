@@ -24,6 +24,45 @@ final class ShopperListRenderer {
 	public const ROW_CLASS = 'wc-block-shopper-list-item';
 
 	/**
+	 * Seed the shared `woocommerce/shopper-lists` iAPI store for one list.
+	 *
+	 * Every shopper-list block (Wishlist, Saved for Later, Add to Wishlist
+	 * button) seeds the store identically: the REST URL, a starter nonce, and
+	 * the pre-fetched items for its own slug (`isLoading` false). This is the
+	 * single copy of that seed. The starter nonce is what the cart store also
+	 * seeds via `state.nonce` — the JS layer keeps it fresh by reading the
+	 * `Nonce` response header on every subsequent request, so this is just the
+	 * bootstrap value (and avoids deadlocking mutations that await
+	 * `isNonceReady` before any GET has fired).
+	 *
+	 * Multiple blocks may seed on the same page (e.g. a merchant drops the
+	 * Wishlist block into a single-product sidebar alongside the Add to
+	 * Wishlist button). `wp_interactivity_state` merges via
+	 * `array_replace_recursive` — LATER writer wins per leaf — so each block
+	 * seeding its own slug is additive, and re-seeding an identical payload is
+	 * harmless.
+	 *
+	 * @param string                   $slug  The list slug to seed.
+	 * @param array<int, array<mixed>> $items The pre-fetched list items.
+	 * @return void
+	 */
+	public static function seed_list_state( string $slug, array $items ): void {
+		wp_interactivity_state(
+			'woocommerce/shopper-lists',
+			array(
+				'restUrl' => get_rest_url(),
+				'nonce'   => wp_create_nonce( 'wc_store_api' ),
+				'lists'   => array(
+					$slug => array(
+						'items'     => $items,
+						'isLoading' => false,
+					),
+				),
+			)
+		);
+	}
+
+	/**
 	 * Wrap `$inner` in the block's outer `<section><ul>…</ul></section>`
 	 * grid scaffold. `$wrapper_attrs` are merged with the block's wrapper
 	 * attributes via `get_block_wrapper_attributes()`.

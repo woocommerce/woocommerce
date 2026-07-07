@@ -146,12 +146,26 @@ class GroupedProductItemSelector extends AbstractBlock {
 
 		$product_context_directive = wp_interactivity_data_wp_context(
 			array(
-				'productId'   => $product->get_id(),
-				'variationId' => null,
+				'productId' => $product->get_id(),
 			),
 			'woocommerce/products'
 		);
-		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" data-wp-interactive="woocommerce/add-to-cart-with-options-quantity-selector" data-wp-on--change="actions.handleQuantityCheckboxChange" ' . $product_context_directive . ' aria-label="' . esc_attr( $label ) . '"/>';
+
+		// Emit an EMPTY own-namespace context (`woocommerce/add-to-cart-with-options-quantity-selector`)
+		// on the wrapper, exactly like the stepper input's wrapper does via
+		// `Utils::make_quantity_input_interactive`. The checkbox's `commitQuantity`
+		// reads `getContext<Context>()` in that namespace; without an own-namespace
+		// context present, `getContext` throws for a bare checkbox — the wrapper
+		// context makes it resolve to `{}` instead, so no client-side try/catch is
+		// needed. The `woocommerce/products` context stays on the nested `<input>`,
+		// keeping the two namespaces on separate elements (WP ≤ 6.8 allows only one
+		// `data-wp-context` per element).
+		$quantity_selector_context = wp_interactivity_data_wp_context(
+			array(),
+			'woocommerce/add-to-cart-with-options-quantity-selector'
+		);
+
+		return '<div data-wp-interactive="woocommerce/add-to-cart-with-options-quantity-selector" ' . $quantity_selector_context . '><input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" data-wp-on--change="actions.handleQuantityCheckboxChange" ' . $product_context_directive . ' aria-label="' . esc_attr( $label ) . '"/></div>';
 	}
 
 	/**

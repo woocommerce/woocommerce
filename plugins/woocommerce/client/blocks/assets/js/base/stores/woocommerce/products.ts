@@ -308,10 +308,19 @@ const { state: productsState } = store< ProductsStore >(
 				// Single Product block bound to one variation). The products store
 				// reads ONLY its own context/state — never the cart store — so
 				// with no `variationId` set, there is no selected variation.
-				const explicitVariationId =
-					context && 'variationId' in context
-						? context.variationId
-						: productsState.variationId;
+				//
+				// CONTEXT PRESENCE SHADOWS GLOBAL: a surface that declares its own
+				// `woocommerce/products` context (e.g. a collection card or a
+				// grouped-child row) has scoped OUT of the page's product entirely.
+				// Its `variationId` is therefore whatever THAT context carries — and
+				// only that. We must NOT fall back to the page-global `variationId`
+				// when the context defines a `productId` but no `variationId`, or a
+				// scoped card would inherit the global selection and derive the
+				// wrong variation. Fallback to global happens only when there is no
+				// products context at all.
+				const explicitVariationId = context
+					? context.variationId
+					: productsState.variationId;
 				if ( explicitVariationId ) {
 					return (
 						productsState.productVariations[

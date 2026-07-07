@@ -119,8 +119,7 @@ class Utils {
 
 		if ( $set_product_context && $product instanceof \WC_Product ) {
 			$product_context = array(
-				'productId'   => $product->get_id(),
-				'variationId' => null,
+				'productId' => $product->get_id(),
 			);
 
 			$products_context = 'woocommerce/products::' . wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
@@ -232,24 +231,5 @@ class Utils {
 		$min_purchase_quantity = $product->get_min_purchase_quantity();
 		$max_purchase_quantity = $product->get_max_purchase_quantity();
 		return $min_purchase_quantity === $max_purchase_quantity;
-	}
-
-	/**
-	 * Get the quantity constraints for a product.
-	 *
-	 * @param \WC_Product $product The product to get the quantity constraints for.
-	 * @return array The quantity constraints.
-	 */
-	public static function get_product_quantity_constraints( $product ) {
-		$min          = is_numeric( $product->get_min_purchase_quantity() ) ? $product->get_min_purchase_quantity() : 1;
-		$max_quantity = $product->get_max_purchase_quantity();
-		$max          = is_numeric( $max_quantity ) && -1 !== $max_quantity ? $max_quantity : null;
-		$step         = is_numeric( $product->get_purchase_quantity_step() ) ? $product->get_purchase_quantity_step() : 1;
-
-		return array(
-			'min'  => $min,
-			'max'  => $max,
-			'step' => $step,
-		);
 	}
 }

@@ -103,8 +103,11 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 
 				// For grouped products, the button should always be visible.
 				// Its enabled/disabled state is controlled by isFormValid which
-				// checks whether any child products are selected.
-				if ( product.type === 'grouped' ) {
+				// checks whether any child products are selected. Detect "grouped"
+				// by the schema field `grouped_products` being non-empty (a
+				// schema-field read, carve-out 3), mirroring button/frontend.ts —
+				// never a `type === 'grouped'` sniff in this non-specialized block.
+				if ( ( product.grouped_products?.length ?? 0 ) > 0 ) {
 					return true;
 				}
 

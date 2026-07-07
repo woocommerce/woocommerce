@@ -136,7 +136,6 @@ class ProductButton extends AbstractBlock {
 			'tempQuantity'     => $number_of_items_in_cart,
 			'animationStatus'  => 'IDLE',
 			'inTheCartText'    => $this->get_in_the_cart_text( $product ),
-			'noticeId'         => '',
 			'hasPressedButton' => false,
 		);
 

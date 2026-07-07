@@ -251,6 +251,16 @@ class AddToCartWithOptions extends AbstractBlock {
 			// form on the page. Deriving the product from the ambient
 			// `woocommerce/products` context (the same source the client getter
 			// uses) keeps each form's SSR value correct on multi-product pages.
+			// This SSR closure is a DELIBERATELY CONSERVATIVE approximation of the
+			// client `isFormValid` predicate, not a faithful mirror: it only knows
+			// the product type and whether options exist (grouped / has-options →
+			// invalid until the shopper interacts), because at first paint there is
+			// no draft or selection to validate against. The client predicate is
+			// the source of truth once hydrated (it validates the actual draft
+			// quantity, variation selection, and grouped child quantities). Keep
+			// this approximation as-is — do NOT try to reproduce the full client
+			// logic server-side; its only job is a sensible pre-hydration default
+			// for the add button's disabled state.
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options',
 				array(

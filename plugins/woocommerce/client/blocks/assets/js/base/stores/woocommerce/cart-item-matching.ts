@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import type { CartItem, CartVariationItem } from '@woocommerce/types';
+import type { CartItem } from '@woocommerce/types';
+import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Cart-item matching helpers — the pure core of the envelope resolution ladder.
@@ -27,10 +28,13 @@ export type DraftItem = {
 	id: number;
 	/** Target quantity (absolute). Optional; `addItem` falls back to a min. */
 	quantity?: number;
-	/** The shopper's attribute selection (Store API `add-item` shape). */
-	variation?:
-		| CartVariationItem[]
-		| Array< { attribute: string; value: string } >;
+	/**
+	 * The shopper's attribute selection, in the canonical `SelectedAttributes`
+	 * shape (`{ attribute, value }[]`, the products store's one variation type).
+	 * The label-vs-slug form the form writes is absorbed at resolution time by
+	 * `findProduct` — see the schema's variation-payload note.
+	 */
+	variation?: SelectedAttributes[];
 	/**
 	 * Extension request params at the payload root, keyed by namespace (e.g.
 	 * `"my-plugin/gift-note"`). Legacy non-namespaced names are tolerated. Every
@@ -65,11 +69,21 @@ export type CartItemFilterPredicate = (
  * namespaced extension request params. Everything on a draft that is not one of
  * these is treated as an extension prop and matched against `extensions[ns]`.
  *
+ * `draftKey` is a store-internal routing field (an optional imperative override
+ * on `upsertDraftItem`), never an extension prop and never POSTed — so it is
+ * reserved to keep it out of the extension-prop projection and off the add-item
+ * body.
+ *
  * A draft is a payload, not a cart line: line-only fields like `key`/`type` are
  * deliberately NOT reserved, so seeding a draft from a cart line surfaces them as
  * (bogus) extension props and fails loudly rather than silently.
  */
-const RESERVED_DRAFT_KEYS = new Set( [ 'id', 'quantity', 'variation' ] );
+const RESERVED_DRAFT_KEYS = new Set( [
+	'id',
+	'quantity',
+	'variation',
+	'draftKey',
+] );
 
 /**
  * Extract the namespaced extension request params from a draft — every own,
@@ -147,22 +161,33 @@ export function deepEqual( a: unknown, b: unknown ): boolean {
 }
 
 /**
- * Whether a value counts as "empty" for absent/empty normalization: `undefined`,
- * `null`, `''`, `[]`, or `{}`. A draft prop the extension set to an empty value
- * and a line that carries nothing under that namespace must compare equal.
+ * Whether a value counts as "empty" for absent/empty normalization. Emptiness is
+ * DEEP: `undefined`, `null`, `''`, `[]`, `{}`, AND any array/object whose members
+ * are ALL recursively empty (e.g. `{ ns: { field: '' } }`, `[ {} ]`).
+ *
+ * The deep rule is what keeps pairing forgiving when the two sides of a comparison
+ * disagree only on presence-of-shape, not on data. A draft that touched an
+ * extension field and then cleared it holds `{ ns: { field: '' } }`, while a line
+ * that never carried that field exposes nothing (`{}` or absent) — both must read
+ * as "no content under this namespace" so the surface still pairs with its line.
+ * A shallow check would treat `{ ns: { field: '' } }` as non-empty and break the
+ * match store-wide (the gift-note demo's touched-then-cleared draft is the
+ * canonical case).
  *
  * @param value The value to test.
- * @return True when the value is considered empty.
+ * @return True when the value is considered (recursively) empty.
  */
 export function isEmptyValue( value: unknown ): boolean {
 	if ( value === undefined || value === null || value === '' ) {
 		return true;
 	}
 	if ( Array.isArray( value ) ) {
-		return value.length === 0;
+		return value.every( ( item ) => isEmptyValue( item ) );
 	}
 	if ( typeof value === 'object' ) {
-		return Object.keys( value as Record< string, unknown > ).length === 0;
+		return Object.values( value as Record< string, unknown > ).every(
+			( item ) => isEmptyValue( item )
+		);
 	}
 	return false;
 }

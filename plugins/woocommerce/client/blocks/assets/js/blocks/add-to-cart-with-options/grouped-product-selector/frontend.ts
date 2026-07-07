@@ -119,11 +119,14 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 
 				// Collect the non-zero child drafts (one draft per child, keyed by
 				// the child product id). Each is a pure add-item payload carrying
-				// id + quantity. An untouched child has no draft → skipped.
+				// id + quantity. An untouched child has no stored draft →
+				// `findItem` reports `draft: undefined` (it never fabricates one) →
+				// skipped. Reading through the envelope (rather than the raw
+				// `draftItems` map) keeps this on the single lookup surface.
 				const childDrafts = groupedProductIds
 					.map(
 						( childProductId ) =>
-							cartState.draftItems[ String( childProductId ) ]
+							cartState.findItem( { id: childProductId } ).draft
 					)
 					.filter(
 						( draft ): draft is DraftItem =>

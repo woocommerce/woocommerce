@@ -207,8 +207,7 @@ class ProductQuery extends AbstractBlock {
 			wc_interactivity_api_load_product( 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce', $product_id );
 
 			$product_context = array(
-				'productId'   => $product_id,
-				'variationId' => null,
+				'productId' => $product_id,
 			);
 
 			$processor->set_attribute( 'data-wp-interactive', 'woocommerce/products' );

@@ -70,25 +70,15 @@ final class AddToWishlistButton extends AbstractBlock {
 
 		$items = $this->prefetch_items();
 
-		// Seed the shared shopper-lists store the same way the Wishlist
-		// block does — restUrl + starter nonce + prefetched items. The
-		// two blocks may both render on the same page (e.g. the merchant
-		// drops the Wishlist block into a sidebar of single-product); iAPI's
-		// deep-merge keeps the first writer's payload, so seeding identical
-		// values here is a no-op when Wishlist already ran.
-		wp_interactivity_state(
-			'woocommerce/shopper-lists',
-			array(
-				'restUrl' => get_rest_url(),
-				'nonce'   => wp_create_nonce( 'wc_store_api' ),
-				'lists'   => array(
-					self::LIST_SLUG => array(
-						'items'     => $items,
-						'isLoading' => false,
-					),
-				),
-			)
-		);
+		// Seed the shared shopper-lists store (rest URL + starter nonce +
+		// pre-fetched items for this slug). Single copy lives in
+		// ShopperListRenderer::seed_list_state. The Wishlist block may also
+		// render on the same page (e.g. the merchant drops it into a
+		// single-product sidebar); `wp_interactivity_state` merges via
+		// `array_replace_recursive` — LATER writer wins per leaf — so seeding
+		// the same slug's identical payload is harmless (not "first writer
+		// wins": the last call for a given leaf is the one that sticks).
+		ShopperListRenderer::seed_list_state( self::LIST_SLUG, $items );
 
 		// Visible labels flow through `wp_interactivity_config` so the
 		// JS-side getter can pick the right one based on

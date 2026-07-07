@@ -35,7 +35,6 @@ type ServerState = {
 	state: {
 		inTheCartText: string;
 		addToCartText: string;
-		noticeId: string;
 	};
 };
 
@@ -60,19 +59,14 @@ const { state: productsState } = store< ProductsStore >(
 const productButtonStore = {
 	state: {
 		// The "X in cart" quantity, resolved through the cart store's
-		// type-invariant `inCartQuantity` read keyed by the main/context product
-		// id (`mainProductInContext` — the parent, never a variation). The cart
-		// store resolves the total for ANY purchasable form (simple line,
-		// resolved variation line, or the sum over a grouped parent's children),
-		// so the button never branches on product type here.
+		// type-invariant `inCartQuantity` read. Called with no argument, the shared
+		// getter defaults the id to the context product (`mainProductInContext` —
+		// the parent, never a variation) and zero-falls-back when nothing resolves.
+		// It resolves the total for ANY purchasable form (simple line, resolved
+		// variation line, or the sum over a grouped parent's children), so the
+		// button never branches on product type here.
 		get inCartQuantity(): number {
-			const mainProduct = productsState.mainProductInContext;
-
-			if ( ! mainProduct ) {
-				return 0;
-			}
-
-			return cartState.inCartQuantity( mainProduct.id );
+			return cartState.inCartQuantity();
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();

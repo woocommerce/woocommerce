@@ -112,8 +112,6 @@ class QuantitySelector extends AbstractBlock {
 		);
 		$input_attributes   = array();
 
-		$product_quantity_constraints = AddToCartWithOptionsUtils::get_product_quantity_constraints( $product );
-
 		// The reactive quantity constraints (min/max/step bindings + the
 		// re-clamp watcher) are emitted for EVERY product type, not just
 		// variable. For a non-variable product the bound values simply never

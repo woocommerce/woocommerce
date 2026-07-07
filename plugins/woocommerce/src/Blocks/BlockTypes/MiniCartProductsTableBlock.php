@@ -37,17 +37,12 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 					// context lands under the `woocommerce/cart` namespace (the
 					// `data-wp-each` directive keys the item context by its own
 					// namespace — see WP_Interactivity_API::data_wp_each_processor).
-					$context    = wp_interactivity_get_context( 'woocommerce/cart' );
-					$cart_state = wp_interactivity_state( 'woocommerce/cart' );
-					$item_key   = $context['cartItem']['key'] ?? null;
-
-					foreach ( $cart_state['cart']['items'] as $item ) {
-						if ( $item['key'] === $item_key ) {
-							return $item;
-						}
-					}
-
-					return null;
+					// The each-item context ALREADY carries this row's line, so we
+					// return it directly — no items loop / key re-lookup needed
+					// (mirrors the client `cartItem` getter, which reads
+					// `itemInContext.cart` via envelope step 1).
+					$context = wp_interactivity_get_context( 'woocommerce/cart' );
+					return $context['cartItem'] ?? null;
 				},
 			)
 		);

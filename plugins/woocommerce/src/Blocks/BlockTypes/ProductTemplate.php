@@ -124,8 +124,7 @@ class ProductTemplate extends AbstractBlock {
 			);
 			$product_context_directive = wp_interactivity_data_wp_context(
 				array(
-					'productId'   => $product_id,
-					'variationId' => null,
+					'productId' => $product_id,
 				),
 				'woocommerce/products'
 			);

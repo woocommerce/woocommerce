@@ -147,6 +147,76 @@ type CartItemDataAttr = {
 
 type DataProperty = 'item_data' | 'variation';
 
+/**
+ * Empty-shaped placeholder cart line, returned by the row's `cartItem` getter
+ * when the envelope has no line yet (the row is hidden in that state via
+ * `data-wp-bind--hidden="!state.cartItem.key"`). Module-level and shared so the
+ * getter never fabricates a fresh object per read and — crucially — never mutates
+ * the read-only envelope line. It carries the nested shape the row getters
+ * dereference (`prices.raw_prices`, `quantity_limits`, `totals`, `images`,
+ * `variation`, `item_data`, `extensions`) so their evaluation stays safe even
+ * before a line resolves.
+ */
+const EMPTY_LINE = {
+	key: '',
+	id: 0,
+	type: '',
+	quantity: 0,
+	catalog_visibility: 'visible',
+	quantity_limits: {
+		minimum: 0,
+		maximum: 0,
+		multiple_of: 1,
+		editable: false,
+	},
+	name: '',
+	summary: '',
+	short_description: '',
+	description: '',
+	sku: '',
+	low_stock_remaining: null,
+	backorders_allowed: false,
+	show_backorder_badge: false,
+	sold_individually: false,
+	permalink: '',
+	images: [],
+	variation: [],
+	prices: {
+		price: '0',
+		regular_price: '0',
+		sale_price: '0',
+		price_range: null,
+		currency_code: '',
+		currency_symbol: '',
+		currency_minor_unit: 2,
+		currency_decimal_separator: '.',
+		currency_thousand_separator: ',',
+		currency_prefix: '',
+		currency_suffix: '',
+		raw_prices: {
+			precision: 6,
+			price: '0',
+			regular_price: '0',
+			sale_price: '0',
+		},
+	},
+	totals: {
+		line_subtotal: '0',
+		line_subtotal_tax: '0',
+		line_total: '0',
+		line_total_tax: '0',
+		currency_code: '',
+		currency_symbol: '',
+		currency_minor_unit: 2,
+		currency_decimal_separator: '.',
+		currency_thousand_separator: ',',
+		currency_prefix: '',
+		currency_suffix: '',
+	},
+	extensions: {},
+	item_data: [],
+} as unknown as CartItem;
+
 const trimWords = ( html: string, maxWords = 15 ): string => {
 	const words = html.trim().split( /\s+/ );
 	if ( words.length <= maxWords ) {
@@ -454,16 +524,15 @@ const { state: cartItemState } = store(
 			get cartItem(): CartItem {
 				// The each-item row context (`woocommerce/cart::{ cartItem }`)
 				// already carries this row's line, so `itemInContext` is the
-				// default read: envelope step 1 resolves the row's
-				// `cartItem.key` directly, with no explicit lookup. Fall back to
-				// an empty object while the line is unresolved.
-				const cartItem = ( cartState.itemInContext.cart ||
-					{} ) as CartItem;
-
-				cartItem.variation = cartItem.variation || [];
-				cartItem.item_data = cartItem.item_data || [];
-
-				return cartItem;
+				// default read: envelope step 1 resolves the row's `cartItem.key`
+				// directly, with no explicit lookup. `itemInContext.cart` is
+				// READ-ONLY server truth — we never assign into it (a getter must
+				// not mutate the envelope line). Fall back to a shared, empty-shaped
+				// constant while the line is unresolved; the row is hidden in that
+				// state (`data-wp-bind--hidden="!state.cartItem.key"`), so the empty
+				// line only needs a safe shape for getter evaluation, not real data.
+				const line = cartState.itemInContext.cart;
+				return ( line ?? EMPTY_LINE ) as CartItem;
 			},
 
 			get currency(): Currency {
@@ -895,54 +964,74 @@ const { state: cartItemState } = store(
 		},
 
 		actions: {
-			*overrideInvalidQuantity(
-				e: InputEvent
-			): Generator< unknown, void > {
+			// Fires on every `input` event: clamp/visual-only, NO write. Keeps the
+			// live clamp feedback (typing 999 snaps the field back to the maximum
+			// as you type) without persisting — so a single edit posts exactly
+			// once, from `changeQuantity` on `change`. Splitting the write out of
+			// here is what removes the double POST (input+change both used to
+			// persist). Never mutates `state.cart` — it only touches the DOM input.
+			overrideInvalidQuantity( e: InputEvent ): void {
+				const input = e.target as HTMLInputElement;
+				const { quantity: currentQuantity } = cartItemState.cartItem;
+				const { minimum, maximum } =
+					cartItemState.cartItem.quantity_limits;
+
+				const quantity = parseInt( input.value, 10 );
+
+				// Invalid input: reset the field to the line's current quantity.
+				if ( Number.isNaN( quantity ) ) {
+					input.value = currentQuantity.toString();
+					return;
+				}
+
+				// Reflect the clamped value visually right away.
+				if ( quantity < minimum ) {
+					input.value = minimum.toString();
+				} else if ( quantity > maximum ) {
+					input.value = maximum.toString();
+				}
+			},
+
+			// Fires on `change` (blur / Enter): the single write owner. Reads the
+			// input's COMMITTED value (already clamped by `overrideInvalidQuantity`
+			// on the preceding `input` events, and re-clamped defensively here in
+			// case `change` arrives without one), then persists once via
+			// `updateItem` by key. Mini-cart rows always operate on
+			// server-confirmed lines (they carry a `key`), so quantity changes are
+			// `updateItem`s by key — no client-side add/update inference.
+			*changeQuantity( e: Event ): Generator< unknown, void > {
 				const input = e.target as HTMLInputElement;
 				const { key, quantity: currentQuantity } =
 					cartItemState.cartItem;
 				const { minimum, maximum } =
 					cartItemState.cartItem.quantity_limits;
 
-				const quantity = parseInt( input.value, 10 );
+				const parsed = parseInt( input.value, 10 );
 
-				// Invalid input: reset the field to the line's current quantity
-				// (direct DOM write — `state.cart` is read-only for consumers).
-				if ( Number.isNaN( quantity ) ) {
+				// Invalid committed value: reset the field, persist nothing.
+				if ( Number.isNaN( parsed ) ) {
 					input.value = currentQuantity.toString();
 					return;
 				}
 
-				let finalQuantity = quantity;
-
-				if ( quantity < minimum ) {
+				let finalQuantity = parsed;
+				if ( parsed < minimum ) {
 					finalQuantity = minimum;
-				} else if ( quantity > maximum ) {
+				} else if ( parsed > maximum ) {
 					finalQuantity = maximum;
 				}
 
-				// Reflect the clamped value visually right away…
+				// Keep the field in sync with the clamped value…
 				input.value = finalQuantity.toString();
 
-				// …and persist it by key when it actually changed. Never mutate
-				// `state.cart` directly — go through `updateItem` (mutations
-				// use an explicit key).
+				// …and persist by key only when it actually changed (mutations use
+				// an explicit key; `state.cart` is never mutated directly).
 				if ( finalQuantity !== currentQuantity ) {
 					yield actions.updateItem( {
 						key,
 						quantity: finalQuantity,
 					} );
 				}
-			},
-
-			*changeQuantity(): Generator< unknown, void > {
-				// Mini-cart rows always operate on server-confirmed lines (they
-				// carry a `key`), so quantity changes are `updateItem`s by key —
-				// no client-side add/update inference).
-				yield actions.updateItem( {
-					key: cartItemState.cartItem.key,
-					quantity: cartItemState.cartItem.quantity,
-				} );
 			},
 
 			// Pure event shield: the row's each-item context carries the line

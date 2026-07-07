@@ -177,26 +177,10 @@ final class SavedForLater extends AbstractBlock {
 
 		$items = $this->prefetch_items();
 
-		// Seed the shared shopper-lists store with the rest URL, the
-		// pre-fetched items, and a starter nonce. The starter nonce is
-		// what the cart store also seeds via `state.nonce` — the JS layer
-		// keeps it fresh by reading the `Nonce` response header on every
-		// subsequent request, so this is just the bootstrap value (and
-		// avoids deadlocking mutations that await `isNonceReady` before
-		// any GET has fired).
-		wp_interactivity_state(
-			'woocommerce/shopper-lists',
-			array(
-				'restUrl' => get_rest_url(),
-				'nonce'   => wp_create_nonce( 'wc_store_api' ),
-				'lists'   => array(
-					self::LIST_SLUG => array(
-						'items'     => $items,
-						'isLoading' => false,
-					),
-				),
-			)
-		);
+		// Seed the shared shopper-lists store (rest URL + starter nonce +
+		// pre-fetched items for this slug). Single copy lives in
+		// ShopperListRenderer::seed_list_state.
+		ShopperListRenderer::seed_list_state( self::LIST_SLUG, $items );
 
 		// Templates flow through `wp_interactivity_config` so the JS-side
 		// getters can interpolate them (`%d`, `%s`). Visible strings (empty

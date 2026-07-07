@@ -50,9 +50,11 @@ store( NAMESPACE, {
 		/**
 		 * The current note for this product's context draft, or '' when unset.
 		 * Reads the shared envelope's editable draft — no product id needed here
-		 * because `itemInContext` is resolved from the surrounding shared
-		 * `woocommerce` context. The note lives under the bare-namespace prop as
-		 * `draft[ NAMESPACE ][ NOTE_KEY ]`.
+		 * because `itemInContext` resolves the context product through the
+		 * `woocommerce/products` store's `mainProductInContext` (this field sits
+		 * inside the Add to Cart + Options form, which carries that product
+		 * scope); there is no bare-`woocommerce` context. The note lives under the
+		 * bare-namespace prop as `draft[ NAMESPACE ][ NOTE_KEY ]`.
 		 *
 		 * @return {string} The gift note.
 		 */

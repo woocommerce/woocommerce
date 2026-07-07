@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Shared iAPI stores review batch: forgiving deep empty-value matching, `variationId` context-shadows-global fix, `draftKey` reserved, `findItem({id})` no longer fabricates drafts, `addItem` no-op-with-warning on nothing-resolvable, mini-cart single-write quantity edits, and assorted consistency/dead-code cleanups. Internal changes to private stores — no shopper-facing behavior change.

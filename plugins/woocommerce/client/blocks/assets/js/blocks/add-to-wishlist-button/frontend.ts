@@ -11,10 +11,7 @@ import '@woocommerce/stores/woocommerce/products';
 import '@woocommerce/stores/woocommerce/shopper-lists';
 import '@woocommerce/stores/woocommerce/cart';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
-import type {
-	SelectedAttributes,
-	Store as WooCommerce,
-} from '@woocommerce/stores/woocommerce/cart';
+import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type {
 	RawShopperListItem,
 	Store as ShopperListsStore,
@@ -99,8 +96,7 @@ const { state } = store< BlockStore >(
 				return shopperListsState.findListItem( {
 					slug: LIST_SLUG,
 					id,
-					variation: ( cartState.itemInContext.draft?.variation ??
-						[] ) as SelectedAttributes[],
+					variation: cartState.itemInContext.draft?.variation ?? [],
 				} );
 			},
 
@@ -171,9 +167,8 @@ const { state } = store< BlockStore >(
 							}
 						);
 						const variation = (
-							( cartState.itemInContext.draft?.variation ??
-								[] ) as SelectedAttributes[]
-						 ).map( ( { attribute, value } ) => ( {
+							cartState.itemInContext.draft?.variation ?? []
+						).map( ( { attribute, value } ) => ( {
 							attribute: attrMap.get( attribute ) ?? attribute,
 							value,
 						} ) );

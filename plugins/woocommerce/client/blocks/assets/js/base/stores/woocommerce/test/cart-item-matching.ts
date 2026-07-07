@@ -67,6 +67,22 @@ describe( 'cart-item-matching — pure ladder helpers', () => {
 			expect( isEmptyValue( [ 1 ] ) ).toBe( false );
 			expect( isEmptyValue( { a: 1 } ) ).toBe( false );
 		} );
+
+		it( 'is DEEP: an object/array whose members are all recursively empty is empty', () => {
+			// A touched-then-cleared draft prop and a nested empty shape both
+			// read as empty so pairing stays forgiving.
+			expect( isEmptyValue( { ns: { field: '' } } ) ).toBe( true );
+			expect( isEmptyValue( { ns: {} } ) ).toBe( true );
+			expect( isEmptyValue( { a: null, b: undefined } ) ).toBe( true );
+			expect( isEmptyValue( [ {} ] ) ).toBe( true );
+			expect( isEmptyValue( [ { field: '' }, [] ] ) ).toBe( true );
+		} );
+
+		it( 'stays non-empty when any nested member carries a value', () => {
+			expect( isEmptyValue( { ns: { field: 'A' } } ) ).toBe( false );
+			expect( isEmptyValue( { ns: { field: 0 } } ) ).toBe( false );
+			expect( isEmptyValue( [ { field: 'A' } ] ) ).toBe( false );
+		} );
 	} );
 
 	describe( 'getDraftExtensionProps', () => {
@@ -90,6 +106,18 @@ describe( 'cart-item-matching — pure ladder helpers', () => {
 			expect( getDraftExtensionProps( { id: 5, quantity: 1 } ) ).toEqual(
 				{}
 			);
+		} );
+
+		it( 'excludes the reserved `draftKey` routing field (never an extension prop, never POSTed)', () => {
+			const draft = {
+				id: 5,
+				quantity: 1,
+				draftKey: 'custom-key',
+				'my-plugin/note': 'A',
+			} as unknown as DraftItem;
+			expect( getDraftExtensionProps( draft ) ).toEqual( {
+				'my-plugin/note': 'A',
+			} );
 		} );
 	} );
 
@@ -192,6 +220,29 @@ describe( 'cart-item-matching — pure ladder helpers', () => {
 			expect( isGenericExactPair( { 'my-plugin': 'A' }, line ) ).toBe(
 				false
 			);
+		} );
+
+		it( 'pairs a line exposing `{ ns: { field: "" } }` with a prop-less draft (deep-empty normalization)', () => {
+			// A note-less line whose extension callback echoes an empty-shaped
+			// projection must still pair with a draft that never touched the
+			// field. Deep `isEmptyValue` treats the nested empty as absent.
+			const line = makeLine( {
+				extensions: { 'wc-gift-note-demo': { 'gift-note': '' } },
+			} );
+			expect( isGenericExactPair( {}, line ) ).toBe( true );
+		} );
+
+		it( 'pairs a touched-then-cleared draft prop `{ ns: { field: "" } }` with a bare line `{}`', () => {
+			// The shopper typed a note then cleared it: the draft holds
+			// `{ ns: { field: '' } }`. The line carries nothing under the
+			// namespace. Both normalize empty → they pair.
+			const line = makeLine( { extensions: {} } );
+			expect(
+				isGenericExactPair(
+					{ 'wc-gift-note-demo': { 'gift-note': '' } },
+					line
+				)
+			).toBe( true );
 		} );
 	} );
 } );
