@@ -84,6 +84,13 @@ final class ProductQueryFoundRowsOptimizer {
 	}
 
 	/**
+	 * Memoized is_supported() result for the current request. NULL until first computed.
+	 *
+	 * @var bool|null
+	 */
+	private static ?bool $is_supported = null;
+
+	/**
 	 * Whether the separate-COUNT rewrite is worth using on the live database.
 	 *
 	 * It only wins on MySQL 8.0+. MariaDB (all versions) and MySQL < 8.0 regress: the plain SELECT trades
@@ -92,16 +99,18 @@ final class ProductQueryFoundRowsOptimizer {
 	 *
 	 * Uses wc_get_server_database_version() (a SELECT VERSION() probe) rather than db_server_info():
 	 * behind a proxy such as ProxySQL or MaxScale the latter reports the proxy's handshake version, not
-	 * the actual backend server.
+	 * the actual backend server. The result is memoized so that probe runs at most once per request,
+	 * even when several product queries render on one page.
 	 *
 	 * @return bool True when the server is MySQL 8.0 or newer.
 	 */
 	public static function is_supported(): bool {
-		$db_version = wc_get_server_database_version();
-		if ( false !== stripos( (string) $db_version['string'], 'mariadb' ) ) {
-			return false;
+		if ( null === self::$is_supported ) {
+			$db_version         = wc_get_server_database_version();
+			self::$is_supported = false === stripos( (string) $db_version['string'], 'mariadb' )
+				&& version_compare( (string) $db_version['number'], '8.0', '>=' );
 		}
-		return version_compare( (string) $db_version['number'], '8.0', '>=' );
+		return self::$is_supported;
 	}
 
 	/**

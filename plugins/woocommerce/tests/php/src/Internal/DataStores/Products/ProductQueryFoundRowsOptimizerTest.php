@@ -17,6 +17,17 @@ class ProductQueryFoundRowsOptimizerTest extends \WC_Unit_Test_Case {
 	use RunsMainProductQueryTrait;
 
 	/**
+	 * Reset the memoized is_supported() result so each stubbed server version is re-probed.
+	 */
+	public function tearDown(): void {
+		$is_supported = new \ReflectionProperty( ProductQueryFoundRowsOptimizer::class, 'is_supported' );
+		$is_supported->setAccessible( true );
+		$is_supported->setValue( null, null );
+
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox The product archive drops SQL_CALC_FOUND_ROWS but still reports the correct pagination total.
 	 */
 	public function test_product_query_uses_separate_count_for_pagination(): void {
