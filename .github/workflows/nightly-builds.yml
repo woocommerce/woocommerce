@@ -63,3 +63,23 @@ jobs:
           asset_name: woocommerce-${{ env.SOURCE_REF }}-nightly.zip
           asset_content_type: application/zip
           max_releases: 1
+
+      - name: 'Update nightly release notes'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const sourceRef = process.env.SOURCE_REF;
+            const builtAt = new Date().toISOString().replace('T', ' ').replace(/\..+/, ' UTC');
+            const body = [
+              `Nightly build, regenerated every night from \`${ sourceRef }\`.`,
+              '',
+              `Last update: **${ builtAt }**`,
+            ].join('\n');
+
+            await github.rest.repos.updateRelease({
+              ...context.repo,
+              release_id: Number(process.env.RELEASE_ID),
+              body,
+              target_commitish: sourceRef,
+            });

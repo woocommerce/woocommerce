@@ -18,7 +18,9 @@
 	height: 100%;
 }
 
-:where(.wc-block-add-to-cart-with-options) {
+:where(.wc-block-add-to-cart-with-options),
+:where(.wc-block-add-to-cart-with-options__quantity-selector),
+:where(.wc-block-add-to-cart-with-options-grouped-product-item-selector) {
 	// This resets some WC component styles, so we need it to have specificity
 	// until those stylesheets are updated.
 	.wc-block-components-quantity-selector.wc-block-components-quantity-selector {
@@ -27,6 +29,7 @@
 		margin-bottom: 0;
 		margin-right: 0;
 	}
+
 	:where(.wc-block-components-quantity-selector) {
 		&::after {
 			border: 1px solid currentColor;

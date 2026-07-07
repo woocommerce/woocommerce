@@ -4,7 +4,6 @@
 import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { external } from '@wordpress/icons';
-// eslint-disable-next-line @woocommerce/dependency-group
 import { PluginPreviewMenuItem } from '@wordpress/editor';
 
 /**
