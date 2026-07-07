@@ -223,73 +223,12 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 
 		$this->assertNull( $envelope['cart'], 'No context draft → no exact cart line.' );
 		$this->assertNull( $envelope['draft'] );
-		$this->assertFalse( $envelope['isInCart'] );
 	}
 
 	/**
-	 * @testdox itemInContext resolves conservatively (no cart, not in cart) when the context carries a cartItemFilter, even for a draft generic narrowing would otherwise pair.
-	 *
-	 * First-paint boundary (T5): a JS cartItemFilter predicate cannot run in PHP
-	 * and, in JS, REPLACES generic narrowing. Applying generic narrowing here
-	 * could server-render a pairing the filter would reject, so the closure must
-	 * resolve conservatively — cart null, isInCart false, draft still resolved —
-	 * and leave the exact pairing to hydration.
+	 * @testdox itemInContext with a cartItemKey stays exact (step 1 resolves the exact line).
 	 */
-	public function test_item_in_context_is_conservative_when_filter_present(): void {
-		BlocksSharedState::load_cart_state( $this->consent );
-
-		// A single plain line + a plain draft: WITHOUT a filter, generic
-		// narrowing would pair this line exactly (isInCart true, cart set). The
-		// presence of a cartItemFilter must suppress that pairing.
-		$state = wp_interactivity_state(
-			'woocommerce/cart',
-			array(
-				'cart'       => array(
-					'items' => array(
-						array(
-							'key'        => 'plain',
-							'id'         => 100,
-							'quantity'   => 1,
-							'extensions' => array(),
-							'item_data'  => array(),
-						),
-					),
-				),
-				'draftItems' => array(
-					array(
-						'id'       => 100,
-						'quantity' => 1,
-					),
-				),
-			)
-		);
-
-		// Product identity is resolved through the products store's
-		// mainProductInContext derived state (T12), not a foreign context read.
-		$this->seed_context_product( 100 );
-		$this->set_interactivity_context(
-			array(
-				'woocommerce/cart' => array(
-					'cartItemFilter' => array(
-						'namespace' => 'my-plugin/x',
-						'action'    => 'matchLine',
-					),
-				),
-			)
-		);
-
-		$envelope = $state['itemInContext']();
-
-		$this->assertNull( $envelope['cart'], 'A filter suppresses server-side pairing (no exact line at first paint).' );
-		$this->assertFalse( $envelope['isInCart'], 'A filtered surface is not "in cart" server-side; hydration decides.' );
-		$this->assertIsArray( $envelope['draft'], 'The draft is still resolved so the surface has its editable draft.' );
-		$this->assertSame( 100, $envelope['draft']['id'] );
-	}
-
-	/**
-	 * @testdox itemInContext with a cartItemKey stays exact even when a cartItemFilter is present (step 1 is unaffected by filters).
-	 */
-	public function test_item_in_context_key_ignores_filter(): void {
+	public function test_item_in_context_key_resolves_exact_line(): void {
 		BlocksSharedState::load_cart_state( $this->consent );
 
 		$state = wp_interactivity_state(
@@ -311,20 +250,107 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 		$this->set_interactivity_context(
 			array(
 				'woocommerce/cart' => array(
-					'cartItemKey'    => 'exact',
-					'cartItemFilter' => array(
-						'namespace' => 'my-plugin/x',
-						'action'    => 'matchLine',
-					),
+					'cartItemKey' => 'exact',
 				),
 			)
 		);
 
 		$envelope = $state['itemInContext']();
 
-		$this->assertIsArray( $envelope['cart'], 'A keyed surface is always exact; the filter never runs.' );
+		$this->assertIsArray( $envelope['cart'], 'A keyed surface resolves the exact line.' );
 		$this->assertSame( 'exact', $envelope['cart']['key'] );
-		$this->assertTrue( $envelope['isInCart'] );
+	}
+
+	/**
+	 * @testdox itemInContext step 1 drops the context draft when the keyed line is a different product (cross-product guard).
+	 *
+	 * Cross-product guard: a mini-cart row for product B rendered while the page
+	 * context product is A resolves the row's exact line by key, but must NOT
+	 * carry A's draft against B's line.
+	 */
+	public function test_item_in_context_key_drops_cross_product_draft(): void {
+		BlocksSharedState::load_cart_state( $this->consent );
+
+		$state = wp_interactivity_state(
+			'woocommerce/cart',
+			array(
+				'cart'       => array(
+					'items' => array(
+						array(
+							'key'      => 'rowB',
+							'id'       => 200,
+							'quantity' => 1,
+						),
+					),
+				),
+				'draftItems' => array(
+					array(
+						'id'       => 100,
+						'quantity' => 1,
+					),
+				),
+			)
+		);
+
+		// Context product is A (100); its draft exists. The keyed line is B (200).
+		$this->seed_context_product( 100 );
+		$this->set_interactivity_context(
+			array(
+				'woocommerce/cart' => array(
+					'cartItemKey' => 'rowB',
+				),
+			)
+		);
+
+		$envelope = $state['itemInContext']();
+
+		$this->assertIsArray( $envelope['cart'], 'The keyed line still resolves exactly.' );
+		$this->assertSame( 'rowB', $envelope['cart']['key'] );
+		$this->assertNull( $envelope['draft'], "A's draft must not pair with B's line." );
+	}
+
+	/**
+	 * @testdox itemInContext step 1 keeps the draft when the keyed line matches the context product.
+	 */
+	public function test_item_in_context_key_keeps_matching_product_draft(): void {
+		BlocksSharedState::load_cart_state( $this->consent );
+
+		$state = wp_interactivity_state(
+			'woocommerce/cart',
+			array(
+				'cart'       => array(
+					'items' => array(
+						array(
+							'key'      => 'rowA',
+							'id'       => 100,
+							'quantity' => 1,
+						),
+					),
+				),
+				'draftItems' => array(
+					array(
+						'id'       => 100,
+						'quantity' => 1,
+					),
+				),
+			)
+		);
+
+		$this->seed_context_product( 100 );
+		$this->set_interactivity_context(
+			array(
+				'woocommerce/cart' => array(
+					'cartItemKey' => 'rowA',
+				),
+			)
+		);
+
+		$envelope = $state['itemInContext']();
+
+		$this->assertIsArray( $envelope['cart'] );
+		$this->assertSame( 'rowA', $envelope['cart']['key'] );
+		$this->assertIsArray( $envelope['draft'], "The matching-product draft is carried." );
+		$this->assertSame( 100, $envelope['draft']['id'] );
 	}
 
 	/**
@@ -373,7 +399,6 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 
 		$this->assertIsArray( $envelope['cart'], 'The each-item context key resolves the row line server-side.' );
 		$this->assertSame( 'row-2', $envelope['cart']['key'] );
-		$this->assertTrue( $envelope['isInCart'] );
 	}
 
 	/**
@@ -509,7 +534,7 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 				),
 			)
 		);
-		$this->assertCount( 0, $excluded, 'Plain draft + decorated-only lines → zero survivors → isInCart false (never first-match).' );
+		$this->assertCount( 0, $excluded, 'Plain draft + decorated-only lines → zero survivors → no cart line (never first-match).' );
 
 		$bare_twin_1 = array(
 			'key'        => 'x1',
@@ -534,6 +559,6 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 				),
 			)
 		);
-		$this->assertCount( 2, $twins, 'Invisible bare twins both survive → isInCart true with cart null (ambiguous presence).' );
+		$this->assertCount( 2, $twins, 'Invisible bare twins both survive → cart null (ambiguous presence, never first-match).' );
 	}
 }

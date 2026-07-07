@@ -201,15 +201,11 @@ class BlocksSharedState {
 	 *   seeded; when a draft exists we match on its `id` directly (already the
 	 *   purchasable id for simple products). Deterministic variation resolution
 	 *   server-side is deferred to the surface that seeds the draft (T6).
-	 * - **`cartItemFilter`**: a JS predicate cannot run during PHP seeding, and
-	 *   in JS the filter REPLACES generic narrowing (it is the sole narrowing
-	 *   authority). Applying generic narrowing server-side when a filter is set
-	 *   could render a pairing the filter would reject, so when the context
-	 *   carries a `cartItemFilter` the closure resolves conservatively: `cart`
-	 *   null, `isInCart` false, draft still resolved. The exact filtered pairing
-	 *   is deferred to hydration. See the CONSERVATIVE FILTER FALLBACK comment in
-	 *   the closure. There is intentionally no PHP callback mechanism for the
-	 *   predicate (out of scope).
+	 * - **Custom `findItem` filters**: custom line matching is an explicit
+	 *   `findItem({ filter })` predicate in JS, not a serialized context
+	 *   reference, so there is nothing to resolve during PHP seeding — the
+	 *   closure only ever runs generic narrowing (the deferred `cartItemFilter`
+	 *   context escape hatch never reaches the server).
 	 *
 	 * @return void
 	 */
@@ -244,62 +240,48 @@ class BlocksSharedState {
 					$key = $context['cartItemKey'] ?? ( $context['cartItem']['key'] ?? null );
 					if ( $key ) {
 						$line = self::find_line_by_key( $items, $key );
-						return array(
-							'cart'     => $line,
-							'draft'    => $draft,
-							'isInCart' => null !== $line,
-						);
-					}
 
-					// CONSERVATIVE FILTER FALLBACK (first-paint, T5):
-					// `context.cartItemFilter` is a JS predicate reference that
-					// CANNOT run during PHP directive processing. In JS the filter
-					// REPLACES generic narrowing and is the sole narrowing
-					// authority, so applying generic narrowing here (as if no
-					// filter existed) could server-render a pairing the filter
-					// would reject (e.g. pair a plain line a bundle-editor filter
-					// excludes) — a hydration mismatch and a wrong mutation
-					// target. We therefore resolve conservatively when a filter is
-					// present: no exact cart line, not in cart. The draft is still
-					// resolved (so the surface has its editable draft), and step 1
-					// above is unaffected (a keyed surface is always exact). The
-					// exact filtered pairing is left to hydration, when the JS
-					// predicate can finally run. There is deliberately no PHP
-					// callback mechanism for the predicate (out of scope).
-					if ( isset( $context['cartItemFilter'] ) ) {
+						// Cross-product guard: only carry the draft when it
+						// belongs to the same product as the resolved line.
+						// Pairing a line and a draft from different products
+						// (e.g. a mini-cart row for product B on product A's
+						// page) would hand the surface a foreign draft.
+						$draft_matches_line = null !== $draft
+							&& null !== $line
+							&& isset( $draft['id'], $line['id'] )
+							&& $draft['id'] === $line['id'];
+
 						return array(
-							'cart'     => null,
-							'draft'    => $draft,
-							'isInCart' => false,
+							'cart'  => $line,
+							'draft' => $draft_matches_line ? $draft : null,
 						);
 					}
 
 					// Without a draft there is nothing to pair against (see the
 					// boundary notes on register_cart_getters). Resolve
-					// conservatively.
+					// conservatively. Custom `findItem` filters are explicit JS
+					// predicates, not context references, so nothing filter-like
+					// ever reaches the server — the closure only runs generic
+					// narrowing.
 					if ( null === $draft ) {
 						return array(
-							'cart'     => null,
-							'draft'    => null,
-							'isInCart' => false,
+							'cart'  => null,
+							'draft' => null,
 						);
 					}
 
 					// Ladder step 2/3: id-matched candidates, generic narrowing.
-					// Both envelope values derive from the SAME survivor set:
-					// `cart` needs exactly one survivor (never first-match);
-					// `isInCart` needs at least one — pre-narrowing candidates
-					// do NOT count, so a product present only as lines the
-					// draft cannot account for (e.g. a decorated bundle child)
-					// yields isInCart false.
+					// `cart` needs exactly one survivor (never first-match) — a
+					// product present only as lines the draft cannot account for
+					// (e.g. a decorated bundle child) yields no survivor and so
+					// no cart line.
 					$candidates = self::find_id_candidates( $items, $draft );
 					$survivors  = self::narrow_candidates( $candidates, $draft );
 					$cart       = 1 === count( $survivors ) ? $survivors[0] : null;
 
 					return array(
-						'cart'     => $cart,
-						'draft'    => $draft,
-						'isInCart' => count( $survivors ) > 0,
+						'cart'  => $cart,
+						'draft' => $draft,
 					);
 				},
 			)
@@ -400,10 +382,9 @@ class BlocksSharedState {
 	/**
 	 * Narrow id-matched candidates to the generic-exact-pair survivors —
 	 * mirrors `narrowCandidates` + `isGenericExactPair` in
-	 * cart-item-matching.ts. The envelope derives BOTH cart-side values from
-	 * this survivor set: `cart` (exactly one survivor, never first-match) and
-	 * `isInCart` (survivors > 0 — "THIS configuration is in the cart"; lines
-	 * the draft cannot account for are not survivors and never count).
+	 * cart-item-matching.ts. The envelope's `cart` derives from this survivor
+	 * set: exactly one survivor (never first-match); lines the draft cannot
+	 * account for are not survivors and yield no cart line.
 	 *
 	 * @param array $candidates Id-matched candidate lines.
 	 * @param array $draft      The context draft.

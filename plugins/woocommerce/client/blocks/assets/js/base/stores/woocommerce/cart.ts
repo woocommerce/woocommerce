@@ -32,7 +32,6 @@ import {
 import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
 import {
 	type CartItemFilterPredicate,
-	type CartItemFilterReference,
 	type DraftItem,
 	getDraftExtensionProps,
 	isGenericExactPair,
@@ -40,11 +39,7 @@ import {
 	resolveExactlyOne,
 } from './cart-item-matching';
 
-export type {
-	DraftItem,
-	CartItemFilterPredicate,
-	CartItemFilterReference,
-} from './cart-item-matching';
+export type { DraftItem, CartItemFilterPredicate } from './cart-item-matching';
 
 export type WooCommerceConfig = {
 	messages?: {
@@ -98,11 +93,7 @@ type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
 
 /**
  * The cart store's OWN context namespace, `woocommerce/cart` (domain-scoped —
- * T12). It carries a cart surface's line identity (`cartItemKey`) and the
- * optional `cartItemFilter` escape hatch — a SERIALIZED ACTION REFERENCE
- * (`{ namespace, action }`), never a live function (context is serialized).
- * Core resolves it to a predicate at envelope-derivation time (see
- * `resolveCartItemFilter`).
+ * T12). It carries a cart surface's line identity (`cartItemKey`).
  *
  * `cartItem` is the IMPLICIT per-row context that a `data-wp-each--cart-item`
  * directive (iterating `woocommerce/cart::state.cart.items`) keys under this
@@ -112,18 +103,19 @@ type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
  *
  * The context carries NO `productId`: cross-domain product identity is resolved
  * through derived state (`woocommerce/products` store's `mainProductInContext`),
- * never by reading the products context namespace (T12).
+ * never by reading the products context namespace (T12). Custom line matching is
+ * an explicit `findItem({ filter })` predicate, not a serialized context
+ * reference (a `cartItemFilter` context escape hatch was deferred; see the
+ * shared-stores schema).
  */
 export type CartScopeContext = {
 	cartItemKey?: string;
-	cartItemFilter?: CartItemFilterReference;
 	cartItem?: { key?: string };
 };
 
 /**
  * The `itemInContext` / `findItem` envelope: the cart line (only when exactly
- * one candidate survives the ladder), the editable context draft, and whether
- * this configuration is in the cart.
+ * one candidate survives the ladder) and the editable context draft.
  *
  * `cart` is the raw Store API cart line (`CartItem`) — never an optimistic
  * in-flight item. Optimistic items lack a `key` and carry no `extensions` /
@@ -131,17 +123,15 @@ export type CartScopeContext = {
  * keeps the "cart" side of the envelope strictly server-truth, which is what
  * consumers feeding `updateItem({ key })` require.
  *
- * `isInCart` is configuration-level: survivors AFTER narrowing > 0 — "THIS
- * configuration is in the cart". It is `false` when the product is present
- * only as lines the draft cannot account for (e.g. a decorated bundle child,
- * or note-split lines with no matching draft props) — such surfaces fall back
- * to plain add-button UI. "In the cart in any form" (banners) is a raw
- * `state.cart.items` scan, not this flag.
+ * `cart` is `undefined` when the product is present only as lines the draft
+ * cannot account for (e.g. a decorated bundle child, or note-split lines with no
+ * matching draft props) — such surfaces fall back to plain add-button UI.
+ * "In the cart in any form" (banners) is a raw `state.cart.items` scan, not this
+ * envelope.
  */
 export type ItemEnvelope = {
 	cart?: CartItem;
 	draft?: DraftItem;
-	isInCart: boolean;
 };
 
 export type Store = {
@@ -159,13 +149,13 @@ export type Store = {
 		 * Editable array of pure `cart/add-item` payloads. One draft per product
 		 * context (identity rule 3); `id` is the main/context product id and
 		 * doubles as the draft's identity. Shopper input is written through the
-		 * draft actions — `upsertDraftItem`, `removeDraftItem`, `clearDraftItems`
-		 * (write policy CONTRACT). `state.cart` is read-only for consumers.
+		 * draft actions — `upsertDraftItem`, `removeDraftItem` (write policy
+		 * CONTRACT). `state.cart` is read-only for consumers.
 		 */
 		draftItems: DraftItem[];
 		/**
-		 * The envelope for the current context: `{ cart, draft, isInCart }`.
-		 * Read-only derived getter. The draft is keyed by the products store's
+		 * The envelope for the current context: `{ cart, draft }`. Read-only
+		 * derived getter. The draft is keyed by the products store's
 		 * `mainProductInContext` id; the exact line key comes from the
 		 * `woocommerce/cart` context (T12).
 		 */
@@ -176,18 +166,15 @@ export type Store = {
 		 * - `key` bypasses the ladder entirely (exact line; ignores any filter).
 		 * - `id` runs the ladder against the context draft (or a bare draft built
 		 *   from the id).
-		 * - `filter` controls narrowing:
-		 *   - a predicate FUNCTION → that predicate is the sole narrowing
-		 *     authority (overrides any `context.cartItemFilter`);
-		 *   - `false` → explicitly opt out of context filtering (generic rules
-		 *     only, ignore `context.cartItemFilter`);
-		 *   - absent → inherit `context.cartItemFilter` when called in an iAPI
-		 *     scope; out-of-scope calls degrade silently to generic rules.
+		 * - `filter` — an optional predicate that REPLACES the generic narrowing
+		 *   (per-namespace compare + presence heuristic) as the sole narrowing
+		 *   authority. Absent → generic narrowing runs. Never inherits any context
+		 *   filter (there is no context-reference machinery).
 		 */
 		findItem: ( args: {
 			key?: string;
 			id?: number;
-			filter?: CartItemFilterPredicate | false;
+			filter?: CartItemFilterPredicate;
 		} ) => ItemEnvelope;
 	};
 	actions: {
@@ -207,7 +194,7 @@ export type Store = {
 		/**
 		 * ALWAYS posts `add-item` (never converts to update-item by client
 		 * matching — identity rule 5). Defaults to `itemInContext.draft`; falls
-		 * back to `{ id: productInContext id, quantity: 1 }`. Resolves with the
+		 * back to `{ id: mainProductInContext id, quantity: 1 }`. Resolves with the
 		 * affected cart line from the batch response (provenance is a return
 		 * value, never stored on drafts).
 		 */
@@ -223,8 +210,11 @@ export type Store = {
 		 * creating it if missing. Returns the draft.
 		 */
 		upsertDraftItem: ( partialPayload: Partial< DraftItem > ) => DraftItem;
+		/**
+		 * Remove the draft for a product id (defaults to the context product).
+		 * NO-OP when neither is resolvable — never clears all drafts.
+		 */
 		removeDraftItem: ( args?: { productId?: number } ) => void;
-		clearDraftItems: ( args?: { productId?: number } ) => void;
 	};
 };
 
@@ -688,163 +678,73 @@ function isServerCartItem(
 }
 
 /**
- * Emit a dev-mode warning about a broken `cartItemFilter` reference.
- *
- * Gated behind `globalThis.SCRIPT_DEBUG` (the iAPI dev-mode flag): a broken
- * reference degrades gracefully to generic narrowing in production (no
- * warning), but surfaces loudly during development so the extension author sees
- * the mistake. Never throws — a bad reference must not break derivation.
- *
- * @param message The warning message.
- */
-function warnFilter( message: string ): void {
-	if ( ( globalThis as { SCRIPT_DEBUG?: boolean } ).SCRIPT_DEBUG ) {
-		// eslint-disable-next-line no-console
-		console.warn( `[woocommerce/cart] cartItemFilter: ${ message }` );
-	}
-}
-
-/**
- * Resolve a serialized `cartItemFilter` reference (`{ namespace, action }`) to a
- * live predicate function, via the iAPI store registry.
- *
- * Resolution mechanics:
- *
- * - The `namespace` is looked up with the public `store( namespace )` accessor.
- *   We do NOT pass a lock: an extension exposing a filter action registers a
- *   *public* store, and a plain `store( namespace )` read of a public store is a
- *   no-op that returns its proxy. If the extension locked its store, the lookup
- *   throws — we catch it and treat it as an unresolvable reference (degrade).
- * - The `action` is either a plain name or a dotted path:
- *   - **dotted** (`"actions.matchLine"`, `"actions.filters.byNote"`) → walked
- *     from the store root, property by property.
- *   - **plain** (`"matchLine"`) → tried first at `store.actions[ action ]`, then
- *     at the store root `store[ action ]` (tolerates authors who expose the
- *     predicate off `state`/root rather than `actions`).
- * - The final target must be a function; anything else (unknown namespace,
- *   unknown action, non-function value) resolves to `null`.
- *
- * Failure behavior: unknown namespace/action or a non-function target returns
- * `null` — the caller behaves as if no filter is set (generic narrowing runs) —
- * with a dev-mode `console.warn` (see `warnFilter`). Never throws.
- *
- * @param reference The serialized filter reference from context.
- * @return The resolved predicate, or `null` when it cannot be resolved.
- */
-function resolveCartItemFilter(
-	reference: CartItemFilterReference | undefined
-): CartItemFilterPredicate | null {
-	if (
-		! reference ||
-		typeof reference.namespace !== 'string' ||
-		typeof reference.action !== 'string'
-	) {
-		return null;
-	}
-
-	const { namespace, action } = reference;
-
-	let storeProxy: Record< string, unknown >;
-	try {
-		// Public read: no lock passed. Locked extension stores throw here and
-		// fall through to the catch → treated as unresolvable.
-		storeProxy = store( namespace ) as Record< string, unknown >;
-	} catch {
-		warnFilter(
-			`store "${ namespace }" could not be read (is it locked?); ignoring filter.`
-		);
-		return null;
-	}
-
-	// Resolve the target: dotted path walked from the store root; a plain name
-	// tried on `actions` first, then the root.
-	let target: unknown;
-	if ( action.includes( '.' ) ) {
-		target = action.split( '.' ).reduce< unknown >( ( node, segment ) => {
-			if ( node && typeof node === 'object' ) {
-				return ( node as Record< string, unknown > )[ segment ];
-			}
-			return undefined;
-		}, storeProxy );
-	} else {
-		const actions = storeProxy.actions as
-			| Record< string, unknown >
-			| undefined;
-		target = actions?.[ action ] ?? storeProxy[ action ];
-	}
-
-	if ( typeof target !== 'function' ) {
-		warnFilter(
-			`action "${ action }" on store "${ namespace }" is not a function; ignoring filter.`
-		);
-		return null;
-	}
-
-	return target as CartItemFilterPredicate;
-}
-
-/**
- * Resolve the `{ cart, draft, isInCart }` envelope via the resolution ladder.
+ * Resolve the `{ cart, draft }` envelope via the resolution ladder.
  *
  * Ladder:
  *
  * 1. A cart-context line key (`context.cartItemKey`, or a `data-wp-each` item
  *    context's `cartItem.key` — both in the `woocommerce/cart` namespace) →
- *    that exact line. Filters NEVER run; cart surfaces are always exact.
- *    `isInCart` reflects whether the line exists. (This step is unchanged by
- *    the `cartItemFilter` escape hatch.)
+ *    that exact line. Custom filters NEVER run; cart surfaces are always exact.
+ *    CROSS-PRODUCT GUARD: if a context draft is also present but its resolved
+ *    product does NOT correspond to the keyed line's product, the draft is
+ *    dropped from the envelope (`draft: undefined`) rather than pairing a line
+ *    and a draft from different products — e.g. a mini-cart row for product B
+ *    rendered on product A's page must not carry A's draft.
  * 2. Candidates = lines whose purchasable id matches the draft's resolved id
  *    (variation-id resolution only — no attribute matching at cart level,
  *    Raluca's rule). Then EITHER:
- *    - `filter` (a resolved `cartItemFilter` predicate) is set → the predicate
- *      is the **sole** narrowing authority: it REPLACES the generic narrowing
+ *    - `filter` (an explicit `findItem` predicate) is set → the predicate is the
+ *      **sole** narrowing authority: it REPLACES the generic narrowing
  *      (per-namespace compare + presence heuristic), it does not compose with
- *      it. This is what lets a surface (e.g. a bundle editor) pair with a line
- *      the presence heuristic would otherwise exclude.
+ *      it. This is what lets a caller (e.g. a bundle editor, the gift-note badge
+ *      demo) pair with a line the presence heuristic would otherwise exclude.
  *    - otherwise → generic narrowing: per-namespace deep-compare of the draft's
  *      namespaced props vs the line's `extensions[ns]`, plus the presence
  *      heuristic (a line with visible `item_data`/`extensions` the draft doesn't
  *      account for is excluded).
  * 3. Exactly one survivor → `cart`; zero or several → undefined. NEVER
- *    first-match fallback. `isInCart` = survivors AFTER narrowing > 0 ("THIS
- *    configuration is in the cart") — pre-narrowing candidates do NOT count:
- *    a product present only as lines the draft cannot account for (e.g. a
- *    decorated bundle child) yields `isInCart: false`, so the surface renders
- *    plain add-button UI instead of in-cart UI without a safe mutation target.
- *    Invisible bare twins both survive → `isInCart: true` with `cart`
- *    undefined (genuinely ambiguous presence). This exactly-one rule and the
- *    survivors-based `isInCart` apply to the filter's survivor set identically.
+ *    first-match fallback — a product present only as lines the draft cannot
+ *    account for (e.g. a decorated bundle child) yields `cart: undefined`, so
+ *    the surface renders plain add-button UI instead of in-cart UI without a
+ *    safe mutation target. Invisible bare twins both survive → still `cart`
+ *    undefined (genuinely ambiguous presence). This exactly-one rule applies to
+ *    the filter's survivor set identically.
  *
- * @param opts.draft   The draft to pair (usually the context draft).
- * @param opts.key     An explicit cart item key (bypasses everything).
- * @param opts.filter  A resolved `cartItemFilter` predicate. When present it is
- *                     the sole narrowing authority (replaces generic narrowing).
- * @param opts.context The `woocommerce/cart` context, passed to the predicate.
+ * @param opts.draft  The draft to pair (usually the context draft).
+ * @param opts.key    An explicit cart item key (bypasses everything).
+ * @param opts.filter An explicit `findItem` predicate. When present it is the
+ *                    sole narrowing authority (replaces generic narrowing).
  * @return The resolved envelope.
  */
 function resolveEnvelope( opts: {
 	draft?: DraftItem | undefined;
 	key?: string | undefined;
 	filter?: CartItemFilterPredicate | null | undefined;
-	context?: CartScopeContext | null | undefined;
 } ): ItemEnvelope {
-	const { draft, key, filter, context } = opts;
+	const { draft, key, filter } = opts;
 
 	// Step 1: explicit key wins — exact, no filters, no narrowing.
 	if ( key ) {
 		const line = state.cart.items.find( ( item ) => item.key === key ) as
 			| CartItem
 			| undefined;
+		// Cross-product guard: only carry the draft when it belongs to the same
+		// product as the resolved line. Pairing a line and a draft from different
+		// products (e.g. a mini-cart row for product B on product A's page) would
+		// hand the surface a foreign draft.
+		const draftMatchesLine =
+			draft !== undefined &&
+			line !== undefined &&
+			resolvePurchasableId( draft ) === line.id;
 		return {
 			...( line && { cart: line } ),
-			...( draft && { draft } ),
-			isInCart: Boolean( line ),
+			...( draftMatchesLine && { draft } ),
 		};
 	}
 
 	// Without a draft (and without a key) there is nothing to pair against.
 	if ( ! draft ) {
-		return { isInCart: false };
+		return {};
 	}
 
 	// Step 2: id + variation candidates (purchasable-id resolution only).
@@ -856,12 +756,11 @@ function resolveEnvelope( opts: {
 
 	// Step 2 narrowing. When a filter is set it is the SOLE narrowing authority
 	// (replace, not compose — the generic narrowing does NOT also run). Step 3
-	// (exactly-one + survivors-based isInCart) then applies identically to the
-	// survivor set, whichever narrowing produced it.
+	// (exactly-one) then applies identically to the survivor set, whichever
+	// narrowing produced it.
 	let narrow: ( line: CartItem ) => boolean;
 	if ( filter ) {
-		narrow = ( line ) =>
-			filter( line, { draft, context: context ?? null } );
+		narrow = ( line ) => filter( line, { draft } );
 	} else {
 		const draftProps = getDraftExtensionProps( draft );
 		narrow = ( line ) => isGenericExactPair( draftProps, line );
@@ -872,7 +771,6 @@ function resolveEnvelope( opts: {
 	return {
 		...( cart && { cart } ),
 		draft,
-		isInCart: survivors.length > 0,
 	};
 }
 
@@ -907,36 +805,27 @@ const { actions } = store< Store >(
 			// maintainer sign-off.)
 
 			/**
-			 * The `{ cart, draft, isInCart }` envelope for the current context.
-			 * Derived read-only getter.
+			 * The `{ cart, draft }` envelope for the current context. Derived
+			 * read-only getter.
 			 *
 			 * `draft` is the `draftItems` entry whose `id` === the context product
 			 * id — resolved via derived state (`getContextProductId`, which reads
 			 * the products store's `mainProductInContext`), NOT by reading the
 			 * products context namespace (T12 cross-domain rule). Shopper input is
 			 * written back through the draft actions (`upsertDraftItem`) per the
-			 * write-policy contract. `cart` and `isInCart` come from the resolution
-			 * ladder.
+			 * write-policy contract. `cart` comes from the resolution ladder
+			 * (generic narrowing only — there is no context filter).
 			 *
 			 * The exact line key comes from the cart store's own context
 			 * (`woocommerce/cart`): an explicit `cartItemKey`, or the each-item
 			 * `cartItem.key` a `data-wp-each--cart-item` directive keys under this
 			 * namespace (envelope step 1 accepts either).
-			 *
-			 * When `context.cartItemFilter` is set, its resolved predicate is the
-			 * sole narrowing authority (it replaces generic narrowing). A broken
-			 * reference resolves to `null` → generic narrowing runs (graceful
-			 * degradation, dev-mode warning). Innermost-context shadowing falls
-			 * out of iAPI context inheritance for free: `getCartContext()` reads
-			 * the nearest `woocommerce/cart` context, so an inner region's
-			 * `cartItemFilter` naturally overrides an outer one.
 			 */
 			get itemInContext(): ItemEnvelope {
 				const context = getCartContext();
 				const draft = findDraftByProductId( getContextProductId() );
 				const key = context?.cartItemKey ?? context?.cartItem?.key;
-				const filter = resolveCartItemFilter( context?.cartItemFilter );
-				return resolveEnvelope( { draft, key, filter, context } );
+				return resolveEnvelope( { draft, key } );
 			},
 
 			/**
@@ -946,24 +835,13 @@ const { actions } = store< Store >(
 			 * - `id` runs the ladder against the context draft for that product
 			 *   id (or a bare draft built from the id when no context draft
 			 *   exists).
-			 * - `filter` (add-on to the ladder):
-			 *   - a predicate FUNCTION → overrides any `context.cartItemFilter`
-			 *     (callers in JS can pass real functions);
-			 *   - `false` → explicitly opt out of context filtering (generic
-			 *     rules run, `context.cartItemFilter` ignored);
-			 *   - absent → inherit `context.cartItemFilter`.
-			 *
-			 * Scope caveat: inheriting the context filter requires an iAPI scope,
-			 * because it reads `getContext('woocommerce/cart')`. In scope means
-			 * the call happens synchronously inside a directive callback or an
-			 * action/derived-state getter (see `getCartContext`). Out of scope
-			 * — a plain module call, a `setTimeout`/`Promise.then` callback not
-			 * wrapped in `withScope`, or an async continuation after a `yield` in
-			 * a generator (the scope is only guaranteed for the synchronous part)
-			 * — `getContext` throws, `getCartContext()` returns `null`, and the
-			 * lookup degrades silently to generic rules. Pass an explicit
-			 * `filter` (or `filter: false`) to make the behavior deterministic
-			 * regardless of scope.
+			 * - `filter` — an optional predicate `( cartItem, { draft } ) =>
+			 *   boolean`. When present it REPLACES the generic narrowing
+			 *   (per-namespace compare + presence heuristic) and is the sole
+			 *   narrowing authority, so a caller can pair with a line the generic
+			 *   rules would exclude (e.g. a bundle editor, the gift-note badge
+			 *   demo). Absent → generic narrowing runs. `findItem` never inherits
+			 *   any context filter — there is no context-reference machinery.
 			 */
 			findItem( {
 				key,
@@ -972,7 +850,7 @@ const { actions } = store< Store >(
 			}: {
 				key?: string;
 				id?: number;
-				filter?: CartItemFilterPredicate | false;
+				filter?: CartItemFilterPredicate;
 			} ): ItemEnvelope {
 				if ( key ) {
 					const draft =
@@ -982,31 +860,11 @@ const { actions } = store< Store >(
 					return resolveEnvelope( { draft, key } );
 				}
 
-				const context = getCartContext();
 				const draft =
 					findDraftByProductId( id ) ??
 					( id !== undefined ? { id } : undefined );
 
-				// Filter precedence:
-				// - explicit predicate → use it verbatim (overrides context).
-				// - `false` → opt out: generic rules, ignore context filter.
-				// - absent → inherit the (possibly resolved) context filter.
-				let resolvedFilter: CartItemFilterPredicate | null;
-				if ( typeof filter === 'function' ) {
-					resolvedFilter = filter;
-				} else if ( filter === false ) {
-					resolvedFilter = null;
-				} else {
-					resolvedFilter = resolveCartItemFilter(
-						context?.cartItemFilter
-					);
-				}
-
-				return resolveEnvelope( {
-					draft,
-					filter: resolvedFilter,
-					context,
-				} );
+				return resolveEnvelope( { draft, filter } );
 			},
 
 			findItemInCart( {
@@ -1332,14 +1190,18 @@ const { actions } = store< Store >(
 			 * Payload resolution:
 			 * 1. explicit `payload` argument, else
 			 * 2. `itemInContext.draft`, else
-			 * 3. `{ id: productInContext id, quantity: 1 }` fallback (a bare
+			 * 3. `{ id: mainProductInContext id, quantity: 1 }` fallback (a bare
 			 *    Product Button with no seeded draft).
 			 *
-			 * The draft is POSTed as-is: the `add-item` endpoint accepts a
-			 * variable parent id + full `variation` array and resolves the
-			 * variation id server-side via `find_matching_product_variation`
-			 * (verified in `CartController::parse_variation_data`), so no
-			 * client-side purchasable-id swap is needed at send time.
+			 * The purchasable id IS resolved client-side at send time (identity
+			 * rule 6): posting the parent id and relying on server-side variation
+			 * resolution is not universally safe, because the draft's `variation`
+			 * carries shopper-facing attribute LABELS and custom-slug attributes
+			 * (label ≠ slug) fail server resolution with "No matching variation
+			 * found" (T6 e2e finding). `findProduct` resolves the variation id
+			 * client-side; the full `variation` array is still sent so the server
+			 * validates the attributes against the concrete variation. See the
+			 * SEND-TIME PURCHASABLE-ID SWAP below.
 			 *
 			 * Resolves with the affected cart line from the batch response so
 			 * callers can keep their own draft↔line link (provenance is a return
@@ -1549,31 +1411,15 @@ const { actions } = store< Store >(
 
 			/**
 			 * Remove the draft for a product id (defaults to the context product
-			 * id — derived state, not a foreign context read, T12).
+			 * id — derived state, not a foreign context read, T12). NO-OP when
+			 * neither a `productId` nor a context product is resolvable — it never
+			 * clears all drafts.
 			 */
 			removeDraftItem( {
 				productId,
 			}: { productId?: number } = {} ): void {
 				const targetId = productId ?? getContextProductId();
 				if ( targetId === undefined ) {
-					return;
-				}
-				state.draftItems = state.draftItems.filter(
-					( draft ) => draft.id !== targetId
-				);
-			},
-
-			/**
-			 * Clear drafts. With a `productId` (or the context product id — derived
-			 * state, T12), clears only that draft; called with an explicit `{}`/no
-			 * context it clears all drafts.
-			 */
-			clearDraftItems( {
-				productId,
-			}: { productId?: number } = {} ): void {
-				const targetId = productId ?? getContextProductId();
-				if ( targetId === undefined ) {
-					state.draftItems = [];
 					return;
 				}
 				state.draftItems = state.draftItems.filter(

@@ -197,14 +197,14 @@ describe( 'cart-item-matching — pure ladder helpers', () => {
 		} );
 	} );
 
-	describe( 'narrowCandidates (survivor set — feeds both cart and isInCart)', () => {
+	describe( 'narrowCandidates (survivor set — feeds cart)', () => {
 		it( 'returns the survivors of the predicate', () => {
 			expect( narrowCandidates( [ 1, 2, 3 ], ( n ) => n > 1 ) ).toEqual( [
 				2, 3,
 			] );
 		} );
 
-		it( 'returns an empty set when nothing survives (isInCart false case)', () => {
+		it( 'returns an empty set when nothing survives (no cart line case)', () => {
 			expect( narrowCandidates( [ 1, 2, 3 ], () => false ) ).toEqual(
 				[]
 			);

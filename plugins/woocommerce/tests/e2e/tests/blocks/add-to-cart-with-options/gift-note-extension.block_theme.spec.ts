@@ -12,11 +12,14 @@ import { test, expect, wpCLI } from '@woocommerce/e2e-utils';
  *
  * (a) a note typed on the product page travels to the cart line and displays;
  * (b) two different notes → two separate, separately-removable lines;
- * (c) the field round-trips the draft note the shared store owns;
- * (d) with a plain draft (no note), the two decorated lines do not pair
- *     (`itemInContext.cart` undefined / `isInCart` false — the presence
- *     heuristic), asserted on the envelope via `findItem`;
- * (e) the `cartItemFilter` demo pairs a line the generic rules would not.
+ * (c) the field round-trips the draft note the shared store owns (bare-namespace
+ *     extension prop, `draft['wc-gift-note-demo']['gift-note']`);
+ * (d) POSITIVE generic pairing (no filter): with two note-lines in the cart and a
+ *     draft holding note A, `findItem`/`itemInContext` resolves the note-A line;
+ * (e) with a plain draft (no note), the two decorated lines do not pair
+ *     (`itemInContext.cart` undefined — the presence heuristic), asserted on the
+ *     envelope via `findItem`;
+ * (f) the `findItem({ filter })` demo pairs a line the generic rules would not.
  *
  * WHY ONE TEST (not five): the Add to Cart + Options block renders its iAPI form
  * (with the hooked gift-note field) only on the FIRST front-end product render
@@ -55,7 +58,7 @@ const SINGLE_PRODUCT_TEMPLATE_CONTENT = `
  * add-item batch to settle.
  */
 async function addWithNote(
-	page: import( '@playwright/test' ).Page,
+	page: import('@playwright/test').Page,
 	note?: string
 ) {
 	await page.goto( `/product/${ PRODUCT_SLUG }/` );
@@ -103,9 +106,7 @@ test.describe( 'Add to Cart + Options — Gift Note extension (T8)', () => {
 			await expect(
 				page.getByText( 'Gift note', { exact: false } ).first()
 			).toBeVisible();
-			await expect(
-				page.getByText( 'Happy Birthday!' )
-			).toBeVisible();
+			await expect( page.getByText( 'Happy Birthday!' ) ).toBeVisible();
 		} );
 
 		await test.step( '(b) two different notes → two separate, removable lines', async () => {
@@ -122,9 +123,7 @@ test.describe( 'Add to Cart + Options — Gift Note extension (T8)', () => {
 			).toHaveCount( 2 );
 
 			// Independently removable: removing one leaves the other.
-			const removeButtons = page.getByLabel(
-				/Remove Beanie from cart/
-			);
+			const removeButtons = page.getByLabel( /Remove Beanie from cart/ );
 			await expect( removeButtons ).toHaveCount( 2 );
 			const batch = page.waitForResponse( '**/wc/store/v1/batch**' );
 			await removeButtons.first().click();
@@ -148,34 +147,88 @@ test.describe( 'Add to Cart + Options — Gift Note extension (T8)', () => {
 			const draftNote = await page.evaluate( async ( lock ) => {
 				const { store } = await import( '@wordpress/interactivity' );
 				await import( '@woocommerce/stores/woocommerce/cart' );
-				const { state } = store(
-					'woocommerce/cart',
-					{},
-					{ lock }
-				);
+				const { state } = store( 'woocommerce/cart', {}, { lock } );
 				const drafts = state.draftItems || [];
 				const withNote = drafts.find(
-					( d: Record< string, unknown > ) =>
-						d[ 'wc-gift-note-demo/gift-note' ] === 'Round trip'
+					( d: Record< string, unknown > ) => {
+						// Bare-namespace extension prop: the note lives under
+						// `draft['wc-gift-note-demo']['gift-note']` — the exact shape
+						// the cart line echoes on `extensions[ns]`.
+						const ns = d[ 'wc-gift-note-demo' ] as
+							| Record< string, unknown >
+							| undefined;
+						return ns?.[ 'gift-note' ] === 'Round trip';
+					}
 				);
 				return withNote ? 'found' : 'missing';
 			}, CART_LOCK );
 			expect( draftNote ).toBe( 'found' );
 		} );
 
-		await test.step( '(d) a plain draft (no note) does not pair the decorated lines', async () => {
-			// The cart currently holds one note-carrying line (from step b) plus
-			// the "Round trip" draft has no matching line. Read the envelope for a
-			// note-less draft: the presence heuristic must exclude the decorated
-			// line → cart undefined, isInCart false.
-			const env = await page.evaluate( async ( lock ) => {
+		await test.step( '(d) POSITIVE generic pairing: a draft holding note A resolves the note-A line', async () => {
+			// Put two note-split lines in the cart — one with note "A", one with
+			// note "B" — then read the envelope for a draft that carries note A.
+			// Generic narrowing (no filter) must deep-match the draft's
+			// `wc-gift-note-demo` prop against each line's `extensions[ns]` and
+			// resolve EXACTLY the note-A line.
+			await addWithNote( page, 'A' );
+			await addWithNote( page, 'B' );
+
+			const result = await page.evaluate( async ( lock ) => {
 				const { store } = await import( '@wordpress/interactivity' );
 				await import( '@woocommerce/stores/woocommerce/cart' );
-				const { state } = store(
+				const { state, actions } = store(
 					'woocommerce/cart',
 					{},
 					{ lock }
 				);
+				const items = state.cart?.items || [];
+				const noteALine = items.find(
+					( i: Record< string, unknown > ) => {
+						const ext = i.extensions as
+							| Record< string, Record< string, unknown > >
+							| undefined;
+						return (
+							ext?.[ 'wc-gift-note-demo' ]?.[ 'gift-note' ] ===
+							'A'
+						);
+					}
+				) as { id?: number; key?: string } | undefined;
+				if ( ! noteALine?.id ) {
+					return { error: 'no-note-a-line' };
+				}
+				// Write note A into the draft in the canonical bare-namespace
+				// shape, then resolve WITHOUT a filter: generic narrowing must
+				// deep-match the draft's `wc-gift-note-demo` prop against the
+				// line's `extensions[ns]` and pair exactly the note-A line.
+				actions.upsertDraftItem( {
+					id: noteALine.id,
+					'wc-gift-note-demo': { 'gift-note': 'A' },
+				} );
+				const envelope = state.findItem( { id: noteALine.id } );
+				return {
+					resolvedKey: envelope?.cart?.key ?? null,
+					expectedKey: noteALine.key ?? null,
+				};
+			}, CART_LOCK );
+
+			expect( result ).not.toHaveProperty( 'error' );
+			const { resolvedKey, expectedKey } = result as {
+				resolvedKey: string | null;
+				expectedKey: string | null;
+			};
+			expect( resolvedKey ).not.toBeNull();
+			expect( resolvedKey ).toBe( expectedKey );
+		} );
+
+		await test.step( '(e) a plain draft (no note) does not pair the decorated lines', async () => {
+			// The cart holds note-carrying lines. Read the envelope for a
+			// note-less draft: the presence heuristic must exclude the decorated
+			// lines → cart undefined.
+			const env = await page.evaluate( async ( lock ) => {
+				const { store } = await import( '@wordpress/interactivity' );
+				await import( '@woocommerce/stores/woocommerce/cart' );
+				const { state } = store( 'woocommerce/cart', {}, { lock } );
 				const productId = ( state.draftItems || [] )[ 0 ]?.id as
 					| number
 					| undefined;
@@ -183,30 +236,26 @@ test.describe( 'Add to Cart + Options — Gift Note extension (T8)', () => {
 					return { error: 'no-draft' };
 				}
 				// findItem with an id but no note props builds a bare draft and
-				// runs the generic ladder (filter: false forces generic rules).
-				const envelope = state.findItem( {
-					id: productId,
-					filter: false,
-				} );
+				// runs generic narrowing (no filter → presence heuristic applies).
+				const envelope = state.findItem( { id: productId } );
 				return {
 					hasCart: Boolean( envelope?.cart ),
-					isInCart: envelope?.isInCart ?? null,
 				};
 			}, CART_LOCK );
 
 			expect( env ).not.toHaveProperty( 'error' );
 			expect( ( env as { hasCart: boolean } ).hasCart ).toBe( false );
-			expect( ( env as { isInCart: boolean } ).isInCart ).toBe( false );
 		} );
 
-		await test.step( '(e) the cartItemFilter demo pairs a line the generic rules would not', async () => {
+		await test.step( '(f) the findItem({ filter }) demo pairs a line the generic rules would not', async () => {
 			// Add a line whose note starts with the badge's marker.
 			await addWithNote( page, 'VIP - handle with care' );
 
 			// Back on the product page the seeded draft has no note (generic rules
 			// would exclude the decorated line via the presence heuristic), but the
-			// badge's `cartItemFilter` predicate matches by marker prefix and pairs
-			// exactly that line → the badge (bound to `itemInContext.cart`) shows.
+			// badge's local `findItem({ filter })` predicate matches by marker
+			// prefix and pairs exactly that line → the badge (bound to the
+			// filtered envelope's `cart`) shows.
 			await page.goto( `/product/${ PRODUCT_SLUG }/` );
 			await page.waitForResponse( '**/wc/store/v1/cart**' );
 

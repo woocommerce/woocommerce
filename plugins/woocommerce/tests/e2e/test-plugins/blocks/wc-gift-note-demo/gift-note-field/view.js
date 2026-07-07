@@ -17,8 +17,8 @@
  *   context product id (landmine #2: never key by `productInContext.id`).
  *
  * This module contains ZERO submission code — the core Add to Cart button POSTs
- * the draft, and our namespaced `wc-gift-note-demo/gift-note` prop (a payload-
- * root extension request param) rides along.
+ * the draft, and our `wc-gift-note-demo` extension prop (a payload-root extension
+ * request param) rides along.
  */
 
 /**
@@ -26,10 +26,13 @@
  */
 import { store } from '@wordpress/interactivity';
 
-// The namespaced payload-root key that travels client -> server in the draft
-// and is echoed back on the cart line's `extensions` (identity convention).
+// The draft's extension-prop key is the BARE NAMESPACE; its value is exactly the
+// object the extension's cart-item `extensions[ NS ]` callback echoes back
+// (`{ 'gift-note': <string> }`). That single shape travels client -> server in
+// the draft and is deep-compared against the cart line's `extensions[ NS ]`
+// (identity convention). See the shared-stores schema's extension contract.
 const NAMESPACE = 'wc-gift-note-demo';
-const NOTE_KEY = 'wc-gift-note-demo/gift-note';
+const NOTE_KEY = 'gift-note';
 
 // Private cart store: same lock every core consumer uses. Reading a locked
 // store requires the lock; this is a demo of the intended extension surface.
@@ -48,23 +51,29 @@ store( NAMESPACE, {
 		 * The current note for this product's context draft, or '' when unset.
 		 * Reads the shared envelope's editable draft — no product id needed here
 		 * because `itemInContext` is resolved from the surrounding shared
-		 * `woocommerce` context.
+		 * `woocommerce` context. The note lives under the bare-namespace prop as
+		 * `draft[ NAMESPACE ][ NOTE_KEY ]`.
 		 *
 		 * @return {string} The gift note.
 		 */
 		get giftNote() {
 			const draft = cartState.itemInContext.draft;
-			const value = draft ? draft[ NOTE_KEY ] : '';
-			return typeof value === 'string' ? value : '';
+			const nsData = draft ? draft[ NAMESPACE ] : undefined;
+			const value =
+				nsData && typeof nsData[ NOTE_KEY ] === 'string'
+					? nsData[ NOTE_KEY ]
+					: '';
+			return value;
 		},
 	},
 	actions: {
 		/**
-		 * Write the input's value into the context draft under the namespaced
-		 * payload-root key. `upsertDraftItem` targets the draft for the context
-		 * product (resolved via the products store's `mainProductInContext` — T12;
-		 * creating it if missing), so the note is stored against the right product
-		 * with no id bookkeeping here.
+		 * Write the input's value into the context draft under the bare-namespace
+		 * extension prop, in the SAME SHAPE the cart line echoes on
+		 * `extensions[ NS ]` (`{ 'gift-note': <string> }`). `upsertDraftItem`
+		 * targets the draft for the context product (resolved via the products
+		 * store's `mainProductInContext` — T12; creating it if missing), so the
+		 * note is stored against the right product with no id bookkeeping here.
 		 *
 		 * iAPI passes the DOM event as the first argument to `data-wp-on--*`
 		 * handlers (same pattern as the Product Filter price inputs).
@@ -72,9 +81,10 @@ store( NAMESPACE, {
 		 * @param {Event} event The input event.
 		 */
 		setGiftNote( event ) {
-			const value =
-				event && event.target ? event.target.value : '';
-			cartActions.upsertDraftItem( { [ NOTE_KEY ]: value } );
+			const value = event && event.target ? event.target.value : '';
+			cartActions.upsertDraftItem( {
+				[ NAMESPACE ]: { [ NOTE_KEY ]: value },
+			} );
 		},
 	},
 } );

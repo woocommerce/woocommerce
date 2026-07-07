@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WooCommerce Gift Note Demo (Shared iAPI stores reference extension)
- * Description: Reference extension proving the shared iAPI stores extension contract (T8). A gift-note field on the Add to Cart + Options form that travels to the cart line, splits lines by note, and demos the cartItemFilter escape hatch. Contains ZERO submission code and ZERO core changes.
+ * Description: Reference extension proving the shared iAPI stores extension contract (T8). A gift-note field on the Add to Cart + Options form that travels to the cart line, splits lines by note, and demos the findItem({ filter }) escape hatch. Contains ZERO submission code and ZERO core changes.
  * Plugin URI: https://github.com/woocommerce/woocommerce
  * Author: WooCommerce
  * Text Domain: wc-gift-note-demo
@@ -16,16 +16,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * The extension namespace. It is used verbatim in FOUR places, and the identity
- * convention requires them to agree:
+ * The extension namespace. It is used verbatim as the BARE-NAMESPACE extension
+ * prop, and the identity convention requires ONE shape everywhere — the prop's
+ * value is always `array( WC_GIFT_NOTE_DEMO_ITEM_KEY => <string> )`:
  *
- * 1. the draft's payload-root key (`{NS}/gift-note`, written client-side),
- * 2. the `add-item` request prop the server reads,
- * 3. the cart-item `extensions[ NS ]` machine-readable projection, and
+ * 1. the draft's payload-root prop (`draft[ NS ] = array( 'gift-note' => ... )`,
+ *    written client-side by the field module),
+ * 2. the `add-item` request prop the server reads (`$request[ NS ]['gift-note']`),
+ * 3. the cart-item `extensions[ NS ]` machine-readable projection (same shape),
+ *    which core deep-compares against the draft prop, and
  * 4. the iAPI store the field/badge modules register.
  */
 const WC_GIFT_NOTE_DEMO_NS       = 'wc-gift-note-demo';
-const WC_GIFT_NOTE_DEMO_PROP     = 'wc-gift-note-demo/gift-note';
 const WC_GIFT_NOTE_DEMO_ITEM_KEY = 'gift-note';
 
 /**
@@ -153,17 +155,20 @@ add_filter(
 /**
  * HOOK 1 — request -> cart_item_data.
  *
- * Read our namespaced payload-root prop off the raw Store API `add-item`
- * request, sanitize it, and stash it in `cart_item_data`. Because
- * `cart_item_data` feeds `WC_Cart::generate_cart_id`, two adds of the same
- * product with DIFFERENT notes hash to DIFFERENT line keys — the server splits
- * them into two cart lines. Two adds with the SAME note merge. This is the whole
- * "split lines by note" behavior, and it is 100% server-owned identity (rule 1).
+ * Read our bare-namespace extension prop off the raw Store API `add-item`
+ * request (`$request['wc-gift-note-demo']['gift-note']` — the SAME shape the
+ * draft holds and the cart line echoes), sanitize it, and stash it in
+ * `cart_item_data`. Because `cart_item_data` feeds `WC_Cart::generate_cart_id`,
+ * two adds of the same product with DIFFERENT notes hash to DIFFERENT line keys —
+ * the server splits them into two cart lines. Two adds with the SAME note merge.
+ * This is the whole "split lines by note" behavior, and it is 100% server-owned
+ * identity (rule 1).
  */
 add_filter(
 	'woocommerce_store_api_add_to_cart_data',
 	function ( array $add_to_cart_data, $request ) {
-		$raw = $request[ WC_GIFT_NOTE_DEMO_PROP ] ?? '';
+		$ns_data = $request[ WC_GIFT_NOTE_DEMO_NS ] ?? array();
+		$raw     = is_array( $ns_data ) ? ( $ns_data[ WC_GIFT_NOTE_DEMO_ITEM_KEY ] ?? '' ) : '';
 
 		if ( is_string( $raw ) && '' !== trim( $raw ) ) {
 			if ( ! isset( $add_to_cart_data['cart_item_data'] ) || ! is_array( $add_to_cart_data['cart_item_data'] ) ) {
@@ -184,11 +189,12 @@ add_filter(
  * HOOK 2 — cart_item_data -> extensions[ ns ] (the identity convention).
  *
  * Expose the note on the cart-item `extensions` under our namespace, in the SAME
- * SHAPE the request accepts (`{ 'gift-note': <string> }`). This machine-readable
- * projection is what core's generic narrowing deep-compares against the draft's
- * `wc-gift-note-demo/gift-note` prop, so `itemInContext.cart` resolves to the
- * line whose note matches the draft. Extensions that skip this degrade safely to
- * ambiguity (cart undefined), never to wrong pairing.
+ * SHAPE the request accepts and the draft holds (`{ 'gift-note': <string> }`).
+ * This machine-readable projection is what core's generic narrowing deep-compares
+ * against the draft's bare-namespace `wc-gift-note-demo` prop, so
+ * `itemInContext.cart` resolves to the line whose note matches the draft.
+ * Extensions that skip this degrade safely to ambiguity (cart undefined), never
+ * to wrong pairing.
  */
 add_action(
 	'woocommerce_blocks_loaded',

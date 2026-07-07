@@ -4,7 +4,7 @@
 	"name": "wc-gift-note-demo/badge",
 	"title": "Gift Note Badge (Demo)",
 	"category": "woocommerce-product-elements",
-	"description": "Reference extension cartItemFilter demo: pairs a note-split cart line via a filter predicate the generic rules would not.",
+	"description": "Reference extension findItem({ filter }) demo: pairs a note-split cart line via a local predicate the generic rules would not.",
 	"keywords": [ "WooCommerce", "gift note" ],
 	"textdomain": "wc-gift-note-demo",
 	"usesContext": [ "postId" ],

@@ -9,27 +9,18 @@ type MockStore = { state: Store[ 'state' ]; actions: Store[ 'actions' ] };
 let mockRegisteredStore: MockStore | null = null;
 const mockState = {} as Store[ 'state' ];
 
-// Extension-owned iAPI stores, keyed by namespace, that the `cartItemFilter`
-// resolver walks via the public `store( namespace )` accessor. Tests register a
-// fake extension store here (with an `actions` bag holding the predicate) and
-// clear it in beforeEach. A namespace absent from this map (and not one of the
-// core namespaces below) throws from the mocked `store()` — mirroring iAPI's
-// "unknown namespace on a locked read" so the resolver's catch path is exercised.
-const mockExtensionStores: Record< string, Record< string, unknown > > = {};
-
 // The cart store's OWN context (`woocommerce/cart`), returned by
-// getContext( 'woocommerce/cart' ). Carries the line key, the each-item
-// `cartItem`, and the `cartItemFilter` reference — NOT the product id (that is
-// derived state, T12).
+// getContext( 'woocommerce/cart' ). Carries the line key and the each-item
+// `cartItem` — NOT the product id (that is derived state, T12) and NO filter
+// (custom matching is an explicit `findItem({ filter })` predicate, not a
+// context reference).
 let mockCartContext: {
 	cartItemKey?: string;
 	cartItem?: { key?: string };
-	cartItemFilter?: { namespace: string; action: string };
 } | null = null;
 
 // The context product id the products store's `mainProductInContext` resolves to
 // (derived state — the cart store reads it instead of a foreign context, T12).
-// Tests set this in place of the old `mockContext.productId`.
 let mockContextProductId: number | undefined;
 
 // products store `findProduct` — deterministic variation resolution stand-in.
@@ -49,8 +40,8 @@ jest.mock(
 	() => ( {
 		getConfig: jest.fn( () => mockConfig ),
 		// Namespace-aware: the cart store reads its OWN context
-		// (`woocommerce/cart`) for the line key/filter. There is no product-context
-		// read anymore (T12), so any other namespace resolves to null.
+		// (`woocommerce/cart`) for the line key. There is no product-context read
+		// anymore (T12), so any other namespace resolves to null.
 		getContext: jest.fn( ( namespace?: string ) =>
 			namespace === 'woocommerce/cart' ? mockCartContext : null
 		),
@@ -81,23 +72,6 @@ jest.mock(
 						removeNotice: jest.fn(),
 					},
 				};
-			}
-			// Extension-store read (cartItemFilter reference resolution). Any
-			// namespace that is not one of the core store namespaces is treated
-			// as an extension read: return its registered fake store, or throw
-			// when it is not registered (iAPI throws for a locked/unknown read;
-			// the resolver's try/catch degrades to generic rules on that throw).
-			if (
-				name !== 'woocommerce/cart' &&
-				name !== 'woocommerce' &&
-				! definition
-			) {
-				if ( mockExtensionStores[ name ] ) {
-					return mockExtensionStores[ name ];
-				}
-				throw new Error(
-					`Mock: no extension store registered for "${ name }".`
-				);
 			}
 			// The cart store registers under `woocommerce/cart` and re-registers
 			// a delegating alias under `woocommerce`. In real iAPI the alias is a
@@ -237,10 +211,6 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 		mockFindProduct = ( { id } ) => ( { id } );
 		// Reset shared mock state so drafts don't leak between tests.
 		( mockState as { draftItems?: DraftItem[] } ).draftItems = [];
-		// Reset the extension-store registry between tests.
-		for ( const key of Object.keys( mockExtensionStores ) ) {
-			delete mockExtensionStores[ key ];
-		}
 	} );
 
 	describe( 'ladder — cart resolution', () => {
@@ -254,7 +224,6 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 
 			const env = cart.state.itemInContext;
 			expect( env.cart?.key ).toBe( 'def' );
-			expect( env.isInCart ).toBe( true );
 		} );
 
 		it( 'single id-match pairs the draft with the one line', async () => {
@@ -275,8 +244,52 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 
 			const env = cart.state.itemInContext;
 			expect( env.cart?.key ).toBe( 'abc' );
-			expect( env.isInCart ).toBe( true );
 			expect( env.draft ).toEqual( { id: 100, quantity: 1 } );
+		} );
+
+		it( 'canonical documented shape: bare-namespace draft prop pairs the line whose extensions[ns] deep-matches', async () => {
+			// B1 positive pairing, end-to-end with the exact documented shape:
+			// `upsertDraftItem({ 'wc-gift-note-demo': { 'gift-note': 'A' } })`
+			// pairs against `line.extensions['wc-gift-note-demo'] = { 'gift-note':
+			// 'A' }`. Two note-lines are in the cart; the draft holds note A; the
+			// envelope must resolve the note-A line (generic pairing, no filter).
+			const cart = await loadCartAndReady();
+			setCartItems( cart, [
+				{
+					key: 'noteA',
+					id: 100,
+					quantity: 1,
+					name: 'A',
+					type: 'simple',
+					extensions: {
+						'wc-gift-note-demo': { 'gift-note': 'A' },
+					},
+					item_data: [ { key: 'Gift note', value: 'A' } ],
+				},
+				{
+					key: 'noteB',
+					id: 100,
+					quantity: 1,
+					name: 'A',
+					type: 'simple',
+					extensions: {
+						'wc-gift-note-demo': { 'gift-note': 'B' },
+					},
+					item_data: [ { key: 'Gift note', value: 'B' } ],
+				},
+			] );
+			mockContextProductId = 100;
+			cart.actions.upsertDraftItem( {
+				id: 100,
+				quantity: 1,
+				'wc-gift-note-demo': { 'gift-note': 'A' },
+			} );
+
+			const env = cart.state.itemInContext;
+			expect( env.cart?.key ).toBe( 'noteA' );
+			expect( env.draft?.[ 'wc-gift-note-demo' ] ).toEqual( {
+				'gift-note': 'A',
+			} );
 		} );
 
 		it( 'resolves the purchasable (variation) id via findProduct before matching', async () => {
@@ -339,7 +352,6 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 
 			const env = cart.state.itemInContext;
 			expect( env.cart?.key ).toBe( 'noteB' );
-			expect( env.isInCart ).toBe( true );
 		} );
 
 		it( 'same two lines + draft with NO props → cart undefined (presence heuristic)', async () => {
@@ -369,14 +381,12 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			cart.state.draftItems = [ { id: 100, quantity: 1 } ];
 
 			const env = cart.state.itemInContext;
-			expect( env.cart ).toBeUndefined();
 			// Both note-lines are excluded by the presence heuristic → zero
-			// survivors → THIS (plain) configuration is NOT in the cart, only
-			// decorated lines the draft cannot account for are.
-			expect( env.isInCart ).toBe( false );
+			// survivors → THIS (plain) configuration is NOT paired: no cart line.
+			expect( env.cart ).toBeUndefined();
 		} );
 
-		it( 'decorated-line-only presence + plain draft → { cart: undefined, isInCart: false }', async () => {
+		it( 'decorated-line-only presence + plain draft → cart undefined', async () => {
 			const cart = await loadCartAndReady();
 			// Product 5 is in the cart ONLY as a visibly-decorated line (e.g. a
 			// bundle child with "Part of" item_data). A plain draft cannot
@@ -399,14 +409,13 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 
 			const env = cart.state.itemInContext;
 			expect( env.cart ).toBeUndefined();
-			expect( env.isInCart ).toBe( false );
 		} );
 
-		it( 'invisible bare twins → { cart: undefined, isInCart: true } (both survive)', async () => {
+		it( 'invisible bare twins → cart undefined (both survive, ambiguous)', async () => {
 			const cart = await loadCartAndReady();
 			// Two lines with the same id and NO visible meta at all — BOTH
 			// survive narrowing (the draft accounts for them trivially), so the
-			// presence is genuine but ambiguous: isInCart true, cart undefined.
+			// presence is genuine but ambiguous: cart undefined.
 			setCartItems( cart, [
 				{
 					key: 'x1',
@@ -432,7 +441,6 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 
 			const env = cart.state.itemInContext;
 			expect( env.cart ).toBeUndefined();
-			expect( env.isInCart ).toBe( true );
 		} );
 
 		it( 'exactly-one rule: never first-match when several survive', async () => {
@@ -464,13 +472,11 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			];
 
 			const env = cart.state.itemInContext;
+			// Two survivors: no exact pairing (never first-match).
 			expect( env.cart ).toBeUndefined();
-			// Two survivors: presence is genuine (isInCart true) but there is
-			// no exact pairing (never first-match).
-			expect( env.isInCart ).toBe( true );
 		} );
 
-		it( 'no id-match → isInCart false, cart undefined', async () => {
+		it( 'no id-match → cart undefined', async () => {
 			const cart = await loadCartAndReady();
 			setCartItems( cart, [
 				{
@@ -488,7 +494,57 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 
 			const env = cart.state.itemInContext;
 			expect( env.cart ).toBeUndefined();
-			expect( env.isInCart ).toBe( false );
+		} );
+	} );
+
+	describe( 'cross-product envelope guard (step 1 key path)', () => {
+		it( 'drops the context draft when the keyed line is a different product', async () => {
+			// A mini-cart row for product B (line key "rowB") rendered while the
+			// page context product is A (draft id 100). Step 1 resolves the row's
+			// exact line by key, but must NOT carry A's draft against B's line.
+			const cart = await loadCartAndReady();
+			setCartItems( cart, [
+				{
+					key: 'rowB',
+					id: 200,
+					quantity: 1,
+					name: 'B',
+					type: 'simple',
+					extensions: {},
+					item_data: [],
+				},
+			] );
+			// Context product is A (100); its draft exists.
+			mockContextProductId = 100;
+			cart.state.draftItems = [ { id: 100, quantity: 1 } ];
+			mockCartContext = { cartItemKey: 'rowB' };
+
+			const env = cart.state.itemInContext;
+			expect( env.cart?.key ).toBe( 'rowB' );
+			// A's draft must not be paired with B's line.
+			expect( env.draft ).toBeUndefined();
+		} );
+
+		it( 'keeps the draft when the keyed line matches the context product', async () => {
+			const cart = await loadCartAndReady();
+			setCartItems( cart, [
+				{
+					key: 'rowA',
+					id: 100,
+					quantity: 1,
+					name: 'A',
+					type: 'simple',
+					extensions: {},
+					item_data: [],
+				},
+			] );
+			mockContextProductId = 100;
+			cart.state.draftItems = [ { id: 100, quantity: 1 } ];
+			mockCartContext = { cartItemKey: 'rowA' };
+
+			const env = cart.state.itemInContext;
+			expect( env.cart?.key ).toBe( 'rowA' );
+			expect( env.draft?.id ).toBe( 100 );
 		} );
 	} );
 
@@ -556,12 +612,14 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			const cart = await loadCartAndReady();
 			mockContextProductId = 100;
 			cart.actions.upsertDraftItem( { quantity: 1 } );
-			cart.actions.upsertDraftItem( { 'my-plugin/gift-note': 'A' } );
+			cart.actions.upsertDraftItem( {
+				'my-plugin': { 'gift-note': 'A' },
+			} );
 			expect( cart.state.draftItems ).toHaveLength( 1 );
 			expect( cart.state.draftItems[ 0 ] ).toEqual( {
 				id: 100,
 				quantity: 1,
-				'my-plugin/gift-note': 'A',
+				'my-plugin': { 'gift-note': 'A' },
 			} );
 		} );
 
@@ -586,16 +644,31 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			] );
 		} );
 
-		it( 'clearDraftItems with no context clears all drafts', async () => {
+		it( 'removeDraftItem targets an explicit productId', async () => {
 			const cart = await loadCartAndReady();
 			cart.state.draftItems = [
 				{ id: 100, quantity: 1 },
 				{ id: 200, quantity: 1 },
 			];
-			// No context product (mainProductInContext resolves nothing).
+			mockContextProductId = 100;
+			cart.actions.removeDraftItem( { productId: 200 } );
+			expect( cart.state.draftItems.map( ( d ) => d.id ) ).toEqual( [
+				100,
+			] );
+		} );
+
+		it( 'removeDraftItem is a NO-OP when neither productId nor context resolves (never clears all)', async () => {
+			const cart = await loadCartAndReady();
+			cart.state.draftItems = [
+				{ id: 100, quantity: 1 },
+				{ id: 200, quantity: 1 },
+			];
+			// No context product (mainProductInContext resolves nothing) and no
+			// explicit productId.
 			mockContextProductId = undefined;
-			cart.actions.clearDraftItems();
-			expect( cart.state.draftItems ).toHaveLength( 0 );
+			cart.actions.removeDraftItem();
+			// Must NOT clear all drafts.
+			expect( cart.state.draftItems ).toHaveLength( 2 );
 		} );
 	} );
 
@@ -733,12 +806,12 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 				cart.actions.addItem( {
 					id: 100,
 					quantity: 1,
-					'my-plugin/gift-note': 'Happy birthday',
+					'wc-gift-note-demo': { 'gift-note': 'Happy birthday' },
 				} ) as unknown as Iterator< unknown >
 			);
 
 			expect( batchCalls[ 0 ][ 0 ].body ).toMatchObject( {
-				'my-plugin/gift-note': 'Happy birthday',
+				'wc-gift-note-demo': { 'gift-note': 'Happy birthday' },
 			} );
 		} );
 
@@ -797,7 +870,7 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 		} );
 	} );
 
-	describe( 'cartItemFilter — the context escape hatch (T5)', () => {
+	describe( 'findItem({ filter }) — the explicit predicate escape hatch', () => {
 		// A decorated line the presence heuristic would exclude, plus a plain
 		// line. Shared by several tests.
 		const decoratedLine = {
@@ -825,81 +898,54 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 			// A plain draft: generic narrowing (presence heuristic) would
 			// EXCLUDE the decorated line → zero survivors → cart undefined.
 			cart.state.draftItems = [ { id: 100, quantity: 1 } ];
-
-			// The filter selects the decorated line by its key — the escape
-			// hatch a bundle editor uses to pair with a line the defaults reject.
-			mockExtensionStores[ 'bundle/editor' ] = {
-				actions: {
-					matchLine: ( item: { key?: string } ) =>
-						item.key === 'decorated',
-				},
-			};
 			mockContextProductId = 100;
-			mockCartContext = {
-				cartItemFilter: {
-					namespace: 'bundle/editor',
-					action: 'matchLine',
-				},
-			};
 
-			const env = cart.state.itemInContext;
+			// The predicate selects the decorated line by its key — the escape
+			// hatch a bundle editor uses to pair with a line the defaults reject.
+			const env = cart.state.findItem( {
+				id: 100,
+				filter: ( item ) => item.key === 'decorated',
+			} );
 			expect( env.cart?.key ).toBe( 'decorated' );
-			expect( env.isInCart ).toBe( true );
 		} );
 
-		it( 'filter receives ( cartItem, { draft, context } )', async () => {
+		it( 'filter receives ( cartItem, { draft } )', async () => {
 			const cart = await loadCartAndReady();
 			setCartItems( cart, [ plainLine ] );
 			cart.state.draftItems = [
-				{ id: 100, quantity: 1, 'my-plugin/token': 'seed' },
+				{ id: 100, quantity: 1, 'my-plugin': { token: 'seed' } },
 			];
+			mockContextProductId = 100;
 
 			const seen: Array< {
 				key: string | undefined;
 				draftToken: unknown;
 				draftId: number | undefined;
-				ctxFilterNamespace: string | undefined;
 			} > = [];
-			mockExtensionStores[ 'my-plugin/x' ] = {
-				actions: {
-					matchLine: (
-						item: { key?: string },
-						extra: {
-							draft?: Record< string, unknown >;
-							// The predicate receives the `woocommerce/cart`
-							// context (T12) — it carries the filter reference, not
-							// a product id (product identity is derived state).
-							context?: {
-								cartItemFilter?: { namespace?: string };
-							} | null;
-						}
-					) => {
-						seen.push( {
-							key: item.key,
-							draftToken: extra.draft?.[ 'my-plugin/token' ],
-							draftId: extra.draft?.id as number | undefined,
-							ctxFilterNamespace:
-								extra.context?.cartItemFilter?.namespace,
-						} );
-						return true;
-					},
-				},
-			};
-			mockContextProductId = 100;
-			mockCartContext = {
-				cartItemFilter: {
-					namespace: 'my-plugin/x',
-					action: 'matchLine',
-				},
-			};
 
-			cart.state.itemInContext;
+			cart.state.findItem( {
+				id: 100,
+				filter: ( item, extra ) => {
+					const draft = extra.draft as
+						| Record< string, unknown >
+						| undefined;
+					const ns = draft?.[ 'my-plugin' ] as
+						| { token?: unknown }
+						| undefined;
+					seen.push( {
+						key: item.key,
+						draftToken: ns?.token,
+						draftId: draft?.id as number | undefined,
+					} );
+					return true;
+				},
+			} );
+
 			expect( seen ).toEqual( [
 				{
 					key: 'plain',
 					draftToken: 'seed',
 					draftId: 100,
-					ctxFilterNamespace: 'my-plugin/x',
 				},
 			] );
 		} );
@@ -911,368 +957,68 @@ describe( 'woocommerce/cart — envelope resolution ladder + drafts', () => {
 				{ ...plainLine, key: 't2', extensions: { p: { n: 'B' } } },
 			] );
 			cart.state.draftItems = [ { id: 100, quantity: 1 } ];
-			mockExtensionStores[ 'my-plugin/x' ] = {
-				actions: {
-					matchLine: ( item: {
-						extensions?: { p?: { n?: string } };
-					} ) => item.extensions?.p?.n === 'B',
-				},
-			};
 			mockContextProductId = 100;
-			mockCartContext = {
-				cartItemFilter: {
-					namespace: 'my-plugin/x',
-					action: 'matchLine',
-				},
-			};
 
-			const env = cart.state.itemInContext;
+			const env = cart.state.findItem( {
+				id: 100,
+				filter: ( item ) =>
+					( item.extensions as { p?: { n?: string } } )?.p?.n === 'B',
+			} );
 			expect( env.cart?.key ).toBe( 't2' );
-			expect( env.isInCart ).toBe( true );
 		} );
 
-		it( 'filter selecting zero → { cart: undefined, isInCart: false }', async () => {
+		it( 'filter selecting zero → cart undefined', async () => {
 			const cart = await loadCartAndReady();
 			setCartItems( cart, [ plainLine ] );
 			cart.state.draftItems = [ { id: 100, quantity: 1 } ];
-			mockExtensionStores[ 'my-plugin/x' ] = {
-				actions: { matchLine: () => false },
-			};
 			mockContextProductId = 100;
-			mockCartContext = {
-				cartItemFilter: {
-					namespace: 'my-plugin/x',
-					action: 'matchLine',
-				},
-			};
 
-			const env = cart.state.itemInContext;
+			const env = cart.state.findItem( {
+				id: 100,
+				filter: () => false,
+			} );
 			expect( env.cart ).toBeUndefined();
-			expect( env.isInCart ).toBe( false );
 		} );
 
-		it( 'filter leaving several → { cart: undefined, isInCart: true }', async () => {
+		it( 'filter leaving several → cart undefined (exactly-one still applies)', async () => {
 			const cart = await loadCartAndReady();
 			setCartItems( cart, [
 				{ ...plainLine, key: 'm1' },
 				{ ...plainLine, key: 'm2' },
 			] );
 			cart.state.draftItems = [ { id: 100, quantity: 1 } ];
-			mockExtensionStores[ 'my-plugin/x' ] = {
-				actions: { matchLine: () => true },
-			};
 			mockContextProductId = 100;
-			mockCartContext = {
-				cartItemFilter: {
-					namespace: 'my-plugin/x',
-					action: 'matchLine',
-				},
-			};
 
-			const env = cart.state.itemInContext;
-			expect( env.cart ).toBeUndefined();
-			expect( env.isInCart ).toBe( true );
-		} );
-
-		it( 'key-in-context IGNORES the filter (step 1 unchanged)', async () => {
-			const cart = await loadCartAndReady();
-			setCartItems( cart, [
-				{ key: 'exact', id: 1, quantity: 1, name: 'A', type: 'simple' },
-			] );
-			// A filter that would reject everything — must never run for a key.
-			mockExtensionStores[ 'my-plugin/x' ] = {
-				actions: { matchLine: () => false },
-			};
-			mockCartContext = {
-				cartItemKey: 'exact',
-				cartItemFilter: {
-					namespace: 'my-plugin/x',
-					action: 'matchLine',
-				},
-			};
-
-			const env = cart.state.itemInContext;
-			expect( env.cart?.key ).toBe( 'exact' );
-			expect( env.isInCart ).toBe( true );
-		} );
-
-		it( 'resolves a dotted action path from the store root', async () => {
-			const cart = await loadCartAndReady();
-			setCartItems( cart, [ { ...plainLine, key: 'dp' } ] );
-			cart.state.draftItems = [ { id: 100, quantity: 1 } ];
-			mockExtensionStores[ 'my-plugin/x' ] = {
-				actions: {
-					filters: {
-						byNote: ( item: { key?: string } ) => item.key === 'dp',
-					},
-				},
-			};
-			mockContextProductId = 100;
-			mockCartContext = {
-				cartItemFilter: {
-					namespace: 'my-plugin/x',
-					action: 'actions.filters.byNote',
-				},
-			};
-
-			const env = cart.state.itemInContext;
-			expect( env.cart?.key ).toBe( 'dp' );
-		} );
-
-		describe( 'broken reference → generic rules + dev warning', () => {
-			it( 'unknown namespace → generic narrowing runs, warns in dev', async () => {
-				const cart = await loadCartAndReady();
-				const warn = jest
-					.spyOn( console, 'warn' )
-					.mockImplementation( () => undefined );
-				( globalThis as { SCRIPT_DEBUG?: boolean } ).SCRIPT_DEBUG =
-					true;
-
-				// One plain line that generic narrowing WOULD pair.
-				setCartItems( cart, [ plainLine ] );
-				cart.state.draftItems = [ { id: 100, quantity: 1 } ];
-				mockContextProductId = 100;
-				mockCartContext = {
-					cartItemFilter: {
-						namespace: 'does-not/exist',
-						action: 'matchLine',
-					},
-				};
-
-				const env = cart.state.itemInContext;
-				// Fell back to generic rules: the plain draft pairs the plain line.
-				expect( env.cart?.key ).toBe( 'plain' );
-				expect( warn ).toHaveBeenCalled();
-
-				delete ( globalThis as { SCRIPT_DEBUG?: boolean } )
-					.SCRIPT_DEBUG;
-				warn.mockRestore();
-			} );
-
-			it( 'unknown action on a known store → generic narrowing runs, warns', async () => {
-				const cart = await loadCartAndReady();
-				const warn = jest
-					.spyOn( console, 'warn' )
-					.mockImplementation( () => undefined );
-				( globalThis as { SCRIPT_DEBUG?: boolean } ).SCRIPT_DEBUG =
-					true;
-
-				setCartItems( cart, [ plainLine ] );
-				cart.state.draftItems = [ { id: 100, quantity: 1 } ];
-				mockExtensionStores[ 'my-plugin/x' ] = {
-					actions: { somethingElse: () => true },
-				};
-				mockContextProductId = 100;
-				mockCartContext = {
-					cartItemFilter: {
-						namespace: 'my-plugin/x',
-						action: 'noSuchAction',
-					},
-				};
-
-				const env = cart.state.itemInContext;
-				expect( env.cart?.key ).toBe( 'plain' );
-				expect( warn ).toHaveBeenCalled();
-
-				delete ( globalThis as { SCRIPT_DEBUG?: boolean } )
-					.SCRIPT_DEBUG;
-				warn.mockRestore();
-			} );
-
-			it( 'non-function target → generic narrowing runs, warns', async () => {
-				const cart = await loadCartAndReady();
-				const warn = jest
-					.spyOn( console, 'warn' )
-					.mockImplementation( () => undefined );
-				( globalThis as { SCRIPT_DEBUG?: boolean } ).SCRIPT_DEBUG =
-					true;
-
-				setCartItems( cart, [ plainLine ] );
-				cart.state.draftItems = [ { id: 100, quantity: 1 } ];
-				mockExtensionStores[ 'my-plugin/x' ] = {
-					actions: { matchLine: 'not a function' },
-				};
-				mockContextProductId = 100;
-				mockCartContext = {
-					cartItemFilter: {
-						namespace: 'my-plugin/x',
-						action: 'matchLine',
-					},
-				};
-
-				const env = cart.state.itemInContext;
-				expect( env.cart?.key ).toBe( 'plain' );
-				expect( warn ).toHaveBeenCalled();
-
-				delete ( globalThis as { SCRIPT_DEBUG?: boolean } )
-					.SCRIPT_DEBUG;
-				warn.mockRestore();
-			} );
-
-			it( 'does NOT warn in production (SCRIPT_DEBUG off)', async () => {
-				const cart = await loadCartAndReady();
-				const warn = jest
-					.spyOn( console, 'warn' )
-					.mockImplementation( () => undefined );
-				// SCRIPT_DEBUG left unset (production).
-
-				setCartItems( cart, [ plainLine ] );
-				cart.state.draftItems = [ { id: 100, quantity: 1 } ];
-				mockContextProductId = 100;
-				mockCartContext = {
-					cartItemFilter: {
-						namespace: 'does-not/exist',
-						action: 'matchLine',
-					},
-				};
-
-				const env = cart.state.itemInContext;
-				expect( env.cart?.key ).toBe( 'plain' );
-				expect( warn ).not.toHaveBeenCalled();
-
-				warn.mockRestore();
-			} );
-		} );
-
-		it( 'innermost-context shadowing: the effective context filter wins', async () => {
-			const cart = await loadCartAndReady();
-			setCartItems( cart, [
-				{ ...plainLine, key: 'outerPick' },
-				{ ...plainLine, key: 'innerPick' },
-			] );
-			cart.state.draftItems = [ { id: 100, quantity: 1 } ];
-
-			// Two competing filters. iAPI context inheritance means the getter
-			// reads the NEAREST (innermost) `cartItemFilter`; we simulate that by
-			// setting the effective context to the inner reference and proving
-			// the inner predicate selects — the outer one is never consulted.
-			mockExtensionStores[ 'outer/region' ] = {
-				actions: {
-					pick: ( item: { key?: string } ) =>
-						item.key === 'outerPick',
-				},
-			};
-			mockExtensionStores[ 'inner/region' ] = {
-				actions: {
-					pick: ( item: { key?: string } ) =>
-						item.key === 'innerPick',
-				},
-			};
-
-			// Outer context would pick 'outerPick'…
-			mockContextProductId = 100;
-			mockCartContext = {
-				cartItemFilter: { namespace: 'outer/region', action: 'pick' },
-			};
-			expect( cart.state.itemInContext.cart?.key ).toBe( 'outerPick' );
-
-			// …but an inner region shadowing it picks 'innerPick' (innermost wins).
-			mockContextProductId = 100;
-			mockCartContext = {
-				cartItemFilter: { namespace: 'inner/region', action: 'pick' },
-			};
-			expect( cart.state.itemInContext.cart?.key ).toBe( 'innerPick' );
-		} );
-
-		describe( 'findItem filter param', () => {
-			const twinA = {
-				key: 'A',
+			const env = cart.state.findItem( {
 				id: 100,
-				quantity: 1,
-				name: 'A',
-				type: 'simple',
-				extensions: {},
-				item_data: [],
-			};
-			const twinB = { ...twinA, key: 'B' };
-
-			it( 'explicit predicate overrides the context filter', async () => {
-				const cart = await loadCartAndReady();
-				setCartItems( cart, [ twinA, twinB ] );
-				cart.state.draftItems = [ { id: 100, quantity: 1 } ];
-				// Context filter would pick A…
-				mockExtensionStores[ 'ctx/x' ] = {
-					actions: {
-						pick: ( item: { key?: string } ) => item.key === 'A',
-					},
-				};
-				mockContextProductId = 100;
-				mockCartContext = {
-					cartItemFilter: { namespace: 'ctx/x', action: 'pick' },
-				};
-
-				// …but an explicit predicate (real function) picks B and wins.
-				const env = cart.state.findItem( {
-					id: 100,
-					filter: ( item ) => item.key === 'B',
-				} );
-				expect( env.cart?.key ).toBe( 'B' );
+				filter: () => true,
 			} );
+			expect( env.cart ).toBeUndefined();
+		} );
 
-			it( 'filter: false opts out — generic rules run, context filter ignored', async () => {
-				const cart = await loadCartAndReady();
-				// A single plain line generic rules WOULD pair, plus a context
-				// filter that would reject everything. filter:false must ignore
-				// the context filter and let generic narrowing pair the line.
-				setCartItems( cart, [ twinA ] );
-				cart.state.draftItems = [ { id: 100, quantity: 1 } ];
-				mockExtensionStores[ 'ctx/x' ] = {
-					actions: { pick: () => false },
-				};
-				mockContextProductId = 100;
-				mockCartContext = {
-					cartItemFilter: { namespace: 'ctx/x', action: 'pick' },
-				};
-
-				const env = cart.state.findItem( { id: 100, filter: false } );
-				expect( env.cart?.key ).toBe( 'A' );
-				expect( env.isInCart ).toBe( true );
+		it( 'key bypasses the filter param entirely', async () => {
+			const cart = await loadCartAndReady();
+			setCartItems( cart, [
+				{ ...plainLine, key: 'A' },
+				{ ...plainLine, key: 'B' },
+			] );
+			const env = cart.state.findItem( {
+				key: 'B',
+				filter: () => false,
 			} );
+			expect( env.cart?.key ).toBe( 'B' );
+		} );
 
-			it( 'absent filter inherits the context filter when in scope', async () => {
-				const cart = await loadCartAndReady();
-				setCartItems( cart, [ twinA, twinB ] );
-				cart.state.draftItems = [ { id: 100, quantity: 1 } ];
-				mockExtensionStores[ 'ctx/x' ] = {
-					actions: {
-						pick: ( item: { key?: string } ) => item.key === 'B',
-					},
-				};
-				mockContextProductId = 100;
-				mockCartContext = {
-					cartItemFilter: { namespace: 'ctx/x', action: 'pick' },
-				};
+		it( 'absent filter runs generic narrowing (no context filter inheritance)', async () => {
+			const cart = await loadCartAndReady();
+			// A single plain line generic rules WOULD pair. There is no context
+			// filter to inherit anymore — absent filter always means generic.
+			setCartItems( cart, [ plainLine ] );
+			cart.state.draftItems = [ { id: 100, quantity: 1 } ];
+			mockContextProductId = 100;
 
-				const env = cart.state.findItem( { id: 100 } );
-				expect( env.cart?.key ).toBe( 'B' );
-			} );
-
-			it( 'out of scope: degrades silently to generic rules (no context filter)', async () => {
-				const cart = await loadCartAndReady();
-				setCartItems( cart, [ twinA ] );
-				cart.state.draftItems = [ { id: 100, quantity: 1 } ];
-				// getContext throws out of scope → getSharedContext returns null.
-				const { getContext } = require( '@wordpress/interactivity' );
-				( getContext as jest.Mock ).mockImplementationOnce( () => {
-					throw new Error( 'out of scope' );
-				} );
-
-				// No context filter is inherited; generic narrowing pairs the
-				// single plain line.
-				const env = cart.state.findItem( { id: 100 } );
-				expect( env.cart?.key ).toBe( 'A' );
-				expect( env.isInCart ).toBe( true );
-			} );
-
-			it( 'key bypasses the filter param entirely', async () => {
-				const cart = await loadCartAndReady();
-				setCartItems( cart, [ twinA, twinB ] );
-				const env = cart.state.findItem( {
-					key: 'B',
-					filter: () => false,
-				} );
-				expect( env.cart?.key ).toBe( 'B' );
-			} );
+			const env = cart.state.findItem( { id: 100 } );
+			expect( env.cart?.key ).toBe( 'plain' );
 		} );
 	} );
 } );

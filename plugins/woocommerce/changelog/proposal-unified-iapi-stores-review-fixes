@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Shared iAPI stores proposal: unify the draft extension-prop shape to bare-namespace objects, drop the itemInContext `isInCart` flag, replace the `cartItemFilter` context escape hatch with an explicit `findItem({ filter })` predicate, merge `clearDraftItems` into `removeDraftItem`, and guard cross-product envelope pairing.

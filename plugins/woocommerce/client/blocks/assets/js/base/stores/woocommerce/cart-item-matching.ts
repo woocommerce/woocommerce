@@ -50,42 +50,24 @@ export type DraftItem = {
 };
 
 /**
- * A serialized reference to a `cartItemFilter` predicate, as it travels in the
- * cart store's own context (`woocommerce/cart` — T12):
- * `data-wp-context='woocommerce/cart::{"cartItemFilter":{"namespace":"my-plugin/x","action":"matchLine"}}'`.
- * It is NEVER a live function — context is serialized. Core resolves it against
- * the iAPI store registry at envelope-derivation time (see `resolveCartItemFilter`
- * in `cart.ts`).
+ * The optional `findItem({ filter })` predicate contract. Pure and synchronous —
+ * it receives a candidate cart line and the derivation extras (the active draft)
+ * and returns whether the line is a match. It MUST NOT mutate its arguments or
+ * perform side effects; it runs during derived-state evaluation, potentially many
+ * times per render.
  *
- * `action` accepts either a plain action name (resolved against the store's
- * `actions[ name ]`, then the store root `[ name ]`) or a dotted path walked
- * from the store root (e.g. `"actions.matchLine"`, `"actions.filters.byNote"`).
- */
-export type CartItemFilterReference = {
-	/** The iAPI store namespace that owns the predicate action. */
-	namespace: string;
-	/** Plain action name or dotted path from the store root. */
-	action: string;
-};
-
-/**
- * The resolved `cartItemFilter` predicate contract. Pure and synchronous — it
- * receives a candidate cart line and the derivation context (the active draft
- * and the `woocommerce/cart` context) and returns whether the line is a match.
- * It MUST NOT mutate its arguments or perform side effects; it runs during
- * derived-state evaluation, potentially many times per render.
- *
- * When set (via `context.cartItemFilter` or an explicit `findItem({ filter })`),
- * it becomes the SOLE narrowing authority over the id+variation candidates — it
- * REPLACES the generic narrowing (per-namespace compare + presence heuristic),
- * it does not compose with it. This is what lets a surface (e.g. a bundle
- * editor) pair with a line the presence heuristic would otherwise exclude.
+ * When passed to `findItem`, it becomes the SOLE narrowing authority over the
+ * id+variation candidates — it REPLACES the generic narrowing (per-namespace
+ * compare + presence heuristic), it does not compose with it. This is what lets a
+ * caller (e.g. a bundle editor, or the gift-note badge demo) pair with a line the
+ * presence heuristic would otherwise exclude. It is a caller-supplied function
+ * only — there is no serialized context-reference machinery (a `cartItemFilter`
+ * context escape hatch was deferred; see the shared-stores schema).
  */
 export type CartItemFilterPredicate = (
 	cartItem: CartItem,
 	extra: {
 		draft?: DraftItem;
-		context?: Record< string, unknown > | null;
 	}
 ) => boolean;
 
@@ -265,10 +247,9 @@ export function draftPropsMatchLineExtensions(
  * This split is what lets:
  * - two note-lines + a draft with the matching note → pair the right line, but
  * - the same two note-lines + a draft with no note props → both excluded →
- *   zero survivors → `cart` undefined AND `isInCart` false: THIS (plain)
- *   configuration is not in the cart, only decorated lines the draft cannot
- *   account for are (the #65869-safe outcome — the surface falls back to a
- *   plain add button).
+ *   zero survivors → `cart` undefined: THIS (plain) configuration is not paired
+ *   with a line, only decorated lines the draft cannot account for are (the
+ *   #65869-safe outcome — the surface falls back to a plain add button).
  *
  * Hidden `item_data` entries (`hidden: true`, from the
  * `__experimental_woocommerce_blocks_hidden` convention) are internal and never
@@ -336,20 +317,18 @@ export function isGenericExactPair(
 
 /**
  * Narrow candidate lines to the survivors of a narrowing predicate (ladder
- * step 2's output). The envelope derives BOTH of its cart-side values from
- * this single survivor set:
+ * step 2's output). The envelope's `cart` derives from this survivor set via
+ * `resolveExactlyOne( survivors )`.
  *
- * - `cart` — via `resolveExactlyOne( survivors )`, and
- * - `isInCart` — `survivors.length > 0` ("THIS configuration is in the cart").
- *   Pre-narrowing candidates deliberately do NOT count: a product present only
- *   as lines the draft cannot account for (e.g. a decorated bundle child, or
- *   note-split lines with no matching draft props) is NOT this configuration,
- *   so `isInCart` is `false` and the surface falls back to plain add-button UI
- *   (the #65869-aligned behavior).
+ * Pre-narrowing candidates deliberately do NOT survive on their own: a product
+ * present only as lines the draft cannot account for (e.g. a decorated bundle
+ * child, or note-split lines with no matching draft props) is NOT paired, so
+ * `cart` is `undefined` and the surface falls back to plain add-button UI (the
+ * #65869-aligned behavior).
  *
  * @param candidates Lines already matched by purchasable id + variation.
- * @param predicate  The narrowing predicate (generic pair, or a context
- *                   filter).
+ * @param predicate  The narrowing predicate (generic pair, or an explicit
+ *                   `findItem` filter).
  * @return The surviving lines.
  */
 export function narrowCandidates< T >(
