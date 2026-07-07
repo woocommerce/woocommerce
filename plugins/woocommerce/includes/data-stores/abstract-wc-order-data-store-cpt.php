@@ -976,7 +976,9 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 */
 	protected function get_refund_orders_join_clause( int $order_id ): string {
 		global $wpdb;
-		return $wpdb->prepare( '%i AS refunds ON ( refunds.post_type = %s AND refunds.post_parent = %d )', $wpdb->posts, 'shop_order_refund', $order_id );
+		$posts = $wpdb->posts;
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+		return $wpdb->prepare( "{$posts} AS refunds ON ( refunds.post_type = %s AND refunds.post_parent = %d )", 'shop_order_refund', $order_id );
 	}
 
 	/**
@@ -992,8 +994,9 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected function get_refund_orders_batch_join_clause( array $order_ids ): string {
 		global $wpdb;
 		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
-		return $wpdb->prepare( "%i AS refunds ON ( refunds.post_type = %s AND refunds.post_parent IN ( $id_list ) )", $wpdb->posts, 'shop_order_refund' );
+		$posts   = $wpdb->posts;
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above; trusted table name.
+		return $wpdb->prepare( "{$posts} AS refunds ON ( refunds.post_type = %s AND refunds.post_parent IN ( $id_list ) )", 'shop_order_refund' );
 	}
 
 	/**
@@ -1020,20 +1023,18 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected function get_batch_refund_totals( array $order_ids ): array {
 		global $wpdb;
 
-		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
+		$id_list  = implode( ', ', array_map( 'absint', $order_ids ) );
+		$postmeta = $wpdb->postmeta;
+		$posts    = $wpdb->posts;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above; trusted table names.
 		$refund_totals = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT posts.post_parent AS order_id, SUM( postmeta.meta_value ) AS total
-				FROM %i AS postmeta
-				INNER JOIN %i AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent IN ( $id_list ) )
+			"SELECT posts.post_parent AS order_id, SUM( postmeta.meta_value ) AS total
+				FROM {$postmeta} AS postmeta
+				INNER JOIN {$posts} AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent IN ( $id_list ) )
 				WHERE postmeta.meta_key = '_refund_amount'
 				AND postmeta.post_id = posts.ID
-				GROUP BY posts.post_parent",
-				$wpdb->postmeta,
-				$wpdb->posts
-			)
+				GROUP BY posts.post_parent"
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
@@ -1059,19 +1060,19 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		$refund_join      = $this->get_refund_orders_join_clause( $order->get_id() );
 		$meta_placeholder = implode( ', ', array_fill( 0, count( $meta_keys ), '%s' ) );
+		$order_itemmeta   = $wpdb->prefix . 'woocommerce_order_itemmeta';
+		$order_items      = $wpdb->prefix . 'woocommerce_order_items';
 
 		$total = $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $refund_join is already prepared.
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $refund_join is already prepared; trusted table names.
 			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $meta_keys is splatted.
 			$wpdb->prepare(
 				"SELECT SUM( order_itemmeta.meta_value )
-				FROM %i AS order_itemmeta
+				FROM {$order_itemmeta} AS order_itemmeta
 				INNER JOIN $refund_join
-				INNER JOIN %i AS order_items ON ( order_items.order_id = refunds.id AND order_items.order_item_type = %s )
+				INNER JOIN {$order_items} AS order_items ON ( order_items.order_id = refunds.id AND order_items.order_item_type = %s )
 				WHERE order_itemmeta.order_item_id = order_items.order_item_id
 				AND order_itemmeta.meta_key IN ( $meta_placeholder )",
-				$wpdb->prefix . 'woocommerce_order_itemmeta',
-				$wpdb->prefix . 'woocommerce_order_items',
 				$item_type,
 				...$meta_keys,
 			)
@@ -1159,22 +1160,20 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		}
 
 		// Batch query: total tax refunded per order.
-		$refund_join = $this->get_refund_orders_batch_join_clause( $non_cached_ids );
-		$parent_col  = $this->get_refund_parent_column();
+		$refund_join    = $this->get_refund_orders_batch_join_clause( $non_cached_ids );
+		$parent_col     = $this->get_refund_parent_column();
+		$order_itemmeta = $wpdb->prefix . 'woocommerce_order_itemmeta';
+		$order_items    = $wpdb->prefix . 'woocommerce_order_items';
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $refund_join is already prepared, $parent_col is hardcoded.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $refund_join is already prepared, $parent_col is hardcoded, trusted table names.
 		$tax_totals = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT $parent_col AS order_id, SUM( order_itemmeta.meta_value ) AS total
-				FROM %i AS order_itemmeta
+			"SELECT $parent_col AS order_id, SUM( order_itemmeta.meta_value ) AS total
+				FROM {$order_itemmeta} AS order_itemmeta
 				INNER JOIN $refund_join
-				INNER JOIN %i AS order_items ON ( order_items.order_id = refunds.id AND order_items.order_item_type = 'tax' )
+				INNER JOIN {$order_items} AS order_items ON ( order_items.order_id = refunds.id AND order_items.order_item_type = 'tax' )
 				WHERE order_itemmeta.order_item_id = order_items.order_item_id
 				AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')
-				GROUP BY $parent_col",
-				$wpdb->prefix . 'woocommerce_order_itemmeta',
-				$wpdb->prefix . 'woocommerce_order_items'
-			)
+				GROUP BY $parent_col"
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
