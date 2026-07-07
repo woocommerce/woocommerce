@@ -840,8 +840,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$wpdb->query(
 			$wpdb->prepare(
-				'UPDATE %i SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d',
-				$orders_stats_table,
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+				"UPDATE {$orders_stats_table} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d",
 				$order_id,
 				$customer_id
 			)
