@@ -1,82 +1,43 @@
-# Enqueueable WooCommerce Blocks Packages
+# WooCommerce Blocks Editor Assets
 
-WooCommerce Blocks exposes a small set of JavaScript packages as WordPress script handles. These handles let WooCommerce scripts, extensions, and third-party code depend on shared Blocks APIs without copying the package into every bundle.
+WooCommerce Blocks uses shared editor assets instead of one editor script and stylesheet per block. This page documents which assets are loaded for WooCommerce blocks in the editor, which packages remain external dependencies of `wc-block-library`, and which handles are still registered for extensions that enqueue them manually.
 
-The main sources of truth are:
+Not every registered handle is enqueued by default. Handles listed as compatibility handles are available to avoid breaking existing consumers, but new editor code should usually rely on `wc-block-library` and its declared dependencies.
 
-- `plugins/woocommerce/client/blocks/bin/webpack-helpers.js` for import-to-global and import-to-handle mapping.
-- `plugins/woocommerce/client/blocks/bin/webpack-entries.js` for Blocks package entry points emitted by webpack.
-- `plugins/woocommerce/src/Blocks/AssetsController.php` for script registration.
-- `plugins/woocommerce/src/Blocks/DependencyDetection.php` for runtime warnings when scripts use `window.wc.*` globals without declaring the matching handle.
+## Default editor assets
 
-## Block library bundling
+WooCommerce block types use these shared handles in the block editor:
 
-The `@woocommerce/block-library` editor build intentionally bundles most WooCommerce package imports. That keeps the editor from enqueueing a long list of package scripts.
-
-The exceptions are package instances that must be shared with editor extensions or initialized exactly once:
-
-- `@woocommerce/block-data` remains external through the `wc-blocks-data-store` handle so WooCommerce Blocks data stores are registered once and shared with external checkout APIs.
-- `@woocommerce/blocks-checkout` remains external through the `wc-blocks-checkout` handle so checkout filters, slot/fill APIs, and checkout block registry helpers use the same package instance.
-- `@woocommerce/blocks-checkout-events` remains external through the `wc-blocks-checkout-events` handle so checkout lifecycle event subscribers and emitters use the same event emitter.
-- `@woocommerce/blocks-registry` remains external through the `wc-blocks-registry` handle so block, payment method, and extension registrations are stored in the same registries.
-- `@woocommerce/entities` remains external through the `wc-entities` handle so WooCommerce entity registration is shared in the editor.
-- `@woocommerce/price-format` remains external through the `wc-price-format` handle so editor, frontend, and extension code share one small price formatting package instead of duplicating it across bundles.
-
-The standalone handles below must still be registered and emitted. They are public dependency targets for non-editor scripts and third-party consumers that explicitly enqueue or declare them.
-
-Package handles used as editor externals should be emitted by the core package build rather than the cart and checkout frontend build. That keeps editor dependencies from loading cart/checkout-only split chunks.
-
-## Source locations
-
-Package source location communicates the intended surface:
-
-- `assets/js/blocks-registry`, `assets/js/data`, `assets/js/entities`, `assets/js/middleware`, `assets/js/shared`, and `assets/js/types` contain Blocks package surfaces that are emitted as standalone handles and/or bundled into `@woocommerce/block-library`.
-- `packages/*` contains packages that already use the standalone package layout, such as `checkout`, `components`, and `prices`.
-- `assets/js/blocks/*` contains concrete block implementation code.
-
-## Package handles
-
-| Package import | Script handle | Global | Purpose |
-| --- | --- | --- | --- |
-| `@woocommerce/block-data` | `wc-blocks-data-store` | `wc.wcBlocksData` | Blocks data stores for cart, checkout, collections, payment, query state, schema, store notices, and validation. Depends on `wc-blocks-middleware`. |
-| `@woocommerce/blocks-checkout` | `wc-blocks-checkout` | `wc.blocksCheckout` | Checkout and cart extension APIs, including checkout components, hooks, utilities, slot/fill support, checkout filter registry, and checkout block registry helpers. |
-| `@woocommerce/blocks-checkout-events` | `wc-blocks-checkout-events` | `wc.blocksCheckoutEvents` | Checkout lifecycle event emitter used for validation and checkout result handling, such as checkout validation, success, and failure events. |
-| `@woocommerce/blocks-components` | `wc-blocks-components` | `wc.blocksComponents` | Shared Blocks UI components such as buttons, form controls, chips, notices, totals, text inputs, labels, panels, and spinners. |
-| `@woocommerce/blocks-registry` | `wc-blocks-registry` | `wc.wcBlocksRegistry` | Registries for payment methods, block components, and product collection variations/extensions. |
-| `@woocommerce/data` | `wc-store-data` | `wc.data` | WooCommerce admin data stores, store descriptors, hydration helpers, REST constants, and shared admin data types. This package is registered by WooCommerce Admin assets rather than the Blocks core webpack entries. |
-| `@woocommerce/entities` | `wc-entities` | `wc.wcEntities` | Entity registration and hooks for WooCommerce entities, currently including product entities and conditional settings entities. |
-| `@woocommerce/price-format` | `wc-price-format` | `wc.priceFormat` | Price and currency formatting utilities used by cart, checkout, Mini Cart, Product Filters, product elements, and extensions. |
-| `@woocommerce/sanitize` | `wc-sanitize` | `wc.sanitize` | HTML sanitization helpers and Trusted Types policy utilities. This package is registered from the WooCommerce admin sanitize build. |
-| `@woocommerce/settings` | `wc-settings` | `wc.wcSettings` | Shared settings access, default constants, default field definitions, and block settings initialization through `allSettings`. |
-| `@woocommerce/shared-context` | `wc-blocks-shared-context` | `wc.wcBlocksSharedContext` | Shared React contexts for custom data, inner block layout, and product data. |
-| `@woocommerce/shared-hocs` | `wc-blocks-shared-hocs` | `wc.wcBlocksSharedHocs` | Shared higher-order components for product data context and filtered attributes. |
-| `@woocommerce/types` | `wc-types` | `wc.wcTypes` | Shared type definitions and runtime type guards used by Blocks packages and extension-facing APIs. |
-
-## Supporting handles
-
-These handles are registered alongside the package handles but do not map directly to a public `@woocommerce/*` package import.
-
-| Script handle | Global | Purpose |
+| Handle | Type | What it contains |
 | --- | --- | --- |
-| `wc-blocks-middleware` | None | Installs Store API request middleware, including nonce handling, locale removal, and cart hash behavior. `wc-blocks-data-store` depends on it. |
-| `wc-schema-parser` | `window.schemaParser` | AJV-based JSON schema parser used by checkout validation and schema-aware block behavior. |
+| `wc-block-library` | Script | The shared editor bundle for WooCommerce blocks. It is built from `entries.main.wc-block-library`, which includes `assets/js/index.js` and the block editor entrypoints. |
+| `wc-block-library-style` | Stylesheet | The shared editor stylesheet for WooCommerce blocks. Block metadata and PHP block registration point editor styles to this handle. |
 
-## Bundled-only imports
+When `wc-block-library` is loaded, its generated asset file declares the package handles that still need to be shared as separate scripts:
 
-Some WooCommerce imports are intentionally bundled and do not have a Blocks package handle.
+| Package import | Script handle | Global | Why it stays external |
+| --- | --- | --- | --- |
+| `@woocommerce/block-data` | `wc-blocks-data-store` | `wc.wcBlocksData` | Registers WooCommerce Blocks data stores once and shares them with editor extensions and checkout APIs. |
+| `@woocommerce/blocks-checkout` | `wc-blocks-checkout` | `wc.blocksCheckout` | Shares checkout filters, slot/fill APIs, and checkout block registry helpers with extensions. |
+| `@woocommerce/blocks-checkout-events` | `wc-blocks-checkout-events` | `wc.blocksCheckoutEvents` | Shares the checkout lifecycle event emitter between subscribers and emitters. |
+| `@woocommerce/blocks-registry` | `wc-blocks-registry` | `wc.wcBlocksRegistry` | Keeps block, payment method, and product collection registrations in shared registries. |
+| `@woocommerce/entities` | `wc-entities` | `wc.wcEntities` | Shares WooCommerce entity registration in the editor. |
+| `@woocommerce/price-format` | `wc-price-format` | `wc.priceFormat` | Shares price and currency formatting across editor, frontend, and extension code. |
 
-| Package import | Reason |
-| --- | --- |
-| `@woocommerce/tracks` | Tracking helpers are bundled into consumers and are not exposed as a Blocks package handle. |
+This list comes from `editorExternalPackages` in `webpack-helpers.js`. Imports for other mapped WooCommerce packages are bundled into `wc-block-library` in the editor build.
 
-## Adding or changing a package handle
+## Compatibility handles
 
-When adding, removing, or renaming one of these packages, update the full chain:
+The packages below resolve as bundled editor imports when they are used by WooCommerce editor code, but their script handles remain registered so existing extensions and non-editor scripts can still enqueue or declare them directly.
 
-1. Update `wcDepMap` and `wcHandleMap` in `bin/webpack-helpers.js`.
-2. Add or update the webpack entry in `bin/webpack-entries.js` when Blocks emits the standalone script.
-3. Register the handle in `src/Blocks/AssetsController.php`, or confirm another asset controller already registers it.
-4. Update dependency detection if the package exposes a `window.wc.*` global that third-party scripts can consume.
-5. Update this README.
+| Package import | Script handle | Global | Registration owner | Notes |
+| --- | --- | --- | --- | --- |
+| `@woocommerce/blocks-components` | `wc-blocks-components` | `wc.blocksComponents` | `AssetsController::register_deprecated_package_scripts()` | Deprecated editor dependency target kept for backward compatibility. |
+| `@woocommerce/shared-context` | `wc-blocks-shared-context` | `wc.wcBlocksSharedContext` | `AssetsController::register_deprecated_package_scripts()` | Deprecated editor dependency target kept for backward compatibility. |
+| `@woocommerce/shared-hocs` | `wc-blocks-shared-hocs` | `wc.wcBlocksSharedHocs` | `AssetsController::register_deprecated_package_scripts()` | Deprecated editor dependency target kept for backward compatibility. |
+| `@woocommerce/settings` | `wc-settings` | `wc.wcSettings` | `AssetDataRegistry::register_data_script()` | Still used when scripts need WooCommerce settings data; inline data is only printed when the handle is enqueued. |
+| `@woocommerce/types` | `wc-types` | `wc.wcTypes` | `AssetsController::register_assets()` | Runtime type helpers remain available as a standalone handle. |
+| `@woocommerce/sanitize` | `wc-sanitize` | `wc.sanitize` | `AssetsController::register_assets()` and WooCommerce Admin assets | Sanitization helpers remain available as a standalone handle. |
+| `@woocommerce/data` | `wc-store-data` | `wc.data` | WooCommerce Admin assets | Registered by WooCommerce Admin, not by the Blocks core webpack entries. |
 
-Changing the public API of these packages can affect third-party extensions that declare the matching script handle, even when `@woocommerce/block-library` bundles the same package internally.
+`wc-blocks-middleware` is also registered by Blocks and is loaded as a dependency of `wc-blocks-data-store`. It does not map to a public `@woocommerce/*` package import.
