@@ -46,6 +46,34 @@ use WC_Session_Handler;
 class POSSessionHandler extends WC_Session_Handler {
 
 	/**
+	 * Session-key prefix of POS transaction sessions.
+	 *
+	 * Distinct from the web guest `t_` prefix so tokens can never cross
+	 * surfaces in either direction.
+	 */
+	public const SESSION_KEY_PREFIX = 'pos_';
+
+	/**
+	 * Resolve a Cart-Token to the POS transaction session it identifies.
+	 *
+	 * The single definition of "is this token a resumable POS transaction" —
+	 * used by this handler and by the routes' fail-loud pre-check, so the two
+	 * can never drift.
+	 *
+	 * @param string $cart_token The presented token.
+	 * @return string The transaction session key, or '' when the token is not a valid POS token.
+	 */
+	public static function resolve_transaction_id( string $cart_token ): string {
+		if ( '' === $cart_token || ! CartTokenUtils::validate_cart_token( $cart_token ) ) {
+			return '';
+		}
+
+		$customer_id = (string) ( CartTokenUtils::get_cart_token_payload( $cart_token )['user_id'] ?? '' );
+
+		return 0 === strpos( $customer_id, self::SESSION_KEY_PREFIX ) ? $customer_id : '';
+	}
+
+	/**
 	 * Init the session: resume the transaction from a Cart-Token header, or
 	 * start a fresh guest session.
 	 *
@@ -83,7 +111,7 @@ class POSSessionHandler extends WC_Session_Handler {
 	 * @return string
 	 */
 	public function generate_customer_id() {
-		return wc_rand_hash( 'pos_', 28 );
+		return wc_rand_hash( self::SESSION_KEY_PREFIX, 28 );
 	}
 
 	/**
@@ -171,12 +199,6 @@ class POSSessionHandler extends WC_Session_Handler {
 	private function get_customer_id_from_cart_token(): string {
 		$cart_token = wc_clean( wp_unslash( $_SERVER['HTTP_CART_TOKEN'] ?? '' ) );
 
-		if ( ! is_string( $cart_token ) || '' === $cart_token || ! CartTokenUtils::validate_cart_token( $cart_token ) ) {
-			return '';
-		}
-
-		$customer_id = (string) ( CartTokenUtils::get_cart_token_payload( $cart_token )['user_id'] ?? '' );
-
-		return 0 === strpos( $customer_id, 'pos_' ) ? $customer_id : '';
+		return is_string( $cart_token ) ? self::resolve_transaction_id( $cart_token ) : '';
 	}
 }

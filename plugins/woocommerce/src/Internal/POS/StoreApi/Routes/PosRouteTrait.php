@@ -7,7 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\POS\StoreApi\Routes;
 
-use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
+use Automattic\WooCommerce\Internal\POS\StoreApi\POSSessionHandler;
 use WP_Error;
 use WP_REST_Request;
 
@@ -73,17 +73,14 @@ trait PosRouteTrait {
 	/**
 	 * Whether a presented Cart-Token identifies a resumable POS transaction.
 	 *
+	 * Delegates to the session handler's single definition so the route
+	 * pre-check and the actual resumption can never drift.
+	 *
 	 * @param string $cart_token The presented token.
 	 * @return bool
 	 */
 	private function is_resumable_pos_cart_token( string $cart_token ): bool {
-		if ( ! CartTokenUtils::validate_cart_token( $cart_token ) ) {
-			return false;
-		}
-
-		$customer_id = (string) ( CartTokenUtils::get_cart_token_payload( $cart_token )['user_id'] ?? '' );
-
-		return 0 === strpos( $customer_id, 'pos_' );
+		return '' !== POSSessionHandler::resolve_transaction_id( $cart_token );
 	}
 
 	/**
