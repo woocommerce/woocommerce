@@ -85,12 +85,13 @@ Source: https://uncut.wtf/sans-serif/uncut-sans.html
 
 == Images ==
 
-Theme screenshot, Icon and logo images 
+Theme screenshot, icon and logo images 
 Author: Beatriz Fialho
 License: CC0 1.0 Universal
 License URI: https://creativecommons.org/publicdomain/zero/1.0/
 
+
 Pattern placeholder, product images
-Author: Marek Rybicki
+Author: Automattic
 License: CC0 1.0 Universal
 License URI: https://creativecommons.org/publicdomain/zero/1.0/
