@@ -10,7 +10,6 @@ import { getEnvVar } from '@woocommerce/monorepo-utils/src/core/environment';
 import { Command } from '@commander-js/extra-typings';
 import dotenv from 'dotenv';
 // @ts-expect-error - The enquirer types are incorrect.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { Select } from 'enquirer';
 
 /**

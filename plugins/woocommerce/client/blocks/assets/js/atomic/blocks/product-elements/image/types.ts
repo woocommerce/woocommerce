@@ -8,6 +8,12 @@ export enum ImageSizing {
 	THUMBNAIL = 'thumbnail',
 }
 
+export type AspectRatioStyle = {
+	dimensions?: {
+		aspectRatio?: string;
+	};
+};
+
 export interface BlockAttributes {
 	// The product ID.
 	productId: number;
@@ -33,6 +39,8 @@ export interface BlockAttributes {
 	scale: 'cover' | 'contain' | 'fill';
 	// Aspect ratio of the image.
 	aspectRatio: string;
+	// Block style from dimensions support (not React CSSProperties).
+	style?: AspectRatioStyle;
 }
 
 export interface ProductImageContext extends ProductQueryContext {

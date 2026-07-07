@@ -125,6 +125,19 @@ $products = wc_get_products( array( 'orderby' => 'rand' ) );
 $products = wc_get_products( array( 'return' => 'ids' ) );
 ```
 
+## Product archive URL query parameters
+
+The query parameters in this reference are PHP arguments for `wc_get_products()` and `WC_Product_Query`. Storefront product archives, including the shop page and product category pages, can also read query parameters from the URL to build the main catalog query. For example, the `orderby` URL query parameter changes the catalog sort order.
+
+To link visitors to a catalog view that lists products with prices before products without prices, sort the archive by price from high to low:
+
+```text
+https://example.com/shop/?orderby=price-desc
+https://example.com/product-category/clothing/?orderby=price-desc
+```
+
+The `price-desc` value maps to the "Price: high to low" catalog sort. Products with no price or a zero price are sorted after products with a higher price. Use `orderby=price` for the "Price: low to high" catalog sort.
+
 ### Pagination
 
 | Parameter | Description |
