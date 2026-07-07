@@ -3585,9 +3585,9 @@ function wc_update_1100_enable_point_of_sale_feature() {
 /**
  * Remove product meta associated with the key '_headstart_post'.
  *
- * This meta was used to mark AI-generated sample products created during store
- * onboarding. It is no longer needed and removing it prevents stale sample
- * product markers from lingering in the database.
+ * This meta was used to mark sample products created during store onboarding.
+ * It is no longer needed and removing it prevents stale sample product markers
+ * from lingering in the database.
  *
  * @since 11.1.0
  *

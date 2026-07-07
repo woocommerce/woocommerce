@@ -188,7 +188,7 @@ class Products extends Task {
 	 * @param WC_Product $product Product object.
 	 */
 	public function maybe_set_has_product_transient( $product_id, $product ) {
-		if ( ! $this->has_previously_completed() ) {
+		if ( ! $this->has_previously_completed() && ProductStatus::PUBLISH === $product->get_status() ) {
 			set_transient( self::HAS_PRODUCT_TRANSIENT, 'yes' );
 			$this->possibly_track_completion();
 		}
