@@ -37,7 +37,7 @@ final class SchemaInstaller {
 	 * 2.2.0 - dispatcher columns: cycle `claimed_until` (crash-recovery lease) and
 	 *         reserved `retry_at`; a `due_contract (status, next_payment_gmt)` index on
 	 *         contracts for the batch renewal scan.
-	 * 3.0.0 - catalog flatten: drop the plan_groups table; plans lose group_id and
+	 * 2.3.0 - catalog flatten: drop the plan_groups table; plans lose group_id and
 	 *         options, gain merchant_code (UNIQUE).
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
@@ -45,7 +45,7 @@ final class SchemaInstaller {
 	 * on an earlier schema must drop and recreate the tables (and clear VERSION_OPTION)
 	 * to pick up such changes - in-place ALTERs and backfills arrive with the freeze.
 	 */
-	private const VERSION = '3.0.0';
+	private const VERSION = '2.3.0';
 
 	/**
 	 * Option key tracking the installed schema version.
