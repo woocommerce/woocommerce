@@ -247,76 +247,22 @@ class WC_Data_Store_WP {
 	 *
 	 * Note: WordPress `get_metadata` function returns an empty string when meta data does not exist.
 	 *
-	 * @param WC_Data $data_object The WP_Data object (WC_Coupon for coupons, etc).
+	 * @param WC_Data $object The WP_Data object (WC_Coupon for coupons, etc).
 	 * @param string  $meta_key Meta key to update.
 	 * @param mixed   $meta_value Value to save.
-	 * @param bool    $creating Whether the object is being created.
-	 * @param array   $existing_meta_keys Existing meta keys map, maintained across calls during creation. Passed by reference.
+	 *
 	 * @since 3.6.0 Added to prevent empty meta being stored unless required.
 	 *
-	 * @return bool True if added/updated/deleted.
+	 * @return bool True if updated/deleted.
 	 */
-	protected function update_or_delete_post_meta( $data_object, $meta_key, $meta_value, $creating = false, &$existing_meta_keys = null ) {
-		$is_empty_meta_value = in_array( $meta_value, array( array(), '' ), true );
-		$must_exist          = in_array( $meta_key, $this->must_exist_meta_keys, true );
-		$object_id           = $data_object->get_id();
-
-		if ( $creating ) {
-			if ( ! is_array( $existing_meta_keys ) ) {
-				$existing_meta_keys = $this->get_existing_meta_keys( $object_id );
-			}
-
-			$meta_exists = isset( $existing_meta_keys[ $meta_key ] );
-
-			if ( $is_empty_meta_value && ! $must_exist ) {
-				if ( ! $meta_exists ) {
-					return false;
-				}
-
-				$updated = delete_post_meta( $object_id, $meta_key );
-				unset( $existing_meta_keys[ $meta_key ] );
-
-				return (bool) $updated;
-			}
-
-			if ( $meta_exists ) {
-				$updated = update_post_meta( $object_id, $meta_key, $meta_value );
-			} else {
-				$updated = add_post_meta( $object_id, $meta_key, $meta_value );
-				if ( $updated ) {
-					$existing_meta_keys[ $meta_key ] = true;
-				}
-			}
-
-			return (bool) $updated;
-		}
-
-		if ( $is_empty_meta_value && ! $must_exist ) {
-			$updated = delete_post_meta( $object_id, $meta_key );
+	protected function update_or_delete_post_meta( $object, $meta_key, $meta_value ) {
+		if ( in_array( $meta_value, array( array(), '' ), true ) && ! in_array( $meta_key, $this->must_exist_meta_keys, true ) ) {
+			$updated = delete_post_meta( $object->get_id(), $meta_key );
 		} else {
-			$updated = update_post_meta( $object_id, $meta_key, $meta_value );
+			$updated = update_post_meta( $object->get_id(), $meta_key, $meta_value );
 		}
 
 		return (bool) $updated;
-	}
-
-	/**
-	 * Get the set of meta keys an object already has, to avoid per-key existence queries during creation.
-	 *
-	 * @param int $object_id Object ID.
-	 * @return array Map of existing meta key => true.
-	 */
-	protected function get_existing_meta_keys( $object_id ) {
-		global $wpdb;
-
-		$meta_keys = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT meta_key FROM {$wpdb->postmeta} WHERE post_id = %d",
-				$object_id
-			)
-		);
-
-		return array_fill_keys( $meta_keys, true );
 	}
 
 	/**
