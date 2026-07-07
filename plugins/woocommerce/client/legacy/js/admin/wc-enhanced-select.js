@@ -302,19 +302,6 @@ jQuery( function ( $ ) {
 							},
 						};
 
-						// When the search lives inside a Backbone modal, render
-						// its dropdown inside the modal instead of letting
-						// selectWoo attach it to <body>, which strands a "rogue"
-						// dropdown in the page corner when the modal closes.
-						// Fields outside a modal keep the default (body)
-						// behaviour, so nothing else in admin changes.
-						var $modalContent = $( this ).closest(
-							'.wc-backbone-modal-content'
-						);
-						if ( $modalContent.length ) {
-							select2_args.dropdownParent = $modalContent;
-						}
-
 						display_result( this, select2_args );
 					} );
 

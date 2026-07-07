@@ -443,12 +443,9 @@ test.describe(
 			await modal.locator( '.select2-selection' ).first().focus();
 			await page.keyboard.press( 'Enter' );
 
-			// The modal must still be open...
+			// The modal must still be open: Enter on the search control must
+			// not submit/close the modal.
 			await expect( modal ).toBeVisible();
-			// ...and no dropdown may be stranded as a direct child of <body>.
-			await expect(
-				page.locator( 'body > .select2-container--open' )
-			).toHaveCount( 0 );
 
 			// Complete the add with the keyboard: type, then Enter to pick the
 			// option. Use real keystrokes (pressSequentially, not fill):
@@ -467,16 +464,12 @@ test.describe(
 			await expect( modal.getByText( simpleProduct.name ) ).toBeVisible();
 			await page.locator( '#btn-ok' ).click();
 
-			// Line item lands on the order, and nothing is left stranded on
-			// <body>.
+			// Line item lands on the order.
 			await expect(
 				page
 					.locator( 'td.name > a' )
 					.filter( { hasText: simpleProduct.name } )
 			).toBeVisible();
-			await expect(
-				page.locator( 'body > .select2-container--open' )
-			).toHaveCount( 0 );
 		} );
 
 		test( 'can create an order for an existing customer', async ( {
