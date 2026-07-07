@@ -84,26 +84,38 @@ class Context {
 	 * @return bool
 	 */
 	private static function detect_pos_request(): bool {
-		// Direct request: the route is in the URI path (/wp-json/wc/internal/pos/...).
-		// Only the path component is inspected; a query string containing the
-		// prefix must not count.
+		// Admin requests (wp-admin pages, admin-ajax.php) never dispatch POS
+		// REST routes; any POS-looking URI or rest_route there is spoofing.
+		if ( is_admin() ) {
+			return false;
+		}
+
+		// Direct request: the URI path starts with the site's actual REST base
+		// for the POS namespace (rest_url() accounts for subdirectory installs
+		// and prefix filters). Anchored on purpose: a substring match would
+		// let the prefix appear mid-path (PATH_INFO on a storefront URL) and
+		// force POS behaviour onto a shopper's request. On plain-permalink
+		// sites rest_url() is query-string based, so this branch never
+		// matches there — those requests carry rest_route instead.
 		if ( ! empty( $_SERVER['REQUEST_URI'] ) ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$request_path = wp_parse_url( (string) $_SERVER['REQUEST_URI'], PHP_URL_PATH );
-			if ( is_string( $request_path ) && false !== strpos( $request_path, trailingslashit( rest_get_url_prefix() ) . self::URI_PREFIX ) ) {
+			$request_path  = wp_parse_url( (string) $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+			$pos_rest_path = wp_parse_url( rest_url( self::URI_PREFIX ), PHP_URL_PATH );
+
+			if (
+				is_string( $request_path ) && is_string( $pos_rest_path )
+				&& false !== strpos( $pos_rest_path, self::URI_PREFIX )
+				&& 0 === strpos( $request_path, $pos_rest_path )
+			) {
 				return true;
 			}
 		}
 
 		// Proxied request (e.g. Jetpack tunnel): the route arrives as a `rest_route` GET parameter.
-		// Only honoured outside admin contexts: admin-ajax.php and friends never
-		// dispatch REST routes, so a rest_route parameter there is spoofing —
-		// honouring it would let a crafted link run a shopper's admin-ajax
-		// request under the POS session handler.
 		// Sanitized with sanitize_text_field, not esc_url_raw — the latter treats a
 		// schemaless route like `wc/internal/pos/...` as a hostname and mangles it.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context check, not a state change.
-		if ( ! is_admin() && isset( $_GET['rest_route'] ) && is_string( $_GET['rest_route'] ) ) {
+		if ( isset( $_GET['rest_route'] ) && is_string( $_GET['rest_route'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Context check, not a state change.
 			$rest_route = rawurldecode( sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ) );
 			if ( 0 === strpos( ltrim( $rest_route, '/' ), self::URI_PREFIX ) ) {

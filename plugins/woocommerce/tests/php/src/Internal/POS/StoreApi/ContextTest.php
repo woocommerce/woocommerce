@@ -32,6 +32,10 @@ class ContextTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		// The URI-path branch only exists for pretty permalinks (plain
+		// permalinks carry the route in rest_route instead), so test it in
+		// that mode. WP resets the structure between tests.
+		$this->set_permalink_structure( '/%postname%/' );
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$this->original_request_uri = $_SERVER['REQUEST_URI'] ?? null;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
@@ -75,11 +79,18 @@ class ContextTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox is_pos_request returns true for a subdirectory install path.
+	 * The POS prefix appearing mid-path (PATH_INFO on a storefront URL) must
+	 * not classify the request as POS — the match is anchored to the site's
+	 * actual REST base.
+	 *
+	 * @testdox is_pos_request rejects the POS prefix appearing mid-path.
 	 */
-	public function test_returns_true_for_subdirectory_install(): void {
-		$_SERVER['REQUEST_URI'] = '/shop/wp-json/wc/internal/pos/v1/cart/add-items';
-		$this->assertTrue( Context::is_pos_request() );
+	public function test_returns_false_for_mid_path_prefix(): void {
+		$_SERVER['REQUEST_URI'] = '/some-page/wp-json/wc/internal/pos/v1/cart/add-items';
+		$this->assertFalse( Context::is_pos_request() );
+
+		$_SERVER['REQUEST_URI'] = '/index.php/extra/wp-json/wc/internal/pos/';
+		$this->assertFalse( Context::is_pos_request() );
 	}
 
 	/**
