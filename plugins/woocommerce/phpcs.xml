@@ -24,6 +24,8 @@
 	<exclude-pattern>tests/e2e/test-plugins/blocks/</exclude-pattern>
 	<!-- Helper scripts loaded only during e2e tests. -->
 	<exclude-pattern>tests/e2e/bin/</exclude-pattern>
+	<!-- Custom PHPCS sniffs and their fixtures follow PHPCS naming/structure, not the WooCommerce ruleset. -->
+	<exclude-pattern>tests/Tools/phpcs/</exclude-pattern>
 
 	<!-- Only check PHP files. -->
 	<arg name="extensions" value="php" />
@@ -43,6 +45,13 @@
 
 	<!-- Rules -->
 	<rule ref="WooCommerce-Core" />
+
+	<!-- Local sniff: flag `%i` SQL identifier placeholders in wpdb::prepare() that aren't guarded by
+	     wpdb::has_cap( 'identifier_placeholders' ). Trusted identifiers should be interpolated directly. -->
+	<rule ref="tests/Tools/phpcs/WooCommerceInternal/Sniffs/DB/IdentifierPlaceholderSniff.php">
+		<include-pattern>src/</include-pattern>
+		<include-pattern>includes/</include-pattern>
+	</rule>
 
 	<rule ref="WooCommerce.Functions.InternalInjectionMethod">
 		<include-pattern>src/</include-pattern>
