@@ -7,9 +7,9 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\POS\StoreApi\Routes;
 
-use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
+use Automattic\WooCommerce\StoreApi\Utilities\ApplyCouponTrait;
 
 /**
  * POS cart/apply-coupon route.
@@ -28,6 +28,7 @@ use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
  */
 class CartApplyCoupon extends AbstractCartRoute {
 
+	use ApplyCouponTrait;
 	use PosRouteTrait;
 
 	/**
@@ -94,24 +95,15 @@ class CartApplyCoupon extends AbstractCartRoute {
 	/**
 	 * Handle the request and return a valid response for this endpoint.
 	 *
-	 * Mirrors the web cart/apply-coupon handler.
+	 * The coupon application is the shared web pipeline (ApplyCouponTrait);
+	 * only the response status differs.
 	 *
-	 * @throws RouteException When coupons are disabled or the coupon cannot be applied.
 	 * @param \WP_REST_Request $request Request object.
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		if ( ! wc_coupons_enabled() ) {
-			throw new RouteException( 'woocommerce_rest_cart_coupon_disabled', esc_html__( 'Coupons are disabled.', 'woocommerce' ), 404 );
-		}
-
-		$coupon_code = wc_format_coupon_code( wp_unslash( $request['code'] ) );
-
-		// apply_coupon() throws RouteException on failure, which the route
-		// dispatch converts to the error response (the web route's extra
-		// WC_REST_Exception catch is dead code per static analysis).
-		$this->cart_controller->apply_coupon( $coupon_code );
+		$this->apply_coupon_from_request( $request );
 
 		$response = rest_ensure_response( $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() ) );
 		$response->set_status( 201 );

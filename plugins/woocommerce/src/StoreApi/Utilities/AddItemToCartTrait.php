@@ -45,7 +45,8 @@ trait AddItemToCartTrait {
 		 *
 		 * @since 8.8.0
 		 *
-		 * @param array $add_to_cart_data An array of cart item data.
+		 * @param array            $add_to_cart_data An array of cart item data.
+		 * @param \WP_REST_Request $request          Full details about the request.
 		 * @return array
 		 */
 		$add_to_cart_data = apply_filters(
