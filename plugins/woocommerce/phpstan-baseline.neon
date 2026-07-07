@@ -38848,21 +38848,15 @@ parameters:
 			path: src/Admin/API/OnboardingProductTypes.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingProducts\:\:create_products\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingProducts.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingProducts\:\:create_products\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/OnboardingProducts.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingProducts\:\:create_products\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_REST_Response\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingProducts\:\:create_products\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_REST_Response\.$#'
 			identifier: return.type
-			count: 2
+			count: 1
 			path: src/Admin/API/OnboardingProducts.php
 
 		-
@@ -38884,7 +38878,7 @@ parameters:
 			path: src/Admin/API/OnboardingProducts.php
 
 		-
-			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Data_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 88 on line 5$#'
+			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Data_Controller\)\: Unexpected token "\\n \* ", expected ''\<'' at offset 90 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: src/Admin/API/OnboardingProducts.php
@@ -46636,18 +46630,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/Tasks/Payments.php
 
 		-
-			message: '#^Call to method get_id\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
-			message: '#^Call to method get_meta\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
 			message: '#^Call to method get_status\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
@@ -46680,12 +46662,6 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$product of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:maybe_set_has_product_transient\(\) expects Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
-			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:is_valid_product\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
 
@@ -49304,30 +49280,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Autoloader.php
-
-		-
-			message: '#^Cannot call method date\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Blocks/AIContent/UpdateProducts.php
-
-		-
-			message: '#^Parameter \#1 \$price of method WC_Product\:\:set_price\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/AIContent/UpdateProducts.php
-
-		-
-			message: '#^Parameter \#1 \$price of method WC_Product\:\:set_regular_price\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/AIContent/UpdateProducts.php
-
-		-
-			message: '#^Parameter \#1 \$var of function count expects array\|Countable, array\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Blocks/AIContent/UpdateProducts.php
 
 		-
 			message: '#^Default value of the parameter \#1 \$classes \(string\) of method Automattic\\WooCommerce\\Blocks\\Assets\:\:add_theme_admin_body_class\(\) is incompatible with type array\.$#'
@@ -56984,7 +56936,6 @@ parameters:
 			identifier: offsetAccess.notFound
 			count: 1
 			path: src/Internal/Admin/Logging/LogHandlerFileV2.php
-
 
 		-
 			message: '#^Call to protected method prepare_column_headers\(\) of class WC_Admin_Log_Table_List\.$#'
