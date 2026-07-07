@@ -13,7 +13,7 @@ declare( strict_types=1 );
 
 defined( 'ABSPATH' ) || exit;
 
-// This plugin is only mounted by .wp-env.json for E2E test environments — it does not ship
+// This plugin is only mounted by .wp-env.test.json for E2E test environments — it does not ship
 // in any production WooCommerce build. REST permission callbacks still enforce manage_options.
 
 define( 'WC_EMAIL_TEMPLATE_SYNC_TEST_HELPER_DIR', plugin_dir_path( __FILE__ ) );

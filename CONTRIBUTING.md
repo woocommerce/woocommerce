@@ -75,7 +75,7 @@ pnpm --filter='@woocommerce/plugin-woocommerce' watch:build
 # PHP unit tests (requires wp-env)
 cd plugins/woocommerce
 # Start the test environment
-pnpm env:dev
+pnpm env:test
 # Run all PHP unit tests
 pnpm test:unit:env
 # Run a specific test class
@@ -86,7 +86,7 @@ pnpm test:unit:env:watch
 # E2E tests (requires Docker)
 cd plugins/woocommerce
 # Start the E2E environment
-pnpm env:start
+pnpm env:test
 # Run Playwright E2E tests
 pnpm test:e2e
 

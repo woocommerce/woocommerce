@@ -375,7 +375,9 @@ final class RenewalEngine {
 	 * @return BillingPolicy|null The billing policy, or null when unresolvable.
 	 */
 	private function resolve_billing_policy( Contract $contract ): ?BillingPolicy {
-		$snapshot = $this->contracts->find_plan_snapshot( $contract->get_plan_snapshot_id() );
+		// The full contract reads already carry the snapshot; the store fetch is the
+		// fallback for a contract built on a lean path (row-only reads).
+		$snapshot = $contract->get_plan_snapshot() ?? $this->contracts->find_plan_snapshot( $contract->get_plan_snapshot_id() );
 		if ( $snapshot instanceof PlanSnapshot ) {
 			$payload = $snapshot->to_array();
 			if ( isset( $payload['billing_policy'] ) && is_array( $payload['billing_policy'] ) ) {
@@ -718,7 +720,23 @@ final class RenewalEngine {
 			$contract->set_next_payment_gmt( $cycle->get_ends_at_gmt() );
 			$contract->set_last_payment_gmt( null !== $paid_at ? gmdate( 'Y-m-d H:i:s', $paid_at->getTimestamp() ) : $now );
 			$contract->set_last_attempt_gmt( $now );
-			$this->contracts->update( $contract );
+			// Conditioned on the ACTIVE status this settle read: a lifecycle transition
+			// that landed mid-settle (a customer cancel) must not be clobbered by this
+			// schedule advance - the cycle outcome above already landed either way.
+			if ( ! $this->contracts->update_if_status( $contract, ContractStatus::ACTIVE ) ) {
+				wc_get_logger()->info(
+					sprintf( 'RenewalEngine: contract %d transitioned during settle; schedule advance skipped.', (int) $contract->get_id() ),
+					array(
+						'source'      => self::LOG_SOURCE,
+						'contract_id' => (int) $contract->get_id(),
+					)
+				);
+
+				// The action below announces "billed AND schedule advanced"; the advance
+				// did not persist, so do not hand listeners the unpersisted in-memory
+				// entity. The order + billed cycle rows carry the charge for audit.
+				return;
+			}
 
 			/**
 			 * Fires after a renewal cycle is billed and the contract schedule advanced.
@@ -742,7 +760,9 @@ final class RenewalEngine {
 			$cycle->set_claimed_until_gmt( null );
 
 			$contract->set_last_attempt_gmt( $now );
-			$this->contracts->update( $contract );
+			// Conditioned like the billed branch: bookkeeping only, never worth
+			// clobbering a concurrent lifecycle transition for.
+			$this->contracts->update_if_status( $contract, ContractStatus::ACTIVE );
 
 			return;
 		}
@@ -756,7 +776,9 @@ final class RenewalEngine {
 		}
 
 		$contract->set_last_attempt_gmt( $now );
-		$this->contracts->update( $contract );
+		// Conditioned like the billed branch: bookkeeping only, never worth clobbering
+		// a concurrent lifecycle transition for.
+		$this->contracts->update_if_status( $contract, ContractStatus::ACTIVE );
 	}
 
 	/**
@@ -1062,7 +1084,9 @@ final class RenewalEngine {
 			}
 
 			$contract->set_next_payment_gmt( null );
-			$this->contracts->update( $contract );
+			// Conditioned on the status just read: a lifecycle transition racing the
+			// park must not be clobbered - the contract is out of the due set either way.
+			$this->contracts->update_if_status( $contract, $contract->get_status() );
 		} catch ( Throwable $e ) {
 			wc_get_logger()->error(
 				sprintf( 'RenewalEngine::park(): failed to park contract %d - %s', $contract_id, $e->getMessage() ),
