@@ -15169,12 +15169,6 @@ parameters:
 			path: includes/class-wc-shortcodes.php
 
 		-
-			message: '#^Cannot access property \$post_status on WP_Post\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-shortcodes.php
-
-		-
 			message: '#^Cannot access property \$post_type on WP_Post\|null\.$#'
 			identifier: property.nonObject
 			count: 1
