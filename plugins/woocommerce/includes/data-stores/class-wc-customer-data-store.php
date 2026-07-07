@@ -398,9 +398,9 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			if ( $this->is_cot_in_use() ) {
+				$orders_table  = OrdersTableDataStore::get_orders_table_name();
 				$sql           = $wpdb->prepare(
-					"SELECT id FROM %i WHERE customer_id = %d AND status IN $order_statuses_sql ORDER BY id DESC LIMIT 1",
-					OrdersTableDataStore::get_orders_table_name(),
+					"SELECT id FROM {$orders_table} WHERE customer_id = %d AND status IN $order_statuses_sql ORDER BY id DESC LIMIT 1",
 					$customer_id
 				);
 				$last_order_id = $wpdb->get_var( $sql );
@@ -459,12 +459,12 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			if ( $this->is_cot_in_use() ) {
-				$sql   = $wpdb->prepare(
-					"SELECT COUNT(id) FROM %i WHERE customer_id = %d AND status IN $order_statuses_sql",
-					OrdersTableDataStore::get_orders_table_name(),
+				$orders_table = OrdersTableDataStore::get_orders_table_name();
+				$sql          = $wpdb->prepare(
+					"SELECT COUNT(id) FROM {$orders_table} WHERE customer_id = %d AND status IN $order_statuses_sql",
 					$customer_id
 				);
-				$count = $wpdb->get_var( $sql );
+				$count        = $wpdb->get_var( $sql );
 			} else {
 				$count = $wpdb->get_var(
 					"SELECT COUNT(*)
@@ -516,9 +516,9 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			if ( $this->is_cot_in_use() ) {
-				$sql = $wpdb->prepare(
-					"SELECT SUM(total_amount) FROM %i WHERE customer_id = %d AND status IN $statuses_sql",
-					OrdersTableDataStore::get_orders_table_name(),
+				$orders_table = OrdersTableDataStore::get_orders_table_name();
+				$sql          = $wpdb->prepare(
+					"SELECT SUM(total_amount) FROM {$orders_table} WHERE customer_id = %d AND status IN $statuses_sql",
 					$customer_id
 				);
 			} else {

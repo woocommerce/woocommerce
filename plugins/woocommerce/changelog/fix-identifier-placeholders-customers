@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Interpolate the trusted orders table name directly instead of using the `%i` placeholder in the customer data store and customer search service, so these queries stay valid on database layers that run on a supported WordPress version but don't implement `%i`.
