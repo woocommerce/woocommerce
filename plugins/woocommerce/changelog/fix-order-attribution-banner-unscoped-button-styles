@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Scope the order attribution install banner button styles to the banner, so they no longer center the content of every icon+text components button rendered on WooCommerce admin pages.

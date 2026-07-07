@@ -17,10 +17,13 @@ permissions: {}
 concurrency:
   group: release-wporg-svn
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   get-and-validate-release-asset:
     name: Get intended release details
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     permissions:
       contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
     outputs:
@@ -158,7 +161,7 @@ jobs:
 
   commit:
     name: Commit release to WordPress.org
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     needs: [get-and-validate-release-asset]
     if: ${{ github.repository == 'woocommerce/woocommerce' }}
     permissions:

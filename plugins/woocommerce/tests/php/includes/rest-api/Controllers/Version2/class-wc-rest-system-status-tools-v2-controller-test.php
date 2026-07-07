@@ -145,4 +145,83 @@ class WC_REST_System_Status_Tools_V2_Controller_Test extends WC_REST_Unit_Test_C
 		$prefix_after = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
 		$this->assertNotEquals( $prefix_before, $prefix_after, 'Cache prefix should have changed after invalidation' );
 	}
+
+	/**
+	 * @testdox Product lookup table regeneration status is shown alongside the matching tool.
+	 */
+	public function test_get_tools_shows_product_lookup_table_regeneration_status() {
+		as_unschedule_all_actions( '', array(), 'wc_update_product_lookup_tables' );
+
+		// The status link text depends on whether WP-Cron is disabled, which it is in the
+		// test environment. Pin it so the assertions are deterministic rather than environment-dependent.
+		\Automattic\Jetpack\Constants::set_constant( 'DISABLE_WP_CRON', false );
+
+		try {
+			WC()->queue()->schedule_single(
+				time() + HOUR_IN_SECONDS,
+				'wc_update_product_lookup_tables_column',
+				array(
+					'column' => 'min_max_price',
+				),
+				'wc_update_product_lookup_tables'
+			);
+
+			$tools = $this->endpoint->get_tools();
+			$tool  = $tools['regenerate_product_lookup_tables'];
+
+			$this->assertTrue( $tool['requires_refresh'] );
+			$this->assertTrue( $tool['disabled'] );
+			$this->assertEquals( 'Regenerating in progress', $tool['button'] );
+			$this->assertStringContainsString( 'View progress', $tool['status_text'] );
+			$this->assertStringContainsString( 'wc_update_product_lookup_tables', $tool['status_text'] );
+			$this->assertStringNotContainsString( 'dashicons-update', $tool['status_text'] );
+
+			// When WP-Cron is disabled the link nudges to the queued updates instead.
+			\Automattic\Jetpack\Constants::set_constant( 'DISABLE_WP_CRON', true );
+			$tool = $this->endpoint->get_tools()['regenerate_product_lookup_tables'];
+			$this->assertStringContainsString( 'View queued updates', $tool['status_text'] );
+		} finally {
+			\Automattic\Jetpack\Constants::clear_single_constant( 'DISABLE_WP_CRON' );
+			as_unschedule_all_actions( '', array(), 'wc_update_product_lookup_tables' );
+		}
+	}
+
+	/**
+	 * @testdox Thumbnail regeneration status is shown alongside the matching tool.
+	 */
+	public function test_get_tools_shows_thumbnail_regeneration_status() {
+		$background_process_property = new ReflectionProperty( WC_Regenerate_Images::class, 'background_process' );
+		$background_process_property->setAccessible( true );
+		$original_background_process = $background_process_property->getValue();
+
+		$background_process_property->setValue(
+			null,
+			new class() {
+				/**
+				 * Simulate a non-empty thumbnail regeneration queue.
+				 *
+				 * @return bool
+				 */
+				public function is_running() {
+					return false;
+				}
+			}
+		);
+
+		try {
+			$tools = $this->endpoint->get_tools();
+			$tool  = $tools['regenerate_thumbnails'];
+
+			$this->assertTrue( $tool['requires_refresh'] );
+			$this->assertTrue( $tool['disabled'] );
+			$this->assertEquals( 'Regenerating in progress', $tool['button'] );
+			$this->assertStringContainsString( '>Cancel</a>', $tool['status_text'] );
+			$this->assertStringContainsString( 'aria-label="Cancel thumbnail regeneration"', $tool['status_text'] );
+			$this->assertStringContainsString( 'class="button button-large"', $tool['status_text'] );
+			$this->assertStringContainsString( 'wc-hide-notice=regenerating_thumbnails', $tool['status_text'] );
+			$this->assertStringNotContainsString( 'dashicons-update', $tool['status_text'] );
+		} finally {
+			$background_process_property->setValue( null, $original_background_process );
+		}
+	}
 }

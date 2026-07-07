@@ -3,7 +3,9 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFeed\Storage;
 
+use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedLockException;
 use Automattic\WooCommerce\Internal\ProductFeed\Storage\JsonFileFeed;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 
 // This file works directly with local files. That's fine.
 // phpcs:disable WordPress.WP.AlternativeFunctions
@@ -17,6 +19,8 @@ if ( ! function_exists( 'WP_Filesystem' ) ) {
  * JsonFileFeedTest class.
  */
 class JsonFileFeedTest extends \WC_Unit_Test_Case {
+	use LoggerSpyTrait;
+
 	/**
 	 * Clean up test fixtures.
 	 */
@@ -38,19 +42,16 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 		$feed->start();
 		$feed->end();
 
-		// The file should be in `/tmp` at first.
+		// The file is written directly into the shared uploads directory.
 		$path = $feed->get_file_path();
-		$this->assertStringStartsWith( get_temp_dir(), $path );
+		$this->assertStringContainsString( 'uploads/product-feeds', $path );
 		$this->assertStringContainsString( gmdate( 'Y-m-d', $current_time ), $path );
 		$this->assertStringContainsString( wp_hash( 'test-feed' . gmdate( 'r', $current_time ) ), $path );
 		$this->assertTrue( file_exists( $path ) );
 		$this->assertEquals( '[]', file_get_contents( $path ) );
 
-		// Once a URL is retrieved, the file will be moved to the uploads dir.
-		$url   = $feed->get_file_url();
-		$path2 = $feed->get_file_path();
+		$url = $feed->get_file_url();
 		$this->assertNotNull( $url );
-		$this->assertStringContainsString( 'uploads/product-feeds', $path2 );
 		$this->assertStringEndsWith( '.json', (string) $url );
 		$this->assertStringContainsString( '/product-feeds/', (string) $url );
 	}
@@ -81,6 +82,162 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 			wp_json_encode( $data ),
 			file_get_contents( $feed->get_file_path() )
 		);
+	}
+
+	/**
+	 * Test that a feed written across chunks (start fresh, flush, resume, end) produces a single
+	 * valid JSON array.
+	 */
+	public function test_chunked_feed_produces_valid_json_across_chunks() {
+		$chunk_one = array(
+			array( 'name' => 'First' ),
+			array( 'name' => 'Second' ),
+		);
+		$chunk_two = array(
+			array( 'name' => 'Third' ),
+		);
+
+		// First chunk: start the feed and write some entries, then flush (do not end).
+		$feed       = new JsonFileFeed( 'test-feed' );
+		$identifier = $feed->open();
+		foreach ( $chunk_one as $entry ) {
+			$feed->add_entry( $entry );
+		}
+		$entries_written = $feed->get_entry_count();
+		$feed->flush();
+
+		// Second (final) chunk: a fresh instance resumes the same feed and ends it, mirroring how a
+		// subsequent Action Scheduler action would run in its own process.
+		$feed_two = new JsonFileFeed( 'test-feed' );
+		$feed_two->open( $identifier, $entries_written );
+		foreach ( $chunk_two as $entry ) {
+			$feed_two->add_entry( $entry );
+		}
+		$feed_two->end();
+
+		$path = $feed_two->get_file_path();
+		$this->assertNotNull( $path );
+		$this->assertSame(
+			wp_json_encode( array_merge( $chunk_one, $chunk_two ) ),
+			file_get_contents( $path )
+		);
+	}
+
+	/**
+	 * Test that a chunked feed whose first chunk wrote no entries still produces a valid JSON array.
+	 */
+	public function test_chunked_feed_handles_empty_first_chunk() {
+		$feed       = new JsonFileFeed( 'test-feed' );
+		$identifier = $feed->open();
+		$feed->flush();
+
+		$feed_two = new JsonFileFeed( 'test-feed' );
+		$feed_two->open( $identifier, 0 );
+		$feed_two->add_entry( array( 'name' => 'Only' ) );
+		$feed_two->end();
+
+		$this->assertSame(
+			wp_json_encode( array( array( 'name' => 'Only' ) ) ),
+			file_get_contents( $feed_two->get_file_path() )
+		);
+	}
+
+	/**
+	 * Test that open() resumes an existing partial feed by reusing its identifier, and throws when the
+	 * partial file is missing rather than appending to a non-existent file.
+	 */
+	public function test_open_resumes_existing_feed_and_throws_when_missing() {
+		// Resuming a just-created feed reuses the same identifier.
+		$feed       = new JsonFileFeed( 'test-feed' );
+		$identifier = $feed->open();
+		$feed->flush();
+
+		$feed_two = new JsonFileFeed( 'test-feed' );
+		$this->assertSame( $identifier, $feed_two->open( $identifier ) );
+		$feed_two->flush();
+
+		// Resuming a feed that no longer exists throws.
+		$this->expectException( \Exception::class );
+		( new JsonFileFeed( 'test-feed' ) )->open( 'does-not-exist.json' );
+	}
+
+	/**
+	 * @testdox Should throw when another process already holds the feed file lock, so overlapping writes cannot interleave.
+	 */
+	public function test_open_throws_when_feed_file_is_locked_by_another_process() {
+		$feed       = new JsonFileFeed( 'test-feed' );
+		$identifier = $feed->open();
+
+		$feed_two = new JsonFileFeed( 'test-feed' );
+
+		try {
+			$this->expectException( FeedLockException::class );
+			$feed_two->open( $identifier );
+		} finally {
+			$feed->flush();
+		}
+	}
+
+	/**
+	 * @testdox Should let a later process write the feed once the previous process releases the lock.
+	 */
+	public function test_open_succeeds_after_feed_file_lock_is_released() {
+		$feed       = new JsonFileFeed( 'test-feed' );
+		$identifier = $feed->open();
+		$feed->flush();
+
+		$feed_two = new JsonFileFeed( 'test-feed' );
+		$this->assertSame(
+			$identifier,
+			$feed_two->open( $identifier ),
+			'A resumed feed should acquire the lock once the previous holder released it.'
+		);
+		$feed_two->flush();
+	}
+
+	/**
+	 * Test that delete removes a partial feed file.
+	 */
+	public function test_delete_removes_partial_feed_file() {
+		$feed       = new JsonFileFeed( 'test-feed' );
+		$identifier = $feed->open();
+		$feed->flush();
+
+		$path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier;
+		$this->assertTrue( file_exists( $path ) );
+
+		$feed->delete( $identifier );
+		$this->assertFalse( file_exists( $path ) );
+	}
+
+	/**
+	 * Test that resuming with an identifier that is actually a path (traversal attempt) is rejected
+	 * rather than opening a file outside the feed directory.
+	 */
+	public function test_open_rejects_resume_identifier_with_path() {
+		$this->expectException( \Exception::class );
+		( new JsonFileFeed( 'test-feed' ) )->open( '../escape.json' );
+	}
+
+	/**
+	 * Test that delete() ignores an identifier containing a path, so it cannot remove a file outside
+	 * the feed directory, while a plain identifier still deletes normally.
+	 */
+	public function test_delete_ignores_identifier_with_path() {
+		$feed       = new JsonFileFeed( 'test-feed' );
+		$identifier = $feed->open();
+		$feed->flush();
+
+		$path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier;
+		$this->assertTrue( file_exists( $path ) );
+
+		// An identifier that resolves back to the same file via a parent path must be rejected.
+		$feed->delete( '../' . JsonFileFeed::UPLOAD_DIR . '/' . $identifier );
+		$this->assertTrue( file_exists( $path ), 'A traversal identifier must not delete the file.' );
+
+		// The plain identifier still deletes.
+		$feed->delete( $identifier );
+		$this->assertFalse( file_exists( $path ) );
 	}
 
 	/**
@@ -268,6 +425,70 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 			file_get_contents( $directory . '/.htaccess' ),
 			'Custom .htaccess content must be preserved, not overwritten by the refresh.'
 		);
+	}
+
+	/**
+	 * @testdox Should leave the feed directory alone when it has no .htaccess.
+	 */
+	public function test_existing_feed_dir_without_htaccess_is_left_alone(): void {
+		// Directory exists but its .htaccess is missing (e.g. it was removed) — the is_file() === false case.
+		// A missing file is not a blocked feed, so the refresh must not create one.
+		$directory = wp_upload_dir()['basedir'] . '/product-feeds';
+		wp_mkdir_p( $directory );
+		if ( file_exists( $directory . '/.htaccess' ) ) {
+			unlink( $directory . '/.htaccess' );
+		}
+
+		$feed = new JsonFileFeed( 'test-feed' );
+		$feed->start();
+		$feed->end();
+		$feed->get_file_url();
+
+		$this->assertFileDoesNotExist(
+			$directory . '/.htaccess',
+			'A missing .htaccess must be left alone, not created by the refresh.'
+		);
+	}
+
+	/**
+	 * @testdox Should log a warning when an existing legacy .htaccess cannot be overwritten.
+	 */
+	public function test_logs_warning_when_htaccess_cannot_be_written(): void {
+		// Redirect uploads to a container-local path: wp-env's bind-mounted uploads ignore chmod,
+		// so the read-only legacy file must live where file permissions are actually enforced.
+		$base     = get_temp_dir() . uniqid( 'wc-feed-perms-', true );
+		$feed_dir = $base . '/product-feeds';
+		$htaccess = $feed_dir . '/.htaccess';
+		mkdir( $feed_dir, 0755, true );
+		file_put_contents( $htaccess, 'deny from all' );
+		chmod( $htaccess, 0444 );
+
+		$filter = function ( $dir ) use ( $base ) {
+			$dir['basedir'] = $base;
+			$dir['baseurl'] = 'http://example.test/uploads';
+			$dir['error']   = false;
+			return $dir;
+		};
+		add_filter( 'upload_dir', $filter );
+
+		try {
+			$feed = new JsonFileFeed( 'test-feed' );
+			$feed->start();
+			$feed->end();
+			$feed->get_file_url();
+
+			$this->assertLogged(
+				'warning',
+				'Could not update the product feed .htaccess',
+				array( 'source' => 'product-feed' )
+			);
+		} finally {
+			remove_filter( 'upload_dir', $filter );
+			chmod( $htaccess, 0644 );
+			global $wp_filesystem;
+			WP_Filesystem();
+			$wp_filesystem->rmdir( $base, true );
+		}
 	}
 
 	/**

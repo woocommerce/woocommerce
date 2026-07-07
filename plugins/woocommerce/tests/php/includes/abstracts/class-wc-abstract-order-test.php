@@ -18,9 +18,22 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
+	 * Post statuses registered during a test, to clean up on tear down.
+	 *
+	 * @var string[]
+	 */
+	private $registered_order_statuses = array();
+
+	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
+		// register_post_status() mutates the global registry, which WP_UnitTestCase does not restore.
+		foreach ( $this->registered_order_statuses as $status ) {
+			unset( $GLOBALS['wp_post_statuses'][ $status ] );
+		}
+		$this->registered_order_statuses = array();
+
 		parent::tearDown();
 		$this->disable_cogs_feature();
 	}
@@ -622,6 +635,86 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_taxes persists cart and shipping tax totals as order tax items, and updates existing items in-place on a second call.
+	 */
+	public function test_update_taxes_persists_cart_and_shipping_tax_totals(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// German standard 19% non-compound VAT rate.
+		$tax_rate    = array(
+			'tax_rate_country'  => 'DE',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '19.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = new WC_Order();
+
+		// Line item carrying $1.00 cart tax for the rate.
+		// WC_Order_Item_Product::set_taxes() requires both 'total' and 'subtotal' to be non-empty.
+		$line_item = new WC_Order_Item_Product();
+		$line_item->set_product( $product );
+		$line_item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => '1.00' ),
+				'subtotal' => array( $tax_rate_id => '1.00' ),
+			)
+		);
+		$order->add_item( $line_item );
+
+		// Shipping item carrying $0.50 shipping tax for the rate.
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_taxes( array( 'total' => array( $tax_rate_id => '0.50' ) ) );
+		$order->add_item( $shipping_item );
+
+		$order->save();
+		$order->update_taxes();
+
+		$tax_items = $order->get_taxes();
+		$this->assertCount( 1, $tax_items );
+
+		/** @var WC_Order_Item_Tax $tax_item */
+		$tax_item = reset( $tax_items );
+		// Confirm the German 19% VAT rate is correctly associated with the tax item.
+		$this->assertSame( 19.0, (float) $tax_item->get_rate_percent() );
+		// Cart and shipping taxes are accumulated from line items and persisted on the tax item.
+		$this->assertSame( 1.00, (float) $tax_item->get_tax_total() );
+		$this->assertSame( 0.50, (float) $tax_item->get_shipping_tax_total() );
+		// Order-level totals are rolled up from all tax items.
+		$this->assertSame( 1.00, (float) $order->get_cart_tax() );
+		$this->assertSame( 0.50, (float) $order->get_shipping_tax() );
+
+		// Second call: update line item taxes and verify existing tax item is updated in-place, not duplicated.
+		foreach ( $order->get_items() as $item ) {
+			if ( $item instanceof WC_Order_Item_Product ) {
+				$item->set_taxes(
+					array(
+						'total'    => array( $tax_rate_id => '2.00' ),
+						'subtotal' => array( $tax_rate_id => '2.00' ),
+					)
+				);
+				$item->save();
+			}
+		}
+
+		$order->update_taxes();
+
+		$tax_items_after = $order->get_taxes();
+		$this->assertCount( 1, $tax_items_after, 'update_taxes() must update the existing tax item, not create a duplicate.' );
+
+		$tax_item_after = reset( $tax_items_after );
+		$this->assertSame( 2.00, (float) $tax_item_after->get_tax_total() );
+		$this->assertSame( 0.50, (float) $tax_item_after->get_shipping_tax_total() );
+	}
+
+	/**
 	 * Get an order object with a fixed total COGS value.
 	 *
 	 * @return WC_Order
@@ -914,5 +1007,57 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		} finally {
 			remove_filter( 'woocommerce_order_type_to_group', $adjust );
 		}
+	}
+
+	/**
+	 * Register a custom order status so it survives set_status() and is prefixed on save.
+	 *
+	 * Registers it in the valid order statuses (so set_status keeps it) and as a post status
+	 * (so get_post_status adds the wc- prefix, which is what pushes it over the column limit).
+	 *
+	 * @param string $status Unprefixed order status key.
+	 */
+	private function register_custom_order_status( string $status ): void {
+		$prefixed = 'wc-' . $status;
+
+		add_filter(
+			'wc_order_statuses',
+			function ( $statuses ) use ( $prefixed ) {
+				$statuses[ $prefixed ] = 'Custom status for testing';
+				return $statuses;
+			}
+		);
+		register_post_status( $prefixed );
+		$this->registered_order_statuses[] = $prefixed;
+	}
+
+	/**
+	 * @testdox Should warn when an order is saved with a status that exceeds the storage limit.
+	 */
+	public function test_saving_an_order_with_a_too_long_status_warns() {
+		$this->setExpectedIncorrectUsage( 'Abstract_WC_Order_Data_Store_CPT::get_post_status' );
+
+		// 'wc-' + 18 characters = 21, one over the 20-character storage limit.
+		$status = str_repeat( 'a', 18 );
+		$this->register_custom_order_status( $status );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( $status );
+		$order->save();
+	}
+
+	/**
+	 * @testdox Should not warn when an order is saved with a status at the storage limit.
+	 */
+	public function test_saving_an_order_with_a_status_at_the_limit_does_not_warn() {
+		// 'wc-' + 17 characters = 20, exactly the storage limit.
+		$status = str_repeat( 'a', 17 );
+		$this->register_custom_order_status( $status );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( $status );
+		$order->save();
+
+		$this->assertSame( $status, wc_get_order( $order->get_id() )->get_status() );
 	}
 }

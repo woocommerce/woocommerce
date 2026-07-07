@@ -132,10 +132,20 @@ class Autoloader {
 	 *
 	 * Registration is idempotent: at most one handler is ever added per request.
 	 *
+	 * Degrades to null (nothing registered) if the Composer files are unavailable or a
+	 * foreign/malformed `ClassLoader` shape is present. The handler likewise leaves a class
+	 * unresolved — rather than fataling — if a resolved file is torn/unparseable mid-upgrade,
+	 * so a defensive `class_exists()` probe during an upgrade gets `false` instead of an error.
+	 * The failed attempt stays retryable: the handler records only the files it has executed
+	 * cleanly, so once the upgrade finishes writing a file that previously failed to parse,
+	 * link, or run, a later probe in the same request re-attempts and loads it. It never
+	 * re-executes a path it already loaded (an uncatchable "Cannot redeclare class" fatal);
+	 * it cannot, however, guard the first execution of a file that declares a class already
+	 * loaded elsewhere under a non-matching PSR-4 path.
+	 *
 	 * @since 11.0.0
 	 *
-	 * @return \Closure|null The registered autoloader, or null if the Composer files are
-	 *                       unavailable (nothing was registered).
+	 * @return \Closure|null The registered autoloader, or null if no fallback was registered.
 	 */
 	public static function register_woocommerce_psr4_fallback(): ?\Closure {
 		static $registered_handler = null;
@@ -150,16 +160,110 @@ class Autoloader {
 		// rebuilds a throwaway loader per miss from this captured map (for performance — the map
 		// is read once, not on every miss). Do NOT collapse this into a shared loader or a per-miss
 		// build() call: either reintroduces the negative-cache bug the fresh-per-miss design avoids.
-		$availability_probe = self::build_woocommerce_psr4_fallback();
-		if ( null === $availability_probe ) {
+		//
+		// A foreign/malformed ClassLoader shape must degrade to "no fallback" rather than fatal the
+		// bootstrap — matching build()'s own contract. The guard is twofold, because the map reaches
+		// find_scoped_file()'s `array $psr4_entries` parameter on every miss, outside the handler's
+		// own try/catch: the try/catch here handles a getPrefixesPsr4() that THROWS, and
+		// read_scoped_psr4_map() handles one that RETURNS a non-array (the method carries no
+		// return-type declaration, so an older/foreign loader can) — which would otherwise raise an
+		// uncatchable TypeError on the first autoload miss.
+		try {
+			$availability_probe = self::build_woocommerce_psr4_fallback();
+			if ( null === $availability_probe ) {
+				self::log_fallback_declined( 'the Composer files are unavailable or a foreign ClassLoader shape was rejected by build()' );
+				return null;
+			}
+			$psr4_entries = self::read_scoped_psr4_map( $availability_probe );
+			if ( null === $psr4_entries ) {
+				self::log_fallback_declined( 'getPrefixesPsr4() returned a non-array shape' );
+				return null;
+			}
+		} catch ( \Throwable $e ) {
+			self::log_fallback_declined( 'building the availability probe threw: ' . $e->getMessage() );
 			return null;
 		}
-		$psr4_entries = $availability_probe->getPrefixesPsr4();
 
 		$handler = static function ( string $class_name ) use ( $psr4_entries ) {
+			/*
+			 * Paths this handler has executed, so a repeated probe never re-runs a file:
+			 * - $loaded: includes that returned cleanly. Re-including one would redeclare its
+			 *   class — an UNCATCHABLE "Cannot redeclare class" fatal (e.g. a probe whose PSR-4
+			 *   file declares a different class name, then a second probe of the same path).
+			 * - $attempted: every path we have tried, success or failure. Used only to tell our
+			 *   own failed (and therefore retryable) attempt apart from a file some other loader
+			 *   already executed — see the get_included_files() check below.
+			 */
+			static $loaded    = array();
+			static $attempted = array();
+
 			$file = self::find_scoped_file( $class_name, $psr4_entries );
-			if ( null !== $file ) {
-				require_once $file;
+			if ( null === $file ) {
+				return;
+			}
+
+			$canonical = realpath( $file );
+			if ( false !== $canonical ) {
+				// Already executed cleanly by this handler: re-including would redeclare.
+				if ( isset( $loaded[ $canonical ] ) ) {
+					return;
+				}
+
+				/*
+				 * Executed by another mechanism (the primary autoloader, a manual require) but
+				 * never attempted by us: re-including risks the same redeclare fatal, so skip.
+				 * A path WE attempted and that threw is deliberately excluded from this check so
+				 * it stays retryable once the upgrade finishes writing it.
+				 */
+				if ( ! isset( $attempted[ $canonical ] ) && in_array( $canonical, get_included_files(), true ) ) {
+					return;
+				}
+				$attempted[ $canonical ] = true;
+			}
+
+			try {
+				/*
+				 * Deliberately a plain `include`, NOT `require_once`: the *_once variants record
+				 * a path in the engine's included-files table BEFORE compiling it, so a torn
+				 * file's caught error would mark the path included and every later attempt would
+				 * no-op — the completed file could never load for the rest of the request. A
+				 * plain include lets us record success ourselves (in $loaded, below) only after
+				 * it returns, so a file that fails to parse, link (e.g. a parent not yet written
+				 * mid-upgrade), or run stays retryable. A file that vanishes between findFile()
+				 * and here degrades to a warning plus a FALSE return, where require would fatal —
+				 * no Throwable reaches the catch below, so the return value is the only signal
+				 * that nothing was compiled or executed.
+				 */
+				$included = include $file;
+
+				// A false return means the include never OPENED the file (deleted/unreadable
+				// mid-upgrade): nothing ran, so re-including is safe and the path must stay
+				// retryable — recording it as loaded would skip the restored file for the
+				// rest of the request. A successful include of a src/ file never yields false
+				// (class files return 1; the odd config file returns an array), so false here
+				// always means the open failed.
+				if ( false !== $included && false !== $canonical ) {
+					$loaded[ $canonical ] = true;
+				}
+			} catch ( \Throwable $e ) {
+				/*
+				 * A torn/partially-written file mid-upgrade must not turn a class probe into a
+				 * fatal: leave the class unresolved so e.g. class_exists() returns false and the
+				 * request continues, instead of an uncatchable error escaping the autoload handler.
+				 * Surface it under WP_DEBUG so a genuine (non-upgrade) parse/link error in a
+				 * shipped src/ file is not an invisible miss.
+				 */
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+						sprintf(
+							'WooCommerce PSR-4 fallback could not load %1$s for %2$s: %3$s',
+							$file,
+							$class_name,
+							$e->getMessage()
+						)
+					);
+				}
+				return;
 			}
 		};
 
@@ -167,6 +271,84 @@ class Autoloader {
 		$registered_handler = $handler;
 
 		return $handler;
+	}
+
+	/**
+	 * Log, under WP_DEBUG only, why the PSR-4 fallback declined to register.
+	 *
+	 * When the fallback bails to "no fallback", the downstream "class not found" fatal an operator
+	 * eventually sees during an in-place upgrade carries no breadcrumb back to this decision — yet
+	 * that breadcrumb is the most useful signal in the system, since the fallback exists precisely
+	 * to prevent that fatal. Mirrors the WP_DEBUG error_log the registered handler already emits for
+	 * a caught autoload error.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param string $reason Human-readable reason the fallback was not registered.
+	 */
+	private static function log_fallback_declined( string $reason ): void {
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				'WooCommerce PSR-4 fallback not registered: ' . $reason
+			);
+		}
+	}
+
+	/**
+	 * Read the scoped PSR-4 prefix map out of a built fallback loader, degrading to null on any
+	 * non-array shape.
+	 *
+	 * {@see ClassLoader::getPrefixesPsr4()} carries no return-type declaration, so an older or
+	 * foreign `Composer\Autoload\ClassLoader` — one another plugin or wp-cli loaded from a
+	 * different path, then reused by {@see self::build_woocommerce_psr4_fallback()} — may return a
+	 * non-array. The registered handler passes this map straight into {@see self::find_scoped_file()},
+	 * whose `array $psr4_entries` parameter would raise an uncatchable TypeError on the first
+	 * autoload miss, outside the handler's own try/catch. Validating here keeps the fallback's
+	 * degrade-don't-fatal contract whole, mirroring the is_array() guard build() already applies to
+	 * the file-sourced map.
+	 *
+	 * @internal Public only so the unit tests can reach it; its sole production caller is
+	 *           {@see self::register_woocommerce_psr4_fallback()}.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param ClassLoader $loader A loader returned by build_woocommerce_psr4_fallback().
+	 *
+	 * @return array<string, list<string>>|null The scoped PSR-4 map, or null on a non-array shape.
+	 */
+	public static function read_scoped_psr4_map( ClassLoader $loader ): ?array {
+		$psr4_entries = $loader->getPrefixesPsr4();
+
+		return is_array( $psr4_entries ) ? $psr4_entries : null;
+	}
+
+	/**
+	 * Read a resolved file path out of a fallback loader's findFile(), degrading to null on any
+	 * non-string shape.
+	 *
+	 * The sibling of {@see self::read_scoped_psr4_map()}: {@see ClassLoader::findFile()} carries no
+	 * return-type declaration either, so the same older or foreign `Composer\Autoload\ClassLoader`
+	 * reused by {@see self::build_woocommerce_psr4_fallback()} may return a non-string. The caller,
+	 * {@see self::find_scoped_file()}, declares a `: ?string` return, so a non-string result would
+	 * raise an uncatchable TypeError at that return statement — which, on an autoload miss, runs
+	 * outside the registered handler's own try/catch, exactly the shape this fallback guards against
+	 * for getPrefixesPsr4(). Composer's own miss sentinel is `false`, which is not a string and so
+	 * degrades to null here, unchanged. Validating keeps the degrade-don't-fatal contract whole.
+	 *
+	 * @internal Public only so the unit tests can reach it; its sole production caller is
+	 *           {@see self::find_scoped_file()}.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param ClassLoader $loader     A loader built from the scoped PSR-4 map.
+	 * @param string      $class_name Fully-qualified class name to resolve.
+	 *
+	 * @return string|null The resolved absolute file path, or null on a miss or non-string shape.
+	 */
+	public static function read_scoped_file_path( ClassLoader $loader, string $class_name ): ?string {
+		$file = $loader->findFile( $class_name );
+
+		return is_string( $file ) ? $file : null;
 	}
 
 	/**
@@ -178,7 +360,8 @@ class Autoloader {
 	 * file is on disk. Building fresh here guarantees a class missed pre-swap resolves post-swap,
 	 * within the same request.
 	 *
-	 * @internal Public only so the registered autoload handler and the unit tests can drive it.
+	 * @internal Public only so the unit tests can reach it; in production only the registered
+	 *           autoload handler calls it.
 	 *
 	 * @param string                      $class_name   Fully-qualified class name.
 	 * @param array<string, list<string>> $psr4_entries Pre-scoped PSR-4 prefix => dirs map.
@@ -196,13 +379,14 @@ class Autoloader {
 			foreach ( $psr4_entries as $namespace => $paths ) {
 				$loader->setPsr4( $namespace, $paths );
 			}
-			$file = $loader->findFile( $class_name );
+
+			// read_scoped_file_path() guards findFile()'s untyped return: a non-string would
+			// otherwise TypeError against this method's `: ?string`, outside the handler's try/catch.
+			return self::read_scoped_file_path( $loader, $class_name );
 		} catch ( \Throwable $e ) {
 			// Foreign/malformed ClassLoader — miss rather than fatal the autoload path.
 			return null;
 		}
-
-		return false !== $file ? $file : null;
 	}
 
 	/**
