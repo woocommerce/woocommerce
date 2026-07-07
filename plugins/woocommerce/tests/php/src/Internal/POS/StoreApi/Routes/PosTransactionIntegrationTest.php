@@ -436,6 +436,28 @@ class PosTransactionIntegrationTest extends ControllerTestCase {
 	}
 
 	/**
+	 * An empty-cart fee would be stored but invisible in the response totals
+	 * (calculate_totals early-returns on empty carts) — the client would
+	 * re-send it and the customer would be double-charged later.
+	 *
+	 * @testdox add-fee rejects an empty cart.
+	 */
+	public function test_add_fee_rejects_empty_cart(): void {
+		wp_set_current_user( $this->operator_id );
+
+		$response = $this->dispatch_post(
+			'/cart/add-fee',
+			array(
+				'name'   => 'Too early',
+				'amount' => 5,
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_pos_rest_cart_empty', $response->get_data()['code'] );
+	}
+
+	/**
 	 * @testdox add-fee rejects non-finite amounts (1e400 casts to INF and passes numeric checks).
 	 */
 	public function test_add_fee_rejects_non_finite_amount(): void {

@@ -142,6 +142,15 @@ class CartAddFee extends AbstractCartRoute {
 			throw new RouteException( 'woocommerce_pos_rest_no_session', esc_html__( 'No transaction session is available.', 'woocommerce' ), 500 );
 		}
 
+		// Reject rather than store invisibly: WC_Cart::calculate_totals()
+		// early-returns on an empty cart and never applies fees, so the fee
+		// would be missing from the response totals — the client would
+		// reasonably re-send it under a fresh id, and both fees would spring
+		// into the totals with the first item, overcharging the customer.
+		if ( $this->cart_controller->get_cart_instance()->is_empty() ) {
+			throw new RouteException( 'woocommerce_pos_rest_cart_empty', esc_html__( 'Add items to the cart before adding a fee.', 'woocommerce' ), 400 );
+		}
+
 		( new CustomFeesStore( WC()->session ) )->add( $name, $amount, (bool) $request['taxable'], (string) $request['tax_class'], (string) ( $request['id'] ?? '' ) );
 
 		// Recalculate so the response cart includes the fee (CustomFeesPolicy
