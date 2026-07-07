@@ -7,9 +7,13 @@ import {
 	useInnerBlocksProps,
 	InspectorControls,
 } from '@wordpress/block-editor';
-import { PanelBody, RangeControl } from '@wordpress/components';
-import { Icon, trash } from '@wordpress/icons';
-import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
+import { PanelBody, RangeControl, Placeholder } from '@wordpress/components';
+import { Icon, trash, starEmpty } from '@wordpress/icons';
+import {
+	PLACEHOLDER_IMG_SRC,
+	getSettingWithCoercion,
+} from '@woocommerce/settings';
+import { isBoolean } from '@woocommerce/types';
 
 interface SavedForLaterAttributes {
 	columnCount: number;
@@ -81,6 +85,15 @@ const PREVIEW_ITEMS = [
 const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 	const { columnCount } = attributes;
 
+	// The block type stays registered when the `cart_save_for_later` feature is
+	// off (so content saved while it was on isn't flagged as an unsupported
+	// block). `experimentalCartSaveForLater` mirrors that feature in wcSettings.
+	const isFeatureEnabled = getSettingWithCoercion(
+		'experimentalCartSaveForLater',
+		false,
+		isBoolean
+	);
+
 	const blockProps = useBlockProps( {
 		className: 'wc-block-saved-for-later',
 	} );
@@ -94,6 +107,23 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 		{ className: 'wc-block-saved-for-later__header' },
 		{ template: TEMPLATE }
 	);
+
+	// Nothing to preview when the feature is off — show a short notice instead
+	// of the sample list, so a persisted block doesn't look like a real one.
+	if ( ! isFeatureEnabled ) {
+		return (
+			<div { ...blockProps }>
+				<Placeholder
+					icon={ <Icon icon={ starEmpty } /> }
+					label={ __( 'Saved for later', 'woocommerce' ) }
+					instructions={ __(
+						'The "Save for Later in Cart" feature is off, so this block will not appear on your store. Enable it under WooCommerce → Settings → Advanced → Features.',
+						'woocommerce'
+					) }
+				/>
+			</div>
+		);
+	}
 
 	return (
 		<>
