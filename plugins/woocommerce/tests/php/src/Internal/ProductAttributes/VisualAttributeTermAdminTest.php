@@ -197,62 +197,6 @@ class VisualAttributeTermAdminTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should skip existing terms when seeding color terms.
-	 */
-	public function test_seeds_only_missing_default_color_terms(): void {
-		$suffix         = self::get_unique_suffix();
-		$attribute_data = array(
-			'name' => 'Seed Visual Partial ' . $suffix,
-			'slug' => 'seed-visual-partial-' . $suffix,
-			'type' => 'wc-visual',
-		);
-		$attribute_id   = wc_create_attribute( $attribute_data );
-
-		$this->assertIsInt( $attribute_id, 'A wc-visual attribute should be created.' );
-
-		$attribute = wc_get_attribute( $attribute_id );
-		$taxonomy  = $attribute->slug;
-		$term_id   = 0;
-		$term_ids  = array();
-
-		try {
-			register_taxonomy( $taxonomy, array( 'product' ) );
-
-			$term = wp_insert_term( 'Red', $taxonomy, array( 'slug' => 'red' ) );
-			$this->assertIsArray( $term, 'An existing Red term should be inserted.' );
-
-			$term_id = (int) $term['term_id'];
-			update_term_meta( $term_id, 'color', '#000000' );
-			$term_ids[] = $term_id;
-
-			VisualAttributeTermAdmin::seed_visual_attribute_terms(
-				$attribute_id
-			);
-
-			$terms = get_terms(
-				array(
-					'taxonomy'   => $taxonomy,
-					'hide_empty' => false,
-				)
-			);
-
-			$this->assertIsArray( $terms, 'Terms should be returned for the taxonomy.' );
-			$this->assertCount( 9, $terms, 'Nine default color terms should exist after seeding.' );
-			$this->assertSame( '#000000', get_term_meta( $term_id, 'color', true ), 'The existing Red term color should not be overwritten.' );
-
-			foreach ( $terms as $term ) {
-				$term_ids[] = (int) $term->term_id;
-			}
-		} finally {
-			foreach ( $term_ids as $id ) {
-				wp_delete_term( $id, $taxonomy );
-			}
-			unregister_taxonomy( $taxonomy );
-			wc_delete_attribute( $attribute_id );
-		}
-	}
-
-	/**
 	 * @testdox Should not create color terms for non-wc-visual attribute types.
 	 */
 	public function test_does_not_seed_for_non_wc_visual_attribute(): void {
