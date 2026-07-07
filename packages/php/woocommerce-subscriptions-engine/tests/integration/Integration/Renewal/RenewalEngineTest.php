@@ -18,6 +18,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
@@ -1469,6 +1470,200 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$reloaded = $repo->find( $contract_id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertSame( '2026-03-15 00:00:00', $reloaded->get_next_payment_gmt() );
+	}
+
+	/**
+	 * @testdox the scheduled scan materializes an all-cycles bogo as bonus line quantity, money-neutral.
+	 */
+	public function test_scheduled_renewal_materializes_bogo_bonus_quantity(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract_with_line_item(
+			self::GATEWAY_APPROVING,
+			PricingPolicy::from_array(
+				array(
+					'policies' => array(
+						array( 'type' => 'bogo' ),
+					),
+				)
+			)
+		);
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$renewal_order = $this->run_scheduled_renewal( $contract_id );
+		$this->assertInstanceOf( WC_Order::class, $renewal_order );
+		$this->assertTrue( $renewal_order->is_paid() );
+
+		// The line carries paid + bonus units: 2 paid earn 2 free.
+		$items = array_values( $renewal_order->get_items() );
+		$this->assertCount( 1, $items );
+		$item = $items[0];
+		$this->assertInstanceOf( \WC_Order_Item_Product::class, $item );
+		$this->assertSame( 4, $item->get_quantity() );
+
+		// Money-neutral: the line amounts still price the paid units only, and the
+		// order total is exactly the cycle's expected_total (the price authority).
+		$this->assertSame( 39.98, (float) $item->get_subtotal() );
+		$this->assertSame( 39.98, (float) $item->get_total() );
+		$this->assertSame( 39.98, (float) $renewal_order->get_total() );
+
+		$head = ( new ContractRepository() )->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertSame( '39.98000000', $head->get_expected_total() );
+	}
+
+	/**
+	 * @testdox a first-cycle-only bogo grants no bonus on the cycle-2 renewal order.
+	 *
+	 * `duration_cycles: 1` scopes the bogo benefit to cycle 1 (the origin order, whose
+	 * materialization is the consumer's checkout, not the engine's). The engine-built
+	 * cycle-2 renewal is outside the window: paid quantity only.
+	 */
+	public function test_scheduled_renewal_grants_no_bonus_when_the_bogo_window_has_ended(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract_with_line_item(
+			self::GATEWAY_APPROVING,
+			PricingPolicy::from_array(
+				array(
+					'policies' => array(
+						array(
+							'type'            => 'bogo',
+							'duration_cycles' => 1,
+						),
+					),
+				)
+			)
+		);
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$renewal_order = $this->run_scheduled_renewal( $contract_id );
+		$this->assertInstanceOf( WC_Order::class, $renewal_order );
+
+		$items = array_values( $renewal_order->get_items() );
+		$this->assertCount( 1, $items );
+		$item = $items[0];
+		$this->assertInstanceOf( \WC_Order_Item_Product::class, $item );
+		$this->assertSame( 2, $item->get_quantity(), 'No bonus outside the bogo window.' );
+		$this->assertSame( 39.98, (float) $renewal_order->get_total() );
+	}
+
+	/**
+	 * @testdox the bogo bonus materializes from the contract's frozen snapshot even when the live plan is deleted.
+	 */
+	public function test_scheduled_renewal_materializes_bogo_from_the_snapshot_when_the_live_plan_is_deleted(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract_with_line_item(
+			self::GATEWAY_APPROVING,
+			PricingPolicy::from_array(
+				array(
+					'policies' => array(
+						array( 'type' => 'bogo' ),
+					),
+				)
+			)
+		);
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		// The live plan goes away; the contract's frozen snapshot carries the terms.
+		( new PlanRepository() )->delete( $contract->get_selling_plan_id() );
+
+		$renewal_order = $this->run_scheduled_renewal( $contract_id );
+		$this->assertInstanceOf( WC_Order::class, $renewal_order );
+
+		$items = array_values( $renewal_order->get_items() );
+		$this->assertCount( 1, $items );
+		$item = $items[0];
+		$this->assertInstanceOf( \WC_Order_Item_Product::class, $item );
+		$this->assertSame( 4, $item->get_quantity(), 'The snapshot terms grant the bonus without the live plan.' );
+	}
+
+	/**
+	 * @testdox a discount added to the live plan after signup does not change a contract's frozen terms.
+	 *
+	 * The snapshot records an explicit "no pricing policy" at signup; a bogo entry added
+	 * to the live plan later must not leak onto the contract's renewals (and the base
+	 * quantity regression holds: no pricing policy means quantities are untouched).
+	 */
+	public function test_scheduled_renewal_honors_the_snapshots_explicit_lack_of_a_pricing_policy(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract_with_line_item( self::GATEWAY_APPROVING, null );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		// The merchant later adds a bogo discount to the live plan.
+		$plans = new PlanRepository();
+		$plan  = $plans->find( $contract->get_selling_plan_id() );
+		$this->assertInstanceOf( Plan::class, $plan );
+		$plan->set_pricing_policy(
+			PricingPolicy::from_array(
+				array(
+					'policies' => array(
+						array( 'type' => 'bogo' ),
+					),
+				)
+			)
+		);
+		$this->assertTrue( $plans->update( $plan ) );
+
+		$renewal_order = $this->run_scheduled_renewal( $contract_id );
+		$this->assertInstanceOf( WC_Order::class, $renewal_order );
+
+		$items = array_values( $renewal_order->get_items() );
+		$this->assertCount( 1, $items );
+		$item = $items[0];
+		$this->assertInstanceOf( \WC_Order_Item_Product::class, $item );
+		$this->assertSame( 2, $item->get_quantity(), 'Frozen terms: the later live-plan discount does not apply.' );
+		$this->assertSame( 39.98, (float) $renewal_order->get_total() );
+	}
+
+	/**
+	 * Sign up a contract from an order carrying a real product line (quantity 2, USD
+	 * 39.98) on a monthly plan with the given pricing policy - the shape the BOGO
+	 * materialization tests read renewal line quantities from.
+	 *
+	 * @param string             $gateway        Gateway id stamped on the order/contract.
+	 * @param PricingPolicy|null $pricing_policy The plan's pricing policy, or null for none.
+	 * @return Contract The persisted contract with cycle 1 billed.
+	 */
+	private function sign_up_contract_with_line_item( string $gateway, ?PricingPolicy $pricing_policy ): Contract {
+		$plan = Plan::create(
+			array(
+				'name'           => 'Monthly',
+				'billing_policy' => new BillingPolicy( 'month', 1, null, null, null ),
+				'pricing_policy' => $pricing_policy,
+				'category'       => Plan::DEFAULT_CATEGORY,
+				'extension_slug' => 'engine-tests',
+			)
+		);
+		( new PlanRepository() )->insert( $plan );
+
+		$product = new \WC_Product_Simple();
+		$product->set_name( 'Monthly Filters' );
+		$product->set_regular_price( '19.99' );
+		$product_id = (int) $product->save();
+
+		$order = new WC_Order();
+		$order->set_currency( 'USD' );
+		$order->set_payment_method( $gateway );
+		$order->set_total( '39.98' );
+		$order->set_date_paid( '2026-01-15 00:00:00' );
+		$line = new \WC_Order_Item_Product();
+		$line->set_name( 'Monthly Filters' );
+		$line->set_product_id( $product_id );
+		$line->set_quantity( 2 );
+		$line->set_subtotal( '39.98' );
+		$line->set_total( '39.98' );
+		$order->add_item( $line );
+		$order->save();
+
+		return ( new ContractFactory() )->create_from_order( $order, $plan );
 	}
 
 	/**
