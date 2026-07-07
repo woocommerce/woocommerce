@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add `small` to ALLOWED_TAGS to fix price suffix stripped on variable products.

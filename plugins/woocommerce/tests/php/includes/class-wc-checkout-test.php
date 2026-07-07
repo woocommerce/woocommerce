@@ -43,6 +43,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
+		delete_option( 'woocommerce_calc_taxes' );
 	}
 
 	/**
@@ -247,6 +248,46 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( $sut->get_value( 'billing_country' ) );
 
 		WC()->customer = $orig_customer;
+	}
+
+	/**
+	 * @testdox create_order_tax_lines sets rate_code, label, compound and rate_percent on order tax items.
+	 */
+	public function test_create_order_tax_lines_sets_correct_tax_item_props(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// German standard 19% non-compound VAT rate.
+		$tax_rate = array(
+			'tax_rate_country'  => 'DE',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '19.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->customer->set_billing_country( 'DE' );
+		WC()->customer->set_shipping_country( 'DE' );
+		WC()->customer->set_is_vat_exempt( false );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		$order     = wc_get_order( $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) ) );
+		$tax_items = $order->get_taxes();
+
+		$this->assertCount( 1, $tax_items );
+
+		/** @var WC_Order_Item_Tax $tax_item */
+		$tax_item = array_values( $tax_items )[0];
+		$this->assertSame( 'DE-VAT-1', $tax_item->get_rate_code() );
+		$this->assertSame( 'VAT', $tax_item->get_label() );
+		$this->assertFalse( $tax_item->get_compound() );
+		$this->assertSame( 19.0, $tax_item->get_rate_percent() );
 	}
 
 	/**

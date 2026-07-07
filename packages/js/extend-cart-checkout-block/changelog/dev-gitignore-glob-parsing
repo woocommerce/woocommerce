@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove a stray placeholder line from the literal .gitignore (the real template lives in .gitignore.mustache) so glob-based ignore parsers no longer fail on it.

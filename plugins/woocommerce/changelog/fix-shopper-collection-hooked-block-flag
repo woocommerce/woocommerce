@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Set `cartPageHasSavedForLater` from the Shopper Collection block itself so the cart "Save for later" link shows when the block is auto-injected as a hooked block (which `has_block()` does not detect).

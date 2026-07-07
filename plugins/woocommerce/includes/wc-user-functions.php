@@ -326,9 +326,14 @@ function wc_set_customer_auth_cookie( $customer_id ) {
  * @return int
  */
 function wc_update_new_customer_past_orders( $customer_id ) {
+	$customer = get_user_by( 'id', absint( $customer_id ) );
+
+	if ( ! $customer ) {
+		return 0;
+	}
+
 	$linked          = 0;
 	$complete        = 0;
-	$customer        = get_user_by( 'id', absint( $customer_id ) );
 	$customer_orders = wc_get_orders(
 		array(
 			'limit'    => -1,
@@ -439,7 +444,8 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		$cache_version = WC_Cache_Helper::get_transient_version( 'orders' );
 	}
 
-	$aggregation_version = 'v3'; // Update the version when modifying the aggregation implementation to ensure the cache is repopulated.
+	// Update the version when modifying the aggregation implementation to ensure the cache is repopulated.
+	$aggregation_version = 'v3';
 	$cache_group         = 'orders';
 	$cache_key           = 'wc_customer_bought_product_' . md5( $customer_email . '-' . $user_id . '-' . $use_lookup_tables . '-' . $aggregation_version );
 	$cache_value         = wp_cache_get( $cache_key, $cache_group );
