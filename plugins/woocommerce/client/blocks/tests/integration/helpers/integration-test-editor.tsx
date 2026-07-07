@@ -14,7 +14,6 @@ import {
 	// @ts-expect-error privateApis exists but is not typed
 	privateApis as blockEditorPrivateApis,
 } from '@wordpress/block-editor';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	type BlockAttributes,
 	type BlockInstance,

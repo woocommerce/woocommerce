@@ -8,7 +8,6 @@ import apiFetch from '@wordpress/api-fetch';
 import { log, init as initRemoteLogging } from '@woocommerce/remote-logging';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore no types
-// eslint-disable-next-line @woocommerce/dependency-group
 import { dispatch } from '@wordpress/data';
 
 /**
@@ -17,7 +16,6 @@ import { dispatch } from '@wordpress/data';
 import { API_NAMESPACE } from './constants';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore no types
-// eslint-disable-next-line @woocommerce/dependency-group
 import { STORE_KEY as optionsStore } from '../options/data/constants';
 
 interface RemoteLoggingStatus {

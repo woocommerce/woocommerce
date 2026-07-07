@@ -101,6 +101,32 @@ final class PlanSnapshot {
 	}
 
 	/**
+	 * The frozen billing cadence, reconstructed from the snapshot payload.
+	 *
+	 * Sourced from the `billing_policy` entry captured at signup, NOT the live plan -
+	 * so a consumer reads the cadence a contract is billed under straight off the
+	 * snapshot, even after the plan it came from is edited or deleted, with no live
+	 * {@see \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository}
+	 * join. Returns null when the payload carries no (or an unreadable) billing policy,
+	 * so a caller degrades to "no cadence" rather than fataling.
+	 */
+	public function get_billing_policy(): ?BillingPolicy {
+		$policy = $this->data['billing_policy'] ?? null;
+		if ( ! is_array( $policy ) ) {
+			return null;
+		}
+
+		try {
+			return BillingPolicy::from_array( self::string_keyed( $policy ) );
+		} catch ( DomainException $e ) {
+			// A structurally-invalid stored policy degrades to "no cadence" rather than
+			// fataling the read; snapshots this engine writes always carry a valid policy.
+			unset( $e );
+			return null;
+		}
+	}
+
+	/**
 	 * The plan terms payload, in its original key order.
 	 *
 	 * @return array<string, mixed>
@@ -117,5 +143,22 @@ final class PlanSnapshot {
 	 */
 	public function to_payload(): array {
 		return $this->data;
+	}
+
+	/**
+	 * Re-key a nested payload array as string-keyed for the typed value-object factory.
+	 * A no-op at runtime (decoded JSON object keys are already strings); it recovers the
+	 * string-keyed type that erases to `array<int|string, mixed>`.
+	 *
+	 * @param array<int|string, mixed> $value Nested payload array.
+	 * @return array<string, mixed>
+	 */
+	private static function string_keyed( array $value ): array {
+		$out = array();
+		foreach ( $value as $key => $item ) {
+			$out[ (string) $key ] = $item;
+		}
+
+		return $out;
 	}
 }

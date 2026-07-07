@@ -234,6 +234,21 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		);
 	}
 
+	/**
+	 * @testdox The due_contract index keys the dispatcher scan as (status, next_payment_gmt).
+	 */
+	public function test_contracts_due_contract_index_keys_the_dispatcher_scan(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// The dispatcher scans status=active AND next_payment_gmt <= now; the status-first
+		// column order is load-bearing for the index, so assert it exactly.
+		$this->assertContains( 'due_contract', $this->index_names( $table ) );
+		$this->assertSame(
+			array( 'status', 'next_payment_gmt' ),
+			$this->index_columns( $table, 'due_contract' )
+		);
+	}
+
 	public function test_cycles_table_has_expected_columns(): void {
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 
@@ -253,10 +268,31 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 			'items_snapshot_id',
 			'order_id',
 			'extension_slug',
+			'claimed_until',
+			'retry_at',
 		);
 
 		foreach ( $columns as $column ) {
 			$this->assertTrue( $this->has_column( $table, $column ), "Expected cycles.{$column} column." );
+		}
+	}
+
+	/**
+	 * @testdox The cycle dispatcher columns (claimed_until lease, reserved retry_at) are nullable.
+	 */
+	public function test_cycles_table_dispatcher_columns_are_nullable(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		foreach ( array( 'claimed_until', 'retry_at' ) as $column ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", $column ), ARRAY_A );
+
+			$this->assertIsArray( $row, "Expected a cycles.{$column} column." );
+			$this->assertArrayHasKey( 'Null', $row );
+			$this->assertIsString( $row['Null'] );
+			$this->assertSame( 'YES', $row['Null'], "Expected cycles.{$column} to be NULLable." );
 		}
 	}
 

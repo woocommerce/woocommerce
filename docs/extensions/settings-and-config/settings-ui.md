@@ -137,6 +137,46 @@ WooCommerce creates the settings UI adapter for registered sections internally. 
 
 Use a section id that does not conflict with an existing section on the same settings tab. For the `checkout` tab, ids that match existing payment gateway sections are reserved.
 
+### Provide a native Settings UI page for a registered section
+
+Sections with custom navigation, save handlers, or native Settings UI schemas can provide their own Settings UI page instead of using the legacy settings adapter.
+
+```php
+<?php
+use Automattic\WooCommerce\Admin\Settings\SettingsSection;
+use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
+
+final class My_Plugin_Settings_Section extends SettingsSection {
+	// Other settings section methods omitted for brevity.
+
+	public function get_settings_ui_page( WC_Settings_Page $parent_page ): ?SettingsUIPageInterface {
+		return new My_Plugin_Settings_UI_Page( $parent_page );
+	}
+}
+```
+
+When `get_settings_ui_page()` returns a `SettingsUIPageInterface`, WooCommerce uses it directly for the registered section. Returning `null` keeps the default behavior: WooCommerce converts the section's legacy `get_settings()` array into a Settings UI schema.
+
+### Section navigation on native pages
+
+The Settings UI shell renders sibling-section navigation from the `shell.sectionNavigation` schema key. Native page schemas control it through three states:
+
+-   **Omit the key** - WooCommerce injects the default navigation listing every section of the settings page, matching the legacy settings adapter. This is the right choice for most pages.
+-   **Set a custom array** - the page owns navigation entirely. Each entry needs `id`, `label`, `href`, and `active` keys.
+-   **Set an empty array** - no shell navigation renders, for pages that provide their own in-page navigation.
+
+```php
+// Custom navigation entry shape.
+$schema['shell']['sectionNavigation'] = array(
+	array(
+		'id'     => 'my_section',
+		'label'  => __( 'My section', 'my-plugin' ),
+		'href'   => admin_url( 'admin.php?page=wc-settings&tab=checkout&section=my_section' ),
+		'active' => true,
+	),
+);
+```
+
 ## Native field migration
 
 The legacy adapter converts the existing `get_settings()` array into a canonical schema for React. It supports common settings fields:
