@@ -43,6 +43,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test fixture preserves the raw request URI for restoration.
 		$this->original_request_uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : null;
 		$_SERVER['REQUEST_URI']     = '/';
 		$this->reset_scripts();
@@ -405,8 +406,10 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	private function delete_request_scope_transient( array $scope ): void {
 		ksort( $scope );
 
+		$scope_json = wp_json_encode( $scope );
+
 		delete_transient(
-			'wc_legacy_select2_check_' . md5( wp_json_encode( $scope ) )
+			'wc_legacy_select2_check_' . md5( is_string( $scope_json ) ? $scope_json : '' )
 		);
 	}
 }

@@ -73,6 +73,10 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function track_usage( string $context ): void {
+		if ( ! $this->is_legacy_select2_printed() ) {
+			return;
+		}
+
 		$scope = $this->get_request_scope( $context );
 
 		if ( $this->was_recently_checked( $scope ) ) {
@@ -120,7 +124,7 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 
 			$handles              += array_fill_keys( $legacy_handles, true );
 			$dependents[ $handle ] = true;
-			$source               = $wp_scripts->registered[ $handle ]->src ?? '';
+			$source                = isset( $wp_scripts->registered[ $handle ] ) ? $wp_scripts->registered[ $handle ]->src : '';
 			if ( is_string( $source ) && '' !== $source ) {
 				$sources[] = $source;
 			}
@@ -184,6 +188,21 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 	 */
 	private function mark_recently_checked( array $scope ): void {
 		set_transient( $this->get_transient_key( $scope ), 'yes', WEEK_IN_SECONDS );
+	}
+
+	/**
+	 * Check whether a legacy Select2 handle has been printed.
+	 *
+	 * @return bool
+	 */
+	private function is_legacy_select2_printed(): bool {
+		foreach ( self::LEGACY_HANDLES as $handle ) {
+			if ( wp_script_is( $handle, 'done' ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
