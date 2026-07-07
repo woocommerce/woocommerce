@@ -170,6 +170,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.9.4 2026-XX-XX =
+= 10.9.4 2026-07-07 =
+
+**WooCommerce**
+
+* Fix - Fix is_vat_exempt being not correctly applied during block checkout for logged-in users. [#66342](https://github.com/woocommerce/woocommerce/pull/66342)
+
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
