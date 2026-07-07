@@ -70088,22 +70088,10 @@ parameters:
 			path: src/StoreApi/Routes/V1/Cart.php
 
 		-
-			message: '#^Expected 2 @param tags, found 1\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/StoreApi/Routes/V1/CartAddItem.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CartAddItem\:\:get_route_post_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
 			path: src/StoreApi/Routes/V1/CartAddItem.php
-
-		-
-			message: '#^Dead catch \- WC_REST_Exception is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
-			path: src/StoreApi/Routes/V1/CartApplyCoupon.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CartApplyCoupon\:\:get_route_post_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
