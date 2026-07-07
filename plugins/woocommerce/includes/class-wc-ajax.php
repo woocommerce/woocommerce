@@ -1037,6 +1037,18 @@ class WC_AJAX {
 		$data  = array();
 		$items = $order->get_items();
 
+		/**
+		 * Customer download data store.
+		 *
+		 * @var WC_Customer_Download_Data_Store $data_store
+		 */
+		$data_store               = WC_Data_Store::load( 'customer-download' );
+		$existing_download_access = array();
+
+		foreach ( $data_store->get_downloads( array( 'order_id' => $order_id ) ) as $download ) {
+			$existing_download_access[ $download->get_product_id() . '|' . $download->get_download_id() ] = true;
+		}
+
 		// Check against order items first.
 		foreach ( $items as $item ) {
 			$product = $item->get_product();
@@ -1065,8 +1077,15 @@ class WC_AJAX {
 
 			if ( ! empty( $download_data['files'] ) ) {
 				foreach ( $download_data['files'] as $download_id => $file ) {
+					$download_access_key = $product_id . '|' . $download_id;
+
+					if ( isset( $existing_download_access[ $download_access_key ] ) ) {
+						continue;
+					}
+
 					$inserted_id = wc_downloadable_file_permission( $download_id, $product->get_id(), $order, $download_data['quantity'], $download_data['order_item'] );
 					if ( $inserted_id ) {
+						$existing_download_access[ $download_access_key ] = true;
 						$download = new WC_Customer_Download( $inserted_id );
 						++$loop;
 						++$file_counter;
