@@ -812,7 +812,9 @@ class WC_Discounts {
 			/**
 			 * Filter the result of coupon product_ids validation.
 			 *
-			 * @since 10.9.0
+			 * Return true to treat the coupon as valid for the cart, or false to reject it.
+			 *
+			 * @since 11.0.0
 			 * @param bool         $valid  Whether the coupon is valid.
 			 * @param WC_Coupon    $coupon Coupon data.
 			 * @param WC_Discounts $this   The discounts instance.
@@ -867,7 +869,9 @@ class WC_Discounts {
 			/**
 			 * Filter the result of coupon product_categories validation.
 			 *
-			 * @since 10.9.0
+			 * Return true to treat the coupon as valid for the cart, or false to reject it.
+			 *
+			 * @since 11.0.0
 			 * @param bool         $valid  Whether the coupon is valid.
 			 * @param WC_Coupon    $coupon Coupon data.
 			 * @param WC_Discounts $this   The discounts instance.
@@ -946,7 +950,9 @@ class WC_Discounts {
 			/**
 			 * Filter the result of coupon excluded_items validation.
 			 *
-			 * @since 10.9.0
+			 * Return true to treat the coupon as valid for the cart, or false to reject it.
+			 *
+			 * @since 11.0.0
 			 * @param bool         $valid  Whether the coupon is valid.
 			 * @param WC_Coupon    $coupon Coupon data.
 			 * @param WC_Discounts $this   The discounts instance.
@@ -978,16 +984,16 @@ class WC_Discounts {
 	 */
 	protected function validate_coupon_eligible_items( $coupon ) {
 		if ( ! $coupon->is_type( wc_get_product_coupon_types() ) ) {
-			$valid = true;
-
 			/**
 			 * Filter the result of coupon eligible_items validation.
 			 *
 			 * Allows short-circuiting the sale items, excluded product IDs, and excluded product categories
-			 * checks for cart discounts. Returning a non-null value from the filter bypasses those checks.
+			 * checks for cart discounts. Return null (the default) to run those checks as usual, or a boolean
+			 * to bypass them: true accepts the coupon, false rejects it. Only a strict null defers; any other
+			 * value, including a falsy 0, '' or array(), is treated as a decision.
 			 *
-			 * @since 10.9.0
-			 * @param bool|null    $valid  Short-circuit result. Default null (continue to individual checks).
+			 * @since 11.0.0
+			 * @param bool|null    $pre    Short-circuit result. Default null (continue to individual checks).
 			 * @param WC_Coupon    $coupon Coupon data.
 			 * @param WC_Discounts $this   The discounts instance.
 			 */
