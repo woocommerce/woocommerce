@@ -189,4 +189,28 @@ class CategoryTitleTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( '<a href=', $markup, 'Title should be wrapped in an anchor when isLink is true.' );
 		$this->assertStringContainsString( 'Linked Title', $markup, 'Custom content should appear inside the link.' );
 	}
+
+	/**
+	 * @testdox User-provided markup in the content attribute is escaped, not rendered raw.
+	 */
+	public function test_content_escape_user_markup(): void {
+		$markup = $this->render_with_context(
+			array(
+				'content' => '<script>alert("xss")</script>',
+				'level'   => 2,
+			),
+			$this->term_id
+		);
+
+		$this->assertStringContainsString(
+			'&lt;script&gt;',
+			$markup,
+			'Safe HTML entities should be used instead of raw tags.'
+		);
+		$this->assertStringNotContainsString(
+			'<script>',
+			$markup,
+			'Raw script tags should not be present in the rendered output.'
+		);
+	}
 }

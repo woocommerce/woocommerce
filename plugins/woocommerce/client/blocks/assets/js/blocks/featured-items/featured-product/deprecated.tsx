@@ -103,6 +103,8 @@ const v2 = {
 				return createBlock( 'woocommerce/featured-product-title', {
 					level: block.attributes.level ?? 2,
 					isLink: block.attributes.isLink ?? false,
+					linkTarget: block.attributes.linkTarget ?? '_self',
+					rel: block.attributes.rel ?? '',
 					textAlign: block.attributes.textAlign ?? '',
 				} );
 			}
