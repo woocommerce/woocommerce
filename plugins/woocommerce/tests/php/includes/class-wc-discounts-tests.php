@@ -259,7 +259,9 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		);
 		$coupon->save();
 
-		$this->assertWPError( $discounts->is_coupon_valid( $coupon ), 'A coupon restricted to a product not in the cart should be invalid.' );
+		$result = $discounts->is_coupon_valid( $coupon );
+		$this->assertWPError( $result, 'A coupon restricted to a product not in the cart should be invalid.' );
+		$this->assertStringContainsString( 'is not applicable to selected products', $result->get_error_message(), 'The failure should come from the product_ids check.' );
 
 		add_filter( 'woocommerce_coupon_validate_product_ids', '__return_true' );
 		$this->assertTrue( $discounts->is_coupon_valid( $coupon ), 'Returning true from the filter should bypass the product ID restriction.' );
@@ -279,7 +281,9 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $discounts->is_coupon_valid( $valid_coupon ), 'A coupon restricted to a product in the cart should be valid.' );
 		add_filter( 'woocommerce_coupon_validate_product_ids', '__return_false' );
-		$this->assertWPError( $discounts->is_coupon_valid( $valid_coupon ), 'Returning false from the filter should force rejection.' );
+		$result = $discounts->is_coupon_valid( $valid_coupon );
+		$this->assertWPError( $result, 'Returning false from the filter should force rejection.' );
+		$this->assertStringContainsString( 'is not applicable to selected products', $result->get_error_message(), 'Forced rejection should surface the product_ids error.' );
 		remove_filter( 'woocommerce_coupon_validate_product_ids', '__return_false' );
 	}
 
@@ -302,7 +306,9 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		);
 		$coupon->save();
 
-		$this->assertWPError( $discounts->is_coupon_valid( $coupon ), 'A coupon restricted to a category none of the cart items belong to should be invalid.' );
+		$result = $discounts->is_coupon_valid( $coupon );
+		$this->assertWPError( $result, 'A coupon restricted to a category none of the cart items belong to should be invalid.' );
+		$this->assertStringContainsString( 'is not applicable to selected products', $result->get_error_message(), 'The failure should come from the product_categories check.' );
 
 		add_filter( 'woocommerce_coupon_validate_product_categories', '__return_true' );
 		$this->assertTrue( $discounts->is_coupon_valid( $coupon ), 'Returning true from the filter should bypass the category restriction.' );
@@ -328,7 +334,9 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		);
 		$coupon->save();
 
-		$this->assertWPError( $discounts->is_coupon_valid( $coupon ), 'A product coupon whose only cart item is excluded should be invalid.' );
+		$result = $discounts->is_coupon_valid( $coupon );
+		$this->assertWPError( $result, 'A product coupon whose only cart item is excluded should be invalid.' );
+		$this->assertStringContainsString( 'is not applicable to selected products', $result->get_error_message(), 'The failure should come from the excluded_items check.' );
 
 		add_filter( 'woocommerce_coupon_validate_excluded_items', '__return_true' );
 		$this->assertTrue( $discounts->is_coupon_valid( $coupon ), 'Returning true from the filter should bypass the excluded item restriction.' );
@@ -355,7 +363,9 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		$coupon->save();
 
 		// Default (no filter): the null short-circuit falls through to the excluded-product check, which fails.
-		$this->assertWPError( $discounts->is_coupon_valid( $coupon ), 'A cart coupon excluding the only cart item should be invalid by default.' );
+		$result = $discounts->is_coupon_valid( $coupon );
+		$this->assertWPError( $result, 'A cart coupon excluding the only cart item should be invalid by default.' );
+		$this->assertStringContainsString( 'is not applicable to the products', $result->get_error_message(), 'The null default should fall through to the excluded-product check, not the short-circuit throw.' );
 
 		add_filter( 'woocommerce_coupon_validate_eligible_items', '__return_true' );
 		$this->assertTrue( $discounts->is_coupon_valid( $coupon ), 'Returning true should short-circuit and accept the coupon.' );
@@ -372,7 +382,17 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $discounts->is_coupon_valid( $valid_coupon ), 'An unrestricted cart coupon is valid by default.' );
 		add_filter( 'woocommerce_coupon_validate_eligible_items', '__return_false' );
-		$this->assertWPError( $discounts->is_coupon_valid( $valid_coupon ), 'Returning false should short-circuit and reject the coupon.' );
+		$result = $discounts->is_coupon_valid( $valid_coupon );
+		$this->assertWPError( $result, 'Returning false should short-circuit and reject the coupon.' );
+		$this->assertStringContainsString( 'is not valid for the items in your cart', $result->get_error_message(), 'The false short-circuit should use the eligible_items rejection message, not the excluded-product check.' );
 		remove_filter( 'woocommerce_coupon_validate_eligible_items', '__return_false' );
+
+		// A non-null falsy return (0) is a decision, not deferral: only a strict null continues to the checks.
+		$return_zero = function () {
+			return 0;
+		};
+		add_filter( 'woocommerce_coupon_validate_eligible_items', $return_zero );
+		$this->assertWPError( $discounts->is_coupon_valid( $valid_coupon ), 'A non-null falsy return should short-circuit and reject, not defer.' );
+		remove_filter( 'woocommerce_coupon_validate_eligible_items', $return_zero );
 	}
 }
