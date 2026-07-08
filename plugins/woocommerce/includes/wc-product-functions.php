@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\Caches\ProductTransientsDeferrer;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -923,6 +924,18 @@ add_filter( 'wp_get_attachment_image_attributes', 'wc_get_attachment_image_attri
  * @return array
  */
 function wc_prepare_attachment_for_js( $response ) {
+	if (
+		ProductMediaGallery::is_feature_enabled() &&
+		isset( $response['id'], $response['type'] ) &&
+		'video' === $response['type']
+	) {
+		$poster_id = absint( get_post_thumbnail_id( $response['id'] ) );
+
+		if ( $poster_id ) {
+			$response['poster_id'] = $poster_id;
+		}
+	}
+
 	/*
 	 * If the user can manage woocommerce, allow them to
 	 * see the image content.
