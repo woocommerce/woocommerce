@@ -77,7 +77,6 @@ final class AssetsController {
 		$this->api->register_script( 'wc-entities', 'assets/client/blocks/wc-entities.js', array(), false );
 		$this->api->register_script( 'wc-blocks-middleware', 'assets/client/blocks/wc-blocks-middleware.js', array(), false );
 		$this->api->register_script( 'wc-blocks-data-store', 'assets/client/blocks/wc-blocks-data.js', array( 'wc-blocks-middleware' ) );
-		wp_register_script( 'wc-blocks-vendors', false, array(), $this->api->wc_version, true );
 		$this->api->register_script( 'wc-blocks-registry', 'assets/client/blocks/wc-blocks-registry.js', array(), false );
 		$this->api->register_script(
 			'wc-block-library',
@@ -85,7 +84,6 @@ final class AssetsController {
 			array( 'wc-blocks-middleware', 'wc-entities' ),
 			true
 		);
-		wp_register_script( 'wc-blocks', false, array(), $this->api->wc_version, true );
 		$this->register_deprecated_package_scripts();
 
 		// Keep price-format as a dedicated shared package: editor and frontend/runtime assets depend on it, and
@@ -122,14 +120,18 @@ final class AssetsController {
 	}
 
 	/**
-	 * Register deprecated package script handles for backward compatibility.
+	 * Register deprecated package and aggregate script handles for backward compatibility.
 	 *
-	 * These package handles are no longer used by WooCommerce's consolidated editor build, but are still registered
+	 * These handles are no longer used by WooCommerce's consolidated editor build, but are still registered
 	 * so extensions that declare them directly do not break. Other package handles in register_assets() are
 	 * intentionally kept at their normal registration sites because they remain supported shared APIs,
 	 * frontend/runtime dependencies, or are registered by another asset controller.
 	 */
 	private function register_deprecated_package_scripts(): void {
+		// Deprecated aggregate handles kept as placeholders for extensions that still declare them.
+		wp_register_script( 'wc-blocks-vendors', false, array(), $this->api->wc_version, true );
+		wp_register_script( 'wc-blocks', false, array(), $this->api->wc_version, true );
+
 		// Deprecated package handle kept for extensions that still declare wc-blocks-shared-context.
 		$this->api->register_script( 'wc-blocks-shared-context', 'assets/client/blocks/wc-blocks-shared-context.js' );
 

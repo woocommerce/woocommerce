@@ -28,10 +28,12 @@ This list comes from `editorExternalPackages` in `webpack-helpers.js`. Imports f
 
 ## Compatibility handles
 
-The packages below resolve as bundled editor imports when they are used by WooCommerce editor code, but their script handles remain registered so existing extensions and non-editor scripts can still enqueue or declare them directly.
+The entries below resolve as bundled editor imports when they are used by WooCommerce editor code, but their script handles remain registered so existing extensions and non-editor scripts can still enqueue or declare them directly. The `wc-blocks-vendors` and `wc-blocks` handles should continue to be registered for backward compatibility, but they are placeholders and no longer load the old vendor or editor bundles.
 
 | Package import | Script handle | Global | Registration owner | Notes |
 | --- | --- | --- | --- | --- |
+| N/A | `wc-blocks-vendors` | N/A | `AssetsController::register_deprecated_package_scripts()` | Compatibility placeholder only; keeps legacy dependencies resolvable but does not print a script, so enqueueing it no longer loads the old vendor bundle. |
+| N/A | `wc-blocks` | N/A | `AssetsController::register_deprecated_package_scripts()` | Compatibility placeholder only; keeps legacy dependencies resolvable but does not print a script. Use `wc-block-library` for the shared editor bundle. |
 | `@woocommerce/blocks-components` | `wc-blocks-components` | `wc.blocksComponents` | `AssetsController::register_deprecated_package_scripts()` | Deprecated editor dependency target kept for backward compatibility. |
 | `@woocommerce/shared-context` | `wc-blocks-shared-context` | `wc.wcBlocksSharedContext` | `AssetsController::register_deprecated_package_scripts()` | Deprecated editor dependency target kept for backward compatibility. |
 | `@woocommerce/shared-hocs` | `wc-blocks-shared-hocs` | `wc.wcBlocksSharedHocs` | `AssetsController::register_deprecated_package_scripts()` | Deprecated editor dependency target kept for backward compatibility. |
