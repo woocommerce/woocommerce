@@ -447,13 +447,15 @@ test.describe(
 			// not submit/close the modal.
 			await expect( modal ).toBeVisible();
 
-			// Complete the add with the keyboard: type, then Enter to pick the
-			// option. Use real keystrokes (pressSequentially, not fill):
-			// selectWoo's AJAX search fires on keyup, so a programmatic fill()
-			// may not request results.
-			await modal
-				.locator( '.select2-search__field' )
-				.pressSequentially( simpleProduct.name );
+			// selectWoo attaches its search dropdown to <body> (not inside the
+			// modal), so target the search field at the page level — the same
+			// locator the mouse-driven helper uses. Enter (above) opened the
+			// dropdown; type the query, wait for the result, then press Enter to
+			// choose it with the keyboard (results are loaded first, so this is
+			// not the premature-Enter path).
+			await page
+				.locator( 'span > .select2-search__field' )
+				.fill( simpleProduct.name );
 			await page
 				.getByRole( 'option', { name: simpleProduct.name } )
 				.first()
