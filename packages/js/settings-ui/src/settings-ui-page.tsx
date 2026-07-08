@@ -430,23 +430,18 @@ const ShellHeader = ( {
 	context,
 	values,
 	initialValues,
-	isDirty,
-	isSaving,
-	saveStrategy,
-	onSave,
+	actions,
 	children,
 }: {
 	schema: SettingsUISchema;
 	context: SettingsFieldContext;
 	values: SettingsValues;
 	initialValues: SettingsValues;
-	isDirty: boolean;
-	isSaving: boolean;
-	saveStrategy: SettingsUISaveStrategy;
-	onSave: () => void | Promise< boolean >;
+	actions?: ReactNode;
 	children: ReactNode;
 } ) => {
 	const shell = schema.shell || {};
+	const showHeader = shell.header === 'visible';
 	const title = shell.title || schema.title;
 	const NavigationComponent = shell.navigationComponent
 		? resolveRegionComponent( shell.navigationComponent, context )
@@ -456,9 +451,6 @@ const ShellHeader = ( {
 			( shell.sectionNavigation && shell.sectionNavigation.length > 0 ) ||
 			NavigationComponent
 	);
-	const showSaveButton = saveStrategy.adapter !== 'none';
-	const saveButtonType =
-		saveStrategy.adapter === 'form_post' ? 'submit' : 'button';
 
 	const breadcrumbs =
 		shell.breadcrumbs && shell.breadcrumbs.length > 0 ? (
@@ -492,31 +484,17 @@ const ShellHeader = ( {
 		  ) )
 		: undefined;
 
-	const saveButtonLabel = __( 'Save', 'woocommerce' );
-
-	const actions = showSaveButton ? (
-		<Button
-			className="woocommerce-save-button"
-			variant="primary"
-			type={ saveButtonType }
-			name="save"
-			value={ saveButtonLabel }
-			disabled={ ! isDirty || isSaving }
-			isBusy={ isSaving }
-			onClick={ onSave }
-		>
-			{ saveButtonLabel }
-		</Button>
-	) : undefined;
-
 	return (
 		<Page
 			className="wc-settings-ui-shell"
-			title={ title }
-			subTitle={ shell.subtitle }
-			breadcrumbs={ breadcrumbs }
-			badges={ badges }
-			actions={ actions }
+			// Labels the region when the header is hidden; the Page runtime
+			// supports ariaLabel but its shipped types do not declare it.
+			{ ...( { ariaLabel: title } as object ) }
+			title={ showHeader ? title : undefined }
+			subTitle={ showHeader ? shell.subtitle : undefined }
+			breadcrumbs={ showHeader ? breadcrumbs : undefined }
+			badges={ showHeader ? badges : undefined }
+			actions={ showHeader ? actions : undefined }
 		>
 			{ hasNavigation ? (
 				<div className="wc-settings-ui-shell__navigation">
@@ -874,20 +852,37 @@ export const SettingsUIPage = ( {
 	const formPostFields =
 		saveStrategy.adapter === 'form_post' ? getAllFields( schema ) : [];
 
+	const showHeader = schema.shell?.header === 'visible';
+	const saveButtonLabel = __( 'Save', 'woocommerce' );
+	const saveButton =
+		saveStrategy.adapter !== 'none' ? (
+			<Button
+				className="woocommerce-save-button"
+				variant="primary"
+				type={
+					saveStrategy.adapter === 'form_post' ? 'submit' : 'button'
+				}
+				name="save"
+				value={ saveButtonLabel }
+				disabled={ ! isDirty || isSaving }
+				isBusy={ isSaving }
+				onClick={ () =>
+					saveStrategy.adapter === 'form_post'
+						? submitSettingsForm()
+						: handleCustomSave()
+				}
+			>
+				{ saveButtonLabel }
+			</Button>
+		) : undefined;
+
 	return (
 		<ShellHeader
 			schema={ schema }
 			context={ context }
 			values={ values }
 			initialValues={ initialValues }
-			isDirty={ isDirty }
-			isSaving={ isSaving }
-			saveStrategy={ saveStrategy }
-			onSave={
-				saveStrategy.adapter === 'form_post'
-					? submitSettingsForm
-					: handleCustomSave
-			}
+			actions={ saveButton }
 		>
 			{ pendingNavigation ? (
 				<UnsavedChangesModal
@@ -960,6 +955,11 @@ export const SettingsUIPage = ( {
 						</Card.Root>
 					</section>
 				) ) }
+				{ ! showHeader && saveButton ? (
+					<div className="wc-settings-ui__footer-actions">
+						{ saveButton }
+					</div>
+				) : null }
 			</Stack>
 			{ formPostFields.length > 0 ? (
 				<div className="wc-settings-ui__hidden-inputs">

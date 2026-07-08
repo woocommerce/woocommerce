@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Settings UI: hide the shell header for pages registered at the top level of settings, with the save button rendered at the bottom of the page.

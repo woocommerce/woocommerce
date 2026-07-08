@@ -115,6 +115,7 @@ describe( 'settings UI shell header fields', () => {
 		const { container, root } = renderElement(
 			<SettingsUIPage
 				schema={ baseSchema( {
+					header: 'visible',
 					title: 'Test page',
 					subtitle: 'Manage your test settings.',
 				} ) }
@@ -136,6 +137,7 @@ describe( 'settings UI shell header fields', () => {
 		const { container, root } = renderElement(
 			<SettingsUIPage
 				schema={ baseSchema( {
+					header: 'visible',
 					title: 'Test page',
 					badges: [
 						{ label: 'Active', intent: 'success' },
@@ -163,6 +165,7 @@ describe( 'settings UI shell header fields', () => {
 		const { container, root } = renderElement(
 			<SettingsUIPage
 				schema={ baseSchema( {
+					header: 'visible',
 					title: 'Test page',
 					// Simulate an extension passing an unrecognized intent string at runtime
 					// (TS unions are erased; PHP-supplied schemas can carry arbitrary strings).
@@ -188,7 +191,10 @@ describe( 'settings UI shell header fields', () => {
 	it( 'omits subtitle and badges when not provided', () => {
 		const { container, root } = renderElement(
 			<SettingsUIPage
-				schema={ baseSchema( { title: 'Test page' } ) }
+				schema={ baseSchema( {
+					header: 'visible',
+					title: 'Test page',
+				} ) }
 				page="test_page"
 			/>
 		);

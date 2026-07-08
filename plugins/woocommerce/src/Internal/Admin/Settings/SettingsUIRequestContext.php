@@ -447,7 +447,9 @@ class SettingsUIRequestContext {
 		}
 
 		try {
-			$this->schema = $this->ensure_section_navigation( $this->settings_ui_page->get_schema( $this->section ) );
+			$this->schema = $this->apply_shell_header_visibility(
+				$this->ensure_section_navigation( $this->settings_ui_page->get_schema( $this->section ) )
+			);
 		} catch ( \Throwable $e ) {
 			$this->schema_failed = true;
 
@@ -501,6 +503,25 @@ class SettingsUIRequestContext {
 		if ( is_array( $schema['shell'] ) && ! isset( $schema['shell']['sectionNavigation'] ) ) {
 			$schema['shell']['sectionNavigation'] = SettingsSectionNavigation::build_default( $this->settings_page, $this->section );
 		}
+
+		return $schema;
+	}
+
+	/**
+	 * Hide the shell header, which is reserved for drill-down pages.
+	 *
+	 * Every page this context resolves is registered at the top level of
+	 * settings (a tab or a registered section), so the header is always hidden.
+	 *
+	 * @param array $schema Resolved settings UI schema.
+	 * @return array
+	 */
+	private function apply_shell_header_visibility( array $schema ): array {
+		if ( ! isset( $schema['shell'] ) || ! is_array( $schema['shell'] ) ) {
+			$schema['shell'] = array();
+		}
+
+		$schema['shell']['header'] = 'hidden';
 
 		return $schema;
 	}

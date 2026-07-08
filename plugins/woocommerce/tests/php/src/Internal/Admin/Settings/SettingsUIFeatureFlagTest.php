@@ -257,6 +257,30 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * It hides the shell header for pages registered at the top level of settings.
+	 */
+	public function test_request_context_hides_shell_header_for_top_level_pages(): void {
+		$page    = $this->get_settings_ui_test_page();
+		$context = SettingsUIRequestContext::for_settings_page( $page, '' );
+
+		$schema = $context->get_schema();
+
+		$this->assertSame( 'hidden', $schema['shell']['header'] );
+	}
+
+	/**
+	 * It overrides a schema-provided shell header for top-level pages.
+	 */
+	public function test_request_context_overrides_a_schema_provided_shell_header(): void {
+		$page    = $this->get_settings_ui_test_page_with_visible_shell_header();
+		$context = SettingsUIRequestContext::for_settings_page( $page, '' );
+
+		$schema = $context->get_schema();
+
+		$this->assertSame( 'hidden', $schema['shell']['header'], 'Top-level pages cannot opt into the shell header.' );
+	}
+
+	/**
 	 * It does not inject settings UI shared data when the feature flag is disabled.
 	 */
 	public function test_shared_settings_are_not_injected_when_feature_flag_is_disabled(): void {
@@ -389,6 +413,60 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			 */
 			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
 				return new \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter( $this );
+			}
+
+			/**
+			 * Get settings for the default section.
+			 *
+			 * @return array
+			 */
+			protected function get_settings_for_default_section() {
+				return array(
+					array(
+						'id'    => 'woocommerce_settings_ui_flag_test',
+						'type'  => 'text',
+						'title' => 'Settings UI flag test',
+					),
+				);
+			}
+		};
+	}
+
+	/**
+	 * Build a settings page whose settings UI schema asks for a visible shell header.
+	 *
+	 * @return \WC_Settings_Page
+	 */
+	private function get_settings_ui_test_page_with_visible_shell_header(): \WC_Settings_Page {
+		return new class() extends \WC_Settings_Page {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id    = 'settings_ui_flag_test';
+				$this->label = 'Settings UI flag test';
+			}
+
+			/**
+			 * Get the settings UI page adapter.
+			 *
+			 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
+			 */
+			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
+				return new class( $this ) extends \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter {
+					/**
+					 * Get the schema for a section.
+					 *
+					 * @param string $section Section id.
+					 * @return array
+					 */
+					public function get_schema( string $section ): array {
+						$schema                    = parent::get_schema( $section );
+						$schema['shell']['header'] = 'visible';
+
+						return $schema;
+					}
+				};
 			}
 
 			/**
