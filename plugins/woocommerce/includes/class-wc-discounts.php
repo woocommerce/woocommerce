@@ -815,9 +815,9 @@ class WC_Discounts {
 			 * Return true to treat the coupon as valid for the cart, or false to reject it.
 			 *
 			 * @since 11.0.0
-			 * @param bool         $valid  Whether the coupon is valid.
-			 * @param WC_Coupon    $coupon Coupon data.
-			 * @param WC_Discounts $this   The discounts instance.
+			 * @param bool         $valid     Whether the coupon is valid.
+			 * @param WC_Coupon    $coupon    Coupon data.
+			 * @param WC_Discounts $discounts The discounts instance.
 			 */
 			$valid = apply_filters( 'woocommerce_coupon_validate_product_ids', $valid, $coupon, $this );
 
@@ -872,9 +872,9 @@ class WC_Discounts {
 			 * Return true to treat the coupon as valid for the cart, or false to reject it.
 			 *
 			 * @since 11.0.0
-			 * @param bool         $valid  Whether the coupon is valid.
-			 * @param WC_Coupon    $coupon Coupon data.
-			 * @param WC_Discounts $this   The discounts instance.
+			 * @param bool         $valid     Whether the coupon is valid.
+			 * @param WC_Coupon    $coupon    Coupon data.
+			 * @param WC_Discounts $discounts The discounts instance.
 			 */
 			$valid = apply_filters( 'woocommerce_coupon_validate_product_categories', $valid, $coupon, $this );
 
@@ -911,6 +911,18 @@ class WC_Discounts {
 					break;
 				}
 			}
+
+			/**
+			 * Filter the result of coupon sale_items validation.
+			 *
+			 * Return true to treat the coupon as valid for the cart, or false to reject it.
+			 *
+			 * @since 11.0.0
+			 * @param bool         $valid     Whether the coupon is valid.
+			 * @param WC_Coupon    $coupon    Coupon data.
+			 * @param WC_Discounts $discounts The discounts instance.
+			 */
+			$valid = apply_filters( 'woocommerce_coupon_validate_sale_items', $valid, $coupon, $this );
 
 			if ( ! $valid ) {
 				throw new Exception(
@@ -953,9 +965,9 @@ class WC_Discounts {
 			 * Return true to treat the coupon as valid for the cart, or false to reject it.
 			 *
 			 * @since 11.0.0
-			 * @param bool         $valid  Whether the coupon is valid.
-			 * @param WC_Coupon    $coupon Coupon data.
-			 * @param WC_Discounts $this   The discounts instance.
+			 * @param bool         $valid     Whether the coupon is valid.
+			 * @param WC_Coupon    $coupon    Coupon data.
+			 * @param WC_Discounts $discounts The discounts instance.
 			 */
 			$valid = apply_filters( 'woocommerce_coupon_validate_excluded_items', $valid, $coupon, $this );
 
@@ -984,36 +996,6 @@ class WC_Discounts {
 	 */
 	protected function validate_coupon_eligible_items( $coupon ) {
 		if ( ! $coupon->is_type( wc_get_product_coupon_types() ) ) {
-			/**
-			 * Filter the result of coupon eligible_items validation.
-			 *
-			 * Allows short-circuiting the sale items, excluded product IDs, and excluded product categories
-			 * checks for cart discounts. Return null (the default) to run those checks as usual, or a boolean
-			 * to bypass them: true accepts the coupon, false rejects it. Only a strict null defers; any other
-			 * value, including a falsy 0, '' or array(), is treated as a decision.
-			 *
-			 * @since 11.0.0
-			 * @param bool|null    $pre    Short-circuit result. Default null (continue to individual checks).
-			 * @param WC_Coupon    $coupon Coupon data.
-			 * @param WC_Discounts $this   The discounts instance.
-			 */
-			$pre = apply_filters( 'woocommerce_coupon_validate_eligible_items', null, $coupon, $this );
-
-			if ( null !== $pre ) {
-				if ( ! $pre ) {
-					throw new Exception(
-						sprintf(
-							/* translators: %s: coupon code */
-							esc_html__( 'Sorry, coupon "%s" is not valid for the items in your cart.', 'woocommerce' ),
-							esc_html( $coupon->get_code() )
-						),
-						109
-					);
-				}
-
-				return true;
-			}
-
 			$this->validate_coupon_sale_items( $coupon );
 			$this->validate_coupon_excluded_product_ids( $coupon );
 			$this->validate_coupon_excluded_product_categories( $coupon );
@@ -1041,7 +1023,21 @@ class WC_Discounts {
 				}
 			}
 
-			if ( ! empty( $products ) ) {
+			$valid = empty( $products );
+
+			/**
+			 * Filter the result of coupon excluded_product_ids validation.
+			 *
+			 * Return true to treat the coupon as valid for the cart, or false to reject it.
+			 *
+			 * @since 11.0.0
+			 * @param bool         $valid     Whether the coupon is valid.
+			 * @param WC_Coupon    $coupon    Coupon data.
+			 * @param WC_Discounts $discounts The discounts instance.
+			 */
+			$valid = apply_filters( 'woocommerce_coupon_validate_excluded_product_ids', $valid, $coupon, $this );
+
+			if ( ! $valid ) {
 				throw new Exception(
 					sprintf(
 						/* translators: %1$s: coupon code, %2$s: products list */
@@ -1089,7 +1085,21 @@ class WC_Discounts {
 				}
 			}
 
-			if ( ! empty( $categories ) ) {
+			$valid = empty( $categories );
+
+			/**
+			 * Filter the result of coupon excluded_product_categories validation.
+			 *
+			 * Return true to treat the coupon as valid for the cart, or false to reject it.
+			 *
+			 * @since 11.0.0
+			 * @param bool         $valid     Whether the coupon is valid.
+			 * @param WC_Coupon    $coupon    Coupon data.
+			 * @param WC_Discounts $discounts The discounts instance.
+			 */
+			$valid = apply_filters( 'woocommerce_coupon_validate_excluded_product_categories', $valid, $coupon, $this );
+
+			if ( ! $valid ) {
 				throw new Exception(
 					sprintf(
 						/* translators: %1$s: coupon code, %2$s: categories list */
