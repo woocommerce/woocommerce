@@ -65,6 +65,28 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox published value of 2 maps to the pending review status on import.
+	 */
+	public function test_expand_data_maps_published_to_pending() {
+		$csv_file = __DIR__ . '/sample.csv';
+
+		$reflected_importer = new ReflectionClass( WC_Product_CSV_Importer::class );
+		$expand_data        = $reflected_importer->getMethod( 'expand_data' );
+		$expand_data->setAccessible( true );
+
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+		$parsed   = $expand_data->invoke(
+			$importer,
+			array(
+				'type'      => array( ProductType::SIMPLE ),
+				'published' => 2,
+			)
+		);
+
+		$this->assertEquals( ProductStatus::PENDING, $parsed['status'] );
+	}
+
+	/**
 	 * @testdox Test that the importer calculates the percent complete as 99 when it's >= 99.5% through the file.
 	 */
 	public function test_import_completion_issue_36618_lines_remaining() {

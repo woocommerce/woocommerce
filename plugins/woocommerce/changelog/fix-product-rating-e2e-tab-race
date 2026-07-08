@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Set the product's comment_status via WP-CLI in the product-rating E2E specs instead of clicking product-data tabs that race against admin JS initialization; test-only, no changes to shipped code.

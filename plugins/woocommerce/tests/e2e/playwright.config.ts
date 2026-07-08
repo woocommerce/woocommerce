@@ -120,15 +120,17 @@ export const setupProjects = [
  * `core-parallel` by default, except the other-project folders in `nonCoreSpecs`.
  */
 const serialRunSpecs = [
-	// Drains the whole store's Action Scheduler queue via `?process-waiting-actions`
-	// (other workers' order/product churn floods it past the 10s timeout) and asserts
-	// exact store-wide totals, polluted by concurrent orders.
-	'**/tests/analytics/analytics-data.spec.ts',
-	// Asserts store-wide `$0.00 / Orders 0`, polluted by concurrent orders.
-	'**/tests/analytics/analytics-access.spec.ts',
-	// Mutates the shared admin's `woocommerce_meta.dashboard_sections` and flips the
-	// global `woocommerce_analytics_scheduled_import` option (racing analytics-settings).
-	'**/tests/analytics/analytics-overview.spec.ts',
+	// Toggles the global `woocommerce_analytics_scheduled_import` option to
+	// exercise the Settings-page scheduled/immediate switch. Kept serial because,
+	// as a standalone file, running it in `core-parallel` would race
+	// `analytics.spec.ts` — which also toggles that option — across workers.
+	// (The other analytics specs are parallel: `analytics` owns its own
+	// import-mode toggles plus the Overview manual-trigger tests in one file, so
+	// those serialise within a single worker; `analytics-overview` only mutates
+	// the admin's own `dashboard_sections` meta. No other parallel spec depends on
+	// the order-import mode, and this serial job never runs concurrently with the
+	// parallel one.)
+	'**/tests/analytics/analytics-settings.spec.ts',
 	// Flips the global `woocommerce_default_customer_address` (geolocation) and
 	// `woocommerce_enable_ajax_add_to_cart` settings, which change add-to-cart
 	// behavior for every other worker. (`cart.spec.ts` runs in core-parallel — it
