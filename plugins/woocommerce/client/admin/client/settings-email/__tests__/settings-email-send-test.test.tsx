@@ -191,6 +191,33 @@ describe( 'useSendTestEmail + SendTestEmailForm', () => {
 		);
 	} );
 
+	it( 'shows the busy "Sending…" state while the request is in flight', async () => {
+		let resolveRequest: ( value: unknown ) => void = () => {};
+		apiFetchMock.mockImplementation(
+			() =>
+				new Promise( ( resolve ) => {
+					resolveRequest = resolve;
+				} )
+		);
+
+		render( <Harness target={ editorTarget } source="email_listing" /> );
+
+		enterEmailAndSend( 'merchant@example.com' );
+
+		const sendingButton = await screen.findByRole( 'button', {
+			name: 'Sending…',
+		} );
+		expect( sendingButton ).toBeDisabled();
+
+		resolveRequest( { success: true, result: true } );
+
+		await waitFor( () =>
+			expect(
+				screen.getByRole( 'button', { name: 'Send test email' } )
+			).toBeEnabled()
+		);
+	} );
+
 	it( 'invokes onCancel when the cancel button is clicked', () => {
 		const onCancel = jest.fn();
 		render(

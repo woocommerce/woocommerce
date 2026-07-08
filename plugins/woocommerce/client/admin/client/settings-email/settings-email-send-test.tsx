@@ -167,8 +167,10 @@ export const useSendTestEmail = (
 
 			recordEvent( 'settings_emails_preview_test_sent_failed', {
 				email_type: target.emailType,
-				error: wpError.message,
-				error_code: wpError.code,
+				// apiFetch can reject with non-WPError shapes (e.g. a native
+				// TypeError), so guard against missing fields.
+				error: wpError?.message ?? '',
+				error_code: wpError?.code ?? '',
 				source,
 			} );
 		}
@@ -229,6 +231,7 @@ export const SendTestEmailForm = ( {
 
 			{ notice && (
 				<div
+					role={ noticeType === 'error' ? 'alert' : 'status' }
 					className={ `wc-settings-email-preview-send-modal-notice wc-settings-email-preview-send-modal-notice-${ noticeType }` }
 				>
 					<Icon

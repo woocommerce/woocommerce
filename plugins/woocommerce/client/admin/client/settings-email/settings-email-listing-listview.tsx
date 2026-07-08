@@ -206,9 +206,10 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				label: __( 'Send test email', 'woocommerce' ),
 				supportsBulk: false,
 				// The editor's send_preview_email endpoint renders the
-				// woo_email post, so a post is required — rows without one
-				// offer the "Recreate email post" action instead.
-				isEligible: ( item: EmailType ) => !! item.post_id,
+				// woo_email post, so a numeric post ID is required — rows
+				// without one offer the "Recreate email post" action instead.
+				isEligible: ( item: EmailType ) =>
+					Number.isFinite( parseInt( item.post_id, 10 ) ),
 				modalHeader: __( 'Send a test email', 'woocommerce' ),
 				RenderModal: ( {
 					items,

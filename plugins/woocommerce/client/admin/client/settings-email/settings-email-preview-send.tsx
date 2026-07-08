@@ -40,6 +40,11 @@ export const EmailPreviewSend = ( { type }: EmailPreviewSendProps ) => {
 		'email_preview'
 	);
 
+	const closeModal = () => {
+		setIsModalOpen( false );
+		setIsSending( false );
+	};
+
 	return (
 		<div className="wc-settings-email-preview-send">
 			<Button
@@ -52,10 +57,7 @@ export const EmailPreviewSend = ( { type }: EmailPreviewSendProps ) => {
 			{ isModalOpen && (
 				<Modal
 					title={ __( 'Send a test email', 'woocommerce' ) }
-					onRequestClose={ () => {
-						setIsModalOpen( false );
-						setIsSending( false );
-					} }
+					onRequestClose={ closeModal }
 					className="wc-settings-email-preview-send-modal"
 				>
 					<SendTestEmailForm
@@ -65,7 +67,7 @@ export const EmailPreviewSend = ( { type }: EmailPreviewSendProps ) => {
 						notice={ notice }
 						noticeType={ noticeType }
 						onSend={ sendEmail }
-						onCancel={ () => setIsModalOpen( false ) }
+						onCancel={ closeModal }
 					/>
 				</Modal>
 			) }
