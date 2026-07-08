@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a woocommerce_format_phone_number filter and a WC_Validation::is_phone_format() method.

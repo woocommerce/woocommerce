@@ -17,9 +17,18 @@ class WC_Email_Customer_Review_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Load up the email classes since they aren't loaded by default.
+	 *
+	 * `WC_Emails::init()` only registers the review-request email class
+	 * when the `customer_review_request` feature flag is on, so the suite
+	 * has to enable the option (and re-init the mailer to pick up the
+	 * flag change) before exercising the mailer-level registration. Doing
+	 * it here makes every test self-contained rather than relying on the
+	 * incidental order of other OrderReviews suites that also flip the flag.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
 
 		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
 		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email.php';
@@ -27,7 +36,19 @@ class WC_Email_Customer_Review_Request_Test extends \WC_Unit_Test_Case {
 
 		$this->ensure_review_order_page();
 
+		WC()->mailer()->init();
+
 		$this->sut = new WC_Email_Customer_Review_Request();
+	}
+
+	/**
+	 * Reset the feature flag between tests so the suite doesn't leak the
+	 * enabled state into unrelated test classes that assume the default.
+	 */
+	public function tearDown(): void {
+		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
+
+		parent::tearDown();
 	}
 
 	/**
@@ -208,5 +229,85 @@ class WC_Email_Customer_Review_Request_Test extends \WC_Unit_Test_Case {
 		$after = count( $mailer->mock_sent );
 
 		$this->assertSame( $before, $after, 'Disabled review-request email must not dispatch any mail.' );
+	}
+
+	/**
+	 * @testdox trigger() refuses to send when the order is no longer in an eligible status.
+	 *
+	 * Defence-in-depth against the scheduler missing a transition out of
+	 * `completed` (WOOPLUG-6672): even if the action fires, the email must
+	 * not go out for an order that is no longer eligible.
+	 */
+	public function test_trigger_skips_when_order_not_in_eligible_status(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+		$order->set_status( 'processing' );
+		$order->save();
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+		$this->sut->trigger( $order->get_id() );
+		$after = count( $mailer->mock_sent );
+
+		$this->assertSame( $before, $after, 'Review-request email must not dispatch for non-eligible status.' );
+	}
+
+	/**
+	 * @testdox trigger() skips orders whose items all have reviews disabled.
+	 *
+	 * Eligibility can change between scheduling and sending — e.g. the admin
+	 * disables product reviews site-wide during the delay window — so the
+	 * email gates on `ItemEligibility::has_actionable_items()` at send time.
+	 */
+	public function test_trigger_skips_when_no_actionable_items(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_reviews_allowed( false );
+		$product->save();
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( 1, $product );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+		$this->sut->trigger( $order->get_id() );
+		$after = count( $mailer->mock_sent );
+
+		$this->assertSame( $before, $after, 'Review-request email must not dispatch when nothing on the order is reviewable.' );
+	}
+
+	/**
+	 * @testdox The woocommerce_review_order_eligible_statuses filter widens the eligible set for trigger().
+	 */
+	public function test_trigger_eligible_statuses_filter_can_widen(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->set_status( 'processing' );
+		$order->save();
+
+		$widen_statuses = static function () {
+			return array( 'completed', 'processing' );
+		};
+		add_filter( 'woocommerce_review_order_eligible_statuses', $widen_statuses );
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+		try {
+			$this->sut->trigger( $order->get_id() );
+			$after = count( $mailer->mock_sent );
+		} finally {
+			remove_filter( 'woocommerce_review_order_eligible_statuses', $widen_statuses );
+		}
+
+		$this->assertSame( $before + 1, $after, 'Filter must allow non-default statuses to receive the email.' );
 	}
 }

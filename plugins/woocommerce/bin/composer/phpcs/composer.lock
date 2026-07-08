@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4b7c50b51b5a09878954339be989bfdd",
+    "content-hash": "3b518363dc38fa21955eb79c65519597",
     "packages": [],
     "packages-dev": [
         {
@@ -771,61 +771,6 @@
             "time": "2025-11-04T16:30:35+00:00"
         },
         {
-            "name": "suin/phpcs-psr4-sniff",
-            "version": "v3.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/suin/phpcs-psr4-sniff.git",
-                "reference": "b000ca1e3d04c9876b39c2e56859760b93dfc84d"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/suin/phpcs-psr4-sniff/zipball/b000ca1e3d04c9876b39c2e56859760b93dfc84d",
-                "reference": "b000ca1e3d04c9876b39c2e56859760b93dfc84d",
-                "shasum": ""
-            },
-            "require": {
-                "ext-json": "*",
-                "php": ">=7.1",
-                "slevomat/coding-standard": ">=4.7 <8.0.0",
-                "squizlabs/php_codesniffer": ">=3.3 <4.0.0"
-            },
-            "type": "phpcodesniffer-standard",
-            "autoload": {
-                "psr-0": {
-                    "Suin\\Sniffs\\Classes\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "suin",
-                    "email": "suinyeze@gmail.com",
-                    "homepage": "https://github.com/suin",
-                    "role": "Developer"
-                }
-            ],
-            "description": "PHP_CodeSniffer sniff that checks class name matches PSR-4 project structure.",
-            "homepage": "https://github.com/suin/php",
-            "keywords": [
-                "PSR-4",
-                "coding-standards",
-                "coding-style",
-                "namespace",
-                "php-codesniffer",
-                "phpcs",
-                "static-analysis"
-            ],
-            "support": {
-                "issues": "https://github.com/suin/php/issues",
-                "source": "https://github.com/suin/phpcs-psr4-sniff/tree/v3.0.0"
-            },
-            "time": "2021-06-02T06:16:24+00:00"
-        },
-        {
             "name": "woocommerce/woocommerce-sniffs",
             "version": "1.0.0",
             "source": {
@@ -950,5 +895,5 @@
     "platform-overrides": {
         "php": "7.4"
     },
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }

@@ -1,3 +1,3 @@
-import '@woocommerce/internal-ts-config/types/@wordpress/data';
-import '@woocommerce/internal-ts-config/types/@wordpress/core-data';
-import '@woocommerce/internal-ts-config/types/@wordpress/editor';
+import '@woocommerce/internal-build/type-overrides/@wordpress/data';
+import '@woocommerce/internal-build/type-overrides/@wordpress/core-data';
+import '@woocommerce/internal-build/type-overrides/@wordpress/editor';

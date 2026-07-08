@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Remove Legacy REST API settings section, admin notices, auto-install logic, and UI nudges from WooCommerce core. The Legacy REST API extension continues to work if manually installed.

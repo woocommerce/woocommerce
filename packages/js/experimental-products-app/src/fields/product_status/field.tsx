@@ -2,15 +2,23 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { SelectControl } from '@wordpress/ui';
 
 import type { Field } from '@wordpress/dataviews';
-import { SelectControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../types';
 import { ProductStatusBadge } from '../components/product-status-badge';
+import {
+	getVariationActiveValue,
+	VariationActiveBadge,
+} from '../variation_active/field';
+
+function isVariation( item: ProductEntityRecord ) {
+	return item.type === 'variation' || Boolean( item.parent_id );
+}
 
 function isValidStatus( value: string ) {
 	return (
@@ -36,25 +44,41 @@ const fieldDefinition = {
 
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	...fieldDefinition,
-	getValue: ( { item } ) => item.status,
-	render: ( { item }: { item: ProductEntityRecord } ) => (
-		<ProductStatusBadge status={ item.status } />
-	),
-	Edit: ( { data, onChange, field } ) => (
-		<SelectControl
-			label={ field.label }
-			value={ data.status }
-			options={ field.elements?.filter(
+	getValue: ( { item } ) =>
+		isVariation( item ) ? getVariationActiveValue( item ) : item.status,
+	render: ( { item }: { item: ProductEntityRecord } ) =>
+		isVariation( item ) ? (
+			<VariationActiveBadge value={ getVariationActiveValue( item ) } />
+		) : (
+			<ProductStatusBadge status={ item.status } />
+		),
+	Edit: ( { data, onChange, field } ) => {
+		const options =
+			field.elements?.filter(
 				( element: { label: string; value: string } ) =>
 					element.value !== 'trash'
-			) }
-			onChange={ ( value ) => {
-				if ( value && isValidStatus( value ) ) {
-					onChange( {
-						status: value,
-					} );
-				}
-			} }
-		/>
-	),
+			) ?? [];
+		const selectedOption =
+			field.placeholder && ! data.status
+				? undefined
+				: options.find( ( option ) => option.value === data.status );
+
+		return (
+			<SelectControl
+				label={ field.label }
+				placeholder={ field.placeholder }
+				value={ selectedOption }
+				items={ options }
+				onValueChange={ ( option ) => {
+					const value = option?.value;
+
+					if ( typeof value === 'string' && isValidStatus( value ) ) {
+						onChange( {
+							status: value,
+						} );
+					}
+				} }
+			/>
+		);
+	},
 };

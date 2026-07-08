@@ -9,7 +9,6 @@ import { useSelect } from '@wordpress/data';
 import clsx from 'clsx';
 import { Button, Stack, Tabs } from '@wordpress/ui';
 import { privateApis as editorPrivateApis } from '@wordpress/editor';
-import { Page } from '@wordpress/admin-ui';
 import { addQueryArgs } from '@wordpress/url';
 import { getAdminLink } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
@@ -29,13 +28,17 @@ import {
 import { productFields } from './fields';
 import {
 	getItemId,
+	getProductEditPostId,
 	getProductListNavigationPath,
 	getProductListTab,
 	getProductsWithEmbeddedVariations,
 	getSelectionFromPostId,
+	hasActiveProductListSearchOrFilters,
 	isProductEditorAccessible,
 } from './utils';
 import { useProductActions } from '../dataviews-actions';
+import { ProductListEmptyState } from './empty-state';
+import { ProductListPage, ProductListPageHeader } from './page';
 
 const { usePostActions } = unlock( editorPrivateApis );
 const { useHistory, useLocation } = unlock( routerPrivateApis );
@@ -96,7 +99,7 @@ export default function ProductList( {
 			if ( items.length > 0 ) {
 				nextParams.postId = items.join( ',' );
 			} else {
-				delete nextParams.postId;
+				nextParams.postId = undefined;
 			}
 
 			navigate(
@@ -124,9 +127,8 @@ export default function ProductList( {
 			const nextParams = {
 				...currentQuery,
 				activeView: nextTab,
+				postId: undefined,
 			};
-
-			delete nextParams.postId;
 
 			navigate(
 				getProductListNavigationPath( location.path, nextParams )
@@ -149,6 +151,18 @@ export default function ProductList( {
 		() => getProductsWithEmbeddedVariations( records || EMPTY_ARRAY ),
 		[ records ]
 	);
+	const hasActiveSearchOrFilters =
+		hasActiveProductListSearchOrFilters( view );
+
+	const onClearSearchOrFilters = useCallback( () => {
+		setView( {
+			...view,
+			filters: [],
+			page: 1,
+			search: '',
+		} );
+	}, [ setView, view ] );
+
 	const getItemParentId = useCallback(
 		( item: ProductEntityRecord ) =>
 			item.parent_id && item.parent_id > 0 ? item.parent_id : undefined,
@@ -224,8 +238,9 @@ export default function ProductList( {
 				{ __( 'Import', 'woocommerce' ) }
 			</Button>
 			<Button
-				size="compact"
 				disabled={ canCreateRecord === false }
+				size="compact"
+				variant="solid"
 				onClick={ () =>
 					( window.location.href = getAdminLink(
 						addQueryArgs( 'post-new.php', {
@@ -239,23 +254,50 @@ export default function ProductList( {
 		</Stack>
 	);
 
+	const toolbar = (
+		<Stack
+			direction="row"
+			align="center"
+			justify="space-between"
+			gap="sm"
+			className="woocommerce-product-list__toolbar"
+		>
+			{ /* Tabs component should not be used: https://github.com/woocommerce/woocommerce/issues/64478 */ }
+			<Tabs.Root value={ selectedTab } onValueChange={ onChangeTab }>
+				<Tabs.List
+					variant="minimal"
+					aria-label={ __(
+						'Filter products by status',
+						'woocommerce'
+					) }
+				>
+					{ PRODUCT_LIST_TABS.map( ( tab ) => (
+						<Tabs.Tab key={ tab.value } value={ tab.value }>
+							{ tab.label }
+						</Tabs.Tab>
+					) ) }
+				</Tabs.List>
+			</Tabs.Root>
+			<Stack direction="row" align="center" gap="xs">
+				<DataViews.Search label={ __( 'Search', 'woocommerce' ) } />
+				<DataViews.FiltersToggle />
+				<DataViews.LayoutSwitcher />
+				<DataViews.ViewConfig />
+			</Stack>
+		</Stack>
+	);
+
 	return (
-		<Page
+		<ProductListPage
 			className={ classes }
 			ariaLabel={ __( 'Products', 'woocommerce' ) }
-			subTitle={ __(
-				'Add, edit, and manage the products you sell in your store',
-				'woocommerce'
-			) }
-			title={ __( 'Products', 'woocommerce' ) }
-			actions={ pageActions }
 		>
 			<DataViews
 				key={ activeView }
 				paginationInfo={ paginationInfo }
 				fields={ productFields }
 				data={ data }
-				isLoading={ isLoading && ! hasResolved }
+				isLoading={ isLoading || ! hasResolved }
 				view={ view }
 				actions={ actions }
 				onChangeView={ setView }
@@ -265,12 +307,19 @@ export default function ProductList( {
 				selection={ selection }
 				defaultLayouts={ DEFAULT_LAYOUTS }
 				isItemClickable={ isProductEditorAccessible }
+				empty={
+					<ProductListEmptyState
+						isSearchOrFilterResult={ hasActiveSearchOrFilters }
+						onClearFilters={ onClearSearchOrFilters }
+						tab={ selectedTab }
+					/>
+				}
 				renderItemLink={ ( { item, ...props } ) => (
 					<a
 						{ ...props }
 						href={ getAdminLink(
 							addQueryArgs( 'post.php', {
-								post: item.id,
+								post: getProductEditPostId( item ),
 								action: 'edit',
 							} )
 						) }
@@ -279,45 +328,19 @@ export default function ProductList( {
 					</a>
 				) }
 			>
-				<Stack
-					direction="row"
-					align="center"
-					justify="space-between"
-					gap="sm"
-					className="woocommerce-product-list__toolbar"
-				>
-					{ /* Tabs component should not be used: https://github.com/woocommerce/woocommerce/issues/64478 */ }
-					<Tabs.Root
-						value={ selectedTab }
-						onValueChange={ onChangeTab }
-					>
-						<Tabs.List
-							variant="minimal"
-							aria-label={ __(
-								'Filter products by status',
-								'woocommerce'
-							) }
-						>
-							{ PRODUCT_LIST_TABS.map( ( tab ) => (
-								<Tabs.Tab key={ tab.value } value={ tab.value }>
-									{ tab.label }
-								</Tabs.Tab>
-							) ) }
-						</Tabs.List>
-					</Tabs.Root>
-					<Stack direction="row" align="center" gap="xs">
-						<DataViews.Search
-							label={ __( 'Search products', 'woocommerce' ) }
-						/>
-						<DataViews.FiltersToggle />
-						<DataViews.LayoutSwitcher />
-						<DataViews.ViewConfig />
-					</Stack>
-				</Stack>
-				<DataViews.FiltersToggled />
+				<ProductListPageHeader
+					title={ __( 'Products', 'woocommerce' ) }
+					subTitle={ __(
+						'Add, edit, and manage the products you sell in your store.',
+						'woocommerce'
+					) }
+					actions={ pageActions }
+					toolbar={ toolbar }
+				/>
+				<DataViews.FiltersToggled className="woocommerce-product-list__filters" />
 				<DataViews.Layout />
 				<DataViews.Footer />
 			</DataViews>
-		</Page>
+		</ProductListPage>
 	);
 }

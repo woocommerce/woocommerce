@@ -15,7 +15,6 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalUseMultipleOriginColorsAndGradients as useMultipleOriginColorsAndGradients,
 } from '@wordpress/block-editor';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	ToggleControl,
 	Disabled,
@@ -56,7 +55,7 @@ const PriceSliderEdit = ( {
 		customSlider,
 	} = attributes;
 
-	const rangeInput = context.woocommerceRangeInput;
+	const rangeInput = context[ 'woocommerce/rangeInput' ];
 	const { isLoading } = rangeInput ?? {};
 
 	const blockProps = useBlockProps( {

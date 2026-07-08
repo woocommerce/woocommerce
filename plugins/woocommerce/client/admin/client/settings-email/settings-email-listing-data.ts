@@ -7,7 +7,7 @@ import { settingsStore } from '@woocommerce/data';
 import { useState, useCallback, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 // @ts-expect-error - We need to use this /wp see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/#dataviews
-import { View } from '@wordpress/dataviews/wp'; // eslint-disable-line @woocommerce/dependency-group
+import { View } from '@wordpress/dataviews/wp';
 
 /**
  * Internal dependencies
@@ -106,6 +106,12 @@ export const useTransactionalEmails = (
 						? rawVersion
 						: null;
 
+				const rawBackfilled = meta?._wc_email_backfilled;
+				const wasBackfilled =
+					rawBackfilled === true ||
+					rawBackfilled === '1' ||
+					rawBackfilled === 1;
+
 				// PHP serializes the registry's current version under
 				// `current_version` (snake) on the slotfill payload; project to
 				// `currentVersion` (camel) for the row's TS contract.
@@ -125,6 +131,7 @@ export const useTransactionalEmails = (
 					templateStatus,
 					templateVersion,
 					currentVersion,
+					wasBackfilled,
 				};
 			} ),
 		[ emailTypesData, emailPosts, postIdsMap ]

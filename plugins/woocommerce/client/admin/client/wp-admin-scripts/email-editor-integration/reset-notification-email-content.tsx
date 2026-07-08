@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __, sprintf, TranslatableText } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import { store as coreStore } from '@wordpress/core-data';
 import { backup } from '@wordpress/icons';
@@ -16,7 +16,6 @@ import {
 import { decodeEntities } from '@wordpress/html-entities';
 import apiFetch from '@wordpress/api-fetch';
 
-// eslint-disable-next-line @woocommerce/dependency-group
 import type { PostWithPermissions } from '@woocommerce/email-editor';
 
 function getItemTitle( item: {
@@ -157,7 +156,7 @@ const getResetNotificationEmailContentAction = () => {
 
 									onActionPerformed?.( items );
 								} catch ( error ) {
-									let errorMessage = __(
+									let errorMessage = __< string >(
 										'An error occurred while resetting the email content.',
 										'woocommerce'
 									);
@@ -167,7 +166,8 @@ const getResetNotificationEmailContentAction = () => {
 										typeof error === 'object' &&
 										'message' in error
 									) {
-										errorMessage = String( error.message );
+										errorMessage =
+											error.message as TranslatableText< string >;
 									}
 
 									createErrorNotice( errorMessage, {

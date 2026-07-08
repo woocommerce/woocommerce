@@ -328,4 +328,56 @@ describe( 'useCollection', () => {
 			[ 10, 30 ],
 		] );
 	} );
+	const renderWithStoreError = ( errorValue ) => {
+		mocks.selectors.getCollectionError.mockReturnValue( errorValue );
+		const TestComponent = getTestComponent();
+		act( () => {
+			renderer = TestRenderer.create(
+				getWrappedComponents( TestComponent, {
+					options: {
+						namespace: 'test/store',
+						resourceName: 'products',
+						query: { bar: 'foo' },
+					},
+				} )
+			);
+		} );
+		//eslint-disable-next-line testing-library/await-async-query
+		return renderer.root.findByType( 'div' ).props;
+	};
+
+	it( 'should propagate an Error instance from the store via the error boundary', () => {
+		const error = new Error( 'A real error' );
+		const props = renderWithStoreError( error );
+		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
+		expect( props[ 'data-error' ].message ).toBe( 'A real error' );
+		expect( console ).toHaveErrored( /your React components:/ );
+		renderer.unmount();
+	} );
+	it( 'should convert a non-Error object with a message into an Error instance', () => {
+		const error = { code: 'rest_no_route', message: 'No route found.' };
+		const props = renderWithStoreError( error );
+		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
+		expect( props[ 'data-error' ].message ).toBe( 'No route found.' );
+		expect( console ).toHaveErrored( /your React components:/ );
+		renderer.unmount();
+	} );
+	it( 'should use a fallback message when a non-Error object has no message', () => {
+		const props = renderWithStoreError( { code: 500 } );
+		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
+		expect( props[ 'data-error' ].message ).toBe(
+			'Something went wrong while loading data.'
+		);
+		expect( console ).toHaveErrored( /your React components:/ );
+		renderer.unmount();
+	} );
+	it( 'should use a fallback message when a primitive value is returned from the store', () => {
+		const props = renderWithStoreError( 'oops' );
+		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
+		expect( props[ 'data-error' ].message ).toBe(
+			'Something went wrong while loading data.'
+		);
+		expect( console ).toHaveErrored( /your React components:/ );
+		renderer.unmount();
+	} );
 } );

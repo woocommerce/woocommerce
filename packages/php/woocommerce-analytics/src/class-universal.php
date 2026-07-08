@@ -134,6 +134,10 @@ class Universal {
 	public function capture_remove_from_cart( $cart_item_key, $cart ) {
 		$item = $cart->removed_cart_contents[ $cart_item_key ] ?? null;
 
+		if ( ! is_array( $item ) || ! isset( $item['product_id'], $item['quantity'] ) ) {
+			return;
+		}
+
 		WC_Analytics_Tracking::record_event(
 			'remove_from_cart',
 			$this->get_cart_checkout_event_properties(
@@ -156,6 +160,10 @@ class Universal {
 	 * @return void
 	 */
 	public function capture_cart_quantity_update( $cart_item_key, $quantity, $old_quantity, $cart ) {
+		if ( ! isset( $cart->cart_contents[ $cart_item_key ]['product_id'] ) ) {
+			return;
+		}
+
 		$product_id = $cart->cart_contents[ $cart_item_key ]['product_id'];
 		if ( $quantity > $old_quantity ) {
 			WC_Analytics_Tracking::record_event(

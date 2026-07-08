@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
+
 /**
  * Product Filter: Checkbox List Block.
  */
@@ -33,11 +35,11 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( empty( $block->context['woocommerceSelectableItems'] ) ) {
+		if ( empty( $block->context['woocommerce/selectableItems'] ) ) {
 			return '';
 		}
 
-		$block_context   = $block->context['woocommerceSelectableItems'];
+		$block_context   = $block->context['woocommerce/selectableItems'];
 		$items           = is_array( $block_context['items'] ?? null ) ? $block_context['items'] : array();
 		$store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
 		$filter_type     = $block_context['filterType'] ?? '';
@@ -72,16 +74,20 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 
 		$checkbox_svg = '<svg class="wc-block-product-filter-checkbox-list__mark" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.25 1.19922L3.75 6.69922L1 3.94922" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-		$star_path      = '<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>';
-		$stars_svg      = sprintf(
+		$star_path               = '<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>';
+		$stars_svg               = sprintf(
 			'<svg class="wc-block-product-filter-checkbox-list__stars-svg" width="120" height="24" viewBox="0 0 120 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">%1$s<g transform="translate(24, 0)">%1$s</g><g transform="translate(48, 0)">%1$s</g><g transform="translate(72, 0)">%1$s</g><g transform="translate(96, 0)">%1$s</g></svg>',
 			$star_path
 		);
-		$visible_items  = array_slice( $items, 0, $display_limit, true );
-		$has_more_items = count( $items ) > count( $visible_items );
-		$hidden_count   = max( 0, count( $items ) - count( $visible_items ) );
-		$first_item     = reset( $items );
-		$show_counts    = is_array( $first_item ) && array_key_exists( 'count', $first_item );
+		$first_items             = array_slice( $items, 0, $display_limit, true );
+		$overflow_items          = array_slice( $items, $display_limit );
+		$overflow_selected_items = array_filter( $overflow_items, fn( $item ) => is_array( $item ) && ! empty( $item['selected'] ) );
+		$visible_items           = array_merge( $first_items, $overflow_selected_items );
+		$hidden_count            = count( $items ) - count( $visible_items );
+
+		$first_item          = reset( $items );
+		$show_counts         = is_array( $first_item ) && array_key_exists( 'count', $first_item );
+		$has_visual_swatches = self::has_visual_swatches( $items );
 
 		ob_start();
 		?>
@@ -90,19 +96,15 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 				<?php if ( ! empty( $block_context['groupLabel'] ) ) : ?>
 					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
 				<?php endif; ?>
-				<div
-					class="wc-block-product-filter-checkbox-list__items"
-					data-wp-interactive="<?php echo esc_attr( $store_namespace ); ?>"
-				>
+				<div class="wc-block-product-filter-checkbox-list__items">
 					<?php
-					foreach ( $visible_items as $index => $item ) :
-						$context_item = array_merge( $item, array( 'index' => $index ) );
+					foreach ( $visible_items as $item ) :
 						?>
 						<div
 							class="wc-block-product-filter-checkbox-list__item"
 							data-wp-each-child
-							<?php echo wp_interactivity_data_wp_context( array( 'item' => $context_item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							data-wp-bind--hidden="woocommerce/product-filter-checkbox-list::state.itemHidden"
+							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							data-wp-bind--hidden="context.item.hidden"
 						>
 							<label
 								class="wc-block-product-filter-checkbox-list__label"
@@ -137,6 +139,19 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 											<?php echo $stars_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 										</span>
 									<?php else : ?>
+										<?php if ( $has_visual_swatches ) : ?>
+											<?php
+											$swatch_style = $this->get_item_swatch_style( $item );
+											$has_visual   = '' !== $swatch_style;
+											?>
+											<span
+												class="wc-block-product-filter-checkbox-list__color-swatch<?php echo ! $has_visual ? ' is-empty' : ''; ?>"
+												<?php if ( $has_visual ) : ?>
+													style="<?php echo esc_attr( $swatch_style ); ?>"
+												<?php endif; ?>
+												aria-hidden="true"
+											></span>
+										<?php endif; ?>
 										<span class="wc-block-product-filter-checkbox-list__text">
 											<?php echo esc_html( $item['label'] ); ?>
 										</span>
@@ -151,12 +166,12 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 						</div>
 					<?php endforeach; ?>
 					<template
-						data-wp-each--item="state.selectableItems"
+						data-wp-each--item="state.items"
 						data-wp-each-key="context.item.id"
 					>
 						<div
 							class="wc-block-product-filter-checkbox-list__item"
-							data-wp-bind--hidden="woocommerce/product-filter-checkbox-list::state.itemHidden"
+							data-wp-bind--hidden="context.item.hidden"
 						>
 							<label
 								class="wc-block-product-filter-checkbox-list__label"
@@ -185,6 +200,14 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 											<?php echo $stars_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 										</span>
 									<?php else : ?>
+										<?php if ( $has_visual_swatches ) : ?>
+											<span
+												class="wc-block-product-filter-checkbox-list__color-swatch"
+												data-wp-class--is-empty="woocommerce/product-filter-checkbox-list::state.isColorSwatchEmpty"
+												data-wp-bind--style="woocommerce/product-filter-checkbox-list::state.colorSwatchStyle"
+												aria-hidden="true"
+											></span>
+										<?php endif; ?>
 										<span
 											class="wc-block-product-filter-checkbox-list__text"
 											data-wp-text="context.item.label"
@@ -200,7 +223,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 						</div>
 					</template>
 				</div>
-				<?php if ( $has_more_items ) : ?>
+				<?php if ( $hidden_count > 0 ) : ?>
 					<div class="wc-block-product-filter-checkbox-list__show-more">
 						<button
 							type="button"
@@ -219,6 +242,34 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Check whether any item has visual swatch data.
+	 *
+	 * @param array $items Selectable items.
+	 * @return bool
+	 */
+	private static function has_visual_swatches( array $items ): bool {
+		foreach ( $items as $item ) {
+			if ( is_array( $item ) && array_key_exists( 'visual', $item ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Build inline swatch style from item visual data.
+	 *
+	 * @param array $item Selectable item data.
+	 * @return string
+	 */
+	private function get_item_swatch_style( array $item ): string {
+		$visual = isset( $item['visual'] ) && is_array( $item['visual'] ) ? $item['visual'] : array();
+
+		return VisualAttributeTermMeta::get_swatch_style( $visual );
 	}
 
 	/**

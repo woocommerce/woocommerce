@@ -67,8 +67,8 @@ final class ProductFilterStatus extends AbstractBlock {
 			$items[] = array(
 				'type'        => 'status',
 				'value'       => $status,
-				// translators: %s: status.
-				'activeLabel' => sprintf( __( 'Status: %s', 'woocommerce' ), $status_options[ $status ] ),
+				// translators: %s: availability.
+				'activeLabel' => sprintf( __( 'Availability: %s', 'woocommerce' ), $status_options[ $status ] ),
 			);
 		}
 
@@ -111,12 +111,14 @@ final class ProductFilterStatus extends AbstractBlock {
 		$show_counts    = $attributes['showCounts'] ?? false;
 		$filter_options = array_map(
 			function ( $item ) use ( $stock_statuses, $selected_stock_statuses, $show_counts ) {
+				$label  = $stock_statuses[ $item['status'] ];
 				$option = array(
-					'id'       => 'status-' . $item['status'],
-					'label'    => $stock_statuses[ $item['status'] ],
-					'value'    => $item['status'],
-					'selected' => in_array( $item['status'], $selected_stock_statuses, true ),
-					'type'     => 'status',
+					'id'        => 'status-' . $item['status'],
+					'label'     => $label,
+					'ariaLabel' => $label,
+					'value'     => $item['status'],
+					'selected'  => in_array( $item['status'], $selected_stock_statuses, true ),
+					'type'      => 'status',
 				);
 
 				if ( $show_counts ) {
@@ -132,7 +134,7 @@ final class ProductFilterStatus extends AbstractBlock {
 			'items'          => array_values( $filter_options ),
 			'selectionMode'  => 'multiple',
 			'storeNamespace' => 'woocommerce/product-filters',
-			'groupLabel'     => __( 'Status', 'woocommerce' ),
+			'groupLabel'     => __( 'Availability', 'woocommerce' ),
 		);
 
 		$wrapper_attributes = array(
@@ -140,8 +142,8 @@ final class ProductFilterStatus extends AbstractBlock {
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'data-wp-context'     => wp_json_encode(
 				array(
-					/* translators: {{label}} is the status filter item label. */
-					'activeLabelTemplate' => __( 'Status: {{label}}', 'woocommerce' ),
+					/* translators: {{label}} is the availability filter item label. */
+					'activeLabelTemplate' => __( 'Availability: {{label}}', 'woocommerce' ),
 					'filterType'          => 'status',
 					'items'               => $filter_context['items'],
 				),
@@ -162,7 +164,7 @@ final class ProductFilterStatus extends AbstractBlock {
 			array_reduce(
 				$block->parsed_block['innerBlocks'],
 				function ( $carry, $parsed_block ) use ( $filter_context ) {
-					$carry .= ( new \WP_Block( $parsed_block, array( 'woocommerceSelectableItems' => $filter_context ) ) )->render();
+					$carry .= ( new \WP_Block( $parsed_block, array( 'woocommerce/selectableItems' => $filter_context ) ) )->render();
 					return $carry;
 				},
 				''

@@ -281,6 +281,7 @@ A template for attribute name and options that will be applied to all variable p
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector
 - **Supports:** interactivity, ~~inserter~~
+- **Attributes:** autoselect, disabledAttributesAction, displayStyle
 
 ## Variation Selector: Attribute Name (Beta) - woocommerce/add-to-cart-with-options-variation-selector-attribute-name
 
@@ -291,16 +292,6 @@ Format the name of an attribute associated with a variable product.
 - **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector-attribute
 - **Supports:** color (background, gradients, text), interactivity, spacing (padding), typography (fontSize, lineHeight), ~~alignWide~~, ~~align~~, ~~inserter~~
 
-## Variation Selector: Attribute Options (Beta) - woocommerce/add-to-cart-with-options-variation-selector-attribute-options
-
-Display the attribute options associated with a variable product.
-
-- **Name:** woocommerce/add-to-cart-with-options-variation-selector-attribute-options
-- **Category:** woocommerce-product-elements
-- **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector-attribute
-- **Supports:** interactivity, ~~inserter~~
-- **Attributes:** autoselect, disabledAttributesAction, optionStyle
-
 ## Variation Selector (Beta) - woocommerce/add-to-cart-with-options-variation-selector
 
 Display any product variations available to select from and add to cart.
@@ -309,6 +300,15 @@ Display any product variations available to select from and add to cart.
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/add-to-cart-with-options
 - **Supports:** interactivity
+
+## Add to Wishlist Button - woocommerce/add-to-wishlist-button
+
+Lets shoppers add the current product to their wishlist from the single-product page.
+
+- **Name:** woocommerce/add-to-wishlist-button
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/add-to-cart-with-options
+- **Supports:** color (background, text), interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~multiple~~, ~~reusable~~
 
 ## Filter by Attribute Controls - woocommerce/attribute-filter
 
@@ -531,7 +531,7 @@ Enable customers to change the sorting order of the products.
 
 - **Name:** woocommerce/catalog-sorting
 - **Category:** woocommerce
-- **Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize)
+- **Supports:** color (text, ~~background~~), interactivity, typography (fontSize)
 - **Attributes:** fontSize, useLabel
 
 ## Product Category Description - woocommerce/category-description
@@ -816,7 +816,7 @@ Include a coupon code to entice customers to make a purchase.
 - **Name:** woocommerce/coupon-code
 - **Category:** woocommerce
 - **Supports:** align, color (background, text), email, spacing (margin, padding), typography (fontSize), ~~html~~
-- **Attributes:** couponCode
+- **Attributes:** amount, couponCode, discountType, emailRestrictions, excludeSaleItems, excludedProductCategoryIds, excludedProductIds, expiryDay, freeShipping, individualUse, maximumAmount, minimumAmount, productCategoryIds, productIds, source, usageLimit, usageLimitPerUser
 
 ## Customer account - woocommerce/customer-account
 
@@ -826,6 +826,15 @@ A block that allows your customers to log in and out of their accounts in your s
 - **Category:** woocommerce
 - **Supports:** align, color (background, text), interactivity, spacing (margin, padding), typography (fontSize)
 - **Attributes:** displayStyle, hasDropdownNavigation, iconClass, iconStyle
+
+## Dropdown - woocommerce/dropdown
+
+Display options in a dropdown.
+
+- **Name:** woocommerce/dropdown
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector-attribute
+- **Supports:** interactivity, woocommerce (innerBlockDisplayStyle)
 
 ## Email Content - woocommerce/email-content
 
@@ -1226,16 +1235,16 @@ Display a product's description, attributes, and reviews
 
 ## Product Filters - woocommerce/product-filters
 
-Let shoppers filter products displayed on the page.
+Add a set of filters shoppers can use.
 
 - **Name:** woocommerce/product-filters
 - **Category:** woocommerce
-- **Supports:** align, color (background, button, heading, text, ~~enableContrastChecker~~), inserter, interactivity, layout (default, ~~allowEditing~~), multiple, spacing (blockGap), typography (fontSize)
-- **Attributes:** isPreview
+- **Supports:** align, color (background, button, heading, text, ~~enableContrastChecker~~), inserter, interactivity, layout (default, ~~allowEditing~~), spacing (blockGap), typography (fontSize)
+- **Attributes:** isPreview, showFilterDrawer
 
 ## Active Filters - woocommerce/product-filter-active
 
-Display the currently active filters.
+Display all active filters.
 
 - **Name:** woocommerce/product-filter-active
 - **Category:** woocommerce
@@ -1244,7 +1253,7 @@ Display the currently active filters.
 
 ## Attribute Filter - woocommerce/product-filter-attribute
 
-Enable customers to filter the product grid by selecting one or more attributes, such as color.
+Let shoppers filter products by attribute.
 
 - **Name:** woocommerce/product-filter-attribute
 - **Category:** woocommerce
@@ -1254,12 +1263,12 @@ Enable customers to filter the product grid by selecting one or more attributes,
 
 ## List - woocommerce/product-filter-checkbox-list
 
-Display a list of filter options.
+Display filter options as a list.
 
 - **Name:** woocommerce/product-filter-checkbox-list
 - **Category:** woocommerce
 - **Ancestor:** woocommerce/product-filter-attribute, woocommerce/product-filter-status, woocommerce/product-filter-taxonomy, woocommerce/product-filter-rating
-- **Supports:** interactivity
+- **Supports:** interactivity, woocommerce (innerBlockDisplayStyle)
 - **Attributes:** customLabelElement, customOptionElement, customOptionElementBorder, customOptionElementSelected, labelElement, optionElement, optionElementBorder, optionElementSelected
 
 ## Chips - woocommerce/product-filter-chips
@@ -1268,13 +1277,13 @@ Display filter options as chips.
 
 - **Name:** woocommerce/product-filter-chips
 - **Category:** woocommerce
-- **Ancestor:** woocommerce/product-filter-attribute, woocommerce/product-filter-taxonomy, woocommerce/product-filter-status
-- **Supports:** interactivity
+- **Ancestor:** woocommerce/product-filter-attribute, woocommerce/product-filter-taxonomy, woocommerce/product-filter-status, woocommerce/add-to-cart-with-options-variation-selector-attribute
+- **Supports:** interactivity, woocommerce (innerBlockDisplayStyle)
 - **Attributes:** chipBackground, chipBorder, chipText, customChipBackground, customChipBorder, customChipText, customSelectedChipBackground, customSelectedChipBorder, customSelectedChipText, selectedChipBackground, selectedChipBorder, selectedChipText
 
 ## Clear filters - woocommerce/product-filter-clear-button
 
-Allows shoppers to clear active filters.
+Let shoppers clear any active filters.
 
 - **Name:** woocommerce/product-filter-clear-button
 - **Category:** woocommerce
@@ -1283,7 +1292,7 @@ Allows shoppers to clear active filters.
 
 ## Price Filter - woocommerce/product-filter-price
 
-Let shoppers filter products by choosing a price range.
+Let shoppers filter products by price.
 
 - **Name:** woocommerce/product-filter-price
 - **Category:** woocommerce
@@ -1292,7 +1301,7 @@ Let shoppers filter products by choosing a price range.
 
 ## Price Slider - woocommerce/product-filter-price-slider
 
-A slider helps shopper choose a price range.
+Let shoppers choose a price range with a slider.
 
 - **Name:** woocommerce/product-filter-price-slider
 - **Category:** woocommerce
@@ -1302,7 +1311,7 @@ A slider helps shopper choose a price range.
 
 ## Rating Filter - woocommerce/product-filter-rating
 
-Enable customers to filter the product collection by rating.
+Let shoppers filter products by rating.
 
 - **Name:** woocommerce/product-filter-rating
 - **Category:** woocommerce
@@ -1312,7 +1321,7 @@ Enable customers to filter the product collection by rating.
 
 ## Chips - woocommerce/product-filter-removable-chips
 
-Display removable active filters as chips.
+Display active filters as removable chips.
 
 - **Name:** woocommerce/product-filter-removable-chips
 - **Category:** woocommerce
@@ -1320,9 +1329,9 @@ Display removable active filters as chips.
 - **Supports:** interactivity, layout (default, ~~allowInheriting~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~)
 - **Attributes:** chipBackground, chipBorder, chipText, customChipBackground, customChipBorder, customChipText
 
-## Status Filter - woocommerce/product-filter-status
+## Availability Filter - woocommerce/product-filter-status
 
-Let shoppers filter products by choosing stock status.
+Let shoppers filter products by availability.
 
 - **Name:** woocommerce/product-filter-status
 - **Category:** woocommerce
@@ -1332,7 +1341,7 @@ Let shoppers filter products by choosing stock status.
 
 ## Taxonomy Filter - woocommerce/product-filter-taxonomy
 
-Enable customers to filter the product collection by selecting one or more taxonomy terms, such as categories, brands, or tags.
+Let shoppers filter products by category, brand, or tag.
 
 - **Name:** woocommerce/product-filter-taxonomy
 - **Category:** woocommerce
@@ -1598,6 +1607,15 @@ Display reviews for your products.
 - **Category:** woocommerce
 - **Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize), ~~html~~
 
+## Saved for Later - woocommerce/saved-for-later
+
+Display items the shopper has saved from their cart for later.
+
+- **Name:** woocommerce/saved-for-later
+- **Category:** woocommerce
+- **Supports:** align (full, wide), color (background, text), interactivity, spacing (blockGap, margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
+- **Attributes:** columnCount
+
 ## Product - woocommerce/single-product
 
 Display a single product of your choice with full control over its presentation.
@@ -1605,7 +1623,7 @@ Display a single product of your choice with full control over its presentation.
 - **Name:** woocommerce/single-product
 - **Category:** woocommerce
 - **Supports:** align (full, wide), interactivity
-- **Attributes:** isPreview, productId
+- **Attributes:** productId
 
 ## Filter by Stock Controls - woocommerce/stock-filter
 
@@ -1624,5 +1642,14 @@ Display shopper-facing notifications generated by WooCommerce or extensions.
 - **Category:** woocommerce
 - **Supports:** align (full, wide), interactivity (clientNavigation), ~~multiple~~
 - **Attributes:** align
+
+## Wishlist - woocommerce/wishlist
+
+Display the shopper's wishlist.
+
+- **Name:** woocommerce/wishlist
+- **Category:** woocommerce
+- **Supports:** align (full, wide), color (background, text), interactivity, spacing (blockGap, margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
+- **Attributes:** columnCount
 
 {/* END Autogenerated - DO NOT EDIT */}

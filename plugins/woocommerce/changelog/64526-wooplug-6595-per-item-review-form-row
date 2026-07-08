@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add the per-item review form row on the Review Order page: linked product title, thumbnail, accessible star rating, review textarea, and an extensions hook (`woocommerce_review_order_form_fields`). Submit button is gated on at least one rating being selected. Narrow-viewport layout stacks the row vertically below 600px.

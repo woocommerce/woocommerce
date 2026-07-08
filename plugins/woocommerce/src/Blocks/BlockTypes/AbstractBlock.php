@@ -1,12 +1,13 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use WP_Block;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
-use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
-use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
+use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
+use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use WP_Block;
 
 /**
  * AbstractBlock class.
@@ -72,9 +73,9 @@ abstract class AbstractBlock {
 	}
 
 	/**
-	 * Get the interactivity namespace. Only used when utilizing the interactivity API.
-
-	 * @return string The interactivity namespace, used to namespace interactivity API actions and state.
+	 * Get the full block name, including namespace.
+	 *
+	 * @return string
 	 */
 	protected function get_full_block_name() {
 		return $this->namespace . '/' . $this->block_name;
@@ -261,7 +262,7 @@ abstract class AbstractBlock {
 		$block_settings['uses_context'] = $this->get_block_type_uses_context();
 
 		register_block_type(
-			$this->get_block_type(),
+			$this->get_full_block_name(),
 			$block_settings
 		);
 	}
@@ -269,10 +270,12 @@ abstract class AbstractBlock {
 	/**
 	 * Get the block type.
 	 *
+	 * @deprecated 10.9.0 Use get_full_block_name() instead.
 	 * @return string
 	 */
 	protected function get_block_type() {
-		return $this->namespace . '/' . $this->block_name;
+		wc_deprecated_function( __METHOD__, '10.9.0', 'get_full_block_name' );
+		return $this->get_full_block_name();
 	}
 
 	/**
@@ -441,8 +444,8 @@ abstract class AbstractBlock {
 				'wordCountType' => _x( 'words', 'Word count type. Do not translate!', 'woocommerce' ),
 			];
 			if ( is_admin() && ! WC()->is_rest_api_request() ) {
-				$product_counts     = wp_count_posts( 'product' );
-				$published_products = isset( $product_counts->publish ) ? $product_counts->publish : 0;
+				$product_counts     = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
+				$published_products = $product_counts[ ProductStatus::PUBLISH ] ?? 0;
 				$wc_blocks_config   = array_merge(
 					$wc_blocks_config,
 					[

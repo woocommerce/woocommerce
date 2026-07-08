@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Disable the "Continue" button on the product CSV import page until a file is selected or a server path is entered.

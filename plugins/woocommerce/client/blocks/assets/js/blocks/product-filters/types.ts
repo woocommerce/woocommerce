@@ -7,6 +7,7 @@ import type { BlockEditProps } from '@wordpress/blocks';
  * Internal dependencies
  */
 import type { SelectableItem } from '../../types/type-defs/selectable-items';
+import type { VisualAttributeTerm } from '../../base/utils/visual-attribute-terms';
 
 // ----------------------------------------
 // Filter-specific item fields
@@ -18,6 +19,7 @@ export type FilterItemFields = {
 	depth?: number;
 	menuOrder?: number;
 	attributeQueryType?: 'and' | 'or';
+	visual?: VisualAttributeTerm;
 };
 
 export type FilterOptionItem = SelectableItem< FilterItemFields >;
@@ -40,6 +42,10 @@ export type ProductFiltersContext = {
 	item: FilterOptionItem;
 	activeLabelTemplate: string;
 	filterType: string;
+	// Set when Product Filters is a descendant of Product Collection. Null
+	// signals the frontend to fall back to the global interactivity config
+	// (sibling-block layout).
+	forcePageReload?: boolean | null;
 };
 
 // ----------------------------------------
@@ -48,16 +54,7 @@ export type ProductFiltersContext = {
 export type BlockAttributes = {
 	productId?: string;
 	isPreview: boolean;
+	showFilterDrawer?: boolean;
 };
 
 export type EditProps = BlockEditProps< BlockAttributes >;
-
-// ----------------------------------------
-// Editor color picker
-// ----------------------------------------
-export type Color = {
-	slug?: string;
-	class?: string;
-	name?: string;
-	color: string;
-};

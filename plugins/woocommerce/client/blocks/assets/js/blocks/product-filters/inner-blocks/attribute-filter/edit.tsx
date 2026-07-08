@@ -65,7 +65,11 @@ const Edit = ( props: EditProps ) => {
 			resourceName: 'products/attributes/terms',
 			resourceValues: [ attributeObject?.id || 0 ],
 			shouldSelect: !! attributeObject?.id,
-			query: { orderby: 'menu_order', hide_empty: hideEmpty },
+			query: {
+				orderby: 'menu_order',
+				hide_empty: hideEmpty,
+				__experimental_visual: true,
+			},
 		} );
 
 	const { data: filteredCounts, isLoading: isFilterCountsLoading } =
@@ -102,6 +106,9 @@ const Edit = ( props: EditProps ) => {
 					value: term.id.toString(),
 					selected: index === 0,
 					...( showCounts && { count: term.count } ),
+					...( term.__experimentalVisual && {
+						visual: term.__experimentalVisual,
+					} ),
 				} ) );
 
 			setAttributeOptions(
@@ -202,7 +209,7 @@ const Edit = ( props: EditProps ) => {
 			<InitialDisabled>
 				<BlockContextProvider
 					value={ {
-						woocommerceSelectableItems: {
+						'woocommerce/selectableItems': {
 							items:
 								attributeOptions.length === 0 && isPreview
 									? attributeOptionsPreview

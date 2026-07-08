@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\EmailEditor\WCTransactionalEmails;
 
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
@@ -195,6 +196,48 @@ class WCTransactionalEmailPostsGeneratorTest extends \WC_Unit_Test_Case {
 			'/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/',
 			$synced_at,
 			'_wc_email_last_synced_at should be a GMT MySQL-format timestamp.'
+		);
+	}
+
+	/**
+	 * @testdox Should stamp _wc_email_template_last_core_render meta with the canonical post_content at generation time.
+	 */
+	public function test_generation_stamps_last_core_render_meta(): void {
+		$email_type = 'customer_on_hold_order';
+
+		$this->email_generator->init_default_transactional_emails();
+		$this->template_manager->delete_email_template( $email_type );
+
+		$post_id = $this->email_generator->generate_email_template_if_not_exists( $email_type );
+
+		$this->assertIsInt( $post_id );
+		$this->assertGreaterThan( 0, $post_id );
+
+		$stored_render = (string) get_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			true
+		);
+
+		$this->assertNotSame(
+			'',
+			$stored_render,
+			'_wc_email_template_last_core_render should be populated at generation time.'
+		);
+
+		$email = null;
+		foreach ( \WC_Emails::instance()->get_emails() as $candidate ) {
+			if ( $candidate instanceof \WC_Email && $candidate->id === $email_type ) {
+				$email = $candidate;
+				break;
+			}
+		}
+		$this->assertInstanceOf( \WC_Email::class, $email );
+
+		$this->assertSame(
+			WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email ),
+			$stored_render,
+			'last_core_render must equal compute_canonical_post_content() output.'
 		);
 	}
 
