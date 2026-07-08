@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Use the standard WordPress UI Notice for payment method eligibility notices in WooPayments onboarding.

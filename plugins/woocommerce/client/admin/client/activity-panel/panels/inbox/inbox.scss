@@ -1,5 +1,11 @@
 .woocommerce-layout__activity-panel-content {
 
+	.woocommerce-abbreviated-card,
+	.woocommerce-homepage-notes-wrapper .components-card,
+	.woocommerce-inbox-message {
+		border-radius: 0;
+	}
+
 	.woocommerce-abbreviated-notifications {
 		border-top: 1px solid $gray-200;
 		& > div {
