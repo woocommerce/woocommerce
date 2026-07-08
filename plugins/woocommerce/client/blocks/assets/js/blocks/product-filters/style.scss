@@ -1,5 +1,5 @@
 :where(.wc-block-product-filters) {
-	--top-padding: var(--wp-admin--admin-bar--height);
+	--top-padding: var(--wp-admin--admin-bar--height, 0);
 	@include breakpoint("<782px") {
 		--top-padding: var(--adminbar-mobile-padding, 0);
 	}
@@ -116,8 +116,8 @@
 	}
 
 	@include breakpoint(">600px") {
-		&,
-		&.is-overlay-opened {
+		&:not(.is-overlay-always),
+		&:not(.is-overlay-always).is-overlay-opened {
 			display: flex;
 
 			.wc-block-product-filters__overlay-header,

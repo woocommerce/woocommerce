@@ -1,3 +1,4 @@
+/* eslint-disable @wordpress/no-unsafe-wp-apis */
 /**
  * External dependencies
  */
@@ -7,7 +8,11 @@ import {
 	useBlockProps,
 } from '@wordpress/block-editor';
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
-import { PanelBody, ToggleControl } from '@wordpress/components';
+import {
+	PanelBody,
+	__experimentalToggleGroupControl as ToggleGroupControl,
+	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { Icon, close } from '@wordpress/icons';
 import { useState } from '@wordpress/element';
@@ -19,8 +24,9 @@ import clsx from 'clsx';
  * Internal dependencies
  */
 import './editor.scss';
-import { type BlockAttributes } from './types';
+import { type BlockAttributes, type OverlayMenu } from './types';
 import { getColorsFromBlockSupports } from './utils/get-colors-from-block-supports';
+import { getOverlayMenu } from './utils/overlay-menu';
 import { presetToCssVariable } from './utils/preset-to-css-variable';
 
 const TEMPLATE: InnerBlockTemplate[] = [
@@ -46,7 +52,9 @@ const TEMPLATE: InnerBlockTemplate[] = [
 export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	const { attributes, setAttributes } = props;
 	const { isPreview } = attributes;
-	const showFilterDrawer = attributes.showFilterDrawer !== false;
+	const overlayMenu = getOverlayMenu( attributes );
+	const hasOverlay = overlayMenu !== 'never';
+	const isOverlayAlways = overlayMenu === 'always';
 	const [ isOpen, setIsOpen ] = useState( false );
 
 	const globalColors = getSetting< { background?: string; text?: string } >(
@@ -65,7 +73,8 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filters', {
 			'is-overlay-opened': isOpen,
-			'is-filter-drawer-disabled': ! showFilterDrawer,
+			'is-filter-drawer-disabled': ! hasOverlay,
+			'is-overlay-always': isOverlayAlways,
 		} ),
 		style: {
 			'--wc-product-filters-background-color':
@@ -86,7 +95,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 				<InnerBlocks templateLock={ false } template={ TEMPLATE } />
 			</div>
 		);
-	} else if ( showFilterDrawer ) {
+	} else if ( hasOverlay ) {
 		filtersContent = (
 			<>
 				<button
@@ -147,27 +156,40 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 		<>
 			<InspectorControls>
 				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
-					<ToggleControl
-						label={ __(
-							'Collapse filters on small screens',
+					<ToggleGroupControl
+						__next40pxDefaultSize
+						__nextHasNoMarginBottom
+						label={ __( 'Overlay menu', 'woocommerce' ) }
+						aria-label={ __(
+							'Configure overlay menu',
 							'woocommerce'
 						) }
-						help={
-							showFilterDrawer
-								? __(
-										'Shoppers tap a button to open filters.',
-										'woocommerce'
-								  )
-								: __(
-										'Filters are shown directly on the page.',
-										'woocommerce'
-								  )
-						}
-						checked={ showFilterDrawer }
+						value={ overlayMenu }
+						help={ __(
+							'Collapses filters into a menu icon that opens an overlay.',
+							'woocommerce'
+						) }
 						onChange={ ( value ) =>
-							setAttributes( { showFilterDrawer: value } )
+							setAttributes( {
+								overlayMenu: value as OverlayMenu,
+								showFilterDrawer: undefined,
+							} )
 						}
-					/>
+						isBlock
+					>
+						<ToggleGroupControlOption
+							value="never"
+							label={ __( 'Off', 'woocommerce' ) }
+						/>
+						<ToggleGroupControlOption
+							value="mobile"
+							label={ __( 'Mobile', 'woocommerce' ) }
+						/>
+						<ToggleGroupControlOption
+							value="always"
+							label={ __( 'Always', 'woocommerce' ) }
+						/>
+					</ToggleGroupControl>
 				</PanelBody>
 			</InspectorControls>
 			<div { ...blockProps }>{ filtersContent }</div>

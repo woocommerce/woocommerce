@@ -111,10 +111,14 @@ class ProductFilters extends AbstractBlock {
 			'forcePageReload' => isset( $block->context['forcePageReload'] ) ? (bool) $block->context['forcePageReload'] : null,
 		);
 
-		$show_filter_drawer = ! isset( $attributes['showFilterDrawer'] ) || false !== $attributes['showFilterDrawer'];
-		$wrapper_classes    = array( 'wc-block-product-filters' );
-		if ( ! $show_filter_drawer ) {
+		$overlay_menu    = $this->get_overlay_menu( $attributes, $block );
+		$has_overlay     = 'never' !== $overlay_menu;
+		$wrapper_classes = array( 'wc-block-product-filters' );
+		if ( ! $has_overlay ) {
 			$wrapper_classes[] = 'is-filter-drawer-disabled';
+		}
+		if ( 'always' === $overlay_menu ) {
+			$wrapper_classes[] = 'is-overlay-always';
 		}
 
 		$wrapper_attributes = array(
@@ -126,7 +130,7 @@ class ProductFilters extends AbstractBlock {
 			'style'                         => $this->get_css_variables( $attributes ),
 		);
 
-		if ( $show_filter_drawer ) {
+		if ( $has_overlay ) {
 			$wrapper_attributes['data-wp-watch--scrolling']         = 'callbacks.scrollLimit';
 			$wrapper_attributes['data-wp-on--keyup']                = 'actions.closeOverlayOnEscape';
 			$wrapper_attributes['data-wp-class--is-overlay-opened'] = 'context.isOverlayOpened';
@@ -140,7 +144,7 @@ class ProductFilters extends AbstractBlock {
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<?php if ( $show_filter_drawer ) : ?>
+			<?php if ( $has_overlay ) : ?>
 				<button
 					type="button"
 					class="wc-block-product-filters__open-overlay"
@@ -192,6 +196,58 @@ class ProductFilters extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Get overlay menu behavior from block attributes.
+	 *
+	 * @param array    $attributes Block attributes.
+	 * @param WP_Block $block      Block instance.
+	 * @return string Overlay menu behavior.
+	 */
+	private function get_overlay_menu( array $attributes, WP_Block $block ): string {
+		$parsed_attributes   = $block->parsed_block['attrs'] ?? array();
+		$parsed_overlay_menu = $this->get_valid_overlay_menu_value( $parsed_attributes['overlayMenu'] ?? null );
+
+		if ( null !== $parsed_overlay_menu && 'mobile' !== $parsed_overlay_menu ) {
+			return $parsed_overlay_menu;
+		}
+
+		if ( false === ( $parsed_attributes['showFilterDrawer'] ?? null ) ) {
+			return 'never';
+		}
+
+		if ( null !== $parsed_overlay_menu ) {
+			return $parsed_overlay_menu;
+		}
+
+		$overlay_menu = $this->get_valid_overlay_menu_value( $attributes['overlayMenu'] ?? null );
+
+		if ( null !== $overlay_menu && 'mobile' !== $overlay_menu ) {
+			return $overlay_menu;
+		}
+
+		if ( false === ( $attributes['showFilterDrawer'] ?? null ) ) {
+			return 'never';
+		}
+
+		return $overlay_menu ?? 'mobile';
+	}
+
+	/**
+	 * Get a valid overlay menu value.
+	 *
+	 * @param mixed $overlay_menu Overlay menu value.
+	 * @return string|null Valid overlay menu value.
+	 */
+	private function get_valid_overlay_menu_value( $overlay_menu ): ?string {
+		$overlay_values = array( 'never', 'mobile', 'always' );
+
+		if ( ! is_string( $overlay_menu ) ) {
+			return null;
+		}
+
+		return in_array( $overlay_menu, $overlay_values, true ) ? $overlay_menu : null;
 	}
 
 	/**

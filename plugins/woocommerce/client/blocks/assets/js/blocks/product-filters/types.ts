@@ -51,9 +51,12 @@ export type ProductFiltersContext = {
 // ----------------------------------------
 // Block props
 // ----------------------------------------
+export type OverlayMenu = 'never' | 'mobile' | 'always';
+
 export type BlockAttributes = {
 	productId?: string;
 	isPreview: boolean;
+	overlayMenu?: OverlayMenu;
 	showFilterDrawer?: boolean;
 };
 

@@ -37,6 +37,13 @@ class ProductFilters extends \WP_UnitTestCase {
 	private $canonical_method;
 
 	/**
+	 * Reflection method used to invoke the private get_overlay_menu method.
+	 *
+	 * @var \ReflectionMethod
+	 */
+	private $overlay_menu_method;
+
+	/**
 	 * Set up the test subject and dependencies.
 	 *
 	 * @return void
@@ -58,6 +65,9 @@ class ProductFilters extends \WP_UnitTestCase {
 
 		$this->canonical_method = new \ReflectionMethod( ProductFiltersBlock::class, 'get_canonical_url_no_pagination' );
 		$this->canonical_method->setAccessible( true );
+
+		$this->overlay_menu_method = new \ReflectionMethod( ProductFiltersBlock::class, 'get_overlay_menu' );
+		$this->overlay_menu_method->setAccessible( true );
 	}
 
 	/**
@@ -104,6 +114,27 @@ class ProductFilters extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Convenience wrapper for invoking the private overlay menu helper.
+	 *
+	 * @param array $attributes        Block attributes after defaults are applied.
+	 * @param array $parsed_attributes Raw parsed block attributes.
+	 * @return string
+	 */
+	private function invoke_overlay_menu_helper( array $attributes, array $parsed_attributes = array() ): string {
+		$block = new \WP_Block(
+			array(
+				'blockName'    => 'woocommerce/product-filters',
+				'attrs'        => $parsed_attributes,
+				'innerBlocks'  => array(),
+				'innerHTML'    => '',
+				'innerContent' => array(),
+			)
+		);
+
+		return (string) $this->overlay_menu_method->invoke( $this->product_filters, $attributes, $block );
+	}
+
+	/**
 	 * Ensures get_pagenum_link filters receive the expected argument types.
 	 *
 	 * @param mixed $link    Base URL from WordPress.
@@ -123,6 +154,56 @@ class ProductFilters extends \WP_UnitTestCase {
 		$this->assertTrue(
 			null === $escape || is_bool( $escape ),
 			'The get_pagenum_link filter must receive a null or boolean escape flag as the third argument.'
+		);
+	}
+
+	/**
+	 * @testdox Should resolve overlay menu settings.
+	 *
+	 * @param array  $attributes        Block attributes after defaults are applied.
+	 * @param array  $parsed_attributes Raw parsed block attributes.
+	 * @param string $expected          Expected overlay menu setting.
+	 * @return void
+	 *
+	 * @dataProvider overlay_menu_provider
+	 */
+	public function test_resolves_overlay_menu( array $attributes, array $parsed_attributes, string $expected ): void {
+		$this->assertSame(
+			$expected,
+			$this->invoke_overlay_menu_helper( $attributes, $parsed_attributes ),
+			'Overlay menu should match the configured or legacy setting.'
+		);
+	}
+
+	/**
+	 * Provides Product Filters overlay menu settings.
+	 *
+	 * @return array[]
+	 */
+	public function overlay_menu_provider(): array {
+		return array(
+			'default'                 => array( array(), array(), 'mobile' ),
+			'parsed mobile'           => array( array(), array( 'overlayMenu' => 'mobile' ), 'mobile' ),
+			'parsed always'           => array( array(), array( 'overlayMenu' => 'always' ), 'always' ),
+			'parsed never'            => array( array(), array( 'overlayMenu' => 'never' ), 'never' ),
+			'legacy disabled'         => array(
+				array(
+					'overlayMenu'      => 'mobile',
+					'showFilterDrawer' => false,
+				),
+				array( 'showFilterDrawer' => false ),
+				'never',
+			),
+			'parsed explicit always'  => array(
+				array( 'showFilterDrawer' => false ),
+				array(
+					'overlayMenu'      => 'always',
+					'showFilterDrawer' => false,
+				),
+				'always',
+			),
+			'attribute fallback'      => array( array( 'overlayMenu' => 'always' ), array(), 'always' ),
+			'invalid parsed fallback' => array( array(), array( 'overlayMenu' => 'desktop' ), 'mobile' ),
 		);
 	}
 

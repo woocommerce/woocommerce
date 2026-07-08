@@ -40,6 +40,9 @@
 			"type": "boolean",
 			"default": false
 		},
+		"overlayMenu": {
+			"type": "string"
+		},
 		"showFilterDrawer": {
 			"type": "boolean",
 			"default": true
