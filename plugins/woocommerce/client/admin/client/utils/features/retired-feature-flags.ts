@@ -111,10 +111,6 @@ export const RETIRED_FEATURE_FLAGS = {
 		deprecatedSince: '11.1.0',
 		removedIn: null,
 	},
-	'store-alerts': {
-		deprecatedSince: '11.1.0',
-		removedIn: null,
-	},
 	'transient-notices': {
 		deprecatedSince: '11.1.0',
 		removedIn: null,

@@ -132,10 +132,6 @@ class Features {
 			'deprecated_since' => '11.1.0',
 			'removed_in'       => null,
 		),
-		'store-alerts'                         => array(
-			'deprecated_since' => '11.1.0',
-			'removed_in'       => null,
-		),
 		'transient-notices'                    => array(
 			'deprecated_since' => '11.1.0',
 			'removed_in'       => null,

@@ -50,8 +50,6 @@ type DeprecatedWcAdminFeatureFlags = {
 	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
 	subscriptions: boolean;
 	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
-	'store-alerts': boolean;
-	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
 	'transient-notices': boolean;
 	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
 	'wc-pay-promotion': boolean;
@@ -118,6 +116,7 @@ declare global {
 			'experimental-blocks': boolean;
 			'minified-js': boolean;
 			'settings-ui': boolean;
+			'store-alerts': boolean;
 			'rest-api-v4': boolean;
 			'order-detail-redesign': boolean;
 			'product-variations-classic-redesign': boolean;
