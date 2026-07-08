@@ -61,6 +61,12 @@ class CategoryTitleTest extends WP_UnitTestCase {
 
 		$instance = new WP_Block( $parsed_block, $context );
 
+		// Inject decoupledEdit context directly (simulating what
+		// FeaturedItem::update_context does via render_block_context filter
+		// in production) so it is available even when the test env's block
+		// type registration does not populate uses_context.
+		$instance->context['decoupledEdit'] = $decoupled;
+
 		return $instance->render();
 	}
 
@@ -102,9 +108,9 @@ class CategoryTitleTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox The term name is used when the content attribute is not set.
+	 * @testdox The term name is used when the content attribute is not set (unset).
 	 */
-	public function test_term_name_used_when_content_empty(): void {
+	public function test_term_name_used_when_content_unset(): void {
 		$markup = $this->render_with_context(
 			array( 'level' => 2 ),
 			$this->term_id
@@ -114,9 +120,9 @@ class CategoryTitleTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Whitespace-only content falls back to the term name.
+	 * @testdox Once content is set (even to whitespace), the block stays detached and renders empty.
 	 */
-	public function test_empty_content_falls_back_to_term_name(): void {
+	public function test_set_whitespace_content_stays_detached(): void {
 		$markup = $this->render_with_context(
 			array(
 				'content' => '   ',
@@ -125,7 +131,23 @@ class CategoryTitleTest extends WP_UnitTestCase {
 			$this->term_id
 		);
 
-		$this->assertStringContainsString( 'Original Category Name', $markup, 'Whitespace-only content should fall back to term name.' );
+		$this->assertStringNotContainsString( 'Original Category Name', $markup, 'Whitespace-only set content should not fall back to term name.' );
+		$this->assertEmpty( trim( wp_strip_all_tags( $markup ) ), 'Detached empty content should render an empty title.' );
+	}
+
+	/**
+	 * @testdox An empty-but-set content string keeps the block detached from the term.
+	 */
+	public function test_empty_string_content_stays_detached(): void {
+		$markup = $this->render_with_context(
+			array(
+				'content' => '',
+				'level'   => 2,
+			),
+			$this->term_id
+		);
+
+		$this->assertStringNotContainsString( 'Original Category Name', $markup, 'An explicitly empty content should not fall back to the term name.' );
 	}
 
 	/**

@@ -73,12 +73,10 @@ const v1 = {
 			);
 		}
 		innerBlocks.unshift(
-			createBlock( 'core/post-title', {
+			createBlock( 'woocommerce/featured-product-title', {
 				level: 2,
 				isLink: false,
 				textAlign: 'center',
-				__woocommerceNamespace:
-					'woocommerce/product-collection/product-title',
 			} )
 		);
 
@@ -86,4 +84,34 @@ const v1 = {
 	},
 };
 
-export default [ v1 ];
+// Version 2: Convert the legacy `core/post-title` inner block (used before the
+// dedicated `woocommerce/featured-product-title` block existed) so its text
+// edits stay decoupled from the underlying product.
+const v2 = {
+	save: () => <InnerBlocks.Content />,
+	isEligible: (
+		_attributes: BlockAttributes,
+		innerBlocks: BlockInstance[]
+	) => {
+		return innerBlocks.some(
+			( block ) => block.name === 'core/post-title'
+		);
+	},
+	migrate: ( attributes: BlockAttributes, innerBlocks: BlockInstance[] ) => {
+		const migratedInnerBlocks = innerBlocks.map( ( block ) => {
+			if ( block.name === 'core/post-title' ) {
+				return createBlock( 'woocommerce/featured-product-title', {
+					level: block.attributes.level ?? 2,
+					isLink: block.attributes.isLink ?? false,
+					textAlign: block.attributes.textAlign ?? '',
+				} );
+			}
+
+			return block;
+		} );
+
+		return [ attributes, migratedInnerBlocks ];
+	},
+};
+
+export default [ v1, v2 ];

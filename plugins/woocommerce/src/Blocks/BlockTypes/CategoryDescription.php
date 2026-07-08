@@ -38,9 +38,11 @@ class CategoryDescription extends AbstractBlock {
 		}
 
 		// Use the locally edited content when decoupled editing is enabled (e.g. inside a
-		// Featured Category block), falling back to the term description otherwise.
+		// Featured Category block). Once `content` has been set (even to an empty
+		// string) the block stays detached from the term, falling back to the term
+		// description only when the attribute is absent.
 		$decoupled   = ! empty( $block->context['decoupledEdit'] );
-		$description = $decoupled && isset( $attributes['content'] ) && '' !== trim( (string) $attributes['content'] )
+		$description = $decoupled && array_key_exists( 'content', $attributes )
 			? (string) $attributes['content']
 			: $term->description;
 		if ( empty( trim( $description ) ) ) {

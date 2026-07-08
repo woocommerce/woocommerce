@@ -101,7 +101,8 @@
 		},
 		"decoupledEdit": {
 			"type": "boolean",
-			"default": true
+			"default": true,
+			"role": "local"
 		}
 	},
 	"selectors": {

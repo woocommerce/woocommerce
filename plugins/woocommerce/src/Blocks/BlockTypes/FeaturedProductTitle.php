@@ -42,7 +42,10 @@ class FeaturedProductTitle extends AbstractBlock {
 		// Use the locally edited content when decoupled editing is enabled (e.g. inside a
 		// Featured Product block), falling back to the product title otherwise.
 		$decoupled = ! empty( $block->context['decoupledEdit'] );
-		$title     = $decoupled && isset( $attributes['content'] ) && '' !== trim( (string) $attributes['content'] )
+		// Once `content` has been set (even to an empty string) the block stays
+		// detached from the product, falling back to the product title only when
+		// the attribute is absent.
+		$title = $decoupled && array_key_exists( 'content', $attributes )
 			? (string) $attributes['content']
 			: get_the_title( $post_id );
 

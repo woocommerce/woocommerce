@@ -85,14 +85,11 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		postId ? String( postId ) : undefined
 	);
 
-	// Only use the locally edited content when it's non-empty; otherwise fall
-	// back to the entity value, matching the PHP renderer's fallback to
-	// `get_the_title()`. This also marks when `displayFullTitle` holds raw,
-	// unsanitized `PlainText` input (needs to render as text, not HTML).
+	// Use the locally edited content whenever the `content` attribute has been
+	// set (even if empty), so clearing the text keeps the block detached from
+	// the entity instead of reverting to it.
 	const hasDecoupledContent =
-		decoupledEdit &&
-		typeof attributes.content === 'string' &&
-		attributes.content.length > 0;
+		decoupledEdit && attributes.content !== undefined;
 
 	let displayRawTitle = '';
 	if ( hasDecoupledContent ) {
@@ -135,6 +132,11 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		}
 	};
 
+	// Decoupled edits only write to block attributes, so they do not depend on
+	// the author's entity edit permissions. A page editor can always edit the
+	// local text of a Featured block even without product edit caps.
+	const canEditDecoupled = decoupledEdit;
+
 	const blockProps = useBlockProps( {
 		className: clsx( { [ `has-text-align-${ textAlign }` ]: textAlign } ),
 	} );
@@ -160,18 +162,19 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 			/>
 		);
 
-		titleElement = userCanEdit ? (
-			<PlainText
-				tagName={ TagName }
-				placeholder={ __( 'No title', 'woocommerce' ) }
-				value={ displayRawTitle }
-				onChange={ onChangeTitle }
-				__experimentalVersion={ 2 }
-				{ ...blockProps }
-			/>
-		) : (
-			readOnlyTitle
-		);
+		titleElement =
+			canEditDecoupled || userCanEdit ? (
+				<PlainText
+					tagName={ TagName }
+					placeholder={ __( 'No title', 'woocommerce' ) }
+					value={ displayRawTitle }
+					onChange={ onChangeTitle }
+					__experimentalVersion={ 2 }
+					{ ...blockProps }
+				/>
+			) : (
+				readOnlyTitle
+			);
 	}
 
 	if ( isLink && postId ) {
@@ -200,26 +203,27 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 			</ContainerElement>
 		);
 
-		titleElement = userCanEdit ? (
-			<ContainerElement tagName={ TagName } { ...blockProps }>
-				<PlainText
-					tagName="a"
-					href={ link }
-					target={ linkTarget }
-					rel={ rel }
-					placeholder={
-						! displayRawTitle?.length
-							? __( 'No title', 'woocommerce' )
-							: undefined
-					}
-					value={ displayRawTitle }
-					onChange={ onChangeTitle }
-					__experimentalVersion={ 2 }
-				/>
-			</ContainerElement>
-		) : (
-			readOnlyLinkedTitle
-		);
+		titleElement =
+			canEditDecoupled || userCanEdit ? (
+				<ContainerElement tagName={ TagName } { ...blockProps }>
+					<PlainText
+						tagName="a"
+						href={ link }
+						target={ linkTarget }
+						rel={ rel }
+						placeholder={
+							! displayRawTitle?.length
+								? __( 'No title', 'woocommerce' )
+								: undefined
+						}
+						value={ displayRawTitle }
+						onChange={ onChangeTitle }
+						__experimentalVersion={ 2 }
+					/>
+				</ContainerElement>
+			) : (
+				readOnlyLinkedTitle
+			);
 	}
 
 	return (

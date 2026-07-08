@@ -873,6 +873,8 @@ Displays the current product title.
 - **Supports:** color (background, text), spacing (margin, padding), typography, ~~align~~, ~~html~~
 - **Attributes:** content, isLink, level, linkTarget, rel, textAlign
 
+Replaces `core/post-title` as the default title block for the Featured Product block. Text edits are stored locally in the `content` attribute rather than written back to the product, so customizing a single Featured Product layout does not rename the underlying product. Existing Featured Product blocks that still contain a `core/post-title` inner block are migrated automatically.
+
 ## Filter Block - woocommerce/filter-wrapper
 
 

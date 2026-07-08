@@ -67,6 +67,12 @@ class CategoryDescriptionTest extends WP_UnitTestCase {
 
 		$instance = new WP_Block( $parsed_block, $context );
 
+		// Inject decoupledEdit context directly (simulating what
+		// FeaturedItem::update_context does via render_block_context filter
+		// in production) so it is available even when the test env's block
+		// type registration does not populate uses_context.
+		$instance->context['decoupledEdit'] = $decoupled;
+
 		return $instance->render();
 	}
 
@@ -102,24 +108,37 @@ class CategoryDescriptionTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox The term description is used when the content attribute is not set.
+	 * @testdox The term description is used when the content attribute is not set (unset).
 	 */
-	public function test_term_description_used_when_content_empty(): void {
+	public function test_term_description_used_when_content_unset(): void {
 		$markup = $this->render_with_context( array(), $this->term_id );
 
 		$this->assertStringContainsString( 'Original term description', $markup, 'Term description should be rendered as fallback.' );
 	}
 
 	/**
-	 * @testdox Whitespace-only content falls back to the term description.
+	 * @testdox Once content is set (even to whitespace), the block stays detached and renders empty.
 	 */
-	public function test_empty_content_falls_back_to_term_description(): void {
+	public function test_set_whitespace_content_stays_detached(): void {
 		$markup = $this->render_with_context(
 			array( 'content' => '   ' ),
 			$this->term_id
 		);
 
-		$this->assertStringContainsString( 'Original term description', $markup, 'Whitespace-only content should fall back to term description.' );
+		$this->assertStringNotContainsString( 'Original term description', $markup, 'Whitespace-only set content should not fall back to the term description.' );
+		$this->assertEmpty( trim( wp_strip_all_tags( $markup ) ), 'Detached empty content should render an empty description.' );
+	}
+
+	/**
+	 * @testdox An empty-but-set content string keeps the block detached from the term.
+	 */
+	public function test_empty_string_content_stays_detached(): void {
+		$markup = $this->render_with_context(
+			array( 'content' => '' ),
+			$this->term_id
+		);
+
+		$this->assertStringNotContainsString( 'Original term description', $markup, 'An explicitly empty content should not fall back to the term description.' );
 	}
 
 	/**

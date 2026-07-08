@@ -54,19 +54,15 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	const isPreviewMode = usePreviewMode();
 
-	// Only use the locally edited content when it's non-empty; otherwise fall
-	// back to the entity value, matching the PHP renderer's fallback to
-	// `$term->description`. This also marks when `displayFullDescription`
-	// holds raw, unsanitized `PlainText` input (needs to render as text, not
-	// HTML).
+	// Use the locally edited content whenever the `content` attribute has been
+	// set (even if empty), so clearing the text keeps the block detached from
+	// the entity instead of reverting to it.
 	const hasDecoupledContent =
-		decoupledEdit &&
-		typeof attributes.content === 'string' &&
-		attributes.content.length > 0;
+		decoupledEdit && attributes.content !== undefined;
 
 	let displayRawDescription = '';
 	if ( isPreviewMode ) {
-		displayRawDescription = previewCategories[ 0 ].description;
+		displayRawDescription = previewCategories[ 0 ]?.description ?? '';
 	} else if ( hasDecoupledContent ) {
 		displayRawDescription = attributes.content as string;
 	} else if ( typeof rawDescription === 'string' ) {
@@ -75,7 +71,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	let displayFullDescription = '';
 	if ( isPreviewMode ) {
-		displayFullDescription = previewCategories[ 0 ].description;
+		displayFullDescription = previewCategories[ 0 ]?.description ?? '';
 	} else if ( hasDecoupledContent ) {
 		displayFullDescription = attributes.content as string;
 	} else if (
@@ -94,6 +90,11 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 			( setDescription as ( v: string ) => void )( v );
 		}
 	};
+
+	// Decoupled edits only write to block attributes, so they do not depend on
+	// the author's entity edit permissions. A page editor can always edit the
+	// local text of a Featured block even without product/category caps.
+	const canEditDecoupled = decoupledEdit;
 
 	const blockProps = useBlockProps( {
 		className: clsx( { [ `has-text-align-${ textAlign }` ]: textAlign } ),
@@ -115,18 +116,21 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 			/>
 		);
 
-		descriptionElement = userCanEdit ? (
-			<PlainText
-				tagName="p"
-				placeholder={ __( 'No description', 'woocommerce' ) as string }
-				value={ displayRawDescription }
-				onChange={ onChangeDescription }
-				__experimentalVersion={ 2 }
-				{ ...blockProps }
-			/>
-		) : (
-			readOnlyDescription
-		);
+		descriptionElement =
+			canEditDecoupled || userCanEdit ? (
+				<PlainText
+					tagName="p"
+					placeholder={
+						__( 'No description', 'woocommerce' ) as string
+					}
+					value={ displayRawDescription }
+					onChange={ onChangeDescription }
+					__experimentalVersion={ 2 }
+					{ ...blockProps }
+				/>
+			) : (
+				readOnlyDescription
+			);
 	}
 
 	return (
