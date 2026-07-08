@@ -16,7 +16,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanGroup;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
@@ -27,7 +26,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalDispat
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalIntent;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanGroupRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
 /**
@@ -116,10 +114,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	 * @param int|null $max_cycles Maximum billing cycles, or null for open-ended.
 	 */
 	private function make_plan_object( ?int $max_cycles = null ): Plan {
-		$group_id = ( new PlanGroupRepository() )->insert( PlanGroup::create( array( 'name' => 'Club' ) ) );
-
 		$plan = Plan::create(
-			$group_id,
 			array(
 				'name'           => 'Monthly',
 				'billing_policy' => new BillingPolicy( 'month', 1, null, $max_cycles, null ),
