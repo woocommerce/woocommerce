@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix false "unsaved changes"/"Leave site?" warning shown when clicking Update on the order edit screen after editing notes.

@@ -25,8 +25,13 @@ jQuery( function ( $ ) {
 			$( '.js_field-country' ).selectWoo().on( 'change', this.change_country );
 			$( '.js_field-country' ).trigger( 'change', [ true ] );
 			$( document.body ).on( 'change', 'select.js_field-state', this.change_state );
-			$( '#woocommerce-order-actions input, #woocommerce-order-actions a' ).on( 'click', function() {
+			$( '#woocommerce-order-actions button, #woocommerce-order-actions input, #woocommerce-order-actions a' ).on( 'click', function() {
 				window.onbeforeunload = '';
+				// Also detach WordPress core's unsaved-changes guard. When the `autosave` script is
+				// enqueued on the order screen, post.js registers a namespaced jQuery beforeunload
+				// handler, so clearing window.onbeforeunload alone does not remove it. This mirrors
+				// what post.js itself does on its own form submit.
+				$( window ).off( 'beforeunload.edit-post' );
 			});
 			$( 'a.edit_address' ).on( 'click', this.edit_address );
 			$( 'a.billing-same-as-shipping' ).on( 'click', this.copy_billing_to_shipping );
