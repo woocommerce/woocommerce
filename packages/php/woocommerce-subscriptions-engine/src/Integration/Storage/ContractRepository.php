@@ -337,12 +337,6 @@ final class ContractRepository {
 	);
 
 	/**
-	 * The ceiling on the bounded customer lookup a text search runs, so a broad term
-	 * cannot expand the `customer_id IN (...)` set without limit.
-	 */
-	private const SEARCH_CUSTOMER_LIMIT = 50;
-
-	/**
 	 * Query a window of contracts for list screens. Newest first (id DESC) by default,
 	 * or by a whitelisted `orderby`/`order`. Hydrated lightweight (row only, no children)
 	 * like {@see self::find_summary()}.
@@ -415,9 +409,10 @@ final class ContractRepository {
 	 *
 	 * A `search` term:
 	 * - numeric  -> `( id = %d OR origin_order_id = %d )`;
-	 * - non-empty text -> resolved to a bounded set of customer ids ({@see self::find_customer_ids_for_search()})
-	 *   and matched as `customer_id IN (...)`; an empty resolved set forces `0=1` (no rows),
-	 *   so a text term that matches no customer returns nothing rather than everything.
+	 * - non-empty text -> matched against the owning customer's email / display name / login via a
+	 *   users-table subquery ({@see self::build_customer_search_clause()}), so a term matching no
+	 *   customer naturally returns no rows (the subquery is empty) rather than everything, with no
+	 *   cap on how many customers can match.
 	 *
 	 * @param array<string, mixed> $args Query args (only `status` and `search` are read).
 	 * @return array{0: string, 1: array<int, int|string>} The WHERE SQL and its params in order.
@@ -439,16 +434,10 @@ final class ContractRepository {
 				$params[]  = (int) $search;
 				$params[]  = (int) $search;
 			} else {
-				$customer_ids = $this->find_customer_ids_for_search( $search );
-				if ( array() === $customer_ids ) {
-					// A text term matching no customer must return no rows, not every row.
-					$clauses[] = '0 = 1';
-				} else {
-					$placeholders = implode( ', ', array_fill( 0, count( $customer_ids ), '%d' ) );
-					$clauses[]    = "customer_id IN ( {$placeholders} )";
-					foreach ( $customer_ids as $customer_id ) {
-						$params[] = $customer_id;
-					}
+				list( $clause, $like_params ) = $this->build_customer_search_clause( $search );
+				$clauses[]                    = $clause;
+				foreach ( $like_params as $like_param ) {
+					$params[] = $like_param;
 				}
 			}
 		}
@@ -483,27 +472,28 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Resolve a non-numeric search term to a bounded set of customer ids - the text-search
-	 * half of {@see self::build_list_criteria()}. Runs a capped `get_users()` lookup over
-	 * email / display name / login and returns only the ids, so the caller matches on
-	 * `customer_id IN (...)`. Bounded by {@see self::SEARCH_CUSTOMER_LIMIT} so a broad term
-	 * cannot expand the IN() set without limit. This user lookup is Integration-layer work
-	 * and stays out of `Core\`.
+	 * Build the customer-search clause for a non-numeric term - the text-search half of
+	 * {@see self::build_list_criteria()}. Matches a contract whose owning customer's email,
+	 * display name or login contains the term, via a subquery on the users table rather than a
+	 * materialised id list, so the database bounds a broad term instead of a truncated
+	 * `IN (...)` set (no matches are silently dropped, and `count()` stays accurate). The three
+	 * `LIKE` params are the same escaped term. WP-native user-table access is Integration-layer
+	 * work and stays out of `Core\`.
 	 *
 	 * @param string $term The non-empty, non-numeric search term.
-	 * @return array<int, int> Matching customer ids (possibly empty).
+	 * @return array{0: string, 1: array<int, string>} The clause SQL and its LIKE params in order.
 	 */
-	private function find_customer_ids_for_search( string $term ): array {
-		$users = get_users(
-			array(
-				'search'         => '*' . $term . '*',
-				'search_columns' => array( 'user_email', 'display_name', 'user_login' ),
-				'number'         => self::SEARCH_CUSTOMER_LIMIT,
-				'fields'         => 'ID',
-			)
-		);
+	private function build_customer_search_clause( string $term ): array {
+		global $wpdb;
 
-		return array_map( 'intval', $users );
+		$like = '%' . $wpdb->esc_like( $term ) . '%';
+
+		// $wpdb->users is a trusted core table name; the term is bound through the %s LIKE
+		// placeholders when the caller runs this fragment through $wpdb->prepare().
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$clause = "customer_id IN ( SELECT ID FROM {$wpdb->users} WHERE user_email LIKE %s OR display_name LIKE %s OR user_login LIKE %s )";
+
+		return array( $clause, array( $like, $like, $like ) );
 	}
 
 	/**
@@ -584,7 +574,20 @@ final class ContractRepository {
 	 * @return array<int, int> Contract id => line-item count, one entry per requested id.
 	 */
 	public function count_items_by_contract( array $contract_ids ): array {
-		$ids    = array_values( array_unique( array_map( 'intval', $contract_ids ) ) );
+		// Keep only scalar, positive ids (this is a public entry point): casting an object or
+		// array with intval would warn and collapse to a bogus 0. Array keys de-duplicate.
+		$ids = array();
+		foreach ( $contract_ids as $contract_id ) {
+			if ( ! is_scalar( $contract_id ) ) {
+				continue;
+			}
+			$id = (int) $contract_id;
+			if ( $id > 0 ) {
+				$ids[ $id ] = $id;
+			}
+		}
+		$ids = array_values( $ids );
+
 		$counts = array_fill_keys( $ids, 0 );
 		if ( array() === $ids ) {
 			return $counts;

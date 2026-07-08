@@ -410,6 +410,51 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox query search matches a customer by display name and by login, not only email.
+	 */
+	public function test_query_search_matches_display_name_and_login(): void {
+		$customer = self::factory()->user->create(
+			array(
+				'user_login'   => 'zelda_login',
+				'user_email'   => 'zelda@example.test',
+				'display_name' => 'Zelda Fitzgerald',
+			)
+		);
+		$this->assertIsInt( $customer );
+		$contract = $this->insert_list_contract( ContractStatus::ACTIVE, (int) $customer );
+
+		// The users-table subquery covers display_name and user_login, not just email.
+		$this->assertSame( array( $contract ), $this->query_ids( array( 'search' => 'Fitzgerald' ) ) );
+		$this->assertSame( array( $contract ), $this->query_ids( array( 'search' => 'zelda_login' ) ) );
+	}
+
+	/**
+	 * @testdox query/count customer search keeps every match, past the old 50-user lookup cap.
+	 */
+	public function test_query_search_is_not_capped_at_a_user_limit(): void {
+		// More than the old 50-user get_users() cap, all sharing an email substring, each with a contract.
+		$total = 55;
+		for ( $i = 0; $i < $total; $i++ ) {
+			$customer = self::factory()->user->create( array( 'user_email' => "capsearch{$i}@example.test" ) );
+			$this->assertIsInt( $customer );
+			$this->insert_list_contract( ContractStatus::ACTIVE, (int) $customer );
+		}
+
+		// The users-table subquery matches every customer whose email contains the term - no
+		// truncation - and count() agrees with the full set the page is a window onto.
+		$this->assertSame( $total, $this->sut->count( array( 'search' => 'capsearch' ) ) );
+		$this->assertCount(
+			$total,
+			$this->sut->query(
+				array(
+					'search' => 'capsearch',
+					'limit'  => 100,
+				)
+			)
+		);
+	}
+
+	/**
 	 * @testdox query composes status, search, and sort together.
 	 */
 	public function test_query_composes_status_search_and_sort(): void {
