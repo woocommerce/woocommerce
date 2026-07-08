@@ -16,11 +16,11 @@ If you have questions about testing, reach out to the developer community in our
 
 ## End-to-end testing
 
-[End-to-end tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw) are powered by Playwright. The test site is spun up using `wp-env`.
+[End-to-end tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e) are powered by Playwright. The test site is spun up using `wp-env`.
 
 ## API testing
 
-[API tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw/tests/api-tests) are part of the Playwright suite and use the same `wp-env` test environment as end-to-end tests.
+[API tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e/tests/api-tests) are part of the Playwright suite and use the same `wp-env` test environment as end-to-end tests.
 
 ## Testing instructions
 

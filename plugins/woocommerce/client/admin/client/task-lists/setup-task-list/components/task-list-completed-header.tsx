@@ -3,11 +3,11 @@
  */
 import clsx from 'clsx';
 import { useEffect, useState } from '@wordpress/element';
-import { EllipsisMenu } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { optionsStore, WEEK } from '@woocommerce/data';
-import { Button, Card, CardHeader } from '@wordpress/components';
+import { Card, CardHeader, DropdownMenu } from '@wordpress/components';
+import { moreVertical } from '@wordpress/icons';
 import { Text } from '@woocommerce/experimental';
 import {
 	ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
@@ -190,23 +190,28 @@ export const TaskListCompletedHeader = ( {
 								) }
 							</Text>
 							<div className="woocommerce-task-card__header-menu">
-								<EllipsisMenu
+								<DropdownMenu
+									controls={ [
+										{
+											title: __(
+												'Hide this',
+												'woocommerce'
+											),
+											onClick: () => hideTasks(),
+										},
+									] }
+									icon={ moreVertical }
 									label={ __(
-										'Task List Options',
+										'Task list options',
 										'woocommerce'
 									) }
-									renderContent={ () => (
-										<div className="woocommerce-task-card__section-controls">
-											<Button
-												onClick={ () => hideTasks() }
-											>
-												{ __(
-													'Hide this',
-													'woocommerce'
-												) }
-											</Button>
-										</div>
-									) }
+									popoverProps={ {
+										placement: 'bottom-end',
+									} }
+									toggleProps={ {
+										className:
+											'woocommerce-ellipsis-menu__toggle',
+									} }
 								/>
 							</div>
 						</div>

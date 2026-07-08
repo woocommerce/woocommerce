@@ -22,7 +22,7 @@ import {
 	useInstallPlugin,
 } from './shipping-recommendations-utils';
 import './shipping-recommendations.scss';
-import { ShippingTour } from '../guided-tours/shipping-tour';
+import { ShippingTour } from '~/guided-tours/shipping-tour';
 
 type ExtensionId = 'woocommerce-shipping' | 'shipstation' | 'packlink';
 
