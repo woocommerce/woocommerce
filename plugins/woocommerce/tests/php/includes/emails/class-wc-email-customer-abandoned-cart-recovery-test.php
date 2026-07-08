@@ -291,6 +291,26 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox trigger() does not dispatch when META_KEY_SENT_AT is already populated, so a duplicate AS firing or a re-trigger after a successful send cannot double-email the customer.
+	 */
+	public function test_trigger_skips_when_already_sent(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = $this->age_order_past_threshold( $order );
+		$order->update_meta_data( WC_Email_Customer_Abandoned_Cart_Recovery::META_KEY_SENT_AT, (string) time() );
+		$order->save();
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+		$this->sut->trigger( $order->get_id() );
+		$after = count( $mailer->mock_sent );
+
+		$this->assertSame( $before, $after, 'Order already marked as sent must not receive a second dispatch.' );
+	}
+
+	/**
 	 * @testdox trigger() does not write the sent_at meta when the email is disabled (no send happened).
 	 */
 	public function test_trigger_does_not_record_meta_when_disabled(): void {
@@ -682,6 +702,55 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 		}
 
 		$this->assertArrayNotHasKey( WC_Email_Customer_Abandoned_Cart_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+	}
+
+	/**
+	 * @testdox register_order_action() hides the action once the order is marked as sent so merchants don't click a dropdown item that would silently no-op on the trigger-side dedup gate.
+	 */
+	public function test_register_order_action_skips_when_already_sent(): void {
+		$this->become_admin();
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = $this->age_order_past_threshold( $order );
+		$order->update_meta_data( WC_Email_Customer_Abandoned_Cart_Recovery::META_KEY_SENT_AT, (string) time() );
+		$order->save();
+
+		$actions = $this->sut->register_order_action( array(), $order );
+
+		$this->assertArrayNotHasKey( WC_Email_Customer_Abandoned_Cart_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+	}
+
+	/**
+	 * @testdox handle_recovery_email_send() does not record a "sent from the order actions menu" order note when trigger() bails on the dedup gate — keeps the audit trail honest about whether an email actually went out.
+	 */
+	public function test_handle_recovery_email_send_skips_note_when_already_sent(): void {
+		$this->become_admin();
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = $this->age_order_past_threshold( $order );
+		$order->update_meta_data( WC_Email_Customer_Abandoned_Cart_Recovery::META_KEY_SENT_AT, (string) ( time() - HOUR_IN_SECONDS ) );
+		$order->save();
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+
+		$this->sut->handle_recovery_email_send( $order );
+
+		$this->assertSame( $before, count( $mailer->mock_sent ), 'Already-sent order must not dispatch a second message from the manual handler.' );
+
+		$notes        = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$note_strings = wp_list_pluck( $notes, 'content' );
+		$this->assertEmpty(
+			array_filter(
+				$note_strings,
+				static fn ( $note ) => false !== strpos( $note, 'sent from the order actions menu' )
+			),
+			'Dedup-gated trigger() must not leave a "sent from the order actions menu" order note behind.'
+		);
 	}
 
 	/**

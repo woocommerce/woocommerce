@@ -23,17 +23,25 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Money-scale normalization helper.
+ *
+ * @internal Engine implementation detail. Not part of the supported extension API.
  */
-trait MoneyScale {
+final class MoneyScale {
 
-	use ScalarCoercion;
+	/**
+	 * Static helper only.
+	 *
+	 * @internal Engine implementation detail. Not part of the supported extension API.
+	 */
+	private function __construct() {}
 
 	/**
 	 * Normalize a money value to the storage scale (8 decimals).
 	 *
 	 * @param mixed $value Money value (decimal string or number).
+	 * @internal Engine implementation detail. Not part of the supported extension API.
 	 */
-	private static function normalize_money( $value ): string {
-		return number_format( self::coerce_float( $value ?? '0' ), 8, '.', '' );
+	public static function normalize_money( $value ): string {
+		return number_format( ScalarCoercion::coerce_float( $value ?? '0' ), 8, '.', '' );
 	}
 }

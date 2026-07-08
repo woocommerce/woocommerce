@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Schedule the abandoned cart recovery email to send 2 hours after a pending order is created, and cancel the pending send when the order leaves the pending status.

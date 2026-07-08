@@ -1,6 +1,6 @@
 {
 	"name": "woocommerce/product-filter-status",
-	"title": "Availability filter",
+	"title": "Availability Filter",
 	"description": "Let shoppers filter products by availability.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
