@@ -68,13 +68,16 @@ class WooPaymentsService {
 	const ONBOARDING_STEP_STATUS_BLOCKED = 'blocked';
 
 	/**
-	 * Error types/codes for which retrying the test account initialization cannot succeed.
+	 * Error identifiers for which retrying the test account initialization cannot succeed.
+	 *
+	 * Each entry is matched against both the error type and the error code reported by the
+	 * WooPayments extension, since either field can carry the identifying value.
 	 *
 	 * These are errors the merchant has no way of fixing on their end (e.g. Stripe rejecting
 	 * data that WooCommerce/WooPayments generates automatically), so instead of trapping the
 	 * merchant in a retry loop, we skip the step forward and let onboarding proceed.
 	 */
-	const ONBOARDING_TEST_ACCOUNT_NON_RECOVERABLE_ERROR_TYPES = array( 'invalid_request_error' );
+	const ONBOARDING_TEST_ACCOUNT_NON_RECOVERABLE_ERROR_IDENTIFIERS = array( 'invalid_request_error' );
 
 	const ACTION_TYPE_REST     = 'REST';
 	const ACTION_TYPE_REDIRECT = 'REDIRECT';
@@ -556,8 +559,27 @@ class WooPaymentsService {
 		$error_type = $error_data['data']['error_type'] ?? $error_data['error_type'] ?? null;
 		$error_code = $error_data['data']['error_code'] ?? $error_data['error_code'] ?? null;
 
-		return in_array( $error_type, self::ONBOARDING_TEST_ACCOUNT_NON_RECOVERABLE_ERROR_TYPES, true ) ||
-			in_array( $error_code, self::ONBOARDING_TEST_ACCOUNT_NON_RECOVERABLE_ERROR_TYPES, true );
+		/**
+		 * Filters the error identifiers for which retrying the WooPayments test account
+		 * initialization cannot succeed.
+		 *
+		 * Each identifier is matched against both the error type and the error code reported
+		 * by the WooPayments extension. When an initialization error matches, the test account
+		 * onboarding step is skipped forward instead of being marked as failed.
+		 *
+		 * @param string[] $identifiers The non-recoverable error identifiers.
+		 * @param WP_Error $error       The error returned by the test account initialization request.
+		 *
+		 * @since 11.1.0
+		 */
+		$non_recoverable_identifiers = (array) apply_filters(
+			'woocommerce_woopayments_onboarding_test_account_non_recoverable_errors',
+			self::ONBOARDING_TEST_ACCOUNT_NON_RECOVERABLE_ERROR_IDENTIFIERS,
+			$error
+		);
+
+		return in_array( $error_type, $non_recoverable_identifiers, true ) ||
+			in_array( $error_code, $non_recoverable_identifiers, true );
 	}
 
 	/**
@@ -579,7 +601,18 @@ class WooPaymentsService {
 	 * @throws ApiException Always, with a dedicated error code signaling the non-recoverable failure.
 	 */
 	private function skip_onboarding_test_account_step( string $location, ?string $source, array $context = array() ): void {
-		$this->record_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location, false, $source );
+		$step_recorded = $this->record_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location, false, $source );
+		if ( ! $step_recorded ) {
+			// The client will still advance the merchant, so leave a trail: the stored onboarding
+			// state now disagrees with the client navigation.
+			$this->proxy->call_function( 'wc_get_logger' )->error(
+				'Failed to record the test account onboarding step as completed while skipping it forward.',
+				array(
+					'source'   => 'settings-payments',
+					'location' => $location,
+				)
+			);
+		}
 
 		$this->record_event(
 			self::EVENT_PREFIX . 'onboarding_test_account_skipped',
