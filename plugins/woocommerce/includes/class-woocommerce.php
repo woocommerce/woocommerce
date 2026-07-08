@@ -326,6 +326,7 @@ final class WooCommerce {
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'load-post.php', array( $this, 'includes' ) );
+		add_action( 'load-post-new.php', array( $this, 'includes' ) );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( $this, 'maybe_init_order_reviews' ), 1 );
 		add_action( 'init', array( $this, 'maybe_init_abandoned_cart_recovery' ), 1 );
@@ -1000,7 +1001,7 @@ final class WooCommerce {
 	 * so the order-edit action listener is registered before
 	 * `WC_Meta_Box_Order_Actions::save()` dispatches its hook on POST.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @internal
 	 */
 	public function maybe_init_abandoned_cart_recovery(): void {
@@ -1008,6 +1009,7 @@ final class WooCommerce {
 			return;
 		}
 		wc_get_container()->get( \Automattic\WooCommerce\Internal\AbandonedCartRecovery\ManualSendHandler::class );
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\AbandonedCartRecovery\Scheduler::class );
 	}
 
 	/**
@@ -1022,7 +1024,7 @@ final class WooCommerce {
 	 * stop working. Both consequences are wrong, so this method runs even
 	 * when no specific email kind that uses it is currently active.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @internal
 	 */
 	public function init_email_unsubscribes(): void {

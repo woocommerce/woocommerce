@@ -148,7 +148,7 @@ export const SettingsProvider = ( {
 		// @todo This should be improved to include error handling in case of API failure, or invalid data being sent that
 		// does not match the schema. This would fail silently on the API side.
 		apiFetch( {
-			path: '/wp/v2/settings',
+			path: '/wc/v3/pickup-locations',
 			method: 'POST',
 			data,
 		} ).then( ( response ) => {
