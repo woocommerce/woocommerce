@@ -99,6 +99,19 @@ final class Subscriptions {
 	}
 
 	/**
+	 * The line-item count for a page of contracts - the read behind an admin list's
+	 * "Items" column. One grouped scan over the given ids, returned as a map keyed by
+	 * every requested id (ids with no items are 0), so a list renders an items count
+	 * per row without a per-row query. Ids are de-duplicated and int-cast.
+	 *
+	 * @param array<int, int> $contract_ids Contract ids to count items for.
+	 * @return array<int, int> Contract id => line-item count, one entry per requested id.
+	 */
+	public static function item_counts( array $contract_ids ): array {
+		return ( new ContractRepository() )->count_items_by_contract( $contract_ids );
+	}
+
+	/**
 	 * List a single customer's subscription contracts, newest first - the customer
 	 * portal's owner-scoped list read.
 	 *

@@ -574,6 +574,45 @@ final class ContractRepository {
 	}
 
 	/**
+	 * The line-item count per contract - the list "Items" column's read. One
+	 * `GROUP BY contract_id` scan of the items table over a page of contract ids,
+	 * returned as a map keyed by EVERY requested id (ids with no items filled with
+	 * 0), so the caller renders a value for every row without a per-row query. Ids
+	 * are de-duplicated and cast to int before binding; an empty request is a no-op.
+	 *
+	 * @param array<int, int> $contract_ids Contract ids to count items for.
+	 * @return array<int, int> Contract id => line-item count, one entry per requested id.
+	 */
+	public function count_items_by_contract( array $contract_ids ): array {
+		$ids    = array_values( array_unique( array_map( 'intval', $contract_ids ) ) );
+		$counts = array_fill_keys( $ids, 0 );
+		if ( array() === $ids ) {
+			return $counts;
+		}
+
+		global $wpdb;
+
+		$table        = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS );
+		$placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
+
+		// The id placeholders join dynamically, so the sniff sees none in the literal.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT contract_id, COUNT(*) AS total FROM {$table} WHERE contract_id IN ({$placeholders}) GROUP BY contract_id", $ids ), ARRAY_A );
+
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+			$cid = ScalarCoercion::coerce_int( $row['contract_id'] ?? 0 );
+			if ( array_key_exists( $cid, $counts ) ) {
+				$counts[ $cid ] = ScalarCoercion::coerce_int( $row['total'] ?? 0 );
+			}
+		}
+
+		return $counts;
+	}
+
+	/**
 	 * Construct a page of list contracts from fetched rows: row-only children, with the
 	 * frozen plan terms batch-loaded in ONE `IN()` read for the whole page - the one
 	 * list construction path, so every list read carries the snapshot the same way.

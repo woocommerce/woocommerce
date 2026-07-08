@@ -532,6 +532,26 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox count_items_by_contract maps every requested id, zero-filling ids with no items.
+	 */
+	public function test_count_items_by_contract_maps_every_requested_id(): void {
+		$with_items = $this->sut->insert( $this->make_contract() ); // Seeds one line item.
+		$no_items   = $this->insert_list_contract( ContractStatus::ACTIVE ); // Bare row, no items.
+		$absent     = 999999; // Never inserted.
+
+		$counts = $this->sut->count_items_by_contract( array( $with_items, $no_items, $absent ) );
+
+		$this->assertSame( 1, $counts[ $with_items ], 'A contract with items reports its line-item count.' );
+		$this->assertSame( 0, $counts[ $no_items ], 'A contract with no items is zero-filled, not absent.' );
+		$this->assertSame( 0, $counts[ $absent ], 'A requested id with no rows is present at zero.' );
+		$this->assertCount( 3, $counts, 'The map carries exactly the requested ids.' );
+
+		// De-duplicates its input and short-circuits an empty request.
+		$this->assertSame( array( $with_items => 1 ), $this->sut->count_items_by_contract( array( $with_items, $with_items ) ) );
+		$this->assertSame( array(), $this->sut->count_items_by_contract( array() ) );
+	}
+
+	/**
 	 * @testdox A manual/admin contract with a null origin order round-trips.
 	 */
 	public function test_contract_round_trips_a_null_origin_order(): void {
