@@ -5713,24 +5713,6 @@ parameters:
 			path: includes/admin/meta-boxes/class-wc-meta-box-product-data.php
 
 		-
-			message: '#^Call to an undefined method object\:\:save\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-product-images.php
-
-		-
-			message: '#^Call to an undefined method object\:\:set_gallery_image_ids\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-product-images.php
-
-		-
-			message: '#^Cannot call method get_gallery_image_ids\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-product-images.php
-
-		-
 			message: '#^Method WC_Meta_Box_Product_Images\:\:output\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -52822,12 +52804,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductGalleryLargeImage\:\:get_main_images_html\(\) should return array but returns string\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductGalleryLargeImage\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -52841,18 +52817,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$html of function wp_interactivity_process_directives expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
-
-		-
-			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''a'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
-
-		-
-			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''img'' given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
