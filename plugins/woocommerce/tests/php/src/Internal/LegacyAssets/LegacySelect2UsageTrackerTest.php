@@ -72,6 +72,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_tracks_plugin_owned_header_dependency_on_select2(): void {
 		set_current_screen( 'woocommerce_page_wc-settings' );
+		$_SERVER['REQUEST_URI'] = '/wp-admin/admin.php?page=wc-settings';
 		wp_register_script(
 			'my-extension-admin',
 			plugins_url( 'my-extension/assets/admin.js' ),
@@ -86,7 +87,8 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'context'    => 'admin',
-				'location'   => 'woocommerce_page_wc-settings',
+				'page_type'  => 'woocommerce_page_wc-settings',
+				'page_url'   => '/wp-admin/admin.php',
 				'handles'    => 'select2',
 				'dependents' => 'my-extension-admin',
 				'sources'    => 'http://localhost:8086/wp-content/plugins/my-extension/assets/admin.js',
@@ -114,7 +116,8 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'context'    => 'frontend',
-				'location'   => '/',
+				'page_type'  => 'other',
+				'page_url'   => '/',
 				'handles'    => 'wc-select2',
 				'dependents' => 'my-extension-footer',
 				'sources'    => 'http://localhost:8086/wp-content/plugins/my-extension/assets/footer.js',
@@ -160,7 +163,8 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'context'    => 'frontend',
-				'location'   => '/',
+				'page_type'  => 'other',
+				'page_url'   => '/',
 				'handles'    => 'select2',
 				'dependents' => 'select2',
 				'sources'    => '',
@@ -227,7 +231,8 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'context'    => 'frontend',
-				'location'   => '/',
+				'page_type'  => 'other',
+				'page_url'   => '/',
 				'handles'    => 'wc-select2',
 				'dependents' => 'my-extension-footer',
 				'sources'    => 'http://localhost:8086/wp-content/plugins/my-extension/assets/footer.js',
@@ -253,24 +258,25 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should record each detected usage event only once per week.
+	 * @testdox Should record each detected usage event only once per page type per week.
 	 */
-	public function test_records_each_detected_usage_event_only_once_per_week(): void {
+	public function test_records_each_detected_usage_event_only_once_per_page_type_per_week(): void {
 		$original_request_uri     = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
 		$_SERVER['REQUEST_URI']   = '/shop/?filter=featured';
-		$frontend_shop_page_scope = array(
-			'context'  => 'frontend',
-			'location' => '/shop/',
+		$frontend_page_type_scope = array(
+			'context'   => 'frontend',
+			'page_type' => 'other',
 		);
 		$event                    = array(
 			'context'    => 'frontend',
-			'location'   => '/shop/',
+			'page_type'  => 'other',
+			'page_url'   => '/shop/',
 			'handles'    => 'wc-select2',
 			'dependents' => 'my-extension-footer',
 			'sources'    => 'http://localhost:8086/wp-content/plugins/my-extension/assets/footer.js',
 		);
 
-		$this->delete_request_scope_transient( $frontend_shop_page_scope );
+		$this->delete_request_scope_transient( $frontend_page_type_scope );
 
 		$sut = new class() extends LegacySelect2UsageTracker {
 			/**
@@ -327,6 +333,9 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 
 		$this->print_script_group( 1 );
 		$sut->handle_wp_print_footer_scripts();
+
+		$_SERVER['REQUEST_URI'] = '/product/hoodie/';
+
 		$sut->handle_wp_print_footer_scripts();
 
 		$this->assertSame(
@@ -337,11 +346,11 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 				),
 			),
 			$sut->recorded_events,
-			'Repeated requests for the same legacy Select2 usage should be rate limited.'
+			'Repeated requests for the same legacy Select2 usage page type should be rate limited.'
 		);
-		$this->assertSame( 1, $sut->usage_event_calls, 'The cached frontend path should skip repeated script registry scans.' );
+		$this->assertSame( 1, $sut->usage_event_calls, 'The cached frontend page type should skip repeated script registry scans.' );
 
-		$this->delete_request_scope_transient( $frontend_shop_page_scope );
+		$this->delete_request_scope_transient( $frontend_page_type_scope );
 
 		if ( null === $original_request_uri ) {
 			unset( $_SERVER['REQUEST_URI'] );

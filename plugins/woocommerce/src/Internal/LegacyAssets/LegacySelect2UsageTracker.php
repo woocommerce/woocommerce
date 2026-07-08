@@ -134,17 +134,10 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 			return array();
 		}
 
-		$location = '';
-
-		if ( self::CONTEXT_ADMIN === $context ) {
-			$location = $this->get_current_screen_id();
-		} elseif ( self::CONTEXT_FRONTEND === $context ) {
-			$location = $this->get_current_request_path();
-		}
-
 		return array(
 			'context'    => $context,
-			'location'   => $location,
+			'page_type'  => $this->get_current_page_type( $context ),
+			'page_url'   => $this->get_current_request_path(),
 			'handles'    => implode( ',', array_keys( $handles ) ),
 			'dependents' => implode( ',', array_keys( $dependents ) ),
 			'sources'    => implode( ',', array_unique( $sources ) ),
@@ -212,17 +205,9 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 	 * @return array<string, string>
 	 */
 	private function get_request_scope( string $context ): array {
-		$location = '';
-
-		if ( self::CONTEXT_ADMIN === $context ) {
-			$location = $this->get_current_screen_id();
-		} elseif ( self::CONTEXT_FRONTEND === $context ) {
-			$location = $this->get_current_request_path();
-		}
-
 		return array(
-			'context'  => $context,
-			'location' => $location,
+			'context'   => $context,
+			'page_type' => $this->get_current_page_type( $context ),
 		);
 	}
 
@@ -307,6 +292,85 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 
 		$screen = get_current_screen();
 		return $screen ? (string) $screen->id : '';
+	}
+
+	/**
+	 * Get the current page type.
+	 *
+	 * @param string $context The request context.
+	 * @return string
+	 */
+	private function get_current_page_type( string $context ): string {
+		if ( self::CONTEXT_ADMIN === $context ) {
+			return $this->get_current_screen_id();
+		}
+
+		if ( self::CONTEXT_FRONTEND === $context ) {
+			return $this->get_current_frontend_page_type();
+		}
+
+		return '';
+	}
+
+	/**
+	 * Get the current frontend page type.
+	 *
+	 * @return string
+	 */
+	private function get_current_frontend_page_type(): string {
+		if ( is_cart() ) {
+			return 'cart';
+		}
+
+		if ( is_checkout() ) {
+			return 'checkout';
+		}
+
+		if ( is_account_page() ) {
+			return 'my_account';
+		}
+
+		if ( is_shop() ) {
+			return 'shop';
+		}
+
+		if ( is_product() ) {
+			return 'product';
+		}
+
+		if ( is_product_category() ) {
+			return 'product_category';
+		}
+
+		if ( is_product_tag() ) {
+			return 'product_tag';
+		}
+
+		if ( is_product_taxonomy() ) {
+			return 'product_taxonomy';
+		}
+
+		if ( is_front_page() ) {
+			return 'front_page';
+		}
+
+		if ( is_home() ) {
+			return 'home';
+		}
+
+		if ( is_search() ) {
+			return 'search';
+		}
+
+		if ( is_archive() ) {
+			return 'archive';
+		}
+
+		if ( is_singular() ) {
+			return 'singular';
+		}
+
+		return 'other';
 	}
 
 	/**
