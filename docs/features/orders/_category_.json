@@ -1,0 +1,11 @@
+{
+    "position": 2,
+    "label": "Orders",
+    "collapsible": true,
+    "collapsed": true,
+    "link": {
+        "type": "generated-index",
+        "title": "Orders",
+        "slug": "/features/orders"
+    }
+}

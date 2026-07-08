@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add a new transactional abandoned cart recovery email that prompts customers to complete a pending checkout, behind the new `checkout_recovery` feature flag.
+Add a new transactional abandoned cart recovery email that prompts customers to complete a pending checkout, behind the new `abandoned_cart_recovery` feature flag.

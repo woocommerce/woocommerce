@@ -5684,6 +5684,30 @@ img.help_tip {
 					height: auto;
 					display: block;
 				}
+
+				.woocommerce-product-gallery__video-preview {
+					display: block;
+					width: 100%;
+					aspect-ratio: 1;
+					object-fit: cover;
+					background: $gray-100;
+				}
+
+				&.video::before {
+					@include icon_dashicons("\f522");
+
+					left: 50%;
+					top: 50%;
+					transform: translate(-50%, -50%);
+					z-index: 1;
+					width: auto;
+					height: auto;
+					color: $contentbg;
+					font-size: 1.4em;
+					line-height: 1;
+					text-shadow: 0 0 0.25em rgba(0, 0, 0, 0.8);
+					pointer-events: none;
+				}
 			}
 
 			li.wc-metabox-sortable-placeholder {
