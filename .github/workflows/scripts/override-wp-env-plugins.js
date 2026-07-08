@@ -89,10 +89,9 @@ for ( const configFile of configFiles ) {
 		} from ${ configFile }; mapping ${ artifactUrl } -> wp-content/plugins/woocommerce`
 	);
 
-	const overrideConfigPath = configPath.replace(
-		/\.json$/,
-		'.override.json'
-	);
+	const overrideConfigPath = configPath.endsWith( '.json' )
+		? configPath.slice( 0, -5 ) + '.override.json'
+		: configPath;
 	console.log( `Saving ${ overrideConfigPath }` );
 	fs.writeFileSync(
 		overrideConfigPath,
