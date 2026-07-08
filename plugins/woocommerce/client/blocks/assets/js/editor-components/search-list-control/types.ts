@@ -21,8 +21,8 @@ interface ItemProps< T extends object = object > {
 	// Search string, used to highlight the substring in the item name.
 	search: string;
 	useExpandedPanelId: [
-		number,
-		React.Dispatch< React.SetStateAction< number > >
+		string | number | null,
+		React.Dispatch< React.SetStateAction< string | number | null > >
 	];
 }
 
@@ -97,6 +97,8 @@ export interface RenderItemArgs< T extends object = object >
 	item: SearchListItem< T >;
 	// Whether this item is selected.
 	isSelected: boolean;
+	// Whether this item is selectable.
+	isSelectable?: boolean;
 	// Whether this should only display a single item (controls radio vs checkbox icon).
 	isSingle: boolean;
 	// The list of currently selected items.

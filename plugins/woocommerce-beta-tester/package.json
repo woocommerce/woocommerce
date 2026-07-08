@@ -16,7 +16,7 @@
 		"@types/wordpress__block-editor": "catalog:wp-min",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/env": "11.0.1-next.v.20260206T143.0",
+		"@wordpress/env": "11.9.0",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/scripts": "^19.2.4",
 		"eslint": "^8.55.0",
@@ -49,7 +49,6 @@
 	"peerDependencies": {
 		"@types/react": "18.3.x",
 		"@types/react-dom": "18.3.x",
-		"@wordpress/data": "^10.0.2",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"
 	},

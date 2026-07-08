@@ -220,7 +220,7 @@ export const SettingsPaymentsBacs = () => {
 								data={ formValues }
 								fields={ fields }
 								form={ {
-									type: 'regular',
+									layout: { type: 'regular' },
 									fields: [
 										'enabled',
 										'title',

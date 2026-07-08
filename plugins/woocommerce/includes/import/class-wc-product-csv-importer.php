@@ -725,12 +725,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Parse the published field. 1 is published, 0 is private, -1 is draft.
+	 * Parse the published field. 1 is published, 0 is private, -1 is draft, 2 is pending review.
 	 * Alternatively, 'true' can be used for published and 'false' for draft.
 	 *
 	 * @param string $value Field value.
 	 *
-	 * @return float|string
+	 * @return int|float|string
 	 */
 	public function parse_published_field( $value ) {
 		if ( '' === $value ) {
@@ -913,6 +913,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				-1 => ProductStatus::DRAFT,
 				0  => ProductStatus::PRIVATE,
 				1  => ProductStatus::PUBLISH,
+				2  => ProductStatus::PENDING,
 			);
 			$data['status'] = $statuses[ $published ] ?? ProductStatus::DRAFT;
 

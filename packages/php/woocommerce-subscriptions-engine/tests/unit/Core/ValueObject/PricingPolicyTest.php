@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\ValueObject;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
 
@@ -38,6 +39,21 @@ class PricingPolicyTest extends TestCase {
 		);
 
 		$this->assertSame( 90.0, $policy->calculate_price( 100.0 ) );
+	}
+
+	public function test_line_total_uses_effective_unit_price_for_quantity(): void {
+		$policy = PricingPolicy::from_array(
+			array(
+				'policies' => array(
+					array(
+						'type'  => 'percentage',
+						'value' => 10,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 270.0, $policy->calculate_line_total( 100.0, 3.0 ) );
 	}
 
 	public function test_fixed_amount_is_clamped_at_zero(): void {
@@ -72,6 +88,62 @@ class PricingPolicyTest extends TestCase {
 		$this->assertSame( 50.0, $policy->calculate_price( 50.0, 1 ) );
 		// Cycle 2 onward the rule fires and replaces the price.
 		$this->assertSame( 5.0, $policy->calculate_price( 50.0, 2 ) );
+	}
+
+	public function test_duration_cycles_limits_policy_window(): void {
+		$policy = PricingPolicy::from_array(
+			array(
+				'policies' => array(
+					array(
+						'type'            => 'percentage',
+						'value'           => 50,
+						'starting_cycle'  => 2,
+						'duration_cycles' => 2,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 100.0, $policy->calculate_price( 100.0, 1 ) );
+		$this->assertSame( 50.0, $policy->calculate_price( 100.0, 2 ) );
+		$this->assertSame( 50.0, $policy->calculate_price( 100.0, 3 ) );
+		$this->assertSame( 100.0, $policy->calculate_price( 100.0, 4 ) );
+	}
+
+	/**
+	 * @dataProvider provide_invalid_cycle_gate_values
+	 *
+	 * @param string $field Cycle gate field.
+	 * @param mixed  $value Invalid value.
+	 */
+	public function test_invalid_cycle_gate_values_are_rejected_by_pricing_policy( string $field, $value ): void {
+		$this->expectException( InvalidArgumentException::class );
+
+		PricingPolicy::from_array(
+			array(
+				'policies' => array(
+					array(
+						'type'  => 'percentage',
+						'value' => 10,
+						$field  => $value,
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * @return array<string, array{0: string, 1: mixed}>
+	 */
+	public function provide_invalid_cycle_gate_values(): array {
+		return array(
+			'fractional starting_cycle float'    => array( 'starting_cycle', 1.5 ),
+			'fractional starting_cycle string'   => array( 'starting_cycle', '1.5' ),
+			'non-numeric starting_cycle string'  => array( 'starting_cycle', 'soon' ),
+			'fractional duration_cycles float'   => array( 'duration_cycles', 1.5 ),
+			'fractional duration_cycles string'  => array( 'duration_cycles', '1.5' ),
+			'non-numeric duration_cycles string' => array( 'duration_cycles', 'forever' ),
+		);
 	}
 
 	public function test_whole_number_values_normalize_to_float(): void {

@@ -13,27 +13,28 @@ import {
 /**
  * Internal dependencies
  */
-import { tags, test, expect } from '../../fixtures/fixtures';
+import { tags, test, expect, request } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { fillPageTitle } from '../../utils/editor';
+import { getFakeProduct, getFakeTag, getFakeAttribute } from '../../utils/data';
+import { setOption } from '../../utils/options';
 
 const pageTitle = 'Product Showcase';
-const singleProductPrice1 = '5.00';
-const singleProductPrice2 = '10.00';
-const singleProductPrice3 = '15.00';
 
-const productTagName1 = 'product tag 1';
-const productTagName2 = 'product tag 2';
-const productTagName3 = 'product tag 3';
+const productTagName1 = getFakeTag().name;
+const productTagName2 = getFakeTag().name;
+const productTagName3 = getFakeTag().name;
 
-const productAttributeName = 'color';
-const productAttributeTerm = 'red';
-
-const simpleProductName = 'Single Product With Tags';
+// Both the attribute and its term must be unique: the attribute creates a
+// global `pa_*` taxonomy and the term a global term within it, so a fixed name
+// would collide across parallel workers.
+const productAttributeName = getFakeAttribute().name;
+const productAttributeTerm = getFakeAttribute().name;
 
 let product1Id: number,
 	product2Id: number,
 	product3Id: number,
+	product1Slug: string,
 	productTag1Id: number,
 	productTag2Id: number,
 	productTag3Id: number,
@@ -44,6 +45,10 @@ test.describe(
 	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
+
+		const product1 = getFakeProduct();
+		const product2 = getFakeProduct();
+		const product3 = getFakeProduct();
 
 		test.beforeAll( async ( { restApi } ) => {
 			// add product tags
@@ -90,9 +95,7 @@ test.describe(
 			// add products
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
-					name: simpleProductName + ' 1',
-					type: 'simple',
-					regular_price: singleProductPrice1,
+					...product1,
 					tags: [
 						{ id: productTag1Id },
 						{
@@ -112,12 +115,11 @@ test.describe(
 				} )
 				.then( ( response ) => {
 					product1Id = response.data.id;
+					product1Slug = response.data.slug;
 				} );
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
-					name: simpleProductName + ' 2',
-					type: 'simple',
-					regular_price: singleProductPrice2,
+					...product2,
 					tags: [
 						{ id: productTag1Id },
 						{
@@ -137,9 +139,7 @@ test.describe(
 				} );
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
-					name: simpleProductName + ' 3',
-					type: 'simple',
-					regular_price: singleProductPrice3,
+					...product3,
 					tags: [ { id: productTag1Id } ],
 					attributes: [
 						{
@@ -214,8 +214,11 @@ test.describe(
 		test( 'should see and sort tags page with all the products', async ( {
 			page,
 		} ) => {
-			await page.goto( 'shop/?orderby=date' );
-			await page.locator( `text=${ simpleProductName } 1` ).click();
+			// Navigate straight to the product by slug. Going through the
+			// shared, date-sorted shop listing is parallel-fragile: other
+			// workers' products can push this one onto a later page where the
+			// click would fail.
+			await page.goto( `product/${ product1Slug }` );
 			await page.getByRole( 'link', { name: productTagName1 } ).click();
 			await expect(
 				page.getByRole( 'heading', { name: productTagName1 } )
@@ -232,6 +235,7 @@ test.describe(
 
 		test( 'should see and sort attributes page with all its products', async ( {
 			page,
+			baseURL,
 		} ) => {
 			// the api setting for enabling attribute term page doesn't apply for some reason
 			// workaround for the change to take effect is to just update via the settings ui.
@@ -257,8 +261,22 @@ test.describe(
 
 			await expect( attributeLookupCheckbox ).toBeChecked();
 
-			const slug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
-			await page.goto( `product/${ slug }` );
+			// wc_create_attribute() only queues the attribute-archive rewrite
+			// rules flush as a WP-Cron event, which doesn't run in the test env,
+			// so the term archive 404s. Set WooCommerce's own flush flag; it is
+			// applied on the next request's `init` (the product page load below).
+			await setOption(
+				request,
+				baseURL || '',
+				'woocommerce_queue_flush_rewrite_rules',
+				'yes'
+			);
+
+			await page.goto( `product/${ product1Slug }` );
+
+			await page
+				.getByRole( 'tab', { name: 'Additional information' } )
+				.click();
 			await page
 				.locator(
 					'.woocommerce-product-attributes-item__value > p > a',
