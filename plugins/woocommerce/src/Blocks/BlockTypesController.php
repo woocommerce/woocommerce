@@ -700,7 +700,7 @@ final class BlockTypesController {
 	 * @return array Block metadata.
 	 */
 	public function use_single_block_editor_style( $args, $block_name ) {
-		if ( ! is_admin() || false === strpos( $block_name, 'woocommerce/' ) ) {
+		if ( ! is_admin() || false === str_starts_with( $block_name, 'woocommerce/' ) ) {
 			return $args;
 		}
 
