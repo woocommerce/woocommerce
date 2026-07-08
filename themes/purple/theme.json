@@ -224,9 +224,6 @@
 				"spacing": {
 					"margin": {
 						"top": "0"
-					},
-					"padding": {
-						"bottom": "var(--wp--preset--spacing--20)"
 					}
 				}
 			},
@@ -635,7 +632,7 @@
 					}
 				},
 				"typography": {
-					"fontSize": "14px",
+					"fontSize": "var(--wp--preset--font-size--small)",
 					"fontWeight": "400"
 				}
 			},

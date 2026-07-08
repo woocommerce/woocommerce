@@ -23,6 +23,10 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 	text-decoration: underline;
 }
 
+.underline-link a:hover {
+	text-decoration: none;
+}
+
 /* Add a transition state for buttons. */
 .wp-element-button {
 	transition: border, background-color, color, box-shadow, opacity, filter;
@@ -346,7 +350,9 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 	align-items: flex-start;
 }
 
+/* Fixed #fff — form control surface; not theme-1 (page background shifts per style variation). */
 .wc-block-components-quantity-selector {
+	background-color: #fff;
 	border-color: var(--wp--preset--color--theme-6);
 	border-radius: 0;
 	min-height: 44px;
@@ -358,7 +364,7 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 .wc-block-components-quantity-selector input.wc-block-components-quantity-selector__input {
 	-webkit-appearance: textfield;
 	appearance: textfield;
-	background: transparent;
+	background-color: #fff;
 	border: 0;
 	box-shadow: none;
 	flex: 1 1 auto;
@@ -378,10 +384,12 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 }
 
 .wc-block-components-quantity-selector > .wc-block-components-quantity-selector__button--minus {
+	background-color: #fff;
 	order: 1;
 }
 
 .wc-block-components-quantity-selector > .wc-block-components-quantity-selector__button--plus {
+	background-color: #fff;
 	order: 3;
 }
 
