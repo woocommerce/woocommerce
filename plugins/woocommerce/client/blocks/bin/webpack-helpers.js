@@ -9,9 +9,12 @@ const CHECK_CIRCULAR_DEPS = process.env.CHECK_CIRCULAR_DEPS || false;
 const ASSET_CHECK = process.env.ASSET_CHECK === 'true';
 const SHARED_EDITOR_STYLE_HANDLE = 'wc-blocks-editor-style';
 
-// See also @woocommerce/dependency-extraction-webpack-plugin/assets/packages. It will backfill any missing
-// mapping here and any duplicates are because of switched between Woo and WordPress versions of the plugin.
-// As of 2026 it's Woo version to address pnpm peer dependencies related issues to support filesystem cache.
+// See also @woocommerce/dependency-extraction-webpack-plugin/assets/packages and
+// docs/internal-developers/enqueueable-packages/README.md. They should stay in sync with this map.
+// The dependency extraction plugin will backfill any missing mapping here. Duplicates exist because
+// this file has switched between Woo and WordPress versions of the plugin.
+// As of 2026, it uses the Woo version to address pnpm peer dependency issues and support
+// filesystem cache.
 const wcDepMap = {
 	'@woocommerce/tracks': false, // Bundle; do not externalize
 	'@woocommerce/blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
