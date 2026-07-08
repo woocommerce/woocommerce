@@ -14,14 +14,12 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { privateApis as themePrivateApis } from '@wordpress/theme';
 import { Card } from '@wordpress/ui';
 import type { ErrorInfo, ReactNode } from 'react';
 
 /**
  * Internal dependencies
  */
-import { unlock } from './lock-unlock';
 import { HiddenInputs } from './hidden-inputs';
 import { error, warn } from './diagnostics';
 import { sanitizeSettingsHtml } from './html';
@@ -42,11 +40,6 @@ import type {
 	SettingsValue,
 	SettingsValues,
 } from './types';
-
-// ThemeProvider delivers the --wpds-* design tokens. It is only reachable
-// through private-apis while @wordpress/theme stabilises; the package is
-// exact-pinned so upstream changes land as deliberate updates.
-const { ThemeProvider } = unlock( themePrivateApis );
 
 type SaveNotice = {
 	status: 'success' | 'error';
@@ -830,103 +823,99 @@ export const SettingsUIPage = ( {
 		saveStrategy.adapter === 'form_post' ? getAllFields( schema ) : [];
 
 	return (
-		<ThemeProvider isRoot>
-			<ShellHeader
-				schema={ schema }
-				context={ context }
-				values={ values }
-				initialValues={ initialValues }
-				isDirty={ isDirty }
-				isSaving={ isSaving }
-				saveStrategy={ saveStrategy }
-				onSave={
-					saveStrategy.adapter === 'form_post'
-						? submitSettingsForm
-						: handleCustomSave
-				}
-			>
-				{ pendingNavigation ? (
-					<UnsavedChangesModal
-						isSaving={ isSaving }
-						onClose={ () => setPendingNavigation( null ) }
-						onDiscard={ handleDiscardNavigation }
-						onSave={ handleSavePendingNavigation }
-					/>
-				) : null }
-				{ saveNotice ? (
-					<Notice
-						className="wc-settings-ui-shell__notice"
-						status={ saveNotice.status }
-						isDismissible
-						onRemove={ () => setSaveNotice( null ) }
+		<ShellHeader
+			schema={ schema }
+			context={ context }
+			values={ values }
+			initialValues={ initialValues }
+			isDirty={ isDirty }
+			isSaving={ isSaving }
+			saveStrategy={ saveStrategy }
+			onSave={
+				saveStrategy.adapter === 'form_post'
+					? submitSettingsForm
+					: handleCustomSave
+			}
+		>
+			{ pendingNavigation ? (
+				<UnsavedChangesModal
+					isSaving={ isSaving }
+					onClose={ () => setPendingNavigation( null ) }
+					onDiscard={ handleDiscardNavigation }
+					onSave={ handleSavePendingNavigation }
+				/>
+			) : null }
+			{ saveNotice ? (
+				<Notice
+					className="wc-settings-ui-shell__notice"
+					status={ saveNotice.status }
+					isDismissible
+					onRemove={ () => setSaveNotice( null ) }
+				>
+					{ saveNotice.message }
+				</Notice>
+			) : null }
+			<div className="wc-settings-ui">
+				{ visibleGroups.map( ( group ) => (
+					<section
+						className="wc-settings-ui__section"
+						key={ group.id }
 					>
-						{ saveNotice.message }
-					</Notice>
-				) : null }
-				<div className="wc-settings-ui">
-					{ visibleGroups.map( ( group ) => (
-						<section
-							className="wc-settings-ui__section"
-							key={ group.id }
-						>
-							<Card.Root className="wc-settings-ui__section-card">
-								<GroupHeader group={ group } />
-								<Card.Content className="wc-settings-ui__section-fields">
-									{ group.fields.map( ( field ) => {
-										const FieldComponent =
-											resolveFieldComponent(
-												field,
-												context
-											) || NativeSettingsField;
-										const value = values[ field.id ];
+						<Card.Root className="wc-settings-ui__section-card">
+							<GroupHeader group={ group } />
+							<Card.Content className="wc-settings-ui__section-fields">
+								{ group.fields.map( ( field ) => {
+									const FieldComponent =
+										resolveFieldComponent(
+											field,
+											context
+										) || NativeSettingsField;
+									const value = values[ field.id ];
 
-										return (
-											<div
-												className={ [
-													'wc-settings-ui__field',
-													getFieldTypeClassName(
-														field.type
-													),
-												].join( ' ' ) }
-												key={ field.id }
-											>
-												<FieldComponent
-													field={ field }
-													value={ value }
-													context={ context }
-													values={ values }
-													initialValues={
-														initialValues
-													}
-													setValue={ setValue }
-													setValues={ setValues }
-													onChange={ ( nextValue ) =>
-														setValue(
-															field.id,
-															nextValue
-														)
-													}
-												/>
-											</div>
-										);
-									} ) }
-								</Card.Content>
-							</Card.Root>
-						</section>
+									return (
+										<div
+											className={ [
+												'wc-settings-ui__field',
+												getFieldTypeClassName(
+													field.type
+												),
+											].join( ' ' ) }
+											key={ field.id }
+										>
+											<FieldComponent
+												field={ field }
+												value={ value }
+												context={ context }
+												values={ values }
+												initialValues={ initialValues }
+												setValue={ setValue }
+												setValues={ setValues }
+												onChange={ ( nextValue ) =>
+													setValue(
+														field.id,
+														nextValue
+													)
+												}
+											/>
+										</div>
+									);
+								} ) }
+							</Card.Content>
+						</Card.Root>
+					</section>
+				) ) }
+			</div>
+			{ formPostFields.length > 0 ? (
+				<div className="wc-settings-ui__hidden-inputs">
+					{ formPostFields.map( ( field ) => (
+						<HiddenInputs
+							field={ field }
+							value={ values[ field.id ] }
+							key={ field.id }
+						/>
 					) ) }
 				</div>
-				{ formPostFields.length > 0 ? (
-					<div className="wc-settings-ui__hidden-inputs">
-						{ formPostFields.map( ( field ) => (
-							<HiddenInputs
-								field={ field }
-								value={ values[ field.id ] }
-								key={ field.id }
-							/>
-						) ) }
-					</div>
-				) : null }
-			</ShellHeader>
-		</ThemeProvider>
+			) : null }
+		</ShellHeader>
 	);
 };
