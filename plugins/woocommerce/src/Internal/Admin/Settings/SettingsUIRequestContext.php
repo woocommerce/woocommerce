@@ -367,7 +367,7 @@ class SettingsUIRequestContext {
 		try {
 			$registered_section = SettingsSectionRegistry::get_instance()->get_registered( $settings_page->get_id(), $section );
 		} catch ( \Throwable $e ) {
-			self::log_resolution_failure( 'Registered settings section', $settings_page->get_id(), $section, $e, __METHOD__ );
+			self::log_resolution_failure( 'Registered settings section', $settings_page->get_id(), $section, $e );
 			$registered_section = null;
 		}
 
@@ -379,7 +379,7 @@ class SettingsUIRequestContext {
 						return $settings_ui_page;
 					}
 				} catch ( \Throwable $e ) {
-					self::log_resolution_failure( 'Native Settings UI page', $settings_page->get_id(), $section, $e, __METHOD__ );
+					self::log_resolution_failure( 'Native Settings UI page', $settings_page->get_id(), $section, $e );
 
 					// Raise a developer notice here only: this failure still
 					// renders through the registered-section adapter, so
@@ -423,7 +423,7 @@ class SettingsUIRequestContext {
 		} catch ( \Throwable $e ) {
 			$this->script_handles_failed = true;
 
-			self::log_resolution_failure( 'Settings UI script handles', $this->get_page_id(), $this->section, $e, __METHOD__ );
+			self::log_resolution_failure( 'Settings UI script handles', $this->get_page_id(), $this->section, $e );
 
 			if ( $e instanceof \Exception ) {
 				$this->script_handles_failure_reason = sprintf(
@@ -451,7 +451,7 @@ class SettingsUIRequestContext {
 		} catch ( \Throwable $e ) {
 			$this->schema_failed = true;
 
-			self::log_resolution_failure( 'Settings UI schema', $this->get_page_id(), $this->section, $e, __METHOD__ );
+			self::log_resolution_failure( 'Settings UI schema', $this->get_page_id(), $this->section, $e );
 		}
 	}
 
@@ -462,9 +462,8 @@ class SettingsUIRequestContext {
 	 * @param string     $page_id Settings page id.
 	 * @param string     $section Section id. Empty string means the default section.
 	 * @param \Throwable $e The resolution failure.
-	 * @param string     $caller Calling method, for exception tracking.
 	 */
-	private static function log_resolution_failure( string $subject, string $page_id, string $section, \Throwable $e, string $caller ): void {
+	private static function log_resolution_failure( string $subject, string $page_id, string $section, \Throwable $e ): void {
 		wc_get_logger()->debug(
 			sprintf(
 				'%1$s could not be resolved for page "%2$s" section "%3$s": %4$s: %5$s',
@@ -476,10 +475,6 @@ class SettingsUIRequestContext {
 			),
 			array( 'source' => 'settings-ui' )
 		);
-
-		if ( $e instanceof \Exception ) {
-			wc_caught_exception( $e, $caller );
-		}
 	}
 
 	/**

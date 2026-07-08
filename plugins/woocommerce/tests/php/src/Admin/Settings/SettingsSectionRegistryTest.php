@@ -242,30 +242,28 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should report exceptions from a registered section native Settings UI page provider and fall back to the default adapter.
+	 * @testdox Should fall back to the default adapter when a registered section native Settings UI page provider throws an exception.
 	 */
 	public function test_falls_back_to_default_adapter_when_registered_section_native_settings_ui_page_provider_throws_exception(): void {
 		$this->setExpectedIncorrectUsage( SettingsUIRequestContext::class . '::resolve_settings_ui_page' );
-
-		$caught   = array();
-		$listener = static function ( $exception ) use ( &$caught ): void {
-			$caught[] = $exception;
-		};
-		add_action( 'woocommerce_caught_exception', $listener );
 
 		$page      = $this->get_parent_page();
 		$exception = new \RuntimeException( 'Unable to resolve native settings UI page.' );
 		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section( 'acme_payments', $exception ) );
 
-		try {
-			$settings_ui_page = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' )->get_settings_ui_page();
-		} finally {
-			remove_action( 'woocommerce_caught_exception', $listener );
-		}
+		$settings_ui_page = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' )->get_settings_ui_page();
 
+		// Mirrors the `\Error` case above with a thrown `\Exception`: both must
+		// fall back to the default adapter (signalled by the doing_it_wrong notice
+		// asserted above) so the schema still resolves. Keeping both throwable
+		// types guards against a regression that narrows the provider's catch from
+		// `\Throwable` to `\Exception`, which would let an `\Error` escape and
+		// fatal — caught by the sibling test, but not by this one.
 		$this->assertInstanceOf( SettingsUIPageInterface::class, $settings_ui_page );
 		$this->assertSame( 'checkout', $settings_ui_page->get_page_id() );
-		$this->assertSame( array( $exception ), $caught, 'Provider exceptions should be reported through wc_caught_exception().' );
+
+		$schema = $settings_ui_page->get_schema( 'acme_payments' );
+		$this->assertSame( 'registered_acme_payments_setting', $schema['groups']['default']['fields'][0]['id'] );
 	}
 
 	/**

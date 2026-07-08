@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Stop redundant error_log noise from handled settings-UI resolution fallbacks; the recovered condition is already recorded via the logger.
