@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 11.0.0
+ * @version 11.1.0
  */
 
 declare( strict_types = 1);

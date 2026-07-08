@@ -82,6 +82,27 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that `product_brand_thumbnails` shortcode clamps invalid `columns`
+	 * values instead of letting them reach the template raw.
+	 *
+	 * Regression test: `columns="0"` (or any non-numeric value) used to fall straight
+	 * through to the template, where modulo/width calculations throw a
+	 * ModuloByZeroError/DivisionByZeroError on PHP8.
+	 */
+	public function test_product_brand_thumbnails_shortcode_clamps_invalid_columns() {
+		$data            = $this->setup_brand_test_data();
+		$brands_instance = $data['brands_instance'];
+
+		// columns="0" should not throw a division-by-zero error.
+		$output = $brands_instance->output_product_brand_thumbnails( array( 'columns' => '0' ) );
+		$this->assertNotEmpty( $output, 'columns="0" should not produce empty output' );
+
+		// Non-numeric columns should not throw either.
+		$output = $brands_instance->output_product_brand_thumbnails( array( 'columns' => 'abc' ) );
+		$this->assertNotEmpty( $output, 'Non-numeric columns should not produce empty output' );
+	}
+
+	/**
 	 * Test that `product_brand_list` shortcode's `show_empty_brands` argument works as expected.
 	 */
 	public function test_product_brand_list_shortcode_with_show_empty_brands_arg() {

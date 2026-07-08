@@ -731,7 +731,7 @@ class WC_Brands {
 			'widgets/brand-thumbnails.php',
 			array(
 				'brands'        => $brands,
-				'columns'       => is_numeric( $args['columns'] ) ? intval( $args['columns'] ) : 4,
+				'columns'       => max( 1, absint( $args['columns'] ) ),
 				'fluid_columns' => wp_validate_boolean( $args['fluid_columns'] ),
 			),
 			'woocommerce',
