@@ -468,19 +468,44 @@ class WC_Discounts {
 	}
 
 	/**
-	 * Apply fixed cart discount to items.
+	 * Apply a fixed cart-level discount across eligible items.
+	 * 
+	 * @since 3.2.0
+	 * @since 10.9.0 Added eligibility filtering by product ID/category restriction (OR logic).
 	 *
-	 * @since  3.2.0
-	 * @param  WC_Coupon $coupon Coupon object. Passed through filters.
-	 * @param  array     $items_to_apply Array of items to apply the coupon to.
-	 * @param  int       $amount Fixed discount amount to apply in cents. Leave blank to pull from coupon.
-	 * @return int Total discounted.
+	 * Distributes the flat discount amount only across items that satisfy the
+	 * coupon's product ID or product category restrictions (OR logic). Items
+	 * that match neither restriction are excluded from the discount entirely.
+	 *
+	 * @param  WC_Coupon $coupon          Coupon object.
+	 * @param  array     $items_to_apply  Items to consider for discount. Usually cart items, but
+	 *                                    $items_to_apply may also come from a WC_Order (order line
+	 *                                    items) when discounts are recalculated on an existing order.
+	 * @param  int|null  $amount          Discount amount with precision, or null to use coupon amount.
+	 * @return int Total discount applied (with precision).
 	 */
 	protected function apply_coupon_fixed_cart( $coupon, $items_to_apply, $amount = null ) {
 		$total_discount = 0;
 		$amount         = $amount ? $amount : wc_add_number_precision( (float) $coupon->get_amount() );
 		$items_to_apply = array_filter( $items_to_apply, array( $this, 'filter_products_with_price' ) );
-		$item_count     = array_sum( wp_list_pluck( $items_to_apply, 'quantity' ) );
+
+		// Filter items down to only those eligible under the coupon's product ID or
+		// category restrictions before distributing the discount. OR logic applies:
+		// an item qualifies if it matches a listed product ID OR a listed category.
+		// Non-eligible items receive no portion of the discount.
+		$has_product_restriction  = count( $coupon->get_product_ids() ) > 0;
+		$has_category_restriction = count( $coupon->get_product_categories() ) > 0;
+
+		if ( $has_product_restriction || $has_category_restriction ) {
+			$items_to_apply = array_filter(
+				$items_to_apply,
+				function ( $item ) use ( $coupon, $has_product_restriction, $has_category_restriction ) {
+					return $this->item_matches_product_or_category_restriction( $item, $coupon, $has_product_restriction, $has_category_restriction );
+				}
+			);
+		}
+
+		$item_count = array_sum( wp_list_pluck( $items_to_apply, 'quantity' ) );
 
 		if ( ! $item_count ) {
 			return $total_discount;
@@ -490,7 +515,7 @@ class WC_Discounts {
 			// If there is no amount we still send it through so filters are fired.
 			$total_discount = $this->apply_coupon_fixed_product( $coupon, $items_to_apply, 0 );
 		} else {
-			$per_item_discount = absint( $amount / $item_count ); // round it down to the nearest cent.
+			$per_item_discount = absint( $amount / $item_count ); // Round down to the nearest cent.
 
 			if ( $per_item_discount > 0 ) {
 				$total_discount = $this->apply_coupon_fixed_product( $coupon, $items_to_apply, $per_item_discount );
@@ -505,7 +530,53 @@ class WC_Discounts {
 				$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $amount );
 			}
 		}
+
 		return $total_discount;
+	}
+
+	/**
+	 * Determine whether an item satisfies the coupon's product ID or product
+	 * category restriction, using OR logic (matching either is sufficient).
+	 *
+	 * Works for both cart items and order items, since it reads from
+	 * $item->product (a WC_Product instance) rather than a cart-array shape.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param object    $item                      Cart or order item exposing a ->product property.
+	 * @param WC_Coupon $coupon                    Coupon object.
+	 * @param bool      $has_product_restriction   Whether the coupon restricts by product ID.
+	 * @param bool      $has_category_restriction  Whether the coupon restricts by product category.
+	 * @return bool True if the item is eligible under the restriction(s).
+	 */
+	protected function item_matches_product_or_category_restriction( $item, $coupon, $has_product_restriction, $has_category_restriction ) {
+		if ( ! $item->product ) {
+			return false;
+		}
+
+		$product_id = $item->product->get_id();
+		$parent_id  = $item->product->get_parent_id();
+
+		// Allow if product ID or parent ID matches an allowed product ID.
+		if ( $has_product_restriction ) {
+			$allowed_ids = $coupon->get_product_ids();
+
+			if ( in_array( $product_id, $allowed_ids, true ) || in_array( $parent_id, $allowed_ids, true ) ) {
+				return true;
+			}
+		}
+
+		// Allow if the product belongs to an allowed category.
+		if ( $has_category_restriction ) {
+			$lookup_id    = $item->product->is_type( 'variation' ) ? $parent_id : $product_id;
+			$product_cats = wc_get_product_cat_ids( $lookup_id );
+
+			if ( array_intersect( $product_cats, $coupon->get_product_categories() ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -791,79 +862,41 @@ class WC_Discounts {
 	}
 
 	/**
-	 * Ensure coupon is valid for products in the list is valid or throw exception.
+	 * Validates that the coupon is applicable to at least one item in the cart.
+	 * Uses OR logic — passes if any cart item matches either an allowed product ID
+	 * OR an allowed product category. Both restrictions are not required simultaneously.
 	 *
-	 * @since  3.2.0
-	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon Coupon data.
-	 * @return bool
+	 * @param WC_Coupon $coupon Coupon data.
+	 * @throws Exception When no cart item satisfies either restriction.
+	 * @return true
 	 */
-	protected function validate_coupon_product_ids( $coupon ) {
-		if ( count( $coupon->get_product_ids() ) > 0 ) {
-			$valid = false;
+	protected function validate_coupon_product_ids_or_categories( $coupon ) {
+		$has_product_restriction  = count( $coupon->get_product_ids() ) > 0;
+		$has_category_restriction = count( $coupon->get_product_categories() ) > 0;
 
-			foreach ( $this->get_items_to_validate() as $item ) {
-				if ( $item->product && ( in_array( $item->product->get_id(), $coupon->get_product_ids(), true ) || in_array( $item->product->get_parent_id(), $coupon->get_product_ids(), true ) ) ) {
-					$valid = true;
-					break;
-				}
-			}
+		// No restrictions set — all products are eligible, nothing to validate.
+		if ( ! $has_product_restriction && ! $has_category_restriction ) {
+			return true;
+		}
 
-			if ( ! $valid ) {
-				throw new Exception(
-					sprintf(
-					/* translators: %s: coupon code */
-						esc_html__( 'Sorry, coupon "%s" is not applicable to selected products.', 'woocommerce' ),
-						esc_html( $coupon->get_code() )
-					),
-					109
-				);
+		$valid = false;
+
+		foreach ( $this->get_items_to_validate() as $item ) {
+			if ( $this->item_matches_product_or_category_restriction( $item, $coupon, $has_product_restriction, $has_category_restriction ) ) {
+				$valid = true;
+				break;
 			}
 		}
 
-		return true;
-	}
-
-	/**
-	 * Ensure coupon is valid for product categories in the list is valid or throw exception.
-	 *
-	 * @since  3.2.0
-	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon Coupon data.
-	 * @return bool
-	 */
-	protected function validate_coupon_product_categories( $coupon ) {
-		if ( count( $coupon->get_product_categories() ) > 0 ) {
-			$valid = false;
-
-			foreach ( $this->get_items_to_validate() as $item ) {
-				if ( $coupon->get_exclude_sale_items() && $item->product && $item->product->is_on_sale() ) {
-					continue;
-				}
-
-				$product_cats = wc_get_product_cat_ids( $item->product->get_id() );
-
-				if ( $item->product->get_parent_id() ) {
-					$product_cats = array_merge( $product_cats, wc_get_product_cat_ids( $item->product->get_parent_id() ) );
-				}
-
-				// If we find an item with a cat in our allowed cat list, the coupon is valid.
-				if ( count( array_intersect( $product_cats, $coupon->get_product_categories() ) ) > 0 ) {
-					$valid = true;
-					break;
-				}
-			}
-
-			if ( ! $valid ) {
-				throw new Exception(
-					sprintf(
-						/* translators: %s: coupon code */
-						esc_html__( 'Sorry, coupon "%s" is not applicable to selected products.', 'woocommerce' ),
-						esc_html( $coupon->get_code() )
-					),
-					109
-				);
-			}
+		if ( ! $valid ) {
+			throw new Exception(
+				sprintf(
+					/* translators: %s: coupon code */
+					esc_html__( 'Sorry, coupon "%s" is not applicable to selected products.', 'woocommerce' ),
+					esc_html( $coupon->get_code() )
+				),
+				WC_Coupon::E_WC_COUPON_NOT_APPLICABLE
+			);
 		}
 
 		return true;
@@ -1139,8 +1172,7 @@ class WC_Discounts {
 			$this->validate_coupon_expiry_date( $coupon );
 			$this->validate_coupon_minimum_amount( $coupon );
 			$this->validate_coupon_maximum_amount( $coupon );
-			$this->validate_coupon_product_ids( $coupon );
-			$this->validate_coupon_product_categories( $coupon );
+			$this->validate_coupon_product_ids_or_categories( $coupon );
 			$this->validate_coupon_excluded_items( $coupon );
 			$this->validate_coupon_eligible_items( $coupon );
 			$this->validate_coupon_allowed_emails( $coupon );
