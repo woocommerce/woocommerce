@@ -59,6 +59,7 @@ package-lock.json
 
 # wp-env config
 .wp-env.override.json
+.wp-env.test.override.json
 
 # Unit tests
 tmp/

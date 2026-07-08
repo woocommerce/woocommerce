@@ -1,7 +1,18 @@
 module.exports = {
-	plugins: [ '@wordpress', '@woocommerce' ],
+	plugins: [ '@wordpress' ],
 	rules: {
-		'@woocommerce/dependency-group': 'error',
+		// Group external imports before internal ones (`~/…` and relative).
+		'import/order': [
+			'error',
+			{
+				groups: [
+					[ 'builtin', 'external', 'internal' ],
+					[ 'parent', 'sibling', 'index' ],
+				],
+				pathGroups: [ { pattern: '~/**', group: 'parent' } ],
+				pathGroupsExcludedImportTypes: [ 'builtin' ],
+			},
+		],
 	},
 	settings: {
 		jsdoc: {

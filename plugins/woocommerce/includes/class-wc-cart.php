@@ -1154,11 +1154,26 @@ class WC_Cart extends WC_Legacy_Cart {
 			// Ensure we don't add a variation to the cart directly by variation ID.
 			if ( 'product_variation' === get_post_type( $product_id ) ) {
 				$variation_id = $product_id;
-				$product_id   = wp_get_post_parent_id( $variation_id );
+
+				// Guard against wp_get_post_parent_id returning false for invalid posts.
+				$product_id = wp_get_post_parent_id( $variation_id );
+				if ( false === $product_id ) {
+					return false;
+				}
 			}
 
 			$product_data = wc_get_product( $variation_id ? $variation_id : $product_id );
-			$quantity     = apply_filters( 'woocommerce_add_to_cart_quantity', $quantity, $product_id );
+
+			/**
+			 * Filters the change the quantity to add to cart.
+			 *
+			 * @since 3.1.0
+			 * @since 11.0.0 Added the `$variation_id` parameter.
+			 * @param number $quantity The default quantity.
+			 * @param number $product_id The product id.
+			 * @param number $variation_id     The variation ID.
+			 */
+			$quantity = apply_filters( 'woocommerce_add_to_cart_quantity', $quantity, $product_id, $variation_id );
 
 			if ( $quantity <= 0 || ! $product_data || ProductStatus::TRASH === $product_data->get_status() ) {
 				return false;

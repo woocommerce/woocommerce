@@ -8,7 +8,7 @@ const execAsync = promisify( exec );
 
 const wpCLI = async ( command: string ) => {
 	const { stdout, stderr } = await execAsync(
-		`pnpm exec wp-env run tests-cli -- ${ command }`
+		`pnpm exec wp-env --config .wp-env.test.json run cli -- ${ command }`
 	);
 
 	return { stdout, stderr };
