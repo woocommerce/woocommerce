@@ -326,6 +326,7 @@ final class WooCommerce {
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'load-post.php', array( $this, 'includes' ) );
+		add_action( 'load-post-new.php', array( $this, 'includes' ) );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( $this, 'maybe_init_order_reviews' ), 1 );
 		add_action( 'init', array( $this, 'maybe_init_abandoned_cart_recovery' ), 1 );

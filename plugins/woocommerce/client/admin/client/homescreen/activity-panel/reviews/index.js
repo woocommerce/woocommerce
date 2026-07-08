@@ -362,7 +362,7 @@ export default compose( [
 			isRequesting,
 		};
 	} ),
-	withDispatch( ( dispatch, props ) => {
+	withDispatch( ( dispatch ) => {
 		const { deleteReview, updateReview, invalidateResolution } =
 			dispatch( reviewsStore );
 		const { invalidateResolution: invalidateActivityPanel } =
@@ -371,11 +371,9 @@ export default compose( [
 
 		const clearReviewsCache = () => {
 			invalidateResolution( 'getReviews', [ reviewsQuery ] );
-			if ( props.reviews && props.reviews.length < 2 ) {
-				invalidateResolution( 'getReviewsTotalCount', [
-					unapprovedReviewsQuery,
-				] );
-			}
+			invalidateResolution( 'getReviewsTotalCount', [
+				unapprovedReviewsQuery,
+			] );
 			invalidateActivityPanel( 'getActivityPanelCounts', [] );
 		};
 
