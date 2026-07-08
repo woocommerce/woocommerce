@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Audit wc_product_dropdown_categories usages in admin

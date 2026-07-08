@@ -119,57 +119,42 @@ class ProductQueryFilters {
 	 * @return array termId=>count pairs.
 	 */
 	public function get_attribute_counts( $request, $attributes = [] ) {
-		global $wpdb;
-
 		// Remove paging and sorting params from the request.
 		$request->set_param( 'page', null );
 		$request->set_param( 'per_page', null );
 		$request->set_param( 'order', null );
 		$request->set_param( 'orderby', null );
 
-		// Grab the request from the WP Query object, and remove SQL_CALC_FOUND_ROWS and Limits so we get a list of all products.
+		// Convert request to query_vars for FilterData.
 		$product_query = new ProductQuery();
-
-		add_filter( 'posts_clauses', array( $product_query, 'add_query_clauses' ), 10, 2 );
-		add_filter( 'posts_pre_query', '__return_empty_array' );
-
-		$query_args                   = $product_query->prepare_objects_query( $request );
-		$query_args['no_found_rows']  = true;
-		$query_args['posts_per_page'] = -1;
-		$query                        = new \WP_Query();
-		$result                       = $query->query( $query_args );
-		$product_query_sql            = $query->request;
-
-		remove_filter( 'posts_clauses', array( $product_query, 'add_query_clauses' ), 10 );
-		remove_filter( 'posts_pre_query', '__return_empty_array' );
+		$query_vars    = $product_query->prepare_objects_query( $request );
 
 		if ( count( $attributes ) === count( array_filter( $attributes, 'is_numeric' ) ) ) {
 			$attributes = array_map( 'wc_attribute_taxonomy_name_by_id', wp_parse_id_list( $attributes ) );
 		}
 
-		$attributes_to_count     = array_map(
-			function ( $attribute ) {
-				$attribute = wc_sanitize_taxonomy_name( $attribute );
-				return esc_sql( $attribute );
-			},
-			$attributes
-		);
-		$attributes_to_count_sql = 'AND term_taxonomy.taxonomy IN (\'' . implode( '\',\'', $attributes_to_count ) . '\')';
+		// Use FilterData with ProductQuery as QueryClausesGenerator. This shares the cached,
+		// invalidation-aware filter-data path used by get_taxonomy_counts() and the product filter blocks.
+		$container = wc_get_container();
 
-		$attribute_count_sql = "
-			SELECT COUNT( DISTINCT posts.ID ) as term_count, terms.term_id as term_count_id
-			FROM {$wpdb->posts} AS posts
-			INNER JOIN {$wpdb->term_relationships} AS term_relationships ON posts.ID = term_relationships.object_id
-			INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
-			INNER JOIN {$wpdb->terms} AS terms USING( term_id )
-			WHERE posts.ID IN ( {$product_query_sql} )
-			{$attributes_to_count_sql}
-			GROUP BY terms.term_id
-		";
+		$filter_data_provider = $container->get( \Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider::class );
+		$filter_data          = $filter_data_provider->with( $product_query );
 
-		$results = $wpdb->get_results( $attribute_count_sql ); // phpcs:ignore
+		$all_counts = array();
 
-		return array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
+		// Get counts for each attribute taxonomy individually so each is cached separately.
+		foreach ( $attributes as $attribute ) {
+			$taxonomy = wc_sanitize_taxonomy_name( $attribute );
+			if ( ! $taxonomy ) {
+				continue;
+			}
+			$counts = $filter_data->get_attribute_counts( $query_vars, $taxonomy );
+			// Each attribute taxonomy owns a disjoint set of term IDs, so the union operator safely
+			// merges the term_id => count pairs without colliding or overwriting between taxonomies.
+			$all_counts = $all_counts + $counts;
+		}
+
+		return $all_counts;
 	}
 
 	/**

@@ -7,32 +7,28 @@ const [
 	,
 	moduleConfig,
 ] = require( '@wordpress/scripts/config/webpack.config' );
-const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
-
-/**
- * Internal dependencies
- */
-const { getResolve } = require( './webpack-helpers' );
-
-// Blocks' webpack writes directly to the WooCommerce plugin's
-// `assets/client/blocks/` so PHP can enqueue files from their final location
-// without an intermediate rsync step.
-const BUILD_DIR = path.resolve( __dirname, '../../../assets/client/blocks' );
-
-/**
- * Internal dependencies
- */
 const DependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
-const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
 const {
 	WebpackRTLPlugin,
 } = require( '@woocommerce/internal-build/style-build' );
+
+/**
+ * Internal dependencies
+ */
+const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
+const { getResolve } = require( './webpack-helpers' );
+const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
 const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 const {
 	scriptModuleEntries,
 	styleEntries,
 	editorStyleEntries,
 } = require( './webpack-interactivity-entries' );
+
+// Blocks' webpack writes directly to the WooCommerce plugin's
+// `assets/client/blocks/` so PHP can enqueue files from their final location
+// without an intermediate rsync step.
+const BUILD_DIR = path.resolve( __dirname, '../../../assets/client/blocks' );
 
 const entries = {
 	// Blocks

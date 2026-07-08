@@ -2,13 +2,15 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
-import { useEffect, useRef } from '@wordpress/element';
+import { Children, useEffect, useRef } from '@wordpress/element';
 import {
 	pluginsStore,
 	settingsStore,
 	onboardingStore,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { getAdminLink } from '@woocommerce/settings';
+import { CardFooter, Text } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -17,12 +19,14 @@ import { getCountryCode } from '~/dashboard/utils';
 import WooCommerceShippingItem from './woocommerce-shipping-item';
 import ShipStationItem from './shipstation-item';
 import PacklinkItem from './packlink-item';
-import {
-	ShippingRecommendationsList,
-	useInstallPlugin,
-} from './shipping-recommendations-utils';
+import { useInstallPlugin } from './shipping-recommendations-utils';
 import './shipping-recommendations.scss';
-import { ShippingTour } from '../guided-tours/shipping-tour';
+import { TrackedLink } from '~/components/tracked-link/tracked-link';
+import { useOptionDismiss } from '~/hooks/use-option-dismiss';
+import {
+	DismissableList,
+	DismissableListHeading,
+} from '~/settings-recommendations/dismissable-list';
 
 type ExtensionId = 'woocommerce-shipping' | 'shipstation' | 'packlink';
 
@@ -43,10 +47,58 @@ const COUNTRY_EXTENSIONS_MAP: Record< string, ExtensionId[] > = {
 	PT: [ 'packlink' ],
 };
 
-const EXTENSION_PLUGIN_SLUGS: Record< ExtensionId, string > = {
-	'woocommerce-shipping': 'woocommerce-shipping',
-	shipstation: 'woocommerce-shipstation-integration',
-	packlink: 'packlink-pro-shipping',
+export const ShippingRecommendationsList = ( {
+	children,
+}: {
+	children: React.ReactNode;
+} ) => {
+	const { isDismissed, onDismiss } = useOptionDismiss(
+		'woocommerce_settings_shipping_recommendations_hidden'
+	);
+
+	return (
+		<DismissableList
+			className="woocommerce-recommended-shipping-extensions"
+			isDismissed={ isDismissed }
+		>
+			<DismissableListHeading onDismiss={ onDismiss }>
+				<Text variant="title.small" as="p" size="20" lineHeight="28px">
+					{ __( 'Recommended shipping solutions', 'woocommerce' ) }
+				</Text>
+				<Text
+					className="woocommerce-recommended-shipping__header-heading"
+					variant="caption"
+					as="p"
+					size="12"
+					lineHeight="16px"
+				>
+					{ __(
+						'We recommend adding one of the following shipping extensions to your store.',
+						'woocommerce'
+					) }
+				</Text>
+			</DismissableListHeading>
+			<ul className="woocommerce-list">
+				{ Children.map( children, ( item ) => (
+					<li className="woocommerce-list__item">{ item }</li>
+				) ) }
+			</ul>
+			<CardFooter>
+				<TrackedLink
+					message={ __(
+						// translators: {{Link}} is a placeholder for a html element.
+						'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
+						'woocommerce'
+					) }
+					targetUrl={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
+					) }
+					linkType="wc-admin"
+					eventName="settings_shipping_recommendation_visit_marketplace_click"
+				/>
+			</CardFooter>
+		</DismissableList>
+	);
 };
 
 const ShippingRecommendations = () => {

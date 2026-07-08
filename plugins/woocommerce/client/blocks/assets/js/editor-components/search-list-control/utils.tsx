@@ -26,6 +26,28 @@ export const defaultMessages = {
 };
 
 /**
+ * Whether a tree item should show as expanded: it matches expandedPanelId or
+ * contains a descendant that does.
+ */
+export const isExpandedOrDescendantIsExpanded = (
+	item: SearchListItem,
+	expandedPanelId: string | number | null
+): boolean => {
+	if ( expandedPanelId === null ) {
+		return false;
+	}
+	if ( item.id === expandedPanelId ) {
+		return true;
+	}
+	if ( Array.isArray( item.children ) && item.children.length > 0 ) {
+		return item.children.some( ( child ) =>
+			isExpandedOrDescendantIsExpanded( child, expandedPanelId )
+		);
+	}
+	return false;
+};
+
+/**
  * Returns terms in a tree form.
  *
  * @param {Array} filteredList Array of terms, possibly a subset of all terms, in flat format.

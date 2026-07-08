@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 
 /**
@@ -19,6 +20,14 @@ use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 	use ArraySubsetAsserts;
+
+	/**
+	 * Tear down test case.
+	 */
+	public function tearDown(): void {
+		delete_option( ProductMediaGallery::ENABLE_OPTION_NAME );
+		parent::tearDown();
+	}
 
 	/**
 	 * Test product setters and getters
@@ -108,6 +117,308 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$product->save();
 		$this->assertEquals( $image_id[0], $product->get_image_id() );
 		wp_delete_attachment( $image_id[0], true ); // Remove attachment.
+	}
+
+	/**
+	 * @testdox Should normalize media gallery items.
+	 */
+	public function test_media_gallery_normalizes_items() {
+		$image_id  = wp_insert_attachment(
+			array(
+				'post_title'     => 'Gallery image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$video_id  = wp_insert_attachment(
+			array(
+				'post_title'     => 'Product video',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'video/mp4',
+			)
+		);
+		$poster_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Video poster',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+
+		$media_gallery = ProductMediaGallery::normalize_media_gallery_items(
+			array(
+				array(
+					'media_type'  => 'image',
+					'id'          => (string) $image_id,
+					'poster_id'   => $poster_id,
+					'settings'    => array(
+						'controls' => false,
+					),
+					'extra_field' => 'ignored',
+				),
+				array(
+					'media_type'  => 'video',
+					'source_type' => 'attachment',
+					'id'          => (string) $video_id,
+					'poster_id'   => (string) $poster_id,
+					'settings'    => array(
+						'controls'     => 'yes',
+						'autoplay'     => '0',
+						'loop'         => 1,
+						'muted'        => false,
+						'plays_inline' => 'true',
+						'preload'      => 'metadata',
+						'ignored'      => true,
+					),
+				),
+				array(
+					'media_type'         => 'video',
+					'source_type'        => 'embed',
+					'url'                => 'https://www.youtube.com/watch?v=abc123',
+					'provider_name_slug' => 'YouTube',
+					'poster_id'          => 321,
+					'embed'              => array(
+						'responsive'  => 'yes',
+						'previewable' => 0,
+						'ignored'     => true,
+					),
+				),
+				array(
+					'media_type'  => 'audio',
+					'source_type' => 'attachment',
+					'id'          => $video_id,
+				),
+				array(
+					'media_type'  => 'image',
+					'source_type' => 'embed',
+					'url'         => 'https://example.com/image.jpg',
+				),
+			)
+		);
+
+		$this->assertEquals(
+			array(
+				array(
+					'media_type'  => 'image',
+					'source_type' => 'attachment',
+					'id'          => $image_id,
+				),
+				array(
+					'media_type'  => 'video',
+					'source_type' => 'attachment',
+					'id'          => $video_id,
+					'poster_id'   => $poster_id,
+				),
+			),
+			$media_gallery,
+			'Media gallery should keep only supported normalized items.'
+		);
+
+		wp_delete_attachment( $image_id, true );
+		wp_delete_attachment( $video_id, true );
+		wp_delete_attachment( $poster_id, true );
+	}
+
+	/**
+	 * @testdox Should persist video gallery items.
+	 */
+	public function test_video_gallery_persists_items() {
+		$video_id               = wp_insert_attachment(
+			array(
+				'post_title'     => 'Product video',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'video/mp4',
+			)
+		);
+		$poster_id              = wp_insert_attachment(
+			array(
+				'post_title'     => 'Video poster',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$video_gallery          = array(
+			array(
+				'media_type'  => 'video',
+				'source_type' => 'attachment',
+				'id'          => $video_id,
+				'position'    => 1,
+				'poster_id'   => $poster_id,
+				'settings'    => array(
+					'controls' => true,
+					'preload'  => 'metadata',
+				),
+			),
+		);
+		$expected_video_gallery = array(
+			array(
+				'source_type' => 'attachment',
+				'id'          => $video_id,
+				'position'    => 1,
+				'poster_id'   => $poster_id,
+			),
+		);
+		$product                = new WC_Product_Simple();
+
+		$product->set_name( 'Product with video gallery' );
+		ProductMediaGallery::set_stored_video_gallery_items( $product, $video_gallery );
+		$product->save();
+
+		$this->assertEquals(
+			$expected_video_gallery,
+			json_decode( get_post_meta( $product->get_id(), '_wc_video_gallery', true ), true ),
+			'Video gallery should be stored as JSON product meta.'
+		);
+
+		$reloaded_product = wc_get_product( $product->get_id() );
+
+		$this->assertInstanceOf( WC_Product::class, $reloaded_product );
+		$this->assertEquals(
+			$expected_video_gallery,
+			ProductMediaGallery::get_stored_video_gallery_items( $reloaded_product ),
+			'Reloaded product should expose stored video gallery items through the internal helper.'
+		);
+
+		$product->delete( true );
+		wp_delete_attachment( $video_id, true );
+		wp_delete_attachment( $poster_id, true );
+	}
+
+	/**
+	 * @testdox Should save video gallery items from the classic product gallery metabox.
+	 */
+	public function test_product_gallery_meta_box_saves_video_gallery_items() {
+		if ( ! class_exists( 'WC_Meta_Box_Product_Images' ) ) {
+			require_once WC_ABSPATH . 'includes/admin/meta-boxes/class-wc-meta-box-product-images.php';
+		}
+
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
+
+		$product  = WC_Helper_Product::create_simple_product();
+		$image_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Gallery image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$video_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Product video',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'video/mp4',
+			)
+		);
+		$post     = get_post( $product->get_id() );
+		$_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+		try {
+			// phpcs:disable WordPress.Security.NonceVerification.Missing
+			$_POST['product-type']          = 'simple';
+			$_POST['product_image_gallery'] = (string) $image_id;
+			$_POST['product_media_gallery'] = wp_json_encode(
+				array(
+					array(
+						'media_type'  => 'video',
+						'source_type' => 'attachment',
+						'id'          => $video_id,
+					),
+					array(
+						'media_type'  => 'image',
+						'source_type' => 'attachment',
+						'id'          => $image_id,
+					),
+				)
+			);
+			// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+			WC_Meta_Box_Product_Images::save( $product->get_id(), $post );
+		} finally {
+			$_POST = $_post;
+		}
+
+		$updated_product = wc_get_product( $product->get_id() );
+
+		$this->assertInstanceOf( WC_Product::class, $updated_product );
+		$this->assertSame( array( $image_id ), $updated_product->get_gallery_image_ids() );
+		$this->assertEquals(
+			array(
+				array(
+					'source_type' => 'attachment',
+					'id'          => $video_id,
+					'position'    => 0,
+				),
+			),
+			ProductMediaGallery::get_stored_video_gallery_items( $updated_product )
+		);
+
+		$product->delete( true );
+		wp_delete_attachment( $image_id, true );
+		wp_delete_attachment( $video_id, true );
+	}
+
+	/**
+	 * @testdox Should leave stored video gallery data untouched when videos are disabled.
+	 */
+	public function test_product_gallery_meta_box_does_not_touch_video_gallery_items_when_videos_disabled() {
+		if ( ! class_exists( 'WC_Meta_Box_Product_Images' ) ) {
+			require_once WC_ABSPATH . 'includes/admin/meta-boxes/class-wc-meta-box-product-images.php';
+		}
+
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'no' );
+
+		$product       = WC_Helper_Product::create_simple_product();
+		$video_id      = wp_insert_attachment(
+			array(
+				'post_title'     => 'Product video',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'video/mp4',
+			)
+		);
+		$new_image_id  = wp_insert_attachment(
+			array(
+				'post_title'     => 'New gallery image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$post          = get_post( $product->get_id() );
+		$_post         = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$video_gallery = array(
+			array(
+				'source_type' => 'attachment',
+				'id'          => $video_id,
+				'position'    => 0,
+			),
+		);
+
+		ProductMediaGallery::set_stored_video_gallery_items(
+			$product,
+			$video_gallery
+		);
+
+		try {
+			// phpcs:disable WordPress.Security.NonceVerification.Missing
+			$_POST['product-type']          = 'simple';
+			$_POST['product_image_gallery'] = (string) $new_image_id;
+			unset( $_POST['product_media_gallery'] );
+			// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+			WC_Meta_Box_Product_Images::save( $product->get_id(), $post );
+		} finally {
+			$_POST = $_post;
+		}
+
+		$updated_product = wc_get_product( $product->get_id() );
+
+		$this->assertInstanceOf( WC_Product::class, $updated_product );
+		$this->assertSame( array( $new_image_id ), $updated_product->get_gallery_image_ids() );
+		$this->assertSame( $video_gallery, ProductMediaGallery::get_stored_video_gallery_items( $updated_product ) );
+		$this->assertTrue( metadata_exists( 'post', $product->get_id(), '_wc_video_gallery' ) );
+
+		$product->delete( true );
+		wp_delete_attachment( $video_id, true );
+		wp_delete_attachment( $new_image_id, true );
 	}
 
 	/**

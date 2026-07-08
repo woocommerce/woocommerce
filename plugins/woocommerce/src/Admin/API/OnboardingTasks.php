@@ -7,11 +7,12 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingIndustries;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -191,7 +192,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 					'duration'     => array(
 						'description'       => __( 'Time period to snooze the task.', 'woocommerce' ),
 						'type'              => 'string',
-						'validate_callback' => function( $param, $request, $key ) {
+						'validate_callback' => function ( $param, $request, $key ) {
 							return in_array( $param, array_keys( $this->duration_to_ms ), true );
 						},
 					),
@@ -510,8 +511,8 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return string Template contents.
 	 */
 	private static function get_homepage_template( $post_id ) {
-		$products = wp_count_posts( 'product' );
-		if ( $products->publish >= 4 ) {
+		$products = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
+		if ( ( $products[ ProductStatus::PUBLISH ] ?? 0 ) >= 4 ) {
 			$images   = self::sideload_homepage_images( $post_id, 1 );
 			$image_1  = ! empty( $images[0] ) ? $images[0] : '';
 			$template = self::get_homepage_cover_block( $image_1 ) . '
@@ -658,7 +659,8 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 				'post_title'   => __( 'Homepage', 'woocommerce' ),
 				'post_type'    => 'page',
 				'post_status'  => 'publish',
-				'post_content' => '', // Template content is updated below, so images can be attached to the post.
+				'post_content' => '',
+			// Template content is updated below, so images can be attached to the post.
 			)
 		);
 
@@ -712,7 +714,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$params['extended_tasks'] = array(
 			'description'       => __( 'List of extended deprecated tasks from the client side filter.', 'woocommerce' ),
 			'type'              => 'array',
-			'validate_callback' => function( $param, $request, $key ) {
+			'validate_callback' => function ( $param, $request, $key ) {
 				$has_valid_keys = true;
 				foreach ( $param as $task ) {
 					if ( $has_valid_keys ) {
@@ -740,7 +742,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$lists = is_array( $task_list_ids ) && count( $task_list_ids ) > 0 ? TaskLists::get_lists_by_ids( $task_list_ids ) : TaskLists::get_lists();
 
 		$json = array_map(
-			function( $list ) {
+			function ( $list ) {
 				return $list->sort_tasks()->get_json();
 			},
 			$lists
@@ -984,5 +986,4 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$task->mark_actioned();
 		return rest_ensure_response( $task->get_json() );
 	}
-
 }

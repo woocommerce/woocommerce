@@ -160,13 +160,79 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 
 		$required_strings = array(
 			'Step \d+ of \d+',
-			'You&#039;re almost there! Once you complete store setup you can start receiving orders.',
-			'Start selling',
+			'dashboard-widget-finish-setup__title',
+			'dashboard-widget-finish-setup__image',
 		);
 
 		foreach ( $required_strings as $required_string ) {
 			$this->assertMatchesRegularExpression( "/{$required_string}/", $html );
 		}
+	}
+
+	/**
+	 * Tests the widget output when the next task is in progress.
+	 *
+	 * @testdox Widget output includes the in-progress label for the next task.
+	 */
+	public function test_widget_output_includes_in_progress_label() {
+		// phpcs:disable Squiz.Commenting
+		$task_list = new class() {
+			public function is_complete() {
+				return false;
+			}
+			public function is_hidden() {
+				return false;
+			}
+			public function get_viewable_tasks() {
+				return array(
+					new class() extends \Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task {
+						public function get_id() {
+							return 'payments';
+						}
+						public function get_title() {
+							return 'Set up payments';
+						}
+						public function get_content() {
+							return 'Choose payment providers and enable payment methods at checkout.';
+						}
+						public function get_time() {
+							return '5 minutes';
+						}
+						public function get_action_url() {
+							return 'payments';
+						}
+						public function get_action_label() {
+							return 'Configure payments';
+						}
+						public function is_complete() {
+							return false;
+						}
+						public function is_in_progress() {
+							return true;
+						}
+						public function in_progress_label() {
+							return 'Test account';
+						}
+					},
+				);
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$widget = $this->get_widget();
+		$widget->set_task_list( $task_list );
+
+		ob_start();
+		$widget->render();
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'dashboard-widget-finish-setup__in-progress', $html );
+		$this->assertStringContainsString( 'Set up payments', $html );
+		$this->assertStringContainsString( 'Choose payment providers and enable payment methods at checkout.', $html );
+		$this->assertStringContainsString( 'Configure payments', $html );
+		$this->assertStringContainsString( 'payment-illustration.svg', $html );
+		$this->assertStringContainsString( 'Test account', $html );
+		$this->assertMatchesRegularExpression( '/<h3 class="dashboard-widget-finish-setup__title">.*Test account.*<\/h3>/s', $html );
 	}
 
 	/**
