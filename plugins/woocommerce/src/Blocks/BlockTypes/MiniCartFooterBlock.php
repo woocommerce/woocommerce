@@ -95,7 +95,7 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 			</div>
 		</div>
 		<?php
-		return ob_get_clean();
+		return (string) ob_get_clean();
 	}
 
 	/**

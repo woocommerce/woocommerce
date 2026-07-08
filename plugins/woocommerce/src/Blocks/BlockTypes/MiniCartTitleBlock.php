@@ -35,6 +35,6 @@ class MiniCartTitleBlock extends AbstractInnerBlock {
 				?>
 			</h2>
 		<?php
-		return ob_get_clean();
+		return (string) ob_get_clean();
 	}
 }

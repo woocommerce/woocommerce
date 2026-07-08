@@ -922,7 +922,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @since 11.0.0 Made public.
 	 * @return bool
 	 */
-	private static function is_scheduled_import_enabled(): bool {
+	public static function is_scheduled_import_enabled(): bool {
 		$value = get_option( self::SCHEDULED_IMPORT_OPTION, false );
 
 		if ( false !== $value ) {

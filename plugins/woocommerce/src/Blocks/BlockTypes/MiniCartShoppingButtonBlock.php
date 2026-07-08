@@ -38,6 +38,6 @@ class MiniCartShoppingButtonBlock extends AbstractInnerBlock {
 			</a>
 		</div>
 		<?php
-		return ob_get_clean();
+		return (string) ob_get_clean();
 	}
 }

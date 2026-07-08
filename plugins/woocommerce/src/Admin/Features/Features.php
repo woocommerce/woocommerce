@@ -486,6 +486,7 @@ class Features {
 	 * and filtering shared settings, where emitting deprecation notices would warn on
 	 * every admin page load.
 	 *
+	 * @since 11.1.0
 	 * @return array<string, bool>
 	 */
 	public static function get_legacy_feature_compatibility_values() {

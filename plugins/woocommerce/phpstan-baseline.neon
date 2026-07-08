@@ -50878,12 +50878,6 @@ parameters:
 			path: src/Blocks/BlockTypes/CustomerAccount.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\EmptyMiniCartContentsBlock\:\:render\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/EmptyMiniCartContentsBlock.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedCategory\:\:get_item_image\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -50980,12 +50974,6 @@ parameters:
 			path: src/Blocks/BlockTypes/FeaturedProduct.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FilledMiniCartContentsBlock\:\:render\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/FilledMiniCartContentsBlock.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\HandpickedProducts\:\:set_block_query_args\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -51048,12 +51036,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:register_empty_cart_message_block_pattern\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:render\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCart.php
 
@@ -51160,22 +51142,10 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartCartButtonBlock\:\:render\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartCartButtonBlock.php
-
-		-
 			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartCartButtonBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartCheckoutButtonBlock\:\:render\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartCheckoutButtonBlock.php
 
 		-
 			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|false given\.$#'
@@ -51198,12 +51168,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartContents\:\:get_mini_cart_block_types\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartContents.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartContents\:\:render\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartContents.php
 
@@ -51238,22 +51202,10 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartFooterBlock\:\:render\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
-
-		-
 			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''bdi'' given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartItemsBlock\:\:render\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartItemsBlock.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartProductsTableBlock\:\:render\(\) should return string but returns string\|false\.$#'
@@ -51280,34 +51232,10 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCartProductsTableBlock.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartShoppingButtonBlock\:\:render\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartShoppingButtonBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartTitleBlock\:\:render\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartTitleBlock.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartTitleItemsCounterBlock\:\:get_cart_instance\(\) should return WC_Cart but returns null\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartTitleItemsCounterBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartTitleItemsCounterBlock\:\:render\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartTitleItemsCounterBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartTitleLabelBlock\:\:render\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartTitleLabelBlock.php
 
 		-
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
@@ -56374,12 +56302,6 @@ parameters:
 			path: src/Internal/Admin/FeaturePlugin.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\FeaturePlugin\:\:replace_supported_features\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/FeaturePlugin.php
-
-		-
 			message: '#^PHPDoc tag @var does not specify variable name\.$#'
 			identifier: varTag.noVariable
 			count: 4
@@ -56738,7 +56660,6 @@ parameters:
 			identifier: offsetAccess.notFound
 			count: 1
 			path: src/Internal/Admin/Logging/LogHandlerFileV2.php
-
 
 		-
 			message: '#^Call to protected method prepare_column_headers\(\) of class WC_Admin_Log_Table_List\.$#'

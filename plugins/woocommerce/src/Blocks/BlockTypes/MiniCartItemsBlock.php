@@ -34,6 +34,6 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 			<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</div>
 		<?php
-		return ob_get_clean();
+		return (string) ob_get_clean();
 	}
 }

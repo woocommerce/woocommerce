@@ -446,7 +446,7 @@ class MiniCart extends AbstractBlock {
 				</button>
 			</div>
 			<?php
-			return ob_get_clean();
+			return (string) ob_get_clean();
 		}
 
 		return '';
@@ -455,6 +455,7 @@ class MiniCart extends AbstractBlock {
 	/**
 	 * Echoes the Interactivity API Mini Cart overlay markup.
 	 *
+	 * @since 11.1.0
 	 * @return void
 	 */
 	public function render_mini_cart_overlay() {

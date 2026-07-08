@@ -57,7 +57,7 @@ class MiniCartTitleItemsCounterBlock extends AbstractInnerBlock {
 		<span <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 		</span>
 		<?php
-		return ob_get_clean();
+		return (string) ob_get_clean();
 	}
 
 	/**

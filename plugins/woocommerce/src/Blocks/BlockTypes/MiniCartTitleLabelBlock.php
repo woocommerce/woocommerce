@@ -31,6 +31,6 @@ class MiniCartTitleLabelBlock extends AbstractInnerBlock {
 			<?php echo esc_html( $cart_label ); ?>
 		</span>
 		<?php
-		return ob_get_clean();
+		return (string) ob_get_clean();
 	}
 }
