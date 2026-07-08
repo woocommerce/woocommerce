@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Functions\Stock
  */
 
+use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 
 /**
@@ -27,13 +28,13 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	public $order_stock_restore_statuses = array(
 		OrderInternalStatus::CANCELLED,
 		OrderInternalStatus::PENDING,
+		OrderInternalStatus::FAILED,
 	);
 
 	/**
 	 * @var array List of statuses which have no impact on inventory.
 	 */
 	public $order_stock_no_effect_statuses = array(
-		OrderInternalStatus::FAILED,
 		OrderInternalStatus::REFUNDED,
 	);
 
@@ -68,6 +69,71 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$order->set_status( $status );
 		$order->save();
 		return $order;
+	}
+
+	/**
+	 * Run a callback with stock reservation enabled and the configured hold duration.
+	 *
+	 * @param string   $hold_stock_minutes Configured hold stock duration.
+	 * @param callable $callback Callback to run.
+	 * @return mixed
+	 */
+	private function with_stock_reservation_options( $hold_stock_minutes, $callback ) {
+		$option_names         = array(
+			'woocommerce_hold_stock_minutes',
+			'woocommerce_manage_stock',
+			'woocommerce_schema_version',
+		);
+		$missing_option_value = new stdClass();
+		$original_options     = array();
+
+		foreach ( $option_names as $option_name ) {
+			$option_value                     = get_option( $option_name, $missing_option_value );
+			$original_options[ $option_name ] = array(
+				'exists' => $missing_option_value !== $option_value,
+				'value'  => $option_value,
+			);
+		}
+
+		update_option( 'woocommerce_hold_stock_minutes', $hold_stock_minutes );
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		update_option( 'woocommerce_schema_version', 430 );
+
+		try {
+			return $callback();
+		} finally {
+			foreach ( $original_options as $option_name => $option_data ) {
+				if ( $option_data['exists'] ) {
+					update_option( $option_name, $option_data['value'] );
+				} else {
+					delete_option( $option_name );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Capture stock reservation minutes observed by the stock hold filter.
+	 *
+	 * @param callable $reserve_stock_callback Callback that attempts to reserve stock.
+	 * @return int|null
+	 */
+	private function get_captured_order_hold_stock_minutes( $reserve_stock_callback ) {
+		$captured_minutes = null;
+		$capture_minutes  = function ( $minutes ) use ( &$captured_minutes ) {
+			$captured_minutes = $minutes;
+			return 0;
+		};
+
+		add_filter( 'woocommerce_order_hold_stock_minutes', $capture_minutes );
+
+		try {
+			$reserve_stock_callback();
+		} finally {
+			remove_filter( 'woocommerce_order_hold_stock_minutes', $capture_minutes );
+		}
+
+		return $captured_minutes;
 	}
 
 	/**
@@ -203,6 +269,68 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * An order that reduced stock while on-hold (e.g. an accepted-but-pending payment) and then fails
+	 * should have its stock restored and its stock-reduced flag cleared, mirroring cancel/pending.
+	 */
+	public function test_on_hold_to_failed_restores_stock_and_clears_reduced_flag() {
+		$order      = $this->create_order_from_cart_with_status( OrderInternalStatus::ON_HOLD );
+		$product_id = array_values( $order->get_items( 'line_item' ) )[0]->get_product_id();
+
+		$this->assertEquals( 9, wc_get_product( $product_id )->get_stock_quantity(), 'On-hold should reduce stock by the ordered quantity.' );
+		$this->assertTrue( (bool) $order->get_data_store()->get_stock_reduced( $order->get_id() ), 'The stock-reduced flag should be set while on-hold.' );
+
+		$order->set_status( OrderInternalStatus::FAILED );
+		$order->save();
+
+		$this->assertEquals( 10, wc_get_product( $product_id )->get_stock_quantity(), 'Failing an order that reduced stock should restore it.' );
+		$this->assertFalse( (bool) $order->get_data_store()->get_stock_reduced( $order->get_id() ), 'The stock-reduced flag should be cleared after the stock is restored.' );
+
+		$restore_notes = array_filter(
+			wc_get_order_notes( array( 'order_id' => $order->get_id() ) ),
+			function ( $note ) {
+				return false !== strpos( $note->content, 'Stock levels increased' );
+			}
+		);
+		$this->assertNotEmpty( $restore_notes, 'A "Stock levels increased" order note should be recorded when the stock is restored.' );
+	}
+
+	/**
+	 * A plain pending -> failed order (a payment declined before any stock was reduced) should be a
+	 * no-op: there is nothing to restore, so stock stays put.
+	 */
+	public function test_pending_to_failed_does_not_change_stock() {
+		$order      = $this->create_order_from_cart_with_status( OrderInternalStatus::PENDING );
+		$product_id = array_values( $order->get_items( 'line_item' ) )[0]->get_product_id();
+
+		$this->assertEquals( 10, wc_get_product( $product_id )->get_stock_quantity(), 'Pending should not reduce stock.' );
+
+		$order->set_status( OrderInternalStatus::FAILED );
+		$order->save();
+
+		$this->assertEquals( 10, wc_get_product( $product_id )->get_stock_quantity(), 'Failing an order that never reduced stock should not change stock.' );
+	}
+
+	/**
+	 * Admin-path safety check. A failed order is a dead end in the gateway flow, but an admin can
+	 * manually move it back to a paid status. Because the failure already restored the stock, doing
+	 * so must reduce stock exactly once, not twice.
+	 */
+	public function test_reactivating_a_failed_order_reduces_stock_only_once() {
+		$order      = $this->create_order_from_cart_with_status( OrderInternalStatus::ON_HOLD );
+		$product_id = array_values( $order->get_items( 'line_item' ) )[0]->get_product_id();
+
+		$order->set_status( OrderInternalStatus::FAILED );
+		$order->save();
+		$this->assertEquals( 10, wc_get_product( $product_id )->get_stock_quantity(), 'Failure should restore the reduced stock.' );
+
+		// Admin manually re-activates the order.
+		$order->set_status( OrderInternalStatus::PROCESSING );
+		$order->save();
+		$this->assertEquals( 9, wc_get_product( $product_id )->get_stock_quantity(), 'Re-activating the order should reduce stock exactly once.' );
+		$this->assertTrue( (bool) $order->get_data_store()->get_stock_reduced( $order->get_id() ), 'The stock-reduced flag should be set again after re-activation.' );
+	}
+
+	/**
 	 * Assert that a value is equal to another one and is of integer type.
 	 *
 	 * @param mixed $expected The value $actual must be equal to.
@@ -211,6 +339,55 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	private function assertIsIntAndEquals( $expected, $actual ) {
 		$this->assertEquals( $expected, $actual );
 		self::assertIsInteger( $actual );
+	}
+
+	/**
+	 * @testdox reserve_stock_for_order defaults to 60 minutes when no duration is provided.
+	 */
+	public function test_reserve_stock_for_order_defaults_to_60_minutes() {
+		$minutes = $this->with_stock_reservation_options(
+			'15',
+			function () {
+				$order         = wc_create_order();
+				$reserve_stock = new ReserveStock();
+
+				return $this->get_captured_order_hold_stock_minutes(
+					function () use ( $reserve_stock, $order ) {
+						$reserve_stock->reserve_stock_for_order( $order );
+					}
+				);
+			}
+		);
+
+		$this->assertSame(
+			60,
+			$minutes,
+			'Direct stock reservation calls should use the explicit default duration.'
+		);
+	}
+
+	/**
+	 * @testdox wc_reserve_stock_for_order passes the configured checkout stock hold duration.
+	 */
+	public function test_wc_reserve_stock_for_order_passes_configured_checkout_hold_duration() {
+		$minutes = $this->with_stock_reservation_options(
+			'15',
+			function () {
+				$order = wc_create_order();
+
+				return $this->get_captured_order_hold_stock_minutes(
+					function () use ( $order ) {
+						wc_reserve_stock_for_order( $order );
+					}
+				);
+			}
+		);
+
+		$this->assertSame(
+			15,
+			$minutes,
+			'Core checkout stock reservation should use the configured hold duration.'
+		);
 	}
 
 	/**

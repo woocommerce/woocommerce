@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Warn when an order status key is too long and can't be stored.

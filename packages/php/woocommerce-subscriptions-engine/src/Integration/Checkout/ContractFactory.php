@@ -1,11 +1,12 @@
 <?php
 /**
  * Builds and persists a {@see Contract} (plus its origin {@see Cycle}) from a paid
- * checkout order, and links order <-> contract in both directions. Does not schedule
- * the first renewal - the caller arms that separately via {@see RenewalEngine::schedule()}.
+ * checkout order, and links order <-> contract in both directions. Renewals need no
+ * arming beyond this: the contract's `next_payment_gmt` places it on the due index the
+ * batch dispatcher scans.
  *
- * Integration zone: WordPress-native. Reads a live `WC_Order`; the order never
- * crosses into Core - only the snapshot values pulled off it do.
+ * Reads a live `WC_Order`; the order never crosses into Core - only the snapshot
+ * values pulled off it do.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout
  */
@@ -34,8 +35,6 @@ defined( 'ABSPATH' ) || exit;
  * Order -> contract factory.
  */
 final class ContractFactory {
-
-	use ScalarCoercion;
 
 	/**
 	 * The repository the factory persists through.
@@ -95,10 +94,10 @@ final class ContractFactory {
 
 		// First renewal date: cycle 1's period end and the contract's next-bill cache.
 		$next_payment = isset( $overrides['next_payment_gmt'] )
-			? self::coerce_string( $overrides['next_payment_gmt'] )
+			? ScalarCoercion::coerce_string( $overrides['next_payment_gmt'] )
 			: $plan->get_billing_policy()->compute_first_renewal_from( $anchor )->format( 'Y-m-d H:i:s' );
 
-		$expected_total = isset( $overrides['billing_total'] ) ? self::coerce_string( $overrides['billing_total'] ) : (string) $order->get_total();
+		$expected_total = isset( $overrides['billing_total'] ) ? ScalarCoercion::coerce_string( $overrides['billing_total'] ) : (string) $order->get_total();
 		$currency       = $order->get_currency();
 
 		$contract_defaults = array(

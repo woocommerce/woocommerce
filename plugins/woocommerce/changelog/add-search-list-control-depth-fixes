@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix hierarchical selection and expansion in SearchListControl for multi-level categories

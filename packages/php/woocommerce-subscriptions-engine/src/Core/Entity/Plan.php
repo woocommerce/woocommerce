@@ -26,19 +26,17 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Plan {
 
-	use ScalarCoercion;
+	public const DEFAULT_CATEGORY = 'SUBSCRIPTION';
 
-	const DEFAULT_CATEGORY = 'SUBSCRIPTION';
+	public const DEFAULT_STATUS = 'active';
 
-	const DEFAULT_STATUS = 'active';
+	public const STATUS_ACTIVE = 'active';
 
-	const STATUS_ACTIVE = 'active';
+	public const STATUS_ARCHIVED = 'archived';
 
-	const STATUS_ARCHIVED = 'archived';
+	public const ALLOWED_STATUSES = array( self::STATUS_ACTIVE, self::STATUS_ARCHIVED );
 
-	const ALLOWED_STATUSES = array( self::STATUS_ACTIVE, self::STATUS_ARCHIVED );
-
-	const ALLOWED_POLICY_TYPES = array( 'percentage', 'fixed_amount', 'price' );
+	public const ALLOWED_POLICY_TYPES = array( 'percentage', 'fixed_amount', 'price' );
 
 	/**
 	 * Plan id, or null before it is persisted.
@@ -46,13 +44,6 @@ final class Plan {
 	 * @var int|null
 	 */
 	private $id;
-
-	/**
-	 * Parent plan group id.
-	 *
-	 * @var int
-	 */
-	private $group_id;
 
 	/**
 	 * Display name.
@@ -67,13 +58,6 @@ final class Plan {
 	 * @var string|null
 	 */
 	private $description;
-
-	/**
-	 * Picker options, e.g. [{ name, value }].
-	 *
-	 * @var array<int, mixed>
-	 */
-	private $options;
 
 	/**
 	 * Billing cadence. Required - every plan has one.
@@ -118,6 +102,14 @@ final class Plan {
 	private $sort_order;
 
 	/**
+	 * Optional stable external identifier, unique at the storage layer - the
+	 * consumer-side dedup key. Immutable post-create.
+	 *
+	 * @var string|null
+	 */
+	private $merchant_code;
+
+	/**
 	 * Owning extension slug, or null until owner semantics are assigned.
 	 *
 	 * @var string|null
@@ -128,56 +120,52 @@ final class Plan {
 	 * Use {@see self::create()} or {@see self::from_storage()}.
 	 *
 	 * @param int|null            $id              Plan id, or null before save.
-	 * @param int                 $group_id        Parent plan group id.
 	 * @param string              $name            Display name.
 	 * @param string|null         $description     Optional description.
-	 * @param array<int, mixed>   $options         Picker options.
 	 * @param BillingPolicy       $billing_policy  Billing cadence.
 	 * @param DeliveryPolicy|null $delivery_policy Optional delivery policy.
 	 * @param PricingPolicy|null  $pricing_policy  Optional pricing policy.
 	 * @param string              $category        Plan category.
 	 * @param string              $status          Merchant lifecycle status.
 	 * @param int                 $sort_order      Manual display order.
+	 * @param string|null         $merchant_code   Optional stable external identifier.
 	 * @param string|null         $extension_slug  Owning extension slug.
 	 */
 	private function __construct(
 		?int $id,
-		int $group_id,
 		string $name,
 		?string $description,
-		array $options,
 		BillingPolicy $billing_policy,
 		?DeliveryPolicy $delivery_policy,
 		?PricingPolicy $pricing_policy,
 		string $category,
 		string $status,
 		int $sort_order,
+		?string $merchant_code,
 		?string $extension_slug
 	) {
 		self::validate_status( $status );
 
 		$this->id              = $id;
-		$this->group_id        = $group_id;
 		$this->name            = $name;
 		$this->description     = $description;
-		$this->options         = $options;
 		$this->billing_policy  = $billing_policy;
 		$this->delivery_policy = $delivery_policy;
 		$this->pricing_policy  = $pricing_policy;
 		$this->category        = $category;
 		$this->status          = $status;
 		$this->sort_order      = $sort_order;
+		$this->merchant_code   = $merchant_code;
 		$this->extension_slug  = $extension_slug;
 	}
 
 	/**
 	 * Build a new, unsaved plan.
 	 *
-	 * @param int                  $group_id Parent plan group id.
-	 * @param array<string, mixed> $args     Plan attributes.
+	 * @param array<string, mixed> $args Plan attributes.
 	 * @throws InvalidArgumentException If pricing_policy entries fail validation.
 	 */
-	public static function create( int $group_id, array $args ): self {
+	public static function create( array $args ): self {
 		$pricing_policy = $args['pricing_policy'] ?? null;
 		if ( null !== $pricing_policy && ! $pricing_policy instanceof PricingPolicy ) {
 			throw new InvalidArgumentException( 'Plan: pricing_policy must be a PricingPolicy instance or null.' );
@@ -198,17 +186,16 @@ final class Plan {
 
 		return new self(
 			null,
-			$group_id,
-			self::coerce_string( $args['name'] ?? null ),
-			self::coerce_nullable_string( $args['description'] ?? null ),
-			is_array( $args['options'] ?? null ) ? $args['options'] : array(),
+			ScalarCoercion::coerce_string( $args['name'] ?? null ),
+			ScalarCoercion::coerce_nullable_string( $args['description'] ?? null ),
 			$billing_policy,
 			$delivery_policy,
 			$pricing_policy,
-			self::coerce_string( $args['category'] ?? null, self::DEFAULT_CATEGORY ),
-			self::coerce_string( $args['status'] ?? null, self::DEFAULT_STATUS ),
-			self::coerce_int( $args['sort_order'] ?? null, 0 ),
-			self::coerce_nullable_string( $args['extension_slug'] ?? null )
+			ScalarCoercion::coerce_string( $args['category'] ?? null, self::DEFAULT_CATEGORY ),
+			ScalarCoercion::coerce_string( $args['status'] ?? null, self::DEFAULT_STATUS ),
+			ScalarCoercion::coerce_int( $args['sort_order'] ?? null, 0 ),
+			ScalarCoercion::coerce_nullable_string( $args['merchant_code'] ?? null ),
+			ScalarCoercion::coerce_nullable_string( $args['extension_slug'] ?? null )
 		);
 	}
 
@@ -232,18 +219,17 @@ final class Plan {
 		}
 
 		return new self(
-			isset( $row['id'] ) ? self::coerce_int( $row['id'] ) : null,
-			self::coerce_int( $row['group_id'] ?? null ),
-			self::coerce_string( $row['name'] ?? null ),
-			self::coerce_nullable_string( $row['description'] ?? null ),
-			is_array( $row['options'] ?? null ) ? $row['options'] : array(),
+			isset( $row['id'] ) ? ScalarCoercion::coerce_int( $row['id'] ) : null,
+			ScalarCoercion::coerce_string( $row['name'] ?? null ),
+			ScalarCoercion::coerce_nullable_string( $row['description'] ?? null ),
 			BillingPolicy::from_array( is_array( $row['billing_policy'] ?? null ) ? $row['billing_policy'] : array() ),
 			isset( $row['delivery_policy'] ) && is_array( $row['delivery_policy'] ) ? DeliveryPolicy::from_array( $row['delivery_policy'] ) : null,
 			$pricing_policy,
-			self::coerce_string( $row['category'] ?? null, self::DEFAULT_CATEGORY ),
-			self::coerce_string( $row['status'] ?? null, self::DEFAULT_STATUS ),
-			self::coerce_int( $row['sort_order'] ?? null, 0 ),
-			self::coerce_nullable_string( $row['extension_slug'] ?? null )
+			ScalarCoercion::coerce_string( $row['category'] ?? null, self::DEFAULT_CATEGORY ),
+			ScalarCoercion::coerce_string( $row['status'] ?? null, self::DEFAULT_STATUS ),
+			ScalarCoercion::coerce_int( $row['sort_order'] ?? null, 0 ),
+			ScalarCoercion::coerce_nullable_string( $row['merchant_code'] ?? null ),
+			ScalarCoercion::coerce_nullable_string( $row['extension_slug'] ?? null )
 		);
 	}
 
@@ -261,13 +247,6 @@ final class Plan {
 	 */
 	public function set_id( int $id ): void {
 		$this->id = $id;
-	}
-
-	/**
-	 * Parent plan group id.
-	 */
-	public function get_group_id(): int {
-		return $this->group_id;
 	}
 
 	/**
@@ -300,24 +279,6 @@ final class Plan {
 	 */
 	public function set_description( ?string $description ): void {
 		$this->description = $description;
-	}
-
-	/**
-	 * Picker options.
-	 *
-	 * @return array<int, mixed>
-	 */
-	public function get_options(): array {
-		return $this->options;
-	}
-
-	/**
-	 * Set the picker options.
-	 *
-	 * @param array<int, mixed> $options Picker options.
-	 */
-	public function set_options( array $options ): void {
-		$this->options = $options;
 	}
 
 	/**
@@ -423,6 +384,13 @@ final class Plan {
 	}
 
 	/**
+	 * Optional stable external identifier, or null. Immutable post-create.
+	 */
+	public function get_merchant_code(): ?string {
+		return $this->merchant_code;
+	}
+
+	/**
 	 * Owning extension slug, or null.
 	 */
 	public function get_extension_slug(): ?string {
@@ -472,16 +440,15 @@ final class Plan {
 	 */
 	public function to_storage(): array {
 		return array(
-			'group_id'        => $this->group_id,
 			'name'            => $this->name,
 			'description'     => $this->description,
-			'options'         => $this->options,
 			'billing_policy'  => $this->billing_policy->to_array(),
 			'delivery_policy' => null !== $this->delivery_policy ? $this->delivery_policy->to_array() : null,
 			'pricing_policy'  => null !== $this->pricing_policy ? $this->pricing_policy->to_array() : null,
 			'category'        => $this->category,
 			'status'          => $this->status,
 			'sort_order'      => $this->sort_order,
+			'merchant_code'   => $this->merchant_code,
 			'extension_slug'  => $this->extension_slug,
 		);
 	}

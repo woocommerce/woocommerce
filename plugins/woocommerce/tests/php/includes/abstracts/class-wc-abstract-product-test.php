@@ -454,4 +454,45 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'outofstock', $product->get_stock_status() );
 	}
+
+	/**
+	 * @testdox A published product is viewable by anyone, with or without capability checks.
+	 */
+	public function test_is_viewable_published_product() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		wp_set_current_user( 0 );
+		$this->assertTrue( $product->is_viewable(), 'Published products are viewable when logged out.' );
+		$this->assertTrue( $product->is_publicly_viewable(), 'Published products are publicly viewable.' );
+
+		wp_set_current_user( $this->admin_user );
+		$this->assertTrue( $product->is_viewable(), 'Published products are viewable by admins.' );
+	}
+
+	/**
+	 * @testdox A non-published product is hidden from the public but viewable by users who can edit it, unless capability checks are disabled.
+	 * @testWith ["draft"]
+	 *           ["pending"]
+	 *           ["private"]
+	 * @param string $status A non-published product status.
+	 */
+	public function test_is_viewable_non_published_product( $status ) {
+		$customer = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$product  = WC_Helper_Product::create_simple_product();
+		$product->set_status( $status );
+		$product->save();
+
+		wp_set_current_user( 0 );
+		$this->assertFalse( $product->is_viewable(), "A $status product is not viewable when logged out." );
+
+		wp_set_current_user( $customer );
+		$this->assertFalse( $product->is_viewable(), "A $status product is not viewable by customers." );
+
+		wp_set_current_user( $this->shop_manager_user );
+		$this->assertTrue( $product->is_viewable(), "A $status product is viewable by shop managers." );
+
+		wp_set_current_user( $this->admin_user );
+		$this->assertTrue( $product->is_viewable(), "A $status product is viewable by admins." );
+		$this->assertFalse( $product->is_publicly_viewable(), "A $status product is never publicly viewable, even for admins." );
+	}
 }

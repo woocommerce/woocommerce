@@ -9,7 +9,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
@@ -1740,7 +1739,7 @@ function wc_products_array_filter_visible( $product ) {
  * @return bool
  */
 function wc_products_array_filter_visible_grouped( $product ) {
-	return $product && is_a( $product, 'WC_Product' ) && ( ProductStatus::PUBLISH === $product->get_status() || current_user_can( 'edit_product', $product->get_id() ) );
+	return $product && is_a( $product, 'WC_Product' ) && $product->is_viewable();
 }
 
 /**

@@ -19,14 +19,22 @@ defined( 'ABSPATH' ) || exit;
  */
 final class PlanRepository {
 
-	use ScalarCoercion;
-
 	/**
 	 * Policy columns stored as JSON.
 	 *
 	 * @var array<int, string>
 	 */
-	private const JSON_COLUMNS = array( 'options', 'billing_policy', 'delivery_policy', 'pricing_policy' );
+	private const JSON_COLUMNS = array( 'billing_policy', 'delivery_policy', 'pricing_policy' );
+
+	/**
+	 * Always-false WHERE clause: a filter arg that is present but empty or
+	 * invalid must match NOTHING, never fall open to matching everything
+	 * (the WP core / WooCommerce fail-closed posture, e.g. WP_Tax_Query and
+	 * the HPOS OrdersTableFieldQuery force_no_results clause).
+	 *
+	 * @var string
+	 */
+	private const MATCH_NOTHING = '0 = 1';
 
 	/**
 	 * Columns callers may sort by through query().
@@ -45,9 +53,13 @@ final class PlanRepository {
 	/**
 	 * Insert a new plan and stamp its id back onto the entity.
 	 *
+	 * `merchant_code` uniqueness is DB-enforced per extension (composite UNIQUE
+	 * with `extension_slug`, NULLs distinct): a duplicate code within one
+	 * extension fails the insert and surfaces as the RuntimeException.
+	 *
 	 * @param Plan $plan Plan to insert.
 	 * @return int The new plan id.
-	 * @throws \RuntimeException If the insert fails.
+	 * @throws \RuntimeException If the insert fails, including on a duplicate merchant_code.
 	 */
 	public function insert( Plan $plan ): int {
 		global $wpdb;
@@ -59,10 +71,8 @@ final class PlanRepository {
 		$inserted = $wpdb->insert(
 			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
 			array(
-				'group_id'         => $data['group_id'],
 				'name'             => $data['name'],
 				'description'      => $data['description'],
-				'options'          => wp_json_encode( $data['options'] ),
 				'billing_policy'   => wp_json_encode( $data['billing_policy'] ),
 				'delivery_policy'  => null !== $data['delivery_policy'] ? wp_json_encode( $data['delivery_policy'] ) : null,
 				'inventory_policy' => null,
@@ -70,6 +80,7 @@ final class PlanRepository {
 				'category'         => $data['category'],
 				'status'           => $data['status'],
 				'sort_order'       => $data['sort_order'],
+				'merchant_code'    => $data['merchant_code'],
 				'extension_slug'   => $data['extension_slug'],
 				'date_created_gmt' => $now,
 				'date_updated_gmt' => $now,
@@ -124,8 +135,13 @@ final class PlanRepository {
 	/**
 	 * Query plans.
 	 *
-	 * Supported args: limit, offset, search, status, extension_slug, orderby,
-	 * order. Results default to manual order, oldest id as a stable tiebreaker.
+	 * Supported args: limit, offset, search, status, extension_slugs, ids,
+	 * orderby, order. `extension_slugs` filters by owning extension: a list
+	 * of slugs (a single-slug list unfolds to an equality match) or
+	 * `array( 'any' )` to skip the scope. `ids` filters to plans whose id is
+	 * in the given int list; it composes with the other filters and is
+	 * honored by count(). Results default to manual order, oldest id as a
+	 * stable tiebreaker.
 	 *
 	 * @param array<string, mixed> $args Query args.
 	 * @return array<int, Plan>
@@ -134,15 +150,20 @@ final class PlanRepository {
 		global $wpdb;
 
 		$table  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
-		$where  = $this->build_where_clauses( $args );
 		$order  = $this->build_order_clause( $args );
-		$limit  = max( 1, self::coerce_int( $args['limit'] ?? null, 50 ) );
-		$offset = max( 0, self::coerce_int( $args['offset'] ?? null, 0 ) );
+		$limit  = max( 1, ScalarCoercion::coerce_int( $args['limit'] ?? null, 50 ) );
+		$offset = max( 0, ScalarCoercion::coerce_int( $args['offset'] ?? null, 0 ) );
 
-		$sql = "SELECT * FROM {$table}{$where} {$order} LIMIT %d OFFSET %d";
+		// phpcs:ignore Generic.Arrays.DisallowShortArraySyntax.Found
+		[
+			'sql'    => $where_sql,
+			'params' => $where_params,
+		] = $this->build_where_clause( $args );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
-		$rows = $wpdb->get_results( $wpdb->prepare( $sql, $limit, $offset ), ARRAY_A );
+		$params = array( ...$where_params, $limit, $offset );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table}{$where_sql} {$order} LIMIT %d OFFSET %d", $params ), ARRAY_A );
 		if ( ! is_array( $rows ) ) {
 			return array();
 		}
@@ -169,14 +190,29 @@ final class PlanRepository {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
-		$where = $this->build_where_clauses( $args );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}{$where}" );
+		// phpcs:ignore Generic.Arrays.DisallowShortArraySyntax.Found
+		[
+			'sql'    => $where_sql,
+			'params' => $where_params,
+		] = $this->build_where_clause( $args );
+
+		if ( array() === $where_params ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$result = $wpdb->get_var( "SELECT COUNT(*) FROM {$table}{$where_sql}" );
+		} else {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			$result = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table}{$where_sql}", $where_params ) );
+		}
+
+		return (int) $result;
 	}
 
 	/**
 	 * Persist changes to an existing plan.
+	 *
+	 * `merchant_code` is immutable post-create and intentionally not written here,
+	 * same as `id`.
 	 *
 	 * @param Plan $plan Plan to update. Must have an id.
 	 * @return bool True on success.
@@ -198,7 +234,6 @@ final class PlanRepository {
 			array(
 				'name'             => $data['name'],
 				'description'      => $data['description'],
-				'options'          => wp_json_encode( $data['options'] ),
 				'billing_policy'   => wp_json_encode( $data['billing_policy'] ),
 				'delivery_policy'  => null !== $data['delivery_policy'] ? wp_json_encode( $data['delivery_policy'] ) : null,
 				'pricing_policy'   => null !== $data['pricing_policy'] ? wp_json_encode( $data['pricing_policy'] ) : null,
@@ -276,7 +311,7 @@ final class PlanRepository {
 			? array_unique(
 				array_map(
 					static function ( $matched_id ): int {
-						return self::coerce_int( $matched_id );
+						return ScalarCoercion::coerce_int( $matched_id );
 					},
 					$matched_ids
 				)
@@ -307,26 +342,21 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Build SQL WHERE clauses from supported query args.
+	 * Build SQL WHERE clauses and params from supported query args.
 	 *
 	 * @param array<string, mixed> $args Query args.
+	 * @return array{sql: string, params: array<int, mixed>}
 	 */
-	private function build_where_clauses( array $args ): string {
+	private function build_where_clause( array $args ): array {
 		global $wpdb;
 
 		$clauses = array();
+		$params  = array();
 
-		$status = self::coerce_string( $args['status'] ?? null );
+		$status = ScalarCoercion::coerce_string( $args['status'] ?? null );
 		if ( '' !== $status ) {
-			$clauses[] = $wpdb->prepare( 'status = %s', $status );
-		}
-
-		if ( array_key_exists( 'extension_slug', $args ) ) {
-			if ( self::is_valid_extension_slug( $args['extension_slug'] ) ) {
-				$clauses[] = $wpdb->prepare( 'extension_slug = %s', $args['extension_slug'] );
-			} else {
-				$clauses[] = '0 = 1';
-			}
+			$clauses[] = 'status = %s';
+			$params[]  = $status;
 		}
 
 		if ( array_key_exists( 'extension_slugs', $args ) && null !== $args['extension_slugs'] ) {
@@ -349,27 +379,71 @@ final class PlanRepository {
 						$are_extension_slugs_valid = true;
 
 						$extension_slugs = array_values( $valid_slugs );
-						$clauses[]       = $wpdb->prepare( 'extension_slug IN (' . implode( ',', array_fill( 0, count( $extension_slugs ), '%s' ) ) . ')', $extension_slugs );
+						if ( 1 === count( $extension_slugs ) ) {
+							$clauses[] = 'extension_slug = %s';
+							$params[]  = $extension_slugs[0];
+						} else {
+							$clauses[] = 'extension_slug IN (' . implode( ',', array_fill( 0, count( $extension_slugs ), '%s' ) ) . ')';
+							$params    = array_merge( $params, $extension_slugs );
+						}
 					}
 				}
 			}
 
 			if ( ! $are_extension_slugs_valid ) {
-				$clauses[] = '0 = 1';
+				$clauses[] = self::MATCH_NOTHING;
 			}
 		}
 
-		$search = self::coerce_string( $args['search'] ?? null );
+		if ( array_key_exists( 'ids', $args ) && null !== $args['ids'] ) {
+			$are_ids_valid = false;
+
+			if ( is_array( $args['ids'] ) && array() !== $args['ids'] ) {
+				$ids       = array();
+				$all_valid = true;
+				foreach ( array_values( $args['ids'] ) as $possible_id ) {
+					$plan_id = ScalarCoercion::coerce_int( $possible_id );
+					if ( $plan_id <= 0 ) {
+						$all_valid = false;
+						break;
+					}
+					$ids[ $plan_id ] = $plan_id;
+				}
+
+				// Require all ids to be positive ints before running the query.
+				if ( $all_valid ) {
+					$are_ids_valid = true;
+
+					$ids       = array_values( $ids );
+					$clauses[] = 'id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')';
+					$params    = array_merge( $params, $ids );
+				}
+			}
+
+			if ( ! $are_ids_valid ) {
+				$clauses[] = self::MATCH_NOTHING;
+			}
+		}
+
+		$search = ScalarCoercion::coerce_string( $args['search'] ?? null );
 		if ( '' !== $search ) {
 			$like      = '%' . $wpdb->esc_like( $search ) . '%';
-			$clauses[] = $wpdb->prepare( '(name LIKE %s OR description LIKE %s)', $like, $like );
+			$clauses[] = '(name LIKE %s OR description LIKE %s)';
+			$params[]  = $like;
+			$params[]  = $like;
 		}
 
 		if ( empty( $clauses ) ) {
-			return '';
+			return array(
+				'sql'    => '',
+				'params' => array(),
+			);
 		}
 
-		return ' WHERE ' . implode( ' AND ', $clauses );
+		return array(
+			'sql'    => ' WHERE ' . implode( ' AND ', $clauses ),
+			'params' => $params,
+		);
 	}
 
 	/**
@@ -378,11 +452,11 @@ final class PlanRepository {
 	 * @param array<string, mixed> $args Query args.
 	 */
 	private function build_order_clause( array $args ): string {
-		$orderby_arg = self::coerce_string( $args['orderby'] ?? null );
+		$orderby_arg = ScalarCoercion::coerce_string( $args['orderby'] ?? null );
 		$orderby     = isset( self::ORDERBY_COLUMNS[ $orderby_arg ] )
 			? self::ORDERBY_COLUMNS[ $orderby_arg ]
 			: 'sort_order';
-		$order       = 'desc' === strtolower( self::coerce_string( $args['order'] ?? null ) ) ? 'DESC' : 'ASC';
+		$order       = 'desc' === strtolower( ScalarCoercion::coerce_string( $args['order'] ?? null ) ) ? 'DESC' : 'ASC';
 
 		if ( 'sort_order' === $orderby ) {
 			return "ORDER BY sort_order {$order}, id ASC";
