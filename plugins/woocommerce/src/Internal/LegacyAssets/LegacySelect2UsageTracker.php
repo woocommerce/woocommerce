@@ -137,7 +137,6 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 		return array(
 			'context'    => $context,
 			'page_type'  => $this->get_current_page_type( $context ),
-			'page_url'   => $this->get_current_request_path(),
 			'handles'    => implode( ',', array_keys( $handles ) ),
 			'dependents' => implode( ',', array_keys( $dependents ) ),
 			'sources'    => implode( ',', array_unique( $sources ) ),
@@ -371,17 +370,5 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 		}
 
 		return 'other';
-	}
-
-	/**
-	 * Get the current request path.
-	 *
-	 * @return string
-	 */
-	private function get_current_request_path(): string {
-		$request_uri = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
-		$path        = wp_parse_url( $request_uri, PHP_URL_PATH );
-
-		return is_string( $path ) ? $path : '';
 	}
 }

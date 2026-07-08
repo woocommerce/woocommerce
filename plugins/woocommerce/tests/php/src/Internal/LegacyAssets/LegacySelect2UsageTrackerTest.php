@@ -88,7 +88,6 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 			array(
 				'context'    => 'admin',
 				'page_type'  => 'woocommerce_page_wc-settings',
-				'page_url'   => '/wp-admin/admin.php',
 				'handles'    => 'select2',
 				'dependents' => 'my-extension-admin',
 				'sources'    => 'http://localhost:8086/wp-content/plugins/my-extension/assets/admin.js',
@@ -117,7 +116,6 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 			array(
 				'context'    => 'frontend',
 				'page_type'  => 'other',
-				'page_url'   => '/',
 				'handles'    => 'wc-select2',
 				'dependents' => 'my-extension-footer',
 				'sources'    => 'http://localhost:8086/wp-content/plugins/my-extension/assets/footer.js',
@@ -164,7 +162,6 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 			array(
 				'context'    => 'frontend',
 				'page_type'  => 'other',
-				'page_url'   => '/',
 				'handles'    => 'select2',
 				'dependents' => 'select2',
 				'sources'    => '',
@@ -232,7 +229,6 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 			array(
 				'context'    => 'frontend',
 				'page_type'  => 'other',
-				'page_url'   => '/',
 				'handles'    => 'wc-select2',
 				'dependents' => 'my-extension-footer',
 				'sources'    => 'http://localhost:8086/wp-content/plugins/my-extension/assets/footer.js',
@@ -270,7 +266,6 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$event                    = array(
 			'context'    => 'frontend',
 			'page_type'  => 'other',
-			'page_url'   => '/shop/',
 			'handles'    => 'wc-select2',
 			'dependents' => 'my-extension-footer',
 			'sources'    => 'http://localhost:8086/wp-content/plugins/my-extension/assets/footer.js',
