@@ -135,7 +135,6 @@ class BlockPatterns {
 			'keywords'      => 'Keywords',
 			'blockTypes'    => 'Block Types',
 			'inserter'      => 'Inserter',
-			'featureFlag'   => 'Feature Flag',
 			'templateTypes' => 'Template Types',
 		);
 
