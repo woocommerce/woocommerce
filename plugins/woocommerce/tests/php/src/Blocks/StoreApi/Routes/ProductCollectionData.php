@@ -15,10 +15,19 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
 class ProductCollectionData extends ControllerTestCase {
 
 	/**
+	 * Product attributes created during a test.
+	 *
+	 * @var array<string,int>
+	 */
+	private $created_product_attributes = array();
+
+	/**
 	 * Setup test product data. Called before every test.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+
+		$this->created_product_attributes = array();
 
 		$fixtures = new FixtureData();
 
@@ -39,6 +48,28 @@ class ProductCollectionData extends ControllerTestCase {
 
 		$fixtures->add_product_review( $this->products[0]->get_id(), 5 );
 		$fixtures->add_product_review( $this->products[1]->get_id(), 4 );
+	}
+
+	/**
+	 * Cleanup test product data. Called after every test.
+	 */
+	protected function tearDown(): void {
+		global $wc_product_attributes;
+
+		foreach ( $this->created_product_attributes as $taxonomy => $attribute_id ) {
+			wc_delete_attribute( $attribute_id );
+
+			if ( taxonomy_exists( $taxonomy ) ) {
+				unregister_taxonomy( $taxonomy );
+			}
+
+			unset( $wc_product_attributes[ $taxonomy ] );
+		}
+
+		delete_transient( 'wc_attribute_taxonomies' );
+		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
+
+		parent::tearDown();
 	}
 
 	/**
@@ -81,7 +112,7 @@ class ProductCollectionData extends ControllerTestCase {
 		$product  = $fixtures->get_variable_product(
 			array(),
 			array(
-				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+				$this->create_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
 			)
 		);
 		$fixtures->get_taxonomy_and_term( $product, 'pa_size', 'large', 'large' );
@@ -665,7 +696,7 @@ class ProductCollectionData extends ControllerTestCase {
 		$product  = $fixtures->get_variable_product(
 			array(),
 			array(
-				FixtureData::get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+				$this->create_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
 			)
 		);
 		$fixtures->get_taxonomy_and_term( $product, 'pa_size', 'large', 'large' );
@@ -728,12 +759,33 @@ class ProductCollectionData extends ControllerTestCase {
 	}
 
 	/**
+	 * Create a product attribute taxonomy and track it for cleanup.
+	 *
+	 * @param string $raw_name Attribute name.
+	 * @param array  $terms Attribute terms.
+	 * @return array Attribute data and created terms.
+	 */
+	private function create_product_attribute( string $raw_name, array $terms ): array {
+		$attribute_name = wc_sanitize_taxonomy_name( $raw_name );
+		$existing_id    = wc_attribute_taxonomy_id_by_name( $attribute_name );
+		$attribute      = FixtureData::get_product_attribute( $raw_name, $terms );
+		$attribute_id   = (int) $attribute['attribute_id'];
+		$taxonomy       = $attribute['attribute_taxonomy'];
+
+		if ( ! $existing_id && $attribute_id ) {
+			$this->created_product_attributes[ $taxonomy ] = $attribute_id;
+		}
+
+		return $attribute;
+	}
+
+	/**
 	 * Create the size product attribute taxonomy.
 	 *
 	 * @return int
 	 */
 	private function create_size_attribute(): int {
-		$attribute = FixtureData::get_product_attribute( 'size', array( 'small', 'medium', 'large' ) );
+		$attribute = $this->create_product_attribute( 'size', array( 'small', 'medium', 'large' ) );
 
 		return (int) $attribute['attribute_id'];
 	}
@@ -773,7 +825,7 @@ class ProductCollectionData extends ControllerTestCase {
 		$product  = $fixtures->get_variable_product(
 			array(),
 			array(
-				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+				$this->create_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
 			)
 		);
 
