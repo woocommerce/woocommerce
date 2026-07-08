@@ -327,7 +327,7 @@ final class ContractRepository {
 	/**
 	 * The columns a list query may order by, mapped from the public sort key to the
 	 * stored column. A whitelist, never raw input, is the ORDER BY column - so an
-	 * `orderby` arg can only ever name one of these five columns.
+	 * `orderby` arg can only ever name one of these four columns.
 	 */
 	private const ORDERBY_COLUMNS = array(
 		'id'           => 'id',
