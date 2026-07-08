@@ -51,7 +51,8 @@ export const DismissableListHeading = ( {
 
 /**
  * Pure UI wrapper for a dismissable recommendation card. Hides the `Card` when
- * `isDismissed` is true, otherwise wraps `children` in a `Card`.
+ * `isDismissed` is true, optionally rendering `dismissedContent` in its place;
+ * otherwise wraps `children` in a `Card`.
  *
  * This component holds no persistence logic. Callers manage the dismissal state
  * with a hook and pass the resulting `isDismissed` here and `onDismiss` to the
@@ -66,10 +67,12 @@ export const DismissableListHeading = ( {
 export const DismissableList = ( {
 	children,
 	className,
+	dismissedContent,
 	isDismissed,
 }: {
 	children: React.ReactNode;
 	className?: string;
+	dismissedContent?: React.ReactNode;
 	/**
 	 * Whether the card has been dismissed. When true the card is hidden.
 	 */
@@ -97,7 +100,9 @@ export const DismissableList = ( {
 			tabIndex={ -1 }
 			className="woocommerce-dismissable-list__wrapper"
 		>
-			{ ! isDismissed && (
+			{ isDismissed ? (
+				dismissedContent
+			) : (
 				<Card
 					size="medium"
 					className={ clsx(

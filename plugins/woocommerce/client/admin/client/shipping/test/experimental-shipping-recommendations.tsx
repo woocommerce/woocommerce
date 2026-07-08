@@ -22,12 +22,35 @@ jest.mock( '@wordpress/data', () => ( {
 jest.mock( '../../settings-recommendations/dismissable-list', () => ( {
 	DismissableList: ( {
 		children,
+		dismissedContent,
 		isDismissed,
 	}: {
 		children: React.ReactNode;
+		dismissedContent?: React.ReactNode;
 		isDismissed?: boolean;
-	} ) => ( isDismissed ? null : children ),
+	} ) => (
+		<div
+			data-dismissed={ String( Boolean( isDismissed ) ) }
+			data-testid="dismissable-list"
+		>
+			{ isDismissed ? dismissedContent : children }
+		</div>
+	),
 	DismissableListHeading: ( ( { children } ) => children ) as React.FC,
+} ) );
+jest.mock( '../../guided-tours/shipping-tour', () => ( {
+	ShippingTour: ( {
+		showShippingRecommendationsStep,
+	}: {
+		showShippingRecommendationsStep: boolean;
+	} ) => (
+		<div
+			data-show-recommendations-step={ String(
+				showShippingRecommendationsStep
+			) }
+			data-testid="shipping-tour"
+		/>
+	),
 } ) );
 jest.mock( '../../lib/notices', () => ( {
 	createNoticesFromResponse: () => null,
@@ -333,6 +356,17 @@ describe( 'ShippingRecommendations', () => {
 			expect(
 				screen.queryByText( 'the WooCommerce Marketplace' )
 			).toBeInTheDocument();
+			expect( screen.getByTestId( 'dismissable-list' ) ).toHaveAttribute(
+				'data-dismissed',
+				'true'
+			);
+			expect(
+				screen.getByTestId( 'dismissable-list' )
+			).toHaveTextContent( 'the WooCommerce Marketplace' );
+			expect( screen.getByTestId( 'shipping-tour' ) ).toHaveAttribute(
+				'data-show-recommendations-step',
+				'false'
+			);
 		} );
 	} );
 

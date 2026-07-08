@@ -109,6 +109,14 @@ const ShippingRecommendations = () => {
 	const visiblePluginSlugs = visibleExtensions
 		.map( ( ext ) => EXTENSION_PLUGIN_SLUGS[ ext ] )
 		.join( ',' );
+	const marketplaceFallbackLink = (
+		<ShippingRecommendationsMarketplaceLink
+			textProps={ {
+				as: 'p',
+				className: 'woocommerce-recommended-shipping__fallback-link',
+			} }
+		/>
+	);
 
 	const impressionFired = useRef( false );
 	useEffect( () => {
@@ -133,21 +141,18 @@ const ShippingRecommendations = () => {
 		return (
 			<>
 				<ShippingTour showShippingRecommendationsStep={ false } />
-				<ShippingRecommendationsMarketplaceLink
-					textProps={ {
-						as: 'p',
-						className:
-							'woocommerce-recommended-shipping__fallback-link',
-					} }
-				/>
+				{ marketplaceFallbackLink }
 			</>
 		);
 	}
 
 	return (
 		<div style={ { paddingBottom: 60 } }>
-			<ShippingTour showShippingRecommendationsStep={ true } />
+			<ShippingTour
+				showShippingRecommendationsStep={ ! isRecommendationsHidden }
+			/>
 			<ShippingRecommendationsList
+				dismissedContent={ marketplaceFallbackLink }
 				dismissState={ recommendationsDismissState }
 			>
 				{ visibleExtensions.map( ( ext ) => {
@@ -204,15 +209,6 @@ const ShippingRecommendations = () => {
 					}
 				} ) }
 			</ShippingRecommendationsList>
-			{ isRecommendationsHidden && (
-				<ShippingRecommendationsMarketplaceLink
-					textProps={ {
-						as: 'p',
-						className:
-							'woocommerce-recommended-shipping__fallback-link',
-					} }
-				/>
-			) }
 		</div>
 	);
 };
