@@ -202,7 +202,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		 * cart recovery email — simulated here so the test exercises the
 		 * registered handler end-to-end.
 		 *
-		 * @since 10.9.0
+		 * @since 11.0.0
 		 *
 		 * @param int $order_id The order to dispatch the recovery email for.
 		 */

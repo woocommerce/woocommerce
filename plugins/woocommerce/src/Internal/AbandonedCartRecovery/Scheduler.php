@@ -34,7 +34,7 @@ use WC_Order;
  *
  * @internal Just for internal use.
  *
- * @since 10.9.0
+ * @since 11.0.0
  */
 class Scheduler {
 

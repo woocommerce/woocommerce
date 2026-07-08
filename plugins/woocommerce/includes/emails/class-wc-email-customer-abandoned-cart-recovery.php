@@ -24,7 +24,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 	 * Merchants can also trigger the email manually from the order edit page.
 	 *
 	 * @class    WC_Email_Customer_Abandoned_Cart_Recovery
-	 * @version  10.9.0
+	 * @version  11.0.0
 	 * @package  WooCommerce\Classes\Emails
 	 */
 	class WC_Email_Customer_Abandoned_Cart_Recovery extends WC_Email {
@@ -95,7 +95,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 * threshold still gates manual sends from the order edit page so merchants
 		 * have an earlier window to intervene.
 		 *
-		 * @since 10.9.0
+		 * @since 11.0.0
 		 */
 		public const AUTO_SEND_DELAY_SECONDS = 2 * HOUR_IN_SECONDS;
 
@@ -130,7 +130,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 * `woocommerce_send_abandoned_cart_recovery_notification`, and directly by the
 		 * manual-send action on the order edit page.
 		 *
-		 * @since 10.9.0
+		 * @since 11.0.0
 		 *
 		 * @param int $order_id The order ID.
 		 * @return bool True when an email was dispatched in this call, false when any
@@ -196,7 +196,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 * abandonment. A capability check guards against role configurations that
 		 * grant the order edit page to users without `edit_shop_orders`.
 		 *
-		 * @since 10.9.0
+		 * @since 11.0.0
 		 *
 		 * @param array         $actions Existing order actions keyed by action id.
 		 * @param WC_Order|null $order   Order being rendered, or null in contexts without one.
@@ -252,7 +252,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 * eligible-status set via `woocommerce_abandoned_cart_recovery_eligible_statuses`
 		 * and both paths will agree.
 		 *
-		 * @since 10.9.0
+		 * @since 11.0.0
 		 *
 		 * @param WC_Order $order Order to evaluate.
 		 * @return bool
@@ -265,7 +265,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			 * integrations or merchants who want recovery to fire for other states (e.g. `failed`)
 			 * can widen the list here.
 			 *
-			 * @since 10.9.0
+			 * @since 11.0.0
 			 *
 			 * @param string[] $eligible_statuses Default: ABANDONED_STATUSES.
 			 * @param WC_Order $order             Order being inspected.
@@ -299,7 +299,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 * capability and order status as defense in depth in case the hook is
 		 * invoked from a non-metabox path.
 		 *
-		 * @since 10.9.0
+		 * @since 11.0.0
 		 *
 		 * @param WC_Order $order The order whose customer should receive the email.
 		 * @return void
@@ -339,7 +339,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			/**
 			 * Fires before the abandoned cart recovery email is manually resent.
 			 *
-			 * @since 10.9.0
+			 * @since 11.0.0
 			 *
 			 * @param WC_Order $order      Order being recovered.
 			 * @param string   $email_type Email identifier ('customer_abandoned_cart_recovery').
@@ -362,7 +362,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			/**
 			 * Fires after the abandoned cart recovery email has been manually resent.
 			 *
-			 * @since 10.9.0
+			 * @since 11.0.0
 			 *
 			 * @param WC_Order $order      Order being recovered.
 			 * @param string   $email_type Email identifier ('customer_abandoned_cart_recovery').
@@ -383,7 +383,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 * order edit page. The Action Scheduler integration consults this before
 		 * scheduling a send.
 		 *
-		 * @since 10.9.0
+		 * @since 11.0.0
 		 * @return bool
 		 */
 		public function is_automated(): bool {
@@ -393,7 +393,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		/**
 		 * Currently-active known recovery handlers, keyed by plugin file path with the display name as value.
 		 *
-		 * @since 10.9.0
+		 * @since 11.0.0
 		 * @return array<string, string> Map of plugin file path → display name for plugins that are active.
 		 */
 		public static function get_active_recovery_handlers(): array {
@@ -418,7 +418,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 * manual-send handler and the scheduler can call it without instantiating
 		 * the email class.
 		 *
-		 * @since 10.9.0
+		 * @since 11.0.0
 		 *
 		 * @return bool
 		 */
@@ -429,7 +429,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			 * Partner plugins that handle abandoned cart recovery themselves can
 			 * return true here to prevent core from sending a duplicate email.
 			 *
-			 * @since 10.9.0
+			 * @since 11.0.0
 			 *
 			 * @param bool $suppress Default false.
 			 */
@@ -443,7 +443,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 * pending order. A future iteration may swap this for a single-use signed
 		 * URL with explicit expiry (see `woocommerce_abandoned_cart_recovery_url` filter).
 		 *
-		 * @since  10.9.0
+		 * @since  11.0.0
 		 * @return string
 		 */
 		public function get_recovery_url() {
@@ -454,7 +454,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			/**
 			 * Filter the URL included in the abandoned cart recovery email.
 			 *
-			 * @since 10.9.0
+			 * @since 11.0.0
 			 *
 			 * @param string   $url   Default: the pending order's pay endpoint.
 			 * @param WC_Order $order Order being recovered.
@@ -471,7 +471,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 * both states mean there's no recipient to unsubscribe and the
 		 * template should suppress the footer link.
 		 *
-		 * @since  10.9.0
+		 * @since  11.0.0
 		 * @return string
 		 */
 		public function get_unsubscribe_url() {
@@ -492,7 +492,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 * dropdown gate, and any future auto-send scheduler — without each
 		 * caller needing to thread the repository through.
 		 *
-		 * @since  10.9.0
+		 * @since  11.0.0
 		 *
 		 * @param string $email Raw recipient email.
 		 * @return bool
@@ -507,7 +507,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		/**
 		 * Get default email subject.
 		 *
-		 * @since  10.9.0
+		 * @since  11.0.0
 		 * @return string
 		 */
 		public function get_default_subject() {
@@ -517,7 +517,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		/**
 		 * Get default email heading.
 		 *
-		 * @since  10.9.0
+		 * @since  11.0.0
 		 * @return string
 		 */
 		public function get_default_heading() {
@@ -527,7 +527,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		/**
 		 * Default content to show below main email content.
 		 *
-		 * @since  10.9.0
+		 * @since  11.0.0
 		 * @return string
 		 */
 		public function get_default_additional_content() {
