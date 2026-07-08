@@ -253,7 +253,13 @@ class CustomerHistory {
 			return $this->excluded_statuses;
 		}
 
-		$excluded_statuses = get_option( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed', 'cancelled' ) );
+		/**
+		 * Filters the default set of order statuses excluded from Analytics report totals.
+		 *
+		 * @since 11.0.0
+		 * @param array $default_statuses Default excluded order statuses.
+		 */
+		$excluded_statuses = get_option( 'woocommerce_excluded_report_order_statuses', apply_filters( 'woocommerce_analytics_settings_default_excluded_order_statuses', array( 'pending', 'failed', 'cancelled' ) ) );
 		if ( ! is_array( $excluded_statuses ) ) {
 			$excluded_statuses = array( 'pending', 'failed', 'cancelled' );
 		}

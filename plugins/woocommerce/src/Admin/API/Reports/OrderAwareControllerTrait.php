@@ -93,7 +93,13 @@ trait OrderAwareControllerTrait {
 	public static function get_order_statuses() {
 		// Allow all statuses selected as "actionable" - this may include unregistered statuses.
 		// See: https://github.com/woocommerce/woocommerce-admin/issues/5592.
-		$actionable_statuses = get_option( 'woocommerce_actionable_order_statuses', array() );
+		/**
+		 * Filters the default set of order statuses considered actionable in Analytics.
+		 *
+		 * @since 11.0.0
+		 * @param array $default_statuses Default actionable order statuses.
+		 */
+		$actionable_statuses = get_option( 'woocommerce_actionable_order_statuses', apply_filters( 'woocommerce_analytics_settings_default_actionable_order_statuses', array( 'processing', 'on-hold' ) ) );
 
 		// Prevent errors if the database entry is not the expected type (array).
 		if ( ! is_array( $actionable_statuses ) ) {
