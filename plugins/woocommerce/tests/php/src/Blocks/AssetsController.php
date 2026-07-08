@@ -274,4 +274,42 @@ class AssetsController extends \WP_UnitTestCase {
 			$urls,
 		);
 	}
+
+	/**
+	 * @testdox Should add console warnings for deprecated script handles.
+	 */
+	public function test_register_assets_adds_warnings_for_deprecated_script_handles(): void {
+		$this->api->wc_version = 'wc-test';
+		$this->api->method( 'get_block_asset_build_path' )
+			->willReturnCallback(
+				function ( $filename, $type = 'js' ) {
+					return "assets/client/blocks/{$filename}.{$type}";
+				}
+			);
+
+		$deprecated_handles = array(
+			'wc-blocks-vendors',
+			'wc-blocks',
+			'wc-blocks-shared-context',
+			'wc-blocks-shared-hocs',
+			'wc-blocks-components',
+		);
+
+		$this->api
+			->expects( $this->exactly( count( $deprecated_handles ) ) )
+			->method( 'add_inline_script' )
+			->withConsecutive(
+				...array_map(
+					function ( $handle ) {
+						return array(
+							$handle,
+							$this->stringContains( sprintf( 'The \\"%s\\" script handle is deprecated', $handle ) ),
+						);
+					},
+					$deprecated_handles
+				)
+			);
+
+		$this->assets_controller->register_assets();
+	}
 }

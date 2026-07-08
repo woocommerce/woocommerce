@@ -140,6 +140,41 @@ final class AssetsController {
 
 		// Deprecated package handle kept for extensions that still declare wc-blocks-components.
 		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js' );
+
+		$this->add_deprecated_script_handle_warnings(
+			array(
+				'wc-blocks-vendors',
+				'wc-blocks',
+				'wc-blocks-shared-context',
+				'wc-blocks-shared-hocs',
+				'wc-blocks-components',
+			)
+		);
+	}
+
+	/**
+	 * Add console warnings for deprecated script handles.
+	 *
+	 * @param array $handles Deprecated script handles.
+	 */
+	private function add_deprecated_script_handle_warnings( array $handles ): void {
+		foreach ( $handles as $handle ) {
+			$message = wp_json_encode(
+				sprintf(
+					'[WooCommerce] The "%s" script handle is deprecated and kept for backward compatibility only. See the enqueueable packages documentation for the supported WooCommerce Blocks package handles: https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/docs/internal-developers/enqueueable-packages',
+					$handle
+				)
+			);
+
+			if ( false === $message ) {
+				continue;
+			}
+
+			$this->api->add_inline_script(
+				$handle,
+				sprintf( 'console.warn( %s );', $message )
+			);
+		}
 	}
 
 	/**
