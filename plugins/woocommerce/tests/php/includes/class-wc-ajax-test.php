@@ -650,10 +650,19 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$_POST['metakeyinput']         = 'my_test_key';
 		$_POST['metavalue']            = 'my_test_value';
 
+		$output_buffering_level = ob_get_level();
+
 		try {
+			// Note that _handleAjax makes use of output buffering, which the die
+			// handler usually cleans up; the finally block below closes only any
+			// buffer it leaves dangling so the buffer level stays balanced.
 			$this->_handleAjax( 'woocommerce_order_add_meta' );
 		} catch ( WPAjaxDieContinueException $e ) {
-			ob_end_clean();
+			unset( $e );
+		} finally {
+			while ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
+			}
 		}
 
 		$this->assertStringContainsString(
