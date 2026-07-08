@@ -239,4 +239,140 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		$this->assertWPError( $result, 'email-restricted coupon should be invalid for a non-matching customer' );
 		$this->assertEquals( $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED ), $result->get_error_message() );
 	}
+
+	/**
+	 * @testdox The woocommerce_coupon_validate_product_ids filter can bypass or force product ID validation.
+	 */
+	public function test_product_ids_validation_filter() {
+		$in_cart     = WC_Helper_Product::create_simple_product();
+		$not_in_cart = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $in_cart->get_id(), 1 );
+		$discounts = new WC_Discounts( WC()->cart );
+
+		$coupon = new WC_Coupon();
+		$coupon->set_props(
+			array(
+				'discount_type' => 'fixed_cart',
+				'amount'        => 10,
+				'product_ids'   => array( $not_in_cart->get_id() ),
+			)
+		);
+		$coupon->save();
+
+		$this->assertWPError( $discounts->is_coupon_valid( $coupon ), 'A coupon restricted to a product not in the cart should be invalid.' );
+
+		add_filter( 'woocommerce_coupon_validate_product_ids', '__return_true' );
+		$this->assertTrue( $discounts->is_coupon_valid( $coupon ), 'Returning true from the filter should bypass the product ID restriction.' );
+		remove_filter( 'woocommerce_coupon_validate_product_ids', '__return_true' );
+
+		$this->assertWPError( $discounts->is_coupon_valid( $coupon ), 'Normal validation should resume once the filter is removed.' );
+
+		$valid_coupon = new WC_Coupon();
+		$valid_coupon->set_props(
+			array(
+				'discount_type' => 'fixed_cart',
+				'amount'        => 10,
+				'product_ids'   => array( $in_cart->get_id() ),
+			)
+		);
+		$valid_coupon->save();
+
+		$this->assertTrue( $discounts->is_coupon_valid( $valid_coupon ), 'A coupon restricted to a product in the cart should be valid.' );
+		add_filter( 'woocommerce_coupon_validate_product_ids', '__return_false' );
+		$this->assertWPError( $discounts->is_coupon_valid( $valid_coupon ), 'Returning false from the filter should force rejection.' );
+		remove_filter( 'woocommerce_coupon_validate_product_ids', '__return_false' );
+	}
+
+	/**
+	 * @testdox The woocommerce_coupon_validate_product_categories filter can bypass category validation.
+	 */
+	public function test_product_categories_validation_filter() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$discounts = new WC_Discounts( WC()->cart );
+
+		$term   = wp_insert_term( 'coupon-cat-' . uniqid(), 'product_cat' );
+		$coupon = new WC_Coupon();
+		$coupon->set_props(
+			array(
+				'discount_type'      => 'fixed_cart',
+				'amount'             => 10,
+				'product_categories' => array( $term['term_id'] ),
+			)
+		);
+		$coupon->save();
+
+		$this->assertWPError( $discounts->is_coupon_valid( $coupon ), 'A coupon restricted to a category none of the cart items belong to should be invalid.' );
+
+		add_filter( 'woocommerce_coupon_validate_product_categories', '__return_true' );
+		$this->assertTrue( $discounts->is_coupon_valid( $coupon ), 'Returning true from the filter should bypass the category restriction.' );
+		remove_filter( 'woocommerce_coupon_validate_product_categories', '__return_true' );
+	}
+
+	/**
+	 * @testdox The woocommerce_coupon_validate_excluded_items filter can bypass excluded item validation.
+	 */
+	public function test_excluded_items_validation_filter() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$discounts = new WC_Discounts( WC()->cart );
+
+		// excluded_items only runs for product-type coupons (e.g. percent).
+		$coupon = new WC_Coupon();
+		$coupon->set_props(
+			array(
+				'discount_type'        => 'percent',
+				'amount'               => 10,
+				'excluded_product_ids' => array( $product->get_id() ),
+			)
+		);
+		$coupon->save();
+
+		$this->assertWPError( $discounts->is_coupon_valid( $coupon ), 'A product coupon whose only cart item is excluded should be invalid.' );
+
+		add_filter( 'woocommerce_coupon_validate_excluded_items', '__return_true' );
+		$this->assertTrue( $discounts->is_coupon_valid( $coupon ), 'Returning true from the filter should bypass the excluded item restriction.' );
+		remove_filter( 'woocommerce_coupon_validate_excluded_items', '__return_true' );
+	}
+
+	/**
+	 * @testdox The woocommerce_coupon_validate_eligible_items filter short-circuits eligibility checks on a null, true, or false return.
+	 */
+	public function test_eligible_items_validation_filter() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$discounts = new WC_Discounts( WC()->cart );
+
+		// eligible_items runs for cart-type coupons (e.g. fixed_cart).
+		$coupon = new WC_Coupon();
+		$coupon->set_props(
+			array(
+				'discount_type'        => 'fixed_cart',
+				'amount'               => 10,
+				'excluded_product_ids' => array( $product->get_id() ),
+			)
+		);
+		$coupon->save();
+
+		// Default (no filter): the null short-circuit falls through to the excluded-product check, which fails.
+		$this->assertWPError( $discounts->is_coupon_valid( $coupon ), 'A cart coupon excluding the only cart item should be invalid by default.' );
+
+		add_filter( 'woocommerce_coupon_validate_eligible_items', '__return_true' );
+		$this->assertTrue( $discounts->is_coupon_valid( $coupon ), 'Returning true should short-circuit and accept the coupon.' );
+		remove_filter( 'woocommerce_coupon_validate_eligible_items', '__return_true' );
+
+		$valid_coupon = new WC_Coupon();
+		$valid_coupon->set_props(
+			array(
+				'discount_type' => 'fixed_cart',
+				'amount'        => 10,
+			)
+		);
+		$valid_coupon->save();
+
+		$this->assertTrue( $discounts->is_coupon_valid( $valid_coupon ), 'An unrestricted cart coupon is valid by default.' );
+		add_filter( 'woocommerce_coupon_validate_eligible_items', '__return_false' );
+		$this->assertWPError( $discounts->is_coupon_valid( $valid_coupon ), 'Returning false should short-circuit and reject the coupon.' );
+		remove_filter( 'woocommerce_coupon_validate_eligible_items', '__return_false' );
+	}
 }
