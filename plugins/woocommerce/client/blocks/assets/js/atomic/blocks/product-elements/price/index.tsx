@@ -7,7 +7,7 @@ import { currencyDollar, Icon } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import save from '../save';
+
 import edit from './edit';
 import metadata from './block.json';
 import deprecated from './deprecated';
