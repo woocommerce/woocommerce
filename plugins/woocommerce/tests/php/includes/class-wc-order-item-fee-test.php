@@ -325,6 +325,48 @@ class WC_Order_Item_Fee_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox calculate_taxes apportions taxes for a negative fee across taxable order costs.
+	 *
+	 * Exercises the negative-fee branch of calculate_taxes(), where the (coerced) fee total is
+	 * distributed across the order's taxable costs by tax class. The helper order contains a $40
+	 * taxable line item and $10 taxable shipping (both standard rate), so a -$10 fee is apportioned
+	 * in full and taxed at 20%, yielding -$2 of fee tax.
+	 */
+	public function test_calculate_taxes_apportions_negative_fee_across_taxable_costs() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$order = WC_Helper_Order::create_order();
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_name( 'Negative fee' );
+		$fee->set_total( '-10' );
+		$fee->set_tax_status( \Automattic\WooCommerce\Enums\ProductTaxStatus::TAXABLE );
+		$order->add_item( $fee );
+		$order->save();
+
+		$order->calculate_totals();
+
+		$this->assertEquals( -2.0, (float) $fee->get_total_tax() );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$order->delete( true );
+	}
+
+	/**
 	 * @testdox set_taxes handles empty/null values gracefully.
 	 */
 	public function test_set_taxes_with_empty_values() {
