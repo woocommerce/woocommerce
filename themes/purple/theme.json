@@ -59,7 +59,7 @@
 			"duotone": [
 				{
 					"colors": [
-						"#000000",
+						"#111111",
 						"#FFFFFF"
 					],
 					"name": "Duotone 1",
@@ -67,8 +67,8 @@
 				},
 				{
 					"colors": [
-						"#000000",
-						"#BBBBBB"
+						"#111111",
+						"#F7F7F7"
 					],
 					"name": "Duotone 2",
 					"slug": "duotone-2"
