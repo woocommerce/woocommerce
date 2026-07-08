@@ -14,11 +14,14 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { privateApis as themePrivateApis } from '@wordpress/theme';
+import { Card } from '@wordpress/ui';
 import type { ErrorInfo, ReactNode } from 'react';
 
 /**
  * Internal dependencies
  */
+import { unlock } from './lock-unlock';
 import { HiddenInputs } from './hidden-inputs';
 import { error, warn } from './diagnostics';
 import { sanitizeSettingsHtml } from './html';
@@ -39,6 +42,11 @@ import type {
 	SettingsValue,
 	SettingsValues,
 } from './types';
+
+// ThemeProvider delivers the --wpds-* design tokens. It is only reachable
+// through private-apis while @wordpress/theme stabilises; the package is
+// exact-pinned so upstream changes land as deliberate updates.
+const { ThemeProvider } = unlock( themePrivateApis );
 
 type SaveNotice = {
 	status: 'success' | 'error';
@@ -229,9 +237,19 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 	}
 
 	return (
-		<header className="wc-settings-ui__section-header">
+		<Card.Header
+			className="wc-settings-ui__section-header"
+			render={ <header /> }
+		>
 			<div className="wc-settings-ui__section-heading">
-				{ group.title ? <h2>{ group.title }</h2> : null }
+				{ group.title ? (
+					<Card.Title
+						// eslint-disable-next-line jsx-a11y/heading-has-content -- Card.Title injects its children into the render element.
+						render={ <h2 /> }
+					>
+						{ group.title }
+					</Card.Title>
+				) : null }
 				{ group.description ? (
 					<div className="wc-settings-ui__section-description">
 						<RawHTML>
@@ -255,7 +273,7 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 					) ) }
 				</div>
 			) : null }
-		</header>
+		</Card.Header>
 	);
 };
 
@@ -812,99 +830,103 @@ export const SettingsUIPage = ( {
 		saveStrategy.adapter === 'form_post' ? getAllFields( schema ) : [];
 
 	return (
-		<ShellHeader
-			schema={ schema }
-			context={ context }
-			values={ values }
-			initialValues={ initialValues }
-			isDirty={ isDirty }
-			isSaving={ isSaving }
-			saveStrategy={ saveStrategy }
-			onSave={
-				saveStrategy.adapter === 'form_post'
-					? submitSettingsForm
-					: handleCustomSave
-			}
-		>
-			{ pendingNavigation ? (
-				<UnsavedChangesModal
-					isSaving={ isSaving }
-					onClose={ () => setPendingNavigation( null ) }
-					onDiscard={ handleDiscardNavigation }
-					onSave={ handleSavePendingNavigation }
-				/>
-			) : null }
-			{ saveNotice ? (
-				<Notice
-					className="wc-settings-ui-shell__notice"
-					status={ saveNotice.status }
-					isDismissible
-					onRemove={ () => setSaveNotice( null ) }
-				>
-					{ saveNotice.message }
-				</Notice>
-			) : null }
-			<div className="wc-settings-ui">
-				{ visibleGroups.map( ( group ) => (
-					<section
-						className="wc-settings-ui__section"
-						key={ group.id }
+		<ThemeProvider isRoot>
+			<ShellHeader
+				schema={ schema }
+				context={ context }
+				values={ values }
+				initialValues={ initialValues }
+				isDirty={ isDirty }
+				isSaving={ isSaving }
+				saveStrategy={ saveStrategy }
+				onSave={
+					saveStrategy.adapter === 'form_post'
+						? submitSettingsForm
+						: handleCustomSave
+				}
+			>
+				{ pendingNavigation ? (
+					<UnsavedChangesModal
+						isSaving={ isSaving }
+						onClose={ () => setPendingNavigation( null ) }
+						onDiscard={ handleDiscardNavigation }
+						onSave={ handleSavePendingNavigation }
+					/>
+				) : null }
+				{ saveNotice ? (
+					<Notice
+						className="wc-settings-ui-shell__notice"
+						status={ saveNotice.status }
+						isDismissible
+						onRemove={ () => setSaveNotice( null ) }
 					>
-						<div className="wc-settings-ui__section-card">
-							<GroupHeader group={ group } />
-							<div className="wc-settings-ui__section-fields">
-								{ group.fields.map( ( field ) => {
-									const FieldComponent =
-										resolveFieldComponent(
-											field,
-											context
-										) || NativeSettingsField;
-									const value = values[ field.id ];
+						{ saveNotice.message }
+					</Notice>
+				) : null }
+				<div className="wc-settings-ui">
+					{ visibleGroups.map( ( group ) => (
+						<section
+							className="wc-settings-ui__section"
+							key={ group.id }
+						>
+							<Card.Root className="wc-settings-ui__section-card">
+								<GroupHeader group={ group } />
+								<Card.Content className="wc-settings-ui__section-fields">
+									{ group.fields.map( ( field ) => {
+										const FieldComponent =
+											resolveFieldComponent(
+												field,
+												context
+											) || NativeSettingsField;
+										const value = values[ field.id ];
 
-									return (
-										<div
-											className={ [
-												'wc-settings-ui__field',
-												getFieldTypeClassName(
-													field.type
-												),
-											].join( ' ' ) }
-											key={ field.id }
-										>
-											<FieldComponent
-												field={ field }
-												value={ value }
-												context={ context }
-												values={ values }
-												initialValues={ initialValues }
-												setValue={ setValue }
-												setValues={ setValues }
-												onChange={ ( nextValue ) =>
-													setValue(
-														field.id,
-														nextValue
-													)
-												}
-											/>
-										</div>
-									);
-								} ) }
-							</div>
-						</div>
-					</section>
-				) ) }
-			</div>
-			{ formPostFields.length > 0 ? (
-				<div className="wc-settings-ui__hidden-inputs">
-					{ formPostFields.map( ( field ) => (
-						<HiddenInputs
-							field={ field }
-							value={ values[ field.id ] }
-							key={ field.id }
-						/>
+										return (
+											<div
+												className={ [
+													'wc-settings-ui__field',
+													getFieldTypeClassName(
+														field.type
+													),
+												].join( ' ' ) }
+												key={ field.id }
+											>
+												<FieldComponent
+													field={ field }
+													value={ value }
+													context={ context }
+													values={ values }
+													initialValues={
+														initialValues
+													}
+													setValue={ setValue }
+													setValues={ setValues }
+													onChange={ ( nextValue ) =>
+														setValue(
+															field.id,
+															nextValue
+														)
+													}
+												/>
+											</div>
+										);
+									} ) }
+								</Card.Content>
+							</Card.Root>
+						</section>
 					) ) }
 				</div>
-			) : null }
-		</ShellHeader>
+				{ formPostFields.length > 0 ? (
+					<div className="wc-settings-ui__hidden-inputs">
+						{ formPostFields.map( ( field ) => (
+							<HiddenInputs
+								field={ field }
+								value={ values[ field.id ] }
+								key={ field.id }
+							/>
+						) ) }
+					</div>
+				) : null }
+			</ShellHeader>
+		</ThemeProvider>
 	);
 };
