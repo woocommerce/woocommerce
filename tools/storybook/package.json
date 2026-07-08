@@ -11,12 +11,12 @@
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"scripts": {
-		"build": "pnpm build:storybook",
+		"build": "pnpm --filter='@woocommerce/block-library' build:storybook && pnpm build:storybook",
 		"build:storybook": "./import-wp-css-storybook.sh && STORYBOOK=true BABEL_ENV=storybook storybook build -c ./.storybook --quiet && pnpm run copy-blocks-storybook-iframe",
 		"watch:build": "pnpm watch:build:storybook",
 		"watch:build:storybook": "./import-wp-css-storybook.sh && STORYBOOK=true BABEL_ENV=storybook storybook dev -c ./.storybook -p 6007 --ci",
 		"copy-blocks-storybook-iframe": "cp ../../plugins/woocommerce/client/blocks/storybook/dist/iframe.html ./storybook-static/assets/woocommerce-blocks",
-		"storybook-rtl": "USE_RTL_STYLE=true pnpm storybook",
+		"storybook-rtl": "USE_RTL_STYLE=true pnpm watch:build:storybook",
 		"preinstall": "npx only-allow pnpm"
 	},
 	"engines": {
@@ -49,6 +49,7 @@
 		"@woocommerce/admin-library": "workspace:*",
 		"@woocommerce/block-library": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@wordpress/base-styles": "catalog:wp-bundled",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
 		"storybook": "7.6.19",

@@ -3224,7 +3224,12 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
 
 		$different_request && $this->reset_order_data_store_state( $cot_store );
-		sleep( 2 );
+
+		// Backdate the modified date on both records (save() backfills the post while sync is on) so the
+		// upcoming sync-off meta update bumps the order's modified date past the post's, without waiting
+		// on the real clock.
+		$r_order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-2 day' ) ) );
+		$r_order->save();
 
 		$this->disable_cot_sync();
 		$r_order->update_meta_data( 'test_key', 'test_value_updated' );
