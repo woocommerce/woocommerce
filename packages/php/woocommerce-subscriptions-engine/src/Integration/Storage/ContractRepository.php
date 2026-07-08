@@ -367,8 +367,12 @@ final class ContractRepository {
 	public function query( array $args = array() ): array {
 		global $wpdb;
 
-		$limit  = isset( $args['limit'] ) && is_numeric( $args['limit'] ) ? (int) $args['limit'] : 20;
-		$offset = isset( $args['offset'] ) && is_numeric( $args['offset'] ) ? (int) $args['offset'] : 0;
+		// Clamp to non-negative so a negative arg cannot emit `LIMIT -n` / `OFFSET -n`
+		// (invalid MySQL); mirrors the `$limit < 1` guard in find_due(). The public
+		// facade methods are callable directly, so this is defence in depth beyond the
+		// list table's own paging math.
+		$limit  = isset( $args['limit'] ) && is_numeric( $args['limit'] ) ? max( 0, (int) $args['limit'] ) : 20;
+		$offset = isset( $args['offset'] ) && is_numeric( $args['offset'] ) ? max( 0, (int) $args['offset'] ) : 0;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 

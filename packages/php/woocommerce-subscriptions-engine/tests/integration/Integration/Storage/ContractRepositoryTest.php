@@ -350,6 +350,20 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox query clamps a negative limit or offset instead of emitting invalid SQL.
+	 */
+	public function test_query_clamps_negative_paging(): void {
+		$this->insert_list_contract( ContractStatus::ACTIVE );
+		$this->insert_list_contract( ContractStatus::ACTIVE );
+
+		// A negative limit clamps to 0 (LIMIT 0 -> no rows) rather than "LIMIT -n", which is a SQL error.
+		$this->assertSame( array(), $this->query_ids( array( 'limit' => -5 ) ) );
+
+		// A negative offset clamps to 0, so the page is unaffected and no SQL error is raised.
+		$this->assertCount( 2, $this->query_ids( array( 'offset' => -10 ) ) );
+	}
+
+	/**
 	 * @testdox query search matches by contract id or origin order id for a numeric term.
 	 */
 	public function test_query_search_matches_id_and_origin_order_for_a_numeric_term(): void {
