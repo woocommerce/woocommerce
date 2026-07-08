@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# Command prefix for running wp-cli against the single-container test environment
-# (started via `wp-env --config .wp-env.test.json`, whose container is `cli`).
+# Command prefix for running wp-cli against the single-container E2E environment
+# (started via `wp-env --config .wp-env.e2e.json`, whose container is `cli`).
 # The CI fast-path below re-runs this script inside the container with the prefix
 # blanked out (WP_CLI_PREFIX=), so each command runs as a bare `wp …` in a single
 # container exec instead of one `wp-env run` round-trip per command.
-WP_ENV_TEST_CMD="wp-env --config .wp-env.test.json"
+WP_ENV_TEST_CMD="wp-env --config .wp-env.e2e.json"
 WP_CLI_PREFIX="${WP_CLI_PREFIX-$WP_ENV_TEST_CMD run cli}"
 
 if [ ! -z ${CI+y} ]; then

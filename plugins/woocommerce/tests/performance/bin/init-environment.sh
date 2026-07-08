@@ -2,9 +2,9 @@
 
 echo "Initializing WooCommerce E2E"
 
-# Command prefix for running wp-cli against the single-container test environment
-# (started via `wp-env --config .wp-env.test.json`, whose container is `cli`).
-wp_cli="wp-env --config .wp-env.test.json run cli"
+# Command prefix for running wp-cli against the single-container E2E environment
+# (started via `wp-env --config .wp-env.e2e.json`, whose container is `cli`).
+wp_cli="wp-env --config .wp-env.e2e.json run cli"
 
 $wp_cli wp config set WP_HTTP_BLOCK_EXTERNAL false --raw --type=constant
 
