@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 10.9.4 2026-07-07 =
+
+**WooCommerce**
+
+* Fix - Fix is_vat_exempt being not correctly applied during block checkout for logged-in users. [#66342](https://github.com/woocommerce/woocommerce/pull/66342)
+
+
 = 10.9.3 2026-07-03 =
 
 **WooCommerce**
