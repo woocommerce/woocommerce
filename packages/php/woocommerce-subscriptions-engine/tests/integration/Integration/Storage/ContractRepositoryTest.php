@@ -430,6 +430,94 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox count_by_status returns every known status, filling absent ones with zero.
+	 */
+	public function test_count_by_status_returns_every_status_filling_zeros(): void {
+		$this->insert_list_contract( ContractStatus::ACTIVE );
+		$this->insert_list_contract( ContractStatus::ACTIVE );
+		$this->insert_list_contract( ContractStatus::ON_HOLD );
+
+		$counts = $this->sut->count_by_status();
+
+		// Every known status is a key, in ContractStatus::all() order, with absent ones 0.
+		$this->assertSame( ContractStatus::all(), array_keys( $counts ) );
+		$this->assertSame( 2, $counts[ ContractStatus::ACTIVE ] );
+		$this->assertSame( 1, $counts[ ContractStatus::ON_HOLD ] );
+		$this->assertSame( 0, $counts[ ContractStatus::PENDING_CANCELLATION ] );
+		$this->assertSame( 0, $counts[ ContractStatus::CANCELLED ] );
+		$this->assertSame( 0, $counts[ ContractStatus::EXPIRED ] );
+	}
+
+	/**
+	 * @testdox count_by_status returns all-zero when there are no contracts.
+	 */
+	public function test_count_by_status_is_all_zero_when_empty(): void {
+		$counts = $this->sut->count_by_status();
+
+		$this->assertSame( ContractStatus::all(), array_keys( $counts ) );
+		$this->assertSame( array( 0, 0, 0, 0, 0 ), array_values( $counts ) );
+	}
+
+	/**
+	 * @testdox count honours the same status + search filter as query, ignoring paging/sort.
+	 */
+	public function test_count_matches_the_query_filter(): void {
+		$customer = self::factory()->user->create( array( 'user_email' => 'counted@example.test' ) );
+		$this->assertIsInt( $customer );
+
+		$this->insert_list_contract( ContractStatus::ACTIVE, (int) $customer );
+		$this->insert_list_contract( ContractStatus::ACTIVE, (int) $customer );
+		$this->insert_list_contract( ContractStatus::ON_HOLD, (int) $customer );
+		$this->insert_list_contract( ContractStatus::ACTIVE, 42, '2026-07-15 00:00:00', '19.99', '2026-06-15 00:00:00', 4242 );
+
+		// No args: the grand total.
+		$this->assertSame( 4, $this->sut->count() );
+
+		// A status filter counts only that status.
+		$this->assertSame( 3, $this->sut->count( array( 'status' => ContractStatus::ACTIVE ) ) );
+		$this->assertSame( 1, $this->sut->count( array( 'status' => ContractStatus::ON_HOLD ) ) );
+
+		// A numeric search counts by id / origin order id.
+		$this->assertSame( 1, $this->sut->count( array( 'search' => '4242' ) ) );
+
+		// A text search counts the matching customer's rows; status composes with it.
+		$this->assertSame( 3, $this->sut->count( array( 'search' => 'counted@example.test' ) ) );
+		$this->assertSame(
+			2,
+			$this->sut->count(
+				array(
+					'search' => 'counted@example.test',
+					'status' => ContractStatus::ACTIVE,
+				)
+			)
+		);
+
+		// Paging and sort args do not change the count.
+		$this->assertSame(
+			4,
+			$this->sut->count(
+				array(
+					'limit'   => 1,
+					'offset'  => 2,
+					'orderby' => 'total',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox count agrees with the number of rows query returns for the same filter.
+	 */
+	public function test_count_agrees_with_query_result_size(): void {
+		$this->insert_list_contract( ContractStatus::ACTIVE );
+		$this->insert_list_contract( ContractStatus::ACTIVE );
+		$this->insert_list_contract( ContractStatus::CANCELLED );
+
+		$args = array( 'status' => ContractStatus::ACTIVE );
+		$this->assertSame( count( $this->sut->query( $args ) ), $this->sut->count( $args ) );
+	}
+
+	/**
 	 * @testdox A manual/admin contract with a null origin order round-trips.
 	 */
 	public function test_contract_round_trips_a_null_origin_order(): void {

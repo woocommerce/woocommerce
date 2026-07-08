@@ -503,6 +503,73 @@ final class ContractRepository {
 	}
 
 	/**
+	 * The contract count per status - the views bar's read. One `GROUP BY status` scan,
+	 * returned as a map keyed by EVERY {@see ContractStatus::all()} value (absent statuses
+	 * filled with 0) and in that order, so a consumer can render a fixed set of views
+	 * without knowing which statuses currently have rows. The `All` total is the caller's
+	 * `array_sum()`. Independent of any search / paging (WC-style: the views count the whole
+	 * store, not the current page).
+	 *
+	 * @return array<string, int> Status => count, every known status present.
+	 */
+	public function count_by_status(): array {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results( "SELECT status, COUNT(*) AS total FROM {$table} GROUP BY status", ARRAY_A );
+
+		// Seed every known status at 0 so the map is complete and stably ordered.
+		$counts = array();
+		foreach ( ContractStatus::all() as $status ) {
+			$counts[ $status ] = 0;
+		}
+
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+			$status = ScalarCoercion::coerce_string( $row['status'] ?? '' );
+			// A row whose status has drifted outside the known set is ignored, not added
+			// as a stray key - the map stays exactly ContractStatus::all().
+			if ( array_key_exists( $status, $counts ) ) {
+				$counts[ $status ] = ScalarCoercion::coerce_int( $row['total'] ?? 0 );
+			}
+		}
+
+		return $counts;
+	}
+
+	/**
+	 * The number of contracts matching a list filter - the total behind a list view's
+	 * pagination. Applies the SAME status + search WHERE as {@see self::query()} (via
+	 * {@see self::build_list_criteria()}), and ignores paging / sort, so the count always
+	 * describes the full set the page is a window onto.
+	 *
+	 * @param array<string, mixed> $args Query args (only `status` and `search` are read).
+	 * @return int The matching contract count.
+	 */
+	public function count( array $args = array() ): int {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		list( $where_sql, $params ) = $this->build_list_criteria( $args );
+
+		if ( array() === $params ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$total = $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}" );
+		} else {
+			// The WHERE placeholders join dynamically, so the sniff sees none in the literal.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			$total = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}", $params ) );
+		}
+
+		return ScalarCoercion::coerce_int( $total );
+	}
+
+	/**
 	 * Construct a page of list contracts from fetched rows: row-only children, with the
 	 * frozen plan terms batch-loaded in ONE `IN()` read for the whole page - the one
 	 * list construction path, so every list read carries the snapshot the same way.
