@@ -174,12 +174,13 @@ abstract class AbstractBlock {
 				)
 			)
 		);
-		$data         = $this->asset_api->get_script_data( $path );
-		$has_i18n     = in_array( 'wp-i18n', $data['dependencies'], true );
 
 		if ( wp_script_is( $handle, 'registered' ) ) {
 			$this->add_script_dependencies( $handle, $dependencies );
 		} else {
+			$data     = $this->asset_api->get_script_data( $path );
+			$has_i18n = in_array( 'wp-i18n', $data['dependencies'], true );
+
 			$this->asset_api->register_script(
 				$handle,
 				$path,
