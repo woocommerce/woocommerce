@@ -101,6 +101,8 @@ const ShippingRecommendations = () => {
 		: extensionsForCountry;
 
 	const hasVisibleExtensions = visibleExtensions.length > 0;
+	const shouldShowRecommendationsFallback =
+		! hasVisibleExtensions || isSellingDigitalProductsOnly;
 	const shouldTrackRecommendationsImpression =
 		! isRecommendationsHidden && hasVisibleExtensions;
 
@@ -127,7 +129,7 @@ const ShippingRecommendations = () => {
 		visiblePluginSlugs,
 	] );
 
-	if ( ! hasVisibleExtensions ) {
+	if ( shouldShowRecommendationsFallback ) {
 		return (
 			<>
 				<ShippingTour showShippingRecommendationsStep={ false } />
