@@ -1,7 +1,9 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
-use Automattic\WooCommerce\StoreApi\Utilities\ProductQueryFilters;
+use Automattic\WooCommerce\Internal\ProductFilters\FilterData;
+use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
+use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
 
 /**
  * ProductCollectionData route.
@@ -76,7 +78,7 @@ class ProductCollectionData extends AbstractRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
-		$data    = [
+		$data = [
 			'min_price'           => null,
 			'max_price'           => null,
 			'attribute_counts'    => null,
@@ -84,21 +86,33 @@ class ProductCollectionData extends AbstractRoute {
 			'rating_counts'       => null,
 			'taxonomy_counts'     => null,
 		];
-		$filters = new ProductQueryFilters();
+
+		$product_query = new ProductQuery();
+		/**
+		 * Product filter data service.
+		 *
+		 * @var FilterData $filter_data
+		 */
+		$filter_data = wc_get_container()->get( FilterDataProvider::class )->with( $product_query );
 
 		if ( ! empty( $request['calculate_price_range'] ) ) {
 			$filter_request = clone $request;
 			$filter_request->set_param( 'min_price', null );
 			$filter_request->set_param( 'max_price', null );
 
-			$price_results     = $filters->get_filtered_price( $filter_request );
-			$data['min_price'] = $price_results->min_price;
-			$data['max_price'] = $price_results->max_price;
+			$price_results     = (array) $filter_data->get_filtered_price( $this->get_filter_data_query_vars( $filter_request, $product_query ) );
+			$data['min_price'] = $price_results['min_price'] ?? null;
+			$data['max_price'] = $price_results['max_price'] ?? null;
 		}
 
 		if ( ! empty( $request['calculate_stock_status_counts'] ) ) {
 			$filter_request = clone $request;
-			$counts         = $filters->get_stock_status_counts( $filter_request );
+			$filter_request->set_param( 'stock_status', null );
+			$stock_statuses = array_keys( wc_get_product_stock_status_options() );
+			$counts         = array_replace(
+				array_fill_keys( $stock_statuses, 0 ),
+				$filter_data->get_stock_status_counts( $this->get_filter_data_query_vars( $filter_request, $product_query ), $stock_statuses )
+			);
 
 			$data['stock_status_counts'] = [];
 
@@ -167,7 +181,7 @@ class ProductCollectionData extends AbstractRoute {
 					}
 
 					$filter_request->set_param( 'attributes', $filter_attributes );
-					$counts = $filters->get_attribute_counts( $filter_request, [ $taxonomy ] );
+					$counts = $filter_data->get_attribute_counts( $this->get_filter_data_query_vars( $filter_request, $product_query ), $taxonomy );
 
 					foreach ( $counts as $key => $value ) {
 						$data['attribute_counts'][] = (object) [
@@ -179,21 +193,28 @@ class ProductCollectionData extends AbstractRoute {
 			}
 
 			if ( $taxonomy__and_queries ) {
-				$counts = $filters->get_attribute_counts( $request, $taxonomy__and_queries );
+				$query_vars = $this->get_filter_data_query_vars( $request, $product_query );
 
-				foreach ( $counts as $key => $value ) {
-					$data['attribute_counts'][] = (object) [
-						'term'  => $key,
-						'count' => $value,
-					];
+				foreach ( $taxonomy__and_queries as $taxonomy ) {
+					$counts = $filter_data->get_attribute_counts( $query_vars, $taxonomy );
+
+					foreach ( $counts as $key => $value ) {
+						$data['attribute_counts'][] = (object) [
+							'term'  => $key,
+							'count' => $value,
+						];
+					}
 				}
 			}
 		}
 
 		if ( ! empty( $request['calculate_rating_counts'] ) ) {
-			$filter_request        = clone $request;
-			$counts                = $filters->get_rating_counts( $filter_request );
+			$filter_request = clone $request;
+			$filter_request->set_param( 'rating', null );
+			$counts                = $filter_data->get_rating_counts( $this->get_filter_data_query_vars( $filter_request, $product_query ) );
 			$data['rating_counts'] = [];
+
+			ksort( $counts, SORT_NUMERIC );
 
 			foreach ( $counts as $key => $value ) {
 				$data['rating_counts'][] = (object) [
@@ -211,18 +232,41 @@ class ProductCollectionData extends AbstractRoute {
 			$data['taxonomy_counts'] = [];
 
 			if ( $taxonomies ) {
-				$counts = $filters->get_taxonomy_counts( $request, $taxonomies );
+				$query_vars = $this->get_filter_data_query_vars( $request, $product_query );
 
-				foreach ( $counts as $key => $value ) {
-					$data['taxonomy_counts'][] = (object) [
-						'term'  => $key,
-						'count' => $value,
-					];
+				foreach ( $taxonomies as $taxonomy ) {
+					$counts = $filter_data->get_taxonomy_counts( $query_vars, $taxonomy );
+
+					foreach ( $counts as $key => $value ) {
+						$data['taxonomy_counts'][] = (object) [
+							'term'  => $key,
+							'count' => $value,
+						];
+					}
 				}
 			}
 		}
 
 		return rest_ensure_response( $this->schema->get_item_response( $data ) );
+	}
+
+	/**
+	 * Get query vars for FilterData from a Store API request.
+	 *
+	 * @param \WP_REST_Request $request       Request object.
+	 * @param ProductQuery     $product_query Product query utility.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 * @return array
+	 */
+	private function get_filter_data_query_vars( \WP_REST_Request $request, ProductQuery $product_query ) {
+		$filter_request = clone $request;
+
+		$filter_request->set_param( 'page', null );
+		$filter_request->set_param( 'per_page', null );
+		$filter_request->set_param( 'order', null );
+		$filter_request->set_param( 'orderby', null );
+
+		return $product_query->prepare_objects_query( $filter_request );
 	}
 
 	/**
