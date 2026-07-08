@@ -112,4 +112,21 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 		$this->assertSame( '123 Main Street', $result['address_1'], 'A plain field should be unchanged.' );
 		$this->assertSame( 'Suite 100', $result['address_2'], 'A plain field should be unchanged.' );
 	}
+
+	/**
+	 * @testdox Should not texturize billing email addresses in API responses.
+	 */
+	public function test_get_item_response_does_not_texturize_billing_email_address(): void {
+		$customer = new \WC_Customer();
+		$customer->set_billing_email( 'info@48x17.com' );
+
+		$result = $this->sut->get_item_response( $customer );
+
+		$this->assertArrayHasKey( 'email', $result );
+		$this->assertSame(
+			'info@48x17.com',
+			$result['email'],
+			'Billing email addresses should be returned as raw data, not typographic display text.'
+		);
+	}
 }

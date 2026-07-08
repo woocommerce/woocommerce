@@ -136,7 +136,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 
 		await pageObject.addFilter( 'Show product categories' );
 		await pageObject.checkTaxonomyTerm( 'categories', 'Clothing' );
-		await expect( pageObject.products ).toHaveCount( 8 );
+		await expect( pageObject.products ).toHaveCount( 9 );
 
 		// Switch to Accessories
 		await pageObject.uncheckTaxonomyTerm( 'categories', 'Clothing' );
