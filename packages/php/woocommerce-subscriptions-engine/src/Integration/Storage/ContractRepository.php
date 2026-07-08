@@ -325,20 +325,44 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Query a window of contracts for list screens, newest first (id DESC). Hydrated
-	 * lightweight (row only, no children) like {@see self::find_summary()}.
+	 * The columns a list query may order by, mapped from the public sort key to the
+	 * stored column. A whitelist, never raw input, is the ORDER BY column - so an
+	 * `orderby` arg can only ever name one of these five columns.
+	 */
+	private const ORDERBY_COLUMNS = array(
+		'id'           => 'id',
+		'next_payment' => 'next_payment_gmt',
+		'total'        => 'billing_total',
+		'start'        => 'start_gmt',
+	);
+
+	/**
+	 * The ceiling on the bounded customer lookup a text search runs, so a broad term
+	 * cannot expand the `customer_id IN (...)` set without limit.
+	 */
+	private const SEARCH_CUSTOMER_LIMIT = 50;
+
+	/**
+	 * Query a window of contracts for list screens. Newest first (id DESC) by default,
+	 * or by a whitelisted `orderby`/`order`. Hydrated lightweight (row only, no children)
+	 * like {@see self::find_summary()}.
 	 *
 	 * Takes a WooCommerce-style args array (cf. `wc_get_orders()`) rather than positional
-	 * paging args, so the shape can widen to status / search / sort without a signature
-	 * change. Only the paging args are honoured for now.
+	 * paging args, so the shape widens to status / search / sort without a signature change.
+	 * The status + search filter is shared with {@see self::count()} via
+	 * {@see self::build_list_criteria()}, so a list page and its total count always agree.
 	 *
 	 * @param array<string, mixed> $args {
 	 *     Optional. Query args.
 	 *
-	 *     @type int $limit  Maximum contracts to return. Default 20.
-	 *     @type int $offset Rows to skip (for paging). Default 0.
+	 *     @type int    $limit   Maximum contracts to return. Default 20.
+	 *     @type int    $offset  Rows to skip (for paging). Default 0.
+	 *     @type string $status  Filter to one status ({@see ContractStatus}); ignored when empty or invalid.
+	 *     @type string $orderby One of the {@see self::ORDERBY_COLUMNS} keys (id, next_payment, total, start); default id.
+	 *     @type string $order   ASC or DESC (case-insensitive); default DESC.
+	 *     @type string $search  A numeric term matches contract id or origin order id; a text term matches the owning customer.
 	 * }
-	 * @return array<int, Contract> Contracts newest first.
+	 * @return array<int, Contract> Contracts in the requested order.
 	 */
 	public function query( array $args = array() ): array {
 		global $wpdb;
@@ -348,10 +372,134 @@ final class ContractRepository {
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} ORDER BY id DESC LIMIT %d OFFSET %d", $limit, $offset ), ARRAY_A );
+		list( $where_sql, $where_params ) = $this->build_list_criteria( $args );
+		$order_by                         = $this->build_order_by( $args );
+
+		$params   = $where_params;
+		$params[] = $limit;
+		$params[] = $offset;
+
+		// The WHERE placeholders join dynamically, so the sniff cannot count them; the
+		// ORDER BY column is from a fixed whitelist, never raw input (see build_order_by()).
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT *
+				FROM {$table}
+				WHERE {$where_sql}
+				ORDER BY {$order_by}
+				LIMIT %d OFFSET %d",
+				$params
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
 		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
+	}
+
+	/**
+	 * Build the shared WHERE clause and its ordered placeholder params for a list query -
+	 * the status + search filter that {@see self::query()} and {@see self::count()} apply
+	 * identically, so a page and its total always describe the same set. Paging and sort
+	 * are NOT part of this (they never change which rows match), so `count()` reuses it as is.
+	 *
+	 * The clause is built from placeholders following the {@see self::find_by_customer_id()}
+	 * dynamic-placeholder pattern; the empty-filter case returns `1=1` so the caller can
+	 * always interpolate `WHERE {$where}` unconditionally. A `status` is honoured only when
+	 * a known {@see ContractStatus}; an empty or unknown status is dropped (never injected).
+	 *
+	 * A `search` term:
+	 * - numeric  -> `( id = %d OR origin_order_id = %d )`;
+	 * - non-empty text -> resolved to a bounded set of customer ids ({@see self::find_customer_ids_for_search()})
+	 *   and matched as `customer_id IN (...)`; an empty resolved set forces `0=1` (no rows),
+	 *   so a text term that matches no customer returns nothing rather than everything.
+	 *
+	 * @param array<string, mixed> $args Query args (only `status` and `search` are read).
+	 * @return array{0: string, 1: array<int, int|string>} The WHERE SQL and its params in order.
+	 */
+	private function build_list_criteria( array $args ): array {
+		$clauses = array();
+		$params  = array();
+
+		$status = isset( $args['status'] ) && is_string( $args['status'] ) ? $args['status'] : '';
+		if ( '' !== $status && ContractStatus::is_valid( $status ) ) {
+			$clauses[] = 'status = %s';
+			$params[]  = $status;
+		}
+
+		$search = isset( $args['search'] ) && is_scalar( $args['search'] ) ? trim( (string) $args['search'] ) : '';
+		if ( '' !== $search ) {
+			if ( ctype_digit( $search ) ) {
+				$clauses[] = '( id = %d OR origin_order_id = %d )';
+				$params[]  = (int) $search;
+				$params[]  = (int) $search;
+			} else {
+				$customer_ids = $this->find_customer_ids_for_search( $search );
+				if ( array() === $customer_ids ) {
+					// A text term matching no customer must return no rows, not every row.
+					$clauses[] = '0 = 1';
+				} else {
+					$placeholders = implode( ', ', array_fill( 0, count( $customer_ids ), '%d' ) );
+					$clauses[]    = "customer_id IN ( {$placeholders} )";
+					foreach ( $customer_ids as $customer_id ) {
+						$params[] = $customer_id;
+					}
+				}
+			}
+		}
+
+		$where_sql = array() === $clauses ? '1 = 1' : implode( ' AND ', $clauses );
+
+		return array( $where_sql, $params );
+	}
+
+	/**
+	 * Build the `ORDER BY` fragment from the whitelisted `orderby`/`order` args. The column
+	 * is only ever one of {@see self::ORDERBY_COLUMNS} (default `id`) and the direction only
+	 * `ASC` or `DESC` (default `DESC`), so raw input never reaches the SQL - the fragment is
+	 * safe to interpolate. A stable `id` tiebreak keeps paging deterministic when the primary
+	 * column has ties.
+	 *
+	 * @param array<string, mixed> $args Query args (only `orderby` and `order` are read).
+	 * @return string The `ORDER BY` fragment (without the `ORDER BY` keyword).
+	 */
+	private function build_order_by( array $args ): string {
+		$orderby_key = isset( $args['orderby'] ) && is_string( $args['orderby'] ) ? $args['orderby'] : 'id';
+		$column      = self::ORDERBY_COLUMNS[ $orderby_key ] ?? 'id';
+
+		$order = isset( $args['order'] ) && is_string( $args['order'] ) ? strtoupper( $args['order'] ) : 'DESC';
+		$order = in_array( $order, array( 'ASC', 'DESC' ), true ) ? $order : 'DESC';
+
+		if ( 'id' === $column ) {
+			return "id {$order}";
+		}
+
+		return "{$column} {$order}, id {$order}";
+	}
+
+	/**
+	 * Resolve a non-numeric search term to a bounded set of customer ids - the text-search
+	 * half of {@see self::build_list_criteria()}. Runs a capped `get_users()` lookup over
+	 * email / display name / login and returns only the ids, so the caller matches on
+	 * `customer_id IN (...)`. Bounded by {@see self::SEARCH_CUSTOMER_LIMIT} so a broad term
+	 * cannot expand the IN() set without limit. This user lookup is Integration-layer work
+	 * and stays out of `Core\`.
+	 *
+	 * @param string $term The non-empty, non-numeric search term.
+	 * @return array<int, int> Matching customer ids (possibly empty).
+	 */
+	private function find_customer_ids_for_search( string $term ): array {
+		$users = get_users(
+			array(
+				'search'         => '*' . $term . '*',
+				'search_columns' => array( 'user_email', 'display_name', 'user_login' ),
+				'number'         => self::SEARCH_CUSTOMER_LIMIT,
+				'fields'         => 'ID',
+			)
+		);
+
+		return array_map( 'intval', $users );
 	}
 
 	/**
