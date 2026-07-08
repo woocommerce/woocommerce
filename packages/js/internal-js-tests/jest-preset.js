@@ -20,6 +20,9 @@ const transformModules = {
 	'parsel-js': {
 		'.*\\.js$': 'babel-jest',
 	},
+	marked: {
+		'lib/marked\\.esm\\.js$': 'babel-jest',
+	},
 };
 
 /**
