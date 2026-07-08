@@ -193,7 +193,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 					'duration'     => array(
 						'description'       => __( 'Time period to snooze the task.', 'woocommerce' ),
 						'type'              => 'string',
-						'validate_callback' => function ( $param, $request, $key ) {
+						'validate_callback' => function ( $param ) {
 							return in_array( $param, array_keys( $this->duration_to_ms ), true );
 						},
 					),
@@ -715,7 +715,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$params['extended_tasks'] = array(
 			'description'       => __( 'List of extended deprecated tasks from the client side filter.', 'woocommerce' ),
 			'type'              => 'array',
-			'validate_callback' => function ( $param, $request, $key ) {
+			'validate_callback' => function ( $param ) {
 				$has_valid_keys = true;
 				foreach ( $param as $task ) {
 					if ( $has_valid_keys ) {
@@ -743,7 +743,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$lists = is_array( $task_list_ids ) && count( $task_list_ids ) > 0 ? TaskLists::get_lists_by_ids( $task_list_ids ) : TaskLists::get_lists();
 
 		$json = array_map(
-			function ( $list ) {
+			function ( $list ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.listFound
 				return $list->sort_tasks()->get_json();
 			},
 			$lists
