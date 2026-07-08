@@ -16,12 +16,10 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanGroup;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanGroupRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
 /**
@@ -35,12 +33,7 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 	 * @param array{length: int, unit: string}|null $trial      Native trial duration, or null for none.
 	 */
 	private function make_plan( ?int $max_cycles = null, ?array $trial = null ): Plan {
-		$group_id = ( new PlanGroupRepository() )->insert(
-			PlanGroup::create( array( 'name' => 'Coffee club' ) )
-		);
-
 		$plan = Plan::create(
-			$group_id,
 			array(
 				'name'           => 'Monthly coffee',
 				'billing_policy' => new BillingPolicy( 'month', 1, null, $max_cycles, $trial ),
@@ -119,7 +112,7 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 		$this->assertNotNull( $contract_id );
 
 		$repo  = new ContractRepository();
-		$cycle = $repo->find_current_cycle( $contract_id );
+		$cycle = $repo->find_chain_head( $contract_id );
 
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( Cycle::KIND_BILLING, $cycle->get_kind() );
@@ -202,7 +195,7 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 		$this->assertNotNull( $contract_id );
 
 		// Cycle 1's period end matches that first renewal date.
-		$cycle = ( new ContractRepository() )->find_current_cycle( $contract_id );
+		$cycle = ( new ContractRepository() )->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( '2026-01-29 00:00:00', $cycle->get_ends_at_gmt() );
 	}
@@ -229,7 +222,7 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
-		$cycle = ( new ContractRepository() )->find_current_cycle( $contract_id );
+		$cycle = ( new ContractRepository() )->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( '49.00000000', $cycle->get_expected_total() );
 		$this->assertSame( '2026-12-01 00:00:00', $cycle->get_ends_at_gmt() );
@@ -241,7 +234,6 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 	public function test_unsaved_plan_is_rejected(): void {
 		$order = $this->make_order();
 		$plan  = Plan::create(
-			1,
 			array(
 				'name'           => 'Monthly coffee',
 				'billing_policy' => new BillingPolicy( 'month', 1, null, null, null ),

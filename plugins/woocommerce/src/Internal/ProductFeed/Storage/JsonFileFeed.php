@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\Internal\ProductFeed\Storage;
 
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedInterface;
+use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedLockException;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ResumableFeedInterface;
 use Exception;
 
@@ -117,7 +118,8 @@ class JsonFileFeed implements ResumableFeedInterface {
 	 * @param string|null $resume_identifier Identifier of an existing feed to resume, or null to start fresh.
 	 * @param int         $entries_written   The number of entries already written by previous chunks.
 	 * @return string The identifier of the feed that was started.
-	 * @throws Exception If the feed directory or file cannot be created/opened, or a resumed feed is missing.
+	 * @throws Exception If the feed directory or file cannot be created/opened, a resumed feed is missing,
+	 *                   or the feed file is already locked by another generation process (FeedLockException).
 	 */
 	public function open( ?string $resume_identifier = null, int $entries_written = 0 ): string {
 		$upload_dir = $this->get_upload_dir();
@@ -157,7 +159,8 @@ class JsonFileFeed implements ResumableFeedInterface {
 
 			// Seed the entry count so add_entry()'s separator accounts for entries already written.
 			$this->entry_count = $entries_written;
-			$this->open_handle( $this->file_path, 'a' );
+			$handle            = $this->open_handle( $this->file_path, 'a' );
+			$this->acquire_lock( $handle );
 
 			return $this->file_name;
 		}
@@ -165,7 +168,28 @@ class JsonFileFeed implements ResumableFeedInterface {
 		$this->entry_count = 0;
 		$this->file_name   = $this->generate_file_name();
 		$this->file_path   = $upload_dir['path'] . $this->file_name;
-		$handle            = $this->open_handle( $this->file_path, 'w' );
+
+		// Open with 'c' (create, do not truncate) rather than 'w' so the exclusive lock is acquired
+		// *before* any existing content is cleared. An overlapping process that fails to get the lock
+		// must not truncate a feed the lock holder is still writing; only once the lock is held is it
+		// safe to clear stale content and write the array from the top.
+		$handle = $this->open_handle( $this->file_path, 'c' );
+		$this->acquire_lock( $handle );
+
+		if ( ! ftruncate( $handle, 0 ) || ! rewind( $handle ) ) {
+			fclose( $handle );
+			$this->file_handle = null;
+			throw new Exception(
+				esc_html(
+					sprintf(
+						/* translators: %s: file path */
+						__( 'Unable to reset feed file for writing: %s', 'woocommerce' ),
+						$this->file_path
+					)
+				)
+			);
+		}
+
 		fwrite( $handle, '[' );
 
 		return $this->file_name;
@@ -204,6 +228,10 @@ class JsonFileFeed implements ResumableFeedInterface {
 		}
 
 		fwrite( $this->file_handle, ']' );
+		// Do not unlock explicitly before closing: fclose() flushes PHP's userspace stream buffer to the
+		// OS and only then releases the lock. Unlocking first would open a window in which another process
+		// could acquire the lock and start writing while this process's buffered bytes are still pending,
+		// interleaving output — the exact corruption the lock prevents.
 		fclose( $this->file_handle );
 		$this->file_handle    = null;
 		$this->file_completed = true;
@@ -214,6 +242,9 @@ class JsonFileFeed implements ResumableFeedInterface {
 	 */
 	public function flush(): void {
 		if ( is_resource( $this->file_handle ) ) {
+			// Rely on fclose() to release the lock: it flushes the userspace buffer first and only then
+			// unlocks, so the lock stays held until the buffered bytes are durable. An explicit LOCK_UN
+			// here would release it while pending bytes are still buffered (see end()).
 			fclose( $this->file_handle );
 			$this->file_handle = null;
 		}
@@ -291,6 +322,40 @@ class JsonFileFeed implements ResumableFeedInterface {
 
 		$this->file_handle = $handle;
 		return $handle;
+	}
+
+	/**
+	 * Acquires an exclusive, non-blocking lock on the open feed file handle.
+	 *
+	 * A feed file is written across separate, short-lived processes (one Action Scheduler action per
+	 * chunk). A stuck in-progress job can be treated as stuck and have a fresh generation enqueued
+	 * while the original is still running, so two processes can end up writing the same file at once;
+	 * without mutual exclusion their unbuffered writes interleave into malformed JSON. The lock makes
+	 * each chunk's write to the shared file exclusive, so overlapping generations cannot interleave.
+	 *
+	 * The lock is advisory, which is sufficient because every writer goes through this class. It is
+	 * released when the handle is closed in flush()/end(), including when a process is killed and the
+	 * OS closes its descriptors — so a killed job leaves no stale lock, and its partial file is handled
+	 * by the heartbeat-based stuck-job recovery instead.
+	 *
+	 * @param resource $handle The open feed file handle.
+	 * @return void
+	 * @throws FeedLockException If the lock is already held by another process.
+	 */
+	private function acquire_lock( $handle ): void {
+		if ( ! flock( $handle, LOCK_EX | LOCK_NB ) ) {
+			fclose( $handle );
+			$this->file_handle = null;
+			throw new FeedLockException(
+				esc_html(
+					sprintf(
+						/* translators: %s: file path */
+						__( 'Feed file is locked by another generation process: %s', 'woocommerce' ),
+						$this->file_path
+					)
+				)
+			);
+		}
 	}
 
 	/**

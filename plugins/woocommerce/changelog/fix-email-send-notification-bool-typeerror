@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix a fatal error in WC_Email::send_notification() when a filtered mail callback returns a non-bool value.

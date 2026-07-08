@@ -208,6 +208,49 @@ describe( 'TaskListItem', () => {
 		} );
 	} );
 
+	it( 'should call trackClick when clicking tasklist item', () => {
+		const trackClick = jest.fn();
+		render(
+			<TaskListItem
+				task={ { ...task } }
+				isExpandable={ false }
+				isExpanded={ false }
+				setExpandedTask={ () => {} }
+				trackClick={ trackClick }
+			/>
+		);
+
+		act( () => {
+			userEvent.click( screen.getByText( task.title ) );
+		} );
+
+		expect( trackClick ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'should call trackClick before expanding expandable tasklist item', () => {
+		const trackClick = jest.fn();
+		const setExpandedTask = jest.fn();
+		render(
+			<TaskListItem
+				task={ { ...task } }
+				isExpandable={ true }
+				isExpanded={ false }
+				setExpandedTask={ setExpandedTask }
+				trackClick={ trackClick }
+			/>
+		);
+
+		act( () => {
+			userEvent.click( screen.getByText( task.title ) );
+		} );
+
+		expect( trackClick ).toHaveBeenCalledTimes( 1 );
+		expect( setExpandedTask ).toHaveBeenCalledWith( task.id );
+		expect( trackClick.mock.invocationCallOrder[ 0 ] ).toBeLessThan(
+			setExpandedTask.mock.invocationCallOrder[ 0 ]
+		);
+	} );
+
 	it( 'should not call dismissTask when isDismissable is set to false', () => {
 		const { queryByRole } = render(
 			<TaskListItem

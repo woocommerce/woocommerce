@@ -188,4 +188,30 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'plugin-namespace/gov-id', $fields );
 		$this->assertArrayNotHasKey( 'namespace/vat-number', $fields );
 	}
+
+	/**
+	 * Registering a field before after_setup_theme warns the developer.
+	 */
+	public function test_registering_before_after_setup_theme_triggers_notice() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
+
+		$saved_action = $GLOBALS['wp_actions']['after_setup_theme'] ?? null;
+		unset( $GLOBALS['wp_actions']['after_setup_theme'] );
+
+		try {
+			woocommerce_register_additional_checkout_field(
+				array(
+					'id'       => 'test-namespace/early-field',
+					'label'    => 'Early field',
+					'location' => 'contact',
+				)
+			);
+		} finally {
+			if ( null !== $saved_action ) {
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the count cleared above to simulate registering before after_setup_theme.
+				$GLOBALS['wp_actions']['after_setup_theme'] = $saved_action;
+			}
+			__internal_woocommerce_blocks_deregister_checkout_field( 'test-namespace/early-field' );
+		}
+	}
 }
