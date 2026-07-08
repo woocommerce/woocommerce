@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a batch line-item count read (Subscriptions::item_counts) so an admin list can show an items count per row without a per-row query.
