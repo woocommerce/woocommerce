@@ -94,7 +94,6 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 
 		// Fee totals may be stored as a blank string (e.g. a fee saved with its value cleared). Coerce to a
 		// float so a non-numeric total is treated as 0, avoiding a TypeError during tax calculation.
-		// See https://github.com/woocommerce/woocommerce/issues/44859.
 		$total = (float) $this->get_total();
 
 		// Use regular calculation unless the fee is negative.

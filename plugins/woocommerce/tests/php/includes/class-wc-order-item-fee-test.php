@@ -284,7 +284,6 @@ class WC_Order_Item_Fee_Test extends WC_Unit_Test_Case {
 	 * Repro steps from the issue: enable taxes with a standard rate, create an order with a fee,
 	 * blank out the fee value (empty string, not 0), then run calculate_totals().
 	 *
-	 * @see https://github.com/woocommerce/woocommerce/issues/44859
 	 */
 	public function test_calculate_taxes_with_blank_fee_total_is_treated_as_zero() {
 		// Enable taxes and add a standard rate.
