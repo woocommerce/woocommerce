@@ -188,7 +188,7 @@ class Products extends Task {
 	 * @param WC_Product $product Product object.
 	 */
 	public function maybe_set_has_product_transient( $product_id, $product ) {
-		if ( ! $this->has_previously_completed() && $this->is_valid_product( $product ) ) {
+		if ( ! $this->has_previously_completed() && ProductStatus::PUBLISH === $product->get_status() ) {
 			set_transient( self::HAS_PRODUCT_TRANSIENT, 'yes' );
 			$this->possibly_track_completion();
 		}
@@ -260,18 +260,6 @@ class Products extends Task {
 	}
 
 	/**
-	 * Check if the product qualifies as a user created product.
-	 *
-	 * @param WC_Product $product Product object.
-	 * @return bool
-	 */
-	private function is_valid_product( $product ) {
-		return ProductStatus::PUBLISH === $product->get_status() &&
-			( ! $product->get_meta( '_headstart_post' ) ||
-			get_post_meta( $product->get_id(), '_edit_last', true ) );
-	}
-
-	/**
 	 * Check if the store has any user created published products.
 	 *
 	 * @return bool
@@ -282,56 +270,8 @@ class Products extends Task {
 			return 'yes' === $product_exists;
 		}
 
-		global $wpdb;
-
-		/*
-		 * Check if any valid products exist and return 'yes' or 'no'
-		 * A valid product must:
-		 * 1. Be a published product post type
-		 * 2. Meet one of these conditions:
-		 *    - Have been edited by a user (_edit_last meta exists), OR
-		 *    - Not have _headstart_post meta, OR
-		 *    - Have _headstart_post meta but it's NULL
-		 */
-		$value = $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT IF(
-					EXISTS (
-						SELECT 1 FROM {$wpdb->posts} p
-						WHERE p.post_type = %s
-						AND p.post_status = %s
-						AND (
-							EXISTS (
-								SELECT 1 FROM {$wpdb->postmeta} pm
-								WHERE pm.post_id = p.ID
-								AND pm.meta_key = %s
-							)
-							OR
-							NOT EXISTS (
-								SELECT 1 FROM {$wpdb->postmeta} pm
-								WHERE pm.post_id = p.ID
-								AND pm.meta_key = %s
-							)
-							OR
-							EXISTS (
-								SELECT 1 FROM {$wpdb->postmeta} pm
-								WHERE pm.post_id = p.ID
-								AND pm.meta_key = %s
-								AND pm.meta_value = ''
-							)
-						)
-						LIMIT 1
-					),
-					'yes', 'no'
-				)",
-				'product',
-				ProductStatus::PUBLISH,
-				'_edit_last',
-				'_headstart_post',
-				'_headstart_post'
-			)
-		);
-
+		$counts = wp_count_posts( 'product' );
+		$value  = isset( $counts->publish ) && $counts->publish > 0 ? 'yes' : 'no';
 		set_transient( self::HAS_PRODUCT_TRANSIENT, $value );
 		return 'yes' === $value;
 	}

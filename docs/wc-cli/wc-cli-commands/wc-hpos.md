@@ -3,7 +3,7 @@ title: wc hpos
 sidebar_label: wc hpos
 ---
 
-Commands for managing High-Performance Order Storage (HPOS). For detailed examples, see [HPOS CLI tools](/docs/features/high-performance-order-storage/cli-tools/).
+Commands for managing High-Performance Order Storage (HPOS). For detailed examples, see [HPOS CLI tools](/docs/features/orders/high-performance-order-storage/cli-tools/).
 
 The older `wc cot` namespace is deprecated. Use `wc hpos` instead of the remaining deprecated aliases: `wc cot count_unmigrated`, `wc cot sync`, `wc cot verify_cot_data`, `wc cot enable`, and `wc cot disable`. The `wc cot migrate` command is fully deprecated and no longer works.
 
