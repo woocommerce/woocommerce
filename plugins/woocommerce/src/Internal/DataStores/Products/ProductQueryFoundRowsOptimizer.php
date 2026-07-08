@@ -21,6 +21,12 @@ defined( 'ABSPATH' ) || exit;
  * stripping SQL_CALC_FOUND_ROWS, and answering the found-rows lookup with COUNT( DISTINCT ID ) over the
  * same clauses (so price and layered-nav filters are reflected). WC_Query wires one instance per product
  * query and attaches/detaches it around the loop; identity against the captured query scopes the filters.
+ *
+ * The strip runs on posts_request_ids, i.e. WordPress's split-query ID request, not posts_request:
+ * modifying posts_request would make WP_Query see a filtered request and disable its split-query
+ * optimization (fetching whole rows instead of IDs then priming). On the rare non-split path
+ * (posts_per_page >= 500, or another plugin filtered the request) the strip does not run and WordPress'
+ * native SQL_CALC_FOUND_ROWS / FOUND_ROWS() is left in place, so there is never a double count.
  */
 final class ProductQueryFoundRowsOptimizer {
 
@@ -43,6 +49,15 @@ final class ProductQueryFoundRowsOptimizer {
 	 * @var array|null
 	 */
 	private ?array $found_posts_clauses = null;
+
+	/**
+	 * Whether SQL_CALC_FOUND_ROWS was actually stripped from this query's request. Gates the COUNT
+	 * swap so the found-rows lookup is only replaced when we removed the native count (the split path);
+	 * on the non-split path the request keeps SQL_CALC_FOUND_ROWS and native FOUND_ROWS() is used.
+	 *
+	 * @var bool
+	 */
+	private bool $calc_found_rows_removed = false;
 
 	/**
 	 * Hook closures registered by attach(), as hook name => array( priority, closure ), so detach()
@@ -119,10 +134,11 @@ final class ProductQueryFoundRowsOptimizer {
 	 * (price, layered nav, ordering) and the COUNT matches the main query exactly.
 	 */
 	public function attach(): void {
-		$this->found_posts_clauses = null;
-		$this->hooks               = array(
+		$this->found_posts_clauses     = null;
+		$this->calc_found_rows_removed = false;
+		$this->hooks                   = array(
 			'posts_clauses'     => array( 999, fn( $clauses, $wp_query ) => $this->capture_product_query_clauses( $clauses, $wp_query ) ),
-			'posts_request'     => array( 10, fn( $request, $wp_query ) => $this->remove_product_query_found_rows( $request, $wp_query ) ),
+			'posts_request_ids' => array( 10, fn( $request, $wp_query ) => $this->remove_product_query_found_rows( $request, $wp_query ) ),
 			'found_posts_query' => array( 10, fn( $found_posts_query, $wp_query ) => $this->product_query_found_posts_query( $found_posts_query, $wp_query ) ),
 		);
 		foreach ( $this->hooks as $hook => list( $priority, $closure ) ) {
@@ -137,7 +153,9 @@ final class ProductQueryFoundRowsOptimizer {
 		foreach ( $this->hooks as $hook => list( $priority, $closure ) ) {
 			remove_filter( $hook, $closure, $priority );
 		}
-		$this->hooks = array();
+		$this->hooks                   = array();
+		$this->found_posts_clauses     = null;
+		$this->calc_found_rows_removed = false;
 	}
 
 	/**
@@ -159,20 +177,23 @@ final class ProductQueryFoundRowsOptimizer {
 	}
 
 	/**
-	 * Remove SQL_CALC_FOUND_ROWS from the product query request. The total row count is supplied
-	 * separately by product_query_found_posts_query().
+	 * Remove SQL_CALC_FOUND_ROWS from WordPress's split-query ID request (posts_request_ids). The total
+	 * row count is supplied separately by product_query_found_posts_query(). The anchored pattern only
+	 * touches the leading SELECT modifier (a coincidental occurrence in a WHERE literal is left alone)
+	 * and $count gates the COUNT swap so it only runs when a strip actually happened.
 	 *
-	 * @param string   $request  The complete SQL query.
+	 * @param string   $request  The post-ID SQL query produced by WordPress's split_the_query path.
 	 * @param WP_Query $wp_query The current product query.
 	 * @return string The query without SQL_CALC_FOUND_ROWS.
 	 */
 	private function remove_product_query_found_rows( $request, $wp_query ) {
 		if ( null !== $this->found_posts_clauses && $wp_query === $this->query ) {
-			$stripped = preg_replace( '/^(\s*SELECT\s+)SQL_CALC_FOUND_ROWS\s+/i', '$1', $request, 1 );
+			$stripped = preg_replace( '/^(\s*SELECT\s+)SQL_CALC_FOUND_ROWS\s+/i', '$1', $request, 1, $count );
 
 			// Guard against a preg_replace error (null); keep the original request if so.
-			if ( null !== $stripped ) {
-				$request = $stripped;
+			if ( null !== $stripped && $count > 0 ) {
+				$request                       = $stripped;
+				$this->calc_found_rows_removed = true;
 			}
 		}
 
@@ -191,14 +212,17 @@ final class ProductQueryFoundRowsOptimizer {
 	private function product_query_found_posts_query( $found_posts_query, $wp_query ) {
 		global $wpdb;
 
-		if ( null !== $this->found_posts_clauses && $wp_query === $this->query ) {
+		// Only replace the count when we actually stripped SQL_CALC_FOUND_ROWS (the split path). On the
+		// non-split path the request keeps it, so leaving FOUND_ROWS() avoids running two counts.
+		if ( $this->calc_found_rows_removed && null !== $this->found_posts_clauses && $wp_query === $this->query ) {
 			$join  = $this->found_posts_clauses['join'];
 			$where = $this->found_posts_clauses['where'];
 
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $join and $where are the same WordPress-built clauses already used for the main query; they are not re-interpolated here.
 			$found_posts_query = "SELECT COUNT( DISTINCT {$wpdb->posts}.ID ) FROM {$wpdb->posts} {$join} WHERE 1=1 {$where}";
 
-			$this->found_posts_clauses = null;
+			$this->found_posts_clauses     = null;
+			$this->calc_found_rows_removed = false;
 		}
 
 		return $found_posts_query;

@@ -54,6 +54,33 @@ class ProductQueryFoundRowsOptimizerTest extends \WC_Unit_Test_Case {
 		$this->assertGreaterThanOrEqual( 3, $optimized['found_posts'], 'The created products should be counted.' );
 		$this->assertSame( $baseline['found_posts'], $optimized['found_posts'], 'The separate COUNT must match the SQL_CALC_FOUND_ROWS total.' );
 		$this->assertSame( $baseline['max_num_pages'], $optimized['max_num_pages'], 'max_num_pages must match the baseline, computed from the separate COUNT.' );
+
+		// Regression guard: the strip must not disable WordPress's split-query optimization. The optimized
+		// data query must still be the ID-only split form (SELECT wp_posts.ID), exactly as the baseline is.
+		$this->assertTrue( $baseline['split_used'], 'The baseline query should use WordPress split-query.' );
+		$this->assertTrue( $optimized['split_used'], 'The optimization must keep WordPress split-query enabled.' );
+		$this->assertTrue( $optimized['selects_ids_only'], 'The optimized main query must still select wp_posts.ID, not wp_posts.*.' );
+	}
+
+	/**
+	 * @testdox On the non-split path the optimization leaves native SQL_CALC_FOUND_ROWS in place (no double count).
+	 */
+	public function test_non_split_query_falls_back_to_native_count(): void {
+		for ( $i = 0; $i < 3; $i++ ) {
+			WC_Helper_Product::create_simple_product();
+		}
+
+		$per_page = 2;
+
+		add_filter( 'woocommerce_product_query_use_separate_count_query', '__return_true' );
+		add_filter( 'split_the_query', '__return_false' );
+		$result = $this->run_main_product_query( $per_page );
+		remove_filter( 'split_the_query', '__return_false' );
+		remove_filter( 'woocommerce_product_query_use_separate_count_query', '__return_true' );
+
+		$this->assertFalse( $result['split_used'], 'split_the_query was forced off, so no ID request should run.' );
+		$this->assertTrue( $result['used_sql_calc_found_rows'], 'Without the split path the request keeps native SQL_CALC_FOUND_ROWS (posts_request_ids never fires).' );
+		$this->assertGreaterThanOrEqual( 3, $result['found_posts'], 'The native count must still report the created products.' );
 	}
 
 	/**
