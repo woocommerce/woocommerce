@@ -89,8 +89,12 @@ const CheckoutProcessor = () => {
 	const { shippingAddress, billingAddress, useBillingAsShipping } =
 		useCheckoutAddress();
 
-	const { cartNeedsPayment, cartNeedsShipping, receiveCartContents } =
-		useStoreCart();
+	const {
+		cartNeedsPayment,
+		cartNeedsShipping,
+		cartTotals,
+		receiveCartContents,
+	} = useStoreCart();
 
 	const {
 		activePaymentMethod,
@@ -270,6 +274,17 @@ const CheckoutProcessor = () => {
 			shipping_address: cartNeedsShipping
 				? shippingAddressData
 				: undefined,
+			// Send the total the shopper is currently seeing so the server can reject the
+			// order if it no longer matches (e.g. a product, price or quantity changed during
+			// checkout). Express payment methods may not know the final total up front, so
+			// they opt out of this check. `total_price` is '' only before the cart resolves; a
+			// real total of zero serialises to '0', so free (e.g. fully-discounted) orders are
+			// still guarded.
+			...( ! isExpressPaymentMethodActive &&
+			cartTotals &&
+			cartTotals.total_price !== ''
+				? { expected_total: cartTotals.total_price }
+				: {} ),
 			...paymentData,
 		};
 
@@ -337,6 +352,8 @@ const CheckoutProcessor = () => {
 	}, [
 		isProcessingOrder,
 		cartNeedsPayment,
+		cartTotals,
+		isExpressPaymentMethodActive,
 		paymentMethodId,
 		paymentMethodData,
 		shouldSavePayment,

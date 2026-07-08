@@ -107,6 +107,10 @@ class Checkout extends AbstractCartRoute {
 							'description' => __( 'Customer password for new accounts, if applicable.', 'woocommerce' ),
 							'type'        => 'string',
 						],
+						'expected_total'    => [
+							'description' => __( 'The order total the shopper confirmed on the client, as a string in the smallest unit of the store currency (e.g. cents), matching the cart `totals.total_price` format. When provided, the order is rejected if the total calculated on the server no longer matches it, protecting the shopper from being charged an unexpected amount.', 'woocommerce' ),
+							'type'        => 'string',
+						],
 					],
 					$this->schema->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE )
 				),
@@ -560,6 +564,14 @@ class Checkout extends AbstractCartRoute {
 		 * Validate items and fix violations before the order is processed.
 		 */
 		$this->cart_controller->validate_cart();
+
+		/**
+		 * Reject the order if the total the shopper confirmed no longer matches the total the
+		 * server calculates for this request (e.g. a server-side filter or another concurrent
+		 * request changed the cart, a product price/quantity was edited, a stock limit clamped
+		 * a quantity, a coupon expired, or shipping/tax was recalculated).
+		 */
+		$this->validate_order_totals( $request );
 
 		/**
 		 * Persist customer session data from the request first so that OrderController::update_addresses_from_cart
@@ -1045,6 +1057,53 @@ class Checkout extends AbstractCartRoute {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Ensure the order total the shopper confirmed on the client still matches the total the
+	 * server calculates while processing this place-order request.
+	 *
+	 * The total the shopper sees was rendered by an earlier request. When they press "Place
+	 * order" the server recalculates from scratch, and that result can differ from what was
+	 * rendered: server-side filters and hooks may adjust totals or fees, another concurrent
+	 * Store API request may have mutated the cart or session, or the store's own data may
+	 * have changed since the render (a product price or quantity edited, a stock limit
+	 * clamping a quantity, a coupon expiring, shipping or tax recalculating). Under deferred
+	 * draft orders no order exists until this POST, so nothing pins the total between render
+	 * and place-order. Without this guard the order is placed — and the shopper charged — at
+	 * the recalculated total without their knowledge.
+	 *
+	 * The check is opt-in: it only runs when the client sends the total it displayed. Flows
+	 * that legitimately cannot know the final total up front (e.g. some express payment
+	 * methods) simply omit it and are unaffected. Runs on POST /checkout only, before the
+	 * draft order is materialised, so a mismatch leaves no order behind.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @throws RouteException When the totals differ. Returns HTTP 409 with the refreshed cart so the client can display the updated total.
+	 */
+	private function validate_order_totals( \WP_REST_Request $request ): void {
+		$expected_total = $request['expected_total'] ?? '';
+
+		// Opt-in: skip the check unless the client told us what total it displayed.
+		if ( '' === $expected_total ) {
+			return;
+		}
+
+		// Mirror the minor-unit conversion the cart schema uses for `totals.total_price` so the
+		// two integer values are directly comparable.
+		$decimals           = wc_get_price_decimals();
+		$cart_total         = (float) $this->cart_controller->get_cart_instance()->get_total( 'edit' );
+		$actual_total_minor = (int) round( $cart_total * pow( 10, $decimals ), 0, PHP_ROUND_HALF_UP );
+
+		if ( (int) $expected_total !== $actual_total_minor ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_total_mismatch',
+				esc_html__( 'The order total changed while you were checking out. Please review the updated total and place your order again.', 'woocommerce' ),
+				409
+			);
+		}
 	}
 
 	/**
