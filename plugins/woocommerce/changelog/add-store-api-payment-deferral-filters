@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Store API: add `woocommerce_store_api_checkout_require_payment_method` and `woocommerce_store_api_order_default_payment_method` filters so trusted-actor checkout clients can defer payment selection past order creation. Both default to current web behaviour.

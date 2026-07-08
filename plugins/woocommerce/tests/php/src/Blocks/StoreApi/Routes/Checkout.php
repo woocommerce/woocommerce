@@ -214,6 +214,80 @@ class Checkout extends MockeryTestCase {
 	}
 
 	/**
+	 * Ensure that a missing payment method is rejected by default on a POST that needs payment.
+	 */
+	public function test_post_data_requires_payment_method_by_default() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) $this->get_test_address( true ),
+				'shipping_address' => (object) $this->get_test_address(),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertEquals( 'woocommerce_rest_checkout_missing_payment_method', $response->get_data()['code'] );
+	}
+
+	/**
+	 * Ensure the payment method requirement can be waived so an order is created pending.
+	 */
+	public function test_post_data_allows_missing_payment_method_when_requirement_waived() {
+		add_filter( 'woocommerce_store_api_checkout_require_payment_method', '__return_false' );
+		add_filter( 'woocommerce_store_api_order_default_payment_method', '__return_empty_string' );
+
+		try {
+			$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+			$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+			$request->set_body_params(
+				array(
+					'billing_address'  => (object) $this->get_test_address( true ),
+					'shipping_address' => (object) $this->get_test_address(),
+				)
+			);
+
+			$response = rest_get_server()->dispatch( $request );
+
+			$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+			$order = wc_get_order( $response->get_data()['order_id'] );
+			$this->assertSame( '', $order->get_payment_method(), 'Order should be created without a payment method.' );
+		} finally {
+			remove_filter( 'woocommerce_store_api_checkout_require_payment_method', '__return_false' );
+			remove_filter( 'woocommerce_store_api_order_default_payment_method', '__return_empty_string' );
+		}
+	}
+
+	/**
+	 * A complete billing/shipping address that passes Store API validation.
+	 *
+	 * @param bool $with_email Whether to include the billing email (only valid on the billing address).
+	 * @return array
+	 */
+	private function get_test_address( bool $with_email = false ) {
+		$address = array(
+			'first_name' => 'test',
+			'last_name'  => 'test',
+			'company'    => '',
+			'address_1'  => 'test',
+			'address_2'  => '',
+			'city'       => 'test',
+			'state'      => '',
+			'postcode'   => 'cb241ab',
+			'country'    => 'GB',
+			'phone'      => '01234567890',
+		);
+
+		if ( $with_email ) {
+			$address['email'] = 'testaccount@test.com';
+		}
+
+		return $address;
+	}
+
+	/**
 	 * Ensure that orders can be placed with virtual products.
 	 */
 	public function test_virtual_product_post_data() {

@@ -8,6 +8,7 @@ use WC_Helper_Product;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
+use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
@@ -324,6 +325,48 @@ class OrderControllerTests extends TestCase {
 		$this->sut->validate_address_fields( $order, 'shipping', $errors );
 		$this->assertEmpty( $errors->get_error_messages() );
 		remove_filter( 'woocommerce_get_country_locale', $hide_postcode );
+	}
+
+	/**
+	 * @testdox create_order_from_cart() stamps the default payment method on the draft order.
+	 */
+	public function test_create_order_from_cart_uses_default_payment_method(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$order = $this->sut->create_order_from_cart();
+		WC()->cart->empty_cart();
+
+		$this->assertSame(
+			PaymentUtils::get_default_payment_method(),
+			$order->get_payment_method(),
+			'The draft order should default to the first enabled gateway.'
+		);
+	}
+
+	/**
+	 * @testdox The draft order default payment method can be filtered to an empty string.
+	 */
+	public function test_create_order_from_cart_default_payment_method_is_filterable(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		add_filter( 'woocommerce_store_api_order_default_payment_method', '__return_empty_string' );
+
+		try {
+			$order = $this->sut->create_order_from_cart();
+		} finally {
+			remove_filter( 'woocommerce_store_api_order_default_payment_method', '__return_empty_string' );
+			WC()->cart->empty_cart();
+		}
+
+		$this->assertSame(
+			'',
+			$order->get_payment_method(),
+			'A trusted-actor caller should be able to defer the payment method by filtering it to empty.'
+		);
 	}
 
 	/**
