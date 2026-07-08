@@ -151,4 +151,173 @@ class WC_Tests_Admin_Post_Types extends WC_Unit_Test_Case {
 		$actual  = $product->{"get_{$type_of_price}_price"}();
 		$this->assertEquals( $expected_new_price, $actual );
 	}
+
+	/**
+	 * Build the standard bulk-edit request payload with optional taxonomy trackers.
+	 *
+	 * @param array $extra Extra request fields to merge in (e.g. `bulk_edit_seen_taxonomy`, `tax_input`).
+	 * @return array
+	 */
+	private function build_bulk_edit_request_data( array $extra = array() ) {
+		return array_merge(
+			array(
+				'woocommerce_bulk_edit'        => '1',
+				'woocommerce_quick_edit_nonce' => wp_create_nonce( 'woocommerce_quick_edit_nonce' ),
+			),
+			$extra
+		);
+	}
+
+	/**
+	 * @test
+	 * @testdox Unchecking a pre-checked category in the bulk-edit checklist removes it from the product.
+	 */
+	public function bulk_edit_unchecking_seen_category_removes_it() {
+		$suffix = uniqid();
+		$cat_a  = wp_insert_term( "Bulk Edit Cat A {$suffix}", 'product_cat' );
+		$cat_b  = wp_insert_term( "Bulk Edit Cat B {$suffix}", 'product_cat' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_category_ids( array( $cat_a['term_id'], $cat_b['term_id'] ) );
+		$product->save();
+
+		$this->login_as_administrator();
+
+		$request_data = $this->build_bulk_edit_request_data(
+			array(
+				'bulk_edit_seen_taxonomy' => array(
+					'product_cat' => array( $cat_a['term_id'], $cat_b['term_id'] ),
+				),
+				'tax_input'               => array(
+					'product_cat' => array( $cat_b['term_id'] ),
+				),
+			)
+		);
+
+		$sut = $this->get_sut_with_request_data( $request_data );
+		$sut->bulk_and_quick_edit_save_post( $product->get_id(), get_post( $product->get_id() ) );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( array( $cat_b['term_id'] ), $product->get_category_ids() );
+
+		wp_delete_term( $cat_a['term_id'], 'product_cat' );
+		wp_delete_term( $cat_b['term_id'], 'product_cat' );
+	}
+
+	/**
+	 * @test
+	 * @testdox Checking a previously-unchecked category in the bulk-edit checklist adds it to the product.
+	 */
+	public function bulk_edit_checking_unchecked_category_adds_it() {
+		$suffix = uniqid();
+		$cat_a  = wp_insert_term( "Bulk Edit Add Cat A {$suffix}", 'product_cat' );
+		$cat_b  = wp_insert_term( "Bulk Edit Add Cat B {$suffix}", 'product_cat' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_category_ids( array( $cat_a['term_id'] ) );
+		$product->save();
+
+		$this->login_as_administrator();
+
+		$request_data = $this->build_bulk_edit_request_data(
+			array(
+				'bulk_edit_seen_taxonomy' => array(
+					'product_cat' => array( $cat_a['term_id'], $cat_b['term_id'] ),
+				),
+				'tax_input'               => array(
+					'product_cat' => array( $cat_a['term_id'], $cat_b['term_id'] ),
+				),
+			)
+		);
+
+		$sut = $this->get_sut_with_request_data( $request_data );
+		$sut->bulk_and_quick_edit_save_post( $product->get_id(), get_post( $product->get_id() ) );
+
+		$product = wc_get_product( $product->get_id() );
+		$result  = $product->get_category_ids();
+		sort( $result );
+		$expected = array( $cat_a['term_id'], $cat_b['term_id'] );
+		sort( $expected );
+		$this->assertEquals( $expected, $result );
+
+		wp_delete_term( $cat_a['term_id'], 'product_cat' );
+		wp_delete_term( $cat_b['term_id'], 'product_cat' );
+	}
+
+	/**
+	 * @test
+	 * @testdox Indeterminate categories (only some selected products have them) are preserved per product.
+	 */
+	public function bulk_edit_indeterminate_category_is_preserved() {
+		$suffix = uniqid();
+		$cat_a  = wp_insert_term( "Bulk Edit Indet Cat A {$suffix}", 'product_cat' );
+		$cat_b  = wp_insert_term( "Bulk Edit Indet Cat B {$suffix}", 'product_cat' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_category_ids( array( $cat_a['term_id'] ) );
+		$product->save();
+
+		$this->login_as_administrator();
+
+		$request_data = $this->build_bulk_edit_request_data(
+			array(
+				'bulk_edit_seen_taxonomy'          => array(
+					'product_cat' => array( $cat_a['term_id'], $cat_b['term_id'] ),
+				),
+				'bulk_edit_indeterminate_taxonomy' => array(
+					'product_cat' => array( $cat_a['term_id'] ),
+				),
+				'tax_input'                        => array(
+					'product_cat' => array(),
+				),
+			)
+		);
+
+		$sut = $this->get_sut_with_request_data( $request_data );
+		$sut->bulk_and_quick_edit_save_post( $product->get_id(), get_post( $product->get_id() ) );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals(
+			array( $cat_a['term_id'] ),
+			$product->get_category_ids(),
+			'Indeterminate term should be preserved; controllable but unchecked term should not be added.'
+		);
+
+		wp_delete_term( $cat_a['term_id'], 'product_cat' );
+		wp_delete_term( $cat_b['term_id'], 'product_cat' );
+	}
+
+	/**
+	 * @test
+	 * @testdox A bulk-edit submission whose seen / submitted state matches the product's current categories leaves the categories unchanged.
+	 */
+	public function bulk_edit_no_change_when_seen_state_matches_current() {
+		$suffix = uniqid();
+		$cat_a  = wp_insert_term( "Bulk Edit Noop Cat A {$suffix}", 'product_cat' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_category_ids( array( $cat_a['term_id'] ) );
+		$product->save();
+
+		$this->login_as_administrator();
+
+		$request_data = $this->build_bulk_edit_request_data(
+			array(
+				'bulk_edit_seen_taxonomy' => array(
+					'product_cat' => array( $cat_a['term_id'] ),
+				),
+				'tax_input'               => array(
+					'product_cat' => array( $cat_a['term_id'] ),
+				),
+			)
+		);
+
+		$sut = $this->get_sut_with_request_data( $request_data );
+		$sut->bulk_and_quick_edit_save_post( $product->get_id(), get_post( $product->get_id() ) );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( array( $cat_a['term_id'] ), $product->get_category_ids() );
+
+		wp_delete_term( $cat_a['term_id'], 'product_cat' );
+	}
 }

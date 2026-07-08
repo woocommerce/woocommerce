@@ -662,6 +662,65 @@ class WC_Admin_Post_Types {
 			$this->maybe_update_cogs_value( $product, $request_data );
 		}
 
+		/*
+		 * Apply replace-semantics for hierarchical taxonomy checklists rendered in
+		 * the bulk-edit row (e.g. product_cat, product_brand). WP core's bulk-edit
+		 * merges current+submitted terms before save_post fires, so unchecking a
+		 * pre-checked term has no effect. The JS submits two trackers:
+		 *   bulk_edit_seen_taxonomy[<tax>][]          — every visible term
+		 *   bulk_edit_indeterminate_taxonomy[<tax>][] — terms with partial overlap
+		 * "Seen but not indeterminate" terms are treated as replace; the rest are
+		 * preserved per-product.
+		 */
+		if ( ! empty( $request_data['bulk_edit_seen_taxonomy'] ) && is_array( $request_data['bulk_edit_seen_taxonomy'] ) ) {
+			foreach ( $request_data['bulk_edit_seen_taxonomy'] as $taxonomy_name => $seen_ids ) {
+				$taxonomy_name = sanitize_key( $taxonomy_name );
+				if ( ! taxonomy_exists( $taxonomy_name ) ) {
+					continue;
+				}
+
+				$seen_ids          = array_map( 'absint', (array) $seen_ids );
+				$indeterminate_ids = isset( $request_data['bulk_edit_indeterminate_taxonomy'][ $taxonomy_name ] )
+					? array_map( 'absint', (array) $request_data['bulk_edit_indeterminate_taxonomy'][ $taxonomy_name ] )
+					: array();
+				$submitted_ids     = isset( $request_data['tax_input'][ $taxonomy_name ] )
+					? array_map( 'absint', (array) $request_data['tax_input'][ $taxonomy_name ] )
+					: array();
+
+				$controllable = array_diff( $seen_ids, $indeterminate_ids );
+				if ( empty( $controllable ) ) {
+					continue;
+				}
+
+				// Prefer the in-memory product getters when available to avoid an extra DB query per product.
+				if ( 'product_cat' === $taxonomy_name ) {
+					$current = $product->get_category_ids();
+				} elseif ( 'product_brand' === $taxonomy_name && method_exists( $product, 'get_brand_ids' ) ) {
+					$current = $product->get_brand_ids();
+				} else {
+					$current = wc_get_object_terms( $post_id, $taxonomy_name, 'term_id' );
+				}
+				$current = array_map( 'absint', $current );
+
+				// Preserve indeterminate / unseen terms; replace controllable ones with the submitted set.
+				$preserved = array_diff( $current, $controllable );
+				$additions = array_intersect( $submitted_ids, $controllable );
+				$new_terms = array_values( array_unique( array_merge( $preserved, $additions ) ) );
+
+				if ( count( $new_terms ) === count( $current ) && empty( array_diff( $new_terms, $current ) ) ) {
+					continue;
+				}
+
+				if ( 'product_cat' === $taxonomy_name ) {
+					$product->set_category_ids( $new_terms );
+				} elseif ( 'product_brand' === $taxonomy_name && method_exists( $product, 'set_brand_ids' ) ) {
+					$product->set_brand_ids( $new_terms );
+				} else {
+					wp_set_object_terms( $post_id, $new_terms, $taxonomy_name );
+				}
+			}
+		}
+
 		$product->save();
 
 		do_action( 'woocommerce_product_bulk_edit_save', $product );

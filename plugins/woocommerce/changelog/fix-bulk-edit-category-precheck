@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Bulk-edit categories and brands now reflect their shared state correctly: shared terms are pre-checked, partial-overlap terms are shown as indeterminate, and unchecking a pre-checked term removes it from every selected product. Previously the checklist was always empty and unchecking had no effect.

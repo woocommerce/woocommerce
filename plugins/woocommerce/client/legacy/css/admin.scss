@@ -1695,6 +1695,21 @@ table.wc_status_table--tools {
 	}
 }
 
+// WP core's :indeterminate::before is scoped to input[name="post_category[]"],
+// so custom hierarchical taxonomy checkboxes (tax_input[<tax>][]) render blank
+// in bulk edit even when the JS sets indeterminate. Mirror the WP rule, but
+// match by type so it applies to product_cat, product_brand, etc.
+ul.cat-checklist input[type="checkbox"]:indeterminate::before {
+	content: "";
+	border-top: 2px solid grey;
+	width: 65%;
+	height: 2px;
+	position: absolute;
+	top: calc(50% + 1px);
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
 #woocommerce-fields.inline-edit-col {
 	clear: left;
 

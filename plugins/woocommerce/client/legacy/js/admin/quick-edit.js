@@ -148,6 +148,105 @@ jQuery(
 			}
 		);
 
+		// Pre-check shared terms in the bulk-edit hierarchical taxonomy checklists,
+		// and emit hidden trackers so the backend can implement replace-semantics
+		// (uncheck = remove). WP core's setBulk() only handles the built-in
+		// `category` taxonomy and its append-only flow doesn't support unchecking.
+		$( '#wpbody' ).on(
+			'click',
+			'#doaction, #doaction2',
+			function() {
+				var actionSelectName = $( this ).attr( 'id' ).substr( 2 );
+				if ( 'edit' !== $( 'select[name="' + actionSelectName + '"]' ).val() ) {
+					return;
+				}
+
+				var $checked = $( 'tbody th.check-column input[type="checkbox"]:checked' );
+				if ( ! $checked.length ) {
+					return;
+				}
+
+				var productIds = $checked.map( function() {
+					return $( this ).val();
+				} ).get();
+
+				// Clear trackers from any previous bulk-edit open.
+				$( '#bulk-edit input.wc-bulk-edit-tax-tracker' ).remove();
+
+				$( '#bulk-edit ul.cat-checklist' ).each( function() {
+					var $checklist = $( this );
+					var taxonomy = '';
+					$.each( ( $checklist.attr( 'class' ) || '' ).split( /\s+/ ), function( _, cls ) {
+						if ( 'cat-checklist' !== cls && '-checklist' === cls.slice( -10 ) ) {
+							taxonomy = cls.slice( 0, -10 );
+							return false;
+						}
+					} );
+					if ( ! taxonomy ) {
+						return;
+					}
+
+					var counts = {};
+					$.each( productIds, function( _, productId ) {
+						var ids = ( $( '#' + taxonomy + '_' + productId ).text() || '' ).split( ',' );
+						$.each( ids, function( _, termId ) {
+							if ( '' === termId ) {
+								return;
+							}
+							counts[ termId ] = ( counts[ termId ] || 0 ) + 1;
+						} );
+					} );
+
+					$checklist.find( 'input[type="checkbox"]' ).each( function() {
+						var $cb = $( this );
+						var termId = $cb.val();
+						var count = counts[ termId ] || 0;
+						if ( count === productIds.length ) {
+							$cb.prop( 'checked', true ).prop( 'indeterminate', false );
+						} else if ( count > 0 ) {
+							$cb.prop( 'checked', false ).prop( 'indeterminate', true );
+						} else {
+							$cb.prop( 'checked', false ).prop( 'indeterminate', false );
+						}
+
+						// Emit a "seen" tracker so the backend knows this term was rendered
+						// in the form (i.e., unchecking it should remove it from products).
+						$( '<input>', {
+							type: 'hidden',
+							'class': 'wc-bulk-edit-tax-tracker',
+							name: 'bulk_edit_seen_taxonomy[' + taxonomy + '][]',
+							value: termId
+						} ).insertAfter( $cb );
+
+						// Emit an "indeterminate" tracker for partial-overlap terms so the
+						// backend leaves their per-product state alone.
+						if ( $cb.prop( 'indeterminate' ) ) {
+							$( '<input>', {
+								type: 'hidden',
+								'class': 'wc-bulk-edit-tax-tracker wc-bulk-edit-tax-indeterminate',
+								name: 'bulk_edit_indeterminate_taxonomy[' + taxonomy + '][]',
+								value: termId
+							} ).insertAfter( $cb );
+						}
+					} );
+				} );
+			}
+		);
+
+		// On user toggle: clear the indeterminate visual + drop the indeterminate tracker
+		// (the user took an explicit position, so the backend should honour it).
+		$( '#wpbody' ).on(
+			'change',
+			'#bulk-edit ul.cat-checklist input[type="checkbox"]',
+			function() {
+				var $cb = $( this );
+				$cb.prop( 'indeterminate', false );
+				$cb.siblings( 'input.wc-bulk-edit-tax-indeterminate' ).filter( function() {
+					return $( this ).val() === $cb.val();
+				} ).remove();
+			}
+		);
+
 		$( '#wpbody' ).on(
 			'change',
 			'#woocommerce-fields-bulk .inline-edit-group .change_to',
