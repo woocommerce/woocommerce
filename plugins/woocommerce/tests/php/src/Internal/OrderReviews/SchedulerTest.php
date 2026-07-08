@@ -99,8 +99,8 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$order->update_status( 'completed' );
 		$first = (int) wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY );
 
-		// Simulate a second completed-notification firing (e.g. status toggled back and forth).
-		do_action( 'woocommerce_order_status_completed', $order->get_id() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- existing core hook, fired here only to simulate a duplicate transition in the test.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Existing core hook, fired here only to simulate a second completed-notification (e.g. status toggled back and forth).
+		do_action( 'woocommerce_order_status_completed', $order->get_id() );
 		$second = (int) wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY );
 
 		$this->assertSame( $first, $second, 'Scheduled-at meta should not change on re-completion.' );
