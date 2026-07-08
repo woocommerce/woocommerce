@@ -462,8 +462,14 @@ test.describe(
 				.waitFor();
 			await page.keyboard.press( 'Enter' );
 
-			// The product row is added inside the modal, then commit.
-			await expect( modal.getByText( simpleProduct.name ) ).toBeVisible();
+			// The product is selected in the modal's search control; commit.
+			// Assert on the rendered selection specifically — a bare getByText
+			// also matches the hidden <option>, which trips strict mode.
+			await expect(
+				modal
+					.locator( '.select2-selection__rendered' )
+					.filter( { hasText: simpleProduct.name } )
+			).toBeVisible();
 			await page.locator( '#btn-ok' ).click();
 
 			// Line item lands on the order.
