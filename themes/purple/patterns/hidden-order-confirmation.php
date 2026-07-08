@@ -34,7 +34,7 @@
 <h2 class="wp-block-heading has-large-font-size"><?php esc_html_e( 'Shipping address', 'purple' ); ?></h2>
 <!-- /wp:heading -->
 
-<!-- wp:woocommerce/order-confirmation-shipping-address {"lock":{"remove":true},"style":{"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}},"border":{"width":"1px","color":"rgba(17, 17, 17, 0.2)"}}} /-->
+<!-- wp:woocommerce/order-confirmation-shipping-address {"lock":{"remove":true},"style":{"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}},"border":{"width":"1px","color":"var:preset|color|theme-6"}}} /-->
 <!-- /wp:woocommerce/order-confirmation-shipping-wrapper --></div>
 <!-- /wp:column -->
 
@@ -44,7 +44,7 @@
 <h2 class="wp-block-heading has-large-font-size"><?php esc_html_e( 'Billing address', 'purple' ); ?></h2>
 <!-- /wp:heading -->
 
-<!-- wp:woocommerce/order-confirmation-billing-address {"lock":{"remove":true},"style":{"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}},"border":{"width":"1px","color":"rgba(17, 17, 17, 0.2)"}}} /-->
+<!-- wp:woocommerce/order-confirmation-billing-address {"lock":{"remove":true},"style":{"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}},"border":{"width":"1px","color":"var:preset|color|theme-6"}}} /-->
 <!-- /wp:woocommerce/order-confirmation-billing-wrapper --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
