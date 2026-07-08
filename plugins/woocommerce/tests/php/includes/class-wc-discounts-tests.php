@@ -400,6 +400,25 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_coupon_validate_excluded_product_ids', '__return_true' );
 		$this->assertTrue( $discounts->is_coupon_valid( $coupon ), 'Returning true from the filter should bypass the excluded product restriction.' );
 		remove_filter( 'woocommerce_coupon_validate_excluded_product_ids', '__return_true' );
+
+		// Force-reject when no cart item matched: the generic message is used, not a dangling empty list.
+		$unmatched_coupon = new WC_Coupon();
+		$unmatched_coupon->set_props(
+			array(
+				'discount_type'        => 'fixed_cart',
+				'amount'               => 10,
+				'excluded_product_ids' => array( $product->get_id() + 999 ),
+			)
+		);
+		$unmatched_coupon->save();
+
+		$this->assertTrue( $discounts->is_coupon_valid( $unmatched_coupon ), 'A coupon excluding a product not in the cart is valid by default.' );
+		add_filter( 'woocommerce_coupon_validate_excluded_product_ids', '__return_false' );
+		$result = $discounts->is_coupon_valid( $unmatched_coupon );
+		$this->assertWPError( $result, 'Returning false should reject even when no excluded product is in the cart.' );
+		$this->assertStringContainsString( 'is not applicable to selected products', $result->get_error_message(), 'With no matched products the generic message is used.' );
+		$this->assertStringNotContainsString( 'products: .', $result->get_error_message(), 'The rejection message should not contain an empty product list.' );
+		remove_filter( 'woocommerce_coupon_validate_excluded_product_ids', '__return_false' );
 	}
 
 	/**
