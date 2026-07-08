@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 
 /**
  * ProductGallery class.
@@ -32,19 +33,10 @@ class ProductGallery extends AbstractBlock {
 	/**
 	 * Return the dialog content.
 	 *
-	 * @param array $images An array of all images of the product.
+	 * @param array $media_items An array of all media items of the product.
 	 * @return string
 	 */
-	protected function render_dialog( $images ) {
-		$images_html = '';
-		foreach ( $images as $image ) {
-			$id           = esc_attr( $image['id'] );
-			$src          = esc_url( $image['src'] );
-			$srcset       = esc_attr( $image['srcset'] );
-			$sizes        = esc_attr( $image['sizes'] );
-			$alt          = esc_attr( $image['alt'] );
-			$images_html .= "<img data-image-id='{$id}' data-wp-watch='callbacks.toggleImageVisibility' src='{$src}' srcset='{$srcset}' sizes='{$sizes}' decoding='async' alt='{$alt}' />";
-		}
+	protected function render_dialog( $media_items ) {
 		ob_start();
 		?>
 			<dialog
@@ -65,12 +57,36 @@ class ProductGallery extends AbstractBlock {
 					</button>
 				</div>
 				<div class="wc-block-product-gallery-dialog__content">
-						<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Attribute values are escaped above when building $images_html. ?>
-						<?php echo $images_html; ?>
+					<?php foreach ( $media_items as $index => $media ) : ?>
+						<?php if ( 'video' === ( $media['media_type'] ?? '' ) ) : ?>
+							<?php echo $this->get_dialog_video_html( $media ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php else : ?>
+							<img
+								data-image-id="<?php echo esc_attr( $media['id'] ); ?>"
+								data-wp-watch="callbacks.toggleImageVisibility"
+								src="<?php echo esc_url( $media['src'] ); ?>"
+								srcset="<?php echo esc_attr( $media['srcset'] ); ?>"
+								sizes="<?php echo esc_attr( $media['sizes'] ); ?>"
+								decoding="async"
+								alt="<?php echo esc_attr( $media['alt'] ); ?>" />
+						<?php endif; ?>
+					<?php endforeach; ?>
 				</div>
 			</dialog>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Get video HTML for the product gallery dialog.
+	 *
+	 * @param array $media Video media data.
+	 * @return string
+	 */
+	private function get_dialog_video_html( $media ) {
+		return ProductGalleryUtils::get_video_html(
+			ProductGalleryUtils::get_video_attributes( $media, 'dialog' )
+		);
 	}
 
 	/**
@@ -112,16 +128,18 @@ class ProductGallery extends AbstractBlock {
 			return '';
 		}
 
-		$image_ids         = ProductGalleryUtils::get_all_image_ids( $product );
-		$default_image_ids = array_map( 'intval', ProductGalleryUtils::get_product_gallery_image_ids( $product ) );
+		$media_items       = ProductGalleryUtils::get_all_media_items( $product );
+		$default_media_ids = ProductGalleryUtils::get_media_ids(
+			ProductMediaGallery::get_product_media_gallery_items_for_display( $product )
+		);
 
-		$number_of_images       = count( $default_image_ids );
+		$number_of_media        = count( $default_media_ids );
 		$classname              = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
-		$initial_image_id       = $number_of_images > 0 ? $default_image_ids[0] : -1;
-		$classname_single_image = $number_of_images < 2 ? 'is-single-product-gallery-image' : '';
+		$initial_media_id       = $number_of_media > 0 ? $default_media_ids[0] : -1;
+		$classname_single_image = $number_of_media < 2 ? 'is-single-product-gallery-image' : '';
 		$product_id             = strval( $product->get_id() );
-		$fullsize_image_data    = ProductGalleryUtils::get_image_src_data( $image_ids, 'full', $product->get_title() );
-		$gallery_with_dialog    = $this->inject_dialog( $content, $this->render_dialog( $fullsize_image_data ) );
+		$fullsize_media_data    = ProductGalleryUtils::get_media_src_data( $media_items, 'full', $product->get_title() );
+		$gallery_with_dialog    = $this->inject_dialog( $content, $this->render_dialog( $fullsize_media_data ) );
 		$p                      = new \WP_HTML_Tag_Processor( $gallery_with_dialog );
 		$html                   = $gallery_with_dialog;
 
@@ -131,13 +149,13 @@ class ProductGallery extends AbstractBlock {
 				'data-wp-context',
 				wp_json_encode(
 					array(
-						'imageData'               => $default_image_ids,
+						'imageData'               => $default_media_ids,
 						'isDialogOpen'            => false,
 						'isDragging'              => false,
 						'touchStartX'             => 0,
 						'touchCurrentX'           => 0,
 						'productId'               => $product_id,
-						'selectedImageId'         => $initial_image_id,
+						'selectedImageId'         => $initial_media_id,
 						'thumbnailsOverflow'      => [
 							'top'    => false,
 							'bottom' => false,
@@ -145,9 +163,9 @@ class ProductGallery extends AbstractBlock {
 							'right'  => false,
 						],
 						// Next/Previous Buttons block context.
-						'hideNextPreviousButtons' => $number_of_images <= 1,
+						'hideNextPreviousButtons' => $number_of_media <= 1,
 						'isDisabledPrevious'      => true,
-						'isDisabledNext'          => $number_of_images <= 1,
+						'isDisabledNext'          => $number_of_media <= 1,
 						'ariaLabelPrevious'       => __( 'Previous image', 'woocommerce' ),
 						'ariaLabelNext'           => __( 'Next image', 'woocommerce' ),
 					),
@@ -164,8 +182,8 @@ class ProductGallery extends AbstractBlock {
 						array(
 							'products' => array(
 								$product->get_id() => array(
-									'image_id'   => (int) $product->get_image_id(),
-									'image_ids'  => $default_image_ids,
+									'image_id'   => $initial_media_id,
+									'image_ids'  => $default_media_ids,
 									'variations' => $formatted_variations_data,
 								),
 							),

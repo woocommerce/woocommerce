@@ -10,6 +10,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin;
+
 /**
  * WC_Admin_Attributes Class.
  */
@@ -114,6 +116,8 @@ class WC_Admin_Attributes {
 		if ( is_wp_error( $id ) ) {
 			return $id;
 		}
+
+		VisualAttributeTermAdmin::seed_visual_attribute_terms( $id );
 
 		return true;
 	}

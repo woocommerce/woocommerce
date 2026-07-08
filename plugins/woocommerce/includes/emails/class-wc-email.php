@@ -1233,7 +1233,21 @@ class WC_Email extends WC_Settings_API {
 		$message              = apply_filters( 'woocommerce_mail_content', $this->style_inline( $message ) );
 		$mail_callback        = apply_filters( 'woocommerce_mail_callback', 'wp_mail', $this );
 		$mail_callback_params = apply_filters( 'woocommerce_mail_callback_params', array( $to, wp_specialchars_decode( $subject ), $message, $headers, $attachments ), $this );
-		$return               = (bool) $mail_callback( ...$mail_callback_params );
+		$return               = $mail_callback( ...$mail_callback_params );
+		if ( ! is_bool( $return ) ) {
+			$original_type = gettype( $return );
+
+			$return = is_scalar( $return ) ? wc_string_to_bool( (string) $return ) : false;
+
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					'The callback registered to the woocommerce_mail_callback filter should return a boolean; %s returned.',
+					$original_type
+				),
+				'11.1.0'
+			);
+		}
 
 		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
