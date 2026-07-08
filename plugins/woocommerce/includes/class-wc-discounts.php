@@ -814,7 +814,7 @@ class WC_Discounts {
 			 *
 			 * Return true to treat the coupon as valid for the cart, or false to reject it.
 			 *
-			 * @since 11.0.0
+			 * @since 11.1.0
 			 * @param bool         $valid     Whether the coupon is valid.
 			 * @param WC_Coupon    $coupon    Coupon data.
 			 * @param WC_Discounts $discounts The discounts instance.
@@ -871,7 +871,7 @@ class WC_Discounts {
 			 *
 			 * Return true to treat the coupon as valid for the cart, or false to reject it.
 			 *
-			 * @since 11.0.0
+			 * @since 11.1.0
 			 * @param bool         $valid     Whether the coupon is valid.
 			 * @param WC_Coupon    $coupon    Coupon data.
 			 * @param WC_Discounts $discounts The discounts instance.
@@ -917,7 +917,7 @@ class WC_Discounts {
 			 *
 			 * Return true to treat the coupon as valid for the cart, or false to reject it.
 			 *
-			 * @since 11.0.0
+			 * @since 11.1.0
 			 * @param bool         $valid     Whether the coupon is valid.
 			 * @param WC_Coupon    $coupon    Coupon data.
 			 * @param WC_Discounts $discounts The discounts instance.
@@ -964,7 +964,7 @@ class WC_Discounts {
 			 *
 			 * Return true to treat the coupon as valid for the cart, or false to reject it.
 			 *
-			 * @since 11.0.0
+			 * @since 11.1.0
 			 * @param bool         $valid     Whether the coupon is valid.
 			 * @param WC_Coupon    $coupon    Coupon data.
 			 * @param WC_Discounts $discounts The discounts instance.
@@ -1030,7 +1030,7 @@ class WC_Discounts {
 			 *
 			 * Return true to treat the coupon as valid for the cart, or false to reject it.
 			 *
-			 * @since 11.0.0
+			 * @since 11.1.0
 			 * @param bool         $valid     Whether the coupon is valid.
 			 * @param WC_Coupon    $coupon    Coupon data.
 			 * @param WC_Discounts $discounts The discounts instance.
@@ -1092,7 +1092,7 @@ class WC_Discounts {
 			 *
 			 * Return true to treat the coupon as valid for the cart, or false to reject it.
 			 *
-			 * @since 11.0.0
+			 * @since 11.1.0
 			 * @param bool         $valid     Whether the coupon is valid.
 			 * @param WC_Coupon    $coupon    Coupon data.
 			 * @param WC_Discounts $discounts The discounts instance.
