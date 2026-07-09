@@ -30,6 +30,7 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 		if ( ! is_admin() ) {
 			return;
 		}
+
 		add_action( 'created_term', array( $this, 'save_product_attribute_term_fields' ), 10, 3 );
 		add_action( 'edit_term', array( $this, 'save_product_attribute_term_fields' ), 10, 3 );
 
@@ -437,5 +438,122 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 	 */
 	private function get_current_taxonomy(): string {
 		return isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	}
+
+	/**
+	 * Get the default color terms to create for a new wc-visual attribute.
+	 *
+	 * @return array<string, array{label: string, color: string}>
+	 */
+	private static function get_default_color_terms(): array {
+		return array(
+			'black'  => array(
+				'label' => __( 'Black', 'woocommerce' ),
+				'color' => '#121212',
+			),
+			'white'  => array(
+				'label' => __( 'White', 'woocommerce' ),
+				'color' => '#FFFFFF',
+			),
+			'gray'   => array(
+				'label' => __( 'Gray', 'woocommerce' ),
+				'color' => '#6E6E6E',
+			),
+			'red'    => array(
+				'label' => __( 'Red', 'woocommerce' ),
+				'color' => '#D32F2F',
+			),
+			'blue'   => array(
+				'label' => __( 'Blue', 'woocommerce' ),
+				'color' => '#1976D2',
+			),
+			'green'  => array(
+				'label' => __( 'Green', 'woocommerce' ),
+				'color' => '#388E3C',
+			),
+			'yellow' => array(
+				'label' => __( 'Yellow', 'woocommerce' ),
+				'color' => '#FBE02D',
+			),
+			'pink'   => array(
+				'label' => __( 'Pink', 'woocommerce' ),
+				'color' => '#EC407A',
+			),
+			'brown'  => array(
+				'label' => __( 'Brown', 'woocommerce' ),
+				'color' => '#5D4037',
+			),
+		);
+	}
+
+	/**
+	 * Seed default color terms for a newly created wc-visual attribute.
+	 *
+	 * @internal
+	 *
+	 * @param int $attribute_id Attribute ID.
+	 * @return void
+	 */
+	public static function seed_visual_attribute_terms( int $attribute_id ): void {
+		if ( 0 >= $attribute_id ) {
+			return;
+		}
+
+		$attribute = wc_get_attribute( $attribute_id );
+
+		if (
+			! $attribute ||
+			! isset( $attribute->slug, $attribute->type ) ||
+			'wc-visual' !== $attribute->type
+		) {
+			return;
+		}
+
+		$taxonomy = $attribute->slug;
+
+		// Taxonomy is registered on init from the cached list but not yet available
+		// at process_add_attribute time (cache invalidated after wc_create_attribute).
+		// Use the same WC filter seams as WC_Post_Types::register_taxonomies().
+		if ( ! taxonomy_exists( $taxonomy ) ) {
+			/**
+			 * Filters the object types for a WooCommerce taxonomy.
+			 *
+			 * @param array $objects Object types.
+			 *
+			 * @since 11.0.0
+			 */
+			$objects = apply_filters( "woocommerce_taxonomy_objects_{$taxonomy}", array( 'product' ) );
+			/**
+			 * Filters the arguments for a WooCommerce taxonomy.
+			 *
+			 * @param array $args Taxonomy arguments.
+			 *
+			 * @since 11.0.0
+			 */
+			$args = apply_filters(
+				"woocommerce_taxonomy_args_{$taxonomy}",
+				array(
+					'hierarchical' => false,
+					'public'       => false,
+					'show_ui'      => false,
+					'show_in_menu' => false,
+				)
+			);
+			register_taxonomy( $taxonomy, $objects, $args );
+		}
+
+		foreach ( self::get_default_color_terms() as $slug => $term ) {
+			if ( get_term_by( 'slug', $slug, $taxonomy ) ) {
+				continue;
+			}
+
+			$result = wp_insert_term( $term['label'], $taxonomy, array( 'slug' => $slug ) );
+
+			if ( is_wp_error( $result ) || empty( $result['term_id'] ) ) {
+				continue;
+			}
+
+			VisualAttributeTermMeta::save_term_visual( (int) $result['term_id'], $term['color'], 0 );
+		}
 	}
 }

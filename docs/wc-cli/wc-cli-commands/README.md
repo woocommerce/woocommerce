@@ -32,7 +32,7 @@ wp wc [command] --help
 | [wc com](/docs/wc-cli/wc-cli-commands/wc-com/) | Interacts with extensions from the WooCommerce.com marketplace via CLI. |
 | [wc customer](/docs/wc-cli/wc-cli-commands/wc-customer/) | Manage WooCommerce customer resources. |
 | [wc customer_download](/docs/wc-cli/wc-cli-commands/wc-customer-download/) | Manage WooCommerce customer download resources. |
-| [wc hpos](/docs/wc-cli/wc-cli-commands/wc-hpos/) | Commands for managing High-Performance Order Storage (HPOS). For detailed examples, see [HPOS CLI tools](/docs/features/high-performance-order-storage/cli-tools/). |
+| [wc hpos](/docs/wc-cli/wc-cli-commands/wc-hpos/) | Commands for managing High-Performance Order Storage (HPOS). For detailed examples, see [HPOS CLI tools](/docs/features/orders/high-performance-order-storage/cli-tools/). |
 | [wc order_note](/docs/wc-cli/wc-cli-commands/wc-order-note/) | Manage WooCommerce order note resources. |
 | [wc palt](/docs/wc-cli/wc-cli-commands/wc-palt/) | Commands for managing the product attributes lookup table. The table stores denormalized product attribute term data used to speed up catalog filtering. |
 | [wc payment_gateway](/docs/wc-cli/wc-cli-commands/wc-payment-gateway/) | Manage WooCommerce payment gateway resources. |
