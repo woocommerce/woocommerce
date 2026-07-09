@@ -1,7 +1,12 @@
 /**
  * Internal dependencies
  */
-import { AspectRatioStyle, ImageSizing } from './types';
+import { ImageSizing, type BlockAttributes } from './types';
+
+type AspectRatioAttributes = Pick<
+	Partial< BlockAttributes >,
+	'style' | 'aspectRatio' | 'imageSizing'
+>;
 
 export const isTryingToDisplayLegacySaleBadge = ( showSaleBadge?: boolean ) => {
 	// If the block is pristine, it doesn't have a showSaleBadge attribute
@@ -21,11 +26,11 @@ export const isTryingToDisplayLegacySaleBadge = ( showSaleBadge?: boolean ) => {
  * Block-level overrides take priority over store thumbnail cropping settings.
  */
 export const resolveAspectRatio = (
-	style: AspectRatioStyle | undefined,
-	aspectRatio: string | undefined,
-	storeAspectRatio: string | null | undefined,
-	imageSizing: ImageSizing | undefined
+	attributes: AspectRatioAttributes | undefined,
+	storeAspectRatio: string | null | undefined
 ): string | undefined => {
+	const { style, aspectRatio, imageSizing } = attributes ?? {};
+
 	if (
 		style &&
 		style.dimensions &&

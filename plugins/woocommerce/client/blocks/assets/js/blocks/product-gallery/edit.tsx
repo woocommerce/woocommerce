@@ -9,16 +9,14 @@ import {
 } from '@wordpress/block-editor';
 import {
 	BlockEditProps,
-	BlockInstance,
 	InnerBlockTemplate,
+	type BlockInstance,
 } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { useProductDataContext } from '@woocommerce/shared-context';
 import { getSetting } from '@woocommerce/settings';
-import { findBlock } from '@woocommerce/utils';
 import clsx from 'clsx';
-import type { CSSProperties } from 'react';
 
 /**
  * Internal dependencies
@@ -26,11 +24,7 @@ import type { CSSProperties } from 'react';
 import { ProductGalleryBlockSettings } from './block-settings/index';
 import type { ProductGalleryBlockAttributes } from './types';
 import { resolveAspectRatio } from '../../atomic/blocks/product-elements/image/utils';
-import type {
-	AspectRatioStyle,
-	BlockAttributes as ProductImageBlockAttributes,
-	ImageSizing,
-} from '../../atomic/blocks/product-elements/image/types';
+import type { BlockAttributes as ProductImageBlockAttributes } from '../../atomic/blocks/product-elements/image/types';
 
 const TEMPLATE: InnerBlockTemplate[] = [
 	[ 'woocommerce/product-gallery-thumbnails' ],
@@ -56,9 +50,47 @@ const TEMPLATE: InnerBlockTemplate[] = [
 	],
 ];
 
-const parseAspectRatio = ( aspectRatio: string | undefined ) => {
+const PRODUCT_IMAGE_BLOCK_NAME = 'woocommerce/product-image';
+
+type ParsedAspectRatio = {
+	width: string;
+	height: string;
+};
+
+const DEFAULT_ASPECT_RATIO: ParsedAspectRatio = { width: '1', height: '1' };
+
+type ProductImageBlock = BlockInstance<
+	Partial< ProductImageBlockAttributes >
+>;
+
+const isProductImageBlock = (
+	block: BlockInstance
+): block is ProductImageBlock => block.name === PRODUCT_IMAGE_BLOCK_NAME;
+
+const findProductImageBlock = (
+	blocks: BlockInstance[]
+): ProductImageBlock | undefined => {
+	for ( const block of blocks ) {
+		if ( isProductImageBlock( block ) ) {
+			return block;
+		}
+
+		const innerProductImageBlock = findProductImageBlock(
+			block.innerBlocks
+		);
+		if ( innerProductImageBlock ) {
+			return innerProductImageBlock;
+		}
+	}
+
+	return undefined;
+};
+
+const parseAspectRatio = (
+	aspectRatio: string | undefined
+): ParsedAspectRatio => {
 	if ( ! aspectRatio ) {
-		return { width: '1', height: '1' };
+		return DEFAULT_ASPECT_RATIO;
 	}
 
 	const ratioParts = aspectRatio
@@ -66,20 +98,15 @@ const parseAspectRatio = ( aspectRatio: string | undefined ) => {
 		.map( ( part ) => part.trim() )
 		.filter( Boolean );
 
-	if ( ratioParts.length > 2 ) {
-		return { width: '1', height: '1' };
+	if ( ratioParts.length === 0 || ratioParts.length > 2 ) {
+		return DEFAULT_ASPECT_RATIO;
 	}
 
 	const width = Number( ratioParts[ 0 ] );
 	const height = Number( ratioParts[ 1 ] ?? ratioParts[ 0 ] );
 
-	if (
-		! Number.isFinite( width ) ||
-		! Number.isFinite( height ) ||
-		width <= 0 ||
-		height <= 0
-	) {
-		return { width: '1', height: '1' };
+	if ( ! Number.isFinite( width ) || ! Number.isFinite( height ) ) {
+		return DEFAULT_ASPECT_RATIO;
 	}
 
 	return {
@@ -110,27 +137,13 @@ export const Edit = withProductDataContext(
 		);
 		const productImageAspectRatio = useSelect(
 			( select ) => {
-				const galleryBlock = select( blockEditorStore ).getBlock(
-					clientId
-				) as BlockInstance | null;
-				const productImageBlock = findBlock( {
-					blocks: galleryBlock?.innerBlocks ?? [],
-					findCondition: ( block: BlockInstance ) =>
-						block.name === 'woocommerce/product-image',
-				} );
-				const productImageAttributes = productImageBlock?.attributes as
-					| Partial< ProductImageBlockAttributes >
-					| undefined;
+				const productImageBlock = findProductImageBlock(
+					select( blockEditorStore ).getBlocks( clientId )
+				);
 
 				return resolveAspectRatio(
-					productImageAttributes?.style as
-						| AspectRatioStyle
-						| undefined,
-					productImageAttributes?.aspectRatio,
-					storeAspectRatio,
-					productImageAttributes?.imageSizing as
-						| ImageSizing
-						| undefined
+					productImageBlock?.attributes,
+					storeAspectRatio
 				);
 			},
 			[ clientId, storeAspectRatio ]
@@ -148,7 +161,7 @@ export const Edit = withProductDataContext(
 					productGalleryAspectRatio.width,
 				'--wc-block-product-gallery-image-ratio-height':
 					productGalleryAspectRatio.height,
-			} as CSSProperties,
+			},
 		} );
 
 		return (
