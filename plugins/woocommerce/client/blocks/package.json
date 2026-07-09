@@ -162,7 +162,7 @@
 		"@wordpress/prettier-config": "1.4.0",
 		"@wordpress/private-apis": "catalog:wp-min",
 		"@wordpress/rich-text": "catalog:wp-min",
-		"@wordpress/scripts": "30.13.0",
+		"@wordpress/scripts": "32.6.0",
 		"@wordpress/stylelint-config": "^23.14.0",
 		"ajv-cli": "3.3.x",
 		"allure-playwright": "^2.9.2",
