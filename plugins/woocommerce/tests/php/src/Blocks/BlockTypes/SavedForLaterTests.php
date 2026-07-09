@@ -88,7 +88,7 @@ class SavedForLaterTests extends WP_UnitTestCase {
 		$block_json = WC_ABSPATH . 'assets/client/blocks/saved-for-later/block.json';
 		$this->assertFileExists( $block_json, 'Built saved-for-later block.json should exist.' );
 
-		$metadata = json_decode( (string) file_get_contents( $block_json ), true );
+		$metadata = wp_json_file_decode( $block_json, array( 'associative' => true ) );
 		$this->assertIsArray( $metadata );
 		$this->assertArrayHasKey( 'blockHooks', $metadata );
 		$this->assertArrayHasKey( 'woocommerce/cart', $metadata['blockHooks'] );
