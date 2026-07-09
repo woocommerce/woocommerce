@@ -204,6 +204,14 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	abstract protected function get_item_image( $item, $size = 'full' );
 
 	/**
+	 * Returns the featured item image attachment ID.
+	 *
+	 * @param \WP_Term|\WC_Product $item Item object.
+	 * @return int
+	 */
+	abstract protected function get_item_image_id( $item );
+
+	/**
 	 * Renders the featured item attributes.
 	 *
 	 * @param \WP_Term|\WC_Product $item       Item object.
@@ -269,6 +277,21 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	}
 
 	/**
+	 * Returns the image size slug for the featured item image.
+	 *
+	 * @param array $attributes Block attributes. Default empty array.
+	 * @return string
+	 */
+	private function get_image_size( $attributes ) {
+		$image_size = 'large';
+		if ( 'none' !== $attributes['align'] || $attributes['height'] > 800 ) {
+			$image_size = 'full';
+		}
+
+		return $image_size;
+	}
+
+	/**
 	 * Returns the url the item's image
 	 *
 	 * @param array                $attributes Block attributes. Default empty array.
@@ -277,10 +300,7 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	 * @return string
 	 */
 	private function get_image_url( $attributes, $item ) {
-		$image_size = 'large';
-		if ( 'none' !== $attributes['align'] || $attributes['height'] > 800 ) {
-			$image_size = 'full';
-		}
+		$image_size = $this->get_image_size( $attributes );
 
 		if ( $attributes['mediaId'] ) {
 			return wp_get_attachment_image_url( $attributes['mediaId'], $image_size );
@@ -355,7 +375,7 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	 * @return string
 	 */
 	private function render_image( $attributes, $item, string $image_url ) {
-		$style   = sprintf( 'object-fit: %s;', esc_attr( $attributes['imageFit'] ) );
+		$style   = sprintf( 'object-fit: %s;', $attributes['imageFit'] );
 		$img_alt = $attributes['alt'] ?: $this->get_item_title( $item );
 
 		if ( $this->hasFocalPoint( $attributes ) ) {
@@ -364,6 +384,21 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 				$attributes['focalPoint']['x'] * 100,
 				$attributes['focalPoint']['y'] * 100
 			);
+		}
+
+		$image_id   = empty( $attributes['mediaId'] ) ?
+			$this->get_item_image_id( $item ) :
+			absint( $attributes['mediaId'] );
+		$image_size = $this->get_image_size( $attributes );
+
+		if ( $image_id ) {
+			$attr = array(
+				'alt'   => $img_alt,
+				'class' => "wc-block-{$this->block_name}__background-image",
+				'style' => $style,
+			);
+
+			return wp_get_attachment_image( $image_id, $image_size, false, $attr );
 		}
 
 		if ( ! empty( $image_url ) ) {
