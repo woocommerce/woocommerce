@@ -70,6 +70,7 @@
 	},
 	"devDependencies": {
 		"@types/wordpress__block-editor": "15.0.6",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/core-data": "7.33.9",
 		"@wordpress/data": "10.33.1",

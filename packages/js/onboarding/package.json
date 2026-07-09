@@ -83,6 +83,7 @@
 		"@types/jest": "29.5.x",
 		"@types/react": "18.3.x",
 		"@types/string-similarity": "4.0.0",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",

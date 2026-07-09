@@ -75,6 +75,7 @@
 		"@babel/runtime": "7.25.7",
 		"@types/jest": "29.5.x",
 		"@types/lodash": "^4.14.202",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",

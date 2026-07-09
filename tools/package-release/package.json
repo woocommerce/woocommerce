@@ -32,6 +32,7 @@
 	},
 	"devDependencies": {
 		"@types/node": "^24.1.0",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"oclif": "^2.7.0",
 		"shx": "^0.3.4",

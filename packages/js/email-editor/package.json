@@ -135,6 +135,7 @@
 		"@types/wordpress__block-library": "catalog:wp-min",
 		"@types/wordpress__blocks": "catalog:wp-min",
 		"@types/wordpress__edit-post": "catalog:wp-min",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",

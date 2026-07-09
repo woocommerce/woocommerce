@@ -86,6 +86,7 @@
 		"@babel/core": "7.25.7",
 		"@types/jest": "29.5.x",
 		"@types/react": "18.3.x",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",

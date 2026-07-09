@@ -49,6 +49,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "7.25.7",
+		"@woocommerce/eslint-config": "workspace:*",
 		"eslint": "^10.0.0",
 		"rimraf": "5.0.5",
 		"typescript": "5.7.x"

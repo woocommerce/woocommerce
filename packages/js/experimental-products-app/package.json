@@ -89,6 +89,7 @@
 		"@types/jest": "29.5.x",
 		"@types/react": "18.3.x",
 		"@types/testing-library__jest-dom": "^5.14.9",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",

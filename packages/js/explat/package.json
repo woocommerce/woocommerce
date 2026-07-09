@@ -79,6 +79,7 @@
 		"@types/node": "^24.1.0",
 		"@types/qs": "^6.9.10",
 		"@types/react": "18.3.x",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",

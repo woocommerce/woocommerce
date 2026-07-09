@@ -45,6 +45,7 @@
 		"@babel/preset-env": "7.25.7",
 		"@babel/runtime": "7.25.7",
 		"@types/node": "^24.1.0",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/monorepo-utils": "workspace:*",
 		"@wordpress/prettier-config": "4.49.0",

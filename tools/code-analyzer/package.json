@@ -27,6 +27,7 @@
 	"devDependencies": {
 		"@types/jest": "29.5.x",
 		"@types/node": "^24.1.0",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^10.0.0",
 		"jest": "29.5.x",
