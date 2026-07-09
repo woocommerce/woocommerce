@@ -93,6 +93,14 @@ export default [
 		rules: {
 			'playwright/no-wait-for-timeout': 'error',
 			'playwright/no-skipped-test': 'off',
+			/*
+			 * New or tightened in eslint-plugin-playwright v1 -> v2. Relaxed with
+			 * the rest of the upgrade-surfaced rules; see tools/eslint-config.
+			 */
+			'playwright/valid-test-tags': 'warn',
+			'playwright/prefer-web-first-assertions': 'warn',
+			'playwright/no-unused-locators': 'warn',
+			'playwright/valid-title': 'warn',
 			'no-console': 'off',
 			// Renamed from `no-test-callback` in eslint-plugin-jest v24.
 			'jest/no-done-callback': 'off',
@@ -139,14 +147,16 @@ export default [
 			},
 		},
 		plugins: {
-			'woocommerce-e2e': {
+			// Keep the `rulesdir` namespace so the eslint-disable comments that
+			// reference it keep working.
+			rulesdir: {
 				rules: {
 					'no-raw-playwright-test-import': noRawPlaywrightTestImport,
 				},
 			},
 		},
 		rules: {
-			'woocommerce-e2e/no-raw-playwright-test-import': 'error',
+			'rulesdir/no-raw-playwright-test-import': 'error',
 			// Since we're restoring the database for each test, hooks other
 			// than `beforeEach` don't make sense.
 			// See https://github.com/woocommerce/woocommerce/pull/46432.

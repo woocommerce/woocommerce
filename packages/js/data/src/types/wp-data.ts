@@ -77,7 +77,7 @@ type CastToFunction< T > = Cast< T, ( ...args: any[] ) => any >;
  * This is useful for typing some @wordpress/data functions that make a leading
  * `state` argument implicit.
  */
-// eslint-disable-next-line @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type, @typescript-eslint/no-empty-object-type
 type TailParameters< F extends Function > = F extends (
 	head: any,
 	...tail: infer T

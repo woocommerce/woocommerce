@@ -667,7 +667,7 @@ class ProductCollectionPage {
 				await productAttributesContainer
 					.getByLabel( value )
 					.elementHandles()
-			 ).length !== 0;
+			).length !== 0;
 		if ( ! isAttributeValueVisible ) {
 			await productAttributesContainer
 				.locator( `li:has-text("${ attribute }")` )

@@ -37,7 +37,11 @@ module.exports = [
 		},
 		settings: {
 			// List of modules that are externals in our webpack config.
-			'import/core-modules': [ '@woocommerce/settings', 'lodash', 'react' ],
+			'import/core-modules': [
+				'@woocommerce/settings',
+				'lodash',
+				'react',
+			],
 			react: {
 				pragma: 'createElement',
 				version: '18.3',
@@ -104,11 +108,7 @@ module.exports = [
 		},
 	},
 	{
-		files: [
-			'**/stories/*.js',
-			'**/stories/*.jsx',
-			'**/docs/example.js',
-		],
+		files: [ '**/stories/*.js', '**/stories/*.jsx', '**/docs/example.js' ],
 		rules: {
 			'react/react-in-jsx-scope': 'off',
 		},

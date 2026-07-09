@@ -148,7 +148,7 @@ test.describe( `${ blockData.name }`, () => {
 				await pageObject.getThumbnailsBlock( {
 					page: 'frontend',
 				} )
-			 )
+			)
 				.locator( 'img' )
 				.nth( 1 )
 				.click();

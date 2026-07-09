@@ -1535,7 +1535,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		for ( const optionStyle of [ 'chips', 'dropdown' ] as (
 			| 'chips'
 			| 'dropdown'
-		 )[] ) {
+		)[] ) {
 			// eslint-disable-next-line playwright/expect-expect
 			test( `${ optionStyle }: Test the autoselect block attribute`, async ( {
 				page,
