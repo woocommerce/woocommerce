@@ -204,7 +204,13 @@ describe( 'Product Gallery Block', () => {
 	} );
 
 	it( 'should ensure thumbnail height matches viewer height with custom aspect ratio', async () => {
-		await setup( { aspectRatio: '16/9' } );
+		await setup( {
+			style: {
+				dimensions: {
+					aspectRatio: '3/5',
+				},
+			},
+		} );
 
 		// Get the viewer
 		const productImage = screen.getByTestId( 'product-image' );
@@ -215,8 +221,15 @@ describe( 'Product Gallery Block', () => {
 			'.wc-block-components-product-image'
 		);
 		expect( imageContainer ).toHaveClass(
-			'wc-block-components-product-image--aspect-ratio-16-9'
+			'wc-block-components-product-image--aspect-ratio-3-5'
 		);
+		const productGalleryBlock = screen.getByRole( 'document', {
+			name: /Block: Product Gallery/i,
+		} );
+		expect( productGalleryBlock ).toHaveStyle( {
+			'--wc-block-product-gallery-image-ratio-width': '3',
+			'--wc-block-product-gallery-image-ratio-height': '5',
+		} );
 
 		// Get the thumbnails block
 		const thumbnailsBlock = screen.getByRole( 'document', {

@@ -56,9 +56,25 @@ class ProductGallery extends \WP_UnitTestCase {
 	 *
 	 * @param int    $product_id The product ID.
 	 * @param string $gallery_attributes Optional gallery attributes.
+	 * @param array  $product_image_attributes Optional Product Image block attributes.
 	 * @return string The rendered markup.
 	 */
-	private function render_product_gallery( $product_id, $gallery_attributes = '' ) {
+	private function render_product_gallery(
+		$product_id,
+		$gallery_attributes = '',
+		$product_image_attributes = array()
+	) {
+		$product_image_attributes = wp_json_encode(
+			array_merge(
+				array(
+					'showProductLink'                  => false,
+					'showSaleBadge'                    => false,
+					'isDescendentOfSingleProductBlock' => true,
+				),
+				$product_image_attributes
+			)
+		);
+
 		return do_blocks(
 			sprintf(
 				'<!-- wp:woocommerce/single-product {"productId":%d} -->
@@ -69,7 +85,7 @@ class ProductGallery extends \WP_UnitTestCase {
 
 						<!-- wp:woocommerce/product-gallery-large-image -->
 						<div class="wp-block-woocommerce-product-gallery-large-image wc-block-product-gallery-large-image__inner-blocks">
-							<!-- wp:woocommerce/product-image {"showProductLink":false,"showSaleBadge":false,"isDescendentOfSingleProductBlock":true} /-->
+							<!-- wp:woocommerce/product-image %s /-->
 
 							<!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
 
@@ -83,7 +99,8 @@ class ProductGallery extends \WP_UnitTestCase {
 				</div>
 				<!-- /wp:woocommerce/single-product -->',
 				$product_id,
-				$gallery_attributes
+				$gallery_attributes,
+				$product_image_attributes
 			)
 		);
 	}
@@ -130,6 +147,37 @@ class ProductGallery extends \WP_UnitTestCase {
 
 		// Check that the aspect ratio class is applied.
 		$this->assertStringContainsString( 'wc-block-components-product-image--aspect-ratio-auto', $markup );
+
+		$this->cleanup_product_data( $data );
+	}
+
+	/**
+	 * @testdox Should expose custom Product Image aspect ratios as gallery CSS variables.
+	 */
+	public function test_product_gallery_exposes_custom_product_image_aspect_ratio_css_variables() {
+		$data = $this->create_product_with_gallery( 3 );
+
+		$markup = $this->render_product_gallery(
+			$data['product']->get_id(),
+			'',
+			array(
+				'style' => array(
+					'dimensions' => array(
+						'aspectRatio' => '3/5',
+					),
+				),
+			)
+		);
+
+		$this->assertStringContainsString(
+			'--wc-block-product-gallery-image-ratio-width:3;',
+			$markup
+		);
+		$this->assertStringContainsString(
+			'--wc-block-product-gallery-image-ratio-height:5;',
+			$markup
+		);
+		$this->assertStringContainsString( 'aspect-ratio:3/5;', $markup );
 
 		$this->cleanup_product_data( $data );
 	}
