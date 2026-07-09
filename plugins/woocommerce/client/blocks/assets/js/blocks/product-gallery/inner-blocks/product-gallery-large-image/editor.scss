@@ -11,5 +11,5 @@
 // In the editor there is no frontend wrapper, so the gallery ratio is inherited
 // from the parent Product Gallery block CSS variables.
 :where(.wc-block-product-gallery-large-image) {
-	aspect-ratio: var(--wc-block-product-gallery-image-ratio-width, 1) / var(--wc-block-product-gallery-image-ratio-height, 1);
+	aspect-ratio: var(--wc-block-product-gallery-large-image-ratio-width, 1) / var(--wc-block-product-gallery-large-image-ratio-height, 1);
 }

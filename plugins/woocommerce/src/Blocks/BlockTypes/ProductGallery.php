@@ -192,8 +192,8 @@ class ProductGallery extends AbstractBlock {
 		);
 
 		return sprintf(
-			'--wc-block-product-gallery-image-ratio-width:%1$s;' .
-			'--wc-block-product-gallery-image-ratio-height:%2$s;',
+			'--wc-block-product-gallery-large-image-ratio-width:%1$s;' .
+			'--wc-block-product-gallery-large-image-ratio-height:%2$s;',
 			$aspect_ratio['width'],
 			$aspect_ratio['height']
 		);

@@ -171,9 +171,9 @@ export const Edit = withProductDataContext(
 					hasOneOrNoImages,
 			} ),
 			style: {
-				'--wc-block-product-gallery-image-ratio-width':
+				'--wc-block-product-gallery-large-image-ratio-width':
 					productGalleryAspectRatio.width,
-				'--wc-block-product-gallery-image-ratio-height':
+				'--wc-block-product-gallery-large-image-ratio-height':
 					productGalleryAspectRatio.height,
 			},
 		} );

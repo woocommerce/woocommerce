@@ -162,22 +162,22 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Assert that rendered gallery markup contains the expected aspect ratio CSS variables.
+	 * Assert that rendered gallery markup contains the expected large image aspect ratio CSS variables.
 	 *
 	 * @param string $markup Rendered gallery markup.
 	 * @param string $width Expected ratio width.
 	 * @param string $height Expected ratio height.
 	 */
-	private function assert_product_gallery_ratio_variables( string $markup, string $width, string $height ): void {
+	private function assert_product_gallery_large_image_ratio_variables( string $markup, string $width, string $height ): void {
 		$this->assertStringContainsString(
-			"--wc-block-product-gallery-image-ratio-width:{$width};",
+			"--wc-block-product-gallery-large-image-ratio-width:{$width};",
 			$markup,
-			"Expected Product Gallery markup to expose a {$width}:{$height} aspect ratio width variable."
+			"Expected Product Gallery markup to expose a {$width}:{$height} large image aspect ratio width variable."
 		);
 		$this->assertStringContainsString(
-			"--wc-block-product-gallery-image-ratio-height:{$height};",
+			"--wc-block-product-gallery-large-image-ratio-height:{$height};",
 			$markup,
-			"Expected Product Gallery markup to expose a {$width}:{$height} aspect ratio height variable."
+			"Expected Product Gallery markup to expose a {$width}:{$height} large image aspect ratio height variable."
 		);
 	}
 
@@ -211,7 +211,7 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Should expose Product Image style aspect ratios as gallery CSS variables.
+	 * @testdox Should expose Product Image style aspect ratios as large image CSS variables.
 	 */
 	public function test_product_gallery_exposes_custom_product_image_aspect_ratio_css_variables(): void {
 		$data = $this->create_product_with_gallery( 3 );
@@ -228,13 +228,13 @@ class ProductGallery extends \WP_UnitTestCase {
 			)
 		);
 
-		$this->assert_product_gallery_ratio_variables( $markup, '3', '5' );
+		$this->assert_product_gallery_large_image_ratio_variables( $markup, '3', '5' );
 
 		$this->cleanup_product_data( $data );
 	}
 
 	/**
-	 * @testdox Should expose Product Image aspectRatio attributes as gallery CSS variables.
+	 * @testdox Should expose Product Image aspectRatio attributes as large image CSS variables.
 	 */
 	public function test_product_gallery_exposes_legacy_product_image_aspect_ratio_css_variables(): void {
 		$data = $this->create_product_with_gallery( 3 );
@@ -247,7 +247,7 @@ class ProductGallery extends \WP_UnitTestCase {
 			)
 		);
 
-		$this->assert_product_gallery_ratio_variables( $markup, '7', '4' );
+		$this->assert_product_gallery_large_image_ratio_variables( $markup, '7', '4' );
 
 		$this->cleanup_product_data( $data );
 	}
@@ -273,7 +273,7 @@ class ProductGallery extends \WP_UnitTestCase {
 			)
 		);
 
-		$this->assert_product_gallery_ratio_variables( $markup, '5', '8' );
+		$this->assert_product_gallery_large_image_ratio_variables( $markup, '5', '8' );
 
 		$this->cleanup_product_data( $data );
 	}
