@@ -20,9 +20,12 @@ class ProductTransientsDeferrerTest extends \WC_Unit_Test_Case {
 		try {
 			$deferrer->start_deferring();
 
-			$priority = has_action( 'shutdown', array( $deferrer, 'handle_shutdown' ) );
-			$this->assertSame( 0, $priority );
-			$this->assertLessThan( 10, $priority );
+			$sync_priority = has_action( 'shutdown', array( 'WC_Post_Data', 'do_deferred_product_sync' ) );
+			$priority      = has_action( 'shutdown', array( $deferrer, 'handle_shutdown' ) );
+
+			$this->assertNotFalse( $priority );
+			$this->assertNotFalse( $sync_priority );
+			$this->assertLessThan( $sync_priority, $priority );
 
 			$deferrer->stop_deferring();
 			$this->assertFalse( has_action( 'shutdown', array( $deferrer, 'handle_shutdown' ) ) );
