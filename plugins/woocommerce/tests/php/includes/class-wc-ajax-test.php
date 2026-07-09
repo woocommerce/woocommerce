@@ -16,6 +16,19 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 	/**
+	 * Sets up the test fixture.
+	 */
+	public function set_up() {
+		parent::set_up();
+
+		// The WP AJAX test case removes these before the class runs, but mixed
+		// test sequences can re-add core admin hooks before individual tests.
+		remove_action( 'admin_init', '_maybe_update_core' );
+		remove_action( 'admin_init', '_maybe_update_plugins' );
+		remove_action( 'admin_init', '_maybe_update_themes' );
+	}
+
+	/**
 	 * Stock should not be reduced from AJAX when an item is added to an order.
 	 */
 	public function test_add_item_to_pending_payment_order() {
@@ -107,11 +120,15 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$_POST['permissions'] = 'read';
 		$_POST['description'] = $description;
 
+		$output_buffering_level = ob_get_level();
+
 		try {
 			$this->_handleAjax( 'woocommerce_update_api_key' );
 		} catch ( WPAjaxDieContinueException $e ) {
 			// wp_die() doesn't actually occur, so we need to clean up WC_AJAX::update_api_key's output buffer.
-			ob_end_clean();
+			if ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
+			}
 		}
 
 		$response = json_decode( $this->_last_response, true );
@@ -650,10 +667,14 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$_POST['metakeyinput']         = 'my_test_key';
 		$_POST['metavalue']            = 'my_test_value';
 
+		$output_buffering_level = ob_get_level();
+
 		try {
 			$this->_handleAjax( 'woocommerce_order_add_meta' );
 		} catch ( WPAjaxDieContinueException $e ) {
-			ob_end_clean();
+			if ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
+			}
 		}
 
 		$this->assertStringContainsString(
