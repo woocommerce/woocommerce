@@ -324,6 +324,8 @@ class Features {
 		/**
 		 * Filter allowing WooCommerce Admin optional features to be disabled.
 		 *
+		 * @since 4.0.0
+		 *
 		 * @param bool $disabled False.
 		 */
 		if ( apply_filters( 'woocommerce_admin_disabled', false ) ) {
@@ -529,6 +531,26 @@ class Features {
 		 * @param array $features Array of feature slugs.
 		 */
 		return apply_filters( 'woocommerce_admin_features', array_keys( self::get_legacy_feature_compatibility_defaults() ) );
+	}
+
+	/**
+	 * Checks if Analytics was disabled by legacy WooCommerce Admin filters.
+	 *
+	 * @return bool True if Analytics was disabled by legacy filters.
+	 */
+	public static function is_analytics_disabled_by_legacy_filters(): bool {
+		/**
+		 * Filter allowing WooCommerce Admin optional features to be disabled.
+		 *
+		 * @since 4.0.0
+		 *
+		 * @param bool $disabled False.
+		 */
+		if ( apply_filters( 'woocommerce_admin_disabled', false ) ) {
+			return true;
+		}
+
+		return ! in_array( 'analytics', self::get_features_with_legacy_compatibility_defaults(), true );
 	}
 
 	/**
