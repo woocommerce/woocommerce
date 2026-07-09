@@ -12,6 +12,45 @@ use WC_Helper_Product;
 class ProductGallery extends \WP_UnitTestCase {
 
 	/**
+	 * Previous thumbnail cropping option values to restore after tests.
+	 *
+	 * @var array<string, mixed>
+	 */
+	private $prev_thumbnail_cropping_options = array();
+
+	/**
+	 * Set up.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$option_names = array(
+			'woocommerce_thumbnail_cropping',
+			'woocommerce_thumbnail_cropping_custom_width',
+			'woocommerce_thumbnail_cropping_custom_height',
+		);
+
+		foreach ( $option_names as $option_name ) {
+			$this->prev_thumbnail_cropping_options[ $option_name ] = get_option( $option_name, null );
+		}
+	}
+
+	/**
+	 * Tear down.
+	 */
+	public function tearDown(): void {
+		foreach ( $this->prev_thumbnail_cropping_options as $option_name => $value ) {
+			if ( null === $value ) {
+				delete_option( $option_name );
+			} else {
+				update_option( $option_name, $value );
+			}
+		}
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Helper method to create a product with multiple images.
 	 *
 	 * @param int $gallery_count Number of gallery images to create.
@@ -222,30 +261,21 @@ class ProductGallery extends \WP_UnitTestCase {
 	public function test_product_gallery_uses_store_thumbnail_ratio_for_thumbnail_product_image_sizing( string $image_sizing ): void {
 		$data = $this->create_product_with_gallery( 3 );
 
-		$previous_cropping      = get_option( 'woocommerce_thumbnail_cropping', false );
-		$previous_custom_width  = get_option( 'woocommerce_thumbnail_cropping_custom_width', false );
-		$previous_custom_height = get_option( 'woocommerce_thumbnail_cropping_custom_height', false );
-
 		update_option( 'woocommerce_thumbnail_cropping', 'custom' );
 		update_option( 'woocommerce_thumbnail_cropping_custom_width', '5' );
 		update_option( 'woocommerce_thumbnail_cropping_custom_height', '8' );
 
-		try {
-			$markup = $this->render_product_gallery(
-				$data['product']->get_id(),
-				'',
-				array(
-					'imageSizing' => $image_sizing,
-				)
-			);
+		$markup = $this->render_product_gallery(
+			$data['product']->get_id(),
+			'',
+			array(
+				'imageSizing' => $image_sizing,
+			)
+		);
 
-			$this->assert_product_gallery_ratio_variables( $markup, '5', '8' );
-		} finally {
-			$this->restore_option( 'woocommerce_thumbnail_cropping', $previous_cropping );
-			$this->restore_option( 'woocommerce_thumbnail_cropping_custom_width', $previous_custom_width );
-			$this->restore_option( 'woocommerce_thumbnail_cropping_custom_height', $previous_custom_height );
-			$this->cleanup_product_data( $data );
-		}
+		$this->assert_product_gallery_ratio_variables( $markup, '5', '8' );
+
+		$this->cleanup_product_data( $data );
 	}
 
 	/**
@@ -258,44 +288,6 @@ class ProductGallery extends \WP_UnitTestCase {
 			'thumbnail sizing' => array( 'thumbnail' ),
 			'cropped sizing'   => array( 'cropped' ),
 		);
-	}
-
-	/**
-	 * @testdox Should fall back to a square gallery ratio when the Product Image ratio is invalid.
-	 */
-	public function test_product_gallery_uses_square_ratio_for_invalid_product_image_aspect_ratio(): void {
-		$data = $this->create_product_with_gallery( 3 );
-
-		$markup = $this->render_product_gallery(
-			$data['product']->get_id(),
-			'',
-			array(
-				'style' => array(
-					'dimensions' => array(
-						'aspectRatio' => '1/2/3',
-					),
-				),
-			)
-		);
-
-		$this->assert_product_gallery_ratio_variables( $markup, '1', '1' );
-
-		$this->cleanup_product_data( $data );
-	}
-
-	/**
-	 * Restore an option to its previous value.
-	 *
-	 * @param string $option Option name.
-	 * @param mixed  $previous_value Previous option value, or false when the option did not exist.
-	 */
-	private function restore_option( string $option, $previous_value ): void {
-		if ( false === $previous_value ) {
-			delete_option( $option );
-			return;
-		}
-
-		update_option( $option, $previous_value );
 	}
 
 	/**

@@ -86,6 +86,20 @@ const findProductImageBlock = (
 	return undefined;
 };
 
+const resolveProductImageAspectRatio = (
+	attributes: Partial< ProductImageBlockAttributes > | undefined,
+	storeAspectRatio: string | null
+): string | undefined => {
+	const { style, aspectRatio, imageSizing } = attributes ?? {};
+
+	return resolveAspectRatio(
+		style,
+		aspectRatio,
+		storeAspectRatio,
+		imageSizing
+	);
+};
+
 const parseAspectRatio = (
 	aspectRatio: string | undefined
 ): ParsedAspectRatio => {
@@ -141,7 +155,7 @@ export const Edit = withProductDataContext(
 					select( blockEditorStore ).getBlocks( clientId )
 				);
 
-				return resolveAspectRatio(
+				return resolveProductImageAspectRatio(
 					productImageBlock?.attributes,
 					storeAspectRatio
 				);

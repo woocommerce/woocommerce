@@ -182,7 +182,12 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		'thumbnailAspectRatio',
 		null
 	);
-	const finalAspectRatio = resolveAspectRatio( props, storeAspectRatio );
+	const finalAspectRatio = resolveAspectRatio(
+		style,
+		aspectRatio,
+		storeAspectRatio,
+		imageSizing
+	);
 	const aspectRatioClass = `wc-block-components-product-image--aspect-ratio-${
 		finalAspectRatio ? finalAspectRatio.replace( '/', '-' ) : 'auto'
 	}`;

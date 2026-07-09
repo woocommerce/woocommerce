@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
+use Automattic\WooCommerce\Blocks\Utils\ProductImageUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
@@ -124,55 +125,6 @@ class ProductImage extends AbstractBlock {
 	}
 
 	/**
-	 * Get the store thumbnail aspect ratio from WooCommerce Customizer settings.
-	 *
-	 * @return string|null CSS aspect ratio value (e.g. "1/1", "4/3"), or null when uncropped.
-	 */
-	private function get_store_thumbnail_aspect_ratio() {
-		$cropping = get_option( 'woocommerce_thumbnail_cropping', '1:1' );
-
-		if ( 'uncropped' === $cropping ) {
-			return null;
-		}
-
-		if ( 'custom' === $cropping ) {
-			$width  = max( 1, (float) get_option( 'woocommerce_thumbnail_cropping_custom_width', '4' ) );
-			$height = max( 1, (float) get_option( 'woocommerce_thumbnail_cropping_custom_height', '3' ) );
-
-			return $width . '/' . $height;
-		}
-
-		return str_replace( ':', '/', $cropping );
-	}
-
-	/**
-	 * Resolve the aspect ratio for a product image.
-	 *
-	 * Block-level overrides take priority over store thumbnail cropping settings.
-	 *
-	 * @param array $attributes Parsed block attributes.
-	 * @return string|null CSS aspect ratio value, or null when no ratio should be applied.
-	 */
-	private function resolve_aspect_ratio( $attributes ) {
-		if ( ! empty( $attributes['style']['dimensions']['aspectRatio'] ) ) {
-			return $attributes['style']['dimensions']['aspectRatio'];
-		}
-
-		if ( ! empty( $attributes['aspectRatio'] ) ) {
-			return $attributes['aspectRatio'];
-		}
-
-		// For backwards compatibility, we interpret "thumbnail" as following
-		// the store thumbnail cropping settings.
-		// "cropped" was used as a synonym for "thumbnail" in the past, but it's now deprecated.
-		if ( 'thumbnail' === $attributes['imageSizing'] || 'cropped' === $attributes['imageSizing'] ) {
-			return $this->get_store_thumbnail_aspect_ratio();
-		}
-
-		return null;
-	}
-
-	/**
 	 * Render Image.
 	 *
 	 * @param \WC_Product $product Product object.
@@ -194,7 +146,7 @@ class ProductImage extends AbstractBlock {
 			$image_style .= sprintf( 'object-fit:%s;', $attributes['scale'] );
 		}
 
-		$aspect_ratio = $this->resolve_aspect_ratio( $attributes );
+		$aspect_ratio = ProductImageUtils::resolve_aspect_ratio( $attributes );
 		if ( $aspect_ratio ) {
 			$image_style .= sprintf( 'aspect-ratio:%s;', $aspect_ratio );
 		}
@@ -272,7 +224,7 @@ class ProductImage extends AbstractBlock {
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
 		$this->asset_data_registry->add( 'placeholderImgSrcFullSize', wc_placeholder_img_src( 'woocommerce_single' ) );
-		$this->asset_data_registry->add( 'thumbnailAspectRatio', $this->get_store_thumbnail_aspect_ratio() );
+		$this->asset_data_registry->add( 'thumbnailAspectRatio', ProductImageUtils::get_store_thumbnail_aspect_ratio() );
 	}
 
 	/**
@@ -289,7 +241,7 @@ class ProductImage extends AbstractBlock {
 		$post_id               = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
 		$image_id              = isset( $block->context['imageId'] ) ? (int) $block->context['imageId'] : null;
 		$product               = wc_get_product( $post_id );
-		$resolved_aspect_ratio = $this->resolve_aspect_ratio( $parsed_attributes );
+		$resolved_aspect_ratio = ProductImageUtils::resolve_aspect_ratio( $parsed_attributes );
 		$aspect_ratio_class    = 'wc-block-components-product-image--aspect-ratio-' . ( $resolved_aspect_ratio ? str_replace( '/', '-', $resolved_aspect_ratio ) : 'auto' );
 
 		$classes = implode(
