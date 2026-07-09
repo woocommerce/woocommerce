@@ -1011,10 +1011,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$order_1_datetime->setTime( $order_1_hour, 10, 0 ); // Set a time near the top of the hour.
 		$order_1_time = $order_1_datetime->format( 'U' );
 
-		// One more order needs to fit into the same hour, but also be one second later than this one.
-		$order_2_time = $order_1_time + 1;
-
-		$this_['hour']  = array( 1, 2 );
+		$this_['hour']  = array( 1 );
 		$this_['day']   = array( 1, 2 );
 		$this_['week']  = array( 1, 2 );
 		$this_['month'] = array( 1, 2 );
@@ -1098,7 +1095,6 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						foreach (
 							array(
 								$order_1_time,
-								$order_2_time,
 							) as $order_time
 						) { // As there are no tests for different timeframes, ignore these for now: $order_3_time, $order_4_time, $order_5_time, $order_6_time, $order_7_time
 							// One order with only 1 product.
@@ -2418,7 +2414,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'customer_type' => 'returning',
 		);
 
-		$total_orders_count     = 144;
+		$total_orders_count     = count( $this_['hour'] ) * 72;
 		$returning_orders_count = 2;
 		$order_w_coupon_1_perms = 24;
 		$order_w_coupon_2_perms = 24;

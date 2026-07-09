@@ -1434,9 +1434,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		);
 		// Ensure the order is a complete object with an initial modified date.
 		$order = wc_get_order( $order->get_id() );
-
-		// Ensure the order's initial modified date is sufficiently in the past.
-		sleep( 1 );
+		$order->set_date_modified( '2020-01-01 00:00:00' );
+		$order->save();
+		$order = wc_get_order( $order->get_id() );
 
 		$args = array(
 			'order_id' => $order->get_id(),

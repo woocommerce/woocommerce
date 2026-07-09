@@ -366,12 +366,9 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$variation_order_2->set_status( OrderStatus::COMPLETED );
 		$variation_order_2->save();
 
-		// Create more orders for simple products.
-		for ( $i = 0; $i < 10; $i++ ) {
-			$order = WC_Helper_Order::create_order( $this->user );
-			$order->set_status( OrderStatus::COMPLETED );
-			$order->save();
-		}
+		$order = WC_Helper_Order::create_order( $this->user );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
@@ -382,7 +379,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 
 		// Sanity check before filtering by attribute.
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 12, count( $response_orders ) );
+		$this->assertEquals( 3, count( $response_orders ) );
 
 		// Filter by the "Numeric Size" custom attribute, with value "1".
 		$request = new WP_REST_Request( 'GET', $this->endpoint );

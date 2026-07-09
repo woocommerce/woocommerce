@@ -80,9 +80,11 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$order2 = OrderHelper::create_order( $this->user );
 
 		$order1->set_status( OrderStatus::COMPLETED );
+		$order1->set_date_modified( '2020-01-01 00:00:00' );
 		$order1->save();
-		sleep( 1 );
+
 		$order2->set_status( OrderStatus::COMPLETED );
+		$order2->set_date_modified( '2020-01-02 00:00:00' );
 		$order2->save();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
