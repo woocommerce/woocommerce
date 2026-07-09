@@ -1235,7 +1235,7 @@ Display a product's description, attributes, and reviews
 
 ## Product Filters - woocommerce/product-filters
 
-Let shoppers filter products displayed on the page.
+Add a set of filters shoppers can use.
 
 - **Name:** woocommerce/product-filters
 - **Category:** woocommerce
@@ -1244,7 +1244,7 @@ Let shoppers filter products displayed on the page.
 
 ## Active Filters - woocommerce/product-filter-active
 
-Display the currently active filters.
+Display all active filters.
 
 - **Name:** woocommerce/product-filter-active
 - **Category:** woocommerce
@@ -1253,7 +1253,7 @@ Display the currently active filters.
 
 ## Attribute Filter - woocommerce/product-filter-attribute
 
-Enable customers to filter the product grid by selecting one or more attributes, such as color.
+Let shoppers filter products by attribute.
 
 - **Name:** woocommerce/product-filter-attribute
 - **Category:** woocommerce
@@ -1263,7 +1263,7 @@ Enable customers to filter the product grid by selecting one or more attributes,
 
 ## List - woocommerce/product-filter-checkbox-list
 
-Display a list of filter options.
+Display filter options as a list.
 
 - **Name:** woocommerce/product-filter-checkbox-list
 - **Category:** woocommerce
@@ -1283,7 +1283,7 @@ Display filter options as chips.
 
 ## Clear filters - woocommerce/product-filter-clear-button
 
-Allows shoppers to clear active filters.
+Let shoppers clear any active filters.
 
 - **Name:** woocommerce/product-filter-clear-button
 - **Category:** woocommerce
@@ -1292,7 +1292,7 @@ Allows shoppers to clear active filters.
 
 ## Price Filter - woocommerce/product-filter-price
 
-Let shoppers filter products by choosing a price range.
+Let shoppers filter products by price.
 
 - **Name:** woocommerce/product-filter-price
 - **Category:** woocommerce
@@ -1301,7 +1301,7 @@ Let shoppers filter products by choosing a price range.
 
 ## Price Slider - woocommerce/product-filter-price-slider
 
-A slider helps shopper choose a price range.
+Let shoppers choose a price range with a slider.
 
 - **Name:** woocommerce/product-filter-price-slider
 - **Category:** woocommerce
@@ -1311,7 +1311,7 @@ A slider helps shopper choose a price range.
 
 ## Rating Filter - woocommerce/product-filter-rating
 
-Enable customers to filter the product collection by rating.
+Let shoppers filter products by rating.
 
 - **Name:** woocommerce/product-filter-rating
 - **Category:** woocommerce
@@ -1321,7 +1321,7 @@ Enable customers to filter the product collection by rating.
 
 ## Chips - woocommerce/product-filter-removable-chips
 
-Display removable active filters as chips.
+Display active filters as removable chips.
 
 - **Name:** woocommerce/product-filter-removable-chips
 - **Category:** woocommerce
@@ -1329,7 +1329,7 @@ Display removable active filters as chips.
 - **Supports:** interactivity, layout (default, ~~allowInheriting~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~)
 - **Attributes:** chipBackground, chipBorder, chipText, customChipBackground, customChipBorder, customChipText
 
-## Availability filter - woocommerce/product-filter-status
+## Availability Filter - woocommerce/product-filter-status
 
 Let shoppers filter products by availability.
 
@@ -1341,7 +1341,7 @@ Let shoppers filter products by availability.
 
 ## Taxonomy Filter - woocommerce/product-filter-taxonomy
 
-Enable customers to filter the product collection by selecting one or more taxonomy terms, such as categories, brands, or tags.
+Let shoppers filter products by category, brand, or tag.
 
 - **Name:** woocommerce/product-filter-taxonomy
 - **Category:** woocommerce
