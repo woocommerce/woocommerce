@@ -294,7 +294,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 	.wc-settings-ui__info {
 		background: var(--wpds-color-background-surface-neutral-weak);
-		border-radius: 4px;
+		border-radius: var(--wpds-border-radius-md);
 		padding: 16px;
 
 		strong {
