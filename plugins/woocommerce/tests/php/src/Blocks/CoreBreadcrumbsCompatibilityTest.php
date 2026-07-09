@@ -43,6 +43,20 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	private $original_woocommerce_permalinks;
 
 	/**
+	 * Original product post type archive setting.
+	 *
+	 * @var mixed
+	 */
+	private $original_product_has_archive;
+
+	/**
+	 * Original request query vars.
+	 *
+	 * @var array
+	 */
+	private $original_wp_query_vars;
+
+	/**
 	 * Shop page ID.
 	 *
 	 * @var int
@@ -64,11 +78,17 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		global $wp;
+
 		$this->sut = new CoreBreadcrumbsCompatibility();
+
+		$product_post_type = get_post_type_object( 'product' );
 
 		$this->original_shop_page_id            = get_option( 'woocommerce_shop_page_id' );
 		$this->original_myaccount_page_id       = get_option( 'woocommerce_myaccount_page_id' );
 		$this->original_woocommerce_permalinks  = get_option( 'woocommerce_permalinks' );
+		$this->original_product_has_archive     = $product_post_type ? $product_post_type->has_archive : null;
+		$this->original_wp_query_vars           = $wp instanceof \WP && is_array( $wp->query_vars ) ? $wp->query_vars : array();
 		$this->shop_page_id                     = self::factory()->post->create(
 			array(
 				'post_type'   => 'page',
@@ -91,6 +111,10 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_shop_page_id', $this->shop_page_id );
 		update_option( 'woocommerce_myaccount_page_id', $this->my_account_page_id );
 		update_option( 'woocommerce_permalinks', $woocommerce_permalinks );
+
+		if ( $product_post_type ) {
+			$product_post_type->has_archive = get_page_uri( $this->shop_page_id );
+		}
 
 		register_post_type(
 			'wc_story',
@@ -133,6 +157,8 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
+		global $wp;
+
 		remove_filter( 'block_core_breadcrumbs_post_type_settings', array( $this->sut, 'set_product_breadcrumbs_preferred_taxonomy' ), 10 );
 		remove_filter( 'block_core_breadcrumbs_items', array( $this->sut, 'apply_woocommerce_breadcrumb_filters' ), 10 );
 		remove_filter( 'woocommerce_is_account_page', '__return_true' );
@@ -141,6 +167,15 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_myaccount_page_id', $this->original_myaccount_page_id );
 		update_option( 'woocommerce_permalinks', $this->original_woocommerce_permalinks );
 
+		$product_post_type = get_post_type_object( 'product' );
+		if ( $product_post_type ) {
+			$product_post_type->has_archive = $this->original_product_has_archive;
+		}
+
+		if ( $wp instanceof \WP ) {
+			$wp->query_vars = $this->original_wp_query_vars;
+		}
+
 		if ( post_type_exists( 'wc_story' ) ) {
 			unregister_post_type( 'wc_story' );
 		}
@@ -148,11 +183,6 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		if ( taxonomy_exists( 'wc_topic' ) ) {
 			unregister_taxonomy( 'wc_topic' );
 		}
-
-		global $wp, $wp_query, $post;
-		$wp       = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$wp_query = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$post     = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		parent::tearDown();
 	}
@@ -211,33 +241,76 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should apply the WooCommerce Home breadcrumb URL filter.
+	 */
+	public function test_core_breadcrumbs_apply_home_breadcrumb_url_filter(): void {
+		$callback = function () {
+			return home_url( '/storefront/' );
+		};
+		add_filter( 'woocommerce_breadcrumb_home_url', $callback );
+
+		try {
+			$result = $this->apply_core_breadcrumb_filters(
+				$this->get_breadcrumb_item( 'Current page' )
+			);
+		} finally {
+			remove_filter( 'woocommerce_breadcrumb_home_url', $callback );
+		}
+
+		$this->assertSame(
+			array(
+				$this->get_home_breadcrumb_item( home_url( '/storefront/' ) ),
+				$this->get_breadcrumb_item( 'Current page' ),
+			),
+			$result,
+			'Core Breadcrumbs should use the filtered WooCommerce Home breadcrumb URL.'
+		);
+	}
+
+	/**
+	 * @testdox Should use the default Home breadcrumb URL when the WooCommerce Home URL filter returns a non-string.
+	 */
+	public function test_core_breadcrumbs_use_default_home_breadcrumb_url_for_non_string_filter_value(): void {
+		$callback = function () {
+			return array();
+		};
+		add_filter( 'woocommerce_breadcrumb_home_url', $callback );
+
+		try {
+			$result = $this->apply_core_breadcrumb_filters(
+				$this->get_breadcrumb_item( 'Current page' )
+			);
+		} finally {
+			remove_filter( 'woocommerce_breadcrumb_home_url', $callback );
+		}
+
+		$this->assertSame(
+			home_url(),
+			$result[0]['url'],
+			'Core Breadcrumbs should fall back to the default WooCommerce Home breadcrumb URL.'
+		);
+	}
+
+	/**
 	 * @testdox Should use the shop page title for product archive breadcrumbs.
 	 */
 	public function test_core_breadcrumbs_use_shop_page_title_for_product_archive_item(): void {
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'All Products',
-				'url'   => get_post_type_archive_link( 'product' ),
-			),
-			array(
-				'label' => 'Logo Tee',
-			),
+		$product_item = $this->get_breadcrumb_item( 'Logo Tee' );
+
+		$result = $this->apply_core_breadcrumb_filters(
+			$this->get_breadcrumb_item( 'All Products', $this->get_product_archive_url() ),
+			$product_item
 		);
 
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
-		$this->assertSame( array( 'Home', 'Catalog', 'Logo Tee' ), $this->get_breadcrumb_labels( $result ), 'Product archive breadcrumb should use the Shop page title.' );
 		$this->assertSame(
-			array(
-				$this->get_home_breadcrumb_item(),
-				array(
-					'label' => 'Catalog',
-					'url'   => get_post_type_archive_link( 'product' ),
-				),
-				array(
-					'label' => 'Logo Tee',
-				),
+			array( 'Home', 'Catalog', 'Logo Tee' ),
+			$this->get_breadcrumb_labels( $result ),
+			'Product archive breadcrumb should use the Shop page title.'
+		);
+		$this->assertSame(
+			$this->get_core_breadcrumb_items(
+				$this->get_breadcrumb_item( 'Catalog', $this->get_product_archive_url() ),
+				$product_item
 			),
 			$result,
 			'Product archive breadcrumb should preserve Core item shape while updating the label.'
@@ -251,16 +324,11 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		$category_id = $this->create_term( 'Shirts', 'product_cat', array( 'slug' => 'shirts' ) );
 		$this->go_to( get_term_link( $category_id, 'product_cat' ) );
 
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'Shirts',
-			),
+		$this->assert_core_breadcrumb_labels(
+			array( 'Home', 'Catalog', 'Shirts' ),
+			'Product category breadcrumbs should include the Shop page crumb.',
+			$this->get_breadcrumb_item( 'Shirts' )
 		);
-
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
-		$this->assertSame( array( 'Home', 'Catalog', 'Shirts' ), $this->get_breadcrumb_labels( $result ), 'Product category breadcrumbs should include the Shop page crumb.' );
 	}
 
 	/**
@@ -270,29 +338,17 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		$category_id = $this->create_term( 'Shirts', 'product_cat', array( 'slug' => 'shirts' ) );
 		$this->go_to( get_term_link( $category_id, 'product_cat' ) );
 
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'Existing catalog',
-				'url'   => untrailingslashit( get_post_type_archive_link( 'product' ) ),
-			),
-			array(
-				'label' => 'Shirts',
-			),
+		$shop_url   = untrailingslashit( $this->get_shop_page_url() );
+		$shirt_item = $this->get_breadcrumb_item( 'Shirts' );
+		$result     = $this->apply_core_breadcrumb_filters(
+			$this->get_breadcrumb_item( 'Existing catalog', $shop_url ),
+			$shirt_item
 		);
 
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
 		$this->assertSame(
-			array(
-				$this->get_home_breadcrumb_item(),
-				array(
-					'label' => 'Catalog',
-					'url'   => untrailingslashit( get_post_type_archive_link( 'product' ) ),
-				),
-				array(
-					'label' => 'Shirts',
-				),
+			$this->get_core_breadcrumb_items(
+				$this->get_breadcrumb_item( 'Catalog', $shop_url ),
+				$shirt_item
 			),
 			$result,
 			'Product category breadcrumbs should reuse the existing Shop crumb instead of inserting another one.'
@@ -310,16 +366,10 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		$category_id = $this->create_term( 'Shirts', 'product_cat', array( 'slug' => 'shirts' ) );
 		$this->go_to( get_term_link( $category_id, 'product_cat' ) );
 
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'Shirts',
-			),
+		$this->assert_core_breadcrumbs_unchanged(
+			'Product category breadcrumbs should remain unchanged when WooCommerce would not prepend Shop.',
+			$this->get_breadcrumb_item( 'Shirts' )
 		);
-
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
-		$this->assertSame( $items, $result, 'Product category breadcrumbs should remain unchanged when WooCommerce would not prepend Shop.' );
 	}
 
 	/**
@@ -329,16 +379,11 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		$tag_id = $this->create_term( 'Sale', 'product_tag', array( 'slug' => 'sale' ) );
 		$this->go_to( get_term_link( $tag_id, 'product_tag' ) );
 
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'Sale',
-			),
+		$this->assert_core_breadcrumb_labels(
+			array( 'Home', 'Catalog', 'Products tagged &ldquo;Sale&rdquo;' ),
+			'Product tag breadcrumbs should match WooCommerce labels.',
+			$this->get_breadcrumb_item( 'Sale' )
 		);
-
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
-		$this->assertSame( array( 'Home', 'Catalog', 'Products tagged &ldquo;Sale&rdquo;' ), $this->get_breadcrumb_labels( $result ), 'Product tag breadcrumbs should match WooCommerce labels.' );
 	}
 
 	/**
@@ -349,20 +394,12 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		$this->go_to( get_term_link( $tag_id, 'product_tag' ) );
 		set_query_var( 'paged', 2 );
 
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'Sale',
-				'url'   => get_term_link( $tag_id, 'product_tag' ),
-			),
-			array(
-				'label' => 'Page 2',
-			),
+		$this->assert_core_breadcrumb_labels(
+			array( 'Home', 'Catalog', 'Products tagged &ldquo;Sale&rdquo;', 'Page 2' ),
+			'Paginated product tag breadcrumbs should keep the pagination crumb.',
+			$this->get_breadcrumb_item( 'Sale', get_term_link( $tag_id, 'product_tag' ) ),
+			$this->get_breadcrumb_item( 'Page 2' )
 		);
-
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
-		$this->assertSame( array( 'Home', 'Catalog', 'Products tagged &ldquo;Sale&rdquo;', 'Page 2' ), $this->get_breadcrumb_labels( $result ), 'Paginated product tag breadcrumbs should keep the pagination crumb.' );
 	}
 
 	/**
@@ -371,141 +408,34 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	public function test_core_breadcrumbs_prepend_shop_page_and_label_product_search_items(): void {
 		$this->go_to( '/?s=hoodie&post_type=product' );
 
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'Search results for: "hoodie"',
-			),
+		$this->assert_core_breadcrumb_labels(
+			array( 'Home', 'Catalog', 'Search results for &ldquo;hoodie&rdquo;' ),
+			'Product search breadcrumbs should include the Shop page crumb and WooCommerce search label.',
+			$this->get_breadcrumb_item( 'Search results for: "hoodie"' )
 		);
-
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
-		$this->assertSame( array( 'Home', 'Catalog', 'Search results for &ldquo;hoodie&rdquo;' ), $this->get_breadcrumb_labels( $result ), 'Product search breadcrumbs should include the Shop page crumb and WooCommerce search label.' );
 	}
 
 	/**
 	 * @testdox Should preserve pagination when labeling product search breadcrumbs.
 	 */
 	public function test_core_breadcrumbs_label_paginated_product_search_items(): void {
+		self::factory()->post->create_many(
+			12,
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'publish',
+				'post_title'  => 'Hoodie',
+			)
+		);
 		$this->go_to( '/?s=hoodie&post_type=product&paged=2' );
 		set_query_var( 'paged', 2 );
 
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'Search results for: "hoodie"',
-				'url'   => get_pagenum_link( 1 ),
-			),
-			array(
-				'label' => 'Page 2',
-			),
+		$this->assert_core_breadcrumb_labels(
+			array( 'Home', 'Catalog', 'Search results for &ldquo;hoodie&rdquo;', 'Page 2' ),
+			'Paginated product search breadcrumbs should keep the pagination crumb.',
+			$this->get_breadcrumb_item( 'Search results for: "hoodie"', get_pagenum_link( 1 ) ),
+			$this->get_breadcrumb_item( 'Page 2' )
 		);
-
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
-		$this->assertSame( array( 'Home', 'Catalog', 'Search results for &ldquo;hoodie&rdquo;', 'Page 2' ), $this->get_breadcrumb_labels( $result ), 'Paginated product search breadcrumbs should keep the pagination crumb.' );
-	}
-
-	/**
-	 * @testdox Should use WooCommerce labels for post tag breadcrumbs.
-	 */
-	public function test_core_breadcrumbs_label_post_tag_items(): void {
-		$tag_id = $this->create_term( 'Breadcrumb Tag', 'post_tag', array( 'slug' => 'breadcrumb-tag' ) );
-		$this->go_to( get_term_link( $tag_id, 'post_tag' ) );
-
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'Breadcrumb Tag',
-			),
-		);
-
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
-		$this->assertSame( array( 'Home', 'Posts tagged &ldquo;Breadcrumb Tag&rdquo;' ), $this->get_breadcrumb_labels( $result ), 'Post tag breadcrumbs should match WooCommerce labels.' );
-	}
-
-	/**
-	 * @testdox Should preserve pagination when labeling post tag breadcrumbs.
-	 */
-	public function test_core_breadcrumbs_label_paginated_post_tag_items(): void {
-		$tag_id = $this->create_term( 'Breadcrumb Tag', 'post_tag', array( 'slug' => 'breadcrumb-tag' ) );
-		$this->go_to( get_term_link( $tag_id, 'post_tag' ) );
-		set_query_var( 'paged', 2 );
-
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'Breadcrumb Tag',
-				'url'   => get_tag_link( $tag_id ),
-			),
-			array(
-				'label' => 'Page 2',
-			),
-		);
-
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
-		$this->assertSame( array( 'Home', 'Posts tagged &ldquo;Breadcrumb Tag&rdquo;', 'Page 2' ), $this->get_breadcrumb_labels( $result ), 'Paginated post tag breadcrumbs should keep the pagination crumb.' );
-	}
-
-	/**
-	 * @testdox Should use WooCommerce labels for author breadcrumbs.
-	 */
-	public function test_core_breadcrumbs_label_author_items(): void {
-		$user_id = self::factory()->user->create(
-			array(
-				'display_name' => 'Breadcrumb Author',
-			)
-		);
-		self::factory()->post->create(
-			array(
-				'post_author' => $user_id,
-			)
-		);
-		$this->go_to( get_author_posts_url( $user_id ) );
-
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'Breadcrumb Author',
-			),
-		);
-
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
-		$this->assertSame( array( 'Home', 'Author: Breadcrumb Author' ), $this->get_breadcrumb_labels( $result ), 'Author breadcrumbs should match WooCommerce labels.' );
-	}
-
-	/**
-	 * @testdox Should use WooCommerce labels for day archive breadcrumbs.
-	 */
-	public function test_core_breadcrumbs_label_day_archive_items(): void {
-		self::factory()->post->create(
-			array(
-				'post_date' => '2026-05-08 10:00:00',
-			)
-		);
-		$this->go_to( get_day_link( 2026, 5, 8 ) );
-
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => '2026',
-				'url'   => get_year_link( 2026 ),
-			),
-			array(
-				'label' => 'May',
-				'url'   => get_month_link( 2026, 5 ),
-			),
-			array(
-				'label' => '8',
-			),
-		);
-
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
-		$this->assertSame( array( 'Home', '2026', 'May', '08' ), $this->get_breadcrumb_labels( $result ), 'Day archive breadcrumbs should use WooCommerce zero-padded day labels.' );
 	}
 
 	/**
@@ -514,16 +444,11 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	public function test_core_breadcrumbs_label_custom_post_type_archive_items(): void {
 		$this->go_to( get_post_type_archive_link( 'wc_story' ) );
 
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'Story Archives',
-			),
+		$this->assert_core_breadcrumb_labels(
+			array( 'Home', 'Stories' ),
+			'Custom post type archive breadcrumbs should use the WooCommerce archive label.',
+			$this->get_breadcrumb_item( 'Story Archives' )
 		);
-
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
-		$this->assertSame( array( 'Home', 'Stories' ), $this->get_breadcrumb_labels( $result ), 'Custom post type archive breadcrumbs should use the WooCommerce archive label.' );
 	}
 
 	/**
@@ -549,28 +474,14 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		wp_set_post_terms( $post_id, array( $child_topic_id ), 'wc_topic' );
 		$this->go_to( get_permalink( $post_id ) );
 
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'Story Archives',
-				'url'   => get_post_type_archive_link( 'wc_story' ),
-			),
-			array(
-				'label' => 'Topic Parent',
-				'url'   => get_term_link( $parent_topic_id, 'wc_topic' ),
-			),
-			array(
-				'label' => 'Topic Child',
-				'url'   => get_term_link( $child_topic_id, 'wc_topic' ),
-			),
-			array(
-				'label' => 'Breadcrumb Story',
-			),
+		$this->assert_core_breadcrumb_labels(
+			array( 'Home', 'Story', 'Breadcrumb Story' ),
+			'Custom post type single breadcrumbs should use the WooCommerce trail.',
+			$this->get_breadcrumb_item( 'Story Archives', get_post_type_archive_link( 'wc_story' ) ),
+			$this->get_breadcrumb_item( 'Topic Parent', get_term_link( $parent_topic_id, 'wc_topic' ) ),
+			$this->get_breadcrumb_item( 'Topic Child', get_term_link( $child_topic_id, 'wc_topic' ) ),
+			$this->get_breadcrumb_item( 'Breadcrumb Story' )
 		);
-
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
-		$this->assertSame( array( 'Home', 'Story', 'Breadcrumb Story' ), $this->get_breadcrumb_labels( $result ), 'Custom post type single breadcrumbs should use the WooCommerce trail.' );
 	}
 
 	/**
@@ -588,20 +499,12 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		);
 		$this->go_to( get_term_link( $child_topic_id, 'wc_topic' ) );
 
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'Topic Parent',
-				'url'   => get_term_link( $parent_topic_id, 'wc_topic' ),
-			),
-			array(
-				'label' => 'Topic Child',
-			),
+		$this->assert_core_breadcrumb_labels(
+			array( 'Home', 'Topics', 'Topic Parent', 'Topic Child' ),
+			'Custom taxonomy breadcrumbs should include the taxonomy label crumb.',
+			$this->get_breadcrumb_item( 'Topic Parent', get_term_link( $parent_topic_id, 'wc_topic' ) ),
+			$this->get_breadcrumb_item( 'Topic Child' )
 		);
-
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
-		$this->assertSame( array( 'Home', 'Topics', 'Topic Parent', 'Topic Child' ), $this->get_breadcrumb_labels( $result ), 'Custom taxonomy breadcrumbs should include the taxonomy label crumb.' );
 	}
 
 	/**
@@ -610,16 +513,11 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	public function test_core_breadcrumbs_prepend_my_account_page_to_endpoint_items(): void {
 		$this->set_account_endpoint_request( 'orders' );
 
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'Orders',
-			),
+		$this->assert_core_breadcrumb_labels(
+			array( 'Home', 'My account', 'Orders' ),
+			'My Account endpoint breadcrumbs should include the account page crumb.',
+			$this->get_breadcrumb_item( 'Orders' )
 		);
-
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
-		$this->assertSame( array( 'Home', 'My account', 'Orders' ), $this->get_breadcrumb_labels( $result ), 'My Account endpoint breadcrumbs should include the account page crumb.' );
 	}
 
 	/**
@@ -628,38 +526,11 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	public function test_core_breadcrumbs_do_not_duplicate_existing_my_account_page_item(): void {
 		$this->set_account_endpoint_request( 'orders' );
 
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'My account',
-				'url'   => get_permalink( $this->my_account_page_id ),
-			),
-			array(
-				'label' => 'Orders',
-			),
+		$this->assert_core_breadcrumbs_unchanged(
+			'My Account endpoint breadcrumbs should reuse the existing My Account crumb.',
+			$this->get_breadcrumb_item( 'My account', get_permalink( $this->my_account_page_id ) ),
+			$this->get_breadcrumb_item( 'Orders' )
 		);
-
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
-		$this->assertSame( $items, $result, 'My Account endpoint breadcrumbs should reuse the existing My Account crumb.' );
-	}
-
-	/**
-	 * @testdox Should use the WooCommerce 404 breadcrumb label.
-	 */
-	public function test_core_breadcrumbs_use_woocommerce_404_label(): void {
-		$this->go_to( '/not-a-real-page/' );
-
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'Page not found',
-			),
-		);
-
-		$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
-
-		$this->assertSame( array( 'Home', 'Error 404' ), $this->get_breadcrumb_labels( $result ), '404 breadcrumbs should match WooCommerce labels.' );
 	}
 
 	/**
@@ -672,24 +543,20 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_get_breadcrumb', $callback );
 
-		$items = array(
-			$this->get_home_breadcrumb_item(),
-			array(
-				'label' => 'All Products',
-				'url'   => get_post_type_archive_link( 'product' ),
-			),
-			array(
-				'label' => 'Logo Tee',
-			),
-		);
-
 		try {
-			$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
+			$result = $this->apply_core_breadcrumb_filters(
+				$this->get_breadcrumb_item( 'All Products', $this->get_product_archive_url() ),
+				$this->get_breadcrumb_item( 'Logo Tee' )
+			);
 		} finally {
 			remove_filter( 'woocommerce_get_breadcrumb', $callback );
 		}
 
-		$this->assertSame( array( 'Home', 'Filtered Catalog', 'Logo Tee' ), $this->get_breadcrumb_labels( $result ), 'Legacy breadcrumb filters should receive WooCommerce-adjusted Core breadcrumb items.' );
+		$this->assertSame(
+			array( 'Home', 'Filtered Catalog', 'Logo Tee' ),
+			$this->get_breadcrumb_labels( $result ),
+			'Legacy breadcrumb filters should receive WooCommerce-adjusted Core breadcrumb items.'
+		);
 	}
 
 	/**
@@ -701,32 +568,120 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_get_breadcrumb', $callback );
 
-		$items = array(
-			$this->get_home_breadcrumb_item(),
+		$product_item = $this->get_breadcrumb_item(
+			'<span>Logo Tee</span>',
+			null,
 			array(
-				'label'      => '<span>Logo Tee</span>',
 				'allow_html' => true,
-			),
+			)
 		);
 
 		try {
-			$result = $this->sut->apply_woocommerce_breadcrumb_filters( $items );
+			$result = $this->apply_core_breadcrumb_filters( $product_item );
 		} finally {
 			remove_filter( 'woocommerce_get_breadcrumb', $callback );
 		}
 
-		$this->assertSame( $items, $result, 'Core breadcrumb item metadata should survive WooCommerce breadcrumb filter conversion.' );
+		$this->assertSame(
+			$this->get_core_breadcrumb_items( $product_item ),
+			$result,
+			'Core breadcrumb item metadata should survive WooCommerce breadcrumb filter conversion.'
+		);
 	}
 
 	/**
 	 * Get the Home breadcrumb item.
 	 *
+	 * @param string|null $url Home URL.
 	 * @return array Home breadcrumb item.
 	 */
-	private function get_home_breadcrumb_item(): array {
-		return array(
-			'label' => 'Home',
-			'url'   => home_url( '/' ),
+	private function get_home_breadcrumb_item( ?string $url = null ): array {
+		return $this->get_breadcrumb_item( 'Home', $url ?? home_url( '/' ) );
+	}
+
+	/**
+	 * Get a breadcrumb item.
+	 *
+	 * @param string      $label Breadcrumb label.
+	 * @param string|null $url Breadcrumb URL.
+	 * @param array       $metadata Extra breadcrumb metadata.
+	 * @return array Breadcrumb item.
+	 */
+	private function get_breadcrumb_item( string $label, ?string $url = null, array $metadata = array() ): array {
+		$item = array_merge(
+			array(
+				'label' => $label,
+			),
+			$metadata
+		);
+
+		if ( null !== $url ) {
+			$item['url'] = $url;
+		}
+
+		return $item;
+	}
+
+	/**
+	 * Get Core breadcrumb items with a Home item.
+	 *
+	 * @param array ...$items Breadcrumb items after Home.
+	 * @return array Breadcrumb items.
+	 */
+	private function get_core_breadcrumb_items( array ...$items ): array {
+		array_unshift( $items, $this->get_home_breadcrumb_item() );
+
+		return $items;
+	}
+
+	/**
+	 * Apply WooCommerce breadcrumb compatibility filters to Core breadcrumb items.
+	 *
+	 * @param array ...$items Breadcrumb items after Home.
+	 * @return array Filtered breadcrumb items.
+	 */
+	private function apply_core_breadcrumb_filters( array ...$items ): array {
+		return $this->apply_breadcrumb_filters( $this->get_core_breadcrumb_items( ...$items ) );
+	}
+
+	/**
+	 * Apply WooCommerce breadcrumb compatibility filters.
+	 *
+	 * @param array $items Breadcrumb items.
+	 * @return array Filtered breadcrumb items.
+	 */
+	private function apply_breadcrumb_filters( array $items ): array {
+		return $this->sut->apply_woocommerce_breadcrumb_filters( $items );
+	}
+
+	/**
+	 * Assert breadcrumb labels after applying filters to Core breadcrumb items.
+	 *
+	 * @param array  $expected_labels Expected breadcrumb labels.
+	 * @param string $message Assertion message.
+	 * @param array  ...$items Breadcrumb items after Home.
+	 */
+	private function assert_core_breadcrumb_labels( array $expected_labels, string $message, array ...$items ): void {
+		$this->assertSame(
+			$expected_labels,
+			$this->get_breadcrumb_labels( $this->apply_core_breadcrumb_filters( ...$items ) ),
+			$message
+		);
+	}
+
+	/**
+	 * Assert Core breadcrumb items are unchanged after applying filters.
+	 *
+	 * @param string $message Assertion message.
+	 * @param array  ...$items Breadcrumb items after Home.
+	 */
+	private function assert_core_breadcrumbs_unchanged( string $message, array ...$items ): void {
+		$core_items = $this->get_core_breadcrumb_items( ...$items );
+
+		$this->assertSame(
+			$core_items,
+			$this->apply_breadcrumb_filters( $core_items ),
+			$message
 		);
 	}
 
@@ -741,6 +696,36 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Get the product archive URL.
+	 *
+	 * @return string Product archive URL.
+	 */
+	private function get_product_archive_url(): string {
+		$url = get_post_type_archive_link( 'product' );
+
+		if ( ! is_string( $url ) ) {
+			$this->fail( 'Expected the product archive link to be available.' );
+		}
+
+		return $url;
+	}
+
+	/**
+	 * Get the Shop page URL.
+	 *
+	 * @return string Shop page URL.
+	 */
+	private function get_shop_page_url(): string {
+		$url = get_permalink( $this->shop_page_id );
+
+		if ( ! is_string( $url ) ) {
+			$this->fail( 'Expected the Shop page permalink to be available.' );
+		}
+
+		return $url;
+	}
+
+	/**
 	 * Set the current request as a My Account endpoint.
 	 *
 	 * @param string $endpoint Endpoint name.
@@ -748,8 +733,15 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	private function set_account_endpoint_request( string $endpoint ): void {
 		global $wp;
 
-		$wp             = new \stdClass(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$wp->query_vars = array( $endpoint => '' );
+		if ( ! $wp instanceof \WP ) {
+			$wp = new \WP(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+
+		if ( ! is_array( $wp->query_vars ) ) {
+			$wp->query_vars = array();
+		}
+
+		$wp->query_vars[ $endpoint ] = '';
 
 		add_filter( 'woocommerce_is_account_page', '__return_true' );
 	}

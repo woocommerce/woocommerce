@@ -57,9 +57,46 @@ final class CoreBreadcrumbsCompatibility {
 		}
 
 		$settings['taxonomy'] = 'product_cat';
-		$main_term            = $this->get_product_main_term( (int) $post_id );
+		$post_id              = (int) $post_id;
 
-		if ( $main_term ) {
+		if ( ! $post_id ) {
+			return $settings;
+		}
+
+		$terms = wc_get_product_terms(
+			$post_id,
+			'product_cat',
+			/**
+			 * Filters the arguments used to fetch product terms for breadcrumbs.
+			 *
+			 * @since 9.5.0
+			 *
+			 * @param array $args Array of arguments for `wc_get_product_terms()`.
+			 */
+			apply_filters(
+				'woocommerce_breadcrumb_product_terms_args',
+				array(
+					'orderby' => 'parent',
+					'order'   => 'DESC',
+				)
+			)
+		);
+
+		if ( empty( $terms ) || is_wp_error( $terms ) ) {
+			return $settings;
+		}
+
+		/**
+		 * Filters the main term used in product breadcrumbs.
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param \WP_Term   $main_term The main term to be used in breadcrumbs.
+		 * @param \WP_Term[] $terms     Array of all product category terms.
+		 */
+		$main_term = apply_filters( 'woocommerce_breadcrumb_main_term', $terms[0], $terms );
+
+		if ( $main_term instanceof \WP_Term ) {
 			$settings['term'] = $main_term->slug;
 		}
 
@@ -108,7 +145,25 @@ final class CoreBreadcrumbsCompatibility {
 		 */
 		$wc_crumbs = apply_filters( 'woocommerce_get_breadcrumb', $wc_crumbs, null );
 
-		return $this->convert_woocommerce_crumbs_to_core_items( $wc_crumbs, $items );
+		$core_items = array();
+
+		foreach ( $wc_crumbs as $index => $crumb ) {
+			$item  = isset( $items[ $index ] ) && is_array( $items[ $index ] ) ? $items[ $index ] : array();
+			$label = is_array( $crumb ) ? ( $crumb[0] ?? '' ) : '';
+			$url   = is_array( $crumb ) ? ( $crumb[1] ?? '' ) : '';
+
+			$item['label'] = $label;
+
+			if ( $url ) {
+				$item['url'] = $url;
+			} else {
+				unset( $item['url'] );
+			}
+
+			$core_items[] = $item;
+		}
+
+		return $core_items;
 	}
 
 	/**
@@ -129,12 +184,42 @@ final class CoreBreadcrumbsCompatibility {
 		$items = $this->prepend_taxonomy_label_to_custom_taxonomy_breadcrumbs( $items );
 		$items = $this->prepend_shop_page_to_product_search_breadcrumbs( $items );
 		$items = $this->replace_product_tag_breadcrumb_label( $items );
-		$items = $this->replace_post_tag_breadcrumb_label( $items );
-		$items = $this->replace_author_breadcrumb_label( $items );
-		$items = $this->replace_day_breadcrumb_label( $items );
 		$items = $this->replace_search_breadcrumb_label( $items );
 		$items = $this->prepend_my_account_page_to_endpoint_breadcrumbs( $items );
-		$items = $this->replace_404_breadcrumb_label( $items );
+		$items = $this->apply_home_breadcrumb_url_filter( $items );
+
+		return $items;
+	}
+
+	/**
+	 * Apply WooCommerce's Home breadcrumb URL filter.
+	 *
+	 * @param array $items Array of breadcrumb items from Core.
+	 * @return array Modified breadcrumb items.
+	 */
+	private function apply_home_breadcrumb_url_filter( $items ) {
+		if ( ! has_filter( 'woocommerce_breadcrumb_home_url' ) ) {
+			return $items;
+		}
+
+		$home_index = $this->get_breadcrumb_item_index_by_url( $items, home_url( '/' ) );
+
+		if ( null === $home_index ) {
+			return $items;
+		}
+
+		$default_home_url = home_url();
+
+		/**
+		 * Filters the Home breadcrumb URL.
+		 *
+		 * @param string $url The Home breadcrumb URL.
+		 *
+		 * @since 2.3.0
+		 */
+		$home_url = apply_filters( 'woocommerce_breadcrumb_home_url', $default_home_url );
+
+		$items[ $home_index ]['url'] = is_string( $home_url ) ? $home_url : $default_home_url;
 
 		return $items;
 	}
@@ -158,7 +243,13 @@ final class CoreBreadcrumbsCompatibility {
 			return $items;
 		}
 
-		return $this->replace_breadcrumb_labels_by_url( $items, $shop_page_item['url'], $shop_page_item['label'] );
+		foreach ( $items as $index => $item ) {
+			if ( self::are_breadcrumb_urls_equal( $item['url'] ?? '', $shop_page_item['url'] ) ) {
+				$items[ $index ]['label'] = $shop_page_item['label'];
+			}
+		}
+
+		return $items;
 	}
 
 	/**
@@ -240,7 +331,19 @@ final class CoreBreadcrumbsCompatibility {
 	 * @return array Modified breadcrumb items.
 	 */
 	private function prepend_shop_page_to_product_taxonomy_breadcrumbs( $items ) {
-		if ( ! ( is_product_category() || is_product_tag() ) || ! $this->should_prepend_shop_page() ) {
+		if ( ! ( is_product_category() || is_product_tag() ) ) {
+			return $items;
+		}
+
+		$permalinks = wc_get_permalink_structure();
+		$shop_page  = $this->get_woocommerce_page_post( 'shop' );
+
+		if (
+			! $shop_page ||
+			! isset( $permalinks['product_base'] ) ||
+			! strstr( $permalinks['product_base'], '/' . $shop_page->post_name ) ||
+			intval( get_option( 'page_on_front' ) ) === $shop_page->ID
+		) {
 			return $items;
 		}
 
@@ -341,66 +444,6 @@ final class CoreBreadcrumbsCompatibility {
 	}
 
 	/**
-	 * Replace post tag breadcrumb labels with WooCommerce's tag archive label.
-	 *
-	 * @param array $items Array of breadcrumb items from Core.
-	 * @return array Modified breadcrumb items.
-	 */
-	private function replace_post_tag_breadcrumb_label( $items ) {
-		if ( ! is_tag() || empty( $items ) ) {
-			return $items;
-		}
-
-		$current_term = $this->get_queried_term();
-
-		if ( ! $current_term ) {
-			return $items;
-		}
-
-		/* translators: %s: tag name */
-		return $this->replace_current_archive_breadcrumb_label( $items, sprintf( __( 'Posts tagged &ldquo;%s&rdquo;', 'woocommerce' ), single_tag_title( '', false ) ), get_tag_link( $current_term->term_id ) );
-	}
-
-	/**
-	 * Replace author breadcrumb labels with WooCommerce's author archive label.
-	 *
-	 * @param array $items Array of breadcrumb items from Core.
-	 * @return array Modified breadcrumb items.
-	 */
-	private function replace_author_breadcrumb_label( $items ) {
-		if ( ! is_author() || empty( $items ) ) {
-			return $items;
-		}
-
-		$current_author = get_queried_object();
-
-		if ( ! $current_author instanceof \WP_User ) {
-			return $items;
-		}
-
-		/* translators: %s: author name */
-		return $this->replace_current_archive_breadcrumb_label( $items, sprintf( __( 'Author: %s', 'woocommerce' ), $current_author->display_name ), get_author_posts_url( $current_author->ID ) );
-	}
-
-	/**
-	 * Replace day archive breadcrumb labels with WooCommerce's zero-padded day label.
-	 *
-	 * @param array $items Array of breadcrumb items from Core.
-	 * @return array Modified breadcrumb items.
-	 */
-	private function replace_day_breadcrumb_label( $items ) {
-		if ( ! is_day() || empty( $items ) ) {
-			return $items;
-		}
-
-		return $this->replace_current_archive_breadcrumb_label(
-			$items,
-			(string) get_the_time( 'd' ),
-			get_day_link( (int) get_query_var( 'year' ), (int) get_query_var( 'monthnum' ), (int) get_query_var( 'day' ) )
-		);
-	}
-
-	/**
 	 * Prepend the My Account page to account endpoint breadcrumbs.
 	 *
 	 * @param array $items Array of breadcrumb items from Core.
@@ -427,70 +470,9 @@ final class CoreBreadcrumbsCompatibility {
 		);
 	}
 
-	/**
-	 * Replace Core's 404 breadcrumb label with WooCommerce's 404 label.
-	 *
-	 * @param array $items Array of breadcrumb items from Core.
-	 * @return array Modified breadcrumb items.
-	 */
-	private function replace_404_breadcrumb_label( $items ) {
-		if ( ! is_404() || empty( $items ) ) {
-			return $items;
-		}
-
-		return $this->replace_breadcrumb_label_at_index( $items, array_key_last( $items ), __( 'Error 404', 'woocommerce' ) );
-	}
-
 	/*
 	 * Utility methods.
 	 */
-
-	/**
-	 * Get the main product category term for breadcrumbs.
-	 *
-	 * @param int $post_id Post ID.
-	 * @return \WP_Term|null Main product category term.
-	 */
-	private function get_product_main_term( int $post_id ) {
-		if ( ! $post_id ) {
-			return null;
-		}
-
-		$terms = wc_get_product_terms(
-			$post_id,
-			'product_cat',
-			/**
-			 * Filters the arguments used to fetch product terms for breadcrumbs.
-			 *
-			 * @since 9.5.0
-			 *
-			 * @param array $args Array of arguments for `wc_get_product_terms()`.
-			 */
-			apply_filters(
-				'woocommerce_breadcrumb_product_terms_args',
-				array(
-					'orderby' => 'parent',
-					'order'   => 'DESC',
-				)
-			)
-		);
-
-		if ( empty( $terms ) || is_wp_error( $terms ) ) {
-			return null;
-		}
-
-		/**
-		 * Filters the main term used in product breadcrumbs.
-		 *
-		 * @since 9.5.0
-		 *
-		 * @param \WP_Term   $main_term The main term to be used in breadcrumbs.
-		 * @param \WP_Term[] $terms     Array of all product category terms.
-		 */
-		$main_term = apply_filters( 'woocommerce_breadcrumb_main_term', $terms[0], $terms );
-
-		return $main_term instanceof \WP_Term ? $main_term : null;
-	}
 
 	/**
 	 * Prepend the shop page to breadcrumb items.
@@ -505,6 +487,12 @@ final class CoreBreadcrumbsCompatibility {
 			return $items;
 		}
 
+		$shop_page_index = $this->get_breadcrumb_item_index_by_url( $items, $shop_page_item['url'] );
+
+		if ( null !== $shop_page_index ) {
+			return $this->replace_breadcrumb_label_at_index( $items, $shop_page_index, $shop_page_item['label'] );
+		}
+
 		return $this->insert_parent_breadcrumb_item_if_missing_url( $items, $shop_page_item );
 	}
 
@@ -516,7 +504,9 @@ final class CoreBreadcrumbsCompatibility {
 	 */
 	private function get_shop_page_breadcrumb_item( $shop_url = '' ) {
 		$shop_page  = $this->get_woocommerce_page_post( 'shop' );
-		$shop_url   = $shop_url ? $shop_url : get_post_type_archive_link( 'product' );
+		$shop_url   = $shop_url ? $shop_url : (
+			$shop_page ? get_permalink( $shop_page ) : get_post_type_archive_link( 'product' )
+		);
 		$shop_label = $shop_page ? get_the_title( $shop_page ) : '';
 
 		if ( ! $shop_label ) {
@@ -532,21 +522,6 @@ final class CoreBreadcrumbsCompatibility {
 			'label' => $shop_label,
 			'url'   => $shop_url,
 		);
-	}
-
-	/**
-	 * Check whether WooCommerce would prepend the shop page breadcrumb.
-	 *
-	 * @return bool Whether to prepend the shop page breadcrumb.
-	 */
-	private function should_prepend_shop_page() {
-		$permalinks = wc_get_permalink_structure();
-		$shop_page  = $this->get_woocommerce_page_post( 'shop' );
-
-		return $shop_page
-			&& isset( $permalinks['product_base'] )
-			&& strstr( $permalinks['product_base'], '/' . $shop_page->post_name )
-			&& intval( get_option( 'page_on_front' ) ) !== $shop_page->ID;
 	}
 
 	/**
@@ -573,57 +548,6 @@ final class CoreBreadcrumbsCompatibility {
 	}
 
 	/**
-	 * Convert WooCommerce crumbs back to Core breadcrumb items.
-	 *
-	 * @param array $wc_crumbs WooCommerce breadcrumb crumbs.
-	 * @param array $items Original Core breadcrumb items.
-	 * @return array Core breadcrumb items.
-	 */
-	private function convert_woocommerce_crumbs_to_core_items( $wc_crumbs, $items ) {
-		$core_items = array();
-
-		foreach ( $wc_crumbs as $index => $crumb ) {
-			$item  = isset( $items[ $index ] ) && is_array( $items[ $index ] ) ? $items[ $index ] : array();
-			$label = is_array( $crumb ) ? ( $crumb[0] ?? '' ) : '';
-			$url   = is_array( $crumb ) ? ( $crumb[1] ?? '' ) : '';
-
-			$item['label'] = $label;
-
-			if ( $url ) {
-				$item['url'] = $url;
-			} else {
-				unset( $item['url'] );
-			}
-
-			$core_items[] = $item;
-		}
-
-		return $core_items;
-	}
-
-	/**
-	 * Replace breadcrumb labels for every item matching a URL.
-	 *
-	 * @param array  $items Array of breadcrumb items from Core.
-	 * @param string $url URL to find.
-	 * @param string $label Replacement label.
-	 * @return array Modified breadcrumb items.
-	 */
-	private function replace_breadcrumb_labels_by_url( $items, $url, $label ) {
-		if ( ! $url ) {
-			return $items;
-		}
-
-		foreach ( $items as $index => $item ) {
-			if ( self::are_breadcrumb_urls_equal( $item['url'] ?? '', $url ) ) {
-				$items[ $index ]['label'] = $label;
-			}
-		}
-
-		return $items;
-	}
-
-	/**
 	 * Replace the current archive breadcrumb label.
 	 *
 	 * @param array  $items Array of breadcrumb items from Core.
@@ -632,7 +556,32 @@ final class CoreBreadcrumbsCompatibility {
 	 * @return array Modified breadcrumb items.
 	 */
 	private function replace_current_archive_breadcrumb_label( $items, $label, $archive_url = '' ) {
-		return $this->replace_breadcrumb_label_at_index( $items, $this->get_current_archive_breadcrumb_index( $items, $archive_url ), $label );
+		$item_index = $this->get_breadcrumb_item_index_by_url( $items, $archive_url );
+
+		if ( null === $item_index ) {
+			$item_keys = array_keys( $items );
+
+			if ( empty( $item_keys ) ) {
+				return $items;
+			}
+
+			$item_index = end( $item_keys );
+			$paged      = (int) get_query_var( 'paged' );
+
+			if ( $paged > 1 && count( $item_keys ) > 1 && isset( $items[ $item_index ]['label'] ) ) {
+				$pagination_label = sprintf(
+					/* translators: %s: page number */
+					__( 'Page %s', 'default' ), // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch -- Match the Core Breadcrumbs block pagination label.
+					number_format_i18n( $paged )
+				);
+
+				if ( $pagination_label === (string) $items[ $item_index ]['label'] ) {
+					$item_index = $item_keys[ count( $item_keys ) - 2 ];
+				}
+			}
+		}
+
+		return $this->replace_breadcrumb_label_at_index( $items, $item_index, $label );
 	}
 
 	/**
@@ -679,55 +628,6 @@ final class CoreBreadcrumbsCompatibility {
 		array_splice( $items, $this->get_first_breadcrumb_insert_index( $items ), 0, array( $item ) );
 
 		return $items;
-	}
-
-	/**
-	 * Get the current archive breadcrumb item index.
-	 *
-	 * @param array  $items Array of breadcrumb items from Core.
-	 * @param string $archive_url Archive URL.
-	 * @return int|string|null Breadcrumb item index.
-	 */
-	private function get_current_archive_breadcrumb_index( $items, $archive_url = '' ) {
-		$item_index = $this->get_breadcrumb_item_index_by_url( $items, $archive_url );
-
-		if ( null !== $item_index ) {
-			return $item_index;
-		}
-
-		$item_keys = array_keys( $items );
-
-		if ( empty( $item_keys ) ) {
-			return null;
-		}
-
-		$last_key = end( $item_keys );
-
-		if ( (int) get_query_var( 'paged' ) > 1 && count( $item_keys ) > 1 && $this->is_pagination_breadcrumb_item( $items[ $last_key ] ) ) {
-			return $item_keys[ count( $item_keys ) - 2 ];
-		}
-
-		return $last_key;
-	}
-
-	/**
-	 * Check whether a breadcrumb item is Core's pagination item.
-	 *
-	 * @param array $item Breadcrumb item.
-	 * @return bool Whether this is the pagination item.
-	 */
-	private function is_pagination_breadcrumb_item( $item ) {
-		$paged = (int) get_query_var( 'paged' );
-
-		if ( $paged <= 1 || ! isset( $item['label'] ) ) {
-			return false;
-		}
-
-		return sprintf(
-			/* translators: %s: page number */
-			__( 'Page %s', 'default' ), // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch -- Match the Core Breadcrumbs block pagination label.
-			number_format_i18n( $paged )
-		) === (string) $item['label'];
 	}
 
 	/**
