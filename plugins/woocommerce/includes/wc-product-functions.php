@@ -815,9 +815,10 @@ add_action( 'deleted_post_meta', 'wc_maybe_schedule_sale_events_on_meta_change',
  * check. Between a sale's start/end time elapsing and the next save or AS event, the
  * stored price can disagree with what the dates imply: the simple-product data store
  * reads a stale `_price` straight into the price prop, and own-cache extensions such as
- * Product Bundles read a stale cached base price. (Variations are unaffected — their
- * data store re-derives the price from `is_on_sale()` on every read.) The result is the
- * wrong price shown and charged for up to one AS runner interval.
+ * Product Bundles read a stale cached base price. (Individual variations self-heal —
+ * their data store re-derives the price from `is_on_sale()` on every read — but the
+ * variable parent's cached aggregate does not; see the limitations below.) The result is
+ * the wrong price shown and charged for up to one AS runner interval.
  *
  * This filter resolves the active price from the raw sale/regular prices and the sale
  * dates whenever the stored price still equals one of them but disagrees with the dates,
@@ -831,9 +832,14 @@ add_action( 'deleted_post_meta', 'wc_maybe_schedule_sale_events_on_meta_change',
  * grouped parents whose own sale price is empty) exits after a single prop read, before
  * any date or price-comparison work.
  *
- * Limitation: a deliberate custom `_price` that happens to equal the sale or regular
+ * Limitations: a deliberate custom `_price` that happens to equal the sale or regular
  * price while a sale is scheduled cannot be distinguished from a stale schedule price
- * and will be reconciled; a custom price unrelated to either is left untouched.
+ * and will be reconciled; a custom price unrelated to either is left untouched. A
+ * variable parent's aggregate display — the "From" price, on-sale badge, and min/max
+ * prices served from the `wc_var_prices_{id}` transient — is built from cached values
+ * with no sale-window component in the cache key, so it can stay stale until the AS
+ * event or a save bumps the product transient version. That gap is display-only: the
+ * cart prices the variation itself, which self-heals at read.
  *
  * @since 11.0.0
  *

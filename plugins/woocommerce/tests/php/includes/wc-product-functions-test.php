@@ -296,6 +296,40 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A started scheduled sale with no end date heals to the sale price.
+	 */
+	public function test_scheduled_sale_active_price_heals_started_sale_with_no_end_date(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 20 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$product->save();
+
+		// Start time elapses without the AS event running, so _price stays at the regular price.
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 5 );
+		clean_post_cache( $product->get_id() );
+
+		$this->assertEquals( 20, wc_get_product( $product->get_id() )->get_price(), 'A started sale with only a start date should display the sale price.' );
+	}
+
+	/**
+	 * @testdox An ended scheduled sale with no start date heals to the regular price.
+	 */
+	public function test_scheduled_sale_active_price_heals_ended_sale_with_no_start_date(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 20 );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$product->save();
+
+		// End time elapses without the AS event running, so _price stays at the sale price.
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 5 );
+		clean_post_cache( $product->get_id() );
+
+		$this->assertEquals( 50, wc_get_product( $product->get_id() )->get_price(), 'An ended sale with only an end date should display the regular price.' );
+	}
+
+	/**
 	 * @testdox An active scheduled sale leaves the sale price unchanged.
 	 */
 	public function test_scheduled_sale_active_price_leaves_active_sale_unchanged(): void {
