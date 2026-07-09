@@ -306,9 +306,12 @@ Descriptions are sanitized with `wp_kses_post()`. Actions are structured data wi
 
 ## Page header
 
-The shell header (the page title, badges, breadcrumbs, and the top save button) is reserved for drill-down pages. Pages registered at the top level of settings, whether a `WC_Settings_Page` tab or a registered section, render without the header, and the save button appears at the bottom of the page instead. WooCommerce enforces this from the page registration, so a top-level page cannot opt into the header through its schema (`shell.header` is always set to `hidden`).
+The shell header (the page title, badges, breadcrumbs, and the top save button) is reserved for drill-down pages. WooCommerce decides this from the page registration, so a page cannot change it through its schema:
 
-A settings UI page that supplies its own schema (via `SettingsUIPageInterface::get_schema()`) can still set header content through the `shell` key for contexts that render it. Alongside `title` and `breadcrumbs`, the header supports a `subtitle` and `badges`:
+- Pages registered at the top level of settings, whether a `WC_Settings_Page` tab or a registered section, render without the header. The top-level settings tabs stay visible and the save button appears at the bottom of the page.
+- Sections of the Payments tab render as drill-down pages. The header replaces the top-level settings tabs, and its breadcrumbs default to a link back to the Payments tab when the schema does not provide any. The save button renders in the header.
+
+A settings UI page that supplies its own schema (via `SettingsUIPageInterface::get_schema()`) can set header content through the `shell` key for drill-down pages. Alongside `title` and `breadcrumbs`, the header supports a `subtitle` and `badges`:
 
 ```php
 $schema['shell']['subtitle'] = __( 'Manage your store payment settings.', 'my-plugin' );
