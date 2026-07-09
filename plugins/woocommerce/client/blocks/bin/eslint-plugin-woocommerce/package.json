@@ -8,5 +8,8 @@
 	"engines": {
 		"node": "^24.15.0",
 		"npm": "^8.0.0"
+	},
+	"dependencies": {
+		"requireindex": "^1.2.0"
 	}
 }
