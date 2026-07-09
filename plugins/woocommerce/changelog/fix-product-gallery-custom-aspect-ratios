@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make Product Gallery layout and thumbnails honor custom Product Image aspect ratios.
