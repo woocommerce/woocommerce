@@ -57,7 +57,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			&:hover,
 			&:active {
 				box-shadow: none;
-				color: var(--wp-admin-theme-color, #3858e9);
+				color: var(--wpds-color-foreground-interactive-brand);
 				outline: none;
 			}
 
@@ -66,7 +66,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 				font-weight: var(--wpds-typography-font-weight-medium);
 
 				&::after {
-					background: var(--wp-admin-theme-color, #3858e9);
+					background: var(--wpds-color-stroke-interactive-brand);
 					border-radius: 999px;
 					bottom: 0;
 					content: "";
@@ -129,7 +129,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 			&:focus,
 			&:hover {
-				color: var(--wp-admin-theme-color, #3858e9);
+				color: var(--wpds-color-foreground-interactive-brand);
 			}
 		}
 	}
@@ -207,7 +207,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		&:hover,
 		&:active {
 			box-shadow: none;
-			color: var(--wp-admin-theme-color, #3858e9);
+			color: var(--wpds-color-foreground-interactive-brand);
 			outline: none;
 		}
 
@@ -215,7 +215,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			color: var(--wpds-color-foreground-interactive-neutral);
 
 			&::after {
-				background: var(--wp-admin-theme-color, #3858e9);
+				background: var(--wpds-color-stroke-interactive-brand);
 				border-radius: 999px;
 				bottom: 0;
 				content: "";
