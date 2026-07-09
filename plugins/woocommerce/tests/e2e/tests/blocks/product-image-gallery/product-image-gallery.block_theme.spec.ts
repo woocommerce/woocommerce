@@ -93,6 +93,58 @@ test.describe( `${ blockData.name } frontend`, () => {
 			activeImageSrc as string
 		);
 	} );
+
+	test( 'aligns the active slide when the gallery width is fractional', async ( {
+		page,
+	} ) => {
+		await page.goto( blockData.productPage );
+
+		const gallery = page.locator( '.woocommerce-product-gallery' );
+		const viewport = page.locator( '.flex-viewport' );
+		const thumbnails = page.locator(
+			'.flex-control-nav.flex-control-thumbs img'
+		);
+
+		await expect( gallery ).toBeVisible();
+		await expect( viewport ).toBeVisible();
+
+		await gallery.evaluate( ( element ) => {
+			( element as HTMLElement ).style.width = '320.5px';
+			window.dispatchEvent( new Event( 'resize' ) );
+		} );
+
+		await thumbnails.nth( 1 ).tap();
+
+		await expect
+			.poll( async () =>
+				page.evaluate( () => {
+					const activeThumbIndex = [
+						...document.querySelectorAll(
+							'.flex-control-nav.flex-control-thumbs img'
+						),
+					].findIndex( ( image ) =>
+						image.classList.contains( 'flex-active' )
+					);
+					const activeSlide = document.querySelectorAll(
+						'.woocommerce-product-gallery__image'
+					)[ activeThumbIndex ];
+					const flexViewport =
+						document.querySelector( '.flex-viewport' );
+
+					if ( ! activeSlide || ! flexViewport ) {
+						return null;
+					}
+
+					return Number(
+						(
+							activeSlide.getBoundingClientRect().left -
+							flexViewport.getBoundingClientRect().left
+						).toFixed( 3 )
+					);
+				} )
+			)
+			.toBeCloseTo( 0, 3 );
+	} );
 } );
 
 test.describe( `${ blockData.name } editor`, () => {
