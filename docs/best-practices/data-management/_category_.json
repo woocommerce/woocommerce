@@ -1,4 +1,9 @@
 {
     "position": 5,
-    "label": "Data management"
+    "label": "Data management",
+    "link": {
+        "type": "generated-index",
+        "title": "Data management",
+        "slug": "/best-practices/data-management"
+    }
 }

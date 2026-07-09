@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
@@ -56,14 +55,20 @@ class MiniCartContents extends AbstractBlock {
 	}
 
 	/**
-	 * Render experimental iAPI powered Mini-Cart Contents block.
+	 * Render the markup for the Mini-Cart Contents block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content    Block content.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
-	protected function render_experimental_iapi_mini_cart_contents( $attributes, $content, $block ) {
+	protected function render( $attributes, $content, $block ) {
+		if ( is_admin() || WC()->is_rest_api_request() ) {
+			// In the editor we will display the placeholder, so no need to
+			// print the markup.
+			return '';
+		}
+
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'data-wp-interactive'             => 'woocommerce/mini-cart-contents',
@@ -87,37 +92,15 @@ class MiniCartContents extends AbstractBlock {
 			?>
 		</div>
 		<?php
-		return ob_get_clean();
-	}
-
-	/**
-	 * Render the markup for the Mini-Cart Contents block.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render( $attributes, $content, $block ) {
-		if ( is_admin() || WC()->is_rest_api_request() ) {
-			// In the editor we will display the placeholder, so no need to
-			// print the markup.
-			return '';
-		}
-
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			return $this->render_experimental_iapi_mini_cart_contents( $attributes, $content, $block );
-		}
-
-		return $content;
+		return (string) ob_get_clean();
 	}
 
 	/**
 	 * Enqueue frontend assets for this block, just in time for rendering.
 	 *
-	 * @param array    $attributes  Any attributes that currently are available from the block.
-	 * @param string   $content    The block content.
-	 * @param WP_Block $block    The block object.
+	 * @param array     $attributes Any attributes that currently are available from the block.
+	 * @param string    $content    The block content.
+	 * @param \WP_Block $block      The block object.
 	 */
 	protected function enqueue_assets( array $attributes, $content, $block ) {
 		parent::enqueue_assets( $attributes, $content, $block );
