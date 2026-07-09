@@ -21,6 +21,7 @@ When `wc-block-library` is loaded, its generated asset file declares the package
 | `@woocommerce/blocks-checkout` | `wc-blocks-checkout` | `wc.blocksCheckout` | Shares checkout filters, slot/fill APIs, and checkout block registry helpers with extensions. |
 | `@woocommerce/blocks-checkout-events` | `wc-blocks-checkout-events` | `wc.blocksCheckoutEvents` | Shares the checkout lifecycle event emitter between subscribers and emitters. |
 | `@woocommerce/blocks-registry` | `wc-blocks-registry` | `wc.wcBlocksRegistry` | Keeps block, payment method, and product collection registrations in shared registries. |
+| `@woocommerce/data` | `wc-store-data` | `wc.data` | Shares WooCommerce Admin data stores without re-registering them from the editor bundle. |
 | `@woocommerce/entities` | `wc-entities` | `wc.wcEntities` | Shares WooCommerce entity registration in the editor. |
 | `@woocommerce/price-format` | `wc-price-format` | `wc.priceFormat` | Shares price and currency formatting across editor, frontend, and extension code. |
 
@@ -40,6 +41,5 @@ The entries below resolve as bundled editor imports when they are used by WooCom
 | `@woocommerce/settings` | `wc-settings` | `wc.wcSettings` | `AssetDataRegistry::register_data_script()` | Still used when scripts need WooCommerce settings data; inline data is only printed when the handle is enqueued. |
 | `@woocommerce/types` | `wc-types` | `wc.wcTypes` | `AssetsController::register_assets()` | Runtime type helpers remain available as a standalone handle. |
 | `@woocommerce/sanitize` | `wc-sanitize` | `wc.sanitize` | `AssetsController::register_assets()` and WooCommerce Admin assets | Sanitization helpers remain available as a standalone handle. |
-| `@woocommerce/data` | `wc-store-data` | `wc.data` | WooCommerce Admin assets | Registered by WooCommerce Admin, not by the Blocks core webpack entries. |
 
 `wc-blocks-middleware` is also registered by Blocks and is loaded as a dependency of `wc-blocks-data-store`. It does not map to a public `@woocommerce/*` package import.

@@ -26,7 +26,7 @@ const wcDepMap = {
 	'@woocommerce/shared-hocs': [ 'wc', 'wcBlocksSharedHocs' ],
 	'@woocommerce/price-format': [ 'wc', 'priceFormat' ],
 	'@woocommerce/blocks-checkout': [ 'wc', 'blocksCheckout' ],
-	'@woocommerce/blocks-components': [ 'wc', 'blocksComponents' ],
+	'@woocommerce/blocks-components': false, // Bundle; compatibility handle remains registered separately
 	'@woocommerce/types': [ 'wc', 'wcTypes' ],
 	'@woocommerce/sanitize': [ 'wc', 'sanitize' ],
 	'@woocommerce/entities': [ 'wc', 'wcEntities' ],
@@ -42,7 +42,7 @@ const wcHandleMap = {
 	'@woocommerce/price-format': 'wc-price-format',
 	'@woocommerce/blocks-checkout': 'wc-blocks-checkout',
 	'@woocommerce/blocks-checkout-events': 'wc-blocks-checkout-events',
-	'@woocommerce/blocks-components': 'wc-blocks-components',
+	'@woocommerce/blocks-components': false, // Bundle; compatibility handle remains registered separately
 	'@woocommerce/types': 'wc-types',
 	'@woocommerce/sanitize': 'wc-sanitize',
 	'@woocommerce/entities': 'wc-entities',
@@ -56,6 +56,7 @@ const editorExternalPackages = [
 	'@woocommerce/blocks-checkout',
 	'@woocommerce/blocks-checkout-events',
 	'@woocommerce/blocks-registry',
+	'@woocommerce/data',
 	'@woocommerce/entities',
 	'@woocommerce/price-format',
 ];
@@ -153,6 +154,10 @@ const getAlias = ( options = {} ) => {
 		'@woocommerce/block-data': path.resolve(
 			__dirname,
 			`../assets/js/data`
+		),
+		'@woocommerce/blocks-components': path.resolve(
+			__dirname,
+			`../packages/components`
 		),
 		'@woocommerce/blocks': path.resolve(
 			__dirname,
