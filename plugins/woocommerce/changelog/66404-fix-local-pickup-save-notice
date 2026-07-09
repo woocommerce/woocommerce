@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the Local Pickup settings save confirmation on a successful save (and an error notice on failure), instead of only when the server response matched the sent payload, which suppressed the notice when values were sanitized (e.g. "&" normalized to "&amp;").

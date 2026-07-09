@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API: fall back to the billing address when a checkout request omits the shipping address and the cart needs shipping.

@@ -1,10 +1,7 @@
-// We need to disable the following eslint check as it's only applicable
-// to testing-library/react not `react-test-renderer` used here
-/* eslint-disable testing-library/await-async-query */
 /**
  * External dependencies
  */
-import TestRenderer from 'react-test-renderer';
+import { render, act } from '@testing-library/react';
 import * as mockUtils from '@woocommerce/editor-components/utils';
 
 /**
@@ -23,30 +20,41 @@ jest.mock( '../../base/utils/errors', () => ( {
 
 const mockCategory = { name: 'Clothing' };
 const attributes = { categoryId: 1 };
-const TestComponent = withCategory( ( props ) => {
-	return (
-		<div
-			data-error={ props.error }
-			data-getCategory={ props.getCategory }
-			data-isLoading={ props.isLoading }
-			data-category={ props.category }
-		/>
-	);
+
+// Capture the props the HOC injects into the wrapped component.
+let lastProps;
+const CapturedComponent = jest.fn( ( props ) => {
+	lastProps = props;
+	return null;
 } );
-const render = () => {
-	return TestRenderer.create( <TestComponent attributes={ attributes } /> );
+const TestComponent = withCategory( CapturedComponent );
+
+// Run an interaction and flush the async state updates it triggers inside
+// `act`, so React's async fetch-then-setState work does not leak past the test.
+const settle = async ( fn ) => {
+	await act( async () => {
+		fn();
+		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
+	} );
 };
 
 describe( 'withCategory Component', () => {
-	let renderer;
+	let renderResult;
+	const renderComponent = ( props = { attributes } ) =>
+		settle( () => {
+			renderResult = render( <TestComponent { ...props } /> );
+		} );
+
 	afterEach( () => {
 		mockUtils.getCategory.mockReset();
+		CapturedComponent.mockClear();
+		lastProps = undefined;
 	} );
 
 	describe( 'lifecycle events', () => {
-		beforeEach( () => {
+		beforeEach( async () => {
 			mockUtils.getCategory.mockImplementation( () => Promise.resolve() );
-			renderer = render();
+			await renderComponent();
 		} );
 
 		it( 'getCategory is called on mount with passed in category id', () => {
@@ -56,10 +64,14 @@ describe( 'withCategory Component', () => {
 			expect( getCategory ).toHaveBeenCalledTimes( 1 );
 		} );
 
-		it( 'getCategory is called on component update', () => {
+		it( 'getCategory is called on component update', async () => {
 			const { getCategory } = mockUtils;
 			const newAttributes = { ...attributes, categoryId: 2 };
-			renderer.update( <TestComponent attributes={ newAttributes } /> );
+			await settle( () =>
+				renderResult.rerender(
+					<TestComponent attributes={ newAttributes } />
+				)
+			);
 
 			expect( getCategory ).toHaveBeenNthCalledWith(
 				2,
@@ -68,31 +80,28 @@ describe( 'withCategory Component', () => {
 			expect( getCategory ).toHaveBeenCalledTimes( 2 );
 		} );
 
-		it( 'getCategory is hooked to the prop', () => {
+		it( 'getCategory is hooked to the prop', async () => {
 			const { getCategory } = mockUtils;
-			const props = renderer.root.findByType( 'div' ).props;
 
-			props[ 'data-getCategory' ]();
+			await settle( () => lastProps.getCategory() );
 
 			expect( getCategory ).toHaveBeenCalledTimes( 2 );
 		} );
 	} );
 
 	describe( 'when the API returns category data', () => {
-		beforeEach( () => {
+		beforeEach( async () => {
 			mockUtils.getCategory.mockImplementation( ( categoryId ) =>
 				Promise.resolve( { ...mockCategory, id: categoryId } )
 			);
-			renderer = render();
+			await renderComponent();
 		} );
 
 		it( 'sets the category props', () => {
-			const props = renderer.root.findByType( 'div' ).props;
-
-			expect( props[ 'data-error' ] ).toBeNull();
-			expect( typeof props[ 'data-getCategory' ] ).toBe( 'function' );
-			expect( props[ 'data-isLoading' ] ).toBe( false );
-			expect( props[ 'data-category' ] ).toEqual( {
+			expect( lastProps.error ).toBeNull();
+			expect( typeof lastProps.getCategory ).toBe( 'function' );
+			expect( lastProps.isLoading ).toBe( false );
+			expect( lastProps.category ).toEqual( {
 				...mockCategory,
 				id: attributes.categoryId,
 			} );
@@ -101,31 +110,25 @@ describe( 'withCategory Component', () => {
 
 	describe( 'when the API returns an error', () => {
 		const error = { message: 'There was an error.' };
-		const getCategoryPromise = Promise.reject( error );
 		const formattedError = { message: 'There was an error.', type: 'api' };
 
-		beforeEach( () => {
-			mockUtils.getCategory.mockImplementation(
-				() => getCategoryPromise
+		beforeEach( async () => {
+			mockUtils.getCategory.mockImplementation( () =>
+				Promise.reject( error )
 			);
-			mockBaseUtils.formatError.mockImplementation(
-				() => formattedError
-			);
-			renderer = render();
+			mockBaseUtils.formatError.mockImplementation( () => formattedError );
+			await renderComponent();
 		} );
 
-		test( 'sets the error prop', async () => {
-			await expect( () => getCategoryPromise() ).toThrow();
-
+		test( 'sets the error prop', () => {
 			const { formatError } = mockBaseUtils;
-			const props = renderer.root.findByType( 'div' ).props;
 
 			expect( formatError ).toHaveBeenCalledWith( error );
 			expect( formatError ).toHaveBeenCalledTimes( 1 );
-			expect( props[ 'data-error' ] ).toEqual( formattedError );
-			expect( typeof props[ 'data-getCategory' ] ).toBe( 'function' );
-			expect( props[ 'data-isLoading' ] ).toBe( false );
-			expect( props[ 'data-category' ] ).toBeNull();
+			expect( lastProps.error ).toEqual( formattedError );
+			expect( typeof lastProps.getCategory ).toBe( 'function' );
+			expect( lastProps.isLoading ).toBe( false );
+			expect( lastProps.category ).toBeNull();
 		} );
 	} );
 } );

@@ -22,6 +22,7 @@ use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\PluginsInstaller;
 use Automattic\WooCommerce\Admin\ReportExporter;
 use Automattic\WooCommerce\Admin\ReportsSync;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Admin\CategoryLookup;
 use Automattic\WooCommerce\Internal\Admin\Events;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\Onboarding;
@@ -171,15 +172,12 @@ class FeaturePlugin {
 		// Initialize API.
 		API\Init::instance();
 
-		if ( Features::is_enabled( 'onboarding' ) ) {
-			Onboarding::init();
-		}
+		Onboarding::init();
 
-		if ( Features::is_enabled( 'analytics' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'analytics' ) ) {
 			// Initialize Reports syncing.
 			ReportsSync::init();
 			CategoryLookup::instance()->init();
-
 			// Initialize Reports exporter.
 			ReportExporter::init();
 		}
@@ -206,11 +204,11 @@ class FeaturePlugin {
 		WCAdminAssets::get_instance();
 	}
 
-
 	/**
-	 * Overwrites the allowed features array using a local `feature-config.php` file.
+	 * Adds the allowed features from a local `feature-config.php` file.
 	 *
 	 * @param array $features Array of feature slugs.
+	 * @return array
 	 */
 	public function replace_supported_features( $features ) {
 		/**
@@ -219,8 +217,9 @@ class FeaturePlugin {
 		 * @since 6.5.0
 		 */
 		$feature_config = apply_filters( 'woocommerce_admin_get_feature_config', wc_admin_get_feature_config() );
-		$features       = array_keys( array_filter( $feature_config ) );
-		return $features;
+		$features       = array_merge( $features, array_keys( array_filter( $feature_config ) ) );
+
+		return array_values( array_unique( $features ) );
 	}
 
 	/**
