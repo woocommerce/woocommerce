@@ -4409,6 +4409,9 @@ importers:
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../../packages/js/eslint-plugin
+      '@woocommerce/internal-build':
+        specifier: workspace:*
+        version: link:../../packages/js/internal-build
       '@wordpress/base-styles':
         specifier: catalog:wp-bundled
         version: 6.9.1
