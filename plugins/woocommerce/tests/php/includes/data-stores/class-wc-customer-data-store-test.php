@@ -127,26 +127,31 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$customer_1 = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
 		$customer_2 = WC_Helper_Customer::create_customer( 'test2', 'pass2', 'test2@example.com' );
 
-		// Customer 1 places several valid orders; the most recent (highest ID) is the expected result.
-		// The unit-test suite enables HPOS usage by default, so these are written straight into the
-		// orders table at creation, which is why the raw rows below must use non-colliding IDs.
-		WC_Helper_Order::create_order( $customer_1->get_id() );
-		$last_valid_order = WC_Helper_Order::create_order( $customer_1->get_id() );
-
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 
-		// Insert raw orders with IDs above the created orders so they cannot collide on the PRIMARY
-		// key. Customer 1's wc-invalid-status order gets the highest ID of all their orders, so
-		// get_last_order() must skip it and still return $last_valid_order. Customer 2's orders also
-		// have higher IDs, so they must be excluded by customer scoping rather than by ID ordering.
-		$customer_1_id       = $customer_1->get_id();
-		$customer_2_id       = $customer_2->get_id();
-		$last_valid_order_id = $last_valid_order->get_id();
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+
+		// Derive the base ID from the orders table itself so the raw rows never collide with a row that
+		// already exists there (under HPOS, order creation writes into this table). Using MAX(id) keeps
+		// the test collision-safe whether or not HPOS is enabled, and inserting every order directly
+		// into the orders table keeps it independent of the storage mode.
+		$base_id = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COALESCE( MAX( id ), 0 ) FROM %i', $orders_table ) );
+
+		$customer_1_id = $customer_1->get_id();
+		$customer_2_id = $customer_2->get_id();
+
+		// Customer 1 has two completed orders plus a higher-ID invalid order; get_last_order() must
+		// skip the invalid one and return the most recent completed order ($last_valid_order_id).
+		// Customer 2's orders have even higher IDs, so they must be excluded by customer scoping
+		// rather than by ID ordering.
+		$last_valid_order_id = $base_id + 2;
 
 		$sql =
-			'INSERT INTO ' . OrdersTableDataStore::get_orders_table_name() . "
+			'INSERT INTO ' . $orders_table . "
 				( id, customer_id, status, type )
 			VALUES
+				( %d, %d, '" . OrderInternalStatus::COMPLETED . "', 'shop_order' ),
+				( %d, %d, '" . OrderInternalStatus::COMPLETED . "', 'shop_order' ),
 				( %d, %d, 'wc-invalid-status', 'shop_order' ),
 				( %d, %d, '" . OrderInternalStatus::COMPLETED . "', 'shop_order' ),
 				( %d, %d, '" . OrderInternalStatus::COMPLETED . "', 'shop_order' )";
@@ -154,11 +159,15 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		$query = $wpdb->prepare(
 			$sql,
-			$last_valid_order_id + 1,
+			$base_id + 1,
 			$customer_1_id,
-			$last_valid_order_id + 2,
+			$last_valid_order_id,
+			$customer_1_id,
+			$base_id + 3,
+			$customer_1_id,
+			$base_id + 4,
 			$customer_2_id,
-			$last_valid_order_id + 3,
+			$base_id + 5,
 			$customer_2_id
 		);
 		$wpdb->query( $query );
@@ -167,7 +176,7 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$sut          = new WC_Customer_Data_Store();
 		$actual_order = $sut->get_last_order( $customer_1 );
 
-		$this->assertEquals( $last_valid_order->get_id(), $actual_order->get_id() );
+		$this->assertEquals( $last_valid_order_id, $actual_order->get_id() );
 	}
 
 	/**
