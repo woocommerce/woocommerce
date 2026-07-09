@@ -8,7 +8,7 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import WooCommerceShippingItem from '../experimental-woocommerce-shipping-item';
+import WooCommerceShippingItem from '../woocommerce-shipping-item';
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
 	useDispatch: jest.fn(),
