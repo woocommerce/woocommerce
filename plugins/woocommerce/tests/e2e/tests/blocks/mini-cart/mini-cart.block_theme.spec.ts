@@ -590,9 +590,29 @@ test.describe( `${ blockData.name } Block (variation attributes)`, () => {
 		await page
 			.getByLabel( 'Shade', { exact: true } )
 			.selectOption( 'Red & Blue' );
+
+		// The classic variable-product Add to cart button only registers a
+		// selection once the variations script has processed it. Until then the
+		// hidden `variation_id` input stays at "0" and clicking is a silent
+		// no-op (the disabled state is class-based, which Playwright's
+		// actionability checks ignore). Wait for the variation to be registered
+		// (a positive, non-zero variation id) before clicking.
+		await expect( page.locator( 'input.variation_id' ) ).toHaveValue(
+			/^[1-9][0-9]*$/
+		);
 		await page
 			.getByRole( 'button', { name: 'Add to cart', exact: true } )
 			.click();
+
+		// Wait for a definitive "added to cart" confirmation before navigating
+		// to the shop. The single-product Add to cart is a form submission; if
+		// we navigate away before it settles the item may not be in the cart
+		// when the mini-cart opens, which is what makes the assertions below
+		// race the add-to-cart request. Scope to the success notice (role=alert)
+		// so we don't match unrelated page text.
+		await expect(
+			page.getByRole( 'alert' ).getByText( /added to your cart/i )
+		).toBeVisible();
 
 		// Open the mini-cart.
 		await frontendUtils.goToShop();

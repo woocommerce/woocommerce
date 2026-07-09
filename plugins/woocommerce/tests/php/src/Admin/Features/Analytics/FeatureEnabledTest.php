@@ -19,6 +19,8 @@ class FeatureEnabledTest extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_analytics_enabled' );
 		delete_option( RemoteInboxNotifications::TOGGLE_OPTION_NAME );
 		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_analytics_feature' ) );
+		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_analytics_feature' ), PHP_INT_MAX );
+		remove_filter( 'woocommerce_admin_disabled', '__return_true', PHP_INT_MAX );
 		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_launch_your_store_feature' ) );
 		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_customize_store_feature' ) );
 
@@ -35,6 +37,38 @@ class FeatureEnabledTest extends WC_Unit_Test_Case {
 			FeaturesUtil::feature_is_enabled( 'analytics' ),
 			'Analytics should be disabled when the feature option is disabled.'
 		);
+	}
+
+	/**
+	 * @testdox Should disable analytics when removed from the legacy admin feature list.
+	 */
+	public function test_should_be_disabled_when_removed_from_legacy_admin_features(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'disable_analytics_feature' ), PHP_INT_MAX );
+
+		try {
+			$this->assertFalse(
+				FeaturesUtil::feature_is_enabled( 'analytics' ),
+				'Analytics should be disabled when removed from the legacy admin feature list.'
+			);
+		} finally {
+			remove_filter( 'woocommerce_admin_features', array( $this, 'disable_analytics_feature' ), PHP_INT_MAX );
+		}
+	}
+
+	/**
+	 * @testdox Should disable analytics when WooCommerce Admin is disabled by legacy filter.
+	 */
+	public function test_should_be_disabled_when_woocommerce_admin_is_disabled(): void {
+		add_filter( 'woocommerce_admin_disabled', '__return_true', PHP_INT_MAX );
+
+		try {
+			$this->assertFalse(
+				FeaturesUtil::feature_is_enabled( 'analytics' ),
+				'Analytics should be disabled when WooCommerce Admin is disabled.'
+			);
+		} finally {
+			remove_filter( 'woocommerce_admin_disabled', '__return_true', PHP_INT_MAX );
+		}
 	}
 
 	/**
@@ -151,6 +185,16 @@ class FeatureEnabledTest extends WC_Unit_Test_Case {
 		$features[] = 'analytics';
 
 		return array_unique( $features );
+	}
+
+	/**
+	 * Disable the analytics feature in the legacy admin feature list.
+	 *
+	 * @param array $features Feature slugs.
+	 * @return array
+	 */
+	public function disable_analytics_feature( array $features ): array {
+		return array_values( array_diff( $features, array( 'analytics' ) ) );
 	}
 
 	/**

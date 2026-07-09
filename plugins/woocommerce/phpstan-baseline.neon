@@ -12403,12 +12403,6 @@ parameters:
 			path: includes/class-wc-order-item-coupon.php
 
 		-
-			message: '#^Binary operation "\*" between string and float results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/class-wc-order-item-fee.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_total\(\)\.$#'
 			identifier: method.notFound
 			count: 4

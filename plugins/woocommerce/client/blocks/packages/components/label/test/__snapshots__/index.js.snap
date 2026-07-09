@@ -1,62 +1,74 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Label with wrapperElement should render both label and screen reader label 1`] = `
-<label
-  className="foo-bar"
-  data-foo="bar"
->
-  <span
-    aria-hidden="true"
+<div>
+  <label
+    class="foo-bar"
+    data-foo="bar"
   >
-    Lorem
-  </span>
-  <span
-    className="screen-reader-text"
-  >
-    Ipsum
-  </span>
-</label>
+    <span
+      aria-hidden="true"
+    >
+      Lorem
+    </span>
+    <span
+      class="screen-reader-text"
+    >
+      Ipsum
+    </span>
+  </label>
+</div>
 `;
 
 exports[`Label with wrapperElement should render only the label 1`] = `
-<label
-  className="foo-bar"
-  data-foo="bar"
->
-  Lorem
-</label>
+<div>
+  <label
+    class="foo-bar"
+    data-foo="bar"
+  >
+    Lorem
+  </label>
+</div>
 `;
 
 exports[`Label with wrapperElement should render only the screen reader label 1`] = `
-<label
-  className="foo-bar screen-reader-text"
-  data-foo="bar"
->
-  Ipsum
-</label>
+<div>
+  <label
+    class="foo-bar screen-reader-text"
+    data-foo="bar"
+  >
+    Ipsum
+  </label>
+</div>
 `;
 
 exports[`Label without wrapperElement should render both label and screen reader label 1`] = `
-[
+<div>
   <span
     aria-hidden="true"
   >
     Lorem
-  </span>,
+  </span>
   <span
-    className="screen-reader-text"
+    class="screen-reader-text"
   >
     Ipsum
-  </span>,
-]
+  </span>
+</div>
 `;
 
-exports[`Label without wrapperElement should render only the label 1`] = `"Lorem"`;
+exports[`Label without wrapperElement should render only the label 1`] = `
+<div>
+  Lorem
+</div>
+`;
 
 exports[`Label without wrapperElement should render only the screen reader label 1`] = `
-<span
-  className="screen-reader-text"
->
-  Ipsum
-</span>
+<div>
+  <span
+    class="screen-reader-text"
+  >
+    Ipsum
+  </span>
+</div>
 `;
