@@ -197,6 +197,13 @@ jobs:
               "max-download-attempts": 10,
               "max-concurrent-downloads": 3
             }
+            
+      - name: 'Start Test Environment: enable docker cache'
+        if: ${{ matrix.testEnv.shouldCreate }}
+        uses: ScribeMD/docker-cache@fb28c93772363301b8d0a6072ce850224b73f74e # 0.5.0
+        with:
+          key: docker-${{ runner.os }}-${{ hashFiles('plugins/woocommerce/.wp-env.json') }}
+          # read-only: ${{ github.ref != 'refs/heads/trunk' }}
 
       - name: 'Start Test Environment: start'
         id: 'prepare-test-environment'
