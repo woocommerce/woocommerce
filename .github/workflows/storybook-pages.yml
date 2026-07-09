@@ -36,3 +36,11 @@ jobs:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   publish_dir: ./tools/storybook/storybook-static
                   force_orphan: true
+
+            - name: Report failure on Slack
+              if: ${{ failure() }}
+              env:
+                  SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+                  DEFAULT_CHECKS_CHANNEL: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
+                  DAILY_CHECKS_CHANNEL: ${{ secrets.DAILY_CHECKS_CHANNEL }}
+              run: pnpm utils slack-test-report -c failure -r "nightly-checks Storybook build and deploy" --config ".github/workflows/slack-report-config.json"
