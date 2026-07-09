@@ -324,8 +324,6 @@ class Features {
 		/**
 		 * Filter allowing WooCommerce Admin optional features to be disabled.
 		 *
-		 * @since 4.0.0
-		 *
 		 * @param bool $disabled False.
 		 */
 		if ( apply_filters( 'woocommerce_admin_disabled', false ) ) {
@@ -541,8 +539,6 @@ class Features {
 	public static function is_analytics_disabled_by_legacy_filters(): bool {
 		/**
 		 * Filter allowing WooCommerce Admin optional features to be disabled.
-		 *
-		 * @since 4.0.0
 		 *
 		 * @param bool $disabled False.
 		 */
