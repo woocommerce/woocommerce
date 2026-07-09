@@ -1670,6 +1670,13 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			return;
 		}
 
+		/**
+		 * Filter the use of a visible label for the orderby dropdown.
+		 * 
+		 * @since x.y.z
+		 * 
+		 * @param bool $use_label Whether to use a visible label for the orderby dropdown. Default is whatever was passed in the block attributes or false.
+		 */
 		$use_label = apply_filters( 'woocommerce_catalog_orderby_use_label', isset( $attributes ) && isset( $attributes['useLabel'] ) ? $attributes['useLabel'] : false );
 
 		/**
