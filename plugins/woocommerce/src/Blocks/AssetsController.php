@@ -138,7 +138,7 @@ final class AssetsController {
 		// Deprecated package handle kept for extensions that still declare wc-blocks-shared-hocs.
 		$this->api->register_script( 'wc-blocks-shared-hocs', 'assets/client/blocks/wc-blocks-shared-hocs.js', array(), false );
 
-		// Deprecated package handle kept for extensions that still declare wc-blocks-components.
+		// Supported package handle loaded by the consolidated editor build when components are externalized.
 		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js' );
 
 		$this->add_deprecated_script_handle_warnings(
@@ -147,7 +147,6 @@ final class AssetsController {
 				'wc-blocks',
 				'wc-blocks-shared-context',
 				'wc-blocks-shared-hocs',
-				'wc-blocks-components',
 			)
 		);
 	}

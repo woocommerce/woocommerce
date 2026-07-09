@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore wc-blocks-components as a WooCommerce Blocks editor dependency so extensions that use the shared components global continue to load safely.

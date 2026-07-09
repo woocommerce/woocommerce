@@ -35,7 +35,7 @@ The entries below resolve as bundled editor imports when they are used by WooCom
 | --- | --- | --- | --- | --- |
 | N/A | `wc-blocks-vendors` | N/A | `AssetsController::register_deprecated_package_scripts()` | Compatibility placeholder only; keeps legacy dependencies resolvable but does not print a script, so enqueueing it no longer loads the old vendor bundle. |
 | N/A | `wc-blocks` | N/A | `AssetsController::register_deprecated_package_scripts()` | Compatibility placeholder only; keeps legacy dependencies resolvable but does not print a script. Use `wc-block-library` for the shared editor bundle. |
-| `@woocommerce/blocks-components` | `wc-blocks-components` | `wc.blocksComponents` | `AssetsController::register_deprecated_package_scripts()` | Deprecated editor dependency target kept for backward compatibility. |
+| `@woocommerce/blocks-components` | `wc-blocks-components` | `wc.blocksComponents` | `AssetsController::register_deprecated_package_scripts()` | Supported editor dependency target for shared Blocks components. |
 | `@woocommerce/shared-context` | `wc-blocks-shared-context` | `wc.wcBlocksSharedContext` | `AssetsController::register_deprecated_package_scripts()` | Deprecated editor dependency target kept for backward compatibility. |
 | `@woocommerce/shared-hocs` | `wc-blocks-shared-hocs` | `wc.wcBlocksSharedHocs` | `AssetsController::register_deprecated_package_scripts()` | Deprecated editor dependency target kept for backward compatibility. |
 | `@woocommerce/settings` | `wc-settings` | `wc.wcSettings` | `AssetDataRegistry::register_data_script()` | Still used when scripts need WooCommerce settings data; inline data is only printed when the handle is enqueued. |
