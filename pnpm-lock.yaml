@@ -3285,9 +3285,6 @@ importers:
       react-refresh:
         specifier: ^0.14.0
         version: 0.14.2
-      react-test-renderer:
-        specifier: 18.3.x
-        version: 18.3.1(react@18.3.1)
       readline-sync:
         specifier: ^1.4.10
         version: 1.4.10
@@ -3853,9 +3850,6 @@ importers:
       react-docgen-typescript-plugin:
         specifier: ^1.0.5
         version: 1.0.8(typescript@5.7.3)(webpack@5.97.1)
-      react-test-renderer:
-        specifier: 18.3.x
-        version: 18.3.1(react@18.3.1)
       redux:
         specifier: 4.2.1
         version: 4.2.1
