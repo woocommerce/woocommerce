@@ -10,6 +10,12 @@ export type productCountVisibilityType =
 	| 'greater_than_zero'
 	| undefined;
 
+export enum DisplayStyle {
+	ICON_AND_TEXT = 'icon_and_text',
+	TEXT_ONLY = 'text_only',
+	ICON_ONLY = 'icon_only',
+}
+
 export interface ColorItem {
 	color: string;
 	name?: string;
@@ -24,6 +30,7 @@ export interface BlockAttributes {
 	style?: Record< string, Record< string, string > >;
 	contents: string;
 	miniCartIcon?: IconType;
+	displayStyle?: DisplayStyle;
 	addToCartBehaviour: string;
 	onCartClickBehaviour: string;
 	hasHiddenPrice: boolean;

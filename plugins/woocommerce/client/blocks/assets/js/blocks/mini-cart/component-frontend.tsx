@@ -48,6 +48,7 @@ const renderMiniCartFrontend = () => {
 				colorClassNames,
 				style: el.dataset.style ? JSON.parse( el.dataset.style ) : {},
 				miniCartIcon: el.dataset.miniCartIcon,
+				displayStyle: el.dataset.displayStyle || 'icon_only',
 				addToCartBehaviour: el.dataset.addToCartBehaviour || 'none',
 				onCartClickBehaviour:
 					el.dataset.onCartClickBehaviour || 'open_drawer',

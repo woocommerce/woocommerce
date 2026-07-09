@@ -16,6 +16,7 @@ interface Props {
 	iconColor?: ColorItem | { color: undefined };
 	productCountColor?: ColorItem | { color: undefined };
 	productCountVisibility?: productCountVisibilityType;
+	ariaLabel?: string;
 }
 
 const QuantityBadge = ( {
@@ -24,6 +25,7 @@ const QuantityBadge = ( {
 	iconColor,
 	productCountColor,
 	productCountVisibility,
+	ariaLabel,
 }: Props ): JSX.Element => {
 	function getIcon( iconName?: 'cart' | 'bag' | 'bag-alt' ) {
 		switch ( iconName ) {
@@ -45,7 +47,10 @@ const QuantityBadge = ( {
 	const displayCount = shouldDisplayCount ? count : '';
 
 	return (
-		<span className="wc-block-mini-cart__quantity-badge">
+		<span
+			className="wc-block-mini-cart__quantity-badge"
+			{ ...( ariaLabel && { 'aria-label': ariaLabel } ) }
+		>
 			<Icon
 				className="wc-block-mini-cart__icon"
 				color={ iconColor?.color }

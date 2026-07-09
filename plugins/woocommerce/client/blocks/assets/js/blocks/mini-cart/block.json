@@ -28,6 +28,10 @@
 			"type": "string",
 			"default": "cart"
 		},
+		"displayStyle": {
+			"type": "string",
+			"default": "icon_only"
+		},
 		"addToCartBehaviour": {
 			"type": "string",
 			"default": "none"
