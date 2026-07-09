@@ -147,7 +147,7 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$last_valid_order_id = $base_id + 2;
 
 		$sql =
-			'INSERT INTO ' . $orders_table . "
+			'INSERT INTO %i' . "
 				( id, customer_id, status, type )
 			VALUES
 				( %d, %d, '" . OrderInternalStatus::COMPLETED . "', 'shop_order' ),
@@ -159,6 +159,7 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		$query = $wpdb->prepare(
 			$sql,
+			$orders_table,
 			$base_id + 1,
 			$customer_1_id,
 			$last_valid_order_id,
