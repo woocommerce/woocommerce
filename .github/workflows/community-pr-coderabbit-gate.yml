@@ -1,0 +1,159 @@
+# Gate community PR reviewer assignment on CodeRabbit's review status.
+#
+# Problem: Community PRs (from forks) get reviewer teams assigned immediately,
+# even when CodeRabbit has already flagged issues. Human reviewers waste time
+# re-discovering the same problems.
+#
+# Solution: This workflow listens for CodeRabbit's summary comment and checks
+# its formal review state. If approved, it adds a `coderabbit-approved` label
+# which triggers reviewer assignment in automate-team-review-assignment.yml.
+# If changes are requested, it posts a guidance comment to the contributor.
+#
+# Why issue_comment instead of pull_request_review?
+# For fork PRs, pull_request_review events have read-only GITHUB_TOKEN and no
+# access to secrets. The issue_comment event runs in the base repo context with
+# full permissions, even for fork PRs. The label bridges from this context to
+# pull_request_target (labeled) where the reviewer assignment action has the
+# github.event.pull_request context it needs.
+
+name: Community PR CodeRabbit Gate
+
+on:
+    issue_comment:
+        types: [created]
+
+concurrency:
+    group: community-pr-coderabbit-gate-${{ github.event.issue.number }}
+    cancel-in-progress: false
+
+permissions:
+    contents: read
+    pull-requests: write
+    issues: write
+
+jobs:
+    handle-coderabbit-review:
+        name: Handle CodeRabbit review for community PRs
+        if: ${{ github.event.issue.pull_request && github.event.comment.user.login == 'coderabbitai[bot]' }}
+        runs-on: ubuntu-latest
+        steps:
+            - name: Get PR details and check gate conditions
+              id: gate
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+              with:
+                  script: |
+                      const prNumber = context.payload.issue.number;
+
+                      // Get full PR details
+                      const { data: pr } = await github.rest.pulls.get({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          pull_number: prNumber,
+                      });
+
+                      // Skip drafts
+                      if ( pr.draft ) {
+                          core.info( 'PR is a draft, skipping.' );
+                          core.setOutput( 'action', 'none' );
+                          return;
+                      }
+
+                      // Skip closed/merged PRs
+                      if ( pr.state !== 'open' ) {
+                          core.info( `PR is ${ pr.state }, skipping.` );
+                          core.setOutput( 'action', 'none' );
+                          return;
+                      }
+
+                      // Check if community contribution
+                      const { data: { permission } } = await github.rest.repos.getCollaboratorPermissionLevel( {
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          username: pr.user.login,
+                      } );
+                      const isCommunity = ( permission === 'read' || permission === 'none' )
+                          && pr.user.login !== 'gglobalstep'
+                          && pr.user.login !== 'linear[bot]';
+
+                      if ( ! isCommunity ) {
+                          core.info( `Author ${ pr.user.login } is a collaborator, skipping.` );
+                          core.setOutput( 'action', 'none' );
+                          return;
+                      }
+
+                      // Check if reviewers are already assigned
+                      if ( pr.requested_reviewers.length > 0 || pr.requested_teams.length > 0 ) {
+                          core.info( 'Reviewers already assigned, skipping.' );
+                          core.setOutput( 'action', 'none' );
+                          return;
+                      }
+
+                      // Get CodeRabbit's latest review
+                      const { data: reviews } = await github.rest.pulls.listReviews( {
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          pull_number: prNumber,
+                          per_page: 100,
+                      } );
+
+                      const coderabbitReviews = reviews.filter(
+                          ( r ) => r.user.login === 'coderabbitai[bot]'
+                      );
+
+                      if ( coderabbitReviews.length === 0 ) {
+                          core.info( 'No CodeRabbit review found yet, skipping.' );
+                          core.setOutput( 'action', 'none' );
+                          return;
+                      }
+
+                      // Get the latest CodeRabbit review state
+                      const latestReview = coderabbitReviews[ coderabbitReviews.length - 1 ];
+                      const state = latestReview.state.toLowerCase();
+
+                      if ( state === 'approved' ) {
+                          core.setOutput( 'action', 'approve' );
+                      } else if ( state === 'changes_requested' ) {
+                          core.setOutput( 'action', 'request_changes' );
+                      } else {
+                          core.info( `CodeRabbit review state is "${ state }", no action needed.` );
+                          core.setOutput( 'action', 'none' );
+                      }
+
+                      core.setOutput( 'pr_number', prNumber );
+
+            - name: Add coderabbit-approved label
+              if: ${{ steps.gate.outputs.action == 'approve' }}
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+              env:
+                  PR_NUMBER: ${{ steps.gate.outputs.pr_number }}
+              with:
+                  script: |
+                      await github.rest.issues.addLabels( {
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          issue_number: Number( process.env.PR_NUMBER ),
+                          labels: [ 'coderabbit-approved' ],
+                      } );
+
+            - name: Find existing guidance comment
+              if: ${{ steps.gate.outputs.action == 'request_changes' }}
+              uses: peter-evans/find-comment@034abe94d3191f9c89d870519735beae326f2bdb
+              id: find-guidance
+              with:
+                  issue-number: ${{ steps.gate.outputs.pr_number }}
+                  comment-author: 'github-actions[bot]'
+                  body-includes: CodeRabbit has requested changes on this PR
+
+            - name: Post guidance comment
+              if: ${{ steps.gate.outputs.action == 'request_changes' }}
+              uses: peter-evans/create-or-update-comment@67dcc547d311b736a8e6c5c236542148a47adc3d
+              with:
+                  comment-id: ${{ steps.find-guidance.outputs.comment-id }}
+                  issue-number: ${{ steps.gate.outputs.pr_number }}
+                  body: |
+                      CodeRabbit has requested changes on this PR. Please address the feedback in the review comments and push your changes — CodeRabbit will re-review automatically.
+
+                      If you believe a comment is a false positive, you can resolve it with a brief explanation using GitHub's "Resolve conversation" button, or reply `@coderabbitai resolve` to resolve all comments at once.
+
+                      Once all comments are resolved, a reviewer will be assigned automatically.
+                  edit-mode: replace

@@ -1,4 +1,5 @@
 reviews:
+    request_changes_workflow: true
     assess_linked_issues: false
     collapse_walkthrough: true
     high_level_summary: false

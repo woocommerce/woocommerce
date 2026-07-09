@@ -2,12 +2,12 @@ name: Add community label, Assign reviewers
 
 on:
     pull_request_target:
-        types: [opened, ready_for_review, review_requested]
+        types: [opened, ready_for_review, labeled, review_requested]
     issues:
         types: [opened]
 
 concurrency:
-    group: automate-team-review-assignment-${{ github.event_name }}-${{ github.event.action }}-${{ github.event.pull_request.number || github.event.issue.number }}
+    group: automate-team-review-assignment-${{ github.event_name }}-${{ github.event.action }}-${{ github.event.label.name || '' }}-${{ github.event.pull_request.number || github.event.issue.number }}
     cancel-in-progress: true
 
 permissions:
@@ -49,31 +49,65 @@ jobs:
 
     assign-reviewers:
       name: Assign reviewers
-      if: ${{ github.event.pull_request && ( github.event.action == 'opened' || github.event.action == 'ready_for_review' ) }}
+      if: >
+        ${{ github.event.pull_request && (
+          github.event.action == 'opened' ||
+          github.event.action == 'ready_for_review' ||
+          ( github.event.action == 'labeled' && github.event.label.name == 'coderabbit-approved' )
+        ) }}
       runs-on: ubuntu-latest
       steps:
         - name: Check if community contribution
           id: check
           uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+          env:
+            PR_USER: ${{ github.event.pull_request.user.login }}
+            ACTION: ${{ github.event.action }}
+            LABEL_NAME: ${{ github.event.label.name }}
           with:
             retries: 2
             script: |
+              const username = process.env.PR_USER;
               const { data: { permission } } = await github.rest.repos.getCollaboratorPermissionLevel( {
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  username: '${{ github.event.pull_request.user.login }}',
+                  username,
               } );
-              core.setOutput( 'contributor', ( permission === 'read' || permission === 'none' ) ? 'yes' : 'no' );
+              const isCommunity = ( permission === 'read' || permission === 'none' )
+                  && username !== 'gglobalstep'
+                  && username !== 'linear[bot]';
+              core.setOutput( 'contributor', isCommunity ? 'yes' : 'no' );
+
+              // Community PRs are only assigned when the coderabbit-approved label is added
+              const shouldAssignCommunity = isCommunity
+                  && process.env.ACTION === 'labeled'
+                  && process.env.LABEL_NAME === 'coderabbit-approved';
+              core.setOutput( 'assign_community', shouldAssignCommunity ? 'yes' : 'no' );
+
+        - name: Check if reviewers already assigned
+          if: ${{ steps.check.outputs.assign_community == 'yes' }}
+          id: reviewers
+          uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+          with:
+            retries: 2
+            script: |
+              const { data: pr } = await github.rest.pulls.get( {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: ${{ github.event.pull_request.number }},
+              } );
+              const hasReviewers = pr.requested_reviewers.length > 0 || pr.requested_teams.length > 0;
+              core.setOutput( 'already_assigned', hasReviewers ? 'yes' : 'no' );
 
         - name: Assign reviewers for a community PR
-          if: ${{ steps.check.outputs.contributor == 'yes' && github.event.pull_request.draft == false }}
+          if: ${{ steps.check.outputs.assign_community == 'yes' && github.event.pull_request.draft == false && steps.reviewers.outputs.already_assigned != 'yes' }}
           uses: shufo/auto-assign-reviewer-by-files@f5f3db9ef06bd72ab6978996988c6462cbdaabf6
           with:
               config: '.github/project-community-pr-assigner.yml'
               token: ${{ secrets.PR_ASSIGN_TOKEN }}
 
         - name: Assign reviewers for a teams PR
-          if: ${{ steps.check.outputs.contributor == 'no' && github.event.pull_request.draft == false && ! contains( github.event.pull_request.labels.*.name, 'Release' ) && ( github.event.pull_request.base.ref == 'trunk' || startsWith( github.event.pull_request.base.ref, 'release/' ) ) }}
+          if: ${{ steps.check.outputs.contributor == 'no' && ( github.event.action == 'opened' || github.event.action == 'ready_for_review' ) && github.event.pull_request.draft == false && ! contains( github.event.pull_request.labels.*.name, 'Release' ) && ( github.event.pull_request.base.ref == 'trunk' || startsWith( github.event.pull_request.base.ref, 'release/' ) ) }}
           continue-on-error: ${{ ( github.event.pull_request.head.repo.fork && 'true' ) || 'false' }}
           uses: acq688/Request-Reviewer-For-Team-Action@fca1c60fd0504aef59bdc925f3902c8a2d8bce62 # v1.1
           with:
