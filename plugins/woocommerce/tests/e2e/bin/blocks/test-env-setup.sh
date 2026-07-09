@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Command prefix for running wp-cli against the single-container test environment
-# (started via `wp-env --config .wp-env.test.json`, whose container is `cli`).
-wp_cli="wp-env --config .wp-env.test.json run cli"
+# Command prefix for running wp-cli against the single-container E2E environment
+# (started via `wp-env --config .wp-env.e2e.json`, whose container is `cli`).
+wp_cli="wp-env --config .wp-env.e2e.json run cli"
 
 # Remove the database snapshot if it exists.
 $wp_cli -- rm -f blocks_e2e.sql

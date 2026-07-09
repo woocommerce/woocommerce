@@ -2407,15 +2407,9 @@ parameters:
 			path: includes/admin/class-wc-admin-pointers.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$base\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/admin/class-wc-admin-post-types.php
-
-		-
 			message: '#^Access to an undefined property object\:\:\$post_type\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: includes/admin/class-wc-admin-post-types.php
 
 		-
@@ -5711,24 +5705,6 @@ parameters:
 			identifier: method.unused
 			count: 1
 			path: includes/admin/meta-boxes/class-wc-meta-box-product-data.php
-
-		-
-			message: '#^Call to an undefined method object\:\:save\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-product-images.php
-
-		-
-			message: '#^Call to an undefined method object\:\:set_gallery_image_ids\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-product-images.php
-
-		-
-			message: '#^Cannot call method get_gallery_image_ids\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-product-images.php
 
 		-
 			message: '#^Method WC_Meta_Box_Product_Images\:\:output\(\) has no return type specified\.$#'
@@ -15164,12 +15140,6 @@ parameters:
 
 		-
 			message: '#^Cannot access property \$post_parent on WP_Post\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-shortcodes.php
-
-		-
-			message: '#^Cannot access property \$post_status on WP_Post\|null\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: includes/class-wc-shortcodes.php
@@ -38848,21 +38818,15 @@ parameters:
 			path: src/Admin/API/OnboardingProductTypes.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingProducts\:\:create_products\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingProducts.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingProducts\:\:create_products\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/OnboardingProducts.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingProducts\:\:create_products\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_REST_Response\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingProducts\:\:create_products\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_REST_Response\.$#'
 			identifier: return.type
-			count: 2
+			count: 1
 			path: src/Admin/API/OnboardingProducts.php
 
 		-
@@ -38884,7 +38848,7 @@ parameters:
 			path: src/Admin/API/OnboardingProducts.php
 
 		-
-			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Data_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 88 on line 5$#'
+			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Data_Controller\)\: Unexpected token "\\n \* ", expected ''\<'' at offset 90 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: src/Admin/API/OnboardingProducts.php
@@ -46636,18 +46600,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/Tasks/Payments.php
 
 		-
-			message: '#^Call to method get_id\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
-			message: '#^Call to method get_meta\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
 			message: '#^Call to method get_status\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
@@ -46680,12 +46632,6 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$product of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:maybe_set_has_product_transient\(\) expects Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
-			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:is_valid_product\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
 
@@ -49304,30 +49250,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Autoloader.php
-
-		-
-			message: '#^Cannot call method date\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Blocks/AIContent/UpdateProducts.php
-
-		-
-			message: '#^Parameter \#1 \$price of method WC_Product\:\:set_price\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/AIContent/UpdateProducts.php
-
-		-
-			message: '#^Parameter \#1 \$price of method WC_Product\:\:set_regular_price\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/AIContent/UpdateProducts.php
-
-		-
-			message: '#^Parameter \#1 \$var of function count expects array\|Countable, array\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Blocks/AIContent/UpdateProducts.php
 
 		-
 			message: '#^Default value of the parameter \#1 \$classes \(string\) of method Automattic\\WooCommerce\\Blocks\\Assets\:\:add_theme_admin_body_class\(\) is incompatible with type array\.$#'
@@ -52828,12 +52750,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductGalleryLargeImage\:\:get_main_images_html\(\) should return array but returns string\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductGalleryLargeImage\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -52847,18 +52763,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$html of function wp_interactivity_process_directives expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
-
-		-
-			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''a'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
-
-		-
-			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''img'' given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
@@ -54606,12 +54510,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$shipping\.$#'
 			identifier: property.notFound
-			count: 1
-			path: src/Blocks/Shipping/ShippingController.php
-
-		-
-			message: '#^Action callback returns bool but should not return anything\.$#'
-			identifier: return.void
 			count: 1
 			path: src/Blocks/Shipping/ShippingController.php
 
@@ -56984,7 +56882,6 @@ parameters:
 			identifier: offsetAccess.notFound
 			count: 1
 			path: src/Internal/Admin/Logging/LogHandlerFileV2.php
-
 
 		-
 			message: '#^Call to protected method prepare_column_headers\(\) of class WC_Admin_Log_Table_List\.$#'
@@ -70006,7 +69903,7 @@ parameters:
 		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
-			count: 3
+			count: 2
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
