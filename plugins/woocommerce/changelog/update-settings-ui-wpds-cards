@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Render settings UI section cards with WordPress Design System components behind the settings-ui feature flag.

@@ -2407,15 +2407,9 @@ parameters:
 			path: includes/admin/class-wc-admin-pointers.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$base\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/admin/class-wc-admin-post-types.php
-
-		-
 			message: '#^Access to an undefined property object\:\:\$post_type\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: includes/admin/class-wc-admin-post-types.php
 
 		-
@@ -5711,24 +5705,6 @@ parameters:
 			identifier: method.unused
 			count: 1
 			path: includes/admin/meta-boxes/class-wc-meta-box-product-data.php
-
-		-
-			message: '#^Call to an undefined method object\:\:save\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-product-images.php
-
-		-
-			message: '#^Call to an undefined method object\:\:set_gallery_image_ids\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-product-images.php
-
-		-
-			message: '#^Cannot call method get_gallery_image_ids\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-product-images.php
 
 		-
 			message: '#^Method WC_Meta_Box_Product_Images\:\:output\(\) has no return type specified\.$#'
@@ -10291,12 +10267,6 @@ parameters:
 			path: includes/class-wc-cart.php
 
 		-
-			message: '#^Parameter \#1 \$product_id of method WC_Cart\:\:generate_cart_id\(\) expects int, int\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-cart.php
-
-		-
 			message: '#^Parameter \#1 \$stock_quantity of function wc_format_stock_quantity_for_display expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 3
@@ -11563,18 +11533,6 @@ parameters:
 			path: includes/class-wc-emails.php
 
 		-
-			message: '#^Call to an undefined method object\:\:get_formatted_name\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-emails.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_stock_quantity\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-emails.php
-
-		-
 			message: '#^Cannot call method get_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -12443,12 +12401,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: includes/class-wc-order-item-coupon.php
-
-		-
-			message: '#^Binary operation "\*" between string and float results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/class-wc-order-item-fee.php
 
 		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_total\(\)\.$#'
@@ -15182,12 +15134,6 @@ parameters:
 
 		-
 			message: '#^Cannot access property \$post_parent on WP_Post\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-shortcodes.php
-
-		-
-			message: '#^Cannot access property \$post_status on WP_Post\|null\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: includes/class-wc-shortcodes.php
@@ -31666,12 +31612,6 @@ parameters:
 			path: includes/shortcodes/class-wc-shortcode-my-account.php
 
 		-
-			message: '#^Function wc_add_notice invoked with 4 parameters, 1\-3 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-my-account.php
-
-		-
 			message: '#^Method WC_Shortcode_My_Account\:\:add_payment_method\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -33064,12 +33004,6 @@ parameters:
 			path: includes/wc-account-functions.php
 
 		-
-			message: '#^@param string \$old_slug does not accept actual type of parameter\: string\|null\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: includes/wc-attribute-functions.php
-
-		-
 			message: '#^Argument of an invalid type array\<int, WP_Term\>\|WP_Error supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
@@ -33121,30 +33055,6 @@ parameters:
 			message: '#^Parameter \#1 \$args of function get_terms expects array\{taxonomy\?\: array\<string\>\|string, object_ids\?\: array\<int\>\|int, orderby\?\: string, order\?\: string, hide_empty\?\: bool\|int, include\?\: array\<int\>\|string, exclude\?\: array\<int\>\|string, exclude_tree\?\: array\<int\>\|string, \.\.\.\}, non\-falsy\-string given\.$#'
 			identifier: argument.type
 			count: 1
-			path: includes/wc-attribute-functions.php
-
-		-
-			message: '#^Parameter \#1 \$attribute_name of function wc_attribute_taxonomy_name expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 3
-			path: includes/wc-attribute-functions.php
-
-		-
-			message: '#^Parameter \#1 \$attribute_name of function wc_check_if_attribute_name_is_reserved expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-attribute-functions.php
-
-		-
-			message: '#^Parameter \#1 \$string of function strlen expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-attribute-functions.php
-
-		-
-			message: '#^Parameter \#1 \$title of function sanitize_title expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 3
 			path: includes/wc-attribute-functions.php
 
 		-
@@ -34427,12 +34337,6 @@ parameters:
 
 		-
 			message: '#^Function wc_format_option_price_num_decimals\(\) should return string but returns int\<0, max\>\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/wc-formatting-functions.php
-
-		-
-			message: '#^Function wc_format_phone_number\(\) should return string but returns string\|null\.$#'
 			identifier: return.type
 			count: 1
 			path: includes/wc-formatting-functions.php
@@ -38908,21 +38812,15 @@ parameters:
 			path: src/Admin/API/OnboardingProductTypes.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingProducts\:\:create_products\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/OnboardingProducts.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingProducts\:\:create_products\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/OnboardingProducts.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingProducts\:\:create_products\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_REST_Response\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingProducts\:\:create_products\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_REST_Response\.$#'
 			identifier: return.type
-			count: 2
+			count: 1
 			path: src/Admin/API/OnboardingProducts.php
 
 		-
@@ -38944,7 +38842,7 @@ parameters:
 			path: src/Admin/API/OnboardingProducts.php
 
 		-
-			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Data_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 88 on line 5$#'
+			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Data_Controller\)\: Unexpected token "\\n \* ", expected ''\<'' at offset 90 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: src/Admin/API/OnboardingProducts.php
@@ -41470,85 +41368,13 @@ parameters:
 			path: src/Admin/API/Reports/Customers/DataStore.php
 
 		-
-			message: '#^Call to an undefined method object\:\:get_billing_city\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_billing_country\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_billing_email\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_billing_postcode\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_billing_state\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_customer_first_name\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_customer_last_name\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_date_created\(\)\.$#'
-			identifier: method.notFound
-			count: 3
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_email\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
 			message: '#^Call to an undefined method object\:\:get_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Admin/API/Reports/Customers/DataStore.php
 
 		-
-			message: '#^Call to an undefined method object\:\:get_user_id\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_username\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
 			message: '#^Cannot call method get_id\(\) on Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\WC_Order\|WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Cannot call method get_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Admin/API/Reports/Customers/DataStore.php
@@ -41669,18 +41495,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$customer_id of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_last_order\(\) expects int, int\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Parameter \#1 \$order of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_customer_order_data_and_format\(\) expects object, WC_Order\|WC_Order_Refund\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Parameter \#1 \$order of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_existing_customer_id_from_order\(\) expects object, WC_Order\|WC_Order_Refund\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Admin/API/Reports/Customers/DataStore.php
@@ -46780,18 +46594,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/Tasks/Payments.php
 
 		-
-			message: '#^Call to method get_id\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
-			message: '#^Call to method get_meta\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
 			message: '#^Call to method get_status\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
@@ -46824,12 +46626,6 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$product of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:maybe_set_has_product_transient\(\) expects Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
-
-		-
-			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\Products\:\:is_valid_product\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\WC_Product\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/Features/OnboardingTasks/Tasks/Products.php
 
@@ -47824,12 +47620,6 @@ parameters:
 			path: src/Admin/Overrides/OrderRefund.php
 
 		-
-			message: '#^Parameter \#1 \$order of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_or_create_customer_from_order\(\) expects object, WC_Order\|WC_Order_Refund\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Overrides/OrderRefund.php
-
-		-
 			message: '#^Parameter \$item of method Automattic\\WooCommerce\\Admin\\Overrides\\OrderRefund\:\:get_item_cart_tax_amount\(\) has invalid type Automattic\\WooCommerce\\Admin\\Overrides\\WC_Order_Item\.$#'
 			identifier: class.notFound
 			count: 1
@@ -47855,12 +47645,6 @@ parameters:
 
 		-
 			message: '#^Property Automattic\\WooCommerce\\Admin\\Overrides\\OrderRefund\:\:\$customer_id \(int\) does not accept bool\|int\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Admin/Overrides/OrderRefund.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Admin\\Overrides\\OrderRefund\:\:\$customer_id \(int\) does not accept false\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: src/Admin/Overrides/OrderRefund.php
@@ -49462,30 +49246,6 @@ parameters:
 			path: src/Autoloader.php
 
 		-
-			message: '#^Cannot call method date\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Blocks/AIContent/UpdateProducts.php
-
-		-
-			message: '#^Parameter \#1 \$price of method WC_Product\:\:set_price\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/AIContent/UpdateProducts.php
-
-		-
-			message: '#^Parameter \#1 \$price of method WC_Product\:\:set_regular_price\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/AIContent/UpdateProducts.php
-
-		-
-			message: '#^Parameter \#1 \$var of function count expects array\|Countable, array\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Blocks/AIContent/UpdateProducts.php
-
-		-
 			message: '#^Default value of the parameter \#1 \$classes \(string\) of method Automattic\\WooCommerce\\Blocks\\Assets\:\:add_theme_admin_body_class\(\) is incompatible with type array\.$#'
 			identifier: parameter.defaultValue
 			count: 1
@@ -49643,12 +49403,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/AssetsController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:register_and_enqueue_site_editor_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Blocks/AssetsController.php
@@ -49955,12 +49709,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$file_or_folder of function register_block_type_from_metadata expects string, string\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractBlock.php
-
-		-
-			message: '#^Parameter \#1 \$handle of function wp_add_inline_script expects string, array\|string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/AbstractBlock.php
@@ -51064,24 +50812,6 @@ parameters:
 			path: src/Blocks/BlockTypes/CustomerAccount.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\EmptyMiniCartContentsBlock\:\:render_experimental_empty_mini_cart_contents\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/EmptyMiniCartContentsBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\EmptyMiniCartContentsBlock\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/EmptyMiniCartContentsBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\EmptyMiniCartContentsBlock\:\:render_experimental_empty_mini_cart_contents\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/EmptyMiniCartContentsBlock.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedCategory\:\:get_item_image\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -51178,24 +50908,6 @@ parameters:
 			path: src/Blocks/BlockTypes/FeaturedProduct.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FilledMiniCartContentsBlock\:\:render_experimental_filled_mini_cart_contents\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/FilledMiniCartContentsBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FilledMiniCartContentsBlock\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/FilledMiniCartContentsBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FilledMiniCartContentsBlock\:\:render_experimental_filled_mini_cart_contents\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/FilledMiniCartContentsBlock.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\HandpickedProducts\:\:set_block_query_args\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -51220,26 +50932,8 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:append_script_and_deps_src\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:enable_interactivity_support\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:get_block_type_script\(\) should return array\|string but empty return statement found\.$#'
-			identifier: return.empty
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCart.php
 
@@ -51252,12 +50946,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:get_cart_price_markup\(\) should return string but empty return statement found\.$#'
 			identifier: return.empty
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:get_inner_blocks_translations\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCart.php
 
@@ -51280,20 +50968,8 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:print_lazy_load_scripts\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:register_empty_cart_message_block_pattern\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:render_experimental_iapi_mini_cart\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCart.php
 
@@ -51312,12 +50988,6 @@ parameters:
 		-
 			message: '#^PHPDoc tag @return has invalid value \(array\|string;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 148 on line 5$#'
 			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\<string\>\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCart.php
 
@@ -51352,24 +51022,6 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Parameter \#1 \$str of function rawurlencode expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:render_experimental_iapi_mini_cart\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Parameter \$context of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:modify_hooked_block_attributes\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block_Template\.$#'
 			identifier: class.notFound
 			count: 1
@@ -51391,18 +51043,6 @@ parameters:
 			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:\$hooked_block_placements \(array\) in isset\(\) is not nullable\.$#'
 			identifier: isset.property
 			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:\$scripts_to_lazy_load \(array\<string\>\) does not accept array\<array\<string, bool\|string\>\|string\>\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:\$scripts_to_lazy_load \(array\<string\>\) does not accept array\<array\<string, mixed\>\|string\>\.$#'
-			identifier: assign.propertyType
-			count: 2
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
@@ -51436,50 +51076,14 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartCartButtonBlock\:\:render_experimental_iapi_markup\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartCartButtonBlock.php
-
-		-
 			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartCartButtonBlock.php
 
 		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartCartButtonBlock\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartCartButtonBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartCartButtonBlock\:\:render_experimental_iapi_markup\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartCartButtonBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartCheckoutButtonBlock\:\:render_experimental_iapi_markup\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartCheckoutButtonBlock.php
-
-		-
 			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartCheckoutButtonBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartCheckoutButtonBlock\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartCheckoutButtonBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartCheckoutButtonBlock\:\:render_experimental_iapi_markup\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartCheckoutButtonBlock.php
 
@@ -51502,12 +51106,6 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCartContents.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartContents\:\:render_experimental_iapi_mini_cart_contents\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartContents.php
-
-		-
 			message: '#^PHPDoc tag @return has invalid value \(array;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 91 on line 4$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -51526,30 +51124,6 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCartContents.php
 
 		-
-			message: '#^Parameter \#3 \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractBlock\:\:enqueue_assets\(\) expects WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartContents.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartContents\:\:enqueue_assets\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartContents.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartContents\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartContents.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartContents\:\:render_experimental_iapi_mini_cart_contents\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartContents.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartFooterBlock\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -51562,46 +51136,10 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartFooterBlock\:\:render_experimental_iapi_mini_cart_footer\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
-
-		-
 			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''bdi'' given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartFooterBlock\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartFooterBlock\:\:render_experimental_iapi_mini_cart_footer\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartItemsBlock\:\:render_experimental_iapi_markup\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartItemsBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartItemsBlock\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartItemsBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartItemsBlock\:\:render_experimental_iapi_markup\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartItemsBlock.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartProductsTableBlock\:\:render\(\) should return string but returns string\|false\.$#'
@@ -51628,76 +51166,10 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCartProductsTableBlock.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartShoppingButtonBlock\:\:render_experimental_iapi_markup\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartShoppingButtonBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartShoppingButtonBlock\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartShoppingButtonBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartShoppingButtonBlock\:\:render_experimental_iapi_markup\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartShoppingButtonBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartTitleBlock\:\:render_experimental_iapi_title_block\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartTitleBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartTitleBlock\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartTitleBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartTitleBlock\:\:render_experimental_iapi_title_block\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartTitleBlock.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartTitleItemsCounterBlock\:\:get_cart_instance\(\) should return WC_Cart but returns null\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartTitleItemsCounterBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartTitleItemsCounterBlock\:\:render_experimental_iapi_title_label_block\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartTitleItemsCounterBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartTitleItemsCounterBlock\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartTitleItemsCounterBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartTitleLabelBlock\:\:render_experimental_iapi_title_label_block\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartTitleLabelBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartTitleLabelBlock\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartTitleLabelBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartTitleLabelBlock\:\:render_experimental_iapi_title_label_block\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartTitleLabelBlock.php
 
 		-
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
@@ -52158,12 +51630,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_product_id\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/HandlerRegistry.php
-
-		-
-			message: '#^Cannot call method get_upsell_ids\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Blocks/BlockTypes/ProductCollection/HandlerRegistry.php
 
@@ -52996,12 +52462,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductGalleryLargeImage\:\:get_main_images_html\(\) should return array but returns string\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductGalleryLargeImage\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -53015,18 +52475,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$html of function wp_interactivity_process_directives expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
-
-		-
-			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''a'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
-
-		-
-			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''img'' given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
@@ -54778,12 +54226,6 @@ parameters:
 			path: src/Blocks/Shipping/ShippingController.php
 
 		-
-			message: '#^Action callback returns bool but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: src/Blocks/Shipping/ShippingController.php
-
-		-
 			message: '#^Cannot call method get_data\(\) on bool\|WC_Shipping_Zone\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -55516,49 +54958,7 @@ parameters:
 			path: src/Caches/OrderCacheController.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCache\:\:decrement\(\) should return int but returns int\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Caches/OrderCountCache.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCache\:\:increment\(\) should return int but returns int\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Caches/OrderCountCache.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCacheService\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Caches/OrderCountCacheService.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCacheService\:\:unschedule_background_actions\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Caches/OrderCountCacheService.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCacheService\:\:update_on_new_order\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Caches/OrderCountCacheService.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCacheService\:\:update_on_order_deleted\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Caches/OrderCountCacheService.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCacheService\:\:update_on_order_status_changed\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Caches/OrderCountCacheService.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCacheService\:\:update_on_order_trashed\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Caches/OrderCountCacheService.php
@@ -56830,12 +56230,6 @@ parameters:
 			path: src/Internal/Admin/FeaturePlugin.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\FeaturePlugin\:\:replace_supported_features\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/FeaturePlugin.php
-
-		-
 			message: '#^PHPDoc tag @var does not specify variable name\.$#'
 			identifier: varTag.noVariable
 			count: 4
@@ -57192,18 +56586,6 @@ parameters:
 		-
 			message: '#^Offset ''dirname'' might not exist on array\{dirname\?\: string, basename\: string, extension\?\: string, filename\: string\}\.$#'
 			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Internal/Admin/Logging/LogHandlerFileV2.php
-
-		-
-			message: '#^Parameter \#1 \$input of function array_filter expects array, array\<Automattic\\WooCommerce\\Internal\\Admin\\Logging\\FileV2\\File\>\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Logging/LogHandlerFileV2.php
-
-		-
-			message: '#^Parameter \#1 \$var of function count expects array\|Countable, array\<Automattic\\WooCommerce\\Internal\\Admin\\Logging\\FileV2\\File\>\|int given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Logging/LogHandlerFileV2.php
 
@@ -70227,7 +69609,7 @@ parameters:
 		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
-			count: 3
+			count: 2
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-

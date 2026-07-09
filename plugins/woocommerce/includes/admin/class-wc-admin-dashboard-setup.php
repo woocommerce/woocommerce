@@ -7,7 +7,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
@@ -249,11 +248,11 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		 * @return bool
 		 */
 		public function should_display_widget() {
-			if ( ! class_exists( 'Automattic\WooCommerce\Admin\Features\Features' ) || ! class_exists( 'Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists' ) ) {
+			if ( ! class_exists( 'Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists' ) ) {
 				return false;
 			}
 
-			if ( ! Features::is_enabled( 'onboarding' ) || ! WC()->is_wc_admin_active() ) {
+			if ( ! WC()->is_wc_admin_active() ) {
 				return false;
 			}
 

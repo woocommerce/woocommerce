@@ -55,6 +55,29 @@ class WebpackRTLPlugin {
 									}
 								}
 
+								/*
+								 * In-place mode rewrites the original stylesheet to
+								 * RTL rather than emitting a separate `-rtl.css`
+								 * sibling, so an existing (LTR) `<link>` renders RTL.
+								 * Storybook uses this for its RTL preview, where the
+								 * content-hashed chunk filenames can't be predicted
+								 * to swap a link. Skips the sibling/caching path.
+								 */
+								if ( this.options.inPlace ) {
+									const rtlSource = rtlcss.process(
+										assets[ asset ].source(),
+										this.options.options,
+										this.options.plugins
+									);
+									compilation.updateAsset(
+										asset,
+										new compiler.webpack.sources.RawSource(
+											rtlSource
+										)
+									);
+									return;
+								}
+
 								// Compute the filename
 								const filename = asset.replace(
 									cssRe,

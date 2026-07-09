@@ -9,8 +9,7 @@
 
 // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
-use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -37,21 +36,23 @@ if ( ! $tab_exists ) {
 	exit;
 }
 
-$hide_nav                  = 'checkout' === $current_tab && in_array( $current_section, array( 'offline', 'bacs', 'cheque', 'cod' ), true );
-$is_settings_ui_page       = false;
-$settings_ui_settings_page = null;
+$hide_nav = 'checkout' === $current_tab && in_array( $current_section, array( 'offline', 'bacs', 'cheque', 'cod' ), true );
 
-if ( Features::is_enabled( 'settings-ui' ) ) {
-	foreach ( WC_Admin_Settings::get_settings_pages() as $settings_page ) {
-		if ( ! $settings_page instanceof WC_Settings_Page || $settings_page->get_id() !== $current_tab ) {
-			continue;
-		}
-
-		$is_settings_ui_page       = $settings_page->get_settings_ui_page() instanceof SettingsUIPageInterface;
-		$settings_ui_settings_page = $is_settings_ui_page ? $settings_page : null;
-		break;
+// Resolve the Settings UI context for this request, falling back to legacy
+// rendering when the settings SDK classes are unavailable. The class can be
+// missing mid-update, when this file has been replaced on disk but the cached
+// autoloader has not refreshed yet.
+$settings_ui_context = null;
+try {
+	if ( class_exists( SettingsUIRequestContext::class ) ) {
+		$settings_ui_context = SettingsUIRequestContext::get_current();
 	}
+} catch ( \Throwable $e ) {
+	$settings_ui_context = null;
 }
+
+$settings_ui_settings_page = $settings_ui_context ? $settings_ui_context->get_settings_page() : null;
+$is_settings_ui_page       = null !== $settings_ui_settings_page;
 
 if ( $settings_ui_settings_page instanceof WC_Settings_Page ) {
 	remove_action( 'woocommerce_sections_' . $current_tab, array( $settings_ui_settings_page, 'output_sections' ) );

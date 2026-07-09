@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix My Account endpoint page titles showing the page title instead of the endpoint heading (e.g. "Orders") in block themes when the cart is not empty.
