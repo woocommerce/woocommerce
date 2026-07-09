@@ -542,7 +542,7 @@ class Features {
 		 *
 		 * @param bool $disabled False.
 		 */
-		if ( apply_filters( 'woocommerce_admin_disabled', false ) ) {
+		if ( apply_filters( 'woocommerce_admin_disabled', false ) ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			return true;
 		}
 
