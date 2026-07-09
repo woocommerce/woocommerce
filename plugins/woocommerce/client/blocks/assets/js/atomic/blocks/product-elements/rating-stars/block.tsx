@@ -21,7 +21,6 @@ import './style.scss';
 interface ProductRatingStarsProps {
 	className?: string;
 	textAlign?: string;
-	isDescendentOfQueryLoop: boolean;
 	postId: number;
 	productId: number;
 	shouldDisplayMockedReviewsWhenProductHasNoReviews: boolean;

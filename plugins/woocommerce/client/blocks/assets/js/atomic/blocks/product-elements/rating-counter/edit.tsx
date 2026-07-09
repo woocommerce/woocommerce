@@ -54,10 +54,6 @@ const Edit = (
 			<div { ...blockProps }>
 				<Block
 					{ ...blockAttrs }
-					isDescendentOfQueryLoop={ isDescendentOfQueryLoop }
-					isDescendentOfSingleProductBlock={
-						isDescendentOfSingleProductBlock
-					}
 				/>
 			</div>
 		</>
