@@ -110,8 +110,13 @@ test.describe( 'Merchant > Customer List', () => {
 			const responsePromise = page.waitForResponse(
 				'**/wp-json/wc-analytics/reports/customers?orderby**'
 			);
+			// Pin the page size to 100 so every customer this test created shows
+			// on a single page regardless of how many customers other parallel
+			// workers have created. This keeps the list assertions and the CSV
+			// download (which only streams in-browser when all rows are loaded,
+			// otherwise the report is emailed) deterministic.
 			await page.goto(
-				'wp-admin/admin.php?page=wc-admin&path=%2Fcustomers'
+				'wp-admin/admin.php?page=wc-admin&path=%2Fcustomers&per_page=100'
 			);
 			await responsePromise;
 		} );
@@ -237,8 +242,9 @@ test.describe( 'Merchant > Customer List', () => {
 			// around a midnight boundary. Assert the filename structure with a
 			// YYYY-MM-DD date rather than pinning an exact local date, which is
 			// what this step actually verifies (the orderby/order/path encoding).
+			// The page size we pinned on the report URL is encoded too.
 			const filenamePattern =
-				/^customers_\d{4}-\d{2}-\d{2}_orderby-date-last-active_order-desc_page-wc-admin_path--customers\.csv$/;
+				/^customers_\d{4}-\d{2}-\d{2}_orderby-date-last-active_order-desc_page-wc-admin_path--customers_per-page-100\.csv$/;
 
 			expect( download.suggestedFilename() ).toMatch( filenamePattern );
 		} );

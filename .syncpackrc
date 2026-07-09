@@ -333,7 +333,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^1.57.0"
+			"pinVersion": "^1.61.1"
 		},
 		{
 			"dependencies": [
@@ -401,7 +401,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "11.0.1-next.v.20260206T143.0"
+			"pinVersion": "11.9.0"
 		},
 		{
 			"label": "Ensure @woocommerce/* dependencies are locked to the monorepo itself - except certain dependencies (migration pending).",

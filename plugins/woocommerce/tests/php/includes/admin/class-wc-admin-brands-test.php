@@ -15,6 +15,92 @@ require_once WC_ABSPATH . '/includes/class-wc-brands.php';
  */
 class WC_Admin_Brands_Test extends WC_Unit_Test_Case {
 
+	/**
+	 * Keep track of whether we manually unregistered the taxonomy
+	 * so we can restore it in tearDown.
+	 *
+	 * @var bool
+	 */
+	private static $unregistered_brand_taxonomy = false;
+
+	/**
+	 * Restore the product_brand taxonomy after tests that unregister it.
+	 *
+	 * @return void
+	 */
+	public function tearDown(): void {
+		if ( self::$unregistered_brand_taxonomy ) {
+			WC_Brands::init_taxonomy();
+			self::$unregistered_brand_taxonomy = false;
+		}
+		parent::tearDown();
+	}
+
+	/**
+	 * Tests that product_columns() moves the taxonomy-product_brand column
+	 * to the third-to-last position (before the last two columns) when
+	 * the taxonomy is registered.
+	 *
+	 * The reorder logic uses array_slice( $columns, 0, -2 ) for the
+	 * "before" portion and array_slice( $columns, -2 ) for the last two
+	 * columns, inserting the brand column between them.
+	 *
+	 * @return void
+	 */
+	public function test_product_columns_reorders_brand_column() {
+		WC_Brands::init_taxonomy();
+
+		// Brand column starts after "name" so the reorder actually moves it.
+		$columns = array(
+			'cb'                     => '<input type="checkbox" />',
+			'name'                   => __( 'Name', 'woocommerce' ),
+			'taxonomy-product_brand' => __( 'Brands', 'woocommerce' ),
+			'sku'                    => __( 'SKU', 'woocommerce' ),
+			'product_cat'            => __( 'Categories', 'woocommerce' ),
+			'featured'               => __( 'Featured', 'woocommerce' ),
+			'date'                   => __( 'Date', 'woocommerce' ),
+		);
+
+		$brands_admin = new WC_Brands_Admin();
+		$result       = $brands_admin->product_columns( $columns );
+		$result_keys  = array_keys( $result );
+
+		/*
+		 * After reorder: cb, name, sku, product_cat, taxonomy-product_brand, featured, date.
+		 * Brand column is inserted before the last 2 columns (featured, date).
+		 * Use assertNotSame because the reorder only changes column order, and
+		 * assertEquals/assertNotEquals compare arrays order-insensitively.
+		 */
+		$this->assertNotSame( $columns, $result, 'Columns should have been reordered.' );
+
+		// The brand column should be at the third-to-last position.
+		$last_index = count( $result_keys ) - 1;
+		$this->assertEquals( 'date', $result_keys[ $last_index ], 'Last column should be date.' );
+		$this->assertEquals( 'featured', $result_keys[ $last_index - 1 ], 'Second-to-last column should be featured.' );
+		$this->assertEquals( 'taxonomy-product_brand', $result_keys[ $last_index - 2 ], 'Brand column should be third-to-last.' );
+	}
+
+	/**
+	 * Tests that product_columns() returns columns unchanged when
+	 * the product_brand column is not present in the columns array.
+	 *
+	 * @return void
+	 */
+	public function test_product_columns_returns_unchanged_when_column_not_present() {
+		WC_Brands::init_taxonomy();
+
+		$columns = array(
+			'cb'   => '<input type="checkbox" />',
+			'name' => __( 'Name', 'woocommerce' ),
+			'date' => __( 'Date', 'woocommerce' ),
+		);
+
+		$brands_admin = new WC_Brands_Admin();
+		$result       = $brands_admin->product_columns( $columns );
+
+		// Without the brand column present, columns should remain untouched.
+		$this->assertEquals( $columns, $result );
+	}
 
 	/**
 	 * Tests brands filter outputs as a standard dropdown.
