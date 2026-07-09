@@ -839,7 +839,9 @@ add_action( 'deleted_post_meta', 'wc_maybe_schedule_sale_events_on_meta_change',
  * prices served from the `wc_var_prices_{id}` transient — is built from cached values
  * with no sale-window component in the cache key, so it can stay stale until the AS
  * event or a save bumps the product transient version. That gap is display-only: the
- * cart prices the variation itself, which self-heals at read.
+ * cart prices the variation itself, which self-heals at read. Prices already changed by
+ * an earlier filter (deliberate overrides, but also ambient transforms such as currency
+ * conversion) are intentionally not healed — see the guard below.
  *
  * @since 11.0.0
  *
@@ -874,8 +876,12 @@ function wc_filter_scheduled_sale_active_price( $price, $product ) {
 	}
 
 	// Respect third-party prices: if another callback already changed the price away from
-	// the stored value, leave it alone. The 'edit' context returns the raw stored price
-	// without re-applying this filter, so there is no recursion.
+	// the stored value, leave it alone. This is deliberate even for ambient transforms
+	// such as currency conversion: by this priority the price is already transformed, and
+	// returning a raw sale/regular price would bypass the transform, which cannot be
+	// re-applied from here. Those stores keep their pre-existing behavior during the gap.
+	// The 'edit' context returns the raw stored price without re-applying this filter, so
+	// there is no recursion.
 	$stored_price = $product->get_price( 'edit' );
 	if ( (string) $price !== (string) $stored_price ) {
 		return $price;
