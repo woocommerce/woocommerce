@@ -291,6 +291,36 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should render radio settings without an invalid header label.
+	 */
+	public function test_output_fields_renders_radio_setting_without_invalid_header_label(): void {
+		$output = $this->get_output_fields_html(
+			array(
+				array(
+					'id'       => 'test_radio_setting',
+					'title'    => 'Radio title',
+					'type'     => 'radio',
+					'default'  => 'abc',
+					'value'    => 'abc',
+					'options'  => array(
+						'abc' => 'First option',
+						'xyz' => 'Second option',
+					),
+					'disabled' => array( 'xyz' ),
+				),
+			)
+		);
+
+		$this->assertStringNotContainsString( '<label for="test_radio_setting">', $output );
+		$this->assertStringContainsString( '<legend class="screen-reader-text"><span>Radio title</span></legend>', $output );
+		$this->assertStringContainsString( 'name="test_radio_setting"', $output );
+		$this->assertStringContainsString( 'value="abc"', $output );
+		$this->assertStringContainsString( 'checked', $output );
+		$this->assertStringContainsString( 'value="xyz"', $output );
+		$this->assertStringContainsString( 'disabled', $output );
+	}
+
+	/**
 	 * Prepare globals used by WC_Admin_Settings::save().
 	 *
 	 * @param string|null $redirect_to Requested redirect target, or null to omit the Settings UI redirect field.
@@ -310,5 +340,18 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 		if ( null !== $redirect_to ) {
 			$_POST['wc_settings_ui_redirect_to'] = $redirect_to;
 		}
+	}
+
+	/**
+	 * Capture settings field output.
+	 *
+	 * @param array $options Settings options.
+	 * @return string
+	 */
+	private function get_output_fields_html( array $options ): string {
+		ob_start();
+		WC_Admin_Settings::output_fields( $options );
+
+		return (string) ob_get_clean();
 	}
 }

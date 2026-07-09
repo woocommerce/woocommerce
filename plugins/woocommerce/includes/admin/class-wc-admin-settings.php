@@ -517,10 +517,15 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						?>
 						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
+								<?php echo esc_html( $value['title'] ); ?>
+								<?php
+								// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+								echo $tooltip_html;
+								?>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
 								<fieldset>
+									<legend class="screen-reader-text"><span><?php echo esc_html( $value['title'] ); ?></span></legend>
 									<?php
 									if ( ! $show_desc_at_end ) {
 										echo wp_kses_post( $description );
