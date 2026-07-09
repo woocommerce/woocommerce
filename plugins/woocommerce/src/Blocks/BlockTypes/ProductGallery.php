@@ -153,29 +153,25 @@ class ProductGallery extends AbstractBlock {
 	 * @return array
 	 */
 	private function parse_aspect_ratio( $aspect_ratio ) {
+		$default_aspect_ratio = array(
+			'width'  => '1',
+			'height' => '1',
+		);
+
 		if ( empty( $aspect_ratio ) || ! is_string( $aspect_ratio ) ) {
-			return array(
-				'width'  => '1',
-				'height' => '1',
-			);
+			return $default_aspect_ratio;
 		}
 
 		$parts = array_map( 'trim', explode( '/', $aspect_ratio ) );
 		if ( count( $parts ) > 2 ) {
-			return array(
-				'width'  => '1',
-				'height' => '1',
-			);
+			return $default_aspect_ratio;
 		}
 
 		$width  = (float) $parts[0];
 		$height = isset( $parts[1] ) ? (float) $parts[1] : $width;
 
 		if ( $width <= 0 || $height <= 0 ) {
-			return array(
-				'width'  => '1',
-				'height' => '1',
-			);
+			return $default_aspect_ratio;
 		}
 
 		return array(
@@ -201,23 +197,6 @@ class ProductGallery extends AbstractBlock {
 			$aspect_ratio['width'],
 			$aspect_ratio['height']
 		);
-	}
-
-	/**
-	 * Append styles to the current tag.
-	 *
-	 * @param \WP_HTML_Tag_Processor $processor The HTML tag processor.
-	 * @param string                 $style     CSS declarations to append.
-	 */
-	private function append_style( $processor, $style ): void {
-		$existing_style = $processor->get_attribute( 'style' );
-		$existing_style = is_string( $existing_style ) ? trim( $existing_style ) : '';
-
-		if ( '' !== $existing_style && ';' !== substr( $existing_style, -1 ) ) {
-			$existing_style .= ';';
-		}
-
-		$processor->set_attribute( 'style', $existing_style . $style );
 	}
 
 	/**
@@ -307,7 +286,15 @@ class ProductGallery extends AbstractBlock {
 
 			$p->add_class( $classname );
 			$p->add_class( $classname_single_image );
-			$this->append_style( $p, $this->get_aspect_ratio_style( $block ) );
+
+			$style = $p->get_attribute( 'style' );
+			$style = is_string( $style ) ? trim( $style ) : '';
+
+			if ( '' !== $style && ';' !== substr( $style, -1 ) ) {
+				$style .= ';';
+			}
+
+			$p->set_attribute( 'style', $style . $this->get_aspect_ratio_style( $block ) );
 			$html = $p->get_updated_html();
 		}
 
