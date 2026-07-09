@@ -8,6 +8,13 @@ use WC_Unit_Test_Case;
 
 /**
  * Tests for the LegacySelect2UsageTracker class.
+ *
+ * The cart page fixture uses WOOCOMMERCE_CART, an immutable PHP constant.
+ * Isolating each test prevents that constant from leaking across tests.
+ *
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ * @group run-in-separate-process
  */
 class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 
@@ -46,6 +53,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test fixture preserves the raw request URI for restoration.
 		$this->original_request_uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : null;
 		$_SERVER['REQUEST_URI']     = '/';
+		wc_maybe_define_constant( 'WOOCOMMERCE_CART', true );
 		$this->reset_scripts();
 		$this->register_legacy_select2_scripts();
 		$this->sut = new LegacySelect2UsageTracker();
@@ -75,7 +83,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$_SERVER['REQUEST_URI'] = '/wp-admin/admin.php?page=wc-settings';
 		wp_register_script(
 			'my-extension-admin',
-			plugins_url( 'my-extension/assets/admin.js' ),
+			$this->get_my_extension_asset_url( 'admin.js' ),
 			array( 'select2' ),
 			'1.0.0',
 			false
@@ -90,7 +98,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 				'page_type'  => 'woocommerce_page_wc-settings',
 				'handles'    => 'select2',
 				'dependents' => 'my-extension-admin',
-				'sources'    => 'http://localhost:8086/wp-content/plugins/my-extension/assets/admin.js',
+				'sources'    => $this->get_my_extension_asset_url( 'admin.js' ),
 			),
 			$this->sut->get_usage_event( 'admin' ),
 			'Admin usage should include only the expected event properties.'
@@ -103,7 +111,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	public function test_tracks_plugin_owned_footer_dependency_on_wc_select2(): void {
 		wp_register_script(
 			'my-extension-footer',
-			plugins_url( 'my-extension/assets/footer.js' ),
+			$this->get_my_extension_asset_url( 'footer.js' ),
 			array( 'wc-select2' ),
 			'1.0.0',
 			true
@@ -115,10 +123,10 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'context'    => 'frontend',
-				'page_type'  => 'other',
+				'page_type'  => 'cart',
 				'handles'    => 'wc-select2',
 				'dependents' => 'my-extension-footer',
-				'sources'    => 'http://localhost:8086/wp-content/plugins/my-extension/assets/footer.js',
+				'sources'    => $this->get_my_extension_asset_url( 'footer.js' ),
 			),
 			$this->sut->get_usage_event( 'frontend' ),
 			'Frontend usage should report the direct wc-select2 handle.'
@@ -131,14 +139,14 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	public function test_does_not_track_transitive_dependency_reaching_select2(): void {
 		wp_register_script(
 			'intermediate-select2-wrapper',
-			plugins_url( 'my-extension/assets/wrapper.js' ),
+			$this->get_my_extension_asset_url( 'wrapper.js' ),
 			array( 'select2' ),
 			'1.0.0',
 			true
 		);
 		wp_register_script(
 			'my-extension-transitive',
-			plugins_url( 'my-extension/assets/transitive.js' ),
+			$this->get_my_extension_asset_url( 'transitive.js' ),
 			array( 'intermediate-select2-wrapper' ),
 			'1.0.0',
 			true
@@ -161,7 +169,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'context'    => 'frontend',
-				'page_type'  => 'other',
+				'page_type'  => 'cart',
 				'handles'    => 'select2',
 				'dependents' => 'select2',
 				'sources'    => '',
@@ -196,7 +204,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		set_current_screen( 'woocommerce_page_wc-settings' );
 		wp_register_script(
 			'my-extension-admin',
-			plugins_url( 'my-extension/assets/admin.js' ),
+			$this->get_my_extension_asset_url( 'admin.js' ),
 			array( 'select2' ),
 			'1.0.0',
 			false
@@ -212,7 +220,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	public function test_reports_footer_dependencies_after_footer_scripts_are_printed(): void {
 		wp_register_script(
 			'my-extension-footer',
-			plugins_url( 'my-extension/assets/footer.js' ),
+			$this->get_my_extension_asset_url( 'footer.js' ),
 			array( 'wc-select2' ),
 			'1.0.0',
 			true
@@ -228,10 +236,10 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'context'    => 'frontend',
-				'page_type'  => 'other',
+				'page_type'  => 'cart',
 				'handles'    => 'wc-select2',
 				'dependents' => 'my-extension-footer',
-				'sources'    => 'http://localhost:8086/wp-content/plugins/my-extension/assets/footer.js',
+				'sources'    => $this->get_my_extension_asset_url( 'footer.js' ),
 			),
 			$this->sut->get_usage_event( 'frontend' ),
 			'Footer dependencies should be reported after footer scripts are printed.'
@@ -244,7 +252,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	public function test_does_not_track_registered_plugin_dependencies_that_are_not_enqueued(): void {
 		wp_register_script(
 			'my-extension-footer',
-			plugins_url( 'my-extension/assets/footer.js' ),
+			$this->get_my_extension_asset_url( 'footer.js' ),
 			array( 'wc-select2' ),
 			'1.0.0',
 			true
@@ -261,14 +269,14 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$_SERVER['REQUEST_URI']   = '/shop/?filter=featured';
 		$frontend_page_type_scope = array(
 			'context'   => 'frontend',
-			'page_type' => 'other',
+			'page_type' => 'cart',
 		);
 		$event                    = array(
 			'context'    => 'frontend',
-			'page_type'  => 'other',
+			'page_type'  => 'cart',
 			'handles'    => 'wc-select2',
 			'dependents' => 'my-extension-footer',
-			'sources'    => 'http://localhost:8086/wp-content/plugins/my-extension/assets/footer.js',
+			'sources'    => $this->get_my_extension_asset_url( 'footer.js' ),
 		);
 
 		$this->delete_request_scope_transient( $frontend_page_type_scope );
@@ -319,7 +327,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 
 		wp_register_script(
 			'my-extension-footer',
-			plugins_url( 'my-extension/assets/footer.js' ),
+			$this->get_my_extension_asset_url( 'footer.js' ),
 			array( 'wc-select2' ),
 			'1.0.0',
 			true
@@ -400,6 +408,16 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		}
 
 		ob_end_clean();
+	}
+
+	/**
+	 * Get a plugin fixture asset URL.
+	 *
+	 * @param string $asset Asset filename.
+	 * @return string
+	 */
+	private function get_my_extension_asset_url( string $asset ): string {
+		return plugins_url( 'my-extension/assets/' . $asset );
 	}
 
 	/**
