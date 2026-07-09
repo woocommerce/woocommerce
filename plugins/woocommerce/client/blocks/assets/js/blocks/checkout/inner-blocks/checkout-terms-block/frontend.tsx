@@ -101,7 +101,9 @@ const FrontendBlock = ( {
 						<CheckboxControl
 							id="terms-and-conditions"
 							checked={ checked }
-							onChange={ () => setChecked( ( value ) => ! value ) }
+							onChange={ () =>
+								setChecked( ( value ) => ! value )
+							}
 							hasError={ hasError }
 							aria-describedby={ validationErrorHtmlId }
 							disabled={ isDisabled }
