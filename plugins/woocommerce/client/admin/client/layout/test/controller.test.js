@@ -6,7 +6,8 @@ import * as navigation from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { updateLinkHref } from '../controller';
+import { getPages, updateLinkHref } from '../controller';
+import { isFeatureEnabled } from '~/utils/features';
 
 jest.mock( '@woocommerce/navigation', () => {
 	const actual = jest.requireActual( '@woocommerce/navigation' );
@@ -14,6 +15,41 @@ jest.mock( '@woocommerce/navigation', () => {
 		...actual,
 		getHistory: jest.fn( actual.getHistory ),
 	};
+} );
+
+jest.mock( '~/utils/features', () => ( {
+	isFeatureEnabled: jest.fn().mockReturnValue( true ),
+} ) );
+
+describe( 'getPages', () => {
+	const analyticsPaths = [
+		'/analytics/overview',
+		'/analytics/settings',
+		'/customers',
+		'/analytics/:report',
+	];
+
+	beforeEach( () => {
+		isFeatureEnabled.mockReturnValue( true );
+	} );
+
+	it( 'registers analytics pages when analytics is enabled', () => {
+		const paths = getPages().map( ( page ) => page.path );
+
+		analyticsPaths.forEach( ( path ) => {
+			expect( paths ).toContain( path );
+		} );
+	} );
+
+	it( 'does not register analytics pages when analytics is disabled', () => {
+		isFeatureEnabled.mockReturnValue( false );
+
+		const paths = getPages().map( ( page ) => page.path );
+
+		analyticsPaths.forEach( ( path ) => {
+			expect( paths ).not.toContain( path );
+		} );
+	} );
 } );
 
 describe( 'updateLinkHref', () => {

@@ -31,6 +31,7 @@ import {
 	ActivityCardPlaceholder,
 } from '~/activity-panel/activity-card';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { isFeatureEnabled } from '~/utils/features';
 import './style.scss';
 
 function recordOrderEvent( eventName ) {
@@ -93,7 +94,7 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 			customers.find( ( c ) => c.user_id === customerId ) || {};
 		let customerUrl = null;
 		if ( customer && customer.id ) {
-			customerUrl = window.wcAdminFeatures.analytics
+			customerUrl = isFeatureEnabled( 'analytics' )
 				? getNewPath( {}, '/analytics/customers', {
 						filter: 'single_customer',
 						customers: customer.id,
@@ -304,7 +305,7 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 	} );
 
 	if ( isError ) {
-		if ( ! orderStatuses.length && window.wcAdminFeatures.analytics ) {
+		if ( ! orderStatuses.length && isFeatureEnabled( 'analytics' ) ) {
 			return (
 				<EmptyContent
 					title={ __(

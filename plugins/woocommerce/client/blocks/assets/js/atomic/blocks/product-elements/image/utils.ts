@@ -39,7 +39,11 @@ export const resolveAspectRatio = (
 		return aspectRatio;
 	}
 
-	if ( imageSizing && imageSizing === ImageSizing.THUMBNAIL ) {
+	if (
+		imageSizing &&
+		( imageSizing === ImageSizing.THUMBNAIL ||
+			imageSizing === ImageSizing.CROPPED )
+	) {
 		return storeAspectRatio ?? undefined;
 	}
 
