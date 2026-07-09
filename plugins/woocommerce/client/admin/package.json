@@ -84,6 +84,7 @@
 		"@wordpress/data-controls": "catalog:wp-min",
 		"@wordpress/dataviews": "catalog:wp-bundled",
 		"@wordpress/date": "catalog:wp-min",
+		"@wordpress/deprecated": "catalog:wp-min",
 		"@wordpress/dom": "catalog:wp-min",
 		"@wordpress/dom-ready": "catalog:wp-min",
 		"@wordpress/edit-site": "5.15.0",
