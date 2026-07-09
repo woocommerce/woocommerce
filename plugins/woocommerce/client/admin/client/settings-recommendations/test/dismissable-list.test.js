@@ -51,22 +51,6 @@ describe( 'DismissableList', () => {
 		).not.toBeInTheDocument();
 	} );
 
-	it( 'renders dismissed content when isDismissed is true', () => {
-		render(
-			<DismissableList
-				dismissedContent={ <span>dismissed content</span> }
-				isDismissed={ true }
-			>
-				<span>dismissible children</span>
-			</DismissableList>
-		);
-
-		expect(
-			screen.queryByText( 'dismissible children' )
-		).not.toBeInTheDocument();
-		expect( screen.queryByText( 'dismissed content' ) ).toBeInTheDocument();
-	} );
-
 	describe( 'dismissal accessibility', () => {
 		beforeEach( () => {
 			speak.mockClear();

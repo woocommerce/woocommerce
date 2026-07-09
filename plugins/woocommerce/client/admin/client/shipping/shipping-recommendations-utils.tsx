@@ -101,11 +101,9 @@ export const ShippingRecommendationsMarketplaceLink = ( {
 
 export const ShippingRecommendationsList = ( {
 	children,
-	dismissedContent,
 	dismissState,
 }: {
 	children: React.ReactNode;
-	dismissedContent?: React.ReactNode;
 	dismissState?: DismissState;
 } ) => {
 	const defaultDismissState = useOptionDismiss(
@@ -116,7 +114,6 @@ export const ShippingRecommendationsList = ( {
 	return (
 		<DismissableList
 			className="woocommerce-recommended-shipping-extensions"
-			dismissedContent={ dismissedContent }
 			isDismissed={ isDismissed }
 		>
 			<DismissableListHeading onDismiss={ onDismiss }>

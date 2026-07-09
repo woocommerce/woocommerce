@@ -102,7 +102,9 @@ const ShippingRecommendations = () => {
 
 	const hasVisibleExtensions = visibleExtensions.length > 0;
 	const shouldShowRecommendationsFallback =
-		! hasVisibleExtensions || isSellingDigitalProductsOnly;
+		isRecommendationsHidden ||
+		! hasVisibleExtensions ||
+		isSellingDigitalProductsOnly;
 	const shouldTrackRecommendationsImpression =
 		! isRecommendationsHidden && hasVisibleExtensions;
 
@@ -152,7 +154,6 @@ const ShippingRecommendations = () => {
 				showShippingRecommendationsStep={ ! isRecommendationsHidden }
 			/>
 			<ShippingRecommendationsList
-				dismissedContent={ marketplaceFallbackLink }
 				dismissState={ recommendationsDismissState }
 			>
 				{ visibleExtensions.map( ( ext ) => {

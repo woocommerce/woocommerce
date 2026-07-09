@@ -9,9 +9,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import ShippingRecommendations from '../shipping-recommendations';
-import {
-	SHIPPING_RECOMMENDATIONS_DISMISS_OPTION,
-} from '../shipping-recommendations-utils';
+import { SHIPPING_RECOMMENDATIONS_DISMISS_OPTION } from '../shipping-recommendations-utils';
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
@@ -19,11 +17,7 @@ jest.mock( '@wordpress/data', () => ( {
 	useDispatch: jest.fn(),
 } ) );
 jest.mock( '~/components/tracked-link/tracked-link', () => ( {
-	TrackedLink: ( {
-		textProps,
-	}: {
-		textProps?: { className?: string };
-	} ) => (
+	TrackedLink: ( { textProps }: { textProps?: { className?: string } } ) => (
 		<span className={ textProps?.className }>
 			the WooCommerce Marketplace
 		</span>
@@ -32,25 +26,20 @@ jest.mock( '~/components/tracked-link/tracked-link', () => ( {
 jest.mock( '../../settings-recommendations/dismissable-list', () => ( {
 	DismissableList: ( {
 		children,
-		dismissedContent,
 		isDismissed,
 	}: {
 		children: React.ReactNode;
-		dismissedContent?: React.ReactNode;
 		isDismissed?: boolean;
 	} ) => (
 		<div
 			data-dismissed={ String( Boolean( isDismissed ) ) }
 			data-testid="dismissable-list"
 		>
-			{ isDismissed ? dismissedContent : children }
+			{ ! isDismissed && children }
 		</div>
 	),
-	DismissableListHeading: ( {
+	DismissableListHeading: ( { children }: { children: React.ReactNode } ) =>
 		children,
-	}: {
-		children: React.ReactNode;
-	} ) => children,
 } ) );
 jest.mock( '~/guided-tours/shipping-tour', () => ( {
 	ShippingTour: ( {
@@ -149,10 +138,9 @@ describe( 'ShippingRecommendations', () => {
 		expect(
 			screen.queryByText( 'the WooCommerce Marketplace' )
 		).toBeInTheDocument();
-		expect( screen.getByTestId( 'dismissable-list' ) ).toHaveAttribute(
-			'data-dismissed',
-			'true'
-		);
+		expect(
+			screen.queryByTestId( 'dismissable-list' )
+		).not.toBeInTheDocument();
 		expect( screen.getByTestId( 'shipping-tour' ) ).toHaveAttribute(
 			'data-show-recommendations-step',
 			'false'
