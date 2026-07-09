@@ -58,9 +58,6 @@ const Edit = (
 					isDescendentOfSingleProductBlock={
 						isDescendentOfSingleProductBlock
 					}
-					isDescendentOfSingleProductTemplate={
-						isDescendentOfSingleProductTemplate
-					}
 				/>
 			</div>
 		</>

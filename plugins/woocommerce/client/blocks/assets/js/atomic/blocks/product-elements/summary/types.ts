@@ -32,4 +32,6 @@ export type BlockProps = Attributes & {
 	className?: string;
 	product?: ProductEntityResponse | null | undefined;
 	isAdmin?: boolean;
+	isDescendentOfQueryLoop?: boolean;
+	isDescendentOfSingleProductTemplate?: boolean;
 };

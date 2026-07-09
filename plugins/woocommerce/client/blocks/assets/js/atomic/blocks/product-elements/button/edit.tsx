@@ -111,7 +111,6 @@ const Edit = ( {
 				<Disabled>
 					<Block
 						{ ...{ ...attributes, ...context } }
-						isDescendentOfQueryLoop={ isDescendentOfQueryLoop }
 						product={ {
 							...product,
 							button_text: product?.button_text || '',
