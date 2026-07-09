@@ -123,6 +123,26 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Assert that rendered gallery markup contains the expected aspect ratio CSS variables.
+	 *
+	 * @param string $markup Rendered gallery markup.
+	 * @param string $width Expected ratio width.
+	 * @param string $height Expected ratio height.
+	 */
+	private function assert_product_gallery_ratio_variables( string $markup, string $width, string $height ): void {
+		$this->assertStringContainsString(
+			"--wc-block-product-gallery-image-ratio-width:{$width};",
+			$markup,
+			"Expected Product Gallery markup to expose a {$width}:{$height} aspect ratio width variable."
+		);
+		$this->assertStringContainsString(
+			"--wc-block-product-gallery-image-ratio-height:{$height};",
+			$markup,
+			"Expected Product Gallery markup to expose a {$width}:{$height} aspect ratio height variable."
+		);
+	}
+
+	/**
 	 * Test that the ProductGallery block renders correctly with multiple images.
 	 */
 	public function test_product_gallery_render_with_multiple_images() {
@@ -152,9 +172,9 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Should expose custom Product Image aspect ratios as gallery CSS variables.
+	 * @testdox Should expose Product Image style aspect ratios as gallery CSS variables.
 	 */
-	public function test_product_gallery_exposes_custom_product_image_aspect_ratio_css_variables() {
+	public function test_product_gallery_exposes_custom_product_image_aspect_ratio_css_variables(): void {
 		$data = $this->create_product_with_gallery( 3 );
 
 		$markup = $this->render_product_gallery(
@@ -169,16 +189,113 @@ class ProductGallery extends \WP_UnitTestCase {
 			)
 		);
 
-		$this->assertStringContainsString(
-			'--wc-block-product-gallery-image-ratio-width:3;',
-			$markup
-		);
-		$this->assertStringContainsString(
-			'--wc-block-product-gallery-image-ratio-height:5;',
-			$markup
-		);
+		$this->assert_product_gallery_ratio_variables( $markup, '3', '5' );
 
 		$this->cleanup_product_data( $data );
+	}
+
+	/**
+	 * @testdox Should expose Product Image aspectRatio attributes as gallery CSS variables.
+	 */
+	public function test_product_gallery_exposes_legacy_product_image_aspect_ratio_css_variables(): void {
+		$data = $this->create_product_with_gallery( 3 );
+
+		$markup = $this->render_product_gallery(
+			$data['product']->get_id(),
+			'',
+			array(
+				'aspectRatio' => '7/4',
+			)
+		);
+
+		$this->assert_product_gallery_ratio_variables( $markup, '7', '4' );
+
+		$this->cleanup_product_data( $data );
+	}
+
+	/**
+	 * @testdox Should use custom store thumbnail ratios for Product Image thumbnail sizing.
+	 * @dataProvider product_image_thumbnail_sizing_data
+	 *
+	 * @param string $image_sizing Product Image sizing mode.
+	 */
+	public function test_product_gallery_uses_store_thumbnail_ratio_for_thumbnail_product_image_sizing( string $image_sizing ): void {
+		$data = $this->create_product_with_gallery( 3 );
+
+		$previous_cropping      = get_option( 'woocommerce_thumbnail_cropping', false );
+		$previous_custom_width  = get_option( 'woocommerce_thumbnail_cropping_custom_width', false );
+		$previous_custom_height = get_option( 'woocommerce_thumbnail_cropping_custom_height', false );
+
+		update_option( 'woocommerce_thumbnail_cropping', 'custom' );
+		update_option( 'woocommerce_thumbnail_cropping_custom_width', '5' );
+		update_option( 'woocommerce_thumbnail_cropping_custom_height', '8' );
+
+		try {
+			$markup = $this->render_product_gallery(
+				$data['product']->get_id(),
+				'',
+				array(
+					'imageSizing' => $image_sizing,
+				)
+			);
+
+			$this->assert_product_gallery_ratio_variables( $markup, '5', '8' );
+		} finally {
+			$this->restore_option( 'woocommerce_thumbnail_cropping', $previous_cropping );
+			$this->restore_option( 'woocommerce_thumbnail_cropping_custom_width', $previous_custom_width );
+			$this->restore_option( 'woocommerce_thumbnail_cropping_custom_height', $previous_custom_height );
+			$this->cleanup_product_data( $data );
+		}
+	}
+
+	/**
+	 * Data provider for Product Image thumbnail sizing modes.
+	 *
+	 * @return array[]
+	 */
+	public function product_image_thumbnail_sizing_data(): array {
+		return array(
+			'thumbnail sizing' => array( 'thumbnail' ),
+			'cropped sizing'   => array( 'cropped' ),
+		);
+	}
+
+	/**
+	 * @testdox Should fall back to a square gallery ratio when the Product Image ratio is invalid.
+	 */
+	public function test_product_gallery_uses_square_ratio_for_invalid_product_image_aspect_ratio(): void {
+		$data = $this->create_product_with_gallery( 3 );
+
+		$markup = $this->render_product_gallery(
+			$data['product']->get_id(),
+			'',
+			array(
+				'style' => array(
+					'dimensions' => array(
+						'aspectRatio' => '1/2/3',
+					),
+				),
+			)
+		);
+
+		$this->assert_product_gallery_ratio_variables( $markup, '1', '1' );
+
+		$this->cleanup_product_data( $data );
+	}
+
+	/**
+	 * Restore an option to its previous value.
+	 *
+	 * @param string $option Option name.
+	 * @param mixed  $previous_value Previous option value, or false when the option did not exist.
+	 */
+	private function restore_option( string $option, $previous_value ): void {
+		if ( false === $previous_value ) {
+			delete_option( $option );
+			return;
+		}
+
+		update_option( $option, $previous_value );
 	}
 
 	/**
