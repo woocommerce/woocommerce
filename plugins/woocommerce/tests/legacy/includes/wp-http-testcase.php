@@ -17,6 +17,20 @@ use Automattic\Jetpack\Constants;
 abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 
 	/**
+	 * Shared sample image URL used by WooCommerce tests.
+	 *
+	 * @var string
+	 */
+	private const SAMPLE_IMAGE_URL = 'http://cldup.com/Dr1Bczxq4q.png';
+
+	/**
+	 * Shared sample image fixture used by WooCommerce tests.
+	 *
+	 * @var string
+	 */
+	private const SAMPLE_IMAGE_FILE = 'Dr1Bczxq4q.png';
+
+	/**
 	 * The HTTP requests caught.
 	 *
 	 * Each of the requests has the following keys:
@@ -213,7 +227,41 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 			$preempt = call_user_func( $this->http_responder, $request, $url );
 		}
 
+		if ( false === $preempt && self::SAMPLE_IMAGE_URL === $url ) {
+			$preempt = $this->mock_sample_image_response( $request );
+		}
+
 		return $preempt;
+	}
+
+	/**
+	 * Mock the shared sample image download from a local fixture.
+	 *
+	 * @param array $request The request arguments.
+	 * @return array
+	 */
+	protected function mock_sample_image_response( $request ) {
+		$fixture_path = WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/' . self::SAMPLE_IMAGE_FILE;
+		$response     = array(
+			'headers'  => array(
+				'content-type' => 'image/png',
+			),
+			'body'     => '',
+			'response' => array(
+				'code'    => 200,
+				'message' => 'OK',
+			),
+			'cookies'  => array(),
+		);
+
+		if ( ! empty( $request['filename'] ) ) {
+			WC_Unit_Test_Case::file_copy( $fixture_path, $request['filename'] );
+			$response['filename'] = $request['filename'];
+			return $response;
+		}
+
+		$response['body'] = file_get_contents( $fixture_path );
+		return $response;
 	}
 
 	/**
