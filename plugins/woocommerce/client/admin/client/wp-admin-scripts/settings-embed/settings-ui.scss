@@ -235,20 +235,17 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	.wc-settings-ui {
 		box-sizing: border-box;
 		margin: 32px auto 48px;
-		// WPDS surface-width/xl.
-		max-width: 720px;
+		max-width: var(--wpds-dimension-surface-width-xl, 720px);
 	}
 
 	.wc-settings-ui__section {
 		margin: 0 0 24px;
 	}
 
+	// Surface styling (background, border, radius, padding) comes from the
+	// @wordpress/ui Card components.
 	.wc-settings-ui__section-card {
-		background: #fff;
-		border: 1px solid #e0e0e0;
-		border-radius: 10px;
 		box-sizing: border-box;
-		padding: 24px;
 		width: 100%;
 	}
 
@@ -257,19 +254,10 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		display: flex;
 		gap: 24px;
 		justify-content: space-between;
-		margin-bottom: 24px;
 	}
 
 	.wc-settings-ui__section-heading {
 		min-width: 0;
-	}
-
-	.wc-settings-ui__section-header h2 {
-		color: #1e1e1e;
-		font-size: 15px;
-		font-weight: 500;
-		line-height: 20px;
-		margin: 0;
 	}
 
 	.wc-settings-ui__section-description {
@@ -456,10 +444,6 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		.wc-settings-ui {
 			margin: 48px 24px 32px;
 			max-width: none;
-		}
-
-		.wc-settings-ui__section-card {
-			padding: 24px;
 		}
 
 		.wc-settings-ui__section-header {
