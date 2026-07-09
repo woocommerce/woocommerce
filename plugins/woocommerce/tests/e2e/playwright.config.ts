@@ -244,13 +244,6 @@ export default defineConfig( {
 			workers: 4,
 		},
 		{
-			name: 'legacy-mini-cart',
-			testMatch: [ '**/tests/cart/**', '**/tests/checkout/**' ],
-			testIgnore: [ '**/tests/blocks/**' ],
-			dependencies: [ 'site setup' ],
-			workers: 1,
-		},
-		{
 			name: 'paypal-standard',
 			testMatch: [ '**/tests/paypal/**' ],
 			dependencies: [ 'site setup' ],
@@ -259,22 +252,6 @@ export default defineConfig( {
 		{
 			name: 'blocks-chromium',
 			testDir: `${ TESTS_ROOT_PATH }/tests/blocks`,
-			dependencies: [ 'blocks setup' ],
-			workers: 1,
-			use: {
-				...devices[ 'Desktop Chrome' ],
-				storageState: BLOCKS_ADMIN_STATE,
-			},
-		},
-		{
-			name: 'blocks-legacy-mini-cart',
-			testDir: `${ TESTS_ROOT_PATH }/tests/blocks`,
-			testMatch: [
-				'**/mini-cart/**/*.spec.ts',
-				'**/add-to-cart-with-options/**/*.spec.ts',
-				'**/product-button/**/*.spec.ts',
-				'**/product-collection/**/*.spec.ts',
-			],
 			dependencies: [ 'blocks setup' ],
 			workers: 1,
 			use: {

@@ -63,7 +63,7 @@ catalogs:
         '@wordpress/fields': 0.25.11
         '@wordpress/icons': 11.0.1
         '@wordpress/interface': 9.18.5
-        '@wordpress/ui': 0.15.1
+        '@wordpress/ui': 0.17.0
         '@wordpress/undo-manager': 1.33.1
         '@wordpress/views': 1.0.8
         '@wordpress/base-styles': 6.9.1

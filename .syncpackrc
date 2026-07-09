@@ -119,7 +119,6 @@
 			"dependencies": [
 				"react",
 				"react-dom",
-				"react-test-renderer",
 				"@types/react-dom",
 				"@types/react"
 			],

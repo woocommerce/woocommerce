@@ -902,11 +902,9 @@ class Checkout extends AbstractCartRoute {
 			$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
 
 			if ( 'shipping_address' === $context_data['param'] ) {
-				$field_values = (array) $request['shipping_address'] ?? ( $request['billing_address'] ?? [] );
-
-				if ( ! WC()->cart->needs_shipping() ) {
-					$field_values = $request['billing_address'] ?? [];
-				}
+				$field_values = WC()->cart->needs_shipping()
+					? (array) ( $request['shipping_address'] ?? $request['billing_address'] ?? [] )
+					: (array) ( $request['billing_address'] ?? [] );
 			} else {
 				$field_values = (array) $request[ $context_data['param'] ] ?? [];
 			}

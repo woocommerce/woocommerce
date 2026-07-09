@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Exclude email-template test fixtures from PHPUnit discovery so they no longer print markup to stdout during suite construction.
