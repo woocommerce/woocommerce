@@ -158,9 +158,11 @@ class BatchProcessingController {
 	 * Reduce a processor list to unique, non-empty class-name strings, preserving order.
 	 *
 	 * The enqueued-processors option is a plain serialized array, so a corrupted option (or the historical
-	 * duplicate-accumulation bug) can leave it holding duplicates or non-string values. Sanitizing before any
-	 * comparison keeps the mutators safe and heals the stored list on the next write: in particular array_diff()
-	 * string-casts its operands and would fatal on an object entry in PHP 8, so removals run on the sanitized list.
+	 * duplicate-accumulation bug) can leave it holding duplicates, empty strings, or non-string values. Sanitizing
+	 * before any comparison keeps the mutators safe and heals the stored list on the next write: in particular
+	 * array_diff() string-casts its operands and would fatal on an object entry in PHP 8, so removals run on the
+	 * sanitized list. Empty strings are dropped too: they are never a valid class name, and left in place would be
+	 * scheduled and then fatal in get_processor_instance( '' ), with the watchdog rescheduling them indefinitely.
 	 *
 	 * @since 11.0.0
 	 *
@@ -171,7 +173,7 @@ class BatchProcessingController {
 		$sanitized = array();
 		$seen      = array();
 		foreach ( $processors as $value ) {
-			if ( is_string( $value ) && ! isset( $seen[ $value ] ) ) {
+			if ( is_string( $value ) && '' !== $value && ! isset( $seen[ $value ] ) ) {
 				$seen[ $value ] = true;
 				$sanitized[]    = $value;
 			}
@@ -394,7 +396,7 @@ class BatchProcessingController {
 	 * (because they have just been enqueued, or because the processing for a batch failed).
 	 */
 	private function handle_watchdog_action(): void {
-		$pending_processes = $this->get_enqueued_processors();
+		$pending_processes = $this->sanitize_processor_list( $this->get_enqueued_processors() );
 		if ( empty( $pending_processes ) ) {
 			return;
 		}
@@ -671,8 +673,8 @@ class BatchProcessingController {
 		// Resolve membership authoritatively inside the lock (no unguarded fast-path read). remove_processor() is
 		// not a per-request hot path — the continuous-sync 'shutdown' handler enqueues rather than removes — so it
 		// always takes the lock and re-reads the freshest list rather than acting on a possibly-stale cached copy.
-		$was_enqueued = false;
-		$this->mutate_enqueued_processors(
+		$was_enqueued         = false;
+		$remaining_processors = $this->mutate_enqueued_processors(
 			function ( array $enqueued_processors ) use ( $processor_class_name, &$was_enqueued ): array {
 				if ( ! in_array( $processor_class_name, $enqueued_processors, true ) ) {
 					return $enqueued_processors;
@@ -687,18 +689,31 @@ class BatchProcessingController {
 		}
 
 		/*
-		 * The new list (which may now be empty) was persisted atomically inside the critical section above. Only the
-		 * removed processor's own scheduling needs tearing down here, so we unschedule by class name rather than
-		 * wiping every action. This intentionally does NOT unschedule the watchdog, even when the list is now empty:
-		 * handle_watchdog_action() returns without rescheduling itself once the list is empty (so a lingering
-		 * watchdog fires at most once more and then stops). force_clear_all_processes() is deliberately avoided: its
-		 * own unguarded read-modify-write would clobber a processor that a concurrent request enqueued in the gap
-		 * after this mutation committed — the exact lost-update race this change exists to prevent. Leaving the
-		 * watchdog in place lets it pick up such a concurrent enqueue; in the narrow window where the watchdog is
-		 * already mid-run, the 'shutdown' reconciler remove_or_retry_failed_processors() reschedules the
-		 * enqueued-but-unscheduled processor on the next request.
+		 * $remaining_processors is the list exactly as persisted inside the critical section above, so the empty
+		 * check is decided from the lock-guarded snapshot rather than a second, unguarded re-read (which would only
+		 * ever see this request's own post-mutation value anyway). When that snapshot is empty we unschedule every
+		 * single-batch action to sweep up any orphaned "ghost" actions left in Action Scheduler for processors that
+		 * are no longer enqueued; otherwise only the removed processor's own scheduling needs tearing down, so we
+		 * unschedule by class name.
+		 *
+		 * This intentionally does NOT unschedule the watchdog: handle_watchdog_action() returns without rescheduling
+		 * itself once the list is empty (so a lingering watchdog fires at most once more and then stops), and leaving
+		 * it in place is what makes the empty-list sweep safe. force_clear_all_processes() is deliberately avoided:
+		 * its own unguarded read-modify-write would clobber a processor that a concurrent request enqueued in the gap
+		 * after this mutation committed — the exact lost-update race this change exists to prevent.
+		 *
+		 * There is still a narrow window: a concurrent request can enqueue processor Q and have the watchdog schedule
+		 * Q's single-batch action after our lock releases but before the sweep runs, in which case the sweep cancels
+		 * Q's action even though Q remains enqueued. Q is never lost from the option (the source of truth), so this is
+		 * a bounded scheduling delay, not a lost update: the watchdog we leave in place reschedules Q on its next run.
+		 * That recovery is bounded by the watchdog delay (woocommerce_batch_processor_watchdog_delay_seconds), not the
+		 * next request, because remove_or_retry_failed_processors() no-ops while any watchdog is already scheduled.
 		 */
-		as_unschedule_all_actions( self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ) );
+		if ( empty( $remaining_processors ) ) {
+			as_unschedule_all_actions( self::PROCESS_SINGLE_BATCH_ACTION_NAME );
+		} else {
+			as_unschedule_all_actions( self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ) );
+		}
 		$this->clear_processor_state( $processor_class_name );
 
 		return true;

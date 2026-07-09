@@ -641,4 +641,108 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 		$this->assertFalse( $this->sut->is_scheduled( get_class( $second_processor ) ) );
 		$this->assertFalse( as_has_scheduled_action( $this->sut::WATCHDOG_ACTION_NAME ) );
 	}
+
+	/**
+	 * @testdox The watchdog sanitizes a corrupted enqueued list, scheduling each valid processor once without fataling on non-string or empty entries.
+	 */
+	public function test_handle_watchdog_action_sanitizes_corrupted_list(): void {
+		// A raw option holding duplicates, a non-string, an empty string, and a corrupt array entry: without
+		// sanitizing, the non-string would fatal when passed to the strictly-typed is_scheduled(), and the empty
+		// string would be scheduled and later fatal in get_processor_instance( '' ).
+		update_option(
+			BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME,
+			array( 'Processor\\A', 'Processor\\A', new \stdClass(), '', array( 'corrupt' ), 'Processor\\B' ),
+			false
+		);
+
+		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( $this->sut::WATCHDOG_ACTION_NAME );
+
+		$this->assertTrue( $this->sut->is_scheduled( 'Processor\\A' ), 'A valid processor should be scheduled by the watchdog.' );
+		$this->assertTrue( $this->sut->is_scheduled( 'Processor\\B' ), 'A valid processor should be scheduled by the watchdog.' );
+		$this->assertFalse(
+			as_has_scheduled_action( $this->sut::PROCESS_SINGLE_BATCH_ACTION_NAME, array( '' ) ),
+			'An empty-string entry must be dropped by sanitization, not scheduled as a processor.'
+		);
+		$this->assertCount(
+			2,
+			as_get_scheduled_actions(
+				array(
+					'hook'     => $this->sut::PROCESS_SINGLE_BATCH_ACTION_NAME,
+					'group'    => '',
+					'status'   => \ActionScheduler_Store::STATUS_PENDING,
+					'per_page' => -1,
+				),
+				'ids'
+			),
+			'Only the two valid processors should be scheduled; duplicate, empty-string, and non-string entries must be dropped.'
+		);
+	}
+
+	/**
+	 * @testdox Removing the last enqueued processor sweeps orphaned 'ghost' single-batch actions left for processors no longer enqueued.
+	 */
+	public function test_remove_processor_sweeps_ghost_actions_when_queue_empties(): void {
+		$this->sut->enqueue_processor( get_class( $this->test_process ) );
+
+		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( $this->sut::WATCHDOG_ACTION_NAME );
+
+		// A leftover single-batch action for a processor that is no longer enqueued, e.g. from the historical corruption bug.
+		as_schedule_single_action( time() + HOUR_IN_SECONDS, $this->sut::PROCESS_SINGLE_BATCH_ACTION_NAME, array( 'Ghost\\Processor' ) );
+
+		$this->assertTrue( $this->sut->is_scheduled( get_class( $this->test_process ) ) );
+		$this->assertTrue( as_has_scheduled_action( $this->sut::PROCESS_SINGLE_BATCH_ACTION_NAME, array( 'Ghost\\Processor' ) ) );
+
+		$this->sut->remove_processor( get_class( $this->test_process ) );
+
+		$this->assertFalse( $this->sut->is_scheduled( get_class( $this->test_process ) ), 'The removed processor should be unscheduled.' );
+		$this->assertFalse(
+			as_has_scheduled_action( $this->sut::PROCESS_SINGLE_BATCH_ACTION_NAME, array( 'Ghost\\Processor' ) ),
+			'Emptying the queue should sweep orphaned ghost single-batch actions.'
+		);
+		$this->assertCount(
+			0,
+			as_get_scheduled_actions(
+				array(
+					'hook'     => $this->sut::PROCESS_SINGLE_BATCH_ACTION_NAME,
+					'group'    => '',
+					'status'   => \ActionScheduler_Store::STATUS_PENDING,
+					'per_page' => -1,
+				),
+				'ids'
+			),
+			'Emptying the queue should sweep every single-batch action, not just the removed processor.'
+		);
+		$this->assertTrue(
+			as_has_scheduled_action( $this->sut::WATCHDOG_ACTION_NAME ),
+			'The watchdog should be left scheduled so a concurrent enqueue is not stranded.'
+		);
+	}
+
+	/**
+	 * @testdox Removing a processor while others remain enqueued unschedules only its own action, leaving siblings scheduled.
+	 */
+	public function test_remove_processor_leaves_siblings_scheduled_when_queue_not_empty(): void {
+		$second_processor = $this->get_processor_stub();
+
+		$this->sut->enqueue_processor( get_class( $this->test_process ) );
+		$this->sut->enqueue_processor( get_class( $second_processor ) );
+
+		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( $this->sut::WATCHDOG_ACTION_NAME );
+
+		$this->assertTrue( $this->sut->is_scheduled( get_class( $this->test_process ) ) );
+		$this->assertTrue( $this->sut->is_scheduled( get_class( $second_processor ) ) );
+
+		$this->sut->remove_processor( get_class( $this->test_process ) );
+
+		$this->assertFalse( $this->sut->is_scheduled( get_class( $this->test_process ) ), 'The removed processor should be unscheduled.' );
+		$this->assertFalse( $this->sut->is_enqueued( get_class( $this->test_process ) ), 'The removed processor should also be dequeued.' );
+		$this->assertTrue(
+			$this->sut->is_scheduled( get_class( $second_processor ) ),
+			'A still-enqueued sibling processor must not have its scheduled action swept.'
+		);
+		$this->assertTrue( $this->sut->is_enqueued( get_class( $second_processor ) ), 'The sibling processor should remain enqueued.' );
+	}
 }
