@@ -7232,9 +7232,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Test account init skips the step forward when the initialization error is non-recoverable.
 	 *
+	 * @dataProvider provider_onboarding_test_account_init_non_recoverable_error_data
+	 *
+	 * @param array $error_data The WP_Error data attached to the initialization error.
+	 *
 	 * @return void
 	 */
-	public function test_onboarding_test_account_init_skips_step_on_non_recoverable_error() {
+	public function test_onboarding_test_account_init_skips_step_on_non_recoverable_error( array $error_data ) {
 		$location = 'US';
 
 		// Arrange the WPCOM connection.
@@ -7276,22 +7280,14 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( $error_data ) {
 						// Avoid parameter not used PHPCS errors.
 						unset( $params );
 						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
 							return new WP_Error(
 								'woocommerce_settings_payments_rest_error',
 								"REST request POST failed with: (bad_request) The statement descriptor matches a common term or website URL, and can't be used.",
-								array(
-									'code'    => 'bad_request',
-									'message' => "The statement descriptor matches a common term or website URL, and can't be used.",
-									'data'    => array(
-										'status'     => 400,
-										'error_type' => 'invalid_request_error',
-										'error_code' => 'invalid_request_error',
-									),
-								)
+								$error_data
 							);
 						}
 
@@ -7317,6 +7313,60 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$statuses      = $final_profile['onboarding'][ $location ]['steps'][ WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT ]['statuses'];
 		$this->assertArrayHasKey( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, $statuses, 'The step should be marked completed so onboarding can proceed.' );
 		$this->assertArrayNotHasKey( WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED, $statuses, 'The step should not be marked failed.' );
+	}
+
+	/**
+	 * Data provider for the non-recoverable initialization error shapes.
+	 *
+	 * The shapes mimic what Utils::rest_endpoint_post_request() produces, depending on where
+	 * the WooPayments extension surfaces the error details in the REST error response.
+	 *
+	 * @return array<string, array<array>>
+	 */
+	public function provider_onboarding_test_account_init_non_recoverable_error_data(): array {
+		return array(
+			'error type and code in nested data' => array(
+				array(
+					'code'    => 'bad_request',
+					'message' => "The statement descriptor matches a common term or website URL, and can't be used.",
+					'data'    => array(
+						'status'     => 400,
+						'error_type' => 'invalid_request_error',
+						'error_code' => 'invalid_request_error',
+					),
+				),
+			),
+			'error code only in nested data'     => array(
+				array(
+					'code'    => 'bad_request',
+					'message' => "The statement descriptor matches a common term or website URL, and can't be used.",
+					'data'    => array(
+						'status'     => 400,
+						'error_code' => 'invalid_request_error',
+					),
+				),
+			),
+			'error type only in nested data'     => array(
+				array(
+					'code'    => 'bad_request',
+					'message' => "The statement descriptor matches a common term or website URL, and can't be used.",
+					'data'    => array(
+						'status'     => 400,
+						'error_type' => 'invalid_request_error',
+					),
+				),
+			),
+			'error type at top level'            => array(
+				array(
+					'error_type' => 'invalid_request_error',
+				),
+			),
+			'error code at top level'            => array(
+				array(
+					'error_code' => 'invalid_request_error',
+				),
+			),
+		);
 	}
 
 	/**
@@ -8124,11 +8174,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test account init logs an error when the skipped step completion fails to persist.
+	 * @testdox Test account init falls back to the failure path when the skipped step completion fails to persist.
 	 *
 	 * @return void
 	 */
-	public function test_onboarding_test_account_init_skip_step_logs_when_completion_not_persisted() {
+	public function test_onboarding_test_account_init_skip_step_falls_back_to_failure_when_completion_not_persisted() {
 		$location = 'US';
 
 		// Arrange the WPCOM connection.
@@ -8224,9 +8274,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			$this->fail( 'Expected ApiException was not thrown.' );
 		} catch ( ApiException $e ) {
 			$this->assertSame(
-				'woocommerce_woopayments_onboarding_test_account_non_recoverable_error',
+				'woocommerce_woopayments_onboarding_client_api_error',
 				$e->getErrorCode(),
-				'The merchant should still be moved forward even if the completion could not be persisted.'
+				'Without the completion persisted, the client should see the regular failure (and retry) instead of being advanced.'
 			);
 		}
 

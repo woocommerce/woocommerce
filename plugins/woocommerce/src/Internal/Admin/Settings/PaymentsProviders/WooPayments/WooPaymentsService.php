@@ -490,8 +490,10 @@ class WooPaymentsService {
 	/**
 	 * Record an onboarding step as completed without re-checking whether a new onboarding action is allowed.
 	 *
-	 * This is for internal use only, by callers that have already committed an account mutation and
-	 * just need to sync the resulting NOX onboarding state. Unlike mark_onboarding_step_completed(),
+	 * This is for internal use only, by callers that just need to sync the NOX onboarding state
+	 * with the outcome of an already-settled operation — whether it succeeded (e.g. a committed
+	 * account mutation) or failed in a way that resolves the step (e.g. a non-recoverable
+	 * initialization error that skips the step forward). Unlike mark_onboarding_step_completed(),
 	 * it deliberately skips check_if_onboarding_step_action_is_acceptable() — including the shared
 	 * onboarding lock check — because the state change is the consequence of work that already
 	 * happened, not a new user action. Re-checking the lock here would let a concurrent request that
@@ -598,19 +600,40 @@ class WooPaymentsService {
 	 * @param array       $context  Additional event context (e.g. reason, error code).
 	 *
 	 * @return void
-	 * @throws ApiException Always, with a dedicated error code signaling the non-recoverable failure.
+	 * @throws ApiException Always. With a dedicated error code signaling the non-recoverable failure
+	 *                      when the step completion was persisted, or with the regular client API
+	 *                      error code when it wasn't — so the client offers a retry instead of
+	 *                      advancing a merchant whose stored onboarding state didn't move.
 	 */
 	private function skip_onboarding_test_account_step( string $location, ?string $source, array $context = array() ): void {
 		$step_recorded = $this->record_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location, false, $source );
 		if ( ! $step_recorded ) {
-			// The client will still advance the merchant, so leave a trail: the stored onboarding
-			// state now disagrees with the client navigation.
+			// Leave a trail before falling back to the regular failure handling.
 			$this->proxy->call_function( 'wc_get_logger' )->error(
 				'Failed to record the test account onboarding step as completed while skipping it forward.',
 				array(
 					'source'   => 'settings-payments',
 					'location' => $location,
 				)
+			);
+
+			// Without the completed status persisted, advancing the client would desync it from
+			// the stored onboarding state. Fail the step instead: the client shows the regular
+			// error with a retry, and a later attempt can complete the skip.
+			$this->mark_onboarding_step_failed(
+				self::ONBOARDING_STEP_TEST_ACCOUNT,
+				$location,
+				array(
+					'code'    => 'skip_forward_not_persisted',
+					'message' => esc_html__( 'Failed to record the onboarding progress.', 'woocommerce' ),
+					'context' => $context,
+				)
+			);
+
+			throw new ApiException(
+				'woocommerce_woopayments_onboarding_client_api_error',
+				esc_html__( 'Failed to initialize the test account.', 'woocommerce' ),
+				(int) WP_Http::FAILED_DEPENDENCY
 			);
 		}
 
