@@ -87,11 +87,7 @@
 		"test:e2e:hpos-off": "pnpm test:e2e:with-env default-hpos-disabled --project=e2e-hpos-disabled",
 		"test:e2e:gb-stable": "pnpm test:e2e:with-env gutenberg-stable",
 		"test:e2e:gb-nightly": "pnpm test:e2e:with-env gutenberg-nightly",
-		"ci:legacy-minicart-flag-off": "node ./bin/set-legacy-minicart-flag.js && php bin/generate-feature-config.php",
-		"test:e2e:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm test:e2e:default --project=legacy-mini-cart",
-		"test:e2e:blocks:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm playwright test --config=tests/e2e/playwright.config.ts --project=blocks-legacy-mini-cart",
 		"test:e2e:paypal-standard": "pnpm test:e2e:default --project=paypal-standard",
-		"test:php:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm test:php:env",
 		"test:env:start": "pnpm env:test",
 		"test:perf": "./tests/performance/bin/k6 run ./tests/performance/tests/main.js",
 		"test:perf:ci-setup": "pnpm test:perf:install-k6 && pnpm env:perf",
@@ -178,37 +174,6 @@
 						"pull_request",
 						"push",
 						"php-unit-php-8.5-wp-latest"
-					]
-				},
-				{
-					"name": "PHP: 8.5 WP: latest - Legacy MiniCart",
-					"testType": "unit:php",
-					"command": "test:php:legacy-mini-cart",
-					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main",
-						"--testsuite=wc-phpunit-graphql-infra",
-						"--testsuite=wc-phpunit-graphql-api"
-					],
-					"onlyForDependencies": [],
-					"changes": [
-						"client/admin/config/*.json",
-						"composer.json",
-						"composer.lock",
-						"**/*.php",
-						".wp-env.test.json",
-						"phpunit.xml"
-					],
-					"testEnv": {
-						"start": "env:test --debug",
-						"config": {
-							"phpVersion": "8.5",
-							"wpVersion": "latest"
-						}
-					},
-					"events": [
-						"pull_request",
-						"push"
 					]
 				},
 				{
@@ -353,38 +318,6 @@
 					],
 					"report": {
 						"resultsBlobName": "core-e2e-report",
-						"resultsPath": "tests/e2e/test-results",
-						"allure": true
-					}
-				},
-				{
-					"name": "Core e2e tests - Legacy MiniCart",
-					"testType": "e2e",
-					"command": "test:e2e:legacy-mini-cart",
-					"shardingArguments": [],
-					"changes": [
-						"client/admin/config/*.json",
-						"composer.json",
-						"composer.lock",
-						"i18n/**/*.php",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/e2e/**",
-						".wp-env.e2e.json",
-						"woocommerce.php",
-						"uninstall.php"
-					],
-					"testEnv": {
-						"start": "env:e2e --debug"
-					},
-					"events": [
-						"pull_request",
-						"push"
-					],
-					"report": {
-						"resultsBlobName": "legacy-core-e2e-report",
 						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
@@ -893,50 +826,6 @@
 					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report",
-						"resultsPath": "tests/e2e/test-results",
-						"allure": true
-					}
-				},
-				{
-					"name": "Blocks e2e tests - Legacy MiniCart",
-					"testType": "e2e",
-					"command": "test:e2e:blocks:legacy-mini-cart",
-					"shardingArguments": [
-						"--shard=1/3",
-						"--shard=2/3",
-						"--shard=3/3"
-					],
-					"changes": [
-						"patterns/**/*.php",
-						"includes/**/*.php",
-						"src/Blocks/**/*.php",
-						"templates/**/*.php",
-						"templates/**/*.html",
-						"tests/e2e/bin/blocks/**",
-						"tests/e2e/fixtures/blocks-setup.ts",
-						"tests/e2e/playwright.config.ts",
-						"tests/e2e/content-templates/blocks/**",
-						"tests/e2e/test-data/blocks/**",
-						"tests/e2e/test-plugins/blocks/**",
-						"tests/e2e/tests/blocks/**",
-						"tests/e2e/themes/blocks/**",
-						"tests/e2e/utils/blocks/**"
-					],
-					"onlyForDependencies": [
-						"@woocommerce/block-library"
-					],
-					"testEnv": {
-						"start": "env:start:blocks",
-						"config": {
-							"phpVersion": "7.4"
-						}
-					},
-					"events": [
-						"pull_request",
-						"push"
-					],
-					"report": {
-						"resultsBlobName": "legacy-blocks-e2e-report",
 						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
