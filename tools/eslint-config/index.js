@@ -14,7 +14,14 @@ const woocommerce = require( '@woocommerce/eslint-plugin' );
  * `eslint src`, and ESLint 8 without --ext only looked at `.js`; flat config
  * decides extensions from `files`, so the TypeScript that was never linted now is.
  *
- * Restoring these is tracked in
+ * Two packages carry downgrades of their own alongside these, because they re-set
+ * those severities themselves and the later config object wins: client/blocks
+ * (import/named, import/no-unresolved, import/no-duplicates,
+ * react-hooks/exhaustive-deps, and the TypeScript no-unused-vars/no-shadow it
+ * overrides) and plugins/woocommerce (the playwright rules, whose plugin is only
+ * registered for its e2e block).
+ *
+ * Restoring all of them is tracked in
  * https://github.com/woocommerce/woocommerce/issues/66078.
  */
 const RELAXED_RULES = {
