@@ -213,6 +213,12 @@ const jsConfig = {
 			},
 			{ test: /\.md$/, use: 'raw-loader' },
 			{
+				// @wordpress/theme declares sideEffects: false, which would
+				// tree-shake bare imports of its design tokens stylesheet.
+				test: /@wordpress[\/\\]theme[\/\\].*\.css$/,
+				sideEffects: true,
+			},
+			{
 				test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/,
 				type: 'asset',
 			},

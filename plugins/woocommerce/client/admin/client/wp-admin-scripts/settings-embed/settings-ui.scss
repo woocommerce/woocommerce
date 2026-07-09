@@ -235,7 +235,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	.wc-settings-ui {
 		box-sizing: border-box;
 		margin: 32px auto 48px;
-		max-width: var(--wpds-dimension-surface-width-xl, 720px);
+		max-width: var(--wpds-dimension-surface-width-xl);
 	}
 
 	.wc-settings-ui__section {
@@ -294,7 +294,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui__info {
-		background: #f6f7f7;
+		background: var(--wpds-color-background-surface-neutral-weak);
 		border-radius: 4px;
 		padding: 16px;
 
