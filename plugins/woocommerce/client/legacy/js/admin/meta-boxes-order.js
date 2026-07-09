@@ -1518,9 +1518,26 @@ jQuery( function ( $ ) {
 			};
 
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-
 				if ( response && -1 !== parseInt( response ) ) {
-					$( '.order_download_permissions .wc-metaboxes' ).append( response );
+					var existingDownloads = {};
+					var $newPermissions = $( response ).filter( '.wc-metabox' );
+
+					$( '.order_download_permissions .revoke_access' ).each( function() {
+						existingDownloads[ $( this ).attr( 'rel' ) ] = true;
+					} );
+
+					$newPermissions = $newPermissions.filter( function() {
+						var downloadKey = $( this ).find( '.revoke_access' ).attr( 'rel' );
+
+						if ( existingDownloads[ downloadKey ] ) {
+							return false;
+						}
+
+						existingDownloads[ downloadKey ] = true;
+						return true;
+					} );
+
+					$( '.order_download_permissions .wc-metaboxes' ).append( $newPermissions );
 				} else {
 					window.alert( woocommerce_admin_meta_boxes.i18n_download_permission_fail );
 				}

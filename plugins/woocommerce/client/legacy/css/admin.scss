@@ -2333,6 +2333,7 @@ body.woocommerce_page_wc-orders {
 			width: 10em;
 			margin: 0 0 0 0.5em;
 			box-sizing: border-box;
+			position: relative;
 
 			input[type="text"] {
 				width: 96%;
@@ -5682,6 +5683,30 @@ img.help_tip {
 					width: 100%;
 					height: auto;
 					display: block;
+				}
+
+				.woocommerce-product-gallery__video-preview {
+					display: block;
+					width: 100%;
+					aspect-ratio: 1;
+					object-fit: cover;
+					background: $gray-100;
+				}
+
+				&.video::before {
+					@include icon_dashicons("\f522");
+
+					left: 50%;
+					top: 50%;
+					transform: translate(-50%, -50%);
+					z-index: 1;
+					width: auto;
+					height: auto;
+					color: $contentbg;
+					font-size: 1.4em;
+					line-height: 1;
+					text-shadow: 0 0 0.25em rgba(0, 0, 0, 0.8);
+					pointer-events: none;
 				}
 			}
 
