@@ -218,6 +218,31 @@ describe( 'useSendTestEmail + SendTestEmailForm', () => {
 		);
 	} );
 
+	it( 'submits the form when Enter is pressed in the email field, but not while the email is invalid', async () => {
+		apiFetchMock.mockResolvedValue( { success: true, result: true } );
+
+		render( <Harness target={ editorTarget } source="email_listing" /> );
+
+		const emailField = screen.getByLabelText( 'Send to' );
+
+		fireEvent.change( emailField, {
+			target: { value: 'not-an-email' },
+		} );
+		fireEvent.submit( emailField );
+		expect( apiFetchMock ).not.toHaveBeenCalled();
+
+		fireEvent.change( emailField, {
+			target: { value: 'merchant@example.com' },
+		} );
+		fireEvent.submit( emailField );
+
+		await waitFor( () =>
+			expect(
+				screen.getByText( 'Test email sent successfully!' )
+			).toBeInTheDocument()
+		);
+	} );
+
 	it( 'invokes onCancel when the cancel button is clicked', () => {
 		const onCancel = jest.fn();
 		render(

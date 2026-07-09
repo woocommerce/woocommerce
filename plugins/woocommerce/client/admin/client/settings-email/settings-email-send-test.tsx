@@ -213,7 +213,15 @@ export const SendTestEmailForm = ( {
 	onCancel,
 }: SendTestEmailFormProps ) => {
 	return (
-		<>
+		<form
+			onSubmit={ ( e ) => {
+				e.preventDefault();
+				if ( ! isValidEmail( email ) || isSending ) {
+					return;
+				}
+				onSend();
+			} }
+		>
 			<p>
 				{ __(
 					'Send yourself a test email to check how your email looks in different email apps.',
@@ -249,8 +257,8 @@ export const SendTestEmailForm = ( {
 				</Button>
 
 				<Button
+					type="submit"
 					variant="primary"
-					onClick={ onSend }
 					isBusy={ isSending }
 					disabled={ ! isValidEmail( email ) || isSending }
 				>
@@ -259,6 +267,6 @@ export const SendTestEmailForm = ( {
 						: __( 'Send test email', 'woocommerce' ) }
 				</Button>
 			</div>
-		</>
+		</form>
 	);
 };
