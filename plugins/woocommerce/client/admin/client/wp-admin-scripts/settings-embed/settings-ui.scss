@@ -111,7 +111,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui-shell__breadcrumbs {
-		color: #757575;
+		color: var(--wpds-color-foreground-content-neutral-weak);
 		font-size: var(--wpds-typography-font-size-sm);
 		line-height: var(--wpds-typography-line-height-xs);
 		margin: 0 0 8px;
@@ -124,7 +124,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 
 		a {
-			color: #505050;
+			color: var(--wpds-color-foreground-interactive-neutral-weak);
 			text-decoration: none;
 
 			&:focus,
@@ -260,7 +260,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui__section-description {
-		color: #757575;
+		color: var(--wpds-color-foreground-content-neutral-weak);
 		font-size: 13px;
 		line-height: 20px;
 		margin: 8px 0 0;
@@ -318,7 +318,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 
 		.components-base-control__help {
-			color: #757575;
+			color: var(--wpds-color-foreground-content-neutral-weak);
 			font-size: 13px;
 			line-height: 20px;
 			margin-top: 8px;
