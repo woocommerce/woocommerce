@@ -120,34 +120,30 @@ final class AssetsController {
 	}
 
 	/**
-	 * Register deprecated package and aggregate script handles for backward compatibility.
+	 * Register deprecated aggregate handles and standalone package bundles for backward compatibility.
 	 *
-	 * These handles are no longer used by WooCommerce's consolidated editor build, but are still registered
-	 * so extensions that declare them directly do not break. Other package handles in register_assets() are
-	 * intentionally kept at their normal registration sites because they remain supported shared APIs,
-	 * frontend/runtime dependencies, or are registered by another asset controller.
+	 * The aggregate handles are placeholders so extensions that declare them directly do not break.
+	 * The package handles below remain real bundles because WooCommerce's consolidated editor build
+	 * externalizes them as shared dependencies for extension compatibility.
 	 */
 	private function register_deprecated_package_scripts(): void {
 		// Deprecated aggregate handles kept as placeholders for extensions that still declare them.
 		wp_register_script( 'wc-blocks-vendors', false, array(), $this->api->wc_version, true );
 		wp_register_script( 'wc-blocks', false, array(), $this->api->wc_version, true );
 
-		// Deprecated package handle kept for extensions that still declare wc-blocks-shared-context.
+		// Standalone package bundle for extensions that depend on wc-blocks-shared-context.
 		$this->api->register_script( 'wc-blocks-shared-context', 'assets/client/blocks/wc-blocks-shared-context.js' );
 
-		// Deprecated package handle kept for extensions that still declare wc-blocks-shared-hocs.
+		// Standalone package bundle for extensions that depend on wc-blocks-shared-hocs.
 		$this->api->register_script( 'wc-blocks-shared-hocs', 'assets/client/blocks/wc-blocks-shared-hocs.js', array(), false );
 
-		// Deprecated package handle kept for extensions that still declare wc-blocks-components.
+		// Standalone package bundle for extensions that depend on wc-blocks-components.
 		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js' );
 
 		$this->add_deprecated_script_handle_warnings(
 			array(
 				'wc-blocks-vendors',
 				'wc-blocks',
-				'wc-blocks-shared-context',
-				'wc-blocks-shared-hocs',
-				'wc-blocks-components',
 			)
 		);
 	}
