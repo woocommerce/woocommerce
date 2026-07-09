@@ -683,13 +683,15 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$output_buffering_level = ob_get_level();
 
 		try {
-			// Note that _handleAjax makes use of output buffering...
+			// Note that _handleAjax makes use of output buffering, which the die
+			// handler usually cleans up; the finally block below closes only any
+			// buffer it leaves dangling so the buffer level stays balanced.
 			$this->_handleAjax( $ajax_action );
 		} catch ( Exception $e ) {
-			// ...However, if an exception is raised, it may not be able to clean-up,
-			// which can lead to PhpUnit emitting risky test warnings.
-			if ( ob_get_level() === $output_buffering_level + 1 ) {
-				ob_get_clean();
+			unset( $e );
+		} finally {
+			while ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
 			}
 		}
 
