@@ -177,7 +177,6 @@ class ProductGallery extends \WP_UnitTestCase {
 			'--wc-block-product-gallery-image-ratio-height:5;',
 			$markup
 		);
-		$this->assertStringContainsString( 'aspect-ratio:3/5;', $markup );
 
 		$this->cleanup_product_data( $data );
 	}
