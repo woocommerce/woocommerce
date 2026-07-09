@@ -155,45 +155,42 @@ const baseConfig = {
 	},
 };
 
-// Add import mode setting if feature is enabled
-if ( !! window.wcAdminFeatures?.[ 'analytics-scheduled-import' ] ) {
-	const importInterval = getAdminSetting(
-		'woocommerce_analytics_import_interval',
-		__( '12 hours', 'woocommerce' ) // Default value for the import interval.
-	);
+const importInterval = getAdminSetting(
+	'woocommerce_analytics_import_interval',
+	__( '12 hours', 'woocommerce' ) // Default value for the import interval.
+);
 
-	baseConfig[ SCHEDULED_IMPORT_SETTING_NAME ] = {
-		name: SCHEDULED_IMPORT_SETTING_NAME,
-		label: __( 'Updates:', 'woocommerce' ),
-		inputType: 'radio',
-		options: [
-			{
-				label: __( 'Scheduled (recommended)', 'woocommerce' ),
-				value: 'yes',
-				description: sprintf(
-					/* translators: %s: import interval, e.g. "12 hours" */
-					__(
-						'Updates automatically every %s. Lowest impact on your site.',
-						'woocommerce'
-					),
-					importInterval
-				),
-			},
-			{
-				label: __( 'Immediately', 'woocommerce' ),
-				value: 'no',
-				description: __(
-					'Updates as soon as new data is available. May slow busy stores.',
+baseConfig[ SCHEDULED_IMPORT_SETTING_NAME ] = {
+	name: SCHEDULED_IMPORT_SETTING_NAME,
+	label: __( 'Updates:', 'woocommerce' ),
+	inputType: 'radio',
+	options: [
+		{
+			label: __( 'Scheduled (recommended)', 'woocommerce' ),
+			value: 'yes',
+			description: sprintf(
+				/* translators: %s: import interval, e.g. "12 hours" */
+				__(
+					'Updates automatically every %s. Lowest impact on your site.',
 					'woocommerce'
 				),
-			},
-		],
-		// This default value is primarily used when users click "Reset defaults" for settings.
-		// We set 'yes' (Scheduled) as the default for new installs, since it is the recommended, lowest-impact option.
-		// Note: The PHP backend defaults to 'no' (Immediate) to preserve legacy behavior for existing stores and avoid disrupting current site operations.
-		// This intentional difference ensures new stores use the best-practice default, while existing stores are not affected by updates.
-		defaultValue: 'yes',
-	};
-}
+				importInterval
+			),
+		},
+		{
+			label: __( 'Immediately', 'woocommerce' ),
+			value: 'no',
+			description: __(
+				'Updates as soon as new data is available. May slow busy stores.',
+				'woocommerce'
+			),
+		},
+	],
+	// This default value is primarily used when users click "Reset defaults" for settings.
+	// We set 'yes' (Scheduled) as the default for new installs, since it is the recommended, lowest-impact option.
+	// Note: The PHP backend defaults to 'no' (Immediate) to preserve legacy behavior for existing stores and avoid disrupting current site operations.
+	// This intentional difference ensures new stores use the best-practice default, while existing stores are not affected by updates.
+	defaultValue: 'yes',
+};
 
 export const config = applyFilters( SETTINGS_FILTER, baseConfig );

@@ -14,6 +14,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { Card } from '@wordpress/ui';
 import type { ErrorInfo, ReactNode } from 'react';
 
 /**
@@ -229,9 +230,19 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 	}
 
 	return (
-		<header className="wc-settings-ui__section-header">
+		<Card.Header
+			className="wc-settings-ui__section-header"
+			render={ <header /> }
+		>
 			<div className="wc-settings-ui__section-heading">
-				{ group.title ? <h2>{ group.title }</h2> : null }
+				{ group.title ? (
+					<Card.Title
+						// eslint-disable-next-line jsx-a11y/heading-has-content -- Card.Title injects its children into the render element.
+						render={ <h2 /> }
+					>
+						{ group.title }
+					</Card.Title>
+				) : null }
 				{ group.description ? (
 					<div className="wc-settings-ui__section-description">
 						<RawHTML>
@@ -255,7 +266,7 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 					) ) }
 				</div>
 			) : null }
-		</header>
+		</Card.Header>
 	);
 };
 
@@ -850,9 +861,9 @@ export const SettingsUIPage = ( {
 						className="wc-settings-ui__section"
 						key={ group.id }
 					>
-						<div className="wc-settings-ui__section-card">
+						<Card.Root className="wc-settings-ui__section-card">
 							<GroupHeader group={ group } />
-							<div className="wc-settings-ui__section-fields">
+							<Card.Content className="wc-settings-ui__section-fields">
 								{ group.fields.map( ( field ) => {
 									const FieldComponent =
 										resolveFieldComponent(
@@ -889,8 +900,8 @@ export const SettingsUIPage = ( {
 										</div>
 									);
 								} ) }
-							</div>
-						</div>
+							</Card.Content>
+						</Card.Root>
 					</section>
 				) ) }
 			</div>

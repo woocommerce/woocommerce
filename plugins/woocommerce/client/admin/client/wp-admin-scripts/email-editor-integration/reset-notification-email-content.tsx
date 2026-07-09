@@ -16,7 +16,6 @@ import {
 import { decodeEntities } from '@wordpress/html-entities';
 import apiFetch from '@wordpress/api-fetch';
 
-// eslint-disable-next-line @woocommerce/dependency-group
 import type { PostWithPermissions } from '@woocommerce/email-editor';
 
 function getItemTitle( item: {

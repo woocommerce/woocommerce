@@ -8,6 +8,8 @@ import {
 } from '@wordpress/block-editor';
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
+import { useProductDataContext } from '@woocommerce/shared-context';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -43,9 +45,22 @@ export const Edit = withProductDataContext(
 	( {
 		attributes,
 		setAttributes,
-	}: BlockEditProps< ProductGalleryBlockAttributes > ) => {
+		context,
+	}: BlockEditProps< ProductGalleryBlockAttributes > & {
+		context?: {
+			postId?: number | string;
+		};
+	} ) => {
+		const { product, isLoading } = useProductDataContext();
+		const productImages = product?.images || [];
+		const hasProductContext = Boolean( context?.postId && product?.id );
+		const hasOneOrNoImages =
+			hasProductContext && ! isLoading && productImages.length <= 1;
 		const blockProps = useBlockProps( {
-			className: 'wc-block-product-gallery',
+			className: clsx( 'wc-block-product-gallery', {
+				'wc-block-product-gallery--has-one-or-no-images':
+					hasOneOrNoImages,
+			} ),
 		} );
 
 		return (

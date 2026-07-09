@@ -1,10 +1,7 @@
-// We need to disable the following eslint check as it's only applicable
-// to testing-library/react not `react-test-renderer` used here
-/* eslint-disable testing-library/await-async-query */
 /**
  * External dependencies
  */
-import TestRenderer from 'react-test-renderer';
+import { render, act } from '@testing-library/react';
 import * as mockUtils from '@woocommerce/editor-components/utils';
 
 /**
@@ -23,30 +20,41 @@ jest.mock( '../../base/utils/errors', () => ( {
 
 const mockProduct = { name: 'T-Shirt' };
 const attributes = { productId: 1 };
-const TestComponent = withProduct( ( props ) => {
-	return (
-		<div
-			data-error={ props.error }
-			data-getProduct={ props.getProduct }
-			data-isLoading={ props.isLoading }
-			data-product={ props.product }
-		/>
-	);
+
+// Capture the props the HOC injects into the wrapped component.
+let lastProps;
+const CapturedComponent = jest.fn( ( props ) => {
+	lastProps = props;
+	return null;
 } );
-const render = () => {
-	return TestRenderer.create( <TestComponent attributes={ attributes } /> );
+const TestComponent = withProduct( CapturedComponent );
+
+// Run an interaction and flush the async state updates it triggers inside
+// `act`, so React's async fetch-then-setState work does not leak past the test.
+const settle = async ( fn ) => {
+	await act( async () => {
+		fn();
+		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
+	} );
 };
 
 describe( 'withProduct Component', () => {
-	let renderer;
+	let renderResult;
+	const renderComponent = ( props = { attributes } ) =>
+		settle( () => {
+			renderResult = render( <TestComponent { ...props } /> );
+		} );
+
 	afterEach( () => {
 		mockUtils.getProduct.mockReset();
+		CapturedComponent.mockClear();
+		lastProps = undefined;
 	} );
 
 	describe( 'lifecycle events', () => {
-		beforeEach( () => {
+		beforeEach( async () => {
 			mockUtils.getProduct.mockImplementation( () => Promise.resolve() );
-			renderer = render();
+			await renderComponent();
 		} );
 
 		it( 'getProduct is called on mount with passed in product id', () => {
@@ -56,10 +64,14 @@ describe( 'withProduct Component', () => {
 			expect( getProduct ).toHaveBeenCalledTimes( 1 );
 		} );
 
-		it( 'getProduct is called on component update', () => {
+		it( 'getProduct is called on component update', async () => {
 			const { getProduct } = mockUtils;
 			const newAttributes = { ...attributes, productId: 2 };
-			renderer.update( <TestComponent attributes={ newAttributes } /> );
+			await settle( () =>
+				renderResult.rerender(
+					<TestComponent attributes={ newAttributes } />
+				)
+			);
 
 			expect( getProduct ).toHaveBeenNthCalledWith(
 				2,
@@ -68,31 +80,28 @@ describe( 'withProduct Component', () => {
 			expect( getProduct ).toHaveBeenCalledTimes( 2 );
 		} );
 
-		it( 'getProduct is hooked to the prop', () => {
+		it( 'getProduct is hooked to the prop', async () => {
 			const { getProduct } = mockUtils;
-			const props = renderer.root.findByType( 'div' ).props;
 
-			props[ 'data-getProduct' ]();
+			await settle( () => lastProps.getProduct() );
 
 			expect( getProduct ).toHaveBeenCalledTimes( 2 );
 		} );
 	} );
 
 	describe( 'when the API returns product data', () => {
-		beforeEach( () => {
+		beforeEach( async () => {
 			mockUtils.getProduct.mockImplementation( ( productId ) =>
 				Promise.resolve( { ...mockProduct, id: productId } )
 			);
-			renderer = render();
+			await renderComponent();
 		} );
 
 		it( 'sets the product props', () => {
-			const props = renderer.root.findByType( 'div' ).props;
-
-			expect( props[ 'data-error' ] ).toBeNull();
-			expect( typeof props[ 'data-getProduct' ] ).toBe( 'function' );
-			expect( props[ 'data-isLoading' ] ).toBe( false );
-			expect( props[ 'data-product' ] ).toEqual( {
+			expect( lastProps.error ).toBeNull();
+			expect( typeof lastProps.getProduct ).toBe( 'function' );
+			expect( lastProps.isLoading ).toBe( false );
+			expect( lastProps.product ).toEqual( {
 				...mockProduct,
 				id: attributes.productId,
 			} );
@@ -101,29 +110,25 @@ describe( 'withProduct Component', () => {
 
 	describe( 'when the API returns an error', () => {
 		const error = { message: 'There was an error.' };
-		const getProductPromise = Promise.reject( error );
 		const formattedError = { message: 'There was an error.', type: 'api' };
 
-		beforeEach( () => {
-			mockUtils.getProduct.mockImplementation( () => getProductPromise );
-			mockBaseUtils.formatError.mockImplementation(
-				() => formattedError
+		beforeEach( async () => {
+			mockUtils.getProduct.mockImplementation( () =>
+				Promise.reject( error )
 			);
-			renderer = render();
+			mockBaseUtils.formatError.mockImplementation( () => formattedError );
+			await renderComponent();
 		} );
 
-		test( 'sets the error prop', async () => {
-			await expect( () => getProductPromise() ).toThrow();
-
+		test( 'sets the error prop', () => {
 			const { formatError } = mockBaseUtils;
-			const props = renderer.root.findByType( 'div' ).props;
 
 			expect( formatError ).toHaveBeenCalledWith( error );
 			expect( formatError ).toHaveBeenCalledTimes( 1 );
-			expect( props[ 'data-error' ] ).toEqual( formattedError );
-			expect( typeof props[ 'data-getProduct' ] ).toBe( 'function' );
-			expect( props[ 'data-isLoading' ] ).toBe( false );
-			expect( props[ 'data-product' ] ).toBeNull();
+			expect( lastProps.error ).toEqual( formattedError );
+			expect( typeof lastProps.getProduct ).toBe( 'function' );
+			expect( lastProps.isLoading ).toBe( false );
+			expect( lastProps.product ).toBeNull();
 		} );
 	} );
 } );
