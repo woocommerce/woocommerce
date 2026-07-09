@@ -33,6 +33,10 @@ final class CoreBreadcrumbsCompatibility {
 		$this->is_initialized = true;
 	}
 
+	/*
+	 * Compatibility methods.
+	 */
+
 	/**
 	 * Set the preferred taxonomy and term for the breadcrumbs block on the product post type.
 	 *
@@ -295,22 +299,6 @@ final class CoreBreadcrumbsCompatibility {
 	}
 
 	/**
-	 * Prepend the shop page to breadcrumb items.
-	 *
-	 * @param array $items Array of breadcrumb items from Core.
-	 * @return array Modified breadcrumb items.
-	 */
-	private function prepend_shop_page_to_breadcrumbs( $items ) {
-		$shop_page_item = $this->get_shop_page_breadcrumb_item();
-
-		if ( empty( $shop_page_item ) ) {
-			return $items;
-		}
-
-		return $this->insert_parent_breadcrumb_item_if_missing_url( $items, $shop_page_item );
-	}
-
-	/**
 	 * Replace Core's search breadcrumb label with WooCommerce's search label.
 	 *
 	 * @param array $items Array of breadcrumb items from Core.
@@ -450,8 +438,12 @@ final class CoreBreadcrumbsCompatibility {
 			return $items;
 		}
 
-		return $this->replace_last_breadcrumb_label( $items, __( 'Error 404', 'woocommerce' ) );
+		return $this->replace_breadcrumb_label_at_index( $items, array_key_last( $items ), __( 'Error 404', 'woocommerce' ) );
 	}
+
+	/*
+	 * Utility methods.
+	 */
 
 	/**
 	 * Get the main product category term for breadcrumbs.
@@ -498,6 +490,22 @@ final class CoreBreadcrumbsCompatibility {
 		$main_term = apply_filters( 'woocommerce_breadcrumb_main_term', $terms[0], $terms );
 
 		return $main_term instanceof \WP_Term ? $main_term : null;
+	}
+
+	/**
+	 * Prepend the shop page to breadcrumb items.
+	 *
+	 * @param array $items Array of breadcrumb items from Core.
+	 * @return array Modified breadcrumb items.
+	 */
+	private function prepend_shop_page_to_breadcrumbs( $items ) {
+		$shop_page_item = $this->get_shop_page_breadcrumb_item();
+
+		if ( empty( $shop_page_item ) ) {
+			return $items;
+		}
+
+		return $this->insert_parent_breadcrumb_item_if_missing_url( $items, $shop_page_item );
 	}
 
 	/**
@@ -625,17 +633,6 @@ final class CoreBreadcrumbsCompatibility {
 	 */
 	private function replace_current_archive_breadcrumb_label( $items, $label, $archive_url = '' ) {
 		return $this->replace_breadcrumb_label_at_index( $items, $this->get_current_archive_breadcrumb_index( $items, $archive_url ), $label );
-	}
-
-	/**
-	 * Replace the final breadcrumb label.
-	 *
-	 * @param array  $items Array of breadcrumb items from Core.
-	 * @param string $label Replacement label.
-	 * @return array Modified breadcrumb items.
-	 */
-	private function replace_last_breadcrumb_label( $items, $label ) {
-		return $this->replace_breadcrumb_label_at_index( $items, array_key_last( $items ), $label );
 	}
 
 	/**
