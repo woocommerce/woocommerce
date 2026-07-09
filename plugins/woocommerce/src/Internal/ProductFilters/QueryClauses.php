@@ -30,23 +30,14 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	private $params;
 
 	/**
-	 * Pre-computed taxonomy hierarchy data.
-	 *
-	 * @var TaxonomyHierarchyData
-	 */
-	private $taxonomy_hierarchy_data;
-
-	/**
 	 * Initialize the query clauses.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 * @param Params                $params                  The filter params.
-	 * @param TaxonomyHierarchyData $taxonomy_hierarchy_data Taxonomy hierarchy data.
+	 * @param Params $params The filter params.
 	 * @return void
 	 */
-	final public function init( Params $params, TaxonomyHierarchyData $taxonomy_hierarchy_data ): void {
-		$this->params                  = $params;
-		$this->taxonomy_hierarchy_data = $taxonomy_hierarchy_data;
+	final public function init( Params $params ): void {
+		$this->params = $params;
 	}
 
 	/**
@@ -367,19 +358,17 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			}
 
 			if ( is_taxonomy_hierarchical( $taxonomy ) ) {
-				// Expand chosen terms to include descendants using the per-taxonomy
-				// hierarchy map (one get_terms per taxonomy) instead of a child_of
-				// query per chosen term.
-				$expanded_term_ids = $term_ids;
+				// Expand chosen terms to include descendants via the per-taxonomy
+				// hierarchy map (one get_terms per taxonomy). Resolved lazily so the
+				// service is only instantiated when a hierarchical filter is in play.
+				$hierarchy_data  = wc_get_container()->get( TaxonomyHierarchyData::class );
+				$descendant_sets = array( $term_ids );
 
 				foreach ( $term_ids as $term_id ) {
-					$expanded_term_ids = array_merge(
-						$expanded_term_ids,
-						$this->taxonomy_hierarchy_data->get_descendants( (int) $term_id, $taxonomy )
-					);
+					$descendant_sets[] = $hierarchy_data->get_descendants( (int) $term_id, $taxonomy );
 				}
 
-				$term_ids = array_unique( $expanded_term_ids );
+				$term_ids = array_unique( array_merge( ...$descendant_sets ) );
 			}
 
 			$term_ids_list = '(' . implode( ',', array_map( 'absint', $term_ids ) ) . ')';
