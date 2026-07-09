@@ -89,7 +89,6 @@ const Edit = ( {
 } ): JSX.Element => {
 	const blockProps = useBlockProps();
 	const { product } = useProduct( context?.postId );
-	const isDescendentOfQueryLoop = Number.isFinite( context?.queryId );
 	const { width } = attributes;
 	return (
 		<>

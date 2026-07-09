@@ -173,8 +173,6 @@ const Edit = ( {
 			<Block
 				isAdmin={ true }
 				{ ...attributes }
-				isDescendentOfQueryLoop={ isDescendentOfQueryLoop }
-
 				isDescendentOfSingleProductTemplate={
 					isDescendentOfSingleProductTemplate
 				}

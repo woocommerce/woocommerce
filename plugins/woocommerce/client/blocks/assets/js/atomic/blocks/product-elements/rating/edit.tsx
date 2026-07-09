@@ -16,8 +16,8 @@ import { useProduct } from '@woocommerce/entities';
 import Block from './block';
 import { BlockAttributes } from './types';
 import './editor.scss';
-import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
-import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
+
+
 
 const Edit = (
 	props: BlockEditProps< BlockAttributes > & { context: Context }
@@ -31,17 +31,7 @@ const Edit = (
 		...context,
 		shouldDisplayMockedReviewsWhenProductHasNoReviews: true,
 	};
-	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
-	const { isDescendentOfSingleProductBlock } =
-		useIsDescendentOfSingleProductBlock( {
-			blockClientId: blockProps?.id,
-		} );
-	let { isDescendentOfSingleProductTemplate } =
-		useIsDescendentOfSingleProductTemplate();
 
-	if ( isDescendentOfQueryLoop || isDescendentOfSingleProductBlock ) {
-		isDescendentOfSingleProductTemplate = false;
-	}
 
 	const { product } = useProduct( context.postId );
 
@@ -59,10 +49,6 @@ const Edit = (
 				<Block
 					isAdmin={ true }
 					{ ...blockAttrs }
-					isDescendentOfQueryLoop={ isDescendentOfQueryLoop }
-					isDescendentOfSingleProductBlock={
-						isDescendentOfSingleProductBlock
-					}
 					product={ product }
 				/>
 			</div>
