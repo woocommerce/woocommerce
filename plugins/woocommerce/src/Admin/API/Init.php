@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin\API;
 
 use AllowDynamicProperties;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -66,11 +67,9 @@ class Init {
 		$rest_api_util = wc_get_container()->get( RestApiUtil::class );
 		$rest_api_util->lazy_load_namespace( 'wc-analytics', array( $this, 'rest_api_init_wc_analytics' ) );
 
-		if ( Features::is_enabled( 'launch-your-store' ) ) {
-			$controller        = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';
-			$this->$controller = new $controller();
-			$this->$controller->register_routes();
-		}
+		$controller        = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';
+		$this->$controller = new $controller();
+		$this->$controller->register_routes();
 	}
 
 	/**
@@ -159,7 +158,7 @@ class Init {
 		);
 
 		$analytics_controllers = array();
-		if ( Features::is_enabled( 'analytics' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'analytics' ) ) {
 			$analytics_controllers = array(
 				'Automattic\WooCommerce\Admin\API\Customers',
 				'Automattic\WooCommerce\Admin\API\Leaderboards',
