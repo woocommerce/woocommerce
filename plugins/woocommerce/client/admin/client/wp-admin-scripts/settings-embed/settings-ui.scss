@@ -134,42 +134,6 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 	}
 
-	// Intent-to-token mapping mirrors the @wordpress/ui Badge component.
-	.wc-settings-ui-shell__badge {
-		align-items: center;
-		border-radius: var(--wpds-border-radius-sm);
-		display: inline-flex;
-		font-size: var(--wpds-typography-font-size-sm);
-		font-weight: var(--wpds-typography-font-weight-regular);
-		line-height: var(--wpds-typography-line-height-xs);
-		min-height: var(--wpds-dimension-size-sm);
-		padding: 0 var(--wpds-dimension-padding-sm);
-
-		// Default / neutral; also applies to `&--default`, which inherits the base styling.
-		background: var(--wpds-color-background-surface-neutral-weak);
-		color: var(--wpds-color-foreground-content-neutral);
-
-		&--success {
-			background: var(--wpds-color-background-surface-success);
-			color: var(--wpds-color-foreground-content-success);
-		}
-
-		&--info {
-			background: var(--wpds-color-background-surface-info);
-			color: var(--wpds-color-foreground-content-info);
-		}
-
-		&--warning {
-			background: var(--wpds-color-background-surface-warning);
-			color: var(--wpds-color-foreground-content-warning);
-		}
-
-		&--error {
-			background: var(--wpds-color-background-surface-error);
-			color: var(--wpds-color-foreground-content-error);
-		}
-	}
-
 	.wc-settings-ui-shell__navigation {
 		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
 		margin: 0;
@@ -241,18 +205,9 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		margin: 0 0 24px;
 	}
 
-	// Surface styling (background, border, radius, padding) comes from the
-	// @wordpress/ui Card components.
 	.wc-settings-ui__section-card {
 		box-sizing: border-box;
 		width: 100%;
-	}
-
-	.wc-settings-ui__section-header {
-		align-items: flex-start;
-		display: flex;
-		gap: 24px;
-		justify-content: space-between;
 	}
 
 	.wc-settings-ui__section-heading {
@@ -261,8 +216,6 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 	.wc-settings-ui__section-description {
 		color: var(--wpds-color-foreground-content-neutral-weak);
-		font-size: 13px;
-		line-height: 20px;
 		margin: 8px 0 0;
 
 		p {
@@ -275,16 +228,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui__section-actions {
-		display: flex;
 		flex: 0 0 auto;
-		flex-wrap: wrap;
-		gap: 8px;
-	}
-
-	.wc-settings-ui__section-fields {
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
 	}
 
 	.wc-settings-ui__field {

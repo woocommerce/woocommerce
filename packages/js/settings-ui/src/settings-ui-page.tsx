@@ -14,8 +14,8 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Card } from '@wordpress/ui';
-import type { ErrorInfo, ReactNode } from 'react';
+import { Badge, Card, Stack, Text } from '@wordpress/ui';
+import type { ComponentProps, ErrorInfo, ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -36,6 +36,7 @@ import type {
 	SettingsUIGroup,
 	SettingsUISaveStrategy,
 	SettingsUISchema,
+	SettingsUIShellBadgeIntent,
 	SettingsFieldContext,
 	SettingsValue,
 	SettingsValues,
@@ -104,13 +105,22 @@ const getActionVariant = ( variant?: string ) =>
 		? variant
 		: 'secondary' ) as 'primary' | 'secondary' | 'tertiary' | 'link';
 
-// TS unions erase at runtime, so guard the className interpolation against unexpected
-// strings from PHP-supplied schemas.
-const getBadgeIntent = ( intent?: string ) =>
-	[ 'default', 'info', 'success', 'warning', 'error' ].includes(
-		intent || ''
-	)
-		? intent
+const BADGE_INTENTS: Record<
+	SettingsUIShellBadgeIntent,
+	ComponentProps< typeof Badge >[ 'intent' ]
+> = {
+	default: 'draft',
+	info: 'informational',
+	success: 'stable',
+	warning: 'medium',
+	error: 'high',
+};
+
+// TS unions erase at runtime, so guard against unexpected strings from
+// PHP-supplied schemas.
+const getBadgeIntent = ( intent?: string ): SettingsUIShellBadgeIntent =>
+	intent && intent in BADGE_INTENTS
+		? ( intent as SettingsUIShellBadgeIntent )
 		: 'default';
 
 const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>
@@ -232,7 +242,15 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 	return (
 		<Card.Header
 			className="wc-settings-ui__section-header"
-			render={ <header /> }
+			render={
+				<Stack
+					render={ <header /> }
+					direction="row"
+					gap="xl"
+					align="flex-start"
+					justify="space-between"
+				/>
+			}
 		>
 			<div className="wc-settings-ui__section-heading">
 				{ group.title ? (
@@ -244,15 +262,24 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 					</Card.Title>
 				) : null }
 				{ group.description ? (
-					<div className="wc-settings-ui__section-description">
+					<Text
+						className="wc-settings-ui__section-description"
+						variant="body-md"
+						render={ <div /> }
+					>
 						<RawHTML>
 							{ sanitizeSettingsHtml( group.description ) }
 						</RawHTML>
-					</div>
+					</Text>
 				) : null }
 			</div>
 			{ group.actions && group.actions.length > 0 ? (
-				<div className="wc-settings-ui__section-actions">
+				<Stack
+					className="wc-settings-ui__section-actions"
+					direction="row"
+					gap="sm"
+					wrap="wrap"
+				>
 					{ group.actions.map( ( action ) => (
 						<Button
 							key={ action.id }
@@ -264,7 +291,7 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 							{ action.label }
 						</Button>
 					) ) }
-				</div>
+				</Stack>
 			) : null }
 		</Card.Header>
 	);
@@ -428,16 +455,18 @@ const ShellHeader = ( {
 		) : undefined;
 
 	const badges = shell.badges?.length
-		? shell.badges.map( ( badge, index ) => (
-				<span
-					className={ `wc-settings-ui-shell__badge wc-settings-ui-shell__badge--${ getBadgeIntent(
-						badge.intent
-					) }` }
-					key={ `${ badge.label }-${ index }` }
-				>
-					{ badge.label }
-				</span>
-		  ) )
+		? shell.badges.map( ( badge, index ) => {
+				const intent = getBadgeIntent( badge.intent );
+				return (
+					<Badge
+						className={ `wc-settings-ui-shell__badge wc-settings-ui-shell__badge--${ intent }` }
+						intent={ BADGE_INTENTS[ intent ] }
+						key={ `${ badge.label }-${ index }` }
+					>
+						{ badge.label }
+					</Badge>
+				);
+		  } )
 		: undefined;
 
 	const saveButtonLabel = __( 'Save', 'woocommerce' );
@@ -863,7 +892,10 @@ export const SettingsUIPage = ( {
 					>
 						<Card.Root className="wc-settings-ui__section-card">
 							<GroupHeader group={ group } />
-							<Card.Content className="wc-settings-ui__section-fields">
+							<Card.Content
+								className="wc-settings-ui__section-fields"
+								render={ <Stack direction="column" gap="lg" /> }
+							>
 								{ group.fields.map( ( field ) => {
 									const FieldComponent =
 										resolveFieldComponent(
