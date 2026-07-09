@@ -229,10 +229,7 @@ const Edit = ( {
 			<Block
 				{ ...{ ...attributes, ...context } }
 				showSaleBadge={ showSaleBadge }
-				isDescendentOfQueryLoop={ isDescendentOfQueryLoop }
-				isDescendentOfSingleProductBlock={
-					isDescendentOfSingleProductBlock
-				}
+
 				isAdmin={ true }
 				product={ product }
 				isResolving={ isResolving }

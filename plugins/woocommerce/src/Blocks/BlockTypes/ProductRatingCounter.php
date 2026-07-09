@@ -30,11 +30,8 @@ class ProductRatingCounter extends AbstractBlock {
 	private function parse_attributes( $attributes ) {
 		// These should match what's set in JS `registerBlockType`.
 		$defaults = array(
-			'productId'                           => 0,
-			'isDescendentOfQueryLoop'             => false,
-			'textAlign'                           => '',
-			'isDescendentOfSingleProductBlock'    => false,
-			'isDescendentOfSingleProductTemplate' => false,
+			'productId' => 0,
+			'textAlign' => '',
 		);
 
 		return wp_parse_args( $attributes, $defaults );
@@ -88,8 +85,8 @@ class ProductRatingCounter extends AbstractBlock {
 			$product_reviews_count                    = $product->get_review_count();
 			$product_rating                           = $product->get_average_rating();
 			$parsed_attributes                        = $this->parse_attributes( $attributes );
-			$is_descendent_of_single_product_block    = $parsed_attributes['isDescendentOfSingleProductBlock'];
-			$is_descendent_of_single_product_template = $parsed_attributes['isDescendentOfSingleProductTemplate'];
+			$is_descendent_of_single_product_block    = get_the_ID() !== $post_id;
+			$is_descendent_of_single_product_template = is_singular( 'product' ) && get_the_ID() === $post_id;
 
 			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );

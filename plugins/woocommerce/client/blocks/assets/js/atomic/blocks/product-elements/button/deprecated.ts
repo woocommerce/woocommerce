@@ -1,10 +1,33 @@
 /**
  * Internal dependencies
  */
+import { useBlockProps } from '@wordpress/block-editor';
+import clsx from 'clsx';
 import metadata from './block.json';
-import save from './save';
 
 const { attributes: blockAttributes } = metadata;
+
+const save = ( { attributes, innerBlocks }: any ) => {
+	if (
+		attributes.isDescendentOfQueryLoop ||
+		attributes.isDescendentOfSingleProductBlock ||
+		! innerBlocks ||
+		innerBlocks?.length === 0
+	) {
+		return null;
+	}
+
+	return (
+		<div
+			{ ...useBlockProps.save( {
+				className: clsx( 'is-loading', attributes.className, {
+					[ `has-custom-width wp-block-button__width-${ attributes.width }` ]:
+						attributes.width,
+				} ),
+			} ) }
+		/>
+	);
+};
 
 const v1 = {
 	attributes: {

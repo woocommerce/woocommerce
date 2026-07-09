@@ -16,13 +16,12 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
+import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
-import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
-import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
 import type { EditProps, ControlProps } from './types';
 import './editor.scss';
 
@@ -159,8 +158,6 @@ const Edit = ( {
 	} = attributes;
 
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
-	const { isDescendentOfSingleProductBlock } =
-		useIsDescendentOfSingleProductBlock( { blockClientId: blockProps.id } );
 
 	let { isDescendentOfSingleProductTemplate } =
 		useIsDescendentOfSingleProductTemplate();
@@ -177,9 +174,7 @@ const Edit = ( {
 				isAdmin={ true }
 				{ ...attributes }
 				isDescendentOfQueryLoop={ isDescendentOfQueryLoop }
-				isDescendentOfSingleProductBlock={
-					isDescendentOfSingleProductBlock
-				}
+
 				isDescendentOfSingleProductTemplate={
 					isDescendentOfSingleProductTemplate
 				}
