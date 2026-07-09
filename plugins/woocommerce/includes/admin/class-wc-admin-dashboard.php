@@ -9,6 +9,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -385,9 +386,9 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 							"SELECT COUNT( product_id )
 							FROM {$wpdb->wc_product_meta_lookup} AS lookup
 							INNER JOIN {$wpdb->posts} as posts ON lookup.product_id = posts.ID
-							WHERE stock_quantity <= %d
+							WHERE lookup.stock_status = %s
 							AND posts.post_status = 'publish'",
-							$nostock
+							ProductStockStatus::OUT_OF_STOCK
 						)
 					);
 				}
