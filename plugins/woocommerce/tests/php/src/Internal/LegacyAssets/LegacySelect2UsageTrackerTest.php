@@ -3,18 +3,12 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\LegacyAssets;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\LegacyAssets\LegacySelect2UsageTracker;
 use WC_Unit_Test_Case;
 
 /**
  * Tests for the LegacySelect2UsageTracker class.
- *
- * The cart page fixture uses WOOCOMMERCE_CART, an immutable PHP constant.
- * Isolating each test prevents that constant from leaking across tests.
- *
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
- * @group run-in-separate-process
  */
 class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 
@@ -53,7 +47,6 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test fixture preserves the raw request URI for restoration.
 		$this->original_request_uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : null;
 		$_SERVER['REQUEST_URI']     = '/';
-		wc_maybe_define_constant( 'WOOCOMMERCE_CART', true );
 		$this->reset_scripts();
 		$this->register_legacy_select2_scripts();
 		$this->sut = new LegacySelect2UsageTracker();
@@ -123,7 +116,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'context'    => 'frontend',
-				'page_type'  => 'cart',
+				'page_type'  => $this->get_expected_frontend_page_type(),
 				'handles'    => 'wc-select2',
 				'dependents' => 'my-extension-footer',
 				'sources'    => $this->get_my_extension_asset_url( 'footer.js' ),
@@ -169,7 +162,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'context'    => 'frontend',
-				'page_type'  => 'cart',
+				'page_type'  => $this->get_expected_frontend_page_type(),
 				'handles'    => 'select2',
 				'dependents' => 'select2',
 				'sources'    => '',
@@ -236,7 +229,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'context'    => 'frontend',
-				'page_type'  => 'cart',
+				'page_type'  => $this->get_expected_frontend_page_type(),
 				'handles'    => 'wc-select2',
 				'dependents' => 'my-extension-footer',
 				'sources'    => $this->get_my_extension_asset_url( 'footer.js' ),
@@ -265,21 +258,22 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	 * @testdox Should record each detected usage event only once per page type per week.
 	 */
 	public function test_records_each_detected_usage_event_only_once_per_page_type_per_week(): void {
-		$original_request_uri     = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
-		$_SERVER['REQUEST_URI']   = '/shop/?filter=featured';
-		$frontend_page_type_scope = array(
-			'context'   => 'frontend',
-			'page_type' => 'cart',
-		);
-		$event                    = array(
+		$original_request_uri   = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
+		$_SERVER['REQUEST_URI'] = '/shop/?filter=featured';
+		$event                  = array(
 			'context'    => 'frontend',
-			'page_type'  => 'cart',
+			'page_type'  => $this->get_expected_frontend_page_type(),
 			'handles'    => 'wc-select2',
 			'dependents' => 'my-extension-footer',
 			'sources'    => $this->get_my_extension_asset_url( 'footer.js' ),
 		);
 
-		$this->delete_request_scope_transient( $frontend_page_type_scope );
+		$this->delete_request_scope_transient(
+			array(
+				'context'   => 'frontend',
+				'page_type' => $this->get_expected_frontend_page_type(),
+			)
+		);
 
 		$sut = new class() extends LegacySelect2UsageTracker {
 			/**
@@ -353,7 +347,12 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		);
 		$this->assertSame( 1, $sut->usage_event_calls, 'The cached frontend page type should skip repeated script registry scans.' );
 
-		$this->delete_request_scope_transient( $frontend_page_type_scope );
+		$this->delete_request_scope_transient(
+			array(
+				'context'   => 'frontend',
+				'page_type' => $this->get_expected_frontend_page_type(),
+			)
+		);
 
 		if ( null === $original_request_uri ) {
 			unset( $_SERVER['REQUEST_URI'] );
@@ -418,6 +417,19 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	 */
 	private function get_my_extension_asset_url( string $asset ): string {
 		return plugins_url( 'my-extension/assets/' . $asset );
+	}
+
+	/**
+	 * Get the frontend page type expected for the current PHPUnit process.
+	 *
+	 * Some tests render cart flows that define WOOCOMMERCE_CART. Since PHP
+	 * constants cannot be undefined, this test must accept the inherited cart
+	 * page type when it runs later in the same process.
+	 *
+	 * @return string
+	 */
+	private function get_expected_frontend_page_type(): string {
+		return Constants::is_defined( 'WOOCOMMERCE_CART' ) ? 'cart' : 'other';
 	}
 
 	/**
