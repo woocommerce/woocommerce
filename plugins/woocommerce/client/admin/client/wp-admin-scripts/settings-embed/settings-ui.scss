@@ -91,36 +91,66 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		height: auto;
 		line-height: var(--wpds-typography-line-height-sm);
 		margin: 0 -48px;
-	}
 
-	.wc-settings-ui-shell > :first-child {
-		padding-left: 48px;
-		padding-right: 48px;
-		position: static;
-	}
-
-	.wc-settings-ui-shell {
-		&:has(.wc-settings-ui-shell__navigation) > :first-child {
+		&:has(.wc-settings-ui-shell__navigation) .wc-settings-ui-shell__header {
 			border-bottom: 0;
 		}
 	}
 
-	.wc-settings-ui-shell__breadcrumbs {
-		color: var(--wpds-color-foreground-content-neutral-weak);
-		font-size: var(--wpds-typography-font-size-sm);
-		line-height: var(--wpds-typography-line-height-xs);
-		margin: 0 0 8px;
+	.wc-settings-ui-shell__header {
+		background: var(--wpds-color-background-surface-neutral-strong);
+		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
+		padding: 24px 48px;
 	}
 
+	.wc-settings-ui-shell__header-row {
+		align-items: center;
+		display: flex;
+	}
+
+	.wc-settings-ui-shell__title {
+		font-size: 16px;
+		font-weight: var(--wpds-typography-font-weight-medium);
+		line-height: var(--wpds-typography-line-height-md);
+		margin: 0;
+	}
+
+	.wc-settings-ui-shell__header-row > .wc-settings-ui-shell__badge {
+		margin-left: 8px;
+	}
+
+	.wc-settings-ui-shell__header-actions {
+		display: flex;
+		flex: 0 0 auto;
+		gap: 8px;
+		margin-left: auto;
+	}
+
+	.wc-settings-ui-shell__subtitle {
+		color: var(--wpds-color-foreground-content-neutral-weak);
+		margin: 8px 0 0;
+	}
+
+	// Carries #mainform so the margins beat extension styles targeting bare
+	// `nav` elements inside the settings form (WooPayments ships one).
+	#mainform .wc-settings-ui-shell__breadcrumbs {
+		font-size: 16px;
+		line-height: var(--wpds-typography-line-height-md);
+		margin: 0;
+	}
+
+	// The page title always follows the breadcrumbs, so every crumb gets a
+	// trailing separator.
 	.wc-settings-ui-shell__breadcrumb {
-		&:not(:last-child)::after {
+		&::after {
+			color: var(--wpds-color-foreground-content-neutral-weak);
 			content: "/";
 			margin: 0 8px;
 		}
 
 		a {
-			color: var(--wpds-color-foreground-interactive-neutral-weak);
-			text-decoration: none;
+			color: var(--wpds-color-foreground-content-neutral);
+			text-decoration: underline;
 
 			&:focus,
 			&:hover {
@@ -329,7 +359,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			margin-right: -24px;
 		}
 
-		.wc-settings-ui-shell > :first-child {
+		.wc-settings-ui-shell__header {
 			padding-left: 24px;
 			padding-right: 24px;
 		}

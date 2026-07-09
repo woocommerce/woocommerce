@@ -6,35 +6,18 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { ReactNode } from 'react';
 
-// Mirror the real admin-ui Page, which only renders the header when it has content.
+// Mirror the real admin-ui NavigableRegion, which wraps the shell in a labeled region.
 jest.mock( '@wordpress/admin-ui', () => ( {
-	Page: ( {
-		title,
-		subTitle,
-		breadcrumbs,
-		badges,
-		actions,
+	NavigableRegion: ( {
 		children,
 		className,
+		ariaLabel,
 	}: {
-		title?: ReactNode;
-		subTitle?: ReactNode;
-		breadcrumbs?: ReactNode;
-		badges?: ReactNode;
-		actions?: ReactNode;
 		children: ReactNode;
 		className?: string;
+		ariaLabel?: string;
 	} ) => (
-		<div className={ className }>
-			{ ( title || breadcrumbs || badges || actions ) && (
-				<header className="admin-ui-page__header">
-					{ title }
-					{ breadcrumbs }
-					{ badges }
-					{ subTitle }
-					{ actions }
-				</header>
-			) }
+		<div className={ className } role="region" aria-label={ ariaLabel }>
 			{ children }
 		</div>
 	),
@@ -101,9 +84,14 @@ describe( 'settings UI shell header visibility', () => {
 		);
 
 		expect(
-			container.querySelector( '.admin-ui-page__header' )
+			container.querySelector( '.wc-settings-ui-shell__header' )
 		).toBeNull();
 		expect( container.textContent ).not.toContain( 'Test page' );
+		expect(
+			container
+				.querySelector( '.wc-settings-ui-shell' )
+				?.getAttribute( 'aria-label' )
+		).toBe( 'Test page' );
 
 		const footerSaveButton = container.querySelector(
 			'.wc-settings-ui .wc-settings-ui__footer-actions .woocommerce-save-button'
@@ -125,7 +113,9 @@ describe( 'settings UI shell header visibility', () => {
 			/>
 		);
 
-		const header = container.querySelector( '.admin-ui-page__header' );
+		const header = container.querySelector(
+			'.wc-settings-ui-shell__header'
+		);
 		expect( header ).not.toBeNull();
 		expect( header?.textContent ).toContain( 'Test page' );
 		expect(

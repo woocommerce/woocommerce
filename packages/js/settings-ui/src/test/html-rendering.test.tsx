@@ -7,20 +7,13 @@ import { createRoot } from 'react-dom/client';
 import type { ReactNode } from 'react';
 
 jest.mock( '@wordpress/admin-ui', () => ( {
-	Page: ( {
-		actions,
+	NavigableRegion: ( {
 		children,
 		className,
 	}: {
-		actions?: ReactNode;
 		children: ReactNode;
 		className?: string;
-	} ) => (
-		<div className={ className }>
-			{ actions }
-			{ children }
-		</div>
-	),
+	} ) => <div className={ className }>{ children }</div>,
 } ) );
 
 /**

@@ -22,38 +22,18 @@ jest.mock( '@wordpress/ui', () => ( {
 	),
 } ) );
 
-// Surface the header props the real admin-ui Page would render so the shell
-// header wiring (subtitle, badges) can be asserted.
+// Mirror the real admin-ui NavigableRegion, which wraps the shell in a labeled region.
 jest.mock( '@wordpress/admin-ui', () => ( {
-	Page: ( {
-		title,
-		subTitle,
-		breadcrumbs,
-		badges,
-		actions,
+	NavigableRegion: ( {
 		children,
 		className,
+		ariaLabel,
 	}: {
-		title?: ReactNode;
-		subTitle?: ReactNode;
-		breadcrumbs?: ReactNode;
-		badges?: ReactNode;
-		actions?: ReactNode;
 		children: ReactNode;
 		className?: string;
+		ariaLabel?: string;
 	} ) => (
-		<div className={ className }>
-			<header>
-				{ title }
-				{ breadcrumbs }
-				{ badges }
-				{ subTitle && (
-					<p className="admin-ui-page__header-subtitle">
-						{ subTitle }
-					</p>
-				) }
-				{ actions }
-			</header>
+		<div className={ className } role="region" aria-label={ ariaLabel }>
 			{ children }
 		</div>
 	),
@@ -123,11 +103,10 @@ describe( 'settings UI shell header fields', () => {
 			/>
 		);
 
-		// Anchor on the forwarded text, not the mock's structural class —
-		// this would catch a `subtitle` → `subTitle` mapping bug regardless of how the mock renders.
-		expect( container.textContent ).toContain(
-			'Manage your test settings.'
+		const subtitle = container.querySelector(
+			'.wc-settings-ui-shell__subtitle'
 		);
+		expect( subtitle?.textContent ).toBe( 'Manage your test settings.' );
 
 		act( () => root.unmount() );
 		container.remove();
@@ -200,7 +179,7 @@ describe( 'settings UI shell header fields', () => {
 		);
 
 		expect(
-			container.querySelector( '.admin-ui-page__header-subtitle' )
+			container.querySelector( '.wc-settings-ui-shell__subtitle' )
 		).toBeNull();
 		expect(
 			container.querySelector( '[data-testid="shell-badge"]' )
