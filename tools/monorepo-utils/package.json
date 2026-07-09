@@ -18,7 +18,7 @@
 	],
 	"scripts": {
 		"build": "webpack --config webpack.config.js && replace '\r\n' '\n' fonts/Standard.flf",
-		"lint": "eslint . --ext .ts",
+		"lint": "eslint .",
 		"start": "webpack --config webpack.config.js --watch",
 		"test": "pnpm test:js",
 		"test:js": "jest"

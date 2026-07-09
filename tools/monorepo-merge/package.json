@@ -18,7 +18,7 @@
 	],
 	"scripts": {
 		"build": "shx rm -rf dist && tsc --project tsconfig.json",
-		"lint": "eslint . --ext .ts",
+		"lint": "eslint .",
 		"prepack": "pnpm build && oclif manifest",
 		"postpack": "shx rm -f oclif.manifest.json",
 		"posttest": "pnpm lint"

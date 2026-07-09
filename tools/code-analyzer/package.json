@@ -10,7 +10,7 @@
 	"types": "dist/index.d.ts",
 	"scripts": {
 		"analyzer": "node -r ts-node/register ./src/commands/analyzer/index.ts",
-		"lint": "eslint . --ext .ts",
+		"lint": "eslint .",
 		"test": "pnpm test:js",
 		"test:js": "jest"
 	},
