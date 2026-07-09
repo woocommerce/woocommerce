@@ -124,26 +124,43 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function test_get_last_customer_order_using_cot() {
 		global $wpdb;
 
-		$customer_1       = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
-		$customer_2       = WC_Helper_Customer::create_customer( 'test2', 'pass2', 'test2@example.com' );
+		$customer_1 = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
+		$customer_2 = WC_Helper_Customer::create_customer( 'test2', 'pass2', 'test2@example.com' );
+
+		// Customer 1 places several valid orders; the most recent (highest ID) is the expected result.
+		// The unit-test suite enables HPOS usage by default, so these are written straight into the
+		// orders table at creation, which is why the raw rows below must use non-colliding IDs.
+		WC_Helper_Order::create_order( $customer_1->get_id() );
 		$last_valid_order = WC_Helper_Order::create_order( $customer_1->get_id() );
 
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+
+		// Insert raw orders with IDs above the created orders so they cannot collide on the PRIMARY
+		// key. Customer 1's wc-invalid-status order gets the highest ID of all their orders, so
+		// get_last_order() must skip it and still return $last_valid_order. Customer 2's orders also
+		// have higher IDs, so they must be excluded by customer scoping rather than by ID ordering.
+		$customer_1_id       = $customer_1->get_id();
+		$customer_2_id       = $customer_2->get_id();
+		$last_valid_order_id = $last_valid_order->get_id();
 
 		$sql =
 			'INSERT INTO ' . OrdersTableDataStore::get_orders_table_name() . "
 				( id, customer_id, status, type )
 			VALUES
-				( 1, %d, '" . OrderInternalStatus::COMPLETED . "', 'shop_order' ),
+				( %d, %d, 'wc-invalid-status', 'shop_order' ),
 				( %d, %d, '" . OrderInternalStatus::COMPLETED . "', 'shop_order' ),
-				( 3, %d, 'wc-invalid-status', 'shop_order' ),
-				( 4, %d, '" . OrderInternalStatus::COMPLETED . "', 'shop_order' ),
-				( 5, %d, '" . OrderInternalStatus::COMPLETED . "', 'shop_order' )";
+				( %d, %d, '" . OrderInternalStatus::COMPLETED . "', 'shop_order' )";
 
-		$customer_1_id = $customer_1->get_id();
-		$customer_2_id = $customer_2->get_id();
 		//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		$query = $wpdb->prepare( $sql, $customer_1_id, $last_valid_order->get_id(), $customer_1_id, $customer_1_id, $customer_2_id, $customer_2_id );
+		$query = $wpdb->prepare(
+			$sql,
+			$last_valid_order_id + 1,
+			$customer_1_id,
+			$last_valid_order_id + 2,
+			$customer_2_id,
+			$last_valid_order_id + 3,
+			$customer_2_id
+		);
 		$wpdb->query( $query );
 		//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
