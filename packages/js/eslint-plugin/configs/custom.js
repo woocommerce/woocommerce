@@ -8,10 +8,16 @@ const wordpress = require( '@wordpress/eslint-plugin' );
  */
 const reactTestingLibraryConfig = require( './react-testing-library' );
 
+/*
+ * The eslintrc configs these globs came from only matched `.js`, because a bare
+ * `eslint src` under ESLint 8 never looked at anything else. Flat config lints
+ * TypeScript too, so match it here or `jest` goes unregistered in `.ts` tests and
+ * their eslint-disable directives resolve to unknown rules.
+ */
 const TEST_FILES = [
-	'**/@(test|__tests__)/**/*.js',
-	'**/?(*.)test.js',
-	'**/tests/**/*.js',
+	'**/@(test|__tests__)/**/*.[jt]s?(x)',
+	'**/?(*.)test.[jt]s?(x)',
+	'**/tests/**/*.[jt]s?(x)',
 ];
 
 /**
