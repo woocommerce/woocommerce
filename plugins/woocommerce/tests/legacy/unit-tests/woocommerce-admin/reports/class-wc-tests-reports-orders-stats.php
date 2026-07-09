@@ -6371,11 +6371,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		$this->assertEquals( 1, $actual_data->totals->total_customers );
 
-		// Wait a bit so that orders are not created at the same second.
-		sleep( 1 );
-
 		$order_2 = WC_Helper_Order::create_order( 0, $product );
 		$order_2->set_date_created( $order_1_time );
+		$order_2->set_date_modified( $order_1_time + 1 );
 		$order_2->set_date_paid( $order_1_time );
 		$order_2->set_status( OrderStatus::PROCESSING );
 		$order_2->set_total( 100 );
@@ -6480,11 +6478,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		$this->assertEquals( 1, $actual_data->totals->total_customers );
 
-		// Wait a bit so that orders are not created at the same second.
-		sleep( 1 );
-
 		$order_2 = WC_Helper_Order::create_order( $customer_1->get_id(), $product );
 		$order_2->set_date_created( $order_1_time );
+		$order_2->set_date_modified( $order_1_time + 1 );
 		$order_2->set_date_paid( $order_1_time );
 		$order_2->set_status( OrderStatus::PROCESSING );
 		$order_2->set_total( 100 );
