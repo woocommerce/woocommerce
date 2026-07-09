@@ -236,7 +236,7 @@ export const updateReleaseBranchChangelogs = async (
 			);
 			deletionCommitHash = (
 				await git.raw( [ 'rev-parse', 'HEAD' ] )
-			 ).trim();
+			).trim();
 			Logger.notice( `git deletion hash: ${ deletionCommitHash }` );
 		} else {
 			Logger.notice(

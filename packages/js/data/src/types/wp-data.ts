@@ -49,7 +49,7 @@ type GeneratorReturnType< T extends ( ...args: any[] ) => Generator > =
  * @template A Selector map, usually from `import * as actions from './my-store/actions';`
  */
 export type DispatchFromMap<
-	A extends Record< string, ( ...args: any[] ) => any >
+	A extends Record< string, ( ...args: any[] ) => any >,
 > = {
 	[ actionCreator in keyof A ]: (
 		...args: Parameters< A[ actionCreator ] >
