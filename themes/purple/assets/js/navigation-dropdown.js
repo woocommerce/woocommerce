@@ -37,12 +37,10 @@
 					return;
 				}
 
-				// Land the panel top on the header bottom. Pull up 1px so the
-				// hairline reads flush on retina without a hero seam.
+				// Land the panel top exactly on the header bottom.
 				var offset =
 					Math.round( header.getBoundingClientRect().bottom ) -
-					item.getBoundingClientRect().bottom -
-					1;
+					item.getBoundingClientRect().bottom;
 
 				header.style.setProperty(
 					'--purple-nav-dropdown-offset',

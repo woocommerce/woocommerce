@@ -517,14 +517,14 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 				left: 0;
 				right: 0;
 				top: 100%;
-				height: var(--purple-nav-dropdown-offset, calc(1.875rem + 0.6875rem));
+				height: var(--purple-nav-dropdown-offset, 31.5px);
 				background: transparent;
 				pointer-events: auto;
 				z-index: 2;
 			}
 
 			& > .wp-block-navigation__submenu-container {
-				top: calc(100% + var(--purple-nav-dropdown-offset, calc(1.875rem + 0.6875rem)));
+				top: calc(100% + var(--purple-nav-dropdown-offset, 31.5px));
 				left: -1.25rem;
 				z-index: 3;
 
@@ -534,7 +534,7 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 					left: 0;
 					right: 0;
 					bottom: 100%;
-					height: var(--purple-nav-dropdown-offset, calc(1.875rem + 0.6875rem));
+					height: var(--purple-nav-dropdown-offset, 31.5px);
 					background: transparent;
 					pointer-events: auto;
 				}
