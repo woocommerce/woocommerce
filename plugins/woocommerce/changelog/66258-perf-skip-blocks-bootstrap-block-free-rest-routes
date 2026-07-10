@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Skip block, pattern and template registration on REST requests to core endpoints that never render block content, with a woocommerce_blocks_block_free_rest_routes filter to customize the route list.

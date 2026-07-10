@@ -109,7 +109,7 @@ class Bootstrap {
 			function () {
 				$is_store_api_request = wc()->is_store_api_request();
 
-				if ( ! $is_store_api_request && ( wp_is_block_theme() || current_theme_supports( 'block-template-parts' ) ) ) {
+				if ( ! $is_store_api_request && ! $this->is_block_free_rest_request() && ( wp_is_block_theme() || current_theme_supports( 'block-template-parts' ) ) ) {
 					$this->container->get( BlockTemplatesRegistry::class )->init();
 					$this->container->get( BlockTemplatesController::class )->init();
 				}
@@ -144,7 +144,7 @@ class Bootstrap {
 		}
 
 		// Load assets unless this is a request specifically for the store API.
-		if ( ! $is_store_api_request ) {
+		if ( ! $is_store_api_request && ! $this->is_block_free_rest_request() ) {
 			// Template related functionality. These won't be loaded for store API requests, but may be loaded for
 			// regular rest requests to maintain compatibility with the store editor.
 			$this->container->get( BlockPatterns::class );
@@ -160,6 +160,68 @@ class Bootstrap {
 				$this->container->get( TemplateOptions::class )->init();
 			}
 		}
+	}
+
+	/**
+	 * Whether the current request is a REST request to a core route that can never
+	 * render block content, so block types, patterns and templates are not needed.
+	 *
+	 * Kept deliberately conservative: only structural wp/v2 endpoints that return
+	 * schema-like data (no rendered post content) are listed. Anything else —
+	 * including posts, pages, templates, patterns and unknown/third-party routes —
+	 * keeps loading the full blocks infrastructure.
+	 *
+	 * @return bool
+	 */
+	private function is_block_free_rest_request() {
+		if ( ! wc()->is_rest_api_request() ) {
+			return false;
+		}
+
+		$route = '';
+		if ( ! empty( $_GET['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$route = sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		} elseif ( ! empty( $_SERVER['REQUEST_URI'] ) && function_exists( 'rest_get_url_prefix' ) ) {
+			$path   = (string) wp_parse_url( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH );
+			$prefix = '/' . rest_get_url_prefix();
+			$pos    = strpos( $path, $prefix );
+			if ( false !== $pos ) {
+				$route = substr( $path, $pos + strlen( $prefix ) );
+			}
+		}
+
+		$route = '/' . ltrim( $route, '/' );
+
+		/**
+		 * Filters the REST route prefixes for which the blocks infrastructure (block types,
+		 * patterns, templates) is not loaded because those routes never render block content.
+		 *
+		 * Note that wp/v2/settings is deliberately NOT in this list: block classes register
+		 * settings with show_in_rest (for example woocommerce_default_catalog_orderby in
+		 * ProductCollection), so that endpoint needs the blocks infrastructure loaded.
+		 *
+		 * Return an empty array to always load the blocks infrastructure on REST requests.
+		 *
+		 * @param string[] $block_free_route_prefixes REST route prefixes, each starting with '/'.
+		 * @since 11.0.0
+		 */
+		$block_free_route_prefixes = apply_filters(
+			'woocommerce_blocks_block_free_rest_routes',
+			array(
+				'/wp/v2/types',
+				'/wp/v2/taxonomies',
+				'/wp/v2/users',
+				'/wp/v2/statuses',
+			)
+		);
+
+		foreach ( $block_free_route_prefixes as $block_free_route_prefix ) {
+			if ( $route === $block_free_route_prefix || str_starts_with( $route, $block_free_route_prefix . '/' ) || str_starts_with( $route, $block_free_route_prefix . '?' ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
