@@ -33,6 +33,7 @@ jest.mock( '../components/task-headers', () => ( {
 		required: () => <div>required_header</div>,
 		completed: () => <div>completed_header</div>,
 	},
+	DefaultTaskHeader: () => <div>default_header</div>,
 } ) );
 jest.mock( '@woocommerce/data', () => ( {
 	...jest.requireActual( '@woocommerce/data' ),
