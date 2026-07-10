@@ -8,15 +8,15 @@ use Automattic\WooCommerce\Admin\Features\Fulfillments\OrderFulfillmentsRestCont
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Controller as FulfillmentsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Schema\FulfillmentSchema;
 use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
-use WC_REST_Unit_Test_Case;
 use WC_Helper_Order;
 use WC_Order;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
 
 /**
  * Fulfillments Controller test class
  */
-class ControllerTest extends WC_REST_Unit_Test_Case {
+class ControllerTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Controller instance
@@ -92,7 +92,10 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->controller = new FulfillmentsController();
 		$this->controller->init( new FulfillmentSchema(), new OrderFulfillmentsRestController() );
-		$this->controller->register_routes();
+		$this->create_rest_server_with_routes(
+			array( array( $this->controller, 'register_routes' ) ),
+			true
+		);
 
 		$this->admin_user_id = $this->factory->user->create(
 			array(
@@ -128,6 +131,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillments;" );
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillment_meta;" );
 
+		$this->clear_rest_server();
 		parent::tearDown();
 	}
 
