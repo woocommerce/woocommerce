@@ -1,0 +1,61 @@
+name: Class Removal Check
+
+# Fails when a type declared on the base branch is missing from the PR result, unless the
+# author acknowledges the removal in the PR description. Removing shipped classes causes
+# fatal errors during in-place updates (stale code/classmaps can still reference them).
+on:
+  pull_request:
+    paths:
+      - 'plugins/woocommerce/src/**'
+      - 'plugins/woocommerce/includes/**'
+      - 'plugins/woocommerce/bin/check-removed-classes.php'
+      - '.github/workflows/class-removal-check.yml'
+
+concurrency:
+  group: class-removal-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  check-removed-classes:
+    name: Detect removed PHP classes vs base branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract base branch tree
+        run: |
+          git fetch --depth=1 origin "${{ github.event.pull_request.base.ref }}"
+          mkdir -p /tmp/wc-base
+          git archive FETCH_HEAD plugins/woocommerce/src plugins/woocommerce/includes | tar -x -C /tmp/wc-base
+
+      - name: Scan base and PR class declarations
+        run: |
+          php plugins/woocommerce/bin/check-removed-classes.php scan /tmp/wc-base/plugins/woocommerce /tmp/base-classes.json
+          php plugins/woocommerce/bin/check-removed-classes.php scan plugins/woocommerce /tmp/pr-classes.json
+
+      - name: Compare class declarations
+        id: compare
+        continue-on-error: true
+        run: php plugins/woocommerce/bin/check-removed-classes.php compare /tmp/base-classes.json /tmp/pr-classes.json
+
+      - name: Check for author acknowledgment
+        if: steps.compare.outcome == 'failure'
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if printf '%s' "$PR_BODY" | grep -qiE '\[x\][[:space:]]+This Pull Request intentionally removes PHP classes'; then
+            echo "Class removals acknowledged by the author in the PR description."
+            exit 0
+          fi
+          echo "::error::This PR removes PHP classes that exist on the base branch (see the compare step above)."
+          echo ""
+          echo "Removing a shipped class causes fatal errors during in-place updates. Deprecate it and"
+          echo "keep it as a stub for at least one release instead. If the removal is intentional and"
+          echo "update-safe (e.g. the class was never shipped, or its deprecation window has passed),"
+          echo "acknowledge it by checking the box in the PR description, with an explanation:"
+          echo ""
+          echo "- [x] This Pull Request intentionally removes PHP classes. (Comment required in the description)"
+          exit 1

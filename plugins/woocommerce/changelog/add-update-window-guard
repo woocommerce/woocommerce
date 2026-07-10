@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add an UpdateDetection guard that suppresses deferrable late-request work (settings lazy data, wc-admin REST controller registration, shutdown cleanup) while WooCommerce plugin files are being updated in place, preventing update-time class-not-found fatal errors.

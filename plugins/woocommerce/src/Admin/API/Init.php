@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Utilities\UpdateDetection;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 /**
@@ -60,6 +61,13 @@ class Init {
 	 * @return void
 	 */
 	public function rest_api_init() {
+		$update_detection = $this->get_update_detection();
+		if ( $update_detection && $update_detection->is_update_in_progress() ) {
+			// Registration can fatal uncatchably on autoload mid-update; the next request registers normally.
+			$update_detection->log_suppressed_work( 'wc_admin_rest_controllers' );
+			return;
+		}
+
 		if ( wc_rest_should_load_namespace( 'wc-admin' ) ) {
 			$this->rest_api_init_wc_admin();
 		}
@@ -122,13 +130,7 @@ class Init {
 			}
 		}
 
-		$controllers = array_values( array_unique( $controllers ) );
-		foreach ( $controllers as $controller ) {
-			if ( is_string( $controller ) ) {
-				$this->$controller = new $controller();
-				$this->$controller->register_routes();
-			}
-		}
+		$this->register_controllers( $controllers );
 	}
 
 	/**
@@ -213,12 +215,43 @@ class Init {
 			}
 		}
 
+		$this->register_controllers( $controllers );
+	}
+
+	/**
+	 * Instantiate the given controller class names and register their routes.
+	 * Controllers whose classes cannot be loaded are skipped and logged instead of fataling.
+	 *
+	 * @param array $controllers List of fully qualified controller class names.
+	 */
+	private function register_controllers( array $controllers ): void {
 		$controllers = array_values( array_unique( $controllers ) );
 		foreach ( $controllers as $controller ) {
-			if ( is_string( $controller ) ) {
-				$this->$controller = new $controller();
-				$this->$controller->register_routes();
+			if ( ! is_string( $controller ) ) {
+				continue;
 			}
+			if ( ! class_exists( $controller ) ) {
+				$update_detection = $this->get_update_detection();
+				if ( $update_detection ) {
+					$update_detection->log_suppressed_work( 'rest_controller:' . $controller );
+				}
+				continue;
+			}
+			$this->$controller = new $controller();
+			$this->$controller->register_routes();
+		}
+	}
+
+	/**
+	 * Get the UpdateDetection instance, or null if it cannot be resolved (the guard must never break REST registration).
+	 *
+	 * @return UpdateDetection|null The UpdateDetection instance or null.
+	 */
+	private function get_update_detection() {
+		try {
+			return wc_get_container()->get( UpdateDetection::class );
+		} catch ( \Throwable $throwable ) {
+			return null;
 		}
 	}
 

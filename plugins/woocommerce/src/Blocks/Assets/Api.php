@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\Assets;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
+use Automattic\WooCommerce\Internal\Utilities\UpdateDetection;
 use Exception;
 use Automattic\Jetpack\Constants;
 /**
@@ -181,6 +182,10 @@ class Api {
 		if ( ! $this->script_data_modified ) {
 			return;
 		}
+		// Don't persist script data computed mid-update; it may mix old and new asset state.
+		if ( $this->is_woocommerce_update_in_progress() ) {
+			return;
+		}
 		set_transient(
 			$this->script_data_transient_key,
 			wp_json_encode(
@@ -192,6 +197,20 @@ class Api {
 			),
 			DAY_IN_SECONDS * 30
 		);
+	}
+
+	/**
+	 * Whether a WooCommerce update window is active for this request.
+	 * Failures resolving the guard must never break asset registration.
+	 *
+	 * @return bool True if an update is in progress.
+	 */
+	private function is_woocommerce_update_in_progress() {
+		try {
+			return wc_get_container()->get( UpdateDetection::class )->is_update_in_progress();
+		} catch ( \Throwable $throwable ) {
+			return false;
+		}
 	}
 
 	/**

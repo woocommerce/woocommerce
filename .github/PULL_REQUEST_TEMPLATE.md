@@ -21,6 +21,10 @@ Closes # .
 
 (For Bug Fixes) Bug introduced in PR # .
 
+<!-- If this PR intentionally removes PHP classes, interfaces, traits or enums that exist on the base branch, check the box below and explain in the description why the removal is safe during in-place updates. Shipped classes should normally be deprecated and kept as stubs for at least one release before removal — see the Class Removal Check workflow. -->
+
+-   [ ] This Pull Request intentionally removes PHP classes. (Comment required in the description)
+
 ### Screenshots or screen recordings:
 
 <!-- If this PR includes UI changes, please provide screenshots or a screen recording for clarity. -->
