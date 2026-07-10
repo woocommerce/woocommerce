@@ -41,6 +41,23 @@ class WC_Cart_Shipping_Rounding_Test extends WC_Unit_Test_Case {
 	private $flat_rate_id;
 
 	/**
+	 * Shipping enabled state before the test.
+	 *
+	 * @var bool
+	 */
+	private $shipping_was_enabled;
+
+	/**
+	 * Set up shipping state for the test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->shipping_was_enabled = WC()->shipping()->enabled;
+		WC()->shipping()->enabled   = true;
+	}
+
+	/**
 	 * Clean up after each test.
 	 */
 	public function tearDown(): void {
@@ -65,6 +82,7 @@ class WC_Cart_Shipping_Rounding_Test extends WC_Unit_Test_Case {
 
 		// Clear shipping caches.
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping()->enabled = $this->shipping_was_enabled;
 	}
 
 	/**
