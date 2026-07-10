@@ -327,7 +327,7 @@ The following REST endpoints are available to interact with tasks. For ease of u
 
 ### SlotFills
 
-The task UI can be supplemented by registering plugins that fill the provided task slots. Learn more about slot fills in the [SlotFill documentation](https://developer.wordpress.org/block-editor/reference-guides/slotfills/) and [here](https://developer.wordpress.org/block-editor/reference-guides/components/slot-fill/).
+The task UI can be supplemented by registering plugins that fill the provided task slots. Learn more about slot fills in the [SlotFill documentation](https://developer.wordpress.org/block-editor/reference-guides/slotfills/) and the [SlotFill component reference](https://developer.wordpress.org/block-editor/reference-guides/components/slot-fill/).
 
 ### Task content
 
