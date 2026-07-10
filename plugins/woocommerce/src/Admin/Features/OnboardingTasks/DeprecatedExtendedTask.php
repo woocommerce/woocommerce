@@ -93,7 +93,6 @@ class DeprecatedExtendedTask extends Task {
 	 */
 	public $image_alt = '';
 
-
 	/**
 	 * Constructor.
 	 *
