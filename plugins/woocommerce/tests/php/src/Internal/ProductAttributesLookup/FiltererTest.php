@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
-use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\AttributesHelper;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
@@ -16,6 +15,13 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  * Tests related to filtering for WC_Query.
  */
 class FiltererTest extends \WC_Unit_Test_Case {
+
+	/**
+	 * Product IDs owned by the current test.
+	 *
+	 * @var int[]
+	 */
+	private $product_ids = array();
 
 	/**
 	 * Counter to insert unique SKU for concurrent tests.
@@ -56,50 +62,18 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		global $wpdb;
-
 		remove_all_filters( 'woocommerce_layered_nav_count_cache_max_entries' );
 
-		parent::tearDown();
-
-		// Unregister all product attributes.
-
 		$attribute_ids_by_name = wc_get_attribute_taxonomy_ids();
-		foreach ( $attribute_ids_by_name as $attribute_name => $attribute_id ) {
+		foreach ( array_keys( $attribute_ids_by_name ) as $attribute_name ) {
 			$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
 			$taxonomy_name  = wc_attribute_taxonomy_name( $attribute_name );
 			unregister_taxonomy( $taxonomy_name );
-
-			wc_delete_attribute( $attribute_id );
 		}
 
-		// Remove all products.
-
-		$product_ids = wc_get_products( array( 'return' => 'ids' ) );
-		foreach ( $product_ids as $product_id ) {
-			$product     = wc_get_product( $product_id );
-			$is_variable = $product->is_type( ProductType::VARIABLE );
-
-			foreach ( $product->get_children() as $child_id ) {
-				$child = wc_get_product( $child_id );
-				if ( empty( $child ) ) {
-					continue;
-				}
-
-				if ( $is_variable ) {
-					$child->delete( true );
-				} else {
-					$child->set_parent_id( 0 );
-					$this->save( $child );
-				}
-			}
-
-			$product->delete( true );
-		}
-
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_product_attributes_lookup" );
-
+		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 		\WC_Query::reset_chosen_attributes();
+		parent::tearDown();
 	}
 
 	/**
@@ -246,6 +220,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$product->set_stock_status( $in_stock ? ProductStockStatus::IN_STOCK : ProductStockStatus::OUT_OF_STOCK );
 
 		$this->save( $product );
+		$this->product_ids[] = $product->get_id();
 
 		if ( empty( $attribute_terms_by_name ) ) {
 			return $product;
@@ -317,6 +292,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$this->save( $product );
 
 		$product_id = $product->get_id();
+		$this->product_ids[] = $product_id;
 
 		// * Now create the variations.
 
@@ -490,12 +466,19 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$_GET[ 'query_type_' . wc_sanitize_taxonomy_name( $name ) ] = $value;
 		}
 
-		return $wp_the_query->query(
-			array(
-				'post_type' => 'product',
-				'fields'    => 'ids',
-			)
-		);
+		$include_owned_products = fn() => $this->product_ids;
+		add_filter( 'loop_shop_post_in', $include_owned_products );
+
+		try {
+			return $wp_the_query->query(
+				array(
+					'post_type' => 'product',
+					'fields'    => 'ids',
+				)
+			);
+		} finally {
+			remove_filter( 'loop_shop_post_in', $include_owned_products );
+		}
 	}
 
 	/**
