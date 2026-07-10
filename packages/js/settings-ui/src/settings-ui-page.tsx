@@ -213,7 +213,12 @@ const UnsavedChangesModal = ( {
 					'woocommerce'
 				) }
 			</p>
-			<div className="wc-settings-ui__unsaved-changes-actions">
+			<Stack
+				className="wc-settings-ui__unsaved-changes-actions"
+				direction="row"
+				gap="sm"
+				justify="flex-end"
+			>
 				<Button variant="tertiary" onClick={ onDiscard }>
 					{ __( 'Discard', 'woocommerce' ) }
 				</Button>
@@ -228,7 +233,7 @@ const UnsavedChangesModal = ( {
 				>
 					{ __( 'Save', 'woocommerce' ) }
 				</Button>
-			</div>
+			</Stack>
 		</Modal>
 	);
 };
