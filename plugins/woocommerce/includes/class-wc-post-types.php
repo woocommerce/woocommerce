@@ -353,9 +353,9 @@ class WC_Post_Types {
 		}
 
 		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
-		// Skip this check in WP-CLI and cron contexts: themes may not be loaded (e.g. --skip-themes),
-		// which would incorrectly record theme support as "no" and corrupt rewrite rules on the frontend.
-		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! wp_doing_cron() ) {
+		// Skip this check in contexts where themes may not be loaded, which would incorrectly record
+		// theme support as "no" and corrupt rewrite rules on the frontend.
+		if ( ! wp_installing() && ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! wp_doing_cron() ) {
 			$theme_support = wc_current_theme_supports_woocommerce_or_fse() ? 'yes' : 'no';
 			if ( get_option( 'current_theme_supports_woocommerce' ) !== $theme_support && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
 				update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
@@ -686,6 +686,10 @@ class WC_Post_Types {
 	 * @since 3.3.0
 	 */
 	public static function maybe_flush_rewrite_rules() {
+		if ( wp_installing() ) {
+			return;
+		}
+
 		if ( 'yes' === get_option( 'woocommerce_queue_flush_rewrite_rules' ) ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
 			self::flush_rewrite_rules();
