@@ -117,16 +117,26 @@ class Cart extends ControllerTestCase {
 	 * Resets customer state and remove any existing data from previous tests.
 	 */
 	private function reset_customer_state() {
-		wc()->customer->set_billing_country( 'US' );
-		wc()->customer->set_shipping_country( 'US' );
-		wc()->customer->set_billing_state( '' );
-		wc()->customer->set_shipping_state( '' );
-		wc()->customer->set_billing_postcode( '' );
-		wc()->customer->set_shipping_postcode( '' );
-		wc()->customer->set_shipping_city( '' );
-		wc()->customer->set_billing_city( '' );
-		wc()->customer->set_shipping_address_1( '' );
+		wc()->customer->set_billing_first_name( '' );
+		wc()->customer->set_billing_last_name( '' );
+		wc()->customer->set_billing_company( '' );
 		wc()->customer->set_billing_address_1( '' );
+		wc()->customer->set_billing_address_2( '' );
+		wc()->customer->set_billing_city( '' );
+		wc()->customer->set_billing_state( '' );
+		wc()->customer->set_billing_postcode( '' );
+		wc()->customer->set_billing_country( 'US' );
+		wc()->customer->set_billing_email( '' );
+		wc()->customer->set_billing_phone( '' );
+		wc()->customer->set_shipping_first_name( '' );
+		wc()->customer->set_shipping_last_name( '' );
+		wc()->customer->set_shipping_company( '' );
+		wc()->customer->set_shipping_address_1( '' );
+		wc()->customer->set_shipping_address_2( '' );
+		wc()->customer->set_shipping_city( '' );
+		wc()->customer->set_shipping_state( '' );
+		wc()->customer->set_shipping_postcode( '' );
+		wc()->customer->set_shipping_country( 'US' );
 	}
 
 	/**
