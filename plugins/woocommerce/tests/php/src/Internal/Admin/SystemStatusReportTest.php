@@ -36,35 +36,21 @@ class SystemStatusReportTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for test_render_daily_cron.
-	 *
-	 * @return array<string, array<string>>
-	 */
-	public function provider_render_daily_cron(): array {
-		return array(
-			'scheduled'     => array( 'scheduled' ),
-			'not-scheduled' => array( 'not-scheduled' ),
-		);
-	}
-
-	/**
 	 * Test render_daily_cron across scheduled and not-scheduled Action Scheduler states.
 	 *
-	 * @dataProvider provider_render_daily_cron
+	 * @testWith ["scheduled"]
+	 *           ["not-scheduled"]
 	 *
 	 * @param string $scenario Either 'scheduled' or 'not-scheduled'.
 	 */
 	public function test_render_daily_cron( string $scenario ): void {
-		$expected_label = '';
-		$expected_date  = '';
+		$expected_date = '';
 
 		if ( 'scheduled' === $scenario ) {
 			$timestamp     = time() + DAY_IN_SECONDS;
 			$expected_date = esc_html( date_i18n( 'Y-m-d H:i:s P', $timestamp ) );
 
 			as_schedule_recurring_action( $timestamp, DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
-		} else {
-			$expected_label = 'Not scheduled';
 		}
 
 		ob_start();

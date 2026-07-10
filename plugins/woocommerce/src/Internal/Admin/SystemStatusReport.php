@@ -125,10 +125,12 @@ class SystemStatusReport {
 				<td class="help"><?php echo wc_help_tip( esc_html__( 'Is the daily cron job active, when does it next run?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 				<td>
 					<?php
-					if ( true === $next_action_time ) {
-						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html__( 'Currently running', 'woocommerce' ) . '</mark>';
-					} elseif ( is_numeric( $next_action_time ) ) {
-						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> Next scheduled: ' . esc_html( date_i18n( 'Y-m-d H:i:s P', (int) $next_action_time ) ) . '</mark>';
+					if ( $next_action_time ) {
+						$status_text = true === $next_action_time
+							? esc_html__( 'Currently running', 'woocommerce' )
+							/* translators: %s: Date and time the daily cron job is next scheduled to run. */
+							: sprintf( esc_html__( 'Next scheduled: %s', 'woocommerce' ), esc_html( date_i18n( 'Y-m-d H:i:s P', (int) $next_action_time ) ) );
+						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . $status_text . '</mark>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $status_text built from esc_html()/esc_html__() above.
 					} else {
 						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Not scheduled', 'woocommerce' ) . '</mark>';
 					}
