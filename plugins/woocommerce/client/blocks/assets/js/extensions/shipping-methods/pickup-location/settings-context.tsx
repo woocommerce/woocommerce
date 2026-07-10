@@ -12,7 +12,6 @@ import type { UniqueIdentifier } from '@dnd-kit/core';
 import apiFetch from '@wordpress/api-fetch';
 import { dispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import fastDeepEqual from 'fast-deep-equal/es6';
 import { store as noticesStore } from '@wordpress/notices';
 
 /**
@@ -145,32 +144,37 @@ export const SettingsProvider = ( {
 		setIsSaving( true );
 		setIsDirty( false );
 
-		// @todo This should be improved to include error handling in case of API failure, or invalid data being sent that
-		// does not match the schema. This would fail silently on the API side.
+		// A resolved apiFetch means the request succeeded (2xx); the server
+		// sanitizes the payload before echoing it back, so the response will not
+		// necessarily match what we sent. Gate the notice on success, not on the
+		// response matching the payload, otherwise sanitized values (e.g. "&"
+		// normalized to "&amp;") would suppress the confirmation on a save that
+		// actually persisted.
 		apiFetch( {
 			path: '/wc/v3/pickup-locations',
 			method: 'POST',
 			data,
-		} ).then( ( response ) => {
-			setIsSaving( false );
-			if (
-				fastDeepEqual(
-					response.pickup_location_settings,
-					data.pickup_location_settings
-				) &&
-				fastDeepEqual(
-					response.pickup_locations,
-					data.pickup_locations
-				)
-			) {
+		} )
+			.then( () => {
 				dispatch( noticesStore ).createSuccessNotice(
 					__(
 						'Local Pickup settings have been saved.',
 						'woocommerce'
 					)
 				);
-			}
-		} );
+			} )
+			.catch( () => {
+				setIsDirty( true );
+				dispatch( noticesStore ).createErrorNotice(
+					__(
+						'There was an error saving your Local Pickup settings. Please try again.',
+						'woocommerce'
+					)
+				);
+			} )
+			.finally( () => {
+				setIsSaving( false );
+			} );
 	}, [ settings, pickupLocations ] );
 
 	const settingsData = {

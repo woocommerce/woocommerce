@@ -887,7 +887,7 @@ Display a button for shoppers to quickly view their cart.
 
 - **Name:** woocommerce/mini-cart
 - **Category:** woocommerce
-- **Supports:** spacing (margin, padding), typography (fontSize), ~~html~~, ~~multiple~~
+- **Supports:** interactivity, spacing (margin, padding), typography (fontSize), ~~html~~, ~~multiple~~
 - **Attributes:** addToCartBehaviour, cartAndCheckoutRenderStyle, hasHiddenPrice, iconColor, iconColorValue, miniCartIcon, onCartClickBehaviour, priceColor, priceColorValue, productCountColor, productCountColorValue, productCountVisibility
 
 ## Mini-Cart Contents - woocommerce/mini-cart-contents
