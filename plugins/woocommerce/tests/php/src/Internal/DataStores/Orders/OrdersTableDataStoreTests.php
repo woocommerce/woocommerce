@@ -3781,9 +3781,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			foreach ( range( 0, $i ) as $_ ) {
 				$expected_counts[ $status ] = $i + 1;
 
-				$order = WC_Helper_Order::create_order();
-				$order->set_status( $status );
-				$order->save();
+				wc_create_order( array( 'status' => $status ) );
 			}
 		}
 
