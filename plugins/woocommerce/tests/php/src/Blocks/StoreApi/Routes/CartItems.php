@@ -39,7 +39,6 @@ class CartItems extends ControllerTestCase {
 					'stock_status'  => ProductStockStatus::IN_STOCK,
 					'regular_price' => 10,
 					'weight'        => 10,
-					'image_id'      => $fixtures->sideload_image(),
 				)
 			),
 		);
@@ -50,7 +49,6 @@ class CartItems extends ControllerTestCase {
 				'stock_status'  => ProductStockStatus::IN_STOCK,
 				'regular_price' => 10,
 				'weight'        => 10,
-				'image_id'      => $fixtures->sideload_image(),
 			),
 			array(
 				$fixtures->get_product_attribute( 'color', array( 'red', 'green', 'blue' ) ),
@@ -328,6 +326,7 @@ class CartItems extends ControllerTestCase {
 	 * @throws \Exception When the images are not filtered correctly.
 	 */
 	public function test_cart_item_image_filtering() {
+		$image_id   = $this->add_image_to_product();
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart-items', 'v1' );
 		$cart       = WC()->cart->get_cart();
@@ -352,6 +351,7 @@ class CartItems extends ControllerTestCase {
 		$this->assertEquals( $image->src, 'https://example.com/image-1.jpg' );
 		$this->assertEquals( $image->thumbnail, 'https://example.com/image-1-thumbnail.jpg' );
 		remove_all_filters( 'woocommerce_store_api_cart_item_images' );
+		wp_delete_attachment( $image_id, true );
 	}
 
 	/**
@@ -361,6 +361,7 @@ class CartItems extends ControllerTestCase {
 	 * @throws \Exception When the errors are not logged correctly.
 	 */
 	public function test_cart_item_image_filtering_logging() {
+		$image_id   = $this->add_image_to_product();
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart-items', 'v1' );
 		$cart       = WC()->cart->get_cart();
@@ -422,6 +423,23 @@ class CartItems extends ControllerTestCase {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		$this->assertEquals( $image->src, $expected_image );
 		$this->assertEquals( $image->thumbnail, $expected_image );
+		wp_delete_attachment( $image_id, true );
+	}
+
+	/**
+	 * Add an image to the simple product used by image-filter tests.
+	 *
+	 * @return int Attachment ID.
+	 */
+	private function add_image_to_product(): int {
+		$fixtures = new FixtureData();
+		$image_id = $fixtures->sideload_image( $this->products[0]->get_id() );
+		$this->products[0]->set_image_id( $image_id );
+		$this->products[0]->save();
+		$cart_item = WC()->cart->get_cart_item( $this->keys[0] );
+		$cart_item['data']->set_image_id( $image_id );
+
+		return $image_id;
 	}
 
 	/**
