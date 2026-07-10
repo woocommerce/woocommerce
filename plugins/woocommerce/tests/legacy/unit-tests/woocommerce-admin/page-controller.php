@@ -139,99 +139,111 @@ class WC_Admin_Tests_Page_Controller extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Registered pages match current requests with route parameters.
+	 * @dataProvider provide_matching_route_patterns
+	 * @testdox Registered page route patterns match supported current requests.
+	 *
+	 * @param string $registered_path Registered route pattern.
+	 * @param string $request_uri      Current request URI.
 	 */
-	public function test_registered_page_path_parameter_matches_current_request() {
+	public function test_registered_page_route_pattern_matches_current_request( $registered_path, $request_uri ) {
 		$this->assert_registered_page_for_request(
-			'codex-param-page',
-			'/wp-admin/admin.php?page=wc-admin&path=%2Fcodex-param%2FWoo',
+			'route-pattern-page',
+			$request_uri,
 			array(
 				array(
-					'id'   => 'codex-param-page',
-					'path' => '/codex-param/:unicornName',
+					'id'   => 'route-pattern-page',
+					'path' => $registered_path,
 				),
 			)
 		);
 	}
 
 	/**
-	 * @testdox Registered page path parameters only match one segment.
+	 * Data provider for supported route pattern matches.
+	 *
+	 * @return array[]
 	 */
-	public function test_registered_page_path_parameter_does_not_match_extra_segments() {
-		$current_page = $this->determine_registered_page_for_request(
-			'/wp-admin/admin.php?page=wc-admin&path=%2Fcodex-param%2FWoo%2Fdetails',
+	public function provide_matching_route_patterns() {
+		return array(
+			'path parameter'               => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
+			'case-insensitive static path' => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2FROUTE-PARAMS%2Fsample' ),
+			'trailing slash in pattern'    => array( '/route-params/:itemName/', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
+			'repeated request slashes'     => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample%2F%2F' ),
+			'wildcard base path'           => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard' ),
+			'wildcard base trailing slash' => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2F' ),
+			'wildcard descendant path'     => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme%2Falpha' ),
+		);
+	}
+
+	/**
+	 * @dataProvider provide_non_matching_route_patterns
+	 * @testdox Registered page route patterns reject unsupported or unrelated current requests.
+	 *
+	 * @param string $registered_path Registered route pattern.
+	 * @param string $request_uri      Current request URI.
+	 */
+	public function test_registered_page_route_pattern_does_not_match_current_request( $registered_path, $request_uri ) {
+		$result = $this->get_registered_page_result_for_request(
+			$request_uri,
 			array(
 				array(
-					'id'   => 'codex-param-page',
-					'path' => '/codex-param/:unicornName',
+					'id'   => 'route-pattern-page',
+					'path' => $registered_path,
 				),
 			)
 		);
 
-		$this->assertFalse( $current_page );
+		$this->assertFalse( $result['current_page'] );
+		$this->assertFalse( $result['is_registered_page'] );
 	}
 
 	/**
-	 * @testdox Registered page path parameters match requests with a trailing slash.
+	 * Data provider for unsupported or unrelated route pattern requests.
+	 *
+	 * @return array[]
 	 */
-	public function test_registered_page_path_parameter_matches_trailing_slash_request() {
-		$this->assert_registered_page_for_request(
-			'codex-param-page',
-			'/wp-admin/admin.php?page=wc-admin&path=%2Fcodex-param%2FWoo%2F',
-			array(
-				array(
-					'id'   => 'codex-param-page',
-					'path' => '/codex-param/:unicornName',
-				),
-			)
+	public function provide_non_matching_route_patterns() {
+		return array(
+			'parameter with extra segment' => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample%2Fdetails' ),
+			'partial parameter segment'    => array( '/route-patterns/:itemId/prefix-:suffix', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fprefix-value' ),
+			'non-terminal wildcard'        => array( '/route-patterns/:itemId/*/details', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fone%2Fdetails' ),
+			'different page root'          => array( '/route-params/:itemName', '/wp-admin/admin.php?page=other-page-root&path=%2Froute-params%2Fsample' ),
 		);
 	}
 
 	/**
-	 * @testdox Registered pages match terminal wildcard requests.
-	 */
-	public function test_registered_page_terminal_wildcard_matches_base_and_descendant_paths() {
-		$pages = array(
-			array(
-				'id'   => 'codex-wildcard-page',
-				'path' => '/codex-wildcard/*',
-			),
-		);
-
-		$this->assert_registered_page_for_request(
-			'codex-wildcard-page',
-			'/wp-admin/admin.php?page=wc-admin&path=%2Fcodex-wildcard',
-			$pages
-		);
-		$this->assert_registered_page_for_request(
-			'codex-wildcard-page',
-			'/wp-admin/admin.php?page=wc-admin&path=%2Fcodex-wildcard%2F',
-			$pages
-		);
-		$this->assert_registered_page_for_request(
-			'codex-wildcard-page',
-			'/wp-admin/admin.php?page=wc-admin&path=%2Fcodex-wildcard%2Ftheme%2Falpha',
-			$pages
-		);
-	}
-
-	/**
+	 * @dataProvider provide_static_route_precedence_requests
 	 * @testdox Exact registered pages win over earlier route patterns.
+	 *
+	 * @param string $request_uri Current request URI.
 	 */
-	public function test_registered_page_exact_path_takes_precedence_over_route_pattern() {
+	public function test_registered_page_exact_path_takes_precedence_over_route_pattern( $request_uri ) {
 		$this->assert_registered_page_for_request(
-			'codex-exact-page',
-			'/wp-admin/admin.php?page=wc-admin&path=%2Fcodex-routes%2Fsettings',
+			'route-exact-page',
+			$request_uri,
 			array(
 				array(
-					'id'   => 'codex-param-page',
-					'path' => '/codex-routes/:itemId',
+					'id'   => 'route-param-page',
+					'path' => '/route-patterns/:itemId',
 				),
 				array(
-					'id'   => 'codex-exact-page',
-					'path' => '/codex-routes/settings',
+					'id'   => 'route-exact-page',
+					'path' => '/route-patterns/settings',
 				),
 			)
+		);
+	}
+
+	/**
+	 * Data provider for static route precedence requests.
+	 *
+	 * @return array[]
+	 */
+	public function provide_static_route_precedence_requests() {
+		return array(
+			'exact request'            => array( '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2Fsettings' ),
+			'case-normalized request'  => array( '/wp-admin/admin.php?page=wc-admin&path=%2FROUTE-PATTERNS%2Fsettings' ),
+			'slash-normalized request' => array( '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2Fsettings%2F%2F' ),
 		);
 	}
 
@@ -240,16 +252,16 @@ class WC_Admin_Tests_Page_Controller extends WP_UnitTestCase {
 	 */
 	public function test_registered_page_specific_route_pattern_takes_precedence_over_wildcard() {
 		$this->assert_registered_page_for_request(
-			'codex-details-page',
-			'/wp-admin/admin.php?page=wc-admin&path=%2Fcodex-routes%2F123%2Fdetails',
+			'route-details-page',
+			'/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails',
 			array(
 				array(
-					'id'   => 'codex-wildcard-page',
-					'path' => '/codex-routes/*',
+					'id'   => 'route-wildcard-page',
+					'path' => '/route-patterns/*',
 				),
 				array(
-					'id'   => 'codex-details-page',
-					'path' => '/codex-routes/:itemId/details',
+					'id'   => 'route-details-page',
+					'path' => '/route-patterns/:itemId/details',
 				),
 			)
 		);
@@ -260,46 +272,29 @@ class WC_Admin_Tests_Page_Controller extends WP_UnitTestCase {
 	 */
 	public function test_registered_page_equal_specificity_route_patterns_use_registration_order() {
 		$this->assert_registered_page_for_request(
-			'codex-earlier-param-page',
-			'/wp-admin/admin.php?page=wc-admin&path=%2Fcodex-routes%2F123',
+			'route-earlier-param-page',
+			'/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123',
 			array(
 				array(
-					'id'   => 'codex-earlier-param-page',
-					'path' => '/codex-routes/:earlierId',
+					'id'   => 'route-earlier-param-page',
+					'path' => '/route-patterns/:earlierId',
 				),
 				array(
-					'id'   => 'codex-later-param-page',
-					'path' => '/codex-routes/:laterId',
+					'id'   => 'route-later-param-page',
+					'path' => '/route-patterns/:laterId',
 				),
 			)
 		);
 	}
 
 	/**
-	 * @testdox Registered page route patterns require the same page root.
-	 */
-	public function test_registered_page_route_pattern_requires_same_page_root() {
-		$current_page = $this->determine_registered_page_for_request(
-			'/wp-admin/admin.php?page=codex-other-root&path=%2Fcodex-param%2FWoo',
-			array(
-				array(
-					'id'   => 'codex-param-page',
-					'path' => '/codex-param/:unicornName',
-				),
-			)
-		);
-
-		$this->assertFalse( $current_page );
-	}
-
-	/**
-	 * Determines the current PageController page for a simulated admin request.
+	 * Gets the PageController result for a simulated admin request.
 	 *
 	 * @param string $request_uri Request URI.
 	 * @param array  $pages       Pages to register.
-	 * @return array|false
+	 * @return array{current_page: array|false, is_registered_page: bool}
 	 */
-	private function determine_registered_page_for_request( $request_uri, array $pages ) {
+	private function get_registered_page_result_for_request( $request_uri, array $pages ) {
 		$controller            = PageController::get_instance();
 		$reflection            = new \ReflectionClass( $controller );
 		$pages_property        = $reflection->getProperty( 'pages' );
@@ -310,34 +305,29 @@ class WC_Admin_Tests_Page_Controller extends WP_UnitTestCase {
 		$original_pages        = $pages_property->getValue( $controller );
 		$original_current_page = $current_page_property->getValue( $controller );
 		$original_request_uri  = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request URI.
-		$global_keys           = array( 'menu', 'submenu', 'admin_page_hooks', '_registered_pages', '_parent_pages', '_wp_submenu_nopriv' );
-		$global_backups        = array();
+		$registered_pages      = array();
 
-		foreach ( $global_keys as $global_key ) {
-			$global_backups[ $global_key ] = $GLOBALS[ $global_key ] ?? null;
-			$GLOBALS[ $global_key ]        = array();
+		foreach ( $pages as $page ) {
+			$registered_pages[ $page['id'] ] = array(
+				'id'      => $page['id'],
+				'path'    => PageController::PAGE_ROOT . '&path=' . $page['path'],
+				'js_page' => true,
+			);
 		}
 
 		try {
-			$pages_property->setValue( $controller, array() );
+			$pages_property->setValue( $controller, $registered_pages );
 			$current_page_property->setValue( $controller, null );
 			$_SERVER['REQUEST_URI'] = $request_uri;
-
-			foreach ( $pages as $page ) {
-				$controller->register_page(
-					wp_parse_args(
-						$page,
-						array(
-							'title'      => 'Codex test page',
-							'page_title' => 'Codex test page',
-							'capability' => 'manage_woocommerce',
-						)
-					)
-				);
+			if ( ! did_action( 'current_screen' ) ) {
+				set_current_screen( 'woocommerce_page_wc-admin' );
 			}
 
 			$controller->determine_current_page();
-			return $current_page_property->getValue( $controller );
+			return array(
+				'current_page'       => $controller->get_current_page(),
+				'is_registered_page' => wc_admin_is_registered_page(),
+			);
 		} finally {
 			$pages_property->setValue( $controller, $original_pages );
 			$current_page_property->setValue( $controller, $original_current_page );
@@ -346,14 +336,6 @@ class WC_Admin_Tests_Page_Controller extends WP_UnitTestCase {
 				unset( $_SERVER['REQUEST_URI'] );
 			} else {
 				$_SERVER['REQUEST_URI'] = $original_request_uri;
-			}
-
-			foreach ( $global_backups as $global_key => $global_value ) {
-				if ( null === $global_value ) {
-					unset( $GLOBALS[ $global_key ] );
-				} else {
-					$GLOBALS[ $global_key ] = $global_value;
-				}
 			}
 		}
 	}
@@ -366,8 +348,10 @@ class WC_Admin_Tests_Page_Controller extends WP_UnitTestCase {
 	 * @param array  $pages            Pages to register.
 	 */
 	private function assert_registered_page_for_request( $expected_page_id, $request_uri, array $pages ) {
-		$current_page = $this->determine_registered_page_for_request( $request_uri, $pages );
+		$result       = $this->get_registered_page_result_for_request( $request_uri, $pages );
+		$current_page = $result['current_page'];
 
+		$this->assertTrue( $result['is_registered_page'], 'A matching page should be reported through wc_admin_is_registered_page().' );
 		$this->assertIsArray( $current_page, 'A matching registered page should be detected.' );
 		$this->assertSame( $expected_page_id, $current_page['id'] );
 	}
