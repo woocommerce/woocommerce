@@ -107,42 +107,28 @@ test.describe( `${ blockData.name } frontend`, () => {
 
 		await expect( gallery ).toBeVisible();
 		await expect( viewport ).toBeVisible();
+		await expect( gallery ).toHaveCSS( 'opacity', '1' );
 
 		await gallery.evaluate( ( element ) => {
 			( element as HTMLElement ).style.width = '320.5px';
 			window.dispatchEvent( new Event( 'resize' ) );
 		} );
 
-		await thumbnails.nth( 1 ).tap();
+		const targetThumbnail = thumbnails.nth( 1 );
+		await targetThumbnail.click();
+		await expect( targetThumbnail ).toHaveClass( /flex-active/ );
 
 		await expect
-			.poll( async () =>
-				page.evaluate( () => {
-					const activeThumbIndex = [
-						...document.querySelectorAll(
-							'.flex-control-nav.flex-control-thumbs img'
-						),
-					].findIndex( ( image ) =>
-						image.classList.contains( 'flex-active' )
-					);
-					const activeSlide = document.querySelectorAll(
-						'.woocommerce-product-gallery__image'
-					)[ activeThumbIndex ];
-					const flexViewport =
-						document.querySelector( '.flex-viewport' );
+			.poll( async () => {
+				const activeSlideBox = await gallery
+					.locator( '.flex-active-slide' )
+					.boundingBox();
+				const viewportBox = await viewport.boundingBox();
 
-					if ( ! activeSlide || ! flexViewport ) {
-						return null;
-					}
-
-					return Number(
-						(
-							activeSlide.getBoundingClientRect().left -
-							flexViewport.getBoundingClientRect().left
-						).toFixed( 3 )
-					);
-				} )
-			)
+				return activeSlideBox && viewportBox
+					? activeSlideBox.x - viewportBox.x
+					: null;
+			} )
 			.toBeCloseTo( 0, 3 );
 	} );
 } );
