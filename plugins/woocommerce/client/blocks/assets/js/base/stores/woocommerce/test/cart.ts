@@ -827,19 +827,26 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 	} );
 
-	describe( 'notice-diff suppression for keyless meta-only adds', () => {
+	describe( 'no spurious quantity-changed notice on exact keyless adds', () => {
 		// The quantity-changed info notice template the auto-UPDATE branch emits.
 		const QUANTITY_CHANGED = 'was changed to';
 
 		it( 'emits no quantity-changed notice for a keyless add resolved server-side as a new standalone line', async () => {
-			// The product is present only as a single keyed meta line (qty 3,
-			// is_standalone_line: false). findItemInCart excludes meta lines on a
-			// keyless lookup, so it returns undefined — the optimistic update pushes
-			// a brand-new plain line instead of bumping the meta line. The server
-			// keeps the meta line at qty 3 and adds a separate standalone line
-			// (qty 1). lineMatchesProduct is meta-inclusive, so the pre-add total
-			// captures the meta line's qty 3; expectedTotal = 3+1 = 4. The server
-			// total (3+1=4) equals expectedTotal (4) → no spurious notice fires.
+			// The cart holds only a meta line (qty 3, is_standalone_line: false).
+			// findItemInCart excludes meta lines on a keyless lookup, so no
+			// existing line matches and the optimistic update pushes a
+			// brand-new keyless line (no key) rather than bumping the meta
+			// line. The post-optimistic snapshot is therefore [meta line qty 3
+			// (key server-key-abc), new line qty 1 (no key)].
+			//
+			// The server keeps the meta line unchanged at qty 3 and adds its
+			// own new line under a server-assigned key (server-key-new, qty
+			// 1). Diffing by key: the meta line's key and quantity match
+			// exactly between the two carts, so it does not notify. The
+			// server's new line has a key that never appears in the
+			// post-optimistic snapshot (the client's pushed line carried no
+			// key), so there is nothing to diff it against and it is skipped
+			// too. The diff is empty — no notice fires.
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
@@ -879,16 +886,18 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 
 		it( 'emits no quantity-changed notice when only the first of two meta lines for the same product is bumped optimistically', async () => {
-			// The product is present as two distinct keyed meta lines (qty 3 and
-			// qty 2, both is_standalone_line: false). findItemInCart excludes both
-			// meta lines on a keyless lookup, so it returns undefined — the
-			// optimistic update pushes a brand-new plain line instead of bumping
-			// either meta line. The server keeps both meta lines at their pre-add
-			// quantities (3 and 2) and adds a separate standalone line (qty 1).
-			// lineMatchesProduct is meta-inclusive, so the pre-add total captures
-			// both meta lines: preAddTotal = 3+2 = 5, deltaTotal = 1,
-			// expectedTotal = 6. The server total (3+2+1=6) equals expectedTotal
-			// (6) → no spurious notice fires for any of the three lines.
+			// The cart holds two meta lines (qty 3 and qty 2, both
+			// is_standalone_line: false). findItemInCart excludes both on a
+			// keyless lookup, so the optimistic update pushes a brand-new
+			// keyless line (no key) rather than bumping either meta line. The
+			// post-optimistic snapshot is [meta line 1 qty 3, meta line 2 qty
+			// 2, new line qty 1 (no key)].
+			//
+			// The server keeps both meta lines unchanged and adds its own new
+			// line under a server-assigned key. Diffing by key: both meta
+			// lines match exactly, and the server's new line has no
+			// counterpart key in the post-optimistic snapshot to diff
+			// against. No notice fires for any of the three lines.
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
@@ -1007,14 +1016,19 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			).toBe( true );
 		} );
 
-		it( 'suppresses the notice for a keyless batch add resolved server-side as a new standalone line', async () => {
-			// Same meta-only scenario through the batch path: the cart has only a
-			// single meta line (qty 3, is_standalone_line: false). findItemInCart
-			// excludes it, so the optimistic update pushes a brand-new plain line.
-			// The server keeps the meta line at 3 and adds a standalone line (qty 1).
-			// lineMatchesProduct is meta-inclusive → preAddTotal = 3, deltaTotal = 1,
-			// expectedTotal = 4; serverTotal = 3+1 = 4 → suppress, no spurious
-			// notice.
+		it( 'emits no quantity-changed notice for a keyless batch add resolved server-side as a new standalone line', async () => {
+			// Same meta-only scenario through the batch path: the cart has
+			// only a single meta line (qty 3, is_standalone_line: false).
+			// findItemInCart excludes it, so the optimistic update pushes a
+			// brand-new keyless line (no key) instead. The batch's
+			// post-optimistic snapshot — captured after the (only, and
+			// therefore last) item's optimistic update — is [meta line qty 3,
+			// new line qty 1 (no key)].
+			//
+			// The server keeps the meta line unchanged and adds its own new
+			// line under a server-assigned key. Diffing by key: the meta line
+			// matches exactly; the server's new line has no counterpart key
+			// to diff against. No notice fires.
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
@@ -1055,16 +1069,13 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			).toBe( false );
 		} );
 
-		it( 'suppresses the quantity-changed notice for a keyless re-add when the server returns the line at pre-add + delta', async () => {
-			// Pre-add: matched line at qty 3. Keyless add delta: +1.
-			// Expected total: 3 + 1 = 4. Server returns the line at 4.
-			// Since serverTotal (4) === expectedTotal (4), the add was exact →
-			// no "quantity changed" notice must fire.
-			// This also indirectly guards the by-value pre-add capture: if
-			// preAddTotal were captured after the optimistic bump (reading 4
-			// instead of 3), expectedTotal would be 4+1=5 ≠ server 4, which
-			// would keep the key un-suppressed and fire the notice, failing
-			// this assertion.
+		it( 'emits no quantity-changed notice for a keyless re-add when the server returns the line at pre-add + delta', async () => {
+			// The matched line (key server-key-abc) starts at qty 3. A
+			// keyless add with delta +1 bumps it in place, so the
+			// post-optimistic snapshot has that same key at qty 4. The server
+			// confirms the line at qty 4 too — an exact add. Diffing by key
+			// finds the same key at the same quantity on both sides, so no
+			// notice fires.
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
@@ -1087,20 +1098,23 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				} )
 			);
 
-			// Server total (4) === expected total (3+1=4) → suppress.
-			// No "quantity changed" notice must fire.
 			expect(
 				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
 			).toBe( false );
 		} );
 
-		it( 'suppresses the quantity-changed notice for a keyless batch re-add when the server total matches pre-add + sum of deltas', async () => {
-			// Pre-add: matched line at qty 3. Batch deltas: +1 and +1.
-			// A real /batch endpoint compounds server-side: each add-item
-			// sub-request runs sequentially against one WC_Cart session, so the
-			// server accumulates both deltas and lands at 5, not 4.
-			// Expected total: 3 + (1+1) = 5. Server returns the line at 5.
-			// Since serverTotal (5) === expectedTotal (5), suppress → no notice.
+		it( 'emits no quantity-changed notice for a keyless batch re-add when the server total matches the post-optimistic quantity', async () => {
+			// The matched line (key server-key-abc) starts at qty 3. Two
+			// keyless batch items each add a delta of +1. Both deltas are
+			// computed against the same pre-batch quantity (3) at .map()
+			// time, but applyOptimistic runs sequentially and each bump
+			// stacks on the previous one, so the line lands at qty 5 by the
+			// time the batch's post-optimistic snapshot is captured (after
+			// the last item's applyOptimistic). A real /batch endpoint
+			// compounds the same way server-side — each add-item sub-request
+			// runs sequentially against one WC_Cart session — so the server
+			// also lands on 5. Diffing by key finds the same key at the same
+			// quantity (5) on both sides, so no notice fires.
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
@@ -1123,8 +1137,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				] )
 			);
 
-			// Server total (5) === expected total (3+1+1=5) → suppress.
-			// No "quantity changed" notice must fire.
 			expect(
 				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
 			).toBe( false );
@@ -1166,17 +1178,18 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			).toBe( true );
 		} );
 
-		it( 'suppresses the notice for a keyless add when the client bumps a meta line but the server grows the standalone line', async () => {
-			// Product 42 occupies two lines: a meta-differentiated line (server-key-
-			// meta, qty 1, is_standalone_line: false) and a plain standalone line
-			// (server-key-standalone, qty 1). findItemInCart excludes the meta line
-			// on a keyless lookup and returns the standalone line directly, so the
-			// optimistic update bumps the standalone line from 1 to 2. The server
-			// also grows the standalone line to 2 and keeps the meta line at 1.
-			// lineMatchesProduct is meta-inclusive → preAddTotal = 1+1 = 2,
-			// deltaTotal = 1, expectedTotal = 3. Server total: meta(1)+standalone(2)
-			// = 3 === expected → suppress for both pre-existing keys. No "quantity
-			// changed" notice must fire.
+		it( 'emits no quantity-changed notice for a keyless add when the client bumps a meta line but the server grows the standalone line', async () => {
+			// Product 42 occupies two lines: a meta-differentiated line
+			// (server-key-meta, qty 1, is_standalone_line: false) and a plain
+			// standalone line (server-key-standalone, qty 1). findItemInCart
+			// excludes the meta line on a keyless lookup and returns the
+			// standalone line directly, so the optimistic update bumps the
+			// standalone line in place from 1 to 2. Post-optimistic snapshot:
+			// meta line unchanged at 1, standalone line at 2.
+			//
+			// The server also grows the standalone line to 2 and keeps the
+			// meta line at 1 — an exact add. Diffing by key finds both lines
+			// at the same quantity on both sides, so no notice fires.
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
@@ -1217,21 +1230,25 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				} )
 			);
 
-			// Server total (1+2=3) === expected total (1+1+1=3) → suppress.
 			expect(
 				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
 			).toBe( false );
 		} );
 
-		it( 'suppresses the notice for a keyless batch add when the client bumps a meta line but the server grows the standalone line, through the batch path', async () => {
+		it( 'emits no quantity-changed notice for a keyless batch add when the client bumps a meta line but the server grows the standalone line, through the batch path', async () => {
 			// Same meta-line/standalone-line scenario through the batch path.
-			// Product 42 occupies two lines: meta first (qty 1, is_standalone_line:
-			// false) then standalone (qty 1). findItemInCart excludes the meta line
-			// and returns the standalone line, so the batch item bumps the standalone
-			// line optimistically. The server also grows the standalone line to 2 and
-			// keeps the meta line at 1. lineMatchesProduct is meta-inclusive →
-			// preAddTotal = 1+1 = 2, deltaTotal = 1, expectedTotal = 3. Server total:
-			// meta(1)+standalone(2)=3 === expected → suppress.
+			// Product 42 occupies two lines: meta first (qty 1,
+			// is_standalone_line: false) then standalone (qty 1).
+			// findItemInCart excludes the meta line and returns the
+			// standalone line, so the (only, and therefore last) batch item
+			// bumps the standalone line optimistically from 1 to 2. The
+			// post-optimistic snapshot — captured after that item's
+			// optimistic update — has the meta line unchanged at 1 and the
+			// standalone line at 2.
+			//
+			// The server also grows the standalone line to 2 and keeps the
+			// meta line at 1. Diffing by key finds both lines at the same
+			// quantity on both sides, so no notice fires.
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
@@ -1269,17 +1286,19 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.batchAddCartItems( [ { id: 42, quantityToAdd: 1 } ] )
 			);
 
-			// Server total (1+2=3) === expected total (1+1+1=3) → suppress.
 			expect(
 				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
 			).toBe( false );
 		} );
 
-		it( 'suppresses the quantity-changed notice for a keyless variation re-add when the server returns the line at pre-add + delta', async () => {
-			// A variation line (type: variation, id: 42, variation: [Color:Red])
-			// is matched by id+variation. Keyless add delta: +1. Pre-add qty: 2.
-			// Expected total: 2+1=3. Server returns the variation line at 3.
-			// Since serverTotal (3) === expectedTotal (3) → suppress.
+		it( 'emits no quantity-changed notice for a keyless variation re-add when the server returns the line at pre-add + delta', async () => {
+			// A variation line (type: variation, id: 42, variation:
+			// [Color:Red]) is matched by id+variation. It starts at qty 2; a
+			// keyless add with delta +1 bumps it in place, so the
+			// post-optimistic snapshot has that same key at qty 3. The server
+			// confirms the variation line at qty 3 too. Diffing by key finds
+			// the same key at the same quantity on both sides, so no notice
+			// fires.
 			const colorRedVariation = [
 				{ attribute: 'Color', value: 'Red' },
 			] as CartItem[ 'variation' ];
@@ -1318,7 +1337,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				} )
 			);
 
-			// Server total (3) === expected total (2+1=3) → suppress.
 			expect(
 				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
 			).toBe( false );
@@ -1552,72 +1570,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const result = mockState.findItemInCart( { id: 42 } );
 
 			expect( result ).toBe( optimisticLine );
-		} );
-
-		it( 'lineMatchesProduct still includes meta lines when summing the pre-add total (meta-inclusive, unchanged)', async () => {
-			// lineMatchesProduct is intentionally meta-inclusive. It sums ALL
-			// lines of a product — including meta lines — for the pre-add total
-			// and the keyless-add suppress-keys baseline. This diverges from
-			// findItemInCart on purpose.
-			//
-			// Verification: the cart holds a meta line (qty 2) and a standalone
-			// line (qty 1) for product 42. A keyless add (+1) computes its
-			// suppress-key baseline using lineMatchesProduct, which counts both
-			// lines → preAddTotal = 3, deltaTotal = 1, expectedTotal = 4.
-			// The server returns the standalone line at 2 and the meta line
-			// unchanged at 2 → serverTotal = 4. Because serverTotal (4) ===
-			// expectedTotal (4), the pre-existing keys are suppressed and no
-			// spurious "quantity changed" notice fires.
-			//
-			// If lineMatchesProduct had been changed to skip meta lines it would
-			// compute preAddTotal = 1 (standalone only), expectedTotal = 2, and
-			// compare against serverTotal = 4 → mismatch → notice fires, failing
-			// the assertion below.
-			const QUANTITY_CHANGED = 'was changed to';
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'standalone-key',
-						id: 42,
-						quantity: 2,
-					} ),
-					makeKeyedLine( {
-						key: 'meta-key',
-						id: 42,
-						quantity: 2,
-						is_standalone_line: false,
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( {
-					key: 'standalone-key',
-					id: 42,
-					quantity: 1,
-					is_standalone_line: true,
-				} ),
-				makeKeyedLine( {
-					key: 'meta-key',
-					id: 42,
-					quantity: 2,
-					is_standalone_line: false,
-				} ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-				} )
-			);
-
-			// Server total (2+2=4) === expected total (3+1=4) → suppress.
-			// No "quantity changed" notice must fire.
-			expect(
-				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
-			).toBe( false );
 		} );
 	} );
 
