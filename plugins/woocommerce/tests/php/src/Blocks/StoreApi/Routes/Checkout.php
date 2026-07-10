@@ -28,6 +28,7 @@ use WC_Gateway_BACS;
  */
 class Checkout extends \WP_Test_REST_TestCase {
 	use MockeryPHPUnitIntegration;
+	use StoreApiRestTestCaseTrait;
 
 	const TEST_COUPON_CODE = 'test_coupon_code';
 	/**
@@ -42,9 +43,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
-		global $wp_rest_server;
-		$wp_rest_server = new \Spy_REST_Server();
-		do_action( 'rest_api_init', $wp_rest_server );
+		$this->initialize_store_api_server();
 
 		wp_set_current_user( 0 );
 
