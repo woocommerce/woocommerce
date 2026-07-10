@@ -151,9 +151,24 @@ class Endpoint {
 			return;
 		}
 
-		// No managed page anywhere. The permanent `woocommerce_create_pages`
-		// filter (registered in `init()`) makes the call inject our entry.
-		\WC_Install::create_pages();
+		// No managed page anywhere. Scope this internal repair to our own page
+		// so merchants' intentional choices for other WC pages are not repaired.
+		$create_review_order_page_only = function ( $pages ) {
+			$pages = $this->inject_review_order_page( $pages );
+
+			if ( ! is_array( $pages ) ) {
+				return $pages;
+			}
+
+			return array_intersect_key( $pages, array( self::PAGE_KEY => true ) );
+		};
+
+		add_filter( 'woocommerce_create_pages', $create_review_order_page_only, 100 );
+		try {
+			\WC_Install::create_pages();
+		} finally {
+			remove_filter( 'woocommerce_create_pages', $create_review_order_page_only, 100 );
+		}
 
 		// Defer the rewrite flush to wp_loaded; rewrite_rule fires later on init.
 		update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );

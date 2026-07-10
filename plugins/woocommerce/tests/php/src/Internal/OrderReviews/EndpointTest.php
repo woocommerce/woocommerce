@@ -714,6 +714,38 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox maybe_create_host_page() preserves an intentionally empty Shop page setting.
+	 */
+	public function test_maybe_create_host_page_preserves_empty_shop_page_option(): void {
+		$this->reset_review_order_pages();
+		$this->reset_shop_pages();
+
+		$shop_page_id = (int) wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Shop',
+				'post_name'   => 'shop',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', '' );
+		delete_option( 'woocommerce_review_order_flush_rewrite_pending' );
+
+		add_filter( 'woocommerce_create_pages', array( $this->endpoint, 'inject_review_order_page' ) );
+		try {
+			$this->endpoint->maybe_create_host_page();
+
+			$this->assertSame( '', get_option( 'woocommerce_shop_page_id' ), 'intentional empty shop page option should stay empty' );
+			$this->assertInstanceOf( \WP_Post::class, get_post( $shop_page_id ), 'existing shop page should remain present' );
+			$this->assertGreaterThan( 0, (int) wc_get_page_id( Endpoint::PAGE_KEY ), 'review order page should still be created' );
+		} finally {
+			remove_filter( 'woocommerce_create_pages', array( $this->endpoint, 'inject_review_order_page' ) );
+			$this->reset_review_order_pages();
+			$this->reset_shop_pages();
+		}
+	}
+
+	/**
 	 * @testdox The `woocommerce_create_pages` filter injects the Review Order entry so any caller of `WC_Install::create_pages()` (e.g. Status → Tools repair) seeds the page.
 	 */
 	public function test_inject_review_order_page_filter_adds_entry_for_third_party_callers(): void {
@@ -747,5 +779,25 @@ class EndpointTest extends WC_Unit_Test_Case {
 			wp_delete_post( (int) $page->ID, true );
 		}
 		delete_option( 'woocommerce_review_order_page_id' );
+	}
+
+	/**
+	 * Remove every page that could match the Shop page lookup, plus the
+	 * stored option, so a test can stage an intentionally empty setting.
+	 */
+	private function reset_shop_pages(): void {
+		$candidates = get_posts(
+			array(
+				'name'             => 'shop',
+				'post_type'        => 'page',
+				'post_status'      => 'any',
+				'numberposts'      => -1,
+				'suppress_filters' => false,
+			)
+		);
+		foreach ( $candidates as $page ) {
+			wp_delete_post( (int) $page->ID, true );
+		}
+		delete_option( 'woocommerce_shop_page_id' );
 	}
 }

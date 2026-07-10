@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Keep Review Order page creation from restoring an intentionally empty shop page setting.
