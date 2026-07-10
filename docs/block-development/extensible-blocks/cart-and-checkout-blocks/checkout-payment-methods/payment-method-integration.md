@@ -12,7 +12,7 @@ The client side integration consists of an API for registering both _regular_ an
 
 In both cases, the client side integration is done using registration methods exposed on the `blocks-registry` API. You can access this via the `wc` global in a WooCommerce environment (`wc.wcBlocksRegistry`).
 
-> Note: In your build process, you could do something similar to what is done in the blocks repository which [aliases this API as an external on `@woocommerce/blocks-registry`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e089ae17043fa525e8397d605f0f470959f2ae95/bin/webpack-helpers.js#L16-L35).
+> Note: The `@woocommerce/blocks-registry` import examples in this document require a build process that maps WooCommerce packages to their registered script handles. Do not install `@woocommerce/blocks-registry` from npm. Use the [`@woocommerce/dependency-extraction-webpack-plugin`](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin) in your webpack configuration to externalize bundled WooCommerce packages such as `@woocommerce/blocks-registry` to the `wc-blocks-registry` script.
 
 ## Express Payment Methods
 
@@ -71,7 +71,7 @@ const options = {
 | `content` | ReactNode | React node output in the express payment method area when the block is rendered in the frontend. Receives props from the checkout payment method interface. | Yes |
 | `edit` | ReactNode | React node output in the express payment method area when the block is rendered in the editor. Receives props from the payment method interface to checkout (with preview data). | Yes |
 | `canMakePayment` | Function | Callback to determine whether the payment method should be available for the shopper. | Yes |
-| `paymentMethodId` | String | Identifier accompanying the checkout processing request to the server. Used to identify the payment method gateway class for processing the payment. | No |
+| `paymentMethodId` | String | Identifier accompanying the checkout processing request to the server. Used to identify the payment method gateway class for processing the payment. Should match the gateway's server-side ID, as it is also used to detect whether the gateway is compatible with the Checkout block in the editor. Defaults to the value of `name` when omitted. | No |
 | `supports:features` | Array | Array of payment features supported by the gateway. Used to crosscheck if the payment method can be used for the cart content. Defaults to `['products']` if no value is provided. | No |
 | `supports:style` | Array | This is an array of style variations supported by the express payment method. These are styles that are applied across all the active express payment buttons and can be controlled from the express payment block in the editor. Supported values for these are one of `['height', 'borderRadius']`. | No |
 
@@ -91,7 +91,7 @@ canMakePayment( {
 } )
 ```
 
-`canMakePayment` returns a boolean value. If your gateway needs to perform async initialization to determine availability, you can return a promise (resolving to boolean). This allows a payment method to be hidden based on the cart, e.g. if the cart has physical/shippable products (example: [`Cash on delivery`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e089ae17043fa525e8397d605f0f470959f2ae95/assets/js/payment-method-extensions/payment-methods/cod/index.js#L48-L70)); or for payment methods to control whether they are available depending on other conditions.
+`canMakePayment` returns a boolean value. If your gateway needs to perform async initialization to determine availability, you can return a promise (resolving to boolean). This allows a payment method to be hidden based on the cart, e.g. if the cart has physical/shippable products (example: [`Cash on delivery`](https://github.com/woocommerce/woocommerce/blob/df02d62e2d41e9007da44cb87fea2b7a9551f55c/plugins/woocommerce/client/blocks/assets/js/extensions/payment-methods/cod/index.js#L46-L73)); or for payment methods to control whether they are available depending on other conditions.
 
 `canMakePayment` only runs on the frontend of the Store. In editor context, rather than use `canMakePayment`, the editor will assume the payment method is available (true) so that the defined `edit` component is shown to the merchant.
 
@@ -259,7 +259,7 @@ registerPaymentMethod( {
 
 ## Props Fed to Payment Method Nodes
 
-A big part of the payment method integration is the interface that is exposed for payment methods to use via props when the node provided is cloned and rendered on block mount. While all the props are listed below, you can find more details about what the props reference, their types etc via the [typedefs described in this file](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/assets/js/types/type-defs/payment-method-interface.ts).
+A big part of the payment method integration is the interface that is exposed for payment methods to use via props when the node provided is cloned and rendered on block mount. While all the props are listed below, you can find more details about what the props reference, their types etc via the [typedefs described in this file](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/types/type-defs/payment-method-interface.ts).
 
 | Property | Type | Description |
 | --- | --- | --- |
@@ -268,7 +268,7 @@ A big part of the payment method integration is the interface that is exposed fo
 | `cartData` | Object with cartItems, cartFees, extensions properties | Data exposed from the cart including items, fees, and any registered extension data. Note that this data should be treated as immutable (should not be modified/mutated) or it will result in errors in your application. |
 | `checkoutStatus` | Object with isCalculating, isComplete, isIdle, isProcessing properties | The current checkout status exposed as various boolean state. |
 | `components` | Object with ValidationInputError, PaymentMethodLabel, PaymentMethodIcons, LoadingMask properties | It exposes React components that can be implemented by your payment method for various common interface elements used by payment methods. |
-| `emitResponse` | Object with noticeContexts and responseTypes properties | Contains some constants that can be helpful when using the event emitter. Read the _[Emitting Events](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/e267cd96a4329a4eeef816b2ef627e113ebb72a5/docs/extensibility/checkout-flow-and-events.md#emitting-events)_ section for more details. |
+| `emitResponse` | Object with noticeContexts and responseTypes properties | Contains some constants that can be helpful when using the event emitter. Read the _[Emitting Events](./checkout-flow-and-events.md#emitting-events)_ section for more details. |
 | `eventRegistration` | Object with onCheckoutValidation, onCheckoutSuccess, onCheckoutFail, onPaymentSetup, onShippingRateSuccess, onShippingRateFail, onShippingRateSelectSuccess, onShippingRateSelectFail properties | Contains all the checkout event emitter registration functions. These are functions the payment method can register observers on to interact with various points in the checkout flow (see [this doc](./checkout-flow-and-events.md) for more info). |
 | `onClick` | Function | **Provided to express payment methods** that should be triggered when the payment method button is clicked (which will signal to checkout the payment method has taken over payment processing) |
 | `onClose` | Function | **Provided to express payment methods** that should be triggered when the express payment method modal closes and control is returned to checkout. |

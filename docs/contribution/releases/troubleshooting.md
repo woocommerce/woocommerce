@@ -27,7 +27,7 @@ During the release process, you may encounter CI test failures on release-relate
 2. **Backport test fixes**: If possible, [backport](/docs/contribution/releases/backporting) the relevant test fixes from trunk to the release branch, then re-run the CI workflow.
 3. **Handle complex cases**: If backporting isn't possible due to dependencies or the cause isn't clear, document what you've found and ask for help in the release Slack channel. The "Heart of Gold - Flux" team can assist with resolving CI issues that block release work.
 
-<h3 id="can-i-start-over-id">Something looks wrong in the final release ZIP. Can I start over?</h3>
+### Something looks wrong in the final release ZIP. Can I start over?
 
 If, after downloading and unzipping the generated artifact, something seems off (e.g., missing files, incorrect changelog, or version mismatch), this usually means:
 
@@ -45,7 +45,7 @@ If, after downloading and unzipping the generated artifact, something seems off 
 
 **Once you know which step failed,** re-run only that step as described in the [Building & Publishing guide](/docs/contribution/releases/building-and-publishing). Make sure to run skipped workflows in the correct order and double-check all configuration (version number, release type, etc.) before proceeding.
 
-<h3 id="deploy-serious-bug">A serious bug was detected during internal checks / monitoring</h3>
+### A serious bug was detected during internal checks / monitoring
 
 For RC and stable releases, deploying to our staging environment and monitoring for errors is required before the release is made publicly available. If a serious bug is detected during this monitoring period, follow these steps:
 
@@ -54,11 +54,11 @@ For RC and stable releases, deploying to our staging environment and monitoring 
 3. **Update the tracking issue** to reflect that the release is blocked, including details about the bug.
 4. **Do not publish** any of the draft GitHub releases that were created, but also **do not delete** them. They will be published later along with the version that passes validation.
 5. **Coordinate with the relevant engineering team(s)** to develop a fix.
-6. **Involve Developer Advocacy** if the release schedule needs to be adjusted or communicated publicly ([read more on delays below](#release-delay)).
+6. **Involve Developer Advocacy** if the release schedule needs to be adjusted or communicated publicly ([read more on delays below](#the-release-needs-to-be-delayed-what-should-we-do)).
 
 #### How to proceed once the bug fix is merged into the release branch?
 
-1. **Create a new tracking issue** for the new version (e.g., `-rc.2` if the bug was detected during `-rc.1`, or `x.y.2` if detected while monitoring `x.y.1`) by running the [`Release: Create Tracking Issue`](https://github.com/woocommerce/woocommerce/actions/workflows/release-create-tracking-issue.yml) workflow. Do not reuse the existing tracking issue.
+1. **Create a new tracking issue** for the new version (e.g., `-rc.2` if the bug was detected during `-rc.1`, or `x.y.2` if detected while monitoring `x.y.1`) by running the [`Release: Create Tracking Issue`](https://github.com/woocommerce/woocommerce/actions/workflows/release-create-tracking-issue.yml) workflow. Do not reuse the existing tracking issue. The new issue is automatically nested under the `[X.Y] Release tracking` parent in Linear.
 2. **Follow the release procedure as normal** for the new version.
 3. **Publish all draft releases** for the affected version series. Even if the prior version wasn't made publicly available, it must be published along with the valid version. Each version will have its own changelog section.
 
@@ -67,21 +67,21 @@ For RC and stable releases, deploying to our staging environment and monitoring 
 If a severe regression or bug is discovered (e.g., checkout failure or unrecoverable data loss):
 
 1. Immediately notify the relevant engineering team(s).
-2. Prepare to do a [Point Release](/docs/contribution/releases/point-releases).
-3. Temporarily move the stable tag on WordPress.org back to the previous known-good version:
+2. If the severity warrants it (e.g., checkout failure, data loss, or other critical impact affecting many stores), temporarily move the stable tag on WordPress.org back to the previous known-good version, so new installs and updates stop landing on the broken version while the fix is being prepared:
    - Identify the correct previous version and note its exact number.
    - Use the [`Release: Update stable tag`](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml) workflow, making sure to check the _Revert_ option to allow downgrading.
    - Merge any auto-generated PRs right away.
+3. Follow the [Point Releases guide](/docs/contribution/releases/point-releases) to create a tracking issue, prepare the fix, and ship the patch.
 
-<h3 id="release-delay">The release needs to be delayed. What should we do?</h3>
+### The release needs to be delayed. What should we do?
 
 1. Create an internal Slack thread to communicate with the engineering teams as well as Dev Advocacy. This also provides an opportunity for teams to share any additional context and verify or challenge schedule changes.
 2. Ask Dev Advocacy to communicate the delay publicly.
 3. If there's a clear ETA on the patch release with a fix, [update the release calendar](https://developer.woocommerce.com/release-calendar/) with the new dates.
 
-Remember to not plan the patch release [too close to the weekend](#release-delay-weekend-id).
+Remember to not plan the patch release [too close to the weekend](#the-release-was-delayed-can-we-still-release-after-tuesday).
 
-<h3 id="release-delay-weekend-id">The release was delayed. Can we still release after Tuesday?</h3>
+### The release was delayed. Can we still release after Tuesday?
 
 In general, avoid releasing after Tuesday, especially close to a weekend.
 

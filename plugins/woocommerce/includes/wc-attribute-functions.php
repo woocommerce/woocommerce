@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -144,6 +145,22 @@ function wc_attribute_taxonomy_name( $attribute_name ) {
 }
 
 /**
+ * Get the maximum byte length allowed for a product attribute slug.
+ *
+ * WordPress's register_taxonomy() rejects taxonomy names longer than 32 bytes
+ * (see wp-includes/taxonomy.php), and WooCommerce prefixes attribute slugs with
+ * 'pa_'. That leaves the slug itself a budget of 32 bytes minus the prefix length.
+ * The limit is measured in bytes, not characters: multibyte characters (Cyrillic,
+ * Chinese, etc.) consume 2-4 bytes each.
+ *
+ * @since 11.0.0
+ * @return int Maximum attribute slug length, in bytes.
+ */
+function wc_get_attribute_slug_max_byte_length() {
+	return 32 - strlen( 'pa_' );
+}
+
+/**
  * Get the attribute name used when storing values in post meta.
  *
  * @since 2.6.0
@@ -211,7 +228,7 @@ function wc_attribute_label( $name, $product = '' ) {
 		}
 	} else {
 		$label = $name;
-	}
+	}//end if
 
 	return apply_filters( 'woocommerce_attribute_label', $label, $name, $product );
 }
@@ -253,16 +270,38 @@ function wc_get_attribute_taxonomy_names() {
  * @return array
  */
 function wc_get_attribute_types() {
+	$attribute_types = array(
+		'select' => __( 'Text', 'woocommerce' ),
+	);
+
+	$allow_visual_attribute_type =
+		wp_is_block_theme() &&
+		FeaturesUtil::feature_is_enabled( 'wc-visual-attribute' );
+
+	// If the store already has some visual attributes, let's allow them even
+	// if the current theme is not a block theme.
+	if ( ! $allow_visual_attribute_type ) {
+		foreach ( wc_get_attribute_taxonomies() as $attribute_taxonomy ) {
+			if ( isset( $attribute_taxonomy->attribute_type ) && 'wc-visual' === $attribute_taxonomy->attribute_type ) {
+				$allow_visual_attribute_type = true;
+				break;
+			}
+		}
+	}
+
+	if ( $allow_visual_attribute_type ) {
+		$attribute_types['wc-visual'] = __( 'Color / image', 'woocommerce' );
+	}
+
 	return (array) apply_filters(
 		'product_attributes_type_selector',
-		array(
-			'select' => __( 'Select', 'woocommerce' ),
-		)
+		$attribute_types
 	);
 }
 
 /**
- * Check if there are custom attribute types.
+ * Check if there are attribute types different than the default `select` type.
+ * Note: `wc-visual` is considered a custom attribute type.
  *
  * @since  3.3.2
  * @return bool True if there are custom types, otherwise false.
@@ -283,7 +322,7 @@ function wc_has_custom_attribute_types() {
 function wc_get_attribute_type_label( $type ) {
 	$types = wc_get_attribute_types();
 
-	return isset( $types[ $type ] ) ? $types[ $type ] : __( 'Select', 'woocommerce' );
+	return isset( $types[ $type ] ) ? $types[ $type ] : __( 'Text', 'woocommerce' );
 }
 
 /**
@@ -459,7 +498,8 @@ function wc_get_attribute( $id ) {
  *     @type string $name         Attribute name. Always required.
  *     @type string $slug         Attribute alphanumeric identifier.
  *     @type string $type         Type of attribute.
- *                                Core by default accepts: 'select' and 'text'.
+ *                                Core by default accepts: 'select' and
+ *                                'wc-visual' (which is experimental).
  *                                Default to 'select'.
  *     @type string $order_by     Sort order.
  *                                Accepts: 'menu_order', 'name', 'name_num' and 'id'.
@@ -484,13 +524,24 @@ function wc_create_attribute( $args ) {
 	if ( empty( $args['slug'] ) ) {
 		$slug = wc_sanitize_taxonomy_name( $args['name'] );
 	} else {
-		$slug = preg_replace( '/^pa\_/', '', wc_sanitize_taxonomy_name( $args['slug'] ) );
+		$slug = (string) preg_replace( '/^pa\_/', '', wc_sanitize_taxonomy_name( $args['slug'] ) );
 	}
 
-	// Validate slug.
-	if ( strlen( $slug ) > 28 ) {
-		/* translators: %s: attribute slug */
-		return new WP_Error( 'invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+	// Validate slug length against the byte budget left by WordPress's 32-byte taxonomy
+	// name limit once the 'pa_' prefix is accounted for (see wc_get_attribute_slug_max_byte_length()).
+	$slug_byte_length = strlen( $slug );
+	$max_byte_length  = wc_get_attribute_slug_max_byte_length();
+	if ( $slug_byte_length > $max_byte_length ) {
+		return new WP_Error(
+			'invalid_product_attribute_slug_too_long',
+			/* translators: %s: attribute slug */
+			sprintf( __( 'Slug "%s" is too long. Please use a shorter slug.', 'woocommerce' ), $slug ),
+			array(
+				'status'                 => 400,
+				'slug_byte_length'       => $slug_byte_length,
+				'slug_byte_length_limit' => $max_byte_length,
+			)
+		);
 	} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
 		/* translators: %s: attribute slug */
 		return new WP_Error( 'invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
@@ -621,8 +672,8 @@ function wc_create_attribute( $args ) {
 			if ( isset( $wp_taxonomies[ $old_taxonomy_name ] ) && ! isset( $wp_taxonomies[ $new_taxonomy_name ] ) ) {
 				$wp_taxonomies[ $new_taxonomy_name ] = $wp_taxonomies[ $old_taxonomy_name ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			}
-		}
-	}
+		}//end if
+	}//end if
 
 	// Clear cache and flush rewrite rules.
 	wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
@@ -730,7 +781,7 @@ function wc_delete_attribute( $id ) {
 		WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 
 		return true;
-	}
+	}//end if
 
 	return false;
 }

@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Avoid requesting product with id -1 while loading #46769

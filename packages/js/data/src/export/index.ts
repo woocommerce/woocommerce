@@ -9,7 +9,7 @@ import { Reducer, AnyAction } from 'redux';
 import { STORE_NAME } from './constants';
 import * as selectors from './selectors';
 import * as actions from './actions';
-import reducer, { State } from './reducer';
+import reducer, { type State } from './reducer';
 import { DispatchFromMap, SelectFromMap, WPDataSelectors } from '../types';
 import controls from '../controls';
 import { PromiseifySelectors } from '../types/promiseify-selectors';

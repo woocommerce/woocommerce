@@ -4,7 +4,6 @@
 import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { external } from '@wordpress/icons';
-// eslint-disable-next-line @woocommerce/dependency-group
 import { PluginPreviewMenuItem } from '@wordpress/editor';
 
 /**
@@ -28,7 +27,7 @@ export function SendPreview() {
 					togglePreviewModal( true );
 				} }
 			>
-				{ __( 'Send a test email', 'woocommerce' ) }
+				{ __( 'Send a test email', __i18n_text_domain__ ) }
 			</PluginPreviewMenuItem>
 			<SendPreviewEmail />
 		</>

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add internal helper methods on Refunds\DataUtils to support the upcoming refund preview endpoint.

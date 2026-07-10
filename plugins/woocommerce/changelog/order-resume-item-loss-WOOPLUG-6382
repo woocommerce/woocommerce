@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent order items from being lost when order resume fails between removing items and saving the order.

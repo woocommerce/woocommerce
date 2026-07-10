@@ -596,6 +596,77 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox Restoring an HPOS order from trash does not re-fire transactional email dispatch, but still fires the status transition actions.
+	 */
+	public function test_cot_datastore_untrash_suspends_email_dispatch_but_keeps_status_actions() {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$this->sut->trash_order( $order );
+		$this->sut->read( $order );
+
+		$status_action_count       = 0;
+		$status_notification_count = 0;
+		$status_action             = function ( $order_id ) use ( $order, &$status_action_count ) {
+			if ( $order->get_id() === $order_id ) {
+				++$status_action_count;
+			}
+		};
+		$notification_action       = function ( $order_id ) use ( $order, &$status_notification_count ) {
+			if ( $order->get_id() === $order_id ) {
+				++$status_notification_count;
+			}
+		};
+
+		add_action( 'woocommerce_order_status_completed', $status_action );
+		add_action( 'woocommerce_order_status_completed_notification', $notification_action );
+
+		try {
+			$this->assertTrue( $this->sut->untrash_order( $order ) );
+		} finally {
+			remove_action( 'woocommerce_order_status_completed', $status_action );
+			remove_action( 'woocommerce_order_status_completed_notification', $notification_action );
+		}
+
+		$this->assertSame( OrderStatus::COMPLETED, $order->get_status() );
+		// The status transition action still fires so 3rd-party integrations keep working.
+		$this->assertSame( 1, $status_action_count );
+		// The _notification action (which transactional emails listen to) must NOT fire on restore.
+		$this->assertSame( 0, $status_notification_count );
+	}
+
+	/**
+	 * @testdox After untrash, the WC_Emails transactional dispatch listeners are reinstated.
+	 */
+	public function test_cot_datastore_untrash_restores_email_dispatch_after_save() {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$this->sut->trash_order( $order );
+		$this->sut->read( $order );
+
+		$dispatch_callbacks_before = array(
+			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'send_transactional_email' ) ),
+			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'queue_transactional_email' ) ),
+		);
+
+		$this->assertTrue( $this->sut->untrash_order( $order ) );
+
+		$dispatch_callbacks_after = array(
+			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'send_transactional_email' ) ),
+			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'queue_transactional_email' ) ),
+		);
+
+		$this->assertSame( $dispatch_callbacks_before, $dispatch_callbacks_after );
+	}
+
+	/**
 	 * @testDox Tests the `delete()` method on the COT datastore -- full deletes.
 	 *
 	 * @return void
@@ -1225,6 +1296,16 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		);
 		$this->assertCount( 12, $query->orders, 'A limit of -1 can successfully be combined with an offset.' );
 		$this->assertEquals( array_slice( $test_orders, 18 ), $query->orders, 'The expected dataset is supplied when an offset is combined with a limit of -1.' );
+		$this->assertEquals(
+			30,
+			$query->found_orders,
+			'A limit of -1 combined with an offset still calculates all found orders.'
+		);
+		$this->assertEquals(
+			0,
+			$query->max_num_pages,
+			'A limit of -1 combined with an offset is treated as unpaged.'
+		);
 
 		$query = new OrdersTableQuery( array( 'limit' => 5 ) );
 		$this->assertCount( 5, $query->orders, 'Limits are respected when applied.' );
@@ -3143,7 +3224,12 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
 
 		$different_request && $this->reset_order_data_store_state( $cot_store );
-		sleep( 2 );
+
+		// Backdate the modified date on both records (save() backfills the post while sync is on) so the
+		// upcoming sync-off meta update bumps the order's modified date past the post's, without waiting
+		// on the real clock.
+		$r_order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-2 day' ) ) );
+		$r_order->save();
 
 		$this->disable_cot_sync();
 		$r_order->update_meta_data( 'test_key', 'test_value_updated' );

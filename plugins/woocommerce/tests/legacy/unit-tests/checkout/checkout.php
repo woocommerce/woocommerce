@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Checkout
  */
 
+declare(strict_types=1);
+
 use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
@@ -312,5 +314,109 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( false, WC()->cart->check_cart_items() );
+	}
+
+	/**
+	 * Test that a customer-chosen value for an "any" variation attribute is preserved on the order line item.
+	 */
+	public function test_create_order_preserves_customer_chosen_any_attribute_value(): void {
+		$parent_product = WC_Helper_Product::create_variation_product();
+
+		// Find the first variation that has pa_number as "any" (stored as '').
+		$any_number_variation_id = 0;
+		$any_number_variation    = null;
+		foreach ( $parent_product->get_children() as $child_id ) {
+			$child = wc_get_product( $child_id );
+			if ( '' === ( $child->get_variation_attributes()['attribute_pa_number'] ?? null ) ) {
+				$any_number_variation_id = $child_id;
+				$any_number_variation    = $child;
+				break;
+			}
+		}
+		$this->assertGreaterThan( 0, $any_number_variation_id, 'Expected a variation with an "any" pa_number attribute.' );
+
+		// Build cart attributes: use the variation's fixed values for non-number attributes, supply an arbitrary value for
+		// any remaining "any" attributes, and the customer's chosen value (1) for the "any" pa_number attribute under test.
+		$cart_variation = array(
+			'attribute_pa_size'   => 'small',
+			'attribute_pa_colour' => 'red',
+			'attribute_pa_number' => '1',
+		);
+		WC()->cart->add_to_cart( $parent_product->get_id(), 1, $any_number_variation_id, $cart_variation );
+
+		$order_id = WC_Checkout::instance()->create_order(
+			array(
+				'payment_method' => WC_Gateway_COD::ID,
+				'billing_email'  => 'a@b.com',
+			)
+		);
+		$this->assertNotWPError( $order_id );
+
+		// Re-read from storage to assert the persisted value.
+		/** @var WC_Order_Item_Product[] $items */
+		$items = wc_get_order( $order_id )->get_items();
+		$this->assertCount( 1, $items );
+
+		// The chosen value must survive; premature set_product() overwrites it with '' (empty).
+		$this->assertSame(
+			'1',
+			array_values( $items )[0]->get_meta( 'pa_number' ),
+			'The customer-chosen value for an "Any" variation attribute must be persisted on the order line item.'
+		);
+	}
+
+	/**
+	 * @testdox Should not save checkout shipping fields as customer meta.
+	 *
+	 * @throws ReflectionException When unable to reflect the checkout method.
+	 */
+	public function test_process_customer_does_not_save_checkout_shipping_fields_as_customer_meta(): void {
+		$user_id = wp_create_user( 'checkout-shipping-fields-customer', 'password', 'checkout-shipping-fields-customer@example.com' );
+		$this->assertNotWPError( $user_id );
+		wp_set_current_user( $user_id );
+
+		$process_customer = new ReflectionMethod( WC_Checkout::class, 'process_customer' );
+		$process_customer->setAccessible( true );
+		$process_customer->invoke(
+			WC_Checkout::instance(),
+			array(
+				'billing_first_name' => 'Jane',
+				'billing_last_name'  => 'Customer',
+				'billing_email'      => 'checkout-shipping-fields-customer@example.com',
+				'shipping_address_1' => '123 Test Street',
+				'shipping_custom'    => 'custom shipping value',
+				'shipping_method'    => array( 'flat_rate:1' ),
+				'shipping_total'     => '5.00',
+				'shipping_tax'       => '0.50',
+			)
+		);
+
+		$this->assertSame(
+			'123 Test Street',
+			get_user_meta( $user_id, 'shipping_address_1', true ),
+			'Regular shipping address fields should still be saved as customer meta.'
+		);
+		$this->assertSame(
+			'custom shipping value',
+			get_user_meta( $user_id, 'shipping_custom', true ),
+			'Custom shipping fields should still be saved as customer meta.'
+		);
+		$this->assertSame(
+			'',
+			get_user_meta( $user_id, 'shipping_method', true ),
+			'The selected checkout shipping method should not be saved as customer meta.'
+		);
+		$this->assertSame(
+			'',
+			get_user_meta( $user_id, 'shipping_total', true ),
+			'Checkout shipping totals should not be saved as customer meta.'
+		);
+		$this->assertSame(
+			'',
+			get_user_meta( $user_id, 'shipping_tax', true ),
+			'Checkout shipping taxes should not be saved as customer meta.'
+		);
+
+		wp_set_current_user( 0 );
 	}
 }

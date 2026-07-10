@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Warn when additional checkout fields are registered before the woocommerce_init action, which can load translations too early.

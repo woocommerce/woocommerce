@@ -155,7 +155,7 @@ const renderTabs = (
 	return tabContent;
 };
 
-const Tabs = ( props: TabsProps ): JSX.Element => {
+const Tabs = ( props: TabsProps ): React.JSX.Element => {
 	const { additionalClassNames } = props;
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const { isLoading, setSelectedTab } = marketplaceContextValue;

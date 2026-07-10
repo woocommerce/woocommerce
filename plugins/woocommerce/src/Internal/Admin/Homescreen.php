@@ -3,9 +3,10 @@
  * WooCommerce Homescreen.
  */
 
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Shipping;
 
 /**
@@ -52,13 +53,11 @@ class Homescreen {
 
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
 
-		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
-			add_filter(
-				'woocommerce_admin_shared_settings',
-				array( $this, 'maybe_set_default_shipping_options_on_home' ),
-				9999
-			);
-		}
+		add_filter(
+			'woocommerce_admin_shared_settings',
+			array( $this, 'maybe_set_default_shipping_options_on_home' ),
+			9999
+		);
 	}
 
 	/**
@@ -86,7 +85,7 @@ class Homescreen {
 
 		// Abort if we already created the shipping options.
 		$already_created = get_option( 'woocommerce_admin_created_default_shipping_zones' );
-		if ( $already_created === 'yes' ) {
+		if ( 'yes' === $already_created ) {
 			return $settings;
 		}
 
@@ -126,7 +125,7 @@ class Homescreen {
 		if (
 			( 'US' === $country_code && $is_jetpack_installed )
 			||
-			( ! in_array( $country_code, array( 'CA', 'AU', 'NZ', 'SG', 'HK', 'GB', 'ES', 'IT', 'DE', 'FR', 'CL', 'AR', 'PE', 'BR', 'UY', 'GT', 'NL', 'AT', 'BE' ), true ) )
+			( ! in_array( $country_code, array( 'US', 'CA', 'AU', 'NZ', 'SG', 'HK', 'GB', 'ES', 'IT', 'DE', 'FR', 'MX', 'CO', 'CL', 'AR', 'PE', 'BR', 'UY', 'GT', 'NL', 'AT', 'BE' ), true ) )
 			||
 			( 'US' === $country_code && false === $is_jetpack_installed && false === $is_wcs_installed )
 		) {

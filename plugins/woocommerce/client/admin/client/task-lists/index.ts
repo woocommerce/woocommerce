@@ -4,6 +4,5 @@
 import './fills';
 
 export * from './task-lists';
-export * from './reminder-bar';
 export * from './progress-title';
 export * from './components/placeholder';

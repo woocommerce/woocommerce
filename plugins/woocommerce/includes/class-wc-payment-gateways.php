@@ -25,7 +25,7 @@ class WC_Payment_Gateways {
 	/**
 	 * Payment gateway classes.
 	 *
-	 * @var array
+	 * @var WC_Payment_Gateway[]
 	 */
 	public $payment_gateways = array();
 
@@ -91,7 +91,16 @@ class WC_Payment_Gateways {
 		// Filter.
 		$load_gateways = apply_filters( 'woocommerce_payment_gateways', $load_gateways );
 
-		// No wp_prime_option_caches needed: gateway settings are autoloaded (WC_Settings_API saves with autoload='yes').
+		// Preload option caches to minimize future queries for options that do not yet exist or are not set to autoload.
+		wp_prime_option_caches(
+			array(
+				'woocommerce_bacs_settings',
+				'woocommerce_bacs_accounts',
+				'woocommerce_cheque_settings',
+				'woocommerce_cod_settings',
+				'woocommerce_paypal_settings',
+			)
+		);
 
 		// Get sort order option.
 		$ordering  = (array) get_option( 'woocommerce_gateway_order' );
@@ -319,7 +328,7 @@ class WC_Payment_Gateways {
 	 * may try to rely on the existence of a WC session - a valid thing to do,
 	 * and cause fatal errors when the session is not available.
 	 *
-	 * @return array The available payment gateways.
+	 * @return WC_Payment_Gateway[] The available payment gateways.
 	 */
 	public function get_available_payment_gateways() {
 		$_available_gateways = array();

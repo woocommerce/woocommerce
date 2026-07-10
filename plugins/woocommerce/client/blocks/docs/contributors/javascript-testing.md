@@ -3,10 +3,8 @@
 ## Table of contents <!-- omit in toc -->
 
 -   [How to run JavaScript unit tests](#how-to-run-javascript-unit-tests)
--   [How to run end-to-end tests with deprecated infrastructure](#how-to-run-end-to-end-tests-with-deprecated-infrastructure)
 -   [How to run end-to-end tests](#how-to-run-end-to-end-tests)
     -   [Debugging e2e tests using generated reports](#debugging-e2e-tests-using-generated-reports)
-    -   [Modify the local environment used by end-to-end tests](#modify-the-local-environment-used-by-end-to-end-tests)
     -   [WordPress versions and end-to-end tests suites](#wordpress-versions-and-end-to-end-tests-suites)
 
 Tests for JavaScript in the Blocks plugin are powered by [Jest](https://jestjs.io/). The Blocks plugin follows the same patterns as Gutenberg, therefore for instructions on writing tests you can [refer to this page in the Gutenberg Handbook](https://developer.wordpress.org/block-editor/contributors/develop/testing-overview/).
@@ -37,33 +35,24 @@ Additionally,
 -   `test:update` updates the snapshot tests for components, used if you change a component that has tests attached.
 -   `test:watch` keeps watch of files and automatically re-runs tests when things change.
 
-## How to run end-to-end tests with deprecated infrastructure
-
-End-to-end tests are implemented in `tests/e2e-tests/specs/`.
-
-Since these drive the user interface, they need to run against a test environment - i.e. a web server running WordPress, Woo and blocks plugin, with a known state/configuration.
-
-To set up to run e2e tests:
-
--   `npm run build` builds the assets (js/css), you can exclude this step if you've already got built files to test with.
--   `npm run wp-env start` to start the test environment
-
-    Then, to run the tests:
-
--   `npm run test:e2e`
-
-When you're iterating on a new test you'll often run this repeatedly, as you develop, until your test is just right.
-
-Between tests, especially when they rely on the fixture data added, it might help to run `npm run wp-env clean`.
-When you're done, you may want to shut down the test environment:
-
--   `npm run wp-env stop` to stop the test environment
-
-**Note:** There are a number of other useful `wp-env` commands. You can find out more in the [wp-env docs](https://github.com/WordPress/gutenberg/blob/trunk/packages/env/README.md).
-
 ## How to run end-to-end tests
 
-Visit the [dedicated documentation](../../tests/e2e/README.md).
+The Blocks end-to-end tests were merged into the WooCommerce Core e2e suite. They now
+live at `plugins/woocommerce/tests/e2e/tests/blocks/` and run through the shared
+Playwright config (`tests/e2e/playwright.config.ts`, project `blocks-chromium`).
+
+From `plugins/woocommerce`:
+
+```bash
+# Start wp-env, run the Blocks test-env setup, and install the browser
+pnpm env:start:blocks
+
+# Run the Blocks e2e suite
+pnpm test:e2e:blocks
+```
+
+For the full setup and available environments, see the
+[core e2e documentation](../../../../tests/e2e/README.md).
 
 ### Debugging e2e tests using generated reports
 
@@ -71,37 +60,17 @@ When e2e test suites are run in a GitHub automation, a report is generated autom
 
 To access the reports, you should go to the _Details_ of a failed e2e test suite:
 
-<img src="https://user-images.githubusercontent.com/3616980/231486295-26b1d8fd-2420-4890-b143-a249cc990d20.png" alt="PR showing a failing test suite and the cursor over the Details button of that suite" width="780" />
+![PR showing a failing test suite and the cursor over the Details button of that suite](https://user-images.githubusercontent.com/3616980/231486295-26b1d8fd-2420-4890-b143-a249cc990d20.png)
 
 From there, you can open the _Summary_ of the e2e test jobs:
 
-<img src="https://user-images.githubusercontent.com/3616980/231486308-8f85779b-8ede-440d-a250-6ff612d6ea20.png" alt="Log of an e2e test suite that failed, highlighting the Summary button" width="780" />
+![Log of an e2e test suite that failed, highlighting the Summary button](https://user-images.githubusercontent.com/3616980/231486308-8f85779b-8ede-440d-a250-6ff612d6ea20.png)
 
 From the _Summary_ page, if you scroll down, you can download the report of each test suite that failed:
 
-<img src="https://user-images.githubusercontent.com/3616980/231486320-c52a0e10-c80e-4d3a-ae0f-b3998013f528.png" alt="Report summary showing the Artifacts list, including the e2e reports" width="780" />
+![Report summary showing the Artifacts list, including the e2e reports](https://user-images.githubusercontent.com/3616980/231486320-c52a0e10-c80e-4d3a-ae0f-b3998013f528.png)
 
 That will download a ZIP that you can open in your browser locally.
-
-### Modify the local environment used by end-to-end tests
-
-To modify the environment used by tests locally, you will need to modify `.wp-env.json`. For example, you can set a specific WP version and install the latest Gutenberg version with these two lines:
-
-```diff
-{
--	"core": "WordPress/WordPress#5.7-branch",
-+	"core": "WordPress/WordPress#5.6-branch",
-	"plugins": [
-		"https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip",
-		"https://github.com/WP-API/Basic-Auth/archive/master.zip",
-+		"https://downloads.wordpress.org/plugin/gutenberg.latest-stable.zip",
-		"."
-	],
-  ...
-}
-```
-
-You will need to stop `wp-env` and start it again. In some cases, you will also need to clean the database: `npm run wp-env clean all`.
 
 ### WordPress versions and end-to-end tests suites
 

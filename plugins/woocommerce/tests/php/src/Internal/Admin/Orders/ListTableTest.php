@@ -232,4 +232,95 @@ class ListTableTest extends \WC_Unit_Test_Case {
 
 		$this->assertCount( 2, $filtered_items ); // Both orders should be shown.
 	}
+
+	/**
+	 * Helper to read the order query args prepared by the list table.
+	 *
+	 * @return array
+	 */
+	private function get_order_query_args(): array {
+		$getter = function () {
+			return $this->order_query_args;
+		};
+
+		return $getter->call( $this->sut );
+	}
+
+	/**
+	 * @testdox Submitting the search form with an empty search term keeps the cached-count fast path.
+	 */
+	public function test_empty_search_term_uses_cached_count_fast_path(): void {
+		\WC_Helper_Order::create_order();
+
+		$_REQUEST['s']             = '';
+		$_REQUEST['search-filter'] = 'all';
+
+		$this->sut->prepare_items();
+		$query_args = $this->get_order_query_args();
+
+		unset( $_REQUEST['s'], $_REQUEST['search-filter'] );
+
+		$this->assertArrayNotHasKey( 's', $query_args, 'An empty search term should not be added to the query args' );
+		$this->assertArrayNotHasKey( 'search_filter', $query_args, 'The search filter should not be added without a search term' );
+		$this->assertTrue( $query_args['no_found_rows'] ?? false, 'An empty search should use cached order counts instead of a COUNT query' );
+	}
+
+	/**
+	 * @testdox Searching with a term applies the selected search filter and uses a real results count.
+	 */
+	public function test_search_term_sets_search_filter_and_counts_results(): void {
+		\WC_Helper_Order::create_order();
+
+		$_REQUEST['s']             = 'some-term';
+		$_REQUEST['search-filter'] = 'order_id';
+
+		$this->sut->prepare_items();
+		$query_args = $this->get_order_query_args();
+
+		unset( $_REQUEST['s'], $_REQUEST['search-filter'] );
+
+		$this->assertSame( 'some-term', $query_args['s'] ?? null, 'The search term should be added to the query args' );
+		$this->assertSame( 'order_id', $query_args['search_filter'] ?? null, 'The selected search filter should be applied' );
+		$this->assertArrayNotHasKey( 'no_found_rows', $query_args, 'Searches should count their actual results' );
+	}
+
+	/**
+	 * @testdox When a filter modifies the query args via woocommerce_order_list_table_prepare_items_query_args, the cache fast path is not used.
+	 */
+	public function test_filter_modifying_query_args_disables_no_found_rows(): void {
+		\WC_Helper_Order::create_order();
+
+		$called = false;
+
+		$callback = function ( $args ) use ( &$called ) {
+			$called               = true;
+			$args['meta_query'][] = array(
+				'key'     => 'my_custom_meta_key',
+				'value'   => 'any_value',
+				'compare' => '=',
+			);
+			return $args;
+		};
+		add_filter( 'woocommerce_order_list_table_prepare_items_query_args', $callback );
+
+		$this->sut->prepare_items();
+		$query_args = $this->get_order_query_args();
+
+		remove_filter( 'woocommerce_order_list_table_prepare_items_query_args', $callback );
+
+		$this->assertTrue( $called, 'The filter should have been invoked' );
+		$this->assertArrayNotHasKey( 'no_found_rows', $query_args, 'When a filter modifies the query args, the cache fast path should not be used' );
+	}
+
+	/**
+	 * @testdox Without any filter modifying the query args, the cache fast path is still used.
+	 */
+	public function test_basic_query_still_uses_no_found_rows(): void {
+		\WC_Helper_Order::create_order();
+
+		$this->sut->prepare_items();
+		$query_args = $this->get_order_query_args();
+
+		$this->assertTrue( $query_args['no_found_rows'] ?? false, 'A basic query should use the cache fast path' );
+	}
 }

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add DimensionUnit enum class for woocommerce_dimension_unit option values and implement it across the codebase.

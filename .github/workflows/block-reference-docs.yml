@@ -1,0 +1,65 @@
+name: 'Block Reference Documentation'
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'plugins/woocommerce/client/blocks/assets/js/**/block.json'
+      - '.github/workflows/block-reference-docs.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: block-reference-docs-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update-block-reference-docs:
+    name: 'Validate block reference docs'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: 'Check for block metadata changes'
+        if: ${{ github.event_name == 'pull_request' }}
+        id: changes
+        uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
+        with:
+          filters: |
+            block-json:
+              - 'plugins/woocommerce/client/blocks/assets/js/**/block.json'
+
+      - name: 'Setup WooCommerce monorepo'
+        if: ${{ github.event_name == 'workflow_dispatch' || steps.changes.outputs.block-json == 'true' }}
+        uses: ./.github/actions/setup-woocommerce-monorepo
+        with:
+          php-version: false
+          install: '@woocommerce/block-library'
+          pull-package-deps: '@woocommerce/block-library'
+
+      - name: 'Generate block reference docs'
+        if: ${{ github.event_name == 'workflow_dispatch' || steps.changes.outputs.block-json == 'true' }}
+        run: pnpm --filter=@woocommerce/block-library build:docs:block-references
+
+      - name: 'Check generated docs'
+        if: ${{ github.event_name == 'workflow_dispatch' || steps.changes.outputs.block-json == 'true' }}
+        id: docs
+        run: |
+          if git diff --quiet -- docs/block-development/reference/block-references.md; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 'Fail when generated docs are out of date'
+        if: ${{ steps.docs.outputs.changed == 'true' }}
+        run: |
+          echo "Block reference documentation is out of date." >&2
+          echo "Run pnpm --filter=@woocommerce/block-library build:docs:block-references and commit the result." >&2
+          git diff -- docs/block-development/reference/block-references.md >&2
+          exit 1

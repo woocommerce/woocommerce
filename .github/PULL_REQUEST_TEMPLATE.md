@@ -114,3 +114,23 @@ Using the [WooCommerce Testing Instructions Guide](https://developer.woocommerce
 #### Comment <!-- If your Pull Request doesn't require a changelog entry, a comment explaining why is required instead -->
 
 </details>
+
+### Release Communication
+
+<!-- release-communication-section -->
+Select if this PR needs a generated summary for release notes:
+
+- [ ] **Feature Highlight** - For user-facing features (what changed, user impact)
+- [ ] **Developer Advisory** - For developer-facing changes (what changed, how to detect, actions needed)
+
+<details>
+<summary>When to use each?</summary>
+
+**Feature Highlight**: New features, UI changes, or improvements that merchants/store owners will notice.
+- Example: "New bulk editing for products", "Improved checkout performance"
+
+**Developer Advisory**: Breaking changes, deprecations, or changes that affect themes/plugins/extensions.
+- Example: "Hook signature change", "Deprecated filter", "REST API field removed"
+
+An AI will analyze your PR and post a draft comment for you to review and edit.
+</details>

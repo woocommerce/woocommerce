@@ -27,7 +27,7 @@ export const deprecatedAdminProperties = {
 		profile:
 			'Deprecated: wcSettings.admin.onboarding.profile is deprecated. It is planned to be released in WooCommerce 10.0.0. Please use `getProfileItems` from the onboarding store. See https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/data/src/onboarding for more information.',
 		euCountries:
-			'Deprecated: wcSettings.admin.onboarding.euCountries is deprecated. Please use `/wc/v3/data/continents/eu` from the REST API. See https://woocommerce.github.io/woocommerce-rest-api-docs/#list-all-continents for more information.',
+			'Deprecated: wcSettings.admin.onboarding.euCountries is deprecated. Please use `/wc/v3/data/continents/eu` from the REST API. See https://developer.woocommerce.com/docs/apis/rest-api/v3/data/#list-all-continents for more information.',
 		localInfo:
 			'Deprecated: wcSettings.admin.onboarding.localInfo is deprecated. Please use `include WC()->plugin_path() . "/i18n/locale-info.php"` instead.',
 		currencySymbols:
