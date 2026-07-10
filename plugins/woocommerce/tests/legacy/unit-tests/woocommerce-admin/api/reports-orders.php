@@ -332,30 +332,29 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		WC_Helper_Reports::reset_stats_dbs();
 
-		// Create a variable product.
-		$variable_product = WC_Helper_Product::create_variation_product( new WC_Product_Variable() );
+		$variable_product = new WC_Product_Variable();
+		$variable_product->set_name( 'Custom attribute product' );
 
-		// Add a custom attribute.
-		$attributes  = $variable_product->get_attributes();
 		$custom_attr = new WC_Product_Attribute();
 		$custom_attr->set_name( 'Numeric Size' );
 		$custom_attr->set_options( array( '1', '2', '3', '4', '5' ) );
 		$custom_attr->set_visible( true );
 		$custom_attr->set_variation( true );
-		$attributes[] = $custom_attr;
-		$variable_product->set_attributes( $attributes );
+		$variable_product->set_attributes( array( $custom_attr ) );
 		$variable_product->save();
 
-		// Custom attribute terms can only be found once assigned to variations.
-		$data_store = $variable_product->get_data_store();
-		$data_store->create_all_product_variations( $variable_product );
-
-		// Fetch the product to get new variations.
-		$variable_product   = wc_get_product( $variable_product->get_id() );
-		$product_variations = $variable_product->get_children();
-
-		$order_variation_1 = wc_get_product( $product_variations[0] ); // Variation: size = small.
-		$order_variation_2 = wc_get_product( end( $product_variations ) ); // Variation: size = huge, colour = blue, number = 1, numeric-size = 5.
+		$order_variation_1 = WC_Helper_Product::create_product_variation_object(
+			$variable_product->get_id(),
+			'DUMMY SKU CUSTOM ATTRIBUTE 1',
+			10,
+			array( 'numeric-size' => '1' )
+		);
+		$order_variation_2 = WC_Helper_Product::create_product_variation_object(
+			$variable_product->get_id(),
+			'DUMMY SKU CUSTOM ATTRIBUTE 5',
+			10,
+			array( 'numeric-size' => '5' )
+		);
 
 		// Create orders for variations.
 		$variation_order_1 = WC_Helper_Order::create_order( $this->user, $order_variation_1 );
