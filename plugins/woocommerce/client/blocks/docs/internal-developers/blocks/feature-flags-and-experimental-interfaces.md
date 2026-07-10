@@ -26,7 +26,7 @@ These flags are experimental, disabled by default, and registered in [`FeaturesC
 | --- | --- |
 | `cart_save_for_later` | Registers the `woocommerce/saved-for-later` block through [`BlockTypesController`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/BlockTypesController.php), enables the related shopper-list APIs, and exposes the Save for later action in Cart when the block is present. |
 | `product_wishlist` | Registers the `woocommerce/wishlist` and `woocommerce/add-to-wishlist-button` blocks through [`BlockTypesController`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/BlockTypesController.php) and enables the related shopper-list APIs and My Account endpoint. |
-| `wc-visual-attribute` | Enables the experimental `wc-visual` product attribute type for block themes. Add to Cart + Options reads the resulting attribute data to display visual variation choices. |
+| `wc-visual-attribute` | Enables the experimental `wc-visual` product attribute type for block themes. The Product Filters and Add to Cart + Options blocks read the resulting attribute data to display visual variation choices. |
 
 The hidden, mature `cart_checkout_blocks` feature definition is a compatibility marker used to report extensions that declared compatibility with Cart and Checkout blocks. It does not enable or disable those blocks.
 
