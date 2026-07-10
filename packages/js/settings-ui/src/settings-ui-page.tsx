@@ -522,7 +522,7 @@ const ShellHeader = ( {
 				<div className="wc-settings-ui-shell__navigation">
 					{ shell.navigation && shell.navigation.length > 0 ? (
 						<nav
-							className="wc-settings-ui-shell__tabs wc-settings-ui-shell__tabs--primary"
+							className="wc-settings-ui-shell__tabs"
 							aria-label={ __( 'Settings pages', 'woocommerce' ) }
 						>
 							{ shell.navigation.map( ( item ) => (
