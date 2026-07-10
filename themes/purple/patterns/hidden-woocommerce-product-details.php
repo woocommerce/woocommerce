@@ -36,4 +36,4 @@
 <div style="height:var(--wp--preset--spacing--10)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
 
- <!-- wp:template-part {"slug":"single-product-info"} /-->
+<!-- wp:pattern {"slug":"purple/store-features-two-columns"} /-->

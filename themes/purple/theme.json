@@ -11,6 +11,10 @@
 		{
 			"name": "archive-product-without-filters",
 			"title": "Product Catalog (No Filters)"
+		},
+		{
+			"name": "template-blank",
+			"title": "Blank Template"
 		}
 	],
 	"settings": {
@@ -751,6 +755,11 @@
 			"area": "footer",
 			"name": "footer-alternative",
 			"title": "Footer alternative"
+		},
+		{
+			"area": "uncategorized",
+			"name": "mini-cart",
+			"title": "Mini Cart"
 		}
 	],
 	"version": 3,

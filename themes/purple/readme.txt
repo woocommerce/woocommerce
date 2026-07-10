@@ -3,7 +3,7 @@ Contributors: Automattic
 Requires at least: 6.8
 Tested up to: 7.0
 Requires PHP: 7.2
-Stable tag: 1.0
+Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,7 +18,7 @@ Purple is the new WooCommerce starter theme, fully built with blocks and ready f
 
 == Copyright ==
 
-Purple WordPress Theme, (C) 2025 Automattic
+Purple WordPress Theme, (C) 2026 Automattic
 Purple is distributed under the terms of the GNU GPL.
 
 This program is free software: you can redistribute it and/or modify
