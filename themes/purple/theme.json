@@ -760,6 +760,26 @@
 			"area": "uncategorized",
 			"name": "mini-cart",
 			"title": "Mini Cart"
+		},
+		{
+			"area": "uncategorized",
+			"name": "simple-product-add-to-cart-with-options",
+			"title": "Simple Product Add to Cart with Options"
+		},
+		{
+			"area": "uncategorized",
+			"name": "variable-product-add-to-cart-with-options",
+			"title": "Variable Product Add to Cart with Options"
+		},
+		{
+			"area": "uncategorized",
+			"name": "grouped-product-add-to-cart-with-options",
+			"title": "Grouped Product Add to Cart with Options"
+		},
+		{
+			"area": "uncategorized",
+			"name": "external-product-add-to-cart-with-options",
+			"title": "External Product Add to Cart with Options"
 		}
 	],
 	"version": 3,
