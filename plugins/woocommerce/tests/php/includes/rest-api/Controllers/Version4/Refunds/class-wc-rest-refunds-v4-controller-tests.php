@@ -106,6 +106,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->created_refunds = array();
 		$this->created_orders  = array();
 
+		self::disable_direct_product_attribute_lookup_updates();
 		parent::tearDown();
 		$this->disable_rest_api_v4_feature();
 	}
@@ -142,6 +143,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		$this->enable_rest_api_v4_feature();
 		parent::setUp();
+		self::enable_direct_product_attribute_lookup_updates();
 
 		// Create schema instances with dependency injection.
 		$this->refund_schema = new RefundSchema();
