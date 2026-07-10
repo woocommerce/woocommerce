@@ -63,9 +63,7 @@ ul.brand-thumbnails:not(.fluid-columns) li.first,
 	clear: both;
 }
 
-ul.brand-thumbnails:not(.fluid-columns) li.last,
-:where(.brand-thumbnails-description li.last),
-:where(.brand-thumbnails-description.columns-1 li) {
+ul.brand-thumbnails:not(.fluid-columns) li.last {
 	margin-right: 0;
 }
 
@@ -129,6 +127,11 @@ ul.brand-thumbnails.columns-6 li {
 	padding: 0;
 	position: relative;
 	text-align: center;
+}
+
+:where(.brand-thumbnails-description li.last),
+:where(.brand-thumbnails-description.columns-1 li) {
+	margin-right: 0;
 }
 
 :where(.brand-thumbnails-description li .term-thumbnail img) {
