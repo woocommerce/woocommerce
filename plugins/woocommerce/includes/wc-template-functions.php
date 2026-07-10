@@ -4259,7 +4259,16 @@ function wc_display_product_attributes( $product ) {
 				$value_name = esc_html( $attribute_value->name );
 
 				if ( $attribute_taxonomy->attribute_public ) {
-					$values[] = '<a href="' . esc_url( get_term_link( $attribute_value->term_id, $attribute->get_name() ) ) . '" rel="tag">' . $value_name . '</a>';
+					$term_link = get_term_link( $attribute_value->term_id, $attribute->get_name() );
+
+					// get_term_link() returns WP_Error when the term cannot be resolved (for
+					// example when a cached term list outlives the term). Passing that to
+					// esc_url() would raise a TypeError, so fall back to the plain value.
+					if ( is_wp_error( $term_link ) ) {
+						$values[] = $value_name;
+					} else {
+						$values[] = '<a href="' . esc_url( $term_link ) . '" rel="tag">' . $value_name . '</a>';
+					}
 				} else {
 					$values[] = $value_name;
 				}
