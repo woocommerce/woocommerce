@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
-use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Testing\Tools\FakeQueue;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -70,12 +69,12 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	 * Runs after all the tests.
 	 */
 	public static function tearDownAfterClass(): void {
-		parent::tearDownAfterClass();
-
 		foreach ( self::$attributes as $attribute ) {
 			wc_delete_attribute( $attribute['id'] );
 			unregister_taxonomy( $attribute['name'] );
 		}
+
+		parent::tearDownAfterClass();
 	}
 
 	/**
@@ -87,7 +86,8 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		parent::setUp();
 
 		$this->lookup_table_name = $wpdb->prefix . 'wc_product_attributes_lookup';
-		$this->sut               = new LookupDataStore();
+		delete_option( 'woocommerce_attribute_lookup_optimized_updates' );
+		$this->sut = new LookupDataStore();
 
 		$this->reset_legacy_proxy_mocks();
 		$this->register_legacy_proxy_class_mocks(
@@ -96,16 +96,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->get_instance_of( DataRegenerator::class )->truncate_lookup_table();
-	}
-
-	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		delete_option( 'woocommerce_attribute_lookup_optimized_updates' );
+		$this->empty_lookup_table();
 	}
 
 	/**
@@ -897,7 +888,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		$another_product_id = $product_id + 100;
 
 		// The product creation will have populated the table, but we want to start clean.
-		$this->get_instance_of( DataRegenerator::class )->truncate_lookup_table();
+		$this->empty_lookup_table();
 
 		$this->insert_lookup_table_data( $another_product_id, $another_product_id, $another_attribute['name'], $another_attribute['term_ids'][0], false, true );
 		if ( 'creation' !== $expected_action && 'deletion' !== $expected_action ) {
@@ -995,7 +986,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		$another_product_id = $variation_id + 100;
 
 		// The product creation will have populated the table, but we want to start clean.
-		$this->get_instance_of( DataRegenerator::class )->truncate_lookup_table();
+		$this->empty_lookup_table();
 
 		$this->insert_lookup_table_data( $another_product_id, $another_product_id, $another_attribute['name'], $another_attribute['term_ids'][0], false, true );
 		if ( 'creation' !== $expected_action && 'deletion' !== $expected_action ) {
@@ -1104,7 +1095,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		$another_product_id = $variation_id + 100;
 
 		// The product creation will have populated the table, but we want to start clean.
-		$this->get_instance_of( DataRegenerator::class )->truncate_lookup_table();
+		$this->empty_lookup_table();
 
 		$this->insert_lookup_table_data( $another_product_id, $another_product_id, $another_attribute['name'], $another_attribute['term_ids'][0], false, true );
 		if ( 'creation' !== $expected_action && 'deletion' !== $expected_action ) {
@@ -1226,6 +1217,15 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$queue = WC()->get_instance_of( \WC_Queue::class );
 		$queue->clear_methods_called();
+	}
+
+	/**
+	 * Empty the lookup table inside the current test transaction.
+	 */
+	private function empty_lookup_table(): void {
+		global $wpdb;
+
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_product_attributes_lookup" );
 	}
 
 	/**
