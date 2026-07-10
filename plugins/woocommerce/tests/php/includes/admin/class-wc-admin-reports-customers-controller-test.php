@@ -30,24 +30,110 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 	 *
 	 * @var WC_Product_Simple
 	 */
-	protected $product;
+	protected static $product;
 
 	/**
 	 * Registered customers.
 	 *
 	 * @var array
 	 */
-	protected $registered_customers = array();
+	protected static $registered_customers = array();
 
 	/**
 	 * Guest orders (no user_id).
 	 *
 	 * @var array
 	 */
-	protected $guest_orders = array();
+	protected static $guest_orders = array();
 
 	/**
-	 * Setup test reports customers data.
+	 * Set up shared report customer data.
+	 */
+	public static function wpSetUpBeforeClass() {
+		WC_Helper_Reports::reset_stats_dbs();
+		self::$registered_customers = array();
+		self::$guest_orders         = array();
+
+		// Create a test product.
+		self::$product = new WC_Product_Simple();
+		self::$product->set_name( 'Test Product' );
+		self::$product->set_regular_price( 25 );
+		self::$product->save();
+
+		// Create registered customers with different names for search testing.
+		$customer1 = WC_Helper_Customer::create_customer( 'customer1', 'password', 'customer1@example.com' );
+		$customer1->set_first_name( 'John' );
+		$customer1->set_last_name( 'Doe' );
+		$customer1->set_billing_state( 'CA' );
+		$customer1->set_billing_country( 'US' );
+		$customer1->save();
+		self::$registered_customers[] = $customer1;
+
+		$customer2 = WC_Helper_Customer::create_customer( 'customer2', 'password', 'customer2@example.com' );
+		$customer2->set_first_name( 'Jane' );
+		$customer2->set_last_name( 'Smith' );
+		$customer2->set_billing_state( 'NY' );
+		$customer2->set_billing_country( 'US' );
+		$customer2->save();
+		self::$registered_customers[] = $customer2;
+
+		$customer3 = WC_Helper_Customer::create_customer( 'customer3', 'password', 'customer3@example.com' );
+		$customer3->set_first_name( 'Bob' );
+		$customer3->set_last_name( 'Johnson' );
+		$customer3->set_billing_state( 'CA' );
+		$customer3->set_billing_country( 'US' );
+		$customer3->save();
+		self::$registered_customers[] = $customer3;
+
+		// Create orders for registered customers with location data.
+		foreach ( self::$registered_customers as $index => $customer ) {
+			$order = WC_Helper_Order::create_order( $customer->get_id(), self::$product );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->set_total( 100 + ( $index * 50 ) );
+			$order->set_billing_state( $customer->get_billing_state() );
+			$order->set_billing_country( $customer->get_billing_country() );
+			$order->save();
+		}
+
+		// Create guest orders (no user_id) with different locations.
+		$guest_order1 = WC_Helper_Order::create_order( 0, self::$product );
+		$guest_order1->set_billing_email( 'guest1@example.com' );
+		$guest_order1->set_billing_first_name( 'Guest' );
+		$guest_order1->set_billing_last_name( 'Customer' );
+		$guest_order1->set_billing_state( 'TX' );
+		$guest_order1->set_billing_country( 'US' );
+		$guest_order1->set_status( OrderStatus::COMPLETED );
+		$guest_order1->set_total( 50 );
+		$guest_order1->save();
+		self::$guest_orders[] = $guest_order1;
+
+		$guest_order2 = WC_Helper_Order::create_order( 0, self::$product );
+		$guest_order2->set_billing_email( 'guest2@example.com' );
+		$guest_order2->set_billing_first_name( 'Guest' );
+		$guest_order2->set_billing_last_name( 'User' );
+		$guest_order2->set_billing_state( 'ON' );
+		$guest_order2->set_billing_country( 'CA' );
+		$guest_order2->set_status( OrderStatus::COMPLETED );
+		$guest_order2->set_total( 75 );
+		$guest_order2->save();
+		self::$guest_orders[] = $guest_order2;
+
+		// Sync all data to lookup tables.
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+	}
+
+	/**
+	 * Clean up shared report customer data.
+	 */
+	public static function wpTearDownAfterClass() {
+		WC_Helper_Reports::reset_stats_dbs();
+		self::$product              = null;
+		self::$registered_customers = array();
+		self::$guest_orders         = array();
+	}
+
+	/**
+	 * Set up authentication for each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
@@ -59,74 +145,6 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		wp_set_current_user( $this->user );
-		WC_Helper_Reports::reset_stats_dbs();
-
-		// Create a test product.
-		$this->product = new WC_Product_Simple();
-		$this->product->set_name( 'Test Product' );
-		$this->product->set_regular_price( 25 );
-		$this->product->save();
-
-		// Create registered customers with different names for search testing.
-		$customer1 = WC_Helper_Customer::create_customer( 'customer1', 'password', 'customer1@example.com' );
-		$customer1->set_first_name( 'John' );
-		$customer1->set_last_name( 'Doe' );
-		$customer1->set_billing_state( 'CA' );
-		$customer1->set_billing_country( 'US' );
-		$customer1->save();
-		$this->registered_customers[] = $customer1;
-
-		$customer2 = WC_Helper_Customer::create_customer( 'customer2', 'password', 'customer2@example.com' );
-		$customer2->set_first_name( 'Jane' );
-		$customer2->set_last_name( 'Smith' );
-		$customer2->set_billing_state( 'NY' );
-		$customer2->set_billing_country( 'US' );
-		$customer2->save();
-		$this->registered_customers[] = $customer2;
-
-		$customer3 = WC_Helper_Customer::create_customer( 'customer3', 'password', 'customer3@example.com' );
-		$customer3->set_first_name( 'Bob' );
-		$customer3->set_last_name( 'Johnson' );
-		$customer3->set_billing_state( 'CA' );
-		$customer3->set_billing_country( 'US' );
-		$customer3->save();
-		$this->registered_customers[] = $customer3;
-
-		// Create orders for registered customers with location data.
-		foreach ( $this->registered_customers as $index => $customer ) {
-			$order = WC_Helper_Order::create_order( $customer->get_id(), $this->product );
-			$order->set_status( OrderStatus::COMPLETED );
-			$order->set_total( 100 + ( $index * 50 ) );
-			$order->set_billing_state( $customer->get_billing_state() );
-			$order->set_billing_country( $customer->get_billing_country() );
-			$order->save();
-		}
-
-		// Create guest orders (no user_id) with different locations.
-		$guest_order1 = WC_Helper_Order::create_order( 0, $this->product );
-		$guest_order1->set_billing_email( 'guest1@example.com' );
-		$guest_order1->set_billing_first_name( 'Guest' );
-		$guest_order1->set_billing_last_name( 'Customer' );
-		$guest_order1->set_billing_state( 'TX' );
-		$guest_order1->set_billing_country( 'US' );
-		$guest_order1->set_status( OrderStatus::COMPLETED );
-		$guest_order1->set_total( 50 );
-		$guest_order1->save();
-		$this->guest_orders[] = $guest_order1;
-
-		$guest_order2 = WC_Helper_Order::create_order( 0, $this->product );
-		$guest_order2->set_billing_email( 'guest2@example.com' );
-		$guest_order2->set_billing_first_name( 'Guest' );
-		$guest_order2->set_billing_last_name( 'User' );
-		$guest_order2->set_billing_state( 'ON' );
-		$guest_order2->set_billing_country( 'CA' );
-		$guest_order2->set_status( OrderStatus::COMPLETED );
-		$guest_order2->set_total( 75 );
-		$guest_order2->save();
-		$this->guest_orders[] = $guest_order2;
-
-		// Sync all data to lookup tables.
-		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 	}
 
 	/**
@@ -804,7 +822,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 	 * @testdox Should consolidate numeric name_includes IDs into customers param.
 	 */
 	public function test_name_includes_with_customer_ids(): void {
-		$customer_id = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
+		$customer_id = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[0]->get_id() );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
@@ -825,8 +843,8 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 	 * @testdox Should consolidate numeric email_includes IDs into customers param.
 	 */
 	public function test_email_includes_with_customer_ids(): void {
-		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
-		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[1]->get_id() );
+		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[0]->get_id() );
+		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[1]->get_id() );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
@@ -846,8 +864,8 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 	 * @testdox Should filter by customers_exclude param.
 	 */
 	public function test_customers_exclude(): void {
-		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
-		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[1]->get_id() );
+		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[0]->get_id() );
+		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[1]->get_id() );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
@@ -869,7 +887,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 	 * @testdox Should consolidate numeric exclude IDs into customers_exclude param.
 	 */
 	public function test_email_excludes_with_customer_ids(): void {
-		$customer_id = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
+		$customer_id = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[0]->get_id() );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
@@ -890,8 +908,8 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 	 * @testdox Should intersect include sets when match=all.
 	 */
 	public function test_consolidation_match_all_intersection(): void {
-		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
-		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[1]->get_id() );
+		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[0]->get_id() );
+		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[1]->get_id() );
 
 		$args = CustomersController::consolidate_customer_id_filters(
 			array(
@@ -914,8 +932,8 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 	 * @testdox Should union include sets when match=any.
 	 */
 	public function test_consolidation_match_any_union(): void {
-		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
-		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[1]->get_id() );
+		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[0]->get_id() );
+		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[1]->get_id() );
 
 		$args = CustomersController::consolidate_customer_id_filters(
 			array(
