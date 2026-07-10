@@ -617,12 +617,13 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		// Search using CRUD.
 		if ( ! empty( $query_vars['s'] ) ) {
+			$search_term                  = wc_clean( wp_unslash( $query_vars['s'] ) );
 			$data_store                   = WC_Data_Store::load( 'product' );
-			$ids                          = $data_store->search_products( wc_clean( wp_unslash( $query_vars['s'] ) ), '', true, true );
+			$ids                          = $data_store->search_products( $search_term, '', true, true );
 			$query_vars['post__in']       = array_merge( $ids, array( 0 ) );
 			$query_vars['product_search'] = true;
 			if ( empty( $query_vars['orderby'] ) ) {
-				$query_vars['orderby'] = 'post__in';
+				$query_vars['product_search_term'] = $search_term;
 			}
 			unset( $query_vars['s'] );
 		}
@@ -631,13 +632,39 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Undocumented function
+	 * Prioritize title matches in unsorted product searches.
 	 *
 	 * @param array    $args  Array of SELECT statement pieces (from, where, etc).
 	 * @param WP_Query $query WP_Query instance.
 	 * @return array
 	 */
 	public function posts_clauses( $args, $query ) {
+		$search_term = $query->get( 'product_search_term' );
+		if ( ! $query->get( 'product_search' ) || ! is_string( $search_term ) || '' === $search_term ) {
+			return $args;
+		}
+
+		global $wpdb;
+
+		$title_match_queries = array();
+		$search_terms        = preg_split( '/\s+or\s+/i', $search_term );
+		if ( ! $search_terms ) {
+			return $args;
+		}
+
+		foreach ( $search_terms as $term ) {
+			$term = trim( $term, "\"' " );
+			if ( '' !== $term ) {
+				$title_match_queries[] = $wpdb->prepare(
+					"{$wpdb->posts}.post_title LIKE %s",
+					'%' . $wpdb->esc_like( $term ) . '%'
+				);
+			}
+		}
+
+		if ( $title_match_queries ) {
+			$args['orderby'] = 'CASE WHEN (' . implode( ' OR ', $title_match_queries ) . ") THEN 0 ELSE 1 END, {$wpdb->posts}.post_title ASC";
+		}
 
 		return $args;
 	}
