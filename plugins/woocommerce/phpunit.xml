@@ -23,6 +23,11 @@
 			<directory suffix=".php">./tests/php</directory>
 			<exclude>./tests/php/helpers</exclude>
 			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
+			<!-- Email-template fixtures are plain PHP that emit markup at
+			     include-time (top-level HTML and `echo`). PHPUnit's directory
+			     discovery `require`s every matched `.php` file, so leaving them
+			     in would print their output to stdout during suite construction. -->
+			<exclude>./tests/php/src/Internal/EmailEditor/WCTransactionalEmails/fixtures</exclude>
 			<!-- Enumerated rather than a blanket ./tests/php/src/Api, so a new
 			     ./tests/php/src/Api/<X>/ subdir surfaces in this suite instead
 			     of being silently dropped from every suite but wc-phpunit-full.
@@ -57,6 +62,11 @@
 			<directory suffix=".php">./tests/php</directory>
 			<exclude>./tests/php/helpers</exclude>
 			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
+			<!-- Email-template fixtures are plain PHP that emit markup at
+			     include-time (top-level HTML and `echo`). PHPUnit's directory
+			     discovery `require`s every matched `.php` file, so leaving them
+			     in would print their output to stdout during suite construction. -->
+			<exclude>./tests/php/src/Internal/EmailEditor/WCTransactionalEmails/fixtures</exclude>
 			<exclude>./tests/php/src/Api/Infrastructure</exclude>
 			<exclude>./tests/php/src/Api/Queries</exclude>
 			<exclude>./tests/php/src/Api/Mutations</exclude>
@@ -67,6 +77,11 @@
 			<directory suffix=".php">./tests/php</directory>
 			<exclude>./tests/php/helpers</exclude>
 			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
+			<!-- Email-template fixtures are plain PHP that emit markup at
+			     include-time (top-level HTML and `echo`). PHPUnit's directory
+			     discovery `require`s every matched `.php` file, so leaving them
+			     in would print their output to stdout during suite construction. -->
+			<exclude>./tests/php/src/Internal/EmailEditor/WCTransactionalEmails/fixtures</exclude>
 		</testsuite>
 	</testsuites>
 	<listeners>
