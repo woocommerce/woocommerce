@@ -1157,7 +1157,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @testdox Variable add-to-cart skips the gallery snapshot when the feature is off.
 	 */
 	public function test_woocommerce_variable_add_to_cart_skips_gallery_snapshot_when_feature_off() {
-		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
+		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'no' );
 
 		$inline_js = $this->capture_variable_add_to_cart_inline_js();
 
