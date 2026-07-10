@@ -21,6 +21,13 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
+
+	/**
 	 * Stores the original COT state.
 	 *
 	 * @var bool
@@ -34,7 +41,8 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		parent::setUp();
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
-		$this->setup_cot();
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		$this->toggle_cot_feature_and_usage( true );
 	}
 
