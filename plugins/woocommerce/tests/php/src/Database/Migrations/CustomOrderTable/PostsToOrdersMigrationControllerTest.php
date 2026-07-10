@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Testing\Tools\DynamicDecorator;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use WC_DateTime;
 
@@ -32,23 +33,81 @@ class PostsToOrdersMigrationControllerTest extends \WC_Unit_Test_Case {
 	private $executed_transaction_statements;
 
 	/**
+	 * Whether HPOS was authoritative before the test.
+	 *
+	 * @var bool
+	 */
+	private $previous_hpos_state;
+
+	/**
+	 * Original migration transaction option.
+	 *
+	 * @var mixed
+	 */
+	private $previous_transactions_option;
+
+	/**
+	 * Original migration transaction isolation option.
+	 *
+	 * @var mixed
+	 */
+	private $previous_isolation_option;
+
+	/**
+	 * Original database session SQL mode.
+	 *
+	 * @var string
+	 */
+	private $previous_sql_mode;
+
+	/**
 	 * Setup data_store and sut.
 	 */
 	public function setUp(): void {
+		global $wpdb;
+
 		parent::setUp();
+
+		$this->previous_hpos_state          = OrderUtil::custom_orders_table_usage_is_enabled();
+		$this->previous_transactions_option = get_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, null );
+		$this->previous_isolation_option    = get_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, null );
+		$this->previous_sql_mode            = $wpdb->get_var( 'SELECT @@SESSION.sql_mode' );
+
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		OrderHelper::toggle_cot_feature_and_usage( false );
 		OrderHelper::create_order_custom_table_if_not_exist();
 		$this->data_store = wc_get_container()->get( OrdersTableDataStore::class );
 		$this->sut        = wc_get_container()->get( PostsToOrdersMigrationController::class );
-		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 	}
 
 	/**
 	 * Run after each test.
 	 */
 	public function tearDown(): void {
+		global $wpdb;
+
+		$wpdb->suppress_errors( false );
+		$wpdb->query( $wpdb->prepare( 'SET SESSION sql_mode = %s', $this->previous_sql_mode ) );
+		$this->restore_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, $this->previous_transactions_option );
+		$this->restore_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, $this->previous_isolation_option );
+		OrderHelper::toggle_cot_feature_and_usage( $this->previous_hpos_state );
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
 		parent::tearDown();
-		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'no' );
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+	}
+
+	/**
+	 * Restore an option to its value before the test, including nonexistence.
+	 *
+	 * @param string $option_name Option name.
+	 * @param mixed  $previous_value Original option value, or null when absent.
+	 */
+	private function restore_option( string $option_name, $previous_value ): void {
+		if ( null === $previous_value ) {
+			delete_option( $option_name );
+		} else {
+			update_option( $option_name, $previous_value );
+		}
 	}
 
 	/**
@@ -822,25 +881,28 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$sql_mode = $wpdb->get_var( 'SELECT @@sql_mode' );
 
-		// Set SQL mode to strict to disallow 0 dates.
-		$wpdb->query( "SET sql_mode = 'TRADITIONAL'" );
+		try {
+			// Set SQL mode to strict to disallow 0 dates.
+			$wpdb->query( "SET sql_mode = 'TRADITIONAL'" );
 
-		// Assert that strict mode was indeed enabled, by trying to insert 0 date.
-		$orders_table = OrdersTableDataStore::get_orders_table_name();
-		$wpdb->suppress_errors();
+			// Assert that strict mode was indeed enabled, by trying to insert 0 date.
+			$orders_table = OrdersTableDataStore::get_orders_table_name();
+			$wpdb->suppress_errors();
 
-		// phpcs:ignore -- Ignoring this error because we are testing for it.
-		$result = $wpdb->query( "INSERT INTO $orders_table (date_created_gmt) VALUES ('0000-00-00 00:00:00')" );
-		$this->assertFalse( $result );
-		$wpdb->suppress_errors( false );
+			// phpcs:ignore -- Ignoring this error because we are testing for it.
+			$result = $wpdb->query( "INSERT INTO $orders_table (date_created_gmt) VALUES ('0000-00-00 00:00:00')" );
+			$this->assertFalse( $result );
+			$wpdb->suppress_errors( false );
 
-		$this->sut->migrate_order( $order->get_id() );
+			$this->sut->migrate_order( $order->get_id() );
 
-		$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
-		$this->assertEmpty( $errors ); // _customer_user_agent
-
-		// phpcs:ignore -- Hardcoded value.
-		$wpdb->query( "SET sql_mode = '$sql_mode' " );
+			$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
+			$this->assertEmpty( $errors );
+		} finally {
+			$wpdb->suppress_errors( false );
+			// phpcs:ignore -- Hardcoded value.
+			$wpdb->query( "SET sql_mode = '$sql_mode' " );
+		}
 	}
 
 	/**
