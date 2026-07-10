@@ -203,7 +203,7 @@ jobs:
         if: ${{ matrix.testEnv.shouldCreate }}
         # `wp-env start` fails on transient network timeouts from several subsystems:
         # composer fetching packagist inside the Docker build ("curl error 28"), wp-env's
-        # own `got` client downloading WordPress core ("ETIMEDOUT"), and the Docker daemon
+        # own `got` client downloading WordPress core ("ETIMEDOUT"/"socket hang up"), and the Docker daemon
         # pulling images from Docker Hub ("context deadline exceeded"). Retry the whole
         # start to ride out those blips -- BuildKit reuses layers that already succeeded,
         # so a retry only re-runs whatever failed. Each retried attempt emits a
@@ -220,7 +220,7 @@ jobs:
             # patterns below, so reason= is for monitoring only, not a retry gate.
             if grep -qF 'curl error 28' "$log"; then reason=packagist
             elif grep -qE 'registry-1\.docker\.io|context deadline exceeded' "$log"; then reason=dockerhub
-            elif grep -qF 'ETIMEDOUT' "$log"; then reason=wordpress
+            elif grep -qE 'ETIMEDOUT|socket hang up|ECONNRESET' "$log"; then reason=wordpress
             else reason=unknown
             fi
             if [ "$attempt" -ge "$max_attempts" ]; then
