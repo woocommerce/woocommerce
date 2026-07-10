@@ -645,6 +645,12 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 			}
 		);
 
+		// Rebuild the data store so its injected logger (captured in init() via wc_get_logger())
+		// is the fake logger added above, and orders created below use this instance.
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$container->get( OrdersTableDataStore::class );
+
 		$order = new WC_Order();
 		$order->add_meta_data( 'custom_meta_key', 'custom_value', true );
 		$order->save();
@@ -706,6 +712,12 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 				return $fake_logger;
 			}
 		);
+
+		// Rebuild the data store so its injected logger (captured in init() via wc_get_logger())
+		// is the fake logger added above, and orders created below use this instance.
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$container->get( OrdersTableDataStore::class );
 
 		$order = new WC_Order();
 		$order->add_meta_data( 'custom_meta_key', 'custom_value', true );
