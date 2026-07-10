@@ -481,7 +481,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		$existing_tables = array_unique( array_intersect( $order_tables, $wpdb->get_col( 'SHOW TABLES' ) ) );
 		foreach ( $existing_tables as $table ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->query( "TRUNCATE TABLE {$table}" );
+			$wpdb->query( "DELETE FROM {$table}" );
 		}
 	}
 }
