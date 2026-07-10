@@ -126,6 +126,20 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Get the IDs of the products owned by this test class.
+	 *
+	 * @return int[]
+	 */
+	private function get_fixture_product_ids(): array {
+		return array_map(
+			static function ( $product ) {
+				return $product->get_id();
+			},
+			self::$products
+		);
+	}
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
@@ -603,11 +617,12 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_collection_param_include_meta() {
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_param( 'include_meta', 'test1' );
+		$request->set_param( 'include', $this->get_fixture_product_ids() );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_data = $response->get_data();
-		$this->assertCount( 7, $response_data );
+		$this->assertCount( count( self::$products ), $response_data );
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
@@ -628,11 +643,12 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_collection_param_include_meta_empty() {
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_param( 'include_meta', '' );
+		$request->set_param( 'include', $this->get_fixture_product_ids() );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_data = $response->get_data();
-		$this->assertCount( 7, $response_data );
+		$this->assertCount( count( self::$products ), $response_data );
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
@@ -653,11 +669,12 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_collection_param_exclude_meta() {
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_param( 'exclude_meta', 'test1' );
+		$request->set_param( 'include', $this->get_fixture_product_ids() );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_data = $response->get_data();
-		$this->assertCount( 7, $response_data );
+		$this->assertCount( count( self::$products ), $response_data );
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
@@ -679,11 +696,12 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_param( 'include_meta', 'test1' );
 		$request->set_param( 'exclude_meta', 'test1' );
+		$request->set_param( 'include', $this->get_fixture_product_ids() );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_data = $response->get_data();
-		$this->assertCount( 7, $response_data );
+		$this->assertCount( count( self::$products ), $response_data );
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
