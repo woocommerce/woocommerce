@@ -294,7 +294,7 @@ jobs:
     name: Report SVN state after failure
     runs-on: ubuntu-latest
     needs: [get-and-validate-release-asset, commit]
-    if: failure() && github.event.inputs.confirm-update == 'true'
+    if: failure() && github.event.inputs.confirm-update == 'true' && needs.get-and-validate-release-asset.outputs.release_tag != ''
     permissions: {}
     env:
       RELEASE_TAG: ${{ needs.get-and-validate-release-asset.outputs.release_tag }}
@@ -305,10 +305,6 @@ jobs:
 
       - name: Check live SVN state
         run: |
-          if [ -z "$RELEASE_TAG" ]; then
-            exit 0
-          fi
-
           trunk_version=$( svn cat "$SVN_URL/trunk/woocommerce.php" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" 2>/dev/null | grep -oP '(?<=Version: )(.+)' | head -n1 )
 
           tag_exists="no"
