@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a fatal TypeError on the product page when get_term_link() returns a WP_Error for an attribute term that can no longer be resolved; render the value as plain text instead.
