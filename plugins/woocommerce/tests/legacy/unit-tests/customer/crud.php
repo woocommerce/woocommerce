@@ -310,7 +310,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer_id = $customer->get_id();
 		$last        = (int) get_user_meta( $customer_id, 'last_update', true ) - 1;
 		update_user_meta( $customer_id, 'last_update', $last );
-		$customer    = new WC_Customer( $customer_id );
+		$customer = new WC_Customer( $customer_id );
 		$this->assertEquals( $last, $customer->get_date_modified()->getOffsetTimestamp() );
 		$customer->set_billing_address( '1234 Some St.' );
 		$customer->save();

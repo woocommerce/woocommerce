@@ -173,11 +173,12 @@ class WC_Lazy_REST_Server extends WP_Test_Spy_REST_Server {
 	}
 }
 
+// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound -- Test server and its base case are intentionally colocated.
 /**
  * Base class for REST related unit test classes.
  */
-// phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound -- Test server and its base case are intentionally colocated.
 class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
+	// phpcs:enable Generic.Files.OneObjectStructurePerFile.MultipleFound
 
 	/**
 	 * @var WP_REST_Server
