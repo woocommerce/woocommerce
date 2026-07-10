@@ -75,53 +75,75 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	protected static $products = array();
 
 	/**
+	 * Run class fixture changes without leaving asynchronous lookup actions behind.
+	 *
+	 * @param callable $callback Fixture lifecycle callback.
+	 */
+	private static function with_direct_attribute_lookup_updates( callable $callback ): void {
+		$enable_direct_updates = static function () {
+			return 'yes';
+		};
+		add_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', $enable_direct_updates );
+
+		try {
+			$callback();
+		} finally {
+			remove_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', $enable_direct_updates );
+		}
+	}
+
+	/**
 	 * Create products for tests.
 	 *
 	 * @return void
 	 */
 	public static function wpSetUpBeforeClass() {
-		self::$products[] = WC_Helper_Product::create_simple_product(
-			true,
-			array(
-				'name' => 'Pancake',
-				'sku'  => 'pancake-1',
-			)
-		);
-		self::$products[] = WC_Helper_Product::create_simple_product(
-			true,
-			array(
-				'name' => 'Waffle 1',
-				'sku'  => 'pancake-2',
-			)
-		);
-		self::$products[] = WC_Helper_Product::create_simple_product(
-			true,
-			array(
-				'name' => 'French Toast',
-				'sku'  => 'waffle-2',
-			)
-		);
-		self::$products[] = WC_Helper_Product::create_simple_product(
-			true,
-			array(
-				'name' => 'Waffle 3',
-				'sku'  => 'waffle-3',
-			)
-		);
+		self::with_direct_attribute_lookup_updates(
+			static function () {
+				self::$products[] = WC_Helper_Product::create_simple_product(
+					true,
+					array(
+						'name' => 'Pancake',
+						'sku'  => 'pancake-1',
+					)
+				);
+				self::$products[] = WC_Helper_Product::create_simple_product(
+					true,
+					array(
+						'name' => 'Waffle 1',
+						'sku'  => 'pancake-2',
+					)
+				);
+				self::$products[] = WC_Helper_Product::create_simple_product(
+					true,
+					array(
+						'name' => 'French Toast',
+						'sku'  => 'waffle-2',
+					)
+				);
+				self::$products[] = WC_Helper_Product::create_simple_product(
+					true,
+					array(
+						'name' => 'Waffle 3',
+						'sku'  => 'waffle-3',
+					)
+				);
 
-		$grouped_product       = WC_Helper_Product::create_grouped_product();
-		$children_products_ids = $grouped_product->get_children();
+				$grouped_product       = WC_Helper_Product::create_grouped_product();
+				$children_products_ids = $grouped_product->get_children();
 
-		foreach ( $children_products_ids as $child_product_id ) {
-			self::$products[] = wc_get_product( $child_product_id );
-		}
-		self::$products[] = $grouped_product;
+				foreach ( $children_products_ids as $child_product_id ) {
+					self::$products[] = wc_get_product( $child_product_id );
+				}
+				self::$products[] = $grouped_product;
 
-		foreach ( self::$products as $product ) {
-			$product->add_meta_data( 'test1', 'test1', true );
-			$product->add_meta_data( 'test2', 'test2', true );
-			$product->save();
-		}
+				foreach ( self::$products as $product ) {
+					$product->add_meta_data( 'test1', 'test1', true );
+					$product->add_meta_data( 'test2', 'test2', true );
+					$product->save();
+				}
+			}
+		);
 	}
 
 	/**
@@ -130,9 +152,13 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpTearDownAfterClass() {
-		foreach ( self::$products as $product ) {
-			WC_Helper_Product::delete_product( $product->get_id() );
-		}
+		self::with_direct_attribute_lookup_updates(
+			static function () {
+				foreach ( self::$products as $product ) {
+					WC_Helper_Product::delete_product( $product->get_id() );
+				}
+			}
+		);
 	}
 
 	/**
@@ -167,7 +193,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 		parent::setUp();
 		$this->endpoint = new ProductsController();
 		$this->reset_rest_server();
-		$this->user     = $this->factory->user->create(
+		$this->user = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
@@ -748,7 +774,8 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 
 		$response_data       = $this->server->response_to_data( $response, false );
 		$encoded_data_string = wp_json_encode( $response_data );
-		$decoded_data_object = json_decode( $encoded_data_string, false ); // Ensure object instead of associative array.
+		// Ensure object instead of associative array.
+		$decoded_data_object = json_decode( $encoded_data_string, false );
 
 		$this->assertIsArray( $decoded_data_object[0]->meta_data );
 	}
@@ -2187,7 +2214,8 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 		$create_request_for_failure->set_body_params(
 			array(
 				'name'          => 'New Product Attempt That Fails',
-				'sku'           => $original_product_sku, // Duplicate SKU.
+				// Duplicate SKU.
+				'sku'           => $original_product_sku,
 				'type'          => 'simple',
 				'regular_price' => '20',
 				'images'        => array(
