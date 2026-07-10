@@ -18,7 +18,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
-use Mockery\Adapter\Phpunit\MockeryTestCase;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use WC_Gateway_BACS;
 
 /**
@@ -26,7 +26,8 @@ use WC_Gateway_BACS;
  *
  * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r, WooCommerce.Commenting.CommentHooks.MissingHookComment
  */
-class Checkout extends MockeryTestCase {
+class Checkout extends \WP_Test_REST_TestCase {
+	use MockeryPHPUnitIntegration;
 
 	const TEST_COUPON_CODE = 'test_coupon_code';
 	/**
@@ -37,6 +38,7 @@ class Checkout extends MockeryTestCase {
 
 		add_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ), 10, 4 );
 
+		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
@@ -118,8 +120,6 @@ class Checkout extends MockeryTestCase {
 	 * Tear down Rest API server.
 	 */
 	protected function tearDown(): void {
-		parent::tearDown();
-
 		remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
 
 		remove_all_filters( 'woocommerce_get_country_locale' );
@@ -151,6 +151,8 @@ class Checkout extends MockeryTestCase {
 		WC()->session->destroy_session();
 
 		$GLOBALS['wp_rest_server'] = null;
+
+		parent::tearDown();
 	}
 
 	/**
