@@ -30,11 +30,11 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	private $endpoint;
 
 	/**
-	 * User ID.
+	 * Shared admin user ID used for REST authentication across the class.
 	 *
 	 * @var int
 	 */
-	private $user_id;
+	protected static $user_id;
 
 	/**
 	 * Customer schema instance.
@@ -79,6 +79,15 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Create the shared admin user once for the whole class.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user_id = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
@@ -95,12 +104,7 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->endpoint = new CustomersController();
 		$this->endpoint->init( $this->customer_schema, $collection_query, $update_utils );
 
-		$this->user_id = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 	}
 
 	/**
@@ -163,6 +167,22 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->created_customers[] = $customer->get_id();
 
 		return $customer;
+	}
+
+	/**
+	 * Backdate a customer's registration timestamp so ordering-by-registration-date tests are
+	 * deterministic without waiting on the real clock.
+	 *
+	 * @param int $user_id     User ID.
+	 * @param int $seconds_ago How many seconds before "now" the user should appear to have registered.
+	 */
+	private function set_user_registered( int $user_id, int $seconds_ago ): void {
+		wp_update_user(
+			array(
+				'ID'              => $user_id,
+				'user_registered' => gmdate( 'Y-m-d H:i:s', time() - $seconds_ago ),
+			)
+		);
 	}
 
 	/**
@@ -1044,15 +1064,15 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		// Wait a moment to ensure different registration times.
-		sleep( 1 );
-
 		$customer2 = $this->create_test_customer(
 			array(
 				'email'    => 'orderby2@example.com',
 				'username' => 'orderby2',
 			)
 		);
+
+		$this->set_user_registered( $customer1->get_id(), 200 );
+		$this->set_user_registered( $customer2->get_id(), 100 );
 
 		// Test ordering by ID ascending.
 		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
@@ -1346,9 +1366,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		// Wait to ensure different registration times.
-		sleep( 1 );
-
 		$customer2 = $this->create_test_customer(
 			array(
 				'email'    => 'orderbydefault2@example.com',
@@ -1356,14 +1373,16 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		sleep( 1 );
-
 		$customer3 = $this->create_test_customer(
 			array(
 				'email'    => 'orderbydefault3@example.com',
 				'username' => 'orderbydefault3',
 			)
 		);
+
+		$this->set_user_registered( $customer1->get_id(), 300 );
+		$this->set_user_registered( $customer2->get_id(), 200 );
+		$this->set_user_registered( $customer3->get_id(), 100 );
 
 		// Make request without orderby parameter.
 		$request  = new WP_REST_Request( 'GET', '/wc/v4/customers' );
@@ -1416,8 +1435,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 		update_user_meta( $customer1->get_id(), 'wc_order_count_' . $site_specific_key, 10 );
 
-		sleep( 1 );
-
 		$customer2 = $this->create_test_customer(
 			array(
 				'email'    => 'orderbypresent2@example.com',
@@ -1425,8 +1442,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 		update_user_meta( $customer2->get_id(), 'wc_order_count_' . $site_specific_key, 25 );
-
-		sleep( 1 );
 
 		$customer3 = $this->create_test_customer(
 			array(
@@ -1530,8 +1545,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		sleep( 1 );
-
 		$customer2 = $this->create_test_customer(
 			array(
 				'email'    => 'registered2@example.com',
@@ -1539,14 +1552,16 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		sleep( 1 );
-
 		$customer3 = $this->create_test_customer(
 			array(
 				'email'    => 'registered3@example.com',
 				'username' => 'registered3',
 			)
 		);
+
+		$this->set_user_registered( $customer1->get_id(), 300 );
+		$this->set_user_registered( $customer2->get_id(), 200 );
+		$this->set_user_registered( $customer3->get_id(), 100 );
 
 		// Test with orderby=registered_date.
 		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );

@@ -69,6 +69,7 @@ test.describe( `${ blockData.name } Block`, () => {
 
 	test( 'should compound quantity when rapidly clicking same button', async ( {
 		frontendUtils,
+		page,
 	} ) => {
 		const blocks = await frontendUtils.getBlockByName( blockData.slug );
 		const block = blocks.first();
@@ -77,10 +78,19 @@ test.describe( `${ blockData.name } Block`, () => {
 			state: 'detached',
 		} );
 
+		// Set up waitForResponse BEFORE the clicks to avoid a race condition:
+		// on fast networks the batched Store API request may complete before we
+		// start listening. Asserting before the request settles is what makes
+		// this test flaky. Mirrors the add-to-cart-with-options rapid-click test.
+		const batchPromise = page.waitForResponse( '**/wc/store/v1/batch**' );
+
 		// Click the same button 3 times rapidly.
 		await block.click();
 		await block.click();
 		await block.click();
+
+		// Wait for the batched add-to-cart request to complete before asserting.
+		await batchPromise;
 
 		// All 3 clicks should compound to "3 in cart".
 		await expect( block.getByRole( 'button' ) ).toHaveText( '3 in cart', {

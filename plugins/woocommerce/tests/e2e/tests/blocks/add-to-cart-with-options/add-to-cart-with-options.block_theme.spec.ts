@@ -8,7 +8,6 @@ import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
  */
 import AddToCartWithOptionsPage from './add-to-cart-with-options.page';
 import { ProductGalleryPage } from '../product-gallery/product-gallery.page';
-import config from '../../../../../client/admin/config/core.json';
 
 const test = base.extend< {
 	pageObject: AddToCartWithOptionsPage;
@@ -126,59 +125,53 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect( addToCartButton ).toHaveText( '4 in cart' );
 	} );
 
-	// This test only applies to the iAPI cart which uses batch requests.
-	// The legacy cart sends individual requests, not batched ones.
-	if ( config.features[ 'experimental-iapi-mini-cart' ] ) {
-		test( 'handles rapid add-to-cart clicks correctly', async ( {
-			page,
-			frontendUtils,
-			miniCartUtils,
-		} ) => {
-			// Go to shop page where iAPI Product Button is used in product listings.
-			await frontendUtils.goToShop();
+	test( 'handles rapid add-to-cart clicks correctly', async ( {
+		page,
+		frontendUtils,
+		miniCartUtils,
+	} ) => {
+		// Go to shop page where iAPI Product Button is used in product listings.
+		await frontendUtils.goToShop();
 
-			// Get the first Add to cart button on the page (Album product).
-			const addToCartButton = page.locator( 'text=Add to cart' ).first();
-			await expect( addToCartButton ).toBeVisible();
+		// Get the first Add to cart button on the page (Album product).
+		const addToCartButton = page.locator( 'text=Add to cart' ).first();
+		await expect( addToCartButton ).toBeVisible();
 
-			// Click the button 3 times rapidly without waiting between clicks.
-			// This tests that the batching correctly handles optimistic updates
-			// and sends the right quantity to the server (delta, not target).
-			// Without the fix, this would result in 1+2+3=6 items.
-			//
-			// Set up waitForResponse BEFORE the clicks to avoid a race condition.
-			// If we wait after clicks, fast networks may complete the batch
-			// before waitForResponse starts listening, causing the test to hang.
-			const batchPromise = page.waitForResponse(
-				'**/wc/store/v1/batch**'
-			);
-			await addToCartButton.click();
-			await addToCartButton.click();
-			await addToCartButton.click();
+		// Click the button 3 times rapidly without waiting between clicks.
+		// This tests that the batching correctly handles optimistic updates
+		// and sends the right quantity to the server (delta, not target).
+		// Without the fix, this would result in 1+2+3=6 items.
+		//
+		// Set up waitForResponse BEFORE the clicks to avoid a race condition.
+		// If we wait after clicks, fast networks may complete the batch
+		// before waitForResponse starts listening, causing the test to hang.
+		const batchPromise = page.waitForResponse( '**/wc/store/v1/batch**' );
+		await addToCartButton.click();
+		await addToCartButton.click();
+		await addToCartButton.click();
 
-			// Wait for all batch requests to complete.
-			await batchPromise;
+		// Wait for all batch requests to complete.
+		await batchPromise;
 
-			// Open mini cart and verify the count.
-			await miniCartUtils.openMiniCart();
+		// Open mini cart and verify the count.
+		await miniCartUtils.openMiniCart();
 
-			// Check the mini cart shows exactly 3 items.
-			// If the bug were present, it would show 6 (1+2+3).
-			const quantityInput = page.getByLabel(
-				'Quantity of Album in your cart.'
-			);
-			const quantity = await quantityInput.inputValue();
-			const quantityNum = parseInt( quantity, 10 );
+		// Check the mini cart shows exactly 3 items.
+		// If the bug were present, it would show 6 (1+2+3).
+		const quantityInput = page.getByLabel(
+			'Quantity of Album in your cart.'
+		);
+		const quantity = await quantityInput.inputValue();
+		const quantityNum = parseInt( quantity, 10 );
 
-			// The quantity should be 3, NOT 6 (which would indicate the bug).
-			// We use a soft assertion to account for any timing edge cases.
-			expect( quantityNum ).toBeLessThanOrEqual( 3 );
-			expect( quantityNum ).toBeGreaterThanOrEqual( 2 );
+		// The quantity should be 3, NOT 6 (which would indicate the bug).
+		// We use a soft assertion to account for any timing edge cases.
+		expect( quantityNum ).toBeLessThanOrEqual( 3 );
+		expect( quantityNum ).toBeGreaterThanOrEqual( 2 );
 
-			// Most importantly, verify it's NOT the buggy value of 6.
-			expect( quantityNum ).not.toBe( 6 );
-		} );
-	}
+		// Most importantly, verify it's NOT the buggy value of 6.
+		expect( quantityNum ).not.toBe( 6 );
+	} );
 
 	test( 'allows adding variable products to cart', async ( {
 		page,
@@ -620,11 +613,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 
 			await expect(
-				page.getByLabel(
-					config.features[ 'experimental-iapi-mini-cart' ]
-						? 'Number of items in the cart: 2'
-						: '2 items in cart'
-				)
+				page.getByLabel( 'Number of items in the cart: 2' )
 			).toBeVisible();
 		} );
 
@@ -692,11 +681,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await batchPromise;
 
 			await expect(
-				page.getByLabel(
-					config.features[ 'experimental-iapi-mini-cart' ]
-						? 'Number of items in the cart: 3'
-						: '3 items in cart'
-				)
+				page.getByLabel( 'Number of items in the cart: 3' )
 			).toBeVisible();
 		} );
 
@@ -737,11 +722,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			// Verify optimistic updates were applied, so the product that was
 			// successfully added to cart is counted.
 			await expect(
-				page.getByLabel(
-					config.features[ 'experimental-iapi-mini-cart' ]
-						? 'Number of items in the cart: 4'
-						: '4 items in cart'
-				)
+				page.getByLabel( 'Number of items in the cart: 4' )
 			).toBeVisible();
 		} );
 	} );
@@ -789,11 +770,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 
 			await expect(
-				page.getByLabel(
-					config.features[ 'experimental-iapi-mini-cart' ]
-						? 'Number of items in the cart: 2'
-						: '2 items in cart'
-				)
+				page.getByLabel( 'Number of items in the cart: 2' )
 			).toBeVisible();
 		} );
 
@@ -812,11 +789,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await addedToCartButton.click();
 
 			await expect(
-				page.getByLabel(
-					config.features[ 'experimental-iapi-mini-cart' ]
-						? 'Number of items in the cart: 4'
-						: '4 items in cart'
-				)
+				page.getByLabel( 'Number of items in the cart: 4' )
 			).toBeVisible();
 		} );
 
@@ -824,11 +797,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await page.reload();
 
 			await expect(
-				page.getByLabel(
-					config.features[ 'experimental-iapi-mini-cart' ]
-						? 'Number of items in the cart: 4'
-						: '4 items in cart'
-				)
+				page.getByLabel( 'Number of items in the cart: 4' )
 			).toBeVisible();
 		} );
 	} );
