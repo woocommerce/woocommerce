@@ -73,6 +73,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public static function setupBeforeClass(): void {
 		parent::setupBeforeClass();
+		self::enable_direct_product_attribute_lookup_updates();
 
 		self::$original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
@@ -109,12 +110,14 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			);
 			self::$created_fulfillment_ids[ $customer_order->get_id() ][] = $f->get_id();
 		}
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**
 	 * Destroys the test environment after all tests on this file are run.
 	 */
 	public static function tearDownAfterClass(): void {
+		self::enable_direct_product_attribute_lookup_updates();
 		// Delete the created orders and their fulfillments.
 		global $wpdb;
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillments;" );
@@ -132,6 +135,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		}
 
 		parent::tearDownAfterClass();
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**

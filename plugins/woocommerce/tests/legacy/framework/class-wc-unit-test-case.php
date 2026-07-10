@@ -35,6 +35,35 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	private static $code_hacker_temporary_disables_requested = 0;
 
 	/**
+	 * Stable filter used to run product attribute lookup updates synchronously.
+	 *
+	 * @var Closure|null
+	 */
+	private static $direct_product_attribute_lookup_updates_filter;
+
+	/**
+	 * Enable synchronous product attribute lookup updates for test fixtures.
+	 */
+	protected static function enable_direct_product_attribute_lookup_updates(): void {
+		if ( null === self::$direct_product_attribute_lookup_updates_filter ) {
+			self::$direct_product_attribute_lookup_updates_filter = static function () {
+				return 'yes';
+			};
+		}
+
+		add_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', self::$direct_product_attribute_lookup_updates_filter );
+	}
+
+	/**
+	 * Restore the product attribute lookup update mode after fixture work.
+	 */
+	protected static function disable_direct_product_attribute_lookup_updates(): void {
+		if ( null !== self::$direct_product_attribute_lookup_updates_filter ) {
+			remove_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', self::$direct_product_attribute_lookup_updates_filter );
+		}
+	}
+
+	/**
 	 * Increase the count of Code Hacker disable requests, and effectively disable it if the count was zero.
 	 * Does nothing if the code hacker wasn't enabled when the test suite started running.
 	 */
@@ -149,8 +178,13 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * Clean up after tests have run.
 	 */
 	public static function tearDownAfterClass(): void {
-		self::clear_hpos_orders();
-		parent::tearDownAfterClass();
+		self::enable_direct_product_attribute_lookup_updates();
+		try {
+			self::clear_hpos_orders();
+			parent::tearDownAfterClass();
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
 	}
 
 	/**

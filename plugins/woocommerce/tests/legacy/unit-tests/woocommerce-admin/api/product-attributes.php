@@ -31,10 +31,12 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 	}
 
 	public static function tearDownAfterClass(): void {
+		self::enable_direct_product_attribute_lookup_updates();
 		parent::tearDownAfterClass();
 		global $wpdb;
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies" );
 		$wpdb->query('commit');
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**
@@ -42,6 +44,7 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
+		self::enable_direct_product_attribute_lookup_updates();
 
 		// Use the test helper to populate some global attributes.
 		$product    = \WC_Helper_Product::create_variation_product();
@@ -86,6 +89,7 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 			)
 		);
 		$product_2->save();
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**

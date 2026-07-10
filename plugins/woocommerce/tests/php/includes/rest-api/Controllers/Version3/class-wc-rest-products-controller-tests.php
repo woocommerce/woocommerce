@@ -70,6 +70,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpSetUpBeforeClass( $factory ) {
+		self::enable_direct_product_attribute_lookup_updates();
 		self::$fixture_user = $factory->user->create( array( 'role' => 'administrator' ) );
 
 		self::$products[] = WC_Helper_Product::create_simple_product(
@@ -106,6 +107,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 			$product->add_meta_data( 'test2', 'test2', true );
 			$product->save();
 		}
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**
@@ -114,9 +116,11 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpTearDownAfterClass() {
+		self::enable_direct_product_attribute_lookup_updates();
 		foreach ( self::$products as $product ) {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**

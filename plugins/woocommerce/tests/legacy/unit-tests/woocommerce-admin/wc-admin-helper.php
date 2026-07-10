@@ -81,6 +81,7 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function setUp(): void {
+		self::enable_direct_product_attribute_lookup_updates();
 		parent::setUp();
 
 		// Create a product.
@@ -99,7 +100,9 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 		parent::tearDown();
 
 		// Clean up product.
+		self::enable_direct_product_attribute_lookup_updates();
 		WC_Helper_Product::delete_product( $this->product_id );
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**
