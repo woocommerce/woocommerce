@@ -91,8 +91,8 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	 */
 	public function test_get_stock_status_counts_with_default_query_using_postmeta_table() {
 		global $wpdb;
-		// Truncate the lookup table to confirm that the underlying query is targeting the correct postmeta table.
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->wc_product_meta_lookup}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// Empty the lookup table to confirm that the underlying query is targeting the correct postmeta table.
+		$wpdb->query( "DELETE FROM {$wpdb->wc_product_meta_lookup}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		update_option( 'woocommerce_product_lookup_table_is_generating', '1' );
 		$this->test_get_stock_status_counts_with( new \WP_Query( array( 'post_type' => 'product' ) ) );

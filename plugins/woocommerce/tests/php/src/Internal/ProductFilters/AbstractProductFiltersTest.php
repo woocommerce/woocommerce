@@ -48,25 +48,11 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 	protected $product_tags;
 
 	/**
-	 * Backup options.
-	 *
-	 * @var array
+	 * Ensure the lookup table exists before per-test transactions start.
 	 */
-	protected $backup_options;
-
-	/**
-	 * Runs before each test.
-	 */
-	public function setUp(): void {
-		parent::setUp();
-
-		$this->fixture_data = new FixtureData();
-
-		/**
-		 * Create the lookup table if it doesn't exist.
-		 * Unit tests can be run selectively, so we need to ensure the lookup table exists.
-		 */
+	public static function wpSetUpBeforeClass(): void {
 		global $wpdb;
+
 		$wpdb->query(
 			"
 			  CREATE TABLE IF NOT EXISTS {$wpdb->prefix}wc_product_attributes_lookup (
@@ -79,12 +65,25 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 			  );
 			"
 		);
+	}
 
-		$this->backup_options = array(
-			'woocommerce_attribute_lookup_enabled' => get_option( 'woocommerce_attribute_lookup_enabled' ),
-			'woocommerce_calc_taxes'               => get_option( 'woocommerce_calc_taxes' ),
-			'woocommerce_tax_display_shop'         => get_option( 'woocommerce_tax_display_shop' ),
-		);
+	/**
+	 * Remove custom-table rows not covered by WordPress's class cleanup.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		global $wpdb;
+
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_product_meta_lookup" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_product_attributes_lookup" );
+	}
+
+	/**
+	 * Runs before each test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->fixture_data = new FixtureData();
 
 		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'no' );
@@ -217,32 +216,23 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
-
-		$this->remove_all_attributes();
-		$this->remove_all_products();
-		$this->remove_all_product_categories();
-		$this->remove_all_product_tags();
-		$this->empty_lookup_tables();
-
-		foreach ( $this->backup_options as $option => $value ) {
-			if ( false === $value ) {
-				delete_option( $option );
-			} else {
-				update_option( $option, $value );
-			}
+		foreach ( array_keys( wc_get_attribute_taxonomy_ids() ) as $attribute_name ) {
+			$taxonomy_name = wc_attribute_taxonomy_name( wc_sanitize_taxonomy_name( $attribute_name ) );
+			unregister_taxonomy( $taxonomy_name );
 		}
 
-		wp_cache_flush();
+		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
+		\WC_Query::reset_chosen_attributes();
+		parent::tearDown();
 	}
 
 	/**
-	 * Truncate the lookup table.
+	 * Empty the lookup tables inside the current test transaction.
 	 */
 	private function empty_lookup_tables() {
 		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_product_meta_lookup" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_product_attributes_lookup" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_product_meta_lookup" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_product_attributes_lookup" );
 	}
 
 	/**
@@ -289,24 +279,6 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 			}
 
 			$product->delete( true );
-		}
-	}
-
-	/**
-	 * Remove all product taxonomies.
-	 */
-	private function remove_all_product_categories() {
-		foreach ( $this->product_categories as $term ) {
-			wp_delete_term( $term['term_id'], 'product_cat' );
-		}
-	}
-
-	/**
-	 * Remove all product tags.
-	 */
-	private function remove_all_product_tags() {
-		foreach ( $this->product_tags as $term ) {
-			wp_delete_term( $term['term_id'], 'product_tag' );
 		}
 	}
 
