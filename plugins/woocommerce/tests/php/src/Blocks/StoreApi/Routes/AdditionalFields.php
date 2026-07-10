@@ -23,6 +23,13 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	use StoreApiRestTestCaseTrait;
 
 	/**
+	 * Product IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
+
+	/**
 	 * Fields to register.
 	 *
 	 * @var array
@@ -43,6 +50,52 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	protected $products;
 
 	/**
+	 * Create immutable catalog rows shared by all test methods.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::$product_ids = array_map(
+			static fn( $product ) => $product->get_id(),
+			self::create_class_fixture_products(
+				array(
+					array(
+						'name'          => 'Test Product 1',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+					),
+					array(
+						'name'          => 'Test Product 2',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+					),
+					array(
+						'name'          => 'Virtual Test Product 3',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+						'virtual'       => true,
+					),
+					array(
+						'name'          => 'Downloadable Test Product 4',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+						'downloadable'  => true,
+					),
+				)
+			)
+		);
+	}
+
+	/**
+	 * Delete class products through WooCommerce data stores.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::delete_class_fixture_products( self::$product_ids );
+	}
+
+	/**
 	 * Setup products and a cart, as well as register fields.
 	 */
 	protected function setUp(): void {
@@ -58,41 +111,9 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
 		$fixtures->payments_enable_bacs();
-		$this->products = array(
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 1',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Virtual Test Product 3',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-					'virtual'       => true,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Downloadable Test Product 4',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-					'downloadable'  => true,
-				)
-			),
+		$this->products = array_map(
+			'wc_get_product',
+			self::$product_ids
 		);
 		$this->reset_session();
 	}

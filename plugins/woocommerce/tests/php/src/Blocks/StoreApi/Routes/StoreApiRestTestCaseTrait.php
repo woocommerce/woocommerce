@@ -53,6 +53,24 @@ trait StoreApiRestTestCaseTrait {
 	}
 
 	/**
+	 * Delete class-owned products through WooCommerce data stores.
+	 *
+	 * @param int[] $product_ids Product IDs to delete.
+	 */
+	protected static function delete_class_fixture_products( array $product_ids ): void {
+		self::with_direct_product_attribute_lookup_updates(
+			static function () use ( $product_ids ) {
+				foreach ( $product_ids as $product_id ) {
+					$product = wc_get_product( $product_id );
+					if ( $product ) {
+						$product->delete( true );
+					}
+				}
+			}
+		);
+	}
+
+	/**
 	 * Create a REST server with only the relevant WooCommerce namespace loaded.
 	 */
 	protected function initialize_store_api_server(): void {

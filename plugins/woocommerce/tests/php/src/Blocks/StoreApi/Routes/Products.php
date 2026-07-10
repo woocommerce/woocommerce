@@ -72,16 +72,7 @@ class Products extends ControllerTestCase {
 	 * Delete class products through WooCommerce data stores.
 	 */
 	public static function wpTearDownAfterClass(): void {
-		self::with_direct_product_attribute_lookup_updates(
-			static function () {
-				foreach ( self::$owned_product_ids as $product_id ) {
-					$product = wc_get_product( $product_id );
-					if ( $product ) {
-						$product->delete( true );
-					}
-				}
-			}
-		);
+		self::delete_class_fixture_products( self::$owned_product_ids );
 	}
 
 	/**
