@@ -34,9 +34,9 @@ class PageController {
 	private static $instance = false;
 
 	/**
-	 * Current page ID (or false if not registered with this controller).
+	 * Current page data (or false if not registered with this controller).
 	 *
-	 * @var string
+	 * @var array|false|null
 	 */
 	private $current_page = null;
 
@@ -139,6 +139,10 @@ class PageController {
 		$current_path  = empty( $current_pieces['page'] ) ? '' : $current_pieces['page'];
 		$current_path .= empty( $current_pieces['path'] ) ? '' : '&path=' . $current_pieces['path'];
 
+		$route_pattern_pages = array();
+
+		$route_pattern_index = 0;
+
 		foreach ( $this->pages as $page ) {
 			if ( isset( $page['js_page'] ) && $page['js_page'] ) {
 				// Check registered admin pages.
@@ -147,6 +151,14 @@ class PageController {
 				) {
 					$this->current_page = $page;
 					return;
+				}
+
+				if ( $this->is_route_pattern_path( $page['path'] ) ) {
+					$route_pattern_pages[] = array(
+						'index' => $route_pattern_index,
+						'page'  => $page,
+					);
+					++$route_pattern_index;
 				}
 			} else {
 				// Check connected admin pages.
@@ -159,7 +171,137 @@ class PageController {
 				}
 			}
 		}
+
+		$route_pattern_page = $this->get_matching_route_pattern_page( $route_pattern_pages, $current_path );
+		if ( $route_pattern_page ) {
+			$this->current_page = $route_pattern_page;
+			return;
+		}
+
 		$this->current_page = false;
+	}
+
+	/**
+	 * Get the matching registered route pattern page for a current request path.
+	 *
+	 * @param array  $route_pattern_pages Registered route pattern pages with original indexes.
+	 * @param string $current_path Current request path.
+	 * @return array|null Matching page data.
+	 */
+	private function get_matching_route_pattern_page( $route_pattern_pages, $current_path ) {
+		$matching_pages = array();
+
+		foreach ( $route_pattern_pages as $route_pattern_page ) {
+			if ( $this->route_pattern_matches_current_path( $route_pattern_page['page']['path'], $current_path ) ) {
+				$matching_pages[] = array(
+					'index' => $route_pattern_page['index'],
+					'page'  => $route_pattern_page['page'],
+					'score' => $this->get_route_pattern_score( $route_pattern_page['page']['path'] ),
+				);
+			}
+		}
+
+		if ( empty( $matching_pages ) ) {
+			return null;
+		}
+
+		usort(
+			$matching_pages,
+			function ( $first_page, $second_page ) {
+				if ( $first_page['score'] === $second_page['score'] ) {
+					return $first_page['index'] <=> $second_page['index'];
+				}
+
+				return $second_page['score'] <=> $first_page['score'];
+			}
+		);
+
+		return $matching_pages[0]['page'];
+	}
+
+	/**
+	 * Whether a registered page path contains supported route syntax.
+	 *
+	 * @param string $registered_path Registered page path.
+	 * @return bool
+	 */
+	private function is_route_pattern_path( $registered_path ) {
+		$path_parts = $this->split_registered_page_path( $registered_path );
+
+		return 1 === preg_match( '#(^|/):[A-Za-z0-9_]+(?=/|$)#', $path_parts['path'] ) ||
+			1 === preg_match( '#/\*$#', $path_parts['path'] );
+	}
+
+	/**
+	 * Whether a registered route pattern matches the current request path.
+	 *
+	 * @param string $registered_path Registered page path.
+	 * @param string $current_path Current request path.
+	 * @return bool
+	 */
+	private function route_pattern_matches_current_path( $registered_path, $current_path ) {
+		$registered_parts = $this->split_registered_page_path( $registered_path );
+		$current_parts    = $this->split_registered_page_path( $current_path );
+
+		if ( $registered_parts['root'] !== $current_parts['root'] || '' === $registered_parts['path'] || '' === $current_parts['path'] ) {
+			return false;
+		}
+
+		$route_pattern = $registered_parts['path'];
+
+		if ( 1 === preg_match( '#/\*$#', $route_pattern ) ) {
+			$route_regex = preg_quote( substr( $route_pattern, 0, -2 ), '#' ) . '(?:/.*)?';
+		} else {
+			$route_regex = preg_quote( $route_pattern, '#' );
+		}
+
+		$route_regex = preg_replace( '#\\\\:[A-Za-z0-9_]+#', '[^/]+', $route_regex );
+
+		return 1 === preg_match( '#^' . $route_regex . '/?$#', $current_parts['path'] );
+	}
+
+	/**
+	 * Split a registered PageController path into root and app path pieces.
+	 *
+	 * @param string $path Registered or current page path.
+	 * @return array
+	 */
+	private function split_registered_page_path( $path ) {
+		$path_parts = explode( '&path=', $path, 2 );
+
+		return array(
+			'root' => $path_parts[0],
+			'path' => $path_parts[1] ?? '',
+		);
+	}
+
+	/**
+	 * Get a specificity score for supported route patterns.
+	 *
+	 * @param string $registered_path Registered page path.
+	 * @return int
+	 */
+	private function get_route_pattern_score( $registered_path ) {
+		$path_parts = $this->split_registered_page_path( $registered_path );
+		$segments   = array_filter(
+			explode( '/', trim( $path_parts['path'], '/' ) ),
+			function ( $segment ) {
+				return '' !== $segment;
+			}
+		);
+		$score      = count( $segments );
+
+		foreach ( $segments as $segment ) {
+			if ( '*' === $segment ) {
+				$score -= 2;
+			} elseif ( 1 === preg_match( '#^:[A-Za-z0-9_]+$#', $segment ) ) {
+				$score += 3;
+			} else {
+				$score += 10;
+			}
+		}
+
+		return $score;
 	}
 
 
@@ -239,7 +381,7 @@ class PageController {
 			$this->determine_current_page();
 		}
 
-		return $this->current_page;
+		return $this->current_page ?? false;
 	}
 
 

@@ -90,10 +90,12 @@ Register pages with `wc_admin_register_page()` using these parameters:
 -   `id` - Identifies the page with the controller. Required.
 -   `parent` - Denotes the page as a child of `parent`. Used for breadcrumbs. Optional.
 -   `title` - Page title. Used to build breadcrumbs. String or array of breadcrumb pieces. Required.
--   `path` - Page path (relative to `#wc-admin`). Used for identifying this page and for linking breadcrumb pieces when this page is a `parent`. Required.
+-   `path` - Page path (relative to `#wc-admin`). Used for identifying this page and for linking breadcrumb pieces when this page is a `parent`. Supports static paths, `:paramName` path segments, and terminal `/*` wildcards for recognizing matching React routes. Required.
 -   `capability` - User capability needed to access this page. Optional (defaults to `manage_options`).
 -   `icon` - Dashicons helper class or base64-encoded SVG. Include the entire dashicon class name, ie `dashicons-*`. This is optional and won't be included in WC Navigation.
 -   `position` - Menu item position for parent pages. Optional. See: `add_menu_page()`.
+
+Parameterized paths are used to recognize direct loads for matching React routes registered with `woocommerce_admin_pages_list`. They do not generate concrete WordPress menu URLs; use static paths for menu items that merchants should click directly.
 
 ### Example - Adding a New Analytics Report
 
