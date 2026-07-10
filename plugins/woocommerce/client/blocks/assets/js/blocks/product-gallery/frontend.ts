@@ -36,6 +36,89 @@ const getArrowsState = ( imageIndex: number, totalImages: number ) => ( {
 	isDisabledNext: imageIndex === totalImages - 1,
 } );
 
+const DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO = 0.25;
+
+const getVerticalIntersectionRatio = ( rect: DOMRect, rootRect: DOMRect ) => {
+	const height =
+		Math.min( rect.bottom, rootRect.bottom ) -
+		Math.max( rect.top, rootRect.top );
+	const referenceHeight = Math.min( rect.height, rootRect.height );
+
+	return referenceHeight ? Math.max( 0, height ) / referenceHeight : 0;
+};
+
+const isDialogVideoInView = ( video: HTMLVideoElement ) => {
+	const scrollableContainer = video.closest( SELECTORS.dialogContent );
+
+	if ( ! scrollableContainer ) {
+		return false;
+	}
+
+	const videoRect = video.getBoundingClientRect();
+	const containerRect = scrollableContainer.getBoundingClientRect();
+
+	return (
+		getVerticalIntersectionRatio( videoRect, containerRect ) >=
+		DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO
+	);
+};
+
+const isDialogVideoIntersectionInView = (
+	entry: IntersectionObserverEntry
+) => {
+	if ( ! entry.rootBounds || ! entry.boundingClientRect.height ) {
+		return false;
+	}
+
+	return (
+		getVerticalIntersectionRatio(
+			entry.boundingClientRect,
+			entry.rootBounds
+		) >= DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO
+	);
+};
+
+const syncVideoPlaybackState = (
+	video: HTMLVideoElement,
+	shouldPlay: boolean
+) => {
+	if ( shouldPlay && video.paused ) {
+		void video.play().catch( () => undefined );
+	} else if ( ! shouldPlay && ! video.paused ) {
+		video.pause();
+	}
+};
+
+const syncVideoElementPlayback = (
+	video: HTMLVideoElement,
+	selectedImageId: number,
+	isDialogOpen: boolean,
+	videoLocation?: ProductGalleryContext[ 'videoLocation' ]
+) => {
+	const imageId = Number( video.getAttribute( 'data-image-id' ) ?? 0 );
+	const shouldPlayInDialog =
+		videoLocation === 'dialog' &&
+		isDialogOpen &&
+		isDialogVideoInView( video );
+	const shouldPlayInGallery =
+		videoLocation === 'gallery' &&
+		selectedImageId === imageId &&
+		! isDialogOpen;
+	const shouldPlay = shouldPlayInDialog || shouldPlayInGallery;
+
+	syncVideoPlaybackState( video, shouldPlay );
+};
+
+const syncScopedVideoElementPlayback = ( video: HTMLVideoElement ) => {
+	const { selectedImageId, isDialogOpen, videoLocation } = getContext();
+	syncVideoElementPlayback(
+		video,
+		selectedImageId,
+		isDialogOpen,
+		videoLocation
+	);
+};
+
 /** Read the `products` map from the WooCommerce iAPI config (or `{}`). */
 const getConfiguredProducts = () =>
 	( getConfig( 'woocommerce' ) as ProductGalleryConfig )?.products || {};
@@ -237,7 +320,7 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 	}
 
 	const thumbnailElement = galleryContainer.querySelector(
-		`${ SELECTORS.thumbnail } ${ SELECTORS.imgByImageId( imageId ) }`
+		`${ SELECTORS.thumbnail } ${ SELECTORS.elementByImageId( imageId ) }`
 	);
 
 	if ( ! thumbnailElement ) {
@@ -544,7 +627,7 @@ const productGallery = {
 				);
 				if ( galleryContainer ) {
 					const selectedImage = galleryContainer.querySelector(
-						SELECTORS.imgByImageId( selectedImageId )
+						SELECTORS.elementByImageId( selectedImageId )
 					) as HTMLElement;
 					if ( selectedImage ) {
 						selectedImage.focus( { preventScroll: true } );
@@ -723,7 +806,11 @@ const productGallery = {
 			const { selectedImageId, isDialogOpen } = getContext();
 			const { ref: dialogRef } = getElement() || {};
 
-			if ( isDialogOpen && dialogRef instanceof HTMLElement ) {
+			if ( ! ( dialogRef instanceof HTMLElement ) ) {
+				return;
+			}
+
+			if ( isDialogOpen ) {
 				dialogRef.focus();
 				const selectedImage = dialogRef.querySelector(
 					SELECTORS.elementByImageId( selectedImageId )
@@ -742,6 +829,61 @@ const productGallery = {
 						32; // Arbitrary value for the header height.
 				}
 			}
+		},
+		initDialogVideoPlayback: () => {
+			const element = getElement()?.ref;
+
+			if ( ! ( element instanceof HTMLVideoElement ) ) {
+				return;
+			}
+
+			const scrollableContainer = element.closest(
+				SELECTORS.dialogContent
+			);
+
+			if ( ! scrollableContainer || ! window.IntersectionObserver ) {
+				return () => element.pause();
+			}
+
+			const observer = new IntersectionObserver(
+				( entries: IntersectionObserverEntry[] ) => {
+					entries.forEach( ( entry ) => {
+						if ( entry.target !== element ) {
+							return;
+						}
+
+						const isDialogOpen = document.body.classList.contains(
+							CLASSES.dialogOpenBody
+						);
+						const shouldPlay =
+							isDialogOpen &&
+							isDialogVideoIntersectionInView( entry );
+
+						syncVideoPlaybackState( element, shouldPlay );
+					} );
+				},
+				{
+					root: scrollableContainer,
+					threshold: [ 0, DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO, 1 ],
+				}
+			);
+
+			observer.observe( element );
+
+			return () => {
+				observer.disconnect();
+				element.pause();
+			};
+		},
+		syncVideoPlayback: () => {
+			const element = getElement()?.ref;
+
+			if ( ! ( element instanceof HTMLVideoElement ) ) {
+				return;
+			}
+
+			toggleImageVisibility( element );
+			syncScopedVideoElementPlayback( element );
 		},
 		/** Per-image `data-wp-watch` callback that toggles visibility from `imageData`. */
 		toggleImageVisibility: () => {

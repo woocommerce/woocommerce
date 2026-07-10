@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
@@ -26,6 +25,7 @@ use Automattic\Block_Delimiter;
  */
 class MiniCart extends AbstractBlock {
 	use BlockHooksTrait;
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
@@ -33,20 +33,6 @@ class MiniCart extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'mini-cart';
-
-	/**
-	 * Chunks build folder.
-	 *
-	 * @var string
-	 */
-	protected $chunks_folder = 'mini-cart-contents-block';
-
-	/**
-	 * Array of scripts that will be lazy loaded when interacting with the block.
-	 *
-	 * @var string[]
-	 */
-	protected $scripts_to_lazy_load = array();
 
 	/**
 	 *  Inc Tax label.
@@ -116,28 +102,8 @@ class MiniCart extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 		add_action( 'wp_loaded', array( $this, 'register_empty_cart_message_block_pattern' ) );
-		add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 2 );
 		add_filter( 'hooked_block_woocommerce/mini-cart', array( $this, 'modify_hooked_block_attributes' ), 10, 5 );
 		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
-
-		// Priority 20 ensures this runs after WooCommerce block registration (priority 10)
-		// allowing us to modify the block supports in the registry after registration is complete.
-		add_action( 'init', array( $this, 'enable_interactivity_support' ), 20 );
-	}
-
-	/**
-	 * Enable interactivity through Block Supports API. We're using WP_Block_Type_Registry instead
-	 * of get_block_type_supports method available in AbstractBlock as the latter works only for
-	 * blocks without static block.json metadata.
-	 */
-	public function enable_interactivity_support() {
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( 'woocommerce/mini-cart' );
-
-			if ( $block_type ) {
-				$block_type->supports['interactivity'] = true;
-			}
-		}
 	}
 
 	/**
@@ -185,28 +151,10 @@ class MiniCart extends AbstractBlock {
 	 *
 	 * @see $this->register_block_type()
 	 * @param string $key Data to get, or default to everything.
-	 * @return array|string
+	 * @return null
 	 */
 	protected function get_block_type_script( $key = null ) {
-		if ( is_cart() || is_checkout() || Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			return;
-		}
-
-		$script = array(
-			'handle'       => 'wc-' . $this->block_name . '-block-frontend',
-			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name . '-frontend' ),
-			'dependencies' => array(),
-		);
-		return $key ? $script[ $key ] : $script;
-	}
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return string[]
-	 */
-	protected function get_block_type_style() {
-		return array_merge( parent::get_block_type_style(), array( 'wc-blocks-packages-style' ) );
+		return null;
 	}
 
 	/**
@@ -289,148 +237,6 @@ class MiniCart extends AbstractBlock {
 	}
 
 	/**
-	 * Prints the variable containing information about the scripts to lazy load.
-	 */
-	public function print_lazy_load_scripts() {
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			return;
-		}
-
-		$script_data = $this->asset_api->get_script_data( 'assets/client/blocks/mini-cart-component-frontend.js' );
-
-		$num_dependencies = is_countable( $script_data['dependencies'] ) ? count( $script_data['dependencies'] ) : 0;
-		$wp_scripts       = wp_scripts();
-
-		for ( $i = 0; $i < $num_dependencies; $i++ ) {
-			$dependency = $script_data['dependencies'][ $i ];
-
-			foreach ( $wp_scripts->registered as $script ) {
-				if ( $script->handle === $dependency ) {
-					$this->append_script_and_deps_src( $script );
-					break;
-				}
-			}
-		}
-
-		$payment_method_registry = Package::container()->get( PaymentMethodRegistry::class );
-		$payment_methods         = $payment_method_registry->get_all_active_payment_method_script_dependencies();
-
-		foreach ( $payment_methods as $payment_method ) {
-			$payment_method_script = $this->get_script_from_handle( $payment_method );
-
-			if ( ! is_null( $payment_method_script ) ) {
-				$this->append_script_and_deps_src( $payment_method_script );
-			}
-		}
-
-		$this->scripts_to_lazy_load['wc-block-mini-cart-component-frontend'] = array(
-			'src'          => $script_data['src'],
-			'version'      => $script_data['version'],
-			'translations' => $this->get_inner_blocks_translations(),
-		);
-
-		$inner_blocks_frontend_scripts = array();
-		$cart                          = $this->get_cart_instance();
-		if ( $cart ) {
-			// Preload inner blocks frontend scripts.
-			$inner_blocks_frontend_scripts = $cart->is_empty() ? array(
-				'empty-cart-frontend',
-				'filled-cart-frontend',
-				'shopping-button-frontend',
-			) : array(
-				'empty-cart-frontend',
-				'filled-cart-frontend',
-				'title-frontend',
-				'items-frontend',
-				'footer-frontend',
-				'products-table-frontend',
-				'cart-button-frontend',
-				'checkout-button-frontend',
-				'title-label-frontend',
-				'title-items-counter-frontend',
-			);
-		}
-		foreach ( $inner_blocks_frontend_scripts as $inner_block_frontend_script ) {
-			$script_data = $this->asset_api->get_script_data( 'assets/client/blocks/mini-cart-contents-block/' . $inner_block_frontend_script . '.js' );
-			$this->scripts_to_lazy_load[ 'wc-block-' . $inner_block_frontend_script ] = array(
-				'src'     => $script_data['src'],
-				'version' => $script_data['version'],
-			);
-		}
-
-		$data                          = rawurlencode( wp_json_encode( $this->scripts_to_lazy_load ) );
-		$mini_cart_dependencies_script = "var wcBlocksMiniCartFrontendDependencies = JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
-
-		wp_add_inline_script(
-			'wc-mini-cart-block-frontend',
-			$mini_cart_dependencies_script,
-			'before'
-		);
-	}
-
-	/**
-	 * Returns the script data given its handle.
-	 *
-	 * @param string $handle Handle of the script.
-	 *
-	 * @return \_WP_Dependency|null Object containing the script data if found, or null.
-	 */
-	protected function get_script_from_handle( $handle ) {
-		$wp_scripts = wp_scripts();
-		foreach ( $wp_scripts->registered as $script ) {
-			if ( $script->handle === $handle ) {
-				return $script;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Recursively appends a scripts and its dependencies into the scripts_to_lazy_load array.
-	 *
-	 * @param \_WP_Dependency $script Object containing script data.
-	 */
-	protected function append_script_and_deps_src( $script ) {
-		$wp_scripts = wp_scripts();
-
-		// This script and its dependencies have already been appended.
-		if ( ! $script || array_key_exists( $script->handle, $this->scripts_to_lazy_load ) || wp_script_is( $script->handle, 'enqueued' ) ) {
-			return;
-		}
-
-		if ( is_countable( $script->deps ) && count( $script->deps ) ) {
-			foreach ( $script->deps as $dep ) {
-				if ( ! array_key_exists( $dep, $this->scripts_to_lazy_load ) ) {
-					$dep_script = $this->get_script_from_handle( $dep );
-
-					if ( ! is_null( $dep_script ) ) {
-						$this->append_script_and_deps_src( $dep_script );
-					}
-				}
-			}
-		}
-		if ( ! $script->src ) {
-			return;
-		}
-
-		if ( Utils::wp_version_compare( '6.3', '>=' ) ) {
-			$script_before = $wp_scripts->get_inline_script_data( $script->handle, 'before' );
-			$script_after  = $wp_scripts->get_inline_script_data( $script->handle, 'after' );
-		} else {
-			$script_before = $wp_scripts->print_inline_script( $script->handle, 'before', false );
-			$script_after  = $wp_scripts->print_inline_script( $script->handle, 'after', false );
-		}
-
-		$this->scripts_to_lazy_load[ $script->handle ] = array(
-			'src'          => Utils::get_absolute_script_url( $script->src ),
-			'version'      => $script->ver,
-			'before'       => $script_before,
-			'after'        => $script_after,
-			'translations' => $wp_scripts->print_translations( $script->handle, false ),
-		);
-	}
-
-	/**
 	 * Returns the markup for the cart price.
 	 *
 	 * @param array $attributes Block attributes.
@@ -465,9 +271,9 @@ class MiniCart extends AbstractBlock {
 	/**
 	 * Render the Mini-Cart block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content    Block content.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
@@ -483,23 +289,10 @@ class MiniCart extends AbstractBlock {
 		 * In the cart and checkout pages, the block is either rendered hidden or removed.
 		 * It is not interactive, so it can fall back to the existing implementation.
 		 */
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) && ! is_cart() && ! is_checkout() ) {
-			return $this->render_experimental_iapi_mini_cart( $attributes, $content, $block );
+		if ( is_cart() || is_checkout() ) {
+			return $content . $this->get_markup( MiniCartUtils::migrate_attributes_to_color_panel( $attributes ) );
 		}
 
-		return $content . $this->get_markup( MiniCartUtils::migrate_attributes_to_color_panel( $attributes ) );
-	}
-
-
-	/**
-	 * Render an experimental interactivity API powered Mini-Cart block.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render_experimental_iapi_mini_cart( $attributes, $content, $block ) {
 		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		// Enqueue all integration scripts registered for this block.
@@ -516,14 +309,15 @@ class MiniCart extends AbstractBlock {
 		$cart = $this->get_cart_instance();
 
 		if ( $cart ) {
-			$classes_styles                   = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-			$icon_color                       = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
-			$product_count_color              = isset( $attributes['productCountColor']['color'] ) ? $attributes['productCountColor']['color'] : '';
-			$styles                           = $product_count_color ? 'background:' . esc_attr( $product_count_color ) : '';
-			$icon                             = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
-			$product_count_visibility         = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
-			$wrapper_classes                  = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
-			$wrapper_styles                   = $classes_styles['styles'];
+			$classes_styles           = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+			$icon_color               = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
+			$product_count_color      = isset( $attributes['productCountColor']['color'] ) ? $attributes['productCountColor']['color'] : '';
+			$styles                   = $product_count_color ? 'background:' . esc_attr( $product_count_color ) : '';
+			$icon                     = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
+			$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
+			$wrapper_classes          = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
+			$wrapper_styles           = $classes_styles['styles'];
+			// Pre-render the template part so nested blocks enqueue their assets before the overlay is printed in wp_footer.
 			$template_part_contents           = $this->get_template_part_contents( false );
 			$template_part_contents           = do_blocks( $this->process_template_contents( $template_part_contents ) );
 			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
@@ -592,12 +386,12 @@ class MiniCart extends AbstractBlock {
 				: '';
 
 			// Render the minicart overlay in the body, outside of the block itself.
-			if ( ! has_action( 'wp_footer', array( $this, 'render_experimental_iapi_mini_cart_overlay' ) ) ) {
-				add_action( 'wp_footer', array( $this, 'render_experimental_iapi_mini_cart_overlay' ) );
+			if ( ! has_action( 'wp_footer', array( $this, 'render_mini_cart_overlay' ) ) ) {
+				add_action( 'wp_footer', array( $this, 'render_mini_cart_overlay' ) );
 			}
 			ob_start();
 			?>
-		
+
 			<div
 				data-wp-interactive="woocommerce/mini-cart"
 				data-wp-init="callbacks.setupJQueryEventBridge"
@@ -652,7 +446,7 @@ class MiniCart extends AbstractBlock {
 				</button>
 			</div>
 			<?php
-			return ob_get_clean();
+			return (string) ob_get_clean();
 		}
 
 		return '';
@@ -661,9 +455,10 @@ class MiniCart extends AbstractBlock {
 	/**
 	 * Echoes the Interactivity API Mini Cart overlay markup.
 	 *
+	 * @since 11.1.0
 	 * @return void
 	 */
-	public function render_experimental_iapi_mini_cart_overlay() {
+	public function render_mini_cart_overlay() {
 		$template_part_contents = $this->get_template_part_contents( false );
 		$template_part_contents = do_blocks( $this->process_template_contents( $template_part_contents ) );
 		ob_start();
@@ -693,7 +488,7 @@ class MiniCart extends AbstractBlock {
 					</div>
 				</div>
 			</div>
-		</div>				
+		</div>
 		<?php
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo wp_interactivity_process_directives( ob_get_clean() );
@@ -911,29 +706,6 @@ class MiniCart extends AbstractBlock {
 			'tax_label'                         => '',
 			'display_cart_prices_including_tax' => false,
 		);
-	}
-
-	/**
-	 * Prepare translations for inner blocks and dependencies.
-	 */
-	protected function get_inner_blocks_translations() {
-		$wp_scripts   = wp_scripts();
-		$translations = array();
-
-		$chunks        = $this->get_chunks_paths( $this->chunks_folder );
-		$vendor_chunks = $this->get_chunks_paths( 'vendors--mini-cart-contents-block' );
-		$shared_chunks = array( 'cart-blocks/cart-line-items--mini-cart-contents-block/products-table-frontend' );
-
-		foreach ( array_merge( $chunks, $vendor_chunks, $shared_chunks ) as $chunk ) {
-			$handle = 'wc-blocks-' . $chunk . '-chunk';
-			$this->asset_api->register_script( $handle, $this->asset_api->get_block_asset_build_path( $chunk ), array(), true );
-			$translations[] = $wp_scripts->print_translations( $handle, false );
-			wp_deregister_script( $handle );
-		}
-
-		$translations = array_filter( $translations );
-
-		return implode( "\n", $translations );
 	}
 
 	/**

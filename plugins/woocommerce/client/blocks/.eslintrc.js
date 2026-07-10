@@ -258,6 +258,7 @@ module.exports = {
 			plugins: [ 'jest', '@typescript-eslint' ],
 			extends: [ 'plugin:jest/recommended' ],
 			rules: {
+				'@typescript-eslint/no-non-null-assertion': 'error',
 				'jest/no-mocks-import': 'off',
 				// With React Testing library, it is expected use expect() in the waitFor() function: https://testing-library.com/docs/dom-testing-library/api-async/
 				'jest/no-standalone-expect': 'off',
@@ -278,6 +279,7 @@ module.exports = {
 			],
 			rules: {
 				'@typescript-eslint/no-explicit-any': 'error',
+				'@typescript-eslint/no-non-null-assertion': 'error',
 				'no-use-before-define': 'off',
 				'@typescript-eslint/no-use-before-define': [ 'error' ],
 				'jsdoc/require-param': 'off',

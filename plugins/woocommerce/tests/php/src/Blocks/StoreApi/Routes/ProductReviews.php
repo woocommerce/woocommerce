@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes\ControllerTestCase;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
+use Automattic\WooCommerce\Enums\ProductStatus;
 
 /**
  * Product Reviews Controller Tests.
@@ -81,6 +82,43 @@ class ProductReviews extends ControllerTestCase {
 		$this->assertSame( 4, $data[0]['rating'] );
 		$this->assertSame( 'Test Product 1', $data[1]['product_name'] );
 		$this->assertSame( 5, $data[1]['rating'] );
+	}
+
+	/**
+	 * @testdox Reviews are only returned for published products.
+	 */
+	public function test_reviews_are_limited_to_published_products() {
+		$fixtures      = new FixtureData();
+		$draft_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Draft Review Product',
+				'regular_price' => 10,
+			)
+		);
+		$fixtures->add_product_review( $draft_product->get_id(), 5, 'Hidden review' );
+
+		// Product becomes non-public after the review exists.
+		$draft_product->set_status( ProductStatus::DRAFT );
+		$draft_product->save();
+
+		$response    = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/reviews' ) );
+		$product_ids = wp_list_pluck( $response->get_data(), 'product_id' );
+
+		$this->assertSame( 200, $response->get_status() );
+		// Reviews for the published products from setUp are still returned (regression)...
+		$this->assertContains( $this->products[0]->get_id(), $product_ids );
+		$this->assertContains( $this->products[1]->get_id(), $product_ids );
+		// ...but the non-public product's review is excluded.
+		$this->assertNotContains( $draft_product->get_id(), $product_ids );
+
+		// A targeted query for the non-public product returns nothing.
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/reviews' );
+		$request->set_param( 'product_id', (string) $draft_product->get_id() );
+		$targeted = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $targeted->get_status() );
+		$this->assertCount( 0, $targeted->get_data() );
+		$this->assertSame( 0, (int) $targeted->get_headers()['X-WP-Total'] );
 	}
 
 	/**

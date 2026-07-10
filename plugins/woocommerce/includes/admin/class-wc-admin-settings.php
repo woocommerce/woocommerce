@@ -57,9 +57,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-accounts.php';
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-emails.php';
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-integrations.php';
-				if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'launch-your-store' ) ) {
-					$settings[] = include_once __DIR__ . '/settings/class-wc-settings-site-visibility.php';
-				}
+				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-site-visibility.php';
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-point-of-sale.php';
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-advanced.php';
 
@@ -106,6 +104,33 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			WC()->query->add_endpoints();
 
 			do_action( 'woocommerce_settings_saved' );
+
+			self::maybe_redirect_after_settings_ui_save();
+		}
+
+		/**
+		 * Redirect to the requested Settings UI destination after a form-post save.
+		 */
+		private static function maybe_redirect_after_settings_ui_save(): void {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The settings nonce is verified before this method is called.
+			if ( empty( $_POST['wc_settings_ui_redirect_to'] ) ) {
+				return;
+			}
+
+			$redirect_to = wp_validate_redirect(
+				esc_url_raw(
+					// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The settings nonce is verified before this method is called.
+					wp_unslash( $_POST['wc_settings_ui_redirect_to'] )
+				),
+				''
+			);
+
+			if ( '' === $redirect_to ) {
+				return;
+			}
+
+			wp_safe_redirect( $redirect_to );
+			exit;
 		}
 
 		/**

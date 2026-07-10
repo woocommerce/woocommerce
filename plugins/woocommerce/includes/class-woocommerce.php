@@ -38,9 +38,11 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
+use Automattic\WooCommerce\Caches\ProductCountCacheService;
 use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
+use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\Jetpack\Constants;
 
@@ -56,7 +58,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '11.0.0-dev';
+	public $version = '11.1.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -324,6 +326,7 @@ final class WooCommerce {
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'load-post.php', array( $this, 'includes' ) );
+		add_action( 'load-post-new.php', array( $this, 'includes' ) );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( $this, 'maybe_init_order_reviews' ), 1 );
 		add_action( 'init', array( $this, 'maybe_init_abandoned_cart_recovery' ), 1 );
@@ -374,6 +377,7 @@ final class WooCommerce {
 		$container->get( ComingSoonCacheInvalidator::class );
 		$container->get( ComingSoonRequestHandler::class );
 		$container->get( OrderCountCacheService::class );
+		$container->get( ProductCountCacheService::class );
 		$container->get( EmailImprovements::class );
 		$container->get( DeferredEmailQueue::class );
 		$container->get( AddressProviderController::class );
@@ -383,6 +387,7 @@ final class WooCommerce {
 		$container->get( OrdersVersionStringInvalidator::class );
 		$container->get( TaxRateVersionStringInvalidator::class );
 		$container->get( OrderMilestoneEasterEgg::class );
+		$container->get( CustomerEmailVerification::class );
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
@@ -409,6 +414,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
@@ -631,8 +637,27 @@ final class WooCommerce {
 		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
 			return false;
 		}
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		return false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' );
+
+		// Pretty permalinks: the Store API namespace is part of the path, e.g. /wp-json/wc/store/v1/cart. Match the
+		// path only (a leading slash anchors the prefix) so a REST-like query argument such as
+		// /some-page/?arg=/wp-json/wc/store/ is not mistaken for a Store API request.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$path = wp_parse_url( '/' . ltrim( (string) wp_unslash( $_SERVER['REQUEST_URI'] ), '/' ), PHP_URL_PATH );
+		if ( is_string( $path ) && false !== strpos( $path, '/' . trailingslashit( rest_get_url_prefix() ) . 'wc/store/' ) ) {
+			return true;
+		}
+
+		// Plain permalinks: the route is passed as a query parameter, e.g. ?rest_route=/wc/store/v1/cart.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the route only, no state change.
+		if ( isset( $_GET['rest_route'] ) && is_string( $_GET['rest_route'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the route only, no state change.
+			$rest_route = '/' . ltrim( rawurldecode( sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ) ), '/' );
+			if ( 0 === strpos( $rest_route, '/wc/store/' ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -995,7 +1020,7 @@ final class WooCommerce {
 	 * so the order-edit action listener is registered before
 	 * `WC_Meta_Box_Order_Actions::save()` dispatches its hook on POST.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @internal
 	 */
 	public function maybe_init_abandoned_cart_recovery(): void {
@@ -1003,6 +1028,7 @@ final class WooCommerce {
 			return;
 		}
 		wc_get_container()->get( \Automattic\WooCommerce\Internal\AbandonedCartRecovery\ManualSendHandler::class );
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\AbandonedCartRecovery\Scheduler::class );
 	}
 
 	/**
@@ -1017,7 +1043,7 @@ final class WooCommerce {
 	 * stop working. Both consequences are wrong, so this method runs even
 	 * when no specific email kind that uses it is currently active.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @internal
 	 */
 	public function init_email_unsubscribes(): void {

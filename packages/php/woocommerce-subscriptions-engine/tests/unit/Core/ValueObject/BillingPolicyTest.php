@@ -128,6 +128,19 @@ class BillingPolicyTest extends TestCase {
 		$policy->compute_next_renewal_from( new DateTimeImmutable( '2026-01-01', new DateTimeZone( 'UTC' ) ) );
 	}
 
+	public function test_non_array_trial_duration_throws(): void {
+		$this->expectException( DomainException::class );
+		$this->expectExceptionMessage( 'BillingPolicy: trial_duration must be null or an array, got string.' );
+
+		BillingPolicy::from_array(
+			array(
+				'period'         => 'month',
+				'interval'       => 1,
+				'trial_duration' => 'P7D',
+			)
+		);
+	}
+
 	/**
 	 * @dataProvider provide_min_and_max_cycles_validation_cases
 	 * @param string|null $expected_exception_message The expected exception message, or null if no exception is expected.
@@ -150,12 +163,14 @@ class BillingPolicyTest extends TestCase {
 		);
 
 		if ( null === $expected_exception_message ) {
-			$this->assertInstanceOf( BillingPolicy::class, $policy );
 			$this->assertSame( $min_cycles, $policy->get_min_cycles() );
 			$this->assertSame( $max_cycles, $policy->get_max_cycles() );
 		}
 	}
 
+	/**
+	 * @return array<string, array{expected_exception_message: string|null, min_cycles: int|null, max_cycles: int|null}>
+	 */
 	public function provide_min_and_max_cycles_validation_cases(): array {
 		return array(
 			'min_cycles is 0, max_cycles is null'        => array(

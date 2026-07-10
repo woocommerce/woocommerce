@@ -12,7 +12,7 @@ The client side integration consists of an API for registering both _regular_ an
 
 In both cases, the client side integration is done using registration methods exposed on the `blocks-registry` API. You can access this via the `wc` global in a WooCommerce environment (`wc.wcBlocksRegistry`).
 
-> Note: In your build process, you could do something similar to what is done in the blocks repository which [aliases this API as an external on `@woocommerce/blocks-registry`](https://github.com/woocommerce/woocommerce/blob/e024b720ddeb617fe889b9772959db6eca9e8c70/plugins/woocommerce/client/blocks/bin/webpack-helpers.js#L14-L33).
+> Note: The `@woocommerce/blocks-registry` import examples in this document require a build process that maps WooCommerce packages to their registered script handles. Do not install `@woocommerce/blocks-registry` from npm. Use the [`@woocommerce/dependency-extraction-webpack-plugin`](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin) in your webpack configuration to externalize bundled WooCommerce packages such as `@woocommerce/blocks-registry` to the `wc-blocks-registry` script.
 
 ## Express Payment Methods
 
@@ -71,7 +71,7 @@ const options = {
 | `content` | ReactNode | React node output in the express payment method area when the block is rendered in the frontend. Receives props from the checkout payment method interface. | Yes |
 | `edit` | ReactNode | React node output in the express payment method area when the block is rendered in the editor. Receives props from the payment method interface to checkout (with preview data). | Yes |
 | `canMakePayment` | Function | Callback to determine whether the payment method should be available for the shopper. | Yes |
-| `paymentMethodId` | String | Identifier accompanying the checkout processing request to the server. Used to identify the payment method gateway class for processing the payment. | No |
+| `paymentMethodId` | String | Identifier accompanying the checkout processing request to the server. Used to identify the payment method gateway class for processing the payment. Should match the gateway's server-side ID, as it is also used to detect whether the gateway is compatible with the Checkout block in the editor. Defaults to the value of `name` when omitted. | No |
 | `supports:features` | Array | Array of payment features supported by the gateway. Used to crosscheck if the payment method can be used for the cart content. Defaults to `['products']` if no value is provided. | No |
 | `supports:style` | Array | This is an array of style variations supported by the express payment method. These are styles that are applied across all the active express payment buttons and can be controlled from the express payment block in the editor. Supported values for these are one of `['height', 'borderRadius']`. | No |
 

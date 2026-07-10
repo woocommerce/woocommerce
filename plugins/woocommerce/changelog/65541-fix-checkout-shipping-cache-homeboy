@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent non-rate package metadata from invalidating cached shipping rates.

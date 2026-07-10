@@ -24,6 +24,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 use DateTimeImmutable;
 use DateTimeZone;
 use DomainException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -114,7 +115,7 @@ final class BillingPolicy {
 		$trial = $data['trial_duration'] ?? null;
 		if ( null !== $trial && ! is_array( $trial ) ) {
 			throw new DomainException(
-				sprintf( 'BillingPolicy: trial_duration must be null or an array, got %s.', wp_json_encode( $trial ) )
+				sprintf( 'BillingPolicy: trial_duration must be null or an array, got %s.', gettype( $trial ) )
 			);
 		}
 
@@ -123,8 +124,8 @@ final class BillingPolicy {
 		return new self(
 			(string) $data['period'],
 			(int) $data['interval'],
-			isset( $data['min_cycles'] ) ? (int) $data['min_cycles'] : null,
-			isset( $data['max_cycles'] ) ? (int) $data['max_cycles'] : null,
+			ScalarCoercion::coerce_nullable_int( $data['min_cycles'] ?? null ),
+			ScalarCoercion::coerce_nullable_int( $data['max_cycles'] ?? null ),
 			$trial
 		);
 	}
@@ -284,7 +285,7 @@ final class BillingPolicy {
 	/**
 	 * Normalize the trial duration.
 	 *
-	 * @param array{length: int, unit: string}|null $trial_duration The trial duration.
+	 * @param array<array-key, mixed>|null $trial_duration The trial duration.
 	 * @return array{length: int, unit: string}|null The normalized trial duration.
 	 * @throws DomainException If the trial duration is not valid.
 	 */
