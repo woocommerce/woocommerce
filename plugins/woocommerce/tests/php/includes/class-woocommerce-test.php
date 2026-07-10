@@ -127,4 +127,23 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 
 		$this->assertFalse( WC()->is_store_api_request(), 'A REST-like value in a query argument should not be detected as Store API.' );
 	}
+
+	/**
+	 * @testdox Should detect a Store API request whose URL has repeated leading slashes.
+	 */
+	public function test_is_store_api_request_returns_true_for_repeated_slashes(): void {
+		$_SERVER['REQUEST_URI'] = '///wp-json/wc/store/v1/cart';
+
+		$this->assertTrue( WC()->is_store_api_request(), 'A ///wp-json/wc/store/ path with repeated leading slashes should be detected as Store API.' );
+	}
+
+	/**
+	 * @testdox Should detect a Store API plain-permalink request whose route has repeated leading slashes.
+	 */
+	public function test_is_store_api_request_returns_true_for_repeated_slashes_plain(): void {
+		$_SERVER['REQUEST_URI'] = '/index.php?rest_route=//wc/store/v1/cart';
+		$_GET['rest_route']     = '//wc/store/v1/cart';
+
+		$this->assertTrue( WC()->is_store_api_request(), 'A ?rest_route=//wc/store/ request with repeated leading slashes should be detected as Store API.' );
+	}
 }

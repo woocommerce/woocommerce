@@ -112,6 +112,10 @@ class BlockRegistrationContextTest extends WC_Unit_Test_Case {
 			'wc/v3 rest (pretty)'          => array( '/wp-json/wc/v3/orders', null, null, false ),
 			'wc/v4 rest (pretty)'          => array( '/wp-json/wc/v4/products', null, null, false ),
 			'wc/v3 rest (plain)'           => array( '/index.php?rest_route=/wc/v3/orders', '/wc/v3/orders', null, false ),
+
+			// Repeated leading slashes must still be recognised (some servers send them; WP trims request URIs too).
+			'wc/v3 rest (leading slashes)'  => array( '///wp-json/wc/v3/orders', null, null, false ),
+			'wc/v3 plain (leading slashes)' => array( '/index.php?rest_route=//wc/v3/orders', '//wc/v3/orders', null, false ),
 			'wc-admin rest'                => array( '/wp-json/wc-admin/options', null, null, false ),
 			'wc-analytics rest'            => array( '/wp-json/wc-analytics/reports', null, null, false ),
 			'wc-telemetry rest'            => array( '/wp-json/wc-telemetry/tracker', null, null, false ),
@@ -131,6 +135,7 @@ class BlockRegistrationContextTest extends WC_Unit_Test_Case {
 
 			'favicon'                      => array( '/favicon.ico', null, null, false ),
 			'favicon (subdirectory)'       => array( '/blog/favicon.ico', null, null, false ),
+			'favicon (repeated slash)'     => array( '///favicon.ico', null, null, false ),
 			'robots.txt'                   => array( '/robots.txt', null, null, false ),
 			'sitemap index'                => array( '/wp-sitemap.xml', null, null, false ),
 			'sitemap posts'                => array( '/wp-sitemap-posts-post-1.xml', null, null, false ),

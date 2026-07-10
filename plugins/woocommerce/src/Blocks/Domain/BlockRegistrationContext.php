@@ -142,7 +142,7 @@ class BlockRegistrationContext {
 			return false;
 		}
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$path = wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH );
+		$path = wp_parse_url( '/' . ltrim( (string) wp_unslash( $_SERVER['REQUEST_URI'] ), '/' ), PHP_URL_PATH );
 		if ( ! is_string( $path ) ) {
 			return false;
 		}
@@ -194,7 +194,7 @@ class BlockRegistrationContext {
 		// Match against the path only (a leading slash anchors the prefix) so a REST-like query argument such as
 		// /some-page/?arg=/wp-json/wc/v3 is not mistaken for a REST request.
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$path        = wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH );
+		$path        = wp_parse_url( '/' . ltrim( (string) wp_unslash( $_SERVER['REQUEST_URI'] ), '/' ), PHP_URL_PATH );
 		$rest_prefix = '/' . trailingslashit( rest_get_url_prefix() );
 
 		// Pretty permalinks: /wp-json/<namespace>...
@@ -210,7 +210,7 @@ class BlockRegistrationContext {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the route only, no state change.
 		if ( isset( $_GET['rest_route'] ) && is_string( $_GET['rest_route'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the route only, no state change.
-			$rest_route = rawurldecode( sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ) );
+			$rest_route = '/' . ltrim( rawurldecode( sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ) ), '/' );
 			foreach ( $namespaces as $namespace ) {
 				if ( 0 === strpos( $rest_route, '/' . $namespace ) ) {
 					return true;
