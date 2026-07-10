@@ -36,6 +36,18 @@ export const PRODUCT_X = {
 } as const;
 
 /**
+ * A second sample-data product ("Cap"), distinct from {@link PRODUCT_X}, for
+ * flows that need two simultaneously-in-cart products. It sorts immediately
+ * after "Beanie" and "Belt" alphabetically, so — like product X — it is on
+ * the shop archive's first page, reachable via its ProductButton without
+ * pagination.
+ */
+export const PRODUCT_Y = {
+	id: 12,
+	name: 'Cap',
+} as const;
+
+/**
  * Seeds "product X is in the cart as a single meta-differentiated line".
  *
  * Navigates to a flagged legacy add-to-cart URL. The helper plugin attaches a
