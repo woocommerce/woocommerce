@@ -31,6 +31,57 @@ class Checkout extends \WP_Test_REST_TestCase {
 	use StoreApiRestTestCaseTrait;
 
 	const TEST_COUPON_CODE = 'test_coupon_code';
+
+	/**
+	 * Product IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
+
+	/**
+	 * Create immutable catalog rows shared by all test methods.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$fixtures = new FixtureData();
+
+		self::$product_ids = array_map(
+			fn( $product ) => $product->get_id(),
+			array(
+				$fixtures->get_simple_product(
+					array(
+						'name'          => 'Test Product 1',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+					)
+				),
+				$fixtures->get_simple_product(
+					array(
+						'name'          => 'Test Product 2',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+					)
+				),
+				$fixtures->get_simple_product(
+					array(
+						'name'          => 'Virtual Test Product 2',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+						'virtual'       => true,
+					)
+				),
+			)
+		);
+
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( self::TEST_COUPON_CODE );
+		$coupon->set_amount( 2 );
+		$coupon->save();
+	}
+
 	/**
 	 * Setup test product data. Called before every test.
 	 */
@@ -46,11 +97,6 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->initialize_store_api_server();
 
 		wp_set_current_user( 0 );
-
-		$coupon = new \WC_Coupon();
-		$coupon->set_code( self::TEST_COUPON_CODE );
-		$coupon->set_amount( 2 );
-		$coupon->save();
 
 		$formatters = new Formatters();
 		$formatters->register( 'money', MoneyFormatter::class );
@@ -83,33 +129,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$fixtures->shipping_add_pickup_location();
 		$fixtures->shipping_add_flat_rate_instance();
 
-		$this->products = array(
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 1',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Virtual Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-					'virtual'       => true,
-				)
-			),
-		);
+		$this->products = array_map( 'wc_get_product', self::$product_ids );
 		wc_empty_cart();
 		wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
 		wc()->cart->add_to_cart( $this->products[1]->get_id(), 1 );
@@ -136,9 +156,6 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$fixtures = new FixtureData();
 		$fixtures->shipping_remove_pickup_location();
 		$fixtures->shipping_remove_methods_from_default_zone();
-
-		$coupon_to_delete = new \WC_Coupon( self::TEST_COUPON_CODE );
-		$coupon_to_delete->delete( true );
 
 		$customer_to_delete = get_user_by( 'email', 'testaccount@test.com' );
 		if ( $customer_to_delete ) {
