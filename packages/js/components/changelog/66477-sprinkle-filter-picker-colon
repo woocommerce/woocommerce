@@ -1,4 +1,4 @@
 Significance: patch
 Type: tweak
 
-<!-- Add a changelog message here --> Remove the trailing colon from FilterPicker labels to match WordPress 7.0 form-field labeling.
+Remove the trailing colon from FilterPicker labels to match WordPress 7.0 form-field labeling.
