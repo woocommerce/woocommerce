@@ -260,7 +260,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 			return $response;
 		}
 
-		$response['body'] = file_get_contents( $fixture_path );
+		$response['body'] = file_get_contents( $fixture_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading a local test fixture.
 		return $response;
 	}
 

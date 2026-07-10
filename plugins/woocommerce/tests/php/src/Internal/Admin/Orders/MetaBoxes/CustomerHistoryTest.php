@@ -59,7 +59,7 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		self::clear_hpos_orders();
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 
-		if ( self::$hpos_prev_state !== OrderUtil::custom_orders_table_usage_is_enabled() ) {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() !== self::$hpos_prev_state ) {
 			OrderHelper::toggle_cot_feature_and_usage( self::$hpos_prev_state );
 		}
 

@@ -125,8 +125,8 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function test_get_last_customer_order_using_cot() {
 		global $wpdb;
 
-		$customer_1       = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
-		$customer_2       = WC_Helper_Customer::create_customer( 'test2', 'pass2', 'test2@example.com' );
+		$customer_1 = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
+		$customer_2 = WC_Helper_Customer::create_customer( 'test2', 'pass2', 'test2@example.com' );
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 		$last_valid_order = WC_Helper_Order::create_order( $customer_1->get_id() );
 

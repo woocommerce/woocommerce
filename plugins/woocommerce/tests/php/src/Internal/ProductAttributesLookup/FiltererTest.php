@@ -311,6 +311,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$this->save( $product );
 
 		$product_id = $product->get_id();
+
 		$this->product_ids[] = $product_id;
 
 		// * Now create the variations.

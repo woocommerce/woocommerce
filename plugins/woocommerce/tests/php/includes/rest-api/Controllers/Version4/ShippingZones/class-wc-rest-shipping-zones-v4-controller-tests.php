@@ -67,7 +67,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_Unit_Test_Case {
 			array( array( $this->endpoint, 'register_routes' ) ),
 			true
 		);
-		$this->user = $this->factory->user->create(
+		$this->user   = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
 			)

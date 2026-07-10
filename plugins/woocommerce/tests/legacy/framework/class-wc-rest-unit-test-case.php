@@ -72,15 +72,15 @@ class WC_Lazy_REST_Server extends WP_Test_Spy_REST_Server {
 	/**
 	 * Get registered routes, initializing all routes for direct inspection.
 	 *
-	 * @param string $namespace Optionally limit results to a namespace.
+	 * @param string $route_namespace Optionally limit results to a namespace.
 	 * @return array
 	 */
-	public function get_routes( $namespace = '' ) {
+	public function get_routes( $route_namespace = '' ) {
 		if ( 0 === $this->dispatch_depth && ! $this->initializing && ! $this->all_routes_initialized && ! $this->has_registered_routes() ) {
 			$this->initialize_all_routes();
 		}
 
-		return parent::get_routes( $namespace );
+		return parent::get_routes( $route_namespace );
 	}
 
 	/**
@@ -176,6 +176,7 @@ class WC_Lazy_REST_Server extends WP_Test_Spy_REST_Server {
 /**
  * Base class for REST related unit test classes.
  */
+// phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound -- Test server and its base case are intentionally colocated.
 class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 
 	/**
@@ -213,7 +214,7 @@ class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 		global $wp_filter;
 
 		$rest_api_init_hook         = $wp_filter['rest_api_init'] ?? null;
-		$wp_filter['rest_api_init'] = new WP_Hook();
+		$wp_filter['rest_api_init'] = new WP_Hook(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The original hook is restored below.
 		add_action( 'rest_api_init', 'rest_api_default_filters' );
 
 		try {
@@ -223,7 +224,7 @@ class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 			if ( null === $rest_api_init_hook ) {
 				unset( $wp_filter['rest_api_init'] );
 			} else {
-				$wp_filter['rest_api_init'] = $rest_api_init_hook;
+				$wp_filter['rest_api_init'] = $rest_api_init_hook; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the original hook.
 			}
 		}
 	}

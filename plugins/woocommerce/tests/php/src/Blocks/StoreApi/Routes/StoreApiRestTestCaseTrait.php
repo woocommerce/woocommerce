@@ -3,6 +3,8 @@
  * Shared REST server setup for Store API route tests.
  */
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 /**
@@ -19,6 +21,7 @@ trait StoreApiRestTestCaseTrait {
 
 		$had_rest_route = array_key_exists( 'rest_route', $GLOBALS['wp']->query_vars );
 		$rest_route     = $GLOBALS['wp']->query_vars['rest_route'] ?? null;
+
 		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/store/v1';
 
 		try {

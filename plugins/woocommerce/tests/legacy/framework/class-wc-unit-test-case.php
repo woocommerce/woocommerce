@@ -100,8 +100,8 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 		$wp_rest_server = new WP_REST_Server();
 
-		$rest_api_init_hook          = $wp_filter['rest_api_init'] ?? null;
-		$wp_filter['rest_api_init'] = new WP_Hook();
+		$rest_api_init_hook         = $wp_filter['rest_api_init'] ?? null;
+		$wp_filter['rest_api_init'] = new WP_Hook(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The original hook is restored below.
 
 		if ( $register_default_filters ) {
 			add_action( 'rest_api_init', 'rest_api_default_filters' );
@@ -118,7 +118,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			if ( null === $rest_api_init_hook ) {
 				unset( $wp_filter['rest_api_init'] );
 			} else {
-				$wp_filter['rest_api_init'] = $rest_api_init_hook;
+				$wp_filter['rest_api_init'] = $rest_api_init_hook; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the original hook.
 			}
 		}
 

@@ -48,7 +48,7 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 	public static function tearDownAfterClass(): void {
 		self::clear_hpos_orders();
 
-		if ( self::$hpos_prev_state !== OrderUtil::custom_orders_table_usage_is_enabled() ) {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() !== self::$hpos_prev_state ) {
 			OrderHelper::toggle_cot_feature_and_usage( self::$hpos_prev_state );
 		}
 

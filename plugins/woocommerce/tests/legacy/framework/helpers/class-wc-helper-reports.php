@@ -25,8 +25,8 @@ class WC_Helper_Reports {
 
 		$category_lookup = \Automattic\WooCommerce\Internal\Admin\CategoryLookup::instance();
 		$category_ids    = get_terms(
-			'product_cat',
 			array(
+				'taxonomy'   => 'product_cat',
 				'hide_empty' => false,
 				'fields'     => 'ids',
 			)

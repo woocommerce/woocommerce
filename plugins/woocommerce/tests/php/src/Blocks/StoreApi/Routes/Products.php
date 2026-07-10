@@ -128,8 +128,8 @@ class Products extends ControllerTestCase {
 		);
 		$request     = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
 		$request->set_param( 'include', $product_ids );
-		$response    = rest_get_server()->dispatch( $request );
-		$data        = $response->get_data();
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( count( $product_ids ), $data );
