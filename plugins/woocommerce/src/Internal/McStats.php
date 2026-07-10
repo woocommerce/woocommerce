@@ -17,8 +17,6 @@ use Automattic\Jetpack\A8c_Mc_Stats;
  */
 class McStats extends A8c_Mc_Stats {
 
-	// Temporary no-op comment to trigger CI on the Node 24 GitHub Actions bump; revert before merge.
-
 	/**
 	 * Return the stats from a group in an array ready to be added as parameters in a query string
 	 *
