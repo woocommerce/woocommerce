@@ -126,6 +126,7 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$customer_1       = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
 		$customer_2       = WC_Helper_Customer::create_customer( 'test2', 'pass2', 'test2@example.com' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 		$last_valid_order = WC_Helper_Order::create_order( $customer_1->get_id() );
 
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
@@ -144,7 +145,7 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$customer_2_id = $customer_2->get_id();
 		//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		$query = $wpdb->prepare( $sql, $customer_1_id, $last_valid_order->get_id(), $customer_1_id, $customer_1_id, $customer_2_id, $customer_2_id );
-		$wpdb->query( $query );
+		$this->assertSame( 5, $wpdb->query( $query ), 'All custom order table fixtures should be inserted.' );
 		//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 		$sut          = new WC_Customer_Data_Store();
