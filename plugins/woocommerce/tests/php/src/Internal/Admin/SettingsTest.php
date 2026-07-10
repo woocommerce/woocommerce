@@ -175,4 +175,29 @@ class SettingsTest extends WC_Unit_Test_Case {
 		$statuses[] = 'not-a-real-status';
 		return $statuses;
 	}
+
+	/**
+	 * @testdox get_valid_order_statuses_or_default() only falls back for non-array or empty values.
+	 * @dataProvider provider_valid_order_statuses_or_default
+	 * @param mixed $value    Value to validate.
+	 * @param array $expected Expected result.
+	 */
+	public function test_get_valid_order_statuses_or_default( $value, array $expected ): void {
+		$result = Settings::get_valid_order_statuses_or_default( $value, array( 'processing', 'on-hold' ) );
+
+		$this->assertSame( $expected, $result );
+	}
+
+	/**
+	 * Data provider for test_get_valid_order_statuses_or_default.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function provider_valid_order_statuses_or_default(): array {
+		return array(
+			'non-empty array passes through' => array( array( 'refunded' ), array( 'refunded' ) ),
+			'non-array value falls back'     => array( false, array( 'processing', 'on-hold' ) ),
+			'empty array falls back'         => array( array(), array( 'processing', 'on-hold' ) ),
+		);
+	}
 }

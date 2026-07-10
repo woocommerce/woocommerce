@@ -387,6 +387,30 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tooltip should fall back to default excluded statuses when the default-statuses filter returns a non-array.
+	 */
+	public function test_tooltip_falls_back_when_default_excluded_statuses_filter_returns_non_array(): void {
+		$this->toggle_cot_feature_and_usage( true );
+		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', '__return_false' );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		remove_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', '__return_false' );
+
+		$this->assertStringContainsString( 'pending payment', $output, 'Tooltip should still mention "pending payment"' );
+		$this->assertStringContainsString( 'failed', $output, 'Tooltip should still mention "failed"' );
+		$this->assertStringContainsString( 'cancelled', $output, 'Tooltip should still mention "cancelled"' );
+	}
+
+	/**
 	 * @testdox Tooltip should reflect custom excluded statuses option.
 	 */
 	public function test_tooltip_reflects_custom_option(): void {

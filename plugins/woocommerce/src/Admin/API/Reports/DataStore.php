@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Internal\Admin\Settings;
 
 /**
  * Common parent for custom report data stores.
@@ -833,15 +834,24 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 		/**
 		 * Filters the default set of order statuses excluded from Analytics report totals.
 		 *
-		 * @since 11.0.0
+		 * @since 11.1.0
 		 * @param array $default_statuses Default excluded order statuses.
 		 */
 		$excluded_statuses = \WC_Admin_Settings::get_option( 'woocommerce_excluded_report_order_statuses', apply_filters( 'woocommerce_analytics_settings_default_excluded_order_statuses', array( 'pending', 'failed', 'cancelled' ) ) );
-		if ( ! is_array( $excluded_statuses ) ) {
-			$excluded_statuses = array( 'pending', 'failed', 'cancelled' );
-		}
+		$excluded_statuses = Settings::get_valid_order_statuses_or_default( $excluded_statuses, array( 'pending', 'failed', 'cancelled' ) );
 		$excluded_statuses = array_merge( array( 'auto-draft', 'trash' ), array_map( 'esc_sql', $excluded_statuses ) );
-		return apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
+
+		/**
+		 * Filter the list of excluded order statuses for customer history and analytics reports.
+		 *
+		 * @since 4.0.0
+		 * @param array $excluded_statuses Order statuses to exclude.
+		 */
+		$excluded_statuses = apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
+		if ( ! is_array( $excluded_statuses ) ) {
+			$excluded_statuses = array( 'auto-draft', 'trash', 'pending', 'failed', 'cancelled' );
+		}
+		return $excluded_statuses;
 	}
 
 	/**

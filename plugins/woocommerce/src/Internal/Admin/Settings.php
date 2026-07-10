@@ -97,6 +97,25 @@ class Settings {
 	}
 
 	/**
+	 * Validate a value that should be a non-empty array of order status slugs (an option value
+	 * or a default-order-statuses filter's return value), falling back to the built-in default
+	 * if it isn't usable.
+	 *
+	 * Cheap type/emptiness check only - does not cross-check slugs against registered or synced
+	 * order statuses. Runtime call sites intentionally accept slugs outside that set and must
+	 * not pay for OrdersDataStore::get_all_statuses()'s DB-backed lookup on every request. Only
+	 * add_settings() needs the fuller cross-check, via sanitize_default_order_statuses().
+	 *
+	 * @since 11.1.0
+	 * @param mixed $value    Value to validate.
+	 * @param array $fallback Built-in default to use if $value is not a non-empty array.
+	 * @return array
+	 */
+	public static function get_valid_order_statuses_or_default( $value, array $fallback ): array {
+		return ( is_array( $value ) && ! empty( $value ) ) ? array_values( $value ) : $fallback;
+	}
+
+	/**
 	 * Return an object defining the currency options for the site's current currency
 	 *
 	 * @return  array  Settings for the current currency {
@@ -341,7 +360,7 @@ class Settings {
 		/**
 		 * Filters the default set of order statuses excluded from Analytics report totals.
 		 *
-		 * @since 11.0.0
+		 * @since 11.1.0
 		 * @param array $default_statuses Default excluded order statuses.
 		 */
 		$default_excluded_statuses = apply_filters( 'woocommerce_analytics_settings_default_excluded_order_statuses', array( 'pending', 'cancelled', 'failed' ) );
@@ -350,7 +369,7 @@ class Settings {
 		/**
 		 * Filters the default set of order statuses considered actionable in Analytics.
 		 *
-		 * @since 11.0.0
+		 * @since 11.1.0
 		 * @param array $default_statuses Default actionable order statuses.
 		 */
 		$default_actionable_statuses = apply_filters( 'woocommerce_analytics_settings_default_actionable_order_statuses', array( 'processing', 'on-hold' ) );

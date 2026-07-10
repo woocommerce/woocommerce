@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes;
 
 use Automattic\WooCommerce\Admin\API\Reports\Customers\Query as CustomersQuery;
 use Automattic\WooCommerce\Admin\Overrides\Order as AdminOrder;
+use Automattic\WooCommerce\Internal\Admin\Settings;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
@@ -256,13 +257,11 @@ class CustomerHistory {
 		/**
 		 * Filters the default set of order statuses excluded from Analytics report totals.
 		 *
-		 * @since 11.0.0
+		 * @since 11.1.0
 		 * @param array $default_statuses Default excluded order statuses.
 		 */
 		$excluded_statuses = get_option( 'woocommerce_excluded_report_order_statuses', apply_filters( 'woocommerce_analytics_settings_default_excluded_order_statuses', array( 'pending', 'failed', 'cancelled' ) ) );
-		if ( ! is_array( $excluded_statuses ) ) {
-			$excluded_statuses = array( 'pending', 'failed', 'cancelled' );
-		}
+		$excluded_statuses = Settings::get_valid_order_statuses_or_default( $excluded_statuses, array( 'pending', 'failed', 'cancelled' ) );
 		$excluded_statuses = array_merge( array( 'auto-draft', 'trash' ), $excluded_statuses );
 
 		/**
