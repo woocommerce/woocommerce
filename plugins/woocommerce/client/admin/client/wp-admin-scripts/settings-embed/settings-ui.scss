@@ -313,9 +313,8 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		transform: translateY(-50%);
 	}
 
-	// The shell (.admin-ui-page) creates a stacking context at z-index 1, so
-	// the portaled dialog needs its own context above the wp-admin chrome.
-	// Matches the z-index used by @wordpress/components modals.
+	// Lifts the dialog above the shell's own stacking context; 100000 matches
+	// @wordpress/components modals.
 	.wc-settings-ui__unsaved-changes-portal {
 		position: relative;
 		z-index: 100000;
