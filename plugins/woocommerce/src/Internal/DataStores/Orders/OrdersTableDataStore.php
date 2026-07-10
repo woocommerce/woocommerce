@@ -1520,6 +1520,7 @@ WHERE
 				),
 				array( 'source' => 'hpos-data-cache' )
 			);
+
 			/*
 			 * Invalidate every cache the corrupt value could have come from so the next read
 			 * self-heals from the database. The HPOS meta cache (orders_meta group) is primed by
@@ -1528,6 +1529,7 @@ WHERE
 			 * so without clearing that group the corrupt entry would persist across reads.
 			 */
 			$this->data_store_meta->clear_cached_data( array( $object->get_id() ) );
+
 			/*
 			 * delete_meta_cache() is defined on WC_Data, so $object always has it in a consistent
 			 * deploy. The guard only covers the brief window during a plugin upgrade where this

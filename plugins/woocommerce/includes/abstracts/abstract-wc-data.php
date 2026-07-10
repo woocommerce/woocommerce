@@ -677,8 +677,10 @@ abstract class WC_Data {
 	 * object cache entry.
 	 *
 	 * @since 11.0.0
+	 *
+	 * @return void
 	 */
-	public function delete_meta_cache() {
+	public function delete_meta_cache(): void {
 		if ( empty( $this->cache_group ) || ! $this->get_id() ) {
 			return;
 		}
