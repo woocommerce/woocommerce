@@ -3,6 +3,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Tests for the WC_User class.
@@ -11,20 +12,30 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
+	 * Whether HPOS was authoritative before the test.
+	 *
+	 * @var bool
+	 */
+	private $previous_hpos_state;
+
+	/**
 	 * Setup COT.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		$this->setup_cot();
-		$this->toggle_cot_feature_and_usage( true );
 	}
 
 	/**
 	 * Clean COT specific things.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
 		$this->clean_up_cot_setup();
+		$this->toggle_cot_feature_and_usage( $this->previous_hpos_state );
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		parent::tearDown();
 
 		// In case `wc_update_user_last_active` test fail, clean the global state.
 		global $wp_current_filter;
