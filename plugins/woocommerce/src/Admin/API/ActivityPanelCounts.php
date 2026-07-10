@@ -173,14 +173,10 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 	private function get_default_order_statuses() {
 		$actionable = get_option( 'woocommerce_actionable_order_statuses', false );
 
-		// A missing option means actionable statuses were never configured, so fall
-		// back to the store's built-in defaults. An explicitly empty array means the
-		// merchant intentionally cleared all statuses, which we respect (nothing to
-		// fulfill) to match the previous client-side behaviour.
-		if ( false === $actionable ) {
-			return array( 'processing', 'on-hold' );
-		}
-
+		// Any array is respected as-is, including an explicitly empty one: the merchant
+		// intentionally cleared all actionable statuses, so there is nothing to fulfill,
+		// matching the previous client-side behaviour. A missing (never configured) or
+		// malformed option falls back to the built-in defaults.
 		return is_array( $actionable ) ? $actionable : array( 'processing', 'on-hold' );
 	}
 
