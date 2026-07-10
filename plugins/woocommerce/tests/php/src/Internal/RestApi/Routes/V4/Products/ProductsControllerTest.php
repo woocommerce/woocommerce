@@ -75,6 +75,13 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	protected static $products = array();
 
 	/**
+	 * Administrator ID used to authenticate requests.
+	 *
+	 * @var int
+	 */
+	private static $administrator_id;
+
+	/**
 	 * Run class fixture changes without leaving asynchronous lookup actions behind.
 	 *
 	 * @param callable $callback Fixture lifecycle callback.
@@ -98,6 +105,12 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpSetUpBeforeClass() {
+		self::$administrator_id = self::factory()->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+
 		self::with_direct_attribute_lookup_updates(
 			static function () {
 				self::$products[] = WC_Helper_Product::create_simple_product(
@@ -193,12 +206,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 		parent::setUp();
 		$this->endpoint = new ProductsController();
 		$this->reset_rest_server();
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-		wp_set_current_user( $this->user );
+		wp_set_current_user( self::$administrator_id );
 
 		// Reset tax settings to ensure consistent product pricing.
 		// Some tests (like OrderHelper::create_complex_wp_post_order) modify tax settings globally,
