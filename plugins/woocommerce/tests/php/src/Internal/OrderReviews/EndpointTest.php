@@ -731,15 +731,42 @@ class EndpointTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_shop_page_id', '' );
 		delete_option( 'woocommerce_review_order_flush_rewrite_pending' );
 
+		$customize_review_order_page = static function ( $pages ) {
+			if ( isset( $pages[ Endpoint::PAGE_KEY ] ) ) {
+					$pages[ Endpoint::PAGE_KEY ]['title'] = 'Customized review order page';
+
+					$pages[ Endpoint::PAGE_KEY ]['content'] .= '<!-- extension-customization -->';
+			}
+			return $pages;
+		};
+		$restore_shop_page           = static function ( $pages ) {
+			$pages['shop'] = array(
+				'name'    => 'shop',
+				'title'   => 'Shop',
+				'content' => '',
+			);
+			return $pages;
+		};
+
 		add_filter( 'woocommerce_create_pages', array( $this->endpoint, 'inject_review_order_page' ) );
+		add_filter( 'woocommerce_create_pages', $customize_review_order_page, 50 );
+		add_filter( 'woocommerce_create_pages', $restore_shop_page, 200 );
 		try {
 			$this->endpoint->maybe_create_host_page();
 
 			$this->assertSame( '', get_option( 'woocommerce_shop_page_id' ), 'intentional empty shop page option should stay empty' );
-			$this->assertInstanceOf( \WP_Post::class, get_post( $shop_page_id ), 'existing shop page should remain present' );
-			$this->assertGreaterThan( 0, (int) wc_get_page_id( Endpoint::PAGE_KEY ), 'review order page should still be created' );
+
+			$review_order_page = get_post( (int) wc_get_page_id( Endpoint::PAGE_KEY ) );
+			$this->assertInstanceOf( \WP_Post::class, $review_order_page, 'review order page should still be created' );
+			$this->assertSame( 'Customized review order page', $review_order_page->post_title, 'earlier page-definition customizations should be preserved' );
+			$this->assertStringContainsString( '<!-- extension-customization -->', $review_order_page->post_content, 'earlier content customizations should be preserved' );
+
+			\WC_Install::create_pages();
+			$this->assertSame( $shop_page_id, (int) wc_get_page_id( 'shop' ), 'a later full repair should adopt the staged Shop page' );
 		} finally {
 			remove_filter( 'woocommerce_create_pages', array( $this->endpoint, 'inject_review_order_page' ) );
+			remove_filter( 'woocommerce_create_pages', $customize_review_order_page, 50 );
+			remove_filter( 'woocommerce_create_pages', $restore_shop_page, 200 );
 			$this->reset_review_order_pages();
 			$this->reset_shop_pages();
 		}
