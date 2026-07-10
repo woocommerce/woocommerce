@@ -34,6 +34,13 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	private static $administrator_id;
 
 	/**
+	 * Product ID used by generic order fixtures.
+	 *
+	 * @var int
+	 */
+	private static $product_id;
+
+	/**
 	 * Refund schema instance.
 	 *
 	 * @var RefundSchema
@@ -68,6 +75,28 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'role'       => 'administrator',
 			)
 		);
+
+		self::enable_direct_product_attribute_lookup_updates();
+		try {
+			self::$product_id = WC_Helper_Product::create_simple_product()->get_id();
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
+	}
+
+	/**
+	 * Delete WooCommerce class fixtures through their data stores.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::enable_direct_product_attribute_lookup_updates();
+		try {
+			$product = wc_get_product( self::$product_id );
+			if ( $product ) {
+				$product->delete( true );
+			}
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
 	}
 
 	/**
@@ -135,13 +164,9 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @return WC_Order
 	 */
 	private function create_test_order( array $order_data = array() ): WC_Order {
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_price( 10.00 );
-		$product->save();
-
 		$default_data = array(
-			'status'     => OrderStatus::COMPLETED,
-			'billing'    => array(
+			'status'  => OrderStatus::COMPLETED,
+			'billing' => array(
 				'first_name' => 'John',
 				'last_name'  => 'Doe',
 				'email'      => 'john.doe@example.com',
@@ -152,13 +177,16 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'postcode'   => '12345',
 				'country'    => 'US',
 			),
-			'line_items' => array(
+		);
+
+		if ( ! array_key_exists( 'line_items', $order_data ) ) {
+			$default_data['line_items'] = array(
 				array(
-					'product_id' => $product->get_id(),
+					'product_id' => self::$product_id,
 					'quantity'   => 1,
 				),
-			),
-		);
+			);
+		}
 
 		$order_data = wp_parse_args( $order_data, $default_data );
 
@@ -171,8 +199,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$order                  = wc_get_order( $data['id'] );
 		$this->created_orders[] = $order->get_id();
-
-		$product->delete( true );
 
 		return $order;
 	}
