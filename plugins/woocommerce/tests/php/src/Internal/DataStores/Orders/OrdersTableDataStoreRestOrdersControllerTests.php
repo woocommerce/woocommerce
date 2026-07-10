@@ -21,6 +21,12 @@ if ( ! class_exists( 'WC_REST_Orders_Controller_Tests' ) ) {
  * Test for REST support in the OrdersTableDataStore class.
  */
 class OrdersTableDataStoreRestOrdersControllerTests extends \WC_REST_Orders_Controller_Tests {
+	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
 
 	/**
 	 * Initializes system under test.
@@ -33,8 +39,6 @@ class OrdersTableDataStoreRestOrdersControllerTests extends \WC_REST_Orders_Cont
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
-		OrderHelper::delete_order_custom_tables();
-		OrderHelper::create_order_custom_table_if_not_exist();
 
 		$this->toggle_cot_feature_and_usage( true );
 	}
