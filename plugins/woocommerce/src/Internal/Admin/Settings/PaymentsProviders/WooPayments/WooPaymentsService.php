@@ -553,7 +553,8 @@ class WooPaymentsService {
 	 * @param bool        $overwrite Whether to overwrite the step status if it is already completed and update the timestamp.
 	 *                               Regardless of this, the stored statuses are re-written whenever the
 	 *                               skip marker needs to be added or can be safely removed, so the marker
-	 *                               reflects how the latest completion happened.
+	 *                               reflects how the latest completion happened — to the extent the
+	 *                               account state can vouch for it.
 	 * @param string|null $source    Optional. The source for the current onboarding flow.
 	 *                               If not provided, it will identify the source as the WC Admin Payments settings.
 	 * @param bool        $skipped   Optional. Whether the step is being completed by skipping it forward
