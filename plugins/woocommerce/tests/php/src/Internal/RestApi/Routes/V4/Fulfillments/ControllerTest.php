@@ -121,13 +121,6 @@ class ControllerTest extends WC_Unit_Test_Case {
 	 * Teardown test environment
 	 */
 	public function tearDown(): void {
-		// Delete the created users.
-		wp_delete_user( $this->admin_user_id );
-		wp_delete_user( $this->customer_user_id );
-
-		// Delete the created orders and their fulfillments.
-		WC_Helper_Order::delete_order( $this->test_order->get_id() );
-
 		$this->clear_rest_server();
 		parent::tearDown();
 	}
