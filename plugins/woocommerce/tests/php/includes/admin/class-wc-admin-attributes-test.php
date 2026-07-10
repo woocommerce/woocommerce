@@ -39,7 +39,6 @@ class WC_Admin_Attributes_Test extends WC_Unit_Test_Case {
 		}
 
 		$this->attribute_ids = array();
-		$this->clear_attribute_taxonomy_cache();
 
 		parent::tearDown();
 	}
@@ -50,7 +49,11 @@ class WC_Admin_Attributes_Test extends WC_Unit_Test_Case {
 	 * @covers WC_Admin_Attributes::add_attribute()
 	 */
 	public function test_add_attribute_renders_default_row_actions(): void {
-		$attribute_id = $this->create_test_attribute( 'test_attr_default' );
+		$attribute_id        = $this->create_test_attribute( 'test_attr_default' );
+		$expected_delete_url = wp_nonce_url(
+			add_query_arg( 'delete', $attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ),
+			'woocommerce-delete-attribute_' . $attribute_id
+		);
 
 		$output         = $this->render_add_attribute_page();
 		$decoded_output = html_entity_decode( $output, ENT_QUOTES );
@@ -59,8 +62,7 @@ class WC_Admin_Attributes_Test extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '<span class="edit"><a href=', $output, 'The edit action should be rendered as a row action.' );
 		$this->assertStringContainsString( '<span class="delete"><a class="delete" href=', $output, 'The delete action should preserve the delete class.' );
 		$this->assertStringContainsString( 'edit.php?post_type=product&page=product_attributes&edit=' . $attribute_id, $decoded_output, 'The edit action should target the attribute edit screen.' );
-		$this->assertStringContainsString( 'edit.php?post_type=product&page=product_attributes&delete=' . $attribute_id, $decoded_output, 'The delete action should target the attribute delete URL.' );
-		$this->assertStringContainsString( '_wpnonce=', $decoded_output, 'The delete action should retain a nonce.' );
+		$this->assertStringContainsString( 'href="' . esc_url( $expected_delete_url ) . '"', $output, 'The delete action should retain its attribute-specific nonce.' );
 	}
 
 	/**
@@ -84,7 +86,8 @@ class WC_Admin_Attributes_Test extends WC_Unit_Test_Case {
 				$captured_actions  = $actions;
 				$captured_tax      = $tax;
 				$captured_taxonomy = $taxonomy;
-				$actions['sync']   = '<a href="' . esc_url( 'https://example.test/sync-attribute' ) . '">Sync</a>';
+				unset( $actions['delete'] );
+				$actions['sync'] = '<a href="' . esc_url( 'https://example.test/sync-attribute' ) . '">Sync</a>';
 
 				return $actions;
 			},
@@ -92,7 +95,8 @@ class WC_Admin_Attributes_Test extends WC_Unit_Test_Case {
 			3
 		);
 
-		$output = $this->render_add_attribute_page();
+		$output         = $this->render_add_attribute_page();
+		$decoded_output = html_entity_decode( $output, ENT_QUOTES );
 
 		$this->assertIsArray( $captured_actions, 'The row actions filter should run for the test attribute.' );
 		$this->assertArrayHasKey( 'edit', $captured_actions, 'Default edit action should be filterable.' );
@@ -103,6 +107,11 @@ class WC_Admin_Attributes_Test extends WC_Unit_Test_Case {
 			'<span class="sync"><a href="https://example.test/sync-attribute">Sync</a></span>',
 			$output,
 			'Custom filtered actions should render as row actions.'
+		);
+		$this->assertStringNotContainsString(
+			'edit.php?post_type=product&page=product_attributes&delete=' . $attribute_id,
+			$decoded_output,
+			'Filtered default actions should be removable.'
 		);
 	}
 
@@ -125,17 +134,8 @@ class WC_Admin_Attributes_Test extends WC_Unit_Test_Case {
 
 		$this->assertIsInt( $attribute_id, 'Test attribute should be created.' );
 		$this->attribute_ids[] = $attribute_id;
-		$this->clear_attribute_taxonomy_cache();
 
 		return $attribute_id;
-	}
-
-	/**
-	 * Clears product attribute taxonomy caches.
-	 */
-	private function clear_attribute_taxonomy_cache(): void {
-		delete_transient( 'wc_attribute_taxonomies' );
-		WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 	}
 
 	/**
