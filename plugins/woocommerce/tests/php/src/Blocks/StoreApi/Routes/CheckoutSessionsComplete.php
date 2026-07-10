@@ -40,6 +40,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 
 		// Reset customer and cart FIRST before anything else.
 		wc_empty_cart();
