@@ -18,6 +18,7 @@
  * @var string  $class     The class to apply to the thumbnail image.
  * @var string  $width     The width of the image.
  * @var string  $height    The height of the image.
+ * @var string  $style     The optional image inline style.
  *
  * Ignore space indent sniff for this file, as it is used for alignment rather than actual indents.
  * phpcs:ignoreFile Generic.WhiteSpace.DisallowSpaceIndent
@@ -25,7 +26,7 @@
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
  * @usedby  [product_brand]
- * @version 9.4.0
+ * @version 11.1.0
  */
 
 declare( strict_types = 1);
@@ -34,5 +35,8 @@ declare( strict_types = 1);
 	<img src="<?php echo esc_url( $thumbnail ); ?>"
 	     alt="<?php echo esc_attr( $term->name ); ?>"
 	     class="<?php echo esc_attr( $class ); ?>"
-	     style="width: <?php echo esc_attr( $width ); ?>; height: <?php echo esc_attr( $height ); ?>;"/>
+		<?php if ( $style ) : ?>
+	     style="<?php echo esc_attr( $style ); ?>"
+		<?php endif; ?>
+	/>
 </a>

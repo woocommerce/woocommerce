@@ -83,6 +83,59 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product brand shortcode omits image style when width and height are empty.
+	 */
+	public function test_product_brand_shortcode_omits_empty_image_style() {
+		$data = $this->setup_single_brand_shortcode_test_data();
+
+		$output = $data['brands_instance']->output_product_brand(
+			array(
+				'post_id' => $data['product']->get_id(),
+			)
+		);
+
+		$this->assertStringContainsString( '<img ', $output );
+		$this->assertStringNotContainsString( ' style=', $output );
+		$this->assertStringNotContainsString( 'width: ;', $output );
+		$this->assertStringNotContainsString( 'height: ;', $output );
+	}
+
+	/**
+	 * @testdox Product brand shortcode normalizes numeric dimensions to pixels.
+	 */
+	public function test_product_brand_shortcode_normalizes_numeric_dimensions_to_pixels() {
+		$data = $this->setup_single_brand_shortcode_test_data();
+
+		$output = $data['brands_instance']->output_product_brand(
+			array(
+				'post_id' => $data['product']->get_id(),
+				'width'   => '123',
+				'height'  => '567',
+			)
+		);
+
+		$this->assertStringContainsString( 'style="width: 123px; height: 567px;"', $output );
+		$this->assertStringNotContainsString( 'width: 123;', $output );
+		$this->assertStringNotContainsString( 'height: 567;', $output );
+	}
+
+	/**
+	 * @testdox Product brand shortcode keeps unit dimensions and auto fallback.
+	 */
+	public function test_product_brand_shortcode_keeps_unit_dimensions_and_auto_fallback() {
+		$data = $this->setup_single_brand_shortcode_test_data();
+
+		$output = $data['brands_instance']->output_product_brand(
+			array(
+				'post_id' => $data['product']->get_id(),
+				'width'   => '64px',
+			)
+		);
+
+		$this->assertStringContainsString( 'style="width: 64px; height: auto;"', $output );
+	}
+
+	/**
 	 * Test that brand counts are correctly calculated and cached.
 	 */
 	public function test_brand_count_calculation_and_caching() {
@@ -202,6 +255,59 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 			'empty_brand'         => $empty_brand,
 			'product'             => $product,
 		);
+	}
+
+	/**
+	 * Helper method to set up test data for single brand shortcode tests.
+	 *
+	 * @return array Contains brands instance, brand term, product, and thumbnail ID.
+	 */
+	private function setup_single_brand_shortcode_test_data() {
+		WC_Brands::init_taxonomy();
+
+		$brand   = wp_insert_term( 'Shortcode Brand', 'product_brand' );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->save();
+		wp_set_object_terms( $product->get_id(), array( $brand['term_id'] ), 'product_brand' );
+
+		$thumbnail_id = $this->create_brand_thumbnail_attachment();
+		update_term_meta( $brand['term_id'], 'thumbnail_id', $thumbnail_id );
+
+		return array(
+			'brands_instance' => new WC_Brands(),
+			'brand'           => $brand,
+			'product'         => $product,
+			'thumbnail_id'    => $thumbnail_id,
+		);
+	}
+
+	/**
+	 * Create a lightweight image attachment for brand thumbnail tests.
+	 *
+	 * @return int Attachment ID.
+	 */
+	private function create_brand_thumbnail_attachment() {
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Brand shortcode thumbnail',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+
+		update_post_meta( $attachment_id, '_wp_attached_file', 'brand-shortcode-thumbnail.jpg' );
+		update_post_meta(
+			$attachment_id,
+			'_wp_attachment_metadata',
+			array(
+				'width'  => 100,
+				'height' => 80,
+				'file'   => 'brand-shortcode-thumbnail.jpg',
+				'sizes'  => array(),
+			)
+		);
+
+		return $attachment_id;
 	}
 
 	/**
