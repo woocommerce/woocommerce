@@ -173,4 +173,29 @@ describe( 'ShippingRecommendations', () => {
 			'false'
 		);
 	} );
+
+	it( 'renders the marketplace fallback for stores selling digital products only', () => {
+		mockSelect( {
+			getProfileItems: () => ( {
+				product_types: [ 'downloads' ],
+			} ),
+		} );
+
+		render( <ShippingRecommendations /> );
+
+		expect(
+			screen.queryByText( 'WooCommerce Shipping' )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText( 'the WooCommerce Marketplace' )
+		).toBeInTheDocument();
+		expect( screen.getByTestId( 'shipping-tour' ) ).toHaveAttribute(
+			'data-show-recommendations-step',
+			'false'
+		);
+		expect( recordEvent ).not.toHaveBeenCalledWith(
+			'shipping_partner_impression',
+			expect.anything()
+		);
+	} );
 } );

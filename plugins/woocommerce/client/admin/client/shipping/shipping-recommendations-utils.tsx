@@ -18,10 +18,7 @@ import {
 	DismissableListHeading,
 } from '../settings-recommendations/dismissable-list';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
-import {
-	type DismissState,
-	useOptionDismiss,
-} from '~/hooks/use-option-dismiss';
+import { type DismissState } from '~/hooks/use-option-dismiss';
 
 export const SHIPPING_RECOMMENDATIONS_DISMISS_OPTION =
 	'woocommerce_settings_shipping_recommendations_hidden';
@@ -104,12 +101,9 @@ export const ShippingRecommendationsList = ( {
 	dismissState,
 }: {
 	children: React.ReactNode;
-	dismissState?: DismissState;
+	dismissState: DismissState;
 } ) => {
-	const defaultDismissState = useOptionDismiss(
-		SHIPPING_RECOMMENDATIONS_DISMISS_OPTION
-	);
-	const { isDismissed, onDismiss } = dismissState ?? defaultDismissState;
+	const { isDismissed, onDismiss } = dismissState;
 
 	return (
 		<DismissableList
