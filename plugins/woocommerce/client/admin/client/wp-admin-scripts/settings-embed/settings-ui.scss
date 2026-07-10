@@ -93,8 +93,6 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		margin: 0 -48px;
 	}
 
-	// The Page header is its first child; admin-ui 2.4.1 hashes its classnames,
-	// so this targets it structurally until the shell owns its header markup.
 	.wc-settings-ui-shell > :first-child {
 		padding-left: 48px;
 		padding-right: 48px;
