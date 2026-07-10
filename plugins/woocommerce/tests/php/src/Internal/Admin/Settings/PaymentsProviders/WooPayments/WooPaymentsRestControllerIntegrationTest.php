@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProx
 use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
 
 /**
@@ -23,7 +23,7 @@ use WP_REST_Request;
  *
  * @class WooPaymentsRestController
  */
-class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
+class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	/**
 	 * Endpoint.
 	 *
@@ -72,6 +72,13 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	 * @var int
 	 */
 	protected $store_admin_id;
+
+	/**
+	 * REST server used by the controller tests.
+	 *
+	 * @var \WP_REST_Server
+	 */
+	protected $server;
 
 	/**
 	 * The current time in seconds.
@@ -124,6 +131,10 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		$gateways                   = \WC_Payment_Gateways::instance();
+		$gateways->payment_gateways = array();
+		$gateways->init();
 
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
@@ -279,9 +290,16 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->woopayments_provider_service = $container->get( WooPaymentsService::class );
 
 		// Register the REST controller routes again to make sure the dependency tree is using our mocks.
-		$sut = new WooPaymentsRestController();
-		$sut->init( $container->get( Payments::class ), $this->woopayments_provider_service );
-		$sut->register_routes( true );
+		$this->controller = new WooPaymentsRestController();
+		$this->controller->init( $container->get( Payments::class ), $this->woopayments_provider_service );
+		$this->server = $this->create_rest_server_with_routes(
+			array(
+				function () {
+					$this->controller->register_routes( true );
+				},
+			),
+			true
+		);
 	}
 
 	/**
@@ -304,6 +322,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$container = wc_get_container();
 		$container->reset_all_resolved();
 
+		$this->clear_rest_server();
 		parent::tearDown();
 	}
 
