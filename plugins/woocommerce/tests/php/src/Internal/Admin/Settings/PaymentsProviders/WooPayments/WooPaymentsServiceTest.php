@@ -8283,6 +8283,237 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test account skip adds the skip marker to a step previously completed without one.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_test_account_skip_adds_marker_to_previously_completed_step() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the NOX profile with a step completed through a non-skip path (no skip marker).
+		$stored_profile          = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT => array(
+							'statuses' => array(
+								WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $this->current_time - 100,
+							),
+						),
+					),
+				),
+			),
+		);
+		$updated_stored_profiles = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( &$updated_stored_profiles, $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return ! empty( $updated_stored_profiles ) ? end( $updated_stored_profiles ) : $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( &$updated_stored_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profiles[] = $value;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Arrange the account state: no account before the initialization, and a test-drive
+		// account that requires verification (i.e. is not valid) after the platform fell back to it.
+		$account_connected = false;
+		$this->mock_provider
+			->expects( $this->any() )
+			->method( 'is_account_connected' )
+			->willReturnCallback(
+				function () use ( &$account_connected ) {
+					return $account_connected;
+				}
+			);
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'is_stripe_account_valid' )
+			->willReturn( false );
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'get_account_status_data' )
+			->willReturn(
+				array(
+					'status'           => 'restricted',
+					'testDrive'        => true,
+					'isLive'           => false,
+					'paymentsEnabled'  => false,
+					'detailsSubmitted' => false,
+				)
+			);
+
+		// Arrange the REST API requests.
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$account_connected ) {
+						unset( $params );
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							// The platform fell back to an account that requires verification.
+							$account_connected = true;
+
+							return array(
+								'success' => false,
+							);
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		try {
+			$this->sut->onboarding_test_account_init( $location );
+			$this->fail( 'Expected ApiException was not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertSame(
+				'woocommerce_woopayments_onboarding_test_account_non_recoverable_error',
+				$e->getErrorCode(),
+				'A dedicated error code should signal the non-recoverable failure to the client.'
+			);
+		}
+
+		$this->assertNotEmpty( $updated_stored_profiles );
+		$final_profile = end( $updated_stored_profiles );
+		$statuses      = $final_profile['onboarding'][ $location ]['steps'][ WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT ]['statuses'];
+		$this->assertArrayHasKey( WooPaymentsService::ONBOARDING_STEP_SKIPPED_MARKER, $statuses, 'The skip marker should be added even when the step was already completed without one.' );
+
+		$status = $this->sut->get_onboarding_step_status( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+		$this->assertSame(
+			WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+			$status,
+			'The skipped step should report completed despite the invalid fallback test account.'
+		);
+	}
+
+	/**
+	 * @testdox A stale skip marker is cleared when the test account step completes through a non-skip path.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_test_account_non_skip_completion_clears_stale_skip_marker() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the NOX profile with a step completed by being skipped forward.
+		$stored_profile          = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT => array(
+							'statuses' => array(
+								WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $this->current_time - 100,
+								WooPaymentsService::ONBOARDING_STEP_SKIPPED_MARKER => $this->current_time - 100,
+							),
+						),
+					),
+				),
+			),
+		);
+		$updated_stored_profiles = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( &$updated_stored_profiles, $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return ! empty( $updated_stored_profiles ) ? end( $updated_stored_profiles ) : $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( &$updated_stored_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profiles[] = $value;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Arrange a connected test-drive account that becomes valid and working (the merchant
+		// eventually got a genuine test account), then lapses back to invalid.
+		$account_valid = true;
+		$this->mock_provider
+			->expects( $this->any() )
+			->method( 'is_account_connected' )
+			->willReturn( true );
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'is_stripe_account_valid' )
+			->willReturnCallback(
+				function () use ( &$account_valid ) {
+					return $account_valid;
+				}
+			);
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'get_account_status_data' )
+			->willReturnCallback(
+				function () use ( &$account_valid ) {
+					return array(
+						'status'           => $account_valid ? 'complete' : 'restricted',
+						'testDrive'        => true,
+						'isLive'           => false,
+						'paymentsEnabled'  => $account_valid,
+						'detailsSubmitted' => $account_valid,
+					);
+				}
+			);
+
+		// The valid, working test account auto-completes the step through the non-skip path,
+		// which should clear the stale skip marker.
+		$status = $this->sut->get_onboarding_step_status( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+		$this->assertSame( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, $status );
+
+		$this->assertNotEmpty( $updated_stored_profiles );
+		$final_profile = end( $updated_stored_profiles );
+		$statuses      = $final_profile['onboarding'][ $location ]['steps'][ WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT ]['statuses'];
+		$this->assertArrayNotHasKey( WooPaymentsService::ONBOARDING_STEP_SKIPPED_MARKER, $statuses, 'A non-skip completion should clear a stale skip marker.' );
+
+		// With the marker gone, a lapsed account validity should re-gate the stored completed status again.
+		$account_valid = false;
+
+		$status = $this->sut->get_onboarding_step_status( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+		$this->assertNotSame(
+			WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+			$status,
+			'An invalid test account should re-gate the completed status once the skip marker is cleared.'
+		);
+	}
+
+	/**
 	 * @testdox Test account init falls back to the failure path when the skipped step completion fails to persist.
 	 *
 	 * @return void

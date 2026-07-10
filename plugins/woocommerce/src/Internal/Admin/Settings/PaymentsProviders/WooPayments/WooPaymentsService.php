@@ -72,7 +72,8 @@ class WooPaymentsService {
 	 * rather than actually completed (e.g. the test account could not be created due to a
 	 * non-recoverable failure). It is never reported as a step status; it only informs the
 	 * status determination logic. Being stored with the step statuses, it shares their
-	 * lifecycle and is removed when the step progress is cleaned.
+	 * lifecycle: it is removed when the step progress is cleaned and when the step is
+	 * completed through a non-skip path.
 	 */
 	const ONBOARDING_STEP_SKIPPED_MARKER = 'skipped';
 
@@ -540,11 +541,15 @@ class WooPaymentsService {
 	 * @param string      $location  The location for which we are onboarding.
 	 *                               This is an ISO 3166-1 alpha-2 country code.
 	 * @param bool        $overwrite Whether to overwrite the step status if it is already completed and update the timestamp.
+	 *                               Regardless of this, the stored statuses are re-written whenever the stored
+	 *                               skip marker does not match the $skipped intent, so the marker always
+	 *                               reflects how the latest completion happened.
 	 * @param string|null $source    Optional. The source for the current onboarding flow.
 	 *                               If not provided, it will identify the source as the WC Admin Payments settings.
 	 * @param bool        $skipped   Optional. Whether the step is being completed by skipping it forward
 	 *                               rather than through actual completion. A marker is stored with the
 	 *                               step statuses so the status determination logic can tell the two apart.
+	 *                               A non-skip completion clears any previously stored marker.
 	 *
 	 * @return bool Whether the onboarding step was marked as completed.
 	 */
@@ -552,10 +557,11 @@ class WooPaymentsService {
 		// Clear possible failed status for the step.
 		$this->clear_onboarding_step_failed( $step_id, $location );
 
-		$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+		$statuses   = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+		$has_marker = ! empty( $statuses[ self::ONBOARDING_STEP_SKIPPED_MARKER ] );
 		if ( ! $overwrite &&
 			! empty( $statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] ) &&
-			( ! $skipped || ! empty( $statuses[ self::ONBOARDING_STEP_SKIPPED_MARKER ] ) )
+			$skipped === $has_marker
 		) {
 			return true;
 		}
@@ -564,6 +570,11 @@ class WooPaymentsService {
 		$statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ] = $this->proxy->call_function( 'time' );
 		if ( $skipped ) {
 			$statuses[ self::ONBOARDING_STEP_SKIPPED_MARKER ] = $statuses[ self::ONBOARDING_STEP_STATUS_COMPLETED ];
+		} else {
+			// The marker must not outlive the skip being the reason for the completion. Otherwise,
+			// a stale marker would keep bypassing the status re-gating (e.g. for a genuine test
+			// account whose validity lapses later).
+			unset( $statuses[ self::ONBOARDING_STEP_SKIPPED_MARKER ] );
 		}
 
 		// Store the updated step data.
