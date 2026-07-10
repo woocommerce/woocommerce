@@ -239,8 +239,6 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 
 		$attributes['height'] = $attributes['height'] ?? wc_get_theme_support( 'featured_block::default_height', 500 );
 
-		$image_url = esc_url( $this->get_image_url( $attributes, $item ) );
-
 		$styles  = $this->get_styles( $attributes );
 		$classes = $this->get_classes( $attributes );
 
@@ -249,9 +247,9 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 		$output .= $this->render_overlay( $attributes );
 
 		if ( ! $attributes['isRepeated'] && ! $attributes['hasParallax'] ) {
-			$output .= $this->render_image( $attributes, $item, $image_url );
+			$output .= $this->render_image( $attributes, $item );
 		} else {
-			$output .= $this->render_bg_image( $attributes, $image_url );
+			$output .= $this->render_bg_image( $attributes, $item );
 		}
 
 		if ( isset( $aria_label ) && ! empty( $aria_label ) ) {
@@ -312,13 +310,14 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	/**
 	 * Renders the featured image as a div background.
 	 *
-	 * @param array  $attributes Block attributes. Default empty array.
-	 * @param string $image_url  Item image url.
+	 * @param array                $attributes Block attributes. Default empty array.
+	 * @param \WC_Product|\WP_Term $item       Item object.
 	 *
 	 * @return string
 	 */
-	private function render_bg_image( $attributes, $image_url ) {
-		$styles = $this->get_bg_styles( $attributes, $image_url );
+	private function render_bg_image( $attributes, $item ) {
+		$image_url = $this->get_image_url( $attributes, $item );
+		$styles    = $this->get_bg_styles( $attributes, $image_url );
 
 		$classes = [ "wc-block-{$this->block_name}__background-image" ];
 
@@ -370,11 +369,10 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	 *
 	 * @param array                $attributes Block attributes. Default empty array.
 	 * @param \WC_Product|\WP_Term $item       Item object.
-	 * @param string               $image_url  Item image url.
 	 *
 	 * @return string
 	 */
-	private function render_image( $attributes, $item, string $image_url ) {
+	private function render_image( $attributes, $item ) {
 		$style   = sprintf( 'object-fit: %s;', $attributes['imageFit'] );
 		$img_alt = $attributes['alt'] ?: $this->get_item_title( $item );
 
@@ -399,16 +397,6 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 			);
 
 			return wp_get_attachment_image( $image_id, $image_size, false, $attr );
-		}
-
-		if ( ! empty( $image_url ) ) {
-			return sprintf(
-				'<img alt="%1$s" class="wc-block-%2$s__background-image" src="%3$s" style="%4$s" />',
-				esc_attr( $img_alt ),
-				$this->block_name,
-				esc_url( $image_url ),
-				esc_attr( $style )
-			);
 		}
 
 		return '';
