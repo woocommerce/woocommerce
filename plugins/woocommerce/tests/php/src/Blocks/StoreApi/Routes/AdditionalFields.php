@@ -6,11 +6,11 @@
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
 use WC_Gateway_BACS;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
 /**
  * AdditionalFields Controller Tests.
@@ -18,7 +18,8 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  *
  * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r, WooCommerce.Commenting.CommentHooks.MissingHookComment
  */
-class AdditionalFields extends MockeryTestCase {
+class AdditionalFields extends \WP_Test_REST_TestCase {
+	use MockeryPHPUnitIntegration;
 
 	/**
 	 * Fields to register.
@@ -45,6 +46,7 @@ class AdditionalFields extends MockeryTestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 
 		global $wp_rest_server;
@@ -347,6 +349,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered without an ID.
 	 */
 	public function test_missing_id_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
@@ -388,6 +391,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered with an invalid ID.
 	 */
 	public function test_invalid_id_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'invalid-id';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -432,6 +436,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered without a label.
 	 */
 	public function test_missing_label_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/missing-label';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -474,6 +479,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered without a location key.
 	 */
 	public function test_missing_location_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/missing-location';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -515,6 +521,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered with an invalid location key (contact, address, additional).
 	 */
 	public function test_invalid_location_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/invalid-location';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -560,6 +567,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered with an existing id.
 	 */
 	public function test_already_registered_field() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/gov-id';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -602,6 +610,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered with an invalid type (text, select, checkbox).
 	 */
 	public function test_invalid_type_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/invalid-type';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -654,6 +663,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered with an invalid sanitize callback.
 	 */
 	public function test_invalid_sanitize_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/invalid-sanitize';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -700,6 +710,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered with an invalid validate callback.
 	 */
 	public function test_invalid_validate_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/invalid-validate';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -746,6 +757,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered with an invalid attributes prop.
 	 */
 	public function test_invalid_attribute_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/invalid-attribute';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -815,6 +827,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered if a field is registered with invalid attributes values.
 	 */
 	public function test_invalid_attributes_values_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/invalid-attribute-values';
 		$invalid_attributes    = array( 'invalidAttribute' );
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
@@ -890,6 +903,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a select is registered without options prop.
 	 */
 	public function test_missing_select_options_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/missing-options';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -935,6 +949,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a select is registered with an invalid options array.
 	 */
 	public function test_invalid_select_options_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/invalid-options';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -982,6 +997,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a select is registered with duplicate options.
 	 */
 	public function test_duplicate_select_options_in_registration() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/duplicate-options';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -1051,6 +1067,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a checkbox is registered with invalid required property.
 	 */
 	public function test_invalid_required_prop_checkbox() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/checkbox-bad-required-value';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -1162,6 +1179,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure a warning is triggered when a checkbox is registered with an error_message, but it is not required.
 	 */
 	public function test_error_message_non_required_checkbox() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/checkbox-non-required-error-message';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -1225,6 +1243,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure a warning is triggered when a checkbox is registered with an invalid required prop.
 	 */
 	public function test_error_message_bad_required_value_checkbox() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/checkbox-non-required-error-message';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -1284,6 +1303,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure a warning is triggered when a checkbox is registered with a non-string error_message.
 	 */
 	public function test_non_string_error_message_checkbox() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/checkbox-non-string-error-message';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -1347,6 +1367,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered with hidden set to true.
 	 */
 	public function test_register_hidden_field_error() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$id                    = 'plugin-namespace/hidden-field';
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
@@ -2548,6 +2569,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Test for errors when providing the wrong rules schema.
 	 */
 	public function test_invalid_rules_schema() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". validation: Rules must be defined as an array.' );
 		\woocommerce_register_additional_checkout_field(
 			array(
@@ -2568,6 +2590,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Test for errors when providing the wrong validation rules schema.
 	 */
 	public function test_invalid_validation_rules_schema() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". validation: The properties must match schema: {properties}' );
 		\woocommerce_register_additional_checkout_field(
 			array(
@@ -2626,6 +2649,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Test for errors when providing the wrong required rules schema.
 	 */
 	public function test_invalid_required_rules_schema() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". required: Rules must be defined as an array.' );
 		\woocommerce_register_additional_checkout_field(
 			array(
