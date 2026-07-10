@@ -1085,8 +1085,8 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 
 		$order      = wc_get_order( $response_data['id'] );
-		$line_items = $order->get_items();
-		$line_item  = reset( $line_items );
+		$line_items = $order->get_items( 'line_item' );
+		$line_item  = $line_items[ $line_item_data['id'] ];
 		$this->assertEquals( $complex_meta_value, $line_item->get_meta( '_file_upload_data' ) );
 	}
 }
