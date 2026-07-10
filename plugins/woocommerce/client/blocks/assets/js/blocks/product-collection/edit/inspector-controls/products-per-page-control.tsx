@@ -4,7 +4,6 @@
 import { useIsEmailEditor } from '@woocommerce/email-editor';
 import { __ } from '@wordpress/i18n';
 import {
-	RangeControl,
 	Notice,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
@@ -15,9 +14,8 @@ import {
  */
 import { CoreFilterNames, QueryControlProps } from '../../types';
 import { DEFAULT_QUERY } from '../../constants';
+import ProductsPerPageRangeControl from './products-per-page-range-control';
 
-const MIN_PRODUCTS_PER_PAGE = 1;
-const MAX_PRODUCTS_PER_PAGE = 100;
 const CAROUSEL_PERFORMANCE_WARNING_THRESHOLD = 30;
 
 const defaultLabel = __( 'Products per page', 'woocommerce' );
@@ -70,23 +68,13 @@ const ProductsPerPageControl = ( {
 					</Notice>
 				</div>
 			) }
-			<RangeControl
-				__next40pxDefaultSize
-				__nextHasNoMarginBottom
+			<ProductsPerPageRangeControl
 				label={ label }
-				min={ MIN_PRODUCTS_PER_PAGE }
-				max={ MAX_PRODUCTS_PER_PAGE }
+				value={ perPage }
 				onChange={ ( newPerPage: number ) => {
-					if (
-						newPerPage < MIN_PRODUCTS_PER_PAGE ||
-						newPerPage > MAX_PRODUCTS_PER_PAGE
-					) {
-						return;
-					}
 					setQueryAttribute( { perPage: newPerPage } );
 					trackInteraction( CoreFilterNames.PRODUCTS_PER_PAGE );
 				} }
-				value={ perPage }
 			/>
 		</ToolsPanelItem>
 	);

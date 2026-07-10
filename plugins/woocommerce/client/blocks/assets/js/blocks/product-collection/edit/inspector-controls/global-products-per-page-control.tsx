@@ -5,14 +5,15 @@ import { getSetting } from '@woocommerce/settings';
 import { useEntityProp } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 import {
-	RangeControl,
 	Notice,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
 
-const MIN_PRODUCTS_PER_PAGE = 1;
-const MAX_PRODUCTS_PER_PAGE = 100;
+/**
+ * Internal dependencies
+ */
+import ProductsPerPageRangeControl from './products-per-page-range-control';
 
 const GlobalProductsPerPageControl = () => {
 	const [ perPage, setPerPage ] = useEntityProp(
@@ -39,22 +40,10 @@ const GlobalProductsPerPageControl = () => {
 					) }
 				</Notice>
 			</div>
-			<RangeControl
-				__next40pxDefaultSize
-				__nextHasNoMarginBottom
+			<ProductsPerPageRangeControl
 				label={ __( 'Products per page', 'woocommerce' ) }
-				min={ MIN_PRODUCTS_PER_PAGE }
-				max={ MAX_PRODUCTS_PER_PAGE }
-				onChange={ ( newPerPage: number ) => {
-					if (
-						newPerPage < MIN_PRODUCTS_PER_PAGE ||
-						newPerPage > MAX_PRODUCTS_PER_PAGE
-					) {
-						return;
-					}
-					setPerPage( newPerPage );
-				} }
 				value={ perPage || loopShopPerPage }
+				onChange={ setPerPage }
 			/>
 		</ToolsPanelItem>
 	);
