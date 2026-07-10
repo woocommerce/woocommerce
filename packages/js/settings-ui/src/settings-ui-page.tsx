@@ -908,7 +908,7 @@ export const SettingsUIPage = ( {
 					<Notice.CloseIcon onClick={ () => setSaveNotice( null ) } />
 				</Notice.Root>
 			) : null }
-			<div className="wc-settings-ui">
+			<Stack className="wc-settings-ui" direction="column" gap="xl">
 				{ visibleGroups.map( ( group ) => (
 					<section
 						className="wc-settings-ui__section"
@@ -960,7 +960,7 @@ export const SettingsUIPage = ( {
 						</Card.Root>
 					</section>
 				) ) }
-			</div>
+			</Stack>
 			{ formPostFields.length > 0 ? (
 				<div className="wc-settings-ui__hidden-inputs">
 					{ formPostFields.map( ( field ) => (
