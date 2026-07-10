@@ -8515,6 +8515,135 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A warning is logged when the auto-completion of the test account step fails to persist.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_test_account_auto_completion_logs_warning_when_not_persisted() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange a logger that captures warning calls.
+		$logged_warnings = array();
+		$mock_logger     = new class( $logged_warnings ) {
+			/**
+			 * The captured warning calls.
+			 *
+			 * @var array
+			 */
+			public $warnings;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param array $warnings The captured warning calls, by reference.
+			 */
+			public function __construct( array &$warnings ) {
+				$this->warnings = &$warnings;
+			}
+
+			/**
+			 * Capture a warning log call.
+			 *
+			 * @param string $message The log message.
+			 * @param array  $context The log context.
+			 *
+			 * @return void
+			 */
+			public function warning( string $message, array $context = array() ) {
+				$this->warnings[] = array(
+					'message' => $message,
+					'context' => $context,
+				);
+			}
+		};
+
+		// Arrange the NOX profile with a step completed by being skipped forward,
+		// but make persisting the profile fail.
+		$stored_profile = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT => array(
+							'statuses' => array(
+								WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $this->current_time - 100,
+								WooPaymentsService::ONBOARDING_STEP_SKIPPED_MARKER => $this->current_time - 100,
+							),
+						),
+					),
+				),
+			),
+		);
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) {
+					// Avoid parameter not used PHPCS errors.
+					unset( $value );
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return false;
+					}
+
+					return true;
+				},
+				'wc_get_logger' => function () use ( $mock_logger ) {
+					return $mock_logger;
+				},
+			)
+		);
+
+		// Arrange a connected, valid, and working test-drive account so the step auto-completes
+		// through the non-skip path (which also tries to clear the stale skip marker).
+		$this->mock_provider
+			->expects( $this->any() )
+			->method( 'is_account_connected' )
+			->willReturn( true );
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'is_stripe_account_valid' )
+			->willReturn( true );
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'get_account_status_data' )
+			->willReturn(
+				array(
+					'status'           => 'complete',
+					'testDrive'        => true,
+					'isLive'           => false,
+					'paymentsEnabled'  => true,
+					'detailsSubmitted' => true,
+				)
+			);
+
+		$status = $this->sut->get_onboarding_step_status( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+
+		$this->assertSame(
+			WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+			$status,
+			'The step should still report completed since the auto-completion is retried on every status read.'
+		);
+		$this->assertNotEmpty( $logged_warnings, 'A persistence failure of the auto-completion should be logged.' );
+		$this->assertStringContainsString( 'Failed to store the test account onboarding step completion', $logged_warnings[0]['message'] );
+		$this->assertSame( 'settings-payments', $logged_warnings[0]['context']['source'] );
+	}
+
+	/**
 	 * @testdox Finishing the test account step preserves the skip marker while the fallback account is not valid.
 	 *
 	 * @return void
