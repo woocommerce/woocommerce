@@ -14,7 +14,7 @@ WooCommerce currently uses two feature-flag systems in Blocks:
 ### Build-configured flags
 
 | Flag | Defaults | Current Blocks usage |
-|---|---|---|
+| --- | --- | --- |
 | `experimental-blocks` | Enabled in [development](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/admin/config/development.json) and disabled in [core builds](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/admin/config/core.json). | Exposed to the editor through [`isExperimentalBlocksEnabled()`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/settings/blocks/feature-flags.ts). It currently gates the **Disable product descriptions** editor control in Checkout Order Summary Cart Items and conditional checkout-field processing in the Store API. It does not determine which block scripts webpack builds or which general block types are registered. |
 | `rest-api-v4` | Disabled in both development and core build configurations. | Exposed through [`isExperimentalWcRestApiV4Enabled()`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/settings/blocks/feature-flags.ts). It switches product entities from `/wc/v3/products` to `/wc/v4/products`, registers the settings entity, and enables the v4 product-data paths used by Product Price and Product Button in the editor. |
 
@@ -23,20 +23,12 @@ WooCommerce currently uses two feature-flag systems in Blocks:
 These flags are experimental, disabled by default, and registered in [`FeaturesController`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/Features/FeaturesController.php).
 
 | Flag | Current Blocks usage |
-|---|---|
+| --- | --- |
 | `cart_save_for_later` | Registers the `woocommerce/saved-for-later` block through [`BlockTypesController`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/BlockTypesController.php), enables the related shopper-list APIs, and exposes the Save for later action in Cart when the block is present. |
 | `product_wishlist` | Registers the `woocommerce/wishlist` and `woocommerce/add-to-wishlist-button` blocks through [`BlockTypesController`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/BlockTypesController.php) and enables the related shopper-list APIs and My Account endpoint. |
 | `wc-visual-attribute` | Enables the experimental `wc-visual` product attribute type for block themes. Add to Cart + Options reads the resulting attribute data to display visual variation choices. |
 
 The hidden, mature `cart_checkout_blocks` feature definition is a compatibility marker used to report extensions that declared compatibility with Cart and Checkout blocks. It does not enable or disable those blocks.
-
-### Behavior that is not feature-flag controlled
-
-- Product Filter blocks are no longer excluded from builds or registration by an experimental flag.
-- Add to Cart + Options blocks are registered for block themes; they are not controlled by `experimental-blocks`.
-- Delayed account creation is controlled by the `woocommerce_enable_delayed_account_creation` option, not by a feature flag.
-- The Product Price and Product Title controls previously described as feature-plugin features have graduated and are not feature-flag controlled.
-- The Blocks webpack configuration no longer creates a separate experimental bundle or filters block entries according to `blocks.ini`.
 
 ## Experimental interfaces
 
@@ -45,7 +37,7 @@ Names prefixed with `__experimental`, `experimental__`, or `Experimental` are un
 ### Current PHP hooks
 
 | Interface | Type | Purpose |
-|---|---|---|
+| --- | --- | --- |
 | `__experimental_woocommerce_blocks_add_data_attributes_to_namespace` | Filter | Adds block namespaces whose rendered markup should receive block and attribute `data-` attributes. See [`BlockTypesController`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/BlockTypesController.php). |
 | `__experimental_woocommerce_blocks_add_data_attributes_to_block` | Filter | Adds individual blocks whose rendered markup should receive block and attribute `data-` attributes. See [`BlockTypesController`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/BlockTypesController.php). |
 | `__experimental_woocommerce_blocks_payment_gateway_features_list` | Filter | Changes the features exposed by the PayPal Standard Blocks integration. See [`PayPal`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/Payments/Integrations/PayPal.php). |
@@ -57,7 +49,7 @@ Names prefixed with `__experimental`, `experimental__`, or `Experimental` are un
 The following compatibility aliases still run but should not be used in new code.
 
 | Deprecated interface | Stable replacement |
-|---|---|
+| --- | --- |
 | `__experimental_woocommerce_blocks_register_checkout_field()` | `woocommerce_register_additional_checkout_field()` |
 | `__experimental_woocommerce_blocks_sanitize_additional_field` | `woocommerce_sanitize_additional_field` |
 | `__experimental_woocommerce_blocks_validate_additional_field` | `woocommerce_validate_additional_field` |
@@ -71,7 +63,7 @@ The checkout-field aliases are implemented in [`functions.php`](https://github.c
 ### Store API parameters and properties
 
 | Interface | Purpose |
-|---|---|
+| --- | --- |
 | `__experimental_calc_totals` | Checkout request parameter that recalculates cart totals before validation. See the [Checkout route](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/StoreApi/Routes/V1/Checkout.php). |
 | `__experimental_visual` | Product attribute terms request parameter that includes experimental visual swatch data. See [`ProductAttributeTerms`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/StoreApi/Routes/V1/ProductAttributeTerms.php). |
 | `__experimental_woocommerce_blocks_hidden` | Cart item data property that overrides the `hidden` value used by Blocks. See [`CartItemSchema`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/StoreApi/Schemas/V1/CartItemSchema.php). |
@@ -79,7 +71,7 @@ The checkout-field aliases are implemented in [`functions.php`](https://github.c
 ### JavaScript methods
 
 | Interface | Status and purpose |
-|---|---|
+| --- | --- |
 | `__experimentalRegisterProductCollection` | Registers a Product Collection collection. It is experimental and can change without notice. See [`register-product-collection.tsx`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/blocks-registry/product-collection/register-product-collection.tsx). |
 | `__experimentalDeRegisterPaymentMethod` | Deregisters a payment method. It is primarily used by tests. See [`registry.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/blocks-registry/payment-methods/registry.ts). |
 | `__experimentalDeRegisterExpressPaymentMethod` | Deregisters an express payment method. It is primarily used by tests. See [`registry.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/blocks-registry/payment-methods/registry.ts). |
@@ -91,7 +83,7 @@ The deprecated Checkout Filter aliases are implemented in the [`filter-registry`
 ### SlotFills
 
 | Export | Internal slot name | Placement |
-|---|---|---|
+| --- | --- | --- |
 | `ExperimentalOrderMeta` | `__experimentalOrderMeta` | Below the Checkout summary or above the Cart checkout button. |
 | `ExperimentalOrderShippingPackages` | `__experimentalOrderShippingPackages` | Inside the shipping options shown by Cart and Checkout. |
 | `ExperimentalOrderLocalPickupPackages` | `__experimentalOrderLocalPickupPackages` | Inside the Checkout pickup options. |
@@ -104,7 +96,7 @@ See the [available SlotFills](https://github.com/woocommerce/woocommerce/blob/tr
 [`useStoreEvents`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/base/context/hooks/use-store-events.ts) emits actions through `@wordpress/hooks`. Store events use the `experimental__woocommerce_blocks-` prefix.
 
 | Action | Parameters |
-|---|---|
+| --- | --- |
 | `experimental__woocommerce_blocks-cart-add-item` | `product` |
 | `experimental__woocommerce_blocks-cart-view-link` | `product` |
 | `experimental__woocommerce_blocks-cart-remove-item` | `product`, `quantity` |
@@ -120,7 +112,7 @@ The Product Search block emits its action directly in [`ProductSearch`](https://
 Checkout events use the `experimental__woocommerce_blocks-checkout-` prefix. `dispatchCheckoutEvent()` adds the current `storeCart` value to every event payload in addition to the parameters listed below.
 
 | Action | Additional parameters |
-|---|---|
+| --- | --- |
 | `experimental__woocommerce_blocks-checkout-submit` | None |
 | `experimental__woocommerce_blocks-checkout-set-selected-shipping-rate` | `shippingRateId` |
 | `experimental__woocommerce_blocks-checkout-set-active-payment-method` | `paymentMethodSlug` |
