@@ -45,37 +45,22 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_Unit_Test_Case {
 	protected $zones = array();
 
 	/**
-	 * Enable the REST API v4 feature.
+	 * Add the REST API v4 feature.
+	 *
+	 * @param array $features Enabled WooCommerce Admin features.
+	 * @return array
 	 */
-	public static function enable_rest_api_v4_feature() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features[] = 'rest-api-v4';
-				return $features;
-			}
-		);
-	}
-
-	/**
-	 * Disable the REST API v4 feature.
-	 */
-	public static function disable_rest_api_v4_feature() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features = array_diff( $features, array( 'rest-api-v4' ) );
-				return $features;
-			}
-		);
+	public static function enable_rest_api_v4_feature( $features ) {
+		$features[] = 'rest-api-v4';
+		return $features;
 	}
 
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
-		$this->enable_rest_api_v4_feature();
 		parent::setUp();
+		add_filter( 'woocommerce_admin_features', array( self::class, 'enable_rest_api_v4_feature' ) );
 		$this->endpoint = new ShippingZonesController();
 		$this->endpoint->init( new ShippingZoneSchema(), new ShippingZoneService() );
 		$this->server = $this->create_rest_server_with_routes(
@@ -104,8 +89,8 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_Unit_Test_Case {
 		$this->zones = array();
 
 		$this->clear_rest_server();
+		remove_filter( 'woocommerce_admin_features', array( self::class, 'enable_rest_api_v4_feature' ) );
 		parent::tearDown();
-		$this->disable_rest_api_v4_feature();
 	}
 
 	/**
