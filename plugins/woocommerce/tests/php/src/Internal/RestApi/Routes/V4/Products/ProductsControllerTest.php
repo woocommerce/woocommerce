@@ -35,8 +35,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		global $wp_rest_server;
-		$wp_rest_server = null;
+		$this->clear_rest_server();
 		unset( $this->server );
 
 		parent::tearDown();
@@ -154,26 +153,10 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * Register only the product routes used by this test class.
 	 */
 	private function reset_rest_server(): void {
-		global $wp_filter, $wp_rest_server;
-
-		$wp_rest_server = new WP_REST_Server();
-		$this->server   = $wp_rest_server;
-
-		$rest_api_init_hook          = $wp_filter['rest_api_init'] ?? null;
-		$wp_filter['rest_api_init'] = new \WP_Hook();
-		add_action( 'rest_api_init', 'rest_api_default_filters' );
-		add_action( 'rest_api_init', array( $this->endpoint, 'register_routes' ) );
-
-		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			do_action( 'rest_api_init' );
-		} finally {
-			if ( null === $rest_api_init_hook ) {
-				unset( $wp_filter['rest_api_init'] );
-			} else {
-				$wp_filter['rest_api_init'] = $rest_api_init_hook;
-			}
-		}
+		$this->server = $this->create_rest_server_with_routes(
+			array( array( $this->endpoint, 'register_routes' ) ),
+			true
+		);
 	}
 
 	/**
