@@ -8,6 +8,7 @@ use WC_Helper_Order;
 use WC_Unit_Test_Case;
 use WP_REST_Request;
 use WP_REST_Server;
+use WP_UnitTest_Factory;
 
 /**
  * OrderActionsRestController API controller test.
@@ -28,9 +29,26 @@ class OrderActionsRestControllerTest extends WC_Unit_Test_Case {
 	private $server;
 
 	/**
+	 * User fixture IDs keyed by role.
+	 *
+	 * @var int[]
+	 */
+	private static $fixture_user = array();
+
+	/**
 	 * @var int[] Associative array of user IDs.
 	 */
 	private $user = array();
+
+	/**
+	 * Create immutable users shared by the test class.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$fixture_user['shop_manager'] = $factory->user->create( array( 'role' => 'shop_manager' ) );
+		self::$fixture_user['customer']     = $factory->user->create( array( 'role' => 'customer' ) );
+	}
 
 	/**
 	 * Set up test.
@@ -44,8 +62,7 @@ class OrderActionsRestControllerTest extends WC_Unit_Test_Case {
 			true
 		);
 
-		$this->user['shop_manager'] = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
-		$this->user['customer']     = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$this->user = self::$fixture_user;
 
 		// Load and instantiate POS email classes to register their filter hooks.
 		// WP_UnitTestCase restores hooks between tests, so this must run each setUp().
