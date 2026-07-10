@@ -20,6 +20,7 @@ use WP_Error;
 use WP_Http;
 use WP_REST_Request;
 use WP_REST_Server;
+use WP_UnitTest_Factory;
 
 /**
  * Tests for the PushTokenRestController class.
@@ -42,6 +43,34 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	 * @var PushTokenRestController
 	 */
 	private $controller;
+
+	/**
+	 * Shop manager fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_user_id;
+
+	/**
+	 * Customer fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_customer_id;
+
+	/**
+	 * Another shop manager fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_other_shop_manager_id;
+
+	/**
+	 * Subscriber fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_subscriber_id;
 
 	/**
 	 * Shop manager user ID for testing.
@@ -72,6 +101,18 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	private $subscriber_id;
 
 	/**
+	 * Create immutable users shared by the test class.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$fixture_user_id               = $factory->user->create( array( 'role' => 'shop_manager' ) );
+		self::$fixture_customer_id           = $factory->user->create( array( 'role' => 'customer' ) );
+		self::$fixture_other_shop_manager_id = $factory->user->create( array( 'role' => 'shop_manager' ) );
+		self::$fixture_subscriber_id         = $factory->user->create( array( 'role' => 'subscriber' ) );
+	}
+
+	/**
 	 * Set up test.
 	 */
 	public function setUp(): void {
@@ -85,10 +126,10 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 			true
 		);
 
-		$this->user_id               = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
-		$this->customer_id           = $this->factory->user->create( array( 'role' => 'customer' ) );
-		$this->other_shop_manager_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
-		$this->subscriber_id         = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$this->user_id               = self::$fixture_user_id;
+		$this->customer_id           = self::$fixture_customer_id;
+		$this->other_shop_manager_id = self::$fixture_other_shop_manager_id;
+		$this->subscriber_id         = self::$fixture_subscriber_id;
 	}
 
 	/**
@@ -96,11 +137,6 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
-
-		wp_delete_user( $this->user_id );
-		wp_delete_user( $this->customer_id );
-		wp_delete_user( $this->other_shop_manager_id );
-		wp_delete_user( $this->subscriber_id );
 
 		$this->reset_container_replacements();
 		wc_get_container()->reset_all_resolved();
