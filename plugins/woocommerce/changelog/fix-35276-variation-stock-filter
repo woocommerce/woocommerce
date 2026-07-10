@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Include variable products with out-of-stock variations in the Products stock status filter.
