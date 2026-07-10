@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@wordpress/admin-ui';
-import { Button, Modal, Notice } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import {
 	Component,
 	createElement,
@@ -14,7 +14,15 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Badge, Card, Stack, Text } from '@wordpress/ui';
+import {
+	Badge,
+	Button as UIButton,
+	Card,
+	Dialog,
+	Notice,
+	Stack,
+	Text,
+} from '@wordpress/ui';
 import type { ComponentProps, ErrorInfo, ReactNode } from 'react';
 
 /**
@@ -202,39 +210,49 @@ const UnsavedChangesModal = ( {
 	onSave: () => void;
 } ) => {
 	return (
-		<Modal
-			className="wc-settings-ui__unsaved-changes-modal"
-			title={ __( 'You have unsaved changes', 'woocommerce' ) }
-			onRequestClose={ onClose }
+		<Dialog.Root
+			open
+			onOpenChange={ ( open ) => {
+				if ( ! open ) {
+					onClose();
+				}
+			} }
 		>
-			<p>
-				{ __(
-					"If you leave now, your changes won't be saved.",
-					'woocommerce'
-				) }
-			</p>
-			<Stack
-				className="wc-settings-ui__unsaved-changes-actions"
-				direction="row"
-				gap="sm"
-				justify="flex-end"
+			<Dialog.Popup
+				className="wc-settings-ui__unsaved-changes-modal"
+				portal={
+					<Dialog.Portal className="wc-settings-ui__unsaved-changes-portal" />
+				}
+				size="small"
 			>
-				<Button variant="tertiary" onClick={ onDiscard }>
-					{ __( 'Discard', 'woocommerce' ) }
-				</Button>
-				<Button
-					variant="primary"
-					type="button"
-					name="save"
-					value={ __( 'Save', 'woocommerce' ) }
-					isBusy={ isSaving }
-					disabled={ isSaving }
-					onClick={ onSave }
-				>
-					{ __( 'Save', 'woocommerce' ) }
-				</Button>
-			</Stack>
-		</Modal>
+				<Dialog.Header>
+					<Dialog.Title>
+						{ __( 'You have unsaved changes', 'woocommerce' ) }
+					</Dialog.Title>
+					<Dialog.CloseIcon />
+				</Dialog.Header>
+				<Dialog.Content>
+					<Dialog.Description>
+						{ __(
+							"If you leave now, your changes won't be saved.",
+							'woocommerce'
+						) }
+					</Dialog.Description>
+				</Dialog.Content>
+				<Dialog.Footer className="wc-settings-ui__unsaved-changes-actions">
+					<UIButton variant="minimal" onClick={ onDiscard }>
+						{ __( 'Discard', 'woocommerce' ) }
+					</UIButton>
+					<UIButton
+						loading={ isSaving }
+						disabled={ isSaving }
+						onClick={ onSave }
+					>
+						{ __( 'Save', 'woocommerce' ) }
+					</UIButton>
+				</Dialog.Footer>
+			</Dialog.Popup>
+		</Dialog.Root>
 	);
 };
 
@@ -392,12 +410,14 @@ export class SettingsUIErrorBoundary extends Component<
 	render() {
 		if ( this.state.hasError ) {
 			return (
-				<Notice status="error" isDismissible={ false }>
-					{ __(
-						'Something went wrong while rendering this settings page. Reload the page with the settings UI feature disabled to use the classic settings screen.',
-						'woocommerce'
-					) }
-				</Notice>
+				<Notice.Root intent="error">
+					<Notice.Description>
+						{ __(
+							'Something went wrong while rendering this settings page. Reload the page with the settings UI feature disabled to use the classic settings screen.',
+							'woocommerce'
+						) }
+					</Notice.Description>
+				</Notice.Root>
 			);
 		}
 
@@ -878,14 +898,15 @@ export const SettingsUIPage = ( {
 				/>
 			) : null }
 			{ saveNotice ? (
-				<Notice
+				<Notice.Root
 					className="wc-settings-ui-shell__notice"
-					status={ saveNotice.status }
-					isDismissible
-					onRemove={ () => setSaveNotice( null ) }
+					intent={ saveNotice.status }
 				>
-					{ saveNotice.message }
-				</Notice>
+					<Notice.Description>
+						{ saveNotice.message }
+					</Notice.Description>
+					<Notice.CloseIcon onClick={ () => setSaveNotice( null ) } />
+				</Notice.Root>
 			) : null }
 			<div className="wc-settings-ui">
 				{ visibleGroups.map( ( group ) => (

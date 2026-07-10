@@ -194,7 +194,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 	}
 
-	.wc-settings-ui-shell__notice.components-notice {
+	.wc-settings-ui-shell__notice {
 		margin: 24px 48px 0;
 	}
 
@@ -322,31 +322,12 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		transform: translateY(-50%);
 	}
 
-	.wc-settings-ui__unsaved-changes-modal {
-		.components-modal__header {
-			min-height: 72px;
-			padding: 24px 32px 8px;
-		}
-
-		.components-modal__header-heading {
-			font-size: 20px;
-			font-weight: 500;
-			line-height: 24px;
-		}
-
-		.components-modal__content {
-			padding: 4px 32px 32px;
-		}
-
-		p {
-			font-size: 13px;
-			line-height: 20px;
-			margin: 0;
-		}
-	}
-
-	.wc-settings-ui__unsaved-changes-actions {
-		margin-top: 24px;
+	// The shell (.admin-ui-page) creates a stacking context at z-index 1, so
+	// the portaled dialog needs its own context above the wp-admin chrome.
+	// Matches the z-index used by @wordpress/components modals.
+	.wc-settings-ui__unsaved-changes-portal {
+		position: relative;
+		z-index: 100000;
 	}
 
 	@media (max-width: 960px) {
@@ -379,7 +360,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			padding-right: 24px;
 		}
 
-		.wc-settings-ui-shell__notice.components-notice {
+		.wc-settings-ui-shell__notice {
 			margin-left: 24px;
 			margin-right: 24px;
 		}
