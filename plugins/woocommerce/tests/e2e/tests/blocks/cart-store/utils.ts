@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Page, Locator } from '@playwright/test';
+import { wpCLI } from '@woocommerce/e2e-utils';
 
 /**
  * Activation slug of the cart-line-identity helper plugin
@@ -130,3 +131,50 @@ export const cartLineRows = ( page: Page, productName: string ): Locator =>
 	page.locator( '.wc-block-cart-items__row', {
 		hasText: new RegExp( productName ),
 	} );
+
+/**
+ * Creates a fresh, stock-managed, in-stock simple product via WP-CLI.
+ *
+ * Batch-cap flows need products whose stock can be deterministically capped
+ * afterward, independent of the shop's sample-data catalog (whose stock
+ * status and existing cart quantities aren't under the test's control).
+ *
+ * @param name          The product name.
+ * @param stockQuantity The initial stock quantity (ample by default, so the
+ *                      product starts unconstrained until explicitly capped
+ *                      via {@link capProductStock}).
+ * @return The numeric product id.
+ */
+export const createStockManagedProduct = async (
+	name: string,
+	stockQuantity = 50
+): Promise< number > => {
+	const result = await wpCLI(
+		`wc product create --name="${ name }" --regular_price=10 --manage_stock=true --stock_quantity=${ stockQuantity } --user=1 --porcelain`
+	);
+	// wp-env prefixes stdout with informational lines, so pick the bare
+	// numeric id line rather than assuming it's the only output.
+	const productId = result.stdout.match( /^\d+$/m )?.[ 0 ];
+	if ( ! productId ) {
+		throw new Error(
+			`Failed to extract product ID from wpCLI output: ${ result.stdout }`
+		);
+	}
+	return Number( productId );
+};
+
+/**
+ * Caps a product's stock quantity via WP-CLI, simulating a genuine
+ * server-side stock constraint discovered at add-to-cart time.
+ *
+ * @param productId     The product id to cap.
+ * @param stockQuantity The new (lower) stock quantity.
+ */
+export const capProductStock = async (
+	productId: number,
+	stockQuantity: number
+): Promise< void > => {
+	await wpCLI(
+		`wc product update ${ productId } --manage_stock=true --stock_quantity=${ stockQuantity } --user=1`
+	);
+};

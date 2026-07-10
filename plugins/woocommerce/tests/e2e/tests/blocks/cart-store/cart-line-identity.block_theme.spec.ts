@@ -315,11 +315,19 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 	} );
 
 	test.describe( 'known-line quantity change (Mini-Cart stepper)', () => {
-		test( 'Stepper updates the exact line with no spurious notice and no extra line', async ( {
+		test( 'Exact keyed update via the stepper — no notice banner, exact line updated, no extra line', async ( {
 			page,
 			frontendUtils,
 			miniCartUtils,
 		} ) => {
+			// The Mini-Cart stepper is the default-on, notice-bearing
+			// consumer of the keyed `update-item` path (registered by
+			// default via `experimental-iapi-mini-cart`). Every step below
+			// requests an absolute quantity the server commits exactly (the
+			// product is in stock and unconstrained), so the post-optimistic
+			// cart always equals the server-committed cart: an empty diff,
+			// and therefore no "quantity was changed to" notice — by
+			// construction, not by any suppression.
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart( PRODUCT_X.name );
 			await miniCartUtils.openMiniCart();
@@ -327,9 +335,14 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			const quantity = page.getByLabel(
 				`Quantity of ${ PRODUCT_X.name } in your cart.`
 			);
+			const noticeBanners = page.locator(
+				'.wc-block-components-notice-banner'
+			);
 			await expect( quantity ).toHaveValue( '1' );
+			await expect( noticeBanners ).toHaveCount( 0 );
 
-			// Increment via the stepper (keyed update-item path).
+			// Increment via the stepper (keyed update-item path, exact
+			// absolute target of 2).
 			const batchIncrease = page.waitForResponse(
 				'**/wp-json/wc/store/v1/batch**'
 			);
@@ -341,7 +354,13 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			await batchIncrease;
 			await expect( quantity ).toHaveValue( '2' );
 
-			// Decrement back.
+			// No notice banner appears for this exact keyed update — checked
+			// immediately after the response, not only at the end, so a
+			// notice that appeared and was later dismissed would still be
+			// caught.
+			await expect( noticeBanners ).toHaveCount( 0 );
+
+			// Decrement back (exact absolute target of 1).
 			const batchReduce = page.waitForResponse(
 				'**/wp-json/wc/store/v1/batch**'
 			);
@@ -353,12 +372,12 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			await batchReduce;
 			await expect( quantity ).toHaveValue( '1' );
 
-			// No spurious notice from the stepper change itself.
-			await expect(
-				page.locator( '.wc-block-components-notice-banner' )
-			).toHaveCount( 0 );
+			// No notice banner appears for the decrement either.
+			await expect( noticeBanners ).toHaveCount( 0 );
 
-			// No extra line was created: exactly one line for the product.
+			// The stepper updated the exact known line: no extra line was
+			// created, and the persisted quantity matches the last exact
+			// keyed update.
 			await frontendUtils.goToCart();
 			expect(
 				await readCartLineQuantities( page, PRODUCT_X.name )

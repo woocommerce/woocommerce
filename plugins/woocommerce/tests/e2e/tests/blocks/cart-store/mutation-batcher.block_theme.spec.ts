@@ -14,7 +14,17 @@
 /**
  * External dependencies
  */
-import { expect, test as base } from '@woocommerce/e2e-utils';
+import { expect, test as base, guestFile } from '@woocommerce/e2e-utils';
+
+/**
+ * Internal dependencies
+ */
+import {
+	capProductStock,
+	cartLineRows,
+	createStockManagedProduct,
+	readCartLineQuantities,
+} from './utils';
 
 const test = base.extend( {} );
 
@@ -275,5 +285,171 @@ test.describe( 'Mutation Batcher', () => {
 		// Should still have been sent as a single batch.
 		expect( batchRequests ).toHaveLength( 1 );
 		expect( batchRequests[ 0 ] ).toBe( 3 );
+	} );
+
+	test.describe( 'Distinct-product batch with a stock cap', () => {
+		// Guest isolation gives every run a brand-new, empty cart, so the
+		// saved-cart assertions below aren't affected by state left over from
+		// other tests that share the default (admin) session in this file.
+		test.use( { storageState: guestFile } );
+
+		test( 'a single batch of distinct products lands each at its requested quantity, with no flash to a wrong count, while a stock-capped product is rejected without affecting the others', async ( {
+			page,
+			frontendUtils,
+		} ) => {
+			await frontendUtils.goToShop();
+
+			// Two products with ample stock, and one whose stock is capped
+			// below the quantity this batch requests for it. Fresh products
+			// (rather than shop sample data) keep the scenario deterministic:
+			// their stock and cart history are entirely under this test's
+			// control.
+			const productA = await createStockManagedProduct(
+				'Batch Product A'
+			);
+			const productB = await createStockManagedProduct(
+				'Batch Product B'
+			);
+			const productC = await createStockManagedProduct(
+				'Batch Product C'
+			);
+
+			const requestedA = 3;
+			const requestedB = 2;
+			const requestedC = 5;
+
+			// Cap product C's stock below the quantity the batch will
+			// request for it.
+			await capProductStock( productC, 2 );
+
+			// Delay the batch response so the optimistic (pre-commit) cart
+			// can be inspected while the request is still in flight, the
+			// same technique used in "total batch failure rolls back
+			// product button UI to pre-failure state" above.
+			await page.route( '**/wc/store/v1/batch**', async ( route ) => {
+				await new Promise( ( resolve ) => setTimeout( resolve, 1000 ) );
+				await route.continue();
+			} );
+
+			const requestSent = page.waitForRequest( '**/wc/store/v1/batch**' );
+
+			// Fire the three distinct-product adds without awaiting the
+			// evaluate call yet, so the batched request can be observed
+			// in flight from the outside.
+			const addSettled = page.evaluate(
+				async ( { idA, idB, idC, qtyA, qtyB, qtyC } ) => {
+					const { store } = await import(
+						'@wordpress/interactivity'
+					);
+					const unlockKey =
+						'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+					await import( '@woocommerce/stores/woocommerce/cart' );
+					const { actions } = store(
+						'woocommerce',
+						{},
+						{ lock: unlockKey }
+					);
+
+					// Three distinct products, added synchronously in one
+					// microtick — the mutation batcher groups them into a
+					// single request.
+					const pA = actions.addCartItem( {
+						id: idA,
+						quantityToAdd: qtyA,
+					} );
+					const pB = actions.addCartItem( {
+						id: idB,
+						quantityToAdd: qtyB,
+					} );
+					const pC = actions.addCartItem( {
+						id: idC,
+						quantityToAdd: qtyC,
+					} );
+
+					// addCartItem catches errors internally so all promises
+					// resolve, even for the item the server rejects.
+					await Promise.allSettled( [ pA, pB, pC ] );
+				},
+				{
+					idA: productA,
+					idB: productB,
+					idC: productC,
+					qtyA: requestedA,
+					qtyB: requestedB,
+					qtyC: requestedC,
+				}
+			);
+
+			// The batched request has been sent to the network; the route
+			// above is holding its response.
+			await requestSent;
+
+			// Reads each product's quantity from the live store state.
+			const readQuantities = ( ids: number[] ) =>
+				page.evaluate( async ( productIds ) => {
+					const { store } = await import(
+						'@wordpress/interactivity'
+					);
+					const unlockKey =
+						'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+					await import( '@woocommerce/stores/woocommerce/cart' );
+					const { state } = store(
+						'woocommerce',
+						{},
+						{ lock: unlockKey }
+					);
+					return productIds.map(
+						( id ) =>
+							state.cart.items.find(
+								( item: { id: number } ) => item.id === id
+							)?.quantity ?? 0
+					);
+				}, ids );
+
+			// While the response is still pending, the optimistic cart
+			// already reflects every requested quantity — applyOptimistic
+			// runs synchronously for all three adds before the batched
+			// request is even sent, so there is no earlier, wrong value to
+			// observe and no later flash once the response lands.
+			const [ optimisticA, optimisticB, optimisticC ] =
+				await readQuantities( [ productA, productB, productC ] );
+			expect( optimisticA ).toBe( requestedA );
+			expect( optimisticB ).toBe( requestedB );
+			expect( optimisticC ).toBe( requestedC );
+
+			// Let the delayed response resolve and let the add calls settle.
+			await addSettled;
+
+			// The real server's stock-cap behavior for a batched add-item
+			// request, confirmed against a live server, is a full per-item
+			// rejection (HTTP 400 `woocommerce_rest_product_partially_out_of_stock`)
+			// rather than a partial commit: the two in-stock products commit
+			// at their exact requested quantities, unaffected by the third
+			// item's rejection, and the capped product's requested quantity
+			// never lands — it stays absent from the cart at its
+			// server-committed quantity of 0.
+			const [ committedA, committedB, committedC ] = await readQuantities(
+				[ productA, productB, productC ]
+			);
+			expect( committedA ).toBe( requestedA );
+			expect( committedB ).toBe( requestedB );
+			expect( committedC ).toBe( 0 );
+
+			// Confirm the same outcome in the saved (persisted) cart, not
+			// just in-memory store state — the two unaffected products keep
+			// their exact quantities and the capped product has no line at
+			// all.
+			await frontendUtils.goToCart();
+			expect(
+				await readCartLineQuantities( page, 'Batch Product A' )
+			).toEqual( [ requestedA ] );
+			expect(
+				await readCartLineQuantities( page, 'Batch Product B' )
+			).toEqual( [ requestedB ] );
+			await expect( cartLineRows( page, 'Batch Product C' ) ).toHaveCount(
+				0
+			);
+		} );
 	} );
 } );
