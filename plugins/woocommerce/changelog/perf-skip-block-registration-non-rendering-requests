@@ -1,3 +1,3 @@
 Significance: patch
 Type: performance
-Comment: Skip block and pattern registration on requests that never render blocks (cron, AJAX, favicon, robots.txt, XML sitemaps, XML-RPC, WooCommerce REST routes and WooCommerce admin pages).
+Comment: Skip block and pattern registration on requests that never render blocks. Add the woocommerce_should_register_blocks filter to let extensions opt out.
