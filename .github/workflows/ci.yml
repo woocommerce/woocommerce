@@ -201,7 +201,35 @@ jobs:
       - name: 'Start Test Environment: start'
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
-        run: pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
+        # `wp-env start` fails on transient network timeouts from several subsystems:
+        # composer fetching packagist inside the Docker build ("curl error 28"), wp-env's
+        # own `got` client downloading WordPress core ("ETIMEDOUT"), and the Docker daemon
+        # pulling images from Docker Hub ("context deadline exceeded"). Retry the whole
+        # start to ride out those blips -- BuildKit reuses layers that already succeeded,
+        # so a retry only re-runs whatever failed. Each retried attempt emits a
+        # "::warning::wp-env-start-retry reason=<subsystem>" marker (grep-friendly) so the
+        # underlying incident rate stays measurable even when the retry keeps the job green.
+        run: |
+          attempt=1
+          max_attempts=3
+          log="$(mktemp)"
+          trap 'rm -f "$log"' EXIT
+          until pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }} 2>&1 | tee "$log"; do
+            # We retry regardless of cause -- transient failures aren't limited to the
+            # patterns below, so reason= is for monitoring only, not a retry gate.
+            if grep -qF 'curl error 28' "$log"; then reason=packagist
+            elif grep -qE 'registry-1\.docker\.io|context deadline exceeded' "$log"; then reason=dockerhub
+            elif grep -qF 'ETIMEDOUT' "$log"; then reason=wordpress
+            else reason=unknown
+            fi
+            if [ "$attempt" -ge "$max_attempts" ]; then
+              echo "::error::wp-env start failed after ${max_attempts} attempts (last reason=${reason})"
+              exit 1
+            fi
+            echo "::warning::wp-env-start-retry reason=${reason} attempt=${attempt}/${max_attempts} -- retrying in $((attempt * 15))s"
+            sleep "$((attempt * 15))"
+            attempt=$((attempt + 1))
+          done
 
       - name: 'Resolve artifacts path'
         if: ${{ always() && matrix.report.resultsPath != '' }}
