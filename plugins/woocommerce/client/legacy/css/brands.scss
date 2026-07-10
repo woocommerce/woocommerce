@@ -33,7 +33,7 @@ ul.brand-thumbnails,
 }
 
 ul.brand-thumbnails:before,
-:where(.brand-thumbnails-description):before {
+:where(.brand-thumbnails-description:before) {
 	clear: both;
 	content: "";
 	display: table;
