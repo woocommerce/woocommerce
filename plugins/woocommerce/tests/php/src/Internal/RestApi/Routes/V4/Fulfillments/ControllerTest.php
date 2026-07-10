@@ -127,9 +127,6 @@ class ControllerTest extends WC_Unit_Test_Case {
 
 		// Delete the created orders and their fulfillments.
 		WC_Helper_Order::delete_order( $this->test_order->get_id() );
-		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillments;" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillment_meta;" );
 
 		$this->clear_rest_server();
 		parent::tearDown();
